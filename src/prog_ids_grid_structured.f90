@@ -8,6 +8,7 @@ program prog_ids_grid_structured
 
   call test1
   call test2
+  call test3
 
 contains
 
@@ -75,6 +76,8 @@ contains
     call gridSetupStructured( grid, coordtype_in , gshape_in, x_in , output_flag, output_message, id)
     if ( output_flag /= 0 ) then
        write(*,*)'ERROR recieved from gridSetupStructured'
+       write(*,*)output_message
+       deallocate(output_message)
        stop
     end if
 
@@ -106,6 +109,8 @@ contains
     call gridStructGetAxes( grid, coordtype_out, gshape_out, x_out, output_flag, output_message)
     if ( output_flag /= 0 ) then
        write(*,*)'ERROR recieved from gridStructGetAxes'
+       write(*,*)output_message
+       deallocate(output_message)
        stop
     end if
 
@@ -118,5 +123,63 @@ contains
   end subroutine test2
   
 
+  subroutine test3
+
+    type(ids_generic_grid_dynamic) :: grid 
+
+    integer, dimension(2) :: coordtype = (/ 1 , 2 /)
+    integer, dimension(2) :: gshape = (/ 13 , 7 /)
+    real(DP), dimension(13, 2) :: x = 0_DP
+
+    type(ids_generic_grid_scalar) :: cpofield
+    integer :: subgrid
+    real(DP), dimension(13,2) :: data_in
+    real(DP), dimension(13,2) :: data_out
+
+    integer, allocatable, dimension(:) :: coordtype_out
+    integer, allocatable, dimension(:) :: gshape_out
+    real(DP), allocatable, dimension(:,:) :: x_out
+
+    character(64) :: id='COORD_X'
+    integer :: output_flag = -999999999
+    character(len=:), allocatable :: output_message
+
+    ! Internal
+    integer :: j, k
+    
+    write(*,*)
+    write(*,*)'=== START: test3 (writing and reading grids)'
+
+    write(*,*)'Writing grid...'
+    x(1:gshape(1) , 1) = (/ ( real(j-1,DP) / real(gshape(1)-1,DP) , j=1,gshape(1) ) /)
+    x(1:gshape(2) , 2) = (/ ( real(j-1,DP) / real(gshape(2)-1,DP) , j=1,gshape(2) ) /)
+
+    call gridSetupStructured( grid, coordtype , gshape, x , output_flag, output_message, id)
+    if ( output_flag /= 0 ) then
+       write(*,*)'ERROR recieved from gridSetupStructured'
+       write(*,*)output_message
+       deallocate(output_message)
+       stop
+    end if
+
+    do j=1,gshape(1)
+       do k=1,gshape(2)
+          data_in(j,k) = atan( real(j,DP) * log( real(k,DP)-0.2_DP ) )
+       enddo
+    enddo
+
+    write(*,*)'Writing data...'
+    call gridStructWriteData( grid , cpofield , subgrid , data_in )
+
+    write(*,*)'Reading data...'
+    call gridStructReadData( grid, cpofield, subgrid, data_out, output_flag, output_message)
+    
+    write(*,*)'range of data_in: ',minval(data_in), ' -- ', maxval(data_in)
+    write(*,*)'maxval(abs(data_in - data_out))=',maxval(abs(data_in - data_out))
+    
+    write(*,*)
+    write(*,*)'=== END: test3'
+
+  end subroutine test3
 
 end program prog_ids_grid_structured

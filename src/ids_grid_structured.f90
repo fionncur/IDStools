@@ -19,6 +19,12 @@ module ids_grid_structured
 !          & gridStructWriteData1dComplex, gridStructWriteData2dComplex
   end interface
 
+  interface gridStructReadData
+     module procedure gridStructReadData1d, gridStructReadData2d, gridStructReadData3d , &
+          & gridStructReadData4d, gridStructReadData5d, gridStructReadData6d !, &
+!          & gridStructReadData1dComplex, gridStructReadData2dComplex
+  end interface
+
 contains
 
   !============================================================================
