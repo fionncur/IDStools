@@ -1,0 +1,6 @@
+# Makefile specifics for gfortran
+F90=gfortran
+LIBS= #`pkg-config imas-gfortran imas-lowlevel --libs`
+INCLUDE= #`pkg-config imas-gfortran --cflags`
+F90FLAGS=-fPIC -cpp
+MOD_LOCATION_FLAG= -J
