@@ -28,7 +28,7 @@ OBJ=$(OBJECTCODE)/obj
 LIB=$(OBJECTCODE)/lib
 PKG=$(shell pwd)/pkg-config
 
-OBJECTS=$(OBJ)/ids_schemas.o $(OBJ)/ids_grid_access.o $(OBJ)/ids_grid_structured.o
+OBJECTS=$(OBJ)/ids_schemas.o $(OBJ)/ids_grid_common.o $(OBJ)/ids_grid_access.o $(OBJ)/ids_grid_structured.o
 
 EXE=$(LIB)/prog_ids_grid_structured.exe
 RUN=$(addprefix &&, $(EXE))
@@ -65,9 +65,16 @@ mkdirs:
 	@mkdir -p $(OBJ) $(LIB) 2> /dev/null
 
 %.pc: trigger
-	cat $@.template | sed 's|=GGDVERSION=|$(VERSION)|g' | sed 's|=GGDPATH=|$(PKG)/$(OBJECTCODE)|g' > $@
+	cat $@.template | sed 's|=GGDVERSION=|$(VERSION)|g' | sed 's|=GGDPATH=|$(shell pwd)/$(OBJECTCODE)|g' > $@
+	@echo "================================================================="
+	@echo "To use new library update your PKG_CONFIG_PATH (assuming bash):"
+	@echo "export PKG_CONFIG_PATH=\$$PKG_CONFIG_PATH:$(PKG)"
+	@echo "================================================================="
 
 trigger:
+
+get_pkg_path:
+	@echo ${PKG}
 
 .PHONY: mkdirs clean veryclean \
 	library progs test all trigger
@@ -80,3 +87,4 @@ veryclean: clean
 	rm -f *~ */*~
 	rm -f */*/*.a */*/*.mod */*/*.o
 	-rmdir $(OBJ)/ $(LIB) $(OBJECTCODE)/ 2> /dev/null
+	rm -f *~

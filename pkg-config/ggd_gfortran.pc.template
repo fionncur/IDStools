@@ -1,5 +1,5 @@
 Name: ggd
-Description: IMAS Fortran Library for accessing using the General Grid Description
+Description: Fortran Library for reading and writing data in the IMAS General Grid Description (defined within the IDSs data descriptions)
 Version: =GGDVERSION=
 Libs: -L=GGDPATH=/lib -lggd
 Cflags: -I=GGDPATH=/obj
