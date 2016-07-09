@@ -1,0 +1,6 @@
+# Makefile specifics for intel
+F90=ifort
+LIBS=$(shell pkg-config imas-ifort --libs)
+INCLUDE=$(shell pkg-config imas-ifort --cflags)
+F90FLAGS= -fpp
+MOD_LOCATION_FLAG= -module

@@ -1,16 +1,5 @@
 VERSION=1.0.0
 
-# ------------------------------------------------
-# LINKS TO THE IMAS LIBRARY AND INCLUDE DIRECTORY
-# ------------------------------------------------
-# INTEL
-#OBJECTCODE=intel
-#F90=ifort            # FORTRAN COMPILER
-#LIBS=`pkg-config imas-ifort imas-lowlevel --libs` `pkg-config imas-ifort --cflags`
-#F90FLAGS=-fPIC -fpp # FPIC AND PREPROCESSING OPTION
-#MOD_LOCATION_FLAG= -module
-
-# GFORTRAN
 ifndef OBJECTCODE
   OBJECTCODE=gfortran
 endif
@@ -28,7 +17,7 @@ OBJ=$(OBJECTCODE)/obj
 LIB=$(OBJECTCODE)/lib
 PKG=$(shell pwd)/pkg-config
 
-OBJECTS=$(OBJ)/ids_schemas.o $(OBJ)/ids_grid_common.o $(OBJ)/ids_grid_access.o $(OBJ)/ids_grid_structured.o
+OBJECTS=$(OBJ)/ids_grid_common.o $(OBJ)/ids_grid_access.o $(OBJ)/ids_grid_structured.o
 
 EXE=$(LIB)/prog_ids_grid_structured.exe
 RUN=$(addprefix &&, $(EXE))
@@ -45,6 +34,10 @@ test: progs
 progs: $(EXE)
 
 install: library $(PC_FILES)
+
+install_all:
+	make install OBJECTCODE=gfortran
+	make install OBJECTCODE=intel
 
 library: $(LIBNAME)
 
@@ -85,6 +78,6 @@ clean:
 
 veryclean: clean
 	rm -f *~ */*~
-	rm -f */*/*.a */*/*.mod */*/*.o
+	rm -f */*/*.a */*/*.mod */*/*.o */*.pyc
 	-rmdir $(OBJ)/ $(LIB) $(OBJECTCODE)/ 2> /dev/null
 	rm -f *~
