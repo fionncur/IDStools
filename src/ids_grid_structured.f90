@@ -85,6 +85,7 @@ contains
        output_flag = -2
        return
     endif
+    output_flag = 0
 
     if (present(id)) then
         allocate( grid%identifier%name(1) )

@@ -16,7 +16,14 @@ ifndef OBJECTCODE
 endif
 
 include config/$(OBJECTCODE)
+F90FLAGS+= -fPIC
+ifdef DEBUG
+  F90FLAGS+= -g
+else
+  F90FLAGS+= -O3
+endif
 
+SRC=src
 OBJ=$(OBJECTCODE)/obj
 LIB=$(OBJECTCODE)/lib
 PKG=$(shell pwd)/pkg-config
@@ -50,7 +57,7 @@ $(LIB)/%.exe: $(OBJECTS) $(OBJ)/%.o
 	$(F90) $(F90FLAGS) -o $@ $^ $(LIBS)
 
 # RULES FOR ALL OBJECT FILES
-$(OBJ)/%.o: %.f90
+$(OBJ)/%.o: $(SRC)/%.f90
 	@make mkdirs
 	$(F90) $(MOD_LOCATION_FLAG) $(OBJ) $(F90FLAGS) -c  $< $(INCLUDE) -o $@
 
@@ -67,9 +74,9 @@ trigger:
 
 # CLEAN DIRECTORY
 clean:
-	rm -f *.exe $(LIB)/*.a $(OBJ)/*.mod $(OBJ)/*.o
+	rm -f $(LIB)/*.exe $(LIB)/*.a $(OBJ)/*.mod $(OBJ)/*.o $(PKG)/*.pc
 
-veryclean:
+veryclean: clean
 	rm -f *~ */*~
 	rm -f */*/*.a */*/*.mod */*/*.o
-	-rmdir $(OBJ) $(LIB) $(OBJECTCODE) 2> /dev/null
+	-rmdir $(OBJ)/ $(LIB) $(OBJECTCODE)/ 2> /dev/null

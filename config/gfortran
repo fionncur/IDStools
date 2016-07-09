@@ -2,5 +2,5 @@
 F90=gfortran
 LIBS= #`pkg-config imas-gfortran imas-lowlevel --libs`
 INCLUDE= #`pkg-config imas-gfortran --cflags`
-F90FLAGS=-fPIC -cpp
+F90FLAGS= -cpp
 MOD_LOCATION_FLAG= -J
