@@ -133,8 +133,8 @@ contains
 
     type(ids_generic_grid_scalar) :: cpofield
     integer :: subgrid
-    real(DP), dimension(13,2) :: data_in
-    real(DP), dimension(13,2) :: data_out
+    real(DP), dimension(13,7) :: data_in
+    real(DP), dimension(13,7) :: data_out
 
     integer, allocatable, dimension(:) :: coordtype_out
     integer, allocatable, dimension(:) :: gshape_out
