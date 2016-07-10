@@ -13,6 +13,22 @@ module ids_grid_structured
   
   implicit none
 
+  !> Definition of default subgrids
+  integer, parameter :: GRID_STRUCT_SUBGRID_0D = 1 ! all 0d objects
+  integer, parameter :: GRID_STRUCT_SUBGRID_1D = 2 ! all 1d objects
+  integer, parameter :: GRID_STRUCT_SUBGRID_2D = 3 ! all 2d objects
+  integer, parameter :: GRID_STRUCT_SUBGRID_3D = 4 ! all 3d objects
+  integer, parameter :: GRID_STRUCT_SUBGRID_4D = 5 ! all 4d objects
+  integer, parameter :: GRID_STRUCT_SUBGRID_5D = 6 ! all 5d objects
+  integer, parameter :: GRID_STRUCT_SUBGRID_6D = 7 ! all 6d objects
+
+  ! Same as above, with human-readable names
+  integer, parameter :: GRID_STRUCT_NODES = GRID_STRUCT_SUBGRID_0D ! all 0d objects
+  integer, parameter :: GRID_STRUCT_EDGES = GRID_STRUCT_SUBGRID_1D ! all 1d objects
+  integer, parameter :: GRID_STRUCT_FACES = GRID_STRUCT_SUBGRID_2D ! all 2d objects
+  integer, parameter :: GRID_STRUCT_CELLS = GRID_STRUCT_SUBGRID_3D ! all 3d objects
+
+
   interface gridStructWriteData
      module procedure gridStructWriteData1d, gridStructWriteData2d , gridStructWriteData3d ,&
           & gridStructWriteData4d, gridStructWriteData5d, gridStructWriteData6d !, &
@@ -65,30 +81,31 @@ contains
   !>       \c output_flag and an \c output_message. This modification may be forwarded  
   !>       to the ITM version of the subroutine. 
   !>
-  subroutine gridSetupStructured( grid, coordtype, gshape, x, output_flag, output_message, id, periodicSpaces)
+  subroutine gridSetupStructured( grid, coordtype, gshape, x, &
+       output_flag, output_message, id, periodicSpaces)
     type(ids_generic_grid_dynamic), intent(out) :: grid 
     integer, dimension(:), intent(in) :: coordtype
     integer, dimension(size(coordtype)), intent(in) :: gshape
     real(DP), dimension(:, :), intent(in) :: x
-    character(*), intent(in), optional :: id
-    integer, intent(in), optional :: periodicSpaces(:)
     integer, intent(out) :: output_flag
     character(len=:), allocatable, intent(out) :: output_message
+    character(*), intent(in), optional :: id
+    integer, intent(in), optional :: periodicSpaces(:)
 
     ! Internal
     integer :: ndim, idim
     logical :: periodic
-    
+
     if ( size( coordtype ) /= size( gshape ) ) then
        allocate(character(len("gridWriteStructured: size of coordtype and gshape don't match")) :: output_message )
        output_message =       "gridWriteStructured: size of coordtype and gshape don't match"
-       output_flag = -1
+       output_flag = -1001
        return
     endif
     if ( maxval( shape( x ) ) < maxval( gshape ) ) then
        allocate(character(len("gridWriteStructured: shape of x seems to be inconsistent with gshape")) :: output_message )
        output_message =       "gridWriteStructured: shape of x seems to be inconsistent with gshape"
-       output_flag = -2
+       output_flag = -1002
        return
     endif
     output_flag = 0
@@ -112,6 +129,209 @@ contains
     end do
     
   end subroutine gridSetupStructured
+
+
+
+
+  !> Write a n-dimensional structured grid into a grid descriptor (alternate version
+  !> with separate dimension vectors)
+
+  !> Alternate wrapper for gridSetupStructured, which makes it easier
+  !> to give the node positions as individual arrays
+
+  !> @see gridSetupStructured
+  subroutine gridSetupStructuredSep( grid, ndim, &
+       c1, x1, c2, x2, c3, x3, c4, x4, c5, x5, c6, x6, &
+       id, createSubgrids, periodicSpaces, uid, computeMeasures, &
+       output_flag, output_message )
+    type(ids_generic_grid_dynamic), intent(out) :: grid
+    integer, intent(in) :: ndim
+    real(DP), intent(in), dimension(:) :: x1 ! have to have at least one dimension
+    integer, intent(in) :: c1 ! have to have at least one dimension
+    real(DP), intent(in), dimension(:), optional :: x2, x3, x4, x5, x6
+    integer, intent(in),optional :: c2, c3, c4, c5, c6
+    character(*), intent(in), optional :: id
+    logical, intent(in), optional :: createSubgrids
+    integer, intent(in), optional :: periodicSpaces(:)
+    integer, intent(in), optional :: uid
+    logical, intent(in), optional :: computeMeasures
+    integer, intent(out), optional :: output_flag
+    character(len=:), allocatable, intent(out), optional :: output_message
+
+
+    ! internal
+    integer :: lndim, nmax, i
+    real(DP), dimension(:,:), allocatable :: x
+    integer, dimension(:), allocatable :: gshape, coordtype
+    integer :: internal_output_flag
+    character(len=:), allocatable :: internal_output_message
+
+    lndim = 1
+    nmax = size( x1 )
+    if ( present( x2 ) ) then
+       lndim = 2
+       nmax = max( nmax, size( x2 ) )
+       if ( .not. present( c2 ) ) then
+          if (present(output_flag)) then
+             output_flag = -2002
+          else
+             stop
+          end if
+          if (present(output_message)) then
+             allocate(character(len("gridSetupStructuredSep: x2 given, but not c2")) :: output_message )
+             output_message =       "gridSetupStructuredSep: x2 given, but not c2"
+          end if
+       end if
+    end if
+    if ( present( x3 ) ) then
+       lndim = 3
+       nmax = max( nmax, size( x3 ) )
+       if (.not. present( c3 )) then
+          if (present(output_flag)) then
+             output_flag = -2003
+          else
+             stop
+          end if
+          if (present(output_message)) then
+             allocate(character(len("gridSetupStructuredSep: x3 given, but not c3")) :: output_message )
+             output_message =       "gridSetupStructuredSep: x3 given, but not c3"
+          end if
+       end if
+    end if
+    if ( present( x4 ) ) then
+       lndim = 4
+       nmax = max( nmax, size( x4 ) )
+       if (.not. present( c4 ))then
+          if (present(output_flag)) then
+             output_flag = -2004
+          else
+             stop
+          end if
+          if (present(output_message)) then
+             allocate(character(len("gridSetupStructuredSep: x4 given, but not c4")) :: output_message )
+             output_message =       "gridSetupStructuredSep: x4 given, but not c4"
+          end if
+       end if
+    end if
+    if ( present( x5 ) ) then
+       lndim = 5
+       nmax = max( nmax, size( x5 ) )
+       if (.not. present( c5 )) then
+          if (present(output_flag)) then
+             output_flag = -2005
+          else
+             stop
+          end if
+          if (present(output_message)) then
+             allocate(character(len("gridSetupStructuredSep: x5 given, but not c5")) :: output_message )
+             output_message =       "gridSetupStructuredSep: x5 given, but not c5"
+          end if
+       end if
+    end if
+    if ( present( x6 ) ) then
+       lndim = 6
+       nmax = max( nmax, size( x6 ) )
+       if (.not. present( c6 )) then
+          if (present(output_flag)) then
+             output_flag = -2006
+          else
+             stop
+          end if
+          if (present(output_message)) then
+             allocate(character(len("gridSetupStructuredSep: x6 given, but not c6")) :: output_message )
+             output_message =       "gridSetupStructuredSep: x6 given, but not c6"
+          end if
+       end if
+    end if
+
+    if ( lndim /= ndim ) then
+       if (present(output_flag)) then
+          output_flag = -2001
+       else
+          stop
+       end if
+       if (present(output_message)) then
+          allocate(character(len("gridWriteStructured: error in call, ndim does not match number of arguments")) :: output_message )
+          output_message =       "gridWriteStructured: error in call, ndim does not match number of arguments"
+       end if
+    endif
+
+    ! allocate and assemble temporary data structure
+    allocate( x( nmax, ndim ) )
+    allocate( gshape( ndim ) )
+    allocate( coordtype( ndim ) )
+
+    do i = 1, ndim
+
+            select case( i )
+            case( 1 )
+                    x( 1:size( x1 ), 1 ) = x1
+                    gshape(1) = size( x1 )
+                    coordtype(1) = c1
+            case( 2 )
+                    x( 1:size( x2 ), 2 ) = x2
+                    gshape(2) = size( x2 )
+                    coordtype(2) = c2
+            case( 3 )
+                    x( 1:size( x3 ), 3 ) = x3
+                    gshape(3) = size( x3 )
+                    coordtype(3) = c3
+            case( 4 )
+                    x( 1:size( x4 ), 4 ) = x4
+                    gshape(4) = size( x4 )
+                    coordtype(4) = c4
+            case( 5 )
+                    x( 1:size( x5 ), 5 ) = x5
+                    gshape(5) = size( x5 )
+                    coordtype(5) = c5
+            case( 6 )
+                    x( 1:size( x6 ), 6 ) = x6
+                    gshape(6) = size( x6 )
+                    coordtype(6) = c6
+            end select
+
+    end do
+
+    if (present(id) .and. present(periodicSpaces)) then
+       call gridSetupStructured( grid, coordtype, gshape, x, internal_output_flag, &
+            internal_output_message, id=id, periodicSpaces=periodicSpaces)
+    elseif (present(id) .and. (.not. present(periodicSpaces))) then
+       call gridSetupStructured( grid, coordtype, gshape, x, internal_output_flag, &
+            internal_output_message, id=id)
+    elseif ((.not. present(id)) .and. present(periodicSpaces)) then
+       call gridSetupStructured( grid, coordtype, gshape, x, internal_output_flag, &
+            internal_output_message, periodicSpaces=periodicSpaces)
+    else
+       call gridSetupStructured( grid, coordtype, gshape, x, internal_output_flag, &
+            internal_output_message)
+    end if
+
+    if (present(output_flag)) then
+       output_flag = internal_output_flag
+    endif
+
+    if (internal_output_flag /= 0) then
+       if (present(output_message)) then
+          if (allocated(internal_output_message)) then
+             allocate( character(len(internal_output_message)) :: output_message)
+             output_message = internal_output_message
+             deallocate(internal_output_message)
+          end if
+          return
+       else
+          write(*,*)'in gridSetupStructuredSep, error recieved from gridSetupStructured'
+          write(*,*)'   output_flag =',output_flag
+          stop 'in ids_grid_structured.f90::gridSetupStructuredSep'
+       end if
+    endif
+
+    if (allocated(internal_output_message)) deallocate(internal_output_message)
+
+    deallocate(x)
+    deallocate(gshape)
+    deallocate(coordtype)
+
+  end subroutine gridSetupStructuredSep
 
 
   subroutine gridSetupStruct1dSpace( space, coordtype, nodes, periodic )
@@ -170,7 +390,7 @@ contains
     if (.not. gridIsStructured( grid ) ) then
        allocate(character(len("gridStructGetAxes: not a structured grid: cpofield%scalar not associated")) :: output_message )
        output_message =       "gridStructGetAxes: not a structured grid"
-       output_flag = 1010
+       output_flag = -3001
        return
     endif
     output_flag=0
@@ -351,7 +571,7 @@ contains
     if (.not. associated( cpofield%values ) ) then
        allocate(character(len("gridStructReadDataBody: cpofield%scalar not associated")) :: output_message )
        output_message =       "gridStructReadDataBody: cpofield%scalar not associated"
-       output_flag = 1003
+       output_flag = -4001
        return
     endif
     output_flag=0
@@ -436,6 +656,5 @@ contains
        data = reshape( cpofield%values, shape(data) )
     endif
   end subroutine gridStructReadData6d
-
 
 end module ids_grid_structured
