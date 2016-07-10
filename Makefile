@@ -15,11 +15,12 @@ endif
 SRC=src
 OBJ=$(OBJECTCODE)/obj
 LIB=$(OBJECTCODE)/lib
+BIN=$(OBJECTCODE)/bin
 PKG=$(shell pwd)/pkg-config
 
 OBJECTS=$(OBJ)/ids_grid_common.o $(OBJ)/ids_grid_access.o $(OBJ)/ids_grid_structured.o
 
-EXE=$(LIB)/prog_ids_grid_structured.exe
+EXE=$(BIN)/prog_ids_grid_structured.exe
 RUN=$(addprefix &&, $(EXE))
 
 LIBNAME=$(LIB)/libggd.a
@@ -45,7 +46,7 @@ $(LIBNAME): $(OBJECTS)
 	@make mkdirs
 	ar -cvr $@ $^
 
-$(LIB)/%.exe: $(OBJECTS) $(OBJ)/%.o
+$(BIN)/%.exe: $(OBJECTS) $(OBJ)/%.o
 	@make mkdirs
 	$(F90) $(F90FLAGS) -o $@ $^ $(LIBS)
 
@@ -55,7 +56,7 @@ $(OBJ)/%.o: $(SRC)/%.f90
 	$(F90) $(MOD_LOCATION_FLAG) $(OBJ) $(F90FLAGS) -c  $< $(INCLUDE) -o $@
 
 mkdirs:
-	@mkdir -p $(OBJ) $(LIB) 2> /dev/null
+	@mkdir -p $(OBJ) $(LIB) $(BIN) 2> /dev/null
 
 %.pc: trigger
 	cat $@.template | sed 's|=GGDVERSION=|$(VERSION)|g' | sed 's|=GGDPATH=|$(shell pwd)/$(OBJECTCODE)|g' > $@
@@ -74,10 +75,11 @@ get_pkg_path:
 
 # CLEAN DIRECTORY
 clean:
-	rm -f $(LIB)/*.exe $(LIB)/*.a $(OBJ)/*.mod $(OBJ)/*.o $(PKG)/*.pc
+	rm -f $(BIN)/*.exe $(LIB)/*.a $(OBJ)/*.mod $(OBJ)/*.o $(PKG)/*.pc
 
 veryclean: clean
+	make clean -C example/
 	rm -f *~ */*~
-	rm -f */*/*.a */*/*.mod */*/*.o */*.pyc
-	-rmdir $(OBJ)/ $(LIB) $(OBJECTCODE)/ 2> /dev/null
+	rm -f */*/*.a */*/*.mod */*/*.o */*.pyc */*.exe
+	-rmdir $(OBJ)/ $(LIB)/ $(OBJECTCODE)/ $(BIN)/ 2> /dev/null
 	rm -f *~
