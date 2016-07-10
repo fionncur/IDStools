@@ -3,7 +3,7 @@ import xml.etree.ElementTree as ET
 input_filename='coordinate_identifier.xml'
 output_filename='../src/ids_grid_common.f90'
 
-ROOT=ET.parse(filename);
+ROOT=ET.parse(input_filename);
 
 MAX_ROW_LENGTH=124
 
@@ -12,6 +12,28 @@ FILE_STR = """module ids_grid_common
   use iso_c_binding, only: DP => c_double
 
   implicit none
+
+  integer, parameter :: GRID_UNDEFINED = 0
+
+  ! Data representation definitions
+  integer, parameter :: GEO_TYPE_STANDARD = 1
+  character(*), parameter :: GEO_TYPE_ID_STANDARD = "Standard"
+  integer, parameter :: GEO_TYPE_FOURIER = 2
+  character(*), parameter :: GEO_TYPE_ID_FOURIER = "Fourier"
+
+ ! Field aligned vector definitions
+  integer, parameter :: VEC_ALIGN_DEFAULT = 1
+  character(len=132), parameter :: VEC_ALIGN_DEFAULT_ID = "DEFAULT"
+
+  integer, parameter :: VEC_ALIGN_POLOIDAL = 1001
+  character(len=132), parameter :: VEC_ALIGN_POLOIDAL_ID = "Poloidal"
+  integer, parameter :: VEC_ALIGN_RADIAL = 1002
+  character(len=132), parameter :: VEC_ALIGN_RADIAL_ID = "Radial"
+  integer, parameter :: VEC_ALIGN_PARALLEL = 1003
+  character(len=132), parameter :: VEC_ALIGN_PARALLEL_ID = "Parallel"
+
+  integer, parameter :: VEC_ALIGN_TOROIDAL = 1004
+  character(len=132), parameter :: VEC_ALIGN_TOROIDAL_ID = "Toroidal"
 
 """
 
