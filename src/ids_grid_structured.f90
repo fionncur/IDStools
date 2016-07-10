@@ -166,6 +166,36 @@ contains
     integer :: internal_output_flag
     character(len=:), allocatable :: internal_output_message
 
+    if (present(createSubgrids)) then
+       if (createSubgrids) then
+          if (present(output_flag)) then
+             output_flag = -2010
+          end if
+          if (present(output_message)) then
+             allocate(character(len( &
+                  & "gridSetupStructuredSep: createSubgrids requested, but not yet implemented!")) :: output_message )
+             output_message = &
+                  & "gridSetupStructuredSep: createSubgrids requested, but not yet implemented!"
+             return
+          end if
+       end if
+    end if
+
+    if (present(computeMeasures)) then
+       if (computeMeasures) then
+          if (present(output_flag)) then
+             output_flag = -2010
+          end if
+          if (present(output_message)) then
+             allocate(character(len( &
+                  & "gridSetupStructuredSep: computeMeasures requested, but not yet implemented!")) :: output_message )
+             output_message = &
+                  & "gridSetupStructuredSep: computeMeasures requested, but not yet implemented!"
+          end if
+          return
+       end if
+    end if
+
     lndim = 1
     nmax = size( x1 )
     if ( present( x2 ) ) then
