@@ -53,7 +53,7 @@ program ids_grid_example1_2dstructured_servicelibrary
   edgecpo(1) % code % name(1)="ids_grid_example1_2dstructured_service"
 
   ! Allocate one time-slice:
-  allocate(edgecpo(1) % profiles_ggd(1) )
+  allocate(edgecpo(1) % ggd(1) )
 
   ! === 2. Set up grid ===
   write(*,*)' === 2. Set up grid ==='
@@ -65,7 +65,7 @@ program ids_grid_example1_2dstructured_servicelibrary
   write(*,*)'x1=',x1
   write(*,*)'x2=',x2
   call gridSetupStructuredSep( &
-      & grid = edgecpo(1) % profiles_ggd(1) % grid, &
+      & grid = edgecpo(1) % ggd(1) % grid, &
       & ndim = 2, &
       & c1 = COORDTYPE_R, &
       & x1 = x1, &
@@ -100,9 +100,9 @@ program ids_grid_example1_2dstructured_servicelibrary
   enddo
 
   ! Write the data on the grid
-  allocate( edgecpo(1) % profiles_ggd(1) % electrons % density(1) )
-  call gridStructWriteData2d( edgecpo(1) % profiles_ggd(1) % grid, &
-       edgecpo(1) % profiles_ggd(1) % electrons % density(1), &
+  allocate( edgecpo(1) % ggd(1) % electrons % density(1) )
+  call gridStructWriteData2d( edgecpo(1) % ggd(1) % grid, &
+       edgecpo(1) % ggd(1) % electrons % density(1), &
        GRID_STRUCT_FACES, cellData )
 
   ! === 5. Write the edge CPO to the UAL ===
