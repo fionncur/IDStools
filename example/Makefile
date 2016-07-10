@@ -15,7 +15,7 @@ endif
 INCLUDE+=$(shell pkg-config --cflags ggd_$(OBJECTCODE))
 LIBS+=   $(shell pkg-config --libs ggd_$(OBJECTCODE))
 
-EXE=ex1_writing_structured.exe
+EXE=ex1_writing_structured.exe ids_grid_example1_2dstructured_servicelibrary.exe
 RUN=$(addprefix &&./, $(EXE))
 
 all: test
@@ -33,5 +33,5 @@ progs: $(EXE)
 	$(F90) $(F90FLAGS) $(INCLUDE) -c  $< -o $@
 
 clean:
-	rm *.o *.mod *.exe
+	rm -f *.o *.mod *.exe
 
