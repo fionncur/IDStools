@@ -24,8 +24,13 @@ program ex1_writing_structured
 
   ! Internal
   integer :: j
-    
+
+  write(*,*)
   write(*,*)'=== START: ex1_writing_structured test1'
+
+  ! Dimensions of coordinate system
+  gshape(1) = Nx
+  gshape(2) = Ny
 
   ! Initialise the grid coordinates: x and y
   x(1:Nx) = (/ ( real(j-1,DP) , j=1,gshape(1) ) /)
@@ -34,10 +39,6 @@ program ex1_writing_structured
   ! In the GGD you need to put your grid in a matrix, here we call this matrix grid_matrix:
   grid_matrix( 1:Nx , 1 ) = x(:)
   grid_matrix( 1:Ny , 2 ) = y(:)
-
-  ! Dimensions of coordinate system
-  gshape(1) = Nx
-  gshape(2) = Ny
 
   ! Describe which coordinates are being used
   coordtype(1) = COORDTYPE_rho_tor
@@ -55,5 +56,6 @@ program ex1_writing_structured
   end if
 
   write(*,*)'=== END: ex1_writing_structured test1'
+  write(*,*)
 
 end program ex1_writing_structured
