@@ -42,6 +42,8 @@ program ids_grid_example1_2dstructured_servicelibrary
   real(DP) :: nodeData(NPOINTR, NPOINTZ)
   real(DP) :: x1(NPOINTR)
   real(DP) :: x2(NPOINTZ)
+  integer :: output_flag
+  character(len=:), allocatable :: output_message
 
   write(*,*)'START: program ids_grid_example1_2dstructured_servicelibrary'
   
@@ -57,13 +59,9 @@ program ids_grid_example1_2dstructured_servicelibrary
 
   ! === 2. Set up grid ===
   write(*,*)' === 2. Set up grid ==='
-  write(*,*)'COORDTYPE_R=',COORDTYPE_R
-  write(*,*)'COORDTYPE_Z=',COORDTYPE_Z
-
   x1(:) = (/ ( 1.0_DP * i, i=0,NPOINTR-1) /)
   x2(:) = (/ ( 0.5_DP * i, i=0,NPOINTZ-1) /)
-  write(*,*)'x1=',x1
-  write(*,*)'x2=',x2
+
   call gridSetupStructuredSep( &
       & grid = edgecpo(1) % ggd(1) % grid, &
       & ndim = 2, &
@@ -71,10 +69,21 @@ program ids_grid_example1_2dstructured_servicelibrary
       & x1 = x1, &
       & c2 = COORDTYPE_Z, &
       & x2 = x2, &
-      & id = '2d_structured' )
+      & id = '2d_structured', &
+      & output_flag = output_flag, &
+      & output_message = output_message)
+
+  if (output_flag /= 0) then
+     write(*,*)'in ids_grid_example1_2dstructured_servicelibrary ',&
+          & 'error recieved from gridSetupStructuredSep'
+     if (allocated(output_message)) then
+        write(*,*)output_message
+     end if
+     return
+  end if
 
   ! === 3. Set up subgrid for 2d cells ("faces") ===
-  write(*,*)' === 3. Set up subgrid for 2d cells ("faces") ==='
+  write(*,*)' === 3. SKIP!!  (set up subgrid) ==='
   ! Not necessary, a default set of subgrids is automatically created by gridSetupStructured.
   ! You can disable this behaviour by calling gridSetupStructuredSep with the optional
   ! argument createSubgrids = .false. 
