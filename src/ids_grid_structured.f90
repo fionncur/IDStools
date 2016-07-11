@@ -52,37 +52,41 @@ contains
   !>
   !> The dimension n of the grid is taken as size(coordtype).
   !> 
-  !> @param grid Grid descriptor to fill
-  !> \param coordtype Dimension(n). Defines coordinate types / labels for the 
+  !> @param grid      Grid descriptor to fill
+  !> 2param coordtype Dimension(n). Defines coordinate types / labels for the 
   !>                  individual axes. See the 
   !>                  constants defined in itm_grid.f90 (COORDTYPE_*)
-  !> \param gshape    Dimension(n). Shape of the grid. In dimension i the grid 
+  !> @param gshape    Dimension(n). Shape of the grid. In dimension i the grid 
   !>                  has shape(i) grid points.
   !> @param x         Dimension( maxval( gshape(n) ), n ). 
   !>                  Grid node coordinates in the individual dimensions. 
   !>                  The node positions in  space i are given by 
   !>                  x( 1 : gshape( i ), id ).
+  !> @param id        Name / identifier string for this grid
+  !> @param createSubgrids Optional flag controlling whether default subgrids
+  !>                  are created. Default is .true.
   !> @param periodicSpaces Optional integer array containing the indices
   !>                  of the coordinate directions that are periodic. This will
   !>                  result in the last node in these coordinate directions to
   !>                  be connected to the first node by an edge. Note that if periodic
   !>                  spaces are present, no metric information is computed.
-  !> @param uid A unique identifier number for the          
+  !> @param uid       Unique index of this grid. Used for handling multiple grids.
   !>
   !> @see gridSetupStructuredSep
   !>
   !> NOTE: This routines is a modified version of the ITM (EUIM) routine \c gridSetupStructured
   !>       adapted to IDSs by Thomas Jonsson 8 July 2016.
   !>       During the adaptation the functionality was reduced:
-  !>        - sub-grid are no longer generated (removed optional input \c createSubgrids);
-  !>        - metric information is no longer calculated on the grid (removed optional
-  !>          input \c computeMeasures).
+  !>        - sub-grid are no longer generated;
+  !>        - metric information is no longer calculated on the grid.
+  !>        - uid seemms not to have a placeholder in the IDS grid description.
   !>       During the adaptation calls to the itm_assert library were replaced by returning
   !>       \c output_flag and an \c output_message. This modification may be forwarded  
   !>       to the ITM version of the subroutine. 
   !>
   subroutine gridSetupStructured( grid, coordtype, gshape, x, &
-       output_flag, output_message, id, periodicSpaces)
+       output_flag, output_message, id, createSubgrids, &
+       periodicSpaces, uid, computeMeasures)
     type(ids_generic_grid_dynamic), intent(out) :: grid 
     integer, dimension(:), intent(in) :: coordtype
     integer, dimension(size(coordtype)), intent(in) :: gshape
@@ -90,7 +94,10 @@ contains
     integer, intent(out) :: output_flag
     character(len=:), allocatable, intent(out) :: output_message
     character(*), intent(in), optional :: id
+    logical, intent(in), optional :: createSubgrids
     integer, intent(in), optional :: periodicSpaces(:)
+    integer, intent(in), optional :: uid
+    logical, intent(in), optional :: computeMeasures 
 
     ! Internal
     integer :: ndim, idim
@@ -108,7 +115,34 @@ contains
        output_flag = -1002
        return
     endif
+
+    if (present(createSubgrids)) then
+       if (createSubgrids) then
+          output_flag = -1010
+          allocate(character(len( &
+               & "gridSetupStructuredSep: createSubgrids requested, but not yet implemented!")) :: output_message )
+          output_message = &
+               & "gridSetupStructuredSep: createSubgrids requested, but not yet implemented!"
+          return
+       end if
+    end if
+
+    if (present(computeMeasures)) then
+       if (computeMeasures) then
+          output_flag = -1011
+          allocate(character(len( &
+               & "gridSetupStructuredSep: computeMeasures requested, but not yet implemented!")) :: output_message )
+          output_message = &
+               & "gridSetupStructuredSep: computeMeasures requested, but not yet implemented!"
+          return
+       end if
+    end if
+
     output_flag = 0
+
+    if (present(uid)) then
+!!! Are there any place holder for "uid" in the IDSs???
+    end if
 
     if (present(id)) then
         allocate( grid%identifier%name(1) )
@@ -184,7 +218,7 @@ contains
     if (present(computeMeasures)) then
        if (computeMeasures) then
           if (present(output_flag)) then
-             output_flag = -2010
+             output_flag = -2011
           end if
           if (present(output_message)) then
              allocate(character(len( &
