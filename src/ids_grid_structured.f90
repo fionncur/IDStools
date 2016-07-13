@@ -1,5 +1,19 @@
 module ids_grid_structured
 
+  !> This modules provides simple interfaces to the Generic Grid Description (GGD) 
+  !> to handle rectangular grids and data stored on rectangular grids.
+  !>
+  !> Data can either be stored/recovered using high or low level routines, although
+  !> for rectangular grids, the high level routines should be sufficient. The main
+  !> high-level read and write routines are:
+  !> 1. The main subroutine for writing data to a grid is: \c gridSetupStructuredSep.
+  !>    An alternative subroutine is \c gridSetupStructured.
+  !> 2. To recover a grid from the GGD, use \c gridStructGetAxes
+  !> 3. To store a data field represented on a GGD grid, use \c gridStructWriteData
+  !> 4. To recover a data field represented on a GGD grid, use \c gridStructReadData
+  !>
+  !> @author Hajo Klignshirn (for the ITM), adapted to IMAS by Thomas Jonsson 2016
+
   use ids_schemas, only: &
        DP, &
        ids_generic_grid_dynamic, &
@@ -53,7 +67,7 @@ contains
   !> The dimension n of the grid is taken as size(coordtype).
   !> 
   !> @param grid      Grid descriptor to fill
-  !> 2param coordtype Dimension(n). Defines coordinate types / labels for the 
+  !> @param coordtype Dimension(n). Defines coordinate types / labels for the 
   !>                  individual axes. See the 
   !>                  constants defined in itm_grid.f90 (COORDTYPE_*)
   !> @param gshape    Dimension(n). Shape of the grid. In dimension i the grid 
