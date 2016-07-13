@@ -84,6 +84,7 @@ contains
   !>                  result in the last node in these coordinate directions to
   !>                  be connected to the first node by an edge. Note that if periodic
   !>                  spaces are present, no metric information is computed.
+  !> @param computeMeasures NOT IMPLEMENTED.
   !> @param uid       Unique index of this grid. Used for handling multiple grids.
   !>
   !> @see gridSetupStructuredSep
@@ -183,10 +184,41 @@ contains
 
   !> Write a n-dimensional structured grid into a grid descriptor (alternate version
   !> with separate dimension vectors)
-
-  !> Alternate wrapper for gridSetupStructured, which makes it easier
+  !>
+  !> Alternate wrapper for \c gridSetupStructured, which makes it easier
   !> to give the node positions as individual arrays
-
+  !>
+  !> The dimension n of the grid is given by \c ndim and has to be consistent with
+  !> the number of arguments x<j> recieved (j=1...6).
+  !>
+  !> @param grid      Grid descriptor to fill
+  !> @param ndim      Dimensions of the grid.
+  !> @param c1        Type of coordinate no. 1 (integer)
+  !> @param x1        Grid in the space spanned by coordinate no. 1
+  !> @param c2        Type of coordinate no. 2 (integer)
+  !> @param x2        Grid in the space spanned by coordinate no. 2
+  !> @param c3        Type of coordinate no. 3 (integer)
+  !> @param x3        Grid in the space spanned by coordinate no. 3
+  !> @param c4        Type of coordinate no. 4 (integer)
+  !> @param x4        Grid in the space spanned by coordinate no. 4
+  !> @param c5        Type of coordinate no. 5 (integer)
+  !> @param x5        Grid in the space spanned by coordinate no. 5
+  !> @param c6        Type of coordinate no. 6 (integer)
+  !> @param x6        Grid in the space spanned by coordinate no. 6
+  !> @param id        Name / identifier string for this grid
+  !> @param createSubgrids Optional flag controlling whether default subgrids
+  !>                  are created. Default is .true.
+  !> @param periodicSpaces Optional integer array containing the indices
+  !>                  of the coordinate directions that are periodic. This will
+  !>                  result in the last node in these coordinate directions to
+  !>                  be connected to the first node by an edge. Note that if periodic
+  !>                  spaces are present, no metric information is computed.
+  !> @param uid       Unique index of this grid. Used for handling multiple grids.
+  !> @param computeMeasures NOT IMPLEMENTED.
+  !> @param output_flag Flag to identify different errors tha may occur;
+  !>                  output_flag=0 means that no error has occured.
+  !> @param output_message String-message describing errors.
+  !>
   !> @see gridSetupStructured
   subroutine gridSetupStructuredSep( grid, ndim, &
        c1, x1, c2, x2, c3, x3, c4, x4, c5, x5, c6, x6, &
@@ -412,13 +444,12 @@ contains
   end subroutine gridSetupStructuredSep
 
 
+  !> Set up a 1d structured space.
+  !>
+  !> Helper routine used by gridSetupStructured. Sets up a space descriptor for the case
+  !> of a simple 1d structured grid with standard connectivity
+
   subroutine gridSetupStruct1dSpace( space, coordtype, nodes, periodic )
-    !
-    !  space%geometry_type% <- identifier
-    !  space%coordinates_type(:)% <- integer = coordtype!!
-    !  space%objects_per_dimension(:)  <- ids_generic_grid_dynamic_space_dimension
-    !  space%objects_per_dimension(:)%object(:)  <- ids_generic_grid_dynamic_space_dimension_object
-    !   - ids_generic_grid_dynamic_space_dimension_object: { boundary , geometry , geometry_error_upper , geometry_error_lower , geometry_error_index , measure , measure_error_upper , measure_error_lower , measure_error_index }
     
     type(ids_generic_grid_dynamic_space), intent(inout) :: space !> The space descriptor to fill
     integer, intent(in) :: coordtype !> The coordinate type of the space
@@ -446,6 +477,15 @@ contains
   end subroutine gridSetupStruct1dSpace
 
 
+  !> Test whether the given grid descriptor contains a structured
+  !> grid in the sense of this service module.
+  logical function gridIsStructured( grid )
+    type(ids_generic_grid_dynamic),  intent(in) :: grid 
+    gridIsStructured = .true.
+
+    !> \todo Function gridIsStructured not properly implemented yet!!
+
+  end function gridIsStructured
 
   !> Return the axes description of a structured grid. Essentially the equivalent read routine to gridSetupStructured.
   !> 
@@ -493,12 +533,6 @@ contains
     end do
 
   end subroutine gridStructGetAxes
-
-
-  logical function gridIsStructured( grid )
-    type(ids_generic_grid_dynamic),  intent(in) :: grid 
-    gridIsStructured = .true.
-  end function gridIsStructured
 
 
   !> Return the shape (number of points in every dimension) of a structured grid. 
