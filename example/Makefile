@@ -34,4 +34,7 @@ progs: $(EXE)
 
 clean:
 	rm -f *.o *.mod *.exe
+	rm -rf *.exe.dSYM/
 
+veryclean: clean
+	rm -f *~
