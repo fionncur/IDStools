@@ -15,7 +15,9 @@ program ids_grid_example1_2dstructured_servicelibrary
   !> Direct link (might be broken): https://www.efda-itm.eu/ITM/html/imp3_gridexamples.html#imp3_gridexamples_5 
 
   ! ITM data structure/CPO definitions
-  use ids_schemas, only: DP, ids_edge_profiles     
+  use ids_schemas, only: DP, ids_edge_profiles
+
+  use ids_routines ! , only: imas_create, ids_put, imas_close
 
   !  use ids_routines    ! ITM UAL routines
 
@@ -51,11 +53,15 @@ program ids_grid_example1_2dstructured_servicelibrary
   write(*,*)' === 1. Set up CPO ==='
 
   allocate( edgecpo(1) )    
+  allocate( edgecpo(1) % time(1) )
+  edgecpo(1) % time(1) = 3.1415_DP
+
   allocate( edgecpo(1) % code % name(1) )
   edgecpo(1) % code % name(1)="ids_grid_example1_2dstructured_service"
 
   ! Allocate one time-slice:
   allocate(edgecpo(1) % ggd(1) )
+  edgecpo(1) % ggd(1) % time = 3.1415_DP
 
   ! === 2. Set up grid ===
   write(*,*)' === 2. Set up grid ==='
@@ -116,11 +122,12 @@ program ids_grid_example1_2dstructured_servicelibrary
 
   ! === 5. Write the edge CPO to the UAL ===
   write(*,*)' === 5. Write the edge CPO to the UAL ==='
-!  write (*,*) "Example 1: writing to shot ", SHOTNUM, ", run ", RUNNUM
-!  call euitm_create( 'euitm', SHOTNUM, RUNNUM, 0, 0, idx)
-!  call euitm_put(idx, "edge", edgecpo)
-!  call euitm_close(idx)
-!  call euitm_deallocate(edgecpo)   
+  write(*,*) "Example 1: writing to shot ", SHOTNUM, ", run ", RUNNUM
+  call imas_create( 'ids', SHOTNUM, RUNNUM, 0, 0, idx)
+  call ids_put(idx, "edge", edgecpo(1))
+  call imas_close(idx)
+  call ids_deallocate(edgecpo(1))
+  deallocate(edgecpo)
 
   write(*,*)'END: program ids_grid_example1_2dstructured_servicelibrary'
 
