@@ -1,5 +1,5 @@
-VERSION=1.0.2
 CODENAME=imas_ggd
+VERSION=1.0.2
 
 ifndef OBJECTCODE
   OBJECTCODE=gfortran
@@ -32,6 +32,8 @@ RUN=$(addprefix &&, $(EXE))
 LIBNAME=$(LIB)/lib${CODENAME}.a
 
 PC_FILES=$(PKG)/${CODENAME}_${OBJECTCODE}.pc
+
+GITINFO=info_git_detailed_status.txt
 
 all: install test
 
@@ -70,15 +72,27 @@ mkdirs:
 
 trigger:
 
-install: clean library ${PC_FILES}
+${GITINFO}: library
+	echo "# git version info for ${CODENAME}, version=${VERSION}" > $@
+	echo "\n\n --- git log | head -3: \n"    >> $@
+	git log | head -3                        >> $@
+	echo "\n\n --- git status: \n"           >> $@
+	git status                               >> $@
+	echo "git version info for ${CODENAME}:" >> $@
+	echo "\n\n --- git diff: \n"             >> $@
+	git diff                                 >> $@
+
+
+install: clean ${GITINFO} library ${PC_FILES}
 	@echo "Installing ${CODENAME} at ${INSTALL_DIR_EXTENDED}..."
 	mkdir -p ${INSTALL_DIR_EXTENDED}/lib
 	mkdir -p ${INSTALL_DIR_EXTENDED}/include
 	mkdir -p ${INSTALL_DIR_EXTENDED}/pkg-config
-	install ${LIB}/*.a    ${INSTALL_DIR_EXTENDED}/lib
 	@#install ${LIB}/*.so   ${INSTALL_DIR_EXTENDED}/lib
+	install ${LIB}/*.a    ${INSTALL_DIR_EXTENDED}/lib
 	install ${OBJ}/*.mod  ${INSTALL_DIR_EXTENDED}/include
 	install ${PKG}/*.pc   ${INSTALL_DIR_EXTENDED}/pkg-config
+	install ${GITINFO}    ${INSTALL_DIR_EXTENDED}
 	@echo "================================================================="
 	@echo "To use new library update your PKG_CONFIG_PATH (assuming bash):"
 	@echo "export PKG_CONFIG_PATH=\$$PKG_CONFIG_PATH:${INSTALL_DIR_EXTENDED}/pkg-config"
@@ -89,7 +103,7 @@ install: clean library ${PC_FILES}
 
 # CLEAN DIRECTORY
 clean:
-	rm -f $(BIN)/*.exe $(LIB)/*.a $(OBJ)/*.mod $(OBJ)/*.o $(PKG)/*.pc
+	rm -f ${GITINFO} $(BIN)/*.exe $(LIB)/*.a $(OBJ)/*.mod $(OBJ)/*.o $(PKG)/*.pc
 
 veryclean: clean
 	make clean -C example/
