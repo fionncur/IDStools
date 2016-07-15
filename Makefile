@@ -1,10 +1,16 @@
-VERSION=1.0.0
+VERSION=1.0.2
+CODENAME=imas_ggd
 
 ifndef OBJECTCODE
   OBJECTCODE=gfortran
 endif
 
-include config/$(OBJECTCODE)
+ifndef INSTALL_DIR
+  INSTALL_DIR=${shell echo ${HOME}}/codes/INSTALL/${CODENAME}
+endif
+INSTALL_DIR_EXTENDED=${INSTALL_DIR}/$(VERSION)/$(OBJECTCODE)
+
+include config/${OBJECTCODE}
 F90FLAGS+= -fPIC
 ifdef DEBUG
   F90FLAGS+= -g
@@ -16,16 +22,16 @@ SRC=src
 OBJ=$(OBJECTCODE)/obj
 LIB=$(OBJECTCODE)/lib
 BIN=$(OBJECTCODE)/bin
-PKG=$(shell pwd)/pkg-config
+PKG=pkg-config
 
 OBJECTS=$(OBJ)/ids_grid_common.o $(OBJ)/ids_grid_access.o $(OBJ)/ids_grid_structured.o
 
 EXE=$(BIN)/prog_ids_grid_structured.exe
 RUN=$(addprefix &&, $(EXE))
 
-LIBNAME=$(LIB)/libggd.a
+LIBNAME=$(LIB)/lib${CODENAME}.a
 
-PC_FILES=$(PKG)/ggd_$(OBJECTCODE).pc
+PC_FILES=$(PKG)/${CODENAME}_${OBJECTCODE}.pc
 
 all: install test
 
@@ -34,7 +40,7 @@ test: progs
 
 progs: $(EXE)
 
-install: library $(PC_FILES)
+#install: library $(PC_FILES)
 
 install_all:
 	make install OBJECTCODE=gfortran
@@ -59,16 +65,24 @@ mkdirs:
 	@mkdir -p $(OBJ) $(LIB) $(BIN) 2> /dev/null
 
 %.pc: trigger
-	cat $@.template | sed 's|=GGDVERSION=|$(VERSION)|g' | sed 's|=GGDPATH=|$(shell pwd)/$(OBJECTCODE)|g' > $@
-	@echo "================================================================="
-	@echo "To use new library update your PKG_CONFIG_PATH (assuming bash):"
-	@echo "export PKG_CONFIG_PATH=\$$PKG_CONFIG_PATH:$(PKG)"
-	@echo "================================================================="
+	NAME=${shell echo $@ |sed 's/_${OBJECTCODE}//g'}; \
+	cat $$NAME.template | sed 's|@GGDVERSION@|$(VERSION)|g' | sed 's|@OBJECTCODE@|$(OBJECTCODE)|g' | sed 's|@GGDPATH@|${INSTALL_DIR_EXTENDED}|g' > $@
 
 trigger:
 
-get_pkg_path:
-	@echo ${PKG}
+install: clean library ${PC_FILES}
+	@echo "Installing ${CODENAME} at ${INSTALL_DIR_EXTENDED}..."
+	mkdir -p ${INSTALL_DIR_EXTENDED}/lib
+	mkdir -p ${INSTALL_DIR_EXTENDED}/include
+	mkdir -p ${INSTALL_DIR_EXTENDED}/pkg-config
+	install ${LIB}/*.a    ${INSTALL_DIR_EXTENDED}/lib
+	@#install ${LIB}/*.so   ${INSTALL_DIR_EXTENDED}/lib
+	install ${OBJ}/*.mod  ${INSTALL_DIR_EXTENDED}/include
+	install ${PKG}/*.pc   ${INSTALL_DIR_EXTENDED}/pkg-config
+	@echo "================================================================="
+	@echo "To use new library update your PKG_CONFIG_PATH (assuming bash):"
+	@echo "export PKG_CONFIG_PATH=\$$PKG_CONFIG_PATH:${INSTALL_DIR_EXTENDED}/pkg-config"
+	@echo "================================================================="
 
 .PHONY: mkdirs clean veryclean \
 	library progs test all trigger
@@ -81,5 +95,6 @@ veryclean: clean
 	make clean -C example/
 	rm -f *~ */*~
 	rm -f */*/*.a */*/*.mod */*/*.o */*.pyc */*.exe
-	-rmdir $(OBJ)/ $(LIB)/ $(OBJECTCODE)/ $(BIN)/ 2> /dev/null
+	rm -rf $(BIN)/*.exe.dSYM/
+	-rmdir $(OBJ) $(LIB) $(BIN) $(OBJECTCODE) 2> /dev/null
 	rm -f *~

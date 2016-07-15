@@ -12,8 +12,8 @@ else
   F90FLAGS+= -O3
 endif
 
-INCLUDE+=$(shell pkg-config --cflags ggd_$(OBJECTCODE))
-LIBS+=   $(shell pkg-config --libs ggd_$(OBJECTCODE))
+INCLUDE+=$(shell pkg-config --cflags imas_ggd_$(OBJECTCODE))
+LIBS+=   $(shell pkg-config --libs imas_ggd_$(OBJECTCODE))
 
 EXE=ex1_writing_structured.exe ids_grid_example1_2dstructured_servicelibrary.exe
 RUN=$(addprefix &&./, $(EXE))
