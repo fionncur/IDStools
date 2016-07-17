@@ -1,5 +1,5 @@
-CODENAME=imas_ggd
 VERSION=1.0.2
+CODENAME=imas_ggd
 
 ifndef OBJECTCODE
   OBJECTCODE=gfortran
