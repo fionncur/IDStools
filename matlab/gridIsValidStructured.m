@@ -20,6 +20,7 @@ function [isValid,flag] = gridIsValidStructured( grid )
   end
 
   for j=1:length(grid.space)
+
     if not( isfield( grid.space(j) , 'coordinates_type' ) )
       flag=5;
       return
@@ -31,7 +32,7 @@ function [isValid,flag] = gridIsValidStructured( grid )
     elseif not( isfield( grid.space(j) , 'objects_per_dimension' ) )
       flag=7;
       return
-    elseif not( isvector( grid.space(j).objects_per_dimension ) )
+    elseif not( length( grid.space(j).objects_per_dimension ) == 1 )
       flag=8;
       return
     end
@@ -41,18 +42,26 @@ function [isValid,flag] = gridIsValidStructured( grid )
       if not( isfield( grid.space(j).objects_per_dimension(k) , 'object' ) )
 	flag=9;
 	return
+      elseif not( length( grid.space(j).objects_per_dimension(k)object ) == 1 )
+	flag=10;
+	return
       end
 
       for  n=1:length( grid.space(j).objects_per_dimension(k).object )
 	if not( isfield( grid.space(j).objects_per_dimension(k).object(n) , 'geometry' ) )
-	  flag=10;
+	  flag=11;
+	  return
+	elseif not( length( grid.space(j).objects_per_dimension(k).object(n).geometry ) == 1 )
+	  flag=12;
 	  return
 	elseif not( isnumeric( grid.space(j).objects_per_dimension(k).object(n).geometry(1) ) )
-	  flag=11;
+	  flag=13;
 	  return
 	end
       end
+
     end
+
   end
 
   flag=0;
