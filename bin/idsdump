@@ -1,0 +1,49 @@
+#!/usr/bin/python
+import imas
+import numpy
+import sys
+
+if __name__ == '__main__':
+    if len(sys.argv) == 4:
+        shot = int(sys.argv[1])
+        run = int(sys.argv[2])
+        ids = sys.argv[3]
+    elif len(sys.argv) == 7:
+        user = sys.argv[1]
+        tokamak = sys.argv[2]
+        version = sys.argv[3]
+        shot = int(sys.argv[4])
+        run = int(sys.argv[5])
+        ids = sys.argv[6]
+    else:
+        print('Usage: idsdump <USER> <TOKAMAK> <VERSION> <SHOT> <RUN> <IDS>')
+        print('         or')
+        print('       idsdump <SHOT> <RUN> <IDS>')
+        exit(1)
+
+    numpy.set_printoptions(threshold='nan')
+
+    imas = imas.ids(shot, run)
+    if len(sys.argv) == 4:
+        imas.open()
+    else:
+        imas.open_env(user, tokamak, version)
+
+    ids = ids.split('/')
+    if len(ids) == 1:
+        occurrence = 0
+    else:
+        occurrence = int(ids[1])
+    ids = ids[0]
+
+    idsdata = imas.__dict__[ids]
+    if 'get' not in dir(idsdata):
+        idsdata = imas.__dict__[ids + 'Array']
+        idsdata.get(occurrence)
+        if idsdata.array:
+            for slice in idsdata.array:
+                print(slice)
+    else:
+        idsdata.get(occurrence)
+        print(idsdata)
+    imas.close()

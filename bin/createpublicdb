@@ -1,0 +1,334 @@
+#!/usr/bin/python
+# search.py
+'''
+Script for copying database from user's space into public space
+
+Authors: Michal Owsiak, Hajo Klingshirn
+'''
+import sys
+import argparse
+import imastools.db_tools as db
+import logging
+import os
+import shutil
+import subprocess
+import string
+from time import localtime, strftime
+
+logger = logging.getLogger('db_logger')
+logger.setLevel(logging.INFO)
+
+ch = logging.StreamHandler()
+ch.setLevel(logging.INFO)
+
+#formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+formatter = logging.Formatter('%(levelname)s - %(message)s')
+
+ch.setFormatter(formatter)
+
+logger.addHandler(ch)
+
+# Parse arguments as required
+
+description="Copy a IMAS database to the public database.\n\
+\n\
+This tool\n\
+-copies the given source database to the public IMAS database in $IMASPUBLICDBHOME\n\
+-stores metainformation about this operation in $IMASPUBLICDBMETADATA\n\
+\n\
+Tokamak name and shot number of the source database are maintained (but can be overridden, see the optional arguments).\n\
+The run number is chosen by the tool.\n\
+\n\
+Example:\n\
+\n\
+   createpublicdb hmk test 4.10a 9001 1 description.txt\
+"
+
+parser = argparse.ArgumentParser(description=description, formatter_class=argparse.RawDescriptionHelpFormatter)
+
+public_dest_shot = 0
+public_dest_tokamak = ''
+
+parser.add_argument(dest='user_name',metavar='user_name', help="User name for source database")
+parser.add_argument(dest='tokamak',metavar='tokamak_name', help="Tokamak name for source database")
+parser.add_argument(dest='version',metavar='database_version', help="IMAS data version of source database")
+parser.add_argument(dest='shot',metavar='shot_number', type=int, help="Shot number of source database")
+parser.add_argument(dest='run',metavar='run_number', type=int, help="Run number of source database")
+parser.add_argument('--backend', dest='backend', action='store', choices=['mdsplus','hdf5'], help='Name of the backend to be used - by default mdsplus is used', default='mdsplus', required=False)
+parser.add_argument('--public-tokamak', '--pt', dest='public_tokamak', action='store', help='Name of the tokamak in public database (if different from Tokamak name of source database)', type=int)
+parser.add_argument('--public-shot', '--ps', dest='public_shot', metavar='public_shot', action='store', help='Number of shot in public database (if different from shot number of source database)', type=int)
+parser.add_argument('--dry-run', '-n', dest='dry_run', action='store_true', help='Perform dry run - no action is taken', required=False)
+parser.add_argument(dest='description',metavar='description_file',help="Filename of a file holding a plain-text description of the database")
+
+args = parser.parse_args()
+
+if args.dry_run:
+	logger.debug("Performing dry run")
+
+# Get the time stamp when starting
+current_time_stamp = strftime("%Y-%m-%d, %H:%M:%S", localtime())
+
+# Output the collected arguments
+logger.info("Source database:")
+logger.info('  User name: ' + args.user_name)
+logger.info('  Tokamak: ' + args.tokamak)
+logger.info('  DB version: ' + args.version)
+logger.info('  Shot number: ' + str(args.shot))
+logger.info('  Run number: ' + str(args.run))
+logger.info('  Backend: ' + args.backend)
+logger.info('  Description file: ' + args.description)
+if args.public_tokamak is None:
+	logger.debug('Public tokamak is not defined, using user tokamak = ' + args.tokamak)
+	public_dest_tokamak = args.tokamak
+else:
+	logger.info('Using specified public tokamak: ' + args.public_tokamak)
+	public_dest_tokamak = args.public_tokamak
+	
+if args.public_shot is None:
+	logger.debug('Public shot is not defined, using user shot = ' + str(args.shot) )
+	public_dest_shot = args.shot
+else:
+	logger.debug('Using specified public shot: ' + str(args.public_shot))
+	public_dest_shot = args.public_shot
+
+if not os.path.exists(args.description):
+	logger.error("Description file " + args.description + " does not exist")
+	sys.exit(1)
+
+# FIXME: check that user database actually exists. This can be done easiest by checking
+# whether the actual database files exists further down where they are copied
+# Stop with error if this is not the case
+
+# find whether public database is set up for given machine and version
+existing_tokamaks_for_dv = [ tokamak for tokamak, dataversions in db.list_tokamaks("public", args.version)]
+if not public_dest_tokamak in existing_tokamaks_for_dv:
+	logger.error('Public database not set up for tokamak ' + public_dest_tokamak + ' and data version ' + args.version)
+	logger.error("You have to run \n \t create_public_imas_dir " + public_dest_tokamak + " " + args.version + '\nfirst')
+	sys.exit(1)
+
+logger.debug('Retrieving public databases for tokamak: ' + public_dest_tokamak + \
+			" data version " + args.version + \
+			" backend " + args.backend );
+public_dbs = db.list_databases(user="public", tokamak=public_dest_tokamak, \
+							dataversion=args.version, backends=[args.backend])
+
+logger.debug(public_dbs)
+
+# Extract shot list from public database list
+shot_exists_in_public_db = False 
+existing_runs = None
+for tokamak, data in public_dbs:
+	for dataversion, data in data:
+		for backend, data in data:
+			for shot, runs in data:
+				if shot == args.shot:
+					shot_exists_in_public_db = True 				 
+					existing_runs = runs
+
+# for the given shot, we have to find first empty run inside public db
+if not shot_exists_in_public_db:
+	logger.debug('There is no shot: ' + str(public_dest_shot) + ' in public db. The following shot will be populated: ' + str(public_dest_shot))
+	public_dest_run = 1
+else:
+	logger.debug('Shot ' + str(args.shot) + ' exists in public database with runs: ' + str(existing_runs))
+	# we will look for all runs and pick first empty one
+	# first, we have to sort the runs
+	public_dest_run = 0
+	logger.debug("Sorted runs looks following way: " + str(existing_runs))
+	# then, we have to check whether there are more than one run
+	# if there is only one run, at first check whether idx = 1 was already used
+	# if not, we will use it
+	if len(existing_runs) == 1:
+		if existing_runs[0] != 1:
+			public_dest_run = 1
+		else:
+			public_dest_run = existing_runs[0] + 1
+	else:
+		# if there are more runs, we are looking for the first "gap" wider than one
+		logger.debug('Looking for the gap between runs')
+		last_value = existing_runs[0]
+		if last_value != 1:
+			public_dest_run = 1
+		else:
+			for idx, value in enumerate(existing_runs):
+				logger.debug('Checking: ' + str(idx) + ' with value: ' + str(value))
+				if idx == 0:
+					continue
+				else:
+					if last_value + 1 == value:
+						last_value = value
+					else:
+						public_dest_run = last_value + 1
+						break
+			public_dest_run = last_value + 1
+	logger.debug('The following public shot and run will be populated: ' + str(args.shot) + ' / ' + str(public_dest_run))
+
+logger.info("Target database:")
+logger.info('  User name: public')
+logger.info('  Tokamak: ' + public_dest_tokamak)
+logger.info('  DB version: ' + args.version)
+logger.info('  Shot number: ' + str(public_dest_shot))
+logger.info('  Run number: ' + str(public_dest_run))
+logger.info('  Backend: ' + args.backend)
+#logger.debug('  Description file: ' + args.description)
+
+# now, we have everything we need
+# let's prepare the transfer plan
+
+# first, we need location of original file for user, tokamak, database, shot and run
+files = db.get_dbfiles(args.user_name, args.tokamak, args.version, args.shot, args.run, args.backend)
+files_public = db.get_dbfiles('public', public_dest_tokamak, args.version, public_dest_shot, public_dest_run, args.backend)
+
+logger.info("The following copies will be performed:")
+for file_from, file_to in zip(files, files_public):
+	logger.info("-------")
+	logger.info( "File: ")
+	logger.info( "\t" + file_from)
+	logger.info( "Will be copied to: ")
+	logger.info( "\t" + file_to)
+logger.info("-------")
+
+if not args.dry_run:
+	for from_file, to_file in zip(files, files_public):
+		shutil.copyfile(from_file, to_file)
+	
+#FIXME: stop on error when copying
+
+# we have to create metadata for the data transfer
+out = []
+		
+SEPARATOR = '>>>>>>>>>>>>>>> '
+out.append(SEPARATOR + "METAFILE FORMAT VERSION")
+out.append("v1")
+
+out.append(SEPARATOR + "TIMESTAMP")
+out.append(current_time_stamp)
+
+out.append(SEPARATOR + "EXECUTING USER")
+out.append(os.environ['USER'])
+
+out.append(SEPARATOR + "EXECUTION DIRECTORY")
+out.append(os.environ['PWD'])
+
+out.append(SEPARATOR + "EXECUTED COMMAND LINE")
+out.append(string.join(sys.argv, ' '))
+
+out.append(SEPARATOR + "SOURCE DATABASE")
+out.append('User name: ' + args.user_name)
+out.append('Tokamak: ' + args.tokamak)
+out.append('Dataversion: ' + args.version)
+out.append('Shot number: ' + str(args.shot))
+out.append('Run number: ' + str(args.run))
+out.append('Backend: ' + args.backend)
+out.append('Description filename (relative to execution path): ' + args.description)
+
+out.append(SEPARATOR + "TARGET DATABASE")
+out.append('User name: public')
+out.append('Tokamak: ' + public_dest_tokamak)
+out.append('Dataversion: ' + args.version)
+out.append('Shot number: ' + str(public_dest_shot))
+out.append('Run number: ' + str(public_dest_run))
+out.append('Backend: ' + args.backend)
+
+out.append(SEPARATOR + "SOURCE FILES")
+for filename in files:
+	out.append(filename)
+
+out.append(SEPARATOR + "TARGET FILES")
+for filename in files_public:
+	out.append(filename)
+
+out.append(SEPARATOR + "SOURCE FILE INFORMATION")
+for filename in files: 
+	p = subprocess.Popen(['/bin/ls -l ' + filename, ''], stdout=subprocess.PIPE, 
+                                       stderr=subprocess.PIPE, shell=True)
+	stdout, stderr = p.communicate()
+	out.append(stdout)
+
+out.append(SEPARATOR + "TARGET FILE INFORMATION")
+if args.dry_run:
+	out.append("(Can't get file information for target database files in dry run)")
+else:
+	for filename in files_public: 
+		p = subprocess.Popen(['/bin/ls -l ' + filename, ''], stdout=subprocess.PIPE, 
+                	                       stderr=subprocess.PIPE, shell=True)
+		stdout, stderr = p.communicate()
+		out.append(stdout)
+
+out.append(SEPARATOR + "SOURCE FILE MD5 HASHES")
+for filename in files: 
+	p = subprocess.Popen(['md5sum', filename], stdout=subprocess.PIPE, 
+                                       stderr=subprocess.PIPE)
+	stdout, stderr = p.communicate()
+	out.append(stdout)
+
+out.append(SEPARATOR + "TARGET FILE MD5 HASHES")
+if args.dry_run:
+	out.append("(Can't run md5sum on target database files in dry run)")
+else:
+	for filename in files_public: 
+		p = subprocess.Popen(['md5sum', filename], stdout=subprocess.PIPE, \
+                             stderr=subprocess.PIPE)
+		stdout, stderr = p.communicate()
+		out.append(stdout)
+
+# FIXME: check return status of md5sum command, stop on error
+# FIXME: compare md5 hashes of source and target database
+
+out.append(SEPARATOR + "IMASDBS OUTPUT FOR SOURCE DB")
+command = '/bin/tcsh -c "( source $IMASSCRIPTDIR/IMASv1 kepler test ' + args.version + \
+	'; imasdbs -u ' + args.user_name + ' -t ' + args.tokamak \
+	+ ' -v ' + args.version \
+	+ ' times ' + str(args.shot) + ' ' + str(args.run) + ' )"'
+logger.debug(command) 
+p = subprocess.Popen([command, ''], stdout=subprocess.PIPE,  
+                                   stderr=subprocess.PIPE,
+                                   shell = True)
+stdout, stderr = p.communicate()
+out.append(stdout)
+
+out.append(SEPARATOR + "IMASDBS OUTPUT FOR TARGET DB")
+
+if args.dry_run:
+	out.append("(Can't run imasdbs on target database in dry run)")
+else:
+	command = '/bin/tcsh -c "( source $IMASSCRIPTDIR/IMASv1 kepler test ' + args.version + \
+		'; imasdbs -u public -t ' + public_dest_tokamak \
+		+ ' -v ' + args.version \
+         	+ ' times ' + str(public_dest_shot) + ' ' + str(public_dest_run) + ' )"'
+	logger.debug(command) 
+	p = subprocess.Popen([command, ''], stdout=subprocess.PIPE,  
+                                       stderr=subprocess.PIPE,
+                                       shell = True)
+	stdout, stderr = p.communicate()
+	out.append(stdout)
+
+
+out.append(SEPARATOR + "DATABASE DESCRIPTION")
+with open(args.description) as f:
+	lines = f.readlines()
+# Add lines, but cut newline
+for line in lines:
+	out.append(line[0:-1])
+
+# Write output to file or stdout
+
+try:
+	meta_dir = os.environ['IMASPUBLICDBMETADATA']
+except:
+	logger.error( "Environment variable IMASPUBLICDBMETADATA is not defined. Quitting.")
+	sys.exit(1)
+
+meta_file_path = os.path.join( meta_dir, args.version + '_' + args.tokamak + '_' + str(args.shot) + '_' + str(public_dest_run))
+logger.info( "Metadata is written to file " + meta_file_path )
+
+outlines = [line + "\n" for line in out]
+if args.dry_run:
+	sys.stdout.writelines( outlines )
+else:
+	metafile = open(meta_file_path, 'w')
+	metafile.writelines( outlines )
+	metafile.close()
+	#FIXME: stop on write error
+	
+	

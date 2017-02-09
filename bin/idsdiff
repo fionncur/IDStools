@@ -1,0 +1,90 @@
+#!/usr/bin/python
+import copy
+import numpy
+import sys
+import imas
+
+def get_ids(shot, run, idsname, time=0, interp=1):
+    '''
+    Open IMASdb to get specific IDS and return its deep copy.
+    '''
+    imas = imas.ids(shot, run)
+    imas.open()
+    imas.__dict__[idsname].getSlice(time, interp)
+    ids = copy.deepcopy(imas.__dict__[idsname])
+    imas.close()
+    return ids
+
+def compare(x, y, parent):
+    '''
+    Iterate over every field and compare values depending on the type of field.
+    '''
+    #print "compare objects of type " + type(x).__name__ + " from " + parent
+
+    xd = x.__dict__
+    yd = y.__dict__
+    for key in set(xd.keys()).union(set(yd.keys())):
+        if key not in xd:
+            print('%s not present in IDS1' % key)
+            continue
+
+        if key not in yd:
+            print('%s not present in IDS2' % key)
+            continue
+
+        xo = x.__dict__[key]
+        yo = y.__dict__[key]
+        if type(xo) != type(yo):
+            print('%s.%s is of different type in both IDSs' % (parent, key))
+            continue
+
+        if type(xo).__name__ == 'instance':
+            compare(xo, yo, parent + '.' + xo.__class__.__name__)
+            continue
+
+        # treatment of struct_array and list of strings
+        if type(xo).__name__ == 'list':
+            if len(xo) != len(yo):
+                print('%s.%s is of different length in both IDSs' % (parent, key))
+            else:
+                for i in range(len(xo)):
+                    if type(xo[i]).__name__ == 'instance':
+                        compare(xo[i], yo[i], parent + '.array[' + str(i) + ']')
+                    else:
+                        #print "list of "+type(xo[i]).__name__
+                        continue
+        else:
+            result = xo == yo
+            if type(result).__name__ == 'ndarray':
+                result = result.all()
+
+            if not result:
+                missing = [False]
+                if type(xo).__name__ == 'ndarray':
+                    if xo.size == 0:
+                        missing = [True, 'first']
+                    elif yo.size == 0:
+                        missing = [True, 'second']
+                else:
+                    missmap = { int : -999999999, float : -9e+40}
+                    for t in missmap:
+                        if isinstance(xo, t):
+                            if xo == missmap[t]:
+                                missing = [True, 'first']
+                            elif yo == missmap[t]:
+                                missing = [True, 'second']
+
+                if missing[0]:
+                    print('%s.%s is missing in the %s IDS' % (parent, key, missing[1]))
+                else:
+                    print('%s.%s is of different value in both IDSs' % (parent, key))
+
+
+if __name__ == '__main__':
+    if len(sys.argv) != 6:
+        print('Usage: ./idsdiff.py <IDSNAME> <SHOTa> <RUNa> <SHOTb> <RUNb>')
+        exit(1)
+
+    compare(get_ids(int(sys.argv[2]), int(sys.argv[3]), sys.argv[1]),\
+            get_ids(int(sys.argv[4]), int(sys.argv[5]), sys.argv[1]),\
+            sys.argv[1])

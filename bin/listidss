@@ -1,0 +1,36 @@
+#!/usr/bin/env python
+
+# @author: H.-J. Klingshirn
+
+import sys
+import imastools.ids_cli_tools as cli
+import imastools.ids_tools as ct
+
+def extended(str, wlen):
+	l = len(str)
+	if l < len:
+		return ' ' * (wlen - l) + str
+	else:
+		return str
+		
+def print_vector(vec, wlen):
+	from string import join
+	return join( [extended(str(x), wlen) for x in vec] )
+
+
+pars, args = cli.read_shot()
+
+try:
+	db = ct.ImasDb(pars["shot"], pars["run"], pars["user"], pars["tokamakname"], pars["dataversion"], True, pars["hdf5"])
+except:
+	print >> sys.stderr, "Unable to open database"
+	print sys.exc_info()[0]
+	sys.exit(1)	
+	
+alltimes = db.all_times()
+
+for idsname, times in alltimes:
+	print extended(idsname, 15) + ": " \
+		+ extended(str(len(times)), 5) + " slices: " \
+		+ print_vector(times, 4)
+	
