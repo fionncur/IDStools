@@ -21,6 +21,7 @@ uninstall: tools_uninstall module_uninstall
 module : $(MODULEFILE)
 
 clean:
+	rm -f imastools/*.pyc
 	rm -rf build/
 	rm -rf module/imastools/
 

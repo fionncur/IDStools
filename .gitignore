@@ -1,2 +1,3 @@
 module/imastools/
 build/
+*.pyc
