@@ -33,10 +33,10 @@ ifneq (,$(PY2VER))
 	install -d $(INSTALL_PY2)
 	python2 setup.py install --install-lib=$(INSTALL_PY2) --install-scripts=$(INSTALL)/bin
 endif
-ifneq (,$(PY3VER))
-	install -d $(INSTALL_PY3)
-	python3 setup.py install --install-lib=$(INSTALL_PY3) --install-scripts=$(INSTALL)/bin
-endif
+#ifneq (,$(PY3VER))
+#	install -d $(INSTALL_PY3)
+#	python3 setup.py install --install-lib=$(INSTALL_PY3) --install-scripts=$(INSTALL)/bin
+#endif
 
 module_uninstall:
 	rm -f $(INSTALL_MOD)
@@ -50,14 +50,14 @@ $(MODULEFILE):  module/imastools.in
 	install -d $(dir $@)
 	sed -e "s;__VERSION__;$(VERSION);" \
 		-e "s;__PY2VER__;$(PY2VER);" \
-		-e "s;__PY3VER__;$(PY3VER);" \
 		-e "s;__IMAS_HOME__;$(IMAS_HOME);" \
 		$< > $@
+#		-e "s;__PY3VER__;$(PY3VER);" \
 
 install_deps:
 	$(if $(wildcard $(IMAS_HOME)),,$(error IMAS_HOME dir was non existent, did you install imas yet? ($(IMAS_HOME))))
 	$(if $(wildcard $(PY2))$(wildcard $(PY3)),,$(error No python2 or python3 executable in path, did you load any python module?))
 	$(info Using IMAS_HOME: $(IMAS_HOME))
 	$(info Found python2: $(PY2))
-	$(info Found python3: $(PY3))
+#	$(info Found python3: $(PY3))
 
