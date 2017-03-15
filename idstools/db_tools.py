@@ -156,7 +156,7 @@ def list_databases_mdsplus(user, tokamak, dataversion):
                     dbs[shot] = list()
                 dbs[shot].append(run)
             except:
-	         print "EXC: ", sys.exc_info()
+                 print "EXC: ", sys.exc_info()
                  logging.warn("Malformed MDSPlus database filename: " + join(root, filename))
             
     # create sorted lists
