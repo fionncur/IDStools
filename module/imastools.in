@@ -1,0 +1,65 @@
+#%Module1.0#####################################################################
+##
+##      $name modulefile
+##
+## Copyright (c) 2017, ITER Organization
+## Route de Vinon-sur-Verdon, CS 90 046, 13067 St-Paul-lez-Durance Cedex, France
+
+# Extract $name/$ver from module name
+
+# Split on "/"
+set wordlist [ split [module-info name] / ]
+# Join selected words with "/"
+set name [ lrange $wordlist 0 0 ]
+set ver [ join [ lrange $wordlist 1 end ] "/" ]
+
+set imas_home __IMAS_HOME__
+set loading [module-info mode load]
+
+if { "imastools" != $name } {
+  puts stderr "Error: module name does not start with imastools."
+  break
+}
+
+if { 0 == [file exists $imas_home] } {
+#  if { [info exists ::env(IMAS_HOME) ] } {
+#    if { [file exists $::env(IMAS_HOME) ] } {
+#      set imas_home $::env(IMAS_HOME)
+#      puts stderr "Warning: using IMAS_HOME from environment."
+#    }
+#  }
+}
+
+if { ! [file exists $imas_home] } {
+  puts stderr "Error: $imas_home path could not be found. Exiting. Try setting $IMAS_HOME..."
+  break
+}
+
+module-whatis "IMAS IDS Python tools. ($ver)"
+
+proc ModulesHelp { } {
+  puts stderr "\tThis module sets the environment for $name version $ver"
+}
+
+conflict $name
+
+# List of required module names, and corresponding module/version to load:
+prereq imas
+
+set prefix "$imas_home/core/$name/$ver"
+if { [file exists $prefix] } {
+  prepend-path PATH             $prefix/bin
+  #prepend-path MANPATH          $prefix/share/man
+  #prepend-path LD_LIBRARY_PATH  $prefix/lib
+  #prepend-path PKG_CONFIG_PATH  $prefix/lib/pkgconfig
+if { [file exists $prefix/lib/python__PY2VER__] } {
+  setenv PYTHONPATH             $prefix/lib/python__PY2VER__
+}
+if { [file exists $prefix/lib/python__PY3VER__] } {
+  setenv PYTHON3PATH             $prefix/lib/python__PY3VER__
+}
+} else {
+  puts stderr "Error: $prefix could not be found, exiting without changes."
+  break
+}
+
