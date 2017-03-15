@@ -31,12 +31,12 @@ def print_list(dbs, shotnum = None, compact = False):
 	for tokamak, dvs in dbs:
 		printed_tokamak = False
 		for dv, dbbackends in dvs:
-			printed_dataversion = False				
+			printed_dataversion = False
 			for backend, dbs in dbbackends:
 				printed_backend = False
 				for shot, runs in dbs:
 					if shotnum is not None:
-						# if a shotnum is given, only display databases with this shot number 
+						# if a shotnum is given, only display databases with this shot number
 						if shot != shotnum:
 							continue
 
@@ -47,13 +47,13 @@ def print_list(dbs, shotnum = None, compact = False):
 						print TAB + "Data version: " + dv
 						printed_dataversion = True
 					if not printed_backend:
-						print TAB * 2 + "UAL Backend: " + backend				
+						print TAB * 2 + "UAL Backend: " + backend
 						printed_backend = True
 																	
 					if compact:
 						print TAB * 3 + "Shot " + extended(str(shot), SHOT_STR_LEN) \
-							+ ": " + extended(str(len(runs)), RUNNUM_STR_LEN) + " runs" 					
-					else:					
+							+ ": " + extended(str(len(runs)), RUNNUM_STR_LEN) + " runs"
+					else:
 						print TAB * 3 + "Shot " + extended(str(shot), SHOT_STR_LEN) \
 							+ " Runs: " + print_vector(runs, RUN_STR_LEN)
 
@@ -62,13 +62,13 @@ def print_times(dbs, opts, printTimes = False, shotnum= None, runnum = None):
 	
 	for tokamak, dvs in dbs:
 		printed_tokamak = False
-		for dv, dbbackends in dvs:	
+		for dv, dbbackends in dvs:
 			printed_dataversion = False
 			for backend, dbs in dbbackends:
 				printed_backend = False
 				for shot, runs in dbs:
 					
-					# If a shotnum and/or runnum is given, only display these					
+					# If a shotnum and/or runnum is given, only display these
 					if shotnum is not None:
 						if shot != shotnum:
 							continue
@@ -86,15 +86,15 @@ def print_times(dbs, opts, printTimes = False, shotnum= None, runnum = None):
 							print TAB + "Data version: " + dv
 							printed_dataversion = True
 						if not printed_backend:
-							print TAB * 2 + "UAL Backend: " + backend				
+							print TAB * 2 + "UAL Backend: " + backend
 							printed_backend = True
 						if not printed_shot:
 							print TAB * 3 + "Shot " + extended(str(shot), SHOT_STR_LEN)
-							printed_shot = True						
+							printed_shot = True
 						
-						print TAB * 4 + " Run: " + extended(str(run), RUN_STR_LEN)					
+						print TAB * 4 + " Run: " + extended(str(run), RUN_STR_LEN)
 						db = ct.ImasDb(shot, run, opts.user, tokamak, dv, True, backend == "hdf5")
-						alltimes = db.all_times()						
+						alltimes = db.all_times()
 						for idsname, times in alltimes:
 							if printTimes:
 								print TAB * 5 + extended(idsname, IDSNAME_STR_LEN) + ": "\
@@ -138,7 +138,7 @@ opts, args = p.parse_args()
 
 
 if not args or args[0] == "list" or args[0] == "slices" or args[0] == "times":
-	# Default action: show databases	
+	# Default action: show databases
 	
 	
 	shotnum = None
@@ -146,26 +146,26 @@ if not args or args[0] == "list" or args[0] == "slices" or args[0] == "times":
 		try:
 			shotnum = int(args[1])
 		except:
-			print >> sys.stderr, "Second argument must be an integer"		
+			print >> sys.stderr, "Second argument must be an integer"
 			sys.exit(1)
 	
-	runnum = None	
+	runnum = None
 	if len(args) > 2:
 		try:
 			runnum = int(args[2])
 		except:
-			print >> sys.stderr, "Third argument must be an integer"		
+			print >> sys.stderr, "Third argument must be an integer"
 			sys.exit(1)
 	
 	if len(args) > 0 and (args[0] == "slices" or args[0] == "times"):
 		envdv = os.getenv("DATAVERSION")
 		if opts.version is not None and envdv != opts.version:
-			print >> sys.stderr, "Cannot access IDS times for data version differing from current $DATAVERSION"		
+			print >> sys.stderr, "Cannot access IDS times for data version differing from current $DATAVERSION"
 			sys.exit(1)
 		
 	
 	if opts.backend:
-		backends = opts.backend.split(',')		
+		backends = opts.backend.split(',')
 	else:
 		backends = None
 	

@@ -84,9 +84,9 @@ if __name__ == '__main__':
         else:
             for i in range(maxoccur + 1):
                 if i:
-                    print 'Processing %s/%d' % (ids_info['type'], i), 
+                    print 'Processing %s/%d' % (ids_info['type'], i),
                 else:
-                    print 'Processing %s' % ids_info['type'], 
+                    print 'Processing %s' % ids_info['type'],
                 ids = idss_in.__dict__[type + 'Array']
                 stdout = sys.stdout
                 sys.stdout = open('/dev/null', 'w') # suppress warnings

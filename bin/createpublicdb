@@ -115,14 +115,14 @@ public_dbs = db.list_databases(user="public", tokamak=public_dest_tokamak, \
 logger.debug(public_dbs)
 
 # Extract shot list from public database list
-shot_exists_in_public_db = False 
+shot_exists_in_public_db = False
 existing_runs = None
 for tokamak, data in public_dbs:
 	for dataversion, data in data:
 		for backend, data in data:
 			for shot, runs in data:
 				if shot == args.shot:
-					shot_exists_in_public_db = True 				 
+					shot_exists_in_public_db = True
 					existing_runs = runs
 
 # for the given shot, we have to find first empty run inside public db
@@ -239,8 +239,8 @@ for filename in files_public:
 	out.append(filename)
 
 out.append(SEPARATOR + "SOURCE FILE INFORMATION")
-for filename in files: 
-	p = subprocess.Popen(['/bin/ls -l ' + filename, ''], stdout=subprocess.PIPE, 
+for filename in files:
+	p = subprocess.Popen(['/bin/ls -l ' + filename, ''], stdout=subprocess.PIPE,
                                        stderr=subprocess.PIPE, shell=True)
 	stdout, stderr = p.communicate()
 	out.append(stdout)
@@ -249,15 +249,15 @@ out.append(SEPARATOR + "TARGET FILE INFORMATION")
 if args.dry_run:
 	out.append("(Can't get file information for target database files in dry run)")
 else:
-	for filename in files_public: 
-		p = subprocess.Popen(['/bin/ls -l ' + filename, ''], stdout=subprocess.PIPE, 
+	for filename in files_public:
+		p = subprocess.Popen(['/bin/ls -l ' + filename, ''], stdout=subprocess.PIPE,
                 	                       stderr=subprocess.PIPE, shell=True)
 		stdout, stderr = p.communicate()
 		out.append(stdout)
 
 out.append(SEPARATOR + "SOURCE FILE MD5 HASHES")
-for filename in files: 
-	p = subprocess.Popen(['md5sum', filename], stdout=subprocess.PIPE, 
+for filename in files:
+	p = subprocess.Popen(['md5sum', filename], stdout=subprocess.PIPE,
                                        stderr=subprocess.PIPE)
 	stdout, stderr = p.communicate()
 	out.append(stdout)
@@ -266,7 +266,7 @@ out.append(SEPARATOR + "TARGET FILE MD5 HASHES")
 if args.dry_run:
 	out.append("(Can't run md5sum on target database files in dry run)")
 else:
-	for filename in files_public: 
+	for filename in files_public:
 		p = subprocess.Popen(['md5sum', filename], stdout=subprocess.PIPE, \
                              stderr=subprocess.PIPE)
 		stdout, stderr = p.communicate()
@@ -280,8 +280,8 @@ command = '/bin/tcsh -c "( source $IMASSCRIPTDIR/IMASv1 kepler test ' + args.ver
 	'; imasdbs -u ' + args.user_name + ' -t ' + args.tokamak \
 	+ ' -v ' + args.version \
 	+ ' times ' + str(args.shot) + ' ' + str(args.run) + ' )"'
-logger.debug(command) 
-p = subprocess.Popen([command, ''], stdout=subprocess.PIPE,  
+logger.debug(command)
+p = subprocess.Popen([command, ''], stdout=subprocess.PIPE,
                                    stderr=subprocess.PIPE,
                                    shell = True)
 stdout, stderr = p.communicate()
@@ -296,8 +296,8 @@ else:
 		'; imasdbs -u public -t ' + public_dest_tokamak \
 		+ ' -v ' + args.version \
          	+ ' times ' + str(public_dest_shot) + ' ' + str(public_dest_run) + ' )"'
-	logger.debug(command) 
-	p = subprocess.Popen([command, ''], stdout=subprocess.PIPE,  
+	logger.debug(command)
+	p = subprocess.Popen([command, ''], stdout=subprocess.PIPE,
                                        stderr=subprocess.PIPE,
                                        shell = True)
 	stdout, stderr = p.communicate()

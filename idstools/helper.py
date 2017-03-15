@@ -11,7 +11,7 @@ def is_sequence(arg):
             hasattr(arg, "__iter__"))
 
 def make_sequence(arg):
-    '''Make sure an object is a sequence. If not, package it in a tuple.'''    
+    '''Make sure an object is a sequence. If not, package it in a tuple.'''
     if is_sequence(arg):
         return arg
     else:

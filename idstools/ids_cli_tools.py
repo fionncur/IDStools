@@ -17,7 +17,7 @@ def read_shot():
     
         my_program [OPTIONS] IMASDBSPECIFIER
         
-    where IMASDBSPECIFIER has the form 
+    where IMASDBSPECIFIER has the form
     
         shotnum,runnum[,time]
         
@@ -41,7 +41,7 @@ def read_shot_ids():
     
         my_program [OPTIONS] IMASDBSPECIFIER IDSNAME
         
-    where IMASDBSPECIFIER has the form 
+    where IMASDBSPECIFIER has the form
     
         shotnum,runnum[,time]
         
@@ -54,7 +54,7 @@ def read_shot_ids():
     if len(args) < 1:
         raise SystemExit("Not enough arguments given")
         
-    # FIXME: check that the IDS string makes sense - test against known IDS names (see Matlab interface)    
+    # FIXME: check that the IDS string makes sense - test against known IDS names (see Matlab interface)
     pars["ids"] = args[0]
             
     return pars, args[1:]
@@ -65,7 +65,7 @@ def read_shot_ids_list():
     
         my_program [OPTIONS] IMASDBSPECIFIER [IDSNAME1 IDSNAME2 ...]
         
-    where IMASDBSPECIFIER has the form 
+    where IMASDBSPECIFIER has the form
     
         shotnum,runnum[,time]
         
@@ -73,22 +73,22 @@ def read_shot_ids_list():
     
     Returns a dictionary with all parameters.'''
     
-    pars, args = read_shot()        
+    pars, args = read_shot()
     # FIXME: check that the IDS string makes sense - test against known IDS names (see Matlab interface)
-    pars["ids"] = args            
+    pars["ids"] = args
     return pars
 
     
 def parseShotDescription(shotDesc):
     pars = {}
-    try:        
+    try:
         parts = shotDesc.split(',')
         if len(parts) >= 2:
-            pars["shot"] = int(parts[0])       
-            pars["run"] = int(parts[1])       
+            pars["shot"] = int(parts[0])
+            pars["run"] = int(parts[1])
         if len(parts) >= 3:
-            pars["time"] = float(parts[2])                   
-    except:    
+            pars["time"] = float(parts[2])
+    except:
         raise SystemExit("Invalid shot description: " + shotDesc)
         
     return pars
@@ -103,17 +103,17 @@ def setup_parser():
     p.add_option("--debug", action="store_true", dest="debug", default=False)
     return p
 
-def parse_cli(p):    
+def parse_cli(p):
     opts, args = p.parse_args()
     
     if ((opts.user is not None) | (opts.tokamak is not None) | (opts.version is not None)) \
         & opts.useHDF5:
-        raise SystemExit("HDF5 access method not allowed when specifying user, tokamak or data version.")         
+        raise SystemExit("HDF5 access method not allowed when specifying user, tokamak or data version.")
 
     pars = setDefaultParameters()
-    if opts.user is not None: pars["user"] = opts.user  
-    if opts.tokamak is not None: pars["tokamakname"] = opts.tokamak  
-    if opts.version is not None: pars["dataversion"] = opts.version  
+    if opts.user is not None: pars["user"] = opts.user
+    if opts.tokamak is not None: pars["tokamakname"] = opts.tokamak
+    if opts.version is not None: pars["dataversion"] = opts.version
     pars["hdf5"] = opts.useHDF5
     pars["debug"] = opts.debug
     
