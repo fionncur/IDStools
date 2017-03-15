@@ -5,7 +5,7 @@ from numpy.distutils.core import setup
 setup(name='IMAS IDS Tools',
       version='1.0',
       description='IMAS IDS Python tools',
-      packages=['imastools'],
+      packages=['idstools'],
       py_modules=[],
       scripts=['bin/imasdbs', 'bin/idsdiff', 'bin/idsdump', 'bin/idscopy']
      )

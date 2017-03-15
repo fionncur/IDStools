@@ -7,7 +7,7 @@ Authors: Michal Owsiak, Hajo Klingshirn
 '''
 import sys
 import argparse
-import imastools.db_tools as db
+import idstools.db_tools as db
 import logging
 import os
 import shutil

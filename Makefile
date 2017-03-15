@@ -4,9 +4,9 @@ VERSION=$(shell git describe --always --dirty)
 # Module imas will set IMAS_HOME to system wide, otherwise pick $PWD/imas:
 IMAS_HOME ?= $(realpath $(CURDIR)/$(dir $(lastword $(MAKEFILE_LIST))))/imas
 
-INSTALL = $(IMAS_HOME)/core/imastools/$(VERSION)
-INSTALL_MOD = $(IMAS_HOME)/etc/modulefiles/imastools/$(VERSION)
-MODULEFILE = module/imastools/$(VERSION)
+INSTALL = $(IMAS_HOME)/core/idstools/$(VERSION)
+INSTALL_MOD = $(IMAS_HOME)/etc/modulefiles/idstools/$(VERSION)
+MODULEFILE = module/idstools/$(VERSION)
 
 # Check that python2 and python3 exists and get their full path
 PY2:=$(shell command -v python2 2> /dev/null)
@@ -21,9 +21,9 @@ uninstall: tools_uninstall module_uninstall
 module : $(MODULEFILE)
 
 clean:
-	rm -f imastools/*.pyc
+	rm -f idstools/*.pyc
 	rm -rf build/
-	rm -rf module/imastools/
+	rm -rf module/idstools/
 
 tools_uninstall:
 	rm -rf $(INSTALL)
@@ -47,7 +47,7 @@ module_install: install_deps $(MODULEFILE)
 	install $(MODULEFILE) $(INSTALL_MOD)
 
 .PHONY: $(MODULEFILE) install_deps
-$(MODULEFILE):  module/imastools.in
+$(MODULEFILE):  module/idstools.in
 	install -d $(dir $@)
 	sed -e "s;__VERSION__;$(VERSION);" \
 		-e "s;__PY2VER__;$(PY2VER);" \

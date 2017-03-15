@@ -3,8 +3,8 @@
 # @author: H.-J. Klingshirn
 
 import sys
-import imastools.ids_cli_tools as cli
-import imastools.ids_tools as ct
+import idstools.ids_cli_tools as cli
+import idstools.ids_tools as ct
 
 def extended(str, wlen):
 	l = len(str)
