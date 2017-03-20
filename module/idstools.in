@@ -53,10 +53,10 @@ if { [file exists $prefix] } {
   #prepend-path LD_LIBRARY_PATH  $prefix/lib
   #prepend-path PKG_CONFIG_PATH  $prefix/lib/pkgconfig
 if { [file exists $prefix/lib/python__PY2VER__] } {
-  setenv PYTHONPATH             $prefix/lib/python__PY2VER__
+  prepend-path PYTHONPATH             $prefix/lib/python__PY2VER__
 }
 if { [file exists $prefix/lib/python__PY3VER__] } {
-  setenv PYTHON3PATH             $prefix/lib/python__PY3VER__
+  prepend-path PYTHON3PATH             $prefix/lib/python__PY3VER__
 }
 } else {
   puts stderr "Error: $prefix could not be found, exiting without changes."
