@@ -1,30 +1,25 @@
 program ids_grid_example1_2dstructured_servicelibrary
 
   !> This example program demonstrates how to use the general grid description
-  !> to store a simple 2d structured grid and write some data given on it to the CPO.
+  !> to store a simple 2d structured grid and write some data given on it to the IDS.
   !>
   !> The focus of this example program is delegate as much work as possible onto the
   !> grid service library. This is the recommended way to use the general grid description.
   !>
   !> If you want to learn how to do everything manually, step-by-step, without hiding any
-  !> complexity behind high-level calls, have a look at the file itm_grid_example1_2dstructured_manual.f90
+  !> complexity behind high-level calls, have a look at the file ids_grid_example1_2dstructured_manual.f90
   !> in this directory.
   !>
-  !> The used grid is described in detail here on the ITM Documentation Website (https://www.efda-itm.eu/ITM/html/)
-  !> Then go to IMP3 -> IMP3 general grid description & service library -> Example grids -> Example grid #1
-  !> Direct link (might be broken): https://www.efda-itm.eu/ITM/html/imp3_gridexamples.html#imp3_gridexamples_5 
 
-  ! ITM data structure/CPO definitions
+  ! IMAS data structure/IDS definitions
   use ids_schemas, only: DP, ids_edge_profiles
 
   use ids_routines ! , only: imas_create, ids_put, imas_close
 
-  !  use ids_routines    ! ITM UAL routines
-
-  ! ITM grid service library: constant definitions like COORDTYPE_R, COORDTYPE_Z
+  ! IMAS grid service library: constant definitions like COORDTYPE_R, COORDTYPE_Z
   use ids_grid_common, only: COORDTYPE_R, COORDTYPE_Z
 
-  ! ITM grid service libary, routines for handling structured grids
+  ! IMAS grid service libary, routines for handling structured grids
   use ids_grid_structured, only: gridSetupStructuredSep, gridStructWriteData2d, GRID_STRUCT_FACES
 
   implicit none
@@ -37,7 +32,7 @@ program ids_grid_example1_2dstructured_servicelibrary
   integer, parameter :: RUNNUM = 1
 
   ! variables
-  type (ids_edge_profiles),pointer :: edgecpo(:) => null()
+  type (ids_edge_profiles) :: edgeids => null()
   integer :: idx
   integer :: ir, iz, i
   real(DP) :: cellData(NPOINTR - 1, NPOINTZ - 1)
@@ -49,19 +44,18 @@ program ids_grid_example1_2dstructured_servicelibrary
 
   write(*,*)'START: program ids_grid_example1_2dstructured_servicelibrary'
   
-  ! === 1. Set up CPO ===
-  write(*,*)' === 1. Set up CPO ==='
+  ! === 1. Set up IDS ===
+  write(*,*)' === 1. Set up IDS ==='
 
-  allocate( edgecpo(1) )    
-  allocate( edgecpo(1) % time(1) )
-  edgecpo(1) % time(1) = 3.1415_DP
+  allocate( edgeids % time(1) )
+  edgeids % time(1) = 3.1415_DP
 
-  allocate( edgecpo(1) % code % name(1) )
-  edgecpo(1) % code % name(1)="ids_grid_example1_2dstructured_service"
+  allocate( edgeids % code % name(1) )
+  edgeids % code % name(1)="ids_grid_example1_2dstructured_service"
 
   ! Allocate one time-slice:
-  allocate(edgecpo(1) % ggd(1) )
-  edgecpo(1) % ggd(1) % time = 3.1415_DP
+  allocate(edgeids % ggd(1) )
+  edgeids % ggd(1) % time = 3.1415_DP
 
   ! === 2. Set up grid ===
   write(*,*)' === 2. Set up grid ==='
@@ -69,7 +63,7 @@ program ids_grid_example1_2dstructured_servicelibrary
   x2(:) = (/ ( 0.5_DP * i, i=0,NPOINTZ-1) /)
 
   call gridSetupStructuredSep( &
-      & grid = edgecpo(1) % ggd(1) % grid, &
+      & grid = edgeids % ggd(1) % grid, &
       & ndim = 2, &
       & c1 = COORDTYPE_R, &
       & x1 = x1, &
@@ -95,11 +89,11 @@ program ids_grid_example1_2dstructured_servicelibrary
   ! argument createSubgrids = .false. 
   ! 
   ! The easiest way to manually create the subgrid for all (1,1) cells ("faces") is 
-  ! allocate(edgecpo(1)%subgrids(1))  
-  ! call createSubGridForClass(edgecpo(1)%grid, edgecpo(1)%subgrids(1), (/ 1, 1 /), "Cells")
+  ! allocate(edgeids%subgrids(1))  
+  ! call createSubGridForClass(edgeids%grid, edgeids%subgrids(1), (/ 1, 1 /), "Cells")
 
-  ! === 4. Write some fake scalar data to the edge cpo ===
-  write(*,*)' === 4. Write some fake scalar data to the edge cpo ==='
+  ! === 4. Write some fake scalar data to the edge ids ===
+  write(*,*)' === 4. Write some fake scalar data to the edge ids ==='
 
   ! Make up some data
   do ir = 1, NPOINTR - 1 
@@ -115,19 +109,23 @@ program ids_grid_example1_2dstructured_servicelibrary
   enddo
 
   ! Write the data on the grid
-  allocate( edgecpo(1) % ggd(1) % electrons % density(1) )
-  call gridStructWriteData2d( edgecpo(1) % ggd(1) % grid, &
-       edgecpo(1) % ggd(1) % electrons % density(1), &
+  allocate( edgeids % ggd(1) % electrons % density(1) )
+  call gridStructWriteData2d( edgeids % ggd(1) % grid, &
+       edgeids % ggd(1) % electrons % density(1), &
        GRID_STRUCT_FACES, cellData )
 
-  ! === 5. Write the edge CPO to the UAL ===
-  write(*,*)' === 5. Write the edge CPO to the UAL ==='
+  allocate(edgeids%time(1))
+  edgeids%time(1) = 0.0
+  edgeids%ids_properties%homogeneous_time = 1
+
+  ! === 5. Write the edge IDS to the UAL ===
+  write(*,*)' === 5. Write the edge IDS to the UAL ==='
   write(*,*) "Example 1: writing to shot ", SHOTNUM, ", run ", RUNNUM
   call imas_create( 'ids', SHOTNUM, RUNNUM, 0, 0, idx)
-  call ids_put(idx, "edge", edgecpo(1))
+  call ids_put(idx, "edge", edgeids)
   call imas_close(idx)
-  call ids_deallocate(edgecpo(1))
-  deallocate(edgecpo)
+  call ids_deallocate(edgeids)
+  deallocate(edgeids)
 
   write(*,*)'END: program ids_grid_example1_2dstructured_servicelibrary'
 
