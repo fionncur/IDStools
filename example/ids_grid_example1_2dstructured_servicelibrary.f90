@@ -32,7 +32,7 @@ program ids_grid_example1_2dstructured_servicelibrary
   integer, parameter :: RUNNUM = 1
 
   ! variables
-  type (ids_edge_profiles) :: edgeids => null()
+  type (ids_edge_profiles) :: edge_profiles
   integer :: idx
   integer :: ir, iz, i
   real(DP) :: cellData(NPOINTR - 1, NPOINTZ - 1)
@@ -47,15 +47,15 @@ program ids_grid_example1_2dstructured_servicelibrary
   ! === 1. Set up IDS ===
   write(*,*)' === 1. Set up IDS ==='
 
-  allocate( edgeids % time(1) )
-  edgeids % time(1) = 3.1415_DP
+  allocate( edge_profiles % time(1) )
+  edge_profiles % time(1) = 3.1415_DP
 
-  allocate( edgeids % code % name(1) )
-  edgeids % code % name(1)="ids_grid_example1_2dstructured_service"
+  allocate( edge_profiles % code % name(1) )
+  edge_profiles % code % name(1)="ids_grid_example1_2dstructured_service"
 
   ! Allocate one time-slice:
-  allocate(edgeids % ggd(1) )
-  edgeids % ggd(1) % time = 3.1415_DP
+  allocate(edge_profiles % ggd(1) )
+  edge_profiles % ggd(1) % time = 3.1415_DP
 
   ! === 2. Set up grid ===
   write(*,*)' === 2. Set up grid ==='
@@ -63,7 +63,7 @@ program ids_grid_example1_2dstructured_servicelibrary
   x2(:) = (/ ( 0.5_DP * i, i=0,NPOINTZ-1) /)
 
   call gridSetupStructuredSep( &
-      & grid = edgeids % ggd(1) % grid, &
+      & grid = edge_profiles % ggd(1) % grid, &
       & ndim = 2, &
       & c1 = COORDTYPE_R, &
       & x1 = x1, &
@@ -79,7 +79,7 @@ program ids_grid_example1_2dstructured_servicelibrary
      if (allocated(output_message)) then
         write(*,*)output_message
      end if
-     return
+     stop
   end if
 
   ! === 3. Set up subgrid for 2d cells ("faces") ===
@@ -89,8 +89,8 @@ program ids_grid_example1_2dstructured_servicelibrary
   ! argument createSubgrids = .false. 
   ! 
   ! The easiest way to manually create the subgrid for all (1,1) cells ("faces") is 
-  ! allocate(edgeids%subgrids(1))  
-  ! call createSubGridForClass(edgeids%grid, edgeids%subgrids(1), (/ 1, 1 /), "Cells")
+  ! allocate(edge_profiles%subgrids(1))  
+  ! call createSubGridForClass(edge_profiles%grid, edge_profiles%subgrids(1), (/ 1, 1 /), "Cells")
 
   ! === 4. Write some fake scalar data to the edge ids ===
   write(*,*)' === 4. Write some fake scalar data to the edge ids ==='
@@ -109,23 +109,22 @@ program ids_grid_example1_2dstructured_servicelibrary
   enddo
 
   ! Write the data on the grid
-  allocate( edgeids % ggd(1) % electrons % density(1) )
-  call gridStructWriteData2d( edgeids % ggd(1) % grid, &
-       edgeids % ggd(1) % electrons % density(1), &
+  allocate( edge_profiles % ggd(1) % electrons % density(1) )
+  call gridStructWriteData2d( edge_profiles % ggd(1) % grid, &
+       edge_profiles % ggd(1) % electrons % density(1), &
        GRID_STRUCT_FACES, cellData )
 
-  allocate(edgeids%time(1))
-  edgeids%time(1) = 0.0
-  edgeids%ids_properties%homogeneous_time = 1
+  allocate(edge_profiles%time(1))
+  edge_profiles%time(1) = 0.0
+  edge_profiles%ids_properties%homogeneous_time = 1
 
   ! === 5. Write the edge IDS to the UAL ===
   write(*,*)' === 5. Write the edge IDS to the UAL ==='
   write(*,*) "Example 1: writing to shot ", SHOTNUM, ", run ", RUNNUM
   call imas_create( 'ids', SHOTNUM, RUNNUM, 0, 0, idx)
-  call ids_put(idx, "edge", edgeids)
+  call ids_put(idx, "edge_profiles", edge_profiles)
   call imas_close(idx)
-  call ids_deallocate(edgeids)
-  deallocate(edgeids)
+  call ids_deallocate(edge_profiles)
 
   write(*,*)'END: program ids_grid_example1_2dstructured_servicelibrary'
 

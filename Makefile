@@ -1,3 +1,10 @@
+# Makefile for light version of the grid-service-library in IMAS, providing support to structured grids only
+#
+# Input:
+#  * OBJECTCODE   - Compiler, gfortan/ifort. Default: gfortran
+#  * INSTALL_DIR  - Where the library is installed. Default: ${HOME}/codes/INSTALL/imas_ggd
+#
+
 VERSION=1.0.2
 CODENAME=imas_ggd
 
