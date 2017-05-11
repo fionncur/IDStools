@@ -47,13 +47,28 @@ module ids_grid_structured
      module procedure gridStructWriteData1d, gridStructWriteData2d , gridStructWriteData3d ,&
           & gridStructWriteData4d, gridStructWriteData5d, gridStructWriteData6d !, &
 !          & gridStructWriteData1dComplex, gridStructWriteData2dComplex
-  end interface
+  end interface gridStructWriteData
+
+  ! These routines have no EU-IM equivalent. The should be used for the nodes of the
+  ! derived type "ids_generic_grid_vector_components"
+  interface gridWriteDataVectorComponent
+     module procedure gridWriteDataVectorComponent1d, gridWriteDataVectorComponent2d, &
+          gridWriteDataVectorComponent3d, gridWriteDataVectorComponent4d, &
+          gridWriteDataVectorComponent5d
+  end interface gridWriteDataVectorComponent
 
   interface gridStructReadData
      module procedure gridStructReadData1d, gridStructReadData2d, gridStructReadData3d , &
           & gridStructReadData4d, gridStructReadData5d, gridStructReadData6d !, &
 !          & gridStructReadData1dComplex, gridStructReadData2dComplex
-  end interface
+  end interface gridStructReadData
+
+  ! These routines have no EU-IM equivalent. The should be used for the nodes of the
+  ! derived type "ids_generic_grid_vector_components"
+  interface gridStructReadDataVectorComponent
+     module procedure gridStructReadDataVectorComponent1d, gridStructReadDataVectorComponent2d, &
+          gridStructReadDataVectorComponent3d, gridStructReadDataVectorComponent4d
+  end interface gridStructReadDataVectorComponent
 
 contains
 
@@ -606,7 +621,7 @@ contains
   end subroutine gridStructWriteData4d
 
   subroutine gridStructWriteData5d( grid, cpofield, subgrid, data )
-    type(ids_generic_grid_dynamic),  intent(in) :: grid
+    type(ids_generic_grid_dynamic)r,  intent(in) :: grid
     integer, intent(in) :: subgrid
     type(ids_generic_grid_scalar), intent(inout) :: cpofield
     real(DP), dimension(:,:,:,:,:), intent(in) :: data
@@ -665,7 +680,111 @@ contains
 
   end subroutine gridWriteDataScalar
 
+
+  !============================================================================
+  ! WRITE VECTOR COMPONENTS
+  !============================================================================
+
+  subroutine gridWriteDataVectorComponent1d( cpofield, subgrid , data )
+    real(DP), pointer :: cpofield(:)
+    integer, intent(in) :: subgrid
+    real(DP), dimension(:), intent(in) :: data
+
+    ! Make sure the data field is properly allocated
+    if ( associated( cpofield ) ) then
+        if ( .not. size( cpofield ) == size(data) ) then
+            deallocate( cpofield )
+        end if
+    end if
+    ! If required, allocate storage
+    if ( .not. associated( cpofield ) ) then
+        allocate( cpofield ( size(data) ))
+    end if
+
+    ! copy data
+    cpofield (:) = data (:)
+  end subroutine gridWriteDataVectorComponent1d
+
+  subroutine gridWriteDataVectorComponent2d( cpofield, subgrid , data )
+    real(DP), pointer :: cpofield(:)
+    integer, intent(in) :: subgrid
+    real(DP), dimension(:,:), intent(in) :: data
+
+    ! Make sure the data field is properly allocated
+    if ( associated( cpofield ) ) then
+        if ( .not. size( cpofield ) == size(data) ) then
+            deallocate( cpofield )
+        end if
+    end if
+    ! If required, allocate storage
+    if ( .not. associated( cpofield ) ) then
+        allocate( cpofield ( size(data) ))
+    end if
+
+    ! copy data
+    cpofield (:) = reshape( data , size(data) )
+  end subroutine gridWriteDataVectorComponent2d
   
+  subroutine gridWriteDataVectorComponent3d( cpofield, subgrid , data )
+    real(DP), pointer :: cpofield(:)
+    integer, intent(in) :: subgrid
+    real(DP), dimension(:,:,:), intent(in) :: data
+
+    ! Make sure the data field is properly allocated
+    if ( associated( cpofield ) ) then
+        if ( .not. size( cpofield ) == size(data) ) then
+            deallocate( cpofield )
+        end if
+    end if
+    ! If required, allocate storage
+    if ( .not. associated( cpofield ) ) then
+        allocate( cpofield ( size(data) ))
+    end if
+
+    ! copy data
+    cpofield (:) = reshape( data , size(data) )
+  end subroutine gridWriteDataVectorComponent3d
+
+  subroutine gridWriteDataVectorComponent4d( cpofield, subgrid , data )
+    real(DP), pointer :: cpofield(:)
+    integer, intent(in) :: subgrid
+    real(DP), dimension(:,:,:,:), intent(in) :: data
+
+    ! Make sure the data field is properly allocated
+    if ( associated( cpofield ) ) then
+        if ( .not. size( cpofield ) == size(data) ) then
+            deallocate( cpofield )
+        end if
+    end if
+    ! If required, allocate storage
+    if ( .not. associated( cpofield ) ) then
+        allocate( cpofield ( size(data) ))
+    end if
+
+    ! copy data
+    cpofield (:) = reshape( data , size(data) )
+  end subroutine gridWriteDataVectorComponent4d
+
+  subroutine gridWriteDataVectorComponent5d( cpofield, subgrid , data )
+    real(DP), pointer :: cpofield(:)
+    integer, intent(in) :: subgrid
+    real(DP), dimension(:,:,:,:,:), intent(in) :: data
+
+    ! Make sure the data field is properly allocated
+    if ( associated( cpofield ) ) then
+        if ( .not. size( cpofield ) == size(data) ) then
+            deallocate( cpofield )
+        end if
+    end if
+    ! If required, allocate storage
+    if ( .not. associated( cpofield ) ) then
+        allocate( cpofield ( size(data) ))
+    end if
+
+    ! copy data
+    cpofield (:) = reshape( data , size(data) )
+  end subroutine gridWriteDataVectorComponent5d
+
   !============================================================================
   ! READ A DATA BODY
   !============================================================================
@@ -768,5 +887,114 @@ contains
        data = reshape( cpofield%values, shape(data) )
     endif
   end subroutine gridStructReadData6d
+
+  !============================================================================
+  ! READ A DATA BODY OF VECTOR COMPONENT
+  !============================================================================
+
+  subroutine gridStructReadDataVectorComponent1d( cpofield , data , output_flag, output_message)
+    real(DP), dimension(:), intent(in) :: cpofield
+    real(DP), dimension(:), intent(inout) :: data
+    integer :: output_flag
+    character(len=:), allocatable :: output_message
+
+    if (.not.associated(cpofield)) then
+       output_flag = -1
+       output_message = "Error in gridStructReadData1d: Input field no associated"
+       return
+    end if
+    if (associated(data)) then
+       if (size(data) .ne. size(cpofield)) then
+          deallocate(data)
+       end if
+    end if
+    if (.not.associated(data)) then
+       allocate(data(size(cpofield)))
+    endif
+    if (output_flag == 0) then
+       data = reshape( cpofield , shape(data) )
+    endif
+  end subroutine gridStructReadDataVectorComponent1d
+
+  subroutine gridStructReadDataVectorComponent2d( cpofield , data , output_flag, output_message)
+    real(DP), dimension(:), intent(in) :: cpofield
+    real(DP), dimension(:,:), intent(inout) :: data
+    integer :: output_flag
+    character(len=:), allocatable :: output_message
+
+    if (.not.associated(cpofield)) then
+       output_flag = -1
+       output_message = "Error in gridStructReadData2d: Input field no associated"
+       return
+    end if
+    if (associated(data)) then
+       if (size(data) .ne. size(cpofield)) then
+          output_flag = -2
+          output_message = "Error in gridStructReadData2d: Output field has the wrong size"
+          return
+       end if
+    else
+       output_flag = -3
+       output_message = "Error in gridStructReadData2d: Output field no associated"
+       return
+    endif
+    if (output_flag == 0) then
+       data = reshape( cpofield , shape(data) )
+    endif
+  end subroutine gridStructReadDataVectorComponent2d
+
+  subroutine gridStructReadDataVectorComponent3d( cpofield , data , output_flag, output_message)
+    real(DP), dimension(:), intent(in) :: cpofield
+    real(DP), dimension(:,:,:), intent(inout) :: data
+    integer :: output_flag
+    character(len=:), allocatable :: output_message
+
+    if (.not.associated(cpofield)) then
+       output_flag = -1
+       output_message = "Error in gridStructReadData3d: Input field no associated"
+       return
+    end if
+    if (associated(data)) then
+       if (size(data) .ne. size(cpofield)) then
+          output_flag = -2
+          output_message = "Error in gridStructReadData3d: Output field has the wrong size"
+          return
+       end if
+    else
+       output_flag = -3
+       output_message = "Error in gridStructReadData3d: Output field no associated"
+       return
+    endif
+    if (output_flag == 0) then
+       data = reshape( cpofield , shape(data) )
+    endif
+  end subroutine gridStructReadDataVectorComponent3d
+
+  subroutine gridStructReadDataVectorComponent4d( cpofield , data , output_flag, output_message)
+    real(DP), dimension(:), intent(in) :: cpofield
+    real(DP), dimension(:,:,:,:), intent(inout) :: data
+    integer :: output_flag
+    character(len=:), allocatable :: output_message
+
+    if (.not.associated(cpofield)) then
+       output_flag = -1
+       output_message = "Error in gridStructReadData4d: Input field no associated"
+       return
+    end if
+    if (associated(data)) then
+       if (size(data) .ne. size(cpofield)) then
+          output_flag = -2
+          output_message = "Error in gridStructReadData4d: Output field has the wrong size"
+          return
+       end if
+    else
+       output_flag = -3
+       output_message = "Error in gridStructReadData34: Output field no associated"
+       return
+    endif
+    if (output_flag == 0) then
+       data = reshape( cpofield , shape(data) )
+    endif
+  end subroutine gridStructReadDataVectorComponent4d
 
 end module ids_grid_structured
