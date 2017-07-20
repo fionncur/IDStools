@@ -25,9 +25,18 @@ clean:
 	rm -rf build/
 	rm -rf module/idstools/
 
+tools_build:
+ifneq (,$(PY2VER))
+	python2 setup.py build -e '/usr/bin/env python'
+endif
+#ifneq (,$(PY3VER))
+#	python3 setup.py build -e '/usr/bin/env python'
+#endif
+
+
 tools_uninstall:
 	rm -rf $(INSTALL)
-tools_install: install_deps
+tools_install: install_deps tools_build
 	install -d $(INSTALL)
 	echo $(VERSION) > $(INSTALL)/VERSION
 ifneq (,$(PY2VER))
