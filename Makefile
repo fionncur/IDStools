@@ -1,5 +1,6 @@
 
-VERSION=$(shell git describe --always --dirty)
+VERSION = $(shell git describe --always --dirty)
+export PKGVERSION = $(shell echo $(VERSION) | awk 'BEGIN{FS="-"} ; {if (NF >= 3) if ($$2>0) print $$1".dev"$$2"+"$$3$$4; else print $$1"+"$$3$$4; else print $$1}')
 
 # Module imas will set IMAS_HOME to system wide, otherwise pick $PWD/imas:
 IMAS_HOME ?= $(realpath $(CURDIR)/$(dir $(lastword $(MAKEFILE_LIST))))/imas
@@ -38,7 +39,6 @@ tools_uninstall:
 	rm -rf $(INSTALL)
 tools_install: install_deps tools_build
 	install -d $(INSTALL)
-	echo $(VERSION) > $(INSTALL)/VERSION
 ifneq (,$(PY2VER))
 	install -d $(INSTALL_PY2)
 	python2 setup.py install --install-lib=$(INSTALL_PY2) --install-scripts=$(INSTALL)/bin
