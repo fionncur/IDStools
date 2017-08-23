@@ -124,8 +124,8 @@ def setDefaultParameters():
     
     default = {}
     default["user"] = os.getenv("USER")
-    default["tokamakname"] = os.getenv("TOKAMAKNAME")
-    default["dataversion"] = os.getenv("DATAVERSION")
+    default["tokamakname"] = os.getenv("MDSPLUS_TREE_BASE_0").split("/")[-3]
+    default["dataversion"] = os.getenv("IMAS_VERSION").split(".")[0]
     default["hdf5"] = False
     default["debug"] = False
 

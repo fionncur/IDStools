@@ -35,8 +35,8 @@ class ImasDb():
         self._version = version
         # We want to use open_env, so we need proper parameters for it
         if not self._user: self._user=os.getenv("USER")
-        if not self._tokamak: self._tokamak=os.getenv("TOKAMAKNAME")
-        if not self._version: self._version=os.getenv("DATAVERSION")
+        if not self._tokamak: self._tokamak=os.getenv("MDSPLUS_TREE_BASE_0").split("/")[-3]
+        if not self._version: self._version=os.getenv("IMAS_VERSION").split(".")[0]
                 
         self._useHDF5 = useHDF5
         self._dbUALDAO = None # this is the UAL data access object (DAO)
