@@ -8,16 +8,17 @@ def get_ids(shot, run, idsname, time=0, interp=1):
     '''
     Open IMASdb to get specific IDS and return its deep copy.
     '''
-    imas = imas.ids(shot, run)
-    imas.open()
-    imas.__dict__[idsname].getSlice(time, interp)
-    ids = copy.deepcopy(imas.__dict__[idsname])
-    imas.close()
+    imas_obj = imas.ids(shot, run)
+    imas_obj.open()
+    imas_obj.__dict__[idsname].get()
+    ids = copy.deepcopy(imas_obj.__dict__[idsname])
+    imas_obj.close()
     return ids
 
 def compare(x, y, parent):
     '''
     Iterate over every field and compare values depending on the type of field.
+    This Version does not work properly for IDSs, since arrays of structure are detected as type(xo).__name__ == 'instance' (like simple structure) and not as 'list'. The algorithm below thus does not go inside the indices of AoS as it should
     '''
     #print "compare objects of type " + type(x).__name__ + " from " + parent
 
@@ -43,7 +44,7 @@ def compare(x, y, parent):
             continue
 
         # treatment of struct_array and list of strings
-        if type(xo).__name__ == 'list':
+        if type(xo).__name__ == 'list': 
             if len(xo) != len(yo):
                 print('%s.%s is of different length in both IDSs' % (parent, key))
             else:
