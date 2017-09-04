@@ -1,0 +1,166 @@
+#!/usr/bin/env python
+
+import os, sys, glob, yaml, json, argparse
+from operator import itemgetter
+from stat import *
+
+# ----------------------------------------------------------------------
+
+class SmartFormatter(argparse.HelpFormatter):
+
+    def _split_lines(self, text, width):
+        if text.startswith('R|'):
+            return text[2:].splitlines()  
+        # this is the RawTextHelpFormatter._split_lines
+        return argparse.HelpFormatter._split_lines(self, text, width)
+
+# ----------------------------------------------------------------------
+
+def rec(data={},path=os.getcwd(),extension='.yaml',choice=['shot','run','plasma_current','magnetic_field']):
+
+  table = {}
+  plus  = {}
+
+  files = glob.glob(path + "/*")
+
+  # Fill data dictionary with yaml input files describing simulations
+  j = -1
+  for i in range(len(files)):
+    name = files[i]
+    # Recursivity on sub-folders
+    if os.path.isdir(files[i]):
+      rec(data=data,path=files[i],extension=extension,choice=choice)
+    # Work on all YAML files
+    elif files[i].endswith(extension):
+      try:
+        j = j + 1
+        file = open(files[i], 'r')
+        #print files[i]
+        data[j] = yaml.load(file)
+        file.close()
+      except yaml.YAMLError as exc:
+        print(exc)
+
+    # Sort data as a function of run numbers
+    sorted_indices = sorted(data, key = lambda x: data[x]['characteristics']['run'])
+    sdata = {}
+    for i in range(len(data)):
+      sdata[i] = data[sorted_indices[i]]
+
+    # Names to be displayed
+    disp_shot                  = 'Shot'
+    disp_run                   = 'Run'
+    disp_type                  = 'Type'
+    disp_workflow              = 'Workflow'
+    disp_machine               = 'Machine'
+    disp_plasma_current        = 'Ip(MA)'
+    disp_magnetic_field        = 'B0(T)'
+    disp_main_species          = 'Species'
+    disp_line_averaged_density = 'ne0(m-3)'
+    disp_free_description      = 'Extra information'
+    disp_idslist               = 'List of IDSs'
+    disp_free_description      = 'Free description'
+      
+    # Create a clean formatted table
+    tabulation_width = 23
+    emptyline = ""
+    sepa = "------------------------"
+    sepaline = sepa
+    for i in range(1,len(choice)):
+      sepaline = sepaline + sepa
+
+    # Table heading
+    table = {}
+    table[0] = sepaline
+    table[1] = str(choice[0])
+    for i in range(1,len(choice)):
+      table[1] = table[1] + "\t" + eval('disp_'+str(choice[i]))
+    table[1] = table[1].expandtabs(tabulation_width)
+    table[2] = sepaline
+
+    # Extra variables
+    plus = {}
+    for i in range(3):
+      plus[i] = emptyline
+
+    # Fill the table
+    j = 2
+    for i in range(len(sdata)):
+      j = j+1
+
+      shot                  = sdata[i].get('characteristics').get('shot')
+      run                   = sdata[i].get('characteristics').get('run')
+      type                  = sdata[i].get('characteristics').get('type')
+      workflow              = sdata[i].get('characteristics').get('workflow')
+      machine               = sdata[i].get('characteristics').get('machine')
+      plasma_current        = sdata[i].get('scenario_key_parameters').get('plasma_current')
+      magnetic_field        = sdata[i].get('scenario_key_parameters').get('magnetic_field')
+      main_species          = sdata[i].get('scenario_key_parameters').get('main_species')
+      line_averaged_density = sdata[i].get('scenario_key_parameters').get('line_averaged_density')
+      free_description      = sdata[i].get('free_description')
+      idslist               = sdata[i].get('idslist')
+        
+      # Compute the list of IDSs to be displayed
+      idslist_nice = str()
+      for k,v in idslist.iteritems():
+        idslist_nice = idslist_nice + str(k) + "\n\t"
+      idslist_nice = idslist_nice.expandtabs(tabulation_width*(len(choice)-1))
+
+      # Content of the table
+      table[j]=str(eval(choice[0]))
+      for i in range(1,len(choice)):
+        table[j] = table[j] + "\t" + str(eval(choice[i]))
+      table[j] = table[j].expandtabs(tabulation_width)
+      plus[j] = free_description
+
+    table[j+1] = sepaline
+
+  return table, plus
+
+# ----------------------------------------------------------------------
+
+# Input arguments
+parser = argparse.ArgumentParser(description='---- Script to list available scenarios in a specific folder ----',\
+                                 formatter_class=SmartFormatter)
+parser.add_argument('-f','--folder',help='folder where to search for scenarios (recursive)', required=False)
+parser.add_argument('-c','--choice', help=\
+                    "R|list of variables to display, e.g.: " "\"'shot','run','plasma_current','magnetic_field'\"\n"\
+                    "... available among following variables:\n"\
+                    "        'shot', 'run', 'type', 'workflow', 'machine',\n"\
+                    "        'plasma_current', 'magnetic_field', 'main_species',\n" \
+                    "        'line_averaged_density', 'free_description', 'idslist'", required=False)
+args = vars(parser.parse_args())
+
+# Folder
+if args['folder'] != None:
+  folder = args['folder']
+else:
+  folder = '/work/imas/shared/scenarios/'
+  #folder = os.getcwd()
+
+# Choice of variables to display
+if args['choice'] != None:
+    try:
+        choice = eval(str(args['choice']))
+    except:
+        print "------------------------------------------------------------------"
+        print "Wrong way to write your list of variables to display"
+        print "You wrote "+str(args['choice'])
+        print "Try e.g. this way: "+ """ scenario_summary -c "'shot','run','workflow'" """
+        print "------------------------------------------------------------------"
+        sys.exit(0)
+else:
+  choice = ['shot','run','plasma_current','magnetic_field','main_species','line_averaged_density']
+
+# Default extension, search folder and choice of variables to display
+data   = {}
+ext    = ".yaml"
+
+# Call the function
+[table,plus] = rec(data=data,path=folder,extension=ext,choice=choice)
+
+# Display the clean formatted table
+for i in range(len(table)):
+  print table[i]
+  
+# [/work/imas/shared/scenarios]$ scenario_summary -f /work/imas/shared/scenarios/metis/3/0/ -c "'shot','run'"
