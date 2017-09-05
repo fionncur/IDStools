@@ -139,7 +139,7 @@ f.write("""idslist:\n""")
 f.close()
 
 # Complete the yaml file with the output of create_ids_content
-system('./create_ids_content -u ' + str(user) + ' -t ' + str(tokamakname) \
+system('create_ids_content -u ' + str(user) + ' -t ' + str(tokamakname) \
           + ' -s ' + str(shot) + ' -r ' + str(run) + ' >> ' + filename)
 
 print "----> " + filename + " created."

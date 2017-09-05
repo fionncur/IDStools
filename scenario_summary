@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import os, sys, glob, yaml, json, argparse
+import os, sys, glob, yaml, argparse
 from operator import itemgetter
 from stat import *
 
@@ -34,8 +34,12 @@ def rec(data={},path=os.getcwd(),extension='.yaml',choice=['shot','run','plasma_
     elif files[i].endswith(extension):
       try:
         j = j + 1
+        if len(data) == 0:
+            print "-----------------------------"
+            print "Location of simulation files:"
+            print "-----------------------------"
         file = open(files[i], 'r')
-        #print files[i]
+        print " " + files[i]
         data[j] = yaml.load(file)
         file.close()
       except yaml.YAMLError as exc:
@@ -61,27 +65,43 @@ def rec(data={},path=os.getcwd(),extension='.yaml',choice=['shot','run','plasma_
     disp_idslist               = 'List of IDSs'
     disp_free_description      = 'Free description'
       
-    # Create a clean formatted table
-    tabulation_width = 23
-    emptyline = ""
-    sepa = "------------------------"
-    sepaline = sepa
-    for i in range(1,len(choice)):
-      sepaline = sepaline + sepa
-
+    # Identify optimized taubulation for each colum
+    tab_shot                  = 0
+    tab_run                   = 0
+    tab_type                  = 0
+    tab_workflow              = 0
+    tab_machine               = 0
+    tab_plasma_current        = 0
+    tab_magnetic_field        = 0
+    tab_main_species          = 0
+    tab_line_averaged_density = 0
+    tab_free_description      = 0
+    tab_idslist               = 0
+    for i in range(len(sdata)):
+        tab_shot                  = max(max(len(str(sdata[i].get('characteristics').get('shot'))),tab_shot),len(disp_shot))
+        tab_run                   = max(max(len(str(sdata[i].get('characteristics').get('run'))),tab_run),len(disp_run))
+        tab_type                  = max(max(len(str(sdata[i].get('characteristics').get('type'))),tab_type),len(disp_type))
+        tab_workflow              = max(max(len(str(sdata[i].get('characteristics').get('workflow'))),tab_workflow),len(disp_workflow))
+        tab_machine               = max(max(len(str(sdata[i].get('characteristics').get('machine'))),tab_machine),len(disp_machine))
+        tab_plasma_current        = max(max(len(str(sdata[i].get('scenario_key_parameters').get('plasma_current'))),tab_plasma_current),len(disp_plasma_current))
+        tab_magnetic_field        = max(max(len(str(sdata[i].get('scenario_key_parameters').get('magnetic_field'))),tab_magnetic_field),len(disp_magnetic_field))
+        tab_main_species          = max(max(len(str(sdata[i].get('scenario_key_parameters').get('main_species'))),tab_main_species),len(disp_main_species))
+        tab_line_averaged_density = max(max(len(str(sdata[i].get('scenario_key_parameters').get('line_averaged_density'))),tab_line_averaged_density),len(disp_line_averaged_density))
+        tab_free_description      = max(max(len(str(sdata[i].get('free_description'))),tab_free_description),len(disp_free_description))
+        tab_idslist               = max(max(len(str(sdata[i].get('idslist'))),tab_idslist),len(disp_idslist))
+    
     # Table heading
     table = {}
-    table[0] = sepaline
     table[1] = str(choice[0])
     for i in range(1,len(choice)):
-      table[1] = table[1] + "\t" + eval('disp_'+str(choice[i]))
-    table[1] = table[1].expandtabs(tabulation_width)
-    table[2] = sepaline
+      space_length = eval('tab_'+str(choice[i-1])) - len(eval('disp_'+str(choice[i-1])))+2
+      table[1] = table[1] + " "*space_length + eval('disp_'+str(choice[i]))
+    dimline = len(table[1])
 
     # Extra variables
     plus = {}
     for i in range(3):
-      plus[i] = emptyline
+      plus[i] = " "
 
     # Fill the table
     j = 2
@@ -102,18 +122,24 @@ def rec(data={},path=os.getcwd(),extension='.yaml',choice=['shot','run','plasma_
         
       # Compute the list of IDSs to be displayed
       idslist_nice = str()
+      i=0
       for k,v in idslist.iteritems():
-        idslist_nice = idslist_nice + str(k) + "\n\t"
-      idslist_nice = idslist_nice.expandtabs(tabulation_width*(len(choice)-1))
+        i=i+1
+        idslist_nice = idslist_nice + str(k) + " "
+      idslist = idslist_nice
 
       # Content of the table
       table[j]=str(eval(choice[0]))
       for i in range(1,len(choice)):
-        table[j] = table[j] + "\t" + str(eval(choice[i]))
-      table[j] = table[j].expandtabs(tabulation_width)
+        space_length = eval('tab_'+str(choice[i-1]))-len(str(eval(choice[i-1])))+2
+        table[j] = table[j] + " "*space_length + str(eval(choice[i]))
+        if len(table[j]) > dimline:
+            dimline = len(table[j])
       plus[j] = free_description
 
-    table[j+1] = sepaline
+    # Seperation lines
+    for iline in 0,2,j+1:
+        table[iline] = "-"*(dimline+1)
 
   return table, plus
 
@@ -128,7 +154,7 @@ parser.add_argument('-c','--choice', help=\
                     "... available among following variables:\n"\
                     "        'shot', 'run', 'type', 'workflow', 'machine',\n"\
                     "        'plasma_current', 'magnetic_field', 'main_species',\n" \
-                    "        'line_averaged_density', 'free_description', 'idslist'", required=False)
+                    "        'line_averaged_density', 'idslist'", required=False)
 args = vars(parser.parse_args())
 
 # Folder
