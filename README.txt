@@ -1,4 +1,3 @@
-
 ----------------------------------------------------------------------------------------------------------------
  scenario_summary
 ------------------
@@ -22,6 +21,26 @@ EXAMPLE:
 scenario_summary -c "'shot','run','workflow'"
 
 ----------------------------------------------------------------------------------------------------------------
+create_yaml  (needs create_ids_content, described below)
+------------
+
+usage: create_yaml [-h] -u USER -t TOKAMAKNAME -s SHOT -r RUN
+
+---- Auto-generated yaml scenario file (!!! STILL TO BE COMPLETED BY HAND !!!)
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -u USER, --user USER  username of the DB where the datafile is located
+  -t TOKAMAKNAME, --tokamakname TOKAMAKNAME
+                        tokamak name of the DB where the datafile is located
+  -s SHOT, --shot SHOT  shot number
+  -r RUN, --run RUN     run number
+
+EXAMPLE:
+create_yaml -u schneim -t test -s 33 -r 1
+----> ids_330001.yaml created.
+
+----------------------------------------------------------------------------------------------------------------
  create_ids_content
 --------------------
 
@@ -38,4 +57,4 @@ optional arguments:
   -r RUN, --run RUN     run number
 
 EXAMPLE:
-./create_ids_content  -u schneim -t test -s 33 -r 1
+create_ids_content  -u schneim -t test -s 33 -r 1
