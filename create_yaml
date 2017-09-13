@@ -21,7 +21,13 @@ user = args["user"]
 tokamakname = args["tokamakname"]
 
 # Open the database and read the necessary IDSs
-cli = pyual.Client(shot,run,user=user)
+try:
+    cli = pyual.Client(shot,run,user=user)
+except:
+    print "Shot " + str(shot) + ", run " + str(run) + " does not exist"
+    print "----> Aborted."
+    exit()
+    
 
 # Read necessary IDSs from database
 try:
@@ -36,50 +42,107 @@ except:
     print "The core_profiles IDS is absent from the input datafile"
     print "----> Aborted."
     exit()
+try:
+    summary = cli.get('summary')
+except:
+    print "The summary IDS is absent from the input datafile"
+    print "----> H&CD waveforms not filled (to be completed by hand)"
 
 # Mendeleiev table
 table_mendeleiev = mend.create_table_mendeleiev()
 
 # Fill the variables necessary to complete the yaml description file
 try:
-    magnetic_field = equilibrium.time_slice[0].global_quantities.magnetic_axis.b_tor
+    islice = len(equilibrium.time)/2
+    #magnetic_field = equilibrium.time_slice[islice].global_quantities.magnetic_axis.b_field_tor
+    magnetic_field = max(equilibrium.vacuum_toroidal_field.b0)
 except:
-    print "equilibrium.time_slice[0].global_quantities.magnetic_axis.b_tor could not be read"
+    print "equilibrium.time_slice[:].global_quantities.magnetic_axis.b_tor could not be read"
     print "----> Aborted."
     exit()
 
 try:
-    plasma_current = equilibrium.time_slice[0].global_quantities.ip*1.e-6
+    plasma_current = 0
+    for islice in range(len(equilibrium.time)):
+        if abs(equilibrium.time_slice[islice].global_quantities.ip)*1.e-6 > plasma_current:
+            plasma_current = abs(equilibrium.time_slice[islice].global_quantities.ip)*1.e-6
 except:
-    print "equilibrium.time_slice[0].global_quantities.ip could not be read"
+    print "equilibrium.time_slice[:].global_quantities.ip could not be read"
     print "----> Aborted."
     exit()
 
 try:
     a = int(core_profiles.profiles_1d[0].ion[0].element[0].a)
 except:
-    print "core_profiles.profiles_1d[0].ion[0].element[0].a could not be read"
-    print "----> Aborted."
-    exit()
+    print "core_profiles.profiles_1d[:].ion[0].element[0].a could not be read"
+    a = 0
+    #print "----> Aborted."
+    #exit()
 
 try:
     z = int(core_profiles.profiles_1d[0].ion[0].element[0].z_n)
 except:
-    print "core_profiles.profiles_1d[0].ion[0].element[0].z_n could not be read"
-    print "----> Aborted."
-    exit()
+    print "core_profiles.profiles_1d[:].ion[0].element[0].z_n could not be read"
+    z = 0
+    #print "----> Aborted."
+    #exit()
 
 try:
-    line_averaged_density = core_profiles.profiles_1d[0].electrons.density[0]
+    central_electron_density = 0
+    for islice in range(len(core_profiles.profiles_1d)):
+        if core_profiles.profiles_1d[islice].electrons.density[0] > central_electron_density:
+            central_electron_density = core_profiles.profiles_1d[islice].electrons.density[0]
 except:
-    print "core_profiles.profiles_1d[0].electrons.density[0] could not be read"
+    print "core_profiles.profiles_1d[:].electrons.density[0] could not be read"
     print "----> Aborted."
     exit()
 
-main_species = table_mendeleiev[z][a].name
+# H&CD quantities from summary IDS
+if len(summary.time)==0:
+    print "--------------------------------------------------------"
+    print "The summary IDS is absent from the input datafile"
+    print "----> H&CD waveforms not filled: to be completed by hand"
+    print "--------------------------------------------------------"
+    p_ec   = "tbd"
+    p_ic   = "tbd"
+    p_nbi  = "tbd"
+    p_lh   = "tbd"
+    p_hcd  = "tbd"
+else:
+    p_ec  = 0
+    p_ic  = 0
+    p_nbi = 0
+    p_lh  = 0
+    n_ec  = len(summary.heating_current_drive.ec)
+    n_ic  = len(summary.heating_current_drive.ic)
+    n_nbi = len(summary.heating_current_drive.nbi)
+    n_lh  = len(summary.heating_current_drive.lh)
+    if n_ec > 0:
+        for isource in range(n_ec):
+            if len(summary.heating_current_drive.ec[isource].power.value) > 0:
+                p_ec = p_ec + max(summary.heating_current_drive.ec[isource].power.value)*1.e-6
+    if n_ic > 0:
+        for isource in range(n_ic):
+            if len(summary.heating_current_drive.ic[isource].power.value) > 0:
+                p_ic = p_ic + max(summary.heating_current_drive.ic[isource].power.value)*1.e-6
+    if n_nbi > 0:
+        for isource in range(n_nbi):
+            if len(summary.heating_current_drive.nbi[isource].power.value) > 0:
+                p_nbi = p_nbi + max(summary.heating_current_drive.nbi[isource].power.value)*1.e-6
+    if n_lh > 0:
+        for isource in range(n_lh):
+            if len(summary.heating_current_drive.lh[isource].power.value) > 0:
+                p_lh = p_lh + max(summary.heating_current_drive.lh[isource].power.value)*1.e-6
+    p_hcd = p_ec + p_ic + p_nbi + p_lh
 
-workflow = "???? (example: METIS)"
-type = "???? (example: predictive)"
+# Define plasma main species (if there are two, the auto-generated yaml file does not see it)
+if a != 0 and z != 0:
+    main_species = table_mendeleiev[z][a].name
+else:
+    main_species = "tbd"
+
+workflow = "tbd"
+type = "tbd"
 
 # Set up the name of the yaml file
 strsize = len(str(shot))+len(str(run))
@@ -92,12 +155,20 @@ filename = "ids_"+str(shot)+add0+str(run)+".yaml"
 
 # Go for it: fill the yaml file
 f = open(filename, 'w')
-f.write("""# ---------------------------------------------------------------\n""")
+f.write("""# ------------------------------------------------------------------\n""")
+f.write("""# Status is "draft" when auto-generated by the create_yam function,\n""")
+f.write("""# to be changed to "active" once simulation and yaml files are ready\n""")
+f.write("""# to be changed to "obsolete" if the simulation becomes obsolete\n""")
+f.write("""# ------------------------------------------------------------------\n""")
+f.write("""status: \n""")
+f.write("""    draft \n""")
+f.write("""\n""")
+f.write("""# ------------------------------------------------------------------\n""")
 f.write("""# Shot number, run numbers, type, code, machine attributes\n""")
 f.write("""# Type: interpretative, predictive, experiment\n""")
 f.write("""# Code: code name in case of simulation, 0 in case of experiment\n""")
 f.write("""# Machine: tokamak name\n""")
-f.write("""# ---------------------------------------------------------------\n""")
+f.write("""# ------------------------------------------------------------------\n""")
 f.write("""characteristics:\n""")
 f.write("""    shot: %i\n""" % shot)
 f.write("""    run: %i\n""" % run)
@@ -108,38 +179,55 @@ f.write("""\n""")
 f.write("""# --------------------------------------------------\n""")
 f.write("""# Machine description or specific configuration\n""")
 f.write("""# (scenario keys can be completed here if relevant)\n""")
-f.write("""# Units are SI\n""")
+f.write("""# Units are [T], [-], [MA], [m-3] respectively\n""")
 f.write("""# --------------------------------------------------\n""")
 f.write("""scenario_key_parameters:\n""")
 f.write("""    magnetic_field: %.2f\n""" % magnetic_field)
 f.write("""    main_species: %s\n""" % main_species)
 f.write("""    plasma_current: %.2f \n""" % plasma_current)
-f.write("""    line_averaged_density: %.2e\n""" % line_averaged_density)
+f.write("""    central_electron_density: %.2e\n""" % central_electron_density)
+f.write("""\n""")
+f.write("""# ---------------------------------------------------\n""")
+f.write("""# Nominal power of H&CD systems (MW)\n""")
+f.write("""# (initial guess to be adjusted by hand if necessary)\n""")
+f.write("""# ---------------------------------------------------\n""")
+f.write("""hcd:\n""")
+if len(summary.time)==0:
+    f.write("""    p_hcd: tbd\n""")
+    f.write("""    p_ec:  tbd\n""")
+    f.write("""    p_ic:  tbd\n""")
+    f.write("""    p_nbi: tbd\n""")
+    f.write("""    p_lh:  tbd\n""")
+else:
+    f.write("""    p_hcd: %.2f\n""" % p_hcd)
+    f.write("""    p_ec:  %.2f\n""" % p_ec)
+    f.write("""    p_ic:  %.2f\n""" % p_ic)
+    f.write("""    p_nbi: %.2f\n""" % p_nbi)
+    f.write("""    p_lh:  %.2f\n""" % p_lh)
 f.write("""\n""")
 f.write("""# --------------------\n""")
 f.write("""# Content description\n""")
 f.write("""# --------------------\n""")
 f.write("""free_description: |\n""")
-f.write("""    - Hydrogen plasma, H-mode\n""")
-f.write("""    - Density:           ne = ??% nGW, peaking adjusted to fit with QuaLiKiz NN\n""")
-f.write("""    - Auxiliary heating: ?? MW ECRH + ?? MW ICRH = ?? MW\n""")
-f.write("""    - Confinement:       ITERL-96P(th) + ITERH-98P(y,2)\n""")
-f.write("""    - Pedestal:          min [ITPA McDonald NF2007 , K(W_H-mode-W_L-mode)]\n""")
-f.write("""    - L-H transition:    Martin 2008 + Behn PPCF 2015\n""")
-f.write("""    - Impurities:        Zeff=?? in H, Zeff=?? in He, with Be and W impurities.\n""")
+f.write("""    - H-mode or L-mode or whatever\n""")
+f.write("""    - Density:           ne = ??% nGW, peaking assumptions...\n""")
+f.write("""    - Confinement:       transport model or scaling law that have been used...\n""")
+f.write("""    - Pedestal:          pedestal assumptions....\n""")
+f.write("""    - L-H transition:    scaling laws that have been used\n""")
+f.write("""    - Impurities:        Zeff=?? , with ?? and ?? impurities.\n""")
 f.write("""\n""")
-f.write("""# ---------------------------------------------------------------------------\n""")
+f.write("""# ------------------------------------------------------------------------------\n""")
 f.write("""# List of filled IDSs with time quantities in seconds (start, end, step)\n""")
-f.write("""# It should be the ouptut of the "create_ids_content" script, adapted from\n""")
+f.write("""# It should be the ouptut of the "ids_content" script, adapted from\n""")
 f.write("""# listidss, see IMAS-1010 (note: the datafile has to be copied to a personal\n""")
 f.write("""# database for the script to work, see the example below):\n""")
-f.write("""#  create_ids_content -u schneim -t test -v 3 4321,1\n""")
-f.write("""# ---------------------------------------------------------------------------\n""")
+f.write("""#  ids_content -u schneim -t test -v 3 4321,1\n""")
+f.write("""# ------------------------------------------------------------------------------\n""")
 f.write("""idslist:\n""")
 f.close()
 
-# Complete the yaml file with the output of create_ids_content
-system('create_ids_content -u ' + str(user) + ' -t ' + str(tokamakname) \
+# Complete the yaml file with the output of ids_content
+system('ids_content -u ' + str(user) + ' -t ' + str(tokamakname) \
           + ' -s ' + str(shot) + ' -r ' + str(run) + ' >> ' + filename)
 
 print "----> " + filename + " created."

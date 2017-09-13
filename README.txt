@@ -15,13 +15,13 @@ optional arguments:
                         ...available among following variables:
                                 'shot', 'run', 'type', 'workflow', 'machine',
                                 'plasma_current', 'magnetic_field', 'main_species',
-                                'line_averaged_density', 'free_description', 'idslist'
+                                'line_averaged_density', 'idslist'
 
 EXAMPLE:
 scenario_summary -c "'shot','run','workflow'"
 
 ----------------------------------------------------------------------------------------------------------------
-create_yaml  (needs create_ids_content, described below)
+create_yaml  (needs ids_content, described below)
 ------------
 
 usage: create_yaml [-h] -u USER -t TOKAMAKNAME -s SHOT -r RUN
@@ -41,10 +41,10 @@ create_yaml -u schneim -t test -s 33 -r 1
 ----> ids_330001.yaml created.
 
 ----------------------------------------------------------------------------------------------------------------
- create_ids_content
---------------------
+ ids_content
+--------------
 
-usage: create_ids_content [-h] -u USER -t TOKAMAKNAME -s SHOT -r RUN
+usage: ids_content [-h] -u USER -t TOKAMAKNAME -s SHOT -r RUN
 
 ---- List ids content for yaml files aimed at describing a scenario ----
 
@@ -57,4 +57,4 @@ optional arguments:
   -r RUN, --run RUN     run number
 
 EXAMPLE:
-create_ids_content  -u schneim -t test -s 33 -r 1
+ids_content  -u schneim -t test -s 33 -r 1

@@ -34,13 +34,9 @@ def rec(data={},path=os.getcwd(),extension='.yaml',choice=['shot','run','plasma_
     elif files[i].endswith(extension):
       try:
         j = j + 1
-        if len(data) == 0:
-            print "-----------------------------"
-            print "Location of simulation files:"
-            print "-----------------------------"
         file = open(files[i], 'r')
-        print " " + files[i]
         data[j] = yaml.load(file)
+        data[j]['location'] = files[i]
         file.close()
       except yaml.YAMLError as exc:
         print(exc)
@@ -52,43 +48,46 @@ def rec(data={},path=os.getcwd(),extension='.yaml',choice=['shot','run','plasma_
       sdata[i] = data[sorted_indices[i]]
 
     # Names to be displayed
-    disp_shot                  = 'Shot'
-    disp_run                   = 'Run'
-    disp_type                  = 'Type'
-    disp_workflow              = 'Workflow'
-    disp_machine               = 'Machine'
-    disp_plasma_current        = 'Ip(MA)'
-    disp_magnetic_field        = 'B0(T)'
-    disp_main_species          = 'Species'
-    disp_line_averaged_density = 'ne0(m-3)'
-    disp_free_description      = 'Extra information'
-    disp_idslist               = 'List of IDSs'
-    disp_free_description      = 'Free description'
+    disp_shot                     = 'Shot'
+    disp_run                      = 'Run'
+    disp_type                     = 'Type'
+    disp_workflow                 = 'Workflow'
+    disp_machine                  = 'Machine'
+    disp_plasma_current           = 'Ip(MA)'
+    disp_magnetic_field           = 'B0(T)'
+    disp_main_species             = 'Species'
+    disp_central_electron_density = 'ne0(m-3)'
+    disp_free_description         = 'Free description'
+    disp_idslist                  = 'List of IDSs'
+    disp_location                 = 'Location'
       
     # Identify optimized taubulation for each colum
-    tab_shot                  = 0
-    tab_run                   = 0
-    tab_type                  = 0
-    tab_workflow              = 0
-    tab_machine               = 0
-    tab_plasma_current        = 0
-    tab_magnetic_field        = 0
-    tab_main_species          = 0
-    tab_line_averaged_density = 0
-    tab_free_description      = 0
-    tab_idslist               = 0
+    tab_shot                     = 0
+    tab_run                      = 0
+    tab_type                     = 0
+    tab_workflow                 = 0
+    tab_machine                  = 0
+    tab_plasma_current           = 0
+    tab_magnetic_field           = 0
+    tab_main_species             = 0
+    tab_central_electron_density = 0
+    tab_free_description         = 0
+    tab_idslist                  = 0
+    tab_location                 = 0
     for i in range(len(sdata)):
-        tab_shot                  = max(max(len(str(sdata[i].get('characteristics').get('shot'))),tab_shot),len(disp_shot))
-        tab_run                   = max(max(len(str(sdata[i].get('characteristics').get('run'))),tab_run),len(disp_run))
-        tab_type                  = max(max(len(str(sdata[i].get('characteristics').get('type'))),tab_type),len(disp_type))
-        tab_workflow              = max(max(len(str(sdata[i].get('characteristics').get('workflow'))),tab_workflow),len(disp_workflow))
-        tab_machine               = max(max(len(str(sdata[i].get('characteristics').get('machine'))),tab_machine),len(disp_machine))
-        tab_plasma_current        = max(max(len(str(sdata[i].get('scenario_key_parameters').get('plasma_current'))),tab_plasma_current),len(disp_plasma_current))
-        tab_magnetic_field        = max(max(len(str(sdata[i].get('scenario_key_parameters').get('magnetic_field'))),tab_magnetic_field),len(disp_magnetic_field))
-        tab_main_species          = max(max(len(str(sdata[i].get('scenario_key_parameters').get('main_species'))),tab_main_species),len(disp_main_species))
-        tab_line_averaged_density = max(max(len(str(sdata[i].get('scenario_key_parameters').get('line_averaged_density'))),tab_line_averaged_density),len(disp_line_averaged_density))
-        tab_free_description      = max(max(len(str(sdata[i].get('free_description'))),tab_free_description),len(disp_free_description))
-        tab_idslist               = max(max(len(str(sdata[i].get('idslist'))),tab_idslist),len(disp_idslist))
+        tab_shot                     = max(max(len(str(sdata[i].get('characteristics').get('shot'))),tab_shot),len(disp_shot))
+        tab_run                      = max(max(len(str(sdata[i].get('characteristics').get('run'))),tab_run),len(disp_run))
+        tab_type                     = max(max(len(str(sdata[i].get('characteristics').get('type'))),tab_type),len(disp_type))
+        tab_workflow                 = max(max(len(str(sdata[i].get('characteristics').get('workflow'))),tab_workflow),len(disp_workflow))
+        tab_machine                  = max(max(len(str(sdata[i].get('characteristics').get('machine'))),tab_machine),len(disp_machine))
+        tab_plasma_current           = max(max(len(str(sdata[i].get('scenario_key_parameters').get('plasma_current'))),tab_plasma_current),len(disp_plasma_current))
+        tab_magnetic_field           = max(max(len(str(sdata[i].get('scenario_key_parameters').get('magnetic_field'))),tab_magnetic_field),len(disp_magnetic_field))
+        tab_main_species             = max(max(len(str(sdata[i].get('scenario_key_parameters').get('main_species'))),tab_main_species),len(disp_main_species))
+        tab_central_electron_density = max(max(len(str(sdata[i].get('scenario_key_parameters').get('central_electron_density')))\
+                                               ,tab_central_electron_density),len(disp_central_electron_density))
+        tab_free_description         = max(max(len(str(sdata[i].get('free_description'))),tab_free_description),len(disp_free_description))
+        tab_idslist                  = max(max(len(str(sdata[i].get('ids_list'))),tab_idslist),len(disp_idslist))
+        tab_location                 = max(max(len(str(sdata[i].get('location'))),tab_location),len(disp_location))
     
     # Table heading
     table = {}
@@ -106,36 +105,38 @@ def rec(data={},path=os.getcwd(),extension='.yaml',choice=['shot','run','plasma_
     # Fill the table
     j = 2
     for i in range(len(sdata)):
-      j = j+1
+        if sdata[i]['status'] == "active":
+          j = j+1
 
-      shot                  = sdata[i].get('characteristics').get('shot')
-      run                   = sdata[i].get('characteristics').get('run')
-      type                  = sdata[i].get('characteristics').get('type')
-      workflow              = sdata[i].get('characteristics').get('workflow')
-      machine               = sdata[i].get('characteristics').get('machine')
-      plasma_current        = sdata[i].get('scenario_key_parameters').get('plasma_current')
-      magnetic_field        = sdata[i].get('scenario_key_parameters').get('magnetic_field')
-      main_species          = sdata[i].get('scenario_key_parameters').get('main_species')
-      line_averaged_density = sdata[i].get('scenario_key_parameters').get('line_averaged_density')
-      free_description      = sdata[i].get('free_description')
-      idslist               = sdata[i].get('idslist')
-        
-      # Compute the list of IDSs to be displayed
-      idslist_nice = str()
-      i=0
-      for k,v in idslist.iteritems():
-        i=i+1
-        idslist_nice = idslist_nice + str(k) + " "
-      idslist = idslist_nice
+          shot                     = sdata[i].get('characteristics').get('shot')
+          run                      = sdata[i].get('characteristics').get('run')
+          type                     = sdata[i].get('characteristics').get('type')
+          workflow                 = sdata[i].get('characteristics').get('workflow')
+          machine                  = sdata[i].get('characteristics').get('machine')
+          plasma_current           = sdata[i].get('scenario_key_parameters').get('plasma_current')
+          magnetic_field           = sdata[i].get('scenario_key_parameters').get('magnetic_field')
+          main_species             = sdata[i].get('scenario_key_parameters').get('main_species')
+          central_electron_density = sdata[i].get('scenario_key_parameters').get('central_electron_density')
+          free_description         = sdata[i].get('free_description')
+          idslist                  = sdata[i].get('idslist')
+          location                 = sdata[i].get('location')
 
-      # Content of the table
-      table[j]=str(eval(choice[0]))
-      for i in range(1,len(choice)):
-        space_length = eval('tab_'+str(choice[i-1]))-len(str(eval(choice[i-1])))+2
-        table[j] = table[j] + " "*space_length + str(eval(choice[i]))
-        if len(table[j]) > dimline:
-            dimline = len(table[j])
-      plus[j] = free_description
+          # Compute the list of IDSs to be displayed
+          idslist_nice = str()
+          i=0
+          for k,v in idslist.iteritems():
+            i=i+1
+            idslist_nice = idslist_nice + str(k) + " "
+          idslist = idslist_nice
+
+          # Content of the table
+          table[j]=str(eval(choice[0]))
+          for i in range(1,len(choice)):
+            space_length = eval('tab_'+str(choice[i-1]))-len(str(eval(choice[i-1])))+2
+            table[j] = table[j] + " "*space_length + str(eval(choice[i]))
+            if len(table[j]) > dimline:
+                dimline = len(table[j])
+          plus[j] = free_description
 
     # Seperation lines
     for iline in 0,2,j+1:
@@ -154,7 +155,7 @@ parser.add_argument('-c','--choice', help=\
                     "... available among following variables:\n"\
                     "        'shot', 'run', 'type', 'workflow', 'machine',\n"\
                     "        'plasma_current', 'magnetic_field', 'main_species',\n" \
-                    "        'line_averaged_density', 'idslist'", required=False)
+                    "        'central_electron_density', 'idslist', 'location'", required=False)
 args = vars(parser.parse_args())
 
 # Folder
@@ -176,7 +177,7 @@ if args['choice'] != None:
         print "------------------------------------------------------------------"
         sys.exit(0)
 else:
-  choice = ['shot','run','plasma_current','magnetic_field','main_species','line_averaged_density']
+  choice = ['shot','run','plasma_current','magnetic_field','main_species','central_electron_density','location']
 
 # Default extension, search folder and choice of variables to display
 data   = {}
