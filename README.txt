@@ -21,10 +21,10 @@ EXAMPLE:
 scenario_summary -c "'shot','run','workflow'"
 
 ----------------------------------------------------------------------------------------------------------------
-create_yaml  (needs ids_content, described below)
+create_db_entry  (needs ids_content, described below)
 ------------
 
-usage: create_yaml [-h] -u USER -t TOKAMAKNAME -s SHOT -r RUN
+usage: create_db_entry [-h] -u USER -t TOKAMAKNAME -s SHOT -r RUN
 
 ---- Auto-generated yaml scenario file (!!! STILL TO BE COMPLETED BY HAND !!!)
 
@@ -37,7 +37,7 @@ optional arguments:
   -r RUN, --run RUN     run number
 
 EXAMPLE:
-create_yaml -u schneim -t test -s 33 -r 1
+create_db_entry -u schneim -t test -s 33 -r 1
 ----> ids_330001.yaml created.
 
 ----------------------------------------------------------------------------------------------------------------

@@ -1,0 +1,155 @@
+#!/usr/bin/env python
+
+import argparse, pyual
+import init_mendeleiev as mend
+
+# ----------------------------------------------------------------------
+
+# Management of input arguments
+parser = argparse.ArgumentParser(description=\
+	 '---- Auto-generated yaml scenario file (!!! STILL TO BE COMPLETED BY HAND !!!)')
+parser.add_argument('-u','--user',help='username of the DB where the datafile is located', required=True)
+parser.add_argument('-t','--tokamakname',help='tokamak name of the DB where the datafile is located', required=True)
+parser.add_argument('-s','--shot',help='shot number', required=True,type=int)
+parser.add_argument('-r','--run',help='run number',required=True,type=int)
+args = vars(parser.parse_args())
+shot = args["shot"]
+run  = args["run"]
+user = args["user"]
+tokamakname = args["tokamakname"]
+
+# Open the database and read the necessary IDSs
+try:
+    cli = pyual.Client(shot,run,user=user)
+except:
+    print "Shot " + str(shot) + ", run " + str(run) + " does not exist"
+    print "----> Aborted."
+    exit()
+    
+try:
+    core_profiles = cli.get('core_profiles')
+except:
+    print "The core_profiles IDS is absent from the input datafile"
+    print "----> Aborted."
+    exit()
+
+# Mendeleiev table
+table_mendeleiev = mend.create_table_mendeleiev()
+
+try:
+    nspecies = len(core_profiles.profiles_1d[0].ion)
+    a = [0] * nspecies
+    for ispecies in range(nspecies):
+        a[ispecies] = int(core_profiles.profiles_1d[0].ion[ispecies].element[0].a)
+except:
+    print "core_profiles.profiles_1d[:].ion[0].element[0].a could not be read"
+    print "----> Aborted."
+    exit()
+
+try:
+    nspecies = len(core_profiles.profiles_1d[0].ion)
+    z = [0] * nspecies
+    for ispecies in range(nspecies):
+        z[ispecies] = int(core_profiles.profiles_1d[0].ion[ispecies].element[0].z_n)
+except:
+    print "core_profiles.profiles_1d[:].ion[0].element[0].z_n could not be read"
+    print "----> Aborted."
+    exit()
+
+try:
+    central_electron_density = 0
+    for islice in range(len(core_profiles.profiles_1d)):
+        if core_profiles.profiles_1d[islice].electrons.density[0] > central_electron_density:
+            central_electron_density = core_profiles.profiles_1d[islice].electrons.density[0]
+            the_slice = islice
+except:
+    print "core_profiles.profiles_1d[:].electrons.density[0] could not be read"
+    print "----> Aborted."
+    exit()
+
+try:
+    volume = core_profiles.profiles_1d[the_slice].grid.volume
+    if len(volume) == 0:
+        try:
+            equilibrium = cli.get('equilibrium')
+        except:
+            exit()
+        volume = equilibrium.time_slice[the_slice].profiles_1d.volume
+        if len(volume) == len(core_profiles.profiles_1d[the_slice].electrons.density):
+            print "   core_profiles.profiles_1d[:].grid.volume could not be read"
+            print "   ----> equilibrium.time_slice[:].profiles_1d.volume used instead"
+            print "   (possible because the resolution is the same, but maybe not correct)"
+        else:
+            exit()
+except:
+    print "core_profiles.profiles_1d[:].grid.volume could not be read"
+    print "----> Aborted."
+    exit()
+
+try:
+    central_zeff = 0
+    for islice in range(len(core_profiles.profiles_1d)):
+        if core_profiles.profiles_1d[islice].zeff[0] > central_zeff:
+            central_zeff = core_profiles.profiles_1d[islice].zeff[0]
+except:
+    print "core_profiles.profiles_1d[:].zeff[0] could not be read"
+    print "----> Aborted."
+    exit()
+
+# ----------------------------------------------------------------------
+
+if nspecies > 0:
+
+    # Plasma composition
+    species = []
+    for ispecies in range(nspecies):
+        species.append(table_mendeleiev[z[ispecies]][a[ispecies]].element)
+
+    # Species concentrations
+    ntot = 0
+    species_density = [0] * nspecies
+    for ispecies in range(nspecies):
+        species_density[ispecies] = sum(volume*core_profiles.profiles_1d[0].ion[ispecies].density)
+        ntot = ntot + species_density[ispecies]
+    ne = sum(volume*core_profiles.profiles_1d[0].electrons.density)
+
+    nspec_over_ntot = species_density/ntot
+    nspec_over_ne   = species_density/ne
+    nspec_over_nmaj = species_density/species_density[0]
+
+    # Nice display of plasma composition with species concentrations
+    disp_species         = '   species:      '
+    disp_a               = '   a:            '
+    disp_z               = '   z:            '
+    disp_nspec_over_ntot = '   n_over_ntot:  '
+    disp_nspec_over_ne   = '   n_over_ne:    '
+    disp_nspec_over_nmaj = '   n_over_n_maj: '
+    main_species = ''
+    for ispecies in range(nspecies):
+        if nspec_over_ntot[ispecies] > 0.45:
+            if len(main_species) == 0:
+                main_species = main_species + species[ispecies]
+            else:
+                main_species = main_species + "-" + species[ispecies]
+        if nspec_over_ne[ispecies] > 0.001:
+            tabsize = 8
+            disp_species = disp_species + species[ispecies] + " " * (tabsize-len(species[ispecies]))
+            disp_a = disp_a + format("%.1f" % a[ispecies]) + " " * (tabsize-len(format("%.1f" % a[ispecies])))
+            disp_z = disp_z + format("%.1f" % z[ispecies]) + " " * (tabsize-len(format("%.1f" % z[ispecies])))
+            disp_nspec_over_ntot = disp_nspec_over_ntot + format("%.2f" % nspec_over_ntot[ispecies]) + " " * (tabsize-len(format("%.2f" % nspec_over_ntot[ispecies])))
+            disp_nspec_over_ne   = disp_nspec_over_ne   + format("%.2f" % nspec_over_ne[ispecies])   + " " * (tabsize-len(format("%.2f" % nspec_over_ne[ispecies])))
+            disp_nspec_over_nmaj = disp_nspec_over_nmaj + format("%.2f" % nspec_over_nmaj[ispecies]) + " " * (tabsize-len(format("%.2f" % nspec_over_nmaj[ispecies])))
+    print "   ------------"
+    print disp_species
+    print disp_a
+    print disp_z
+    print disp_nspec_over_ntot
+    print disp_nspec_over_ne
+    print disp_nspec_over_nmaj
+    print "   ------------"
+
+else:
+    print "----> No species listed in the plasma composition of the core_profiles IDS."
+
+
+

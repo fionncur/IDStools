@@ -53,7 +53,6 @@ table_mendeleiev = mend.create_table_mendeleiev()
 
 # Fill the variables necessary to complete the yaml description file
 try:
-    islice = len(equilibrium.time)/2
     magnetic_field = max(equilibrium.vacuum_toroidal_field.b0)
 except:
     print "equilibrium.time_slice[:].global_quantities.magnetic_axis.b_tor could not be read"
@@ -95,8 +94,28 @@ try:
     for islice in range(len(core_profiles.profiles_1d)):
         if core_profiles.profiles_1d[islice].electrons.density[0] > central_electron_density:
             central_electron_density = core_profiles.profiles_1d[islice].electrons.density[0]
+            the_slice = islice
 except:
     print "core_profiles.profiles_1d[:].electrons.density[0] could not be read"
+    print "----> Aborted."
+    exit()
+
+try:
+    volume = core_profiles.profiles_1d[the_slice].grid.volume
+    if len(volume) == 0:
+        try:
+            equilibrium = cli.get('equilibrium')
+        except:
+            exit()
+        volume = equilibrium.time_slice[the_slice].profiles_1d.volume
+        if len(volume) == len(core_profiles.profiles_1d[the_slice].electrons.density):
+            print "core_profiles.profiles_1d[:].grid.volume could not be read"
+            print "----> equilibrium.time_slice[:].profiles_1d.volume used instead"
+            print "(possible because the resolution is the same, but maybe not correct)"
+        else:
+            exit()
+except:
+    print "core_profiles.profiles_1d[:].grid.volume could not be read"
     print "----> Aborted."
     exit()
 
@@ -156,9 +175,6 @@ if nspecies > 0:
         species.append(table_mendeleiev[z[ispecies]][a[ispecies]].element)
 
     # Species concentrations
-    nrho   = max(len(core_profiles.profiles_1d[0].grid.rho_tor_norm),len(core_profiles.profiles_1d[0].grid.rho_tor))
-    volume = core_profiles.profiles_1d[0].grid.volume
-
     ntot = 0
     species_density = [0] * nspecies
     for ispecies in range(nspecies):
@@ -192,14 +208,14 @@ if nspecies > 0:
             disp_nspec_over_ntot = disp_nspec_over_ntot + format("%.2f" % nspec_over_ntot[ispecies]) + " " * (tabsize-len(format("%.2f" % nspec_over_ntot[ispecies])))
             disp_nspec_over_ne   = disp_nspec_over_ne   + format("%.2f" % nspec_over_ne[ispecies])   + " " * (tabsize-len(format("%.2f" % nspec_over_ne[ispecies])))
             disp_nspec_over_nmaj = disp_nspec_over_nmaj + format("%.2f" % nspec_over_nmaj[ispecies]) + " " * (tabsize-len(format("%.2f" % nspec_over_nmaj[ispecies])))
-    print "   ---------------------------------------------------------------------"
-    print disp_species
-    print disp_a
-    print disp_z
-    print disp_nspec_over_ntot
-    print disp_nspec_over_ne
-    print disp_nspec_over_nmaj
-    print "   ---------------------------------------------------------------------"
+    #print "   ---------------------------------------------------------------------"
+    #print disp_species
+    #print disp_a
+    #print disp_z
+    #print disp_nspec_over_ntot
+    #print disp_nspec_over_ne
+    #print disp_nspec_over_nmaj
+    #print "   ---------------------------------------------------------------------"
 
 else:
     main_species = "tbd"
@@ -252,10 +268,10 @@ f.write("""    plasma_current: %.2f \n""" % plasma_current)
 f.write("""    central_electron_density: %.2e\n""" % central_electron_density)
 f.write("""    central_zeff: %.2f\n""" % central_zeff)
 f.write("""\n""")
-f.write("""# ---------------------------------------------------\n""")
-f.write("""# Nominal power of H&CD systems (MW)\n""")
-f.write("""# (initial guess to be adjusted by hand if necessary)\n""")
-f.write("""# ---------------------------------------------------\n""")
+f.write("""# ----------------------------------------------------------------------------\n""")
+f.write("""# Nominal power of H&CD systems [MW]\n""")
+f.write("""# (initially filled with max values, adjust by hand if necessary)\n""")
+f.write("""# ----------------------------------------------------------------------------\n""")
 f.write("""hcd:\n""")
 if len(summary.time)==0:
     f.write("""    p_hcd: tbd\n""")

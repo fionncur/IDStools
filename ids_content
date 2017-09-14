@@ -35,8 +35,15 @@ except:
 alltimes = db.all_times()
 
 for idsname, times in alltimes:
+	if len(times) > 1:
+		time_step  = (times[len(times)-1]-times[0])/(len(times)-1)
+		start_time = times[0]
+		end_time   = times[len(times)-1]
+	else: # Only one time slice
+		time_step  = 0
+		start_time = 0
+		end_time   = 0
 	print("  "+idsname+":")
 	print("     time_step_number: " + str(len(times)))
-	print("     start_end_step:   [" + str(times[0]) + "  " \
-	+  str(times[len(times)-1]) + "  " +  str((times[len(times)-1]-times[0])/len(times)) + "]")
+	print("     start_end_step:   [" + str(start_time) + "  " +  str(end_time) + "  " +  str(time_step) + "]")
 
