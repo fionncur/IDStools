@@ -16,10 +16,9 @@ class SmartFormatter(argparse.HelpFormatter):
 
 # ----------------------------------------------------------------------------
 
-def rec(data={},path=os.getcwd(),extension='.yaml',choice=['shot','run','ip','b0']):
+def rec(data={},path=os.getcwd(),extension='.yaml',choice=['shot','run','ip','b0'],selection=None):
 
   table = {}
-  plus  = {}
 
   files = glob.glob(path + "/*")
 
@@ -67,7 +66,7 @@ def rec(data={},path=os.getcwd(),extension='.yaml',choice=['shot','run','ip','b0
     disp_idslist  = 'List of IDSs'
     disp_location = 'Location'
       
-    # Identify optimized taubulation for each colum
+    # Identify optimized tabulation for each column
     tab_shot     = 0
     tab_run      = 0
     tab_type     = 0
@@ -119,11 +118,6 @@ def rec(data={},path=os.getcwd(),extension='.yaml',choice=['shot','run','ip','b0
           exit()
     dimline = len(table[1])
 
-    # Extra variables
-    plus = {}
-    for i in range(3):
-      plus[i] = " "
-
     # Fill the table
     j = 2
     for i in range(len(sdata)):
@@ -164,21 +158,42 @@ def rec(data={},path=os.getcwd(),extension='.yaml',choice=['shot','run','ip','b0
             table[j] = table[j] + " "*space_length + str(eval(choice[i]))
             if len(table[j]) > dimline:
                 dimline = len(table[j])
-          plus[j] = extra
 
     # Separation lines
     for iline in 0,2,j+1:
         table[iline] = "-"*(dimline+1)
 
-  return table, plus
+    # Final filtering if any
+    if selection != None:
+        filtered_table = []
+        filter = eval(str("""['"""+re.sub(""",""", r"""','""", selection)+"""']"""))
+        criterion = 'zip('
+        for ifilter in range(len(filter)):
+            if ifilter==0:
+                criterion = criterion+"""re.findall('"""+str(filter[ifilter])+"""',table[iline])"""
+            else:
+                criterion = criterion+""",re.findall('"""+str(filter[ifilter])+"""',table[iline])"""
+        criterion = criterion+""")"""
+        for iline in range(len(table)):
+            if iline in [0,1,2,j+1] or len(eval(criterion)) > 0:
+                filtered_table.append(table[iline])
+        table = filtered_table
+
+  return table
 
 # ----------------------------------------------------------------------
 
 # Input arguments
-parser = argparse.ArgumentParser(description='---- Script to list available scenarios in a specific folder ----',\
-                                 formatter_class=SmartFormatter)
-parser.add_argument('-f','--folder',help='folder where to search for scenarios (recursive)', required=False)
-parser.add_argument('-c','--choice', help=\
+parser = argparse.ArgumentParser(description=\
+                    "---- Script to list available scenarios in a specific folder ----"\
+                     , formatter_class=SmartFormatter)
+parser.add_argument("-f","--folder",help=\
+                    "folder where to search for scenarios (recursive)", required=False)
+parser.add_argument("-s","--selection",help=\
+                    "R|list of fields to filter: e.g. He4,2.65\n"\
+                    "----> Select only scenarios filling these criteria"\
+                    , required=False)
+parser.add_argument("-c","--choice", help=\
                     "R|list of variables to display, e.g.: shot,run,ip,b0\n"\
                     "... available among following variables:\n"\
                     "        shot     = shot number\n"\
@@ -212,6 +227,13 @@ else:
   folder = '/work/imas/shared/scenarios/'
   #folder = os.getcwd()
 
+# Filter
+if args['selection'] != None:
+  selection = args['selection']
+  noarg = "No"
+else:
+  selection = None
+
 # Choice of variables to display
 if args['choice'] != None:
     noarg = "No"
@@ -238,7 +260,7 @@ if noarg == "Yes":
     print """      scenario_summary -c workflow,shot,run,ip,b0,species,ne0,location"""
 
 # Call the function
-[table,plus] = rec(data=data,path=folder,extension=ext,choice=choice)
+table = rec(data=data,path=folder,extension=ext,choice=choice,selection=selection)
 
 # Display the clean formatted table
 for i in range(len(table)):

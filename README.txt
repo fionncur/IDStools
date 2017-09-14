@@ -2,7 +2,7 @@
  scenario_summary
 ------------------
 
-usage: scenario_summary [-h] [-f FOLDER] [-c CHOICE]
+usage: scenario_summary [-h] [-f FOLDER] [-s SELECTION] [-c CHOICE]
 
 ---- Script to list available scenarios in a specific folder ----
 
@@ -10,19 +10,33 @@ optional arguments:
   -h, --help            show this help message and exit
   -f FOLDER, --folder FOLDER
                         folder where to search for scenarios (recursive)
+  -s SELECTION, --selection SELECTION
+                        list of fields to filter: e.g. He4,2.65
+                        ----> Select only scenarios filling these criteria
   -c CHOICE, --choice CHOICE
-                        list of variables to display, e.g.: "'shot','run','plasma_current','magnetic_field'"
-                        ...available among following variables:
-                                'shot', 'run', 'type', 'workflow', 'machine',
-                                'plasma_current', 'magnetic_field', 'main_species',
-                                'line_averaged_density', 'idslist'
-
-EXAMPLE:
-scenario_summary -c "'shot','run','workflow'"
+                        list of variables to display, e.g.: shot,run,ip,b0
+                        ... available among following variables:
+                                shot     = shot number
+                                run      = run number
+                                type     = data type (experimental,predictive,interpretative)
+                                workflow = suite of codes used to compte these data
+                                machine  = tokamak name
+                                ip       = plasma current
+                                b0       = central magnetic field
+                                species  = plasma main species
+                                ne0      = central electron density
+                                zeff     = central Zeff
+                                p_hcd    = total H&CD power
+                                p_ec     = EC power
+                                p_ic     = IC power
+                                p_nbi    = NBI power
+                                p_lh     = LH power
+                                idslist  = List of IDSs available in the datafile
+                                location = Location of the full description file
 
 ----------------------------------------------------------------------------------------------------------------
 create_db_entry  (needs ids_content, described below)
-------------
+----------------
 
 usage: create_db_entry [-h] -u USER -t TOKAMAKNAME -s SHOT -r RUN
 
