@@ -34,6 +34,9 @@ optional arguments:
                                 idslist  = List of IDSs available in the datafile
                                 location = Location of the full description file
 
+EXAMPLE:
+scenario_summary -c workflow,shot,run,ip,b0,species,ne0,location -s He4,2.65
+
 ----------------------------------------------------------------------------------------------------------------
 create_db_entry  (needs ids_content, described below)
 ----------------
@@ -51,7 +54,7 @@ optional arguments:
   -r RUN, --run RUN     run number
 
 EXAMPLE:
-create_db_entry -u schneim -t test -s 33 -r 1
+create_db_entry -s 33 -r 1
 ----> ids_330001.yaml created.
 
 ----------------------------------------------------------------------------------------------------------------
@@ -71,4 +74,24 @@ optional arguments:
   -r RUN, --run RUN     run number
 
 EXAMPLE:
-ids_content  -u schneim -t test -s 33 -r 1
+ids_content -s 33 -r 1
+
+----------------------------------------------------------------------------------------------------------------
+ ids_compo
+-----------
+
+usage: ids_compo [-h] [-u USER] [-t TOKAMAKNAME] -s SHOT -r RUN
+
+---- Display the plasma composition from the core_profiles IDS
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -u USER, --user USER  username of the DB where the datafile is located
+  -t TOKAMAKNAME, --tokamakname TOKAMAKNAME
+                        tokamak name of the DB where the datafile is located
+  -s SHOT, --shot SHOT  shot number
+  -r RUN, --run RUN     run number
+
+EXAMPLE:
+ids_compo -s 33 -r 1
+

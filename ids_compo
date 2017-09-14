@@ -7,7 +7,7 @@ import init_mendeleiev as mend
 
 # Management of input arguments
 parser = argparse.ArgumentParser(description=\
-	 '---- Auto-generated yaml scenario file (!!! STILL TO BE COMPLETED BY HAND !!!)')
+	 '---- Display the plasma composition from the core_profiles IDS')
 parser.add_argument('-u','--user',help='username of the DB where the datafile is located', required=False)
 parser.add_argument('-t','--tokamakname',help='tokamak name of the DB where the datafile is located', required=False)
 parser.add_argument('-s','--shot',help='shot number', required=True,type=int)
