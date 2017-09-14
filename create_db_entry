@@ -10,15 +10,26 @@ from sys import exit
 # Management of input arguments
 parser = argparse.ArgumentParser(description=\
 	 '---- Auto-generated yaml scenario file (!!! STILL TO BE COMPLETED BY HAND !!!)')
-parser.add_argument('-u','--user',help='username of the DB where the datafile is located', required=True)
-parser.add_argument('-t','--tokamakname',help='tokamak name of the DB where the datafile is located', required=True)
+parser.add_argument('-u','--user',help='username of the DB where the datafile is located', required=False)
+parser.add_argument('-t','--tokamakname',help='tokamak name of the DB where the datafile is located', required=False)
 parser.add_argument('-s','--shot',help='shot number', required=True,type=int)
 parser.add_argument('-r','--run',help='run number',required=True,type=int)
 args = vars(parser.parse_args())
 shot = args["shot"]
 run  = args["run"]
-user = args["user"]
-tokamakname = args["tokamakname"]
+
+# Username
+if args['user'] != None:
+	user = args["user"]
+else:
+	import os
+	user = os.getenv('USER')
+
+# Tokamak name
+if args['tokamakname'] != None:
+	tokamakname = args["tokamakname"]
+else:
+	tokamakname = "test"
 
 # Open the database and read the necessary IDSs
 try:
