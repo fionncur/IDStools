@@ -29,8 +29,8 @@ def create_table_mendeleiev():
 
     table_mendeleiev[2][1].name='Helium'
     table_mendeleiev[2][2].name='Helium'
-    table_mendeleiev[2][3].name='Helium 3'
-    table_mendeleiev[2][4].name='Helium 4'
+    table_mendeleiev[2][3].name='Helium-3'
+    table_mendeleiev[2][4].name='Helium-4'
 
     for imass in range(nmass+1):
         table_mendeleiev[3][imass].name='Lithium'
