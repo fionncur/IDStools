@@ -19,7 +19,7 @@ optional arguments:
                                 shot     = shot number
                                 run      = run number
                                 type     = data type (experimental,predictive,interpretative)
-                                workflow = suite of codes used to compte these data
+                                workflow = suite of codes used to compute these data
                                 machine  = tokamak name
                                 ip       = plasma current
                                 b0       = central magnetic field
@@ -43,7 +43,7 @@ create_db_entry  (needs ids_content, described below)
 
 usage: create_db_entry [-h] -u USER -t TOKAMAKNAME -s SHOT -r RUN
 
----- Auto-generated yaml scenario file (!!! STILL TO BE COMPLETED BY HAND !!!)
+---- Auto-generated yaml scenario and watcher files (!!! STILL TO BE COMPLETED BY HAND !!!)
 
 optional arguments:
   -h, --help            show this help message and exit

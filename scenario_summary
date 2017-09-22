@@ -199,7 +199,7 @@ parser.add_argument("-c","--choice", help=\
                     "        shot     = shot number\n"\
                     "        run      = run number\n"\
                     "        type     = data type (experimental,predictive,interpretative)\n"\
-                    "        workflow = suite of codes used to compte these data\n"\
+                    "        workflow = suite of codes used to compute these data\n"\
                     "        machine  = tokamak name\n"\
                     "        ip       = plasma current\n"\
                     "        b0       = central magnetic field \n"\
@@ -224,7 +224,7 @@ if args['folder'] != None:
   folder = args['folder']
   noarg = "No"
 else:
-  folder = '/work/imas/shared/scenarios/'
+  folder = '/work/imas/shared/scenarios/db'
   #folder = os.getcwd()
 
 # Filter
