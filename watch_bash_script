@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# SOURCE THE ENVIRONMENT VARIABLES NECESSARY TO EXECUTE THE PYTHONSCRIPT
+. /usr/share/Modules/init/sh
+module load imas
+
+# EXECUTE THE PYTHON SCRIPT THAT WATCHES THE SCENARIO FOLDER
+python /work/imas/extra/bin/watch_scenario_folder.py
+
