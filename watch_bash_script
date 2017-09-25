@@ -5,5 +5,5 @@
 module load imas
 
 # EXECUTE THE PYTHON SCRIPT THAT WATCHES THE SCENARIO FOLDER
-python /work/imas/extra/bin/watch_scenario_folder.py
+python $IMAS_HOME/extra/bin/watch_scenario_folder.py
 
