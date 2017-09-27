@@ -95,3 +95,40 @@ optional arguments:
 EXAMPLE:
 ids_compo -s 33 -r 1
 
+----------------------------------------------------------------------------------------------------------------
+ equiplot
+-----------
+
+usage: equiplot [-h] [-u USER] [-m MACHINE] -s SHOT -r RUN [-t TIME]
+                [-p PLOTRHO]
+
+---- Display the plasma equilibrium from the magnetic IDS
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -u USER, --user USER  username of the DB where the datafile is located
+  -m MACHINE, --machine MACHINE
+                        tokamak name of the DB where the datafile is located
+  -s SHOT, --shot SHOT  shot number
+  -r RUN, --run RUN     run number
+  -t TIME, --time TIME  time
+  -p PLOTRHO, --plotrho PLOTRHO
+                        flag to plot rho(R,Z) (1) or not (0)
+
+----------------------------------------------------------------------------------------------------------------
+ kinplot
+-----------
+
+usage: kinplot [-h] [-u USER] [-m MACHINE] -s SHOT -r RUN [-t TIME]
+
+---- Display the plasma kinetic profiles and equilibrium from the
+core_profiles and equilibrium IDSs
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -u USER, --user USER  username of the DB where the datafile is located
+  -m MACHINE, --machine MACHINE
+                        tokamak name of the DB where the datafile is located
+  -s SHOT, --shot SHOT  shot number
+  -r RUN, --run RUN     run number
+  -t TIME, --time TIME  time
