@@ -248,7 +248,7 @@ if args['choice'] != None:
         print "------------------------------------------------------------------"
         sys.exit(0)
 else:
-  choice = ['workflow','shot','run','ip','b0','species','ne0','location']
+  choice = ['workflow','shot','run','machine','ip','b0','species','ne0','location']
 
 # Default extension, search folder and choice of variables to display
 data = {}
