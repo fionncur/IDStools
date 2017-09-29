@@ -17,7 +17,7 @@ includes = r'|'.join([fnmatch.translate(x) for x in includes])
 excludes = r'|'.join([fnmatch.translate(x) for x in excludes]) or r'$.'
 
 # Global folder where to search for modifications
-scenario_folder = '/work/imas/shared/scenarios/db'
+scenario_folder = '/work/imas/shared/iterdb'
 
 # Recursive search in the scenario folder of the file(s) that have changed
 msg_per_file = []

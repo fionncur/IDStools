@@ -224,7 +224,7 @@ if args['folder'] != None:
   folder = args['folder']
   noarg = "No"
 else:
-  folder = '/work/imas/shared/scenarios/db'
+  folder = '/work/imas/shared/iterdb'
   #folder = os.getcwd()
 
 # Filter
