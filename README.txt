@@ -132,3 +132,22 @@ optional arguments:
   -s SHOT, --shot SHOT  shot number
   -r RUN, --run RUN     run number
   -t TIME, --time TIME  time
+
+----------------------------------------------------------------------------------------------------------------
+scenplot
+----------
+
+usage: scenplot [-h] [-u USER] [-m MACHINE] -s SHOT -r RUN [-t TIME]
+
+---- Display the plasma kinetic profiles and equilibrium from the
+core_profiles and equilibrium IDSs
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -u USER, --user USER  username of the DB where the datafile is located
+  -m MACHINE, --machine MACHINE
+                        tokamak name of the DB where the datafile is located
+  -s SHOT, --shot SHOT  shot number
+  -r RUN, --run RUN     run number
+  -t TIME, --time TIME  time
+

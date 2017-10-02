@@ -257,7 +257,7 @@ ext  = ".yaml"
 # Print the arguments of the default call to the function
 if noarg == "Yes":
     print """----> Default call equivalent to: """
-    print """      scenario_summary -c workflow,shot,run,ip,b0,species,ne0,location"""
+    print """      scenario_summary -c workflow,shot,run,machine,ip,b0,species,ne0,location"""
 
 # Call the function
 table = rec(data=data,path=folder,extension=ext,choice=choice,selection=selection)
