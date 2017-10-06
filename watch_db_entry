@@ -1,0 +1,40 @@
+#!/usr/bin/env python
+
+import argparse
+
+# Management of input arguments
+parser = argparse.ArgumentParser(description=\
+	 '---- Subscribe as a watcher to a simulation file stored in ITER-DB')
+parser.add_argument('-s','--shot',help='shot number', required=True,type=int)
+parser.add_argument('-r','--run',help='run number',required=True,type=int)
+parser.add_argument('-f','--firstname',help='user firstname',required=True,type=str)
+parser.add_argument('-n','--name',help='user name',required=True,type=str)
+parser.add_argument('-e','--email',help='user e-mail',required=True,type=str)
+args = vars(parser.parse_args())
+
+shot      = args["shot"]
+run       = args["run"]
+firstname = args["firstname"]
+name      = args["name"]
+email     = args["email"]
+
+# ------------------------------------------------------------------------------------------------------------
+
+# Set up the name of the yaml file
+strsize = len(str(shot))+len(str(run))
+if strsize < 8:
+    add0 = ""
+    for i in range(8-strsize):
+        if len(add0) < 3:
+            add0 = add0+"0"
+
+filename = "ids_"+str(shot)+add0+str(run)+".watcher"
+folder = '/work/imas/shared/iterdb'
+fullpath = folder+'/3/0/'+filename
+
+f = open(fullpath,'a')
+f.write( (""" %s \t %s \t %s \n""").expandtabs(17) %  (firstname,name,email) )
+f.close()
+
+print '----> Watcher '+firstname+' '+name+ ' added for shot '+str(shot)+' run '+str(run)+'.'
+
