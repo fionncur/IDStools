@@ -18,6 +18,9 @@ args = vars(parser.parse_args())
 shot = args["shot"]
 run  = args["run"]
 
+# A priori the DB is not the local one
+localdb = 0
+
 # Username
 if args['user'] != None:
 	user = args["user"]
@@ -33,7 +36,10 @@ else:
 
 # Open the database and read the necessary IDSs
 try:
-    cli = pyual.Client(shot,run,user=user,machine=tokamakname)
+    if localdb == 1:
+        cli = pyual.Client(shot,run,user=user,machine=tokamakname)
+    else:
+        cli = pyual.Client(shot,run)
 except:
     print "Shot " + str(shot) + ", run " + str(run) + " does not exist"
     print "----> Aborted."
@@ -338,17 +344,10 @@ print "----> " + filename + " created."
 # Associated WATCHER file
 filename = "ids_"+str(shot)+add0+str(run)+".watcher"
 f = open(filename, 'w')
-f.write("""# ----------------------------------------------------------\n""")
-f.write("""# Add your name and email address to this file if you want\n""")
-f.write("""# to be notified on any update of the IMAS datafile\n""")
-f.write("""# associated with the present watcher file\n""")
-f.write("""# ----------------------------------------------------------\n""")
-f.write(""" \n""")
 f.write("""----------------------------------------------------------------------------------\n""")
-f.write("""Firstname		Name			E-mail-\n""")
+f.write(""" Firstname		Name			E-mail\n""")
 f.write("""----------------------------------------------------------------------------------\n""")
-f.write("""Mireille		Schneider		mireille.schneider@iter.org\n""")
-f.write("""----------------------------------------------------------------------------------\n""")
+f.write(""" Mireille		Schneider		mireille.schneider@iter.org\n""")
 f.close()
 print "----> " + filename + " created."
 

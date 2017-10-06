@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import os, argparse, yaml
+import os, argparse
 
 # Management of input arguments
 parser = argparse.ArgumentParser(description=\
