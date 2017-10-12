@@ -40,8 +40,7 @@ def rec(data={},path=os.getcwd(),extension='.yaml',choice=['shot','run','ip','b0
       except yaml.YAMLError as exc:
         print(exc)
 
-    # Sort data as a function of run numbers
-    #sorted_indices = sorted(data, key = lambda x: data[x]['characteristics']['shot'])
+    # Sort data as a function of shot and run numbers
     sorted_indices = sorted(data, key = lambda x: data[x]['characteristics']['shot']+data[x]['characteristics']['run'])
     sdata = {}
     for i in range(len(data)):
