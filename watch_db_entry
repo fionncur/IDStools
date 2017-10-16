@@ -21,12 +21,10 @@ email     = args["email"]
 # ------------------------------------------------------------------------------------------------------------
 
 # Set up the name of the yaml file
-strsize = len(str(shot))+len(str(run))
-if strsize < 8:
-    add0 = ""
-    for i in range(8-strsize):
-        if len(add0) < 3:
-            add0 = add0+"0"
+add0 = ""
+add0_length = 4-len(str(run))
+for i in range(add0_length):
+    add0 = add0+"0"
 
 filename = "ids_"+str(shot)+add0+str(run)+".watcher"
 folder = '/work/imas/shared/iterdb'
