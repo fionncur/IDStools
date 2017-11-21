@@ -122,7 +122,7 @@ def rec(data={},path=os.getcwd(),extension='.yaml',choice=['shot','run','ip','b0
 
     # Table heading
     table = {}
-    table[1] = str(choice[0])
+    table[1] = eval('disp_'+str(choice[0]))
     for i in range(1,len(choice)):
       space_length = eval('tab_'+str(choice[i-1])) - len(eval('disp_'+str(choice[i-1])))+2
       try:
