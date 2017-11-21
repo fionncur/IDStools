@@ -295,7 +295,7 @@ if args['choice'] != None:
         print "------------------------------------------------------------------"
         sys.exit(0)
 else:
-  choice = ['workflow','shot','run','machine','ip','b0','species','ne0']
+  choice = ['shot','run','machine','ref_name','ip','b0','species','confinement','workflow']
 
 # Default extension, search folder and choice of variables to display
 data = {}
@@ -304,7 +304,7 @@ ext  = ".yaml"
 # Print the arguments of the default call to the function
 if noarg == "Yes":
     print """----> Default call equivalent to: """
-    print """      scenario_summary -c workflow,shot,run,machine,ip,b0,species,ne0"""
+    print """      scenario_summary -c shot,run,machine,ref_name,ip,b0,species,confinement,workflow"""
 
 # Call the function
 table = rec(data=data,path=folder,extension=ext,choice=choice,selection=selection)
