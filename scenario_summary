@@ -188,12 +188,22 @@ def rec(data={},path=os.getcwd(),extension='.yaml',choice=['shot','run','ip','b0
                     space_length = space_length - 1 # To re-align following column
 
             if choice[i] == 'composition':
-                species = composition.split()
-                x       = composition_x.split()
-                nspecies = len(species)
+
+                unsorted_species = composition.split()
+                unsorted_xspec   = composition_x.split()
+                nspecies = len(unsorted_species)
+
+                # Sort species as a function of concentration
+                sorted_x = sorted(range(nspecies), key = lambda x: unsorted_xspec[x], reverse=True)
+                species = []
+                xspec = []
+                for i in range(nspecies):
+                    species.append(unsorted_species[sorted_x[i]])
+                    xspec.append(unsorted_xspec[sorted_x[i]])
+
                 compo = ''
                 for ispec in range(nspecies):
-                    compo = compo+species[ispec]+'('+x[ispec]+'),'
+                    compo = compo+species[ispec]+'('+xspec[ispec]+'),'
                 compo = compo[:-1]
                 table[j] = table[j] + " "*space_length + compo
                 space_length_compo = eval('tab_composition')-len(compo)+2
