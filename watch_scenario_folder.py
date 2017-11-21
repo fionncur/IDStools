@@ -44,7 +44,7 @@ for root,dirs,files in os.walk(scenario_folder):
                 owner = pwd.getpwuid(os.stat(fullpathfile).st_uid).pw_name
                 if fullpathfile.endswith('.watcher'):
                     msgfile = '\n'
-                    msgfile = 'The WATCHER file %s has been modified on %s by %s.\n \n'%(fullpathfile, mtime, owner)
+                    msgfile = 'The WATCHER file %s has been modified on %s.\n \n'%(fullpathfile, mtime)
                     msgfile = msgfile + '----> Please update the related watcher maling list.\n \n'
                     msg_per_watcher_file.append(msgfile)
                     msg_per_watcher_file.append('----> New list of watchers:\n')

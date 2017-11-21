@@ -45,7 +45,6 @@ except:
     print "----> Aborted."
     exit()
     
-
 # Read necessary IDSs from database
 try:
     equilibrium = cli.get('equilibrium')
@@ -157,6 +156,7 @@ if len(summary.time)==0:
     p_nbi  = "tbd"
     p_lh   = "tbd"
     p_hcd  = "tbd"
+    confinement_regime = "tbd"
 else:
     p_ec  = 0
     p_ic  = 0
@@ -183,6 +183,21 @@ else:
             if len(summary.heating_current_drive.lh[isource].power.value) > 0:
                 p_lh = p_lh + max(summary.heating_current_drive.lh[isource].power.value)*1.e-6
     p_hcd = p_ec + p_ic + p_nbi + p_lh
+
+    # Detect L-H and H-L transitions
+    if len(summary.global_quantities.h_mode.value) > 0:
+	    foo = ''
+	    nt = len(summary.global_quantities.h_mode.value)
+	    for it in range(nt):
+		    if summary.global_quantities.h_mode.value[it]==1:
+			    foo = foo+'H'
+		    else:
+			    foo = foo+'L'
+	    confinement_regime = ''.join([foo[i]+'-' for i in range(len(foo)-1) if foo[i+1]!= foo[i]]+[foo[-1]])
+	    if len(confinement_regime)>5:
+		    confinement_regime = confinement_regime[0:5]
+	    if len(confinement_regime)==1:
+		    confinement_regime = confinement_regime+'-mode'
 
 if nspecies > 0:
 
@@ -259,6 +274,18 @@ f.write("""# ------------------------------------------------------------------\
 f.write("""status: \n""")
 f.write("""    draft\n""")
 f.write("""\n""")
+f.write("""# -----------------------------------------------\n""")
+f.write("""# Reference name describing the simulation\n""")
+f.write("""# -----------------------------------------------\n""")
+f.write("""reference_name:\n""")
+f.write("""    tbd\n""")
+f.write("""\n""")
+f.write("""# ---------------------------------------------------------\n""")
+f.write("""# Responsible officer name(s), can be separated by comas\n""")
+f.write("""# ---------------------------------------------------------\n""")
+f.write("""responsible_name:\n""")
+f.write("""    tbd\n""")
+f.write("""\n""")
 f.write("""# ------------------------------------------------------------------\n""")
 f.write("""# Shot number, run numbers, type, code, machine attributes\n""")
 f.write("""# Type: interpretative, predictive, experiment\n""")
@@ -278,16 +305,17 @@ f.write("""# (scenario keys can be completed here if relevant)\n""")
 f.write("""# Units are [T], [-], [MA], [m-3] respectively\n""")
 f.write("""# --------------------------------------------------\n""")
 f.write("""scenario_key_parameters:\n""")
+f.write("""    confinement_regime: %s\n""" % confinement_regime)
 f.write("""    magnetic_field: %.2f\n""" % magnetic_field)
 f.write("""    main_species: %s\n""" % main_species)
 f.write("""    plasma_current: %.2f \n""" % plasma_current)
 f.write("""    central_electron_density: %.2e\n""" % central_electron_density)
 f.write("""    central_zeff: %.2f\n""" % central_zeff)
 f.write("""\n""")
-f.write("""# ----------------------------------------------------------------------------\n""")
+f.write("""# ---------------------------------------------------------------------\n""")
 f.write("""# Nominal power of H&CD systems [MW]\n""")
 f.write("""# (initially filled with max values, adjust by hand if necessary)\n""")
-f.write("""# ----------------------------------------------------------------------------\n""")
+f.write("""# ---------------------------------------------------------------------\n""")
 f.write("""hcd:\n""")
 if len(summary.time)==0:
     f.write("""    p_hcd: tbd\n""")
@@ -302,17 +330,25 @@ else:
     f.write("""    p_nbi: %.2f\n""" % p_nbi)
     f.write("""    p_lh:  %.2f\n""" % p_lh)
 f.write("""\n""")
+f.write("""# ---------------------------------------------------------\n""")
+f.write("""# Plasma composition as deduced from the core_profiles IDS\n""")
+f.write("""# ---------------------------------------------------------\n""")
+f.write("""plasma_composition:\n""")
 if nspecies > 0:
-    f.write("""# ---------------------------------------------------------\n""")
-    f.write("""# Plasma composition as deduced from the core_profiles IDS\n""")
-    f.write("""# ---------------------------------------------------------\n""")
-    f.write("""plasma_composition:\n""")
     f.write(disp_species+"\n")
     f.write(disp_a+"\n")
     f.write(disp_z+"\n")
     f.write(disp_nspec_over_ntot+"\n")
     f.write(disp_nspec_over_ne+"\n")
     f.write(disp_nspec_over_nmaj+"\n")
+    f.write("""\n""")
+else:
+    f.write("""   species:      tbd\n""")
+    f.write("""   a:            tbd\n""")
+    f.write("""   z:            tbd\n""")
+    f.write("""   n_over_ntot:  tbd\n""")
+    f.write("""   n_over_ne:    tbd\n""")
+    f.write("""   n_over_n_maj: tbd\n""")
     f.write("""\n""")
 f.write("""# --------------------\n""")
 f.write("""# Content description\n""")
