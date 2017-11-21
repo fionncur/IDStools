@@ -6,7 +6,7 @@ import os, argparse
 parser = argparse.ArgumentParser(description=\
 	 '---- Show full description file for a given simulation stored in ITER DB folder')
 parser.add_argument("-f","--folder",help=\
-                    "folder where to search for scenarios (recursive)", required=False)
+                    "folder where to search for scenarios", required=False)
 parser.add_argument('-s','--shot',help='shot number', required=True,type=int)
 parser.add_argument('-r','--run',help='run number',required=True,type=int)
 args = vars(parser.parse_args())
