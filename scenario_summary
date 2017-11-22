@@ -139,8 +139,8 @@ def rec(data={},path=os.getcwd(),extension='.yaml',choice=['shot','run','ip','b0
         if sdata[i]['status'] == "active":
           j = j+1
 
-          ref_name    = sdata[i]['reference_name']
-          ro_name     = sdata[i]['responsible_name']
+          ref_name    = sdata[i].get('reference_name')
+          ro_name     = sdata[i].get('responsible_name')
           shot        = sdata[i].get('characteristics').get('shot')
           run         = sdata[i].get('characteristics').get('run')
           type        = sdata[i].get('characteristics').get('type')
@@ -194,7 +194,10 @@ def rec(data={},path=os.getcwd(),extension='.yaml',choice=['shot','run','ip','b0
                 nspecies = len(unsorted_species)
 
                 # Sort species as a function of concentration
-                sorted_x = sorted(range(nspecies), key = lambda x: unsorted_xspec[x], reverse=True)
+                if nspecies>1:
+                    sorted_x = sorted(range(nspecies), key = lambda x: float(unsorted_xspec[x]), reverse=True)
+                else:
+                    sorted_x = sorted(range(nspecies), key = lambda x: unsorted_xspec[x], reverse=True)
                 species = []
                 xspec = []
                 for i in range(nspecies):
