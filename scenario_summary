@@ -38,8 +38,10 @@ def rec(data={},path=os.getcwd(),extension='.yaml',choice=['shot','run','ip','b0
         data[j]['location'] = files[i]
         #print files[i]
         file.close()
-      except yaml.YAMLError as exc:
-        print(exc)
+      except:
+        print 'Error reading yaml files.'
+        print '----> Aborted.'
+        sys.exit()
 
     # Sort data as a function of shot and run numbers
     sorted_indices = sorted(data, key = lambda x: data[x]['characteristics']['shot']+data[x]['characteristics']['run'])
@@ -58,7 +60,7 @@ def rec(data={},path=os.getcwd(),extension='.yaml',choice=['shot','run','ip','b0
     disp_confinement = 'Confinement'
     disp_ip          = 'Ip[MA]'
     disp_b0          = 'B0[T]'
-    disp_species     = 'Fuelling'
+    disp_fuelling    = 'Fuelling'
     disp_ne0         = 'ne0[m-3]'
     disp_zeff        = 'Zeff'
     disp_p_hcd       = 'P_HCD[MW]'
@@ -69,7 +71,7 @@ def rec(data={},path=os.getcwd(),extension='.yaml',choice=['shot','run','ip','b0
     disp_extra       = 'Free description'
     disp_idslist     = 'List of IDSs'
     disp_location    = 'Location'
-    disp_composition = 'Species X[ni/ne]'
+    disp_composition = 'Composition X[ni/ne]'
       
     # Identify optimized tabulation for each column
     tab_ref_name    = 0
@@ -82,7 +84,7 @@ def rec(data={},path=os.getcwd(),extension='.yaml',choice=['shot','run','ip','b0
     tab_confinement = 0
     tab_ip          = 0
     tab_b0          = 0
-    tab_species     = 0
+    tab_fuelling    = 0
     tab_ne0         = 0
     tab_zeff        = 0
     tab_p_hcd       = 0
@@ -105,7 +107,7 @@ def rec(data={},path=os.getcwd(),extension='.yaml',choice=['shot','run','ip','b0
         tab_confinement = max(max(len(str(sdata[i].get('scenario_key_parameters').get('confinement_regime'))),tab_confinement),len(disp_confinement))
         tab_ip          = max(max(len(str(sdata[i].get('scenario_key_parameters').get('plasma_current'))),tab_ip),len(disp_ip))
         tab_b0          = max(max(len(str(sdata[i].get('scenario_key_parameters').get('magnetic_field'))),tab_b0),len(disp_b0))
-        tab_species     = max(max(len(str(sdata[i].get('scenario_key_parameters').get('main_species'))),tab_species),len(disp_species))
+        tab_fuelling    = max(max(len(str(sdata[i].get('scenario_key_parameters').get('main_species'))),tab_fuelling),len(disp_fuelling))
         tab_ne0         = max(max(len(str(sdata[i].get('scenario_key_parameters').get('central_electron_density'))),tab_ne0),len(disp_ne0))
         tab_zeff        = max(max(len(str(sdata[i].get('scenario_key_parameters').get('central_zeff'))),tab_zeff),len(disp_zeff))
         tab_p_hcd       = max(max(len(str(sdata[i].get('hcd').get('p_hcd'))),tab_p_hcd),len(disp_p_hcd))
@@ -149,7 +151,7 @@ def rec(data={},path=os.getcwd(),extension='.yaml',choice=['shot','run','ip','b0
           confinement = sdata[i].get('scenario_key_parameters').get('confinement_regime')
           ip          = sdata[i].get('scenario_key_parameters').get('plasma_current')
           b0          = sdata[i].get('scenario_key_parameters').get('magnetic_field')
-          species     = sdata[i].get('scenario_key_parameters').get('main_species')
+          fuelling    = sdata[i].get('scenario_key_parameters').get('main_species')
           ne0         = sdata[i].get('scenario_key_parameters').get('central_electron_density')
           zeff        = sdata[i].get('scenario_key_parameters').get('central_zeff')
           p_hcd       = sdata[i].get('hcd').get('p_hcd')
@@ -262,7 +264,7 @@ parser.add_argument("-c","--choice", help=\
                     "        confinement = confinement regime (L or H)\n"\
                     "        ip          = plasma current\n"\
                     "        b0          = central magnetic field \n"\
-                    "        species     = plasma main species\n"\
+                    "        fuelling    = plasma fuelling species\n"\
                     "        ne0         = central electron density\n"\
                     "        zeff        = central Zeff\n"\
                     "        p_hcd       = total H&CD power\n"\
@@ -308,7 +310,7 @@ if args['choice'] != None:
         print "------------------------------------------------------------------"
         sys.exit(0)
 else:
-  choice = ['shot','run','machine','ref_name','ip','b0','species','confinement','workflow']
+  choice = ['shot','run','machine','ref_name','ip','b0','fuelling','confinement','workflow']
 
 # Default extension, search folder and choice of variables to display
 data = {}
@@ -317,7 +319,7 @@ ext  = ".yaml"
 # Print the arguments of the default call to the function
 if noarg == "Yes":
     print """----> Default call equivalent to: """
-    print """      scenario_summary -c shot,run,machine,ref_name,ip,b0,species,confinement,workflow"""
+    print """      scenario_summary -c shot,run,machine,ref_name,ip,b0,fuelling,confinement,workflow"""
 
 # Call the function
 table = rec(data=data,path=folder,extension=ext,choice=choice,selection=selection)
