@@ -24,7 +24,6 @@ localdb = 0
 # Username
 if args['user'] != None:
 	user = args["user"]
-	localdb = 1
 else:
 	import os
 	user = os.getenv('USER')
@@ -32,7 +31,6 @@ else:
 # Tokamak name
 if args['tokamakname'] != None:
 	tokamakname = args["tokamakname"]
-	localdb = 1
 else:
 	tokamakname = "test"
 
@@ -88,26 +86,6 @@ except:
     exit()
 
 try:
-    nspecies = len(core_profiles.profiles_1d[0].ion)
-    a = [0] * nspecies
-    for ispecies in range(nspecies):
-        a[ispecies] = int(core_profiles.profiles_1d[0].ion[ispecies].element[0].a)
-except:
-    print "core_profiles.profiles_1d[:].ion[0].element[0].a could not be read"
-    nspecies = 0
-    a = [0]
-
-try:
-    nspecies = len(core_profiles.profiles_1d[0].ion)
-    z = [0] * nspecies
-    for ispecies in range(nspecies):
-        z[ispecies] = int(core_profiles.profiles_1d[0].ion[ispecies].element[0].z_n)
-except:
-    print "core_profiles.profiles_1d[:].ion[0].element[0].z_n could not be read"
-    nspecies = 0
-    z = [0]
-
-try:
     central_electron_density = 0
     for islice in range(len(core_profiles.profiles_1d)):
         if core_profiles.profiles_1d[islice].electrons.density[0] > central_electron_density:
@@ -117,6 +95,26 @@ except:
     print "core_profiles.profiles_1d[:].electrons.density[0] could not be read"
     print "----> Aborted."
     exit()
+
+try:
+    nspecies = len(core_profiles.profiles_1d[0].ion)
+    a = [0] * nspecies
+    for ispecies in range(nspecies):
+        a[ispecies] = int(core_profiles.profiles_1d[the_slice].ion[ispecies].element[0].a)
+except:
+    print "core_profiles.profiles_1d[:].ion[0].element[0].a could not be read"
+    nspecies = 0
+    a = [0]
+
+try:
+    nspecies = len(core_profiles.profiles_1d[0].ion)
+    z = [0] * nspecies
+    for ispecies in range(nspecies):
+        z[ispecies] = int(core_profiles.profiles_1d[the_slice].ion[ispecies].element[0].z_n)
+except:
+    print "core_profiles.profiles_1d[:].ion[0].element[0].z_n could not be read"
+    nspecies = 0
+    z = [0]
 
 try:
     volume = core_profiles.profiles_1d[the_slice].grid.volume
@@ -138,16 +136,14 @@ except:
     exit()
 
 try:
-    central_zeff = 0
-    for islice in range(len(core_profiles.profiles_1d)):
-        if core_profiles.profiles_1d[islice].zeff[0] > central_zeff:
-            central_zeff = core_profiles.profiles_1d[islice].zeff[0]
+    central_zeff = core_profiles.profiles_1d[the_slice].zeff[0]
 except:
     print "core_profiles.profiles_1d[:].zeff[0] could not be read"
     print "----> Aborted."
     exit()
 
 # H&CD quantities from summary IDS
+confinement_regime = "tbd"
 if len(summary.time)==0:
     print "--------------------------------------------------------"
     print "The summary IDS is absent from the input datafile"
@@ -158,7 +154,6 @@ if len(summary.time)==0:
     p_nbi  = "tbd"
     p_lh   = "tbd"
     p_hcd  = "tbd"
-    confinement_regime = "tbd"
 else:
     p_ec  = 0
     p_ic  = 0
@@ -212,24 +207,13 @@ if nspecies > 0:
     ntot = 0
     species_density = [0] * nspecies
     for ispecies in range(nspecies):
-        species_density[ispecies] = sum(volume*core_profiles.profiles_1d[0].ion[ispecies].density)
+        species_density[ispecies] = sum(volume*core_profiles.profiles_1d[the_slice].ion[ispecies].density)
         ntot = ntot + species_density[ispecies]
-    ne = sum(volume*core_profiles.profiles_1d[0].electrons.density)
+    ne = sum(volume*core_profiles.profiles_1d[the_slice].electrons.density)
 
     nspec_over_ntot = species_density/ntot
     nspec_over_ne   = species_density/ne
     nspec_over_nmaj = species_density/species_density[0]
-
-    # When a species appears twice: combine
-    for ispecies in range(nspecies):
-       for jspecies in range(nspecies):
-          if (species[jspecies] == species[ispecies]) & (jspecies != ispecies):
-	     nspec_over_ntot[ispecies] = nspec_over_ntot[ispecies] + nspec_over_ntot[jspecies]
-	     nspec_over_ntot[jspecies] = 0
-	     nspec_over_ne[ispecies] = nspec_over_ne[ispecies] + nspec_over_ne[jspecies]
-	     nspec_over_ne[jspecies] = 0
-	     nspec_over_nmaj[ispecies] = nspec_over_nmaj[ispecies] + nspec_over_nmaj[jspecies]
-	     nspec_over_nmaj[jspecies] = 0
 
     # Nice display of plasma composition with species concentrations
     disp_species         = '   species:      '
@@ -245,23 +229,14 @@ if nspecies > 0:
                 main_species = main_species + species[ispecies]
             else:
                 main_species = main_species + "-" + species[ispecies]
-        if nspec_over_ne[ispecies] > 0.:
-            tabsize = 10
+        if nspec_over_ne[ispecies] > 0.001:
+            tabsize = 8
             disp_species = disp_species + species[ispecies] + " " * (tabsize-len(species[ispecies]))
             disp_a = disp_a + format("%.1f" % a[ispecies]) + " " * (tabsize-len(format("%.1f" % a[ispecies])))
             disp_z = disp_z + format("%.1f" % z[ispecies]) + " " * (tabsize-len(format("%.1f" % z[ispecies])))
-	    if nspec_over_ntot[ispecies] < 1.e-2:
-               disp_nspec_over_ntot = disp_nspec_over_ntot + format("%.2e" % nspec_over_ntot[ispecies]) + " " * (tabsize-len(format("%.2e" % nspec_over_ntot[ispecies])))
-	    else:
-               disp_nspec_over_ntot = disp_nspec_over_ntot + format("%.3f" % nspec_over_ntot[ispecies]) + " " * (tabsize-len(format("%.3f" % nspec_over_ntot[ispecies])))
-	    if nspec_over_ne[ispecies] < 1.e-2:
-	       disp_nspec_over_ne   = disp_nspec_over_ne   + format("%.2e" % nspec_over_ne[ispecies])   + " " * (tabsize-len(format("%.2e" % nspec_over_ne[ispecies])))
-	    else:
-	       disp_nspec_over_ne   = disp_nspec_over_ne   + format("%.3f" % nspec_over_ne[ispecies])   + " " * (tabsize-len(format("%.3f" % nspec_over_ne[ispecies])))
-	    if nspec_over_nmaj[ispecies] < 1.e-2:
-               disp_nspec_over_nmaj = disp_nspec_over_nmaj + format("%.2e" % nspec_over_nmaj[ispecies]) + " " * (tabsize-len(format("%.2e" % nspec_over_nmaj[ispecies])))
-            else:
-               disp_nspec_over_nmaj = disp_nspec_over_nmaj + format("%.3f" % nspec_over_nmaj[ispecies]) + " " * (tabsize-len(format("%.3f" % nspec_over_nmaj[ispecies])))
+            disp_nspec_over_ntot = disp_nspec_over_ntot + format("%.2f" % nspec_over_ntot[ispecies]) + " " * (tabsize-len(format("%.2f" % nspec_over_ntot[ispecies])))
+            disp_nspec_over_ne   = disp_nspec_over_ne   + format("%.2f" % nspec_over_ne[ispecies])   + " " * (tabsize-len(format("%.2f" % nspec_over_ne[ispecies])))
+            disp_nspec_over_nmaj = disp_nspec_over_nmaj + format("%.2f" % nspec_over_nmaj[ispecies]) + " " * (tabsize-len(format("%.2f" % nspec_over_nmaj[ispecies])))
     #print "   ---------------------------------------------------------------------"
     #print disp_species
     #print disp_a
