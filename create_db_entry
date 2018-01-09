@@ -234,7 +234,7 @@ if nspecies > 0:
                 main_species = main_species + species[ispecies]
             else:
                 main_species = main_species + "-" + species[ispecies]
-        if nspec_over_ne[ispecies] > 0.001:
+        if nspec_over_ne[ispecies] > 0.:
             tabsize = 8
             disp_species = disp_species + species[ispecies] + " " * (tabsize-len(species[ispecies]))
             disp_a = disp_a + format("%.1f" % a[ispecies]) + " " * (tabsize-len(format("%.1f" % a[ispecies])))
