@@ -206,14 +206,19 @@ if nspecies > 0:
     # Species concentrations
     ntot = 0
     species_density = [0] * nspecies
+    max_density = -999.
     for ispecies in range(nspecies):
         species_density[ispecies] = sum(volume*core_profiles.profiles_1d[the_slice].ion[ispecies].density)
         ntot = ntot + species_density[ispecies]
+        if species_density[ispecies] > max_density:
+            max_density = species_density[ispecies]
+            imax = ispecies
+
     ne = sum(volume*core_profiles.profiles_1d[the_slice].electrons.density)
 
     nspec_over_ntot = species_density/ntot
     nspec_over_ne   = species_density/ne
-    nspec_over_nmaj = species_density/species_density[0]
+    nspec_over_nmaj = species_density/species_density[imax]
 
     # Nice display of plasma composition with species concentrations
     disp_species         = '   species:      '
