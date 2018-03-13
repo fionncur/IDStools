@@ -1,9 +1,10 @@
 program prog_ids_grid_structured
 
+  use ids_schemas, only: DP=>ids_real
   use ids_schemas
-  use ids_grid_structured
-  use ids_grid_access
-  use ids_grid_common, only: COORDTYPE_X , COORDTYPE_Y , COORDTYPE_theta , COORDTYPE_rho_tor
+  use ids_grid_structured_light
+  use ids_grid_access_light
+  use ids_grid_common_light, only: COORDTYPE_X , COORDTYPE_Y , COORDTYPE_theta , COORDTYPE_rho_tor
 
   implicit none
 

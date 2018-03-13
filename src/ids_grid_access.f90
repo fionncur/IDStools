@@ -1,4 +1,4 @@
-module ids_grid_access
+module ids_grid_access_light
   !>
   !> Translations of all subroutines and functions in EU-ITM (EUIM) module itm_grid_access.
   !> The only exception is \c gridNodeCoord for which the translation is
@@ -14,7 +14,7 @@ module ids_grid_access
   !>            than one "objects_per_dimension".
   !> Warning 3: The translation of gridNodeCoord is incomplete.
   
-  use ids_schemas, only: DP, ids_generic_grid_dynamic, ids_generic_grid_dynamic_space
+  use ids_schemas, only: DP=>ids_real, ids_generic_grid_dynamic, ids_generic_grid_dynamic_space
 
   implicit none
 
@@ -258,4 +258,4 @@ contains
 
   end function gridNodeCoord
 
-end module ids_grid_access
+end module ids_grid_access_light

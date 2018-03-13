@@ -1,4 +1,4 @@
-module ids_grid_common
+module ids_grid_common_light
 
   use iso_c_binding, only: DP => c_double
 
@@ -112,4 +112,4 @@ module ids_grid_common
         0, 1, 2, 4, 5, 6, 7, 8, 107, 109, 110, 111, 112, 113, 114, 115, 116 , &
         117, 118, 119, 120, 121, 122, 123, 124, 125, 126 /)
 
-end module ids_grid_common
+end module ids_grid_common_light

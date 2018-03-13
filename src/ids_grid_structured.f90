@@ -1,4 +1,4 @@
-module ids_grid_structured
+module ids_grid_structured_light
 
   !> This modules provides simple interfaces to the Generic Grid Description (GGD) 
   !> to handle rectangular grids and data stored on rectangular grids.
@@ -15,12 +15,12 @@ module ids_grid_structured
   !> @author Hajo Klignshirn (for the ITM), adapted to IMAS by Thomas Jonsson 2016
 
   use ids_schemas, only: &
-       DP, &
+       DP=>ids_real, &
        ids_generic_grid_dynamic, &
        ids_generic_grid_dynamic_space, &
        ids_generic_grid_scalar
 
-  use ids_grid_access, only: &
+  use ids_grid_access_light, only: &
        gridNDim, &
        gridCoordTypes, &
        gridSpaceNNodes
@@ -769,4 +769,4 @@ contains
     endif
   end subroutine gridStructReadData6d
 
-end module ids_grid_structured
+end module ids_grid_structured_light

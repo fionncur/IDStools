@@ -5,7 +5,7 @@
 #  * INSTALL_DIR  - Where the library is installed. Default: ${HOME}/codes/INSTALL/imas_ggd
 #
 
-VERSION=1.0.2
+VERSION=1.0.3
 CODENAME=imas_ggd
 
 ifndef OBJECTCODE
