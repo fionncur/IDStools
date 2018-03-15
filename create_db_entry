@@ -220,6 +220,17 @@ if nspecies > 0:
     nspec_over_ne   = species_density/ne
     nspec_over_nmaj = species_density/species_density[imax]
 
+    # When a species appears twice: combine
+    for ispecies in range(nspecies):
+       for jspecies in range(nspecies):
+          if (species[jspecies] == species[ispecies]) & (jspecies != ispecies):
+	     nspec_over_ntot[ispecies] = nspec_over_ntot[ispecies] + nspec_over_ntot[jspecies]
+	     nspec_over_ntot[jspecies] = 0
+	     nspec_over_ne[ispecies] = nspec_over_ne[ispecies] + nspec_over_ne[jspecies]
+	     nspec_over_ne[jspecies] = 0
+	     nspec_over_nmaj[ispecies] = nspec_over_nmaj[ispecies] + nspec_over_nmaj[jspecies]
+	     nspec_over_nmaj[jspecies] = 0
+
     # Nice display of plasma composition with species concentrations
     disp_species         = '   species:      '
     disp_a               = '   a:            '
