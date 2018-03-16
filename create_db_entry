@@ -2,6 +2,7 @@
 
 import argparse, pyual
 import init_mendeleiev as mend
+import numpy as np
 from os import system
 from sys import exit
 
@@ -69,7 +70,10 @@ table_mendeleiev = mend.create_table_mendeleiev()
 
 # Fill the variables necessary to complete the yaml description file
 try:
-    magnetic_field = max(equilibrium.vacuum_toroidal_field.b0)
+    if min(np.sign(equilibrium.vacuum_toroidal_field.b0)) < 0:
+      magnetic_field = min(equilibrium.vacuum_toroidal_field.b0)
+    else:
+      magnetic_field = max(equilibrium.vacuum_toroidal_field.b0)
 except:
     print "equilibrium.time_slice[:].global_quantities.magnetic_axis.b_tor could not be read"
     print "----> Aborted."
@@ -79,7 +83,7 @@ try:
     plasma_current = 0
     for islice in range(len(equilibrium.time)):
         if abs(equilibrium.time_slice[islice].global_quantities.ip)*1.e-6 > plasma_current:
-            plasma_current = abs(equilibrium.time_slice[islice].global_quantities.ip)*1.e-6
+            plasma_current = equilibrium.time_slice[islice].global_quantities.ip*1.e-6
 except:
     print "equilibrium.time_slice[:].global_quantities.ip could not be read"
     print "----> Aborted."
