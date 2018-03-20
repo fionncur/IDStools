@@ -38,7 +38,7 @@ RUN=$(addprefix &&, $(EXE))
 
 LIBNAME=$(LIB)/lib${CODENAME}.a
 
-PC_FILES=$(PKG)/${CODENAME}_${OBJECTCODE}.pc
+PC_FILES=$(PKG)/${CODENAME}-${OBJECTCODE}.pc
 
 GITINFO=info_git_detailed_status.txt
 
@@ -95,11 +95,13 @@ install: clean ${GITINFO} library ${PC_FILES}
 	mkdir -p ${INSTALL_DIR_EXTENDED}/lib
 	mkdir -p ${INSTALL_DIR_EXTENDED}/include
 	mkdir -p ${INSTALL_DIR_EXTENDED}/pkg-config
+	mkdir -p ${INSTALL_DIR_EXTENDED}/example
 	@#install ${LIB}/*.so   ${INSTALL_DIR_EXTENDED}/lib
 	install ${LIB}/*.a    ${INSTALL_DIR_EXTENDED}/lib
 	install ${OBJ}/*.mod  ${INSTALL_DIR_EXTENDED}/include
 	install ${PKG}/*.pc   ${INSTALL_DIR_EXTENDED}/pkg-config
 	install ${GITINFO}    ${INSTALL_DIR_EXTENDED}
+	install example/*      ${INSTALL_DIR_EXTENDED}/example/
 	@echo "================================================================="
 	@echo "To use new library update your PKG_CONFIG_PATH (assuming bash):"
 	@echo "export PKG_CONFIG_PATH=\$$PKG_CONFIG_PATH:${INSTALL_DIR_EXTENDED}/pkg-config"
