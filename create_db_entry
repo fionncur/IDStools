@@ -250,13 +250,22 @@ if nspecies > 0:
             else:
                 main_species = main_species + "-" + species[ispecies]
         if nspec_over_ne[ispecies] > 0.:
-            tabsize = 8
+            tabsize = 10
             disp_species = disp_species + species[ispecies] + " " * (tabsize-len(species[ispecies]))
             disp_a = disp_a + format("%.1f" % a[ispecies]) + " " * (tabsize-len(format("%.1f" % a[ispecies])))
             disp_z = disp_z + format("%.1f" % z[ispecies]) + " " * (tabsize-len(format("%.1f" % z[ispecies])))
-            disp_nspec_over_ntot = disp_nspec_over_ntot + format("%.2f" % nspec_over_ntot[ispecies]) + " " * (tabsize-len(format("%.2f" % nspec_over_ntot[ispecies])))
-            disp_nspec_over_ne   = disp_nspec_over_ne   + format("%.2f" % nspec_over_ne[ispecies])   + " " * (tabsize-len(format("%.2f" % nspec_over_ne[ispecies])))
-            disp_nspec_over_nmaj = disp_nspec_over_nmaj + format("%.2f" % nspec_over_nmaj[ispecies]) + " " * (tabsize-len(format("%.2f" % nspec_over_nmaj[ispecies])))
+	    if nspec_over_ntot[ispecies] < 1.e-2:
+               disp_nspec_over_ntot = disp_nspec_over_ntot + format("%.2e" % nspec_over_ntot[ispecies]) + " " * (tabsize-len(format("%.2e" % nspec_over_ntot[ispecies])))
+	    else:
+               disp_nspec_over_ntot = disp_nspec_over_ntot + format("%.3f" % nspec_over_ntot[ispecies]) + " " * (tabsize-len(format("%.3f" % nspec_over_ntot[ispecies])))
+	    if nspec_over_ne[ispecies] < 1.e-2:
+	       disp_nspec_over_ne   = disp_nspec_over_ne   + format("%.2e" % nspec_over_ne[ispecies])   + " " * (tabsize-len(format("%.2e" % nspec_over_ne[ispecies])))
+	    else:
+	       disp_nspec_over_ne   = disp_nspec_over_ne   + format("%.3f" % nspec_over_ne[ispecies])   + " " * (tabsize-len(format("%.3f" % nspec_over_ne[ispecies])))
+	    if nspec_over_nmaj[ispecies] < 1.e-2:
+               disp_nspec_over_nmaj = disp_nspec_over_nmaj + format("%.2e" % nspec_over_nmaj[ispecies]) + " " * (tabsize-len(format("%.2e" % nspec_over_nmaj[ispecies])))
+            else:
+               disp_nspec_over_nmaj = disp_nspec_over_nmaj + format("%.3f" % nspec_over_nmaj[ispecies]) + " " * (tabsize-len(format("%.3f" % nspec_over_nmaj[ispecies])))
     #print "   ---------------------------------------------------------------------"
     #print disp_species
     #print disp_a
