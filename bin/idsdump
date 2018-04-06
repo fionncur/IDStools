@@ -42,10 +42,10 @@ if __name__ == '__main__':
         idsdata.get(occurrence)
         if idsdata.array:
             for slice in idsdata.array:
-                idsDump = slice.__str__()
+                idsDump = slice.__str__().encode('utf-8')
                 print(idsDump)
     else:
         idsdata.get(occurrence)
-	idsDump = idsdata.__str__()
+        idsDump = idsdata.__str__().encode('utf-8')
         print(idsDump)
     imas.close()
