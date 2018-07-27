@@ -1,4 +1,4 @@
-module ids_grid_access
+module ids_grid_access_light
   !>
   !> Translations of all subroutines and functions in EU-ITM (EUIM) module itm_grid_access.
   !> The only exception is \c gridNodeCoord for which the translation is
@@ -258,4 +258,4 @@ contains
 
   end function gridNodeCoord
 
-end module ids_grid_access
+end module ids_grid_access_light
