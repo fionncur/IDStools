@@ -686,7 +686,7 @@ contains
   !============================================================================
 
   subroutine gridWriteDataVectorComponent1d( cpofield, subgrid , data )
-    real(DP), pointer :: cpofield(:)
+    real(DP), pointer, intent(inout) :: cpofield(:)
     integer, intent(in) :: subgrid
     real(DP), dimension(:), intent(in) :: data
 
@@ -706,7 +706,7 @@ contains
   end subroutine gridWriteDataVectorComponent1d
 
   subroutine gridWriteDataVectorComponent2d( cpofield, subgrid , data )
-    real(DP), pointer :: cpofield(:)
+    real(DP), pointer, intent(inout) :: cpofield(:)
     integer, intent(in) :: subgrid
     real(DP), dimension(:,:), intent(in) :: data
 
@@ -726,7 +726,7 @@ contains
   end subroutine gridWriteDataVectorComponent2d
   
   subroutine gridWriteDataVectorComponent3d( cpofield, subgrid , data )
-    real(DP), pointer :: cpofield(:)
+    real(DP), pointer, intent(inout) :: cpofield(:)
     integer, intent(in) :: subgrid
     real(DP), dimension(:,:,:), intent(in) :: data
 
@@ -746,7 +746,7 @@ contains
   end subroutine gridWriteDataVectorComponent3d
 
   subroutine gridWriteDataVectorComponent4d( cpofield, subgrid , data )
-    real(DP), pointer :: cpofield(:)
+    real(DP), pointer, intent(inout) :: cpofield(:)
     integer, intent(in) :: subgrid
     real(DP), dimension(:,:,:,:), intent(in) :: data
 
@@ -765,9 +765,8 @@ contains
     cpofield (:) = reshape( data , size(data) )
   end subroutine gridWriteDataVectorComponent4d
 
-  subroutine gridWriteDataVectorComponent5d( cpofield, subgrid , data )
-    real(DP), pointer :: cpofield(:)
-    integer, intent(in) :: subgrid
+  subroutine gridWriteDataVectorComponent5d( cpofield , data )
+    real(DP), pointer, intent(inout) :: cpofield(:)
     real(DP), dimension(:,:,:,:,:), intent(in) :: data
 
     ! Make sure the data field is properly allocated
@@ -893,8 +892,8 @@ contains
   !============================================================================
 
   subroutine gridStructReadDataVectorComponent1d( cpofield , data , output_flag, output_message)
-    real(DP), dimension(:), intent(in) :: cpofield
-    real(DP), dimension(:), intent(inout) :: data
+    real(DP), dimension(:), pointer, intent(in) :: cpofield
+    real(DP), dimension(:), intent(out) :: data
     integer :: output_flag
     character(len=:), allocatable :: output_message
 
@@ -903,22 +902,18 @@ contains
        output_message = "Error in gridStructReadData1d: Input field no associated"
        return
     end if
-    if (associated(data)) then
        if (size(data) .ne. size(cpofield)) then
           deallocate(data)
        end if
     end if
-    if (.not.associated(data)) then
-       allocate(data(size(cpofield)))
-    endif
     if (output_flag == 0) then
        data = reshape( cpofield , shape(data) )
     endif
   end subroutine gridStructReadDataVectorComponent1d
 
   subroutine gridStructReadDataVectorComponent2d( cpofield , data , output_flag, output_message)
-    real(DP), dimension(:), intent(in) :: cpofield
-    real(DP), dimension(:,:), intent(inout) :: data
+    real(DP), dimension(:), pointer, intent(in) :: cpofield
+    real(DP), dimension(:,:), intent(out) :: data
     integer :: output_flag
     character(len=:), allocatable :: output_message
 
@@ -927,25 +922,19 @@ contains
        output_message = "Error in gridStructReadData2d: Input field no associated"
        return
     end if
-    if (associated(data)) then
-       if (size(data) .ne. size(cpofield)) then
-          output_flag = -2
-          output_message = "Error in gridStructReadData2d: Output field has the wrong size"
-          return
-       end if
-    else
-       output_flag = -3
-       output_message = "Error in gridStructReadData2d: Output field no associated"
+    if (size(data) .ne. size(cpofield)) then
+       output_flag = -2
+       output_message = "Error in gridStructReadData2d: Output field has the wrong size"
        return
-    endif
+    end if
     if (output_flag == 0) then
        data = reshape( cpofield , shape(data) )
     endif
   end subroutine gridStructReadDataVectorComponent2d
 
   subroutine gridStructReadDataVectorComponent3d( cpofield , data , output_flag, output_message)
-    real(DP), dimension(:), intent(in) :: cpofield
-    real(DP), dimension(:,:,:), intent(inout) :: data
+    real(DP), dimension(:), pointer, intent(in) :: cpofield
+    real(DP), dimension(:,:,:), intent(out) :: data
     integer :: output_flag
     character(len=:), allocatable :: output_message
 
@@ -954,25 +943,19 @@ contains
        output_message = "Error in gridStructReadData3d: Input field no associated"
        return
     end if
-    if (associated(data)) then
-       if (size(data) .ne. size(cpofield)) then
-          output_flag = -2
-          output_message = "Error in gridStructReadData3d: Output field has the wrong size"
-          return
-       end if
-    else
-       output_flag = -3
-       output_message = "Error in gridStructReadData3d: Output field no associated"
+    if (size(data) .ne. size(cpofield)) then
+       output_flag = -2
+       output_message = "Error in gridStructReadData3d: Output field has the wrong size"
        return
-    endif
+    end if
     if (output_flag == 0) then
        data = reshape( cpofield , shape(data) )
     endif
   end subroutine gridStructReadDataVectorComponent3d
 
   subroutine gridStructReadDataVectorComponent4d( cpofield , data , output_flag, output_message)
-    real(DP), dimension(:), intent(in) :: cpofield
-    real(DP), dimension(:,:,:,:), intent(inout) :: data
+    real(DP), dimension(:), pointer, intent(in) :: cpofield
+    real(DP), dimension(:,:,:,:), intent(out) :: data
     integer :: output_flag
     character(len=:), allocatable :: output_message
 
@@ -981,17 +964,11 @@ contains
        output_message = "Error in gridStructReadData4d: Input field no associated"
        return
     end if
-    if (associated(data)) then
-       if (size(data) .ne. size(cpofield)) then
-          output_flag = -2
-          output_message = "Error in gridStructReadData4d: Output field has the wrong size"
-          return
-       end if
-    else
-       output_flag = -3
-       output_message = "Error in gridStructReadData34: Output field no associated"
+    if (size(data) .ne. size(cpofield)) then
+       output_flag = -2
+       output_message = "Error in gridStructReadData4d: Output field has the wrong size"
        return
-    endif
+    end if
     if (output_flag == 0) then
        data = reshape( cpofield , shape(data) )
     endif
