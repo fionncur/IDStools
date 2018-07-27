@@ -14,7 +14,7 @@ module ids_grid_access
   !>            than one "objects_per_dimension".
   !> Warning 3: The translation of gridNodeCoord is incomplete.
   
-  use ids_schemas, only: DP, ids_generic_grid_dynamic, ids_generic_grid_dynamic_space
+  use ids_schemas, only: DP=>ids_real, ids_generic_grid_dynamic, ids_generic_grid_dynamic_space
 
   implicit none
 

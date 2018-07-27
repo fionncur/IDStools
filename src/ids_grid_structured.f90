@@ -15,7 +15,7 @@ module ids_grid_structured
   !> @author Hajo Klignshirn (for the ITM), adapted to IMAS by Thomas Jonsson 2016
 
   use ids_schemas, only: &
-       DP, &
+       DP=>ids_real, &
        ids_generic_grid_dynamic, &
        ids_generic_grid_dynamic_space, &
        ids_generic_grid_scalar
@@ -621,7 +621,7 @@ contains
   end subroutine gridStructWriteData4d
 
   subroutine gridStructWriteData5d( grid, cpofield, subgrid, data )
-    type(ids_generic_grid_dynamic)r,  intent(in) :: grid
+    type(ids_generic_grid_dynamic),  intent(in) :: grid
     integer, intent(in) :: subgrid
     type(ids_generic_grid_scalar), intent(inout) :: cpofield
     real(DP), dimension(:,:,:,:,:), intent(in) :: data
@@ -722,7 +722,7 @@ contains
     end if
 
     ! copy data
-    cpofield (:) = reshape( data , size(data) )
+    cpofield (:) = reshape( data , (/ size(data) /) )
   end subroutine gridWriteDataVectorComponent2d
   
   subroutine gridWriteDataVectorComponent3d( cpofield, subgrid , data )
@@ -742,7 +742,7 @@ contains
     end if
 
     ! copy data
-    cpofield (:) = reshape( data , size(data) )
+    cpofield (:) = reshape( data , (/ size(data) /) )
   end subroutine gridWriteDataVectorComponent3d
 
   subroutine gridWriteDataVectorComponent4d( cpofield, subgrid , data )
@@ -762,7 +762,7 @@ contains
     end if
 
     ! copy data
-    cpofield (:) = reshape( data , size(data) )
+    cpofield (:) = reshape( data , (/ size(data) /) )
   end subroutine gridWriteDataVectorComponent4d
 
   subroutine gridWriteDataVectorComponent5d( cpofield , data )
@@ -781,7 +781,7 @@ contains
     end if
 
     ! copy data
-    cpofield (:) = reshape( data , size(data) )
+    cpofield (:) = reshape( data , (/ size(data) /) )
   end subroutine gridWriteDataVectorComponent5d
 
   !============================================================================
@@ -893,7 +893,7 @@ contains
 
   subroutine gridStructReadDataVectorComponent1d( cpofield , data , output_flag, output_message)
     real(DP), dimension(:), pointer, intent(in) :: cpofield
-    real(DP), dimension(:), intent(out) :: data
+    real(DP), dimension(:), pointer, intent(inout) :: data
     integer :: output_flag
     character(len=:), allocatable :: output_message
 
@@ -902,13 +902,17 @@ contains
        output_message = "Error in gridStructReadData1d: Input field no associated"
        return
     end if
+    if (associated(data)) then
        if (size(data) .ne. size(cpofield)) then
           deallocate(data)
+          allocate(data(size(cpofield)))
        end if
+    else
+       allocate(data(size(cpofield)))
     end if
     if (output_flag == 0) then
        data = reshape( cpofield , shape(data) )
-    endif
+    end  if
   end subroutine gridStructReadDataVectorComponent1d
 
   subroutine gridStructReadDataVectorComponent2d( cpofield , data , output_flag, output_message)
