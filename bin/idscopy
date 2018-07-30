@@ -59,7 +59,7 @@ if __name__ == '__main__':
     idx = idss_out.expIdx
     ids_list = None
     if len(sys.argv) == 9:
-        ids_list = eval(sys.argv[8]) #idss_in.
+        ids_list = eval(sys.argv[8]) 
     # read/write every IDS
     for ids_info in parser.idss:
         name = ids_info['name']
@@ -87,7 +87,7 @@ if __name__ == '__main__':
 	       print 'This IDS is empty and skipped'
     idss_in.close()
     idss_out.close()
-    #        else: Slice by slice copy, CPO feature obsolete for IDSs
+    #        else: setExpIds on each slice, CPO feature obsolete for IDSs
     #            for i in range(maxoccur + 1):
     #                if i:
     #                    print 'Processing %s/%d' % (ids_info['type'], i),
