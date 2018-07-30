@@ -24,24 +24,25 @@ class Parser(xml.sax.handler.ContentHandler):
 
 if __name__ == '__main__':
     if len(sys.argv) != 8 and len(sys.argv) != 9:
-        print('Usage:')
-        print('    idscopy USER MACHINE VERSION SHOT RUN OWN_SHOT OWN_RUN '
+        print('This script copies a list of IDS from a data entry to a new data entry created in your database set by imasdb, via a series of GET/PUT operations')
+	print('Usage:')
+        print('    idscopy USER MACHINE IMAS_MAJOR_VERSION SHOT RUN OWN_SHOT OWN_RUN '
               '[IDS-list-as-Python-list]')
-        print('Example, copy everything:')
-        print('    idscopy coster jet 4.08a 71827 21 71827 21')
+        print('Example, copy all IDSs:')
+        print('    idscopy coster jet 3 71827 21 71827 30')
         print('Example, copy just coreprof and equilibrium:')
-        print('    idscopy coster jet 4.08a 71827 21 71827 21 '
+        print('    idscopy coster jet 3 71827 21 71827 30 '
               '"[\'coreprof\', \'equilibrium\']"')
         print
-        print('NOTE 1: other fields are taken from env. variables as set by '
-              'IMASv1')
+        print('NOTE : The destination MACHINE name is set by the imasdb script, the destination IMAS_MAJOR_VERSION by the loaded IMAS module')
         exit()
     # parse XML with IDS information
-    path = os.getenv('UAL')
-    path = os.path.join(path, 'xml')
-    path = os.path.join(path, 'IDSDef.xml')
+    path = os.getenv('IMAS_PREFIX')
+    path = os.path.join(path, 'include/dd_data_dictionary.xml')
+    #path = os.path.join(path, 'dd_data_dictionary.xml')
     parser = Parser()
     xml.sax.parse(path, parser)
+    
     # open input pulsefile and create output one
     user, machine, versioni = sys.argv[1], sys.argv[2], sys.argv[3]
     shot, run = int(sys.argv[4]), int(sys.argv[5])
@@ -49,8 +50,8 @@ if __name__ == '__main__':
     idss_in = imas.ids(shot, run)
     idss_in.open_env(user, machine, versioni)
 
-    user, machine, versiono = os.getenv('USER'), os.getenv('TOKAMAKNAME'),\
-            os.getenv('DATAVERSION')
+    user, machine, versiono = os.getenv('USER'), os.getenv("MDSPLUS_TREE_BASE_0").split("/")[-3],\
+            os.getenv("IMAS_VERSION").split(".")[0]
     shot, run = int(sys.argv[6]), int(sys.argv[7])
     print 'Creating /%s/%s/%s/%d/%d' % (user, machine, versiono, shot, run)
     idss_out = imas.ids(shot, run)
@@ -58,46 +59,49 @@ if __name__ == '__main__':
     idx = idss_out.expIdx
     ids_list = None
     if len(sys.argv) == 9:
-        ids_list = eval(sys.argv[8])
+        ids_list = eval(sys.argv[8]) #idss_in.
     # read/write every IDS
     for ids_info in parser.idss:
-        type = ids_info['type']
-        timed = ids_info['timed']
+        name = ids_info['name']
+        #timed = ids_info['timed'] CPO feature, obsolete for IDSs. 
         maxoccur = int(ids_info['maxoccur'])
-        if ids_list and type not in ids_list:
+        if ids_list and name not in ids_list:
             continue
-        if type not in idss_in.__dict__:
+        if name not in idss_in.__dict__:
             continue
-        if ids_info['timed'] == 'no':
-            for i in range(maxoccur + 1):
-                if i:
-                    print 'Processing %s/%d' % (ids_info['type'], i)
-                else:
-                    print 'Processing %s' % ids_info['type']
-                ids = idss_in.__dict__[type]
-                stdout = sys.stdout
-                sys.stdout = open('/dev/null', 'w') # suppress warnings
-                ids.get(i)
-                sys.stdout = stdout
-                ids.setExpIdx(idx)
-                ids.put(i)
-        else:
-            for i in range(maxoccur + 1):
-                if i:
-                    print 'Processing %s/%d' % (ids_info['type'], i),
-                else:
-                    print 'Processing %s' % ids_info['type'],
-                ids = idss_in.__dict__[type + 'Array']
-                stdout = sys.stdout
-                sys.stdout = open('/dev/null', 'w') # suppress warnings
-                ids.get(i)
-                sys.stdout = stdout
-                if not ids.array:
-                    print
-                    continue
-                print '(found', len(ids.array), 'slices)'
-                for slice in ids.array:
-                    slice.setExpIdx(idx)
-                ids.put(i)
+        #if ids_info['timed'] == 'no':
+        for i in range(maxoccur + 1):
+            if i:
+                print 'Processing %s/%d' % (ids_info['name'], i)
+            else:
+                print 'Processing %s' % ids_info['name']
+            ids = idss_in.__dict__[name]
+            stdout = sys.stdout
+            sys.stdout = open('/dev/null', 'w') # suppress warnings
+            ids.get(i)
+            sys.stdout = stdout
+	    if (ids.ids_properties.homogeneous_time == 0 or ids.ids_properties.homogeneous_time == 1):
+               ids.setExpIdx(idx)
+               ids.put(i)
+	    else:
+	       print 'This IDS is empty and skipped'
     idss_in.close()
     idss_out.close()
+    #        else: Slice by slice copy, CPO feature obsolete for IDSs
+    #            for i in range(maxoccur + 1):
+    #                if i:
+    #                    print 'Processing %s/%d' % (ids_info['type'], i),
+    #                else:
+    #                    print 'Processing %s' % ids_info['type'],
+    #                ids = idss_in.__dict__[type + 'Array']
+    #                stdout = sys.stdout 
+    #                sys.stdout = open('/dev/null', 'w') # suppress warnings
+    #                ids.get(i)
+    #                sys.stdout = stdout
+    #                if not ids.array: 
+    #                    print
+    #                    continue
+    #                print '(found', len(ids.array), 'slices)'
+    #                for slice in ids.array:
+    #                    slice.setExpIdx(idx)
+    #                ids.put(i)
