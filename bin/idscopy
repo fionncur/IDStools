@@ -24,15 +24,16 @@ class Parser(xml.sax.handler.ContentHandler):
 
 if __name__ == '__main__':
     if len(sys.argv) != 8 and len(sys.argv) != 9:
-        print('This script copies a list of IDS from a data entry to a new data entry created in your database set by imasdb, via a series of GET/PUT operations')
+        print('This script copies a list of IDS from a data entry specified by (username, databasename IMASMajorVersion, pulse and run) to a new destination data entry created in your database via a series of GET/PUT operations')
+	print('If the destination data entry was pre-existing, its previous content is erased in the operation.')
 	print('Usage:')
-        print('    idscopy USER MACHINE IMAS_MAJOR_VERSION SHOT RUN OWN_SHOT OWN_RUN '
+        print('    idscopy username databasename IMASMajorVersion pulse run destination_pulse destination_run '
               '[IDS-list-as-Python-list]')
         print('Example, copy all IDSs:')
         print('    idscopy coster jet 3 71827 21 71827 30')
-        print('Example, copy just coreprof and equilibrium:')
+        print('Example, copy just core_profiles and equilibrium:')
         print('    idscopy coster jet 3 71827 21 71827 30 '
-              '"[\'coreprof\', \'equilibrium\']"')
+              '"[\'core_profiles\', \'equilibrium\']"')
         print
         print('NOTE : The destination MACHINE name is set by the imasdb script, the destination IMAS_MAJOR_VERSION by the loaded IMAS module')
         exit()
