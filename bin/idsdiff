@@ -18,7 +18,6 @@ def get_ids(shot, run, idsname, time=0, interp=1):
 def compare(x, y, parent):
     '''
     Iterate over every field and compare values depending on the type of field.
-    This Version does not work properly for IDSs, since arrays of structure are detected as type(xo).__name__ == 'instance' (like simple structure) and not as 'list'. The algorithm below thus does not go inside the indices of AoS as it should
     '''
     #print "compare objects of type " + type(x).__name__ + " from " + parent
 
@@ -83,7 +82,7 @@ def compare(x, y, parent):
 
 if __name__ == '__main__':
     if len(sys.argv) != 6:
-        print('Usage: ./idsdiff.py <IDSNAME> <SHOTa> <RUNa> <SHOTb> <RUNb>')
+        print('Usage: idsdiff <IDSNAME> <SHOTa> <RUNa> <SHOTb> <RUNb>')
         exit(1)
 
     compare(get_ids(int(sys.argv[2]), int(sys.argv[3]), sys.argv[1]),\
