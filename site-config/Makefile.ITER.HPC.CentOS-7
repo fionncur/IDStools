@@ -5,3 +5,4 @@
 
 # Default variables
 IMAS_MODULE?=IMAS
+IDSTOOLS_NAME=IDStools

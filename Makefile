@@ -16,10 +16,11 @@ include $(SITECONFIG)
 
 # Module imas will set IMAS_HOME to system wide, otherwise pick $PWD/imas:
 IMAS_HOME ?= $(realpath $(CURDIR)/$(dir $(lastword $(MAKEFILE_LIST))))/imas
+IDSTOOLS_NAME ?= idstools
 
-INSTALL = $(IMAS_HOME)/core/idstools/$(VERSION)
-INSTALL_MOD = $(IMAS_HOME)/etc/modulefiles/idstools/$(VERSION)
-MODULEFILE = module/idstools/$(VERSION)
+INSTALL = $(IMAS_HOME)/core/$(IDSTOOLS_NAME)/$(VERSION)
+INSTALL_MOD = $(IMAS_HOME)/etc/modulefiles/$(IDSTOOLS_NAME)/$(VERSION)
+MODULEFILE = module/$(IDSTOOLS_NAME)/$(VERSION)
 
 # Check that python2 and python3 exists and get their full path
 PY2:=$(shell command -v python2 2> /dev/null)
@@ -29,6 +30,7 @@ PY3VER?=$(shell python3 -c 'print(".".join(str(i) for i in __import__("sys").ver
 INSTALL_PY2 = $(INSTALL)/lib/python$(PY2VER)
 INSTALL_PY3 = $(INSTALL)/lib/python$(PY3VER)
 
+all: tools_build module
 install: tools_install module_install
 uninstall: tools_uninstall module_uninstall
 module : $(MODULEFILE)
@@ -36,7 +38,7 @@ module : $(MODULEFILE)
 clean:
 	rm -f idstools/*.pyc
 	rm -rf build/
-	rm -rf module/idstools/
+	rm -rf module/$(IDSTOOLS_NAME)/
 
 tools_build:
 ifneq (,$(PY2VER))
