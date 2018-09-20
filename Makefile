@@ -76,6 +76,7 @@ $(MODULEFILE):  module/idstools.in
 		-e "s;__PY2VER__;$(PY2VER);" \
 		-e "s;__IMAS_HOME__;$(IMAS_HOME);" \
 		-e "s;__IMAS_MODULE__;$(IMAS_MODULE);" \
+		-e "s;__IDSTOOLS_NAME__;$(IDSTOOLS_NAME);" \
 		$< > $@
 #		-e "s;__PY3VER__;$(PY3VER);" \
 

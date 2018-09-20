@@ -16,8 +16,8 @@ set ver [ join [ lrange $wordlist 1 end ] "/" ]
 set imas_home __IMAS_HOME__
 set loading [module-info mode load]
 
-if { "idstools" != $name } {
-  puts stderr "Error: module name does not start with idstools."
+if { "__IDSTOOLS_NAME__" != $name } {
+  puts stderr "Error: module name does not start with __IDSTOOLS_NAME__."
   break
 }
 
