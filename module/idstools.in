@@ -44,7 +44,7 @@ proc ModulesHelp { } {
 conflict $name
 
 # List of required module names, and corresponding module/version to load:
-prereq imas
+prereq __IMAS_MODULE__
 
 set prefix "$imas_home/core/$name/$ver"
 if { [file exists $prefix] } {

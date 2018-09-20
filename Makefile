@@ -2,6 +2,18 @@
 VERSION = $(shell git describe --always --dirty)
 export PKGVERSION = $(shell echo $(VERSION) | awk 'BEGIN{FS="-"} ; {if (NF >= 3) if ($$2>0) print $$1".dev"$$2"+"$$3$$4; else print $$1"+"$$3$$4; else print $$1}')
 
+# Inherit a site-config where you can override defaults.
+# Choose your site configuration file manually, e.g.
+#SITECONFIG=./site-config/Makefile.ITER.HPC
+# Or let the hostname/OS determine the appropriate:
+ifndef SITECONFIG
+SITECONFIG:=$(shell imas-config-installer)
+endif
+ifeq (,$(wildcard $(SITECONFIG)))
+$(error Error in finding site-config, load imas module or try setting SITECONFIG=./site-config/Makefile.default)
+endif
+include $(SITECONFIG)
+
 # Module imas will set IMAS_HOME to system wide, otherwise pick $PWD/imas:
 IMAS_HOME ?= $(realpath $(CURDIR)/$(dir $(lastword $(MAKEFILE_LIST))))/imas
 
@@ -61,6 +73,7 @@ $(MODULEFILE):  module/idstools.in
 	sed -e "s;__VERSION__;$(VERSION);" \
 		-e "s;__PY2VER__;$(PY2VER);" \
 		-e "s;__IMAS_HOME__;$(IMAS_HOME);" \
+		-e "s;__IMAS_MODULE__;$(IMAS_MODULE);" \
 		$< > $@
 #		-e "s;__PY3VER__;$(PY3VER);" \
 
