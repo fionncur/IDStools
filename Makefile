@@ -5,24 +5,24 @@
 #  * INSTALL_DIR  - Where the library is installed. Default: ${HOME}/codes/INSTALL/imas_ggd
 #
 
-VERSION=1.0.3
-CODENAME=imas_ggd
+VERSION=1.0.4
+CODENAME=structGrids
 
 ifndef OBJECTCODE
   OBJECTCODE=gfortran
 endif
 
 ifndef INSTALL_DIR
-  INSTALL_DIR=${shell echo ${HOME}}/codes/INSTALL/${CODENAME}
+  INSTALL_DIR=${shell echo ${HOME}}/public/INSTALL/${CODENAME}
 endif
-INSTALL_DIR_EXTENDED=${INSTALL_DIR}/$(VERSION)/$(OBJECTCODE)
+INSTALL_DIR_EXTENDED=${INSTALL_DIR}/$(VERSION)/$(IMAS_VERSION)/$(OBJECTCODE)
 
 include config/${OBJECTCODE}
 F90FLAGS+= -fPIC
 ifdef DEBUG
   F90FLAGS+= -g
 else
-  F90FLAGS+= -O3
+  F90FLAGS+= -O2
 endif
 
 SRC=src
@@ -31,12 +31,14 @@ LIB=$(OBJECTCODE)/lib
 BIN=$(OBJECTCODE)/bin
 PKG=pkg-config
 
-OBJECTS=$(OBJ)/ids_grid_common.o $(OBJ)/ids_grid_access.o $(OBJ)/ids_grid_structured.o
+OBJECTS=$(OBJ)/ids_grid_common.o \
+	$(OBJ)/ids_grid_access.o \
+	$(OBJ)/ids_grid_structured.o
 
 EXE=$(BIN)/prog_ids_grid_structured.exe
 RUN=$(addprefix &&, $(EXE))
 
-LIBNAME=$(LIB)/lib${CODENAME}.a
+LIBNAME=$(LIB)/lib${CODENAME}_$(VERSION)_imas$(IMAS_VERSION).a
 
 PC_FILES=$(PKG)/${CODENAME}-${OBJECTCODE}.pc
 
@@ -96,11 +98,11 @@ install: clean ${GITINFO} library ${PC_FILES}
 	mkdir -p ${INSTALL_DIR_EXTENDED}/include
 	mkdir -p ${INSTALL_DIR_EXTENDED}/pkg-config
 	mkdir -p ${INSTALL_DIR_EXTENDED}/example
-	@#install ${LIB}/*.so   ${INSTALL_DIR_EXTENDED}/lib
-	install ${LIB}/*.a    ${INSTALL_DIR_EXTENDED}/lib
-	install ${OBJ}/*.mod  ${INSTALL_DIR_EXTENDED}/include
-	install ${PKG}/*.pc   ${INSTALL_DIR_EXTENDED}/pkg-config
-	install ${GITINFO}    ${INSTALL_DIR_EXTENDED}
+	@#install ${LIB}/*.so  ${INSTALL_DIR_EXTENDED}/lib
+	install ${LIB}/*.a     ${INSTALL_DIR_EXTENDED}/lib
+	install ${OBJ}/*.mod   ${INSTALL_DIR_EXTENDED}/include
+	install ${PKG}/*.pc    ${INSTALL_DIR_EXTENDED}/pkg-config
+	install ${GITINFO}     ${INSTALL_DIR_EXTENDED}
 	install example/*      ${INSTALL_DIR_EXTENDED}/example/
 	@echo "================================================================="
 	@echo "To use new library update your PKG_CONFIG_PATH (assuming bash):"

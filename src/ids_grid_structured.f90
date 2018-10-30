@@ -473,7 +473,7 @@ contains
 
     ! internal
     integer, parameter :: NDIM = 1 ! this is a 1d grid
-    integer :: j_obj
+    integer :: j_obj, j_dim
 
     ! Set coordinate types
     ! (dimension of space = NDIM = size( coordtype )
@@ -482,11 +482,17 @@ contains
 
     ! Allocate object definition arrays
     allocate( space % objects_per_dimension(1) )
-    allocate( space % objects_per_dimension(1) % object(NDIM + 1) )
 
-    do j_obj = 1 , NDIM+1
-       allocate( space % objects_per_dimension(1) % object(j_obj) % geometry( size(nodes)) )
-       space % objects_per_dimension(1) % object(j_obj) % geometry(:) = nodes(:)
+! OLD IMPLEMENTATION:    allocate( space % objects_per_dimension(1) % object(NDIM) )
+! OLD IMPLEMENTATION:    do j_obj = 1 , NDIM+1
+! OLD IMPLEMENTATION:       allocate( space % objects_per_dimension(1) % object(j_obj) % geometry( size(nodes)) )
+! OLD IMPLEMENTATION:       space % objects_per_dimension(1) % object(j_obj) % geometry(:) = nodes(:)
+! OLD IMPLEMENTATION:    enddo
+
+    allocate( space % objects_per_dimension(1) % object( size(nodes) ) )
+    do j_obj = 1 , size(nodes)
+       allocate( space % objects_per_dimension(1) % object(j_obj) % geometry(1) )
+       space % objects_per_dimension(1) % object(j_obj) % geometry(1) = nodes(j_obj)
     enddo
 
   end subroutine gridSetupStruct1dSpace
@@ -518,7 +524,7 @@ contains
     character(len=:), allocatable :: output_message
 
     ! internal
-    integer :: id, ndim
+    integer :: id, ndim, jobj
 
     if (.not. gridIsStructured( grid ) ) then
        allocate(character(len("gridStructGetAxes: not a structured grid: cpofield%scalar not associated")) :: output_message )
@@ -540,11 +546,26 @@ contains
 
     allocate( x( 1 : maxval( gshape ), ndim ) )
     
+! OLD version
+!    x = 0.0_DP
+!    do id = 1, ndim
+!       ! TODO: support multiple geometries
+!       x( 1 : gshape( id ), id ) = &
+!            grid % space( id ) % objects_per_dimension(1) % object(1) % geometry(:)
+!    end do
+
     x = 0.0_DP
     do id = 1, ndim
-       ! TODO: support multiple geometries
-       x( 1 : gshape( id ), id ) = &
-            grid % space( id ) % objects_per_dimension(1) % object(1) % geometry(:)
+       do jobj = 1 , size(grid % space(id) % objects_per_dimension(1) % object)
+          if (associated( grid % space(id) % objects_per_dimension(1) % object(jobj) % geometry )) then
+             x(jobj,id) = grid % space(id) % objects_per_dimension(1) % object(jobj) % geometry(1)
+          else
+             output_flag = -1
+             output_message = 'in ids_grid_structured::gridStructGetAxes, '//&
+                  'grid % space(id) % objects_per_dimension(1) % object(jobj) % geometry not associated'
+             return
+          end if
+       end do
     end do
 
   end subroutine gridStructGetAxes
