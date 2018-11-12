@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import argparse, pyual
+import argparse, imas
 import init_mendeleiev as mend
 import numpy as np
 from os import system
@@ -12,55 +12,52 @@ from sys import exit
 parser = argparse.ArgumentParser(description=\
 	 '---- Auto-generated yaml scenario and watcher files (!!! STILL TO BE COMPLETED BY HAND !!!)')
 parser.add_argument('-u','--user',help='username of the DB where the datafile is located', required=False)
-parser.add_argument('-t','--tokamakname',help='tokamak name of the DB where the datafile is located', required=False)
+parser.add_argument('-t','--machine',help='tokamak name of the DB where the datafile is located', required=False)
 parser.add_argument('-s','--shot',help='shot number', required=True,type=int)
 parser.add_argument('-r','--run',help='run number',required=True,type=int)
 args = vars(parser.parse_args())
 shot = args["shot"]
 run  = args["run"]
 
-# A priori the DB is not the local one
-localdb = 0
-
 # Username
 if args['user'] != None:
 	user = args["user"]
 else:
-	import os
-	user = os.getenv('USER')
+	user = 'public'
 
 # Tokamak name
-if args['tokamakname'] != None:
-	tokamakname = args["tokamakname"]
+if args['machine'] != None:
+	machine = args["machine"]
 else:
-	tokamakname = "test"
+	machine = 'iterdb'
 
 # Open the database and read the necessary IDSs
 try:
-    if localdb == 1:
-        cli = pyual.Client(shot,run,user=user,machine=tokamakname)
-    else:
-        cli = pyual.Client(shot,run)
+    input = imas.ids(shot,run)
+    input.open_env(str(user),str(machine),'3')
 except:
-    print "Shot " + str(shot) + ", run " + str(run) + " does not exist"
-    print "----> Aborted."
+    print 'Shot ' + str(shot) + ', run ' + str(run) + ' does not exist'
+    print '----> Aborted.'
     exit()
-    
+
 # Read necessary IDSs from database
 try:
-    equilibrium = cli.get('equilibrium')
+    input.equilibrium.get()
+    equilibrium = input.equilibrium
 except:
     print "The equilibrium IDS is absent from the input datafile"
     print "----> Aborted."
     exit()
 try:
-    core_profiles = cli.get('core_profiles')
+    input.core_profiles.get()
+    core_profiles = input.core_profiles
 except:
     print "The core_profiles IDS is absent from the input datafile"
     print "----> Aborted."
     exit()
 try:
-    summary = cli.get('summary')
+    input.summary.get()
+    summary = input.summary
 except:
     print "The summary IDS is absent from the input datafile"
     print "----> H&CD waveforms not filled (to be completed by hand)"
@@ -323,7 +320,7 @@ f.write("""    shot: %i\n""" % shot)
 f.write("""    run: %i\n""" % run)
 f.write("""    type: %s\n""" % type)
 f.write("""    workflow: %s\n""" % workflow)
-f.write("""    machine: %s\n""" % tokamakname)
+f.write("""    machine: %s\n""" % machine)
 f.write("""\n""")
 f.write("""# --------------------------------------------------\n""")
 f.write("""# Machine description or specific configuration\n""")
@@ -397,7 +394,7 @@ f.write("""idslist:\n""")
 f.close()
 
 # Complete the yaml file with the output of ids_content
-system('ids_content -u ' + str(user) + ' -t ' + str(tokamakname) \
+system('ids_content -u ' + str(user) + ' -t ' + str(machine) \
           + ' -s ' + str(shot) + ' -r ' + str(run) + ' >> ' + filename)
 
 print "----> " + filename + " created."

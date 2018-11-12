@@ -8,7 +8,7 @@ import argparse
 parser = argparse.ArgumentParser(description=\
 	 '---- List ids content for yaml files aimed at describing a scenario ----')
 parser.add_argument('-u','--user',help='username of the DB where the datafile is located', required=False)
-parser.add_argument('-t','--tokamakname',help='tokamak name of the DB where the datafile is located', required=False)
+parser.add_argument('-t','--machine',help='tokamak name of the DB where the datafile is located', required=False)
 parser.add_argument('-s','--shot',help='shot number', required=True,type=int)
 parser.add_argument('-r','--run',help='run number',required=True,type=int)
 args = vars(parser.parse_args())
@@ -20,15 +20,15 @@ run  = args["run"]
 if args['user'] != None:
 	user = args["user"]
 else:
-	import os
-	user = os.getenv('USER')
+	#import os
+	#user = os.getenv('USER')
+	user = 'public'
 
 # Tokamak name
-if args['tokamakname'] != None:
-	tokamakname = args["tokamakname"]
+if args['machine'] != None:
+	machine = args["machine"]
 else:
-	tokamakname = "test"
-
+	machine = 'iterdb'
 
 # Avoid too many arguments to be filled by the user (otherwise it is not user-friendly anymore)
 dataversion = '3'
@@ -37,7 +37,7 @@ debug = False
 
 try:
 	import idstools.ids_tools as opendb
-	db = opendb.ImasDb(shot,run,user,tokamakname,dataversion,True,False)
+	db = opendb.ImasDb(shot,run,user,machine,dataversion,True,False)
 except:
 	import sys
 	print >> sys.stderr, "Unable to open database"

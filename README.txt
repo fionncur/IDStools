@@ -41,14 +41,14 @@ scenario_summary -c workflow,shot,run,ip,b0,species,ne0,location -s He4,2.65
 create_db_entry  (needs ids_content, described below)
 ----------------
 
-usage: create_db_entry [-h] -u USER -t TOKAMAKNAME -s SHOT -r RUN
+usage: create_db_entry [-h] -u USER -t MACHINE -s SHOT -r RUN
 
 ---- Auto-generated yaml scenario and watcher files (!!! STILL TO BE COMPLETED BY HAND !!!)
 
 optional arguments:
   -h, --help            show this help message and exit
   -u USER, --user USER  username of the DB where the datafile is located
-  -t TOKAMAKNAME, --tokamakname TOKAMAKNAME
+  -t MACHINE, --machine MACHINE
                         tokamak name of the DB where the datafile is located
   -s SHOT, --shot SHOT  shot number
   -r RUN, --run RUN     run number
@@ -61,14 +61,14 @@ create_db_entry -s 33 -r 1
  ids_content
 --------------
 
-usage: ids_content [-h] -u USER -t TOKAMAKNAME -s SHOT -r RUN
+usage: ids_content [-h] -u USER -t MACHINE -s SHOT -r RUN
 
 ---- List ids content for yaml files aimed at describing a scenario ----
 
 optional arguments:
   -h, --help            show this help message and exit
   -u USER, --user USER  username of the DB where the datafile is located
-  -t TOKAMAKNAME, --tokamakname TOKAMAKNAME
+  -t MACHINE, --machine MACHINE
                         tokamak name of the DB where the datafile is located
   -s SHOT, --shot SHOT  shot number
   -r RUN, --run RUN     run number
@@ -80,14 +80,14 @@ ids_content -s 33 -r 1
  ids_compo
 -----------
 
-usage: ids_compo [-h] [-u USER] [-t TOKAMAKNAME] -s SHOT -r RUN
+usage: ids_compo [-h] [-u USER] [-t MACHINE] -s SHOT -r RUN
 
 ---- Display the plasma composition from the core_profiles IDS
 
 optional arguments:
   -h, --help            show this help message and exit
   -u USER, --user USER  username of the DB where the datafile is located
-  -t TOKAMAKNAME, --tokamakname TOKAMAKNAME
+  -t MACHINE, --machine MACHINE
                         tokamak name of the DB where the datafile is located
   -s SHOT, --shot SHOT  shot number
   -r RUN, --run RUN     run number

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import argparse, pyual
+import argparse, imas
 import init_mendeleiev as mend
 
 # ----------------------------------------------------------------------
@@ -9,44 +9,39 @@ import init_mendeleiev as mend
 parser = argparse.ArgumentParser(description=\
 	 '---- Display the plasma composition from the core_profiles IDS')
 parser.add_argument('-u','--user',help='username of the DB where the datafile is located', required=False)
-parser.add_argument('-t','--tokamakname',help='tokamak name of the DB where the datafile is located', required=False)
+parser.add_argument('-t','--machine',help='machine name of the DB where the datafile is located', required=False)
 parser.add_argument('-s','--shot',help='shot number', required=True,type=int)
 parser.add_argument('-r','--run',help='run number',required=True,type=int)
 args = vars(parser.parse_args())
 shot = args["shot"]
 run  = args["run"]
 
-# A priori the DB is not the local one
-localdb = 0
-
 # Username
 if args['user'] != None:
 	user = args["user"]
-	localdb = 1
 else:
-	import os
-	user = os.getenv('USER')
+        #import os
+	#user = os.getenv('USER')
+	user = 'public'
 
-# Tokamak name
-if args['tokamakname'] != None:
-	tokamakname = args["tokamakname"]
-	localdb = 1
+# Machine name
+if args['machine'] != None:
+	machine = args["machine"]
 else:
-	tokamakname = "test"
+	machine = 'iterdb'
 
 # Open the database and read the necessary IDSs
 try:
-    if localdb == 1:
-        cli = pyual.Client(shot,run,user=user,machine=tokamakname)
-    else:
-        cli = pyual.Client(shot,run)
+    input = imas.ids(shot,run)
+    input.open_env(str(user),str(machine),'3')
 except:
-    print "Shot " + str(shot) + ", run " + str(run) + " does not exist"
-    print "----> Aborted."
+    print 'Shot ' + str(shot) + ', run ' + str(run) + ' does not exist'
+    print '----> Aborted.'
     exit()
-    
+
 try:
-    core_profiles = cli.get('core_profiles')
+    input.core_profiles.get()
+    core_profiles = input.core_profiles
 except:
     print "The core_profiles IDS is absent from the input datafile"
     print "----> Aborted."
