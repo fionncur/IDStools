@@ -79,7 +79,6 @@ def compare(x, y, parent):
                 else:
                     print('%s.%s is of different value in both IDSs' % (parent, key))
 
-
 if __name__ == '__main__':
     if len(sys.argv) != 6:
         print('Usage: idsdiff <IDSNAME> <SHOTa> <RUNa> <SHOTb> <RUNb>')

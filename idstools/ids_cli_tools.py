@@ -16,22 +16,22 @@ def read_shot():
     The form of the command line is:
     
         my_program [OPTIONS] IMASDBSPECIFIER
-        
+    
     where IMASDBSPECIFIER has the form
     
         shotnum,runnum[,time]
-        
+    
     with the time being optional.
     
     Returns a dictionary with all parameters and options and the remaining arguments.'''
-    
+
     parser = setup_parser()
     pars, opts, args = parse_cli(parser)
     if len(args) == 0:
         raise SystemExit("No shot parameters given")
-    
+
     pars.update(parseShotDescription(args[0]))
-    
+
     return pars, args[1:]
 
 
@@ -40,23 +40,23 @@ def read_shot_ids():
     The form of the command line is:
     
         my_program [OPTIONS] IMASDBSPECIFIER IDSNAME
-        
+    
     where IMASDBSPECIFIER has the form
     
         shotnum,runnum[,time]
-        
+    
     with the time being optional. Specifying the IDSNAME is mandatory.
     
     Returns a dictionary with all parameters and options and the remaining arguments.'''
-    
+
     pars, args = read_shot()
-    
+
     if len(args) < 1:
         raise SystemExit("Not enough arguments given")
-        
+
     # FIXME: check that the IDS string makes sense - test against known IDS names (see Matlab interface)
     pars["ids"] = args[0]
-            
+
     return pars, args[1:]
 
 def read_shot_ids_list():
@@ -64,21 +64,20 @@ def read_shot_ids_list():
     The form of the command line is:
     
         my_program [OPTIONS] IMASDBSPECIFIER [IDSNAME1 IDSNAME2 ...]
-        
+    
     where IMASDBSPECIFIER has the form
     
         shotnum,runnum[,time]
-        
+    
     with the time being optional. The list of IDSNAMES can be empty.
     
     Returns a dictionary with all parameters.'''
-    
+
     pars, args = read_shot()
     # FIXME: check that the IDS string makes sense - test against known IDS names (see Matlab interface)
     pars["ids"] = args
     return pars
 
-    
 def parseShotDescription(shotDesc):
     pars = {}
     try:
@@ -90,9 +89,9 @@ def parseShotDescription(shotDesc):
             pars["time"] = float(parts[2])
     except:
         raise SystemExit("Invalid shot description: " + shotDesc)
-        
+
     return pars
-       
+
 def setup_parser():
     p = optparse.OptionParser()
     p.add_option("-u", "--user", dest="user", default=None)
@@ -105,7 +104,7 @@ def setup_parser():
 
 def parse_cli(p):
     opts, args = p.parse_args()
-    
+
     if ((opts.user is not None) | (opts.tokamak is not None) | (opts.version is not None)) \
         & opts.useHDF5:
         raise SystemExit("HDF5 access method not allowed when specifying user, tokamak or data version.")
@@ -116,12 +115,10 @@ def parse_cli(p):
     if opts.version is not None: pars["dataversion"] = opts.version
     pars["hdf5"] = opts.useHDF5
     pars["debug"] = opts.debug
-    
+
     return pars, opts, args
 
-
 def setDefaultParameters():
-    
     default = {}
     default["user"] = os.getenv("USER")
     default["tokamakname"] = os.getenv("MDSPLUS_TREE_BASE_0").split("/")[-3]

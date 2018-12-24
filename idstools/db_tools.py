@@ -30,23 +30,23 @@ def list_tokamaks(user=None, dataversion=None):
     Returns a list of tuples (tokamak, dataversions),
     where dataversions is a list of dataversion strings this tokamak exists for.
     """
-    
+
     dbdir = get_user_db_directory(user)
     if not isdir(dbdir):
         return []
-    
+
     dvs = dict()
     for tokamak in os.listdir(join(dbdir)):
         if not isdir(join(dbdir, tokamak)):
             continue
-        
+
         tokDvs = list_dataversions_for_tokamak(tokamak, user)
-        
+
         if dataversion and dataversion not in tokDvs:
                 continue
-            
+
         dvs[tokamak] = tokDvs
-    
+
     return [ (tokamak, dvs[tokamak]) for tokamak in sorted(dvs.keys()) ]
 
 def list_dataversions(user=None):
@@ -71,13 +71,12 @@ def list_dataversions_for_tokamak(tokamak, user=None):
     treedir = join(get_user_db_directory(user), tokamak)
     if not isdir(treedir):
         return []
-    
+
     dvs = []
     for dv in os.listdir(treedir):
         if isdir(join(treedir, dv)):
             dvs.append(dv)
     return sorted(dvs)
-    
 
 def list_databases(user=None, tokamak=None, dataversion=None, backends=None):
     """List databases.
@@ -97,21 +96,21 @@ def list_databases(user=None, tokamak=None, dataversion=None, backends=None):
     where dblist is a list of tuples (shotnum, runnums),
     where runnums is a list of integers.
     """
-    
+
     result = []
-    
+
     if not user: user = os.getlogin()
     if not backends:
         backends = ALL_BACKENDS
-    
+
     if tokamak:
         tokamaks = [tokamak]
     else:
         tokamakDvs = list_tokamaks(user, dataversion)
         tokamaks = [ entry[0] for entry in tokamakDvs ]
-        
+
     for tokamak in tokamaks:
-    
+
         tokamakDbs = []
         if dataversion:
             dvs = [dataversion]
@@ -132,12 +131,12 @@ def list_databases(user=None, tokamak=None, dataversion=None, backends=None):
 
             if dvDbs:
                 tokamakDbs.append( (dv, dvDbs) )
-                
+
         if tokamakDbs:
             result.append( (tokamak, tokamakDbs) )
-            
+
     return result
-            
+
 def list_databases_mdsplus(user, tokamak, dataversion):
     """List all MDSPLUS databases for a given user, tokamak, dataversion."""
     from os.path import join, split, isdir
@@ -163,10 +162,10 @@ def list_databases_mdsplus(user, tokamak, dataversion):
             except:
                  print("EXC: ", sys.exc_info())
                  logging.warn("Malformed MDSPlus database filename: " + join(root, filename))
-            
+
     # create sorted lists
     return [ (shot, sorted(dbs[shot])) for shot in sorted(dbs.keys()) ]
-                
+
 def get_dbfiles_stem_mdsplus(user, tokamak, dataversion, shot, run):
     """Return the filename stem for the MDS+ database file with given parameters"""
     from os.path import join
@@ -184,7 +183,7 @@ def get_dbfiles_mdsplus(user, tokamak, dataversion, shot, run):
     """Return the MDS+ database filenames for a given IMAS database"""
     stem = get_dbfiles_stem_mdsplus(user, tokamak, dataversion, shot, run)
     return (stem + ".characteristics", stem + ".datafile", stem + ".tree")
-                
+
 def list_databases_hdf5(user, tokamak, dataversion):
     """List all HDF5 databases for a given user, tokamak, dataversion."""
     from os.path import join, split, isdir
@@ -206,7 +205,7 @@ def list_databases_hdf5(user, tokamak, dataversion):
                 dbs[shot].append(run)
             except:
                 logging.warn("Malformed HDF5 database filename: " + join(root, filename))
-            
+
     # create sorted lists
     return [ (shot, sorted(dbs[shot])) for shot in sorted(dbs.keys()) ]
 
@@ -224,4 +223,3 @@ def get_dbfiles(user, tokamak, dataversion, shot, run, backend):
         return get_dbfile_hdf5(user, tokamak, dataversion, shot, run)
     else:
         raise NotImplementedError("Unsupported backend: " + backend)
-    

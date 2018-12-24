@@ -83,7 +83,7 @@ if args.public_tokamak is None:
 else:
 	logger.info('Using specified public tokamak: ' + args.public_tokamak)
 	public_dest_tokamak = args.public_tokamak
-	
+
 if args.public_shot is None:
 	logger.debug('Public shot is not defined, using user shot = ' + str(args.shot) )
 	public_dest_shot = args.shot
@@ -107,10 +107,10 @@ if not public_dest_tokamak in existing_tokamaks_for_dv:
 	sys.exit(1)
 
 logger.debug('Retrieving public databases for tokamak: ' + public_dest_tokamak + \
-			" data version " + args.version + \
-			" backend " + args.backend );
+	" data version " + args.version + \
+	" backend " + args.backend );
 public_dbs = db.list_databases(user="public", tokamak=public_dest_tokamak, \
-							dataversion=args.version, backends=[args.backend])
+	dataversion=args.version, backends=[args.backend])
 
 logger.debug(public_dbs)
 
@@ -191,12 +191,12 @@ logger.info("-------")
 if not args.dry_run:
 	for from_file, to_file in zip(files, files_public):
 		shutil.copyfile(from_file, to_file)
-	
+
 #FIXME: stop on error when copying
 
 # we have to create metadata for the data transfer
 out = []
-		
+
 SEPARATOR = '>>>>>>>>>>>>>>> '
 out.append(SEPARATOR + "METAFILE FORMAT VERSION")
 out.append("v1")
@@ -241,7 +241,7 @@ for filename in files_public:
 out.append(SEPARATOR + "SOURCE FILE INFORMATION")
 for filename in files:
 	p = subprocess.Popen(['/bin/ls -l ' + filename, ''], stdout=subprocess.PIPE,
-                                       stderr=subprocess.PIPE, shell=True)
+		stderr=subprocess.PIPE, shell=True)
 	stdout, stderr = p.communicate()
 	out.append(stdout)
 
@@ -251,14 +251,14 @@ if args.dry_run:
 else:
 	for filename in files_public:
 		p = subprocess.Popen(['/bin/ls -l ' + filename, ''], stdout=subprocess.PIPE,
-                	                       stderr=subprocess.PIPE, shell=True)
+			stderr=subprocess.PIPE, shell=True)
 		stdout, stderr = p.communicate()
 		out.append(stdout)
 
 out.append(SEPARATOR + "SOURCE FILE MD5 HASHES")
 for filename in files:
 	p = subprocess.Popen(['md5sum', filename], stdout=subprocess.PIPE,
-                                       stderr=subprocess.PIPE)
+		stderr=subprocess.PIPE)
 	stdout, stderr = p.communicate()
 	out.append(stdout)
 
@@ -267,8 +267,8 @@ if args.dry_run:
 	out.append("(Can't run md5sum on target database files in dry run)")
 else:
 	for filename in files_public:
-		p = subprocess.Popen(['md5sum', filename], stdout=subprocess.PIPE, \
-                             stderr=subprocess.PIPE)
+		p = subprocess.Popen(['md5sum', filename], stdout=subprocess.PIPE,
+			stderr=subprocess.PIPE)
 		stdout, stderr = p.communicate()
 		out.append(stdout)
 
@@ -295,11 +295,11 @@ else:
 	command = '/bin/tcsh -c "( source $IMASSCRIPTDIR/IMASv1 kepler test ' + args.version + \
 		'; imasdbs -u public -t ' + public_dest_tokamak \
 		+ ' -v ' + args.version \
-         	+ ' times ' + str(public_dest_shot) + ' ' + str(public_dest_run) + ' )"'
+		+ ' times ' + str(public_dest_shot) + ' ' + str(public_dest_run) + ' )"'
 	logger.debug(command)
 	p = subprocess.Popen([command, ''], stdout=subprocess.PIPE,
-                                       stderr=subprocess.PIPE,
-                                       shell = True)
+		stderr=subprocess.PIPE,
+		shell = True)
 	stdout, stderr = p.communicate()
 	out.append(stdout)
 
@@ -330,5 +330,3 @@ else:
 	metafile.writelines( outlines )
 	metafile.close()
 	#FIXME: stop on write error
-	
-	

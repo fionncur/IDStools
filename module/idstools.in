@@ -62,4 +62,3 @@ if { [file exists $prefix/lib/python__PY3VER__] } {
   puts stderr "Error: $prefix could not be found, exiting without changes."
   break
 }
-

@@ -7,7 +7,7 @@ import os
 here = os.path.abspath(os.path.dirname(__file__))
 script_files = []
 for file in os.listdir(os.path.join(here,'bin')):
-  script_files.append(os.path.join(here,'bin',file))
+    script_files.append(os.path.join(here,'bin',file))
 
 setup(name='IMAS IDS Tools',
       version       = os.getenv("PKGVERSION"),
