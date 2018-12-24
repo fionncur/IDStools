@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 # @author: H.-J. Klingshirn
-
+from __future__ import print_function
 import sys
 import idstools.ids_cli_tools as cli
 import idstools.ids_tools as ct
@@ -23,14 +23,14 @@ pars, args = cli.read_shot()
 try:
 	db = ct.ImasDb(pars["shot"], pars["run"], pars["user"], pars["tokamakname"], pars["dataversion"], True, pars["hdf5"])
 except:
-	print >> sys.stderr, "Unable to open database"
-	print sys.exc_info()[0]
+	print("Unable to open database", file=sys.stderr)
+	print(sys.exc_info()[0])
 	sys.exit(1)
 	
 alltimes = db.all_times()
 
 for idsname, times in alltimes:
-	print extended(idsname, 15) + ": " \
+	print(extended(idsname, 15) + ": " \
 		+ extended(str(len(times)), 5) + " slices: " \
-		+ print_vector(times, 4)
+		+ print_vector(times, 4))
 	

@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 # @author: H.-J. Klingshirn
+from __future__ import print_function
 import optparse
 import idstools.db_tools as dbtools
 import os
@@ -18,14 +19,13 @@ TIME_STR_LEN = 4
 
 def extended(str, wlen):
 	l = len(str)
-	if l < len:
+	if l < wlen:
 		return ' ' * (wlen - l) + str
 	else:
 		return str
 		
 def print_vector(vec, wlen):
-	from string import join
-	return join( [extended(str(x), wlen) for x in vec] )
+	return "".join( [extended(str(x), wlen) for x in vec] )
 
 def print_list(dbs, shotnum = None, compact = False):
 	for tokamak, dvs in dbs:
@@ -41,21 +41,21 @@ def print_list(dbs, shotnum = None, compact = False):
 							continue
 
 					if not printed_tokamak:
-						print "Tokamak: " + tokamak
+						print("Tokamak: " + tokamak)
 						printed_tokamak = True
 					if not printed_dataversion:
-						print TAB + "Data version: " + dv
+						print(TAB + "Data version: " + dv)
 						printed_dataversion = True
 					if not printed_backend:
-						print TAB * 2 + "UAL Backend: " + backend
+						print(TAB * 2 + "UAL Backend: " + backend)
 						printed_backend = True
 																	
 					if compact:
-						print TAB * 3 + "Shot " + extended(str(shot), SHOT_STR_LEN) \
-							+ ": " + extended(str(len(runs)), RUNNUM_STR_LEN) + " runs"
+						print(TAB * 3 + "Shot " + extended(str(shot), SHOT_STR_LEN) \
+							+ ": " + extended(str(len(runs)), RUNNUM_STR_LEN) + " runs")
 					else:
-						print TAB * 3 + "Shot " + extended(str(shot), SHOT_STR_LEN) \
-							+ " Runs: " + print_vector(runs, RUN_STR_LEN)
+						print(TAB * 3 + "Shot " + extended(str(shot), SHOT_STR_LEN) \
+							+ " Runs: " + print_vector(runs, RUN_STR_LEN))
 
 def print_times(dbs, opts, printTimes = False, shotnum= None, runnum = None):
 	import idstools.ids_tools as ct
@@ -80,31 +80,31 @@ def print_times(dbs, opts, printTimes = False, shotnum= None, runnum = None):
 								continue
 						
 						if not printed_tokamak:
-							print "Tokamak: " + tokamak
+							print("Tokamak: " + tokamak)
 							printed_tokamak = True
 						if not printed_dataversion:
-							print TAB + "Data version: " + dv
+							print(TAB + "Data version: " + dv)
 							printed_dataversion = True
 						if not printed_backend:
-							print TAB * 2 + "UAL Backend: " + backend
+							print(TAB * 2 + "UAL Backend: " + backend)
 							printed_backend = True
 						if not printed_shot:
-							print TAB * 3 + "Shot " + extended(str(shot), SHOT_STR_LEN)
+							print(TAB * 3 + "Shot " + extended(str(shot), SHOT_STR_LEN))
 							printed_shot = True
 						
-						print TAB * 4 + " Run: " + extended(str(run), RUN_STR_LEN)
+						print(TAB * 4 + " Run: " + extended(str(run), RUN_STR_LEN))
 						db = ct.ImasDb(shot, run, opts.user, tokamak, dv, True, backend == "hdf5")
 						alltimes = db.all_times()
 						for idsname, times in alltimes:
 							if printTimes:
-								print TAB * 5 + extended(idsname, IDSNAME_STR_LEN) + ": "\
+								print(TAB * 5 + extended(idsname, IDSNAME_STR_LEN) + ": "\
 									+ extended(str(len(times)), SLICENUM_STR_LEN) + " slices (" \
-									+ print_vector(times, TIME_STR_LEN) + ")"
+									+ print_vector(times, TIME_STR_LEN) + ")")
 							else:
-								print TAB * 5 + extended(idsname, IDSNAME_STR_LEN) + ": " \
+								print(TAB * 5 + extended(idsname, IDSNAME_STR_LEN) + ": " \
 									+ extended(str(len(times)), SLICENUM_STR_LEN) + " slices ("\
 									+ extended(str(times[0]), TIME_STR_LEN) + " - " \
-										+ extended(str(times[-1]), TIME_STR_LEN) + ")"
+										+ extended(str(times[-1]), TIME_STR_LEN) + ")")
 
 						db.close()
 
@@ -146,7 +146,7 @@ if not args or args[0] == "list" or args[0] == "slices" or args[0] == "times":
 		try:
 			shotnum = int(args[1])
 		except:
-			print >> sys.stderr, "Second argument must be an integer"
+			print("Second argument must be an integer",file=sys.stderr)
 			sys.exit(1)
 	
 	runnum = None
@@ -154,13 +154,13 @@ if not args or args[0] == "list" or args[0] == "slices" or args[0] == "times":
 		try:
 			runnum = int(args[2])
 		except:
-			print >> sys.stderr, "Third argument must be an integer"
+			print("Third argument must be an integer",file=sys.stderr)
 			sys.exit(1)
 	
 	if len(args) > 0 and (args[0] == "slices" or args[0] == "times"):
 		envdv = os.getenv("DATAVERSION")
 		if opts.version is not None and envdv != opts.version:
-			print >> sys.stderr, "Cannot access IDS times for data version differing from current $DATAVERSION"
+			print("Cannot access IDS times for data version differing from current $DATAVERSION",file=sys.stderr)
 			sys.exit(1)
 		
 	
@@ -181,15 +181,11 @@ if not args or args[0] == "list" or args[0] == "slices" or args[0] == "times":
 
 elif args[0] == "tokamaks":
 	for tokamak, dvs in dbtools.list_tokamaks(opts.user, opts.version):
-		print extended(tokamak, TOKAMAK_STR_LEN) + " " + print_vector(dvs, VERSION_STR_LEN)
+		print(extended(tokamak, TOKAMAK_STR_LEN) + " " + print_vector(dvs, VERSION_STR_LEN))
 
 elif args[0] == "dataversions":
 	for dv, tokamaks in dbtools.list_dataversions(opts.user):
-		print extended(dv, VERSION_STR_LEN) + " " + print_vector(tokamaks, TOKAMAK_STR_LEN)
+		print(extended(dv, VERSION_STR_LEN) + " " + print_vector(tokamaks, TOKAMAK_STR_LEN))
 		
 else:
-	print "Unknown command: " + args[0] + ". Possible commands are (none), list, tokamaks"
-	
-	
-	
-	
+	print("Unknown command: " + args[0] + ". Possible commands are (none), list, tokamaks")

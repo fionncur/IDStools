@@ -1,6 +1,7 @@
 """Library for retrieving IMAS database information.
 
 @author H.-J. Klingshirn"""
+from __future__ import print_function
 import logging
 import os
 import sys
@@ -12,7 +13,11 @@ def get_user_db_directory(user=None):
     If user is omitted, the current user is used."""
     if not user: user = os.getlogin()
     if (user=="public"):
-        return os.getenv("IMASPUBLICDBHOME")
+        publichome = os.getenv("IMASPUBLICDBHOME")
+        if (publichome == None):
+            print("Environment variable IMASPUBLICDBHOME is not defined. Quitting.",file=sys.stderr)
+            sys.exit(1)
+        return publichome
     else:
         return os.path.expanduser("~" + user + "/public/imasdb")
 
@@ -156,7 +161,7 @@ def list_databases_mdsplus(user, tokamak, dataversion):
                     dbs[shot] = list()
                 dbs[shot].append(run)
             except:
-                 print "EXC: ", sys.exc_info()
+                 print("EXC: ", sys.exc_info())
                  logging.warn("Malformed MDSPlus database filename: " + join(root, filename))
             
     # create sorted lists

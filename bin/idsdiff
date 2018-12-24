@@ -19,7 +19,7 @@ def compare(x, y, parent):
     '''
     Iterate over every field and compare values depending on the type of field.
     '''
-    #print "compare objects of type " + type(x).__name__ + " from " + parent
+    #print("compare objects of type " + type(x).__name__ + " from " + parent)
 
     xd = x.__dict__
     yd = y.__dict__
@@ -51,7 +51,7 @@ def compare(x, y, parent):
                     if type(xo[i]).__name__ == 'instance':
                         compare(xo[i], yo[i], parent + '.array[' + str(i) + ']')
                     else:
-                        #print "list of "+type(xo[i]).__name__
+                        #print("list of "+type(xo[i]).__name__)
                         continue
         else:
             result = xo == yo

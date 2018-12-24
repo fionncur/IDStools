@@ -34,7 +34,7 @@ if __name__ == '__main__':
         print('Example, copy just core_profiles and equilibrium:')
         print('    idscopy coster jet 3 71827 21 71827 30 '
               '"[\'core_profiles\', \'equilibrium\']"')
-        print
+        print()
         print('NOTE : The destination MACHINE name is set by the imasdb script, the destination IMAS_MAJOR_VERSION by the loaded IMAS module')
         exit()
     # parse XML with IDS information
@@ -47,14 +47,14 @@ if __name__ == '__main__':
     # open input pulsefile and create output one
     user, machine, versioni = sys.argv[1], sys.argv[2], sys.argv[3]
     shot, run = int(sys.argv[4]), int(sys.argv[5])
-    print 'Opening  /%s/%s/%s/%d/%d' % (user, machine, versioni, shot, run)
+    print('Opening  /%s/%s/%s/%d/%d' % (user, machine, versioni, shot, run))
     idss_in = imas.ids(shot, run)
     idss_in.open_env(user, machine, versioni)
 
     user, machine, versiono = os.getenv('USER'), os.getenv("MDSPLUS_TREE_BASE_0").split("/")[-3],\
             os.getenv("IMAS_VERSION").split(".")[0]
     shot, run = int(sys.argv[6]), int(sys.argv[7])
-    print 'Creating /%s/%s/%s/%d/%d' % (user, machine, versiono, shot, run)
+    print('Creating /%s/%s/%s/%d/%d' % (user, machine, versiono, shot, run))
     idss_out = imas.ids(shot, run)
     idss_out.create()
     idx = idss_out.expIdx
@@ -73,9 +73,9 @@ if __name__ == '__main__':
         #if ids_info['timed'] == 'no':
         for i in range(maxoccur + 1):
             if i:
-                print 'Processing %s/%d' % (ids_info['name'], i)
+                print('Processing %s/%d' % (ids_info['name'], i))
             else:
-                print 'Processing %s' % ids_info['name']
+                print('Processing %s' % ids_info['name'])
             ids = idss_in.__dict__[name]
             stdout = sys.stdout
             sys.stdout = open('/dev/null', 'w') # suppress warnings
@@ -85,24 +85,24 @@ if __name__ == '__main__':
                ids.setExpIdx(idx)
                ids.put(i)
 	    else:
-	       print 'This IDS is empty and skipped'
+	       print('This IDS is empty and skipped')
     idss_in.close()
     idss_out.close()
     #        else: setExpIds on each slice, CPO feature obsolete for IDSs
     #            for i in range(maxoccur + 1):
     #                if i:
-    #                    print 'Processing %s/%d' % (ids_info['type'], i),
+    #                    print('Processing %s/%d' % (ids_info['type'], i))
     #                else:
-    #                    print 'Processing %s' % ids_info['type'],
+    #                    print('Processing %s' % ids_info['type'])
     #                ids = idss_in.__dict__[type + 'Array']
     #                stdout = sys.stdout 
     #                sys.stdout = open('/dev/null', 'w') # suppress warnings
     #                ids.get(i)
     #                sys.stdout = stdout
     #                if not ids.array: 
-    #                    print
+    #                    print()
     #                    continue
-    #                print '(found', len(ids.array), 'slices)'
+    #                print('(found', len(ids.array), 'slices)')
     #                for slice in ids.array:
     #                    slice.setExpIdx(idx)
     #                ids.put(i)
