@@ -3,7 +3,7 @@ Service classes for handling IDSs
 
 @author: Hajo Klingshirn, MPI-IPP
 '''
-from helper import *
+from .helper import *
 import logging
 import imas
 
