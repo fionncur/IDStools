@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import argparse, imas
 import init_mendeleiev as mend
@@ -36,8 +36,8 @@ try:
     input = imas.ids(shot,run)
     input.open_env(str(user),str(machine),'3')
 except:
-    print 'Shot ' + str(shot) + ', run ' + str(run) + ' does not exist'
-    print '----> Aborted.'
+    print('Shot ' + str(shot) + ', run ' + str(run) + ' does not exist')
+    print('----> Aborted.')
     exit()
 
 # Read necessary IDSs from database
@@ -45,15 +45,15 @@ try:
     input.equilibrium.get()
     equilibrium = input.equilibrium
 except:
-    print "The equilibrium IDS is absent from the input datafile"
-    print "----> Aborted."
+    print("The equilibrium IDS is absent from the input datafile")
+    print("----> Aborted.")
     exit()
 try:
     input.core_profiles.get()
     core_profiles = input.core_profiles
 except:
-    print "The core_profiles IDS is absent from the input datafile"
-    print "----> Aborted."
+    print("The core_profiles IDS is absent from the input datafile")
+    print("----> Aborted.")
     exit()
 try:
     input.summary.get()
@@ -80,8 +80,8 @@ try:
     else:
       magnetic_field = max(equilibrium.vacuum_toroidal_field.b0)
 except:
-    print "equilibrium.time_slice[:].global_quantities.magnetic_axis.b_tor could not be read"
-    print "----> Aborted."
+    print("equilibrium.time_slice[:].global_quantities.magnetic_axis.b_tor could not be read")
+    print("----> Aborted.")
     exit()
 
 try:
@@ -90,8 +90,8 @@ try:
         if abs(equilibrium.time_slice[islice].global_quantities.ip)*1.e-6 > plasma_current:
             plasma_current = equilibrium.time_slice[islice].global_quantities.ip*1.e-6
 except:
-    print "equilibrium.time_slice[:].global_quantities.ip could not be read"
-    print "----> Aborted."
+    print("equilibrium.time_slice[:].global_quantities.ip could not be read")
+    print("----> Aborted.")
     exit()
 
 try:
@@ -101,8 +101,8 @@ try:
             central_electron_density = core_profiles.profiles_1d[islice].electrons.density[0]
             the_slice = islice
 except:
-    print "core_profiles.profiles_1d[:].electrons.density[0] could not be read"
-    print "----> Aborted."
+    print("core_profiles.profiles_1d[:].electrons.density[0] could not be read")
+    print("----> Aborted.")
     exit()
 
 try:
@@ -111,7 +111,7 @@ try:
     for ispecies in range(nspecies):
         a[ispecies] = int(core_profiles.profiles_1d[the_slice].ion[ispecies].element[0].a)
 except:
-    print "core_profiles.profiles_1d[:].ion[0].element[0].a could not be read"
+    print("core_profiles.profiles_1d[:].ion[0].element[0].a could not be read")
     nspecies = 0
     a = [0]
 
@@ -121,7 +121,7 @@ try:
     for ispecies in range(nspecies):
         z[ispecies] = int(core_profiles.profiles_1d[the_slice].ion[ispecies].element[0].z_n)
 except:
-    print "core_profiles.profiles_1d[:].ion[0].element[0].z_n could not be read"
+    print("core_profiles.profiles_1d[:].ion[0].element[0].z_n could not be read")
     nspecies = 0
     z = [0]
 
@@ -134,30 +134,30 @@ try:
             exit()
         volume = equilibrium.time_slice[the_slice].profiles_1d.volume
         if len(volume) == len(core_profiles.profiles_1d[the_slice].electrons.density):
-            print "core_profiles.profiles_1d[:].grid.volume could not be read"
-            print "----> equilibrium.time_slice[:].profiles_1d.volume used instead"
-            print "(possible because the resolution is the same, but maybe not correct)"
+            print("core_profiles.profiles_1d[:].grid.volume could not be read")
+            print("----> equilibrium.time_slice[:].profiles_1d.volume used instead")
+            print("(possible because the resolution is the same, but maybe not correct)")
         else:
             exit()
 except:
-    print "core_profiles.profiles_1d[:].grid.volume could not be read"
-    print "----> Aborted."
+    print("core_profiles.profiles_1d[:].grid.volume could not be read")
+    print("----> Aborted.")
     exit()
 
 try:
     central_zeff = core_profiles.profiles_1d[the_slice].zeff[0]
 except:
-    print "core_profiles.profiles_1d[:].zeff[0] could not be read"
-    print "----> Aborted."
+    print("core_profiles.profiles_1d[:].zeff[0] could not be read")
+    print("----> Aborted.")
     exit()
 
 # H&CD quantities from summary IDS
 confinement_regime = "tbd"
 if len(summary.time)==0:
-    print "--------------------------------------------------------"
-    print "The summary IDS is absent from the input datafile"
-    print "----> H&CD waveforms not filled: to be completed by hand"
-    print "--------------------------------------------------------"
+    print("--------------------------------------------------------")
+    print("The summary IDS is absent from the input datafile")
+    print("----> H&CD waveforms not filled: to be completed by hand")
+    print("--------------------------------------------------------")
     p_ec   = "tbd"
     p_ic   = "tbd"
     p_nbi  = "tbd"
@@ -233,12 +233,12 @@ if nspecies > 0:
     for ispecies in range(nspecies):
        for jspecies in range(nspecies):
           if (species[jspecies] == species[ispecies]) & (jspecies != ispecies):
-	     nspec_over_ntot[ispecies] = nspec_over_ntot[ispecies] + nspec_over_ntot[jspecies]
-	     nspec_over_ntot[jspecies] = 0
-	     nspec_over_ne[ispecies] = nspec_over_ne[ispecies] + nspec_over_ne[jspecies]
-	     nspec_over_ne[jspecies] = 0
-	     nspec_over_nmaj[ispecies] = nspec_over_nmaj[ispecies] + nspec_over_nmaj[jspecies]
-	     nspec_over_nmaj[jspecies] = 0
+             nspec_over_ntot[ispecies] = nspec_over_ntot[ispecies] + nspec_over_ntot[jspecies]
+             nspec_over_ntot[jspecies] = 0
+             nspec_over_ne[ispecies] = nspec_over_ne[ispecies] + nspec_over_ne[jspecies]
+             nspec_over_ne[jspecies] = 0
+             nspec_over_nmaj[ispecies] = nspec_over_nmaj[ispecies] + nspec_over_nmaj[jspecies]
+             nspec_over_nmaj[jspecies] = 0
 
     # Nice display of plasma composition with species concentrations
     disp_species         = '   species:      '
@@ -259,26 +259,26 @@ if nspecies > 0:
             disp_species = disp_species + species[ispecies] + " " * (tabsize-len(species[ispecies]))
             disp_a = disp_a + format("%.1f" % a[ispecies]) + " " * (tabsize-len(format("%.1f" % a[ispecies])))
             disp_z = disp_z + format("%.1f" % z[ispecies]) + " " * (tabsize-len(format("%.1f" % z[ispecies])))
-	    if nspec_over_ntot[ispecies] < 1.e-2:
+            if nspec_over_ntot[ispecies] < 1.e-2:
                disp_nspec_over_ntot = disp_nspec_over_ntot + format("%.2e" % nspec_over_ntot[ispecies]) + " " * (tabsize-len(format("%.2e" % nspec_over_ntot[ispecies])))
-	    else:
+            else:
                disp_nspec_over_ntot = disp_nspec_over_ntot + format("%.3f" % nspec_over_ntot[ispecies]) + " " * (tabsize-len(format("%.3f" % nspec_over_ntot[ispecies])))
-	    if nspec_over_ne[ispecies] < 1.e-2:
-	       disp_nspec_over_ne   = disp_nspec_over_ne   + format("%.2e" % nspec_over_ne[ispecies])   + " " * (tabsize-len(format("%.2e" % nspec_over_ne[ispecies])))
-	    else:
-	       disp_nspec_over_ne   = disp_nspec_over_ne   + format("%.3f" % nspec_over_ne[ispecies])   + " " * (tabsize-len(format("%.3f" % nspec_over_ne[ispecies])))
-	    if nspec_over_nmaj[ispecies] < 1.e-2:
+            if nspec_over_ne[ispecies] < 1.e-2:
+               disp_nspec_over_ne   = disp_nspec_over_ne   + format("%.2e" % nspec_over_ne[ispecies])   + " " * (tabsize-len(format("%.2e" % nspec_over_ne[ispecies])))
+            else:
+               disp_nspec_over_ne   = disp_nspec_over_ne   + format("%.3f" % nspec_over_ne[ispecies])   + " " * (tabsize-len(format("%.3f" % nspec_over_ne[ispecies])))
+            if nspec_over_nmaj[ispecies] < 1.e-2:
                disp_nspec_over_nmaj = disp_nspec_over_nmaj + format("%.2e" % nspec_over_nmaj[ispecies]) + " " * (tabsize-len(format("%.2e" % nspec_over_nmaj[ispecies])))
             else:
                disp_nspec_over_nmaj = disp_nspec_over_nmaj + format("%.3f" % nspec_over_nmaj[ispecies]) + " " * (tabsize-len(format("%.3f" % nspec_over_nmaj[ispecies])))
-    #print "   ---------------------------------------------------------------------"
-    #print disp_species
-    #print disp_a
-    #print disp_z
-    #print disp_nspec_over_ntot
-    #print disp_nspec_over_ne
-    #print disp_nspec_over_nmaj
-    #print "   ---------------------------------------------------------------------"
+    #print("   ---------------------------------------------------------------------")
+    #print(disp_species)
+    #print(disp_a)
+    #print(disp_z)
+    #print(disp_nspec_over_ntot)
+    #print(disp_nspec_over_ne)
+    #print(disp_nspec_over_nmaj)
+    #print("   ---------------------------------------------------------------------")
 
 else:
     main_species = "tbd"
@@ -403,10 +403,10 @@ f.write("""idslist:\n""")
 f.close()
 
 # Complete the yaml file with the output of ids_content
-system('ids_content -u ' + str(user) + ' -t ' + str(machine) \
+system('./ids_content -u ' + str(user) + ' -t ' + str(machine) \
           + ' -s ' + str(shot) + ' -r ' + str(run) + ' >> ' + filename)
 
-print "----> " + filename + " created."
+print("----> " + filename + " created.")
 
 # Associated WATCHER file
 filename = "ids_"+str(shot)+add0+str(run)+".watcher"
@@ -416,5 +416,6 @@ f.write(""" Firstname		Name			E-mail\n""")
 f.write("""----------------------------------------------------------------------------------\n""")
 f.write(""" Mireille		Schneider		mireille.schneider@iter.org\n""")
 f.close()
-print "----> " + filename + " created."
+print("----> " + filename + " created.")
+
 
