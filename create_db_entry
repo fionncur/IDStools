@@ -64,11 +64,12 @@ except:
 try:
     input.dataset_description.get()
     dataset_description = input.dataset_description
-    print "----> dataset_description.ids_properties.comment read"
     comment = dataset_description.ids_properties.comment
+    dd_version = dataset_description.dd_version
 except:
     print "----> dataset_description does not exist"
     comment = ''
+    dd_version = ''
 
 # Mendeleiev table
 table_mendeleiev = mend.create_table_mendeleiev()
@@ -387,6 +388,7 @@ f.write("""# Content description\n""")
 f.write("""# --------------------\n""")
 f.write("""free_description: |\n""")
 f.write(comment+"\n")
+f.write("DD version: "+dd_version+"\n")
 f.write("""    - H-mode or L-mode or whatever\n""")
 f.write("""    - Density:           ne = ??% nGW, peaking assumptions...\n""")
 f.write("""    - Confinement:       transport model or scaling law that have been used...\n""")
