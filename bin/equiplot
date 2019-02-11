@@ -1,0 +1,173 @@
+#!/usr/bin/env python
+
+import argparse,os, imas
+
+# ----------------------------------------------------------------------
+
+def find_nearest(a, a0):
+    "Element in nd array `a` closest to the scalar value `a0`"
+    idx = numpy.abs(a - a0).argmin()
+    return a.flat[idx],idx
+
+# ----------------------------------------------------------------------
+
+# Management of input arguments
+parser = argparse.ArgumentParser(description=\
+	 '---- Display the plasma equilibrium from the magnetic IDS')
+parser.add_argument('-u','--user',help='username of the DB where the datafile is located', required=False)
+parser.add_argument('-m','--machine',help='tokamak name of the DB where the datafile is located', required=False)
+parser.add_argument('-s','--shot',help='shot number', required=True,type=int)
+parser.add_argument('-r','--run',help='run number',required=True,type=int)
+parser.add_argument('-t','--time',help='time', required=False,type=float)
+parser.add_argument('-p','--plotrho',help='flag to plot rho(R,Z) (1) or not (0)', required=False,type=int)
+
+args = vars(parser.parse_args())
+shot = args["shot"]
+run  = args["run"]
+
+# Username
+if args['user'] != None:
+    user = args["user"]
+else:
+    #user = os.getenv('USER')
+    user = 'public'
+
+# Tokamak name
+if args['machine'] != None:
+    machine = args["machine"]
+else:
+    machine = 'iterdb'
+
+# Time
+if args['time'] != None:
+    time = args["time"]
+else:
+    time = -99.
+
+# Flag to plot rho(R,Z)
+if args['plotrho'] != None:
+    flag_rho2d = args["plotrho"]
+else:
+    flag_rho2d = 0
+
+# Open the database and read the necessary IDSs
+try:
+    input = imas.ids(shot,run)
+    input.open_env(str(user),str(machine),'3')
+except:
+    print "Shot " + str(shot) + ", run " + str(run) + " does not exist"
+    print "----> Aborted."
+    exit()
+
+if user == 'public':
+    MDSPLUS_TREE_BASE_0 = '/work/imas/shared/'+str(machine)+'/3/0'
+else:
+    MDSPLUS_TREE_BASE_0 = os.path.expanduser("~{}".format(user))+"/public/imasdb/"+str(machine)+"/3/0"
+
+try:
+    input.equilibrium.get()
+    equilibrium = input.equilibrium
+except:
+    print "The equilibrium IDS is absent from the input datafile"
+    print "----> Aborted."
+    exit()
+
+if len(equilibrium.time_slice) == 0:
+    print "The equilibrium IDS is empty: len(equilibrium.time_slice)=0"
+    print "----> Aborted."
+    exit()
+
+# phi(R,Z) for rho(R,Z) calculation
+if len(equilibrium.time_slice[0].profiles_2d[0].phi) < 1:
+    print "equilibrium.time_slice[:].profiles_2d[0].phi could not be read"
+    flag_rho2d = 0
+
+# psi(R,Z)
+if len(equilibrium.time_slice[0].profiles_2d[0].psi) < 1:
+    print "equilibrium.time_slice[:].profiles_2d[0].psi could not be read"
+    print "----> Aborted."
+    exit()
+
+# ----------------------------------------------------------------------
+
+from math import *
+from numpy import *
+import matplotlib
+if 'DISPLAY' not in os.environ:
+    matplotlib.use('agg')
+else:
+    matplotlib.use('TKagg')
+from matplotlib import *
+import matplotlib.pyplot as plt
+
+# Tick size and X and Y axes
+ticksize = 15
+
+# Font definition
+font = {'family': 'serif',
+        'color':  'darkred',
+        'weight': 'normal',
+        'size': 18,
+        }
+
+# Search for adequate time slice for equilibrium display
+ntime = len(equilibrium.time)
+timevec = equilibrium.time
+if len(timevec) > 1:
+    if time >= 0:
+	[tc,it] = find_nearest(timevec,time)
+    else:
+        it = int(ntime/2)
+        tc = timevec[it]
+    time = tc
+    print '   Time  = '+'%.2f' % tc+' s in range ['+'%.2f' % timevec[0]+','+'%.2f' % timevec[ntime-1]+'] s'
+    print '   Index = ',str(it)
+    print '   Averaged resolution = ', (timevec[ntime-1]-timevec[0])/(ntime-1),' s'
+else:
+    if len(timevec) > 0:
+        tc = timevec[0]
+    else:
+        tc = 0
+    it = 0
+	
+time = tc
+
+# Cartesian (R,Z) grids
+r2d   = equilibrium.time_slice[it].profiles_2d[0].r
+z2d   = equilibrium.time_slice[it].profiles_2d[0].z
+psi2d = equilibrium.time_slice[it].profiles_2d[0].psi  
+  
+# Display the figure
+plt.figure()
+if flag_rho2d == 1:
+    rho2d = sqrt(equilibrium.time_slice[it].profiles_2d[0].phi/amax(equilibrium.time_slice[it].profiles_2d[0].phi))
+    plt.contour(r2d,z2d,rho2d,30,colors='r')
+plt.contour(r2d,z2d,psi2d,30)
+plt.xlim(r2d.min(),r2d.max())
+plt.gca().set_aspect('equal', adjustable='box')
+plt.xlabel('$R$ [m]', fontdict=font)
+plt.ylabel('$Z$ [m]', fontdict=font)
+plt.xticks(fontsize = ticksize)
+plt.yticks(fontsize = ticksize)
+plt.title('2D equilibrium', fontdict=font)
+
+#from matplotlib.offsetbox import AnchoredText
+#anchored_text = AnchoredText('Shot '+str(shot)+' / '+'Run '+str(run),prop=dict(size=8),loc=4)
+#ax.add_artist(anchored_text)
+
+fig = plt.gcf()
+ax = plt.gca()
+
+hostdir= os.environ["HOSTNAME"]+":"+MDSPLUS_TREE_BASE_0
+xmin, xmax = ax.get_xlim()
+ymin, ymax = ax.get_ylim()
+plt.text(xmax+0.01*abs(xmax),ymax-0.015*abs(ymax-ymin),hostdir[:-2]+' - Shot '+str(shot)+' / '+' Run '+str(run),fontsize=6,rotation=90)
+
+fig.set_size_inches(4.5,6.5)
+try:
+    fig.savefig('Equilibrium'+'_shot_'+str(shot)+'_run_'+str(run)+'_time_'+'%.1f' % time+'.png', dpi=100)
+    print '----> Figure saved to '+'Equilibrium'+'_shot_'+str(shot)+'_run_'+str(run)+'_time_'+'%.1f' % time+'.png'
+except:
+    print 'The figure could not be saved (check local permissions).'
+plt.show()
+
