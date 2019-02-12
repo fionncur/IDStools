@@ -1,0 +1,30 @@
+#%Module1.0#####################################################################
+##
+##      $name modulefile
+##
+## Copyright (c) 2017, ITER Organization
+## Route de Vinon-sur-Verdon, CS 90 046, 13067 St-Paul-lez-Durance Cedex, France
+
+set name __IDSTOOLS_NAME__
+set ver __VERSION__
+
+set loading [module-info mode load]
+
+module-whatis "IMAS IDS Python tools. ($ver)"
+proc ModulesHelp { } {
+  puts stderr "\tThis module sets the environment for $name version $ver"
+}
+
+conflict $name
+
+# List of required module names
+prereq __IMAS_MODULE__
+
+set prefix "__INSTALL_PREFIX__"
+if { [file exists $prefix] } {
+  prepend-path PATH             $prefix/bin
+  prepend-path PYTHONPATH       __INSTALL_PY__
+} else {
+  puts stderr "Error: $prefix could not be found, exiting without changes."
+  break
+}
