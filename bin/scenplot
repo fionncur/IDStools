@@ -22,7 +22,7 @@ def find_nearest(a, a0):
 
 # Management of input arguments
 parser = argparse.ArgumentParser(description=\
-	 '---- Display the plasma kinetic profiles and equilibrium from the core_profiles and equilibrium IDSs')
+    '---- Display the plasma kinetic profiles and equilibrium from the core_profiles and equilibrium IDSs')
 parser.add_argument('-u','--user',help='username of the DB where the datafile is located', required=False)
 parser.add_argument('-m','--machine',help='tokamak name of the DB where the datafile is located', required=False)
 parser.add_argument('-s','--shot',help='shot number', required=True,type=int)
@@ -38,30 +38,30 @@ run  = args['run']
 
 # Username
 if args['user'] != None:
-	user = args['user']
+    user = args['user']
 else:
-	#user = os.getenv('USER')
-        user = 'public'
+    #user = os.getenv('USER')
+    user = 'public'
 
 # Tokamak name
 if args['machine'] != None:
-	machine = args['machine']
+    machine = args['machine']
 else:
-	machine = 'iterdb'
+    machine = 'iterdb'
 
 # Time
 if args['time'] != None:
-	time = args['time']
+    time = args['time']
 else:
-	time = -99.
+    time = -99.
 
 # Open the database and read the necessary IDSs
 try:
     input = imas.ids(shot,run)
     input.open_env(str(user),str(machine),'3')
 except:
-    print 'Shot ' + str(shot) + ', run ' + str(run) + ' does not exist'
-    print '----> Aborted.'
+    print('Shot ' + str(shot) + ', run ' + str(run) + ' does not exist')
+    print('----> Aborted.')
     exit()
 
 if user == 'public':
@@ -73,24 +73,24 @@ try:
     input.core_profiles.get()
     core_profiles = input.core_profiles
 except:
-    print 'The core_profiles IDS is absent from the input datafile'
-    print '----> Aborted.'
+    print('The core_profiles IDS is absent from the input datafile')
+    print('----> Aborted.')
     exit()
 
 try:
     input.equilibrium.get()
     equilibrium = input.equilibrium
 except:
-    print 'The equilibrium IDS is absent from the input datafile'
-    print '----> Aborted.'
+    print('The equilibrium IDS is absent from the input datafile')
+    print('----> Aborted.')
     exit()
 
 try:
     input.summary.get()
     summary = input.summary
 except:
-    print 'The summary IDS is absent from the input datafile'
-    print '----> Aborted.'
+    print('The summary IDS is absent from the input datafile')
+    print('----> Aborted.')
     exit()
 
 # ----------------------------------------------------------------------
@@ -106,14 +106,14 @@ ntime = len(core_profiles.time)
 timevec = core_profiles.time
 if ntime > 1:
     if time >= 0:
-	[tc,it] = find_nearest(timevec,time)
+        [tc,it] = find_nearest(timevec,time)
     else:
         it = int(ntime/2)
         tc = timevec[it]
     time = tc
-    print '   Time  = '+'%.2f' % tc+' s in range ['+'%.2f' % timevec[0]+','+'%.2f' % timevec[ntime-1]+'] s'
-    print '   Index = ',str(it)
-    print '   Averaged resolution = ', (timevec[ntime-1]-timevec[0])/(ntime-1),' s'
+    print('   Time  = '+'%.2f' % tc+' s in range ['+'%.2f' % timevec[0]+','+'%.2f' % timevec[ntime-1]+'] s')
+    print('   Index = ',str(it))
+    print('   Averaged resolution = ', (timevec[ntime-1]-timevec[0])/(ntime-1),' s')
 else:
     if len(timevec) > 0:
         tc = timevec[0]
@@ -126,7 +126,7 @@ time = tc
 # psi(R,Z) (not mandatory)
 plot_equi = 1
 if len(equilibrium.time_slice[0].profiles_2d[0].psi) < 1:
-    print 'equilibrium.time_slice[:].profiles_2d[0].psi could not be read'
+    print('equilibrium.time_slice[:].profiles_2d[0].psi could not be read')
     plot_equi = 0
 
 # Rho profile (mandatory)
@@ -139,164 +139,164 @@ try:
         nrho = len(core_profiles.profiles_1d[it].grid.rho_tor)
         rho_tor_norm = core_profiles.profiles_1d[it].grid.rho_tor/core_profiles.profiles_1d[it].grid.rho_tor[nrho-1]
 except:
-    print 'core_profiles.profiles_1d[:].grid.rho_tor_norm and rho_tor could not be read'
-    print '----> Aborted.'
+    print('core_profiles.profiles_1d[:].grid.rho_tor_norm and rho_tor could not be read')
+    print('----> Aborted.')
     exit()
 
 # Ip waveform
 if len(summary.global_quantities.ip.value) < 1:
-    print 'summary.global_quantities.ip.value could not be read'
+    print('summary.global_quantities.ip.value could not be read')
     if len(core_profiles.global_quantities.ip) < 1:
-        print 'core_profiles.global_quantities.ip could not be read'
+        print('core_profiles.global_quantities.ip could not be read')
         summary.global_quantities.ip.value = asarray([nan]*ntime)
     else:
-        print 'use core_profiles.global_quantities.ip instead'
+        print('use core_profiles.global_quantities.ip instead')
         summary.global_quantities.ip.value = core_profiles.global_quantities.ip
 
 # Current_non_inductive waveform
 if len(summary.global_quantities.current_non_inductive.value) < 1:
-    print 'summary.global_quantities.current_non_inductive.value could not be read'
+    print('summary.global_quantities.current_non_inductive.value could not be read')
     if len(core_profiles.global_quantities.current_non_inductive) < 1:
-        print 'core_profiles.global_quantities.current_non_inductive could not be read'
+        print('core_profiles.global_quantities.current_non_inductive could not be read')
         summary.global_quantities.current_non_inductive.value = asarray([nan]*ntime)
     else:
-        print 'use core_profiles.global_quantities.current_non_inductive instead'
+        print('use core_profiles.global_quantities.current_non_inductive instead')
         summary.global_quantities.current_non_inductive.value = core_profiles.global_quantities.current_non_inductive
 
 # Current_bootstrap waveform
 if len(summary.global_quantities.current_bootstrap.value) < 1:
-    print 'summary.global_quantities.current_bootstrap.value could not be read'
+    print('summary.global_quantities.current_bootstrap.value could not be read')
     if len(core_profiles.global_quantities.current_bootstrap) < 1:
-        print 'core_profiles.global_quantities.current_bootstrap could not be read'
+        print('core_profiles.global_quantities.current_bootstrap could not be read')
         summary.global_quantities.current_bootstrap.value = asarray([nan]*ntime)
     else:
-        print 'use core_profiles.global_quantities.current_bootstrap instead'
+        print('use core_profiles.global_quantities.current_bootstrap instead')
         summary.global_quantities.current_bootstrap.value = core_profiles.global_quantities.current_bootstrap
 
 # V_loop waveform
 if len(summary.global_quantities.v_loop.value) < 1:
-    print 'summary.global_quantities.v_loop.value could not be read'
+    print('summary.global_quantities.v_loop.value could not be read')
     if len(core_profiles.global_quantities.v_loop) < 1:
-        print 'core_profiles.global_quantities.v_loop could not be read'
+        print('core_profiles.global_quantities.v_loop could not be read')
         summary.global_quantities.v_loop.value = asarray([nan]*ntime)
     else:
-        print 'use core_profiles.global_quantities.v_loop instead'
+        print('use core_profiles.global_quantities.v_loop instead')
         summary.global_quantities.v_loop.value = core_profiles.global_quantities.v_loop
 
 # Beta_tor_norm waveform
 if len(summary.global_quantities.beta_tor_norm.value) < 1:
-    print 'summary.global_quantities.beta_tor_norm.value could not be read'
+    print('summary.global_quantities.beta_tor_norm.value could not be read')
     if len(core_profiles.global_quantities.beta_tor_norm) < 1:
-        print 'core_profiles.global_quantities.beta_tor_norm could not be read'
+        print('core_profiles.global_quantities.beta_tor_norm could not be read')
         summary.global_quantities.beta_tor_norm.value = asarray([nan]*ntime)
     else:
-        print 'use core_profiles.global_quantities.beta_tor_norm instead'
+        print('use core_profiles.global_quantities.beta_tor_norm instead')
         summary.global_quantities.beta_tor_norm.value = core_profiles.global_quantities.beta_tor_norm
 
 # Beta_pol waveform
 if len(summary.global_quantities.beta_pol.value) < 1:
-    print 'summary.global_quantities.beta_pol.value could not be read'
+    print('summary.global_quantities.beta_pol.value could not be read')
     if len(core_profiles.global_quantities.beta_pol) < 1:
-        print 'core_profiles.global_quantities.beta_pol could not be read'
+        print('core_profiles.global_quantities.beta_pol could not be read')
         summary.global_quantities.beta_pol.value = asarray([nan]*ntime)
     else:
-        print 'use core_profiles.global_quantities.beta_pol instead'
+        print('use core_profiles.global_quantities.beta_pol instead')
         summary.global_quantities.beta_pol.value = core_profiles.global_quantities.beta_pol
 
 # Energy_diamagnetic waveform
 if len(summary.global_quantities.energy_diamagnetic.value) < 1:
-    print 'summary.global_quantities.energy_diamagnetic.value could not be read'
+    print('summary.global_quantities.energy_diamagnetic.value could not be read')
     if len(core_profiles.global_quantities.energy_diamagnetic) < 1:
-        print 'core_profiles.global_quantities.energy_diamagnetic could not be read'
+        print('core_profiles.global_quantities.energy_diamagnetic could not be read')
         summary.global_quantities.energy_diamagnetic.value = asarray([nan]*ntime)
     else:
-        print 'use core_profiles.global_quantities.energy_diamagnetic instead'
+        print('use core_profiles.global_quantities.energy_diamagnetic instead')
         summary.global_quantities.energy_diamagnetic.value = core_profiles.global_quantities.energy_diamagnetic
 
 # Current_ohm waveform
 if len(summary.global_quantities.current_ohm.value) < 1:
-    print 'summary.global_quantities.current_ohm.value could not be read'
+    print('summary.global_quantities.current_ohm.value could not be read')
     summary.global_quantities.current_ohm.value = asarray([nan]*ntime)
 
 # Energy_total waveform
 if len(summary.global_quantities.energy_total.value) < 1:
-    print 'summary.global_quantities.energy_total.value could not be read'
+    print('summary.global_quantities.energy_total.value could not be read')
     summary.global_quantities.energy_total.value = asarray([nan]*ntime)
 
 # Energy_thermal waveform
 if len(summary.global_quantities.energy_thermal.value) < 1:
-    print 'summary.global_quantities.energy_thermal.value could not be read'
+    print('summary.global_quantities.energy_thermal.value could not be read')
     summary.global_quantities.energy_thermal.value = asarray([nan]*ntime)
 
 # B0 waveform
 if len(summary.global_quantities.b0.value) < 1:
-    print 'summary.global_quantities.b0.value could not be read'
+    print('summary.global_quantities.b0.value could not be read')
     summary.global_quantities.b0.value = asarray([nan]*ntime)
 
 # H_98 waveform
 if len(summary.global_quantities.h_98.value) < 1:
-    print 'summary.global_quantities.h_98.value could not be read'
+    print('summary.global_quantities.h_98.value could not be read')
     summary.global_quantities.h_98.value = asarray([nan]*ntime)
 
 # Tau_energy waveform
 if len(summary.global_quantities.tau_energy.value) < 1:
-    print 'summary.global_quantities.tau_energy.value could not be read'
+    print('summary.global_quantities.tau_energy.value could not be read')
     summary.global_quantities.tau_energy.value = asarray([nan]*ntime)
 
 # H-mode flag
 if len(summary.global_quantities.h_mode.value) < 1:
-    print 'summary.global_quantities.h_mode.value could not be read'
+    print('summary.global_quantities.h_mode.value could not be read')
     summary.global_quantities.h_mode.value = asarray([nan]*ntime)
 
 # H&CD waveforms
 if len(summary.time)==0:
-    print 'The summary IDS is absent from the input datafile => no H&CD waveform available'
+    print('The summary IDS is absent from the input datafile => no H&CD waveform available')
 
 # J_bootstrap profile
 if len(core_profiles.profiles_1d[it].j_bootstrap) < 1:
-    print 'core_profiles.profiles_1d['+str(it)+'].j_bootstrap could not be read'
+    print('core_profiles.profiles_1d['+str(it)+'].j_bootstrap could not be read')
     core_profiles.profiles_1d[it].j_bootstrap = asarray([nan]*nrho)
 
 # J_non_inductive profile
 if len(core_profiles.profiles_1d[it].j_non_inductive) < 1:
-    print 'core_profiles.profiles_1d['+str(it)+'].j_non_inductive could not be read'
+    print('core_profiles.profiles_1d['+str(it)+'].j_non_inductive could not be read')
     core_profiles.profiles_1d[it].j_non_inductive = asarray([nan]*nrho)
 
 # J_ohmic profile
 if len(core_profiles.profiles_1d[it].j_ohmic) < 1:
-    print 'core_profiles.profiles_1d['+str(it)+'].j_ohmic could not be read'
+    print('core_profiles.profiles_1d['+str(it)+'].j_ohmic could not be read')
     core_profiles.profiles_1d[it].j_ohmic = asarray([nan]*nrho)
 
 # J_total profile
 if len(core_profiles.profiles_1d[it].j_total) < 1:
-    print 'core_profiles.profiles_1d['+str(it)+'].j_total could not be read'
+    print('core_profiles.profiles_1d['+str(it)+'].j_total could not be read')
     core_profiles.profiles_1d[it].j_total = asarray([nan]*nrho)
 
 # q-profile
 if len(core_profiles.profiles_1d[it].q) < 1:
-    print 'core_profiles.profiles_1d['+str(it)+'].q could not be read'
+    print('core_profiles.profiles_1d['+str(it)+'].q could not be read')
     core_profiles.profiles_1d[it].q = asarray([nan]*nrho)
 
 # Magnetic shear profile
 if len(core_profiles.profiles_1d[it].magnetic_shear) < 1:
-    print 'core_profiles.profiles_1d['+str(it)+'].magnetic_shear could not be read'
+    print('core_profiles.profiles_1d['+str(it)+'].magnetic_shear could not be read')
     core_profiles.profiles_1d[it].magnetic_shear = asarray([nan]*nrho)
 
 hostdir = os.environ["HOSTNAME"]+":"+MDSPLUS_TREE_BASE_0
 hostdir = hostdir[:-2]
 
 if len(core_profiles.profiles_1d[it].q) != nrho:
-    print '--------------------------------------------------------------'
-    print 'Dimensions of input core profiles are not consistent:'
-    print '  core_profiles.profiles_1d[it].grid.rho_tor(_norm)'
-    print '  and core_profiles.profiles_1d[it].q'
-    print '  have different dimensions:'
-    print '- len(core_profiles.profiles_1d[it].grid.rho_tor(_norm))= ',nrho
-    print '- len(core_profiles.profiles_1d[it].q = ',len(core_profiles.profiles_1d[it].q)
-    print '----> Aborted.'
-    print '--------------------------------------------------------------'
+    print('--------------------------------------------------------------')
+    print('Dimensions of input core profiles are not consistent:')
+    print('  core_profiles.profiles_1d[it].grid.rho_tor(_norm)')
+    print('  and core_profiles.profiles_1d[it].q')
+    print('  have different dimensions:')
+    print('- len(core_profiles.profiles_1d[it].grid.rho_tor(_norm))= ',nrho)
+    print('- len(core_profiles.profiles_1d[it].q = ',len(core_profiles.profiles_1d[it].q))
+    print('----> Aborted.')
+    print('--------------------------------------------------------------')
     exit()
-    
+
 # ----------------------------------------------------------------------
 
 # H&CD power
@@ -417,7 +417,7 @@ def CustomLegend_wf(legend,fontsize):
     for label in legend.get_texts():
         label.set_fontsize(fontsize)
     for label in legend.get_lines():
-        label.set_linewidth(1.5)  # the legend line width    
+        label.set_linewidth(1.5)  # the legend line width
     return
 
 def CustomLegend_pr(legend):
@@ -426,7 +426,7 @@ def CustomLegend_pr(legend):
     for label in legend.get_texts():
         label.set_fontsize(7)
     for label in legend.get_lines():
-        label.set_linewidth(1.5)  # the legend line width    
+        label.set_linewidth(1.5)  # the legend line width
     return
 
 # Plot customization
@@ -594,7 +594,7 @@ ax5.xaxis.set_label_position('top')
 if plot_equi == 1:
     r2d   = equilibrium.time_slice[it].profiles_2d[0].r
     z2d   = equilibrium.time_slice[it].profiles_2d[0].z
-    psi2d = equilibrium.time_slice[it].profiles_2d[0].psi  
+    psi2d = equilibrium.time_slice[it].profiles_2d[0].psi
     plt.contour(r2d,z2d,psi2d,50) #,label=r'$\Psi_{pol}$')
     plt.xlim(r2d.min(),r2d.max())
     plt.gca().set_aspect('equal', adjustable='box')
@@ -614,9 +614,9 @@ fig.set_size_inches(10,8)
 
 try:
     fig.savefig('Scenario'+'_shot_'+str(shot)+'_run_'+str(run)+'_time_'+'%.1f' % time+'.png', dpi=100)
-    print '----> Figure saved to '+'Kinetic'+'_shot_'+str(shot)+'_run_'+str(run)+'_time_'+'%.1f' % time+'.png'
+    print('----> Figure saved to '+'Kinetic'+'_shot_'+str(shot)+'_run_'+str(run)+'_time_'+'%.1f' % time+'.png')
 except:
-    print 'The figure could not be saved (check local permissions).'
+    print('The figure could not be saved (check local permissions).')
 
 plt.show()
 

@@ -13,7 +13,7 @@ def find_nearest(a, a0):
 
 # Management of input arguments
 parser = argparse.ArgumentParser(description=\
-	 '---- Display the plasma equilibrium from the magnetic IDS')
+    '---- Display the plasma equilibrium from the magnetic IDS')
 parser.add_argument('-u','--user',help='username of the DB where the datafile is located', required=False)
 parser.add_argument('-m','--machine',help='tokamak name of the DB where the datafile is located', required=False)
 parser.add_argument('-s','--shot',help='shot number', required=True,type=int)
@@ -55,8 +55,8 @@ try:
     input = imas.ids(shot,run)
     input.open_env(str(user),str(machine),'3')
 except:
-    print "Shot " + str(shot) + ", run " + str(run) + " does not exist"
-    print "----> Aborted."
+    print("Shot " + str(shot) + ", run " + str(run) + " does not exist")
+    print("----> Aborted.")
     exit()
 
 if user == 'public':
@@ -68,24 +68,24 @@ try:
     input.equilibrium.get()
     equilibrium = input.equilibrium
 except:
-    print "The equilibrium IDS is absent from the input datafile"
-    print "----> Aborted."
+    print("The equilibrium IDS is absent from the input datafile")
+    print("----> Aborted.")
     exit()
 
 if len(equilibrium.time_slice) == 0:
-    print "The equilibrium IDS is empty: len(equilibrium.time_slice)=0"
-    print "----> Aborted."
+    print("The equilibrium IDS is empty: len(equilibrium.time_slice)=0")
+    print("----> Aborted.")
     exit()
 
 # phi(R,Z) for rho(R,Z) calculation
 if len(equilibrium.time_slice[0].profiles_2d[0].phi) < 1:
-    print "equilibrium.time_slice[:].profiles_2d[0].phi could not be read"
+    print("equilibrium.time_slice[:].profiles_2d[0].phi could not be read")
     flag_rho2d = 0
 
 # psi(R,Z)
 if len(equilibrium.time_slice[0].profiles_2d[0].psi) < 1:
-    print "equilibrium.time_slice[:].profiles_2d[0].psi could not be read"
-    print "----> Aborted."
+    print("equilibrium.time_slice[:].profiles_2d[0].psi could not be read")
+    print("----> Aborted.")
     exit()
 
 # ----------------------------------------------------------------------
@@ -115,21 +115,21 @@ ntime = len(equilibrium.time)
 timevec = equilibrium.time
 if len(timevec) > 1:
     if time >= 0:
-	[tc,it] = find_nearest(timevec,time)
+        [tc,it] = find_nearest(timevec,time)
     else:
         it = int(ntime/2)
         tc = timevec[it]
     time = tc
-    print '   Time  = '+'%.2f' % tc+' s in range ['+'%.2f' % timevec[0]+','+'%.2f' % timevec[ntime-1]+'] s'
-    print '   Index = ',str(it)
-    print '   Averaged resolution = ', (timevec[ntime-1]-timevec[0])/(ntime-1),' s'
+    print('   Time  = '+'%.2f' % tc+' s in range ['+'%.2f' % timevec[0]+','+'%.2f' % timevec[ntime-1]+'] s')
+    print('   Index = ',str(it))
+    print('   Averaged resolution = ', (timevec[ntime-1]-timevec[0])/(ntime-1),' s')
 else:
     if len(timevec) > 0:
         tc = timevec[0]
     else:
         tc = 0
     it = 0
-	
+
 time = tc
 
 # Cartesian (R,Z) grids
@@ -166,8 +166,8 @@ plt.text(xmax+0.01*abs(xmax),ymax-0.015*abs(ymax-ymin),hostdir[:-2]+' - Shot '+s
 fig.set_size_inches(4.5,6.5)
 try:
     fig.savefig('Equilibrium'+'_shot_'+str(shot)+'_run_'+str(run)+'_time_'+'%.1f' % time+'.png', dpi=100)
-    print '----> Figure saved to '+'Equilibrium'+'_shot_'+str(shot)+'_run_'+str(run)+'_time_'+'%.1f' % time+'.png'
+    print('----> Figure saved to '+'Equilibrium'+'_shot_'+str(shot)+'_run_'+str(run)+'_time_'+'%.1f' % time+'.png')
 except:
-    print 'The figure could not be saved (check local permissions).'
+    print('The figure could not be saved (check local permissions).')
 plt.show()
 

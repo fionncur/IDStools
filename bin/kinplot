@@ -17,7 +17,7 @@ def find_nearest(a, a0):
 
 # Management of input arguments
 parser = argparse.ArgumentParser(description=\
-	 '---- Display the plasma kinetic profiles from the core_profiles IDSs')
+    '---- Display the plasma kinetic profiles from the core_profiles IDSs')
 parser.add_argument('-u','--user',help='username of the DB where the datafile is located', required=False)
 parser.add_argument('-m','--machine',help='tokamak name of the DB where the datafile is located', required=False)
 parser.add_argument('-s','--shot',help='shot number', required=True,type=int)
@@ -33,30 +33,30 @@ run  = args['run']
 
 # Username
 if args['user'] != None:
-	user = args['user']
+    user = args['user']
 else:
-	#user = os.getenv('USER')
-        user = 'public'
+    #user = os.getenv('USER')
+    user = 'public'
 
 # Tokamak name
 if args['machine'] != None:
-	machine = args['machine']
+    machine = args['machine']
 else:
-	machine = 'iterdb'
+    machine = 'iterdb'
 
 # Time
 if args['time'] != None:
-	time = args['time']
+    time = args['time']
 else:
-	time = -99.
+    time = -99.
 
 # Open the database and read the necessary IDSs
 try:
     input = imas.ids(shot,run)
     input.open_env(str(user),str(machine),'3')
 except:
-    print 'Shot ' + str(shot) + ', run ' + str(run) + ' does not exist'
-    print '----> Aborted.'
+    print('Shot ' + str(shot) + ', run ' + str(run) + ' does not exist')
+    print('----> Aborted.')
     exit()
 
 if user == 'public':
@@ -68,8 +68,8 @@ try:
     input.core_profiles.get()
     core_profiles = input.core_profiles
 except:
-    print 'The core_profiles IDS is absent from the input datafile'
-    print '----> Aborted.'
+    print('The core_profiles IDS is absent from the input datafile')
+    print('----> Aborted.')
     exit()
 
 hostdir = os.environ["HOSTNAME"]+":"+MDSPLUS_TREE_BASE_0
@@ -81,9 +81,9 @@ from math import *
 from numpy import *
 import matplotlib
 if 'DISPLAY' not in os.environ:
-	matplotlib.use('agg')
+    matplotlib.use('agg')
 else:
-	matplotlib.use('TKagg')
+    matplotlib.use('TKagg')
 
 from matplotlib import *
 import matplotlib.pyplot as plt
@@ -94,14 +94,14 @@ ntime = len(core_profiles.time)
 timevec = core_profiles.time
 if ntime > 1:
     if time >= 0:
-	[tc,it] = find_nearest(timevec,time)
+        [tc,it] = find_nearest(timevec,time)
     else:
         it = int(ntime/2)
         tc = timevec[it]
     time = tc
-    print '   Time  = '+'%.2f' % tc+' s in range ['+'%.2f' % timevec[0]+','+'%.2f' % timevec[ntime-1]+'] s'
-    print '   Index = ',str(it)
-    print '   Averaged resolution = ', (timevec[ntime-1]-timevec[0])/(ntime-1),' s'
+    print('   Time  = '+'%.2f' % tc+' s in range ['+'%.2f' % timevec[0]+','+'%.2f' % timevec[ntime-1]+'] s')
+    print('   Index = ',str(it))
+    print('   Averaged resolution = ', (timevec[ntime-1]-timevec[0])/(ntime-1),' s')
 else:
     if len(timevec) > 0:
         tc = timevec[0]
@@ -129,8 +129,8 @@ try:
         nrho = len(core_profiles.profiles_1d[it].grid.rho_tor)
         rho_tor_norm = core_profiles.profiles_1d[it].grid.rho_tor/core_profiles.profiles_1d[it].grid.rho_tor[nrho-1]
 except:
-    print 'core_profiles.profiles_1d[:].grid.rho_tor_norm and rho_tor could not be read'
-    print '----> Aborted.'
+    print('core_profiles.profiles_1d[:].grid.rho_tor_norm and rho_tor could not be read')
+    print('----> Aborted.')
     exit()
 
 # Species A number (not mandatory)
@@ -140,7 +140,7 @@ try:
     for ispecies in range(nspecies):
         a[ispecies] = int(core_profiles.profiles_1d[it].ion[ispecies].element[0].a)
 except:
-    print 'core_profiles.profiles_1d[:].ion[0].element[0].a could not be read'
+    print('core_profiles.profiles_1d[:].ion[0].element[0].a could not be read')
     plot_compo = 0
 
 # Species Z number (not mandatory)
@@ -150,7 +150,7 @@ try:
     for ispecies in range(nspecies):
         z[ispecies] = int(core_profiles.profiles_1d[it].ion[ispecies].element[0].z_n)
 except:
-    print 'core_profiles.profiles_1d[:].ion[0].element[0].z_n could not be read'
+    print('core_profiles.profiles_1d[:].ion[0].element[0].z_n could not be read')
     plot_compo = 0
 
 # Volume profile (not mandatory)
@@ -163,37 +163,37 @@ try:
             exit()
         volume = equilibrium.time_slice[it].profiles_1d.volume
         if len(volume) == len(core_profiles.profiles_1d[it].electrons.density):
-            print '   core_profiles.profiles_1d[:].grid.volume could not be read'
-            print '   ----> equilibrium.time_slice[:].profiles_1d.volume used instead'
-            print '   (possible because the resolution is the same, but maybe not correct)'
+            print('   core_profiles.profiles_1d[:].grid.volume could not be read')
+            print('   ----> equilibrium.time_slice[:].profiles_1d.volume used instead')
+            print('   (possible because the resolution is the same, but maybe not correct)')
         else:
             exit()
 except:
-    print 'core_profiles.profiles_1d[:].grid.volume could not be read'
+    print('core_profiles.profiles_1d[:].grid.volume could not be read')
     plot_compo = 0
 
 # Zeff profile (not mandatory)
 if len(core_profiles.profiles_1d[it].zeff) < 1:
-    print 'core_profiles.profiles_1d[:].zeff could not be read'
+    print('core_profiles.profiles_1d[:].zeff could not be read')
     for itime in range(ntime):
         core_profiles.profiles_1d[itime].zeff = asarray([nan]*nrho)
 
 # Ne profile (not mandatory)
 if len(core_profiles.profiles_1d[it].electrons.density) < 1:
-    print 'core_profiles.profiles_1d[:].electrons.density could not be read'
+    print('core_profiles.profiles_1d[:].electrons.density could not be read')
     for itime in range(ntime):
         core_profiles.profiles_1d[itime].electrons.density = asarray([nan]*nrho)
 
 # Te profile (not mandatory)
 if len(core_profiles.profiles_1d[it].electrons.temperature) < 1:
-    print 'core_profiles.profiles_1d[:].electrons.temperature could not be read'
+    print('core_profiles.profiles_1d[:].electrons.temperature could not be read')
     for itime in range(ntime):
         core_profiles.profiles_1d[itime].electrons.temperature = asarray([nan]*nrho)
 
 # Ti profile (not mandatory)
 ti_flag = 0
 if len(core_profiles.profiles_1d[it].t_i_average) < 1:
-    print 'core_profiles.profiles_1d[:].t_i_average could not be read'
+    print('core_profiles.profiles_1d[:].t_i_average could not be read')
     for itime in range(ntime):
         core_profiles.profiles_1d[itime].t_i_average = asarray([nan]*nrho)
 else:
@@ -201,7 +201,7 @@ else:
 
 for ispecies in range(nspecies):
     if len(core_profiles.profiles_1d[it].ion[ispecies].temperature) < 1:
-        print 'core_profiles.profiles_1d[:].ion['+str(ispecies)+'].temperature could not be read'
+        print('core_profiles.profiles_1d[:].ion['+str(ispecies)+'].temperature could not be read')
         for itime in range(ntime):
             core_profiles.profiles_1d[itime].ion[ispecies].temperature = asarray([nan]*nrho)
     else:
@@ -211,7 +211,7 @@ for ispecies in range(nspecies):
 # Ni profile (not mandatory)
 for ispecies in range(nspecies):
     if len(core_profiles.profiles_1d[it].ion[ispecies].density) < 1:
-        print 'core_profiles.profiles_1d[:].ion['+str(ispecies)+'].density could not be read'
+        print('core_profiles.profiles_1d[:].ion['+str(ispecies)+'].density could not be read')
         for itime in range(ntime):
             core_profiles.profiles_1d[itime].ion[ispecies].density = asarray([nan]*nrho)
 
@@ -219,13 +219,13 @@ for ispecies in range(nspecies):
 vtor_flag = 0
 for ispecies in range(nspecies):
     if len(core_profiles.profiles_1d[it].ion[ispecies].velocity.toroidal) < 1:
-        print 'core_profiles.profiles_1d[:].ion['+str(ispecies)+'].velocity.toroidal could not be read'
+        print('core_profiles.profiles_1d[:].ion['+str(ispecies)+'].velocity.toroidal could not be read')
         for itime in range(ntime):
             core_profiles.profiles_1d[itime].ion[ispecies].velocity.toroidal = asarray([nan]*nrho)
     else:
         vtor_flag = 1
     if len(core_profiles.profiles_1d[it].ion[ispecies].velocity_tor) < 1:
-        print 'core_profiles.profiles_1d[:].ion['+str(ispecies)+'].velocity_tor could not be read'
+        print('core_profiles.profiles_1d[:].ion['+str(ispecies)+'].velocity_tor could not be read')
         for itime in range(ntime):
             core_profiles.profiles_1d[itime].ion[ispecies].velocity_tor = asarray([nan]*nrho)
     else:
@@ -236,13 +236,13 @@ for ispecies in range(nspecies):
 vpol_flag = 0
 for ispecies in range(nspecies):
     if len(core_profiles.profiles_1d[it].ion[ispecies].velocity.poloidal) < 1:
-        print 'core_profiles.profiles_1d[:].ion['+str(ispecies)+'].velocity.poloidal could not be read'
+        print('core_profiles.profiles_1d[:].ion['+str(ispecies)+'].velocity.poloidal could not be read')
         for itime in range(ntime):
             core_profiles.profiles_1d[itime].ion[ispecies].velocity.poloidal = asarray([nan]*nrho)
     else:
         vpol_flag = 1
     if len(core_profiles.profiles_1d[it].ion[ispecies].velocity_pol) < 1:
-        print 'core_profiles.profiles_1d[:].ion['+str(ispecies)+'].velocity_pol could not be read'
+        print('core_profiles.profiles_1d[:].ion['+str(ispecies)+'].velocity_pol could not be read')
         for itime in range(ntime):
             core_profiles.profiles_1d[itime].ion[ispecies].velocity_pol = asarray([nan]*nrho)
     else:
@@ -277,14 +277,14 @@ if (nspecies > 0) & (plot_compo==1):
 
     # When a species appears twice: combine
     for ispecies in range(nspecies):
-       for jspecies in range(nspecies):
-          if (species[jspecies] == species[ispecies]) & (jspecies != ispecies):
-	     nspec_over_ntot[ispecies] = nspec_over_ntot[ispecies] + nspec_over_ntot[jspecies]
-	     nspec_over_ntot[jspecies] = 0
-	     nspec_over_ne[ispecies] = nspec_over_ne[ispecies] + nspec_over_ne[jspecies]
-	     nspec_over_ne[jspecies] = 0
-	     nspec_over_nmaj[ispecies] = nspec_over_nmaj[ispecies] + nspec_over_nmaj[jspecies]
-	     nspec_over_nmaj[jspecies] = 0
+        for jspecies in range(nspecies):
+            if (species[jspecies] == species[ispecies]) & (jspecies != ispecies):
+                nspec_over_ntot[ispecies] = nspec_over_ntot[ispecies] + nspec_over_ntot[jspecies]
+                nspec_over_ntot[jspecies] = 0
+                nspec_over_ne[ispecies] = nspec_over_ne[ispecies] + nspec_over_ne[jspecies]
+                nspec_over_ne[jspecies] = 0
+                nspec_over_nmaj[ispecies] = nspec_over_nmaj[ispecies] + nspec_over_nmaj[jspecies]
+                nspec_over_nmaj[jspecies] = 0
 
     # Nice display of plasma composition with species concentrations
     disp_species         = '   species:      '
@@ -306,14 +306,14 @@ if (nspecies > 0) & (plot_compo==1):
             disp_nspec_over_nmaj = disp_nspec_over_nmaj + format('%.2f' % nspec_over_nmaj[ispecies]) \
                                    + ' ' * (tabsize-len(format('%.2f' % nspec_over_nmaj[ispecies])))
 
-    print '   ------------'
-    print disp_species
-    print disp_a
-    print disp_z
-    print disp_nspec_over_ntot
-    print disp_nspec_over_ne
-    print disp_nspec_over_nmaj
-    print '   ------------'
+    print('   ------------')
+    print(disp_species)
+    print(disp_a)
+    print(disp_z)
+    print(disp_nspec_over_ntot)
+    print(disp_nspec_over_ne)
+    print(disp_nspec_over_nmaj)
+    print('   ------------')
 
 else:
     nspec_over_ne = [0]*nspecies
@@ -597,9 +597,9 @@ fig.tight_layout()
 
 try:
     fig.savefig('Kinetic'+'_shot_'+str(shot)+'_run_'+str(run)+'_time_'+'%.1f' % time+'.png', dpi=100)
-    print '----> Figure saved to '+'Kinetic'+'_shot_'+str(shot)+'_run_'+str(run)+'_time_'+'%.1f' % time+'.png'
+    print('----> Figure saved to '+'Kinetic'+'_shot_'+str(shot)+'_run_'+str(run)+'_time_'+'%.1f' % time+'.png')
 except:
-    print 'The figure could not be saved (check local permissions).'
+    print('The figure could not be saved (check local permissions).')
 
 plt.show()
 

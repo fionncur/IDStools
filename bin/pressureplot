@@ -16,7 +16,7 @@ def find_nearest(a, a0):
 
 # Management of input arguments
 parser = argparse.ArgumentParser(description=\
-	 '---- Display the plasma kinetic profiles from the core_profiles IDSs')
+    '---- Display the plasma kinetic profiles from the core_profiles IDSs')
 parser.add_argument('-u','--user',help='username of the DB where the datafile is located', required=False)
 parser.add_argument('-m','--machine',help='tokamak name of the DB where the datafile is located', required=False)
 parser.add_argument('-s','--shot',help='shot number', required=True,type=int)
@@ -32,22 +32,22 @@ run  = args['run']
 
 # Username
 if args['user'] != None:
-	user = args['user']
+    user = args['user']
 else:
-	#user = os.getenv('USER')
-        user = 'public'
+    #user = os.getenv('USER')
+    user = 'public'
 
 # Tokamak name
 if args['machine'] != None:
-	machine = args['machine']
+    machine = args['machine']
 else:
-	machine = 'iterdb'
+    machine = 'iterdb'
 
 # Time
 if args['time'] != None:
-	time = args['time']
+    time = args['time']
 else:
-	time = -99.
+    time = -99.
 
 # -----------------------------------------------
 # Open the database and read the necessary IDSs
@@ -56,8 +56,8 @@ try:
     input = imas.ids(shot,run)
     input.open_env(str(user),str(machine),'3')
 except:
-    print 'Shot ' + str(shot) + ', run ' + str(run) + ' does not exist'
-    print '----> Aborted.'
+    print('Shot ' + str(shot) + ', run ' + str(run) + ' does not exist')
+    print('----> Aborted.')
     exit()
 
 if user == 'public':
@@ -69,8 +69,8 @@ try:
     input.core_profiles.get()
     core_profiles = input.core_profiles
 except:
-    print 'The core_profiles IDS is absent from the input datafile'
-    print '----> Aborted.'
+    print('The core_profiles IDS is absent from the input datafile')
+    print('----> Aborted.')
     exit()
 
 hostdir = os.environ["HOSTNAME"]+":"+MDSPLUS_TREE_BASE_0
@@ -96,17 +96,17 @@ ntime = len(core_profiles.time)
 timevec = core_profiles.time
 if ntime >= 1:
     if time >= 0:
-	[tc,it] = find_nearest(timevec,time)
+        [tc,it] = find_nearest(timevec,time)
     else:
         it = int(ntime/2)
         tc = timevec[it]
     time = tc
     if ntime > 1:
-        print '   Time  = '+'%.2f' % tc+' s in range ['+'%.2f' % timevec[0]+','+'%.2f' % timevec[ntime-1]+'] s'
-        print '   Index = ',str(it)
-        print '   Averaged resolution = ', (timevec[ntime-1]-timevec[0])/(ntime-1),' s'
+        print('   Time  = '+'%.2f' % tc+' s in range ['+'%.2f' % timevec[0]+','+'%.2f' % timevec[ntime-1]+'] s')
+        print('   Index = ',str(it))
+        print('   Averaged resolution = ', (timevec[ntime-1]-timevec[0])/(ntime-1),' s')
     else:
-        print '   Time  = '+'%.2f' % tc+' s'
+        print('   Time  = '+'%.2f' % tc+' s')
 else:
     if len(timevec) > 0:
         tc = timevec[0]
@@ -129,13 +129,13 @@ try:
             nrho = len(core_profiles.profiles_1d[0].grid.rho_tor)
             rho_tor_norm = core_profiles.profiles_1d[0].grid.rho_tor/core_profiles.profiles_1d[0].grid.rho_tor_norm
 except:
-    print 'core_profiles.profiles_1d[0].grid.rho_tor/core_profiles.profiles_1d[0].grid.rho_tor(_norm) could not be read'
-    print '----> Aborted.'
+    print('core_profiles.profiles_1d[0].grid.rho_tor/core_profiles.profiles_1d[0].grid.rho_tor(_norm) could not be read')
+    print('----> Aborted.')
     exit()
 
 if nrho==0:
-    print 'core_profiles.profiles_1d[0].grid.rho_tor/core_profiles.profiles_1d[0].grid.rho_tor(_norm) is empty'
-    print '----> Aborted.'
+    print('core_profiles.profiles_1d[0].grid.rho_tor/core_profiles.profiles_1d[0].grid.rho_tor(_norm) is empty')
+    print('----> Aborted.')
     exit()
 
 # ------------------------------
@@ -144,7 +144,7 @@ if nrho==0:
 try:
     volume = core_profiles.profiles_1d[0].grid.volume
 except:
-    print 'core_profiles.profiles_1d[0].grid.volume could not be read'
+    print('core_profiles.profiles_1d[0].grid.volume could not be read')
 
 # ---------------------------------------------
 # General tests whether variables exist or not
@@ -152,70 +152,70 @@ except:
 
 nions = len(core_profiles.profiles_1d[0].ion)
 if len(core_profiles.profiles_1d[0].ion[0].pressure) < 1:
-    print 'core_profiles.profiles_1d[0].ion[0].pressure could not be read'
+    print('core_profiles.profiles_1d[0].ion[0].pressure could not be read')
     for iion in range(nions):
         core_profiles.profiles_1d[0].ion[iion].pressure = asarray([nan]*nrho)
 
 if len(core_profiles.profiles_1d[0].ion[0].pressure_thermal) < 1:
-    print 'core_profiles.profiles_1d[0].ion[0].pressure_thermal could not be read'
+    print('core_profiles.profiles_1d[0].ion[0].pressure_thermal could not be read')
     for iion in range(nions):
         core_profiles.profiles_1d[0].ion[iion].pressure_thermal = asarray([nan]*nrho)
 
 if len(core_profiles.profiles_1d[0].ion[0].pressure_fast_parallel) < 1:
-    print 'core_profiles.profiles_1d[0].ion[0].pressure_fast_parallel could not be read'
+    print('core_profiles.profiles_1d[0].ion[0].pressure_fast_parallel could not be read')
     for iion in range(nions):
         core_profiles.profiles_1d[0].ion[iion].pressure_fast_parallel = asarray([nan]*nrho)
 
 if len(core_profiles.profiles_1d[0].ion[0].pressure_fast_perpendicular) < 1:
-    print 'core_profiles.profiles_1d[0].ion[0].pressure_fast_perpendicular could not be read'
+    print('core_profiles.profiles_1d[0].ion[0].pressure_fast_perpendicular could not be read')
     for iion in range(nions):
         core_profiles.profiles_1d[0].ion[iion].pressure_fast_perpendicular = asarray([nan]*nrho)
 
 if len(core_profiles.profiles_1d[0].electrons.pressure) < 1:
-    print 'core_profiles.profiles_1d[0].electrons.pressure could not be read'
+    print('core_profiles.profiles_1d[0].electrons.pressure could not be read')
     core_profiles.profiles_1d[0].electrons.pressure = asarray([nan]*nrho)
 
 if len(core_profiles.profiles_1d[0].electrons.pressure_thermal) < 1:
-    print 'core_profiles.profiles_1d[0].electrons.pressure_thermal could not be read'
+    print('core_profiles.profiles_1d[0].electrons.pressure_thermal could not be read')
     core_profiles.profiles_1d[0].electrons.pressure_thermal = asarray([nan]*nrho)
 
 if len(core_profiles.profiles_1d[0].electrons.pressure_fast_parallel) < 1:
-    print 'core_profiles.profiles_1d[0].electrons.pressure_fast_parallel could not be read'
+    print('core_profiles.profiles_1d[0].electrons.pressure_fast_parallel could not be read')
     core_profiles.profiles_1d[0].electrons.pressure_fast_parallel = asarray([nan]*nrho)
 
 if len(core_profiles.profiles_1d[0].electrons.pressure_fast_perpendicular) < 1:
-    print 'core_profiles.profiles_1d[0].electrons.pressure_fast_perpendicular could not be read'
+    print('core_profiles.profiles_1d[0].electrons.pressure_fast_perpendicular could not be read')
     core_profiles.profiles_1d[0].electrons.pressure_fast_perpendicular = asarray([nan]*nrho)
 
 if len(core_profiles.profiles_1d[0].pressure_thermal) < 1:
-    print 'core_profiles.profiles_1d[0].pressure_thermal could not be read'
+    print('core_profiles.profiles_1d[0].pressure_thermal could not be read')
     core_profiles.profiles_1d[0].pressure_thermal = asarray([nan]*nrho)
 
 if len(core_profiles.profiles_1d[0].pressure_parallel) < 1:
-    print 'core_profiles.profiles_1d[0].pressure_parallel could not be read'
+    print('core_profiles.profiles_1d[0].pressure_parallel could not be read')
     core_profiles.profiles_1d[0].pressure_parallel = asarray([nan]*nrho)
 
 if len(core_profiles.profiles_1d[0].pressure_perpendicular) < 1:
-    print 'core_profiles.profiles_1d[0].pressure_perpendicular could not be read'
+    print('core_profiles.profiles_1d[0].pressure_perpendicular could not be read')
     core_profiles.profiles_1d[0].pressure_perpendicular = asarray([nan]*nrho)
 
 # ----------------------------------------------------------------------------------------
 
 # ----------------------------------------------------------------------
-# Total variables may be filled: in which case, we use them, otherwise 
+# Total variables may be filled: in which case, we use them, otherwise
 # we sum up on what we can (ions, electrons+ions, etc.)
 # ----------------------------------------------------------------------
 
 if len(core_profiles.profiles_1d[0].pressure_ion_total) > 1:
     pressure_ion_total = core_profiles.profiles_1d[0].pressure_ion_total
 else:
-    print 'core_profiles.profiles_1d[0].pressure_ion_total could not be read'
+    print('core_profiles.profiles_1d[0].pressure_ion_total could not be read')
     if len(core_profiles.profiles_1d[0].ion[0].pressure) > 1:
         pressure_ion_total = 0.
         for iion in range(nions):
             pressure_ion_total = pressure_ion_total + core_profiles.profiles_1d[0].ion[iion].pressure
     else:
-        print 'core_profiles.profiles_1d[0].ion[0].pressure could not be read'
+        print('core_profiles.profiles_1d[0].ion[0].pressure could not be read')
         pressure_ion_total = asarray([nan]*nrho)
 
 pressure_ion_thermal            = 0.
@@ -267,7 +267,7 @@ def CustomLegend_wf(legend):
     for label in legend.get_texts():
         label.set_fontsize(7)
     for label in legend.get_lines():
-        label.set_linewidth(1.5)  # the legend line width    
+        label.set_linewidth(1.5)  # the legend line width
     return
 
 def CustomLegend_pr(legend):
@@ -276,7 +276,7 @@ def CustomLegend_pr(legend):
     for label in legend.get_texts():
         label.set_fontsize(7)
     for label in legend.get_lines():
-        label.set_linewidth(1.5)  # the legend line width    
+        label.set_linewidth(1.5)  # the legend line width
     return
 
 # Plot customization
@@ -361,9 +361,9 @@ fig.tight_layout()
 
 try:
     fig.savefig('Pressure'+'_shot_'+str(shot)+'_run_'+str(run)+'_time_'+'%.1f' % time+'.png', dpi=100)
-    print '----> Figure saved to '+'Pressure'+'_shot_'+str(shot)+'_run_'+str(run)+'_time_'+'%.1f' % time+'.png'
+    print('----> Figure saved to '+'Pressure'+'_shot_'+str(shot)+'_run_'+str(run)+'_time_'+'%.1f' % time+'.png')
 except:
-    print 'The figure could not be saved (check local permissions).'
+    print('The figure could not be saved (check local permissions).')
 
 plt.show()
 
