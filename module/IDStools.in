@@ -17,9 +17,6 @@ proc ModulesHelp { } {
 
 conflict $name
 
-# List of required module names
-prereq __IMAS_MODULE__
-
 set prefix "__INSTALL_PREFIX__"
 if { [file exists $prefix] } {
   prepend-path PATH             $prefix/bin
