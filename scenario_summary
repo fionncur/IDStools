@@ -36,11 +36,11 @@ def rec(data={},path=os.getcwd(),extension='.yaml',choice=['shot','run','ip','b0
         file = open(files[i], 'r')
         data[j] = yaml.load(file)
         data[j]['location'] = files[i]
-        #print files[i]
+        #print(files[i])
         file.close()
       except:
-        print 'Error reading yaml files.'
-        print '----> Aborted.'
+        print('Error reading yaml files.')
+        print('----> Aborted.')
         sys.exit()
 
     # Sort data as a function of shot and run numbers
@@ -133,8 +133,8 @@ def rec(data={},path=os.getcwd(),extension='.yaml',choice=['shot','run','ip','b0
       try:
           table[1] = table[1] + " "*space_length + eval('disp_'+str(choice[i]))
       except:
-          print "The argument "+str(choice[i]) + " is not correct."
-          print "----> Aborted."
+          print("The argument "+str(choice[i]) + " is not correct.")
+          print("----> Aborted.")
           exit()
     dimline = len(table[1])
 
@@ -172,7 +172,7 @@ def rec(data={},path=os.getcwd(),extension='.yaml',choice=['shot','run','ip','b0
           # Compute the list of IDSs to be displayed
           idslist_nice = str()
           i=0
-          for k,v in idslist.iteritems():
+          for k,v in idslist.items():
             i=i+1
             idslist_nice = idslist_nice + str(k) + " "
           idslist = idslist_nice
@@ -308,11 +308,11 @@ if args['choice'] != None:
         input_choice = args['choice']
         choice = eval(str("""['"""+re.sub(""",""", r"""','""", input_choice)+"""']"""))
     except:
-        print "------------------------------------------------------------------"
-        print "Wrong way to write your list of variables to display"
-        print "You wrote "+str(args['choice'])
-        print "Try e.g. this way: "+ """ scenario_summary -c shot,run,workflow """
-        print "------------------------------------------------------------------"
+        print("------------------------------------------------------------------")
+        print("Wrong way to write your list of variables to display")
+        print("You wrote "+str(args['choice']))
+        print("Try e.g. this way: "+ """ scenario_summary -c shot,run,workflow """)
+        print("------------------------------------------------------------------")
         sys.exit(0)
 else:
   choice = ['shot','run','machine','ref_name','ip','b0','fuelling','confinement','workflow']
@@ -323,14 +323,14 @@ ext  = ".yaml"
 
 # Print the arguments of the default call to the function
 if noarg == "Yes":
-    print """----> Default call equivalent to: """
-    print """      scenario_summary -c shot,run,machine,ref_name,ip,b0,fuelling,confinement,workflow"""
+    print("""----> Default call equivalent to: """)
+    print("""      scenario_summary -c shot,run,machine,ref_name,ip,b0,fuelling,confinement,workflow""")
 
 # Call the function
 table = rec(data=data,path=folder,extension=ext,choice=choice,selection=selection)
 
 # Display the clean formatted table
 for i in range(len(table)):
-  print table[i]
+  print(table[i])
   
 

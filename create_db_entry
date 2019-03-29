@@ -59,15 +59,15 @@ try:
     input.summary.get()
     summary = input.summary
 except:
-    print "The summary IDS is absent from the input datafile"
-    print "----> H&CD waveforms not filled (to be completed by hand)"
+    print("The summary IDS is absent from the input datafile")
+    print("----> H&CD waveforms not filled (to be completed by hand)")
 try:
     input.dataset_description.get()
     dataset_description = input.dataset_description
     comment = string.replace(dataset_description.ids_properties.comment,'\n','\n   ')
     dd_version = dataset_description.dd_version
 except:
-    print "----> dataset_description does not exist"
+    print("----> dataset_description does not exist")
     comment = ''
     dd_version = ''
 

@@ -36,13 +36,14 @@ hdf5 = False
 debug = False
 
 try:
-	import idstools.ids_tools as opendb
-	db = opendb.ImasDb(shot,run,user,machine,dataversion,True,False)
+#        print("test1")
+        import idstools.ids_tools as opendb
+#        print("test2")
+        db = opendb.ImasDb(shot,run,user,machine,dataversion,True,False)
+#        print("test3")
 except:
-	import sys
-	print >> sys.stderr, "Unable to open database"
-	print sys.exc_info()[0]
-	sys.exit(1)
+        import sys
+        sys.exit("Unable to open database")
 	
 alltimes = db.all_times()
 
