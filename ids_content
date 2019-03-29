@@ -53,8 +53,8 @@ for idsname, times in alltimes:
 		end_time   = times[len(times)-1]
 	else: # Only one time slice
 		time_step  = 0
-		start_time = 0
-		end_time   = 0
+		start_time = times[0]
+		end_time   = times[0]
 	print("  "+idsname+":")
 	print("     time_step_number: " + str(len(times)))
 	print("     start_end_step:   [" + str(start_time) + "  " +  str(end_time) + "  " +  str(time_step) + "]")

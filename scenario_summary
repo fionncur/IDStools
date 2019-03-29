@@ -63,6 +63,7 @@ def rec(data={},path=os.getcwd(),extension='.yaml',choice=['shot','run','ip','b0
     disp_fuelling    = 'Fuelling'
     disp_ne0         = 'ne0[m-3]'
     disp_zeff        = 'Zeff'
+    disp_npeak       = 'n_peak'
     disp_p_hcd       = 'P_HCD[MW]'
     disp_p_ec        = 'P_EC[MW]'
     disp_p_ic        = 'P_IC[MW]'
@@ -87,6 +88,7 @@ def rec(data={},path=os.getcwd(),extension='.yaml',choice=['shot','run','ip','b0
     tab_fuelling    = 0
     tab_ne0         = 0
     tab_zeff        = 0
+    tab_npeak       = 0
     tab_p_hcd       = 0
     tab_p_ec        = 0
     tab_p_ic        = 0
@@ -110,6 +112,7 @@ def rec(data={},path=os.getcwd(),extension='.yaml',choice=['shot','run','ip','b0
         tab_fuelling    = max(max(len(str(sdata[i].get('scenario_key_parameters').get('main_species'))),tab_fuelling),len(disp_fuelling))
         tab_ne0         = max(max(len(str(sdata[i].get('scenario_key_parameters').get('central_electron_density'))),tab_ne0),len(disp_ne0))
         tab_zeff        = max(max(len(str(sdata[i].get('scenario_key_parameters').get('central_zeff'))),tab_zeff),len(disp_zeff))
+        tab_npeak       = max(max(len(str(sdata[i].get('scenario_key_parameters').get('density_peaking'))),tab_npeak),len(disp_npeak))
         tab_p_hcd       = max(max(len(str(sdata[i].get('hcd').get('p_hcd'))),tab_p_hcd),len(disp_p_hcd))
         tab_p_ec        = max(max(len(str(sdata[i].get('hcd').get('p_ec'))),tab_p_ec),len(disp_p_ec))
         tab_p_ic        = max(max(len(str(sdata[i].get('hcd').get('p_ic'))),tab_p_ic),len(disp_p_ic))
@@ -154,6 +157,7 @@ def rec(data={},path=os.getcwd(),extension='.yaml',choice=['shot','run','ip','b0
           fuelling    = sdata[i].get('scenario_key_parameters').get('main_species')
           ne0         = sdata[i].get('scenario_key_parameters').get('central_electron_density')
           zeff        = sdata[i].get('scenario_key_parameters').get('central_zeff')
+          npeak       = sdata[i].get('scenario_key_parameters').get('density_peaking')
           p_hcd       = sdata[i].get('hcd').get('p_hcd')
           p_ec        = sdata[i].get('hcd').get('p_ec')
           p_ic        = sdata[i].get('hcd').get('p_ic')
@@ -267,6 +271,7 @@ parser.add_argument("-c","--choice", help=\
                     "        fuelling    = plasma fuelling species\n"\
                     "        ne0         = central electron density\n"\
                     "        zeff        = central Zeff\n"\
+                    "        npeak       = density peaking Zeff\n"\
                     "        p_hcd       = total H&CD power\n"\
                     "        p_ec        = EC power\n"\
                     "        p_ic        = IC power\n"\

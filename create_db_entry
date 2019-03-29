@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import argparse, imas
+import argparse, imas, string
 import init_mendeleiev as mend
 import numpy as np
 from os import system
@@ -64,11 +64,12 @@ except:
 try:
     input.dataset_description.get()
     dataset_description = input.dataset_description
-    print "----> dataset_description.ids_properties.comment read"
-    comment = dataset_description.ids_properties.comment
+    comment = string.replace(dataset_description.ids_properties.comment,'\n','\n   ')
+    dd_version = dataset_description.dd_version
 except:
     print "----> dataset_description does not exist"
     comment = ''
+    dd_version = ''
 
 # Mendeleiev table
 table_mendeleiev = mend.create_table_mendeleiev()
@@ -342,6 +343,7 @@ f.write("""    main_species: %s\n""" % main_species)
 f.write("""    plasma_current: %.2f \n""" % plasma_current)
 f.write("""    central_electron_density: %.2e\n""" % central_electron_density)
 f.write("""    central_zeff: %.2f\n""" % central_zeff)
+f.write("""    density_peaking: tbd\n""")
 f.write("""\n""")
 f.write("""# ---------------------------------------------------------------------\n""")
 f.write("""# Nominal power of H&CD systems [MW]\n""")
@@ -385,12 +387,13 @@ f.write("""# --------------------\n""")
 f.write("""# Content description\n""")
 f.write("""# --------------------\n""")
 f.write("""free_description: |\n""")
-f.write(comment+"\n")
-f.write("""    - H-mode or L-mode or whatever\n""")
-f.write("""    - Density:           ne = ??% nGW, peaking assumptions...\n""")
-f.write("""    - Confinement:       transport model or scaling law that have been used...\n""")
-f.write("""    - Pedestal:          pedestal assumptions....\n""")
-f.write("""    - L-H transition:    scaling laws that have been used\n""")
+f.write("   "+comment+"\n")
+f.write("   DD version: "+dd_version+"\n")
+#f.write("""    - H-mode or L-mode or whatever\n""")
+#f.write("""    - Density:           ne = ??% nGW, peaking assumptions...\n""")
+#f.write("""    - Confinement:       transport model or scaling law that have been used...\n""")
+#f.write("""    - Pedestal:          pedestal assumptions....\n""")
+#f.write("""    - L-H transition:    scaling laws that have been used\n""")
 f.write("""\n""")
 f.write("""# ------------------------------------------------------------------------------\n""")
 f.write("""# List of filled IDSs with time quantities in seconds (start, end, step)\n""")
