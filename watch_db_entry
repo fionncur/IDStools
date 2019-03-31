@@ -26,9 +26,9 @@ if del_email!=None:
     delflag = 1
 else:
     if (firstname==None) | (name==None) | (email==None):
-        print '''  You need to specify your firstname, name and e-mail address'''
-        print '''  Type 'watch_db_entry -h' for help'''
-        print '''  ----> Aborted.'''
+        print('''  You need to specify your firstname, name and e-mail address''')
+        print('''  Type 'watch_db_entry -h' for help''')
+        print('''  ----> Aborted.''')
         import sys
         sys.exit(0)
 
@@ -50,7 +50,7 @@ if delflag == 0:
     f.write( (""" %s \t %s \t %s \n""").expandtabs(17) %  (firstname,name,email) )
     f.close()
     
-    print '----> Watcher '+firstname+' '+name+ ' added for shot '+str(shot)+' run '+str(run)+'.'
+    print('----> Watcher '+firstname+' '+name+ ' added for shot '+str(shot)+' run '+str(run)+'.')
 
 else:
     # Read the file
@@ -63,5 +63,5 @@ else:
         if line.find(del_email) == -1:
             f.write(line)
     f.close()
-    print '----> Watcher with email address ' + del_email + 'removed for shot '+str(shot)+' run '+str(run)+'.'
+    print('----> Watcher with email address ' + del_email + 'removed for shot '+str(shot)+' run '+str(run)+'.')
     
