@@ -67,7 +67,9 @@ if __name__ == '__main__':
     print '----------------------------------------------'
     if result.__class__  == numpy.ndarray and result[0].__class__.__module__ != 'numpy' :
        for i in range(len(result)):
-            print(result[i])
-            print '-------------------------'
+          idsDump = result[i].__str__().encode('utf-8')
+          print(idsDump)
+          print '-------------------------'
     else:       
-        print(result)
+          idsDump = result.__str__().encode('utf-8')
+          print(idsDump)
