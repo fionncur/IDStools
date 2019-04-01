@@ -15,7 +15,7 @@ parser.add_argument('-ids','--ids',help='IDS to copy', required=True)
 
 args = vars(parser.parse_args())
 
-# putnow -si 7897 -ri 32 -so 7897 -ro 31 -u schneim -t iter -ids equilibrium
+# idscp -si 7897 -ri 32 -so 7897 -ro 31 -u schneim -t iter -ids equilibrium
 
 shot_in  = args["shot_input"]
 run_in   = args["run_input"]
