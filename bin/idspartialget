@@ -48,7 +48,7 @@ if __name__ == '__main__':
     
     try:
         result = ids.partialGet(dataPath, idsOccurrence)
-    except Exception, exc:
+    except Exception as  exc:
         print(str(exc))
         exit(1)
     
@@ -56,20 +56,20 @@ if __name__ == '__main__':
     
     
     resultType = type(result)
-    print 'Type: ' + str(resultType)
+    print ('Type: ' + str(resultType))
     if result.__class__  == numpy.ndarray:
-       print 'Shape: ' + str(result.shape)
-       print 'Data type: ' + str(result.dtype.name)
+       print ('Shape: ' + str(result.shape))
+       print ('Data type: ' + str(result.dtype.name))
        
     if result.__class__  == numpy.ndarray and len(result) < 1 :
         exit(0)
   
-    print '----------------------------------------------'
+    print ('----------------------------------------------')
     if result.__class__  == numpy.ndarray and result[0].__class__.__module__ != 'numpy' :
        for i in range(len(result)):
           idsDump = result[i].__str__().encode('utf-8')
           print(idsDump)
-          print '-------------------------'
+          print ('-------------------------')
     else:       
           idsDump = result.__str__().encode('utf-8')
           print(idsDump)
