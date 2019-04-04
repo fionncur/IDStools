@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 import imas
 import numpy
 import sys
@@ -42,10 +43,8 @@ if __name__ == '__main__':
         idsdata.get(occurrence)
         if idsdata.array:
             for slice in idsdata.array:
-                idsDump = slice.__str__().encode('utf-8')
-                print(idsDump)
+                print(slice)
     else:
         idsdata.get(occurrence)
-        idsDump = idsdata.__str__().encode('utf-8')
-        print(idsDump)
+        print(idsdata)
     imas.close()

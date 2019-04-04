@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 import numpy
 import imas
@@ -67,9 +68,8 @@ if __name__ == '__main__':
     print ('----------------------------------------------')
     if result.__class__  == numpy.ndarray and result[0].__class__.__module__ != 'numpy' :
        for i in range(len(result)):
-          idsDump = result[i].__str__().encode('utf-8')
+          idsDump = result[i]
           print(idsDump)
           print ('-------------------------')
     else:       
-          idsDump = result.__str__().encode('utf-8')
-          print(idsDump)
+          print(result)
