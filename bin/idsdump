@@ -22,7 +22,7 @@ if __name__ == '__main__':
         print('       idsdump <SHOT> <RUN> <IDS>')
         exit(1)
 
-    numpy.set_printoptions(threshold='nan')
+    numpy.set_printoptions(threshold=sys.maxsize)
 
     imas = imas.ids(shot, run)
     if len(sys.argv) == 4:

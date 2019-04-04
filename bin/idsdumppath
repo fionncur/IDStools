@@ -11,6 +11,7 @@ if __name__ == '__main__':
         print('Usage: idsdumppath <USER> <TOKAMAK> <VERSION> <SHOT> <RUN> <IDS> <DATA_PATH>')
         exit(1)
 
+    numpy.set_printoptions(threshold=sys.maxsize)
     user = sys.argv[1]
     tokamak = sys.argv[2]
     version = sys.argv[3]
