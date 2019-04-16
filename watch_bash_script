@@ -2,7 +2,6 @@
 
 # SOURCE THE ENVIRONMENT VARIABLES NECESSARY TO EXECUTE THE PYTHONSCRIPT
 . /usr/share/Modules/init/sh
-module load imas
 
 # EXECUTE THE PYTHON SCRIPT THAT WATCHES THE SCENARIO FOLDER
 python $IMAS_HOME/extra/bin/watch_scenario_folder.py
