@@ -117,19 +117,22 @@ class ImasDb():
         import types
 
         # FIXME: Crude hack to get names of all time-dependent IDS. Will be fixed with improved UAL interface
-        timedep_ids_test = lambda x: isinstance(x, types.InstanceType)
+        timedep_ids_test = lambda x: x.__class__.__module__ != int.__class__.__module__
         timedep_idss = inspect.getmembers(self.db, timedep_ids_test )        
-        print("IDSS:  ", timedep_idss)
 
         result = []
         for idsnameArray, obj in timedep_idss:
-            #print('X',idsnameArray,'Y',obj)
-            for occurrence in range(4):
+           # FIXME: Max number of occurrences should be provided by IDS API
+            for occurrence in range(2):
                 if occurrence == 0:
                     idsname = idsnameArray
                 else:
                     idsname = idsnameArray + '/' + str(occurrence)
-                times = self.times(idsname)
+                try:
+                    times = self.times(idsname)
+                except Exception as exc:
+                    times = []
+                    print("ERROR! IDS '" + idsname + "': Reading time array fails due to following problem : " + str(exc)) 
                 if times is not None and len(times):
                     result.append( (idsname, times) )
 
