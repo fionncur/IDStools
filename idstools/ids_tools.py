@@ -117,8 +117,9 @@ class ImasDb():
         import types
 
         # FIXME: Crude hack to get names of all time-dependent IDS. Will be fixed with improved UAL interface
-        timedep_idss = inspect.getmembers(self.db)
-        #print("IDSS:  ", timedep_idss)
+        timedep_ids_test = lambda x: isinstance(x, types.InstanceType)
+        timedep_idss = inspect.getmembers(self.db, timedep_ids_test )        
+        print("IDSS:  ", timedep_idss)
 
         result = []
         for idsnameArray, obj in timedep_idss:
