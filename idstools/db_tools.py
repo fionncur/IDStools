@@ -154,7 +154,7 @@ def list_databases_mdsplus(user, tokamak, dataversion):
                 numStartPos = filename.find('_') + 1
                 numEndPos = filename.rfind('.')
                 num = int(filename[numStartPos:numEndPos])
-                shot = num / 10000
+                shot = int(num / 10000)
                 run = int(rundir) * 10000 + (num % 10000)
                 if shot not in dbs:
                     dbs[shot] = list()
