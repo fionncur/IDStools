@@ -39,9 +39,9 @@ def rec(data={},path=os.getcwd(),extension='.yaml',choice=['shot','run','ip','b0
         #print(files[i])
         file.close()
       except:
-        print('Error reading yaml files.')
-        print('----> Aborted.')
-        sys.exit()
+        print('Error reading yaml files.', file=sys.stderr)
+        print('----> Aborted.', file=sys.stderr)
+        sys.exit(1)
 
     # Sort data as a function of shot and run numbers
     sorted_indices = sorted(data, key = lambda x: data[x]['characteristics']['shot']+data[x]['characteristics']['run'])
@@ -133,9 +133,9 @@ def rec(data={},path=os.getcwd(),extension='.yaml',choice=['shot','run','ip','b0
       try:
           table[1] = table[1] + " "*space_length + eval('disp_'+str(choice[i]))
       except:
-          print("The argument "+str(choice[i]) + " is not correct.")
-          print("----> Aborted.")
-          exit()
+          print("The argument "+str(choice[i]) + " is not correct.", file=sys.stderr)
+          print("----> Aborted.", file=sys.stderr)
+          exit(1)
     dimline = len(table[1])
 
     # Fill the table
@@ -308,12 +308,12 @@ if args['choice'] != None:
         input_choice = args['choice']
         choice = eval(str("""['"""+re.sub(""",""", r"""','""", input_choice)+"""']"""))
     except:
-        print("------------------------------------------------------------------")
-        print("Wrong way to write your list of variables to display")
-        print("You wrote "+str(args['choice']))
-        print("Try e.g. this way: "+ """ scenario_summary -c shot,run,workflow """)
-        print("------------------------------------------------------------------")
-        sys.exit(0)
+        print("------------------------------------------------------------------", file=sys.stderr)
+        print("Wrong way to write your list of variables to display", file=sys.stderr)
+        print("You wrote "+str(args['choice']), file=sys.stderr)
+        print("Try e.g. this way: "+ """ scenario_summary -c shot,run,workflow """, file=sys.stderr)
+        print("------------------------------------------------------------------", file=sys.stderr)
+        sys.exit(1)
 else:
   choice = ['shot','run','machine','ref_name','ip','b0','fuelling','confinement','workflow']
 

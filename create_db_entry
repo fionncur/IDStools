@@ -36,25 +36,25 @@ try:
     input = imas.ids(shot,run)
     input.open_env(str(user),str(machine),'3')
 except:
-    print('Shot ' + str(shot) + ', run ' + str(run) + ' does not exist')
-    print('----> Aborted.')
-    exit()
+    print('Shot ' + str(shot) + ', run ' + str(run) + ' does not exist', file=sys.stderr)
+    print('----> Aborted.', file=sys.stderr)
+    exit(1)
 
 # Read necessary IDSs from database
 try:
     input.equilibrium.get()
     equilibrium = input.equilibrium
 except:
-    print("The equilibrium IDS is absent from the input datafile")
-    print("----> Aborted.")
-    exit()
+    print("The equilibrium IDS is absent from the input datafile", file=sys.stderr)
+    print("----> Aborted.", file=sys.stderr)
+    exit(1)
 try:
     input.core_profiles.get()
     core_profiles = input.core_profiles
 except:
-    print("The core_profiles IDS is absent from the input datafile")
-    print("----> Aborted.")
-    exit()
+    print("The core_profiles IDS is absent from the input datafile", file=sys.stderr)
+    print("----> Aborted.", file=sys.stderr)
+    exit(1)
 try:
     input.summary.get()
     summary = input.summary
@@ -81,9 +81,9 @@ try:
     else:
       magnetic_field = max(equilibrium.vacuum_toroidal_field.b0)
 except:
-    print("equilibrium.time_slice[:].global_quantities.magnetic_axis.b_tor could not be read")
-    print("----> Aborted.")
-    exit()
+    print("equilibrium.time_slice[:].global_quantities.magnetic_axis.b_tor could not be read", file=sys.stderr)
+    print("----> Aborted.", file=sys.stderr)
+    exit(1)
 
 try:
     plasma_current = 0
@@ -91,9 +91,9 @@ try:
         if abs(equilibrium.time_slice[islice].global_quantities.ip)*1.e-6 > plasma_current:
             plasma_current = equilibrium.time_slice[islice].global_quantities.ip*1.e-6
 except:
-    print("equilibrium.time_slice[:].global_quantities.ip could not be read")
-    print("----> Aborted.")
-    exit()
+    print("equilibrium.time_slice[:].global_quantities.ip could not be read", file=sys.stderr)
+    print("----> Aborted.", file=sys.stderr)
+    exit(1)
 
 try:
     central_electron_density = 0
@@ -102,9 +102,9 @@ try:
             central_electron_density = core_profiles.profiles_1d[islice].electrons.density[0]
             the_slice = islice
 except:
-    print("core_profiles.profiles_1d[:].electrons.density[0] could not be read")
-    print("----> Aborted.")
-    exit()
+    print("core_profiles.profiles_1d[:].electrons.density[0] could not be read", file=sys.stderr)
+    print("----> Aborted.", file=sys.stderr)
+    exit(1)
 
 try:
     nspecies = len(core_profiles.profiles_1d[0].ion)

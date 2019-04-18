@@ -26,11 +26,11 @@ if del_email!=None:
     delflag = 1
 else:
     if (firstname==None) | (name==None) | (email==None):
-        print('''  You need to specify your firstname, name and e-mail address''')
-        print('''  Type 'watch_db_entry -h' for help''')
-        print('''  ----> Aborted.''')
+        print('''  You need to specify your firstname, name and e-mail address''', file=sys.stderr)
+        print('''  Type 'watch_db_entry -h' for help''', file=sys.stderr)
+        print('''  ----> Aborted.''', file=sys.stderr)
         import sys
-        sys.exit(0)
+        sys.exit(1)
 
 # ------------------------------------------------------------------------------------------------------------
 

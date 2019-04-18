@@ -40,8 +40,9 @@ try:
         db = opendb.ImasDb(shot,run,user,machine,dataversion,True,False)
 except:
         import sys
+        print("%s: %s"%(sys.exc_info()[0],sys.exc_info()[1]), file=sys.stderr)
         sys.exit("Unable to open database")
-	
+
 alltimes = db.all_times()
 
 for idsname, times in alltimes:
