@@ -55,8 +55,8 @@ try:
     input = imas.ids(shot,run)
     input.open_env(str(user),str(machine),'3')
 except:
-    print('Shot ' + str(shot) + ', run ' + str(run) + ' does not exist')
-    print('----> Aborted.')
+    print('Shot ' + str(shot) + ', run ' + str(run) + ' does not exist', file=sys.stderr)
+    print('----> Aborted.', file=sys.stderr)
     exit()
 
 if user == 'public':
@@ -68,8 +68,8 @@ try:
     input.core_profiles.get()
     core_profiles = input.core_profiles
 except:
-    print('The core_profiles IDS is absent from the input datafile')
-    print('----> Aborted.')
+    print('The core_profiles IDS is absent from the input datafile', file=sys.stderr)
+    print('----> Aborted.', file=sys.stderr)
     exit()
 
 hostdir = os.environ["HOSTNAME"]+":"+MDSPLUS_TREE_BASE_0
@@ -129,8 +129,8 @@ try:
         nrho = len(core_profiles.profiles_1d[it].grid.rho_tor)
         rho_tor_norm = core_profiles.profiles_1d[it].grid.rho_tor/core_profiles.profiles_1d[it].grid.rho_tor[nrho-1]
 except:
-    print('core_profiles.profiles_1d[:].grid.rho_tor_norm and rho_tor could not be read')
-    print('----> Aborted.')
+    print('core_profiles.profiles_1d[:].grid.rho_tor_norm and rho_tor could not be read', file=sys.stderr)
+    print('----> Aborted.', file=sys.stderr)
     exit()
 
 # Species A number (not mandatory)
@@ -140,7 +140,7 @@ try:
     for ispecies in range(nspecies):
         a[ispecies] = int(core_profiles.profiles_1d[it].ion[ispecies].element[0].a)
 except:
-    print('core_profiles.profiles_1d[:].ion[0].element[0].a could not be read')
+    print('core_profiles.profiles_1d[:].ion[0].element[0].a could not be read', file=sys.stderr)
     plot_compo = 0
 
 # Species Z number (not mandatory)
@@ -150,7 +150,7 @@ try:
     for ispecies in range(nspecies):
         z[ispecies] = int(core_profiles.profiles_1d[it].ion[ispecies].element[0].z_n)
 except:
-    print('core_profiles.profiles_1d[:].ion[0].element[0].z_n could not be read')
+    print('core_profiles.profiles_1d[:].ion[0].element[0].z_n could not be read', file=sys.stderr)
     plot_compo = 0
 
 # Volume profile (not mandatory)
@@ -163,37 +163,37 @@ try:
             exit()
         volume = equilibrium.time_slice[it].profiles_1d.volume
         if len(volume) == len(core_profiles.profiles_1d[it].electrons.density):
-            print('   core_profiles.profiles_1d[:].grid.volume could not be read')
-            print('   ----> equilibrium.time_slice[:].profiles_1d.volume used instead')
-            print('   (possible because the resolution is the same, but maybe not correct)')
+            print('   core_profiles.profiles_1d[:].grid.volume could not be read', file=sys.stderr)
+            print('   ----> equilibrium.time_slice[:].profiles_1d.volume used instead', file=sys.stderr)
+            print('   (possible because the resolution is the same, but maybe not correct)', file=sys.stderr)
         else:
             exit()
 except:
-    print('core_profiles.profiles_1d[:].grid.volume could not be read')
+    print('core_profiles.profiles_1d[:].grid.volume could not be read', file=sys.stderr)
     plot_compo = 0
 
 # Zeff profile (not mandatory)
 if len(core_profiles.profiles_1d[it].zeff) < 1:
-    print('core_profiles.profiles_1d[:].zeff could not be read')
+    print('core_profiles.profiles_1d[:].zeff could not be read', file=sys.stderr)
     for itime in range(ntime):
         core_profiles.profiles_1d[itime].zeff = asarray([nan]*nrho)
 
 # Ne profile (not mandatory)
 if len(core_profiles.profiles_1d[it].electrons.density) < 1:
-    print('core_profiles.profiles_1d[:].electrons.density could not be read')
+    print('core_profiles.profiles_1d[:].electrons.density could not be read', file=sys.stderr)
     for itime in range(ntime):
         core_profiles.profiles_1d[itime].electrons.density = asarray([nan]*nrho)
 
 # Te profile (not mandatory)
 if len(core_profiles.profiles_1d[it].electrons.temperature) < 1:
-    print('core_profiles.profiles_1d[:].electrons.temperature could not be read')
+    print('core_profiles.profiles_1d[:].electrons.temperature could not be read', file=sys.stderr)
     for itime in range(ntime):
         core_profiles.profiles_1d[itime].electrons.temperature = asarray([nan]*nrho)
 
 # Ti profile (not mandatory)
 ti_flag = 0
 if len(core_profiles.profiles_1d[it].t_i_average) < 1:
-    print('core_profiles.profiles_1d[:].t_i_average could not be read')
+    print('core_profiles.profiles_1d[:].t_i_average could not be read', file=sys.stderr)
     for itime in range(ntime):
         core_profiles.profiles_1d[itime].t_i_average = asarray([nan]*nrho)
 else:
@@ -201,7 +201,7 @@ else:
 
 for ispecies in range(nspecies):
     if len(core_profiles.profiles_1d[it].ion[ispecies].temperature) < 1:
-        print('core_profiles.profiles_1d[:].ion['+str(ispecies)+'].temperature could not be read')
+        print('core_profiles.profiles_1d[:].ion['+str(ispecies)+'].temperature could not be read', file=sys.stderr)
         for itime in range(ntime):
             core_profiles.profiles_1d[itime].ion[ispecies].temperature = asarray([nan]*nrho)
     else:
@@ -211,7 +211,7 @@ for ispecies in range(nspecies):
 # Ni profile (not mandatory)
 for ispecies in range(nspecies):
     if len(core_profiles.profiles_1d[it].ion[ispecies].density) < 1:
-        print('core_profiles.profiles_1d[:].ion['+str(ispecies)+'].density could not be read')
+        print('core_profiles.profiles_1d[:].ion['+str(ispecies)+'].density could not be read', file=sys.stderr)
         for itime in range(ntime):
             core_profiles.profiles_1d[itime].ion[ispecies].density = asarray([nan]*nrho)
 
@@ -219,13 +219,13 @@ for ispecies in range(nspecies):
 vtor_flag = 0
 for ispecies in range(nspecies):
     if len(core_profiles.profiles_1d[it].ion[ispecies].velocity.toroidal) < 1:
-        print('core_profiles.profiles_1d[:].ion['+str(ispecies)+'].velocity.toroidal could not be read')
+        print('core_profiles.profiles_1d[:].ion['+str(ispecies)+'].velocity.toroidal could not be read', file=sys.stderr)
         for itime in range(ntime):
             core_profiles.profiles_1d[itime].ion[ispecies].velocity.toroidal = asarray([nan]*nrho)
     else:
         vtor_flag = 1
     if len(core_profiles.profiles_1d[it].ion[ispecies].velocity_tor) < 1:
-        print('core_profiles.profiles_1d[:].ion['+str(ispecies)+'].velocity_tor could not be read')
+        print('core_profiles.profiles_1d[:].ion['+str(ispecies)+'].velocity_tor could not be read', file=sys.stderr)
         for itime in range(ntime):
             core_profiles.profiles_1d[itime].ion[ispecies].velocity_tor = asarray([nan]*nrho)
     else:
@@ -236,13 +236,13 @@ for ispecies in range(nspecies):
 vpol_flag = 0
 for ispecies in range(nspecies):
     if len(core_profiles.profiles_1d[it].ion[ispecies].velocity.poloidal) < 1:
-        print('core_profiles.profiles_1d[:].ion['+str(ispecies)+'].velocity.poloidal could not be read')
+        print('core_profiles.profiles_1d[:].ion['+str(ispecies)+'].velocity.poloidal could not be read', file=sys.stderr)
         for itime in range(ntime):
             core_profiles.profiles_1d[itime].ion[ispecies].velocity.poloidal = asarray([nan]*nrho)
     else:
         vpol_flag = 1
     if len(core_profiles.profiles_1d[it].ion[ispecies].velocity_pol) < 1:
-        print('core_profiles.profiles_1d[:].ion['+str(ispecies)+'].velocity_pol could not be read')
+        print('core_profiles.profiles_1d[:].ion['+str(ispecies)+'].velocity_pol could not be read', file=sys.stderr)
         for itime in range(ntime):
             core_profiles.profiles_1d[itime].ion[ispecies].velocity_pol = asarray([nan]*nrho)
     else:
@@ -599,7 +599,7 @@ try:
     fig.savefig('Kinetic'+'_shot_'+str(shot)+'_run_'+str(run)+'_time_'+'%.1f' % time+'.png', dpi=100)
     print('----> Figure saved to '+'Kinetic'+'_shot_'+str(shot)+'_run_'+str(run)+'_time_'+'%.1f' % time+'.png')
 except:
-    print('The figure could not be saved (check local permissions).')
+    print('The figure could not be saved (check local permissions).', file=sys.stderr)
 
 plt.show()
 

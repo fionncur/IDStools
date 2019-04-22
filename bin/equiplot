@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import argparse,os, imas
+import sys
 
 # ----------------------------------------------------------------------
 
@@ -55,8 +56,8 @@ try:
     input = imas.ids(shot,run)
     input.open_env(str(user),str(machine),'3')
 except:
-    print("Shot " + str(shot) + ", run " + str(run) + " does not exist")
-    print("----> Aborted.")
+    print("Shot " + str(shot) + ", run " + str(run) + " does not exist", file=sys.stderr)
+    print("----> Aborted.", file=sys.stderr)
     exit()
 
 if user == 'public':
@@ -68,24 +69,24 @@ try:
     input.equilibrium.get()
     equilibrium = input.equilibrium
 except:
-    print("The equilibrium IDS is absent from the input datafile")
-    print("----> Aborted.")
+    print("The equilibrium IDS is absent from the input datafile", file=sys.stderr)
+    print("----> Aborted.", file=sys.stderr)
     exit()
 
 if len(equilibrium.time_slice) == 0:
-    print("The equilibrium IDS is empty: len(equilibrium.time_slice)=0")
-    print("----> Aborted.")
+    print("The equilibrium IDS is empty: len(equilibrium.time_slice)=0", file=sys.stderr)
+    print("----> Aborted.", file=sys.stderr)
     exit()
 
 # phi(R,Z) for rho(R,Z) calculation
 if len(equilibrium.time_slice[0].profiles_2d[0].phi) < 1:
-    print("equilibrium.time_slice[:].profiles_2d[0].phi could not be read")
+    print("equilibrium.time_slice[:].profiles_2d[0].phi could not be read", file=sys.stderr)
     flag_rho2d = 0
 
 # psi(R,Z)
 if len(equilibrium.time_slice[0].profiles_2d[0].psi) < 1:
-    print("equilibrium.time_slice[:].profiles_2d[0].psi could not be read")
-    print("----> Aborted.")
+    print("equilibrium.time_slice[:].profiles_2d[0].psi could not be read", file=sys.stderr)
+    print("----> Aborted.", file=sys.stderr)
     exit()
 
 # ----------------------------------------------------------------------
@@ -168,6 +169,6 @@ try:
     fig.savefig('Equilibrium'+'_shot_'+str(shot)+'_run_'+str(run)+'_time_'+'%.1f' % time+'.png', dpi=100)
     print('----> Figure saved to '+'Equilibrium'+'_shot_'+str(shot)+'_run_'+str(run)+'_time_'+'%.1f' % time+'.png')
 except:
-    print('The figure could not be saved (check local permissions).')
+    print('The figure could not be saved (check local permissions).', file=sys.stderr)
 plt.show()
 

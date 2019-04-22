@@ -54,8 +54,8 @@ try:
     input = imas.ids(shot,run)
     input.open_env(str(user),str(machine),'3')
 except:
-    print('Shot ' + str(shot) + ', run ' + str(run) + ' does not exist')
-    print('----> Aborted.')
+    print('Shot ' + str(shot) + ', run ' + str(run) + ' does not exist', file=sys.stderr)
+    print('----> Aborted.', file=sys.stderr)
     exit()
 
 if user == 'public':
@@ -67,8 +67,8 @@ try:
     input.core_profiles.get()
     core_profiles = input.core_profiles
 except:
-    print('The core_profiles IDS is absent from the input datafile')
-    print('----> Aborted.')
+    print('The core_profiles IDS is absent from the input datafile', file=sys.stderr)
+    print('----> Aborted.', file=sys.stderr)
     exit()
 
 hostdir = os.environ["HOSTNAME"]+":"+MDSPLUS_TREE_BASE_0
@@ -130,8 +130,8 @@ try:
         nrho = len(core_profiles.profiles_1d[it].grid.rho_tor)
         rho_tor_norm = core_profiles.profiles_1d[it].grid.rho_tor/core_profiles.profiles_1d[it].grid.rho_tor[nrho-1]
 except:
-    print('core_profiles.profiles_1d[:].grid.rho_tor_norm and rho_tor could not be read')
-    print('----> Aborted.')
+    print('core_profiles.profiles_1d[:].grid.rho_tor_norm and rho_tor could not be read', file=sys.stderr)
+    print('----> Aborted.', file=sys.stderr)
     exit()
 
 # Species A number (not mandatory)
@@ -141,7 +141,7 @@ try:
     for ispecies in range(nspecies):
         a[ispecies] = int(core_profiles.profiles_1d[it].ion[ispecies].element[0].a)
 except:
-    print('core_profiles.profiles_1d[:].ion[0].element[0].a could not be read')
+    print('core_profiles.profiles_1d[:].ion[0].element[0].a could not be read', file=sys.stderr)
     plot_compo = 0
 
 # Species Z number (not mandatory)
@@ -151,42 +151,42 @@ try:
     for ispecies in range(nspecies):
         z[ispecies] = int(core_profiles.profiles_1d[it].ion[ispecies].element[0].z_n)
 except:
-    print('core_profiles.profiles_1d[:].ion[0].element[0].z_n could not be read')
+    print('core_profiles.profiles_1d[:].ion[0].element[0].z_n could not be read', file=sys.stderr)
     plot_compo = 0
 
 # Volume profile (not mandatory)
 try:
     volume = core_profiles.profiles_1d[it].grid.volume
 except:
-    print('core_profiles.profiles_1d[:].grid.volume could not be read')
+    print('core_profiles.profiles_1d[:].grid.volume could not be read', file=sys.stderr)
 
 # Number of ions
 nions = len(core_profiles.profiles_1d[it].ion)
 
 # E-field profile
 if len(core_profiles.profiles_1d[0].e_field.radial) < 1:
-    print('core_profiles.profiles_1d[0].e_field.radial could not be read')
+    print('core_profiles.profiles_1d[0].e_field.radial could not be read', file=sys.stderr)
     for itime in range(ntime):
         core_profiles.profiles_1d[itime].e_field.radial = asarray([nan]*nrho)
 
 # Toroidal velocity profile
 for iion in range(nions):
     if len(core_profiles.profiles_1d[0].ion[iion].velocity.toroidal) < 1:
-        print('core_profiles.profiles_1d[0].ion[iion].velocity.toroidal could not be read')
+        print('core_profiles.profiles_1d[0].ion[iion].velocity.toroidal could not be read', file=sys.stderr)
         for itime in range(ntime):
             core_profiles.profiles_1d[itime].ion[iion].velocity.toroidal = asarray([nan]*nrho)
 
 # Poloidal velocity profile
 for iion in range(nions):
     if len(core_profiles.profiles_1d[0].ion[iion].velocity.poloidal) < 1:
-        print('core_profiles.profiles_1d[0].ion[iion].velocity.poloidal could not be read')
+        print('core_profiles.profiles_1d[0].ion[iion].velocity.poloidal could not be read', file=sys.stderr)
         for itime in range(ntime):
             core_profiles.profiles_1d[itime].ion[iion].velocity.poloidal = asarray([nan]*nrho)
 
 # Diamagnetic velocity profile
 for iion in range(nions):
     if len(core_profiles.profiles_1d[0].ion[iion].velocity.diamagnetic) < 1:
-        print('core_profiles.profiles_1d[0].ion[iion].velocity.diamagnetic could not be read')
+        print('core_profiles.profiles_1d[0].ion[iion].velocity.diamagnetic could not be read', file=sys.stderr)
         for itime in range(ntime):
             core_profiles.profiles_1d[itime].ion[iion].velocity.diamagnetic = asarray([nan]*nrho)
 
@@ -325,7 +325,7 @@ try:
     fig.savefig('Neutrons'+'_shot_'+str(shot)+'_run_'+str(run)+'_time_'+'%.1f' % time+'.png', dpi=100)
     print('----> Figure saved to '+'Neutrons'+'_shot_'+str(shot)+'_run_'+str(run)+'_time_'+'%.1f' % time+'.png')
 except:
-    print('The figure could not be saved (check local permissions).')
+    print('The figure could not be saved (check local permissions).', file=sys.stderr)
 
 plt.show()
 

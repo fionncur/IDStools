@@ -15,7 +15,7 @@ def get_user_db_directory(user=None):
     if (user=="public"):
         publichome = os.getenv("IMASPUBLICDBHOME")
         if (publichome == None):
-            print("Environment variable IMASPUBLICDBHOME is not defined. Quitting.",file=sys.stderr)
+            print("Environment variable IMASPUBLICDBHOME is not defined. Quitting.", file=sys.stderr)
             sys.exit(1)
         return publichome
     else:
@@ -160,7 +160,7 @@ def list_databases_mdsplus(user, tokamak, dataversion):
                     dbs[shot] = list()
                 dbs[shot].append(run)
             except:
-                 print("EXC: ", sys.exc_info())
+                 print("EXC: ", sys.exc_info(), file=sys.stderr)
                  logging.warn("Malformed MDSPlus database filename: " + join(root, filename))
 
     # create sorted lists

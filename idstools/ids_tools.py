@@ -6,6 +6,7 @@ Service classes for handling IDSs
 from .helper import *
 import logging
 import imas
+import sys
 
 # List of all IDS names to be read if 'all' is supplied as a IDS name
 ALL_IDSS = ('edge')
@@ -132,7 +133,7 @@ class ImasDb():
                     times = self.times(idsname)
                 except Exception as exc:
                     times = []
-                    print("ERROR! IDS '" + idsname + "': Reading time array fails due to following problem : " + str(exc)) 
+                    print("ERROR! IDS '" + idsname + "': Reading time array fails due to following problem : " + str(exc), file=sys.stderr)
                 if times is not None and len(times):
                     result.append( (idsname, times) )
 

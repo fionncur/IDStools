@@ -81,7 +81,7 @@ def compare(x, y, parent):
 
 if __name__ == '__main__':
     if len(sys.argv) != 6:
-        print('Usage: idsdiff <IDSNAME> <SHOTa> <RUNa> <SHOTb> <RUNb>')
+        print('Usage: idsdiff <IDSNAME> <SHOTa> <RUNa> <SHOTb> <RUNb>', file=sys.stderr)
         exit(1)
 
     compare(get_ids(int(sys.argv[2]), int(sys.argv[3]), sys.argv[1]),\

@@ -23,7 +23,7 @@ try:
     db = ct.ImasDb(pars["shot"], pars["run"], pars["user"], pars["tokamakname"], pars["dataversion"], True, pars["hdf5"])
 except:
     print("Unable to open database", file=sys.stderr)
-    print(sys.exc_info()[0])
+    print(sys.exc_info()[0], file=sys.stderr)
     sys.exit(1)
 
 alltimes = db.all_times()

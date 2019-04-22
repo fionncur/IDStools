@@ -140,7 +140,7 @@ if not args or args[0] == "list" or args[0] == "slices" or args[0] == "times":
         try:
             shotnum = int(args[1])
         except:
-            print("Second argument must be an integer",file=sys.stderr)
+            print("Second argument must be an integer", file=sys.stderr)
             sys.exit(1)
 
     runnum = None
@@ -148,13 +148,13 @@ if not args or args[0] == "list" or args[0] == "slices" or args[0] == "times":
         try:
             runnum = int(args[2])
         except:
-            print("Third argument must be an integer",file=sys.stderr)
+            print("Third argument must be an integer", file=sys.stderr)
             sys.exit(1)
 
     if len(args) > 0 and (args[0] == "slices" or args[0] == "times"):
         envdv = os.getenv("DATAVERSION")
         if opts.version is not None and envdv != opts.version:
-            print("Cannot access IDS times for data version differing from current $DATAVERSION",file=sys.stderr)
+            print("Cannot access IDS times for data version differing from current $DATAVERSION", file=sys.stderr)
             sys.exit(1)
 
     if opts.backend:
@@ -180,4 +180,4 @@ elif args[0] == "dataversions":
         print(extended(dv, VERSION_STR_LEN) + " " + print_vector(tokamaks, TOKAMAK_STR_LEN))
 
 else:
-    print("Unknown command: " + args[0] + ". Possible commands are (none), list, tokamaks")
+    print("Unknown command: " + args[0] + ". Possible commands are (none), list, tokamaks", file=sys.stderr)

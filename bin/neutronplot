@@ -53,8 +53,8 @@ try:
     input = imas.ids(shot,run)
     input.open_env(str(user),str(machine),'3')
 except:
-    print('Shot ' + str(shot) + ', run ' + str(run) + ' does not exist')
-    print('----> Aborted.')
+    print('Shot ' + str(shot) + ', run ' + str(run) + ' does not exist', file=sys.stderr)
+    print('----> Aborted.', file=sys.stderr)
     exit()
 
 if user == 'public':
@@ -66,8 +66,8 @@ try:
     input.distribution_sources.get()
     distribution_sources = input.distribution_sources
 except:
-    print('The distribution_sources IDS is absent from the input datafile')
-    print('----> Aborted.')
+    print('The distribution_sources IDS is absent from the input datafile', file=sys.stderr)
+    print('----> Aborted.', file=sys.stderr)
     exit()
 
 hostdir = os.environ["HOSTNAME"]+":"+MDSPLUS_TREE_BASE_0
@@ -122,20 +122,20 @@ try:
             nrho = len(distribution_sources.source[0].profiles_1d[0].grid.rho_tor)
             rho_tor_norm = distribution_sources.source[0].profiles_1d[0].grid.rho_tor/distribution_sources.source[0].profiles_1d[0].grid.rho_tor[nrho-1]
 except:
-    print('distribution_sources.source[0].profiles_1d[0].grid.rho_tor(_norm) could not be read')
-    print('----> Aborted.')
+    print('distribution_sources.source[0].profiles_1d[0].grid.rho_tor(_norm) could not be read', file=sys.stderr)
+    print('----> Aborted.', file=sys.stderr)
     exit()
 
 if nrho==0:
-    print('distribution_sources.source[0].profiles_1d[0].grid.rho_tor(_norm) is empty')
-    print('----> Aborted.')
+    print('distribution_sources.source[0].profiles_1d[0].grid.rho_tor(_norm) is empty', file=sys.stderr)
+    print('----> Aborted.', file=sys.stderr)
     exit()
 
 # Volume profile (not mandatory)
 try:
     volume = distribution_sources.source[0].profiles_1d[0].grid.volume
 except:
-    print('distribution_sources.source[0].profiles_1d[0].grid.volume could not be read')
+    print('distribution_sources.source[0].profiles_1d[0].grid.volume could not be read', file=sys.stderr)
 
 # Number of distribution sources
 nsources = len(distribution_sources.source)
@@ -143,7 +143,7 @@ nsources = len(distribution_sources.source)
 # Toroidal velocity profile
 for isource in range(nsources):
     if len(distribution_sources.source[isource].profiles_1d[0].particles) < 1:
-        print('distribution_sources.source[isource].profiles_1d[0].particles could not be read')
+        print('distribution_sources.source[isource].profiles_1d[0].particles could not be read', file=sys.stderr)
         for itime in range(ntime):
             distribution_sources.source[isource].profiles_1d[0].particles = asarray([nan]*nrho)
 
@@ -239,7 +239,7 @@ try:
     fig.savefig('Neutrons'+'_shot_'+str(shot)+'_run_'+str(run)+'_time_'+'%.1f' % time+'.png', dpi=100)
     print('----> Figure saved to '+'Neutrons'+'_shot_'+str(shot)+'_run_'+str(run)+'_time_'+'%.1f' % time+'.png')
 except:
-    print('The figure could not be saved (check local permissions).')
+    print('The figure could not be saved (check local permissions).', file=sys.stderr)
 
 plt.show()
 

@@ -56,8 +56,8 @@ try:
     input = imas.ids(shot,run)
     input.open_env(str(user),str(machine),'3')
 except:
-    print('Shot ' + str(shot) + ', run ' + str(run) + ' does not exist')
-    print('----> Aborted.')
+    print('Shot ' + str(shot) + ', run ' + str(run) + ' does not exist', file=sys.stderr)
+    print('----> Aborted.', file=sys.stderr)
     exit()
 
 if user == 'public':
@@ -69,8 +69,8 @@ try:
     input.core_profiles.get()
     core_profiles = input.core_profiles
 except:
-    print('The core_profiles IDS is absent from the input datafile')
-    print('----> Aborted.')
+    print('The core_profiles IDS is absent from the input datafile', file=sys.stderr)
+    print('----> Aborted.', file=sys.stderr)
     exit()
 
 hostdir = os.environ["HOSTNAME"]+":"+MDSPLUS_TREE_BASE_0
@@ -129,13 +129,13 @@ try:
             nrho = len(core_profiles.profiles_1d[0].grid.rho_tor)
             rho_tor_norm = core_profiles.profiles_1d[0].grid.rho_tor/core_profiles.profiles_1d[0].grid.rho_tor_norm
 except:
-    print('core_profiles.profiles_1d[0].grid.rho_tor/core_profiles.profiles_1d[0].grid.rho_tor(_norm) could not be read')
-    print('----> Aborted.')
+    print('core_profiles.profiles_1d[0].grid.rho_tor/core_profiles.profiles_1d[0].grid.rho_tor(_norm) could not be read', file=sys.stderr)
+    print('----> Aborted.', file=sys.stderr)
     exit()
 
 if nrho==0:
-    print('core_profiles.profiles_1d[0].grid.rho_tor/core_profiles.profiles_1d[0].grid.rho_tor(_norm) is empty')
-    print('----> Aborted.')
+    print('core_profiles.profiles_1d[0].grid.rho_tor/core_profiles.profiles_1d[0].grid.rho_tor(_norm) is empty', file=sys.stderr)
+    print('----> Aborted.', file=sys.stderr)
     exit()
 
 # ------------------------------
@@ -144,7 +144,7 @@ if nrho==0:
 try:
     volume = core_profiles.profiles_1d[0].grid.volume
 except:
-    print('core_profiles.profiles_1d[0].grid.volume could not be read')
+    print('core_profiles.profiles_1d[0].grid.volume could not be read', file=sys.stderr)
 
 # ---------------------------------------------
 # General tests whether variables exist or not
@@ -152,51 +152,51 @@ except:
 
 nions = len(core_profiles.profiles_1d[0].ion)
 if len(core_profiles.profiles_1d[0].ion[0].pressure) < 1:
-    print('core_profiles.profiles_1d[0].ion[0].pressure could not be read')
+    print('core_profiles.profiles_1d[0].ion[0].pressure could not be read', file=sys.stderr)
     for iion in range(nions):
         core_profiles.profiles_1d[0].ion[iion].pressure = asarray([nan]*nrho)
 
 if len(core_profiles.profiles_1d[0].ion[0].pressure_thermal) < 1:
-    print('core_profiles.profiles_1d[0].ion[0].pressure_thermal could not be read')
+    print('core_profiles.profiles_1d[0].ion[0].pressure_thermal could not be read', file=sys.stderr)
     for iion in range(nions):
         core_profiles.profiles_1d[0].ion[iion].pressure_thermal = asarray([nan]*nrho)
 
 if len(core_profiles.profiles_1d[0].ion[0].pressure_fast_parallel) < 1:
-    print('core_profiles.profiles_1d[0].ion[0].pressure_fast_parallel could not be read')
+    print('core_profiles.profiles_1d[0].ion[0].pressure_fast_parallel could not be read', file=sys.stderr)
     for iion in range(nions):
         core_profiles.profiles_1d[0].ion[iion].pressure_fast_parallel = asarray([nan]*nrho)
 
 if len(core_profiles.profiles_1d[0].ion[0].pressure_fast_perpendicular) < 1:
-    print('core_profiles.profiles_1d[0].ion[0].pressure_fast_perpendicular could not be read')
+    print('core_profiles.profiles_1d[0].ion[0].pressure_fast_perpendicular could not be read', file=sys.stderr)
     for iion in range(nions):
         core_profiles.profiles_1d[0].ion[iion].pressure_fast_perpendicular = asarray([nan]*nrho)
 
 if len(core_profiles.profiles_1d[0].electrons.pressure) < 1:
-    print('core_profiles.profiles_1d[0].electrons.pressure could not be read')
+    print('core_profiles.profiles_1d[0].electrons.pressure could not be read', file=sys.stderr)
     core_profiles.profiles_1d[0].electrons.pressure = asarray([nan]*nrho)
 
 if len(core_profiles.profiles_1d[0].electrons.pressure_thermal) < 1:
-    print('core_profiles.profiles_1d[0].electrons.pressure_thermal could not be read')
+    print('core_profiles.profiles_1d[0].electrons.pressure_thermal could not be read', file=sys.stderr)
     core_profiles.profiles_1d[0].electrons.pressure_thermal = asarray([nan]*nrho)
 
 if len(core_profiles.profiles_1d[0].electrons.pressure_fast_parallel) < 1:
-    print('core_profiles.profiles_1d[0].electrons.pressure_fast_parallel could not be read')
+    print('core_profiles.profiles_1d[0].electrons.pressure_fast_parallel could not be read', file=sys.stderr)
     core_profiles.profiles_1d[0].electrons.pressure_fast_parallel = asarray([nan]*nrho)
 
 if len(core_profiles.profiles_1d[0].electrons.pressure_fast_perpendicular) < 1:
-    print('core_profiles.profiles_1d[0].electrons.pressure_fast_perpendicular could not be read')
+    print('core_profiles.profiles_1d[0].electrons.pressure_fast_perpendicular could not be read', file=sys.stderr)
     core_profiles.profiles_1d[0].electrons.pressure_fast_perpendicular = asarray([nan]*nrho)
 
 if len(core_profiles.profiles_1d[0].pressure_thermal) < 1:
-    print('core_profiles.profiles_1d[0].pressure_thermal could not be read')
+    print('core_profiles.profiles_1d[0].pressure_thermal could not be read', file=sys.stderr)
     core_profiles.profiles_1d[0].pressure_thermal = asarray([nan]*nrho)
 
 if len(core_profiles.profiles_1d[0].pressure_parallel) < 1:
-    print('core_profiles.profiles_1d[0].pressure_parallel could not be read')
+    print('core_profiles.profiles_1d[0].pressure_parallel could not be read', file=sys.stderr)
     core_profiles.profiles_1d[0].pressure_parallel = asarray([nan]*nrho)
 
 if len(core_profiles.profiles_1d[0].pressure_perpendicular) < 1:
-    print('core_profiles.profiles_1d[0].pressure_perpendicular could not be read')
+    print('core_profiles.profiles_1d[0].pressure_perpendicular could not be read', file=sys.stderr)
     core_profiles.profiles_1d[0].pressure_perpendicular = asarray([nan]*nrho)
 
 # ----------------------------------------------------------------------------------------
@@ -209,13 +209,13 @@ if len(core_profiles.profiles_1d[0].pressure_perpendicular) < 1:
 if len(core_profiles.profiles_1d[0].pressure_ion_total) > 1:
     pressure_ion_total = core_profiles.profiles_1d[0].pressure_ion_total
 else:
-    print('core_profiles.profiles_1d[0].pressure_ion_total could not be read')
+    print('core_profiles.profiles_1d[0].pressure_ion_total could not be read', file=sys.stderr)
     if len(core_profiles.profiles_1d[0].ion[0].pressure) > 1:
         pressure_ion_total = 0.
         for iion in range(nions):
             pressure_ion_total = pressure_ion_total + core_profiles.profiles_1d[0].ion[iion].pressure
     else:
-        print('core_profiles.profiles_1d[0].ion[0].pressure could not be read')
+        print('core_profiles.profiles_1d[0].ion[0].pressure could not be read', file=sys.stderr)
         pressure_ion_total = asarray([nan]*nrho)
 
 pressure_ion_thermal            = 0.
@@ -363,7 +363,7 @@ try:
     fig.savefig('Pressure'+'_shot_'+str(shot)+'_run_'+str(run)+'_time_'+'%.1f' % time+'.png', dpi=100)
     print('----> Figure saved to '+'Pressure'+'_shot_'+str(shot)+'_run_'+str(run)+'_time_'+'%.1f' % time+'.png')
 except:
-    print('The figure could not be saved (check local permissions).')
+    print('The figure could not be saved (check local permissions).', file=sys.stderr)
 
 plt.show()
 
