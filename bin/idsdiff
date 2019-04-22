@@ -43,7 +43,7 @@ def compare(x, y, parent):
             continue
 
         # treatment of struct_array and list of strings
-        if type(xo).__name__ == 'list': 
+        if type(xo).__name__ == 'list':
             if len(xo) != len(yo):
                 print('%s.%s is of different length in both IDSs' % (parent, key))
             else:

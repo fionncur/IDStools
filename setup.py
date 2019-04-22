@@ -18,7 +18,7 @@ def get_version():
             p = version.split('-')
             version = p[0]+'.dev'+p[1]+'+'+''.join(p[2:])
     return version
-        
+
 setup(name='IMAS IDS Tools',
       version       = get_version(),
       description   = 'IMAS IDS Python tools',

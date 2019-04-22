@@ -445,7 +445,7 @@ def CustomLegend_wf(legend):
     for label in legend.get_texts():
         label.set_fontsize(10)
     for label in legend.get_lines():
-        label.set_linewidth(1.5)  # the legend line width    
+        label.set_linewidth(1.5)  # the legend line width
     return
 
 def CustomLegend_pr(legend):
@@ -454,7 +454,7 @@ def CustomLegend_pr(legend):
     for label in legend.get_texts():
         label.set_fontsize(7)
     for label in legend.get_lines():
-        label.set_linewidth(1.5)  # the legend line width    
+        label.set_linewidth(1.5)  # the legend line width
     return
 
 # Plot customization

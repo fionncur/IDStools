@@ -21,8 +21,8 @@ tests+=("$USR;$TOKAMAK;$DATAVERSION;53223;0;magnetics;bpol_probe(2:3)/field/data
 #  >>> pf_passive IDS  <<<
 
 tests+=("$USR;$TOKAMAK;$DATAVERSION;53223;0;pf_passive;loop(5:6)/current")
-tests+=("$USR;$TOKAMAK;$DATAVERSION;53223;0;pf_passive;loop(:)/current")  
-tests+=("$USR;$TOKAMAK;$DATAVERSION;53223;0;pf_passive;loop(34)/current") 
+tests+=("$USR;$TOKAMAK;$DATAVERSION;53223;0;pf_passive;loop(:)/current")
+tests+=("$USR;$TOKAMAK;$DATAVERSION;53223;0;pf_passive;loop(34)/current")
 tests+=("$USR;$TOKAMAK;$DATAVERSION;53223;0;pf_passive;loop(33)/current")
 tests+=("$USR;$TOKAMAK;$DATAVERSION;53223;0;pf_passive;loop(5:9)/current")
 tests+=("$USR;$TOKAMAK;$DATAVERSION;53223;0;pf_passive;time")
@@ -45,9 +45,9 @@ tests+=("$USR;$TOKAMAK;$DATAVERSION;12;2;core_profiles;ids_properties/comment")
 #  >>> equilibrium IDS  <<<
 
 tests+=("$USR;$TOKAMAK;$DATAVERSION;400;20;equilibrium;ids_properties/comment")
-tests+=("$USR;$TOKAMAK;$DATAVERSION;400;20;equilibrium;time_slice(2)/profiles_1d/q")  
+tests+=("$USR;$TOKAMAK;$DATAVERSION;400;20;equilibrium;time_slice(2)/profiles_1d/q")
 tests+=("$USR;$TOKAMAK;$DATAVERSION;400;20;equilibrium;time_slice(2)/profiles_1d/q(3:)")
-tests+=("$USR;$TOKAMAK;$DATAVERSION;400;20;equilibrium;time_slice(:3)/profiles_1d/q")  
+tests+=("$USR;$TOKAMAK;$DATAVERSION;400;20;equilibrium;time_slice(:3)/profiles_1d/q")
 
 
 #========================================================================#sssss

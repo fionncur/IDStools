@@ -136,8 +136,8 @@ time = tc
 # Cartesian (R,Z) grids
 r2d   = equilibrium.time_slice[it].profiles_2d[0].r
 z2d   = equilibrium.time_slice[it].profiles_2d[0].z
-psi2d = equilibrium.time_slice[it].profiles_2d[0].psi  
-  
+psi2d = equilibrium.time_slice[it].profiles_2d[0].psi
+
 # Display the figure
 plt.figure()
 if flag_rho2d == 1:

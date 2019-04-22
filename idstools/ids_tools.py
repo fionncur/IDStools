@@ -19,10 +19,10 @@ class ImasDb():
 
         If user, tokamak, version are omitted, the values set in the environment are used
         (environment variables USER, TOKAMAKNAME, DATAVERSION).
-        
+
         The doOpen argument specifies whether the database is opened immediately.
         If set to False, opening the database is delayed to the first access.
-        
+
         The useHDF5 property controls whether UAL access is done through HDF5 (instead of the default MDSPlus.
         If set to True, the parameters user, tokamak and version have no effect.'''
 
@@ -56,7 +56,7 @@ class ImasDb():
 
     def __str__(self):
         """Returns an identifier string for the database.
-        
+
         Format: shot/run"""
         return str(self._shot) + '/' + str(self._run)
 
@@ -106,7 +106,7 @@ class ImasDb():
 
     def times(self, idsName):
         """Return list of time points for the timeslices for which the IDS with given name is present.
-        
+
         If no time slices present for the IDS, returns an empty list."""
         #print('X', idsName, 'X')
         (status, times) = self.db.getTimes(idsName)
@@ -119,7 +119,7 @@ class ImasDb():
 
         # FIXME: Crude hack to get names of all time-dependent IDS. Will be fixed with improved UAL interface
         timedep_ids_test = lambda x: x.__class__.__module__ != int.__class__.__module__
-        timedep_idss = inspect.getmembers(self.db, timedep_ids_test )        
+        timedep_idss = inspect.getmembers(self.db, timedep_ids_test )
 
         result = []
         for idsnameArray, obj in timedep_idss:
@@ -141,7 +141,7 @@ class ImasDb():
 
     def get_ids(self, idsName, time=None, doOpen=True):
         """Get IDS with given name. For time-dependent IDSs, the time has to be given.
-        
+
            If the optional argument time is set to False, reading of the IDS data is delayed
            to the first access."""
         return Ids(self._shot, self._run, idsName, time=time,
@@ -170,13 +170,13 @@ class Ids():
                  parentImasDb = None, idsUALDAO = None ):
         '''Creates an object wrapping an IDS with the given parameters. Shot number, run number and
         ids name (e.g. 'equilibrium') have to be given. For time-dependent IDSs, time has to be given.
-        
+
         If user, tokamak, version are omitted, the values set in the environment are used
         (variables USER, TOKAMAKNAME, DATAVERSION).
-        
+
         The doOpen parameter controls whether UAL access is done immediately when creating the Ids object.
         If it is set to False, UAL access is deferred to the first access to IDS data.
-        
+
         The useHDF5 property controls whether UAL access is done through HDF5. If set to True, the
         parameters user, tokamak and version have no effect.'''
 
@@ -217,7 +217,7 @@ class Ids():
 
     def __str__(self):
         """Returns an identifier string for the IDS
-        
+
         Format: shot/run/time/name for time-dependent IDSs,
         shot/run/name for non-time-dependent IDSs."""
         name = str(self.shot) + '/' + str(self.run)
@@ -244,7 +244,7 @@ class Ids():
 
     def _retrieve_from_ual(self):
         """Retrieve the IDS described by this object from the UAL and return it.
-        
+
         Subsequent calls will return the instance created on the first call."""
 
         if self._idsUALDAO:
@@ -273,25 +273,25 @@ class Ids():
 
 class IdsDescriptor():
     '''Helper class describing one or more IDSs and presenting them as a sequence.
-    
+
     It holds combinations of  shot/run number(s), IDS name(s), time stamp(s), user/tokamak/version.'''
     # TODO: add occurrence...?
 
     def __init__(self, shot, run, idsNames='all', time=0.0,
                  user=None, tokamak=None, version=None, doOpen=True, useHDF5=False):
         '''Create a IDS Descriptor.
-        
+
         Every parameter to the constructor can
         be either a single value or a tuple. The IdsDescriptor then describes
         all possible combinations of these parameters. The order of the IDSs
         is obtained by iterating the leftmost parameter first.
-        
+
         If one of user, tokamak, version are omitted, the resulting IDS
         will take the values set in the environment (variables USER, TOKAMAKNAME, DATAVERSION).
-        
+
         If doOpen = False is given, UAL access for the resulting IDSs is deferred to the first
         method call that accesses IDS data.
-        
+
         If useHDF5 = True is specified, UAL access is done via HDF5 instead of MDSPlus. In this
         case, user/tokamak/version have no effect.'''
 
@@ -341,7 +341,7 @@ class IdsDescriptor():
         for i in self._nPar:
             l = l * i
         return l
-        
+
     def __getitem__(self, ind):
         '''Returns the IDS object for the given index as a Ids object.'''
         if (ind < 0) or (ind >= len(self)):

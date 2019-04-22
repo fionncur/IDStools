@@ -60,11 +60,11 @@ if __name__ == '__main__':
     idx = idss_out.expIdx
     ids_list = None
     if len(sys.argv) == 9:
-        ids_list = eval(sys.argv[8]) 
+        ids_list = eval(sys.argv[8])
     # read/write every IDS
     for ids_info in parser.idss:
         name = ids_info['name']
-        #timed = ids_info['timed'] CPO feature, obsolete for IDSs. 
+        #timed = ids_info['timed'] CPO feature, obsolete for IDSs.
         maxoccur = int(ids_info['maxoccur'])
         if ids_list and name not in ids_list:
             continue
@@ -95,11 +95,11 @@ if __name__ == '__main__':
     #                else:
     #                    print('Processing %s' % ids_info['type'])
     #                ids = idss_in.__dict__[type + 'Array']
-    #                stdout = sys.stdout 
+    #                stdout = sys.stdout
     #                sys.stdout = open('/dev/null', 'w') # suppress warnings
     #                ids.get(i)
     #                sys.stdout = stdout
-    #                if not ids.array: 
+    #                if not ids.array:
     #                    print()
     #                    continue
     #                print('(found', len(ids.array), 'slices)')

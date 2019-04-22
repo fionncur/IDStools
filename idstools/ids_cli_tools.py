@@ -14,15 +14,15 @@ def read_env():
 def read_shot():
     '''Parse database entry specifier provided on the command line.
     The form of the command line is:
-    
+
         my_program [OPTIONS] IMASDBSPECIFIER
-    
+
     where IMASDBSPECIFIER has the form
-    
+
         shotnum,runnum[,time]
-    
+
     with the time being optional.
-    
+
     Returns a dictionary with all parameters and options and the remaining arguments.'''
 
     parser = setup_parser()
@@ -38,15 +38,15 @@ def read_shot():
 def read_shot_ids():
     '''Parse database entry specifier and IDS name provided on the command line.
     The form of the command line is:
-    
+
         my_program [OPTIONS] IMASDBSPECIFIER IDSNAME
-    
+
     where IMASDBSPECIFIER has the form
-    
+
         shotnum,runnum[,time]
-    
+
     with the time being optional. Specifying the IDSNAME is mandatory.
-    
+
     Returns a dictionary with all parameters and options and the remaining arguments.'''
 
     pars, args = read_shot()
@@ -62,15 +62,15 @@ def read_shot_ids():
 def read_shot_ids_list():
     '''Parse database entry specifier and IDS name provided on the command line.
     The form of the command line is:
-    
+
         my_program [OPTIONS] IMASDBSPECIFIER [IDSNAME1 IDSNAME2 ...]
-    
+
     where IMASDBSPECIFIER has the form
-    
+
         shotnum,runnum[,time]
-    
+
     with the time being optional. The list of IDSNAMES can be empty.
-    
+
     Returns a dictionary with all parameters.'''
 
     pars, args = read_shot()

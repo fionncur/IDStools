@@ -26,7 +26,7 @@ def list_tokamaks(user=None, dataversion=None):
     """List all tokamaks for a user.
     If user is omitted, current user is used.
     If dataversion is omitted, tokamaks for all dataversions are returned.
-    
+
     Returns a list of tuples (tokamak, dataversions),
     where dataversions is a list of dataversion strings this tokamak exists for.
     """
@@ -89,7 +89,7 @@ def list_databases(user=None, tokamak=None, dataversion=None, backends=None):
     the full list of tokamaks, data versions and backends (even for combinations for which
     no actual databases are stored), use the methods list_dataversions_for_tokamak, list_tokamaks
     and list_backends.
-    
+
     Returns a list of tuples (tokamakname, dataversion-list),
     where dataversion-list is a list of tuples (dataversion, backendlist),
     where backendlist is a list of tuples(backend, dblist),

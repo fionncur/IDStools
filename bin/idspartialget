@@ -19,58 +19,58 @@ if __name__ == '__main__':
     run = int(sys.argv[5])
     idsFullName = sys.argv[6]
     dataPath = sys.argv[7]
-    
+
     idsOccurrence = 0
 
     imas_obj = imas.ids(shot, run, 0, 0)
-    imas_obj.open_env(user, tokamak, version)  
-    
+    imas_obj.open_env(user, tokamak, version)
+
 
     idsNameElements = idsFullName.split('/')
     if len(idsNameElements) > 2:
       print('ERROR: "' + idsFullName + '" syntax error!', file=sys.stderr)
       exit(1)
-      
+
     idsName = idsNameElements[0]
-    
-    
+
+
     try:
         ids = getattr(imas_obj, idsName)
     except:
         print('ERROR: IDS "' + idsName + '" not found. Misspelled name?', file=sys.stderr)
         exit(1)
-    
+
     try:
         if len(idsNameElements) == 2:
             idsOccurrence = int(idsNameElements[1])
     except:
       print('ERROR: "' + idsFullName + '" syntax error!', file=sys.stderr)
       exit(1)
-    
-    
+
+
     try:
         result = ids.partialGet(dataPath, idsOccurrence)
     except Exception as  exc:
         print(str(exc), file=sys.stderr)
         exit(1)
-    
+
     #result = ids.partialGet(dataPath, idsOccurrence)
-    
-    
+
+
     resultType = type(result)
     print ('Type: ' + str(resultType))
     if result.__class__  == numpy.ndarray:
        print ('Shape: ' + str(result.shape))
        print ('Data type: ' + str(result.dtype.name))
-       
+
     if result.__class__  == numpy.ndarray and len(result) < 1 :
         exit(0)
-  
+
     print ('----------------------------------------------')
     if result.__class__  == numpy.ndarray and result[0].__class__.__module__ != 'numpy' :
        for i in range(len(result)):
           idsDump = result[i]
           print(idsDump)
           print ('-------------------------')
-    else:       
+    else:
           print(result)
