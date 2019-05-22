@@ -2,6 +2,7 @@
 # A script which copies every IDS in a pulsefile to a different version
 # Tomasz Zok, PSNC (tzok [at] man.poznan.pl)
 # ISIP Core Programming Team
+from __future__ import print_function
 
 import os
 import os.path

@@ -5,6 +5,8 @@ Script for copying database from user's space into public space
 
 Authors: Michal Owsiak, Hajo Klingshirn
 '''
+from __future__ import print_function
+
 import sys
 import argparse
 import idstools.db_tools as db
