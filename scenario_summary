@@ -237,7 +237,7 @@ def rec(data={},path=os.getcwd(),extension='.yaml',choice=['shot','run','ip','b0
                 criterion = criterion+""",re.findall('"""+str(filter[ifilter])+"""',table[iline])"""
         criterion = criterion+""")"""
         for iline in range(len(table)):
-            if iline in [0,1,2,j+1] or len(eval(criterion)) > 0:
+            if iline in [0,1,2,j+1] or len(list(eval(criterion))) > 0:
                 filtered_table.append(table[iline])
         table = filtered_table
 
