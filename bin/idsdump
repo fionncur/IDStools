@@ -7,11 +7,7 @@ import numpy
 import sys
 
 if __name__ == '__main__':
-    if len(sys.argv) == 4:
-        shot = int(sys.argv[1])
-        run = int(sys.argv[2])
-        ids = sys.argv[3]
-    elif len(sys.argv) == 7:
+    if len(sys.argv) == 7:
         user = sys.argv[1]
         tokamak = sys.argv[2]
         version = sys.argv[3]
@@ -20,8 +16,6 @@ if __name__ == '__main__':
         ids = sys.argv[6]
     else:
         print('Usage: idsdump <USER> <TOKAMAK> <VERSION> <SHOT> <RUN> <IDS>', file=sys.stderr)
-        print('         or', file=sys.stderr)
-        print('       idsdump <SHOT> <RUN> <IDS>', file=sys.stderr)
         exit(1)
 
     numpy.set_printoptions(threshold=sys.maxsize)
