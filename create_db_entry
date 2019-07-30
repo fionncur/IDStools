@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import argparse, imas, string
+import argparse, imas
 import init_mendeleiev as mend
 import numpy as np
 from os import system
@@ -64,7 +64,7 @@ except:
 try:
     input.dataset_description.get()
     dataset_description = input.dataset_description
-    comment = string.replace(dataset_description.ids_properties.comment,'\n','\n   ')
+    comment = str.replace(dataset_description.ids_properties.comment,'\n','\n   ')
     dd_version = dataset_description.dd_version
 except:
     print("----> dataset_description does not exist")
