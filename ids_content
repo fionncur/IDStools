@@ -21,8 +21,6 @@ run  = args["run"]
 if args['user'] != None:
 	user = args["user"]
 else:
-	#import os
-	#user = os.getenv('USER')
 	user = 'public'
 
 # Tokamak name
