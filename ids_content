@@ -61,8 +61,13 @@ for element in idss.__dict__.keys():
 non_timed_idslist=[]
 for element in dd_idslist:
    if not element in timed_idslist:
-      if eval('idss.'+element+'.partialGet(\'ids_properties/homogeneous_time\')') != -999999999:
-         non_timed_idslist.append(element)
+      if hasattr(eval('idss.'+element),'partialGet'):
+         if eval('idss.'+element+'.partialGet(\'ids_properties/homogeneous_time\')') != -999999999:
+            non_timed_idslist.append(element)
+      else:
+         eval('idss.'+element+'.get()')
+         if eval('idss.'+element+'.ids_properties.homogeneous_time') != -999999999:
+            non_timed_idslist.append(element)
 
 for idsname, times in alltimes:
    if len(times) > 1:
