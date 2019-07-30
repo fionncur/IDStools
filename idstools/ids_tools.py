@@ -117,8 +117,14 @@ class ImasDb():
         import inspect
         import types
 
-        # FIXME: Crude hack to get names of all time-dependent IDS. Will be fixed with improved UAL interface
-        timedep_ids_test = lambda x: x.__class__.__module__ != int.__class__.__module__
+        def is_ids(obj):
+            try:
+                obj.__getattribute__('ids_properties')
+                return True
+            except:
+                return False
+
+        timedep_ids_test = lambda x: is_ids(x)
         timedep_idss = inspect.getmembers(self.db, timedep_ids_test )
 
         result = []
