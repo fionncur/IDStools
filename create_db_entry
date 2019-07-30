@@ -414,7 +414,7 @@ f.write("""idslist:\n""")
 f.close()
 
 # Complete the yaml file with the output of ids_content
-system('./ids_content -u ' + str(user) + ' -t ' + str(machine) \
+system('ids_content -u ' + str(user) + ' -t ' + str(machine) \
           + ' -s ' + str(shot) + ' -r ' + str(run) + ' >> ' + filename)
 
 print("----> " + filename + " created.")
