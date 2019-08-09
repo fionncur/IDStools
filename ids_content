@@ -61,13 +61,16 @@ for element in idss.__dict__.keys():
 non_timed_idslist=[]
 for element in dd_idslist:
    if not element in timed_idslist:
-      if hasattr(eval('idss.'+element),'partialGet'):
-         if eval('idss.'+element+'.partialGet(\'ids_properties/homogeneous_time\')') != -999999999:
-            non_timed_idslist.append(element)
-      else:
-         eval('idss.'+element+'.get()')
-         if eval('idss.'+element+'.ids_properties.homogeneous_time') != -999999999:
-            non_timed_idslist.append(element)
+      try:
+         if hasattr(eval('idss.'+element),'partialGet'):
+            if eval('idss.'+element+'.partialGet(\'ids_properties/homogeneous_time\')') != -999999999:
+               non_timed_idslist.append(element)
+         else:
+            eval('idss.'+element+'.get()')
+            if eval('idss.'+element+'.ids_properties.homogeneous_time') != -999999999:
+               non_timed_idslist.append(element)
+      except Exception as exc:
+         print("WARNING: unsuccessful reading of homogeneous_time from IDS '"+element+"', pulsefile structure might be incomplete or corrupted.")
 
 for idsname, times in alltimes:
    if len(times) > 1:
