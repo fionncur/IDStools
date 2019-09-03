@@ -3,6 +3,7 @@
 import argparse, imas
 import init_mendeleiev as mend
 import numpy as np
+import sys
 from os import system
 from sys import exit
 
@@ -45,7 +46,7 @@ try:
     input.equilibrium.get()
     equilibrium = input.equilibrium
 except:
-    print("The equilibrium IDS is absent from the input datafile", file=sys.stderr)
+    print("The equilibrium IDS is absent from the input datafile", file=sys.stdout)
 if equilibrium.ids_properties.homogeneous_time != -999999999:
     eq_present = 1
 else:
@@ -55,7 +56,7 @@ try:
     input.core_profiles.get()
     core_profiles = input.core_profiles
 except:
-    print("The core_profiles IDS is absent from the input datafile", file=sys.stderr)
+    print("The core_profiles IDS is absent from the input datafile", file=sys.stdout)
 if core_profiles.ids_properties.homogeneous_time != -999999999:
     core_present = 1
 else:
@@ -65,8 +66,8 @@ try:
     input.summary.get()
     summary = input.summary
 except:
-    print("The summary IDS is absent from the input datafile")
-    print("----> H&CD waveforms not filled (to be completed by hand)")
+    print("The summary IDS is absent from the input datafile", file=sys.stdout)
+    print("----> H&CD waveforms not filled (to be completed by hand)", file=sys.stdout)
 
 try:
     input.dataset_description.get()
@@ -74,7 +75,7 @@ try:
     comment = str.replace(dataset_description.ids_properties.comment,'\n','\n   ')
     dd_version = dataset_description.dd_version
 except:
-    print("----> dataset_description does not exist")
+    print("----> dataset_description does not exist", file=sys.stderr)
     comment = ''
     dd_version = ''
 
@@ -82,8 +83,8 @@ try:
     input.edge_profiles.get()
     edge_profiles = input.edge_profiles
 except:
-    print("The edge_profiles IDS is absent from the input datafile", file=sys.stderr)
-    print("Only core data will be used")
+    print("The edge_profiles IDS is absent from the input datafile", file=sys.stdout)
+    print("Only core data will be used", file=sys.stdout)
 if edge_profiles.ids_properties.homogeneous_time != -999999999:
     edge_present = 1
 else:
@@ -93,22 +94,22 @@ try:
     input.edge_transport.get()
     edge_transport = input.edge_transport
 except:
-    print("The edge_transport IDS is absent from the input datafile", file=sys.stderr)
-    print("----> P_SOL information not filled (to be completed by hand)")
+    print("The edge_transport IDS is absent from the input datafile", file=sys.stdout)
+    print("----> P_SOL information not filled (to be completed by hand)", file=sys.stdout)
 if edge_transport.ids_properties.homogeneous_time != -999999999:
     flux_present = 1
 else:
     flux_present = 0
 
 if core_present == 0 and edge_present == 0:
-    print("No profile data present")
-    print("----> Aborted.")
-    exit()
+    print("No profile data present", file=sys.stderr)
+    print("----> Aborted.", file=sys.stderr)
+    exit(1)
 
 if eq_present == 0 and core_present == 1:
-    print("No equilibrium IDS to go with core data")
-    print("----> Aborted.")
-    exit()
+    print("No equilibrium IDS to go with core data", file=sys.stderr)
+    print("----> Aborted.", file=sys.stderr)
+    exit(1)
 
 # Mendeleiev table
 table_mendeleiev = mend.create_table_mendeleiev()
@@ -167,7 +168,7 @@ else:
     except:
        print("edge_profiles.ggd[:].electrons.density[] could not be read", file=sys.stderr)
        print("----> Aborted.", file=sys.stderr)
-       exit()
+       exit(1)
 
 if core_present==1:
    try:
@@ -176,7 +177,7 @@ if core_present==1:
       for ispecies in range(nspecies):
          a[ispecies] = int(core_profiles.profiles_1d[the_slice].ion[ispecies].element[0].a)
    except:
-      print("core_profiles.profiles_1d[:].ion[0].element[0].a could not be read")
+      print("core_profiles.profiles_1d[:].ion[0].element[0].a could not be read", file=sys.stderr)
       nspecies = 0
       a = [0]
 else:
@@ -186,7 +187,7 @@ else:
        for ispecies in range(nspecies):
           a[ispecies] = int(edge_profiles.ggd[the_slice].ion[ispecies].element[0].a)
     except:
-       print("edge_profiles.ggd[:].ion[:].element[0].a could not be read")
+       print("edge_profiles.ggd[:].ion[:].element[0].a could not be read", file=sys.stderr)
        nspecies = 0
        a = [0]
 
@@ -197,7 +198,7 @@ if core_present==1:
       for ispecies in range(nspecies):
          z[ispecies] = int(core_profiles.profiles_1d[the_slice].ion[ispecies].element[0].z_n)
    except:
-      print("core_profiles.profiles_1d[:].ion[0].element[0].z_n could not be read")
+      print("core_profiles.profiles_1d[:].ion[0].element[0].z_n could not be read", file=sys.stderr)
       nspecies = 0
       z = [0]
 else:
@@ -207,7 +208,7 @@ else:
       for ispecies in range(nspecies):
          z[ispecies] = int(edge_profiles.ggd[the_slice].ion[ispecies].element[0].z_n)
    except:
-      print("edge_profiles.ggd[:].ion[:].element[0].z_n could not be read")
+      print("edge_profiles.ggd[:].ion[:].element[0].z_n could not be read", file=sys.stderr)
       nspecies = 0
       z = [0]
 
@@ -218,41 +219,41 @@ if core_present == 1:
           try:
              equilibrium = cli.get('equilibrium')
           except:
-             exit()
+             exit(1)
           volume = equilibrium.time_slice[the_slice].profiles_1d.volume
           if len(volume) == len(core_profiles.profiles_1d[the_slice].electrons.density):
-             print("core_profiles.profiles_1d[:].grid.volume could not be read")
-             print("----> equilibrium.time_slice[:].profiles_1d.volume used instead")
-             print("(possible because the resolution is the same, but maybe not correct)")
+             print("core_profiles.profiles_1d[:].grid.volume could not be read", file=sys.stderr)
+             print("----> equilibrium.time_slice[:].profiles_1d.volume used instead", file=sys.stderr)
+             print("(possible because the resolution is the same, but maybe not correct)", file=sys.stderr)
           else:
-             exit()
+             exit(1)
    except:
-      print("core_profiles.profiles_1d[:].grid.volume could not be read")
-      print("----> Aborted.")
-      exit()
+      print("core_profiles.profiles_1d[:].grid.volume could not be read", file=sys.stderr)
+      print("----> Aborted.", file=sys.stderr)
+      exit(1)
 
    try:
       central_zeff = core_profiles.profiles_1d[the_slice].zeff[0]
    except:
-      print("core_profiles.profiles_1d[:].zeff[0] could not be read")
-      print("----> Aborted.")
-      exit()
+      print("core_profiles.profiles_1d[:].zeff[0] could not be read", file=sys.stderr)
+      print("----> Aborted.", file=sys.stderr)
+      exit(1)
 
 if edge_present == 1:
    try:
       sepmid_zeff = summary.local.separatrix.zeff.value[the_slice]
    except:
-      print("summary.local.separatrix.zeff.value[:] could not be read")
-      print("----> Aborted.")
-      exit()
+      print("summary.local.separatrix.zeff.value[:] could not be read", file=sys.stderr)
+      print("----> Aborted.", file=sys.stderr)
+      exit(1)
 
 # H&CD quantities from summary IDS
 confinement_regime = "tbd"
 if len(summary.time)==0:
-    print("--------------------------------------------------------")
-    print("The summary IDS is absent from the input datafile")
-    print("----> H&CD waveforms not filled: to be completed by hand")
-    print("--------------------------------------------------------")
+    print("--------------------------------------------------------", file=sys.stdout)
+    print("The summary IDS is absent from the input datafile", file=sys.stdout)
+    print("----> H&CD waveforms not filled: to be completed by hand", file=sys.stdout)
+    print("--------------------------------------------------------", file=sys.stdout)
     p_ec  = "tbd"
     p_ic  = "tbd"
     p_nbi = "tbd"
@@ -316,7 +317,7 @@ else:
           except:
              for ispecies in range(nspecies):
                  p_sol_i = p_sol_i + sum(edge_transport.model[0].ggd[the_slice].ion[ispecies].energy.flux[iset].values)
-          p_sol = p_sol_e + p_sol_i
+          p_sol = (p_sol_e + p_sol_i)*1.e-6
 
 if nspecies > 0:
 
@@ -611,7 +612,7 @@ f.close()
 system('ids_content -u ' + str(user) + ' -t ' + str(machine) \
           + ' -s ' + str(shot) + ' -r ' + str(run) + ' >> ' + filename)
 
-print("----> " + filename + " created.")
+print("----> " + filename + " created.", file=sys.stdout)
 
 # Associated WATCHER file
 filename = "ids_"+str(shot)+add0+str(run)+".watcher"
@@ -625,6 +626,6 @@ if core_present == 1:
 if edge_present == 1:
    f.write(""" Xavier			Bonnin   		xavier.bonnin@iter.org\n""")
 f.close()
-print("----> " + filename + " created.")
+print("----> " + filename + " created.", file=sys.stdout)
 
 
