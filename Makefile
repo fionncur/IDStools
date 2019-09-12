@@ -23,10 +23,10 @@ PYCMD:=$(if $(PYTHONCMD),$(shell command -v $(PYTHONCMD) 2>/dev/null))
 PYVER:=$(if $(PYCMD),$(shell $(PYCMD) -c 'print(".".join(str(i) for i in __import__("sys").version_info[:2]))' 2>/dev/null))
 
 # Installation paths
-INSTALL_PREFIX = $(IMAS_HOME)/core/$(IDSTOOLS_NAME)/$(VERSION)
-INSTALL_PY = $(INSTALL_PREFIX)/lib/python$(PYVER)
-INSTALL_MOD = $(IMAS_HOME)/etc/modulefiles
-MODULEFILE = $(IDSTOOLS_NAME)/$(VERSION)
+INSTALL_PREFIX?=$(IMAS_HOME)/core/$(IDSTOOLS_NAME)/$(VERSION)
+INSTALL_PY?=$(INSTALL_PREFIX)/lib/python$(PYVER)
+INSTALL_MOD?=$(IMAS_HOME)/etc/modulefiles
+MODULEFILE?=$(IDSTOOLS_NAME)/$(VERSION)
 
 all: tools_build module
 install: tools_install module_install
