@@ -311,12 +311,18 @@ else:
     nsubsets = len(edge_transport.model[0].ggd[the_slice].electrons.energy.flux)
     for iset in range(nsubsets):
        if edge_transport.model[0].ggd[the_slice].electrons.energy.flux[iset].grid_subset_index == 26:
-          p_sol_e = sum(edge_transport.model[0].ggd[the_slice].electrons.energy.flux[iset].values)
-          try:
-             p_sol_i = sum(edge_transport.model[0].ggd[the_slice].total_ion_energy.flux[iset].values)
-          except:
-             for ispecies in range(nspecies):
-                 p_sol_i = p_sol_i + sum(edge_transport.model[0].ggd[the_slice].ion[ispecies].energy.flux[iset].values)
+          for iFace in range(len(edge_transport.model[0].ggd[the_slice].electrons.energy.flux[iset].values)):
+             faceindex = edge_transport.grid_ggd[the_slice].grid_subset[iset].element[iFace].object[0].index
+             area = edge_transport.grid_ggd[the_slice].space[0].objects_per_dimension[1].object[faceindex-1].measure
+             flux = edge_transport.model[0].ggd[the_slice].electrons.energy.flux[iset].values[iFace]
+             p_sol_e = p_sol_e + flux*area
+             try:
+                flux = edge_transport.model[0].ggd[the_slice].total_ion_energy.flux[iset].values[iFace]
+             except:
+                flux = 0
+                for ispecies in range(nspecies):
+                   flux = flux + edge_transport.model[0].ggd[the_slice].ion[ispecies].energy.flux[iset].values[iFace]
+             p_sol_i = p_sol_i + flux*area
           p_sol = (p_sol_e + p_sol_i)*1.e-6
 
 if nspecies > 0:
