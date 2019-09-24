@@ -6,12 +6,12 @@ import numpy
 import sys
 import imas
 
-def get_ids(shot, run, idsname, time=0, interp=1):
+def get_ids(user, tokamak, version, shot, run, idsname, time=0, interp=1):
     '''
     Open IMASdb to get specific IDS and return its deep copy.
     '''
     imas_obj = imas.ids(shot, run)
-    imas_obj.open()
+    imas_obj.open_env(user, tokamak, version)
     imas_obj.__dict__[idsname].get()
     ids = copy.deepcopy(imas_obj.__dict__[idsname])
     imas_obj.close()
@@ -82,10 +82,10 @@ def compare(x, y, parent):
                     print('%s.%s is of different value in both IDSs' % (parent, key))
 
 if __name__ == '__main__':
-    if len(sys.argv) != 6:
-        print('Usage: idsdiff <IDSNAME> <SHOTa> <RUNa> <SHOTb> <RUNb>', file=sys.stderr)
+    if len(sys.argv) != 9:
+        print('Usage: idsdiff <USER> <TOKAMAK> <VERSION> <SHOTa> <RUNa> <SHOTb> <RUNb> <IDSNAME>', file=sys.stderr)
         exit(1)
 
-    compare(get_ids(int(sys.argv[2]), int(sys.argv[3]), sys.argv[1]),\
-            get_ids(int(sys.argv[4]), int(sys.argv[5]), sys.argv[1]),\
-            sys.argv[1])
+    compare(get_ids(sys.argv[1], sys.argv[2], sys.argv[3], int(sys.argv[4]), int(sys.argv[5]), sys.argv[8]),\
+            get_ids(sys.argv[1], sys.argv[2], sys.argv[3], int(sys.argv[6]), int(sys.argv[7]), sys.argv[8]),\
+            sys.argv[8])
