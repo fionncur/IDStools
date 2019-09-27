@@ -8,14 +8,13 @@ import idstools.ids_tools as ct
 
 def extended(str, wlen):
     l = len(str)
-    if l < len:
+    if l < wlen:
         return ' ' * (wlen - l) + str
     else:
         return str
 
 def print_vector(vec, wlen):
-    from string import join
-    return join( [extended(str(x), wlen) for x in vec] )
+    return " ".join( [extended(str(x), wlen) for x in vec] )
 
 pars, args = cli.read_shot()
 
