@@ -6,6 +6,7 @@ import optparse
 import idstools.db_tools as dbtools
 import os
 import sys
+import numpy
 
 TAB = ' ' * 3
 SHOT_STR_LEN = 5
@@ -95,7 +96,11 @@ def print_times(dbs, opts, printTimes = False, shotnum= None, runnum = None):
                         db = ct.ImasDb(shot, run, opts.user, tokamak, dv, True, backend == "hdf5")
                         alltimes = db.all_times()
                         for idsname, times in alltimes:
-                            if printTimes:
+                            if len(times) == 1 and numpy.isnan(times[0]):
+                                print(TAB * 5 + extended(idsname, IDSNAME_STR_LEN) + ": "\
+                                        + extended('?', SLICENUM_STR_LEN) +  " slices ( " \
+                                        + "non-homogeneous IDS )")
+                            elif printTimes:
                                 print(TAB * 5 + extended(idsname, IDSNAME_STR_LEN) + ": "\
                                         + extended(str(len(times)), SLICENUM_STR_LEN) + " slices (" \
                                         + print_vector(times, TIME_STR_LEN) + ")")
