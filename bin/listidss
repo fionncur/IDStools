@@ -32,7 +32,11 @@ for idsname, times in alltimes:
     if len(times) == 1 and numpy.isnan(times[0]):
         print(extended(idsname, 15) + ": " \
               + extended('?', 5) + " slices: " \
-              + "not homogeneous IDS ")
+              + "heterogeneous IDS ")
+    elif len(times) == 1 and times[0] == numpy.NINF:
+            print(extended(idsname, 15) + ": " \
+                  + extended('?', 5) + " slices: " \
+                  + "time independent IDS ")
     else:
         print(extended(idsname, 15) + ": " \
             + extended(str(len(times)), 5) + " slices: " \

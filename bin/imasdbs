@@ -99,7 +99,11 @@ def print_times(dbs, opts, printTimes = False, shotnum= None, runnum = None):
                             if len(times) == 1 and numpy.isnan(times[0]):
                                 print(TAB * 5 + extended(idsname, IDSNAME_STR_LEN) + ": "\
                                         + extended('?', SLICENUM_STR_LEN) +  " slices ( " \
-                                        + "non-homogeneous IDS )")
+                                        + "heterogeneous IDS )")
+                            elif len(times) == 1 and times[0] == numpy.NINF:
+                                    print(TAB * 5 + extended(idsname, IDSNAME_STR_LEN) + ": " \
+                                          + extended('?', SLICENUM_STR_LEN) + " slices ( " \
+                                          + "time independent IDS )")
                             elif printTimes:
                                 print(TAB * 5 + extended(idsname, IDSNAME_STR_LEN) + ": "\
                                         + extended(str(len(times)), SLICENUM_STR_LEN) + " slices (" \
