@@ -5,6 +5,7 @@ from __future__ import print_function
 import sys
 import idstools.ids_cli_tools as cli
 import idstools.ids_tools as ct
+import numpy
 
 def extended(str, wlen):
     l = len(str)
@@ -28,6 +29,11 @@ except:
 alltimes = db.all_times()
 
 for idsname, times in alltimes:
-    print(extended(idsname, 15) + ": " \
-        + extended(str(len(times)), 5) + " slices: " \
-        + print_vector(times, 4))
+    if len(times) == 1 and numpy.isnan(times[0]):
+        print(extended(idsname, 15) + ": " \
+              + extended('?', 5) + " slices: " \
+              + "not homogeneous IDS ")
+    else:
+        print(extended(idsname, 15) + ": " \
+            + extended(str(len(times)), 5) + " slices: " \
+            + print_vector(times, 4))
