@@ -112,6 +112,7 @@ class ImasDb():
         (status, times) = self.db.getTimes(idsName)
         return times
 
+    @property
     def all_times(self):
         """Returns a list of existing timeslices for all time-dependent IDSs present in the database."""
         import inspect
@@ -130,7 +131,11 @@ class ImasDb():
         result = []
         for idsnameArray, obj in timedep_idss:
            # FIXME: Max number of occurrences should be provided by IDS API
-            for occurrence in range(2):
+            try:
+                maxOccurences = obj.getMaxOccurrences()
+            except AttributeError:
+                maxOccurences = 2
+            for occurrence in range(maxOccurences):
                 if occurrence == 0:
                     idsname = idsnameArray
                 else:
@@ -139,7 +144,7 @@ class ImasDb():
                     times = self.times(idsname)
                 except Exception as exc:
                     times = []
-                    print("ERROR! IDS '" + idsname + "': Reading time array fails due to following problem : " + str(exc), file=sys.stderr)
+                    print("ERROR! IDS '" + idsname + "': Reading time array fails due to following problem : " + exc, file=sys.stderr)
                 if times is not None and len(times):
                     result.append( (idsname, times) )
 
