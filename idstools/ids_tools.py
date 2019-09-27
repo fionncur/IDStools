@@ -112,7 +112,6 @@ class ImasDb():
         (status, times) = self.db.getTimes(idsName)
         return times
 
-    @property
     def all_times(self):
         """Returns a list of existing timeslices for all time-dependent IDSs present in the database."""
         import inspect
@@ -132,10 +131,10 @@ class ImasDb():
         for idsnameArray, obj in timedep_idss:
            # FIXME: Max number of occurrences should be provided by IDS API
             try:
-                maxOccurences = obj.getMaxOccurrences()
+                maxOccurrences = obj.getMaxOccurrences()
             except AttributeError:
-                maxOccurences = 2
-            for occurrence in range(maxOccurences):
+                maxOccurrences = 1
+            for occurrence in range(maxOccurrences + 1):
                 if occurrence == 0:
                     idsname = idsnameArray
                 else:
