@@ -129,7 +129,6 @@ class ImasDb():
 
         result = []
         for idsnameArray, obj in timedep_idss:
-           # FIXME: Max number of occurrences should be provided by IDS API
             try:
                 maxOccurrences = obj.getMaxOccurrences()
             except AttributeError:
@@ -143,7 +142,7 @@ class ImasDb():
                     times = self.times(idsname)
                 except Exception as exc:
                     times = []
-                    print("ERROR! IDS '" + idsname + "': Reading time array fails due to following problem : " + exc, file=sys.stderr)
+                    print("ERROR! IDS '" + idsname + "': Reading time array fails due to following problem : " + str(exc), file=sys.stderr)
                 if times is not None and len(times):
                     result.append( (idsname, times) )
 
