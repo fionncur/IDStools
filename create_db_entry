@@ -169,17 +169,20 @@ if core_present==1:
        print("----> Aborted.", file=sys.stderr)
        exit(1)
 
+sepmid_electron_density = 0
 if edge_present==1:
     try:
-       sepmid_electron_density = 0
        for islice in range(len(summary.local.separatrix.n_e.value)):
           if summary.local.separatrix.n_e.value[islice] > sepmid_electron_density:
              sepmid_electron_density = summary.local.separatrix.n_e.value[islice]
              the_slice = islice
     except:
        print("edge_profiles.ggd[:].electrons.density[] could not be read", file=sys.stderr)
-       print("----> Aborted.", file=sys.stderr)
-       exit(1)
+       if core_present==1:
+          print("Only the core electron density will be provided", file=sys.stderr)
+       else:
+          print("----> Aborted.", file=sys.stderr)
+          exit(1)
 
 if core_present==1:
    try:
@@ -250,13 +253,17 @@ if core_present == 1:
       print("----> Aborted.", file=sys.stderr)
       exit(1)
 
+sepmid_zeff = 0
 if edge_present == 1:
    try:
       sepmid_zeff = summary.local.separatrix.zeff.value[the_slice]
    except:
       print("summary.local.separatrix.zeff.value[:] could not be read", file=sys.stderr)
-      print("----> Aborted.", file=sys.stderr)
-      exit(1)
+      if core_present == 1:
+         print("Only the core Zeff value will be provided", file=sys.stderr)
+      else:
+         print("----> Aborted.", file=sys.stderr)
+         exit(1)
 
 # H&CD quantities from summary IDS
 confinement_regime = "tbd"
@@ -555,8 +562,14 @@ else:
     f.write("""    central_zeff: tbd\n""")
 f.write("""    density_peaking: tbd\n""")
 if edge_present == 1:
-    f.write("""    sepmid_electron_density: %.2e\n""" % sepmid_electron_density)
-    f.write("""    sepmid_zeff: %.2f\n""" % sepmid_zeff)
+    if sepmid_electron_density == 0:
+       f.write("""    sepmid_electron_density: tbd\n""")
+    else:
+       f.write("""    sepmid_electron_density: %.2e\n""" % sepmid_electron_density)
+    if sepmid_zeff == 0:
+       f.write("""    sepmid_zeff: tbd\n""")
+    else:
+       f.write("""    sepmid_zeff: %.2f\n""" % sepmid_zeff)
 else:
     f.write("""    sepmid_electron_density: tbd\n""")
     f.write("""    sepmid_zeff: tbd\n""")
