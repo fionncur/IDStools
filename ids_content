@@ -2,6 +2,7 @@
 
 import argparse
 from imas import ids
+import pdb
 
 # ----------------------------------------------------------------------
 
@@ -71,6 +72,15 @@ for element in dd_idslist:
                non_timed_idslist.append(element)
       except Exception as exc:
          print("WARNING: unsuccessful reading of homogeneous_time from IDS '"+element+"', pulsefile structure might be incomplete or corrupted.")
+
+# To replace NaN time by actual one (new LL)
+for element in timed_idslist:
+   for i in range(len(timed_idslist)):
+      if hasattr(eval('idss.'+element),'partialGet'):
+         if element == alltimes[i][0]:
+            t = eval('idss.'+element+'.partialGet(\'time\')')
+            for itime in range(len(alltimes[i][1])):
+               alltimes[i][1][itime]=t[itime]
 
 for idsname, times in alltimes:
    if len(times) > 1:
