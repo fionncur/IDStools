@@ -74,7 +74,8 @@ for element in dd_idslist:
          print("WARNING: unsuccessful reading of homogeneous_time from IDS '"+element+"', pulsefile structure might be incomplete or corrupted.")
 
 # To replace NaN time by actual one (new LL)
-for element in timed_idslist:
+for el in timed_idslist:
+   element = el.split('/')[0]
    for i in range(len(timed_idslist)):
       if hasattr(eval('idss.'+element),'partialGet'):
          if element == alltimes[i][0]:
