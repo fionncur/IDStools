@@ -45,21 +45,23 @@ except:
 try:
     input.equilibrium.get()
     equilibrium = input.equilibrium
+    if equilibrium.ids_properties.homogeneous_time != -999999999:
+      eq_present = 1
+    else:
+      eq_present = 0
 except:
     print("The equilibrium IDS is absent from the input datafile", file=sys.stdout)
-if equilibrium.ids_properties.homogeneous_time != -999999999:
-    eq_present = 1
-else:
     eq_present = 0
 
 try:
     input.core_profiles.get()
     core_profiles = input.core_profiles
+    if core_profiles.ids_properties.homogeneous_time != -999999999:
+      core_present = 1
+    else:
+      core_present = 0
 except:
     print("The core_profiles IDS is absent from the input datafile", file=sys.stdout)
-if core_profiles.ids_properties.homogeneous_time != -999999999:
-    core_present = 1
-else:
     core_present = 0
 
 try:
