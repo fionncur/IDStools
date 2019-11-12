@@ -306,8 +306,11 @@ if args['folder'] != None:
   folder = args['folder']
   noarg = "No"
 else:
-  folder = '/work/imas/shared/iterdb'
-  #folder = os.getcwd()
+  LL_version=int(os.environ['UAL_VERSION'][0])
+  if LL_version < 4:
+      folder = '/work/imas/shared/iterdb'
+  else:
+      folder = '/work/imas/shared/imasdb/ITER'
 
 # Filter
 if args['selection'] != None:
