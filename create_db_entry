@@ -84,23 +84,25 @@ except:
 try:
     input.edge_profiles.get()
     edge_profiles = input.edge_profiles
+    if edge_profiles.ids_properties.homogeneous_time != -999999999:
+        edge_present = 1
+    else:
+        edge_present = 0
 except:
     print("The edge_profiles IDS is absent from the input datafile", file=sys.stdout)
     print("Only core data will be used", file=sys.stdout)
-if edge_profiles.ids_properties.homogeneous_time != -999999999:
-    edge_present = 1
-else:
     edge_present = 0
 
 try:
     input.edge_transport.get()
     edge_transport = input.edge_transport
+    if edge_transport.ids_properties.homogeneous_time != -999999999:
+        flux_present = 1
+    else:
+        flux_present = 0
 except:
     print("The edge_transport IDS is absent from the input datafile", file=sys.stdout)
     print("----> P_SOL information not filled (to be completed by hand)", file=sys.stdout)
-if edge_transport.ids_properties.homogeneous_time != -999999999:
-    flux_present = 1
-else:
     flux_present = 0
 
 if core_present == 0 and edge_present == 0:
