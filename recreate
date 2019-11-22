@@ -1,0 +1,91 @@
+#!/usr/bin/env python
+
+import imas,os,argparse
+
+# Management of input arguments
+parser = argparse.ArgumentParser(description=\
+	 '---- To recreate a new datafile from a previous one with all its IDSs ----')
+parser.add_argument('-si','--shot_input',help='Input shot number', required=True,type=int)
+parser.add_argument('-ri','--run_input',help='Input run number', required=True,type=int)
+parser.add_argument('-so','--shot_output',help='Output shot number', required=True,type=int)
+parser.add_argument('-ro','--run_output',help='Output run number', required=True,type=int)
+parser.add_argument('-u','--user',help='username of the DB where the datafile is located', required=True)
+parser.add_argument('-t','--machine',help='tokamak name of the DB where the datafile is located', required=True)
+
+args = vars(parser.parse_args())
+
+# recreate -si 44 -ri 33 -so 44 -ro 34 -u schneim -t iter
+# recreate -si 110014 -ri 1 -so 110014 -ro 1 -u public -t ITER
+
+shot_in  = args["shot_input"]
+run_in   = args["run_input"]
+shot_out = args["shot_output"]
+run_out  = args["run_output"]
+user     = args["user"]
+machine  = args["machine"]
+version  = os.getenv('IMAS_VERSION')[0]
+
+# OPEN INPUT
+input = imas.ids(shot_in,run_in,0,0)
+input.open_env(user,machine,'3')
+
+# CREATE OUTPUT
+if not os.path.exists(os.getenv('HOME')+'/public/imasdb/'+machine):
+   print('--> Create local database '+os.getenv('HOME')+'/public/imasdb/'+machine)
+   os.popen("imasdb "+tokamakname).read()
+
+output = imas.ids(shot_out,run_out,0,0)
+output.create_env(os.getenv('USER'),machine,'3')
+
+# Set up the list of existing IDSs in th DD
+dd_idslist=[]
+for element in input.__dict__.keys():
+   if hasattr(input.__dict__.get(element),'ids_properties'):
+      dd_idslist.append(element)
+
+# List of IDSs actually filled in the file but non-timed
+idslist=[]
+for element in dd_idslist:
+   if hasattr(eval('input.'+element),'partialGet'):
+      if eval('input.'+element+'.partialGet(\'ids_properties/homogeneous_time\')') != -999999999:
+         idslist.append(element)
+   else:
+      eval('input.'+element+'.get()')
+      if eval('input.'+element+'.ids_properties.homogeneous_time') != -999999999:
+         idslist.append(element)
+
+#print(idslist)
+
+for ids in idslist:
+
+  if hasattr(eval('input.'+ids),'idx'):
+    idx_in = eval('input.'+ids+'.idx')
+  else:
+    idx_in = eval('input.'+ids+'._idx')
+
+  # GET IDS FROM INPUT
+  eval('input.'+ids+'.get()');
+
+  if hasattr(eval('output.'+ids),'idx'):
+     idx_out = eval('output.'+ids+'.idx')
+  else:
+     idx_out = eval('output.'+ids+'._idx')
+
+  # COPY IDS FROM INPUT TO OUTPUT
+  exec('output.'+ids+' = input.'+ids)
+  eval('output.'+ids+'.setExpIdx(idx_out)')
+
+  # PUT IDS INTO OUTPUT
+  print('---> Put '+ids)
+  print(eval('output.'+ids+'.ids_properties.homogeneous_time'))
+  #print(eval('output.'+ids+'.time'))
+  if (eval('len(output.'+ids+'.time)')) == 0:
+      exec('output.'+ids+'.time = [0.]')
+  print(eval('output.'+ids+'.time'))
+  eval('output.'+ids+'.put()')
+
+# CLOSE FILES
+input.close()
+output.close()
+
+print('Complete.')
