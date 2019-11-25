@@ -1,0 +1,8 @@
+
+## Site configuration Makefile for ITER Organization's HPC Cluster
+
+# This file should be maintained by the administrator of the site.
+
+# Default variables
+IMAS_MODULE?=IMAS
+IDSTOOLS_NAME=idstools
