@@ -28,7 +28,8 @@ if __name__ == '__main__':
     imas_entry = imas.ids(shot, run)
     imas_entry.open_env(user, tokamak, version)
     MAX_NUMBER_OF_IDS_OCCURRENCES = 10
-    print("Searching available occurrences of " + ids_name + " IDS...")
+    print("Searching available occurrences of " + ids_name + " IDS... (scanning first " + \
+    str(MAX_NUMBER_OF_IDS_OCCURRENCES) + " occurrences)") 
     occurrence_found = False
     for occurrence in range(0, MAX_NUMBER_OF_IDS_OCCURRENCES):
        try:
