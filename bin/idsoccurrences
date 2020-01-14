@@ -1,0 +1,54 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+from __future__ import print_function
+
+import imas
+import numpy
+import sys
+import logging
+
+if __name__ == '__main__':
+    if len(sys.argv) == 7:
+        user = sys.argv[1]
+        tokamak = sys.argv[2]
+        version = sys.argv[3]
+        shot = int(sys.argv[4])
+        run = int(sys.argv[5])
+        ids_name = sys.argv[6]
+    elif len(sys.argv) == 8:
+        user = sys.argv[1]
+        tokamak = sys.argv[2]
+        version = sys.argv[3]
+        shot = int(sys.argv[4])
+        run = int(sys.argv[5])
+        ids_name = sys.argv[6]
+        comment = sys.argv[7]
+    else:
+        print('Usage: idsoccurrences <USER> <TOKAMAK> <VERSION> <SHOT> <RUN> <IDS>', file=sys.stderr)
+        print('or: idsoccurrences <USER> <TOKAMAK> <VERSION> <SHOT> <RUN> <IDS> -c', file=sys.stderr)
+        print('-c option adds the IDS (occurrence) comment field to the output')
+        exit(1)
+
+    numpy.set_printoptions(threshold=sys.maxsize)
+
+    imas_entry = imas.ids(shot, run)
+    imas_entry.open_env(user, tokamak, version)
+    MAX_NUMBER_OF_IDS_OCCURRENCES = 10
+    print("Searching available occurrences of " + ids_name + " IDS...")
+    occurrence_found = False
+    for occurrence in range(0, MAX_NUMBER_OF_IDS_OCCURRENCES):
+       try:
+          ids_properties = eval("imas_entry." + ids_name + ".partialGet('ids_properties', occurrence)")
+          ht = ids_properties.homogeneous_time
+          if ht == 0 or ht == 1 or ht == 2:
+             occurrence_found = True
+             print("-->Found occurrence " + str(occurrence))
+             if comment is not None:
+                 print("    " + ids_properties.comment)
+       except:
+          pass
+    if not occurrence_found:
+        print("-->No occurrence found.")
+    imas_entry.close()
+
+
