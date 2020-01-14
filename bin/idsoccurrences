@@ -8,21 +8,15 @@ import sys
 import logging
 
 if __name__ == '__main__':
-    if len(sys.argv) == 7:
+    if len(sys.argv) == 7 or len(sys.argv) == 8:
         user = sys.argv[1]
         tokamak = sys.argv[2]
         version = sys.argv[3]
         shot = int(sys.argv[4])
         run = int(sys.argv[5])
         ids_name = sys.argv[6]
-    elif len(sys.argv) == 8:
-        user = sys.argv[1]
-        tokamak = sys.argv[2]
-        version = sys.argv[3]
-        shot = int(sys.argv[4])
-        run = int(sys.argv[5])
-        ids_name = sys.argv[6]
-        comment = sys.argv[7]
+        if len(sys.argv) == 8:
+           option = sys.argv[7]
     else:
         print('Usage: idsoccurrences <USER> <TOKAMAK> <VERSION> <SHOT> <RUN> <IDS>', file=sys.stderr)
         print('or: idsoccurrences <USER> <TOKAMAK> <VERSION> <SHOT> <RUN> <IDS> -c', file=sys.stderr)
@@ -43,7 +37,7 @@ if __name__ == '__main__':
           if ht == 0 or ht == 1 or ht == 2:
              occurrence_found = True
              print("-->Found occurrence " + str(occurrence))
-             if comment is not None:
+             if option == '-c':
                  print("    " + ids_properties.comment)
        except:
           pass
