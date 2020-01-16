@@ -5,45 +5,84 @@ from __future__ import print_function
 import imas
 import numpy
 import sys
-import logging
+import traceback
+import argparse
+import os
+from argparse import RawTextHelpFormatter
 
 if __name__ == '__main__':
-    if len(sys.argv) == 7 or len(sys.argv) == 8:
-        user = sys.argv[1]
-        tokamak = sys.argv[2]
-        version = sys.argv[3]
-        shot = int(sys.argv[4])
-        run = int(sys.argv[5])
-        ids_name = sys.argv[6]
-        if len(sys.argv) == 8:
-           option = sys.argv[7]
-    else:
-        print('Usage: idsoccurrences <USER> <TOKAMAK> <VERSION> <SHOT> <RUN> <IDS>', file=sys.stderr)
-        print('or: idsoccurrences <USER> <TOKAMAK> <VERSION> <SHOT> <RUN> <IDS> -c', file=sys.stderr)
-        print('-c option adds the IDS (occurrence) comment field to the output')
-        exit(1)
+    # Create the parser
+    parser = argparse.ArgumentParser(prog='idsoccurrences', \
+             description="Search available occurrences of a specified IDS (search is currently limited to 'maxocc' occurrences, default to 15).\n" \
+             + "Example for searching occurrences of 'equilibrium' IDS in shot 54178, run 0, of 'west' machine for user 'imas':\n" \
+             + "idsoccurrences -u imas west 54178 0 equilibrium",
+             formatter_class=RawTextHelpFormatter)
+    parser.add_argument('-u',
+                       metavar='user_name',
+                       required=False,
+                       type=str,
+                       default=os.environ.get('USER'),
+                       help='user name')
+    parser.add_argument('tokamak',
+                       metavar='tokamak',
+                       type=str,
+                       help='tokamak name')
+    parser.add_argument('-v',
+                       metavar='version',
+                       required=False,
+                       type=str,
+                       default='3',
+                       help='IMAS Data Dictionary major version')
+    parser.add_argument('shot',
+                       metavar='shot',
+                       type=int,
+                       help='shot number')
+    parser.add_argument('run',
+                       metavar='run',
+                       type=int,
+                       help='run number')
+    parser.add_argument('ids',
+                       metavar='ids',
+                       type=str,
+                       help='IDS name')
+    parser.add_argument('-c',
+                        '--comment',
+                       required=False,
+                       action='store_true',
+                       help='Output ids_properties.comment field for each found occurrence')
+    parser.add_argument('-maxocc',
+                       metavar='maxocc',
+                       required=False,
+                       type=int,
+                       default=15,
+                       help='Max number of occurrences to scan for availability')         
+                       
+    # Execute parse_args()
+    args = parser.parse_args()
 
-    numpy.set_printoptions(threshold=sys.maxsize)
-
-    imas_entry = imas.ids(shot, run)
-    imas_entry.open_env(user, tokamak, version)
-    MAX_NUMBER_OF_IDS_OCCURRENCES = 10
-    print("Searching available occurrences of " + ids_name + " IDS... (scanning first " + \
-    str(MAX_NUMBER_OF_IDS_OCCURRENCES) + " occurrences)") 
-    occurrence_found = False
-    for occurrence in range(0, MAX_NUMBER_OF_IDS_OCCURRENCES):
-       try:
-          ids_properties = eval("imas_entry." + ids_name + ".partialGet('ids_properties', occurrence)")
-          ht = ids_properties.homogeneous_time
-          if ht == 0 or ht == 1 or ht == 2:
-             occurrence_found = True
-             print("-->Found occurrence " + str(occurrence))
-             if option == '-c':
-                 print("    " + ids_properties.comment)
-       except:
-          pass
-    if not occurrence_found:
-        print("-->No occurrence found.")
-    imas_entry.close()
-
+    try:
+        imas_entry = imas.ids(args.shot, args.run)
+        imas_entry.open_env(args.u, args.tokamak, args.v)
+        
+        print("Searching available occurrences of " + args.ids + " IDS... (scanning first " + \
+        str(args.maxocc) + " occurrences)") 
+        occurrence_found = False
+        for occurrence in range(0, args.maxocc):
+          
+              ids_properties = eval("imas_entry." + args.ids + ".partialGet('ids_properties', occurrence)")
+              ht = ids_properties.homogeneous_time
+              if ht == 0 or ht == 1 or ht == 2:
+                 occurrence_found = True
+                 print("-->Found occurrence " + str(occurrence))
+                 if args.comment:
+                     print("    " + ids_properties.comment)
+                     
+        if not occurrence_found:
+            print("-->No occurrence found.")
+            
+        imas_entry.close()
+        
+    except:
+       traceback.print_exc(file=sys.stdout)
+ 
 
