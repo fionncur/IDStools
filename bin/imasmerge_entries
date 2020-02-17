@@ -1,0 +1,127 @@
+#!/usr/bin/env python
+# A script which copies every IDS in a pulsefile to a different version
+from __future__ import print_function
+
+import os
+import os.path
+import sys
+import imas
+import xml.sax
+import xml.sax.handler
+
+class Parser(xml.sax.handler.ContentHandler):
+    def __init__(self):
+        xml.sax.handler.ContentHandler.__init__(self)
+        self.idss = []
+
+    def startElement(self, name, attrs):
+        if name == 'IDS':
+            ids = dict()
+            for i in attrs.getNames():
+                ids[i] = attrs.getValue(i)
+            self.idss.append(ids)
+
+if __name__ == '__main__':
+    if len(sys.argv) != 8 and len(sys.argv) != 9:
+        print('This script copies all valid IDSs (optionnally, you can specify a list of IDS names) from a given source IMAS data entry #1 to a destination data entry #2')
+        print('If a given IDS already exists in the destination data entry, it asks whether it should be overwritten or not')
+        print('If the destination data entry doesn''t exist, it creates it')
+        print('All IDS occurrences will be copied. If you provide a list of IDS names, all existing occurrences in the source will be copied to the destination')
+        print('Usage:')
+        print('    idsmerge source_user source_machine source_pulse source_run destination_machine desination_pulse destination_run '
+              '[IDS-list-as-Python-list]')
+        print('Example, merge all IDSs:')
+        print('    idsmerge source_user jet 71827 21 jet 71827 30')
+        print('Example, copy just core_profiles and equilibrium:')
+        print('    idscopy source_user jet 71827 21 jet 71827 30 '
+              '"[\'core_profiles\', \'equilibrium\']"')
+        print('')
+        print('NOTE : the destination IMAS_MAJOR_VERSION is defined by the loaded IMAS module')
+        exit()
+    # parse XML with IDS information
+    path = os.getenv('IMAS_PREFIX')
+    path = os.path.join(path, 'include/dd_data_dictionary.xml')
+    #path = os.path.join(path, 'dd_data_dictionary.xml')
+    parser = Parser()
+    xml.sax.parse(path, parser)
+
+    # open input pulsefile and output one
+    user1, machine1, shot1, run1 = sys.argv[1], sys.argv[2], int(sys.argv[3]), int(sys.argv[4])
+    machine2, shot2, run2 = sys.argv[5] , int(sys.argv[6]), int(sys.argv[7])
+    version = os.getenv("IMAS_VERSION").split(".")[0]
+    print('Opening source /%s/%s/%s/%d/%d' % (user1, machine1, version, shot1, run1))
+    idss_in = imas.ids(shot1, run1)
+    idss_in.open_env(user1, machine1, version)
+ 
+    user2 = os.getenv('USER')
+    print('Opening destination /%s/%s/%s/%d/%d' % (user2, machine2, version, shot2, run2))
+    idss_out = imas.ids(shot2, run2)
+    try:
+      idss_out.open_env(user2, machine2, version)
+    except:
+      print('The destination data entry didn''t exist, creating it now')
+      idss_out.create_env(user2, machine2, version)
+    idx = idss_out.expIdx
+    ids_list = None
+    if len(sys.argv) == 9:
+        ids_list = eval(sys.argv[8])
+    # read/write every IDS
+    for ids_info in parser.idss:
+        name = ids_info['name']
+        #timed = ids_info['timed'] CPO feature, obsolete for IDSs.
+        maxoccur = int(ids_info['maxoccur'])
+        if ids_list and name not in ids_list:
+            continue
+        if name not in idss_in.__dict__:
+            continue
+        #if ids_info['timed'] == 'no':
+        for i in range(maxoccur + 1):
+            #if i:
+            #    print('Copying %s/%d' % (ids_info['name'], i))
+            #else:
+            #    print('Copying %s' % ids_info['name'])
+            ids = idss_in.__dict__[name]
+            stdout = sys.stdout
+            sys.stdout = open('/dev/null', 'w') # suppress warnings
+            ids.get(i)
+            sys.stdout = stdout
+            if (ids.ids_properties.homogeneous_time == 0 or ids.ids_properties.homogeneous_time == 1 or ids.ids_properties.homogeneous_time == 2):
+              ht = eval("idss_out." + ids_info['name'] + ".partialGet('ids_properties/homogeneous_time', i)")
+              if ht == 0 or ht == 1 or ht == 2:
+                 ans = input('Found IDS ' + ids_info['name'] + ' occurrence ' + str(i) + ' in the destination. Do you want to overwrite it (y/n) ? ')
+                 if ans == 'y':
+                    if i:
+                       print('Copying %s/%d' % (ids_info['name'], i))
+                    else:
+                       print('Copying %s' % ids_info['name'])
+                    ids.setExpIdx(idx)
+                    ids.put(i)
+                 else:
+                    continue
+              else:
+                 if i:
+                    print('Copying %s/%d' % (ids_info['name'], i))
+                 else:
+                    print('Copying %s' % ids_info['name'])
+                 ids.setExpIdx(idx)
+                 ids.put(i)
+    idss_in.close()
+    idss_out.close()
+    #        else: setExpIds on each slice, CPO feature obsolete for IDSs
+    #            for i in range(maxoccur + 1):
+    #                if i:
+    #                    print('Processing %s/%d' % (ids_info['type'], i))
+    #                else:
+    #                    print('Processing %s' % ids_info['type'])
+    #                ids = idss_in.__dict__[type + 'Array']
+    #                stdout = sys.stdout
+    #                sys.stdout = open('/dev/null', 'w') # suppress warnings
+    #                ids.get(i)
+    #                sys.stdout = stdout
+    #                if not ids.array:
+    #                    print()
+    #                    continue
+    #                print('(found', len(ids.array), 'slices)')
+    #                for slice in ids.array:
+    #                    slice.setExpIdx(idx)
+    #                ids.put(i)
