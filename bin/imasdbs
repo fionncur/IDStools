@@ -124,8 +124,8 @@ Possible commands are: \n\
 \tlist <shot number>- list existing databases \n\
 \tslices <shot number> <run number> - list existing databases, including number of timeslices and time range for time-dependent IDSs\n\
 \ttimes <shot number> <run number> - list existing databases, including number of timeslices their time points for time-dependent IDSs \n\
-\ttokamak - list existing tokamaks (with data versions)\n\
-\tdataversion - list existing dataversions (with tokamaks)\n\
+\ttokamaks - list existing tokamaks (with data versions)\n\
+\tdataversions - list existing dataversions (with tokamaks)\n\
 \n\
 If the optional arguments shot number and run number are given, only databases with these numbers will be shown.\n\
 \n\
