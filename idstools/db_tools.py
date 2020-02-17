@@ -13,11 +13,11 @@ def get_user_db_directory(user=None):
     If user is omitted, the current user is used."""
     if not user: user = os.getlogin()
     if (user=="public"):
-        publichome = os.getenv("IMASPUBLICDBHOME")
+        publichome = os.getenv("IMAS_HOME")
         if (publichome == None):
-            print("Environment variable IMASPUBLICDBHOME is not defined. Quitting.", file=sys.stderr)
+            print("Environment variable IMAS_HOME is not defined. Quitting.", file=sys.stderr)
             sys.exit(1)
-        return publichome
+        return publichome+'/shared/imasdb'
     else:
         return os.path.expanduser("~" + user + "/public/imasdb")
 
