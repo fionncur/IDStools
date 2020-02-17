@@ -30,7 +30,7 @@ if __name__ == '__main__':
         print('If the destination data entry doesn''t exist, it creates it')
         print('All IDS occurrences will be copied. If you provide a list of IDS names, all existing occurrences in the source will be copied to the destination')
         print('Usage:')
-        print('    imasmerge_entries source_user source_machine source_pulse source_run destination_machine desination_pulse destination_run '
+        print('    imasmerge_entries source_user source_machine source_pulse source_run destination_machine destination_pulse destination_run '
               '[IDS-list-as-Python-list]')
         print('Example, copy all IDSs:')
         print('    imasmerge_entries source_user jet 71827 21 jet 71827 30')
