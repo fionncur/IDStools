@@ -23,17 +23,19 @@ class Parser(xml.sax.handler.ContentHandler):
 
 if __name__ == '__main__':
     if len(sys.argv) != 8 and len(sys.argv) != 9:
-        print('This script copies all valid IDSs (optionnally, you can specify a list of IDS names) from a given source IMAS data entry #1 to a destination data entry #2')
+        print('This script copies all valid IDSs (optionnally, you can specify a list of IDS names) from a given source IMAS data entry to a destination data entry')
+        print('Its provide a form of merge functionality between IMAS data entries')
+        print('  ')
         print('If a given IDS already exists in the destination data entry, it asks whether it should be overwritten or not')
         print('If the destination data entry doesn''t exist, it creates it')
         print('All IDS occurrences will be copied. If you provide a list of IDS names, all existing occurrences in the source will be copied to the destination')
         print('Usage:')
-        print('    idsmerge source_user source_machine source_pulse source_run destination_machine desination_pulse destination_run '
+        print('    imasmerge_entries source_user source_machine source_pulse source_run destination_machine desination_pulse destination_run '
               '[IDS-list-as-Python-list]')
-        print('Example, merge all IDSs:')
-        print('    idsmerge source_user jet 71827 21 jet 71827 30')
+        print('Example, copy all IDSs:')
+        print('    imasmerge_entries source_user jet 71827 21 jet 71827 30')
         print('Example, copy just core_profiles and equilibrium:')
-        print('    idscopy source_user jet 71827 21 jet 71827 30 '
+        print('    imasmerge_entries source_user jet 71827 21 jet 71827 30 '
               '"[\'core_profiles\', \'equilibrium\']"')
         print('')
         print('NOTE : the destination IMAS_MAJOR_VERSION is defined by the loaded IMAS module')
