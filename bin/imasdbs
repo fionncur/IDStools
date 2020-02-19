@@ -11,7 +11,7 @@ import numpy
 TAB = ' ' * 3
 SHOT_STR_LEN = 5
 RUN_STR_LEN = 5
-TOKAMAK_STR_LEN = 12
+DATABASE_STR_LEN = 12
 VERSION_STR_LEN = 6
 IDSNAME_STR_LEN = 15
 SLICENUM_STR_LEN = 4
@@ -29,8 +29,8 @@ def print_vector(vec, wlen):
     return "".join( [extended(str(x), wlen) for x in vec] )
 
 def print_list(dbs, shotnum = None, compact = False):
-    for tokamak, dvs in dbs:
-        printed_tokamak = False
+    for dbname, dvs in dbs:
+        printed_database = False
         for dv, dbbackends in dvs:
             printed_dataversion = False
             for backend, dbs in dbbackends:
@@ -41,9 +41,9 @@ def print_list(dbs, shotnum = None, compact = False):
                         if shot != shotnum:
                             continue
 
-                    if not printed_tokamak:
-                        print("Tokamak: " + tokamak)
-                        printed_tokamak = True
+                    if not printed_database:
+                        print("Database: " + dbname)
+                        printed_database = True
                     if not printed_dataversion:
                         print(TAB + "Data version: " + dv)
                         printed_dataversion = True
@@ -60,8 +60,8 @@ def print_list(dbs, shotnum = None, compact = False):
 def print_times(dbs, opts, printTimes = False, shotnum= None, runnum = None):
     import idstools.ids_tools as ct
 
-    for tokamak, dvs in dbs:
-        printed_tokamak = False
+    for dbname, dvs in dbs:
+        printed_database = False
         for dv, dbbackends in dvs:
             printed_dataversion = False
             for backend, dbs in dbbackends:
@@ -79,9 +79,9 @@ def print_times(dbs, opts, printTimes = False, shotnum= None, runnum = None):
                             if run != runnum:
                                 continue
 
-                        if not printed_tokamak:
-                            print("Tokamak: " + tokamak)
-                            printed_tokamak = True
+                        if not printed_database:
+                            print("Tokamak: " + dbname)
+                            printed_database = True
                         if not printed_dataversion:
                             print(TAB + "Data version: " + dv)
                             printed_dataversion = True
@@ -93,7 +93,7 @@ def print_times(dbs, opts, printTimes = False, shotnum= None, runnum = None):
                             printed_shot = True
 
                         print(TAB * 4 + " Run: " + extended(str(run), RUN_STR_LEN))
-                        db = ct.ImasDb(shot, run, opts.user, tokamak, dv, True, backend == "hdf5")
+                        db = ct.ImasDb(shot, run, opts.user, dbname, dv, True, backend == "hdf5")
                         alltimes = db.all_times()
                         for idsname, times in alltimes:
                             if len(times) == 1 and numpy.isnan(times[0]):
@@ -124,8 +124,8 @@ Possible commands are: \n\
 \tlist <shot number>- list existing databases \n\
 \tslices <shot number> <run number> - list existing databases, including number of timeslices and time range for time-dependent IDSs\n\
 \ttimes <shot number> <run number> - list existing databases, including number of timeslices their time points for time-dependent IDSs \n\
-\ttokamaks - list existing tokamaks (with data versions)\n\
-\tdataversions - list existing dataversions (with tokamaks)\n\
+\tdatabases - list existing databases (with data versions)\n\
+\tdataversions - list existing dataversions (with databases)\n\
 \n\
 If the optional arguments shot number and run number are given, only databases with these numbers will be shown.\n\
 \n\
@@ -134,7 +134,8 @@ If no command is given, the list command is performed. \n\
 To see databases stored in the public imas database, use 'public' as the user name.\
 ")
 p.add_option("-u", "--user", dest="user", default=None, help = "Show databases of specified user")
-p.add_option("-t", "--tokamak", dest="tokamak", default=None, help = "Show only databases for specified tokamaks")
+p.add_option("-t", "--tokamak", dest="dbname", default=None, help = "[DEPRECATED, use -d instead] Show only databases with specified tokamak")
+p.add_option("-d", "--database", dest="dbname", default=None, help = "Show only databases with specified name")
 p.add_option("-v", "--version", dest="version", default=None, help = "Show only databases for specified data version")
 p.add_option("--backend", dest="backend", default=None, help = "Show databases written with given backend(s). \n\
 Comma-separated list of backends (Currently supported: mdsplus, hdf5). By default all backends are shown.")
@@ -171,7 +172,7 @@ if not args or args[0] == "list" or args[0] == "slices" or args[0] == "times":
     else:
         backends = None
 
-    dbs = dbtools.list_databases(opts.user, opts.tokamak, opts.version, backends)
+    dbs = dbtools.list_databases(opts.user, opts.dbname, opts.version, backends)
 
     if args and args[0] == "slices":
         print_times(dbs, opts, printTimes = False, shotnum = shotnum, runnum = runnum)
@@ -181,12 +182,17 @@ if not args or args[0] == "list" or args[0] == "slices" or args[0] == "times":
         print_list(dbs, shotnum, opts.compact)
 
 elif args[0] == "tokamaks":
-    for tokamak, dvs in dbtools.list_tokamaks(opts.user, opts.version):
-        print(extended(tokamak, TOKAMAK_STR_LEN) + " " + print_vector(dvs, VERSION_STR_LEN))
+    print('Warning: "tokamaks" command is being deprecated and should be replaced by "databases"')
+    for dbname, dvs in dbtools.list_tokamaks(opts.user, opts.version):
+        print(extended(dbname, DATABASE_STR_LEN) + " " + print_vector(dvs, VERSION_STR_LEN))
+
+elif args[0] == "databases":
+    for dbname, dvs in dbtools.list_tokamaks(opts.user, opts.version):
+        print(extended(dbname, DATABASE_STR_LEN) + " " + print_vector(dvs, VERSION_STR_LEN))
 
 elif args[0] == "dataversions":
-    for dv, tokamaks in dbtools.list_dataversions(opts.user):
-        print(extended(dv, VERSION_STR_LEN) + " " + print_vector(tokamaks, TOKAMAK_STR_LEN))
+    for dv, dbname in dbtools.list_dataversions(opts.user):
+        print(extended(dv, VERSION_STR_LEN) + " " + print_vector(dbname, DATABASE_STR_LEN))
 
 else:
-    print("Unknown command: " + args[0] + ". Possible commands are (none), list, tokamaks", file=sys.stderr)
+    print("Unknown command: " + args[0] + ". Possible commands are (none), list, slices, times, databases, dataversions", file=sys.stderr)
