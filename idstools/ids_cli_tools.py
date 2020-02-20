@@ -95,7 +95,8 @@ def parseShotDescription(shotDesc):
 def setup_parser():
     p = optparse.OptionParser()
     p.add_option("-u", "--user", dest="user", default=None)
-    p.add_option("-t", "--tokamak", dest="tokamak", default=None)
+    p.add_option("-t", "--tokamak", dest="tokamak", default=None, help="[Deprecated, use -d instead]")
+    p.add_option("-d", "--database", dest="database", default=None)
     p.add_option("-v", "--version", dest="version", default=None)
 
     p.add_option("--hdf5", action="store_true", dest="useHDF5", default=False)
@@ -105,13 +106,14 @@ def setup_parser():
 def parse_cli(p):
     opts, args = p.parse_args()
 
-    if ((opts.user is not None) | (opts.tokamak is not None) | (opts.version is not None)) \
+    if ((opts.user is not None) | (opts.tokamak is not None) | (opts.database is not None) | (opts.version is not None)) \
         & opts.useHDF5:
         raise SystemExit("HDF5 access method not allowed when specifying user, tokamak or data version.")
 
     pars = setDefaultParameters()
     if opts.user is not None: pars["user"] = opts.user
     if opts.tokamak is not None: pars["tokamakname"] = opts.tokamak
+    if opts.database is not None: pars["databasename"] = opts.database
     if opts.version is not None: pars["dataversion"] = opts.version
     pars["hdf5"] = opts.useHDF5
     pars["debug"] = opts.debug
@@ -121,7 +123,7 @@ def parse_cli(p):
 def setDefaultParameters():
     default = {}
     default["user"] = os.getenv("USER")
-    default["tokamakname"] = os.getenv("MDSPLUS_TREE_BASE_0").split("/")[-3]
+    default["tokamakname"] = "iter" 
     default["dataversion"] = os.getenv("IMAS_VERSION").split(".")[0]
     default["hdf5"] = False
     default["debug"] = False
