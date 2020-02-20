@@ -18,8 +18,8 @@ def find_nearest(a, a0):
 # Management of input arguments
 parser = argparse.ArgumentParser(description=\
     '---- Display the plasma kinetic profiles from the core_profiles IDSs')
-parser.add_argument('-u','--user',help='username of the DB where the datafile is located', required=False)
-parser.add_argument('-m','--machine',help='tokamak name of the DB where the datafile is located', required=False)
+parser.add_argument('-u','--user',help='username of the DB where the data-entry is located', required=False)
+parser.add_argument('-m','--machine',help='tokamak name of the targeted data-entry', required=False)
 parser.add_argument('-s','--shot',help='shot number', required=True,type=int)
 parser.add_argument('-r','--run',help='run number',required=True,type=int)
 parser.add_argument('-t','--time',help='time', required=False,type=float)
