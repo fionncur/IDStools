@@ -15,7 +15,7 @@ if __name__ == '__main__':
         run = int(sys.argv[5])
         ids = sys.argv[6]
     else:
-        print('Usage: idsdump <USER> <TOKAMAK> <VERSION> <SHOT> <RUN> <IDS>', file=sys.stderr)
+        print('Usage: idsdump <USER> <DATABASE> <VERSION> <SHOT> <RUN> <IDS>', file=sys.stderr)
         exit(1)
 
     numpy.set_printoptions(threshold=sys.maxsize)

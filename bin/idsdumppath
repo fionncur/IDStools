@@ -9,7 +9,7 @@ import sys
 if __name__ == '__main__':
 
     if len(sys.argv) != 8:
-        print('Usage: idsdumppath <USER> <TOKAMAK> <VERSION> <SHOT> <RUN> <IDS> <DATA_PATH>', file=sys.stderr)
+        print('Usage: idsdumppath <USER> <DATABASE> <VERSION> <SHOT> <RUN> <IDS> <DATA_PATH>', file=sys.stderr)
         exit(1)
 
     numpy.set_printoptions(threshold=sys.maxsize)

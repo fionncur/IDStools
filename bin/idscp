@@ -11,7 +11,9 @@ parser.add_argument('-ri','--run_input',help='Input run number', required=True,t
 parser.add_argument('-so','--shot_output',help='Output shot number', required=True,type=int)
 parser.add_argument('-ro','--run_output',help='Output run number', required=True,type=int)
 parser.add_argument('-u','--user',help='username of the DB where the datafile is located', required=False)
-parser.add_argument('-t','--machine',help='tokamak name of the DB where the datafile is located', required=False)
+group = parser.add_mutually_exclusive_group()
+group.add_argument('-t','--machine',help='[Deprecated, use -d instead] tokamak name of the DB where the datafile is located', required=False)
+group.add_argument('-d','--database',help='database name of the DB where the datafile is located', required=False)
 parser.add_argument('-ids','--ids',help='IDS to copy', required=True)
 
 args = vars(parser.parse_args())
@@ -33,6 +35,8 @@ else:
 # Tokamak name
 if args['machine'] != None:
     machine = args["machine"]
+elif args['database'] != None:
+    machine = args['database']
 else:
     machine = 'iter'
 

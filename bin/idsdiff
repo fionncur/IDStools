@@ -6,12 +6,12 @@ import numpy
 import sys
 import imas
 
-def get_ids(user, tokamak, version, shot, run, idsname, time=0, interp=1):
+def get_ids(user, database, version, shot, run, idsname, time=0, interp=1):
     '''
     Open IMASdb to get specific IDS and return its deep copy.
     '''
     imas_obj = imas.ids(shot, run)
-    imas_obj.open_env(user, tokamak, version)
+    imas_obj.open_env(user, database, version)
     imas_obj.__dict__[idsname].get()
     ids = copy.deepcopy(imas_obj.__dict__[idsname])
     imas_obj.close()
@@ -83,7 +83,7 @@ def compare(x, y, parent):
 
 if __name__ == '__main__':
     if len(sys.argv) != 9:
-        print('Usage: idsdiff <USER> <TOKAMAK> <VERSION> <SHOTa> <RUNa> <SHOTb> <RUNb> <IDSNAME>', file=sys.stderr)
+        print('Usage: idsdiff <USER> <DATABASE> <VERSION> <SHOTa> <RUNa> <SHOTb> <RUNb> <IDSNAME>', file=sys.stderr)
         exit(1)
 
     compare(get_ids(sys.argv[1], sys.argv[2], sys.argv[3], int(sys.argv[4]), int(sys.argv[5]), sys.argv[8]),\
