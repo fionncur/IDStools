@@ -14,7 +14,7 @@ if __name__ == '__main__':
     # Create the parser
     parser = argparse.ArgumentParser(prog='idsoccurrences', \
              description="Search available occurrences of a specified IDS (search is currently limited to 'maxocc' occurrences, default to 15).\n" \
-             + "Example for searching occurrences of 'equilibrium' IDS in shot 54178, run 0, of 'west' machine for user 'imas':\n" \
+             + "Example for searching occurrences of 'equilibrium' IDS in shot 54178, run 0, of 'west' database for user 'imas':\n" \
              + "idsoccurrences -u imas west 54178 0 equilibrium",
              formatter_class=RawTextHelpFormatter)
     parser.add_argument('-u',
@@ -23,10 +23,10 @@ if __name__ == '__main__':
                        type=str,
                        default=os.environ.get('USER'),
                        help='user name')
-    parser.add_argument('tokamak',
-                       metavar='tokamak',
+    parser.add_argument('database',
+                       metavar='database',
                        type=str,
-                       help='tokamak name')
+                       help='database name')
     parser.add_argument('-v',
                        metavar='version',
                        required=False,
@@ -62,7 +62,7 @@ if __name__ == '__main__':
 
     try:
         imas_entry = imas.ids(args.shot, args.run)
-        imas_entry.open_env(args.u, args.tokamak, args.v)
+        imas_entry.open_env(args.u, args.database, args.v)
         
         print("Searching available occurrences of " + args.ids + " IDS... (scanning first " + \
         str(args.maxocc) + " occurrences)") 
