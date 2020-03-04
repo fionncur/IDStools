@@ -54,7 +54,7 @@ if __name__ == '__main__':
     print('Opening source /%s/%s/%s/%d/%d' % (user1, machine1, version, shot1, run1))
     idss_in = imas.ids(shot1, run1)
     idss_in.open_env(user1, machine1, version)
- 
+    idx_in = idss_in.expIdx
     user2 = os.getenv('USER')
     print('Opening destination /%s/%s/%s/%d/%d' % (user2, machine2, version, shot2, run2))
     idss_out = imas.ids(shot2, run2)
@@ -63,7 +63,7 @@ if __name__ == '__main__':
     except:
       print('The destination data entry didn''t exist, creating it now')
       idss_out.create_env(user2, machine2, version)
-    idx = idss_out.expIdx
+    idx_out = idss_out.expIdx
     ids_list = None
     if len(sys.argv) == 9:
         ids_list = eval(sys.argv[8])
@@ -78,11 +78,8 @@ if __name__ == '__main__':
             continue
         #if ids_info['timed'] == 'no':
         for i in range(maxoccur + 1):
-            #if i:
-            #    print('Copying %s/%d' % (ids_info['name'], i))
-            #else:
-            #    print('Copying %s' % ids_info['name'])
             ids = idss_in.__dict__[name]
+            ids.setExpIdx(idx_in)  #Reset IDS variable to point to input data entry before GET operation
             stdout = sys.stdout
             sys.stdout = open('/dev/null', 'w') # suppress warnings
             ids.get(i)
@@ -96,7 +93,7 @@ if __name__ == '__main__':
                        print('Copying %s/%d' % (ids_info['name'], i))
                     else:
                        print('Copying %s' % ids_info['name'])
-                    ids.setExpIdx(idx)
+                    ids.setExpIdx(idx_out)
                     ids.put(i)
                  else:
                     continue
@@ -105,7 +102,7 @@ if __name__ == '__main__':
                     print('Copying %s/%d' % (ids_info['name'], i))
                  else:
                     print('Copying %s' % ids_info['name'])
-                 ids.setExpIdx(idx)
+                 ids.setExpIdx(idx_out)
                  ids.put(i)
     idss_in.close()
     idss_out.close()
