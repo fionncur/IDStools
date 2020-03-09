@@ -8,6 +8,9 @@ import sys
 import imas
 import xml.sax
 import xml.sax.handler
+import argparse
+from argparse import RawTextHelpFormatter
+
 
 class Parser(xml.sax.handler.ContentHandler):
     def __init__(self):
@@ -22,24 +25,71 @@ class Parser(xml.sax.handler.ContentHandler):
             self.idss.append(ids)
 
 if __name__ == '__main__':
-    if len(sys.argv) != 8 and len(sys.argv) != 9:
-        print('This script copies all valid IDSs (optionnally, you can specify a list of IDS names) from a given source IMAS data entry to a destination data entry')
-        print('Its provide a form of merge functionality between IMAS data entries')
-        print('  ')
-        print('If a given IDS already exists in the destination data entry, it asks whether it should be overwritten or not')
-        print('If the destination data entry doesn''t exist, it creates it')
-        print('All IDS occurrences will be copied. If you provide a list of IDS names, all existing occurrences in the source will be copied to the destination')
-        print('Usage:')
-        print('    imasmerge_entries source_user source_machine source_pulse source_run destination_machine destination_pulse destination_run '
-              '[IDS-list-as-Python-list]')
-        print('Example, copy all IDSs:')
-        print('    imasmerge_entries source_user jet 71827 21 jet 71827 30')
-        print('Example, copy just core_profiles and equilibrium:')
-        print('    imasmerge_entries source_user jet 71827 21 jet 71827 30 '
-              '"[\'core_profiles\', \'equilibrium\']"')
-        print('')
-        print('NOTE : the destination IMAS_MAJOR_VERSION is defined by the loaded IMAS module')
-        exit()
+    # Parse input arguments
+    parser_input = argparse.ArgumentParser(prog='imasmerge_entries', \
+             description="This script copies all valid IDSs (optionnally, you can specify a list of IDS names) from a given source IMAS data entry to a destination data entry\n" \
+             + "Its provide a form of merge functionality between IMAS data entries\n" \
+             + "If a given IDS already exists in the destination data entry, it asks whether it should be overwritten or not\n" \
+             + "If the destination data entry doesn''t exist, it creates it\n" \
+             + "All IDS occurrences will be copied. If you provide a list of IDS names, all existing occurrences in the source will be copied to the destination\n" \
+             + "NOTE : the destination IMAS_MAJOR_VERSION is defined by the loaded IMAS module\n" \
+             + "Usage:\n" \
+             + "   imasmerge_entries source_user source_machine source_pulse source_run destination_machine destination_pulse destination_run '[IDS-list-as-Python-list]'\n" \
+             + "Example, copy all IDSs:\n" \
+             + "    imasmerge_entries source_user jet 71827 21 jet 71827 30\n" \
+             + "Example, copy just core_profiles and equilibrium:\n" \
+             + "    imasmerge_entries source_user jet 71827 21 jet 71827 30 '[\'core_profiles\', \'equilibrium\']'\n",
+             formatter_class=RawTextHelpFormatter)
+    parser_input.add_argument('-u',
+                       metavar='user_name',
+                       required=False,
+                       type=str,
+                       default=os.environ.get('USER'),
+                       help='user name of the input database')
+    parser_input.add_argument('-v',
+                       metavar='version',
+                       required=False,
+                       type=str,
+                       default=os.getenv("IMAS_VERSION").split(".")[0],
+                       help='IMAS Data Dictionary major version')
+    parser_input.add_argument('-overwrite',
+                       required=False,
+                       action='store_true',
+                       help='If this option is enabled, existing IDS occurrences in the output data entry will be overwritten')
+    parser_input.add_argument('database_input',
+                       metavar='database_input',
+                       type=str,
+                       help='Input database')
+    parser_input.add_argument('shot_input',
+                       metavar='shot_input',
+                       type=int,
+                       help='Input shot number')
+    parser_input.add_argument('run_input',
+                       metavar='run_input',
+                       type=int,
+                       help='Input run number')
+    parser_input.add_argument('database_output',
+                       metavar='database_output',
+                       type=str,
+                       help='Input database')
+    parser_input.add_argument('shot_output',
+                       metavar='shot_output',
+                       type=int,
+                       help='Output shot number')
+    parser_input.add_argument('run_output',
+                       metavar='run_output',
+                       type=int,
+                       help='Output run number')
+    parser_input.add_argument('-ids_list',
+                       required=False,
+                       metavar='ids_list',
+                       type=str,
+                       default=None,
+                       help='List of IDS names that have to be copied (if not specified, all IDSs will be copied)')
+    # Execute parse_args()
+    args = parser_input.parse_args()
+    print(args)
+
     # parse XML with IDS information
     path = os.getenv('IMAS_PREFIX')
     path = os.path.join(path, 'include/dd_data_dictionary.xml')
@@ -48,31 +98,30 @@ if __name__ == '__main__':
     xml.sax.parse(path, parser)
 
     # open input pulsefile and output one
-    user1, machine1, shot1, run1 = sys.argv[1], sys.argv[2], int(sys.argv[3]), int(sys.argv[4])
-    machine2, shot2, run2 = sys.argv[5] , int(sys.argv[6]), int(sys.argv[7])
-    version = os.getenv("IMAS_VERSION").split(".")[0]
-    print('Opening source /%s/%s/%s/%d/%d' % (user1, machine1, version, shot1, run1))
-    idss_in = imas.ids(shot1, run1)
-    idss_in.open_env(user1, machine1, version)
+    #user1, database_input, shot_input, run_input = sys.argv[1], sys.argv[2], int(sys.argv[3]), int(sys.argv[4])
+    #database_output, shot_output, run_output = sys.argv[5] , int(sys.argv[6]), int(sys.argv[7])
+    print('Opening source /%s/%s/%s/%d/%d' % (args.u, args.database_input, args.v, args.shot_input, args.run_input))
+    idss_in = imas.ids(args.shot_input, args.run_input)
+    idss_in.open_env(args.u, args.database_input, args.v)
     idx_in = idss_in.expIdx
     user2 = os.getenv('USER')
-    print('Opening destination /%s/%s/%s/%d/%d' % (user2, machine2, version, shot2, run2))
-    idss_out = imas.ids(shot2, run2)
+    print('Opening destination /%s/%s/%s/%d/%d' % (user2, args.database_output, args.v, args.shot_output, args.run_output))
+    idss_out = imas.ids(args.shot_output, args.run_output)
     try:
-      idss_out.open_env(user2, machine2, version)
+      idss_out.open_env(user2, args.database_output, args.v)
     except:
       print('The destination data entry didn''t exist, creating it now')
-      idss_out.create_env(user2, machine2, version)
+      idss_out.create_env(user2, args.database_output, args.v)
     idx_out = idss_out.expIdx
-    ids_list = None
-    if len(sys.argv) == 9:
-        ids_list = eval(sys.argv[8])
+    #    ids_list = None
+    #    if len(sys.argv) == 9:
+    #        ids_list = eval(sys.argv[8])
     # read/write every IDS
     for ids_info in parser.idss:
         name = ids_info['name']
         #timed = ids_info['timed'] CPO feature, obsolete for IDSs.
         maxoccur = int(ids_info['maxoccur'])
-        if ids_list and name not in ids_list:
+        if args.ids_list and name not in args.ids_list:
             continue
         if name not in idss_in.__dict__:
             continue
@@ -87,8 +136,9 @@ if __name__ == '__main__':
             if (ids.ids_properties.homogeneous_time == 0 or ids.ids_properties.homogeneous_time == 1 or ids.ids_properties.homogeneous_time == 2):
               ht = eval("idss_out." + ids_info['name'] + ".partialGet('ids_properties/homogeneous_time', i)")
               if ht == 0 or ht == 1 or ht == 2:
-                 ans = input('Found IDS ' + ids_info['name'] + ' occurrence ' + str(i) + ' in the destination. Do you want to overwrite it (y/n) ? ')
-                 if ans == 'y':
+                 #ans = input('Found IDS ' + ids_info['name'] + ' occurrence ' + str(i) + ' in the destination. Do you want to overwrite it (y/n) ? ')
+                 #if ans == 'y':
+                 if args.overwrite:
                     if i:
                        print('Copying %s/%d' % (ids_info['name'], i))
                     else:
@@ -96,6 +146,7 @@ if __name__ == '__main__':
                     ids.setExpIdx(idx_out)
                     ids.put(i)
                  else:
+                    print('Skipping IDS ' + ids_info['name'] + ' occurrence ' + str(i) + 'which was found non-empty in the destination.')
                     continue
               else:
                  if i:
