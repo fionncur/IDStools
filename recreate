@@ -4,38 +4,38 @@ import imas,os,argparse
 
 # Management of input arguments
 parser = argparse.ArgumentParser(description=\
-	 '---- To recreate a new datafile from a previous one with all its IDSs ----')
+	 '---- To recreate a new data-entry from a previous one with all its IDSs ----')
 parser.add_argument('-si','--shot_input',help='Input shot number', required=True,type=int)
 parser.add_argument('-ri','--run_input',help='Input run number', required=True,type=int)
 parser.add_argument('-so','--shot_output',help='Output shot number', required=True,type=int)
 parser.add_argument('-ro','--run_output',help='Output run number', required=True,type=int)
-parser.add_argument('-u','--user',help='username of the DB where the datafile is located', required=True)
-parser.add_argument('-t','--machine',help='tokamak name of the DB where the datafile is located', required=True)
+parser.add_argument('-u','--user_or_path',help='User or path name of the DB where the data-entry is located', required=True)
+parser.add_argument('-d','--database',help='Database name of the DB where the data-entry is located', required=True)
 
 args = vars(parser.parse_args())
 
-# recreate -si 44 -ri 33 -so 44 -ro 34 -u schneim -t iter
-# recreate -si 110014 -ri 1 -so 110014 -ro 1 -u public -t ITER
+# recreate -si 44 -ri 33 -so 44 -ro 34 -u schneim -d iter
+# recreate -si 110014 -ri 1 -so 110014 -ro 1 -u public -d ITER
 
-shot_in  = args["shot_input"]
-run_in   = args["run_input"]
-shot_out = args["shot_output"]
-run_out  = args["run_output"]
-user     = args["user"]
-machine  = args["machine"]
-version  = os.getenv('IMAS_VERSION')[0]
+shot_in      = args["shot_input"]
+run_in       = args["run_input"]
+shot_out     = args["shot_output"]
+run_out      = args["run_output"]
+user_or_path = args["user_or_path"]
+database     = args["database"]
+version      = os.getenv('IMAS_VERSION')[0]
 
 # OPEN INPUT
 input = imas.ids(shot_in,run_in,0,0)
-input.open_env(user,machine,'3')
+input.open_env(user_or_path,database,version)
 
 # CREATE OUTPUT
-if not os.path.exists(os.getenv('HOME')+'/public/imasdb/'+machine):
-   print('--> Create local database '+os.getenv('HOME')+'/public/imasdb/'+machine)
-   os.popen("imasdb "+tokamakname).read()
+if not os.path.exists(os.getenv('HOME')+'/public/imasdb/'+database):
+   print('--> Create local database '+os.getenv('HOME')+'/public/imasdb/'+database)
+   os.popen("imasdb "+database).read()
 
 output = imas.ids(shot_out,run_out,0,0)
-output.create_env(os.getenv('USER'),machine,'3')
+output.create_env(os.getenv('USER'),database,version)
 
 # Set up the list of existing IDSs in th DD
 dd_idslist=[]

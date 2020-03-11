@@ -1,10 +1,11 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
+from __future__ import print_function
 
 import argparse, imas
 import init_mendeleiev as mend
 import numpy as np
 import sys
-from os import system
+from os import system,getenv
 from sys import exit
 
 # ----------------------------------------------------------------------
@@ -12,34 +13,35 @@ from sys import exit
 # Management of input arguments
 parser = argparse.ArgumentParser(description=\
 	 '---- Auto-generated yaml scenario and watcher files (!!! STILL TO BE COMPLETED BY HAND !!!)')
-parser.add_argument('-u','--user',help='username of the DB where the datafile is located', required=False)
-parser.add_argument('-t','--machine',help='tokamak name of the DB where the datafile is located', required=False)
+parser.add_argument('-u','--user_or_path',help='User or path name of the DB where the data-entry is located', required=False)
+parser.add_argument('-d','--database',help='Database name of the DB where the data-entry is located', required=False)
 parser.add_argument('-s','--shot',help='shot number', required=True,type=int)
 parser.add_argument('-r','--run',help='run number',required=True,type=int)
 args = vars(parser.parse_args())
 shot = args["shot"]
 run  = args["run"]
 
-# Username
-if args['user'] != None:
-	user = args["user"]
+# User or path name
+if args['user_or_path'] != None:
+	user_or_path = args["user_or_path"]
 else:
-	user = 'public'
+	user_or_path = 'public'
 
-# Tokamak name
-if args['machine'] != None:
-	machine = args["machine"]
+# Database name
+if args['database'] != None:
+	database = args["database"]
 else:
-	machine = 'iterdb'
+	database = 'iterdb'
 
 # Open the database and read the necessary IDSs
 try:
+    version = getenv('IMAS_VERSION')[0]
     input = imas.ids(shot,run)
-    input.open_env(str(user),str(machine),'3')
+    input.open_env(str(user_or_path),str(database),version)
 except:
     print('Shot ' + str(shot) + ', run ' + str(run) + ' does not exist', file=sys.stderr)
     print('----> Aborted.', file=sys.stderr)
-    exit(1)
+    exit()
 
 # Read necessary IDSs from database
 try:
@@ -50,7 +52,7 @@ try:
     else:
       eq_present = 0
 except:
-    print("The equilibrium IDS is absent from the input datafile", file=sys.stdout)
+    print("The equilibrium IDS is absent from the input data-entry", file=sys.stdout)
     eq_present = 0
 
 try:
@@ -61,14 +63,14 @@ try:
     else:
       core_present = 0
 except:
-    print("The core_profiles IDS is absent from the input datafile", file=sys.stdout)
+    print("The core_profiles IDS is absent from the input data-entry", file=sys.stdout)
     core_present = 0
 
 try:
     input.summary.get()
     summary = input.summary
 except:
-    print("The summary IDS is absent from the input datafile", file=sys.stdout)
+    print("The summary IDS is absent from the input data-entry", file=sys.stdout)
     print("----> H&CD waveforms not filled (to be completed by hand)", file=sys.stdout)
 
 try:
@@ -89,7 +91,7 @@ try:
     else:
         edge_present = 0
 except:
-    print("The edge_profiles IDS is absent from the input datafile", file=sys.stdout)
+    print("The edge_profiles IDS is absent from the input data-entry", file=sys.stdout)
     print("Only core data will be used", file=sys.stdout)
     edge_present = 0
 
@@ -101,19 +103,19 @@ try:
     else:
         flux_present = 0
 except:
-    print("The edge_transport IDS is absent from the input datafile", file=sys.stdout)
+    print("The edge_transport IDS is absent from the input data-entry", file=sys.stdout)
     print("----> P_SOL information not filled (to be completed by hand)", file=sys.stdout)
     flux_present = 0
 
 if core_present == 0 and edge_present == 0:
     print("No profile data present", file=sys.stderr)
     print("----> Aborted.", file=sys.stderr)
-    exit(1)
+    exit()
 
 if eq_present == 0 and core_present == 1:
     print("No equilibrium IDS to go with core data", file=sys.stderr)
     print("----> Aborted.", file=sys.stderr)
-    exit(1)
+    exit()
 
 # Mendeleiev table
 table_mendeleiev = mend.create_table_mendeleiev()
@@ -128,7 +130,7 @@ if eq_present == 1:
    except:
       print("equilibrium.time_slice[:].global_quantities.magnetic_axis.b_tor could not be read", file=sys.stderr)
       print("----> Aborted.", file=sys.stderr)
-      exit(1)
+      exit()
 else:
    try:
       if min(np.sign(summary.global_quantities.b0.value)) < 0:
@@ -138,7 +140,7 @@ else:
    except:
       print("summary.global_quantities.b0.value[:] could not be read", file=sys.stderr)
       print("----> Aborted.", file=sys.stderr)
-      exit(1)
+      exit()
 
 if eq_present==1:
    try:
@@ -149,7 +151,7 @@ if eq_present==1:
    except:
       print("equilibrium.time_slice[:].global_quantities.ip could not be read", file=sys.stderr)
       print("----> Aborted.", file=sys.stderr)
-      exit(1)
+      exit()
 else:
    try:
       plasma_current = 0
@@ -159,7 +161,7 @@ else:
    except:
       print("summary.global_quantities.ip could not be read", file=sys.stderr)
       print("----> Aborted.", file=sys.stderr)
-      exit(1)
+      exit()
 
 if core_present==1:
     try:
@@ -171,7 +173,7 @@ if core_present==1:
     except:
        print("core_profiles.profiles_1d[:].electrons.density[0] could not be read", file=sys.stderr)
        print("----> Aborted.", file=sys.stderr)
-       exit(1)
+       exit()
 
 sepmid_electron_density = 0
 if edge_present==1:
@@ -186,7 +188,7 @@ if edge_present==1:
           print("Only the core electron density will be provided", file=sys.stderr)
        else:
           print("----> Aborted.", file=sys.stderr)
-          exit(1)
+          exit()
 
 if core_present==1:
    try:
@@ -237,25 +239,25 @@ if core_present == 1:
           try:
              equilibrium = cli.get('equilibrium')
           except:
-             exit(1)
+             exit()
           volume = equilibrium.time_slice[the_slice].profiles_1d.volume
           if len(volume) == len(core_profiles.profiles_1d[the_slice].electrons.density):
              print("core_profiles.profiles_1d[:].grid.volume could not be read", file=sys.stderr)
              print("----> equilibrium.time_slice[:].profiles_1d.volume used instead", file=sys.stderr)
              print("(possible because the resolution is the same, but maybe not correct)", file=sys.stderr)
           else:
-             exit(1)
+             exit()
    except:
       print("core_profiles.profiles_1d[:].grid.volume could not be read", file=sys.stderr)
       print("----> Aborted.", file=sys.stderr)
-      exit(1)
+      exit()
 
    try:
       central_zeff = core_profiles.profiles_1d[the_slice].zeff[0]
    except:
       print("core_profiles.profiles_1d[:].zeff[0] could not be read", file=sys.stderr)
       print("----> Aborted.", file=sys.stderr)
-      exit(1)
+      exit()
 
 sepmid_zeff = 0
 if edge_present == 1:
@@ -267,13 +269,13 @@ if edge_present == 1:
          print("Only the core Zeff value will be provided", file=sys.stderr)
       else:
          print("----> Aborted.", file=sys.stderr)
-         exit(1)
+         exit()
 
 # H&CD quantities from summary IDS
 confinement_regime = "tbd"
 if len(summary.time)==0:
     print("--------------------------------------------------------", file=sys.stdout)
-    print("The summary IDS is absent from the input datafile", file=sys.stdout)
+    print("The summary IDS is absent from the input data-entry", file=sys.stdout)
     print("----> H&CD waveforms not filled: to be completed by hand", file=sys.stdout)
     print("--------------------------------------------------------", file=sys.stdout)
     p_ec  = "tbd"
@@ -528,17 +530,17 @@ f.write("""responsible_name:\n""")
 f.write("""    tbd\n""")
 f.write("""\n""")
 f.write("""# ------------------------------------------------------------------\n""")
-f.write("""# Shot number, run numbers, type, code, machine attributes\n""")
+f.write("""# Shot number, run numbers, type, code, database attributes\n""")
 f.write("""# Type: interpretative, predictive, experiment\n""")
 f.write("""# Code: code name in case of simulation, 0 in case of experiment\n""")
-f.write("""# Machine: tokamak name\n""")
+f.write("""# Machine: database name\n""")
 f.write("""# ------------------------------------------------------------------\n""")
 f.write("""characteristics:\n""")
 f.write("""    shot: %i\n""" % shot)
 f.write("""    run: %i\n""" % run)
 f.write("""    type: %s\n""" % type)
 f.write("""    workflow: %s\n""" % workflow)
-f.write("""    machine: %s\n""" % machine.upper())
+f.write("""    machine: %s\n""" % database.upper())
 f.write("""\n""")
 f.write("""# ------------------------------------------------------------------\n""")
 f.write("""# Relations to other entries in this database (if any)\n""")
@@ -640,15 +642,15 @@ f.write("""\n""")
 f.write("""# ------------------------------------------------------------------------------\n""")
 f.write("""# List of filled IDSs with time quantities in seconds (start, end, step)\n""")
 f.write("""# It should be the output of the "ids_content" script, adapted from\n""")
-f.write("""# listidss, see IMAS-1010 (note: the datafile has to be copied to a personal\n""")
+f.write("""# listidss, see IMAS-1010 (note: the data-entry has to be copied to a personal\n""")
 f.write("""# database for the script to work, see the example below):\n""")
-f.write("""#  ids_content -u schneim -t test -s 4321 -r 1\n""")
+f.write("""#  ids_content -u schneim -d test -s 4321 -r 1\n""")
 f.write("""# ------------------------------------------------------------------------------\n""")
 f.write("""idslist:\n""")
 f.close()
 
 # Complete the yaml file with the output of ids_content
-system('ids_content -u ' + str(user) + ' -t ' + str(machine) \
+system('ids_content -u ' + str(user_or_path) + ' -d ' + str(database) \
           + ' -s ' + str(shot) + ' -r ' + str(run) + ' >> ' + filename)
 
 print("----> " + filename + " created.", file=sys.stdout)

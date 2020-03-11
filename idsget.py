@@ -1,9 +1,11 @@
-import imas
+import imas,os
+
+version = os.getenv('IMAS_VERSION')[0]
 
 # ----------------------------------------------------------------------
-def get_equilibrium(shot,run,user,machine,occ=None):
+def get_equilibrium(shot,run,user_or_path,database,occ=None):
     input=imas.ids(shot,run,0,0)
-    input.open_env(user,machine,'3')
+    input.open_env(user_or_path,database,version)
     if occ==None:
       input.equilibrium.get()
     else:
@@ -12,9 +14,9 @@ def get_equilibrium(shot,run,user,machine,occ=None):
     return input.equilibrium
 
 # ----------------------------------------------------------------------
-def get_core_profiles(shot,run,user,machine,occ=None):
+def get_core_profiles(shot,run,user_or_path,database,occ=None):
     input=imas.ids(shot,run,0,0)
-    input.open_env(user,machine,'3')
+    input.open_env(user_or_path,database,version)
     if occ==None:
       input.core_profiles.get()
     else:
@@ -23,9 +25,9 @@ def get_core_profiles(shot,run,user,machine,occ=None):
     return input.core_profiles
 
 # ----------------------------------------------------------------------
-def get_nbi(shot,run,user,machine,occ=None):
+def get_nbi(shot,run,user_or_path,database,occ=None):
     input=imas.ids(shot,run,0,0)
-    input.open_env(user,machine,'3')
+    input.open_env(user_or_path,database,version)
     if occ==None:
       input.nbi.get()
     else:
@@ -34,9 +36,9 @@ def get_nbi(shot,run,user,machine,occ=None):
     return input.nbi
 
 # ----------------------------------------------------------------------
-def get_ic_antennas(shot,run,user,machine,occ=None):
+def get_ic_antennas(shot,run,user_or_path,database,occ=None):
     input=imas.ids(shot,run,0,0)
-    input.open_env(user,machine,'3')
+    input.open_env(user_or_path,database,version)
     if occ==None:
       input.ic_antennas.get()
     else:
@@ -45,9 +47,9 @@ def get_ic_antennas(shot,run,user,machine,occ=None):
     return input.ic_antennas
 
 # ----------------------------------------------------------------------
-def get_ec_antennas(shot,run,user,machine,occ=None):
+def get_ec_antennas(shot,run,user_or_path,database,occ=None):
     input=imas.ids(shot,run,0,0)
-    input.open_env(user,machine,'3')
+    input.open_env(user_or_path,database,version)
     if occ==None:
       input.ec_antennas.get()
     else:
@@ -56,9 +58,9 @@ def get_ec_antennas(shot,run,user,machine,occ=None):
     return input.ec_antennas
 
 # ----------------------------------------------------------------------
-def get_ec_launchers(shot,run,user,machine,occ=None):
+def get_ec_launchers(shot,run,user_or_path,database,occ=None):
     input=imas.ids(shot,run,0,0)
-    input.open_env(user,machine,'3')
+    input.open_env(user_or_path,database,version)
     if occ==None:
       input.ec_launchers.get()
     else:
@@ -67,9 +69,9 @@ def get_ec_launchers(shot,run,user,machine,occ=None):
     return input.ec_launchers
 
 # ----------------------------------------------------------------------
-def get_summary(shot,run,user,machine,occ=None):
+def get_summary(shot,run,user_or_path,database,occ=None):
     input=imas.ids(shot,run,0,0)
-    input.open_env(user,machine,'3')
+    input.open_env(user_or_path,database,version)
     if occ==None:
       input.summary.get()
     else:
@@ -78,9 +80,9 @@ def get_summary(shot,run,user,machine,occ=None):
     return input.summary
 
 # ----------------------------------------------------------------------
-def get_charge_exchange(shot,run,user,machine,occ=None):
+def get_charge_exchange(shot,run,user_or_path,database,occ=None):
     input=imas.ids(shot,run,0,0)
-    input.open_env(user,machine,'3')
+    input.open_env(user_or_path,database,version)
     if occ==None:
       input.charge_exchange.get()
     else:
@@ -89,9 +91,9 @@ def get_charge_exchange(shot,run,user,machine,occ=None):
     return input.charge_exchange
 
 # ----------------------------------------------------------------------
-def get_core_sources(shot,run,user,machine,occ=None):
+def get_core_sources(shot,run,user_or_path,database,occ=None):
     input=imas.ids(shot,run,0,0)
-    input.open_env(user,machine,'3')
+    input.open_env(user_or_path,database,version)
     if occ==None:
       input.core_sources.get()
     else:
@@ -100,9 +102,9 @@ def get_core_sources(shot,run,user,machine,occ=None):
     return input.core_sources
 
 # ----------------------------------------------------------------------
-def get_core_transport(shot,run,user,machine,occ=None):
+def get_core_transport(shot,run,user_or_path,database,occ=None):
     input=imas.ids(shot,run,0,0)
-    input.open_env(user,machine,'3')
+    input.open_env(user_or_path,database,version)
     if occ==None:
       input.core_transport.get()
     else:
@@ -111,9 +113,9 @@ def get_core_transport(shot,run,user,machine,occ=None):
     return input.core_transport
 
 # ----------------------------------------------------------------------
-def get_dataset_description(shot,run,user,machine,occ=None):
+def get_dataset_description(shot,run,user_or_path,database,occ=None):
     input=imas.ids(shot,run,0,0)
-    input.open_env(user,machine,'3')
+    input.open_env(user_or_path,database,version)
     if occ==None:
       input.dataset_description.get()
     else:
@@ -122,9 +124,9 @@ def get_dataset_description(shot,run,user,machine,occ=None):
     return input.dataset_description
 
 # ----------------------------------------------------------------------
-def get_distributions(shot,run,user,machine,occ=None):
+def get_distributions(shot,run,user_or_path,database,occ=None):
     input=imas.ids(shot,run,0,0)
-    input.open_env(user,machine,'3')
+    input.open_env(user_or_path,database,version)
     if occ==None:
       input.distributions.get()
     else:
@@ -133,9 +135,9 @@ def get_distributions(shot,run,user,machine,occ=None):
     return input.distributions
 
 # ----------------------------------------------------------------------
-def get_distribution_sources(shot,run,user,machine,occ=None):
+def get_distribution_sources(shot,run,user_or_path,database,occ=None):
     input=imas.ids(shot,run,0,0)
-    input.open_env(user,machine,'3')
+    input.open_env(user_or_path,database,version)
     if occ==None:
       input.distribution_sources.get()
     else:
@@ -144,9 +146,9 @@ def get_distribution_sources(shot,run,user,machine,occ=None):
     return input.distribution_sources
 
 # ----------------------------------------------------------------------
-def get_edge_profiles(shot,run,user,machine,occ=None):
+def get_edge_profiles(shot,run,user_or_path,database,occ=None):
     input=imas.ids(shot,run,0,0)
-    input.open_env(user,machine,'3')
+    input.open_env(user_or_path,database,version)
     if occ==None:
       input.edge_profiles.get()
     else:
@@ -155,9 +157,9 @@ def get_edge_profiles(shot,run,user,machine,occ=None):
     return input.edge_profiles
 
 # ----------------------------------------------------------------------
-def get_edge_sources(shot,run,user,machine,occ=None):
+def get_edge_sources(shot,run,user_or_path,database,occ=None):
     input=imas.ids(shot,run,0,0)
-    input.open_env(user,machine,'3')
+    input.open_env(user_or_path,database,version)
     if occ==None:
       input.edge_sources.get()
     else:
@@ -166,9 +168,9 @@ def get_edge_sources(shot,run,user,machine,occ=None):
     return input.edge_sources
 
 # ----------------------------------------------------------------------
-def get_magnetics(shot,run,user,machine,occ=None):
+def get_magnetics(shot,run,user_or_path,database,occ=None):
     input=imas.ids(shot,run,0,0)
-    input.open_env(user,machine,'3')
+    input.open_env(user_or_path,database,version)
     if occ==None:
       input.magnetics.get()
     else:
@@ -177,9 +179,9 @@ def get_magnetics(shot,run,user,machine,occ=None):
     return input.magnetics
 
 # ----------------------------------------------------------------------
-def get_pf_active(shot,run,user,machine,occ=None):
+def get_pf_active(shot,run,user_or_path,database,occ=None):
     input=imas.ids(shot,run,0,0)
-    input.open_env(user,machine,'3')
+    input.open_env(user_or_path,database,version)
     if occ==None:
       input.pf_active.get()
     else:
@@ -188,9 +190,9 @@ def get_pf_active(shot,run,user,machine,occ=None):
     return input.pf_active
 
 # ----------------------------------------------------------------------
-def get_pulse_schedule(shot,run,user,machine,occ=None):
+def get_pulse_schedule(shot,run,user_or_path,database,occ=None):
     input=imas.ids(shot,run,0,0)
-    input.open_env(user,machine,'3')
+    input.open_env(user_or_path,database,version)
     if occ==None:
       input.pulse_schedule.get()
     else:
@@ -199,9 +201,9 @@ def get_pulse_schedule(shot,run,user,machine,occ=None):
     return input.pulse_schedule
 
 # ----------------------------------------------------------------------
-def get_temporary(shot,run,user,machine,occ=None):
+def get_temporary(shot,run,user_or_path,database,occ=None):
     input=imas.ids(shot,run,0,0)
-    input.open_env(user,machine,'3')
+    input.open_env(user_or_path,database,version)
     if occ==None:
       input.temporary.get()
     else:
@@ -210,9 +212,9 @@ def get_temporary(shot,run,user,machine,occ=None):
     return input.temporary
 
 # ----------------------------------------------------------------------
-def get_tf(shot,run,user,machine,occ=None):
+def get_tf(shot,run,user_or_path,database,occ=None):
     input=imas.ids(shot,run,0,0)
-    input.open_env(user,machine,'3')
+    input.open_env(user_or_path,database,version)
     if occ==None:
       input.tf.get()
     else:
@@ -221,9 +223,9 @@ def get_tf(shot,run,user,machine,occ=None):
     return input.tf
 
 # ----------------------------------------------------------------------
-def get_transport_solver_numerics(shot,run,user,machine,occ=None):
+def get_transport_solver_numerics(shot,run,user_or_path,database,occ=None):
     input=imas.ids(shot,run,0,0)
-    input.open_env(user,machine,'3')
+    input.open_env(user_or_path,database,version)
     if occ==None:
       input.transport_solver_numerics.get()
     else:
@@ -232,9 +234,9 @@ def get_transport_solver_numerics(shot,run,user,machine,occ=None):
     return input.transport_solver_numerics
 
 # ----------------------------------------------------------------------
-def get_wall(shot,run,user,machine,occ=None):
+def get_wall(shot,run,user_or_path,database,occ=None):
     input=imas.ids(shot,run,0,0)
-    input.open_env(user,machine,'3')
+    input.open_env(user_or_path,database,version)
     if occ==None:
       input.wall.get()
     else:
@@ -243,9 +245,9 @@ def get_wall(shot,run,user,machine,occ=None):
     return input.wall
 
 # ----------------------------------------------------------------------
-def get_waves(shot,run,user,machine,occ=None):
+def get_waves(shot,run,user_or_path,database,occ=None):
     input=imas.ids(shot,run,0,0)
-    input.open_env(user,machine,'3')
+    input.open_env(user_or_path,database,version)
     if occ==None:
       input.waves.get()
     else:

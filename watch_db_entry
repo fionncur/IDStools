@@ -41,7 +41,7 @@ for i in range(add0_length):
     add0 = add0+"0"
 
 filename = "ids_"+str(shot)+add0+str(run)+".watcher"
-folder = '/work/imas/shared/iterdb'
+folder = '/work/imas/shared/imasdb/ITER'
 fullpath = folder+'/3/0/'+filename
 
 if delflag == 0:

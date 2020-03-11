@@ -28,7 +28,7 @@ if args['folder'] != None:
   folder = args['folder']
   os.system('cat '+folder+'/'+filename)
 else:
-  folder = '/work/imas/shared/iterdb'
+  folder = '/work/imas/shared/imasdb/ITER'
   os.system('cat '+folder+'/3/0/'+filename)
 
 

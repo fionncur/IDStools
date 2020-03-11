@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import argparse
+import argparse,os
 from imas import ids
 import pdb
 
@@ -9,35 +9,35 @@ import pdb
 # Management of input arguments
 parser = argparse.ArgumentParser(description=\
 	 '---- List ids content for yaml files aimed at describing a scenario ----')
-parser.add_argument('-u','--user',help='username of the DB where the datafile is located', required=False)
-parser.add_argument('-t','--machine',help='tokamak name of the DB where the datafile is located', required=False)
-parser.add_argument('-s','--shot',help='shot number', required=True,type=int)
-parser.add_argument('-r','--run',help='run number',required=True,type=int)
+parser.add_argument('-u','--user_or_path',help='User or path of the DB where the data-entry is located', required=False)
+parser.add_argument('-d','--database',help='Database name of the DB where the data-entry is located', required=False)
+parser.add_argument('-s','--shot',help='Shot number', required=True,type=int)
+parser.add_argument('-r','--run',help='Run number',required=True,type=int)
 args = vars(parser.parse_args())
 
 shot = args["shot"]
 run  = args["run"]
 
-# Username
-if args['user'] != None:
-	user = args["user"]
+# User or path name
+if args['user_or_path'] != None:
+	user_or_path = args["user_or_path"]
 else:
-	user = 'public'
+	user_or_path = 'public'
 
-# Tokamak name
-if args['machine'] != None:
-	machine = args["machine"]
+# Database name
+if args['database'] != None:
+	database = args["database"]
 else:
-	machine = 'iterdb'
+	database = 'iterdb'
 
 # Avoid too many arguments to be filled by the user (otherwise it is not user-friendly anymore)
-dataversion = '3'
+dataversion = os.getenv('IMAS_VERSION')[0]
 hdf5 = False
 debug = False
 
 try:
         import idstools.ids_tools as opendb
-        db = opendb.ImasDb(shot,run,user,machine,dataversion,True,False)
+        db = opendb.ImasDb(shot,run,user_or_path,database,dataversion,True,False)
 except:
         import sys
         print("%s: %s"%(sys.exc_info()[0],sys.exc_info()[1]), file=sys.stderr)
@@ -50,7 +50,7 @@ for idsname, times in alltimes:
 
 # Open the file to check IDSs for which no time is defined
 idss=ids(shot,run,0,0)
-idss.open_env(user,machine,'3')
+idss.open_env(user_or_path,database,dataversion)
 
 # Set up the list of existing IDSs in th DD
 dd_idslist=[]
