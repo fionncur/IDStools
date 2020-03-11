@@ -75,7 +75,7 @@ else:
     MDSPLUS_TREE_BASE_0 = os.path.expanduser("~{}".format(user_or_path))+"/public/imasdb/"+str(database)+"/3/0"
 
 try:
-    input.equilibrium.get()
+    input.equilibrium.get(occ)
     equilibrium = input.equilibrium
 except:
     print("The equilibrium IDS is absent from the input data-entry", file=sys.stderr)
