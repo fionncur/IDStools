@@ -1,0 +1,268 @@
+#!/usr/bin/env python
+from __future__ import print_function
+
+# MODULES
+# --------
+import numpy as np
+import imas,argparse,sys,os
+import matplotlib
+matplotlib.use('TKagg')
+import matplotlib.pyplot as plt
+
+# MANAGEMENT OF INPUT ARGUMENTS
+# ------------------------------
+parser = argparse.ArgumentParser(description=\
+	 '---- Display IC results')
+parser.add_argument('-s','--shot',help='Shot number', required=True,type=int)
+parser.add_argument('-r','--run',help='Run number',required=True,type=int)
+parser.add_argument('-u','--user_or_path',help='User or path name where the data-entry is located', required=True)
+parser.add_argument('-d','--database',help='Database name where the data-entry is located', required=True)
+parser.add_argument('-t','--time',help='time', required=False,type=float)
+
+args         = vars(parser.parse_args())
+shot         = args["shot"]
+run          = args["run"]
+database     = args["database"]
+user_or_path = args["user_or_path"]
+time         = args["time"]
+
+# DISPLAY PARAMETERS
+# -------------------
+fontsize = 12
+figure_width  = 5
+figure_height = 4
+
+plt.rcParams['font.size'] = fontsize
+plt.rcParams['axes.linewidth'] = 1.5
+plt.rcParams['grid.alpha'] = 1.0
+
+font = {'family': 'serif',
+        'color':  'darkred',
+        'weight': 'normal',
+        'size': fontsize,
+        }
+
+
+# ----------------------------------------------------------------------
+
+def find_nearest(a, a0):
+    'Element in nd array `a` closest to the scalar value `a0`'
+    idx = np.abs(a - a0).argmin()
+    return a.flat[idx],idx
+
+# ----------------------------------------------------------------------
+
+# Legend customization
+def CustomLegend(legend):
+    frame = legend.get_frame()
+    frame.set_facecolor('0.95')
+    for label in legend.get_texts():
+        label.set_fontsize(fontsize)
+    for label in legend.get_lines():
+        label.set_linewidth(1.5)  # the legend line width    
+    return
+
+# ----------------------------------------------------------------------
+
+# READ IDS'S FROM LOCAL DATABASE
+# -------------------------------
+try:
+    version = os.getenv('IMAS_VERSION')[0]
+    input=imas.ids(shot,run)
+    input.open_env(user_or_path,database,version)
+except:
+    print('Shot ' + str(shot) + ', run ' + str(run) + ' does not exist', file=sys.stderr)
+    print('----> Aborted.', file=sys.stderr)
+    exit()
+input.waves.get()
+input.close()
+
+# TIME VECTOR AND TIME INDEX
+# ---------------------------
+
+timevec = input.waves.time
+ntime = len(timevec)
+if ntime==1:
+    if len(timevec) > 0:
+        tc = timevec[0]
+    else:
+        tc = 0
+    it = 0
+else:
+    if time:
+        [tc,it] = find_nearest(timevec,time)
+    else:
+        it = int(ntime/2)
+        tc = timevec[it]
+    print('--------------------------------------------------------------------------')
+    print(' Time  = '+'%.2f' % tc+' s in range ['+'%.2f' % timevec[0]+','+'%.2f' % timevec[ntime-1]+'] s')
+    print(' Index = ',str(it))
+    print(' Averaged resolution = ', (timevec[ntime-1]-timevec[0])/(ntime-1),' s')  
+    print('--------------------------------------------------------------------------')
+time = tc
+
+# test provisoire
+factor = 0.4
+if 0:
+    for itime in range(ntime):
+        input.waves.coherent_wave[0].global_quantities[itime].power                   = input.waves.coherent_wave[3].global_quantities[itime].power*factor
+        input.waves.coherent_wave[0].global_quantities[itime].electrons.power_thermal = input.waves.coherent_wave[3].global_quantities[itime].electrons.power_thermal*factor
+        input.waves.coherent_wave[0].global_quantities[itime].current_tor             = input.waves.coherent_wave[3].global_quantities[itime].current_tor*factor
+    input.waves.coherent_wave[0].profiles_1d[it].grid.rho_tor_norm                    = input.waves.coherent_wave[3].profiles_1d[it].grid.rho_tor_norm
+    input.waves.coherent_wave[0].profiles_1d[it].grid.rho_tor                         = input.waves.coherent_wave[3].profiles_1d[it].grid.rho_tor
+    input.waves.coherent_wave[0].profiles_1d[it].power_density                        = input.waves.coherent_wave[3].profiles_1d[it].power_density*factor
+    input.waves.coherent_wave[0].profiles_1d[it].current_parallel_density             = input.waves.coherent_wave[3].profiles_1d[it].current_parallel_density*factor
+    input.waves.coherent_wave[0].beam_tracing[it].beam[0].power_initial               = input.waves.coherent_wave[3].beam_tracing[it].beam[0].power_initial*factor
+
+nwaves = len(input.waves.coherent_wave)
+is_active = [0]*nwaves
+for iwave in range(nwaves):
+    if input.waves.coherent_wave[iwave].global_quantities[0].power>0:
+        is_active[iwave] = 1
+        rho_tor_norm = input.waves.coherent_wave[iwave].profiles_1d[it].grid.rho_tor_norm
+        try:
+            rho_tor_norm = 0
+            if len(input.waves.coherent_wave[iwave].profiles_1d[it].grid.rho_tor_norm) > 0:
+                nrho = len(input.waves.coherent_wave[iwave].profiles_1d[it].grid.rho_tor_norm)
+                rho_tor_norm = input.waves.coherent_wave[iwave].profiles_1d[it].grid.rho_tor_norm
+            elif len(input.waves.coherent_wave[iwave].profiles_1d[it].grid.rho_tor) > 0:
+                nrho = len(input.waves.coherent_wave[iwave].profiles_1d[it].grid.rho_tor)
+                rho_tor_norm = input.waves.coherent_wave[iwave].profiles_1d[it].grid.rho_tor/input.waves.coherent_wave[iwave].profiles_1d[it].grid.rho_tor[nrho-1]
+        except:
+            print('waves.coherent_wave[iwave].profiles_1d[it].grid.rho_tor_norm and rho_tor could not be read', file=sys.stderr)
+            print('----> Aborted.', file=sys.stderr)
+            exit()
+        if nrho==0:
+            print('waves.coherent_wave[iwave].profiles_1d[it].grid.rho_tor_norm and rho_tor are empty', file=sys.stderr)
+            print('----> Aborted.', file=sys.stderr)
+            exit()
+
+if sum(is_active)==0:
+    print('The waves IDS appears empty ----> Abort.')
+    exit()
+
+# LOOP OVER ALL EC LAUNCHERS
+single_ic_antenna_name          = dict()
+single_injected_power           = dict()   # for the chosen time slice
+single_absorbed_power           = dict()   # for the chosen time slice
+total_injected_power            = 0        # for the chosen time slice
+
+total_power_density_profile     = [0]*nrho # profile
+total_current_density_profile   = [0]*nrho # profile
+single_power_density_profile    = dict()   # profile
+single_current_density_profile  = dict()   # profile
+
+total_power_waveform    = [0]*ntime # waveform
+total_current_waveform  = [0]*ntime # waveform
+single_power_waveform   = dict()    # waveform
+single_current_waveform = dict()    # waveform
+
+for iwave in range(nwaves):
+    single_ic_antenna_name[iwave] = input.waves.coherent_wave[iwave].identifier.antenna_name
+    if is_active[iwave]:
+        single_power_waveform[iwave]   = []
+        single_current_waveform[iwave] = []
+        for itime in range(ntime):
+            single_power_waveform[iwave].append(input.waves.coherent_wave[iwave].global_quantities[itime].electrons.power_thermal)
+            nion = len(waves.coherent_wave[iwave].global_quantities[itime].ion)
+            # To be checked
+            for iion in range(nion):
+                single_power_waveform[iwave][itime] = .append(input.waves.coherent_wave[iwave].global_quantities[itime].ion[iion].power_thermal)
+           
+
+
+            single_current_waveform[iwave].append(input.waves.coherent_wave[iwave].global_quantities[itime].current_tor)
+            total_power_waveform[itime]   = total_power_waveform[itime]   + input.waves.coherent_wave[iwave].global_quantities[itime].electrons.power_thermal
+            total_current_waveform[itime] = total_current_waveform[itime] + input.waves.coherent_wave[iwave].global_quantities[itime].current_tor
+        total_power_density_profile            = total_power_density_profile  + input.waves.coherent_wave[iwave].profiles_1d[it].power_density
+        single_power_density_profile[iwave]    = input.waves.coherent_wave[iwave].profiles_1d[it].power_density
+        total_current_density_profile         = total_current_density_profile   + input.waves.coherent_wave[iwave].profiles_1d[it].current_parallel_density
+        single_current_density_profile[iwave] = input.waves.coherent_wave[iwave].profiles_1d[it].current_parallel_density
+        single_injected_power[iwave] = 0.
+        for ibeam in range(len(input.waves.coherent_wave[iwave].beam_tracing[it].beam)):
+            total_injected_power         = total_injected_power + input.waves.coherent_wave[iwave].beam_tracing[it].beam[ibeam].power_initial
+            single_injected_power[iwave] = single_injected_power[iwave] + input.waves.coherent_wave[iwave].beam_tracing[it].beam[ibeam].power_initial
+        single_absorbed_power[iwave] = input.waves.coherent_wave[iwave].global_quantities[it].power
+        print(' '+single_ic_antenna_name[iwave]+' is active with a power of {:.2f}'.format(single_injected_power[iwave]*1.e-6)+' MW --> Absorbed power = {:.2f}'.format(single_absorbed_power[iwave]*1.e-6)+' MW')
+    else:
+        print(' '+single_ic_antenna_name[iwave]+' is off')
+print('--------------------------------------------------------------------------')
+
+# PROFILE OF ABSORBED POWER DENSIY [MW/M3]
+fig,ax =plt.subplots(1,1)
+if sum(is_active)>1:
+    ax.plot(rho_tor_norm, total_power_density_profile*1.e-6,label=r'Total')
+for iwave in range(nwaves):
+    if is_active[iwave]:
+        ax.plot(rho_tor_norm, single_power_density_profile[iwave]*1.e-6,label=single_ic_antenna_name[iwave])
+ax.set_ylabel('Absorbed power $\mathrm{[MW/m^{3}]}$')
+ax.set_xlabel('Normalized toroidal flux coordinate')
+plt.grid()
+legend = plt.legend()
+CustomLegend(legend)
+fig.set_size_inches(figure_width,figure_height)
+fig.tight_layout()
+fig.savefig('ICRH_profile_shot_{0}_run_{1}.png'.format(shot,run),bbox_inches="tight")
+#plt.title('Whatever')
+plt.show(block=False)
+
+# ICCD PROFILE [KA/M2]
+fig,ax =plt.subplots(1,1)
+if sum(is_active)>1:
+    ax.plot(rho_tor_norm, total_current_density_profile*1.e-6)
+for iwave in range(nwaves):
+    if is_active[iwave]:
+        ax.plot(rho_tor_norm, single_current_density_profile[iwave]*1.e-3,label=single_ic_antenna_name[iwave])
+ax.set_ylabel('$\mathrm{ICCD} [kA/m^{2}]}$')
+ax.set_xlabel('Normalized toroidal flux coordinate')
+plt.grid()
+legend = plt.legend()
+CustomLegend(legend)
+fig.set_size_inches(figure_width,figure_height)
+fig.tight_layout()
+fig.savefig('ICCD_profile_shot_{0}_run_{1}.png'.format(shot,run),bbox_inches="tight")
+#plt.title('Whatever')
+
+# IC POWER AND ICCD WAVEFORMS
+if ntime==1:
+    print('Only one time slice --> ICRH and ICCD waveforms not displayed')
+    plt.show(block=True)
+else:
+    plt.show(block=False)
+    # IC POWER WAVEFORM
+    fig,ax =plt.subplots(1,1)
+    if sum(is_active)>1:
+        ax.plot(timevec, np.array(total_power_waveform)*1.e-6,label=r'Total')
+    for iwave in range(nwaves):
+        if is_active[iwave]:
+            ax.plot(timevec, np.array(single_power_waveform[iwave])*1.e-6,label=single_ec_launcher_name[iwave])
+    ax.set_ylabel('Power to the electrons $\mathrm{[MW]}$')
+    ax.set_xlabel('Time (s)')
+    plt.grid()
+    legend = plt.legend()
+    CustomLegend(legend)
+    fig.set_size_inches(figure_width,figure_height)
+    fig.tight_layout()
+    fig.savefig('ICRH_waveform_shot_{0}_run_{1}.png'.format(shot,run),bbox_inches="tight")
+    #plt.title('Whatever')
+    plt.gca().set_ylim(0,max(total_power_waveform)*1.2e-6)
+    plt.show(block=False)
+
+    # ICCD WAVEFORM
+    fig,ax =plt.subplots(1,1)
+    if sum(is_active)>1:
+        ax.plot(timevec, np.array(total_current_waveform)*1.e-3,label=r'Total')
+    for iwave in range(nwaves):
+        if is_active[iwave]:
+            ax.plot(timevec, np.array(single_current_waveform[iwave])*1.e-3,label=single_ec_launcher_name[iwave])
+    ax.set_ylabel('ICCD $\mathrm{[kA]}$')
+    ax.set_xlabel('Time (s)')
+    plt.grid()
+    legend = plt.legend()
+    CustomLegend(legend)
+    fig.set_size_inches(figure_width,figure_height)
+    fig.tight_layout()
+    fig.savefig('ICCD_waveform_shot_{0}_run_{1}.png'.format(shot,run),bbox_inches="tight")
+    #plt.title('Whatever')
+    #plt.gca().set_ylim(0,max(np.array(total_current_waveform))*1.2e-3)
+    plt.show(block=True)

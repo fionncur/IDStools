@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from __future__ import print_function
 
-import argparse,os, imas
+import argparse,os,imas
 import sys
 
 # ----------------------------------------------------------------------
@@ -16,35 +16,42 @@ def find_nearest(a, a0):
 # Management of input arguments
 parser = argparse.ArgumentParser(description=\
     '---- Display the plasma equilibrium from the magnetic IDS')
-parser.add_argument('-u','--user',help='username of the DB where the data-entry is located', required=False)
-parser.add_argument('-m','--machine',help='database name of the targeted data-entry', required=False)
-parser.add_argument('-s','--shot',help='shot number', required=True,type=int)
-parser.add_argument('-r','--run',help='run number',required=True,type=int)
-parser.add_argument('-t','--time',help='time', required=False,type=float)
-parser.add_argument('-p','--plotrho',help='flag to plot rho(R,Z) (1) or not (0)', required=False,type=int)
+parser.add_argument('-u','--user_or_path',help='User or path name of the DB where the data-entry is located', required=False)
+parser.add_argument('-d','--database',help='Database name of the targeted data-entry', required=False)
+parser.add_argument('-s','--shot',help='Shot number', required=True,type=int)
+parser.add_argument('-r','--run',help='Run number',required=True,type=int)
+parser.add_argument('-t','--time',help='Time', required=False,type=float)
+parser.add_argument('-o','--occurrence',help='Occurrence number', required=False,type=int)
+parser.add_argument('-p','--plotrho',help='Flag to plot rho(R,Z) (1) or not (0)', required=False,type=int)
 
 args = vars(parser.parse_args())
 shot = args["shot"]
 run  = args["run"]
 
-# Username
-if args['user'] != None:
-    user = args["user"]
+# User or path
+if args['user_or_path'] != None:
+    user_or_path = args["user_or_path"]
 else:
-    #user = os.getenv('USER')
-    user = 'public'
+    #user_or_path = os.getenv('USER')
+    user_or_path = 'public'
 
-# Tokamak name
-if args['machine'] != None:
-    machine = args["machine"]
+# Database name
+if args['database'] != None:
+    database = args["database"]
 else:
-    machine = 'iterdb'
+    database = 'iterdb'
 
 # Time
 if args['time'] != None:
     time = args["time"]
 else:
     time = -99.
+
+# Occurrence
+if args['occurrence'] != None:
+    occ = args["occurrence"]
+else:
+    occ = 0
 
 # Flag to plot rho(R,Z)
 if args['plotrho'] != None:
@@ -54,23 +61,24 @@ else:
 
 # Open the database and read the necessary IDSs
 try:
+    version = os.getenv('IMAS_VERSION')[0]
     input = imas.ids(shot,run)
-    input.open_env(str(user),str(machine),'3')
+    input.open_env(str(user_or_path),str(database),version)
 except:
     print("Shot " + str(shot) + ", run " + str(run) + " does not exist", file=sys.stderr)
     print("----> Aborted.", file=sys.stderr)
     exit()
 
-if user == 'public':
-    MDSPLUS_TREE_BASE_0 = '/work/imas/shared/'+str(machine)+'/3/0'
+if user_or_path == 'public':
+    MDSPLUS_TREE_BASE_0 = '/work/imas/shared/'+str(database)+'/3/0'
 else:
-    MDSPLUS_TREE_BASE_0 = os.path.expanduser("~{}".format(user))+"/public/imasdb/"+str(machine)+"/3/0"
+    MDSPLUS_TREE_BASE_0 = os.path.expanduser("~{}".format(user_or_path))+"/public/imasdb/"+str(database)+"/3/0"
 
 try:
     input.equilibrium.get()
     equilibrium = input.equilibrium
 except:
-    print("The equilibrium IDS is absent from the input datafile", file=sys.stderr)
+    print("The equilibrium IDS is absent from the input data-entry", file=sys.stderr)
     print("----> Aborted.", file=sys.stderr)
     exit()
 

@@ -1,0 +1,416 @@
+#!/usr/bin/env python
+from __future__ import print_function
+
+# MODULES
+# --------
+import numpy as np
+import imas,argparse,sys,os
+import matplotlib
+matplotlib.use('TKagg')
+import matplotlib.pyplot as plt
+
+# MANAGEMENT OF INPUT ARGUMENTS
+# ------------------------------
+parser = argparse.ArgumentParser(description=\
+	 '---- Display core_sources results')
+parser.add_argument('-s','--shot',help='Shot number', required=True,type=int)
+parser.add_argument('-r','--run',help='Run number',required=True,type=int)
+parser.add_argument('-u','--user_or_path',help='User or path name where the data-entry is located', required=True)
+parser.add_argument('-d','--database',help='Database name where the data-entry is located', required=True)
+parser.add_argument('-t','--time',help='time', required=False,type=float)
+
+args         = vars(parser.parse_args())
+shot         = args["shot"]
+run          = args["run"]
+database     = args["database"]
+user_or_path = args["user_or_path"]
+time         = args["time"]
+
+# DISPLAY PARAMETERS
+# -------------------
+fontsize = 12
+figure_width  = 5
+figure_height = 4
+
+plt.rcParams['font.size'] = fontsize
+plt.rcParams['axes.linewidth'] = 1.5
+plt.rcParams['grid.alpha'] = 1.0
+
+font = {'family': 'serif',
+        'color':  'darkred',
+        'weight': 'normal',
+        'size': fontsize,
+        }
+
+
+# ----------------------------------------------------------------------
+
+def find_nearest(a, a0):
+    'Element in nd array `a` closest to the scalar value `a0`'
+    idx = np.abs(a - a0).argmin()
+    return a.flat[idx],idx
+
+# ----------------------------------------------------------------------
+
+# Legend customization
+def CustomLegend(legend):
+    frame = legend.get_frame()
+    frame.set_facecolor('0.95')
+    for label in legend.get_texts():
+        label.set_fontsize(fontsize)
+    for label in legend.get_lines():
+        label.set_linewidth(1.5)  # the legend line width    
+    return
+
+# ----------------------------------------------------------------------
+
+# READ IDS'S FROM LOCAL DATABASE
+# -------------------------------
+try:
+    version = os.getenv('IMAS_VERSION')[0]
+    input=imas.ids(shot,run)
+    input.open_env(user_or_path,database,version)
+except:
+    print('Shot ' + str(shot) + ', run ' + str(run) + ' does not exist', file=sys.stderr)
+    print('----> Aborted.', file=sys.stderr)
+    exit()
+input.core_sources.get()
+input.close()
+
+# TIME VECTOR AND TIME INDEX
+# ---------------------------
+
+timevec = input.core_sources.time
+ntime = len(timevec)
+if ntime==1:
+    if len(timevec) > 0:
+        tc = timevec[0]
+    else:
+        tc = 0
+    it = 0
+else:
+    if time:
+        [tc,it] = find_nearest(timevec,time)
+    else:
+        it = int(ntime/2)
+        tc = timevec[it]
+    print('--------------------------------------------------------------------------')
+    print(' Time  = '+'%.2f' % tc+' s in range ['+'%.2f' % timevec[0]+','+'%.2f' % timevec[ntime-1]+'] s')
+    print(' Index = ',str(it))
+    print(' Averaged resolution = ', (timevec[ntime-1]-timevec[0])/(ntime-1),' s')  
+    print('--------------------------------------------------------------------------')
+time = tc
+
+nsources = len(input.core_sources.source)
+#print(nsources,input.core_sources.source[0].global_quantities[0].power)
+is_active = [0]*nsources
+for isource in range(nsources):
+    if len(input.core_sources.source[isource].global_quantities)>0:
+        if input.core_sources.source[isource].global_quantities[0].power>0:
+            is_active[isource] = 1
+            rho_tor_norm = input.core_sources.source[isource].profiles_1d[it].grid.rho_tor_norm
+            try:
+                rho_tor_norm = 0
+                if len(input.core_sources.source[isource].profiles_1d[it].grid.rho_tor_norm) > 0:
+                    nrho = len(input.core_sources.source[isource].profiles_1d[it].grid.rho_tor_norm)
+                    rho_tor_norm = input.core_sources.source[isource].profiles_1d[it].grid.rho_tor_norm
+                elif len(input.core_sources.source[isource].profiles_1d[it].grid.rho_tor) > 0:
+                    nrho = len(input.core_sources.source[isource].profiles_1d[it].grid.rho_tor)
+                    rho_tor_norm = input.core_sources.source[isource].profiles_1d[it].grid.rho_tor/input.core_sources.source[isource].profiles_1d[it].grid.rho_tor[nrho-1]
+            except:
+                print('core_sources.source[isource].profiles_1d[it].grid.rho_tor_norm and rho_tor could not be read', file=sys.stderr)
+                print('----> Aborted.', file=sys.stderr)
+                exit()
+            if nrho==0:
+                print('core_sources.source[isource].profiles_1d[it].grid.rho_tor_norm and rho_tor are empty', file=sys.stderr)
+                print('----> Aborted.', file=sys.stderr)
+                exit()
+
+if sum(is_active)==0:
+    print('The core_sources IDS appears empty ----> Abort.')
+    exit()
+
+# LOOP OVER ALL EC LAUNCHERS
+single_source_name    = dict()
+
+# SINGLE AND TOTAL PROFILES (ELECTRONS+IONS)
+#total_power_profile                = [0]*nrho  # profile
+#total_particles_profile            = [0]*nrho  # profile
+#single_power_profile               = dict()    # profile
+#single_particles_profile           = dict()    # profile
+total_current_profile               = [0]*nrho  # profile
+single_current_profile              = dict()    # profile
+# SINGLE AND TOTAL PROFILES (ELECTRONS)
+total_electron_power_profile       = [0]*nrho  # profile
+total_electron_particles_profile   = [0]*nrho  # profile
+single_electron_power_profile      = dict()    # profile
+single_electron_particles_profile  = dict()    # profile
+# SINGLE AND TOTAL PROFILES (IONS)
+total_ion_power_profile            = [0]*nrho  # profile
+total_ion_particles_profile        = [0]*nrho  # profile
+single_ion_power_profile           = dict()    # profile
+single_ion_particles_profile       = dict()    # profile
+
+# SINGLE AND TOTAL WAVEFORMS (ELECTRONS+IONS)
+total_power_waveform               = [0]*ntime # waveform
+total_particles_waveform           = [0]*ntime # waveform
+single_power_waveform              = dict()    # waveform
+single_particles_waveform          = dict()    # waveform
+# SINGLE AND TOTAL WAVEFORMS (ELECTRONS)
+total_electron_power_waveform      = [0]*ntime # waveform
+total_electron_particles_waveform  = [0]*ntime # waveform
+single_electron_power_waveform     = dict()    # waveform
+single_electron_particles_waveform = dict()    # waveform
+# SINGLE AND TOTAL WAVEFORMS (IONS)
+total_ion_power_waveform           = [0]*ntime # waveform
+total_ion_particles_waveform       = [0]*ntime # waveform
+single_ion_power_waveform          = dict()    # waveform
+single_ion_particles_waveform      = dict()    # waveform
+# SINGLE AND TOTAL CURRENT AND TORQUE
+total_current_waveform             = [0]*ntime # waveform
+total_torque_waveform              = [0]*ntime # waveform
+single_current_waveform            = dict()    # waveform
+single_torque_waveform             = dict()    # waveform
+
+# Initialise all core_sources profiles and global quantities with zeros when they are not defined,
+# such that to avoid errors when looping over these quantities below
+for isource in range(nsources):
+    for itime in range(ntime):
+        if input.core_sources.source[isource].global_quantities[itime].electrons.power < 0:
+            input.core_sources.source[isource].global_quantities[itime].electrons.power = 0.
+        if input.core_sources.source[isource].global_quantities[itime].electrons.particles < 0:
+            input.core_sources.source[isource].global_quantities[itime].electrons.particles = 0.
+        if input.core_sources.source[isource].global_quantities[itime].total_ion_power < 0:
+            input.core_sources.source[isource].global_quantities[itime].total_ion_power = 0.
+        if input.core_sources.source[isource].global_quantities[itime].current_parallel < -1.e40:
+            input.core_sources.source[isource].global_quantities[itime].current_parallel = 0.
+        if input.core_sources.source[isource].global_quantities[itime].torque_tor < 0:
+            input.core_sources.source[isource].global_quantities[itime].torque_tor = 0.
+        # Waiting for the DD to be extended:
+        input.core_sources.source[isource].global_quantities[itime].total_ion_particles = 0
+        if input.core_sources.source[isource].global_quantities[itime].total_ion_particles < 0:
+            input.core_sources.source[isource].global_quantities[itime].total_ion_particles = 0.
+        # ----
+        if len (input.core_sources.source[isource].profiles_1d[it].electrons.energy) < 1:
+            input.core_sources.source[isource].profiles_1d[it].electrons.energy = [0]*nrho
+        if len (input.core_sources.source[isource].profiles_1d[it].electrons.particles) < 1:
+          input.core_sources.source[isource].profiles_1d[it].electrons.particles = [0]*nrho
+        nions = len(input.core_sources.source[isource].profiles_1d[it].ion)
+        for iion in range(nions):
+            if len (input.core_sources.source[isource].profiles_1d[it].ion[iion].energy) < 1:
+                input.core_sources.source[isource].profiles_1d[it].ion[iion].energy = [0]*nrho
+            if len (input.core_sources.source[isource].profiles_1d[it].ion[iion].particles) < 1:
+                input.core_sources.source[isource].profiles_1d[it].ion[iion].particles = [0]*nrho
+
+for isource in range(nsources):
+    single_source_name[isource] = input.core_sources.source[isource].identifier.name.upper()
+    if is_active[isource]:
+        single_electron_power_waveform[isource]   = []
+        single_electron_particles_waveform[isource] = []
+        single_ion_power_waveform[isource]   = []
+        single_ion_particles_waveform[isource] = []
+        single_power_waveform[isource]   = []
+        single_particles_waveform[isource] = []
+        single_current_waveform[isource]   = []
+        single_torque_waveform[isource]       = []
+
+        single_electron_power_profile[isource]     = [0]*nrho
+        single_electron_particles_profile[isource] = [0]*nrho
+        single_ion_power_profile[isource]          = [0]*nrho
+        single_ion_particles_profile[isource]      = [0]*nrho
+        #single_power_profile[isource]              = [0]*nrho
+        #single_particles_profile[isource]          = [0]*nrho
+        single_current_profile[isource]            = [0]*nrho
+        for itime in range(ntime):
+            single_electron_power_waveform[isource].append(input.core_sources.source[isource].global_quantities[itime].electrons.power)
+            single_electron_particles_waveform[isource].append(input.core_sources.source[isource].global_quantities[itime].electrons.particles)
+            single_ion_power_waveform[isource].append(input.core_sources.source[isource].global_quantities[itime].total_ion_power)
+            single_ion_particles_waveform[isource].append(input.core_sources.source[isource].global_quantities[itime].total_ion_particles)
+            single_power_waveform[isource].append( input.core_sources.source[isource].global_quantities[itime].electrons.power \
+             + input.core_sources.source[isource].global_quantities[itime].total_ion_power)
+            single_particles_waveform[isource].append(input.core_sources.source[isource].global_quantities[itime].electrons.particles \
+             + input.core_sources.source[isource].global_quantities[itime].total_ion_particles)
+            single_current_waveform[isource].append(input.core_sources.source[isource].global_quantities[itime].current_parallel)
+            single_torque_waveform[isource].append(input.core_sources.source[isource].global_quantities[itime].torque_tor)
+
+            total_electron_power_waveform[itime] = total_electron_power_waveform[itime] + input.core_sources.source[isource].global_quantities[itime].electrons.power
+            total_electron_particles_waveform[itime] = total_electron_particles_waveform[itime] + input.core_sources.source[isource].global_quantities[itime].electrons.particles
+            total_ion_power_waveform[itime] = total_ion_power_waveform[itime] + input.core_sources.source[isource].global_quantities[itime].total_ion_power
+            total_ion_particles_waveform[itime] = total_ion_particles_waveform[itime] + input.core_sources.source[isource].global_quantities[itime].total_ion_particles
+            total_power_waveform[itime] = total_electron_power_waveform[itime] + input.core_sources.source[isource].global_quantities[itime].electrons.power \
+             + input.core_sources.source[isource].global_quantities[itime].total_ion_power
+            total_particles_waveform[itime] = total_electron_particles_waveform[itime] + input.core_sources.source[isource].global_quantities[itime].electrons.particles \
+             + input.core_sources.source[isource].global_quantities[itime].total_ion_particles
+            total_current_waveform[itime] = total_current_waveform[itime] + input.core_sources.source[isource].global_quantities[itime].current_parallel
+            total_torque_waveform[itime] = total_torque_waveform[itime] + input.core_sources.source[isource].global_quantities[itime].torque_tor
+
+        single_electron_power_profile[isource] = np.array(input.core_sources.source[isource].profiles_1d[it].electrons.energy)
+        single_electron_particles_profile[isource] = np.array(input.core_sources.source[isource].profiles_1d[it].electrons.particles)
+        nions = len(input.core_sources.source[isource].profiles_1d[it].ion)
+        for iion in range(nions):
+          single_ion_power_profile[isource] = np.array(single_ion_power_profile[isource]) + input.core_sources.source[isource].profiles_1d[it].ion[iion].energy
+          single_ion_particles_profile[isource] = np.array(single_ion_particles_profile[isource]) + input.core_sources.source[isource].profiles_1d[it].ion[iion].particles
+        #single_power_profile[isource] = single_electron_power_profile[isource] + single_ion_power_profile[isource]
+        #single_particles_profile[isource] = single_electron_particles_profile[isource] + single_ion_particles_profile[isource]
+        single_current_profile[isource] = np.array(input.core_sources.source[isource].profiles_1d[it].j_parallel)
+
+        total_electron_power_profile = total_electron_power_profile + input.core_sources.source[isource].profiles_1d[it].electrons.energy
+        total_electron_particles_profile = total_electron_particles_profile + input.core_sources.source[isource].profiles_1d[it].electrons.particles
+        for iion in range(nions):
+          total_ion_power_profile = total_ion_power_profile + input.core_sources.source[isource].profiles_1d[it].ion[iion].energy
+          total_ion_particles_profile = total_ion_particles_profile + input.core_sources.source[isource].profiles_1d[it].ion[iion].particles
+        #total_power_profile = total_electron_power_profile + total_ion_power_profile
+        #total_particles_profile = total_electron_particles_profile + total_ion_particles_profile
+        total_current_profile = total_current_profile + np.array(input.core_sources.source[isource].profiles_1d[it].j_parallel)
+
+    else:
+        print(' '+single_source_name[isource]+' is off')
+
+# POWER PROFILES [MW/M3]
+fig,ax =plt.subplots(1,1)
+if sum(is_active)>1:
+    ax.plot(rho_tor_norm, np.array(total_electron_power_profile)*1.e-6,label=r'Total to electrons')
+    ax.plot(rho_tor_norm, np.array(total_ion_power_profile)*1.e-6,'--',label=r'Total to ions')
+for isource in range(nsources):
+    if is_active[isource]:
+        ax.plot(rho_tor_norm, np.array(single_electron_power_profile[isource])*1.e-6,label=single_source_name[isource]+' to electrons')
+        ax.plot(rho_tor_norm, np.array(single_ion_power_profile[isource])*1.e-6,'--',label=single_source_name[isource]+' to ions')
+ax.set_ylabel('Power to bulk $\mathrm{[MW/m^{3}]}$')
+ax.set_xlabel('Normalized toroidal flux coordinate')
+plt.grid()
+legend = plt.legend()
+CustomLegend(legend)
+fig.set_size_inches(figure_width,figure_height)
+fig.tight_layout()
+fig.savefig('CS_power_profiles_shot_{0}_run_{1}.png'.format(shot,run),bbox_inches="tight")
+#plt.title('Whatever')
+plt.show(block=False)
+
+# PARTICLES PROFILES [/M3/S]
+fig,ax =plt.subplots(1,1)
+if sum(is_active)>1:
+    ax.plot(rho_tor_norm, np.array(total_electron_particles_profile)*1.e-6,label=r'Total to electrons')
+    ax.plot(rho_tor_norm, np.array(total_ion_particles_profile)*1.e-6,'--',label=r'Total to ions')
+for isource in range(nsources):
+    if is_active[isource]:
+        ax.plot(rho_tor_norm, np.array(single_electron_particles_profile[isource])*1.e-6,label=single_source_name[isource]+' electrons')
+        ax.plot(rho_tor_norm, np.array(single_ion_particles_profile[isource])*1.e-6,'--',label=single_source_name[isource]+' ions')
+ax.set_ylabel('Density $\mathrm{[m^{-3}.s^{-1}]}$')
+ax.set_xlabel('Normalized toroidal flux coordinate')
+plt.grid()
+legend = plt.legend()
+CustomLegend(legend)
+fig.set_size_inches(figure_width,figure_height)
+fig.tight_layout()
+fig.savefig('CS_particles_profiles_shot_{0}_run_{1}.png'.format(shot,run),bbox_inches="tight")
+#plt.title('Whatever')
+
+# CURRENT PROFILES [KA/M2]
+fig,ax =plt.subplots(1,1)
+if sum(is_active)>1:
+    ax.plot(rho_tor_norm, np.array(total_current_profile)*1.e-3,label=r'Total current')
+for isource in range(nsources):
+    if is_active[isource]:
+        ax.plot(rho_tor_norm, np.array(single_current_profile[isource])*1.e-3,label=single_source_name[isource])
+ax.set_ylabel('Current density $\mathrm{[kA/m^{2}]}$')
+ax.set_xlabel('Normalized toroidal flux coordinate')
+plt.grid()
+legend = plt.legend()
+CustomLegend(legend)
+fig.set_size_inches(figure_width,figure_height)
+fig.tight_layout()
+fig.savefig('CS_current_profiles_shot_{0}_run_{1}.png'.format(shot,run),bbox_inches="tight")
+#plt.title('Whatever')
+
+# POWER AND PARTICLE WAVEFORMS
+if ntime==1:
+    print('Only one time slice --> Waveforms not displayed')
+    plt.show(block=True)
+else:
+    plt.show(block=False)
+    # POWER WAVEFORM
+    fig,ax =plt.subplots(1,1)
+    if sum(is_active)>1:
+        ax.plot(timevec, np.array(total_power_waveform)*1.e-6,label=r'Total electrons+ions')
+        ax.plot(timevec, np.array(total_electron_power_waveform)*1.e-6,label=r'Total electrons')
+        ax.plot(timevec, np.array(total_ion_power_waveform)*1.e-6,label=r'Total ions')
+    for isource in range(nsources):
+        if is_active[isource]:
+            ax.plot(timevec, np.array(single_power_waveform[isource])*1.e-6,label=single_source_name[isource]+' electrons+ions')
+            ax.plot(timevec, np.array(single_electron_power_waveform[isource])*1.e-6,label=single_source_name[isource]+' electrons')
+            ax.plot(timevec, np.array(single_ion_power_waveform[isource])*1.e-6,label=single_source_name[isource]+' ions')
+    ax.set_ylabel('Power waveforms $\mathrm{[MW]}$')
+    ax.set_xlabel('Time (s)')
+    plt.grid()
+    legend = plt.legend()
+    CustomLegend(legend)
+    fig.set_size_inches(figure_width,figure_height)
+    fig.tight_layout()
+    fig.savefig('CS_power_waveforms_shot_{0}_run_{1}.png'.format(shot,run),bbox_inches="tight")
+    #plt.title('Whatever')
+    #plt.gca().set_ylim(0,max(total_power_waveform)*1.2e-6)
+    plt.show(block=False)
+
+    # PARTICLES WAVEFORM
+    fig,ax =plt.subplots(1,1)
+    if sum(is_active)>1:
+        ax.plot(timevec, np.array(total_particles_waveform),label=r'Total electrons+ions')
+        ax.plot(timevec, np.array(total_electron_particles_waveform),label=r'Total electrons')
+        ax.plot(timevec, np.array(total_ion_particles_waveform),label=r'Total ions')
+        print(total_ion_particles_waveform)
+    for isource in range(nsources):
+        if is_active[isource]:
+            ax.plot(timevec, np.array(single_particles_waveform[isource]),label=single_source_name[isource]+' electrons+ions')
+            ax.plot(timevec, np.array(single_electron_particles_waveform[isource]),label=single_source_name[isource]+' electrons')
+            ax.plot(timevec, np.array(single_ion_particles_waveform[isource]),label=single_source_name[isource]+' ions')
+    ax.set_ylabel('Particles waveforms $\mathrm{[s^{-1}]}$')
+    ax.set_xlabel('Time (s)')
+    plt.grid()
+    legend = plt.legend()
+    CustomLegend(legend)
+    fig.set_size_inches(figure_width,figure_height)
+    fig.tight_layout()
+    fig.savefig('CS_particles_waveforms_shot_{0}_run_{1}.png'.format(shot,run),bbox_inches="tight")
+    #plt.title('Whatever')
+    #plt.gca().set_ylim(0,max(total_particles_waveform)*1.2e-6)
+    plt.show(block=False)
+
+    # CURRENT WAVEFORM
+    fig,ax =plt.subplots(1,1)
+    if sum(is_active)>1:
+        ax.plot(timevec, np.array(total_current_waveform)*1.e-3,label=r'Total electrons+ions')
+    for isource in range(nsources):
+        if is_active[isource]:
+            ax.plot(timevec, np.array(single_current_waveform[isource])*1.e-3,label=single_source_name[isource])
+    ax.set_ylabel('Current waveforms $\mathrm{[kA.m]}$')
+    ax.set_xlabel('Time (s)')
+    plt.grid()
+    legend = plt.legend()
+    CustomLegend(legend)
+    fig.set_size_inches(figure_width,figure_height)
+    fig.tight_layout()
+    fig.savefig('CS_current_waveforms_shot_{0}_run_{1}.png'.format(shot,run),bbox_inches="tight")
+    #plt.title('Whatever')
+    #plt.gca().set_ylim(0,max(total_current_waveform)*1.2e-6)
+    plt.show(block=False)
+
+    # TORQUE WAVEFORM
+    fig,ax =plt.subplots(1,1)
+    if sum(is_active)>1:
+        ax.plot(timevec, np.array(total_torque_waveform),label=r'Total electrons+ions')
+    for isource in range(nsources):
+        if is_active[isource]:
+            ax.plot(timevec, np.array(single_torque_waveform[isource]),label=single_source_name[isource])
+    ax.set_ylabel('Torque waveforms $\mathrm{[kg.m^2.s^{-2}]}$')
+    ax.set_xlabel('Time (s)')
+    plt.grid()
+    legend = plt.legend()
+    CustomLegend(legend)
+    fig.set_size_inches(figure_width,figure_height)
+    fig.tight_layout()
+    fig.savefig('CS_torque_waveforms_shot_{0}_run_{1}.png'.format(shot,run),bbox_inches="tight")
+    #plt.title('Whatever')
+    #plt.gca().set_ylim(0,max(total_torque_waveform)*1.2e-6)
+    plt.show(block=True)
+
+

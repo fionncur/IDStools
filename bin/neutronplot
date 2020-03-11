@@ -16,32 +16,32 @@ def find_nearest(a, a0):
 
 # Management of input arguments
 parser = argparse.ArgumentParser(description=\
-    '---- Display the plasma kinetic profiles from the core_profiles IDSs')
-parser.add_argument('-u','--user',help='username of the DB where the data-entry is located', required=False)
-parser.add_argument('-m','--machine',help='tokamak name of the targeted data-entry', required=False)
-parser.add_argument('-s','--shot',help='shot number', required=True,type=int)
-parser.add_argument('-r','--run',help='run number',required=True,type=int)
-parser.add_argument('-t','--time',help='time', required=False,type=float)
+    '---- Display the neutron profiles from the distribution_sources IDSs')
+parser.add_argument('-u','--user_or_path',help='User or path name of the DB where the data-entry is located', required=False)
+parser.add_argument('-d','--database',help='Database name of the targeted data-entry', required=False)
+parser.add_argument('-s','--shot',help='Shot number', required=True,type=int)
+parser.add_argument('-r','--run',help='Run number',required=True,type=int)
+parser.add_argument('-t','--time',help='Time', required=False,type=float)
 args = vars(parser.parse_args())
 
 # For execution from python shell
-#args = {'run': 0, 'machine': None, 'user': None, 'time': None, 'shot': 121003}
+#args = {'run': 0, 'database': None, 'user_or_path': None, 'time': None, 'shot': 121003}
 
 shot = args['shot']
 run  = args['run']
 
-# Username
-if args['user'] != None:
-    user = args['user']
+# User or path name
+if args['user_or_path'] != None:
+    user_or_path = args['user_or_path']
 else:
-    #user = os.getenv('USER')
-    user = 'public'
+    #user_or_path = os.getenv('USER')
+    user_or_path = 'public'
 
-# Tokamak name
-if args['machine'] != None:
-    machine = args['machine']
+# Database name
+if args['database'] != None:
+    database = args['database']
 else:
-    machine = 'iterdb'
+    database = 'iterdb'
 
 # Time
 if args['time'] != None:
@@ -51,23 +51,24 @@ else:
 
 # Open the database and read the necessary IDSs
 try:
+    version = os.getenv('IMAS_VERSION')[0]
     input = imas.ids(shot,run)
-    input.open_env(str(user),str(machine),'3')
+    input.open_env(str(user_or_path),str(database),version)
 except:
     print('Shot ' + str(shot) + ', run ' + str(run) + ' does not exist', file=sys.stderr)
     print('----> Aborted.', file=sys.stderr)
     exit()
 
-if user == 'public':
-    MDSPLUS_TREE_BASE_0 = '/work/imas/shared/'+str(machine)+'/3/0'
+if user_or_path == 'public':
+    MDSPLUS_TREE_BASE_0 = '/work/imas/shared/'+str(database)+'/3/0'
 else:
-    MDSPLUS_TREE_BASE_0 = os.path.expanduser("~{}".format(user))+"/public/imasdb/"+str(machine)+"/3/0"
+    MDSPLUS_TREE_BASE_0 = os.path.expanduser("~{}".format(user_or_path))+"/public/imasdb/"+str(database)+"/3/0"
 
 try:
     input.distribution_sources.get()
     distribution_sources = input.distribution_sources
 except:
-    print('The distribution_sources IDS is absent from the input datafile', file=sys.stderr)
+    print('The distribution_sources IDS is absent from the input data-entry', file=sys.stderr)
     print('----> Aborted.', file=sys.stderr)
     exit()
 
@@ -115,6 +116,7 @@ time = tc
 # ----------------------------------------------------------------------
 
 # Rho profile (mandatory)
+nrho=0
 try:
     rho_tor_norm = distribution_sources.source[0].profiles_1d[0].grid.rho_tor_norm
     nrho = len(rho_tor_norm)
@@ -124,6 +126,10 @@ try:
             rho_tor_norm = distribution_sources.source[0].profiles_1d[0].grid.rho_tor/distribution_sources.source[0].profiles_1d[0].grid.rho_tor[nrho-1]
 except:
     print('distribution_sources.source[0].profiles_1d[0].grid.rho_tor(_norm) could not be read', file=sys.stderr)
+    print('----> Aborted.', file=sys.stderr)
+    exit()
+if nrho==0:
+    print('core_profiles.profiles_1d[:].grid.rho_tor_norm and rho_tor are empty', file=sys.stderr)
     print('----> Aborted.', file=sys.stderr)
     exit()
 
@@ -218,6 +224,11 @@ plt.figure()
 
 # Neutron profiles: distributions are for neutrons only if distribution_sources.source{isource}.species.type.index = 6
 print(' ------------------------------------------------------------')
+
+# Number of sources limited to 32 in the UAL
+if nsources > 32:
+    nsources=32
+
 for isource in range(nsources):
     mlabel1 = unicodedata.normalize('NFKD', distribution_sources.source[isource].process[0].type.description).encode('ascii','ignore')
     mlabel2 = unicodedata.normalize('NFKD', distribution_sources.source[isource].process[0].reactant_energy.description).encode('ascii','ignore')
