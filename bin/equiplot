@@ -70,9 +70,9 @@ except:
     exit()
 
 if user_or_path == 'public':
-    MDSPLUS_TREE_BASE_0 = '/work/imas/shared/'+str(database)+'/3/0'
+    DB_FOLDER = '/work/imas/shared/'+str(database)+'/3/0'
 else:
-    MDSPLUS_TREE_BASE_0 = os.path.expanduser("~{}".format(user_or_path))+"/public/imasdb/"+str(database)+"/3/0"
+    DB_FOLDER = os.path.expanduser("~{}".format(user_or_path))+"/public/imasdb/"+str(database)+"/3/0"
 
 try:
     input.equilibrium.get(occ)
@@ -168,7 +168,7 @@ plt.title('2D equilibrium', fontdict=font)
 fig = plt.gcf()
 ax = plt.gca()
 
-hostdir= os.environ["HOSTNAME"]+":"+MDSPLUS_TREE_BASE_0
+hostdir= os.environ["HOSTNAME"]+":"+DB_FOLDER
 xmin, xmax = ax.get_xlim()
 ymin, ymax = ax.get_ylim()
 plt.text(xmax+0.01*abs(xmax),ymax-0.015*abs(ymax-ymin),hostdir[:-2]+' - Shot '+str(shot)+' / '+' Run '+str(run),fontsize=6,rotation=90)

@@ -60,9 +60,9 @@ except:
     exit()
 
 if user_or_path == 'public':
-    MDSPLUS_TREE_BASE_0 = '/work/imas/shared/'+str(database)+'/3/0'
+    DB_FOLDER = '/work/imas/shared/'+str(database)+'/3/0'
 else:
-    MDSPLUS_TREE_BASE_0 = os.path.expanduser("~{}".format(user_or_path))+"/public/imasdb/"+str(database)+"/3/0"
+    DB_FOLDER = os.path.expanduser("~{}".format(user_or_path))+"/public/imasdb/"+str(database)+"/3/0"
 
 try:
     input.distribution_sources.get()
@@ -72,7 +72,7 @@ except:
     print('----> Aborted.', file=sys.stderr)
     exit()
 
-hostdir = os.environ["HOSTNAME"]+":"+MDSPLUS_TREE_BASE_0
+hostdir = os.environ["HOSTNAME"]+":"+DB_FOLDER
 hostdir = hostdir[:-2]
 
 # ----------------------------------------------------------------------
