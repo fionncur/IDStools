@@ -10,7 +10,7 @@ parser.add_argument('-si','--shot_input',help='Input shot number', required=True
 parser.add_argument('-ri','--run_input',help='Input run number', required=True,type=int)
 parser.add_argument('-so','--shot_output',help='Output shot number', required=True,type=int)
 parser.add_argument('-ro','--run_output',help='Output run number', required=True,type=int)
-parser.add_argument('-u','--user_or_path',help='User or path name of the DB where the data-entry is located', required=False)
+parser.add_argument('-u','--user_or_path',help='User or absolute path name of the DB where the data-entry is located', required=False)
 parser.add_argument('-d','--database',help='Database name of the DB where the data-entry is located', required=False)
 parser.add_argument('-ids','--ids',help='IDS to copy', required=True)
 
@@ -24,7 +24,7 @@ shot_out = args["shot_output"]
 run_out  = args["run_output"]
 ids      = args["ids"]
 
-# User or path name
+# User or absolute path name
 if args['user_or_path'] != None:
     user_or_path = args["user_or_path"]
 else:

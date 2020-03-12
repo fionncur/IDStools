@@ -15,7 +15,7 @@ parser = argparse.ArgumentParser(description= \
                                      '---- Display NBI results')
 parser.add_argument('-s','--shot',help='Shot number', required=True,type=int)
 parser.add_argument('-r','--run',help='Run number',required=True,type=int)
-parser.add_argument('-u','--user_or_path',help='User or path name where the data-entry is located', required=True)
+parser.add_argument('-u','--user_or_path',help='User or absolute path name where the data-entry is located', required=True)
 parser.add_argument('-d','--database',help='Database name where the data-entry is located', required=True)
 parser.add_argument('-t','--time',help='time', required=False,type=float)
 
