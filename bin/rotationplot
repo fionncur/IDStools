@@ -61,9 +61,9 @@ except:
     exit()
 
 if user_or_path == 'public':
-    DB_FOLDER = '/work/imas/shared/'+str(database)+'/3/0'
+    DB_ABS_PATH = '/work/imas/shared/'+str(database)+'/3/0'
 else:
-    DB_FOLDER = os.path.expanduser("~{}".format(user_or_path))+"/public/imasdb/"+str(database)+"/3/0"
+    DB_ABS_PATH = os.path.expanduser("~{}".format(user_or_path))+"/public/imasdb/"+str(database)+"/3/0"
 
 try:
     input.core_profiles.get()
@@ -73,7 +73,7 @@ except:
     print('----> Aborted.', file=sys.stderr)
     exit()
 
-hostdir = os.environ["HOSTNAME"]+":"+DB_FOLDER
+hostdir = os.environ["HOSTNAME"]+":"+DB_ABS_PATH
 hostdir = hostdir[:-2]
 
 # ----------------------------------------------------------------------

@@ -52,7 +52,7 @@ if __name__ == '__main__':
     idss_in = imas.ids(shot, run)
     idss_in.open_env(user, machine, versioni)
 
-    user, machine, versiono = os.getenv('USER'), os.getenv("DB_FOLDER").split("/")[-3],\
+    user, machine, versiono = os.getenv('USER'), os.getenv("DB_ABS_PATH").split("/")[-3],\
         os.getenv("IMAS_VERSION").split(".")[0]
     shot, run = int(sys.argv[6]), int(sys.argv[7])
     print('Creating /%s/%s/%s/%d/%d' % (user, machine, versiono, shot, run))

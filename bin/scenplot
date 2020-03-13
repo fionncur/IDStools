@@ -67,9 +67,9 @@ except:
     exit()
 
 if user_or_path == 'public':
-    DB_FOLDER = '/work/imas/shared/'+str(database)+'/3/0'
+    DB_ABS_PATH = '/work/imas/shared/'+str(database)+'/3/0'
 else:
-    DB_FOLDER = os.path.expanduser("~{}".format(user_or_path))+"/public/imasdb/"+str(database)+"/3/0"
+    DB_ABS_PATH = os.path.expanduser("~{}".format(user_or_path))+"/public/imasdb/"+str(database)+"/3/0"
 
 try:
     input.core_profiles.get()
@@ -289,7 +289,7 @@ if len(core_profiles.profiles_1d[it].magnetic_shear) < 1:
     print('core_profiles.profiles_1d['+str(it)+'].magnetic_shear could not be read', file=sys.stderr)
     core_profiles.profiles_1d[it].magnetic_shear = asarray([nan]*nrho)
 
-hostdir = os.environ["HOSTNAME"]+":"+DB_FOLDER
+hostdir = os.environ["HOSTNAME"]+":"+DB_ABS_PATH
 hostdir = hostdir[:-2]
 
 if len(core_profiles.profiles_1d[it].q) != nrho:
