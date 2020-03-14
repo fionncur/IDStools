@@ -29,16 +29,16 @@ if __name__ == '__main__':
     parser_input = argparse.ArgumentParser(prog='imasmerge_entries', \
              description="This script copies all valid IDSs (optionnally, you can specify a list of IDS names) from a given source IMAS data entry to a destination data entry\n" \
              + "Its provide a form of merge functionality between IMAS data entries\n" \
-             + "If a given IDS already exists in the destination data entry, it asks whether it should be overwritten or not\n" \
+             + "If a given IDS already exists in the destination data entry, it skips it by default or overwrites it if you have selected the -overwrite option\n" \
              + "If the destination data entry doesn''t exist, it creates it\n" \
              + "All IDS occurrences will be copied. If you provide a list of IDS names, all existing occurrences in the source will be copied to the destination\n" \
-             + "NOTE : the destination IMAS_MAJOR_VERSION is defined by the loaded IMAS module\n" \
+             + "NOTE : the destination IMAS_MAJOR_VERSION is defined by the loaded IMAS module. The source IMAS_MAJOR_VERSION as well, unless you specify the -v option\n" \
              + "Usage:\n" \
-             + "   imasmerge_entries source_user source_machine source_pulse source_run destination_machine destination_pulse destination_run '[IDS-list-as-Python-list]'\n" \
+             + "   imasmerge_entries [-u source_user] [-v DD_major_version] [-overwrite] source_machine source_pulse source_run destination_machine destination_pulse destination_run [-ids_list 'IDS-list-as-Python-list']\n" \
              + "Example, copy all IDSs:\n" \
-             + "    imasmerge_entries source_user jet 71827 21 jet 71827 30\n" \
+             + "    imasmerge_entries jet 71827 21 jet 71827 30\n" \
              + "Example, copy just core_profiles and equilibrium:\n" \
-             + "    imasmerge_entries source_user jet 71827 21 jet 71827 30 '[\'core_profiles\', \'equilibrium\']'\n",
+             + "    imasmerge_entries -u source_user -v 3 -overwrite jet 71827 21 jet 71827 30 -ids_list '[\'core_profiles\', \'equilibrium\']'\n",
              formatter_class=RawTextHelpFormatter)
     parser_input.add_argument('-u',
                        metavar='user_name',
@@ -51,7 +51,7 @@ if __name__ == '__main__':
                        required=False,
                        type=str,
                        default=os.getenv("IMAS_VERSION").split(".")[0],
-                       help='IMAS Data Dictionary major version')
+                       help='Source IMAS Data Dictionary major version')
     parser_input.add_argument('-overwrite',
                        required=False,
                        action='store_true',
@@ -105,13 +105,14 @@ if __name__ == '__main__':
     idss_in.open_env(args.u, args.database_input, args.v)
     idx_in = idss_in.expIdx
     user2 = os.getenv('USER')
+    version2 = os.getenv("IMAS_VERSION").split(".")[0]
     print('Opening destination /%s/%s/%s/%d/%d' % (user2, args.database_output, args.v, args.shot_output, args.run_output))
     idss_out = imas.ids(args.shot_output, args.run_output)
     try:
-      idss_out.open_env(user2, args.database_output, args.v)
+      idss_out.open_env(user2, args.database_output, version2)
     except:
       print('The destination data entry didn''t exist, creating it now')
-      idss_out.create_env(user2, args.database_output, args.v)
+      idss_out.create_env(user2, args.database_output, version2)
     idx_out = idss_out.expIdx
     #    ids_list = None
     #    if len(sys.argv) == 9:
@@ -146,7 +147,7 @@ if __name__ == '__main__':
                     ids.setExpIdx(idx_out)
                     ids.put(i)
                  else:
-                    print('Skipping IDS ' + ids_info['name'] + ' occurrence ' + str(i) + 'which was found non-empty in the destination.')
+                    print('Skipping IDS ' + ids_info['name'] + ' occurrence ' + str(i) + ' which was found non-empty in the destination.')
                     continue
               else:
                  if i:
