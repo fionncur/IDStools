@@ -2,13 +2,14 @@
 from __future__ import print_function
 
 import argparse,os,imas
-import sys
+import sys,pdb
+import numpy as np
 
 # ----------------------------------------------------------------------
 
 def find_nearest(a, a0):
     "Element in nd array `a` closest to the scalar value `a0`"
-    idx = numpy.abs(a - a0).argmin()
+    idx = np.abs(a - a0).argmin()
     return a.flat[idx],idx
 
 # ----------------------------------------------------------------------
@@ -75,50 +76,19 @@ else:
     DB_ABS_PATH = os.path.expanduser("~{}".format(user_or_path))+"/public/imasdb/"+str(database)+"/3/0"
 
 try:
-    input.equilibrium.get(occ)
+    #input.equilibrium.get(occ)
     equilibrium = input.equilibrium
+    equilibrium.time=input.equilibrium.partialGet('time',occ)
 except:
     print("The equilibrium IDS is absent from the input data-entry", file=sys.stderr)
     print("----> Aborted.", file=sys.stderr)
     exit()
 
-if len(equilibrium.time_slice) == 0:
-    print("The equilibrium IDS is empty: len(equilibrium.time_slice)=0", file=sys.stderr)
+if equilibrium.time is None:
+    print("The equilibrium IDS for this occurence is empty in the input"\
+          +" data-entry because equilibrium.time is empty", file=sys.stderr)
     print("----> Aborted.", file=sys.stderr)
     exit()
-
-# phi(R,Z) for rho(R,Z) calculation
-if len(equilibrium.time_slice[0].profiles_2d[0].phi) < 1:
-    print("equilibrium.time_slice[:].profiles_2d[0].phi could not be read", file=sys.stderr)
-    flag_rho2d = 0
-
-# psi(R,Z)
-if len(equilibrium.time_slice[0].profiles_2d[0].psi) < 1:
-    print("equilibrium.time_slice[:].profiles_2d[0].psi could not be read", file=sys.stderr)
-    print("----> Aborted.", file=sys.stderr)
-    exit()
-
-# ----------------------------------------------------------------------
-
-from math import *
-from numpy import *
-import matplotlib
-if 'DISPLAY' not in os.environ:
-    matplotlib.use('agg')
-else:
-    matplotlib.use('TKagg')
-from matplotlib import *
-import matplotlib.pyplot as plt
-
-# Tick size and X and Y axes
-ticksize = 15
-
-# Font definition
-font = {'family': 'serif',
-        'color':  'darkred',
-        'weight': 'normal',
-        'size': 18,
-        }
 
 # Search for adequate time slice for equilibrium display
 ntime = len(equilibrium.time)
@@ -142,15 +112,59 @@ else:
 
 time = tc
 
+# Read 2D-profiles for this time slice
+equilibrium.time_slice.resize(1)
+equilibrium.time_slice[0] = input.equilibrium.partialGet('time_slice('+str(it)+')',occ)
+
+if len(equilibrium.time_slice[0].profiles_2d) == 0:
+    print("The equilibrium IDS is empty: len(equilibrium.time_slice[0].profiles_2d)=0", file=sys.stderr)
+    print("----> Aborted.", file=sys.stderr)
+    exit()
+
+# phi(R,Z) for rho(R,Z) calculation
+if len(equilibrium.time_slice[0].profiles_2d[0].phi) < 1:
+    print("equilibrium.time_slice[:].profiles_2d[0].phi could not be read", file=sys.stderr)
+    flag_rho2d = 0
+
+# psi(R,Z)
+if len(equilibrium.time_slice[0].profiles_2d[0].psi) < 1:
+    print("equilibrium.time_slice[:].profiles_2d[0].psi could not be read", file=sys.stderr)
+    print("----> Aborted.", file=sys.stderr)
+    exit()
+
+# ----------------------------------------------------------------------
+
+import matplotlib
+if 'DISPLAY' not in os.environ:
+    matplotlib.use('agg')
+else:
+    matplotlib.use('TKagg')
+import matplotlib.pyplot as plt
+
+# Tick size and X and Y axes
+ticksize = 15
+
+# Font definition
+font = {'family': 'serif',
+        'color':  'darkred',
+        'weight': 'normal',
+        'size': 18,
+        }
+
 # Cartesian (R,Z) grids
-r2d   = equilibrium.time_slice[it].profiles_2d[0].r
-z2d   = equilibrium.time_slice[it].profiles_2d[0].z
-psi2d = equilibrium.time_slice[it].profiles_2d[0].psi
+r2d   = equilibrium.time_slice[0].profiles_2d[0].r
+z2d   = equilibrium.time_slice[0].profiles_2d[0].z
+psi2d = equilibrium.time_slice[0].profiles_2d[0].psi
+
+if not ((np.size(r2d) == np.size(z2d)) and (np.size(r2d) == np.size(psi2d))):
+    print('r, z and psi have not the same dimension in equilibrium.time_slice[0].profiles_2d[0]', file=sys.stderr)
+    print("----> Aborted.", file=sys.stderr)
+    exit()
 
 # Display the figure
 plt.figure()
 if flag_rho2d == 1:
-    rho2d = sqrt(equilibrium.time_slice[it].profiles_2d[0].phi/amax(equilibrium.time_slice[it].profiles_2d[0].phi))
+    rho2d = sqrt(equilibrium.time_slice[0].profiles_2d[0].phi/amax(equilibrium.time_slice[0].profiles_2d[0].phi))
     plt.contour(r2d,z2d,rho2d,30,colors='r')
 plt.contour(r2d,z2d,psi2d,30)
 plt.xlim(r2d.min(),r2d.max())

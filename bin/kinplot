@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 from __future__ import print_function
 
-import os, sys, glob, yaml, argparse, re, imas
+import os, sys, glob, yaml, argparse, re, imas, pdb
 from operator import itemgetter
 from stat import *
 import init_mendeleiev as mend
+import numpy as np
 
 # ----------------------------------------------------------------------
 
@@ -35,7 +36,6 @@ run  = args['run']
 if args['user_or_path'] != None:
     user_or_path = args['user_or_path']
 else:
-    #user_or_path = os.getenv('USER')
     user_or_path = 'public'
 
 # Database name
@@ -66,8 +66,9 @@ else:
     DB_ABS_PATH = os.path.expanduser("~{}".format(user_or_path))+"/public/imasdb/"+str(database)+"/3/0"
 
 try:
-    input.core_profiles.get()
-    core_profiles = input.core_profiles
+    #input.core_profiles.get()
+    core_profiles = input.core_profiles # To inialise the empty IDS structure
+    core_profiles.time=input.core_profiles.partialGet('time')
 except:
     print('The core_profiles IDS is absent from the input data-entry', file=sys.stderr)
     print('----> Aborted.', file=sys.stderr)
@@ -78,15 +79,12 @@ hostdir = hostdir[:-2]
 
 # ----------------------------------------------------------------------
 
-from math import *
-from numpy import *
 import matplotlib
 if 'DISPLAY' not in os.environ:
     matplotlib.use('agg')
 else:
     matplotlib.use('TKagg')
 
-from matplotlib import *
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mtick
 
@@ -110,6 +108,10 @@ else:
         tc = 0
     it = 0
 
+# Read 1D-profiles for this time slice
+core_profiles.profiles_1d.resize(1)
+core_profiles.profiles_1d[0] = input.core_profiles.partialGet('profiles_1d('+str(it)+')')
+
 time = tc
 
 # Mendeleiev table
@@ -124,12 +126,12 @@ plot_compo = 1
 nrho=0
 try:
     rho_tor_norm = 0
-    if len(core_profiles.profiles_1d[it].grid.rho_tor_norm) > 0:
-        nrho = len(core_profiles.profiles_1d[it].grid.rho_tor_norm)
-        rho_tor_norm = core_profiles.profiles_1d[it].grid.rho_tor_norm
-    elif len(core_profiles.profiles_1d[it].grid.rho_tor) > 0:
-        nrho = len(core_profiles.profiles_1d[it].grid.rho_tor)
-        rho_tor_norm = core_profiles.profiles_1d[it].grid.rho_tor/core_profiles.profiles_1d[it].grid.rho_tor[nrho-1]
+    if len(core_profiles.profiles_1d[0].grid.rho_tor_norm) > 0:
+        nrho = len(core_profiles.profiles_1d[0].grid.rho_tor_norm)
+        rho_tor_norm = core_profiles.profiles_1d[0].grid.rho_tor_norm
+    elif len(core_profiles.profiles_1d[0].grid.rho_tor) > 0:
+        nrho = len(core_profiles.profiles_1d[0].grid.rho_tor)
+        rho_tor_norm = core_profiles.profiles_1d[0].grid.rho_tor/core_profiles.profiles_1d[0].grid.rho_tor[nrho-1]
 except:
     print('core_profiles.profiles_1d[:].grid.rho_tor_norm and rho_tor could not be read', file=sys.stderr)
     print('----> Aborted.', file=sys.stderr)
@@ -141,34 +143,35 @@ if nrho==0:
 
 # Species A number (not mandatory)
 try:
-    nspecies = len(core_profiles.profiles_1d[it].ion)
+    nspecies = len(core_profiles.profiles_1d[0].ion)
     a = [0] * nspecies
     for ispecies in range(nspecies):
-        a[ispecies] = int(core_profiles.profiles_1d[it].ion[ispecies].element[0].a)
+        a[ispecies] = int(core_profiles.profiles_1d[0].ion[ispecies].element[0].a)
 except:
     print('core_profiles.profiles_1d[:].ion[0].element[0].a could not be read', file=sys.stderr)
     plot_compo = 0
 
 # Species Z number (not mandatory)
 try:
-    nspecies = len(core_profiles.profiles_1d[it].ion)
+    nspecies = len(core_profiles.profiles_1d[0].ion)
     z = [0] * nspecies
     for ispecies in range(nspecies):
-        z[ispecies] = int(core_profiles.profiles_1d[it].ion[ispecies].element[0].z_n)
+        z[ispecies] = int(core_profiles.profiles_1d[0].ion[ispecies].element[0].z_n)
 except:
     print('core_profiles.profiles_1d[:].ion[0].element[0].z_n could not be read', file=sys.stderr)
     plot_compo = 0
 
 # Volume profile (not mandatory)
 try:
-    volume = core_profiles.profiles_1d[it].grid.volume
+    volume = core_profiles.profiles_1d[0].grid.volume
     if len(volume) == 0:
         try:
-            equilibrium = cli.get('equilibrium')
+            equilibrium = input.equilibrium
+            equilibrium.time_slice[0].profiles_1d.volume = input.equilibrium.partialGet('time_slice('+str(it)+')/profiles_1d/volume')
         except:
             exit()
-        volume = equilibrium.time_slice[it].profiles_1d.volume
-        if len(volume) == len(core_profiles.profiles_1d[it].electrons.density):
+        volume = equilibrium.time_slice[0].profiles_1d.volume
+        if len(volume) == len(core_profiles.profiles_1d[0].electrons.density):
             print('   core_profiles.profiles_1d[:].grid.volume could not be read', file=sys.stderr)
             print('   ----> equilibrium.time_slice[:].profiles_1d.volume used instead', file=sys.stderr)
             print('   (possible because the resolution is the same, but maybe not correct)', file=sys.stderr)
@@ -179,26 +182,26 @@ except:
     plot_compo = 0
 
 # Zeff profile (not mandatory)
-if len(core_profiles.profiles_1d[it].zeff) < 1:
+if len(core_profiles.profiles_1d[0].zeff) < 1:
     print('core_profiles.profiles_1d[:].zeff could not be read', file=sys.stderr)
     for itime in range(ntime):
         core_profiles.profiles_1d[itime].zeff = asarray([nan]*nrho)
 
 # Ne profile (not mandatory)
-if len(core_profiles.profiles_1d[it].electrons.density) < 1:
+if len(core_profiles.profiles_1d[0].electrons.density) < 1:
     print('core_profiles.profiles_1d[:].electrons.density could not be read', file=sys.stderr)
     for itime in range(ntime):
         core_profiles.profiles_1d[itime].electrons.density = asarray([nan]*nrho)
 
 # Te profile (not mandatory)
-if len(core_profiles.profiles_1d[it].electrons.temperature) < 1:
+if len(core_profiles.profiles_1d[0].electrons.temperature) < 1:
     print('core_profiles.profiles_1d[:].electrons.temperature could not be read', file=sys.stderr)
     for itime in range(ntime):
         core_profiles.profiles_1d[itime].electrons.temperature = asarray([nan]*nrho)
 
 # Ti profile (not mandatory)
 ti_flag = 0
-if len(core_profiles.profiles_1d[it].t_i_average) < 1:
+if len(core_profiles.profiles_1d[0].t_i_average) < 1:
     print('core_profiles.profiles_1d[:].t_i_average could not be read', file=sys.stderr)
     for itime in range(ntime):
         core_profiles.profiles_1d[itime].t_i_average = asarray([nan]*nrho)
@@ -206,7 +209,7 @@ else:
     ti_flag = 1
 
 for ispecies in range(nspecies):
-    if len(core_profiles.profiles_1d[it].ion[ispecies].temperature) < 1:
+    if len(core_profiles.profiles_1d[0].ion[ispecies].temperature) < 1:
         print('core_profiles.profiles_1d[:].ion['+str(ispecies)+'].temperature could not be read', file=sys.stderr)
         for itime in range(ntime):
             core_profiles.profiles_1d[itime].ion[ispecies].temperature = asarray([nan]*nrho)
@@ -216,7 +219,7 @@ for ispecies in range(nspecies):
 
 # Ni profile (not mandatory)
 for ispecies in range(nspecies):
-    if len(core_profiles.profiles_1d[it].ion[ispecies].density) < 1:
+    if len(core_profiles.profiles_1d[0].ion[ispecies].density) < 1:
         print('core_profiles.profiles_1d[:].ion['+str(ispecies)+'].density could not be read', file=sys.stderr)
         for itime in range(ntime):
             core_profiles.profiles_1d[itime].ion[ispecies].density = asarray([nan]*nrho)
@@ -224,13 +227,13 @@ for ispecies in range(nspecies):
 # Vtor profile (not mandatory)
 vtor_flag = 0
 for ispecies in range(nspecies):
-    if len(core_profiles.profiles_1d[it].ion[ispecies].velocity.toroidal) < 1:
+    if len(core_profiles.profiles_1d[0].ion[ispecies].velocity.toroidal) < 1:
         print('core_profiles.profiles_1d[:].ion['+str(ispecies)+'].velocity.toroidal could not be read', file=sys.stderr)
         for itime in range(ntime):
             core_profiles.profiles_1d[itime].ion[ispecies].velocity.toroidal = asarray([nan]*nrho)
     else:
         vtor_flag = 1
-    if len(core_profiles.profiles_1d[it].ion[ispecies].velocity_tor) < 1:
+    if len(core_profiles.profiles_1d[0].ion[ispecies].velocity_tor) < 1:
         print('core_profiles.profiles_1d[:].ion['+str(ispecies)+'].velocity_tor could not be read', file=sys.stderr)
         for itime in range(ntime):
             core_profiles.profiles_1d[itime].ion[ispecies].velocity_tor = asarray([nan]*nrho)
@@ -241,13 +244,13 @@ for ispecies in range(nspecies):
 # Vpol profile (not mandatory)
 vpol_flag = 0
 for ispecies in range(nspecies):
-    if len(core_profiles.profiles_1d[it].ion[ispecies].velocity.poloidal) < 1:
+    if len(core_profiles.profiles_1d[0].ion[ispecies].velocity.poloidal) < 1:
         print('core_profiles.profiles_1d[:].ion['+str(ispecies)+'].velocity.poloidal could not be read', file=sys.stderr)
         for itime in range(ntime):
             core_profiles.profiles_1d[itime].ion[ispecies].velocity.poloidal = asarray([nan]*nrho)
     else:
         vpol_flag = 1
-    if len(core_profiles.profiles_1d[it].ion[ispecies].velocity_pol) < 1:
+    if len(core_profiles.profiles_1d[0].ion[ispecies].velocity_pol) < 1:
         print('core_profiles.profiles_1d[:].ion['+str(ispecies)+'].velocity_pol could not be read', file=sys.stderr)
         for itime in range(ntime):
             core_profiles.profiles_1d[itime].ion[ispecies].velocity_pol = asarray([nan]*nrho)
@@ -269,13 +272,13 @@ if (nspecies > 0) & (plot_compo==1):
     species_density = [0] * nspecies
     max_density = -999.
     for ispecies in range(nspecies):
-        species_density[ispecies] = sum(volume*core_profiles.profiles_1d[it].ion[ispecies].density)
+        species_density[ispecies] = sum(volume*core_profiles.profiles_1d[0].ion[ispecies].density)
         ntot = ntot + species_density[ispecies]
         if species_density[ispecies] > max_density:
             max_density = species_density[ispecies]
             imax = ispecies
 
-    ne = sum(volume*core_profiles.profiles_1d[it].electrons.density)
+    ne = sum(volume*core_profiles.profiles_1d[0].electrons.density)
 
     nspec_over_ntot = species_density/ntot
     nspec_over_ne   = species_density/ne
@@ -332,35 +335,35 @@ impurity_limit = 0.001
 # Create the dictionary defining the list of profiles that can be displayed
 profiles = {}
 profiles['rhonorm'] = rho_tor_norm
-profiles['te'] = core_profiles.profiles_1d[it].electrons.temperature*1.e-3
+profiles['te'] = core_profiles.profiles_1d[0].electrons.temperature*1.e-3
 if ti_flag == 1:
-    profiles['ti'] = core_profiles.profiles_1d[it].t_i_average*1.e-3
+    profiles['ti'] = core_profiles.profiles_1d[0].t_i_average*1.e-3
 else:
-    profiles['ti'] = core_profiles.profiles_1d[it].ion[0].temperature*1.e-3
+    profiles['ti'] = core_profiles.profiles_1d[0].ion[0].temperature*1.e-3
 
-profiles['ne'] = core_profiles.profiles_1d[it].electrons.density
+profiles['ne'] = core_profiles.profiles_1d[0].electrons.density
 profiles['ni'] = [0] * nrho
-profiles['zeff'] = core_profiles.profiles_1d[it].zeff
+profiles['zeff'] = core_profiles.profiles_1d[0].zeff
 profiles['n_species'] = {}
 for ispecies in range(nspecies):
     if plot_compo == 1:
         if nspec_over_ne[ispecies] > impurity_limit:
             profiles['n_species'][species[ispecies]]={}
             profiles['n_species'][species[ispecies]]['density'] = \
-                    core_profiles.profiles_1d[it].ion[ispecies].density
+                    core_profiles.profiles_1d[0].ion[ispecies].density
             if vpol_flag == 1:
                 profiles['n_species'][species[ispecies]]['vpol']    = \
-                    abs(core_profiles.profiles_1d[it].ion[ispecies].velocity.poloidal)
+                    abs(core_profiles.profiles_1d[0].ion[ispecies].velocity.poloidal)
             else:
                 profiles['n_species'][species[ispecies]]['vpol']    = \
-                    abs(core_profiles.profiles_1d[it].ion[ispecies].velocity_pol)
+                    abs(core_profiles.profiles_1d[0].ion[ispecies].velocity_pol)
             if vtor_flag == 1:
                 profiles['n_species'][species[ispecies]]['vtor']    = \
-                    abs(core_profiles.profiles_1d[it].ion[ispecies].velocity.toroidal)
+                    abs(core_profiles.profiles_1d[0].ion[ispecies].velocity.toroidal)
             else:
                 profiles['n_species'][species[ispecies]]['vtor']    = \
-                    abs(core_profiles.profiles_1d[it].ion[ispecies].velocity_tor)
-    profiles['ni'] = profiles['ni'] + core_profiles.profiles_1d[it].ion[ispecies].density
+                    abs(core_profiles.profiles_1d[0].ion[ispecies].velocity_tor)
+    profiles['ni'] = profiles['ni'] + core_profiles.profiles_1d[0].ion[ispecies].density
 
 # Min and max of velocity profiles
 max_vtor = -9e99
@@ -387,38 +390,53 @@ waveform['time'] = timevec
 for ikey in ['te','ti','ne','zeff']:
     waveform[ikey] = createWaveForm(0)
 
-for itime in range(ntime):
-    waveform['te']['central'].append(core_profiles.profiles_1d[itime].electrons.temperature[0]*1e-3)
-    if ti_flag == 1:
-        waveform['ti']['central'].append(core_profiles.profiles_1d[itime].t_i_average[0]*1e-3)
-    else:
-        waveform['ti']['central'].append(core_profiles.profiles_1d[itime].ion[0].temperature[0]*1e-3)
+imas_2928 = 0
 
-    waveform['ne']['central'].append(core_profiles.profiles_1d[itime].electrons.density[0])
-    waveform['zeff']['central'].append(core_profiles.profiles_1d[itime].zeff[0])
+waveform['te']['central'] = input.core_profiles.partialGet('profiles_1d(:)/electrons/temperature(0)')*1e-3
+if ti_flag == 1:
+    waveform['ti']['central'] = input.core_profiles.partialGet('profiles_1d(:)/t_i_average(0)')*1e-3
+else:
+    # Wait for resolution of IMAS-2928
+    if imas_2928 == 1:
+        waveform['ti']['central'] = input.core_profiles.partialGet('profiles_1d(:)/ion(0)/temperature(0)')*1e-3
+    else:
+        waveform['ti']['central'] = [np.NaN]*nrho
+    
+waveform['ne']  ['central'] = input.core_profiles.partialGet('profiles_1d(:)/electrons/density(0)')
+waveform['zeff']['central'] = input.core_profiles.partialGet('profiles_1d(:)/zeff(0)')
 
 waveform['n_species'] = {}
 waveform['ni'] = createWaveForm(ntime)
 for ispecies in range(nspecies):
     if (plot_compo == 1) & (nspec_over_ne[ispecies] > impurity_limit):
         waveform['n_species'][species[ispecies]]={'density' : createWaveForm(0), 'vpol' : createWaveForm(0),'vtor' : createWaveForm(0)}
-    for itime in range(ntime):
+
+    # Wait for resolution of IMAS-2928
+    if imas_2928 == 1:
         if (plot_compo == 1) & (nspec_over_ne[ispecies] > impurity_limit):
-            waveform['n_species'][species[ispecies]]['density']['central']\
-                    .append(core_profiles.profiles_1d[itime].ion[ispecies].density[0])
+            waveform['n_species'][species[ispecies]]['density']['central'] = \
+                input.core_profiles.partialGet('profiles_1d(:)/ion('+str(ispecies)+')/density(0)')
             if vpol_flag == 1:
-                waveform['n_species'][species[ispecies]]['vpol']['central']\
-                    .append(core_profiles.profiles_1d[itime].ion[ispecies].velocity.poloidal[0])
+                waveform['n_species'][species[ispecies]]['vpol']['central'] = \
+                input.core_profiles.partialGet('profiles_1d(:)/ion('+str(ispecies)+')/velocity/poloidal(0)')
             else:
-                waveform['n_species'][species[ispecies]]['vpol']['central']\
-                    .append(core_profiles.profiles_1d[itime].ion[ispecies].velocity_pol[0])
+                waveform['n_species'][species[ispecies]]['vpol']['central'] = \
+                input.core_profiles.partialGet('profiles_1d(:)/ion('+str(ispecies)+')/velocity_pol(0)')
             if vtor_flag == 1:
-                waveform['n_species'][species[ispecies]]['vtor']['central']\
-                    .append(core_profiles.profiles_1d[itime].ion[ispecies].velocity.toroidal[0])
+                waveform['n_species'][species[ispecies]]['vtor']['central'] = \
+                input.core_profiles.partialGet('profiles_1d(:)/ion('+str(ispecies)+')/velocity/toroidal(0)')
             else:
-                waveform['n_species'][species[ispecies]]['vtor']['central']\
-                    .append(core_profiles.profiles_1d[itime].ion[ispecies].velocity_tor[0])
-        waveform['ni']['central'][itime] = waveform['ni']['central'][itime] + core_profiles.profiles_1d[itime].ion[ispecies].density[0]
+                waveform['n_species'][species[ispecies]]['vtor']['central'] = \
+                input.core_profiles.partialGet('profiles_1d(:)/ion('+str(ispecies)+')/velocity_tor(0)')
+    else:
+        if (plot_compo == 1) & (nspec_over_ne[ispecies] > impurity_limit):
+            waveform['n_species'][species[ispecies]]['density']['central'] = [np.NaN]*ntime
+            waveform['n_species'][species[ispecies]]['vpol']   ['central'] = [np.NaN]*ntime
+            waveform['n_species'][species[ispecies]]['vtor']   ['central'] = [np.NaN]*ntime
+
+    if (plot_compo == 1) & (nspec_over_ne[ispecies] > impurity_limit):
+        for itime in range(ntime):
+            waveform['ni']['central'][itime] = waveform['ni']['central'][itime] + waveform['n_species'][species[ispecies]]['density']['central'][itime]
 
 # ----------------------------------------------------------------------
 
