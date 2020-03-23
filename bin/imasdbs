@@ -9,24 +9,20 @@ import sys
 import numpy
 
 TAB = ' ' * 3
-SHOT_STR_LEN = 5
+SHOT_STR_LEN = 6
 RUN_STR_LEN = 5
 DATABASE_STR_LEN = 12
 VERSION_STR_LEN = 6
-IDSNAME_STR_LEN = 15
+IDSNAME_STR_LEN = 26
 SLICENUM_STR_LEN = 4
 RUNNUM_STR_LEN = 4
 TIME_STR_LEN = 4
 
 def extended(str, wlen):
-    l = len(str)
-    if l < wlen:
-        return ' ' * (wlen - l) + str
-    else:
-        return str
+    return f"{str:>{wlen}s}"
 
 def print_vector(vec, wlen):
-    return "".join( [extended(str(x), wlen) for x in vec] )
+    return ' '.join( [f"{str(x):>{wlen}s}" for x in vec] )
 
 def print_list(dbs, shotnum = None, compact = False):
     for dbname, dvs in dbs:
