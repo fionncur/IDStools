@@ -111,7 +111,7 @@ input.distribution_sources.getSlice(time,1)
 nsources = len(input.distribution_sources.source)
 if nsources>1:
     print('Distribution_sources contains '+str(nsources)+' sources', file=sys.stderr)
-else
+else:
     print('Distribution_sources contains '+str(nsources)+' source', file=sys.stderr)
 
 active = [1]*nsources # A priori all sources are active
