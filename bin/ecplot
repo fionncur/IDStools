@@ -15,16 +15,26 @@ parser = argparse.ArgumentParser(description=\
 	 '---- Display EC results')
 parser.add_argument('-s','--shot',help='Shot number', required=True,type=int)
 parser.add_argument('-r','--run',help='Run number',required=True,type=int)
-parser.add_argument('-u','--user_or_path',help='User or absolute path name where the data-entry is located', required=True)
-parser.add_argument('-d','--database',help='Database name where the data-entry is located', required=True)
+parser.add_argument('-u','--user_or_path',help='User or absolute path name where the data-entry is located', required=False)
+parser.add_argument('-d','--database',help='Database name where the data-entry is located', required=False)
 parser.add_argument('-t','--time',help='Time', required=False,type=float)
 
 args         = vars(parser.parse_args())
 shot         = args["shot"]
 run          = args["run"]
-database     = args["database"]
-user_or_path = args["user_or_path"]
 time         = args["time"]
+
+# User or absolute path name
+if args['user_or_path'] != None:
+    user_or_path = args['user_or_path']
+else:
+    user_or_path = 'public'
+
+# Database name
+if args['database'] != None:
+    database = args['database']
+else:
+    database = 'iter'
 
 # DISPLAY PARAMETERS
 # -------------------
@@ -66,14 +76,14 @@ def CustomLegend(legend):
 
 # READ IDS'S FROM LOCAL DATABASE
 # -------------------------------
-try:
-    version = os.getenv('IMAS_VERSION')[0]
-    input=imas.ids(shot,run)
-    input.open_env(user_or_path,database,version)
-except:
-    print('Shot ' + str(shot) + ', run ' + str(run) + ' does not exist', file=sys.stderr)
+version = os.getenv('IMAS_VERSION')[0]
+input=imas.ids(shot,run)
+[err,n]=input.open_env(user_or_path,database,version,silent=True)
+if err != 0:
+    print('Shot ' + str(shot) + ', run ' + str(run) +' for user_or_path = '+user_or_path+' and database = '+database+' does not exist', file=sys.stderr)
     print('----> Aborted.', file=sys.stderr)
     exit()
+
 input.waves.get()
 input.close()
 
@@ -94,11 +104,11 @@ else:
     else:
         it = int(ntime/2)
         tc = timevec[it]
-    print('--------------------------------------------------------------------------')
-    print(' Time  = '+'%.2f' % tc+' s in range ['+'%.2f' % timevec[0]+','+'%.2f' % timevec[ntime-1]+'] s')
-    print(' Index = ',str(it))
-    print(' Averaged resolution = ', (timevec[ntime-1]-timevec[0])/(ntime-1),' s')  
-    print('--------------------------------------------------------------------------')
+    print('--------------------------------------------------------------------------', file=sys.stderr)
+    print(' Time  = '+'%.2f' % tc+' s in range ['+'%.2f' % timevec[0]+','+'%.2f' % timevec[ntime-1]+'] s', file=sys.stderr)
+    print(' Index = ',str(it), file=sys.stderr)
+    print(' Averaged resolution = ', (timevec[ntime-1]-timevec[0])/(ntime-1),' s', file=sys.stderr)  
+    print('--------------------------------------------------------------------------', file=sys.stderr)
 time = tc
 
 # test provisoire
@@ -137,7 +147,7 @@ for iwave in range(nwaves):
             exit()
 
 if sum(is_active)==0:
-    print('The waves IDS appears empty ----> Abort.')
+    print('The waves IDS appears empty ----> Abort.', file=sys.stderr)
     exit()
 
 # LOOP OVER ALL EC LAUNCHERS
@@ -175,10 +185,10 @@ for iwave in range(nwaves):
             total_injected_power         = total_injected_power + input.waves.coherent_wave[iwave].beam_tracing[it].beam[ibeam].power_initial
             single_injected_power[iwave] = single_injected_power[iwave] + input.waves.coherent_wave[iwave].beam_tracing[it].beam[ibeam].power_initial
         single_absorbed_power[iwave] = input.waves.coherent_wave[iwave].global_quantities[it].power
-        print(' '+single_ec_launcher_name[iwave]+' is active with a power of {:.2f}'.format(single_injected_power[iwave]*1.e-6)+' MW --> Absorbed power = {:.2f}'.format(single_absorbed_power[iwave]*1.e-6)+' MW')
+        print(' '+single_ec_launcher_name[iwave]+' is active with a power of {:.2f}'.format(single_injected_power[iwave]*1.e-6)+' MW --> Absorbed power = {:.2f}'.format(single_absorbed_power[iwave]*1.e-6)+' MW', file=sys.stderr)
     else:
-        print(' '+single_ec_launcher_name[iwave]+' is off')
-print('--------------------------------------------------------------------------')
+        print(' '+single_ec_launcher_name[iwave]+' is off', file=sys.stderr)
+print('--------------------------------------------------------------------------', file=sys.stderr)
 
 # PROFILE OF ABSORBED POWER DENSITY [MW/M3]
 fig,ax =plt.subplots(1,1)
@@ -217,7 +227,7 @@ fig.savefig('ECCD_profile_shot_{0}_run_{1}.png'.format(shot,run),bbox_inches="ti
 
 # EC POWER AND ECCD WAVEFORMS
 if ntime==1:
-    print('Only one time slice --> ECRH and ECCD waveforms not displayed')
+    print('Only one time slice --> ECRH and ECCD waveforms not displayed', file=sys.stderr)
     plt.show(block=True)
 else:
     plt.show(block=False)

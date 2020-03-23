@@ -51,12 +51,11 @@ else:
     time = -99.
 
 # Open the database and read the necessary IDSs
-try:
-    version = os.getenv('IMAS_VERSION')[0]
-    input = imas.ids(shot,run)
-    input.open_env(str(user_or_path),str(database),version)
-except:
-    print('Shot ' + str(shot) + ', run ' + str(run) + ' does not exist', file=sys.stderr)
+version = os.getenv('IMAS_VERSION')[0]
+input=imas.ids(shot,run)
+[err,n]=input.open_env(user_or_path,database,version,silent=True)
+if err != 0:
+    print('Shot ' + str(shot) + ', run ' + str(run) +' for user_or_path = '+user_or_path+' and database = '+database+' does not exist', file=sys.stderr)
     print('----> Aborted.', file=sys.stderr)
     exit()
 
@@ -69,6 +68,9 @@ try:
     #input.core_profiles.get()
     core_profiles = input.core_profiles # To inialise the empty IDS structure
     core_profiles.time=input.core_profiles.partialGet('time')
+    if core_profiles.time is None:
+        print('No core_profiles IDS in the data-entry --> Abort.', file=sys.stderr)
+        exit()
 except:
     print('The core_profiles IDS is absent from the input data-entry', file=sys.stderr)
     print('----> Aborted.', file=sys.stderr)
@@ -78,15 +80,6 @@ hostdir = os.environ["HOSTNAME"]+":"+DB_ABS_PATH
 hostdir = hostdir[:-2]
 
 # ----------------------------------------------------------------------
-
-import matplotlib
-if 'DISPLAY' not in os.environ:
-    matplotlib.use('agg')
-else:
-    matplotlib.use('TKagg')
-
-import matplotlib.pyplot as plt
-import matplotlib.ticker as mtick
 
 # Search for adequate time slice for display
 ntime = len(core_profiles.time)
@@ -98,9 +91,9 @@ if ntime > 1:
         it = int(ntime/2)
         tc = timevec[it]
     time = tc
-    print('   Time  = '+'%.2f' % tc+' s in range ['+'%.2f' % timevec[0]+','+'%.2f' % timevec[ntime-1]+'] s')
-    print('   Index = ',str(it))
-    print('   Averaged resolution = ', (timevec[ntime-1]-timevec[0])/(ntime-1),' s')
+    print('   Time  = '+'%.2f' % tc+' s in range ['+'%.2f' % timevec[0]+','+'%.2f' % timevec[ntime-1]+'] s', file=sys.stderr)
+    print('   Index = ',str(it), file=sys.stderr)
+    print('   Averaged resolution = ', (timevec[ntime-1]-timevec[0])/(ntime-1),' s', file=sys.stderr)
 else:
     if len(timevec) > 0:
         tc = timevec[0]
@@ -315,14 +308,14 @@ if (nspecies > 0) & (plot_compo==1):
             disp_nspec_over_nmaj = disp_nspec_over_nmaj + format('%.2f' % nspec_over_nmaj[ispecies]) \
                                    + ' ' * (tabsize-len(format('%.2f' % nspec_over_nmaj[ispecies])))
 
-    print('   ------------')
-    print(disp_species)
-    print(disp_a)
-    print(disp_z)
-    print(disp_nspec_over_ntot)
-    print(disp_nspec_over_ne)
-    print(disp_nspec_over_nmaj)
-    print('   ------------')
+    print('   ------------', file=sys.stderr)
+    print(disp_species, file=sys.stderr)
+    print(disp_a, file=sys.stderr)
+    print(disp_z, file=sys.stderr)
+    print(disp_nspec_over_ntot, file=sys.stderr)
+    print(disp_nspec_over_ne, file=sys.stderr)
+    print(disp_nspec_over_nmaj, file=sys.stderr)
+    print('   ------------', file=sys.stderr)
 
 else:
     nspec_over_ne = [0]*nspecies
@@ -439,6 +432,15 @@ for ispecies in range(nspecies):
             waveform['ni']['central'][itime] = waveform['ni']['central'][itime] + waveform['n_species'][species[ispecies]]['density']['central'][itime]
 
 # ----------------------------------------------------------------------
+
+import matplotlib
+if 'DISPLAY' not in os.environ:
+    matplotlib.use('agg')
+else:
+    matplotlib.use('TKagg')
+
+import matplotlib.pyplot as plt
+import matplotlib.ticker as mtick
 
 # Tick size and X and Y axes
 ticksize = 12
@@ -621,7 +623,7 @@ fig.tight_layout()
 
 try:
     fig.savefig('Kinetic'+'_shot_'+str(shot)+'_run_'+str(run)+'_time_'+'%.1f' % time+'.png', dpi=100)
-    print('----> Figure saved to '+'Kinetic'+'_shot_'+str(shot)+'_run_'+str(run)+'_time_'+'%.1f' % time+'.png')
+    print('----> Figure saved to '+'Kinetic'+'_shot_'+str(shot)+'_run_'+str(run)+'_time_'+'%.1f' % time+'.png', file=sys.stderr)
 except:
     print('The figure could not be saved (check local permissions).', file=sys.stderr)
 
