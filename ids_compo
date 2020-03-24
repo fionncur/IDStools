@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import argparse, imas
+import argparse, imas, sys
 import init_mendeleiev as mend
 import os
 
