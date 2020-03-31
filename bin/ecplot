@@ -22,7 +22,6 @@ parser.add_argument('-t','--time',help='Time', required=False,type=float)
 args         = vars(parser.parse_args())
 shot         = args["shot"]
 run          = args["run"]
-time         = args["time"]
 
 # User or absolute path name
 if args['user_or_path'] != None:
@@ -35,6 +34,12 @@ if args['database'] != None:
     database = args['database']
 else:
     database = 'iter'
+
+# Time
+if args['time'] != None:
+    time = args['time']
+else:
+    time = -99.
 
 # DISPLAY PARAMETERS
 # -------------------
@@ -99,7 +104,7 @@ if ntime==1:
         tc = 0
     it = 0
 else:
-    if time:
+    if time>=0:
         [tc,it] = find_nearest(timevec,time)
     else:
         it = int(ntime/2)
