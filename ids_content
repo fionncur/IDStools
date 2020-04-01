@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import argparse,os
+import argparse,os,sys
 from imas import ids
 import pdb
 
@@ -39,18 +39,21 @@ try:
         import idstools.ids_tools as opendb
         db = opendb.ImasDb(shot,run,user_or_path,database,dataversion,True,False)
 except:
-        import sys
         print("%s: %s"%(sys.exc_info()[0],sys.exc_info()[1]), file=sys.stderr)
-        sys.exit("Unable to open database")
+        print('Unable to open the database for user_or_path = '+user_or_path+' and database = '+database, file=sys.stderr)
+
+# Open the file to check IDSs for which no time is defined
+idss=ids(shot,run,0,0)
+[err,n]=idss.open_env(user_or_path,database,dataversion,silent=True)
+if err!=0:
+    print('Shot ' + str(shot) + ', run ' + str(run) +' for user_or_path = '+user_or_path+' and database = '+database+' does not exist', file=sys.stderr)
+    print('----> Aborted.', file=sys.stderr)
+    exit()
 
 alltimes = db.all_times()
 timed_idslist = []
 for idsname, times in alltimes:
    timed_idslist.append(idsname)
-
-# Open the file to check IDSs for which no time is defined
-idss=ids(shot,run,0,0)
-idss.open_env(user_or_path,database,dataversion)
 
 # Set up the list of existing IDSs in th DD
 dd_idslist=[]
