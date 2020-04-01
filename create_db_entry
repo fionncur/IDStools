@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from __future__ import print_function
 
-import argparse, imas
+import argparse, imas, pdb
 import init_mendeleiev as mend
 import numpy as np
 import sys
@@ -45,19 +45,9 @@ except:
 
 # Read necessary IDSs from database
 try:
-    input.equilibrium.get()
-    equilibrium = input.equilibrium
-    if equilibrium.ids_properties.homogeneous_time != -999999999:
-      eq_present = 1
-    else:
-      eq_present = 0
-except:
-    print("The equilibrium IDS is absent from the input data-entry", file=sys.stdout)
-    eq_present = 0
-
-try:
-    input.core_profiles.get()
+    #input.core_profiles.get()
     core_profiles = input.core_profiles
+    core_profiles.ids_properties = input.core_profiles.partialGet('ids_properties')
     if core_profiles.ids_properties.homogeneous_time != -999999999:
       core_present = 1
     else:
@@ -67,11 +57,71 @@ except:
     core_present = 0
 
 try:
+    #input.edge_profiles.get()
+    edge_profiles = input.edge_profiles
+    edge_profiles.ids_properties = input.edge_profiles.partialGet('ids_properties')
+    if edge_profiles.ids_properties.homogeneous_time != -999999999:
+        edge_present = 1
+    else:
+        edge_present = 0
+except:
+    print("The edge_profiles IDS is absent from the input data-entry", file=sys.stdout)
+    print("Only core data will be used", file=sys.stdout)
+    edge_present = 0
+
+try:
     input.summary.get()
     summary = input.summary
 except:
     print("The summary IDS is absent from the input data-entry", file=sys.stdout)
     print("----> H&CD waveforms not filled (to be completed by hand)", file=sys.stdout)
+
+if core_present==1:
+    try:
+        ne0 = input.core_profiles.partialGet('profiles_1d(:)/electrons/density(0)')
+        central_electron_density = 0
+        for islice in range(len(ne0)):
+            if ne0[islice] > central_electron_density:
+                central_electron_density = ne0[islice]
+                the_slice = islice
+    except:
+       print("core_profiles.profiles_1d[:].electrons.density[0] could not be read", file=sys.stderr)
+       print("----> Aborted.", file=sys.stderr)
+       exit()
+    core_profiles.profiles_1d.resize(1)
+    core_profiles.profiles_1d[0] = input.core_profiles.partialGet('profiles_1d('+str(the_slice)+')')
+
+if edge_present==1:
+    try:
+        ne_sep = input.summary.local.separatrix.n_e.value
+        sepmid_electron_density = 0
+        for islice in range(len(ne_sep)):
+            if ne_sep[islice] > sepmid_electron_density:
+                sepmid_electron_density = ne_sep[islice]
+                the_slice = islice
+    except:
+       print("summary.local.separatrix.n_e.value could not be read", file=sys.stderr)
+       if core_present==1:
+          print("Only the core electron density will be provided", file=sys.stderr)
+       else:
+          print("----> Aborted.", file=sys.stderr)
+          exit()
+
+try:
+    #input.equilibrium.get()
+    equilibrium = input.equilibrium
+    equilibrium.ids_properties = input.equilibrium.partialGet('ids_properties')
+    if equilibrium.ids_properties.homogeneous_time != -999999999:
+       eq_present = 1
+    else:
+       eq_present = 0
+    if eq_present == 1:
+       equilibrium.vacuum_toroidal_field = input.equilibrium.partialGet('vacuum_toroidal_field')
+       equilibrium.time_slice.resize(1)
+       equilibrium.time_slice[0]         = input.equilibrium.partialGet('time_slice('+str(the_slice)+')')
+except:
+    print("The equilibrium IDS is absent from the input data-entry", file=sys.stdout)
+    eq_present = 0
 
 try:
     input.dataset_description.get()
@@ -84,24 +134,19 @@ except:
     dd_version = ''
 
 try:
-    input.edge_profiles.get()
-    edge_profiles = input.edge_profiles
-    if edge_profiles.ids_properties.homogeneous_time != -999999999:
-        edge_present = 1
-    else:
-        edge_present = 0
-except:
-    print("The edge_profiles IDS is absent from the input data-entry", file=sys.stdout)
-    print("Only core data will be used", file=sys.stdout)
-    edge_present = 0
-
-try:
-    input.edge_transport.get()
+    #input.edge_transport.get()
     edge_transport = input.edge_transport
+    edge_transport.ids_properties = input.edge_transport.partialGet('ids_properties')
     if edge_transport.ids_properties.homogeneous_time != -999999999:
         flux_present = 1
     else:
         flux_present = 0
+    if flux_present == 1:
+        edge_transport.model.resize(1)
+        edge_transport.model[0].ggd.resize(1)
+        edge_transport.model[0].ggd[0] = input.edge_transport.partialGet('model(0)/ggd('+str(the_slice)+')')
+        edge_transport.grid_ggd.resize(1)
+        edge_transport.grid_ggd[0] = input.edge_transport.partialGet('grid_ggd('+str(the_slice)+')')
 except:
     print("The edge_transport IDS is absent from the input data-entry", file=sys.stdout)
     print("----> P_SOL information not filled (to be completed by hand)", file=sys.stdout)
@@ -128,7 +173,7 @@ if eq_present == 1:
       else:
          magnetic_field = max(equilibrium.vacuum_toroidal_field.b0)
    except:
-      print("equilibrium.time_slice[:].global_quantities.magnetic_axis.b_tor could not be read", file=sys.stderr)
+      print("equilibrium.vacuum_toroidal_field.b0 could not be read", file=sys.stderr)
       print("----> Aborted.", file=sys.stderr)
       exit()
 else:
@@ -145,9 +190,10 @@ else:
 if eq_present==1:
    try:
       plasma_current = 0
-      for islice in range(len(equilibrium.time)):
-        if abs(equilibrium.time_slice[islice].global_quantities.ip)*1.e-6 > plasma_current:
-          plasma_current = equilibrium.time_slice[islice].global_quantities.ip*1.e-6
+      ip = input.equilibrium.partialGet('time_slice(:)/global_quantities/ip')
+      for islice in range(len(ip)):
+        if abs(ip[islice]) > plasma_current:
+          plasma_current = ip[islice]*1.e-6
    except:
       print("equilibrium.time_slice[:].global_quantities.ip could not be read", file=sys.stderr)
       print("----> Aborted.", file=sys.stderr)
@@ -164,48 +210,26 @@ else:
       exit()
 
 if core_present==1:
-    try:
-       central_electron_density = 0
-       for islice in range(len(core_profiles.profiles_1d)):
-            if core_profiles.profiles_1d[islice].electrons.density[0] > central_electron_density:
-               central_electron_density = core_profiles.profiles_1d[islice].electrons.density[0]
-               the_slice = islice
-    except:
-       print("core_profiles.profiles_1d[:].electrons.density[0] could not be read", file=sys.stderr)
-       print("----> Aborted.", file=sys.stderr)
-       exit()
-
-sepmid_electron_density = 0
-if edge_present==1:
-    try:
-       for islice in range(len(summary.local.separatrix.n_e.value)):
-          if summary.local.separatrix.n_e.value[islice] > sepmid_electron_density:
-             sepmid_electron_density = summary.local.separatrix.n_e.value[islice]
-             the_slice = islice
-    except:
-       print("edge_profiles.ggd[:].electrons.density[] could not be read", file=sys.stderr)
-       if core_present==1:
-          print("Only the core electron density will be provided", file=sys.stderr)
-       else:
-          print("----> Aborted.", file=sys.stderr)
-          exit()
-
-if core_present==1:
    try:
       nspecies = len(core_profiles.profiles_1d[0].ion)
       a = [0] * nspecies
       for ispecies in range(nspecies):
-         a[ispecies] = int(core_profiles.profiles_1d[the_slice].ion[ispecies].element[0].a)
+         a[ispecies] = int(core_profiles.profiles_1d[0].ion[ispecies].element[0].a)
    except:
       print("core_profiles.profiles_1d[:].ion[0].element[0].a could not be read", file=sys.stderr)
       nspecies = 0
       a = [0]
 else:
     try:
+       edge_profiles = input.edge_profiles
+       edge_profiles.ggd.resize(1)
+       #pdb.set_trace()
+       #edge_profiles.ggd[0].ion = input.edge_profiles.partialGet('ggd('+str(the_slice)+')/ion')
+       edge_profiles.ggd[0] = input.edge_profiles.partialGet('ggd('+str(the_slice)+')')
        nspecies = len(edge_profiles.ggd[0].ion)
        a = [0] * nspecies
        for ispecies in range(nspecies):
-          a[ispecies] = int(edge_profiles.ggd[the_slice].ion[ispecies].element[0].a)
+          a[ispecies] = int(edge_profiles.ggd[0].ion[ispecies].element[0].a)
     except:
        print("edge_profiles.ggd[:].ion[:].element[0].a could not be read", file=sys.stderr)
        nspecies = 0
@@ -216,7 +240,7 @@ if core_present==1:
       nspecies = len(core_profiles.profiles_1d[0].ion)
       z = [0] * nspecies
       for ispecies in range(nspecies):
-         z[ispecies] = int(core_profiles.profiles_1d[the_slice].ion[ispecies].element[0].z_n)
+         z[ispecies] = int(core_profiles.profiles_1d[0].ion[ispecies].element[0].z_n)
    except:
       print("core_profiles.profiles_1d[:].ion[0].element[0].z_n could not be read", file=sys.stderr)
       nspecies = 0
@@ -226,7 +250,7 @@ else:
       nspecies = len(edge_profiles.ggd[0].ion)
       z = [0] * nspecies
       for ispecies in range(nspecies):
-         z[ispecies] = int(edge_profiles.ggd[the_slice].ion[ispecies].element[0].z_n)
+         z[ispecies] = int(edge_profiles.ggd[0].ion[ispecies].element[0].z_n)
    except:
       print("edge_profiles.ggd[:].ion[:].element[0].z_n could not be read", file=sys.stderr)
       nspecies = 0
@@ -234,14 +258,14 @@ else:
 
 if core_present == 1:
    try:
-      volume = core_profiles.profiles_1d[the_slice].grid.volume
+      volume = core_profiles.profiles_1d[0].grid.volume
       if len(volume) == 0:
           try:
-             equilibrium = cli.get('equilibrium')
+             equilibrium = input.equilibrium
           except:
              exit()
-          volume = equilibrium.time_slice[the_slice].profiles_1d.volume
-          if len(volume) == len(core_profiles.profiles_1d[the_slice].electrons.density):
+          volume = equilibrium.time_slice[0].profiles_1d.volume
+          if len(volume) == len(core_profiles.profiles_1d[0].electrons.density):
              print("core_profiles.profiles_1d[:].grid.volume could not be read", file=sys.stderr)
              print("----> equilibrium.time_slice[:].profiles_1d.volume used instead", file=sys.stderr)
              print("(possible because the resolution is the same, but maybe not correct)", file=sys.stderr)
@@ -253,7 +277,7 @@ if core_present == 1:
       exit()
 
    try:
-      central_zeff = core_profiles.profiles_1d[the_slice].zeff[0]
+      central_zeff = core_profiles.profiles_1d[0].zeff[0]
    except:
       print("core_profiles.profiles_1d[:].zeff[0] could not be read", file=sys.stderr)
       print("----> Aborted.", file=sys.stderr)
@@ -332,20 +356,20 @@ else:
     p_sol = 0
     p_sol_e = 0
     p_sol_i = 0
-    nsubsets = len(edge_transport.model[0].ggd[the_slice].electrons.energy.flux)
+    nsubsets = len(edge_transport.model[0].ggd[0].electrons.energy.flux)
     for iset in range(nsubsets):
-       if edge_transport.model[0].ggd[the_slice].electrons.energy.flux[iset].grid_subset_index == 26:
-          for iFace in range(len(edge_transport.model[0].ggd[the_slice].electrons.energy.flux[iset].values)):
-             faceindex = edge_transport.grid_ggd[the_slice].grid_subset[iset].element[iFace].object[0].index
-             area = edge_transport.grid_ggd[the_slice].space[0].objects_per_dimension[1].object[faceindex-1].measure
-             flux = edge_transport.model[0].ggd[the_slice].electrons.energy.flux[iset].values[iFace]
+       if edge_transport.model[0].ggd[0].electrons.energy.flux[iset].grid_subset_index == 26:
+          for iFace in range(len(edge_transport.model[0].ggd[0].electrons.energy.flux[iset].values)):
+             faceindex = edge_transport.grid_ggd[0].grid_subset[iset].element[iFace].object[0].index
+             area = edge_transport.grid_ggd[0].space[0].objects_per_dimension[1].object[faceindex-1].measure
+             flux = edge_transport.model[0].ggd[0].electrons.energy.flux[iset].values[iFace]
              p_sol_e = p_sol_e + flux*area
              try:
-                flux = edge_transport.model[0].ggd[the_slice].total_ion_energy.flux[iset].values[iFace]
+                flux = edge_transport.model[0].ggd[0].total_ion_energy.flux[iset].values[iFace]
              except:
                 flux = 0
                 for ispecies in range(nspecies):
-                   flux = flux + edge_transport.model[0].ggd[the_slice].ion[ispecies].energy.flux[iset].values[iFace]
+                   flux = flux + edge_transport.model[0].ggd[0].ion[ispecies].energy.flux[iset].values[iFace]
              p_sol_i = p_sol_i + flux*area
           p_sol = (p_sol_e + p_sol_i)*1.e-6
 
@@ -363,7 +387,7 @@ if nspecies > 0:
     max_density = -999.
     for ispecies in range(nspecies):
         if core_present == 1:
-            species_density[ispecies] = sum(volume*core_profiles.profiles_1d[the_slice].ion[ispecies].density)
+            species_density[ispecies] = sum(volume*core_profiles.profiles_1d[0].ion[ispecies].density)
         elif edge_present == 1:
             if z[ispecies] == 1:
                if a[ispecies] == 1:
@@ -429,7 +453,7 @@ if nspecies > 0:
             imax = ispecies
 
     if core_present == 1:
-        ne = sum(volume*core_profiles.profiles_1d[the_slice].electrons.density)
+        ne = sum(volume*core_profiles.profiles_1d[0].electrons.density)
     elif edge_present == 1:
         ne = summary.local.separatrix.n_e.value[the_slice]
 
