@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 
-import argparse, imas, sys
+import argparse, imas, sys, os
 import init_mendeleiev as mend
-import os
 
 # ----------------------------------------------------------------------
 
@@ -21,8 +20,6 @@ run  = args["run"]
 if args['user_or_path'] != None:
 	user_or_path = args["user_or_path"]
 else:
-        #import os
-	#user_or_path = os.getenv('USER')
 	user_or_path = 'public'
 
 # Database name
@@ -32,25 +29,41 @@ else:
 	database = 'iterdb'
 
 # Open the database and read the necessary IDSs
-try:
-    version = os.getenv('IMAS_VERSION')[0]
-    input = imas.ids(shot,run)
-    input.open_env(str(user_or_path),str(database),version)
-except:
-    print('Shot ' + str(shot) + ', run ' + str(run) + ' does not exist', file=sys.stderr)
+version = os.getenv('IMAS_VERSION')[0]
+input=imas.ids(shot,run)
+[err,n]=input.open_env(user_or_path,database,version,silent=True)
+if err != 0:
+    print('Shot ' + str(shot) + ', run ' + str(run) +' for user_or_path = '+user_or_path+' and database = '+database+' does not exist', file=sys.stderr)
     print('----> Aborted.', file=sys.stderr)
     exit()
 
 try:
-    input.core_profiles.get()
-    core_profiles = input.core_profiles
+    #input.core_profiles.get()
+    core_profiles = input.core_profiles # To inialise the empty IDS structure
+    core_profiles.time=input.core_profiles.partialGet('time')
+    if core_profiles.time is None:
+        print('No core_profiles IDS in the data-entry --> Abort.', file=sys.stderr)
+        exit()
 except:
     print("The core_profiles IDS is absent from the input data-entry", file=sys.stderr)
     print("----> Aborted.", file=sys.stderr)
     exit()
 
-# Mendeleiev table
-table_mendeleiev = mend.create_table_mendeleiev()
+try:
+    ne0 = input.core_profiles.partialGet('profiles_1d(:)/electrons/density(0)')
+    central_electron_density = 0
+    for islice in range(len(ne0)):
+        if ne0[islice] > central_electron_density:
+            central_electron_density = ne0[islice]
+            the_slice = islice
+except:
+    print("core_profiles.profiles_1d[:].electrons.density[0] could not be read", file=sys.stderr)
+    print("----> Aborted.", file=sys.stderr)
+    exit()
+
+# Read 1D-profiles for this time slice
+core_profiles.profiles_1d.resize(1)
+core_profiles.profiles_1d[0] = input.core_profiles.partialGet('profiles_1d('+str(the_slice)+')')
 
 try:
     nspecies = len(core_profiles.profiles_1d[0].ion)
@@ -73,25 +86,15 @@ except:
     exit()
 
 try:
-    central_electron_density = 0
-    for islice in range(len(core_profiles.profiles_1d)):
-        if core_profiles.profiles_1d[islice].electrons.density[0] > central_electron_density:
-            central_electron_density = core_profiles.profiles_1d[islice].electrons.density[0]
-            the_slice = islice
-except:
-    print("core_profiles.profiles_1d[:].electrons.density[0] could not be read", file=sys.stderr)
-    print("----> Aborted.", file=sys.stderr)
-    exit()
-
-try:
-    volume = core_profiles.profiles_1d[the_slice].grid.volume
+    volume = core_profiles.profiles_1d[0].grid.volume
     if len(volume) == 0:
         try:
-            equilibrium = cli.get('equilibrium')
+            equilibrium = input.equilibrium
+            equilibrium.time_slice[0].profiles_1d.volume = input.equilibrium.partialGet('time_slice('+str(the_slice)+')/profiles_1d/volume')
         except:
             exit()
-        volume = equilibrium.time_slice[the_slice].profiles_1d.volume
-        if len(volume) == len(core_profiles.profiles_1d[the_slice].electrons.density):
+        volume = equilibrium.time_slice[0].profiles_1d.volume
+        if len(volume) == len(core_profiles.profiles_1d[0].electrons.density):
             print("   core_profiles.profiles_1d[:].grid.volume could not be read", file=sys.stderr)
             print("   ----> equilibrium.time_slice[:].profiles_1d.volume used instead", file=sys.stderr)
             print("   (possible because the resolution is the same, but maybe not correct)", file=sys.stderr)
@@ -103,16 +106,16 @@ except:
     exit()
 
 try:
-    central_zeff = 0
-    for islice in range(len(core_profiles.profiles_1d)):
-        if core_profiles.profiles_1d[islice].zeff[0] > central_zeff:
-            central_zeff = core_profiles.profiles_1d[islice].zeff[0]
+    central_zeff = core_profiles.profiles_1d[0].zeff[0]
 except:
     print("core_profiles.profiles_1d[:].zeff[0] could not be read", file=sys.stderr)
     print("----> Aborted.", file=sys.stderr)
     exit()
 
 # ----------------------------------------------------------------------
+
+# Mendeleiev table
+table_mendeleiev = mend.create_table_mendeleiev()
 
 if nspecies > 0:
 
