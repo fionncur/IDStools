@@ -10,7 +10,7 @@ from stat import *
 class SmartFormatter(argparse.HelpFormatter):
     def _split_lines(self, text, width):
         if text.startswith('R|'):
-            return text[2:].splitlines()  
+            return text[2:].splitlines()
         return argparse.HelpFormatter._split_lines(self, text, width)
 
 # ----------------------------------------------------------------------------
@@ -20,7 +20,7 @@ def rec(data={},path=os.getcwd(),extension='.yaml',choice=['shot','run','ip','b0
   trunc_number = 50 # Need to truncate the reference name when it is too long
 
   # --------------------
-  # Read all YAML files 
+  # Read all YAML files
   # --------------------
   table = {}
   files = glob.glob(path + "/*")
@@ -110,6 +110,7 @@ def rec(data={},path=os.getcwd(),extension='.yaml',choice=['shot','run','ip','b0
   tab_idslist     = 0
   tab_location    = 0
   tab_composition = 0
+  nspecies_max    = 0
   for i in range(len(sdata)):
     tab_ref_name    = max(max(len(str(sdata[i].get('reference_name')[0:trunc_number])),tab_ref_name),len(disp_ref_name))
     tab_ro_name     = max(max(len(str(sdata[i].get('responsible_name'))),tab_ro_name),len(disp_ro_name))
@@ -136,8 +137,9 @@ def rec(data={},path=os.getcwd(),extension='.yaml',choice=['shot','run','ip','b0
     tab_extra       = max(max(len(str(sdata[i].get('free_description'))),tab_extra),len(disp_extra))
     tab_idslist     = max(max(len(str(sdata[i].get('ids_list'))),tab_idslist),len(disp_idslist))
     tab_location    = max(max(len(str(sdata[i].get('location'))),tab_location),len(disp_location))
-    tab_composition = max(max(len(str(sdata[i].get('plasma_composition').get('species'))),tab_composition),len(disp_composition))      
-  tab_composition = tab_composition+6 # (I cannot easily calculate the max tab size for composition so I oversize it a bit)
+    tab_composition = max(max(len(str(sdata[i].get('plasma_composition').get('species'))),tab_composition),len(disp_composition))
+    nspecies_max    = max(len(sdata[i].get('plasma_composition').get('species').split()),nspecies_max)
+  tab_composition = tab_composition+3*nspecies_max # tab_composition allows for concentration in format (0.xxx), here we pad to fit the (x.xxe-xx) format
 
   # --------------
   # Table heading
