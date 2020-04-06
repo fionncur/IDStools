@@ -653,7 +653,7 @@ else:
 f.write("""# --------------------\n""")
 f.write("""# Content description\n""")
 f.write("""# --------------------\n""")
-f.write("""free_description: |\n""")
+f.write("""free_description:\n""")
 f.write("   "+comment+"\n")
 f.write("   DD version: "+dd_version+"\n")
 #f.write("""    - H-mode or L-mode or whatever\n""")

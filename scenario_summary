@@ -213,18 +213,18 @@ def rec(data={},path=os.getcwd(),extension='.yaml',choice=['shot','run','ip','b0
 
         if choice[ic] == 'composition':
             unsorted_species = composition.split()
-            unsorted_xspec   = composition_x.split()
             nspecies = len(unsorted_species)
             # Sort species as a function of concentration
             if nspecies>1:
-                sorted_x = sorted(range(nspecies), key = lambda x: float(unsorted_xspec[x]), reverse=True)
+                unsorted_xspec = composition_x.split()
             else:
-                sorted_x = sorted(range(nspecies), key = lambda x: unsorted_xspec[x], reverse=True)
+                unsorted_xspec[0] = str(composition_x)
+            sorted_x = sorted(range(nspecies), key = lambda x: float(unsorted_xspec[x]), reverse=True)
             species = []
             xspec = []
-            for i in range(nspecies):
-                species.append(unsorted_species[sorted_x[ic]])
-                xspec.append(unsorted_xspec[sorted_x[ic]])
+            for ispec in range(nspecies):
+                species.append(unsorted_species[sorted_x[ispec]])
+                xspec.append(unsorted_xspec[sorted_x[ispec]])
             compo = ''
             for ispec in range(nspecies):
                 compo = compo+species[ispec]+'('+xspec[ispec]+'),'
