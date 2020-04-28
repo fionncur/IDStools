@@ -83,8 +83,11 @@ for el in timed_idslist:
       if hasattr(eval('idss.'+element),'partialGet'):
          if element == alltimes[i][0]:
             t = eval('idss.'+element+'.partialGet(\'time\')')
-            for itime in range(len(alltimes[i][1])):
-               alltimes[i][1][itime]=t[itime]
+            if eval('idss.'+element+'.partialGet(\'ids_properties/homogeneous_time\')') !=2:
+               for itime in range(len(alltimes[i][1])):
+                  alltimes[i][1][itime]=t[itime]
+            else:
+                  alltimes[i][1][itime]='static'
 
 for idsname, times in alltimes:
    if len(times) > 1:
