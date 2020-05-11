@@ -3,7 +3,7 @@ from __future__ import print_function
 
 # MODULES
 # --------
-import numpy as np
+from numpy import *
 import imas,argparse,sys,os,pdb
 import matplotlib
 matplotlib.use('TKagg')
@@ -61,7 +61,7 @@ font = {'family': 'serif',
 
 def find_nearest(a, a0):
     'Element in nd array `a` closest to the scalar value `a0`'
-    idx = np.abs(a - a0).argmin()
+    idx = abs(a - a0).argmin()
     return a.flat[idx],idx
 
 # ----------------------------------------------------------------------
@@ -286,15 +286,15 @@ for isource in range(nsources):
             total_current_waveform[itime] = total_current_waveform[itime] + core_sources.source[isource].global_quantities[itime].current_parallel
             total_torque_waveform[itime] = total_torque_waveform[itime] + core_sources.source[isource].global_quantities[itime].torque_tor
 
-        single_electron_power_profile[isource] = np.array(core_sources.source[isource].profiles_1d[0].electrons.energy)
-        single_electron_particles_profile[isource] = np.array(core_sources.source[isource].profiles_1d[0].electrons.particles)
+        single_electron_power_profile[isource] = array(core_sources.source[isource].profiles_1d[0].electrons.energy)
+        single_electron_particles_profile[isource] = array(core_sources.source[isource].profiles_1d[0].electrons.particles)
         nions = len(core_sources.source[isource].profiles_1d[0].ion)
         for iion in range(nions):
-          single_ion_power_profile[isource] = np.array(single_ion_power_profile[isource]) + core_sources.source[isource].profiles_1d[0].ion[iion].energy
-          single_ion_particles_profile[isource] = np.array(single_ion_particles_profile[isource]) + core_sources.source[isource].profiles_1d[0].ion[iion].particles
+          single_ion_power_profile[isource] = array(single_ion_power_profile[isource]) + core_sources.source[isource].profiles_1d[0].ion[iion].energy
+          single_ion_particles_profile[isource] = array(single_ion_particles_profile[isource]) + core_sources.source[isource].profiles_1d[0].ion[iion].particles
         #single_power_profile[isource] = single_electron_power_profile[isource] + single_ion_power_profile[isource]
         #single_particles_profile[isource] = single_electron_particles_profile[isource] + single_ion_particles_profile[isource]
-        single_current_profile[isource] = np.array(core_sources.source[isource].profiles_1d[0].j_parallel)
+        single_current_profile[isource] = array(core_sources.source[isource].profiles_1d[0].j_parallel)
 
         total_electron_power_profile = total_electron_power_profile + core_sources.source[isource].profiles_1d[0].electrons.energy
         total_electron_particles_profile = total_electron_particles_profile + core_sources.source[isource].profiles_1d[0].electrons.particles
@@ -303,7 +303,7 @@ for isource in range(nsources):
           total_ion_particles_profile = total_ion_particles_profile + core_sources.source[isource].profiles_1d[0].ion[iion].particles
         #total_power_profile = total_electron_power_profile + total_ion_power_profile
         #total_particles_profile = total_electron_particles_profile + total_ion_particles_profile
-        total_current_profile = total_current_profile + np.array(core_sources.source[isource].profiles_1d[0].j_parallel)
+        total_current_profile = total_current_profile + array(core_sources.source[isource].profiles_1d[0].j_parallel)
 
     else:
         print(' '+single_source_name[isource]+' is off', file=sys.stderr)
@@ -311,12 +311,12 @@ for isource in range(nsources):
 # POWER PROFILES [MW/M3]
 fig,ax =plt.subplots(1,1)
 if sum(is_active)>1:
-    ax.plot(rho_tor_norm, np.array(total_electron_power_profile)*1.e-6,label=r'Total to electrons')
-    ax.plot(rho_tor_norm, np.array(total_ion_power_profile)*1.e-6,'--',label=r'Total to ions')
+    ax.plot(rho_tor_norm, array(total_electron_power_profile)*1.e-6,label=r'Total to electrons')
+    ax.plot(rho_tor_norm, array(total_ion_power_profile)*1.e-6,'--',label=r'Total to ions')
 for isource in range(nsources):
     if is_active[isource]:
-        ax.plot(rho_tor_norm, np.array(single_electron_power_profile[isource])*1.e-6,label=single_source_name[isource]+' to electrons')
-        ax.plot(rho_tor_norm, np.array(single_ion_power_profile[isource])*1.e-6,'--',label=single_source_name[isource]+' to ions')
+        ax.plot(rho_tor_norm, array(single_electron_power_profile[isource])*1.e-6,label=single_source_name[isource]+' to electrons')
+        ax.plot(rho_tor_norm, array(single_ion_power_profile[isource])*1.e-6,'--',label=single_source_name[isource]+' to ions')
 ax.set_ylabel('Power to bulk $\mathrm{[MW/m^{3}]}$')
 ax.set_xlabel('Normalized toroidal flux coordinate')
 plt.grid()
@@ -331,12 +331,12 @@ plt.show(block=False)
 # PARTICLES PROFILES [/M3/S]
 fig,ax =plt.subplots(1,1)
 if sum(is_active)>1:
-    ax.plot(rho_tor_norm, np.array(total_electron_particles_profile)*1.e-6,label=r'Total to electrons')
-    ax.plot(rho_tor_norm, np.array(total_ion_particles_profile)*1.e-6,'--',label=r'Total to ions')
+    ax.plot(rho_tor_norm, array(total_electron_particles_profile)*1.e-6,label=r'Total to electrons')
+    ax.plot(rho_tor_norm, array(total_ion_particles_profile)*1.e-6,'--',label=r'Total to ions')
 for isource in range(nsources):
     if is_active[isource]:
-        ax.plot(rho_tor_norm, np.array(single_electron_particles_profile[isource])*1.e-6,label=single_source_name[isource]+' electrons')
-        ax.plot(rho_tor_norm, np.array(single_ion_particles_profile[isource])*1.e-6,'--',label=single_source_name[isource]+' ions')
+        ax.plot(rho_tor_norm, array(single_electron_particles_profile[isource])*1.e-6,label=single_source_name[isource]+' electrons')
+        ax.plot(rho_tor_norm, array(single_ion_particles_profile[isource])*1.e-6,'--',label=single_source_name[isource]+' ions')
 ax.set_ylabel('Density $\mathrm{[m^{-3}.s^{-1}]}$')
 ax.set_xlabel('Normalized toroidal flux coordinate')
 plt.grid()
@@ -350,10 +350,10 @@ fig.savefig('CS_particles_profiles_shot_{0}_run_{1}.png'.format(shot,run),bbox_i
 # CURRENT PROFILES [KA/M2]
 fig,ax =plt.subplots(1,1)
 if sum(is_active)>1:
-    ax.plot(rho_tor_norm, np.array(total_current_profile)*1.e-3,label=r'Total current')
+    ax.plot(rho_tor_norm, array(total_current_profile)*1.e-3,label=r'Total current')
 for isource in range(nsources):
     if is_active[isource]:
-        ax.plot(rho_tor_norm, np.array(single_current_profile[isource])*1.e-3,label=single_source_name[isource])
+        ax.plot(rho_tor_norm, array(single_current_profile[isource])*1.e-3,label=single_source_name[isource])
 ax.set_ylabel('Current density $\mathrm{[kA/m^{2}]}$')
 ax.set_xlabel('Normalized toroidal flux coordinate')
 plt.grid()
@@ -373,14 +373,14 @@ else:
     # POWER WAVEFORM
     fig,ax =plt.subplots(1,1)
     if sum(is_active)>1:
-        ax.plot(timevec, np.array(total_power_waveform)*1.e-6,label=r'Total electrons+ions')
-        ax.plot(timevec, np.array(total_electron_power_waveform)*1.e-6,label=r'Total electrons')
-        ax.plot(timevec, np.array(total_ion_power_waveform)*1.e-6,label=r'Total ions')
+        ax.plot(timevec, array(total_power_waveform)*1.e-6,label=r'Total electrons+ions')
+        ax.plot(timevec, array(total_electron_power_waveform)*1.e-6,label=r'Total electrons')
+        ax.plot(timevec, array(total_ion_power_waveform)*1.e-6,label=r'Total ions')
     for isource in range(nsources):
         if is_active[isource]:
-            ax.plot(timevec, np.array(single_power_waveform[isource])*1.e-6,label=single_source_name[isource]+' electrons+ions')
-            ax.plot(timevec, np.array(single_electron_power_waveform[isource])*1.e-6,label=single_source_name[isource]+' electrons')
-            ax.plot(timevec, np.array(single_ion_power_waveform[isource])*1.e-6,label=single_source_name[isource]+' ions')
+            ax.plot(timevec, array(single_power_waveform[isource])*1.e-6,label=single_source_name[isource]+' electrons+ions')
+            ax.plot(timevec, array(single_electron_power_waveform[isource])*1.e-6,label=single_source_name[isource]+' electrons')
+            ax.plot(timevec, array(single_ion_power_waveform[isource])*1.e-6,label=single_source_name[isource]+' ions')
     ax.set_ylabel('Power waveforms $\mathrm{[MW]}$')
     ax.set_xlabel('Time (s)')
     plt.grid()
@@ -396,14 +396,14 @@ else:
     # PARTICLES WAVEFORM
     fig,ax =plt.subplots(1,1)
     if sum(is_active)>1:
-        ax.plot(timevec, np.array(total_particles_waveform),label=r'Total electrons+ions')
-        ax.plot(timevec, np.array(total_electron_particles_waveform),label=r'Total electrons')
-        ax.plot(timevec, np.array(total_ion_particles_waveform),label=r'Total ions')
+        ax.plot(timevec, array(total_particles_waveform),label=r'Total electrons+ions')
+        ax.plot(timevec, array(total_electron_particles_waveform),label=r'Total electrons')
+        ax.plot(timevec, array(total_ion_particles_waveform),label=r'Total ions')
     for isource in range(nsources):
         if is_active[isource]:
-            ax.plot(timevec, np.array(single_particles_waveform[isource]),label=single_source_name[isource]+' electrons+ions')
-            ax.plot(timevec, np.array(single_electron_particles_waveform[isource]),label=single_source_name[isource]+' electrons')
-            ax.plot(timevec, np.array(single_ion_particles_waveform[isource]),label=single_source_name[isource]+' ions')
+            ax.plot(timevec, array(single_particles_waveform[isource]),label=single_source_name[isource]+' electrons+ions')
+            ax.plot(timevec, array(single_electron_particles_waveform[isource]),label=single_source_name[isource]+' electrons')
+            ax.plot(timevec, array(single_ion_particles_waveform[isource]),label=single_source_name[isource]+' ions')
     ax.set_ylabel('Particles waveforms $\mathrm{[s^{-1}]}$')
     ax.set_xlabel('Time (s)')
     plt.grid()
@@ -419,10 +419,10 @@ else:
     # CURRENT WAVEFORM
     fig,ax =plt.subplots(1,1)
     if sum(is_active)>1:
-        ax.plot(timevec, np.array(total_current_waveform)*1.e-3,label=r'Total electrons+ions')
+        ax.plot(timevec, array(total_current_waveform)*1.e-3,label=r'Total electrons+ions')
     for isource in range(nsources):
         if is_active[isource]:
-            ax.plot(timevec, np.array(single_current_waveform[isource])*1.e-3,label=single_source_name[isource])
+            ax.plot(timevec, array(single_current_waveform[isource])*1.e-3,label=single_source_name[isource])
     ax.set_ylabel('Current waveforms $\mathrm{[kA.m]}$')
     ax.set_xlabel('Time (s)')
     plt.grid()
@@ -438,10 +438,10 @@ else:
     # TORQUE WAVEFORM
     fig,ax =plt.subplots(1,1)
     if sum(is_active)>1:
-        ax.plot(timevec, np.array(total_torque_waveform),label=r'Total electrons+ions')
+        ax.plot(timevec, array(total_torque_waveform),label=r'Total electrons+ions')
     for isource in range(nsources):
         if is_active[isource]:
-            ax.plot(timevec, np.array(single_torque_waveform[isource]),label=single_source_name[isource])
+            ax.plot(timevec, array(single_torque_waveform[isource]),label=single_source_name[isource])
     ax.set_ylabel('Torque waveforms $\mathrm{[kg.m^2.s^{-2}]}$')
     ax.set_xlabel('Time (s)')
     plt.grid()

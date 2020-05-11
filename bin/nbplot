@@ -3,7 +3,7 @@ from __future__ import print_function
 
 # MODULES
 # --------
-import numpy as np
+from numpy import *
 import imas,argparse,sys,os
 import matplotlib
 matplotlib.use('TKagg')
@@ -62,7 +62,7 @@ font = {'family': 'serif',
 
 def find_nearest(a, a0):
     'Element in nd array `a` closest to the scalar value `a0`'
-    idx = np.abs(a - a0).argmin()
+    idx = abs(a - a0).argmin()
     return a.flat[idx],idx
 
 # ----------------------------------------------------------------------
@@ -272,12 +272,12 @@ else:
     # NBI POWER WAVEFORM
     fig,ax =plt.subplots(1,1)
     if sum(is_active)>1:
-        ax.plot(timevec, np.array(all_injectors_total_power_waveform)*1.e-6,label=r'Total')
-        ax.plot(timevec, np.array(all_injectors_electron_power_waveform)*1.e-6,label=r'To electrons')
-        ax.plot(timevec, np.array(all_injectors_ion_power_waveform) * 1.e-6, label=r'To ions')
+        ax.plot(timevec, array(all_injectors_total_power_waveform)*1.e-6,label=r'Total')
+        ax.plot(timevec, array(all_injectors_electron_power_waveform)*1.e-6,label=r'To electrons')
+        ax.plot(timevec, array(all_injectors_ion_power_waveform) * 1.e-6, label=r'To ions')
 for idistrib in range(ndistributions):
     if is_active[idistrib]:
-        ax.plot(timevec, np.array(single_total_power_waveform[idistrib])*1.e-6,label=single_nb_source_name[idistrib])
+        ax.plot(timevec, array(single_total_power_waveform[idistrib])*1.e-6,label=single_nb_source_name[idistrib])
 ax.set_ylabel('Power to the bulk $\mathrm{[MW]}$')
 ax.set_xlabel('Time (s)')
 plt.grid()
@@ -293,10 +293,10 @@ plt.show(block=False)
 # NBCD WAVEFORM
 fig,ax =plt.subplots(1,1)
 if sum(is_active)>1:
-    ax.plot(timevec, np.array(all_injectors_current_waveform)*1.e-6,label=r'Total')
+    ax.plot(timevec, array(all_injectors_current_waveform)*1.e-6,label=r'Total')
 for idistrib in range(ndistributions):
     if is_active[idistrib]:
-        ax.plot(timevec, np.array(single_current_waveform[idistrib])*1.e-6,label=single_nb_source_name[idistrib])
+        ax.plot(timevec, array(single_current_waveform[idistrib])*1.e-6,label=single_nb_source_name[idistrib])
 ax.set_ylabel('NBCD $\mathrm{[MA]}$')
 ax.set_xlabel('Time (s)')
 plt.grid()
@@ -306,5 +306,5 @@ fig.set_size_inches(figure_width,figure_height)
 fig.tight_layout()
 fig.savefig('NBCD_waveform_shot_{0}_run_{1}.png'.format(shot,run),bbox_inches="tight")
 #plt.title('Whatever')
-#plt.gca().set_ylim(0,max(np.array(all_injectors_current_waveform))*1.2e-3)
+#plt.gca().set_ylim(0,max(array(all_injectors_current_waveform))*1.2e-3)
 plt.show(block=True)

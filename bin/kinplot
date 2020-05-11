@@ -4,14 +4,14 @@ from __future__ import print_function
 import os, sys, glob, yaml, argparse, re, imas, pdb
 from operator import itemgetter
 from stat import *
+from numpy import *
 import init_mendeleiev as mend
-import numpy as np
 
 # ----------------------------------------------------------------------
 
 def find_nearest(a, a0):
     'Element in nd array `a` closest to the scalar value `a0`'
-    idx = np.abs(a - a0).argmin()
+    idx = abs(a - a0).argmin()
     return a.flat[idx],idx
 
 # ----------------------------------------------------------------------
@@ -393,7 +393,7 @@ else:
     if imas_2928 == 1:
         waveform['ti']['central'] = input.core_profiles.partialGet('profiles_1d(:)/ion(0)/temperature(0)')*1e-3
     else:
-        waveform['ti']['central'] = [np.NaN]*nrho
+        waveform['ti']['central'] = [NaN]*nrho
     
 waveform['ne']  ['central'] = input.core_profiles.partialGet('profiles_1d(:)/electrons/density(0)')
 waveform['zeff']['central'] = input.core_profiles.partialGet('profiles_1d(:)/zeff(0)')
@@ -423,9 +423,9 @@ for ispecies in range(nspecies):
                 input.core_profiles.partialGet('profiles_1d(:)/ion('+str(ispecies)+')/velocity_tor(0)')
     else:
         if (plot_compo == 1) & (nspec_over_ne[ispecies] > impurity_limit):
-            waveform['n_species'][species[ispecies]]['density']['central'] = [np.NaN]*ntime
-            waveform['n_species'][species[ispecies]]['vpol']   ['central'] = [np.NaN]*ntime
-            waveform['n_species'][species[ispecies]]['vtor']   ['central'] = [np.NaN]*ntime
+            waveform['n_species'][species[ispecies]]['density']['central'] = [NaN]*ntime
+            waveform['n_species'][species[ispecies]]['vpol']   ['central'] = [NaN]*ntime
+            waveform['n_species'][species[ispecies]]['vtor']   ['central'] = [NaN]*ntime
 
     if (plot_compo == 1) & (nspec_over_ne[ispecies] > impurity_limit):
         for itime in range(ntime):

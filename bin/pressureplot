@@ -4,13 +4,13 @@ from __future__ import print_function
 import os, sys, glob, yaml, argparse, re, imas
 from operator import itemgetter
 from stat import *
-import numpy as np
+from numpy import *
 
 # ----------------------------------------------------------------------
 
 def find_nearest(a, a0):
     'Element in nd array `a` closest to the scalar value `a0`'
-    idx = np.abs(a - a0).argmin()
+    idx = abs(a - a0).argmin()
     return a.flat[idx],idx
 
 # ----------------------------------------------------------------------
@@ -158,50 +158,50 @@ nions = len(core_profiles.profiles_1d[0].ion)
 if len(core_profiles.profiles_1d[0].ion[0].pressure) < 1:
     print('core_profiles.profiles_1d[0].ion[0].pressure could not be read', file=sys.stderr)
     for iion in range(nions):
-        core_profiles.profiles_1d[0].ion[iion].pressure = np.asarray([np.nan]*nrho)
+        core_profiles.profiles_1d[0].ion[iion].pressure = asarray([nan]*nrho)
 
 if len(core_profiles.profiles_1d[0].ion[0].pressure_thermal) < 1:
     print('core_profiles.profiles_1d[0].ion[0].pressure_thermal could not be read', file=sys.stderr)
     for iion in range(nions):
-        core_profiles.profiles_1d[0].ion[iion].pressure_thermal = np.asarray([np.nan]*nrho)
+        core_profiles.profiles_1d[0].ion[iion].pressure_thermal = asarray([nan]*nrho)
 
 if len(core_profiles.profiles_1d[0].ion[0].pressure_fast_parallel) < 1:
     print('core_profiles.profiles_1d[0].ion[0].pressure_fast_parallel could not be read', file=sys.stderr)
     for iion in range(nions):
-        core_profiles.profiles_1d[0].ion[iion].pressure_fast_parallel = np.asarray([np.nan]*nrho)
+        core_profiles.profiles_1d[0].ion[iion].pressure_fast_parallel = asarray([nan]*nrho)
 
 if len(core_profiles.profiles_1d[0].ion[0].pressure_fast_perpendicular) < 1:
     print('core_profiles.profiles_1d[0].ion[0].pressure_fast_perpendicular could not be read', file=sys.stderr)
     for iion in range(nions):
-        core_profiles.profiles_1d[0].ion[iion].pressure_fast_perpendicular = np.asarray([np.nan]*nrho)
+        core_profiles.profiles_1d[0].ion[iion].pressure_fast_perpendicular = asarray([nan]*nrho)
 
 if len(core_profiles.profiles_1d[0].electrons.pressure) < 1:
     print('core_profiles.profiles_1d[0].electrons.pressure could not be read', file=sys.stderr)
-    core_profiles.profiles_1d[0].electrons.pressure = np.asarray([np.nan]*nrho)
+    core_profiles.profiles_1d[0].electrons.pressure = asarray([nan]*nrho)
 
 if len(core_profiles.profiles_1d[0].electrons.pressure_thermal) < 1:
     print('core_profiles.profiles_1d[0].electrons.pressure_thermal could not be read', file=sys.stderr)
-    core_profiles.profiles_1d[0].electrons.pressure_thermal = np.asarray([np.nan]*nrho)
+    core_profiles.profiles_1d[0].electrons.pressure_thermal = asarray([nan]*nrho)
 
 if len(core_profiles.profiles_1d[0].electrons.pressure_fast_parallel) < 1:
     print('core_profiles.profiles_1d[0].electrons.pressure_fast_parallel could not be read', file=sys.stderr)
-    core_profiles.profiles_1d[0].electrons.pressure_fast_parallel = np.asarray([np.nan]*nrho)
+    core_profiles.profiles_1d[0].electrons.pressure_fast_parallel = asarray([nan]*nrho)
 
 if len(core_profiles.profiles_1d[0].electrons.pressure_fast_perpendicular) < 1:
     print('core_profiles.profiles_1d[0].electrons.pressure_fast_perpendicular could not be read', file=sys.stderr)
-    core_profiles.profiles_1d[0].electrons.pressure_fast_perpendicular = np.asarray([np.nan]*nrho)
+    core_profiles.profiles_1d[0].electrons.pressure_fast_perpendicular = asarray([nan]*nrho)
 
 if len(core_profiles.profiles_1d[0].pressure_thermal) < 1:
     print('core_profiles.profiles_1d[0].pressure_thermal could not be read', file=sys.stderr)
-    core_profiles.profiles_1d[0].pressure_thermal = np.asarray([np.nan]*nrho)
+    core_profiles.profiles_1d[0].pressure_thermal = asarray([nan]*nrho)
 
 if len(core_profiles.profiles_1d[0].pressure_parallel) < 1:
     print('core_profiles.profiles_1d[0].pressure_parallel could not be read', file=sys.stderr)
-    core_profiles.profiles_1d[0].pressure_parallel = np.asarray([np.nan]*nrho)
+    core_profiles.profiles_1d[0].pressure_parallel = asarray([nan]*nrho)
 
 if len(core_profiles.profiles_1d[0].pressure_perpendicular) < 1:
     print('core_profiles.profiles_1d[0].pressure_perpendicular could not be read', file=sys.stderr)
-    core_profiles.profiles_1d[0].pressure_perpendicular = np.asarray([np.nan]*nrho)
+    core_profiles.profiles_1d[0].pressure_perpendicular = asarray([nan]*nrho)
 
 # ----------------------------------------------------------------------------------------
 
@@ -220,7 +220,7 @@ else:
             pressure_ion_total = pressure_ion_total + core_profiles.profiles_1d[0].ion[iion].pressure
     else:
         print('core_profiles.profiles_1d[0].ion[0].pressure could not be read', file=sys.stderr)
-        pressure_ion_total = np.asarray([np.nan]*nrho)
+        pressure_ion_total = asarray([nan]*nrho)
 
 pressure_ion_thermal            = 0.
 pressure_ion_fast_parallel      = 0.
@@ -311,9 +311,9 @@ def time_display(plot,time):
 # ----------------------------------------------------------------------
 
 # Minima and maxima calculations for plots
-max_tot = max(np.nan_to_num(max(pressure_total[0:nrho-1])),np.nan_to_num(max(pressure_thermal[0:nrho-1])),np.nan_to_num(max(pressure_parallel[0:nrho-1])),np.nan_to_num(max(pressure_perpendicular[0:nrho-1])))
-max_ion = max(np.nan_to_num(max(pressure_ion_thermal[0:nrho-1])),np.nan_to_num(max(pressure_ion_fast_parallel[0:nrho-1])),np.nan_to_num(max(pressure_ion_fast_perpendicular[0:nrho-1])))
-max_el  = max(np.nan_to_num(max(pressure_electron_total[0:nrho-1])),np.nan_to_num(max(pressure_electron_thermal[0:nrho-1])),np.nan_to_num(max(pressure_electron_fast_parallel[0:nrho-1])),np.nan_to_num(max(pressure_electron_fast_perpendicular[0:nrho-1])))
+max_tot = max(nan_to_num(max(pressure_total[0:nrho-1])),nan_to_num(max(pressure_thermal[0:nrho-1])),nan_to_num(max(pressure_parallel[0:nrho-1])),nan_to_num(max(pressure_perpendicular[0:nrho-1])))
+max_ion = max(nan_to_num(max(pressure_ion_thermal[0:nrho-1])),nan_to_num(max(pressure_ion_fast_parallel[0:nrho-1])),nan_to_num(max(pressure_ion_fast_perpendicular[0:nrho-1])))
+max_el  = max(nan_to_num(max(pressure_electron_total[0:nrho-1])),nan_to_num(max(pressure_electron_thermal[0:nrho-1])),nan_to_num(max(pressure_electron_fast_parallel[0:nrho-1])),nan_to_num(max(pressure_electron_fast_perpendicular[0:nrho-1])))
 
 max_tot = max_tot * 1.1
 max_ion = max_ion * 1.1
