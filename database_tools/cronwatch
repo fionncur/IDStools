@@ -1,0 +1,3 @@
+* * * * * /work/imas/extra/bin/watch_bash_script
+0 8 * * * `mail -s "Daily crontab mail" mireille.schneider@iter.org <<< 'Mireille, the cronjob to monitor the IMAS DB is still active!'`
+

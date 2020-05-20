@@ -1,0 +1,697 @@
+#!/usr/bin/env python
+from __future__ import print_function
+
+import argparse, imas, pdb
+import init_mendeleiev as mend
+import numpy as np
+import sys
+from os import system,getenv
+from sys import exit
+
+# ----------------------------------------------------------------------
+
+# Management of input arguments
+parser = argparse.ArgumentParser(description=\
+	 '---- Auto-generated yaml scenario and watcher files (!!! STILL TO BE COMPLETED BY HAND !!!)')
+parser.add_argument('-u','--user_or_path',help='User or path name of the DB where the data-entry is located', required=False)
+parser.add_argument('-d','--database',help='Database name of the DB where the data-entry is located', required=False)
+parser.add_argument('-s','--shot',help='shot number', required=True,type=int)
+parser.add_argument('-r','--run',help='run number',required=True,type=int)
+args = vars(parser.parse_args())
+shot = args["shot"]
+run  = args["run"]
+
+# User or path name
+if args['user_or_path'] != None:
+	user_or_path = args["user_or_path"]
+else:
+	user_or_path = 'public'
+
+# Database name
+if args['database'] != None:
+	database = args["database"]
+else:
+	database = 'iterdb'
+
+# Open the database and read the necessary IDSs
+try:
+    version = getenv('IMAS_VERSION')[0]
+    input = imas.ids(shot,run)
+    input.open_env(str(user_or_path),str(database),version)
+except:
+    print('Shot ' + str(shot) + ', run ' + str(run) + ' does not exist', file=sys.stderr)
+    print('----> Aborted.', file=sys.stderr)
+    exit()
+
+# Read necessary IDSs from database
+try:
+    #input.core_profiles.get()
+    core_profiles = input.core_profiles
+    core_profiles.ids_properties = input.core_profiles.partialGet('ids_properties')
+    if core_profiles.ids_properties.homogeneous_time != -999999999:
+      core_present = 1
+    else:
+      core_present = 0
+except:
+    print("The core_profiles IDS is absent from the input data-entry", file=sys.stdout)
+    core_present = 0
+
+try:
+    #input.edge_profiles.get()
+    edge_profiles = input.edge_profiles
+    edge_profiles.ids_properties = input.edge_profiles.partialGet('ids_properties')
+    if edge_profiles.ids_properties.homogeneous_time != -999999999:
+        edge_present = 1
+    else:
+        edge_present = 0
+except:
+    print("The edge_profiles IDS is absent from the input data-entry", file=sys.stdout)
+    print("Only core data will be used", file=sys.stdout)
+    edge_present = 0
+
+try:
+    input.summary.get()
+    summary = input.summary
+except:
+    print("The summary IDS is absent from the input data-entry", file=sys.stdout)
+    print("----> H&CD waveforms not filled (to be completed by hand)", file=sys.stdout)
+
+if core_present==1:
+    try:
+        ne0 = input.core_profiles.partialGet('profiles_1d(:)/electrons/density(0)')
+        central_electron_density = 0
+        for islice in range(len(ne0)):
+            if ne0[islice] > central_electron_density:
+                central_electron_density = ne0[islice]
+                the_slice = islice
+    except:
+       print("core_profiles.profiles_1d[:].electrons.density[0] could not be read", file=sys.stderr)
+       print("----> Aborted.", file=sys.stderr)
+       exit()
+    core_profiles.profiles_1d.resize(1)
+    core_profiles.profiles_1d[0] = input.core_profiles.partialGet('profiles_1d('+str(the_slice)+')')
+
+if edge_present==1:
+    try:
+        ne_sep = input.summary.local.separatrix.n_e.value
+        sepmid_electron_density = 0
+        for islice in range(len(ne_sep)):
+            if ne_sep[islice] > sepmid_electron_density:
+                sepmid_electron_density = ne_sep[islice]
+                the_slice = islice
+    except:
+       print("summary.local.separatrix.n_e.value could not be read", file=sys.stderr)
+       if core_present==1:
+          print("Only the core electron density will be provided", file=sys.stderr)
+       else:
+          print("----> Aborted.", file=sys.stderr)
+          exit()
+
+try:
+    #input.equilibrium.get()
+    equilibrium = input.equilibrium
+    equilibrium.ids_properties = input.equilibrium.partialGet('ids_properties')
+    if equilibrium.ids_properties.homogeneous_time != -999999999:
+       eq_present = 1
+    else:
+       eq_present = 0
+    if eq_present == 1:
+       equilibrium.vacuum_toroidal_field = input.equilibrium.partialGet('vacuum_toroidal_field')
+       equilibrium.time_slice.resize(1)
+       equilibrium.time_slice[0]         = input.equilibrium.partialGet('time_slice('+str(the_slice)+')')
+except:
+    print("The equilibrium IDS is absent from the input data-entry", file=sys.stdout)
+    eq_present = 0
+
+try:
+    input.dataset_description.get()
+    dataset_description = input.dataset_description
+    comment = str.replace(dataset_description.ids_properties.comment,'\n','\n   ')
+    dd_version = dataset_description.dd_version
+except:
+    print("----> dataset_description does not exist", file=sys.stderr)
+    comment = ''
+    dd_version = ''
+
+try:
+    #input.edge_transport.get()
+    edge_transport = input.edge_transport
+    edge_transport.ids_properties = input.edge_transport.partialGet('ids_properties')
+    if edge_transport.ids_properties.homogeneous_time != -999999999:
+        flux_present = 1
+    else:
+        flux_present = 0
+    if flux_present == 1:
+        edge_transport.model.resize(1)
+        edge_transport.model[0].ggd.resize(1)
+        edge_transport.model[0].ggd[0] = input.edge_transport.partialGet('model(0)/ggd('+str(the_slice)+')')
+        edge_transport.grid_ggd.resize(1)
+        edge_transport.grid_ggd[0] = input.edge_transport.partialGet('grid_ggd('+str(the_slice)+')')
+except:
+    print("The edge_transport IDS is absent from the input data-entry", file=sys.stdout)
+    print("----> P_SOL information not filled (to be completed by hand)", file=sys.stdout)
+    flux_present = 0
+
+if core_present == 0 and edge_present == 0:
+    print("No profile data present", file=sys.stderr)
+    print("----> Aborted.", file=sys.stderr)
+    exit()
+
+if eq_present == 0 and core_present == 1:
+    print("No equilibrium IDS to go with core data", file=sys.stderr)
+    print("----> Aborted.", file=sys.stderr)
+    exit()
+
+# Mendeleiev table
+table_mendeleiev = mend.create_table_mendeleiev()
+
+# Fill the variables necessary to complete the yaml description file
+if eq_present == 1:
+   try:
+      if min(np.sign(equilibrium.vacuum_toroidal_field.b0)) < 0:
+         magnetic_field = min(equilibrium.vacuum_toroidal_field.b0)
+      else:
+         magnetic_field = max(equilibrium.vacuum_toroidal_field.b0)
+   except:
+      print("equilibrium.vacuum_toroidal_field.b0 could not be read", file=sys.stderr)
+      print("----> Aborted.", file=sys.stderr)
+      exit()
+else:
+   try:
+      if min(np.sign(summary.global_quantities.b0.value)) < 0:
+         magnetic_field = min(summary.global_quantities.b0.value)
+      else:
+         magnetic_field = max(summary.global_quantities.b0.value)
+   except:
+      print("summary.global_quantities.b0.value[:] could not be read", file=sys.stderr)
+      print("----> Aborted.", file=sys.stderr)
+      exit()
+
+if eq_present==1:
+   try:
+      plasma_current = 0
+      ip = input.equilibrium.partialGet('time_slice(:)/global_quantities/ip')
+      for islice in range(len(ip)):
+        if abs(ip[islice]) > plasma_current:
+          plasma_current = ip[islice]*1.e-6
+   except:
+      print("equilibrium.time_slice[:].global_quantities.ip could not be read", file=sys.stderr)
+      print("----> Aborted.", file=sys.stderr)
+      exit()
+else:
+   try:
+      plasma_current = 0
+      for islice in range(len(summary.time)):
+        if abs(summary.global_quantities.ip.value[islice])*1.e-6 > plasma_current:
+          plasma_current = summary.global_quantities.ip.value[islice]*1.e-6
+   except:
+      print("summary.global_quantities.ip could not be read", file=sys.stderr)
+      print("----> Aborted.", file=sys.stderr)
+      exit()
+
+if core_present==1:
+   try:
+      nspecies = len(core_profiles.profiles_1d[0].ion)
+      a = [0] * nspecies
+      for ispecies in range(nspecies):
+         a[ispecies] = int(core_profiles.profiles_1d[0].ion[ispecies].element[0].a)
+   except:
+      print("core_profiles.profiles_1d[:].ion[0].element[0].a could not be read", file=sys.stderr)
+      nspecies = 0
+      a = [0]
+else:
+    try:
+       edge_profiles = input.edge_profiles
+       edge_profiles.ggd.resize(1)
+       #pdb.set_trace()
+       #edge_profiles.ggd[0].ion = input.edge_profiles.partialGet('ggd('+str(the_slice)+')/ion')
+       edge_profiles.ggd[0] = input.edge_profiles.partialGet('ggd('+str(the_slice)+')')
+       nspecies = len(edge_profiles.ggd[0].ion)
+       a = [0] * nspecies
+       for ispecies in range(nspecies):
+          a[ispecies] = int(edge_profiles.ggd[0].ion[ispecies].element[0].a)
+    except:
+       print("edge_profiles.ggd[:].ion[:].element[0].a could not be read", file=sys.stderr)
+       nspecies = 0
+       a = [0]
+
+if core_present==1:
+   try:
+      nspecies = len(core_profiles.profiles_1d[0].ion)
+      z = [0] * nspecies
+      for ispecies in range(nspecies):
+         z[ispecies] = int(core_profiles.profiles_1d[0].ion[ispecies].element[0].z_n)
+   except:
+      print("core_profiles.profiles_1d[:].ion[0].element[0].z_n could not be read", file=sys.stderr)
+      nspecies = 0
+      z = [0]
+else:
+   try:
+      nspecies = len(edge_profiles.ggd[0].ion)
+      z = [0] * nspecies
+      for ispecies in range(nspecies):
+         z[ispecies] = int(edge_profiles.ggd[0].ion[ispecies].element[0].z_n)
+   except:
+      print("edge_profiles.ggd[:].ion[:].element[0].z_n could not be read", file=sys.stderr)
+      nspecies = 0
+      z = [0]
+
+if core_present == 1:
+   try:
+      volume = core_profiles.profiles_1d[0].grid.volume
+      if len(volume) == 0:
+          try:
+             equilibrium = input.equilibrium
+          except:
+             exit()
+          volume = equilibrium.time_slice[0].profiles_1d.volume
+          if len(volume) == len(core_profiles.profiles_1d[0].electrons.density):
+             print("core_profiles.profiles_1d[:].grid.volume could not be read", file=sys.stderr)
+             print("----> equilibrium.time_slice[:].profiles_1d.volume used instead", file=sys.stderr)
+             print("(possible because the resolution is the same, but maybe not correct)", file=sys.stderr)
+          else:
+             exit()
+   except:
+      print("core_profiles.profiles_1d[:].grid.volume could not be read", file=sys.stderr)
+      print("----> Aborted.", file=sys.stderr)
+      exit()
+
+   try:
+      central_zeff = core_profiles.profiles_1d[0].zeff[0]
+   except:
+      print("core_profiles.profiles_1d[:].zeff[0] could not be read", file=sys.stderr)
+      print("----> Aborted.", file=sys.stderr)
+      exit()
+
+sepmid_zeff = 0
+if edge_present == 1:
+   try:
+      sepmid_zeff = summary.local.separatrix.zeff.value[the_slice]
+   except:
+      print("summary.local.separatrix.zeff.value[:] could not be read", file=sys.stderr)
+      if core_present == 1:
+         print("Only the core Zeff value will be provided", file=sys.stderr)
+      else:
+         print("----> Aborted.", file=sys.stderr)
+         exit()
+
+# H&CD quantities from summary IDS
+confinement_regime = "tbd"
+if len(summary.time)==0:
+    print("--------------------------------------------------------", file=sys.stdout)
+    print("The summary IDS is absent from the input data-entry", file=sys.stdout)
+    print("----> H&CD waveforms not filled: to be completed by hand", file=sys.stdout)
+    print("--------------------------------------------------------", file=sys.stdout)
+    p_ec  = "tbd"
+    p_ic  = "tbd"
+    p_nbi = "tbd"
+    p_lh  = "tbd"
+    p_hcd = "tbd"
+else:
+    p_ec  = 0
+    p_ic  = 0
+    p_nbi = 0
+    p_lh  = 0
+    n_ec  = len(summary.heating_current_drive.ec)
+    n_ic  = len(summary.heating_current_drive.ic)
+    n_nbi = len(summary.heating_current_drive.nbi)
+    n_lh  = len(summary.heating_current_drive.lh)
+    if n_ec > 0:
+        for isource in range(n_ec):
+            if len(summary.heating_current_drive.ec[isource].power.value) > 0:
+                p_ec = p_ec + max(summary.heating_current_drive.ec[isource].power.value)*1.e-6
+    if n_ic > 0:
+        for isource in range(n_ic):
+            if len(summary.heating_current_drive.ic[isource].power.value) > 0:
+                p_ic = p_ic + max(summary.heating_current_drive.ic[isource].power.value)*1.e-6
+    if n_nbi > 0:
+        for isource in range(n_nbi):
+            if len(summary.heating_current_drive.nbi[isource].power.value) > 0:
+                p_nbi = p_nbi + max(summary.heating_current_drive.nbi[isource].power.value)*1.e-6
+    if n_lh > 0:
+        for isource in range(n_lh):
+            if len(summary.heating_current_drive.lh[isource].power.value) > 0:
+                p_lh = p_lh + max(summary.heating_current_drive.lh[isource].power.value)*1.e-6
+    p_hcd = p_ec + p_ic + p_nbi + p_lh
+
+    # Detect L-H and H-L transitions
+    if len(summary.global_quantities.h_mode.value) > 0:
+	    foo = ''
+	    nt = len(summary.global_quantities.h_mode.value)
+	    for it in range(nt):
+		    if summary.global_quantities.h_mode.value[it]==1:
+			    foo = foo+'H'
+		    else:
+			    foo = foo+'L'
+	    confinement_regime = ''.join([foo[i]+'-' for i in range(len(foo)-1) if foo[i+1]!= foo[i]]+[foo[-1]])
+	    if len(confinement_regime)>5:
+		    confinement_regime = confinement_regime[0:5]
+	    if len(confinement_regime)==1:
+		    confinement_regime = confinement_regime+'-mode'
+
+if flux_present == 0 :
+    p_sol = "tbd"
+else:
+    # grid subset with identifier index 26 is the core-sol boundary
+    p_sol = 0
+    p_sol_e = 0
+    p_sol_i = 0
+    nsubsets = len(edge_transport.model[0].ggd[0].electrons.energy.flux)
+    for iset in range(nsubsets):
+       if edge_transport.model[0].ggd[0].electrons.energy.flux[iset].grid_subset_index == 26:
+          for iFace in range(len(edge_transport.model[0].ggd[0].electrons.energy.flux[iset].values)):
+             faceindex = edge_transport.grid_ggd[0].grid_subset[iset].element[iFace].object[0].index
+             area = edge_transport.grid_ggd[0].space[0].objects_per_dimension[1].object[faceindex-1].measure
+             flux = edge_transport.model[0].ggd[0].electrons.energy.flux[iset].values[iFace]
+             p_sol_e = p_sol_e + flux*area
+             try:
+                flux = edge_transport.model[0].ggd[0].total_ion_energy.flux[iset].values[iFace]
+             except:
+                flux = 0
+                for ispecies in range(nspecies):
+                   flux = flux + edge_transport.model[0].ggd[0].ion[ispecies].energy.flux[iset].values[iFace]
+             p_sol_i = p_sol_i + flux*area
+          p_sol = (p_sol_e + p_sol_i)*1.e-6
+
+if nspecies > 0:
+
+    # Plasma composition
+    species = []
+    for ispecies in range(nspecies):
+        species.append(table_mendeleiev[z[ispecies]][a[ispecies]].element)
+
+    # Species concentrations
+    ntot = 0
+    species_done = [0] * 14
+    species_density = [0] * nspecies
+    max_density = -999.
+    for ispecies in range(nspecies):
+        if core_present == 1:
+            species_density[ispecies] = sum(volume*core_profiles.profiles_1d[0].ion[ispecies].density)
+        elif edge_present == 1:
+            if z[ispecies] == 1:
+               if a[ispecies] == 1:
+                  if species_done[0] == 0:
+                     species_density[ispecies] = summary.local.separatrix.n_i.hydrogen.value[the_slice]
+                     species_done[0] = 1
+               elif a[ispecies] == 2:
+                  if species_done[1] == 0:
+                     species_density[ispecies] = summary.local.separatrix.n_i.deuterium.value[the_slice]
+                     species_done[1] = 1
+               elif a[ispecies] == 3:
+                  if species_done[2] == 0:
+                     species_density[ispecies] = summary.local.separatrix.n_i.tritium.value[the_slice]
+                     species_done[2] = 1
+            elif z[ispecies] == 2:
+               if a[ispecies] == 3:
+                  if species_done[3] == 0:
+                     species_density[ispecies] = summary.local.separatrix.n_i.helium_3.value[the_slice]
+                     species_done[3] = 1
+               elif a[ispecies] == 4:
+                  if species_done[4] == 0:
+                     species_density[ispecies] = summary.local.separatrix.n_i.helium_4.value[the_slice]
+                     species_done[4] = 1
+            elif z[ispecies] == 3:
+               if species_done[5] == 0:
+                  species_density[ispecies] = summary.local.separatrix.n_i.lithium.value[the_slice]
+                  species_done[5] = 1
+            elif z[ispecies] == 4:
+               if species_done[6] == 0:
+                  species_density[ispecies] = summary.local.separatrix.n_i.beryllium.value[the_slice]
+                  species_done[6] = 1
+            elif z[ispecies] == 6:
+               if species_done[7] == 0:
+                  species_density[ispecies] = summary.local.separatrix.n_i.carbon.value[the_slice]
+                  species_done[7] = 1
+            elif z[ispecies] == 7:
+               if species_done[8] == 0:
+                  species_density[ispecies] = summary.local.separatrix.n_i.nitrogen.value[the_slice]
+                  species_done[8] = 1
+            elif z[ispecies] == 8:
+               if species_done[9] == 0:
+                  species_density[ispecies] = summary.local.separatrix.n_i.oxygen.value[the_slice]
+                  species_done[9] = 1
+            elif z[ispecies] == 10:
+               if species_done[10] == 0:
+                  species_density[ispecies] = summary.local.separatrix.n_i.neon.value[the_slice]
+                  species_done[10] = 1
+            elif z[ispecies] == 18:
+               if species_done[11] == 0:
+                  species_density[ispecies] = summary.local.separatrix.n_i.argon.value[the_slice]
+                  species_done[11] = 1
+            elif z[ispecies] == 54:
+               if species_done[12] == 0:
+                  species_density[ispecies] = summary.local.separatrix.n_i.xenon.value[the_slice]
+                  species_done[12] = 1
+            elif z[ispecies] == 74:
+               if species_done[13] == 0:
+                  species_density[ispecies] = summary.local.separatrix.n_i.tungsten.value[the_slice]
+                  species_done[13] = 1
+        ntot = ntot + species_density[ispecies]
+        if species_density[ispecies] > max_density:
+            max_density = species_density[ispecies]
+            imax = ispecies
+
+    if core_present == 1:
+        ne = sum(volume*core_profiles.profiles_1d[0].electrons.density)
+    elif edge_present == 1:
+        ne = summary.local.separatrix.n_e.value[the_slice]
+
+    nspec_over_ntot = [0] * nspecies
+    nspec_over_ne = [0] * nspecies
+    nspec_over_nmaj = [0] * nspecies
+    for ispecies in range(nspecies):
+        nspec_over_ntot[ispecies] = species_density[ispecies]/ntot
+        nspec_over_ne[ispecies]   = species_density[ispecies]/ne
+        nspec_over_nmaj[ispecies] = species_density[ispecies]/species_density[imax]
+
+    # When a species appears twice: combine
+    for ispecies in range(nspecies):
+       for jspecies in range(nspecies):
+          if (species[jspecies] == species[ispecies]) & (jspecies != ispecies):
+             nspec_over_ntot[ispecies] = nspec_over_ntot[ispecies] + nspec_over_ntot[jspecies]
+             nspec_over_ntot[jspecies] = 0
+             nspec_over_ne[ispecies] = nspec_over_ne[ispecies] + nspec_over_ne[jspecies]
+             nspec_over_ne[jspecies] = 0
+             nspec_over_nmaj[ispecies] = nspec_over_nmaj[ispecies] + nspec_over_nmaj[jspecies]
+             nspec_over_nmaj[jspecies] = 0
+
+    # Nice display of plasma composition with species concentrations
+    disp_species         = '   species:      '
+    disp_a               = '   a:            '
+    disp_z               = '   z:            '
+    disp_nspec_over_ntot = '   n_over_ntot:  '
+    disp_nspec_over_ne   = '   n_over_ne:    '
+    disp_nspec_over_nmaj = '   n_over_n_maj: '
+    main_species = ''
+    for ispecies in range(nspecies):
+        if nspec_over_ntot[ispecies] > 0.45:
+            if len(main_species) == 0:
+                main_species = main_species + species[ispecies]
+            else:
+                main_species = main_species + "-" + species[ispecies]
+        if nspec_over_ne[ispecies] > 0.:
+            tabsize = 10
+            disp_species = disp_species + species[ispecies] + " " * (tabsize-len(species[ispecies]))
+            disp_a = disp_a + format("%.1f" % a[ispecies]) + " " * (tabsize-len(format("%.1f" % a[ispecies])))
+            disp_z = disp_z + format("%.1f" % z[ispecies]) + " " * (tabsize-len(format("%.1f" % z[ispecies])))
+            if nspec_over_ntot[ispecies] < 1.e-2:
+               disp_nspec_over_ntot = disp_nspec_over_ntot + format("%.2e" % nspec_over_ntot[ispecies]) + " " * (tabsize-len(format("%.2e" % nspec_over_ntot[ispecies])))
+            else:
+               disp_nspec_over_ntot = disp_nspec_over_ntot + format("%.3f" % nspec_over_ntot[ispecies]) + " " * (tabsize-len(format("%.3f" % nspec_over_ntot[ispecies])))
+            if nspec_over_ne[ispecies] < 1.e-2:
+               disp_nspec_over_ne   = disp_nspec_over_ne   + format("%.2e" % nspec_over_ne[ispecies])   + " " * (tabsize-len(format("%.2e" % nspec_over_ne[ispecies])))
+            else:
+               disp_nspec_over_ne   = disp_nspec_over_ne   + format("%.3f" % nspec_over_ne[ispecies])   + " " * (tabsize-len(format("%.3f" % nspec_over_ne[ispecies])))
+            if nspec_over_nmaj[ispecies] < 1.e-2:
+               disp_nspec_over_nmaj = disp_nspec_over_nmaj + format("%.2e" % nspec_over_nmaj[ispecies]) + " " * (tabsize-len(format("%.2e" % nspec_over_nmaj[ispecies])))
+            else:
+               disp_nspec_over_nmaj = disp_nspec_over_nmaj + format("%.3f" % nspec_over_nmaj[ispecies]) + " " * (tabsize-len(format("%.3f" % nspec_over_nmaj[ispecies])))
+    #print("   ---------------------------------------------------------------------")
+    #print(disp_species)
+    #print(disp_a)
+    #print(disp_z)
+    #print(disp_nspec_over_ntot)
+    #print(disp_nspec_over_ne)
+    #print(disp_nspec_over_nmaj)
+    #print("   ---------------------------------------------------------------------")
+
+else:
+    main_species = "tbd"
+
+# Misc
+workflow = "tbd"
+type     = "tbd"
+
+# Set up the name of the yaml file
+add0 = ""
+add0_length = 4-len(str(run))
+for i in range(add0_length):
+    add0 = add0+"0"
+
+filename = "ids_"+str(shot)+add0+str(run)+".yaml"
+
+# Go for it: fill the yaml file
+f = open(filename, 'w')
+f.write("""# ------------------------------------------------------------------\n""")
+f.write("""# Status is "draft" when auto-generated by the create_yam function,\n""")
+f.write("""# to be changed to "active" once simulation and yaml files are ready\n""")
+f.write("""# to be changed to "obsolete" if the simulation becomes obsolete\n""")
+f.write("""# ------------------------------------------------------------------\n""")
+f.write("""status: \n""")
+f.write("""    draft\n""")
+f.write("""\n""")
+f.write("""# -----------------------------------------------\n""")
+f.write("""# Reference name describing the simulation\n""")
+f.write("""# -----------------------------------------------\n""")
+f.write("""reference_name:\n""")
+f.write("""    tbd\n""")
+f.write("""\n""")
+f.write("""# ---------------------------------------------------------\n""")
+f.write("""# Responsible officer name(s), can be separated by commas\n""")
+f.write("""# ---------------------------------------------------------\n""")
+f.write("""responsible_name:\n""")
+f.write("""    tbd\n""")
+f.write("""\n""")
+f.write("""# ------------------------------------------------------------------\n""")
+f.write("""# Shot number, run numbers, type, code, database attributes\n""")
+f.write("""# Type: interpretative, predictive, experiment\n""")
+f.write("""# Code: code name in case of simulation, 0 in case of experiment\n""")
+f.write("""# Machine: database name\n""")
+f.write("""# ------------------------------------------------------------------\n""")
+f.write("""characteristics:\n""")
+f.write("""    shot: %i\n""" % shot)
+f.write("""    run: %i\n""" % run)
+f.write("""    type: %s\n""" % type)
+f.write("""    workflow: %s\n""" % workflow)
+f.write("""    machine: %s\n""" % database.upper())
+f.write("""\n""")
+f.write("""# ------------------------------------------------------------------\n""")
+f.write("""# Relations to other entries in this database (if any)\n""")
+f.write("""# referred to by (shot,run) pairs\n""")
+f.write("""# ------------------------------------------------------------------\n""")
+f.write("""database_relations:\n""")
+f.write("""    replaces: \n""" )
+f.write("""    replaced_by: \n""")
+f.write("""\n""")
+f.write("""# --------------------------------------------------\n""")
+f.write("""# Machine description or specific configuration\n""")
+f.write("""# (scenario keys can be completed here if relevant)\n""")
+f.write("""# Units are [T], [-], [MA], [m-3] respectively\n""")
+f.write("""# --------------------------------------------------\n""")
+f.write("""scenario_key_parameters:\n""")
+f.write("""    confinement_regime: %s\n""" % confinement_regime)
+f.write("""    magnetic_field: %.2f\n""" % magnetic_field)
+f.write("""    main_species: %s\n""" % main_species)
+f.write("""    plasma_current: %.2f \n""" % plasma_current)
+if core_present == 1:
+    f.write("""    central_electron_density: %.2e\n""" % central_electron_density)
+    f.write("""    central_zeff: %.2f\n""" % central_zeff)
+else:
+    f.write("""    central_electron_density: tbd\n""")
+    f.write("""    central_zeff: tbd\n""")
+f.write("""    density_peaking: tbd\n""")
+if edge_present == 1:
+    if sepmid_electron_density == 0:
+       f.write("""    sepmid_electron_density: tbd\n""")
+    else:
+       f.write("""    sepmid_electron_density: %.2e\n""" % sepmid_electron_density)
+    if sepmid_zeff == 0:
+       f.write("""    sepmid_zeff: tbd\n""")
+    else:
+       f.write("""    sepmid_zeff: %.2f\n""" % sepmid_zeff)
+else:
+    f.write("""    sepmid_electron_density: tbd\n""")
+    f.write("""    sepmid_zeff: tbd\n""")
+
+f.write("""\n""")
+f.write("""# ---------------------------------------------------------------------\n""")
+f.write("""# Nominal power of H&CD systems [MW]\n""")
+f.write("""# (initially filled with max values, adjust by hand if necessary)\n""")
+f.write("""# ---------------------------------------------------------------------\n""")
+f.write("""hcd:\n""")
+if len(summary.time)==0:
+    f.write("""    p_hcd: tbd\n""")
+    f.write("""    p_ec:  tbd\n""")
+    f.write("""    p_ic:  tbd\n""")
+    f.write("""    p_nbi: tbd\n""")
+    f.write("""    p_lh:  tbd\n""")
+else:
+    f.write("""    p_hcd: %.2f\n""" % p_hcd)
+    f.write("""    p_ec:  %.2f\n""" % p_ec)
+    f.write("""    p_ic:  %.2f\n""" % p_ic)
+    f.write("""    p_nbi: %.2f\n""" % p_nbi)
+    f.write("""    p_lh:  %.2f\n""" % p_lh)
+if flux_present == 1:
+    f.write("""    p_sol: %.2f\n""" % p_sol)
+else:
+    f.write("""    p_sol: tbd\n""")
+f.write("""\n""")
+f.write("""# ---------------------------------------------------------\n""")
+if core_present == 1:
+    f.write("""# Plasma composition as deduced from the core_profiles IDS\n""")
+elif edge_present == 1:
+    f.write("""# Plasma composition as deduced from the edge_profiles IDS\n""")
+f.write("""# ---------------------------------------------------------\n""")
+f.write("""plasma_composition:\n""")
+if nspecies > 0:
+    f.write(disp_species+"\n")
+    f.write(disp_a+"\n")
+    f.write(disp_z+"\n")
+    f.write(disp_nspec_over_ntot+"\n")
+    f.write(disp_nspec_over_ne+"\n")
+    f.write(disp_nspec_over_nmaj+"\n")
+    f.write("""\n""")
+else:
+    f.write("""   species:      tbd\n""")
+    f.write("""   a:            tbd\n""")
+    f.write("""   z:            tbd\n""")
+    f.write("""   n_over_ntot:  tbd\n""")
+    f.write("""   n_over_ne:    tbd\n""")
+    f.write("""   n_over_n_maj: tbd\n""")
+    f.write("""\n""")
+f.write("""# --------------------\n""")
+f.write("""# Content description\n""")
+f.write("""# --------------------\n""")
+# Vertical bar is necessary here to deal with long lines in free description
+f.write("""free_description: |\n""")
+f.write("   "+comment+"\n")
+f.write("   DD version: "+dd_version+"\n")
+#f.write("""    - H-mode or L-mode or whatever\n""")
+#f.write("""    - Density:           ne = ??% nGW, peaking assumptions...\n""")
+#f.write("""                         for edge data: midplane separatrix\n""")
+#f.write("""    - Confinement:       transport model or scaling law that have been used...\n""")
+#f.write("""    - Pedestal:          pedestal assumptions....\n""")
+#f.write("""    - L-H transition:    scaling laws that have been used\n""")
+f.write("""\n""")
+f.write("""# ------------------------------------------------------------------------------\n""")
+f.write("""# List of filled IDSs with time quantities in seconds (start, end, step)\n""")
+f.write("""# It should be the output of the "ids_content" script, adapted from\n""")
+f.write("""# listidss, see IMAS-1010 (note: the data-entry has to be copied to a personal\n""")
+f.write("""# database for the script to work, see the example below):\n""")
+f.write("""#  ids_content -u schneim -d test -s 4321 -r 1\n""")
+f.write("""# ------------------------------------------------------------------------------\n""")
+f.write("""idslist:\n""")
+f.close()
+
+# Complete the yaml file with the output of ids_content
+system('ids_content -u ' + str(user_or_path) + ' -d ' + str(database) \
+          + ' -s ' + str(shot) + ' -r ' + str(run) + ' >> ' + filename)
+
+print("----> " + filename + " created.", file=sys.stdout)
+
+# Associated WATCHER file
+filename = "ids_"+str(shot)+add0+str(run)+".watcher"
+f = open(filename, 'w')
+if 1 == 1: # Done for alignment
+   f.write("""----------------------------------------------------------------------------------\n""")
+   f.write(""" Firstname		Name			E-mail\n""")
+   f.write("""----------------------------------------------------------------------------------\n""")
+if core_present == 1:
+   f.write(""" Mireille			Schneider		mireille.schneider@iter.org\n""")
+if edge_present == 1:
+   f.write(""" Xavier			Bonnin   		xavier.bonnin@iter.org\n""")
+f.close()
+print("----> " + filename + " created.", file=sys.stdout)
+
+
