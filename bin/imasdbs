@@ -24,7 +24,7 @@ def extended(str, wlen):
 def print_vector(vec, wlen):
     return ' '.join( [f"{str(x):>{wlen}s}" for x in vec] )
 
-def print_list(dbs, shotnum = None, compact = False):
+def print_list(dbs, shotnum = None, compact = False, timestamp = False):
     for dbname, dvs in dbs:
         printed_database = False
         for dv, dbbackends in dvs:
@@ -49,9 +49,16 @@ def print_list(dbs, shotnum = None, compact = False):
                     if compact:
                         print(TAB * 3 + "Shot " + extended(str(shot), SHOT_STR_LEN) \
                             + ": " + extended(str(len(runs)), RUNNUM_STR_LEN) + " runs")
+                        
+                    elif timestamp:
+                        print(TAB * 3 + "Shot " + extended(str(shot), SHOT_STR_LEN))
+                        runs.sort(reverse=True, key=lambda x: x[1])
+                        for r in runs:
+                            print(TAB * 3 + " "*(5+SHOT_STR_LEN)+" Runs: "+extended(str(r[0]),RUN_STR_LEN)+" ("+str(r[1])+")"
+
                     else:
                         print(TAB * 3 + "Shot " + extended(str(shot), SHOT_STR_LEN) \
-                            + " Runs: " + print_vector(runs, RUN_STR_LEN))
+                              + " Runs: " + print_vector([r[0] for r in runs], RUN_STR_LEN))
 
 def print_times(dbs, opts, printTimes = False, shotnum= None, runnum = None):
     import idstools.ids_tools as ct
@@ -70,7 +77,8 @@ def print_times(dbs, opts, printTimes = False, shotnum= None, runnum = None):
                             continue
 
                     printed_shot = False
-                    for run in runs:
+                    justruns = [r[0] for r in runs]              
+                    for run in justruns:
                         if runnum is not None:
                             if run != runnum:
                                 continue
@@ -136,6 +144,8 @@ p.add_option("-v", "--version", dest="version", default=None, help = "Show only 
 p.add_option("--backend", dest="backend", default=None, help = "Show databases written with given backend(s). \n\
 Comma-separated list of backends (Currently supported: mdsplus, hdf5). By default all backends are shown.")
 p.add_option("-c", "--compact", action="store_true", dest="compact", default=False, help = "Compact/reduced output")
+p.add_option("-M", "--lastModifiedDate", action="store_true", dest="timestamp", default=False, help = "Show (and sort per) date of last modification of the runs")
+
 
 opts, args = p.parse_args()
 
@@ -175,7 +185,7 @@ if not args or args[0] == "list" or args[0] == "slices" or args[0] == "times":
     elif args and args[0] == "times":
         print_times(dbs, opts, printTimes = True, shotnum = shotnum, runnum = runnum)
     else:
-        print_list(dbs, shotnum, opts.compact)
+        print_list(dbs, shotnum, opts.compact, opts.timestamp)
 
 elif args[0] == "tokamaks":
     print('Warning: "tokamaks" command is being deprecated and should be replaced by "databases"')

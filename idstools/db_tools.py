@@ -139,8 +139,9 @@ def list_databases(user=None, tokamak=None, dataversion=None, backends=None):
 
 def list_databases_mdsplus(user, tokamak, dataversion):
     """List all MDSPLUS databases for a given user, tokamak, dataversion."""
-    from os.path import join, split, isdir
+    from os.path import join, split, isdir, getmtime
     import fnmatch
+    from datetime import datetime
 
     mdsplusdir = join(get_user_db_directory(user), tokamak, dataversion)
     if not isdir(mdsplusdir):
@@ -158,7 +159,7 @@ def list_databases_mdsplus(user, tokamak, dataversion):
                 run = int(rundir) * 10000 + (num % 10000)
                 if shot not in dbs:
                     dbs[shot] = list()
-                dbs[shot].append(run)
+                dbs[shot].append((run,datetime.fromtimestamp(getmtime(get_dbfiles_mdsplus(user, tokamak, dataversion, shot, run)[1])).replace(microsecond=0)))
             except:
                  print("EXC: ", sys.exc_info(), file=sys.stderr)
                  logging.warn("Malformed MDSPlus database filename: " + join(root, filename))
@@ -186,8 +187,9 @@ def get_dbfiles_mdsplus(user, tokamak, dataversion, shot, run):
 
 def list_databases_hdf5(user, tokamak, dataversion):
     """List all HDF5 databases for a given user, tokamak, dataversion."""
-    from os.path import join, split, isdir
+    from os.path import join, split, isdir, getmtime
     import fnmatch
+    from datetime import datetime
 
     hdf5dir = join(get_user_db_directory(user), tokamak, dataversion)
     if not isdir(hdf5dir):
@@ -202,7 +204,7 @@ def list_databases_hdf5(user, tokamak, dataversion):
                 run = int(parts[2])
                 if shot not in dbs:
                     dbs[shot] = list()
-                dbs[shot].append(run)
+                dbs[shot].append((run,datetime.fromtimestamp(getmtime(get_dbfiles_hdf5(user, tokamak, dataversion, shot, run)[1])).replace(microsecond=0)))
             except:
                 logging.warn("Malformed HDF5 database filename: " + join(root, filename))
 
