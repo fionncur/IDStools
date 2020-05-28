@@ -170,14 +170,15 @@ def list_databases_mdsplus(user, tokamak, dataversion):
 def get_dbfiles_stem_mdsplus(user, tokamak, dataversion, shot, run):
     """Return the filename stem for the MDS+ database file with given parameters"""
     from os.path import join
-    mdsplusdir = join(get_user_db_directory(user), tokamak, dataversion, "mdsplus")
+    mdsplusdir = join(get_user_db_directory(user), tokamak, dataversion)
     # filename is ids_<shot><run> where run is last four digits of run number,
     # right-aligned (filled with zeros).
     # Examples: 1
     run_string = str(run % 10000)
-    if ( len(run_string) < 4 ):
-        run_string = (4 - len(run_string)) * "0" + run_string
-    stem = join(mdsplusdir, str(run / 10000), 'ids_' + str(shot) + run_string)
+    if (shot==0):
+        stem = join(mdsplusdir, str(int(run / 10000)), 'ids_' + run_string.zfill(3))
+    else:
+        stem = join(mdsplusdir, str(int(run / 10000)), 'ids_' + str(shot) + run_string.zfill(4))
     return stem
 
 def get_dbfiles_mdsplus(user, tokamak, dataversion, shot, run):
