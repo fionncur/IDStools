@@ -1,0 +1,34 @@
+#!/usr/bin/env python
+
+import os, argparse
+
+# Management of input arguments
+parser = argparse.ArgumentParser(description=\
+	 '---- Show full description file for a given simulation stored in ITER DB folder')
+parser.add_argument("-f","--folder",help=\
+                    "folder where to search for scenarios", required=False)
+parser.add_argument('-s','--shot',help='shot number', required=True,type=int)
+parser.add_argument('-r','--run',help='run number',required=True,type=int)
+args = vars(parser.parse_args())
+shot = args["shot"]
+run  = args["run"]
+
+# ------------------------------------------------------------------------------------------------------------
+
+# Set up the name of the yaml file
+add0 = ""
+add0_length = 4-len(str(run))
+for i in range(add0_length):
+    add0 = add0+"0"
+
+filename = "ids_"+str(shot)+add0+str(run)+".yaml"
+
+# Folder
+if args['folder'] != None:
+  folder = args['folder']
+  os.system('cat '+folder+'/'+filename)
+else:
+  folder = '/work/imas/shared/imasdb/ITER'
+  os.system('cat '+folder+'/3/0/'+filename)
+
+

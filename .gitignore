@@ -1,3 +1,8 @@
+# Files and directories to exclude from Git repository
+*~
+*.[oa]
+*.mod
+*.exe
+*.pyc
 module/*/
 build/
-*.pyc
