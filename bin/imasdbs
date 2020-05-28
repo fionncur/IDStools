@@ -54,8 +54,7 @@ def print_list(dbs, shotnum = None, compact = False, timestamp = False):
                         print(TAB * 3 + "Shot " + extended(str(shot), SHOT_STR_LEN))
                         runs.sort(reverse=True, key=lambda x: x[1])
                         for r in runs:
-                            print(TAB * 3 + " "*(5+SHOT_STR_LEN)+" Runs: "+extended(str(r[0]),RUN_STR_LEN)+" ("+str(r[1])+")"
-
+                            print(TAB * 3 + " "*(5+SHOT_STR_LEN)+" Runs: "+extended(str(r[0]),RUN_STR_LEN)+" ("+str(r[1])+")")
                     else:
                         print(TAB * 3 + "Shot " + extended(str(shot), SHOT_STR_LEN) \
                               + " Runs: " + print_vector([r[0] for r in runs], RUN_STR_LEN))
