@@ -3,6 +3,8 @@ from __future__ import print_function
 
 import imas,os,argparse
 
+# This script imports an equilibrium IDS, rigidly shifts it vertically, and then adds it to the output IDS
+
 # Management of input arguments
 parser = argparse.ArgumentParser(description=\
 	 '---- To copy an IDS from a data-entry to another one ----')
@@ -12,18 +14,17 @@ parser.add_argument('-so','--shot_output',help='Output shot number', required=Tr
 parser.add_argument('-ro','--run_output',help='Output run number', required=True,type=int)
 parser.add_argument('-u','--user_or_path',help='User or path name of the DB where the data-entry is located', required=False)
 parser.add_argument('-d','--database',help='Database name of the DB where the data-entry is located', required=False)
-parser.add_argument('-ids','--ids',help='IDS to copy', required=True)
 parser.add_argument('-s','--shift',help='Upward shift of equilibriumi (m)', required=True)
 
 args = vars(parser.parse_args())
 
-# idscp -si 131035 -ri 124 -so 123001 -ro 1 -s -0.01 -u bonninx -d iter -ids equilibrium
+# idscp -si 131035 -ri 124 -so 123001 -ro 1 -s -0.01 -u bonninx -d iter
 
 shot_in  = args["shot_input"]
 run_in   = args["run_input"]
 shot_out = args["shot_output"]
 run_out  = args["run_output"]
-ids      = args["ids"]
+ids      = "equilibrium"
 z_shift  = float(args["shift"])
 
 # User or path name
