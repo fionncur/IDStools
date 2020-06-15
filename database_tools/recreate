@@ -37,7 +37,7 @@ if not os.path.exists(os.getenv('HOME')+'/public/imasdb/'+database):
 output = imas.ids(shot_out,run_out,0,0)
 output.create_env(os.getenv('USER'),database,version)
 
-# Set up the list of existing IDSs in th DD
+# Set up the list of existing IDSs in the DD
 dd_idslist=[]
 for element in input.__dict__.keys():
    if hasattr(input.__dict__.get(element),'ids_properties'):
