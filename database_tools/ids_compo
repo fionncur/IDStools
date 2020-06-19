@@ -39,7 +39,7 @@ if err != 0:
 
 try:
     #input.core_profiles.get()
-    core_profiles = input.core_profiles # To inialise the empty IDS structure
+    core_profiles = input.core_profiles # To initialise the empty IDS structure
     core_profiles.time=input.core_profiles.partialGet('time')
     if core_profiles.time is None:
         print('No core_profiles IDS in the data-entry --> Abort.', file=sys.stderr)
