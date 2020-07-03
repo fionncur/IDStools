@@ -528,7 +528,7 @@ else:
     if imas_2928 == 1:
         waveform['ti']['central'] = input.core_profiles.partialGet('profiles_1d(:)/ion(0)/temperature(0)')*1e-3
     else:
-        waveform['ti']['central'] = [NaN]*nrho
+        waveform['ti']['central'] = [NaN]*ntime
 
 waveform['ne']  ['central'] = input.core_profiles.partialGet('profiles_1d(:)/electrons/density(0)')
 waveform['zeff']['central'] = input.core_profiles.partialGet('profiles_1d(:)/zeff(0)')
@@ -719,8 +719,9 @@ Signature(hostdir,shot,run,plt)
 # Vtor profiles
 ax7 = plt.subplot2grid((nline,ncol), (1,6),colspan=2)
 for ispecies in range(nspecies):
-    if (plot_compo == 1) & (nspec_over_ne[ispecies] > impurity_limit):
-        plt.plot(profiles['rhonorm'],profiles['n_species'][species[ispecies]]['vtor'])
+    if 'vtor'  in profiles['n_species'][species[ispecies]].keys():
+        if (plot_compo == 1) & (nspec_over_ne[ispecies] > impurity_limit):
+            plt.plot(profiles['rhonorm'],profiles['n_species'][species[ispecies]]['vtor'])
 
 nice(plt,r'$\rho/\rho_0$',r'$|v_{tor}|\/[\mathrm{m.s^{-1}}]$',fontsize)
 plt.xlim(0,xend)
@@ -734,8 +735,9 @@ Signature(hostdir,shot,run,plt)
 # Vpol profiles
 ax8 = plt.subplot2grid((nline,ncol), (2,4),colspan=2)
 for ispecies in range(nspecies):
-    if (plot_compo == 1) & (nspec_over_ne[ispecies] > impurity_limit):
-        plt.plot(profiles['rhonorm'],profiles['n_species'][species[ispecies]]['vpol'])
+    if 'vtor'  in profiles['n_species'][species[ispecies]].keys():
+        if (plot_compo == 1) & (nspec_over_ne[ispecies] > impurity_limit):
+            plt.plot(profiles['rhonorm'],profiles['n_species'][species[ispecies]]['vpol'])
 
 nice(plt,r'$\rho/\rho_0$',r'$|v_{pol}|\/[\mathrm{m.s^{-1}}]$',fontsize)
 plt.xlim(0,xend)
