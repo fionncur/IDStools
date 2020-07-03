@@ -498,14 +498,16 @@ max_vpol = -9e99
 min_vpol = 9e99
 for ispecies in range(nspecies):
     if (plot_compo == 1) & (nspec_over_ne[ispecies] > impurity_limit):
-        if max_vtor < max(profiles['n_species'][species[ispecies]]['vtor'][0:nrho-1]):
-            max_vtor = max(profiles['n_species'][species[ispecies]]['vtor'][0:nrho-1])
-        if min_vtor > min(profiles['n_species'][species[ispecies]]['vtor'][0:nrho-1]):
-            min_vtor = min(profiles['n_species'][species[ispecies]]['vtor'][0:nrho-1])
-        if max_vpol < max(profiles['n_species'][species[ispecies]]['vpol'][0:nrho-1]):
-            max_vpol = max(profiles['n_species'][species[ispecies]]['vpol'][0:nrho-1])
-        if min_vpol > min(profiles['n_species'][species[ispecies]]['vpol'][0:nrho-1]):
-            min_vpol = min(profiles['n_species'][species[ispecies]]['vpol'][0:nrho-1])
+        if 'vtor'  in profiles['n_species'][species[ispecies]].keys():
+          if max_vtor < max(profiles['n_species'][species[ispecies]]['vtor'][0:nrho-1]):
+              max_vtor = max(profiles['n_species'][species[ispecies]]['vtor'][0:nrho-1])
+          if min_vtor > min(profiles['n_species'][species[ispecies]]['vtor'][0:nrho-1]):
+              min_vtor = min(profiles['n_species'][species[ispecies]]['vtor'][0:nrho-1])
+        if 'vpol'  in profiles['n_species'][species[ispecies]].keys():
+          if max_vpol < max(profiles['n_species'][species[ispecies]]['vpol'][0:nrho-1]):
+              max_vpol = max(profiles['n_species'][species[ispecies]]['vpol'][0:nrho-1])
+          if min_vpol > min(profiles['n_species'][species[ispecies]]['vpol'][0:nrho-1]):
+              min_vpol = min(profiles['n_species'][species[ispecies]]['vpol'][0:nrho-1])
 
 # Create the dictionary defining the list of waveforms (central values) that can be displayed
 def createWaveForm(ndim):
