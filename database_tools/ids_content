@@ -85,7 +85,12 @@ for el in timed_idslist:
             t = eval('idss.'+element+'.partialGet(\'time\')')
             if eval('idss.'+element+'.partialGet(\'ids_properties/homogeneous_time\')') !=2:
                for itime in range(len(alltimes[i][1])):
-                  alltimes[i][1][itime]=t[itime]
+                  if t is not None:
+                     alltimes[i][1][itime]=t[itime]
+                  else:
+                     print('!!! WARNING: time not defined in '+element+' IDS'+ \
+                        '--> '+element+'.ids_properties.homogeneous_time should be set to 2 !')
+                     alltimes[i][1][0]='static'
             else:
                   alltimes[i][1][0]='static'
 
