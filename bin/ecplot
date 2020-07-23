@@ -183,7 +183,10 @@ single_power_waveform   = dict()    # waveform
 single_current_waveform = dict()    # waveform
 
 for iwave in range(nwaves):
-    single_ec_launcher_name[iwave] = input.waves.coherent_wave[iwave].identifier.antenna_name
+    if(len(input.waves.coherent_wave[iwave].identifier.antenna_name)>0):
+        single_ec_launcher_name[iwave] = input.waves.coherent_wave[iwave].identifier.antenna_name
+    else:
+        single_ec_launcher_name[iwave] = 'Antenna'+str(iwave+1)
     if is_active[iwave]:
         single_power_waveform[iwave]   = []
         single_current_waveform[iwave] = []
@@ -230,7 +233,7 @@ plt.show(block=False)
 # ECCD PROFILE [MA/M2]
 fig,ax =plt.subplots(1,1)
 if sum(is_active)>1:
-    ax.plot(rho_tor_norm, total_current_density_profile*1.e-6)
+    ax.plot(rho_tor_norm, total_current_density_profile*1.e-6,label=r'Total')
 for iwave in range(nwaves):
     if is_active[iwave]:
         ax.plot(rho_tor_norm, single_current_density_profile[iwave]*1.e-6,label=single_ec_launcher_name[iwave])
