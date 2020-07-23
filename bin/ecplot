@@ -131,6 +131,8 @@ if 0:
 
 nwaves = len(input.waves.coherent_wave)
 is_active = [0]*nwaves
+nrho = 0
+psi_based = 0
 for iwave in range(nwaves):
     if size(input.waves.coherent_wave[iwave].global_quantities) > 0:
         if input.waves.coherent_wave[iwave].global_quantities[0].power>0:
@@ -143,12 +145,16 @@ for iwave in range(nwaves):
                 elif len(input.waves.coherent_wave[iwave].profiles_1d[it].grid.rho_tor) > 0:
                     nrho = len(input.waves.coherent_wave[iwave].profiles_1d[it].grid.rho_tor)
                     rho_tor_norm = input.waves.coherent_wave[iwave].profiles_1d[it].grid.rho_tor/input.waves.coherent_wave[iwave].profiles_1d[it].grid.rho_tor[nrho-1]
+                elif len(input.waves.coherent_wave[iwave].profiles_1d[it].grid.psi) > 0:
+                    psi_based = 1
+                    nrho = len(input.waves.coherent_wave[iwave].profiles_1d[it].grid.psi)
+                    rho_tor_norm = -input.waves.coherent_wave[iwave].profiles_1d[it].grid.psi
             except:
-                print('waves.coherent_wave[iwave].profiles_1d[it].grid.rho_tor_norm and rho_tor could not be read', file=sys.stderr)
+                print('waves.coherent_wave[iwave].profiles_1d[it].grid.rho_tor_norm, rho_tor and psi could not be read', file=sys.stderr)
                 print('----> Aborted.', file=sys.stderr)
                 exit()
             if nrho==0:
-                print('waves.coherent_wave[iwave].profiles_1d[it].grid.rho_tor_norm and rho_tor are empty', file=sys.stderr)
+                print('waves.coherent_wave[iwave].profiles_1d[it].grid.rho_tor_norm, rho_tor and psi are empty', file=sys.stderr)
                 print('----> Aborted.', file=sys.stderr)
                 exit()
     else:
@@ -208,7 +214,10 @@ for iwave in range(nwaves):
     if is_active[iwave]:
         ax.plot(rho_tor_norm, single_power_density_profile[iwave]*1.e-6,label=single_ec_launcher_name[iwave])
 ax.set_ylabel('Absorbed power $\mathrm{[MW/m^{3}]}$')
-ax.set_xlabel('Normalized toroidal flux coordinate')
+if psi_based == 0:
+    ax.set_xlabel('Normalized toroidal flux coordinate')
+else:
+    ax.set_xlabel('-(Poloidal flux coordinate) [Wb]')
 plt.grid()
 legend = plt.legend()
 CustomLegend(legend)
@@ -226,7 +235,10 @@ for iwave in range(nwaves):
     if is_active[iwave]:
         ax.plot(rho_tor_norm, single_current_density_profile[iwave]*1.e-6,label=single_ec_launcher_name[iwave])
 ax.set_ylabel('$\mathrm{ECCD} [MA/m^{2}]}$')
-ax.set_xlabel('Normalized toroidal flux coordinate')
+if psi_based == 0:
+    ax.set_xlabel('Normalized toroidal flux coordinate')
+else:
+    ax.set_xlabel('-(Poloidal flux coordinate) [Wb]')
 plt.grid()
 legend = plt.legend()
 CustomLegend(legend)
