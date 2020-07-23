@@ -186,7 +186,7 @@ for iwave in range(nwaves):
     if(len(input.waves.coherent_wave[iwave].identifier.antenna_name)>0):
         single_ec_launcher_name[iwave] = input.waves.coherent_wave[iwave].identifier.antenna_name
     else:
-        single_ec_launcher_name[iwave] = 'Antenna'+str(iwave+1)
+        single_ec_launcher_name[iwave] = 'Launcher'+str(iwave+1)
     if is_active[iwave]:
         single_power_waveform[iwave]   = []
         single_current_waveform[iwave] = []
