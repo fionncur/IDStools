@@ -18,6 +18,7 @@ parser.add_argument('-r','--run',help='Run number',required=True,type=int)
 parser.add_argument('-u','--user_or_path',help='User or absolute path name where the data-entry is located', required=False)
 parser.add_argument('-d','--database',help='Database name where the data-entry is located', required=False)
 parser.add_argument('-t','--time',help='Time', required=False,type=float)
+parser.add_argument('-f','--force_psi',help='= 1 to force displaying the profiles versus poloidal flux', required=False)
 
 args         = vars(parser.parse_args())
 shot         = args["shot"]
@@ -40,6 +41,12 @@ if args['time'] != None:
     time = args['time']
 else:
     time = -99.
+
+# Flag to force psi radial coordinate to be used
+if args['force_psi'] != None:
+    force_psi = int(args['force_psi'])
+else:
+    force_psi = 0
 
 # DISPLAY PARAMETERS
 # -------------------
@@ -133,6 +140,7 @@ nwaves = len(input.waves.coherent_wave)
 is_active = [0]*nwaves
 nrho = 0
 psi_based = 0
+psi_there = 0
 for iwave in range(nwaves):
     if size(input.waves.coherent_wave[iwave].global_quantities) > 0:
         if input.waves.coherent_wave[iwave].global_quantities[0].power>0:
@@ -157,11 +165,24 @@ for iwave in range(nwaves):
                 print('waves.coherent_wave[iwave].profiles_1d[it].grid.rho_tor_norm, rho_tor and psi are empty', file=sys.stderr)
                 print('----> Aborted.', file=sys.stderr)
                 exit()
+            if len(input.waves.coherent_wave[iwave].profiles_1d[it].grid.psi) > 0:
+                psi_there = 1
+                npsi = len(input.waves.coherent_wave[iwave].profiles_1d[it].grid.psi)
+                psi1d = -input.waves.coherent_wave[iwave].profiles_1d[it].grid.psi
     else:
         print('waves.coherent_wave[iwave].global_quantities has not been allocated')
         print('----> Aborted.', file=sys.stderr)
         exit()
 
+if force_psi == 1:
+    if psi_there == 0:
+        print('The psi radial coordinate forced but the 1D psi profile is not filled')
+        print('----> Aborted.', file=sys.stderr)
+        exit()
+    else:
+        nrho = npsi
+        rho_tor_norm = psi1d
+        
 if sum(is_active)==0:
     print('The waves IDS appears empty ----> Abort.', file=sys.stderr)
     exit()
@@ -170,6 +191,7 @@ if sum(is_active)==0:
 single_ec_launcher_name         = dict()
 single_injected_power           = dict()   # for the chosen time slice
 single_absorbed_power           = dict()   # for the chosen time slice
+single_eccd                     = dict()   # for the chosen time slice
 total_injected_power            = 0        # for the chosen time slice
 
 total_power_density_profile     = [0]*nrho # profile
@@ -204,7 +226,9 @@ for iwave in range(nwaves):
             total_injected_power         = total_injected_power + input.waves.coherent_wave[iwave].beam_tracing[it].beam[ibeam].power_initial
             single_injected_power[iwave] = single_injected_power[iwave] + input.waves.coherent_wave[iwave].beam_tracing[it].beam[ibeam].power_initial
         single_absorbed_power[iwave] = input.waves.coherent_wave[iwave].global_quantities[it].power
+        single_eccd[iwave]           = input.waves.coherent_wave[iwave].global_quantities[it].current_tor
         print(' '+single_ec_launcher_name[iwave]+' is active with a power of {:.2f}'.format(single_injected_power[iwave]*1.e-6)+' MW --> Absorbed power = {:.2f}'.format(single_absorbed_power[iwave]*1.e-6)+' MW', file=sys.stderr)
+        print('                                           --> ECCD =  {:.2f}'.format(single_eccd[iwave]*1.e-3)+' kA', file=sys.stderr)
     else:
         print(' '+single_ec_launcher_name[iwave]+' is off', file=sys.stderr)
 print('--------------------------------------------------------------------------', file=sys.stderr)
