@@ -133,6 +133,14 @@ except:
     comment = ''
     dd_version = ''
 
+p_sol = 0
+try:
+     p_loss = input.summary.global_quantities.power_loss.value
+     p_sol = p_loss[the_slice]*1.e-6
+except:
+     print("----> summary IDS did not include power_loss", file=sys.stdout)
+     print("P_sol will be deduced from edge_transport if available", file=sys.stdout)
+
 try:
     #input.edge_transport.get()
     edge_transport = input.edge_transport
@@ -149,7 +157,8 @@ try:
         edge_transport.grid_ggd[0] = input.edge_transport.partialGet('grid_ggd('+str(the_slice)+')')
 except:
     print("The edge_transport IDS is absent from the input data-entry", file=sys.stdout)
-    print("----> P_SOL information not filled (to be completed by hand)", file=sys.stdout)
+    if p_sol == 0:
+        print("----> P_sol information not filled (to be completed by hand)", file=sys.stdout)
     flux_present = 0
 
 if core_present == 0 and edge_present == 0:
@@ -196,8 +205,7 @@ if eq_present==1:
           plasma_current = ip[islice]*1.e-6
    except:
       print("equilibrium.time_slice[:].global_quantities.ip could not be read", file=sys.stderr)
-      print("----> Aborted.", file=sys.stderr)
-      exit()
+      print("Plasma current will need to be provided by hand.", file=sys.stderr)
 else:
    try:
       plasma_current = 0
@@ -206,8 +214,7 @@ else:
           plasma_current = summary.global_quantities.ip.value[islice]*1.e-6
    except:
       print("summary.global_quantities.ip could not be read", file=sys.stderr)
-      print("----> Aborted.", file=sys.stderr)
-      exit()
+      print("Plasma current will need to be provided by hand.", file=sys.stderr)
 
 if core_present==1:
    try:
@@ -349,29 +356,31 @@ else:
 	    if len(confinement_regime)==1:
 		    confinement_regime = confinement_regime+'-mode'
 
-if flux_present == 0 :
-    p_sol = "tbd"
-else:
-    # grid subset with identifier index 26 is the core-sol boundary
-    p_sol = 0
-    p_sol_e = 0
-    p_sol_i = 0
-    nsubsets = len(edge_transport.model[0].ggd[0].electrons.energy.flux)
-    for iset in range(nsubsets):
-       if edge_transport.model[0].ggd[0].electrons.energy.flux[iset].grid_subset_index == 26:
-          for iFace in range(len(edge_transport.model[0].ggd[0].electrons.energy.flux[iset].values)):
-             faceindex = edge_transport.grid_ggd[0].grid_subset[iset].element[iFace].object[0].index
-             area = edge_transport.grid_ggd[0].space[0].objects_per_dimension[1].object[faceindex-1].measure
-             flux = edge_transport.model[0].ggd[0].electrons.energy.flux[iset].values[iFace]
-             p_sol_e = p_sol_e + flux*area
-             try:
-                flux = edge_transport.model[0].ggd[0].total_ion_energy.flux[iset].values[iFace]
-             except:
-                flux = 0
-                for ispecies in range(nspecies):
-                   flux = flux + edge_transport.model[0].ggd[0].ion[ispecies].energy.flux[iset].values[iFace]
-             p_sol_i = p_sol_i + flux*area
-          p_sol = (p_sol_e + p_sol_i)*1.e-6
+if p_sol == 0:
+    # if P_sol has not been obtained from summary IDS, deduce it from edge_transport
+    if flux_present == 0:
+        p_sol = "tbd"
+    else:
+        # grid subset with identifier index 26 is the core-sol boundary
+        p_sol = 0
+        p_sol_e = 0
+        p_sol_i = 0
+        nsubsets = len(edge_transport.model[0].ggd[0].electrons.energy.flux)
+        for iset in range(nsubsets):
+            if edge_transport.model[0].ggd[0].electrons.energy.flux[iset].grid_subset_index == 26:
+                for iFace in range(len(edge_transport.model[0].ggd[0].electrons.energy.flux[iset].values)):
+                     faceindex = edge_transport.grid_ggd[0].grid_subset[iset].element[iFace].object[0].index
+                     area = edge_transport.grid_ggd[0].space[0].objects_per_dimension[1].object[faceindex-1].measure
+                     flux = edge_transport.model[0].ggd[0].electrons.energy.flux[iset].values[iFace]
+                     p_sol_e = p_sol_e + flux*area
+                     try:
+                         flux = edge_transport.model[0].ggd[0].total_ion_energy.flux[iset].values[iFace]
+                     except:
+                         flux = 0
+                         for ispecies in range(nspecies):
+                             flux = flux + edge_transport.model[0].ggd[0].ion[ispecies].energy.flux[iset].values[iFace]
+                     p_sol_i = p_sol_i + flux*area
+        p_sol = (p_sol_e + p_sol_i)*1.e-6
 
 if nspecies > 0:
 
@@ -583,7 +592,10 @@ f.write("""scenario_key_parameters:\n""")
 f.write("""    confinement_regime: %s\n""" % confinement_regime)
 f.write("""    magnetic_field: %.2f\n""" % magnetic_field)
 f.write("""    main_species: %s\n""" % main_species)
-f.write("""    plasma_current: %.2f \n""" % plasma_current)
+if plasma_current == 0:
+    f.write("""    plasma_current: tbd\n""")
+else:
+    f.write("""    plasma_current: %.2f \n""" % plasma_current)
 if core_present == 1:
     f.write("""    central_electron_density: %.2e\n""" % central_electron_density)
     f.write("""    central_zeff: %.2f\n""" % central_zeff)
