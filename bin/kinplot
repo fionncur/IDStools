@@ -719,8 +719,8 @@ Signature(hostdir,shot,run,plt)
 # Vtor profiles
 ax7 = plt.subplot2grid((nline,ncol), (1,6),colspan=2)
 for ispecies in range(nspecies):
-    if 'vtor'  in profiles['n_species'][species[ispecies]].keys():
-        if (plot_compo == 1) & (nspec_over_ne[ispecies] > impurity_limit):
+    if (plot_compo == 1) & (nspec_over_ne[ispecies] > impurity_limit):
+        if 'vtor'  in profiles['n_species'][species[ispecies]].keys():
             plt.plot(profiles['rhonorm'],profiles['n_species'][species[ispecies]]['vtor'])
 
 nice(plt,r'$\rho/\rho_0$',r'$|v_{tor}|\/[\mathrm{m.s^{-1}}]$',fontsize)
@@ -735,8 +735,8 @@ Signature(hostdir,shot,run,plt)
 # Vpol profiles
 ax8 = plt.subplot2grid((nline,ncol), (2,4),colspan=2)
 for ispecies in range(nspecies):
-    if 'vtor'  in profiles['n_species'][species[ispecies]].keys():
-        if (plot_compo == 1) & (nspec_over_ne[ispecies] > impurity_limit):
+    if (plot_compo == 1) & (nspec_over_ne[ispecies] > impurity_limit):
+        if 'vtor'  in profiles['n_species'][species[ispecies]].keys():
             plt.plot(profiles['rhonorm'],profiles['n_species'][species[ispecies]]['vpol'])
 
 nice(plt,r'$\rho/\rho_0$',r'$|v_{pol}|\/[\mathrm{m.s^{-1}}]$',fontsize)
