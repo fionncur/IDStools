@@ -374,9 +374,10 @@ p_fus = asarray([0]*ntime)
 if len(summary.fusion.power.value) > 0:
     p_fus = summary.fusion.power.value*1.e-6
 
-# to be completed when data model extended (summary IDS)
+# Neutron power
 p_neut = asarray([0]*ntime)
-
+if len(summary.fusion.neutron_power_total.value) > 0:
+    p_neut = summary.fusion.neutron_power_total.value*1.e-6
 
 # H-mode flag
 def indices(a, func):
@@ -656,7 +657,7 @@ fig.set_size_inches(10,8)
 
 try:
     fig.savefig('Scenario'+'_shot_'+str(shot)+'_run_'+str(run)+'_time_'+'%.1f' % time+'.png', dpi=100)
-    print('----> Figure saved to '+'Kinetic'+'_shot_'+str(shot)+'_run_'+str(run)+'_time_'+'%.1f' % time+'.png', file=sys.stderr)
+    print('----> Figure saved to '+'Scenario'+'_shot_'+str(shot)+'_run_'+str(run)+'_time_'+'%.1f' % time+'.png', file=sys.stderr)
 except:
     print('The figure could not be saved (check local permissions).', file=sys.stderr)
 
