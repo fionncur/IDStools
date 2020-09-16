@@ -139,7 +139,7 @@ To see databases stored in the public imas database, use 'public' as the user na
 p.add_option("-u", "--user", dest="user", default=None, help = "Show databases of specified user")
 p.add_option("-t", "--tokamak", dest="dbname", default=None, help = "[DEPRECATED, use -d instead] Show only databases with specified tokamak")
 p.add_option("-d", "--database", dest="dbname", default=None, help = "Show only databases with specified name")
-p.add_option("-v", "--version", dest="version", default=None, help = "Show only databases for specified data version")
+p.add_option("-v", "--version", dest="version", default=None, help = "Show only databases for specified major data version")
 p.add_option("--backend", dest="backend", default=None, help = "Show databases written with given backend(s). \n\
 Comma-separated list of backends (Currently supported: mdsplus, hdf5). By default all backends are shown.")
 p.add_option("-c", "--compact", action="store_true", dest="compact", default=False, help = "Compact/reduced output")
@@ -167,9 +167,10 @@ if not args or args[0] == "list" or args[0] == "slices" or args[0] == "times":
             sys.exit(1)
 
     if len(args) > 0 and (args[0] == "slices" or args[0] == "times"):
-        envdv = os.getenv("DATAVERSION")
-        if opts.version is not None and envdv != opts.version:
-            print("Cannot access IDS times for data version differing from current $DATAVERSION", file=sys.stderr)
+        envdv = (os.getenv("IMAS_VERSION")).split('.')[0]
+        
+        if opts.version != None and envdv != opts.version:
+            print("Cannot access IDS times for data version differing from current major version "+envdv, file=sys.stderr)
             sys.exit(1)
 
     if opts.backend:
