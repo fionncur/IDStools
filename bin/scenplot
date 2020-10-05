@@ -419,12 +419,19 @@ profiles['q'] = core_profiles.profiles_1d[0].q
 profiles['magnetic_shear'] = core_profiles.profiles_1d[0].magnetic_shear
 
 h_mode_indices  = indices(waveform['h_mode'], lambda h_mode_flag: h_mode_flag>0)
+
+# For bad initialisations in the input scenario
+#import pdb
+#pdb.set_trace()
+h_mode_indices = h_mode_indices[2:-1]
+
 if len(h_mode_indices) > 0:
     hmode = 1
     th_min = timevec[h_mode_indices[0]]
     th_max = timevec[h_mode_indices[len(h_mode_indices)-1]]
 else:
     hmode = 0
+
 
 # ----------------------------------------------------------------------
 
