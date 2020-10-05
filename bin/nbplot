@@ -81,22 +81,20 @@ def CustomLegend(legend):
 
 # READ IDS'S FROM LOCAL DATABASE
 # -------------------------------
-version = os.getenv('IMAS_VERSION')[0]
-input=imas.ids(shot,run)
-[err,n]=input.open_env(user_or_path,database,version,silent=True)
+input = imas.DBEntry(imas.imasdef.MDSPLUS_BACKEND,database,shot,run,user_or_path)
+[err,n]=input.open()
 if err != 0:
     print('Shot ' + str(shot) + ', run ' + str(run) +' for user_or_path = '+user_or_path+' and database = '+database+' does not exist', file=sys.stderr)
     print('----> Aborted.', file=sys.stderr)
     exit()
 
-#input.distribution_sources.get()
-input.distributions.get()
+distributions = input.get('distributions')
 input.close()
 
 # TIME VECTOR AND TIME INDEX
 # ---------------------------
 
-timevec = input.distributions.time
+timevec = distributions.time
 ntime = len(timevec)
 if ntime==1:
     if len(timevec) > 0:
@@ -118,19 +116,22 @@ else:
 
 time = tc
 
-ndistributions = len(input.distributions.distribution)
+ndistributions = len(distributions.distribution)
 is_active = [0]*ndistributions
+cur_calc = 1
 for idistrib in range(ndistributions):
-    if len(input.distributions.distribution[idistrib].global_quantities[0].collisions.ion)>0:
+    if len(distributions.distribution[idistrib].global_quantities[0].collisions.ion)>0:
         is_active[idistrib] = 1
+        if distributions.distribution[idistrib].global_quantities[0].current_tor==-9e40:
+            cur_calc = 0
         try:
             rho_tor_norm = 0
-            if len(input.distributions.distribution[idistrib].profiles_1d[it].grid.rho_tor_norm) > 0:
-                nrho = len(input.distributions.distribution[idistrib].profiles_1d[it].grid.rho_tor_norm)
-                rho_tor_norm = input.distributions.distribution[idistrib].profiles_1d[it].grid.rho_tor_norm
-            elif len(input.distributions.distribution[idistrib].profiles_1d[it].grid.rho_tor) > 0:
-                nrho = len(input.distributions.distribution[idistrib].profiles_1d[it].grid.rho_tor)
-                rho_tor_norm = input.distributions.distribution[idistrib].profiles_1d[it].grid.rho_tor/input.distributions.distribution[idistrib].profiles_1d[it].grid.rho_tor[nrho-1]
+            if len(distributions.distribution[idistrib].profiles_1d[it].grid.rho_tor_norm) > 0:
+                nrho = len(distributions.distribution[idistrib].profiles_1d[it].grid.rho_tor_norm)
+                rho_tor_norm = distributions.distribution[idistrib].profiles_1d[it].grid.rho_tor_norm
+            elif len(distributions.distribution[idistrib].profiles_1d[it].grid.rho_tor) > 0:
+                nrho = len(distributions.distribution[idistrib].profiles_1d[it].grid.rho_tor)
+                rho_tor_norm = distributions.distribution[idistrib].profiles_1d[it].grid.rho_tor/distributions.distribution[idistrib].profiles_1d[it].grid.rho_tor[nrho-1]
         except:
             print('distributions.distribution[idistrib].profiles_1d[it].grid.rho_tor_norm and rho_tor could not be read', file=sys.stderr)
             print('----> Aborted.', file=sys.stderr)
@@ -172,9 +173,9 @@ single_total_power_density_profile           = dict()
 # LOOP OVER ALL NBI INJECTORS
 for idistrib in range(ndistributions):
     # INJECTOR NAME
-    if len(input.distributions.distribution[idistrib].process)>0:
-        if len(input.distributions.distribution[idistrib].process[0].type.description)>0:
-            single_nb_source_name[idistrib] = input.distributions.distribution[idistrib].process[0].type.description+str(idistrib)
+    if len(distributions.distribution[idistrib].process)>0:
+        if len(distributions.distribution[idistrib].process[0].type.description)>0:
+            single_nb_source_name[idistrib] = distributions.distribution[idistrib].process[0].type.description+str(idistrib)
         else:
             single_nb_source_name[idistrib] = 'Beam_'+str(idistrib)
     else:
@@ -185,12 +186,13 @@ for idistrib in range(ndistributions):
         single_electron_power_waveform[idistrib] = [0]*ntime
         single_ion_power_waveform[idistrib]      = [0]*ntime
         single_total_power_waveform[idistrib]    = [0]*ntime
-        nions = len(input.distributions.distribution[idistrib].global_quantities[0].collisions.ion)
+        nions = len(distributions.distribution[idistrib].global_quantities[0].collisions.ion)
         for itime in range(ntime):
-            single_current_waveform[idistrib][itime]        = input.distributions.distribution[idistrib].global_quantities[itime].current_tor
-            single_electron_power_waveform[idistrib][itime] = input.distributions.distribution[idistrib].global_quantities[itime].collisions.electrons.power_thermal
+            if cur_calc == 1:
+                single_current_waveform[idistrib][itime]    = distributions.distribution[idistrib].global_quantities[itime].current_tor
+            single_electron_power_waveform[idistrib][itime] = distributions.distribution[idistrib].global_quantities[itime].collisions.electrons.power_thermal
             for iion in range(nions):
-                single_ion_power_waveform[idistrib][itime]  = single_ion_power_waveform[idistrib][itime] + input.distributions.distribution[idistrib].global_quantities[itime].collisions.ion[iion].power_thermal
+                single_ion_power_waveform[idistrib][itime]  = single_ion_power_waveform[idistrib][itime]   + distributions.distribution[idistrib].global_quantities[itime].collisions.ion[iion].power_thermal
             single_total_power_waveform[idistrib][itime]    = single_electron_power_waveform[idistrib][itime] + single_ion_power_waveform[idistrib][itime]
             all_injectors_current_waveform[itime]           = all_injectors_current_waveform[itime]        + single_current_waveform[idistrib][itime]
             all_injectors_electron_power_waveform[itime]    = all_injectors_electron_power_waveform[itime] + single_electron_power_waveform[idistrib][itime]
@@ -201,37 +203,57 @@ for idistrib in range(ndistributions):
         single_electron_power_density_profile[idistrib] = [0]*nrho
         single_ion_power_density_profile[idistrib]      = [0]*nrho
         single_total_power_density_profile[idistrib]    = [0]*nrho
-        single_current_density_profile[idistrib]         = input.distributions.distribution[idistrib].profiles_1d[it].current_tor
-        single_electron_power_density_profile[idistrib]  = input.distributions.distribution[idistrib].profiles_1d[it].collisions.electrons.power_thermal
+        if cur_calc == 1:
+            single_current_density_profile[idistrib]    = distributions.distribution[idistrib].profiles_1d[it].current_tor
+        single_electron_power_density_profile[idistrib] = distributions.distribution[idistrib].profiles_1d[it].collisions.electrons.power_thermal
         for iion in range(nions):
-            single_ion_power_density_profile[idistrib]   = single_ion_power_density_profile[idistrib] + input.distributions.distribution[idistrib].profiles_1d[it].collisions.ion[iion].power_thermal
-        single_total_power_density_profile[idistrib]     = single_electron_power_density_profile[idistrib] + single_ion_power_density_profile[idistrib]
-        all_injectors_current_density_profile            = all_injectors_current_density_profile           + single_current_density_profile[idistrib]
-        all_injectors_electron_power_density_profile     = all_injectors_electron_power_density_profile    + single_electron_power_density_profile[idistrib]
-        all_injectors_ion_power_density_profile          = all_injectors_ion_power_density_profile         + single_ion_power_density_profile[idistrib]
-        all_injectors_total_power_density_profile        = all_injectors_total_power_density_profile       + single_electron_power_density_profile[idistrib] + single_ion_power_density_profile[idistrib]
+            single_ion_power_density_profile[idistrib]  = single_ion_power_density_profile[idistrib]      + distributions.distribution[idistrib].profiles_1d[it].collisions.ion[iion].power_thermal
+        single_total_power_density_profile[idistrib]    = single_electron_power_density_profile[idistrib] + single_ion_power_density_profile[idistrib]
+        all_injectors_current_density_profile           = all_injectors_current_density_profile           + single_current_density_profile[idistrib]
+        all_injectors_electron_power_density_profile    = all_injectors_electron_power_density_profile    + single_electron_power_density_profile[idistrib]
+        all_injectors_ion_power_density_profile         = all_injectors_ion_power_density_profile         + single_ion_power_density_profile[idistrib]
+        all_injectors_total_power_density_profile       = all_injectors_total_power_density_profile       + single_electron_power_density_profile[idistrib] + single_ion_power_density_profile[idistrib]
+
+print('--------------------------------------------------------------------------', file=sys.stderr)
+print(' Total NBI power = {:.2f}'.format(all_injectors_total_power_waveform[it]*1.e-6)+' MW',file = sys.stderr)
+print(' To electrons    = {:.2f}'.format(all_injectors_electron_power_waveform[it]*1.e-6)+' MW',file = sys.stderr)
+print(' To ions         = {:.2f}'.format(all_injectors_ion_power_waveform[it]*1.e-6)+' MW',file = sys.stderr)
+
+if cur_calc == 1:
+    print('--------------------------------------------------------------------------', file=sys.stderr)
+    print(' Total NBCD      = {:.2f}'.format(all_injectors_current_waveform[it]*1.e-3)+' kA',file = sys.stderr)
+
+if sum(is_active)>1:
+    print('--------------------------------------------------------------------------', file=sys.stderr)
+    for idistrib in range(ndistributions):
+        if is_active[idistrib]:
+            print(' Distribution #'+str(idistrib+1)+' - NBI power = {:.2f}'.format(single_total_power_waveform[idistrib][it]*1.e-6)+' MW',file = sys.stderr)
+            if cur_calc == 1:
+                print(' Distribution #'+str(idistrib+1)+' - NBCD      = {:.2f}'.format(single_current_waveform[idistrib][it]*1.e-3)+' kA',file = sys.stderr)
+
+print('--------------------------------------------------------------------------', file=sys.stderr)
 
 # PROFILE OF ABSORBED POWER DENSITY ON ELECTRONS+IONS FOR ALL INJECTORS AND EACH OF THEM INDIVIDUALLY [MW/M3]
-fig,ax =plt.subplots(1,1)
 if sum(is_active)>1:
+    fig,ax =plt.subplots(1,1)
     ax.plot(rho_tor_norm, all_injectors_total_power_density_profile*1.e-6,label=r'All injectors')
-for idistrib in range(ndistributions):
-    if is_active[idistrib]:
-        ax.plot(rho_tor_norm, single_total_power_density_profile[idistrib]*1.e-6,label=single_nb_source_name[idistrib])
-ax.set_ylabel('Absorbed power $\mathrm{[MW/m^{3}]}$')
-ax.set_xlabel('Normalized toroidal flux coordinate')
-plt.grid()
-#legend = plt.legend()
-#CustomLegend(legend)
-fig.set_size_inches(figure_width,figure_height)
-fig.tight_layout()
-fig.savefig('NBI_power_individuals_injectors_profile_shot_{0}_run_{1}.png'.format(shot,run),bbox_inches="tight")
-#plt.title('Whatever')
-plt.show(block=False)
+    for idistrib in range(ndistributions):
+        if is_active[idistrib]:
+            ax.plot(rho_tor_norm, single_total_power_density_profile[idistrib]*1.e-6,label=single_nb_source_name[idistrib])
+    ax.set_ylabel('Absorbed power $\mathrm{[MW/m^{3}]}$')
+    ax.set_xlabel('Normalized toroidal flux coordinate')
+    plt.grid()
+    #legend = plt.legend()
+    #CustomLegend(legend)
+    fig.set_size_inches(figure_width,figure_height)
+    fig.tight_layout()
+    fig.savefig('NBI_power_individuals_injectors_profile_shot_{0}_run_{1}.png'.format(shot,run),bbox_inches="tight")
+    #plt.title('Whatever')
+    plt.show(block=False)
 
 # PROFILE OF ABSORBED POWER DENSITY ON ELECTRONS+IONS, ELECTRONS, IONS FOR ALL INJECTORS [MW/M3]
 fig,ax =plt.subplots(1,1)
-if sum(is_active)>1:
+if sum(is_active)>0:
     ax.plot(rho_tor_norm, all_injectors_total_power_density_profile*1.e-6,label=r'Electrons+Ions')
     ax.plot(rho_tor_norm, all_injectors_electron_power_density_profile*1.e-6,label=r'Electrons')
     ax.plot(rho_tor_norm, all_injectors_ion_power_density_profile*1.e-6,label=r'Ions')
@@ -247,21 +269,22 @@ fig.savefig('NBI_power_all_injectors_el_ion_profile_shot_{0}_run_{1}.png'.format
 plt.show(block=False)
 
 # NBCD PROFILE [MA/M2]
-fig,ax =plt.subplots(1,1)
-if sum(is_active)>1:
-    ax.plot(rho_tor_norm, all_injectors_current_density_profile*1.e-6)
-for idistrib in range(ndistributions):
-    if is_active[idistrib]:
-        ax.plot(rho_tor_norm, single_current_density_profile[idistrib]*1.e-6,label=single_nb_source_name[idistrib])
-ax.set_ylabel('$\mathrm{NBCD} [MA/m^{2}]}$')
-ax.set_xlabel('Normalized toroidal flux coordinate')
-plt.grid()
-#legend = plt.legend()
-#CustomLegend(legend)
-fig.set_size_inches(figure_width,figure_height)
-fig.tight_layout()
-fig.savefig('NBI_power_profile_shot_{0}_run_{1}.png'.format(shot,run),bbox_inches="tight")
-#plt.title('Whatever')
+if cur_calc == 1:
+    fig,ax =plt.subplots(1,1)
+    if sum(is_active)>1:
+        ax.plot(rho_tor_norm, all_injectors_current_density_profile*1.e-6)
+    for idistrib in range(ndistributions):
+        if is_active[idistrib]:
+            ax.plot(rho_tor_norm, single_current_density_profile[idistrib]*1.e-6,label=single_nb_source_name[idistrib])
+    ax.set_ylabel('$\mathrm{NBCD} [MA/m^{2}]}$')
+    ax.set_xlabel('Normalized toroidal flux coordinate')
+    plt.grid()
+    #legend = plt.legend()
+    #CustomLegend(legend)
+    fig.set_size_inches(figure_width,figure_height)
+    fig.tight_layout()
+    fig.savefig('NBI_power_profile_shot_{0}_run_{1}.png'.format(shot,run),bbox_inches="tight")
+    #plt.title('Whatever')
 
 # NBI POWER AND NBCD WAVEFORMS
 if ntime==1:
@@ -291,20 +314,21 @@ plt.gca().set_ylim(0,max(all_injectors_total_power_waveform)*1.2e-6)
 plt.show(block=False)
 
 # NBCD WAVEFORM
-fig,ax =plt.subplots(1,1)
-if sum(is_active)>1:
-    ax.plot(timevec, array(all_injectors_current_waveform)*1.e-6,label=r'Total')
-for idistrib in range(ndistributions):
-    if is_active[idistrib]:
-        ax.plot(timevec, array(single_current_waveform[idistrib])*1.e-6,label=single_nb_source_name[idistrib])
-ax.set_ylabel('NBCD $\mathrm{[MA]}$')
-ax.set_xlabel('Time (s)')
-plt.grid()
-#legend = plt.legend()
-#CustomLegend(legend)
-fig.set_size_inches(figure_width,figure_height)
-fig.tight_layout()
-fig.savefig('NBCD_waveform_shot_{0}_run_{1}.png'.format(shot,run),bbox_inches="tight")
-#plt.title('Whatever')
-#plt.gca().set_ylim(0,max(array(all_injectors_current_waveform))*1.2e-3)
-plt.show(block=True)
+if cur_calc == 1:
+    fig,ax =plt.subplots(1,1)
+    if sum(is_active)>1:
+        ax.plot(timevec, array(all_injectors_current_waveform)*1.e-6,label=r'Total')
+    for idistrib in range(ndistributions):
+        if is_active[idistrib]:
+            ax.plot(timevec, array(single_current_waveform[idistrib])*1.e-6,label=single_nb_source_name[idistrib])
+    ax.set_ylabel('NBCD $\mathrm{[MA]}$')
+    ax.set_xlabel('Time (s)')
+    plt.grid()
+    #legend = plt.legend()
+    #CustomLegend(legend)
+    fig.set_size_inches(figure_width,figure_height)
+    fig.tight_layout()
+    fig.savefig('NBCD_waveform_shot_{0}_run_{1}.png'.format(shot,run),bbox_inches="tight")
+    #plt.title('Whatever')
+    #plt.gca().set_ylim(0,max(array(all_injectors_current_waveform))*1.2e-3)
+    plt.show(block=True)
