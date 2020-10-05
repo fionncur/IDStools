@@ -8,6 +8,7 @@ import imas,argparse,sys,os
 import matplotlib
 matplotlib.use('TKagg')
 import matplotlib.pyplot as plt
+import init_mendeleiev as mend
 
 # MANAGEMENT OF INPUT ARGUMENTS
 # ------------------------------
@@ -57,6 +58,8 @@ font = {'family': 'serif',
         'size': fontsize,
         }
 
+# Mendeleiev table
+table_mendeleiev = mend.create_table_mendeleiev()
 
 # ----------------------------------------------------------------------
 
@@ -218,6 +221,24 @@ print('-------------------------------------------------------------------------
 print(' Total NBI power = {:.2f}'.format(all_injectors_total_power_waveform[it]*1.e-6)+' MW',file = sys.stderr)
 print(' To electrons    = {:.2f}'.format(all_injectors_electron_power_waveform[it]*1.e-6)+' MW',file = sys.stderr)
 print(' To ions         = {:.2f}'.format(all_injectors_ion_power_waveform[it]*1.e-6)+' MW',file = sys.stderr)
+
+# Power absorbed to individual ions
+all_injectors_total_power_waveform_per_ion = [0]*nions
+element = [0]*nions
+compo_detail = 0
+for idistrib in range(ndistributions):
+    if is_active[idistrib]:
+        for iion in range(nions):
+            all_injectors_total_power_waveform_per_ion[iion] = all_injectors_total_power_waveform_per_ion[iion] + distributions.distribution[idistrib].global_quantities[it].collisions.ion[iion].power_thermal
+            if len(distributions.distribution[idistrib].global_quantities[it].collisions.ion[iion].element) > 0:
+                compo_detail = 1
+                a = int(distributions.distribution[idistrib].global_quantities[it].collisions.ion[iion].element[0].a)
+                z = int(distributions.distribution[idistrib].global_quantities[it].collisions.ion[iion].element[0].z_n)
+                element[iion] = table_mendeleiev[z][a].element
+
+if compo_detail == 1:
+    for iion in range(nions):
+        print('      - '+element[iion]+' = {:.2f}'.format(all_injectors_total_power_waveform_per_ion[iion]*1.e-3)+' kW',file = sys.stderr)
 
 if cur_calc == 1:
     print('--------------------------------------------------------------------------', file=sys.stderr)
