@@ -25,7 +25,7 @@ setup(name='IMAS IDS Tools',
       author        = "ITER Organization",
       author_email  = "imas-support@iter.org",
       url           = "https://imas.iter.org/",
-      packages      = ['idstools'],
+      packages      = ['idstools','database_tools'],
       py_modules    = [],
       scripts       = script_files,
      )
