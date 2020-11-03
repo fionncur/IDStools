@@ -60,9 +60,13 @@ if err != 0:
     exit()
 
 if user_or_path == 'public':
-    DB_ABS_PATH = '/work/imas/shared/'+str(database)+'/3/0'
+    publichome = os.getenv("IMAS_HOME")
+    if (publichome == None):
+        print("Environment variable IMAS_HOME is not defined. Quitting.", file=sys.stderr)
+        sys.exit(1)
+    DB_ABS_PATH = publichome+'/shared/imasdb/'+str(database)+'/3/'+str(run//10000)
 else:
-    DB_ABS_PATH = os.path.expanduser("~{}".format(user_or_path))+"/public/imasdb/"+str(database)+"/3/0"
+    DB_ABS_PATH = os.path.expanduser("~{}".format(user_or_path))+"/public/imasdb/"+str(database)+"/3/"+str(run//10000)
 
 try:
     #input.core_profiles.get()
@@ -235,71 +239,61 @@ except:
 zeff = [0]
 if len(core_profiles.profiles_1d[0].zeff) < 1:
     print('core_profiles.profiles_1d[:].zeff could not be read', file=sys.stderr)
-    for itime in range(ntime):
-        core_profiles.profiles_1d[itime].zeff = asarray([nan]*nrho)
+    core_profiles.profiles_1d[0].zeff = asarray([nan]*nrho)
 zeff[0:nrho-1] = core_profiles.profiles_1d[0].zeff
 if edge_present == 1:
     if len(edge_profiles.profiles_1d[0].zeff) < 1:
         print('edge_profiles.profiles_1d[:].zeff could not be read', file=sys.stderr)
-    for itime in range(etime):
-        edge_profiles.profiles_1d[itime].zeff = asarray([nan]*erho)
+        edge_profiles.profiles_1d[0].zeff = asarray([nan]*erho)
     zeff[nrho:nrho+erho-1] = edge_profiles.profiles_1d[0].zeff
 
 # Ne profile (not mandatory)
 electron_density = [0]
 if len(core_profiles.profiles_1d[0].electrons.density) < 1:
     print('core_profiles.profiles_1d[:].electrons.density could not be read', file=sys.stderr)
-    for itime in range(ntime):
-        core_profiles.profiles_1d[itime].electrons.density = asarray([nan]*nrho)
+    core_profiles.profiles_1d[0].electrons.density = asarray([nan]*nrho)
 electron_density[0:nrho-1] = core_profiles.profiles_1d[0].electrons.density
 if edge_present == 1:
     if len(edge_profiles.profiles_1d[0].electrons.density) < 1:
         print('edge_profiles.profiles_1d[:].electrons.density could not be read', file=sys.stderr)
-        for itime in range(etime):
-            edge_profiles.profiles_1d[itime].electrons.density = asarray([nan]*erho)
+        edge_profiles.profiles_1d[0].electrons.density = asarray([nan]*erho)
     electron_density[nrho:nrho+erho-1] = edge_profiles.profiles_1d[0].electrons.density
 
 # Te profile (not mandatory)
 electron_temperature = [0]
 if len(core_profiles.profiles_1d[0].electrons.temperature) < 1:
     print('core_profiles.profiles_1d[:].electrons.temperature could not be read', file=sys.stderr)
-    for itime in range(ntime):
-        core_profiles.profiles_1d[itime].electrons.temperature = asarray([nan]*nrho)
+    core_profiles.profiles_1d[0].electrons.temperature = asarray([nan]*nrho)
 electron_temperature[0:nrho-1] = core_profiles.profiles_1d[0].electrons.temperature*1.e-3
 if edge_present == 1:
     if len(edge_profiles.profiles_1d[0].electrons.temperature) < 1:
         print('edge_profiles.profiles_1d[:].electrons.temperature could not be read', file=sys.stderr)
-        for itime in range(etime):
-            edge_profiles.profiles_1d[itime].electrons.temperature = asarray([nan]*erho)
+        edge_profiles.profiles_1d[0].electrons.temperature = asarray([nan]*erho)
     electron_temperature[nrho:nrho+erho-1] = edge_profiles.profiles_1d[0].electrons.temperature*1.e-3
 
 # Ti profile (not mandatory)
 ti_flag = 0
 if len(core_profiles.profiles_1d[0].t_i_average) < 1:
     print('core_profiles.profiles_1d[:].t_i_average could not be read', file=sys.stderr)
-    for itime in range(ntime):
-        core_profiles.profiles_1d[itime].t_i_average = asarray([nan]*nrho)
+    core_profiles.profiles_1d[0].t_i_average = asarray([nan]*nrho)
 else:
     ti_flag = 1
 if edge_present == 1:
     if len(edge_profiles.profiles_1d[0].t_i_average) < 1:
         print('edge_profiles.profiles_1d[:].t_i_average could not be read', file=sys.stderr)
-        for itime in range(etime):
-            edge_profiles.profiles_1d[itime].t_i_average = asarray([nan]*erho)
+        edge_profiles.profiles_1d[0].t_i_average = asarray([nan]*erho)
 
 for ispecies in range(nspecies):
     if len(core_profiles.profiles_1d[0].ion[ispecies].temperature) < 1:
         print('core_profiles.profiles_1d[:].ion['+str(ispecies)+'].temperature could not be read', file=sys.stderr)
-        for itime in range(ntime):
-            core_profiles.profiles_1d[itime].ion[ispecies].temperature = asarray([nan]*nrho)
+        core_profiles.profiles_1d[0].ion[ispecies].temperature = asarray([nan]*nrho)
     else:
         if ti_flag == 0:
             ti_flag = 2
     if edge_present == 1:
         if len(edge_profiles.profiles_1d[0].ion[ispecies].temperature) < 1:
             print('edge_profiles.profiles_1d[:].ion['+str(ispecies)+'].temperature could not be read', file=sys.stderr)
-            for itime in range(etime):
-                edge_profiles.profiles_1d[itime].ion[ispecies].temperature = asarray([nan]*erho)
+            edge_profiles.profiles_1d[0].ion[ispecies].temperature = asarray([nan]*erho)
 
 ion_temperature = [0]
 if ti_flag == 1:
@@ -317,14 +311,12 @@ for ispecies in range(nspecies):
     ion_density[ispecies] = [0]
     if len(core_profiles.profiles_1d[0].ion[ispecies].density) < 1:
         print('core_profiles.profiles_1d[:].ion['+str(ispecies)+'].density could not be read', file=sys.stderr)
-        for itime in range(ntime):
-            core_profiles.profiles_1d[itime].ion[ispecies].density = asarray([nan]*nrho)
+        core_profiles.profiles_1d[0].ion[ispecies].density = asarray([nan]*nrho)
     ion_density[ispecies][0:nrho-1] = core_profiles.profiles_1d[0].ion[ispecies].density
     if edge_present == 1:
         if len(edge_profiles.profiles_1d[0].ion[ispecies].density) < 1:
             print('edge_profiles.profiles_1d[:].ion['+str(ispecies)+'].density could not be read', file=sys.stderr)
-            for itime in range(etime):
-                edge_profiles.profiles_1d[itime].ion[ispecies].density = asarray([nan]*erho)
+            edge_profiles.profiles_1d[0].ion[ispecies].density = asarray([nan]*erho)
         ion_density[ispecies][nrho:nrho+erho-1] = edge_profiles.profiles_1d[0].ion[ispecies].density
 
 # Vtor profile (not mandatory)
@@ -334,15 +326,13 @@ for ispecies in range(nspecies):
     ion_vtor[ispecies] = [0]
     if len(core_profiles.profiles_1d[0].ion[ispecies].velocity.toroidal) < 1:
         print('core_profiles.profiles_1d[:].ion['+str(ispecies)+'].velocity.toroidal could not be read', file=sys.stderr)
-        for itime in range(ntime):
-            core_profiles.profiles_1d[itime].ion[ispecies].velocity.toroidal = asarray([nan]*nrho)
+        core_profiles.profiles_1d[0].ion[ispecies].velocity.toroidal = asarray([nan]*nrho)
     else:
         vtor_flag = 1
         ion_vtor[ispecies][0:nrho-1] = abs(core_profiles.profiles_1d[0].ion[ispecies].velocity.toroidal)
     if len(core_profiles.profiles_1d[0].ion[ispecies].velocity_tor) < 1:
         print('core_profiles.profiles_1d[:].ion['+str(ispecies)+'].velocity_tor could not be read', file=sys.stderr)
-        for itime in range(ntime):
-            core_profiles.profiles_1d[itime].ion[ispecies].velocity_tor = asarray([nan]*nrho)
+        core_profiles.profiles_1d[0].ion[ispecies].velocity_tor = asarray([nan]*nrho)
     else:
         if vtor_flag == 0:
             vtor_flag = 2
@@ -351,14 +341,12 @@ for ispecies in range(nspecies):
         if vtor_flag == 1:
             if len(edge_profiles.profiles_1d[0].ion[ispecies].velocity.toroidal) < 1:
                 print('edge_profiles.profiles_1d[:].ion['+str(ispecies)+'].velocity.toroidal could not be read', file=sys.stderr)
-                for itime in range(etime):
-                    edge_profiles.profiles_1d[itime].ion[ispecies].velocity.toroidal = asarray([nan]*erho)
+                edge_profiles.profiles_1d[0].ion[ispecies].velocity.toroidal = asarray([nan]*erho)
             ion_vtor[ispecies][nrho:nrho+erho-1] = abs(edge_profiles.profiles_1d[0].ion[ispecies].velocity.toroidal)
         elif vtor_flag == 2:
             if len(edge_profiles.profiles_1d[0].ion[ispecies].velocity_tor) < 1:
                 print('edge_profiles.profiles_1d[:].ion['+str(ispecies)+'].velocity_tor could not be read', file=sys.stderr)
-                for itime in range(etime):
-                    edge_profiles.profiles_1d[itime].ion[ispecies].velocity_tor = asarray([nan]*erho)
+                edge_profiles.profiles_1d[0].ion[ispecies].velocity_tor = asarray([nan]*erho)
             ion_vtor[nrho:nrho+erho-1] = abs(edge_profiles.profiles_1d[0].ion[ispecies].velocity_tor)
 
 # Vpol profile (not mandatory)
@@ -368,15 +356,13 @@ for ispecies in range(nspecies):
     ion_vpol[ispecies] = [0]
     if len(core_profiles.profiles_1d[0].ion[ispecies].velocity.poloidal) < 1:
         print('core_profiles.profiles_1d[:].ion['+str(ispecies)+'].velocity.poloidal could not be read', file=sys.stderr)
-        for itime in range(ntime):
-            core_profiles.profiles_1d[itime].ion[ispecies].velocity.poloidal = asarray([nan]*nrho)
+        core_profiles.profiles_1d[0].ion[ispecies].velocity.poloidal = asarray([nan]*nrho)
     else:
         vpol_flag = 1
         ion_vpol[ispecies][0:nrho-1] = abs(core_profiles.profiles_1d[0].ion[ispecies].velocity.poloidal)
     if len(core_profiles.profiles_1d[0].ion[ispecies].velocity_pol) < 1:
         print('core_profiles.profiles_1d[:].ion['+str(ispecies)+'].velocity_pol could not be read', file=sys.stderr)
-        for itime in range(ntime):
-            core_profiles.profiles_1d[itime].ion[ispecies].velocity_pol = asarray([nan]*nrho)
+        core_profiles.profiles_1d[0].ion[ispecies].velocity_pol = asarray([nan]*nrho)
     else:
         if vpol_flag == 0:
             vpol_flag = 2
@@ -385,14 +371,12 @@ for ispecies in range(nspecies):
         if vpol_flag == 1:
             if len(edge_profiles.profiles_1d[0].ion[ispecies].velocity.poloidal) < 1:
                 print('edge_profiles.profiles_1d[:].ion['+str(ispecies)+'].velocity.poloidal could not be read', file=sys.stderr)
-                for itime in range(etime):
-                    edge_profiles.profiles_1d[itime].ion[ispecies].velocity.poloidal = asarray([nan]*erho)
+                edge_profiles.profiles_1d[0].ion[ispecies].velocity.poloidal = asarray([nan]*erho)
             ion_vpol[ispecies][nrho:nrho+erho-1] = abs(edge_profiles.profiles_1d[0].ion[ispecies].velocity.poloidal)
         elif vpol_flag == 2:
             if len(edge_profiles.profiles_1d[0].ion[ispecies].velocity_pol) < 1:
                 print('edge_profiles.profiles_1d[:].ion['+str(ispecies)+'].velocity_pol could not be read', file=sys.stderr)
-                for itime in range(etime):
-                    edge_profiles.profiles_1d[itime].ion[ispecies].velocity_pol = asarray([nan]*erho)
+                edge_profiles.profiles_1d[0].ion[ispecies].velocity_pol = asarray([nan]*erho)
             ion_vpol[nrho:nrho+erho-1] = abs(edge_profiles.profiles_1d[0].ion[ispecies].velocity_pol)
 
 # ----------------------------------------------------------------------
