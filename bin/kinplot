@@ -5,7 +5,7 @@ import os, sys, glob, yaml, argparse, re, imas, pdb
 from operator import itemgetter
 from stat import *
 from numpy import *
-import init_mendeleiev as mend
+import database_tools.init_mendeleiev as mend
 
 # ----------------------------------------------------------------------
 
