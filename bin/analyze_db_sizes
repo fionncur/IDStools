@@ -1,0 +1,66 @@
+#! /usr/bin/env python
+### David.Coster@ipp.mpg.de
+import numpy as np
+import imas
+import argparse
+import os
+import time
+IMAS_BACKEND = imas.imasdef.MDSPLUS_BACKEND
+
+parser = argparse.ArgumentParser(description="Calculate size of IDSs", epilog
+="""
+""", formatter_class=argparse.RawTextHelpFormatter)
+parser.add_argument("--user", "-u", type=str, help="user", default=os.getenv("USER"))
+parser.add_argument("--tokamak", "-t", "-m", "-d", type=str, help="tokamak", default=os.getenv("TOKAMAKNAME"))
+parser.add_argument("--version", "-v", type=str, help="version", default='3')
+parser.add_argument("--occurrence", "-o", type=int, help="version", default='0')
+parser.add_argument("shot", type=int, help="Shot number")
+parser.add_argument("run", type=int, help="Run number")
+args=parser.parse_args()
+
+def byte_size(O):
+  S = 0
+  if type(O) == str: 
+    S += len(O)
+  elif type(O) == np.ndarray:
+    S += O.nbytes
+  elif type(O) == int:
+    S += 4
+  elif type(O) == float:
+    S += 8
+  elif type(O) == list:
+    for o in O:
+      S += byte_size(o)
+  elif type(O) == dict:
+    for o in O.values():
+      S += byte_size(o)
+  else:
+    for o in O.__dict__.values():
+      S += byte_size(o)
+  return S
+
+IDS = imas.DBEntry(IMAS_BACKEND, args.tokamak, args.shot, args.run, user_name=args.user)
+IDS.open()
+
+print('\n\nExamining data for %s/%s/%s/%s/%s\n\n' % (args.user, args.tokamak, args.version, args.shot, args.run))
+
+SIZES = {}
+for i in [i.value for i in imas.IDSName]: 
+    HT = IDS.partial_get(i, 'ids_properties/homogeneous_time')
+    if HT >= 0:
+        SIZES[i] = {}
+        start_time = time.time()
+        SIZES[i]['IDS'] = IDS.get(i)
+        SIZES[i]['time'] = time.time() - start_time
+        SIZES[i]['bytes'] = byte_size(SIZES[i]['IDS'])
+        print('Reading %0.3f MB data for %s took %0.2f seconds' % ( SIZES[i]['bytes']/1024**2, i, SIZES[i]['time']))
+
+total = np.array([v['bytes'] for v in SIZES.values()]).sum()
+
+print('\n\nTotal data size = %4.1f MB\n' % (total/1024**2))
+
+print('\nFractions of the total size for %s/%s/%s/%s/%s\n' % (args.user, args.tokamak, args.version, args.shot, args.run))
+
+print('% bytes    IDS')
+for v in SIZES.keys():
+    print('%4.1f %%     %s' % (SIZES[v]['bytes']/total*100, v))

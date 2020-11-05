@@ -1,0 +1,48 @@
+#! /usr/bin/env python
+### David.Coster@ipp.mpg.de
+import numpy as np
+import imas
+import argparse
+import os
+IMAS_BACKEND = imas.imasdef.MDSPLUS_BACKEND
+
+parser = argparse.ArgumentParser(description="View information about sources", epilog
+="""
+""", formatter_class=argparse.RawTextHelpFormatter)
+parser.add_argument("--user", "-u", type=str, help="user",default=os.getenv("USER"))
+parser.add_argument("--tokamak", "-t", "-m", "-d", type=str, help="tokamak",default=os.getenv("TOKAMAKNAME"))
+parser.add_argument("--version", "-v", type=str, help="version",default='3')
+parser.add_argument("--occurrence", "-o", type=int, help="version",default='0')
+parser.add_argument("shot", type=int, help="Shot number")
+parser.add_argument("run", type=int, help="Run number")
+parser.add_argument("time", type=float, help="Time")
+args=parser.parse_args()
+
+IDS = imas.DBEntry(IMAS_BACKEND, args.tokamak, args.shot, args.run, user_name=args.user)
+IDS.open()
+S = IDS.get_slice('core_sources', args.time, imas.imasdef.CLOSEST_SAMPLE, occurrence=args.occurrence)
+print('\nTime = %0.3f for %s/%s/%s/%s/%s\n' % (S.time, args.user, args.tokamak, args.version, args.shot, args.run))
+for s in S.source:
+    print(s.identifier.name)
+    print("       electrons", end='')
+    # electrons
+    i= s.profiles_1d[0].electrons
+    if len(i.particles) == 0:
+        print('     particles     --       ', end='')
+    else:
+        print('     particles %13.6e' % (np.trapz(i.particles, s.profiles_1d[0].grid.volume)), end='')
+    if len(i.energy) == 0:
+        print('     energy     --       ')
+    else:
+        print('     energy %13.6e' % (np.trapz(i.energy, s.profiles_1d[0].grid.volume)))
+    # ions
+    for i in s.profiles_1d[0].ion:
+        print("    ", i.element[0].a, i.element[0].z_n, i.z_ion, end='')
+        if len(i.particles) == 0:
+           print('     particles     --       ', end='')
+        else:
+           print('     particles %13.6e' % (np.trapz(i.particles, s.profiles_1d[0].grid.volume)), end='')
+        if len(i.energy) == 0:
+           print('     energy     --     ')
+        else:
+           print('     energy %13.6e' % (np.trapz(i.energy, s.profiles_1d[0].grid.volume)))
