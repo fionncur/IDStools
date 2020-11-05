@@ -12,6 +12,8 @@ from operator import itemgetter
 from stat import *
 from pylab import *
 from numpy import *
+import matplotlib.pyplot as plt
+import matplotlib.ticker as mtick
 
 # ----------------------------------------------------------------------
 
@@ -29,31 +31,32 @@ parser.add_argument('-u','--user_or_path',help='User or absolute path name of th
 parser.add_argument('-d','--database',help='Database name of the targeted data-entry', required=False)
 parser.add_argument('-s','--shot',help='Shot number', required=True,type=int)
 parser.add_argument('-r','--run',help='Run number',required=True,type=int)
-parser.add_argument('-t','--time',help='Time', required=False,type=float)
-args = vars(parser.parse_args())
+group = parser.add_mutually_exclusive_group()
+group.add_argument('-t','--time',help='Time for profiles',required=False,type=float)
+group.add_argument('-n','--noProfiles',action='store_true',help='Do not plot profiles or equilibrium')
+
+
+args = parser.parse_args()
 
 # For execution from python shell
 #args = {'run': 6, 'database': None, 'user_or_path': None, 'time': None, 'shot': 4321}
 
-shot = args['shot']
-run  = args['run']
+shot = args.shot
+run  = args.run
 
 # User or absolute path name
-if args['user_or_path'] != None:
-    user_or_path = args['user_or_path']
-else:
+user_or_path = args.user_or_path
+if user_or_path == None:
     user_or_path = 'public'
 
 # Database name
-if args['database'] != None:
-    database = args['database']
-else:
-    database = 'iterdb'
+database = args.database
+if database == None:
+    database = 'iter'
 
 # Time
-if args['time'] != None:
-    time = args['time']
-else:
+time = args.time
+if time == None:
     time = -99.
 
 # Open the database and read the necessary IDSs
@@ -66,374 +69,20 @@ if err != 0:
     exit()
 
 if user_or_path == 'public':
-    DB_ABS_PATH = '/work/imas/shared/'+str(database)+'/3/0'
+    publichome = os.getenv("IMAS_HOME")
+    if (publichome == None):
+        print("Environment variable IMAS_HOME is not defined. Quitting.", file=sys.stderr)
+        sys.exit(1)
+    DB_ABS_PATH = publichome+'/shared/imasdb/'+str(database)+'/3/'+str(run//10000)
 else:
-    DB_ABS_PATH = os.path.expanduser("~{}".format(user_or_path))+"/public/imasdb/"+str(database)+"/3/0"
+    DB_ABS_PATH = os.path.expanduser("~{}".format(user_or_path))+"/public/imasdb/"+str(database)+"/3/"+str(run//10000)
 
-try:
-    #input.core_profiles.get()
-    core_profiles = input.core_profiles # To initialise the empty IDS structure
-    core_profiles.time=input.core_profiles.partialGet('time')
-    core_profiles.global_quantities=input.core_profiles.partialGet('global_quantities')
-    if core_profiles.time is None:
-        print('No core_profiles IDS in the data-entry --> Abort.', file=sys.stderr)
-        exit()
-except:
-    print('The core_profiles IDS is absent from the input data-entry', file=sys.stderr)
-    print('----> Aborted.', file=sys.stderr)
-    exit()
 
-try:
-    #input.equilibrium.get()
-    equilibrium = input.equilibrium # To initialise the empty IDS structure
-except:
-    print('The equilibrium IDS is absent from the input data-entry', file=sys.stderr)
-    print('----> Aborted.', file=sys.stderr)
-    exit()
-
-try:
-    input.summary.get()
-    summary = input.summary # To initialise the empty IDS structure
-except:
-    print('The summary IDS is absent from the input data-entry', file=sys.stderr)
-    print('----> Aborted.', file=sys.stderr)
-    exit()
 
 # ----------------------------------------------------------------------
-
-import matplotlib.pyplot as plt
-import matplotlib.ticker as mtick
-
-# Search for adequate time slice for display
-ntime = len(core_profiles.time)
-timevec = core_profiles.time
-if ntime > 1:
-    if time >= 0:
-        [tc,it] = find_nearest(timevec,time)
-    else:
-        it = int(ntime/2)
-        tc = timevec[it]
-    time = tc
-    print('   Time  = '+'%.2f' % tc+' s in range ['+'%.2f' % timevec[0]+','+'%.2f' % timevec[ntime-1]+'] s', file=sys.stderr)
-    print('   Index = ',str(it), file=sys.stderr)
-    print('   Averaged resolution = ', (timevec[ntime-1]-timevec[0])/(ntime-1),' s', file=sys.stderr)
-else:
-    if len(timevec) > 0:
-        tc = timevec[0]
-    else:
-        tc = 0
-    it = 0
-
-# Read 1D-profiles for this time slice
-core_profiles.profiles_1d.resize(1)
-core_profiles.profiles_1d[0] = input.core_profiles.partialGet('profiles_1d('+str(it)+')')
-
-# Below is less optimal than global partialGet on profiles_1d (keep it here for reference)
-#core_profiles.profiles_1d[0].grid.rho_tor_norm = input.core_profiles.partialGet('profiles_1d('+str(it)+')/grid/rho_tor_norm')
-#core_profiles.profiles_1d[0].grid.rho_tor      = input.core_profiles.partialGet('profiles_1d('+str(it)+')/grid/rho_tor')
-#core_profiles.profiles_1d[0].j_bootstrap       = input.core_profiles.partialGet('profiles_1d('+str(it)+')/j_bootstrap')
-#core_profiles.profiles_1d[0].j_non_inductive   = input.core_profiles.partialGet('profiles_1d('+str(it)+')/j_non_inductive')
-#core_profiles.profiles_1d[0].j_ohmic           = input.core_profiles.partialGet('profiles_1d('+str(it)+')/j_ohmic')
-#core_profiles.profiles_1d[0].j_total           = input.core_profiles.partialGet('profiles_1d('+str(it)+')/j_total')
-#core_profiles.profiles_1d[0].q                 = input.core_profiles.partialGet('profiles_1d('+str(it)+')/q')
-#core_profiles.profiles_1d[0].magnetic_shear    = input.core_profiles.partialGet('profiles_1d('+str(it)+')/magnetic_shear')
-
-equilibrium.time_slice.resize(1)
-equilibrium.time_slice[0].profiles_2d.resize(1)
-
-# Here individual partialGet seems more optimal than a global one on profiles_2d (not very clear)
-#equilibrium.time_slice[0].profiles_2d[0]   = input.equilibrium.partialGet('time_slice('+str(it)+')/profiles_2d(0)')
-equilibrium.time_slice[0].profiles_2d[0].r   = input.equilibrium.partialGet('time_slice('+str(it)+')/profiles_2d(0)/r')
-equilibrium.time_slice[0].profiles_2d[0].z   = input.equilibrium.partialGet('time_slice('+str(it)+')/profiles_2d(0)/z')
-equilibrium.time_slice[0].profiles_2d[0].psi = input.equilibrium.partialGet('time_slice('+str(it)+')/profiles_2d(0)/psi')
-
-time = tc
-
-# psi(R,Z) (not mandatory)
-plot_equi = 1
-if equilibrium.time_slice[0].profiles_2d[0].psi is None:
-    print('equilibrium.time_slice[:].profiles_2d[0].psi could not be read', file=sys.stderr)
-    plot_equi = 0
-
-if equilibrium.time_slice[0].profiles_2d[0].r is None:
-    print('equilibrium.time_slice[:].profiles_2d[0].r could not be read', file=sys.stderr)
-    plot_equi = 0
-
-if equilibrium.time_slice[0].profiles_2d[0].z is None:
-    print('equilibrium.time_slice[:].profiles_2d[0].z could not be read', file=sys.stderr)
-    plot_equi = 0
-
-# Rho profile (mandatory)
-nrho=0
-try:
-    rho_tor_norm = 0
-    if len(core_profiles.profiles_1d[0].grid.rho_tor_norm) > 0:
-        nrho = len(core_profiles.profiles_1d[0].grid.rho_tor_norm)
-        rho_tor_norm = core_profiles.profiles_1d[0].grid.rho_tor_norm
-    elif len(core_profiles.profiles_1d[0].grid.rho_tor) > 0:
-        nrho = len(core_profiles.profiles_1d[0].grid.rho_tor)
-        rho_tor_norm = core_profiles.profiles_1d[0].grid.rho_tor/core_profiles.profiles_1d[0].grid.rho_tor[nrho-1]
-except:
-    print('core_profiles.profiles_1d[:].grid.rho_tor_norm and rho_tor could not be read', file=sys.stderr)
-    print('----> Aborted.', file=sys.stderr)
-    exit()
-if nrho==0:
-    print('core_profiles.profiles_1d[:].grid.rho_tor_norm and rho_tor are empty', file=sys.stderr)
-    print('----> Aborted.', file=sys.stderr)
-    exit()
-
-# Ip waveform
-if len(summary.global_quantities.ip.value) < 1:
-    print('summary.global_quantities.ip.value could not be read', file=sys.stderr)
-    if len(core_profiles.global_quantities.ip) < 1:
-        print('core_profiles.global_quantities.ip could not be read', file=sys.stderr)
-        summary.global_quantities.ip.value = asarray([nan]*ntime)
-    else:
-        print('use core_profiles.global_quantities.ip instead', file=sys.stderr)
-        summary.global_quantities.ip.value = core_profiles.global_quantities.ip
-
-# Current_non_inductive waveform
-if len(summary.global_quantities.current_non_inductive.value) < 1:
-    print('summary.global_quantities.current_non_inductive.value could not be read', file=sys.stderr)
-    if len(core_profiles.global_quantities.current_non_inductive) < 1:
-        print('core_profiles.global_quantities.current_non_inductive could not be read', file=sys.stderr)
-        summary.global_quantities.current_non_inductive.value = asarray([nan]*ntime)
-    else:
-        print('use core_profiles.global_quantities.current_non_inductive instead', file=sys.stderr)
-        summary.global_quantities.current_non_inductive.value = core_profiles.global_quantities.current_non_inductive
-
-# Current_bootstrap waveform
-if len(summary.global_quantities.current_bootstrap.value) < 1:
-    print('summary.global_quantities.current_bootstrap.value could not be read', file=sys.stderr)
-    if len(core_profiles.global_quantities.current_bootstrap) < 1:
-        print('core_profiles.global_quantities.current_bootstrap could not be read', file=sys.stderr)
-        summary.global_quantities.current_bootstrap.value = asarray([nan]*ntime)
-    else:
-        print('use core_profiles.global_quantities.current_bootstrap instead', file=sys.stderr)
-        summary.global_quantities.current_bootstrap.value = core_profiles.global_quantities.current_bootstrap
-
-# V_loop waveform
-if len(summary.global_quantities.v_loop.value) < 1:
-    print('summary.global_quantities.v_loop.value could not be read', file=sys.stderr)
-    if len(core_profiles.global_quantities.v_loop) < 1:
-        print('core_profiles.global_quantities.v_loop could not be read', file=sys.stderr)
-        summary.global_quantities.v_loop.value = asarray([nan]*ntime)
-    else:
-        print('use core_profiles.global_quantities.v_loop instead', file=sys.stderr)
-        summary.global_quantities.v_loop.value = core_profiles.global_quantities.v_loop
-
-# Beta_tor_norm waveform
-if len(summary.global_quantities.beta_tor_norm.value) < 1:
-    print('summary.global_quantities.beta_tor_norm.value could not be read', file=sys.stderr)
-    if len(core_profiles.global_quantities.beta_tor_norm) < 1:
-        print('core_profiles.global_quantities.beta_tor_norm could not be read', file=sys.stderr)
-        summary.global_quantities.beta_tor_norm.value = asarray([nan]*ntime)
-    else:
-        print('use core_profiles.global_quantities.beta_tor_norm instead', file=sys.stderr)
-        summary.global_quantities.beta_tor_norm.value = core_profiles.global_quantities.beta_tor_norm
-
-# Beta_pol waveform
-if len(summary.global_quantities.beta_pol.value) < 1:
-    print('summary.global_quantities.beta_pol.value could not be read', file=sys.stderr)
-    if len(core_profiles.global_quantities.beta_pol) < 1:
-        print('core_profiles.global_quantities.beta_pol could not be read', file=sys.stderr)
-        summary.global_quantities.beta_pol.value = asarray([nan]*ntime)
-    else:
-        print('use core_profiles.global_quantities.beta_pol instead', file=sys.stderr)
-        summary.global_quantities.beta_pol.value = core_profiles.global_quantities.beta_pol
-
-# Energy_diamagnetic waveform
-if len(summary.global_quantities.energy_diamagnetic.value) < 1:
-    print('summary.global_quantities.energy_diamagnetic.value could not be read', file=sys.stderr)
-    if len(core_profiles.global_quantities.energy_diamagnetic) < 1:
-        print('core_profiles.global_quantities.energy_diamagnetic could not be read', file=sys.stderr)
-        summary.global_quantities.energy_diamagnetic.value = asarray([nan]*ntime)
-    else:
-        print('use core_profiles.global_quantities.energy_diamagnetic instead', file=sys.stderr)
-        summary.global_quantities.energy_diamagnetic.value = core_profiles.global_quantities.energy_diamagnetic
-
-# Current_ohm waveform
-if len(summary.global_quantities.current_ohm.value) < 1:
-    print('summary.global_quantities.current_ohm.value could not be read', file=sys.stderr)
-    summary.global_quantities.current_ohm.value = asarray([nan]*ntime)
-
-# Energy_total waveform
-if len(summary.global_quantities.energy_total.value) < 1:
-    print('summary.global_quantities.energy_total.value could not be read', file=sys.stderr)
-    summary.global_quantities.energy_total.value = asarray([nan]*ntime)
-
-# Energy_thermal waveform
-if len(summary.global_quantities.energy_thermal.value) < 1:
-    print('summary.global_quantities.energy_thermal.value could not be read', file=sys.stderr)
-    summary.global_quantities.energy_thermal.value = asarray([nan]*ntime)
-
-# B0 waveform
-if len(summary.global_quantities.b0.value) < 1:
-    print('summary.global_quantities.b0.value could not be read', file=sys.stderr)
-    summary.global_quantities.b0.value = asarray([nan]*ntime)
-
-# H_98 waveform
-if len(summary.global_quantities.h_98.value) < 1:
-    print('summary.global_quantities.h_98.value could not be read', file=sys.stderr)
-    summary.global_quantities.h_98.value = asarray([nan]*ntime)
-
-# Tau_energy waveform
-if len(summary.global_quantities.tau_energy.value) < 1:
-    print('summary.global_quantities.tau_energy.value could not be read', file=sys.stderr)
-    summary.global_quantities.tau_energy.value = asarray([nan]*ntime)
-
-# H-mode flag
-if len(summary.global_quantities.h_mode.value) < 1:
-    print('summary.global_quantities.h_mode.value could not be read', file=sys.stderr)
-    summary.global_quantities.h_mode.value = asarray([nan]*ntime)
-
-# H&CD waveforms
-if len(summary.time)==0:
-    print('The summary IDS is absent from the input data-entry => no H&CD waveform available', file=sys.stderr)
-
-# J_bootstrap profile
-if len(core_profiles.profiles_1d[0].j_bootstrap) < 1:
-    print('core_profiles.profiles_1d['+str(it)+'].j_bootstrap could not be read', file=sys.stderr)
-    core_profiles.profiles_1d[0].j_bootstrap = asarray([nan]*nrho)
-
-# J_non_inductive profile
-if len(core_profiles.profiles_1d[0].j_non_inductive) < 1:
-    print('core_profiles.profiles_1d['+str(it)+'].j_non_inductive could not be read', file=sys.stderr)
-    core_profiles.profiles_1d[0].j_non_inductive = asarray([nan]*nrho)
-
-# J_ohmic profile
-if len(core_profiles.profiles_1d[0].j_ohmic) < 1:
-    print('core_profiles.profiles_1d['+str(it)+'].j_ohmic could not be read', file=sys.stderr)
-    core_profiles.profiles_1d[0].j_ohmic = asarray([nan]*nrho)
-
-# J_total profile
-if len(core_profiles.profiles_1d[0].j_total) < 1:
-    print('core_profiles.profiles_1d['+str(it)+'].j_total could not be read', file=sys.stderr)
-    core_profiles.profiles_1d[0].j_total = asarray([nan]*nrho)
-
-# q-profile
-if len(core_profiles.profiles_1d[0].q) < 1:
-    print('core_profiles.profiles_1d['+str(it)+'].q could not be read', file=sys.stderr)
-    core_profiles.profiles_1d[0].q = asarray([nan]*nrho)
-
-# Magnetic shear profile
-if len(core_profiles.profiles_1d[0].magnetic_shear) < 1:
-    print('core_profiles.profiles_1d['+str(it)+'].magnetic_shear could not be read', file=sys.stderr)
-    core_profiles.profiles_1d[0].magnetic_shear = asarray([nan]*nrho)
 
 hostdir = os.environ["HOSTNAME"]+":"+DB_ABS_PATH
 hostdir = hostdir[:-2]
-
-if len(core_profiles.profiles_1d[0].q) != nrho:
-    print('--------------------------------------------------------------', file=sys.stderr)
-    print('Dimensions of input core profiles are not consistent:', file=sys.stderr)
-    print('  core_profiles.profiles_1d[0].grid.rho_tor(_norm)', file=sys.stderr)
-    print('  and core_profiles.profiles_1d[0].q', file=sys.stderr)
-    print('  have different dimensions:', file=sys.stderr)
-    print('- len(core_profiles.profiles_1d[0].grid.rho_tor(_norm))= ',nrho, file=sys.stderr)
-    print('- len(core_profiles.profiles_1d[0].q = ',len(core_profiles.profiles_1d[0].q), file=sys.stderr)
-    print('----> Aborted.', file=sys.stderr)
-    print('--------------------------------------------------------------', file=sys.stderr)
-    exit()
-
-# ----------------------------------------------------------------------
-
-# H&CD power
-p_ec  = asarray([0]*ntime)
-p_ic  = asarray([0]*ntime)
-p_nbi = asarray([0]*ntime)
-p_lh  = asarray([0]*ntime)
-n_ec  = len(summary.heating_current_drive.ec)
-n_ic  = len(summary.heating_current_drive.ic)
-n_nbi = len(summary.heating_current_drive.nbi)
-n_lh  = len(summary.heating_current_drive.lh)
-if n_ec > 0:
-    for isource in range(n_ec):
-        if len(summary.heating_current_drive.ec[isource].power.value) > 0:
-            p_ec = p_ec + summary.heating_current_drive.ec[isource].power.value*1.e-6
-
-if n_ic > 0:
-    for isource in range(n_ic):
-        if len(summary.heating_current_drive.ic[isource].power.value) > 0:
-            p_ic = p_ic + summary.heating_current_drive.ic[isource].power.value*1.e-6
-
-if n_nbi > 0:
-    for isource in range(n_nbi):
-        if len(summary.heating_current_drive.nbi[isource].power.value) > 0:
-            p_nbi = p_nbi + summary.heating_current_drive.nbi[isource].power.value*1.e-6
-
-if n_lh > 0:
-    for isource in range(n_lh):
-        if len(summary.heating_current_drive.lh[isource].power.value) > 0:
-            p_lh = p_lh + summary.heating_current_drive.lh[isource].power.value*1.e-6
-
-p_hcd = p_ec + p_ic + p_nbi + p_lh
-
-# Fusion power
-p_fus = asarray([0]*ntime)
-if len(summary.fusion.power.value) > 0:
-    p_fus = summary.fusion.power.value*1.e-6
-
-# Neutron power
-p_neut = asarray([0]*ntime)
-if len(summary.fusion.neutron_power_total.value) > 0:
-    p_neut = summary.fusion.neutron_power_total.value*1.e-6
-
-# H-mode flag
-def indices(a, func):
-    return [i for (i, val) in enumerate(a) if func(val)]
-
-# Create the dictionary defining the list of waveforms (central values) that can be displayed
-waveform = {}
-waveform['time'] = timevec
-waveform['ip'] = summary.global_quantities.ip.value
-waveform['current_non_inductive'] = summary.global_quantities.current_non_inductive.value
-waveform['current_bootstrap'] = summary.global_quantities.current_bootstrap.value
-waveform['v_loop'] = summary.global_quantities.v_loop.value
-waveform['beta_tor_norm'] = summary.global_quantities.beta_tor_norm.value
-waveform['beta_pol'] = summary.global_quantities.beta_pol.value
-waveform['energy_diamagnetic'] = summary.global_quantities.energy_diamagnetic.value
-waveform['current_ohm'] = summary.global_quantities.current_ohm.value
-waveform['energy_total'] = summary.global_quantities.energy_total.value
-waveform['energy_thermal'] = summary.global_quantities.energy_thermal.value
-waveform['b0'] = summary.global_quantities.b0.value
-waveform['h_98'] = summary.global_quantities.h_98.value
-waveform['tau_energy'] = summary.global_quantities.tau_energy.value
-waveform['h_mode'] = summary.global_quantities.h_mode.value
-waveform['p_hcd'] = p_hcd
-waveform['p_ec'] = p_ec
-waveform['p_ic'] = p_ic
-waveform['p_nbi'] = p_nbi
-waveform['p_lh'] = p_lh
-waveform['p_fusion'] = p_fus
-waveform['p_neutron'] = p_neut
-
-# Create the dictionary defining the list of profiles that can be displayed
-profiles = {}
-profiles['rhonorm'] = rho_tor_norm
-profiles['j_bootstrap'] = core_profiles.profiles_1d[0].j_bootstrap
-profiles['j_non_inductive'] = core_profiles.profiles_1d[0].j_non_inductive
-profiles['j_ohmic'] = core_profiles.profiles_1d[0].j_ohmic
-profiles['j_total'] = core_profiles.profiles_1d[0].j_total
-profiles['q'] = core_profiles.profiles_1d[0].q
-profiles['magnetic_shear'] = core_profiles.profiles_1d[0].magnetic_shear
-
-h_mode_indices  = indices(waveform['h_mode'], lambda h_mode_flag: h_mode_flag>0)
-
-# For bad initialisations in the input scenario
-#import pdb
-#pdb.set_trace()
-h_mode_indices = h_mode_indices[2:-1]
-
-if len(h_mode_indices) > 0:
-    hmode = 1
-    th_min = timevec[h_mode_indices[0]]
-    th_max = timevec[h_mode_indices[len(h_mode_indices)-1]]
-else:
-    hmode = 0
-
-
-# ----------------------------------------------------------------------
 
 # Tick size and X and Y axes
 ticksize = 12
@@ -444,7 +93,10 @@ font = {'family': 'serif','color':  'darkred','weight': 'normal','size': fontsiz
 
 # Frame configuration
 nline = 4
-ncol  = 4
+if args.noProfiles:
+    ncol = 2
+else:
+    ncol = 4
 legx_pos = 1.28
 legy_pos = 1.05
 
@@ -503,12 +155,353 @@ def time_display(plot,time):
 
 # ----------------------------------------------------------------------
 
+
+
+
+if not args.noProfiles:
+    try:
+        #input.core_profiles.get()
+        core_profiles = input.core_profiles # To initialise the empty IDS structure
+        core_profiles.time=input.core_profiles.partialGet('time')
+        core_profiles.global_quantities=input.core_profiles.partialGet('global_quantities')
+        if core_profiles.time is None:
+            print('No core_profiles IDS in the data-entry --> Abort.', file=sys.stderr)
+            exit()
+    except:
+        print('The core_profiles IDS is absent from the input data-entry', file=sys.stderr)
+        print('----> Aborted.', file=sys.stderr)
+        exit()
+
+    try:
+        #input.equilibrium.get()
+        equilibrium = input.equilibrium # To initialise the empty IDS structure
+    except:
+        print('The equilibrium IDS is absent from the input data-entry', file=sys.stderr)
+        print('----> Aborted.', file=sys.stderr)
+        exit()
+
+    # Search for adequate time slice for display
+    ntime = len(core_profiles.time)
+    timevec = core_profiles.time
+    if ntime > 1:
+        if time >= 0:
+            [tc,it] = find_nearest(timevec,time)
+        else:
+            it = int(ntime/2)
+            tc = timevec[it]
+        time = tc
+        print('   Time  = '+'%.2f' % tc+' s in range ['+'%.2f' % timevec[0]+','+'%.2f' % timevec[ntime-1]+'] s', file=sys.stderr)
+        print('   Index = ',str(it), file=sys.stderr)
+        print('   Averaged resolution = ', (timevec[ntime-1]-timevec[0])/(ntime-1),' s', file=sys.stderr)
+    else:
+        if len(timevec) > 0:
+            tc = timevec[0]
+        else:
+            tc = 0
+        it = 0
+
+    # Read 1D-profiles for this time slice
+    core_profiles.profiles_1d.resize(1)
+    core_profiles.profiles_1d[0] = input.core_profiles.partialGet('profiles_1d('+str(it)+')')
+
+    # Below is less optimal than global partialGet on profiles_1d (keep it here for reference)
+    #core_profiles.profiles_1d[0].grid.rho_tor_norm = input.core_profiles.partialGet('profiles_1d('+str(it)+')/grid/rho_tor_norm')
+    #core_profiles.profiles_1d[0].grid.rho_tor      = input.core_profiles.partialGet('profiles_1d('+str(it)+')/grid/rho_tor')
+    #core_profiles.profiles_1d[0].j_bootstrap       = input.core_profiles.partialGet('profiles_1d('+str(it)+')/j_bootstrap')
+    #core_profiles.profiles_1d[0].j_non_inductive   = input.core_profiles.partialGet('profiles_1d('+str(it)+')/j_non_inductive')
+    #core_profiles.profiles_1d[0].j_ohmic           = input.core_profiles.partialGet('profiles_1d('+str(it)+')/j_ohmic')
+    #core_profiles.profiles_1d[0].j_total           = input.core_profiles.partialGet('profiles_1d('+str(it)+')/j_total')
+    #core_profiles.profiles_1d[0].q                 = input.core_profiles.partialGet('profiles_1d('+str(it)+')/q')
+    #core_profiles.profiles_1d[0].magnetic_shear    = input.core_profiles.partialGet('profiles_1d('+str(it)+')/magnetic_shear')
+
+    equilibrium.time_slice.resize(1)
+    equilibrium.time_slice[0].profiles_2d.resize(1)
+
+    # Here individual partialGet seems more optimal than a global one on profiles_2d (not very clear)
+    #equilibrium.time_slice[0].profiles_2d[0]   = input.equilibrium.partialGet('time_slice('+str(it)+')/profiles_2d(0)')
+    equilibrium.time_slice[0].profiles_2d[0].r   = input.equilibrium.partialGet('time_slice('+str(it)+')/profiles_2d(0)/r')
+    equilibrium.time_slice[0].profiles_2d[0].z   = input.equilibrium.partialGet('time_slice('+str(it)+')/profiles_2d(0)/z')
+    equilibrium.time_slice[0].profiles_2d[0].psi = input.equilibrium.partialGet('time_slice('+str(it)+')/profiles_2d(0)/psi')
+
+    time = tc
+
+    # psi(R,Z) (not mandatory)
+    plot_equi = 1
+    if equilibrium.time_slice[0].profiles_2d[0].psi is None:
+        print('equilibrium.time_slice[:].profiles_2d[0].psi could not be read', file=sys.stderr)
+        plot_equi = 0
+
+    if equilibrium.time_slice[0].profiles_2d[0].r is None:
+        print('equilibrium.time_slice[:].profiles_2d[0].r could not be read', file=sys.stderr)
+        plot_equi = 0
+
+    if equilibrium.time_slice[0].profiles_2d[0].z is None:
+        print('equilibrium.time_slice[:].profiles_2d[0].z could not be read', file=sys.stderr)
+        plot_equi = 0
+
+    # Rho profile (mandatory)
+    nrho=0
+    try:
+        rho_tor_norm = 0
+        if len(core_profiles.profiles_1d[0].grid.rho_tor_norm) > 0:
+            nrho = len(core_profiles.profiles_1d[0].grid.rho_tor_norm)
+            rho_tor_norm = core_profiles.profiles_1d[0].grid.rho_tor_norm
+        elif len(core_profiles.profiles_1d[0].grid.rho_tor) > 0:
+            nrho = len(core_profiles.profiles_1d[0].grid.rho_tor)
+            rho_tor_norm = core_profiles.profiles_1d[0].grid.rho_tor/core_profiles.profiles_1d[0].grid.rho_tor[nrho-1]
+    except:
+        print('core_profiles.profiles_1d[:].grid.rho_tor_norm and rho_tor could not be read', file=sys.stderr)
+        print('----> Aborted.', file=sys.stderr)
+        exit()
+    if nrho==0:
+        print('core_profiles.profiles_1d[:].grid.rho_tor_norm and rho_tor are empty', file=sys.stderr)
+        print('----> Aborted.', file=sys.stderr)
+        exit()
+
+
+    # J_bootstrap profile
+    if len(core_profiles.profiles_1d[0].j_bootstrap) < 1:
+        print('core_profiles.profiles_1d['+str(it)+'].j_bootstrap could not be read', file=sys.stderr)
+        core_profiles.profiles_1d[0].j_bootstrap = asarray([nan]*nrho)
+
+    # J_non_inductive profile
+    if len(core_profiles.profiles_1d[0].j_non_inductive) < 1:
+        print('core_profiles.profiles_1d['+str(it)+'].j_non_inductive could not be read', file=sys.stderr)
+        core_profiles.profiles_1d[0].j_non_inductive = asarray([nan]*nrho)
+
+    # J_ohmic profile
+    if len(core_profiles.profiles_1d[0].j_ohmic) < 1:
+        print('core_profiles.profiles_1d['+str(it)+'].j_ohmic could not be read', file=sys.stderr)
+        core_profiles.profiles_1d[0].j_ohmic = asarray([nan]*nrho)
+
+    # J_total profile
+    if len(core_profiles.profiles_1d[0].j_total) < 1:
+        print('core_profiles.profiles_1d['+str(it)+'].j_total could not be read', file=sys.stderr)
+        core_profiles.profiles_1d[0].j_total = asarray([nan]*nrho)
+
+    # q-profile
+    if len(core_profiles.profiles_1d[0].q) < 1:
+        print('core_profiles.profiles_1d['+str(it)+'].q could not be read', file=sys.stderr)
+        core_profiles.profiles_1d[0].q = asarray([nan]*nrho)
+
+    # Magnetic shear profile
+    if len(core_profiles.profiles_1d[0].magnetic_shear) < 1:
+        print('core_profiles.profiles_1d['+str(it)+'].magnetic_shear could not be read', file=sys.stderr)
+        core_profiles.profiles_1d[0].magnetic_shear = asarray([nan]*nrho)
+
+    if len(core_profiles.profiles_1d[0].q) != nrho:
+        print('--------------------------------------------------------------', file=sys.stderr)
+        print('Dimensions of input core profiles are not consistent:', file=sys.stderr)
+        print('  core_profiles.profiles_1d[0].grid.rho_tor(_norm)', file=sys.stderr)
+        print('  and core_profiles.profiles_1d[0].q', file=sys.stderr)
+        print('  have different dimensions:', file=sys.stderr)
+        print('- len(core_profiles.profiles_1d[0].grid.rho_tor(_norm))= ',nrho, file=sys.stderr)
+        print('- len(core_profiles.profiles_1d[0].q = ',len(core_profiles.profiles_1d[0].q), file=sys.stderr)
+        print('----> Aborted.', file=sys.stderr)
+        print('--------------------------------------------------------------', file=sys.stderr)
+        exit()
+
+
+    # Create the dictionary defining the list of profiles that can be displayed
+    profiles = {}
+    profiles['rhonorm'] = rho_tor_norm
+    profiles['j_bootstrap'] = core_profiles.profiles_1d[0].j_bootstrap
+    profiles['j_non_inductive'] = core_profiles.profiles_1d[0].j_non_inductive
+    profiles['j_ohmic'] = core_profiles.profiles_1d[0].j_ohmic
+    profiles['j_total'] = core_profiles.profiles_1d[0].j_total
+    profiles['q'] = core_profiles.profiles_1d[0].q
+    profiles['magnetic_shear'] = core_profiles.profiles_1d[0].magnetic_shear
+
+
+
+
+
+
+
+# ----------------------------------------------------------------------
+
+
+try:
+    input.summary.get()
+    summary = input.summary # To initialise the empty IDS structure
+except:
+    print('The summary IDS is absent from the input data-entry', file=sys.stderr)
+    print('----> Aborted.', file=sys.stderr)
+    exit()
+
+
+stime = len(summary.time)
+
+if stime < 1:
+    print('The summary IDS is absent from the input data-entry', file=sys.stderr)
+    print('----> Aborted.', file=sys.stderr)
+    sys.exit(1)
+
+
+# Ip waveform
+if len(summary.global_quantities.ip.value) < 1:
+    print('summary.global_quantities.ip.value could not be read', file=sys.stderr)
+    summary.global_quantities.ip.value = asarray([nan]*stime)
+
+# Current_non_inductive waveform
+if len(summary.global_quantities.current_non_inductive.value) < 1:
+    print('summary.global_quantities.current_non_inductive.value could not be read', file=sys.stderr)
+    summary.global_quantities.current_non_inductive.value = asarray([nan]*stime)
+
+# Current_bootstrap waveform
+if len(summary.global_quantities.current_bootstrap.value) < 1:
+    print('summary.global_quantities.current_bootstrap.value could not be read', file=sys.stderr)
+    summary.global_quantities.current_bootstrap.value = asarray([nan]*stime)
+
+# V_loop waveform
+if len(summary.global_quantities.v_loop.value) < 1:
+    print('summary.global_quantities.v_loop.value could not be read', file=sys.stderr)
+    summary.global_quantities.v_loop.value = asarray([nan]*stime)
+
+# Beta_tor_norm waveform
+if len(summary.global_quantities.beta_tor_norm.value) < 1:
+    print('summary.global_quantities.beta_tor_norm.value could not be read', file=sys.stderr)
+    summary.global_quantities.beta_tor_norm.value = asarray([nan]*stime)
+
+# Beta_pol waveform
+if len(summary.global_quantities.beta_pol.value) < 1:
+    print('summary.global_quantities.beta_pol.value could not be read', file=sys.stderr)
+    summary.global_quantities.beta_pol.value = asarray([nan]*stime)
+
+# Energy_diamagnetic waveform
+if len(summary.global_quantities.energy_diamagnetic.value) < 1:
+    print('summary.global_quantities.energy_diamagnetic.value could not be read', file=sys.stderr)
+    summary.global_quantities.energy_diamagnetic.value = asarray([nan]*stime)
+
+# Current_ohm waveform
+if len(summary.global_quantities.current_ohm.value) < 1:
+    print('summary.global_quantities.current_ohm.value could not be read', file=sys.stderr)
+    summary.global_quantities.current_ohm.value = asarray([nan]*stime)
+
+# Energy_total waveform
+if len(summary.global_quantities.energy_total.value) < 1:
+    print('summary.global_quantities.energy_total.value could not be read', file=sys.stderr)
+    summary.global_quantities.energy_total.value = asarray([nan]*stime)
+
+# Energy_thermal waveform
+if len(summary.global_quantities.energy_thermal.value) < 1:
+    print('summary.global_quantities.energy_thermal.value could not be read', file=sys.stderr)
+    summary.global_quantities.energy_thermal.value = asarray([nan]*stime)
+
+# B0 waveform
+if len(summary.global_quantities.b0.value) < 1:
+    print('summary.global_quantities.b0.value could not be read', file=sys.stderr)
+    summary.global_quantities.b0.value = asarray([nan]*stime)
+
+# H_98 waveform
+if len(summary.global_quantities.h_98.value) < 1:
+    print('summary.global_quantities.h_98.value could not be read', file=sys.stderr)
+    summary.global_quantities.h_98.value = asarray([nan]*stime)
+
+# Tau_energy waveform
+if len(summary.global_quantities.tau_energy.value) < 1:
+    print('summary.global_quantities.tau_energy.value could not be read', file=sys.stderr)
+    summary.global_quantities.tau_energy.value = asarray([nan]*stime)
+
+# H-mode flag
+if len(summary.global_quantities.h_mode.value) < 1:
+    print('summary.global_quantities.h_mode.value could not be read', file=sys.stderr)
+    summary.global_quantities.h_mode.value = asarray([nan]*stime)
+
+
+# ----------------------------------------------------------------------
+
+# H&CD power
+p_ec  = asarray([0]*stime)
+p_ic  = asarray([0]*stime)
+p_nbi = asarray([0]*stime)
+p_lh  = asarray([0]*stime)
+n_ec  = len(summary.heating_current_drive.ec)
+n_ic  = len(summary.heating_current_drive.ic)
+n_nbi = len(summary.heating_current_drive.nbi)
+n_lh  = len(summary.heating_current_drive.lh)
+if n_ec > 0:
+    for isource in range(n_ec):
+        if len(summary.heating_current_drive.ec[isource].power.value) > 0:
+            p_ec = p_ec + summary.heating_current_drive.ec[isource].power.value*1.e-6
+
+if n_ic > 0:
+    for isource in range(n_ic):
+        if len(summary.heating_current_drive.ic[isource].power.value) > 0:
+            p_ic = p_ic + summary.heating_current_drive.ic[isource].power.value*1.e-6
+
+if n_nbi > 0:
+    for isource in range(n_nbi):
+        if len(summary.heating_current_drive.nbi[isource].power.value) > 0:
+            p_nbi = p_nbi + summary.heating_current_drive.nbi[isource].power.value*1.e-6
+
+if n_lh > 0:
+    for isource in range(n_lh):
+        if len(summary.heating_current_drive.lh[isource].power.value) > 0:
+            p_lh = p_lh + summary.heating_current_drive.lh[isource].power.value*1.e-6
+
+p_hcd = p_ec + p_ic + p_nbi + p_lh
+
+# Fusion power
+p_fus = asarray([0]*stime)
+if len(summary.fusion.power.value) > 0:
+    p_fus = summary.fusion.power.value*1.e-6
+
+# Neutron power
+p_neut = asarray([0]*stime)
+if len(summary.fusion.neutron_power_total.value) > 0:
+    p_neut = summary.fusion.neutron_power_total.value*1.e-6
+
+# H-mode flag
+def indices(a, func):
+    return [i for (i, val) in enumerate(a) if func(val)]
+
+# Create the dictionary defining the list of waveforms (central values) that can be displayed
+waveform = {}
+waveform['time'] = summary.time #timevec
+waveform['ip'] = summary.global_quantities.ip.value
+waveform['current_non_inductive'] = summary.global_quantities.current_non_inductive.value
+waveform['current_bootstrap'] = summary.global_quantities.current_bootstrap.value
+waveform['v_loop'] = summary.global_quantities.v_loop.value
+waveform['beta_tor_norm'] = summary.global_quantities.beta_tor_norm.value
+waveform['beta_pol'] = summary.global_quantities.beta_pol.value
+waveform['energy_diamagnetic'] = summary.global_quantities.energy_diamagnetic.value
+waveform['current_ohm'] = summary.global_quantities.current_ohm.value
+waveform['energy_total'] = summary.global_quantities.energy_total.value
+waveform['energy_thermal'] = summary.global_quantities.energy_thermal.value
+waveform['b0'] = summary.global_quantities.b0.value
+waveform['h_98'] = summary.global_quantities.h_98.value
+waveform['tau_energy'] = summary.global_quantities.tau_energy.value
+waveform['h_mode'] = summary.global_quantities.h_mode.value
+waveform['p_hcd'] = p_hcd
+waveform['p_ec'] = p_ec
+waveform['p_ic'] = p_ic
+waveform['p_nbi'] = p_nbi
+waveform['p_lh'] = p_lh
+waveform['p_fusion'] = p_fus
+waveform['p_neutron'] = p_neut
+
+h_mode_indices  = indices(waveform['h_mode'], lambda h_mode_flag: h_mode_flag>0)
+h_mode_indices = h_mode_indices[2:-1]
+
+if len(h_mode_indices) > 0:
+    hmode = 1
+    th_min = summary.time[h_mode_indices[0]]
+    th_max = summary.time[h_mode_indices[len(h_mode_indices)-1]]
+else:
+    hmode = 0
+
+
+
+# Starts plotting
+
 # Display the figure
 plt.figure()
 
 single_style='o'
 multi_style='-'
 plotstyle = multi_style if len(waveform['time']) > 1 else single_style
+
 # H&CD waveforms
 ax1 = plt.subplot2grid((nline,ncol), (0,0), colspan=2)
 nleg = 0
@@ -541,7 +534,7 @@ if max(waveform['p_neutron']) > 0:
     plt.plot(waveform['time'],waveform['p_neutron'],plotstyle,label=r'$P_{NEUT}$')
     nleg = nleg + 1
 
-plt.xlim(timevec[0],timevec[ntime-1])
+plt.xlim(summary.time[0],summary.time[-1])
 
 time_display(plt,time)
 nleg = nleg + 1
@@ -558,6 +551,8 @@ elif nleg == 7:
 else:
     legfsize = 7
 
+
+
 CustomLegend_wf(legend,legfsize)
 Signature(hostdir,shot,run,plt)
 plt.title('Profiles displayed for t = '+'%.1f' % time+' s', fontdict=font)
@@ -569,7 +564,7 @@ plt.plot(waveform['time'],abs(waveform['ip'])*1.e-6,plotstyle,label=r'$|I_p|$')
 #plt.plot(waveform['time'],waveform['current_bootstrap']*1.e-6,label=r'$J_{BOOT}$')
 #plt.plot(waveform['time'],waveform['current_ohm']*1.e-6,label=r'$J_{OHM}$')
 plt.plot(waveform['time'],abs(waveform['b0']),plotstyle,label=r'$|B_0|$')
-plt.xlim(timevec[0],timevec[ntime-1])
+plt.xlim(summary.time[0],summary.time[-1])
 time_display(plt,time)
 if hmode == 1: hmode_display(plt,th_min,th_max)
 
@@ -584,7 +579,7 @@ ax3 = plt.subplot2grid((nline,ncol), (2,0), colspan=2)
 plt.plot(waveform['time'],waveform['energy_total']*1.e-6,plotstyle,label=r'$W_{TOT}$')
 plt.plot(waveform['time'],waveform['energy_diamagnetic']*1.e-6,plotstyle,label=r'$W_{DIA}$')
 plt.plot(waveform['time'],waveform['energy_thermal']*1.e-6,plotstyle,label=r'$W_{TH}$')
-plt.xlim(timevec[0],timevec[ntime-1])
+plt.xlim(summary.time[0],summary.time[-1])
 time_display(plt,time)
 if hmode == 1: hmode_display(plt,th_min,th_max)
 
@@ -598,7 +593,7 @@ ax4 = plt.subplot2grid((nline,ncol), (3,0), colspan=2)
 plt.plot(waveform['time'],waveform['v_loop'],plotstyle,label=r'$V_{LOOP}$')
 plt.plot(waveform['time'],waveform['h_98'],plotstyle,label=r'$H_{98}$')
 plt.plot(waveform['time'],waveform['tau_energy'],plotstyle,label=r'$\tau_{E}$')
-plt.xlim(timevec[0],timevec[ntime-1])
+plt.xlim(summary.time[0],summary.time[-1])
 time_display(plt,time)
 if hmode == 1: hmode_display(plt,th_min,th_max)
 
@@ -606,55 +601,70 @@ nice(plt,'$Time\/[\mathrm{s}]$',r'$V\/[\mathrm{V}],\/H,\/\tau\/[\mathrm{s}]$',fo
 legend = plt.legend(loc='upper right',bbox_to_anchor=(legx_pos,legy_pos),handlelength=1)
 CustomLegend_wf(legend,legfsize)
 Signature(hostdir,shot,run,plt)
+if args.noProfiles:
+    ax = plt.gca()
+    xmin, xmax = ax.get_xlim()
+    ymin, ymax = ax.get_ylim()
+    plt.text(xmax,ymin-0.5*(ymax-ymin),hostdir+' - Shot '+str(shot)+' / '+' Run '+str(run),fontdict=font,fontsize=6,color='black',ha='right')
 
-# q-profile and magnetic shear profile
-ax6 = plt.subplot2grid((nline,ncol), (2,3))
-plt.plot(profiles['rhonorm'],profiles['q'],label=r'$q$')
-plt.plot(profiles['rhonorm'],profiles['magnetic_shear'],label=r'$s=\frac{1}{q}\frac{dq}{d\rho}$')
-#nice(plt,r'$\rho/\rho_0$','q, shear',fontsize)
-nice(plt,'','$q,\/s$',fontsize)
-plt.xlim(0,1)
-legend = plt.legend(loc='upper right',bbox_to_anchor=(1.62,1.05),handlelength=1)
-CustomLegend_wf(legend,legfsize)
-Signature(hostdir,shot,run,plt)
 
-# Current density profiles
-ax7 = plt.subplot2grid((nline,ncol), (3,3))
-plt.plot(profiles['rhonorm'],profiles['j_total']*1.e-3,label=r'$j_{TOT}$')
-plt.plot(profiles['rhonorm'],profiles['j_non_inductive']*1.e-3,label=r'$j_{NI}$')
-plt.plot(profiles['rhonorm'],profiles['j_bootstrap']*1.e-3,label=r'$j_{BOOT}$')
-plt.plot(profiles['rhonorm'],profiles['j_ohmic']*1.e-3,label=r'$j_{OHM}$')
-nice(plt,r'$\rho/\rho_0$',r'$j\/[\mathrm{kA/m^2}]$',fontsize)
-plt.xlim(0,1)
-legend = plt.legend(loc='upper right',bbox_to_anchor=(1.57,1.05),handlelength=1)
-CustomLegend_wf(legend,legfsize)
-Signature(hostdir,shot,run,plt)
-ax = plt.gca()
-xmin, xmax = ax.get_xlim()
-ymin, ymax = ax.get_ylim()
-plt.text(xmin,ymin-0.5*(ymax-ymin),hostdir+' - Shot '+str(shot)+' / '+' Run '+str(run), fontdict=font,fontsize=6,color='black')
+# extra plots
 
-# Equilibrium
-ax5 = plt.subplot2grid((nline,ncol), (0,3), rowspan=2)
-ax5.xaxis.tick_top()
-ax5.xaxis.set_label_position('top')
-if plot_equi == 1:
-    r2d   = equilibrium.time_slice[0].profiles_2d[0].r
-    z2d   = equilibrium.time_slice[0].profiles_2d[0].z
-    psi2d = equilibrium.time_slice[0].profiles_2d[0].psi
-    plt.contour(r2d,z2d,psi2d,50) #,label=r'$\Psi_{pol}$')
-    plt.xlim(r2d.min(),r2d.max())
-    plt.gca().set_aspect('equal', adjustable='box')
-    plt.xlabel('R (m)', fontdict=font)
-    plt.ylabel('Z (m)', fontdict=font)
-    plt.xticks(fontsize = ticksize)
-    plt.yticks(fontsize = ticksize)
-    nice(plt,'$R\/\mathrm{[m]}$','$Z\/\mathrm{[m]}$',fontsize)
-    #plt.title('Time = '+'%.1f' % time+' s', fontdict=font)
-    #plt.title('2D equilibrium', fontdict=font)
-else:
-    ax5.text(0.2, 0.5, '2D equilibrium', fontsize=10)
-    ax5.text(0.2, 0.45, 'not available', fontsize=10)
+if not args.noProfiles:
+    # q-profile and magnetic shear profile
+    ax6 = plt.subplot2grid((nline,ncol), (2,3))
+    plt.plot(profiles['rhonorm'],profiles['q'],label=r'$q$')
+    plt.plot(profiles['rhonorm'],profiles['magnetic_shear'],label=r'$s=\frac{1}{q}\frac{dq}{d\rho}$')
+    #nice(plt,r'$\rho/\rho_0$','q, shear',fontsize)
+    nice(plt,'','$q,\/s$',fontsize)
+    plt.xlim(0,1)
+    legend = plt.legend(loc='upper right',bbox_to_anchor=(1.62,1.05),handlelength=1)
+    CustomLegend_wf(legend,legfsize)
+    Signature(hostdir,shot,run,plt)
+
+    # Current density profiles
+    ax7 = plt.subplot2grid((nline,ncol), (3,3))
+    plt.plot(profiles['rhonorm'],profiles['j_total']*1.e-3,label=r'$j_{TOT}$')
+    plt.plot(profiles['rhonorm'],profiles['j_non_inductive']*1.e-3,label=r'$j_{NI}$')
+    plt.plot(profiles['rhonorm'],profiles['j_bootstrap']*1.e-3,label=r'$j_{BOOT}$')
+    plt.plot(profiles['rhonorm'],profiles['j_ohmic']*1.e-3,label=r'$j_{OHM}$')
+    nice(plt,r'$\rho/\rho_0$',r'$j\/[\mathrm{kA/m^2}]$',fontsize)
+    plt.xlim(0,1)
+    legend = plt.legend(loc='upper right',bbox_to_anchor=(1.57,1.05),handlelength=1)
+    CustomLegend_wf(legend,legfsize)
+    Signature(hostdir,shot,run,plt)
+    ax = plt.gca()
+    xmin, xmax = ax.get_xlim()
+    ymin, ymax = ax.get_ylim()
+    plt.text(xmax,ymin-0.5*(ymax-ymin),hostdir+' - Shot '+str(shot)+' / '+' Run '+str(run), fontdict=font,fontsize=6,color='black',ha='right')
+
+    # Equilibrium
+    ax5 = plt.subplot2grid((nline,ncol), (0,3), rowspan=2)
+    ax5.xaxis.tick_top()
+    ax5.xaxis.set_label_position('top')
+    if plot_equi == 1:
+        r2d   = equilibrium.time_slice[0].profiles_2d[0].r
+        z2d   = equilibrium.time_slice[0].profiles_2d[0].z
+        psi2d = equilibrium.time_slice[0].profiles_2d[0].psi
+        plt.contour(r2d,z2d,psi2d,50) #,label=r'$\Psi_{pol}$')
+        plt.xlim(r2d.min(),r2d.max())
+        plt.gca().set_aspect('equal', adjustable='box')
+        plt.xlabel('R (m)', fontdict=font)
+        plt.ylabel('Z (m)', fontdict=font)
+        plt.xticks(fontsize = ticksize)
+        plt.yticks(fontsize = ticksize)
+        nice(plt,'$R\/\mathrm{[m]}$','$Z\/\mathrm{[m]}$',fontsize)
+        #plt.title('Time = '+'%.1f' % time+' s', fontdict=font)
+        #plt.title('2D equilibrium', fontdict=font)
+    else:
+        ax5.text(0.2, 0.5, '2D equilibrium', fontsize=10)
+        ax5.text(0.2, 0.45, 'not available', fontsize=10)
+
+
+
+
+
+
 
 plt.subplots_adjust(left=None, bottom=None, right=0.8, top=None, wspace=0., hspace=0.1)
 Signature(hostdir,shot,run,plt)
