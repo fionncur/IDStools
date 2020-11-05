@@ -555,7 +555,9 @@ else:
 
 CustomLegend_wf(legend,legfsize)
 Signature(hostdir,shot,run,plt)
-plt.title('Profiles displayed for t = '+'%.1f' % time+' s', fontdict=font)
+
+if not args.noProfiles:
+    plt.title('Profiles displayed for t = '+'%.1f' % time+' s', fontdict=font)
 
 # Ip, B0 waveforms
 ax2 = plt.subplot2grid((nline,ncol), (1,0), colspan=2)
