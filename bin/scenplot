@@ -536,7 +536,7 @@ if max(waveform['p_neutron']) > 0:
 
 plt.xlim(summary.time[0],summary.time[-1])
 
-time_display(plt,time)
+if not args.noProfiles: time_display(plt,time)
 nleg = nleg + 1
 
 if hmode == 1: hmode_display(plt,th_min,th_max)
@@ -555,7 +555,6 @@ else:
 
 CustomLegend_wf(legend,legfsize)
 Signature(hostdir,shot,run,plt)
-
 if not args.noProfiles:
     plt.title('Profiles displayed for t = '+'%.1f' % time+' s', fontdict=font)
 
@@ -567,7 +566,7 @@ plt.plot(waveform['time'],abs(waveform['ip'])*1.e-6,plotstyle,label=r'$|I_p|$')
 #plt.plot(waveform['time'],waveform['current_ohm']*1.e-6,label=r'$J_{OHM}$')
 plt.plot(waveform['time'],abs(waveform['b0']),plotstyle,label=r'$|B_0|$')
 plt.xlim(summary.time[0],summary.time[-1])
-time_display(plt,time)
+if not args.noProfiles: time_display(plt,time)
 if hmode == 1: hmode_display(plt,th_min,th_max)
 
 nice(plt,'',r'$I_p\/[\mathrm{MA}], B_0\/[\mathrm{T}]$',fontsize)
@@ -582,7 +581,7 @@ plt.plot(waveform['time'],waveform['energy_total']*1.e-6,plotstyle,label=r'$W_{T
 plt.plot(waveform['time'],waveform['energy_diamagnetic']*1.e-6,plotstyle,label=r'$W_{DIA}$')
 plt.plot(waveform['time'],waveform['energy_thermal']*1.e-6,plotstyle,label=r'$W_{TH}$')
 plt.xlim(summary.time[0],summary.time[-1])
-time_display(plt,time)
+if not args.noProfiles: time_display(plt,time)
 if hmode == 1: hmode_display(plt,th_min,th_max)
 
 nice(plt,'',r'$W\/[\mathrm{MJ}]}$',fontsize)
@@ -596,7 +595,7 @@ plt.plot(waveform['time'],waveform['v_loop'],plotstyle,label=r'$V_{LOOP}$')
 plt.plot(waveform['time'],waveform['h_98'],plotstyle,label=r'$H_{98}$')
 plt.plot(waveform['time'],waveform['tau_energy'],plotstyle,label=r'$\tau_{E}$')
 plt.xlim(summary.time[0],summary.time[-1])
-time_display(plt,time)
+if not args.noProfiles: time_display(plt,time)
 if hmode == 1: hmode_display(plt,th_min,th_max)
 
 nice(plt,'$Time\/[\mathrm{s}]$',r'$V\/[\mathrm{V}],\/H,\/\tau\/[\mathrm{s}]$',fontsize)
