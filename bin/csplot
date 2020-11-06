@@ -8,6 +8,7 @@ import imas,argparse,sys,os,pdb
 import matplotlib
 matplotlib.use('TKagg')
 import matplotlib.pyplot as plt
+from imas.hli_exception import *
 
 # MANAGEMENT OF INPUT ARGUMENTS
 # ------------------------------
@@ -137,7 +138,11 @@ for isource in range(nsources):
     core_sources.source[isource].profiles_1d.resize(1)
     core_sources.source[isource].global_quantities.resize(1)
     core_sources.source[isource].profiles_1d[0] = input.core_sources.partialGet('source('+str(isource)+')/profiles_1d('+str(it)+')')
-    core_sources.source[isource].global_quantities = input.core_sources.partialGet('source('+str(isource)+')/global_quantities')
+    try:
+        core_sources.source[isource].global_quantities = input.core_sources.partialGet('source('+str(isource)+')/global_quantities')
+    except:
+        print('source('+str(isource)+') does not have global_quantities', file=sys.stderr)
+        core_sources.source[isource].global_quantities.resize(0)
     core_sources.source[isource].identifier.name = input.core_sources.partialGet('source('+str(isource)+')/identifier/name')
 
 nsources = len(core_sources.source)
