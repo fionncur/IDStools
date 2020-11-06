@@ -56,7 +56,7 @@ for i in [i.value for i in imas.IDSName]:
       _IDS = IDS.get(i)
       SIZES[field]['time'] = time.time() - start_time
       SIZES[field]['bytes'] = byte_size(_IDS)
-      print('Reading %0.3f MB data for %s took %0.2f seconds' % ( SIZES[field]['bytes']/1024**2, i, SIZES[field]['time']))
+      print('Reading %0.3f MB data for %s took %0.2f seconds' % ( SIZES[field]['bytes']/1024**2, field, SIZES[field]['time']))
       del _IDS
 
 total_bytes = np.array([v['bytes'] for v in SIZES.values()]).sum()
