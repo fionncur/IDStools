@@ -14,6 +14,7 @@ from pylab import *
 from numpy import *
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mtick
+import json
 
 # ----------------------------------------------------------------------
 
@@ -34,7 +35,8 @@ parser.add_argument('-r','--run',help='Run number',required=True,type=int)
 group = parser.add_mutually_exclusive_group()
 group.add_argument('-t','--time',help='Time for profiles',required=False,type=float)
 group.add_argument('-n','--noProfiles',action='store_true',help='Do not plot profiles or equilibrium')
-
+parser.add_argument('-T', '--Title', action='store_true',
+                    help='Add title with additional provenance information')
 
 args = parser.parse_args()
 
@@ -373,6 +375,11 @@ if len(summary.global_quantities.energy_diamagnetic.value) < 1:
     print('summary.global_quantities.energy_diamagnetic.value could not be read', file=sys.stderr)
     summary.global_quantities.energy_diamagnetic.value = asarray([nan]*stime)
 
+# Energy_mhd waveform
+if len(summary.global_quantities.energy_mhd.value) < 1:
+    print('summary.global_quantities.energy_mhd.value could not be read', file=sys.stderr)
+    summary.global_quantities.energy_mhd.value = asarray([nan]*stime)
+
 # Current_ohm waveform
 if len(summary.global_quantities.current_ohm.value) < 1:
     print('summary.global_quantities.current_ohm.value could not be read', file=sys.stderr)
@@ -424,21 +431,33 @@ if n_ec > 0:
     for isource in range(n_ec):
         if len(summary.heating_current_drive.ec[isource].power.value) > 0:
             p_ec = p_ec + summary.heating_current_drive.ec[isource].power.value*1.e-6
+else:
+    if len(summary.heating_current_drive.power_ec.value) > 0:
+        p_ec = summary.heating_current_drive.power_ec.value*1.e-6
 
 if n_ic > 0:
     for isource in range(n_ic):
         if len(summary.heating_current_drive.ic[isource].power.value) > 0:
             p_ic = p_ic + summary.heating_current_drive.ic[isource].power.value*1.e-6
+else:
+    if len(summary.heating_current_drive.power_ic.value) > 0:
+        p_ic = summary.heating_current_drive.power_ic.value*1.e-6
 
 if n_nbi > 0:
     for isource in range(n_nbi):
         if len(summary.heating_current_drive.nbi[isource].power.value) > 0:
             p_nbi = p_nbi + summary.heating_current_drive.nbi[isource].power.value*1.e-6
+else:
+    if len(summary.heating_current_drive.power_nbi.value) > 0:
+        p_nbi = summary.heating_current_drive.power_nbi.value*1.e-6
 
 if n_lh > 0:
     for isource in range(n_lh):
         if len(summary.heating_current_drive.lh[isource].power.value) > 0:
             p_lh = p_lh + summary.heating_current_drive.lh[isource].power.value*1.e-6
+else:
+    if len(summary.heating_current_drive.power_lh.value) > 0:
+        p_nbi = summary.heating_current_drive.power_lh.value*1.e-6
 
 p_hcd = p_ec + p_ic + p_nbi + p_lh
 
@@ -446,6 +465,16 @@ p_hcd = p_ec + p_ic + p_nbi + p_lh
 p_fus = asarray([0]*stime)
 if len(summary.fusion.power.value) > 0:
     p_fus = summary.fusion.power.value*1.e-6
+
+# Ohmic power
+p_ohmic = asarray([0]*stime)
+if len(summary.global_quantities.power_ohm.value) > 0:
+    p_ohmic = summary.global_quantities.power_ohm.value*1.e-6
+
+# Steady power
+p_steady = asarray([0]*stime)
+if len(summary.global_quantities.power_steady.value) > 0:
+    p_steady = summary.global_quantities.power_steady.value*1.e-6
 
 # Neutron power
 p_neut = asarray([0]*stime)
@@ -466,6 +495,7 @@ waveform['v_loop'] = summary.global_quantities.v_loop.value
 waveform['beta_tor_norm'] = summary.global_quantities.beta_tor_norm.value
 waveform['beta_pol'] = summary.global_quantities.beta_pol.value
 waveform['energy_diamagnetic'] = summary.global_quantities.energy_diamagnetic.value
+waveform['energy_mhd'] = summary.global_quantities.energy_mhd.value
 waveform['current_ohm'] = summary.global_quantities.current_ohm.value
 waveform['energy_total'] = summary.global_quantities.energy_total.value
 waveform['energy_thermal'] = summary.global_quantities.energy_thermal.value
@@ -480,14 +510,14 @@ waveform['p_nbi'] = p_nbi
 waveform['p_lh'] = p_lh
 waveform['p_fusion'] = p_fus
 waveform['p_neutron'] = p_neut
+waveform['p_ohmic'] = p_ohmic
+waveform['p_steady'] = p_steady
 
 h_mode_indices  = indices(waveform['h_mode'], lambda h_mode_flag: h_mode_flag>0)
-h_mode_indices = h_mode_indices[2:-1]
-
 if len(h_mode_indices) > 0:
     hmode = 1
     th_min = summary.time[h_mode_indices[0]]
-    th_max = summary.time[h_mode_indices[len(h_mode_indices)-1]]
+    th_max = summary.time[h_mode_indices[-1]]
 else:
     hmode = 0
 
@@ -534,6 +564,14 @@ if max(waveform['p_neutron']) > 0:
     plt.plot(waveform['time'],waveform['p_neutron'],plotstyle,label=r'$P_{NEUT}$')
     nleg = nleg + 1
 
+if max(waveform['p_ohmic']) > 0:
+    plt.plot(waveform['time'],waveform['p_ohmic'],plotstyle,label=r'$P_{OHM}$')
+    nleg = nleg + 1
+
+if max(waveform['p_steady']) > 0:
+    plt.plot(waveform['time'],waveform['p_steady'],plotstyle,label=r'$P_{STEADY}$')
+    nleg = nleg + 1
+
 plt.xlim(summary.time[0],summary.time[-1])
 
 if not args.noProfiles: time_display(plt,time)
@@ -559,7 +597,7 @@ if not args.noProfiles:
     plt.title('Profiles displayed for t = '+'%.1f' % time+' s', fontdict=font)
 
 # Ip, B0 waveforms
-ax2 = plt.subplot2grid((nline,ncol), (1,0), colspan=2)
+ax2 = plt.subplot2grid((nline,ncol), (1,0), sharex=ax1, colspan=2)
 plt.plot(waveform['time'],abs(waveform['ip'])*1.e-6,plotstyle,label=r'$|I_p|$')
 #plt.plot(waveform['time'],waveform['current_non_inductive']*1.e-6,label=r'$J_{NI}$')
 #plt.plot(waveform['time'],waveform['current_bootstrap']*1.e-6,label=r'$J_{BOOT}$')
@@ -576,10 +614,11 @@ CustomLegend_wf(legend,legfsize)
 Signature(hostdir,shot,run,plt)
 
 # Energy content waveforms
-ax3 = plt.subplot2grid((nline,ncol), (2,0), colspan=2)
+ax3 = plt.subplot2grid((nline,ncol), (2,0), sharex=ax1, colspan=2)
 plt.plot(waveform['time'],waveform['energy_total']*1.e-6,plotstyle,label=r'$W_{TOT}$')
 plt.plot(waveform['time'],waveform['energy_diamagnetic']*1.e-6,plotstyle,label=r'$W_{DIA}$')
 plt.plot(waveform['time'],waveform['energy_thermal']*1.e-6,plotstyle,label=r'$W_{TH}$')
+plt.plot(waveform['time'],waveform['energy_mhd']*1.e-6,plotstyle,label=r'$W_{MHD}$')
 plt.xlim(summary.time[0],summary.time[-1])
 if not args.noProfiles: time_display(plt,time)
 if hmode == 1: hmode_display(plt,th_min,th_max)
@@ -590,7 +629,7 @@ CustomLegend_wf(legend,legfsize)
 Signature(hostdir,shot,run,plt)
 
 # Vloop waveforms
-ax4 = plt.subplot2grid((nline,ncol), (3,0), colspan=2)
+ax4 = plt.subplot2grid((nline,ncol), (3,0), sharex=ax1, colspan=2)
 plt.plot(waveform['time'],waveform['v_loop'],plotstyle,label=r'$V_{LOOP}$')
 plt.plot(waveform['time'],waveform['h_98'],plotstyle,label=r'$H_{98}$')
 plt.plot(waveform['time'],waveform['tau_energy'],plotstyle,label=r'$\tau_{E}$')
@@ -607,6 +646,14 @@ if args.noProfiles:
     xmin, xmax = ax.get_xlim()
     ymin, ymax = ax.get_ylim()
     plt.text(xmax,ymin-0.5*(ymax-ymin),hostdir+' - Shot '+str(shot)+' / '+' Run '+str(run),fontdict=font,fontsize=6,color='black',ha='right')
+
+if args.Title:
+    # F4F specific?
+    if summary.tag.name != '':
+        additional_data = json.loads(summary.tag.name)
+        plt.suptitle('%s / %s / %s ; %s / %s\nprovider=%s, shot_date=%s, shot_time=%s\ndata_dictionary=%s, access_layer=%s' % (user_or_path, database, version, shot, run, summary.ids_properties.provider, additional_data['date'], additional_data['time'], summary.ids_properties.version_put.data_dictionary, summary.ids_properties.version_put.access_layer))
+    else:
+        plt.suptitle('%s / %s / %s ; %s / %s\nprovider=%s, creation_date=%s\ndata_dictionary=%s, access_layer=%s' % (user_or_path, database, version, shot, run, summary.ids_properties.provider, summary.ids_properties.creation_date, summary.ids_properties.version_put.data_dictionary, summary.ids_properties.version_put.access_layer))
 
 
 # extra plots
@@ -661,17 +708,16 @@ if not args.noProfiles:
         ax5.text(0.2, 0.5, '2D equilibrium', fontsize=10)
         ax5.text(0.2, 0.45, 'not available', fontsize=10)
 
-
-
-
-
-
-
 plt.subplots_adjust(left=None, bottom=None, right=0.8, top=None, wspace=0., hspace=0.1)
+#for ax in [ax1, ax2, ax3]:
+#    plt.setp(ax.get_xticklabels(), visible=False)
+    # The y-ticks will overlap with "hspace=0", so we'll hide the bottom tick
+#    ax.set_yticks(ax.get_yticks()[1:])
 Signature(hostdir,shot,run,plt)
 
 fig = plt.gcf()
 fig.set_size_inches(10,8)
+
 
 try:
     fig.savefig('Scenario'+'_shot_'+str(shot)+'_run_'+str(run)+'_time_'+'%.1f' % time+'.png', dpi=100)
