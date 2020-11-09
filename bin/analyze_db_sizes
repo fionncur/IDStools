@@ -7,6 +7,10 @@ import os,sys
 import time
 from idstools.cli import *
 
+db_group.add_argument("--tokamak", "-t", 
+                   type=str, dest="database", default=os.getenv("TOKAMAKNAME"),
+                   help="tokamak name \t[deprecated: use -d instead]")
+
 parser = argparse.ArgumentParser(description="Calculate size of IDSs", epilog
 ="""
 """, formatter_class=argparse.RawTextHelpFormatter, parents=[imas_parser])

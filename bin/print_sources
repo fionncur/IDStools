@@ -6,6 +6,10 @@ import argparse
 import os,sys
 from idstools.cli import *
 
+db_group.add_argument("--tokamak", "-t", 
+                   type=str, dest="database", default=os.getenv("TOKAMAKNAME"),
+                   help="tokamak name \t[deprecated: use -d instead]")
+
 parser = argparse.ArgumentParser(description="View information about sources", epilog
 ="""
 """, formatter_class=argparse.RawTextHelpFormatter, parents=[imas_parser])
@@ -30,7 +34,7 @@ if status!=0:
 
 SM = getattr(imasdef,args.SlicingMethod+'_INTERP')
 S = IDS.get_slice('core_sources', args.time, SM, occurrence=args.occurrence)
-print('\nTime = %0.3f for %s/%s/%s/%s/%s\n' % (S.time, args.user, args.tokamak, args.version, args.shot, args.run))
+print('\nTime = %0.3f for %s/%s/%s/%s/%s\n' % (S.time, args.user, args.database, args.version, args.shot, args.run))
 
 for s in S.source:
     print(s.identifier.name)

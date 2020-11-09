@@ -6,6 +6,10 @@ import argparse
 import os,sys
 from idstools.cli import *
 
+db_group.add_argument("--tokamak", "-t", 
+                   type=str, dest="database", default=os.getenv("TOKAMAKNAME"),
+                   help="tokamak name \t[deprecated: use -d instead]")
+
 parser = argparse.ArgumentParser(description="View information about fluxes", epilog
 ="""
 """, formatter_class=argparse.RawTextHelpFormatter, parents=[imas_parser])
