@@ -3,17 +3,13 @@
 import numpy as np
 import imas
 import argparse
-import os
+import os,sys
 import time
-IMAS_BACKEND = imas.imasdef.MDSPLUS_BACKEND
+from idstools.cli import *
 
 parser = argparse.ArgumentParser(description="Calculate size of IDSs", epilog
 ="""
-""", formatter_class=argparse.RawTextHelpFormatter)
-parser.add_argument("--user", "-u", type=str, help="user", default=os.getenv("USER"))
-parser.add_argument("--tokamak", "-t", "-m", "-d", type=str, help="tokamak", default=os.getenv("TOKAMAKNAME"))
-parser.add_argument("--version", "-v", type=str, help="version", default='3')
-parser.add_argument("--occurrence", "-o", type=int, help="version", default='0')
+""", formatter_class=argparse.RawTextHelpFormatter, parents=[imas_parser])
 parser.add_argument("shot", type=int, help="Shot number")
 parser.add_argument("run", type=int, help="Run number")
 args=parser.parse_args()
@@ -39,10 +35,16 @@ def byte_size(O):
       S += byte_size(o)
   return S
 
-IDS = imas.DBEntry(IMAS_BACKEND, args.tokamak, args.shot, args.run, user_name=args.user)
-IDS.open()
 
-print('\n\nExamining data for %s/%s/%s/%s/%s\n\n' % (args.user, args.tokamak, args.version, args.shot, args.run))
+IDS = imas.DBEntry(get_backend_id(args.backend), args.database, args.shot, args.run, user_name=args.user)
+status,idx = IDS.open()
+
+print('\n\nExamining data for %s/%s/%s/%s/%s\n\n' % (args.user, args.database, args.version, args.shot, args.run))
+
+if status!=0:
+  print('Error opening pulse! Please check existence.')
+  sys.exit(status)
+
 
 SIZES = {}
 for i in [i.value for i in imas.IDSName]:
@@ -66,7 +68,7 @@ print('\n\nTotal reading time = %0.2f s\n' % (total_time))
 
 print('\nTotal data size = %4.1f MB\n' % (total_bytes/1024**2))
 
-print('\nFractions of the total size for %s/%s/%s/%s/%s\n' % (args.user, args.tokamak, args.version, args.shot, args.run))
+print('\nFractions of the total size for %s/%s/%s/%s/%s\n' % (args.user, args.database, args.version, args.shot, args.run))
 
 print('% bytes    IDS')
 for v in SIZES.keys():

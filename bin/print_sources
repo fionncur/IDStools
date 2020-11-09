@@ -3,25 +3,35 @@
 import numpy as np
 import imas
 import argparse
-import os
-IMAS_BACKEND = imas.imasdef.MDSPLUS_BACKEND
+import os,sys
+from idstools.cli import *
 
 parser = argparse.ArgumentParser(description="View information about sources", epilog
 ="""
-""", formatter_class=argparse.RawTextHelpFormatter)
-parser.add_argument("--user", "-u", type=str, help="user",default=os.getenv("USER"))
-parser.add_argument("--tokamak", "-t", "-m", "-d", type=str, help="tokamak",default=os.getenv("TOKAMAKNAME"))
-parser.add_argument("--version", "-v", type=str, help="version",default='3')
-parser.add_argument("--occurrence", "-o", type=int, help="version",default='0')
+""", formatter_class=argparse.RawTextHelpFormatter, parents=[imas_parser])
+parser.add_argument("-S", "--SlicingMethod",
+                    type=str, default="CLOSEST", 
+                    choices=["CLOSEST","PREVIOUS","LINEAR"],
+                    help="Slicing method \t(default=%(default)s)")
+parser.add_argument("-o", "--occurrence", 
+                    type=int, default=0,
+                    help="occurrence")
 parser.add_argument("shot", type=int, help="Shot number")
 parser.add_argument("run", type=int, help="Run number")
 parser.add_argument("time", type=float, help="Time")
 args=parser.parse_args()
 
-IDS = imas.DBEntry(IMAS_BACKEND, args.tokamak, args.shot, args.run, user_name=args.user)
-IDS.open()
-S = IDS.get_slice('core_sources', args.time, imas.imasdef.CLOSEST_SAMPLE, occurrence=args.occurrence)
+IDS = imas.DBEntry(get_backend_id(args.backend), args.database, args.shot, args.run, user_name=args.user)
+status,idx = IDS.open()
+
+if status!=0:
+  print('Error opening pulse! Please check existence.')
+  sys.exit(status)
+
+SM = getattr(imasdef,args.SlicingMethod+'_INTERP')
+S = IDS.get_slice('core_sources', args.time, SM, occurrence=args.occurrence)
 print('\nTime = %0.3f for %s/%s/%s/%s/%s\n' % (S.time, args.user, args.tokamak, args.version, args.shot, args.run))
+
 for s in S.source:
     print(s.identifier.name)
     print("       electrons", end='')
