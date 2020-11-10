@@ -34,9 +34,18 @@ LABEL = '\n%s/%s/%s/%s/%s @ %0.3f' % (args.user, args.tokamak, args.version, arg
 #gm7(:) 	Flux surface averaged |grad_rho_tor| {dynamic} [-]
 # V' [-D Y' gm3 + v Y gm7]
 
-V = T.model[0].profiles_1d[-1].grid_d.volume
-r = T.model[0].profiles_1d[-1].grid_d.rho_tor_norm
-S = T.model[0].profiles_1d[-1].grid_d.surface
+try:
+    model_index = [t.identifier.name for t in T.model].index('transport_solver')
+    print('Found model "transport_solver" as model %s' % (model_index))
+except:
+    print('"transport_solver" not found in the transport models')
+    exit()
+
+Tm = T.model[model_index]
+
+V = Tm.profiles_1d[-1].grid_d.volume
+r = Tm.profiles_1d[-1].grid_d.rho_tor_norm
+S = Tm.profiles_1d[-1].grid_d.surface
 Vp_per_S =  np.gradient(V, r) / S
 
 rho_tor_sep = E.time_slice[-1].profiles_1d.rho_tor[-1]
@@ -44,7 +53,7 @@ rho_tor_sep = E.time_slice[-1].profiles_1d.rho_tor[-1]
 gm3 = np.interp(r, E.time_slice[-1].profiles_1d.rho_tor_norm, E.time_slice[-1].profiles_1d.gm3) / rho_tor_sep**2
 gm7 = np.interp(r, E.time_slice[-1].profiles_1d.rho_tor_norm, E.time_slice[-1].profiles_1d.gm7) / rho_tor_sep
 
-for T_i, C_i in zip(T.model[0].profiles_1d[-1].ion, C.profiles_1d[-1].ion):
+for T_i, C_i in zip(Tm.profiles_1d[-1].ion, C.profiles_1d[-1].ion):
     plt.figure()
     Gamma_i = Vp_per_S * (-T_i.particles.d * np.gradient(C_i.density, r) * gm3 + C_i.density * T_i.particles.v * gm7)
     plt.plot(r, Gamma_i, label = 'Direct evaluation')
@@ -68,11 +77,11 @@ for T_i, C_i in zip(T.model[0].profiles_1d[-1].ion, C.profiles_1d[-1].ion):
     plt.ylabel('Energy flux density')
     plt.legend(loc=0)
 
-T_e = T.model[0].profiles_1d[-1].electrons
+T_e = Tm.profiles_1d[-1].electrons
 C_e = C.profiles_1d[-1].electrons
 
 plt.figure()
-Gamma_e = np.array([t.particles.flux*t.z_ion for t in T.model[0].profiles_1d[-1].ion]).sum(axis=0)
+Gamma_e = np.array([t.particles.flux*t.z_ion for t in Tm.profiles_1d[-1].ion]).sum(axis=0)
 plt.plot(r, Gamma_e, label = 'Ambipolar Transport code fluxes')
 plt.plot(r, T_e.particles.flux, label = 'Transport code')
 plt.title('Particle fluxes for electrons %s' % (LABEL))
