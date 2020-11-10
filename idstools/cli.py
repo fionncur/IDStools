@@ -23,4 +23,5 @@ def get_backend_id(name):
     return getattr(imasdef,name+"_BACKEND")
 
 
-
+def get_slice_mode(name):
+    return getattr(imasdef,name+"_INTERP")

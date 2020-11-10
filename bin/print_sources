@@ -32,8 +32,7 @@ if status!=0:
   print('Error opening pulse! Please check existence.')
   sys.exit(status)
 
-SM = getattr(imasdef,args.SlicingMethod+'_INTERP')
-S = IDS.get_slice('core_sources', args.time, SM, occurrence=args.occurrence)
+S = IDS.get_slice('core_sources', args.time, get_slice_mode(args.SlicingMethod), occurrence=args.occurrence)
 print('\nTime = %0.3f for %s/%s/%s/%s/%s\n' % (S.time, args.user, args.database, args.version, args.shot, args.run))
 
 for s in S.source:
