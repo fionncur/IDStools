@@ -27,6 +27,8 @@ T = IDS.get_slice('core_transport', args.time, imas.imasdef.CLOSEST_SAMPLE)
 C = IDS.get_slice('core_profiles', args.time, imas.imasdef.CLOSEST_SAMPLE)
 E = IDS.get_slice('equilibrium', args.time, imas.imasdef.CLOSEST_SAMPLE)
 
+LABEL = '\n%s/%s/%s/%s/%s @ %0.3f' % (args.user, args.tokamak, args.version, args.shot, args.run, T.time)
+
 # V' [-D Y' <|grad(rho_tor_norm)|^2> + v Y <|grad(rho_tor_norm)|>]
 #gm3(:) 	Flux surface averaged |grad_rho_tor|^2 {dynamic} [-]
 #gm7(:) 	Flux surface averaged |grad_rho_tor| {dynamic} [-]
@@ -46,21 +48,22 @@ for T_i, C_i in zip(T.model[0].profiles_1d[-1].ion, C.profiles_1d[-1].ion):
     plt.figure()
     Gamma_i = Vp_per_S * (-T_i.particles.d * np.gradient(C_i.density, r) * gm3 + C_i.density * T_i.particles.v * gm7)
     plt.plot(r, Gamma_i, label = 'Direct evaluation')
-    plt.plot(r, T_i.particles.flux, label = 'ETS')
-    plt.title('Particle fluxes for %s/%s' % (T_i.element[0].z_n, T_i.element[0].a))
+    plt.plot(r, T_i.particles.flux, label = 'Transport code')
+    plt.title('Particle fluxes for %s/%s %s' % (T_i.element[0].z_n, T_i.element[0].a, LABEL))
     plt.xlabel('rho_tor_norm')
     plt.ylabel('Particle flux density')
     plt.legend(loc=0)
 
     plt.figure()
     Q_i_conductive = Vp_per_S * (-T_i.energy.d * np.gradient(C_i.temperature, r) * gm3 + C_i.temperature * T_i.energy.v * gm7) * C_i.density * imas_constants.QE
-    Q_i_convective = Gamma_i * C_i.temperature * 1.5 * imas_constants.QE
-    Q_i = Q_i_conductive + Q_i_convective
+    Q_i_convective = Gamma_i * C_i.temperature * imas_constants.QE
     plt.plot(r, Q_i_conductive, label = 'Direct evaluation (conductive)')
-    plt.plot(r, Q_i_convective, label = 'Direct evaluation (convective)')
-    plt.plot(r, Q_i, label = 'Direct evaluation')
-    plt.plot(r, T_i.energy.flux, label = 'ETS')
-    plt.title('Energy fluxes for %s/%s' % (T_i.element[0].z_n, T_i.element[0].a))
+    base_line, = plt.plot(r, Q_i_convective*1.5, label = 'Direct evaluation (convective)')
+    plt.fill_between(r, Q_i_convective*0.0, Q_i_convective*2.5, facecolor=base_line.get_color(), alpha=0.2)
+    base_line, = plt.plot(r, Q_i_conductive + Q_i_convective*1.5, label = 'Direct evaluation')
+    plt.fill_between(r, Q_i_conductive + Q_i_convective*0.0, Q_i_conductive + Q_i_convective*2.5, facecolor=base_line.get_color(), alpha=0.2)
+    plt.plot(r, T_i.energy.flux, label = 'Transport code')
+    plt.title('Energy fluxes for %s/%s %s' % (T_i.element[0].z_n, T_i.element[0].a, LABEL))
     plt.xlabel('rho_tor_norm')
     plt.ylabel('Energy flux density')
     plt.legend(loc=0)
@@ -70,38 +73,25 @@ C_e = C.profiles_1d[-1].electrons
 
 plt.figure()
 Gamma_e = np.array([t.particles.flux*t.z_ion for t in T.model[0].profiles_1d[-1].ion]).sum(axis=0)
-plt.plot(r, Gamma_e, label = 'Ambipolar ETS fluxes')
-plt.plot(r, T_e.particles.flux, label = 'ETS')
-plt.title('Particle fluxes for electrons' )
+plt.plot(r, Gamma_e, label = 'Ambipolar Transport code fluxes')
+plt.plot(r, T_e.particles.flux, label = 'Transport code')
+plt.title('Particle fluxes for electrons %s' % (LABEL))
 plt.xlabel('rho_tor_norm')
 plt.ylabel('Particle flux density')
 plt.legend(loc=0)
 
 plt.figure()
 Q_e_conductive = Vp_per_S * (-T_e.energy.d * np.gradient(C_e.temperature, r) * gm3 + C_e.temperature * T_e.energy.v * gm7) * C_e.density * imas_constants.QE
-Q_e_convective = Gamma_e * C_e.temperature * 1.5 * imas_constants.QE
-Q_e = Q_e_conductive + Q_e_convective
+Q_e_convective = Gamma_e * C_e.temperature * imas_constants.QE
 plt.plot(r, Q_e_conductive, label = 'Direct evaluation (conductive)')
-plt.plot(r, Q_e_convective, label = 'Direct evaluation (convective)')
-plt.plot(r, Q_e, label = 'Direct evaluation')
-plt.plot(r, T_e.energy.flux, label = 'ETS')
-plt.title('Energy fluxes for electrons')
+base_line, = plt.plot(r, Q_e_convective*1.5, label = 'Direct evaluation (convective)')
+plt.fill_between(r, Q_e_convective*0.0, Q_e_convective*2.5, facecolor=base_line.get_color(), alpha=0.2)
+base_line, = plt.plot(r, Q_e_conductive + Q_e_convective*1.5, label = 'Direct evaluation')
+plt.fill_between(r, Q_e_conductive + Q_e_convective*0.0, Q_e_conductive + Q_e_convective*2.5, facecolor=base_line.get_color(), alpha=0.2)
+plt.plot(r, T_e.energy.flux, label = 'Transport code')
+plt.title('Energy fluxes for electrons %s' % (LABEL))
 plt.xlabel('rho_tor_norm')
 plt.ylabel('Energy flux density')
 plt.legend(loc=0)
 
 plt.show()
-
-exit()
-
-plt.clf()
-Q_e = Vp_per_S * (-T_e.energy.d * np.gradient(C_e.temperature, r) * gm3 + T_e.energy.v * gm7) * C_e.density * imas_constants.QE
-plt.plot(r, Q_e, label = 'Direct evaluation')
-Q_e = Vp_per_S * (-T_e.energy.d * np.gradient(C_e.temperature, r) * gm3 + T_e.energy.v * gm7) * C_e.density * imas_constants.QE + Gamma_e * C_e.temperature * 1.5 * imas_constants.QE * S
-plt.plot(r, Q_e, label = 'Direct evaluation (with wrong S factor included in convective flux)')
-plt.plot(r, T_e.energy.flux, label = 'ETS')
-plt.title('Energy fluxes for electrons')
-plt.xlabel('rho_tor_norm')
-plt.ylabel('Energy flux density')
-plt.legend(loc=0)
-
