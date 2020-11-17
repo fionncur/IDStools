@@ -8,6 +8,7 @@ import imas,argparse,sys,os,pdb
 import matplotlib
 matplotlib.use('TKagg')
 import matplotlib.pyplot as plt
+from imas.hli_exception import *
 
 # MANAGEMENT OF INPUT ARGUMENTS
 # ------------------------------
@@ -137,10 +138,15 @@ for isource in range(nsources):
     core_sources.source[isource].profiles_1d.resize(1)
     core_sources.source[isource].global_quantities.resize(1)
     core_sources.source[isource].profiles_1d[0] = input.core_sources.partialGet('source('+str(isource)+')/profiles_1d('+str(it)+')')
-    core_sources.source[isource].global_quantities = input.core_sources.partialGet('source('+str(isource)+')/global_quantities')
+    try:
+        core_sources.source[isource].global_quantities = input.core_sources.partialGet('source('+str(isource)+')/global_quantities')
+    except:
+        print('source('+str(isource)+') does not have global_quantities', file=sys.stderr)
+        core_sources.source[isource].global_quantities.resize(0)
     core_sources.source[isource].identifier.name = input.core_sources.partialGet('source('+str(isource)+')/identifier/name')
 
 nsources = len(core_sources.source)
+validsources = []
 
 #print(len(core_sources.source[0].global_quantities))
 #pdb.set_trace()
@@ -148,6 +154,7 @@ nsources = len(core_sources.source)
 is_active = [0]*nsources
 for isource in range(nsources):
     if len(core_sources.source[isource].global_quantities)>0:
+        validsources.append(isource)
         if core_sources.source[isource].global_quantities[0].power>0:
             is_active[isource] = 1
             rho_tor_norm = core_sources.source[isource].profiles_1d[0].grid.rho_tor_norm
@@ -167,6 +174,9 @@ for isource in range(nsources):
                 print('core_sources.source[isource].profiles_1d[0].grid.rho_tor_norm and rho_tor are empty', file=sys.stderr)
                 print('----> Aborted.', file=sys.stderr)
                 exit()
+    else:
+        print('core_sources.source['+str(isource)+'] has no global_quantities, will be discarded.', file=sys.stderr)
+        
 
 if sum(is_active)==0:
     print('The core_sources IDS appears empty ----> Abort.', file=sys.stderr)
@@ -216,7 +226,7 @@ single_torque_waveform             = dict()    # waveform
 
 # Initialise all core_sources profiles and global quantities with zeros when they are not defined,
 # such that to avoid errors when looping over these quantities below
-for isource in range(nsources):
+for isource in validsources: #range(nsources):
     for itime in range(ntime):
         if core_sources.source[isource].global_quantities[itime].electrons.power < 0:
             core_sources.source[isource].global_quantities[itime].electrons.power = 0.
@@ -244,7 +254,7 @@ for isource in range(nsources):
             if len (core_sources.source[isource].profiles_1d[0].ion[iion].particles) < 1:
                 core_sources.source[isource].profiles_1d[0].ion[iion].particles = [0]*nrho
 
-for isource in range(nsources):
+for isource in validsources: #range(nsources):
     single_source_name[isource] = core_sources.source[isource].identifier.name.upper()
     if is_active[isource]:
         single_electron_power_waveform[isource]   = []
