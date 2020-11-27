@@ -630,13 +630,24 @@ if args.noProfiles:
     plt.text(xmax,ymin-0.5*(ymax-ymin),hostdir+' - Shot '+str(args.shot)+' / '+' Run '+str(args.run),fontdict=font,fontsize=6,color='black',ha='right')
 
 if args.Title:
+    try:
+        dataset_description = input.get('dataset_description')
+        got_dataset_description = True
+    except:
+        print('Warning: The dataset_description IDS is absent from the input data-entry', file=sys.stderr)
+        got_dataset_description = False
     # F4F specific?
-    if summary.tag.name != '':
-        additional_data = json.loads(summary.tag.name)
-        plt.suptitle('%s / %s / %s ; %s / %s\nprovider=%s, shot_date=%s, shot_time=%s\ndata_dictionary=%s, access_layer=%s' % (args.user, args.database, args.version, args.shot, args.run, summary.ids_properties.provider, additional_data['date'], additional_data['time'], summary.ids_properties.version_put.data_dictionary, summary.ids_properties.version_put.access_layer))
-    else:
-        plt.suptitle('%s / %s / %s ; %s / %s\nprovider=%s, creation_date=%s\ndata_dictionary=%s, access_layer=%s' % (args.user, args.database, args.version, args.shot, args.run, summary.ids_properties.provider, summary.ids_properties.creation_date, summary.ids_properties.version_put.data_dictionary, summary.ids_properties.version_put.access_layer))
-
+    if got_dataset_description:
+        plt.suptitle('%s / %s / %s ; %s / %s\nprovider=%s, shot_date_time=%s\ndata_dictionary=%s, access_layer-%s' % (args.user, args.database, args.version, args.shot, args.run, summary.ids_properties.provider, dataset_description.pulse_time_begin, summary.ids_properties.version_put.data_dictionary, summary.ids_properties.version_put.access_layer))
+    elif summary.tag.name != '':
+        try:
+            additional_data = json.loads(summary.tag.name)
+        except:
+            additional_data = ''
+        if 'date' in additional_data:
+            plt.suptitle('%s / %s / %s ; %s / %s\nprovider=%s, shot_date=%s, shot_time=%s\ndata_dictionary=%s, access_layer=%s' % (args.user, args.database, args.version, args.shot, args.run, summary.ids_properties.provider, additional_data['date'], additional_data['time'], summary.ids_properties.version_put.data_dictionary, summary.ids_properties.version_put.access_layer))
+        else:
+            plt.suptitle('%s / %s / %s ; %s / %s\nprovider=%s, creation_date=%s\ndata_dictionary=%s, access_layer=%s' % (args.user, args.database, args.version, args.shot, args.run, summary.ids_properties.provider, summary.ids_properties.creation_date, summary.ids_properties.version_put.data_dictionary, summary.ids_properties.version_put.access_layer))
 
 # extra plots
 
