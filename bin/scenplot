@@ -201,26 +201,28 @@ if not args.noProfiles:
     equilibrium.time_slice[0].profiles_2d.resize(1)
 
     # Here individual partialGet seems more optimal than a global one on profiles_2d (not very clear)
-    #equilibrium.time_slice[0].profiles_2d[0]   = input.equilibrium.partialGet('time_slice('+str(it)+')/profiles_2d(0)')
-    equilibrium.time_slice[0].profiles_2d[0].r   = input.partial_get('equilibrium','time_slice('+str(it)+')/profiles_2d(0)/r')
-    equilibrium.time_slice[0].profiles_2d[0].z   = input.partial_get('equilibrium','time_slice('+str(it)+')/profiles_2d(0)/z')
-    equilibrium.time_slice[0].profiles_2d[0].psi = input.partial_get('equilibrium','time_slice('+str(it)+')/profiles_2d(0)/psi')
+    #equilibrium.time_slice[0].profiles_2d[0].r   = input.partial_get('equilibrium','time_slice('+str(it)+')/profiles_2d(0)/r')
+    #equilibrium.time_slice[0].profiles_2d[0].z   = input.partial_get('equilibrium','time_slice('+str(it)+')/profiles_2d(0)/z')
+    #equilibrium.time_slice[0].profiles_2d[0].psi = input.partial_get('equilibrium','time_slice('+str(it)+')/profiles_2d(0)/psi')
+    equilibrium.time_slice[0].profiles_2d   = input.partial_get('equilibrium','time_slice('+str(it)+')/profiles_2d')
+    if len(equilibrium.time_slice[0].profiles_2d) == 0:
+        plot_equi = 0
+    else:
+        plot_equi = 1
 
     time = tc
 
     # psi(R,Z) (not mandatory)
-    plot_equi = 1
-    if equilibrium.time_slice[0].profiles_2d[0].psi is None:
-        print('equilibrium.time_slice[:].profiles_2d[0].psi could not be read', file=sys.stderr)
-        plot_equi = 0
-
-    if equilibrium.time_slice[0].profiles_2d[0].r is None:
-        print('equilibrium.time_slice[:].profiles_2d[0].r could not be read', file=sys.stderr)
-        plot_equi = 0
-
-    if equilibrium.time_slice[0].profiles_2d[0].z is None:
-        print('equilibrium.time_slice[:].profiles_2d[0].z could not be read', file=sys.stderr)
-        plot_equi = 0
+    if plot_equi == 1:
+        if equilibrium.time_slice[0].profiles_2d[0].psi is None:
+            print('equilibrium.time_slice[:].profiles_2d[0].psi could not be read', file=sys.stderr)
+            plot_equi = 0
+        if equilibrium.time_slice[0].profiles_2d[0].r is None:
+            print('equilibrium.time_slice[:].profiles_2d[0].r could not be read', file=sys.stderr)
+            plot_equi = 0
+        if equilibrium.time_slice[0].profiles_2d[0].z is None:
+            print('equilibrium.time_slice[:].profiles_2d[0].z could not be read', file=sys.stderr)
+            plot_equi = 0
 
     # Rho profile (mandatory)
     nrho=0
