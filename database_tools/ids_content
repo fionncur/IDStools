@@ -2,7 +2,6 @@
 
 import argparse,os,sys
 from imas import ids
-import pdb
 
 # ----------------------------------------------------------------------
 
@@ -28,7 +27,7 @@ else:
 if args['database'] != None:
 	database = args["database"]
 else:
-	database = 'iterdb'
+	database = 'iter'
 
 # Avoid too many arguments to be filled by the user (otherwise it is not user-friendly anymore)
 dataversion = os.getenv('IMAS_VERSION')[0]

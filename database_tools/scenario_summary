@@ -262,98 +262,100 @@ def rec(data={},path=os.getcwd(),extension='.yaml',choice=['shot','run','ip','b0
 
 # ----------------------------------------------------------------------
 
-# Input arguments
-parser = argparse.ArgumentParser(description=\
-                    "---- Script to list available scenarios in a specific folder ----"\
-                     , formatter_class=SmartFormatter)
-parser.add_argument("-f","--folder",help=\
-                    "folder where to search for scenarios (recursive)", required=False)
-parser.add_argument("-s","--selection",help=\
-                    "R|list of fields to filter: e.g. He4,2.65\n"\
-                    "----> Select only scenarios filling these criteria"\
-                    , required=False)
-parser.add_argument("-c","--choice", help=\
-                    "R|list of variables to display, e.g.: shot,run,ip,b0\n"\
-                    "... available among following variables:\n"\
-                    "        ref_name    = dataset reference name\n"\
-                    "        ro_name     = resonsible officer name\n"\
-                    "        shot        = shot number\n"\
-                    "        run         = run number\n"\
-                    "        type        = data type (experimental,predictive,interpretative)\n"\
-                    "        workflow    = suite of codes used to compute these data\n"\
-                    "        database    = database name\n"\
-                    "        confinement = confinement regime (L or H)\n"\
-                    "        ip          = plasma current\n"\
-                    "        b0          = central magnetic field \n"\
-                    "        fuelling    = plasma fuelling species\n"\
-                    "        ne0         = central electron density\n"\
-                    "        nesep       = midplane separatrix electron density\n"\
-                    "        zeff        = central Zeff\n"\
-                    "        zeff_sep    = midplane separatrix Zeff\n"\
-                    "        npeak       = density peaking\n"\
-                    "        p_hcd       = total H&CD power\n"\
-                    "        p_ec        = EC power\n"\
-                    "        p_ic        = IC power\n"\
-                    "        p_nbi       = NBI power\n"\
-                    "        p_lh        = LH power\n"\
-                    "        p_sol       = SOL power\n"\
-                    "        idslist     = List of IDSs available in the data-entry\n"\
-                    "        location    = Location of the full description file\n"\
-                    "        composition = Plasma composition\n"\
-                    , required=False)
+if __name__ == "__main__":
 
-args = vars(parser.parse_args())
+    # Input arguments
+    parser = argparse.ArgumentParser(description=\
+                                     "---- Script to list available scenarios in a specific folder ----"\
+                                     , formatter_class=SmartFormatter)
+    parser.add_argument("-f","--folder",help=\
+                        "folder where to search for scenarios (recursive)", required=False)
+    parser.add_argument("-s","--selection",help=\
+                        "R|list of fields to filter: e.g. He4,2.65\n"\
+                        "----> Select only scenarios filling these criteria"\
+                        , required=False)
+    parser.add_argument("-c","--choice", help=\
+                        "R|list of variables to display, e.g.: shot,run,ip,b0\n"\
+                        "... available among following variables:\n"\
+                        "        ref_name    = dataset reference name\n"\
+                        "        ro_name     = resonsible officer name\n"\
+                        "        shot        = shot number\n"\
+                        "        run         = run number\n"\
+                        "        type        = data type (experimental,predictive,interpretative)\n"\
+                        "        workflow    = suite of codes used to compute these data\n"\
+                        "        database    = database name\n"\
+                        "        confinement = confinement regime (L or H)\n"\
+                        "        ip          = plasma current\n"\
+                        "        b0          = central magnetic field \n"\
+                        "        fuelling    = plasma fuelling species\n"\
+                        "        ne0         = central electron density\n"\
+                        "        nesep       = midplane separatrix electron density\n"\
+                        "        zeff        = central Zeff\n"\
+                        "        zeff_sep    = midplane separatrix Zeff\n"\
+                        "        npeak       = density peaking\n"\
+                        "        p_hcd       = total H&CD power\n"\
+                        "        p_ec        = EC power\n"\
+                        "        p_ic        = IC power\n"\
+                        "        p_nbi       = NBI power\n"\
+                        "        p_lh        = LH power\n"\
+                        "        p_sol       = SOL power\n"\
+                        "        idslist     = List of IDSs available in the data-entry\n"\
+                        "        location    = Location of the full description file\n"\
+                        "        composition = Plasma composition\n"\
+                        , required=False)
 
-# No input argument
-noarg = "Yes"
+    args = vars(parser.parse_args())
 
-# Folder
-if args['folder'] != None:
-  folder = args['folder']
-  noarg = "No"
-else:
-  LL_version=int(os.environ['UAL_VERSION'][0])
-  if LL_version < 4:
-      folder = '/work/imas/shared/iterdb/3/0'
-  else:
-      folder = '/work/imas/shared/imasdb/ITER/3/0'
+    # No input argument
+    noarg = "Yes"
 
-# Filter
-if args['selection'] != None:
-  selection = args['selection']
-  noarg = "No"
-else:
-  selection = None
+    # Folder
+    if args['folder'] != None:
+        folder = args['folder']
+        noarg = "No"
+    else:
+        LL_version=int(os.environ['UAL_VERSION'][0])
+        if LL_version < 4:
+            folder = '/work/imas/shared/iterdb/3/0'
+        else:
+            folder = '/work/imas/shared/imasdb/ITER/3/0'
 
-# Choice of variables to display
-if args['choice'] != None:
-    noarg = "No"
-    try:
-        input_choice = args['choice']
-        choice = eval(str("""['"""+re.sub(""",""", r"""','""", input_choice)+"""']"""))
-    except:
-        print("------------------------------------------------------------------", file=sys.stderr)
-        print("Wrong way to write your list of variables to display", file=sys.stderr)
-        print("You wrote "+str(args['choice']), file=sys.stderr)
-        print("Try e.g. this way: "+ """ scenario_summary -c shot,run,workflow """, file=sys.stderr)
-        print("------------------------------------------------------------------", file=sys.stderr)
-        sys.exit(1)
-else:
-  choice = ['shot','run','database','ref_name','ip','b0','fuelling','confinement','workflow']
+    # Filter
+    if args['selection'] != None:
+        selection = args['selection']
+        noarg = "No"
+    else:
+        selection = None
 
-# Default extension, search folder and choice of variables to display
-data = {}
-ext  = ".yaml"
+    # Choice of variables to display
+    if args['choice'] != None:
+        noarg = "No"
+        try:
+            input_choice = args['choice']
+            choice = eval(str("""['"""+re.sub(""",""", r"""','""", input_choice)+"""']"""))
+        except:
+            print("------------------------------------------------------------------", file=sys.stderr)
+            print("Wrong way to write your list of variables to display", file=sys.stderr)
+            print("You wrote "+str(args['choice']), file=sys.stderr)
+            print("Try e.g. this way: "+ """ scenario_summary -c shot,run,workflow """, file=sys.stderr)
+            print("------------------------------------------------------------------", file=sys.stderr)
+            sys.exit(1)
+    else:
+        choice = ['shot','run','database','ref_name','ip','b0','fuelling','confinement','workflow']
 
-# Print the arguments of the default call to the function
-if noarg == "Yes":
-    print("""----> Default call equivalent to: """)
-    print("""      scenario_summary -c shot,run,database,ref_name,ip,b0,fuelling,confinement,workflow""")
+    # Default extension, search folder and choice of variables to display
+    data = {}
+    ext  = ".yaml"
 
-# Call the function
-table = rec(data=data,path=folder,extension=ext,choice=choice,selection=selection)
+    # Print the arguments of the default call to the function
+    if noarg == "Yes":
+        print("""----> Default call equivalent to: """)
+        print("""      scenario_summary -c shot,run,database,ref_name,ip,b0,fuelling,confinement,workflow""")
 
-# Display the clean formatted table
-for i in range(len(table)):
-  print(table[i])
+    # Call the function
+    table = rec(data=data,path=folder,extension=ext,choice=choice,selection=selection)
+
+    # Display the clean formatted table
+    for i in range(len(table)):
+        print(table[i])
 
