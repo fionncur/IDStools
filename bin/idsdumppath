@@ -35,7 +35,7 @@ if __name__ == '__main__':
     nameocc = args.IDS.split('/')
     if len(nameocc) == 1:
         occurrence = 0
-    elif len(namocc) == 2:
+    elif len(nameocc) == 2:
         occurrence = int(nameocc[1])
     else:
       print('ERROR: "' + args.IDS + '" syntax error!', file=sys.stderr)
