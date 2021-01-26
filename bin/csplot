@@ -281,35 +281,35 @@ for isource in validsources: #range(nsources):
             single_ion_power_waveform[isource].append(core_sources.source[isource].global_quantities[itime].total_ion_power)
             single_ion_particles_waveform[isource].append(core_sources.source[isource].global_quantities[itime].total_ion_particles)
             single_power_waveform[isource].append( core_sources.source[isource].global_quantities[itime].electrons.power \
-             + core_sources.source[isource].global_quantities[itime].total_ion_power)
+             + np.array(core_sources.source[isource].global_quantities[itime].total_ion_power))
             single_particles_waveform[isource].append(core_sources.source[isource].global_quantities[itime].electrons.particles \
-             + core_sources.source[isource].global_quantities[itime].total_ion_particles)
+             + np.array(core_sources.source[isource].global_quantities[itime].total_ion_particles))
             single_current_waveform[isource].append(core_sources.source[isource].global_quantities[itime].current_parallel)
             single_torque_waveform[isource].append(core_sources.source[isource].global_quantities[itime].torque_tor)
 
-            total_electron_power_waveform[itime] = total_electron_power_waveform[itime] + core_sources.source[isource].global_quantities[itime].electrons.power
-            total_electron_particles_waveform[itime] = total_electron_particles_waveform[itime] + core_sources.source[isource].global_quantities[itime].electrons.particles
-            total_ion_power_waveform[itime] = total_ion_power_waveform[itime] + core_sources.source[isource].global_quantities[itime].total_ion_power
-            total_ion_particles_waveform[itime] = total_ion_particles_waveform[itime] + core_sources.source[isource].global_quantities[itime].total_ion_particles
-            total_power_waveform[itime] = total_electron_power_waveform[itime] + core_sources.source[isource].global_quantities[itime].electrons.power \
-             + core_sources.source[isource].global_quantities[itime].total_ion_power
-            total_particles_waveform[itime] = total_electron_particles_waveform[itime] + core_sources.source[isource].global_quantities[itime].electrons.particles \
-             + core_sources.source[isource].global_quantities[itime].total_ion_particles
-            total_current_waveform[itime] = total_current_waveform[itime] + core_sources.source[isource].global_quantities[itime].current_parallel
-            total_torque_waveform[itime] = total_torque_waveform[itime] + core_sources.source[isource].global_quantities[itime].torque_tor
+            total_electron_power_waveform[itime] = total_electron_power_waveform[itime] + np.array(core_sources.source[isource].global_quantities[itime].electrons.power)
+            total_electron_particles_waveform[itime] = total_electron_particles_waveform[itime] + np.array(core_sources.source[isource].global_quantities[itime].electrons.particles)
+            total_ion_power_waveform[itime] = total_ion_power_waveform[itime] + np.array(core_sources.source[isource].global_quantities[itime].total_ion_power)
+            total_ion_particles_waveform[itime] = total_ion_particles_waveform[itime] + np.array(core_sources.source[isource].global_quantities[itime].total_ion_particles)
+            total_power_waveform[itime] = total_electron_power_waveform[itime] + np.array(core_sources.source[isource].global_quantities[itime].electrons.power) \
+             + np.array(core_sources.source[isource].global_quantities[itime].total_ion_power)
+            total_particles_waveform[itime] = total_electron_particles_waveform[itime] + np.array(core_sources.source[isource].global_quantities[itime].electrons.particles) \
+             + np.array(core_sources.source[isource].global_quantities[itime].total_ion_particles)
+            total_current_waveform[itime] = total_current_waveform[itime] + np.array(core_sources.source[isource].global_quantities[itime].current_parallel)
+            total_torque_waveform[itime] = total_torque_waveform[itime] + np.array(core_sources.source[isource].global_quantities[itime].torque_tor)
 
         single_electron_power_profile[isource] = np.array(core_sources.source[isource].profiles_1d[0].electrons.energy)
         single_electron_particles_profile[isource] = np.array(core_sources.source[isource].profiles_1d[0].electrons.particles)
         nions = len(core_sources.source[isource].profiles_1d[0].ion)
         for iion in range(nions):
-          single_ion_power_profile[isource] = np.array(single_ion_power_profile[isource]) + core_sources.source[isource].profiles_1d[0].ion[iion].energy
-          single_ion_particles_profile[isource] = np.array(single_ion_particles_profile[isource]) + core_sources.source[isource].profiles_1d[0].ion[iion].particles
-        #single_power_profile[isource] = single_electron_power_profile[isource] + single_ion_power_profile[isource]
-        #single_particles_profile[isource] = single_electron_particles_profile[isource] + single_ion_particles_profile[isource]
+          single_ion_power_profile[isource] = np.array(single_ion_power_profile[isource]) + np.array(core_sources.source[isource].profiles_1d[0].ion[iion].energy)
+          single_ion_particles_profile[isource] = np.array(single_ion_particles_profile[isource]) + np.array(core_sources.source[isource].profiles_1d[0].ion[iion].particles)
+        #single_power_profile[isource] = single_electron_power_profile[isource] + np.array(single_ion_power_profile[isource])
+        #single_particles_profile[isource] = single_electron_particles_profile[isource] + np.array(single_ion_particles_profile[isource])
         single_current_profile[isource] = np.array(core_sources.source[isource].profiles_1d[0].j_parallel)
 
-        total_electron_power_profile = total_electron_power_profile + core_sources.source[isource].profiles_1d[0].electrons.energy
-        total_electron_particles_profile = total_electron_particles_profile + core_sources.source[isource].profiles_1d[0].electrons.particles
+        total_electron_power_profile = total_electron_power_profile + np.array(core_sources.source[isource].profiles_1d[0].electrons.energy)
+        total_electron_particles_profile = total_electron_particles_profile + np.array(core_sources.source[isource].profiles_1d[0].electrons.particles)
         for iion in range(nions):
           total_ion_power_profile = total_ion_power_profile + np.array(core_sources.source[isource].profiles_1d[0].ion[iion].energy)
           total_ion_particles_profile = total_ion_particles_profile + np.array(core_sources.source[isource].profiles_1d[0].ion[iion].particles)
