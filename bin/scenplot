@@ -497,13 +497,14 @@ waveform['p_steady'] = p_steady
 
 if size(waveform['h_mode'][2:]) > 2:
     h_mode_indices  = indices(waveform['h_mode'][2:], lambda h_mode_flag: h_mode_flag>0)
-if len(h_mode_indices) > 0:
-    hmode = 1
-    th_min = summary.time[h_mode_indices[0]]
-    th_max = summary.time[h_mode_indices[-1]]
+    if len(h_mode_indices) > 0:
+        hmode = 1
+        th_min = summary.time[h_mode_indices[0]]
+        th_max = summary.time[h_mode_indices[-1]]
+    else:
+        hmode = 0
 else:
     hmode = 0
-
 
 
 # Starts plotting
