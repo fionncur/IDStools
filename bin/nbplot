@@ -92,6 +92,9 @@ if err != 0:
     exit()
 
 distributions = input.get('distributions')
+if distributions.ids_properties.homogeneous_time<0:
+    print('The distribution IDS is not present in the input file => Abort.')
+    exit()
 input.close()
 
 # TIME VECTOR AND TIME INDEX
