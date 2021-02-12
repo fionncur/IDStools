@@ -208,7 +208,10 @@ if not args.noProfiles:
     if len(equilibrium.time_slice[0].profiles_2d) == 0:
         plot_equi = 0
     else:
-        plot_equi = 1
+        if len(equilibrium.time_slice[0].profiles_2d[0].grid.dim1)>0:
+            plot_equi = 1
+        else:
+            plot_equi = 0
 
     time = tc
 
