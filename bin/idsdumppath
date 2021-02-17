@@ -42,8 +42,6 @@ if __name__ == '__main__':
       exit(1)
     idsname = nameocc[0]
 
-    ids = input.get(idsname, occurrence)
-
     try:
         result = input.partial_get(idsname, args.DATA_PATH, occurrence)
     except Exception as  exc:
