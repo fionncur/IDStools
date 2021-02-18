@@ -78,6 +78,7 @@ def rec(data={},path=os.getcwd(),extension='.yaml',choice=['shot','run','ip','b0
   disp_p_sol       = 'P_SOL[MW]'
   disp_extra       = 'Free description'
   disp_idslist     = 'List of IDSs'
+  disp_tsteps      = '#time steps'
   disp_location    = 'Location'
   disp_composition = 'Composition X[ni/ne]'
 
@@ -108,6 +109,7 @@ def rec(data={},path=os.getcwd(),extension='.yaml',choice=['shot','run','ip','b0
   tab_p_sol       = 0
   tab_extra       = 0
   tab_idslist     = 0
+  tab_tsteps      = 0
   tab_location    = 0
   tab_composition = 0
   nspecies_max    = 0
@@ -136,10 +138,11 @@ def rec(data={},path=os.getcwd(),extension='.yaml',choice=['shot','run','ip','b0
     tab_p_sol       = max(max(len(str(sdata[i].get('hcd').get('p_sol'))),tab_p_sol),len(disp_p_sol))
     tab_extra       = max(max(len(str(sdata[i].get('free_description'))),tab_extra),len(disp_extra))
     tab_idslist     = max(max(len(str(sdata[i].get('ids_list'))),tab_idslist),len(disp_idslist))
+    tab_tsteps      = max(max(len(str(sdata[i].get('tsteps'))),tab_tsteps),len(disp_tsteps))
     tab_location    = max(max(len(str(sdata[i].get('location'))),tab_location),len(disp_location))
     tab_composition = max(max(len(str(sdata[i].get('plasma_composition').get('species'))),tab_composition),len(disp_composition))
     nspecies_max    = max(len(sdata[i].get('plasma_composition').get('species').split()),nspecies_max)
-  tab_composition = tab_composition+3*nspecies_max # tab_composition allows for concentration in format (0.xxx), here we pad to fit the (x.xxe-xx) format
+    tab_composition = tab_composition+3*nspecies_max # tab_composition allows for concentration in format (0.xxx), here we pad to fit the (x.xxe-xx) format
 
   # --------------
   # Table heading
@@ -187,9 +190,15 @@ def rec(data={},path=os.getcwd(),extension='.yaml',choice=['shot','run','ip','b0
       p_sol         = sdata[i].get('hcd').get('p_sol')
       extra         = sdata[i].get('free_description')
       idslist       = sdata[i].get('idslist')
+      tsteps        = sdata[i].get('tsteps')
       location      = sdata[i].get('location')
       composition   = sdata[i].get('plasma_composition').get('species')
       composition_x = sdata[i].get('plasma_composition').get('n_over_ne')
+
+      # Number of time steps in the scenario
+      tstep = -99
+      if 'equilibrium' in idslist.keys():
+          tsteps = idslist['equilibrium']['time_step_number']
 
       # Compute the list of IDSs to be displayed
       idslist_nice = str()
@@ -300,19 +309,16 @@ if __name__ == "__main__":
                         "        p_lh        = LH power\n"\
                         "        p_sol       = SOL power\n"\
                         "        idslist     = List of IDSs available in the data-entry\n"\
+                        "        tsteps      = Number of time steps in the scenario\n"\
                         "        location    = Location of the full description file\n"\
                         "        composition = Plasma composition\n"\
                         , required=False)
 
     args = vars(parser.parse_args())
 
-    # No input argument
-    noarg = "Yes"
-
     # Folder
     if args['folder'] != None:
         folder = args['folder']
-        noarg = "No"
     else:
         LL_version=int(os.environ['UAL_VERSION'][0])
         if LL_version < 4:
@@ -323,13 +329,11 @@ if __name__ == "__main__":
     # Filter
     if args['selection'] != None:
         selection = args['selection']
-        noarg = "No"
     else:
         selection = None
 
     # Choice of variables to display
     if args['choice'] != None:
-        noarg = "No"
         try:
             input_choice = args['choice']
             choice = eval(str("""['"""+re.sub(""",""", r"""','""", input_choice)+"""']"""))
@@ -348,7 +352,7 @@ if __name__ == "__main__":
     ext  = ".yaml"
 
     # Print the arguments of the default call to the function
-    if noarg == "Yes":
+    if args['choice'] == None:
         print("""----> Default call equivalent to: """)
         print("""      scenario_summary -c shot,run,database,ref_name,ip,b0,fuelling,confinement,workflow""")
 
