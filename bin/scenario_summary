@@ -197,8 +197,8 @@ def rec(data={},path=os.getcwd(),extension='.yaml',choice=['shot','run','ip','b0
 
       # Number of time steps in the scenario
       tstep = -99
-      if 'equilibrium' in idslist.keys():
-          tsteps = idslist['equilibrium']['time_step_number']
+      if 'summary' in idslist.keys():
+          tsteps = idslist['summary']['time_step_number']
 
       # Compute the list of IDSs to be displayed
       idslist_nice = str()
