@@ -404,10 +404,10 @@ if len(summary.global_quantities.h_mode.value) < 1:
 # ----------------------------------------------------------------------
 
 # H&CD power
-p_ec  = asarray([0]*stime)
-p_ic  = asarray([0]*stime)
-p_nbi = asarray([0]*stime)
-p_lh  = asarray([0]*stime)
+p_ec  = asarray([0.0]*stime)
+p_ic  = asarray([0.0]*stime)
+p_nbi = asarray([0.0]*stime)
+p_lh  = asarray([0.0]*stime)
 n_ec  = len(summary.heating_current_drive.ec)
 n_ic  = len(summary.heating_current_drive.ic)
 n_nbi = len(summary.heating_current_drive.nbi)
@@ -415,56 +415,56 @@ n_lh  = len(summary.heating_current_drive.lh)
 if n_ec > 0:
     for isource in range(n_ec):
         if len(summary.heating_current_drive.ec[isource].power.value) > 0:
-            p_ec = p_ec + summary.heating_current_drive.ec[isource].power.value*1.e-6
+            p_ec = p_ec + summary.heating_current_drive.ec[isource].power.value
 else:
     if len(summary.heating_current_drive.power_ec.value) > 0:
-        p_ec = summary.heating_current_drive.power_ec.value*1.e-6
+        p_ec = summary.heating_current_drive.power_ec.value
 
 if n_ic > 0:
     for isource in range(n_ic):
         if len(summary.heating_current_drive.ic[isource].power.value) > 0:
-            p_ic = p_ic + summary.heating_current_drive.ic[isource].power.value*1.e-6
+            p_ic = p_ic + summary.heating_current_drive.ic[isource].power.value
 else:
     if len(summary.heating_current_drive.power_ic.value) > 0:
-        p_ic = summary.heating_current_drive.power_ic.value*1.e-6
+        p_ic = summary.heating_current_drive.power_ic.value
 
 if n_nbi > 0:
     for isource in range(n_nbi):
         if len(summary.heating_current_drive.nbi[isource].power.value) > 0:
-            p_nbi = p_nbi + summary.heating_current_drive.nbi[isource].power.value*1.e-6
+            p_nbi = p_nbi + summary.heating_current_drive.nbi[isource].power.value
 else:
     if len(summary.heating_current_drive.power_nbi.value) > 0:
-        p_nbi = summary.heating_current_drive.power_nbi.value*1.e-6
+        p_nbi = summary.heating_current_drive.power_nbi.value
 
 if n_lh > 0:
     for isource in range(n_lh):
         if len(summary.heating_current_drive.lh[isource].power.value) > 0:
-            p_lh = p_lh + summary.heating_current_drive.lh[isource].power.value*1.e-6
+            p_lh = p_lh + summary.heating_current_drive.lh[isource].power.value
 else:
     if len(summary.heating_current_drive.power_lh.value) > 0:
-        p_nbi = summary.heating_current_drive.power_lh.value*1.e-6
+        p_nbi = summary.heating_current_drive.power_lh.value
 
 p_hcd = p_ec + p_ic + p_nbi + p_lh
 
 # Fusion power
-p_fus = asarray([0]*stime)
+p_fus = asarray([0.0]*stime)
 if len(summary.fusion.power.value) > 0:
-    p_fus = summary.fusion.power.value*1.e-6
+    p_fus = summary.fusion.power.value
 
 # Ohmic power
-p_ohmic = asarray([0]*stime)
+p_ohmic = asarray([0.0]*stime)
 if len(summary.global_quantities.power_ohm.value) > 0:
-    p_ohmic = summary.global_quantities.power_ohm.value*1.e-6
+    p_ohmic = summary.global_quantities.power_ohm.value
 
 # Steady power
-p_steady = asarray([0]*stime)
+p_steady = asarray([0.0]*stime)
 if len(summary.global_quantities.power_steady.value) > 0:
-    p_steady = summary.global_quantities.power_steady.value*1.e-6
+    p_steady = summary.global_quantities.power_steady.value
 
 # Neutron power
-p_neut = asarray([0]*stime)
+p_neut = asarray([0.0]*stime)
 if len(summary.fusion.neutron_power_total.value) > 0:
-    p_neut = summary.fusion.neutron_power_total.value*1.e-6
+    p_neut = summary.fusion.neutron_power_total.value
 
 # H-mode flag
 def indices(a, func):
@@ -497,6 +497,8 @@ waveform['p_fusion'] = p_fus
 waveform['p_neutron'] = p_neut
 waveform['p_ohmic'] = p_ohmic
 waveform['p_steady'] = p_steady
+for k in waveform.keys():
+    waveform[k][waveform[k] == imas.imasdef.EMPTY_DOUBLE] = np.nan
 
 if size(waveform['h_mode'][2:]) > 2:
     h_mode_indices  = indices(waveform['h_mode'][2:], lambda h_mode_flag: h_mode_flag>0)
@@ -523,40 +525,40 @@ plotstyle = multi_style if len(waveform['time']) > 1 else single_style
 ax1 = plt.subplot2grid((nline,ncol), (0,0), colspan=2)
 nleg = 0
 if max(waveform['p_hcd']) > 0:
-    plt.plot(waveform['time'],waveform['p_hcd'],plotstyle,label=r'$P_{HCD}$')
+    plt.plot(waveform['time'],waveform['p_hcd']*1.e-6,plotstyle,label=r'$P_{HCD}$')
     nleg = nleg + 1
 
 if max(waveform['p_ec']) > 0:
-    plt.plot(waveform['time'],waveform['p_ec'],plotstyle,label=r'$P_{EC}$')
+    plt.plot(waveform['time'],waveform['p_ec']*1.e-6,plotstyle,label=r'$P_{EC}$')
     nleg = nleg + 1
 
 if max(waveform['p_ic']) > 0:
-    plt.plot(waveform['time'],waveform['p_ic'],plotstyle,label=r'$P_{IC}$')
+    plt.plot(waveform['time'],waveform['p_ic']*1.e-6,plotstyle,label=r'$P_{IC}$')
     nleg = nleg + 1
 
 if max(waveform['p_nbi']) > 0:
-    plt.plot(waveform['time'],waveform['p_nbi'],plotstyle,label=r'$P_{NBI}$')
+    plt.plot(waveform['time'],waveform['p_nbi']*1.e-6,plotstyle,label=r'$P_{NBI}$')
     nleg = nleg + 1
 
 if max(waveform['p_lh']) > 0:
-    plt.plot(waveform['time'],waveform['p_lh'],plotstyle,label=r'$P_{LH}$')
+    plt.plot(waveform['time'],waveform['p_lh']*1.e-6,plotstyle,label=r'$P_{LH}$')
     nleg = nleg + 1
 
 # Fusion waveforms
 if max(waveform['p_fusion']) > 0:
-    plt.plot(waveform['time'],waveform['p_fusion'],plotstyle,label=r'$P_{FUS}$')
+    plt.plot(waveform['time'],waveform['p_fusion']*1.e-6,plotstyle,label=r'$P_{FUS}$')
     nleg = nleg + 1
 
 if max(waveform['p_neutron']) > 0:
-    plt.plot(waveform['time'],waveform['p_neutron'],plotstyle,label=r'$P_{NEUT}$')
+    plt.plot(waveform['time'],waveform['p_neutron']*1.e-6,plotstyle,label=r'$P_{NEUT}$')
     nleg = nleg + 1
 
 if max(waveform['p_ohmic']) > 0:
-    plt.plot(waveform['time'],waveform['p_ohmic'],plotstyle,label=r'$P_{OHM}$')
+    plt.plot(waveform['time'],waveform['p_ohmic']*1.e-6,plotstyle,label=r'$P_{OHM}$')
     nleg = nleg + 1
 
 if max(waveform['p_steady']) > 0:
-    plt.plot(waveform['time'],waveform['p_steady'],plotstyle,label=r'$P_{STEADY}$')
+    plt.plot(waveform['time'],waveform['p_steady']*1.e-6,plotstyle,label=r'$P_{STEADY}$')
     nleg = nleg + 1
 
 plt.xlim(summary.time[0],summary.time[-1])
