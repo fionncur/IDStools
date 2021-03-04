@@ -217,13 +217,13 @@ if not args.noProfiles:
 
     # psi(R,Z) (not mandatory)
     if plot_equi == 1:
-        if equilibrium.time_slice[0].profiles_2d[0].psi is None:
+        if equilibrium.time_slice[0].profiles_2d[0].psi is None or len(equilibrium.time_slice[0].profiles_2d[0].psi)==0:
             print('equilibrium.time_slice[:].profiles_2d[0].psi could not be read', file=sys.stderr)
             plot_equi = 0
-        if equilibrium.time_slice[0].profiles_2d[0].r is None:
+        if equilibrium.time_slice[0].profiles_2d[0].r is None or len(equilibrium.time_slice[0].profiles_2d[0].r)==0:
             print('equilibrium.time_slice[:].profiles_2d[0].r could not be read', file=sys.stderr)
             plot_equi = 0
-        if equilibrium.time_slice[0].profiles_2d[0].z is None:
+        if equilibrium.time_slice[0].profiles_2d[0].z is None or len(equilibrium.time_slice[0].profiles_2d[0].z)==0:
             print('equilibrium.time_slice[:].profiles_2d[0].z could not be read', file=sys.stderr)
             plot_equi = 0
 
@@ -487,7 +487,7 @@ waveform['energy_thermal'] = summary.global_quantities.energy_thermal.value
 waveform['b0'] = summary.global_quantities.b0.value
 waveform['h_98'] = summary.global_quantities.h_98.value
 waveform['tau_energy'] = summary.global_quantities.tau_energy.value
-waveform['h_mode'] = summary.global_quantities.h_mode.value
+waveform['h_mode'] = summary.global_quantities.h_mode.value.astype(float)
 waveform['p_hcd'] = p_hcd
 waveform['p_ec'] = p_ec
 waveform['p_ic'] = p_ic
@@ -699,6 +699,8 @@ if not args.noProfiles:
         r2d   = equilibrium.time_slice[0].profiles_2d[0].r
         z2d   = equilibrium.time_slice[0].profiles_2d[0].z
         psi2d = equilibrium.time_slice[0].profiles_2d[0].psi
+        import pdb
+        pdb.set_trace()
         plt.contour(r2d,z2d,psi2d,50) #,label=r'$\Psi_{pol}$')
         plt.xlim(r2d.min(),r2d.max())
         plt.gca().set_aspect('equal', adjustable='box')
