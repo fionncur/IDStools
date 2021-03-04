@@ -699,8 +699,6 @@ if not args.noProfiles:
         r2d   = equilibrium.time_slice[0].profiles_2d[0].r
         z2d   = equilibrium.time_slice[0].profiles_2d[0].z
         psi2d = equilibrium.time_slice[0].profiles_2d[0].psi
-        import pdb
-        pdb.set_trace()
         plt.contour(r2d,z2d,psi2d,50) #,label=r'$\Psi_{pol}$')
         plt.xlim(r2d.min(),r2d.max())
         plt.gca().set_aspect('equal', adjustable='box')
