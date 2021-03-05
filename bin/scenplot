@@ -486,6 +486,11 @@ waveform['energy_total'] = summary.global_quantities.energy_total.value
 waveform['energy_thermal'] = summary.global_quantities.energy_thermal.value
 waveform['b0'] = summary.global_quantities.b0.value
 waveform['h_98'] = summary.global_quantities.h_98.value
+
+for t in range(len(waveform['h_98'])):
+    if waveform['h_98'][t] < 0:
+        waveform['h_98'][t] = 0
+
 waveform['tau_energy'] = summary.global_quantities.tau_energy.value
 waveform['h_mode'] = summary.global_quantities.h_mode.value.astype(float)
 waveform['p_hcd'] = p_hcd
