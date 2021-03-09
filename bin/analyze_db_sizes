@@ -59,7 +59,7 @@ for i in [i.value for i in imas.IDSName]:
       field = "%s/%s" % (i, o)
       SIZES[field] = {}
       start_time = time.time()
-      _IDS = IDS.get(i)
+      _IDS = IDS.get(i, occurrence=o)
       SIZES[field]['time'] = time.time() - start_time
       SIZES[field]['bytes'] = byte_size(_IDS)
       print('Reading %0.3f MB data for %s took %0.2f seconds' % ( SIZES[field]['bytes']/1024**2, field, SIZES[field]['time']))
