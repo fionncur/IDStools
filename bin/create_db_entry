@@ -128,10 +128,12 @@ try:
     dataset_description = input.dataset_description
     comment = str.replace(dataset_description.ids_properties.comment,'\n','\n   ')
     dd_version = dataset_description.dd_version
+    workflow = dataset_description.simulation.workflow
 except:
     print("----> dataset_description does not exist", file=sys.stderr)
     comment = ''
     dd_version = ''
+    workflow = "tbd"
 
 p_sol = 0
 try:
@@ -529,7 +531,6 @@ else:
     main_species = "tbd"
 
 # Misc
-workflow = "tbd"
 type     = "tbd"
 
 # Set up the name of the yaml file
