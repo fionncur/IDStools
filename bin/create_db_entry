@@ -31,7 +31,7 @@ else:
 if args['database'] != None:
 	database = args["database"]
 else:
-	database = 'iterdb'
+	database = 'ITER'
 
 # Open the database and read the necessary IDSs
 try:
@@ -574,7 +574,7 @@ f.write("""    shot: %i\n""" % shot)
 f.write("""    run: %i\n""" % run)
 f.write("""    type: %s\n""" % type)
 f.write("""    workflow: %s\n""" % workflow)
-f.write("""    machine: %s\n""" % database.upper())
+f.write("""    machine: %s\n""" % database)
 f.write("""\n""")
 f.write("""# ------------------------------------------------------------------\n""")
 f.write("""# Relations to other entries in this database (if any)\n""")
