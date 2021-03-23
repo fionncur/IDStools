@@ -24,6 +24,11 @@ class Parser(xml.sax.handler.ContentHandler):
             self.idss.append(ids)
 
 if __name__ == '__main__':
+    print('\n[DEPRECATED]')
+    print(' ****************************************** ')
+    print(' ******** Please use idscp instead ******** ')
+    print(' ****************************************** \n')
+
     if len(sys.argv) != 8 and len(sys.argv) != 9:
         print('This script copies a list of IDS from a data entry specified by (username, databasename IMASMajorVersion, pulse and run) to a new destination data entry created in your database via a series of GET/PUT operations')
         print('If the destination data entry was pre-existing, its previous content is erased in the operation.')

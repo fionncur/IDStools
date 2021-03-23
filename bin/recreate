@@ -2,6 +2,11 @@
 
 import imas,os,argparse,sys
 
+print('\n[DEPRECATED]')
+print(' ****************************************** ')
+print(' ******** Please use idscp instead ******** ')
+print(' ****************************************** \n')
+
 # Management of input arguments
 parser = argparse.ArgumentParser(description=\
 	 '---- To recreate a new data-entry from a previous one with all its IDSs ----')

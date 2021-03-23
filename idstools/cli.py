@@ -9,7 +9,7 @@ imas_parser.add_argument("-u", "--user_or_path", dest="user",
                          help="user \t\t(default=%(default)s)")
 db_group = imas_parser.add_mutually_exclusive_group()
 db_group.add_argument("--database", "-d", 
-                      type=str, default="iter",
+                      type=str, default="ITER",
                       help="database name \t(default=%(default)s)")
 imas_parser.add_argument("--backend", "-b", 
                          type=str, default="MDSPLUS", 

@@ -1,70 +1,84 @@
 #!/usr/bin/env python
 from __future__ import print_function
 
-import imas,os,argparse
+import imas,os,sys,argparse
+from idstools.cli import *
 
 # Management of input arguments
-parser = argparse.ArgumentParser(description=\
-	 '---- To copy an IDS from a data-entry to another one ----')
-parser.add_argument('-si','--shot_input',help='Input shot number', required=True,type=int)
-parser.add_argument('-ri','--run_input',help='Input run number', required=True,type=int)
-parser.add_argument('-so','--shot_output',help='Output shot number', required=True,type=int)
-parser.add_argument('-ro','--run_output',help='Output run number', required=True,type=int)
-parser.add_argument('-u','--user_or_path',help='User or absolute path name of the DB where the data-entry is located', required=False)
-parser.add_argument('-d','--database',help='Database name of the DB where the data-entry is located', required=False)
-parser.add_argument('-ids','--ids',help='IDS to copy', required=True)
+parser = argparse.ArgumentParser(description='Copy IDSs from a data-entry into another one',
+                                 parents=[imas_parser])
+parser.add_argument('-si','--shot_input',help='Input shot number',required=True,type=int)
+parser.add_argument('-ri','--run_input',help='Input run number',required=True,type=int)
+parser.add_argument('-so','--shot_output',help='Output shot number',required=True,type=int)
+parser.add_argument('-ro','--run_output',help='Output run number',required=True,type=int)
+# default user from parent parser is 'public',
+# which is fine for exploration scripts but less
+# for management scripts
+parser.set_defaults(user=os.environ['USER'])
+parser.add_argument('-do','--database_output',type=str,default=None,
+                    help='Database name for the destination data-entry')
+parser.add_argument('-bo','--backend_output',type=str,
+                    help='Backend name for the destination data-entry')
+parser.add_argument('-k','--keep',action='store_true',
+                    help='Attempt to keep destination data-entry if exist, otherwise create it')
+parser.add_argument('ids',nargs='*',type=str,
+                    help='IDSs to copy (leave empty to copy all)')
 
-args = vars(parser.parse_args())
+args = parser.parse_args()
 
-# idscp -si 7897 -ri 32 -so 7897 -ro 31 -u schneim -d iter -ids equilibrium
 
-shot_in  = args["shot_input"]
-run_in   = args["run_input"]
-shot_out = args["shot_output"]
-run_out  = args["run_output"]
-ids      = args["ids"]
+if args.database_output == None:
+    args.database_output = args.database
 
-# User or absolute path name
-if args['user_or_path'] != None:
-    user_or_path = args["user_or_path"]
+if args.backend_output == None:
+    args.backend_output = args.backend
+
+if args.ids == []:
+    args.ids = [ids.value for ids in list(imas.IDSName)]
+
+
+
+# OPEN SOURCE
+src = imas.DBEntry(get_backend_id(args.backend),args.database,
+                   args.shot_input,args.run_input,user_name=args.user)
+status,_ = src.open()
+if status!=0:
+    print('Error opening source pulse! Please check existence.',file=sys.stderr)
+    sys.exit(status)
+
+
+dest = imas.DBEntry(get_backend_id(args.backend_output),args.database_output,
+                    args.shot_output,args.run_output,user_name=os.environ['USER'])
+if args.keep:
+    # OPEN DEST
+    status,_ = dest.open()
+    if status!=0:
+        print('Error opening destination pulse! Please check parameters.')
+        sys.exit(status)
 else:
-    user_or_path = os.getenv('USER')
+    # CREATE DEST
+    status,_ = dest.create()
+    if status!=0:
+        print('Error creating destination pulse! Please check parameters and permissions.',
+              file=sys.stderr)
+        sys.exit(status)
 
-# Database name
-if args['database'] != None:
-    database = args['database']
-else:
-    database = 'iter'
+# COPY IDSs FROM SOURCE TO DEST
+for idsname in args.ids:
+    idsobj = src.get(idsname)
+    try:
+        dest.put(idsobj)
+    except Exception as exc:
+        print(str(exc),file=sys.stderr)
+        if args.keep:
+            print('This error could be due to difference of data dictionary version '
+                  +'between the current one and the existing destination pulse')
+            print('You can ommit option -k/--keep to recreate the destination pulse with '
+                  +'the current DD version (WARNING: all other IDSs will be lost at dest)')
+          
 
-version = os.getenv('IMAS_VERSION')[0]
-
-# OPEN INPUT
-input = imas.ids(shot_in,run_in,0,0)
-input.open_env(user_or_path,database,version)
-if hasattr(eval('input.'+ids),'idx'):
-  idx_in = eval('input.'+ids+'.idx')
-else:
-  idx_in = eval('input.'+ids+'._idx')
-
-# GET IDS FROM INPUT
-eval('input.'+ids+'.get()');
-
-# OPEN OUTPUT
-output = imas.ids(shot_out,run_out,0,0)
-output.open_env(user_or_path,database,version)
-if hasattr(eval('output.'+ids),'idx'):
-   idx_out = eval('output.'+ids+'.idx')
-else:
-   idx_out = eval('output.'+ids+'._idx')
-
-# COPY IDS FROM INPUT TO OUTPUT
-exec('output.'+ids+' = input.'+ids)
-eval('output.'+ids+'.setExpIdx(idx_out)')
-
-# PUT IDS INTO OUTPUT
-eval('output.'+ids+'.put()')
-
+    
 # CLOSE FILES
-input.close()
-output.close()
+src.close()
+dest.close()
 
