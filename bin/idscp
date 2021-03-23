@@ -21,6 +21,8 @@ parser.add_argument('-bo','--backend_output',type=str,
                     help='Backend name for the destination data-entry')
 parser.add_argument('-k','--keep',action='store_true',
                     help='Attempt to keep destination data-entry if exist, otherwise create it')
+parser.add_argument('--setDatasetVersion',action='store_true',
+                    help='Store current DD version into dataset_description IDS if exists')
 parser.add_argument('ids',nargs='*',type=str,
                     help='IDSs to copy (leave empty to copy all)')
 
@@ -66,6 +68,8 @@ else:
 # COPY IDSs FROM SOURCE TO DEST
 for idsname in args.ids:
     idsobj = src.get(idsname)
+    if args.setDatasetVersion and idsname=='dataset_description':
+        idsobj.dd_version = os.environ['IMAS_VERSION']
     try:
         dest.put(idsobj)
     except Exception as exc:
