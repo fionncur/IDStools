@@ -20,9 +20,9 @@ parser.add_argument('-do','--database_output',type=str,default=None,
 parser.add_argument('-bo','--backend_output',type=str,
                     help='Backend name for the destination data-entry')
 parser.add_argument('-k','--keep',action='store_true',
-                    help='Attempt to keep destination data-entry if exist, otherwise create it')
+                    help='Attempt to keep destination data-entry if it exists, otherwise create it')
 parser.add_argument('--setDatasetVersion',action='store_true',
-                    help='Store current DD version into dataset_description IDS if exists')
+                    help='Store current DD version into dataset_description IDS if it exists')
 parser.add_argument('ids',nargs='*',type=str,
                     help='IDSs to copy (leave empty to copy all)')
 
@@ -75,9 +75,9 @@ for idsname in args.ids:
     except Exception as exc:
         print(str(exc),file=sys.stderr)
         if args.keep:
-            print('This error could be due to difference of data dictionary version '
+            print('This error could be due to a difference of data dictionary versions '
                   +'between the current one and the existing destination pulse')
-            print('You can ommit option -k/--keep to recreate the destination pulse with '
+            print('You can omit option -k/--keep to recreate the destination pulse with '
                   +'the current DD version (WARNING: all other IDSs will be lost at dest)')
           
 
