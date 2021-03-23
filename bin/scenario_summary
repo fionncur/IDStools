@@ -142,7 +142,7 @@ def rec(data={},path=os.getcwd(),extension='.yaml',choice=['shot','run','ip','b0
     tab_location    = max(max(len(str(sdata[i].get('location'))),tab_location),len(disp_location))
     tab_composition = max(max(len(str(sdata[i].get('plasma_composition').get('species'))),tab_composition),len(disp_composition))
     nspecies_max    = max(len(sdata[i].get('plasma_composition').get('species').split()),nspecies_max)
-    tab_composition = tab_composition+3*nspecies_max # tab_composition allows for concentration in format (0.xxx), here we pad to fit the (x.xxe-xx) format
+  tab_composition = tab_composition+3*nspecies_max+1 # tab_composition allows for concentration in format (0.xxx), here we pad to fit the (x.xxe-xx) format
 
   # --------------
   # Table heading
