@@ -44,7 +44,6 @@ if args.ids == []:
     args.ids = [ids.value for ids in list(imas.IDSName)]
 
 
-
 # OPEN SOURCE
 src = imas.DBEntry(get_backend_id(args.backend),args.database,
                    args.shot_input,args.run_input,user_name=args.user)
@@ -65,7 +64,7 @@ if not args.force:
         if status!=0:
             print('Error opening destination pulse! Please check parameters.',
                   file=sys.stderr)
-        sys.exit(status)
+            sys.exit(status)
 else:
     # CREATE DEST
     status,_ = dest.create()
