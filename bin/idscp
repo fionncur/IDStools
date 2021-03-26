@@ -29,7 +29,8 @@ parser.add_argument('ids',nargs='*',type=str,
 args = parser.parse_args()
 
 if args.shot_input==args.shot_output \
-   and args.run_input == args.run_output:
+   and args.run_input == args.run_output \
+   and args.user == os.environ['USER']:
     print('Can not use the same data-entry as source and destination!',file=sys.stderr)
     exit()
     
