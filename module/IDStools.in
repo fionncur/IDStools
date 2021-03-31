@@ -20,7 +20,7 @@ conflict $name
 set prefix "__INSTALL_PREFIX__"
 if { [file exists $prefix] } {
   prepend-path PATH             $prefix/bin
-  prepend-path PYTHONPATH       __INSTALL_PY__
+  prepend-path PYTHONPATH       __INSTALL_PY__/site-packages
 } else {
   puts stderr "Error: $prefix could not be found, exiting without changes."
   break
