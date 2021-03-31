@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 from __future__ import print_function
 
-import copy
-import inspect
 import sys
 import imas
 
@@ -33,7 +31,7 @@ def compare(x, y, parent):
             continue
 
         if key not in xd:
-            print('%s not pdddresent in IDS1' % key)
+            print('%s not present in IDS1' % key)
             continue
 
         if key not in yd:
