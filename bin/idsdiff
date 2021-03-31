@@ -2,7 +2,7 @@
 from __future__ import print_function
 
 import copy
-import numpy
+import inspect
 import sys
 import imas
 
@@ -12,10 +12,12 @@ def get_ids(user, database, version, shot, run, idsname, time=0, interp=1):
     '''
     imas_obj = imas.ids(shot, run)
     imas_obj.open_env(user, database, version)
-    imas_obj.__dict__[idsname].get()
-    ids = copy.deepcopy(imas_obj.__dict__[idsname])
+    ids = imas_obj.__dict__[idsname]
+    ids.get()
+    ids_copy = ids.__class__()
+    ids_copy.copyValues(ids)
     imas_obj.close()
-    return ids
+    return ids_copy
 
 def compare(x, y, parent):
     '''
@@ -26,8 +28,12 @@ def compare(x, y, parent):
     xd = x.__dict__
     yd = y.__dict__
     for key in set(xd.keys()).union(set(yd.keys())):
+
+        if key.startswith('_'):
+            continue
+
         if key not in xd:
-            print('%s not present in IDS1' % key)
+            print('%s not pdddresent in IDS1' % key)
             continue
 
         if key not in yd:
@@ -40,7 +46,7 @@ def compare(x, y, parent):
             print('%s.%s is of different type in both IDSs' % (parent, key))
             continue
 
-        if type(xo).__name__ == 'instance':
+        if hasattr(xo, '__module__') and 'imas' in xo.__module__:
             compare(xo, yo, parent + '.' + xo.__class__.__name__)
             continue
 
