@@ -27,11 +27,6 @@ def compare(x, y, parent):
     yd = y.__dict__
     for key in set(xd.keys()).union(set(yd.keys())):
 
-
-
-        if key.startswith( 'time_slice' ):
-            pass
-
         if key.startswith('_'):
             continue
 
