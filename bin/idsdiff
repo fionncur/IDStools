@@ -27,6 +27,11 @@ def compare(x, y, parent):
     yd = y.__dict__
     for key in set(xd.keys()).union(set(yd.keys())):
 
+
+
+        if key.startswith( 'time_slice' ):
+            pass
+
         if key.startswith('_'):
             continue
 
@@ -54,7 +59,7 @@ def compare(x, y, parent):
                 print('%s.%s is of different length in both IDSs' % (parent, key))
             else:
                 for i in range(len(xo)):
-                    if type(xo[i]).__name__ == 'instance':
+                    if 'structArrayElement' in type(xo[i]).__name__ :
                         compare(xo[i], yo[i], parent + '.array[' + str(i) + ']')
                     else:
                         #print("list of "+type(xo[i]).__name__)
