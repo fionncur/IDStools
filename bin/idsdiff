@@ -3,19 +3,8 @@ from __future__ import print_function
 
 import sys
 import imas
+from idstools.cli import *
 
-def get_ids(user, database, version, shot, run, idsname, time=0, interp=1):
-    '''
-    Open IMASdb to get specific IDS and return its deep copy.
-    '''
-    imas_obj = imas.ids(shot, run)
-    imas_obj.open_env(user, database, version)
-    ids = imas_obj.__dict__[idsname]
-    ids.get()
-    ids_copy = ids.__class__()
-    ids_copy.copyValues(ids)
-    imas_obj.close()
-    return ids_copy
 
 def compare(x, y, parent):
     '''
@@ -86,10 +75,52 @@ def compare(x, y, parent):
                     print('%s.%s is of different value in both IDSs' % (parent, key))
 
 if __name__ == '__main__':
-    if len(sys.argv) != 9:
-        print('Usage: idsdiff <USER> <DATABASE> <VERSION> <SHOTa> <RUNa> <SHOTb> <RUNb> <IDSNAME>', file=sys.stderr)
-        exit(1)
+    # Management of input arguments
+    parser = argparse.ArgumentParser(description='Compare a IDS from 2 datasets',
+                                     parents=[imas_parser])
+    parser.add_argument("shotA",type=int,
+                        help="shot number of first dataset")
+    parser.add_argument("runA",type=int,
+                        help="run number of first dataset")
+    parser.add_argument("shotB",type=int,
+                        help="shot number of second dataset")
+    parser.add_argument("runB",type=int,
+                        help="run number of second dataset")
+    parser.add_argument("ids",nargs="*",type=str,
+                        help="Name (or space separated list of names) of IDS to compare")
+    parser.add_argument("--backendB",type=str,default=None,
+                        help="Specifies the backend of second dataset (default: same as first dataset)")
+    parser.add_argument("--databaseB",type=str,default=None,
+                        help="Specifies the database name of second dataset (default: same as first dataset)")
+    parser.add_argument("--userB",type=str,default=None,
+                        help="Specifies the owner (username) of second dataset (default: same as first dataset)")
 
-    compare(get_ids(sys.argv[1], sys.argv[2], sys.argv[3], int(sys.argv[4]), int(sys.argv[5]), sys.argv[8]),\
-            get_ids(sys.argv[1], sys.argv[2], sys.argv[3], int(sys.argv[6]), int(sys.argv[7]), sys.argv[8]),\
-            sys.argv[8])
+    args = parser.parse_args()
+    
+    # set defaults for second dataset
+    if args.databaseB == None:
+        args.databaseB = args.database
+    if args.backendB == None:
+        args.backendB = args.backend
+    if args.userB == None:
+        args.userB = args.user
+
+    inputA = imas.DBEntry(get_backend_id(args.backend),args.database,
+                          args.shotA,args.runA,user_name=args.user)
+    status,_ = inputA.open()
+    if status!=0:
+        print('Error opening first dataset! Please check existence.',file=sys.stderr)
+        sys.exit(status)
+    
+    inputB = imas.DBEntry(get_backend_id(args.backendB),args.databaseB,
+                          args.shotB,args.runB,user_name=args.userB)
+    status,_ = inputB.open()
+    if status!=0:
+        print('Error opening second dataset! Please check existence.',file=sys.stderr)
+        sys.exit(status)
+    
+    for idsname in args.ids:
+        idsA = inputA.get(idsname)
+        idsB = inputB.get(idsname)
+
+        compare(idsA,idsB,idsname)
