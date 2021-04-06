@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 from __future__ import print_function
 
-import sys
 import imas
+import numpy as np
+
 from idstools.cli import *
 
 
@@ -49,13 +50,15 @@ def compare(x, y, parent):
                         #print("list of "+type(xo[i]).__name__)
                         continue
         else:
-            result = xo == yo
-            if type(result).__name__ == 'ndarray':
-                result = result.all()
+
+            if isinstance( xo, np.ndarray ) and isinstance(yo, np.ndarray):
+                result = np.array_equal( xo, yo) # TODO: add 'equal_nan=True' for NumPy >= 1.19
+            else:
+                result = xo == yo
 
             if not result:
                 missing = [False]
-                if type(xo).__name__ == 'ndarray':
+                if isinstance( xo, np.ndarray ):
                     if xo.size == 0:
                         missing = [True, 'first']
                     elif yo.size == 0:
@@ -96,13 +99,13 @@ if __name__ == '__main__':
                         help="Specifies the owner (username) of second dataset (default: same as first dataset)")
 
     args = parser.parse_args()
-    
+
     # set defaults for second dataset
-    if args.databaseB == None:
+    if args.databaseB is None:
         args.databaseB = args.database
-    if args.backendB == None:
+    if args.backendB is None:
         args.backendB = args.backend
-    if args.userB == None:
+    if args.userB is None:
         args.userB = args.user
 
     inputA = imas.DBEntry(get_backend_id(args.backend),args.database,
@@ -111,14 +114,14 @@ if __name__ == '__main__':
     if status!=0:
         print('Error opening first dataset! Please check existence.',file=sys.stderr)
         sys.exit(status)
-    
+
     inputB = imas.DBEntry(get_backend_id(args.backendB),args.databaseB,
                           args.shotB,args.runB,user_name=args.userB)
     status,_ = inputB.open()
     if status!=0:
         print('Error opening second dataset! Please check existence.',file=sys.stderr)
         sys.exit(status)
-    
+
     for idsname in args.ids:
         idsA = inputA.get(idsname)
         idsB = inputB.get(idsname)
