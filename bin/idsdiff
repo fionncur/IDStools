@@ -20,7 +20,7 @@ def compare(x, y, parent, args):
         if key.startswith('_'):
             continue
 
-        if 'hli_utils' is key:
+        if 'hli_utils' == key:
             continue
 
         if args.skip_provenance and 'version_put' == key:
