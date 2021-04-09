@@ -20,6 +20,9 @@ def compare(x, y, parent, args):
         if key.startswith('_'):
             continue
 
+        if 'hli_utils' is key:
+            continue
+
         if args.skip_provenance and 'version_put' == key:
             continue
 
@@ -38,7 +41,12 @@ def compare(x, y, parent, args):
             continue
 
         if hasattr(xo, '__module__') and 'imas' in xo.__module__:
-            compare(xo, yo, parent + '.' + xo.__class__.__name__, args)
+            #TO DO: To be removed, when private _base_path will be replaced by __name__
+            if hasattr(xo, '__name__'):
+                name = xo.__name__
+            else:
+                name = xo._base_path
+            compare(xo, yo, parent + '.' + name, args)
             continue
 
         # treatment of struct_array and list of strings
@@ -48,7 +56,7 @@ def compare(x, y, parent, args):
             else:
                 for i in range(len(xo)):
                     if 'structArrayElement' in type(xo[i]).__name__ :
-                        compare(xo[i], yo[i], parent + '.array[' + str(i) + ']', args)
+                        compare(xo[i], yo[i], parent + '[' + str(i) + ']', args)
                     else:
                         #print("list of "+type(xo[i]).__name__)
                         continue
