@@ -156,7 +156,7 @@ font = {'family': 'serif',
 r2d   = equilibrium.time_slice[0].profiles_2d[0].r
 z2d   = equilibrium.time_slice[0].profiles_2d[0].z
 psi2d = equilibrium.time_slice[0].profiles_2d[0].psi
-
+ 
 if equilibrium.time_slice[0].profiles_2d[0].grid_type.index == 1 \
    and size(r2d) == 0:
     r1d = equilibrium.time_slice[0].profiles_2d[0].grid.dim1
