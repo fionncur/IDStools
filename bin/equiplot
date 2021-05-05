@@ -157,6 +157,19 @@ r2d   = equilibrium.time_slice[0].profiles_2d[0].r
 z2d   = equilibrium.time_slice[0].profiles_2d[0].z
 psi2d = equilibrium.time_slice[0].profiles_2d[0].psi
 
+if equilibrium.time_slice[0].profiles_2d[0].grid_type.index == 1 \
+   and size(r2d) == 0:
+    r1d = equilibrium.time_slice[0].profiles_2d[0].grid.dim1
+    z1d = equilibrium.time_slice[0].profiles_2d[0].grid.dim2
+    nr = len(r1d)
+    nz = len(z1d)
+    r2d = empty(shape=(nr,nz))
+    z2d = empty(shape=(nr,nz))
+    for iz in range(nz):
+      r2d[:,iz]=r1d
+    for ir in range(nr):
+      z2d[ir,:]=z1d
+
 if not ((size(r2d) == size(z2d)) and (size(r2d) == size(psi2d))):
     print('r, z and psi have not the same dimension in equilibrium.time_slice[0].profiles_2d[0]', file=sys.stderr)
     print("----> Aborted.", file=sys.stderr)
