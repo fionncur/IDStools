@@ -16,7 +16,7 @@ def find_nearest(a, a0):
 # ----------------------------------------------------------------------
 
 # Management of input arguments
-parser = argparse.ArgumentParser(description='---- Display the plasma equilibrium from the magnetic IDS',
+parser = argparse.ArgumentParser(description='---- Display the plasma equilibrium from the equilibrium IDS',
                                  parents=[imas_parser])
 parser.add_argument('-s','--shot',help='Shot number', required=True,type=int)
 parser.add_argument('-r','--run',help='Run number',required=True,type=int)
