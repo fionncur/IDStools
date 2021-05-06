@@ -4,6 +4,7 @@ from __future__ import print_function
 import argparse,os,imas
 import sys,pdb
 from numpy import *
+from idstools.cli import *
 
 # ----------------------------------------------------------------------
 
@@ -15,85 +16,46 @@ def find_nearest(a, a0):
 # ----------------------------------------------------------------------
 
 # Management of input arguments
-parser = argparse.ArgumentParser(description=\
-    '---- Display the plasma equilibrium from the magnetic IDS')
-parser.add_argument('-u','--user_or_path',help='User or absolute path name of the DB where the data-entry is located', required=False)
-parser.add_argument('-d','--database',help='Database name of the targeted data-entry', required=False)
+parser = argparse.ArgumentParser(description='---- Display the plasma equilibrium from the magnetic IDS',
+                                 parents=[imas_parser])
 parser.add_argument('-s','--shot',help='Shot number', required=True,type=int)
 parser.add_argument('-r','--run',help='Run number',required=True,type=int)
-parser.add_argument('-t','--time',help='Time', required=False,type=float)
-parser.add_argument('-o','--occurrence',help='Occurrence number', required=False,type=int)
-parser.add_argument('-p','--plotrho',help='Flag to plot rho(R,Z) (1) or not (0)', required=False,type=int)
+parser.add_argument('-t','--time',help='Time (default=middle)',type=float,default=-99.0)
+parser.add_argument('-o','--occurrence',help='Occurrence number (default=%(default)s)',type=int,default=0)
+parser.add_argument('-p','--plotrho',help='Plots rho(R,Z)',action='store_true')
+parser.add_argument('-a','--allInfo',help='Adds all extra provenance info to the plot',action='store_true')
 
-args = vars(parser.parse_args())
-shot = args["shot"]
-run  = args["run"]
-
-# User or absolute path
-if args['user_or_path'] != None:
-    user_or_path = args["user_or_path"]
-else:
-    user_or_path = 'public'
-
-# Database name
-if args['database'] != None:
-    database = args["database"]
-else:
-    database = 'iterdb'
-
-# Time
-if args['time'] != None:
-    time = args["time"]
-else:
-    time = -99.
-
-# Occurrence
-if args['occurrence'] != None:
-    occ = args["occurrence"]
-else:
-    occ = 0
-
-# Flag to plot rho(R,Z)
-if args['plotrho'] != None:
-    flag_rho2d = args["plotrho"]
-else:
-    flag_rho2d = 0
+args = parser.parse_args()
 
 # Open the database and read the necessary IDSs
-version = os.getenv('IMAS_VERSION')[0]
-input=imas.ids(shot,run)
-[err,n]=input.open_env(user_or_path,database,version,silent=True)
+input=imas.DBEntry(get_backend_id(args.backend),args.database,args.shot,args.run,args.user)
+err,n=input.open()
 if err != 0:
-    print('Shot ' + str(shot) + ', run ' + str(run) +' for user_or_path = '+user_or_path+' and database = '+database+' does not exist', file=sys.stderr)
+    print('Shot {0}, run {1} for user={2} and database={3} does not exists'.format(args.shot,args.run,args.user,args.database),file=sys.stderr)
     print('----> Aborted.', file=sys.stderr)
     exit()
 
-if user_or_path == 'public':
-    DB_ABS_PATH = '/work/imas/shared/'+str(database)+'/3/0'
+if args.user == 'public':
+    DB_ABS_PATH = os.environ['IMAS_HOME']+'/shared/imasdb/'+args.database+'/3'
 else:
-    DB_ABS_PATH = os.path.expanduser("~{}".format(user_or_path))+"/public/imasdb/"+str(database)+"/3/0"
+    DB_ABS_PATH = os.path.expanduser("~{}".format(args.user))+"/public/imasdb/"+args.database+"/3"
 
 try:
-    #input.equilibrium.get(occ)
-    equilibrium = input.equilibrium
-    equilibrium.time=input.equilibrium.partialGet('time',occ)
+    equilibrium = imas.equilibrium()
+    equilibrium.time=input.partial_get('equilibrium','time',args.occurrence)
     if equilibrium.time is None:
-        print('No equilibrium IDS in the data-entry --> Abort.', file=sys.stderr)
+        print("The equilibrium IDS for this occurence is empty in the input"\
+              +" data-entry because equilibrium.time is empty", file=sys.stderr)
         exit()
-except:
-    print("The equilibrium IDS is absent from the input data-entry", file=sys.stderr)
-    print("----> Aborted.", file=sys.stderr)
-    exit()
-
-if equilibrium.time is None:
-    print("The equilibrium IDS for this occurence is empty in the input"\
-          +" data-entry because equilibrium.time is empty", file=sys.stderr)
+except Exception as exc:
+    print("Can not retrieve the equilibrium IDS from the input data-entry: {}".format(exc), file=sys.stderr)
     print("----> Aborted.", file=sys.stderr)
     exit()
 
 # Search for adequate time slice for equilibrium display
 ntime = len(equilibrium.time)
 timevec = equilibrium.time
+time = args.time
 if len(timevec) > 1:
     if time >= 0:
         [tc,it] = find_nearest(timevec,time)
@@ -110,12 +72,11 @@ else:
     else:
         tc = 0
     it = 0
-
-time = tc
+    time = tc
 
 # Read 2D-profiles for this time slice
 equilibrium.time_slice.resize(1)
-equilibrium.time_slice[0] = input.equilibrium.partialGet('time_slice('+str(it)+')',occ)
+equilibrium.time_slice[0] = input.partial_get('equilibrium','time_slice('+str(it)+')',args.occurrence)
 
 if len(equilibrium.time_slice[0].profiles_2d) == 0:
     print("The equilibrium IDS is empty: len(equilibrium.time_slice[0].profiles_2d)=0", file=sys.stderr)
@@ -125,7 +86,7 @@ if len(equilibrium.time_slice[0].profiles_2d) == 0:
 # phi(R,Z) for rho(R,Z) calculation
 if len(equilibrium.time_slice[0].profiles_2d[0].phi) < 1:
     print("equilibrium.time_slice[:].profiles_2d[0].phi could not be read", file=sys.stderr)
-    flag_rho2d = 0
+    args.plotrho = False
 
 # psi(R,Z)
 if len(equilibrium.time_slice[0].profiles_2d[0].psi) < 1:
@@ -177,7 +138,7 @@ if not ((size(r2d) == size(z2d)) and (size(r2d) == size(psi2d))):
 
 # Display the figure
 plt.figure()
-if flag_rho2d == 1:
+if args.plotrho:
     rho2d = sqrt(equilibrium.time_slice[0].profiles_2d[0].phi/amax(equilibrium.time_slice[0].profiles_2d[0].phi))
     plt.contour(r2d,z2d,rho2d,30,colors='r')
 plt.contour(r2d,z2d,psi2d,30)
@@ -187,7 +148,10 @@ plt.xlabel('$R$ [m]', fontdict=font)
 plt.ylabel('$Z$ [m]', fontdict=font)
 plt.xticks(fontsize = ticksize)
 plt.yticks(fontsize = ticksize)
-plt.title('2D equilibrium', fontdict=font)
+plottitle='2D equilibrium'
+if args.allInfo:
+    plottitle+=' (t={:.3f})'.format(time)
+plt.title(plottitle, fontdict=font)
 
 #from matplotlib.offsetbox import AnchoredText
 #anchored_text = AnchoredText('Shot '+str(shot)+' / '+'Run '+str(run),prop=dict(size=8),loc=4)
@@ -196,15 +160,20 @@ plt.title('2D equilibrium', fontdict=font)
 fig = plt.gcf()
 ax = plt.gca()
 
-hostdir= os.environ["HOSTNAME"]+":"+DB_ABS_PATH
-xmin, xmax = ax.get_xlim()
-ymin, ymax = ax.get_ylim()
-plt.text(xmax+0.01*abs(xmax),ymax-0.015*abs(ymax-ymin),hostdir[:-2]+' - Shot '+str(shot)+' / '+' Run '+str(run),fontsize=6,rotation=90)
+if args.allInfo:
+    hostdir= os.environ["HOSTNAME"]+":"+DB_ABS_PATH
+    xmin, xmax = ax.get_xlim()
+    ymin, ymax = ax.get_ylim()
+    ax.text(xmax+0.01*abs(xmax),ymin+0.5*abs(ymax-ymin),
+            '{0}-Shot:{1},{2}'.format(hostdir,args.shot,args.run),
+            horizontalalignment='left',verticalalignment='center',rotation='vertical',fontsize=7)
+
 
 fig.set_size_inches(4.5,6.5)
 try:
-    fig.savefig('Equilibrium'+'_shot_'+str(shot)+'_run_'+str(run)+'_time_'+'%.1f' % time+'.png', dpi=100)
-    print('----> Figure saved to '+'Equilibrium'+'_shot_'+str(shot)+'_run_'+str(run)+'_time_'+'%.1f' % time+'.png', file=sys.stderr)
+    fname = 'Equilibrium_shot_{0}_run_{1}_time_{2:.1f}.png'.format(args.shot,args.run,time)
+    fig.savefig(fname, dpi=100)
+    print('----> Figure saved to '+fname, file=sys.stderr)
 except:
     print('The figure could not be saved (check local permissions).', file=sys.stderr)
 plt.show()
