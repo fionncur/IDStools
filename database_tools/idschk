@@ -71,7 +71,7 @@ class IMASData:
 
 class COCOS:
     """
-    O. Sauter and S. Yu. Medvevdev, "Tokamak coordinate conventions: COCOS",
+    O. Sauter and S. Yu. Medvedev, "Tokamak coordinate conventions: COCOS",
     Comput. Physics Commun. 184 (2013) 293 and Table I
     (see paper in chease directory)
 
