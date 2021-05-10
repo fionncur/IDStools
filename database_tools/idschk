@@ -269,7 +269,7 @@ class IDSValidator(cerberus.Validator):
     """
     cocos = {}
 
-    def _validate_ids_max_eq(self, max_value, field, value):
+    def _validate_ids_le(self, max_value, field, value):
         """ {'nullable': False } """
         try:
             v = np.atleast_1d(value).flatten()
@@ -278,7 +278,7 @@ class IDSValidator(cerberus.Validator):
         except TypeError:
             pass
 
-    def _validate_ids_min_eq(self, min_value, field, value):
+    def _validate_ids_ge(self, min_value, field, value):
         """ {'nullable': False } """
         try:
             v = np.atleast_1d(value).flatten()
@@ -287,7 +287,7 @@ class IDSValidator(cerberus.Validator):
         except TypeError:
             pass
 
-    def _validate_ids_max(self, max_value, field, value):
+    def _validate_ids_lt(self, max_value, field, value):
         """ {'nullable': False } """
         try:
             v = np.atleast_1d(value).flatten()
@@ -296,7 +296,7 @@ class IDSValidator(cerberus.Validator):
         except TypeError:
             pass
 
-    def _validate_ids_min(self, min_value, field, value):
+    def _validate_ids_gt(self, min_value, field, value):
         """ {'nullable': False } """
         try:
             v = np.atleast_1d(value).flatten()
