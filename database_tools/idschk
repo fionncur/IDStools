@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 from os import getenv, path
-from sys import exit
+from sys import exit, stdin
 import re
 import argparse
 import numpy as np
@@ -590,15 +590,22 @@ def main():
     else:
         exit("file not found:{}".format(FILE_IDSDef))
 
-    # Load IDS-Cerberus Schema
-    try:
-        f = open(args.schema_file, mode="r")
-    except:
-        exit("can not open file:{}".format(args.schema_file))
-    try:
-        schema = yaml.safe_load(f)
-    except:
-        exit("invalid yaml in:{}".format(args.schema_file))
+    if args.schema_file:
+        # Load IDS-Cerberus Schema
+        try:
+            f = open(args.schema_file, mode="r")
+        except:
+            exit("can not open file:{}".format(args.schema_file))
+        try:
+            schema = yaml.safe_load(f)
+        except:
+            exit("invalid yaml in:{}".format(args.schema_file))
+    else:
+        # stdin
+        try:
+            schema = yaml.safe_load(stdin)
+        except:
+            exit("stdin error")
 
     # COCOS Initialization
     cocos = COCOS(args.cocos, args.ipsign, args.b0sign).get()
@@ -677,7 +684,7 @@ if __name__ == "__main__":
         dest="schema_file",
         help="File name of validation schema",
         required=False,
-        default="default.yml",
+        default=None,
     )
     parser.add_argument(
         "-c",
