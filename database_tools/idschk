@@ -76,12 +76,12 @@ class COCOS:
     (see paper in chease directory)
 
     Arguments :
-        - KCOCOS
+        - COCOS
         - ipsign
         - b0sign
 
     Returns:
-        - KCOCOS
+        - COCOS
         - sigma_Ip
         - sigma_B0
         - sigma_Bp
@@ -96,108 +96,107 @@ class COCOS:
           thus theta_sign_clockwise=-1
     """
 
-    def __init__(self, KCOCOS, ipsign, b0sign):
+    def __init__(self, COCOS, ipsign, b0sign):
 
-        self.KCOCOS = KCOCOS
+        self.COCOS = COCOS
         #
         # Parameters from Table I
         #
-        if KCOCOS in [1, 11]:
+        if COCOS in [1, 11]:
             # ITER, Boozer are cocos=11
-            Ksigma_Bp = +1
-            Ksigma_RphiZ = +1
-            Ksigma_rhothetaphi = +1
-            Ksign_q_pos = +1
-            Ksign_pprime_pos = -1
-        elif KCOCOS in [2, 12]:
+            sigma_Bp = +1
+            sigma_RphiZ = +1
+            sigma_rhothetaphi = +1
+            sign_q_pos = +1
+            sign_pprime_pos = -1
+        elif COCOS in [2, 12]:
             # CHEASE, ONETWO, Hinton-Hazeltine, LION is cocos=2
-            Ksigma_Bp = +1
-            Ksigma_RphiZ = -1
-            Ksigma_rhothetaphi = +1
-            Ksign_q_pos = +1
-            Ksign_pprime_pos = -1
-        elif KCOCOS in [3, 13]:
+            sigma_Bp = +1
+            sigma_RphiZ = -1
+            sigma_rhothetaphi = +1
+            sign_q_pos = +1
+            sign_pprime_pos = -1
+        elif COCOS in [3, 13]:
             # Freidberg, CAXE, KINX are cocos=3
             # EU-ITM up to end of 2011 is COCOS=13
-            Ksigma_Bp = -1
-            Ksigma_RphiZ = +1
-            Ksigma_rhothetaphi = -1
-            Ksign_q_pos = -1
-            Ksign_pprime_pos = +1
-        elif KCOCOS in [4, 14]:
+            sigma_Bp = -1
+            sigma_RphiZ = +1
+            sigma_rhothetaphi = -1
+            sign_q_pos = -1
+            sign_pprime_pos = +1
+        elif COCOS in [4, 14]:
             #
-            Ksigma_Bp = -1
-            Ksigma_RphiZ = -1
-            Ksigma_rhothetaphi = -1
-            Ksign_q_pos = -1
-            Ksign_pprime_pos = +1
-        elif KCOCOS in [5, 15]:
+            sigma_Bp = -1
+            sigma_RphiZ = -1
+            sigma_rhothetaphi = -1
+            sign_q_pos = -1
+            sign_pprime_pos = +1
+        elif COCOS in [5, 15]:
             #
-            Ksigma_Bp = +1
-            Ksigma_RphiZ = +1
-            Ksigma_rhothetaphi = -1
-            Ksign_q_pos = -1
-            Ksign_pprime_pos = -1
-        elif KCOCOS in [6, 16]:
+            sigma_Bp = +1
+            sigma_RphiZ = +1
+            sigma_rhothetaphi = -1
+            sign_q_pos = -1
+            sign_pprime_pos = -1
+        elif COCOS in [6, 16]:
             #
-            Ksigma_Bp = +1
-            Ksigma_RphiZ = -1
-            Ksigma_rhothetaphi = -1
-            Ksign_q_pos = -1
-            Ksign_pprime_pos = -1
-        elif KCOCOS in [7, 17]:
+            sigma_Bp = +1
+            sigma_RphiZ = -1
+            sigma_rhothetaphi = -1
+            sign_q_pos = -1
+            sign_pprime_pos = -1
+        elif COCOS in [7, 17]:
             # TCV psitbx is cocos=7
-            Ksigma_Bp = -1
-            Ksigma_RphiZ = +1
-            Ksigma_rhothetaphi = +1
-            Ksign_q_pos = +1
-            Ksign_pprime_pos = +1
-        elif KCOCOS in [8, 18]:
+            sigma_Bp = -1
+            sigma_RphiZ = +1
+            sigma_rhothetaphi = +1
+            sign_q_pos = +1
+            sign_pprime_pos = +1
+        elif COCOS in [8, 18]:
             #
-            Ksigma_Bp = -1
-            Ksigma_RphiZ = -1
-            Ksigma_rhothetaphi = +1
-            Ksign_q_pos = +1
-            Ksign_pprime_pos = +1
+            sigma_Bp = -1
+            sigma_RphiZ = -1
+            sigma_rhothetaphi = +1
+            sign_q_pos = +1
+            sign_pprime_pos = +1
         else:
             # Should not be here since all cases defined
-            raise ValueError("error: COCOS = {} does not exist".format(KCOCOS))
+            raise ValueError("error: COCOS = {} does not exist".format(COCOS))
             return
 
         # cocos=i or 10+i have similar coordinate conventions except psi/2pi for
         # cocos=i and psi for cocos=10+i
 
-        if KCOCOS >= 11:
-            Kexp_Bp = 1
+        if COCOS >= 11:
+            exp_Bp = 1
         else:
-            Kexp_Bp = 0
+            exp_Bp = 0
 
-        Ktheta_sign_clockwise = Ksigma_RphiZ * Ksigma_rhothetaphi
+        theta_sign_clockwise = sigma_RphiZ * sigma_rhothetaphi
 
-        self.KCOCOS = KCOCOS
-        self.Ksigma_Ip = ipsign
-        self.Ksigma_B0 = b0sign
-        self.Kexp_Bp = Kexp_Bp
-        self.Ksigma_Bp = Ksigma_Bp
-        self.Ksigma_RphiZ = Ksigma_RphiZ
-        self.Ksigma_rhothetaphi = Ksigma_rhothetaphi
-        self.Ksign_q_pos = Ksign_q_pos
-        self.Ksign_pprime_pos = Ksign_pprime_pos
-        self.Ktheta_sign_clockwise = Ktheta_sign_clockwise
+        self.sigma_Ip = ipsign
+        self.sigma_B0 = b0sign
+        self.exp_Bp = exp_Bp
+        self.sigma_Bp = sigma_Bp
+        self.sigma_RphiZ = sigma_RphiZ
+        self.sigma_rhothetaphi = sigma_rhothetaphi
+        self.sign_q_pos = sign_q_pos
+        self.sign_pprime_pos = sign_pprime_pos
+        self.theta_sign_clockwise = theta_sign_clockwise
 
     def get(self):
 
         return {
-            "KCOCOS": self.KCOCOS,
-            "Ksigma_Ip": self.Ksigma_Ip,
-            "Ksigma_B0": self.Ksigma_B0,
-            "Kexp_Bp": self.Kexp_Bp,
-            "Ksigma_Bp": self.Ksigma_Bp,
-            "Ksigma_RphiZ": self.Ksigma_RphiZ,
-            "Ksigma_rhothetaphi": self.Ksigma_rhothetaphi,
-            "Ksign_q_pos": self.Ksign_q_pos,
-            "Ksign_pprime_pos": self.Ksign_pprime_pos,
-            "Ktheta_sign_clockwise": self.Ktheta_sign_clockwise,
+            "COCOS": self.COCOS,
+            "sigma_Ip": self.sigma_Ip,
+            "sigma_B0": self.sigma_B0,
+            "exp_Bp": self.exp_Bp,
+            "sigma_Bp": self.sigma_Bp,
+            "sigma_RphiZ": self.sigma_RphiZ,
+            "sigma_rhothetaphi": self.sigma_rhothetaphi,
+            "sign_q_pos": self.sign_q_pos,
+            "sign_pprime_pos": self.sign_pprime_pos,
+            "theta_sign_clockwise": self.theta_sign_clockwise,
         }
 
 
@@ -329,10 +328,10 @@ class IDSValidator(cerberus.Validator):
         """ {'nullable': False } """
         try:
             v = np.atleast_1d(value).flatten()
-            Kpsi_like = self.cocos["Ksigma_Ip"] * self.cocos["Ksigma_Bp"]
-            if np.sign(v[-1] - v[0]) != Kpsi_like:
+            psi_like = self.cocos["sigma_Ip"] * self.cocos["sigma_Bp"]
+            if np.sign(v[-1] - v[0]) != psi_like:
                 if not constraint:
-                    self._error(field, "Sign expected as {}".format(Kpsi_like))
+                    self._error(field, "Sign expected as {}".format(psi_like))
         except TypeError:
             pass
 
@@ -340,10 +339,10 @@ class IDSValidator(cerberus.Validator):
         """ {'nullable': False } """
         try:
             v = np.atleast_1d(value).flatten()
-            Kb0_like = self.cocos["Ksigma_B0"]
-            if np.any(np.sign(v) != Kb0_like):
+            b0_like = self.cocos["sigma_B0"]
+            if np.any(np.sign(v) != b0_like):
                 if not constraint:
-                    self._error(field, "Sign expected as {}".format(Kb0_like))
+                    self._error(field, "Sign expected as {}".format(b0_like))
         except TypeError:
             pass
 
@@ -351,10 +350,10 @@ class IDSValidator(cerberus.Validator):
         """ {'nullable': False } """
         try:
             v = np.atleast_1d(value).flatten()
-            Kdodpsi_like = -self.cocos["Ksigma_Ip"] * self.cocos["Ksigma_Bp"]
-            if np.any(np.sign(v) != Kdodpsi_like):
+            dodpsi_like = -self.cocos["sigma_Ip"] * self.cocos["sigma_Bp"]
+            if np.any(np.sign(v) != dodpsi_like):
                 if not constraint:
-                    self._error(field, "Sign expected as {}".format(Kdodpsi_like))
+                    self._error(field, "Sign expected as {}".format(dodpsi_like))
         except TypeError:
             pass
 
@@ -362,14 +361,14 @@ class IDSValidator(cerberus.Validator):
         """ {'nullable': False } """
         try:
             v = np.atleast_1d(value).flatten()
-            Kq_like = (
-                self.cocos["Ksigma_Ip"]
-                * self.cocos["Ksigma_B0"]
-                * self.cocos["Ksigma_rhothetaphi"]
+            q_like = (
+                self.cocos["sigma_Ip"]
+                * self.cocos["sigma_B0"]
+                * self.cocos["sigma_rhothetaphi"]
             )
-            if np.any(np.sign(v) != Kq_like):
+            if np.any(np.sign(v) != q_like):
                 if not constraint:
-                    self._error(field, "Sign expected as {}".format(Kq_like))
+                    self._error(field, "Sign expected as {}".format(q_like))
         except TypeError:
             pass
 
@@ -377,10 +376,10 @@ class IDSValidator(cerberus.Validator):
         """ {'nullable': False } """
         try:
             v = np.atleast_1d(value).flatten()
-            Kip_like = self.cocos["Ksigma_Ip"]
-            if any(np.sign(v) != Kip_like):
+            ip_like = self.cocos["sigma_Ip"]
+            if any(np.sign(v) != ip_like):
                 if not constraint:
-                    self._error(field, "Sign expected as {}".format(Kip_like))
+                    self._error(field, "Sign expected as {}".format(ip_like))
         except TypeError:
             pass
 
