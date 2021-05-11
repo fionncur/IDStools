@@ -599,8 +599,7 @@ def ids_iterator(dd, db, schema, cocos):
             dictw.update(report_buf)
             buf.update({"occurence(" + str(oc) + ")": dictw})
 
-    out = {idsname: buf}
-    return out
+    return {idsname: buf}
 
 
 # ----------------------------------------------------------------------
@@ -618,9 +617,10 @@ def IDSCOCOSValues(db):
     ipsign = np.sign(ids.time_slice[0].global_quantities.ip)
     b0sign = np.sign(ids.vacuum_toroidal_field.b0[0])
 
-    psi_axis = ids.time_slice[0].global_quantities.psi_axis
-    psi_boundary = ids.time_slice[0].global_quantities.psi_boundary
-    dpsi = psi_boundary - psi_axis
+    dpsi = (
+        ids.time_slice[0].global_quantities.psi_boundary
+        - ids.time_slice[0].global_quantities.psi_axis
+    )
     sigma_Bp = np.sign(dpsi) * ipsign
 
     q = ids.time_slice[0].profiles_1d.q
@@ -674,7 +674,6 @@ def main():
     """
     from xml.etree import ElementTree as ET
     import yaml
-    import copy
 
     # Open the database
     try:
@@ -692,46 +691,6 @@ def main():
             )
         )
 
-    # Load IMAS-DD File
-    if path.isfile(FILE_IDSDef):
-        root = ET.parse(FILE_IDSDef).getroot()
-    else:
-        exit("file not found:{}".format(FILE_IDSDef))
-
-    if args.schema_file:
-        # Load IDS-Cerberus Schema
-        try:
-            f = open(args.schema_file, mode="r")
-        except:
-            exit("can not open file:{}".format(args.schema_file))
-        try:
-            schema = yaml.safe_load(f)
-        except:
-            exit("invalid yaml in:{}".format(args.schema_file))
-    else:
-        # stdin
-        try:
-            schema = yaml.safe_load(stdin)
-        except:
-            exit("stdin error")
-
-    # COCOS Initialization
-    index = {"COCOS": args.cocos, "ipsign": args.ipsign, "b0sign": args.b0sign}
-    cocos = COCOS(index=index).get()
-
-    # DD Loop
-    for dd in root:
-        if dd.tag == TARGET_TAG:
-            idsname = dd.get("name")
-            if idsname not in schema:
-                continue
-            if (args.idslist is None) or (idsname in args.idslist):
-                out = ids_iterator(dd, db, schema, cocos)
-                if out[idsname]:
-                    yaml.dump(
-                        out, stdout, indent=4, default_flow_style=False, sort_keys=False
-                    )
-
     # Indicate COCOS in IDS/equilibrium
     if args.indicate_cocos:
         yaml.dump(
@@ -741,6 +700,53 @@ def main():
             default_flow_style=False,
             sort_keys=False,
         )
+
+    # IDS Validation
+    else:
+
+        # Load IMAS-DD File
+        if path.isfile(FILE_IDSDef):
+            root = ET.parse(FILE_IDSDef).getroot()
+        else:
+            exit("file not found:{}".format(FILE_IDSDef))
+
+        if args.schema_file:
+            # Load IDS-Cerberus Schema
+            try:
+                f = open(args.schema_file, mode="r")
+            except:
+                exit("can not open file:{}".format(args.schema_file))
+            try:
+                schema = yaml.safe_load(f)
+            except:
+                exit("invalid yaml in:{}".format(args.schema_file))
+        else:
+            # stdin
+            try:
+                schema = yaml.safe_load(stdin)
+            except:
+                exit("stdin error")
+
+        # COCOS Initialization
+        index = {"COCOS": args.cocos, "ipsign": args.ipsign, "b0sign": args.b0sign}
+        cocos = COCOS(index=index).get()
+
+        # DD Loop
+        for dd in root:
+            if dd.tag == TARGET_TAG:
+                idsname = dd.get("name")
+                if idsname not in schema:
+                    continue
+                if (args.idslist is None) or (idsname in args.idslist):
+                    out = ids_iterator(dd, db, schema, cocos)
+                    if out[idsname]:
+                        yaml.dump(
+                            out,
+                            stdout,
+                            indent=4,
+                            default_flow_style=False,
+                            sort_keys=False,
+                        )
 
     db.close()
 
