@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 from os import getenv, path
-from sys import exit, stdin
+from sys import exit, stdin, stdout
 import re
 import argparse
 import numpy as np
@@ -96,93 +96,144 @@ class COCOS:
           thus theta_sign_clockwise=-1
     """
 
-    def __init__(self, COCOS, ipsign, b0sign):
+    def __init__(self, index=None, values=None):
 
-        self.COCOS = COCOS
-        #
-        # Parameters from Table I
-        #
-        if COCOS in [1, 11]:
-            # ITER, Boozer are cocos=11
-            sigma_Bp = +1
-            sigma_RphiZ = +1
-            sigma_rhothetaphi = +1
-            sign_q_pos = +1
-            sign_pprime_pos = -1
-        elif COCOS in [2, 12]:
-            # CHEASE, ONETWO, Hinton-Hazeltine, LION is cocos=2
-            sigma_Bp = +1
-            sigma_RphiZ = -1
-            sigma_rhothetaphi = +1
-            sign_q_pos = +1
-            sign_pprime_pos = -1
-        elif COCOS in [3, 13]:
-            # Freidberg, CAXE, KINX are cocos=3
-            # EU-ITM up to end of 2011 is COCOS=13
-            sigma_Bp = -1
-            sigma_RphiZ = +1
-            sigma_rhothetaphi = -1
-            sign_q_pos = -1
-            sign_pprime_pos = +1
-        elif COCOS in [4, 14]:
-            #
-            sigma_Bp = -1
-            sigma_RphiZ = -1
-            sigma_rhothetaphi = -1
-            sign_q_pos = -1
-            sign_pprime_pos = +1
-        elif COCOS in [5, 15]:
-            #
-            sigma_Bp = +1
-            sigma_RphiZ = +1
-            sigma_rhothetaphi = -1
-            sign_q_pos = -1
-            sign_pprime_pos = -1
-        elif COCOS in [6, 16]:
-            #
-            sigma_Bp = +1
-            sigma_RphiZ = -1
-            sigma_rhothetaphi = -1
-            sign_q_pos = -1
-            sign_pprime_pos = -1
-        elif COCOS in [7, 17]:
-            # TCV psitbx is cocos=7
-            sigma_Bp = -1
-            sigma_RphiZ = +1
-            sigma_rhothetaphi = +1
-            sign_q_pos = +1
-            sign_pprime_pos = +1
-        elif COCOS in [8, 18]:
-            #
-            sigma_Bp = -1
-            sigma_RphiZ = -1
-            sigma_rhothetaphi = +1
-            sign_q_pos = +1
-            sign_pprime_pos = +1
-        else:
-            # Should not be here since all cases defined
-            raise ValueError("error: COCOS = {} does not exist".format(COCOS))
+        if (index is None) and (values is None):
+            raise ArgumentError("Initialize COCOS with either index or values")
             return
 
-        # cocos=i or 10+i have similar coordinate conventions except psi/2pi for
-        # cocos=i and psi for cocos=10+i
+        elif index is not None:
 
-        if COCOS >= 11:
-            exp_Bp = 1
+            COCOS = index["COCOS"]
+            ipsign = index["ipsign"]
+            b0sign = index["b0sign"]
+
+            #
+            # Parameters from Table I
+            #
+            if COCOS in [1, 11]:
+                # ITER, Boozer are cocos=11
+                val = (+1, +1, +1, +1, -1)
+            elif COCOS in [2, 12]:
+                # CHEASE, ONETWO, Hinton-Hazeltine, LION is cocos=2
+                val = (+1, -1, +1, +1, -1)
+            elif COCOS in [3, 13]:
+                # Freidberg, CAXE, KINX are cocos=3
+                # EU-ITM up to end of 2011 is COCOS=13
+                val = (-1, +1, -1, -1, +1)
+            elif COCOS in [4, 14]:
+                #
+                val = (-1, -1, -1, -1, +1)
+            elif COCOS in [5, 15]:
+                #
+                val = (+1, +1, -1, -1, -1)
+            elif COCOS in [6, 16]:
+                #
+                val = (+1, -1, -1, -1, -1)
+            elif COCOS in [7, 17]:
+                # TCV psitbx is cocos=7
+                val = (-1, +1, +1, +1, +1)
+            elif COCOS in [8, 18]:
+                #
+                val = (-1, -1, +1, +1, +1)
+            else:
+                # Should not be here since all cases defined
+                raise ValueError("error: COCOS = {} does not exist".format(COCOS))
+                return
+
+            (
+                sigma_Bp,
+                sigma_RphiZ,
+                sigma_rhothetaphi,
+                sign_q_pos,
+                sign_pprime_pos,
+            ) = val
+
+            # cocos=i or 10+i have similar coordinate conventions except psi/2pi for
+            # cocos=i and psi for cocos=10+i
+
+            if COCOS >= 11:
+                exp_Bp = 1
+            else:
+                exp_Bp = 0
+
+            theta_sign_clockwise = sigma_RphiZ * sigma_rhothetaphi
+
+            self.COCOS = COCOS
+            self.sigma_Ip = ipsign
+            self.sigma_B0 = b0sign
+            self.exp_Bp = exp_Bp
+            self.sigma_Bp = sigma_Bp
+            self.sigma_RphiZ = sigma_RphiZ
+            self.sigma_rhothetaphi = sigma_rhothetaphi
+            self.sign_q_pos = sign_q_pos
+            self.sign_pprime_pos = sign_pprime_pos
+            self.theta_sign_clockwise = theta_sign_clockwise
+
         else:
-            exp_Bp = 0
 
-        theta_sign_clockwise = sigma_RphiZ * sigma_rhothetaphi
+            sigma_Ip = values["ipsign"]
+            sigma_B0 = values["b0sign"]
+            exp_Bp = values["exp_Bp"]
+            sigma_Bp = values["sigma_Bp"]
+            sigma_RphiZ = values["sigma_RphiZ"]
+            sigma_rhothetaphi = values["sigma_rhothetaphi"]
+            sign_q_pos = values["sign_q_pos"]
+            sign_pprime_pos = values["sign_pprime_pos"]
 
-        self.sigma_Ip = ipsign
-        self.sigma_B0 = b0sign
-        self.exp_Bp = exp_Bp
-        self.sigma_Bp = sigma_Bp
-        self.sigma_RphiZ = sigma_RphiZ
-        self.sigma_rhothetaphi = sigma_rhothetaphi
-        self.sign_q_pos = sign_q_pos
-        self.sign_pprime_pos = sign_pprime_pos
-        self.theta_sign_clockwise = theta_sign_clockwise
+            val = (
+                sigma_Bp,
+                sigma_RphiZ,
+                sigma_rhothetaphi,
+                sign_q_pos,
+                sign_pprime_pos,
+            )
+
+            #
+            # Parameters from Table I
+            #
+            if val == (+1, +1, +1, +1, -1):
+                # ITER, Boozer are cocos=11
+                COCOS = [1, 11]
+            elif val == (+1, -1, +1, +1, -1):
+                # CHEASE, ONETWO, Hinton-Hazeltine, LION is cocos=2
+                COCOS = [2, 12]
+            elif val == (-1, +1, -1, -1, +1):
+                # Freidberg, CAXE, KINX are cocos=3
+                # EU-ITM up to end of 2011 is COCOS=13
+                COCOS = [3, 13]
+            elif val == (-1, -1, -1, -1, +1):
+                #
+                COCOS = [4, 14]
+            elif val == (+1, +1, -1, -1, -1):
+                #
+                COCOS = [5, 15]
+            elif val == (+1, -1, -1, -1, -1):
+                #
+                COCOS = [6, 16]
+            elif val == (-1, +1, +1, +1, +1):
+                #
+                COCOS = [7, 17]
+            elif val == (-1, -1, +1, +1, +1):
+                #
+                COCOS = [8, 18]
+            else:
+                # Should not be here since all cases defined
+                raise ValueError("error: COCOS values")
+                return
+
+            theta_sign_clockwise = sigma_RphiZ * sigma_rhothetaphi
+
+            self.COCOS = COCOS[exp_Bp]
+            self.sigma_Ip = sigma_Ip
+            self.sigma_B0 = sigma_B0
+            self.exp_Bp = exp_Bp
+            self.sigma_Bp = sigma_Bp
+            self.sigma_RphiZ = sigma_RphiZ
+            self.sigma_rhothetaphi = sigma_rhothetaphi
+            self.sign_q_pos = sign_q_pos
+            self.sign_pprime_pos = sign_pprime_pos
+            self.theta_sign_clockwise = theta_sign_clockwise
 
     def get(self):
 
@@ -239,6 +290,7 @@ class IdxDict(dict):
     """
     Class for DD Sub-Indices (e.g. itime, i1, ..., etc.)
     """
+
     def __init__(self, p):
         idict = []
 
@@ -266,6 +318,7 @@ class IDSValidator(cerberus.Validator):
     """
     IDS Validation Methods extending Cerberus-Validator
     """
+
     cocos = {}
 
     def _validate_ids_le(self, max_value, field, value):
@@ -389,7 +442,7 @@ class IDSValidator(cerberus.Validator):
 
 def validator(field, path_doc, ids, schema, cocos, idx):
     """
-    Check the consistency of IDS quantities w.r.t Schema and COCOS
+    Check the consistency of IDS quantities w.r.t. Schema and COCOS
     """
     global report_buf
 
@@ -407,8 +460,8 @@ def validator(field, path_doc, ids, schema, cocos, idx):
     # eval for schema value in case of validation between data
     for key, value in schema[path_doc].items():
         if isinstance(value, str):
-            val = re.sub('_([a-z]+\w+)_', idx_header+r'\1', value)
-            val = val.replace(ids.__name__+'.', ids_header)
+            val = re.sub("_([a-z]+\w+)_", idx_header + r"\1", value)
+            val = val.replace(ids.__name__ + ".", ids_header)
             try:
                 schema[path_doc][key] = eval(val)
             except:
@@ -482,14 +535,7 @@ def path_iterator(field, nodes, ids, fullpath, schema, cocos, idx=None, level=0)
         # for node (e.g. path(itime)/to(i1)/node)
         else:
             path_iterator(
-                field,
-                nodes,
-                ids,
-                fullpath,
-                schema,
-                cocos,
-                idx=idx,
-                level=level + 1
+                field, nodes, ids, fullpath, schema, cocos, idx=idx, level=level + 1
             )
 
     else:
@@ -560,12 +606,75 @@ def ids_iterator(dd, db, schema, cocos):
 # ----------------------------------------------------------------------
 
 
+def IDSCOCOSValues(db):
+    """
+    Compute COCOS values using stored data in IDS/equilibrium
+    """
+
+    ids = db.equilibrium
+    ids.get(0)
+
+    #
+    ipsign = np.sign(ids.time_slice[0].global_quantities.ip)
+    b0sign = np.sign(ids.vacuum_toroidal_field.b0[0])
+
+    psi_axis = ids.time_slice[0].global_quantities.psi_axis
+    psi_boundary = ids.time_slice[0].global_quantities.psi_boundary
+    dpsi = psi_boundary - psi_axis
+    sigma_Bp = np.sign(dpsi) * ipsign
+
+    q = ids.time_slice[0].profiles_1d.q
+    sign_q_pos = np.sign(np.sum(np.sign(q)))
+    sigma_rhothetaphi = sign_q_pos
+
+    dpressure_dpsi = ids.time_slice[0].profiles_1d.dpressure_dpsi
+    sign_pprime_pos = np.sign(np.sum(np.sign(dpressure_dpsi))) * ipsign * sigma_Bp
+
+    #
+    bz = ids.time_slice[0].profiles_2d[0].b_field_z
+    psi2d = ids.time_slice[0].profiles_2d[0].psi
+    r2d = ids.time_slice[0].profiles_2d[0].r
+
+    dpsi2d = np.gradient(psi2d)
+    dr2d = np.gradient(r2d)
+    dpsi2drdr = dpsi2d[0] / dr2d[0] / r2d
+
+    twopi_expBp_sigma_RphiZ = -sigma_Bp * dpsi2drdr / bz
+
+    sigma_RphiZ = np.sign(np.sum(np.sign(twopi_expBp_sigma_RphiZ)))
+
+    x = twopi_expBp_sigma_RphiZ * sigma_RphiZ
+    x = np.average(x)
+
+    if x > 5.0:
+        exp_Bp = 1
+    else:
+        exp_Bp = 0
+
+    values = {
+        "ipsign": int(ipsign),
+        "b0sign": int(b0sign),
+        "exp_Bp": int(exp_Bp),
+        "sigma_Bp": int(sigma_Bp),
+        "sigma_RphiZ": int(sigma_RphiZ),
+        "sigma_rhothetaphi": int(sigma_rhothetaphi),
+        "sign_q_pos": int(sign_q_pos),
+        "sign_pprime_pos": int(sign_pprime_pos),
+    }
+
+    return COCOS(values=values).get()
+
+
+# ----------------------------------------------------------------------
+
+
 def main():
     """
     IDS Data Validation Tool for Two Dimensional Array with respect to DD (IDSDef.xml)
     """
     from xml.etree import ElementTree as ET
     import yaml
+    import copy
 
     # Open the database
     try:
@@ -607,7 +716,8 @@ def main():
             exit("stdin error")
 
     # COCOS Initialization
-    cocos = COCOS(args.cocos, args.ipsign, args.b0sign).get()
+    index = {"COCOS": args.cocos, "ipsign": args.ipsign, "b0sign": args.b0sign}
+    cocos = COCOS(index=index).get()
 
     # DD Loop
     for dd in root:
@@ -618,10 +728,19 @@ def main():
             if (args.idslist is None) or (idsname in args.idslist):
                 out = ids_iterator(dd, db, schema, cocos)
                 if out[idsname]:
-                    print(
-                        yaml.dump( out, indent=4, default_flow_style=False,
-                                   sort_keys=False )
+                    yaml.dump(
+                        out, stdout, indent=4, default_flow_style=False, sort_keys=False
                     )
+
+    # Indicate COCOS in IDS/equilibrium
+    if args.indicate_cocos:
+        yaml.dump(
+            {"COCOS Indication": IDSCOCOSValues(db)},
+            stdout,
+            indent=4,
+            default_flow_style=False,
+            sort_keys=False,
+        )
 
     db.close()
 
@@ -686,7 +805,6 @@ if __name__ == "__main__":
         default=None,
     )
     parser.add_argument(
-        "-c",
         "--cocos",
         dest="cocos",
         help="cocos",
@@ -696,7 +814,6 @@ if __name__ == "__main__":
         choices=[*range(1, 9), *range(11, 19)],
     )
     parser.add_argument(
-        "-i",
         "--ipsign",
         dest="ipsign",
         help="sign(Ip), default=-1",
@@ -706,7 +823,6 @@ if __name__ == "__main__":
         choices=[-1, 1],
     )
     parser.add_argument(
-        "-b",
         "--b0sign",
         dest="b0sign",
         help="sign(B0), default=-1",
@@ -716,12 +832,18 @@ if __name__ == "__main__":
         choices=[-1, 1],
     )
     parser.add_argument(
-        "-v",
         "--verbose",
         help="increase output verbosity",
         required=False,
         default=False,
-        action="store_true"
+        action="store_true",
+    )
+    parser.add_argument(
+        "--indicate_cocos",
+        help="Compute COCOS values from IDS/equilibrium and report",
+        required=False,
+        default=False,
+        action="store_true",
     )
     args = parser.parse_args()
     main()
