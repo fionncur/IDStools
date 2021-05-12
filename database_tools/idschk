@@ -219,7 +219,7 @@ class COCOS:
                 COCOS = [8, 18]
             else:
                 # Should not be here since all cases defined
-                raise ValueError("error: COCOS values")
+                raise ValueError("error: COCOS Values not match {}".format(val))
                 return
 
             theta_sign_clockwise = sigma_RphiZ * sigma_rhothetaphi
@@ -547,7 +547,7 @@ def path_iterator(field, nodes, ids, fullpath, schema, cocos, idx=None, level=0)
 
 def ids_iterator(dd, db, schema, cocos):
     """
-    Iterate over the occurence of IDS and the number of 2D Array wrt DD
+    Iterate over the occurences and the fields of IDS
     """
     global report_buf
     idsname = dd.get("name")
@@ -605,15 +605,45 @@ def ids_iterator(dd, db, schema, cocos):
 # ----------------------------------------------------------------------
 
 
-def IDSCOCOSValues(db):
+def COCOS_equilibrium(ids):
     """
     Compute COCOS values using stored data in IDS/equilibrium
     """
 
-    ids = db.equilibrium
     ids.get(0)
 
-    #
+    # Validate IDS/equilibrium
+    schema = {
+        "ids.ids_properties.homogeneous_time": {"min": 0, "max": 2},
+        "ids.time_slice": {"minlength": 1},
+        "ids.time_slice[0].global_quantities.ip": {"empty": False, "ids_gt": -9e40},
+        "ids.vacuum_toroidal_field.b0": {"empty": False},
+        "ids.time_slice[0].global_quantities.psi_boundary": {"ids_gt": -9e40},
+        "ids.time_slice[0].global_quantities.psi_axis": {"ids_gt": -9e40},
+        "ids.time_slice[0].profiles_1d.q": {"empty": False},
+        "ids.time_slice[0].profiles_1d.dpressure_dpsi": {"empty": False},
+        "ids.time_slice[0].profiles_2d": {"minlength": 1},
+        "ids.time_slice[0].profiles_2d[0].b_field_z": {"empty": False},
+        "ids.time_slice[0].profiles_2d[0].psi": {"empty": False},
+        "ids.time_slice[0].profiles_2d[0].r": {"empty": False},
+    }
+
+    for key, value in schema.items():
+        v_ids = IDSValidator({key: value})
+
+        try:
+            data = eval(key)
+        except:
+            print("eval error on key {}".format(key))
+            return
+
+        remark = v_ids.validate({key: data})
+        errors = v_ids.errors
+        if not remark:
+            raise ValueError(errors)
+            return
+
+    # Compute COCOS Values
     ipsign = np.sign(ids.time_slice[0].global_quantities.ip)
     b0sign = np.sign(ids.vacuum_toroidal_field.b0[0])
 
@@ -646,11 +676,12 @@ def IDSCOCOSValues(db):
     x = twopi_expBp_sigma_RphiZ * sigma_RphiZ
     x = np.average(x)
 
-    if x > 5.0:
+    if x > 6.0:
         exp_Bp = 1
     else:
         exp_Bp = 0
 
+    #
     values = {
         "ipsign": int(ipsign),
         "b0sign": int(b0sign),
@@ -694,7 +725,7 @@ def main():
     # Indicate COCOS in IDS/equilibrium
     if args.indicate_cocos:
         yaml.dump(
-            {"COCOS Indication": IDSCOCOSValues(db)},
+            {"COCOS Indication": COCOS_equilibrium(db.equilibrium)},
             stdout,
             indent=4,
             default_flow_style=False,
@@ -846,7 +877,7 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--indicate_cocos",
-        help="Compute COCOS values from IDS/equilibrium and report",
+        help="Compute COCOS values from IDS/equilibrium",
         required=False,
         default=False,
         action="store_true",
