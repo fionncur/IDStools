@@ -71,32 +71,42 @@ class IMASData:
 
 class COCOS:
     """
-    O. Sauter and S. Yu. Medvedev, "Tokamak coordinate conventions: COCOS",
-    Comput. Physics Commun. 184 (2013) 293 and Table I
-    (see paper in chease directory)
+    Python version of COCOS module
 
-    Arguments :
-        - COCOS
-        - ipsign
-        - b0sign
-
-    Returns:
-        - COCOS
-        - sigma_Ip
-        - sigma_B0
-        - sigma_Bp
-        - sigma_RphiZ
-        - sigma_rhothetaphi
-        - sign_q_pos 
-        - sign_pprime_pos 
-        - theta_sign_clockwise = sigma_RphiZ*sigma_rhothetaphi:
-            +1 if theta clockwise 
-            -1 if counter-clockwise
-          "standard" mathematical polar direction is counter-clockwise 
-          thus theta_sign_clockwise=-1
+    [1] O. Sauter and S. Yu. Medvevdev, "Tokamak Coordinate Conventions : COCOS",
+        Comput. Physics Commun. 184 (2013) 293
+    [2] cocos_module.f90 (CHEASE)
     """
 
-    def __init__(self, index=None, values=None):
+    default = {"COCOS": 11, "ipsign": -1, "b0sign": -1}
+    TWOPI = 6.283185307179586476925286766559005768394
+
+    def __init__(self, index=default, values=None):
+        """
+        return COCOS Index and Values
+
+        Arguments:
+            dictionary
+            - COCOS
+            - ipsign
+            - b0sign
+
+        Returns:
+            - COCOS
+            - sigma_Ip
+            - sigma_B0
+            - sigma_Bp
+            - exp_Bp
+            - sigma_RphiZ
+            - sigma_rhothetaphi
+            - sign_q_pos 
+            - sign_pprime_pos 
+            - theta_sign_clockwise = sigma_RphiZ*sigma_rhothetaphi:
+                +1 if theta clockwise 
+                -1 if counter-clockwise
+              "standard" mathematical polar direction is counter-clockwise 
+              thus theta_sign_clockwise=-1
+            """
 
         if (index is None) and (values is None):
             raise ArgumentError("Initialize COCOS with either index or values")
@@ -106,8 +116,7 @@ class COCOS:
 
             COCOS = index["COCOS"]
             ipsign = index["ipsign"]
-            b0sign = index["b0sign"]
-
+            b0sign = index["b0sign"] 
             #
             # Parameters from Table I
             #
@@ -248,6 +257,92 @@ class COCOS:
             "sign_q_pos": self.sign_q_pos,
             "sign_pprime_pos": self.sign_pprime_pos,
             "theta_sign_clockwise": self.theta_sign_clockwise,
+        }
+
+    @classmethod
+    def values_coefficients(self, index_in=default, index_out=default):
+        """
+        Provide Transformation values for a set of quantities for a given pair of
+        input/output Cocos numbers
+
+        Arguments:
+
+        """
+
+        COCOS_in = index_in["COCOS"]
+        Ipsign_in = index_in["ipsign"]
+        B0sign_in = index_in["b0sign"]
+
+        COCOS_out = index_out["COCOS"]
+        Ipsign_out = index_out["ipsign"]
+        B0sign_out = index_out["b0sign"]
+
+        # Default outputs
+        sigma_Ip_eff = 1.0
+        sigma_B0_eff = 1.0
+        sigma_Bp_eff = 1.0
+        sigma_rhothetaphi_eff = 1.0
+        sigma_RphiZ_eff = 1.0
+        exp_Bp_eff = 1.0
+        fact_psi = 1.0
+        fact_q = 1.0
+        fact_dpsi = 1.0
+        fact_dtheta = 1.0
+
+        # Check inputs
+        sigma_Ip_in = float(Ipsign_in)
+        sigma_B0_in = float(B0sign_in)
+
+        # Get COCOS related parameters
+        CVI = COCOS(index_in).get()
+        CVO = COCOS(index_out).get()
+
+        # Define effective variables: sigma_Ip_eff, si1gma_B0_eff, sigma_Bp_eff,
+        # exp_Bp_eff as in Appendix C
+        sigma_RphiZ_eff = float(CVO["sigma_RphiZ"] * CVI["sigma_RphiZ"])
+
+        sigma_Ip_eff = sigma_Ip_in * float(Ipsign_out)
+        sigma_Ip_out = sigma_Ip_in * sigma_Ip_eff
+
+        sigma_B0_eff = sigma_B0_in * float(B0sign_out)
+        sigma_B0_out = sigma_B0_in * sigma_B0_eff
+
+        sigma_Bp_eff = float(CVO["sigma_Bp"] * CVI["sigma_Bp"])
+        exp_Bp_eff = float(CVO["exp_Bp"] - CVI["exp_Bp"])
+        sigma_rhothetaphi_eff = float(
+            CVO["sigma_rhothetaphi"] * CVI["sigma_rhothetaphi"]
+        )
+        #
+        # Note that sign(sigma_RphiZ*sigma_rhothetaphi) gives theta in clockwise or count    er-clockwise respectively
+        # Thus sigma_RphiZ_eff*sigma_rhothetaphi_eff negative if the direction of theta h    as changed from cocos_in to _out
+        #
+        fact_psi = sigma_Ip_eff * sigma_Bp_eff * TWOPI ** exp_Bp_eff
+        fact_dpsi = sigma_Ip_eff * sigma_Bp_eff / TWOPI ** exp_Bp_eff
+        fact_q = sigma_Ip_eff * sigma_B0_eff * sigma_rhothetaphi_eff
+        fact_dtheta = sigma_RphiZ_eff * sigma_rhothetaphi_eff
+
+        self.sigma_Ip_eff = sigma_Ip_eff
+        self.sigma_B0_eff = sigma_B0_eff
+        self.sigma_Bp_eff = sigma_Bp_eff
+        self.sigma_rhothetaphi_eff = sigma_rhothetaphi_eff
+        self.sigma_RphiZ_eff = sigma_RphiZ_eff
+        self.exp_Bp_eff = exp_Bp_eff
+        self.fact_psi = fact_psi
+        self.fact_q = fact_q
+        self.fact_dpsi = fact_dpsi
+        self.fact_dtheta = fact_dtheta
+
+        return {
+            "sigma_Ip_eff": self.sigma_Ip_eff,
+            "sigma_B0_eff": self.sigma_B0_eff,
+            "sigma_Bp_eff": self.sigma_Bp_eff,
+            "sigma_rhothetaphi_eff": self.sigma_rhothetaphi_eff,
+            "sigma_RphiZ_eff": self.sigma_RphiZ_eff,
+            "exp_Bp_eff": self.exp_Bp_eff,
+            "fact_psi": self.fact_psi,
+            "fact_q": self.fact_q,
+            "fact_dpsi": self.fact_dpsi,
+            "fact_dtheta": self.fact_dtheta,
         }
 
 
@@ -605,7 +700,7 @@ def ids_iterator(dd, db, schema, cocos):
 # ----------------------------------------------------------------------
 
 
-def COCOS_equilibrium(ids):
+def indicate_COCOS(ids):
     """
     Compute COCOS values using stored data in IDS/equilibrium
     """
@@ -725,7 +820,7 @@ def main():
     # Indicate COCOS in IDS/equilibrium
     if args.indicate_cocos:
         yaml.dump(
-            {"COCOS Indication": COCOS_equilibrium(db.equilibrium)},
+            {"COCOS Indication": indicate_COCOS(db.equilibrium)},
             stdout,
             indent=4,
             default_flow_style=False,
@@ -760,7 +855,7 @@ def main():
 
         # COCOS Initialization
         index = {"COCOS": args.cocos, "ipsign": args.ipsign, "b0sign": args.b0sign}
-        cocos = COCOS(index=index).get()
+        cocos = COCOS(index=index)
 
         # DD Loop
         for dd in root:
