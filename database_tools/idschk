@@ -71,7 +71,7 @@ class IMASData:
 
 class COCOS:
     """
-    Python version of COCOS module
+    COCOS module in Python
 
     [1] O. Sauter and S. Yu. Medvevdev, "Tokamak Coordinate Conventions : COCOS",
         Comput. Physics Commun. 184 (2013) 293
@@ -84,29 +84,7 @@ class COCOS:
     def __init__(self, index=default, values=None):
         """
         return COCOS Index and Values
-
-        Arguments:
-            dictionary
-            - COCOS
-            - ipsign
-            - b0sign
-
-        Returns:
-            - COCOS
-            - sigma_Ip
-            - sigma_B0
-            - sigma_Bp
-            - exp_Bp
-            - sigma_RphiZ
-            - sigma_rhothetaphi
-            - sign_q_pos 
-            - sign_pprime_pos 
-            - theta_sign_clockwise = sigma_RphiZ*sigma_rhothetaphi:
-                +1 if theta clockwise 
-                -1 if counter-clockwise
-              "standard" mathematical polar direction is counter-clockwise 
-              thus theta_sign_clockwise=-1
-            """
+        """
 
         if (index is None) and (values is None):
             raise ArgumentError("Initialize COCOS with either index or values")
@@ -262,11 +240,8 @@ class COCOS:
     @classmethod
     def values_coefficients(self, index_in=default, index_out=default):
         """
-        Provide Transformation values for a set of quantities for a given pair of
-        input/output Cocos numbers
-
-        Arguments:
-
+        Provide Transformation values for a set of quantities for a given pair
+        of input/output Cocos numbers
         """
 
         COCOS_in = index_in["COCOS"]
@@ -416,42 +391,6 @@ class IDSValidator(cerberus.Validator):
 
     cocos = {}
 
-    def _validate_ids_le(self, max_value, field, value):
-        """ {'nullable': False } """
-        try:
-            v = np.atleast_1d(value).flatten()
-            if np.any(v > max_value):
-                self._error(field, "Must be smaller than {}".format(max_value))
-        except TypeError:
-            pass
-
-    def _validate_ids_ge(self, min_value, field, value):
-        """ {'nullable': False } """
-        try:
-            v = np.atleast_1d(value).flatten()
-            if np.any(v < min_value):
-                self._error(field, "Must be larger than {}".format(min_value))
-        except TypeError:
-            pass
-
-    def _validate_ids_lt(self, max_value, field, value):
-        """ {'nullable': False } """
-        try:
-            v = np.atleast_1d(value).flatten()
-            if np.any(v >= max_value):
-                self._error(field, "Must be smaller than {}".format(max_value))
-        except TypeError:
-            pass
-
-    def _validate_ids_gt(self, min_value, field, value):
-        """ {'nullable': False } """
-        try:
-            v = np.atleast_1d(value).flatten()
-            if np.any(v <= min_value):
-                self._error(field, "Must be larger than {}".format(min_value))
-        except TypeError:
-            pass
-
     def _validate_ids_nan(self, constraint, field, value):
         """ {'nullable': False } """
         try:
@@ -472,6 +411,42 @@ class IDSValidator(cerberus.Validator):
         except TypeError:
             pass
 
+    def _validate_ids_le(self, max_value, field, value):
+        """ {'nullable': False } """
+        try:
+            v = np.atleast_1d(value).flatten()
+            if np.any(v > max_value):
+                self._error(field, "Must be smaller than {}".format(max_value))
+        except ValueError:
+            pass
+
+    def _validate_ids_ge(self, min_value, field, value):
+        """ {'nullable': False } """
+        try:
+            v = np.atleast_1d(value).flatten()
+            if np.any(v < min_value):
+                self._error(field, "Must be larger than {}".format(min_value))
+        except ValueError:
+            pass
+
+    def _validate_ids_lt(self, max_value, field, value):
+        """ {'nullable': False } """
+        try:
+            v = np.atleast_1d(value).flatten()
+            if np.any(v >= max_value):
+                self._error(field, "Must be smaller than {}".format(max_value))
+        except ValueError:
+            pass
+
+    def _validate_ids_gt(self, min_value, field, value):
+        """ {'nullable': False } """
+        try:
+            v = np.atleast_1d(value).flatten()
+            if np.any(v <= min_value):
+                self._error(field, "Must be larger than {}".format(min_value))
+        except ValueError:
+            pass
+
     def _validate_ids_psi_like(self, constraint, field, value):
         """ {'nullable': False } """
         try:
@@ -480,7 +455,7 @@ class IDSValidator(cerberus.Validator):
             if np.sign(v[-1] - v[0]) != psi_like:
                 if not constraint:
                     self._error(field, "Sign expected as {}".format(psi_like))
-        except TypeError:
+        except ValueError:
             pass
 
     def _validate_ids_b0_like(self, constraint, field, value):
@@ -491,7 +466,7 @@ class IDSValidator(cerberus.Validator):
             if np.any(np.sign(v) != b0_like):
                 if not constraint:
                     self._error(field, "Sign expected as {}".format(b0_like))
-        except TypeError:
+        except ValueError:
             pass
 
     def _validate_ids_dodpsi_like(self, constraint, field, value):
@@ -502,7 +477,7 @@ class IDSValidator(cerberus.Validator):
             if np.any(np.sign(v) != dodpsi_like):
                 if not constraint:
                     self._error(field, "Sign expected as {}".format(dodpsi_like))
-        except TypeError:
+        except ValueError:
             pass
 
     def _validate_ids_q_like(self, constraint, field, value):
@@ -517,7 +492,7 @@ class IDSValidator(cerberus.Validator):
             if np.any(np.sign(v) != q_like):
                 if not constraint:
                     self._error(field, "Sign expected as {}".format(q_like))
-        except TypeError:
+        except ValueError:
             pass
 
     def _validate_ids_ip_like(self, constraint, field, value):
@@ -528,7 +503,7 @@ class IDSValidator(cerberus.Validator):
             if any(np.sign(v) != ip_like):
                 if not constraint:
                     self._error(field, "Sign expected as {}".format(ip_like))
-        except TypeError:
+        except ValueError:
             pass
 
 
@@ -709,18 +684,49 @@ def indicate_COCOS(ids):
 
     # Validate IDS/equilibrium
     schema = {
-        "ids.ids_properties.homogeneous_time": {"min": 0, "max": 2},
-        "ids.time_slice": {"minlength": 1},
-        "ids.time_slice[0].global_quantities.ip": {"empty": False, "ids_gt": -9e40},
-        "ids.vacuum_toroidal_field.b0": {"empty": False},
-        "ids.time_slice[0].global_quantities.psi_boundary": {"ids_gt": -9e40},
-        "ids.time_slice[0].global_quantities.psi_axis": {"ids_gt": -9e40},
-        "ids.time_slice[0].profiles_1d.q": {"empty": False},
-        "ids.time_slice[0].profiles_1d.dpressure_dpsi": {"empty": False},
-        "ids.time_slice[0].profiles_2d": {"minlength": 1},
-        "ids.time_slice[0].profiles_2d[0].b_field_z": {"empty": False},
-        "ids.time_slice[0].profiles_2d[0].psi": {"empty": False},
-        "ids.time_slice[0].profiles_2d[0].r": {"empty": False},
+        "ids.ids_properties.homogeneous_time":
+            {"min": 0, "max": 2},
+        "ids.time_slice":
+            {"minlength": 1},
+        "ids.time_slice[0].global_quantities.ip":
+            {"empty": False,
+             "ids_gt": -9e40,
+             "ids_nan": False,
+             "ids_inf": False},
+        "ids.vacuum_toroidal_field.b0":
+            {"empty": False,
+             "ids_nan": False,
+             "ids_inf": False},
+        "ids.time_slice[0].global_quantities.psi_boundary":
+            {"ids_gt": -9e40,
+             "ids_nan": False,
+             "ids_inf": False},
+        "ids.time_slice[0].global_quantities.psi_axis":
+            {"ids_gt": -9e40,
+             "ids_nan": False,
+             "ids_inf": False},
+        "ids.time_slice[0].profiles_1d.q":
+            {"empty": False,
+             "ids_nan": False,
+             "ids_inf": False},
+        "ids.time_slice[0].profiles_1d.dpressure_dpsi":
+            {"empty": False,
+             "ids_nan":False,
+             "ids_inf": False},
+        "ids.time_slice[0].profiles_2d":
+            {"minlength": 1},
+        "ids.time_slice[0].profiles_2d[0].b_field_z":
+            {"empty": False,
+             "ids_nan": False,
+             "ids_inf": False},
+        "ids.time_slice[0].profiles_2d[0].psi":
+            {"empty": False,
+             "ids_nan": False,
+             "ids_inf": False},
+        "ids.time_slice[0].profiles_2d[0].r":
+            {"empty": False,
+             "ids_nan": False,
+             "ids_inf": False},
     }
 
     for key, value in schema.items():
@@ -738,33 +744,40 @@ def indicate_COCOS(ids):
             raise ValueError(errors)
             return
 
-    # Compute COCOS Values
-    ipsign = np.sign(ids.time_slice[0].global_quantities.ip)
+    # Compute COCOS Values in the middle of time sequence
+    itime = int(np.floor(float(len(ids.time_slice))/2.0))
+    print("itime=",itime)
+
+    ipsign = np.sign(ids.time_slice[itime].global_quantities.ip)
     b0sign = np.sign(ids.vacuum_toroidal_field.b0[0])
 
     dpsi = (
-        ids.time_slice[0].global_quantities.psi_boundary
-        - ids.time_slice[0].global_quantities.psi_axis
+        ids.time_slice[itime].global_quantities.psi_boundary
+        - ids.time_slice[itime].global_quantities.psi_axis
     )
     sigma_Bp = np.sign(dpsi) * ipsign
 
-    q = ids.time_slice[0].profiles_1d.q
+    q = ids.time_slice[itime].profiles_1d.q
     sign_q_pos = np.sign(np.sum(np.sign(q)))
     sigma_rhothetaphi = sign_q_pos
 
-    dpressure_dpsi = ids.time_slice[0].profiles_1d.dpressure_dpsi
+    dpressure_dpsi = ids.time_slice[itime].profiles_1d.dpressure_dpsi
     sign_pprime_pos = np.sign(np.sum(np.sign(dpressure_dpsi))) * ipsign * sigma_Bp
 
     #
-    bz = ids.time_slice[0].profiles_2d[0].b_field_z
-    psi2d = ids.time_slice[0].profiles_2d[0].psi
-    r2d = ids.time_slice[0].profiles_2d[0].r
+    bz = ids.time_slice[itime].profiles_2d[0].b_field_z
+    psi2d = ids.time_slice[itime].profiles_2d[0].psi
+    r2d = ids.time_slice[itime].profiles_2d[0].r
 
     dpsi2d = np.gradient(psi2d)
     dr2d = np.gradient(r2d)
     dpsi2drdr = dpsi2d[0] / dr2d[0] / r2d
 
     twopi_expBp_sigma_RphiZ = -sigma_Bp * dpsi2drdr / bz
+
+    print("dpsi2drdr=",dpsi2drdr,np.sum(dpsi2drdr))
+    print("bz=",bz,np.sum(bz))
+    print("twopi_expBp_sigma_RphiZ=",twopi_expBp_sigma_RphiZ,np.sum(twopi_expBp_sigma_RphiZ))
 
     sigma_RphiZ = np.sign(np.sum(np.sign(twopi_expBp_sigma_RphiZ)))
 
@@ -776,6 +789,10 @@ def indicate_COCOS(ids):
     else:
         exp_Bp = 0
 
+    print(ipsign,b0sign)
+    print(exp_Bp,sigma_Bp)
+    print(sigma_RphiZ,sigma_rhothetaphi)
+    print(sign_q_pos,sign_pprime_pos)
     #
     values = {
         "ipsign": int(ipsign),
@@ -855,7 +872,7 @@ def main():
 
         # COCOS Initialization
         index = {"COCOS": args.cocos, "ipsign": args.ipsign, "b0sign": args.b0sign}
-        cocos = COCOS(index=index)
+        cocos = COCOS(index=index).get()
 
         # DD Loop
         for dd in root:
