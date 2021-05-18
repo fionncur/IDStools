@@ -1,0 +1,104 @@
+#!/usr/bin/env python
+
+import os, argparse, yaml, re
+
+# Management of input arguments
+parser = argparse.ArgumentParser(description=\
+	 '---- Show status and potential parent and children for a given simulation stored in ITER DB folder')
+parser.add_argument("-f","--folder",help=\
+                    "folder where to search for scenarios", required=False)
+parser.add_argument('-s','--shot',help='shot number', required=True,type=int)
+parser.add_argument('-r','--run',help='run number',required=True,type=int)
+args = vars(parser.parse_args())
+shot = args["shot"]
+run  = args["run"]
+
+# ------------------------------------------------------------------------------------------------------------
+
+def read_yaml(shot,run):
+    folder = '/work/imas/shared/imasdb/ITER/3/0'
+    add0 = ""
+    add0_length = 4-len(str(run))
+    for i in range(add0_length):
+        add0 = add0+"0"
+    filename = folder+"/ids_"+str(shot)+add0+str(run)+".yaml"
+    try:
+        file = open(filename, 'r')
+        data = yaml.load(file,Loader=yaml.CLoader)
+        file.close()
+    except:
+        print('Data entry '+str(shot)+'/'+str(run)+' does not exist')
+        exit()
+    return data
+
+data = read_yaml(shot,run)
+
+def find_parent(shot,run,family):
+    datafp = read_yaml(shot,run)
+    replaces = datafp['database_relations']['replaces']
+    if replaces is not None:
+        string_list = re.findall(r'\d+',replaces)
+        shotp = string_list[0]
+        runp = string_list[1]
+        datap = read_yaml(shotp,runp)
+        family['parents']['shot'].insert(0,shotp) # Order to be reversed for parents
+        family['parents']['run'].insert(0,runp)
+        family['parents']['status'].insert(0,datap['status'])
+        family['parents']['comment'].insert(0,datap['database_relations']['replaces'])
+        family = find_parent(shotp,runp,family)
+    return family
+    
+def find_children(shot,run,family):
+    datafc = read_yaml(shot,run)
+    replaced_by = datafc['database_relations']['replaced_by']
+    if replaced_by is not None:
+        string_list = re.findall(r'\d+',replaced_by)
+        shotc = string_list[0]
+        runc = string_list[1]
+        datac = read_yaml(shotc,runc)
+        family['children']['shot'].append(shotc)
+        family['children']['run'].append(runc)
+        family['children']['status'].append(datac['status'])
+        family['children']['comment'].append(datac['database_relations']['replaces'])
+        family = find_children(shotc,runc,family)
+    return family
+    
+if 'database_relations' not in data.keys():
+    print('No DB relation defined: please check your yaml file.')
+    exit()
+else:
+
+    class generic_member():
+        def __init__(self):
+            self.value = {}
+            self.value['shot']    = []
+            self.value['run']     = []
+            self.value['status']  = []
+            self.value['comment'] = []
+
+    family = {}
+    family['parents']  = generic_member().value
+    family['children'] = generic_member().value
+
+    family = find_parent(shot,run,family)
+    family = find_children(shot,run,family)
+
+print("-----------------------------------------------------------------")
+print("  SCENARIO \t STATUS \t REASON WHY IT REPLACES PREVIOUS")
+for iparent in range(len(family['parents']['shot'])):
+    print(" ",family['parents']['shot'][iparent],family['parents']['run'][iparent]
+          ,'\t',family['parents']['status'][iparent]
+          ,'\t',family['parents']['comment'][iparent])
+print("*",shot,run,'\t',data['status']
+          ,'\t',data['database_relations']['replaces'])
+for ichild in range(len(family['children']['shot'])):
+    print(" ",family['children']['shot'][ichild],family['children']['run'][ichild]
+          ,'\t',family['children']['status'][ichild]
+          ,'\t',family['children']['comment'][ichild])
+print("-----------------------------------------------------------------")
+
+
+
+
+
+
