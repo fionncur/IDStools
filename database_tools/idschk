@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 from os import getenv, path
-from sys import exit, stdin, stdout
+from sys import exit, stdout
 import re
 import argparse
 import numpy as np
@@ -14,52 +14,75 @@ TARGET_TAG = "IDS"
 report_buf = {}
 ids_header = "ids."
 idx_header = "idx."
+IDS_COCOS = 11
 
-# Validation Schema for IDS/equilibrium
-IDS_eq_schema = {
-    "ids.ids_properties.homogeneous_time":
-        {"min": 0, "max": 2},
-    "ids.time_slice":
-        {"minlength": 1},
-    "ids.time_slice[0].global_quantities.ip":
-        {"empty": False,
-         "ids_gt": -9e40,
-         "ids_nan": False,
-         "ids_inf": False},
-    "ids.vacuum_toroidal_field.b0":
-        {"empty": False,
-         "ids_nan": False,
-         "ids_inf": False},
-    "ids.time_slice[0].global_quantities.psi_boundary":
-        {"ids_gt": -9e40,
-         "ids_nan": False,
-         "ids_inf": False},
-    "ids.time_slice[0].global_quantities.psi_axis":
-        {"ids_gt": -9e40,
-         "ids_nan": False,
-         "ids_inf": False},
-    "ids.time_slice[0].profiles_1d.q":
-        {"empty": False,
-         "ids_nan": False,
-         "ids_inf": False},
-    "ids.time_slice[0].profiles_1d.dpressure_dpsi":
-        {"empty": False,
-         "ids_nan":False,
-         "ids_inf": False},
-    "ids.time_slice[0].profiles_2d":
-        {"minlength": 1},
-    "ids.time_slice[0].profiles_2d[0].b_field_z":
-        {"empty": False,
-         "ids_nan": False,
-         "ids_inf": False},
-    "ids.time_slice[0].profiles_2d[0].psi":
-        {"empty": False,
-         "ids_nan": False,
-         "ids_inf": False},
-        "ids.time_slice[0].profiles_2d[0].r":
-        {"empty": False,
-         "ids_nan": False,
-         "ids_inf": False},
+# Validation Schema for COCOS using IDS/equilibrium
+required_fields_eq = {
+    "ids.ids_properties.homogeneous_time": {"min": 0, "max": 2},
+    "ids.time_slice": {"minlength": 1},
+    "ids.time_slice[itime].global_quantities.ip": {
+        "empty": False,
+        "ids_gt": -9e40,
+        "ids_nan": False,
+        "ids_inf": False,
+    },
+    "ids.vacuum_toroidal_field.b0": {
+        "empty": False,
+        "ids_nan": False,
+        "ids_inf": False,
+    },
+    "ids.time_slice[itime].profiles_1d.psi": {
+        "empty": False,
+        "ids_nan": False,
+        "ids_inf": False,
+    },
+    "ids.time_slice[itime].profiles_1d.q": {
+        "empty": False,
+        "ids_nan": False,
+        "ids_inf": False,
+    },
+    "ids.time_slice[itime].profiles_1d.dpressure_dpsi": {
+        "empty": False,
+        "ids_nan": False,
+        "ids_inf": False,
+    },
+    "ids.time_slice[itime].profiles_2d": {"minlength": 1},
+    "ids.time_slice[itime].profiles_2d[0].b_field_z": {
+        "empty": False,
+        "ids_nan": False,
+        "ids_inf": False,
+    },
+    "ids.time_slice[itime].profiles_2d[0].psi": {
+        "empty": False,
+        "ids_nan": False,
+        "ids_inf": False,
+    },
+    "ids.time_slice[itime].profiles_2d[0].r": {
+        "empty": False,
+        "ids_nan": False,
+        "ids_inf": False,
+        "ids_gt": 0.0,
+    },
+}
+
+required_fields_cocos = {
+    "ids.ids_properties.homogeneous_time": {"min": 0, "max": 2},
+    "ids.time_slice": {"minlength": 1},
+    "ids.time_slice[itime].global_quantities.ip": {
+        "ids_ip_like": False,
+    },
+    "ids.vacuum_toroidal_field.b0": {
+        "ids_b0_like": False,
+    },
+    "ids.time_slice[itime].profiles_1d.psi": {
+        "ids_psi_like": False,
+    },
+    "ids.time_slice[itime].profiles_1d.q": {
+        "ids_q_like": False,
+    },
+    "ids.time_slice[itime].profiles_1d.dpressure_dpsi": {
+        "ids_dodpsi_like": False,
+    },
 }
 
 
@@ -141,7 +164,7 @@ class COCOS:
 
             COCOS = index["COCOS"]
             ipsign = index["ipsign"]
-            b0sign = index["b0sign"] 
+            b0sign = index["b0sign"]
             #
             # Parameters from Table I
             #
@@ -722,16 +745,49 @@ def ids_iterator(dd, db, schema, cocos):
 # ----------------------------------------------------------------------
 
 
-def indicate_COCOS(ids):
+def validate_COCOS(ids, cocos):
+    """
+    """
+
+    ids.get(0)
+
+    # COCOS Values in the middle of time sequence
+    itime = int(np.floor(float(len(ids.time_slice)) / 2.0))
+
+    # Inter-COCOS Validation
+    for key, value in required_fields_cocos.items():
+        v_ids = IDSValidator({key: value})
+        v_ids.cocos = cocos
+
+        try:
+            data = eval(key)
+        except:
+            print("eval error on key {}".format(key))
+            return
+
+        remark = v_ids.validate({key: data})
+        errors = v_ids.errors
+        if not remark:
+            raise ValueError(errors)
+            #return
+            pass
+
+
+def compute_COCOS(ids, cocos):
     """
     Compute COCOS values using stored data in IDS/equilibrium
     """
 
     ids.get(0)
 
+    # COCOS Values in the middle of time sequence
+    itime = int(np.floor(float(len(ids.time_slice)) / 2.0))
+
     # IDS Validation before COCOS evaluation
-    for key, value in IDS_eq_schema.items():
+    for key, value in required_fields_eq.items():
         v_ids = IDSValidator({key: value})
+        # COCOS Values not used for IDS/equilibrium validation
+        # v_ids.cocos = cocos
 
         try:
             data = eval(key)
@@ -745,16 +801,13 @@ def indicate_COCOS(ids):
             raise ValueError(errors)
             return
 
-    # Compute COCOS Values in the middle of time sequence
-    itime = int(np.floor(float(len(ids.time_slice))/2.0))
-
     #
     ipsign = np.sign(ids.time_slice[itime].global_quantities.ip)
     b0sign = np.sign(ids.vacuum_toroidal_field.b0[0])
 
     dpsi = (
-        ids.time_slice[itime].global_quantities.psi_boundary
-        - ids.time_slice[itime].global_quantities.psi_axis
+        ids.time_slice[itime].profiles_1d.psi[-1]
+        - ids.time_slice[itime].profiles_1d.psi[0]
     )
     sigma_Bp = np.sign(dpsi) * ipsign
 
@@ -777,7 +830,7 @@ def indicate_COCOS(ids):
     # avoid ZeroDivisionError
     rows, cols = np.where(bz != 0.0)
     twopi_expBp_sigma_RphiZ = np.zeros(bz.shape)
-    twopi_expBp_sigma_RphiZ = -sigma_Bp * dpsi2drdr[rows,cols] / bz[rows,cols]
+    twopi_expBp_sigma_RphiZ = -sigma_Bp * dpsi2drdr[rows, cols] / bz[rows, cols]
 
     sigma_RphiZ = np.sign(np.sum(np.sign(twopi_expBp_sigma_RphiZ)))
 
@@ -801,8 +854,26 @@ def indicate_COCOS(ids):
         "sign_pprime_pos": int(sign_pprime_pos),
     }
 
-    return COCOS(values=values).get()
+    cocos2 = COCOS(values=values).get()
 
+    # 
+    for key, value in required_fields_cocos.items():
+        v_ids = IDSValidator({key: value})
+        v_ids.cocos = cocos
+
+        try:
+            data = eval(key)
+        except:
+            print("eval error on key {}".format(key))
+            return
+
+        remark = v_ids.validate({key: data})
+        errors = v_ids.errors
+        if not remark:
+            raise ValueError(errors)
+            pass
+
+    return cocos2
 
 # ----------------------------------------------------------------------
 
@@ -830,45 +901,45 @@ def main():
             )
         )
 
-    # Indicate COCOS in IDS/equilibrium
-    if args.indicate_cocos:
-        yaml.dump(
-            {"COCOS Indication": indicate_COCOS(db.equilibrium)},
-            stdout,
-            indent=4,
-            default_flow_style=False,
-            sort_keys=False,
-        )
+    # COCOS Initialization
+    index = {"COCOS": IDS_COCOS, "ipsign": args.ipsign, "b0sign": args.b0sign}
+    cocos = COCOS(index=index).get()
+
+    # Validate COCOS in IDS/equilibrium
+    if args.validate_cocos:
+        try:
+            cocos2 = compute_COCOS(db.equilibrium, cocos)
+        except:
+            exit("cannot compute COCOS")
+
+        if cocos2["COCOS"] == cocos["COCOS"]:
+            print("COCOS: {}".format(cocos2["COCOS"]))
+        else:
+            yaml.dump(
+                {"COCOS Indication": cocos2},
+                stdout,
+                indent=4,
+                default_flow_style=False,
+                sort_keys=False,
+            )
 
     # IDS Validation
+    # Load IMAS-DD File
+    if path.isfile(FILE_IDSDef):
+        root = ET.parse(FILE_IDSDef).getroot()
     else:
+        exit("file not found:{}".format(FILE_IDSDef))
 
-        # Load IMAS-DD File
-        if path.isfile(FILE_IDSDef):
-            root = ET.parse(FILE_IDSDef).getroot()
-        else:
-            exit("file not found:{}".format(FILE_IDSDef))
-
-        if args.schema_file:
-            # Load IDS-Cerberus Schema
-            try:
-                f = open(args.schema_file, mode="r")
-            except:
-                exit("can not open file:{}".format(args.schema_file))
-            try:
-                schema = yaml.safe_load(f)
-            except:
-                exit("invalid yaml in:{}".format(args.schema_file))
-        else:
-            # stdin
-            try:
-                schema = yaml.safe_load(stdin)
-            except:
-                exit("stdin error")
-
-        # COCOS Initialization
-        index = {"COCOS": args.cocos, "ipsign": args.ipsign, "b0sign": args.b0sign}
-        cocos = COCOS(index=index).get()
+    if args.schema_file:
+        # Load IDS-Cerberus Schema
+        try:
+            f = open(args.schema_file, mode="r")
+        except:
+            exit("can not open file:{}".format(args.schema_file))
+        try:
+            schema = yaml.safe_load(f)
+        except:
+            exit("invalid yaml in:{}".format(args.schema_file))
 
         # DD Loop
         for dd in root:
@@ -950,15 +1021,6 @@ if __name__ == "__main__":
         default=None,
     )
     parser.add_argument(
-        "--cocos",
-        dest="cocos",
-        help="cocos",
-        required=False,
-        type=int,
-        default=11,
-        choices=[*range(1, 9), *range(11, 19)],
-    )
-    parser.add_argument(
         "--ipsign",
         dest="ipsign",
         help="sign(Ip), default=-1",
@@ -984,7 +1046,8 @@ if __name__ == "__main__":
         action="store_true",
     )
     parser.add_argument(
-        "--indicate_cocos",
+        "-c",
+        "--validate_cocos",
         help="Compute COCOS values from IDS/equilibrium",
         required=False,
         default=False,
