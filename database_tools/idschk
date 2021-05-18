@@ -68,21 +68,11 @@ required_fields_eq = {
 required_fields_cocos = {
     "ids.ids_properties.homogeneous_time": {"min": 0, "max": 2},
     "ids.time_slice": {"minlength": 1},
-    "ids.time_slice[itime].global_quantities.ip": {
-        "ids_ip_like": False,
-    },
-    "ids.vacuum_toroidal_field.b0": {
-        "ids_b0_like": False,
-    },
-    "ids.time_slice[itime].profiles_1d.psi": {
-        "ids_psi_like": False,
-    },
-    "ids.time_slice[itime].profiles_1d.q": {
-        "ids_q_like": False,
-    },
-    "ids.time_slice[itime].profiles_1d.dpressure_dpsi": {
-        "ids_dPdpsi_like": False,
-    },
+    "ids.time_slice[itime].global_quantities.ip": {"ids_ip_like": False},
+    "ids.vacuum_toroidal_field.b0": {"ids_b0_like": False},
+    "ids.time_slice[itime].profiles_1d.psi": {"ids_psi_like": False},
+    "ids.time_slice[itime].profiles_1d.q": {"ids_q_like": False},
+    "ids.time_slice[itime].profiles_1d.dpressure_dpsi": {"ids_dPdpsi_like": False},
 }
 
 
@@ -581,12 +571,11 @@ class IDSValidator(cerberus.Validator):
         try:
             v = np.atleast_1d(value).flatten()
             dodpsi_like = -self.cocos["sigma_Ip"] * self.cocos["sigma_Bp"]
-            if (np.sign(np.sum(np.sign(v))) != dodpsi_like):
+            if np.sign(np.sum(np.sign(v))) != dodpsi_like:
                 if not constraint:
                     self._error(field, "avg(Sign) expected as {}".format(dodpsi_like))
         except ValueError:
             pass
-
 
 
 # ----------------------------------------------------------------------
@@ -773,7 +762,7 @@ def validate_COCOS(ids, schema, itime, cocos=None):
         errors = v_ids.errors
         if not remark:
             raise ValueError(errors)
-            #return
+            # return
             pass
 
 
@@ -851,6 +840,7 @@ def compute_COCOS(ids, cocos):
 
     return cocos2
 
+
 # ----------------------------------------------------------------------
 
 
@@ -900,13 +890,14 @@ def main():
             )
 
     # IDS Validation
-    # Load IMAS-DD File
-    if path.isfile(FILE_IDSDef):
-        root = ET.parse(FILE_IDSDef).getroot()
-    else:
-        exit("file not found:{}".format(FILE_IDSDef))
-
     if args.schema_file:
+
+        # Load IMAS-DD File
+        if path.isfile(FILE_IDSDef):
+            root = ET.parse(FILE_IDSDef).getroot()
+        else:
+            exit("file not found:{}".format(FILE_IDSDef))
+
         # Load IDS-Cerberus Schema
         try:
             f = open(args.schema_file, mode="r")
