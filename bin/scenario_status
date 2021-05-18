@@ -61,12 +61,12 @@ def find_children(data,family):
 
 
 data = read_yaml(shot,run)
-if data==None:
+if data is None:
     print(f'Data entry {shot}/{run} does not exist')
     exit()    
     
 if 'database_relations' not in data.keys():
-    print('No DB relation defined: please check your yaml file.')
+    print(f'No database_relations defined: the yaml file associated with this {shot}/{run} might be too old (its status is {data["status"]}).')
     exit()
 else:
 
