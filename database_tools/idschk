@@ -753,19 +753,15 @@ def ids_iterator(dd, db, schema, cocos):
 # ----------------------------------------------------------------------
 
 
-def validate_COCOS(ids, cocos):
+def validate_COCOS(ids, schema, itime, cocos=None):
     """
     """
-
-    ids.get(0)
-
-    # COCOS Values in the middle of time sequence
-    itime = int(np.floor(float(len(ids.time_slice)) / 2.0))
 
     # Inter-COCOS Validation
-    for key, value in required_fields_cocos.items():
+    for key, value in schema.items():
         v_ids = IDSValidator({key: value})
-        v_ids.cocos = cocos
+        if cocos is not None:
+            v_ids.cocos = cocos
 
         try:
             data = eval(key)
@@ -781,6 +777,9 @@ def validate_COCOS(ids, cocos):
             pass
 
 
+# ----------------------------------------------------------------------
+
+
 def compute_COCOS(ids, cocos):
     """
     Compute COCOS values using stored data in IDS/equilibrium
@@ -791,23 +790,8 @@ def compute_COCOS(ids, cocos):
     # COCOS Values in the middle of time sequence
     itime = int(np.floor(float(len(ids.time_slice)) / 2.0))
 
-    # IDS Validation before COCOS evaluation
-    for key, value in required_fields_eq.items():
-        v_ids = IDSValidator({key: value})
-        # COCOS Values not used for IDS/equilibrium validation
-        # v_ids.cocos = cocos
-
-        try:
-            data = eval(key)
-        except:
-            print("eval error on key {}".format(key))
-            return
-
-        remark = v_ids.validate({key: data})
-        errors = v_ids.errors
-        if not remark:
-            raise ValueError(errors)
-            return
+    #
+    validate_COCOS(ids, required_fields_eq, itime)
 
     #
     ipsign = np.sign(ids.time_slice[itime].global_quantities.ip)
@@ -863,23 +847,7 @@ def compute_COCOS(ids, cocos):
     }
 
     cocos2 = COCOS(values=values).get()
-
-    # 
-    for key, value in required_fields_cocos.items():
-        v_ids = IDSValidator({key: value})
-        v_ids.cocos = cocos
-
-        try:
-            data = eval(key)
-        except:
-            print("eval error on key {}".format(key))
-            return
-
-        remark = v_ids.validate({key: data})
-        errors = v_ids.errors
-        if not remark:
-            raise ValueError(errors)
-            pass
+    validate_COCOS(ids, required_fields_cocos, itime, cocos=cocos)
 
     return cocos2
 
