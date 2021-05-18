@@ -8,60 +8,62 @@ parser = argparse.ArgumentParser(description=\
 parser.add_argument("-f","--folder",help=\
                     "folder where to search for scenarios", required=False)
 parser.add_argument('-s','--shot',help='shot number', required=True,type=int)
-parser.add_argument('-r','--run',help='run number',required=True,type=int)
-args = vars(parser.parse_args())
-shot = args["shot"]
-run  = args["run"]
+# currently limiting run < 10000 because of the search path /3/0
+parser.add_argument('-r','--run',help='run number',required=True,type=int,
+                    choices=range(0,9999),metavar="[0-9999]") 
+args = parser.parse_args()
+shot = str(args.shot)
+run  = str(args.run)
 
 # ------------------------------------------------------------------------------------------------------------
 
 def read_yaml(shot,run):
-    folder = '/work/imas/shared/imasdb/ITER/3/0'
-    add0 = ""
-    add0_length = 4-len(str(run))
-    for i in range(add0_length):
-        add0 = add0+"0"
-    filename = folder+"/ids_"+str(shot)+add0+str(run)+".yaml"
+    folder = os.environ['IMAS_HOME']+'/shared/imasdb/ITER/3/0' 
+    filename = folder+f'/ids_{shot}{run.rjust(4,"0")}.yaml'
     try:
-        file = open(filename, 'r')
-        data = yaml.load(file,Loader=yaml.CLoader)
-        file.close()
-    except:
-        print('Data entry '+str(shot)+'/'+str(run)+' does not exist')
-        exit()
+        with open(filename, 'r') as f:
+            data = yaml.load(f,Loader=yaml.CLoader)
+    except Exception as exc:
+        print(f"Warning: {exc}")
+        data = None
     return data
 
-data = read_yaml(shot,run)
-
-def find_parent(shot,run,family):
-    datafp = read_yaml(shot,run)
-    replaces = datafp['database_relations']['replaces']
+def find_parent(data,family):
+    replaces = data['database_relations']['replaces']
     if replaces is not None:
         string_list = re.findall(r'\d+',replaces)
         shotp = string_list[0]
         runp = string_list[1]
         datap = read_yaml(shotp,runp)
-        family['parents']['shot'].insert(0,shotp) # Order to be reversed for parents
-        family['parents']['run'].insert(0,runp)
-        family['parents']['status'].insert(0,datap['status'])
-        family['parents']['comment'].insert(0,datap['database_relations']['replaces'])
-        family = find_parent(shotp,runp,family)
+        if datap is not None:
+            family['parents']['shot'].insert(0,shotp) # Order to be reversed for parents
+            family['parents']['run'].insert(0,runp)
+            family['parents']['status'].insert(0,datap['status'])
+            family['parents']['comment'].insert(0,datap['database_relations']['replaces'])
+            family = find_parent(datap,family)
     return family
     
-def find_children(shot,run,family):
-    datafc = read_yaml(shot,run)
-    replaced_by = datafc['database_relations']['replaced_by']
+def find_children(data,family):
+    replaced_by = data['database_relations']['replaced_by']
     if replaced_by is not None:
         string_list = re.findall(r'\d+',replaced_by)
         shotc = string_list[0]
         runc = string_list[1]
         datac = read_yaml(shotc,runc)
-        family['children']['shot'].append(shotc)
-        family['children']['run'].append(runc)
-        family['children']['status'].append(datac['status'])
-        family['children']['comment'].append(datac['database_relations']['replaces'])
-        family = find_children(shotc,runc,family)
+        if datac is not None:
+            family['children']['shot'].append(shotc)
+            family['children']['run'].append(runc)
+            family['children']['status'].append(datac['status'])
+            family['children']['comment'].append(datac['database_relations']['replaces'])
+            family = find_children(datac,family)
     return family
+
+
+
+data = read_yaml(shot,run)
+if data==None:
+    print(f'Data entry {shot}/{run} does not exist')
+    exit()    
     
 if 'database_relations' not in data.keys():
     print('No DB relation defined: please check your yaml file.')
@@ -80,8 +82,8 @@ else:
     family['parents']  = generic_member().value
     family['children'] = generic_member().value
 
-    family = find_parent(shot,run,family)
-    family = find_children(shot,run,family)
+    family = find_parent(data,family)
+    family = find_children(data,family)
 
 print("-----------------------------------------------------------------")
 print("  SCENARIO \t STATUS \t REASON WHY IT REPLACES PREVIOUS")
