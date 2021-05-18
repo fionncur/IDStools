@@ -81,7 +81,7 @@ required_fields_cocos = {
         "ids_q_like": False,
     },
     "ids.time_slice[itime].profiles_1d.dpressure_dpsi": {
-        "ids_dodpsi_like": False,
+        "ids_dPdpsi_like": False,
     },
 }
 
@@ -576,6 +576,18 @@ class IDSValidator(cerberus.Validator):
         except ValueError:
             pass
 
+    def _validate_ids_dPdpsi_like(self, constraint, field, value):
+        """ {'nullable': False } """
+        try:
+            v = np.atleast_1d(value).flatten()
+            dodpsi_like = -self.cocos["sigma_Ip"] * self.cocos["sigma_Bp"]
+            if (np.sign(np.sum(np.sign(v))) != dodpsi_like):
+                if not constraint:
+                    self._error(field, "avg(Sign) expected as {}".format(dodpsi_like))
+        except ValueError:
+            pass
+
+
 
 # ----------------------------------------------------------------------
 
@@ -665,11 +677,7 @@ def path_iterator(field, nodes, ids, fullpath, schema, cocos, idx=None, level=0)
                     )
                     if not args.check_all:
                         break
-            # except:
-            except Exception as e:
-                import traceback
-
-                print(traceback.format_exc())
+            except:
                 pass
 
         # for node (e.g. path(itime)/to(i1)/node)
@@ -909,8 +917,8 @@ def main():
     if args.validate_cocos:
         try:
             cocos2 = compute_COCOS(db.equilibrium, cocos)
-        except:
-            exit("cannot compute COCOS")
+        except Exception as e:
+            exit("cannot compute COCOS: {}".format(e))
 
         if cocos2["COCOS"] == cocos["COCOS"]:
             print("COCOS: {}".format(cocos2["COCOS"]))
@@ -1046,7 +1054,7 @@ if __name__ == "__main__":
         action="store_true",
     )
     parser.add_argument(
-        "-c",
+        "-v",
         "--validate_cocos",
         help="Compute COCOS values from IDS/equilibrium",
         required=False,
