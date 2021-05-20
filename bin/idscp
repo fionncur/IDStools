@@ -28,12 +28,6 @@ parser.add_argument('ids',nargs='*',type=str,
 
 args = parser.parse_args()
 
-if args.shot_input==args.shot_output \
-   and args.run_input == args.run_output \
-   and args.user == os.environ['USER']:
-    print('Can not use the same data-entry as source and destination!',file=sys.stderr)
-    exit()
-    
 
 if args.database_output == None:
     args.database_output = args.database
@@ -41,6 +35,14 @@ if args.database_output == None:
 if args.backend_output == None:
     args.backend_output = args.backend
 
+if args.shot_input==args.shot_output \
+   and args.run_input == args.run_output \
+   and args.user == os.environ['USER'] \
+   and args.database == args.database_output \
+   and args.backend == args.backend_output:
+    print('Can not use the same data-entry as source and destination!',file=sys.stderr)
+    exit()
+    
 if args.ids == []:
     args.ids = [ids.value for ids in list(imas.IDSName)]
 
@@ -80,7 +82,9 @@ for idsname in args.ids:
     if args.setDatasetVersion and idsname=='dataset_description':
         idsobj.dd_version = os.environ['IMAS_VERSION']
     try:
-        dest.put(idsobj)
+        if idsobj.ids_properties.homogeneous_time != imas.imasdef.EMPTY_INT:
+            print(f'Copying {idsname}')
+            dest.put(idsobj)
     except Exception as exc:
         print(str(exc),file=sys.stderr)
         if not args.force:
