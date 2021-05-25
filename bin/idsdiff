@@ -52,7 +52,11 @@ def compare(x, y, parent, args):
         # treatment of struct_array and list of strings
         if type(xo).__name__ == 'list':
             if len(xo) != len(yo):
-                print('%s.%s is of different length in both IDSs' % (parent, key))
+                # avoids printing "array" as this is internal attribute for AoS
+                if key == 'array':
+                    print('%s is of different length in both IDSs' % (parent))
+                else:
+                    print('%s.%s is of different length in both IDSs' % (parent, key))
             else:
                 for i in range(len(xo)):
                     if 'structArrayElement' in type(xo[i]).__name__ :
