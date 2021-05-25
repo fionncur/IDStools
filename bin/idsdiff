@@ -101,7 +101,7 @@ if __name__ == '__main__':
     parser.add_argument("runB",type=int,
                         help="run number of second dataset")
     parser.add_argument("ids",nargs="*",type=str,
-                        help="Name (or space separated list of names) of IDS to compare")
+                        help="Name (or space separated list of names) of IDS to compare (leave empty to compare all IDSs)")
     parser.add_argument("--backendB",type=str,default=None,
                         help="Specifies the backend of second dataset (default: same as first dataset)")
     parser.add_argument("--databaseB",type=str,default=None,
@@ -134,6 +134,9 @@ if __name__ == '__main__':
     if status!=0:
         print('Error opening second dataset! Please check existence.',file=sys.stderr)
         sys.exit(status)
+
+    if args.ids == []:
+        args.ids = [ids.value for ids in list(imas.IDSName)]
 
     for idsname in args.ids:
         idsA = inputA.get(idsname)
