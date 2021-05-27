@@ -44,8 +44,8 @@ def rec(data={},path=os.getcwd(),extension='.yaml',choice=['shot','run','ip','b0
   # ---------------------------------------------------------------
   # Sort all YAML files by shot and run numbers in sdata structure
   # ---------------------------------------------------------------
-  # Sort data as a function of shot and run numbers
-  sorted_indices = sorted(data, key = lambda x: data[x]['characteristics']['shot']+data[x]['characteristics']['run'])
+  # Sort data as a function of shot and then run numbers
+  sorted_indices = sorted(data, key = lambda x: data[x]['characteristics']['shot'] + 0.001*data[x]['characteristics']['run'])
   sdata = {}
   for i in range(len(data)):
     sdata[i] = data[sorted_indices[i]]
