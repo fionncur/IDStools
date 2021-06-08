@@ -4,7 +4,7 @@ from __future__ import print_function
 import imas,os,sys,argparse,copy
 
 
-def z_shift(equin, equout, shift):
+def z_shift(equin, shift):
     """Rigidly shift an equilibrium
     Args:
         equil (equilibrium IDS): initial equilibrium

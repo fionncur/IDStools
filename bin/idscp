@@ -62,7 +62,7 @@ if not args.force:
     # OPEN DEST
     status,_ = dest.open()
     if status!=0:
-        print('Destination pulse does not exists. Creating.')
+        print('Destination pulse does not exist. Creating.')
         status,_ = dest.create()
         if status!=0:
             print('Error opening destination pulse! Please check parameters.',
