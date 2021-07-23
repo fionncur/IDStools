@@ -5,8 +5,7 @@ import imas,os,sys,argparse,copy
 from imas import imasdef
 import distutils.version as version
 
-
-def field_rescale(equin, rescale):
+def equilibrium_rescale(equin, rescale):
     """Rescale the magnetic field in an equilibrium
     Args:
         equil (equilibrium IDS): initial equilibrium
@@ -207,37 +206,44 @@ def field_rescale(equin, rescale):
 
 
 if __name__ == "__main__":
-    # This script imports an equilibrium IDS, rescales its magnetic field components, and then adds it to the output IDS
-
+    from idstools.cli import *
+    # This script imports an equilibrium IDS, rescales its magnetic field components,
+    # and then stores it to the output IDS
     # Management of input arguments
-    parser = argparse.ArgumentParser(description='Rescaling an equilibrium magnetic field, storing the output into another entry of the same DB')
-    parser.add_argument('-si','--shot_input',help='Input shot number', required=True,type=int)
-    parser.add_argument('-ri','--run_input',help='Input run number', required=True,type=int)
-    parser.add_argument('-so','--shot_output',help='Output shot number', required=True,type=int)
-    parser.add_argument('-ro','--run_output',help='Output run number', required=True,type=int)
-    parser.add_argument('-u','--user_or_path',help='User or absolute path name of the DB where the data-entry is located (default=%(default)s)',type=str,default=os.getenv('USER'))
-    parser.add_argument('-d','--database',help='Database name of the DB where the data-entry is located (default=%(default)s)',type=str,default='iter')
-    parser.add_argument('-r','--rescale',help='Rescaling factor of the equilibrium magnetic field',type=float,required=True)
+    parser = argparse.ArgumentParser(description='Rescaling an equilibrium magnetic field, storing the output into another entry of the same DB', parents=[imas_parser])
+    parser.add_argument('-si','--shot_input',
+                        help='Input shot number', required=True,type=int)
+    parser.add_argument('-ri','--run_input',
+                        help='Input run number', required=True,type=int)
+    parser.add_argument('-so','--shot_output',
+                        help='Output shot number', required=True,type=int)
+    parser.add_argument('-ro','--run_output',
+                        help='Output run number', required=True,type=int)
+    parser.add_argument('-do','--database_output',type=str,default=None,
+                        help='Database name for the destination data-entry')
+    parser.add_argument('-bo','--backend_output',type=str,
+                        help='Backend name for the destination data-entry')
+    parser.add_argument('-r','--rescale',
+                        help='Rescaling factor of the equilibrium magnetic field',type=float,required=True)
 
     args = parser.parse_args()
-    # ids_shift_eq -si 131035 -ri 124 -so 112380 -ro 1 -r 0.5 -u bonninx -d iter
 
-    shot_in      = args.shot_input
-    run_in       = args.run_input
-    shot_out     = args.shot_output
-    run_out      = args.run_output
+    if args.database_output == None:
+        args.database_output = args.database
+
+    if args.backend_output == None:
+        args.backend_output = args.backend
+
     rescale      = args.rescale
-    user_or_path = args.user_or_path
-    database     = args.database
-    #version      = os.getenv('IMAS_VERSION')[0]
 
     if (rescale==0):
         print("Rescale factor cannot be zero!")
         sys.exit(1)
 
     # OPEN INPUT
-    input = imas.DBEntry(imas.imasdef.MDSPLUS_BACKEND,database,shot_in,run_in,user_or_path)
-    status,idx = input.open()
+    input = imas.DBEntry(get_backend_id(args.backend),args.database,
+                         args.shot_input,args.run_input,args.user)
+    status,_ = input.open()
     if (status!=0):
         print("Can't open the input pulse file!")
         sys.exit(1)
@@ -245,18 +251,19 @@ if __name__ == "__main__":
     equin = input.get("equilibrium")
 
     # OPEN OUTPUT
-    output = imas.DBEntry(imas.imasdef.MDSPLUS_BACKEND,database,shot_out,run_out,user_or_path)
-    status,idx = output.open()
+    output = imas.DBEntry(get_backend_id(args.backend),args.database_output,
+                          args.shot_output,args.run_output,user_name=os.environ['USER'])
+    status,_ = output.open()
     if (status!=0):
         print("Can't open the output pulse file!")
         print("Trying to create a new one")
-        status,idx = output.create()
+        status,_ = output.create()
         if (status!=0):
             print("Can't create the output pulse file!")
             sys.exit(1)
 
     print ('Rescaling equilibrium magnetic field by '+str(rescale))
-    equout = field_rescale(equin, rescale)
+    equout = equilibrium_rescale(equin, rescale)
 
     # PUT IDS INTO OUTPUT
     output.put(equout)
