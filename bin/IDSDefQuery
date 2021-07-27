@@ -3,12 +3,15 @@ import xml.etree.ElementTree as ET
 
 
 def getField(struct,field):
+    elt = struct.find('./field[@name="'+field[0]+'"]')
+    if elt==None:
+        raise Exception("Element '"+field[0]+"' not found")
     if len(field)>1:
-        f = getField(struct.find('./field[@name="'+field[0]+'"]'),field[1:])
+        f = getField(elt,field[1:])
     else:
         # specific generic node for which the useful doc is from the parent
         if field[0]!='value':
-            f = struct.find('./field[@name="'+field[0]+'"]')
+            f = elt
         else:
             f = struct
     return f
@@ -39,12 +42,16 @@ if __name__ == "__main__":
     
     ids = root.find('./IDS[@name="'+args.ids+'"]')
     if ids==None:
-        print("Error getting the IDS, please check that "+args.ids+" corresponds to a valid IDS name",file=sys.stderr)
+        print("Error getting the IDS, please check that '"+args.ids+"' corresponds to a valid IDS name",file=sys.stderr)
         sys.exit()
         
     fields = args.path.split('/')
 
-    f = getField(ids,fields)
+    try:
+        f = getField(ids,fields)
+    except Exception as exc:
+        print("Error while accessing "+args.path+": "+str(exc))
+        sys.exit()
 
     if args.all:
         for a in f.attrib:
