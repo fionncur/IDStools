@@ -148,6 +148,14 @@ def test_FLT_2D(field, path_doc, ids, idx):
         return
 
     if data_size > 0:  #   skip in case of data_size .le. 0
+
+        # Replace time node with ids.time if homogeneous_time == 1
+        homogeneous_time = ids.ids_properties.homogeneous_time
+        if re.search("time$", c1) and (homogeneous_time == 1):
+            c1 = "ids.time"
+        if re.search("time$", c2) and (homogeneous_time == 1):
+            c2 = "ids.time"
+
         l_dim1, l_dim2 = data.shape
         report["data_size"] = data_size
         report["data_shape"] = "({0},{1})".format(l_dim1, l_dim2)
@@ -165,6 +173,8 @@ def test_FLT_2D(field, path_doc, ids, idx):
         report["coordinate1_len"] = l_crd1
         if (l_dim1 == l_crd1) and (l_crd1 > 0):
             report["coordinate1_result"] = True
+        elif (report["coordinate1"] == "1...N") and (l_dim1>0):
+            report["coordinate1_result"] = True
         else:
             report["coordinate1_result"] = False
 
@@ -178,6 +188,8 @@ def test_FLT_2D(field, path_doc, ids, idx):
 
         report["coordinate2_len"] = l_crd2
         if (l_dim2 == l_crd2) and (l_crd2 > 0):
+            report["coordinate2_result"] = True
+        elif (report["coordinate2"] == "1...N") and (l_dim2>0):
             report["coordinate2_result"] = True
         else:
             report["coordinate2_result"] = False
@@ -224,14 +236,14 @@ def path_iterator(field, nodes, ids, idx=None, level=0):
 # ----------------------------------------------------------------------
 
 
-def ids_iterator(df, db):
+def ids_iterator(dd, db):
     """
     Iterate over the occurence of IDS and the number of 2D Array wrt DD
     """
     global report_buf
-    idsname = df.get("name")
+    idsname = dd.get("name")
     ids = eval("db." + idsname)
-    maxoc = int(df.get("maxoccur"))
+    maxoc = int(dd.get("maxoccur"))
     buf = {}
 
     for oc in range(maxoc):
@@ -252,7 +264,7 @@ def ids_iterator(df, db):
             else:
                 ids.getSlice(0, 1, oc)
 
-            for field in df.iter("field"):
+            for field in dd.iter("field"):
                 if field.get("data_type") == TARGET_DATA_TYPE:
                     path_doc = field.get("path_doc")
                     nodes = path_doc.split("/")
@@ -295,16 +307,16 @@ def main():
             )
         )
 
-    # Open the IMAS-DD file and read
+    # Load IMAS-DD file
     if path.isfile(FILE_IDSDef):
         root = ET.parse(FILE_IDSDef).getroot()
     else:
         exit("file not found:{}".format(FILE_IDSDef))
 
-    for child in root:
-        if child.tag == "IDS":
-            if (args.idslist is None) or (child.get("name") in args.idslist):
-                out = ids_iterator(child, db)
+    for dd in root:
+        if dd.tag == "IDS":
+            if (args.idslist is None) or (dd.get("name") in args.idslist):
+                out = ids_iterator(dd, db)
                 print(
                     yaml.dump(out, indent=4, default_flow_style=False, sort_keys=False)
                 )
@@ -317,7 +329,7 @@ def main():
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="IDS Data Validation Tool for Two Dimensional Array"
+        description="IDS Data Validation Tool"
     )
     parser.add_argument(
         "-u",
