@@ -63,15 +63,6 @@ def equilibrium_rescale(equin, rescale):
         if (imasdef.isFieldValid(equin.time_slice[itime].constraints.ip.reconstructed)):
             equout.time_slice[itime].constraints.ip.reconstructed = equin.time_slice[itime].constraints.ip.reconstructed * rescale
 
-        if (imasdef.isFieldValid(equin.time_slice[itime].global_quantities.beta_pol)):
-            equout.time_slice[itime].global_quantities.beta_pol = equin.time_slice[itime].global_quantities.beta_pol * rescale**2
-
-        if (imasdef.isFieldValid(equin.time_slice[itime].global_quantities.beta_tor)):
-            equout.time_slice[itime].global_quantities.beta_tor = equin.time_slice[itime].global_quantities.beta_tor * rescale**2
-
-        if (imasdef.isFieldValid(equin.time_slice[itime].global_quantities.beta_normal)):
-            equout.time_slice[itime].global_quantities.beta_normal = equin.time_slice[itime].global_quantities.beta_normal * rescale**2
-
         if (imasdef.isFieldValid(equin.time_slice[itime].global_quantities.ip)):
             equout.time_slice[itime].global_quantities.ip = equin.time_slice[itime].global_quantities.ip * rescale
 
@@ -95,13 +86,13 @@ def equilibrium_rescale(equin, rescale):
             equout.time_slice[itime].profiles_1d.phi[i1d] = equin.time_slice[itime].profiles_1d.phi[i1d] * rescale
 
         for i1d in range(len(equin.time_slice[itime].profiles_1d.pressure)):
-            equout.time_slice[itime].profiles_1d.pressure[i1d] = equin.time_slice[itime].profiles_1d.pressure[i1d] * rescale
+            equout.time_slice[itime].profiles_1d.pressure[i1d] = equin.time_slice[itime].profiles_1d.pressure[i1d] * rescale**2
 
         for i1d in range(len(equin.time_slice[itime].profiles_1d.f)):
             equout.time_slice[itime].profiles_1d.f[i1d] = equin.time_slice[itime].profiles_1d.f[i1d] * rescale
 
         for i1d in range(len(equin.time_slice[itime].profiles_1d.dpressure_dpsi)):
-            equout.time_slice[itime].profiles_1d.dpressure_dpsi[i1d] = equin.time_slice[itime].profiles_1d.dpressure_dpsi[i1d] * rescale**2
+            equout.time_slice[itime].profiles_1d.dpressure_dpsi[i1d] = equin.time_slice[itime].profiles_1d.dpressure_dpsi[i1d] * rescale
 
         for i1d in range(len(equin.time_slice[itime].profiles_1d.f_df_dpsi)):
             equout.time_slice[itime].profiles_1d.f_df_dpsi[i1d] = equin.time_slice[itime].profiles_1d.f_df_dpsi[i1d] * rescale
@@ -129,9 +120,6 @@ def equilibrium_rescale(equin, rescale):
 
         for i1d in range(len(equin.time_slice[itime].profiles_1d.b_field_max)):
             equout.time_slice[itime].profiles_1d.b_field_max[i1d] = equin.time_slice[itime].profiles_1d.b_field_max[i1d] * rescale
-
-        for i1d in range(len(equin.time_slice[itime].profiles_1d.beta_pol)):
-            equout.time_slice[itime].profiles_1d.beta_pol[i1d] = equin.time_slice[itime].profiles_1d.beta_pol[i1d] * rescale**2
 
         for i2d in range(len(equin.time_slice[itime].profiles_2d)):
 
