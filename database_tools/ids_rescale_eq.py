@@ -14,9 +14,19 @@ def equilibrium_rescale(equin, rescale):
         equilibrium IDS: rescaled equilibrium
     """
 
-    dd_version = equin.ids_properties.version_put.data_dictionary
+    try:
+        dd_version = equin.ids_properties.version_put.data_dictionary
+    except:
+        dd_version = '0.0.0'
 
     equout = copy.deepcopy(equin)
+
+    imas_version = os.getenv("IMAS_VERSION")
+    if (imas_version == None):
+        print("Environment variable IMAS_VERSION is not defined. Quitting.", file=sys.stderr)
+        sys.exit(1)
+
+    equout.ids_properties.version_put.data_dictionary = imas_version
 
     for itime in range(len(equin.vacuum_toroidal_field.b0)):
         equout.vacuum_toroidal_field.b0[itime] = equin.vacuum_toroidal_field.b0[itime] * rescale
@@ -75,6 +85,13 @@ def equilibrium_rescale(equin, rescale):
         if (imasdef.isFieldValid(equin.time_slice[itime].global_quantities.magnetic_axis.b_field_tor)):
             equout.time_slice[itime].global_quantities.magnetic_axis.b_field_tor = equin.time_slice[itime].global_quantities.magnetic_axis.b_field_tor * rescale
 
+        if (version.StrictVersion(dd_version) > version.StrictVersion('3.14.0')):
+            if (imasdef.isFieldValid(equin.time_slice[itime].global_quantities.energy_mhd)):
+                equout.time_slice[itime].global_quantities.energy_mhd = equin.time_slice[itime].global_quantities.energy_mhd * rescale**2
+        else:
+            if (imasdef.isFieldValid(equin.time_slice[itime].global_quantities.w_mhd)):
+                equout.time_slice[itime].global_quantities.energy_mhd = equin.time_slice[itime].global_quantities.w_mhd * rescale**2
+
         if (version.StrictVersion(dd_version) > version.StrictVersion('3.31.0')):
             if (imasdef.isFieldValid(equin.time_slice[itime].global_quantities.psi_external_average)):
                 equout.time_slice[itime].global_quantities.psi_external_average = equin.time_slice[itime].global_quantities.psi_external_average * rescale
@@ -103,6 +120,15 @@ def equilibrium_rescale(equin, rescale):
         for i1d in range(len(equin.time_slice[itime].profiles_1d.j_parallel)):
             equout.time_slice[itime].profiles_1d.j_parallel[i1d] = equin.time_slice[itime].profiles_1d.j_parallel[i1d] * rescale
 
+        for i1d in range(len(equin.time_slice[itime].profiles_1d.dpsi_drho_tor)):
+            equout.time_slice[itime].profiles_1d.dpsi_drho_tor[i1d] = equin.time_slice[itime].profiles_1d.dpsi_drho_tor[i1d] * rescale
+
+        for i1d in range(len(equin.time_slice[itime].profiles_1d.dvolume_dpsi)):
+            equout.time_slice[itime].profiles_1d.dvolume_dpsi[i1d] = equin.time_slice[itime].profiles_1d.dvolume_dpsi[i1d] / rescale
+
+        for i1d in range(len(equin.time_slice[itime].profiles_1d.darea_dpsi)):
+            equout.time_slice[itime].profiles_1d.darea_dpsi[i1d] = equin.time_slice[itime].profiles_1d.darea_dpsi[i1d] / rescale
+
         for i1d in range(len(equin.time_slice[itime].profiles_1d.gm4)):
             equout.time_slice[itime].profiles_1d.gm4[i1d] = equin.time_slice[itime].profiles_1d.gm4[i1d] / rescale**2
 
@@ -112,14 +138,26 @@ def equilibrium_rescale(equin, rescale):
         for i1d in range(len(equin.time_slice[itime].profiles_1d.gm6)):
             equout.time_slice[itime].profiles_1d.gm6[i1d] = equin.time_slice[itime].profiles_1d.gm6[i1d] / rescale**2
 
-        for i1d in range(len(equin.time_slice[itime].profiles_1d.b_field_average)):
-            equout.time_slice[itime].profiles_1d.b_field_average[i1d] = equin.time_slice[itime].profiles_1d.b_field_average[i1d] * rescale
+        if (version.StrictVersion(dd_version) > version.StrictVersion('3.5.0')):
+            for i1d in range(len(equin.time_slice[itime].profiles_1d.b_field_average)):
+                equout.time_slice[itime].profiles_1d.b_field_average[i1d] = equin.time_slice[itime].profiles_1d.b_field_average[i1d] * rescale
+        else:
+            for i1d in range(len(equin.time_slice[itime].profiles_1d.b_average)):
+                equout.time_slice[itime].profiles_1d.b_field_average[i1d] = abs(equin.time_slice[itime].profiles_1d.b_average[i1d]) * rescale
 
-        for i1d in range(len(equin.time_slice[itime].profiles_1d.b_field_min)):
-            equout.time_slice[itime].profiles_1d.b_field_min[i1d] = equin.time_slice[itime].profiles_1d.b_field_min[i1d] * rescale
+        if (version.StrictVersion(dd_version) > version.StrictVersion('3.5.0')):
+            for i1d in range(len(equin.time_slice[itime].profiles_1d.b_field_min)):
+                equout.time_slice[itime].profiles_1d.b_field_min[i1d] = equin.time_slice[itime].profiles_1d.b_field_min[i1d] * rescale
+        else:
+            for i1d in range(len(equin.time_slice[itime].profiles_1d.b_min)):
+                equout.time_slice[itime].profiles_1d.b_field_min[i1d] = abs(equin.time_slice[itime].profiles_1d.b_min[i1d]) * rescale
 
-        for i1d in range(len(equin.time_slice[itime].profiles_1d.b_field_max)):
-            equout.time_slice[itime].profiles_1d.b_field_max[i1d] = equin.time_slice[itime].profiles_1d.b_field_max[i1d] * rescale
+        if (version.StrictVersion(dd_version) > version.StrictVersion('3.5.0')):
+            for i1d in range(len(equin.time_slice[itime].profiles_1d.b_field_max)):
+                equout.time_slice[itime].profiles_1d.b_field_max[i1d] = equin.time_slice[itime].profiles_1d.b_field_max[i1d] * rescale
+        else:
+            for i1d in range(len(equin.time_slice[itime].profiles_1d.b_max)):
+                equout.time_slice[itime].profiles_1d.b_field_max[i1d] = abs(equin.time_slice[itime].profiles_1d.b_max[i1d]) * rescale
 
         for i2d in range(len(equin.time_slice[itime].profiles_2d)):
 
@@ -139,17 +177,32 @@ def equilibrium_rescale(equin, rescale):
                 for iz in range(len(equin.time_slice[itime].profiles_2d[i2d].j_parallel[ir])):
                     equout.time_slice[itime].profiles_2d[i2d].j_parallel[ir][iz] = equin.time_slice[itime].profiles_2d[i2d].j_parallel[ir][iz] * rescale
 
-            for ir in range(len(equin.time_slice[itime].profiles_2d[i2d].b_field_r)):
-                for iz in range(len(equin.time_slice[itime].profiles_2d[i2d].b_field_r[ir])):
-                    equout.time_slice[itime].profiles_2d[i2d].b_field_r[ir][iz] = equin.time_slice[itime].profiles_2d[i2d].b_field_r[ir][iz] * rescale
+            if (version.StrictVersion(dd_version) > version.StrictVersion('3.5.0')):
+                for ir in range(len(equin.time_slice[itime].profiles_2d[i2d].b_field_r)):
+                    for iz in range(len(equin.time_slice[itime].profiles_2d[i2d].b_field_r[ir])):
+                        equout.time_slice[itime].profiles_2d[i2d].b_field_r[ir][iz] = equin.time_slice[itime].profiles_2d[i2d].b_field_r[ir][iz] * rescale
+            else:
+                for ir in range(len(equin.time_slice[itime].profiles_2d[i2d].b_r)):
+                    for iz in range(len(equin.time_slice[itime].profiles_2d[i2d].b_r[ir])):
+                        equout.time_slice[itime].profiles_2d[i2d].b_field_r[ir][iz] = equin.time_slice[itime].profiles_2d[i2d].b_r[ir][iz] * rescale
 
-            for ir in range(len(equin.time_slice[itime].profiles_2d[i2d].b_field_z)):
-                for iz in range(len(equin.time_slice[itime].profiles_2d[i2d].b_field_z[ir])):
-                    equout.time_slice[itime].profiles_2d[i2d].b_field_z[ir][iz] = equin.time_slice[itime].profiles_2d[i2d].b_field_z[ir][iz] * rescale
+            if (version.StrictVersion(dd_version) > version.StrictVersion('3.5.0')):
+                for ir in range(len(equin.time_slice[itime].profiles_2d[i2d].b_field_z)):
+                    for iz in range(len(equin.time_slice[itime].profiles_2d[i2d].b_field_z[ir])):
+                        equout.time_slice[itime].profiles_2d[i2d].b_field_z[ir][iz] = equin.time_slice[itime].profiles_2d[i2d].b_field_z[ir][iz] * rescale
+            else:
+                for ir in range(len(equin.time_slice[itime].profiles_2d[i2d].b_z)):
+                    for iz in range(len(equin.time_slice[itime].profiles_2d[i2d].b_z[ir])):
+                        equout.time_slice[itime].profiles_2d[i2d].b_field_z[ir][iz] = equin.time_slice[itime].profiles_2d[i2d].b_z[ir][iz] * rescale
 
-            for ir in range(len(equin.time_slice[itime].profiles_2d[i2d].b_field_tor)):
-                for iz in range(len(equin.time_slice[itime].profiles_2d[i2d].b_field_tor[ir])):
-                    equout.time_slice[itime].profiles_2d[i2d].b_field_tor[ir][iz] = equin.time_slice[itime].profiles_2d[i2d].b_field_tor[ir][iz] * rescale
+            if (version.StrictVersion(dd_version) > version.StrictVersion('3.5.0')):
+                for ir in range(len(equin.time_slice[itime].profiles_2d[i2d].b_field_tor)):
+                    for iz in range(len(equin.time_slice[itime].profiles_2d[i2d].b_field_tor[ir])):
+                        equout.time_slice[itime].profiles_2d[i2d].b_field_tor[ir][iz] = equin.time_slice[itime].profiles_2d[i2d].b_field_tor[ir][iz] * rescale
+            else:
+                for ir in range(len(equin.time_slice[itime].profiles_2d[i2d].b_tor)):
+                    for iz in range(len(equin.time_slice[itime].profiles_2d[i2d].b_tor[ir])):
+                        equout.time_slice[itime].profiles_2d[i2d].b_field_tor[ir][iz] = equin.time_slice[itime].profiles_2d[i2d].b_tor[ir][iz] * rescale
 
         for iggd in range(len(equin.time_slice[itime].ggd)):
             for i2 in range(len(equin.time_slice[itime].ggd[iggd].psi)):
