@@ -1,42 +1,38 @@
 # THE ROSETTA CODE
 
 import imas
-import numpy
 from imas import imasdef
 import pandas as pd
 import numpy as np
+import argparse
 
-database = input('''Please input the '.csv' file location of the Database (ex.: /home/ITER/vidalm/Desktop/HDB5.2.3.csv)
---->''')
+#CLI
+parser = argparse.ArgumentParser(description='This script tries to apply mapping into IDS rules to the content of a non-IDS database (e.g. ITPA DBs)')
+parser.add_argument('-d','--database',type=str,default='/home/ITER/vidalm/Desktop/HDB5.2.3.csv',
+                    help='Path to a csv file containing the external database content \t(default=%(default)s)')
+parser.add_argument('-m','--mapping',type=str,default='/home/ITER/vidalm/Desktop/maptest3.csv',
+                    help='Path to a csv formatted mapping file \t(default=%(default)s)')
+parser.add_argument('--varCol',type=str,default='DB VARIABLE',
+                    help='Name of the column of the mapping file listing all DB variables \t(default=%(default)s)')
+parser.add_argument('--pathCol',type=str,default='IDS PATH',
+                    help='Name of the column of the mapping file listing IDS mapping for all DB variables \t(default=%(default)s)')
+args = parser.parse_args()
 
-if database == '':
-    database = '/home/ITER/vidalm/Desktop/HDB5.2.3.csv'
-    print('database is', database)
 
-mapping_file = input(''' Please input the '.csv' file location of the Mapping file (ex.: /home/ITER/vidalm/Desktop/maptest.csv)
---->: ''')
-
-if mapping_file == '':
-    mapping_file = '/home/ITER/vidalm/Desktop/maptest3.csv'
-    print('mapping_file is', mapping_file)
-
-mf = pd.read_csv(mapping_file, keep_default_na=False, usecols=['DB VARIABLE', 'IDS PATH'])
+mf = pd.read_csv(args.mapping, keep_default_na=False, usecols=[args.varCol, args.pathCol])
 mf.dropna(how='all')
-db = pd.read_csv(database, skiprows=1, keep_default_na=False, na_values=[''])
+db = pd.read_csv(args.database, skiprows=1, keep_default_na=False, na_values=[''])
 db.dropna(how='all')
 row = 0
 de = imas.DBEntry(imasdef.MDSPLUS_BACKEND, 'test', 1, row)
 de.create()
-de.open()
 iod = {}
 for ids in list(imas.IDSName):
     iod[ids.value] = de.get(ids.value)
 
-DbVarCol = mf.filter(regex=(str.upper('variable')))
-IDSPATH = mf.filter(regex=(str.upper('path')))
 
-for var in mf.loc[:, 'DB VARIABLE']:
-    idspath = mf[mf['DB VARIABLE'] == var].iloc[0].at['IDS PATH']
+for var in mf.loc[:,args.varCol]:
+    idspath = mf[mf[args.varCol] == var].iloc[0].at[args.pathCol]
     idsname = (idspath.split('/')[0])
     try:
         dodi = iod[idsname]
@@ -56,7 +52,7 @@ for var in mf.loc[:, 'DB VARIABLE']:
                 setattr(dodi, str(node), float(val))
             elif type(getattr(dodi, node)) == int:
                 setattr(dodi, str(node), int(val))
-            elif type(getattr(dodi, node)) == numpy.ndarray:
+            elif type(getattr(dodi, node)) == np.ndarray:
                 if (getattr(dodi, node)).dtype == 'int32':
                     setattr(dodi, str(node), (np.array([val], dtype='object')))
                 elif (getattr(dodi, node)).dtype == 'float64':
