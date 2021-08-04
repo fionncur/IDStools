@@ -6,32 +6,30 @@ import pandas as pd
 import numpy as np
 import argparse
 
-#CLI
-parser = argparse.ArgumentParser(description='This script tries to apply mapping into IDS rules to the content of a non-IDS database (e.g. ITPA DBs)')
-parser.add_argument('-d','--database',type=str,default='/home/ITER/vidalm/Desktop/HDB5.2.3.csv',
-                    help='Path to a csv file containing the external database content \t(default=%(default)s)')
-parser.add_argument('-m','--mapping',type=str,default='/home/ITER/vidalm/Desktop/maptest3.csv',
-                    help='Path to a csv formatted mapping file \t(default=%(default)s)')
-parser.add_argument('--varCol',type=str,default='DB VARIABLE',
-                    help='Name of the column of the mapping file listing all DB variables \t(default=%(default)s)')
-parser.add_argument('--pathCol',type=str,default='IDS PATH',
-                    help='Name of the column of the mapping file listing IDS mapping for all DB variables \t(default=%(default)s)')
+parser = argparse.ArgumentParser(description="This script tries to apply mapping into IDS rules to the content of a non-IDS database (e.g. ITPA DBs).")
+parser.add_argument("-d", "--database", type=str, default="/home/ITER/vidalm/Desktop/HDB5.2.3.csv",
+                    help="Path to csv file containing the external database content \t(default=%(default)s)")
+parser.add_argument("-m", "--mapping", type=str, default="/home/ITER/vidalm/Desktop/maptest4.csv",
+                    help="Path to csv formatted mapping file \t(default=%(default)s)")
+parser.add_argument("--varCol", type=str, default='DB VARIABLE',
+                    help="Name of the column of the mapping file listing all DB variables \t(default=%(default)s)")
+parser.add_argument("--pathCol", type=str, default="IDS PATH",
+                    help="Name of the column of the mapping file listing IDS mapping for all DB variables \t(default=%(default)s")
 args = parser.parse_args()
 
-
 mf = pd.read_csv(args.mapping, keep_default_na=False, usecols=[args.varCol, args.pathCol])
-mf.dropna(how='all')
-db = pd.read_csv(args.database, skiprows=1, keep_default_na=False, na_values=[''])
-db.dropna(how='all')
+mf.dropna(how="all")
+db = pd.read_csv(args.database, skiprows=1, keep_default_na=False, na_values=[""])
+db.dropna(how="all")
 row = 0
 de = imas.DBEntry(imasdef.MDSPLUS_BACKEND, 'test', 1, row)
 de.create()
 iod = {}
+
 for ids in list(imas.IDSName):
     iod[ids.value] = de.get(ids.value)
 
-
-for var in mf.loc[:,args.varCol]:
+for var in mf.loc[:, args.varCol]:
     idspath = mf[mf[args.varCol] == var].iloc[0].at[args.pathCol]
     idsname = (idspath.split('/')[0])
     try:
@@ -39,11 +37,18 @@ for var in mf.loc[:,args.varCol]:
         path = idspath.split('/')[1:]
         val = db.at[row, var]
         for node in path[0:-1]:
-            try:
-                dodi = getattr(dodi, node)
-            except AttributeError:
-                print(str(node) + " could not be found in " + str(path) + ". Please check spelling or IDS entry.")
-                continue
+            if '(' in node:
+                aos = node.split('(')
+                ind = int(aos[1][:1])
+                dodi = getattr(dodi, aos[0])
+                dodi.resize(ind+1, keep=True)
+                dodi = dodi[ind]
+            else:
+                try:
+                    dodi = getattr(dodi, node)
+                except AttributeError:
+                    print(str(node) + " could not be found in " + str(path) + ". Please check spelling or IDS entry.")
+                    continue
         node = path[-1]
         try:
             if type(getattr(dodi, node)) == str:
@@ -68,12 +73,12 @@ for var in mf.loc[:,args.varCol]:
         continue
 
 
-    #if var == (mf.loc[:, 'DB VARIABLE'][(len(mf.loc[:, 'DB VARIABLE']))-1]):
-        #break
 
 s = iod['summary']
+barometry = iod['barometry']
 s.ids_properties.homogeneous_time = 1
 
+print(barometry.gauge[0].pressure.data)
 print(s.boundary.type.value)
 print(s.time)
 print(s.global_quantities.ip.value)
