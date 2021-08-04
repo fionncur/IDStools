@@ -1,0 +1,155 @@
+#!/usr/bin/env python
+
+import imas, yaml, pdb, argparse, re
+import os, sys, subprocess, glob
+
+# ----------------------------------------------------------------------------
+
+# FOR BETTER FORMATTING OF INPUT ARGUMENT LISTING IN THE HELP OF THE FUNCTION
+class SmartFormatter(argparse.HelpFormatter):
+    def _split_lines(self, text, width):
+        if text.startswith('R|'):
+            return text[2:].splitlines()
+        return argparse.HelpFormatter._split_lines(self, text, width)
+
+# ----------------------------------------------------------------------------
+
+# Input arguments
+parser = argparse.ArgumentParser(description=\
+                                 "---- Script to list available MD data in a specific folder ----"\
+                                 , formatter_class=SmartFormatter)
+parser.add_argument("-f","--folder",help=\
+                    "folder where to search for MD data", required=False)
+parser.add_argument("-s","--selection",help=\
+                    "R|list of fields to filter: e.g. PBS-55,ece\n"\
+                    "----> Select only scenarios filling these criteria"\
+                    , required=False)
+parser.add_argument("-c","--choice", help=\
+                    "R|list of variables to display, e.g.: pbs,ids,description\n"\
+                    "... available among following variables:\n"\
+                    "        pbs                  = Plant Breakdown Structure number\n"\
+                    "        ids                  = Name of the IDS\n"\
+                    "        ro                   = Name of the responsible officer\n"\
+                    "        email                = E-mail of the responsible officer\n"\
+                    "        description          = Description of the data\n"\
+                    "        replaced_by          = New shot/run replacing this one\n"\
+                    "        replaces             = Old shot/run this one replaces\n"\
+                    "        replaced_by_comment  = Comment on why this shot/run has been replaced\n"\
+                    "        replaces_comment     = Comment on why this shot/run replaces the previous one\n"\
+                    , required=False)
+
+args = vars(parser.parse_args())
+
+# Folder
+if args['folder'] != None:
+    folder = args['folder']
+else:
+    folder = '/work/imas/shared/imasdb/ITER_MD/3/0'
+
+# Filter
+if args['selection'] != None:
+    selection = args['selection']
+else:
+    selection = None
+
+# Choice of variables to display
+if args['choice'] != None:
+    try:
+        input_choice = args['choice']
+        choice = eval(str("""['"""+re.sub(""",""", r"""','""", input_choice)+"""']"""))
+    except:
+        print("------------------------------------------------------------------", file=sys.stderr)
+        print("Wrong way to write your list of variables to display", file=sys.stderr)
+        print("You wrote "+str(args['choice']), file=sys.stderr)
+        print("Try e.g. this way: "+ """ md_summary -c pbs,ids,description """, file=sys.stderr)
+        print("------------------------------------------------------------------", file=sys.stderr)
+        sys.exit(1)
+else:
+    choice = ['pbs','ids','description']
+
+# Print the arguments of the default call to the function
+if args['choice'] == None:
+    print("""----> Default call equivalent to: """)
+    print("""      scenario_summary -c pbs,ids,description""")
+
+# ------------------------------------------------------------------------------------------------------
+
+class tab_init():
+  def __init__(self):
+      self.value = {}
+      self.value['case']                = ' '
+      self.value['pbs']                 = ' '
+      self.value['ids']                 = ' '
+      self.value['ro']                  = ' '
+      self.value['email']               = ' '
+      self.value['description']         = ' '
+      self.value['replaced_by']         = ' '
+      self.value['replaces']            = ' '
+      self.value['replaced_by_comment'] = ' '
+      self.value['replaces_comment']    = ' '
+      self.value['status']              = ' '
+
+def tab_adjust(data):
+  tab_array = {}
+  tab_array['max'] = tab_init().value
+  for case in data:
+    if len(case) > len(tab_array['max']['case']):
+      tab_array['max']['case'] = ' '*(len(case)+1)
+    for subkey in data[case]:
+      if data[case][subkey] is not None and len(data[case][subkey]) > len(tab_array['max'][subkey]):
+        tab_array['max'][subkey] = ' '*(len(data[case][subkey])+1)
+  for case in data:
+    tab_array[case] = tab_init().value
+    tab_array[case]['case'] = ' '*(len(tab_array['max']['case']) - len(case))
+    for subkey in data[case]:
+      if data[case][subkey] is not None:
+        tab_array[case][subkey] = ' '*(len(tab_array['max'][subkey]) - len(data[case][subkey]))
+      else:
+        tab_array[case][subkey] = tab_array['max'][subkey]
+  return tab_array
+
+# MAIN STUFF
+file = open(folder+'/md_summary.yaml', 'r')
+data = yaml.load(file,Loader=yaml.CLoader)
+file.close()
+
+tab_array = tab_adjust(data)
+line = '-'*120
+table = {}
+table[0] = line
+column_names = 'Shot/Run'+' '*(len(tab_array['max']['case'])-len('Shot/Run'))
+for ichoice in choice:
+  print(ichoice,len(tab_array['max'][ichoice])-len(ichoice))
+  column_names = column_names+ichoice.upper()+' '*(len(tab_array['max'][ichoice])-len(ichoice))
+table[1] = column_names
+table[2] = line
+j = 2
+for case in data:
+  if data[case]['status'] == 'active':
+    toprint = case+tab_array[case]['case']
+    for ichoice in choice:
+      toprint = toprint + data[case][ichoice]+tab_array[case][ichoice]
+    j+=1
+    table[j] = toprint
+table[j+1]=line
+
+# Final filtering if any
+if selection != None:
+  filtered_table = []
+  filter = eval(str("""['"""+re.sub(""",""", r"""','""", selection)+"""']"""))
+  criterion = 'zip('
+  for ifilter in range(len(filter)):
+    if ifilter==0:
+      criterion = criterion+"""re.findall('"""+str(filter[ifilter])+"""',table[iline])"""
+    else:
+      criterion = criterion+""",re.findall('"""+str(filter[ifilter])+"""',table[iline])"""
+  criterion = criterion+""")"""
+  for iline in range(len(table)):
+    if iline in [0,1,2,j+1] or len(list(eval(criterion))) > 0:
+      filtered_table.append(table[iline])
+  table = filtered_table
+
+# Display the clean formatted table
+for i in range(len(table)):
+  print(table[i])
+
