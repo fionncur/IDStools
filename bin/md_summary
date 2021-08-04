@@ -14,7 +14,7 @@ class SmartFormatter(argparse.HelpFormatter):
 
 # ----------------------------------------------------------------------------
 
-# Input arguments
+# INPUT ARGUMENTS
 parser = argparse.ArgumentParser(description=\
                                  "---- Script to list available MD data in a specific folder ----"\
                                  , formatter_class=SmartFormatter)
@@ -40,19 +40,19 @@ parser.add_argument("-c","--choice", help=\
 
 args = vars(parser.parse_args())
 
-# Folder
+# FOLDER
 if args['folder'] != None:
     folder = args['folder']
 else:
     folder = '/work/imas/shared/imasdb/ITER_MD/3/0'
 
-# Filter
+# FILTER
 if args['selection'] != None:
     selection = args['selection']
 else:
     selection = None
 
-# Choice of variables to display
+# CHOICE OF VARIABLES TO DISPLAY
 if args['choice'] != None:
     try:
         input_choice = args['choice']
@@ -67,7 +67,7 @@ if args['choice'] != None:
 else:
     choice = ['pbs','ids','description']
 
-# Print the arguments of the default call to the function
+# PRINT THE ARGUMENTS OF THE DEFAULT CALL TO THE FUNCTION
 if args['choice'] == None:
     print("""----> Default call equivalent to: """)
     print("""      scenario_summary -c pbs,ids,description""")
@@ -100,10 +100,10 @@ def tab_adjust(data):
         tab_array['max'][subkey] = ' '*(len(data[case][subkey])+1)
   for case in data:
     tab_array[case] = tab_init().value
-    tab_array[case]['case'] = ' '*(len(tab_array['max']['case']) - len(case))
+    tab_array[case]['case'] = ' '*(len(tab_array['max']['case']) - len(case)+1)
     for subkey in data[case]:
       if data[case][subkey] is not None:
-        tab_array[case][subkey] = ' '*(len(tab_array['max'][subkey]) - len(data[case][subkey]))
+        tab_array[case][subkey] = ' '*(len(tab_array['max'][subkey]) - len(data[case][subkey])+1)
       else:
         tab_array[case][subkey] = tab_array['max'][subkey]
   return tab_array
@@ -114,13 +114,12 @@ data = yaml.load(file,Loader=yaml.CLoader)
 file.close()
 
 tab_array = tab_adjust(data)
-line = '-'*120
+column_names = 'Shot/Run'+' '*(len(tab_array['max']['case'])-len('Shot/Run')+1)
+for ichoice in choice:
+  column_names = column_names+ichoice.upper()+' '*(len(tab_array['max'][ichoice])-len(ichoice)+1)
+line = '-'*len(column_names)
 table = {}
 table[0] = line
-column_names = 'Shot/Run'+' '*(len(tab_array['max']['case'])-len('Shot/Run'))
-for ichoice in choice:
-  print(ichoice,len(tab_array['max'][ichoice])-len(ichoice))
-  column_names = column_names+ichoice.upper()+' '*(len(tab_array['max'][ichoice])-len(ichoice))
 table[1] = column_names
 table[2] = line
 j = 2
@@ -133,7 +132,7 @@ for case in data:
     table[j] = toprint
 table[j+1]=line
 
-# Final filtering if any
+# FINAL FILTERING IF ANY
 if selection != None:
   filtered_table = []
   filter = eval(str("""['"""+re.sub(""",""", r"""','""", selection)+"""']"""))
@@ -149,7 +148,7 @@ if selection != None:
       filtered_table.append(table[iline])
   table = filtered_table
 
-# Display the clean formatted table
+# DISPLAY THE CLEAN FORMATTED TABLE
 for i in range(len(table)):
   print(table[i])
 
