@@ -6,10 +6,10 @@ import pandas as pd
 import numpy as np
 import argparse
 
-def ids_setter(IDS, PATH, val):
+
+def ids_setter(IDS, path, val):
     try:
         dodi = IDS
-        path = PATH.split('/')[1:]
         for node in path[0:-1]:
             if '(' in node:
                 aos = node.split('(')
@@ -22,7 +22,7 @@ def ids_setter(IDS, PATH, val):
                     dodi = getattr(dodi, node)
                 except AttributeError:
                     print(str(node) + " could not be found in " + str(path) + ". Please check spelling or IDS entry.")
-                    continue
+                    #continue
         node = path[-1]
         try:
             if type(getattr(dodi, node)) == str:
@@ -55,6 +55,8 @@ parser.add_argument("--pathCol", type=str, default="IDS PATH",
                     help="Name of the column of the mapping file listing IDS mapping for all DB variables \t(default=%(default)s")
 parser.add_argument("--traCol", type=str, default="TRANSFORMATION",
                     help="Name of the column of the mapping file listing transformations to be done on DB variables \t(default=%(default)s")
+parser.add_argument("-v","--verbose", action='store_true',
+                    help="Run in verbose mode")
 args = parser.parse_args()
 
 mf = pd.read_csv(args.mapping, keep_default_na=False, usecols=[args.varCol, args.pathCol])
@@ -70,7 +72,6 @@ DBVAR = db.iloc[row]
 for ids in list(imas.IDSName):
     iod[ids.value] = de.get(ids.value)
 
-
 for var in mf.loc[:, args.varCol]:
     idspath = mf[mf[args.varCol] == var].iloc[0].at[args.pathCol]
     idsname = (idspath.split('/')[0])
@@ -81,6 +82,16 @@ for var in mf.loc[:, args.varCol]:
         val = db.at[row, var]
     ids_setter(iod[idsname], idspath, val)
 
+    if idspath!='':
+        idsname = (idspath.split('/')[0])
+        val = db.at[row, var]
+        path = idspath.split('/')[1:]
+
+        ids = iod[idsname]
+        ids_setter(ids, path, val)
+    else:
+        if args.verbose:
+            print(f"No mapping specified for variable {var}")
 
 
 
