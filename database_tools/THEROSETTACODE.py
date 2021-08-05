@@ -6,36 +6,10 @@ import pandas as pd
 import numpy as np
 import argparse
 
-parser = argparse.ArgumentParser(description="This script tries to apply mapping into IDS rules to the content of a non-IDS database (e.g. ITPA DBs).")
-parser.add_argument("-d", "--database", type=str, default="/home/ITER/vidalm/Desktop/HDB5.2.3.csv",
-                    help="Path to csv file containing the external database content \t(default=%(default)s)")
-parser.add_argument("-m", "--mapping", type=str, default="/home/ITER/vidalm/Desktop/maptest4.csv",
-                    help="Path to csv formatted mapping file \t(default=%(default)s)")
-parser.add_argument("--varCol", type=str, default='DB VARIABLE',
-                    help="Name of the column of the mapping file listing all DB variables \t(default=%(default)s)")
-parser.add_argument("--pathCol", type=str, default="IDS PATH",
-                    help="Name of the column of the mapping file listing IDS mapping for all DB variables \t(default=%(default)s")
-args = parser.parse_args()
-
-mf = pd.read_csv(args.mapping, keep_default_na=False, usecols=[args.varCol, args.pathCol])
-mf.dropna(how="all")
-db = pd.read_csv(args.database, skiprows=1, keep_default_na=False, na_values=[""])
-db.dropna(how="all")
-row = 0
-de = imas.DBEntry(imasdef.MDSPLUS_BACKEND, 'test', 1, row)
-de.create()
-iod = {}
-
-for ids in list(imas.IDSName):
-    iod[ids.value] = de.get(ids.value)
-
-for var in mf.loc[:, args.varCol]:
-    idspath = mf[mf[args.varCol] == var].iloc[0].at[args.pathCol]
-    idsname = (idspath.split('/')[0])
+def ids_setter(IDS, PATH, val):
     try:
-        dodi = iod[idsname]
-        path = idspath.split('/')[1:]
-        val = db.at[row, var]
+        dodi = IDS
+        path = PATH.split('/')[1:]
         for node in path[0:-1]:
             if '(' in node:
                 aos = node.split('(')
@@ -64,13 +38,44 @@ for var in mf.loc[:, args.varCol]:
                     setattr(dodi, str(node), (np.array([val], dtype='float64')))
             else:
                 print("The type of " + str(idspath) + " is not recognized. Make sure it is either a string, float, integer or numpy.ndarray.")
-                continue
         except AttributeError:
             print("The leaf '" + str(node) + "' could not be found in " + str(path) + ". Please check spelling or IDS Entry")
-            continue
     except KeyError:
         print(str(var) + " cannot be stored in " + str(idspath) + " (path not found). Please check spelling and IDS entry.")
-        continue
+
+
+parser = argparse.ArgumentParser(description="This script tries to apply mapping into IDS rules to the content of a non-IDS database (e.g. ITPA DBs).")
+parser.add_argument("-d", "--database", type=str, default="/home/ITER/vidalm/Desktop/HDB5.2.3.csv",
+                    help="Path to csv file containing the external database content \t(default=%(default)s)")
+parser.add_argument("-m", "--mapping", type=str, default="/home/ITER/vidalm/Desktop/maptest4.csv",
+                    help="Path to csv formatted mapping file \t(default=%(default)s)")
+parser.add_argument("--varCol", type=str, default='DB VARIABLE',
+                    help="Name of the column of the mapping file listing all DB variables \t(default=%(default)s)")
+parser.add_argument("--pathCol", type=str, default="IDS PATH",
+                    help="Name of the column of the mapping file listing IDS mapping for all DB variables \t(default=%(default)s")
+args = parser.parse_args()
+
+mf = pd.read_csv(args.mapping, keep_default_na=False, usecols=[args.varCol, args.pathCol])
+mf.dropna(how="all")
+db = pd.read_csv(args.database, skiprows=1, keep_default_na=False, na_values=[""])
+db.dropna(how="all")
+row = 0
+de = imas.DBEntry(imasdef.MDSPLUS_BACKEND, 'test', 1, row)
+de.create()
+iod = {}
+DBVAR = db.iloc[row]
+
+for ids in list(imas.IDSName):
+    iod[ids.value] = de.get(ids.value)
+
+
+for var in mf.loc[:, args.varCol]:
+    idspath = mf[mf[args.varCol] == var].iloc[0].at[args.pathCol]
+    idsname = (idspath.split('/')[0])
+    val = db.at[row, var]
+    ids_setter(iod[idsname], idspath, val)
+
+
 
 
 
@@ -84,8 +89,6 @@ print(s.time)
 print(s.global_quantities.ip.value)
 print(s.global_quantities.volume.value)
 de.put(s)
-
-
 
 
 # for var in mf.loc[63, 'DB VARIABLE']:
