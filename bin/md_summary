@@ -27,17 +27,15 @@ parser.add_argument("-s","--selection",help=\
 parser.add_argument("-c","--choice", help=\
                     "R|list of variables to display, e.g.: pbs,ids,description\n"\
                     "... available among following variables:\n"\
-                    "        pbs                  = Plant Breakdown Structure number\n"\
-                    "        ids                  = Name of the IDS\n"\
-                    "        data_provider        = Name of the data provider\n"\
-                    "        data_provider_email  = E-mail of the data provider\n"\
-                    "        ro                   = Name of the diagnostic responsible officer\n"\
-                    "        ro_email             = E-mail of the diagnostic responsible officer\n"\
-                    "        description          = Description of the data\n"\
-                    "        replaced_by          = New shot/run replacing this one\n"\
-                    "        replaces             = Old shot/run this one replaces\n"\
-                    "        replaced_by_comment  = Comment on why this shot/run has been replaced\n"\
-                    "        replaces_comment     = Comment on why this shot/run replaces the previous one\n"\
+                    "        pbs                    = Plant Breakdown Structure number\n"\
+                    "        ids                    = Name of the IDS\n"\
+                    "        data_provider          = Name of the data provider\n"\
+                    "        data_provider_email    = E-mail of the data provider\n"\
+                    "        ro                     = Name of the diagnostic responsible officer\n"\
+                    "        ro_email               = E-mail of the diagnostic responsible officer\n"\
+                    "        description            = Description of the data\n"\
+                    "        replaces               = Old shot/run this one replaces\n"\
+                    "        reason_for_replacement = Comment on why this shot/run replaces the previous one\n"\
                     , required=False)
 
 args = vars(parser.parse_args())
@@ -79,19 +77,18 @@ if args['choice'] == None:
 class tab_init():
   def __init__(self):
       self.value = {}
-      self.value['case']                = ' '
-      self.value['pbs']                 = ' '
-      self.value['ids']                 = ' '
-      self.value['data_provider']       = ' '
-      self.value['data_provider_email'] = ' '
-      self.value['ro']                  = ' '
-      self.value['ro_email']            = ' '
-      self.value['description']         = ' '
-      self.value['replaced_by']         = ' '
-      self.value['replaces']            = ' '
-      self.value['replaced_by_comment'] = ' '
-      self.value['replaces_comment']    = ' '
-      self.value['status']              = ' '
+      self.value['case']                   = ' '
+      self.value['pbs']                    = ' '
+      self.value['ids']                    = ' '
+      self.value['data_provider']          = ' '
+      self.value['data_provider_email']    = ' '
+      self.value['ro']                     = ' '
+      self.value['ro_email']               = ' '
+      self.value['description']            = ' '
+      self.value['replaced_by']            = ' '
+      self.value['replaces']               = ' '
+      self.value['reason_for_replacement'] = ' '
+      self.value['status']                 = ' '
 
 def tab_adjust(data):
   tab_array = {}
@@ -118,9 +115,10 @@ data = yaml.load(file,Loader=yaml.CLoader)
 file.close()
 
 tab_array = tab_adjust(data)
-column_names = 'Shot/Run'+' '*(len(tab_array['max']['case'])-len('Shot/Run')+1)
+column_names = ''
 for ichoice in choice:
   column_names = column_names+ichoice.upper()+' '*(len(tab_array['max'][ichoice])-len(ichoice)+1)
+column_names = column_names+'SHOT/RUN'+' '*(len(tab_array['max']['case'])-len('SHOT/RUN')+1)
 line = '-'*len(column_names)
 table = {}
 table[0] = line
@@ -129,9 +127,11 @@ table[2] = line
 j = 2
 for case in data:
   if data[case]['status'] == 'active':
-    toprint = case+tab_array[case]['case']
+    toprint=''
     for ichoice in choice:
-      toprint = toprint + data[case][ichoice]+tab_array[case][ichoice]
+      if data[case][ichoice] is not None:
+        toprint = toprint + data[case][ichoice]+tab_array[case][ichoice]
+    toprint = toprint+case+tab_array[case]['case']
     j+=1
     table[j] = toprint
 table[j+1]=line
