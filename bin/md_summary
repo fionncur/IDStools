@@ -29,8 +29,8 @@ parser.add_argument("-c","--choice", help=\
                     "... available among following variables:\n"\
                     "        pbs                  = Plant Breakdown Structure number\n"\
                     "        ids                  = Name of the IDS\n"\
-                    "        ro                   = Name of the responsible officer\n"\
-                    "        email                = E-mail of the responsible officer\n"\
+                    "        data_provider        = Name of the data provider\n"\
+                    "        data_provider_email  = E-mail of the data provider\n"\
                     "        description          = Description of the data\n"\
                     "        replaced_by          = New shot/run replacing this one\n"\
                     "        replaces             = Old shot/run this one replaces\n"\
@@ -80,8 +80,10 @@ class tab_init():
       self.value['case']                = ' '
       self.value['pbs']                 = ' '
       self.value['ids']                 = ' '
+      self.value['data_provider']       = ' '
+      self.value['data_provider_email'] = ' '
       self.value['ro']                  = ' '
-      self.value['email']               = ' '
+      self.value['ro_email']            = ' '
       self.value['description']         = ' '
       self.value['replaced_by']         = ' '
       self.value['replaces']            = ' '
