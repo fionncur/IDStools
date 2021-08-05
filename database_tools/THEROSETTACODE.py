@@ -53,6 +53,8 @@ parser.add_argument("--varCol", type=str, default='DB VARIABLE',
                     help="Name of the column of the mapping file listing all DB variables \t(default=%(default)s)")
 parser.add_argument("--pathCol", type=str, default="IDS PATH",
                     help="Name of the column of the mapping file listing IDS mapping for all DB variables \t(default=%(default)s")
+parser.add_argument("--traCol", type=str, default="TRANSFORMATION",
+                    help="Name of the column of the mapping file listing transformations to be done on DB variables \t(default=%(default)s")
 args = parser.parse_args()
 
 mf = pd.read_csv(args.mapping, keep_default_na=False, usecols=[args.varCol, args.pathCol])
@@ -72,7 +74,11 @@ for ids in list(imas.IDSName):
 for var in mf.loc[:, args.varCol]:
     idspath = mf[mf[args.varCol] == var].iloc[0].at[args.pathCol]
     idsname = (idspath.split('/')[0])
-    val = db.at[row, var]
+    transformation = mf[mf[args.varCol] == var].iloc[0].at[args.traCol]
+    if transformation == '':
+        val = eval(transformation)
+    else:
+        val = db.at[row, var]
     ids_setter(iod[idsname], idspath, val)
 
 
