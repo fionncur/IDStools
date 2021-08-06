@@ -22,7 +22,7 @@ parser.add_argument("-f","--folder",help=\
                     "folder where to search for MD data", required=False)
 parser.add_argument("-s","--selection",help=\
                     "R|list of fields to filter: e.g. PBS-55,ece\n"\
-                    "----> Select only scenarios filling these criteria"\
+                    "----> Select only MD data filling these criteria"\
                     , required=False)
 parser.add_argument("-c","--choice", help=\
                     "R|list of variables to display, e.g.: pbs,ids,description\n"\
@@ -70,7 +70,7 @@ else:
 # PRINT THE ARGUMENTS OF THE DEFAULT CALL TO THE FUNCTION
 if args['choice'] == None:
     print("""----> Default call equivalent to: """)
-    print("""      scenario_summary -c pbs,ids,description""")
+    print("""      md_summary -c pbs,ids,description""")
 
 # ------------------------------------------------------------------------------------------------------
 
