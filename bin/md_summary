@@ -97,16 +97,17 @@ def tab_adjust(data):
     if len(case) > len(tab_array['max']['case']):
       tab_array['max']['case'] = ' '*(len(case)+1)
     for subkey in data[case]:
-      if data[case][subkey] is not None and len(data[case][subkey]) > len(tab_array['max'][subkey]):
+      if data[case][subkey] is None:
+        data[case][subkey] = ' '
+      if len(data[case][subkey]) > len(tab_array['max'][subkey]):
         tab_array['max'][subkey] = ' '*(len(data[case][subkey])+1)
   for case in data:
     tab_array[case] = tab_init().value
     tab_array[case]['case'] = ' '*(len(tab_array['max']['case']) - len(case)+1)
     for subkey in data[case]:
-      if data[case][subkey] is not None:
-        tab_array[case][subkey] = ' '*(len(tab_array['max'][subkey]) - len(data[case][subkey])+1)
-      else:
-        tab_array[case][subkey] = tab_array['max'][subkey]
+      if data[case][subkey] is None:
+        data[case][subkey] = ' '
+      tab_array[case][subkey] = ' '*(len(tab_array['max'][subkey]) - len(data[case][subkey])+1)
   return tab_array
 
 # MAIN STUFF
