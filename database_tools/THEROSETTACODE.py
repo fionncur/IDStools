@@ -1,53 +1,50 @@
 # THE ROSETTA CODE
-import math
 
 import imas
 from imas import imasdef
 import pandas as pd
 import numpy as np
 import argparse
+import math
 
 
 def ids_setter(IDS, path, val):
+    dodi = IDS
+    for node in path[0:-1]:
+        if '(' in node:
+            aos = node.split('(')
+            ind = int(aos[1][:1])
+            dodi = getattr(dodi, aos[0])
+            dodi.resize(ind+1, keep=True)
+            dodi = dodi[ind]
+        else:
+            try:
+                dodi = getattr(dodi, node)
+            except AttributeError:
+                print(str(node) + " could not be found in " + str(path) + ". Please check spelling or IDS entry.")
+    node = path[-1]
     try:
-        dodi = IDS
-        for node in path[0:-1]:
-            if '(' in node:
-                aos = node.split('(')
-                ind = int(aos[1][:1])
-                dodi = getattr(dodi, aos[0])
-                dodi.resize(ind+1, keep=True)
-                dodi = dodi[ind]
-            else:
-                try:
-                    dodi = getattr(dodi, node)
-                except AttributeError:
-                    print(str(node) + " could not be found in " + str(path) + ". Please check spelling or IDS entry.")
-        node = path[-1]
-        try:
-            if type(getattr(dodi, node)) == str:
-                setattr(dodi, str(node), str(val))
-            elif type(getattr(dodi, node)) == float:
-                setattr(dodi, str(node), float(val))
-            elif type(getattr(dodi, node)) == int:
-                setattr(dodi, str(node), int(val))
-            elif type(getattr(dodi, node)) == np.ndarray:
-                if (getattr(dodi, node)).dtype == 'int32':
-                    setattr(dodi, str(node), (np.array([val], dtype='object')))
-                elif (getattr(dodi, node)).dtype == 'float64':
-                    setattr(dodi, str(node), (np.array([val], dtype='float64')))
-            else:
-                print("The type of " + str(idspath) + " is not recognized. Make sure it is either a string, float, integer or numpy.ndarray.")
-        except AttributeError:
-            print("The leaf '" + str(node) + "' could not be found in " + str(path) + ". Please check spelling or IDS Entry")
-    except KeyError:
-        print(str(var) + " cannot be stored in " + str(idspath) + " (path not found). Please check spelling and IDS entry.")
+        if type(getattr(dodi, node)) == str:
+            setattr(dodi, str(node), str(val))
+        elif type(getattr(dodi, node)) == float:
+            setattr(dodi, str(node), float(val))
+        elif type(getattr(dodi, node)) == int:
+            setattr(dodi, str(node), int(val))
+        elif type(getattr(dodi, node)) == np.ndarray:
+            if (getattr(dodi, node)).dtype == 'int32':
+                setattr(dodi, str(node), (np.array([val], dtype='object')))
+            elif (getattr(dodi, node)).dtype == 'float64':
+                setattr(dodi, str(node), (np.array([val], dtype='float64')))
+        else:
+            print("The type of " + str(idspath) + " is not recognized. Make sure it is either a string, float, integer or numpy.ndarray.")
+    except AttributeError:
+        print("The leaf '" + str(node) + "' could not be found in " + str(path) + ". Please check spelling or IDS Entry")
 
 
 parser = argparse.ArgumentParser(description="This script tries to apply mapping into IDS rules to the content of a non-IDS database (e.g. ITPA DBs).")
 parser.add_argument("-d", "--database", type=str, default="/home/ITER/vidalm/Desktop/HDB5.2.3.csv",
                     help="Path to csv file containing the external database content \t(default=%(default)s)")
-parser.add_argument("-m", "--mapping", type=str, default="/home/ITER/vidalm/Desktop/maptest6.csv",
+parser.add_argument("-m", "--mapping", type=str, default="/home/ITER/vidalm/Desktop/maptest7.csv",
                     help="Path to csv formatted mapping file \t(default=%(default)s)")
 parser.add_argument("--varCol", type=str, default='DB VARIABLE',
                     help="Name of the column of the mapping file listing all DB variables \t(default=%(default)s)")
@@ -68,12 +65,14 @@ row = 0
 de = imas.DBEntry(imasdef.MDSPLUS_BACKEND, 'test', 1, 0)
 de.create()
 iod = {}
-DBVAR = db.iloc[0]
+DBVAR = db.iloc[row]
 
 for ids in list(imas.IDSName):
     iod[ids.value] = de.get(ids.value)
 
 for var in mf.loc[:, args.varCol]:
+    row = 0
+    DBVAR = db.iloc[row]
     idspath = mf[mf[args.varCol] == var].iloc[0].at[args.pathCol]
     transformation = mf[mf[args.varCol] == var].iloc[0].at[args.traCol]
     if idspath != '':
@@ -84,34 +83,40 @@ for var in mf.loc[:, args.varCol]:
         except KeyError:
             print(str(idsname)+" is not an IDS name. Please check spelling or IDS entry.")
             break
-        if transformation != '':
-            try:
-                val = eval(transformation)
-            except KeyError as ke:
-                print(var+" could not be transformed with "+str(transformation)+". Please make sure variable names are written in the form DBVAR['var'], and dictionaries end with said variable.")
-        else:
-            val = db.at[row, var]
-        if val != None:
-            if type(val) != str and math.isnan(val):
-                print("Nothing to store for "+str(var)+" in row "+str(row))
+        for row in db.index:
+            if transformation != '':
+                try:
+                    val = eval(transformation)
+                except KeyError as ke:
+                    print(var+" could not be transformed with "+str(transformation)+". Please make sure variable names are written in the form DBVAR['var'], and dictionaries end with said variable.")
             else:
-                ids_setter(IDS, path, val)
-                IDS.ids_properties.homogeneous_time = 1
+                val = db.at[row, var]
+            if val != None:
+                if type(val) != str and math.isnan(val):
+                    print("Nothing to store for "+str(var)+" in row "+str(row))
+                else:
+                    ids_setter(IDS, path, val)
+                    IDS.ids_properties.homogeneous_time = 1
+            else:
+                if args.verbose:
+                    print(f"No mapping specified for variable {var}")
 
-    else:
-        if args.verbose:
-            print(f"No mapping specified for variable {var}")
 
-#for sids in iod[str(idsname)]:
-    #if sids.ids_properties.homogeneous_time == 1:
-        #print(sids)
+for sids in iod:
+    if iod[sids].ids_properties.homogeneous_time == 1:
+        iod[sids].time = np.array([1.])
+        try:
+            de.put(iod[sids])
+        except ValueError:
+            print("The IDS "+str(sids)+" could not be put because of a Value Error. IDS Entry should match Database data type (flt, int, str, np.array...), via the transformation column if necessary.")
+            break
+        print("The IDS "+str(sids)+" was modified and put successfully")
 
 
 dd = iod['dataset_description']
 s = iod['summary']
 barometry = iod['barometry']
 
-# print(barometry.gauge[0].pressure.data)
 print(dd.ids_properties.homogeneous_time)
 print(s.boundary.type.value)
 print(s.time)
