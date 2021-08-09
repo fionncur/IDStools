@@ -36,7 +36,7 @@ def ids_setter(IDS, path, val):
             setattr(dodi, str(node), int(val))
         elif type(getattr(dodi, node)) == np.ndarray:
             if (getattr(dodi, node)).dtype == 'int32':
-                setattr(dodi, str(node), (np.array([val], dtype='object')))
+                setattr(dodi, str(node), (np.array([val], dtype='int32')))
             elif (getattr(dodi, node)).dtype == 'float64':
                 setattr(dodi, str(node), (np.array([val], dtype='float64')))
         else:
