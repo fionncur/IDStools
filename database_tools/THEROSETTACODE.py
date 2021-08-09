@@ -44,46 +44,44 @@ def ids_setter(IDS, path, val):
 parser = argparse.ArgumentParser(description="This script tries to apply mapping into IDS rules to the content of a non-IDS database (e.g. ITPA DBs).")
 parser.add_argument("-d", "--database", type=str, default="/home/ITER/vidalm/Desktop/HDB5.2.3.csv",
                     help="Path to csv file containing the external database content \t(default=%(default)s)")
-parser.add_argument("-m", "--mapping", type=str, default="/home/ITER/vidalm/Desktop/maptest7.csv",
+parser.add_argument("-m", "--mapping", type=str, default="/home/ITER/vidalm/Desktop/maptest8.csv",
                     help="Path to csv formatted mapping file \t(default=%(default)s)")
 parser.add_argument("--varCol", type=str, default='DB VARIABLE',
                     help="Name of the column of the mapping file listing all DB variables \t(default=%(default)s)")
 parser.add_argument("--pathCol", type=str, default="IDS PATH",
-                    help="Name of the column of the mapping file listing IDS mapping for all DB variables \t(default=%(default)s")
+                    help="Name of the column of the mapping file listing IDS mapping for all DB variables \t(default=%(default)s)")
 parser.add_argument("--traCol", type=str, default="TRANSFORMATION",
-                    help="Name of the column of the mapping file listing transformations to be done on DB variables \t(default=%(default)s")
+                    help="Name of the column of the mapping file listing transformations to be done on DB variables \t(default=%(default)s)")
+parser.add_argument("--timeloc", type=str, default="summary",
+                    help="Name of the IDS from which the time will be extracted to populate time-empty IDSs \t(default=%(default)s")
 parser.add_argument("-v", "--verbose", action='store_true',
                     help="Run in verbose mode")
 args = parser.parse_args()
 
 mf = pd.read_csv(args.mapping, keep_default_na=False, usecols=[args.varCol, args.pathCol, args.traCol])
 mf.dropna(how="all")
-db = pd.read_csv(args.database, skiprows=1, keep_default_na=False, na_values=[''])
+db = pd.read_csv(args.database, skiprows=1, keep_default_na=False, na_values=['', '9999999'])
 db.dropna(how="all")
 db = db.replace(to_replace=np.nan, value=None)
-row = 0
-de = imas.DBEntry(imasdef.MDSPLUS_BACKEND, 'test', 1, 0)
-de.create()
-iod = {}
-DBVAR = db.iloc[row]
 
-for ids in list(imas.IDSName):
-    iod[ids.value] = de.get(ids.value)
-
-for var in mf.loc[:, args.varCol]:
-    row = 0
+for row in db.index:
     DBVAR = db.iloc[row]
-    idspath = mf[mf[args.varCol] == var].iloc[0].at[args.pathCol]
-    transformation = mf[mf[args.varCol] == var].iloc[0].at[args.traCol]
-    if idspath != '':
-        idsname = idspath.split('/')[0]
-        path = idspath.split('/')[1:]
-        try:
-            IDS = iod[idsname]
-        except KeyError:
-            print(str(idsname)+" is not an IDS name. Please check spelling or IDS entry.")
-            break
-        for row in db.index:
+    de = imas.DBEntry(imasdef.MDSPLUS_BACKEND, 'test', 1, row)
+    de.create()
+    iod = {}
+    for ids in list(imas.IDSName):
+        iod[ids.value] = de.get(ids.value)
+    for var in mf.loc[:, args.varCol]:
+        idspath = mf[mf[args.varCol] == var].iloc[0].at[args.pathCol]
+        transformation = mf[mf[args.varCol] == var].iloc[0].at[args.traCol]
+        if idspath != '':
+            idsname = idspath.split('/')[0]
+            path = idspath.split('/')[1:]
+            try:
+                IDS = iod[idsname]
+            except KeyError:
+                print(str(idsname)+" is not an IDS name. Please check spelling or IDS entry.")
+                break
             if transformation != '':
                 try:
                     val = eval(transformation)
@@ -93,24 +91,26 @@ for var in mf.loc[:, args.varCol]:
                 val = db.at[row, var]
             if val != None:
                 if type(val) != str and math.isnan(val):
-                    print("Nothing to store for "+str(var)+" in row "+str(row))
+                    if args.verbose:
+                        print("Nothing to store for "+str(var)+" in row "+str(row))
                 else:
                     ids_setter(IDS, path, val)
                     IDS.ids_properties.homogeneous_time = 1
             else:
                 if args.verbose:
                     print(f"No mapping specified for variable {var}")
+    for sids in iod.keys():
+        if iod[sids].ids_properties.homogeneous_time == 1:
+            if iod[sids].time.size == 0:
+                iod[sids].time = iod[args.timeloc].time
+            try:
+                de.put(iod[sids])
+            except:
+                print("The IDS "+str(sids)+" could not be put because of a Value Error. IDS Entry should match Database data type (flt, int, str, np.array...), via the transformation column if necessary.")
+                break
+            print("The IDS "+str(sids)+" for row "+str(row)+" was modified and put successfully")
 
 
-for sids in iod:
-    if iod[sids].ids_properties.homogeneous_time == 1:
-        iod[sids].time = np.array([1.])
-        try:
-            de.put(iod[sids])
-        except ValueError:
-            print("The IDS "+str(sids)+" could not be put because of a Value Error. IDS Entry should match Database data type (flt, int, str, np.array...), via the transformation column if necessary.")
-            break
-        print("The IDS "+str(sids)+" was modified and put successfully")
 
 
 dd = iod['dataset_description']
@@ -123,7 +123,7 @@ print(s.time)
 print(s.global_quantities.ip.value)
 print(s.global_quantities.volume.value)
 print(s.elms.frequency.value)
-de.put(s)
+
 
 
 # for var in mf.loc[63, 'DB VARIABLE']:
