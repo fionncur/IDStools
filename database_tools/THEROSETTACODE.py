@@ -83,7 +83,7 @@ for row in rows:
     de.create()
     iod = {}
     for ids in list(imas.IDSName):
-        iod[ids.value] = de.get(ids.value) #getattr(imas,ids.value)()
+        iod[ids.value] = getattr(imas,ids.value)() #de.get(ids.value) 
 
     for var in mf.loc[:, args.varCol]:
         idspath = mf[mf[args.varCol] == var].iloc[0].at[args.pathCol]
