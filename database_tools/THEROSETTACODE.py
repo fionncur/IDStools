@@ -8,6 +8,10 @@ import argparse
 import math
 
 
+def get_backend_id(name):
+    return getattr(imasdef,name+"_BACKEND")
+
+
 def ids_setter(IDS, path, val):
     dodi = IDS
     for node in path[0:-1]:
@@ -42,7 +46,7 @@ def ids_setter(IDS, path, val):
 
 
 parser = argparse.ArgumentParser(description="This script tries to apply mapping into IDS rules to the content of a non-IDS database (e.g. ITPA DBs).")
-parser.add_argument("-d", "--database", type=str, default="/home/ITER/vidalm/Desktop/HDB5.2.3.csv",
+parser.add_argument("-i", "--inputCSV", type=str, default="/home/ITER/vidalm/Desktop/HDB5.2.3.csv",
                     help="Path to csv file containing the external database content \t(default=%(default)s)")
 parser.add_argument("-m", "--mapping", type=str, default="/home/ITER/vidalm/Desktop/maptest8.csv",
                     help="Path to csv formatted mapping file \t(default=%(default)s)")
@@ -54,23 +58,33 @@ parser.add_argument("--traCol", type=str, default="TRANSFORMATION",
                     help="Name of the column of the mapping file listing transformations to be done on DB variables \t(default=%(default)s)")
 parser.add_argument("--timeloc", type=str, default="summary",
                     help="Name of the IDS from which the time will be extracted to populate time-empty IDSs \t(default=%(default)s")
+parser.add_argument("-b", "--backend", type=str, default="MDSPLUS",
+                    help="backend format \t(default=%(default)s)")
+parser.add_argument("-d", "--database", type=str, default="test",
+                    help="target IMAS database name \t(default=%(default)s)")
+parser.add_argument("-r", "--row", type=int, default=None,
+                    help="Maps data for the given row/entry of the input database \t(processes all rows otherwise)")
 parser.add_argument("-v", "--verbose", action='store_true',
                     help="Run in verbose mode")
 args = parser.parse_args()
 
 mf = pd.read_csv(args.mapping, keep_default_na=False, usecols=[args.varCol, args.pathCol, args.traCol])
 mf.dropna(how="all")
-db = pd.read_csv(args.database, skiprows=1, keep_default_na=False, na_values=['', '9999999'])
+db = pd.read_csv(args.inputCSV, skiprows=1, keep_default_na=False, na_values=['', '9999999','???????'])
 db.dropna(how="all")
 db = db.replace(to_replace=np.nan, value=None)
 
-for row in db.index:
+
+rows = [args.row] if args.row!=None else db.index
+
+for row in rows:
     DBVAR = db.iloc[row]
-    de = imas.DBEntry(imasdef.MDSPLUS_BACKEND, 'test', 1, row)
+    de = imas.DBEntry(get_backend_id(args.backend),args.database, 1, row)
     de.create()
     iod = {}
     for ids in list(imas.IDSName):
-        iod[ids.value] = de.get(ids.value)
+        iod[ids.value] = de.get(ids.value) #getattr(imas,ids.value)()
+
     for var in mf.loc[:, args.varCol]:
         idspath = mf[mf[args.varCol] == var].iloc[0].at[args.pathCol]
         transformation = mf[mf[args.varCol] == var].iloc[0].at[args.traCol]
@@ -105,12 +119,11 @@ for row in db.index:
                 iod[sids].time = iod[args.timeloc].time
             try:
                 de.put(iod[sids])
-            except:
+            except Exception as ex:
+                print(ex)
                 print("The IDS "+str(sids)+" could not be put because of a Value Error. IDS Entry should match Database data type (flt, int, str, np.array...), via the transformation column if necessary.")
                 break
             print("The IDS "+str(sids)+" for row "+str(row)+" was modified and put successfully")
-
-
 
 
 dd = iod['dataset_description']
@@ -125,35 +138,3 @@ print(s.global_quantities.volume.value)
 print(s.elms.frequency.value)
 
 
-
-# for var in mf.loc[63, 'DB VARIABLE']:
-#     path = idspath.split('/')[1:]
-#     x = 0
-#     row = 0
-#     node = path[x]
-#     dodi = getattr(ids, str(node))
-#     while node != path[-1]:
-#         x = x + 1
-#         node = path[x]
-#         getattr(dodi, node)
-#         locals()["dodi"+str(x)] = dodi
-#         if node == path[-1]:
-#             if type(db.at[row, var]) == str:
-#                 setattr(dodi, str(node), db.at[row, var])
-#             else:
-#                 setattr(dodi, str(node), (np.array([db.at[row, var]], dtype='float64')))
-
-
-# idspath2leaf = de.partial_get(str(idsname), str(leaf))
-# if type(db.at[row, var]) == str:
-# idspath2leaf = [db.at[row, var]]
-# else:
-# idspath2leaf = np.array([db.at[row, var]], dtype='float64')
-# de.put_slice(ids)
-
-#fe = getattr(dodi, node)
-#fe.resize(1)
-#fe[0] = val
-
-# for var in mf.loc[:, 'DB VARIABLE']:
-# print('store '+str(db.at[row, var])+' from '+var+' into '+str(mf[mf['DB VARIABLE'] == var].iloc[0].at['IDS PATH']))
