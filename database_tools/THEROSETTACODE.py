@@ -24,9 +24,9 @@ def ids_setter(IDS, path, val):
     path : str
            Path from root of the IDS to field in which the value shall be stored.
            Strutures are separated by slashes and array of structure indices are given between parenthesis.
-           eg. 'structA/arraystruct(0)/structB/data' 
+           eg. 'structA/arraystruct(0)/structB/value'
     val 
-           Value to be stored in IDS/path
+           Value to be stored in the IDS/path node
     """
     dodi = IDS
     for node in path[0:-1]:
@@ -80,17 +80,17 @@ def evaluate(expr):
 
 
 
-parser = argparse.ArgumentParser(description="This script tries to apply mapping into IDS rules to the content of a non-IDS database (e.g. ITPA DBs).")
+parser = argparse.ArgumentParser(description="This script applies mapping the content of a non-IDS database (e.g. ITPA DBs) into IDS rules.")
 parser.add_argument("-i", "--inputCSV", type=str, default="/home/ITER/vidalm/Desktop/HDB5.2.3.csv",
-                    help="Path to csv file containing the external database content \t(default=%(default)s)")
+                    help="Path to csv file containing the external database content (e.g. /home/ITER/vidalm/Desktop/HDB5.2.3.csv) \t(default=%(default)s)")
 parser.add_argument("-m", "--mapping", type=str, default="/home/ITER/vidalm/Desktop/maptest8.csv",
-                    help="Path to csv formatted mapping file \t(default=%(default)s)")
+                    help="Path to csv-formatted mapping file (e.g. /home/ITER/vidalm/Desktop/maptest8.csv) \t(default=%(default)s)")
 parser.add_argument("--varCol", type=str, default='DB VARIABLE',
                     help="Name of the column of the mapping file listing all DB variables \t(default=%(default)s)")
 parser.add_argument("--pathCol", type=str, default="IDS PATH",
-                    help="Name of the column of the mapping file listing IDS mapping for all DB variables \t(default=%(default)s)")
+                    help="Name of the column of the mapping file listing the paths to store all DB variables into IDS fields \t(default=%(default)s)")
 parser.add_argument("--traCol", type=str, default="TRANSFORMATION",
-                    help="Name of the column of the mapping file listing transformations to be done on DB variables \t(default=%(default)s)")
+                    help="Name of the column of the mapping file listing the transformations to be done on DB variables \t(default=%(default)s)")
 parser.add_argument("--timeloc", type=str, default="summary",
                     help="Name of the IDS from which the time will be extracted to populate time-empty IDSs \t(default=%(default)s")
 parser.add_argument("-b", "--backend", type=str, default="MDSPLUS",
@@ -98,7 +98,7 @@ parser.add_argument("-b", "--backend", type=str, default="MDSPLUS",
 parser.add_argument("-d", "--database", type=str, default="test",
                     help="target IMAS database name \t(default=%(default)s)")
 parser.add_argument("-r", "--row", type=int, default=None,
-                    help="Maps data for the given row/entry of the input database \t(processes all rows otherwise)")
+                    help="Stores data for the given row/entry of the input database \t(processes all rows otherwise)")
 parser.add_argument("-v", "--verbose", action='store_true',
                     help="Run in verbose mode")
 parser.add_argument("--debug", action='store_true',
@@ -113,16 +113,16 @@ db = pd.read_csv(args.inputCSV, skiprows=1, keep_default_na=False, na_values=[''
 db.dropna(how="all")
 db = db.replace(to_replace=np.nan, value=None)
 
-rows = [args.row] if args.row!=None else db.index
+rows = [args.row] if args.row != None else db.index
 
-for row in tqdm(rows):
+for row in tqdm(rows) if progbar else rows:
     DBVAR = db.iloc[row]
     de = imas.DBEntry(get_backend_id(args.backend),args.database, 1, row)
     de.create()
 
     iod = {}
     for ids in list(imas.IDSName):
-        iod[ids.value] = getattr(imas,ids.value)() 
+        iod[ids.value] = getattr(imas,ids.value)()
 
     for var in mf.loc[:, args.varCol]:
         idspath = mf[mf[args.varCol] == var].iloc[0].at[args.pathCol] 
@@ -135,7 +135,7 @@ for row in tqdm(rows):
             try:
                 IDS = iod[idsname]
             except KeyError:
-                print(f"{idsname} is not a valid IDS name. Please check mapping")
+                print(f"{idsname} is not a valid IDS name. Please check spelling and IDS list.")
                 sys.exit()
             if transformation != '':
                 val = evaluate(transformation)
@@ -156,7 +156,7 @@ for row in tqdm(rows):
             try:
                 de.put(iod[sids])
             except Exception as ex:
-                print(f"Error while attempting to write the IDS {sids} in IMAS DB: {ex}")
+                print(f"Error while attempting to write the IMAS DB into the IDS {sids}: {ex}")
                 break
             if args.verbose:
                 print(f"The IDS {sids} was stored successfully for DB entry {row}")
