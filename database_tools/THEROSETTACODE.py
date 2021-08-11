@@ -32,10 +32,10 @@ def ids_setter(IDS, path, val):
     for node in path[0:-1]:
         nodestruct = node.split('(')
         try:
-            dodi = getattr(dodi,nodestruct[0])
+            dodi = getattr(dodi, nodestruct[0])
         except AttributeError:
             print(f"Node {node} could not be found in {path} for IDS {IDS._base_path}. Please check spelling.")
-        if len(nodestruct)==2:
+        if len(nodestruct) == 2:
             # AOS case
             nodeindex = int(nodestruct[1][:1])
             dodi.resize(nodeindex+1, keep=True)
@@ -80,7 +80,7 @@ def evaluate(expr):
 
 
 
-parser = argparse.ArgumentParser(description="This script applies mapping the content of a non-IDS database (e.g. ITPA DBs) into IDS rules.")
+parser = argparse.ArgumentParser(description="This script applies mapping of a non-IDS database content (e.g. ITPA DBs) into IDS rules.")
 parser.add_argument("-i", "--inputCSV", type=str, default="/home/ITER/vidalm/Desktop/HDB5.2.3.csv",
                     help="Path to csv file containing the external database content (e.g. /home/ITER/vidalm/Desktop/HDB5.2.3.csv) \t(default=%(default)s)")
 parser.add_argument("-m", "--mapping", type=str, default="/home/ITER/vidalm/Desktop/maptest8.csv",
@@ -109,7 +109,7 @@ args = parser.parse_args()
 mf = pd.read_csv(args.mapping, keep_default_na=False, usecols=[args.varCol, args.pathCol, args.traCol])
 mf.dropna(how="all")
 
-db = pd.read_csv(args.inputCSV, skiprows=1, keep_default_na=False, na_values=['','-9999999','???????'])
+db = pd.read_csv(args.inputCSV, skiprows=1, keep_default_na=False, na_values=['', '-9999999', '???????'])
 db.dropna(how="all")
 db = db.replace(to_replace=np.nan, value=None)
 
@@ -128,7 +128,8 @@ for row in tqdm(rows) if progbar else rows:
         idspath = mf[mf[args.varCol] == var].iloc[0].at[args.pathCol] 
         transformation = mf[mf[args.varCol] == var].iloc[0].at[args.traCol]
         if idspath == '':
-            if args.debug: print(f"No mapping specified for variable {var}")
+            if args.debug:
+                print(f"No mapping specified for variable {var}")
         else:
             idsname = idspath.split('/')[0]
             path = idspath.split('/')[1:]
@@ -156,12 +157,10 @@ for row in tqdm(rows) if progbar else rows:
             try:
                 de.put(iod[sids])
             except Exception as ex:
-                print(f"Error while attempting to write the IMAS DB into the IDS {sids}: {ex}")
+                print(f"Error while attempting to write the IDS {sids} into the IMAS DB: {ex}")
                 break
             if args.verbose:
                 print(f"The IDS {sids} was stored successfully for DB entry {row}")
-
-
 
 if args.debug:
     dd = iod['dataset_description']
@@ -173,5 +172,3 @@ if args.debug:
     print(s.global_quantities.ip.value)
     print(s.global_quantities.volume.value)
     print(s.elms.frequency.value)
-
-
