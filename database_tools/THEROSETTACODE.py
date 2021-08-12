@@ -34,7 +34,7 @@ def ids_setter(IDS, path, val):
         try:
             dodi = getattr(dodi, nodestruct[0])
         except AttributeError:
-            print(f"Node {node} could not be found in {path} for IDS {IDS._base_path}. Please check spelling.")
+            raise AttributeError(f"Node {node} could not be found in {path} for IDS {IDS._base_path}. Please check spelling.")
         if len(nodestruct) == 2:
             # AOS case
             nodeindex = int(nodestruct[1][:1])
@@ -52,9 +52,9 @@ def ids_setter(IDS, path, val):
         elif leaftype == np.ndarray:
             setattr(dodi, str(leaf), (np.array([val], dtype=(getattr(dodi, leaf)).dtype)))
         else:
-            print(f"The type {nodetype} of {idspath} is currently not supported")
+            raise AttributeError(f"The type {nodetype} of {idspath} is currently not supported")
     except AttributeError:
-        print(f"The leaf '{node}' could not be found in {path} for IDS {IDS._base_path}. Please check spelling.")
+        raise AttributeError(f"The leaf '{node}' could not be found in {path} for IDS {IDS._base_path}. Please check spelling.")
 
 
 def evaluate(expr):
@@ -90,13 +90,15 @@ parser.add_argument("--varCol", type=str, default='DB VARIABLE',
 parser.add_argument("--pathCol", type=str, default="IDS PATH",
                     help="Name of the column of the mapping file listing the paths to store all DB variables into IDS fields \t(default=%(default)s)")
 parser.add_argument("--traCol", type=str, default="TRANSFORMATION",
-                    help="Name of the column of the mapping file listing the transformations to be done on DB variables \t(default=%(default)s)")
+                    help="Name of the column of the mapping file listing the transformations to be done on DB variables (default = summary)\t(default=%(default)s)")
 parser.add_argument("--timeloc", type=str, default="summary",
                     help="Name of the IDS from which the time will be extracted to populate time-empty IDSs \t(default=%(default)s")
 parser.add_argument("-b", "--backend", type=str, default="MDSPLUS",
                     help="backend format \t(default=%(default)s)")
 parser.add_argument("-d", "--database", type=str, default="test",
                     help="target IMAS database name \t(default=%(default)s)")
+parser.add_argument("--dbtype", type=str, default="H-MODE",
+                    help="Type of database (default = H-MODE) \t(default=%(default)s)")
 parser.add_argument("-r", "--row", type=int, default=None,
                     help="Stores data for the given row/entry of the input database \t(processes all rows otherwise)")
 parser.add_argument("-v", "--verbose", action='store_true',
@@ -109,20 +111,25 @@ args = parser.parse_args()
 mf = pd.read_csv(args.mapping, keep_default_na=False, usecols=[args.varCol, args.pathCol, args.traCol])
 mf.dropna(how="all")
 
-db = pd.read_csv(args.inputCSV, skiprows=1, keep_default_na=False, na_values=['', '-9999999', '???????'])
+if args.dbtype == 'H-MODE' or args.dbtype == 'HMODE':
+    db = pd.read_csv(args.inputCSV, skiprows=1, keep_default_na=False, na_values=['', '-9999999', '???????'])
+elif args.dbtype == 'L-MODE' or args.dbtype == 'LMODE':
+    db = pd.read_csv(args.inputCSV, delimiter=';', keep_default_na=False, na_values=['', '-9999999', '????????'])
+
 db.dropna(how="all")
 db = db.replace(to_replace=np.nan, value=None)
 
 rows = [args.row] if args.row != None else db.index
 
+
 for row in tqdm(rows) if progbar else rows:
     DBVAR = db.iloc[row]
-    de = imas.DBEntry(get_backend_id(args.backend),args.database, 1, row)
+    de = imas.DBEntry(get_backend_id(args.backend), args.database, 1, row)
     de.create()
 
     iod = {}
     for ids in list(imas.IDSName):
-        iod[ids.value] = getattr(imas,ids.value)()
+        iod[ids.value] = getattr(imas, ids.value)()
 
     for var in mf.loc[:, args.varCol]:
         idspath = mf[mf[args.varCol] == var].iloc[0].at[args.pathCol] 
@@ -147,8 +154,12 @@ for row in tqdm(rows) if progbar else rows:
                     if args.verbose:
                         print(f"Nothing to store for {var} in DB entry {row}")
                 else:
-                    ids_setter(IDS, path, val)
-                    IDS.ids_properties.homogeneous_time = 1
+                    try:
+                        ids_setter(IDS, path, val)
+                        IDS.ids_properties.homogeneous_time = 1
+                    except AttributeError as ae:
+                        print(ae)
+                        sys.exit()
 
     for sids in iod.keys():
         if iod[sids].ids_properties.homogeneous_time == 1:
@@ -158,7 +169,7 @@ for row in tqdm(rows) if progbar else rows:
                 de.put(iod[sids])
             except Exception as ex:
                 print(f"Error while attempting to write the IDS {sids} into the IMAS DB: {ex}")
-                break
+                sys.exit()
             if args.verbose:
                 print(f"The IDS {sids} was stored successfully for DB entry {row}")
 
