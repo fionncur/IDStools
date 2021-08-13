@@ -57,7 +57,7 @@ def z_shift(equin, shift):
 
         for ixpt in range(len(equin.time_slice[itime].constraints.x_point)):
             equout.time_slice[itime].constraints.x_point[ixpt].position_measured.z = equin.time_slice[itime].constraints.x_point[ixpt].position_measured.z + shift
-        equout.time_slice[itime].constraints.x_point[ixpt].position_reconstructed.z = equin.time_slice[itime].constraints.x_point[ixpt].position_reconstructed.z + shift
+            equout.time_slice[itime].constraints.x_point[ixpt].position_reconstructed.z = equin.time_slice[itime].constraints.x_point[ixpt].position_reconstructed.z + shift
 
         for istr in range(len(equin.time_slice[itime].constraints.strike_point)):
             equout.time_slice[itime].constraints.strike_point[istr].position_measured.z = equin.time_slice[itime].constraints.strike_point[istr].position_measured.z + shift
