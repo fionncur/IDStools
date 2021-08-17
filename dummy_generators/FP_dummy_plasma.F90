@@ -46,6 +46,7 @@
   type (ids_summary) :: summary
   type (ids_equilibrium) :: equilibrium
   type (ids_core_profiles) :: core_profiles
+  type (ids_wall) :: wall
   type (amns_handle_type) :: amns
 
   !! Local variables
@@ -53,7 +54,7 @@
   character(len=24) :: shot_string
   character(len=24) :: run_string
   character(len=24) :: argName, hlp_frm
-  integer narg, cptArg, idx, status, shot, run
+  integer narg, cptArg, idx, status, shot, run, idxmd
   integer time_sind, num_time_slices, homogeneous_time
   character username*24, database*24, treename*24, version*24
   character imas_version*132, ual_version*132, code_commit*132
@@ -257,11 +258,16 @@
   time_step = IDS_REAL_INVALID
   num_time_slices = 1
 
-! Import wall IDS
-  write(systemarg,'(a,i7,a,i4,a)') &
-   & 'idscp --setDatasetVersion -u public -d iter -si 10 -ri 3'// &
-   &       ' -so ',shot,' -ro ',run, ' -u '//trim(username)//' wall'
-  call system(systemarg)
+  ! Import wall IDS from MD database
+  call imas_open_env(treename, 10, 3, idxmd, 'public', 'ITER_MD', version, status)
+  if (status.ne.0) stop 'Error opening IMAS database !'
+  call ids_get(idxmd, 'wall', wall, status)
+  if (status.ne.0) stop 'Error reading wall IDS !'
+  call imas_close(idxmd, status)
+  if (status.ne.0) stop 'Error closing IMAS database !'
+  call ids_put(idx, 'wall', wall, status)
+  if (status.ne.0) stop 'Error saving wall IDS !'
+  call ids_deallocate( wall )
   
   call write_ids_properties( core_profiles%ids_properties, &
    &  homogeneous_time, comment, source, create_date )
