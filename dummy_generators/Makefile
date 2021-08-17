@@ -10,7 +10,7 @@ AMNS_FCFLAGS?=`pkg-config --cflags amns`
 IMAS_LDFLAGS?=`pkg-config --libs imas-$(FC)`
 AMNS_LDFLAGS?=`pkg-config --libs amns`
 
-TARGET=FP_dummy_plasma
+TARGET=FP_dummy_plasma.exe
 DATA=FP_parameters.dat
 
 .PHONY: clean
@@ -30,5 +30,5 @@ install: ${TARGET}
 clean:
 	@rm *.o ${TARGET}
 
-FP_dummy_plasma: FP_dummy_plasma.F90
+FP_dummy_plasma.exe: FP_dummy_plasma.F90
 	${FC} ${FCFLAGS} ${IMAS_FCFLAGS} ${AMNS_FCFLAGS} $^ -o $@ ${LDFLAGS} ${IMAS_LDFLAGS} ${AMNS_LDFLAGS}
