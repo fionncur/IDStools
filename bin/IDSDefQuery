@@ -24,7 +24,7 @@ if __name__ == "__main__":
     
     parser = argparse.ArgumentParser(description='Query the IDS XML Definition for documentation')
     parser.add_argument('ids',type=str,help='IDS name')
-    parser.add_argument('path',type=str,help='Path for field of interest within the IDS')
+    parser.add_argument('path',type=str,nargs='?',default=None,help='Path for field of interest within the IDS')
     opt = parser.add_mutually_exclusive_group()
     opt.add_argument('-a','--all',action='store_true',help='Print all attributes')
     opt.add_argument('-s','--select',type=str,default='documentation',
@@ -44,15 +44,19 @@ if __name__ == "__main__":
     if ids==None:
         print("Error getting the IDS, please check that '"+args.ids+"' corresponds to a valid IDS name",file=sys.stderr)
         sys.exit()
-        
-    fields = args.path.split('/')
 
-    try:
-        f = getField(ids,fields)
-    except Exception as exc:
-        print("Error while accessing "+args.path+": "+str(exc))
-        sys.exit()
+    if args.path!=None:
+        fields = args.path.split('/')
 
+        try:
+            f = getField(ids,fields)
+        except Exception as exc:
+            print("Error while accessing "+args.path+": "+str(exc))
+            sys.exit()
+    else:
+        f = ids
+
+            
     if args.all:
         for a in f.attrib:
             print(a+': '+f.attrib[a])
