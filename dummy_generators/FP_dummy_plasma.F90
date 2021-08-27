@@ -73,22 +73,28 @@
   real(IDS_real) :: R0, Z0, radius, Te_max, Ti_max, ne_max
   real(IDS_real) :: imp_conc(92), total_concentration
   real(IDS_real), allocatable :: coronal_density(:)
-  integer, parameter :: N_FW = 19, N_1D = 51
+  integer, parameter :: N_TL = 19, N_DRS = 4, N_1D = 51
   real(IDS_real), parameter :: T_min = 1.0_IDS_real, ne_min = 1.0e8_IDS_real
-  real(IDS_real) :: R_FW(N_FW), Z_FW(N_FW)
+  real(IDS_real) :: R_TL(N_TL), Z_TL(N_TL), R_DRS(N_DRS), Z_DRS(N_DRS)
   real(IDS_real) :: distance, closest, R_cl, Z_cl, R_lim, Z_lim
   logical outside, intersect
 
-! Reference first wall contour from IDM document ITER_D_33NHXN
+! Reference contour for First Plasma Protection Components (FPPC)
+! from IDM document ITER_D_5MKSSF
+! Here we use the OT (Operating Temperature: 100 C) contour
+! TL: Toroidal Limiter
+! DRS: Divertor Replacement Sector
 
-  data R_FW / 4.1053, 4.1053, 4.1053, 4.1053, 4.1053, 4.1053, &
-    &         4.1253, 4.3246, 4.9354, 5.7534, 6.5524, 7.4015, &
-    &         7.9062, 8.2697, 8.3938, 8.3057, 7.9002, 7.2824, &
-    &         6.2661/
-  data Z_FW /-2.5037,-1.4914,-0.4761, 0.5402, 1.5566, 2.5719, &
-    &         3.5852, 4.3371, 4.7196, 4.5344, 3.9256, 3.1796, &
-    &         2.4647, 1.6847, 0.6354,-0.4200,-1.3372,-2.2544, &
-    &        -3.0434/
+  data R_TL / 4.0852632   , 4.0852632  , 4.0852632  , 4.0852632  , 4.0852362   , &
+    &         4.0852632   , 4.105340474, 4.307239623, 4.93172786 , 5.762083707 , &
+    &         6.565134042 , 7.416531105, 7.923580299, 8.289163514, 8.413938512 , &
+    &         8.325376904 , 7.91777713 , 7.29719206 , 6.27607607 /
+  data Z_TL /-2.51524048  ,-1.50293629 ,-0.48762823 , 0.52868112 , 1.54499047  , &
+    &         2.560496394 , 3.576406477, 4.338347497, 4.729420462, 4.541396188 , &
+    &         3.929548314 , 3.181563866, 2.463244175, 1.678700584, 0.6241505981, &
+    &        -0.4365759557,-1.358455938,-2.279778345,-3.070767305/
+  data R_DRS/ 6.770665357 , 5.781724115, 4.829958467, 4.0852632  /
+  data Z_DRS/-2.687642695 ,-2.603764794,-2.412754135,-2.172970445/
 
   integer, save :: nuclear_mass(92)
   data nuclear_mass /   1,   4,   7,   9,  11,  12,  14,  16,  18,  20, &
@@ -189,37 +195,67 @@
   outside = .false.
   intersect = .false.
   closest = huge(1.0_IDS_real)
-  do i = 1, N_FW-1
+  do i = 1, N_TL-1
     outside = outside .or. &
-      &  0.0_IDS_real .gt. ( (R0 - R_FW(I))*(Z_FW(I+1) - Z_FW(I)) - &
-      &                      (Z0 - Z_FW(I))*(R_FW(I+1) - R_FW(I)) )
-    distance = ( (R0 - R_FW(I))*(Z_FW(I+1) - Z_FW(I)) - &
-      &          (Z0 - Z_FW(I))*(R_FW(I+1) - R_FW(I)) ) / &
-      &   sqrt ( (R_FW(I+1) - R_FW(I))**2 + (Z_FW(I+1) - Z_FW(I))**2 )
-    R_cl = R_FW(I) + &
-      &  ( ( R_FW(I+1) - R_FW(I) ) * ( R0 - R_FW(I) ) + &
-      &    ( Z_FW(I+1) - Z_FW(I) ) * ( Z0 - Z_FW(I) ) ) / &
-      &  ( ( R_FW(I+1) - R_FW(I) )**2 + ( Z_FW(I+1) - Z_FW(I) )**2 ) * &
-      &    ( R_FW(I+1) - R_FW(I) )
-    Z_cl = Z_FW(I) + &
-      &  ( ( R_FW(I+1) - R_FW(I) ) * ( R0 - R_FW(I) ) + &
-      &    ( Z_FW(I+1) - Z_FW(I) ) * ( Z0 - Z_FW(I) ) ) / &
-      &  ( ( R_FW(I+1) - R_FW(I) )**2 + ( Z_FW(I+1) - Z_FW(I) )**2 ) * &
-      &    ( Z_FW(I+1) - Z_FW(I) )
+      &  0.0_IDS_real .gt. ( (R0 - R_TL(I))*(Z_TL(I+1) - Z_TL(I)) - &
+      &                      (Z0 - Z_TL(I))*(R_TL(I+1) - R_TL(I)) )
+    distance = ( (R0 - R_TL(I))*(Z_TL(I+1) - Z_TL(I)) - &
+      &          (Z0 - Z_TL(I))*(R_TL(I+1) - R_TL(I)) ) / &
+      &   sqrt ( (R_TL(I+1) - R_TL(I))**2 + (Z_TL(I+1) - Z_TL(I))**2 )
+    R_cl = R_TL(I) + &
+      &  ( ( R_TL(I+1) - R_TL(I) ) * ( R0 - R_TL(I) ) + &
+      &    ( Z_TL(I+1) - Z_TL(I) ) * ( Z0 - Z_TL(I) ) ) / &
+      &  ( ( R_TL(I+1) - R_TL(I) )**2 + ( Z_TL(I+1) - Z_TL(I) )**2 ) * &
+      &    ( R_TL(I+1) - R_TL(I) )
+    Z_cl = Z_TL(I) + &
+      &  ( ( R_TL(I+1) - R_TL(I) ) * ( R0 - R_TL(I) ) + &
+      &    ( Z_TL(I+1) - Z_TL(I) ) * ( Z0 - Z_TL(I) ) ) / &
+      &  ( ( R_TL(I+1) - R_TL(I) )**2 + ( Z_TL(I+1) - Z_TL(I) )**2 ) * &
+      &    ( Z_TL(I+1) - Z_TL(I) )
     if (distance.lt.radius) then
       intersect = .true.
       radius = distance
     end if
     if (distance.lt.closest) then
-      if ((R_cl-R_FW(I))*(R_cl-R_FW(I+1)).lt.1.0e-6_IDS_real .and. &
-        & (Z_cl-Z_FW(I))*(Z_cl-Z_FW(I+1)).lt.1.0e-6_IDS_real) then
+      if ((R_cl-R_TL(I))*(R_cl-R_TL(I+1)).lt.1.0e-6_IDS_real .and. &
+        & (Z_cl-Z_TL(I))*(Z_cl-Z_TL(I+1)).lt.1.0e-6_IDS_real) then
         closest = distance
         R_lim = R_cl
         Z_lim = Z_cl
       end if
     end if
   end do
-  if (outside) stop 'Plasma is outside the First Wall contour !'
+  do i = 1, N_DRS-1
+    outside = outside .or. &
+      &  0.0_IDS_real .gt. ( (R0 - R_DRS(I))*(Z_DRS(I+1) - Z_DRS(I)) - &
+      &                      (Z0 - Z_DRS(I))*(R_DRS(I+1) - R_DRS(I)) )
+    distance = ( (R0 - R_DRS(I))*(Z_DRS(I+1) - Z_DRS(I)) - &
+      &          (Z0 - Z_DRS(I))*(R_DRS(I+1) - R_DRS(I)) ) / &
+      &   sqrt ( (R_DRS(I+1) - R_DRS(I))**2 + (Z_DRS(I+1) - Z_DRS(I))**2 )
+    R_cl = R_DRS(I) + &
+      &  ( ( R_DRS(I+1) - R_DRS(I) ) * ( R0 - R_DRS(I) ) + &
+      &    ( Z_DRS(I+1) - Z_DRS(I) ) * ( Z0 - Z_DRS(I) ) ) / &
+      &  ( ( R_DRS(I+1) - R_DRS(I) )**2 + ( Z_DRS(I+1) - Z_DRS(I) )**2 ) * &
+      &    ( R_DRS(I+1) - R_DRS(I) )
+    Z_cl = Z_DRS(I) + &
+      &  ( ( R_DRS(I+1) - R_DRS(I) ) * ( R0 - R_DRS(I) ) + &
+      &    ( Z_DRS(I+1) - Z_DRS(I) ) * ( Z0 - Z_DRS(I) ) ) / &
+      &  ( ( R_DRS(I+1) - R_DRS(I) )**2 + ( Z_DRS(I+1) - Z_DRS(I) )**2 ) * &
+      &    ( Z_DRS(I+1) - Z_DRS(I) )
+    if (distance.lt.radius) then
+      intersect = .true.
+      radius = distance
+    end if
+    if (distance.lt.closest) then
+      if ((R_cl-R_DRS(I))*(R_cl-R_DRS(I+1)).lt.1.0e-6_IDS_real .and. &
+        & (Z_cl-Z_DRS(I))*(Z_cl-Z_DRS(I+1)).lt.1.0e-6_IDS_real) then
+        closest = distance
+        R_lim = R_cl
+        Z_lim = Z_cl
+      end if
+    end if
+  end do
+  if (outside) stop 'Plasma is outside the First Plasma Protection contour !'
   if (intersect) then
     write(0,*) 'Plasma radius intersects the First Wall !'
     write(0,*) 'Reducing radius to tangency distance...'
