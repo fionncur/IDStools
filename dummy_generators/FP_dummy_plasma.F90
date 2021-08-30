@@ -295,7 +295,7 @@
   num_time_slices = 1
 
   ! Import wall IDS from MD database
-  call imas_open_env(treename, 10, 3, idxmd, 'public', 'ITER_MD', version, status)
+  call imas_open_env(treename, 160612, 1, idxmd, 'public', 'ITER_MD', version, status)
   if (status.ne.0) stop 'Error opening IMAS database !'
   call ids_get(idxmd, 'wall', wall, status)
   if (status.ne.0) stop 'Error reading wall IDS !'
