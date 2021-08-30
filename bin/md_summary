@@ -34,6 +34,7 @@ parser.add_argument("-c","--choice", help=\
                     "        ro                     = Name of the diagnostic responsible officer\n"\
                     "        ro_email               = E-mail of the diagnostic responsible officer\n"\
                     "        description            = Description of the data\n"\
+                    "        provenance             = Data provenance\n"\
                     "        replaces               = Old shot/run this one replaces\n"\
                     "        reason_for_replacement = Comment on why this shot/run replaces the previous one\n"\
                     , required=False)
@@ -85,6 +86,7 @@ class tab_init():
       self.value['ro']                     = ' '
       self.value['ro_email']               = ' '
       self.value['description']            = ' '
+      self.value['provenance']             = ' '
       self.value['replaced_by']            = ' '
       self.value['replaces']               = ' '
       self.value['reason_for_replacement'] = ' '
