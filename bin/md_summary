@@ -22,7 +22,7 @@ parser.add_argument("-f","--folder",help=\
                     "folder where to search for MD data", required=False)
 parser.add_argument("-s","--selection",help=\
                     "R|list of fields to filter: e.g. PBS-55,ece\n"\
-                    "----> Select only scenarios filling these criteria"\
+                    "----> Select only MD data filling these criteria"\
                     , required=False)
 parser.add_argument("-c","--choice", help=\
                     "R|list of variables to display, e.g.: pbs,ids,description\n"\
@@ -34,6 +34,7 @@ parser.add_argument("-c","--choice", help=\
                     "        ro                     = Name of the diagnostic responsible officer\n"\
                     "        ro_email               = E-mail of the diagnostic responsible officer\n"\
                     "        description            = Description of the data\n"\
+                    "        provenance             = Data provenance\n"\
                     "        replaces               = Old shot/run this one replaces\n"\
                     "        reason_for_replacement = Comment on why this shot/run replaces the previous one\n"\
                     , required=False)
@@ -70,7 +71,7 @@ else:
 # PRINT THE ARGUMENTS OF THE DEFAULT CALL TO THE FUNCTION
 if args['choice'] == None:
     print("""----> Default call equivalent to: """)
-    print("""      scenario_summary -c pbs,ids,description""")
+    print("""      md_summary -c pbs,ids,description""")
 
 # ------------------------------------------------------------------------------------------------------
 
@@ -85,6 +86,7 @@ class tab_init():
       self.value['ro']                     = ' '
       self.value['ro_email']               = ' '
       self.value['description']            = ' '
+      self.value['provenance']             = ' '
       self.value['replaced_by']            = ' '
       self.value['replaces']               = ' '
       self.value['reason_for_replacement'] = ' '
@@ -97,16 +99,17 @@ def tab_adjust(data):
     if len(case) > len(tab_array['max']['case']):
       tab_array['max']['case'] = ' '*(len(case)+1)
     for subkey in data[case]:
-      if data[case][subkey] is not None and len(data[case][subkey]) > len(tab_array['max'][subkey]):
+      if data[case][subkey] is None:
+        data[case][subkey] = ' '
+      if len(data[case][subkey]) > len(tab_array['max'][subkey]):
         tab_array['max'][subkey] = ' '*(len(data[case][subkey])+1)
   for case in data:
     tab_array[case] = tab_init().value
     tab_array[case]['case'] = ' '*(len(tab_array['max']['case']) - len(case)+1)
     for subkey in data[case]:
-      if data[case][subkey] is not None:
-        tab_array[case][subkey] = ' '*(len(tab_array['max'][subkey]) - len(data[case][subkey])+1)
-      else:
-        tab_array[case][subkey] = tab_array['max'][subkey]
+      if data[case][subkey] is None:
+        data[case][subkey] = ' '
+      tab_array[case][subkey] = ' '*(len(tab_array['max'][subkey]) - len(data[case][subkey])+1)
   return tab_array
 
 # MAIN STUFF
