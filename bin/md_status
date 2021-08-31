@@ -1,0 +1,91 @@
+#!/usr/bin/env python
+
+import os, argparse, yaml, re
+
+# Management of input arguments
+parser = argparse.ArgumentParser(description=\
+	 '---- Show status and potential parent and children for a given simulation stored in ITER DB folder')
+parser.add_argument("-f","--folder",help=\
+                    "folder where to search for scenarios", required=False)
+parser.add_argument('-s','--shot',help='shot number', required=True,type=int)
+# currently limiting run < 10000 because of the search path /3/0
+parser.add_argument('-r','--run',help='run number',required=True,type=int,
+                    choices=range(0,9999),metavar="[0-9999]") 
+args = parser.parse_args()
+shot = str(args.shot)
+run  = str(args.run)
+
+# ------------------------------------------------------------------------------------------------------------
+
+def find_parent(shotrun,data,family):
+    replaces = data[shotrun]['replaces']
+    if replaces is not None:
+        string_list = re.findall(r'\d+',replaces)
+        shotp = string_list[0]
+        runp = string_list[1]
+        shotrunp = shotp+'/'+runp
+        family['parents']['shot'].insert(0,shotp) # Order to be reversed for parents
+        family['parents']['run'].insert(0,runp)
+        family['parents']['status'].insert(0,data[shotrunp]['status'])
+        family['parents']['reason_for_replacement'].insert(0,data[shotrunp]['reason_for_replacement'])
+        family = find_parent(shotrunp,data,family)
+    return family
+    
+def find_children(shotrun,data,family):
+    replaced_by = data[shotrun]['replaced_by']
+    if replaced_by is not None:
+        string_list = re.findall(r'\d+',replaced_by)
+        shotc = string_list[0]
+        runc = string_list[1]
+        shotrunc = shotc+'/'+runc
+        family['children']['shot'].append(shotc)
+        family['children']['run'].append(runc)
+        family['children']['status'].append(data[shotrunc]['status'])
+        family['children']['reason_for_replacement'].append(data[shotrunc]['reason_for_replacement'])
+        family = find_children(shotrunc,data,family)
+    return family
+
+folder = '/work/imas/shared/imasdb/ITER_MD/3/0'
+file = open(folder+'/md_summary.yaml', 'r')
+data = yaml.load(file,Loader=yaml.CLoader)
+file.close()
+
+shotrun = shot+'/'+run
+
+if shotrun not in data.keys():
+    print(f'Data entry {shot}/{run} does not exist')
+    exit()    
+
+class generic_member():
+    def __init__(self):
+        self.value = {}
+        self.value['shot']    = []
+        self.value['run']     = []
+        self.value['status']  = []
+        self.value['reason_for_replacement'] = []
+
+family = {}
+family['parents']  = generic_member().value
+family['children'] = generic_member().value
+
+family = find_parent(shotrun,data,family)
+family = find_children(shotrun,data,family)
+
+print("-----------------------------------------------------------------")
+print("  SCENARIO \t STATUS \t REASON WHY IT REPLACES PREVIOUS")
+for iparent in range(len(family['parents']['shot'])):
+    print(" ",family['parents']['shot'][iparent]\
+          +' '*(6-len(family['parents']['shot'][iparent])),family['parents']['run'][iparent]\
+          +' '*(4-len(family['parents']['run'][iparent]))\
+          ,'\t',family['parents']['status'][iparent]
+          ,'\t',family['parents']['reason_for_replacement'][iparent])
+print("*",shot+' '*(6-len(shot)),run+' '*(4-len(run)),'\t',data[shotrun]['status']
+          ,'\t',data[shotrun]['reason_for_replacement'])
+for ichild in range(len(family['children']['shot'])):
+    print(" ",family['children']['shot'][ichild]\
+          +' '*(6-len(family['children']['shot'][ichild])),family['children']['run'][ichild]\
+          +' '*(4-len(family['children']['run'][ichild]))\
+          ,'\t',family['children']['status'][ichild]
+          ,'\t',family['children']['reason_for_replacement'][ichild])
+print("-----------------------------------------------------------------")
+
