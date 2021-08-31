@@ -9,6 +9,7 @@ script_files = glob.glob("bin/*")
 script_files.append("database_tools/ids_shift_eq.py")
 script_files.append("database_tools/idstest_dim2d.py")
 script_files.append("database_tools/ids_rescale_eq.py")
+script_files.append("idstools/idsdef.py")
 
 # Get version by PKGVERSION, .version file, or git describe
 def get_version():
