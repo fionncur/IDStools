@@ -6,7 +6,7 @@ import os, argparse, yaml, re
 parser = argparse.ArgumentParser(description=\
 	 '---- Show status and potential parent and children for a given simulation stored in ITER DB folder')
 parser.add_argument("-f","--folder",help=\
-                    "folder where to search for scenarios", required=False)
+                    "folder where to search for MD data", required=False)
 parser.add_argument('-s','--shot',help='shot number', required=True,type=int)
 # currently limiting run < 10000 because of the search path /3/0
 parser.add_argument('-r','--run',help='run number',required=True,type=int,
@@ -72,7 +72,7 @@ family = find_parent(shotrun,data,family)
 family = find_children(shotrun,data,family)
 
 print("-----------------------------------------------------------------")
-print("  SCENARIO \t STATUS \t REASON WHY IT REPLACES PREVIOUS")
+print("  DATASET \t STATUS \t REASON WHY IT REPLACES PREVIOUS")
 for iparent in range(len(family['parents']['shot'])):
     print(" ",family['parents']['shot'][iparent]\
           +' '*(6-len(family['parents']['shot'][iparent])),family['parents']['run'][iparent]\
