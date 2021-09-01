@@ -17,10 +17,6 @@ DATA=FP_parameters.dat
 
 ALL: ${TARGET}
 
-check:
-	echo ${FC}
-	echo ${IMAS_FCFLAGS}
-
 install: ${TARGET}
 	install -d ${INSTALL_DIR}/bin
 	install -d ${INSTALL_DIR}/share
@@ -28,7 +24,7 @@ install: ${TARGET}
 	install ${DATA} ${INSTALL_DIR}/share/.
 
 clean:
-	@rm *.o ${TARGET}
+	@rm -f *.o ${TARGET}
 
 FP_dummy_plasma.exe: FP_dummy_plasma.F90
 	${FC} ${FCFLAGS} ${IMAS_FCFLAGS} ${AMNS_FCFLAGS} $^ -o $@ ${LDFLAGS} ${IMAS_LDFLAGS} ${AMNS_LDFLAGS}

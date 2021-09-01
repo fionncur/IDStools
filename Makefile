@@ -59,7 +59,6 @@ tools_install: tools_build
 	$(PYCMD) -m pip install --compile --prefix $(INSTALL_PREFIX) .
 	@echo "Byte-compiling installed module..."
 	PYTHONPATH=$(INSTALL_PY):$$PYTHONPATH $(PYCMD) -c "import idstools"
-	make -C dummy_generators INSTALL_DIR=$(INSTALL_PREFIX) install
 
 tools_uninstall:
 	rm -rf $(INSTALL_PREFIX)
