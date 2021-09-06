@@ -86,7 +86,7 @@ def evaluate(expr):
 parser = argparse.ArgumentParser(description="This script applies mapping of a non-IDS database content (e.g. ITPA DBs) into IDS rules.")
 parser.add_argument("-i", "--inputCSV", type=str, default="HDB5.2.3.csv",
                     help="Path to csv file containing the external database content \t(default=%(default)s, the H-mode DB will be downloaded from https://osf.io/zhwa3/ automatically if not present)")
-parser.add_argument("-m", "--mapping", type=str, default=os.path.dirname(os.path.realpath(__file__))+"/h-mode-db-mapping.csv",
+parser.add_argument("-m", "--mapping", type=str, default=os.path.dirname(os.path.realpath(__file__))+"/mappings/h-mode-db-mapping.csv",
                     help="Path to csv-formatted mapping file \t(default=%(default)s)")
 parser.add_argument("--varCol", type=str, default='DB_VARIABLE',
                     help="Name of the column of the mapping file listing all DB variables \t(default=%(default)s)")

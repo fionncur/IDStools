@@ -10,7 +10,9 @@ script_files.append("database_tools/ids_shift_eq.py")
 script_files.append("database_tools/idstest_dim2d.py")
 script_files.append("database_tools/ids_rescale_eq.py")
 script_files.append("database_tools/rosettacode.py")
+script_files.append("database_tools/idschk")
 script_files.append("idstools/idsdef.py")
+
 
 # Get version by PKGVERSION, .version file, or git describe
 def get_version():
@@ -33,4 +35,5 @@ setup(name='IMAS IDS Tools',
       packages      = ['idstools','database_tools'],
       py_modules    = [],
       scripts       = script_files,
+      data_files    = [('bin/mappings',['database_tools/mappings/h-mode-db-mapping.csv'])]
      )
