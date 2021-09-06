@@ -38,4 +38,4 @@ that it intersects the wall. It exports an IDS containing a minimal description 
 
 ## Known issues
 
-Current version of the Fortran code does compiles with gfortran version 10.2.0
+Current version of the Fortran code does not compile with gfortran version 10.2.0
