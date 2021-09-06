@@ -8,10 +8,13 @@ import argparse
 import math
 import sys
 from idstools.cli import get_backend_id
+import os
+import requests
 progbar = True
 try:
     from tqdm import tqdm
 except ModuleNotFoundError:
+    print(f"Install tqdm to enable progress-bar")
     progbar = False
     
 
@@ -81,19 +84,19 @@ def evaluate(expr):
 
 
 parser = argparse.ArgumentParser(description="This script applies mapping of a non-IDS database content (e.g. ITPA DBs) into IDS rules.")
-parser.add_argument("-i", "--inputCSV", type=str, default="/home/ITER/vidalm/Desktop/HDB5.2.3.csv",
-                    help="Path to csv file containing the external database content (e.g. /home/ITER/vidalm/Desktop/HDB5.2.3.csv) \t(default=%(default)s)")
-parser.add_argument("-m", "--mapping", type=str, default="/home/ITER/vidalm/Desktop/maptest8.csv",
-                    help="Path to csv-formatted mapping file (e.g. /home/ITER/vidalm/Desktop/maptest8.csv) \t(default=%(default)s)")
-parser.add_argument("--varCol", type=str, default='DB VARIABLE',
+parser.add_argument("-i", "--inputCSV", type=str, default="HDB5.2.3.csv",
+                    help="Path to csv file containing the external database content \t(default=%(default)s, the H-mode DB will be downloaded from https://osf.io/zhwa3/ automatically if not present)")
+parser.add_argument("-m", "--mapping", type=str, default=os.path.dirname(os.path.realpath(__file__))+"/h-mode-db-mapping.csv",
+                    help="Path to csv-formatted mapping file \t(default=%(default)s)")
+parser.add_argument("--varCol", type=str, default='DB_VARIABLE',
                     help="Name of the column of the mapping file listing all DB variables \t(default=%(default)s)")
-parser.add_argument("--pathCol", type=str, default="IDS PATH",
+parser.add_argument("--pathCol", type=str, default="IDS_PATH",
                     help="Name of the column of the mapping file listing the paths to store all DB variables into IDS fields \t(default=%(default)s)")
 parser.add_argument("--traCol", type=str, default="TRANSFORMATION",
                     help="Name of the column of the mapping file listing the transformations to be done on DB variables (default = summary)\t(default=%(default)s)")
 parser.add_argument("--timeloc", type=str, default="summary",
                     help="Name of the IDS from which the time will be extracted to populate time-empty IDSs \t(default=%(default)s")
-parser.add_argument("-b", "--backend", type=str, default="MDSPLUS",
+parser.add_argument("-b", "--backend", type=str, default="ASCII",
                     help="backend format \t(default=%(default)s)")
 parser.add_argument("-d", "--database", type=str, default="test",
                     help="target IMAS database name \t(default=%(default)s)")
@@ -107,6 +110,14 @@ parser.add_argument("--debug", action='store_true',
                     help="Run in debug mode")
 args = parser.parse_args()
 
+try:
+    f = open(args.inputCSV,'r')
+    f.close()
+except FileNotFoundError:
+    print(f"Downloading {args.inputCSV} from https://osf.io/ (CC BY 4.0 @ Geert Verdoolaege and Stanley Kaye)")
+    url = "https://osf.io/zhwa3/download"
+    dl = requests.get(url,allow_redirects=True,verify="/work/imas/etc/iter.pem")
+    open(args.inputCSV,'wb').write(dl.content)
 
 mf = pd.read_csv(args.mapping, keep_default_na=False, usecols=[args.varCol, args.pathCol, args.traCol])
 mf.dropna(how="all")
@@ -121,7 +132,7 @@ db = db.replace(to_replace=np.nan, value=None)
 
 rows = [args.row] if args.row != None else db.index
 
-
+if not progbar: print(f"Starts mapping of the DB {args.inputCSV}, please be patient...")
 for row in tqdm(rows) if progbar else rows:
     DBVAR = db.iloc[row]
     de = imas.DBEntry(get_backend_id(args.backend), args.database, 1, row)
