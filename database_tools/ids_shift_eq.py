@@ -35,22 +35,32 @@ def z_shift(equin, shift):
         equout.time_slice[itime].boundary_separatrix.geometric_axis.z = equin.time_slice[itime].boundary_separatrix.geometric_axis.z + shift
 
         for ixpt in range(len(equin.time_slice[itime].boundary_separatrix.x_point)):
-            equout.time_slice[itime].boundary.x_point[ixpt].z = equin.time_slice[itime].boundary.x_point[ixpt].z + shift
+            equout.time_slice[itime].boundary_separatrix.x_point[ixpt].z = equin.time_slice[itime].boundary_separatrix.x_point[ixpt].z + shift
 
-        for istr in range(len(equin.time_slice[itime].boundary.strike_point)):
-            equout.time_slice[itime].boundary.strike_point[istr].z = equin.time_slice[itime].boundary.strike_point[istr].z + shift
-        equout.time_slice[itime].boundary.active_limiter_point.z = equin.time_slice[itime].boundary.active_limiter_point.z + shift
+        for istr in range(len(equin.time_slice[itime].boundary_separatrix.strike_point)):
+            equout.time_slice[itime].boundary_separatrix.strike_point[istr].z = equin.time_slice[itime].boundary_separatrix.strike_point[istr].z + shift
+        equout.time_slice[itime].boundary_separatrix.active_limiter_point.z = equin.time_slice[itime].boundary_separatrix.active_limiter_point.z + shift
+        equout.time_slice[itime].boundary_separatrix.closest_wall_point.z = equin.time_slice[itime].boundary_separatrix.closest_wall_point.z + shift
+        equout.time_slice[itime].boundary_separatrix.dr_dz_zero_point.z = equin.time_slice[itime].boundary_separatrix.dr_dz_zero_point.z + shift
+
+        for iz in range(len(equin.time_slice[itime].boundary_secondary_separatrix.outline.z)):
+            equout.time_slice[itime].boundary_secondary_separatrix.outline.z[iz] = equin.time_slice[itime].boundary_secondary_separatrix.outline.z[iz] + shift
+
+        for ixpt in range(len(equin.time_slice[itime].boundary_secondary_separatrix.x_point)):
+            equout.time_slice[itime].boundary_secondary_separatrix.x_point[ixpt].z = equin.time_slice[itime].boundary_secondary_separatrix.x_point[ixpt].z + shift
+
+        for istr in range(len(equin.time_slice[itime].boundary_secondary_separatrix.strike_point)):
+            equout.time_slice[itime].boundary_secondary_separatrix.strike_point[istr].z = equin.time_slice[itime].boundary_secondary_separatrix.strike_point[istr].z + shift
 
         for iq in range(len(equin.time_slice[itime].constraints.q)):
             equout.time_slice[itime].constraints.q[iq].position.z = equin.time_slice[itime].constraints.q[iq].position.z + shift
 
         for ixpt in range(len(equin.time_slice[itime].constraints.x_point)):
             equout.time_slice[itime].constraints.x_point[ixpt].position_measured.z = equin.time_slice[itime].constraints.x_point[ixpt].position_measured.z + shift
-        equout.time_slice[itime].constraints.x_point[ixpt].position_reconstructed.z = equin.time_slice[itime].constraints.x_point[ixpt].position_reconstructed.z + shift
+            equout.time_slice[itime].constraints.x_point[ixpt].position_reconstructed.z = equin.time_slice[itime].constraints.x_point[ixpt].position_reconstructed.z + shift
 
         for istr in range(len(equin.time_slice[itime].constraints.strike_point)):
             equout.time_slice[itime].constraints.strike_point[istr].position_measured.z = equin.time_slice[itime].constraints.strike_point[istr].position_measured.z + shift
-        equout.time_slice[itime].constraints.strike_point[istr].position_reconstructed.z = equin.time_slice[itime].constraints.strike_point[istr].position_reconstructed.z + shift
         equout.time_slice[itime].global_quantities.magnetic_axis.z = equin.time_slice[itime].global_quantities.magnetic_axis.z + shift
 
         for iz in range(len(equin.time_slice[itime].profiles_1d.geometric_axis.z)):
@@ -119,13 +129,18 @@ if __name__ == "__main__":
     equin = input.get("equilibrium")
 
     # OPEN OUTPUT
-    output = imas.DBEntry(imas.imasdef.MDSPLUS_BACKEND,database,shot_out,run_out,user_or_path)
+    output = imas.DBEntry(imas.imasdef.MDSPLUS_BACKEND,database,shot_out,run_out,user_name=os.environ['USER'])
     status,idx = output.open()
     if (status!=0):
         print("Can't open the output pulse file!")
-        sys.exit(1)
+        print("Trying to create a new one")
+        status,idx = output.create()
+        if (status!=0):
+          print("Can't create the output pulse file!")
+          sys.exit(1)
 
     print ('Shifting equilibrium by '+str(shift)+' m')
+    print ('Values for wall gaps, locations of strike-points and closest wall points are no longer guaranteed!')
     equout = z_shift(equin, shift)
 
     # PUT IDS INTO OUTPUT
