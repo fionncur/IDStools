@@ -19,15 +19,17 @@ def find_nearest(a, a0):
 # Management of input arguments
 parser = argparse.ArgumentParser(description=\
     '---- Display the plasma kinetic profiles from the core_profiles IDSs')
-parser.add_argument('-u','--user_or_path',help='User or absolute path name of the DB where the data-entry is located', required=False)
-parser.add_argument('-d','--database',help='Database name of the targeted data-entry', required=False)
-parser.add_argument('-s','--shot',help='Shot number', required=True,type=int)
-parser.add_argument('-r','--run',help='Run number', required=True,type=int)
-parser.add_argument('-t','--time',help='Time', required=False,type=float)
-parser.add_argument('-e','--edge',help ='Add edge profiles if available',action='store_true', default=False, required=False)
+parser.add_argument('-u','--user_or_path',help='User or absolute path name of the DB where the data-entry is located',required=False)
+parser.add_argument('-d','--database',help='Database name of the targeted data-entry',required=False)
+parser.add_argument('-s','--shot',help='Shot number',required=True,type=int)
+parser.add_argument('-r','--run',help='Run number',required=True,type=int)
+parser.add_argument('-t','--time',help='Time',required=False,type=float)
+parser.add_argument('-e','--edge',help ='Add edge profiles if available',action='store_true',default=False,required=False)
+parser.add_argument('-v','--verbose',help='Verbose output',action='store_true',default=False,required=False)
 args = vars(parser.parse_args())
 
 edge_plot = args['edge']
+debug = args['verbose']
 
 # For execution from python shell
 #args = {'run': 6, 'database': None, 'user_or_path': None, 'time': None, 'shot': 4321, 'edge': False}
@@ -216,6 +218,9 @@ if r_out_graph == 1:
     if gset == -99:
         print('Did not find outer_midplane GGD grid subset', file=sys.stderr)
         r_out_graph == 0
+    else:
+        if debug:
+            print('Outer midplane GGD grid subset is number '+str(gset)+' of '+str(nsubsets), file=sys.stdout)
     if edge_profiles.midplane.index != 1:
         print('Edge and core profile midplane coordinates are not aligned!', file=sys.stdout)
 
@@ -229,6 +234,7 @@ plot_compo = 1
 
 # Obtain array sizes
 nrho = 0
+mrho = 0
 if r_out_graph == 0:
     try:
         if len(core_profiles.profiles_1d[0].grid.rho_tor_norm) > 0:
@@ -244,7 +250,13 @@ if r_out_graph == 0:
         print('----> Aborted.', file=sys.stderr)
         exit()
 else:
-    nrho = len(equilibrium.time_slice[0].profiles_1d.r_outboard)
+    if len(equilibrium.time_slice[0].profiles_1d.rho_tor_norm) ==  len(core_profiles.profiles_1d[0].grid.rho_tor_norm):
+        nrho = len(equilibrium.time_slice[0].profiles_1d.rho_tor_norm)
+    else:
+        for i in range(len(equilibrium.time_slice[0].profiles_1d.rho_tor_norm)):
+            if equilibrium.time_slice[0].profiles_1d.rho_tor_norm[i] < 0:
+                mrho = mrho + 1
+        nrho = len(equilibrium.time_slice[0].profiles_1d.rho_tor_norm) - mrho
 
 erho = 0
 if edge_present == 1:
@@ -261,6 +273,9 @@ if edge_present == 1:
     else:
         erho = len(edge_profiles.grid_ggd[0].grid_subset[gset].element)
 
+if debug:
+    print('Array sizes: rho_tor_norm = '+str(nrho)+' and edge_profiles = '+str(erho), file=sys.stdout)
+
 # Rho or R_outboard profile
 xbeg = 99.
 xend = 0
@@ -276,7 +291,7 @@ if r_out_graph == 0:
     xend = 1
 else:
     for i in range(nrho):
-        rho_tor_norm[i] = equilibrium.time_slice[0].profiles_1d.r_outboard[i]
+        rho_tor_norm[i] = equilibrium.time_slice[0].profiles_1d.r_outboard[mrho+i]
     xbeg = min(xbeg,rho_tor_norm[nrho-1],rho_tor_norm[0])
     xend = max(xend,rho_tor_norm[nrho-1],rho_tor_norm[0])
 
@@ -345,116 +360,121 @@ if edge_present == 1:
 
 # Volume profile (not mandatory)
 volume = [0] * (nrho + erho)
-try:
-    if len(core_profiles.profiles_1d[0].grid.volume) > 0:
-        for i in range(nrho):
-            volume[i] = core_profiles.profiles_1d[0].grid.volume[i]
-    else:
-        try:
-            equilibrium = input.equilibrium
-            equilibrium.time_slice[0].profiles_1d.volume = input.equilibrium.partialGet('time_slice('+str(it)+')/profiles_1d/volume')
-        except:
-            exit()
+if len(core_profiles.profiles_1d[0].grid.volume) == nrho:
+    for i in range(nrho):
+        volume[i] = core_profiles.profiles_1d[0].grid.volume[i]
+else:
+    try:
+        equilibrium = input.equilibrium
+        equilibrium.time_slice[0].profiles_1d.volume = input.equilibrium.partialGet('time_slice('+str(it)+')/profiles_1d/volume')
         for i in range(nrho):
             volume[i] = equilibrium.time_slice[0].profiles_1d.volume[i]
         if len(volume) == len(core_profiles.profiles_1d[0].electrons.density):
             print('   core_profiles.profiles_1d[:].grid.volume could not be read', file=sys.stderr)
             print('   ----> equilibrium.time_slice[:].profiles_1d.volume used instead', file=sys.stderr)
             print('   (possible because the resolution is the same, but maybe not correct)', file=sys.stderr)
-        else:
-            exit()
-    if (edge_present == 1 and r_out_graph == 0):
-        for i in range(erho):
-            volume[nrho+i] = edge_profiles.profiles_1d[0].grid.volume[i]
-except:
-    print('core_profiles.profiles_1d[:].grid.volume could not be read', file=sys.stderr)
-    plot_compo = 0
+    except:
+        print('core_profiles.profiles_1d[:].grid.volume could not be read', file=sys.stderr)
+        plot_compo = 0
+if (edge_present == 1 and r_out_graph == 0):
+    for i in range(erho):
+        volume[nrho+i] = edge_profiles.profiles_1d[0].grid.volume[i]
 
 # Zeff profile (not mandatory)
 zeff = [0] * (nrho + erho)
-if len(core_profiles.profiles_1d[0].zeff) < 1:
+if len(core_profiles.profiles_1d[0].zeff) != nrho:
     print('core_profiles.profiles_1d[:].zeff could not be read', file=sys.stderr)
-    core_profiles.profiles_1d[0].zeff = asarray([nan]*nrho)
+    print('Size mismatch: rho_tor_norm = '+str(nrho)+', zeff = '+str(len(core_profiles.profiles_1d[0].zeff)), file=sys.stderr)
+    core_profiles.profiles_1d[0].zeff = asarray([NaN]*nrho)
 for i in range(nrho):
     zeff[i] = core_profiles.profiles_1d[0].zeff[i]
 if edge_present == 1:
     if r_out_graph == 0:
         if len(edge_profiles.profiles_1d[0].zeff) < 1:
             print('edge_profiles.profiles_1d[:].zeff could not be read', file=sys.stderr)
-            edge_profiles.profiles_1d[0].zeff = asarray([nan]*erho)
+            edge_profiles.profiles_1d[0].zeff = asarray([NaN]*erho)
         for i in range(erho):
             zeff[nrho+i] = edge_profiles.profiles_1d[0].zeff[i]
     else:
         if len(edge_profiles.ggd[0].zeff[gset].values) < 1:
             print('edge_profiles.ggd[:].zeff could not be read', file=sys.stderr)
-            edge_profiles.ggd[0].zeff[gset].values = asarray([nan]*erho)
+            edge_profiles.ggd[0].zeff[gset].values = asarray([NaN]*erho)
         for i in range(erho):
             zeff[nrho+i] = edge_profiles.ggd[0].zeff[gset].values[i]
 
 # Ne profile (not mandatory)
 electron_density = [0] * (nrho + erho)
-if len(core_profiles.profiles_1d[0].electrons.density) < 1:
+if len(core_profiles.profiles_1d[0].electrons.density) != nrho:
     print('core_profiles.profiles_1d[:].electrons.density could not be read', file=sys.stderr)
-    core_profiles.profiles_1d[0].electrons.density = asarray([nan]*nrho)
+    print('Size mismatch: rho_tor_norm = '+str(nrho)+', electrons.density = '+str(len(core_profiles.profiles_1d[0].electrons.density)), file=sys.stderr)
+    core_profiles.profiles_1d[0].electrons.density = asarray([NaN]*nrho)
 for i in range(nrho):
     electron_density[i] = core_profiles.profiles_1d[0].electrons.density[i]
 if edge_present == 1:
     if r_out_graph == 0:
         if len(edge_profiles.profiles_1d[0].electrons.density) < 1:
             print('edge_profiles.profiles_1d[:].electrons.density could not be read', file=sys.stderr)
-            edge_profiles.profiles_1d[0].electrons.density = asarray([nan]*erho)
+            edge_profiles.profiles_1d[0].electrons.density = asarray([NaN]*erho)
         for i in range(erho):
             electron_density[nrho+i] = edge_profiles.profiles_1d[0].electrons.density[i]
     else:
         if len(edge_profiles.ggd[0].electrons.density[gset].values) < 1:
             print('edge_profiles.ggd[:].electrons.density could not be read', file=sys.stderr)
-            edge_profiles.ggd[0].electrons.density[gset].values = asarray([nan]*erho)
+            edge_profiles.ggd[0].electrons.density[gset].values = asarray([NaN]*erho)
         for i in range(erho):
             electron_density[nrho+i] = edge_profiles.ggd[0].electrons.density[gset].values[i]
 
 # Te profile (not mandatory)
 electron_temperature = [0] * (nrho + erho)
-if len(core_profiles.profiles_1d[0].electrons.temperature) < 1:
+if len(core_profiles.profiles_1d[0].electrons.temperature) != nrho:
     print('core_profiles.profiles_1d[:].electrons.temperature could not be read', file=sys.stderr)
-    core_profiles.profiles_1d[0].electrons.temperature = asarray([nan]*nrho)
+    print('Size mismatch: rho_tor_norm = '+str(nrho)+', electrons.temperature = '+str(len(core_profiles.profiles_1d[0].electrons.temperature)), file=sys.stderr)
+    core_profiles.profiles_1d[0].electrons.temperature = asarray([NaN]*nrho)
 for i in range(nrho):
     electron_temperature[i] = core_profiles.profiles_1d[0].electrons.temperature[i]*1.e-3
 if edge_present == 1:
     if r_out_graph == 0:
         if len(edge_profiles.profiles_1d[0].electrons.temperature) < 1:
             print('edge_profiles.profiles_1d[:].electrons.temperature could not be read', file=sys.stderr)
-            edge_profiles.profiles_1d[0].electrons.temperature = asarray([nan]*erho)
+            edge_profiles.profiles_1d[0].electrons.temperature = asarray([NaN]*erho)
         for i in range(erho):
             electron_temperature[nrho+i] = edge_profiles.profiles_1d[0].electrons.temperature[i]*1.e-3
     else:
         if len(edge_profiles.ggd[0].electrons.temperature[gset].values) < 1:
             print('edge_profiles.ggd[:].electrons.temperature could not be read', file=sys.stderr)
-            edge_profiles.ggd[0].electrons.temperature[gset].values = asarray([nan]*erho)
+            edge_profiles.ggd[0].electrons.temperature[gset].values = asarray([NaN]*erho)
         for i in range(erho):
             electron_temperature[nrho+i] = edge_profiles.ggd[0].electrons.temperature[gset].values[i]*1.e-3
 
 # Ti profile (not mandatory)
 ti_flag = 0
-if len(core_profiles.profiles_1d[0].t_i_average) < 1:
+if len(core_profiles.profiles_1d[0].t_i_average) != nrho:
     print('core_profiles.profiles_1d[:].t_i_average could not be read', file=sys.stderr)
-    core_profiles.profiles_1d[0].t_i_average = asarray([nan]*nrho)
+    print('Size mismatch: rho_tor_norm = '+str(nrho)+', t_i_average = '+str(len(core_profiles.profiles_1d[0].t_i_average)), file=sys.stderr)
+    core_profiles.profiles_1d[0].t_i_average = asarray([NaN]*nrho)
 else:
     ti_flag = 1
-if (edge_present == 1 and ti_flag == 1):
+ti_e_flag = 0
+if (edge_present == 1):
     if r_out_graph == 0:
         if len(edge_profiles.profiles_1d[0].t_i_average) < 1:
             print('edge_profiles.profiles_1d[:].t_i_average could not be read', file=sys.stderr)
-            edge_profiles.profiles_1d[0].t_i_average = asarray([nan]*erho)
+            edge_profiles.profiles_1d[0].t_i_average = asarray([NaN]*erho)
+        else:
+            ti_e_flag = 1
     else:
         if len(edge_profiles.ggd[0].t_i_average[gset].values) < 1:
             print('edge_profiles.ggd[:].t_i_average could not be read', file=sys.stderr)
-            edge_profiles.ggd[0].t_i_average[gset].values = asarray([nan]*erho)
+            edge_profiles.ggd[0].t_i_average[gset].values = asarray([NaN]*erho)
+        else:
+            ti_e_flag = 1
 
 if ti_flag == 0:
     for ispecies in range(nspecies):
-        if len(core_profiles.profiles_1d[0].ion[ispecies].temperature) < 1:
+        if len(core_profiles.profiles_1d[0].ion[ispecies].temperature) != nrho:
             print('core_profiles.profiles_1d[:].ion['+str(ispecies)+'].temperature could not be read', file=sys.stderr)
-            core_profiles.profiles_1d[0].ion[ispecies].temperature = asarray([nan]*nrho)
+            print('Size mismatch: rho_tor_norm = '+str(nrho)+', ion['+str(ispecies)+'].temperature = '+str(len(core_profiles.profiles_1d[0].ion[ispecies].temperature)), file=sys.stderr)
+            core_profiles.profiles_1d[0].ion[ispecies].temperature = asarray([NaN]*nrho)
         else:
             ti_flag = 2
         if edge_present == 1:
@@ -462,28 +482,40 @@ if ti_flag == 0:
             if jspecies != -99:
                 if r_out_graph == 0:
                     if len(edge_profiles.profiles_1d[0].ion[jspecies].temperature) < 1:
-                        print('edge_profiles.profiles_1d[:].ion['+str(jspecies)+'].temperature could not be read', file=sys.stderr)
-                        edge_profiles.profiles_1d[0].ion[jspecies].temperature = asarray([nan]*erho)
+                        if ti_e_flag != 1 or debug:
+                            print('edge_profiles.profiles_1d[:].ion['+str(jspecies)+'].temperature could not be read', file=sys.stderr)
+                        if ti_e_flag != 1:
+                            edge_profiles.profiles_1d[0].ion[jspecies].temperature = asarray([NaN]*erho)
+                    else:
+                        ti_e_flag = 2
                 else:
-                    if len(edge_profiles.ggd[0].ion[jspecies].temperature[gset].values) < 1:
-                        print('edge_profiles.ggd[:].ion[:].temperature could not be read', file=sys.stderr)
-                        edge_profiles.ggd[0].ion[jspecies].temperature[gset].values = asarray([nan]*erho)
+                    if len(edge_profiles.ggd[0].ion[jspecies].temperature) < 1:
+                        if ti_e_flag != 1 or debug:
+                            print('edge_profiles.ggd[:].ion[:].temperature could not be read', file=sys.stderr)
+                        if ti_e_flag != 1:
+                            edge_profiles.ggd[0].ion[jspecies].temperature[gset].values = asarray([NaN]*erho)
+                    else:
+                        ti_e_flag = 2
+
+if debug:
+    print('Ti_flag : '+str(ti_flag)+', Ti_e_flag : '+str(ti_e_flag), file=sys.stdout)
 
 ion_temperature = [0] * (nrho + erho)
 if ti_flag == 1:
     for i in range(nrho):
         ion_temperature[i] = core_profiles.profiles_1d[0].t_i_average[i]*1.e-3
-    if edge_present == 1:
+elif ti_flag == 2:
+    for i in range(nrho):
+        ion_temperature[i] = core_profiles.profiles_1d[0].ion[0].temperature[i]*1.e-3
+if edge_present == 1:
+    if ti_e_flag == 1:
         if r_out_graph == 0:
             for i in range(erho):
                 ion_temperature[nrho+i] = edge_profiles.profiles_1d[0].t_i_average[i]*1.e-3
         else:
             for i in range(erho):
                 ion_temperature[nrho+i] = edge_profiles.ggd[0].t_i_average[gset].values[i]*1.e-3
-else:
-    for i in range(nrho):
-        ion_temperature[i] = core_profiles.profiles_1d[0].ion[0].temperature[i]*1.e-3
-    if edge_present == 1:
+    elif ti_e_flag == 2:
         if r_out_graph == 0:
             for i in range(erho):
                 ion_temperature[nrho+i] = edge_profiles.profiles_1d[0].ion[0].temperature[i]*1.e-3
@@ -495,9 +527,10 @@ else:
 ion_density = {}
 for ispecies in range(nspecies):
     ion_density[ispecies] = [0] * (nrho + erho)
-    if len(core_profiles.profiles_1d[0].ion[ispecies].density) < 1:
+    if len(core_profiles.profiles_1d[0].ion[ispecies].density) != nrho:
         print('core_profiles.profiles_1d[:].ion['+str(ispecies)+'].density could not be read', file=sys.stderr)
-        core_profiles.profiles_1d[0].ion[ispecies].density = asarray([nan]*nrho)
+        print('Size mismatch: rho_tor_norm = '+str(nrho)+', ion['+str(ispecies)+'].density = '+str(len(core_profiles.profiles_1d[0].ion[ispecies].density)), file=sys.stderr)
+        core_profiles.profiles_1d[0].ion[ispecies].density = asarray([NaN]*nrho)
     for i in range(nrho):
         ion_density[ispecies][i] = core_profiles.profiles_1d[0].ion[ispecies].density[i]
     if edge_present == 1:
@@ -507,7 +540,7 @@ for ispecies in range(nspecies):
                 if edge_profiles.profiles_1d[0].ion[jspecies].multiple_states_flag == 0:
                     if len(edge_profiles.profiles_1d[0].ion[jspecies].density) < 1:
                         print('edge_profiles.profiles_1d[:].ion['+str(jspecies)+'].density could not be read', file=sys.stderr)
-                        edge_profiles.profiles_1d[0].ion[jspecies].density = asarray([nan]*erho)
+                        edge_profiles.profiles_1d[0].ion[jspecies].density = asarray([NaN]*erho)
                     for i in range(erho):
                         ion_density[ispecies][nrho+i] = edge_profiles.profiles_1d[0].ion[jspecies].density[i]
                 else:
@@ -521,7 +554,7 @@ for ispecies in range(nspecies):
                 if edge_profiles.ggd[0].ion[jspecies].multiple_states_flag == 0:
                     if len(edge_profiles.ggd[0].ion[jspecies].density[gset].values) < 1:
                         print('edge_profiles.ggd[:].ion['+str(jspecies)+'.density could not be read', file=sys.stderr)
-                        edge_profiles.ggd[0].ion[jspecies].density[gset].values = asarray([nan]*erho)
+                        edge_profiles.ggd[0].ion[jspecies].density[gset].values = asarray([NaN]*erho)
                     for i in range(erho):
                         ion_density[ispecies][nrho+i] = edge_profiles.ggd[0].ion[jspecies].density[gset].values[i]
                 else:
@@ -534,19 +567,22 @@ for ispecies in range(nspecies):
 
 # Vtor profile (not mandatory)
 vtor_flag = 0
+vtor_e_flag = 0
 ion_vtor = {}
 for ispecies in range(nspecies):
     ion_vtor[ispecies] = [0] * (nrho + erho)
-    if len(core_profiles.profiles_1d[0].ion[ispecies].velocity.toroidal) < 1:
+    if len(core_profiles.profiles_1d[0].ion[ispecies].velocity.toroidal) != nrho:
         print('core_profiles.profiles_1d[:].ion['+str(ispecies)+'].velocity.toroidal could not be read', file=sys.stderr)
-        core_profiles.profiles_1d[0].ion[ispecies].velocity.toroidal = asarray([nan]*nrho)
+        print('Size mismatch: rho_tor_norm = '+str(nrho)+', ion['+str(ispecies)+'].velocity.toroidal = '+str(len(core_profiles.profiles_1d[0].ion[ispecies].velocity.toroidal)), file=sys.stderr)
+        core_profiles.profiles_1d[0].ion[ispecies].velocity.toroidal = asarray([NaN]*nrho)
     else:
         vtor_flag = 1
         for i in range(nrho):
             ion_vtor[ispecies][i] = abs(core_profiles.profiles_1d[0].ion[ispecies].velocity.toroidal[i])
-    if len(core_profiles.profiles_1d[0].ion[ispecies].velocity_tor) < 1:
+    if len(core_profiles.profiles_1d[0].ion[ispecies].velocity_tor) != nrho:
         print('core_profiles.profiles_1d[:].ion['+str(ispecies)+'].velocity_tor could not be read', file=sys.stderr)
-        core_profiles.profiles_1d[0].ion[ispecies].velocity_tor = asarray([nan]*nrho)
+        print('Size mismatch: rho_tor_norm = '+str(nrho)+', ion['+str(ispecies)+'].velocity_tor = '+str(len(core_profiles.profiles_1d[0].ion[ispecies].velocity_tor)), file=sys.stderr)
+        core_profiles.profiles_1d[0].ion[ispecies].velocity_tor = asarray([NaN]*nrho)
     else:
         if vtor_flag == 0:
             vtor_flag = 2
@@ -554,27 +590,49 @@ for ispecies in range(nspecies):
                 ion_vtor[ispecies][i] = abs(core_profiles.profiles_1d[0].ion[ispecies].velocity_tor[i])
     if edge_present == 1:
         jspecies = species_map[ispecies]
-        if vtor_flag == 1 and jspecies != -99:
+        if jspecies != -99:
             if r_out_graph == 0:
                 if edge_profiles.profiles_1d[0].ion[jspecies].multiple_states_flag == 0:
                     if len(edge_profiles.profiles_1d[0].ion[jspecies].velocity.toroidal) < 1:
                         print('edge_profiles.profiles_1d[:].ion['+str(jspecies)+'].velocity.toroidal could not be read', file=sys.stderr)
-                        edge_profiles.profiles_1d[0].ion[jspecies].velocity.toroidal = asarray([nan]*erho)
-                    for i in range(erho):
-                        ion_vtor[ispecies][nrho+i] = abs(edge_profiles.profiles_1d[0].ion[jspecies].velocity.toroidal[i])
+                        if len(edge_profiles.profiles_1d[0].ion[jspecies].velocity_tor) < 1:
+                            print('edge_profiles.profiles_1d[:].ion['+str(jspecies)+'].velocity_tor could not be read', file=sys.stderr)
+                            edge_profiles.profiles_1d[0].ion[jspecies].velocity.toroidal = asarray([NaN]*erho)
+                        else:
+                            vtor_e_flag = 2
+                            for i in range(erho):
+                                ion_vtor[ispecies][nrho+i] = abs(edge_profiles.profiles_1d[0].ion[jspecies].velocity_tor[i])
+                    else:
+                        vtor_e_flag = 1
+                    if vtor_e_flag == 1:
+                        for i in range(erho):
+                            ion_vtor[ispecies][nrho+i] = abs(edge_profiles.profiles_1d[0].ion[jspecies].velocity.toroidal[i])
                 else:
                     for istate in range(len(edge_profiles.profiles_1d[0].ion[jspecies].state)):
                         if len(edge_profiles.profiles_1d[0].ion[jspecies].state[istate].velocity.toroidal) < 1:
                             print('edge_profiles.profiles_1d[:].ion['+str(jspecies)+'].state.['+str(istate)+'].velocity.toroidal could not be read', file=sys.stderr)
-                            edge_profiles.profiles_1d[0].ion[jspecies].state[istate].velocity.toroidal = asarray([0]*erho)
-                        for i in range(erho):
-                            if ion_density[ispecies][nrho+i] > 0.:
-                                ion_vtor[ispecies][nrho+i] = ion_vtor[ispecies][nrho+i] + abs(edge_profiles.profiles_1d[0].ion[jspecies].state[istate].velocity.toroidal[i])*edge_profiles.profiles_1d[0].ion[jspecies].state[istate].density[i]/ion_density[ispecies][nrho+i]
+                            if len(edge_profiles.profiles_1d[0].ion[jspecies].state[istate].velocity_tor) < 1:
+                                print('edge_profiles.profiles_1d[:].ion['+str(jspecies)+'].state.['+str(istate)+'].velocity_tor could not be read', file=sys.stderr)
+
+                                edge_profiles.profiles_1d[0].ion[jspecies].state[istate].velocity.toroidal = asarray([0]*erho)
+                            else:
+                                vtor_e_flag = 2
+                                for i in range(erho):
+                                    if ion_density[ispecies][nrho+i] > 0.:
+                                        ion_vtor[ispecies][nrho+i] = ion_vtor[ispecies][nrho+i] + abs(edge_profiles.profiles_1d[0].ion[jspecies].state[istate].velocity_tor[i])*edge_profiles.profiles_1d[0].ion[jspecies].state[istate].density[i]/ion_density[ispecies][nrho+i]
+                        else:
+                            vtor_e_flag = 1
+                        if vtor_e_flag == 1:
+                            for i in range(erho):
+                                if ion_density[ispecies][nrho+i] > 0.:
+                                    ion_vtor[ispecies][nrho+i] = ion_vtor[ispecies][nrho+i] + abs(edge_profiles.profiles_1d[0].ion[jspecies].state[istate].velocity.toroidal[i])*edge_profiles.profiles_1d[0].ion[jspecies].state[istate].density[i]/ion_density[ispecies][nrho+i]
             else:
                 if edge_profiles.ggd[0].ion[jspecies].multiple_states_flag == 0:
                     if len(edge_profiles.ggd[0].ion[jspecies].velocity[gset].toroidal) < 1:
                         print('edge_profiles.ggd[:].ion['+str(jspecies)+'].velocity.toroidal could not be read', file=sys.stderr)
-                        edge_profiles.ggd[0].ion[jspecies].velocity[gset].toroidal = asarray([nan]*erho)
+                        edge_profiles.ggd[0].ion[jspecies].velocity[gset].toroidal = asarray([NaN]*erho)
+                    else:
+                        vtor_e_flag = 1
                     for i in range(erho):
                         ion_vtor[ispecies][nrho+i] = abs(edge_profiles.ggd[0].ion[jspecies].velocity[gset].toroidal[i])
                 else:
@@ -582,41 +640,33 @@ for ispecies in range(nspecies):
                         if len(edge_profiles.ggd[0].ion[jspecies].state[istate].velocity[gset].toroidal) < 1:
                             print('edge_profiles.ggd[:].ion['+str(jspecies)+'].state.['+str(istate)+'].velocity.toroidal could not be read', file=sys.stderr)
                             edge_profiles.ggd[0].ion[jspecies].state[istate].velocity[gset].toroidal = asarray([0]*erho)
+                        else:
+                            vtor_e_flag = 1
                         for i in range(erho):
-                            if ion_density[ispecies][nrho+i] > 0.:
+                            if ion_density[ispecies][nrho+i] > 0:
                                 ion_vtor[ispecies][nrho+i] = ion_vtor[ispecies][nrho+i] + abs(edge_profiles.ggd[0].ion[jspecies].state[istate].velocity[gset].toroidal[i])*edge_profiles.ggd[0].ion[jspecies].state[istate].density[gset].values[i]/ion_density[ispecies][nrho+i]
-        elif vtor_flag == 2 and jspecies != -99:
-            if r_out_graph == 0:
-                if edge_profiles.profiles_1d[0].ion[jspecies].multiple_states_flag == 0:
-                    if len(edge_profiles.profiles_1d[0].ion[jspecies].velocity_tor) < 1:
-                        print('edge_profiles.profiles_1d[:].ion['+str(jspecies)+'].velocity_tor could not be read', file=sys.stderr)
-                        edge_profiles.profiles_1d[0].ion[jspecies].velocity_tor = asarray([nan]*erho)
-                    for i in range(erho):
-                        ion_vtor[ispecies][nrho+i] = abs(edge_profiles.profiles_1d[0].ion[jspecies].velocity_tor[i])
-                else:
-                    for istate in range(len(edge_profiles.profiles_1d[0].ion[jspecies].state)):
-                        if len(edge_profiles.profiles_1d[0].ion[jspecies].state[istate].velocity_tor) < 1:
-                            print('edge_profiles.profiles_1d[:].ion['+str(jspecies)+'].state.['+str(istate)+'].velocity_tor could not be read', file=sys.stderr)
-                            edge_profiles.profiles_1d[0].ion[jspecies].state[istate].velocity_tor = asarray([0]*erho)
-                        for i in range(erho):
-                            if ion_density[ispecies][nrho+i] > 0.:
-                                ion_vtor[ispecies][nrho+i] = ion_vtor[ispecies][nrho+i] + abs(edge_profiles.profiles_1d[0].ion[jspecies].state[istate].velocity_tor[i])*edge_profiles.profiles_1d[0].ion[jspecies].state[istate].density[i]/ion_density[ispecies][nrho+i]
+
+if debug:
+    print('Vtor_flag : '+str(vtor_flag)+', Vtor_e_flag : '+str(vtor_e_flag), file=sys.stdout)
 
 # Vpol profile (not mandatory)
 vpol_flag = 0
+vpol_e_flag = 0
 ion_vpol = {}
 for ispecies in range(nspecies):
     ion_vpol[ispecies] = [0] * (nrho + erho)
-    if len(core_profiles.profiles_1d[0].ion[ispecies].velocity.poloidal) < 1:
+    if len(core_profiles.profiles_1d[0].ion[ispecies].velocity.poloidal) != nrho:
         print('core_profiles.profiles_1d[:].ion['+str(ispecies)+'].velocity.poloidal could not be read', file=sys.stderr)
-        core_profiles.profiles_1d[0].ion[ispecies].velocity.poloidal[0:nrho-1] = asarray([nan]*nrho)
+        print('Size mismatch: rho_tor_norm = '+str(nrho)+', ion['+str(ispecies)+'].velocity.poloidal = '+str(len(core_profiles.profiles_1d[0].ion[ispecies].velocity.poloidal)), file=sys.stderr)
+        core_profiles.profiles_1d[0].ion[ispecies].velocity.poloidal = asarray([NaN]*nrho)
     else:
         vpol_flag = 1
         for i in range(nrho):
             ion_vpol[ispecies][i] = abs(core_profiles.profiles_1d[0].ion[ispecies].velocity.poloidal[i])
-    if len(core_profiles.profiles_1d[0].ion[ispecies].velocity_pol) < 1:
+    if len(core_profiles.profiles_1d[0].ion[ispecies].velocity_pol) != nrho:
         print('core_profiles.profiles_1d[:].ion['+str(ispecies)+'].velocity_pol could not be read', file=sys.stderr)
-        core_profiles.profiles_1d[0].ion[ispecies].velocity_pol = asarray([nan]*nrho)
+        print('Size mismatch: rho_tor_norm = '+str(nrho)+', ion['+str(ispecies)+'].velocity_pol = '+str(len(core_profiles.profiles_1d[0].ion[ispecies].velocity_pol)), file=sys.stderr)
+        core_profiles.profiles_1d[0].ion[ispecies].velocity_pol = asarray([NaN]*nrho)
     else:
         if vpol_flag == 0:
             vpol_flag = 2
@@ -624,12 +674,14 @@ for ispecies in range(nspecies):
                 ion_vpol[ispecies][i] = abs(core_profiles.profiles_1d[0].ion[ispecies].velocity_pol[i])
     if edge_present == 1:
         jspecies = species_map[ispecies]
-        if r_out_graph == 0:
-            if vpol_flag == 1 and jspecies != -99:
+        if jspecies != -99:
+            if r_out_graph == 0:
                 if edge_profiles.profiles_1d[0].ion[jspecies].multiple_states_flag == 0:
                     if len(edge_profiles.profiles_1d[0].ion[jspecies].velocity.poloidal) < 1:
                         print('edge_profiles.profiles_1d[:].ion['+str(jspecies)+'].velocity.poloidal could not be read', file=sys.stderr)
-                        edge_profiles.profiles_1d[0].ion[jspecies].velocity.poloidal = asarray([nan]*erho)
+                        edge_profiles.profiles_1d[0].ion[jspecies].velocity.poloidal = asarray([NaN]*erho)
+                    else:
+                        vpol_e_flag = 1
                     for i in range(erho):
                         ion_vpol[ispecies][nrho+i] = abs(edge_profiles.profiles_1d[0].ion[jspecies].velocity.poloidal[i])
                 else:
@@ -637,39 +689,33 @@ for ispecies in range(nspecies):
                         if len(edge_profiles.profiles_1d[0].ion[jspecies].state[istate].velocity.poloidal) < 1:
                             print('edge_profiles.profiles_1d[:].ion['+str(jspecies)+'].state['+str(istate)+'].velocity.poloidal could not be read', file=sys.stderr)
                             edge_profiles.profiles_1d[0].ion[jspecies].state[istate].velocity.poloidal = asarray([0]*erho)
+                        else:
+                            vpol_e_flag = 1
                         for i in range(erho):
-                            if ion_density[ispecies][nrho+i] > 0.:
+                            if ion_density[ispecies][nrho+i] > 0:
                                 ion_vpol[ispecies][nrho+i] = ion_vpol[ispecies][nrho+i] + abs(edge_profiles.profiles_1d[0].ion[jspecies].state[istate].velocity.poloidal[i])*edge_profiles.profiles_1d[0].ion[jspecies].state[istate].density[i]/ion_density[ispecies][nrho+i]
-            elif vpol_flag == 2 and jspecies != -99:
-                if edge_profiles.profiles_1d[0].ion[jspecies].multiple_states_flag == 0:
-                    if len(edge_profiles.profiles_1d[0].ion[jspecies].velocity_pol) < 1:
-                        print('edge_profiles.profiles_1d[:].ion['+str(jspecies)+'].velocity_pol could not be read', file=sys.stderr)
-                        edge_profiles.profiles_1d[0].ion[jspecies].velocity_pol = asarray([nan]*erho)
-                    for i in range(erho):
-                        ion_vpol[ispecies][nrho+i] = abs(edge_profiles.profiles_1d[0].ion[jspecies].velocity_pol[i])
-                else:
-                    for istate in range(len(edge_profiles.profiles_1d[0].ion[jspecies].state)):
-                        if len(edge_profiles.profiles_1d[0].ion[jspecies].state[istate].velocity_pol) < 1:
-                            print('edge_profiles.profiles_1d[:].ion['+str(jspecies)+'].state['+str(istate)+'].velocity_pol could not be read', file=sys.stderr)
-                            edge_profiles.profiles_1d[0].ion[jspecies].state[istate].velocity_pol = asarray([0]*erho)
-                        for i in range(erho):
-                            if ion_density[ispecies][nrho+i] > 0.:
-                                ion_vpol[ispecies][nrho+i] = ion_vpol[ispecies][nrho+i] + abs(edge_profiles.profiles_1d[0].ion[jspecies].state[istate].velocity_pol[i])*edge_profiles.profiles_1d[0].ion[jspecies].state[istate].density[i]/ion_density[ispecies][nrho+i]
-        elif jspecies != -99:
-            if edge_profiles.ggd[0].ion[jspecies].multiple_states_flag == 0:
-                if len(edge_profiles.ggd[0].ion[jspecies].velocity[gset].poloidal) < 1:
-                    print('edge_profiles.ggd[:].ion['+str(jspecies)+'].velocity.poloidal could not be read', file=sys.stderr)
-                    edge_profiles.ggd[0].ion[jspecies].velocity[gset].poloidal = asarray([nan]*erho)
-                for i in range(erho):
-                    ion_vpol[ispecies][nrho+i] = abs(edge_profiles.ggd[0].ion[jspecies].velocity[gset].poloidal[i])
             else:
-                for istate in range(len(edge_profiles.ggd[0].ion[jspecies].state)):
-                    if len(edge_profiles.ggd[0].ion[jspecies].state[istate].velocity[gset].poloidal) < 1:
-                        print('edge_profiles.ggd[:].ion['+str(jspecies)+'].state['+str(istate)+'].velocity.poloidal could not be read', file=sys.stderr)
-                        edge_profiles.ggd[0].ion[jspecies].state[istate].velocity[gset].poloidal = asarray([0]*erho)
+                if edge_profiles.ggd[0].ion[jspecies].multiple_states_flag == 0:
+                    if len(edge_profiles.ggd[0].ion[jspecies].velocity[gset].poloidal) < 1:
+                        print('edge_profiles.ggd[:].ion['+str(jspecies)+'].velocity.poloidal could not be read', file=sys.stderr)
+                        edge_profiles.ggd[0].ion[jspecies].velocity[gset].poloidal = asarray([NaN]*erho)
+                    else:
+                        vpol_e_flag = 1
                     for i in range(erho):
-                        if ion_density[ispecies][nrho+i] > 0.:
-                            ion_vpol[ispecies][nrho+i] = ion_vpol[ispecies][nrho+i] + abs(edge_profiles.ggd[0].ion[jspecies].state[istate].velocity[gset].poloidal[i])*edge_profiles.ggd[0].ion[jspecies].state[istate].density[gset].values[i]/ion_density[ispecies][nrho+i]
+                        ion_vpol[ispecies][nrho+i] = abs(edge_profiles.ggd[0].ion[jspecies].velocity[gset].poloidal[i])
+                else:
+                    for istate in range(len(edge_profiles.ggd[0].ion[jspecies].state)):
+                        if len(edge_profiles.ggd[0].ion[jspecies].state[istate].velocity[gset].poloidal) < 1:
+                            print('edge_profiles.ggd[:].ion['+str(jspecies)+'].state['+str(istate)+'].velocity.poloidal could not be read', file=sys.stderr)
+                            edge_profiles.ggd[0].ion[jspecies].state[istate].velocity[gset].poloidal = asarray([0]*erho)
+                        else:
+                            vpol_e_flag = 1
+                        for i in range(erho):
+                            if ion_density[ispecies][nrho+i] > 0:
+                                ion_vpol[ispecies][nrho+i] = ion_vpol[ispecies][nrho+i] + abs(edge_profiles.ggd[0].ion[jspecies].state[istate].velocity[gset].poloidal[i])*edge_profiles.ggd[0].ion[jspecies].state[istate].density[gset].values[i]/ion_density[ispecies][nrho+i]
+
+if debug:
+    print('Vpol_flag : '+str(vpol_flag)+', Vpol_e_flag : '+str(vpol_e_flag), file=sys.stdout)
 
 # ----------------------------------------------------------------------
 
@@ -680,8 +726,17 @@ if (nspecies > 0) & (plot_compo==1):
     for ispecies in range(nspecies):
         species.append(table_mendeleiev[z[ispecies]][a[ispecies]].element)
 
+    if debug and edge_present == 1:
+        print('Species_mapping :', file=sys.stdout)
+        for ispecies in range(nspecies):
+             if species_map[ispecies] != -99:
+                 print('Core species '+str(ispecies)+' is '+species[ispecies]+' and maps to edge species '+str(species_map[ispecies]), file=sys.stdout)
+             else:
+                 print('Core species '+str(ispecies)+' is '+species[ispecies]+' and does not map to edge species', file=sys.stdout)
+
     # Species concentrations
     ntot = 0
+    imax = -99
     species_density = [0] * nspecies
     max_density = -999.
     for ispecies in range(nspecies):
@@ -695,7 +750,10 @@ if (nspecies > 0) & (plot_compo==1):
 
     nspec_over_ntot = species_density/ntot
     nspec_over_ne   = species_density/ne
-    nspec_over_nmaj = species_density/species_density[imax]
+    if imax != -99:
+        nspec_over_nmaj = species_density/species_density[imax]
+    else:
+        nspec_over_nmaj = 0
 
     # When a species appears twice: combine
     for ispecies in range(nspecies):
@@ -728,14 +786,14 @@ if (nspecies > 0) & (plot_compo==1):
             disp_nspec_over_nmaj = disp_nspec_over_nmaj + format('%.3f' % nspec_over_nmaj[ispecies]) \
                                    + ' ' * (tabsize-len(format('%.3f' % nspec_over_nmaj[ispecies])))
 
-    print('   ------------', file=sys.stderr)
-    print(disp_species, file=sys.stderr)
-    print(disp_a, file=sys.stderr)
-    print(disp_z, file=sys.stderr)
-    print(disp_nspec_over_ntot, file=sys.stderr)
-    print(disp_nspec_over_ne, file=sys.stderr)
-    print(disp_nspec_over_nmaj, file=sys.stderr)
-    print('   ------------', file=sys.stderr)
+    print('   ------------', file=sys.stdout)
+    print(disp_species, file=sys.stdout)
+    print(disp_a, file=sys.stdout)
+    print(disp_z, file=sys.stdout)
+    print(disp_nspec_over_ntot, file=sys.stdout)
+    print(disp_nspec_over_ne, file=sys.stdout)
+    print(disp_nspec_over_nmaj, file=sys.stdout)
+    print('   ------------', file=sys.stdout)
 
 else:
     nspec_over_ne = [0]*nspecies
@@ -749,34 +807,39 @@ impurity_limit = 0.001
 profiles = {}
 profiles['rhonorm'] = [0] * nrho
 profiles['te'] = [0] * nrho
-profiles['ti'] = [0] * nrho
+if ti_flag != 0:
+    profiles['ti'] = [0] * nrho
 profiles['ne'] = [0] * nrho
 profiles['zeff'] = [0] * nrho
 for i in range(nrho):
     profiles['rhonorm'][i] = rho_tor_norm[i]
     profiles['te'][i] = electron_temperature[i]
-    profiles['ti'][i] = ion_temperature[i]
+    if ti_flag != 0:
+        profiles['ti'][i] = ion_temperature[i]
     profiles['ne'][i] = electron_density[i]
     profiles['zeff'][i] = zeff[i]
 if edge_present == 1:
     profiles['rhonorm_e'] = [0] * erho
     profiles['te_e'] = [0] * erho
-    profiles['ti_e'] = [0] * erho
+    if ti_e_flag != 0:
+        profiles['ti_e'] = [0] * erho
     profiles['ne_e'] = [0] * erho
     profiles['zeff_e'] = [0] * erho
     for i in range(erho):
         profiles['rhonorm_e'][i] = rho_tor_norm[nrho+i]
         profiles['te_e'][i] = electron_temperature[nrho+i]
-        profiles['ti_e'][i] = ion_temperature[nrho+i]
+        if ti_e_flag != 0:
+            profiles['ti_e'][i] = ion_temperature[nrho+i]
         profiles['ne_e'][i] = electron_density[nrho+i]
         profiles['zeff_e'][i] = zeff[nrho+i]
 
 profiles['ni'] = [0] * nrho
+profiles['ni_e'] = [0] * erho
 profiles['n_species'] = {}
 for ispecies in range(nspecies):
+    profiles['n_species'][species[ispecies]]={}
     if plot_compo == 1:
         if nspec_over_ne[ispecies] > impurity_limit:
-            profiles['n_species'][species[ispecies]]={}
             profiles['n_species'][species[ispecies]]['density'] = [0] * nrho
             if vpol_flag != 0:
                 profiles['n_species'][species[ispecies]]['vpol'] = [0] * nrho
@@ -788,55 +851,64 @@ for ispecies in range(nspecies):
                     profiles['n_species'][species[ispecies]]['vpol'][i] = ion_vpol[ispecies][i]
                 if vtor_flag != 0:
                     profiles['n_species'][species[ispecies]]['vtor'][i] = ion_vtor[ispecies][i]
-            if edge_present == 1 and species_map[ispecies] != -99:
-                profiles['n_species'][species[ispecies]]['density_e'] = [0] * erho
-                if vpol_flag != 0:
-                    profiles['n_species'][species[ispecies]]['vpol_e'] = [0] * erho
-                if vtor_flag != 0:
-                    profiles['n_species'][species[ispecies]]['vtor_e'] = [0] * erho
-                for i in range(erho):
-                    profiles['n_species'][species[ispecies]]['density_e'][i] = ion_density[ispecies][nrho+i]
-                    if vpol_flag != 0:
-                        profiles['n_species'][species[ispecies]]['vpol_e'][i] = ion_vpol[ispecies][nrho+i]
-                    if vtor_flag != 0:
-                        profiles['n_species'][species[ispecies]]['vtor_e'][i] = ion_vtor[ispecies][nrho+i]
+    if edge_present == 1 and species_map[ispecies] != -99:
+        profiles['n_species'][species[ispecies]]['density_e'] = [0] * erho
+        if vpol_e_flag != 0:
+            profiles['n_species'][species[ispecies]]['vpol_e'] = [0] * erho
+        if vtor_e_flag != 0:
+            profiles['n_species'][species[ispecies]]['vtor_e'] = [0] * erho
+        for i in range(erho):
+            profiles['n_species'][species[ispecies]]['density_e'][i] = ion_density[ispecies][nrho+i]
+            if vpol_e_flag != 0:
+                profiles['n_species'][species[ispecies]]['vpol_e'][i] = ion_vpol[ispecies][nrho+i]
+            if vtor_e_flag != 0:
+                profiles['n_species'][species[ispecies]]['vtor_e'][i] = ion_vtor[ispecies][nrho+i]
     for i in range(nrho):
         profiles['ni'][i] = profiles['ni'][i] + ion_density[ispecies][i]
     if edge_present == 1:
-        profiles['ni_e'] = [0] * erho
         if species_map[ispecies] != -99:
             for i in range(erho):
                 profiles['ni_e'][i] = profiles['ni_e'][i] + ion_density[ispecies][nrho+i]
 
 # Min and max of velocity profiles
 max_vtor = -9e99
-min_vtor = 9e99
+min_vtor =  9e99
 max_vpol = -9e99
-min_vpol = 9e99
+min_vpol =  9e99
 for ispecies in range(nspecies):
-    if (plot_compo == 1) & (nspec_over_ne[ispecies] > impurity_limit):
-        if 'vtor' in profiles['n_species'][species[ispecies]].keys():
-          if max_vtor < max(profiles['n_species'][species[ispecies]]['vtor'][0:nrho-1]):
-              max_vtor = max(profiles['n_species'][species[ispecies]]['vtor'][0:nrho-1])
-              if edge_present == 1 and species_map[ispecies] != -99:
-                  if max_vtor < max(profiles['n_species'][species[ispecies]]['vtor_e'][0:erho-1]):
-                      max_vtor = max(profiles['n_species'][species[ispecies]]['vtor_e'][0:erho-1])
-          if min_vtor > min(profiles['n_species'][species[ispecies]]['vtor'][0:nrho-1]):
-              min_vtor = min(profiles['n_species'][species[ispecies]]['vtor'][0:nrho-1])
-              if edge_present == 1 and species_map[ispecies] != -99:
-                  if min_vtor > min(profiles['n_species'][species[ispecies]]['vtor_e'][0:erho-1]):
-                      min_vtor =  min(profiles['n_species'][species[ispecies]]['vtor_e'][0:erho-1])
-        if 'vpol' in profiles['n_species'][species[ispecies]].keys():
-          if max_vpol < max(profiles['n_species'][species[ispecies]]['vpol'][0:nrho-1]):
-              max_vpol = max(profiles['n_species'][species[ispecies]]['vpol'][0:nrho-1])
-              if edge_present == 1 and species_map[ispecies] != -99:
-                  if max_vpol < max(profiles['n_species'][species[ispecies]]['vpol_e'][0:erho-1]):
-                      max_vpol = max(profiles['n_species'][species[ispecies]]['vpol_e'][0:erho-1])
-          if min_vpol > min(profiles['n_species'][species[ispecies]]['vpol'][0:nrho-1]):
-              min_vpol = min(profiles['n_species'][species[ispecies]]['vpol'][0:nrho-1])
-              if edge_present == 1 and species_map[ispecies] != -99:
-                  if min_vpol > min(profiles['n_species'][species[ispecies]]['vpol_e'][0:erho-1]):
-                      min_vpol = min(profiles['n_species'][species[ispecies]]['vpol_e'][0:erho-1])
+    if plot_compo == 1 and  nspec_over_ne[ispecies] > impurity_limit:
+        if vtor_flag != 0:
+            if 'vtor' in profiles['n_species'][species[ispecies]].keys():
+                if max_vtor < max(profiles['n_species'][species[ispecies]]['vtor'][0:nrho-1]):
+                    max_vtor = max(profiles['n_species'][species[ispecies]]['vtor'][0:nrho-1])
+                if min_vtor > min(profiles['n_species'][species[ispecies]]['vtor'][0:nrho-1]):
+                    min_vtor = min(profiles['n_species'][species[ispecies]]['vtor'][0:nrho-1])
+        if edge_present == 1 and species_map[ispecies] != -99 and vtor_e_flag != 0:
+            if 'vtor_e' in profiles['n_species'][species[ispecies]].keys():
+                if max_vtor < max(profiles['n_species'][species[ispecies]]['vtor_e'][0:erho-1]):
+                    max_vtor = max(profiles['n_species'][species[ispecies]]['vtor_e'][0:erho-1])
+                if min_vtor > min(profiles['n_species'][species[ispecies]]['vtor_e'][0:erho-1]):
+                    min_vtor =  min(profiles['n_species'][species[ispecies]]['vtor_e'][0:erho-1])
+        if vpol_flag != 0:
+            if 'vpol' in profiles['n_species'][species[ispecies]].keys():
+                if max_vpol < max(profiles['n_species'][species[ispecies]]['vpol'][0:nrho-1]):
+                    max_vpol = max(profiles['n_species'][species[ispecies]]['vpol'][0:nrho-1])
+                if min_vpol > min(profiles['n_species'][species[ispecies]]['vpol'][0:nrho-1]):
+                    min_vpol = min(profiles['n_species'][species[ispecies]]['vpol'][0:nrho-1])
+        if edge_present == 1 and species_map[ispecies] != -99 and vpol_e_flag != 0:
+            if 'vpol_e' in profiles['n_species'][species[ispecies]].keys():
+                if max_vpol < max(profiles['n_species'][species[ispecies]]['vpol_e'][0:erho-1]):
+                    max_vpol = max(profiles['n_species'][species[ispecies]]['vpol_e'][0:erho-1])
+                if min_vpol > min(profiles['n_species'][species[ispecies]]['vpol_e'][0:erho-1]):
+                    min_vpol = min(profiles['n_species'][species[ispecies]]['vpol_e'][0:erho-1])
+
+if debug:
+    if vtor_flag != 0 or vtor_e_flag != 0:
+        print('max_vtor : '+str(max_vtor), file=sys.stdout)
+        print('min_vtor : '+str(min_vtor), file=sys.stdout)
+    if vpol_flag != 0 or vpol_e_flag != 0:
+        print('max_vtor : '+str(max_vpol), file=sys.stdout)
+        print('min_vpol : '+str(min_vpol), file=sys.stdout)
 
 # Create the dictionary defining the list of waveforms (central values) that can be displayed
 def createWaveForm(ndim):
@@ -975,7 +1047,8 @@ plotstyle = multi_style if len(waveform['time']) > 1 else single_style
 # Central temperature waveforms
 ax1 = plt.subplot2grid((nline,ncol), (0,0), colspan=3)
 plt.plot(waveform['time'],waveform['te']['central'],plotstyle,color='r',label=r'$T_e(0)$')
-plt.plot(waveform['time'],waveform['ti']['central'],plotstyle,color='b',label=r'$T_i(0)$')
+if ti_flag != 0:
+    plt.plot(waveform['time'],waveform['ti']['central'],plotstyle,color='b',label=r'$T_i(0)$')
 if timevec[ntime-1] > timevec[0]:
     plt.xlim(timevec[0],timevec[ntime-1])
 
@@ -989,7 +1062,8 @@ plt.title('Profiles displayed for t = '+'%.1f' % time+' s', fontdict=font)
 # Central density waveforms
 ax2 = plt.subplot2grid((nline,ncol), (1,0), colspan=3)
 plt.plot(waveform['time'],waveform['ne']['central'],plotstyle,color='r',label=r'$n_e(0)$')
-plt.plot(waveform['time'],waveform['ni']['central'],plotstyle,color='b',label=r'$n_i(0)$')
+if max(nspec_over_ne) > 0:
+    plt.plot(waveform['time'],waveform['ni']['central'],plotstyle,color='b',label=r'$n_i(0)$')
 for ispecies in range(nspecies):
     if (plot_compo == 1) & (nspec_over_ne[ispecies] > impurity_limit):
         plt.plot(waveform['time'],waveform['n_species'][species[ispecies]]['density']['central'] \
@@ -1017,10 +1091,11 @@ Signature(hostdir,shot,run,plt)
 # Temperature profiles
 ax4 = plt.subplot2grid((nline,ncol), (0,4), colspan=2)
 plt.plot(profiles['rhonorm'],profiles['te'],color='r',label=r'$T_e$')
-plt.plot(profiles['rhonorm'],profiles['ti'],color='b',label=r'$T_i$')
+if ti_flag != 0:
+    plt.plot(profiles['rhonorm'],profiles['ti'],color='b',label=r'$T_i$')
 if edge_present == 1:
-    plt.plot(profiles['rhonorm_e'],profiles['te_e'],color='r',label=r'$T_e$')
-    plt.plot(profiles['rhonorm_e'],profiles['ti_e'],color='b',label=r'$T_i$')
+    plt.plot(profiles['rhonorm_e'],profiles['te_e'],color='r',label=r'$T_{e,edge}$')
+    plt.plot(profiles['rhonorm_e'],profiles['ti_e'],color='b',label=r'$T_{i,edge}$')
 if r_out_graph == 0:
     nice(plt,r'$\rho/\rho_0$','$T\/[\mathrm{keV}]$',fontsize)
 else:
@@ -1032,30 +1107,33 @@ Signature(hostdir,shot,run,plt)
 # Density profiles
 ax5 = plt.subplot2grid((nline,ncol), (0,6),colspan=2)
 plt.plot(profiles['rhonorm'],profiles['ne'],color='r',label=r'$n_e$')
-plt.plot(profiles['rhonorm'],profiles['ni'],color='b',label=r'$n_i$')
+if max(nspec_over_ne) > 0:
+    plt.plot(profiles['rhonorm'],profiles['ni'],color='b',label=r'$n_i$')
 if edge_present == 1:
-    plt.plot(profiles['rhonorm_e'],profiles['ne_e'],color='r',label=r'$n_e$')
-    plt.plot(profiles['rhonorm_e'],profiles['ni_e'],color='b',label=r'$n_i$')
+    plt.plot(profiles['rhonorm_e'],profiles['ne_e'],color='r',label=r'$n_{e,edge}$')
+    plt.plot(profiles['rhonorm_e'],profiles['ni_e'],color='b',label=r'$n_{i,edge}$')
 for ispecies in range(nspecies):
     if (plot_compo == 1) & (nspec_over_ne[ispecies] > impurity_limit):
         plt.plot(profiles['rhonorm'],profiles['n_species'][species[ispecies]]['density'] \
-                 ) #,label=r'$n_'+species[ispecies]+'$')
-        if edge_present and species_map[ispecies] != -99:
+                 ,label=r'$n_'+species[ispecies]+'$')
+        if edge_present == 1 and species_map[ispecies] != -99:
             plt.plot(profiles['rhonorm_e'],profiles['n_species'][species[ispecies]]['density_e'] \
-                 ) #,label=r'$n_'+species[ispecies]+'$')
+                 ,label=r'$n_{'+species[ispecies]+',edge}$')
 if r_out_graph == 0:
     nice(plt,r'$\rho/\rho_0$','$n\/[\mathrm{m^{-3}}]$',fontsize)
 else:
     nice(plt,r'$R_{maj}\/[\mathrm{m}]$','$n\/[\mathrm{m^{-3}}]$',fontsize)
 plt.xlim(xbeg,xend)
 plt.title('t = '+'%.1f' % time+' s', fontdict=font)
+#legend = plt.legend(bbox_to_anchor=(legx_pos,legy_pos))
+#CustomLegend_pr(legend)
 Signature(hostdir,shot,run,plt)
 
 # Zeff profile
 ax6 = plt.subplot2grid((nline,ncol), (1,4),colspan=2)
 plt.plot(profiles['rhonorm'],profiles['zeff'],color='b',label=r'$Z_{eff}$')
 if edge_present == 1:
-    plt.plot(profiles['rhonorm_e'],profiles['zeff_e'],color='b',label=r'$Z_{eff}$')
+    plt.plot(profiles['rhonorm_e'],profiles['zeff_e'],color='b',label=r'$Z_{eff,edge}$')
 if r_out_graph == 0:
     nice(plt,r'$\rho/\rho_0$','$Z_{eff}$',fontsize)
 else:
@@ -1065,44 +1143,57 @@ plt.title('t = '+'%.1f' % time+' s', fontdict=font)
 Signature(hostdir,shot,run,plt)
 
 # Vtor profiles
-ax7 = plt.subplot2grid((nline,ncol), (1,6),colspan=2)
-for ispecies in range(nspecies):
-    if (plot_compo == 1) & (nspec_over_ne[ispecies] > impurity_limit):
-        if 'vtor' in profiles['n_species'][species[ispecies]].keys():
-            plt.plot(profiles['rhonorm'],profiles['n_species'][species[ispecies]]['vtor'])
-            if edge_present and species_map[ispecies] != -99:
-                plt.plot(profiles['rhonorm_e'],profiles['n_species'][species[ispecies]]['vtor_e'])
-if r_out_graph == 0:
-    nice(plt,r'$\rho/\rho_0$',r'$|v_{tor}|\/[\mathrm{m.s^{-1}}]$',fontsize)
-else:
-    nice(plt,r'$R_{maj}\/[\mathrm{m}]$',r'$|v_{tor}|\/[\mathrm{m.s^{-1}}]$',fontsize)
-plt.xlim(xbeg,xend)
-if max_vtor > min_vtor:
-    plt.ylim(min_vtor,max_vtor*1.1)
+if (plot_compo == 1) and (vtor_flag != 0 or vtor_e_flag != 0) and max(nspec_over_ne) > 0: 
+    ax7 = plt.subplot2grid((nline,ncol), (1,6),colspan=2)
+    for ispecies in range(nspecies):
+        if nspec_over_ne[ispecies] > impurity_limit:
+            if 'vtor' in profiles['n_species'][species[ispecies]].keys():
+                if vtor_flag != 0:
+                    plt.plot(profiles['rhonorm'],profiles['n_species'][species[ispecies]]['vtor'] \
+                     ,label=r'$vtor_'+species[ispecies]+'$')
+                if edge_present and species_map[ispecies] != -99 and vtor_e_flag != 0:
+                    plt.plot(profiles['rhonorm_e'],profiles['n_species'][species[ispecies]]['vtor_e'] \
+                     ,label=r'$vtor_{'+species[ispecies]+',edge}$')
+    if r_out_graph == 0:
+        nice(plt,r'$\rho/\rho_0$',r'$|v_{tor}|\/[\mathrm{m.s^{-1}}]$',fontsize)
+    else:
+        nice(plt,r'$R_{maj}\/[\mathrm{m}]$',r'$|v_{tor}|\/[\mathrm{m.s^{-1}}]$',fontsize)
+    plt.xlim(xbeg,xend)
+    if max_vtor > min_vtor:
+        plt.ylim(min_vtor,max_vtor*1.1)
 
-plt.gca().yaxis.set_major_formatter(mtick.FormatStrFormatter('%.0d'))
-plt.title('t = '+'%.1f' % time+' s', fontdict=font)
-Signature(hostdir,shot,run,plt)
+    plt.gca().yaxis.set_major_formatter(mtick.FormatStrFormatter('%.0d'))
+    plt.title('t = '+'%.1f' % time+' s', fontdict=font)
+    #legend = plt.legend(bbox_to_anchor=(legx_pos,legy_pos))
+    #CustomLegend_pr(legend)
+    Signature(hostdir,shot,run,plt)
 
 # Vpol profiles
-ax8 = plt.subplot2grid((nline,ncol), (2,4),colspan=2)
-for ispecies in range(nspecies):
-    if (plot_compo == 1) & (nspec_over_ne[ispecies] > impurity_limit):
-        if 'vtor'  in profiles['n_species'][species[ispecies]].keys():
-            plt.plot(profiles['rhonorm'],profiles['n_species'][species[ispecies]]['vpol'])
-            if edge_present == 1 and species_map[ispecies] != -99:
-                plt.plot(profiles['rhonorm_e'],profiles['n_species'][species[ispecies]]['vpol_e'])
-if r_out_graph == 0:
-    nice(plt,r'$\rho/\rho_0$',r'$|v_{pol}|\/[\mathrm{m.s^{-1}}]$',fontsize)
-else:
-    nice(plt,r'$R_{maj}\/[\mathrm{m}]$',r'$|v_{pol}|\/[\mathrm{m.s^{-1}}]$',fontsize)
-plt.xlim(xbeg,xend)
-if max_vpol > min_vpol:
-    plt.ylim(min_vpol,max_vpol*1.1)
+if (plot_compo == 1) and (vpol_flag != 0 or vpol_e_flag != 0) and max(nspec_over_ne) > 0:
+    ax8 = plt.subplot2grid((nline,ncol), (2,4),colspan=2)
+    for ispecies in range(nspecies):
+        if nspec_over_ne[ispecies] > impurity_limit:
+            if 'vpol' in profiles['n_species'][species[ispecies]].keys():
+                if vpol_flag != 0:
+                    plt.plot(profiles['rhonorm'],profiles['n_species'][species[ispecies]]['vpol'] \
+                     ,label=r'$vpol_'+species[ispecies]+'$')
+                if edge_present == 1 and species_map[ispecies] != -99 and vpol_e_flag != 0:
+                    plt.plot(profiles['rhonorm_e'],profiles['n_species'][species[ispecies]]['vpol_e'] \
+                     ,label=r'$vpol_{'+species[ispecies]+',edge}$')
+    if r_out_graph == 0:
+        nice(plt,r'$\rho/\rho_0$',r'$|v_{pol}|\/[\mathrm{m.s^{-1}}]$',fontsize)
+    else:
+        nice(plt,r'$R_{maj}\/[\mathrm{m}]$',r'$|v_{pol}|\/[\mathrm{m.s^{-1}}]$',fontsize)
+    plt.xlim(xbeg,xend)
+    if max_vpol > min_vpol:
+        plt.ylim(min_vpol,max_vpol*1.1)
 
-plt.gca().yaxis.set_major_formatter(mtick.FormatStrFormatter('%.0d'))
-plt.title('t = '+'%.1f' % time+' s', fontdict=font)
-Signature(hostdir,shot,run,plt)
+    plt.gca().yaxis.set_major_formatter(mtick.FormatStrFormatter('%.0d'))
+    plt.title('t = '+'%.1f' % time+' s', fontdict=font)
+    #legend = plt.legend(bbox_to_anchor=(legx_pos,legy_pos))
+    #CustomLegend_pr(legend)
+    Signature(hostdir,shot,run,plt)
+
 ax = plt.gca()
 xmin, xmax = ax.get_xlim()
 ymin, ymax = ax.get_ylim()
