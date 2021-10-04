@@ -307,12 +307,27 @@ if edge_present == 1:
                 rho_tor_norm[nrho+i] = edge_profiles.profiles_1d[0].grid.rho_tor[i]/core_profiles.profiles_1d[0].grid.rho_tor[nrho-1]
         xend = max(xend,rho_tor_norm[nrho+erho-1],rho_tor_norm[nrho])
     else:
-        for i in range(erho):
-            ielem = edge_profiles.grid_ggd[0].grid_subset[gset].element[i].object[0].index
-            i1 = edge_profiles.grid_ggd[0].space[0].objects_per_dimension[1].object[ielem].nodes[0]
-            i2 = edge_profiles.grid_ggd[0].space[0].objects_per_dimension[1].object[ielem].nodes[1]
-            rho_tor_norm[nrho+i] = ( edge_profiles.grid_ggd[0].space[0].objects_per_dimension[0].object[i1].geometry[0] + edge_profiles.grid_ggd[0].space[0].objects_per_dimension[0].object[i2].geometry[0] ) / 2
-            xend = max(xend,rho_tor_norm[nrho+i])
+        if edge_profiles.grid_ggd[0].grid_subset[gset].dimension == -999999999 and debug:
+            print('Dimensionality of Outer Midplane GGD subset is not defined !', file=sys.stdout)
+            print('Assuming the grid subset is made of edges (dimensionality 2)', file=sys.stdout)
+        if edge_profiles.grid_ggd[0].grid_subset[gset].dimension == 1:
+            for i in range(erho):
+                ielem = edge_profiles.grid_ggd[0].grid_subset[gset].element[i].object[0].index
+                i1 = edge_profiles.grid_ggd[0].space[0].objects_per_dimension[0].object[ielem].nodes[0]
+                rho_tor_norm[nrho+i] = edge_profiles.grid_ggd[0].space[0].objects_per_dimension[0].object[i1].geometry[0]
+                xend = max(xend,rho_tor_norm[nrho+i])
+        elif (edge_profiles.grid_ggd[0].grid_subset[gset].dimension == 2 or \
+              edge_profiles.grid_ggd[0].grid_subset[gset].dimension == -999999999) and edge_present == 1:
+            for i in range(erho):
+                ielem = edge_profiles.grid_ggd[0].grid_subset[gset].element[i].object[0].index
+                i1 = edge_profiles.grid_ggd[0].space[0].objects_per_dimension[1].object[ielem].nodes[0]
+                i2 = edge_profiles.grid_ggd[0].space[0].objects_per_dimension[1].object[ielem].nodes[1]
+                rho_tor_norm[nrho+i] = ( edge_profiles.grid_ggd[0].space[0].objects_per_dimension[0].object[i1].geometry[0] + edge_profiles.grid_ggd[0].space[0].objects_per_dimension[0].object[i2].geometry[0] ) / 2
+                xend = max(xend,rho_tor_norm[nrho+i])
+        else:
+            print('Unexpected dimensionality of Outer Midplane GGD subset : '+str(edge_profiles.grid_ggd[0].grid_subset[gset].dimension), file=sys.stderr)
+            print('Abandoning edge plots !', file=sys.stderr)
+            edge_present = 0
 
 # Species A number (not mandatory)
 try:
