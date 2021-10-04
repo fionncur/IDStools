@@ -372,7 +372,11 @@ if p_sol == 0:
             if edge_transport.model[0].ggd[0].electrons.energy.flux[iset].grid_subset_index == 26:
                 for iFace in range(len(edge_transport.model[0].ggd[0].electrons.energy.flux[iset].values)):
                      faceindex = edge_transport.grid_ggd[0].grid_subset[iset].element[iFace].object[0].index
-                     area = edge_transport.grid_ggd[0].space[0].objects_per_dimension[1].object[faceindex-1].measure
+# Allow for backward-compatibility when measure contained the area instead of the edge length
+                     try:
+                         area = edge_transport.grid_ggd[0].space[0].objects_per_dimension[1].object[faceindex-1].geometry[2]
+                     except:
+                         area = edge_transport.grid_ggd[0].space[0].objects_per_dimension[1].object[faceindex-1].measure
                      flux = edge_transport.model[0].ggd[0].electrons.energy.flux[iset].values[iFace]
                      p_sol_e = p_sol_e + flux*area
                      try:
