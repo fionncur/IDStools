@@ -90,7 +90,7 @@ if edge_plot:
     try:
         edge_profiles = input.edge_profiles # Bring in edge_profiles if available
         edge_profiles.time = input.edge_profiles.partialGet('time')
-        if edge_profiles.time != None:
+        if len(edge_profiles.time) > 0:
             print('Found adjoining edge_profiles. Will attempt to add to plots', file=sys.stdout)
             edge_present = 1
     except:
@@ -100,7 +100,7 @@ eq_present = 0
 try:
     equilibrium = input.equilibrium # Bring in equilibrium IDS if available
     equilibrium.time = input.equilibrium.partialGet('time')
-    if equilibrium.time != None:
+    if len(equilibrium.time) > 0:
         eq_present = 1
 except:
     print('No associated equilibrium data', file=sys.stderr)
@@ -203,7 +203,7 @@ if edge_present == 1:
                     print('No ggd information found in edge_profiles', file=sys.stderr)
                 if edge_present != 0:
                     r_out_graph = 1
-                    print('Using R_outboard coordinate instead', file=sys.stdout)
+                    print('Attempting to use R_outboard coordinate instead', file=sys.stdout)
             else:
                 edge_present = 0
         else:
@@ -217,11 +217,13 @@ if r_out_graph == 1:
             gset = iset
     if gset == -99:
         print('Did not find outer_midplane GGD grid subset', file=sys.stderr)
-        r_out_graph == 0
+        print('Abandoning edge plots !', file=sys.stderr)
+        edge_present = 0
+        r_out_graph = 0
     else:
         if debug:
             print('Outer midplane GGD grid subset is number '+str(gset)+' of '+str(nsubsets), file=sys.stdout)
-    if edge_profiles.midplane.index != 1:
+    if edge_profiles.midplane.index != 1 and r_out_graph == 1:
         print('Edge and core profile midplane coordinates are not aligned!', file=sys.stdout)
 
 # Mendeleiev table
@@ -1125,7 +1127,7 @@ else:
     nice(plt,r'$R_{maj}\/[\mathrm{m}]$','$n\/[\mathrm{m^{-3}}]$',fontsize)
 plt.xlim(xbeg,xend)
 plt.title('t = '+'%.1f' % time+' s', fontdict=font)
-#legend = plt.legend(bbox_to_anchor=(legx_pos,legy_pos))
+#legend = plt.legend(bbox_to_anchor=(0.5,0.,0.5,1.0))
 #CustomLegend_pr(legend)
 Signature(hostdir,shot,run,plt)
 
@@ -1164,7 +1166,7 @@ if (plot_compo == 1) and (vtor_flag != 0 or vtor_e_flag != 0) and max(nspec_over
 
     plt.gca().yaxis.set_major_formatter(mtick.FormatStrFormatter('%.0d'))
     plt.title('t = '+'%.1f' % time+' s', fontdict=font)
-    #legend = plt.legend(bbox_to_anchor=(legx_pos,legy_pos))
+    #legend = plt.legend(bbox_to_anchor=(0.5,0.,0.5,1.0))
     #CustomLegend_pr(legend)
     Signature(hostdir,shot,run,plt)
 
@@ -1190,7 +1192,7 @@ if (plot_compo == 1) and (vpol_flag != 0 or vpol_e_flag != 0) and max(nspec_over
 
     plt.gca().yaxis.set_major_formatter(mtick.FormatStrFormatter('%.0d'))
     plt.title('t = '+'%.1f' % time+' s', fontdict=font)
-    #legend = plt.legend(bbox_to_anchor=(legx_pos,legy_pos))
+    #legend = plt.legend(bbox_to_anchor=(0.5,0.,0.5,1.0))
     #CustomLegend_pr(legend)
     Signature(hostdir,shot,run,plt)
 
