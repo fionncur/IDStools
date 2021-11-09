@@ -257,8 +257,8 @@ if r_out_graph == 1:
     try:
         if edge_profiles.midplane.index != 1 and r_out_graph == 1 and core_present == 1:
             print('Edge and core profile midplane coordinates are not aligned!', file=sys.stdout)
-        else:
-            print('Edge_profiles midplane location not specified! Coordinates may be misaligned.', file=sys.stdout)
+    except:
+        print('Edge_profiles midplane location not specified! Coordinates may be misaligned.', file=sys.stdout)
 
 # Mendeleiev table
 table_mendeleiev = mend.create_table_mendeleiev()
