@@ -201,7 +201,7 @@ if edge_present == 1:
             equilibrium.time_slice.resize(1)
             equilibrium.time_slice[0] = input.equilibrium.partialGet('time_slice('+str(qt)+')')
             tqme = tq
-            if len(equilibrium.time_slice[0].profiles_1d.r_outboard) > 0:
+            if len(equilibrium.time_slice[0].profiles_1d.r_outboard) > 0 or core_present == 0:
                 edge_profiles.grid_ggd.resize(1)
                 try:
                     edge_profiles.grid_ggd[0] = input.edge_profiles.partialGet('grid_ggd('+str(et)+')')
@@ -218,7 +218,8 @@ if edge_present == 1:
                     r_out_graph = 1
                     print('Attempting to use R_outboard coordinate instead.', file=sys.stdout)
             else:
-                edge_present = 0
+                if core_present == 1:
+                    edge_present = 0
         else:
             if core_present == 1:
                 edge_present = 0
@@ -246,15 +247,18 @@ if r_out_graph == 1:
         if edge_profiles.grid_ggd[0].grid_subset[iset].identifier.index == 11:
             gset = iset
     if gset == -99:
-        print('Did not find outer_midplane GGD grid subset', file=sys.stderr)
+        print('Did not find outer_midplane GGD grid subset.', file=sys.stderr)
         print('Abandoning edge plots !', file=sys.stderr)
         edge_present = 0
         r_out_graph = 0
     else:
         if debug:
             print('Outer midplane GGD grid subset is number '+str(gset+1)+' of '+str(nsubsets), file=sys.stdout)
-    if edge_profiles.midplane.index != 1 and r_out_graph == 1 and core_present == 1:
-        print('Edge and core profile midplane coordinates are not aligned!', file=sys.stdout)
+    try:
+        if edge_profiles.midplane.index != 1 and r_out_graph == 1 and core_present == 1:
+            print('Edge and core profile midplane coordinates are not aligned!', file=sys.stdout)
+        else:
+            print('Edge_profiles midplane location not specified! Coordinates may be misaligned.', file=sys.stdout)
 
 # Mendeleiev table
 table_mendeleiev = mend.create_table_mendeleiev()
@@ -274,11 +278,11 @@ if r_out_graph == 0 and core_present == 1:
         elif len(core_profiles.profiles_1d[0].grid.rho_tor) > 0:
             nrho = len(core_profiles.profiles_1d[0].grid.rho_tor)
     except:
-        print('core_profiles.profiles_1d[:].grid.rho_tor_norm and rho_tor could not be read', file=sys.stderr)
+        print('core_profiles.profiles_1d[:].grid.rho_tor_norm and rho_tor could not be read.', file=sys.stderr)
         print('----> Aborted.', file=sys.stderr)
         exit()
     if nrho == 0:
-        print('core_profiles.profiles_1d[:].grid.rho_tor_norm and rho_tor are empty', file=sys.stderr)
+        print('core_profiles.profiles_1d[:].grid.rho_tor_norm and rho_tor are empty.', file=sys.stderr)
         print('----> Aborted.', file=sys.stderr)
         exit()
 else:
@@ -300,9 +304,9 @@ if edge_present == 1:
             elif len(core_profiles.profiles_1d[0].grid.rho_tor) > 0:
                 erho = len(edge_profiles.profiles_1d[0].grid.rho_tor)
         except:
-            print('edge_profiles.profiles_1d[:].grid.rho_tor_norm and rho_tor could not be read', file=sys.stderr)
+            print('edge_profiles.profiles_1d[:].grid.rho_tor_norm and rho_tor could not be read.', file=sys.stderr)
         if erho == 0:
-            print('edge_profiles.profiles_1d[:].grid.rho_tor_norm and rho_tor are empty', file=sys.stderr)
+            print('edge_profiles.profiles_1d[:].grid.rho_tor_norm and rho_tor are empty.', file=sys.stderr)
     else:
         erho = len(edge_profiles.grid_ggd[0].grid_subset[gset].element)
 
@@ -575,13 +579,13 @@ ti_e_flag = 0
 if edge_present == 1:
     if r_out_graph == 0:
         if len(edge_profiles.profiles_1d[0].t_i_average) < 1:
-            print('edge_profiles.profiles_1d[:].t_i_average could not be read', file=sys.stderr)
+            print('edge_profiles.profiles_1d[:].t_i_average could not be read.', file=sys.stderr)
             edge_profiles.profiles_1d[0].t_i_average = asarray([NaN]*erho)
         else:
             ti_e_flag = 1
     else:
         if len(edge_profiles.ggd[0].t_i_average[gset].values) < 1:
-            print('edge_profiles.ggd[:].t_i_average could not be read', file=sys.stderr)
+            print('edge_profiles.ggd[:].t_i_average could not be read.', file=sys.stderr)
             edge_profiles.ggd[0].t_i_average[gset].values = asarray([NaN]*erho)
         else:
             ti_e_flag = 1
