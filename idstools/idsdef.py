@@ -8,6 +8,7 @@ class IDSDef:
     
     root = None
     version = None
+    cocos = None
     
     def __init__(self):
         # parse the XML def
@@ -15,7 +16,8 @@ class IDSDef:
             imaspref = os.environ['IMAS_PREFIX']
             tree = ET.parse(imaspref+'/include/IDSDef.xml')
             self.root = tree.getroot()
-            self.version = self.root.find('./version').text
+            self.version = self.root.findtext('./version',default='N/A')
+            self.cocos = self.root.findtext('./cocos',default='N/A')
         except:
             print("Error while trying to access IDSDef.xml, make sure you've loaded IMAS module",file=sys.stderr)
 
@@ -73,7 +75,7 @@ if __name__ == "__main__":
     opt.add_argument('-a','--all',action='store_true',help='Print all attributes')
     opt.add_argument('-s','--select',type=str,default='documentation',
                         help='Select attribute to be printed \t(default=%(default)s)')
-    parser.add_argument('-v','--version',action='store_true',help='Print Data Dictionary version')
+    parser.add_argument('-m','--metaData',action='store_true',help='Print associated meta-data (version and cocos)')
     args = parser.parse_args()
 
     try:
@@ -82,8 +84,10 @@ if __name__ == "__main__":
     except ValueError as ve:
         print(f"{ve}",file=sys.stderr)
 
-    if args.version:
-        print(f"This is Data Dictionary version = {dd.version}")
+    if args.metaData:
+        mstr = f"This is Data Dictionary version = {dd.version}, following COCOS = {dd.cocos}"
+        print(mstr)
+        print('='*len(mstr))
         
     if args.all:
         for a in f.keys():
