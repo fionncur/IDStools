@@ -23,9 +23,13 @@ parser.add_argument('-f','--force',action='store_true',
                     help='Force the creation of destination data-entry (existing data will be lost)')
 parser.add_argument('--setDatasetVersion',action='store_true',
                     help='Store current DD version into dataset_description IDS if it exists')
+occgroup = parser.add_mutually_exclusive_group()
+occgroup.add_argument('-a','--allOccurrences',action='store_true',
+                      help='Copy all occurrences available in the source into the destination')
+occgroup.add_argument('-o','--outputOccurrence',type=int,default=None,
+                      help='Copy the selected source into the specified occurrence at the destination')
 parser.add_argument('ids',nargs='*',type=str,
-                    help='IDSs to copy (leave empty to copy all)')
-
+                    help='IDSs to copy (leave empty to select all IDSs with default occurrence, or append "/n" to copy a specific occurrence "n")')
 args = parser.parse_args()
 
 
@@ -76,15 +80,37 @@ else:
               file=sys.stderr)
         sys.exit(status)
 
+
+if args.allOccurrences:
+    if '/' in args.ids:
+        print('Please do not specify source occurrences together with -a/--allOccurrences option',
+              file=sys.stderr)
+        sys.exit(status)
+    else:
+        allids = []
+        for idsname in args.ids:
+            mocc = getattr(imas,idsname)().getMaxOccurrences()
+            allids.append(idsname)
+            for o in range(1,mocc+1): # need to check is max occ is the max count or max number 
+                allids.append(idsname+f'/{o}')
+        args.ids = allids
+            
+        
 # COPY IDSs FROM SOURCE TO DEST
 for idsname in args.ids:
-    idsobj = src.get(idsname)
-    if args.setDatasetVersion and idsname=='dataset_description':
+    inocc = 0
+    idsid = idsname.split('/')
+    if len(idsid) == 2:
+        inocc = int(idsid[1])
+  
+    idsobj = src.get(idsid[0],occurrence=inocc)
+    if args.setDatasetVersion and idsid[0]=='dataset_description':
         idsobj.dd_version = os.environ['IMAS_VERSION']
     try:
         if idsobj.ids_properties.homogeneous_time != imas.imasdef.EMPTY_INT:
             print(f'Copying {idsname}')
-            dest.put(idsobj)
+            outocc = inocc if args.outputOccurrence is None else args.outputOccurrence
+            dest.put(idsobj,occurrence=outocc)
     except Exception as exc:
         print(str(exc),file=sys.stderr)
         if not args.force:
