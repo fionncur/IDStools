@@ -1,15 +1,18 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import argparse, imas, sys, os
-import database_tools.init_mendeleiev as mend
-
+import init_mendeleiev as mend
+import numpy as np
 # ----------------------------------------------------------------------
-
+TAB = ' ' * 16
+LINE='-'*8
 # Management of input arguments
 parser = argparse.ArgumentParser(description=\
 	 '---- Display the plasma composition from the core_profiles IDS')
-parser.add_argument('-u','--user_or_path',help='User or path name of the DB where the data-entry is located', required=False)
-parser.add_argument('-d','--database',help='Database name of the DB where the data-entry is located', required=False)
+parser.add_argument('-u','--user_or_path',help='User or path name of the DB where the data-entry is located',
+                    required=False)
+parser.add_argument('-d','--database',help='Database name of the DB where the data-entry is located', 
+                    required=False)
 parser.add_argument('-s','--shot',help='Shot number', required=True,type=int)
 parser.add_argument('-r','--run',help='Run number',required=True,type=int)
 args = vars(parser.parse_args())
@@ -27,173 +30,444 @@ if args['database'] != None:
 	database = args["database"]
 else:
 	database = 'iterdb'
-
+core_flag=0
+edge_flag=0
+states_flag=0
+states_edge_flag=0
+volume_error=''
 # Open the database and read the necessary IDSs
 version = os.getenv('IMAS_VERSION')[0]
 input=imas.ids(shot,run)
 [err,n]=input.open_env(user_or_path,database,version,silent=True)
 if err != 0:
-    print('Shot ' + str(shot) + ', run ' + str(run) +' for user_or_path = '+user_or_path+' and database = '+database+' does not exist', file=sys.stderr)
+    print('!   Shot ' + str(shot) + ', run ' + str(run) +' for user_or_path = '+user_or_path+' and database = '+database+' does not exist', file=sys.stderr)
     print('----> Aborted.', file=sys.stderr)
     exit()
 
 try:
     #input.core_profiles.get()
     core_profiles = input.core_profiles # To initialise the empty IDS structure
+
     core_profiles.time=input.core_profiles.partialGet('time')
     if core_profiles.time is None:
-        print('No core_profiles IDS in the data-entry --> Abort.', file=sys.stderr)
-        exit()
+        print('!   No core_profiles IDS in the data-entry --> Abort.', file=sys.stderr)
+    core_flag=1
 except:
-    print("The core_profiles IDS is absent from the input data-entry", file=sys.stderr)
-    print("----> Aborted.", file=sys.stderr)
-    exit()
+    print("!   The core_profiles IDS is absent from the input data-entry", file=sys.stderr)    
 
-try:
-    ne0 = input.core_profiles.partialGet('profiles_1d(:)/electrons/density(0)')
-    central_electron_density = 0
-    for islice in range(len(ne0)):
-        if ne0[islice] > central_electron_density:
-            central_electron_density = ne0[islice]
-            the_slice = islice
-except:
-    print("core_profiles.profiles_1d[:].electrons.density[0] could not be read", file=sys.stderr)
-    print("----> Aborted.", file=sys.stderr)
-    exit()
+while core_flag==1:
+    try:
+        ne0 = input.core_profiles.partialGet('profiles_1d(:)/electrons/density(0)')
+        central_electron_density = 0
+        for islice in range(len(ne0)):
+            if ne0[islice] > central_electron_density:
+                central_electron_density = ne0[islice]
+                the_slice = islice
+    except:
+        core_flag=0
+        print("!   core_profiles.profiles_1d[:].electrons.density[0] could not be read", file=sys.stderr)
+        break
+        
+        
+    # Read 1D-profiles for this time slice
+    core_profiles.profiles_1d.resize(1)
+    core_profiles.profiles_1d[0] = input.core_profiles.partialGet('profiles_1d('+str(the_slice)+')')
+ #   print('Code',core_profiles.code.name)
+    try:
+        nspecies = len(core_profiles.profiles_1d[0].ion)
+        a = [0] * nspecies
+        for ispecies in range(nspecies):
+            a[ispecies] = int(core_profiles.profiles_1d[0].ion[ispecies].element[0].a)
+    except:
+        print("!   core_profiles.profiles_1d[:].ion[0].element[0].a could not be read", file=sys.stderr)
+        core_flag=0
+        break
+    try:
+        z = [0] * nspecies
+        for ispecies in range(nspecies):
+            z[ispecies] = int(core_profiles.profiles_1d[0].ion[ispecies].element[0].z_n)
+    except:
+        print("!   core_profiles.profiles_1d[:].ion[0].element[0].z_n could not be read", file=sys.stderr)
+        core_flag=0
+        break
+    try:
+        volume = core_profiles.profiles_1d[0].grid.volume
+        if len(volume) == 0:
+            try:
+                equilibrium = input.equilibrium
+                equilibrium.time_slice[0].profiles_1d.volume = input.equilibrium.partialGet('time_slice('+str(the_slice)+')/profiles_1d/volume')
+            except:
+                print('!   Issues with equillibrium.time_slice.profiles_1d.volume')
+            volume = equilibrium.time_slice[0].profiles_1d.volume
+            if len(volume) == len(core_profiles.profiles_1d[0].electrons.density):
+                print("!   core_profiles.profiles_1d[:].grid.volume could not be read", file=sys.stderr)
+                print("    ----> equilibrium.time_slice[:].profiles_1d.volume used instead", file=sys.stderr)
+                print("    (possible because the resolution is the same, but maybe not correct)", file=sys.stderr)
+            else:
+                core_flag=0
+                break
+    except:
+        print("!   core_profiles.profiles_1d[:].grid.volume could not be read", file=sys.stderr)
+        core_flag=0
+        break
 
-# Read 1D-profiles for this time slice
-core_profiles.profiles_1d.resize(1)
-core_profiles.profiles_1d[0] = input.core_profiles.partialGet('profiles_1d('+str(the_slice)+')')
-
-try:
-    nspecies = len(core_profiles.profiles_1d[0].ion)
-    a = [0] * nspecies
+    try:
+        central_zeff = core_profiles.profiles_1d[0].zeff[0]
+    except:
+        print("!   core_profiles.profiles_1d[:].zeff[0] could not be read", file=sys.stderr)
+        core_flag=0
+        break
+        
     for ispecies in range(nspecies):
-        a[ispecies] = int(core_profiles.profiles_1d[0].ion[ispecies].element[0].a)
-except:
-    print("core_profiles.profiles_1d[:].ion[0].element[0].a could not be read", file=sys.stderr)
-    print("----> Aborted.", file=sys.stderr)
-    exit()
-
-try:
-    nspecies = len(core_profiles.profiles_1d[0].ion)
-    z = [0] * nspecies
-    for ispecies in range(nspecies):
-        z[ispecies] = int(core_profiles.profiles_1d[0].ion[ispecies].element[0].z_n)
-except:
-    print("core_profiles.profiles_1d[:].ion[0].element[0].z_n could not be read", file=sys.stderr)
-    print("----> Aborted.", file=sys.stderr)
-    exit()
-
-try:
-    volume = core_profiles.profiles_1d[0].grid.volume
-    if len(volume) == 0:
         try:
-            equilibrium = input.equilibrium
-            equilibrium.time_slice[0].profiles_1d.volume = input.equilibrium.partialGet('time_slice('+str(the_slice)+')/profiles_1d/volume')
+            nstates = len(core_profiles.profiles_1d[0].ion[ispecies].state)
+            if nstates>0:
+                states_flag=1
         except:
-            exit()
-        volume = equilibrium.time_slice[0].profiles_1d.volume
-        if len(volume) == len(core_profiles.profiles_1d[0].electrons.density):
-            print("   core_profiles.profiles_1d[:].grid.volume could not be read", file=sys.stderr)
-            print("   ----> equilibrium.time_slice[:].profiles_1d.volume used instead", file=sys.stderr)
-            print("   (possible because the resolution is the same, but maybe not correct)", file=sys.stderr)
-        else:
-            exit()
-except:
-    print("core_profiles.profiles_1d[:].grid.volume could not be read", file=sys.stderr)
-    print("----> Aborted.", file=sys.stderr)
-    exit()
-
+            states_flag=0
+            print('!   Ion states composition is not available')
+    break       
+# edge_profiles
 try:
-    central_zeff = core_profiles.profiles_1d[0].zeff[0]
+    #input.edge_profiles.get()
+    edge_profiles = input.edge_profiles # To initialise the empty IDS structure
+
+    edge_profiles.time=input.edge_profiles.partialGet('time')
+    if edge_profiles.time is None:
+        print('!   No edge_profiles IDS in the data-entry --> Abort.', file=sys.stderr)
+    edge_flag=1
 except:
-    print("core_profiles.profiles_1d[:].zeff[0] could not be read", file=sys.stderr)
-    print("----> Aborted.", file=sys.stderr)
+    print("!   The edge_profiles IDS is absent from the input data-entry", file=sys.stderr)    
+
+while edge_flag==1:
+    the_slice=0       
+    # Read 1D-profiles for this time slice
+    edge_profiles.ggd.resize(1)
+    edge_profiles.ggd[0] = input.edge_profiles.partialGet('ggd('+str(the_slice)+')')
+    edge_profiles.grid_ggd.resize(1)
+    edge_profiles.grid_ggd[0] = input.edge_profiles.partialGet('grid_ggd('+str(the_slice)+')')
+ #   print('Code', str(edge_profiles.code.name))
+    try:
+        nspecies_edge = len(edge_profiles.ggd[0].ion)
+        a_edge = [0] * nspecies_edge
+        for ispecies in range(nspecies_edge):
+            a_edge[ispecies] = int(edge_profiles.ggd[0].ion[ispecies].element[0].a)
+    except:
+        print("!   edge_profiles.ggd[:].ion[0].element[0].a could not be read", file=sys.stderr)
+        edge_flag=0
+        break
+    try:
+        z_edge = [0] * nspecies_edge
+        for ispecies in range(nspecies_edge):
+            z_edge[ispecies] = int(edge_profiles.ggd[0].ion[ispecies].element[0].z_n)
+    except:
+        print("!   edge_profiles.ggd[:].ion[0].element[0].z_n could not be read", file=sys.stderr)
+        edge_flag=0
+        break
+    try:
+        num_vertices=len(edge_profiles.grid_ggd[0].space[0].objects_per_dimension[0].object)
+        volumes_edge=[0]*num_vertices
+        if num_vertices == 0:
+            print("!   edge_profiles.grid_ggd[0].space[0].objects_per_dimension[0].object has 0 elements", file=sys.stderr)
+            edge_flag=0
+            break
+        else:
+            try:
+                for i in range(num_vertices):
+                    volumes_edge[i] = edge_profiles.grid_ggd[0].space[0].objects_per_dimension[2].object[edge_profiles.grid_ggd[0].grid_subset[0].element[i].object[0].index].measure
+                    if volumes_edge[i]<0:
+                        volume_error='!   objects exist but edge_profiles.grid_ggd[0].space[0].objects_per_dimension[0].object volumes are empty, replaced by 1'
+                        volumes_edge[i]=1
+            except:
+                volume_error='!   cannot find edge_profiles.grid_ggd[0].space[0].objects_per_dimension[0].object volumes, plan B: interpolate on rectangular grid'
+                subset=17
+                num_sep=len(edge.grid_ggd[index].grid_subset[subset].element)
+                sep_coords = np.zeros((num_sep, 2))
+                for i in range(num_sep):
+                    sep_coords[i, :] = (edge_profiles.grid_ggd[0].space[0].objects_per_dimension[0].object[edge_profiles.grid_ggd[index].grid_subset[subset].element[i].object[0].index].geometry[:]) # find separatrix coordinates
+                num_vertices = len(edge_profiles.grid_ggd[0].space[0].objects_per_dimension[0].object)
+                vertex_coords = np.zeros((num_vertices, 2))
+                for vertex_id in range(num_vertices):
+                    vertex_coords[vertex_id, :] = (edge_profiles.grid_ggd[0].space[0].objects_per_dimension[0].object[vertex_id].geometry[:])
+                r_edge = vertex_coords[:, 0]
+                z_edge = vertex_coords[:, 1]
+                a=edge_profiles.ggd[0].electrons.density[0].values
+                x, y = np.meshgrid(np.linspace(4,8.5,400),np.linspace(-4.5,4.5,400))
+                z=interpolate.griddata((r_edge, z_edge),a,(x,y))
+                
+    except:
+        print("!   edge_profiles.grid_ggd[0].space[0].objects_per_dimension[0].object could not be read", file=sys.stderr)
+        edge_flag=0
+        break
+    print(volume_error)
+       
+    for ispecies in range(nspecies_edge):
+        try:
+            nstates = len(edge_profiles.ggd[0].ion[ispecies].state)
+            if nstates>0:
+                states_edge_flag=1
+        except:
+            states_edge_flag=0
+            print('!   Ion states composition is not available')
+    break
+print('core', '+'*core_flag, '-'*(1-core_flag), 'edge', '+'*edge_flag, '-'*(1-edge_flag))
+if (core_flag+edge_flag)==0:
     exit()
 
 # ----------------------------------------------------------------------
 
+
 # Mendeleiev table
 table_mendeleiev = mend.create_table_mendeleiev()
+if core_flag==1:
 
-if nspecies > 0:
+    if nspecies > 0:
 
-    # Plasma composition
-    species = []
-    for ispecies in range(nspecies):
-        species.append(table_mendeleiev[z[ispecies]][a[ispecies]].element)
+        # Plasma composition
+        species = []
+        for ispecies in range(nspecies):
+            species.append(table_mendeleiev[z[ispecies]][a[ispecies]].element)
 
-    # Species concentrations
-    ntot = 0
-    species_density = [0] * nspecies
-    max_density = -999.
-    for ispecies in range(nspecies):
-        species_density[ispecies] = sum(volume*core_profiles.profiles_1d[0].ion[ispecies].density)
-        ntot = ntot + species_density[ispecies]
-        if species_density[ispecies] > max_density:
-            max_density = species_density[ispecies]
-            imax = ispecies
+        # Species concentrations
+        ntot = 0
+        species_density = [0] * nspecies
+        max_density = -999.
+        for ispecies in range(nspecies):
+            species_density[ispecies] = sum(volume*core_profiles.profiles_1d[0].ion[ispecies].density)
+            ntot = ntot + species_density[ispecies]
+            if species_density[ispecies] > max_density:
+                max_density = species_density[ispecies]
+                imax = ispecies
 
-    ne = sum(volume*core_profiles.profiles_1d[0].electrons.density)
+        ne = sum(volume*core_profiles.profiles_1d[0].electrons.density)
 
-    nspec_over_ntot = species_density/ntot
-    nspec_over_ne   = species_density/ne
-    nspec_over_nmaj = species_density/species_density[imax]
+        nspec_over_ntot = species_density/ntot
+        nspec_over_ne   = species_density/ne
+        nspec_over_nmaj = species_density/species_density[imax]
 
-    # When a species appears twice: combine
-    for ispecies in range(nspecies):
-       for jspecies in range(nspecies):
-          if (species[jspecies] == species[ispecies]) & (jspecies != ispecies):
-             nspec_over_ntot[ispecies] = nspec_over_ntot[ispecies] + nspec_over_ntot[jspecies]
-             nspec_over_ntot[jspecies] = 0
-             nspec_over_ne[ispecies] = nspec_over_ne[ispecies] + nspec_over_ne[jspecies]
-             nspec_over_ne[jspecies] = 0
-             nspec_over_nmaj[ispecies] = nspec_over_nmaj[ispecies] + nspec_over_nmaj[jspecies]
-             nspec_over_nmaj[jspecies] = 0
+        # When a species appears twice: combine
+        for ispecies in range(nspecies):
+           for jspecies in range(nspecies):
+              if (species[jspecies] == species[ispecies]) & (jspecies != ispecies):
+                 nspec_over_ntot[ispecies] = nspec_over_ntot[ispecies] + nspec_over_ntot[jspecies]
+                 nspec_over_ntot[jspecies] = 0
+                 nspec_over_ne[ispecies] = nspec_over_ne[ispecies] + nspec_over_ne[jspecies]
+                 nspec_over_ne[jspecies] = 0
+                 nspec_over_nmaj[ispecies] = nspec_over_nmaj[ispecies] + nspec_over_nmaj[jspecies]
+                 nspec_over_nmaj[jspecies] = 0
 
-    # Nice display of plasma composition with species concentrations
-    disp_species         = '   species:      '
-    disp_a               = '   a:            '
-    disp_z               = '   z:            '
-    disp_nspec_over_ntot = '   n_over_ntot:  '
-    disp_nspec_over_ne   = '   n_over_ne:    '
-    disp_nspec_over_nmaj = '   n_over_n_maj: '
-    main_species = ''
-    for ispecies in range(nspecies):
-        if nspec_over_ntot[ispecies] > 0.45:
-            if len(main_species) == 0:
-                main_species = main_species + species[ispecies]
-            else:
-                main_species = main_species + "-" + species[ispecies]
-        if nspec_over_ne[ispecies] > 0.:
-            tabsize = 10
-            disp_species = disp_species + species[ispecies] + " " * (tabsize-len(species[ispecies]))
-            disp_a = disp_a + format("%.1f" % a[ispecies]) + " " * (tabsize-len(format("%.1f" % a[ispecies])))
-            disp_z = disp_z + format("%.1f" % z[ispecies]) + " " * (tabsize-len(format("%.1f" % z[ispecies])))
-            if nspec_over_ntot[ispecies] < 1.e-2:
-               disp_nspec_over_ntot = disp_nspec_over_ntot + format("%.2e" % nspec_over_ntot[ispecies]) + " " * (tabsize-len(format("%.2e" % nspec_over_ntot[ispecies])))
-            else:
-               disp_nspec_over_ntot = disp_nspec_over_ntot + format("%.3f" % nspec_over_ntot[ispecies]) + " " * (tabsize-len(format("%.3f" % nspec_over_ntot[ispecies])))
-            if nspec_over_ne[ispecies] < 1.e-2:
-               disp_nspec_over_ne   = disp_nspec_over_ne   + format("%.2e" % nspec_over_ne[ispecies])   + " " * (tabsize-len(format("%.2e" % nspec_over_ne[ispecies])))
-            else:
-               disp_nspec_over_ne   = disp_nspec_over_ne   + format("%.3f" % nspec_over_ne[ispecies])   + " " * (tabsize-len(format("%.3f" % nspec_over_ne[ispecies])))
-            if nspec_over_nmaj[ispecies] < 1.e-2:
-               disp_nspec_over_nmaj = disp_nspec_over_nmaj + format("%.2e" % nspec_over_nmaj[ispecies]) + " " * (tabsize-len(format("%.2e" % nspec_over_nmaj[ispecies])))
-            else:
-               disp_nspec_over_nmaj = disp_nspec_over_nmaj + format("%.3f" % nspec_over_nmaj[ispecies]) + " " * (tabsize-len(format("%.3f" % nspec_over_nmaj[ispecies])))
+        # Nice display of plasma composition with species concentrations
+        disp_species         = '   species:      '
+        disp_a               = '   a:            '
+        disp_z               = '   z:            '
+        disp_nspec_over_ntot = '   n_over_ntot:  '
+        disp_nspec_over_ne   = '   n_over_ne:    '
+        disp_nspec_over_nmaj = '   n_over_n_maj: '
+        main_species = ''
+        for ispecies in range(nspecies):
+            if nspec_over_ntot[ispecies] > 0.45:
+                if len(main_species) == 0:
+                    main_species = main_species + species[ispecies]
+                else:
+                    main_species = main_species + "-" + species[ispecies]
+            if nspec_over_ne[ispecies] > 0.:
+                tabsize = 10
+                disp_species = disp_species + species[ispecies] + " " * (tabsize-len(species[ispecies]))
+                disp_a = disp_a + format("%.1f" % a[ispecies]) + " " * (tabsize-len(format("%.1f" % a[ispecies])))
+                disp_z = disp_z + format("%.1f" % z[ispecies]) + " " * (tabsize-len(format("%.1f" % z[ispecies])))
+                if nspec_over_ntot[ispecies] < 1.e-2:
+                   disp_nspec_over_ntot = disp_nspec_over_ntot + format("%.2e" % nspec_over_ntot[ispecies]) + " " * (tabsize-len(format("%.2e" % nspec_over_ntot[ispecies])))
+                else:
+                   disp_nspec_over_ntot = disp_nspec_over_ntot + format("%.3f" % nspec_over_ntot[ispecies]) + " " * (tabsize-len(format("%.3f" % nspec_over_ntot[ispecies])))
+                if nspec_over_ne[ispecies] < 1.e-2:
+                   disp_nspec_over_ne   = disp_nspec_over_ne   + format("%.2e" % nspec_over_ne[ispecies])   + " " * (tabsize-len(format("%.2e" % nspec_over_ne[ispecies])))
+                else:
+                   disp_nspec_over_ne   = disp_nspec_over_ne   + format("%.3f" % nspec_over_ne[ispecies])   + " " * (tabsize-len(format("%.3f" % nspec_over_ne[ispecies])))
+                if nspec_over_nmaj[ispecies] < 1.e-2:
+                   disp_nspec_over_nmaj = disp_nspec_over_nmaj + format("%.2e" % nspec_over_nmaj[ispecies]) + " " * (tabsize-len(format("%.2e" % nspec_over_nmaj[ispecies])))
+                else:
+                   disp_nspec_over_nmaj = disp_nspec_over_nmaj + format("%.3f" % nspec_over_nmaj[ispecies]) + " " * (tabsize-len(format("%.3f" % nspec_over_nmaj[ispecies])))
+        print("   ------------")
+        print('core_profiles')
+        print("   ------------")
+        print(disp_species)
+        print(disp_a)
+        print(disp_z)
+        print(disp_nspec_over_ntot)
+        print(disp_nspec_over_ne)
+        print(disp_nspec_over_nmaj)
+        print("   ------------")
+        if states_flag==1:
+            for ispecies in range(nspecies):
+                try:
+                    nstates = len(core_profiles.profiles_1d[0].ion[ispecies].state)
+                    if nstates > 1:
+                        comm='s'
+                    else:
+                        comm=''
+                    print(core_profiles.profiles_1d[0].ion[ispecies].label, ' has ',nstates,' state'+comm)
+                    states_density = [0] * nstates
+                    for istate in range(nstates):
+                        try:
+                            states_density[istate]=sum(core_profiles.profiles_1d[0].ion[ispecies].state[istate].density*volume)
+                        except:
+                            try:
+                                states_density[istate]=sum(core_profiles.profiles_1d[0].ion[ispecies].state[istate].density_thermal*volume)
+                            except:
+                                print('!  Error with density data')
+                        try:
+                            print(TAB, 'state ',str(istate+1),(' '*(5-len(str(istate+1)))),
+                                  core_profiles.profiles_1d[0].ion[ispecies].state[istate].label,
+                                  (' '*(7-len(str(core_profiles.profiles_1d[0].ion[ispecies].state[istate].label)))),
+                                  'z =',np.mean(core_profiles.profiles_1d[0].ion[ispecies].state[istate].z_average),
+                                   (' '*(7-len(str(np.mean(core_profiles.profiles_1d[0].ion[ispecies].state[istate].z_average))))),
+                                  '   n/ni, % :', format("%.6f" % (100*states_density[istate]/species_density[ispecies]))
+                                  )
+                        except:
+                            print(TAB,'state', str(istate+1), (''*(5-len(str(istate+1)))), 'No data for this state')
+                except:
+                    print('States for ', core_profiles.profiles_1d[0].ion[ispecies].label, 'are not available')
+
+
+    else:
+        print("----> No species listed in the plasma composition of the core_profiles IDS.")
+
+
+if edge_flag==1:
+
     print("   ------------")
-    print(disp_species)
-    print(disp_a)
-    print(disp_z)
-    print(disp_nspec_over_ntot)
-    print(disp_nspec_over_ne)
-    print(disp_nspec_over_nmaj)
+    print('edge_profiles')
     print("   ------------")
+    if nspecies_edge > 0:
 
-else:
-    print("----> No species listed in the plasma composition of the core_profiles IDS.")
+        # Plasma composition
+        species_edge = []
+        for ispecies in range(nspecies_edge):
+            species_edge.append(table_mendeleiev[z_edge[ispecies]][a_edge[ispecies]].element)
+
+        # Species concentrations
+        ntot_edge = 0
+        species_density_edge = [0] * nspecies_edge
+        max_density = -999.
+        for ispecies in range(nspecies_edge):
+            # First try to read ion.density
+            try:
+                density_ion=edge_profiles.ggd[0].ion[ispecies].density[0].values
+            except:
+                # If not, try in ion.thermal_density
+                try:
+                    density_ion=edge_profiles.ggd[0].ion[ispecies].density_thermal[0].values
+                except:
+                    # If not, try to read all ion states density and sum
+                    try:
+                        nstates = len(edge_profiles.ggd[0].ion[ispecies].state)
+                        density_ion = [0] * len(volumes_edge)
+                        for istate in range(nstates):
+                            density_ion=density_ion + edge_profiles.ggd[0].ion[ispecies].state[istate].density[0].values
+                    except:
+                        density_ion=[0]*len(volumes_edge)
+                        print('!   No density data for ion', species_edge[ispecies])
+            species_density_edge[ispecies] = sum(np.array(volumes_edge)*np.array(density_ion))
+            ntot_edge = ntot_edge + species_density_edge[ispecies]
+            if species_density_edge[ispecies] > max_density:
+                max_density = species_density_edge[ispecies]
+                imax = ispecies
+        
+        
+        ne_edge = sum(volumes_edge*edge_profiles.ggd[0].electrons.density[0].values)
+        nspec_over_ntot_edge = species_density_edge/ntot_edge
+        nspec_over_ne_edge   = species_density_edge/ne_edge
+        nspec_over_nmaj_edge = species_density_edge/species_density_edge[imax]
+
+        # When a species appears twice: combine
+        for ispecies in range(nspecies_edge):
+            for jspecies in range(nspecies_edge):
+                if (species_edge[jspecies] == species_edge[ispecies]) & (jspecies != ispecies):
+                    nspec_over_ntot_edge[ispecies] = nspec_over_ntot_edge[ispecies] + nspec_over_ntot_edge[jspecies]
+                    nspec_over_ntot_edge[jspecies] = 0
+                    nspec_over_ne_edge[ispecies] = nspec_over_ne_edge[ispecies] + nspec_over_ne_edge[jspecies]
+                    nspec_over_ne_edge[jspecies] = 0
+                    nspec_over_nmaj_edge[ispecies] = nspec_over_nmaj_edge[ispecies] + nspec_over_nmaj_edge[jspecies]
+                    nspec_over_nmaj_edge[jspecies] = 0
+
+        # Nice display of plasma composition with species concentrations
+        disp_species         = '   species:      '
+        disp_a               = '   a:            '
+        disp_z               = '   z:            '
+        disp_nspec_over_ntot = '   n_over_ntot:  '
+        disp_nspec_over_ne   = '   n_over_ne:    '
+        disp_nspec_over_nmaj = '   n_over_n_maj: '
+        main_species = ''
+        for ispecies in range(nspecies_edge):
+            if nspec_over_ntot_edge[ispecies] > 0.45:
+                if len(main_species) == 0:
+                    main_species = main_species + species_edge[ispecies]
+                else:
+                    main_species = main_species + "-" + species_edge[ispecies]
+            if nspec_over_ne_edge[ispecies] > 0.:
+                tabsize = 10
+                disp_species = disp_species + species_edge[ispecies] + " " * (tabsize-len(species_edge[ispecies]))
+                disp_a = disp_a + format("%.1f" % a_edge[ispecies]) + " " * (tabsize-len(format("%.1f" % a_edge[ispecies])))
+                disp_z = disp_z + format("%.1f" % z_edge[ispecies]) + " " * (tabsize-len(format("%.1f" % z_edge[ispecies])))
+                if nspec_over_ntot_edge[ispecies] < 1.e-2:
+                    disp_nspec_over_ntot = disp_nspec_over_ntot + format("%.2e" % nspec_over_ntot_edge[ispecies]) + " " * (tabsize-len(format("%.2e" % nspec_over_ntot_edge[ispecies])))
+                else:
+                    disp_nspec_over_ntot = disp_nspec_over_ntot + format("%.3f" % nspec_over_ntot_edge[ispecies]) + " " * (tabsize-len(format("%.3f" % nspec_over_ntot_edge[ispecies])))
+                if nspec_over_ne_edge[ispecies] < 1.e-2:
+                    disp_nspec_over_ne   = disp_nspec_over_ne   + format("%.2e" % nspec_over_ne_edge[ispecies])   + " " * (tabsize-len(format("%.2e" % nspec_over_ne_edge[ispecies])))
+                else:
+                    disp_nspec_over_ne   = disp_nspec_over_ne   + format("%.3f" % nspec_over_ne_edge[ispecies])   + " " * (tabsize-len(format("%.3f" % nspec_over_ne_edge[ispecies])))
+                if nspec_over_nmaj_edge[ispecies] < 1.e-2:
+                    disp_nspec_over_nmaj = disp_nspec_over_nmaj + format("%.2e" % nspec_over_nmaj_edge[ispecies]) + " " * (tabsize-len(format("%.2e" % nspec_over_nmaj_edge[ispecies])))
+                else:
+                    disp_nspec_over_nmaj = disp_nspec_over_nmaj + format("%.3f" % nspec_over_nmaj_edge[ispecies]) + " " * (tabsize-len(format("%.3f" % nspec_over_nmaj_edge[ispecies])))
+
+        print(disp_species)
+        print(disp_a)
+        print(disp_z)
+        print(disp_nspec_over_ntot)
+        print(disp_nspec_over_ne)
+        print(disp_nspec_over_nmaj)
+        print("   ------------")
+ 
+        if states_edge_flag==1:
+            for ispecies in range(nspecies_edge):
+                try:
+                    nstates = len(edge_profiles.ggd[0].ion[ispecies].state)
+                    if nstates > 1:
+                        comm='s'
+                    else:
+                        comm=''
+                    print(edge_profiles.ggd[0].ion[ispecies].label, ' has ',nstates,' state'+comm)
+                    states_density = [0] * nstates
+                    for istate in range(nstates):
+                        try:
+                            states_density[istate]=sum(np.array(edge_profiles.ggd[0].ion[ispecies].state[istate].density[0].values)*np.array(volumes_edge))
+                            error_state=1
+                        except:
+                            try:
+                                states_density[istate]=sum(np.array(edge_profiles.ggd[0].ion[ispecies].state[istate].density_thermal[0].values)*np.array(volumes_edge))
+                                error_state=1
+                            except:
+                                print(TAB,'state', str(istate+1),'No density data for this state')
+                                error_state=0
+                        if error_state==1:
+                            try:
+                                print(TAB, 'state ', str(istate+1),(' '*(5-len(str(istate+1)))),
+                                      edge_profiles.ggd[0].ion[ispecies].state[istate].label,
+                                      (' '*(7-len(str( edge_profiles.ggd[0].ion[ispecies].state[istate].label)))),
+                                      ' z =',np.mean(edge_profiles.ggd[0].ion[ispecies].state[istate].z_average[0].values),
+                                      (' '*(7-len(str(np.mean(edge_profiles.ggd[0].ion[ispecies].state[istate].z_average[0].values))))),
+                                      'n/ni, % :', format("%.6f" % (100*states_density[istate]/species_density_edge[ispecies]))
+                                     )
+                            except:
+                                print(TAB, 'state', str(istate+1), 'Print error for this state')
+                except:
+                    print('States for ', edge_profiles.ggd[0].ion[ispecies].label, 'are not available')
+
+
+    else:
+        print("----> No species listed in the plasma composition of the edge_profiles IDS.")
 
 
 
