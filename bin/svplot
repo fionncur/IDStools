@@ -1,0 +1,221 @@
+#!/usr/bin/env python
+
+from __future__ import print_function
+
+# --------
+# MODULES
+# --------
+import numpy as np
+import imas,argparse,sys,os,re,logging
+import matplotlib
+matplotlib.use('TKagg')
+import matplotlib.pyplot as plt
+
+# ------------------------------
+# MANAGEMENT OF INPUT ARGUMENTS
+# ------------------------------
+parser = argparse.ArgumentParser(description=\
+	 '---- Display spectrum from spectrometer_visible')
+parser.add_argument('-s','--shot',help='Shot number', required=True,type=int)
+parser.add_argument('-r','--run',help='Run number',required=True,type=int)
+parser.add_argument('-u','--user_or_path',help='User or absolute path name where the data-entry is located', required=False)
+parser.add_argument('-d','--database',help='Database name where the data-entry is located', required=False)
+parser.add_argument('-t','--time',help='Time', required=False,type=float)
+
+args = vars(parser.parse_args())
+shot = args["shot"]
+run  = args["run"]
+
+# User or absolute path name
+if args['user_or_path'] != None:
+    user_or_path = args['user_or_path']
+else:
+    user_or_path = 'public'
+
+# Database name
+if args['database'] != None:
+    database = args['database']
+else:
+    database = 'iter'
+
+# Time
+if args['time'] != None:
+    time = args['time']
+else:
+    time = -99.
+
+# -------------------------------
+# READ IDS'S FROM LOCAL DATABASE
+# -------------------------------
+input = imas.DBEntry(imas.imasdef.MDSPLUS_BACKEND,database,shot,run,user_or_path)
+input.open()
+ids = input.get('spectrometer_visible')
+input.close()
+
+# ---------------------------
+# TIME VECTOR AND TIME INDEX
+# ---------------------------
+timevec = ids.time
+ntime = len(timevec)
+if ntime==1:
+    if len(timevec) > 0:
+        tc = timevec[0]
+    else:
+        tc = 0
+    it = 0
+else:
+    if time>=0:
+        [tc,it] = find_nearest(timevec,time)
+    else:
+        it = int(ntime/2)
+        tc = timevec[it]
+    print('--------------------------------------------------------------------------', file=sys.stderr)
+    print(' Time  = '+'%.2f' % tc+' s in range ['+'%.2f' % timevec[0]+','+'%.2f' % timevec[ntime-1]+'] s', file=sys.stderr)
+    print(' Index = ',str(it), file=sys.stderr)
+    print(' Averaged resolution = ', (timevec[ntime-1]-timevec[0])/(ntime-1),' s', file=sys.stderr)  
+    print('--------------------------------------------------------------------------', file=sys.stderr)
+time = tc
+
+FORMAT = "%(name)s - %(levelname)s - %(funcName)s - %(message)s"
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+logging.basicConfig(format=FORMAT)
+
+LABEL_RADIANCE = "Spectral Radiance (ph s^-1 m^-2 sr^-1 nm^-1)"
+LABEL_INTENSITY = "Intensity (counts)"
+CHANNEL_NAME_PATTERN = re.compile(r"^(\d{2}\.\w{2}) CH#(\d{2}) Spectrum (\d{1})$")
+
+scenario = "/".join((str(shot), str(run), '%.2f' % time))
+
+# Deduce the number of spectra from the channel name (not safe but no other method yet)
+list_of_spectra = []
+for channel in ids.channel:
+    spectrum_index = channel.name.split('Spectrum ')[1]
+    if spectrum_index not in list_of_spectra:
+        list_of_spectra.append(spectrum_index)
+n_spectra = len(list_of_spectra)
+    
+for n in range(n_spectra):
+
+    wavelengths: np.ndarray = None
+    diagnostic: str = None
+    min_wavelength: float = None
+    max_wavelength: float = None
+
+    figure_radiance, axes_radiance = plt.subplots(tight_layout=True)
+    figure_intensity, axes_intensity = plt.subplots(tight_layout=True)
+
+    for channel in ids.channel:
+
+        match = CHANNEL_NAME_PATTERN.fullmatch(channel.name)
+
+        if match is None:
+            logger.error(
+                f"Channel's name {channel.name} does not math pattern "
+                f"{CHANNEL_NAME_PATTERN.pattern}"
+            )
+            raise ValueError()
+
+        if diagnostic is None:
+            diagnostic = match[1]
+
+        identifier = int(match[2])
+        spectrum_n = int(match[3])
+
+        if spectrum_n != n + 1:
+            continue
+
+        gs = channel.grating_spectrometer
+        if not gs.wavelengths.size:
+            logger.warning(f"{channel.name} grating_spectrometer.wavelengths is empty.")
+            continue
+
+        if wavelengths is None:
+            wavelengths = gs.wavelengths * 1e9
+            delta = (wavelengths[1] - wavelengths[0]) / 2.0
+            min_wavelength = wavelengths[0] - delta
+            max_wavelength = wavelengths[-1] + delta
+
+        if not gs.radiance_spectral.data.size:
+            logging.warning(
+                f"{channel.name} grating_spectrometer.radiance_spectral.data is empty."
+            )
+            continue
+        radiance_spectral = gs.radiance_spectral.data[:, 0] * 1e-9
+
+        if not gs.intensity_spectrum.data.size:
+            logging.warning(
+                f"{channel.name} grating_spectrometer.intensity_spectrum.data is empty."
+            )
+            continue
+        intensity_spectrum = gs.intensity_spectrum.data[:, 0]
+
+        if not gs.exposure_time:
+            logging.warning(f"{channel.name} grating_spectrometer.exposure_time is empty.")
+            continue
+        exposure_time = gs.exposure_time
+
+        radius = channel.line_of_sight.second_point.r
+
+        axes_radiance.plot(
+            wavelengths,
+            radiance_spectral,
+            linewidth=1.0,
+            label=f"CH#{identifier:0>2g} R {radius:0>0.2f} m",
+        )
+
+        axes_intensity.plot(
+            wavelengths,
+            intensity_spectrum * exposure_time,
+            linewidth=1.0,
+            label=f"CH#{identifier:0>2g} R {radius:0>0.2f} m",
+        )
+
+    for _, axes, label in [
+        (figure_radiance, axes_radiance, LABEL_RADIANCE),
+        (figure_intensity, axes_intensity, LABEL_INTENSITY),
+    ]:
+        axes.set_ylim(bottom=0.0)
+
+        axes.set_title("\n".join((diagnostic, scenario)))
+        axes.set_xlabel("Wavelength (nm)")
+        axes.set_ylabel(label)
+        axes.grid(True)
+
+        # box = axes.get_position()
+        # axes.set_position([box.x0, box.y0, box.width * 0.75, box.height])
+        # figure.tight_layout(rect=[0, 0, 0.75, 1])
+
+        axes.legend(
+            bbox_to_anchor=(1.0, 0.5),
+            loc="center left",
+            borderaxespad=0.0,
+            frameon=False,
+            fontsize="x-small",
+        )
+
+    filename = "_".join(
+        [
+            diagnostic.replace(".", "_"),
+            f"{min_wavelength:0.2f}",
+            f"{max_wavelength:0.2f}",
+        ]
+    )
+
+    try:
+        figure_radiance.savefig(os.path.join('',f"{filename}_radiance.png"), dpi=300)
+        print('----> Figure saved to '+os.path.join('', f"{filename}_radiance.png"), file=sys.stderr)
+    except:
+        print('The figure could not be saved (check local permissions).', file=sys.stderr)
+
+    try:
+        figure_intensity.savefig(os.path.join('',f"{filename}_intensity.png"), dpi=300)
+        print('----> Figure saved to '+os.path.join('', f"{filename}_intensity.png"), file=sys.stderr)
+    except:
+        print('The figure could not be saved (check local permissions).', file=sys.stderr)
+        
+    if n<n_spectra-1:
+        plt.show(block=False)
+    else:
+        plt.show(block=True)
+    
