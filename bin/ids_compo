@@ -1,54 +1,38 @@
 #!/usr/bin/env python3
 
 import argparse, imas, sys, os
-import init_mendeleiev as mend
+import database_tools.init_mendeleiev as mend
 import numpy as np
+from idstools.cli import *
+import sys
+
 # ----------------------------------------------------------------------
 TAB = ' ' * 16
 LINE='-'*8
 # Management of input arguments
 parser = argparse.ArgumentParser(description=\
-	 '---- Display the plasma composition from the core_profiles IDS')
-parser.add_argument('-u','--user_or_path',help='User or path name of the DB where the data-entry is located',
-                    required=False)
-parser.add_argument('-d','--database',help='Database name of the DB where the data-entry is located', 
-                    required=False)
+	                         '---- Display the plasma composition from the core_profiles IDS',
+                                 parents=[imas_parser])
 parser.add_argument('-s','--shot',help='Shot number', required=True,type=int)
 parser.add_argument('-r','--run',help='Run number',required=True,type=int)
-args = vars(parser.parse_args())
-shot = args["shot"]
-run  = args["run"]
 
-# User or path name
-if args['user_or_path'] != None:
-	user_or_path = args["user_or_path"]
-else:
-	user_or_path = 'public'
+args = parser.parse_args()
 
-# Database name
-if args['database'] != None:
-	database = args["database"]
-else:
-	database = 'iterdb'
 core_flag=0
 edge_flag=0
 states_flag=0
 states_edge_flag=0
 volume_error=''
-# Open the database and read the necessary IDSs
-version = os.getenv('IMAS_VERSION')[0]
-input=imas.ids(shot,run)
-[err,n]=input.open_env(user_or_path,database,version,silent=True)
+
+input = imas.DBEntry(get_backend_id(args.backend),args.database,args.shot,args.run,user_name=args.user,data_version=args.version)
+err,_ = input.open()
 if err != 0:
-    print('!   Shot ' + str(shot) + ', run ' + str(run) +' for user_or_path = '+user_or_path+' and database = '+database+' does not exist', file=sys.stderr)
-    print('----> Aborted.', file=sys.stderr)
-    exit()
+    print(f'!   Shot {args.shot}, run {args.run} for user {args.user} and database {args.database} is not reachable ----> abort!', file=sys.stderr)
+    sys.exit(err)
 
 try:
-    #input.core_profiles.get()
-    core_profiles = input.core_profiles # To initialise the empty IDS structure
-
-    core_profiles.time=input.core_profiles.partialGet('time')
+    core_profiles = imas.core_profiles() # To initialise the empty IDS structure
+    core_profiles.time = input.partial_get('core_profiles','time')
     if core_profiles.time is None:
         print('!   No core_profiles IDS in the data-entry --> Abort.', file=sys.stderr)
     core_flag=1
@@ -57,7 +41,7 @@ except:
 
 while core_flag==1:
     try:
-        ne0 = input.core_profiles.partialGet('profiles_1d(:)/electrons/density(0)')
+        ne0 = input.partial_get('core_profiles','profiles_1d(:)/electrons/density(0)')
         central_electron_density = 0
         for islice in range(len(ne0)):
             if ne0[islice] > central_electron_density:
@@ -71,8 +55,7 @@ while core_flag==1:
         
     # Read 1D-profiles for this time slice
     core_profiles.profiles_1d.resize(1)
-    core_profiles.profiles_1d[0] = input.core_profiles.partialGet('profiles_1d('+str(the_slice)+')')
- #   print('Code',core_profiles.code.name)
+    core_profiles.profiles_1d[0] = input.partial_get('core_profiles',f'profiles_1d({the_slice})')
     try:
         nspecies = len(core_profiles.profiles_1d[0].ion)
         a = [0] * nspecies
@@ -94,8 +77,9 @@ while core_flag==1:
         volume = core_profiles.profiles_1d[0].grid.volume
         if len(volume) == 0:
             try:
-                equilibrium = input.equilibrium
-                equilibrium.time_slice[0].profiles_1d.volume = input.equilibrium.partialGet('time_slice('+str(the_slice)+')/profiles_1d/volume')
+                equilibrium = imas.equilibrium()
+                equilibrium.time_slice.resize(1)
+                equilibrium.time_slice[0].profiles_1d.volume = input.partial_get('equilibrium',f'time_slice({the_slice})/profiles_1d/volume')
             except:
                 print('!   Issues with equillibrium.time_slice.profiles_1d.volume')
             volume = equilibrium.time_slice[0].profiles_1d.volume
@@ -126,13 +110,11 @@ while core_flag==1:
         except:
             states_flag=0
             print('!   Ion states composition is not available')
-    break       
+    break
 # edge_profiles
 try:
-    #input.edge_profiles.get()
-    edge_profiles = input.edge_profiles # To initialise the empty IDS structure
-
-    edge_profiles.time=input.edge_profiles.partialGet('time')
+    edge_profiles = imas.edge_profiles() # To initialise the empty IDS structure
+    edge_profiles.time=input.partial_get('edge_profiles','time')
     if edge_profiles.time is None:
         print('!   No edge_profiles IDS in the data-entry --> Abort.', file=sys.stderr)
     edge_flag=1
@@ -140,13 +122,12 @@ except:
     print("!   The edge_profiles IDS is absent from the input data-entry", file=sys.stderr)    
 
 while edge_flag==1:
-    the_slice=0       
+    the_slice=0
     # Read 1D-profiles for this time slice
     edge_profiles.ggd.resize(1)
-    edge_profiles.ggd[0] = input.edge_profiles.partialGet('ggd('+str(the_slice)+')')
+    edge_profiles.ggd[0] = input.partial_get('edge_profiles',f'ggd({the_slice})')
     edge_profiles.grid_ggd.resize(1)
-    edge_profiles.grid_ggd[0] = input.edge_profiles.partialGet('grid_ggd('+str(the_slice)+')')
- #   print('Code', str(edge_profiles.code.name))
+    edge_profiles.grid_ggd[0] = input.partial_get('edge_profiles',f'grid_ggd({the_slice})')
     try:
         nspecies_edge = len(edge_profiles.ggd[0].ion)
         a_edge = [0] * nspecies_edge
