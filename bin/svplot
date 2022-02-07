@@ -10,45 +10,30 @@ import imas,argparse,sys,os,re,logging
 import matplotlib
 matplotlib.use('TKagg')
 import matplotlib.pyplot as plt
+from idstools.cli import *
+import sys
 
 # ------------------------------
 # MANAGEMENT OF INPUT ARGUMENTS
 # ------------------------------
 parser = argparse.ArgumentParser(description=\
-	 '---- Display spectrum from spectrometer_visible')
+	                         '---- Display spectrum from spectrometer_visible',
+                                 parents=[imas_parser])
 parser.add_argument('-s','--shot',help='Shot number', required=True,type=int)
 parser.add_argument('-r','--run',help='Run number',required=True,type=int)
-parser.add_argument('-u','--user_or_path',help='User or absolute path name where the data-entry is located', required=False)
-parser.add_argument('-d','--database',help='Database name where the data-entry is located', required=False)
-parser.add_argument('-t','--time',help='Time', required=False,type=float)
+parser.add_argument('-t','--time',help='Time', required=False,type=float, default=-99.0)
 
-args = vars(parser.parse_args())
-shot = args["shot"]
-run  = args["run"]
-
-# User or absolute path name
-if args['user_or_path'] != None:
-    user_or_path = args['user_or_path']
-else:
-    user_or_path = 'public'
-
-# Database name
-if args['database'] != None:
-    database = args['database']
-else:
-    database = 'iter'
-
-# Time
-if args['time'] != None:
-    time = args['time']
-else:
-    time = -99.
+args = parser.parse_args()
 
 # -------------------------------
 # READ IDS'S FROM LOCAL DATABASE
 # -------------------------------
-input = imas.DBEntry(imas.imasdef.MDSPLUS_BACKEND,database,shot,run,user_or_path)
-input.open()
+input = imas.DBEntry(get_backend_id(args.backend),args.database,args.shot,args.run,user_name=args.user,data_version=args.version)
+status,_ = input.open()
+if status!=0:
+    print(f'Shot {args.shot}, run {args.run} for user {args.user} and database {args.database} is not reachable ----> abort.', file=sys.stderr)
+    sys.exit(err)
+
 ids = input.get('spectrometer_visible')
 input.close()
 
@@ -64,16 +49,16 @@ if ntime==1:
         tc = 0
     it = 0
 else:
-    if time>=0:
-        [tc,it] = find_nearest(timevec,time)
+    if args.time>=0:
+        [tc,it] = find_nearest(timevec,args.time)
     else:
         it = int(ntime/2)
         tc = timevec[it]
-    print('--------------------------------------------------------------------------', file=sys.stderr)
-    print(' Time  = '+'%.2f' % tc+' s in range ['+'%.2f' % timevec[0]+','+'%.2f' % timevec[ntime-1]+'] s', file=sys.stderr)
-    print(' Index = ',str(it), file=sys.stderr)
-    print(' Averaged resolution = ', (timevec[ntime-1]-timevec[0])/(ntime-1),' s', file=sys.stderr)  
-    print('--------------------------------------------------------------------------', file=sys.stderr)
+    print('--------------------------------------------------------------------------', file=sys.stdout)
+    print(' Time  = '+'%.2f' % tc+' s in range ['+'%.2f' % timevec[0]+','+'%.2f' % timevec[ntime-1]+'] s', file=sys.stdout)
+    print(' Index = ',str(it), file=sys.stdout)
+    print(' Averaged resolution = ', (timevec[ntime-1]-timevec[0])/(ntime-1),' s', file=sys.stdout)
+    print('--------------------------------------------------------------------------', file=sys.stdout)
 time = tc
 
 FORMAT = "%(name)s - %(levelname)s - %(funcName)s - %(message)s"
@@ -85,7 +70,7 @@ LABEL_RADIANCE = "Spectral Radiance (ph s^-1 m^-2 sr^-1 nm^-1)"
 LABEL_INTENSITY = "Intensity (counts)"
 CHANNEL_NAME_PATTERN = re.compile(r"^(\d{2}\.\w{2}) CH#(\d{2}) Spectrum (\d{1})$")
 
-scenario = "/".join((str(shot), str(run), '%.2f' % time))
+scenario = f"{args.shot}/{args.run}/{time:.2f}"
 
 # Deduce the number of spectra from the channel name (not safe but no other method yet)
 list_of_spectra = []
