@@ -1,3 +1,6 @@
+include 'mathematical_constants.f90'  ! Excellent math constant lives here
+include 'codata_2018.f90'      ! Recommended physical constants since 2018
+
   program FP_dummy_plasma
 
 !
@@ -37,9 +40,12 @@
 ! 
 !
   use ids_schemas
-  use imas_constants_module
   use amns_types
   use amns_module
+  use mathematical_constants, only: pi => m_pi
+  use codata, only: amu => atomic_mass_constant
+  use codata, only: me => electron_mass
+  use codata, only: mp => proton_mass
 
   implicit none
 
@@ -408,12 +414,12 @@
   do i = 1, N_1D
     core_profiles%profiles_1d( time_sind )%grid%rho_tor_norm(i) = rratio(i-1,N_1D-1)
     core_profiles%profiles_1d( time_sind )%grid%volume(i) = &
-       &  2.0_IDS_real*imas_constants%pi*R0*imas_constants%pi* &
+       &  2.0_IDS_real*pi*R0*pi* &
        &  ( radius*rratio(i-1,N_1D-1) )**2
-    core_profiles%profiles_1d( time_sind )%grid%area(i) = imas_constants%pi* &
+    core_profiles%profiles_1d( time_sind )%grid%area(i) = pi* &
        &  ( radius*rratio(i-1,N_1D-1) )**2
     core_profiles%profiles_1d( time_sind )%grid%surface(i) = &
-       &  2.0_IDS_real*imas_constants%pi*R0*imas_constants%pi* &
+       &  2.0_IDS_real*pi*R0*pi* &
        &  ( radius*rratio(i-1,N_1D-1) )
     core_profiles%profiles_1d( time_sind )%electrons%temperature(i) = max(T_min, &
        &  Te_max*( 1.0_IDS_real - rratio(i-1,N_1D-1)**2 ) )
@@ -516,18 +522,18 @@
   allocate( equilibrium%time_slice( time_sind )%boundary_separatrix%outline%z(N_1D) )
   do i = 1, N_1D
     equilibrium%time_slice( time_sind )%boundary_separatrix%outline%r(i) = R0 + &
-       & radius*cos( 2.0_IDS_real*imas_constants%pi*rratio(i,N_1D) )
+       & radius*cos( 2.0_IDS_real*pi*rratio(i,N_1D) )
     equilibrium%time_slice( time_sind )%boundary_separatrix%outline%z(i) = Z0 + &
-       & radius*sin( 2.0_IDS_real*imas_constants%pi*rratio(i,N_1D) )
+       & radius*sin( 2.0_IDS_real*pi*rratio(i,N_1D) )
   end do
   equilibrium%time_slice( time_sind )%global_quantities%volume = &
-       & 2.0_IDS_real*imas_constants%pi*R0*imas_constants%pi*radius**2
+       & 2.0_IDS_real*pi*R0*pi*radius**2
   equilibrium%time_slice( time_sind )%global_quantities%area = &
-       & imas_constants%pi*radius**2
+       & pi*radius**2
   equilibrium%time_slice( time_sind )%global_quantities%surface = &
-       & 2.0_IDS_real*imas_constants%pi*R0*imas_constants%pi*radius
+       & 2.0_IDS_real*pi*R0*pi*radius
   equilibrium%time_slice( time_sind )%global_quantities%length_pol = &
-       & imas_constants%pi*radius
+       & pi*radius
   equilibrium%time_slice( time_sind )%global_quantities%psi_boundary = 0.0_IDS_real
   equilibrium%time_slice( time_sind )%global_quantities%magnetic_axis%r = R0
   equilibrium%time_slice( time_sind )%global_quantities%magnetic_axis%z = Z0
@@ -569,9 +575,9 @@
     equilibrium%time_slice( time_sind )%profiles_1d%mass_density(i) = &
       & (core_profiles%profiles_1d( time_sind )%ion(1)%density(i) + &
       &  core_profiles%profiles_1d( time_sind )%neutral(1)%density(i))* &
-      &  imas_constants%mp + &
+      &  mp + &
       &  core_profiles%profiles_1d( time_sind )%electrons%density(i)* &
-      &  imas_constants%me
+      &  me
     do j = 1, n_imp_species
       equilibrium%time_slice( time_sind )%profiles_1d%mass_density(i) = &
          &  equilibrium%time_slice( time_sind )%profiles_1d%mass_density(i) + &
@@ -579,7 +585,7 @@
          &  core_profiles%profiles_1d( time_sind )%ion(j+1)%element(1)%a + &
          &  core_profiles%profiles_1d( time_sind )%neutral(j+1)%density(i)* &
          &  core_profiles%profiles_1d( time_sind )%neutral(j+1)%element(1)%a)* &
-         &  imas_constants%amu
+         &  amu
     end do
   end do
 
