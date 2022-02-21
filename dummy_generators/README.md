@@ -30,7 +30,7 @@ that it intersects the wall. It exports an IDS containing a minimal description 
 ## Build instructions
 
 1. Loading dependent modules
-```module load IMAS AMNS```
+```module load IMAS AMNS Fundamental-Constants```
 2. Selecting the fortran compiler through FC env variable and compiling
 ```FC=ifort make```
 3. Running with the default parameters
