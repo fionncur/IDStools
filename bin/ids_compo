@@ -116,8 +116,9 @@ try:
     edge_profiles = imas.edge_profiles() # To initialise the empty IDS structure
     edge_profiles.time=input.partial_get('edge_profiles','time')
     if edge_profiles.time is None:
-        print('!   No edge_profiles IDS in the data-entry --> Abort.', file=sys.stderr)
-    edge_flag=1
+        print('!   No edge_profiles IDS in the data-entry.', file=sys.stderr)
+    else:
+        edge_flag=1
 except:
     print("!   The edge_profiles IDS is absent from the input data-entry", file=sys.stderr)    
 
