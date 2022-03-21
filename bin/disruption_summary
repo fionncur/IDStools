@@ -232,13 +232,13 @@ if __name__ == "__main__":
 
     # Input arguments
     parser = argparse.ArgumentParser(description=\
-                                     "---- Script to list available scenarios in a specific folder ----"\
+                                     "---- Script to list available disruptions in a specific folder ----"\
                                      , formatter_class=SmartFormatter)
     parser.add_argument("-f","--folder",help=\
-                        "folder where to search for scenarios (recursive)", required=False)
+                        "folder where to search for disruptions (recursive)", required=False)
     parser.add_argument("-s","--selection",help=\
                         "R|list of fields to filter: e.g. MD,up,2.65\n"\
-                        "----> Select only scenarios filling these criteria"\
+                        "----> Select only disruptions filling these criteria"\
                         , required=False)
     parser.add_argument('-o' ,'--obsolete', help='Show also obsolete cases',required=False, action='store_true')
     parser.add_argument("-c","--choice", help=\
@@ -260,7 +260,7 @@ if __name__ == "__main__":
                         "        b0          = central magnetic field \n"\
                         "        ne0         = central electron density\n"\
                         "        idslist     = List of IDSs available in the data-entry\n"\
-                        "        tsteps      = Number of time steps in the scenario\n"\
+                        "        tsteps      = Number of time steps in the disruptions\n"\
                         , required=False)
 
     args = vars(parser.parse_args())
@@ -292,7 +292,7 @@ if __name__ == "__main__":
             print("------------------------------------------------------------------", file=sys.stderr)
             print("Wrong way to write your list of variables to display", file=sys.stderr)
             print("You wrote "+str(args['choice']), file=sys.stderr)
-            print("Try e.g. this way: "+ """ scenario_summary -c shot,run,workflow """, file=sys.stderr)
+            print("Try e.g. this way: "+ """ disruption_summary -c shot,run,ip     """, file=sys.stderr)
             print("------------------------------------------------------------------", file=sys.stderr)
             sys.exit(1)
     else:
@@ -305,7 +305,7 @@ if __name__ == "__main__":
     # Print the arguments of the default call to the function
     if args['choice'] == None:
         print("""----> Default call equivalent to: """)
-        print("""      scenario_summary -c shot,run,database,ref_name,ip,b0,fuelling,confinement,workflow""")
+        print("""      disruption_summary -c shot,run,ip,b0,ne0,dis_type,VD_dir,IREmax,HF,workflow,ref_name""")
 
     # Call the function
     table = rec(data=data,path=folder,extension=ext,choice=choice,selection=selection,obsolete_cases=obsolete_cases)
