@@ -133,17 +133,18 @@ except:
     ref_name = "tbd"
 
 # Major Disruption or VDE?
-if 'MD' in ref_name:
+split_name = ref_name.split("/")[-1]
+if 'MD' in split_name:
     dis_type = 'MD' 
-elif 'VDE' in ref_name:
+elif 'VDE' in split_name:
     dis_type = 'VDE'
 else:
     dis_type = 'tbd' 
 
 # Check the plasma direction (needs better criteria)
-if 'up' in ref_name:
+if 'up' in split_name:
     VD_direction = 'up' 
-elif 'dw' in ref_name:
+elif 'dw' in split_name:
     VD_direction = 'down'
 else:
     VD_direction = 'tbd' 
