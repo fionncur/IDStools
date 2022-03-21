@@ -15,7 +15,7 @@ class SmartFormatter(argparse.HelpFormatter):
 
 # ----------------------------------------------------------------------------
 
-def rec(data={},path=os.getcwd(),extension='.yaml',choice=['shot','run','ip','b0'],selection=None):
+def rec(data={},path=os.getcwd(),extension='.yaml',choice=['shot','run','ip','b0'],selection=None,obsolete_cases=False):
 
   trunc_number = 70 # Need to truncate the reference name when it is too long
 
@@ -132,7 +132,7 @@ def rec(data={},path=os.getcwd(),extension='.yaml',choice=['shot','run','ip','b0
   # ---------------
   j = 2
   for i in range(len(sdata)):
-    if sdata[i]['status'] == "active":
+    if (sdata[i]['status'] == "active") or obsolete_cases:
       j = j+1
       ref_name      = sdata[i].get('reference_name')[0:trunc_number]
       ro_name       = sdata[i].get('responsible_name')
@@ -240,6 +240,7 @@ if __name__ == "__main__":
                         "R|list of fields to filter: e.g. MD,up,2.65\n"\
                         "----> Select only scenarios filling these criteria"\
                         , required=False)
+    parser.add_argument('-o' ,'--obsolete', help='Show also obsolete cases',required=False, action='store_true')
     parser.add_argument("-c","--choice", help=\
                         "R|list of variables to display, e.g.: shot,run,ip,b0\n"\
                         "... available among following variables:\n"\
@@ -263,6 +264,8 @@ if __name__ == "__main__":
                         , required=False)
 
     args = vars(parser.parse_args())
+
+    obsolete_cases = args["obsolete"]
 
     # Folder
     if args['folder'] != None:
@@ -293,7 +296,7 @@ if __name__ == "__main__":
             print("------------------------------------------------------------------", file=sys.stderr)
             sys.exit(1)
     else:
-        choice = ['shot','run','ip','b0','ne0','dis_type','VD_dir','IREmax','workflow', 'ref_name']
+        choice = ['shot','run','ip','b0','ne0','dis_type','VD_dir','IREmax','HF','workflow', 'ref_name']
 
     # Default extension, search folder and choice of variables to display
     data = {}
@@ -305,7 +308,7 @@ if __name__ == "__main__":
         print("""      scenario_summary -c shot,run,database,ref_name,ip,b0,fuelling,confinement,workflow""")
 
     # Call the function
-    table = rec(data=data,path=folder,extension=ext,choice=choice,selection=selection)
+    table = rec(data=data,path=folder,extension=ext,choice=choice,selection=selection,obsolete_cases=obsolete_cases)
 
     # Display the clean formatted table
     for i in range(len(table)):
