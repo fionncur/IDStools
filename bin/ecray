@@ -2,6 +2,8 @@
 
 import imas,os,sys,argparse,matplotlib,pdb
 import numpy as np
+import matplotlib
+matplotlib.use('TKagg')
 from matplotlib import gridspec
 import matplotlib.pyplot as plt
 
@@ -190,11 +192,15 @@ for i in range(len(shot)):
     r2d   = np.array(equilibrium.time_slice[0].profiles_2d[0].r)
     z2d   = np.array(equilibrium.time_slice[0].profiles_2d[0].z)
     psi2d = np.array(equilibrium.time_slice[0].profiles_2d[0].psi)
-    rho2d = np.sqrt(equilibrium.time_slice[0].profiles_2d[0].phi/np.amax(equilibrium.time_slice[0].profiles_2d[0].phi))
+    if len(equilibrium.time_slice[0].profiles_2d[0].phi) > 0:
+        rho2d = np.sqrt(equilibrium.time_slice[0].profiles_2d[0].phi/np.amax(equilibrium.time_slice[0].profiles_2d[0].phi))
+    else:
+        rho2d = []
         
     # Poloidal view plot
     cntrpsi = ax_polview.contour(r2d,z2d,psi2d,50,cmap='summer')
-    cntrrho = ax_polview.contour(r2d,z2d,rho2d,50,cmap='YlOrBr')
+    if len(rho2d)>0:
+        cntrrho = ax_polview.contour(r2d,z2d,rho2d,50,cmap='YlOrBr')
     ax_polview.set_xlim(r2d.min(),r2d.max())
     ax_polview.set_ylim(z2d.min()*0.7,z2d.max()*0.7)
     ax_polview.set_aspect('equal', adjustable='box')
