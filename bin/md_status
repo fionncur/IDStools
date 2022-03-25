@@ -11,9 +11,9 @@ parser.add_argument('-s','--shot',help='shot number', required=True,type=int)
 # currently limiting run < 10000 because of the search path /3/0
 parser.add_argument('-r','--run',help='run number',required=True,type=int,
                     choices=range(0,9999),metavar="[0-9999]") 
-args = parser.parse_args()
-shot = str(args.shot)
-run  = str(args.run)
+args = vars(parser.parse_args())
+shot = str(args['shot'])
+run  = str(args['run'])
 
 # ------------------------------------------------------------------------------------------------------------
 
@@ -45,7 +45,12 @@ def find_children(shotrun,data,family):
         family = find_children(shotrunc,data,family)
     return family
 
-folder = '/work/imas/shared/imasdb/ITER_MD/3/0'
+# FOLDER
+if args['folder'] != None:
+    folder = args['folder']
+else:
+    folder = '/work/imas/shared/imasdb/ITER_MD/3/0'
+
 file = open(folder+'/md_summary.yaml', 'r')
 data = yaml.load(file,Loader=yaml.CLoader)
 file.close()
