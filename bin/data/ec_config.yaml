@@ -1,0 +1,113 @@
+# ----------------------------------------------------------------
+# THIS FILE IS AIMED AT CONFIGURING THE DYNAMIC DATA OF AN IDS
+# PREVIOUSLY READ FROM THE MACHINE DESCRIPTION DATABASE... OR NOT
+# ----------------------------------------------------------------
+
+# -------------------------------------------------------------------------------------------------------
+# CONFIGURATION RULES:
+# --------------------
+# - IF SHOT = O, IDS CREATED FROM SCRACTH, OTHERWISE IT IS READ FROM THE MD DATABASE
+# - IF NO TIME ARRAY IS DEFINED FOR A SPECIFIC VARIABLE, IT USES THE GENERAL ONE INSTEAD
+# - THE TIME ARRAY OF A SPECIFIC VARIABLE HAS TO BE DEFINED AFTER THE SPECIFIC VARIABLE
+# --------------------
+# - ADVICE: DO NOT REMOVE VARIABLES (EXCEPT TIME ARRAYS), COMMENT THEM OUT INSTEAD
+# - NOTE:   THE ACCESS LAYER MAY NOT NOTICE A DIMENSION MISTAKE
+# - CAVEAT: MAKE SURE THE DIMENSION OF THE VARIABLE IS THE SAME AS THE ASSOCIATED TIME ARRAY
+#          (EXCEPTION: IF THE VARIABLE HAS JUST ONE VALUE, IT IS DUPLICATED OVER THE GENERAL TIME ARRAY)
+# -------------------------------------------------------------------------------------------------------
+
+ids: 'ec_launchers'
+
+database:
+   shot: 120000
+   run: 1
+   user: 'public'
+   db: 'ITER_MD'
+
+time: [ 0, 50, 60, 320, 350, 400 ]
+
+nlaunchers: 5
+
+static_variables:
+
+     launcher[0].name: EL/TSM
+     launcher[1].name: EL/MSM
+     launcher[2].name: EL/BSM
+     launcher[3].name: UL/USM
+     launcher[4].name: UL/LSM
+
+dynamic_variables:
+
+    launcher[0].power_launched.data: [0, 0, 6.e6, 3.e6, 3.e6,0]
+    launcher[1].power_launched.data: [0]
+    launcher[2].power_launched.data: [0, 0, 8.e6, 8.e6, 0]
+    launcher[2].power_launched.time: [0, 50, 60, 320, 400] # Independent time array
+    launcher[3].power_launched.data: [0, 10.e6, 10.e6, 10.e6, 10.e6, 0]
+    launcher[4].power_launched.data: [0]
+
+    launcher[0].frequency.data: [170.e9]
+    launcher[1].frequency.data: [170.e9]
+    launcher[2].frequency.data: [170.e9]
+    launcher[3].frequency.data: [170.e9]
+    launcher[4].frequency.data: [170.e9]
+
+    launcher[0].mode.data: [1] # (1) O-mode, (-1) X-mode
+    launcher[1].mode.data: [1]
+    launcher[2].mode.data: [1]
+    launcher[3].mode.data: [1]
+    launcher[4].mode.data: [1]
+
+    launcher[0].steering_angle_pol.data: [0.26179939]
+    launcher[1].steering_angle_pol.data: [0.]
+    launcher[2].steering_angle_pol.data: [-0.17453293]
+    launcher[3].steering_angle_pol.data: [1.13446401]
+    launcher[4].steering_angle_pol.data: [0.95993109]
+
+    launcher[0].steering_angle_tor.data: [-0.34906585]
+    launcher[1].steering_angle_tor.data: [0.43633231]
+    launcher[2].steering_angle_tor.data: [0.43633231]
+    launcher[3].steering_angle_tor.data: [0.34906585]
+    launcher[4].steering_angle_tor.data: [0.34906585]
+
+    launcher[0].launching_position.r: [9.394]
+    launcher[1].launching_position.r: [9.394]
+    launcher[2].launching_position.r: [9.394]
+    launcher[3].launching_position.r: [6.999]
+    launcher[4].launching_position.r: [7.054]
+
+    launcher[0].launching_position.z: [1.192]
+    launcher[1].launching_position.z: [0.62]
+    launcher[2].launching_position.z: [-0.004]
+    launcher[3].launching_position.z: [4.414]
+    launcher[4].launching_position.z: [4.178]
+    
+    launcher[0].launching_position.phi: [0.]
+    launcher[1].launching_position.phi: [0.]
+    launcher[2].launching_position.phi: [0.]
+    launcher[3].launching_position.phi: [0.]
+    launcher[4].launching_position.phi: [0.]
+
+    launcher[0].beam.spot.size.data: [[0.03], [0.03]]
+    launcher[1].beam.spot.size.data: [[0.03], [0.03]]
+    launcher[2].beam.spot.size.data: [[0.03], [0.03]]
+    launcher[3].beam.spot.size.data: [[0.03], [0.03]]
+    launcher[4].beam.spot.size.data: [[0.03], [0.03]]
+
+    launcher[0].beam.spot.angle.data: [0.]
+    launcher[1].beam.spot.angle.data: [0.]
+    launcher[2].beam.spot.angle.data: [0.]
+    launcher[3].beam.spot.angle.data: [0.]
+    launcher[4].beam.spot.angle.data: [0.]
+
+    launcher[0].beam.phase.curvature.data: [[1.934], [1.934]]
+    launcher[1].beam.phase.curvature.data: [[1.934], [1.934]]
+    launcher[2].beam.phase.curvature.data: [[1.934], [1.934]]
+    launcher[3].beam.phase.curvature.data: [[1.934], [1.934]]
+    launcher[4].beam.phase.curvature.data: [[1.934], [1.934]]
+
+    launcher[0].beam.phase.angle.data: [0.]
+    launcher[1].beam.phase.angle.data: [0.]
+    launcher[2].beam.phase.angle.data: [0.]
+    launcher[3].beam.phase.angle.data: [0.]
+    launcher[4].beam.phase.angle.data: [0.]
+
