@@ -158,4 +158,5 @@ if selection != None:
 # DISPLAY THE CLEAN FORMATTED TABLE
 for i in range(len(table)):
   print(table[i])
+print(" NOTE: Read entry from MD database using user = 'public', database = 'ITER_MD'" )
 
