@@ -313,4 +313,5 @@ if __name__ == "__main__":
     # Display the clean formatted table
     for i in range(len(table)):
         print(table[i])
+    print(" NOTE: Read entry from Disruption database using user = 'public', database = 'ITER_DISRUPTIONS'" )
 
