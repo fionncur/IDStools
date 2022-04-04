@@ -64,7 +64,7 @@ else:
 # Artificial rotation of beams in top view to make it look nice and realistic for ITER
 # EL-14
 phi_launchers = [0.]*11
-if database == 'iter':
+if database == 'iter' or database == 'ITER':
     phi_launchers[0] = -90.*np.pi/180.
     phi_launchers[1] = -90.*np.pi/180.
     phi_launchers[2] = -90.*np.pi/180.
@@ -253,27 +253,20 @@ for i in range(len(shot)):
     firstloop = True
     for ibeam in range(nbeam):
       if is_active[ibeam] ==1:
-        # test provisoire
-        #if nray == 5:
-        #    myrange = [0,1]
-        #else:
-        #    myrange = [0]
-        #myrange = range(nray)
         iray = -1
-        #for irray in myrange:
         for irray in range(nray):
             iray = iray+1
             if(waves.coherent_wave[ibeam].beam_tracing[0].beam[iray].power_initial!=0):
                 wavesr   = waves.coherent_wave[ibeam].beam_tracing[0].beam[iray].position.r
-                wavesphi = waves.coherent_wave[ibeam].beam_tracing[0].beam[iray].position.phi
+                wavesphi = waves.coherent_wave[ibeam].beam_tracing[0].beam[iray].position.phi + phi_launchers[ibeam]
                 wavesz   = waves.coherent_wave[ibeam].beam_tracing[0].beam[iray].position.z
                 
                 r[ibeam,iray,:len(wavesr)]     = np.array(wavesr)
                 phi[ibeam,iray,:len(wavesphi)] = np.array(wavesphi)
                 z[ibeam,iray,:len(wavesz)]     = np.array(wavesz)
 
-                x[ibeam,iray,:] = r[ibeam,iray,:]*np.cos(np.pi/180*phi[ibeam,iray,:]+phi_launchers[ibeam])
-                y[ibeam,iray,:] = r[ibeam,iray,:]*np.sin(np.pi/180*phi[ibeam,iray,:]+phi_launchers[ibeam])
+                x[ibeam,iray,:] = r[ibeam,iray,:]*np.cos(phi[ibeam,iray,:])
+                y[ibeam,iray,:] = r[ibeam,iray,:]*np.sin(phi[ibeam,iray,:])
 
                 wavespower = waves.coherent_wave[ibeam].beam_tracing[0].beam[iray].electrons.power
                 wavespowerpar =  waves.coherent_wave[ibeam].beam_tracing[0].beam[iray].power_flow_norm.parallel

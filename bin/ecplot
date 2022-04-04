@@ -242,7 +242,7 @@ for iwave in range(nwaves):
     if is_active[iwave]:
         ax.plot(rho_tor_norm, single_power_density_profile[iwave]*1.e-6,label=single_ec_launcher_name[iwave])
 ax.set_ylabel('Absorbed power $\mathrm{[MW/m^{3}]}$')
-if psi_based == 0:
+if psi_based == 0 and force_psi ==0:
     ax.set_xlabel('Normalized toroidal flux coordinate')
 else:
     ax.set_xlabel('-(Poloidal flux coordinate) [Wb]')
@@ -263,7 +263,7 @@ for iwave in range(nwaves):
     if is_active[iwave]:
         ax.plot(rho_tor_norm, single_current_density_profile[iwave]*1.e-6,label=single_ec_launcher_name[iwave])
 ax.set_ylabel('$\mathrm{ECCD} [MA/m^{2}]}$')
-if psi_based == 0:
+if psi_based == 0 and force_psi ==0:
     ax.set_xlabel('Normalized toroidal flux coordinate')
 else:
     ax.set_xlabel('-(Poloidal flux coordinate) [Wb]')
