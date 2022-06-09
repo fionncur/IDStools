@@ -4,11 +4,11 @@ import argparse
 from pathlib import Path
 
 parser = argparse.ArgumentParser(description="This script applies conversion of IDS data into readable CSV files.")
-parser.add_argument("--path", type=str, default="/home/ITER/vidalm/public/imasdb/test/3/0", help="Path to database containing desired shots and runs")
-parser.add_argument("--backend", type=str, default="HDF5", help="Desired backend of use (currently supports MDS+ or HDF5")
+parser.add_argument("--path", type=str, default="/home/ITER/hoeneno/public/imasdb/benchmark/3", help="Path to database containing desired shots and runs")
+# parser.add_argument("--backend", type=str, default="HDF5", help="Desired backend of use (currently supports MDS+ or HDF5")
 args = parser.parse_args()
 path = args.path
-backend = args.backend
+# backend = args.backend
 
 shots = []
 runs = []
@@ -16,27 +16,25 @@ backends = []
 
 # MDS+
 
-#folder = Path(path).glob('**/*.datafile')
-#for entry in folder:
-#    file = str(entry).split('/')[-1].split('_')[1].split('.')[0]
-#    if len(file) <= 4:
-#        shot = 0
-#    else:
-#        shot = int(file[0:-4])
-#    run = int(file[-4:])+10000*int(str(entry).split('/')[-2])
-#    shots.append(shot)
-#    runs.append(run)
-#    backends.append('MDSPLUS')
+folder = Path(path).glob('**/*.datafile')
+for entry in folder:
+    file = str(entry).split('/')[-1].split('_')[1].split('.')[0]
+    if len(file) <= 4:
+        shot = 0
+    else:
+        shot = int(file[0:-4])
+    run = int(file[-4:])+10000*int(str(entry).split('/')[-2])
+    shots.append(shot)
+    runs.append(run)
+    backends.append('MDSPLUS')
 
 
 # HDF5
 
-folder = Path(path).glob('**/*.h5')
+folder = Path(path).glob('**/*master.h5')
 for entry in folder:
     shot = int(str(entry).split('/')[-3])
     run = int(str(entry).split('/')[-2])
-    if len(runs) > 0 and shot == shots[-1] and run == runs[-1]:
-        continue
     shots.append(shot)
     runs.append(run)
     backends.append('HDF5')
