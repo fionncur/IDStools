@@ -851,6 +851,9 @@ def main():
     from xml.etree import ElementTree as ET
     import yaml
 
+    # Initialization for yaml module
+    yaml.Dumper.ignore_aliases = lambda *args : True
+
     # Open the database
     try:
         db = IMASData(
