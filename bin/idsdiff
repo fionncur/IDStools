@@ -3,8 +3,10 @@ from __future__ import print_function
 
 import imas
 import numpy as np
-
 from idstools.cli import *
+
+from packaging import version
+ARRAY_EQUAL_KWARGS = "equal_nan=True" if version.parse(np.__version__)>version.parse("1.19") else ""
 
 
 def compare(x, y, parent, args):
@@ -67,7 +69,7 @@ def compare(x, y, parent, args):
         else:
 
             if isinstance( xo, np.ndarray ) and isinstance(yo, np.ndarray):
-                result = np.array_equal( xo, yo) # TODO: add 'equal_nan=True' for NumPy >= 1.19
+                result = np.array_equal(xo, yo, ARRAY_EQUAL_KWARGS) 
             else:
                 result = xo == yo
 
