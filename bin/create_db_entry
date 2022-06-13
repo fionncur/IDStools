@@ -738,13 +738,13 @@ def schema_path(f_name, mod_name='database_tools'):
     mod = importlib.import_module(mod_name) 
     path = dirname(mod.__file__) + '/' + f_name
 
-    #if exists(path): 
-    #    return path
-    #else:
-    #    sys.exit("not found: '%s'" % (path))
+    if exists(path): 
+        return path
+    else:
+        sys.exit("not found: '%s'" % (path))
 
     #tentative
-    return "/home/ITER/hosokam/public/tmp/" + f_name
+    #return "/home/ITER/hosokam/public/tmp/" + f_name
 
 
 def run_idschk():
