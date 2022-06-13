@@ -27,8 +27,7 @@ def mdsListPulseRun(locpath):
     list of tuple (pulse,run) 
     """
     if not locpath.exists():
-        print("No such database file or directory. Please check spelling.")
-        exit() # replace by raising exception
+        raise FileNotFoundError("The path provided does not exist or has no such database file or directory. Please check spelling.")
     pulses = []
     folder = Path(locpath).glob('**/*.datafile')
     for entry in folder:
@@ -54,8 +53,7 @@ def hdf5ListPulseRun(locpath):
     list of tuple (pulse,run) 
     """
     if not locpath.exists():
-        print("No such database file or directory. Please check spelling.")
-        exit() # replace by raising exception
+        raise FileNotFoundError("The path provided does not exist or has no such database file or directory. Please check spelling.")
     pulses = []
     folder = Path(locpath).glob('**/*master.h5')
     for entry in folder:
@@ -65,7 +63,7 @@ def hdf5ListPulseRun(locpath):
     return pulses
 
 
-if __name__ == "__main__": 
+if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description="This script applies conversion of IDS data into readable CSV files.",
                                      parents=[imas_parser])
@@ -95,7 +93,6 @@ if __name__ == "__main__":
 
         
     for entry in tqdm(pulses) if progbar else pulses:
-        # get_backend_id(backend) manually entered. If code wishes to be generalized with get_backend_id(backend), 'MDS+' and 'BOTH' options cannot be used.
         de = imas.DBEntry(backend, database, entry[0], entry[1], args.user, args.version)
         de.open()
         value = de.partial_get(idsname, valpath)
@@ -112,7 +109,6 @@ if __name__ == "__main__":
     
     if args.saveas:
         if not Path(args.saveas).parent.exists():
-            print("No such file or directory to save the results. Please check spelling")
-            exit()
+            raise FileNotFoundError("The path provided does not exist or has no such database file or directory. Please check spelling.")
         saveresultsin = Path(r'' + args.saveas + '.csv')
         df.to_csv(saveresultsin, index=args.index, header=True)
