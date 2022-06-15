@@ -4,7 +4,7 @@ ARRAY_EQUAL_KWARGS = "equal_nan=True" if version.parse(np.__version__)>version.p
 
 
 
-def compare(X, Y, field=None, ignore_version=True):
+def compare(X, Y, field=None, ignore_version=True, verb=True):
     """
     Iterate over every field and compare values depending on the type of field.
     
@@ -16,26 +16,30 @@ def compare(X, Y, field=None, ignore_version=True):
           name of the IDS (or sub-structure) being compared
     ignore_version: bool, optional
           ignore content of ids_properties.version_put for the comparison
+    verb: bool, optional
+          prints information about differences
     """
 
+    identical = True
+    
     if hasattr(X,"__name__") and hasattr(Y,"__name__"):
         if X.__name__ == Y.__name__:
             if field is None:
                 field=X.__name__
         else:
-            print(f"Different IDSs: {X.__name__} and {Y.__name__}")
-            return
+            if verb: print(f"Different IDSs: {X.__name__} and {Y.__name__}")
+            return False
     elif hasattr(X,"_base_path") and hasattr(Y,"_base_path"):
         if X._base_path == Y._base_path:
             if field is None:
                 field=X._base_path
         else:
-            print(f"Different structure: {X._base_path} and {Y._base_path}")
-            return
+            if verb: print(f"Different structure: {X._base_path} and {Y._base_path}")
+            return False
     else:
         # un-expected different objects
         print(f"Unexpected objects: {type(X)} and {type(Y)}")
-        return
+        return False
     
             
     Xd = X.__dict__
@@ -52,17 +56,19 @@ def compare(X, Y, field=None, ignore_version=True):
             continue
 
         if key not in Xd:
-            print(f"{key} not present in X")
+            if verb: print(f"{key} not present in X")
+            identical = False
             continue
 
         if key not in Yd:
-            print(f"{key} not present in Y")
+            if verb: print(f"{key} not present in Y")
+            identical = False
             continue
 
         Xo = X.__dict__[key]
         Yo = Y.__dict__[key]
         if type(Xo) != type(Yo):
-            print(f"Different type for {field}.{key}")
+            if verb: print(f"Different type for {field}.{key}")
 
         if hasattr(Xo, "__module__") and "imas" in Xo.__module__:
             #TO DO: To be removed, when private _base_path will be replaced by __name__
@@ -70,7 +76,7 @@ def compare(X, Y, field=None, ignore_version=True):
                 attrname = Xo.__name__
             else:
                 attrname = Xo._base_path
-            compare(Xo, Yo, field=f"{field}.{attrname}", ignore_version=ignore_version)
+            identical &= compare(Xo, Yo, field=f"{field}.{attrname}", ignore_version=ignore_version, verb=verb)
             continue
 
         # treatment of struct_array and list of strings
@@ -81,11 +87,12 @@ def compare(X, Y, field=None, ignore_version=True):
                     f = field
                 else:
                     f = f"{field}.{key}"
-                print(f"{f} is of different length")
+                if verb: print(f"{f} is of different length")
+                identical = False
             else:
                 for i in range(len(Xo)):
                     if "structArrayElement" in type(Xo[i]).__name__ :
-                        compare(Xo[i], Yo[i], field = f"{field}[{i}]", ignore_version=ignore_version)
+                        identical &= compare(Xo[i], Yo[i], field = f"{field}[{i}]", ignore_version=ignore_version, verb=verb)
                     else:
                         #print("list of "+type(xo[i]).__name__)
                         continue
@@ -112,7 +119,10 @@ def compare(X, Y, field=None, ignore_version=True):
                                 missing = [True, "second"]
 
                 if missing[0]:
-                    print(f"{field}.{key} is missing in the {missing[1]} IDS")
+                    if verb: print(f"{field}.{key} is missing in the {missing[1]} IDS")
+                    identical = False
                 else:
-                    print(f"{field}.{key} has different values")
-                        
+                    if verb: print(f"{field}.{key} has different values")
+                    identical = False
+
+    return identical
