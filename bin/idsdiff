@@ -60,4 +60,4 @@ if __name__ == '__main__':
         idsA = inputA.get(idsname)
         idsB = inputB.get(idsname)
 
-        compare(idsA, idsB, idsname, args.skip_provenance)
+        compare(idsA, idsB, field=idsname, ignore_version=args.skip_provenance)
