@@ -14,7 +14,6 @@ except ModuleNotFoundError:
     progbar = False
 
 
-
 def mdsListPulseRun(locpath):
     """ Function that lists Pulse and Run numbers from a given database, in MDSPLUS
     Parameter
@@ -63,6 +62,30 @@ def hdf5ListPulseRun(locpath):
     return pulses
 
 
+def getDBPath(user, database, version):
+    """ Function that returns a pathlib Path to desired database, depending on the status of the user.
+    Parameters
+    ---------
+    user: str
+        Status of user: either public or local. A public user should just be left as public, whereas a local user should write their proper identifier
+
+    database: str
+        Name of database where the data is harbored
+
+    version: str
+        String of number of data version
+
+    Returns
+    -------
+    pathlib Path
+    """
+    if user == 'public':
+        locpath = Path(os.environ['IMAS_HOME'] + '/shared/imasdb/' + database + "/" + version)
+    else:
+        locpath = Path(os.path.expanduser('~' + user) + "/public/imasdb/" + database + "/" + version)
+    return locpath
+
+
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description="This script applies conversion of IDS data into readable CSV files.",
@@ -70,17 +93,15 @@ if __name__ == "__main__":
     parser.add_argument("idspath", type=str, help="IDS path (starting with IDS name) to the desired data to be collected, e.g equilibrium/time")
     parser.add_argument("--saveas", type=str, help="Path to directory ending with name of file to save retrieved data")
     parser.add_argument("-i", "--index", action="store_true", help="Should index be shown in final .csv file?")
-    parser.add_argument("-V","--Verbose",action="store_true", help="Verbose mode")
+    parser.add_argument("-V","--Verbose", action="store_true", help="Verbose mode")
     args = parser.parse_args()
     database = args.database
     idspath = args.idspath
 
+    locpath = getDBPath(args.user, database, args.version)
+
     idsname = idspath.split('/')[0]
     valpath = idspath[1 + len(idsname):]
-    if args.user == 'public':
-        locpath = Path(os.environ['IMAS_HOME'] + '/shared/imasdb/' + database + "/" + args.version)
-    else:
-        locpath = Path(os.path.expanduser('~' + args.user) + "/public/imasdb/" + database + "/" + args.version)
 
     values = []
 
@@ -95,11 +116,13 @@ if __name__ == "__main__":
     for entry in tqdm(pulses) if progbar else pulses:
         de = imas.DBEntry(backend, database, entry[0], entry[1], args.user, args.version)
         de.open()
-        value = de.partial_get(idsname, valpath)
-        de.close()
-        values += value,
-        #values.append(value)
+        try:
+            value = de.partial_get(idsname, valpath)
+            values.append(value)
+        except Exception:
+            values.append(None)
 
+        de.close()
 
     df = pd.DataFrame(pulses, columns=['PULSE', 'RUN'])
     df['VALUE'] = values
@@ -111,4 +134,4 @@ if __name__ == "__main__":
         if not Path(args.saveas).parent.exists():
             raise FileNotFoundError("The path provided does not exist or has no such database file or directory. Please check spelling.")
         saveresultsin = Path(r'' + args.saveas + '.csv')
-        df.to_csv(saveresultsin, index=args.index, header=True)
+        df.to_csv(saveresultsin, na_rep='None', index=args.index, header=True)
