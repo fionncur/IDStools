@@ -2,97 +2,9 @@
 from __future__ import print_function
 
 import imas
-import numpy as np
 from idstools.cli import *
+from idstools.idsdiff import compare
 
-from packaging import version
-ARRAY_EQUAL_KWARGS = "equal_nan=True" if version.parse(np.__version__)>version.parse("1.19") else ""
-
-
-def compare(x, y, parent, args):
-    '''
-    Iterate over every field and compare values depending on the type of field.
-    '''
-    #print("compare objects of type " + type(x).__name__ + " from " + parent)
-
-    xd = x.__dict__
-    yd = y.__dict__
-    for key in set(xd.keys()).union(set(yd.keys())):
-
-        if key.startswith('_'):
-            continue
-
-        if 'hli_utils' == key:
-            continue
-
-        if args.skip_provenance and 'version_put' == key:
-            continue
-
-        if key not in xd:
-            print('%s not present in IDS1' % key)
-            continue
-
-        if key not in yd:
-            print('%s not present in IDS2' % key)
-            continue
-
-        xo = x.__dict__[key]
-        yo = y.__dict__[key]
-        if type(xo) != type(yo):
-            print('%s.%s is of different type in both IDSs' % (parent, key))
-            continue
-
-        if hasattr(xo, '__module__') and 'imas' in xo.__module__:
-            #TO DO: To be removed, when private _base_path will be replaced by __name__
-            if hasattr(xo, '__name__'):
-                name = xo.__name__
-            else:
-                name = xo._base_path
-            compare(xo, yo, parent + '.' + name, args)
-            continue
-
-        # treatment of struct_array and list of strings
-        if type(xo).__name__ == 'list':
-            if len(xo) != len(yo):
-                # avoids printing "array" as this is internal attribute for AoS
-                if key == 'array':
-                    print('%s is of different length in both IDSs' % (parent))
-                else:
-                    print('%s.%s is of different length in both IDSs' % (parent, key))
-            else:
-                for i in range(len(xo)):
-                    if 'structArrayElement' in type(xo[i]).__name__ :
-                        compare(xo[i], yo[i], parent + '[' + str(i) + ']', args)
-                    else:
-                        #print("list of "+type(xo[i]).__name__)
-                        continue
-        else:
-
-            if isinstance( xo, np.ndarray ) and isinstance(yo, np.ndarray):
-                result = np.array_equal(xo, yo, ARRAY_EQUAL_KWARGS) 
-            else:
-                result = xo == yo
-
-            if not result:
-                missing = [False]
-                if isinstance( xo, np.ndarray ):
-                    if xo.size == 0:
-                        missing = [True, 'first']
-                    elif yo.size == 0:
-                        missing = [True, 'second']
-                else:
-                    missmap = { int : -999999999, float : -9e+40}
-                    for t in missmap:
-                        if isinstance(xo, t):
-                            if xo == missmap[t]:
-                                missing = [True, 'first']
-                            elif yo == missmap[t]:
-                                missing = [True, 'second']
-
-                if missing[0]:
-                    print('%s.%s is missing in the %s IDS' % (parent, key, missing[1]))
-                else:
-                    print('%s.%s is of different value in both IDSs' % (parent, key))
 
 if __name__ == '__main__':
     # Management of input arguments
@@ -148,4 +60,4 @@ if __name__ == '__main__':
         idsA = inputA.get(idsname)
         idsB = inputB.get(idsname)
 
-        compare(idsA,idsB,idsname, args)
+        compare(idsA, idsB, idsname, args.skip_provenance)
