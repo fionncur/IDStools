@@ -45,6 +45,7 @@ except:
     exit()
 
 # ----------------------------------------------------------------------
+# Check IDSs
 
 import yaml
 import logging
@@ -73,11 +74,9 @@ def subproc(cmd, cwd=None, env=None, exit=None):
 
 def schema_path(f_name, mod_name='database_tools'):
     """ Return path to schema file """
-    from os.path import dirname, exists
-    import importlib
+    from os.path import exists
 
-    mod = importlib.import_module(mod_name) 
-    path = dirname(mod.__file__) + '/' + f_name
+    path = getenv('EBROOTIDSTOOLS') + '/bin/mappings/' + f_name
 
     if exists(path): 
         return path
@@ -115,8 +114,8 @@ def eval_IDSs(s):
     return flag
 
 
-def main_test():
-    """ Run IDS tests """
+def main_idschk():
+    """ Validate IDSs with idschk command """
 
     com = [
         #'../database_tools/idschk',
@@ -127,7 +126,7 @@ def main_test():
         '-r', str(run),]
          
     print("----> " + "(idschk) COCOS")
-    flag_cocos = eval_COCOS(subproc(com + ['-v']))
+    flag_cocos = eval_COCOS(subproc(com + ['-c']))
     
     print("----> " + "(idschk) core")
     flag_core = eval_IDSs(subproc(com + ['-f', schema_path('required_fields_core.yml')]))
@@ -142,7 +141,7 @@ def main_test():
 
 
 logging.basicConfig(level=logging.WARNING)
-main_test()
+main_idschk()
 
 # ----------------------------------------------------------------------
 
