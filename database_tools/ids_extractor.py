@@ -25,6 +25,7 @@ def mdsListPulseRun(locpath):
     -------
     list of tuple (pulse,run) 
     """
+    locpath = locpath.expanduser()
     if not locpath.exists():
         raise FileNotFoundError("The path provided does not exist or has no such database file or directory. Please check spelling.")
     pulses = []
@@ -51,6 +52,7 @@ def hdf5ListPulseRun(locpath):
     -------
     list of tuple (pulse,run) 
     """
+    locpath = locpath.expanduser()
     if not locpath.exists():
         raise FileNotFoundError("The path provided does not exist or has no such database file or directory. Please check spelling.")
     pulses = []
