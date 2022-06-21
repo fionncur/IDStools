@@ -281,6 +281,8 @@ if __name__ == "__main__":
                         "folder where to search for scenarios (recursive)", required=False)
     parser.add_argument("-s","--selection",help=\
                         "R|list of fields to filter: e.g. He4,2.65\n"\
+                        "fields listed together (-s A,B) means selecting for both A and B\n"\
+                        "fields listed separately (-s A -s B) means selecting for either A or B\n"\
                         "----> Select only scenarios filling these criteria"\
                         , required=False)
     parser.add_argument("-c","--choice", help=\
