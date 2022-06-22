@@ -11,7 +11,7 @@ import os,sys
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="This script give a simple performance profiles for different types of IDS with the IMAS Python Access Layer",
+        description="This script give a simple timings and performance profiles for different types of operations on IDS data with the IMAS Python Access Layer (get/get_slice/put depending on selected options)",
         parents=[imas_parser])
     timegroup = parser.add_mutually_exclusive_group()
     timegroup.add_argument('-s','--sliceTime',type=float,nargs='+',
@@ -24,10 +24,7 @@ if __name__ == "__main__":
                         help='Database name for the destination data-entry')
     parser.add_argument('-bo','--backend_output',type=str,
                         help='Backend name for the destination data-entry')
-
-    
-    group = parser.add_mutually_exclusive_group()
-    group.add_argument('-r','--repeat',type=int,default=1,
+    parser.add_argument('-r','--repeat',type=int,default=1,
                        help="Repeat timing n times (default: %(default)s)")
     parser.add_argument('--verbose',action='store_true',
                       help="Verbose mode, prints additional information")
