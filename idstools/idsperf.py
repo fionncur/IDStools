@@ -1,7 +1,7 @@
 import imas
 import cProfile
 import timeit
-
+import numpy as np
 
 def get_ids(db,idsname,occ=0,times=None,interp=imas.imasdef.PREVIOUS_INTERP,verbose=False):
     """Function that reads an IDS from a given DBEntry, entirely or slices at selected times.
@@ -87,4 +87,36 @@ def get_timings(db,idsname,occ=0,dbout=None,times=None,repeat=5,verbose=False,pr
     
 
 
+def byte_size(obj):
+    """Calculates recursively the approximated size of data of an IDS or its sub-structures. 
+    Does not take into account the overhead of the various containers.
 
+    Parameters
+    ----------
+    idsstruct: object (IDS or sub-structures)
+        object from which data size is being measured
+
+    Returns
+    -------
+    S: int
+        estimated data size in bytes 
+    """
+    S = 0
+    if type(obj) == str: 
+        S += len(obj)
+    elif type(obj) == np.ndarray:
+        S += obj.nbytes
+    elif type(obj) == int:
+        S += 4
+    elif type(obj) == float:
+        S += 8
+    elif type(obj) == list:
+        for o in obj:
+            S += byte_size(o)
+    elif type(obj) == dict:
+        for o in obj.values():
+            S += byte_size(o)
+    else:
+        for o in obj.__dict__.values():
+            S += byte_size(o)
+    return S
