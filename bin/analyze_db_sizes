@@ -6,6 +6,7 @@ import argparse
 import os,sys
 import time
 from idstools.cli import *
+from idstools.idsperf import byte_size
 
 db_group.add_argument("--tokamak", "-t", 
                    type=str, dest="database", default=os.getenv("TOKAMAKNAME"),
@@ -17,28 +18,6 @@ parser = argparse.ArgumentParser(description="Calculate size of IDSs", epilog
 parser.add_argument("shot", type=int, help="Shot number")
 parser.add_argument("run", type=int, help="Run number")
 args=parser.parse_args()
-
-def byte_size(O):
-  S = 0
-  if type(O) == str: 
-    S += len(O)
-  elif type(O) == np.ndarray:
-    S += O.nbytes
-  elif type(O) == int:
-    S += 4
-  elif type(O) == float:
-    S += 8
-  elif type(O) == list:
-    for o in O:
-      S += byte_size(o)
-  elif type(O) == dict:
-    for o in O.values():
-      S += byte_size(o)
-  else:
-    for o in O.__dict__.values():
-      S += byte_size(o)
-  return S
-
 
 IDS = imas.DBEntry(get_backend_id(args.backend), args.database, args.shot, args.run, user_name=args.user)
 status,idx = IDS.open()
@@ -62,7 +41,7 @@ for i in [i.value for i in imas.IDSName]:
       _IDS = IDS.get(i, occurrence=o)
       SIZES[field]['time'] = time.time() - start_time
       SIZES[field]['bytes'] = byte_size(_IDS)
-      print('Reading %0.3f MB data for %s took %0.2f seconds' % ( SIZES[field]['bytes']/1024**2, field, SIZES[field]['time']))
+      print('Reading %0.3f MB of data for %s took %0.2f seconds' % ( SIZES[field]['bytes']/1024**2, field, SIZES[field]['time']))
       del _IDS
 
 total_bytes = np.array([v['bytes'] for v in SIZES.values()]).sum()
