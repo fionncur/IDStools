@@ -34,7 +34,7 @@ def main():
         )
 
     # Initialization for yaml Dumper
-    yaml.Dumper.ignore_aliases = lambda *args : True
+    yaml.Dumper.ignore_aliases = lambda *args: True
 
     # COCOS Initialization
     index = {"COCOS": idschk.IDS_COCOS, "ipsign": args.ipsign, "b0sign": args.b0sign}
@@ -57,7 +57,6 @@ def main():
                 default_flow_style=False,
                 sort_keys=False,
             )
-
 
     # IDS Validation
     if args.schema_file:
@@ -142,11 +141,7 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
-        "-t",
-        "--time",
-        help="Time (default=middle)",
-        type=float,
-        default=-99.0
+        "-t", "--time", help="Time (default=middle)", type=float, default=-99.0
     )
     parser.add_argument(
         "-f",
