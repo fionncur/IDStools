@@ -823,7 +823,7 @@ if debug:
 
 # ----------------------------------------------------------------------
 
-if (nspecies > 0) and plot_compo:
+if (nspecies > 0):
 
     # Plasma composition
     species = []
@@ -838,6 +838,8 @@ if (nspecies > 0) and plot_compo:
                     species.append(edge_profiles.profiles_1d[0].ion[ispecies].label)
                 else:
                     species.append(edge_profiles.ggd[0].ion[ispecies].label)
+
+if (nspecies > 0) and plot_compo:
 
     if debug and edge_present and core_present:
         print('Species_mapping :', file=sys.stdout)
