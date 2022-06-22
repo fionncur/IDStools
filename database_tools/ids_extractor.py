@@ -129,7 +129,7 @@ if __name__ == "__main__":
     df = pd.DataFrame(pulses, columns=['PULSE', 'RUN'])
     df['VALUE'] = values
 
-    if args.Verbose:
+    if args.Verbose or not args.saveas:
         print(df)
     
     if args.saveas:
