@@ -1,7 +1,7 @@
 import imas
 
 
-def all_types():
+def all_ids_types():
     """Returns a list of strings corresponding to all IDS types defined in the version of IMAS being used.
     """
     return [ids.value for ids in list(imas.IDSName)]
@@ -19,7 +19,7 @@ def available_in_dbentry(db, time_mode=None):
         if not specified, occurrences of IDS in all time modes will be returned
     """
     presentidslist = []
-    for idstype in list_ids_types():
+    for idstype in all_ids_types():
         for occ in range(getattr(imas,idstype)().getMaxOccurrences()):
             homogeneous_time = db.partial_get(idstype,"ids_properties/homogeneous_time",occurrence=occ)
             if homogeneous_time!=imas.imasdef.EMPTY_INT and (time_mode==None or time_mode==homogeneous_time):
