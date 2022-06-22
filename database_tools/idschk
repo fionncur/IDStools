@@ -5,8 +5,8 @@ from sys import stdout
 import argparse
 import yaml
 import imas
-import idschk
-from idschk import *
+from database_tools import idschk
+from database_tools.idschk import *
 
 
 # ----------------------------------------------------------------------
