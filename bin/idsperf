@@ -1,0 +1,116 @@
+#!/usr/bin/env python3
+'''Small utility script to profile performance of some AL operations on any dataset.'''
+
+import imas
+from idstools.cli import *
+from idstools import idsperf
+import argparse
+import statistics as stat
+import os,sys
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        description="This script gives simple timing and performance information for different types of operations on IDS data with the IMAS Python Access Layer (get/get_slice/put depending on selected options)",
+        parents=[imas_parser])
+    timegroup = parser.add_mutually_exclusive_group()
+    timegroup.add_argument('-s','--sliceTime',type=float,nargs='+',
+                           help="Use get_slice with selected time(s)")
+    timegroup.add_argument('-a','--allSlices',action='store_true',
+                           help="Use get_slice with all available times")
+    #parser.add_argument('-m','--memoryBackend',action='store_true',
+    #                  help="Use MEMORY_BACKEND for this test (involve reading from file and loading in memory first)")
+    parser.add_argument('-do','--database_output',type=str,default=None,
+                        help='Database name for the destination data-entry')
+    parser.add_argument('-bo','--backend_output',type=str,
+                        help='Backend name for the destination data-entry')
+    parser.add_argument('-r','--repeat',type=int,default=1,
+                       help="Repeat timing n times (default: %(default)s)")
+    parser.add_argument('--verbose',action='store_true',
+                      help="Verbose mode, prints additional information")
+    parser.add_argument('--showStats',action='store_true',
+                      help="Print addition stats for timings")  
+    parser.add_argument('--profile',action='store_true',
+                      help="Also do full profile of the selected operation, via cProfile")
+    parser.add_argument('-o','--outputRun',type=int, 
+                      help="Output run number for checking perf of put")
+    parser.add_argument('shot',type=int, 
+                      help="Shot number")
+    parser.add_argument('run',type=int, 
+                      help="Run number")
+    parser.add_argument('ids',nargs='*',type=str,
+                        help='IDS name(s) (leave empty to select all IDSs with default occurrence, or append "/n" to copy a specific occurrence "n")')
+    # 
+    args = parser.parse_args()
+
+
+    # Open pulse
+    db = imas.DBEntry(get_backend_id(args.backend),args.database,
+                      args.shot,args.run,user_name=args.user)
+    status,_ = db.open()
+    if status!=0:
+        print('Error opening source pulse! Please check existence.',file=sys.stderr)
+        sys.exit(status)
+
+        
+    if args.ids == []:
+        allidss = [ids.value for ids in list(imas.IDSName)]
+        # TODO: treat occurrences
+        args.ids = [ids for ids in allidss if db.partial_get(ids,'ids_properties/homogeneous_time')!=imas.imasdef.EMPTY_INT]
+
+
+    #db = imas.ids(args.shot,args.run)
+    #db.open_env(args.user,
+    #            args.tokamak,
+    #            args.version.split('.')[0])
+    
+    # For memory backend need to read the full IDS and load it into memory 
+    if (args.backend == imas.imasdef.MEMORY_BACKEND):
+        print('Not yet implemented.',file=sys.stderr)
+        sys.exit(1)
+        
+        #idsobj = get_ids(db,args.ids,None,False,True)
+        #status,memctx = ull.ual_begin_pulse_action(ull.MEMORY_BACKEND,
+        #                                           args.shot,
+        #                                           args.run,
+        #                                           args.user,
+        #                                           args.tokamak,
+        #                                           args.version)
+        #status = ull.ual_open_pulse(memctx,ull.FORCE_CREATE_PULSE,'')
+        #idsobj.setExpIdx(memctx)
+        #idsobj.put()
+
+    idsobj = None
+    dbout = None
+    
+    # Set command
+    if (args.outputRun != None):
+        dbout = imas.DBEntry(get_backend_id(args.backend),
+                             args.database,
+                             args.shot,
+                             args.outputRun,
+                             os.environ['USER'])
+        if args.verbose: print("Create pulse for put operation")
+        dbout.create()
+
+    for idsname in args.ids:
+        nameocc = idsname.split('/')
+        idsname = nameocc[0]
+        occ = 0
+        if len(nameocc)==2: occ = int(nameocc[1])
+        
+        if args.allSlices:
+            # TODO: might not be relevant if homogeneous_time != 1
+            times = (db.partial_get(idsname,"time",occurrence=occ)).tolist()
+        else:
+            times = args.sliceTime
+
+        timings = idsperf.get_timings(db,idsname,occ=occ,times=times,repeat=args.repeat,verbose=args.verbose,profile=args.profile)
+            
+        if args.showStats and args.repeat>1:
+            print(f"All timings  = {timings}")
+            print(f"Mean         = {stat.mean(timings)}")
+            print(f"Standard dev = {stat.stdev(timings)}")
+            print(f"Variance     = {stat.variance(timings)}")
+        print(f"{idsname} best time = {min(timings)} s")
+
