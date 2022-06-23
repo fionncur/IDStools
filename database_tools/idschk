@@ -7,7 +7,7 @@ import yaml
 import imas
 from database_tools import idschk
 from database_tools.idschk import *
-
+from idstools.cli import *
 
 # ----------------------------------------------------------------------
 
@@ -18,19 +18,17 @@ def main():
     """
 
     # Open the database
-    try:
-        db = imas.DBEntry(
-            eval("imas.imasdef." + args.backend + "_BACKEND"),
-            args.database,
-            args.shot,
-            args.run,
-            args.user_or_path,
-        )
-        db.open()
-    except:
+    db = imas.DBEntry(
+        get_backend_id(args.backend),
+        args.database,
+        args.shot,
+        args.run,
+        args.user)
+    status,_ = db.open()
+    if status!=0:
         exit(
-            "can not open user_or_path={}, database={}, shot={}, run={}".format(
-                args.user_or_path, args.database, args.shot, args.run
+            "can not open backend={}, user_or_path={}, database={}, shot={}, run={}".format(
+                args.backend, args.user, args.database, args.shot, args.run
             )
         )
 
@@ -109,23 +107,8 @@ def main():
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="IDS Data Validation Tool")
-    parser.add_argument(
-        "-u",
-        "--user_or_path",
-        dest="user_or_path",
-        help="User or path name of DB where the data-entry is located",
-        required=False,
-        default="public",
-    )
-    parser.add_argument(
-        "-d",
-        "--database",
-        dest="database",
-        help="DB name where the data-entry is located",
-        required=False,
-        default="iter",
-    )
+    parser = argparse.ArgumentParser(description="IDS Data Validation Tool",
+                                     parents=[imas_parser])
     parser.add_argument(
         "-s", "--shot", dest="shot", help="Shot number", required=True, type=int
     )
@@ -187,7 +170,6 @@ if __name__ == "__main__":
         choices=[-1, 1],
     )
     parser.add_argument(
-        "-v",
         "--verbose",
         help="increase output verbosity",
         required=False,
@@ -201,15 +183,6 @@ if __name__ == "__main__":
         required=False,
         default=False,
         action="store_true",
-    )
-    parser.add_argument(
-        "-b",
-        "--backend",
-        dest="backend",
-        help="backend, default=%(default)s",
-        required=False,
-        default="MDSPLUS",
-        choices=["ASCII", "MDSPLUS", "HDF5", "MEMORY", "UDA"],
     )
     args = parser.parse_args()
     main()
