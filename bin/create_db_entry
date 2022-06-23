@@ -580,9 +580,6 @@ def schema_path(f_name):
     else:
         sys.exit("not found: '%s'" % (path))
 
-    #tentative
-    #return "/home/ITER/hosokam/public/tmp/" + f_name
-
 
 def eval_COCOS(s):
     """ Return True if COCOS validates """
@@ -615,7 +612,6 @@ def main_idschk(ids_core, ids_edge, ids_eq):
     """ Validate IDSs with idschk command """
 
     com = [
-        #'../database_tools/idschk',
         'idschk',
         '-u', user_or_path,
         '-d', database,

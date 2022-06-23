@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 from os import getenv, path
-from sys import exit, stdout
+from sys import exit
 import re
 import argparse
 import numpy as np
@@ -78,71 +78,6 @@ required_fields_cocos = {
     "ids.time_slice[itime].profiles_1d.q": {"ids_q_like": False},
     "ids.time_slice[itime].profiles_1d.dpressure_dpsi": {"ids_dPdpsi_like": False},
 }
-
-
-# ----------------------------------------------------------------------
-
-
-class IMASData:
-    """
-    Class for handling IMAS Database
-
-    Attributes
-    ----------
-    user_or_path: str
-        User or path name of DB where the data-entry is located
-    database: str
-        DB name where the data-entry is located
-    version: str
-        IMAS major version
-    shot: int
-        Shot number
-    run: int
-        Run number
-    ids: ids
-        Class IDS
-    """
-
-    def __init__(self, user_or_path, database, version, shot, run):
-        self.user_or_path = user_or_path
-        self.database = database
-        self.version = version
-        self.shot = shot
-        self.run = run
-        self.ids = {}
-
-    def entry(self):
-        return imas.ids(self.shot, self.run, 0, 0)
-
-    def open(self):
-        db = self.entry()
-        db.open_env(self.user_or_path, self.database, self.version)
-        if db.expIdx == -1:
-            raise ValueError(
-                "can not open user_or_path={}, database={}, shot={}, run={}".format(
-                    self.user_or_path, self.database, self.shot, self.run
-                )
-            )
-        else:
-            return db
-
-    def create(self):
-        db = self.entry()
-        db.create_env(self.user_or_path, self.database, self.version)
-        if db.expIdx == -1:
-            raise ValueError(
-                "can not create user_or_path={}, database={}, shot={}, run={}".format(
-                    self.user_or_path, self.database, self.shot, self.run
-                )
-            )
-        else:
-            return db
-
-    def close(self, imas_entry):
-        imas_entry.close()
-
-    def get(self, occurrence):
-        return self.ids.get(occurrence)
 
 
 # ----------------------------------------------------------------------
@@ -911,8 +846,6 @@ def compute_COCOS(ids, cocos_check=None):
     cocos: COCOS
     """
 
-    ids.get(0)
-
     # COCOS Values in the middle of time sequence
     itime = int(np.floor(float(len(ids.time_slice)) / 2.0))
 
@@ -1203,7 +1136,8 @@ def ids_validator(
     cocos = COCOS(index=index).get()
 
     # Check all fields if check_all = True
-    global args_check_all
+    global args_verbose, args_check_all
+    args_verbose = verbose
     args_check_all = check_all
 
     # Check for Target IDS
@@ -1213,13 +1147,12 @@ def ids_validator(
         if out[ids.__name__]:
             dump = yaml.dump(
                 out,
-                stdout,
                 indent=4,
                 default_flow_style=False,
                 sort_keys=False,
             )
 
-    return eval_IDSs(dump), dump
+    return eval_IDSs(dump), dump.strip()
 
 
 # ----------------------------------------------------------------------

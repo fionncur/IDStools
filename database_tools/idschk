@@ -19,13 +19,14 @@ def main():
 
     # Open the database
     try:
-        db = IMASData(
-            args.user_or_path,
+        db = imas.DBEntry(
+            eval("imas.imasdef." + args.backend + "_BACKEND"),
             args.database,
-            getenv("IMAS_VERSION")[0],
             args.shot,
             args.run,
-        ).open()
+            args.user_or_path,
+        )
+        db.open()
     except:
         exit(
             "can not open user_or_path={}, database={}, shot={}, run={}".format(
@@ -41,22 +42,26 @@ def main():
     cocos = COCOS(index=index).get()
 
     # Validate COCOS in IDS/equilibrium
+    # To-Do
+    # - COCOS Validation for multiple occurences
+    # - get_slice() instead of get()
     if args.cocos:
         try:
-            cocos2 = compute_COCOS(db.equilibrium, cocos_check=cocos)
+            ids = db.get("equilibrium", 0)
+            cocos2 = compute_COCOS(ids, cocos_check=cocos)
         except Exception as e:
             exit("cannot compute COCOS: {}".format(e))
 
         if cocos2["COCOS"] == cocos["COCOS"]:
             print("COCOS: {}".format(cocos2["COCOS"]))
         else:
-            yaml.dump(
+            dump = yaml.dump(
                 {"COCOS Indication": cocos2},
-                stdout,
                 indent=4,
                 default_flow_style=False,
                 sort_keys=False,
             )
+            print(dump)
 
     # IDS Validation
     if args.schema_file:
@@ -73,19 +78,31 @@ def main():
                 maxoc = int(dd0.get("maxoccur"))
                 #
                 for occ in range(maxoc):
-                    try:
-                        ids = eval("db." + idsname)
-                        idstime = ids.partialGet("time", occ)
-                        # IDS get()/getSlice()
-                        if (args.check_all) or (idstime is None):
-                            ids.get(occ)
-                        else:
-                            time_slice, itime = find_time(idstime, args.time)
-                            ids.getSlice(time_slice, 1, occ)
-                    except Exception as e:
-                        exit("cannot retrieve IDS: {}".format(e))
-
-                    flag, dump = ids_validator(ids, schema, dd=dd0, occ=occ)
+                    idsprop = db.partial_get(idsname, "ids_properties", occurrence=occ)
+                    if idsprop.homogeneous_time in [0, 1, 2]:
+                        #
+                        try:
+                            idstime = db.partial_get(idsname, "time", occurrence=occ)
+                            #
+                            if (args.check_all) or (idstime is None):
+                                ids = db.get(idsname, occurrence=occ)
+                            else:
+                                time_slice, itime = find_time(idstime, args.time)
+                                ids = db.get_slice(
+                                    idsname, time_slice, 1, occurrence=occ
+                                )
+                        except Exception as e:
+                            exit("cannot retrieve IDS: {}".format(e))
+                        #
+                        flag, dump = ids_validator(
+                            ids,
+                            schema,
+                            dd=dd0,
+                            occ=occ,
+                            verbose=args.verbose,
+                            check_all=args.check_all,
+                        )
+                        print(dump)
 
 
 # ----------------------------------------------------------------------
@@ -154,7 +171,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--ipsign",
         dest="ipsign",
-        help="sign(Ip), default=-1",
+        help="sign(Ip), default=%(default)s",
         required=False,
         type=int,
         default=-1,
@@ -163,13 +180,14 @@ if __name__ == "__main__":
     parser.add_argument(
         "--b0sign",
         dest="b0sign",
-        help="sign(B0), default=-1",
+        help="sign(B0), default=%(default)s",
         required=False,
         type=int,
         default=-1,
         choices=[-1, 1],
     )
     parser.add_argument(
+        "-v",
         "--verbose",
         help="increase output verbosity",
         required=False,
@@ -184,5 +202,14 @@ if __name__ == "__main__":
         default=False,
         action="store_true",
     )
-    idschk.args = args = parser.parse_args()
+    parser.add_argument(
+        "-b",
+        "--backend",
+        dest="backend",
+        help="backend, default=%(default)s",
+        required=False,
+        default="MDSPLUS",
+        choices=["ASCII", "MDSPLUS", "HDF5", "MEMORY", "UDA"],
+    )
+    args = parser.parse_args()
     main()
