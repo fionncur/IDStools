@@ -1,10 +1,12 @@
 #!/usr/bin/env python
 from os import getenv, path
-from sys import exit, stdout
+from sys import exit
 import re
 import argparse
 import numpy as np
 import cerberus
+import yaml
+from xml.etree import ElementTree as ET
 import imas
 
 
@@ -15,6 +17,8 @@ report_buf = {}
 ids_header = "ids."
 idx_header = "idx."
 IDS_COCOS = 11
+args_verbose = False
+args_check_all = True
 
 # Validation Schema for COCOS using IDS/equilibrium
 required_fields_eq = {
@@ -79,51 +83,37 @@ required_fields_cocos = {
 # ----------------------------------------------------------------------
 
 
-class IMASData:
+# FUNCTION TO FIND THE INDEX OF THE DESIRED TIME SLICE IN THE TIME ARRAY
+def find_nearest(a, a0):
     """
-    Class for handling IMAS Database
+    Element in nd array 'a' closest to the scalar value 'a0'
     """
 
-    def __init__(self, user_or_path, database, version, shot, run):
-        self.user_or_path = user_or_path
-        self.database = database
-        self.version = version
-        self.shot = shot
-        self.run = run
-        self.ids = {}
+    idx = np.abs(a - a0).argmin()
+    return a.flat[idx], idx
 
-    def entry(self):
-        return imas.ids(self.shot, self.run, 0, 0)
 
-    def open(self):
-        db = self.entry()
-        db.open_env(self.user_or_path, self.database, self.version)
-        if db.expIdx == -1:
-            raise ValueError(
-                "can not open user_or_path={}, database={}, shot={}, run={}".format(
-                    self.user_or_path, self.database, self.shot, self.run
-                )
-            )
+def find_time(timevec, time):
+    """
+    Return time slice and its index in time vector
+    """
+
+    if len(timevec) > 1:
+        if time >= 0:
+            [tc, it] = find_nearest(timevec, time)
         else:
-            return db
-
-    def create(self):
-        db = self.entry()
-        db.create_env(self.user_or_path, self.database, self.version)
-        if db.expIdx == -1:
-            raise ValueError(
-                "can not create user_or_path={}, database={}, shot={}, run={}".format(
-                    self.user_or_path, self.database, self.shot, self.run
-                )
-            )
+            it = int(len(timevec) / 2)
+            tc = timevec[it]
+        time = tc
+    else:
+        if len(timevec) > 0:
+            tc = timevec[0]
         else:
-            return db
+            tc = 0
+        it = 0
+        time = tc
 
-    def close(self, imas_entry):
-        imas_entry.close()
-
-    def get(self, occurrence):
-        return self.ids.get(occurrence)
+    return time, it
 
 
 # ----------------------------------------------------------------------
@@ -136,14 +126,35 @@ class COCOS:
     [1] O. Sauter and S. Yu. Medvevdev, "Tokamak Coordinate Conventions : COCOS",
         Comput. Physics Commun. 184 (2013) 293
     [2] cocos_module.f90 (CHEASE)
+
+    Attributes
+    ----------
+    COCOS: int
+    sigma_Ip: int
+    sigma_B0: int
+    exp_Bp: int
+    sigma_Bp: int
+    sigma_RphiZ: int
+    sigma_rhothetaphi: int
+    sign_q_pos: int
+    sign_pprime_pos: int
+    theta_sign_clockwise: int
+    default: dict
+        Default COCOS index
     """
 
     default = {"COCOS": 11, "ipsign": -1, "b0sign": -1}
     TWOPI = 6.283185307179586476925286766559005768394
 
     def __init__(self, index=default, values=None):
-        """
-        return COCOS Index and Values
+        """Initialize COCOS Index and Values
+
+        Parameters
+        ----------
+        index: dict={"COCOS": 11, "ipsign": -1, "b0sign": -1}
+            COCOS index with signs of Ip and B0
+        values: dict=None
+            COCOS values
         """
 
         if (index is None) and (values is None):
@@ -283,6 +294,13 @@ class COCOS:
             self.theta_sign_clockwise = theta_sign_clockwise
 
     def get(self):
+        """Return COCOS Index and Values
+
+        Returns
+        -------
+        dict
+            COCOS Index and Values in type dict
+        """
 
         return {
             "COCOS": self.COCOS,
@@ -299,9 +317,20 @@ class COCOS:
 
     @classmethod
     def values_coefficients(self, index_in=default, index_out=default):
-        """
-        Provide Transformation values for a set of quantities for a given pair
-        of input/output Cocos numbers
+        """Provide Transformation values for a set of quantities for a given pair
+            of input/output COCOS numbers
+
+        Parameters
+        ----------
+        index_in: dict={"COCOS": 11, "ipsign": -1, "b0sign": -1}
+            COCOS index
+        index_out: dict={"COCOS": 11, "ipsign": -1, "b0sign": -1}
+            COCOS index
+
+        Returns
+        -------
+        dict
+            COCOS Transformation values in type dict
         """
 
         COCOS_in = index_in["COCOS"]
@@ -351,8 +380,8 @@ class COCOS:
         # Note that sign(sigma_RphiZ*sigma_rhothetaphi) gives theta in clockwise or count    er-clockwise respectively
         # Thus sigma_RphiZ_eff*sigma_rhothetaphi_eff negative if the direction of theta h    as changed from cocos_in to _out
         #
-        fact_psi = sigma_Ip_eff * sigma_Bp_eff * TWOPI ** exp_Bp_eff
-        fact_dpsi = sigma_Ip_eff * sigma_Bp_eff / TWOPI ** exp_Bp_eff
+        fact_psi = sigma_Ip_eff * sigma_Bp_eff * TWOPI**exp_Bp_eff
+        fact_dpsi = sigma_Ip_eff * sigma_Bp_eff / TWOPI**exp_Bp_eff
         fact_q = sigma_Ip_eff * sigma_B0_eff * sigma_rhothetaphi_eff
         fact_dtheta = sigma_RphiZ_eff * sigma_rhothetaphi_eff
 
@@ -385,9 +414,26 @@ class COCOS:
 
 
 def path2py(p, rm_last_bracket=False, header=False, idx=None):
+    """Substitute IDS Path to Python Expression
+
+    Parameters
+    ----------
+    p: str
+        Field path
+    rm_last_bracket: boolean
+        Flag to remove last bracket from the path
+    header: str
+        Additional header preceding to the path
+    idx: IdxDict=None
+        DD Sub-Indices (e.g. itime, i1, ..., etc.)
+
+    Returns
+    -------
+    p: str
+        Field path in Python
     """
-    Substitute IDS Path to Python Expression
-    """
+
+    global report_buf
 
     result = re.search("^(\d)\.\.\.(\d)$", p)
     if result is not None:  # constant coordinate definition (e.g. 1...3)
@@ -419,9 +465,21 @@ def path2py(p, rm_last_bracket=False, header=False, idx=None):
 class IdxDict(dict):
     """
     Class for DD Sub-Indices (e.g. itime, i1, ..., etc.)
+
+    Attributes
+    ----------
+    data: dict
+        Keep subscripts of IDS field as type dict
     """
 
     def __init__(self, p):
+        """
+        Parameters
+        ----------
+        path_doc: str
+            Field path
+        """
+
         idict = []
 
         for m in re.finditer("\((\w+)\)", p):  # find subscripts and set as attribute
@@ -432,9 +490,25 @@ class IdxDict(dict):
         super(IdxDict, self).__setattr__("data", d)
 
     def __setattr__(self, k, v):
+        """
+        Parameters
+        ----------
+        k: str
+            Names of subsript for IDS array
+        v: dict
+            Values of subsript for IDS array
+        """
+
         self.data[k] = v
 
     def __getattr__(self, k):
+        """
+        Parameters
+        ----------
+        k: str
+            Names of subsript for IDS array
+        """
+
         try:
             return self.data[k]
         except KeyError:
@@ -446,13 +520,18 @@ class IdxDict(dict):
 
 class IDSValidator(cerberus.Validator):
     """
-    IDS Validation Methods extending Cerberus-Validator
+    Cerberus-Validator extended with custom rules for IDS
+
+    Attributes
+    ----------
+    cocos: COCOS
+        COCOS for validation
     """
 
     cocos = {}
 
     def _validate_ids_nan(self, constraint, field, value):
-        """ {'nullable': False } """
+        """{'nullable': False }"""
         try:
             v = np.atleast_1d(value).flatten()
             if np.any(np.isnan(v)):
@@ -462,7 +541,7 @@ class IDSValidator(cerberus.Validator):
             pass
 
     def _validate_ids_inf(self, constraint, field, value):
-        """ {'nullable': False } """
+        """{'nullable': False }"""
         try:
             v = np.atleast_1d(value).flatten()
             if np.any(np.isinf(v)):
@@ -472,7 +551,7 @@ class IDSValidator(cerberus.Validator):
             pass
 
     def _validate_ids_le(self, max_value, field, value):
-        """ {'nullable': False } """
+        """{'nullable': False }"""
         try:
             v = np.atleast_1d(value).flatten()
             if np.any(v > max_value):
@@ -481,7 +560,7 @@ class IDSValidator(cerberus.Validator):
             pass
 
     def _validate_ids_ge(self, min_value, field, value):
-        """ {'nullable': False } """
+        """{'nullable': False }"""
         try:
             v = np.atleast_1d(value).flatten()
             if np.any(v < min_value):
@@ -490,7 +569,7 @@ class IDSValidator(cerberus.Validator):
             pass
 
     def _validate_ids_lt(self, max_value, field, value):
-        """ {'nullable': False } """
+        """{'nullable': False }"""
         try:
             v = np.atleast_1d(value).flatten()
             if np.any(v >= max_value):
@@ -499,7 +578,7 @@ class IDSValidator(cerberus.Validator):
             pass
 
     def _validate_ids_gt(self, min_value, field, value):
-        """ {'nullable': False } """
+        """{'nullable': False }"""
         try:
             v = np.atleast_1d(value).flatten()
             if np.any(v <= min_value):
@@ -508,7 +587,7 @@ class IDSValidator(cerberus.Validator):
             pass
 
     def _validate_ids_psi_like(self, constraint, field, value):
-        """ {'nullable': False } """
+        """{'nullable': False }"""
         try:
             v = np.atleast_1d(value).flatten()
             psi_like = self.cocos["sigma_Ip"] * self.cocos["sigma_Bp"]
@@ -519,7 +598,7 @@ class IDSValidator(cerberus.Validator):
             pass
 
     def _validate_ids_b0_like(self, constraint, field, value):
-        """ {'nullable': False } """
+        """{'nullable': False }"""
         try:
             v = np.atleast_1d(value).flatten()
             b0_like = self.cocos["sigma_B0"]
@@ -530,7 +609,7 @@ class IDSValidator(cerberus.Validator):
             pass
 
     def _validate_ids_dodpsi_like(self, constraint, field, value):
-        """ {'nullable': False } """
+        """{'nullable': False }"""
         try:
             v = np.atleast_1d(value).flatten()
             dodpsi_like = -self.cocos["sigma_Ip"] * self.cocos["sigma_Bp"]
@@ -541,7 +620,7 @@ class IDSValidator(cerberus.Validator):
             pass
 
     def _validate_ids_q_like(self, constraint, field, value):
-        """ {'nullable': False } """
+        """{'nullable': False }"""
         try:
             v = np.atleast_1d(value).flatten()
             q_like = (
@@ -556,7 +635,7 @@ class IDSValidator(cerberus.Validator):
             pass
 
     def _validate_ids_ip_like(self, constraint, field, value):
-        """ {'nullable': False } """
+        """{'nullable': False }"""
         try:
             v = np.atleast_1d(value).flatten()
             ip_like = self.cocos["sigma_Ip"]
@@ -567,7 +646,7 @@ class IDSValidator(cerberus.Validator):
             pass
 
     def _validate_ids_dPdpsi_like(self, constraint, field, value):
-        """ {'nullable': False } """
+        """{'nullable': False }"""
         try:
             v = np.atleast_1d(value).flatten()
             dodpsi_like = -self.cocos["sigma_Ip"] * self.cocos["sigma_Bp"]
@@ -582,8 +661,26 @@ class IDSValidator(cerberus.Validator):
 
 
 def validator(field, path_doc, ids, schema, cocos, idx):
-    """
-    Check the consistency of IDS quantities w.r.t. Schema and COCOS
+    """Check the consistency of IDS quantities w.r.t. Schema and COCOS
+
+    Parameters
+    ----------
+    field: Element
+        Sub-elements in an IDS
+    path_doc: str
+        Field path
+    ids: IDS
+        IDS for validation
+    schema: dict
+        Cerberus schema loaded as type dict
+    cocos: COCOS
+        COCOS input for validation
+    idx: IdxDict=None
+        DD Sub-Indices (e.g. itime, i1, ..., etc.)
+
+    Returns
+    -------
+    remark: boolean
     """
     global report_buf
 
@@ -614,7 +711,7 @@ def validator(field, path_doc, ids, schema, cocos, idx):
     remark = v_ids.validate(d)
     errors = v_ids.errors
 
-    if args.verbose:
+    if args_verbose:
         report = {}
         report["remark"] = remark
         report["errors"] = errors
@@ -638,10 +735,27 @@ def validator(field, path_doc, ids, schema, cocos, idx):
 # ----------------------------------------------------------------------
 
 
-def path_iterator(field, nodes, ids, fullpath, schema, cocos, idx=None, level=0):
+def path_iterator(field, nodes, ids, schema, cocos, idx=None, level=0):
+    """Iterate Recursively over Sub-Indices of IDS Path (e.g. itime, i1, ..., etc.)
+
+    Parameters
+    ----------
+    field: Element
+        Sub-elements in an IDS
+    nodes: list
+        Name of nodes consisting path_doc (field)
+    ids: IDS
+        IDS for validation
+    schema: dict
+        Cerberus schema loaded as type dict
+    cocos: COCOS
+        COCOS input for validation
+    idx: IdxDict=None
+        DD Sub-Indices (e.g. itime, i1, ..., etc.)
+    level: int=0
+        Depth of node in target field
     """
-    Iterate Recursively over Sub-Indices of IDS Path (e.g. itime, i1, ..., etc.)
-    """
+
     p = "/".join(nodes[: level + 1])
     if level < len(nodes) - 1:
         result = re.search("(\w+)(\(\w+\))$", p)
@@ -658,22 +772,19 @@ def path_iterator(field, nodes, ids, fullpath, schema, cocos, idx=None, level=0)
                         field,
                         nodes,
                         ids,
-                        fullpath,
                         schema,
                         cocos,
                         idx=idx,
                         level=level + 1,
                     )
-                    if not args.check_all:
+                    if not args_check_all:
                         break
             except:
                 pass
 
         # for node (e.g. path(itime)/to(i1)/node)
         else:
-            path_iterator(
-                field, nodes, ids, fullpath, schema, cocos, idx=idx, level=level + 1
-            )
+            path_iterator(field, nodes, ids, schema, cocos, idx=idx, level=level + 1)
 
     else:
         validator(field, p, ids, schema, cocos, idx)
@@ -682,68 +793,19 @@ def path_iterator(field, nodes, ids, fullpath, schema, cocos, idx=None, level=0)
 # ----------------------------------------------------------------------
 
 
-def ids_iterator(dd, db, schema, cocos):
-    """
-    Iterate over the occurences and the fields of IDS
-    """
-    global report_buf
-    idsname = dd.get("name")
-    ids = eval("db." + idsname)
-    maxoc = int(dd.get("maxoccur"))
-    buf = {}
-    dictw = {}
-
-    for oc in range(maxoc):
-        report_buf = {}
-        idsprop = ids.partialGet("ids_properties", oc)
-        homogeneous_time = idsprop.homogeneous_time
-        if args.verbose:
-            dictw = {
-                "remark": None,
-                "ids_properties": {
-                    "homogeneous_time": homogeneous_time,
-                    "data_dictionary": idsprop.version_put.data_dictionary,
-                    "access_layer": idsprop.version_put.access_layer,
-                    "access_layer_language": idsprop.version_put.access_layer_language,
-                },
-            }
-
-        if homogeneous_time in [0, 1, 2]:
-            if args.check_all:
-                ids.get(oc)
-            else:
-                ids.getSlice(0, 1, oc)
-
-            for field in dd.iter("field"):
-                path = field.get("path_doc")
-                if path in schema[idsname]:
-                    nodes = path.split("/")
-                    path_iterator(
-                        field,
-                        nodes,
-                        ids,
-                        path,
-                        schema[idsname],
-                        cocos,
-                        idx=IdxDict(path),
-                    )
-
-            if args.verbose:
-                if bool(report_buf):
-                    dictw["remark"] = all(
-                        {report_buf[x]["remark"] for x in report_buf.keys()}
-                    )
-            dictw.update(report_buf)
-            buf.update({"occurence(" + str(oc) + ")": dictw})
-
-    return {idsname: buf}
-
-
-# ----------------------------------------------------------------------
-
-
 def validate_COCOS(ids, schema, itime, cocos=None):
-    """
+    """Compute COCOS values using stored data in IDS/equilibrium
+
+    Parameters
+    ----------
+    ids: IDS
+        IDS for COCOS estimation
+    cocos_check: COCOS=None
+        Validate IDS wrt COCOS if given
+
+    Returns
+    -------
+    cocos: COCOS
     """
 
     # Inter-COCOS Validation
@@ -769,18 +831,28 @@ def validate_COCOS(ids, schema, itime, cocos=None):
 # ----------------------------------------------------------------------
 
 
-def compute_COCOS(ids, cocos):
-    """
-    Compute COCOS values using stored data in IDS/equilibrium
-    """
+def compute_COCOS(ids, cocos_check=None):
+    """Compute COCOS values using stored data in IDS/equilibrium
 
-    ids.get(0)
+    Parameters
+    ----------
+    ids: IDS
+        IDS for COCOS estimation
+    cocos_check: COCOS=None
+        Validate IDS wrt COCOS if given
+
+    Returns
+    -------
+    cocos: COCOS
+    """
 
     # COCOS Values in the middle of time sequence
     itime = int(np.floor(float(len(ids.time_slice)) / 2.0))
 
     #
     validate_COCOS(ids, required_fields_eq, itime)
+    if cocos_check:
+        validate_COCOS(ids, required_fields_cocos, itime, cocos=cocos_check)
 
     #
     ipsign = np.sign(ids.time_slice[itime].global_quantities.ip)
@@ -835,190 +907,252 @@ def compute_COCOS(ids, cocos):
         "sign_pprime_pos": int(sign_pprime_pos),
     }
 
-    cocos2 = COCOS(values=values).get()
-    validate_COCOS(ids, required_fields_cocos, itime, cocos=cocos)
+    cocos = COCOS(values=values).get()
 
-    return cocos2
+    return cocos
 
 
 # ----------------------------------------------------------------------
 
 
-def main():
-    """
-    IDS Data Validation Tool for Two Dimensional Array with respect to DD (IDSDef.xml)
-    """
-    from xml.etree import ElementTree as ET
-    import yaml
+def load_XML(fpath):
+    """Read XML file and Retrun as ElementTree
 
-    # Open the database
+    Parameters
+    ----------
+    fpath: str
+        Path to XML file
+
+    Returns
+    -------
+    root: ElementTree
+    """
+
+    # Load IMAS-DD File
+    if path.isfile(fpath):
+        root = ET.parse(fpath).getroot()
+    else:
+        exit("file not found:{}".format(fpath))
+
+    return root
+
+
+# ----------------------------------------------------------------------
+
+
+def load_YAML(fpath):
+    """Read YAML file and Retrun as dictionary
+
+    Parameters
+    ----------
+    fpath: str
+        Path to YAML file
+
+    Returns
+    -------
+    d: dict
+    """
+
+    # Load Schema File
     try:
-        db = IMASData(
-            args.user_or_path,
-            args.database,
-            getenv("IMAS_VERSION")[0],
-            args.shot,
-            args.run,
-        ).open()
+        f = open(fpath, mode="r")
     except:
-        exit(
-            "can not open user_or_path={}, database={}, shot={}, run={}".format(
-                args.user_or_path, args.database, args.shot, args.run
-            )
-        )
+        exit("can not open file:{}".format(fpath))
+    try:
+        d = yaml.safe_load(f)
+    except:
+        exit("invalid yaml in:{}".format(fpath))
+
+    return d
+
+
+# ----------------------------------------------------------------------
+
+
+def eval_IDSs(s):
+    """Return True if IDSs validate
+
+    Parameters
+    ----------
+    s: str
+        input string in YAML
+
+    Returns
+    -------
+    flag: boolean
+    """
+
+    flag = True
+    if s:
+        d_ids = yaml.safe_load(s)
+        for k_ids, d_occ in d_ids.items():
+            for k_occ, val in d_occ.items():
+                if val:
+                    flag = False
+                    break
+            if not flag:
+                break
+    else:
+        flag = False
+
+    return flag
+
+
+# ----------------------------------------------------------------------
+
+
+def ids_iterator(ids, schema, dd, cocos, occ=0):
+    """Iterate over the occurences and fields
+
+    Parameters
+    ----------
+    ids: IDS
+        IDS for validation
+    schema: dict
+        Cerberus schema loaded as type dict
+    dd: Element=None
+        Data Dictionary as class Element (read IDSDef.xml if None)
+    cocos: COCOS
+        COCOS input for validation
+    occ: int=0
+        IDS occurence
+
+    Returns
+    -------
+    dict
+        Result of validation in type dict
+    """
+
+    global report_buf
+    idsname = ids.__name__
+    maxoc = ids.getMaxOccurrences()
+    buf = {}
+    dictw = {}
+
+    # Initialization of IDS Occurrence
+    if isinstance(occ, int):
+        if occ in range(maxoc):
+            range_oc = [occ]
+        else:
+            exit("value error:{}".format(occ))
+    else:
+        exit("type error:{}".format(occ))
+
+    for oc in range_oc:
+        report_buf = {}
+        idsprop = ids.ids_properties
+        homogeneous_time = idsprop.homogeneous_time
+        if args_verbose:
+            dictw = {
+                "remark": None,
+                "ids_properties": {
+                    "homogeneous_time": homogeneous_time,
+                    "data_dictionary": idsprop.version_put.data_dictionary,
+                    "access_layer": idsprop.version_put.access_layer,
+                    "access_layer_language": idsprop.version_put.access_layer_language,
+                },
+            }
+
+        if homogeneous_time in [0, 1, 2]:
+            for field in dd.iter("field"):
+                path = field.get("path_doc")
+                if path in schema[idsname]:
+                    nodes = path.split("/")
+                    path_iterator(
+                        field,
+                        nodes,
+                        ids,
+                        schema[idsname],
+                        cocos,
+                        idx=IdxDict(path),
+                    )
+
+            if args_verbose:
+                if bool(report_buf):
+                    dictw["remark"] = all(
+                        {report_buf[x]["remark"] for x in report_buf.keys()}
+                    )
+            dictw.update(report_buf)
+            buf.update({"occurence(" + str(oc) + ")": dictw})
+
+    return {idsname: buf}
+
+
+# ----------------------------------------------------------------------
+
+
+def ids_validator(
+    ids, schema, dd=None, occ=0, ipsign=-1, b0sign=-1, verbose=False, check_all=True
+):
+    """Function Interface for IDS Data Validation Tool w.r.t. DD (IDSDef.xml)
+
+    Parameters
+    ----------
+    ids: IDS
+        IDS for validation
+    schema: dict | str
+        1. dict: Cerberus schema loaded as type dict
+        2. str: File path to Cerberus schema
+    dd: Element=None
+        Data Dictionary as class Element (read IDSDef.xml if None)
+    occ: int=None
+        IDS occurence
+    ipsign: int=-1
+        Sign of Ip
+    b0sign: int=-1
+        Sign of B0
+    verbose: boolean=False
+        Verbosity
+    check_all: boolean=True
+        Check all fields
+
+    Returns
+    -------
+    eval_IDSs(dump): boolean
+        Validation result in type boolean
+    dump: str
+        Validation result in YAML
+    """
+
+    # Schema Initialization
+    if isinstance(schema, dict):
+        pass
+    elif isinstance(schema, str):
+        schema = load_YAML(schema)
+    else:
+        exit("type error:{}".format(schema))
+
+    # DD Initialization for Target IDS
+    if ET.iselement(dd):
+        pass
+    elif dd is None:
+        root = load_XML(FILE_IDSDef)
+        dd = [dd for dd in root if dd.get("name") == ids.__name__][0]
+    else:
+        exit("type error:{}".format(dd))
 
     # COCOS Initialization
-    index = {"COCOS": IDS_COCOS, "ipsign": args.ipsign, "b0sign": args.b0sign}
+    index = {"COCOS": IDS_COCOS, "ipsign": ipsign, "b0sign": b0sign}
     cocos = COCOS(index=index).get()
 
-    # Validate COCOS in IDS/equilibrium
-    if args.validate_cocos:
-        try:
-            cocos2 = compute_COCOS(db.equilibrium, cocos)
-        except Exception as e:
-            exit("cannot compute COCOS: {}".format(e))
+    # Check all fields if check_all = True
+    global args_verbose, args_check_all
+    args_verbose = verbose
+    args_check_all = check_all
 
-        if cocos2["COCOS"] == cocos["COCOS"]:
-            print("COCOS: {}".format(cocos2["COCOS"]))
-        else:
-            yaml.dump(
-                {"COCOS Indication": cocos2},
-                stdout,
+    # Check for Target IDS
+    dump = ""
+    if ids.__name__ in schema:
+        out = ids_iterator(ids, schema, dd, cocos, occ=occ)
+        if out[ids.__name__]:
+            dump = yaml.dump(
+                out,
                 indent=4,
                 default_flow_style=False,
                 sort_keys=False,
             )
 
-    # IDS Validation
-    if args.schema_file:
-
-        # Load IMAS-DD File
-        if path.isfile(FILE_IDSDef):
-            root = ET.parse(FILE_IDSDef).getroot()
-        else:
-            exit("file not found:{}".format(FILE_IDSDef))
-
-        # Load IDS-Cerberus Schema
-        try:
-            f = open(args.schema_file, mode="r")
-        except:
-            exit("can not open file:{}".format(args.schema_file))
-        try:
-            schema = yaml.safe_load(f)
-        except:
-            exit("invalid yaml in:{}".format(args.schema_file))
-
-        # DD Loop
-        for dd in root:
-            if dd.tag == TARGET_TAG:
-                idsname = dd.get("name")
-                if idsname not in schema:
-                    continue
-                if (args.idslist is None) or (idsname in args.idslist):
-                    out = ids_iterator(dd, db, schema, cocos)
-                    if out[idsname]:
-                        yaml.dump(
-                            out,
-                            stdout,
-                            indent=4,
-                            default_flow_style=False,
-                            sort_keys=False,
-                        )
-
-    db.close()
+    return eval_IDSs(dump), dump.strip()
 
 
 # ----------------------------------------------------------------------
-
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="IDS Data Validation Tool")
-    parser.add_argument(
-        "-u",
-        "--user_or_path",
-        dest="user_or_path",
-        help="User or path name of DB where the data-entry is located",
-        required=False,
-        default="public",
-    )
-    parser.add_argument(
-        "-d",
-        "--database",
-        dest="database",
-        help="DB name where the data-entry is located",
-        required=False,
-        default="iter",
-    )
-    parser.add_argument(
-        "-s", "--shot", dest="shot", help="Shot number", required=True, type=int
-    )
-    parser.add_argument(
-        "-r", "--run", dest="run", help="Run number", required=True, type=int
-    )
-    parser.add_argument(
-        "-l",
-        "--list",
-        dest="idslist",
-        help="IDS names to be checked",
-        required=False,
-        nargs="*",
-    )
-    parser.add_argument(
-        "-p",
-        "--properties",
-        action="store_true",
-        dest="prop",
-        help="Report only ids_properties",
-        required=False,
-    )
-    parser.add_argument(
-        "-a",
-        "--check_all",
-        action="store_true",
-        dest="check_all",
-        help="Check all elements in IDSs, otherwise check one slice (default)",
-        required=False,
-    )
-    parser.add_argument(
-        "-f",
-        "--schema_file",
-        dest="schema_file",
-        help="File name of validation schema",
-        required=False,
-        default=None,
-    )
-    parser.add_argument(
-        "--ipsign",
-        dest="ipsign",
-        help="sign(Ip), default=-1",
-        required=False,
-        type=int,
-        default=-1,
-        choices=[-1, 1],
-    )
-    parser.add_argument(
-        "--b0sign",
-        dest="b0sign",
-        help="sign(B0), default=-1",
-        required=False,
-        type=int,
-        default=-1,
-        choices=[-1, 1],
-    )
-    parser.add_argument(
-        "--verbose",
-        help="increase output verbosity",
-        required=False,
-        default=False,
-        action="store_true",
-    )
-    parser.add_argument(
-        "-v",
-        "--validate_cocos",
-        help="Compute COCOS values from IDS/equilibrium",
-        required=False,
-        default=False,
-        action="store_true",
-    )
-    args = parser.parse_args()
-    main()
