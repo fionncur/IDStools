@@ -19,13 +19,10 @@ def main():
 
     # Open the database
     db = imas.DBEntry(
-        get_backend_id(args.backend),
-        args.database,
-        args.shot,
-        args.run,
-        args.user)
-    status,_ = db.open()
-    if status!=0:
+        get_backend_id(args.backend), args.database, args.shot, args.run, args.user
+    )
+    status, _ = db.open()
+    if status != 0:
         exit(
             "can not open backend={}, user_or_path={}, database={}, shot={}, run={}".format(
                 args.backend, args.user, args.database, args.shot, args.run
@@ -82,13 +79,11 @@ def main():
                         try:
                             idstime = db.partial_get(idsname, "time", occurrence=occ)
                             #
-                            if (args.check_all) or (idstime is None):
+                            if (args.time is None) or (idstime is None):
                                 ids = db.get(idsname, occurrence=occ)
                             else:
-                                time_slice, itime = find_time(idstime, args.time)
-                                ids = db.get_slice(
-                                    idsname, time_slice, 1, occurrence=occ
-                                )
+                                time, itime = find_time(idstime, args.time)
+                                ids = db.get_slice(idsname, time, 1, occurrence=occ)
                         except Exception as e:
                             exit("cannot retrieve IDS: {}".format(e))
                         #
@@ -98,7 +93,7 @@ def main():
                             dd=dd0,
                             occ=occ,
                             verbose=args.verbose,
-                            check_all=args.check_all,
+                            check_all=True,
                         )
                         print(dump)
 
@@ -107,8 +102,9 @@ def main():
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="IDS Data Validation Tool",
-                                     parents=[imas_parser])
+    parser = argparse.ArgumentParser(
+        description="IDS Data Validation Tool", parents=[imas_parser]
+    )
     parser.add_argument(
         "-s", "--shot", dest="shot", help="Shot number", required=True, type=int
     )
@@ -128,26 +124,25 @@ if __name__ == "__main__":
         "--properties",
         action="store_true",
         dest="prop",
-        help="Report only ids_properties",
+        help="report only ids_properties",
         required=False,
     )
     parser.add_argument(
-        "-a",
-        "--check_all",
-        action="store_true",
-        dest="check_all",
-        help="Check all elements in IDSs, otherwise check one time-slice (default)",
+        "-t",
+        "--time",
+        dest="time",
+        help="time (default=middle)",
+        type=float,
         required=False,
-    )
-
-    parser.add_argument(
-        "-t", "--time", help="Time (default=middle)", type=float, default=-99.0
+        const=-99.0,
+        default=None,
+        nargs="?",
     )
     parser.add_argument(
         "-f",
         "--schema_file",
         dest="schema_file",
-        help="File name of validation schema",
+        help="file name of validation schema",
         required=False,
         default=None,
     )
@@ -179,7 +174,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "-c",
         "--cocos",
-        help="Compute COCOS values from IDS/equilibrium",
+        help="compute COCOS values from IDS/equilibrium",
         required=False,
         default=False,
         action="store_true",

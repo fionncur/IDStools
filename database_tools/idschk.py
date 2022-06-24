@@ -18,7 +18,7 @@ ids_header = "ids."
 idx_header = "idx."
 IDS_COCOS = 11
 args_verbose = False
-args_check_all = False
+args_check_all = True
 
 # Validation Schema for COCOS using IDS/equilibrium
 required_fields_eq = {
@@ -777,7 +777,7 @@ def path_iterator(field, nodes, ids, schema, cocos, idx=None, level=0):
                         idx=idx,
                         level=level + 1,
                     )
-                    if not args.check_all:
+                    if not args_check_all:
                         break
             except:
                 pass
@@ -1082,7 +1082,7 @@ def ids_iterator(ids, schema, dd, cocos, occ=0):
 
 
 def ids_validator(
-    ids, schema, dd=None, occ=0, ipsign=-1, b0sign=-1, verbose=False, check_all=False
+    ids, schema, dd=None, occ=0, ipsign=-1, b0sign=-1, verbose=False, check_all=True
 ):
     """Function Interface for IDS Data Validation Tool w.r.t. DD (IDSDef.xml)
 
@@ -1103,7 +1103,7 @@ def ids_validator(
         Sign of B0
     verbose: boolean=False
         Verbosity
-    check_all: boolean=False
+    check_all: boolean=True
         Check all fields
 
     Returns
