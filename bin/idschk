@@ -1,0 +1,183 @@
+#!/usr/bin/env python
+from os import getenv
+from sys import exit
+from sys import stdout
+import argparse
+import yaml
+import imas
+from database_tools import idschk
+from database_tools.idschk import *
+from idstools.cli import *
+
+# ----------------------------------------------------------------------
+
+
+def main():
+    """
+    Command Interface of IDS Data Validation Tool w.r.t. DD (IDSDef.xml)
+    """
+
+    # Open the database
+    db = imas.DBEntry(
+        get_backend_id(args.backend), args.database, args.shot, args.run, args.user
+    )
+    status, _ = db.open()
+    if status != 0:
+        exit(
+            "can not open backend={}, user_or_path={}, database={}, shot={}, run={}".format(
+                args.backend, args.user, args.database, args.shot, args.run
+            )
+        )
+
+    # Initialization for yaml Dumper
+    yaml.Dumper.ignore_aliases = lambda *args: True
+
+    # COCOS Initialization
+    index = {"COCOS": idschk.IDS_COCOS, "ipsign": args.ipsign, "b0sign": args.b0sign}
+    cocos = COCOS(index=index).get()
+
+    # Validate COCOS in IDS/equilibrium
+    # To-Do
+    # - COCOS Validation for multiple occurences
+    # - get_slice() instead of get()
+    if args.cocos:
+        try:
+            ids = db.get("equilibrium", 0)
+            cocos2 = compute_COCOS(ids, cocos_check=cocos)
+        except Exception as e:
+            exit("cannot compute COCOS: {}".format(e))
+
+        if cocos2["COCOS"] == cocos["COCOS"]:
+            print("COCOS: {}".format(cocos2["COCOS"]))
+        else:
+            dump = yaml.dump(
+                {"COCOS Indication": cocos2},
+                indent=4,
+                default_flow_style=False,
+                sort_keys=False,
+            )
+            print(dump)
+
+    # IDS Validation
+    if args.schema_file:
+
+        # Load IMAS-DD File
+        root = load_XML(idschk.FILE_IDSDef)
+
+        # Schema Initialization
+        schema = load_YAML(args.schema_file)
+
+        for idsname in schema.keys():
+            if (args.idslist is None) or (idsname in args.idslist):
+                dd0 = [dd for dd in root if dd.get("name") == idsname][0]
+                maxoc = int(dd0.get("maxoccur"))
+                #
+                for occ in range(maxoc):
+                    idsprop = db.partial_get(idsname, "ids_properties", occurrence=occ)
+                    if idsprop.homogeneous_time in [0, 1, 2]:
+                        #
+                        try:
+                            idstime = db.partial_get(idsname, "time", occurrence=occ)
+                            #
+                            if (args.time is None) or (idstime is None):
+                                ids = db.get(idsname, occurrence=occ)
+                            else:
+                                time, itime = find_time(idstime, args.time)
+                                ids = db.get_slice(idsname, time, 1, occurrence=occ)
+                        except Exception as e:
+                            exit("cannot retrieve IDS: {}".format(e))
+                        #
+                        flag, dump = ids_validator(
+                            ids,
+                            schema,
+                            dd=dd0,
+                            occ=occ,
+                            verbose=args.verbose,
+                            check_all=True,
+                        )
+                        print(dump)
+
+
+# ----------------------------------------------------------------------
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        description="IDS Data Validation Tool", parents=[imas_parser]
+    )
+    parser.add_argument(
+        "-s", "--shot", dest="shot", help="Shot number", required=True, type=int
+    )
+    parser.add_argument(
+        "-r", "--run", dest="run", help="Run number", required=True, type=int
+    )
+    parser.add_argument(
+        "-l",
+        "--list",
+        dest="idslist",
+        help="IDS names to be checked",
+        required=False,
+        nargs="*",
+    )
+    parser.add_argument(
+        "-p",
+        "--properties",
+        action="store_true",
+        dest="prop",
+        help="report only ids_properties",
+        required=False,
+    )
+    parser.add_argument(
+        "-t",
+        "--time",
+        dest="time",
+        help="time (default=middle)",
+        type=float,
+        required=False,
+        const=-99.0,
+        default=None,
+        nargs="?",
+    )
+    parser.add_argument(
+        "-f",
+        "--schema_file",
+        dest="schema_file",
+        help="file name of validation schema",
+        required=False,
+        default=None,
+    )
+    parser.add_argument(
+        "--ipsign",
+        dest="ipsign",
+        help="sign(Ip), default=%(default)s",
+        required=False,
+        type=int,
+        default=-1,
+        choices=[-1, 1],
+    )
+    parser.add_argument(
+        "--b0sign",
+        dest="b0sign",
+        help="sign(B0), default=%(default)s",
+        required=False,
+        type=int,
+        default=-1,
+        choices=[-1, 1],
+    )
+    parser.add_argument(
+        "--verbose",
+        help="increase output verbosity",
+        required=False,
+        default=False,
+        action="store_true",
+    )
+    parser.add_argument(
+        "-c",
+        "--cocos",
+        help="compute COCOS values from IDS/equilibrium",
+        required=False,
+        default=False,
+        action="store_true",
+    )
+    args = parser.parse_args()
+    main()
