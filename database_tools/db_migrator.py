@@ -23,6 +23,7 @@ except ModuleNotFoundError:
 parser = argparse.ArgumentParser(description='Copy all IDSs in given directory into a chosen one', parents=[imas_parser])
 parser.add_argument("-do", "--database_out", type=str, default="migrations", help="Name of destination database")
 parser.add_argument("-bo", "--backend_output", type=str, default="HDF5", help="Desired backend for destination data-entry (default=HDF5)")
+parser.add_argument("--validate", action="store_true", help="Performs diff and validation of the migrated data")
 args = parser.parse_args()
 
 locpath = getDBPath(args.user, args.database, args.version)
@@ -36,30 +37,35 @@ if backend == imas.imasdef.MDSPLUS_BACKEND:
 elif backend == imas.imasdef.HDF5_BACKEND:
     files = hdf5ListPulseRun(locpath)
 
-for pulse in tqdm(files) if progbar else files:
+for pulse in files: #tqdm(files) if progbar else files:
     idsinf = []
     run = pulse[1]
     src = imas.DBEntry(backend, args.database, pulse[0], run, args.user)
     src.open()
     dest = imas.DBEntry(get_backend_id(args.backend_output), args.database_out, pulse[0], run)
     dest.create()
-    for ids in available_in_dbentry(src):
+    avids = available_in_dbentry(src)
+    for ids in tqdm(avids, desc=f"Pulse {pulse}") if progbar else avids:
         idsname = ids[0]
         inocc = ids[1]
         idsobj = src.get(idsname, occurrence=inocc)
-        if idsname == 'dataset_description':
-            idsobj.dd_version = os.environ['IMAS_VERSION']
-        try:
-            if idsobj.ids_properties.homogeneous_time != imas.imasdef.EMPTY_INT:
-                dest.put(idsobj, occurrence=inocc)
-                idsobj2 = dest.get(idsname, occurrence=inocc)
-                idsinf.append((idsname, compare(idsobj, idsobj2, verb=False), ids_validator(idsobj, 'required_fields_core.yml')[0]))
-        except Exception as exc:
-            print(str(exc), file=sys.stderr)
-    log.append(idsinf)
+        dest.put(idsobj, occurrence=inocc)
+
+        if args.validate:
+            idsobj2 = dest.get(idsname, occurrence=inocc)
+            same = compare(idsobj, idsobj2, verb=False)
+            idsinf.append((idsname,same,ids_validator(idsobj,os.path.abspath(os.path.dirname( __file__ ))+'/required_fields_core.yml')[0]))
+            #del idsobj2
+
+        #del idsobj
 
     src.close()
+    #del src
     dest.close()
+    #del dest
+        
+    log.append(idsinf)
+
 
 df = pd.DataFrame(files, columns=['PULSE', 'RUN'])
 df['IDS STATUS | Validation'] = log
