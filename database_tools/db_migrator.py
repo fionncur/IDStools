@@ -7,8 +7,8 @@ import argparse
 import pandas as pd
 from idstools.cli import *
 from pathlib import Path
-from ids_extractor import mdsListPulseRun, hdf5ListPulseRun, getDBPath
-from idschk import ids_validator
+from database_tools.ids_extractor import mdsListPulseRun, hdf5ListPulseRun, getDBPath
+from database_tools.idschk import ids_validator
 from idstools.idsdiff import compare
 from idstools.idslist import available_in_dbentry
 from datetime import datetime
@@ -23,6 +23,7 @@ except ModuleNotFoundError:
 parser = argparse.ArgumentParser(description='Copy all IDSs in given directory into a chosen one', parents=[imas_parser])
 parser.add_argument("-do", "--database_out", type=str, default="migrations", help="Name of destination database")
 parser.add_argument("-bo", "--backend_output", type=str, default="HDF5", help="Desired backend for destination data-entry (default=HDF5)")
+parser.add_argument("--skip-obsolete", action="store_true", help="")
 parser.add_argument("--validate", action="store_true", help="Performs diff and validation of the migrated data")
 args = parser.parse_args()
 
@@ -33,7 +34,7 @@ backend = get_backend_id(args.backend)
 log = []
 
 if backend == imas.imasdef.MDSPLUS_BACKEND:
-    files = mdsListPulseRun(locpath)
+    files = mdsListPulseRun(locpath, with_status='active' if args.skip_obsolete else None)
 elif backend == imas.imasdef.HDF5_BACKEND:
     files = hdf5ListPulseRun(locpath)
 

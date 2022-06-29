@@ -5,6 +5,7 @@ from imas import imasdef
 import pandas as pd
 import argparse
 from pathlib import Path
+from glob import glob 
 from idstools.cli import *
 import yaml
 progbar = True
@@ -41,6 +42,8 @@ def mdsListPulseRun(locpath, with_status=None):
     ---------
     locpath: str or Path
         Path in which the database files are stored
+    with_status: str
+        If set, will list only pulses with given status (in associated yaml file, e.g. 'obsolete', 'active')
     
     Returns
     -------
@@ -50,7 +53,8 @@ def mdsListPulseRun(locpath, with_status=None):
     if not locpath.exists():
         raise FileNotFoundError("The path provided does not exist or has no such database file or directory. Please check spelling.")
     pulses = []
-    folder = Path(locpath).glob('**/*.datafile')
+    # folder = Path(locpath).glob('**/*.datafile') # --> does not work with linked subfolders (https://bugs.python.org/issue33428)
+    folder = glob(str(locpath)+"/**/*.datafile",recursive=True) 
     for entry in folder:
         if (with_status is None) or (with_status==get_status(entry.with_suffix(".yaml"))):
             file = str(entry).split('/')[-1].split('_')[1].split('.')[0]
@@ -69,8 +73,6 @@ def hdf5ListPulseRun(locpath):
     ---------
     locpath: str or Path
            Path in which the database files are stored
-    with_status: str
-        If set, will list only pulses with given status (in associated yaml file, e.g. 'obsolete', 'active')
 
     Returns
     -------
@@ -80,7 +82,8 @@ def hdf5ListPulseRun(locpath):
     if not locpath.exists():
         raise FileNotFoundError("The path provided does not exist or has no such database file or directory. Please check spelling.")
     pulses = []
-    folder = Path(locpath).glob('**/*master.h5')
+    #folder = Path(locpath).glob('**/*master.h5')
+    folder = glob(str(locpath)+"/**/*.master.h5",recursive=True)
     for entry in folder:
         pulse = int(str(entry).split('/')[-3])
         run = int(str(entry).split('/')[-2])
@@ -126,6 +129,8 @@ if __name__ == "__main__":
 
     locpath = getDBPath(args.user, database, args.version)
 
+    print(locpath)
+    
     idsname = idspath.split('/')[0]
     valpath = idspath[1 + len(idsname):]
 
@@ -138,6 +143,7 @@ if __name__ == "__main__":
     elif backend == imas.imasdef.HDF5_BACKEND:
         pulses = hdf5ListPulseRun(locpath)
 
+    print(pulses)
         
     for entry in tqdm(pulses) if progbar else pulses:
         de = imas.DBEntry(backend, database, entry[0], entry[1], args.user, args.version)
