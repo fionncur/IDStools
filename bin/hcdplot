@@ -1,0 +1,330 @@
+#!/usr/bin/env python
+
+from __future__ import print_function
+
+# Example: hcdplot -ech 134173/200-219/schneim/TORBEAM -nbi 130012/122/schneim/nf_fopla_synergy -fus 134173/1116/schneim/SPOT -icrh 130012/126/schneim/nf_fopla_synergy
+
+# MODULES
+# --------
+from numpy import *
+import imas,argparse,sys,os
+import matplotlib
+matplotlib.use('TKagg')
+import matplotlib.pyplot as plt
+
+# MANAGEMENT OF INPUT ARGUMENTS
+# ------------------------------
+parser = argparse.ArgumentParser(description=\
+	                         '--- Display H&CD results from multiple data sets \n'\
+                                 +'- Each H&CD source is optional \n'\
+                                 +'- Time is also optional \n'\
+                                 +'- Example: \n'\
+                                 +'  hcdplot -ech 134713/200/schneim/TORBEAM -nbi 130012/122/schneim/nf_fopla_synergy \n',\
+                                 formatter_class=argparse.RawDescriptionHelpFormatter)
+parser.add_argument('-ech',help='shot/run/user/database/[time] for ECH results (waves)', required=False,type=str)
+parser.add_argument('-icrh',help='shot/run/user/database/[time] for ICRH results (distributions)', required=False,type=str)
+parser.add_argument('-nbi',help='shot/run/user/database/[time] for NBI results (distributions)', required=False,type=str)
+parser.add_argument('-fus',help='shot/run/user/database/[time] for fusion products (distributionss)', required=False,type=str)
+
+args = vars(parser.parse_args())
+
+hcd_sources = {'ech': None,'icrh': None,'nbi': None,'fus': None}
+
+for source in hcd_sources.keys():
+    if args[source] != None:
+        hcd_sources[source] = {}
+        hcd_sources[source]['input'] = args[source]
+        if len(hcd_sources[source]['input'].split('/')) == 4:
+            hcd_sources[source]['shot'],\
+                hcd_sources[source]['run'],\
+                hcd_sources[source]['user_or_path'],\
+                hcd_sources[source]['database'],\
+                =hcd_sources[source]['input'].split('/')
+            hcd_sources[source]['time'] = None
+        elif len(hcd_sources[source]['input'].split('/')) == 5:
+            hcd_sources[source]['shot'],\
+                hcd_sources[source]['run'],\
+                hcd_sources[source]['user_or_path'],\
+                hcd_sources[source]['database'],\
+                hcd_sources[source]['time'],\
+                =hcd_sources[source]['input'].split('/')
+        else:
+            print('------------------------------------------------------------')
+            print('Bad input format: '+hcd_sources[source]['input']+' not valid')
+            print('Arguments should be formatted like shot/run/user/database')
+            print('--> Exit.')
+            print('-------------------------------------------------------------')
+            exit()
+        hcd_sources[source]['shot'] = int(hcd_sources[source]['shot'])
+        del hcd_sources[source]['input']
+
+nsource = 0
+for source,value in hcd_sources.items():
+    if value != None:
+        nsource = nsource + 1
+
+if nsource == 0:
+    print('-------------------------')
+    print('No H&CD source to display')
+    print('--> Exit.')
+    print('-------------------------')
+    exit()
+        
+# ECH
+if hcd_sources['ech'] != None:
+    from ecplot import *
+    ec_args = hcd_sources['ech']
+    ec_args['force_psi'] = None
+    ec_profiles,ec_param = ec_prep(ec_args)
+    #ec_display(ec_profiles,ec_param)
+
+# NUCLEAR REACTIONS
+if hcd_sources['fus'] != None:
+    fus_args = hcd_sources['fus']
+    from nbplot import *
+    fus_profiles,fus_param = nbfus_prep(fus_args)
+    #nbfus_display(fus_profiles,fus_param)
+
+# NBI
+if hcd_sources['nbi'] != None:
+    nbi_args = hcd_sources['nbi']
+    nbi_profiles,nbi_param = nbfus_prep(nbi_args)
+    #nbfus_display(nbi_profiles,nbi_param)
+
+# ICRH
+if hcd_sources['icrh'] != None:
+    icrh_args = hcd_sources['icrh']
+    ic_profiles,ic_param = nbfus_prep(icrh_args)
+    ic_fac = 1
+    #nbfus_display(ic_profiles,ic_param)
+
+##################################################################
+
+fontsize = 8
+figure_width  = 5
+figure_height = 4
+plt.rcParams['font.size'] = fontsize
+plt.rcParams['axes.linewidth'] = 1.5
+plt.rcParams['grid.alpha'] = 1.0
+
+font = {'family': 'serif',
+        'color':  'darkred',
+        'weight': 'normal',
+        'size': fontsize,
+        }
+
+torcol = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b']*10
+
+# PROFILE OF POWER DENSITY ABSORBED TO ELECTRONS [MW/M3]
+fig,ax = plt.subplots(1,1)
+
+if hcd_sources['ech'] != None:
+    nsample_ec  = ec_param['nsample']
+    for isample in range(nsample_ec):
+        ec_profiles[isample]['single_ec_launcher_name'][3]='UL/USM'
+        ec_profiles[isample]['single_ec_launcher_name'][4]='UL/BSM'
+        if sum(ec_profiles[isample]['is_active'])>1 and nsample_ec == 0:
+            ax.plot(ec_profiles[isample]['rho_tor_norm'], \
+                    ec_profiles[isample]['total_power_density_profile']*1.e-6,label=r'Total')
+        for iwave in range(ec_profiles[isample]['nwaves']):
+            if ec_profiles[isample]['is_active'][iwave]:
+                if isample != 0:
+                    ec_profiles[isample]['single_ec_launcher_name'][iwave]=''
+                ax.plot(ec_profiles[isample]['rho_tor_norm'], \
+                    ec_profiles[isample]['single_power_density_profile'][iwave]*1.e-6,\
+                        label=ec_profiles[isample]['single_ec_launcher_name'][iwave],color=torcol[iwave])
+
+if hcd_sources['fus'] != None:
+    nsample_fus  = fus_param['nsample']
+    for isample in range(nsample_fus):
+        if sum(fus_profiles[isample]['is_active'])>0:
+            ax.plot(fus_profiles[isample]['rho_tor_norm'], fus_profiles[isample]\
+                    ['all_injectors_electron_power_density_profile']*1.e-6,label=r'Alphas',color='red',linewidth=2)
+            
+if hcd_sources['nbi'] != None:
+    nsample_nbi  = nbi_param['nsample']
+    for isample in range(nsample_nbi):
+        if sum(nbi_profiles[isample]['is_active'])>0:
+            ax.plot(nbi_profiles[isample]['rho_tor_norm'], nbi_profiles[isample]\
+                    ['all_injectors_electron_power_density_profile']*1.e-6,label=r'NBI',color='blue',linewidth=2)
+            
+if hcd_sources['icrh'] != None:
+    nsample_ic  = ic_param['nsample']
+    for isample in range(nsample_ic):
+        if sum(ic_profiles[isample]['is_active'])>0:
+            ax.plot(ic_profiles[isample]['rho_tor_norm'], ic_profiles[isample]\
+                    ['all_injectors_electron_power_density_profile']*1.e-6*ic_fac,label=r'ICRH',color='black',linewidth=2)
+
+ax.set_ylabel('Power to electrons $\mathrm{[MW/m^{3}]}$')
+ax.set_xlabel('Normalized toroidal flux coordinate')
+plt.grid()
+legend = plt.legend()
+CustomLegend(legend)
+fig.set_size_inches(figure_width,figure_height)
+fig.tight_layout()
+try:
+    fname = f'HCD_pe_profiles.svg'
+    fig.savefig(fname,format="svg")
+    print(f'----> Figure saved to {fname}', file=sys.stderr)
+except:
+    print('The figure could not be saved (check local permissions).', file=sys.stderr)
+plt.show(block=False)
+
+# PROFILE OF POWER DENSITY ABSORBED TO IONS [MW/M3]
+fig,ax = plt.subplots(1,1)
+
+if hcd_sources['ech'] == 'Maybe one day':
+    nsample_ec  = ec_param['nsample']
+    for isample in range(nsample_ec):
+        ec_profiles[isample]['single_ec_launcher_name'][3]='UL/USM'
+        ec_profiles[isample]['single_ec_launcher_name'][4]='UL/BSM'
+        if sum(ec_profiles[isample]['is_active'])>1 and nsample_ec == 0:
+            ax.plot(ec_profiles[isample]['rho_tor_norm'], \
+                    ec_profiles[isample]['total_power_density_profile']*1.e-6,label=r'Total')
+        for iwave in range(ec_profiles[isample]['nwaves']):
+            if ec_profiles[isample]['is_active'][iwave]:
+                if isample != 0:
+                    ec_profiles[isample]['single_ec_launcher_name'][iwave]=''
+                ax.plot(ec_profiles[isample]['rho_tor_norm'], \
+                    ec_profiles[isample]['single_power_density_profile'][iwave]*1.e-6,\
+                        label=ec_profiles[isample]['single_ec_launcher_name'][iwave],color=torcol[iwave])
+if hcd_sources['fus'] != None:
+    nsample_fus  = fus_param['nsample']
+    for isample in range(nsample_fus):
+        if sum(fus_profiles[isample]['is_active'])>0:
+            ax.plot(fus_profiles[isample]['rho_tor_norm'], fus_profiles[isample]\
+                    ['all_injectors_ion_power_density_profile']*1.e-6,label=r'Alphas',color='red',linewidth=2)
+if hcd_sources['nbi'] != None:
+    nsample_nbi  = nbi_param['nsample']
+    for isample in range(nsample_nbi):
+        if sum(nbi_profiles[isample]['is_active'])>0:
+            ax.plot(nbi_profiles[isample]['rho_tor_norm'], nbi_profiles[isample]\
+                    ['all_injectors_ion_power_density_profile']*1.e-6,label=r'NBI',color='blue',linewidth=2)
+if hcd_sources['icrh'] != None:
+    nsample_ic  = ic_param['nsample']
+    for isample in range(nsample_ic):
+        if sum(ic_profiles[isample]['is_active'])>0:
+            ax.plot(ic_profiles[isample]['rho_tor_norm'], ic_profiles[isample]\
+                    ['all_injectors_ion_power_density_profile']*1.e-6*ic_fac,label=r'ICRH',color='black',linewidth=2)
+ax.set_ylabel('Power to ions $\mathrm{[MW/m^{3}]}$')
+ax.set_xlabel('Normalized toroidal flux coordinate')
+plt.grid()
+legend = plt.legend()
+CustomLegend(legend)
+fig.set_size_inches(figure_width,figure_height)
+fig.tight_layout()
+try:
+    fname = f'HCD_pi_profiles.svg'
+    fig.savefig(fname,format="svg")
+    print(f'----> Figure saved to {fname}', file=sys.stderr)
+except:
+    print('The figure could not be saved (check local permissions).', file=sys.stderr)
+plt.show(block=False)
+
+# PROFILE OF POWER DENSITY ABSORBED TO ELECTRONS+IONS [MW/M3]
+fig,ax = plt.subplots(1,1)
+if hcd_sources['ech'] != None:
+    nsample_ec  = ec_param['nsample']
+    for isample in range(nsample_ec):
+        ec_profiles[isample]['single_ec_launcher_name'][3]='UL/USM'
+        ec_profiles[isample]['single_ec_launcher_name'][4]='UL/BSM'
+        if sum(ec_profiles[isample]['is_active'])>1 and nsample_ec == 0:
+            ax.plot(ec_profiles[isample]['rho_tor_norm'], \
+                    ec_profiles[isample]['total_power_density_profile']*1.e-6,label=r'Total')
+        for iwave in range(ec_profiles[isample]['nwaves']):
+            if ec_profiles[isample]['is_active'][iwave]:
+                if isample != 0:
+                    ec_profiles[isample]['single_ec_launcher_name'][iwave]=''
+                ax.plot(ec_profiles[isample]['rho_tor_norm'], \
+                    ec_profiles[isample]['single_power_density_profile'][iwave]*1.e-6,\
+                        label=ec_profiles[isample]['single_ec_launcher_name'][iwave],color=torcol[iwave])
+if hcd_sources['fus'] != None:
+    nsample_fus  = fus_param['nsample']
+    for isample in range(nsample_fus):
+        if sum(fus_profiles[isample]['is_active'])>0:
+            ax.plot(fus_profiles[isample]['rho_tor_norm'], fus_profiles[isample]\
+                    ['all_injectors_total_power_density_profile']*1.e-6,label=r'Alphas',color='red',linewidth=2)
+if hcd_sources['nbi'] != None:
+    nsample_nbi  = nbi_param['nsample']
+    for isample in range(nsample_nbi):
+        if sum(nbi_profiles[isample]['is_active'])>0:
+            ax.plot(nbi_profiles[isample]['rho_tor_norm'], nbi_profiles[isample]\
+                    ['all_injectors_total_power_density_profile']*1.e-6,label=r'NBI',color='blue',linewidth=2)
+if hcd_sources['icrh'] != None:
+    nsample_ic  = ic_param['nsample']
+    for isample in range(nsample_ic):
+        if sum(ic_profiles[isample]['is_active'])>0:
+            ax.plot(ic_profiles[isample]['rho_tor_norm'], ic_profiles[isample]\
+                    ['all_injectors_total_power_density_profile']*1.e-6*ic_fac,label=r'ICRH',color='black',linewidth=2)
+ax.set_ylabel('Total power to bulk $\mathrm{[MW/m^{3}]}$')
+ax.set_xlabel('Normalized toroidal flux coordinate')
+plt.grid()
+legend = plt.legend()
+CustomLegend(legend)
+fig.set_size_inches(figure_width,figure_height)
+fig.tight_layout()
+try:
+    fname = f'HCD_ptot_profiles.svg'
+    fig.savefig(fname,format="svg")
+    print(f'----> Figure saved to {fname}', file=sys.stderr)
+except:
+    print('The figure could not be saved (check local permissions).', file=sys.stderr)
+plt.show(block=False)
+
+# CURRENT DENSITY PROFILE [MA/M2]
+fig,ax = plt.subplots(1,1)
+if hcd_sources['ech'] != None:
+    for isample in range(nsample_ec):
+        if sum(ec_profiles[isample]['is_active'])>1 and nsample_ec == 0:
+            ax.plot(ec_profiles[isample]['rho_tor_norm'], \
+                    ec_profiles[isample]['total_current_density_profile']*1.e-6,label=r'Total')
+        for iwave in range(ec_profiles[isample]['nwaves']):
+            if ec_profiles[isample]['is_active'][iwave]:
+                ax.plot(ec_profiles[isample]['rho_tor_norm'], \
+                        ec_profiles[isample]['single_current_density_profile'][iwave]*1.e-6,\
+                        label=ec_profiles[isample]['single_ec_launcher_name'][iwave],color=torcol[iwave])
+if hcd_sources['fus'] != None:
+    for isample in range(nsample_fus):
+        if fus_profiles[isample]['cur_calc'] == 1:
+            ax.plot(fus_profiles[isample]['rho_tor_norm'], \
+                fus_profiles[isample]['all_injectors_current_density_profile']*1.e-6,label=r'Alphas',color='red',linewidth=2)
+            #for idistrib in range(fus_profiles[isample]['ndistributions']):
+            #    if fus_profiles[isample]['is_active'][idistrib]:
+            #        ax.plot(fus_profiles[isample]['rho_tor_norm'], fus_profiles[isample]['single_current_density_profile']\
+            #                [idistrib]*1.e-6,label=fus_profiles[isample]['single_nf_source_name'][idistrib],color=torcol[2])
+if hcd_sources['nbi'] != None:
+    for isample in range(nsample_nbi):
+        if nbi_profiles[isample]['cur_calc'] == 1:
+            ax.plot(nbi_profiles[isample]['rho_tor_norm'], \
+                nbi_profiles[isample]['all_injectors_current_density_profile']*1.e-6,label=r'NBI',color='blue',linewidth=2)
+            #for idistrib in range(nbi_profiles[isample]['ndistributions']):
+            #    if nbi_profiles[isample]['is_active'][idistrib]:
+            #        ax.plot(nbi_profiles[isample]['rho_tor_norm'], nbi_profiles[isample]['single_current_density_profile']\
+            #                [idistrib]*1.e-6,label=nbi_profiles[isample]['single_nf_source_name'][idistrib],color=torcol[2])
+if hcd_sources['icrh'] != None:
+    for isample in range(nsample_ic):
+        if ic_profiles[isample]['cur_calc'] == 1:
+            ax.plot(ic_profiles[isample]['rho_tor_norm'], \
+                ic_profiles[isample]['all_injectors_current_density_profile']\
+                    *1.e-6,label=r'ICRH',color='black',linewidth=2)
+            for idistrib in range(ic_profiles[isample]['ndistributions']):
+                if ic_profiles[isample]['is_active'][idistrib]:
+                    ax.plot(ic_profiles[isample]['rho_tor_norm'], \
+                            ic_profiles[isample]['single_current_density_profile']\
+                            [idistrib]*1.e-6*ic_fac,label=ic_profiles[isample]\
+                            ['single_nf_source_name'][idistrib],color=torcol[2])
+
+ax.set_ylabel('Current density $\mathrm{[MA/m^{2}]}$')
+ax.set_xlabel('Normalized toroidal flux coordinate')
+plt.grid()
+legend = plt.legend()
+CustomLegend(legend)
+fig.set_size_inches(figure_width,figure_height)
+fig.tight_layout()
+try:
+    fname = f'HCD_cur_profiles.svg'
+    fig.savefig(fname,format="svg")
+    print(f'----> Figure saved to {fname}', file=sys.stderr)
+except:
+    print('The figure could not be saved (check local permissions).', file=sys.stderr)
+plt.show(block=True)
