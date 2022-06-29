@@ -71,7 +71,7 @@ def get_timings(db,idsname,occ=0,dbout=None,times=None,repeat=5,verbose=False,pr
         idsobj = get_ids(db,idsname,occ,times,verbose)
         cmd = "dbout.put(idsobj)"
     else:
-        cmd = f"get_ids(db,'{idsname}',occ,times,verbose)"
+        cmd = f"get_ids(db,'{idsname}',occ=occ,times=times,verbose=verbose)"
 
     # Default timing
     # TODO: more fine grained control of imported symbols to avoid issues?
