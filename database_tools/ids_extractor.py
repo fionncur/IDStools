@@ -83,7 +83,7 @@ def hdf5ListPulseRun(locpath):
         raise FileNotFoundError("The path provided does not exist or has no such database file or directory. Please check spelling.")
     pulses = []
     #folder = Path(locpath).glob('**/*master.h5')
-    folder = glob(str(locpath)+"/**/*.master.h5",recursive=True)
+    folder = glob(str(locpath)+"/**/*master.h5",recursive=True)
     for entry in folder:
         pulse = int(str(entry).split('/')[-3])
         run = int(str(entry).split('/')[-2])
