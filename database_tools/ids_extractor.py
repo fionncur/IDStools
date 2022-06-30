@@ -83,7 +83,7 @@ def hdf5ListPulseRun(locpath):
         raise FileNotFoundError("The path provided does not exist or has no such database file or directory. Please check spelling.")
     pulses = []
     #folder = Path(locpath).glob('**/*master.h5')
-    folder = glob(str(locpath)+"/**/*master.h5",recursive=True)
+    folder = glob(str(locpath)+"/**/*master.h5", recursive=True)
     for entry in folder:
         pulse = int(str(entry).split('/')[-3])
         run = int(str(entry).split('/')[-2])
@@ -114,35 +114,40 @@ def getDBPath(user, database, version):
         locpath = Path(os.path.expanduser('~' + user) + "/public/imasdb/" + database + "/" + version)
     return locpath
 
+def ids_extract(user, database, version, backend, idspath, pulses):
+    """ Function that returns a pandas dataframe displaying all values of given IDSs extracted by the function.
+    Parameters
+    ---------
+    user: str
+    Status of user: either public or local. A public user should just be left as public, whereas a local user should write their proper identifier
 
-if __name__ == "__main__":
+    database: str
+        Name of database where the data is harbored
 
-    parser = argparse.ArgumentParser(description="This script applies conversion of IDS data into readable CSV files.",
-                                     parents=[imas_parser])
-    parser.add_argument("idspath", type=str, help="IDS path (starting with IDS name) to the desired data to be collected, e.g equilibrium/time")
-    parser.add_argument("--saveas", type=str, help="Path to directory ending with name of file to save retrieved data")
-    parser.add_argument("-i", "--index", action="store_true", help="Should index be shown in final .csv file?")
-    parser.add_argument("-V","--Verbose", action="store_true", help="Verbose mode")
-    args = parser.parse_args()
-    database = args.database
-    idspath = args.idspath
+    version: str
+        String of number of data version
 
-    locpath = getDBPath(args.user, database, args.version)
+    backend: str
+        Name of backend of the database in which the data is harbored (currently supports only MDSPLUS and HDF5)
 
+    idspath: list of strings
+        IDS path (starting with IDS name) to the desired data to be collected (e.g equilibrium/time)
+
+    lofpulses: list of tuples
+        List of tuples containing (Pulse, Run)
+
+    Returns
+    -------
+    pandas DataFrame
+    """
+
+    values = []
+    backend = get_backend_id(backend)
     idsname = idspath.split('/')[0]
     valpath = idspath[1 + len(idsname):]
 
-    values = []
-
-    backend = get_backend_id(args.backend)
-
-    if backend == imas.imasdef.MDSPLUS_BACKEND:
-        pulses = mdsListPulseRun(locpath)
-    elif backend == imas.imasdef.HDF5_BACKEND:
-        pulses = hdf5ListPulseRun(locpath)
-
     for entry in tqdm(pulses) if progbar else pulses:
-        de = imas.DBEntry(backend, database, entry[0], entry[1], args.user, args.version)
+        de = imas.DBEntry(backend, database, entry[0], entry[1], user, version)
         de.open()
         try:
             value = de.partial_get(idsname, valpath)
@@ -154,12 +159,33 @@ if __name__ == "__main__":
 
     df = pd.DataFrame(pulses, columns=['PULSE', 'RUN'])
     df['VALUE'] = values
+    return df
+
+
+
+if __name__ == "__main__":
+
+    parser = argparse.ArgumentParser(description="This script applies conversion of IDS data into readable CSV files.", parents=[imas_parser])
+    parser.add_argument("idspath", type=str, nargs="*", help="IDS path(s) (starting with IDS name) to the desired data to be collected, e.g equilibrium/time")
+    parser.add_argument("--saveas", type=str, help="Path to directory ending with name of file to save retrieved data")
+    parser.add_argument("-i", "--index", action="store_true", help="Should index be shown in final .csv file?")
+    parser.add_argument("-V","--Verbose", action="store_true", help="Verbose mode")
+    args = parser.parse_args()
+    database = args.database
+    idspath = args.idspath
+
+    locpath = getDBPath(args.user, args.database, args.version)
+
+    df = ids_extract(args.user, args.database, args.version, args.backend, args.idspath, pulses=mdsListPulseRun(locpath) if args.backend == imas.imasdef.MDSPLUS_BACKEND else hdf5ListPulseRun(locpath))
 
     if args.Verbose or not args.saveas:
         print(df)
-    
+
     if args.saveas:
         if not Path(args.saveas).parent.exists():
-            raise FileNotFoundError("The path provided does not exist or has no such database file or directory. Please check spelling.")
+            raise FileNotFoundError(
+                "The path provided does not exist or has no such database file or directory. Please check spelling.")
         saveresultsin = Path(r'' + args.saveas + '.csv')
         df.to_csv(saveresultsin, na_rep='None', index=args.index, header=True)
+
+
