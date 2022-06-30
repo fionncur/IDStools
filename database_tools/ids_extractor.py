@@ -129,8 +129,6 @@ if __name__ == "__main__":
 
     locpath = getDBPath(args.user, database, args.version)
 
-    print(locpath)
-    
     idsname = idspath.split('/')[0]
     valpath = idspath[1 + len(idsname):]
 
@@ -143,8 +141,6 @@ if __name__ == "__main__":
     elif backend == imas.imasdef.HDF5_BACKEND:
         pulses = hdf5ListPulseRun(locpath)
 
-    print(pulses)
-        
     for entry in tqdm(pulses) if progbar else pulses:
         de = imas.DBEntry(backend, database, entry[0], entry[1], args.user, args.version)
         de.open()
