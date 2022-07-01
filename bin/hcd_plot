@@ -75,30 +75,30 @@ if hcd_sources['ech'] != None:
     from hcd_waves_plot import *
     ec_args = hcd_sources['ech']
     ec_args['force_psi'] = None
-    ec_profiles,ec_param = ec_prep(ec_args)
-    #ec_display(ec_profiles,ec_param)
+    ec_profiles,ec_param = waves_prep(ec_args)
+    #waves_display(ec_profiles,ec_param)
 
 # NUCLEAR REACTIONS
 if hcd_sources['fus'] != None:
     from hcd_distributions_plot import *
     fus_args = hcd_sources['fus']
-    fus_profiles,fus_param = nbfus_prep(fus_args)
-    #nbfus_display(fus_profiles,fus_param)
+    fus_profiles,fus_param = distributions_prep(fus_args)
+    #distributions_display(fus_profiles,fus_param)
 
 # NBI
 if hcd_sources['nbi'] != None:
     from hcd_distributions_plot import *
     nbi_args = hcd_sources['nbi']
-    nbi_profiles,nbi_param = nbfus_prep(nbi_args)
-    #nbfus_display(nbi_profiles,nbi_param)
+    nbi_profiles,nbi_param = distributions_prep(nbi_args)
+    #distributions_display(nbi_profiles,nbi_param)
 
 # ICRH
 if hcd_sources['icrh'] != None:
     from hcd_distributions_plot import *
     icrh_args = hcd_sources['icrh']
-    ic_profiles,ic_param = nbfus_prep(icrh_args)
+    ic_profiles,ic_param = distributions_prep(icrh_args)
     ic_fac = 1
-    #nbfus_display(ic_profiles,ic_param)
+    #distributions_display(ic_profiles,ic_param)
 
 ##################################################################
 

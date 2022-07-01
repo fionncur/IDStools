@@ -26,7 +26,7 @@ if __name__ == "__main__":
 
 ###################################################################################
 
-def ec_prep(args):
+def waves_prep(args):
 
    shot = args["shot"]
    run = args["run"]
@@ -287,7 +287,7 @@ def CustomLegend(legend):
 
 ###################################################################################
 
-def ec_display(ec_profiles,ec_param):
+def waves_display(ec_profiles,ec_param):
 
    nsample   = ec_param['nsample']
    psi_based = ec_param['psi_based']
@@ -417,8 +417,8 @@ def ec_display(ec_profiles,ec_param):
 
 ###################################################################################
 def run(args):
-  ec_profiles,ec_param = ec_prep(args)
-  ec_display(ec_profiles,ec_param)
+  ec_profiles,ec_param = waves_prep(args)
+  waves_display(ec_profiles,ec_param)
 
 # When hcd_waves_plot is called directly
 if __name__ == "__main__":

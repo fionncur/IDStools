@@ -25,7 +25,7 @@ if __name__ == "__main__":
 
 ###################################################################################
 
-def nbfus_prep(args):
+def distributions_prep(args):
 
     shot = args["shot"]
     run = args["run"]
@@ -337,7 +337,7 @@ def CustomLegend(legend):
 
 ###################################################################################
 
-def nbfus_display(nbfus_profiles,nbfus_param):
+def distributions_display(nbfus_profiles,nbfus_param):
 
     nsample = nbfus_param['nsample']
     shot    = nbfus_param['shot']
@@ -495,8 +495,8 @@ def nbfus_display(nbfus_profiles,nbfus_param):
 
 ###################################################################################
 def run(args):
-  nbfus_profiles,nbfus_param = nbfus_prep(args)
-  nbfus_display(nbfus_profiles,nbfus_param)
+  nbfus_profiles,nbfus_param = distributions_prep(args)
+  distributions_display(nbfus_profiles,nbfus_param)
 
 # When hcd_distributions_plot is called directly
 if __name__ == "__main__":
