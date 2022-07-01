@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 
 # MANAGEMENT OF INPUT ARGUMENTS
 # ------------------------------
-# When ecplot is called directly
+# When hcd_waves_plot is called directly
 if __name__ == "__main__":
    parser = argparse.ArgumentParser(description=\
             '---- Display EC results')
@@ -420,7 +420,7 @@ def run(args):
   ec_profiles,ec_param = ec_prep(args)
   ec_display(ec_profiles,ec_param)
 
-# When ecplot is called directly
+# When hcd_waves_plot is called directly
 if __name__ == "__main__":
    run(args)
 

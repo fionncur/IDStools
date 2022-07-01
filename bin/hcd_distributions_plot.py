@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 
 # MANAGEMENT OF INPUT ARGUMENTS
 # ------------------------------
-# When nbplot is called directly
+# When hcd_distributions_plot is called directly
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description= \
                                          '---- Display NBI or fusion results')
@@ -498,6 +498,6 @@ def run(args):
   nbfus_profiles,nbfus_param = nbfus_prep(args)
   nbfus_display(nbfus_profiles,nbfus_param)
 
-# When ecplot is called directly
+# When hcd_distributions_plot is called directly
 if __name__ == "__main__":
    run(args)

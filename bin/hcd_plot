@@ -2,7 +2,7 @@
 
 from __future__ import print_function
 
-# Example: hcdplot -ech 134173/200-219/schneim/TORBEAM -nbi 130012/122/schneim/nf_fopla_synergy -fus 134173/1116/schneim/SPOT -icrh 130012/126/schneim/nf_fopla_synergy
+# Example: hcd_plot -ech 134173/200-219/schneim/TORBEAM -nbi 130012/122/schneim/nf_fopla_synergy -fus 134173/1116/schneim/SPOT -icrh 130012/126/schneim/nf_fopla_synergy
 
 # MODULES
 # --------
@@ -72,7 +72,7 @@ if nsource == 0:
         
 # ECH
 if hcd_sources['ech'] != None:
-    from ecplot import *
+    from hcd_waves_plot import *
     ec_args = hcd_sources['ech']
     ec_args['force_psi'] = None
     ec_profiles,ec_param = ec_prep(ec_args)
@@ -80,19 +80,21 @@ if hcd_sources['ech'] != None:
 
 # NUCLEAR REACTIONS
 if hcd_sources['fus'] != None:
+    from hcd_distributions_plot import *
     fus_args = hcd_sources['fus']
-    from nbplot import *
     fus_profiles,fus_param = nbfus_prep(fus_args)
     #nbfus_display(fus_profiles,fus_param)
 
 # NBI
 if hcd_sources['nbi'] != None:
+    from hcd_distributions_plot import *
     nbi_args = hcd_sources['nbi']
     nbi_profiles,nbi_param = nbfus_prep(nbi_args)
     #nbfus_display(nbi_profiles,nbi_param)
 
 # ICRH
 if hcd_sources['icrh'] != None:
+    from hcd_distributions_plot import *
     icrh_args = hcd_sources['icrh']
     ic_profiles,ic_param = nbfus_prep(icrh_args)
     ic_fac = 1
