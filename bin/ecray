@@ -341,7 +341,7 @@ for i in range(len(shot)):
                       ax_powperpview.plot(np.array(length),np.array(wavespowerperp),
                                     color=color,linestyle=style)
 
-ax_powview.legend(loc="upper right", bbox_to_anchor=(1., 0.9),ncol=1, shadow=True, fancybox=True)
+ax_powview.legend(loc="upper left", shadow=True, fancybox=True)
 plt.subplots_adjust(hspace=0.5)
 
 print('------------------------------------------------------------')
