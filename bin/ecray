@@ -5,6 +5,7 @@ import numpy as np
 matplotlib.use('TKagg')
 from matplotlib import gridspec
 import matplotlib.pyplot as plt
+from idstools.cli import *
 
 # Example of call:
 # ./ecray -s [130012,130012] -r [24,23] -u schneim -d iter
@@ -27,15 +28,14 @@ def StrToList(string):
     
 # ARGPARSE - MANAGEMENT OF INPUT ARGUMENTS
 parser = argparse.ArgumentParser(description=\
-'---- Display EC wave ray-tracing results')
+                                 '---- Display EC wave ray-tracing results',
+                                 parents=[imas_parser])
 parser.add_argument('-s','--shot',help="Shot number list, ex: [130012,130013]", required=True)
 parser.add_argument('-r','--run',help="Run number list, ex: [23,24]",required=True,type=str)
-parser.add_argument('-u','--user_or_path',help='User or absolute path name where the data-entry is located', required=False)
-parser.add_argument('-d','--database',help='Database name where the data-entry is located', required=False)
-parser.add_argument('-t','--time',help='Time', required=False,type=float)
+parser.add_argument('-t','--time',help='Time', required=False,type=float,default=-99.0)
 
-args = vars(parser.parse_args())
-shot,run = args['shot'],args['run']
+args = parser.parse_args()
+shot,run = args.shot,args.run
 shot,run = StrToList(shot),StrToList(run)
 
 assert (len(shot)<=len(run)), 'There must be a run number corresponding to each shot'
@@ -43,24 +43,10 @@ if (len(run)>len(shot)):
     assert(len(shot)==1), 'Either give a shot for each run or give a single shot for every run'
     shot = len(run)*shot
 
-if (args['database'] != None):
-    database = args['database']
-else:
-    database = 'iter'
-if (args['user_or_path'] != None):
-    user_or_path = args['user_or_path']
-else:
-    user_or_path = 'public'
-
-# Time
-if args['time'] != None:
-    time = args['time']
-else:
-    time = -99.
 
 # Artificial rotation of beams in top view to make it look nice and realistic for ITER
 phi_launchers = [0.]*11
-if database == 'iter' or database == 'ITER':
+if 'ITER' in args.database.upper():
     # EL-14
     phi_launchers[0] = -90.*np.pi/180.
     phi_launchers[1] = -90.*np.pi/180.
@@ -79,14 +65,19 @@ if database == 'iter' or database == 'ITER':
     phi_launchers[10] = -130.*np.pi/180.
 
 # Search for adequate time slice for display
-input = imas.DBEntry(imas.imasdef.MDSPLUS_BACKEND,database,shot[0],run[0],user_or_path)
-input.open() 
+input = imas.DBEntry(get_backend_id(args.backend),args.database,shot[0],run[0],args.user)
+status,_ = input.open()
+if status != 0:
+    print(f'Pulse {args.shot}/{args.run} in DB {args.user}/{args.database}/{args.version} does not exist', file=sys.stderr)
+    print('----> Aborted.', file=sys.stderr)
+    sys.exit(status)
+
 waves = input.get('waves')
 ntime = len(waves.time)
 timevec = waves.time
 if ntime > 1:
-    if time >= 0:
-        [tc,it] = find_nearest(timevec,time)
+    if args.time >= 0:
+        [tc,it] = find_nearest(timevec,args.time)
     else:
         it = int(ntime/2)
         tc = timevec[it]
@@ -165,9 +156,13 @@ for i in range(len(shot)):
     print('------------------------------------------------------------')
 
     # Reading in data from run in shot
-    print('Open shot: ' + str(ishot)+', run: '+str(irun)+', user: '+str(user_or_path)+', database: '+str(database))
-    result = imas.DBEntry(imas.imasdef.MDSPLUS_BACKEND,database,ishot,irun,user_or_path)
-    result.open() 
+    print(f'Open pulse: {ishot}/{irun} in DB {args.user}/{args.database}/{args.version}')
+    result = imas.DBEntry(get_backend_id(args.backend),args.database,ishot,irun,args.user)
+    status,_ = result.open() 
+    if status != 0:
+        print(f'Pulse {ishot}/{irun} in DB {args.user}/{args.database}/{args.version} does not exist', file=sys.stderr)
+        print('----> Aborted.', file=sys.stderr)
+        sys.exit(status)
        
     # Reading in waves ids and equilibrium ids
     waves = result.get_slice('waves',time,1)
