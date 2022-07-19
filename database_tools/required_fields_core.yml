@@ -1,299 +1,300 @@
-﻿#
-'equilibrium':
-    'ids_properties/homogeneous_time':
+﻿# https://confluence.iter.org/display/IMP/Required+fields+in+a+dataset+to+be+imported+in+a+scenario+database
+#
+equilibrium:
+    ids_properties/homogeneous_time:
         ids_ge: 0
         ids_le: 2
-    'time_slice(itime)/global_quantities/ip':
+    time_slice(itime)/global_quantities/ip:
         ids_gt: -17.0e6
         ids_le: 0.0
         ids_nan: False
         ids_inf: False
         ids_ip_like: False
-    #'time_slice(itime)/profiles_2d(i1)/phi(:,:)':
+    #time_slice(itime)/profiles_2d(i1)/phi(:,:):
     #    empty: False
-    'time_slice(itime)/profiles_2d(i1)/psi(:,:)':
+    time_slice(itime)/profiles_2d(i1)/psi(:,:):
         empty: False
         ids_nan: False
         ids_inf: False
-    'time_slice(itime)/profiles_2d(i1)/r(:,:)':
+    time_slice(itime)/profiles_2d(i1)/r(:,:):
         empty: False
         ids_gt: 0.0
         ids_nan: False
         ids_inf: False
-    'time_slice(itime)/profiles_2d(i1)/z(:,:)':
+    time_slice(itime)/profiles_2d(i1)/z(:,:):
         empty: False
         ids_nan: False
         ids_inf: False
-    'vacuum_toroidal_field/r0':
+    vacuum_toroidal_field/r0:
         ids_gt: 0.0
         ids_nan: False
         ids_inf: False
-    'vacuum_toroidal_field/b0(:)':
+    vacuum_toroidal_field/b0(:):
         empty: False
         ids_nan: False
         ids_inf: False
         ids_b0_like: False
 #
-'core_profiles':
-    'global_quantities/beta_pol(:)':
+core_profiles:
+    global_quantities/beta_pol(:):
         empty: False
         ids_nan: False
         ids_inf: False
-    'global_quantities/beta_tor_norm(:)':
+    global_quantities/beta_tor_norm(:):
         empty: False
         ids_nan: False
         ids_inf: False
-    'global_quantities/current_bootstrap(:)':
+    global_quantities/current_bootstrap(:):
         empty: False
         ids_nan: False
         ids_inf: False
-    'global_quantities/current_non_inductive(:)':
+    global_quantities/current_non_inductive(:):
         empty: False
         ids_nan: False
         ids_inf: False
-    'global_quantities/energy_diamagnetic(:)':
+    global_quantities/energy_diamagnetic(:):
         empty: False
         ids_nan: False
         ids_inf: False
-    'global_quantities/ip(:)':
+    global_quantities/ip(:):
         empty: False
         ids_nan: False
         ids_inf: False
         ids_gt: -17.0e6
         ids_le: 0.0
-    'global_quantities/v_loop(:)':
+    global_quantities/v_loop(:):
         empty: False
         ids_nan: False
         ids_inf: False
-    'profiles_1d(itime)/e_field/radial(:)':
+    profiles_1d(itime)/e_field/radial(:):
         empty: False
         ids_nan: False
         ids_inf: False
-    'profiles_1d(itime)/electrons/density(:)':
-        empty: False
-        ids_nan: False
-        ids_inf: False
-        ids_ge: 0.0
-    'profiles_1d(itime)/electrons/pressure(:)':
+    profiles_1d(itime)/electrons/density(:):
         empty: False
         ids_nan: False
         ids_inf: False
         ids_ge: 0.0
-    'profiles_1d(itime)/electrons/pressure_fast_parallel(:)':
-        empty: False
-        ids_nan: False
-        ids_inf: False
-    'profiles_1d(itime)/electrons/pressure_fast_perpendicular(:)':
-        empty: False
-        ids_nan: False
-        ids_inf: False
-    'profiles_1d(itime)/electrons/pressure_thermal(:)':
-        empty: False
-        ids_nan: False
-        ids_inf: False
-    'profiles_1d(itime)/electrons/temperature(:)':
+    profiles_1d(itime)/electrons/pressure(:):
         empty: False
         ids_nan: False
         ids_inf: False
         ids_ge: 0.0
-    'profiles_1d(itime)/grid/rho_tor(:)':
+    profiles_1d(itime)/electrons/pressure_fast_parallel(:):
         empty: False
         ids_nan: False
         ids_inf: False
-    'profiles_1d(itime)/grid/rho_tor_norm(:)':
+    profiles_1d(itime)/electrons/pressure_fast_perpendicular(:):
+        empty: False
+        ids_nan: False
+        ids_inf: False
+    profiles_1d(itime)/electrons/pressure_thermal(:):
+        empty: False
+        ids_nan: False
+        ids_inf: False
+    profiles_1d(itime)/electrons/temperature(:):
+        empty: False
+        ids_nan: False
+        ids_inf: False
+        ids_ge: 0.0
+    profiles_1d(itime)/grid/rho_tor(:):
+        empty: False
+        ids_nan: False
+        ids_inf: False
+    profiles_1d(itime)/grid/rho_tor_norm(:):
         empty: False
         ids_nan: False
         ids_inf: False
         ids_ge: 0.0
         ids_le: 1.0
-    'profiles_1d(itime)/grid/psi(:)':
+    profiles_1d(itime)/grid/psi(:):
         empty: False
         ids_nan: False
         ids_inf: False
-    'profiles_1d(itime)/grid/volume(:)':
+    profiles_1d(itime)/grid/volume(:):
         empty: False
         ids_nan: False
         ids_inf: False
         ids_ge: 0.0
-    'profiles_1d(itime)/ion(i1)/density(:)':
+    profiles_1d(itime)/ion(i1)/density(:):
         empty: False
         ids_nan: False
         ids_inf: False
         ids_gt: 0.0
-    'profiles_1d(itime)/ion(i1)/element(i2)/a':
+    profiles_1d(itime)/ion(i1)/element(i2)/a:
         empty: False
         ids_nan: False
         ids_inf: False
         ids_gt: 0.0
-    'profiles_1d(itime)/ion(i1)/element(i2)/z_n':
+    profiles_1d(itime)/ion(i1)/element(i2)/z_n:
         empty: False
         ids_nan: False
         ids_inf: False
         ids_gt: 0.0
-    'profiles_1d(itime)/ion(i1)/pressure(:)':
+    profiles_1d(itime)/ion(i1)/pressure(:):
         empty: False
         ids_nan: False
         ids_inf: False
         ids_ge: 0.0
-    'profiles_1d(itime)/ion(i1)/pressure_fast_parallel(:)':
+    profiles_1d(itime)/ion(i1)/pressure_fast_parallel(:):
         empty: False
         ids_nan: False
         ids_inf: False
-    'profiles_1d(itime)/ion(i1)/pressure_fast_perpendicular(:)':
+    profiles_1d(itime)/ion(i1)/pressure_fast_perpendicular(:):
         empty: False
         ids_nan: False
         ids_inf: False
-    'profiles_1d(itime)/ion(i1)/pressure_thermal(:)':
+    profiles_1d(itime)/ion(i1)/pressure_thermal(:):
         empty: False
         ids_nan: False
         ids_inf: False
-    'profiles_1d(itime)/ion(i1)/temperature(:)':
-        empty: False
-        ids_nan: False
-        ids_inf: False
-        ids_ge: 0.0
-    'profiles_1d(itime)/ion(i1)/velocity/diamagnetic(:)':
-        empty: False
-        ids_nan: False
-        ids_inf: False
-    'profiles_1d(itime)/ion(i1)/velocity/poloidal(:)':
-        empty: False
-        ids_nan: False
-        ids_inf: False
-    'profiles_1d(itime)/ion(i1)/velocity/toroidal(:)':
-        empty: False
-        ids_nan: False
-        ids_inf: False
-    'profiles_1d(itime)/j_bootstrap(:)':
-        empty: False
-        ids_nan: False
-        ids_inf: False
-    'profiles_1d(itime)/j_non_inductive(:)':
-        empty: False
-        ids_nan: False
-        ids_inf: False
-    'profiles_1d(itime)/j_ohmic(:)':
-        empty: False
-        ids_nan: False
-        ids_inf: False
-    'profiles_1d(itime)/j_total(:)':
-        empty: False
-        ids_nan: False
-        ids_inf: False
-    'profiles_1d(itime)/magnetic_shear(:)':
-        empty: False
-        ids_nan: False
-        ids_inf: False
-    'profiles_1d(itime)/pressure(:)':
+    profiles_1d(itime)/ion(i1)/temperature(:):
         empty: False
         ids_nan: False
         ids_inf: False
         ids_ge: 0.0
-    'profiles_1d(itime)/pressure_parallel(:)':
+    profiles_1d(itime)/ion(i1)/velocity/diamagnetic(:):
         empty: False
         ids_nan: False
         ids_inf: False
-    'profiles_1d(itime)/pressure_perpendicular(:)':
+    profiles_1d(itime)/ion(i1)/velocity/poloidal(:):
         empty: False
         ids_nan: False
         ids_inf: False
-    'profiles_1d(itime)/q(:)':
+    profiles_1d(itime)/ion(i1)/velocity/toroidal(:):
+        empty: False
+        ids_nan: False
+        ids_inf: False
+    profiles_1d(itime)/j_bootstrap(:):
+        empty: False
+        ids_nan: False
+        ids_inf: False
+    profiles_1d(itime)/j_non_inductive(:):
+        empty: False
+        ids_nan: False
+        ids_inf: False
+    profiles_1d(itime)/j_ohmic(:):
+        empty: False
+        ids_nan: False
+        ids_inf: False
+    profiles_1d(itime)/j_total(:):
+        empty: False
+        ids_nan: False
+        ids_inf: False
+    profiles_1d(itime)/magnetic_shear(:):
+        empty: False
+        ids_nan: False
+        ids_inf: False
+    profiles_1d(itime)/pressure(:):
+        empty: False
+        ids_nan: False
+        ids_inf: False
+        ids_ge: 0.0
+    profiles_1d(itime)/pressure_parallel(:):
+        empty: False
+        ids_nan: False
+        ids_inf: False
+    profiles_1d(itime)/pressure_perpendicular(:):
+        empty: False
+        ids_nan: False
+        ids_inf: False
+    profiles_1d(itime)/q(:):
         empty: False
         ids_nan: False
         ids_inf: False
         ids_q_like: False
-    'profiles_1d(itime)/t_i_average(:)':
+    profiles_1d(itime)/t_i_average(:):
         empty: False
         ids_nan: False
         ids_inf: False
         ids_ge: 0.0
-    'profiles_1d(itime)/zeff(:)':
+    profiles_1d(itime)/zeff(:):
         empty: False
         ids_nan: False
         ids_inf: False
 
 #
-'summary':
-    'time(:)':
+summary:
+    time(:):
         empty: False
         ids_nan: False
         ids_inf: False
-    'global_quantities/b0/value(:)':
+    global_quantities/b0/value(:):
         empty: False
         ids_nan: False
         ids_inf: False
         ids_b0_like: False
-    'global_quantities/r0/value':
+    global_quantities/r0/value:
         empty: False
         ids_nan: False
         ids_inf: False
         ids_gt: 0.0
-    'global_quantities/beta_pol/value(:)':
+    global_quantities/beta_pol/value(:):
         empty: False
         ids_nan: False
         ids_inf: False
         ids_ge: 0.0
-    'global_quantities/beta_tor_norm/value(:)':
+    global_quantities/beta_tor_norm/value(:):
         empty: False
         ids_nan: False
         ids_inf: False
-    'global_quantities/current_bootstrap/value(:)':
+    global_quantities/current_bootstrap/value(:):
         empty: False
         ids_nan: False
         ids_inf: False
-    'global_quantities/current_no_inductive/value(:)':
+    global_quantities/current_no_inductive/value(:):
         empty: False
         ids_nan: False
         ids_inf: False
-    'global_quantities/current_ohm/value(:)':
+    global_quantities/current_ohm/value(:):
         empty: False
         ids_nan: False
         ids_inf: False
-    'global_quantities/energy_diamagnetic/value(:)':
-        empty: False
-        ids_nan: False
-        ids_inf: False
-        ids_ge: 0.0
-    'global_quantities/energy_thermal/value(:)':
+    global_quantities/energy_diamagnetic/value(:):
         empty: False
         ids_nan: False
         ids_inf: False
         ids_ge: 0.0
-    'global_quantities/energy_total/value(:)':
+    global_quantities/energy_thermal/value(:):
         empty: False
         ids_nan: False
         ids_inf: False
         ids_ge: 0.0
-    'global_quantities/h_98/value(:)':
+    global_quantities/energy_total/value(:):
         empty: False
         ids_nan: False
         ids_inf: False
         ids_ge: 0.0
-    'global_quantities/h_mode/value(:)':
+    global_quantities/h_98/value(:):
         empty: False
         ids_nan: False
         ids_inf: False
-    'global_quantities/ip/value(:)':
+        ids_ge: 0.0
+    global_quantities/h_mode/value(:):
+        empty: False
+        ids_nan: False
+        ids_inf: False
+    global_quantities/ip/value(:):
         empty: False
         ids_nan: False
         ids_inf: False
         ids_gt: -17.0e6
         ids_le: 0.0
         ids_ip_like: False
-    'global_quantities/tau_energy/value(:)':
+    global_quantities/tau_energy/value(:):
         empty: False
         ids_nan: False
         ids_inf: False
-    'global_quantities/v_loop/value(:)':
+    global_quantities/v_loop/value(:):
         empty: False
         ids_nan: False
         ids_inf: False
-    'local/separatrix/n_e/value(:)':
+    local/separatrix/n_e/value(:):
         empty: False
         ids_nan: False
         ids_inf: False
         ids_ge: 0.0
-    'local/separatrix/zeff/value(:)':
+    local/separatrix/zeff/value(:):
         empty: False
         ids_nan: False
         ids_inf: False

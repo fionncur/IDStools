@@ -85,7 +85,7 @@ def main():
                                 time, itime = find_time(idstime, args.time)
                                 ids = db.get_slice(idsname, time, 1, occurrence=occ)
                         except Exception as e:
-                            exit("cannot retrieve IDS: {}".format(e))
+                            print("cannot retrieve IDS/{}: {}".format(idsname,e))
                         #
                         flag, dump = ids_validator(
                             ids,

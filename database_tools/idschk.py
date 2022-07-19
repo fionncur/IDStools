@@ -526,9 +526,44 @@ class IDSValidator(cerberus.Validator):
     ----------
     cocos: COCOS
         COCOS for validation
+    shape: tuple
+        numpy.ndarray.shape
+    ndim: int
+        numpy.ndarray.ndim
     """
 
-    cocos = {}
+    # cocos = {}
+    # shape = ()
+    # ndim = None
+
+    def set_cocos(self, cocos):
+        """ """
+        self.cocos = cocos
+        # print("cocos=",self.cocos)
+
+    def set_dim(self, field, ids, data, idx):
+        """ """
+        dtype = re.search("^(INT|FLT)_([1-9])D$", field.get("data_type"))
+        if dtype is not None:
+            #
+            self.ndim = int(dtype.group(2))
+            ls = []
+            for i in range(data.ndim):
+                c = path2py(field.get("coordinate" + str(i + 1)), header=True)
+                homogeneous_time = ids.ids_properties.homogeneous_time
+                if re.search("time$", c) and (homogeneous_time == 1):
+                    c = "ids.time"
+                #
+                if re.search("1\.\.\.", c):
+                    lcrd = data.shape[i]
+                else:
+                    try:
+                        crd = eval(c)
+                        lcrd = len(crd)
+                    except:
+                        lcrd = -1
+                ls.append(lcrd)
+            self.shape = tuple(ls)
 
     def _validate_ids_nan(self, constraint, field, value):
         """{'nullable': False }"""
@@ -656,6 +691,22 @@ class IDSValidator(cerberus.Validator):
         except ValueError:
             pass
 
+    def _validate_ids_dim(self, constraint, field, value):
+        """{'nullable': False }"""
+        if value.size > 0:
+            try:
+                for i in range(len(self.shape)):
+                    if self.shape[i] != value.shape[i]:
+                        if not constraint:
+                            self._error(
+                                field,
+                                "size of coordinate{}={}, expected as {}".format(
+                                    str(i + 1), value.shape[i], self.shape[i]
+                                ),
+                            )
+            except TypeError:
+                pass
+
 
 # ----------------------------------------------------------------------
 
@@ -705,12 +756,17 @@ def validator(field, path_doc, ids, schema, cocos, idx):
             except:
                 print("eval error on value {}, ignored".format(val))
 
+    # Initialization
     v_ids = IDSValidator({path_doc: schema[path_doc]})
-    v_ids.cocos = cocos
+    v_ids.set_dim(field, ids, data, idx)
+    v_ids.set_cocos(cocos)
+
+    # Validation
     d = {path_doc: data}
     remark = v_ids.validate(d)
     errors = v_ids.errors
 
+    # Report
     if args_verbose:
         report = {}
         report["remark"] = remark

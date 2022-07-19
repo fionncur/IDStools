@@ -1,334 +1,333 @@
-﻿#
-# https://confluence.iter.org/display/IMP/Required+fields+in+a+dataset+to+be+imported+in+a+scenario+database
+﻿# https://confluence.iter.org/display/IMP/Required+fields+in+a+dataset+to+be+imported+in+a+scenario+database
 #
-'edge_profiles':
-    'time(:)':
+edge_profiles:
+    time(:):
         empty: False
         ids_nan: False
         ids_inf: False
-    'vacuum_toroidal_field/b0(:)':
+    vacuum_toroidal_field/b0(:):
         empty: False
         ids_nan: False
         ids_inf: False
         ids_b0_like: False
-    'vacuum_toroidal_field/r0':
+    vacuum_toroidal_field/r0:
         ids_gt: 0.0
         ids_nan: False
         ids_inf: False
-    'code/output_flag(:)':
+    code/output_flag(:):
         empty: False
 
     # Within the ggd[:] structure, if present:
-    'ggd(itime)/time':
+    ggd(itime)/time:
         ids_nan: False
         ids_inf: False
         ids_gt: -9e+40
-    'ggd(itime)/electrons/temperature(i1)/values(:)':
+    ggd(itime)/electrons/temperature(i1)/values(:):
         empty: False
         ids_nan: False
         ids_inf: False
         ids_gt: 0.0
-    'ggd(itime)/electrons/velocity(i1)/values(:)':
+    ggd(itime)/electrons/velocity(i1)/values(:):
         empty: False
         ids_nan: False
         ids_inf: False
-    'ggd(itime)/phi_potential(i1)/values(:)':
+    ggd(itime)/phi_potential(i1)/values(:):
         empty: False
         ids_nan: False
         ids_inf: False
-    'ggd(itime)/ion(i1)/element(i2)/a':
+    ggd(itime)/ion(i1)/element(i2)/a:
         ids_nan: False
         ids_inf: False
         ids_gt: 0.0
-    'ggd(itime)/ion(i1)/element(i2)/z_n':
+    ggd(itime)/ion(i1)/element(i2)/z_n:
         ids_nan: False
         ids_inf: False
         ids_gt: 0.0
-    'ggd(itime)/ion(i1)/element(i2)/atoms_n':
+    ggd(itime)/ion(i1)/element(i2)/atoms_n:
         ids_nan: False
         ids_inf: False
         ids_gt: 0
-    'ggd(itime)/ion(i1)/multiple_states_flag':
+    ggd(itime)/ion(i1)/multiple_states_flag:
         ids_ge: 0
         ids_le: 1
-    'ggd(itime)/neutral(i1)/ion_index':
+    ggd(itime)/neutral(i1)/ion_index:
         ids_ge: 0
-        ids_le: 'len(edge_profiles.ggd[_itime_].neutral)'
-    'ggd(itime)/neutral(i1)/element(i2)/a':
+        ids_le: len(edge_profiles.ggd[_itime_].neutral)
+    ggd(itime)/neutral(i1)/element(i2)/a:
         ids_nan: False
         ids_inf: False
         ids_gt: 0.0
-    'ggd(itime)/neutral(i1)/element(i2)/z_n':
+    ggd(itime)/neutral(i1)/element(i2)/z_n:
         ids_nan: False
         ids_inf: False
         ids_gt: 0.0
-    'ggd(itime)/neutral(i1)/element(i2)/atoms_n':
+    ggd(itime)/neutral(i1)/element(i2)/atoms_n:
         ids_nan: False
         ids_inf: False
         ids_gt: 0
-    'ggd(itime)/neutral(i1)/multiple_states_flag':
+    ggd(itime)/neutral(i1)/multiple_states_flag:
         ids_ge: 0
         ids_le: 1
-    'ggd(itime)/neutral(i1)/density(i2)/values(:)':
+    ggd(itime)/neutral(i1)/density(i2)/values(:):
         empty: False
         ids_nan: False
         ids_inf: False
         ids_gt: 0.0
 
     # For each ion[:].state[:] structure:
-    'ggd(itime)/ion(i1)/state(i2)/z_min': 
+    ggd(itime)/ion(i1)/state(i2)/z_min: 
         ids_nan: False
         ids_inf: False
         ids_gt: 0.0
-    'ggd(itime)/ion(i1)/state(i2)/z_max': 
+    ggd(itime)/ion(i1)/state(i2)/z_max: 
         ids_nan: False
         ids_inf: False
         ids_gt: 0.0
-        ids_ge: 'edge_profiles.ggd[_itime_].ion[_i1_].state[_i2_].z_min'
+        ids_ge: edge_profiles.ggd[_itime_].ion[_i1_].state[_i2_].z_min
     #element[:].a
     #element[:].z_n     missing
     #element[:].atoms_n
-    'ggd(itime)/ion(i1)/state(i2)/density(i3)/values(:)': 
+    ggd(itime)/ion(i1)/state(i2)/density(i3)/values(:): 
         empty: False
         ids_nan: False
         ids_inf: False
         ids_gt: 0.0
-    'ggd(itime)/ion(i1)/state(i2)/velocity(i3)/values(:)': 
+    ggd(itime)/ion(i1)/state(i2)/velocity(i3)/values(:): 
         empty: False
         ids_nan: False
         ids_inf: False
 
     # For each neutral[:].state[:] structure:
-    'ggd(itime)/neutral(i1)/state(i2)/neutral_type/name': 
+    ggd(itime)/neutral(i1)/state(i2)/neutral_type/name: 
         empty: False
         ids_nan: False
         ids_inf: False
-    'ggd(itime)/neutral(i1)/state(i2)/density(i3)/value(:)': 
+    ggd(itime)/neutral(i1)/state(i2)/density(i3)/value(:): 
         empty: False
         ids_nan: False
         ids_inf: False
         ids_gt: 0.0
-    'ggd(itime)/neutral(i1)/state(i2)/velocity(i3)/value(:)': 
+    ggd(itime)/neutral(i1)/state(i2)/velocity(i3)/value(:): 
         empty: False
         ids_nan: False
         ids_inf: False
 
 #
-'edge_transport':
-    'time(:)':
+edge_transport:
+    time(:):
         empty: False
         ids_nan: False
         ids_inf: False
-    'model(i1)/flux_multiplier':
+    model(i1)/flux_multiplier:
         ids_nan: False
         ids_inf: False
         ids_gt: 0.0
-    'code/output_flag(:)':
+    code/output_flag(:):
         empty: False
 
     # Within each model[:].ggd[:] structure:
-    'model(i1)/ggd(itime)/time':
+    model(i1)/ggd(itime)/time:
         ids_gt: -9e+40
         ids_nan: False
         ids_inf: False
-    'model(i1)/ggd(itime)/electrons/energy/flux(i2)/values(:)':
+    model(i1)/ggd(itime)/electrons/energy/flux(i2)/values(:):
         empty: False
         ids_nan: False
         ids_inf: False
-    'model(i1)/ggd(itime)/electrons/particles/flux(i2)/values(:)':
+    model(i1)/ggd(itime)/electrons/particles/flux(i2)/values(:):
         empty: False
         ids_nan: False
         ids_inf: False
-    'model(i1)/ggd(itime)/ion(i2)/element(i3)/a':
+    model(i1)/ggd(itime)/ion(i2)/element(i3)/a:
         ids_nan: False
         ids_inf: False
         ids_gt: 0.0
-    'model(i1)/ggd(itime)/ion(i2)/element(i3)/z_n':
+    model(i1)/ggd(itime)/ion(i2)/element(i3)/z_n:
         ids_nan: False
         ids_inf: False
         ids_gt: 0.0
-    'model(i1)/ggd(itime)/ion(i2)/element(i3)/atoms_n':
+    model(i1)/ggd(itime)/ion(i2)/element(i3)/atoms_n:
         ids_nan: False
         ids_inf: False
         ids_gt: 0
-    'model(i1)/ggd(itime)/ion(i2)/multiple_states_flag':
+    model(i1)/ggd(itime)/ion(i2)/multiple_states_flag:
         ids_ge: 0
         ids_le: 1
-    'model(i1)/ggd(itime)/neutral(i2)/ion_index':
+    model(i1)/ggd(itime)/neutral(i2)/ion_index:
         ids_ge: 0
-        ids_le: 'len(edge_transport.model[_i1_].ggd[_itime_].neutral)'
-    'model(i1)/ggd(itime)/neutral(i2)/element(i3)/a':
+        ids_le: len(edge_transport.model[_i1_].ggd[_itime_].neutral)
+    model(i1)/ggd(itime)/neutral(i2)/element(i3)/a:
         ids_nan: False
         ids_inf: False
         ids_gt: 0.0
-    'model(i1)/ggd(itime)/neutral(i2)/element(i3)/z_n':
+    model(i1)/ggd(itime)/neutral(i2)/element(i3)/z_n:
         ids_nan: False
         ids_inf: False
         ids_gt: 0.0
-    'model(i1)/ggd(itime)/neutral(i2)/element(i3)/atoms_n':
+    model(i1)/ggd(itime)/neutral(i2)/element(i3)/atoms_n:
         ids_nan: False
         ids_inf: False
         ids_gt: 0
-    'model(i1)/ggd(itime)/neutral(i2)/multiple_states_flag':
+    model(i1)/ggd(itime)/neutral(i2)/multiple_states_flag:
         ids_ge: 0
         ids_le: 1
 
     # For each ion[:].state[:] structure:
-    'model(i1)/ggd(itime)/ion(i2)/state(i3)/z_min':
+    model(i1)/ggd(itime)/ion(i2)/state(i3)/z_min:
         ids_nan: False
         ids_inf: False
         ids_gt: 0.0
-    'model(i1)/ggd(itime)/ion(i2)/state(i3)/z_max':
+    model(i1)/ggd(itime)/ion(i2)/state(i3)/z_max:
         ids_nan: False
         ids_inf: False
         ids_gt: 0.0
-        ids_ge: 'edge_transport.model[_i1_].ggd[_itime_].ion[_i2_].state[_i3_].z_min'
+        ids_ge: edge_transport.model[_i1_].ggd[_itime_].ion[_i2_].state[_i3_].z_min
     #element[:].a          missing
     #element[:].z_n
     #element[:].atoms_n
-    'model(i1)/ggd(itime)/ion(i2)/state(i3)/particles/flux(:)':
+    model(i1)/ggd(itime)/ion(i2)/state(i3)/particles/flux(:):
         ids_nan: False
         ids_inf: False
         empty: False
-    'model(i1)/ggd(itime)/ion(i2)/state(i3)/energy/flux(:)':
+    model(i1)/ggd(itime)/ion(i2)/state(i3)/energy/flux(:):
         ids_nan: False
         ids_inf: False
         empty: False
 
     # For each neutral[:].state[:] structure:
-    'model(i1)/ggd(itime)/neutral(i2)/state(i3)/neutral_type/name':
+    model(i1)/ggd(itime)/neutral(i2)/state(i3)/neutral_type/name:
         empty: False
-    'model(i1)/ggd(itime)/neutral(i2)/state(i3)/energy/flux(i4)/values(:)':
+    model(i1)/ggd(itime)/neutral(i2)/state(i3)/energy/flux(i4)/values(:):
         empty: False
         ids_nan: False
         ids_inf: False
-    'model(i1)/ggd(itime)/neutral(i2)/state(i3)/particles/flux(i4)/values(:)':
+    model(i1)/ggd(itime)/neutral(i2)/state(i3)/particles/flux(i4)/values(:):
         empty: False
         ids_nan: False
         ids_inf: False
 
 #
-'edge_sources':
-    'time(:)':
+edge_sources:
+    time(:):
         empty: False
         ids_nan: False
         ids_inf: False
-    'code/output_flag(:)':
+    code/output_flag(:):
         empty: False
 
     # Within each source[:].ggd[:] structure:
-    'sources(i1)/ggd(itime)/time':
+    sources(i1)/ggd(itime)/time:
         ids_nan: False
         ids_inf: False
         ids_gt: -9e+40
-    'sources(i1)/ggd(itime)/ion(i2)/element(i3)/a':
+    sources(i1)/ggd(itime)/ion(i2)/element(i3)/a:
         ids_nan: False
         ids_inf: False
         ids_gt: 0.0
-    'sources(i1)/ggd(itime)/ion(i2)/element(i3)/z_n':
+    sources(i1)/ggd(itime)/ion(i2)/element(i3)/z_n:
         ids_nan: False
         ids_inf: False
         ids_gt: 0.0
-    'sources(i1)/ggd(itime)/ion(i2)/element(i3)/atoms_n':
+    sources(i1)/ggd(itime)/ion(i2)/element(i3)/atoms_n:
         ids_nan: False
         ids_inf: False
         ids_gt: 0
-    'sources(i1)/ggd(itime)/ion(i2)/multiple_states_flag':
+    sources(i1)/ggd(itime)/ion(i2)/multiple_states_flag:
         ids_ge: 0
         ids_le: 1
-    'sources(i1)/ggd(itime)/neutral(i2)/ion_index':
+    sources(i1)/ggd(itime)/neutral(i2)/ion_index:
         ids_ge: 0
-        ids_le: 'len(edge_sources.sources[_i1_].ggd[_itime_].neutral)'
-    'sources(i1)/ggd(itime)/neutral(i2)/element(i3)/a':
+        ids_le: len(edge_sources.sources[_i1_].ggd[_itime_].neutral)
+    sources(i1)/ggd(itime)/neutral(i2)/element(i3)/a:
         ids_nan: False
         ids_inf: False
         ids_gt: 0.0
-    'sources(i1)/ggd(itime)/neutral(i2)/element(i3)/z_n':
+    sources(i1)/ggd(itime)/neutral(i2)/element(i3)/z_n:
         ids_nan: False
         ids_inf: False
         ids_gt: 0.0
-    'sources(i1)/ggd(itime)/neutral(i2)/element(i3)/atoms_n':
+    sources(i1)/ggd(itime)/neutral(i2)/element(i3)/atoms_n:
         ids_nan: False
         ids_inf: False
         ids_gt: 0
-    'sources(i1)/ggd(itime)/neutral(i2)/multiple_states_flag':
+    sources(i1)/ggd(itime)/neutral(i2)/multiple_states_flag:
         ids_ge: 0
         ids_le: 1
 
     # For each ion[:].state[:] structure:
 
-    'sources(i1)/species/ion/state/z_min':
+    sources(i1)/species/ion/state/z_min:
         ids_nan: False
         ids_inf: False
         ids_gt: 0.0
-    'sources(i1)/species/ion/state/z_max': # ambiguous roles with z_n, to be done 
+    sources(i1)/species/ion/state/z_max: # ambiguous roles with z_n, to be done 
         ids_nan: False
         ids_inf: False
         ids_gt: 0.0
-        ids_ge: 'edge_sources.sources[_i1_].species.ion.state.z_min'
-    'sources(i1)/species/ion/elements(i2)/a':
+        ids_ge: edge_sources.sources[_i1_].species.ion.state.z_min
+    sources(i1)/species/ion/elements(i2)/a:
         ids_nan: False
         ids_inf: False
         ids_gt: 0.0
-    'sources(i1)/species/ion/elements(i2)/z_n':
+    sources(i1)/species/ion/elements(i2)/z_n:
         ids_nan: False
         ids_inf: False
         ids_gt: 0.0
-    'sources(i1)/species/ion/elements(i2)/atoms_n':
+    sources(i1)/species/ion/elements(i2)/atoms_n:
         ids_nan: False
         ids_inf: False
         ids_gt: 0
 
     # For each neutral[:].state[:] structure:
 
-    'sources(i1)/species/neutral/state/neutral_type/name':
+    sources(i1)/species/neutral/state/neutral_type/name:
         empty: False
 
 #
-'summary':
-    'time(:)':
+summary:
+    time(:):
         empty: False
         ids_nan: False
         ids_inf: False
-    'global_quantities/b0/value(:)':
+    global_quantities/b0/value(:):
         empty: False
         ids_nan: False
         ids_inf: False
         ids_b0_like: False
-    'global_quantities/r0/value':
+    global_quantities/r0/value:
         empty: False
         ids_nan: False
         ids_inf: False
         ids_gt: 0.0
-    'global_quantities/ip/value(:)':
+    global_quantities/ip/value(:):
         empty: False
         ids_nan: False
         ids_inf: False
         ids_gt: -17.0e+6
         ids_le: 0.0
         ids_ip_like: False
-    'global_quantities/q_95/value(:)':
+    global_quantities/q_95/value(:):
         empty: False
         ids_nan: False
         ids_inf: False
         ids_q_like: False
-    'global_quantities/power_loss/value(:)':
+    global_quantities/power_loss/value(:):
         empty: False
         ids_nan: False
         ids_inf: False
         ids_gt: 0.0
-    'local/separatrix/n_e/value(:)':
+    local/separatrix/n_e/value(:):
         empty: False
         ids_nan: False
         ids_inf: False
         ids_gt: 0.0
-    #'local/separatrix/n_i/*/value(:)':
+    #local/separatrix/n_i/*/value(:):
     #    empty: False
     #   ids_gt: 0.0
-    'local/separatrix/t_e/value(:)':
+    local/separatrix/t_e/value(:):
         empty: False
         ids_nan: False
         ids_inf: False
         ids_ge: 0.0
-    'code/output_flag(:)':
+    code/output_flag(:):
         empty: False
