@@ -20,6 +20,9 @@ IDS_COCOS = 11
 args_verbose = False
 args_check_all = True
 
+# Initialization for yaml Dumper
+yaml.Dumper.ignore_aliases = lambda *args: True
+
 # Validation Schema for COCOS using IDS/equilibrium
 required_fields_eq = {
     "ids.ids_properties.homogeneous_time": {"min": 0, "max": 2},
@@ -526,33 +529,34 @@ class IDSValidator(cerberus.Validator):
     ----------
     cocos: COCOS
         COCOS for validation
-    shape: tuple
-        numpy.ndarray.shape
+    shape: list
+        data shape
+    coord: list
+        name of coordinate
     ndim: int
-        numpy.ndarray.ndim
+        number of dimension 
     """
 
-    # cocos = {}
-    # shape = ()
-    # ndim = None
+    cocos = {}
+    #shape = []
+    #coord = []
+    ndim = None
 
     def set_cocos(self, cocos):
         """ """
         self.cocos = cocos
-        # print("cocos=",self.cocos)
 
     def set_dim(self, field, ids, data, idx):
         """ """
         dtype = re.search("^(INT|FLT)_([1-9])D$", field.get("data_type"))
         if dtype is not None:
-            #
+            self.shape = []
+            self.coord = []
             self.ndim = int(dtype.group(2))
-            ls = []
+            #
             for i in range(data.ndim):
                 c = path2py(field.get("coordinate" + str(i + 1)), header=True)
                 homogeneous_time = ids.ids_properties.homogeneous_time
-                if re.search("time$", c) and (homogeneous_time == 1):
-                    c = "ids.time"
                 #
                 if re.search("1\.\.\.", c):
                     lcrd = data.shape[i]
@@ -562,8 +566,9 @@ class IDSValidator(cerberus.Validator):
                         lcrd = len(crd)
                     except:
                         lcrd = -1
-                ls.append(lcrd)
-            self.shape = tuple(ls)
+
+                self.shape.append(lcrd)
+                self.coord.append(c)
 
     def _validate_ids_nan(self, constraint, field, value):
         """{'nullable': False }"""
@@ -698,13 +703,10 @@ class IDSValidator(cerberus.Validator):
                 for i in range(len(self.shape)):
                     if self.shape[i] != value.shape[i]:
                         if not constraint:
-                            self._error(
-                                field,
-                                "size of coordinate{}={}, expected as {}".format(
-                                    str(i + 1), value.shape[i], self.shape[i]
-                                ),
-                            )
-            except TypeError:
+                            msg = "size of coordinate{}|{} = {}, expected as {}".format(
+                                  str(i + 1), self.coord[i], value.shape[i], self.shape[i])
+                            self._error(field, msg)
+            except ValueError:
                 pass
 
 
@@ -771,14 +773,6 @@ def validator(field, path_doc, ids, schema, cocos, idx):
         report = {}
         report["remark"] = remark
         report["errors"] = errors
-
-        if type(data) is np.ndarray:
-            report["ndim"] = data.ndim
-            report["size"] = data.size
-        else:
-            report["ndim"] = 0
-            report["size"] = 1
-
         report_buf.update({path2py(path_doc, idx=idx): report})
     else:
         if not remark:
@@ -1025,6 +1019,29 @@ def load_YAML(fpath):
 # ----------------------------------------------------------------------
 
 
+def load_DD(idsname):
+    """Return Data Dictionary (DD)
+
+    Parameters
+    ----------
+    idsname: str
+        IDS name
+
+    Returns
+    -------
+    dd: class Element
+        DD correspoinding to idsname
+    """
+
+    root = load_XML(FILE_IDSDef)
+    dd =  [dd for dd in root if dd.get("name") == idsname][0]
+
+    return dd
+
+
+# ----------------------------------------------------------------------
+
+
 def eval_IDSs(s):
     """Return True if IDSs validate
 
@@ -1137,10 +1154,58 @@ def ids_iterator(ids, schema, dd, cocos, occ=0):
 # ----------------------------------------------------------------------
 
 
+def init_schema_coordinate(idsname, dd=None, rule={"ids_dim":False}):
+    """Return validation schema and Data Dictionary (DD)
+
+    Parameters
+    ----------
+    idsname: str
+        Name of IDS for validation
+    dd: class Element
+        DD input
+    rule: dict = {ids_dim:False}
+        Cerberus validation rule in type dict
+
+    Returns
+    -------
+    schema: dict
+        validation schema for ids_validator
+    ddo: class Element
+        DD output
+    """
+
+    d = {}
+
+    if ET.iselement(dd):
+        ddo = dd
+    elif dd is None:
+        ddo = load_DD(idsname)
+    else:
+        exit("type error:{}".format(dd))
+
+    for field in ddo.iter():
+        data_type = field.attrib.get("data_type")
+        path_doc = field.attrib.get("path_doc")
+
+        # validata for data_type = INT_*D and FLT_*D
+        if (data_type and re.search("^(INT|FLT)_([1-9])D$", data_type) is not None):
+
+            # skip validation for error_upper and error_lower
+            if re.search("_error_(upper|lower)", path_doc) is None:
+                d[path_doc] = rule
+
+    schema = {idsname:d}
+
+    return schema, ddo
+
+
+# ----------------------------------------------------------------------
+
+
 def ids_validator(
     ids, schema, dd=None, occ=0, ipsign=-1, b0sign=-1, verbose=False, check_all=True
 ):
-    """Function Interface for IDS Data Validation Tool w.r.t. DD (IDSDef.xml)
+    """Function Interface for IDS Validation w.r.t. DD (IDSDef.xml)
 
     Parameters
     ----------
@@ -1151,7 +1216,7 @@ def ids_validator(
         2. str: File path to Cerberus schema
     dd: Element=None
         Data Dictionary as class Element (read IDSDef.xml if None)
-    occ: int=None
+    occ: int=0
         IDS occurence
     ipsign: int=-1
         Sign of Ip
@@ -1182,8 +1247,7 @@ def ids_validator(
     if ET.iselement(dd):
         pass
     elif dd is None:
-        root = load_XML(FILE_IDSDef)
-        dd = [dd for dd in root if dd.get("name") == ids.__name__][0]
+        dd = load_DD(ids.__name__)
     else:
         exit("type error:{}".format(dd))
 
@@ -1206,9 +1270,35 @@ def ids_validator(
                 indent=4,
                 default_flow_style=False,
                 sort_keys=False,
+                width=float("inf"),
             )
 
     return eval_IDSs(dump), dump.strip()
+
+
+# ----------------------------------------------------------------------
+
+
+def ids_coordinate_check(ids, verbose=False):
+    """Function Interface for IDS Validation on Coordinate
+
+    Parameters
+    ----------
+    ids: IDS
+        IDS for validation
+    verbose: boolean=False
+        Increase output verbosity if true
+
+    Returns
+    -------
+    eval_IDSs(dump): boolean
+        Validation result in type boolean
+    dump: str
+        Validation result in YAML
+    """
+
+    schema, dd = init_schema_coordinate(ids.__name__)
+    return ids_validator(ids, schema, dd=dd, verbose=verbose)
 
 
 # ----------------------------------------------------------------------
