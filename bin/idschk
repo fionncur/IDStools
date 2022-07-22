@@ -99,11 +99,50 @@ def main():
 
 
 # ----------------------------------------------------------------------
-
+import textwrap
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="IDS Data Validation Tool", parents=[imas_parser]
+        prog="idschk",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        parents=[imas_parser],
+        description=textwrap.dedent('''\
+            (I) Command Line Interface for IDS Data Validation (idschk)
+            -------------------------------------------------------
+            Examples:
+                0) load IMAS
+                $ module load IMAS
+
+                1) Validate if ITER Scenario meets with physics requirements
+                $ idschk -s 131024 -r 40 -f path/to/schema_file/required_fields_core.yml
+
+                2) Same with 1., but only for one time slice. Specify time, otherwise middle time 
+                $ idschk -s 131024 -r 40 -f path/to/schema_file/required_fields_core.yml -t 100.
+                $ idschk -s 131024 -r 40 -f path/to/schema_file/required_fields_core.yml -t
+
+                3) Check IDS/equilibrium for COCOS
+                $ idschk -s 131024 -r 40 -c
+
+            (II) Functional Interface in Python (database_tools/idschk.py)
+            ---------------------------------------------------------
+            Examples: 
+                0) Initialization
+                >>> import imas
+                >>> from database_tools.idschk import * 
+                >>> input = imas.ids(131024,40)
+                >>> input.open_env("public","ITER","3")
+                >>> equilibrium=input.equilibrium
+                >>> equilibrium.get()
+
+                1) Validate length of coordinate for INT_*D and FLT_*D
+                >>> flag, log = ids_coordinate_check(equilibrium)
+
+                2) In case of increasing verbosity,
+                >>> flag, log = ids_coordinate_check(equilibrium, verbose=True)
+
+                3) Validate if ITER Scenario meets with physics requirements
+                >>> flag, log = ids_validator(equilibrium, 'path/to/schema_file/required_fields_core.yml')
+            ''')
     )
     parser.add_argument(
         "-s", "--shot", dest="shot", help="Shot number", required=True, type=int
