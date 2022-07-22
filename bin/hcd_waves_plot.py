@@ -82,87 +82,87 @@ def waves_prep(args):
    # TIME VECTOR AND TIME INDEX
    # ---------------------------
 
-   ec_profiles = {}
+   hcd_profiles = {}
    for isample in range(nsample):
-       ec_profiles[isample] = {}
-       ec_profiles[isample]['time'] = time
-       ec_profiles[isample]['timevec'] = waves[isample].time
-       ec_profiles[isample]['ntime'] = len(ec_profiles[isample]['timevec'])
-       if ec_profiles[isample]['ntime']==1:
-           if len(ec_profiles[isample]['timevec']) > 0:
-               ec_profiles[isample]['tc'] = ec_profiles[isample]['timevec'][0]
+       hcd_profiles[isample] = {}
+       hcd_profiles[isample]['time'] = time
+       hcd_profiles[isample]['timevec'] = waves[isample].time
+       hcd_profiles[isample]['ntime'] = len(hcd_profiles[isample]['timevec'])
+       if hcd_profiles[isample]['ntime']==1:
+           if len(hcd_profiles[isample]['timevec']) > 0:
+               hcd_profiles[isample]['tc'] = hcd_profiles[isample]['timevec'][0]
            else:
-               ec_profiles[isample]['tc'] = 0
-           ec_profiles[isample]['it'] = 0
+               hcd_profiles[isample]['tc'] = 0
+           hcd_profiles[isample]['it'] = 0
        else:
-           if ec_profiles[isample]['time']>=0:
-               [ec_profiles[isample]['tc'],ec_profiles[isample]['it']] = \
-                  find_nearest(ec_profiles[isample]['timevec'],ec_profiles[isample]['time'])
+           if hcd_profiles[isample]['time']>=0:
+               [hcd_profiles[isample]['tc'],hcd_profiles[isample]['it']] = \
+                  find_nearest(hcd_profiles[isample]['timevec'],hcd_profiles[isample]['time'])
            else:
-               ec_profiles[isample]['it'] = int(ec_profiles[isample]['ntime']/2)
-               ec_profiles[isample]['tc'] = ec_profiles[isample]['timevec'][ec_profiles[isample]['it']]
+               hcd_profiles[isample]['it'] = int(hcd_profiles[isample]['ntime']/2)
+               hcd_profiles[isample]['tc'] = hcd_profiles[isample]['timevec'][hcd_profiles[isample]['it']]
            print('--------------------------------------------------------------------------', file=sys.stderr)
-           print(' Time  = '+'%.2f' % ec_profiles[isample]['tc']+' s in range ['+'%.2f'
-                 % ec_profiles[isample]['timevec'][0]+','+'%.2f' \
-                 % ec_profiles[isample]['timevec'][ec_profiles[isample]['ntime']-1]+'] s', file=sys.stderr)
-           print(' Index = ',str(ec_profiles[isample]['it']), file=sys.stderr)
-           print(' Averaged resolution = ', (ec_profiles[isample]['timevec'][ec_profiles[isample]['ntime']-1]
-                                             -ec_profiles[isample]['timevec'][0])\
-                 /(ec_profiles[isample]['ntime']-1),' s', file=sys.stderr)  
+           print(' Time  = '+'%.2f' % hcd_profiles[isample]['tc']+' s in range ['+'%.2f'
+                 % hcd_profiles[isample]['timevec'][0]+','+'%.2f' \
+                 % hcd_profiles[isample]['timevec'][hcd_profiles[isample]['ntime']-1]+'] s', file=sys.stderr)
+           print(' Index = ',str(hcd_profiles[isample]['it']), file=sys.stderr)
+           print(' Averaged resolution = ', (hcd_profiles[isample]['timevec'][hcd_profiles[isample]['ntime']-1]
+                                             -hcd_profiles[isample]['timevec'][0])\
+                 /(hcd_profiles[isample]['ntime']-1),' s', file=sys.stderr)  
            print('--------------------------------------------------------------------------', file=sys.stderr)
-       ec_profiles[isample]['time'] = ec_profiles[isample]['tc']
+       hcd_profiles[isample]['time'] = hcd_profiles[isample]['tc']
 
-       ec_profiles[isample]['nwaves'] = len(waves[isample].coherent_wave)
-       ec_profiles[isample]['is_active'] = [0]*ec_profiles[isample]['nwaves']
-       ec_profiles[isample]['nrho'] = 0
+       hcd_profiles[isample]['nwaves'] = len(waves[isample].coherent_wave)
+       hcd_profiles[isample]['is_active'] = [0]*hcd_profiles[isample]['nwaves']
+       hcd_profiles[isample]['nrho'] = 0
        psi_based = 0
        psi_there = 0
-       for iwave in range(ec_profiles[isample]['nwaves']):
+       for iwave in range(hcd_profiles[isample]['nwaves']):
            if size(waves[isample].coherent_wave[iwave].global_quantities) > 0:
                for itime in range(len(waves[isample].time)):
                    if waves[isample].coherent_wave[iwave].global_quantities[itime].power>0:
-                       ec_profiles[isample]['is_active'][iwave] = 1
+                       hcd_profiles[isample]['is_active'][iwave] = 1
                        try:
-                           ec_profiles[isample]['rho_tor_norm'] = 0
+                           hcd_profiles[isample]['rho_tor_norm'] = 0
                            if len(waves[isample].coherent_wave[iwave].\
-                                  profiles_1d[ec_profiles[isample]['it']].grid.rho_tor_norm) > 0:
-                               ec_profiles[isample]['nrho'] = len(waves[isample].coherent_wave[iwave].\
-                                    profiles_1d[ec_profiles[isample]['it']].grid.rho_tor_norm)
-                               ec_profiles[isample]['rho_tor_norm'] = waves[isample].coherent_wave[iwave].\
-                                  profiles_1d[ec_profiles[isample]['it']].grid.rho_tor_norm
+                                  profiles_1d[hcd_profiles[isample]['it']].grid.rho_tor_norm) > 0:
+                               hcd_profiles[isample]['nrho'] = len(waves[isample].coherent_wave[iwave].\
+                                    profiles_1d[hcd_profiles[isample]['it']].grid.rho_tor_norm)
+                               hcd_profiles[isample]['rho_tor_norm'] = waves[isample].coherent_wave[iwave].\
+                                  profiles_1d[hcd_profiles[isample]['it']].grid.rho_tor_norm
                            elif len(waves[isample].coherent_wave[iwave].\
-                                    profiles_1d[ec_profiles[isample]['it']].grid.rho_tor) > 0:
-                               ec_profiles[isample]['nrho'] = len(waves[isample].coherent_wave[iwave].\
-                                    profiles_1d[ec_profiles[isample]['it']].grid.rho_tor)
-                               ec_profiles[isample]['rho_tor_norm'] = waves[isample].coherent_wave[iwave].\
-                                  profiles_1d[ec_profiles[isample]['it']]\
+                                    profiles_1d[hcd_profiles[isample]['it']].grid.rho_tor) > 0:
+                               hcd_profiles[isample]['nrho'] = len(waves[isample].coherent_wave[iwave].\
+                                    profiles_1d[hcd_profiles[isample]['it']].grid.rho_tor)
+                               hcd_profiles[isample]['rho_tor_norm'] = waves[isample].coherent_wave[iwave].\
+                                  profiles_1d[hcd_profiles[isample]['it']]\
                                    .grid.rho_tor/waves[isample].coherent_wave[iwave].\
-                                   profiles_1d[ec_profiles[isample]['it']]\
-                                   .grid.rho_tor[ec_profiles[isample]['nrho']-1]
+                                   profiles_1d[hcd_profiles[isample]['it']]\
+                                   .grid.rho_tor[hcd_profiles[isample]['nrho']-1]
                            elif len(waves[isample].coherent_wave[iwave].\
-                                    profiles_1d[ec_profiles[isample]['it']].grid.psi) > 0:
+                                    profiles_1d[hcd_profiles[isample]['it']].grid.psi) > 0:
                                psi_based = 1
-                               ec_profiles[isample]['nrho'] = len(waves[isample].\
-                                    coherent_wave[iwave].profiles_1d[ec_profiles[isample]['it']].grid.psi)
-                               ec_profiles[isample]['rho_tor_norm'] = -waves[isample].\
-                                  coherent_wave[iwave].profiles_1d[ec_profiles[isample]['it']].grid.psi
+                               hcd_profiles[isample]['nrho'] = len(waves[isample].\
+                                    coherent_wave[iwave].profiles_1d[hcd_profiles[isample]['it']].grid.psi)
+                               hcd_profiles[isample]['rho_tor_norm'] = -waves[isample].\
+                                  coherent_wave[iwave].profiles_1d[hcd_profiles[isample]['it']].grid.psi
                        except:
                            print('waves.coherent_wave[iwave].profiles_1d[it]'+\
                                  '.grid.rho_tor_norm, rho_tor and psi could not be read', file=sys.stderr)
                            print('----> Aborted.', file=sys.stderr)
                            exit()
-                       if ec_profiles[isample]['nrho']==0:
+                       if hcd_profiles[isample]['nrho']==0:
                            print('waves.coherent_wave[iwave].profiles_1d[it]'+\
                                  '.grid.rho_tor_norm, rho_tor and psi are empty', file=sys.stderr)
                            print('----> Aborted.', file=sys.stderr)
                            exit()
                        if len(waves[isample].coherent_wave[iwave].profiles_1d\
-                              [ec_profiles[isample]['it']].grid.psi) > 0:
+                              [hcd_profiles[isample]['it']].grid.psi) > 0:
                            psi_there = 1
-                           ec_profiles[isample]['psi'] = len(waves[isample].\
-                              coherent_wave[iwave].profiles_1d[ec_profiles[isample]['it']].grid.psi)
-                           ec_profiles[isample]['psi1d'] = -waves[isample].\
-                              coherent_wave[iwave].profiles_1d[ec_profiles[isample]['it']].grid.psi
+                           hcd_profiles[isample]['psi'] = len(waves[isample].\
+                              coherent_wave[iwave].profiles_1d[hcd_profiles[isample]['it']].grid.psi)
+                           hcd_profiles[isample]['psi1d'] = -waves[isample].\
+                              coherent_wave[iwave].profiles_1d[hcd_profiles[isample]['it']].grid.psi
            else:
                print('waves.coherent_wave[iwave].global_quantities has not been allocated')
                print('----> Aborted.', file=sys.stderr)
@@ -174,97 +174,96 @@ def waves_prep(args):
                print('----> Aborted.', file=sys.stderr)
                exit()
            else:
-               ec_profiles[isample]['nrho'] = ec_profiles[isample]['psi']
-               ec_profiles[isample]['rho_tor_norm'] = ec_profiles[isample]['psi1d']
+               hcd_profiles[isample]['nrho'] = hcd_profiles[isample]['psi']
+               hcd_profiles[isample]['rho_tor_norm'] = hcd_profiles[isample]['psi1d']
 
-       if sum(ec_profiles[isample]['is_active'])==0:
+       if sum(hcd_profiles[isample]['is_active'])==0:
            print('The waves IDS appears empty ----> Abort.', file=sys.stderr)
            exit()
 
        # LOOP OVER ALL EC LAUNCHERS
-       ec_profiles[isample]['single_ec_launcher_name']         = {}
-       ec_profiles[isample]['single_injected_power']           = {}   # for the chosen time slice
-       ec_profiles[isample]['single_absorbed_power']           = {}   # for the chosen time slice
-       ec_profiles[isample]['single_eccd']                     = {}   # for the chosen time slice
-       ec_profiles[isample]['total_injected_power']            = 0    # for the chosen time slice
+       hcd_profiles[isample]['single_hcd_launcher_name']         = {}
+       hcd_profiles[isample]['single_injected_power']           = {}   # for the chosen time slice
+       hcd_profiles[isample]['single_absorbed_power']           = {}   # for the chosen time slice
+       hcd_profiles[isample]['single_cd']                     = {}   # for the chosen time slice
+       hcd_profiles[isample]['total_injected_power']            = 0    # for the chosen time slice
 
-       ec_profiles[isample]['total_power_density_profile']     = [0]*ec_profiles[isample]['nrho'] # profile
-       ec_profiles[isample]['total_current_density_profile']   = [0]*ec_profiles[isample]['nrho'] # profile
-       ec_profiles[isample]['single_power_density_profile']    = {}   # profile
-       ec_profiles[isample]['single_current_density_profile']  = {}   # profile
+       hcd_profiles[isample]['total_power_density_profile']     = [0]*hcd_profiles[isample]['nrho'] # profile
+       hcd_profiles[isample]['total_current_density_profile']   = [0]*hcd_profiles[isample]['nrho'] # profile
+       hcd_profiles[isample]['single_power_density_profile']    = {}   # profile
+       hcd_profiles[isample]['single_current_density_profile']  = {}   # profile
 
-       ec_profiles[isample]['total_power_waveform']    = [0]*ec_profiles[isample]['ntime'] # waveform
-       ec_profiles[isample]['total_current_waveform']  = [0]*ec_profiles[isample]['ntime'] # waveform
-       ec_profiles[isample]['single_power_waveform']   = {}    # waveform
-       ec_profiles[isample]['single_current_waveform'] = {}    # waveform
+       hcd_profiles[isample]['total_power_waveform']    = [0]*hcd_profiles[isample]['ntime'] # waveform
+       hcd_profiles[isample]['total_current_waveform']  = [0]*hcd_profiles[isample]['ntime'] # waveform
+       hcd_profiles[isample]['single_power_waveform']   = {}    # waveform
+       hcd_profiles[isample]['single_current_waveform'] = {}    # waveform
 
-       for iwave in range(ec_profiles[isample]['nwaves']):
-           ec_profiles[isample]['single_injected_power'][iwave] = 0
+       for iwave in range(hcd_profiles[isample]['nwaves']):
+           hcd_profiles[isample]['single_injected_power'][iwave] = 0
 
-       for iwave in range(ec_profiles[isample]['nwaves']):
+       for iwave in range(hcd_profiles[isample]['nwaves']):
            if(len(waves[isample].coherent_wave[iwave].identifier.antenna_name)>0):
-               ec_profiles[isample]['single_ec_launcher_name'][iwave] = \
+               hcd_profiles[isample]['single_hcd_launcher_name'][iwave] = \
                   waves[isample].coherent_wave[iwave].identifier.antenna_name
            else:
-               ec_profiles[isample]['single_ec_launcher_name'][iwave] = 'Launcher'+str(iwave+1)
-           if ec_profiles[isample]['is_active'][iwave]:
-               ec_profiles[isample]['single_power_waveform'][iwave]   = []
-               ec_profiles[isample]['single_current_waveform'][iwave] = []
-               for itime in range(ec_profiles[isample]['ntime']):
-                   ec_profiles[isample]['single_power_waveform'][iwave].\
+               hcd_profiles[isample]['single_hcd_launcher_name'][iwave] = 'Launcher'+str(iwave+1)
+           if hcd_profiles[isample]['is_active'][iwave]:
+               hcd_profiles[isample]['single_power_waveform'][iwave]   = []
+               hcd_profiles[isample]['single_current_waveform'][iwave] = []
+               for itime in range(hcd_profiles[isample]['ntime']):
+                   hcd_profiles[isample]['single_power_waveform'][iwave].\
                        append(waves[isample].coherent_wave[iwave].global_quantities[itime].electrons.power_thermal)
-                   ec_profiles[isample]['single_current_waveform'][iwave].\
+                   hcd_profiles[isample]['single_current_waveform'][iwave].\
                        append(waves[isample].coherent_wave[iwave].global_quantities[itime].current_tor)
-                   ec_profiles[isample]['total_power_waveform'][itime] = \
-                       ec_profiles[isample]['total_power_waveform'][itime] \
+                   hcd_profiles[isample]['total_power_waveform'][itime] = \
+                       hcd_profiles[isample]['total_power_waveform'][itime] \
                        + waves[isample].coherent_wave[iwave].global_quantities[itime].electrons.power_thermal
-                   ec_profiles[isample]['total_current_waveform'][itime] = \
-                       ec_profiles[isample]['total_current_waveform'][itime] \
+                   hcd_profiles[isample]['total_current_waveform'][itime] = \
+                       hcd_profiles[isample]['total_current_waveform'][itime] \
                        + waves[isample].coherent_wave[iwave].global_quantities[itime].current_tor
-               ec_profiles[isample]['total_power_density_profile']  = \
-                   ec_profiles[isample]['total_power_density_profile']  \
-                   + waves[isample].coherent_wave[iwave].profiles_1d[ec_profiles[isample]['it']].power_density
-               ec_profiles[isample]['single_power_density_profile'][iwave] = \
-                   waves[isample].coherent_wave[iwave].profiles_1d[ec_profiles[isample]['it']].power_density
-               ec_profiles[isample]['total_current_density_profile'] = \
-                   ec_profiles[isample]['total_current_density_profile'] \
-                   + waves[isample].coherent_wave[iwave].profiles_1d[ec_profiles[isample]['it']].current_parallel_density
-               ec_profiles[isample]['single_current_density_profile'][iwave] = \
-                   waves[isample].coherent_wave[iwave].profiles_1d[ec_profiles[isample]['it']].current_parallel_density
-               ec_profiles[isample]['single_injected_power[iwave]'] = 0.
+               hcd_profiles[isample]['total_power_density_profile']  = \
+                   hcd_profiles[isample]['total_power_density_profile']  \
+                   + waves[isample].coherent_wave[iwave].profiles_1d[hcd_profiles[isample]['it']].power_density
+               hcd_profiles[isample]['single_power_density_profile'][iwave] = \
+                   waves[isample].coherent_wave[iwave].profiles_1d[hcd_profiles[isample]['it']].power_density
+               hcd_profiles[isample]['total_current_density_profile'] = \
+                   hcd_profiles[isample]['total_current_density_profile'] \
+                   + waves[isample].coherent_wave[iwave].profiles_1d[hcd_profiles[isample]['it']].current_parallel_density
+               hcd_profiles[isample]['single_current_density_profile'][iwave] = \
+                   waves[isample].coherent_wave[iwave].profiles_1d[hcd_profiles[isample]['it']].current_parallel_density
+               hcd_profiles[isample]['single_injected_power[iwave]'] = 0.
                if len(waves[isample].coherent_wave[iwave].beam_tracing) > 0:
-                  for ibeam in range(len(waves[isample].coherent_wave[iwave].beam_tracing[ec_profiles[isample]['it']].beam)):
-                      ec_profiles[isample]['total_injected_power'] = \
-                          ec_profiles[isample]['total_injected_power'] + \
-                          waves[isample].coherent_wave[iwave].beam_tracing[ec_profiles[isample]['it']].beam[ibeam].power_initial
+                  for ibeam in range(len(waves[isample].coherent_wave[iwave].beam_tracing[hcd_profiles[isample]['it']].beam)):
+                      hcd_profiles[isample]['total_injected_power'] = \
+                          hcd_profiles[isample]['total_injected_power'] + \
+                          waves[isample].coherent_wave[iwave].beam_tracing[hcd_profiles[isample]['it']].beam[ibeam].power_initial
                       if imas.imasdef.isFieldValid(waves[isample].coherent_wave[iwave]\
-                                                   .beam_tracing[ec_profiles[isample]['it']].beam[ibeam].power_initial):
-                        ec_profiles[isample]['single_injected_power'][iwave] = \
-                          ec_profiles[isample]['single_injected_power'][iwave] \
+                                                   .beam_tracing[hcd_profiles[isample]['it']].beam[ibeam].power_initial):
+                        hcd_profiles[isample]['single_injected_power'][iwave] = \
+                          hcd_profiles[isample]['single_injected_power'][iwave] \
                           + waves[isample].coherent_wave[iwave].\
-                          beam_tracing[ec_profiles[isample]['it']].beam[ibeam].power_initial
-               ec_profiles[isample]['single_absorbed_power'][iwave] = \
-                   waves[isample].coherent_wave[iwave].global_quantities[ec_profiles[isample]['it']].power
-               ec_profiles[isample]['single_eccd'][iwave] = \
-                   waves[isample].coherent_wave[iwave].global_quantities[ec_profiles[isample]['it']].current_tor
-               print(' '+ec_profiles[isample]['single_ec_launcher_name'][iwave]\
-                     +' is active with a power of {:.2f}'.format(ec_profiles[isample]['single_injected_power'][iwave]*1.e-6)\
-                     +' MW --> Absorbed power = {:.2f}'.format(ec_profiles[isample]['single_absorbed_power'][iwave]*1.e-6)\
+                          beam_tracing[hcd_profiles[isample]['it']].beam[ibeam].power_initial
+               hcd_profiles[isample]['single_absorbed_power'][iwave] = \
+                   waves[isample].coherent_wave[iwave].global_quantities[hcd_profiles[isample]['it']].power
+               hcd_profiles[isample]['single_cd'][iwave] = \
+                   waves[isample].coherent_wave[iwave].global_quantities[hcd_profiles[isample]['it']].current_tor
+               print(' '+hcd_profiles[isample]['single_hcd_launcher_name'][iwave]\
+                     +' is active with a power of {:.2f}'.format(hcd_profiles[isample]['single_injected_power'][iwave]*1.e-6)+' MW')
+               print('   --> Absorbed power = {:.2f}'.format(hcd_profiles[isample]['single_absorbed_power'][iwave]*1.e-6)\
                      +' MW', file=sys.stderr)
-               print('                                           --> ECCD =  {:.2e}'\
-                     .format(ec_profiles[isample]['single_eccd'][iwave]*1.e-3)+' kA', file=sys.stderr)
+               print('   --> Curent Drive =  {:.2e}'.format(hcd_profiles[isample]['single_cd'][iwave]*1.e-3)+' kA', file=sys.stderr)
            else:
-               print(' '+ec_profiles[isample]['single_ec_launcher_name'][iwave]+' is off', file=sys.stderr)
+               print(' '+hcd_profiles[isample]['single_hcd_launcher_name'][iwave]+' is off', file=sys.stderr)
        print('--------------------------------------------------------------------------', file=sys.stderr)
 
-   ec_param={}
-   ec_param['nsample']=nsample
-   ec_param['psi_based']=psi_based
-   ec_param['force_psi']=force_psi
-   ec_param['shot']=shot
-   ec_param['run']=run
+   hcd_param={}
+   hcd_param['nsample']=nsample
+   hcd_param['psi_based']=psi_based
+   hcd_param['force_psi']=force_psi
+   hcd_param['shot']=shot
+   hcd_param['run']=run
    
-   return ec_profiles,ec_param
+   return hcd_profiles,hcd_param
        
 ###################################################################################
 
@@ -287,13 +286,13 @@ def CustomLegend(legend):
 
 ###################################################################################
 
-def waves_display(ec_profiles,ec_param):
+def waves_display(hcd_profiles,hcd_param):
 
-   nsample   = ec_param['nsample']
-   psi_based = ec_param['psi_based']
-   force_psi = ec_param['force_psi']
-   shot      = ec_param['shot']
-   run       = ec_param['run']
+   nsample   = hcd_param['nsample']
+   psi_based = hcd_param['psi_based']
+   force_psi = hcd_param['force_psi']
+   shot      = hcd_param['shot']
+   run       = hcd_param['run']
 
    fontsize = 12
    figure_width  = 5
@@ -313,73 +312,73 @@ def waves_display(ec_profiles,ec_param):
    # PROFILE OF ABSORBED POWER DENSITY [MW/M3]
    fig,ax =plt.subplots(1,1)
    for isample in range(nsample):
-       ec_profiles[isample]['single_ec_launcher_name'][3]='UL/USM'
-       ec_profiles[isample]['single_ec_launcher_name'][4]='UL/BSM'
-       if sum(ec_profiles[isample]['is_active'])>1 and nsample == 0:
-           ax.plot(ec_profiles[isample]['rho_tor_norm'], \
-                   ec_profiles[isample]['total_power_density_profile']*1.e-6,label=r'Total')
-       for iwave in range(ec_profiles[isample]['nwaves']):
-           if ec_profiles[isample]['is_active'][iwave]:
+       hcd_profiles[isample]['single_hcd_launcher_name'][3]='UL/USM'
+       hcd_profiles[isample]['single_hcd_launcher_name'][4]='UL/BSM'
+       if sum(hcd_profiles[isample]['is_active'])>1 and nsample == 0:
+           ax.plot(hcd_profiles[isample]['rho_tor_norm'], \
+                   hcd_profiles[isample]['total_power_density_profile']*1.e-6,label=r'Total')
+       for iwave in range(hcd_profiles[isample]['nwaves']):
+           if hcd_profiles[isample]['is_active'][iwave]:
                if isample != 0:
-                   ec_profiles[isample]['single_ec_launcher_name'][iwave]=''
-               ax.plot(ec_profiles[isample]['rho_tor_norm'], \
-                   ec_profiles[isample]['single_power_density_profile'][iwave]*1.e-6,\
-                       label=ec_profiles[isample]['single_ec_launcher_name'][iwave],color=torcol[iwave])
+                   hcd_profiles[isample]['single_hcd_launcher_name'][iwave]=''
+               ax.plot(hcd_profiles[isample]['rho_tor_norm'], \
+                   hcd_profiles[isample]['single_power_density_profile'][iwave]*1.e-6,\
+                       label=hcd_profiles[isample]['single_hcd_launcher_name'][iwave],color=torcol[iwave])
    ax.set_ylabel('Absorbed power $\mathrm{[MW/m^{3}]}$')
    if psi_based == 0 and force_psi ==0:
        ax.set_xlabel('Normalized toroidal flux coordinate')
    else:
        ax.set_xlabel('-(Poloidal flux coordinate) [Wb]')
    plt.grid()
-   legend = plt.legend()
-   CustomLegend(legend)
+   #legend = plt.legend()
+   #CustomLegend(legend)
    fig.set_size_inches(figure_width,figure_height)
    fig.tight_layout()
    fig.savefig('ECRH_profile_shot_{0}_run_{1}.png'.format(shot,run),bbox_inches="tight")
    #plt.title('Whatever')
    plt.show(block=False)
 
-   # ECCD PROFILE [MA/M2]
+   # CD PROFILE [MA/M2]
    fig,ax =plt.subplots(1,1)
    for isample in range(nsample):
-       if sum(ec_profiles[isample]['is_active'])>1 and nsample == 0:
-           ax.plot(ec_profiles[isample]['rho_tor_norm'], \
-                   ec_profiles[isample]['total_current_density_profile']*1.e-6,label=r'Total')
-       for iwave in range(ec_profiles[isample]['nwaves']):
-           if ec_profiles[isample]['is_active'][iwave]:
-               ax.plot(ec_profiles[isample]['rho_tor_norm'], \
-                       ec_profiles[isample]['single_current_density_profile'][iwave]*1.e-6,\
-                       label=ec_profiles[isample]['single_ec_launcher_name'][iwave],color=torcol[iwave])
-   ax.set_ylabel('$\mathrm{ECCD} [MA/m^{2}]}$')
+       if sum(hcd_profiles[isample]['is_active'])>1 and nsample == 0:
+           ax.plot(hcd_profiles[isample]['rho_tor_norm'], \
+                   hcd_profiles[isample]['total_current_density_profile']*1.e-6,label=r'Total')
+       for iwave in range(hcd_profiles[isample]['nwaves']):
+           if hcd_profiles[isample]['is_active'][iwave]:
+               ax.plot(hcd_profiles[isample]['rho_tor_norm'], \
+                       hcd_profiles[isample]['single_current_density_profile'][iwave]*1.e-6,\
+                       label=hcd_profiles[isample]['single_hcd_launcher_name'][iwave],color=torcol[iwave])
+   ax.set_ylabel('$\mathrm{CD} [MA/m^{2}]}$')
    if psi_based == 0 and force_psi ==0:
        ax.set_xlabel('Normalized toroidal flux coordinate')
    else:
        ax.set_xlabel('-(Poloidal flux coordinate) [Wb]')
    plt.grid()
-   legend = plt.legend()
-   CustomLegend(legend)
+   #legend = plt.legend()
+   #CustomLegend(legend)
    fig.set_size_inches(figure_width,figure_height)
    fig.tight_layout()
-   fig.savefig('ECCD_profile_shot_{0}_run_{1}.png'.format(shot,run),bbox_inches="tight")
+   fig.savefig('CD_profile_shot_{0}_run_{1}.png'.format(shot,run),bbox_inches="tight")
    #plt.title('Whatever')
 
-   # EC POWER AND ECCD WAVEFORMS
-   if ec_profiles[isample]['ntime']==1:
-       print('Only one time slice --> ECRH and ECCD waveforms not displayed', file=sys.stderr)
+   # EC POWER AND CD WAVEFORMS
+   if hcd_profiles[isample]['ntime']==1:
+       print('Only one time slice --> ECRH and CD waveforms not displayed', file=sys.stderr)
        plt.show(block=True)
    else:
        plt.show(block=False)
        # EC POWER WAVEFORM
        fig,ax =plt.subplots(1,1)
        for isample in range(nsample):
-           if sum(ec_profiles[isample]['is_active'])>1 and nsample == 0:
-               ax.plot(ec_profiles[isample]['timevec'], \
-                       array(ec_profiles[isample]['total_power_waveform'])*1.e-6,label=r'Total')
-           for iwave in range(ec_profiles[isample]['nwaves']):
-               if ec_profiles[isample]['is_active'][iwave]:
-                   ax.plot(ec_profiles[isample]['timevec'], \
-                           array(ec_profiles[isample]['single_power_waveform'][iwave])*1.e-6,\
-                           label=ec_profiles[isample]['single_ec_launcher_name'][iwave])
+           if sum(hcd_profiles[isample]['is_active'])>1 and nsample == 0:
+               ax.plot(hcd_profiles[isample]['timevec'], \
+                       array(hcd_profiles[isample]['total_power_waveform'])*1.e-6,label=r'Total')
+           for iwave in range(hcd_profiles[isample]['nwaves']):
+               if hcd_profiles[isample]['is_active'][iwave]:
+                   ax.plot(hcd_profiles[isample]['timevec'], \
+                           array(hcd_profiles[isample]['single_power_waveform'][iwave])*1.e-6,\
+                           label=hcd_profiles[isample]['single_hcd_launcher_name'][iwave])
        ax.set_ylabel('Power to the electrons $\mathrm{[MW]}$')
        ax.set_xlabel('Time (s)')
        plt.grid()
@@ -392,33 +391,33 @@ def waves_display(ec_profiles,ec_param):
        #plt.gca().set_ylim(0,max(total_power_waveform)*1.2e-6)
        plt.show(block=False)
 
-       # ECCD WAVEFORM
+       # CD WAVEFORM
        fig,ax =plt.subplots(1,1)
        for isample in range(nsample):
-           if sum(ec_profiles[isample]['is_active'])>1 and nsample == 0:
-               ax.plot(ec_profiles[isample]['timevec'], \
-                       array(ec_profiles[isample]['total_current_waveform'])*1.e-3,label=r'Total')
-           for iwave in range(ec_profiles[isample]['nwaves']):
-               if ec_profiles[isample]['is_active'][iwave]:
-                   ax.plot(ec_profiles[isample]['timevec'], \
-                           array(ec_profiles[isample]['single_current_waveform'][iwave])*1.e-3,
-                           label=ec_profiles[isample]['single_ec_launcher_name'][iwave])
-       ax.set_ylabel('ECCD $\mathrm{[kA]}$')
+           if sum(hcd_profiles[isample]['is_active'])>1 and nsample == 0:
+               ax.plot(hcd_profiles[isample]['timevec'], \
+                       array(hcd_profiles[isample]['total_current_waveform'])*1.e-3,label=r'Total')
+           for iwave in range(hcd_profiles[isample]['nwaves']):
+               if hcd_profiles[isample]['is_active'][iwave]:
+                   ax.plot(hcd_profiles[isample]['timevec'], \
+                           array(hcd_profiles[isample]['single_current_waveform'][iwave])*1.e-3,
+                           label=hcd_profiles[isample]['single_hcd_launcher_name'][iwave])
+       ax.set_ylabel('CD $\mathrm{[kA]}$')
        ax.set_xlabel('Time (s)')
        plt.grid()
        legend = plt.legend()
        CustomLegend(legend)
        fig.set_size_inches(figure_width,figure_height)
        fig.tight_layout()
-       fig.savefig('ECCD_waveform_shot_{0}_run_{1}.png'.format(shot,run),bbox_inches="tight")
+       fig.savefig('CD_waveform_shot_{0}_run_{1}.png'.format(shot,run),bbox_inches="tight")
        #plt.title('Whatever')
        #plt.gca().set_ylim(0,max(array(total_current_waveform))*1.2e-3)
        plt.show(block=True)
 
 ###################################################################################
 def run(args):
-  ec_profiles,ec_param = waves_prep(args)
-  waves_display(ec_profiles,ec_param)
+  hcd_profiles,hcd_param = waves_prep(args)
+  waves_display(hcd_profiles,hcd_param)
 
 # When hcd_waves_plot is called directly
 if __name__ == "__main__":
