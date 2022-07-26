@@ -3,6 +3,7 @@
 import os, sys, glob, yaml, argparse, re
 from operator import itemgetter
 from stat import *
+from datetime import datetime
 
 # ----------------------------------------------------------------------------
 
@@ -15,7 +16,7 @@ class SmartFormatter(argparse.HelpFormatter):
 
 # ----------------------------------------------------------------------------
 
-def rec(data={},path=os.getcwd(),extension='.yaml',choice=['shot','run','ip','b0'],selection=None):
+def rec(data={},path=os.getcwd(),extension='.yaml',choice=['shot','run','ip','b0'],selection=None,sort_by_date=False):
 
   trunc_number = 50 # Need to truncate the reference name when it is too long
 
@@ -37,6 +38,7 @@ def rec(data={},path=os.getcwd(),extension='.yaml',choice=['shot','run','ip','b0
         file = open(files[i], 'r')
         data[j] = yaml.load(file,Loader=yaml.CLoader)
         data[j]['location'] = files[i]
+        data[j]['lastmodified'] = os.path.getmtime(files[i])
         file.close()
       except:
         print('Error reading yaml '+files[i], file=sys.stderr)
@@ -45,10 +47,14 @@ def rec(data={},path=os.getcwd(),extension='.yaml',choice=['shot','run','ip','b0
   # Sort all YAML files by shot and run numbers in sdata structure
   # ---------------------------------------------------------------
   # Sort data as a function of shot and then run numbers
-  sorted_indices = sorted(data, key = lambda x: data[x]['characteristics']['shot'] + 0.001*data[x]['characteristics']['run'])
+  if sort_by_date:
+      sorted_indices = sorted(data, key = lambda x: data[x]['lastmodified'])
+  else:
+      sorted_indices = sorted(data, key = lambda x: data[x]['characteristics']['shot'] + 0.001*data[x]['characteristics']['run'])
+
   sdata = {}
   for i in range(len(data)):
-    sdata[i] = data[sorted_indices[i]]
+      sdata[i] = data[sorted_indices[i]]
 
   # ---------------------------------
   # Reference name for each variable
@@ -81,6 +87,7 @@ def rec(data={},path=os.getcwd(),extension='.yaml',choice=['shot','run','ip','b0
   disp_tsteps      = '#time steps'
   disp_location    = 'Location'
   disp_composition = 'Composition X[ni/ne]'
+  disp_date        = 'Date'
 
   # ---------------------------------------------------
   # Calculate the optimized tabulation for each column
@@ -113,6 +120,7 @@ def rec(data={},path=os.getcwd(),extension='.yaml',choice=['shot','run','ip','b0
   tab_location    = 0
   tab_composition = 0
   nspecies_max    = 0
+  tab_date        = 0
   for i in range(len(sdata)):
     tab_ref_name    = max(max(len(str(sdata[i].get('reference_name')[0:trunc_number])),tab_ref_name),len(disp_ref_name))
     tab_ro_name     = max(max(len(str(sdata[i].get('responsible_name'))),tab_ro_name),len(disp_ro_name))
@@ -142,8 +150,10 @@ def rec(data={},path=os.getcwd(),extension='.yaml',choice=['shot','run','ip','b0
     tab_location    = max(max(len(str(sdata[i].get('location'))),tab_location),len(disp_location))
     tab_composition = max(max(len(str(sdata[i].get('plasma_composition').get('species'))),tab_composition),len(disp_composition))
     nspecies_max    = max(len(sdata[i].get('plasma_composition').get('species').split()),nspecies_max)
-  tab_composition = tab_composition+3*nspecies_max+1 # tab_composition allows for concentration in format (0.xxx), here we pad to fit the (x.xxe-xx) format
+    tab_composition = tab_composition+3*nspecies_max+1 # tab_composition allows for concentration in format (0.xxx), here we pad to fit the (x.xxe-xx) format
 
+  tab_date = 19 # format dd-mm-YYYY HH:MM:SS
+    
   # --------------
   # Table heading
   # --------------
@@ -194,7 +204,8 @@ def rec(data={},path=os.getcwd(),extension='.yaml',choice=['shot','run','ip','b0
       location      = sdata[i].get('location')
       composition   = sdata[i].get('plasma_composition').get('species')
       composition_x = sdata[i].get('plasma_composition').get('n_over_ne')
-
+      date          = datetime.fromtimestamp(int(sdata[i].get('lastmodified')))
+      
       # Number of time steps in the scenario
       tstep = -99
       if 'summary' in idslist.keys():
@@ -285,6 +296,8 @@ if __name__ == "__main__":
                         "fields listed separately (-s A -s B) means selecting for either A or B\n"\
                         "----> Select only scenarios filling these criteria"\
                         , required=False)
+    parser.add_argument("-d","--sort-by-date",action="store_true",help=\
+                        "sort results by date of their last modification")
     parser.add_argument("-c","--choice", help=\
                         "R|list of variables to display, e.g.: shot,run,ip,b0\n"\
                         "... available among following variables:\n"\
@@ -314,6 +327,7 @@ if __name__ == "__main__":
                         "        tsteps      = Number of time steps in the scenario\n"\
                         "        location    = Location of the full description file\n"\
                         "        composition = Plasma composition\n"\
+                        "        date        = Date of last modification of the dataset\n"\
                         , required=False)
 
     args = vars(parser.parse_args())
@@ -334,6 +348,7 @@ if __name__ == "__main__":
     else:
         selection = None
 
+       
     # Choice of variables to display
     if args['choice'] != None:
         try:
@@ -347,7 +362,7 @@ if __name__ == "__main__":
             print("------------------------------------------------------------------", file=sys.stderr)
             sys.exit(1)
     else:
-        choice = ['shot','run','database','ref_name','ip','b0','fuelling','confinement','workflow']
+        choice = ['shot','run','database','ref_name','ip','b0','fuelling','confinement','workflow','date']
 
     # Default extension, search folder and choice of variables to display
     data = {}
@@ -356,10 +371,10 @@ if __name__ == "__main__":
     # Print the arguments of the default call to the function
     if args['choice'] == None:
         print("""----> Default call equivalent to: """)
-        print("""      scenario_summary -c shot,run,database,ref_name,ip,b0,fuelling,confinement,workflow""")
+        print("""      scenario_summary -c shot,run,database,ref_name,ip,b0,fuelling,confinement,workflow,date""")
 
     # Call the function
-    table = rec(data=data,path=folder,extension=ext,choice=choice,selection=selection)
+    table = rec(data=data,path=folder,extension=ext,choice=choice,selection=selection,sort_by_date=args['sort_by_date'])
 
     # Display the clean formatted table
     for i in range(len(table)):
