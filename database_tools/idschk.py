@@ -161,7 +161,9 @@ class COCOS:
         """
 
         if (index is None) and (values is None):
-            raise ValueError("Initialize COCOS with either index or values: both not given")
+            raise ValueError(
+                "Initialize COCOS with either index or values: both not given"
+            )
             return
 
         elif (index is not None) and (values is not None):
@@ -540,12 +542,12 @@ class IDSValidator(cerberus.Validator):
     coord: list
         name of coordinate
     ndim: int
-        number of dimension 
+        number of dimension
     """
 
     cocos = {}
-    #shape = []
-    #coord = []
+    # shape = []
+    # coord = []
     ndim = None
 
     def set_cocos(self, cocos):
@@ -710,7 +712,8 @@ class IDSValidator(cerberus.Validator):
                     if self.shape[i] != value.shape[i]:
                         if not constraint:
                             msg = "size of coordinate{}|{} = {}, expected as {}".format(
-                                  str(i + 1), self.coord[i], value.shape[i], self.shape[i])
+                                str(i + 1), self.coord[i], value.shape[i], self.shape[i]
+                            )
                             self._error(field, msg)
             except ValueError:
                 pass
@@ -971,6 +974,32 @@ def compute_COCOS(ids, cocos_check=None):
 # ----------------------------------------------------------------------
 
 
+def dict_to_yaml(din):
+    """Transform python dictionary to string in yaml
+
+    Parameters
+    ----------
+    din: dict
+       dict to be transformed to yaml string
+
+    Returns
+    -------
+    yaml.dump: str
+       string in yaml format
+    """
+
+    return yaml.dump(
+        din,
+        indent=4,
+        default_flow_style=False,
+        sort_keys=False,
+        width=float("inf"),
+    )
+
+
+# ----------------------------------------------------------------------
+
+
 def load_XML(fpath):
     """Read XML file and Retrun as ElementTree
 
@@ -1040,7 +1069,7 @@ def load_DD(idsname):
     """
 
     root = load_XML(FILE_IDSDef)
-    dd =  [dd for dd in root if dd.get("name") == idsname][0]
+    dd = [dd for dd in root if dd.get("name") == idsname][0]
 
     return dd
 
@@ -1064,11 +1093,19 @@ def eval_IDSs(s):
     flag = True
     if s:
         d_ids = yaml.safe_load(s)
+        #1st level for IDSs
         for k_ids, d_occ in d_ids.items():
+            #2nd level for occurences
             for k_occ, val in d_occ.items():
-                if val:
-                    flag = False
-                    break
+                #3rd level
+                if args_verbose:
+                    if not(val["remark"]):
+                        flag = False
+                        break
+                else:
+                    if val:
+                        flag = False
+                        break
             if not flag:
                 break
     else:
@@ -1160,7 +1197,7 @@ def ids_iterator(ids, schema, dd, cocos, occ=0):
 # ----------------------------------------------------------------------
 
 
-def init_schema_coordinate(idsname, dd=None, rule={"ids_dim":False}):
+def init_schema_coordinate(idsname, dd=None, rule={"ids_dim": False}):
     """Return validation schema and Data Dictionary (DD)
 
     Parameters
@@ -1194,13 +1231,13 @@ def init_schema_coordinate(idsname, dd=None, rule={"ids_dim":False}):
         path_doc = field.attrib.get("path_doc")
 
         # validata for data_type = INT_*D and FLT_*D
-        if (data_type and re.search("^(INT|FLT)_([1-9])D$", data_type) is not None):
+        if data_type and re.search("^(INT|FLT)_([1-9])D$", data_type) is not None:
 
             # skip validation for error_upper and error_lower
             if re.search("_error_(upper|lower)", path_doc) is None:
                 d[path_doc] = rule
 
-    schema = {idsname:d}
+    schema = {idsname: d}
 
     return schema, ddo
 
@@ -1237,8 +1274,8 @@ def ids_validator(
     -------
     eval_IDSs(dump): boolean
         Validation result in type boolean
-    dump: str
-        Validation result in YAML
+    out: dict
+        Validation result in type dict
     """
 
     # Schema Initialization
@@ -1267,19 +1304,11 @@ def ids_validator(
     args_check_all = check_all
 
     # Check for Target IDS
-    dump = ""
+    out = {}
     if ids.__name__ in schema:
         out = ids_iterator(ids, schema, dd, cocos, occ=occ)
-        if out[ids.__name__]:
-            dump = yaml.dump(
-                out,
-                indent=4,
-                default_flow_style=False,
-                sort_keys=False,
-                width=float("inf"),
-            )
 
-    return eval_IDSs(dump), dump.strip()
+    return eval_IDSs(dict_to_yaml(out)), out
 
 
 # ----------------------------------------------------------------------
@@ -1322,11 +1351,63 @@ def ids_cocos_check(ids, verbose=False):
 
     Returns
     -------
-    eval_IDSs(dump): boolean
+    remark: boolean
         Validation result in type boolean
-    dump: str
-        Validation result in YAML
+    error: dict
+        Validation result in type dict
     """
+
+    remark = False
+    error = {}
+    key = "COCOS"
+
+    if ids.__name__ == "equilibrium":
+        try:
+            cocos = compute_COCOS(ids)
+        except Exception as e:
+            exit("cannot compute COCOS: {}".format(e))
+        # set remark
+        if cocos[key] == IDS_COCOS:
+            remark = True
+        # set error
+        if verbose:
+            error = {key: cocos}
+        else:
+            error = {key: cocos[key]}
+    else:
+        exit("equilibrium instead of {}".format(ids.__name__))
+
+    return remark, error
+
+
+# ----------------------------------------------------------------------
+
+
+def ids_compute_cocos(ids):
+    """Function Interface for computing COCOS
+
+    Parameters
+    ----------
+    ids: IDS
+        IDS for cocos estimation
+
+    Returns
+    -------
+    cocos: int
+        COCOS number computed
+    """
+
+    key = "COCOS"
+
+    if ids.__name__ == "equilibrium":
+        try:
+            cocos = compute_COCOS(ids)
+        except Exception as e:
+            exit("cannot compute COCOS: {}".format(e))
+    else:
+        exit("equilibrium instead of {}".format(ids.__name__))
+
+    return cocos[key]
 
 
 # ----------------------------------------------------------------------
