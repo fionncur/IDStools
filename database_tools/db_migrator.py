@@ -1,4 +1,4 @@
-# Migrates IDS data from specified database to a desired folder, also converting data to desired backend
+# Migrates IDS data from a database to a desired folder, also converting data to desired backend
 
 import imas
 from imas import imasdef
@@ -38,7 +38,7 @@ if backend == imas.imasdef.MDSPLUS_BACKEND:
 elif backend == imas.imasdef.HDF5_BACKEND:
     files = hdf5ListPulseRun(locpath)
 
-for pulse in files: #tqdm(files) if progbar else files:
+for pulse in tqdm(files) if progbar else files:
     idsinf = []
     run = pulse[1]
     src = imas.DBEntry(backend, args.database, pulse[0], run, args.user)
@@ -55,7 +55,7 @@ for pulse in files: #tqdm(files) if progbar else files:
         if args.validate:
             idsobj2 = dest.get(idsname, occurrence=inocc)
             same = compare(idsobj, idsobj2, verb=False)
-            idsinf.append((idsname,same,ids_validator(idsobj,os.path.abspath(os.path.dirname( __file__ ))+'/required_fields_core.yml')[0]))
+            idsinf.append((idsname, same, ids_validator(idsobj, os.path.abspath(os.path.dirname(__file__))+'/required_fields_core.yml')[0]))
             #del idsobj2
 
         #del idsobj
