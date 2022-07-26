@@ -1,4 +1,5 @@
-# From IDS to readable CSV
+# Return values of an IDS in all data entries of a database
+
 import imas
 import os
 from imas import imasdef
@@ -20,13 +21,15 @@ except ModuleNotFoundError:
     
 def get_status(path):
     """ Function that returns the status in the given yaml file
+
     Parameter
     ---------
     path: str or Path
     """
+
     p = Path(path)
     try:
-        with open(p,"r") as f:
+        with open(p, "r") as f:
             metadata = yaml.safe_load(f)
     except FileNotFoundError as exc:
         print(exc)
@@ -38,7 +41,8 @@ def get_status(path):
 
 def mdsListPulseRun(locpath, with_status=None):
     """ Function that lists Pulse and Run numbers from a given database, in MDSPLUS
-    Parameter
+
+    Parameters
     ---------
     locpath: str or Path
         Path in which the database files are stored
@@ -49,14 +53,15 @@ def mdsListPulseRun(locpath, with_status=None):
     -------
     list of tuple (pulse,run) 
     """
+
     locpath = Path(locpath).expanduser()
     if not locpath.exists():
         raise FileNotFoundError("The path provided does not exist or has no such database file or directory. Please check spelling.")
     pulses = []
     # folder = Path(locpath).glob('**/*.datafile') # --> does not work with linked subfolders (https://bugs.python.org/issue33428)
-    folder = glob(str(locpath)+"/**/*.datafile",recursive=True) 
+    folder = glob(str(locpath)+"/**/*.datafile", recursive=True)
     for entry in folder:
-        if (with_status is None) or (with_status==get_status(entry.with_suffix(".yaml"))):
+        if (with_status is None) or (with_status == get_status(entry.with_suffix(".yaml"))):
             file = str(entry).split('/')[-1].split('_')[1].split('.')[0]
             if len(file) <= 4:
                 pulse = 0
@@ -69,6 +74,7 @@ def mdsListPulseRun(locpath, with_status=None):
 
 def hdf5ListPulseRun(locpath):
     """ Function that lists Pulse and Run numbers from a given database, in HDF5
+
     Parameter
     ---------
     locpath: str or Path
@@ -78,6 +84,7 @@ def hdf5ListPulseRun(locpath):
     -------
     list of tuple (pulse,run) 
     """
+
     locpath = Path(locpath).expanduser()
     if not locpath.exists():
         raise FileNotFoundError("The path provided does not exist or has no such database file or directory. Please check spelling.")
@@ -93,6 +100,7 @@ def hdf5ListPulseRun(locpath):
 
 def getDBPath(user, database, version):
     """ Function that returns a pathlib Path to desired database, depending on the user, database and version names.
+
     Parameters
     ---------
     user: str
@@ -108,14 +116,17 @@ def getDBPath(user, database, version):
     -------
     pathlib.Path
     """
+
     if user == 'public':
         locpath = Path(os.environ['IMAS_HOME'] + '/shared/imasdb/' + database + "/" + version)
     else:
         locpath = Path(os.path.expanduser('~' + user) + "/public/imasdb/" + database + "/" + version)
     return locpath
 
+
 def ids_extract(user, database, version, backend, idspath, pulses):
     """ Function that returns a pandas dataframe displaying all values of given IDSs extracted by the function.
+
     Parameters
     ---------
     user: str
@@ -130,10 +141,10 @@ def ids_extract(user, database, version, backend, idspath, pulses):
     backend: str
         Name of backend of the database in which the data is harbored (currently supports only MDSPLUS and HDF5)
 
-    idspath: list of strings
-        IDS path (starting with IDS name) to the desired data to be collected (e.g equilibrium/time)
+    idspath: str
+        IDS path (starting with IDS name) to the desired data to be collected (e.g 'equilibrium/time')
 
-    lofpulses: list of tuples
+    pulses: list of tuples
         List of tuples containing (Pulse, Run)
 
     Returns
@@ -169,7 +180,7 @@ if __name__ == "__main__":
     parser.add_argument("idspath", type=str, nargs="*", help="IDS path(s) (starting with IDS name) to the desired data to be collected, e.g equilibrium/time")
     parser.add_argument("--saveas", type=str, help="Path to directory ending with name of file to save retrieved data")
     parser.add_argument("-i", "--index", action="store_true", help="Should index be shown in final .csv file?")
-    parser.add_argument("-V","--Verbose", action="store_true", help="Verbose mode")
+    parser.add_argument("-verb", "--verbose", action="store_true", help="Verbose mode")
     args = parser.parse_args()
     database = args.database
     idspath = args.idspath
@@ -178,7 +189,7 @@ if __name__ == "__main__":
 
     df = ids_extract(args.user, args.database, args.version, args.backend, args.idspath, pulses=mdsListPulseRun(locpath) if args.backend == imas.imasdef.MDSPLUS_BACKEND else hdf5ListPulseRun(locpath))
 
-    if args.Verbose or not args.saveas:
+    if args.verbose or not args.saveas:
         print(df)
 
     if args.saveas:
@@ -187,5 +198,3 @@ if __name__ == "__main__":
                 "The path provided does not exist or has no such database file or directory. Please check spelling.")
         saveresultsin = Path(r'' + args.saveas + '.csv')
         df.to_csv(saveresultsin, na_rep='None', index=args.index, header=True)
-
-
