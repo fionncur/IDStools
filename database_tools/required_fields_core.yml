@@ -285,6 +285,7 @@ summary:
         empty: False
         ids_nan: False
         ids_inf: False
+        ids_ge: 0.0
     global_quantities/v_loop/value(:):
         empty: False
         ids_nan: False
