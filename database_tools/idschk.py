@@ -149,7 +149,7 @@ class COCOS:
     default = {"COCOS": 11, "ipsign": -1, "b0sign": -1}
     TWOPI = 6.283185307179586476925286766559005768394
 
-    def __init__(self, index=default, values=None):
+    def __init__(self, index=None, values=None):
         """Initialize COCOS Index and Values
 
         Parameters
@@ -161,9 +161,14 @@ class COCOS:
         """
 
         if (index is None) and (values is None):
-            raise ArgumentError("Initialize COCOS with either index or values")
+            raise ValueError("Initialize COCOS with either index or values: both not given")
             return
 
+        elif (index is not None) and (values is not None):
+            raise ValueError("Initialize COCOS with either index or values: both given")
+            return
+
+        # in case of init. by index
         elif index is not None:
 
             COCOS = index["COCOS"]
@@ -231,6 +236,7 @@ class COCOS:
             self.sign_pprime_pos = sign_pprime_pos
             self.theta_sign_clockwise = theta_sign_clockwise
 
+        # in case of init. by values
         else:
 
             sigma_Ip = values["ipsign"]
@@ -1299,6 +1305,28 @@ def ids_coordinate_check(ids, verbose=False):
 
     schema, dd = init_schema_coordinate(ids.__name__)
     return ids_validator(ids, schema, dd=dd, verbose=verbose)
+
+
+# ----------------------------------------------------------------------
+
+
+def ids_cocos_check(ids, verbose=False):
+    """Function Interface for IDS Validation on COCOS
+
+    Parameters
+    ----------
+    ids: IDS
+        IDS for validation
+    verbose: boolean=False
+        Increase output verbosity if true
+
+    Returns
+    -------
+    eval_IDSs(dump): boolean
+        Validation result in type boolean
+    dump: str
+        Validation result in YAML
+    """
 
 
 # ----------------------------------------------------------------------
