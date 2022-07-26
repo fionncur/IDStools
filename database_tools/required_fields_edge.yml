@@ -26,7 +26,7 @@ edge_profiles:
         empty: False
         ids_nan: False
         ids_inf: False
-        ids_gt: 0.0
+        ids_ge: 0.0
     ggd(itime)/electrons/velocity(i1)/values(:):
         empty: False
         ids_nan: False

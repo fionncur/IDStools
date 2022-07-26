@@ -1365,7 +1365,7 @@ def ids_cocos_check(ids, verbose=False):
         try:
             cocos = compute_COCOS(ids)
         except Exception as e:
-            exit("cannot compute COCOS: {}".format(e))
+            exit("Cannot compute COCOS: {}".format(e))
         # set remark
         if cocos[key] == IDS_COCOS:
             remark = True
@@ -1403,7 +1403,7 @@ def ids_compute_cocos(ids):
         try:
             cocos = compute_COCOS(ids)
         except Exception as e:
-            exit("cannot compute COCOS: {}".format(e))
+            exit("Cannot compute COCOS: {}".format(e))
     else:
         exit("equilibrium instead of {}".format(ids.__name__))
 

@@ -40,10 +40,12 @@ core_profiles:
         empty: False
         ids_nan: False
         ids_inf: False
+        ids_ge: 0.0
     global_quantities/beta_tor_norm(:):
         empty: False
         ids_nan: False
         ids_inf: False
+        ids_ge: 0.0
     global_quantities/current_bootstrap(:):
         empty: False
         ids_nan: False
@@ -56,12 +58,14 @@ core_profiles:
         empty: False
         ids_nan: False
         ids_inf: False
+        ids_ge: 0.0
     global_quantities/ip(:):
         empty: False
         ids_nan: False
         ids_inf: False
         ids_gt: -17.0e6
         ids_le: 0.0
+        ids_ip_like: False
     global_quantities/v_loop(:):
         empty: False
         ids_nan: False
@@ -84,10 +88,12 @@ core_profiles:
         empty: False
         ids_nan: False
         ids_inf: False
+        ids_ge: 0.0
     profiles_1d(itime)/electrons/pressure_fast_perpendicular(:):
         empty: False
         ids_nan: False
         ids_inf: False
+        ids_ge: 0.0
     profiles_1d(itime)/electrons/pressure_thermal(:):
         empty: False
         ids_nan: False
@@ -140,14 +146,17 @@ core_profiles:
         empty: False
         ids_nan: False
         ids_inf: False
+        ids_ge: 0.0
     profiles_1d(itime)/ion(i1)/pressure_fast_perpendicular(:):
         empty: False
         ids_nan: False
         ids_inf: False
+        ids_ge: 0.0
     profiles_1d(itime)/ion(i1)/pressure_thermal(:):
         empty: False
         ids_nan: False
         ids_inf: False
+        ids_ge: 0.0
     profiles_1d(itime)/ion(i1)/temperature(:):
         empty: False
         ids_nan: False
@@ -194,10 +203,12 @@ core_profiles:
         empty: False
         ids_nan: False
         ids_inf: False
+        ids_ge: 0.0
     profiles_1d(itime)/pressure_perpendicular(:):
         empty: False
         ids_nan: False
         ids_inf: False
+        ids_ge: 0.0
     profiles_1d(itime)/q(:):
         empty: False
         ids_nan: False
@@ -212,6 +223,7 @@ core_profiles:
         empty: False
         ids_nan: False
         ids_inf: False
+        ids_ge: 1.0
 
 #
 summary:
@@ -238,6 +250,7 @@ summary:
         empty: False
         ids_nan: False
         ids_inf: False
+        ids_ge: 0.0
     global_quantities/current_bootstrap/value(:):
         empty: False
         ids_nan: False
@@ -274,6 +287,8 @@ summary:
         empty: False
         ids_nan: False
         ids_inf: False
+        ids_ge: 0
+        ids_le: 1
     global_quantities/ip/value(:):
         empty: False
         ids_nan: False
@@ -299,3 +314,4 @@ summary:
         empty: False
         ids_nan: False
         ids_inf: False
+        ids_ge: 1.0

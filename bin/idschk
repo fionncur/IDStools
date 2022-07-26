@@ -62,12 +62,12 @@ def main():
                         time, itime = find_time(idstime, args.time)
                         ids = db.get_slice(idsname, time, 1, occurrence=occ)
                 except Exception as e:
-                    print("cannot retrieve IDS/{}: {}".format(idsname,e))
+                    print("Cannot retrieve IDS/{}: {}".format(idsname,e))
                 #
                 try:
                     flag, dump = ids_cocos_check(ids, verbose=args.verbose)
                 except Exception as e:
-                    exit("cannot compute COCOS: {}".format(e))
+                    exit("Cannot compute COCOS: {}".format(e))
                 #
                 buf.update({"occurence(" + str(occ) + ")": dump})
 
@@ -98,7 +98,7 @@ def main():
                                 time, itime = find_time(idstime, args.time)
                                 ids = db.get_slice(idsname, time, 1, occurrence=occ)
                         except Exception as e:
-                            print("cannot retrieve IDS/{}: {}".format(idsname,e))
+                            print("Cannot retrieve IDS/{}: {}".format(idsname,e))
                         #
                         flag, dout = ids_validator(
                             ids,
