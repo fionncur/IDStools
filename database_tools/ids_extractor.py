@@ -61,13 +61,13 @@ def mdsListPulseRun(locpath, with_status=None):
     # folder = Path(locpath).glob('**/*.datafile') # --> does not work with linked subfolders (https://bugs.python.org/issue33428)
     folder = glob(str(locpath)+"/**/*.datafile", recursive=True)
     for entry in folder:
-        if (with_status is None) or (with_status == get_status(entry.with_suffix(".yaml"))):
-            file = str(entry).split('/')[-1].split('_')[1].split('.')[0]
+        if (with_status is None) or (with_status == get_status(Path(entry).with_suffix(".yaml"))):
+            file = entry.split('/')[-1].split('_')[1].split('.')[0]
             if len(file) <= 4:
                 pulse = 0
             else:
                 pulse = int(file[0:-4])
-            run = int(file[-4:]) + 10000 * int(str(entry).split('/')[-2])
+            run = int(file[-4:]) + 10000 * int(entry.split('/')[-2])
             pulses.append((pulse, run))
     return pulses
 
