@@ -1326,14 +1326,17 @@ def ids_coordinate_check(ids, verbose=False):
 
     Returns
     -------
-    eval_IDSs(dump): boolean
+    flag: boolean
         Validation result in type boolean
-    dump: str
-        Validation result in YAML
+    out: dict
+        Validation result in type dict
     """
 
     schema, dd = init_schema_coordinate(ids.__name__)
-    return ids_validator(ids, schema, dd=dd, verbose=verbose)
+    flag, out = ids_validator(ids, schema, dd=dd, verbose=False)
+    if verbose:
+        print(dict_to_yaml(out))
+    return flag, out
 
 
 # ----------------------------------------------------------------------
@@ -1372,6 +1375,7 @@ def ids_cocos_check(ids, verbose=False):
         # set error
         if verbose:
             error = {key: cocos}
+            print(dict_to_yaml(error))
         else:
             error = {key: cocos[key]}
     else:

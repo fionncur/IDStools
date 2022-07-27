@@ -121,7 +121,7 @@ if __name__ == "__main__":
         parents=[imas_parser],
         description=textwrap.dedent('''\
             (I) Command Line Interface for IDS Data Validation (idschk)
-            -------------------------------------------------------
+            -----------------------------------------------------------
             Examples:
                 0) load IMAS
                 $ module load IMAS
@@ -140,7 +140,7 @@ if __name__ == "__main__":
                 $ idschk -s 131024 -r 40 -c --verbose
 
             (II) Functional Interface in Python (database_tools/idschk.py)
-            ---------------------------------------------------------
+            --------------------------------------------------------------
             Examples: 
                 0) Initialization
                 >>> import imas
