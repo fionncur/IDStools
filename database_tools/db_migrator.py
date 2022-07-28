@@ -20,10 +20,10 @@ except ModuleNotFoundError:
     progbar = False
 
 
-parser = argparse.ArgumentParser(description='Copy all IDSs in given directory into a chosen one', parents=[imas_parser])
-parser.add_argument("-do", "--database_out", type=str, default="migrations", help="Name of destination database")
-parser.add_argument("-bo", "--backend_output", type=str, default="HDF5", help="Desired backend for destination data-entry (default=HDF5)")
-parser.add_argument("--skip-obsolete", action="store_true", help="")
+parser = argparse.ArgumentParser(description='Copy all data-entries from one database into another one', parents=[imas_parser])
+parser.add_argument("-do", "--database_out", type=str, required=True, help="Name of destination database")
+parser.add_argument("-bo", "--backend_output", type=str, required=True, help="Desired backend for destination data-entry")
+parser.add_argument("--skip-obsolete", action="store_true", help="Do not copy data that have been marked obsolete (ITER scenarios only)")
 parser.add_argument("--validate", action="store_true", help="Performs diff and validation of the migrated data")
 args = parser.parse_args()
 
@@ -56,20 +56,15 @@ for pulse in tqdm(files) if progbar else files:
             idsobj2 = dest.get(idsname, occurrence=inocc)
             same = compare(idsobj, idsobj2, verb=False)
             idsinf.append((idsname, same, ids_validator(idsobj, os.path.abspath(os.path.dirname(__file__))+'/required_fields_core.yml')[0]))
-            #del idsobj2
-
-        #del idsobj
 
     src.close()
-    #del src
     dest.close()
-    #del dest
         
     log.append(idsinf)
 
 
-df = pd.DataFrame(files, columns=['PULSE', 'RUN'])
-df['IDS STATUS | Validation'] = log
-
-date = datetime.now().strftime("%Y_%m_%d-%I:%M:%S_%p")
-df.to_csv(args.database_out + " migration_log--" + date + ".csv", na_rep='None', index=False, header=True)
+if args.validate:    
+    df = pd.DataFrame(files, columns=['PULSE', 'RUN'])
+    df['IDS STATUS | Validation'] = log
+    date = datetime.now().strftime("%Y_%m_%d-%I:%M:%S_%p")
+    df.to_csv(args.database_out + " migration_log--" + date + ".csv", na_rep='None', index=False, header=True)
