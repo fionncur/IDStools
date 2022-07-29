@@ -50,10 +50,12 @@ core_profiles:
         empty: False
         ids_nan: False
         ids_inf: False
+        ids_ip_like: False
     global_quantities/current_non_inductive(:):
         empty: False
         ids_nan: False
         ids_inf: False
+        ids_ip_like: False
     global_quantities/energy_diamagnetic(:):
         empty: False
         ids_nan: False
@@ -70,6 +72,7 @@ core_profiles:
         empty: False
         ids_nan: False
         ids_inf: False
+        ids_ip_like: False
     profiles_1d(itime)/e_field/radial(:):
         empty: False
         ids_nan: False
@@ -117,6 +120,7 @@ core_profiles:
         empty: False
         ids_nan: False
         ids_inf: False
+        ids_psi_like: False
     profiles_1d(itime)/grid/volume(:):
         empty: False
         ids_nan: False
@@ -255,14 +259,17 @@ summary:
         empty: False
         ids_nan: False
         ids_inf: False
+        ids_ip_like: False
     global_quantities/current_no_inductive/value(:):
         empty: False
         ids_nan: False
         ids_inf: False
+        ids_ip_like: False
     global_quantities/current_ohm/value(:):
         empty: False
         ids_nan: False
         ids_inf: False
+        ids_ip_like: False
     global_quantities/energy_diamagnetic/value(:):
         empty: False
         ids_nan: False
@@ -305,6 +312,7 @@ summary:
         empty: False
         ids_nan: False
         ids_inf: False
+        ids_ip_like: False
     local/separatrix/n_e/value(:):
         empty: False
         ids_nan: False
