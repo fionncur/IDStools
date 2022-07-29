@@ -586,14 +586,19 @@ def eval_COCOS(s):
 
     flag = True
     if s:
-        d_cocos = yaml.safe_load(s)
-        if int(d_cocos['COCOS']) != IDS_COCOS:
-            flag = False
+        d_ids = yaml.safe_load(s)
+        for k_ids, d_occ in d_ids.items():
+            for k_occ, val in d_occ.items():
+                if val != IDS_COCOS:
+                    flag = False
+                    break
+            if not flag:
+                break
     return flag
-    
+
 
 def eval_IDSs(s):
-    """ Return True if IDSs validates """
+    """ Return True if IDSs validate """
 
     flag = True
     if s:

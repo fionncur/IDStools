@@ -9,6 +9,7 @@ from database_tools import idschk
 from database_tools.idschk import *
 from idstools.cli import *
 
+
 # ----------------------------------------------------------------------
 
 
@@ -36,33 +37,45 @@ def main():
     index = {"COCOS": idschk.IDS_COCOS, "ipsign": args.ipsign, "b0sign": args.b0sign}
     cocos = COCOS(index=index).get()
 
-    # Validate COCOS in IDS/equilibrium
-    # To-Do
-    # - COCOS Validation for multiple occurences
-    # - get_slice() instead of get()
-    if args.cocos:
-        try:
-            ids = db.get("equilibrium", 0)
-            cocos2 = compute_COCOS(ids, cocos_check=cocos)
-        except Exception as e:
-            exit("cannot compute COCOS: {}".format(e))
+    # Load IMAS-DD File
+    root = load_XML(idschk.FILE_IDSDef)
 
-        if cocos2["COCOS"] == cocos["COCOS"]:
-            print("COCOS: {}".format(cocos2["COCOS"]))
-        else:
-            dump = yaml.dump(
-                {"COCOS Indication": cocos2},
-                indent=4,
-                default_flow_style=False,
-                sort_keys=False,
-            )
-            print(dump)
+
+    # Validate COCOS in IDS/equilibrium
+    if args.cocos:
+
+        idsname = "equilibrium"
+        dd0 = [dd for dd in root if dd.get("name") == idsname][0]
+        maxoc = int(dd0.get("maxoccur"))
+        #
+        buf = {}
+        for occ in range(maxoc):
+            idsprop = db.partial_get(idsname, "ids_properties", occurrence=occ)
+            if idsprop.homogeneous_time in [0, 1, 2]:
+                #
+                try:
+                    idstime = db.partial_get(idsname, "time", occurrence=occ)
+                    #
+                    if (args.time is None) or (idstime is None):
+                        ids = db.get(idsname, occurrence=occ)
+                    else:
+                        time, itime = find_time(idstime, args.time)
+                        ids = db.get_slice(idsname, time, 1, occurrence=occ)
+                except Exception as e:
+                    print("Cannot retrieve IDS/{}: {}".format(idsname,e))
+                #
+                try:
+                    flag, dump = ids_cocos_check(ids, verbose=args.verbose)
+                except Exception as e:
+                    exit("Cannot compute COCOS: {}".format(e))
+                #
+                buf.update({"occurence(" + str(occ) + ")": dump})
+
+        print(dict_to_yaml({"equilibrium":buf}))
+
 
     # IDS Validation
     if args.schema_file:
-
-        # Load IMAS-DD File
-        root = load_XML(idschk.FILE_IDSDef)
 
         # Schema Initialization
         schema = load_YAML(args.schema_file)
@@ -85,9 +98,9 @@ def main():
                                 time, itime = find_time(idstime, args.time)
                                 ids = db.get_slice(idsname, time, 1, occurrence=occ)
                         except Exception as e:
-                            exit("cannot retrieve IDS: {}".format(e))
+                            print("Cannot retrieve IDS/{}: {}".format(idsname,e))
                         #
-                        flag, dump = ids_validator(
+                        flag, dout = ids_validator(
                             ids,
                             schema,
                             dd=dd0,
@@ -95,15 +108,63 @@ def main():
                             verbose=args.verbose,
                             check_all=True,
                         )
-                        print(dump)
+                        print(dict_to_yaml(dout))
 
 
 # ----------------------------------------------------------------------
-
+import textwrap
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="IDS Data Validation Tool", parents=[imas_parser]
+        prog="idschk",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        parents=[imas_parser],
+        description=textwrap.dedent('''\
+            (I) Command Line Interface for IDS Data Validation (idschk)
+            -----------------------------------------------------------
+            Examples:
+                0) load IMAS
+                $ module load IMAS
+
+                1) Validate if ITER Scenario meets with physics requirements
+                $ idschk -s 131024 -r 40 -f path/to/schema_file/required_fields_core.yml
+
+                2) Same with 1) and only for one time slice. Specify time, otherwise middle point if blank
+                $ idschk -s 131024 -r 40 -f path/to/schema_file/required_fields_core.yml -t 100.
+                $ idschk -s 131024 -r 40 -f path/to/schema_file/required_fields_core.yml -t
+
+                3) Check IDS/equilibrium for COCOS
+                $ idschk -s 131024 -r 40 -c
+
+                4) Check IDS/equilibrium with COCOS values
+                $ idschk -s 131024 -r 40 -c --verbose
+
+            (II) Functional Interface in Python (database_tools/idschk.py)
+            --------------------------------------------------------------
+            Examples: 
+                0) Initialization
+                >>> import imas
+                >>> from database_tools.idschk import * 
+                >>> input = imas.ids(131024,40)
+                >>> input.open_env("public","ITER","3")
+                >>> equilibrium=input.equilibrium
+                >>> equilibrium.get()
+
+                1) Validate if ITER Scenario meets with physics requirements
+                >>> flag, log = ids_validator(equilibrium, 'path/to/schema_file/required_fields_core.yml')
+
+                2) Validate length of coordinate for INT_*D and FLT_*D
+                >>> flag, log = ids_coordinate_check(equilibrium)
+
+                3) Same with 2), increasing verbosity,
+                >>> flag, log = ids_coordinate_check(equilibrium, verbose=True)
+
+                4) Compute COCOS
+                >>> cocos = ids_compute_cocos(equilibrium)
+
+                5) Get COCOS values
+                >>> flag, log = ids_cocos_check(equilibrium, verbose=True)
+            ''')
     )
     parser.add_argument(
         "-s", "--shot", dest="shot", help="Shot number", required=True, type=int
