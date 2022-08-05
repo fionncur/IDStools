@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 
-import imas,os,sys,argparse,matplotlib,pdb
+import imas,os,sys,argparse,matplotlib
 import numpy as np
-import matplotlib
 matplotlib.use('TKagg')
 from matplotlib import gridspec
 import matplotlib.pyplot as plt
+from idstools.cli import *
 
 # Example of call:
 # ./ecray -s [130012,130012] -r [24,23] -u schneim -d iter
@@ -15,8 +15,7 @@ def find_nearest(a, a0):
     idx = abs(a - a0).argmin()
     return a.flat[idx],idx
 
-
-#HELPER FUNCTIONS
+# HELPER FUNCTIONS
 def StrToList(string):
     if (string[0]=='['):
         slist = string.split(',')
@@ -27,18 +26,16 @@ def StrToList(string):
     else:
         return [int(string)]    
     
-
-#ARGPARSE - MANAGEMENT OF INPUT ARGUMENTS
+# ARGPARSE - MANAGEMENT OF INPUT ARGUMENTS
 parser = argparse.ArgumentParser(description=\
-'---- Display EC results')
-parser.add_argument('-s','--shot',help="Shot number list, ex: [130012,130013]", required=True,type=str)
+                                 '---- Display EC wave ray-tracing results',
+                                 parents=[imas_parser])
+parser.add_argument('-s','--shot',help="Shot number list, ex: [130012,130013]", required=True)
 parser.add_argument('-r','--run',help="Run number list, ex: [23,24]",required=True,type=str)
-parser.add_argument('-u','--user_or_path',help='User or absolute path name where the data-entry is located', required=False)
-parser.add_argument('-d','--database',help='Database name where the data-entry is located', required=False)
-parser.add_argument('-t','--time',help='Time', required=False,type=float)
+parser.add_argument('-t','--time',help='Time', required=False,type=float,default=-99.0)
 
-args = vars(parser.parse_args())
-shot,run = args['shot'],args['run']
+args = parser.parse_args()
+shot,run = args.shot,args.run
 shot,run = StrToList(shot),StrToList(run)
 
 assert (len(shot)<=len(run)), 'There must be a run number corresponding to each shot'
@@ -46,25 +43,11 @@ if (len(run)>len(shot)):
     assert(len(shot)==1), 'Either give a shot for each run or give a single shot for every run'
     shot = len(run)*shot
 
-if (args['database'] != None):
-    database = args['database']
-else:
-    database = 'iter'
-if (args['user_or_path'] != None):
-    user_or_path = args['user_or_path']
-else:
-    user_or_path = 'public'
-
-# Time
-if args['time'] != None:
-    time = args['time']
-else:
-    time = -99.
 
 # Artificial rotation of beams in top view to make it look nice and realistic for ITER
-# EL-14
 phi_launchers = [0.]*11
-if database == 'iter' or database == 'ITER':
+if 'ITER' in args.database.upper():
+    # EL-14
     phi_launchers[0] = -90.*np.pi/180.
     phi_launchers[1] = -90.*np.pi/180.
     phi_launchers[2] = -90.*np.pi/180.
@@ -82,16 +65,19 @@ if database == 'iter' or database == 'ITER':
     phi_launchers[10] = -130.*np.pi/180.
 
 # Search for adequate time slice for display
+input = imas.DBEntry(get_backend_id(args.backend),args.database,shot[0],run[0],args.user)
+status,_ = input.open()
+if status != 0:
+    print(f'Pulse {args.shot}/{args.run} in DB {args.user}/{args.database}/{args.version} does not exist', file=sys.stderr)
+    print('----> Aborted.', file=sys.stderr)
+    sys.exit(status)
 
-input = imas.DBEntry(imas.imasdef.MDSPLUS_BACKEND,database,shot[0],run[0],user_or_path)
-input.open() 
 waves = input.get('waves')
-
 ntime = len(waves.time)
 timevec = waves.time
 if ntime > 1:
-    if time >= 0:
-        [tc,it] = find_nearest(timevec,time)
+    if args.time >= 0:
+        [tc,it] = find_nearest(timevec,args.time)
     else:
         it = int(ntime/2)
         tc = timevec[it]
@@ -109,7 +95,7 @@ time = tc
 
 # ------------------------------------------------
 
-# Font/Color definition
+# Font/Colour definition
 fontsize = 9
 bndcolor = 'chocolate'
 shotcolors = ['b','r' ,'c' ,'y','m','b']
@@ -126,29 +112,23 @@ height2 = 3
 width_height_2 = (width2, height2)
 plt.figure(figsize=width_height_2)
 
-
 plt.rcParams['axes.grid'] = True
 plt.rcParams['lines.linewidth'] = 1
 plt.rcParams['xtick.major.pad']='1'
 
-#nrow = 6
-#ncol = 2
 nrow = 1
 ncol = 3
 
-#ax_polview = plt.subplot2grid((nrow,ncol), (0,0), rowspan=3)
 ax_polview = plt.subplot2grid((nrow,ncol), (0,0), rowspan=1)
 ax_polview.set_title('Poloidal view (R,Z)',fontsize=fontsize)
 ax_polview.set_xlabel('R [m]',fontsize=fontsize,labelpad=lpad)
 ax_polview.set_ylabel('Z [m]',fontsize=fontsize,labelpad=lpad)
 
-#ax_topview = plt.subplot2grid((nrow,ncol), (4,0), rowspan=2)
 ax_topview = plt.subplot2grid((nrow,ncol), (0,1), rowspan=1)
 ax_topview.set_title('Top View (X,Y)',fontsize=fontsize)
 ax_topview.set_xlabel('X [m]',fontsize=fontsize,labelpad=lpad)
 ax_topview.set_ylabel('Y [m]',fontsize=fontsize,labelpad=lpad)
 
-#ax_powview = plt.subplot2grid((nrow,ncol), (0,1), rowspan=2)
 ax_powview = plt.subplot2grid((nrow,ncol), (0,2), rowspan=1)
 ax_powview.set_title('Power along the beams',fontsize=fontsize)
 ax_powview.set_xlabel('Path length [m]',fontsize=fontsize,labelpad=lpad)
@@ -173,27 +153,78 @@ for i in range(len(shot)):
     color = shotcolors[colorcounter%len(shotcolors)]
     style = shotstyle[colorcounter%len(shotcolors)]
     colorcounter += 1
-    #print('We have used color ' + color + ' for this shot/run')
     print('------------------------------------------------------------')
 
     # Reading in data from run in shot
-    print('Open shot: ' + str(ishot)+', run: '+str(irun)+', user: '+str(user_or_path)+', database: '+str(database))
-    result = imas.DBEntry(imas.imasdef.MDSPLUS_BACKEND,database,ishot,irun,user_or_path)
-    result.open() 
+    print(f'Open pulse: {ishot}/{irun} in DB {args.user}/{args.database}/{args.version}')
+    result = imas.DBEntry(get_backend_id(args.backend),args.database,ishot,irun,args.user)
+    status,_ = result.open() 
+    if status != 0:
+        print(f'Pulse {ishot}/{irun} in DB {args.user}/{args.database}/{args.version} does not exist', file=sys.stderr)
+        print('----> Aborted.', file=sys.stderr)
+        sys.exit(status)
        
     # Reading in waves ids and equilibrium ids
     waves = result.get_slice('waves',time,1)
     equilibrium = result.get_slice('equilibrium',time,1)
 
+    # ------------------------------------------------
+
+    ec_frequency = waves.coherent_wave[0].global_quantities[0].frequency
+
+    n_harm = [1,2,3,4]
+
+    # B-field at the resonance for three first harmonics
+    B_res = [0]*len(n_harm)
+    for i_harm in range(len(n_harm)):
+        B_res[i_harm] = 2*np.pi*ec_frequency*9.1e-31/1.6e-19/n_harm[i_harm]
+
+    # Find (R,Z) rectangular grid of B-field
+    ieq_rect = -99
+    for ieq in range(len(equilibrium.time_slice[it].profiles_2d)):
+        if equilibrium.time_slice[it].profiles_2d[ieq].grid_type.index == 1:
+            ieq_rect = ieq
+
+    if ieq_rect < 0:
+        print('------------------------------------------------')
+        print('No rectangular R,Z grid found in equilibrium IDS')
+        print('--> Abort.')
+        print('------------------------------------------------')
+        sys.exit()
+
+    r = equilibrium.time_slice[it].profiles_2d[ieq_rect].grid.dim1
+    z = equilibrium.time_slice[it].profiles_2d[ieq_rect].grid.dim2
+    b_tot = np.sqrt(\
+                    equilibrium.time_slice[it].profiles_2d[ieq_rect].b_field_r**2 + \
+                    equilibrium.time_slice[it].profiles_2d[ieq_rect].b_field_z**2 + \
+                    equilibrium.time_slice[it].profiles_2d[ieq_rect].b_field_tor**2)
+
+    [nr,nz] = np.shape(b_tot)
+    b_err = 10/nr
+
+    res_layer = {}
+    for i_harm in range(len(n_harm)):
+        res_layer[i_harm] = {}
+        res_layer[i_harm]['r'] = []
+        res_layer[i_harm]['z'] = []
+        for iz in range(nz):
+            [rloc,ir] = find_nearest(b_tot[:,iz],B_res[i_harm])
+            if np.abs(b_tot[ir,iz]-B_res[i_harm]) < b_err:
+                res_layer[i_harm]['r'].append(r[ir])
+                res_layer[i_harm]['z'].append(z[iz])
+
+    # ------------------------------------------------
+    
     if len(waves.code.name)>0:
         print('Code name = ',waves.code.name.upper())
 
     # Reading in 2d structures
-    r2d   = np.array(equilibrium.time_slice[0].profiles_2d[0].r)
-    z2d   = np.array(equilibrium.time_slice[0].profiles_2d[0].z)
-    psi2d = np.array(equilibrium.time_slice[0].profiles_2d[0].psi)
-    if len(equilibrium.time_slice[0].profiles_2d[0].phi) > 0:
-        rho2d = np.sqrt(equilibrium.time_slice[0].profiles_2d[0].phi/np.amax(equilibrium.time_slice[0].profiles_2d[0].phi))
+    r2d   = np.array(equilibrium.time_slice[it].profiles_2d[ieq_rect].r)
+    z2d   = np.array(equilibrium.time_slice[it].profiles_2d[ieq_rect].z)
+    psi2d = np.array(equilibrium.time_slice[it].profiles_2d[ieq_rect].psi)
+    if len(equilibrium.time_slice[it].profiles_2d[ieq_rect].phi) > 0:
+        rho2d = np.sqrt(equilibrium.time_slice[it].profiles_2d[ieq_rect].phi \
+                        /np.amax(equilibrium.time_slice[it].profiles_2d[ieq_rect].phi))
     else:
         rho2d = []
         
@@ -204,10 +235,14 @@ for i in range(len(shot)):
     ax_polview.set_xlim(r2d.min(),r2d.max())
     ax_polview.set_ylim(z2d.min()*0.7,z2d.max()*0.7)
     ax_polview.set_aspect('equal', adjustable='box')
+    for i_harm in range(len(n_harm)):
+        if len(res_layer[i_harm]['r']) > 1:
+            print('Resonance at n = %i'%i_harm)
+            ax_polview.plot(res_layer[i_harm]['r'],res_layer[i_harm]['z'],color='r',linewidth=2)
 
     # Top view plot
-    r0 = equilibrium.time_slice[0].boundary.geometric_axis.r
-    amin  = equilibrium.time_slice[0].boundary.minor_radius
+    r0    = equilibrium.time_slice[it].boundary.geometric_axis.r
+    amin  = equilibrium.time_slice[it].boundary.minor_radius
     phit  = np.linspace(0,2*np.pi,100)
     xpla  = (r0-amin)*np.cos(phit)
     ypla  = (r0-amin)*np.sin(phit)
@@ -220,9 +255,6 @@ for i in range(len(shot)):
     ax_topview.plot(xplap,yplap,color=bndcolor)
     ax_topview.set_xlim((-r0-amin)*1.1,(r0+amin)*1.1)
     ax_topview.set_aspect('equal')
-
-    # Power along path length
-    #ax_powview.set_xlim(2.8,3.8)
 
     # Looping over beams and rays
     nbeam = len(waves.coherent_wave)
@@ -241,9 +273,13 @@ for i in range(len(shot)):
     nray = max(nray_array)
 
     if(nbeam_active>1):
-        print('There are ' + str(nbeam_active) + ' active beam'+int(nbeam_active!=1)*'s and each beam has '+ str(nray) + ' ray'+int(nray!=1)*'s')
+        print('There are ' + str(nbeam_active) + ' active beam'\
+              +int(nbeam_active!=1)*'s and each beam has '+ str(nray)\
+              + ' ray'+int(nray!=1)*'s')
     else:
-        print('There is ' + str(nbeam_active) + ' active beam and each beam has '+ str(nray) + ' ray'+int(nray!=1)*'s')
+        print('There is ' + str(nbeam_active) \
+              + ' active beam and each beam has '\
+              + str(nray) + ' ray'+int(nray!=1)*'s')
 
     stdarrlen = max(max([[len(waves.coherent_wave[ibeam].beam_tracing[0].beam[iray].position.r) 
                           for iray in range(nray)] for ibeam in range(nbeam)])) 
@@ -268,8 +304,8 @@ for i in range(len(shot)):
                 x[ibeam,iray,:] = r[ibeam,iray,:]*np.cos(phi[ibeam,iray,:])
                 y[ibeam,iray,:] = r[ibeam,iray,:]*np.sin(phi[ibeam,iray,:])
 
-                wavespower = waves.coherent_wave[ibeam].beam_tracing[0].beam[iray].electrons.power
-                wavespowerpar =  waves.coherent_wave[ibeam].beam_tracing[0].beam[iray].power_flow_norm.parallel
+                wavespower     = waves.coherent_wave[ibeam].beam_tracing[0].beam[iray].electrons.power
+                wavespowerpar  = waves.coherent_wave[ibeam].beam_tracing[0].beam[iray].power_flow_norm.parallel
                 wavespowerperp = waves.coherent_wave[ibeam].beam_tracing[0].beam[iray].power_flow_norm.perpendicular
                 length = waves.coherent_wave[ibeam].beam_tracing[0].beam[iray].length
                 if (firstloop):
@@ -296,11 +332,11 @@ for i in range(len(shot)):
                                     color=color,linestyle=style)
                     if extra==1:
                       ax_powparview.plot(np.array(length),np.array(wavespowerpar),
-                                       color=color,linestyle=style)
+                                    color=color,linestyle=style)
                       ax_powperpview.plot(np.array(length),np.array(wavespowerperp),
-                                        color=color,linestyle=style)
+                                    color=color,linestyle=style)
 
-ax_powview.legend(loc="upper right", bbox_to_anchor=(1., 0.9),ncol=1, shadow=True, fancybox=True)
+ax_powview.legend(loc="upper left", shadow=True, fancybox=True)
 plt.subplots_adjust(hspace=0.5)
 
 print('------------------------------------------------------------')

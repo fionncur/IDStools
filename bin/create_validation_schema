@@ -1,0 +1,95 @@
+#!/usr/bin/env python
+from os import getenv, path
+import sys
+import re
+import yaml
+import argparse
+import imas
+from xml.etree import ElementTree as ET
+from database_tools.idschk import *
+
+
+IMAS_DIR = "IMAS_PREFIX"
+FILE_IDSDef = getenv(IMAS_DIR) + "/include/IDSDef.xml"
+
+
+# ----------------------------------------------------------------------
+
+
+def comment_for_schema():
+    """Add comments in stdout
+    """
+
+    print('# Schema File for IDS Validation Tool ({})'.format(path.basename(__file__)))
+    print('# 1) in YAML format, comments starting with "#" and blank lines are allowed.')
+    print('# 2) 1st level lists IDS name, 2nd one is for path_doc and 3rd is for validation rule')
+    print('#')
+    print('# IDS validation schema is listed as below, also default schema of Cerberus can be used. The schema is presumed')
+    print('# in the form of "A:B", where A is name of rule, B is in type of boolean or float. Regarding the rules having B')
+    print('# as "false", an error will be reported in case the validation fails, otherwise ignored with "true".')
+    print('#        A:               B')
+    print('#        ids_nan:         true/false')
+    print('#        ids_inf:         true/false')
+    print('#        ids_le:          float')
+    print('#        ids_ge:          float')
+    print('#        ids_lt:          float')
+    print('#        ids_gt:          float')
+    print('#        ids_psi_like:    true/false')
+    print('#        ids_b0_like:     true/false')
+    print('#        ids_dodpsi_like: true/false')
+    print('#        ids_q_like:      true/false')
+    print('#        ids_ip_like:     true/false')
+    print('#        ids_dPdpsi_like: true/false')
+    print('#        ids_dim_like:    true/false')
+    print('#')
+
+
+def main():
+    """create validation schema wrt DD
+    """
+
+    # Load IMAS-DD file
+    if path.isfile(FILE_IDSDef):
+        root = ET.parse(FILE_IDSDef).getroot()
+    else:
+        exit("file not found:{}".format(FILE_IDSDef))
+
+    # Initialization for yaml.Dumper
+    yaml.Dumper.ignore_aliases = lambda *args: True
+
+    # Default rules for dynamic array
+    rule = {"ids_nan": False, "ids_inf": False, "ids_dim": False}
+
+    #
+    comment_for_schema()
+
+    for dd in root:
+        if dd.tag == "IDS":
+            idsname = dd.get("name")
+            if (args.idslist is None) or (idsname in args.idslist):
+                schema, dd = init_schema_coordinate(idsname, dd=dd, rule=rule)
+                dump = yaml.dump(
+                    schema,
+                    sys.stdout,
+                    indent=4,
+                    default_flow_style=False,
+                    sort_keys=False,
+                    width=float("inf"),
+                )
+
+
+# ----------------------------------------------------------------------
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="create validation schema wrt DD")
+    parser.add_argument(
+        "-i",
+        "--idslist",
+        dest="idslist",
+        help="List of IDS names",
+        required=False,
+        nargs="*",
+    )
+    args = parser.parse_args()
+    main()
