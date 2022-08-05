@@ -1,6 +1,7 @@
 from pathlib import Path
 from glob import glob 
 import yaml
+import os
 progbar = True
 try:
     from tqdm import tqdm

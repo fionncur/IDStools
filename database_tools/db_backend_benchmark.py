@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from idstools.cli import *
 from pathlib import Path
-from ids_extractor import getDBPath, mdsListPulseRun, hdf5ListPulseRun
+from database_tools.db_helpers import getDBPath, mdsListPulseRun, hdf5ListPulseRun
 from idstools.idsperf import get_timings, byte_size
 from idstools.idslist import available_in_dbentry
 from datetime import datetime
@@ -161,7 +161,7 @@ if __name__ == '__main__':
             totaldf['HDF5_PERFORMANCE (Slices/s)'] = totaldf.apply(lambda row: (row.SLICES / row.HDF5_TIME), axis=1)
 
         date = datetime.now().strftime("%Y_%m_%d-%I:%M:%S_%p")
-        totaldf.to_csv("/home/ITER/vidalm/public/totaldf-" + date + ".csv", na_rep='None', index=False, header=True)
+        totaldf.to_csv("totaldf-" + date + ".csv", na_rep='None', index=False, header=True)
 
 
 

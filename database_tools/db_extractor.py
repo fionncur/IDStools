@@ -71,8 +71,9 @@ def extract_from_db(user, database, version, backend, idspath, pulses):
 
 if __name__ == "__main__":
 
-    parser = argparse.ArgumentParser(description="This script applies conversion of IDS data into readable CSV files.", parents=[imas_parser])
-    parser.add_argument("idspath", type=str, nargs="*", help="IDS path(s) (starting with IDS name) to the desired data to be collected, e.g equilibrium/time")
+    parser = argparse.ArgumentParser(description="Extracts given quantities from all data entries of a given database", parents=[imas_parser])
+    parser.add_argument("idspath", type=str, #nargs="*", #multiple paths not yet implemented
+                        help="IDS path (starting with IDS name) to the desired data to be collected, e.g equilibrium/time")
     parser.add_argument("--saveas", type=str, help="Path to directory ending with name of file to save retrieved data")
     parser.add_argument("-i", "--index", action="store_true", help="Should index be shown in final .csv file?")
     parser.add_argument("-verb", "--verbose", action="store_true", help="Verbose mode")
