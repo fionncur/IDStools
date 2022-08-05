@@ -1,7 +1,7 @@
 # Return values of an IDS in all data entries of a database
 
 import imas
-import os
+import os,sys
 from imas import imasdef
 import pandas as pd
 import argparse
@@ -19,7 +19,7 @@ except ModuleNotFoundError:
 
 
 
-def extract_from_db(user, database, version, backend, idspath, pulses):
+def extract_from_db(dbuser, database, version, backend, idspath, pulses):
     """ Function that returns a pandas dataframe displaying all values of given IDSs extracted by the function.
 
     Parameters
@@ -33,8 +33,8 @@ def extract_from_db(user, database, version, backend, idspath, pulses):
     version: str
         String of number of data version
 
-    backend: str
-        Name of backend of the database in which the data is harbored (currently supports only MDSPLUS and HDF5)
+    backend: int
+        ID of backend of the database in which the data is harbored 
 
     idspath: str
         IDS path (starting with IDS name) to the desired data to be collected (e.g 'equilibrium/time')
@@ -48,12 +48,11 @@ def extract_from_db(user, database, version, backend, idspath, pulses):
     """
 
     values = []
-    backend = get_backend_id(backend)
     idsname = idspath.split('/')[0]
     valpath = idspath[1 + len(idsname):]
 
     for entry in tqdm(pulses) if progbar else pulses:
-        de = imas.DBEntry(backend, database, entry[0], entry[1], user, version)
+        de = imas.DBEntry(backend, database, entry[0], entry[1], dbuser, version)
         de.open()
         try:
             value = de.partial_get(idsname, valpath)
@@ -74,23 +73,34 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Extracts given quantities from all data entries of a given database", parents=[imas_parser])
     parser.add_argument("idspath", type=str, #nargs="*", #multiple paths not yet implemented
                         help="IDS path (starting with IDS name) to the desired data to be collected, e.g equilibrium/time")
-    parser.add_argument("--saveas", type=str, help="Path to directory ending with name of file to save retrieved data")
-    parser.add_argument("-i", "--index", action="store_true", help="Should index be shown in final .csv file?")
-    parser.add_argument("-verb", "--verbose", action="store_true", help="Verbose mode")
+    parser.add_argument("--saveas", type=str, help="File in which to store the results of this query, in csv format")
+    parser.add_argument("--status", type=str, help="Will list only data entries with specified status (if such metadata is available)")
+    parser.add_argument("--verbose", action="store_true", help="Verbose mode")
     args = parser.parse_args()
-    database = args.database
-    idspath = args.idspath
 
     locpath = getDBPath(args.user, args.database, args.version)
+    #if args.verbose:
+    #    print(f"database located in {locpath}")
 
-    df = extract_from_db(args.user, args.database, args.version, args.backend, args.idspath, pulses=mdsListPulseRun(locpath) if args.backend == imas.imasdef.MDSPLUS_BACKEND else hdf5ListPulseRun(locpath))
+    backend = get_backend_id(args.backend)
 
-    if args.verbose or not args.saveas:
-        print(df)
+    if backend==imasdef.MDSPLUS_BACKEND:
+        pulses = mdsListPulseRun(locpath,with_status=args.status)
+    elif backend==imasdef.HDF5_BACKEND:
+        pulses = hdf5ListPulseRun(locpath)
+    else:
+        print(f"Functionality not yet implemented for backend {args.backend}")
+        sys.exit()
+
+    #if args.verbose:
+    #    print(pulses)
+        
+    df = extract_from_db(args.user, args.database, args.version, backend, args.idspath, pulses)
 
     if args.saveas:
         if not Path(args.saveas).parent.exists():
             raise FileNotFoundError(
                 "The path provided does not exist or has no such database file or directory. Please check spelling.")
-        saveresultsin = Path(r'' + args.saveas + '.csv')
-        df.to_csv(saveresultsin, na_rep='None', index=args.index, header=True)
+        df.to_csv(args.saveas, na_rep='None', index=True, header=True)
+    else:
+        print(df.to_markdown())
