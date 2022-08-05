@@ -1,4 +1,4 @@
-# Migrates IDS data from a database to a desired folder, also converting data to desired backend
+# Converts an IMAS database (all its data-entries) to the specified folder and backend
 
 import imas
 from imas import imasdef
@@ -7,7 +7,7 @@ import argparse
 import pandas as pd
 from idstools.cli import *
 from pathlib import Path
-from database_tools.ids_extractor import mdsListPulseRun, hdf5ListPulseRun, getDBPath
+from database_tools.db_helpers import mdsListPulseRun, hdf5ListPulseRun, getDBPath
 from database_tools.idschk import ids_validator
 from idstools.idsdiff import compare
 from idstools.idslist import available_in_dbentry
