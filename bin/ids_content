@@ -1,113 +1,65 @@
 #!/usr/bin/env python
 
-import argparse,os,sys
-from imas import ids
+import argparse, os, sys
+import imas
+from idstools.cli import *
+from idstools import idslist
 
 # ----------------------------------------------------------------------
 
 # Management of input arguments
-parser = argparse.ArgumentParser(description=\
-	 '---- List ids content for yaml files aimed at describing a scenario ----')
-parser.add_argument('-u','--user_or_path',help='User or path of the DB where the data-entry is located', required=False)
-parser.add_argument('-d','--database',help='Database name of the DB where the data-entry is located', required=False)
-parser.add_argument('-s','--shot',help='Shot number', required=True,type=int)
-parser.add_argument('-r','--run',help='Run number',required=True,type=int)
-args = vars(parser.parse_args())
+parser = argparse.ArgumentParser(
+    description="---- List ids content for yaml files aimed at describing a scenario ----",
+    parents=[imas_parser],
+)
+parser.add_argument("-s", "--shot", help="shot number", required=True, type=int)
+parser.add_argument("-r", "--run", help="run number", required=True, type=int)
+args = parser.parse_args()
 
-shot = args["shot"]
-run  = args["run"]
-
-# User or path name
-if args['user_or_path'] != None:
-	user_or_path = args["user_or_path"]
-else:
-	user_or_path = 'public'
-
-# Database name
-if args['database'] != None:
-	database = args["database"]
-else:
-	database = 'iter'
-
-# Avoid too many arguments to be filled by the user (otherwise it is not user-friendly anymore)
-dataversion = os.getenv('IMAS_VERSION')[0]
-hdf5 = False
-debug = False
-
-try:
-        import idstools.ids_tools as opendb
-        db = opendb.ImasDb(shot,run,user_or_path,database,dataversion,True,False)
-except:
-        print("%s: %s"%(sys.exc_info()[0],sys.exc_info()[1]), file=sys.stderr)
-        print('Unable to open the database for user_or_path = '+user_or_path+' and database = '+database, file=sys.stderr)
-
-# Open the file to check IDSs for which no time is defined
-idss=ids(shot,run,0,0)
-[err,n]=idss.open_env(user_or_path,database,dataversion,silent=True)
-if err!=0:
-    print('Shot ' + str(shot) + ', run ' + str(run) +' for user_or_path = '+user_or_path+' and database = '+database+' does not exist', file=sys.stderr)
-    print('----> Aborted.', file=sys.stderr)
+# Open the database and read the necessary IDSs
+db = imas.DBEntry(
+    get_backend_id(args.backend), args.database, args.shot, args.run, args.user
+)
+status, _ = db.open()
+if status != 0:
+    print("Shot " + str(args.shot) + ", run " + str(args.run)
+        + " for user_or_path = " + args.user + " and database = " + args.database
+        + " does not exist", file=sys.stderr,)
+    print("----> Aborted.", file=sys.stderr)
     exit()
 
-alltimes = db.all_times()
-timed_idslist = []
-for idsname, times in alltimes:
-   timed_idslist.append(idsname)
+# Print IDS contents
+for idsname, oc in idslist.available_in_dbentry(db):
+    homogeneous_time = db.partial_get(
+        idsname, "ids_properties/homogeneous_time", occurrence=oc
+    )
+    times = db.partial_get(idsname, "time", occurrence=oc)
 
-# Set up the list of existing IDSs in th DD
-dd_idslist=[]
-for element in idss.__dict__.keys():
-   if hasattr(idss.__dict__.get(element),'ids_properties'):
-      dd_idslist.append(element)
+    # Format idsname
+    if oc > 0:
+        idsnameoc = idsname + "/" + str(oc)
+    else:
+        idsnameoc = idsname
 
-# List of IDSs actually filled in the file but non-timed
-non_timed_idslist=[]
-for element in dd_idslist:
-   if not element in timed_idslist:
-      try:
-         if hasattr(eval('idss.'+element),'partialGet'):
-            if eval('idss.'+element+'.partialGet(\'ids_properties/homogeneous_time\')') != -999999999:
-               non_timed_idslist.append(element)
-         else:
-            eval('idss.'+element+'.get()')
-            if eval('idss.'+element+'.ids_properties.homogeneous_time') != -999999999:
-               non_timed_idslist.append(element)
-      except Exception as exc:
-         print("WARNING: unsuccessful reading of homogeneous_time from IDS '"+element+"', pulsefile structure might be incomplete or corrupted.")
-
-# To replace NaN time by actual one (new LL)
-for el in timed_idslist:
-   element = el.split('/')[0]
-   for i in range(len(timed_idslist)):
-      if hasattr(eval('idss.'+element),'partialGet'):
-         if element == alltimes[i][0]:
-            t = eval('idss.'+element+'.partialGet(\'time\')')
-            if eval('idss.'+element+'.partialGet(\'ids_properties/homogeneous_time\')') !=2:
-               for itime in range(len(alltimes[i][1])):
-                  if t is not None:
-                     alltimes[i][1][itime]=t[itime]
-                  else:
-                     if eval('idss.'+element+'.partialGet(\'ids_properties/homogeneous_time\')') !=0:
-                       print('!!! WARNING: time not defined in '+element+' IDS'+ \
-                          '--> '+element+'.ids_properties.homogeneous_time should be set to 0 or 2 !')
-                     alltimes[i][1][0]='unhomogeneous'
-            else:
-                  alltimes[i][1][0]='static'
-
-for idsname, times in alltimes:
-   if len(times) > 1:
-      time_step  = (times[len(times)-1]-times[0])/(len(times)-1)
-      start_time = times[0]
-      end_time   = times[len(times)-1]
-      print("  "+idsname+":")
-      print("     time_step_number: " + str(len(times)))
-      print("     start_end_step:   [" + str(start_time) + "  " +  str(end_time) + "  " +  str(time_step) + "]")
-   else: # Only one time slice
-      print("  "+idsname+":")
-      print("     time_step_number: " + str(len(times)))
-      print("     time:             [" + str(times[0]) + "]")
-
-for idsname in non_timed_idslist:
-   print("  "+idsname+":")
-   print("     non-timed")
-
+    # For every homogeneous_time [0,1,2]
+    if homogeneous_time == 0:
+        print("  " + idsnameoc + ":")
+        print("     time_step_number: " + str(len(times)))
+        print("     time:             [unhomogeneous]")
+    elif homogeneous_time == 1:
+        if len(times) > 1:
+            time_step = (times[len(times) - 1] - times[0]) / (len(times) - 1)
+            start_time = times[0]
+            end_time = times[len(times) - 1]
+            print("  " + idsnameoc + ":")
+            print("     time_step_number: " + str(len(times)))
+            print("     start_end_step:   ["
+                + str(start_time) + "  " + str(end_time) + "  " + str(time_step) + "]")
+        elif len(times) == 1:
+            print("  " + idsnameoc + ":")
+            print("     time_step_number: " + str(len(times)))
+            print("     time:             [" + str(times[0]) + "]")
+    elif homogeneous_time == 2:
+        print("  " + idsnameoc + ":")
+        print("     time_step_number: " + str(len(times)))
+        print("     time:             [static]")

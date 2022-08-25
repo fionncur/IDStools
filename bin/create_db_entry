@@ -5,42 +5,28 @@ import argparse, imas, pdb
 import database_tools.init_mendeleiev as mend
 import numpy as np
 import sys
-from os import system,getenv
+from os import system, path
 from sys import exit
+from idstools.cli import *
 
 # ----------------------------------------------------------------------
 
 # Management of input arguments
 parser = argparse.ArgumentParser(description=\
-	 '---- Auto-generated yaml scenario and watcher files (!!! STILL TO BE COMPLETED BY HAND !!!)')
-parser.add_argument('-u','--user_or_path',help='User or path name of the DB where the data-entry is located', required=False)
-parser.add_argument('-d','--database',help='Database name of the DB where the data-entry is located', required=False)
-parser.add_argument('-s','--shot',help='shot number', required=True,type=int)
+	 '---- Auto-generated yaml scenario and watcher files (!!! STILL TO BE COMPLETED BY HAND !!!)',parents=[imas_parser])
+parser.add_argument('-s','--shot',help='shot number',required=True,type=int)
 parser.add_argument('-r','--run',help='run number',required=True,type=int)
 parser.add_argument('-f','--force',help='generate yaml and watcher files regardless of IDS validation',required=False,action='store_true')
-args = vars(parser.parse_args())
-shot = args["shot"]
-run  = args["run"]
+args = parser.parse_args()
 
-# User or path name
-if args['user_or_path'] != None:
-	user_or_path = args["user_or_path"]
-else:
-	user_or_path = 'public'
-
-# Database name
-if args['database'] != None:
-	database = args["database"]
-else:
-	database = 'ITER'
 
 # Open the database and read the necessary IDSs
-try:
-    version = getenv('IMAS_VERSION')[0]
-    input = imas.ids(shot,run)
-    input.open_env(str(user_or_path),str(database),version)
-except:
-    print('Shot ' + str(shot) + ', run ' + str(run) + ' does not exist', file=sys.stderr)
+input = imas.DBEntry(
+    get_backend_id(args.backend), args.database, args.shot, args.run, args.user
+)
+status, _ = input.open()
+if status != 0:
+    print('Shot ' + str(args.shot) + ', run ' + str(args.run) + ' does not exist', file=sys.stderr)
     print('----> Aborted.', file=sys.stderr)
     exit()
 
@@ -48,9 +34,8 @@ except:
 
 # Read necessary IDSs from database
 try:
-    #input.core_profiles.get()
-    core_profiles = input.core_profiles
-    core_profiles.ids_properties = input.core_profiles.partialGet('ids_properties')
+    core_profiles = imas.core_profiles()
+    core_profiles.ids_properties = input.partial_get('core_profiles','ids_properties')
     if core_profiles.ids_properties.homogeneous_time != -999999999:
       core_present = 1
     else:
@@ -60,9 +45,8 @@ except:
     core_present = 0
 
 try:
-    #input.edge_profiles.get()
-    edge_profiles = input.edge_profiles
-    edge_profiles.ids_properties = input.edge_profiles.partialGet('ids_properties')
+    edge_profiles = imas.edge_profiles()
+    edge_profiles.ids_properties = input.partial_get('edge_profiles','ids_properties')
     if edge_profiles.ids_properties.homogeneous_time != -999999999:
         edge_present = 1
     else:
@@ -73,15 +57,14 @@ except:
     edge_present = 0
 
 try:
-    input.summary.get()
-    summary = input.summary
+    summary = input.get('summary')
 except:
     print("The summary IDS is absent from the input data-entry", file=sys.stdout)
     print("----> H&CD waveforms not filled (to be completed by hand)", file=sys.stdout)
 
 if core_present==1:
     try:
-        ne0 = input.core_profiles.partialGet('profiles_1d(:)/electrons/density(0)')
+        ne0 = input.partial_get('core_profiles','profiles_1d(:)/electrons/density(0)')
         central_electron_density = 0
         for islice in range(len(ne0)):
             if ne0[islice] > central_electron_density:
@@ -92,11 +75,11 @@ if core_present==1:
        print("----> Aborted.", file=sys.stderr)
        exit()
     core_profiles.profiles_1d.resize(1)
-    core_profiles.profiles_1d[0] = input.core_profiles.partialGet('profiles_1d('+str(the_slice)+')')
+    core_profiles.profiles_1d[0] = input.partial_get('core_profiles','profiles_1d('+str(the_slice)+')')
 
 if edge_present==1:
     try:
-        ne_sep = input.summary.local.separatrix.n_e.value
+        ne_sep = summary.local.separatrix.n_e.value
         sepmid_electron_density = 0
         for islice in range(len(ne_sep)):
             if ne_sep[islice] > sepmid_electron_density:
@@ -111,24 +94,22 @@ if edge_present==1:
           exit()
 
 try:
-    #input.equilibrium.get()
-    equilibrium = input.equilibrium
-    equilibrium.ids_properties = input.equilibrium.partialGet('ids_properties')
+    equilibrium = imas.equilibrium()
+    equilibrium.ids_properties = input.partial_get('equilibrium','ids_properties')
     if equilibrium.ids_properties.homogeneous_time != -999999999:
        eq_present = 1
     else:
        eq_present = 0
     if eq_present == 1:
-       equilibrium.vacuum_toroidal_field = input.equilibrium.partialGet('vacuum_toroidal_field')
+       equilibrium.vacuum_toroidal_field = input.partial_get('equilibrium','vacuum_toroidal_field')
        equilibrium.time_slice.resize(1)
-       equilibrium.time_slice[0]         = input.equilibrium.partialGet('time_slice('+str(the_slice)+')')
+       equilibrium.time_slice[0]         = input.partial_get('equilibrium','time_slice('+str(the_slice)+')')
 except:
     print("The equilibrium IDS is absent from the input data-entry", file=sys.stdout)
     eq_present = 0
 
 try:
-    input.dataset_description.get()
-    dataset_description = input.dataset_description
+    dataset_description = input.get('dataset_description')
     comment = str.replace(dataset_description.ids_properties.comment,'\n','\n   ')
     dd_version = dataset_description.dd_version
     workflow = dataset_description.simulation.workflow
@@ -140,16 +121,15 @@ except:
 
 p_sol = 0
 try:
-     p_loss = input.summary.global_quantities.power_loss.value
+     p_loss = summary.global_quantities.power_loss.value
      p_sol = p_loss[the_slice]*1.e-6
 except:
      print("----> summary IDS did not include power_loss", file=sys.stdout)
      print("P_sol will be deduced from edge_transport if available", file=sys.stdout)
 
 try:
-    #input.edge_transport.get()
-    edge_transport = input.edge_transport
-    edge_transport.ids_properties = input.edge_transport.partialGet('ids_properties')
+    edge_transport = imas.edge_transport()
+    edge_transport.ids_properties = input.partial_get('edge_transport','ids_properties')
     if edge_transport.ids_properties.homogeneous_time != -999999999:
         flux_present = 1
     else:
@@ -157,9 +137,9 @@ try:
     if flux_present == 1:
         edge_transport.model.resize(1)
         edge_transport.model[0].ggd.resize(1)
-        edge_transport.model[0].ggd[0] = input.edge_transport.partialGet('model(0)/ggd('+str(the_slice)+')')
+        edge_transport.model[0].ggd[0] = input.partial_get('edge_transport','model(0)/ggd('+str(the_slice)+')')
         edge_transport.grid_ggd.resize(1)
-        edge_transport.grid_ggd[0] = input.edge_transport.partialGet('grid_ggd('+str(the_slice)+')')
+        edge_transport.grid_ggd[0] = input.partial_get('edge_transport','grid_ggd('+str(the_slice)+')')
 except:
     print("The edge_transport IDS is absent from the input data-entry", file=sys.stdout)
     if p_sol == 0:
@@ -204,7 +184,7 @@ else:
 if eq_present==1:
    try:
       plasma_current = 0
-      ip = input.equilibrium.partialGet('time_slice(:)/global_quantities/ip')
+      ip = input.partial_get('equilibrium','time_slice(:)/global_quantities/ip')
       for islice in range(len(ip)):
         if abs(ip[islice]) > plasma_current:
           plasma_current = ip[islice]*1.e-6
@@ -233,11 +213,11 @@ if core_present==1:
       a = [0]
 else:
     try:
-       edge_profiles = input.edge_profiles
+       edge_profiles = imas.edge_profiles()
        edge_profiles.ggd.resize(1)
        #pdb.set_trace()
        #edge_profiles.ggd[0].ion = input.edge_profiles.partialGet('ggd('+str(the_slice)+')/ion')
-       edge_profiles.ggd[0] = input.edge_profiles.partialGet('ggd('+str(the_slice)+')')
+       edge_profiles.ggd[0] = input.partial_get('edge_profiles','ggd('+str(the_slice)+')')
        nspecies = len(edge_profiles.ggd[0].ion)
        a = [0] * nspecies
        for ispecies in range(nspecies):
@@ -273,10 +253,9 @@ if core_present == 1:
       volume = core_profiles.profiles_1d[0].grid.volume
       if len(volume) == 0:
           try:
-             equilibrium = input.equilibrium
+             volume = equilibrium.time_slice[0].profiles_1d.volume
           except:
-             exit()
-          volume = equilibrium.time_slice[0].profiles_1d.volume
+             exit("equilibrium.time_slice[0].profiles_1d.volume could not be read")
           if len(volume) == len(core_profiles.profiles_1d[0].electrons.density):
              print("core_profiles.profiles_1d[:].grid.volume could not be read", file=sys.stderr)
              print("----> equilibrium.time_slice[:].profiles_1d.volume used instead", file=sys.stderr)
@@ -571,14 +550,13 @@ def subproc(cmd, cwd=None, env=None, exit=None):
 
 def schema_path(f_name):
     """ Return path to schema file """
-    from os.path import exists
 
-    path = getenv('EBROOTIDSTOOLS') + '/bin/mappings/' + f_name
+    p = path.dirname(path.realpath(__file__)) + "/validation_schemas/" + f_name
 
-    if exists(path): 
-        return path
+    if path.exists(p): 
+        return p
     else:
-        sys.exit("not found: '%s'" % (path))
+        sys.exit("not found: '%s'" % (p))
 
 
 def eval_COCOS(s):
@@ -618,10 +596,11 @@ def main_idschk(ids_core, ids_edge, ids_eq):
 
     com = [
         'idschk',
-        '-u', user_or_path,
-        '-d', database,
-        '-s', str(shot),
-        '-r', str(run),]
+        '-u', args.user,
+        '-d', args.database,
+        '-b', args.backend,
+        '-s', str(args.shot),
+        '-r', str(args.run),]
 
     flag_core = flag_edge = flag_cocos = True
          
@@ -639,7 +618,7 @@ def main_idschk(ids_core, ids_edge, ids_eq):
     
 
     if not (flag_cocos & flag_core & flag_edge):
-       if not args["force"]:
+       if not args.force:
             logging.error("IDS validation failed. Use '-f, --force' for generating yaml and watcher files anyway")
             sys.exit(1)
 
@@ -650,11 +629,11 @@ main_idschk(core_present, edge_present, eq_present)
 
 # Set up the name of the yaml file
 add0 = ""
-add0_length = 4-len(str(run))
+add0_length = 4-len(str(args.run))
 for i in range(add0_length):
     add0 = add0+"0"
 
-filename = "ids_"+str(shot)+add0+str(run)+".yaml"
+filename = "ids_"+str(args.shot)+add0+str(args.run)+".yaml"
 
 # Go for it: fill the yaml file
 f = open(filename, 'w')
@@ -679,17 +658,17 @@ f.write("""responsible_name:\n""")
 f.write("""    tbd\n""")
 f.write("""\n""")
 f.write("""# ------------------------------------------------------------------\n""")
-f.write("""# Shot number, run numbers, type, code, database attributes\n""")
+f.write("""# Shot number, args.run numbers, type, code, database attributes\n""")
 f.write("""# Type: interpretative, predictive, experiment\n""")
 f.write("""# Code: code name in case of simulation, 0 in case of experiment\n""")
 f.write("""# Machine: database name\n""")
 f.write("""# ------------------------------------------------------------------\n""")
 f.write("""characteristics:\n""")
-f.write("""    shot: %i\n""" % shot)
-f.write("""    run: %i\n""" % run)
+f.write("""    shot: %i\n""" % args.shot)
+f.write("""    run: %i\n""" % args.run)
 f.write("""    type: %s\n""" % type)
 f.write("""    workflow: %s\n""" % workflow)
-f.write("""    machine: %s\n""" % database)
+f.write("""    machine: %s\n""" % args.database)
 f.write("""\n""")
 f.write("""# ------------------------------------------------------------------\n""")
 f.write("""# Relations to other entries in this database (if any)\n""")
@@ -803,13 +782,13 @@ f.write("""idslist:\n""")
 f.close()
 
 # Complete the yaml file with the output of ids_content
-system('ids_content -u ' + str(user_or_path) + ' -d ' + str(database) \
-          + ' -s ' + str(shot) + ' -r ' + str(run) + ' >> ' + filename)
+system('./ids_content -u ' + args.user + ' -d ' + args.database + ' -b ' + args.backend \
+          + ' -s ' + str(args.shot) + ' -r ' + str(args.run) + ' >> ' + filename)
 
 print("----> " + filename + " created.", file=sys.stdout)
 
 # Associated WATCHER file
-filename = "ids_"+str(shot)+add0+str(run)+".watcher"
+filename = "ids_"+str(args.shot)+add0+str(args.run)+".watcher"
 f = open(filename, 'w')
 if 1 == 1: # Done for alignment
    f.write("""----------------------------------------------------------------------------------\n""")
