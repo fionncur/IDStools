@@ -33,5 +33,6 @@ setup(name='IMAS IDS Tools',
       packages      = ['idstools','database_tools'],
       py_modules    = [],
       scripts       = script_files,
-      data_files    = [('bin/mappings',['database_tools/mappings/h-mode-db-mapping.csv'])]
+      data_files    = [('bin/mappings',['database_tools/mappings/h-mode-db-mapping.csv']),
+                       ('bin/validation_schemas',['database_tools/validation_schemas/required_fields_core.yml','database_tools/validation_schemas/required_fields_edge.yml'])]
      )

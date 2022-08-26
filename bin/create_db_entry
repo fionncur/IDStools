@@ -658,7 +658,7 @@ f.write("""responsible_name:\n""")
 f.write("""    tbd\n""")
 f.write("""\n""")
 f.write("""# ------------------------------------------------------------------\n""")
-f.write("""# Shot number, args.run numbers, type, code, database attributes\n""")
+f.write("""# Shot number, run numbers, type, code, database attributes\n""")
 f.write("""# Type: interpretative, predictive, experiment\n""")
 f.write("""# Code: code name in case of simulation, 0 in case of experiment\n""")
 f.write("""# Machine: database name\n""")
@@ -782,7 +782,7 @@ f.write("""idslist:\n""")
 f.close()
 
 # Complete the yaml file with the output of ids_content
-system('./ids_content -u ' + args.user + ' -d ' + args.database + ' -b ' + args.backend \
+system('ids_content -u ' + args.user + ' -d ' + args.database + ' -b ' + args.backend \
           + ' -s ' + str(args.shot) + ' -r ' + str(args.run) + ' >> ' + filename)
 
 print("----> " + filename + " created.", file=sys.stdout)
