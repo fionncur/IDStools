@@ -16,7 +16,7 @@ parser = argparse.ArgumentParser(description=\
 	 '---- Auto-generated yaml scenario and watcher files (!!! STILL TO BE COMPLETED BY HAND !!!)',parents=[imas_parser])
 parser.add_argument('-s','--shot',help='shot number',required=True,type=int)
 parser.add_argument('-r','--run',help='run number',required=True,type=int)
-parser.add_argument('-f','--force',help='generate yaml and watcher files regardless of IDS validation',required=False,action='store_true')
+parser.add_argument('--disable-validation',help='disable IDS validation',required=False,action='store_true',dest="wo_validation")
 args = parser.parse_args()
 
 
@@ -618,13 +618,14 @@ def main_idschk(ids_core, ids_edge, ids_eq):
     
 
     if not (flag_cocos & flag_core & flag_edge):
-       if not args.force:
-            logging.error("IDS validation failed. Use '-f, --force' for generating yaml and watcher files anyway")
-            sys.exit(1)
+        logging.error("IDS validation failed. Use '--disable-validation' for generating yaml and watcher files anyway")
+        sys.exit(1)
 
 
-logging.basicConfig(level=logging.WARNING)
-main_idschk(core_present, edge_present, eq_present)
+if not args.wo_validation:
+    logging.basicConfig(level=logging.WARNING)
+    main_idschk(core_present, edge_present, eq_present)
+
 # ----------------------------------------------------------------------
 
 # Set up the name of the yaml file
