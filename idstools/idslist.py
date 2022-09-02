@@ -1,4 +1,26 @@
 import imas
+import inspect
+import types
+
+
+def is_field(idstype):
+    """Checks if the passed type is possible field of an IDS.
+
+    Parameters
+    ----------
+    idstype: type of an attribute from an IDS or a substructure of an IDS
+    """
+    return idstype != types.MethodType and idstype != types.FunctionType and "Logger" not in str(idstype) and "HLIUtils" not in str(idstype)
+
+
+def list_attributes(idsobj):
+    """Returns a list of attributes names for the given IDS object.
+
+    Parameters
+    ----------
+    idsobj: IDS or substructure object
+    """
+    return [a[0] for a in inspect.getmembers(idsobj) if not a[0].startswith('_') and is_field(type(a[1]))]
 
 
 def all_ids_types():
