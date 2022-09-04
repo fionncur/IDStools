@@ -20,7 +20,10 @@ def list_attributes(idsobj):
     ----------
     idsobj: IDS or substructure object
     """
-    return [a[0] for a in inspect.getmembers(idsobj) if not a[0].startswith('_') and is_field(type(a[1]))]
+    if "imas" in str(type(idsobj)):
+        return [a[0] for a in inspect.getmembers(idsobj) if not a[0].startswith('_') and is_field(type(a[1]))]
+    else:
+        return []
 
 
 def all_ids_types():
