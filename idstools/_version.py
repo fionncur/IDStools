@@ -34,6 +34,9 @@ def get_keywords():
     if not mo_tag_in_git_refnames:
         mo_tag_in_git_describe = re.search(r'(\d+\.)(\d+\.)(\d+)', git_describe_output)
         if mo_tag_in_git_describe:
+            if "-" in git_describe_output:
+                p = git_describe_output.split("-")
+                git_describe_output = p[0] + ".dev" + p[1] + "+" + "".join(p[2:])
             mo_describe = '(, tag: '+ git_describe_output +',,'+ git_refnames + ')'
             git_refnames = mo_describe
     keywords = {"refnames": git_refnames, "full": git_full, "date": git_date}
