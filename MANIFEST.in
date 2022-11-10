@@ -3,4 +3,3 @@ include LICENSE.md
 recursive-exclude * *.py[co]
 include versioneer.py
 include idstools/_version.py
-include database_tools/_version.py
