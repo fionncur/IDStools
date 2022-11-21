@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import xml.etree.ElementTree as ET
 import os
-
+import sys
 class IDSDef:
     """Simple class which allows to query meta-data from the definition of IDSs as expressed in IDSDef.xml.
     """
