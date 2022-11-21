@@ -21,6 +21,7 @@ if __name__ == "__main__":
    parser.add_argument('-d','--database',help='Database name where the data-entry is located', required=False)
    parser.add_argument('-t','--time',help='Time', required=False,type=float)
    parser.add_argument('-f','--force_psi',help='= 1 to force displaying the profiles versus poloidal flux', required=False)
+   parser.add_argument('-l','--legoff',help='= 1 to remove the legend from graphs', required=False)
 
    args  = vars(parser.parse_args())
 
@@ -62,6 +63,11 @@ def waves_prep(args):
    else:
        force_psi = 0
        
+   if args['legoff'] != None:
+      legoff = int(args['legoff'])
+   else:
+      legoff = 0
+
    # READ IDS'S FROM LOCAL DATABASE
    # -------------------------------
    input={}
@@ -260,6 +266,7 @@ def waves_prep(args):
    hcd_param['nsample']=nsample
    hcd_param['psi_based']=psi_based
    hcd_param['force_psi']=force_psi
+   hcd_param['legoff']=legoff
    hcd_param['shot']=shot
    hcd_param['run']=run
    
@@ -275,7 +282,7 @@ def find_nearest(a, a0):
 ###################################################################################
 
 def CustomLegend(legend):
-    legfont = 12
+    legfont = 6
     frame = legend.get_frame()
     frame.set_facecolor('0.95')
     for label in legend.get_texts():
@@ -293,6 +300,7 @@ def waves_display(hcd_profiles,hcd_param):
    force_psi = hcd_param['force_psi']
    shot      = hcd_param['shot']
    run       = hcd_param['run']
+   legoff    = hcd_param['legoff']
 
    fontsize = 12
    figure_width  = 5
@@ -330,8 +338,9 @@ def waves_display(hcd_profiles,hcd_param):
    else:
        ax.set_xlabel('-(Poloidal flux coordinate) [Wb]')
    plt.grid()
-   #legend = plt.legend()
-   #CustomLegend(legend)
+   if legoff == 0:
+      legend = plt.legend()
+      CustomLegend(legend)
    fig.set_size_inches(figure_width,figure_height)
    fig.tight_layout()
    fig.savefig('ECRH_profile_shot_{0}_run_{1}.png'.format(shot,run),bbox_inches="tight")
@@ -355,8 +364,9 @@ def waves_display(hcd_profiles,hcd_param):
    else:
        ax.set_xlabel('-(Poloidal flux coordinate) [Wb]')
    plt.grid()
-   #legend = plt.legend()
-   #CustomLegend(legend)
+   if legoff == 0:
+      legend = plt.legend()
+      CustomLegend(legend)
    fig.set_size_inches(figure_width,figure_height)
    fig.tight_layout()
    fig.savefig('CD_profile_shot_{0}_run_{1}.png'.format(shot,run),bbox_inches="tight")
@@ -382,8 +392,9 @@ def waves_display(hcd_profiles,hcd_param):
        ax.set_ylabel('Power to the electrons $\mathrm{[MW]}$')
        ax.set_xlabel('Time (s)')
        plt.grid()
-       legend = plt.legend()
-       CustomLegend(legend)
+       if legoff == 0:
+          legend = plt.legend()
+          CustomLegend(legend)
        fig.set_size_inches(figure_width,figure_height)
        fig.tight_layout()
        fig.savefig('ECRH_waveform_shot_{0}_run_{1}.png'.format(shot,run),bbox_inches="tight")
@@ -405,8 +416,9 @@ def waves_display(hcd_profiles,hcd_param):
        ax.set_ylabel('CD $\mathrm{[kA]}$')
        ax.set_xlabel('Time (s)')
        plt.grid()
-       legend = plt.legend()
-       CustomLegend(legend)
+       if legoff == 0:
+          legend = plt.legend()
+          CustomLegend(legend)
        fig.set_size_inches(figure_width,figure_height)
        fig.tight_layout()
        fig.savefig('CD_waveform_shot_{0}_run_{1}.png'.format(shot,run),bbox_inches="tight")

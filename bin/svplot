@@ -75,11 +75,14 @@ scenario = f"{args.shot}/{args.run}/{time:.2f}"
 # Deduce the number of spectra from the channel name (not safe but no other method yet)
 list_of_spectra = []
 for channel in ids.channel:
-    spectrum_index = channel.name.split('Spectrum ')[1]
+    if len(channel.name.split('Spectrum ')) > 1:
+        spectrum_index = channel.name.split('Spectrum ')[1]
+    else:
+        spectrum_index = 1
     if spectrum_index not in list_of_spectra:
         list_of_spectra.append(spectrum_index)
 n_spectra = len(list_of_spectra)
-    
+
 for n in range(n_spectra):
 
     wavelengths: np.ndarray = None

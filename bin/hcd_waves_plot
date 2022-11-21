@@ -6,20 +6,22 @@ set SCRIPT=`readlink -f "$0"`
 set SCRIPTPATH=`dirname "$SCRIPT"`
 
 # Mask definition: (shot run user db tslice force)
-# shot  = (1 0 0 0 0 0)
-# run   = (0 1 0 0 0 0)
-# user  = (0 0 1 0 0 0)
-# db    = (0 0 0 1 0 0)
-# tslice  = (0 0 0 0 1 0)
-# force = (0 0 0 0 0 1)
+# shot    = (1 0 0 0 0 0 0)
+# run     = (0 1 0 0 0 0 0)
+# user    = (0 0 1 0 0 0 0)
+# db      = (0 0 0 1 0 0 0)
+# tslice  = (0 0 0 0 1 0 0)
+# force   = (0 0 0 0 0 1 0)
+# legoff  = (0 0 0 0 0 0 1)
 
-set mask = (0 0 0 0 0 0)
+set mask = (0 0 0 0 0 0 0)
 set shot = default
 set run  = default
 set user = default
 set db   = default
 set tslice = default
 set force_psi = default
+set legoff = default
 
 foreach arg ($arglist)
     if (\"$arg\" == \"-h\" | \"$arg\" == \"--help\") then
@@ -38,21 +40,25 @@ foreach arg ($arglist)
       set tslice = $arg
     else if ($mask[6] == 1) then
       set force_psi = $arg
+    else if ($mask[7] == 1) then
+      set legoff = $arg
     endif
     if (\"$arg\" == \"-s\" | \"$arg\" == \"--shot\") then
-      set mask = (1 0 0 0 0 0)
+      set mask = (1 0 0 0 0 0 0)
     else if (\"$arg\" == \"-r\" | \"$arg\" == \"--run\") then
-      set mask = (0 1 0 0 0 0)
+      set mask = (0 1 0 0 0 0 0)
     else if (\"$arg\" == \"-u\" | \"$arg\" == \"--user_or_path\") then
-      set mask = (0 0 1 0 0 0)
+      set mask = (0 0 1 0 0 0 0)
     else if (\"$arg\" == \"-d\" | \"$arg\" == \"--database\") then
-      set mask = (0 0 0 1 0 0)
+      set mask = (0 0 0 1 0 0 0)
     else if (\"$arg\" == \"-t\" | \"$arg\" == \"--time\") then
-      set mask = (0 0 0 0 1 0)
+      set mask = (0 0 0 0 1 0 0)
     else if (\"$arg\" == \"-f\" | \"$arg\" == \"--force_psi\") then
-      set mask = (0 0 0 0 0 1)
+      set mask = (0 0 0 0 0 1 0)
+    else if (\"$arg\" == \"-l\" | \"$arg\" == \"--legoff\") then
+      set mask = (0 0 0 0 0 0 1)
     else
-      set mask = (0 0 0 0 0 0)
+      set mask = (0 0 0 0 0 0 0)
     endif
 end
 
@@ -75,6 +81,8 @@ endif
 if ($force_psi != default) then
   set arg_for_python = `echo $arg_for_python "-f" $force_psi`
 endif
+if ($legoff != default) then
+  set arg_for_python = `echo $arg_for_python "-l" $legoff`
+endif
 
 python $SCRIPTPATH/hcd_waves_plot.py $arg_for_python
-
