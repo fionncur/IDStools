@@ -146,15 +146,15 @@ class COCOS:
         Default COCOS index
     """
 
-    default = {"COCOS": 11, "ipsign": -1, "b0sign": -1}
-    TWOPI = 6.283185307179586476925286766559005768394
+    default = {"COCOS": 11}
 
     def __init__(self, index=None, values=None):
-        """Initialize COCOS Index and Values
+        """
+        Return COCOS index using values, or return values using COCOS index
 
         Parameters
         ----------
-        index: dict={"COCOS": 11, "ipsign": -1, "b0sign": -1}
+        index: dict={"COCOS": 11}
             COCOS index with signs of Ip and B0
         values: dict=None
             COCOS values
@@ -174,8 +174,6 @@ class COCOS:
         elif index is not None:
 
             COCOS = index["COCOS"]
-            ipsign = index["ipsign"]
-            b0sign = index["b0sign"]
             #
             # Parameters from Table I
             #
@@ -228,8 +226,6 @@ class COCOS:
             theta_sign_clockwise = sigma_RphiZ * sigma_rhothetaphi
 
             self.COCOS = COCOS
-            self.sigma_Ip = ipsign
-            self.sigma_B0 = b0sign
             self.exp_Bp = exp_Bp
             self.sigma_Bp = sigma_Bp
             self.sigma_RphiZ = sigma_RphiZ
@@ -241,8 +237,6 @@ class COCOS:
         # in case of init. by values
         else:
 
-            sigma_Ip = values["ipsign"]
-            sigma_B0 = values["b0sign"]
             exp_Bp = values["exp_Bp"]
             sigma_Bp = values["sigma_Bp"]
             sigma_RphiZ = values["sigma_RphiZ"]
@@ -294,8 +288,6 @@ class COCOS:
             theta_sign_clockwise = sigma_RphiZ * sigma_rhothetaphi
 
             self.COCOS = COCOS[exp_Bp]
-            self.sigma_Ip = sigma_Ip
-            self.sigma_B0 = sigma_B0
             self.exp_Bp = exp_Bp
             self.sigma_Bp = sigma_Bp
             self.sigma_RphiZ = sigma_RphiZ
@@ -315,8 +307,6 @@ class COCOS:
 
         return {
             "COCOS": self.COCOS,
-            "sigma_Ip": self.sigma_Ip,
-            "sigma_B0": self.sigma_B0,
             "exp_Bp": self.exp_Bp,
             "sigma_Bp": self.sigma_Bp,
             "sigma_RphiZ": self.sigma_RphiZ,
@@ -391,8 +381,8 @@ class COCOS:
         # Note that sign(sigma_RphiZ*sigma_rhothetaphi) gives theta in clockwise or count    er-clockwise respectively
         # Thus sigma_RphiZ_eff*sigma_rhothetaphi_eff negative if the direction of theta h    as changed from cocos_in to _out
         #
-        fact_psi = sigma_Ip_eff * sigma_Bp_eff * TWOPI**exp_Bp_eff
-        fact_dpsi = sigma_Ip_eff * sigma_Bp_eff / TWOPI**exp_Bp_eff
+        fact_psi = sigma_Ip_eff * sigma_Bp_eff * (2.0*np.pi)**exp_Bp_eff
+        fact_dpsi = sigma_Ip_eff * sigma_Bp_eff / (2.0*np.pi)**exp_Bp_eff
         fact_q = sigma_Ip_eff * sigma_B0_eff * sigma_rhothetaphi_eff
         fact_dtheta = sigma_RphiZ_eff * sigma_rhothetaphi_eff
 
