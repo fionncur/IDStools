@@ -142,20 +142,16 @@ class COCOS:
     sign_q_pos: int
     sign_pprime_pos: int
     theta_sign_clockwise: int
-    default: dict
-        Default COCOS index
     """
-
-    default = {"COCOS": 11}
 
     def __init__(self, index=None, values=None):
         """
-        Return COCOS index using values, or return values using COCOS index
+        Initialize COCOS index using values, or values using COCOS index
 
         Parameters
         ----------
-        index: dict={"COCOS": 11}
-            COCOS index with signs of Ip and B0
+        index: dict=None
+            COCOS index with signs of Ip and B0, e.g. index={"COCOS": 11}
         values: dict=None
             COCOS values
         """
@@ -297,12 +293,13 @@ class COCOS:
             self.theta_sign_clockwise = theta_sign_clockwise
 
     def get(self):
-        """Return COCOS Index and Values
+        """
+        Return COCOS index and values
 
         Returns
         -------
         dict
-            COCOS Index and Values in type dict
+            COCOS index and values in type dict
         """
 
         return {
@@ -317,30 +314,33 @@ class COCOS:
         }
 
     @classmethod
-    def values_coefficients(self, index_in=default, index_out=default):
-        """Provide Transformation values for a set of quantities for a given pair
-            of input/output COCOS numbers
+    def values_coefficients(
+        self, COCOS_in, COCOS_out, Ip_in, B0_in, Ipsign_out, B0sign_out
+    ):
+        """
+        Provide transformation values for a set of quantities for a given pair
+        of input/output COCOS numbers
 
         Parameters
         ----------
-        index_in: dict={"COCOS": 11, "ipsign": -1, "b0sign": -1}
-            COCOS index
-        index_out: dict={"COCOS": 11, "ipsign": -1, "b0sign": -1}
-            COCOS index
+        COCOS_in: int
+            COCOS input
+        COCOS_out: int
+            COCOS output
+        Ip_in: float
+            Plasma curent (toroidal component) [A]
+        B0_in: float
+            Vacuum toroidal field [T]
+        Ipsign_out: int
+            desired sign of Ip in output
+        B0sign_out: int
+            desired sign of B0 in output
 
         Returns
         -------
         dict
-            COCOS Transformation values in type dict
+            COCOS transformation values in type dict
         """
-
-        COCOS_in = index_in["COCOS"]
-        Ipsign_in = index_in["ipsign"]
-        B0sign_in = index_in["b0sign"]
-
-        COCOS_out = index_out["COCOS"]
-        Ipsign_out = index_out["ipsign"]
-        B0sign_out = index_out["b0sign"]
 
         # Default outputs
         sigma_Ip_eff = 1.0
@@ -355,21 +355,29 @@ class COCOS:
         fact_dtheta = 1.0
 
         # Check inputs
-        sigma_Ip_in = float(Ipsign_in)
-        sigma_B0_in = float(B0sign_in)
+        sigma_Ip_in = np.sign(Ip_in)
+        sigma_B0_in = np.sign(B0_in)
 
         # Get COCOS related parameters
-        CVI = COCOS(index_in).get()
-        CVO = COCOS(index_out).get()
+        CVI = COCOS(index={"COCOS": COCOS_in}).get()
+        CVO = COCOS(index={"COCOS": COCOS_out}).get()
 
         # Define effective variables: sigma_Ip_eff, si1gma_B0_eff, sigma_Bp_eff,
         # exp_Bp_eff as in Appendix C
         sigma_RphiZ_eff = float(CVO["sigma_RphiZ"] * CVI["sigma_RphiZ"])
 
-        sigma_Ip_eff = sigma_Ip_in * float(Ipsign_out)
+        # sign(Ip) in output
+        if Ipsign_out == 0:
+            sigma_Ip_eff = sigma_RphiZ_eff  # sign folllowing transformation
+        else:
+            sigma_Ip_eff = sigma_Ip_in * float(Ipsign_out)
         sigma_Ip_out = sigma_Ip_in * sigma_Ip_eff
 
-        sigma_B0_eff = sigma_B0_in * float(B0sign_out)
+        # sign(B0) in output
+        if B0sign_out == 0:
+            sigma_B0_eff = sigma_RphiZ_eff  # sign folllowing transformation
+        else:
+            sigma_B0_eff = sigma_B0_in * float(B0sign_out)
         sigma_B0_out = sigma_B0_in * sigma_B0_eff
 
         sigma_Bp_eff = float(CVO["sigma_Bp"] * CVI["sigma_Bp"])
@@ -381,8 +389,8 @@ class COCOS:
         # Note that sign(sigma_RphiZ*sigma_rhothetaphi) gives theta in clockwise or count    er-clockwise respectively
         # Thus sigma_RphiZ_eff*sigma_rhothetaphi_eff negative if the direction of theta h    as changed from cocos_in to _out
         #
-        fact_psi = sigma_Ip_eff * sigma_Bp_eff * (2.0*np.pi)**exp_Bp_eff
-        fact_dpsi = sigma_Ip_eff * sigma_Bp_eff / (2.0*np.pi)**exp_Bp_eff
+        fact_psi = sigma_Ip_eff * sigma_Bp_eff * (2.0 * np.pi) ** exp_Bp_eff
+        fact_dpsi = sigma_Ip_eff * sigma_Bp_eff / (2.0 * np.pi) ** exp_Bp_eff
         fact_q = sigma_Ip_eff * sigma_B0_eff * sigma_rhothetaphi_eff
         fact_dtheta = sigma_RphiZ_eff * sigma_rhothetaphi_eff
 
@@ -1083,13 +1091,13 @@ def eval_IDSs(s):
     flag = True
     if s:
         d_ids = yaml.safe_load(s)
-        #1st level for IDSs
+        # 1st level for IDSs
         for k_ids, d_occ in d_ids.items():
-            #2nd level for occurences
+            # 2nd level for occurences
             for k_occ, val in d_occ.items():
-                #3rd level
+                # 3rd level
                 if args_verbose:
-                    if not(val["remark"]):
+                    if not (val["remark"]):
                         flag = False
                         break
                 else:

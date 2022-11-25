@@ -2,10 +2,9 @@
 from sys import exit
 import os
 import argparse
+import datetime
 import numpy as np
 from collections import OrderedDict
-import datetime
-from pprint import pprint
 from fortranformat import FortranRecordReader
 
 import imas
@@ -18,36 +17,78 @@ from idstools.cli import *
 
 
 class GEQDSK:
-    """ """
+    """
+    GEQDSK module for IMAS
 
-    def __init__(self, fname, direct):
+    [1] L. Lao, "G EQDSK FORMAT", https://w3.pppl.gov/ntcc/TORAY/G_EQDSK.pdf
 
-        if not os.path.exists(fname):
-            exit("file not found: {}".format(fname))
+    Attributes
+    ----------
+    fpath: str
+        Path to GEQDSK file
+    data: OrderedDict
+        Information in GEQDSK file
+    cocos: COCOS
+        Class COCOS computed from input
+    coef: dict
+        COCOS Transformation coefficients regarding IDS default (COCOS=11)
+    """
 
-        if os.stat(fname).st_size == 0:
-            exit("file size error: {}".format(fname))
+    def __init__(self, fpath, ipsign_out, b0sign_out):
+        """
+        Read GEQDSK file and set COCOS transformation coefficients
+
+        Parameters
+        ----------
+        fpath: str
+            Path to GEQDSK file
+        ipsign_out: int
+            Desired sign(Ip) in output
+        b0sign_out: int
+            Desired sign(B0) in output
+        """
+
+        #
+        self.fpath = fpath
+
+        self.data = self._load(self.fpath)
+
+        self.cocos = self._set_cocos(self.data)
+
+        self.coef = self.cocos.values_coefficients(
+            self.cocos.COCOS,
+            IDS_COCOS,
+            self.data["CURRENT"],
+            self.data["BCENTR"],
+            ipsign_out,
+            b0sign_out,
+        )
+
+    def _load(self, fpath):
+        """
+        Read GEQDSK
+
+        Parameters
+        ----------
+        fpath: str
+            Path to GEQDSK file
+
+        Returns
+        -------
+        dict
+            Information in GEQDSK file
+        """
+
+        if not os.path.exists(fpath):
+            exit("file not found: {}".format(fpath))
+
+        if os.stat(fpath).st_size == 0:
+            exit("file size error: {}".format(fpath))
 
         try:
-            fp = open(fname, "r")
+            fp = open(fpath, "r")
         except OSError:
-            exit("cannot open/read file: {}".format(fname))
-
-        self.data = self._load(fp)
-
-        self.fname = fname
-
-        cocos = self._cocos()
-        self.cocos = cocos
-
-        cocos_in = {"COCOS": cocos.COCOS, "ipsign": +1, "b0sign": +1}
-        if direct:
-            cocos_out = cocos_in
-        else:
-            cocos_out = {"COCOS": 11, "ipsign": +1, "b0sign": +1}
-        self.trans = cocos.values_coefficients(cocos_in, cocos_out)
-
-    def _load(self, fp):
+            exit("cannot open/read file: {}".format(fpath))
 
         fmt00 = FortranRecordReader("6a8,3i4")
         fmt20 = FortranRecordReader("5e16.9")
@@ -120,6 +161,21 @@ class GEQDSK:
         return data
 
     def _read1d(self, fp, nlen, fmt):
+        """
+        Read array with specified format in Fortran
+
+        Parameters
+        ----------
+        fp: _io.TextIOWrapper
+            file pointer
+        nlen: int
+            length of record
+        fmt: FortranRecordReader
+
+        Returns
+        -------
+        numpy.ndarray, dtype=numpy.float64
+        """
 
         ret = np.zeros(nlen, dtype=np.float64)
         i = 0
@@ -135,30 +191,37 @@ class GEQDSK:
 
         return ret
 
-    def _cocos(self):
+    def _set_cocos(self, g):
+        """
+        Read array with Fortran format specified
 
-        # 1.
-        sigma_ip = int(np.sign(self.data["CURRENT"]))
+        Parameters
+        ----------
+        g: dict
+            Information of GEQDSK file
 
-        # 2.
-        sigma_b0 = int(np.sign(self.data["BCENTR"]))
+        Returns
+        -------
+        COCOS
+            COCOS index and values
+        """
 
-        # 3. PSIRZ assumed to be divided by 2*pi
+        # Sign(Ip) and Sign(B0) from input
+        sigma_ip = np.sign(g["CURRENT"])
+        sigma_b0 = np.sign(g["BCENTR"])
+
+        # PSIRZ assumed to be divided by 2*pi
         exp_Bp = 0
 
-        # 4. Eq.(22)
-        sigma_Bp = int(
-            np.sign(
-                np.sign(self.data["SIBRY"] - self.data["SIMAG"])
-                * np.sign(self.data["CURRENT"])
-            )
-        )
+        # Eq.(22)
+        sign_psi_edge_axis = np.sign(g["SIBRY"] - g["SIMAG"])
+        sigma_Bp = int(np.sign(sign_psi_edge_axis * sigma_ip))
 
-        # 5. Right-handed cylindrical coordinate system for GEQDSK format
+        # Right-handed cylindrical coordinate system for GEQDSK format
         sigma_RphiZ = int(np.sign(+1))
 
-        # 6. Sign of q profile
-        x = self.data["QPSI"][1:]
+        # Sign of q profile
+        x = g["QPSI"][1:]
         if np.all(np.sign(x) > 0):
             sign_q_pos = int(np.sign(+1))
         elif np.all(np.sign(x) < 0):
@@ -166,8 +229,8 @@ class GEQDSK:
         else:
             sign_q_pos = int(0)  # raise ValueError in COCOS Class
 
-        # 7. Sign of pprime
-        x = self.data["PPRIME"][1:]
+        # Sign of pprime
+        x = g["PPRIME"][1:]
         if np.all(np.sign(x) > 0):
             sign_pprime_pos = int(np.sign(+1))
         elif np.all(np.sign(x) < 0):
@@ -175,12 +238,10 @@ class GEQDSK:
         else:
             sign_pprime_pos = int(np.sign(0))  # raise ValueError in COCOS Class
 
-        # 8. Eq.(22)
+        # Eq.(22)
         sigma_rhothetaphi = int(np.sign(sign_q_pos * sigma_ip * sigma_b0))
 
         values = {
-            "ipsign": sigma_ip,
-            "b0sign": sigma_b0,
             "exp_Bp": exp_Bp,
             "sigma_Bp": sigma_Bp,
             "sigma_RphiZ": sigma_RphiZ,
@@ -189,20 +250,23 @@ class GEQDSK:
             "sign_pprime_pos": sign_pprime_pos,
         }
 
-        val = (sigma_Bp, sigma_RphiZ, sigma_rhothetaphi, sign_q_pos, sign_pprime_pos)
-        print(
-            "val(sigma_Bp,sigma_RphiZ,sigma_rhothetaphi,sign_q_pos,sign_pprime_pos)=",
-            val,
-        )
-
         return COCOS(values=values)
 
 
 # ----------------------------------------------------------------------
 
 
-def map_GEQDSK_to_IDS(eq, geqdsk):
-    """Convert GEQDSK file to IDS/equilibrium"""
+def map_GEQDSK_to_IDS(geqdsk, eq):
+    """
+    Convert GEQDSK file into IDS/equilibrium
+
+    Parameters
+    ----------
+    geqdsk: GEQDSK
+        Class GEQDSK
+    eq: imas_*_ual_*.equilibrium.equilibrium ('*' corresponds to IMAS/UAL ver.)
+        IDS/equilibrium
+    """
 
     def set_timebase(ids):
         """ """
@@ -229,7 +293,7 @@ def map_GEQDSK_to_IDS(eq, geqdsk):
 
     # Abbrev.
     ga = geqdsk.data
-    coef = geqdsk.trans
+    coef = geqdsk.coef
 
     # IDS info.
     common_properties(eq)
@@ -315,21 +379,15 @@ def map_GEQDSK_to_IDS(eq, geqdsk):
 
 def main():
     """
-    File Converter from GEQDSK to IDS/equilibrium (geqdsk2ids)
+    Converter from GEQDSK to IDS/equilibrium (geqdsk2ids)
     """
 
     # Read GEQDSK file
-    geqdsk = GEQDSK(args.gfile, args.direct)
-
-    # Debug Write
-    pprint(geqdsk.data, indent=2)
-    pprint(geqdsk.fname, indent=2)
-    pprint(geqdsk.cocos.get(), indent=2)
-    pprint(geqdsk.trans, indent=2)
+    geqdsk = GEQDSK(args.fpath, args.ipsign, args.b0sign)
 
     # Map GEQDSK to IDS/equilibrium
     eq = imas.equilibrium()
-    map_GEQDSK_to_IDS(eq, geqdsk)
+    map_GEQDSK_to_IDS(geqdsk, eq)
 
     # Create the output datafile, save the equilibrium IDS, and close the output datafile
     db = imas.DBEntry(
@@ -384,8 +442,8 @@ if __name__ == "__main__":
     parser.add_argument(
         "-i",
         "--input",
-        dest="gfile",
-        help="path to Gfile",
+        dest="fpath",
+        help="path to GEQDSK file",
         required=True,
         default=None,
     )
@@ -397,12 +455,22 @@ if __name__ == "__main__":
         action="store_true",
     )
     parser.add_argument(
-        "--direct-mapping",
-        help="direct output to IDS w/o COCOS transformation (for debug)",
-        dest="direct",
+        "--ipsign",
+        dest="ipsign",
+        help="desired sign of Ip in output (computes factors to obtain these signs), default=%(default)s uses input",
         required=False,
-        default=False,
-        action="store_true",
+        type=int,
+        default=0,
+        choices=[-1, 0, 1],
+    )
+    parser.add_argument(
+        "--b0sign",
+        dest="b0sign",
+        help="desired sign of B0 in output (computes factors to obtain these signs), default=%(default)s uses input",
+        required=False,
+        type=int,
+        default=0,
+        choices=[-1, 0, 1],
     )
     args = parser.parse_args()
     main()
