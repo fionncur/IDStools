@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import imas,os,sys,argparse,matplotlib
+import imas,os,sys,argparse,matplotlib,yaml
 import numpy as np
 matplotlib.use('TKagg')
 from matplotlib import gridspec
@@ -73,8 +73,17 @@ else:
 
 time = tc
 
+# ITER Machine Description configuration
+file = open(os.path.dirname(__file__)+'/ITER_MD_configuration.yaml', 'r')
+data = yaml.load(file,Loader=yaml.CLoader)
+file.close()
+
 if args.wall == 1:
-    wall_md = imas.DBEntry(get_backend_id(args.backend),'ITER_MD',116100,1001,'schneim')
+    wall_md = imas.DBEntry(get_backend_id(args.backend),\
+                           data['wall']['db'],\
+                           data['wall']['shot'],\
+                           data['wall']['run'],\
+                           data['wall']['user'])
     wall_md.open()
     wall=wall_md.partial_get(ids_name='wall',data_path='description_ggd(0)/grid_ggd(0)/space(0)/objects_per_dimension(0)/object(:)')
     wall_md.close()
