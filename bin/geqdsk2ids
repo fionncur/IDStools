@@ -420,13 +420,14 @@ def main():
 
 
 if __name__ == "__main__":
+    prog=os.path.basename(__file__)
     parser = argparse.ArgumentParser(
-        prog="geqdsk2ids",
+        prog=prog,
         formatter_class=argparse.RawDescriptionHelpFormatter,
         parents=[imas_parser],
         description=textwrap.dedent(
             """\
-            File Converter from GEQDSK to IDS/equilibrium (geqdsk2ids)
+            File Converter from GEQDSK to IDS/equilibrium ({})
             -----------------------------------------------------------
             Usage:
                 1) Load IMAS
@@ -435,9 +436,9 @@ if __name__ == "__main__":
                 2) Install fortranformat (if never done)
                 $ pip install fortranformat
 
-                3) Run
-                $ geqdsk2ids -i path_to_gfile -s 12345 -r 1 -u xxxxx -d iter
-            """
+                3) Create IDS data file in local database
+                $ {} -i path_to_gfile -s 12345 -r 1 -u userid -d ITER
+            """.format(prog,prog)
         ),
     )
     parser.add_argument(
@@ -488,7 +489,7 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
      
-    logger = logging.getLogger('geqdsk2ids')
+    logger = logging.getLogger(prog)
     if args.debug:
         logger.setLevel(logging.DEBUG)
     elif args.verbose:
@@ -500,4 +501,7 @@ if __name__ == "__main__":
     logfmt = logging.Formatter('%(asctime)s %(name)s (%(levelname)s): %(message)s')
     handler.setFormatter(logfmt)
      
-    main()
+    try:
+        main()
+    except SystemExit as e:
+        logger.error(str(e))
