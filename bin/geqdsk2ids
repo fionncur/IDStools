@@ -23,7 +23,7 @@ class GEQDSK:
     """
     GEQDSK module for IMAS
 
-    [1] L. Lao, "G EQDSK FORMAT", https://w3.pppl.gov/ntcc/TORAY/G_EQDSK.pdf
+    [1] L.L. Lao, "G EQDSK FORMAT", https://w3.pppl.gov/ntcc/TORAY/G_EQDSK.pdf
 
     Attributes
     ----------
@@ -200,7 +200,7 @@ class GEQDSK:
 
     def _set_cocos(self, g):
         """
-        Read array with Fortran format specified
+        Compute COCOS for GEQDSK file and Return class COCOS 
 
         Parameters
         ----------
