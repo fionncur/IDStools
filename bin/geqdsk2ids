@@ -534,5 +534,5 @@ if __name__ == "__main__":
         main()
     except SystemExit as e:
         logger.error(str(e))
-    except Exception as e:
-        logger.error(str(e))
+    #except Exception as e:
+    #    logger.error(str(e))
