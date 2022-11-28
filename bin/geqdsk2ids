@@ -6,7 +6,7 @@ import datetime
 import numpy as np
 from collections import OrderedDict
 from fortranformat import FortranRecordReader
-from pprint import pformat
+from pprint import pformat, pprint
 import textwrap
 import logging
 
@@ -51,16 +51,19 @@ class GEQDSK:
             Desired sign(B0) in output
         """
 
-        #
+        # 1. Register name of GEQDSK file
         self.fpath = fpath
         logger.debug("GEQDSK fpath: \n%s",pformat(self.fpath,indent=2))
 
+        # 2. Read GEQDSK file
         self.data = self._load(self.fpath)
         logger.debug("GEQDSK data: \n%s",pformat(self.data,indent=2))
 
+        # 3. Compute COCOS
         self.cocos = self._set_cocos(self.data)
         logger.info("GEQDSK COCOS: \n%s",pformat(self.cocos.__dict__,indent=2))
 
+        # 4. Compute transformation coeff.
         self.coef = self.cocos.values_coefficients(
             self.cocos.COCOS,
             IDS_COCOS,
@@ -302,6 +305,9 @@ def map_GEQDSK_to_IDS(geqdsk, eq):
     ga = geqdsk.data
     coef = geqdsk.coef
 
+    # IDS_COCOS
+    cocos = COCOS(index={"COCOS":IDS_COCOS})
+
     # IDS info.
     common_properties(eq)
 
@@ -358,6 +364,8 @@ def map_GEQDSK_to_IDS(geqdsk, eq):
     eq.time_slice[0].profiles_2d[0].psi.resize(nw, nh)
     eq.time_slice[0].profiles_2d[0].r.resize(nw, nh)
     eq.time_slice[0].profiles_2d[0].z.resize(nw, nh)
+    eq.time_slice[0].profiles_2d[0].b_field_r.resize(nw, nh)
+    eq.time_slice[0].profiles_2d[0].b_field_z.resize(nw, nh)
     for i in range(nw):
         eq.time_slice[0].profiles_2d[0].grid.dim1[i] = (
             float(i) / float(nw - 1) * ga["RDIM"] + ga["RLEFT"]
@@ -379,6 +387,18 @@ def map_GEQDSK_to_IDS(geqdsk, eq):
             eq.time_slice[0].profiles_2d[0].z[i, j] = (
                 eq.time_slice[0].profiles_2d[0].grid.dim2[j]
             )
+    # Eq. (19)
+    fact = cocos.sigma_RphiZ * cocos.sigma_Bp / (2.0*np.pi) ** cocos.exp_Bp
+    dim1 = eq.time_slice[0].profiles_2d[0].grid.dim1
+    dim2 = eq.time_slice[0].profiles_2d[0].grid.dim2
+    for i in range(nw):
+        psi = eq.time_slice[0].profiles_2d[0].psi[i,:]
+        br = np.gradient(psi, dim2, edge_order=2) / dim1[i]
+        eq.time_slice[0].profiles_2d[0].b_field_r[i,:] = br[:] * fact
+    for j in range(nh):
+        psi = eq.time_slice[0].profiles_2d[0].psi[:,j]
+        bz = np.gradient(psi, dim1, edge_order=2) / dim1[:]
+        eq.time_slice[0].profiles_2d[0].b_field_z[:,j] = bz[:] * fact * -1.0
 
     logger.debug("IDS/equilibrium: \n%s",pformat(eq,indent=2))
 
@@ -387,7 +407,7 @@ def map_GEQDSK_to_IDS(geqdsk, eq):
 
 def main():
     """
-    Converter from GEQDSK to IDS/equilibrium (geqdsk2ids)
+    GEQDSK Converter to IDS/equilibrium (geqdsk2ids)
     """
 
     # Read GEQDSK file
@@ -399,27 +419,34 @@ def main():
     eq = imas.equilibrium()
     map_GEQDSK_to_IDS(geqdsk, eq)
 
-    # Create the output datafile, save the equilibrium IDS, and close the output datafile
-    logger.info("[3/3] creating output datafile...")
-    db = imas.DBEntry(
-        get_backend_id(args.backend), args.database, args.shot, args.run, args.user
-    )
-    status, _ = db.create()
-    if status != 0:
-        exit(
-            "can not open backend={}, user_or_path={}, database={}, shot={}, run={}".format(
-                args.backend, args.user, args.database, args.shot, args.run
-            )
+    # Create the output datafile if COCOS == IDS_COCOS
+    cocos = compute_COCOS(eq)
+    logger.info("IDS COCOS: \n%s",pformat(cocos,indent=2))
+    if cocos["COCOS"] == IDS_COCOS:
+        logger.info("[3/3] creating output datafile...")
+        db = imas.DBEntry(
+            get_backend_id(args.backend), args.database, args.shot, args.run, args.user
         )
-    db.put(eq)
-    db.close()
-    logger.info("IDS/equilibrium populated in shot/run = {}/{}.".format(args.shot, args.run))
+        status, _ = db.create()
+        if status != 0:
+            exit(
+                "can not open backend={}, user_or_path={}, database={}, shot={}, run={}".format(
+                    args.backend, args.user, args.database, args.shot, args.run
+                )
+            )
+        db.put(eq)
+        db.close()
+        logger.info("IDS/equilibrium populated in shot/run = {}/{}.".format(args.shot, args.run))
+    else:
+        exit("COCOS transformed = {}, expected {}".format(cocos.COCOS,IDS_COCOS))
 
 
 # ----------------------------------------------------------------------
 
 
 if __name__ == "__main__":
+
+    # Parse for command line options
     prog=os.path.basename(__file__)
     parser = argparse.ArgumentParser(
         prog=prog,
@@ -433,7 +460,7 @@ if __name__ == "__main__":
                 1) Load IMAS
                 $ module load IMAS
 
-                2) Install fortranformat (if never done)
+                2) Install fortranformat (if not done before)
                 $ pip install fortranformat
 
                 3) Create IDS data file in local database
@@ -489,6 +516,7 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
      
+    # Initialize logger
     logger = logging.getLogger(prog)
     if args.debug:
         logger.setLevel(logging.DEBUG)
@@ -501,7 +529,10 @@ if __name__ == "__main__":
     logfmt = logging.Formatter('%(asctime)s %(name)s (%(levelname)s): %(message)s')
     handler.setFormatter(logfmt)
      
+    # main() function
     try:
         main()
     except SystemExit as e:
+        logger.error(str(e))
+    except Exception as e:
         logger.error(str(e))
