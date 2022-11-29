@@ -4,9 +4,10 @@ import os
 import argparse
 import datetime
 import numpy as np
+from statistics import median
 from collections import OrderedDict
 from fortranformat import FortranRecordReader
-from pprint import pformat, pprint
+from pprint import pformat
 import textwrap
 import logging
 
@@ -231,19 +232,19 @@ class GEQDSK:
         sigma_RphiZ = int(np.sign(+1))
 
         # Sign of q profile
-        x = g["QPSI"][1:]
-        if np.all(np.sign(x) > 0):
+        x = np.sign(median(g["QPSI"]))
+        if x > 0.:
             sign_q_pos = int(np.sign(+1))
-        elif np.all(np.sign(x) < 0):
+        elif x < 0.:
             sign_q_pos = int(np.sign(-1))
         else:
             sign_q_pos = int(0)  # raise ValueError in COCOS Class
 
         # Sign of pprime
-        x = g["PPRIME"][1:]
-        if np.all(np.sign(x) > 0):
+        x = np.sign(median(g["PPRIME"]))
+        if x > 0.:
             sign_pprime_pos = int(np.sign(+1))
-        elif np.all(np.sign(x) < 0):
+        elif x < 0.:
             sign_pprime_pos = int(np.sign(-1))
         else:
             sign_pprime_pos = int(np.sign(0))  # raise ValueError in COCOS Class
