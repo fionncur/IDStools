@@ -25,6 +25,8 @@ class GEQDSK:
     GEQDSK module for IMAS
 
     [1] L.L. Lao, "G EQDSK FORMAT", https://w3.pppl.gov/ntcc/TORAY/G_EQDSK.pdf
+    [2] O. Sauter and S.Yu. Medvevdev, "Tokamak Coordinate Conventions : COCOS",
+        Comput. Physics Commun. 184 (2013) 293
 
     Attributes
     ----------
@@ -38,7 +40,7 @@ class GEQDSK:
         COCOS Transformation coefficients regarding IDS default (COCOS=11)
     """
 
-    def __init__(self, fpath, ipsign_out, b0sign_out):
+    def __init__(self, fpath, ipsign_out, b0sign_out, cocos_in):
         """
         Read GEQDSK file and set COCOS transformation coefficients
 
@@ -54,15 +56,18 @@ class GEQDSK:
 
         # 1. Register name of GEQDSK file
         self.fpath = fpath
-        logger.debug("GEQDSK fpath: \n%s",pformat(self.fpath,indent=2))
+        logger.debug("GEQDSK fpath: \n%s", pformat(self.fpath, indent=2))
 
         # 2. Read GEQDSK file
         self.data = self._load(self.fpath)
-        logger.debug("GEQDSK data: \n%s",pformat(self.data,indent=2))
+        logger.debug("GEQDSK data: \n%s", pformat(self.data, indent=2))
 
         # 3. Compute COCOS
-        self.cocos = self._set_cocos(self.data)
-        logger.info("GEQDSK COCOS: \n%s",pformat(self.cocos.__dict__,indent=2))
+        if cocos_in:
+            self.cocos = COCOS(index={"COCOS": cocos_in})
+        else:
+            self.cocos = self._set_cocos(self.data)
+        logger.info("GEQDSK COCOS: \n%s", pformat(self.cocos.__dict__, indent=2))
 
         # 4. Compute transformation coeff.
         self.coef = self.cocos.values_coefficients(
@@ -73,7 +78,7 @@ class GEQDSK:
             ipsign_out,
             b0sign_out,
         )
-        logger.info("GEQDSK Transformation Coeff.: \n%s",pformat(self.coef,indent=2))
+        logger.info("GEQDSK Transformation Coeff.: \n%s", pformat(self.coef, indent=2))
 
     def _load(self, fpath):
         """
@@ -204,7 +209,7 @@ class GEQDSK:
 
     def _set_cocos(self, g):
         """
-        Compute COCOS for GEQDSK file and Return class COCOS 
+        Compute COCOS for GEQDSK file and Return class COCOS
 
         Parameters
         ----------
@@ -221,36 +226,38 @@ class GEQDSK:
         sigma_ip = np.sign(g["CURRENT"])
         sigma_b0 = np.sign(g["BCENTR"])
 
-        # PSIRZ assumed to be divided by 2*pi
+        # PSIRZ divided by 2*pi [1], Table 1(a) [2]
         exp_Bp = 0
 
-        # Eq.(22)
+        # Eq.(22) [2]
         sign_psi_edge_axis = np.sign(g["SIBRY"] - g["SIMAG"])
-        sigma_Bp = int(np.sign(sign_psi_edge_axis * sigma_ip))
+        sigma_Bp = int(sign_psi_edge_axis * sigma_ip)
 
-        # Right-handed cylindrical coordinate system for GEQDSK format
-        sigma_RphiZ = int(np.sign(+1))
+        # Right-handed cylindrical coordinate system [1], Table 1(a) [2]
+        sigma_RphiZ = int(+1)
 
-        # Sign of q profile
+        # Eq.(22), Table 1(b) [2]
         x = np.sign(median(g["QPSI"]))
-        if x > 0.:
-            sign_q_pos = int(np.sign(+1))
-        elif x < 0.:
-            sign_q_pos = int(np.sign(-1))
+        if x > 0.0:
+            sign_q = int(+1)
+        elif x < 0.0:
+            sign_q = int(-1)
         else:
-            sign_q_pos = int(0)  # raise ValueError in COCOS Class
+            sign_q = int(0)  # raise ValueError in Class COCOS
+        sign_q_pos = int(sign_q * sigma_ip * sigma_b0)
 
-        # Sign of pprime
+        # Eq.(22) [2]
+        sigma_rhothetaphi = int(sign_q * sigma_ip * sigma_b0)
+
+        # Eq.(22), Table 1(b) [2]
         x = np.sign(median(g["PPRIME"]))
-        if x > 0.:
-            sign_pprime_pos = int(np.sign(+1))
-        elif x < 0.:
-            sign_pprime_pos = int(np.sign(-1))
+        if x > 0.0:
+            sign_pprime = int(+1)
+        elif x < 0.0:
+            sign_pprime = int(-1)
         else:
-            sign_pprime_pos = int(np.sign(0))  # raise ValueError in COCOS Class
-
-        # Eq.(22)
-        sigma_rhothetaphi = int(np.sign(sign_q_pos * sigma_ip * sigma_b0))
+            sign_pprime = int(0)  # raise ValueError in Class COCOS
+        sign_pprime_pos = int(sign_pprime * sigma_ip)
 
         values = {
             "exp_Bp": exp_Bp,
@@ -307,7 +314,7 @@ def map_GEQDSK_to_IDS(geqdsk, eq):
     coef = geqdsk.coef
 
     # IDS_COCOS
-    cocos = COCOS(index={"COCOS":IDS_COCOS})
+    cocos = COCOS(index={"COCOS": IDS_COCOS})
 
     # IDS info.
     common_properties(eq)
@@ -389,19 +396,20 @@ def map_GEQDSK_to_IDS(geqdsk, eq):
                 eq.time_slice[0].profiles_2d[0].grid.dim2[j]
             )
     # Eq. (19)
-    fact = cocos.sigma_RphiZ * cocos.sigma_Bp / (2.0*np.pi) ** cocos.exp_Bp
+    fact = cocos.sigma_RphiZ * cocos.sigma_Bp / (2.0 * np.pi) ** cocos.exp_Bp
     dim1 = eq.time_slice[0].profiles_2d[0].grid.dim1
     dim2 = eq.time_slice[0].profiles_2d[0].grid.dim2
     for i in range(nw):
-        psi = eq.time_slice[0].profiles_2d[0].psi[i,:]
+        psi = eq.time_slice[0].profiles_2d[0].psi[i, :]
         br = np.gradient(psi, dim2, edge_order=2) / dim1[i]
-        eq.time_slice[0].profiles_2d[0].b_field_r[i,:] = br[:] * fact
+        eq.time_slice[0].profiles_2d[0].b_field_r[i, :] = br[:] * fact
     for j in range(nh):
-        psi = eq.time_slice[0].profiles_2d[0].psi[:,j]
+        psi = eq.time_slice[0].profiles_2d[0].psi[:, j]
         bz = np.gradient(psi, dim1, edge_order=2) / dim1[:]
-        eq.time_slice[0].profiles_2d[0].b_field_z[:,j] = bz[:] * fact * -1.0
+        eq.time_slice[0].profiles_2d[0].b_field_z[:, j] = bz[:] * fact * -1.0
 
-    logger.debug("IDS/equilibrium: \n%s",pformat(eq,indent=2))
+    logger.debug("IDS/equilibrium: \n%s", pformat(eq, indent=2))
+
 
 # ----------------------------------------------------------------------
 
@@ -413,7 +421,7 @@ def main():
 
     # Read GEQDSK file
     logger.info("[1/3] loading GEQDSK file...")
-    geqdsk = GEQDSK(args.fpath, args.ipsign, args.b0sign)
+    geqdsk = GEQDSK(args.fpath, args.ipsign, args.b0sign, args.cocos_in)
 
     # Map GEQDSK to IDS/equilibrium
     logger.info("[2/3] mapping to IDS/equilibrium...")
@@ -422,7 +430,7 @@ def main():
 
     # Create the output datafile if COCOS == IDS_COCOS
     cocos = compute_COCOS(eq)
-    logger.info("IDS COCOS: \n%s",pformat(cocos,indent=2))
+    logger.info("IDS COCOS: \n%s", pformat(cocos, indent=2))
     if cocos["COCOS"] == IDS_COCOS:
         logger.info("[3/3] creating output datafile...")
         db = imas.DBEntry(
@@ -437,9 +445,11 @@ def main():
             )
         db.put(eq)
         db.close()
-        logger.info("IDS/equilibrium populated in shot/run = {}/{}.".format(args.shot, args.run))
+        logger.info(
+            "IDS/equilibrium populated in shot/run = {}/{}.".format(args.shot, args.run)
+        )
     else:
-        exit("COCOS transformed = {}, expected {}".format(cocos.COCOS,IDS_COCOS))
+        exit("COCOS transformed = {}, expected {}".format(cocos["COCOS"], IDS_COCOS))
 
 
 # ----------------------------------------------------------------------
@@ -448,25 +458,34 @@ def main():
 if __name__ == "__main__":
 
     # Parse for command line options
-    prog=os.path.basename(__file__)
+    prog = os.path.basename(__file__)
     parser = argparse.ArgumentParser(
         prog=prog,
         formatter_class=argparse.RawDescriptionHelpFormatter,
         parents=[imas_parser],
         description=textwrap.dedent(
             """\
-            File Converter from GEQDSK to IDS/equilibrium ({})
+            File Converter from GEQDSK to IDS/equilibrium ({0})
             -----------------------------------------------------------
             Usage:
-                1) Load IMAS
+                0) Load IMAS and install fortranformat and Cerberus (if not done before)
                 $ module load IMAS
+                $ pip install fortranformat cerberus
 
-                2) Install fortranformat (if not done before)
-                $ pip install fortranformat
+                1) Compute COCOS and create IDS data file in local database
+                $ {0} -i path_to_gfile -s 12345 -r 1 -u userid -d ITER
 
-                3) Create IDS data file in local database
-                $ {} -i path_to_gfile -s 12345 -r 1 -u userid -d ITER
-            """.format(prog,prog)
+                2) Enforce signs of Ip and/or B0 in output
+                $ {0} -i path_to_gfile -s 12345 -r 1 -u userid -d ITER --ipsign -1 --b0sign -1
+
+                3) Increase verbosity to see information as COCOS index and transformation coeff.
+                $ {0} -i path_to_gfile -s 12345 -r 1 -u userid -d ITER --verbose
+
+                4) Coerce input COCOS index
+                $ {0} -i path_to_gfile -s 12345 -r 1 -u userid -d ITER --cocos_in 7
+            """.format(
+                prog
+            )
         ),
     )
     parser.add_argument(
@@ -515,8 +534,17 @@ if __name__ == "__main__":
         default=0,
         choices=[-1, 0, 1],
     )
+    parser.add_argument(
+        "--cocos_in",
+        dest="cocos_in",
+        help="coerced COCOS index, otherwise default=%(default)s computes COCOS in GEQDSK file [1,3,5,7]",
+        required=False,
+        type=int,
+        default=None,
+        choices=[*range(1, 9), *range(11, 19)],
+    )
     args = parser.parse_args()
-     
+
     # Initialize logger
     logger = logging.getLogger(prog)
     if args.debug:
@@ -527,13 +555,13 @@ if __name__ == "__main__":
         logger.setLevel(logging.WARNING)
     handler = logging.StreamHandler()
     logger.addHandler(handler)
-    logfmt = logging.Formatter('%(asctime)s %(name)s (%(levelname)s): %(message)s')
+    logfmt = logging.Formatter("%(asctime)s %(name)s (%(levelname)s): %(message)s")
     handler.setFormatter(logfmt)
-     
+
     # main() function
     try:
         main()
     except SystemExit as e:
         logger.error(str(e))
-    #except Exception as e:
+    # except Exception as e:
     #    logger.error(str(e))

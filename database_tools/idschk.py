@@ -19,6 +19,7 @@ idx_header = "idx."
 IDS_COCOS = 11
 args_verbose = False
 args_check_all = True
+eps = 2.0*np.pi*0.1
 
 # Initialization for yaml Dumper
 yaml.Dumper.ignore_aliases = lambda *args: True
@@ -126,7 +127,7 @@ class COCOS:
     """
     COCOS module in Python
 
-    [1] O. Sauter and S. Yu. Medvevdev, "Tokamak Coordinate Conventions : COCOS",
+    [1] O. Sauter and S.Yu. Medvevdev, "Tokamak Coordinate Conventions : COCOS",
         Comput. Physics Commun. 184 (2013) 293
     [2] cocos_module.f90 (CHEASE)
 
@@ -889,7 +890,7 @@ def validate_COCOS(ids, schema, itime, cocos=None):
 
 
 def compute_COCOS(ids, cocos_check=None):
-    """Compute COCOS values using stored data in IDS/equilibrium
+    """Compute COCOS values using experimental data in IDS/equilibrium
 
     Parameters
     ----------
@@ -906,29 +907,35 @@ def compute_COCOS(ids, cocos_check=None):
     # COCOS Values in the middle of time sequence
     itime = int(np.floor(float(len(ids.time_slice)) / 2.0))
 
-    #
+    # Check IDS/eq
     validate_COCOS(ids, required_fields_eq, itime)
     if cocos_check:
         validate_COCOS(ids, required_fields_cocos, itime, cocos=cocos_check)
 
-    #
+    # Sign(Ip) and Sign(B0) from input
     ipsign = np.sign(ids.time_slice[itime].global_quantities.ip)
     b0sign = np.sign(ids.vacuum_toroidal_field.b0[0])
 
+    # Eq.(22)
     dpsi = (
         ids.time_slice[itime].profiles_1d.psi[-1]
         - ids.time_slice[itime].profiles_1d.psi[0]
     )
     sigma_Bp = np.sign(dpsi) * ipsign
 
+    # Eq.(22)
     q = ids.time_slice[itime].profiles_1d.q
-    sign_q_pos = np.sign(np.sum(np.sign(q)))
+    sign_q = np.sign(np.sum(np.sign(q)))
+    sign_q_pos = sign_q * ipsign * b0sign
+
+    # Eq.(22)
     sigma_rhothetaphi = sign_q_pos
 
+    # Eq.(22)
     dpressure_dpsi = ids.time_slice[itime].profiles_1d.dpressure_dpsi
-    sign_pprime_pos = np.sign(np.sum(np.sign(dpressure_dpsi))) * ipsign * sigma_Bp
+    sign_pprime_pos = np.sign(np.sum(np.sign(dpressure_dpsi))) * ipsign
 
-    # sigma_RphiZ and exp_Bp from Eq.(19) in COCOS paper
+    # sigma_RphiZ and exp_Bp from Eq.(19)
     bz = ids.time_slice[itime].profiles_2d[0].b_field_z
     psi2d = ids.time_slice[itime].profiles_2d[0].psi
     r2d = ids.time_slice[itime].profiles_2d[0].r
@@ -937,25 +944,20 @@ def compute_COCOS(ids, cocos_check=None):
     dr2d = np.gradient(r2d)
     dpsi2drdr = dpsi2d[0] / dr2d[0] / r2d
 
-    # avoid ZeroDivisionError
-    rows, cols = np.where(bz != 0.0)
+    rows, cols = np.where(bz != 0.0)  # avoid ZeroDivisionError
     twopi_expBp_sigma_RphiZ = np.zeros(bz.shape)
     twopi_expBp_sigma_RphiZ = -sigma_Bp * dpsi2drdr[rows, cols] / bz[rows, cols]
 
     sigma_RphiZ = np.sign(np.sum(np.sign(twopi_expBp_sigma_RphiZ)))
 
-    x = twopi_expBp_sigma_RphiZ * sigma_RphiZ
-    x = np.average(x)
-
-    if x > 6.0:
+    x = np.average(twopi_expBp_sigma_RphiZ * sigma_RphiZ)
+    if np.absolute(x - 2.0*np.pi) < eps:
         exp_Bp = 1
     else:
         exp_Bp = 0
 
     #
     values = {
-        "ipsign": int(ipsign),
-        "b0sign": int(b0sign),
         "exp_Bp": int(exp_Bp),
         "sigma_Bp": int(sigma_Bp),
         "sigma_RphiZ": int(sigma_RphiZ),
