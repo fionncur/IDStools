@@ -19,7 +19,6 @@ idx_header = "idx."
 IDS_COCOS = 11
 args_verbose = False
 args_check_all = True
-eps = 2.0*np.pi*0.1
 
 # Initialization for yaml Dumper
 yaml.Dumper.ignore_aliases = lambda *args: True
@@ -935,7 +934,7 @@ def compute_COCOS(ids, cocos_check=None):
     dpressure_dpsi = ids.time_slice[itime].profiles_1d.dpressure_dpsi
     sign_pprime_pos = np.sign(np.sum(np.sign(dpressure_dpsi))) * ipsign
 
-    # sigma_RphiZ and exp_Bp from Eq.(19)
+    # sigma_RphiZ from Eq.(19)
     bz = ids.time_slice[itime].profiles_2d[0].b_field_z
     psi2d = ids.time_slice[itime].profiles_2d[0].psi
     r2d = ids.time_slice[itime].profiles_2d[0].r
@@ -943,18 +942,15 @@ def compute_COCOS(ids, cocos_check=None):
     dpsi2d = np.gradient(psi2d)
     dr2d = np.gradient(r2d)
     dpsi2drdr = dpsi2d[0] / dr2d[0] / r2d
-
-    rows, cols = np.where(bz != 0.0)  # avoid ZeroDivisionError
-    twopi_expBp_sigma_RphiZ = np.zeros(bz.shape)
-    twopi_expBp_sigma_RphiZ = -sigma_Bp * dpsi2drdr[rows, cols] / bz[rows, cols]
-
+    # avoid ZeroDivisionError
+    twopi_expBp_sigma_RphiZ = np.where(
+        np.isclose(bz, 0.0), 0.0, -sigma_Bp * dpsi2drdr / bz
+    )
     sigma_RphiZ = np.sign(np.sum(np.sign(twopi_expBp_sigma_RphiZ)))
 
+    # exp_Bp from Eq.(19)
     x = np.average(twopi_expBp_sigma_RphiZ * sigma_RphiZ)
-    if np.absolute(x - 2.0*np.pi) < eps:
-        exp_Bp = 1
-    else:
-        exp_Bp = 0
+    exp_Bp = np.where(np.isclose(x, 2.0 * np.pi, rtol=0.1), 1, 0)
 
     #
     values = {

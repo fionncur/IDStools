@@ -1,20 +1,19 @@
 #!/usr/bin/env python
-from sys import exit
+from sys import exit, version
 import os
 import argparse
 import datetime
 import numpy as np
 from statistics import median
-from collections import OrderedDict
 from fortranformat import FortranRecordReader
 from pprint import pformat
 import textwrap
 import logging
+import traceback
 
 import imas
-from database_tools import idschk
-from database_tools.idschk import *
-from idstools.cli import *
+from database_tools.idschk import IDS_COCOS, COCOS, compute_COCOS
+from idstools.cli import imas_parser, get_backend_id
 
 
 # ----------------------------------------------------------------------
@@ -60,14 +59,19 @@ class GEQDSK:
 
         # 2. Read GEQDSK file
         self.data = self._load(self.fpath)
-        logger.debug("GEQDSK data: \n%s", pformat(self.data, indent=2))
+        logger.debug(
+            "GEQDSK data: \n%s", pformat(self.data, indent=2, sort_dicts=False)
+        )
 
         # 3. Compute COCOS
         if cocos_in:
             self.cocos = COCOS(index={"COCOS": cocos_in})
         else:
             self.cocos = self._set_cocos(self.data)
-        logger.info("GEQDSK COCOS: \n%s", pformat(self.cocos.__dict__, indent=2))
+        logger.info(
+            "GEQDSK COCOS: \n%s",
+            pformat(self.cocos.__dict__, indent=2, sort_dicts=False),
+        )
 
         # 4. Compute transformation coeff.
         self.coef = self.cocos.values_coefficients(
@@ -78,7 +82,10 @@ class GEQDSK:
             ipsign_out,
             b0sign_out,
         )
-        logger.info("GEQDSK Transformation Coeff.: \n%s", pformat(self.coef, indent=2))
+        logger.info(
+            "GEQDSK Transformation Coeff.: \n%s",
+            pformat(self.coef, indent=2, sort_dicts=False),
+        )
 
     def _load(self, fpath):
         """
@@ -96,21 +103,21 @@ class GEQDSK:
         """
 
         if not os.path.exists(fpath):
-            exit("file not found: {}".format(fpath))
+            raise FileNotFoundError(fpath)
 
         if os.stat(fpath).st_size == 0:
-            exit("file size error: {}".format(fpath))
+            raise IOError("file size is zero: {}".format(fpath))
 
         try:
             fp = open(fpath, "r")
         except OSError:
-            exit("cannot open/read file: {}".format(fpath))
+            raise IOError("cannot open/read file: {}".format(fpath))
 
         fmt00 = FortranRecordReader("6a8,3i4")
         fmt20 = FortranRecordReader("5e16.9")
         fmt22 = FortranRecordReader("2i5")
 
-        data = OrderedDict()
+        data = {}
 
         #
         rec = fmt00.read(fp.readline())
@@ -160,19 +167,31 @@ class GEQDSK:
         data["QPSI"] = self._read1d(fp, nw, fmt20)
 
         #
-        rec = np.int32(fmt22.read(fp.readline()))
+        rec = [0, 0]
+        try:
+            rec = np.int32(fmt22.read(fp.readline()))
+        except:
+            pass
         data["NBBBS"] = nbbbs = rec[0]
         data["LIMITR"] = limitr = rec[1]
 
         #
-        bbbs = np.reshape(self._read1d(fp, 2 * nbbbs, fmt20), (nbbbs, 2))
-        data["RBBBS"] = bbbs[:, 0]
-        data["ZBBBS"] = bbbs[:, 1]
+        if nbbbs > 0:
+            bbbs = np.reshape(self._read1d(fp, 2 * nbbbs, fmt20), (nbbbs, 2))
+            data["RBBBS"] = bbbs[:, 0]
+            data["ZBBBS"] = bbbs[:, 1]
+        else:
+            data["RBBBS"] = []
+            data["ZBBBS"] = []
 
         #
-        lim = np.reshape(self._read1d(fp, 2 * limitr, fmt20), (limitr, 2))
-        data["RLIM"] = lim[:, 0]
-        data["ZLIM"] = lim[:, 1]
+        if limitr > 0:
+            lim = np.reshape(self._read1d(fp, 2 * limitr, fmt20), (limitr, 2))
+            data["RLIM"] = lim[:, 0]
+            data["ZLIM"] = lim[:, 1]
+        else:
+            data["RLIM"] = []
+            data["ZLIM"] = []
 
         return data
 
@@ -302,7 +321,10 @@ def map_GEQDSK_to_IDS(geqdsk, eq):
         ids.ids_properties.provider = os.getenv("USER")
         ids.ids_properties.version_put.data_dictionary = os.getenv("IMAS_VERSION")
         ids.ids_properties.version_put.access_layer = os.getenv("UAL_VERSION")
-        ids.ids_properties.version_put.access_layer_language = sys.version
+        ids.ids_properties.version_put.access_layer_language = version
+
+        ids.ids_properties.provenance.node.resize(1)
+        ids.ids_properties.provenance.node[0].sources[:] = geqdsk.fpath
 
         ids.code.name = "IDStools/geqdsk2ids"
         ids.code.repository = "https://git.iter.org/projects/IMAS/repos/idstools/browse"
@@ -358,11 +380,11 @@ def map_GEQDSK_to_IDS(geqdsk, eq):
         ) * coef["fact_psi"]
 
     # Boundary
-    nbbbs = ga["NBBBS"]
-    eq.time_slice[0].boundary.outline.r.resize(nbbbs - 1)
-    eq.time_slice[0].boundary.outline.z.resize(nbbbs - 1)
-    eq.time_slice[0].boundary.outline.r = ga["RBBBS"][:-2]
-    eq.time_slice[0].boundary.outline.z = ga["ZBBBS"][:-2]
+    if ga["NBBBS"] > 0:
+        eq.time_slice[0].boundary.outline.r.resize(ga["NBBBS"])
+        eq.time_slice[0].boundary.outline.z.resize(ga["NBBBS"])
+        eq.time_slice[0].boundary.outline.r = ga["RBBBS"]
+        eq.time_slice[0].boundary.outline.z = ga["ZBBBS"]
 
     # 2D
     eq.time_slice[0].profiles_2d.resize(1)
@@ -408,7 +430,7 @@ def map_GEQDSK_to_IDS(geqdsk, eq):
         bz = np.gradient(psi, dim1, edge_order=2) / dim1[:]
         eq.time_slice[0].profiles_2d[0].b_field_z[:, j] = bz[:] * fact * -1.0
 
-    logger.debug("IDS/equilibrium: \n%s", pformat(eq, indent=2))
+    logger.debug("IDS/equilibrium: \n%s", pformat(eq, indent=2, sort_dicts=False))
 
 
 # ----------------------------------------------------------------------
@@ -438,7 +460,7 @@ def main():
         )
         status, _ = db.create()
         if status != 0:
-            exit(
+            raise OSError(
                 "can not open backend={}, user_or_path={}, database={}, shot={}, run={}".format(
                     args.backend, args.user, args.database, args.shot, args.run
                 )
@@ -449,7 +471,9 @@ def main():
             "IDS/equilibrium populated in shot/run = {}/{}.".format(args.shot, args.run)
         )
     else:
-        exit("COCOS transformed = {}, expected {}".format(cocos["COCOS"], IDS_COCOS))
+        raise ValueError(
+            "COCOS transformed = {}, expected {}".format(cocos["COCOS"], IDS_COCOS)
+        )
 
 
 # ----------------------------------------------------------------------
@@ -558,10 +582,7 @@ if __name__ == "__main__":
     logfmt = logging.Formatter("%(asctime)s %(name)s (%(levelname)s): %(message)s")
     handler.setFormatter(logfmt)
 
-    # main() function
     try:
         main()
-    except SystemExit as e:
-        logger.error(str(e))
-    # except Exception as e:
-    #    logger.error(str(e))
+    except Exception as e:
+        logger.error(traceback.format_exc())
