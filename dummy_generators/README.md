@@ -29,12 +29,12 @@ that it intersects the wall. It exports an IDS containing a minimal description 
 
 ## Build instructions
 
-Note: versions of this code <= 1.11.0 will not compile with AL>= 4.10.0 (due to the deprecation of imas-constants)
+Note: versions of this code <= 1.11.0 will not compile with AL>= 4.10.0 (due to the deprecation of `imas-constants`)
 
 1. Loading dependent modules
 ```module load IMAS AMNS Fundamental-Constants```
-   Making sure that the IMAS and AMNS modules are using the same DD version and compiler
-2. Selecting the fortran compiler through FC env variable and compiling
+   making sure that the IMAS and AMNS modules are using the same DD version and compiler
+2. Compiling
 ```make```
 3. Running with the default parameters
 ```./FP_dummy_plasma.exe```
