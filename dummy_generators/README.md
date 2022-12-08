@@ -33,11 +33,9 @@ Note: versions of this code <= 1.11.0 will not compile with AL>= 4.10.0 (due to 
 
 1. Loading dependent modules
 ```module load IMAS AMNS Fundamental-Constants```
+   Making sure that the IMAS and AMNS modules are using the same DD version and compiler
 2. Selecting the fortran compiler through FC env variable and compiling
-```FC=ifort make```
+```make```
 3. Running with the default parameters
 ```./FP_dummy_plasma.exe```
 
-## Known issues
-
-Current version of the Fortran code does not compile with gfortran version 10.2.0

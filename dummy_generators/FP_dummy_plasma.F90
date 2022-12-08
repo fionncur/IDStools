@@ -37,7 +37,7 @@ include 'codata_2018.f90'      ! Recommended physical constants since 2018
 ! Compilation instructions for this program are:
 ! ifort -c `pkg-config imas-ifort amns --cflags` -o FP_dummy_plasma.o FP_dummy_plasma.F90
 ! ifort -o FP_dummy_plasma FP_dummy_plasma.o `pkg-config imas-ifort amns --libs`
-! 
+!
 !
   use ids_schemas
   use amns_types
@@ -83,6 +83,7 @@ include 'codata_2018.f90'      ! Recommended physical constants since 2018
   real(IDS_real), parameter :: T_min = 1.0_IDS_real, ne_min = 1.0e8_IDS_real
   real(IDS_real) :: R_TL(N_TL), Z_TL(N_TL), R_DRS(N_DRS), Z_DRS(N_DRS)
   real(IDS_real) :: distance, closest, R_cl, Z_cl, R_lim, Z_lim
+  real(IDS_real), allocatable :: density_sum(:)
   logical outside, intersect
 
 ! Reference contour for First Plasma Protection Components (FPPC)
@@ -131,7 +132,7 @@ include 'codata_2018.f90'      ! Recommended physical constants since 2018
   create_date = date//' '//ctime//' '//' '//zone
   comment = "Dummy circular plasma"
   source = "FP_dummy_plasma"
- 
+
   narg = command_argument_count()
   if (narg.eq.0) then
     write(0,*) 'Call syntax:'
@@ -285,7 +286,7 @@ include 'codata_2018.f90'      ! Recommended physical constants since 2018
 
   write(*,'(a,i8,a,i8,4a)') 'Writing data in IDS shot: ', shot, ' Run: ', run, &
      & ' User: ', trim(username), ' Database: ', trim(database)
-  
+
   call imas_open_env(treename, shot, run, idx, username, database, version, status)
   if (status.ne.0) then
     write (0,*) 'Cannot open IDS file, will create a new one.'
@@ -310,14 +311,14 @@ include 'codata_2018.f90'      ! Recommended physical constants since 2018
   call ids_put(idx, 'wall', wall, status)
   if (status.ne.0) stop 'Error saving wall IDS !'
   call ids_deallocate( wall )
-  
+
   call write_ids_properties( core_profiles%ids_properties, &
    &  homogeneous_time, comment, source, create_date )
   call write_ids_properties( equilibrium%ids_properties, &
    &  homogeneous_time, comment, source, create_date )
   call write_ids_properties( summary%ids_properties, &
    &  homogeneous_time, comment, source, create_date )
-  
+
   call write_ids_code( core_profiles%code, code_commit )
   call write_ids_code( equilibrium%code, code_commit )
   call write_ids_code( summary%code, code_commit )
@@ -458,8 +459,12 @@ include 'codata_2018.f90'      ! Recommended physical constants since 2018
         core_profiles%profiles_1d( time_sind )%ion(j)%density(i) = &
           &  core_profiles%profiles_1d( time_sind )%electrons%density(i)
       else
-        core_profiles%profiles_1d( time_sind )%ion(j)%density(i) = &
-          &  sum( core_profiles%profiles_1d( time_sind )%ion(j)%state(:)%density(i) )
+        allocate( density_sum( size( core_profiles%profiles_1d( time_sind )%ion(j)%state ) ) )
+        do k = 1, size( density_sum )
+          density_sum(k) = core_profiles%profiles_1d( time_sind )%ion(j)%state(k)%density(i)
+        end do
+        core_profiles%profiles_1d( time_sind )%ion(j)%density(i) =  sum( density_sum )
+        deallocate( density_sum )
       end if
       core_profiles%profiles_1d( time_sind )%ion(j)%z_ion_1d(i) = 0.0_IDS_real
       core_profiles%profiles_1d( time_sind )%ion(j)%z_ion_square_1d(i) = 0.0_IDS_real
@@ -480,9 +485,14 @@ include 'codata_2018.f90'      ! Recommended physical constants since 2018
           &  core_profiles%profiles_1d( time_sind )%ion(j)%z_ion_square_1d(i) / &
           &  core_profiles%profiles_1d( time_sind )%ion(j)%density(i)
     end do
+    allocate( density_sum( 1:n_imp_species+1 ) )
+    do k = 1, n_imp_species+1
+      density_sum( k ) = core_profiles%profiles_1d( time_sind )%ion( k )%density(i)
+    end do
     core_profiles%profiles_1d( time_sind )%n_i_total_over_n_e(i) = &
-      & sum(core_profiles%profiles_1d( time_sind )%ion(1:n_imp_species+1)%density(i))/ &
+      & sum(density_sum(1:n_imp_species+1) )/ &
       &     core_profiles%profiles_1d( time_sind )%electrons%density(i)
+    deallocate( density_sum )
     core_profiles%profiles_1d( time_sind )%zeff(i) = &
       &   core_profiles%profiles_1d( time_sind )%ion(1)%z_ion_square_1d(i) * &
       &   core_profiles%profiles_1d( time_sind )%ion(1)%density(i)
@@ -604,8 +614,13 @@ include 'codata_2018.f90'      ! Recommended physical constants since 2018
   call write_sourced_time_value( summary%local%magnetic_axis%t_e, Te_max )
   call write_sourced_time_value( summary%local%magnetic_axis%t_i_average, Ti_max )
   call write_sourced_time_value( summary%local%magnetic_axis%n_e, ne_max )
+  allocate ( density_sum( n_imp_species+1 ) )
+  do k = 1, n_imp_species+1
+    density_sum(k) = core_profiles%profiles_1d( time_sind )%ion(k)%density(1)
+  end do
   call write_sourced_time_value( summary%local%magnetic_axis%n_i_total, &
-    &   sum(core_profiles%profiles_1d( time_sind )%ion(:)%density(1)) )
+    &   sum( density_sum(:) ) )
+  deallocate( density_sum )
   call write_sourced_time_value( summary%local%magnetic_axis%zeff, &
     &   core_profiles%profiles_1d( time_sind )%zeff(1) )
   call write_sourced_time_value2( summary%local%magnetic_axis%n_i%hydrogen, &
@@ -618,8 +633,12 @@ include 'codata_2018.f90'      ! Recommended physical constants since 2018
     &   core_profiles%profiles_1d( time_sind )%t_i_average(N_1D) )
   call write_sourced_time_value( summary%local%separatrix%n_e, &
     &   core_profiles%profiles_1d( time_sind )%electrons%density(N_1D) )
+  allocate ( density_sum( n_imp_species+1 ) )
+  do k = 1, n_imp_species+1
+    density_sum(k) = core_profiles%profiles_1d( time_sind )%ion(k)%density(N_1D)
+  end do
   call write_sourced_time_value( summary%local%separatrix%n_i_total, &
-    &   sum(core_profiles%profiles_1d( time_sind )%ion(:)%density(N_1D)) )
+    &   sum( density_sum(:) ) )
   call write_sourced_time_value( summary%local%separatrix%zeff, &
     &   core_profiles%profiles_1d( time_sind )%zeff(N_1D) )
   call write_sourced_time_value2( summary%local%separatrix%n_i%hydrogen, &
@@ -632,12 +651,13 @@ include 'codata_2018.f90'      ! Recommended physical constants since 2018
     call write_sourced_time_value( summary%local%limiter%n_e, &
       &   core_profiles%profiles_1d( time_sind )%electrons%density(N_1D) )
     call write_sourced_time_value( summary%local%limiter%n_i_total, &
-      &   sum(core_profiles%profiles_1d( time_sind )%ion(:)%density(N_1D)) )
+      &   sum( density_sum(:) ) )
     call write_sourced_time_value( summary%local%limiter%zeff, &
       &   core_profiles%profiles_1d( time_sind )%zeff(N_1D) )
     call write_sourced_time_value2( summary%local%limiter%n_i%hydrogen, &
       &   core_profiles%profiles_1d( time_sind )%ion(1)%density(N_1D) )
   end if
+  deallocate( density_sum )
   call write_sourced_time_integer( summary%boundary%type, 0 )
   call write_sourced_time_value( summary%boundary%geometric_axis_r, R0 )
   call write_sourced_time_value( summary%boundary%geometric_axis_z, Z0 )
@@ -647,7 +667,7 @@ include 'codata_2018.f90'      ! Recommended physical constants since 2018
   call write_sourced_time_value( summary%boundary%elongation, 1.0_IDS_real )
   call write_sourced_time_value( summary%boundary%triangularity_upper, 0.0_IDS_real )
   call write_sourced_time_value( summary%boundary%triangularity_lower, 0.0_IDS_real )
-  call write_sourced_time_value( summary%boundary%gap_limiter_wall, closest - radius )  
+  call write_sourced_time_value( summary%boundary%gap_limiter_wall, closest - radius )
   do j = 1, n_imp_species
     select case ( trim(impurities(j)) )
     case( 'D' )
@@ -790,7 +810,7 @@ include 'codata_2018.f90'      ! Recommended physical constants since 2018
   call ids_deallocate( core_profiles )
   call ids_deallocate( equilibrium )
   call ids_deallocate( summary )
- 
+
   call IMAS_AMNS_FINISH(amns)
   call imas_close(idx, status)
   if (status.ne.0) stop 'Error closing IMAS database !'
@@ -1076,10 +1096,10 @@ include 'codata_2018.f90'      ! Recommended physical constants since 2018
       allocate(species_p1(is)%components(4))
       species_m1(is)%components = &
         &  (/ amns_reactant_type(nc, is  , mi, 0), amns_reactant_type(0, -1, 0, 0), &
-        &     amns_reactant_type(nc, is-1, mi, 1), amns_reactant_type(0, -1, 0, 1) /) 
+        &     amns_reactant_type(nc, is-1, mi, 1), amns_reactant_type(0, -1, 0, 1) /)
       species_p1(is)%components = &
         &  (/ amns_reactant_type(nc, is  , mi, 0), amns_reactant_type(0, -1, 0, 0), &
-        &     amns_reactant_type(nc, is+1, mi, 1), amns_reactant_type(0, -1, 0, 1) /) 
+        &     amns_reactant_type(nc, is+1, mi, 1), amns_reactant_type(0, -1, 0, 1) /)
     end do
 
     xx_rx%string = 'EI'
@@ -1149,31 +1169,31 @@ include 'codata_2018.f90'      ! Recommended physical constants since 2018
 !      v - right part
 !      x - the answer
 !      n - number of equations
- 
+
     integer, intent(in) :: n
     real(kind=ids_real), dimension(n), intent(in) :: a,b,c,v
     real(kind=ids_real), dimension(n), intent(out) :: x
     real(kind=ids_real), dimension(n) :: bp,vp
     real(kind=ids_real) :: m
     integer i
- 
+
 ! Make copies of the b and v variables so that they are unaltered by this sub
     bp(1) = b(1)
     vp(1) = v(1)
-  
+
   !The first pass (setting coefficients):
     firstpass: do i = 2,n
      m = a(i)/bp(i-1)
      bp(i) = b(i) - m*c(i-1)
      vp(i) = v(i) - m*vp(i-1)
     end do firstpass
-  
+
     x(n) = vp(n)/bp(n)
   !The second pass (back-substition)
     backsub:do i = n-1, 1, -1
      x(i) = (vp(i) - c(i)*x(i+1))/bp(i)
     end do backsub
-  
+
     return
     end subroutine solve_tridiag
 
