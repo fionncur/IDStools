@@ -3,6 +3,7 @@ from src.framework.view.equilibrium.functions import BasePlot
 
 from idstools.cli import imas_parser
 from src.manager.equilibrium.plot_equilibrium import PlotEquilibrium
+from src.manager.pf_active.plot_pf_active import PlotPFActiveCoils
 
 parser = argparse.ArgumentParser(
     description="---- Display the plasma equilibrium from the equilibrium IDS",
@@ -30,7 +31,7 @@ parser.add_argument(
 
 args = parser.parse_args()
 
-baseplot = BasePlot()
+baseplot = BasePlot(1, 2)
 ax = baseplot.axes_array
 
 plot_equilibrium = PlotEquilibrium(
@@ -42,7 +43,19 @@ plot_equilibrium = PlotEquilibrium(
     args.user,
     args.occurrence,
     args.time,
-    True,
+    args.allInfo,
 )
+
+plot_pf_coils = PlotPFActiveCoils(
+    ax,
+    args.database,
+    args.backend,
+    args.shot,
+    args.run,
+    args.user,
+    args.occurrence,
+)
+
 plot_equilibrium.generate()
+plot_pf_coils.generate()
 baseplot.show()
