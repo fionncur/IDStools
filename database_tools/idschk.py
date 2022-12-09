@@ -942,10 +942,11 @@ def compute_COCOS(ids, cocos_check=None):
     dpsi2d = np.gradient(psi2d)
     dr2d = np.gradient(r2d)
     dpsi2drdr = dpsi2d[0] / dr2d[0] / r2d
+
     # avoid ZeroDivisionError
-    twopi_expBp_sigma_RphiZ = np.where(
-        np.isclose(bz, 0.0), 0.0, -sigma_Bp * dpsi2drdr / bz
-    )
+    rows, cols = np.where(bz != 0.0)
+    twopi_expBp_sigma_RphiZ = np.zeros(bz.shape)
+    twopi_expBp_sigma_RphiZ = -sigma_Bp * dpsi2drdr[rows, cols] / bz[rows, cols]
     sigma_RphiZ = np.sign(np.sum(np.sign(twopi_expBp_sigma_RphiZ)))
 
     # exp_Bp from Eq.(19)
