@@ -1,1 +1,1 @@
-from .functions import BasePlotLib
+from .functions import BasePlot

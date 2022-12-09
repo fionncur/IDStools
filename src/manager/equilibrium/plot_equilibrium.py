@@ -1,45 +1,68 @@
+from os import stat
 from ...framework.data_providers.data_provider import DataProvider
 from ...framework.compute.equilibrium import EquilibriumCompute
 from ...framework.compute.common import compute_time_index
 from ...framework.view.equilibrium import EquilibriumPlot, EquilibriumPlotDataInterface
 
-#TODO Modify this code to Use builder pattern here
+
 class PlotEquilibrium:
-    def __init__(self, database, backend, shot, run, user, occurrence, time, allInfo):
+    def __init__(
+        self, ax, database, backend, shot, run, user, occurrence, time, is_show_info
+    ):
+        self.ids_name = "equilibrium"
+        self.ids_object = None
+        self.data_provider = None
 
-        dataprovider = DataProvider(
-            database=database,
-            backend=backend,
-            shot=shot,
-            run=run,
-            user=user,
-        )
-        ids_name = "equilibrium"
-        ids_object = dataprovider.get_ids(ids_name)
-        hostdir = dataprovider.get_database_path(database, user)
-        ids_object.time = dataprovider.get_time(
-            ids_name, occurrence
-        )  # Fill time series
+        self.ax = ax
+        self.database = database
+        self.backend = backend
+        self.shot = shot
+        self.run = run
+        self.user = user
+        self.occurrence = occurrence
+        self.time = time
+        self.is_show_info = is_show_info
 
-        # Get time slice
-        time_index, time_value = compute_time_index(
-            ids_object.time, time
-        )  # Calculate time index for time of interest
-        ids_object.time_slice.resize(1)
-        ids_object.time_slice[0] = dataprovider.get_time_slice(
-            ids_name, time_index, occurrence
+    def generate(self):
+        self.retrieve()
+        data = self.compute()
+        self.plot(data)
+
+    def retrieve(self):
+        self.data_provider = DataProvider(
+            database=self.database,
+            backend=self.backend,
+            shot=self.shot,
+            run=self.run,
+            user=self.user,
         )
+
+        self.ids_object = self.data_provider.get_ids(self.ids_name)
+        # Fill time series
+        self.ids_object.time = self.data_provider.get_time(
+            self.ids_name, self.occurrence
+        )
+
+        # Get relevant time slice
+        time_index, time_value = compute_time_index(self.ids_object.time, self.time)
+        self.ids_object.time_slice.resize(1)
+        self.ids_object.time_slice[0] = self.data_provider.get_time_slice(
+            self.ids_name, time_index, self.occurrence
+        )
+
+    def compute(self):
         # Prepare data for EquilibriumPlot
-        equilibrium_compute = EquilibriumCompute(ids_object)
-        data_object = equilibrium_compute.get_cartesian_r_z_grids()
+        equilibrium_compute = EquilibriumCompute(self.ids_object)
+        return equilibrium_compute.get_cartesian_r_z_grids()
 
+    def plot(self, data_object):
         equilibriumDataInterface = EquilibriumPlotDataInterface()
-        equilibriumDataInterface.time = ids_object.time
-        equilibriumDataInterface.hostdir = dataprovider.database_path
-        equilibriumDataInterface.shot = shot
-        equilibriumDataInterface.run = run
-        equilibriumDataInterface.user = user
-        equilibriumDataInterface.allInfo = allInfo
+        equilibriumDataInterface.time = self.ids_object.time
+        equilibriumDataInterface.hostdir = self.data_provider.database_path
+        equilibriumDataInterface.shot = self.shot
+        equilibriumDataInterface.run = self.run
+        equilibriumDataInterface.user = self.user
+        equilibriumDataInterface.is_show_info = self.is_show_info
 
         equilibriumDataInterface.plotrho = data_object.plotrho
         equilibriumDataInterface.r2d = data_object.r2d
@@ -48,7 +71,5 @@ class PlotEquilibrium:
         equilibriumDataInterface.psi2d = data_object.psi2d
         equilibriumDataInterface.levels = 30
 
-        equilibriumPlot = EquilibriumPlot(equilibriumDataInterface)
-        equilibriumPlot.set_plot()
-        equilibriumPlot.set_info()
-        equilibriumPlot.show()
+        equilibriumPlot = EquilibriumPlot(self.ax)
+        equilibriumPlot.overlay(equilibriumDataInterface)

@@ -1,4 +1,5 @@
 import argparse
+from src.framework.view.equilibrium.functions import BasePlot
 
 from idstools.cli import imas_parser
 from src.manager.equilibrium.plot_equilibrium import PlotEquilibrium
@@ -29,7 +30,11 @@ parser.add_argument(
 
 args = parser.parse_args()
 
+baseplot = BasePlot()
+ax = baseplot.axes_array
+
 plot_equilibrium = PlotEquilibrium(
+    ax,
     args.database,
     args.backend,
     args.shot,
@@ -37,5 +42,7 @@ plot_equilibrium = PlotEquilibrium(
     args.user,
     args.occurrence,
     args.time,
-    args.allInfo,
+    True,
 )
+plot_equilibrium.generate()
+baseplot.show()
