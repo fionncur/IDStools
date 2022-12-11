@@ -938,20 +938,34 @@ def compute_COCOS(ids, cocos_check=None):
     bz = ids.time_slice[itime].profiles_2d[0].b_field_z
     psi2d = ids.time_slice[itime].profiles_2d[0].psi
     r2d = ids.time_slice[itime].profiles_2d[0].r
+    # todo - reduce num. of data for COCOS discrimination
+    dim2 = ids.time_slice[itime].profiles_2d[0].grid.dim2
+    z_axis = ids.time_slice[itime].global_quantities.magnetic_axis.z
+    psi_axis = ids.time_slice[itime].profiles_1d.psi[0]
 
     dpsi2d = np.gradient(psi2d)
     dr2d = np.gradient(r2d)
     dpsi2drdr = dpsi2d[0] / dr2d[0] / r2d
 
-    # avoid ZeroDivisionError
-    rows, cols = np.where(bz != 0.0)
+    # grid of magnetic axis in Z
+    iz = np.argmin(np.absolute(dim2 - z_axis))
+    # psi ref. inside LCFS
+    psi_ref = psi_axis + dpsi * 0.9
+
+    # grids close to psi ref.
+    rows, cols = np.where(np.isclose(psi2d, psi_ref, rtol=0.05))
+    # discard grids in private flux region)
+    w = np.where(np.isclose(cols, iz, rtol=0.05))
+
     twopi_expBp_sigma_RphiZ = np.zeros(bz.shape)
-    twopi_expBp_sigma_RphiZ = -sigma_Bp * dpsi2drdr[rows, cols] / bz[rows, cols]
+    twopi_expBp_sigma_RphiZ = (
+        -sigma_Bp * dpsi2drdr[rows[w], cols[w]] / bz[rows[w], cols[w]]
+    )
     sigma_RphiZ = np.sign(np.sum(np.sign(twopi_expBp_sigma_RphiZ)))
 
     # exp_Bp from Eq.(19)
     x = np.average(twopi_expBp_sigma_RphiZ * sigma_RphiZ)
-    exp_Bp = np.where(np.isclose(x, 2.0 * np.pi, rtol=0.1), 1, 0)
+    exp_Bp = np.where(np.isclose(x, 2.0 * np.pi, rtol=0.5), 1, 0)
 
     #
     values = {
