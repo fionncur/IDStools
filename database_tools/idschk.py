@@ -5,6 +5,7 @@ import re
 import argparse
 import numpy as np
 import cerberus
+import traceback
 import yaml
 from xml.etree import ElementTree as ET
 import imas
@@ -955,7 +956,10 @@ def compute_COCOS(ids, cocos_check=None):
     psi_ref = psi_axis + dpsi * 0.75
 
     # grids close to psi ref.
-    rows, cols = np.where((np.isclose(psi2d, psi_ref, rtol=0.2)) & (bz !=0))
+    rows, cols = np.where((np.isclose(psi2d, psi_ref, rtol=0.2)) & (bz != 0))
+    if (not rows.any()) or (not cols.any()):
+        raise ValueError("COCOS discrimination failed, len(grids) and/or Bz is zero")
+
     # discard grids in private flux region)
     w = np.where(np.isclose(cols, iz, rtol=0.1))
 
@@ -1420,7 +1424,8 @@ def ids_compute_cocos(ids):
         try:
             cocos = compute_COCOS(ids)
         except Exception as e:
-            exit("Cannot compute COCOS: {}".format(e))
+            logger.error(traceback.format_exc())
+
     else:
         exit("equilibrium instead of {}".format(ids.__name__))
 
