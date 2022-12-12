@@ -33,7 +33,7 @@ class PlotPFActiveCoils:
             user=self.user,
         )
 
-        self.ids_object = self.data_provider.get_ids(self.ids_name)
+        self.ids_object = self.data_provider.connection.get(self.ids_name)
 
     def compute(self):
         # Prepare data for EquilibriumPlot

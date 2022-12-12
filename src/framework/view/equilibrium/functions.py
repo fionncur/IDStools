@@ -5,47 +5,13 @@
 #     self.data["shot"], self.data["run"], self.data["time"]
 # )
 
-import matplotlib, os, sys
-
-if "DISPLAY" not in os.environ:
-    matplotlib.use("agg")
-else:
-    matplotlib.use("TKagg")
-import matplotlib.pyplot as plt
-
-
-class BasePlot:
-    # Tick size and X and Y axes
-    ticksize = 15
-
-    # Font definition
-    font = {
-        "family": "serif",
-        "color": "darkred",
-        "weight": "normal",
-        "size": 18,
-    }
-
-    def __init__(self, nrows=1, ncols=1, width=4.5, height=6.5, dpi=100) -> None:
-        self.width = width
-        self.height = height
-        self.dpi = dpi
-        self.fig, self.axes_array = plt.subplots()
-
-    def save(self, fname):
-        fig = plt.gcf()
-        fig.set_size_inches(self.width, self.height)
-        try:
-            fig.savefig(fname, dpi=self.dpi)
-            print("----> Figure saved to " + fname, file=sys.stderr)
-        except:
-            print(
-                "The figure could not be saved (check local permissions).",
-                file=sys.stderr,
-            )
-
-    def show(self):
-        plt.show()
+font = {
+    "family": "serif",
+    "color": "darkred",
+    "weight": "normal",
+    "size": 18,
+}
+ticksize = 15
 
 
 class InformationDataInterface:
@@ -77,10 +43,10 @@ class EquilibriumPlot:
         self.ax.contour(data.r2d, data.z2d, data.psi2d, data.levels)
         self.ax.set_xlim(data.r2d.min(), data.r2d.max())
         self.ax.set_aspect("equal", adjustable="box")
-        self.ax.set_xlabel("$R$ [m]", fontdict=BasePlot.font)
-        self.ax.set_ylabel("$Z$ [m]", fontdict=BasePlot.font)
-        # self.ax.set_xticks(ticks=BasePlot.ticksize)
-        # self.ax.set_yticks(ticks=BasePlot.ticksize)
+        self.ax.set_xlabel("$R$ [m]", fontdict=font)
+        self.ax.set_ylabel("$Z$ [m]", fontdict=font)
+        # self.ax.set_xticks(ticks=ticksize)
+        # self.ax.set_yticks(ticks=ticksize)
 
         if data.is_show_info:
             self.overlay_info(data)
@@ -91,7 +57,7 @@ class EquilibriumPlot:
     def overlay_info(self, data):
         plottitle = "2D equilibrium"
         plottitle += " (t={:.3f})".format(0)
-        self.ax.set_title(plottitle, fontdict=BasePlot.font)
+        self.ax.set_title(plottitle, fontdict=font)
 
         xmin, xmax = self.ax.get_xlim()
         ymin, ymax = self.ax.get_ylim()

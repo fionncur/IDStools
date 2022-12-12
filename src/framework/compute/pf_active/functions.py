@@ -9,8 +9,9 @@ class PFCoilsCompute:
 
     def get_pf_coils(self):
         coils = {}
+
         for coil in self.ids_object.coil:
-            element = {}
+            element_dict = {}
             element_counter = 0
             for element in coil.element:
                 cew = element.geometry.rectangle.width
@@ -20,16 +21,8 @@ class PFCoilsCompute:
                         element.geometry.rectangle.r - cew / 2.0,
                         element.geometry.rectangle.z - ceh / 2.0,
                     )
-                else:
-                    cec = 0
-                element["element" + element_counter] = (cew, ceh, cec)
-                element_counter += 1
-            coils[coil.identifier] = element
-        return coils
+                    element_dict["element" + str(element_counter)] = (cew, ceh, cec)
 
-        # rectangle = Rectangle(cec,cew,ceh)
-        # ax.add_patch(rectangle)
-        # rx, ry = rectangle.get_xy()
-        # cx = rx + rectangle.get_width()/2.0
-        # cy = ry + rectangle.get_height()/2.0
-        # ax.annotate(coil.identifier, (cx, cy), color='black', weight='bold', ha='center', va='center')
+                element_counter += 1
+            coils[coil.identifier] = element_dict
+        return coils
