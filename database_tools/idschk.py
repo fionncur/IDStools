@@ -938,24 +938,26 @@ def compute_COCOS(ids, cocos_check=None):
     bz = ids.time_slice[itime].profiles_2d[0].b_field_z
     psi2d = ids.time_slice[itime].profiles_2d[0].psi
     r2d = ids.time_slice[itime].profiles_2d[0].r
-    # todo - reduce num. of data for COCOS discrimination
-    dim2 = ids.time_slice[itime].profiles_2d[0].grid.dim2
-    z_axis = ids.time_slice[itime].global_quantities.magnetic_axis.z
-    psi_axis = ids.time_slice[itime].profiles_1d.psi[0]
 
     dpsi2d = np.gradient(psi2d)
     dr2d = np.gradient(r2d)
     dpsi2drdr = dpsi2d[0] / dr2d[0] / r2d
 
+    # todo - reduce num. of data for COCOS discrimination
+    #      - compute rtol(s) instead of fixed ones.
+    dim2 = ids.time_slice[itime].profiles_2d[0].grid.dim2
+    z_axis = ids.time_slice[itime].global_quantities.magnetic_axis.z
+    psi_axis = ids.time_slice[itime].profiles_1d.psi[0]
+
     # grid of magnetic axis in Z
     iz = np.argmin(np.absolute(dim2 - z_axis))
     # psi ref. inside LCFS
-    psi_ref = psi_axis + dpsi * 0.9
+    psi_ref = psi_axis + dpsi * 0.75
 
     # grids close to psi ref.
-    rows, cols = np.where(np.isclose(psi2d, psi_ref, rtol=0.05))
+    rows, cols = np.where((np.isclose(psi2d, psi_ref, rtol=0.2)) & (bz !=0))
     # discard grids in private flux region)
-    w = np.where(np.isclose(cols, iz, rtol=0.05))
+    w = np.where(np.isclose(cols, iz, rtol=0.1))
 
     twopi_expBp_sigma_RphiZ = np.zeros(bz.shape)
     twopi_expBp_sigma_RphiZ = (
