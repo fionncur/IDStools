@@ -33,7 +33,7 @@ parser = argparse.ArgumentParser(description=\
 parser.add_argument('-s','--shot',help="Shot number list, ex: [130012,130013]", required=True)
 parser.add_argument('-r','--run',help="Run number list, ex: [23,24]",required=True,type=str)
 parser.add_argument('-t','--time',help='Time', required=False,type=float,default=-99.0)
-parser.add_argument('-w','--wall',help='Wall display flag', required=False,type=int,default=0)
+#parser.add_argument('-w','--wall',help='Wall display flag', required=False,type=int,default=0)
 
 args = parser.parse_args()
 shot,run = args.shot,args.run
@@ -78,7 +78,8 @@ file = open(os.path.dirname(__file__)+'/ITER_MD_configuration.yaml', 'r')
 data = yaml.load(file,Loader=yaml.CLoader)
 file.close()
 
-if args.wall == 1:
+#if args.wall == 1:
+if False:
     wall_md = imas.DBEntry(get_backend_id(args.backend),\
                            data['wall']['db'],\
                            data['wall']['shot'],\
