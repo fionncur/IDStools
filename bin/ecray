@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import imas,os,sys,argparse,matplotlib
+import imas,os,sys,argparse,matplotlib,yaml
 import numpy as np
 matplotlib.use('TKagg')
 from matplotlib import gridspec
@@ -33,6 +33,7 @@ parser = argparse.ArgumentParser(description=\
 parser.add_argument('-s','--shot',help="Shot number list, ex: [130012,130013]", required=True)
 parser.add_argument('-r','--run',help="Run number list, ex: [23,24]",required=True,type=str)
 parser.add_argument('-t','--time',help='Time', required=False,type=float,default=-99.0)
+#parser.add_argument('-w','--wall',help='Wall display flag', required=False,type=int,default=0)
 
 args = parser.parse_args()
 shot,run = args.shot,args.run
@@ -42,27 +43,6 @@ assert (len(shot)<=len(run)), 'There must be a run number corresponding to each 
 if (len(run)>len(shot)):
     assert(len(shot)==1), 'Either give a shot for each run or give a single shot for every run'
     shot = len(run)*shot
-
-
-# Artificial rotation of beams in top view to make it look nice and realistic for ITER
-phi_launchers = [0.]*11
-if 'ITER' in args.database.upper():
-    # EL-14
-    phi_launchers[0] = -90.*np.pi/180.
-    phi_launchers[1] = -90.*np.pi/180.
-    phi_launchers[2] = -90.*np.pi/180.
-    # UL-16
-    phi_launchers[3] = -50.*np.pi/180.
-    phi_launchers[4] = -50.*np.pi/180.
-    # UL-15
-    phi_launchers[5] = -70.*np.pi/180.
-    phi_launchers[6] = -70.*np.pi/180.
-    # UL-13
-    phi_launchers[7] = -110.*np.pi/180.
-    phi_launchers[8] = -110.*np.pi/180.
-    # UL-12
-    phi_launchers[9]  = -130.*np.pi/180.
-    phi_launchers[10] = -130.*np.pi/180.
 
 # Search for adequate time slice for display
 input = imas.DBEntry(get_backend_id(args.backend),args.database,shot[0],run[0],args.user)
@@ -92,6 +72,32 @@ else:
     it = 0
 
 time = tc
+
+# ITER Machine Description configuration
+file = open(os.path.dirname(__file__)+'/ITER_MD_configuration.yaml', 'r')
+data = yaml.load(file,Loader=yaml.CLoader)
+file.close()
+
+#if args.wall == 1:
+if False:
+    wall_md = imas.DBEntry(get_backend_id(args.backend),\
+                           data['wall']['db'],\
+                           data['wall']['shot'],\
+                           data['wall']['run'],\
+                           data['wall']['user'])
+    wall_md.open()
+    wall=wall_md.partial_get(ids_name='wall',data_path='description_ggd(0)/grid_ggd(0)/space(0)/objects_per_dimension(0)/object(:)')
+    wall_md.close()
+    npoints = len(wall)
+    xw = np.zeros(npoints)
+    yw = np.zeros(npoints)
+    zw = np.zeros(npoints)
+    rw = np.zeros(npoints)
+    for point in range(npoints):
+        xw[point] = wall.description_ggd[0].grid_ggd[0].space[0].objects_per_dimension[0].object[point].geometry[0]
+        yw[point] = wall.description_ggd[0].grid_ggd[0].space[0].objects_per_dimension[0].object[point].geometry[1]
+        zw[point] = wall.description_ggd[0].grid_ggd[0].space[0].objects_per_dimension[0].object[point].geometry[2]
+        rw[point] = np.sqrt(xw[point]**2+yw[point]**2)
 
 # ------------------------------------------------
 
@@ -173,7 +179,7 @@ for i in range(len(shot)):
     ec_frequency = waves.coherent_wave[0].global_quantities[0].frequency
 
     n_harm = [1,2,3,4]
-
+    
     # B-field at the resonance for three first harmonics
     B_res = [0]*len(n_harm)
     for i_harm in range(len(n_harm)):
@@ -232,7 +238,8 @@ for i in range(len(shot)):
     cntrpsi = ax_polview.contour(r2d,z2d,psi2d,50,cmap='summer')
     if len(rho2d)>0:
         cntrrho = ax_polview.contour(r2d,z2d,rho2d,50,cmap='YlOrBr')
-    ax_polview.set_xlim(r2d.min(),r2d.max())
+    #ax_polview.set_xlim(r2d.min(),r2d.max())
+    ax_polview.set_xlim(3.4,r2d.max())
     ax_polview.set_ylim(z2d.min()*0.7,z2d.max()*0.7)
     ax_polview.set_aspect('equal', adjustable='box')
     for i_harm in range(len(n_harm)):
@@ -294,7 +301,7 @@ for i in range(len(shot)):
             iray = iray+1
             if(waves.coherent_wave[ibeam].beam_tracing[0].beam[iray].power_initial!=0):
                 wavesr   = waves.coherent_wave[ibeam].beam_tracing[0].beam[iray].position.r
-                wavesphi = waves.coherent_wave[ibeam].beam_tracing[0].beam[iray].position.phi + phi_launchers[ibeam]
+                wavesphi = waves.coherent_wave[ibeam].beam_tracing[0].beam[iray].position.phi
                 wavesz   = waves.coherent_wave[ibeam].beam_tracing[0].beam[iray].position.z
                 
                 r[ibeam,iray,:len(wavesr)]     = np.array(wavesr)

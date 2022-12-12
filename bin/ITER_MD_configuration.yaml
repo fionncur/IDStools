@@ -1,0 +1,6 @@
+wall:
+  shot: 116000
+  run: 2
+  user: public
+  db: ITER_MD
+
