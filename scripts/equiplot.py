@@ -4,6 +4,13 @@ import imas
 
 from idstools.cli import get_backend_id
 from idstools.cli import imas_parser
+
+import sys
+import os
+
+root_path = os.path.dirname(os.path.dirname(__file__))
+sys.path.append(root_path)
+
 from src.framework.view.common.functions import CommonPlot
 from src.framework.view.common.functions import BasePlot
 
