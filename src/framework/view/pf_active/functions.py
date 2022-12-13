@@ -1,11 +1,14 @@
 from matplotlib.patches import Rectangle
+from ...compute import PFCoilsCompute
 
 
 class PFCoilsPlot:
-    def __init__(self, ax):
+    def __init__(self, ax, ids_object):
+        self.pfcoils_compute = PFCoilsCompute(ids_object)
         self.ax = ax
 
-    def overlay(self, coils_data):
+    def overlay(self):
+        coils_data = self.pfcoils_compute.get_pf_coils()
         for coil_key, coil_data in coils_data.items():
             for element_key, element_data in coil_data.items():
                 cew, ceh, cec = element_data

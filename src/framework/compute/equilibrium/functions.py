@@ -2,16 +2,6 @@ import numpy as np
 import sys
 
 
-class CartesionRZGridsDataInteface:
-    def __init__(self) -> None:
-        self.r2d = None
-        self.z2d = None
-        self.psi2d = None
-
-        self.plotrho = None
-        self.rho2d = None
-
-
 class EquilibriumCompute:
     def __init__(self, ids_object):
         super().__init__()
@@ -47,7 +37,8 @@ class EquilibriumCompute:
     def get_cartesian_r_z_grids(self):
         self.validate_2d_profile()
         # Cartesian (R,Z) grids
-        data_object = CartesionRZGridsDataInteface()
+        data_object = {}
+
         r2d = self.ids_object.time_slice[0].profiles_2d[0].r
         z2d = self.ids_object.time_slice[0].profiles_2d[0].z
         psi2d = self.ids_object.time_slice[0].profiles_2d[0].psi
@@ -76,17 +67,17 @@ class EquilibriumCompute:
             exit()
 
         if len(self.ids_object.time_slice[0].profiles_2d[0].phi) < 1:
-            data_object.plotrho = False
-            data_object.rho2d = None
+            data_object["plotrho"] = False
+            data_object["rho2d"] = None
         else:
             rho2d = np.sqrt(
                 self.ids_object.time_slice[0].profiles_2d[0].phi
                 / np.amax(self.ids_object.time_slice[0].profiles_2d[0].phi)
             )
-            data_object.plotrho = True
-            data_object.rho2d = rho2d
+            data_object["plotrho"] = True
+            data_object["rho2d"] = rho2d
 
-        data_object.r2d = r2d
-        data_object.z2d = z2d
-        data_object.psi2d = psi2d
+        data_object["r2d"] = r2d
+        data_object["z2d"] = z2d
+        data_object["psi2d"] = psi2d
         return data_object

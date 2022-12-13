@@ -23,7 +23,7 @@ class BasePlot:
         self.width = width
         self.height = height
         self.dpi = dpi
-        self.fig, self.axes = plt.subplots(nrows=nrows, ncols=ncols)
+        self.fig, self.axes_array = plt.subplots(nrows, ncols)
 
     def save(self, fname):
         fig = plt.gcf()
@@ -39,3 +39,38 @@ class BasePlot:
 
     def show(self):
         plt.show()
+
+
+class CommonPlot:
+    font = {
+        "family": "serif",
+        "color": "darkred",
+        "weight": "normal",
+        "size": 18,
+    }
+
+    def __init__(self, ax):
+        self.ax = ax
+
+    def overlay_info(self, title="", hostdir="", shot="", run=""):
+        plottitle = title
+        plottitle += " (t={:.3f})".format(0)
+        self.ax.set_title(plottitle, fontdict=CommonPlot.font)
+
+        xmin, xmax = self.ax.get_xlim()
+        ymin, ymax = self.ax.get_ylim()
+        self.ax.text(
+            xmax + 0.01 * abs(xmax),
+            ymin + 0.5 * abs(ymax - ymin),
+            "{0}-Shot:{1},{2}".format(hostdir, shot, run),
+            horizontalalignment="left",
+            verticalalignment="center",
+            rotation="vertical",
+            fontsize=7,
+        )
+        # from matplotlib.offsetbox import AnchoredText
+
+        # anchored_text = AnchoredText(
+        #     "Shot " + str(shot) + " / " + "Run " + str(run), prop=dict(size=8), loc=4
+        # )
+        # self.ax.add_artist(anchored_text)
