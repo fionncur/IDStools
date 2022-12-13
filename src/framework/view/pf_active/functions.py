@@ -1,5 +1,5 @@
 from matplotlib.patches import Rectangle
-from ...compute import PFCoilsCompute
+from ...compute.pf_active.functions import PFCoilsCompute
 
 
 class PFCoilsPlot:

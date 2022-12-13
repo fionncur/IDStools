@@ -1,4 +1,4 @@
-from ...compute import EquilibriumCompute
+from ...compute.equilibrium.functions import EquilibriumCompute
 
 
 class EquilibriumPlot:

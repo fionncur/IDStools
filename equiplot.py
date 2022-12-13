@@ -4,9 +4,10 @@ import imas
 
 from idstools.cli import get_backend_id
 from idstools.cli import imas_parser
-from src.framework.view.equilibrium.functions import EquilibriumPlot
 from src.framework.view.common.functions import CommonPlot
 from src.framework.view.common.functions import BasePlot
+
+from src.framework.view.equilibrium.functions import EquilibriumPlot
 from src.framework.view.pf_active.functions import PFCoilsPlot
 from src.framework.compute.common.functions import compute_time_index
 
