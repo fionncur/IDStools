@@ -4,10 +4,9 @@ import sys
 
 class PFCoilsCompute:
     def __init__(self, ids_object):
-        super().__init__()
         self.ids_object = ids_object
 
-    def get_pf_coils(self):
+    def pf_coils(self):
         coils = {}
 
         for coil in self.ids_object.coil:

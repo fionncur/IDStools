@@ -1,23 +1,16 @@
+from ...view.common.functions import BasePlot
 from ...compute.equilibrium.functions import EquilibriumCompute
 
 
-class EquilibriumPlot:
-    font = {
-        "family": "serif",
-        "color": "darkred",
-        "weight": "normal",
-        "size": 18,
-    }
-    ticksize = 15
-
+class EquilibriumPlot(BasePlot):
     def __init__(self, ax, ids_object):
-        self.equilibrium_compute = EquilibriumCompute(ids_object)
-        self.ax = ax
+        super().__init__(ax)
+        self.compute_object = EquilibriumCompute(ids_object)
 
-    def overlay(self):
+    def magnetic_poloidal_flux(self):
         levels = 30
 
-        data = self.equilibrium_compute.get_cartesian_r_z_grids()
+        data = self.compute_object.cartesian_rz_grid()
         if data["plotrho"]:
             self.ax.contour(
                 data["r2d"], data["z2d"], data["rho2d"], data["levels"], colors="r"
@@ -25,8 +18,8 @@ class EquilibriumPlot:
         self.ax.contour(data["r2d"], data["z2d"], data["psi2d"], levels)
         self.ax.set_xlim(data["r2d"].min(), data["r2d"].max())
         self.ax.set_aspect("equal", adjustable="box")
-        self.ax.set_xlabel("$R$ [m]", fontdict=EquilibriumPlot.font)
-        self.ax.set_ylabel("$Z$ [m]", fontdict=EquilibriumPlot.font)
+        self.ax.set_xlabel("$R$ [m]", fontdict=BasePlot.font)
+        self.ax.set_ylabel("$Z$ [m]", fontdict=BasePlot.font)
         self.ax.tick_params(
-            axis="both", which="major", labelsize=EquilibriumPlot.ticksize
+            axis="both", which="major", labelsize=BasePlot.ticksize
         )

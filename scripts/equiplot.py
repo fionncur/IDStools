@@ -11,12 +11,12 @@ import os
 root_path = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(root_path)
 
-from src.framework.view.common.functions import CommonPlot
-from src.framework.view.common.functions import BasePlot
+from src.framework.view.common.functions import Figure
 
 from src.framework.view.equilibrium.functions import EquilibriumPlot
 from src.framework.view.pf_active.functions import PFCoilsPlot
-from src.framework.compute.common.functions import compute_time_index
+
+from src.framework.compute.common.functions import nearest
 
 parser = argparse.ArgumentParser(
     description="---- Display the plasma equilibrium from the equilibrium IDS",
@@ -100,40 +100,39 @@ if err != 0:
 
 
 # Prepare IDS Object - equilibrium
-equilibrium_object = eval("imas.equilibrium()")
-equilibrium_object.time = connection.partial_get("equilibrium", "time", args.occurrence)
-time_index, time_value = compute_time_index(equilibrium_object.time, args.time)
-equilibrium_object.time_slice.resize(1)
-equilibrium_object.time_slice[0] = connection.partial_get(
+equilibrium_ids = eval("imas.equilibrium()")
+equilibrium_ids.time = connection.partial_get("equilibrium", "time", args.occurrence)
+time_index, time_value = nearest(equilibrium_ids.time, args.time)
+equilibrium_ids.time_slice.resize(1)
+equilibrium_ids.time_slice[0] = connection.partial_get(
     "equilibrium", "time_slice(" + str(time_index) + ")", args.occurrence
 )
 # Prepare IDS Object - pf active
-pf_active_object = connection_other.get("pf_active")
+pf_active_ids = connection_other.get("pf_active")
 
 
-baseplot = BasePlot(1, 2)
-ax1 = baseplot.axes_array[0]
-ax2 = baseplot.axes_array[1]
+figure = Figure(1, 2)
+axes1 = figure.axes_array[0]
+axes2 = figure.axes_array[1]
 
-equilibrium_plot_ax2 = EquilibriumPlot(ax2, equilibrium_object)
-equilibrium_plot_ax2.overlay()
+equilibrium_plot = EquilibriumPlot(axes2, equilibrium_ids)
+equilibrium_plot.magnetic_poloidal_flux()
 
-common_plot_ax2 = CommonPlot(ax2)
-common_plot_ax2.overlay_info("2D Equilibrium", hostdir, args.shot, args.run)
+equilibrium_plot.database_info("2D Equilibrium", hostdir, args.shot, args.run)
 
-pfcoils_plot_ax1 = PFCoilsPlot(ax1, pf_active_object)
-pfcoils_plot_ax1.overlay()
-ax1.plot()
-ax2.plot()
+pfcoils_plot = PFCoilsPlot(axes1, pf_active_ids)
+pfcoils_plot.pf_coils()
+axes1.plot()
+axes2.plot()
 
 
 try:
     fname = "Equilibrium_shot_{0}_run_{1}_time_{2:.1f}.png".format(
         args.shot, args.run, args.time
     )
-    baseplot.save(fname)
+    figure.save(fname)
     print("----> Figure saved to " + fname, file=sys.stderr)
 except:
     print("The figure could not be saved (check local permissions).", file=sys.stderr)
 
-baseplot.show()
+figure.show()

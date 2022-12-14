@@ -7,7 +7,7 @@ else:
 import matplotlib.pyplot as plt
 
 
-class BasePlot:
+class Figure:
     # Tick size and X and Y axes
     ticksize = 15
 
@@ -41,21 +41,22 @@ class BasePlot:
         plt.show()
 
 
-class CommonPlot:
+class BasePlot:
     font = {
         "family": "serif",
         "color": "darkred",
         "weight": "normal",
         "size": 18,
     }
+    ticksize = 15
 
     def __init__(self, ax):
         self.ax = ax
 
-    def overlay_info(self, title="", hostdir="", shot="", run=""):
+    def database_info(self, title="", hostdir="", shot="", run=""):
         plottitle = title
         plottitle += " (t={:.3f})".format(0)
-        self.ax.set_title(plottitle, fontdict=CommonPlot.font)
+        self.ax.set_title(plottitle, fontdict=BasePlot.font)
 
         xmin, xmax = self.ax.get_xlim()
         ymin, ymax = self.ax.get_ylim()

@@ -4,11 +4,11 @@ from ...compute.pf_active.functions import PFCoilsCompute
 
 class PFCoilsPlot:
     def __init__(self, ax, ids_object):
-        self.pfcoils_compute = PFCoilsCompute(ids_object)
+        self.compute_object = PFCoilsCompute(ids_object)
         self.ax = ax
 
-    def overlay(self):
-        coils_data = self.pfcoils_compute.get_pf_coils()
+    def pf_coils(self):
+        coils_data = self.compute_object.pf_coils()
         for coil_key, coil_data in coils_data.items():
             for element_key, element_data in coil_data.items():
                 cew, ceh, cec = element_data

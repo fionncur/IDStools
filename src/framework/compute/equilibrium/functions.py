@@ -7,48 +7,40 @@ class EquilibriumCompute:
         super().__init__()
         self.ids_object = ids_object
 
-    def validate_2d_profile(self):
+    def cartesian_rz_grid(self):
         if len(self.ids_object.time_slice[0].profiles_2d) == 0:
             # TODO Decide on print or raise exception
             print(
                 "The equilibrium IDS is empty: len(equilibrium.time_slice[0].profiles_2d)=0",
                 file=sys.stderr,
             )
-            print("----> Aborted.", file=sys.stderr)
-            exit()
+            return None
+
+        profiles_2d = self.ids_object.time_slice[0].profiles_2d[0]
+
+        # psi(R,Z)
+        if len(profiles_2d.psi) < 1:
+            print(
+                "equilibrium.time_slice[:].profiles_2d[0].psi could not be read",
+                file=sys.stderr,
+            )
+            return None
 
         # phi(R,Z) for rho(R,Z) calculation
-        if len(self.ids_object.time_slice[0].profiles_2d[0].phi) < 1:
+        if len(profiles_2d.phi) < 1:
             print(
                 "equilibrium.time_slice[:].profiles_2d[0].phi could not be read",
                 file=sys.stderr,
             )
 
-        # psi(R,Z)
-        if len(self.ids_object.time_slice[0].profiles_2d[0].psi) < 1:
-            print(
-                "equilibrium.time_slice[:].profiles_2d[0].psi could not be read",
-                file=sys.stderr,
-            )
-            print("----> Aborted.", file=sys.stderr)
-            exit()
-        return
-
-    def get_cartesian_r_z_grids(self):
-        self.validate_2d_profile()
         # Cartesian (R,Z) grids
-        data_object = {}
+        r2d = profiles_2d.r
+        z2d = profiles_2d.z
+        psi2d = profiles_2d.psi
 
-        r2d = self.ids_object.time_slice[0].profiles_2d[0].r
-        z2d = self.ids_object.time_slice[0].profiles_2d[0].z
-        psi2d = self.ids_object.time_slice[0].profiles_2d[0].psi
-
-        if (
-            self.ids_object.time_slice[0].profiles_2d[0].grid_type.index == 1
-            and np.size(r2d) == 0
-        ):
-            r1d = self.ids_object.time_slice[0].profiles_2d[0].grid.dim1
-            z1d = self.ids_object.time_slice[0].profiles_2d[0].grid.dim2
+        if profiles_2d.grid_type.index == 1 and np.size(r2d) == 0:
+            r1d = profiles_2d.grid.dim1
+            z1d = profiles_2d.grid.dim2
             nr = len(r1d)
             nz = len(z1d)
             r2d = np.empty(shape=(nr, nz))
@@ -63,17 +55,15 @@ class EquilibriumCompute:
                 "r, z and psi have not the same dimension in equilibrium.time_slice[0].profiles_2d[0]",
                 file=sys.stderr,
             )
-            print("----> Aborted.", file=sys.stderr)
-            exit()
+            return None
 
-        if len(self.ids_object.time_slice[0].profiles_2d[0].phi) < 1:
+        # prepare data
+        data_object = {}
+        if len(profiles_2d.phi) < 1:
             data_object["plotrho"] = False
             data_object["rho2d"] = None
         else:
-            rho2d = np.sqrt(
-                self.ids_object.time_slice[0].profiles_2d[0].phi
-                / np.amax(self.ids_object.time_slice[0].profiles_2d[0].phi)
-            )
+            rho2d = np.sqrt(profiles_2d.phi / np.amax(profiles_2d.phi))
             data_object["plotrho"] = True
             data_object["rho2d"] = rho2d
 

@@ -5,51 +5,40 @@ This is a common module which has common functions which can be used across ll I
 import numpy as np
 
 
-def get_nearest_value_in_array(
-    time_array: np.ndarray, time_of_interest: float
-) -> tuple:
-    """Element in nd array `a` closest to the scalar value `a0`
+def nearest(array: np.ndarray, value: float) -> tuple:
+    """
+    Get index and nearest value from value asked from an array
 
     Args:
-        time_array (np.ndarray, ): [description]
-        time_of_interest ([float]): [description]
+        array ([np.ndarray]): [numpy array]
+        value ([float]): [value requested]
 
     Returns:
-        [np.ndarray]: [time value]
-        [float]: [nearest time index]
+        [int]: [index found for value]
+        [float]: [nearest value from value requested]
     """
-    time_index = abs(time_array - time_of_interest).argmin()
-    return time_index, time_array.flat[time_index]
+    if array is None:
+        return None
+    if len(array) == 0:
+        return None
+    index = abs(array - value).argmin()
+    return index, array[index]
 
 
-def compute_time_index(time_array: np.ndarray, time_of_interest: float) -> tuple:
-    """
-    Get time index of time of interste
+def middle(array: np.ndarray) -> tuple:
+    """Get middle value from an array along with index
 
     Args:
-        time_array ([np.ndarray]): [numpy array]
-        time_of_interest ([float]): [time requested]
+        array (np.ndarray): [description]
 
     Returns:
-        [int]: [integer index found for time requested]
-        [float]: [nearest time for time requested]
+        [type]: [description]
     """
-    time_value = 0
-    time_index = 0
-    time_len = len(time_array)
-    # length of time array is 1
-    if time_len == 1:
-        time_value = time_array[0]
-        return time_index, time_array[0]
-
-    # length of array is bigger than 1 and asking for valid time of interest
-    if time_of_interest >= 0:
-        time_index, time_value = get_nearest_value_in_array(
-            time_array, time_of_interest
-        )
-        return time_index, time_value
-
-    # time of interest is not valid then calculate default
-    time_index = int(time_len / 2)
-    time_value = time_array[time_index]
-    return time_index, time_value
+    if array is None:
+        return None
+    if len(array) == 0:
+        return None
+    length = len(array)
+    index = int(length / 2)
+    value = array[index]
+    return index, value
