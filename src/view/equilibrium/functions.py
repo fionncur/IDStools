@@ -16,7 +16,6 @@ class EquilibriumView(BasePlot):
                 data["r2d"], data["z2d"], data["rho2d"], data["levels"], colors="r"
             )
         self.ax.contour(data["r2d"], data["z2d"], data["psi2d"], levels)
-        self.ax.set_xlim(data["r2d"].min(), data["r2d"].max())
         self.ax.set_aspect("equal", adjustable="box")
         self.ax.set_xlabel("$R$ [m]", fontdict=BasePlot.font)
         self.ax.set_ylabel("$Z$ [m]", fontdict=BasePlot.font)

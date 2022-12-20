@@ -49,16 +49,16 @@ class BasePlot:
         "family": "serif",
         "color": "darkred",
         "weight": "normal",
-        "size": 18,
+        "size": 12,
     }
-    ticksize = 15
+    ticksize = 10
 
     def __init__(self, ax):
         self.ax = ax
 
-    def database_info(self, title="", hostdir="", shot="", run=""):
+    def database_info(self, title="", hostdir="", shot="", run="", t=""):
         plottitle = title
-        plottitle += " (t={:.3f})".format(0)
+        plottitle += " (t={:.3f})".format(t)
         self.ax.set_title(plottitle, fontdict=BasePlot.font)
 
         xmin, xmax = self.ax.get_xlim()
@@ -79,9 +79,11 @@ class BasePlot:
         # )
         # self.ax.add_artist(anchored_text)
 
+
 class Console:
     tabsize = 10
     TAB = " " * 16
     LINE = "-" * 8
+
     def __init__(self) -> None:
         pass

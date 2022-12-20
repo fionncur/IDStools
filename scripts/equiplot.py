@@ -41,7 +41,12 @@ parser.add_argument(
     help="Adds all extra provenance info to the plot",
     action="store_true",
 )
-
+parser.add_argument(
+    "-c",
+    "--pfcoils",
+    help="Show pf coils overlay on the plot",
+    action="store_true",
+)
 args = parser.parse_args()
 
 database_abs_path = ""
@@ -101,19 +106,20 @@ equilibrium_ids.time_slice[0] = connection.partial_get(
 pf_active_ids = connection_other.get("pf_active")
 
 
-figure = Figure(1, 2)
-axes1 = figure.axes_array[0]
-axes2 = figure.axes_array[1]
+figure = Figure()
+axes = figure.axes_array
 
-pfcoils_plot = PFCoilsView(axes1, pf_active_ids)
-pfcoils_plot.pf_coils()
+if args.pfcoils is False:
+    pfcoils_plot = PFCoilsView(axes, pf_active_ids)
+    pfcoils_plot.pf_coils()
 
-equilibrium_plot = EquilibriumView(axes2, equilibrium_ids)
+equilibrium_plot = EquilibriumView(axes, equilibrium_ids)
 equilibrium_plot.magnetic_poloidal_flux()
-equilibrium_plot.database_info("2D Equilibrium", hostdir, args.shot, args.run)
+equilibrium_plot.database_info(
+    "2D Equilibrium", hostdir, args.shot, args.run, args.time
+)
 
-axes1.plot()
-axes2.plot()
+axes.plot()
 
 try:
     fname = "Equilibrium_shot_{0}_run_{1}_time_{2:.1f}.png".format(
