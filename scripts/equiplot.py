@@ -44,16 +44,6 @@ parser.add_argument(
 
 args = parser.parse_args()
 
-
-import matplotlib, os, sys
-
-if "DISPLAY" not in os.environ:
-    matplotlib.use("agg")
-else:
-    matplotlib.use("TKagg")
-import matplotlib.pyplot as plt
-
-
 database_abs_path = ""
 if args.user == "public":
     database_abs_path = (
@@ -99,15 +89,15 @@ if err != 0:
     exit()
 
 
-# Prepare IDS Object - equilibrium
-equilibrium_ids = eval("imas.equilibrium()")
+# Get ids Object - equilibrium
+equilibrium_ids = imas.equilibrium()
 equilibrium_ids.time = connection.partial_get("equilibrium", "time", args.occurrence)
 time_index, time_value = nearest(equilibrium_ids.time, args.time)
 equilibrium_ids.time_slice.resize(1)
 equilibrium_ids.time_slice[0] = connection.partial_get(
     "equilibrium", "time_slice(" + str(time_index) + ")", args.occurrence
 )
-# Prepare IDS Object - pf active
+# Get ids Object - pf active
 pf_active_ids = connection_other.get("pf_active")
 
 
@@ -115,16 +105,15 @@ figure = Figure(1, 2)
 axes1 = figure.axes_array[0]
 axes2 = figure.axes_array[1]
 
-equilibrium_plot = EquilibriumPlot(axes2, equilibrium_ids)
-equilibrium_plot.magnetic_poloidal_flux()
-
-equilibrium_plot.database_info("2D Equilibrium", hostdir, args.shot, args.run)
-
 pfcoils_plot = PFCoilsPlot(axes1, pf_active_ids)
 pfcoils_plot.pf_coils()
+
+equilibrium_plot = EquilibriumPlot(axes2, equilibrium_ids)
+equilibrium_plot.magnetic_poloidal_flux()
+equilibrium_plot.database_info("2D Equilibrium", hostdir, args.shot, args.run)
+
 axes1.plot()
 axes2.plot()
-
 
 try:
     fname = "Equilibrium_shot_{0}_run_{1}_time_{2:.1f}.png".format(

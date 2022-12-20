@@ -42,3 +42,24 @@ def middle(array: np.ndarray) -> tuple:
     index = int(length / 2)
     value = array[index]
     return index, value
+
+
+def maximum(array: np.ndarray, max_than: int = 0) -> tuple:
+    """[summary]
+
+    Args:
+        float ([type]): [description]
+
+    Returns:
+        [type]: [description]
+    """
+    if array is not None:
+        if array.size != 0:
+            maximum = max_than
+            maximum_index = 0
+            for index in range(len(array)):
+                if array[index] > maximum:
+                    maximum = array[0]
+                    maximum_index = index
+            return maximum_index, maximum
+    return None
