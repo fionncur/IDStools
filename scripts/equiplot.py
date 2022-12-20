@@ -11,12 +11,12 @@ import os
 root_path = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(root_path)
 
-from src.framework.view.common.functions import Figure
+from src.view.common.functions import Figure
 
-from src.framework.view.equilibrium.functions import EquilibriumPlot
-from src.framework.view.pf_active.functions import PFCoilsPlot
+from src.view.equilibrium.functions import EquilibriumView
+from src.view.pf_active.functions import PFCoilsView
 
-from src.framework.compute.common.functions import nearest
+from src.compute.common.functions import nearest
 
 parser = argparse.ArgumentParser(
     description="---- Display the plasma equilibrium from the equilibrium IDS",
@@ -105,10 +105,10 @@ figure = Figure(1, 2)
 axes1 = figure.axes_array[0]
 axes2 = figure.axes_array[1]
 
-pfcoils_plot = PFCoilsPlot(axes1, pf_active_ids)
+pfcoils_plot = PFCoilsView(axes1, pf_active_ids)
 pfcoils_plot.pf_coils()
 
-equilibrium_plot = EquilibriumPlot(axes2, equilibrium_ids)
+equilibrium_plot = EquilibriumView(axes2, equilibrium_ids)
 equilibrium_plot.magnetic_poloidal_flux()
 equilibrium_plot.database_info("2D Equilibrium", hostdir, args.shot, args.run)
 

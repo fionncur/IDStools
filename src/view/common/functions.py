@@ -19,15 +19,18 @@ class Figure:
         "size": 18,
     }
 
-    def __init__(self, nrows=1, ncols=1, width=4.5, height=6.5, dpi=100) -> None:
-        self.width = width
-        self.height = height
-        self.dpi = dpi
+    def __init__(self, nrows=1, ncols=1) -> None:
         self.fig, self.axes_array = plt.subplots(nrows, ncols)
 
-    def save(self, fname):
+    def save(
+        self,
+        fname,
+        width=4.5,
+        height=6.5,
+        dpi=100,
+    ):
         fig = plt.gcf()
-        fig.set_size_inches(self.width, self.height)
+        fig.set_size_inches(width, height)
         try:
             fig.savefig(fname, dpi=self.dpi)
             print("----> Figure saved to " + fname, file=sys.stderr)
@@ -75,3 +78,10 @@ class BasePlot:
         #     "Shot " + str(shot) + " / " + "Run " + str(run), prop=dict(size=8), loc=4
         # )
         # self.ax.add_artist(anchored_text)
+
+class Console:
+    tabsize = 10
+    TAB = " " * 16
+    LINE = "-" * 8
+    def __init__(self) -> None:
+        pass

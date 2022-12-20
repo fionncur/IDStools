@@ -12,7 +12,7 @@ root_path = os.path.dirname(
 
 sys.path.append(root_path)
 
-from src.framework.compute.common.functions import middle, nearest
+from src.compute.common.functions import middle, nearest
 
 array = [
     0.21069679,

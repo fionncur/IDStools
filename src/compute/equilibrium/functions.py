@@ -7,7 +7,36 @@ class EquilibriumCompute:
         super().__init__()
         self.ids_object = ids_object
 
-    def cartesian_rz_grid(self):
+    @staticmethod
+    def get_cartesian_rz_grid(ids_object) -> dict:
+        """
+        Creates cartesian rz grid and returns the dictionary in below format
+            plotrho
+            rho2d
+            r2d
+            z2d
+            psi2d
+
+        Args:
+            ids_object ([ids_object]): [filled ids object]
+
+        Returns:
+            dict: [Returns cartesian rz grid and returns the dictionary]
+        """
+        compute_object = EquilibriumCompute(ids_object)
+        return compute_object.cartesian_rz_grid()
+
+    def cartesian_rz_grid(self) -> dict:
+        """
+        Creates cartesian rz grid and returns the dictionary in below format
+            plotrho
+            rho2d
+            r2d
+            z2d
+            psi2d
+        Returns:
+            [dict]: [Returns cartesian rz grid and returns the dictionary ]
+        """
         if len(self.ids_object.time_slice[0].profiles_2d) == 0:
             # TODO Decide on print or raise exception
             print(

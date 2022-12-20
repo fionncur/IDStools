@@ -2,13 +2,13 @@ from matplotlib.patches import Rectangle
 from ...compute.pf_active.functions import PFCoilsCompute
 
 
-class PFCoilsPlot:
+class PFCoilsView:
     def __init__(self, ax, ids_object):
-        self.compute_object = PFCoilsCompute(ids_object)
+        self.ids_object = ids_object
         self.ax = ax
 
     def pf_coils(self):
-        coils_data = self.compute_object.pf_coils()
+        coils_data = PFCoilsCompute.get_pf_coils(self.ids_object)
         for coil_key, coil_data in coils_data.items():
             for element_key, element_data in coil_data.items():
                 cew, ceh, cec = element_data

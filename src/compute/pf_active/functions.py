@@ -1,12 +1,25 @@
-import numpy as np
-import sys
-
-
 class PFCoilsCompute:
     def __init__(self, ids_object):
         self.ids_object = ids_object
 
-    def pf_coils(self):
+    @staticmethod
+    def get_pf_coils(ids_object) -> dict:
+        """
+        Returns dictionary of pf coils and its data
+
+        Returns:
+            dict: [dictionary of pf coils and its data]
+        """
+        compute_object = PFCoilsCompute(ids_object)
+        return compute_object.pf_coils()
+
+    def pf_coils(self) -> dict:
+        """
+        Returns dictionary of pf coils and its data
+
+        Returns:
+            dict: [dictionary of pf coils and its data]
+        """
         coils = {}
 
         for coil in self.ids_object.coil:
