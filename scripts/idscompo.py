@@ -62,5 +62,17 @@ profiles_1d_slice = connection.partial_get(
 core_profiles_ids.profiles_1d.resize(1)
 core_profiles_ids.profiles_1d[0] = profiles_1d_slice
 
-core_profiles_view = CoreProfilesView(core_profiles_ids, 0)
-core_profiles_view.view_plasma_composition_with_species_concentration()
+CoreProfilesView.view_plasma_composition_with_species_concentration(
+    core_profiles_ids, 0
+)
+
+
+# edge_profiles_ids = imas.edge_profiles()
+# edge_profiles_ids.time = connection.partial_get("edge_profiles", "time")
+# # TODO There is no relation of Slice index calculated above so getting data of 0th slice. and Why only 0th slice
+# edge_profiles_ids.ggd.resize(1)
+# edge_profiles_ids.ggd[0] = input.partial_get("edge_profiles", f"ggd({0})")
+# edge_profiles_ids.grid_ggd.resize(1)
+# edge_profiles_ids.grid_ggd[0] = input.partial_get("edge_profiles", f"grid_ggd({0})")
+
+# core_profiles_view = CoreProfilesView(core_profiles_ids, 0)

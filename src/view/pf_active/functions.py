@@ -3,12 +3,17 @@ from ...compute.pf_active.functions import PFCoilsCompute
 
 
 class PFCoilsView:
-    def __init__(self, ax, ids_object):
-        self.ids_object = ids_object
+    def __init__(self, ax):
         self.ax = ax
 
-    def pf_coils(self):
-        coils_data = PFCoilsCompute.get_pf_coils(self.ids_object)
+    @staticmethod
+    def view_pf_coils(ax, ids_object):
+        coils_data = PFCoilsCompute.get_pf_coils(ids_object)
+
+        pfCoilsView = PFCoilsView(ax)
+        pfCoilsView._pf_coils(coils_data)
+
+    def _pf_coils(self, coils_data):
         for coil_key, coil_data in coils_data.items():
             for element_key, element_data in coil_data.items():
                 cew, ceh, cec = element_data

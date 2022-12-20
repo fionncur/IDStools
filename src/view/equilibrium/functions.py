@@ -3,12 +3,21 @@ from ...compute.equilibrium.functions import EquilibriumCompute
 
 
 class EquilibriumView(BasePlot):
-    def __init__(self, ax, ids_object):
+    def __init__(self, ax):
         super().__init__(ax)
-        self.ids_object = ids_object
 
-    def magnetic_poloidal_flux(self):
-        data = EquilibriumCompute.get_cartesian_rz_grid(self.ids_object)
+    @staticmethod
+    def view_magnetic_poloidal_flux(ax, ids_object):
+        data = EquilibriumCompute.get_cartesian_rz_grid(ids_object)
+        equillibrium_view = EquilibriumView(ax)
+        equillibrium_view.__magnetic_poloidal_flux(data)
+
+    def view_database_info(ax, title, hostdir, shot, run, t):
+        equillibrium_view = EquilibriumView(ax)
+        equillibrium_view.database_info(title, hostdir, shot, run, t)
+
+    def __magnetic_poloidal_flux(self, data):
+
         levels = 30
 
         if data["plotrho"]:

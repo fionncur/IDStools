@@ -3,21 +3,25 @@ from ...view.common.functions import Console
 
 
 class CoreProfilesView(Console):
-    def __init__(self, ids_object, slice_index=0):
-        self.ids_object = ids_object
-        self.slice_index = slice_index
+    def __init__(self):
+        pass
 
-    def view_plasma_composition_with_species_concentration(self, print_data=False):
+    @staticmethod
+    def view_plasma_composition_with_species_concentration(
+        ids_object, slice_index=0, print_data=False
+    ):
         """
         Nice display of plasma composition with species concentrations
         """
         composition_data = (
             CoreProfilesCompute.get_plasma_composition_with_species_concentration(
-                self.ids_object, self.slice_index
+                ids_object, slice_index
             )
         )
-        self._print_plasma_composition(composition_data)
-        self._print_specis_concentration(composition_data)
+
+        coreProfilesView = CoreProfilesView()
+        coreProfilesView._print_plasma_composition(composition_data)
+        coreProfilesView._print_specis_concentration(composition_data)
 
         if print_data is True:
             import json

@@ -1,21 +1,17 @@
 import argparse
 import imas
-
-
-from idstools.cli import get_backend_id
-from idstools.cli import imas_parser
-
 import sys
 import os
 
 root_path = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(root_path)
 
-from src.view.common.functions import Figure
+from idstools.cli import get_backend_id
+from idstools.cli import imas_parser
 
+from src.view.common.functions import Figure
 from src.view.equilibrium.functions import EquilibriumView
 from src.view.pf_active.functions import PFCoilsView
-
 from src.compute.common.functions import nearest
 
 parser = argparse.ArgumentParser(
@@ -109,15 +105,14 @@ pf_active_ids = connection_other.get("pf_active")
 figure = Figure()
 axes = figure.axes_array
 
-if args.pfcoils is False:
-    pfcoils_plot = PFCoilsView(axes, pf_active_ids)
-    pfcoils_plot.pf_coils()
+if args.pfcoils is True:
+    PFCoilsView.view_pf_coils(axes, pf_active_ids)
 
-equilibrium_plot = EquilibriumView(axes, equilibrium_ids)
-equilibrium_plot.magnetic_poloidal_flux()
-equilibrium_plot.database_info(
-    "2D Equilibrium", hostdir, args.shot, args.run, args.time
-)
+EquilibriumView.view_magnetic_poloidal_flux(axes, equilibrium_ids)
+if args.allInfo is True:
+    EquilibriumView.view_database_info(
+        axes, "2D Equilibrium", hostdir, args.shot, args.run, args.time
+    )
 
 axes.plot()
 

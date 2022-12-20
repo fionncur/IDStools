@@ -56,7 +56,7 @@ class BasePlot:
     def __init__(self, ax):
         self.ax = ax
 
-    def database_info(self, title="", hostdir="", shot="", run="", t=""):
+    def database_info(self, title, hostdir, shot, run, t):
         plottitle = title
         plottitle += " (t={:.3f})".format(t)
         self.ax.set_title(plottitle, fontdict=BasePlot.font)
