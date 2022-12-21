@@ -94,9 +94,9 @@ if False:
     zw = np.zeros(npoints)
     rw = np.zeros(npoints)
     for point in range(npoints):
-        xw[point] = wall.description_ggd[0].grid_ggd[0].space[0].objects_per_dimension[0].object[point].geometry[0]
-        yw[point] = wall.description_ggd[0].grid_ggd[0].space[0].objects_per_dimension[0].object[point].geometry[1]
-        zw[point] = wall.description_ggd[0].grid_ggd[0].space[0].objects_per_dimension[0].object[point].geometry[2]
+        xw[point] = wall[point].geometry[0]
+        yw[point] = wall[point].geometry[1]
+        zw[point] = wall[point].geometry[2]
         rw[point] = np.sqrt(xw[point]**2+yw[point]**2)
 
 # ------------------------------------------------
