@@ -58,14 +58,15 @@ class EdgeProfilesCompute:
         edgeProfilesCompute = EdgeProfilesCompute(ids_object, slice_index)
 
         data = {}
-
         nspec_over_ntot = edgeProfilesCompute.get_nspec_over_ntot()
         nspec_over_ne = edgeProfilesCompute.get_nspec_over_ne()
         nspec_over_nmaj = edgeProfilesCompute.get_nspec_over_nmaj()
         species = edgeProfilesCompute.get_species()
+        labels = edgeProfilesCompute.get_labels()
         edgeProfilesCompute.combine_species_when_appear_twice(
             species, nspec_over_ntot, nspec_over_ne, nspec_over_nmaj
         )
+        # TODO in the label I found H and H2+, In mand table it just takes H
         a = edgeProfilesCompute.get_a()
         z = edgeProfilesCompute.get_z()
         states_data = edgeProfilesCompute.get_states_data()
@@ -79,9 +80,16 @@ class EdgeProfilesCompute:
             species_data["species"] = species[species_index]
             species_data["states"] = states_data[species[species_index]]
 
-            data[species[species_index]] = species_data
+            data[labels[species_index]] = species_data
 
         return data
+
+    def get_labels(self, slice_index=0):
+        nspecies = len(self.ids_object.ggd[slice_index].ion)
+        labels = []
+        for ispecies in range(nspecies):
+            labels.append(self.ids_object.ggd[slice_index].ion[ispecies].label)
+        return labels
 
     def get_a(self, slice_index=0, element_index=0) -> list:  # done
         """
@@ -230,6 +238,7 @@ class EdgeProfilesCompute:
         electron_density = self.ids_object.ggd[slice_index].electrons.density[0].values
         return sum(volume * electron_density)
 
+    # TODO Refactor this logic
     def get_volume(self, slice_index=0):  # Done
         num_vertices = len(
             self.ids_object.grid_ggd[slice_index]
@@ -250,8 +259,8 @@ class EdgeProfilesCompute:
             volumes[i] = (
                 self.ids_object.grid_ggd[slice_index]
                 .space[0]
-                .objects_per_dimension[2]
-                .object[index]
+                .objects_per_dimension[0]
+                .object[index - 1]
                 .measure
             )
             if volumes[i] < 0:
@@ -262,7 +271,7 @@ class EdgeProfilesCompute:
 
     def get_density(self, slice_index=0):  # done
         nspecies = len(self.ids_object.ggd[slice_index].ion)
-        volumes = self.get_volumes()
+        volumes = self.get_volume()
         density_ion = None
         for species_index in range(nspecies):
             # First try to read ion.density
@@ -338,7 +347,7 @@ class EdgeProfilesCompute:
         max_density_index = 0
         for ispecies in range(nspecies):
             species_density_list[ispecies] = self.get_single_species_density(
-                slice_index=0, species_index=ispecies
+                slice_index=0
             )
             ntot = ntot + species_density_list[ispecies]
             if species_density_list[ispecies] > max_density:
@@ -433,3 +442,4 @@ class EdgeProfilesCompute:
                         nspec_over_nmaj[ispecies] + nspec_over_nmaj[jspecies]
                     )
                     nspec_over_nmaj[jspecies] = 0
+

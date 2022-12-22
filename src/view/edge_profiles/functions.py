@@ -3,12 +3,12 @@ from ...view.common.functions import Console
 
 
 class EdgeProfilesView(Console):
-    def __init__(self, ids_object, slice_index=0):
-        self.ids_object = ids_object
-        self.slice_index = slice_index
+    def __init__(self):
+        pass
 
+    @staticmethod
     def view_plasma_composition_with_species_concentration(
-        self, ids_object, slice_index=0, print_data=False
+        ids_object, slice_index=0, print_data=False
     ):
         """
         Nice display of plasma composition with species concentrations
@@ -18,8 +18,9 @@ class EdgeProfilesView(Console):
                 ids_object, slice_index
             )
         )
-        self._print_plasma_composition(composition_data)
-        self._print_specis_concentration(composition_data)
+        edgeProfilesView = EdgeProfilesView()
+        edgeProfilesView._print_plasma_composition(composition_data)
+        edgeProfilesView._print_specis_concentration(composition_data)
 
         if print_data is True:
             import json
