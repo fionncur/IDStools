@@ -51,33 +51,51 @@ if err != 0:
 
 # Prepare IDS with highest density data from core profiles
 core_profiles_ids = imas.core_profiles()
-core_profiles_ids.time = connection.partial_get("core_profiles", "time")
-ne0_list = connection.partial_get(
-    "core_profiles", "profiles_1d(:)/electrons/density(0)"
-)
-slice_index = np.argmax(ne0_list)
+try:
+    core_profiles_ids.time = connection.partial_get("core_profiles", "time")
+except:
+    core_profiles_ids.time = None
 
-profiles_1d_slice = connection.partial_get(
-    "core_profiles", f"profiles_1d({slice_index})"
-)
-core_profiles_ids.profiles_1d.resize(1)
-core_profiles_ids.profiles_1d[0] = profiles_1d_slice
 
-CoreProfilesView.view_plasma_composition_with_species_concentration(
-    core_profiles_ids, 0
-)
+if core_profiles_ids.time is not None:
+    ne0_list = connection.partial_get(
+        "core_profiles", "profiles_1d(:)/electrons/density(0)"
+    )
+    slice_index = np.argmax(ne0_list)
+    profiles_1d_slice = connection.partial_get(
+        "core_profiles", f"profiles_1d({slice_index})"
+    )
+
+    core_profiles_ids.profiles_1d.resize(1)
+    core_profiles_ids.profiles_1d[0] = profiles_1d_slice
+
+    CoreProfilesView.view_plasma_composition_with_species_concentration(
+        core_profiles_ids, 0
+    )
+else:
+    print("Core profile not found")
+
 
 edge_profiles_ids = imas.edge_profiles()
-edge_profiles_ids.time = connection.partial_get("edge_profiles", "time")
+try:
+    edge_profiles_ids.time = connection.partial_get("edge_profiles", "time")
+except:
+    edge_profiles_ids.time = None
+
+
 # TODO There is no relation of Slice index calculated above so getting data of 0th slice. and Why only 0th slice
-edge_profiles_ids.ggd.resize(1)
-edge_profiles_ids.ggd[0] = connection.partial_get("edge_profiles", f"ggd({0})")
 
-edge_profiles_ids.grid_ggd.resize(1)
-edge_profiles_ids.grid_ggd[0] = connection.partial_get(
-    "edge_profiles", f"grid_ggd({0})"
-)
+if core_profiles_ids.time is not None:
+    edge_profiles_ids.ggd.resize(1)
+    edge_profiles_ids.ggd[0] = connection.partial_get("edge_profiles", f"ggd({0})")
 
-EdgeProfilesView.view_plasma_composition_with_species_concentration(
-    edge_profiles_ids, 0
-)
+    edge_profiles_ids.grid_ggd.resize(1)
+    edge_profiles_ids.grid_ggd[0] = connection.partial_get(
+        "edge_profiles", f"grid_ggd({0})"
+    )
+
+    EdgeProfilesView.view_plasma_composition_with_species_concentration(
+        edge_profiles_ids, 0
+    )
+else:
+    print("Edge profile not found")

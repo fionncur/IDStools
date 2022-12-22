@@ -120,7 +120,7 @@ class EdgeProfilesView(Console):
                         )
                     )
         print("   ------------")
-        print("core_profiles")
+        print("edge_profiles")
         print("   ------------")
         print(disp_species)
         print(disp_a)

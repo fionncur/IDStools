@@ -54,6 +54,12 @@ class CoreProfilesCompute:
         Returns:
             [dict]: [species wise data in dictionary format]
         """
+        try:
+            ids_object.profiles_1d[slice_index]
+        except:
+            print("Slice not found in core_profiles ids")
+            return None
+
         coreProfileCompute = CoreProfilesCompute(ids_object, slice_index)
 
         data = {}
