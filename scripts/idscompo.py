@@ -85,7 +85,7 @@ except:
 
 # TODO There is no relation of Slice index calculated above so getting data of 0th slice. and Why only 0th slice
 
-if core_profiles_ids.time is not None:
+if edge_profiles_ids.time is not None:
     edge_profiles_ids.ggd.resize(1)
     edge_profiles_ids.ggd[0] = connection.partial_get("edge_profiles", f"ggd({0})")
 
