@@ -3,11 +3,12 @@ from os import getenv, path
 from sys import exit
 import re
 import argparse
-import numpy as np
-import cerberus
 import traceback
 import yaml
+import statistics
 from xml.etree import ElementTree as ET
+import cerberus
+import numpy as np
 import imas
 
 
@@ -916,26 +917,26 @@ def compute_COCOS(ids, cocos_check=None):
     ipsign = np.sign(ids.time_slice[itime].global_quantities.ip)
     b0sign = np.sign(ids.vacuum_toroidal_field.b0[0])
 
-    # Eq.(22)
+    #1 Eq.(22)
     dpsi = (
         ids.time_slice[itime].profiles_1d.psi[-1]
         - ids.time_slice[itime].profiles_1d.psi[0]
     )
     sigma_Bp = np.sign(dpsi) * ipsign
 
-    # Eq.(22)
+    #2 Eq.(22)
     q = ids.time_slice[itime].profiles_1d.q
     sign_q = np.sign(np.sum(np.sign(q)))
     sign_q_pos = sign_q * ipsign * b0sign
 
-    # Eq.(22)
+    #3 Eq.(22)
     sigma_rhothetaphi = sign_q_pos
 
-    # Eq.(22)
+    #4 Eq.(22)
     dpressure_dpsi = ids.time_slice[itime].profiles_1d.dpressure_dpsi
     sign_pprime_pos = np.sign(np.sum(np.sign(dpressure_dpsi))) * ipsign
 
-    # sigma_RphiZ from Eq.(19)
+    #5 sigma_RphiZ from Eq.(19)
     bz = ids.time_slice[itime].profiles_2d[0].b_field_z
     psi2d = ids.time_slice[itime].profiles_2d[0].psi
     r2d = ids.time_slice[itime].profiles_2d[0].r
@@ -951,12 +952,12 @@ def compute_COCOS(ids, cocos_check=None):
     psi_axis = ids.time_slice[itime].profiles_1d.psi[0]
 
     # grid of magnetic axis in Z
-    iz = np.argmin(np.absolute(dim2 - z_axis))
+    iz = np.argmin(np.abs(dim2 - z_axis))
     # psi ref. inside LCFS
-    psi_ref = psi_axis + dpsi * 0.75
+    psi_ref = psi_axis + dpsi * 0.5
 
     # grids close to psi ref.
-    rows, cols = np.where((np.isclose(psi2d, psi_ref, rtol=0.2)) & (bz != 0))
+    rows, cols = np.where((np.isclose(psi2d, psi_ref, rtol=0.25)) & (bz != 0))
     if (not rows.any()) or (not cols.any()):
         raise ValueError("COCOS discrimination failed, len(grids) and/or Bz is zero")
 
@@ -969,7 +970,7 @@ def compute_COCOS(ids, cocos_check=None):
     )
     sigma_RphiZ = np.sign(np.sum(np.sign(twopi_expBp_sigma_RphiZ)))
 
-    # exp_Bp from Eq.(19)
+    #6 exp_Bp from Eq.(19)
     x = np.average(twopi_expBp_sigma_RphiZ * sigma_RphiZ)
     exp_Bp = np.where(np.isclose(x, 2.0 * np.pi, rtol=0.5), 1, 0)
 
