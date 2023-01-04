@@ -18,14 +18,16 @@ class EdgeProfilesView(Console):
                 ids_object, slice_index
             )
         )
-        edgeProfilesView = EdgeProfilesView()
-        edgeProfilesView._print_plasma_composition(composition_data)
-        edgeProfilesView._print_specis_concentration(composition_data)
+        if composition_data is not None:
+            edgeProfilesView = EdgeProfilesView()
+            edgeProfilesView._print_plasma_composition(composition_data)
+            edgeProfilesView._print_specis_concentration(composition_data)
 
-        if print_data is True:
-            import json
+            if print_data is True:
+                import json
 
-            print(json.dumps(composition_data, sort_keys=True, indent=4))
+                print(json.dumps(composition_data, sort_keys=True, indent=4))
+        return composition_data
 
     def _print_plasma_composition(self, composition_data):
         disp_species = "   species:      "

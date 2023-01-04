@@ -1,6 +1,6 @@
 import numpy as np
 import database_tools.init_mendeleiev as mend
-import json
+import sys
 
 
 class CoreProfilesCompute:
@@ -56,18 +56,22 @@ class CoreProfilesCompute:
         """
         try:
             ids_object.profiles_1d[slice_index]
+
         except:
             print("Slice not found in core_profiles ids")
             return None
 
         coreProfileCompute = CoreProfilesCompute(ids_object, slice_index)
 
+        if coreProfileCompute.get_volume(slice_index) is None:
+            return None
         data = {}
 
         nspec_over_ntot = coreProfileCompute.get_nspec_over_ntot()
         nspec_over_ne = coreProfileCompute.get_nspec_over_ne()
         nspec_over_nmaj = coreProfileCompute.get_nspec_over_nmaj()
         species = coreProfileCompute.get_species()
+        labels = coreProfileCompute.get_species_labels()
         coreProfileCompute.combine_species_when_appear_twice(
             species, nspec_over_ntot, nspec_over_ne, nspec_over_nmaj
         )
@@ -82,9 +86,9 @@ class CoreProfilesCompute:
             species_data["a"] = a[species_index]
             species_data["z"] = z[species_index]
             species_data["species"] = species[species_index]
-            species_data["states"] = states_data[species[species_index]]
+            species_data["states"] = states_data[str(species_index)]
 
-            data[species[species_index]] = species_data
+            data[labels[species_index]] = species_data
 
         return data
 
@@ -169,7 +173,7 @@ class CoreProfilesCompute:
 
         states_data = {}
 
-        volume = self.ids_object.profiles_1d[slice_index].grid.volume
+        volume = self.get_volume(slice_index)
         nspecies = len(self.ids_object.profiles_1d[slice_index].ion)
         species_density, _, _ = self.get_species_density()
         for species_index in range(nspecies):
@@ -213,14 +217,27 @@ class CoreProfilesCompute:
                             * volume
                         )
                     except:
-                        print("!  Error with density data")
+                        print(
+                            "!  Density data is not available for "
+                            + self.ids_object.profiles_1d[slice_index]
+                            .ion[species_index]
+                            .label
+                        )
+                # TODO Couldn't retrive state desnity should we calculate n/ni?
+                # In that case density is always 0 and no meaning of n/ni
+                # We can also get weired errors
+                #  /home/ITER/sawantp1/imasrepo/checkinfolder/idstools/src/compute/core_profiles/functions.py:230: RuntimeWarning: invalid value encountered in double_scalars
+                #   100 * states_density[state_index] / species_density[species_index]
+                # /home/ITER/sawantp1/imasrepo/checkinfolder/idstools/src/compute/core_profiles/functions.py:230: RuntimeWarning: divide by zero encountered in double_scalars
+                #   100 * states_density[state_index] / species_density[species_index]
                 state_data["states_density"] = states_density
                 state_data["n_ni"] = (
                     100 * states_density[state_index] / species_density[species_index]
                 )
                 species_data[str(state_index)] = state_data
-            label = self.ids_object.profiles_1d[slice_index].ion[species_index].label
-            states_data[label] = species_data
+
+            # label = self.ids_object.profiles_1d[slice_index].ion[species_index].label
+            states_data[str(species_index)] = species_data
         return states_data
 
     def get_ne(self, slice_index=0) -> float:
@@ -233,9 +250,44 @@ class CoreProfilesCompute:
         Returns:
             [float]: [Sum of multiplication of volume and elcetrons density ]
         """
-        volume = self.ids_object.profiles_1d[slice_index].grid.volume
+        volume = self.get_volume(slice_index)
         electron_density = self.ids_object.profiles_1d[slice_index].electrons.density
         return sum(volume * electron_density)
+
+    def get_volume(self, slice_index=0):
+        volume = self.ids_object.profiles_1d[slice_index].grid.volume
+        if len(volume) == 0:
+            # TODO Dicuss with oliver for handling below code
+            try:
+                import imas
+
+                equilibrium = imas.equilibrium()
+                equilibrium.time_slice.resize(1)
+                equilibrium.time_slice[0].profiles_1d.volume = input.partial_get(
+                    "equilibrium", f"time_slice({slice_index})/profiles_1d/volume"
+                )
+                volume = equilibrium.time_slice[0].profiles_1d.volume
+            except:
+                print("!   Issues with equillibrium.time_slice.profiles_1d.volume")
+
+            if len(volume) == len(
+                self.ids_object.profiles_1d[slice_index].electrons.density
+            ):
+                print(
+                    "!   core_profiles.profiles_1d[:].grid.volume could not be read",
+                    file=sys.stderr,
+                )
+                print(
+                    "    ----> equilibrium.time_slice[:].profiles_1d.volume used instead",
+                    file=sys.stderr,
+                )
+                print(
+                    "    (possible because the resolution is the same, but maybe not correct)",
+                    file=sys.stderr,
+                )
+            else:
+                volume = None
+        return volume
 
     def get_single_species_density(self, slice_index=0, species_index=0):
         """
@@ -248,7 +300,7 @@ class CoreProfilesCompute:
         Returns:
             [float]: [Sum of multiplication of volume and elcetrons density ]
         """
-        volume = self.ids_object.profiles_1d[slice_index].grid.volume
+        volume = self.get_volume(slice_index)
         density = self.ids_object.profiles_1d[slice_index].ion[species_index].density
         return sum(volume * density)
 
@@ -333,6 +385,23 @@ class CoreProfilesCompute:
         for ispecies in range(nspecies):
             species.append(table_mendeleiev[z[ispecies]][a[ispecies]].element)
         return species
+
+    def get_species_labels(self, slice_index=0) -> list:
+        """
+        Get label of species
+
+        Args:
+            slice_index (int, optional): [slice on which functions should operate on]. Defaults to 0.
+
+        Returns:
+            list: [Returns species labels]
+        """
+        nspecies = len(self.ids_object.profiles_1d[slice_index].ion)
+        labels = []
+        for ispecies in range(nspecies):
+            labels.append(self.ids_object.profiles_1d[slice_index].ion[ispecies].label)
+
+        return labels
 
     def combine_species_when_appear_twice(
         self, species, nspec_over_ntot, nspec_over_ne, nspec_over_nmaj, slice_index=0

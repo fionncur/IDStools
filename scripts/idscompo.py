@@ -56,6 +56,18 @@ try:
 except:
     core_profiles_ids.time = None
 
+edge_profiles_ids = imas.edge_profiles()
+try:
+    edge_profiles_ids.time = connection.partial_get("edge_profiles", "time")
+except:
+    edge_profiles_ids.time = None
+
+core_profile_exists = True
+edge_profile_exists = True
+if core_profiles_ids.time is None:
+    core_profile_exists = False
+if edge_profiles_ids.time is None:
+    edge_profile_exists = False
 
 if core_profiles_ids.time is not None:
     ne0_list = connection.partial_get(
@@ -69,21 +81,16 @@ if core_profiles_ids.time is not None:
     core_profiles_ids.profiles_1d.resize(1)
     core_profiles_ids.profiles_1d[0] = profiles_1d_slice
 
-    CoreProfilesView.view_plasma_composition_with_species_concentration(
+    returnstatus = CoreProfilesView.view_plasma_composition_with_species_concentration(
         core_profiles_ids, 0
     )
+    if returnstatus is None:
+        core_profile_exists = False
 else:
-    print("Core profile not found")
+    print("!   No core_profiles IDS in the data-entry --> Abort.")
 
 
-edge_profiles_ids = imas.edge_profiles()
-try:
-    edge_profiles_ids.time = connection.partial_get("edge_profiles", "time")
-except:
-    edge_profiles_ids.time = None
-
-
-# TODO There is no relation of Slice index calculated above so getting data of 0th slice. and Why only 0th slice
+# # TODO There is no relation of Slice index calculated above so getting data of 0th slice. and Why only 0th slice
 
 if edge_profiles_ids.time is not None:
     edge_profiles_ids.ggd.resize(1)
@@ -94,8 +101,23 @@ if edge_profiles_ids.time is not None:
         "edge_profiles", f"grid_ggd({0})"
     )
 
-    EdgeProfilesView.view_plasma_composition_with_species_concentration(
+    returnstatus = EdgeProfilesView.view_plasma_composition_with_species_concentration(
         edge_profiles_ids, 0
     )
+    if returnstatus is None:
+        edge_profile_exists = False
 else:
-    print("Edge profile not found")
+    print("!   No edge_profiles IDS in the data-entry.")
+
+profile_availability_string = ""
+if core_profile_exists is False:
+    profile_availability_string += "core -\t"
+else:
+    profile_availability_string += "core +\t"
+
+if edge_profile_exists is False:
+    profile_availability_string += "edge -\t"
+else:
+    profile_availability_string += "edge +\t"
+
+print(profile_availability_string)

@@ -1,6 +1,6 @@
 import numpy as np
 import database_tools.init_mendeleiev as mend
-import json
+import sys
 
 # TODO Create base class for Edge and Core as methods are same but way of retriving is different Many common methods
 # TODO Use strategy after that
@@ -55,7 +55,17 @@ class EdgeProfilesCompute:
         Returns:
             [dict]: [species wise data in dictionary format]
         """
+        try:
+            ids_object.ggd[slice_index]
+
+        except:
+            print("Slice not found in edge_profiles ids")
+            return None
+
         edgeProfilesCompute = EdgeProfilesCompute(ids_object, slice_index)
+
+        if edgeProfilesCompute.get_volume(slice_index) is None:
+            return None
 
         data = {}
         nspec_over_ntot = edgeProfilesCompute.get_nspec_over_ntot()
@@ -78,7 +88,7 @@ class EdgeProfilesCompute:
             species_data["a"] = a[species_index]
             species_data["z"] = z[species_index]
             species_data["species"] = species[species_index]
-            species_data["states"] = states_data[species[species_index]]
+            species_data["states"] = states_data[str(species_index)]
 
             data[labels[species_index]] = species_data
 
@@ -214,14 +224,16 @@ class EdgeProfilesCompute:
                             * volume
                         )
                     except:
-                        print("!  Error with density data")
+                        print(
+                            "!  Density data is not available for"
+                            + self.ids_object.ggd[slice_index].ion[species_index].label
+                        )
                 state_data["states_density"] = states_density
                 state_data["n_ni"] = (
                     100 * states_density[state_index] / species_density[species_index]
                 )
                 species_data[str(state_index)] = state_data
-            label = self.ids_object.ggd[slice_index].ion[species_index].label
-            states_data[label] = species_data
+            states_data[str(species_index)] = species_data
         return states_data
 
     def get_ne(self, slice_index=0) -> float:  # done
@@ -249,24 +261,27 @@ class EdgeProfilesCompute:
         volumes = [0] * num_vertices
 
         for i in range(num_vertices):
-            index = (
-                self.ids_object.grid_ggd[slice_index]
-                .grid_subset[0]
-                .element[i]
-                .object[0]
-                .index
-            )
-            volumes[i] = (
-                self.ids_object.grid_ggd[slice_index]
-                .space[0]
-                .objects_per_dimension[0]
-                .object[index - 1]
-                .measure
-            )
-            if volumes[i] < 0:
-                volume_error = "!   objects exist but self.ids_object.grid_ggd[0].space[0].objects_per_dimension[0].object volumes are empty, replaced by 1"
-                volumes[i] = 1
-
+            # TODO verify this logic to extract data of Volume  why .objects_per_dimension[2]?
+            try:
+                index = (
+                    self.ids_object.grid_ggd[slice_index]
+                    .grid_subset[0]
+                    .element[i]
+                    .object[0]
+                    .index
+                )
+                volumes[i] = (
+                    self.ids_object.grid_ggd[slice_index]
+                    .space[0]
+                    .objects_per_dimension[2]
+                    .object[index]
+                    .measure
+                )
+                if volumes[i] < 0:
+                    volume_error = "!   objects exist but self.ids_object.grid_ggd[0].space[0].objects_per_dimension[0].object volumes are empty, replaced by 1"
+                    volumes[i] = 1
+            except:
+                return None
         return volumes
 
     def get_density(self, slice_index=0):  # done
@@ -442,4 +457,3 @@ class EdgeProfilesCompute:
                         nspec_over_nmaj[ispecies] + nspec_over_nmaj[jspecies]
                     )
                     nspec_over_nmaj[jspecies] = 0
-

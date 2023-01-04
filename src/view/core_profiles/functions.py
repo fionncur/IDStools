@@ -18,15 +18,15 @@ class CoreProfilesView(Console):
                 ids_object, slice_index
             )
         )
+        if composition_data is not None:
+            coreProfilesView = CoreProfilesView()
+            coreProfilesView._print_plasma_composition(composition_data)
+            coreProfilesView._print_specis_concentration(composition_data)
 
-        coreProfilesView = CoreProfilesView()
-        coreProfilesView._print_plasma_composition(composition_data)
-        coreProfilesView._print_specis_concentration(composition_data)
+            if print_data is True:
+                import json
 
-        if print_data is True:
-            import json
-
-            print(json.dumps(composition_data, sort_keys=True, indent=4))
+                print(json.dumps(composition_data, sort_keys=True, indent=4))
 
     def _print_plasma_composition(self, composition_data):
         disp_species = "   species:      "
@@ -136,29 +136,30 @@ class CoreProfilesView(Console):
         for species_key, species_data in composition_data.items():
             states = species_data["states"]
             nstates = len(states)
-            if nstates > 1:
-                comm = "s"
-            else:
-                comm = ""
-            print(
-                species_key,
-                " has ",
-                nstates,
-                " state" + comm,
-            )
-            istate = 0
-            for state_key, state_data in states.items():
+            if nstates != 0:
+                if nstates > 1:
+                    comm = "s"
+                else:
+                    comm = ""
                 print(
-                    self.TAB,
-                    "state ",
-                    str(istate + 1),
-                    (" " * (5 - len(str(istate + 1)))),
-                    state_data["label"],
-                    (" " * (7 - len(str(state_data["label"])))),
-                    "z =",
-                    state_data["z_average"],
-                    (" " * (7 - len(str(state_data["z_average"])))),
-                    "   n/ni, % :",
-                    format("%.6f" % (state_data["n_ni"])),
+                    species_key,
+                    " has ",
+                    nstates,
+                    " state" + comm,
                 )
-                istate += 1
+                istate = 0
+                for state_key, state_data in states.items():
+                    print(
+                        self.TAB,
+                        "state ",
+                        str(istate + 1),
+                        (" " * (5 - len(str(istate + 1)))),
+                        state_data["label"],
+                        (" " * (7 - len(str(state_data["label"])))),
+                        "z =",
+                        state_data["z_average"],
+                        (" " * (7 - len(str(state_data["z_average"])))),
+                        "   n/ni, % :",
+                        format("%.6f" % (state_data["n_ni"])),
+                    )
+                    istate += 1
