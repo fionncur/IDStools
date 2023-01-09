@@ -94,7 +94,7 @@ class EdgeProfilesCompute:
 
         return data
 
-    def get_labels(self, slice_index=0):
+    def get_labels(self, slice_index=0):  # done
         nspecies = len(self.ids_object.ggd[slice_index].ion)
         labels = []
         for ispecies in range(nspecies):
@@ -193,41 +193,28 @@ class EdgeProfilesCompute:
                     .state[state_index]
                     .label
                 )
-                # TODO Why [0].values
-                state_data["z_average"] = np.mean(
+
+                for xd in (
                     self.ids_object.ggd[slice_index]
                     .ion[species_index]
                     .state[state_index]
-                    .z_average[0]
-                    .values
-                )
+                    .z_average
+                ):
+                    if xd.grid_subset_index == 5:
+                        state_data["z_average"] = xd.values[0]
 
-                try:
-                    states_density[state_index] = sum(
-                        (
-                            self.ids_object.ggd[slice_index]
-                            .ion[species_index]
-                            .state[state_index]
-                            .density[0]
-                            .values
-                            * volume
-                        )
-                    )
-                except:
-                    try:
+                for xd in (
+                    self.ids_object.ggd[slice_index]
+                    .ion[species_index]
+                    .state[state_index]
+                    .density
+                ):
+                    if xd.grid_subset_index == 5:
                         states_density[state_index] = sum(
-                            self.ids_object.ggd[slice_index]
-                            .ion[species_index]
-                            .state[state_index]
-                            .density_thermal[0]
-                            .values
-                            * volume
+                            np.array(volume) * np.array(xd.values)
                         )
-                    except:
-                        print(
-                            "!  Density data is not available for"
-                            + self.ids_object.ggd[slice_index].ion[species_index].label
-                        )
+                        break
+
                 state_data["states_density"] = states_density
                 state_data["n_ni"] = (
                     100 * states_density[state_index] / species_density[species_index]
@@ -247,101 +234,67 @@ class EdgeProfilesCompute:
             [float]: [Sum of multiplication of volume and elcetrons density ]
         """
         volume = self.get_volume(slice_index)
-        electron_density = self.ids_object.ggd[slice_index].electrons.density[0].values
+        electron_density = self.get_density(slice_index)
+        # electron_density = self.ids_object.ggd[slice_index].electrons.density[0].values
         return sum(volume * electron_density)
 
     # TODO Refactor this logic
+    # Discussed with Xavier read 31 and 32 from dd
     def get_volume(self, slice_index=0):  # Done
-        num_vertices = len(
-            self.ids_object.grid_ggd[slice_index]
-            .space[0]
-            .objects_per_dimension[0]
-            .object
-        )
+        elements = self.ids_object.grid_ggd[slice_index].grid_subset[4].element
+        num_vertices = len(elements)
         volumes = [0] * num_vertices
 
-        for i in range(num_vertices):
-            # TODO verify this logic to extract data of Volume  why .objects_per_dimension[2]?
-            try:
-                index = (
+        for index, element in enumerate(elements):
+            for obj in element.object:
+                # Get mapping information from element like, space, dimension and index which we need to look in space object
+                space_index = obj.space - 1
+                dimension_index = obj.dimension - 1
+                object_index = obj.index - 1
+
+                # Get geometry_content.index to check what is stored in the geometry array
+                geometry_content_index = (
                     self.ids_object.grid_ggd[slice_index]
-                    .grid_subset[0]
-                    .element[i]
-                    .object[0]
-                    .index
+                    .space[space_index]
+                    .objects_per_dimension[dimension_index]
+                    .geometry_content.index
                 )
-                volumes[i] = (
-                    self.ids_object.grid_ggd[slice_index]
-                    .space[0]
-                    .objects_per_dimension[2]
-                    .object[index]
-                    .measure
-                )
-                if volumes[i] < 0:
-                    volume_error = "!   objects exist but self.ids_object.grid_ggd[0].space[0].objects_per_dimension[0].object volumes are empty, replaced by 1"
-                    volumes[i] = 1
-            except:
-                return None
+                # if geometry_content => face_indices_volume or face_indices_volume_connection it contains the volume
+                if geometry_content_index == 31 or geometry_content_index == 32:
+                    # Get the object which is mapped from grid_subset to space
+                    obj_dim = (
+                        self.ids_object.grid_ggd[slice_index]
+                        .space[space_index]
+                        .objects_per_dimension[dimension_index]
+                        .object[object_index]
+                    )
+                    # The third element contains the volume, read the same
+                    volumes[index] = obj_dim.geometry[2]
         return volumes
 
     def get_density(self, slice_index=0):  # done
-        nspecies = len(self.ids_object.ggd[slice_index].ion)
-        volumes = self.get_volume()
         density_ion = None
-        for species_index in range(nspecies):
-            # First try to read ion.density
-            try:
-                density_ion = (
-                    self.ids_object.ggd[slice_index]
-                    .ion[species_index]
-                    .density[0]
-                    .values
-                )
-            except:
-                # If not, try in ion.thermal_density
-                try:
-                    density_ion = (
-                        self.ids_object.ggd[slice_index]
-                        .ion[species_index]
-                        .density_thermal[0]
-                        .values
-                    )
-                except:
-                    # If not, try to read all ion states density and sum
-                    try:
-                        nstates = len(
-                            self.ids_object.ggd[slice_index].ion[species_index].state
-                        )
-                        density_ion = [0] * len(volumes)
-                        for istate in range(nstates):
-                            density_ion = (
-                                density_ion
-                                + self.ids_object.ggd[slice_index]
-                                .ion[species_index]
-                                .state[istate]
-                                .density[0]
-                                .values
-                            )
-                    except:
-                        density_ion = [0] * len(volumes)
-                        # print('!   No density data for ion', species_edge[species_index])
+        for xd in self.ids_object.ggd[slice_index].electrons.density:
+            if xd.grid_subset_index == 5:
+                density_ion = xd.values
+
         return density_ion
 
-    def get_single_species_density(self, slice_index=0):  # done
-        """
-        Sum of multiplication of volume and species density
+    # def get_single_species_density(self, slice_index=0):  # done
+    #     """
+    #     Sum of multiplication of volume and species density
 
-        Args:
-            slice_index (int, optional): [slice on which functions should operate on]. Defaults to 0.
-            species_index (int, optional): [species from which we need to get the data]. Defaults to 0.
+    #     Args:
+    #         slice_index (int, optional): [slice on which functions should operate on]. Defaults to 0.
+    #         species_index (int, optional): [species from which we need to get the data]. Defaults to 0.
 
-        Returns:
-            [float]: [Sum of multiplication of volume and elcetrons density ]
-        """
-        volume = self.get_volume(slice_index)
-        density = self.get_density()
-        # TODO To return  np .array from functions itself
-        return sum(np.array(volume) * np.array(density))
+    #     Returns:
+    #         [float]: [Sum of multiplication of volume and elcetrons density ]
+    #     """
+    #     volume = self.get_volume(slice_index)
+    #     density = self.get_density(slice_index)
+    #     # TODO To return  np .array from functions itself
+    #     return sum(np.array(volume) * np.array(density))
 
     def get_species_density(self, slice_index=0) -> tuple:  # done
         """
@@ -356,14 +309,18 @@ class EdgeProfilesCompute:
             [float]: [max_density_index index at which it has maximum density]
         """
         nspecies = len(self.ids_object.ggd[slice_index].ion)
+        volume = self.get_volume()
         ntot = 0
         species_density_list = [0] * nspecies
         max_density = -999.0
         max_density_index = 0
         for ispecies in range(nspecies):
-            species_density_list[ispecies] = self.get_single_species_density(
-                slice_index=0
-            )
+            for xd in self.ids_object.ggd[slice_index].ion[ispecies].density:
+                if xd.grid_subset_index == 5:
+                    species_density_list[ispecies] = sum(
+                        np.array(volume) * np.array(xd.values)
+                    )
+                    break
             ntot = ntot + species_density_list[ispecies]
             if species_density_list[ispecies] > max_density:
                 max_density = species_density_list[ispecies]
@@ -457,3 +414,46 @@ class EdgeProfilesCompute:
                         nspec_over_nmaj[ispecies] + nspec_over_nmaj[jspecies]
                     )
                     nspec_over_nmaj[jspecies] = 0
+
+    #   nspecies = len(self.ids_object.ggd[slice_index].ion)
+    #     volumes = self.get_volume()
+    #     density_ion = None
+    #     for species_index in range(nspecies):
+    #         # First try to read ion.density
+    #         try:
+    #             density_ion = (
+    #                 self.ids_object.ggd[slice_index]
+    #                 .ion[species_index]
+    #                 .density[0]
+    #                 .values
+    #             )
+    #         except:
+    #             # If not, try in ion.thermal_density
+    #             try:
+    #                 density_ion = (
+    #                     self.ids_object.ggd[slice_index]
+    #                     .ion[species_index]
+    #                     .density_thermal[0]
+    #                     .values
+    #                 )
+    #             except:
+    #                 # If not, try to read all ion states density and sum
+    #                 try:
+    #                     nstates = len(
+    #                         self.ids_object.ggd[slice_index].ion[species_index].state
+    #                     )
+    #                     density_ion = [0] * len(volumes)
+    #                     for istate in range(nstates):
+    #                         density_ion = (
+    #                             density_ion
+    #                             + self.ids_object.ggd[slice_index]
+    #                             .ion[species_index]
+    #                             .state[istate]
+    #                             .density[0]
+    #                             .values
+    #                         )
+    #                 except:
+    #                     density_ion = [0] * len(volumes)
+    #                     print(
+    #                         "!   No density data for ion", species_edge[species_index]
+    #                     )

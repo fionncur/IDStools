@@ -21,7 +21,7 @@ python scripts/idscompo.py -s 130506 -r 403
 echo -e "130507  3=======================================================================================\n\n"
 # 130507  3    ITER      Hybrid-DT, 11.5MA 5.3T L-H-L, 73.0MW Paux, Be/W      -11.5  -5.3   D-T L-H-L  CORSICA 2022-06-23 10:02:24 NO PASS issue of reading equillibrium ids No edge
 python scripts/idscompo.py -s 130507 -r 3
-ids_compo -s 130507 -r 3
+# ids_compo -s 130507 -r 3
 echo -e "22578  1=======================================================================================\n\n"
 # 22578  1    ITER      F57-120-N_1.2%-Be0,D_tpt=2.23e23,N_tpt=1.10e21       -15.02 -5.3   D tbd SOLPS4.3  2022-06-10 17:04:50 CORE PASS File error
 python scripts/idscompo.py -s 22578 -r 1

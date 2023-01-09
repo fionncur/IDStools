@@ -257,36 +257,7 @@ class CoreProfilesCompute:
     def get_volume(self, slice_index=0):
         volume = self.ids_object.profiles_1d[slice_index].grid.volume
         if len(volume) == 0:
-            # TODO Dicuss with oliver for handling below code
-            try:
-                import imas
-
-                equilibrium = imas.equilibrium()
-                equilibrium.time_slice.resize(1)
-                equilibrium.time_slice[0].profiles_1d.volume = input.partial_get(
-                    "equilibrium", f"time_slice({slice_index})/profiles_1d/volume"
-                )
-                volume = equilibrium.time_slice[0].profiles_1d.volume
-            except:
-                print("!   Issues with equillibrium.time_slice.profiles_1d.volume")
-
-            if len(volume) == len(
-                self.ids_object.profiles_1d[slice_index].electrons.density
-            ):
-                print(
-                    "!   core_profiles.profiles_1d[:].grid.volume could not be read",
-                    file=sys.stderr,
-                )
-                print(
-                    "    ----> equilibrium.time_slice[:].profiles_1d.volume used instead",
-                    file=sys.stderr,
-                )
-                print(
-                    "    (possible because the resolution is the same, but maybe not correct)",
-                    file=sys.stderr,
-                )
-            else:
-                volume = None
+            volume = None
         return volume
 
     def get_single_species_density(self, slice_index=0, species_index=0):
