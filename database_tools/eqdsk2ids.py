@@ -330,7 +330,7 @@ def map_GEQDSK_to_IDS(geqdsk, eq):
         ids.ids_properties.provenance.node.resize(1)
         ids.ids_properties.provenance.node[0].sources.append(geqdsk.fpath)
 
-        ids.code.name = "IDStools/geqdsk2ids"
+        ids.code.name = "IDStools/eqdsk2ids"
         ids.code.repository = "https://git.iter.org/projects/IMAS/repos/idstools/browse"
         ids.code.output_flag.resize(1)
         ids.code.output_flag[0] = 0
@@ -484,3 +484,33 @@ def geqdsk2ids(fpath, ipsign=0, b0sign=0, cocos_in=None):
 
 
 # ----------------------------------------------------------------------
+
+
+def eqdsk2ids(gfile=None, afile=None, ipsign=0, b0sign=0, cocos_in=None):
+    """
+    Functional Interface of EQDSK Converter (eqdsk2ids)
+
+    Parameters
+    ----------
+    gfile: str
+        Path to GEQDSK file
+    afile: str
+        Path to AEQDSK file (*not in use)
+    ipsign_out: int=0, optional
+        Desired sign(Ip) in output
+    b0sign_out: int=0, optional
+        Desired sign(B0) in output
+    cocos_in: int=None, optional
+        Coerce input COCOS
+
+    Returns
+    -------
+    eq: imas_*_ual_*.equilibrium.equilibrium ('*' corresponds to IMAS/UAL ver.)
+        IDS/equilibrium
+    """
+
+    # option "afile" not yet implemented
+    if gfile is not None:
+        return geqdsk2ids(gfile, ipsign=ipsign, b0sign=b0sign, cocos_in=cocos_in)
+    else:
+        return None
