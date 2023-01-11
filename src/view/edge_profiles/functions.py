@@ -18,7 +18,7 @@ class EdgeProfilesView(Console):
                 ids_object, slice_index
             )
         )
-        if composition_data is not None:
+        if composition_data != 0 and composition_data != -1:
             edgeProfilesView = EdgeProfilesView()
             edgeProfilesView._print_plasma_composition(composition_data)
             edgeProfilesView._print_specis_concentration(composition_data)
@@ -142,7 +142,7 @@ class EdgeProfilesView(Console):
             else:
                 comm = ""
             print(
-                species_key,
+                species_data["species"],
                 " has ",
                 nstates,
                 " state" + comm,

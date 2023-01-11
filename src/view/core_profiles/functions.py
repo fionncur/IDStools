@@ -8,17 +8,17 @@ class CoreProfilesView(Console):
 
     @staticmethod
     def view_plasma_composition_with_species_concentration(
-        ids_object, slice_index=0, print_data=False
+        ids_object, slice_index=0, print_data=False, volume=None
     ):
         """
         Nice display of plasma composition with species concentrations
         """
         composition_data = (
             CoreProfilesCompute.get_plasma_composition_with_species_concentration(
-                ids_object, slice_index
+                ids_object, slice_index, volume=volume
             )
         )
-        if composition_data is not None:
+        if composition_data != 0 and composition_data != -1:
             coreProfilesView = CoreProfilesView()
             coreProfilesView._print_plasma_composition(composition_data)
             coreProfilesView._print_specis_concentration(composition_data)
@@ -27,6 +27,8 @@ class CoreProfilesView(Console):
                 import json
 
                 print(json.dumps(composition_data, sort_keys=True, indent=4))
+
+        return composition_data
 
     def _print_plasma_composition(self, composition_data):
         disp_species = "   species:      "
@@ -142,24 +144,31 @@ class CoreProfilesView(Console):
                 else:
                     comm = ""
                 print(
-                    species_key,
+                    species_data["species"],
                     " has ",
                     nstates,
                     " state" + comm,
                 )
                 istate = 0
                 for state_key, state_data in states.items():
-                    print(
-                        self.TAB,
-                        "state ",
-                        str(istate + 1),
-                        (" " * (5 - len(str(istate + 1)))),
-                        state_data["label"],
-                        (" " * (7 - len(str(state_data["label"])))),
-                        "z =",
-                        state_data["z_average"],
-                        (" " * (7 - len(str(state_data["z_average"])))),
-                        "   n/ni, % :",
-                        format("%.6f" % (state_data["n_ni"])),
-                    )
-                    istate += 1
+                    if state_data["density_available"] is False:
+                        print(
+                            self.TAB,
+                            "!  core_profile IDS: Density is not available for state ",
+                            str(istate + 1),
+                        )
+                    else:
+                        print(
+                            self.TAB,
+                            "state ",
+                            str(istate + 1),
+                            (" " * (5 - len(str(istate + 1)))),
+                            state_data["label"],
+                            (" " * (7 - len(str(state_data["label"])))),
+                            "z =",
+                            state_data["z_average"],
+                            (" " * (7 - len(str(state_data["z_average"])))),
+                            "   n/ni, % :",
+                            format("%.6f" % (state_data["n_ni"])),
+                        )
+                    istate = istate + 1

@@ -84,8 +84,27 @@ if core_profiles_ids.time is not None:
     returnstatus = CoreProfilesView.view_plasma_composition_with_species_concentration(
         core_profiles_ids, 0
     )
-    if returnstatus is None:
+    if returnstatus == 0:
         core_profile_exists = False
+        print(
+            "!   core_profiles IDS is exists but time slice doesn't exists. --> Abort."
+        )
+    elif returnstatus == -1:
+        core_profile_exists = False
+        print("!   core_profiles IDS is exists but volume doesn't exists. ")
+        print("!   Getting to the volume from equilibrium IDS")
+        equilibrium = imas.equilibrium()
+        equilibrium.time_slice.resize(1)
+        volume = connection.partial_get(
+            "equilibrium", f"time_slice({slice_index})/profiles_1d/volume"
+        )
+        returnstatus = (
+            CoreProfilesView.view_plasma_composition_with_species_concentration(
+                core_profiles_ids, 0, volume=volume
+            )
+        )
+        core_profile_exists = True
+
 else:
     print("!   No core_profiles IDS in the data-entry --> Abort.")
 
@@ -104,10 +123,16 @@ if edge_profiles_ids.time is not None:
     returnstatus = EdgeProfilesView.view_plasma_composition_with_species_concentration(
         edge_profiles_ids, 0
     )
-    if returnstatus is None:
+    if returnstatus == 0:
         edge_profile_exists = False
+        print(
+            "!   edge_profiles IDS is exists but time slice doesn't exists. --> Abort."
+        )
+    elif returnstatus == -1:
+        edge_profile_exists = False
+        print("!   edge_profiles IDS is exists but volume doesn't exists. --> Abort.")
 else:
-    print("!   No edge_profiles IDS in the data-entry.")
+    print("!   No edge_profiles IDS in the data-entry. --> Abort.")
 
 profile_availability_string = ""
 if core_profile_exists is False:

@@ -4,14 +4,15 @@ import sys
 
 
 class CoreProfilesCompute:
-    def __init__(self, ids_object, slice_index=0):
+    def __init__(self, ids_object, slice_index=0, volume=None):
         super().__init__()
         self.ids_object = ids_object
         self.slice_index = slice_index
+        self.volume = volume
 
     @staticmethod
     def get_plasma_composition_with_species_concentration(
-        ids_object, slice_index=0
+        ids_object, slice_index=0, volume=None
     ) -> dict:
         """
         Function retrives composition and species concentration in below format
@@ -58,13 +59,16 @@ class CoreProfilesCompute:
             ids_object.profiles_1d[slice_index]
 
         except:
-            print("Slice not found in core_profiles ids")
-            return None
+            return 0
 
-        coreProfileCompute = CoreProfilesCompute(ids_object, slice_index)
+        coreProfileCompute = CoreProfilesCompute(ids_object, slice_index, volume=volume)
 
-        if coreProfileCompute.get_volume(slice_index) is None:
-            return None
+        if coreProfileCompute.volume is None:
+            volume = coreProfileCompute.get_volume(slice_index)
+            if volume is None:
+                return -1
+            else:
+                coreProfileCompute.volume = volume
         data = {}
 
         nspec_over_ntot = coreProfileCompute.get_nspec_over_ntot()
@@ -88,7 +92,7 @@ class CoreProfilesCompute:
             species_data["species"] = species[species_index]
             species_data["states"] = states_data[str(species_index)]
 
-            data[labels[species_index]] = species_data
+            data[str(species_index)] = species_data
 
         return data
 
@@ -142,7 +146,7 @@ class CoreProfilesCompute:
     # def get_zeff(self, slice_index=0, element_index=0):
     #     return self.ids_object.profiles_1d[slice_index].zeff[element_index]
 
-    def get_states(self, slice_index=0):
+    def get_states(self, slice_index=0, state_index=0):
         """
         Get series wise data of states of all species
 
@@ -160,6 +164,33 @@ class CoreProfilesCompute:
             )
         return states
 
+    def get_state_density(self, slice_index=0, species_index=0, state_index=0):
+        try:
+            density = (
+                self.ids_object.profiles_1d[slice_index]
+                .ion[species_index]
+                .state[state_index]
+                .density
+            )
+            if len(density) != 0:
+                return density
+        except:
+            pass
+
+        try:
+            density = (
+                self.ids_object.profiles_1d[slice_index]
+                .ion[species_index]
+                .state[state_index]
+                .density_thermal
+            )
+            if len(density) != 0:
+                return density
+        except:
+            pass
+
+        return None
+
     def get_states_data(self, slice_index=0) -> dict:
         """
         Get data of states in dictionary format
@@ -173,7 +204,7 @@ class CoreProfilesCompute:
 
         states_data = {}
 
-        volume = self.get_volume(slice_index)
+        volume = self.volume
         nspecies = len(self.ids_object.profiles_1d[slice_index].ion)
         species_density, _, _ = self.get_species_density()
         for species_index in range(nspecies):
@@ -184,12 +215,14 @@ class CoreProfilesCompute:
             states_density = [0] * nstates
             for state_index in range(nstates):
                 state_data = {}
+
                 state_data["label"] = (
                     self.ids_object.profiles_1d[slice_index]
                     .ion[species_index]
                     .state[state_index]
                     .label
                 )
+
                 state_data["z_average"] = np.mean(
                     self.ids_object.profiles_1d[slice_index]
                     .ion[species_index]
@@ -197,32 +230,34 @@ class CoreProfilesCompute:
                     .z_average
                 )
 
-                try:
-                    states_density[state_index] = sum(
-                        (
-                            self.ids_object.profiles_1d[slice_index]
-                            .ion[species_index]
-                            .state[state_index]
-                            .density
-                            * volume
-                        )
-                    )
-                except:
-                    try:
-                        states_density[state_index] = sum(
-                            self.ids_object.profiles_1d[slice_index]
-                            .ion[species_index]
-                            .state[state_index]
-                            .density_thermal
-                            * volume
-                        )
-                    except:
+                density = self.get_state_density(
+                    slice_index, species_index, state_index
+                )
+                state_data["density_available"] = False
+                if density is not None:
+                    if len(density) != 0:
+                        states_density[state_index] = sum(density * volume)
+                        state_data["density_available"] = True
+                    else:
                         print(
-                            "!  Density data is not available for "
-                            + self.ids_object.profiles_1d[slice_index]
+                            "!  core_profile IDS: Density data for species ",
+                            self.ids_object.profiles_1d[slice_index]
                             .ion[species_index]
-                            .label
+                            .label,
+                            " and state ",
+                            state_index,
+                            " is empty ",
                         )
+                else:
+                    print(
+                        "!  core_profile IDS: Density data for species ",
+                        self.ids_object.profiles_1d[slice_index]
+                        .ion[species_index]
+                        .label,
+                        " and state ",
+                        state_index,
+                        " is empty ",
+                    )
                 # TODO Couldn't retrive state desnity should we calculate n/ni?
                 # In that case density is always 0 and no meaning of n/ni
                 # We can also get weired errors
@@ -231,6 +266,7 @@ class CoreProfilesCompute:
                 # /home/ITER/sawantp1/imasrepo/checkinfolder/idstools/src/compute/core_profiles/functions.py:230: RuntimeWarning: divide by zero encountered in double_scalars
                 #   100 * states_density[state_index] / species_density[species_index]
                 state_data["states_density"] = states_density
+
                 state_data["n_ni"] = (
                     100 * states_density[state_index] / species_density[species_index]
                 )
@@ -250,7 +286,8 @@ class CoreProfilesCompute:
         Returns:
             [float]: [Sum of multiplication of volume and elcetrons density ]
         """
-        volume = self.get_volume(slice_index)
+        volume = self.volume
+
         electron_density = self.ids_object.profiles_1d[slice_index].electrons.density
         return sum(volume * electron_density)
 
@@ -258,6 +295,7 @@ class CoreProfilesCompute:
         volume = self.ids_object.profiles_1d[slice_index].grid.volume
         if len(volume) == 0:
             volume = None
+            print("!   core_profile IDS: Grid volume is empty")
         return volume
 
     def get_single_species_density(self, slice_index=0, species_index=0):
@@ -271,7 +309,7 @@ class CoreProfilesCompute:
         Returns:
             [float]: [Sum of multiplication of volume and elcetrons density ]
         """
-        volume = self.get_volume(slice_index)
+        volume = self.volume
         density = self.ids_object.profiles_1d[slice_index].ion[species_index].density
         return sum(volume * density)
 

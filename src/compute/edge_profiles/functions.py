@@ -59,13 +59,13 @@ class EdgeProfilesCompute:
             ids_object.ggd[slice_index]
 
         except:
-            print("Slice not found in edge_profiles ids")
-            return None
+            print("!  edge_profiles IDS:slice not found")
+            return 0
 
         edgeProfilesCompute = EdgeProfilesCompute(ids_object, slice_index)
 
         if edgeProfilesCompute.get_volume(slice_index) is None:
-            return None
+            return -1
 
         data = {}
         nspec_over_ntot = edgeProfilesCompute.get_nspec_over_ntot()
@@ -90,7 +90,7 @@ class EdgeProfilesCompute:
             species_data["species"] = species[species_index]
             species_data["states"] = states_data[str(species_index)]
 
-            data[labels[species_index]] = species_data
+            data[str(species_index)] = species_data
 
         return data
 
@@ -177,7 +177,6 @@ class EdgeProfilesCompute:
 
         states_data = {}
 
-        # TODO return np.array itself get_volume
         volume = self.get_volume()
         nspecies = len(self.ids_object.ggd[slice_index].ion)
         species_density, _, _ = self.get_species_density()
@@ -241,8 +240,19 @@ class EdgeProfilesCompute:
     # TODO Refactor this logic
     # Discussed with Xavier read 31 and 32 from dd
     def get_volume(self, slice_index=0):  # Done
+        # TODO Find Cells grid subset
         elements = self.ids_object.grid_ggd[slice_index].grid_subset[4].element
+        grid_subset_name = (
+            self.ids_object.grid_ggd[slice_index].grid_subset[4].identifier.name
+        )
+
         num_vertices = len(elements)
+        if num_vertices == 0:
+            print(
+                "!  edge_profiles IDS:No element found in grid subset : ",
+                grid_subset_name,
+            )
+            return None
         volumes = [0] * num_vertices
 
         for index, element in enumerate(elements):
@@ -270,6 +280,9 @@ class EdgeProfilesCompute:
                     )
                     # The third element contains the volume, read the same
                     volumes[index] = obj_dim.geometry[2]
+        if np.any(volumes) == False:
+            print("!   edge_profiles IDS: volumes are empty")
+            return None
         return volumes
 
     def get_density(self, slice_index=0):  # done
@@ -277,24 +290,9 @@ class EdgeProfilesCompute:
         for xd in self.ids_object.ggd[slice_index].electrons.density:
             if xd.grid_subset_index == 5:
                 density_ion = xd.values
+                break
 
         return density_ion
-
-    # def get_single_species_density(self, slice_index=0):  # done
-    #     """
-    #     Sum of multiplication of volume and species density
-
-    #     Args:
-    #         slice_index (int, optional): [slice on which functions should operate on]. Defaults to 0.
-    #         species_index (int, optional): [species from which we need to get the data]. Defaults to 0.
-
-    #     Returns:
-    #         [float]: [Sum of multiplication of volume and elcetrons density ]
-    #     """
-    #     volume = self.get_volume(slice_index)
-    #     density = self.get_density(slice_index)
-    #     # TODO To return  np .array from functions itself
-    #     return sum(np.array(volume) * np.array(density))
 
     def get_species_density(self, slice_index=0) -> tuple:  # done
         """
@@ -414,46 +412,3 @@ class EdgeProfilesCompute:
                         nspec_over_nmaj[ispecies] + nspec_over_nmaj[jspecies]
                     )
                     nspec_over_nmaj[jspecies] = 0
-
-    #   nspecies = len(self.ids_object.ggd[slice_index].ion)
-    #     volumes = self.get_volume()
-    #     density_ion = None
-    #     for species_index in range(nspecies):
-    #         # First try to read ion.density
-    #         try:
-    #             density_ion = (
-    #                 self.ids_object.ggd[slice_index]
-    #                 .ion[species_index]
-    #                 .density[0]
-    #                 .values
-    #             )
-    #         except:
-    #             # If not, try in ion.thermal_density
-    #             try:
-    #                 density_ion = (
-    #                     self.ids_object.ggd[slice_index]
-    #                     .ion[species_index]
-    #                     .density_thermal[0]
-    #                     .values
-    #                 )
-    #             except:
-    #                 # If not, try to read all ion states density and sum
-    #                 try:
-    #                     nstates = len(
-    #                         self.ids_object.ggd[slice_index].ion[species_index].state
-    #                     )
-    #                     density_ion = [0] * len(volumes)
-    #                     for istate in range(nstates):
-    #                         density_ion = (
-    #                             density_ion
-    #                             + self.ids_object.ggd[slice_index]
-    #                             .ion[species_index]
-    #                             .state[istate]
-    #                             .density[0]
-    #                             .values
-    #                         )
-    #                 except:
-    #                     density_ion = [0] * len(volumes)
-    #                     print(
-    #                         "!   No density data for ion", species_edge[species_index]
-    #                     )
