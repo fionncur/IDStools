@@ -92,7 +92,7 @@ if core_profiles_ids.time is not None:
     elif returnstatus == -1:
         core_profile_exists = False
         print("!   core_profiles IDS is exists but volume doesn't exists. ")
-        print("!   Getting to the volume from equilibrium IDS")
+        print("!   Retrieving volume from equilibrium IDS")
         equilibrium = imas.equilibrium()
         equilibrium.time_slice.resize(1)
         volume = connection.partial_get(
