@@ -37,4 +37,6 @@ class PFCoilsCompute:
 
                 element_counter += 1
             coils[coil.identifier] = element_dict
+        if not coils:
+            print("!  No PF Coils found")
         return coils

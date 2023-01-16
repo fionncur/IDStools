@@ -74,22 +74,6 @@ if err != 0:
     print("----> Aborted.", file=sys.stderr)
     exit()
 
-connection_other = imas.DBEntry(
-    get_backend_id(args.backend), "ITER_MD", 111001, 202, args.user
-)
-err, n = connection_other.open()
-if err != 0:
-    # TODO chek if you can raise exception or just print or may be use logger
-    print(
-        "Shot {0}, run {1} for user={2} and database={3} does not exists".format(
-            args.shot, args.run, args.user, args.database
-        ),
-        file=sys.stderr,
-    )
-    print("----> Aborted.", file=sys.stderr)
-    exit()
-
-
 # Get ids Object - equilibrium
 equilibrium_ids = imas.equilibrium()
 equilibrium_ids.time = connection.partial_get("equilibrium", "time", args.occurrence)
@@ -99,14 +83,13 @@ equilibrium_ids.time_slice[0] = connection.partial_get(
     "equilibrium", "time_slice(" + str(time_index) + ")", args.occurrence
 )
 # Get ids Object - pf active
-pf_active_ids = connection_other.get("pf_active")
-
+pf_active_ids = connection.get("pf_active")
 
 figure = Figure()
 axes = figure.axes_array
 
-if args.pfcoils is True:
-    PFCoilsView.view_pf_coils(axes, pf_active_ids)
+# if args.pfcoils is True:
+PFCoilsView.view_pf_coils(axes, pf_active_ids)
 
 EquilibriumView.view_magnetic_poloidal_flux(axes, equilibrium_ids)
 if args.allInfo is True:
