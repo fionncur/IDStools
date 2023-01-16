@@ -19,7 +19,7 @@ def main():
     """
 
     # Convert GEQDSK to IDS/equilibrium
-    eq = geqdsk2ids(args.fpath, args.ipsign, args.b0sign, args.cocos_in)
+    eq = geqdsk2ids(args.gpath, args.ipsign, args.b0sign, args.cocos_in)
 
     # Create the output datafile
     logger.info("creating output datafile ...")
@@ -100,7 +100,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "-g",
         "--gfile",
-        dest="fpath",
+        dest="gpath",
         help="path to GEQDSK file",
         required=True,
         default=None,
