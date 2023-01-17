@@ -120,12 +120,13 @@ if __name__ == "__main__":
         formatter_class=argparse.RawDescriptionHelpFormatter,
         parents=[imas_parser],
         description=textwrap.dedent('''\
+            Load IMAS and install Cerberus (if not done before)
+                $ module load IMAS
+                $ pip install cerberus
+
             (I) Command Line Interface for IDS Data Validation (idschk)
             -----------------------------------------------------------
             Examples:
-                0) load IMAS
-                $ module load IMAS
-
                 1) Validate if ITER Scenario meets with physics requirements
                 $ idschk -s 131024 -r 40 -f path/to/schema_file/required_fields_core.yml
 

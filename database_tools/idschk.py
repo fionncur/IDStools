@@ -3,10 +3,12 @@ from os import getenv, path
 from sys import exit
 import re
 import argparse
-import numpy as np
-import cerberus
+import traceback
 import yaml
+import statistics
 from xml.etree import ElementTree as ET
+import cerberus
+import numpy as np
 import imas
 
 
@@ -126,7 +128,7 @@ class COCOS:
     """
     COCOS module in Python
 
-    [1] O. Sauter and S. Yu. Medvevdev, "Tokamak Coordinate Conventions : COCOS",
+    [1] O. Sauter and S.Yu. Medvevdev, "Tokamak Coordinate Conventions : COCOS",
         Comput. Physics Commun. 184 (2013) 293
     [2] cocos_module.f90 (CHEASE)
 
@@ -142,20 +144,16 @@ class COCOS:
     sign_q_pos: int
     sign_pprime_pos: int
     theta_sign_clockwise: int
-    default: dict
-        Default COCOS index
     """
 
-    default = {"COCOS": 11, "ipsign": -1, "b0sign": -1}
-    TWOPI = 6.283185307179586476925286766559005768394
-
     def __init__(self, index=None, values=None):
-        """Initialize COCOS Index and Values
+        """
+        Initialize COCOS index using values, or values using COCOS index
 
         Parameters
         ----------
-        index: dict={"COCOS": 11, "ipsign": -1, "b0sign": -1}
-            COCOS index with signs of Ip and B0
+        index: dict=None
+            COCOS index with signs of Ip and B0, e.g. index={"COCOS": 11}
         values: dict=None
             COCOS values
         """
@@ -174,8 +172,6 @@ class COCOS:
         elif index is not None:
 
             COCOS = index["COCOS"]
-            ipsign = index["ipsign"]
-            b0sign = index["b0sign"]
             #
             # Parameters from Table I
             #
@@ -228,8 +224,6 @@ class COCOS:
             theta_sign_clockwise = sigma_RphiZ * sigma_rhothetaphi
 
             self.COCOS = COCOS
-            self.sigma_Ip = ipsign
-            self.sigma_B0 = b0sign
             self.exp_Bp = exp_Bp
             self.sigma_Bp = sigma_Bp
             self.sigma_RphiZ = sigma_RphiZ
@@ -241,8 +235,6 @@ class COCOS:
         # in case of init. by values
         else:
 
-            sigma_Ip = values["ipsign"]
-            sigma_B0 = values["b0sign"]
             exp_Bp = values["exp_Bp"]
             sigma_Bp = values["sigma_Bp"]
             sigma_RphiZ = values["sigma_RphiZ"]
@@ -294,8 +286,6 @@ class COCOS:
             theta_sign_clockwise = sigma_RphiZ * sigma_rhothetaphi
 
             self.COCOS = COCOS[exp_Bp]
-            self.sigma_Ip = sigma_Ip
-            self.sigma_B0 = sigma_B0
             self.exp_Bp = exp_Bp
             self.sigma_Bp = sigma_Bp
             self.sigma_RphiZ = sigma_RphiZ
@@ -305,18 +295,17 @@ class COCOS:
             self.theta_sign_clockwise = theta_sign_clockwise
 
     def get(self):
-        """Return COCOS Index and Values
+        """
+        Return COCOS index and values
 
         Returns
         -------
         dict
-            COCOS Index and Values in type dict
+            COCOS index and values in type dict
         """
 
         return {
             "COCOS": self.COCOS,
-            "sigma_Ip": self.sigma_Ip,
-            "sigma_B0": self.sigma_B0,
             "exp_Bp": self.exp_Bp,
             "sigma_Bp": self.sigma_Bp,
             "sigma_RphiZ": self.sigma_RphiZ,
@@ -327,30 +316,33 @@ class COCOS:
         }
 
     @classmethod
-    def values_coefficients(self, index_in=default, index_out=default):
-        """Provide Transformation values for a set of quantities for a given pair
-            of input/output COCOS numbers
+    def values_coefficients(
+        self, COCOS_in, COCOS_out, Ip_in, B0_in, Ipsign_out, B0sign_out
+    ):
+        """
+        Provide transformation values for a set of quantities for a given pair
+        of input/output COCOS numbers
 
         Parameters
         ----------
-        index_in: dict={"COCOS": 11, "ipsign": -1, "b0sign": -1}
-            COCOS index
-        index_out: dict={"COCOS": 11, "ipsign": -1, "b0sign": -1}
-            COCOS index
+        COCOS_in: int
+            COCOS input
+        COCOS_out: int
+            COCOS output
+        Ip_in: float
+            Plasma curent (toroidal component) [A]
+        B0_in: float
+            Vacuum toroidal field [T]
+        Ipsign_out: int
+            desired sign of Ip in output
+        B0sign_out: int
+            desired sign of B0 in output
 
         Returns
         -------
         dict
-            COCOS Transformation values in type dict
+            COCOS transformation values in type dict
         """
-
-        COCOS_in = index_in["COCOS"]
-        Ipsign_in = index_in["ipsign"]
-        B0sign_in = index_in["b0sign"]
-
-        COCOS_out = index_out["COCOS"]
-        Ipsign_out = index_out["ipsign"]
-        B0sign_out = index_out["b0sign"]
 
         # Default outputs
         sigma_Ip_eff = 1.0
@@ -365,21 +357,29 @@ class COCOS:
         fact_dtheta = 1.0
 
         # Check inputs
-        sigma_Ip_in = float(Ipsign_in)
-        sigma_B0_in = float(B0sign_in)
+        sigma_Ip_in = np.sign(Ip_in)
+        sigma_B0_in = np.sign(B0_in)
 
         # Get COCOS related parameters
-        CVI = COCOS(index_in).get()
-        CVO = COCOS(index_out).get()
+        CVI = COCOS(index={"COCOS": COCOS_in}).get()
+        CVO = COCOS(index={"COCOS": COCOS_out}).get()
 
         # Define effective variables: sigma_Ip_eff, si1gma_B0_eff, sigma_Bp_eff,
         # exp_Bp_eff as in Appendix C
         sigma_RphiZ_eff = float(CVO["sigma_RphiZ"] * CVI["sigma_RphiZ"])
 
-        sigma_Ip_eff = sigma_Ip_in * float(Ipsign_out)
+        # sign(Ip) in output
+        if Ipsign_out == 0:
+            sigma_Ip_eff = sigma_RphiZ_eff  # sign folllowing transformation
+        else:
+            sigma_Ip_eff = sigma_Ip_in * float(Ipsign_out)
         sigma_Ip_out = sigma_Ip_in * sigma_Ip_eff
 
-        sigma_B0_eff = sigma_B0_in * float(B0sign_out)
+        # sign(B0) in output
+        if B0sign_out == 0:
+            sigma_B0_eff = sigma_RphiZ_eff  # sign folllowing transformation
+        else:
+            sigma_B0_eff = sigma_B0_in * float(B0sign_out)
         sigma_B0_out = sigma_B0_in * sigma_B0_eff
 
         sigma_Bp_eff = float(CVO["sigma_Bp"] * CVI["sigma_Bp"])
@@ -391,8 +391,8 @@ class COCOS:
         # Note that sign(sigma_RphiZ*sigma_rhothetaphi) gives theta in clockwise or count    er-clockwise respectively
         # Thus sigma_RphiZ_eff*sigma_rhothetaphi_eff negative if the direction of theta h    as changed from cocos_in to _out
         #
-        fact_psi = sigma_Ip_eff * sigma_Bp_eff * TWOPI**exp_Bp_eff
-        fact_dpsi = sigma_Ip_eff * sigma_Bp_eff / TWOPI**exp_Bp_eff
+        fact_psi = sigma_Ip_eff * sigma_Bp_eff * (2.0 * np.pi) ** exp_Bp_eff
+        fact_dpsi = sigma_Ip_eff * sigma_Bp_eff / (2.0 * np.pi) ** exp_Bp_eff
         fact_q = sigma_Ip_eff * sigma_B0_eff * sigma_rhothetaphi_eff
         fact_dtheta = sigma_RphiZ_eff * sigma_rhothetaphi_eff
 
@@ -891,7 +891,7 @@ def validate_COCOS(ids, schema, itime, cocos=None):
 
 
 def compute_COCOS(ids, cocos_check=None):
-    """Compute COCOS values using stored data in IDS/equilibrium
+    """Compute COCOS values using experimental data in IDS/equilibrium
 
     Parameters
     ----------
@@ -908,29 +908,35 @@ def compute_COCOS(ids, cocos_check=None):
     # COCOS Values in the middle of time sequence
     itime = int(np.floor(float(len(ids.time_slice)) / 2.0))
 
-    #
+    # Check IDS/eq
     validate_COCOS(ids, required_fields_eq, itime)
     if cocos_check:
         validate_COCOS(ids, required_fields_cocos, itime, cocos=cocos_check)
 
-    #
+    # Sign(Ip) and Sign(B0) from input
     ipsign = np.sign(ids.time_slice[itime].global_quantities.ip)
     b0sign = np.sign(ids.vacuum_toroidal_field.b0[0])
 
+    #1 Eq.(22)
     dpsi = (
         ids.time_slice[itime].profiles_1d.psi[-1]
         - ids.time_slice[itime].profiles_1d.psi[0]
     )
     sigma_Bp = np.sign(dpsi) * ipsign
 
+    #2 Eq.(22)
     q = ids.time_slice[itime].profiles_1d.q
-    sign_q_pos = np.sign(np.sum(np.sign(q)))
+    sign_q = np.sign(np.sum(np.sign(q)))
+    sign_q_pos = sign_q * ipsign * b0sign
+
+    #3 Eq.(22)
     sigma_rhothetaphi = sign_q_pos
 
+    #4 Eq.(22)
     dpressure_dpsi = ids.time_slice[itime].profiles_1d.dpressure_dpsi
-    sign_pprime_pos = np.sign(np.sum(np.sign(dpressure_dpsi))) * ipsign * sigma_Bp
+    sign_pprime_pos = np.sign(np.sum(np.sign(dpressure_dpsi))) * ipsign
 
-    # sigma_RphiZ and exp_Bp from Eq.(19) in COCOS paper
+    #5 sigma_RphiZ from Eq.(19)
     bz = ids.time_slice[itime].profiles_2d[0].b_field_z
     psi2d = ids.time_slice[itime].profiles_2d[0].psi
     r2d = ids.time_slice[itime].profiles_2d[0].r
@@ -939,25 +945,37 @@ def compute_COCOS(ids, cocos_check=None):
     dr2d = np.gradient(r2d)
     dpsi2drdr = dpsi2d[0] / dr2d[0] / r2d
 
-    # avoid ZeroDivisionError
-    rows, cols = np.where(bz != 0.0)
-    twopi_expBp_sigma_RphiZ = np.zeros(bz.shape)
-    twopi_expBp_sigma_RphiZ = -sigma_Bp * dpsi2drdr[rows, cols] / bz[rows, cols]
+    # todo - reduce num. of data for COCOS discrimination
+    #      - compute rtol(s) instead of fixed ones.
+    dim2 = ids.time_slice[itime].profiles_2d[0].grid.dim2
+    z_axis = ids.time_slice[itime].global_quantities.magnetic_axis.z
+    psi_axis = ids.time_slice[itime].profiles_1d.psi[0]
 
+    # grid of magnetic axis in Z
+    iz = np.argmin(np.abs(dim2 - z_axis))
+    # psi ref. inside LCFS
+    psi_ref = psi_axis + dpsi * 0.5
+
+    # grids close to psi ref.
+    rows, cols = np.where((np.isclose(psi2d, psi_ref, rtol=0.25)) & (bz != 0))
+    if (not rows.any()) or (not cols.any()):
+        raise ValueError("COCOS discrimination failed, len(grids) and/or Bz is zero")
+
+    # discard grids in private flux region)
+    w = np.where(np.isclose(cols, iz, rtol=0.1))
+
+    twopi_expBp_sigma_RphiZ = np.zeros(bz.shape)
+    twopi_expBp_sigma_RphiZ = (
+        -sigma_Bp * dpsi2drdr[rows[w], cols[w]] / bz[rows[w], cols[w]]
+    )
     sigma_RphiZ = np.sign(np.sum(np.sign(twopi_expBp_sigma_RphiZ)))
 
-    x = twopi_expBp_sigma_RphiZ * sigma_RphiZ
-    x = np.average(x)
-
-    if x > 6.0:
-        exp_Bp = 1
-    else:
-        exp_Bp = 0
+    #6 exp_Bp from Eq.(19)
+    x = np.average(twopi_expBp_sigma_RphiZ * sigma_RphiZ)
+    exp_Bp = np.where(np.isclose(x, 2.0 * np.pi, rtol=0.5), 1, 0)
 
     #
     values = {
-        "ipsign": int(ipsign),
-        "b0sign": int(b0sign),
         "exp_Bp": int(exp_Bp),
         "sigma_Bp": int(sigma_Bp),
         "sigma_RphiZ": int(sigma_RphiZ),
@@ -1093,13 +1111,13 @@ def eval_IDSs(s):
     flag = True
     if s:
         d_ids = yaml.safe_load(s)
-        #1st level for IDSs
+        # 1st level for IDSs
         for k_ids, d_occ in d_ids.items():
-            #2nd level for occurences
+            # 2nd level for occurences
             for k_occ, val in d_occ.items():
-                #3rd level
+                # 3rd level
                 if args_verbose:
-                    if not(val["remark"]):
+                    if not (val["remark"]):
                         flag = False
                         break
                 else:
@@ -1407,7 +1425,8 @@ def ids_compute_cocos(ids):
         try:
             cocos = compute_COCOS(ids)
         except Exception as e:
-            exit("Cannot compute COCOS: {}".format(e))
+            logger.error(traceback.format_exc())
+
     else:
         exit("equilibrium instead of {}".format(ids.__name__))
 
