@@ -376,7 +376,7 @@ Signature(hostdir,shot,run,plt)
 ax = plt.gca()
 xmin, xmax = ax.get_xlim()
 ymin, ymax = ax.get_ylim()
-plt.text(xmax-0.4*(xmax-xmin),ymin-0.6*(ymax-ymin),hostdir+' - Shot '+str(shot)+' / '+' Run '+str(run), fontdict=font,fontsize=6,color='black')
+plt.text(xmax-0.4*(xmax-xmin),ymin-0.6*(ymax-ymin),hostdir+' - Shot '+str(shot)+' / '+' Run '+str(run),fontsize=6,color='black')
 
 fig = plt.gcf()
 fig.tight_layout()

@@ -325,7 +325,7 @@ plt.title('t = '+'%.1f' % time+' s', fontdict=font)
 ax = plt.gca()
 xmin, xmax = ax.get_xlim()
 ymin, ymax = ax.get_ylim()
-plt.text(xmin-0.7*(xmax-xmin),ymin-0.4*(ymax-ymin),hostdir+' - Shot '+str(shot)+' / '+' Run '+str(run), fontdict=font,fontsize=6,color='black')
+plt.text(xmin-0.7*(xmax-xmin),ymin-0.4*(ymax-ymin),hostdir+' - Shot '+str(shot)+' / '+' Run '+str(run),fontsize=6,color='black')
 
 plt.tight_layout() # Adjust spacking between figures
 
