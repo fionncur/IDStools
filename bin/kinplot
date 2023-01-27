@@ -1344,7 +1344,7 @@ if plot_compo and (vpol_flag != 0 or vpol_e_flag != 0) and (max(nspec_over_ne) >
 ax = plt.gca()
 xmin, xmax = ax.get_xlim()
 ymin, ymax = ax.get_ylim()
-plt.text(xmax-0.2*(xmax-xmin),ymin-0.4*(ymax-ymin),f'{hostdir} - Shot {args.shot} / Run {args.run}', fontdict=font,fontsize=6,color='black')
+plt.text(xmax-0.2*(xmax-xmin),ymin-0.4*(ymax-ymin),f'{hostdir} - Shot {args.shot} / Run {args.run}',fontsize=6,color='black')
 
 #plt.subplots_adjust(left=None, bottom=None, right=None, top=None, wspace=1.5, hspace=0.5)
 
