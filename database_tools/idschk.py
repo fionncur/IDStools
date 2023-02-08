@@ -172,6 +172,8 @@ class COCOS:
         elif index is not None:
 
             COCOS = index["COCOS"]
+            ipsign = index["ipsign"]
+            b0sign = index["b0sign"]
             #
             # Parameters from Table I
             #
@@ -224,6 +226,8 @@ class COCOS:
             theta_sign_clockwise = sigma_RphiZ * sigma_rhothetaphi
 
             self.COCOS = COCOS
+            self.sigma_Ip = ipsign
+            self.sigma_B0 = b0sign
             self.exp_Bp = exp_Bp
             self.sigma_Bp = sigma_Bp
             self.sigma_RphiZ = sigma_RphiZ
@@ -235,6 +239,8 @@ class COCOS:
         # in case of init. by values
         else:
 
+            sigma_Ip = values["ipsign"]
+            sigma_B0 = values["b0sign"]
             exp_Bp = values["exp_Bp"]
             sigma_Bp = values["sigma_Bp"]
             sigma_RphiZ = values["sigma_RphiZ"]
@@ -286,6 +292,8 @@ class COCOS:
             theta_sign_clockwise = sigma_RphiZ * sigma_rhothetaphi
 
             self.COCOS = COCOS[exp_Bp]
+            self.sigma_Ip = sigma_Ip
+            self.sigma_B0 = sigma_B0
             self.exp_Bp = exp_Bp
             self.sigma_Bp = sigma_Bp
             self.sigma_RphiZ = sigma_RphiZ
@@ -306,6 +314,8 @@ class COCOS:
 
         return {
             "COCOS": self.COCOS,
+            "sigma_Ip": self.sigma_Ip,
+            "sigma_B0": self.sigma_B0,
             "exp_Bp": self.exp_Bp,
             "sigma_Bp": self.sigma_Bp,
             "sigma_RphiZ": self.sigma_RphiZ,
@@ -361,8 +371,8 @@ class COCOS:
         sigma_B0_in = np.sign(B0_in)
 
         # Get COCOS related parameters
-        CVI = COCOS(index={"COCOS": COCOS_in}).get()
-        CVO = COCOS(index={"COCOS": COCOS_out}).get()
+        CVI = COCOS(index={"COCOS": COCOS_in, "ipsign": sigma_Ip_in, "b0sign": sigma_B0_in}).get()
+        CVO = COCOS(index={"COCOS": COCOS_out, "ipsign": Ipsign_out, "b0sign": B0sign_out}).get()
 
         # Define effective variables: sigma_Ip_eff, si1gma_B0_eff, sigma_Bp_eff,
         # exp_Bp_eff as in Appendix C
@@ -388,8 +398,8 @@ class COCOS:
             CVO["sigma_rhothetaphi"] * CVI["sigma_rhothetaphi"]
         )
         #
-        # Note that sign(sigma_RphiZ*sigma_rhothetaphi) gives theta in clockwise or count    er-clockwise respectively
-        # Thus sigma_RphiZ_eff*sigma_rhothetaphi_eff negative if the direction of theta h    as changed from cocos_in to _out
+        # Note that sign(sigma_RphiZ*sigma_rhothetaphi) gives theta in clockwise or counter-clockwise respectively
+        # Thus sigma_RphiZ_eff*sigma_rhothetaphi_eff negative if the direction of theta has changed from cocos_in to _out
         #
         fact_psi = sigma_Ip_eff * sigma_Bp_eff * (2.0 * np.pi) ** exp_Bp_eff
         fact_dpsi = sigma_Ip_eff * sigma_Bp_eff / (2.0 * np.pi) ** exp_Bp_eff
@@ -976,6 +986,8 @@ def compute_COCOS(ids, cocos_check=None):
 
     #
     values = {
+        "ipsign": int(ipsign),
+        "b0sign": int(b0sign),
         "exp_Bp": int(exp_Bp),
         "sigma_Bp": int(sigma_Bp),
         "sigma_RphiZ": int(sigma_RphiZ),

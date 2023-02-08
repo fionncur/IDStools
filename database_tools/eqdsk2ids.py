@@ -126,13 +126,13 @@ class GEQDSK:
         if len(header) != 60:
             logger.warning("irregular length of header: %d", len(header))
             header = header.split()
-            data["IDUM"] = np.int16(header[-3])
-            data["NW"] = nw = np.int16(header[-2])
-            data["NH"] = nh = np.int16(header[-1])
+            data["IDUM"] = np.int(header[-3])
+            data["NW"] = nw = np.int(header[-2])
+            data["NH"] = nh = np.int(header[-1])
         else:
-            data["IDUM"] = np.int16(header[48:52])
-            data["NW"] = nw = np.int16(header[52:56])
-            data["NH"] = nh = np.int16(header[56:60])
+            data["IDUM"] = np.int(header[48:52])
+            data["NW"] = nw = np.int(header[52:56])
+            data["NH"] = nh = np.int(header[56:60])
 
         #
         rec = np.float64(fmt20.read(fp.readline()))
@@ -293,6 +293,8 @@ class GEQDSK:
             "sigma_rhothetaphi": sigma_rhothetaphi,
             "sign_q_pos": sign_q_pos,
             "sign_pprime_pos": sign_pprime_pos,
+            "ipsign": sigma_ip,
+            "b0sign": sigma_b0,
         }
 
         return COCOS(values=values)
@@ -348,7 +350,7 @@ def map_GEQDSK_to_IDS(geqdsk, eq):
     coef = geqdsk.coef
 
     # IDS_COCOS
-    cocos = COCOS(index={"COCOS": IDS_COCOS})
+    cocos = COCOS(index={"COCOS": IDS_COCOS, "ipsign": +1, "b0sign": +1})
 
     # IDS info.
     common_properties(eq)
