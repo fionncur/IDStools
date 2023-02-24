@@ -11,21 +11,43 @@ parser.add_argument('-s','--shot',help='shot number', required=True,type=int)
 # currently limiting run < 10000 because of the search path /3/0
 parser.add_argument('-r','--run',help='run number',required=True,type=int,
                     choices=range(0,9999),metavar="[0-9999]") 
-args = parser.parse_args()
-shot = str(args.shot)
-run  = str(args.run)
+args = vars(parser.parse_args())
+shot = str(args['shot'])
+run  = str(args['run'])
+if args['folder'] != None:
+    folder = args['folder']
+else:
+    LL_version = int(os.environ['UAL_VERSION'][0])
+    if LL_version < 4:
+        folder = os.environ['IMAS_HOME']+'/shared/iterdb/3/0'
+    else:
+        folder = os.environ['IMAS_HOME']+'/shared/imasdb/ITER/3/0'
 
 # ------------------------------------------------------------------------------------------------------------
 
-def read_yaml(shot,run):
-    folder = os.environ['IMAS_HOME']+'/shared/imasdb/ITER/3/0' 
+def read_yaml(shot,run,folder):
     filename = folder+f'/ids_{shot}{run.rjust(4,"0")}.yaml'
     try:
         with open(filename, 'r') as f:
             data = yaml.load(f,Loader=yaml.CLoader)
     except Exception as exc:
-        print(f"Warning: {exc}")
-        data = None
+        if args['folder'] == None:
+            print(f"Warning: {exc}")
+            data = None
+        else:
+           try:
+               LL_version = int(os.environ['UAL_VERSION'][0])
+               if LL_version < 4:
+                   filename = os.environ['IMAS_HOME']+'/shared/iterdb/3/0'\
+                             +f'/ids_{shot}{run.rjust(4,"0")}.yaml'
+               else:
+                   filename = os.environ['IMAS_HOME']+'/shared/imasdb/ITER/3/0'\
+                             +f'/ids_{shot}{run.rjust(4,"0")}.yaml'
+               with open(filename, 'r') as f:
+                   data = yaml.load(f,Loader=yaml.CLoader)
+           except Exception as exc:
+               print(f"Warning: {exc}")
+               data = None
     return data
 
 def find_parent(data,family):
@@ -34,7 +56,7 @@ def find_parent(data,family):
         string_list = re.findall(r'\d+',replaces)
         shotp = string_list[0]
         runp = string_list[1]
-        datap = read_yaml(shotp,runp)
+        datap = read_yaml(shotp,runp,folder)
         if datap is not None:
             family['parents']['shot'].insert(0,shotp) # Order to be reversed for parents
             family['parents']['run'].insert(0,runp)
@@ -49,7 +71,7 @@ def find_children(data,family):
         string_list = re.findall(r'\d+',replaced_by)
         shotc = string_list[0]
         runc = string_list[1]
-        datac = read_yaml(shotc,runc)
+        datac = read_yaml(shotc,runc,folder)
         if datac is not None:
             family['children']['shot'].append(shotc)
             family['children']['run'].append(runc)
@@ -60,7 +82,7 @@ def find_children(data,family):
 
 
 
-data = read_yaml(shot,run)
+data = read_yaml(shot,run,folder)
 if data is None:
     print(f'Data entry {shot}/{run} does not exist')
     exit()    
