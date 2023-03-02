@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from os import path
+from os import path, getenv
 import glob
 import logging
 
@@ -258,11 +258,14 @@ def db_validator(
 
     logger.info("loading schema...")
 
-    # Load validation schema in case of "schema_path" not given
+    # Load default validation schema in case of "schema_path" not given
     if not schema_path:
-        dpath = (
-            path.dirname(path.realpath(__file__)) + "/validation_schemas/" + database
-        )
+        vsdir = "/validation_schemas/" + database
+        dpath0 = path.dirname(path.realpath(__file__)) + vsdir
+        if path.exists(dpath0):
+            dpath = dpath0
+        else:
+            dpath = getenv("EBROOTIDSTOOLS") + "/bin" + vsdir
         schema_path = sorted(glob.glob(dpath + "/**/*.y*ml", recursive=True))
 
     # Initialize Scenario Validator
