@@ -1,0 +1,303 @@
+#!/usr/bin/env python
+from os import path
+import glob
+import logging
+
+import imas
+from database_tools import db_helpers
+from database_tools import idschk
+from idstools.idslist import available_in_dbentry
+from idstools.cli import get_backend_id
+
+
+logger = logging.getLogger(__name__)
+
+
+# ----------------------------------------------------------------------
+
+
+def load_scenario(user, database, version, backend):
+    """
+    Return a list of pulses as tuple (shot,run) by using database_tools.db_helper
+
+    Parameters
+    ----------
+    user: str="public"
+        Status of user: either public or local. A public user should just be left as public, whereas a local user should write their proper i    dentifier
+    database: str="ITER"
+        Name of database where the data is harbored
+    version: str="3"
+        String of number of data version
+    backend: str="MDSPLUS"
+        Name of backend format
+
+    Returns
+    -------
+    scenarios: list=[]
+        List of pulses in tuple as (shot, run)
+    """
+
+    scenarios = []
+    if backend == "MDSPLUS":
+        scenarios = db_helpers.mdsListPulseRun(
+            db_helpers.getDBPath(user, database, version), with_status="active"
+        )
+    elif backend == "HDF5":
+        scenarios = db_helpers.hdf5ListPulseRun(
+            db_helpers.getDBPath(user, database, version)
+        )
+
+    return scenarios
+
+
+# ----------------------------------------------------------------------
+
+
+class ScenarioValidator:
+    """
+    Scenario Validator for IMASDB
+
+    Attributes
+    ----------
+    DD: dict={}
+        Data Dictionary
+    SHCEMA: dict={}
+        Validation schema
+    schema_path: list=[]
+        List of shcema file paths in str
+    dd_path: str=""
+        Path to DD
+    """
+
+    DD = {}
+    SCHEMA = {}
+    schema_path = []
+    dd_path = ""
+
+    def __init__(self, dd_path=idschk.FILE_IDSDef, schema_path=[]):
+        """
+        Parameters
+        ----------
+        dd_path: str=idschk.FILE_IDSDef
+            Path to DD
+        schema_path: list=[]
+            List of shcema file paths in str
+
+        Returns
+        -------
+        """
+
+        self.DD or self.load_DD(dd_path)
+
+        if schema_path != self.schema_path:
+            self.load_schema(schema_path)
+            self.schema_path = schema_path
+
+    def load_DD(self, fpath):
+        """
+        Read the xml file of DD and store in self.DD
+
+        Parameters
+        ----------
+        fpath: str=""
+            Path to DD
+
+        Returns
+        -------
+        """
+
+        try:
+            self.DD = idschk.load_XML(fpath)
+        except:
+            raise OSError("can not load DD: {}".format(fpath))
+
+        logger.debug(" DD= {}".format(fpath))
+        logger.debug(" self.DD= {}".format(self.DD))
+
+    def load_schema(self, yaml):
+        """
+        Read the yaml file of validation shemas and store in self.SCHEMA
+
+        Parameters
+        ----------
+        yaml: list
+            List of file path of validation shcema
+
+        Returns
+        -------
+        """
+
+        try:
+            for f in yaml:
+                self.SCHEMA[f] = idschk.load_YAML(f)
+        except:
+            raise OSError("failed to load Schema: {}".format(yaml))
+
+        logger.debug(" schema file= {}".format(f))
+        logger.debug(" schema = {}".format(self.SCHEMA))
+
+    def validate(self, db, idsname, occ=0, time=-99.0, fmt=""):
+        """
+        IDS/occ validation for multiple schemas
+
+        Parameters
+        ----------
+        db: imas.DBEntry
+            Class imas.DBEntry
+        idsname: str
+            Name of IDS
+        occ: int=0
+            IDS occurence
+        time: float=-99.0
+            Specific time[s] for one timeslice validation
+        fmt: str=""
+            "log" for output using logging, otherwise function print()
+
+        Returns
+        -------
+        """
+
+        dd0 = [dd for dd in self.DD if dd.get("name") == idsname][0]
+
+        for fpath, schemas in self.SCHEMA.items():
+            for key, schema in schemas.items():
+                if key == idsname:
+                    #
+                    try:
+                        logger.info(
+                            "- {}/{}/{}/{} < {}".format(
+                                db.__dict__["shot"], db.__dict__["run"], idsname, occ, path.relpath(fpath)
+                            )
+                        )
+                        idstime = db.partial_get(idsname, "time", occurrence=occ)
+                        #
+                        if (time < 0.0) or (idstime is None):
+                            ids = db.get(idsname, occurrence=occ)
+                        else:
+                            tm, itm = find_time(idstime, time)
+                            ids = db.get_slice(idsname, tm, 1, occurrence=occ)
+                    except Exception as e:
+                        print("Cannot retrieve IDS/{}: {}".format(idsname, e))
+                    #
+                    flag, dout = idschk.ids_validator(
+                        ids,
+                        {key: schema},
+                        dd=dd0,
+                        occ=occ,
+                        # verbose=args.verbose,
+                        check_all=True,
+                    )
+                    if fmt == "log":
+                        if flag:
+                            logger.info("- result: OK")
+                        else:
+                            logger.info(
+                                "- result:\n{}".format(
+                                    idschk.dict_to_yaml(dout)
+                                )
+                            )
+                    else:
+                        print(idschk.dict_to_yaml(dout))
+
+    def validate_db(self, db, time=-99.0, fmt=""):
+        """
+        IDS validation in Class DBEntry for multiple schemas
+
+        Parameters
+        ----------
+        db: imas.DBEntry
+            Class imas.DBEntry
+        time: float=-99.0
+            Specific time[s] for one timeslice validation
+        fmt: str=""
+            Output format, "log" with logging, otherwise with print() function
+
+        Returns
+        -------
+        """
+
+        ids_oc = available_in_dbentry(db)
+        logger.debug("ids_oc= {}".format(ids_oc))
+
+        for (idsname, occ) in ids_oc:
+            self.validate(db, idsname, occ=occ, time=time, fmt=fmt)
+
+
+# ----------------------------------------------------------------------
+
+
+def db_validator(
+    user="public",
+    database="ITER",
+    version="3",
+    backend="MDSPLUS",
+    schema_path=[],
+    pulse=[],
+):
+    """
+    Function that validates scenarios in IMAS database
+
+    Parameters
+    ---------
+    user: str="public"
+        Status of user: either public or local. A public user should just be left as public, whereas a local user should write their proper i    dentifier
+    database: str="ITER"
+        Name of database where the data is harbored
+    version: str="3"
+        String of number of data version
+    backend: str="MDSPLUS"
+        Name of backend format
+    schema_path: list=[]
+        List of shcema file paths in str
+    pulse: list=[]
+        List of pulses in tuple as (shot, run)
+    Returns
+    -------
+
+    """
+
+    logger.info("loading schema...")
+
+    # Load validation schema in case of "schema_path" not given
+    if not schema_path:
+        dpath = (
+            path.dirname(path.realpath(__file__)) + "/validation_schemas/" + database
+        )
+        schema_path = sorted(glob.glob(dpath + "/**/*.y*ml", recursive=True))
+
+    # Initialize Scenario Validator
+    sv = ScenarioValidator(schema_path=schema_path)
+
+    # Load scenario table in case of "pulse" not given
+    if pulse:
+        pulses = pulse
+    else:
+        logger.info("loading scenario table...")
+        pulses = load_scenario(user, database, version, backend)
+
+    # Scenario Validation for Pulses
+    npulse = len(pulses)
+    for i, (shot, run) in enumerate(pulses):
+
+        db = imas.DBEntry(get_backend_id(backend), database, shot, run, user)
+        status, _ = db.open()
+        if status != 0:
+            raise OSError(
+                "can not open backend={}, user_or_path={}, database={}, shot={}, run={}".format(
+                    backend, user, database, shot, run
+                )
+            )
+
+        logger.info("-----------------------------------------------------------")
+        logger.info(
+            "{}/{} ({}%) {}/{}".format(
+                i + 1, npulse, int((i + 1) / npulse * 100), shot, run
+            )
+        )
+        logger.info("-----------------------------------------------------------")
+
+        # Scenario Validation
+        sv.validate_db(db, fmt="log")
+
+
+# ----------------------------------------------------------------------

@@ -9,9 +9,17 @@ import statistics
 from xml.etree import ElementTree as ET
 import cerberus
 import numpy as np
+import logging
 import imas
 
 
+logger = logging.getLogger(__name__)
+
+
+# ----------------------------------------------------------------------
+
+
+# Global Constants
 IMAS_PREFIX = "IMAS_PREFIX"
 FILE_IDSDef = getenv(IMAS_PREFIX) + "/include/IDSDef.xml"
 TARGET_TAG = "IDS"
@@ -21,6 +29,7 @@ idx_header = "idx."
 IDS_COCOS = 11
 args_verbose = False
 args_check_all = True
+
 
 # Initialization for yaml Dumper
 yaml.Dumper.ignore_aliases = lambda *args: True

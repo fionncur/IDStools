@@ -1,0 +1,94 @@
+﻿# https://confluence.iter.org/display/IMP/Required+fields+in+a+dataset+to+be+imported+in+a+scenario+database
+#
+edge_transport:
+    time(:):
+        empty: False
+        ids_nan: False
+        ids_inf: False
+    model(i1)/flux_multiplier:
+        ids_nan: False
+        ids_inf: False
+        ids_gt: 0.0
+    code/output_flag(:):
+        empty: False
+
+    # Within each model[:].ggd[:] structure:
+    model(i1)/ggd(itime)/time:
+        ids_gt: -9e+40
+        ids_nan: False
+        ids_inf: False
+    model(i1)/ggd(itime)/electrons/energy/flux(i2)/values(:):
+        empty: False
+        ids_nan: False
+        ids_inf: False
+    model(i1)/ggd(itime)/electrons/particles/flux(i2)/values(:):
+        empty: False
+        ids_nan: False
+        ids_inf: False
+    model(i1)/ggd(itime)/ion(i2)/element(i3)/a:
+        ids_nan: False
+        ids_inf: False
+        ids_gt: 0.0
+    model(i1)/ggd(itime)/ion(i2)/element(i3)/z_n:
+        ids_nan: False
+        ids_inf: False
+        ids_gt: 0.0
+    model(i1)/ggd(itime)/ion(i2)/element(i3)/atoms_n:
+        ids_nan: False
+        ids_inf: False
+        ids_gt: 0
+    model(i1)/ggd(itime)/ion(i2)/multiple_states_flag:
+        ids_ge: 0
+        ids_le: 1
+    model(i1)/ggd(itime)/neutral(i2)/ion_index:
+        ids_ge: 0
+        ids_le: len(edge_transport.model[_i1_].ggd[_itime_].neutral)
+    model(i1)/ggd(itime)/neutral(i2)/element(i3)/a:
+        ids_nan: False
+        ids_inf: False
+        ids_gt: 0.0
+    model(i1)/ggd(itime)/neutral(i2)/element(i3)/z_n:
+        ids_nan: False
+        ids_inf: False
+        ids_gt: 0.0
+    model(i1)/ggd(itime)/neutral(i2)/element(i3)/atoms_n:
+        ids_nan: False
+        ids_inf: False
+        ids_gt: 0
+    model(i1)/ggd(itime)/neutral(i2)/multiple_states_flag:
+        ids_ge: 0
+        ids_le: 1
+
+    # For each ion[:].state[:] structure:
+    model(i1)/ggd(itime)/ion(i2)/state(i3)/z_min:
+        ids_nan: False
+        ids_inf: False
+        ids_gt: 0.0
+    model(i1)/ggd(itime)/ion(i2)/state(i3)/z_max:
+        ids_nan: False
+        ids_inf: False
+        ids_gt: 0.0
+        ids_ge: edge_transport.model[_i1_].ggd[_itime_].ion[_i2_].state[_i3_].z_min
+    #element[:].a          missing
+    #element[:].z_n
+    #element[:].atoms_n
+    model(i1)/ggd(itime)/ion(i2)/state(i3)/particles/flux(:):
+        ids_nan: False
+        ids_inf: False
+        empty: False
+    model(i1)/ggd(itime)/ion(i2)/state(i3)/energy/flux(:):
+        ids_nan: False
+        ids_inf: False
+        empty: False
+
+    # For each neutral[:].state[:] structure:
+    model(i1)/ggd(itime)/neutral(i2)/state(i3)/neutral_type/name:
+        empty: False
+    model(i1)/ggd(itime)/neutral(i2)/state(i3)/energy/flux(i4)/values(:):
+        empty: False
+        ids_nan: False
+        ids_inf: False
+    model(i1)/ggd(itime)/neutral(i2)/state(i3)/particles/flux(i4)/values(:):
+        empty: False
+        ids_nan: False
+        ids_inf: False

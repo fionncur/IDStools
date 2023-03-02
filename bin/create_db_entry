@@ -525,6 +525,7 @@ type     = "tbd"
 
 import yaml
 import logging
+from database_tools.set_logger import set_logger
 
 IDS_COCOS = 11
 

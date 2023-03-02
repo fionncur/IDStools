@@ -1,13 +1,16 @@
 #!/usr/bin/env python
-from os import getenv
+from os import getenv, path
 from sys import exit
 from sys import stdout
 import argparse
+import textwrap
 import yaml
+
 import imas
+from idstools.cli import imas_parser, get_backend_id
+from idstools.idslist import available_in_dbentry
 from database_tools import idschk
-from database_tools.idschk import *
-from idstools.cli import *
+from database_tools.db_validator import ScenarioValidator
 
 
 # ----------------------------------------------------------------------
@@ -35,11 +38,10 @@ def main():
 
     # COCOS Initialization
     index = {"COCOS": idschk.IDS_COCOS, "ipsign": args.ipsign, "b0sign": args.b0sign}
-    cocos = COCOS(index=index).get()
+    cocos = idschk.COCOS(index=index).get()
 
     # Load IMAS-DD File
-    root = load_XML(idschk.FILE_IDSDef)
-
+    root = idschk.load_XML(idschk.FILE_IDSDef)
 
     # Validate COCOS in IDS/equilibrium
     if args.cocos:
@@ -62,64 +64,37 @@ def main():
                         time, itime = find_time(idstime, args.time)
                         ids = db.get_slice(idsname, time, 1, occurrence=occ)
                 except Exception as e:
-                    print("Cannot retrieve IDS/{}: {}".format(idsname,e))
+                    print("Cannot retrieve IDS/{}: {}".format(idsname, e))
                 #
                 try:
-                    flag, dump = ids_cocos_check(ids, verbose=args.verbose)
+                    flag, dump = idschk.ids_cocos_check(ids, verbose=args.verbose)
                 except Exception as e:
                     exit("Cannot compute COCOS: {}".format(e))
                 #
                 buf.update({"occurence(" + str(occ) + ")": dump})
 
-        print(dict_to_yaml({"equilibrium":buf}))
-
+        print(idschk.dict_to_yaml({"equilibrium": buf}))
 
     # IDS Validation
     if args.schema_file:
 
-        # Schema Initialization
-        schema = load_YAML(args.schema_file)
+        # Initialize Scenario Validator
+        sv = ScenarioValidator(schema_path=[path.abspath(args.schema_file)])
 
-        for idsname in schema.keys():
-            if (args.idslist is None) or (idsname in args.idslist):
-                dd0 = [dd for dd in root if dd.get("name") == idsname][0]
-                maxoc = int(dd0.get("maxoccur"))
-                #
-                for occ in range(maxoc):
-                    idsprop = db.partial_get(idsname, "ids_properties", occurrence=occ)
-                    if idsprop.homogeneous_time in [0, 1, 2]:
-                        #
-                        try:
-                            idstime = db.partial_get(idsname, "time", occurrence=occ)
-                            #
-                            if (args.time is None) or (idstime is None):
-                                ids = db.get(idsname, occurrence=occ)
-                            else:
-                                time, itime = find_time(idstime, args.time)
-                                ids = db.get_slice(idsname, time, 1, occurrence=occ)
-                        except Exception as e:
-                            print("Cannot retrieve IDS/{}: {}".format(idsname,e))
-                        #
-                        flag, dout = ids_validator(
-                            ids,
-                            schema,
-                            dd=dd0,
-                            occ=occ,
-                            verbose=args.verbose,
-                            check_all=True,
-                        )
-                        print(dict_to_yaml(dout))
+        # Validation for Class imas.DBEntry
+        sv.validate_db(db)
 
 
 # ----------------------------------------------------------------------
-import textwrap
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         prog="idschk",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         parents=[imas_parser],
-        description=textwrap.dedent('''\
+        description=textwrap.dedent(
+            """\
             Load IMAS and install Cerberus (if not done before)
                 $ module load IMAS
                 $ pip install cerberus
@@ -165,7 +140,8 @@ if __name__ == "__main__":
 
                 5) Get COCOS values
                 >>> flag, log = ids_cocos_check(equilibrium, verbose=True)
-            ''')
+            """
+        ),
     )
     parser.add_argument(
         "-s", "--shot", dest="shot", help="Shot number", required=True, type=int
