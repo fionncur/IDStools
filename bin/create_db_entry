@@ -527,6 +527,9 @@ import yaml
 import logging
 from database_tools.set_logger import set_logger
 
+# Initialize logger
+logger = set_logger(__name__)
+
 IDS_COCOS = 11
 
 def subproc(cmd, cwd=None, env=None, exit=None):

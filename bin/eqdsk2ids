@@ -5,7 +5,6 @@ import textwrap
 import traceback
 
 import imas
-from database_tools import idschk
 from database_tools.set_logger import set_logger
 from database_tools.eqdsk2ids import geqdsk2ids
 from idstools.cli import imas_parser, get_backend_id
