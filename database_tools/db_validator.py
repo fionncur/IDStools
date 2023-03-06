@@ -258,18 +258,32 @@ def db_validator(
 
     logger.info("loading schema...")
 
-    # Load default validation schema in case of "schema_path" not given
+    schema_files = []
     if not schema_path:
-        vsdir = "/validation_schemas/" + database
+        # Load default validation schema in case of "schema_path" not given
+        vsdir = "/validation_schemas/"
         dpath0 = path.dirname(path.realpath(__file__)) + vsdir
         if path.exists(dpath0):
             dpath = dpath0
         else:
             dpath = getenv("EBROOTIDSTOOLS") + "/bin" + vsdir
-        schema_path = sorted(glob.glob(dpath + "/**/*.y*ml", recursive=True))
+        #
+        schema_files.extend(sorted(glob.glob(dpath + "/ITER/*.y*ml", recursive=True)))
+        schema_files.extend(sorted(glob.glob(dpath + "/Generic/*.y*ml", recursive=True)))
+    else:
+        for p in schema_path:
+            if path.isdir(p):
+                # Find yaml files in the dir recursively
+                schema_files.extend(sorted(glob.glob(p + "/**/*.y*ml", recursive=True)))
+            elif path.isfile(p):
+                # Add the path if found
+                schema_files.append(p)
+
+    if len(schema_files) < 1:
+        raise OSError("not found schema: {}".format(schema_path))
 
     # Initialize Scenario Validator
-    sv = ScenarioValidator(schema_path=schema_path)
+    sv = ScenarioValidator(schema_path=schema_files)
 
     # Load scenario table in case of "pulse" not given
     if pulse:

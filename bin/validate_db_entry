@@ -18,7 +18,7 @@ from database_tools.db_validator import db_validator
 
 def main():
     """
-    Scenario Validation for IMAS Database
+    Validation of IDSs 
     """
 
     # Initialize logger
@@ -37,14 +37,12 @@ def main():
 
     # Validation in IMASDB
     res = db_validator(
-        args.user, args.database, args.version, args.backend, args.schema_file, pulse
+        args.user, args.database, args.version, args.backend, args.path, pulse
     )
 
     et = time.time()
     logger.info("-----------------------------------------------------------")
-    logger.info("END")
-    logger.info("-----------------------------------------------------------")
-    logger.info("Total elapsed time(s): %.2f", et - st)
+    logger.info("END: " + __file__ + " [total elapsed time(s): %.2f]", et - st)
     logger.info("-----------------------------------------------------------")
 
 
@@ -64,21 +62,20 @@ if __name__ == "__main__":
             Validation Tool for ITER Scenario DB
             -----------------------------------------------------------
             Usage:
-                0) Load IMAS and install Cerberus (if not done before)
+                0) Load IMAS
                 $ module load IMAS
-                $ pip install cerberus
 
-                1) Validate all pulses in IMAS database to default schemas with output file
+                1) Validate all pulses in IMAS database against default schemas with output file
                 $ {0} -o output.log
 
-                2) Validate all pulses in IMAS database to schemas
-                $ {0} -f /path/to/schema1.yaml /path/to/schema2.yaml
+                2) Check the validity of all pulses in IMAS database against schemas
+                $ {0} -p /path/to/schema1.yaml /path/to/schema2.yaml
  
                 3) Validate all pulses in local database to default schemas
                 $ {0} -u username -d database 
 
-                4) Validate one pulse in IMAS database to schemas
-                $ {0} -s 131024 -r 40 -f /path/to/schema1.yaml /path/to/schema2.yaml
+                4) Validate one pulse in IMAS database to schemas in the directory
+                $ {0} -s 131024 -r 40 -p /path/to/schema/dir
             """.format(
                 prog
             )
@@ -107,10 +104,10 @@ if __name__ == "__main__":
         default=None,
     )
     parser.add_argument(
-        "--schema_file",
-        "-f",
-        dest="schema_file",
-        help="list of validation schema",
+        "--path",
+        "-p",
+        dest="path",
+        help="list of schema file and/or directory paths from which schema files are recursively loaded",
         required=False,
         nargs="+",
         default=[],

@@ -4,9 +4,10 @@ import sys
 import re
 import yaml
 import argparse
+
 import imas
 from xml.etree import ElementTree as ET
-from database_tools.idschk import *
+from database_tools.idschk import init_schema_coordinate
 
 
 IMAS_DIR = "IMAS_PREFIX"
@@ -42,6 +43,8 @@ def comment_for_schema():
     print('#        ids_dPdpsi_like: true/false')
     print('#        ids_dim_like:    true/false')
     print('#')
+    print('# *) The validation rules "ids_nan" and "ids_inf" are default so that the validation scripts as "idschk" and')
+    print('#    "validate_db_entry" can validate all data to the rules implicitly.')
 
 
 def main():
@@ -58,7 +61,7 @@ def main():
     yaml.Dumper.ignore_aliases = lambda *args: True
 
     # Default rules for dynamic array
-    rule = {"ids_nan": False, "ids_inf": False, "ids_dim": False}
+    rule = {"empty": False, "ids_dim": False}
 
     #
     comment_for_schema()

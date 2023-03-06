@@ -1,74 +1,67 @@
 ﻿# https://confluence.iter.org/display/IMP/Required+fields+in+a+dataset+to+be+imported+in+a+scenario+database
 #
 edge_sources:
+    ids_properties/homogeneous_time:
+        empty: False
+        ids_ge: 0
+        ids_le: 2
     time(:):
         empty: False
-        ids_nan: False
-        ids_inf: False
     code/output_flag(:):
         empty: False
 
     # Within each source[:].ggd[:] structure:
     sources(i1)/ggd(itime)/time:
-        ids_nan: False
-        ids_inf: False
+        empty: False
         ids_gt: -9e+40
     sources(i1)/ggd(itime)/ion(i2)/element(i3)/a:
-        ids_nan: False
-        ids_inf: False
+        empty: False
         ids_gt: 0.0
     sources(i1)/ggd(itime)/ion(i2)/element(i3)/z_n:
-        ids_nan: False
-        ids_inf: False
+        empty: False
         ids_gt: 0.0
     sources(i1)/ggd(itime)/ion(i2)/element(i3)/atoms_n:
-        ids_nan: False
-        ids_inf: False
+        empty: False
         ids_gt: 0
     sources(i1)/ggd(itime)/ion(i2)/multiple_states_flag:
+        empty: False
         ids_ge: 0
         ids_le: 1
     sources(i1)/ggd(itime)/neutral(i2)/ion_index:
+        empty: False
         ids_ge: 0
-        ids_le: len(edge_sources.sources[_i1_].ggd[_itime_].neutral)
+        ids_le: len(edge_sources.sources[_i1_].ggd[_itime_].ion)
     sources(i1)/ggd(itime)/neutral(i2)/element(i3)/a:
-        ids_nan: False
-        ids_inf: False
+        empty: False
         ids_gt: 0.0
     sources(i1)/ggd(itime)/neutral(i2)/element(i3)/z_n:
-        ids_nan: False
-        ids_inf: False
+        empty: False
         ids_gt: 0.0
     sources(i1)/ggd(itime)/neutral(i2)/element(i3)/atoms_n:
-        ids_nan: False
-        ids_inf: False
+        empty: False
         ids_gt: 0
     sources(i1)/ggd(itime)/neutral(i2)/multiple_states_flag:
+        empty: False
         ids_ge: 0
         ids_le: 1
 
     # For each ion[:].state[:] structure:
 
     sources(i1)/species/ion/state/z_min:
-        ids_nan: False
-        ids_inf: False
+        empty: False
         ids_gt: 0.0
     sources(i1)/species/ion/state/z_max: # ambiguous roles with z_n, to be done 
-        ids_nan: False
-        ids_inf: False
+        empty: False
         ids_gt: 0.0
         ids_ge: edge_sources.sources[_i1_].species.ion.state.z_min
     sources(i1)/species/ion/elements(i2)/a:
-        ids_nan: False
-        ids_inf: False
+        empty: False
         ids_gt: 0.0
     sources(i1)/species/ion/elements(i2)/z_n:
-        ids_nan: False
-        ids_inf: False
+        empty: False
         ids_gt: 0.0
     sources(i1)/species/ion/elements(i2)/atoms_n:
-        ids_nan: False
-        ids_inf: False
+        empty: False
         ids_gt: 0
 
     # For each neutral[:].state[:] structure:

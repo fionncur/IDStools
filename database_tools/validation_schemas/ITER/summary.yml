@@ -1,0 +1,9 @@
+﻿# https://confluence.iter.org/display/IMP/Required+fields+in+a+dataset+to+be+imported+in+a+scenario+database
+#
+summary:
+    global_quantities/b0/value(:):
+        ids_b0_like: False
+    global_quantities/ip/value(:):
+        ids_gt: -17.0e6
+        ids_le: 0.0
+        ids_ip_like: False
