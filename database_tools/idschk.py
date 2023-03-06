@@ -40,7 +40,6 @@ required_fields_eq = {
     "ids.time_slice": {"minlength": 1},
     "ids.time_slice[itime].global_quantities.ip": {
         "empty": False,
-        "ids_gt": -9e40,
     },
     "ids.vacuum_toroidal_field.b0": {
         "empty": False,
