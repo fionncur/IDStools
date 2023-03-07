@@ -11,9 +11,6 @@ edge_sources:
         empty: False
 
     # Within each source[:].ggd[:] structure:
-    sources(i1)/ggd(itime)/time:
-        empty: False
-        ids_gt: -9e+40
     sources(i1)/ggd(itime)/ion(i2)/element(i3)/a:
         empty: False
         ids_gt: 0.0

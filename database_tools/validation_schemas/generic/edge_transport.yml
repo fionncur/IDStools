@@ -14,9 +14,6 @@ edge_transport:
         empty: False
 
     # Within each model[:].ggd[:] structure:
-    model(i1)/ggd(itime)/time:
-        empty: False
-        ids_gt: -9e+40
     model(i1)/ggd(itime)/electrons/energy/flux(i2)/values(:):
         empty: False
     model(i1)/ggd(itime)/electrons/particles/flux(i2)/values(:):
