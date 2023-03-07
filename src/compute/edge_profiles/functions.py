@@ -200,7 +200,7 @@ class EdgeProfilesCompute:
                     .z_average
                 ):
                     if xd.grid_subset_index == 5:
-                        state_data["z_average"] = xd.values[0]
+                        state_data["z_average"] = np.mean(xd.values)
 
                 for xd in (
                     self.ids_object.ggd[slice_index]
@@ -213,7 +213,6 @@ class EdgeProfilesCompute:
                             np.array(volume) * np.array(xd.values)
                         )
                         break
-
                 state_data["states_density"] = states_density
                 state_data["n_ni"] = (
                     100 * states_density[state_index] / species_density[species_index]
@@ -245,7 +244,6 @@ class EdgeProfilesCompute:
         grid_subset_name = (
             self.ids_object.grid_ggd[slice_index].grid_subset[4].identifier.name
         )
-
         num_vertices = len(elements)
         if num_vertices == 0:
             print(
@@ -281,6 +279,71 @@ class EdgeProfilesCompute:
                     # The third element contains the volume, read the same
                     volumes[index] = obj_dim.geometry[2]
         if np.any(volumes) == False:
+            # Get volume from nodes if volumes are still empty
+            for index, element in enumerate(elements):
+                for obj in element.object:
+                    # Get mapping information from element like, space, dimension and index which we need to look in space object
+                    space_index = obj.space - 1
+                    dimension_index = obj.dimension - 1
+                    object_index = obj.index - 1
+
+                    # Get all nodes of the cell object
+                    nodes = (
+                        self.ids_object.grid_ggd[slice_index]
+                        .space[space_index]
+                        .objects_per_dimension[dimension_index]
+                        .object[object_index]
+                        .nodes
+                    )
+                    # Decrement by 1 to compensate zero based indexing
+                    nodes = nodes - 1
+                    # Get R and Z values from nodes deom object_per_dimesnion 0
+                    R1, Z1 = (
+                        self.ids_object.grid_ggd[slice_index]
+                        .space[space_index]
+                        .objects_per_dimension[0]
+                        .object[nodes[0]]
+                        .geometry
+                    )
+                    R2, Z2 = (
+                        self.ids_object.grid_ggd[slice_index]
+                        .space[space_index]
+                        .objects_per_dimension[0]
+                        .object[nodes[1]]
+                        .geometry
+                    )
+
+                    R3, Z3 = (
+                        self.ids_object.grid_ggd[slice_index]
+                        .space[space_index]
+                        .objects_per_dimension[0]
+                        .object[nodes[2]]
+                        .geometry
+                    )
+                    R4, Z4 = (
+                        self.ids_object.grid_ggd[slice_index]
+                        .space[space_index]
+                        .objects_per_dimension[0]
+                        .object[nodes[3]]
+                        .geometry
+                    )
+                    area = 0.5 * (
+                        (R1 * Z2 + R2 * Z3 + R3 * Z4 + R4 * Z1)
+                        - (R2 * Z1 + R3 * Z2 + R4 * Z3 + R1 * Z4)
+                    )
+                    baryR = (
+                        1.0
+                        / (6.0 * area)
+                        * (
+                            (R1 + R2) * (R1 * Z2 - R2 * Z1)
+                            + (R2 + R3) * (R2 * Z3 - R3 * Z2)
+                            + (R3 + R4) * (R3 * Z4 - R4 * Z3)
+                            + (R4 + R1) * (R4 * Z1 - R1 * Z4)
+                        )
+                    )
+
+                    volumes[index] = 2.0 * np.pi * baryR * area
+        if np.any(volumes) == False:
             print("!   edge_profiles IDS: volumes are empty")
             return None
         return volumes
@@ -291,7 +354,6 @@ class EdgeProfilesCompute:
             if xd.grid_subset_index == 5:
                 density_ion = xd.values
                 break
-
         return density_ion
 
     def get_species_density(self, slice_index=0) -> tuple:  # done
@@ -319,6 +381,11 @@ class EdgeProfilesCompute:
                         np.array(volume) * np.array(xd.values)
                     )
                     break
+            # if len(self.ids_object.ggd[slice_index].ion[ispecies].density) == 0:
+            #     print(
+            #         "!   edge_profiles IDS: species density not found for "
+            #         + self.ids_object.ggd[slice_index].ion[ispecies].label
+            #     )
             ntot = ntot + species_density_list[ispecies]
             if species_density_list[ispecies] > max_density:
                 max_density = species_density_list[ispecies]
