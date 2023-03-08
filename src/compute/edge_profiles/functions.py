@@ -1,6 +1,11 @@
 import numpy as np
 import database_tools.init_mendeleiev as mend
 import sys
+import functools
+
+import logging
+
+logger = logging.getLogger("module." + __name__)
 
 # TODO Create base class for Edge and Core as methods are same but way of retriving is different Many common methods
 # TODO Use strategy after that
@@ -99,8 +104,10 @@ class EdgeProfilesCompute:
         labels = []
         for ispecies in range(nspecies):
             labels.append(self.ids_object.ggd[slice_index].ion[ispecies].label)
+
         return labels
 
+    @functools.lru_cache(maxsize=128)
     def get_a(self, slice_index=0, element_index=0) -> list:  # done
         """
         Get series wise value of a of all species
@@ -119,8 +126,10 @@ class EdgeProfilesCompute:
             a[ispecies] = int(
                 self.ids_object.ggd[slice_index].ion[ispecies].element[element_index].a
             )
+        logger.debug("Mass of atom :" + str(a))
         return a
 
+    @functools.lru_cache(maxsize=128)
     def get_z(self, slice_index=0, element_index=0) -> list:  # done
         """
         Get series wise value of z of all species
@@ -177,7 +186,7 @@ class EdgeProfilesCompute:
 
         states_data = {}
 
-        volume = self.get_volume()
+        volume = self.get_volume(slice_index)
         nspecies = len(self.ids_object.ggd[slice_index].ion)
         species_density, _, _ = self.get_species_density()
         for species_index in range(nspecies):
@@ -234,10 +243,12 @@ class EdgeProfilesCompute:
         volume = self.get_volume(slice_index)
         electron_density = self.get_density(slice_index)
         # electron_density = self.ids_object.ggd[slice_index].electrons.density[0].values
+        logger.info("Total no. electrons (ne): " + str(sum(volume * electron_density)))
         return sum(volume * electron_density)
 
     # TODO Refactor this logic
     # Discussed with Xavier read 31 and 32 from dd
+    @functools.lru_cache(maxsize=128)
     def get_volume(self, slice_index=0):  # Done
         # TODO Find Cells grid subset
         elements = self.ids_object.grid_ggd[slice_index].grid_subset[4].element
@@ -343,9 +354,11 @@ class EdgeProfilesCompute:
                     )
 
                     volumes[index] = 2.0 * np.pi * baryR * area
+
         if np.any(volumes) == False:
             print("!   edge_profiles IDS: volumes are empty")
             return None
+        logger.info("Total volume:" + str(np.sum(volumes)))
         return volumes
 
     def get_density(self, slice_index=0):  # done
@@ -356,6 +369,7 @@ class EdgeProfilesCompute:
                 break
         return density_ion
 
+    @functools.lru_cache(maxsize=128)
     def get_species_density(self, slice_index=0) -> tuple:  # done
         """
         Returns species_density_list, sum_density, max_density_index of all species
@@ -369,7 +383,7 @@ class EdgeProfilesCompute:
             [float]: [max_density_index index at which it has maximum density]
         """
         nspecies = len(self.ids_object.ggd[slice_index].ion)
-        volume = self.get_volume()
+        volume = self.get_volume(slice_index)
         ntot = 0
         species_density_list = [0] * nspecies
         max_density = -999.0
@@ -381,11 +395,11 @@ class EdgeProfilesCompute:
                         np.array(volume) * np.array(xd.values)
                     )
                     break
-            # if len(self.ids_object.ggd[slice_index].ion[ispecies].density) == 0:
-            #     print(
-            #         "!   edge_profiles IDS: species density not found for "
-            #         + self.ids_object.ggd[slice_index].ion[ispecies].label
-            #     )
+            if len(self.ids_object.ggd[slice_index].ion[ispecies].density) == 0:
+                logger.debug(
+                    "!   edge_profiles IDS: species density not found for "
+                    + self.ids_object.ggd[slice_index].ion[ispecies].label
+                )
             ntot = ntot + species_density_list[ispecies]
             if species_density_list[ispecies] > max_density:
                 max_density = species_density_list[ispecies]

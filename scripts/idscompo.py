@@ -15,6 +15,7 @@
 from idstools.cli import *
 import argparse
 import imas
+import logging
 import numpy as np
 import os
 import sys
@@ -30,8 +31,32 @@ parser = argparse.ArgumentParser(
 )
 parser.add_argument("-s", "--shot", help="Shot number", required=True, type=int)
 parser.add_argument("-r", "--run", help="Run number", required=True, type=int)
+parser.add_argument("-i", "--info", action="store_true", help="Show information")
+parser.add_argument("--debug", action="store_true", help="Show debugging")
 
 args = parser.parse_args()
+
+
+def setup_logger(logger_name, isdebug, isinfo):
+    logger = logging.getLogger(logger_name)
+    logger.setLevel(logging.WARN)  # default
+    if isdebug:
+        logger.setLevel(logging.DEBUG)
+    if isinfo:
+        logger.setLevel(logging.INFO)
+    ch = logging.StreamHandler()
+    ch.setLevel(logging.WARN)
+    if isdebug:
+        ch.setLevel(logging.DEBUG)
+    if isinfo:
+        ch.setLevel(logging.INFO)
+    formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+    ch.setFormatter(formatter)
+    logger.addHandler(ch)
+    return logger
+
+
+logger = setup_logger("module", args.debug, args.info)
 
 connection = imas.DBEntry(
     get_backend_id(args.backend),
