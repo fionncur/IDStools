@@ -64,7 +64,7 @@ class EdgeProfilesCompute:
             ids_object.ggd[slice_index]
 
         except:
-            print("!  edge_profiles IDS:slice not found")
+            logger.critica("!  edge_profiles IDS:slice not found")
             return 0
 
         edgeProfilesCompute = EdgeProfilesCompute(ids_object, slice_index)
@@ -94,6 +94,7 @@ class EdgeProfilesCompute:
             species_data["z"] = z[species_index]
             species_data["species"] = species[species_index]
             species_data["states"] = states_data[str(species_index)]
+            species_data["label"] = labels[species_index]
 
             data[str(species_index)] = species_data
 
@@ -105,6 +106,7 @@ class EdgeProfilesCompute:
         for ispecies in range(nspecies):
             labels.append(self.ids_object.ggd[slice_index].ion[ispecies].label)
 
+        logger.debug("Species identification :" + str(labels))
         return labels
 
     @functools.lru_cache(maxsize=128)
@@ -123,10 +125,11 @@ class EdgeProfilesCompute:
         nspecies = len(self.ids_object.ggd[slice_index].ion)
         a = [0] * nspecies
         for ispecies in range(nspecies):
-            a[ispecies] = int(
+            a[ispecies] = (
                 self.ids_object.ggd[slice_index].ion[ispecies].element[element_index].a
             )
-        logger.debug("Mass of atom :" + str(a))
+
+        logger.debug("Mass of atom : " + str(a))
         return a
 
     @functools.lru_cache(maxsize=128)
@@ -151,6 +154,7 @@ class EdgeProfilesCompute:
                 .element[element_index]
                 .z_n
             )
+        logger.debug("Nuclear charge each species : " + str(z))
         return z
 
     # TODO Removed this method as it is not used anywhere
@@ -171,6 +175,7 @@ class EdgeProfilesCompute:
         states = []
         for species_index in range(nspecies):
             states.append(self.ids_object.ggd[slice_index].ion[species_index].state)
+
         return states
 
     def get_states_data(self, slice_index=0) -> dict:  # done
@@ -209,7 +214,7 @@ class EdgeProfilesCompute:
                     .z_average
                 ):
                     if xd.grid_subset_index == 5:
-                        state_data["z_average"] = np.mean(xd.values)
+                        state_data["z_average"] = xd.values[0]
 
                 for xd in (
                     self.ids_object.ggd[slice_index]
@@ -257,7 +262,7 @@ class EdgeProfilesCompute:
         )
         num_vertices = len(elements)
         if num_vertices == 0:
-            print(
+            logger.critical(
                 "!  edge_profiles IDS:No element found in grid subset : ",
                 grid_subset_name,
             )
@@ -356,7 +361,7 @@ class EdgeProfilesCompute:
                     volumes[index] = 2.0 * np.pi * baryR * area
 
         if np.any(volumes) == False:
-            print("!   edge_profiles IDS: volumes are empty")
+            logger.critical("!   edge_profiles IDS: volumes are empty")
             return None
         logger.info("Total volume:" + str(np.sum(volumes)))
         return volumes
@@ -367,6 +372,8 @@ class EdgeProfilesCompute:
             if xd.grid_subset_index == 5:
                 density_ion = xd.values
                 break
+        logger.debug("Electrons density array:" + str(density_ion))
+        logger.info("Total Electrons density:" + str(sum(density_ion)))
         return density_ion
 
     @functools.lru_cache(maxsize=128)
@@ -395,15 +402,33 @@ class EdgeProfilesCompute:
                         np.array(volume) * np.array(xd.values)
                     )
                     break
+
             if len(self.ids_object.ggd[slice_index].ion[ispecies].density) == 0:
-                logger.debug(
+                logger.warn(
                     "!   edge_profiles IDS: species density not found for "
                     + self.ids_object.ggd[slice_index].ion[ispecies].label
+                    + ", Getting density from state."
                 )
+                density = None
+                for counter, state in enumerate(
+                    self.ids_object.ggd[slice_index].ion[ispecies].state
+                ):
+                    for xd in state.density:
+                        if xd.grid_subset_index == 5:
+                            if counter == 0:
+                                density = np.array([0] * len(xd.values))
+                                density = np.add(density, np.array(xd.values))
+                            else:
+                                density = np.add(density, np.array(xd.values))
+                            break
+                species_density_list[ispecies] = sum(np.array(volume) * density)
             ntot = ntot + species_density_list[ispecies]
             if species_density_list[ispecies] > max_density:
                 max_density = species_density_list[ispecies]
                 max_density_index = ispecies
+        logger.debug("Species density : " + str(species_density_list))
+        logger.debug("Sum of Species Density (ntot) : " + str(ntot))
+        logger.debug("Index of Maximum Density Species : " + str(max_density_index))
         return species_density_list, ntot, max_density_index
 
     def get_nspec_over_ntot(self):  # done
@@ -455,7 +480,7 @@ class EdgeProfilesCompute:
         table_mendeleiev = mend.create_table_mendeleiev()
         nspecies = len(self.ids_object.ggd[slice_index].ion)
 
-        a = self.get_a()
+        a = list(map(int, self.get_a()))
         z = self.get_z()
         species = []
         for ispecies in range(nspecies):

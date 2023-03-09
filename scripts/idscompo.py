@@ -50,7 +50,7 @@ def setup_logger(logger_name, isdebug, isinfo):
         ch.setLevel(logging.DEBUG)
     if isinfo:
         ch.setLevel(logging.INFO)
-    formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+    formatter = logging.Formatter("%(levelname)s - %(message)s")
     ch.setFormatter(formatter)
     logger.addHandler(ch)
     return logger
@@ -58,6 +58,18 @@ def setup_logger(logger_name, isdebug, isinfo):
 
 logger = setup_logger("module", args.debug, args.info)
 
+logger.info("----------------------------------------------------------------")
+logger.info(
+    """
+    a       = Mass of atom [Atomic Mass Unit]
+    z       = Nuclear charge [Elementary Charge Unit]
+    ne      = sum(volume * electron_density)
+    volume  = sum(volume of each cell)
+    nspec_over_ntot : Species density list / Sum of Species Density (ntot)
+    nspec_over_ne   : Species density list / Total no. electrons (ne)
+    nspec_over_nmaj : Species density list / Species density[Index of Maximum Density Species]"""
+)
+logger.info("----------------------------------------------------------------")
 connection = imas.DBEntry(
     get_backend_id(args.backend),
     args.database,

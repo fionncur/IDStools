@@ -13,6 +13,9 @@ class CoreProfilesView(Console):
         """
         Nice display of plasma composition with species concentrations
         """
+        print("   ------------")
+        print("core_profiles")
+        print("   ------------")
         composition_data = (
             CoreProfilesCompute.get_plasma_composition_with_species_concentration(
                 ids_object, slice_index, volume=volume
@@ -122,9 +125,7 @@ class CoreProfilesView(Console):
                             - len(format("%.3f" % species_data["nspec_over_nmaj"]))
                         )
                     )
-        print("   ------------")
-        print("core_profiles")
-        print("   ------------")
+
         print(disp_species)
         print(disp_a)
         print(disp_z)

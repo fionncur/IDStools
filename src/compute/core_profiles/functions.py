@@ -1,6 +1,9 @@
 import numpy as np
 import database_tools.init_mendeleiev as mend
 import sys
+import logging
+
+logger = logging.getLogger("module." + __name__)
 
 
 class CoreProfilesCompute:
@@ -110,6 +113,7 @@ class CoreProfilesCompute:
         # TODO why always element_index = 0 we are picking up
         nspecies = len(self.ids_object.profiles_1d[slice_index].ion)
         a = [0] * nspecies
+        a_original = [0] * nspecies
         for ispecies in range(nspecies):
             a[ispecies] = int(
                 self.ids_object.profiles_1d[slice_index]
@@ -117,6 +121,8 @@ class CoreProfilesCompute:
                 .element[element_index]
                 .a
             )
+            a[ispecies] = int(a_original[ispecies])
+        logger.debug("Mass of atom : " + str(a_original))
         return a
 
     def get_z(self, slice_index=0, element_index=0) -> list:
@@ -140,6 +146,7 @@ class CoreProfilesCompute:
                 .element[element_index]
                 .z_n
             )
+        logger.debug("Nuclear charge each species : " + str(z))
         return z
 
     # TODO Removed this method as it is not used anywhere
@@ -239,7 +246,7 @@ class CoreProfilesCompute:
                         states_density[state_index] = sum(density * volume)
                         state_data["density_available"] = True
                     else:
-                        print(
+                        logger.critica(
                             "!  core_profile IDS: Density data for species ",
                             self.ids_object.profiles_1d[slice_index]
                             .ion[species_index]
@@ -249,7 +256,7 @@ class CoreProfilesCompute:
                             " is empty ",
                         )
                 else:
-                    print(
+                    logger.critica(
                         "!  core_profile IDS: Density data for species ",
                         self.ids_object.profiles_1d[slice_index]
                         .ion[species_index]
@@ -289,13 +296,15 @@ class CoreProfilesCompute:
         volume = self.volume
 
         electron_density = self.ids_object.profiles_1d[slice_index].electrons.density
+        logger.info("Total no. electrons (ne): " + str(sum(volume * electron_density)))
         return sum(volume * electron_density)
 
     def get_volume(self, slice_index=0):
         volume = self.ids_object.profiles_1d[slice_index].grid.volume
         if len(volume) == 0:
             volume = None
-            print("!   core_profile IDS: Grid volume is empty")
+            logger.critical("!   core_profile IDS: Grid volume is empty")
+        logger.info("Total volume:" + str(np.sum(volume)))
         return volume
 
     def get_single_species_density(self, slice_index=0, species_index=0):

@@ -13,6 +13,9 @@ class EdgeProfilesView(Console):
         """
         Nice display of plasma composition with species concentrations
         """
+        print("   ------------")
+        print("edge_profiles")
+        print("   ------------")
         composition_data = (
             EdgeProfilesCompute.get_plasma_composition_with_species_concentration(
                 ids_object, slice_index
@@ -49,7 +52,16 @@ class EdgeProfilesView(Console):
                 disp_species = (
                     disp_species
                     + species_data["species"]
-                    + " " * (self.tabsize - len(species_data["species"]))
+                    + " ("
+                    + species_data["label"]
+                    + ")"
+                    + " "
+                    * (
+                        self.tabsize
+                        - len(
+                            species_data["species"] + " (" + species_data["label"] + ")"
+                        )
+                    )
                 )
                 disp_a = (
                     disp_a
@@ -121,9 +133,7 @@ class EdgeProfilesView(Console):
                             - len(format("%.3f" % species_data["nspec_over_nmaj"]))
                         )
                     )
-        print("   ------------")
-        print("edge_profiles")
-        print("   ------------")
+
         print(disp_species)
         print(disp_a)
         print(disp_z)
@@ -141,12 +151,13 @@ class EdgeProfilesView(Console):
                 comm = "s"
             else:
                 comm = ""
-            print(
-                species_data["species"],
-                " has ",
-                nstates,
-                " state" + comm,
-            )
+            if nstates != 0:
+                print(
+                    species_data["species"],
+                    " has ",
+                    nstates,
+                    " state" + comm,
+                )
             istate = 0
             for state_key, state_data in states.items():
                 print(
