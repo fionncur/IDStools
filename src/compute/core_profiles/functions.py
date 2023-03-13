@@ -78,7 +78,7 @@ class CoreProfilesCompute:
         nspec_over_ne = coreProfileCompute.get_nspec_over_ne()
         nspec_over_nmaj = coreProfileCompute.get_nspec_over_nmaj()
         species = coreProfileCompute.get_species()
-        labels = coreProfileCompute.get_species_labels()
+        labels = coreProfileCompute.get_labels()
         coreProfileCompute.combine_species_when_appear_twice(
             species, nspec_over_ntot, nspec_over_ne, nspec_over_nmaj
         )
@@ -94,6 +94,7 @@ class CoreProfilesCompute:
             species_data["z"] = z[species_index]
             species_data["species"] = species[species_index]
             species_data["states"] = states_data[str(species_index)]
+            species_data["label"] = labels[species_index]
 
             data[str(species_index)] = species_data
 
@@ -115,7 +116,7 @@ class CoreProfilesCompute:
         a = [0] * nspecies
         a_original = [0] * nspecies
         for ispecies in range(nspecies):
-            a[ispecies] = int(
+            a_original[ispecies] = (
                 self.ids_object.profiles_1d[slice_index]
                 .ion[ispecies]
                 .element[element_index]
@@ -246,7 +247,7 @@ class CoreProfilesCompute:
                         states_density[state_index] = sum(density * volume)
                         state_data["density_available"] = True
                     else:
-                        logger.critica(
+                        logger.critical(
                             "!  core_profile IDS: Density data for species ",
                             self.ids_object.profiles_1d[slice_index]
                             .ion[species_index]
@@ -256,7 +257,7 @@ class CoreProfilesCompute:
                             " is empty ",
                         )
                 else:
-                    logger.critica(
+                    logger.critical(
                         "!  core_profile IDS: Density data for species ",
                         self.ids_object.profiles_1d[slice_index]
                         .ion[species_index]
@@ -404,7 +405,7 @@ class CoreProfilesCompute:
             species.append(table_mendeleiev[z[ispecies]][a[ispecies]].element)
         return species
 
-    def get_species_labels(self, slice_index=0) -> list:
+    def get_labels(self, slice_index=0) -> list:
         """
         Get label of species
 
@@ -419,6 +420,7 @@ class CoreProfilesCompute:
         for ispecies in range(nspecies):
             labels.append(self.ids_object.profiles_1d[slice_index].ion[ispecies].label)
 
+        logger.debug("Species identification :" + str(labels))
         return labels
 
     def combine_species_when_appear_twice(

@@ -53,7 +53,16 @@ class CoreProfilesView(Console):
                 disp_species = (
                     disp_species
                     + species_data["species"]
-                    + " " * (self.tabsize - len(species_data["species"]))
+                    + " ("
+                    + species_data["label"]
+                    + ")"
+                    + " "
+                    * (
+                        self.tabsize
+                        - len(
+                            species_data["species"] + " (" + species_data["label"] + ")"
+                        )
+                    )
                 )
                 disp_a = (
                     disp_a
