@@ -81,7 +81,6 @@ class EdgeProfilesCompute:
         edgeProfilesCompute.combine_species_when_appear_twice(
             species, nspec_over_ntot, nspec_over_ne, nspec_over_nmaj
         )
-        # TODO in the label I found H and H2+, In mand table it just takes H
         a = edgeProfilesCompute.get_a()
         z = edgeProfilesCompute.get_z()
         states_data = edgeProfilesCompute.get_states_data()
@@ -251,11 +250,9 @@ class EdgeProfilesCompute:
         logger.info("Total no. electrons (ne): " + str(sum(volume * electron_density)))
         return sum(volume * electron_density)
 
-    # TODO Refactor this logic
     # Discussed with Xavier read 31 and 32 from dd
     @functools.lru_cache(maxsize=128)
     def get_volume(self, slice_index=0):  # Done
-        # TODO Find Cells grid subset
         elements = self.ids_object.grid_ggd[slice_index].grid_subset[4].element
         grid_subset_name = (
             self.ids_object.grid_ggd[slice_index].grid_subset[4].identifier.name
@@ -481,7 +478,7 @@ class EdgeProfilesCompute:
         nspecies = len(self.ids_object.ggd[slice_index].ion)
 
         a = list(map(int, self.get_a()))
-        z = self.get_z()
+        z = list(map(int, self.get_z()))
         species = []
         for ispecies in range(nspecies):
             species.append(table_mendeleiev[z[ispecies]][a[ispecies]].element)

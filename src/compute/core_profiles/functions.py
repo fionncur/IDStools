@@ -12,7 +12,7 @@ class CoreProfilesCompute:
         super().__init__()
         self.ids_object = ids_object
         self.slice_index = slice_index
-        self.volume = None
+        self.volume = volume
 
     @staticmethod
     def get_plasma_composition_with_species_concentration(
@@ -213,7 +213,7 @@ class CoreProfilesCompute:
 
         states_data = {}
 
-        volume = self.get_volume(slice_index)
+        volume = self.volume
         nspecies = len(self.ids_object.profiles_1d[slice_index].ion)
         species_density, _, _ = self.get_species_density()
         for species_index in range(nspecies):
@@ -295,7 +295,7 @@ class CoreProfilesCompute:
         Returns:
             [float]: [Sum of multiplication of volume and elcetrons density ]
         """
-        volume = self.get_volume(slice_index)
+        volume = self.volume
 
         electron_density = self.ids_object.profiles_1d[slice_index].electrons.density
         logger.info("Total no. electrons (ne): " + str(sum(volume * electron_density)))
@@ -321,7 +321,7 @@ class CoreProfilesCompute:
         Returns:
             [float]: [Sum of multiplication of volume and elcetrons density ]
         """
-        volume = self.get_volume(slice_index)
+        volume = self.volume
         density = self.ids_object.profiles_1d[slice_index].ion[species_index].density
         return sum(volume * density)
 
