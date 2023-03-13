@@ -153,12 +153,13 @@ class CoreProfilesView(Console):
                     comm = "s"
                 else:
                     comm = ""
-                print(
-                    species_data["species"],
-                    " has ",
-                    nstates,
-                    " state" + comm,
-                )
+                if nstates != 0:
+                    print(
+                        species_data["species"],
+                        " has ",
+                        nstates,
+                        " state" + comm,
+                    )
                 istate = 0
                 for state_key, state_data in states.items():
                     if state_data["density_available"] is False:

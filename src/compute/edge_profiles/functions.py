@@ -64,7 +64,7 @@ class EdgeProfilesCompute:
             ids_object.ggd[slice_index]
 
         except:
-            logger.critica("!  edge_profiles IDS:slice not found")
+            logger.critical("!  edge_profiles IDS:slice not found")
             return 0
 
         edgeProfilesCompute = EdgeProfilesCompute(ids_object, slice_index)

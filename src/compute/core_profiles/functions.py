@@ -2,6 +2,7 @@ import numpy as np
 import database_tools.init_mendeleiev as mend
 import sys
 import logging
+import functools
 
 logger = logging.getLogger("module." + __name__)
 
@@ -11,7 +12,7 @@ class CoreProfilesCompute:
         super().__init__()
         self.ids_object = ids_object
         self.slice_index = slice_index
-        self.volume = volume
+        self.volume = None
 
     @staticmethod
     def get_plasma_composition_with_species_concentration(
@@ -100,6 +101,7 @@ class CoreProfilesCompute:
 
         return data
 
+    @functools.lru_cache(maxsize=128)
     def get_a(self, slice_index=0, element_index=0) -> list:
         """
         Get series wise value of a of all species
@@ -114,18 +116,17 @@ class CoreProfilesCompute:
         # TODO why always element_index = 0 we are picking up
         nspecies = len(self.ids_object.profiles_1d[slice_index].ion)
         a = [0] * nspecies
-        a_original = [0] * nspecies
         for ispecies in range(nspecies):
-            a_original[ispecies] = (
+            a[ispecies] = (
                 self.ids_object.profiles_1d[slice_index]
                 .ion[ispecies]
                 .element[element_index]
                 .a
             )
-            a[ispecies] = int(a_original[ispecies])
-        logger.debug("Mass of atom : " + str(a_original))
+        logger.debug("Mass of atom : " + str(a))
         return a
 
+    @functools.lru_cache(maxsize=128)
     def get_z(self, slice_index=0, element_index=0) -> list:
         """
         Get series wise value of z of all species
@@ -212,7 +213,7 @@ class CoreProfilesCompute:
 
         states_data = {}
 
-        volume = self.volume
+        volume = self.get_volume(slice_index)
         nspecies = len(self.ids_object.profiles_1d[slice_index].ion)
         species_density, _, _ = self.get_species_density()
         for species_index in range(nspecies):
@@ -294,12 +295,13 @@ class CoreProfilesCompute:
         Returns:
             [float]: [Sum of multiplication of volume and elcetrons density ]
         """
-        volume = self.volume
+        volume = self.get_volume(slice_index)
 
         electron_density = self.ids_object.profiles_1d[slice_index].electrons.density
         logger.info("Total no. electrons (ne): " + str(sum(volume * electron_density)))
         return sum(volume * electron_density)
 
+    @functools.lru_cache(maxsize=128)
     def get_volume(self, slice_index=0):
         volume = self.ids_object.profiles_1d[slice_index].grid.volume
         if len(volume) == 0:
@@ -319,10 +321,11 @@ class CoreProfilesCompute:
         Returns:
             [float]: [Sum of multiplication of volume and elcetrons density ]
         """
-        volume = self.volume
+        volume = self.get_volume(slice_index)
         density = self.ids_object.profiles_1d[slice_index].ion[species_index].density
         return sum(volume * density)
 
+    @functools.lru_cache(maxsize=128)
     def get_species_density(self, slice_index=0) -> tuple:
         """
         Returns species_density_list, sum_density, max_density_index of all species
@@ -398,8 +401,8 @@ class CoreProfilesCompute:
         table_mendeleiev = mend.create_table_mendeleiev()
         nspecies = len(self.ids_object.profiles_1d[slice_index].ion)
 
-        a = self.get_a()
-        z = self.get_z()
+        a = list(map(int, self.get_a()))
+        z = list(map(int, self.get_z()))
         species = []
         for ispecies in range(nspecies):
             species.append(table_mendeleiev[z[ispecies]][a[ispecies]].element)
