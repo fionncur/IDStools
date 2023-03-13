@@ -166,7 +166,11 @@ class ScenarioValidator:
                     try:
                         logger.info(
                             "- {}/{}/{}/{} < {}".format(
-                                db.__dict__["shot"], db.__dict__["run"], idsname, occ, path.relpath(fpath)
+                                db.__dict__["shot"],
+                                db.__dict__["run"],
+                                idsname,
+                                occ,
+                                path.relpath(fpath),
                             )
                         )
                         idstime = db.partial_get(idsname, "time", occurrence=occ)
@@ -192,9 +196,7 @@ class ScenarioValidator:
                             logger.info("- result: OK")
                         else:
                             logger.info(
-                                "- result:\n{}".format(
-                                    idschk.dict_to_yaml(dout)
-                                )
+                                "- result:\n{}".format(idschk.dict_to_yaml(dout))
                             )
                     else:
                         print(idschk.dict_to_yaml(dout))
@@ -269,7 +271,9 @@ def db_validator(
             dpath = getenv("EBROOTIDSTOOLS") + "/bin" + vsdir
         #
         schema_files.extend(sorted(glob.glob(dpath + "/ITER/*.y*ml", recursive=True)))
-        schema_files.extend(sorted(glob.glob(dpath + "/Generic/*.y*ml", recursive=True)))
+        schema_files.extend(
+            sorted(glob.glob(dpath + "/generic/*.y*ml", recursive=True))
+        )
     else:
         for p in schema_path:
             if path.isdir(p):
@@ -286,11 +290,17 @@ def db_validator(
     sv = ScenarioValidator(schema_path=schema_files)
 
     # Load scenario table in case of "pulse" not given
-    if pulse:
-        pulses = pulse
+    logger.info("loading scenario table...")
+    scenarios = load_scenario(user, database, version, backend)
+    pulses = []
+    if len(pulse) >= 1:
+        for shot, run in pulse:
+            if shot > 0 and run >= 0:
+                pulses.extend([(shot, run)])
+            if shot > 0 and run < 0:
+                pulses.extend([(s, r) for s, r in scenarios if shot == s])
     else:
-        logger.info("loading scenario table...")
-        pulses = load_scenario(user, database, version, backend)
+        pulses = scenarios
 
     # Scenario Validation for Pulses
     npulse = len(pulses)

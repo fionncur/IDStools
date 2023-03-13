@@ -25,7 +25,7 @@ def main():
     logger = set_logger(__name__, logfile=args.output, level=args.log)
 
     # Set validator for given (shot, run), otherwise whole pulses found
-    if args.shot and args.run:
+    if args.shot:
         pulse = [(args.shot, args.run)]
     else:
         pulse = []
@@ -37,7 +37,7 @@ def main():
 
     # Validation in IMASDB
     res = db_validator(
-        args.user, args.database, args.version, args.backend, args.path, pulse
+        args.user, args.database, args.version, args.backend, args.path, pulse,
     )
 
     et = time.time()
@@ -76,6 +76,9 @@ if __name__ == "__main__":
 
                 4) Validate one pulse in IMAS database to schemas in the directory
                 $ {0} -s 131024 -r 40 -p /path/to/schema/dir
+
+                5) Validate all pulses having the shot number specified
+                $ {0} -s 131024 -p /path/to/schema/dir
             """.format(
                 prog
             )
@@ -85,7 +88,7 @@ if __name__ == "__main__":
         "--shot", "-s", dest="shot", help="Shot number", required=False, type=int
     )
     parser.add_argument(
-        "--run", "-r", dest="run", help="Run number", required=False, type=int
+        "--run", "-r", dest="run", help="Run number", required=False, type=int, default=-1
     )
     parser.add_argument(
         "--log",
