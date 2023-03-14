@@ -193,10 +193,10 @@ class ScenarioValidator:
                     )
                     if fmt == "log":
                         if flag:
-                            logger.info("- result: OK")
+                            logger.info("- OK")
                         else:
-                            logger.info(
-                                "- result:\n{}".format(idschk.dict_to_yaml(dout))
+                            logger.error(
+                                "\n{}".format(idschk.dict_to_yaml(dout))
                             )
                     else:
                         print(idschk.dict_to_yaml(dout))
@@ -271,9 +271,6 @@ def db_validator(
             dpath = getenv("EBROOTIDSTOOLS") + "/bin" + vsdir
         #
         schema_files.extend(sorted(glob.glob(dpath + "/ITER/*.y*ml", recursive=True)))
-        schema_files.extend(
-            sorted(glob.glob(dpath + "/generic/*.y*ml", recursive=True))
-        )
     else:
         for p in schema_path:
             if path.isdir(p):
