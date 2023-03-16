@@ -253,15 +253,42 @@ class EdgeProfilesCompute:
     # Discussed with Xavier read 31 and 32 from dd
     @functools.lru_cache(maxsize=128)
     def get_volume(self, slice_index=0):  # Done
-        elements = self.ids_object.grid_ggd[slice_index].grid_subset[4].element
+        index = 4
+        elements = self.ids_object.grid_ggd[slice_index].grid_subset[index].element
         grid_subset_name = (
-            self.ids_object.grid_ggd[slice_index].grid_subset[4].identifier.name
+            self.ids_object.grid_ggd[slice_index].grid_subset[index].identifier.name
         )
+        logger.info(grid_subset_name)
+        # check if grid_subset[4] identifier name is cells, if not, find out 'cells' index
+        index_counter = 0
+        if grid_subset_name.lower() != "cells":
+            logger.warning(
+                "!  edge_profiles IDS:cells not found in grid subset at 4th index, Checking index of cells"
+            )
+            for subset in self.ids_object.grid_ggd[slice_index].grid_subset:
+                if subset.identifier.name.lower() == "cells":
+                    elements = (
+                        self.ids_object.grid_ggd[slice_index]
+                        .grid_subset[index_counter]
+                        .element
+                    )
+                    grid_subset_name = (
+                        self.ids_object.grid_ggd[slice_index]
+                        .grid_subset[index_counter]
+                        .identifier.name
+                    )
+                    index = index_counter
+                    logger.warning(
+                        "!  edge_profiles IDS:cells found in grid subset at "
+                        + str(index_counter)
+                        + " index"
+                    )
+                    break
+                index_counter = index_counter + 1
         num_vertices = len(elements)
         if num_vertices == 0:
             logger.critical(
-                "!  edge_profiles IDS:No element found in grid subset : ",
-                grid_subset_name,
+                "!  edge_profiles IDS:No element found in grid subset : " + str()
             )
             return None
         volumes = [0] * num_vertices
@@ -292,6 +319,9 @@ class EdgeProfilesCompute:
                     # The third element contains the volume, read the same
                     volumes[index] = obj_dim.geometry[2]
         if np.any(volumes) == False:
+            logger.warning(
+                "!  edge_profiles IDS:volume is not available in cells (face_indices_volume).. Calculating manually from nodes "
+            )
             # Get volume from nodes if volumes are still empty
             for index, element in enumerate(elements):
                 for obj in element.object:

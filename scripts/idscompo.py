@@ -105,7 +105,7 @@ if core_profiles_ids.time is None:
     core_profile_exists = False
 if edge_profiles_ids.time is None:
     edge_profile_exists = False
-
+slice_index = 0
 if core_profiles_ids.time is not None:
     ne0_list = connection.partial_get(
         "core_profiles", "profiles_1d(:)/electrons/density(0)"
@@ -114,7 +114,7 @@ if core_profiles_ids.time is not None:
     profiles_1d_slice = connection.partial_get(
         "core_profiles", f"profiles_1d({slice_index})"
     )
-
+    logger.info("Time slice using : " + str(slice_index))
     core_profiles_ids.profiles_1d.resize(1)
     core_profiles_ids.profiles_1d[0] = profiles_1d_slice
 
@@ -149,12 +149,15 @@ else:
 # # TODO There is no relation of Slice index calculated above so getting data of 0th slice. and Why only 0th slice
 
 if edge_profiles_ids.time is not None:
+    logger.info("Time slice using : " + str(slice_index))
     edge_profiles_ids.ggd.resize(1)
-    edge_profiles_ids.ggd[0] = connection.partial_get("edge_profiles", f"ggd({0})")
+    edge_profiles_ids.ggd[0] = connection.partial_get(
+        "edge_profiles", f"ggd({slice_index})"
+    )
 
     edge_profiles_ids.grid_ggd.resize(1)
     edge_profiles_ids.grid_ggd[0] = connection.partial_get(
-        "edge_profiles", f"grid_ggd({0})"
+        "edge_profiles", f"grid_ggd({slice_index})"
     )
 
     returnstatus = EdgeProfilesView.view_plasma_composition_with_species_concentration(
@@ -162,14 +165,73 @@ if edge_profiles_ids.time is not None:
     )
     if returnstatus == 0:
         edge_profile_exists = False
-        print(
+        logger.critical(
             "!   edge_profiles IDS is exists but time slice doesn't exists. --> Abort."
         )
     elif returnstatus == -1:
-        edge_profile_exists = False
-        print("!   edge_profiles IDS is exists but volume doesn't exists. --> Abort.")
+        logger.warning(
+            "!   edge_profiles IDS is exists but volume doesn't exists. --> Trying another time slice. This will take a while :-)"
+        )
+        edge_profiles = connection.get("edge_profiles")
+        index_list = []
+        for counter in range(1, 10):
+            index_list.append(slice_index - counter)
+            index_list.append(slice_index + counter)
+        for time_slice in index_list:
+            index = 4
+            elements = edge_profiles.grid_ggd[time_slice].grid_subset[index].element
+            grid_subset_name = (
+                edge_profiles.grid_ggd[time_slice].grid_subset[index].identifier.name
+            )
+            # check if grid_subset[4] identifier name is cells, if not, find out 'cells' index
+            index_counter = 0
+            print()
+            if grid_subset_name.lower() != "cells":
+                for subset in edge_profiles.grid_ggd[time_slice].grid_subset:
+                    if subset.identifier.name.lower() == "cells":
+                        elements = (
+                            edge_profiles.grid_ggd[time_slice]
+                            .grid_subset[index_counter]
+                            .element
+                        )
+                        grid_subset_name = (
+                            edge_profiles.grid_ggd[time_slice]
+                            .grid_subset[index_counter]
+                            .identifier.name
+                        )
+                        index = index_counter
+                        break
+                    index_counter = index_counter + 1
+            if len(elements) != 0:
+                logger.info("Time slice using : " + str(time_slice))
+                edge_profiles_ids.ggd.resize(1)
+                edge_profiles_ids.ggd[0] = connection.partial_get(
+                    "edge_profiles", f"ggd({time_slice})"
+                )
+
+                edge_profiles_ids.grid_ggd.resize(1)
+                edge_profiles_ids.grid_ggd[0] = connection.partial_get(
+                    "edge_profiles", f"grid_ggd({time_slice})"
+                )
+
+                returnstatus = (
+                    EdgeProfilesView.view_plasma_composition_with_species_concentration(
+                        edge_profiles_ids, 0
+                    )
+                )
+                if returnstatus == 0:
+                    edge_profile_exists = False
+                    logger.critical(
+                        "!   edge_profiles IDS is exists but time slice doesn't exists. --> Abort."
+                    )
+                elif returnstatus == -1:
+                    edge_profile_exists = False
+                    logger.warning(
+                        "!   edge_profiles IDS is exists but volume doesn't exists."
+                    )
+                break
 else:
-    print("!   No edge_profiles IDS in the data-entry. --> Abort.")
+    logger.critical("!   No edge_profiles IDS in the data-entry. --> Abort.")
 
 profile_availability_string = ""
 if core_profile_exists is False:
