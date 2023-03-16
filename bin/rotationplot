@@ -275,61 +275,78 @@ def time_display(plot,time):
 import unicodedata
 
 # Display the figure
-plt.figure()
+fig = plt.figure()
 #plt.ion()
+gs = plt.GridSpec(2,2)
+fig.subplots_adjust(wspace=0.5, top=0.8)
+fig.suptitle(f"Kinetic profiles, t={time}s, shot={shot}/run={run}")
 
 # E-field profile
-ax1 = plt.subplot(2, 2, 1)
+ax1 = fig.add_subplot(gs[0])
 plt.plot(rho_tor_norm,core_profiles.profiles_1d[0].e_field.radial*1.e-3,label = species[iion])
 plt.xlim(rho_tor_norm[0],rho_tor_norm[nrho-1])
 nice(plt,r'$\rho/\rho_0$',r'E-field ($kV/m$)',fontsize)
-Signature(hostdir,shot,run,plt)
-plt.title('t = '+'%.1f' % time+' s', fontdict=font)
+#Signature(hostdir,shot,run,plt)
+#plt.title('t = '+'%.1f' % time+' s', fontdict=font)
 
 # Toroidal velocity profile
-ax2 = plt.subplot(2, 2, 2)
+ax2 = fig.add_subplot(gs[1])
 for iion in range(nions):
     plt.plot(rho_tor_norm,core_profiles.profiles_1d[0].ion[iion].velocity.toroidal*1.e-3,label = species[iion])
 
 plt.xlim(rho_tor_norm[0],rho_tor_norm[nrho-1])
 nice(plt,r'$\rho/\rho_0$',r'$v_{tor}$ ($km/s$)',fontsize)
-legend = plt.legend(bbox_to_anchor=(legx_pos-0.95,legy_pos-0.05))
-CustomLegend_wf(legend)
-Signature(hostdir,shot,run,plt)
-plt.title('t = '+'%.1f' % time+' s', fontdict=font)
+ax2.yaxis.tick_right()
+ax2.yaxis.set_label_position("right")
+
+#legend = plt.legend(bbox_to_anchor=(legx_pos-0.95,legy_pos-0.05))
+#CustomLegend_wf(legend)
+#Signature(hostdir,shot,run,plt)
+#plt.title('t = '+'%.1f' % time+' s', fontdict=font)
 
 # Poloidal velocity profile
-ax3 = plt.subplot(2, 2, 3)
+ax3 = fig.add_subplot(gs[2])
 for iion in range(nions):
     plt.plot(rho_tor_norm,core_profiles.profiles_1d[0].ion[iion].velocity.poloidal*1.e-3,label = species[iion])
 
 plt.xlim(rho_tor_norm[0],rho_tor_norm[nrho-1])
 nice(plt,r'$\rho/\rho_0$',r'$v_{pol}$ ($km/s$)',fontsize)
-legend = plt.legend(bbox_to_anchor=(legx_pos-0.95,legy_pos-0.5))
-CustomLegend_wf(legend)
-Signature(hostdir,shot,run,plt)
-plt.title('t = '+'%.1f' % time+' s', fontdict=font)
+#legend = plt.legend(bbox_to_anchor=(legx_pos-0.95,legy_pos-0.5))
+#CustomLegend_wf(legend)
+#Signature(hostdir,shot,run,plt)
+#plt.title('t = '+'%.1f' % time+' s', fontdict=font)
 
 # Diamagnetic velocity profile
-ax4 = plt.subplot(2, 2, 4)
+ax4 = fig.add_subplot(gs[3])
 for iion in range(nions):
     plt.plot(rho_tor_norm,core_profiles.profiles_1d[0].ion[iion].velocity.diamagnetic*1.e-3,label = species[iion])
 
 plt.xlim(rho_tor_norm[0],rho_tor_norm[nrho-1])
 nice(plt,r'$\rho/\rho_0$',r'$v_{dia}$ ($km/s$)',fontsize)
-legend = plt.legend(bbox_to_anchor=(legx_pos-0.95,legy_pos-0.5))
-CustomLegend_wf(legend)
-Signature(hostdir,shot,run,plt)
-plt.title('t = '+'%.1f' % time+' s', fontdict=font)
+ax4.yaxis.tick_right()
+ax4.yaxis.set_label_position("right")
+
+#legend = plt.legend(bbox_to_anchor=(legx_pos-0.95,legy_pos-0.5))
+#CustomLegend_wf(legend)
+#Signature(hostdir,shot,run,plt)
+#plt.title('t = '+'%.1f' % time+' s', fontdict=font)
+
+ax3.get_shared_x_axes().join(ax1, ax3)
+ax1.set_xticklabels([])
+ax1.set_xlabel(None)
+ax4.get_shared_x_axes().join(ax2, ax4)
+ax2.set_xticklabels([])
+ax2.set_xlabel(None)
 
 ax = plt.gca()
 xmin, xmax = ax.get_xlim()
 ymin, ymax = ax.get_ylim()
-plt.text(xmin-0.7*(xmax-xmin),ymin-0.4*(ymax-ymin),hostdir+' - Shot '+str(shot)+' / '+' Run '+str(run),fontsize=6,color='black')
-
-plt.tight_layout() # Adjust spacking between figures
+#plt.text(xmin-0.7*(xmax-xmin),ymin-0.4*(ymax-ymin),hostdir+' - Shot '+str(shot)+' / '+' Run '+str(run),fontsize=6,color='black')
+#plt.tight_layout() # Adjust spacking between figures
 
 fig = plt.gcf()
+handles, labels = ax4.get_legend_handles_labels()
+fig.legend(handles, labels, loc="upper left", bbox_to_anchor=(0.45,0.6))
 
 try:
     fig.savefig('Neutrons'+'_shot_'+str(shot)+'_run_'+str(run)+'_time_'+'%.1f' % time+'.png', dpi=100)
