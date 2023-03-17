@@ -222,7 +222,7 @@ if edge_profiles_ids.time is not None:
                 if returnstatus == 0:
                     edge_profile_exists = False
                     logger.critical(
-                        "!   edge_profiles IDS is exists but time slice doesn't exists. --> Abort."
+                        "!   edge_profiles IDS exists but time slice doesn't exists. --> Abort."
                     )
                 elif returnstatus == -1:
                     edge_profile_exists = False
