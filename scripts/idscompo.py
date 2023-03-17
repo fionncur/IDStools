@@ -124,7 +124,7 @@ if core_profiles_ids.time is not None:
     if returnstatus == 0:
         core_profile_exists = False
         print(
-            "!   core_profiles IDS is exists but time slice doesn't exists. --> Abort."
+            "!   core_profiles IDS exists but time slice doesn't exists. --> Abort."
         )
     elif returnstatus == -1:
         core_profile_exists = False
