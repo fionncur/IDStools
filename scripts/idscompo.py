@@ -227,7 +227,7 @@ if edge_profiles_ids.time is not None:
                 elif returnstatus == -1:
                     edge_profile_exists = False
                     logger.warning(
-                        "!   edge_profiles IDS is exists but volume doesn't exists."
+                        "!   edge_profiles IDS exists but volume is not set."
                     )
                 break
 else:
