@@ -170,7 +170,7 @@ if edge_profiles_ids.time is not None:
         )
     elif returnstatus == -1:
         logger.warning(
-            "!   edge_profiles IDS is exists but volume doesn't exists. --> Trying another time slice. This will take a while :-)"
+            "!   edge_profiles IDS exists but volume is not set. --> Trying another time slice. This may take a while :-)"
         )
         edge_profiles = connection.get("edge_profiles")
         index_list = []
