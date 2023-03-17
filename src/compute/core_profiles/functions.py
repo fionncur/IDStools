@@ -213,14 +213,17 @@ class CoreProfilesCompute:
 
         states_data = {}
 
-        volume = self.volume
+        volume = self.get_volume(slice_index)
         nspecies = len(self.ids_object.profiles_1d[slice_index].ion)
         species_density, _, _ = self.get_species_density()
         for species_index in range(nspecies):
+            logger.debug("Species index :" + str(species_index))
+            logger.debug("Species density :" + str(species_density[species_index]))
             species_data = {}
             nstates = len(
                 self.ids_object.profiles_1d[slice_index].ion[species_index].state
             )
+            logger.debug("Species states count :" + str(nstates))
             states_density = [0] * nstates
             for state_index in range(nstates):
                 state_data = {}
@@ -245,27 +248,38 @@ class CoreProfilesCompute:
                 state_data["density_available"] = False
                 if density is not None:
                     if len(density) != 0:
-                        states_density[state_index] = sum(density * volume)
-                        state_data["density_available"] = True
+                        # if all density values in the array are 1.0 or 0.0 then do not calculate because it can be false values
+                        if np.all(density == 1.0) or np.all(density == 0.0):
+                            logger.critical(
+                                "!  core_profile IDS: Density data for species "
+                                + self.ids_object.profiles_1d[slice_index]
+                                .ion[species_index]
+                                .label
+                                + " and state "
+                                + str(state_index)
+                                + " all are ones or zeros "
+                            )
+                        else:
+                            logger.debug("Density array :" + str(density))
+                            states_density[state_index] = sum(density * volume)
+                            state_data["density_available"] = True
                     else:
                         logger.critical(
-                            "!  core_profile IDS: Density data for species ",
-                            self.ids_object.profiles_1d[slice_index]
+                            "!  core_profile IDS: Density data for species "
+                            + self.ids_object.profiles_1d[slice_index]
                             .ion[species_index]
                             .label,
-                            " and state ",
-                            state_index,
-                            " is empty ",
+                            " and state " + str(state_index) + " is empty ",
                         )
                 else:
                     logger.critical(
-                        "!  core_profile IDS: Density data for species ",
-                        self.ids_object.profiles_1d[slice_index]
+                        "!  core_profile IDS: Density data for species "
+                        + self.ids_object.profiles_1d[slice_index]
                         .ion[species_index]
-                        .label,
-                        " and state ",
-                        state_index,
-                        " is empty ",
+                        .label
+                        + " and state "
+                        + str(state_index)
+                        + " is empty "
                     )
                 # TODO Couldn't retrive state desnity should we calculate n/ni?
                 # In that case density is always 0 and no meaning of n/ni
@@ -275,10 +289,23 @@ class CoreProfilesCompute:
                 # /home/ITER/sawantp1/imasrepo/checkinfolder/idstools/src/compute/core_profiles/functions.py:230: RuntimeWarning: divide by zero encountered in double_scalars
                 #   100 * states_density[state_index] / species_density[species_index]
                 state_data["states_density"] = states_density
-
-                state_data["n_ni"] = (
-                    100 * states_density[state_index] / species_density[species_index]
+                logger.debug(
+                    "State density at index "
+                    + str(state_index)
+                    + " : State density : "
+                    + str(states_density[state_index])
+                    + "\t Species density :"
+                    + str(species_density[species_index])
                 )
+                # if species density is 0.0 then do not calculate n/ni
+                if species_density[species_index] != 0.0:
+                    state_data["n_ni"] = (
+                        100
+                        * states_density[state_index]
+                        / species_density[species_index]
+                    )
+                else:
+                    state_data["n_ni"] = 0.0
                 species_data[str(state_index)] = state_data
 
             # label = self.ids_object.profiles_1d[slice_index].ion[species_index].label
@@ -295,7 +322,7 @@ class CoreProfilesCompute:
         Returns:
             [float]: [Sum of multiplication of volume and elcetrons density ]
         """
-        volume = self.volume
+        volume = self.get_volume(slice_index)
 
         electron_density = self.ids_object.profiles_1d[slice_index].electrons.density
         logger.info("Total no. electrons (ne): " + str(sum(volume * electron_density)))
@@ -309,21 +336,6 @@ class CoreProfilesCompute:
             logger.critical("!   core_profile IDS: Grid volume is empty")
         logger.info("Total volume:" + str(np.sum(volume)))
         return volume
-
-    def get_single_species_density(self, slice_index=0, species_index=0):
-        """
-        Sum of multiplication of volume and species density
-
-        Args:
-            slice_index (int, optional): [slice on which functions should operate on]. Defaults to 0.
-            species_index (int, optional): [species from which we need to get the data]. Defaults to 0.
-
-        Returns:
-            [float]: [Sum of multiplication of volume and elcetrons density ]
-        """
-        volume = self.volume
-        density = self.ids_object.profiles_1d[slice_index].ion[species_index].density
-        return sum(volume * density)
 
     @functools.lru_cache(maxsize=128)
     def get_species_density(self, slice_index=0) -> tuple:
@@ -344,13 +356,15 @@ class CoreProfilesCompute:
         max_density = -999.0
         max_density_index = 0
         for ispecies in range(nspecies):
-            species_density_list[ispecies] = self.get_single_species_density(
-                slice_index=0, species_index=ispecies
-            )
+            volume = self.get_volume(slice_index)
+            density = self.ids_object.profiles_1d[slice_index].ion[ispecies].density
+            species_density_list[ispecies] = sum(volume * density)
+
             sum_density = sum_density + species_density_list[ispecies]
             if species_density_list[ispecies] > max_density:
                 max_density = species_density_list[ispecies]
                 max_density_index = ispecies
+        logger.debug("Species density:" + str(species_density_list))
         return species_density_list, sum_density, max_density_index
 
     def get_nspec_over_ntot(self):
