@@ -525,7 +525,7 @@ type     = "tbd"
 
 import yaml
 import logging
-from database_tools.set_logger import set_logger
+from set_logger import set_logger
 
 # Initialize logger
 logger = set_logger(__name__)

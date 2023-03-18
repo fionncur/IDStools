@@ -2,6 +2,7 @@
 from os import path, getenv
 import glob
 import logging
+import inspect
 
 import imas
 from database_tools import db_helpers
@@ -264,12 +265,8 @@ def db_validator(
     if not schema_path:
         # Load default validation schema in case of "schema_path" not given
         vsdir = "/validation_schemas/"
-        dpath0 = path.dirname(path.realpath(__file__)) + vsdir
-        if path.exists(dpath0):
-            dpath = dpath0
-        else:
-            dpath = getenv("EBROOTIDSTOOLS") + "/bin" + vsdir
-        #
+        dpath = "../../../../bin" + vsdir
+        #dpath = path.dirname(path.realpath(__file__)) + vsdir
         schema_files.extend(sorted(glob.glob(dpath + "/ITER/*.y*ml", recursive=True)))
     else:
         for p in schema_path:
