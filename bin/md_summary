@@ -66,7 +66,7 @@ if args['choice'] != None:
         print("------------------------------------------------------------------", file=sys.stderr)
         sys.exit(1)
 else:
-    choice = ['pbs','ids','description']
+    choice = ['pbs','ids','description','backend']
 
 # PRINT THE ARGUMENTS OF THE DEFAULT CALL TO THE FUNCTION
 if args['choice'] == None:
@@ -90,6 +90,7 @@ class tab_init():
       self.value['replaced_by']            = ' '
       self.value['replaces']               = ' '
       self.value['reason_for_replacement'] = ' '
+      self.value['backend']                = ' '
       self.value['status']                 = ' '
 
 def tab_adjust(data):
