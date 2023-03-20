@@ -251,7 +251,7 @@ class CoreProfilesCompute:
                         # if all density values in the array are 1.0 or 0.0 then do not calculate because it can be false values
                         if np.all(density == 1.0) or np.all(density == 0.0):
                             logger.critical(
-                                "!  core_profile IDS: Density data for species "
+                                "core_profile IDS: Density data for species "
                                 + self.ids_object.profiles_1d[slice_index]
                                 .ion[species_index]
                                 .label
@@ -265,7 +265,7 @@ class CoreProfilesCompute:
                             state_data["density_available"] = True
                     else:
                         logger.critical(
-                            "!  core_profile IDS: Density data for species "
+                            "core_profile IDS: Density data for species "
                             + self.ids_object.profiles_1d[slice_index]
                             .ion[species_index]
                             .label,
@@ -273,7 +273,7 @@ class CoreProfilesCompute:
                         )
                 else:
                     logger.critical(
-                        "!  core_profile IDS: Density data for species "
+                        "core_profile IDS: Density data for species "
                         + self.ids_object.profiles_1d[slice_index]
                         .ion[species_index]
                         .label
@@ -333,7 +333,7 @@ class CoreProfilesCompute:
         volume = self.ids_object.profiles_1d[slice_index].grid.volume
         if len(volume) == 0:
             volume = None
-            logger.critical("!   core_profile IDS: Grid volume is empty")
+            logger.critical("core_profile IDS: Grid volume is empty")
         logger.info("Total volume:" + str(np.sum(volume)))
         return volume
 

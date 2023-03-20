@@ -64,7 +64,7 @@ class EdgeProfilesCompute:
             ids_object.ggd[slice_index]
 
         except:
-            logger.critical("!  edge_profiles IDS:slice not found")
+            logger.critical("edge_profiles IDS:slice not found")
             return 0
 
         edgeProfilesCompute = EdgeProfilesCompute(ids_object, slice_index)
@@ -263,7 +263,7 @@ class EdgeProfilesCompute:
         index_counter = 0
         if grid_subset_name.lower() != "cells":
             logger.warning(
-                "!  edge_profiles IDS:cells not found in grid subset at 4th index, Checking index of cells"
+                "edge_profiles IDS:cells not found in grid subset at 4th index, Checking index of cells in the grid subset"
             )
             for subset in self.ids_object.grid_ggd[slice_index].grid_subset:
                 if subset.identifier.name.lower() == "cells":
@@ -279,7 +279,7 @@ class EdgeProfilesCompute:
                     )
                     index = index_counter
                     logger.warning(
-                        "!  edge_profiles IDS:cells found in grid subset at "
+                        "edge_profiles IDS:cells found in grid subset at "
                         + str(index_counter)
                         + " index"
                     )
@@ -287,9 +287,7 @@ class EdgeProfilesCompute:
                 index_counter = index_counter + 1
         num_vertices = len(elements)
         if num_vertices == 0:
-            logger.critical(
-                "!  edge_profiles IDS:No element found in grid subset : " + str()
-            )
+            logger.critical("edge_profiles IDS:No element found in grid subset")
             return None
         volumes = [0] * num_vertices
 
@@ -320,7 +318,7 @@ class EdgeProfilesCompute:
                     volumes[index] = obj_dim.geometry[2]
         if np.any(volumes) == False:
             logger.warning(
-                "!  edge_profiles IDS:volume is not available in cells (face_indices_volume).. Calculating manually from nodes "
+                "edge_profiles IDS:volume is not available in cells (face_indices_volume).. Calculating manually from nodes "
             )
             # Get volume from nodes if volumes are still empty
             for index, element in enumerate(elements):
@@ -388,7 +386,7 @@ class EdgeProfilesCompute:
                     volumes[index] = 2.0 * np.pi * baryR * area
 
         if np.any(volumes) == False:
-            logger.critical("!   edge_profiles IDS: volumes are empty")
+            logger.critical("edge_profiles IDS: volumes are empty")
             return None
         logger.info("Total volume:" + str(np.sum(volumes)))
         return volumes
@@ -432,7 +430,7 @@ class EdgeProfilesCompute:
 
             if len(self.ids_object.ggd[slice_index].ion[ispecies].density) == 0:
                 logger.warn(
-                    "!   edge_profiles IDS: species density not found for "
+                    "edge_profiles IDS: species density not found for "
                     + self.ids_object.ggd[slice_index].ion[ispecies].label
                     + ", Getting density from state."
                 )

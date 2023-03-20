@@ -80,8 +80,8 @@ connection = imas.DBEntry(
 )
 err, _ = connection.open()
 if err != 0:
-    print(
-        f"!   Shot {args.shot}, run {args.run} for user {args.user} and database {args.database} is not reachable ----> abort!",
+    logger.critical(
+        f"Shot {args.shot}, run {args.run} for user {args.user} and database {args.database} is not reachable ----> abort!",
         file=sys.stderr,
     )
     sys.exit(err)
@@ -114,7 +114,10 @@ if core_profiles_ids.time is not None:
     profiles_1d_slice = connection.partial_get(
         "core_profiles", f"profiles_1d({slice_index})"
     )
-    logger.info("Time slice using : " + str(slice_index))
+    logger.info(
+        "core_profiles IDS:Using time slice where maximum electrons density is present, Time slice:"
+        + str(slice_index)
+    )
     core_profiles_ids.profiles_1d.resize(1)
     core_profiles_ids.profiles_1d[0] = profiles_1d_slice
 
@@ -123,13 +126,13 @@ if core_profiles_ids.time is not None:
     )
     if returnstatus == 0:
         core_profile_exists = False
-        print(
-            "!   core_profiles IDS exists but time slice doesn't exists. --> Abort."
+        logger.critical(
+            "core_profiles IDS: IDS exists but time slice doesn't exists. --> Abort."
         )
     elif returnstatus == -1:
         core_profile_exists = False
-        print("!   core_profiles IDS is exists but volume doesn't exists. ")
-        print("!   Retrieving volume from equilibrium IDS")
+        logger.critical("core_profiles IDS:IDS exists but volume is not set")
+        logger.warning("core_profiles IDS :Retrieving volume from equilibrium IDS")
         equilibrium = imas.equilibrium()
         equilibrium.time_slice.resize(1)
         volume = connection.partial_get(
@@ -143,13 +146,18 @@ if core_profiles_ids.time is not None:
         core_profile_exists = True
 
 else:
-    print("!   No core_profiles IDS in the data-entry --> Abort.")
+    logger.critical(
+        "core_profiles IDS:No core_profiles IDS in the data-entry --> Abort."
+    )
 
 
 # # TODO There is no relation of Slice index calculated above so getting data of 0th slice. and Why only 0th slice
 
 if edge_profiles_ids.time is not None:
-    logger.info("Time slice using : " + str(slice_index))
+    logger.info(
+        "edge_profiles IDS:Using time slice where maximum electrons density is present in core, Time slice:"
+        + str(slice_index)
+    )
     edge_profiles_ids.ggd.resize(1)
     edge_profiles_ids.ggd[0] = connection.partial_get(
         "edge_profiles", f"ggd({slice_index})"
@@ -166,17 +174,20 @@ if edge_profiles_ids.time is not None:
     if returnstatus == 0:
         edge_profile_exists = False
         logger.critical(
-            "!   edge_profiles IDS exists but time slice doesn't exists. --> Abort."
+            "edge_profiles IDS:IDS exists but time slice doesn't exists. --> Abort."
         )
     elif returnstatus == -1:
         logger.warning(
-            "!   edge_profiles IDS exists but volume is not set. --> Trying another time slice. This may take a while :-)"
+            "edge_profiles IDS:IDS exists but volume is not set. --> Trying nearby time slice. This may take a while.."
         )
         edge_profiles = connection.get("edge_profiles")
+        time_slices_count = len(edge_profiles.grid_ggd)
         index_list = []
         for counter in range(1, 10):
-            index_list.append(slice_index - counter)
-            index_list.append(slice_index + counter)
+            if slice_index - counter >= 0 and slice_index - counter < time_slices_count:
+                index_list.append(slice_index - counter)
+            if slice_index + counter >= 0 and slice_index + counter < time_slices_count:
+                index_list.append(slice_index + counter)
         for time_slice in index_list:
             index = 4
             elements = edge_profiles.grid_ggd[time_slice].grid_subset[index].element
@@ -185,7 +196,6 @@ if edge_profiles_ids.time is not None:
             )
             # check if grid_subset[4] identifier name is cells, if not, find out 'cells' index
             index_counter = 0
-            print()
             if grid_subset_name.lower() != "cells":
                 for subset in edge_profiles.grid_ggd[time_slice].grid_subset:
                     if subset.identifier.name.lower() == "cells":
@@ -203,7 +213,10 @@ if edge_profiles_ids.time is not None:
                         break
                     index_counter = index_counter + 1
             if len(elements) != 0:
-                logger.info("Time slice using : " + str(time_slice))
+                logger.info(
+                    "edge_profiles IDS:Using nearby time slice in edge where maximum electrons density is present in core, Time slice:"
+                    + str(time_slice)
+                )
                 edge_profiles_ids.ggd.resize(1)
                 edge_profiles_ids.ggd[0] = connection.partial_get(
                     "edge_profiles", f"ggd({time_slice})"
@@ -222,16 +235,18 @@ if edge_profiles_ids.time is not None:
                 if returnstatus == 0:
                     edge_profile_exists = False
                     logger.critical(
-                        "!   edge_profiles IDS exists but time slice doesn't exists. --> Abort."
+                        "edge_profiles IDS:IDS exists but time slice doesn't exists. --> Abort."
                     )
                 elif returnstatus == -1:
                     edge_profile_exists = False
                     logger.warning(
-                        "!   edge_profiles IDS exists but volume is not set."
+                        "edge_profiles IDS:IDS exists but volume is not set."
                     )
                 break
 else:
-    logger.critical("!   No edge_profiles IDS in the data-entry. --> Abort.")
+    logger.critical(
+        "edge_profiles IDS:No edge_profiles IDS in the data-entry. --> Abort."
+    )
 
 profile_availability_string = ""
 if core_profile_exists is False:
