@@ -264,10 +264,9 @@ def db_validator(
     schema_files = []
     if not schema_path:
         # Load default validation schema in case of "schema_path" not given
-        vsdir = "/validation_schemas/"
-        dpath = "../../../../bin" + vsdir
-        #dpath = path.dirname(path.realpath(__file__)) + vsdir
-        schema_files.extend(sorted(glob.glob(dpath + "/ITER/*.y*ml", recursive=True)))
+        p = "../../../../bin/validation_schemas"
+        if path.isdir(p):
+            schema_files.extend(sorted(glob.glob(p + "/ITER/*.y*ml", recursive=True)))
     else:
         for p in schema_path:
             if path.isdir(p):
