@@ -5,9 +5,9 @@ import textwrap
 import traceback
 
 import imas
-from set_logger import set_logger
-from database_tools.eqdsk2ids import geqdsk2ids
+from idstools.set_logger import set_logger
 from idstools.cli import imas_parser, get_backend_id
+from database_tools.eqdsk2ids import geqdsk2ids
 
 
 # ----------------------------------------------------------------------
