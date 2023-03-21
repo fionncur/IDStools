@@ -3,7 +3,7 @@
 
 ## Description
 
-This is the package which provides different tools to interact with IDS database. It also helps physists to quickly execute some task without reinventing the wheel.
+This package provides different tools to interact with IDS database. It helps physicist to provide insights of IDSes without reinventing the wheel.
 
 ## Using IDS Tools
 
