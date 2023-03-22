@@ -13,6 +13,40 @@ from database_tools import idschk
 from database_tools.db_validator import db_validator
 
 
+# ----------------------------------------------------------------------
+
+
+def main():
+    """
+    Validation of IDSs 
+    """
+    
+
+    # Set validator for given (shot, run), otherwise whole pulses found
+    if args.shot:
+        pulse = [(args.shot, args.run)]
+    else:
+        pulse = []
+
+    logger.info("-----------------------------------------------------------")
+    logger.info("START: " + __file__)
+    logger.info("-----------------------------------------------------------")
+    st = time.time()
+
+    # Validation in IMASDB
+    res = db_validator(
+        args.user, args.database, args.version, args.backend, args.path, pulse,
+    )
+
+    et = time.time()
+    logger.info("-----------------------------------------------------------")
+    logger.info("END: " + __file__ + " [total elapsed time(s): %.2f]", et - st)
+    logger.info("-----------------------------------------------------------")
+
+
+# ----------------------------------------------------------------------
+
+
 if __name__ == "__main__":
 
     # Parse for command line options
@@ -81,33 +115,10 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
+    # Initialize logger
     logger = set_logger(__name__, logfile=args.output, level=args.log)
+
     try:
-        """
-        Validation of IDSs 
-        """
-        # Initialize logger
-        
-
-        # Set validator for given (shot, run), otherwise whole pulses found
-        if args.shot:
-            pulse = [(args.shot, args.run)]
-        else:
-            pulse = []
-
-        logger.info("-----------------------------------------------------------")
-        logger.info("START: " + __file__)
-        logger.info("-----------------------------------------------------------")
-        st = time.time()
-
-        # Validation in IMASDB
-        res = db_validator(
-            args.user, args.database, args.version, args.backend, args.path, pulse,
-        )
-
-        et = time.time()
-        logger.info("-----------------------------------------------------------")
-        logger.info("END: " + __file__ + " [total elapsed time(s): %.2f]", et - st)
-        logger.info("-----------------------------------------------------------")
+        main()
     except Exception as e:
         logger.error(traceback.format_exc())

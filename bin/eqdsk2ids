@@ -5,8 +5,8 @@ import textwrap
 import traceback
 
 import imas
-from idstools.set_logger import set_logger
 from idstools.cli import imas_parser, get_backend_id
+from idstools.set_logger import set_logger
 from database_tools.eqdsk2ids import geqdsk2ids
 
 
@@ -17,9 +17,6 @@ def main():
     """
     EQDSK Converter to IDS/equilibrium (eqdsk2ids)
     """
-
-    # Initialize logger
-    logger = set_logger(__name__, level=args.log)
 
     # Convert GEQDSK to IDS/equilibrium
     eq = geqdsk2ids(args.gpath, args.ipsign, args.b0sign, args.cocos_in)
@@ -144,6 +141,9 @@ if __name__ == "__main__":
     )
     parser.set_defaults(user=os.environ["USER"])
     args = parser.parse_args()
+
+    # Initialize logger
+    logger = set_logger(__name__, level=args.log)
 
     try:
         main()
