@@ -1,0 +1,90 @@
+﻿# https://confluence.iter.org/display/IMP/Required+fields+in+a+dataset+to+be+imported+in+a+scenario+database
+#
+edge_profiles:
+    ids_properties/homogeneous_time:
+        empty: False
+        ids_ge: 0
+        ids_le: 2
+    time(:):
+        empty: False
+    vacuum_toroidal_field/b0(:):
+        empty: False
+        #>ITER
+        #ids_b0_like: False
+        ids_lt: 0.0
+        #<ITER
+    vacuum_toroidal_field/r0:
+        empty: False
+        ids_gt: 0.0
+    code/output_flag(:):
+        empty: False
+
+    # Within the ggd[:] structure, if present:
+    ggd(itime)/electrons/temperature(i1)/values(:):
+        empty: False
+        ids_ge: 0.0
+    ggd(itime)/electrons/velocity(i1)/values(:):
+        empty: False
+    ggd(itime)/phi_potential(i1)/values(:):
+        empty: False
+    ggd(itime)/ion(i1)/element(i2)/a:
+        empty: False
+        ids_gt: 0.0
+    ggd(itime)/ion(i1)/element(i2)/z_n:
+        empty: False
+        ids_gt: 0.0
+    ggd(itime)/ion(i1)/element(i2)/atoms_n:
+        empty: False
+        ids_gt: 0
+    ggd(itime)/ion(i1)/multiple_states_flag:
+        empty: False
+        ids_ge: 0
+        ids_le: 1
+    ggd(itime)/neutral(i1)/ion_index:
+        empty: False
+        ids_ge: 0
+        ids_le: len(edge_profiles.ggd[_itime_].neutral)
+    ggd(itime)/neutral(i1)/element(i2)/a:
+        empty: False
+        ids_gt: 0.0
+    ggd(itime)/neutral(i1)/element(i2)/z_n:
+        empty: False
+        ids_gt: 0.0
+    ggd(itime)/neutral(i1)/element(i2)/atoms_n:
+        empty: False
+        ids_gt: 0
+    ggd(itime)/neutral(i1)/multiple_states_flag:
+        empty: False
+        ids_ge: 0
+        ids_le: 1
+    ggd(itime)/neutral(i1)/density(i2)/values(:):
+        empty: False
+        ids_ge: 0.0
+
+    # For each ion[:].state[:] structure:
+    ggd(itime)/ion(i1)/state(i2)/z_min: 
+        empty: False
+        ids_gt: 0.0
+    ggd(itime)/ion(i1)/state(i2)/z_max: 
+        empty: False
+        ids_gt: 0.0
+        ids_ge: edge_profiles.ggd[_itime_].ion[_i1_].state[_i2_].z_min
+    ggd(itime)/ion(i1)/element(i2)/a:
+        empty: False
+        ids_gt: 0.0
+    ggd(itime)/ion(i1)/element(i2)/z_n:
+        empty: False
+        ids_gt: 0.0
+    ggd(itime)/ion(i1)/element(i2)/atoms_n:
+        empty: False
+        ids_gt: 0.0
+    ggd(itime)/ion(i1)/state(i2)/density(i3)/values(:): 
+        empty: False
+        ids_ge: 0.0
+    ggd(itime)/ion(i1)/state(i2)/velocity(i3)/values(:): 
+        empty: False
+
+    # For each neutral[:].state[:] structure:
+    ggd(itime)/neutral(i1)/state(i2)/neutral_type/name: 
+        empty: False
+    # particle_flux, energy_flux not found

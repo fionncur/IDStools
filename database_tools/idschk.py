@@ -9,9 +9,17 @@ import statistics
 from xml.etree import ElementTree as ET
 import cerberus
 import numpy as np
+import logging
 import imas
 
 
+logger = logging.getLogger(__name__)
+
+
+# ----------------------------------------------------------------------
+
+
+# Global Constants
 IMAS_PREFIX = "IMAS_PREFIX"
 FILE_IDSDef = getenv(IMAS_PREFIX) + "/include/IDSDef.xml"
 TARGET_TAG = "IDS"
@@ -22,6 +30,7 @@ IDS_COCOS = 11
 args_verbose = False
 args_check_all = True
 
+
 # Initialization for yaml Dumper
 yaml.Dumper.ignore_aliases = lambda *args: True
 
@@ -31,45 +40,28 @@ required_fields_eq = {
     "ids.time_slice": {"minlength": 1},
     "ids.time_slice[itime].global_quantities.ip": {
         "empty": False,
-        "ids_gt": -9e40,
-        "ids_nan": False,
-        "ids_inf": False,
     },
     "ids.vacuum_toroidal_field.b0": {
         "empty": False,
-        "ids_nan": False,
-        "ids_inf": False,
     },
     "ids.time_slice[itime].profiles_1d.psi": {
         "empty": False,
-        "ids_nan": False,
-        "ids_inf": False,
     },
     "ids.time_slice[itime].profiles_1d.q": {
         "empty": False,
-        "ids_nan": False,
-        "ids_inf": False,
     },
     "ids.time_slice[itime].profiles_1d.dpressure_dpsi": {
         "empty": False,
-        "ids_nan": False,
-        "ids_inf": False,
     },
     "ids.time_slice[itime].profiles_2d": {"minlength": 1},
     "ids.time_slice[itime].profiles_2d[0].b_field_z": {
         "empty": False,
-        "ids_nan": False,
-        "ids_inf": False,
     },
     "ids.time_slice[itime].profiles_2d[0].psi": {
         "empty": False,
-        "ids_nan": False,
-        "ids_inf": False,
     },
     "ids.time_slice[itime].profiles_2d[0].r": {
         "empty": False,
-        "ids_nan": False,
-        "ids_inf": False,
         "ids_gt": 0.0,
     },
 }
@@ -84,6 +76,11 @@ required_fields_cocos = {
     "ids.time_slice[itime].profiles_1d.dpressure_dpsi": {"ids_dPdpsi_like": False},
 }
 
+# Default Validation Schema
+default_schema = {
+    "ids_nan": False,
+    "ids_inf": False,
+}
 
 # ----------------------------------------------------------------------
 
@@ -766,6 +763,9 @@ def validator(field, path_doc, ids, schema, cocos, idx):
     except:
         print("eval error on key {}, skipped".format(p))
         return
+
+    # add default schema
+    schema[path_doc].update(default_schema)
 
     # eval for schema value in case of validation between data
     for key, value in schema[path_doc].items():

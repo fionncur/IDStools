@@ -1,0 +1,81 @@
+﻿# https://confluence.iter.org/display/IMP/Required+fields+in+a+dataset+to+be+imported+in+a+scenario+database
+#
+edge_transport:
+    ids_properties/homogeneous_time:
+        empty: False
+        ids_ge: 0
+        ids_le: 2
+    time(:):
+        empty: False
+    model(i1)/flux_multiplier:
+        empty: False
+        ids_gt: 0.0
+    code/output_flag(:):
+        empty: False
+
+    # Within each model[:].ggd[:] structure:
+    model(i1)/ggd(itime)/electrons/energy/flux(i2)/values(:):
+        empty: False
+    model(i1)/ggd(itime)/electrons/particles/flux(i2)/values(:):
+        empty: False
+    model(i1)/ggd(itime)/ion(i2)/element(i3)/a:
+        empty: False
+        ids_gt: 0.0
+    model(i1)/ggd(itime)/ion(i2)/element(i3)/z_n:
+        empty: False
+        ids_gt: 0.0
+    model(i1)/ggd(itime)/ion(i2)/element(i3)/atoms_n:
+        empty: False
+        ids_gt: 0
+    model(i1)/ggd(itime)/ion(i2)/multiple_states_flag:
+        empty: False
+        ids_ge: 0
+        ids_le: 1
+    model(i1)/ggd(itime)/neutral(i2)/ion_index:
+        empty: False
+        ids_ge: 0
+        ids_le: len(edge_transport.model[_i1_].ggd[_itime_].ion)
+    model(i1)/ggd(itime)/neutral(i2)/element(i3)/a:
+        empty: False
+        ids_gt: 0.0
+    model(i1)/ggd(itime)/neutral(i2)/element(i3)/z_n:
+        empty: False
+        ids_gt: 0.0
+    model(i1)/ggd(itime)/neutral(i2)/element(i3)/atoms_n:
+        empty: False
+        ids_gt: 0
+    model(i1)/ggd(itime)/neutral(i2)/multiple_states_flag:
+        empty: False
+        ids_ge: 0
+        ids_le: 1
+
+    # For each ion[:].state[:] structure:
+    model(i1)/ggd(itime)/ion(i2)/state(i3)/z_min:
+        empty: False
+        ids_gt: 0.0
+    model(i1)/ggd(itime)/ion(i2)/state(i3)/z_max:
+        empty: False
+        ids_gt: 0.0
+        ids_ge: edge_transport.model[_i1_].ggd[_itime_].ion[_i2_].state[_i3_].z_min
+
+    model(i1)/ggd(itime)/ion(i2)/element(i3)/a:
+        empty: False
+        ids_gt: 0.0
+    model(i1)/ggd(itime)/ion(i2)/element(i3)/z_n:
+        empty: False
+        ids_gt: 0.0
+    model(i1)/ggd(itime)/ion(i2)/element(i3)/atoms_n:
+        empty: False
+        ids_gt: 0.0
+    model(i1)/ggd(itime)/ion(i2)/state(i3)/particles/flux(:):
+        empty: False
+    model(i1)/ggd(itime)/ion(i2)/state(i3)/energy/flux(:):
+        empty: False
+
+    # For each neutral[:].state[:] structure:
+    model(i1)/ggd(itime)/neutral(i2)/state(i3)/neutral_type/name:
+        empty: False
+    model(i1)/ggd(itime)/neutral(i2)/state(i3)/energy/flux(i4)/values(:):
+        empty: False
+    model(i1)/ggd(itime)/neutral(i2)/state(i3)/particles/flux(i4)/values(:):
+        empty: False

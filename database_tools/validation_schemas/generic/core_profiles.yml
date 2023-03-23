@@ -1,0 +1,118 @@
+﻿# https://confluence.iter.org/display/IMP/Required+fields+in+a+dataset+to+be+imported+in+a+scenario+database
+#
+core_profiles:
+    ids_properties/homogeneous_time:
+        empty: False
+        ids_ge: 0
+        ids_le: 2
+    global_quantities/beta_pol(:):
+        empty: False
+        ids_ge: 0.0
+    global_quantities/beta_tor_norm(:):
+        empty: False
+        ids_ge: 0.0
+    global_quantities/current_bootstrap(:):
+        empty: False
+        ids_ip_like: False
+    global_quantities/current_non_inductive(:):
+        empty: False
+        ids_ip_like: False
+    global_quantities/energy_diamagnetic(:):
+        empty: False
+        ids_ge: 0.0
+    global_quantities/ip(:):
+        empty: False
+        ids_ip_like: False
+    global_quantities/v_loop(:):
+        empty: False
+        ids_ip_like: False
+    profiles_1d(itime)/e_field/radial(:):
+        empty: False
+    profiles_1d(itime)/electrons/density(:):
+        empty: False
+        ids_ge: 0.0
+    profiles_1d(itime)/electrons/pressure(:):
+        empty: False
+        ids_ge: 0.0
+    profiles_1d(itime)/electrons/pressure_fast_parallel(:):
+        empty: False
+        ids_ge: 0.0
+    profiles_1d(itime)/electrons/pressure_fast_perpendicular(:):
+        empty: False
+        ids_ge: 0.0
+    profiles_1d(itime)/electrons/pressure_thermal(:):
+        empty: False
+        ids_ge: 0.0
+    profiles_1d(itime)/electrons/temperature(:):
+        empty: False
+        ids_ge: 0.0
+    profiles_1d(itime)/grid/rho_tor(:):
+        empty: False
+    profiles_1d(itime)/grid/rho_tor_norm(:):
+        empty: False
+        ids_ge: 0.0
+        ids_le: 1.0
+    profiles_1d(itime)/grid/psi(:):
+        empty: False
+        ids_psi_like: False
+    profiles_1d(itime)/grid/volume(:):
+        empty: False
+        ids_ge: 0.0
+    profiles_1d(itime)/ion(i1)/density(:):
+        empty: False
+        ids_ge: 0.0
+    profiles_1d(itime)/ion(i1)/element(i2)/a:
+        empty: False
+        ids_gt: 0.0
+    profiles_1d(itime)/ion(i1)/element(i2)/z_n:
+        empty: False
+        ids_gt: 0.0
+    profiles_1d(itime)/ion(i1)/pressure(:):
+        empty: False
+        ids_ge: 0.0
+    profiles_1d(itime)/ion(i1)/pressure_fast_parallel(:):
+        empty: False
+        ids_ge: 0.0
+    profiles_1d(itime)/ion(i1)/pressure_fast_perpendicular(:):
+        empty: False
+        ids_ge: 0.0
+    profiles_1d(itime)/ion(i1)/pressure_thermal(:):
+        empty: False
+        ids_ge: 0.0
+    profiles_1d(itime)/ion(i1)/temperature(:):
+        empty: False
+        ids_ge: 0.0
+    profiles_1d(itime)/ion(i1)/velocity/diamagnetic(:):
+        empty: False
+    profiles_1d(itime)/ion(i1)/velocity/poloidal(:):
+        empty: False
+    profiles_1d(itime)/ion(i1)/velocity/toroidal(:):
+        empty: False
+    profiles_1d(itime)/j_bootstrap(:):
+        empty: False
+    profiles_1d(itime)/j_non_inductive(:):
+        empty: False
+    profiles_1d(itime)/j_ohmic(:):
+        empty: False
+    profiles_1d(itime)/j_total(:):
+        empty: False
+    profiles_1d(itime)/magnetic_shear(:):
+        empty: False
+    profiles_1d(itime)/pressure(:):
+        empty: False
+        ids_ge: 0.0
+    profiles_1d(itime)/pressure_parallel(:):
+        empty: False
+        ids_ge: 0.0
+    profiles_1d(itime)/pressure_perpendicular(:):
+        empty: False
+        ids_ge: 0.0
+    profiles_1d(itime)/q(:):
+        empty: False
+        ids_q_like: False
+    profiles_1d(itime)/t_i_average(:):
+        empty: False
+        ids_ge: 0.0
+    profiles_1d(itime)/zeff(:):
+        empty: False
+        ids_ge: 1.0

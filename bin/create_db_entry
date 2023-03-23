@@ -525,6 +525,10 @@ type     = "tbd"
 
 import yaml
 import logging
+from idstools.set_logger import set_logger
+
+# Initialize logger
+logger = set_logger(__name__)
 
 IDS_COCOS = 11
 

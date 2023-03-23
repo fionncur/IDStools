@@ -2,12 +2,12 @@
 import os
 import argparse
 import textwrap
-import logging
 import traceback
 
 import imas
-from database_tools.eqdsk2ids import geqdsk2ids
 from idstools.cli import imas_parser, get_backend_id
+from idstools.set_logger import set_logger
+from database_tools.eqdsk2ids import geqdsk2ids
 
 
 # ----------------------------------------------------------------------
@@ -106,18 +106,11 @@ if __name__ == "__main__":
         default=None,
     )
     parser.add_argument(
-        "--verbose",
-        help="increase output verbosity",
-        required=False,
-        default=False,
-        action="store_true",
-    )
-    parser.add_argument(
-        "--debug",
-        help="debug information",
-        required=False,
-        default=False,
-        action="store_true",
+        "--log",
+        dest="log",
+        default="WARNING",
+        choices=["DEBUG","INFO","WARNING", "ERROR","CRITICAL"],
+        help="Configure the logging level, default=%(default)s",
     )
     parser.add_argument(
         "--ipsign",
@@ -150,17 +143,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # Initialize logger
-    logger = logging.getLogger(prog)
-    if args.debug:
-        logger.setLevel(logging.DEBUG)
-    elif args.verbose:
-        logger.setLevel(logging.INFO)
-    else:
-        logger.setLevel(logging.WARNING)
-    handler = logging.StreamHandler()
-    logger.addHandler(handler)
-    logfmt = logging.Formatter("%(asctime)s %(name)s (%(levelname)s): %(message)s")
-    handler.setFormatter(logfmt)
+    logger = set_logger(__name__, level=args.log)
 
     try:
         main()
