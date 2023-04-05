@@ -151,8 +151,6 @@ def compare_ids(X, Y, field=None, ignore_version=True, verb=True, file_object=No
                 if verb:
                     if file_object is not None:
                         writer.writerow(["different length", f])
-                        print("writer called")
-
                     logger.info(f"{f} is of different length")
                 identical = False
             else:
