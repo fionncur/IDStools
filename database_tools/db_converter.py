@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # Converts an IMAS database (all its data-entries) to the specified folder and backend
 
 import imas

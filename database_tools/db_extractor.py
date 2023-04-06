@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # Return values of an IDS in all data entries of a database
 
 import imas
