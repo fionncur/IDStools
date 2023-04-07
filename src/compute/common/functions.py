@@ -52,7 +52,7 @@ def middle(array: np.ndarray) -> tuple:
     return index, value
 
 
-def compare_ids(X, Y, field=None, ignore_version=True, verb=True, file_object=None):
+def compare_ids(X, Y, field=None, ignore_version=True, verb=True, output={}):
     """
     Iterate over every field and compare values depending on the type of field.
 
@@ -67,16 +67,12 @@ def compare_ids(X, Y, field=None, ignore_version=True, verb=True, file_object=No
     verb: bool, optional
           prints information about differences
     """
-    writer = None
-    if file_object is not None:
-        writer = csv.writer(file_object)
-
     identical = True
-
     if hasattr(X, "__name__") and hasattr(Y, "__name__"):
         if X.__name__ == Y.__name__:
             if field is None:
                 field = X.__name__
+                logger.debug("Has __name__ in IDSes :" + X.__name__)
         else:
             if verb:
                 logger.error(f"Different IDSs: {X.__name__} and {Y.__name__}")
@@ -85,6 +81,7 @@ def compare_ids(X, Y, field=None, ignore_version=True, verb=True, file_object=No
         if X._base_path == Y._base_path:
             if field is None:
                 field = X._base_path
+                logger.debug("Has _base_path in IDSes :" + X._base_path)
         else:
             if verb:
                 logger.error(f"Different structure: {X._base_path} and {Y._base_path}")
@@ -108,12 +105,29 @@ def compare_ids(X, Y, field=None, ignore_version=True, verb=True, file_object=No
 
         if key not in Xd:
             if verb:
+                if field + "." + key not in output.keys():
+                    output[field + "." + key] = (
+                        field + "." + key,
+                        field + "." + key,
+                        "not present in first ids",
+                    )
+                else:
+                    logger.error("Duplicate key found")
                 logger.info(f"{key} not present in X")
             identical = False
             continue
 
         if key not in Yd:
             if verb:
+                if field + "." + key not in output.keys():
+                    output[field + "." + key] = (
+                        field + "." + key,
+                        field + "." + key,
+                        "not present in second ids",
+                    )
+                else:
+                    logger.error("Duplicate key found")
+
                 logger.info(f"{key} not present in Y")
             identical = False
             continue
@@ -122,6 +136,15 @@ def compare_ids(X, Y, field=None, ignore_version=True, verb=True, file_object=No
         Yo = Y.__dict__[key]
         if type(Xo) != type(Yo):
             if verb:
+                if field + "." + key not in output.keys():
+                    output[field + "." + key] = (
+                        Xo,
+                        Yo,
+                        None,
+                        f"different type first type(Xo), second type(Yo) ",
+                    )
+                else:
+                    logger.error("Duplicate key found")
                 logger.warning(f"Different type for {field}.{key}")
 
         if hasattr(Xo, "__module__") and "imas" in Xo.__module__:
@@ -130,18 +153,20 @@ def compare_ids(X, Y, field=None, ignore_version=True, verb=True, file_object=No
                 attrname = Xo.__name__
             else:
                 attrname = Xo._base_path
-            identical &= compare_ids(
+            identical_result, output = compare_ids(
                 Xo,
                 Yo,
                 field=f"{field}.{attrname}",
                 ignore_version=ignore_version,
                 verb=verb,
-                file_object=file_object,
+                output=output,
             )
+            identical &= identical_result
             continue
 
         # treatment of struct_array and list of strings
         if type(Xo).__name__ == "list":
+            data_type = list
             if len(Xo) != len(Yo):
                 # avoids printing "array" as this is internal attribute for AoS
                 if key == "array":
@@ -149,33 +174,43 @@ def compare_ids(X, Y, field=None, ignore_version=True, verb=True, file_object=No
                 else:
                     f = f"{field}.{key}"
                 if verb:
-                    if file_object is not None:
-                        writer.writerow(["different length", f])
+                    if f not in output.keys():
+                        output[f] = (Xo, Yo, data_type, "different length")
+                    else:
+                        logger.error("Duplicate key found")
+
                     logger.info(f"{f} is of different length")
                 identical = False
             else:
                 for i in range(len(Xo)):
                     if "structArrayElement" in type(Xo[i]).__name__:
-                        identical &= compare_ids(
+                        identical_result, output = compare_ids(
                             Xo[i],
                             Yo[i],
                             field=f"{field}[{i}]",
                             ignore_version=ignore_version,
                             verb=verb,
-                            file_object=file_object,
+                            output=output,
                         )
+                        identical &= identical_result
                     else:
                         # print("list of "+type(xo[i]).__name__)
                         continue
         else:
+            # Check equalities of arrays first as numpy array
             if isinstance(Xo, np.ndarray) and isinstance(Yo, np.ndarray):
                 result = np.array_equal(Xo, Yo, ARRAY_EQUAL_KWARGS)
+                # output[field + "." + key]= (Xo, Yo, "equal")
+            # and second as list
             else:
                 result = Xo == Yo
+                # output[field + "." + key]= (Xo, Yo, "equal")
 
             if not result:
+                data_type = None
                 missing = [False]
                 if isinstance(Xo, np.ndarray):
+                    data_type = np.ndarray
                     if Xo.size == 0:
                         missing = [True, "first"]
                     elif Yo.size == 0:
@@ -184,6 +219,7 @@ def compare_ids(X, Y, field=None, ignore_version=True, verb=True, file_object=No
                     missmap = {int: -999999999, float: -9e40}
                     for t in missmap:
                         if isinstance(Xo, t):
+                            data_type = t
                             if Xo == missmap[t]:
                                 missing = [True, "first"]
                             elif Yo == missmap[t]:
@@ -191,15 +227,29 @@ def compare_ids(X, Y, field=None, ignore_version=True, verb=True, file_object=No
 
                 if missing[0]:
                     if verb:
-                        if file_object is not None:
-                            writer.writerow(["different values", field + "." + key])
+                        if field + "." + key not in output.keys():
+                            output[field + "." + key] = (
+                                Xo,
+                                Yo,
+                                data_type,
+                                "missing in the IDS " + missing[1],
+                            )
+                        else:
+                            logger.error("Duplicate key found")
                         logger.info(f"{field}.{key} is missing in the {missing[1]} IDS")
                     identical = False
                 else:
                     if verb:
-                        if file_object is not None:
-                            writer.writerow(["different values", field + "." + key])
+                        if field + "." + key not in output.keys():
+                            output[field + "." + key] = (
+                                Xo,
+                                Yo,
+                                data_type,
+                                "different values",
+                            )
+                        else:
+                            logger.error("Duplicate key found")
                         logger.info(f"{field}.{key} has different values")
                     identical = False
 
-    return identical
+    return identical, output

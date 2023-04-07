@@ -3,6 +3,7 @@ import datetime
 import logging
 import imas
 from idstools.cli import *
+import numpy as np
 
 root_path = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(root_path)
@@ -14,7 +15,6 @@ def setup_logger(name, verbose=False, log_dir="."):
     logger.setLevel(logging.WARN)  # default
     if verbose:
         logger.setLevel(logging.DEBUG)
-    ch = logging.StreamHandler()
     # Create stream handler for logging to stdout (log all five levels)
     stdout_handler = logging.StreamHandler(sys.stdout)
     stdout_handler.setLevel(logging.DEBUG)
@@ -61,6 +61,7 @@ def get_log_filename(name, log_dir):
 if __name__ == "__main__":
     logger, file_name = setup_logger("module", verbose=True, log_dir="logs")
     logger.info("logger is initiated")
+    logger.debug("logger is in debug mode")
     # Management of input arguments
     parser = argparse.ArgumentParser(
         description="Compare a IDS from 2 datasets", parents=[imas_parser]
@@ -139,20 +140,140 @@ if __name__ == "__main__":
 
     if args.ids == []:
         args.ids = [ids.value for ids in list(imas.IDSName)]
-    file_object = open(file_name + ".csv", "w")
-    import csv
+    file_object = open(file_name + ".html", "a")
 
-    writer = csv.writer(file_object)
-    writer.writerow(["Description", "Values"])
     for idsname in args.ids:
+        # idsA = inputA.partial_get(idsname,"time_slice(0)/boundary")
+        # idsB = inputB.partial_get(idsname,"time_slice(0)/boundary")
+
         idsA = inputA.get(idsname)
         idsB = inputB.get(idsname)
 
-        compare_ids(
+        compare_result, output = compare_ids(
             idsA,
             idsB,
             field=idsname,
             ignore_version=args.skip_provenance,
-            file_object=file_object,
+        )
+        # import json
+
+        # print(
+        #     json.dumps(
+        #         output,
+        #         indent=4,
+        #         default=lambda o: f"<<non-serializable: {type(o).__qualname__}>>",
+        #     )
+        # )
+        report_title = f"diff {args.shotA}/{args.runA} ~ {args.shotB}/{args.runB}"
+        report_header_string = (
+            """<head>
+                    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+                    <title>"""
+            + report_title
+            + """</title>
+                    <style type="text/css">
+                        p {
+                            color: black;
+                            font-size: 10pt;
+                            font-weight: normal;
+                        }
+
+                        p.name {
+                            color: red;
+                            font-size: 16pt;
+                            font-weight: bold;
+                        }
+
+                        p.welcome {
+                            color: #3333aa;
+                            font-size: 18pt;
+                            font-weight: bold;
+                            text-align: center;
+                        }
+
+                        span.head {
+                            color: #3333aa;
+                            font-size: 10pt;
+                            font-weight: bold;
+                        }
+                    </style>
+                    <link href="css/jquery.treetable.css" rel="stylesheet" type="text/css">
+                    <link href="css/maketree.css" rel="stylesheet">
+                </head>"""
+        )
+        report_table_header = f"""
+        <thead style="color:#ff0000">
+                            <td>Field Name</td>
+                            <td>{args.shotA}/{args.runA}</td>
+                            <td>{args.shotB}/{args.runB}</td>
+                            <td>Comments</td>
+                            <td>Details</td>
+                        </thead>"""
+
+        report_field_difference = ""
+        report_details = ""
+        for key, values in output.items():
+            print(values[2])
+            if values[2] is np.ndarray:
+                print("found numpy array")
+                import matplotlib.pyplot as plt
+                import base64
+                from io import BytesIO
+
+                fig = plt.figure()
+                # plot sth
+                xpoints = np.array([1, 8])
+                ypoints = np.array([3, 10])
+                plt.plot(xpoints, ypoints)
+
+                tmpfile = BytesIO()
+                fig.savefig(tmpfile, format="png")
+                encoded = base64.b64encode(tmpfile.getvalue()).decode("utf-8")
+
+                report_details = (
+                    f"""<img src="data:image/png;base64, {encoded}" alt="Red dot" />"""
+                )
+                report_diff_line = f"""<tr>
+                        <td><span class="pathname">{key}</span></td>
+                        <td>{len(values[0])}</td>
+                        <td>{len(values[1])}</td>
+                        <td>{values[3]}</td>
+                        <td>{report_details}</td>
+                    </tr>"""
+
+            elif values[2] == list:
+                report_diff_line = f"""<tr>
+                        <td><span class="pathname">{key}</span></td>
+                        <td>{len(values[0])}</td>
+                        <td>{len(values[1])}</td>
+                        <td>{values[3]}</td>
+                        <td></td>
+                    </tr>"""
+            else:
+                report_diff_line = f"""<tr>
+                        <td><span class="pathname">{key}</span></td>
+                        <td>{values[0]}</td>
+                        <td>{values[1]}</td>
+                        <td>{values[3]}</td>
+                        <td></td>
+                    </tr>"""
+            report_field_difference += report_diff_line
+        file_object.write(
+            f"""
+            <html>
+                {report_header_string}
+                <p>{report_title}</p>
+                <body>
+                    <table>
+                        {report_table_header}
+                        {report_field_difference}
+                    </table>
+                    <script src="js/jquery-1.12.4.min.js"></script>
+                    <script src="js/jquery.treetable.js"></script>
+                    <script src="js/treeView2.js"></script>
+                    <script>  makeTree('body>table');</script>
+                </body>
+            </html>
+            """
         )
     file_object.close()
