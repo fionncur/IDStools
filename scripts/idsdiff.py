@@ -140,12 +140,63 @@ if __name__ == "__main__":
 
     if args.ids == []:
         args.ids = [ids.value for ids in list(imas.IDSName)]
-    file_object = open(file_name + ".html", "a")
+    file_object = open(file_name + ".html", "w")
 
+    report_title = f"diff {args.shotA}/{args.runA} ~ {args.shotB}/{args.runB}"
+    report_header_string = (
+        """<head>
+                <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+                <title>"""
+        + report_title
+        + """</title>
+                <style type="text/css">
+                    p {
+                        color: black;
+                        font-size: 10pt;
+                        font-weight: normal;
+                    }
+
+                    p.name {
+                        color: red;
+                        font-size: 16pt;
+                        font-weight: bold;
+                    }
+
+                    p.welcome {
+                        color: #3333aa;
+                        font-size: 18pt;
+                        font-weight: bold;
+                        text-align: center;
+                    }
+
+                    span.head {
+                        color: #3333aa;
+                        font-size: 10pt;
+                        font-weight: bold;
+                    }
+                </style>
+                <link href="css/jquery.treetable.css" rel="stylesheet" type="text/css">
+                <link href="css/maketree.css" rel="stylesheet">
+            </head>"""
+    )
+    report_table_header = f"""
+    <thead style="color:#ff0000">
+                        <td>Field Name</td>
+                        <td>{args.shotA}/{args.runA}</td>
+                        <td>{args.shotB}/{args.runB}</td>
+                        <td>Comments</td>
+                        <td>Details</td>
+                    </thead>"""
+    file_object.write(
+        f"""
+            <html>
+                {report_header_string}
+                <p>{report_title}</p>
+                <body>
+                    <table>
+                        {report_table_header}"""
+    )
     for idsname in args.ids:
-        # idsA = inputA.partial_get(idsname,"time_slice(0)/boundary")
-        # idsB = inputB.partial_get(idsname,"time_slice(0)/boundary")
-
         idsA = inputA.get(idsname)
         idsB = inputB.get(idsname)
 
@@ -155,73 +206,24 @@ if __name__ == "__main__":
             field=idsname,
             ignore_version=args.skip_provenance,
         )
-        # import json
-
-        # print(
-        #     json.dumps(
-        #         output,
-        #         indent=4,
-        #         default=lambda o: f"<<non-serializable: {type(o).__qualname__}>>",
-        #     )
-        # )
-        report_title = f"diff {args.shotA}/{args.runA} ~ {args.shotB}/{args.runB}"
-        report_header_string = (
-            """<head>
-                    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-                    <title>"""
-            + report_title
-            + """</title>
-                    <style type="text/css">
-                        p {
-                            color: black;
-                            font-size: 10pt;
-                            font-weight: normal;
-                        }
-
-                        p.name {
-                            color: red;
-                            font-size: 16pt;
-                            font-weight: bold;
-                        }
-
-                        p.welcome {
-                            color: #3333aa;
-                            font-size: 18pt;
-                            font-weight: bold;
-                            text-align: center;
-                        }
-
-                        span.head {
-                            color: #3333aa;
-                            font-size: 10pt;
-                            font-weight: bold;
-                        }
-                    </style>
-                    <link href="css/jquery.treetable.css" rel="stylesheet" type="text/css">
-                    <link href="css/maketree.css" rel="stylesheet">
-                </head>"""
-        )
-        report_table_header = f"""
-        <thead style="color:#ff0000">
-                            <td>Field Name</td>
-                            <td>{args.shotA}/{args.runA}</td>
-                            <td>{args.shotB}/{args.runB}</td>
-                            <td>Comments</td>
-                            <td>Details</td>
-                        </thead>"""
 
         report_field_difference = ""
         report_details = ""
+        report_diff_line = f"""<tr>
+                        <td><span class="pathname">{idsname}</span></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>"""
+        report_field_difference += report_diff_line
         for key, values in output.items():
-            print(values[2])
             if values[2] is np.ndarray:
-                print("found numpy array")
                 import matplotlib.pyplot as plt
                 import base64
                 from io import BytesIO
 
                 fig = plt.figure()
-                # plot sth
                 xpoints = np.array([1, 8])
                 ypoints = np.array([3, 10])
                 plt.plot(xpoints, ypoints)
@@ -258,16 +260,9 @@ if __name__ == "__main__":
                         <td></td>
                     </tr>"""
             report_field_difference += report_diff_line
-        file_object.write(
-            f"""
-            <html>
-                {report_header_string}
-                <p>{report_title}</p>
-                <body>
-                    <table>
-                        {report_table_header}
-                        {report_field_difference}
-                    </table>
+        file_object.write(f"""   {report_field_difference}""")
+    file_object.write(
+        f"""</table>
                     <script src="js/jquery-1.12.4.min.js"></script>
                     <script src="js/jquery.treetable.js"></script>
                     <script src="js/treeView2.js"></script>
@@ -275,5 +270,18 @@ if __name__ == "__main__":
                 </body>
             </html>
             """
-        )
+    )
     file_object.close()
+
+    # import json
+
+    # print(
+    #     json.dumps(
+    #         output,
+    #         indent=4,
+    #         default=lambda o: f"<<non-serializable: {type(o).__qualname__}>>",
+    #     )
+    # )
+
+    # idsA = inputA.partial_get(idsname,"time_slice(0)/boundary")
+    # idsB = inputB.partial_get(idsname,"time_slice(0)/boundary")
