@@ -1,9 +1,8 @@
 # #!/usr/bin/env python
 
-import datetime
-import logging
-import re
 
+import logging
+import time
 import imas
 from idstools.cli import *
 import numpy as np
@@ -11,10 +10,9 @@ import numpy as np
 root_path = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(root_path)
 from src.compute.common.functions import compare_ids
-from src.utils.dd_helper import DDHelper
 
 
-def setup_logger(name, verbose=False, log_dir="."):
+def setup_logger(name, verbose=False, fmt=None, log_dir="."):
     logger = logging.getLogger(name)
     logger.setLevel(logging.WARN)  # default
     if verbose:
@@ -29,7 +27,8 @@ def setup_logger(name, verbose=False, log_dir="."):
     """Add a file handler for this logger with the specified `name` (and store the log file
     under `log_dir`)."""
     # Format for file log
-    fmt = "%(asctime)s | %(levelname)9s | %(filename)s:%(lineno)d | %(message)s"
+    if fmt is not None:
+        fmt = "%(asctime)s | %(levelname)9s | %(filename)s:%(lineno)d | %(message)s"
     formatter = logging.Formatter(fmt)
 
     file_name = get_log_filename(name, log_dir)
@@ -46,6 +45,8 @@ def setup_logger(name, verbose=False, log_dir="."):
 
 def get_log_filename(name, log_dir):
     # Determine log path and file name; create log path if it does not exist
+    import datetime
+
     now = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
     log_name = f'{str(name).replace(" ", "_")}_{now}'
     if not os.path.exists(log_dir):
@@ -62,94 +63,15 @@ def get_log_filename(name, log_dir):
     return os.path.join(log_dir, log_name)
 
 
-if __name__ == "__main__":
-    logger, file_name = setup_logger("module", verbose=True, log_dir="logs")
-    logger.info("logger is initiated")
-    logger.debug("logger is in debug mode")
-    # Management of input arguments
-    parser = argparse.ArgumentParser(
-        description="Compare a IDS from 2 datasets", parents=[imas_parser]
-    )
-    parser.add_argument("shotA", type=int, help="shot number of first dataset")
-    parser.add_argument("runA", type=int, help="run number of first dataset")
-    parser.add_argument("shotB", type=int, help="shot number of second dataset")
-    parser.add_argument("runB", type=int, help="run number of second dataset")
-    parser.add_argument(
-        "ids",
-        nargs="*",
-        type=str,
-        help="Name (or space separated list of names) of IDS to compare (leave empty to compare all IDSs)",
-    )
-    parser.add_argument(
-        "--backendB",
-        type=str,
-        default=None,
-        help="Specifies the backend of second dataset (default: same as first dataset)",
-    )
-    parser.add_argument(
-        "--databaseB",
-        type=str,
-        default=None,
-        help="Specifies the database name of second dataset (default: same as first dataset)",
-    )
-    parser.add_argument(
-        "--userB",
-        type=str,
-        default=None,
-        help="Specifies the owner (username) of second dataset (default: same as first dataset)",
-    )
-    parser.add_argument(
-        "--skip-provenance",
-        action="store_true",
-        help="Discards provenance data differences (optional)",
-    )
-
-    args = parser.parse_args()
-
-    # set defaults for second dataset
-    if args.databaseB is None:
-        args.databaseB = args.database
-    if args.backendB is None:
-        args.backendB = args.backend
-    if args.userB is None:
-        args.userB = args.user
-
-    inputA = imas.DBEntry(
-        get_backend_id(args.backend),
-        args.database,
-        args.shotA,
-        args.runA,
-        user_name=args.user,
-    )
-    status, _ = inputA.open()
-    if status != 0:
-        logger.error(
-            "Error opening first dataset! Please check existence.", file=sys.stderr
-        )
-        sys.exit(status)
-
-    inputB = imas.DBEntry(
-        get_backend_id(args.backendB),
-        args.databaseB,
-        args.shotB,
-        args.runB,
-        user_name=args.userB,
-    )
-    status, _ = inputB.open()
-    if status != 0:
-        logger.error(
-            "Error opening second dataset! Please check existence.", file=sys.stderr
-        )
-        sys.exit(status)
-    #
-    if args.ids == []:
-        args.ids = [ids.value for ids in list(imas.IDSName)]
+def generate_html(file_name, data, shotA, runA, shotB, runB):
+    logger.info("Writing to html file :" + file_name + ".html")
+    from src.utils.dd_helper import DDHelper
 
     dd_helper = DDHelper()
 
     file_object = open(file_name + ".html", "w")
 
-    report_title = f"Differences : {args.shotA}/{args.runA} ~ {args.shotB}/{args.runB}"
+    report_title = f"Differences : {shotA}/{runA} ~ {shotB}/{runB}"
     report_header_string = (
         """<head>
                 <meta charset="utf-8">
@@ -161,14 +83,14 @@ if __name__ == "__main__":
         + """</title>
             </head>"""
     )
-    shotA = f"{args.shotA} / {args.runA}"
-    shotB = f"{args.shotB} / {args.runB}"
+    shotA = f"{shotA} / {runA}"
+    shotB = f"{shotB} / {runB}"
     report_table_header = f"""
     <thead class="table-primary">
     <tr>
                         <th>Field Name</th>
-                        <th>{args.shotA}/{args.runA}</th>
-                        <th>{args.shotB}/{args.runB}</th>
+                        <th>{shotA}/{runA}</th>
+                        <th>{shotB}/{runB}</th>
                         <th>Comments</th>
                         <th>Details</th>
                         <tr>
@@ -191,13 +113,8 @@ if __name__ == "__main__":
                         {report_table_header}<tbody>"""
     )
     plot_counter = 0
-    for idsname in args.ids:
-        idsA = inputA.get(idsname)
-        idsB = inputB.get(idsname)
-        compare_result, output = compare_ids(
-            idsA, idsB, field=idsname, ignore_version=args.skip_provenance, output={}
-        )
-
+    for idsname, values in data.items():
+        compare_result, output = values
         report_field_difference = ""
         report_details = ""
         report_diff_line = f"""<tr class="table-secondary">
@@ -226,8 +143,6 @@ if __name__ == "__main__":
                     coordinate_path = coordinate_path[1:]
                 if "itime" in coordinate_path:
                     coordinate_path = coordinate_path.replace("itime", "0")
-                print(coordinate_path)
-                print(key)
                 timeA = inputA.partial_get(idsname, coordinate_path)
                 timeB = inputB.partial_get(idsname, coordinate_path)
                 minA = np.amin(timeA)
@@ -247,7 +162,7 @@ if __name__ == "__main__":
                 )
                 fig = plt.figure()
                 plt.title(key)
-                plt.xlabel("time")
+                plt.xlabel(coordinate_path)
                 plt.ylabel("values")
                 if len(values[0]) < 10:
                     plt.plot(
@@ -336,15 +251,114 @@ if __name__ == "__main__":
     )
     file_object.close()
 
-    # import json
 
-    # print(
-    #     json.dumps(
-    #         output,
-    #         indent=4,
-    #         default=lambda o: f"<<non-serializable: {type(o).__qualname__}>>",
-    #     )
-    # )
+if __name__ == "__main__":
+    # Management of input arguments
+    parser = argparse.ArgumentParser(
+        description="Compare a IDS from 2 datasets", parents=[imas_parser]
+    )
+    parser.add_argument("shotA", type=int, help="shot number of first dataset")
+    parser.add_argument("runA", type=int, help="run number of first dataset")
+    parser.add_argument("shotB", type=int, help="shot number of second dataset")
+    parser.add_argument("runB", type=int, help="run number of second dataset")
+    parser.add_argument(
+        "ids",
+        nargs="*",
+        type=str,
+        help="Name (or space separated list of names) of IDS to compare (leave empty to compare all IDSs)",
+    )
+    parser.add_argument(
+        "--backendB",
+        type=str,
+        default=None,
+        help="Specifies the backend of second dataset (default: same as first dataset)",
+    )
+    parser.add_argument(
+        "--databaseB",
+        type=str,
+        default=None,
+        help="Specifies the database name of second dataset (default: same as first dataset)",
+    )
+    parser.add_argument(
+        "--userB",
+        type=str,
+        default=None,
+        help="Specifies the owner (username) of second dataset (default: same as first dataset)",
+    )
+    parser.add_argument(
+        "--skip-provenance",
+        action="store_true",
+        help="Discards provenance data differences (optional)",
+    )
+    parser.add_argument(
+        "--generate-html",
+        action="store_true",
+        help="Generate static html page for showing difference including plots",
+    )
+    args = parser.parse_args()
 
-    # idsA = inputA.partial_get(idsname,"time_slice(0)/boundary")
-    # idsB = inputB.partial_get(idsname,"time_slice(0)/boundary")
+    # set defaults for second dataset
+    if args.databaseB is None:
+        args.databaseB = args.database
+    if args.backendB is None:
+        args.backendB = args.backend
+    if args.userB is None:
+        args.userB = args.user
+
+    inputA = imas.DBEntry(
+        get_backend_id(args.backend),
+        args.database,
+        args.shotA,
+        args.runA,
+        user_name=args.user,
+    )
+    status, _ = inputA.open()
+    if status != 0:
+        print("Error opening first dataset! Please check existence.", file=sys.stderr)
+        sys.exit(status)
+
+    inputB = imas.DBEntry(
+        get_backend_id(args.backendB),
+        args.databaseB,
+        args.shotB,
+        args.runB,
+        user_name=args.userB,
+    )
+    status, _ = inputB.open()
+    if status != 0:
+        print("Error opening second dataset! Please check existence.", file=sys.stderr)
+        sys.exit(status)
+
+    if args.ids == []:
+        args.ids = [ids.value for ids in list(imas.IDSName)]
+
+    file_title = f"_{args.shotA}_{args.runA}_{args.shotB}_{args.runB}"
+    logger, file_name = setup_logger(
+        "module", verbose=True, fmt="%(message)s", log_dir="report"
+    )
+    logger.info("idsdiff started")
+    logger.info("retrieving differences")
+    st = time.time()
+    data = {}
+    for idsname in args.ids:
+        idsA = inputA.get(idsname)
+        idsB = inputB.get(idsname)
+        compare_result, output = compare_ids(
+            idsA, idsB, field=idsname, ignore_version=args.skip_provenance, output={}
+        )
+        data[idsname] = (compare_result, output)
+    et = time.time()
+    elapsed_time = et - st
+    logger.info(
+        "ids difference is calculated in:" + "{:10.2f}".format(elapsed_time) + "seconds"
+    )
+    if args.generate_html is True:
+        st = time.time()
+        generate_html(
+            file_name + file_title, data, args.shotA, args.runA, args.shotB, args.runB
+        )
+        et = time.time()
+        elapsed_time = et - st
+        logger.info(
+            "HTML file is generated in:" + "{:10.2f}".format(elapsed_time) + "seconds"
+        )
