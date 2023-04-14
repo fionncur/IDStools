@@ -11,6 +11,8 @@ root_path = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(root_path)
 from src.compute.common.functions import compare_ids
 
+THRESHOLD_PERCENT = 2
+
 
 def setup_logger(name, verbose=False, fmt=None, log_dir="."):
     logger = logging.getLogger(name)
@@ -127,131 +129,142 @@ def generate_html(file_name, data, shotA, runA, shotB, runB):
                     badge_color = "bg-warning"
 
             if values[2] is np.ndarray:
-                import matplotlib.pyplot as plt
-                import base64
-                from io import BytesIO
-                import re
+                if values[0] is not None and values[1] is not None:
+                    threshold_min = ((values[0] * THRESHOLD_PERCENT) / 100) - values[0]
+                    threshold_max = ((values[0] * THRESHOLD_PERCENT) / 100) + values[0]
 
-                field_path = re.sub("\[(.*?)\]", "", key)
-                field_path = field_path[field_path.index(".") + 1 :]
-                field_path = field_path.replace(".", "/")
-                coordinate_path = dd_helper.get_coordinate(idsname, field_path)
-                if coordinate_path[0] == r"/":
-                    coordinate_path = coordinate_path[1:]
-                if "itime" in coordinate_path:
-                    coordinate_path = coordinate_path.replace("itime", "0")
-
-                # average difference normalised
-                normA = values[0] / np.linalg.norm(values[0])
-                normB = values[1] / np.linalg.norm(values[1])
-                norm_avg_A = np.average(normA)
-                norm_avg_B = np.average(normB)
-                norm_avg_diff = abs(norm_avg_A - norm_avg_B)
-                minA = np.amin(values[0])
-                minB = np.amin(values[1])
-                maxA = np.amax(values[0])
-                maxB = np.amax(values[1])
-                avgA = np.average(values[0])
-                avgB = np.average(values[1])
-                avg_diff = abs(avgA - avgB)
-                rmsA = np.sqrt(np.mean(values[0] ** 2))
-                rmsB = np.sqrt(np.mean(values[1] ** 2))
-                rms_diff = abs(rmsA - rmsB)
-
-                timeA = inputA.partial_get(idsname, coordinate_path)
-                timeB = inputB.partial_get(idsname, coordinate_path)
-                min_time_A = np.amin(timeA)
-                min_time_B = np.amin(timeB)
-
-                max_time_A = np.amax(timeA)
-                max_time_B = np.amax(timeB)
-                ax_timeA = np.linspace(
-                    min_time_A if min_time_A < min_time_B else min_time_B,
-                    max_time_A if max_time_A > max_time_B else max_time_B,
-                    len(values[0]),
-                )
-                ax_timeB = np.linspace(
-                    min_time_A if min_time_A < min_time_B else min_time_B,
-                    max_time_A if max_time_A > max_time_B else max_time_B,
-                    len(values[1]),
-                )
-                fig = plt.figure()
-                plt.title(key)
-                plt.xlabel(coordinate_path)
-                plt.ylabel("values")
-                if len(values[0]) < 10:
-                    plt.plot(
-                        ax_timeA,
-                        values[0],
-                        marker="o",
-                        color="r",
-                        label=shotA,
-                        linewidth="0.5",
-                        ms=2,
+                    within_threshold = all(values[1] > threshold_min) and all(
+                        values[1] < threshold_max
                     )
-                else:
-                    plt.plot(
-                        ax_timeA,
-                        values[0],
-                        color="r",
-                        label=shotA,
-                        linewidth="0.5",
-                        ms=2,
-                    )
-                if len(values[1]) < 10:
-                    plt.plot(
-                        ax_timeB,
-                        values[1],
-                        marker="D",
-                        color="b",
-                        label=shotB,
-                        linewidth="0.5",
-                        ms=2,
-                    )
-                else:
-                    plt.plot(
-                        ax_timeB,
-                        values[1],
-                        color="b",
-                        label=shotB,
-                        linewidth="0.5",
-                        ms=2,
-                    )
-                plt.legend(loc="upper right")
-                plt.grid()
-                tmpfile = BytesIO()
-                fig.savefig(tmpfile, format="png")
-                encoded = base64.b64encode(tmpfile.getvalue()).decode("utf-8")
-                plt.close()
+                    if within_threshold is False:
+                        import matplotlib.pyplot as plt
+                        import base64
+                        from io import BytesIO
+                        import re
 
-                report_details = f"""<ul class="list-group">
-                                        <li class="list-group-item d-flex justify-content-between align-items-center"> normalized average {shotA}/{runA} : <span>{"{:.4f}".format(norm_avg_A)}</span> </li>
-                                        <li class="list-group-item d-flex justify-content-between align-items-center"> normalized average {shotB}/{runB}  : <span>{"{:.4f}".format(norm_avg_B)} </span></li>
-                                        <li class="list-group-item d-flex justify-content-between align-items-center"> normalized average difference : <span>{"{:.4f}".format(norm_avg_diff)} </span></li>
-                                        <li class="list-group-item d-flex justify-content-between align-items-center"> minimum {shotA}/{runA} : <span>{"{:.4f}".format(minA)} </span></li>
-                                        <li class="list-group-item d-flex justify-content-between align-items-center"> minimum {shotB}/{runB} : <span>{"{:.4f}".format(minB)} </span></li>
-                                        <li class="list-group-item d-flex justify-content-between align-items-center"> maximum {shotA}/{runA} : <span>{"{:.4f}".format(maxA)} </span></li>
-                                        <li class="list-group-item d-flex justify-content-between align-items-center"> maximum {shotB}/{runB} : <span>{"{:.4f}".format(maxB)} </span></li>
-                                        <li class="list-group-item d-flex justify-content-between align-items-center"> average {shotA}/{runA} : <span>{"{:.4f}".format(avgA)} </span></li>
-                                        <li class="list-group-item d-flex justify-content-between align-items-center"> average {shotB}/{runB} : <span>{"{:.4f}".format(avgB)} </span></li>
-                                        <li class="list-group-item d-flex justify-content-between align-items-center"> average difference : <span>{"{:.4f}".format(avg_diff)} </span></li>
-                                        
-                                        <li class="list-group-item d-flex justify-content-between align-items-center"> rms difference : <span>{"{:.4f}".format(rms_diff)} </span></li>
-                                        </ul>
-                                        <img src="data:image/png;base64, {encoded}" alt="Red dot"  class="img-fluid rounded"/>"""
-                report_diff_line = f"""<tr>
-                        <td>{key}</td>
-                        <td>Array length : {len(values[0])}</td>
-                        <td>Array length : {len(values[1])}</td>
-                        <td><span class="badge {badge_color}">{values[3]}</span></td>
-                        <td><button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="collapse" data-bs-target="#plot{plot_counter}">View plot</button>
-                        <div class="collapse" id="plot{plot_counter}">
-                        <div class="card card-body">{report_details}
-                        </div>
-                        </div>
-                        </td>
-                    </tr>"""
-                plot_counter = plot_counter + 1
+                        field_path = re.sub("\[(.*?)\]", "", key)
+                        field_path = field_path[field_path.index(".") + 1 :]
+                        field_path = field_path.replace(".", "/")
+                        coordinate_path = dd_helper.get_coordinate(idsname, field_path)
+                        if coordinate_path[0] == r"/":
+                            coordinate_path = coordinate_path[1:]
+                        if "itime" in coordinate_path:
+                            coordinate_path = coordinate_path.replace("itime", "0")
+
+                        # average difference normalised
+                        normA = values[0] / np.linalg.norm(values[0])
+                        normB = values[1] / np.linalg.norm(values[1])
+                        norm_avg_A = np.average(normA)
+                        norm_avg_B = np.average(normB)
+                        norm_avg_diff = abs(norm_avg_A - norm_avg_B)
+                        minA = np.amin(values[0])
+                        minB = np.amin(values[1])
+                        maxA = np.amax(values[0])
+                        maxB = np.amax(values[1])
+                        avgA = np.average(values[0])
+                        avgB = np.average(values[1])
+                        avg_diff = abs(avgA - avgB)
+                        rmsA = np.sqrt(np.mean(values[0] ** 2))
+                        rmsB = np.sqrt(np.mean(values[1] ** 2))
+                        rms_diff = abs(rmsA - rmsB)
+
+                        timeA = inputA.partial_get(idsname, coordinate_path)
+                        timeB = inputB.partial_get(idsname, coordinate_path)
+                        if timeA is not None and timeB is not None:
+                            min_time_A = np.amin(timeA)
+                            min_time_B = np.amin(timeB)
+
+                            max_time_A = np.amax(timeA)
+                            max_time_B = np.amax(timeB)
+                            ax_timeA = np.linspace(
+                                min_time_A if min_time_A < min_time_B else min_time_B,
+                                max_time_A if max_time_A > max_time_B else max_time_B,
+                                len(values[0]),
+                            )
+                            ax_timeB = np.linspace(
+                                min_time_A if min_time_A < min_time_B else min_time_B,
+                                max_time_A if max_time_A > max_time_B else max_time_B,
+                                len(values[1]),
+                            )
+                            fig = plt.figure()
+                            plt.title(key)
+                            plt.xlabel(coordinate_path)
+                            plt.ylabel("values")
+                            if len(values[0]) < 10:
+                                plt.plot(
+                                    ax_timeA,
+                                    values[0],
+                                    marker="o",
+                                    color="r",
+                                    label=f"{shotA}/{runA}",
+                                    linewidth="0.5",
+                                    ms=2,
+                                )
+                            else:
+                                plt.plot(
+                                    ax_timeA,
+                                    values[0],
+                                    color="r",
+                                    label=f"{shotA}/{runA}",
+                                    linewidth="0.5",
+                                    ms=2,
+                                )
+                            if len(values[1]) < 10:
+                                plt.plot(
+                                    ax_timeB,
+                                    values[1],
+                                    marker="D",
+                                    color="b",
+                                    label=f"{shotB}/{runB}",
+                                    linewidth="0.5",
+                                    ms=2,
+                                )
+                            else:
+                                plt.plot(
+                                    ax_timeB,
+                                    values[1],
+                                    color="b",
+                                    label=f"{shotB}/{runB}",
+                                    linewidth="0.5",
+                                    ms=2,
+                                )
+                            plt.legend(loc="upper right")
+                            plt.grid()
+                            tmpfile = BytesIO()
+                            fig.savefig(tmpfile, format="png")
+                            encoded = base64.b64encode(tmpfile.getvalue()).decode(
+                                "utf-8"
+                            )
+                            plt.close()
+
+                            report_details = f"""<ul class="list-group">
+                                                    <li class="list-group-item d-flex justify-content-between align-items-center"> normalized average {shotA}/{runA} : <span>{"{:.4f}".format(norm_avg_A)}</span> </li>
+                                                    <li class="list-group-item d-flex justify-content-between align-items-center"> normalized average {shotB}/{runB}  : <span>{"{:.4f}".format(norm_avg_B)} </span></li>
+                                                    <li class="list-group-item d-flex justify-content-between align-items-center"> normalized average difference : <span>{"{:.4f}".format(norm_avg_diff)} </span></li>
+                                                    <li class="list-group-item d-flex justify-content-between align-items-center"> minimum {shotA}/{runA} : <span>{"{:.4f}".format(minA)} </span></li>
+                                                    <li class="list-group-item d-flex justify-content-between align-items-center"> minimum {shotB}/{runB} : <span>{"{:.4f}".format(minB)} </span></li>
+                                                    <li class="list-group-item d-flex justify-content-between align-items-center"> maximum {shotA}/{runA} : <span>{"{:.4f}".format(maxA)} </span></li>
+                                                    <li class="list-group-item d-flex justify-content-between align-items-center"> maximum {shotB}/{runB} : <span>{"{:.4f}".format(maxB)} </span></li>
+                                                    <li class="list-group-item d-flex justify-content-between align-items-center"> average {shotA}/{runA} : <span>{"{:.4f}".format(avgA)} </span></li>
+                                                    <li class="list-group-item d-flex justify-content-between align-items-center"> average {shotB}/{runB} : <span>{"{:.4f}".format(avgB)} </span></li>
+                                                    <li class="list-group-item d-flex justify-content-between align-items-center"> average difference : <span>{"{:.4f}".format(avg_diff)} </span></li>
+                                                    
+                                                    <li class="list-group-item d-flex justify-content-between align-items-center"> rms difference : <span>{"{:.4f}".format(rms_diff)} </span></li>
+                                                    </ul>
+                                                    <img src="data:image/png;base64, {encoded}" alt="Red dot"  class="img-fluid rounded"/>"""
+                            report_diff_line = f"""<tr>
+                                    <td>{key}</td>
+                                    <td>Array length : {len(values[0])}</td>
+                                    <td>Array length : {len(values[1])}</td>
+                                    <td><span class="badge {badge_color}">{values[3]}</span></td>
+                                    <td><button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="collapse" data-bs-target="#plot{plot_counter}">View plot</button>
+                                    <div class="collapse" id="plot{plot_counter}">
+                                    <div class="card card-body">{report_details}
+                                    </div>
+                                    </div>
+                                    </td>
+                                </tr>"""
+                            plot_counter = plot_counter + 1
 
             elif values[2] == list:
                 report_diff_line = f"""<tr>
@@ -262,13 +275,25 @@ def generate_html(file_name, data, shotA, runA, shotB, runB):
                         <td></td>
                     </tr>"""
             else:
-                report_diff_line = f"""<tr>
-                        <td>{key}</td>
-                        <td>{values[0]}</td>
-                        <td>{values[1]}</td>
-                        <td><span class="badge {badge_color}">{values[3]}</span></td>
-                        <td></td>
-                    </tr>"""
+                if type(values[0]) in [int, float]:
+                    threshold_min = ((values[0] * THRESHOLD_PERCENT) / 100) - values[0]
+                    threshold_max = ((values[0] * THRESHOLD_PERCENT) / 100) + values[0]
+                    if values[1] > threshold_min and values[1] < threshold_max:
+                        report_diff_line = f"""<tr>
+                            <td>{key}</td>
+                            <td>{values[0]}</td>
+                            <td>{values[1]}</td>
+                            <td><span class="badge {badge_color}">{values[3]}</span></td>
+                            <td></td>
+                        </tr>"""
+                else:
+                    report_diff_line = f"""<tr>
+                            <td>{key}</td>
+                            <td>{values[0]}</td>
+                            <td>{values[1]}</td>
+                            <td><span class="badge {badge_color}">{values[3]}</span></td>
+                            <td></td>
+                        </tr>"""
             report_field_difference += report_diff_line
         file_object.write(f"""   {report_field_difference}""")
     file_object.write(
