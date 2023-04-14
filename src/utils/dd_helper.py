@@ -22,7 +22,6 @@ class DDHelper(object):
             return None
         if field_path == "":
             return None
-
         for ids in self.root.findall("IDS"):
             if ids.attrib["name"] == idsname.lower():
                 for field in ids.iter("field"):

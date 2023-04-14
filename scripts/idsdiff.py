@@ -22,12 +22,11 @@ def setup_logger(name, verbose=False, fmt=None, log_dir="."):
     stdout_handler.setLevel(logging.DEBUG)
     stdout_handler.setFormatter(logging.Formatter("%(message)s"))
     logger.addHandler(stdout_handler)
-    # enable_console_output()
 
     """Add a file handler for this logger with the specified `name` (and store the log file
     under `log_dir`)."""
     # Format for file log
-    if fmt is not None:
+    if fmt is None:
         fmt = "%(asctime)s | %(levelname)9s | %(filename)s:%(lineno)d | %(message)s"
     formatter = logging.Formatter(fmt)
 
@@ -83,8 +82,6 @@ def generate_html(file_name, data, shotA, runA, shotB, runB):
         + """</title>
             </head>"""
     )
-    shotA = f"{shotA} / {runA}"
-    shotB = f"{shotB} / {runB}"
     report_table_header = f"""
     <thead class="table-primary">
     <tr>
@@ -143,21 +140,39 @@ def generate_html(file_name, data, shotA, runA, shotB, runB):
                     coordinate_path = coordinate_path[1:]
                 if "itime" in coordinate_path:
                     coordinate_path = coordinate_path.replace("itime", "0")
+
+                # average difference normalised
+                normA = values[0] / np.linalg.norm(values[0])
+                normB = values[1] / np.linalg.norm(values[1])
+                norm_avg_A = np.average(normA)
+                norm_avg_B = np.average(normB)
+                norm_avg_diff = abs(norm_avg_A - norm_avg_B)
+                minA = np.amin(values[0])
+                minB = np.amin(values[1])
+                maxA = np.amax(values[0])
+                maxB = np.amax(values[1])
+                avgA = np.average(values[0])
+                avgB = np.average(values[1])
+                avg_diff = abs(avgA - avgB)
+                rmsA = np.sqrt(np.mean(values[0] ** 2))
+                rmsB = np.sqrt(np.mean(values[1] ** 2))
+                rms_diff = abs(rmsA - rmsB)
+
                 timeA = inputA.partial_get(idsname, coordinate_path)
                 timeB = inputB.partial_get(idsname, coordinate_path)
-                minA = np.amin(timeA)
-                minB = np.amin(timeB)
+                min_time_A = np.amin(timeA)
+                min_time_B = np.amin(timeB)
 
-                maxA = np.amax(timeA)
-                maxB = np.amax(timeB)
+                max_time_A = np.amax(timeA)
+                max_time_B = np.amax(timeB)
                 ax_timeA = np.linspace(
-                    minA if minA < minB else minB,
-                    maxA if maxA > maxB else maxB,
+                    min_time_A if min_time_A < min_time_B else min_time_B,
+                    max_time_A if max_time_A > max_time_B else max_time_B,
                     len(values[0]),
                 )
                 ax_timeB = np.linspace(
-                    minA if minA < minB else minB,
-                    maxA if maxA > maxB else maxB,
+                    min_time_A if min_time_A < min_time_B else min_time_B,
+                    max_time_A if max_time_A > max_time_B else max_time_B,
                     len(values[1]),
                 )
                 fig = plt.figure()
@@ -209,7 +224,21 @@ def generate_html(file_name, data, shotA, runA, shotB, runB):
                 encoded = base64.b64encode(tmpfile.getvalue()).decode("utf-8")
                 plt.close()
 
-                report_details = f"""<img src="data:image/png;base64, {encoded}" alt="Red dot"  class="img-fluid rounded"/>"""
+                report_details = f"""<ul class="list-group">
+                                        <li class="list-group-item d-flex justify-content-between align-items-center"> normalized average {shotA}/{runA} : <span>{"{:.4f}".format(norm_avg_A)}</span> </li>
+                                        <li class="list-group-item d-flex justify-content-between align-items-center"> normalized average {shotB}/{runB}  : <span>{"{:.4f}".format(norm_avg_B)} </span></li>
+                                        <li class="list-group-item d-flex justify-content-between align-items-center"> normalized average difference : <span>{"{:.4f}".format(norm_avg_diff)} </span></li>
+                                        <li class="list-group-item d-flex justify-content-between align-items-center"> minimum {shotA}/{runA} : <span>{"{:.4f}".format(minA)} </span></li>
+                                        <li class="list-group-item d-flex justify-content-between align-items-center"> minimum {shotB}/{runB} : <span>{"{:.4f}".format(minB)} </span></li>
+                                        <li class="list-group-item d-flex justify-content-between align-items-center"> maximum {shotA}/{runA} : <span>{"{:.4f}".format(maxA)} </span></li>
+                                        <li class="list-group-item d-flex justify-content-between align-items-center"> maximum {shotB}/{runB} : <span>{"{:.4f}".format(maxB)} </span></li>
+                                        <li class="list-group-item d-flex justify-content-between align-items-center"> average {shotA}/{runA} : <span>{"{:.4f}".format(avgA)} </span></li>
+                                        <li class="list-group-item d-flex justify-content-between align-items-center"> average {shotB}/{runB} : <span>{"{:.4f}".format(avgB)} </span></li>
+                                        <li class="list-group-item d-flex justify-content-between align-items-center"> average difference : <span>{"{:.4f}".format(avg_diff)} </span></li>
+                                        
+                                        <li class="list-group-item d-flex justify-content-between align-items-center"> rms difference : <span>{"{:.4f}".format(rms_diff)} </span></li>
+                                        </ul>
+                                        <img src="data:image/png;base64, {encoded}" alt="Red dot"  class="img-fluid rounded"/>"""
                 report_diff_line = f"""<tr>
                         <td>{key}</td>
                         <td>Array length : {len(values[0])}</td>
@@ -295,6 +324,12 @@ if __name__ == "__main__":
         action="store_true",
         help="Generate static html page for showing difference including plots",
     )
+    parser.add_argument(
+        "--report-dir",
+        type=str,
+        default=None,
+        help="Specifies directory where report should be stored",
+    )
     args = parser.parse_args()
 
     # set defaults for second dataset
@@ -332,9 +367,13 @@ if __name__ == "__main__":
     if args.ids == []:
         args.ids = [ids.value for ids in list(imas.IDSName)]
 
+    report_dir = "report"
+    if args.report_dir is not None:
+        if os.path.exists(args.report_dir):
+            report_dir = args.report_dir
     file_title = f"_{args.shotA}_{args.runA}_{args.shotB}_{args.runB}"
     logger, file_name = setup_logger(
-        "module", verbose=True, fmt="%(message)s", log_dir="report"
+        "module", verbose=True, fmt="%(message)s", log_dir=report_dir
     )
     logger.info("idsdiff started")
     logger.info("retrieving differences")
