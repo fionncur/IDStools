@@ -320,11 +320,21 @@ summary:
         empty: False
         ids_nan: False
         ids_inf: False
-        ids_ge: 0.0
+        ids_gt: 0.0
     #local/separatrix/n_i/*/value(:):
     #    empty: False
     #   ids_gt: 0.0
     local/separatrix/t_e/value(:):
+        empty: False
+        ids_nan: False
+        ids_inf: False
+        ids_ge: 0.0
+    local/separatrix_average/n_e/value(:):
+        empty: False
+        ids_nan: False
+        ids_inf: False
+        ids_gt: 0.0
+    local/separatrix_average/t_e/value(:):
         empty: False
         ids_nan: False
         ids_inf: False
