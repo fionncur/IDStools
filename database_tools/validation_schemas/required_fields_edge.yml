@@ -72,7 +72,7 @@ edge_profiles:
         empty: False
         ids_nan: False
         ids_inf: False
-        ids_gt: 0.0
+        ids_ge: 0.0
 
     # For each ion[:].state[:] structure:
     ggd(itime)/ion(i1)/state(i2)/z_min: 
@@ -91,7 +91,7 @@ edge_profiles:
         empty: False
         ids_nan: False
         ids_inf: False
-        ids_gt: 0.0
+        ids_ge: 0.0
     ggd(itime)/ion(i1)/state(i2)/velocity(i3)/values(:): 
         empty: False
         ids_nan: False
@@ -106,7 +106,7 @@ edge_profiles:
         empty: False
         ids_nan: False
         ids_inf: False
-        ids_gt: 0.0
+        ids_ge: 0.0
     ggd(itime)/neutral(i1)/state(i2)/velocity(i3)/value(:): 
         empty: False
         ids_nan: False
@@ -320,7 +320,7 @@ summary:
         empty: False
         ids_nan: False
         ids_inf: False
-        ids_gt: 0.0
+        ids_ge: 0.0
     #local/separatrix/n_i/*/value(:):
     #    empty: False
     #   ids_gt: 0.0

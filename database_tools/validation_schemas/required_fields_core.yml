@@ -130,7 +130,7 @@ core_profiles:
         empty: False
         ids_nan: False
         ids_inf: False
-        ids_gt: 0.0
+        ids_ge: 0.0
     profiles_1d(itime)/ion(i1)/element(i2)/a:
         empty: False
         ids_nan: False
