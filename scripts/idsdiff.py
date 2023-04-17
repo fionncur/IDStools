@@ -114,13 +114,20 @@ def generate_html(file_name, data, shotA, runA, shotB, runB):
     plot_counter = 0
     for idsname, values in data.items():
         compare_result, output = values
+        if bool(output) is False:
+            continue
         report_field_difference = ""
         report_details = ""
-        report_diff_line = f"""<tr class="table-secondary">
+
+        add_header = True
+        for key, values in output.items():
+            report_diff_line = ""
+            if add_header == True:
+                report_diff_line = f"""<tr class="table-secondary">
                         <th scope="row" colspan="5">{idsname}</td>
                     </tr>"""
-        report_field_difference += report_diff_line
-        for key, values in output.items():
+                report_field_difference += report_diff_line
+                add_header = False
             badge_color = "bg-secondary"
             if values[3] is not None:
                 if values[3] == "different values":
@@ -130,11 +137,21 @@ def generate_html(file_name, data, shotA, runA, shotB, runB):
 
             if values[2] is np.ndarray:
                 if values[0] is not None and values[1] is not None:
-                    threshold_min = ((values[0] * THRESHOLD_PERCENT) / 100) - values[0]
-                    threshold_max = ((values[0] * THRESHOLD_PERCENT) / 100) + values[0]
+                    if len(values[0]) <= len(values[1]):
+                        threshold_candidate = values[0]
+                        compare_candidate = values[1][: len(values[0])]
+                    else:
+                        threshold_candidate = values[1]
+                        compare_candidate = values[0][: len(values[1])]
+                    threshold_min = (
+                        (threshold_candidate * THRESHOLD_PERCENT) / 100
+                    ) - threshold_candidate
+                    threshold_max = (
+                        (threshold_candidate * THRESHOLD_PERCENT) / 100
+                    ) + threshold_candidate
 
-                    within_threshold = all(values[1] > threshold_min) and all(
-                        values[1] < threshold_max
+                    within_threshold = all(compare_candidate > threshold_min) and all(
+                        compare_candidate < threshold_max
                     )
                     if within_threshold is False:
                         import matplotlib.pyplot as plt
@@ -151,12 +168,33 @@ def generate_html(file_name, data, shotA, runA, shotB, runB):
                         if "itime" in coordinate_path:
                             coordinate_path = coordinate_path.replace("itime", "0")
 
-                        # average difference normalised
-                        normA = values[0] / np.linalg.norm(values[0])
-                        normB = values[1] / np.linalg.norm(values[1])
-                        norm_avg_A = np.average(normA)
-                        norm_avg_B = np.average(normB)
-                        norm_avg_diff = abs(norm_avg_A - norm_avg_B)
+                        valuesA = np.copy(values[0])
+                        valuesB = np.copy(values[1])
+
+                        # Calculate cross corelation
+                        correlate_result = np.correlate(valuesA, valuesB, "full")
+                        b_shift_positions = np.arange(-len(valuesA) + 1, len(valuesB))
+                        itemindex = np.where(
+                            correlate_result == np.max(correlate_result)
+                        )
+                        cross_correlation = b_shift_positions[itemindex][0]
+                        # TODO Check the logic of normalised difference calculation
+                        if len(valuesA) < len(valuesB):
+                            valuesB = valuesB[: len(valuesA)]
+                        else:
+                            valuesA = valuesA[: len(valuesB)]
+                        # valuesA[valuesA == 0] = 0.00000001
+                        # valuesB[valuesB == 0] = 0.00000001
+                        abs_diff = abs(valuesA - valuesB)
+                        base = abs(valuesA)
+                        if np.average(abs(valuesA)) > np.average(abs(valuesB)):
+                            base = abs(valuesB)
+
+                        norm_diff = abs_diff / np.linalg.norm(base, ord=np.inf)
+                        # norm_diff = abs_diff / base
+
+                        norm_avg_diff = np.average(norm_diff)
+
                         minA = np.amin(values[0])
                         minB = np.amin(values[1])
                         maxA = np.amax(values[0])
@@ -237,18 +275,36 @@ def generate_html(file_name, data, shotA, runA, shotB, runB):
                             )
                             plt.close()
 
-                            report_details = f"""<ul class="list-group">
-                                                    <li class="list-group-item d-flex justify-content-between align-items-center"> normalized average {shotA}/{runA} : <span>{"{:.4f}".format(norm_avg_A)}</span> </li>
-                                                    <li class="list-group-item d-flex justify-content-between align-items-center"> normalized average {shotB}/{runB}  : <span>{"{:.4f}".format(norm_avg_B)} </span></li>
+                            report_details = f"""<table class="table table-bordered table-striped table-hover table-sm align-top">
+                                                        <thead class="table-primary">
+                                                            <tr>
+                                                            <th>Attribute Name</th>
+                                                            <th>{shotA}/{runA}</th>
+                                                            <th>{shotB}/{runB} </th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                        <tr>
+                                                            <td>minimum</td>
+                                                            <td>{"{:.4f}".format(minA)}</td>
+                                                            <td>{"{:.4f}".format(minB)}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>maximum</td>
+                                                            <td>{"{:.4f}".format(maxA)}</td>
+                                                            <td>{"{:.4f}".format(maxB)}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>average</td>
+                                                            <td>{"{:.4f}".format(avgA)}</td>
+                                                            <td>{"{:.4f}".format(avgB)}</td>
+                                                        </tr>
+                                                        </tbody>
+                                                    </table>
+                                                    <ul class="list-group">
                                                     <li class="list-group-item d-flex justify-content-between align-items-center"> normalized average difference : <span>{"{:.4f}".format(norm_avg_diff)} </span></li>
-                                                    <li class="list-group-item d-flex justify-content-between align-items-center"> minimum {shotA}/{runA} : <span>{"{:.4f}".format(minA)} </span></li>
-                                                    <li class="list-group-item d-flex justify-content-between align-items-center"> minimum {shotB}/{runB} : <span>{"{:.4f}".format(minB)} </span></li>
-                                                    <li class="list-group-item d-flex justify-content-between align-items-center"> maximum {shotA}/{runA} : <span>{"{:.4f}".format(maxA)} </span></li>
-                                                    <li class="list-group-item d-flex justify-content-between align-items-center"> maximum {shotB}/{runB} : <span>{"{:.4f}".format(maxB)} </span></li>
-                                                    <li class="list-group-item d-flex justify-content-between align-items-center"> average {shotA}/{runA} : <span>{"{:.4f}".format(avgA)} </span></li>
-                                                    <li class="list-group-item d-flex justify-content-between align-items-center"> average {shotB}/{runB} : <span>{"{:.4f}".format(avgB)} </span></li>
+                                                    <li class="list-group-item d-flex justify-content-between align-items-center"> cross correlation : <span>{cross_correlation}</span></li>
                                                     <li class="list-group-item d-flex justify-content-between align-items-center"> average difference : <span>{"{:.4f}".format(avg_diff)} </span></li>
-                                                    
                                                     <li class="list-group-item d-flex justify-content-between align-items-center"> rms difference : <span>{"{:.4f}".format(rms_diff)} </span></li>
                                                     </ul>
                                                     <img src="data:image/png;base64, {encoded}" alt="Red dot"  class="img-fluid rounded"/>"""
@@ -257,7 +313,7 @@ def generate_html(file_name, data, shotA, runA, shotB, runB):
                                     <td>Array length : {len(values[0])}</td>
                                     <td>Array length : {len(values[1])}</td>
                                     <td><span class="badge {badge_color}">{values[3]}</span></td>
-                                    <td><button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="collapse" data-bs-target="#plot{plot_counter}">View plot</button>
+                                    <td><button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="collapse" data-bs-target="#plot{plot_counter}">See details</button>
                                     <div class="collapse" id="plot{plot_counter}">
                                     <div class="card card-body">{report_details}
                                     </div>
