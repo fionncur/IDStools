@@ -104,30 +104,29 @@ def compare_ids(X, Y, field=None, ignore_version=True, verb=True, output={}):
             continue
 
         if key not in Xd:
-            if verb:
-                if field + "." + key not in output.keys():
+            if field + "." + key not in output.keys():
                     output[field + "." + key] = (
                         field + "." + key,
                         field + "." + key,
                         "not present in first ids",
                     )
-                else:
-                    logger.error("Duplicate key found")
+            else:
+                logger.error("Duplicate key found")
+            if verb:
                 logger.info(f"{key} not present in X")
             identical = False
             continue
 
         if key not in Yd:
-            if verb:
-                if field + "." + key not in output.keys():
+            if field + "." + key not in output.keys():
                     output[field + "." + key] = (
                         field + "." + key,
                         field + "." + key,
                         "not present in second ids",
                     )
-                else:
-                    logger.error("Duplicate key found")
-
+            else:
+                logger.error("Duplicate key found")
+            if verb:
                 logger.info(f"{key} not present in Y")
             identical = False
             continue
@@ -135,16 +134,16 @@ def compare_ids(X, Y, field=None, ignore_version=True, verb=True, output={}):
         Xo = X.__dict__[key]
         Yo = Y.__dict__[key]
         if type(Xo) != type(Yo):
-            if verb:
-                if field + "." + key not in output.keys():
+            if field + "." + key not in output.keys():
                     output[field + "." + key] = (
                         Xo,
                         Yo,
                         None,
                         f"different type first type(Xo), second type(Yo) ",
                     )
-                else:
-                    logger.error("Duplicate key found")
+            else:
+                logger.error("Duplicate key found")
+            if verb:
                 logger.warning(f"Different type for {field}.{key}")
 
         if hasattr(Xo, "__module__") and "imas" in Xo.__module__:
@@ -173,12 +172,12 @@ def compare_ids(X, Y, field=None, ignore_version=True, verb=True, output={}):
                     f = field
                 else:
                     f = f"{field}.{key}"
-                if verb:
-                    if f not in output.keys():
+                
+                if f not in output.keys():
                         output[f] = (Xo, Yo, data_type, "different length")
-                    else:
-                        logger.error("Duplicate key found")
-
+                else:
+                    logger.error("Duplicate key found")
+                if verb:
                     logger.info(f"{f} is of different length")
                 identical = False
             else:
@@ -226,29 +225,29 @@ def compare_ids(X, Y, field=None, ignore_version=True, verb=True, output={}):
                                 missing = [True, "second"]
 
                 if missing[0]:
-                    if verb:
-                        if field + "." + key not in output.keys():
+                    if field + "." + key not in output.keys():
                             output[field + "." + key] = (
                                 Xo,
                                 Yo,
                                 data_type,
                                 "missing in the IDS " + missing[1],
                             )
-                        else:
-                            logger.error("Duplicate key found")
+                    else:
+                        logger.error("Duplicate key found")
+                    if verb:
                         logger.info(f"{field}.{key} is missing in the {missing[1]} IDS")
                     identical = False
                 else:
-                    if verb:
-                        if field + "." + key not in output.keys():
+                    if field + "." + key not in output.keys():
                             output[field + "." + key] = (
                                 Xo,
                                 Yo,
                                 data_type,
                                 "different values",
                             )
-                        else:
-                            logger.error("Duplicate key found")
+                    else:
+                        logger.error("Duplicate key found")
+                    if verb:
                         logger.info(f"{field}.{key} has different values")
                     identical = False
 

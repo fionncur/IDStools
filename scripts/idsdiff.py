@@ -12,9 +12,8 @@ sys.path.append(root_path)
 from src.compute.common.functions import compare_ids
 
 THRESHOLD_PERCENT = 2
-
-
-def setup_logger(name, verbose=False, fmt=None, log_dir="."):
+    
+def setup_logger(name,log_file, verbose=False, fmt=None):
     logger = logging.getLogger(name)
     logger.setLevel(logging.WARN)  # default
     if verbose:
@@ -32,24 +31,23 @@ def setup_logger(name, verbose=False, fmt=None, log_dir="."):
         fmt = "%(asctime)s | %(levelname)9s | %(filename)s:%(lineno)d | %(message)s"
     formatter = logging.Formatter(fmt)
 
-    file_name = get_log_filename(name, log_dir)
-
-    log_file = file_name + ".log"
-
     # Create file handler for logging to a file (log all five levels)
     file_handler = logging.FileHandler(log_file)
     file_handler.setLevel(logging.DEBUG)
     file_handler.setFormatter(formatter)
     logger.addHandler(file_handler)
-    return logger, file_name
+    return logger
 
 
-def get_log_filename(name, log_dir):
+def get_filename(name, file_title, log_dir):
     # Determine log path and file name; create log path if it does not exist
     import datetime
 
     now = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-    log_name = f'{str(name).replace(" ", "_")}_{now}'
+    if name =="":
+        file_name = f'{now}_{file_title}'
+    else:
+        file_name = f'{str(name).replace(" ", "_")}_{now}_{file_title}'
     if not os.path.exists(log_dir):
         try:
             os.makedirs(log_dir)
@@ -61,16 +59,16 @@ def get_log_filename(name, log_dir):
             )
             log_dir = "/tmp" if sys.platform.startswith("linux") else "."
             print(f"Defaulting to {log_dir}.", file=sys.stderr)
-    return os.path.join(log_dir, log_name)
+    return os.path.join(log_dir, file_name)
 
 
-def generate_html(file_name, data, shotA, runA, shotB, runB):
-    logger.info("Writing to html file :" + file_name + ".html")
+def generate_html(file_path, data, shotA, runA, shotB, runB):
+    logger.info("Writing to html file :" + file_path)
     from src.utils.dd_helper import DDHelper
 
     dd_helper = DDHelper()
 
-    file_object = open(file_name + ".html", "w")
+    file_object = open(file_path, "w")
 
     report_title = f"Differences : {shotA}/{runA} ~ {shotB}/{runB}"
     report_header_string = (
@@ -185,6 +183,7 @@ def generate_html(file_name, data, shotA, runA, shotB, runB):
                             valuesA = valuesA[: len(valuesB)]
                         # valuesA[valuesA == 0] = 0.00000001
                         # valuesB[valuesB == 0] = 0.00000001
+                        
                         abs_diff = abs(valuesA - valuesB)
                         base = abs(valuesA)
                         if np.average(abs(valuesA)) > np.average(abs(valuesB)):
@@ -225,11 +224,15 @@ def generate_html(file_name, data, shotA, runA, shotB, runB):
                                 len(values[1]),
                             )
                             fig = plt.figure()
-                            plt.title(key)
-                            plt.xlabel(coordinate_path)
-                            plt.ylabel("values")
+                            ax = fig.add_subplot(111)
+                            ax.set_title(key)
+                            ax.set_xlabel(coordinate_path)
+                            ax.set_ylabel("values")
+                            ax2 = ax.twinx()
+                            ax2.plot(ax_timeA, abs_diff, '-g', label = 'difference',linewidth="0.5")
+                            ax2.set_yscale('log')
                             if len(values[0]) < 10:
-                                plt.plot(
+                                ax.plot(
                                     ax_timeA,
                                     values[0],
                                     marker="o",
@@ -239,7 +242,7 @@ def generate_html(file_name, data, shotA, runA, shotB, runB):
                                     ms=2,
                                 )
                             else:
-                                plt.plot(
+                                ax.plot(
                                     ax_timeA,
                                     values[0],
                                     color="r",
@@ -248,7 +251,7 @@ def generate_html(file_name, data, shotA, runA, shotB, runB):
                                     ms=2,
                                 )
                             if len(values[1]) < 10:
-                                plt.plot(
+                                ax.plot(
                                     ax_timeB,
                                     values[1],
                                     marker="D",
@@ -258,7 +261,7 @@ def generate_html(file_name, data, shotA, runA, shotB, runB):
                                     ms=2,
                                 )
                             else:
-                                plt.plot(
+                                ax.plot(
                                     ax_timeB,
                                     values[1],
                                     color="b",
@@ -266,8 +269,8 @@ def generate_html(file_name, data, shotA, runA, shotB, runB):
                                     linewidth="0.5",
                                     ms=2,
                                 )
-                            plt.legend(loc="upper right")
-                            plt.grid()
+                            ax.legend(loc="upper right")
+                            ax.grid()
                             tmpfile = BytesIO()
                             fig.savefig(tmpfile, format="png")
                             encoded = base64.b64encode(tmpfile.getvalue()).decode(
@@ -286,26 +289,26 @@ def generate_html(file_name, data, shotA, runA, shotB, runB):
                                                         <tbody>
                                                         <tr>
                                                             <td>minimum</td>
-                                                            <td>{"{:.4f}".format(minA)}</td>
-                                                            <td>{"{:.4f}".format(minB)}</td>
+                                                            <td>{"{:.4e}".format(minA)}</td>
+                                                            <td>{"{:.4e}".format(minB)}</td>
                                                         </tr>
                                                         <tr>
                                                             <td>maximum</td>
-                                                            <td>{"{:.4f}".format(maxA)}</td>
-                                                            <td>{"{:.4f}".format(maxB)}</td>
+                                                            <td>{"{:.4e}".format(maxA)}</td>
+                                                            <td>{"{:.4e}".format(maxB)}</td>
                                                         </tr>
                                                         <tr>
                                                             <td>average</td>
-                                                            <td>{"{:.4f}".format(avgA)}</td>
-                                                            <td>{"{:.4f}".format(avgB)}</td>
+                                                            <td>{"{:.4e}".format(avgA)}</td>
+                                                            <td>{"{:.4e}".format(avgB)}</td>
                                                         </tr>
                                                         </tbody>
                                                     </table>
                                                     <ul class="list-group">
-                                                    <li class="list-group-item d-flex justify-content-between align-items-center"> normalized average difference : <span>{"{:.4f}".format(norm_avg_diff)} </span></li>
+                                                    <li class="list-group-item d-flex justify-content-between align-items-center"> normalized average difference : <span>{"{:.4e}".format(norm_avg_diff)} </span></li>
                                                     <li class="list-group-item d-flex justify-content-between align-items-center"> cross correlation : <span>{cross_correlation}</span></li>
-                                                    <li class="list-group-item d-flex justify-content-between align-items-center"> average difference : <span>{"{:.4f}".format(avg_diff)} </span></li>
-                                                    <li class="list-group-item d-flex justify-content-between align-items-center"> rms difference : <span>{"{:.4f}".format(rms_diff)} </span></li>
+                                                    <li class="list-group-item d-flex justify-content-between align-items-center"> average difference : <span>{"{:.4e}".format(avg_diff)} </span></li>
+                                                    <li class="list-group-item d-flex justify-content-between align-items-center"> rms difference : <span>{"{:.4e}".format(rms_diff)} </span></li>
                                                     </ul>
                                                     <img src="data:image/png;base64, {encoded}" alt="Red dot"  class="img-fluid rounded"/>"""
                             report_diff_line = f"""<tr>
@@ -331,7 +334,7 @@ def generate_html(file_name, data, shotA, runA, shotB, runB):
                         <td></td>
                     </tr>"""
             else:
-                if type(values[0]) in [int, float]:
+                if type(values[0]) is int or type(values[1]) is int:
                     threshold_min = ((values[0] * THRESHOLD_PERCENT) / 100) - values[0]
                     threshold_max = ((values[0] * THRESHOLD_PERCENT) / 100) + values[0]
                     if values[1] > threshold_min and values[1] < threshold_max:
@@ -342,14 +345,34 @@ def generate_html(file_name, data, shotA, runA, shotB, runB):
                             <td><span class="badge {badge_color}">{values[3]}</span></td>
                             <td></td>
                         </tr>"""
-                else:
-                    report_diff_line = f"""<tr>
+                elif type(values[0]) is float or type(values[1]) is float:
+                    threshold_min = ((values[0] * THRESHOLD_PERCENT) / 100) - values[0]
+                    threshold_max = ((values[0] * THRESHOLD_PERCENT) / 100) + values[0]
+                    if values[1] > threshold_min and values[1] < threshold_max:
+                        report_diff_line = f"""<tr>
                             <td>{key}</td>
-                            <td>{values[0]}</td>
-                            <td>{values[1]}</td>
+                            <td>{"{:.4e}".format(values[0])}</td>
+                            <td>{"{:.4e}".format(values[1])}</td>
                             <td><span class="badge {badge_color}">{values[3]}</span></td>
                             <td></td>
                         </tr>"""
+                elif type(values[0]) is str or type(values[1]) is str :
+                    if len(values[0])>100:
+                        report_diff_line = f"""<tr>
+                                <td>{key}</td>
+                                <td><textarea class="form-control">{values[0]}</textarea></td>
+                                <td><textarea class="form-control">{values[1]}</textarea></td>
+                                <td><span class="badge {badge_color}">{values[3]}</span></td>
+                                <td></td>
+                            </tr>"""
+                    else:
+                        report_diff_line = f"""<tr>
+                                <td>{key}</td>
+                                <td>{values[0]}</td>
+                                <td>{values[0]}</td>
+                                <td><span class="badge {badge_color}">{values[3]}</span></td>
+                                <td></td>
+                            </tr>"""
             report_field_difference += report_diff_line
         file_object.write(f"""   {report_field_difference}""")
     file_object.write(
@@ -448,16 +471,20 @@ if __name__ == "__main__":
     if args.ids == []:
         args.ids = [ids.value for ids in list(imas.IDSName)]
 
+    
+
     report_dir = "report"
     if args.report_dir is not None:
         if os.path.exists(args.report_dir):
             report_dir = args.report_dir
+            
     file_title = f"_{args.shotA}_{args.runA}_{args.shotB}_{args.runB}"
-    logger, file_name = setup_logger(
-        "module", verbose=True, fmt="%(message)s", log_dir=report_dir
+    file_path = get_filename("",file_title, report_dir)
+    log_file = file_path + ".log"
+    html_file = file_path + ".html"
+    logger = setup_logger(
+        "module", log_file=log_file,verbose=True, fmt="%(message)s"
     )
-    logger.info("idsdiff started")
-    logger.info("retrieving differences")
     st = time.time()
     data = {}
     for idsname in args.ids:
@@ -469,16 +496,18 @@ if __name__ == "__main__":
         data[idsname] = (compare_result, output)
     et = time.time()
     elapsed_time = et - st
-    logger.info(
-        "ids difference is calculated in:" + "{:10.2f}".format(elapsed_time) + "seconds"
-    )
-    if args.generate_html is True:
-        st = time.time()
-        generate_html(
-            file_name + file_title, data, args.shotA, args.runA, args.shotB, args.runB
-        )
-        et = time.time()
-        elapsed_time = et - st
-        logger.info(
-            "HTML file is generated in:" + "{:10.2f}".format(elapsed_time) + "seconds"
-        )
+    # logger.debug(
+    #     "ids difference is calculated in:" + "{:10.2f}".format(elapsed_time) + "seconds"
+    # )
+    if  bool(data):
+        if args.generate_html is True:
+            st = time.time()
+            generate_html(
+                html_file, data, args.shotA, args.runA, args.shotB, args.runB
+            )
+            et = time.time()
+            elapsed_time = et - st
+            logger.info(
+                "HTML file is generated in:" + "{:10.2f}".format(elapsed_time) + "seconds. file path: " + html_file
+            )
+
