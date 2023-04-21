@@ -15,7 +15,7 @@ class DDHelper(object):
         if path.isfile(self.ids_def):
             self.root = ET.parse(self.ids_def).getroot()
         else:
-            print("file not found:{}".format(self.ids_def))
+            raise FileNotFoundError("file not found:{}".format(self.ids_def))
 
     def get_coordinate(self, idsname="", field_path=""):
         if self.root is None:
@@ -23,10 +23,12 @@ class DDHelper(object):
         if field_path == "":
             return None
         for ids in self.root.findall("IDS"):
-            if ids.attrib["name"] == idsname.lower():
-                for field in ids.iter("field"):
-                    if field.attrib["path"] == field_path:
-                        if "timebasepath" in field.attrib.keys():
-                            return field.attrib["timebasepath"]
-                        if "coordinate1" in field.attrib.keys():
-                            return field.attrib["coordinate1"]
+            if ids.attrib["name"] != idsname.lower():
+                continue
+            for field in ids.iter("field"):
+                if field.attrib["path"] != field_path:
+                    continue
+                if "timebasepath" in field.attrib.keys():
+                    return field.attrib["timebasepath"]
+                if "coordinate1" in field.attrib.keys():
+                    return field.attrib["coordinate1"]

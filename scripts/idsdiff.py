@@ -1,15 +1,25 @@
 # #!/usr/bin/env python
-
-
-import logging
-import time
+import argparse
+import base64
+import datetime
+import difflib
 import imas
-from idstools.cli import *
+import logging
+import matplotlib.pyplot as plt
 import numpy as np
+import os
+import re
+import sys
+import tempfile
+import time
+
+from idstools.cli import get_backend_id, imas_parser
+from io import BytesIO
 
 root_path = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(root_path)
 from src.compute.common.functions import compare_ids
+from src.utils.dd_helper import DDHelper
 
 THRESHOLD_PERCENT = 2
     
@@ -41,7 +51,7 @@ def setup_logger(name,log_file, verbose=False, fmt=None):
 
 def get_filename(name, file_title, log_dir):
     # Determine log path and file name; create log path if it does not exist
-    import datetime
+   
 
     now = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
     if name =="":
@@ -64,7 +74,7 @@ def get_filename(name, file_title, log_dir):
 
 def generate_html(file_path, data, shotA, runA, shotB, runB):
     logger.info("Writing to html file :" + file_path)
-    from src.utils.dd_helper import DDHelper
+    
 
     dd_helper = DDHelper()
 
@@ -152,10 +162,7 @@ def generate_html(file_path, data, shotA, runA, shotB, runB):
                         compare_candidate < threshold_max
                     )
                     if within_threshold is False:
-                        import matplotlib.pyplot as plt
-                        import base64
-                        from io import BytesIO
-                        import re
+                        
 
                         field_path = re.sub("\[(.*?)\]", "", key)
                         field_path = field_path[field_path.index(".") + 1 :]
@@ -358,10 +365,46 @@ def generate_html(file_path, data, shotA, runA, shotB, runB):
                         </tr>"""
                 elif type(values[0]) is str or type(values[1]) is str :
                     if len(values[0])>100:
+                        tmpdir = "/dev/shm" if os.path.exists("/dev/shm") else "."
+                        idsA = tempfile.mktemp(prefix="idsA_", dir=tmpdir)
+                        idsB = tempfile.mktemp(prefix="idsB_", dir=tmpdir)
+                        try:
+                            with open(idsA, "wb") as f:
+                                f.write(bytes(values[0],'UTF-8'))
+                        except:
+                            if os.path.exists(idsA):
+                                os.unlink(idsA)
+                            raise
+                        
+                        try:
+                            with open(idsB, "wb") as f:
+                                f.write(bytes(values[1],'UTF-8'))
+                        except:
+                            if os.path.exists(idsB):
+                                os.unlink(idsB)
+                            raise
+                        
+                        
+                        with open(idsA,'r') as file_idsA:
+                            lines_idsA = file_idsA.readlines()
+                        with open(idsB,'r') as file_idsB:
+                            lines_idsB = file_idsB.readlines()
+                        
+                        diff = difflib.unified_diff(
+                        lines_idsA, lines_idsB, fromfile=idsA,
+                        tofile=idsB, lineterm='')
+                        
+                        os.unlink(idsA)
+                        os.unlink(idsB)
+                        diff_lines = []
+                        for line in diff:
+                            if "\n" not in line:
+                                line = line + "\n"
+                            diff_lines.append(line)
+                        diff_lines_text = "".join(line for line in diff_lines if not line.isspace())
                         report_diff_line = f"""<tr>
                                 <td>{key}</td>
-                                <td><textarea class="form-control">{values[0]}</textarea></td>
-                                <td><textarea class="form-control">{values[1]}</textarea></td>
+                                <td colspan="2"><textarea class="form-control">{diff_lines_text}</textarea></td>
                                 <td><span class="badge {badge_color}">{values[3]}</span></td>
                                 <td></td>
                             </tr>"""
@@ -507,7 +550,7 @@ if __name__ == "__main__":
             )
             et = time.time()
             elapsed_time = et - st
-            logger.info(
-                "HTML file is generated in:" + "{:10.2f}".format(elapsed_time) + "seconds. file path: " + html_file
-            )
+            # logger.info(
+            #     "HTML file is generated in:" + "{:10.2f}".format(elapsed_time) + "seconds." 
+            # )
 
