@@ -392,7 +392,9 @@ class Canvas:
     # Share axes
     # https://matplotlib.org/stable/gallery/subplots_axes_and_figures/shared_axis_demo.html#sphx-glr-gallery-subplots-axes-and-figures-shared-axis-demo-py
     # https://matplotlib.org/stable/gallery/subplots_axes_and_figures/share_axis_lims_views.html#sphx-glr-gallery-subplots-axes-and-figures-share-axis-lims-views-py
-    def add_axes(self, xlabel="", ylabel="", row=0, col=0, rowspan=1, colspan=1):
+    def add_axes(
+        self, title=None, xlabel=None, ylabel=None, row=0, col=0, rowspan=1, colspan=1
+    ):
         ax = plt.subplot2grid(
             shape=(self.nrows, self.ncols),
             loc=(row, col),
@@ -400,8 +402,12 @@ class Canvas:
             colspan=colspan,
             fig=self.fig,
         )
-        ax.set_xlabel(xlabel)
-        ax.set_ylabel(ylabel)
+        if title is not None:
+            ax.set_title(title)
+        if xlabel is not None:
+            ax.set_xlabel(xlabel)
+        if ylabel is not None:
+            ax.set_ylabel(ylabel)
         ax.grid()
         return ax
 

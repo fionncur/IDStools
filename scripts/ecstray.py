@@ -145,14 +145,20 @@ coreprofilesview = CoreProfilesView(core_profiles_ids)
 wavesview = WavesView(waves_ids)
 ecstrayview = EcStrayView(equilibrium_ids, core_profiles_ids, waves_ids)
 
-ax_waveform = canvas.add_axes("Time [s]", row=0, col=0, colspan=1)
+ax_waveform = canvas.add_axes(
+    title="Waveforms", xlabel="Time [s]", row=0, col=0, colspan=1
+)
 equillibriumview.plot_ip(ax_waveform)  # Plot Ip
 coreprofilesview.plot_ne0(ax_waveform)
 
-ax_beam_index = canvas.add_axes("Beam index", row=0, col=1, colspan=1)
+ax_beam_index = canvas.add_axes(
+    title="Beam_Index", xlabel="Beam index", row=0, col=1, colspan=1
+)
 wavesview.plot_beam_index(ax_beam_index)
 
-ax_pol_view = canvas.add_axes("R [m]", "Z [m]", row=1, col=0, rowspan=1)
+ax_pol_view = canvas.add_axes(
+    title="Poloidal view (R,Z)", xlabel="R [m]", ylabel="Z [m]", row=1, col=0, rowspan=1
+)
 equillibriumview.plot_poloidal_equilibrium(ax_pol_view, time_index_eq)
 
 beam_index = 0
@@ -164,7 +170,9 @@ ecstrayview.plot_resonance_layer(
 
 ecstrayview.plot_cutoff_layer(ax_pol_view, time_index_wv, time_index_cp, time_index_eq)
 
-ax_top_view = canvas.add_axes("X [m]", "Y [m]", row=1, col=1, rowspan=1)
+ax_top_view = canvas.add_axes(
+    title="Top View (X,Y)", xlabel="X [m]", ylabel="Y [m]", row=1, col=1, rowspan=1
+)
 
 ax_topview_plot_eq = equillibriumview.plot_topview_equilibrium(
     ax_top_view, time_index_eq
@@ -175,7 +183,13 @@ ax_topview_plot_traces = wavesview.plot_topview_traces(
 )
 
 # Subplot profiles
-ax_density = canvas.add_axes(r"Normalised $\rho_{tor}$ [-]", row=2, col=0, rowspan=1)
+ax_density = canvas.add_axes(
+    xlabel=r"Normalised $\rho_{tor}$ [-]",
+    ylabel="Density [m-3]",
+    row=2,
+    col=0,
+    rowspan=1,
+)
 ax_density_plot_dens, nmax = coreprofilesview.plot_density_profile(
     ax_density, time_index_cp
 )
@@ -183,8 +197,9 @@ ax_density_plot_dens, nmax = coreprofilesview.plot_density_profile(
 tbdView = TbdView()
 # Subplot polygon graph for beam footprints
 ax_polygon = canvas.add_axes(
-    r"$\phi \times R_{max}$ [Rad.m]",
-    "Length along polygon [m]",
+    title="Beam footprints on the wall",
+    xlabel=r"$\phi \times R_{max}$ [Rad.m]",
+    ylabel="Length along polygon [m]",
     row=2,
     col=1,
     rowspan=1,
