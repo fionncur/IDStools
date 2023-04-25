@@ -22,44 +22,6 @@ class CoreProfilesCompute:
     ) -> dict:
         """
         Function retrives composition and species concentration in below format
-            Spcies_label
-                a
-                nspec_over_ne
-                nspec_over_nmaj
-                nspec_over_ntot
-                species [mendeleiev_table]
-                states
-                    label
-                    n_ni
-                    states_density [list]
-                    z_average
-        Folllowing is the example
-        {
-            "D": {
-                "a": 2,
-                "z": 1
-                "nspec_over_ne": 0.5023622549575154,
-                "nspec_over_nmaj": 1.0,
-                "nspec_over_ntot": 0.5037968786242728,
-                "species": mendeleiev_table,
-                "states": {
-                    "0": {
-                        "label": "",
-                        "n_ni": 100.0,
-                        "states_density": [
-                            8.368879805142247e+23
-                        ],
-                        "z_average": -9e+40
-                    }
-                },
-            },
-        }
-        Args:
-            ids_object ([ids_object]): [filled ids object]
-            slice_index (int, optional): [slice on which functions should operate on]. Defaults to 0.
-
-        Returns:
-            [dict]: [species wise data in dictionary format]
         """
         try:
             ids_object.profiles_1d[slice_index]

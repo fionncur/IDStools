@@ -552,6 +552,12 @@ if __name__ == "__main__":
             generate_html(html_file, data, args.shotA, args.runA, args.shotB, args.runB)
             et = time.time()
             elapsed_time = et - st
+            try:
+                import webbrowser
+
+                webbrowser.open(html_file)
+            except:
+                pass
             # logger.info(
             #     "HTML file is generated in:" + "{:10.2f}".format(elapsed_time) + "seconds."
             # )
