@@ -2,7 +2,7 @@ import numpy as np
 
 from src.compute.equilibrium.functions import EquilibriumCompute
 from src.compute.waves.functions import WavesCompute
-from src.compute.common.functions import find_nearest
+from src.compute.common.functions import nearest
 
 
 class EcStrayCompute:
@@ -50,7 +50,7 @@ class EcStrayCompute:
             res_layer[i_harm]["r"] = []
             res_layer[i_harm]["z"] = []
             for iz in range(nz):
-                [rloc, ir] = find_nearest(b_tot[:, iz], B_res[i_harm])
+                [ir, rloc] = nearest(b_tot[:, iz], B_res[i_harm])
                 if np.abs(b_tot[ir, iz] - B_res[i_harm]) < b_err:
                     res_layer[i_harm]["r"].append(r[ir])
                     res_layer[i_harm]["z"].append(z[iz])
@@ -58,7 +58,6 @@ class EcStrayCompute:
         return res_layer
 
     def get_cutoff_layer(self, time_index_wv=0, time_index_cp=0, time_index_eq=0):
-
         from scipy import constants, interpolate
 
         wavecompute = WavesCompute(self.waves_ids)
@@ -138,7 +137,7 @@ class EcStrayCompute:
         cutoff_layer["r"] = []
         cutoff_layer["z"] = []
         for iz in range(nz):
-            [rloc, ir] = find_nearest(omega_r[:, iz], omega_ec)
+            [ir, rloc] = nearest(omega_r[:, iz], omega_ec)
             if np.abs((omega_r[ir, iz] - omega_ec) / omega_r[ir, iz]) < omega_err:
                 cutoff_layer["r"].append(r[ir])
                 cutoff_layer["z"].append(z[iz])

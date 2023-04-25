@@ -1,40 +1,35 @@
-# plot_ne0 and plot density profile function
-# not ok src/view/core_profiles/functions.py
-
-from ...compute.core_profiles.functions import CoreProfilesCompute
+from ...compute.edge_profiles.functions import EdgeProfilesCompute
 from ...view.common.functions import Console
 
 
-class CoreProfilesView(Console):
-    def __init__(self, ids_object):
-        self.ids_object = ids_object
-        self.core_profiles_compute = CoreProfilesCompute(ids_object)
+class EdgeProfilesView(Console):
+    def __init__(self):
+        pass
 
     @staticmethod
     def view_plasma_composition_with_species_concentration(
-        ids_object, slice_index=0, print_data=False, volume=None
+        ids_object, slice_index=0, print_data=False
     ):
         """
         Nice display of plasma composition with species concentrations
         """
         print("   ------------")
-        print("core_profiles")
+        print("edge_profiles")
         print("   ------------")
         composition_data = (
-            CoreProfilesCompute.get_plasma_composition_with_species_concentration(
-                ids_object, slice_index, volume=volume
+            EdgeProfilesCompute.get_plasma_composition_with_species_concentration(
+                ids_object, slice_index
             )
         )
         if composition_data != 0 and composition_data != -1:
-            coreProfilesView = CoreProfilesView(ids_object)
-            coreProfilesView._print_plasma_composition(composition_data)
-            coreProfilesView._print_specis_concentration(composition_data)
+            edgeProfilesView = EdgeProfilesView()
+            edgeProfilesView._print_plasma_composition(composition_data)
+            edgeProfilesView._print_specis_concentration(composition_data)
 
             if print_data is True:
                 import json
 
                 print(json.dumps(composition_data, sort_keys=True, indent=4))
-
         return composition_data
 
     def _print_plasma_composition(self, composition_data):
@@ -53,6 +48,7 @@ class CoreProfilesView(Console):
                 else:
                     main_species = main_species + "-" + species_data["species"]
             if species_data["nspec_over_ne"] > 0.0:
+
                 disp_species = (
                     disp_species
                     + species_data["species"]
@@ -147,84 +143,34 @@ class CoreProfilesView(Console):
         print("   ------------")
 
     def _print_specis_concentration(self, composition_data):
+
         for species_key, species_data in composition_data.items():
             states = species_data["states"]
             nstates = len(states)
-            if nstates != 0:
-                if nstates > 1:
-                    comm = "s"
-                else:
-                    comm = ""
-                if nstates != 0:
-                    print(
-                        species_data["species"],
-                        " has ",
-                        nstates,
-                        " state" + comm,
-                    )
-                istate = 0
-                for state_key, state_data in states.items():
-                    if state_data["density_available"] is False:
-                        print(
-                            self.TAB,
-                            "!  core_profile IDS: Density is not available for state ",
-                            str(istate + 1),
-                        )
-                    else:
-                        print(
-                            self.TAB,
-                            "state ",
-                            str(istate + 1),
-                            (" " * (5 - len(str(istate + 1)))),
-                            state_data["label"],
-                            (" " * (7 - len(str(state_data["label"])))),
-                            "z =",
-                            state_data["z_average"],
-                            (" " * (7 - len(str(state_data["z_average"])))),
-                            "   n/ni, % :",
-                            format("%.6f" % (state_data["n_ni"])),
-                        )
-                    istate = istate + 1
-
-    def plot_ne0(self, ax):
-        ne0 = self.core_profiles_compute.get_ne0()
-        time_array = self.ids_object.time
-
-        ax.plot(time_array, ne0, color="r", label="$n_{e0} [10^{19}.m^{-3}]$")
-
-        ax.set_xlim(min(time_array), max(time_array))
-        # ax_waveform.set_ylim(0,max(ip)*1.2)
-        ax.set_ylim(0, 20)
-
-    def plot_density_profile(self, ax, time_index, psi_based=0, init=1):
-        rho_tor_norm = self.core_profiles_compute.get_rho_tor_norm(time_index)
-
-        psi = self.core_profiles_compute.get_psi(time_index)
-
-        if rho_tor_norm is not None and psi is not None:
-            radial_coordinate = rho_tor_norm
-            xlabel = ""
-            if init == 1:
-                xlabel = r"Normalised $\rho_{tor}$ [-]"
-            if psi_based == 1:
-                radial_coordinate = psi
-                if init == 1:
-                    xlabel = r"$-\psi$ [Wb]"
-
-            ax.set_xlabel(xlabel)
-            electron_density = self.ids_object.profiles_1d[time_index].electrons.density
-            nmax = max(electron_density) * 1.2
-            ax_density_plot_dens = None
-            if init == 1:
-                (ax_density_plot_dens,) = ax.plot(
-                    radial_coordinate,
-                    electron_density,
-                    color="b",
-                    label=r"$n_e [m^{-3}]$",
-                )
-                # ax_density.set_ylim(bottom=0,top=max(electron_density))
+            if nstates > 1:
+                comm = "s"
             else:
-                ax.legend(loc="upper right", shadow=True, fancybox=True)
-                ax.set_ylim(top=nmax)
-                ax.set_data(radial_coordinate, electron_density)
-            return ax_density_plot_dens, nmax
+                comm = ""
+            if nstates != 0:
+                print(
+                    species_data["species"],
+                    " has ",
+                    nstates,
+                    " state" + comm,
+                )
+            istate = 0
+            for state_key, state_data in states.items():
+                print(
+                    self.TAB,
+                    "state ",
+                    str(istate + 1),
+                    (" " * (5 - len(str(istate + 1)))),
+                    state_data["label"],
+                    (" " * (7 - len(str(state_data["label"])))),
+                    "z =",
+                    state_data["z_average"],
+                    (" " * (7 - len(str(state_data["z_average"])))),
+                    "   n/ni, % :",
+                    format("%.6f" % (state_data["n_ni"])),
+                )
+                istate += 1

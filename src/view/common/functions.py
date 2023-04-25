@@ -1,3 +1,5 @@
+# class figure to canvas
+# src/view/common/functions.py ok need to test equiplot
 import matplotlib, os, sys
 
 if "DISPLAY" not in os.environ:
@@ -442,17 +444,14 @@ class BasePlot:
     }
     ticksize = 10
 
-    def __init__(self, ax):
-        self.ax = ax
-
-    def database_info(self, title, hostdir, shot, run, t):
+    def database_info(self, ax, title, hostdir, shot, run, t):
         plottitle = title
         plottitle += " (t={:.3f})".format(t)
-        self.ax.set_title(plottitle, fontdict=BasePlot.font)
+        ax.set_title(plottitle, fontdict=BasePlot.font)
 
-        xmin, xmax = self.ax.get_xlim()
-        ymin, ymax = self.ax.get_ylim()
-        self.ax.text(
+        xmin, xmax = ax.get_xlim()
+        ymin, ymax = ax.get_ylim()
+        ax.text(
             xmax + 0.01 * abs(xmax),
             ymin + 0.5 * abs(ymax - ymin),
             "{0}-Shot:{1},{2}".format(hostdir, shot, run),

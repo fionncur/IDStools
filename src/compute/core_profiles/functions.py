@@ -1,6 +1,12 @@
+#  src/compute/core_profiles/functions.py ok
+
 import numpy as np
 import database_tools.init_mendeleiev as mend
 import sys
+import logging
+import functools
+
+logger = logging.getLogger("module." + __name__)
 
 
 class CoreProfilesCompute:
@@ -75,7 +81,7 @@ class CoreProfilesCompute:
         nspec_over_ne = coreProfileCompute.get_nspec_over_ne()
         nspec_over_nmaj = coreProfileCompute.get_nspec_over_nmaj()
         species = coreProfileCompute.get_species()
-        labels = coreProfileCompute.get_species_labels()
+        labels = coreProfileCompute.get_labels()
         coreProfileCompute.combine_species_when_appear_twice(
             species, nspec_over_ntot, nspec_over_ne, nspec_over_nmaj
         )
@@ -91,11 +97,13 @@ class CoreProfilesCompute:
             species_data["z"] = z[species_index]
             species_data["species"] = species[species_index]
             species_data["states"] = states_data[str(species_index)]
+            species_data["label"] = labels[species_index]
 
             data[str(species_index)] = species_data
 
         return data
 
+    @functools.lru_cache(maxsize=128)
     def get_ne0(self):
         ntime = len(self.ids_object.time)
 
@@ -106,6 +114,7 @@ class CoreProfilesCompute:
             )
         return ne0
 
+    @functools.lru_cache(maxsize=128)
     def get_a(self, slice_index=0, element_index=0) -> list:
         """
         Get series wise value of a of all species
@@ -121,14 +130,16 @@ class CoreProfilesCompute:
         nspecies = len(self.ids_object.profiles_1d[slice_index].ion)
         a = [0] * nspecies
         for ispecies in range(nspecies):
-            a[ispecies] = int(
+            a[ispecies] = (
                 self.ids_object.profiles_1d[slice_index]
                 .ion[ispecies]
                 .element[element_index]
                 .a
             )
+        logger.debug("Mass of atom : " + str(a))
         return a
 
+    @functools.lru_cache(maxsize=128)
     def get_z(self, slice_index=0, element_index=0) -> list:
         """
         Get series wise value of z of all species
@@ -150,6 +161,7 @@ class CoreProfilesCompute:
                 .element[element_index]
                 .z_n
             )
+        logger.debug("Nuclear charge each species : " + str(z))
         return z
 
     # TODO Removed this method as it is not used anywhere
@@ -214,14 +226,17 @@ class CoreProfilesCompute:
 
         states_data = {}
 
-        volume = self.volume
+        volume = self.get_volume(slice_index)
         nspecies = len(self.ids_object.profiles_1d[slice_index].ion)
         species_density, _, _ = self.get_species_density()
         for species_index in range(nspecies):
+            logger.debug("Species index :" + str(species_index))
+            logger.debug("Species density :" + str(species_density[species_index]))
             species_data = {}
             nstates = len(
                 self.ids_object.profiles_1d[slice_index].ion[species_index].state
             )
+            logger.debug("Species states count :" + str(nstates))
             states_density = [0] * nstates
             for state_index in range(nstates):
                 state_data = {}
@@ -246,27 +261,38 @@ class CoreProfilesCompute:
                 state_data["density_available"] = False
                 if density is not None:
                     if len(density) != 0:
-                        states_density[state_index] = sum(density * volume)
-                        state_data["density_available"] = True
+                        # if all density values in the array are 1.0 or 0.0 then do not calculate because it can be false values
+                        if np.all(density == 1.0) or np.all(density == 0.0):
+                            logger.critical(
+                                "core_profile IDS: Density data for species "
+                                + self.ids_object.profiles_1d[slice_index]
+                                .ion[species_index]
+                                .label
+                                + " and state "
+                                + str(state_index)
+                                + " all are ones or zeros "
+                            )
+                        else:
+                            logger.debug("Density array :" + str(density))
+                            states_density[state_index] = sum(density * volume)
+                            state_data["density_available"] = True
                     else:
-                        print(
-                            "!  core_profile IDS: Density data for species ",
-                            self.ids_object.profiles_1d[slice_index]
+                        logger.critical(
+                            "core_profile IDS: Density data for species "
+                            + self.ids_object.profiles_1d[slice_index]
                             .ion[species_index]
                             .label,
-                            " and state ",
-                            state_index,
-                            " is empty ",
+                            " and state " + str(state_index) + " is empty ",
                         )
                 else:
-                    print(
-                        "!  core_profile IDS: Density data for species ",
-                        self.ids_object.profiles_1d[slice_index]
+                    logger.critical(
+                        "core_profile IDS: Density data for species "
+                        + self.ids_object.profiles_1d[slice_index]
                         .ion[species_index]
-                        .label,
-                        " and state ",
-                        state_index,
-                        " is empty ",
+                        .label
+                        + " and state "
+                        + str(state_index)
+                        + " is empty "
                     )
                 # TODO Couldn't retrive state desnity should we calculate n/ni?
                 # In that case density is always 0 and no meaning of n/ni
@@ -276,10 +302,23 @@ class CoreProfilesCompute:
                 # /home/ITER/sawantp1/imasrepo/checkinfolder/idstools/src/compute/core_profiles/functions.py:230: RuntimeWarning: divide by zero encountered in double_scalars
                 #   100 * states_density[state_index] / species_density[species_index]
                 state_data["states_density"] = states_density
-
-                state_data["n_ni"] = (
-                    100 * states_density[state_index] / species_density[species_index]
+                logger.debug(
+                    "State density at index "
+                    + str(state_index)
+                    + " : State density : "
+                    + str(states_density[state_index])
+                    + "\t Species density :"
+                    + str(species_density[species_index])
                 )
+                # if species density is 0.0 then do not calculate n/ni
+                if species_density[species_index] != 0.0:
+                    state_data["n_ni"] = (
+                        100
+                        * states_density[state_index]
+                        / species_density[species_index]
+                    )
+                else:
+                    state_data["n_ni"] = 0.0
                 species_data[str(state_index)] = state_data
 
             # label = self.ids_object.profiles_1d[slice_index].ion[species_index].label
@@ -296,78 +335,22 @@ class CoreProfilesCompute:
         Returns:
             [float]: [Sum of multiplication of volume and elcetrons density ]
         """
-        volume = self.volume
+        volume = self.get_volume(slice_index)
 
         electron_density = self.ids_object.profiles_1d[slice_index].electrons.density
+        logger.info("Total no. electrons (ne): " + str(sum(volume * electron_density)))
         return sum(volume * electron_density)
 
-    def get_nrho(self, time_index=0):
-        nrho = None
-
-        try:
-            if len(self.ids_object.profiles_1d[time_index].grid.rho_tor_norm) > 0:
-                nrho = len(self.ids_object.profiles_1d[time_index].grid.rho_tor_norm)
-            elif len(self.ids_object.profiles_1d[time_index].grid.rho_tor) > 0:
-                nrho = len(self.ids_object.profiles_1d[time_index].grid.rho_tor)
-        except:
-            print(
-                "core_profiles.profiles_1d[:].grid.rho_tor_norm and rho_tor could not be read.",
-                file=sys.stderr,
-            )
-        if nrho == 0:
-            print(
-                "core_profiles.profiles_1d[:].grid.rho_tor_norm and rho_tor are empty.",
-                file=sys.stderr,
-            )
-        return nrho
-
-    def get_rho_tor_norm(self, time_index=0):
-        # Normalized toroidal and poloidal flux coordinates
-        rho_tor_norm = None
-        nrho = self.get_nrho(time_index)
-        if nrho != None:
-            rho_tor_norm = [0] * nrho
-            if len(self.ids_object.profiles_1d[time_index].grid.rho_tor_norm) > 0:
-                for i in range(nrho):
-                    rho_tor_norm[i] = self.ids_object.profiles_1d[
-                        time_index
-                    ].grid.rho_tor_norm[i]
-            elif len(self.ids_object.profiles_1d[time_index].grid.rho_tor) > 0:
-                for i in range(nrho):
-                    rho_tor_norm[i] = (
-                        self.ids_object.profiles_1d[time_index].grid.rho_tor[i]
-                        / self.ids_object.profiles_1d[time_index].grid.rho_tor[nrho - 1]
-                    )
-        return rho_tor_norm
-
-    def get_psi(self, time_index=0):
-        psi = None
-        if len(self.ids_object.profiles_1d[time_index].grid.psi) > 0:
-            psi = -self.ids_object.profiles_1d[time_index].grid.psi
-        return psi
-
+    @functools.lru_cache(maxsize=128)
     def get_volume(self, slice_index=0):
         volume = self.ids_object.profiles_1d[slice_index].grid.volume
         if len(volume) == 0:
             volume = None
-            print("!   core_profile IDS: Grid volume is empty")
+            logger.critical("core_profile IDS: Grid volume is empty")
+        logger.info("Total volume:" + str(np.sum(volume)))
         return volume
 
-    def get_single_species_density(self, slice_index=0, species_index=0):
-        """
-        Sum of multiplication of volume and species density
-
-        Args:
-            slice_index (int, optional): [slice on which functions should operate on]. Defaults to 0.
-            species_index (int, optional): [species from which we need to get the data]. Defaults to 0.
-
-        Returns:
-            [float]: [Sum of multiplication of volume and elcetrons density ]
-        """
-        volume = self.volume
-        density = self.ids_object.profiles_1d[slice_index].ion[species_index].density
-        return sum(volume * density)
-
+    @functools.lru_cache(maxsize=128)
     def get_species_density(self, slice_index=0) -> tuple:
         """
         Returns species_density_list, sum_density, max_density_index of all species
@@ -386,13 +369,15 @@ class CoreProfilesCompute:
         max_density = -999.0
         max_density_index = 0
         for ispecies in range(nspecies):
-            species_density_list[ispecies] = self.get_single_species_density(
-                slice_index=0, species_index=ispecies
-            )
+            volume = self.get_volume(slice_index)
+            density = self.ids_object.profiles_1d[slice_index].ion[ispecies].density
+            species_density_list[ispecies] = sum(volume * density)
+
             sum_density = sum_density + species_density_list[ispecies]
             if species_density_list[ispecies] > max_density:
                 max_density = species_density_list[ispecies]
                 max_density_index = ispecies
+        logger.debug("Species density:" + str(species_density_list))
         return species_density_list, sum_density, max_density_index
 
     def get_nspec_over_ntot(self):
@@ -443,14 +428,14 @@ class CoreProfilesCompute:
         table_mendeleiev = mend.create_table_mendeleiev()
         nspecies = len(self.ids_object.profiles_1d[slice_index].ion)
 
-        a = self.get_a()
-        z = self.get_z()
+        a = list(map(int, self.get_a()))
+        z = list(map(int, self.get_z()))
         species = []
         for ispecies in range(nspecies):
             species.append(table_mendeleiev[z[ispecies]][a[ispecies]].element)
         return species
 
-    def get_species_labels(self, slice_index=0) -> list:
+    def get_labels(self, slice_index=0) -> list:
         """
         Get label of species
 
@@ -465,6 +450,7 @@ class CoreProfilesCompute:
         for ispecies in range(nspecies):
             labels.append(self.ids_object.profiles_1d[slice_index].ion[ispecies].label)
 
+        logger.debug("Species identification :" + str(labels))
         return labels
 
     def combine_species_when_appear_twice(
@@ -498,3 +484,48 @@ class CoreProfilesCompute:
                         nspec_over_nmaj[ispecies] + nspec_over_nmaj[jspecies]
                     )
                     nspec_over_nmaj[jspecies] = 0
+
+    def get_nrho(self, time_index=0):
+        nrho = None
+
+        try:
+            if len(self.ids_object.profiles_1d[time_index].grid.rho_tor_norm) > 0:
+                nrho = len(self.ids_object.profiles_1d[time_index].grid.rho_tor_norm)
+            elif len(self.ids_object.profiles_1d[time_index].grid.rho_tor) > 0:
+                nrho = len(self.ids_object.profiles_1d[time_index].grid.rho_tor)
+        except:
+            print(
+                "core_profiles.profiles_1d[:].grid.rho_tor_norm and rho_tor could not be read.",
+                file=sys.stderr,
+            )
+        if nrho == 0:
+            print(
+                "core_profiles.profiles_1d[:].grid.rho_tor_norm and rho_tor are empty.",
+                file=sys.stderr,
+            )
+        return nrho
+
+    def get_rho_tor_norm(self, time_index=0):
+        # Normalized toroidal and poloidal flux coordinates
+        rho_tor_norm = None
+        nrho = self.get_nrho(time_index)
+        if nrho != None:
+            rho_tor_norm = [0] * nrho
+            if len(self.ids_object.profiles_1d[time_index].grid.rho_tor_norm) > 0:
+                for i in range(nrho):
+                    rho_tor_norm[i] = self.ids_object.profiles_1d[
+                        time_index
+                    ].grid.rho_tor_norm[i]
+            elif len(self.ids_object.profiles_1d[time_index].grid.rho_tor) > 0:
+                for i in range(nrho):
+                    rho_tor_norm[i] = (
+                        self.ids_object.profiles_1d[time_index].grid.rho_tor[i]
+                        / self.ids_object.profiles_1d[time_index].grid.rho_tor[nrho - 1]
+                    )
+        return rho_tor_norm
+
+    def get_psi(self, time_index=0):
+        psi = None
+        if len(self.ids_object.profiles_1d[time_index].grid.psi) > 0:
+            psi = -self.ids_object.profiles_1d[time_index].grid.psi
+        return psi

@@ -3,3 +3,7 @@ numpy
 pandas
 cerberus
 yaml
+packaging
+pyparsing
+six
+python-dateutil
