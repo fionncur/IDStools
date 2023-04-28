@@ -32,7 +32,7 @@ script_files.append("idstools/idsdef.py")
 
 
 setup(
-    name="IMAS IDS Tools",
+    name="idstools",
     version=versioneer.get_version(),
     cmdclass=versioneer.get_cmdclass(),
     description="IMAS IDS Python tools",

@@ -10,21 +10,24 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
+import idstools
 import os
 import sys
 
-sys.path.insert(0, os.path.abspath(".."))
+root_path = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+
+sys.path.insert(0, root_path)
 
 print("python exec:", sys.executable)
 print("sys.path:", sys.path)
 # -- Project information -----------------------------------------------------
 
-project = "idstools"
+project = "IDSTools"
 copyright = "2023, ITER Organization"
 author = "ITER Organization"
 
 # The full version, including alpha/beta/rc tags
-release = "2.0.0"
+release = idstools.__version__
 
 
 # -- General configuration ---------------------------------------------------
@@ -32,10 +35,31 @@ release = "2.0.0"
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ["sphinx.ext.autodoc", "sphinx.ext.viewcode", "sphinx.ext.napoleon"]
+extensions = [
+    "sphinx.ext.autodoc",
+    "sphinx.ext.autosectionlabel",
+    "sphinx.ext.todo",
+    "sphinx.ext.githubpages",
+    "sphinx.ext.viewcode",
+    "sphinx.ext.extlinks",
+    "sphinx.ext.graphviz",
+    "sphinx.ext.napoleon",
+    "sphinx.ext.autosummary",
+    "sphinx.ext.mathjax",
+    "sphinx_autodoc_typehints",
+    # "sphinxcontrib.mermaid",
+]
+
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
+
+# The suffix of source filenames.
+source_suffix = {
+    ".rst": "restructuredtext",
+    ".txt": "markdown",
+    ".md": "markdown",
+}
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
@@ -43,14 +67,130 @@ templates_path = ["_templates"]
 exclude_patterns = []
 
 
+# -- Extension configuration -------------------------------------------------
+# Configuration of sphinx.ext.autodoc
+# https://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html
+
 # -- Options for HTML output -------------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = "sphinx_rtd_theme"
+html_theme = "pydata_sphinx_theme"
+# html_favicon = "_static/favicon/favicon.ico"
 
+# html_theme_options = {
+#     "logo": {
+#         "image_light": "logo.svg",
+#         "image_dark": "logo_dark.svg",
+#     },
+#     "github_url": "https://github.com/numpy/numpy",
+#     "collapse_navigation": True,
+#     # Add light/dark mode and documentation version switcher:
+#     "navbar_end": ["theme-switcher", "version-switcher", "navbar-icon-links"],
+# }
+html_theme_options = {
+    "search_bar_text": "Search in IDSTools...",
+    "external_links": [
+        {
+            "name": "IMAS Getting Started",
+            "url": "https://confluence.iter.org/display/IMP/Getting+Started",
+        },
+        {
+            "name": "IMAS Data Dictionary",
+            "url": "https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/CI/imas-3.37.2/html_documentation.html",
+        },
+    ],
+    "bitbucket_url": "https://git.iter.org/projects/IMAS/repos/idstools/browse",
+    "primary_sidebar_end": ["indices.html", "sidebar-ethical-ads.html"],
+    "collapse_navigation": True,
+}
+html_sidebars = {
+    "**": ["search-field.html", "sidebar-nav-bs.html", "sidebar-ethical-ads.html"]
+}
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
+html_title = "%s v%s Manual" % (project, release)
+
 html_static_path = ["_static"]
+html_css_files = ["idstools.css"]
+# html_context = {"default_mode": "light"}
+html_file_suffix = ".html"
+htmlhelp_basename = "idstools"
+
+# Configuration of sphinx.ext.autosummary
+# https://www.sphinx-doc.org/en/master/usage/extensions/autosummary.html
+autosummary_generate = True
+
+
+# Configuration of sphinx.ext.napoleon
+# Support for NumPy and Google style docstrings
+# See https://www.sphinx-doc.org/en/master/usage/extensions/napoleon.html
+napoleon_google_docstring = True
+napoleon_numpy_docstring = False
+napoleon_include_init_with_doc = True
+napoleon_include_private_with_doc = True
+# napoleon_include_special_with_doc = True
+# napoleon_use_admonition_for_examples = False
+# napoleon_use_admonition_for_notes = False
+# napoleon_use_admonition_for_references = False
+# napoleon_use_ivar = False
+# napoleon_use_param = True
+# napoleon_use_keyword = False
+# napoleon_use_rtype = True
+napoleon_preprocess_types = True
+napoleon_type_aliases = {
+    # general terms
+    "sequence": ":term:`sequence`",
+    "iterable": ":term:`iterable`",
+    "callable": ":py:func:`callable`",
+    "dict_like": ":term:`dict-like <mapping>`",
+    "dict-like": ":term:`dict-like <mapping>`",
+    "mapping": ":term:`mapping`",
+    "file-like": ":term:`file-like <file-like object>`",
+    # special terms
+    # 'same type as caller': '*same type as caller*',  # does not work, yet
+    # 'same type as values': '*same type as values*',  # does not work, yet
+    # stdlib type aliases
+    "MutableMapping": "~collections.abc.MutableMapping",
+    "sys.stdout": ":obj:`sys.stdout`",
+    "timedelta": "~datetime.timedelta",
+    "string": ":class:`string <str>`",
+    # numpy terms
+    "array_like": ":term:`array_like`",
+    "array-like": ":term:`array-like <array_like>`",
+    "scalar": ":term:`scalar`",
+    "array": ":term:`array`",
+    "hashable": ":term:`hashable <name>`",
+    # matplotlib terms
+    "color-like": ":py:func:`color-like <matplotlib.colors.is_color_like>`",
+    "matplotlib colormap name": ":doc:matplotlib colormap name <Colormap reference>",
+    "matplotlib axes object": ":py:class:`matplotlib axes object <matplotlib.axes.Axes>`",
+    "colormap": ":py:class:`colormap <matplotlib.colors.Colormap>`",
+    # objects without namespace
+    "DataArray": "~xarray.DataArray",
+    "Dataset": "~xarray.Dataset",
+    "Variable": "~xarray.Variable",
+    "ndarray": "~numpy.ndarray",
+    "MaskedArray": "~numpy.ma.MaskedArray",
+    "dtype": "~numpy.dtype",
+    "ComplexWarning": "~numpy.ComplexWarning",
+    "Index": "~pandas.Index",
+    "MultiIndex": "~pandas.MultiIndex",
+    "CategoricalIndex": "~pandas.CategoricalIndex",
+    "TimedeltaIndex": "~pandas.TimedeltaIndex",
+    "DatetimeIndex": "~pandas.DatetimeIndex",
+    "Series": "~pandas.Series",
+    "DataFrame": "~pandas.DataFrame",
+    "Categorical": "~pandas.Categorical",
+    "Path": "~~pathlib.Path",
+    # objects with abbreviated namespace (from pandas)
+    "pd.Index": "~pandas.Index",
+    "pd.NaT": "~pandas.NaT",
+    "pd.DataFrame": "~pandas.NaT",
+}  # TODO: From xarray, improve! New in 3.2
+
+napoleon_attr_annotations = (
+    True  # Allow PEP 526 attributes annotations in classes. New in 3.4
+)
