@@ -77,8 +77,8 @@ exclude_patterns = []
 # a list of builtin themes.
 #
 html_theme = "pydata_sphinx_theme"
-# html_favicon = "_static/favicon/favicon.ico"
-
+html_favicon = "_static/favicon/favicon.ico"
+html_logo = "_static/logo.png"
 # html_theme_options = {
 #     "logo": {
 #         "image_light": "logo.svg",
@@ -90,7 +90,7 @@ html_theme = "pydata_sphinx_theme"
 #     "navbar_end": ["theme-switcher", "version-switcher", "navbar-icon-links"],
 # }
 html_theme_options = {
-    "search_bar_text": "Search in IDSTools...",
+    "search_bar_text": "Search the Docs...",
     "external_links": [
         {
             "name": "IMAS Getting Started",
@@ -104,10 +104,23 @@ html_theme_options = {
     "bitbucket_url": "https://git.iter.org/projects/IMAS/repos/idstools/browse",
     "primary_sidebar_end": ["indices.html", "sidebar-ethical-ads.html"],
     "collapse_navigation": True,
+    "logo": {
+        "image_light": "_static/logo.png",
+        "image_dark": "_static/logo.png",
+    },
+    "show_prev_next": False,
+    "navigation_with_keys": False,
 }
 html_sidebars = {
-    "**": ["search-field.html", "sidebar-nav-bs.html", "sidebar-ethical-ads.html"]
+    "**": [
+        "search-field.html",
+        # "sidebar-nav-bs.html",
+        # "sidebar-ethical-ads.html",
+        "globaltoc.html",
+    ]
 }
+# ['globaltoc.html', 'sourcelink.html', 'searchbox.html'],
+#    'using/windows': ['windowssidebar.html', 'searchbox.html']
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".

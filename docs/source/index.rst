@@ -22,27 +22,54 @@ It provides:
 
 
 
+.. image:: _static/index-images/install.svg
+   :width: 48
+   :class: align-right
+
 .. toctree::
    :maxdepth: 2
    
    install.rst
    
+.. raw:: html
 
+   <hr>
+
+.. image:: _static/index-images/user-guide.svg
+   :width: 48
+   :class: align-right
+   
 .. toctree::
    :maxdepth: 1
    
    usersguide.rst
 
+.. raw:: html
 
+   <hr>
+
+.. image:: _static/index-images/api.svg
+   :width: 48
+   :class: align-right
+   
 .. toctree::
    :maxdepth: 2
 
    api.rst
 
+.. raw:: html
+
+   <hr>
+   
+.. image:: _static/index-images/support.png
+   :width: 48
+   :class: align-right
+   
 .. toctree::
    :maxdepth: 2
 
    support.rst
+
 
 License
 -------
