@@ -1,18 +1,19 @@
 import argparse
 import imas
+import logging
 import sys
 import os
 
 root_path = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(root_path)
 
-from idstools.cli import get_backend_id
-from idstools.cli import imas_parser
+from cli_helper import get_backend_id, imas_parser, setup_logger
 
 from idstools2.view.common.basic import Canvas
 from idstools2.view.equilibrium.basic import EquilibriumView
 from idstools2.view.pf_active.basic import PFCoilsView
 from idstools2.compute.common.basic import nearest
+
 
 parser = argparse.ArgumentParser(
     description="---- Display the plasma equilibrium from the equilibrium IDS",
@@ -45,18 +46,16 @@ parser.add_argument(
 )
 args = parser.parse_args()
 
+
+level = logging.WARN
+logger = setup_logger("module", level)
+
 database_abs_path = ""
-if args.user == "public":
-    database_abs_path = (
-        os.environ["IMAS_HOME"] + "/shared/imasdb/" + args.database + "/3"
-    )
-else:
-    database_abs_path = (
-        os.path.expanduser("~{}".format(args.user))
-        + "/public/imasdb/"
-        + args.database
-        + "/3"
-    )
+database_abs_path = (
+    (os.environ["IMAS_HOME"] + "/shared/imasdb/" + args.database + "/3")
+    if args.user == "public"
+    else f'{os.path.expanduser(f"~{args.user}")}/public/imasdb/{args.database}/3'
+)
 hostdir = os.environ["HOSTNAME"] + ":" + database_abs_path
 
 connection = imas.DBEntry(
@@ -64,15 +63,16 @@ connection = imas.DBEntry(
 )
 err, n = connection.open()
 if err != 0:
-    # TODO chek if you can raise exception or just print or may be use logger
-    print(
+    logger.error(
         "Shot {0}, run {1} for user={2} and database={3} does not exists".format(
             args.shot, args.run, args.user, args.database
-        ),
-        file=sys.stderr,
+        )
     )
-    print("----> Aborted.", file=sys.stderr)
-    exit()
+    raise FileNotFoundError(
+        "Shot {0}, run {1} for user={2} and database={3} does not exists".format(
+            args.shot, args.run, args.user, args.database
+        )
+    )
 
 # Get ids Object - equilibrium
 equilibrium_ids = imas.equilibrium()
@@ -80,7 +80,7 @@ equilibrium_ids.time = connection.partial_get("equilibrium", "time", args.occurr
 time_index, time_value = nearest(equilibrium_ids.time, args.time)
 equilibrium_ids.time_slice.resize(1)
 equilibrium_ids.time_slice[0] = connection.partial_get(
-    "equilibrium", "time_slice(" + str(time_index) + ")", args.occurrence
+    "equilibrium", f"time_slice({str(time_index)})", args.occurrence
 )
 # Get ids Object - pf active
 pf_active_ids = connection.get("pf_active")
@@ -106,8 +106,8 @@ try:
         args.shot, args.run, args.time
     )
     canvas.save(fname)
-    print("----> Figure saved to " + fname, file=sys.stderr)
-except:
+    print(f"----> Figure saved to {fname}", file=sys.stderr)
+except Exception:
     print("The figure could not be saved (check local permissions).", file=sys.stderr)
 
 canvas.show()

@@ -15,7 +15,7 @@ class DDHelper(object):
         if path.isfile(self.ids_def):
             self.root = ET.parse(self.ids_def).getroot()
         else:
-            raise FileNotFoundError("file not found:{}".format(self.ids_def))
+            raise FileNotFoundError(f"file not found:{self.ids_def}")
 
     def get_coordinate(self, idsname="", field_path=""):
         if self.root is None:

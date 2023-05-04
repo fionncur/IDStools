@@ -12,13 +12,16 @@
 #    n_over_ne:    4.45e-06  0.387     0.414     5.89e-07  9.58e-03  0.020     0.010
 #    n_over_n_maj: 1.07e-05  0.933     1.000     1.42e-06  0.023     0.048     0.024
 
-from idstools.cli import *
+# from idstools.cli import *
 import argparse
-import imas
 import logging
+import imas
 import numpy as np
 import os
 import sys
+
+from cli_helper import setup_logger
+from cli_helper import imas_parser, get_backend_id
 
 root_path = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(root_path)
@@ -36,27 +39,12 @@ parser.add_argument("--debug", action="store_true", help="Show debugging")
 
 args = parser.parse_args()
 
-
-def setup_logger(logger_name, isdebug, isinfo):
-    logger = logging.getLogger(logger_name)
-    logger.setLevel(logging.WARN)  # default
-    if isdebug:
-        logger.setLevel(logging.DEBUG)
-    if isinfo:
-        logger.setLevel(logging.INFO)
-    ch = logging.StreamHandler()
-    ch.setLevel(logging.WARN)
-    if isdebug:
-        ch.setLevel(logging.DEBUG)
-    if isinfo:
-        ch.setLevel(logging.INFO)
-    formatter = logging.Formatter("%(levelname)s - %(message)s")
-    ch.setFormatter(formatter)
-    logger.addHandler(ch)
-    return logger
-
-
-logger = setup_logger("module", args.debug, args.info)
+level = logging.WARN
+if args.info:
+    level = logging.INFO
+if args.debug:
+    level = logging.DEBUG
+logger = setup_logger("module", level)
 
 logger.info("----------------------------------------------------------------")
 logger.info(
