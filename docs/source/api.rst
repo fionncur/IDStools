@@ -13,9 +13,9 @@ Overview
    :caption: Overview 
 
 
-   src.compute
-   src.view
-   src.domain
+   idstools2.compute
+   idstools2.view
+   idstools2.domain
 
 API
 ---

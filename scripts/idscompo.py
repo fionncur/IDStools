@@ -22,8 +22,8 @@ import sys
 
 root_path = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(root_path)
-from src.view.core_profiles.functions import CoreProfilesView
-from src.view.edge_profiles.functions import EdgeProfilesView
+from idstools2.view.core_profiles.basic import CoreProfilesView
+from idstools2.view.edge_profiles.basic import EdgeProfilesView
 
 parser = argparse.ArgumentParser(
     description="---- Display the plasma composition from the core_profiles IDS",

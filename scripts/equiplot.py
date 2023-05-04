@@ -9,10 +9,10 @@ sys.path.append(root_path)
 from idstools.cli import get_backend_id
 from idstools.cli import imas_parser
 
-from src.view.common.functions import Canvas
-from src.view.equilibrium.functions import EquilibriumView
-from src.view.pf_active.functions import PFCoilsView
-from src.compute.common.functions import nearest
+from idstools2.view.common.basic import Canvas
+from idstools2.view.equilibrium.basic import EquilibriumView
+from idstools2.view.pf_active.basic import PFCoilsView
+from idstools2.compute.common.basic import nearest
 
 parser = argparse.ArgumentParser(
     description="---- Display the plasma equilibrium from the equilibrium IDS",

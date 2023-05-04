@@ -10,10 +10,9 @@ from database_tools.db_helpers import *
 
 root_path = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(root_path)
-from src.database.functions import DatabaseTools
+from idstools2.database.basic import DatabaseTools
 
 if __name__ == "__main__":
-
     parser = argparse.ArgumentParser(
         description="Extracts given quantities from all data entries of a given database",
         parents=[imas_parser],

@@ -12,7 +12,7 @@ root_path = os.path.dirname(
 
 sys.path.append(root_path)
 
-from src.compute.common.functions import middle, nearest
+from idstools2.compute.common.functions import middle, nearest
 
 array = [
     0.21069679,

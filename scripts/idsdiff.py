@@ -18,8 +18,8 @@ from io import BytesIO
 
 root_path = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(root_path)
-from src.compute.common.functions import compare_ids
-from src.utils.dd_helper import DDHelper
+from idstools2.compute.common.basic import compare_ids
+from idstools2.utils.dd_helper import DDHelper
 
 THRESHOLD_PERCENT = 2
 

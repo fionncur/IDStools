@@ -10,19 +10,19 @@ sys.path.append(root_path)
 from idstools.cli import get_backend_id
 from idstools.cli import imas_parser
 
-from src.compute.core_profiles.functions import CoreProfilesCompute
-from src.compute.equilibrium.functions import EquilibriumCompute
+from idstools2.compute.core_profiles.basic import CoreProfilesCompute
+from idstools2.compute.equilibrium.basic import EquilibriumCompute
 
-from src.database.functions import read_ids
+from idstools2.database.basic import read_ids
 
-from src.view.common.functions import Canvas
-from src.view.core_profiles.functions import CoreProfilesView
-from src.view.domain.ecstray.functions import EcStrayView
-from src.view.equilibrium.functions import EquilibriumView
-from src.view.tbd.functions import TbdView
-from src.view.waves.functions import WavesView
+from idstools2.view.common.basic import Canvas
+from idstools2.view.core_profiles.basic import CoreProfilesView
+from idstools2.view.domain.ecstray.basic import EcStrayView
+from idstools2.view.equilibrium.basic import EquilibriumView
+from idstools2.view.tbd.basic import TbdView
+from idstools2.view.waves.basic import WavesView
 
-from src.input_processing.functions import (
+from idstools2.input_processing.basic import (
     beam_wall_crossing,
     check_rays_into_divertor,
     read_launching_parameters,
@@ -126,9 +126,9 @@ eqcomputeobj = EquilibriumCompute(equilibrium_ids)
 coreprofilesobj = CoreProfilesCompute(core_profiles_ids)
 waveobj = EquilibriumCompute(waves_ids)
 
-time_array_eq = eqcomputeobj.ids_object.time  # Plot Ip
+time_array_eq = eqcomputeobj.ids.time  # Plot Ip
 time_array_cp = coreprofilesobj.ids_object.time
-time_array_wv = waveobj.ids_object.time
+time_array_wv = waveobj.ids.time
 
 time_slice = 5.0
 
