@@ -1,15 +1,12 @@
 """ 
-* :py:class:`EquilibriumCompute`
-This module provides functions and classes for equilibrium ids data
-
+This module provides compute functions and classes for equilibrium ids data
 
 `more about equilibrium ids <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/CI/imas-3.37.2/equilibrium.html>`_
-
-
 """
-
+import logging
 import numpy as np
-import sys
+
+logger = logging.getLogger("module")
 
 
 class EquilibriumCompute:
@@ -19,9 +16,8 @@ class EquilibriumCompute:
         """Initialization EquilibriumCompute object.
 
         Args:
-            ids_object : equilibrium ids object
+            ids : equilibrium ids object
         """
-        super().__init__()
         self.ids = ids
 
     def get2DCartesianGrid(self, timeSlice: int = 0, profiles2DIndex: int = 0) -> dict:
@@ -36,27 +32,27 @@ class EquilibriumCompute:
         Returns:
             A dictionary containing the 2D Cartesian grid coordinates (r2d and z2d) and the corresponding psi values (psi2d).
 
-        Examples:
-            >>> idsobj = EquilibriumCompute()
-            >>> a = idsobj.get2DProfiles(timeSlice=0)
-            [1,2]
+        Example:
+            .. code-block:: python
 
-            >>> idsobj = EquilibriumCompute()
-            >>> a = idsobj.get2DProfiles(timeSlice=2, gridType=1) # Here gridType is rectangular
-            [1,2]
+                import imas
+                connection = imas.DBEntry(imas.imasdef.MDSPLUS_BACKEND,'ITER',134173,106,'public')
+                connection.open()
+                idsObj = connection.get('equilibrium')
+                computeObj = EquilibriumCompute(idsObj)
+                result = computeObj.get2DCartesianGrid(timeSlice=0)
+
+                {'psi2d': array([[]]),
+                'r2d': array([[]]),
+                'z2d': array([[]])}
         """
-        if len(self.ids.time_slice[timeSlice].profiles_2d) == 0:
-            print(
-                "The equilibrium IDS is empty: len(equilibrium.time_slice[0].profiles_2d)=0",
-                file=sys.stderr,
-            )
-            return None
-
-        if len(self.ids.time_slice[timeSlice].profiles_2d[profiles2DIndex].psi) < 1:
-            print(
-                f"equilibrium.time_slice[:].profiles_2d[{profiles2DIndex}].psi could not be read",
-                file=sys.stderr,
-            )
+        profiles2D=None
+        try:
+            profiles2D = self.ids.time_slice[timeSlice].profiles_2d[profiles2DIndex] # using https://docs.python.org/2/glossary.html#term-eafp style
+        except IndexError:
+            logger.error(
+                    f"equilibrium.time_slice[{timeSlice}].profiles_2d[{profiles2DIndex}] not available"
+                    )
             return None
 
         profiles2D = self.ids.time_slice[timeSlice].profiles_2d[profiles2DIndex]
@@ -77,9 +73,8 @@ class EquilibriumCompute:
                 z2d[ir, :] = z1d
 
         if np.size(r2d) != np.size(z2d) or np.size(r2d) != np.size(psi2d):
-            print(
-                f"r, z and psi have not the same dimension in equilibrium.time_slice[{timeSlice}].profiles_2d[{profiles2DIndex}]",
-                file=sys.stderr,
+            logger.error(
+                f"r, z and psi have not the same dimension in equilibrium.time_slice[{timeSlice}].profiles_2d[{profiles2DIndex}]"
             )
             return None
 
@@ -97,26 +92,31 @@ class EquilibriumCompute:
             a value containing the square root of the toroidal flux values divided by the maximum toroidal flux value, if the length of toroidal flux  is greater than 0. If the length of toroidal flux is less than 1, it returns None.
 
         Examples:
-            >>> idsobj = EquilibriumCompute()
-            >>> a = idsobj.get2DProfiles(timeSlice=0)
-            [1,2]
+            .. code-block:: python
 
-            >>> idsobj = EquilibriumCompute()
-            >>> a = idsobj.get2DProfiles(timeSlice=2, gridType=1) # Here gridType is rectangular
-            [1,2]
+                import imas
+                connection = imas.DBEntry(imas.imasdef.MDSPLUS_BACKEND,'ITER',134173,106,'public')
+                connection.open()
+                idsObj = connection.get('equilibrium')
+                computeObj = EquilibriumCompute(idsObj)
+                result = computeObj.getRho2D(timeSlice=0)
+
+                array([[]])
         """
-        if len(self.ids.time_slice[timeSlice].profiles_2d[profiles2DIndex].phi) < 1:
-            print(
-                "equilibrium.time_slice[:].profiles_2d[profiles2DIndex].phi could not be read",
-                file=sys.stderr,
-            )
+        profiles2D_phi=None
+        try:
+            profiles2D_phi = self.ids.time_slice[timeSlice].profiles_2d[profiles2DIndex].phi # using https://docs.python.org/2/glossary.html#term-eafp style
+            if len(profiles2D_phi) == 0:
+                raise IndexError
+        except IndexError:
+            logger.error(
+                    f"equilibrium.time_slice[{timeSlice}].profiles_2d[{profiles2DIndex}].phi not available"
+                    )
+            return None
+        
+        return np.sqrt(profiles2D_phi / np.amax(profiles2D_phi))
 
-        profiles2D = self.ids.time_slice[timeSlice].profiles_2d[profiles2DIndex]
-        return (
-            None
-            if len(profiles2D.phi) < 1
-            else np.sqrt(profiles2D.phi / np.amax(profiles2D.phi))
-        )
+        
 
     def getBTotal(self, timeSlice: int) -> float:
         """

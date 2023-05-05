@@ -179,7 +179,7 @@ napoleon_type_aliases = {
     # matplotlib terms
     "color-like": ":py:func:`color-like <matplotlib.colors.is_color_like>`",
     "matplotlib colormap name": ":doc:matplotlib colormap name <Colormap reference>",
-    "matplotlib axes object": ":py:class:`matplotlib axes object <matplotlib.axes.Axes>`",
+    "matplotlib_axes": ":py:class:`matplotlib axes object <matplotlib.axes.Axes>`",
     "colormap": ":py:class:`colormap <matplotlib.colors.Colormap>`",
     # objects without namespace
     "DataArray": "~xarray.DataArray",

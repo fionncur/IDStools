@@ -1,5 +1,4 @@
-# class figure to canvas
-# src/view/common/functions.py ok need to test equiplot
+
 import matplotlib, os, sys
 
 if "DISPLAY" not in os.environ:
@@ -423,9 +422,9 @@ class Canvas:
         fig = plt.gcf()
         fig.set_size_inches(width, height)
         try:
-            fig.savefig(fname, dpi=self.dpi)
-            print("----> Figure saved to " + fname, file=sys.stderr)
-        except:
+            fig.savefig(fname, dpi=dpi)
+            print(f"----> Figure saved to {fname}", file=sys.stderr)
+        except Exception:
             print(
                 "The figure could not be saved (check local permissions).",
                 file=sys.stderr,

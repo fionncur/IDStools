@@ -1,43 +1,96 @@
+""" 
+This module provides view functions and classes for equilibrium ids data
+
+`more about equilibrium ids <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/CI/imas-3.37.2/equilibrium.html>`_
+"""
+
+import matplotlib.pyplot as plt
 from ...view.common.basic import BasePlot
 from ...compute.equilibrium.basic import EquilibriumCompute
-import numpy as np
-
 
 class EquilibriumView(BasePlot):
-    def __init__(self, ids_object):
-        self.equilibrium_object = ids_object
-        self.equilibrium_compute_object = EquilibriumCompute(ids_object)
+    def __init__(self, idsObj: object):
+        """
+        This is a constructor function that initializes an object with an input object and creates
+        another object using the input object.
+        
+        Args:
+            idsObj (object): The parameter `idsObj` is an object that is being passed to the constructor
+        of the class. It is not clear from the code snippet what type of object it is, but it is being
+        stored as an instance variable `self.idsObj`.
+        """
+        self.idsObj = idsObj
+        self.computeObj = EquilibriumCompute(idsObj)
 
-    def view_magnetic_poloidal_flux(self, ax):
-        cartesian_grid = self.equilibrium_compute_object.get2DCartesianGrid()
-        rho = self.equilibrium_compute_object.getRho2D()
-        levels = 30
+    def viewMagneticPoloidalFlux(self, ax: plt.Axes):
+        """
+        This function plots the magnetic poloidal flux contours on a 2D Cartesian grid.
 
-        if rho:
+        Args:
+            ax: `ax` is a matplotlib axis object on which the magnetic poloidal flux contour plot will be drawn.
+
+        Example:
+            .. code-block:: python
+
+                import imas
+                from idstools2.view.equilibrium.basic import EquilibriumView
+                from idstools2.view.common.basic import Canvas
+
+                input = imas.DBEntry(imas.imasdef.MDSPLUS_BACKEND,'ITER',134173,106,'public')
+                input.open()
+                idsObj = input.get('equilibrium')
+
+                canvas = Canvas(1, 1) # create canvas
+                ax = canvas.add_axes(title="", xlabel="", row=0, col=0)
+
+                viewObj = EquilibriumView(idsObj)
+                viewObj.viewMagneticPoloidalFlux(ax) # plot contour on the canvas axes
+
+                ax.plot()
+                canvas.show()
+
+            .. image:: ../../_static/images/EquilibriumView_viewMagneticPoloidalFlux.png
+                :alt: image not found
+                :align: center
+
+        See also:
+            :func:`idstools2.compute.equilibrium.basic.EquilibriumCompute.get2DCartesianGrid`
+            :func:`idstools2.compute.equilibrium.basic.EquilibriumCompute.EquilibriumCompute.getRho2D`
+
+            :meth:`plot_ip`
+        """
+        cartestionGrid = self.computeObj.get2DCartesianGrid()
+        if cartestionGrid is not None:
+            rho = self.computeObj.getRho2D()
+            levels = 30
+
+            if rho:
+                ax.contour(
+                    cartestionGrid["r2d"],
+                    cartestionGrid["z2d"],
+                    cartestionGrid["rho2d"],
+                    levels,
+                    colors="r",
+                )
             ax.contour(
-                cartesian_grid["r2d"],
-                cartesian_grid["z2d"],
-                cartesian_grid["rho2d"],
+                cartestionGrid["r2d"],
+                cartestionGrid["z2d"],
+                cartestionGrid["psi2d"],
                 levels,
-                colors="r",
             )
-        ax.contour(
-            cartesian_grid["r2d"],
-            cartesian_grid["z2d"],
-            cartesian_grid["psi2d"],
-            levels,
-        )
-        ax.set_aspect("equal", adjustable="box")
-        ax.set_xlabel("$R$ [m]", fontdict=BasePlot.font)
-        ax.set_ylabel("$Z$ [m]", fontdict=BasePlot.font)
-        ax.tick_params(axis="both", which="major", labelsize=BasePlot.ticksize)
+            ax.set_aspect("equal", adjustable="box")
+            ax.set_xlabel("$R$ [m]", fontdict=BasePlot.font)
+            ax.set_ylabel("$Z$ [m]", fontdict=BasePlot.font)
+            ax.tick_params(axis="both", which="major", labelsize=BasePlot.ticksize)
 
-    def view_database_info(self, ax, title, hostdir, shot, run, t):
+    def viewPulseInfo(
+        self, ax: plt.axes, title: str, hostdir: str, shot: int, run: int, t: float
+    ):
         self.database_info(ax, title, hostdir, shot, run, t)
 
     def plot_ip(self, ax):
-        ip = self.equilibrium_compute_object.get_ip()
-        time_array = self.equilibrium_object.time
+        ip = self.computeObj.get_ip()
+        time_array = self.idsObj.time
 
         ax.plot(time_array, ip, color="b", label="$I_p$ [MA]")
 
@@ -47,7 +100,7 @@ class EquilibriumView(BasePlot):
 
     def plot_poloidal_equilibrium(self, ax, timeSlice: int):
         # Extract flux surface quantities from equilibrium
-        data = self.equilibrium_compute_object.getFluxSurfaces(timeSlice)
+        data = self.computeObj.getFluxSurfaces(timeSlice)
         r2d = data["r2d"]
         z2d = data["z2d"]
         rho2d = data["rho2d"]
@@ -68,7 +121,7 @@ class EquilibriumView(BasePlot):
         colorcounter = 0
 
         # Top view plot
-        data = self.equilibrium_compute_object.get_top_view(time_index)
+        data = self.computeObj.get_top_view(time_index)
 
         ax_topview_plot_eq1 = 0
         ax_topview_plot_eq2 = 0

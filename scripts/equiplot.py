@@ -11,7 +11,7 @@ from cli_helper import get_backend_id, imas_parser, setup_logger
 
 from idstools2.view.common.basic import Canvas
 from idstools2.view.equilibrium.basic import EquilibriumView
-from idstools2.view.pf_active.basic import PFCoilsView
+from idstools2.view.pf_active.basic import PFActiveView
 from idstools2.compute.common.basic import nearest
 
 
@@ -46,9 +46,7 @@ parser.add_argument(
 )
 args = parser.parse_args()
 
-
-level = logging.WARN
-logger = setup_logger("module", level)
+logger = setup_logger("module", logging.WARN)
 
 database_abs_path = ""
 database_abs_path = (
@@ -74,29 +72,31 @@ if err != 0:
         )
     )
 
-# Get ids Object - equilibrium
-equilibrium_ids = imas.equilibrium()
-equilibrium_ids.time = connection.partial_get("equilibrium", "time", args.occurrence)
-time_index, time_value = nearest(equilibrium_ids.time, args.time)
-equilibrium_ids.time_slice.resize(1)
-equilibrium_ids.time_slice[0] = connection.partial_get(
-    "equilibrium", f"time_slice({str(time_index)})", args.occurrence
+idsObjEquilibrium = imas.equilibrium()
+idsObjEquilibrium.time = connection.partial_get("equilibrium", "time", args.occurrence)
+timeIndex, timeValue = nearest(idsObjEquilibrium.time, args.time)
+idsObjEquilibrium.time_slice.resize(1)
+idsObjEquilibrium.time_slice[0] = connection.partial_get(
+    "equilibrium", f"time_slice({str(timeIndex)})", args.occurrence
 )
-# Get ids Object - pf active
-pf_active_ids = connection.get("pf_active")
-
+title = "2D Equilibrium"
 canvas = Canvas(1, 1)
-ax = canvas.add_axes(title="PF Coils", xlabel="", row=0, col=0)
-# if args.pfcoils is True:
-pfcoilsview = PFCoilsView(pf_active_ids)
-pfcoilsview.view_pf_coils(ax)
+ax = canvas.add_axes(title="", xlabel="", row=0, col=0)
 
-equilibriumview = EquilibriumView(equilibrium_ids)
+if args.pfcoils is True:
+    idsObjPfActive = imas.pf_active()
+    idsObjPfActive.coil = connection.partial_get("pf_active", "coil")
+    ViewPfCoils = PFActiveView(idsObjPfActive)
+    ViewPfCoils.viewActivePfCoils(ax)
+    title += "Active PF Coils"
 
-equilibriumview.view_magnetic_poloidal_flux(ax)
+idsObjEquilibrium = connection.get("equilibrium")
+ViewEquilibrium = EquilibriumView(idsObjEquilibrium)
+ViewEquilibrium.viewMagneticPoloidalFlux(ax)
+
 if args.allInfo is True:
-    equilibriumview.view_database_info(
-        ax, "2D Equilibrium", hostdir, args.shot, args.run, args.time
+    ViewEquilibrium.viewPulseInfo(
+        ax, title, hostdir, args.shot, args.run, args.time
     )
 
 ax.plot()
@@ -106,8 +106,8 @@ try:
         args.shot, args.run, args.time
     )
     canvas.save(fname)
-    print(f"----> Figure saved to {fname}", file=sys.stderr)
+    logger.info(f"----> Figure saved to {fname}")
 except Exception:
-    print("The figure could not be saved (check local permissions).", file=sys.stderr)
+    logger.error("The figure could not be saved (check local permissions).")
 
 canvas.show()
