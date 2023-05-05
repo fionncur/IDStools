@@ -1,7 +1,8 @@
 """ 
 This module provides view functions and classes for equilibrium ids data
 
-`more about equilibrium ids <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/CI/imas-3.37.2/equilibrium.html>`_
+`more about equilibrium ids <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/CI/imas-3.37.2/equilibrium.html>`_.
+
 """
 
 import matplotlib.pyplot as plt

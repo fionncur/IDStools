@@ -1,7 +1,8 @@
 """ 
 This module provides compute functions and classes for equilibrium ids data
 
-`more about equilibrium ids <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/CI/imas-3.37.2/equilibrium.html>`_
+`more about equilibrium ids <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/CI/imas-3.37.2/equilibrium.html>`_.
+
 """
 import logging
 import numpy as np
@@ -143,7 +144,7 @@ class EquilibriumCompute:
             ``b_field_r`` (Z component of the poloidal magnetic field)
             ``b_field_tor`` (Toroidal component of the magnetic field)
 
-            `more about equilibrium ids https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/CI/imas-3.37.2/equilibrium.html`_
+            `more about equilibrium ids <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/CI/imas-3.37.2/equilibrium.html>`_.
 
         """
         listOfProfiles = self.get2DProfiles(timeSlice)
@@ -177,7 +178,7 @@ class EquilibriumCompute:
             Multiple 2D representations of the equilibrium are stored in ``profiles_2d``.
             Various grid types are available like rectangular, inverse etc. read more on profiles_2d(i1) section
 
-            `more about equilibrium ids https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/CI/imas-3.37.2/equilibrium.html`_
+            `more about equilibrium ids <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/CI/imas-3.37.2/equilibrium.html>`_.
 
         See Also:
             getBTotal : Get total magnetic field

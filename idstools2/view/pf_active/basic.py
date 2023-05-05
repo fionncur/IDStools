@@ -1,7 +1,8 @@
 """ 
 This module provides view functions and classes for pf_active ids data
 
-`more about pf_active ids <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/CI/imas-3.37.2/equilibrium.html>`_
+`more about pf_active ids <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/CI/imas-3.37.2/pf_active.html>`_
+
 """
 import logging
 from matplotlib.patches import Rectangle
