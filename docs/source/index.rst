@@ -53,9 +53,22 @@ It provides:
    :class: align-right
    
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 0
 
    api.rst
+
+.. raw:: html
+
+   <hr>
+
+.. image:: _static/index-images/api.svg
+   :width: 48
+   :class: align-right
+   
+.. toctree::
+   :maxdepth: 0
+
+   detailed.rst
 
 .. raw:: html
 
