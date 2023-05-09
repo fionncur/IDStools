@@ -47,13 +47,15 @@ class EquilibriumCompute:
                 'r2d': array([[]]),
                 'z2d': array([[]])}
         """
-        profiles2D=None
+        profiles2D = None
         try:
-            profiles2D = self.ids.time_slice[timeSlice].profiles_2d[profiles2DIndex] # using https://docs.python.org/2/glossary.html#term-eafp style
+            profiles2D = self.ids.time_slice[timeSlice].profiles_2d[
+                profiles2DIndex
+            ]  # using https://docs.python.org/2/glossary.html#term-eafp style
         except IndexError:
             logger.error(
-                    f"equilibrium.time_slice[{timeSlice}].profiles_2d[{profiles2DIndex}] not available"
-                    )
+                f"equilibrium.time_slice[{timeSlice}].profiles_2d[{profiles2DIndex}] not available"
+            )
             return None
 
         profiles2D = self.ids.time_slice[timeSlice].profiles_2d[profiles2DIndex]
@@ -104,22 +106,22 @@ class EquilibriumCompute:
 
                 array([[]])
         """
-        profiles2D_phi=None
-        try:
-            profiles2D_phi = self.ids.time_slice[timeSlice].profiles_2d[profiles2DIndex].phi # using https://docs.python.org/2/glossary.html#term-eafp style
+        profiles2D_phi = None
+        try:  # using https://docs.python.org/2/glossary.html#term-eafp style
+            profiles2D_phi = (
+                self.ids.time_slice[timeSlice].profiles_2d[profiles2DIndex].phi
+            )
             if len(profiles2D_phi) == 0:
                 raise IndexError
         except IndexError:
             logger.error(
-                    f"equilibrium.time_slice[{timeSlice}].profiles_2d[{profiles2DIndex}].phi not available"
-                    )
+                f"equilibrium.time_slice[{timeSlice}].profiles_2d[{profiles2DIndex}].phi not available"
+            )
             return None
-        
+
         return np.sqrt(profiles2D_phi / np.amax(profiles2D_phi))
 
-        
-
-    def getBTotal(self, timeSlice: int) -> float:
+    def getBTotal(self, timeSlice: int) -> tuple:
         """
         This function calculates the total magnetic field strength at a given time slice based on the radial, vertical, and toroidal components of the magnetic field.
 
@@ -127,16 +129,19 @@ class EquilibriumCompute:
             timeSlice (int): timeSlice is an integer parameter representing the index of the time slice for which the magnetic field is being calculated from profiles 2D.
 
         Returns:
-            the total magnetic field strength (bTotal) at a given time slice, calculated using the square root of the sum of the squares of the radial, vertical, and toroidal components of the magnetic field. If there are no profiles available for the given time slice, the function returns None.
+            Index in `profiles_2d`
+            Array of total magnetic field strength (bTotal) at a given time slice, calculated using the square root of the sum of the squares of the radial, vertical, and toroidal components of the magnetic field. If there are no profiles available for the given time slice, the function returns None.
 
         Examples:
-            >>> idsobj = EquilibriumCompute()
-            >>> a = idsobj.get2DProfiles(timeSlice=0)
-            [1,2]
+            .. code-block:: python
 
-            >>> idsobj = EquilibriumCompute()
-            >>> a = idsobj.get2DProfiles(timeSlice=2, gridType=1) # Here gridType is rectangular
-            [1,2]
+                import imas
+                connection = imas.DBEntry(imas.imasdef.MDSPLUS_BACKEND,'ITER',134173,106,'public')
+                connection.open()
+                idsObj = connection.get('equilibrium')
+                computeObj = EquilibriumCompute(idsObj)
+                indices = idsobj.getBTotal(timeSlice=0)
+                (0, array([[10.99503929
 
         Notes:
             ``profiles_2d`` has information about following fields
@@ -144,12 +149,12 @@ class EquilibriumCompute:
             ``b_field_r`` (Z component of the poloidal magnetic field)
             ``b_field_tor`` (Toroidal component of the magnetic field)
 
-            `more about equilibrium ids <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/CI/imas-3.37.2/equilibrium.html>`_.
 
         """
-        listOfProfiles = self.get2DProfiles(timeSlice)
+        listOfProfiles = self.get2DProfilesIndices(timeSlice)
         bTotal = None
         if listOfProfiles is not None:
+            # TODO Check if we should always pick up first profile
             profile2dIndex = listOfProfiles[0]
             bTotal = np.sqrt(
                 self.ids.time_slice[timeSlice].profiles_2d[profile2dIndex].b_field_r
@@ -161,7 +166,7 @@ class EquilibriumCompute:
             )
         return profile2dIndex, bTotal
 
-    def get2DProfiles(self, timeSlice: int, gridType: int = 1) -> list:
+    def get2DProfilesIndices(self, timeSlice: int, gridType: int = 1) -> list:
         """Return the indices of ``profiles_2d`` of the specified grid type
 
         Args:
@@ -178,19 +183,21 @@ class EquilibriumCompute:
             Multiple 2D representations of the equilibrium are stored in ``profiles_2d``.
             Various grid types are available like rectangular, inverse etc. read more on profiles_2d(i1) section
 
-            `more about equilibrium ids <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/CI/imas-3.37.2/equilibrium.html>`_.
-
-        See Also:
-            getBTotal : Get total magnetic field
+        See also:
+            :meth:`getFluxSurfaces`
+            :meth:`getBTotal`
 
         Examples:
-            >>> idsobj = EquilibriumCompute()
-            >>> a = idsobj.get2DProfiles(timeSlice=0)
-            [1,2]
+            .. code-block:: python
 
-            >>> idsobj = EquilibriumCompute()
-            >>> a = idsobj.get2DProfiles(timeSlice=2, gridType=1) # Here gridType is rectangular
-            [1,2]
+                import imas
+                connection = imas.DBEntry(imas.imasdef.MDSPLUS_BACKEND,'ITER',134173,106,'public')
+                connection.open()
+                idsObj = connection.get('equilibrium')
+                computeObj = EquilibriumCompute(idsObj)
+                indices = idsobj.get2DProfilesIndices(timeSlice=0, gridType=1)
+
+                [0]
         """
         return [
             index
@@ -200,57 +207,85 @@ class EquilibriumCompute:
         ] or None
 
     def getFluxSurfaces(self, timeSlice: int) -> dict:
-        listOfProfiles = self.get2DProfiles(timeSlice)
-        if listOfProfiles is None:
-            return None
-        profile2dIndex = listOfProfiles[0]
-        # Reading in 2d structures
-        r2d = np.array(self.ids.time_slice[timeSlice].profiles_2d[profile2dIndex].r)
-        z2d = np.array(self.ids.time_slice[timeSlice].profiles_2d[profile2dIndex].z)
-        psi2d = np.array(self.ids.time_slice[timeSlice].profiles_2d[profile2dIndex].psi)
-        if len(self.ids.time_slice[timeSlice].profiles_2d[profile2dIndex].phi) > 0:
-            rho2d = np.sqrt(
-                self.ids.time_slice[timeSlice].profiles_2d[profile2dIndex].phi
-                / np.amax(
-                    self.ids.time_slice[timeSlice].profiles_2d[profile2dIndex].phi
-                )
-            )
-        else:
-            rho2d = []
-
-        return {"r2d": r2d, "z2d": z2d, "rho2d": rho2d, "psi2d": psi2d}
-
-    def get_waveform_ip(self):
         """
-        This function returns the waveform IP and time array from a given set of time slices.
+        This function returns a dictionary containing 2D profiles and rho values for a given time slice.
+
+        Args:
+            timeSlice (int): The time slice parameter represents the time step at which the flux surfaces are to be calculated.
 
         Returns:
-            two lists: `ip` and `time_array`. The `ip` list contains the negative values of the global quantities `ip` multiplied by 1.0e-6, and the `time_array` list contains the time values from `self.ids.time` corresponding to each `ip` value.
+            a dictionary containing information about flux surfaces at a specific time slice. The dictionary includes a 2D Cartesian grid, a 2D profile index, and a 2D array of rho values. If no profiles are found, the function returns None.
         """
+        GRID_TYPE_RECTANGULAR = 1
+        listOfProfiles = self.get2DProfilesIndices(timeSlice, GRID_TYPE_RECTANGULAR)
+        if listOfProfiles is None:
+            return None
 
-        ntime = len(self.ids.time_slice)
-        time_array = []
-        ip = []
-        for itime in range(ntime):
-            time_array.append(self.ids.time[itime])
-            ip.append(-self.ids.time_slice[itime].global_quantities.ip * 1.0e-6)
+        logger.debug(f"list Of rectangualar profiles found : {listOfProfiles}")
+        profile2dIndex = listOfProfiles[0]
 
-        return ip, time_array
+        resultDict = self.get2DCartesianGrid(timeSlice, profile2dIndex)
+        rho2d = self.getRho2D(timeSlice, profile2dIndex)
+        if rho2d is None:
+            rho2d = []
+        resultDict["rho2d"] = rho2d
+        return resultDict
 
-    def get_ip(self):
-        ip = []
-        ntime = len(self.ids.time_slice)
-        for itime in range(ntime):
-            ip.append(-self.ids.time_slice[itime].global_quantities.ip * 1.0e-6)
-        return ip
+    def getIP(self) -> list:
+        """
+        This function returns a list of Plasma current (toroidal component) values for each time slice.
 
-    def get_top_view(self, time_index):
-        data = {}
-        data["r0"] = r0 = self.ids.time_slice[time_index].boundary.geometric_axis.r
-        data["amin"] = amin = self.ids.time_slice[time_index].boundary.minor_radius
-        data["phit"] = phit = np.linspace(0, 2 * np.pi, 100)
-        data["xpla"] = (r0 - amin) * np.cos(phit)
-        data["ypla"] = (r0 - amin) * np.sin(phit)
-        data["xplap"] = (r0 + amin) * np.cos(phit)
-        data["yplap"] = (r0 + amin) * np.sin(phit)
-        return data
+        Returns:
+            a list of plasma currents for each time slice in `self.ids.time_slice`. The plasma current is
+        calculated by multiplying the global quantity `ip` by -1.0e-6.
+
+        Examples:
+            .. code-block:: python
+
+                import imas
+                connection = imas.DBEntry(imas.imasdef.MDSPLUS_BACKEND,'ITER',134173,106,'public')
+                connection.open()
+                idsObj = connection.get('equilibrium')
+                computeObj = EquilibriumCompute(idsObj)
+                result = computeObj.getIP()
+
+                array([[]])
+        """
+        return [
+            -self.ids.time_slice[timeIndex].global_quantities.ip * 1.0e-6
+            for timeIndex in range(len(self.ids.time_slice))
+        ]
+
+    def getTopView(self, timeSlice: int = 0) -> dict:
+        """
+        The function returns data for plotting the top view of a 2D shape.
+
+        Args:
+            timeSlice (int): timeSlice is an optional parameter that specifies which time slice to use for the calculation. If not specified, it defaults to 0. Defaults to 0
+
+        Returns:
+            The function `getTopView` returns a dictionary `topViewDict` containing the following keys
+
+            - "r0": the geometric axis r of the boundary at the given `timeSlice`
+            - "amin": the minor radius of the boundary at the given `timeSlice`
+            - "phit": an array of 100 evenly spaced values between 0 and 2 * pi
+            - "xpla": left x-coordinate of a point in polar coordinates
+            - "ypla": left y-coordinate of a point in polar coordinates
+            - "xplap": right x-coordinate of a point in polar coordinates
+            - "yplap": right y-coordinate of a point in polar coordinates
+
+        """
+        # TODO Correct documentation and naming of return variables
+        topViewDict = {}
+        topViewDict["r0"] = r0 = self.ids.time_slice[
+            timeSlice
+        ].boundary.geometric_axis.r
+        topViewDict["amin"] = amin = self.ids.time_slice[
+            timeSlice
+        ].boundary.minor_radius
+        topViewDict["phit"] = phit = np.linspace(0, 2 * np.pi, 100)
+        topViewDict["xpla"] = (r0 - amin) * np.cos(phit)
+        topViewDict["ypla"] = (r0 - amin) * np.sin(phit)
+        topViewDict["xplap"] = (r0 + amin) * np.cos(phit)
+        topViewDict["yplap"] = (r0 + amin) * np.sin(phit)
+        return topViewDict

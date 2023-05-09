@@ -148,7 +148,7 @@ ecstrayview = EcStrayView(equilibrium_ids, core_profiles_ids, waves_ids)
 ax_waveform = canvas.add_axes(
     title="Waveforms", xlabel="Time [s]", row=0, col=0, colspan=1
 )
-equillibriumview.plot_ip(ax_waveform)  # Plot Ip
+equillibriumview.plotIP(ax_waveform)  # Plot Ip
 coreprofilesview.plot_ne0(ax_waveform)
 
 ax_beam_index = canvas.add_axes(

@@ -9,12 +9,13 @@ import matplotlib.pyplot as plt
 from ...view.common.basic import BasePlot
 from ...compute.equilibrium.basic import EquilibriumCompute
 
+
 class EquilibriumView(BasePlot):
     def __init__(self, idsObj: object):
         """
         This is a constructor function that initializes an object with an input object and creates
         another object using the input object.
-        
+
         Args:
             idsObj (object): The parameter `idsObj` is an object that is being passed to the constructor
         of the class. It is not clear from the code snippet what type of object it is, but it is being
@@ -89,14 +90,14 @@ class EquilibriumView(BasePlot):
     ):
         self.database_info(ax, title, hostdir, shot, run, t)
 
-    def plot_ip(self, ax):
-        ip = self.computeObj.get_ip()
+    def plotIP(self, ax):
+        plasmaCurrent = self.computeObj.getIP()
         time_array = self.idsObj.time
 
-        ax.plot(time_array, ip, color="b", label="$I_p$ [MA]")
+        ax.plot(time_array, plasmaCurrent, color="b", label="$I_p$ [MA]")
 
         ax.set_xlim(min(time_array), max(time_array))
-        # ax_waveform.set_ylim(0,max(ip)*1.2)
+        # ax_waveform.set_ylim(0,max(plasmaCurrent)*1.2)
         ax.set_ylim(0, 20)
 
     def plot_poloidal_equilibrium(self, ax, timeSlice: int):
@@ -122,7 +123,7 @@ class EquilibriumView(BasePlot):
         colorcounter = 0
 
         # Top view plot
-        data = self.computeObj.get_top_view(time_index)
+        data = self.computeObj.getTopView(time_index)
 
         ax_topview_plot_eq1 = 0
         ax_topview_plot_eq2 = 0
