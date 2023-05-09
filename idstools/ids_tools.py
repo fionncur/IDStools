@@ -3,15 +3,10 @@ Service classes for handling IDSs
 
 @author: Hajo Klingshirn, MPI-IPP
 '''
-import imas
-from imas.imasdef import IDS_TIME_MODE_INDEPENDENT, IDS_TIME_MODE_HETEROGENEOUS, IDS_TIME_MODE_HOMOGENEOUS
-
 from .helper import *
 import logging
 import imas
 import sys
-
-import numpy as np
 
 # List of all IDS names to be read if 'all' is supplied as a IDS name
 ALL_IDSS = ('edge')
@@ -87,14 +82,11 @@ class ImasDb():
         """Open database."""
         logging.debug("Opening database " + str(self))
 
+        self._dbUALDAO = imas.ids(self._shot, self._run)
         if self._useHDF5:
-            backend_id = imas.imasdef.HDF5_BACKEND
+            self._dbUALDAO.open_hdf5()
         else:
-            backend_id = imas.imasdef.MDSPLUS_BACKEND
-
-        self._dbUALDAO = imas.DBEntry( backend_id=backend_id, db_name=self._tokamak, shot=self._shot, run=self._run,
-                                  user_name=self._user, data_version=self._version )
-        self._dbUALDAO.open()
+            self._dbUALDAO.open_env(self._user, self._tokamak, self._version)
 
         return self._dbUALDAO
 
@@ -102,56 +94,57 @@ class ImasDb():
         """Create database."""
 
         logging.debug("Creating dtabase " + str(self))
+        dbUALDAO = imas.ids(self._shot, self._run)
+
         if self._useHDF5:
-            backend_id = imas.imasdef.HDF5_BACKEND
+            dbUALDAO.create_hdf5()
         else:
-            backend_id = imas.imasdef.MDSPLUS_BACKEND
+            dbUALDAO.create_env(self._user, self._tokamak, self._version)
 
-        self._dbUALDAO = imas.DBEntry( backend_id=backend_id, db_name=self._tokamak, shot=self._shot, run=self._run,
-                                  user_name=self._user, data_version=self._version )
-        self._dbUALDAO.create()
-
+        self._dbUALDAO = dbUALDAO
         return self._dbUALDAO
 
-    def times(self, ids_name, occurrence):
+    def times(self, idsName):
         """Return list of time points for the timeslices for which the IDS with given name is present.
 
         If no time slices present for the IDS, returns an empty list."""
-
-        time_mode = self.db.get_node( ids_name, "ids_properties/homogeneous_time", occurrence )
-
-        if time_mode == IDS_TIME_MODE_INDEPENDENT:
-            times = [np.NINF]
-        elif time_mode == IDS_TIME_MODE_HETEROGENEOUS:
-            times = [np.NaN]
-        elif time_mode == IDS_TIME_MODE_HOMOGENEOUS:
-            times = self.db.get_node(ids_name, "time", occurrence)
-        else :
-            times = []
-
+        #print('X', idsName, 'X')
+        (status, times) = self.db.getTimes(idsName)
         return times
 
     def all_times(self):
         """Returns a list of existing timeslices for all time-dependent IDSs present in the database."""
+        import inspect
+        import types
 
-        from imas.ids_base import IDSBase
+        def is_ids(obj):
+            try:
+                obj.__getattribute__('ids_properties')
+                return True
+            except:
+                return False
 
-        ids_classes = [cls for cls in IDSBase.__subclasses__()]
+        timedep_ids_test = lambda x: is_ids(x)
+        timedep_idss = inspect.getmembers(self.db, timedep_ids_test )
 
         result = []
-        for ids_class in ids_classes:
-
-            ids_name = ids_class.__name__
-            maxOccurrences = ids_class.getMaxOccurrences()
-
+        for idsnameArray, obj in timedep_idss:
+            try:
+                maxOccurrences = obj.getMaxOccurrences()
+            except AttributeError:
+                maxOccurrences = 1
             for occurrence in range(maxOccurrences + 1):
+                if occurrence == 0:
+                    idsname = idsnameArray
+                else:
+                    idsname = idsnameArray + '/' + str(occurrence)
                 try:
-                    times = self.times(ids_name, occurrence )
+                    times = self.times(idsname)
                 except Exception as exc:
                     times = []
-                    print("ERROR! IDS '" + ids_name + "': Reading time array fails due to following problem : " + str(exc), file=sys.stderr)
+                    print("ERROR! IDS '" + idsname + "': Reading time array fails due to following problem : " + str(exc), file=sys.stderr)
                 if times is not None and len(times):
-                    result.append( (ids_name, times) )
+                    result.append( (idsname, times) )
 
         return result
 

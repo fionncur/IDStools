@@ -76,8 +76,8 @@ def print_times(dbs, opts, printTimes = False, shotnum= None, runnum = None):
                             continue
 
                     printed_shot = False
-                    for run_entry in runs:
-                        run = run_entry[0]
+                    justruns = [r[0] for r in runs]              
+                    for run in justruns:
                         if runnum is not None:
                             if run != runnum:
                                 continue
@@ -96,7 +96,6 @@ def print_times(dbs, opts, printTimes = False, shotnum= None, runnum = None):
                             printed_shot = True
 
                         print(TAB * 4 + " Run: " + extended(str(run), RUN_STR_LEN))
-
                         db = ct.ImasDb(shot, run, opts.user, dbname, dv, True, backend == "hdf5")
                         alltimes = db.all_times()
                         for idsname, times in alltimes:
