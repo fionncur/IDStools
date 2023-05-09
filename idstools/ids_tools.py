@@ -18,7 +18,7 @@ ALL_IDSS = ('edge')
 
 class ImasDb():
     '''Helper class wrapping an IMAS database entry.'''
-    def __init__(self, shot, run, user=None, tokamak=None, version=None, doOpen=True, useHDF5=False, al5=False):
+    def __init__(self, shot, run, user=None, tokamak=None, version=None, doOpen=True, useHDF5=False):
         '''Creates an object wrapping a database entry with the given parameters.
         Shot and run number have to be given.
 
@@ -45,7 +45,6 @@ class ImasDb():
 
         self._useHDF5 = useHDF5
         self._dbUALDAO = None # this is the UAL data access object (DAO)
-        self._al5 = al5
 
     @property
     def shot(self):
@@ -93,13 +92,7 @@ class ImasDb():
         else:
             backend_id = imas.imasdef.MDSPLUS_BACKEND
 
-        if self._al5:
-            db_uri = f"imas:mdsplus?shot={self._shot};run={self._run};user={self._user};database={self._tokamak};version={self._version}"
-            #db_uri = f"imas:mdsplus?path=~g2bpalak/public/imasdb/{self._tokamak}/{self._version}/{self._run}/{self._shot}/"
-
-            self._dbUALDAO = imas.DBEntry( db_uri )
-        else:
-            self._dbUALDAO = imas.DBEntry( backend_id=backend_id, db_name=self._tokamak, shot=self._shot, run=self._run,
+        self._dbUALDAO = imas.DBEntry( backend_id=backend_id, db_name=self._tokamak, shot=self._shot, run=self._run,
                                   user_name=self._user, data_version=self._version )
         self._dbUALDAO.open()
 
@@ -114,11 +107,7 @@ class ImasDb():
         else:
             backend_id = imas.imasdef.MDSPLUS_BACKEND
 
-        if self._al5:
-            db_uri = f"imas:mdsplus?shot={self._shot};run={self._run};user={self._user};database={self._tokamak};version{self._version}"
-            self._dbUALDAO = imas.DBEntry( uri = db_uri )
-        else:
-            self._dbUALDAO = imas.DBEntry( backend_id=backend_id, db_name=self._tokamak, shot=self._shot, run=self._run,
+        self._dbUALDAO = imas.DBEntry( backend_id=backend_id, db_name=self._tokamak, shot=self._shot, run=self._run,
                                   user_name=self._user, data_version=self._version )
         self._dbUALDAO.create()
 

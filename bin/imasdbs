@@ -78,7 +78,6 @@ def print_times(dbs, opts, printTimes = False, shotnum= None, runnum = None):
                     printed_shot = False
                     for run_entry in runs:
                         run = run_entry[0]
-                        al5 = run_entry[2]
                         if runnum is not None:
                             if run != runnum:
                                 continue
@@ -98,7 +97,7 @@ def print_times(dbs, opts, printTimes = False, shotnum= None, runnum = None):
 
                         print(TAB * 4 + " Run: " + extended(str(run), RUN_STR_LEN))
 
-                        db = ct.ImasDb(shot, run, opts.user, dbname, dv, True, backend == "hdf5", al5)
+                        db = ct.ImasDb(shot, run, opts.user, dbname, dv, True, backend == "hdf5")
                         alltimes = db.all_times()
                         for idsname, times in alltimes:
                             if len(times) == 1 and numpy.isnan(times[0]):
