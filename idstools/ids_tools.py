@@ -3,17 +3,22 @@ Service classes for handling IDSs
 
 @author: Hajo Klingshirn, MPI-IPP
 '''
+import imas
+from imas.imasdef import IDS_TIME_MODE_INDEPENDENT, IDS_TIME_MODE_HETEROGENEOUS, IDS_TIME_MODE_HOMOGENEOUS
+
 from .helper import *
 import logging
 import imas
 import sys
+
+import numpy as np
 
 # List of all IDS names to be read if 'all' is supplied as a IDS name
 ALL_IDSS = ('edge')
 
 class ImasDb():
     '''Helper class wrapping an IMAS database entry.'''
-    def __init__(self, shot, run, user=None, tokamak=None, version=None, doOpen=True, useHDF5=False):
+    def __init__(self, shot, run, user=None, tokamak=None, version=None, doOpen=True, useHDF5=False, al5=False):
         '''Creates an object wrapping a database entry with the given parameters.
         Shot and run number have to be given.
 
@@ -40,6 +45,7 @@ class ImasDb():
 
         self._useHDF5 = useHDF5
         self._dbUALDAO = None # this is the UAL data access object (DAO)
+        self._al5 = al5
 
     @property
     def shot(self):
@@ -82,11 +88,20 @@ class ImasDb():
         """Open database."""
         logging.debug("Opening database " + str(self))
 
-        self._dbUALDAO = imas.ids(self._shot, self._run)
         if self._useHDF5:
-            self._dbUALDAO.open_hdf5()
+            backend_id = imas.imasdef.HDF5_BACKEND
         else:
-            self._dbUALDAO.open_env(self._user, self._tokamak, self._version)
+            backend_id = imas.imasdef.MDSPLUS_BACKEND
+
+        if self._al5:
+            db_uri = f"imas:mdsplus?shot={self._shot};run={self._run};user={self._user};database={self._tokamak};version={self._version}"
+            #db_uri = f"imas:mdsplus?path=~g2bpalak/public/imasdb/{self._tokamak}/{self._version}/{self._run}/{self._shot}/"
+
+            self._dbUALDAO = imas.DBEntry( db_uri )
+        else:
+            self._dbUALDAO = imas.DBEntry( backend_id=backend_id, db_name=self._tokamak, shot=self._shot, run=self._run,
+                                  user_name=self._user, data_version=self._version )
+        self._dbUALDAO.open()
 
         return self._dbUALDAO
 
@@ -94,57 +109,60 @@ class ImasDb():
         """Create database."""
 
         logging.debug("Creating dtabase " + str(self))
-        dbUALDAO = imas.ids(self._shot, self._run)
-
         if self._useHDF5:
-            dbUALDAO.create_hdf5()
+            backend_id = imas.imasdef.HDF5_BACKEND
         else:
-            dbUALDAO.create_env(self._user, self._tokamak, self._version)
+            backend_id = imas.imasdef.MDSPLUS_BACKEND
 
-        self._dbUALDAO = dbUALDAO
+        if self._al5:
+            db_uri = f"imas:mdsplus?shot={self._shot};run={self._run};user={self._user};database={self._tokamak};version{self._version}"
+            self._dbUALDAO = imas.DBEntry( uri = db_uri )
+        else:
+            self._dbUALDAO = imas.DBEntry( backend_id=backend_id, db_name=self._tokamak, shot=self._shot, run=self._run,
+                                  user_name=self._user, data_version=self._version )
+        self._dbUALDAO.create()
+
         return self._dbUALDAO
 
-    def times(self, idsName):
+    def times(self, ids_name, occurrence):
         """Return list of time points for the timeslices for which the IDS with given name is present.
 
         If no time slices present for the IDS, returns an empty list."""
-        #print('X', idsName, 'X')
-        (status, times) = self.db.getTimes(idsName)
+
+        time_mode = self.db.get_node( ids_name, "ids_properties/homogeneous_time", occurrence )
+
+        if time_mode == IDS_TIME_MODE_INDEPENDENT:
+            times = [np.NINF]
+        elif time_mode == IDS_TIME_MODE_HETEROGENEOUS:
+            times = [np.NaN]
+        elif time_mode == IDS_TIME_MODE_HOMOGENEOUS:
+            times = self.db.get_node(ids_name, "time", occurrence)
+        else :
+            times = []
+
         return times
 
     def all_times(self):
         """Returns a list of existing timeslices for all time-dependent IDSs present in the database."""
-        import inspect
-        import types
 
-        def is_ids(obj):
-            try:
-                obj.__getattribute__('ids_properties')
-                return True
-            except:
-                return False
+        from imas.ids_base import IDSBase
 
-        timedep_ids_test = lambda x: is_ids(x)
-        timedep_idss = inspect.getmembers(self.db, timedep_ids_test )
+        ids_classes = [cls for cls in IDSBase.__subclasses__()]
 
         result = []
-        for idsnameArray, obj in timedep_idss:
-            try:
-                maxOccurrences = obj.getMaxOccurrences()
-            except AttributeError:
-                maxOccurrences = 1
+        for ids_class in ids_classes:
+
+            ids_name = ids_class.__name__
+            maxOccurrences = ids_class.getMaxOccurrences()
+
             for occurrence in range(maxOccurrences + 1):
-                if occurrence == 0:
-                    idsname = idsnameArray
-                else:
-                    idsname = idsnameArray + '/' + str(occurrence)
                 try:
-                    times = self.times(idsname)
+                    times = self.times(ids_name, occurrence )
                 except Exception as exc:
                     times = []
-                    print("ERROR! IDS '" + idsname + "': Reading time array fails due to following problem : " + str(exc), file=sys.stderr)
+                    print("ERROR! IDS '" + ids_name + "': Reading time array fails due to following problem : " + str(exc), file=sys.stderr)
                 if times is not None and len(times):
-                    result.append( (idsname, times) )
+                    result.append( (ids_name, times) )
 
         return result
 
