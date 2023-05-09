@@ -149,14 +149,12 @@ def list_databases_mdsplus(user, tokamak, dataversion):
 
     dbs = dict()
     for root, dirnames, filenames in os.walk(mdsplusdir):
-        for filename in fnmatch.filter(filenames, '*.tree'):
+        for filename in fnmatch.filter(filenames, '*.datafile'):
             try:
-
-                if filename == "ids_001.tree":
-                    file = root + "/ids_001.datafile"
+                file = root + "/" + filename
+                if filename == "ids_001.datafile":
                     if os.path.islink(file):
                         continue
-                    al5 = True
                     run = root.split('/')[-1]
                     run = int(run)
                     shot = root.split('/')[-2]
@@ -168,15 +166,12 @@ def list_databases_mdsplus(user, tokamak, dataversion):
                     num = int( filename[numStartPos:numEndPos] )
                     shot = int( num / 10000 )
                     run = int( rundir ) * 10000 + (num % 10000)
-                    files = get_dbfiles_mdsplus( user, tokamak, dataversion, shot, run )
-                    file = files[1]
-                    al5 = False
 
                 file_time = getmtime(file)
                 file_date = datetime.fromtimestamp(file_time).replace(microsecond=0)
                 if shot not in dbs:
                     dbs[shot] = list()
-                dbs[shot].append((run, file_date, al5))
+                dbs[shot].append((run, file_date))
             except:
                  print("EXC: ", sys.exc_info(), file=sys.stderr)
                  logging.warn("Malformed MDSPlus database filename: " + join(root, filename))
@@ -204,13 +199,6 @@ def get_dbfiles_mdsplus(user, tokamak, dataversion, shot, run):
     stem = get_dbfiles_stem_mdsplus(user, tokamak, dataversion, shot, run)
     return (stem + ".characteristics", stem + ".datafile", stem + ".tree")
 
-def get_dbfiles_mdsplus_al5(user, tokamak, dataversion, shot, run):
-    """Return the MDS+ database filenames for a given IMAS database"""
-    from os.path import join
-    mdsplusdir = join(get_user_db_directory(user), tokamak, dataversion)
-
-    stem = get_dbfiles_stem_mdsplus_al5(user, tokamak, dataversion, shot, run)
-    return (stem + ".characteristics", stem + ".datafile", stem + ".tree")
 
 def list_databases_hdf5(user, tokamak, dataversion):
     """List all HDF5 databases for a given user, tokamak, dataversion."""
