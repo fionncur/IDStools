@@ -7,7 +7,7 @@ import numpy as np
 import sys
 from os import system,getenv
 from sys import exit
-
+from idstools.cli import *
 
 # --------------------------------------------------------------------------------
 # --- Creates an entry for the Disruption database (adapted from create_db_entry
@@ -19,58 +19,28 @@ from sys import exit
 
 # Management of input arguments
 parser = argparse.ArgumentParser(description=\
-	 '---- Auto-generated yaml scenario and watcher files (!!! STILL TO BE COMPLETED BY HAND !!!)')
-parser.add_argument('-u' ,'--user_or_path', help='User or path name of the DB where the data-entry is located', required=False)
-parser.add_argument('-d' ,'--database',     help='Database name of the DB where the data-entry is located', required=False)
+	                         '---- Auto-generated yaml scenario and watcher files (!!! STILL TO BE COMPLETED BY HAND !!!)',
+                                 parents=[imas_parser])
 parser.add_argument('-s' ,'--shot',         help='shot number', required=True,type=int)
 parser.add_argument('-r' ,'--run',          help='run number',required=True,type=int)
-parser.add_argument('-st','--status',       help='active/obsolete',required=False)
-parser.add_argument('-ro','--ro',           help='Name of responsible officer',required=False)
-args = vars(parser.parse_args())
-shot = args["shot"]
-run  = args["run"]
+parser.add_argument('-st','--status',       help='active/obsolete',required=False,type=str,default="draft")
+parser.add_argument('-ro','--ro',           help='Name of responsible officer',required=False,type=str,default="")
 
-# User or path name
-if args['user_or_path'] != None:
-	user_or_path = args["user_or_path"]
-else:
-	user_or_path = 'public'
-
-# Database name
-if args['database'] != None:
-	database = args["database"]
-else:
-	database = 'ITER'
-
-# Status 
-if args['status'] != None:
-	status = args["status"]
-else:
-	status = 'draft'
-
-# RO as input parameter 
-if args['ro'] != None:
-	RO = args["ro"]
-else:
-	RO = ''
+args = parser.parse_args()
 
 
 # Open the database and read the necessary IDSs
-try:
-    version = getenv('IMAS_VERSION')[0]
-    input = imas.ids(shot,run)
-    input.open_env(str(user_or_path),str(database),version)
-except:
-    print('Shot ' + str(shot) + ', run ' + str(run) + ' does not exist', file=sys.stderr)
+input = imas.DBEntry(get_backend_id(args.backend),args.database,args.shot,args.run,user_name=args.user,data_version=args.version)
+err,n = input.open()
+if err != 0:
+    print('Shot ' + str(args.shot) + ', run ' + str(args.run) + ' does not exist', file=sys.stderr)
     print('----> Aborted.', file=sys.stderr)
     exit()
 
 # Read necessary IDSs from database
 try:
-    input.core_profiles.get()
-    core_profiles = input.core_profiles
-    core_profiles.ids_properties = input.core_profiles.partialGet('ids_properties')
-    if core_profiles.ids_properties.homogeneous_time != -999999999:
+    core_profiles = input.get('core_profiles')
+    if core_profiles.ids_properties.homogeneous_time != imas.imasdef.EMPTY_INT:
       core_present = 1
     else:
       core_present = 0
@@ -79,8 +49,7 @@ except:
     core_present = 0
 
 try:
-    input.summary.get()
-    summary = input.summary
+    summary = input.get('summary')
 except:
     print("The summary IDS is absent from the input data-entry", file=sys.stdout)
     print("----> H&CD waveforms not filled (to be completed by hand)", file=sys.stdout)
@@ -88,7 +57,7 @@ except:
 
 if core_present==1:
     try:
-        ne0 = input.core_profiles.partialGet('profiles_1d(:)/electrons/density(0)')
+        ne0 = input.partial_get('core_profiles','profiles_1d(:)/electrons/density(0)')
         central_electron_density = ne0[0]
        
     except:
@@ -96,23 +65,18 @@ if core_present==1:
        ne0 = 0
 
 try:
-    input.equilibrium.get()
-    equilibrium = input.equilibrium
-    equilibrium.ids_properties = input.equilibrium.partialGet('ids_properties')
-    if equilibrium.ids_properties.homogeneous_time != -999999999:
+    equilibrium = input.get('equilibrium')
+    if equilibrium.ids_properties.homogeneous_time != imas.imasdef.EMPTY_INT:
        eq_present = 1
     else:
        eq_present = 0
-    if eq_present == 1:
-       equilibrium.vacuum_toroidal_field = input.equilibrium.partialGet('vacuum_toroidal_field')
 
 except:
     print("The equilibrium IDS is absent from the input data-entry", file=sys.stdout)
     eq_present = 0
 
 try:
-    input.dataset_description.get()
-    dataset_description = input.dataset_description
+    dataset_description = input.get('dataset_description')
     comment = str.replace(dataset_description.ids_properties.comment,'\n','\n   ')
     dd_version = dataset_description.dd_version
 except:
@@ -187,8 +151,7 @@ except:
 # Ihalo
 try:
    halo_current = 0
-   input.disruption.get()
-   disruption = input.disruption
+   disruption = input.get("disruption")
    halo_current = max(disruption.global_quantities.current_halo_pol, key=abs)
 except:
    print("disruption.global_quantities.current_halo_pol could not be read", file=sys.stderr)
@@ -199,11 +162,11 @@ type     = "tbd"
 
 # Set up the name of the yaml file
 add0 = ""
-add0_length = 4-len(str(run))
+add0_length = 4-len(str(args.run))
 for i in range(add0_length):
     add0 = add0+"0"
 
-filename = "ids_"+str(shot)+add0+str(run)+".yaml"
+filename = "ids_"+str(args.shot)+add0+str(args.run)+".yaml"
 
 # Go for it: fill the yaml file
 f = open(filename, 'w')
@@ -213,7 +176,7 @@ f.write("""# to be changed to "active" once simulation and yaml files are ready\
 f.write("""# to be changed to "obsolete" if the simulation becomes obsolete\n""")
 f.write("""# ------------------------------------------------------------------\n""")
 f.write("""status: \n""")
-f.write("""   """ + status + "\n""")
+f.write("""   """ + args.status + "\n""")
 f.write("""\n""")
 f.write("""# -----------------------------------------------\n""")
 f.write("""# Reference name describing the simulation\n""")
@@ -234,11 +197,11 @@ f.write("""# Code: code name in case of simulation, 0 in case of experiment\n"""
 f.write("""# Machine: database name\n""")
 f.write("""# ------------------------------------------------------------------\n""")
 f.write("""characteristics:\n""")
-f.write("""    shot: %i\n""" % shot)
-f.write("""    run: %i\n""" % run)
+f.write("""    shot: %i\n""" % args.shot)
+f.write("""    run: %i\n""" % args.run)
 f.write("""    type: %s\n""" % type)
 f.write("""    workflow: %s\n""" % workflow)
-f.write("""    machine: %s\n""" % database)
+f.write("""    machine: %s\n""" % args.database)
 f.write("""\n""")
 f.write("""# ------------------------------------------------------------------\n""")
 f.write("""# Relations to other entries in this database (if any)\n""")
@@ -283,7 +246,7 @@ f.write("""# --------------------\n""")
 # Vertical bar is necessary here to deal with long lines in free description
 f.write("""free_description: |\n""")
 f.write("   "+comment+"\n")
-f.write("   DD version: "+dd_version+"\n")
+f.write("   DD version: "+args.version+"\n")
 f.write("""\n""")
 f.write("""# ------------------------------------------------------------------------------\n""")
 f.write("""# List of filled IDSs with time quantities in seconds (start, end, step)\n""")
@@ -296,13 +259,13 @@ f.write("""idslist:\n""")
 f.close()
 
 # Complete the yaml file with the output of ids_content
-system('ids_content -u ' + str(user_or_path) + ' -d ' + str(database) \
-          + ' -s ' + str(shot) + ' -r ' + str(run) + ' >> ' + filename)
+system('ids_content -u ' + args.user + ' -d ' + args.database \
+          + ' -s ' + str(args.shot) + ' -r ' + str(args.run) + ' >> ' + filename)
 
 print("----> " + filename + " created.", file=sys.stdout)
 
 # Associated WATCHER file
-filename = "ids_"+str(shot)+add0+str(run)+".watcher"
+filename = "ids_"+str(args.shot)+add0+str(args.run)+".watcher"
 f = open(filename, 'w')
 if 1 == 1: # Done for alignment
    f.write("""----------------------------------------------------------------------------------\n""")

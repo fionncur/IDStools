@@ -5,6 +5,7 @@ import os, sys, glob, yaml, argparse, re, imas, pdb
 from operator import itemgetter
 from stat import *
 from numpy import *
+from idstools.cli import *
 
 # ----------------------------------------------------------------------
 
@@ -17,56 +18,39 @@ def find_nearest(a, a0):
 
 # Management of input arguments
 parser = argparse.ArgumentParser(description=\
-    '---- Display the neutron profiles from the distribution_sources IDSs')
-parser.add_argument('-u','--user_or_path',help='User or absolute path name of the DB where the data-entry is located', required=False)
-parser.add_argument('-d','--database',help='Database name of the targeted data-entry', required=False)
+                                 '---- Display the neutron profiles from the distribution_sources IDSs',
+                                 parents=[imas_parser])
 parser.add_argument('-s','--shot',help='Shot number', required=True,type=int)
 parser.add_argument('-r','--run',help='Run number',required=True,type=int)
-parser.add_argument('-t','--time',help='Time', required=False,type=float)
-args = vars(parser.parse_args())
+parser.add_argument('-t','--time',help='Time', required=False,type=float,default=-99.0)
+
+args = parser.parse_args()
 
 # For execution from python shell
 #args = {'run': 0, 'database': None, 'user_or_path': None, 'time': None, 'shot': 121003}
 
-shot = args['shot']
-run  = args['run']
-
-# User or absolute path name
-if args['user_or_path'] != None:
-    user_or_path = args['user_or_path']
-else:
-    user_or_path = 'public'
-
-# Database name
-if args['database'] != None:
-    database = args['database']
-else:
-    database = 'iterdb'
-
-# Time
-if args['time'] != None:
-    time = args['time']
-else:
-    time = -99.
 
 # Open the database and read the necessary IDSs
-version = os.getenv('IMAS_VERSION')[0]
-input=imas.ids(shot,run)
-[err,n]=input.open_env(user_or_path,database,version,silent=True)
+input = imas.DBEntry(get_backend_id(args.backend), args.database, args.shot, args.run, user_name=args.user, data_version=args.version)
+err,n = input.open()
 if err != 0:
-    print('Shot ' + str(shot) + ', run ' + str(run) +' for user_or_path = '+user_or_path+' and database = '+database+' does not exist', file=sys.stderr)
+    print('Shot ' + str(args.shot) + ', run ' + str(args.run) +' for user_or_path = '+args.user+' and database = '+args.database+' does not exist', file=sys.stderr)
     print('----> Aborted.', file=sys.stderr)
     exit()
 
-if user_or_path == 'public':
-    DB_ABS_PATH = '/work/imas/shared/'+str(database)+'/3/0'
+if args.user == 'public':
+    publichome = os.getenv("IMAS_HOME")
+    if (publichome == None):
+        print("Environment variable IMAS_HOME is not defined. Quitting.", file=sys.stderr)
+        sys.exit(1)
+    DB_ABS_PATH = publichome+'/shared/imasdb/'+args.database+'/'+args.version
 else:
-    DB_ABS_PATH = os.path.expanduser("~{}".format(user_or_path))+"/public/imasdb/"+str(database)+"/3/0"
+    DB_ABS_PATH = os.path.expanduser("~{}".format(user_or_path))+"/public/imasdb/"+str(database)+"/3"
 
 try:
     #input.distribution_sources.get()
-    distribution_sources = input.distribution_sources
-    distribution_sources.time=input.distribution_sources.partialGet('time')
+    distribution_sources = imas.distribution_sources()
+    distribution_sources.time=input.partial_get('distribution_sources','time')
     if distribution_sources.time is None:
         print('No distribution_sources IDS in the data-entry --> Abort.', file=sys.stderr)
         exit()
@@ -82,6 +66,7 @@ hostdir = hostdir[:-2]
 # ----------------------------------------------------------------------
 
 # Search for adequate time slice for display
+time = args.time
 ntime = len(distribution_sources.time)
 timevec = distribution_sources.time
 if ntime >= 1:
@@ -107,8 +92,8 @@ else:
 time = tc
 
 # Read quantities for this time slice
-input.distribution_sources.getSlice(time,1)
-nsources = len(input.distribution_sources.source)
+ds_slice = input.get_slice("distribution_sources",time,1)
+nsources = len(ds_slice.source)
 if nsources>1:
     print('Distribution_sources contains '+str(nsources)+' sources', file=sys.stderr)
 else:
@@ -121,18 +106,18 @@ for isource in range(nsources):
     distribution_sources.source[isource].global_quantities.resize(1)
     distribution_sources.source[isource].process.resize(1)
     try:
-        distribution_sources.source[isource].profiles_1d[0] = input.distribution_sources.partialGet('source('+str(isource)+')/profiles_1d('+str(it)+')')
+        distribution_sources.source[isource].profiles_1d[0] = ds_slices.source[isource].profiles_1d[0]
     except:
         print('Source '+str(isource)+' has no profiles_1d -> considered as inactive', file=sys.stderr)
         active[isource] = 0
     try:
-        distribution_sources.source[isource].global_quantities[0] = input.distribution_sources.partialGet('source('+str(isource)+')/global_quantities('+str(it)+')')
+        distribution_sources.source[isource].global_quantities[0] = ds_slice.source[isource].global_quantities[0]
     except:
         if active[isource]==1:
             print('Source '+str(isource)+' has no global_quantities -> considered as inactive', file=sys.stderr)
             active[isource] = 0
     try:
-        distribution_sources.source[isource].process[0] = input.distribution_sources.partialGet('source('+str(isource)+')/process(0)')
+        distribution_sources.source[isource].process[0] = ds_slice.source[isource].process[0]
     except:
         if active[isource]==1:
             print('Source '+str(isource)+' has no process -> considered as inactive', file=sys.stderr)
@@ -278,14 +263,14 @@ plt.xlim(rho_tor_norm[0],rho_tor_norm[nrho-1])
 nice(plt,r'$\rho/\rho_0$',r'Neutron rate ($s^{-1}.m{^{-3}}$)',fontsize)
 legend = plt.legend(bbox_to_anchor=(legx_pos-0.35,legy_pos-0.05))
 CustomLegend_wf(legend)
-Signature(hostdir,shot,run,plt)
+Signature(hostdir,args.shot,args.run,plt)
 plt.title('Profiles displayed for t = '+'%.1f' % time+' s', fontdict=font)
 
 fig = plt.gcf()
 
 try:
-    fig.savefig('Neutrons'+'_shot_'+str(shot)+'_run_'+str(run)+'_time_'+'%.1f' % time+'.png', dpi=100)
-    print('----> Figure saved to '+'Neutrons'+'_shot_'+str(shot)+'_run_'+str(run)+'_time_'+'%.1f' % time+'.png', file=sys.stderr)
+    fig.savefig('Neutrons'+'_shot_'+str(args.shot)+'_run_'+str(args.run)+'_time_'+'%.1f' % time+'.png', dpi=100)
+    print('----> Figure saved to '+'Neutrons'+'_shot_'+str(args.shot)+'_run_'+str(args.run)+'_time_'+'%.1f' % time+'.png', file=sys.stderr)
 except:
     print('The figure could not be saved (check local permissions).', file=sys.stderr)
 

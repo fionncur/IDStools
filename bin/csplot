@@ -10,39 +10,19 @@ matplotlib.use('TKagg')
 import matplotlib.pyplot as plt
 import numpy as np
 from imas.hli_exception import *
+from idstools.cli import *
 #from scipy.interpolate import interp1d
 
 # MANAGEMENT OF INPUT ARGUMENTS
 # ------------------------------
 parser = argparse.ArgumentParser(description=\
-	 '---- Display core_sources results')
+	                         '---- Display core_sources results',
+                                 parents=[imas_parser])
 parser.add_argument('-s','--shot',help='Shot number', required=True,type=int)
 parser.add_argument('-r','--run',help='Run number',required=True,type=int)
-parser.add_argument('-u','--user_or_path',help='User or absolute path name where the data-entry is located', required=False)
-parser.add_argument('-d','--database',help='Database name where the data-entry is located', required=False)
-parser.add_argument('-t','--time',help='time', required=False,type=float)
+parser.add_argument('-t','--time',help='time', required=False,type=float,default=-99.0)
 
-args         = vars(parser.parse_args())
-shot         = args["shot"]
-run          = args["run"]
-
-# User or absolute path name
-if args['user_or_path'] != None:
-    user_or_path = args['user_or_path']
-else:
-    user_or_path = 'public'
-
-# Database name
-if args['database'] != None:
-    database = args['database']
-else:
-    database = 'iter'
-
-# Time
-if args['time'] != None:
-    time = args['time']
-else:
-    time = -99.
+args         = parser.parse_args()
 
 # DISPLAY PARAMETERS
 # -------------------
@@ -83,23 +63,22 @@ def CustomLegend(legend):
 
 # READ IDS'S FROM LOCAL DATABASE
 # -------------------------------
-version = os.getenv('IMAS_VERSION')[0]
-input=imas.ids(shot,run)
-[err,n]=input.open_env(user_or_path,database,version,silent=True)
+input = imas.DBEntry(get_backend_id(args.backend), args.database, args.shot, args.run, user_name=args.user, data_version=args.version)
+err,n = input.open()
 if err != 0:
-    print('Shot ' + str(shot) + ', run ' + str(run) +' for user_or_path = '+user_or_path+' and database = '+database+' does not exist', file=sys.stderr)
+    print('Shot ' + str(args.shot) + ', run ' + str(args.run) +' for user_or_path = '+args.user+' and database = '+args.database+' does not exist', file=sys.stderr)
     print('----> Aborted.', file=sys.stderr)
     exit()
 #input.core_sources.get()
-core_sources = input.core_sources
-core_sources.time=input.core_sources.partialGet('time')
+core_sources = imas.core_sources()
+core_sources.time=input.partial_get('core_sources','time')
 if core_sources.time is None:
     print('No core_sources IDS in the data-entry --> Abort.', file=sys.stderr)
     exit()
 
 # TIME VECTOR AND TIME INDEX
 # ---------------------------
-
+time = args.time
 timevec = input.core_sources.time
 ntime = len(timevec)
 if ntime==1:
@@ -122,8 +101,8 @@ else:
 time = tc
 
 # Read quantities for this time slice
-input.core_sources.getSlice(time,1)
-nsources = len(input.core_sources.source)
+cs_slice = input.get_slice('core_sources',time,1)
+nsources = len(cs_slice.source)
 #nsources = 1
 
 #input.core_sources.get()
@@ -139,13 +118,13 @@ core_sources.source.resize(nsources)
 for isource in range(nsources):
     core_sources.source[isource].profiles_1d.resize(1)
     core_sources.source[isource].global_quantities.resize(1)
-    core_sources.source[isource].profiles_1d[0] = input.core_sources.partialGet('source('+str(isource)+')/profiles_1d('+str(it)+')')
+    core_sources.source[isource].profiles_1d[0] = cs_slice.source[isource].profiles_1d[0]
     try:
-        core_sources.source[isource].global_quantities = input.core_sources.partialGet('source('+str(isource)+')/global_quantities')
+        core_sources.source[isource].global_quantities = cs_slice.source[isource]global_quantities
     except:
         print('source('+str(isource)+') does not have global_quantities', file=sys.stderr)
         core_sources.source[isource].global_quantities.resize(0)
-    core_sources.source[isource].identifier.name = input.core_sources.partialGet('source('+str(isource)+')/identifier/name')
+    core_sources.source[isource].identifier.name = cs_slice.source[isource].identifier.name
 
 nsources = len(core_sources.source)
 validsources = []
@@ -342,7 +321,7 @@ legend = plt.legend()
 CustomLegend(legend)
 fig.set_size_inches(figure_width,figure_height)
 fig.tight_layout()
-fig.savefig('CS_power_profiles_shot_{0}_run_{1}.png'.format(shot,run),bbox_inches="tight")
+fig.savefig('CS_power_profiles_shot_{0}_run_{1}.png'.format(args.shot,args.run),bbox_inches="tight")
 #plt.title('Whatever')
 plt.show(block=False)
 
@@ -362,7 +341,7 @@ legend = plt.legend()
 CustomLegend(legend)
 fig.set_size_inches(figure_width,figure_height)
 fig.tight_layout()
-fig.savefig('CS_particles_profiles_shot_{0}_run_{1}.png'.format(shot,run),bbox_inches="tight")
+fig.savefig('CS_particles_profiles_shot_{0}_run_{1}.png'.format(args.shot,args.run),bbox_inches="tight")
 #plt.title('Whatever')
 
 # CURRENT PROFILES [KA/M2]
@@ -380,7 +359,7 @@ legend = plt.legend()
 CustomLegend(legend)
 fig.set_size_inches(figure_width,figure_height)
 fig.tight_layout()
-fig.savefig('CS_current_profiles_shot_{0}_run_{1}.png'.format(shot,run),bbox_inches="tight")
+fig.savefig('CS_current_profiles_shot_{0}_run_{1}.png'.format(args.shot,args.run),bbox_inches="tight")
 #plt.title('Whatever')
 
 # POWER AND PARTICLE WAVEFORMS
@@ -407,7 +386,7 @@ else:
     CustomLegend(legend)
     fig.set_size_inches(figure_width,figure_height)
     fig.tight_layout()
-    fig.savefig('CS_power_waveforms_shot_{0}_run_{1}.png'.format(shot,run),bbox_inches="tight")
+    fig.savefig('CS_power_waveforms_shot_{0}_run_{1}.png'.format(args.shot,args.run),bbox_inches="tight")
     #plt.title('Whatever')
     #plt.gca().set_ylim(0,max(total_power_waveform)*1.2e-6)
     plt.show(block=False)
@@ -430,7 +409,7 @@ else:
     CustomLegend(legend)
     fig.set_size_inches(figure_width,figure_height)
     fig.tight_layout()
-    fig.savefig('CS_particles_waveforms_shot_{0}_run_{1}.png'.format(shot,run),bbox_inches="tight")
+    fig.savefig('CS_particles_waveforms_shot_{0}_run_{1}.png'.format(args.shot,args.run),bbox_inches="tight")
     #plt.title('Whatever')
     #plt.gca().set_ylim(0,max(total_particles_waveform)*1.2e-6)
     plt.show(block=False)
@@ -449,7 +428,7 @@ else:
     CustomLegend(legend)
     fig.set_size_inches(figure_width,figure_height)
     fig.tight_layout()
-    fig.savefig('CS_current_waveforms_shot_{0}_run_{1}.png'.format(shot,run),bbox_inches="tight")
+    fig.savefig('CS_current_waveforms_shot_{0}_run_{1}.png'.format(args.shot,args.run),bbox_inches="tight")
     #plt.title('Whatever')
     #plt.gca().set_ylim(0,max(total_current_waveform)*1.2e-6)
     plt.show(block=False)
@@ -468,7 +447,7 @@ else:
     CustomLegend(legend)
     fig.set_size_inches(figure_width,figure_height)
     fig.tight_layout()
-    fig.savefig('CS_torque_waveforms_shot_{0}_run_{1}.png'.format(shot,run),bbox_inches="tight")
+    fig.savefig('CS_torque_waveforms_shot_{0}_run_{1}.png'.format(args.shot,args.run),bbox_inches="tight")
     #plt.title('Whatever')
     #plt.gca().set_ylim(0,max(total_torque_waveform)*1.2e-6)
     plt.show(block=True)

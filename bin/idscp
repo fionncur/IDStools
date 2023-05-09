@@ -23,6 +23,8 @@ parser.add_argument('-f','--force',action='store_true',
                     help='Force the creation of destination data-entry (existing data will be lost)')
 parser.add_argument('--setDatasetVersion',action='store_true',
                     help='Store current DD version into dataset_description IDS if it exists')
+parser.add_argument('--dontOverwrite',action='store_true',
+                    help='Do not copy IDS that already exist at destination')
 occgroup = parser.add_mutually_exclusive_group()
 occgroup.add_argument('-a','--allOccurrences',action='store_true',
                       help='Copy all occurrences available in the source into the destination')
@@ -102,7 +104,12 @@ for idsname in args.ids:
     idsid = idsname.split('/')
     if len(idsid) == 2:
         inocc = int(idsid[1])
-  
+
+    if args.dontOverwrite:
+        if dest.partial_get(idsid[0],"ids_properties/homogeneous_time",occurrence=inocc)==imas.imasdef.EMPTY_INT:
+            print(f"skip {idsid[0]")
+            continue
+        
     idsobj = src.get(idsid[0],occurrence=inocc)
     if args.setDatasetVersion and idsid[0]=='dataset_description':
         idsobj.dd_version = os.environ['IMAS_VERSION']

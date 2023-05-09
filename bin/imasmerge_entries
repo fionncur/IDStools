@@ -26,6 +26,10 @@ class Parser(xml.sax.handler.ContentHandler):
 
 if __name__ == '__main__':
     # Parse input arguments
+    print('\n[DEPRECATED]')
+    print(' ********************************************************************************* ')
+    print(' ******** Please use idscp instead (possibly with --dontOverwrite option) ******** ')
+    print(' ********************************************************************************* \n')
     parser_input = argparse.ArgumentParser(prog='imasmerge_entries', \
              description="This script copies all valid IDSs (optionnally, you can specify a list of IDS names) from a given source IMAS data entry to a destination data entry\n" \
              + "Its provide a form of merge functionality between IMAS data entries\n" \
