@@ -59,26 +59,12 @@ if __name__ == "__main__":
         args.ids = [ids for ids in allidss if db.partial_get(ids,'ids_properties/homogeneous_time')!=imas.imasdef.EMPTY_INT]
 
 
-    #db = imas.ids(args.shot,args.run)
-    #db.open_env(args.user,
-    #            args.tokamak,
-    #            args.version.split('.')[0])
     
     # For memory backend need to read the full IDS and load it into memory 
     if (args.backend == imas.imasdef.MEMORY_BACKEND):
         print('Not yet implemented.',file=sys.stderr)
         sys.exit(1)
         
-        #idsobj = get_ids(db,args.ids,None,False,True)
-        #status,memctx = ull.ual_begin_pulse_action(ull.MEMORY_BACKEND,
-        #                                           args.shot,
-        #                                           args.run,
-        #                                           args.user,
-        #                                           args.tokamak,
-        #                                           args.version)
-        #status = ull.ual_open_pulse(memctx,ull.FORCE_CREATE_PULSE,'')
-        #idsobj.setExpIdx(memctx)
-        #idsobj.put()
 
     idsobj = None
     dbout = None

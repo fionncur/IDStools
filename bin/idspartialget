@@ -7,7 +7,12 @@ import imas
 import sys
 
 if __name__ == '__main__':
+    print('\n[DEPRECATED]')
+    print(' ************************************************ ')
+    print(' ******** Please use idsdumppath instead ******** ')
+    print(' ************************************************ \n')
 
+    
     if len(sys.argv) != 8:
         print('Usage: idspartialget <USER> <DATABASE> <VERSION> <SHOT> <RUN> <IDS> <DATA_PATH>', file=sys.stderr)
         exit(1)

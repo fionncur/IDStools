@@ -11,6 +11,10 @@ import os
 from argparse import RawTextHelpFormatter
 
 if __name__ == '__main__':
+    print('\n[DEPRECATED]')
+    print(' *************************************************************************** ')
+    print(' ******** Please use idslist.available_in_db from idstools instead  ******** ')
+    print(' *************************************************************************** \n')
     # Create the parser
     parser = argparse.ArgumentParser(prog='idsoccurrences', \
              description="Search available occurrences of a specified IDS (search is currently limited to 'maxocc' occurrences, default to 15).\n" \
