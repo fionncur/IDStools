@@ -152,20 +152,21 @@ def list_databases_mdsplus(user, tokamak, dataversion):
         for filename in fnmatch.filter(filenames, '*.datafile'):
             try:
                 file = root + "/" + filename
-                if filename == "ids_001.datafile":
+                rundirs = (root[len(mdsplusdir)+1:]).split('/')
+                if len(rundirs)==1: #AL4 layout
+                    numStartPos = filename.find( '_' ) + 1
+                    numEndPos = filename.rfind( '.' )
+                    num = int( filename[numStartPos:numEndPos] )
+                    shot = int( num / 10000 )
+                    run = int( rundirs[0] ) * 10000 + (num % 10000)
+                else: #AL5 layout
+                    assert(filename=="ids_001.datafile")
                     if os.path.islink(file):
                         continue
                     run = root.split('/')[-1]
                     run = int(run)
                     shot = root.split('/')[-2]
                     shot = int(shot)
-                else:
-                    base, rundir = split( root )
-                    numStartPos = filename.find( '_' ) + 1
-                    numEndPos = filename.rfind( '.' )
-                    num = int( filename[numStartPos:numEndPos] )
-                    shot = int( num / 10000 )
-                    run = int( rundir ) * 10000 + (num % 10000)
 
                 file_time = getmtime(file)
                 file_date = datetime.fromtimestamp(file_time).replace(microsecond=0)
