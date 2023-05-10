@@ -5,10 +5,13 @@ This module provides compute functions and classes for pf_active ids data
 
 """
 import logging
+
 logger = logging.getLogger("module")
+
 
 class PfActiveCompute:
     """This class provides compute functions for pf_active ids"""
+
     def __init__(self, ids: object):
         """Initialization PfActiveCompute object.
 
@@ -20,13 +23,13 @@ class PfActiveCompute:
     def getActivePfCoils(self) -> dict:
         """
         This function returns a dictionary of active PF coils and their corresponding elements dimensions and center coordinates.
-        
+
         Returns:
             a dictionary containing information about the active PF (poloidal field) coils. The keys of the dictionary are the identifiers of the coils, and the values are dictionaries containing information about the individual elements of each coil. The information about each element includes its horizontal width, vertical height, and center coordinates.
-            
+
         Examples:
             .. code-block:: python
-            
+
                 import pprint
                 import imas
                 from idstools2.compute.pf_active.basic import PfActiveCompute
@@ -37,9 +40,9 @@ class PfActiveCompute:
                 idsObj = connection.get('pf_active')
 
                 computeObj = PfActiveCompute(idsObj)
-                result=computeObj.getActivePfCoils() 
+                result=computeObj.getActivePfCoils()
                 pprint.pprint(result)
-                
+
                 {'CS1L': {'element0': (0.74, 2.093, (1.3170000000000002, -2.1185))},
                 'CS1U': {'element0': (0.74,2.093,(1.3170000000000002, 0.045500000000000096))},
                 'CS2L': {'element0': (0.74, 2.093, (1.3170000000000002, -4.3045))},
@@ -53,7 +56,7 @@ class PfActiveCompute:
                 'PF5': {'element0': (0.8125, 0.9538, (7.9845500000000005, -7.2038))},
                 'PF6': {'element0': (1.559, 1.1075, (3.5544999999999995, -8.02025))}}
         """
-        
+
         coils = {}
         for coil in self.ids.coil:
             dictElements = {}
@@ -70,7 +73,13 @@ class PfActiveCompute:
                         verticalHeight,
                         cec,
                     )
+            if dictElements:
+                coils[coil.identifier] = dictElements
+            else:
+                logger.warning(
+                    f"{coil.identifier} : pf_active.coil.element.geometry.rectangle is empty"
+                )
 
-            coils[coil.identifier] = dictElements
+        if not coils:
+            logger.warning("pf_active.coil is empty")
         return coils
-

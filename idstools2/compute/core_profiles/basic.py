@@ -6,7 +6,7 @@ import sys
 import logging
 import functools
 
-logger = logging.getLogger("module." + __name__)
+logger = logging.getLogger(f"module.{__name__}")
 
 
 class CoreProfilesCompute:
@@ -26,7 +26,7 @@ class CoreProfilesCompute:
         try:
             ids_object.profiles_1d[slice_index]
 
-        except:
+        except Exception:
             return 0
 
         coreProfileCompute = CoreProfilesCompute(ids_object, slice_index, volume=volume)
@@ -51,16 +51,16 @@ class CoreProfilesCompute:
         z = coreProfileCompute.get_z()
         states_data = coreProfileCompute.get_states_data()
         for species_index in range(len(species)):
-            species_data = {}
-            species_data["nspec_over_ntot"] = nspec_over_ntot[species_index]
-            species_data["nspec_over_ne"] = nspec_over_ne[species_index]
-            species_data["nspec_over_nmaj"] = nspec_over_nmaj[species_index]
-            species_data["a"] = a[species_index]
-            species_data["z"] = z[species_index]
-            species_data["species"] = species[species_index]
-            species_data["states"] = states_data[str(species_index)]
-            species_data["label"] = labels[species_index]
-
+            species_data = {
+                "nspec_over_ntot": nspec_over_ntot[species_index],
+                "nspec_over_ne": nspec_over_ne[species_index],
+                "nspec_over_nmaj": nspec_over_nmaj[species_index],
+                "a": a[species_index],
+                "z": z[species_index],
+                "species": species[species_index],
+                "states": states_data[str(species_index)],
+                "label": labels[species_index],
+            }
             data[str(species_index)] = species_data
 
         return data
@@ -300,7 +300,7 @@ class CoreProfilesCompute:
         volume = self.get_volume(slice_index)
 
         electron_density = self.ids_object.profiles_1d[slice_index].electrons.density
-        logger.info("Total no. electrons (ne): " + str(sum(volume * electron_density)))
+        logger.info(f"Total no. electrons (ne): {str(sum(volume * electron_density))}")
         return sum(volume * electron_density)
 
     @functools.lru_cache(maxsize=128)
@@ -309,7 +309,7 @@ class CoreProfilesCompute:
         if len(volume) == 0:
             volume = None
             logger.critical("core_profile IDS: Grid volume is empty")
-        logger.info("Total volume:" + str(np.sum(volume)))
+        logger.info(f"Total volume:{str(np.sum(volume))}")
         return volume
 
     @functools.lru_cache(maxsize=128)
@@ -339,7 +339,7 @@ class CoreProfilesCompute:
             if species_density_list[ispecies] > max_density:
                 max_density = species_density_list[ispecies]
                 max_density_index = ispecies
-        logger.debug("Species density:" + str(species_density_list))
+        logger.debug(f"Species density:{str(species_density_list)}")
         return species_density_list, sum_density, max_density_index
 
     def get_nspec_over_ntot(self):
