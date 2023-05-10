@@ -12,6 +12,10 @@ from idstools.cli import *
 
 # MANAGEMENT OF INPUT ARGUMENTS
 # ------------------------------
+print('\n[DEPRECATED]')
+print(' **************************************************** ')
+print(' ******** Please use hcd_waves_plot instead  ******** ')
+print(' **************************************************** \n')
 parser = argparse.ArgumentParser(description=\
 	                         '---- Display IC results',
                                  parents=[imas_parser])
@@ -161,7 +165,7 @@ for iwave in range(nwaves):
             nion = len(waves.coherent_wave[iwave].global_quantities[itime].ion)
             # To be checked
             for iion in range(nion):
-                single_power_waveform[iwave][itime] = .append(waves.coherent_wave[iwave].global_quantities[itime].ion[iion].power_thermal)
+                single_power_waveform[iwave][itime] += waves.coherent_wave[iwave].global_quantities[itime].ion[iion].power_thermal
            
 
 

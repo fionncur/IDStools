@@ -232,11 +232,13 @@ def waves_prep(args):
                    + waves[isample].coherent_wave[iwave].profiles_1d[hcd_profiles[isample]['it']].power_density
                hcd_profiles[isample]['single_power_density_profile'][iwave] = \
                    waves[isample].coherent_wave[iwave].profiles_1d[hcd_profiles[isample]['it']].power_density
-               hcd_profiles[isample]['total_current_density_profile'] = \
-                   hcd_profiles[isample]['total_current_density_profile'] \
-                   + waves[isample].coherent_wave[iwave].profiles_1d[hcd_profiles[isample]['it']].current_parallel_density
-               hcd_profiles[isample]['single_current_density_profile'][iwave] = \
-                   waves[isample].coherent_wave[iwave].profiles_1d[hcd_profiles[isample]['it']].current_parallel_density
+               if len(waves[isample].coherent_wave[iwave].profiles_1d[hcd_profiles[isample]['it']].current_parallel_density)>0:
+                 hcd_profiles[isample]['total_current_density_profile'] = \
+                     hcd_profiles[isample]['total_current_density_profile'] \
+                     + waves[isample].coherent_wave[iwave].profiles_1d[hcd_profiles[isample]['it']].current_parallel_density
+               if len(waves[isample].coherent_wave[iwave].profiles_1d[hcd_profiles[isample]['it']].current_parallel_density)>0:
+                  hcd_profiles[isample]['single_current_density_profile'][iwave] = \
+                     waves[isample].coherent_wave[iwave].profiles_1d[hcd_profiles[isample]['it']].current_parallel_density
                hcd_profiles[isample]['single_injected_power[iwave]'] = 0.
                if len(waves[isample].coherent_wave[iwave].beam_tracing) > 0:
                   for ibeam in range(len(waves[isample].coherent_wave[iwave].beam_tracing[hcd_profiles[isample]['it']].beam)):
@@ -354,7 +356,7 @@ def waves_display(hcd_profiles,hcd_param):
            ax.plot(hcd_profiles[isample]['rho_tor_norm'], \
                    hcd_profiles[isample]['total_current_density_profile']*1.e-6,label=r'Total')
        for iwave in range(hcd_profiles[isample]['nwaves']):
-           if hcd_profiles[isample]['is_active'][iwave]:
+           if hcd_profiles[isample]['is_active'][iwave] and iwave in hcd_profiles[isample]['single_current_density_profile']:
                ax.plot(hcd_profiles[isample]['rho_tor_norm'], \
                        hcd_profiles[isample]['single_current_density_profile'][iwave]*1.e-6,\
                        label=hcd_profiles[isample]['single_hcd_launcher_name'][iwave],color=torcol[iwave])
