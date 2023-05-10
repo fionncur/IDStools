@@ -40,7 +40,7 @@ if err != 0:
     print('----> Aborted.', file=sys.stderr)
     exit()
 
-if user_or_path == 'public':
+if args.user == 'public':
     publichome = os.getenv("IMAS_HOME")
     if (publichome == None):
         print("Environment variable IMAS_HOME is not defined. Quitting.", file=sys.stderr)

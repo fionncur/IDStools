@@ -106,7 +106,7 @@ for isource in range(nsources):
     distribution_sources.source[isource].global_quantities.resize(1)
     distribution_sources.source[isource].process.resize(1)
     try:
-        distribution_sources.source[isource].profiles_1d[0] = ds_slices.source[isource].profiles_1d[0]
+        distribution_sources.source[isource].profiles_1d[0] = ds_slice.source[isource].profiles_1d[0]
     except:
         print('Source '+str(isource)+' has no profiles_1d -> considered as inactive', file=sys.stderr)
         active[isource] = 0
