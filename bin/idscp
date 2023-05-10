@@ -23,8 +23,8 @@ parser.add_argument('-f','--force',action='store_true',
                     help='Force the creation of destination data-entry (existing data will be lost)')
 parser.add_argument('--setDatasetVersion',action='store_true',
                     help='Store current DD version into dataset_description IDS if it exists')
-parser.add_argument('--dontOverwrite',action='store_true',
-                    help='Do not copy IDS that already exist at destination')
+parser.add_argument("-i","--interactive",action="store_true",
+                    help="Prompt the user to overwrite the ids (Default is to overwrite the ids without asking)",)
 occgroup = parser.add_mutually_exclusive_group()
 occgroup.add_argument('-a','--allOccurrences',action='store_true',
                       help='Copy all occurrences available in the source into the destination')
@@ -105,10 +105,16 @@ for idsname in args.ids:
     if len(idsid) == 2:
         inocc = int(idsid[1])
 
-    if args.dontOverwrite:
+    if args.interactive:
         if dest.partial_get(idsid[0],"ids_properties/homogeneous_time",occurrence=inocc)==imas.imasdef.EMPTY_INT:
-            print(f"skip {idsid[0]")
-            continue
+            user_choice = ""
+            while user_choice not in ["y", "n"]:
+                user_choice = input(
+                    f"{idsid[0]} is already exists, do you want to overwrite (y/n)? :"
+                )
+            if user_choice == "n":
+                print(f"skip {idsid[0]}")
+                continue
         
     idsobj = src.get(idsid[0],occurrence=inocc)
     if args.setDatasetVersion and idsid[0]=='dataset_description':
