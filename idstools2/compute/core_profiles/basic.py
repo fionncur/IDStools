@@ -447,54 +447,44 @@ class CoreProfilesCompute:
                     )
                     nspec_over_nmaj[jspecies] = 0
 
-    def getRHOLength(self, timeSlice: int = 0):
+    def getRhoTorNorm(self, timeSlice: int = 0) -> list:
         """
-        This function returns the length of the toroidal flux coordinate for a given time slice in a
-        core_profiles object.
+        This function returns a list of normalized toroidal rho values from a given time slice of a profiles_1d object.
 
         Args:
-            timeSlice (int): Time slice. Defaults to 0
+            timeSlice (int): time index. Defaults to 0
 
         Returns:
-            the length of the toroidal flux coordinate, which is the number of elements in either
-        `self.ids_object.profiles_1d[timeSlice].grid.rho_tor_norm` or
-        `self.ids_object.profiles_1d[timeSlice].grid.rho_tor`. If neither of these attributes are
-        available, the function returns `None`.
+            a list of normalized toroidal flux coordinates (rho_tor_norm) for a given time slice of the IDS object. If rho_tor_norm is not available, it tries to return a list of toroidal flux coordinates (rho_tor) instead. If neither is available, it returns None.
         """
+        rhoTorNorm = None
+        nrho = 0
         try:
-            # Toroidal flux coordinate
             if len(self.ids_object.profiles_1d[timeSlice].grid.rho_tor_norm) > 0:
                 nrho = len(self.ids_object.profiles_1d[timeSlice].grid.rho_tor_norm)
+                rhoTorNorm = [0] * nrho
+                for i in range(nrho):
+                    rhoTorNorm[i] = self.ids_object.profiles_1d[
+                        timeSlice
+                    ].grid.rho_tor_norm[i]
+
+                return rhoTorNorm
             elif len(self.ids_object.profiles_1d[timeSlice].grid.rho_tor) > 0:
                 nrho = len(self.ids_object.profiles_1d[timeSlice].grid.rho_tor)
+                rhoTorNorm = [0] * nrho
+                for i in range(nrho):
+                    rhoTorNorm[i] = (
+                        self.ids_object.profiles_1d[timeSlice].grid.rho_tor[i]
+                        / self.ids_object.profiles_1d[timeSlice].grid.rho_tor[nrho - 1]
+                    )
 
-            if nrho == 0:
-                raise IndexError
-            return nrho
+                return rhoTorNorm
+
         except IndexError:
             logger.error(
-                f"core_profiles.profiles_1d[{timeSlice}].grid.rho_tor_norm or rho_tor not available"
+                f"core_profiles.profiles_1d[{timeSlice}].grid.rho_tor_norm or rho_tor is not available"
             )
         return None
-
-    def get_rho_tor_norm(self, time_index=0):
-        # Normalized toroidal and poloidal flux coordinates
-        rho_tor_norm = None
-        nrho = self.getRHOLength(time_index)
-        if nrho != None:
-            rho_tor_norm = [0] * nrho
-            if len(self.ids_object.profiles_1d[time_index].grid.rho_tor_norm) > 0:
-                for i in range(nrho):
-                    rho_tor_norm[i] = self.ids_object.profiles_1d[
-                        time_index
-                    ].grid.rho_tor_norm[i]
-            elif len(self.ids_object.profiles_1d[time_index].grid.rho_tor) > 0:
-                for i in range(nrho):
-                    rho_tor_norm[i] = (
-                        self.ids_object.profiles_1d[time_index].grid.rho_tor[i]
-                        / self.ids_object.profiles_1d[time_index].grid.rho_tor[nrho - 1]
-                    )
-        return rho_tor_norm
 
     def getPSI(self, timeSlice: int = 0) -> list:
         """

@@ -26,6 +26,7 @@ class EquilibriumCompute:
         This function returns a dictionary containing 2D Cartesian grid coordinates and psi values from
         an equilibrium IDS object.
 
+
         Args:
             timeSlice (int): The time slice index of the equilibrium data to be used for generating the 2D Cartesian grid. Defaults to 0
             profiles2DIndex (int): `profiles2DIndex` is an integer parameter that represents the index of the ``profile_2d`` to be used in the calculation. It is used to access the specific 2D profile from the list of profiles in the `time_slice` object. Defaults to 0
@@ -144,11 +145,13 @@ class EquilibriumCompute:
                 (0, array([[10.99503929
 
         Notes:
+
+            .. math:: bTotal = \sqrt{b\_field\_r^2 + b\_field\_z^2 + b\_field\_tor^2}
+            
             ``profiles_2d`` has information about following fields
             ``b_field_r`` (R component of the poloidal magnetic field)
-            ``b_field_r`` (Z component of the poloidal magnetic field)
+            ``b_field_z`` (Z component of the poloidal magnetic field)
             ``b_field_tor`` (Toroidal component of the magnetic field)
-
 
         """
         listOfProfiles = self.get2DProfilesIndices(timeSlice)

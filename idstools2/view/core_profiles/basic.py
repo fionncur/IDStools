@@ -197,9 +197,9 @@ class CoreProfilesView(Console):
         ax.set_ylim(0, 20)
 
     def plot_density_profile(self, ax, time_index, psi_based=0, init=1):
-        rho_tor_norm = self.core_profiles_compute.get_rho_tor_norm(time_index)
+        rho_tor_norm = self.core_profiles_compute.getRhoTorNorm(time_index)
 
-        psi = self.core_profiles_compute.get_psi(time_index)
+        psi = self.core_profiles_compute.getPSI(time_index)
 
         if rho_tor_norm is not None and psi is not None:
             radial_coordinate = rho_tor_norm
