@@ -31,7 +31,7 @@ class EcStrayCompute:
         z = eqcomputeobj.ids.time_slice[time_index_eq].profiles_2d[ieq_rect].grid.dim2
         wavecompute = WavesCompute(self.waves_ids)
         wavecompute.index = 0
-        B_res = wavecompute.get_B_res(time_index_wv)
+        B_res = wavecompute.getBResonance(time_index_wv)
         n_harm = [1, 2, 3, 4]
 
         [nr, nz] = np.shape(b_tot)
@@ -53,7 +53,7 @@ class EcStrayCompute:
         from scipy import constants, interpolate
 
         wavecompute = WavesCompute(self.waves_ids)
-        omega_ec = wavecompute.get_omega_ec(time_index_wv)
+        omega_ec = wavecompute.getOmegaEC(time_index_wv)
 
         # Find (R,Z) rectangular grid of B-field
         eqcomputeobj = EquilibriumCompute(self.equilibrium_ids)

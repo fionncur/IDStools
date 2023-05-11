@@ -12,6 +12,7 @@ from idstools.cli import imas_parser
 
 from idstools2.compute.core_profiles.basic import CoreProfilesCompute
 from idstools2.compute.equilibrium.basic import EquilibriumCompute
+from idstools2.compute.waves.basic import WavesCompute
 
 from idstools2.database.basic import read_ids
 
@@ -93,7 +94,7 @@ if err != 0:
 
 time_index_eq = 0
 time_index_cp = 0
-time_index_wv = 0
+beamTracingTimeIndex = 0
 
 current_file_path = os.path.dirname(os.path.abspath(__file__))
 
@@ -124,7 +125,7 @@ def iround(x, xi):
 
 eqcomputeobj = EquilibriumCompute(equilibrium_ids)
 coreprofilesobj = CoreProfilesCompute(core_profiles_ids)
-waveobj = EquilibriumCompute(waves_ids)
+waveobj = WavesCompute(waves_ids)
 
 time_array_eq = eqcomputeobj.ids.time  # Plot Ip
 time_array_cp = coreprofilesobj.ids_object.time
@@ -135,7 +136,7 @@ time_slice = 5.0
 # # Indices for time arrays in equilibrium, core_profiles, waves IDSs
 time_index_eq = iround(time_array_eq, time_slice)
 time_index_cp = iround(time_array_cp, time_slice)
-time_index_wv = iround(time_array_wv, time_slice)
+beamTracingTimeIndex = iround(time_array_wv, time_slice)
 
 canvas = Canvas(3, 2)
 
@@ -149,7 +150,7 @@ ax_waveform = canvas.add_axes(
     title="Waveforms", xlabel="Time [s]", row=0, col=0, colspan=1
 )
 equillibriumview.plotIP(ax_waveform)  # Plot Ip
-coreprofilesview.plot_ne0(ax_waveform)
+coreprofilesview.plotElectronDensityNe0(ax_waveform)
 
 ax_beam_index = canvas.add_axes(
     title="Beam_Index", xlabel="Beam index", row=0, col=1, colspan=1
@@ -159,27 +160,27 @@ wavesview.plot_beam_index(ax_beam_index)
 ax_pol_view = canvas.add_axes(
     title="Poloidal view (R,Z)", xlabel="R [m]", ylabel="Z [m]", row=1, col=0, rowspan=1
 )
-equillibriumview.plot_poloidal_equilibrium(ax_pol_view, time_index_eq)
+equillibriumview.plotPoloidalEquilibrium(ax_pol_view, time_index_eq)
 
-beam_index = 0
-wavesview.plot_poloidal_traces(ax_pol_view, time_index_wv, beam_index, verbose=True)
+beamIndex = 0
+wavesview.plotPoloidalTraces(ax_pol_view, beamTracingTimeIndex, beamIndex, verbose=True)
 
 ecstrayview.plot_resonance_layer(
-    ax_pol_view, time_index_wv, time_index_eq, verbose=True
+    ax_pol_view, beamTracingTimeIndex, time_index_eq, verbose=True
 )
 
-ecstrayview.plot_cutoff_layer(ax_pol_view, time_index_wv, time_index_cp, time_index_eq)
+ecstrayview.plot_cutoff_layer(
+    ax_pol_view, beamTracingTimeIndex, time_index_cp, time_index_eq
+)
 
 ax_top_view = canvas.add_axes(
     title="Top View (X,Y)", xlabel="X [m]", ylabel="Y [m]", row=1, col=1, rowspan=1
 )
 
-ax_topview_plot_eq = equillibriumview.plot_topview_equilibrium(
-    ax_top_view, time_index_eq
-)
+ax_topview_plot_eq = equillibriumview.plotTopviewEquilibrium(ax_top_view, time_index_eq)
 
-ax_topview_plot_traces = wavesview.plot_topview_traces(
-    ax_top_view, time_index_wv, beam_index
+ax_topview_plot_traces = wavesview.plotTopviewTraces(
+    ax_top_view, beamTracingTimeIndex, beamIndex
 )
 
 # Subplot profiles
@@ -190,7 +191,7 @@ ax_density = canvas.add_axes(
     col=0,
     rowspan=1,
 )
-ax_density_plot_dens, nmax = coreprofilesview.plot_density_profile(
+ax_density_plot_dens, nmax = coreprofilesview.plotDensityProfile(
     ax_density, time_index_cp
 )
 
@@ -206,7 +207,7 @@ ax_polygon = canvas.add_axes(
 )
 # Subplot polygon graph for beam footprints
 ax_polygon_plot_pol = tbdView.plot_polygon(
-    ax_polygon, wall2d, beam_wall, beam_index, time_index_wv, time_index_wv
+    ax_polygon, wall2d, beam_wall, beamIndex, beamTracingTimeIndex, beamTracingTimeIndex
 )
 canvas.show()
 print("done")

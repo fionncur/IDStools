@@ -6,9 +6,9 @@ from ...view.common.basic import Console
 
 
 class CoreProfilesView(Console):
-    def __init__(self, ids_object):
-        self.ids_object = ids_object
-        self.core_profiles_compute = CoreProfilesCompute(ids_object)
+    def __init__(self, ids):
+        self.ids = ids
+        self.coreProfilesCompute = CoreProfilesCompute(ids)
 
     @staticmethod
     def view_plasma_composition_with_species_concentration(
@@ -147,6 +147,13 @@ class CoreProfilesView(Console):
         print("   ------------")
 
     def _print_specis_concentration(self, composition_data):
+        """
+        This function prints information about the concentration of species and their states.
+
+        Args:
+            composition_data: The parameter composition_data is a dictionary containing information about
+        the composition of a plasma, including the species present and their states.
+        """
         for species_key, species_data in composition_data.items():
             states = species_data["states"]
             nstates = len(states)
@@ -186,9 +193,15 @@ class CoreProfilesView(Console):
                         )
                     istate = istate + 1
 
-    def plot_ne0(self, ax):
-        ne0 = self.core_profiles_compute.get_ne0()
-        time_array = self.ids_object.time
+    def plotElectronDensityNe0(self, ax):
+        """
+        This function plots the electron density (ne0) as a function of time.
+
+        Args:
+            ax: The parameter "ax" is a matplotlib axis object, which is used to plot the electron density data.
+        """
+        ne0 = self.coreProfilesCompute.getElectronDensityNe0()
+        time_array = self.ids.time
 
         ax.plot(time_array, ne0, color="r", label="$n_{e0} [10^{19}.m^{-3}]$")
 
@@ -196,29 +209,41 @@ class CoreProfilesView(Console):
         # ax_waveform.set_ylim(0,max(ip)*1.2)
         ax.set_ylim(0, 20)
 
-    def plot_density_profile(self, ax, time_index, psi_based=0, init=1):
-        rho_tor_norm = self.core_profiles_compute.getRhoTorNorm(time_index)
+    def plotDensityProfile(self, ax, timeIndex, psiCordinate=False, update=True):
+        """
+        This function plots the electron density profile as a function of either the normalized toroidal flux coordinate or the poloidal magnetic flux coordinate.
 
-        psi = self.core_profiles_compute.getPSI(time_index)
+        Args:
+            ax: ax is a matplotlib axis object where the density profile plot will be drawn.
+            timeIndex: The time index refers to the specific time step or snapshot of data that is being plotted. It is used to retrieve the electron density and other relevant data at that particular
+        time.
+            psiCordinate: A boolean parameter that determines whether the density profile should be plotted as a function of the poloidal flux coordinate (-psi) or the normalised toroidal flux coordinate (rho_tor). If psiCordinate is True, the density profile will be plotted as a function of -psi. Defaults to False
+            update: The `update` parameter is a boolean flag that determines whether the plot should be updated or created from scratch. If `update` is `True`, the function will create a new plot with the given data. If `update` is `False`, the function will update an existing plot with the new. Defaults to True
 
-        if rho_tor_norm is not None and psi is not None:
-            radial_coordinate = rho_tor_norm
+        Returns:
+            a tuple containing the matplotlib plot object for the electron density profile (ax_density_plot_dens) and the maximum electron density value (nmax).
+        """
+        rhoTorNorm = self.coreProfilesCompute.getRhoTorNorm(timeIndex)
+        if rhoTorNorm is not None:
+            radial_coordinate = rhoTorNorm
             xlabel = ""
-            if init == 1:
+            if update == True:
                 xlabel = r"Normalised $\rho_{tor}$ [-]"
-            if psi_based == 1:
-                radial_coordinate = psi
-                if init == 1:
-                    xlabel = r"$-\psi$ [Wb]"
+            if psiCordinate == True:
+                psi = self.coreProfilesCompute.getPSI(timeIndex)
+                if psi is not None:
+                    radial_coordinate = psi
+                    if update == True:
+                        xlabel = r"$-\psi$ [Wb]"
 
             ax.set_xlabel(xlabel)
-            electron_density = self.ids_object.profiles_1d[time_index].electrons.density
-            nmax = max(electron_density) * 1.2
+            electronDensity = self.ids.profiles_1d[timeIndex].electrons.density
+            nmax = max(electronDensity) * 1.2
             ax_density_plot_dens = None
-            if init == 1:
+            if update == True:
                 (ax_density_plot_dens,) = ax.plot(
                     radial_coordinate,
-                    electron_density,
+                    electronDensity,
                     color="b",
                     label=r"$n_e [m^{-3}]$",
                 )
@@ -226,5 +251,5 @@ class CoreProfilesView(Console):
             else:
                 ax.legend(loc="upper right", shadow=True, fancybox=True)
                 ax.set_ylim(top=nmax)
-                ax.set_data(radial_coordinate, electron_density)
+                ax.set_data(radial_coordinate, electronDensity)
             return ax_density_plot_dens, nmax

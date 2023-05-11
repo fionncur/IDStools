@@ -8,7 +8,7 @@ class WavesView:
         self.ids_object = ids_object
 
     def plot_beam_index(self, ax):
-        beam_array = self.waves_object.get_beam_array()
+        beam_array = self.waves_object.getBeamArray()
         ax.bar(beam_array, 20, color="g", width=0.5)
 
         ax.set_xlim(beam_array[0] - 1, beam_array[-1] + 1)
@@ -16,11 +16,11 @@ class WavesView:
 
     # time_index_wv, beam_index
 
-    def plot_poloidal_traces(
-        self, ax, time_index_wv, beam_index, verbose=False, init=1
+    def plotPoloidalTraces(
+        self, ax, beamTracingTimeIndex, beamIndex, verbose=False, update=1
     ):
         # Read beam tracing from waves IDS
-        beam_tracing = self.waves_object.read_beam_tracing(time_index_wv)
+        beam_tracing = self.waves_object.getBeamTracing(beamTracingTimeIndex)
         nbeam = beam_tracing["nbeam"]
         nbeam_active = beam_tracing["nbeam_active"]
         nray = beam_tracing["nray"]
@@ -53,28 +53,27 @@ class WavesView:
         ax_polview_plot_traces = {}
         # for ibeam in range(nbeam):
         # ax_polview_plot_traces[ibeam] = {}
-        if is_active[beam_index] == 1:
-            iray = -1
-            for irray in range(nray):
-                iray = iray + 1
-                if init == 1:
+        if is_active[beamIndex] == 1:
+            for iray in range(nray):
+                # TODO: update mechanism needs to be centralied
+                if update == True:
                     (ax_polview_plot_traces[iray],) = ax.plot(
-                        r_ray[beam_index, iray, : len_ray[beam_index, iray]],
-                        z_ray[beam_index, iray, : len_ray[beam_index, iray]],
+                        r_ray[beamIndex, iray, : len_ray[beamIndex, iray]],
+                        z_ray[beamIndex, iray, : len_ray[beamIndex, iray]],
                         color="b",
                         linestyle="-",
                     )
                 else:
                     ax[iray].set_data(
-                        r_ray[beam_index, iray, : len_ray[beam_index, iray]],
-                        z_ray[beam_index, iray, : len_ray[beam_index, iray]],
+                        r_ray[beamIndex, iray, : len_ray[beamIndex, iray]],
+                        z_ray[beamIndex, iray, : len_ray[beamIndex, iray]],
                     )
-        if init == 1:
+        if update == True:
             return ax_polview_plot_traces
 
-    def plot_topview_traces(self, ax, time_index_wv, beam_index, verbose=False, init=1):
+    def plotTopviewTraces(self, ax, beamTracingTimeIndex, beamIndex, verbose=False, update=True):
         # Read beam tracing from waves IDS
-        beam_tracing = self.waves_object.read_beam_tracing(time_index_wv)
+        beam_tracing = self.waves_object.getBeamTracing(beamTracingTimeIndex)
         nbeam = beam_tracing["nbeam"]
         nbeam_active = beam_tracing["nbeam_active"]
         nray = beam_tracing["nray"]
@@ -110,21 +109,19 @@ class WavesView:
         ax_topview_plot_traces = {}
         # for ibeam in range(nbeam):
         # ax_topview_plot_traces[ibeam] = {}
-        if is_active[beam_index] == 1:
-            iray = -1
-            for irray in range(nray):
-                iray = iray + 1
-                if init == 1:
+        if is_active[beamIndex] == 1:
+            for iray in range(nray):
+                if update == 1:
                     (ax_topview_plot_traces[iray],) = ax.plot(
-                        x_ray[beam_index, iray, : len_ray[beam_index, iray]],
-                        y_ray[beam_index, iray, : len_ray[beam_index, iray]],
+                        x_ray[beamIndex, iray, : len_ray[beamIndex, iray]],
+                        y_ray[beamIndex, iray, : len_ray[beamIndex, iray]],
                         color=color,
                         linestyle=style,
                     )
                 else:
                     ax[iray].set_data(
-                        x_ray[beam_index, iray, : len_ray[beam_index, iray]],
-                        y_ray[beam_index, iray, : len_ray[beam_index, iray]],
+                        x_ray[beamIndex, iray, : len_ray[beamIndex, iray]],
+                        y_ray[beamIndex, iray, : len_ray[beamIndex, iray]],
                     )
-        if init == 1:
+        if update == 1:
             return ax_topview_plot_traces

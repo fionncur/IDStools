@@ -11,7 +11,7 @@ from ...compute.equilibrium.basic import EquilibriumCompute
 
 
 class EquilibriumView(BasePlot):
-    def __init__(self, idsObj: object):
+    def __init__(self, ids: object):
         """
         This is a constructor function that initializes an object with an input object and creates
         another object using the input object.
@@ -21,8 +21,8 @@ class EquilibriumView(BasePlot):
         of the class. It is not clear from the code snippet what type of object it is, but it is being
         stored as an instance variable `self.idsObj`.
         """
-        self.idsObj = idsObj
-        self.computeObj = EquilibriumCompute(idsObj)
+        self.ids = ids
+        self.computeObj = EquilibriumCompute(ids)
 
     def viewMagneticPoloidalFlux(self, ax: plt.Axes):
         """
@@ -91,8 +91,14 @@ class EquilibriumView(BasePlot):
         self.database_info(ax, title, hostdir, shot, run, t)
 
     def plotIP(self, ax):
+        """
+        This function plots the plasma current over time on a given axis.
+
+        Args:
+            ax: The parameter "ax" is a matplotlib axis object.
+        """
         plasmaCurrent = self.computeObj.getIP()
-        time_array = self.idsObj.time
+        time_array = self.ids.time
 
         ax.plot(time_array, plasmaCurrent, color="b", label="$I_p$ [MA]")
 
@@ -100,7 +106,17 @@ class EquilibriumView(BasePlot):
         # ax_waveform.set_ylim(0,max(plasmaCurrent)*1.2)
         ax.set_ylim(0, 20)
 
-    def plot_poloidal_equilibrium(self, ax, timeSlice: int):
+    def plotPoloidalEquilibrium(self, ax, timeSlice: int):
+        """
+        This function plots a poloidal equilibrium contour plot using flux surface quantities extracted from the equilibrium.
+
+        Args:
+            ax: `ax` is a matplotlib axis object.
+            timeSlice (int): timeSlice is an integer index.
+
+        Returns:
+            the contour plot object `cntr`.
+        """
         # Extract flux surface quantities from equilibrium
         data = self.computeObj.getFluxSurfaces(timeSlice)
         r2d = data["r2d"]
@@ -118,16 +134,28 @@ class EquilibriumView(BasePlot):
 
         return cntr
 
-    def plot_topview_equilibrium(self, ax, time_index, init=1):
-        bndcolor = "chocolate"
-        colorcounter = 0
+    def plotTopviewEquilibrium(self, ax, timeIndex, update=True):
+        """
+        This function plots the top view equilibrium of a plasma and updates the plot if specified.
 
-        # Top view plot
-        data = self.computeObj.getTopView(time_index)
+        Args:
+            ax: `ax` is a matplotlib axis object.
+            timeIndex: The time index is an integer
+            update: `update` is a boolean parameter that determines whether the plot should be updated or
+        not. If `update` is `True`, the plot will be updated with new data. If `update` is `False`, the
+        existing plot will be modified with new data. Defaults to True
 
+        Returns:
+            list containing two plot objects: ax_topview_plot_eq1 and ax_topview_plot_eq2.
+        """
+        # TODO: Refcator update mechanism of the plot
+        data = self.computeObj.getTopView(timeIndex)
         ax_topview_plot_eq1 = 0
         ax_topview_plot_eq2 = 0
-        if init == 1:
+        if update == True:
+            bndcolor = "chocolate"
+            colorcounter = 0
+
             if colorcounter == 1:
                 (ax_topview_plot_eq1,) = ax.plot(
                     data["xpla"],
@@ -149,5 +177,5 @@ class EquilibriumView(BasePlot):
         else:
             ax[0].set_data(data["xpla"], data["ypla"])
             ax[1].set_data(data["xplap"], data["yplap"])
-        if init == 1:
+        if update == True:
             return [ax_topview_plot_eq1, ax_topview_plot_eq2]

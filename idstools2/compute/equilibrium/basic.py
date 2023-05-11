@@ -264,7 +264,7 @@ class EquilibriumCompute:
         The function returns data for plotting the top view of a 2D shape.
 
         Args:
-            timeSlice (int): timeSlice is an optional parameter that specifies which time slice to use for the calculation. If not specified, it defaults to 0. Defaults to 0
+            timeSlice (int): timeSlice is an index of time_slice. If not specified, it defaults to 0. Defaults to 0
 
         Returns:
             The function `getTopView` returns a dictionary `topViewDict` containing the following keys

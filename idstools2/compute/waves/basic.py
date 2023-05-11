@@ -1,128 +1,192 @@
+""" 
+This module provides compute functions and classes for waves ids data
+
+`more about waves ids <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/CI/imas-3.37.2/waves.html>`_.
+
+"""
+
+from typing import Any
 import numpy as np
 import sys
+import functools
 
 
 class WavesCompute:
-    def __init__(self, ids_object):
-        super().__init__()
-        self.ids_object = ids_object
-        self._index = 0
+    """This class provides compute functions for waves ids"""
 
-        self.n_harm = [1, 2, 3, 4]
-
-    @property
-    def index(self):
-        return self._index
-
-    @index.setter
-    def index(self, value):
-        if value < 0:
-            raise ValueError("Value is not appropriate")
-        self._index = value
-
-    @staticmethod
-    def get_object(ids_object) -> object:
-        """[summary]
+    def __init__(self, ids):
+        """Initialization WavesCompute object.
 
         Args:
-            ids_object ([type]): [description]
-
-        Returns:
-            dict: [description]
+            ids : waves ids object
         """
-        compute_object = WavesCompute(ids_object)
-        return compute_object
+        self.ids = ids
 
-    def get_B_res(self, wave_index=0):
+    def getBResonance(
+        self,
+        coherentWaveIndex: int = 0,
+        timeIndex: int = 0,
+        harmonicFrequencies: list = None,
+    ):
         """
-            B-field at the resonance for three first harmonics
+        This function calculates the B-resonance (magnetic field) for a given coherent wave index, time index, and list of harmonic frequencies.
 
         Args:
-            index (int, optional): [description]. Defaults to 0.
+            coherentWaveIndex (int): The index of the coherent wave for which we want to calculate the B resonance. Defaults to 0
+            timeIndex (int): The index of the time step for which the bResonance is being calculated. Defaults to 0
+            harmonicFrequencies (list): A list of integers representing the harmonic frequencies for which the B-resonance values are to be calculated. If this parameter is not provided, the function uses the default values of [1, 2, 3, 4].
 
         Returns:
-            [type]: [description]
+            A list of values for the magnetic field resonance frequencies for the given coherent wave index, time index, and harmonic frequencies. The length of the list is equal to the length of the input harmonic frequencies list.
+
+
+        Notes:
+            .. math:: BResonance = \ 2*pi*ecfrequency*9.1e^-31/1.6e^-19/HarmonicFrequency
+
+        Here harmonicFrequency is any value from [1,2,3,4]
         """
-        ec_frequency = (
-            self.ids_object.coherent_wave[0].global_quantities[wave_index].frequency
+        if harmonicFrequencies is None:
+            harmonicFrequencies = [1, 2, 3, 4]
+        ecFrequency = (
+            self.ids.coherent_wave[coherentWaveIndex]
+            .global_quantities[timeIndex]
+            .frequency
         )
-
-        # B-field at the resonance for three first harmonics
-        B_res = [0] * len(self.n_harm)
-        for i_harm in range(len(self.n_harm)):
-            B_res[i_harm] = (
-                2 * np.pi * ec_frequency * 9.1e-31 / 1.6e-19 / self.n_harm[i_harm]
+        bResonance = [0] * len(harmonicFrequencies)
+        for harmonicFrequencyIndex in range(len(harmonicFrequencies)):
+            bResonance[harmonicFrequencyIndex] = (
+                2
+                * np.pi
+                * ecFrequency
+                * 9.1e-31
+                / 1.6e-19
+                / harmonicFrequencies[harmonicFrequencyIndex]
             )
-        return B_res
+        return bResonance
 
-    def get_beam_array(self):
-        nbeam = len(self.ids_object.coherent_wave)
+    def getBeamArray(self):
+        """
+        This function returns an array of beam indices based on the number of coherent waves.
 
-        beam_array = np.linspace(0, nbeam - 1, nbeam)
-        return beam_array
+        Returns:
+            a numpy array of equally spaced values from 0 to nbeam-1, where nbeam is the length of the list `waves.coherent_wave`. This array represents the indices of the beams.
+        """
+        nBeam = len(self.ids.coherent_wave)
+        return np.linspace(0, nBeam - 1, nBeam)
 
-    def get_omega_ec(self, time_index):
-        from scipy import constants, interpolate
+    def getOmegaEC(self, coherentWaveIndex: int = 0, timeIndex: int = 0) -> float:
+        """
+        This function returns the angular frequency of a coherent wave at a specific time index.
 
-        omega_ec = (
+        Args:
+            coherentWaveIndex (int): The index of the coherent wave for which the angular frequency needs to be calculated. Defaults to 0
+            timeIndex (int): The time index parameter is used to specify the time step for which the frequency of the coherent wave is to be retrieved. Defaults to 0
+
+        Returns:
+            The value of the angular frequency (in radians per second) of a coherent wave at a specific time index. The value is calculated using the frequency of the coherent wave at the given time index and multiplying it by 2*pi.
+
+        Notes:
+            .. math:: OmegaEC = \ 2*pi*frequency
+
+        """
+        return (
             2
-            * constants.pi
-            * self.ids_object.coherent_wave[0].global_quantities[time_index].frequency
+            * np.pi
+            * self.ids.coherent_wave[coherentWaveIndex]
+            .global_quantities[timeIndex]
+            .frequency
         )
-        return omega_ec
 
-    def read_beam_tracing(self, beam_tracing_index):
+    @functools.lru_cache(maxsize=128)
+    def getActiveBeams(self, beamTracingTimeIndex: int = 0):
+        """
+        This function returns a dictionary of active beams with their respective properties.
 
-        beam_tracing = {}
+        Args:
+            beamTracingTimeIndex (int): The parameter `beamTracingTimeIndex` is an integer that represents the index of the beam tracing time. Defaults to 0
 
-        # Read beam tracing information from the output waves IDS
-        nbeam = len(self.ids_object.coherent_wave)
+        Returns:
+            Dictionary called `activeBeams` which contains information about each beam in `waves.coherent_wave`. The dictionary has keys for each beam index and the values are  dictionaries containing the total number of beams and boolean indicating whether the beam is active or not. The function determines if a beam is active by checking if any of its rays have initial power greater than 0.
+        """
+        activeBeams = {}
 
-        # Count number of active beams and their number of rays
-        is_active = [0] * nbeam
-        nray_array = [0] * nbeam
-        for ibeam in range(nbeam):
-            nray_array[ibeam] = len(
-                self.ids_object.coherent_wave[ibeam]
-                .beam_tracing[beam_tracing_index]
-                .beam
-            )
-            for iray in range(nray_array[ibeam]):
+        for beamIndex in range(len(self.ids.coherent_wave)):
+            beamDict = {
+                "total_beams": len(
+                    self.ids.coherent_wave[beamIndex]
+                    .beam_tracing[beamTracingTimeIndex]
+                    .beam
+                ),
+            }
+            for rayIndex in range(beamDict["total_beams"]):
                 if (
-                    self.ids_object.coherent_wave[ibeam]
-                    .beam_tracing[beam_tracing_index]
-                    .beam[iray]
+                    self.ids.coherent_wave[beamIndex]
+                    .beam_tracing[beamTracingTimeIndex]
+                    .beam[rayIndex]
                     .power_initial
                     > 0
                 ):
-                    is_active[ibeam] = 1
-        nbeam_active = sum(is_active)
+                    # todo: this will loop and overwrite value, is it intended?
+                    beamDict["active"] = True
+            activeBeams[beamIndex] = beamDict
+
+        return activeBeams
+
+    def getBeamTracing(self, beamTracingTimeIndex: int = 0):
+        """
+        This function returns a dictionary containing information about the beam tracing of a coherent wave.
+
+        Args:
+            beamTracingTimeIndex (int): The index of the time step for which to retrieve the beam tracing data. Defaults to 0
+
+        Returns:
+            a dictionary named "beam_tracing" which contains various arrays and values related to the beam tracing data. Following are the values returned by the function
+
+            - nbeam
+            - nbeam_active
+            - nray
+            - is_active
+            - len_ray
+            - x_ray
+            - y_ray
+            - z_ray
+            - r_ray
+            - phi_ray
+            - central_ray_power
+            - central_ray_powerpar
+            - central_ray_powerperp
+            - central_ray_length
+        """
+        # Count number of active beams and their number of rays
+        activeBeamsDict = self.getActiveBeams(beamTracingTimeIndex)
+        totalWaves = len(activeBeamsDict.keys())
+        activeBeamsArray = [data["active"] for _, data in activeBeamsDict.items()]
+        totalBeamsArray = [data["total_beams"] for _, data in activeBeamsDict.items()]
 
         # We assume the same number of rays for each beam, to simplify (and this is usually the case)
-        nray = max(nray_array)
-        stdarrlen = max(
+        maxTotalBeams = max(totalBeamsArray)
+
+        arrayLength = max(
             max(
                 [
-                    [
-                        len(
-                            self.ids_object.coherent_wave[ibeam]
-                            .beam_tracing[beam_tracing_index]
-                            .beam[iray]
-                            .position.r
-                        )
-                        for iray in range(nray)
-                    ]
-                    for ibeam in range(nbeam)
+                    len(
+                        self.ids.coherent_wave[beamIndex]
+                        .beam_tracing[beamTracingTimeIndex]
+                        .beam[rayIndex]
+                        .position.r
+                    )
+                    for rayIndex in range(maxTotalBeams)
                 ]
+                for beamIndex in range(totalWaves)
             )
         )
         len_ray = np.array(
-            [[0.0 for iray in range(nray)] for ibeam in range(nbeam)]
+            [[0.0 for _ in range(maxTotalBeams)] for _ in range(totalWaves)]
         ).astype(int)
         x_ray = np.array(
             [
-                [[0.0 for ix in range(stdarrlen)] for iray in range(nray)]
-                for ibeam in range(nbeam)
+                [[0.0 for _ in range(arrayLength)] for _ in range(maxTotalBeams)]
+                for _ in range(totalWaves)
             ]
         )
         y_ray, z_ray, r_ray, phi_ray = (
@@ -131,8 +195,9 @@ class WavesCompute:
             np.ndarray.copy(x_ray),
             np.ndarray.copy(x_ray),
         )
+
         central_ray_power = np.array(
-            [[0.0 for ix in range(stdarrlen)] for ibeam in range(nbeam)]
+            [[0.0 for _ in range(arrayLength)] for _ in range(totalWaves)]
         )
         central_ray_powerpar, central_ray_powerperp, central_ray_length = (
             np.ndarray.copy(central_ray_power),
@@ -140,117 +205,115 @@ class WavesCompute:
             np.ndarray.copy(central_ray_power),
         )
         wr = []
-        for ibeam in range(nbeam):
-            if is_active[ibeam] == 1:
-                iray = -1
-                for irray in range(nray):
-                    iray = iray + 1
+        for beamIndex in range(totalWaves):
+            if activeBeamsArray[beamIndex] == 1:
+                for iray in range(maxTotalBeams):
                     if (
-                        self.ids_object.coherent_wave[ibeam]
-                        .beam_tracing[beam_tracing_index]
+                        self.ids.coherent_wave[beamIndex]
+                        .beam_tracing[beamTracingTimeIndex]
                         .beam[iray]
                         .power_initial
                         != 0
                     ):
                         wr = (
-                            self.ids_object.coherent_wave[ibeam]
-                            .beam_tracing[beam_tracing_index]
+                            self.ids.coherent_wave[beamIndex]
+                            .beam_tracing[beamTracingTimeIndex]
                             .beam[iray]
                             .position.r
                         )
                         wphi = (
-                            self.ids_object.coherent_wave[ibeam]
-                            .beam_tracing[beam_tracing_index]
+                            self.ids.coherent_wave[beamIndex]
+                            .beam_tracing[beamTracingTimeIndex]
                             .beam[iray]
                             .position.phi
                         )
                         wz = (
-                            self.ids_object.coherent_wave[ibeam]
-                            .beam_tracing[beam_tracing_index]
+                            self.ids.coherent_wave[beamIndex]
+                            .beam_tracing[beamTracingTimeIndex]
                             .beam[iray]
                             .position.z
                         )
-                        len_ray[ibeam, iray] = len(wr)
-                        r_ray[ibeam, iray, : len(wr)] = np.array(wr)
-                        phi_ray[ibeam, iray, : len(wphi)] = np.array(wphi)
-                        z_ray[ibeam, iray, : len(wz)] = np.array(wz)
-                        x_ray[ibeam, iray, :] = r_ray[ibeam, iray, :] * np.cos(
-                            phi_ray[ibeam, iray, :]
+                        len_ray[beamIndex, iray] = len(wr)
+                        r_ray[beamIndex, iray, : len(wr)] = np.array(wr)
+                        phi_ray[beamIndex, iray, : len(wphi)] = np.array(wphi)
+                        z_ray[beamIndex, iray, : len(wz)] = np.array(wz)
+                        x_ray[beamIndex, iray, :] = r_ray[beamIndex, iray, :] * np.cos(
+                            phi_ray[beamIndex, iray, :]
                         )
-                        y_ray[ibeam, iray, :] = r_ray[ibeam, iray, :] * np.sin(
-                            phi_ray[ibeam, iray, :]
+                        y_ray[beamIndex, iray, :] = r_ray[beamIndex, iray, :] * np.sin(
+                            phi_ray[beamIndex, iray, :]
                         )
-                npath = len(
-                    self.ids_object.coherent_wave[ibeam]
-                    .beam_tracing[beam_tracing_index]
-                    .beam[0]
-                    .electrons.power
-                )
-                if (
-                    len(
-                        self.ids_object.coherent_wave[ibeam]
-                        .beam_tracing[beam_tracing_index]
-                        .beam[0]
-                        .electrons.power
-                    )
-                    > 0
-                ):
-                    central_ray_power[ibeam, 0:npath] = (
-                        self.ids_object.coherent_wave[ibeam]
-                        .beam_tracing[beam_tracing_index]
+                    npath = len(
+                        self.ids.coherent_wave[beamIndex]
+                        .beam_tracing[beamTracingTimeIndex]
                         .beam[0]
                         .electrons.power
                     )
                 if (
                     len(
-                        self.ids_object.coherent_wave[ibeam]
-                        .beam_tracing[beam_tracing_index]
+                        self.ids.coherent_wave[beamIndex]
+                        .beam_tracing[beamTracingTimeIndex]
+                        .beam[0]
+                        .electrons.power
+                    )
+                    > 0
+                ):
+                    central_ray_power[beamIndex, 0:npath] = (
+                        self.ids.coherent_wave[beamIndex]
+                        .beam_tracing[beamTracingTimeIndex]
+                        .beam[0]
+                        .electrons.power
+                    )
+                if (
+                    len(
+                        self.ids.coherent_wave[beamIndex]
+                        .beam_tracing[beamTracingTimeIndex]
                         .beam[0]
                         .power_flow_norm.parallel
                     )
                     > 0
                 ):
-                    central_ray_powerpar[ibeam, 0:npath] = (
-                        self.ids_object.coherent_wave[ibeam]
-                        .beam_tracing[beam_tracing_index]
+                    central_ray_powerpar[beamIndex, 0:npath] = (
+                        self.ids.coherent_wave[beamIndex]
+                        .beam_tracing[beamTracingTimeIndex]
                         .beam[0]
                         .power_flow_norm.parallel
                     )
                 if (
                     len(
-                        self.ids_object.coherent_wave[ibeam]
-                        .beam_tracing[beam_tracing_index]
+                        self.ids.coherent_wave[beamIndex]
+                        .beam_tracing[beamTracingTimeIndex]
                         .beam[0]
                         .power_flow_norm.perpendicular
                     )
                     > 0
                 ):
-                    central_ray_powerperp[ibeam, 0:npath] = (
-                        self.ids_object.coherent_wave[ibeam]
-                        .beam_tracing[beam_tracing_index]
+                    central_ray_powerperp[beamIndex, 0:npath] = (
+                        self.ids.coherent_wave[beamIndex]
+                        .beam_tracing[beamTracingTimeIndex]
                         .beam[0]
                         .power_flow_norm.perpendicular
                     )
                 if (
                     len(
-                        self.ids_object.coherent_wave[ibeam]
-                        .beam_tracing[beam_tracing_index]
+                        self.ids.coherent_wave[beamIndex]
+                        .beam_tracing[beamTracingTimeIndex]
                         .beam[0]
                         .length
                     )
                     > 0
                 ):
-                    central_ray_length[ibeam, 0:npath] = (
-                        self.ids_object.coherent_wave[ibeam]
-                        .beam_tracing[beam_tracing_index]
+                    central_ray_length[beamIndex, 0:npath] = (
+                        self.ids.coherent_wave[beamIndex]
+                        .beam_tracing[beamTracingTimeIndex]
                         .beam[0]
                         .length
                     )
 
-        beam_tracing["nbeam"] = nbeam
-        beam_tracing["nbeam_active"] = nbeam_active
-        beam_tracing["nray"] = nray
-        beam_tracing["is_active"] = is_active
+        beam_tracing = {"nbeam": totalWaves}
+        beam_tracing["nbeam_active"] = len(activeBeamsArray)
+        beam_tracing["nray"] = maxTotalBeams
+        beam_tracing["is_active"] = activeBeamsArray
         beam_tracing["len_ray"] = len_ray
         beam_tracing["x_ray"] = x_ray
         beam_tracing["y_ray"] = y_ray

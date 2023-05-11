@@ -66,15 +66,19 @@ class CoreProfilesCompute:
         return data
 
     @functools.lru_cache(maxsize=128)
-    def get_ne0(self):
+    def getElectronDensityNe0(self):
+        """
+        This function returns a list of electron densities at the first position for each time step in a given object.
+
+        Returns:
+            The function `get_ne0` returns a list of electron densities at the first spatial point (index 0) for all time steps in the simulation. The electron density is in units of 1e-19 m^-3.
+        """
         ntime = len(self.ids_object.time)
 
-        ne0 = []
-        for itime in range(ntime):
-            ne0.append(
-                self.ids_object.profiles_1d[itime].electrons.density[0] * 1.0e-19
-            )
-        return ne0
+        return [
+            self.ids_object.profiles_1d[itime].electrons.density[0] * 1.0e-19
+            for itime in range(ntime)
+        ]
 
     @functools.lru_cache(maxsize=128)
     def get_a(self, slice_index=0, element_index=0) -> list:
