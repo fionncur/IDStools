@@ -47,6 +47,7 @@ extensions = [
     "sphinx.ext.autosummary",
     "sphinx.ext.mathjax",
     "sphinx_autodoc_typehints",
+    "sphinx_toolbox.collapse",
     # "sphinxcontrib.mermaid",
 ]
 

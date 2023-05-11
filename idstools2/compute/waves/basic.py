@@ -5,10 +5,8 @@ This module provides compute functions and classes for waves ids data
 
 """
 
-from typing import Any
-import numpy as np
-import sys
 import functools
+import numpy as np
 
 
 class WavesCompute:
@@ -43,7 +41,21 @@ class WavesCompute:
         Notes:
             .. math:: BResonance = \ 2*pi*ecfrequency*9.1e^-31/1.6e^-19/HarmonicFrequency
 
-        Here harmonicFrequency is any value from [1,2,3,4]
+            Here harmonicFrequency is any value from [1,2,3,4]
+
+        Example:
+            .. code-block:: python
+
+                import imas
+                from idstools.compute.waves.basic import WavesCompute
+
+                connection = imas.DBEntry(imas.imasdef.MDSPLUS_BACKEND,'ITER',134174,117,'public')
+                connection.open()
+                idsObj = connection.get('waves')
+                waveobj = WavesCompute(waves_ids)
+                print(waveobj.getBResonance())
+
+                [6.0750547938792625, 3.0375273969396313, 2.025018264626421, 1.5187636984698156]
         """
         if harmonicFrequencies is None:
             harmonicFrequencies = [1, 2, 3, 4]
@@ -70,6 +82,20 @@ class WavesCompute:
 
         Returns:
             a numpy array of equally spaced values from 0 to nbeam-1, where nbeam is the length of the list `waves.coherent_wave`. This array represents the indices of the beams.
+
+        Example:
+            .. code-block:: python
+
+                import imas
+                from idstools.compute.waves.basic import WavesCompute
+
+                connection = imas.DBEntry(imas.imasdef.MDSPLUS_BACKEND,'ITER',134174,117,'public')
+                connection.open()
+                idsObj = connection.get('waves')
+                waveobj = WavesCompute(waves_ids)
+                print(waveobj.getBeamArray())
+
+                [ 0.  1.  2.  3.  4.  5.  6.  7.  8.  9. 10.]
         """
         nBeam = len(self.ids.coherent_wave)
         return np.linspace(0, nBeam - 1, nBeam)
@@ -88,6 +114,20 @@ class WavesCompute:
         Notes:
             .. math:: OmegaEC = \ 2*pi*frequency
 
+        Example:
+            .. code-block:: python
+
+
+                import imas
+                from idstools.compute.waves.basic import WavesCompute
+
+                connection = imas.DBEntry(imas.imasdef.MDSPLUS_BACKEND,'ITER',134174,117,'public')
+                connection.open()
+                idsObj = connection.get('waves')
+                waveobj = WavesCompute(waves_ids)
+                print(waveobj.getOmegaEC())
+
+                1068141502220.5297
         """
         return (
             2
@@ -107,6 +147,31 @@ class WavesCompute:
 
         Returns:
             Dictionary called `activeBeams` which contains information about each beam in `waves.coherent_wave`. The dictionary has keys for each beam index and the values are  dictionaries containing the total number of beams and boolean indicating whether the beam is active or not. The function determines if a beam is active by checking if any of its rays have initial power greater than 0.
+
+        Example:
+            .. code-block:: python
+
+
+                import imas
+                from idstools.compute.waves.basic import WavesCompute
+
+                connection = imas.DBEntry(imas.imasdef.MDSPLUS_BACKEND,'ITER',134174,117,'public')
+                connection.open()
+                idsObj = connection.get('waves')
+                waveobj = WavesCompute(waves_ids)
+                print(waveobj.getActiveBeams())
+
+                {0: {'active': True, 'total_beams': 5},
+                1: {'active': True, 'total_beams': 5},
+                2: {'active': True, 'total_beams': 5},
+                3: {'active': True, 'total_beams': 5},
+                4: {'active': True, 'total_beams': 5},
+                5: {'active': True, 'total_beams': 5},
+                6: {'active': True, 'total_beams': 5},
+                7: {'active': True, 'total_beams': 5},
+                8: {'active': True, 'total_beams': 5},
+                9: {'active': True, 'total_beams': 5},
+                10: {'active': True, 'total_beams': 5}}
         """
         activeBeams = {}
 
@@ -142,21 +207,55 @@ class WavesCompute:
         Returns:
             a dictionary named "beam_tracing" which contains various arrays and values related to the beam tracing data. Following are the values returned by the function
 
-            - nbeam
-            - nbeam_active
-            - nray
-            - is_active
-            - len_ray
-            - x_ray
-            - y_ray
-            - z_ray
-            - r_ray
-            - phi_ray
-            - central_ray_power
-            - central_ray_powerpar
-            - central_ray_powerperp
-            - central_ray_length
+            .. collapse:: return values
+
+                - nbeam
+                - nbeam_active
+                - nray
+                - is_active
+                - len_ray
+                - x_ray
+                - y_ray
+                - z_ray
+                - r_ray
+                - phi_ray
+                - central_ray_power
+                - central_ray_powerpar
+                - central_ray_powerperp
+                - central_ray_length
+
+        Example:
+            .. code-block:: python
+
+                import imas
+                from idstools.compute.waves.basic import WavesCompute
+
+                connection = imas.DBEntry(imas.imasdef.MDSPLUS_BACKEND,'ITER',134174,117,'public')
+                connection.open()
+                idsObj = connection.get('waves')
+                waveobj = WavesCompute(waves_ids)
+                print(waveobj.getBeamTracing())
+
+            .. collapse:: Output
+
+                .. code-block:: python
+
+                    {'central_ray_length': array([[0.        , 0.01
+                    'central_ray_power': array([[     0.        ,
+                    'central_ray_powerpar': array([[0., 0., 0., ..., 0., 0., 0.],
+                    'central_ray_powerperp': array([[0., 0., 0., ..., 0., 0., 0.],
+                    'is_active': [True,
+                    'len_ray': array([[1762, 1762, 1762, 1762, 1762],
+                    'nbeam': 11,
+                    'nbeam_active': 11,
+                    'nray': 5,
+                    'phi_ray': array([[[-1.49735105, -1.49767271, -1.49799498, ...,  0.
+                    'r_ray': array([[[9.98118786, 9.97171675, 9.96224668, ..., 0.
+                    'x_ray': array([[[ 0.73241223,  0.72851836,  0.72462449, ...,  0.
+                    'y_ray': array([[[-9.95427965, -9.94506893, -9.9358582 , ...,  0.
+                    'z_ray': array([[[ 1.25254314,  1.25252628,  1.25250942, ...,  0.
         """
+        # TODO This is long function but due to the data retrival in for loop it makes easy to continue in the same function
         # Count number of active beams and their number of rays
         activeBeamsDict = self.getActiveBeams(beamTracingTimeIndex)
         totalWaves = len(activeBeamsDict.keys())
