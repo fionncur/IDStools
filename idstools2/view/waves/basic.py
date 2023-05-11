@@ -2,6 +2,11 @@ from ...view.common.basic import BasePlot
 from ...compute.waves.basic import WavesCompute
 
 
+import logging
+
+logger = logging.getLogger(f"module.{__name__}")
+
+
 class WavesView:
     def __init__(self, ids_object):
         self.waves_object = WavesCompute(ids_object)
@@ -31,7 +36,7 @@ class WavesView:
 
         if verbose == True:
             if nbeam_active > 1:
-                print(
+                logger.info(
                     "There are "
                     + str(nbeam_active)
                     + " active beam"
@@ -41,8 +46,8 @@ class WavesView:
                     + int(nray != 1) * "s"
                 )
             else:
-                print(
-                    "There is "
+                logger.info(
+                    f"There is "
                     + str(nbeam_active)
                     + " active beam and each beam has "
                     + str(nray)
@@ -71,23 +76,23 @@ class WavesView:
         if update == True:
             return ax_polview_plot_traces
 
-    def plotTopviewTraces(self, ax, beamTracingTimeIndex, beamIndex, verbose=False, update=True):
+    def plotTopviewTraces(
+        self, ax, beamTracingTimeIndex, beamIndex, verbose=False, update=True
+    ):
         # Read beam tracing from waves IDS
         beam_tracing = self.waves_object.getBeamTracing(beamTracingTimeIndex)
         nbeam = beam_tracing["nbeam"]
-        nbeam_active = beam_tracing["nbeam_active"]
-        nray = beam_tracing["nray"]
         is_active = beam_tracing["is_active"]
         len_ray = beam_tracing["len_ray"]
         x_ray = beam_tracing["x_ray"]
         y_ray = beam_tracing["y_ray"]
 
+        nray = beam_tracing["nray"]
         if verbose == True:
+            nbeam_active = beam_tracing["nbeam_active"]
             if nbeam_active > 1:
                 print(
-                    "There are "
-                    + str(nbeam_active)
-                    + " active beam"
+                    f"There are {str(nbeam_active)} active beam"
                     + int(nbeam_active != 1) * "s and each beam has "
                     + str(nray)
                     + " ray"
@@ -95,21 +100,17 @@ class WavesView:
                 )
             else:
                 print(
-                    "There is "
-                    + str(nbeam_active)
-                    + " active beam and each beam has "
-                    + str(nray)
-                    + " ray"
+                    f"There is {str(nbeam_active)} active beam and each beam has {str(nray)} ray"
                     + int(nray != 1) * "s"
                 )
-
-        color = "b"
-        style = "-"
 
         ax_topview_plot_traces = {}
         # for ibeam in range(nbeam):
         # ax_topview_plot_traces[ibeam] = {}
         if is_active[beamIndex] == 1:
+            color = "b"
+            style = "-"
+
             for iray in range(nray):
                 if update == 1:
                     (ax_topview_plot_traces[iray],) = ax.plot(

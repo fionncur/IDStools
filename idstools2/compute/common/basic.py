@@ -14,83 +14,16 @@ ARRAY_EQUAL_KWARGS = (
 logger = logging.getLogger("module")
 
 
-def sample(a, axis=None, dtype=None, out=None):
-    """
-    Return the cumulative sum of the elements along a given axis.
-    Parameters
-    ----------
-    a : array_like
-        Input array.
-    axis : int, optional
-        Axis along which the cumulative sum is computed. The default
-        (None) is to compute the cumsum over the flattened array.
-    dtype : dtype, optional
-        Type of the returned array and of the accumulator in which the
-        elements are summed.  If `dtype` is not specified, it defaults
-        to the dtype of `a`, unless `a` has an integer dtype with a
-        precision less than that of the default platform integer.  In
-        that case, the default platform integer is used.
-    out : ndarray, optional
-        Alternative output array in which to place the result. It must
-        have the same shape and buffer length as the expected output
-        but the type will be cast if necessary. See :ref:`ufuncs-output-type` for
-        more details.
-    Returns
-    -------
-    cumsum_along_axis : ndarray.
-        A new array holding the result is returned unless `out` is
-        specified, in which case a reference to `out` is returned. The
-        result has the same size as `a`, and the same shape as `a` if
-        `axis` is not None or `a` is a 1-d array.
-    See Also
-    --------
-    sum : Sum array elements.
-    trapz : Integration of array values using the composite trapezoidal rule.
-    diff : Calculate the n-th discrete difference along given axis.
-    Notes
-    -----
-    Arithmetic is modular when using integer types, and no error is
-    raised on overflow.
-    ``cumsum(a)[-1]`` may not be equal to ``sum(a)`` for floating-point
-    values since ``sum`` may use a pairwise summation routine, reducing
-    the roundoff-error. See `sum` for more information.
-    Examples
-    --------
-    >>> a = np.array([[1,2,3], [4,5,6]])
-    >>> a
-    array([[1, 2, 3],
-           [4, 5, 6]])
-    >>> np.cumsum(a)
-    array([ 1,  3,  6, 10, 15, 21])
-    >>> np.cumsum(a, dtype=float)     # specifies type of output value(s)
-    array([  1.,   3.,   6.,  10.,  15.,  21.])
-    >>> np.cumsum(a,axis=0)      # sum over rows for each of the 3 columns
-    array([[1, 2, 3],
-           [5, 7, 9]])
-    >>> np.cumsum(a,axis=1)      # sum over columns for each of the 2 rows
-    array([[ 1,  3,  6],
-           [ 4,  9, 15]])
-    ``cumsum(b)[-1]`` may not be equal to ``sum(b)``
-    >>> b = np.array([1, 2e-9, 3e-9] * 1000000)
-    >>> b.cumsum()[-1]
-    1000000.0050045159
-    >>> b.sum()
-    1000000.0050000029
-    """
-    pass
-
-
 def nearest(array: np.ndarray, value: float) -> tuple:
     """
-    Get index and nearest value from value asked from an array
+    The function "nearest" takes in a numpy array and a value, and returns the index and value of the element in the array that is closest to the given value.
 
     Args:
-        array ([np.ndarray]): [numpy array]
-        value ([float]): [value requested]
+        array (np.ndarray): A NumPy array of numbers.
+        value (float): The value to which we want to find the nearest element in the array.
 
     Returns:
-        [int]: [index found for value]
-        [float]: [nearest value from value requested]
+        The function `nearest` returns a tuple containing the index of the element in the input `array` that is closest to the input `value`, and the value of that element. If the input `array` is `None` or empty, the function returns `None`.
     """
     if array is None:
         return None
@@ -101,38 +34,54 @@ def nearest(array: np.ndarray, value: float) -> tuple:
 
 
 def middle(array: np.ndarray) -> tuple:
-    """Get middle value from an array along with index
+    """
+    The "middle" function returns the index and value of the middle element in a given numpy array.
 
     Args:
-        array (np.ndarray): [description]
+        array (np.ndarray): A NumPy array for which we want to find the middle element.
 
     Returns:
-        [type]: [description]
+        The function `middle` takes a numpy array as input and returns a tuple containing the index and value of the middle element of the array. If the input array is None or empty, the function returns None.
     """
     if array is None:
         return None
     if len(array) == 0:
         return None
     length = len(array)
-    index = int(length / 2)
+    index = length // 2
     value = array[index]
     return index, value
+
+    # """
+    # Iterate over every field and compare values depending on the type of field.
+
+    # Parameters
+    # ----------
+    # X, Y: IDS like objects
+    #       IDSs (or sub-structures) objects being compared
+    # field: str, optional
+    #       name of the IDS (or sub-structure) being compared
+    # ignore_version: bool, optional
+    #       ignore content of ids_properties.version_put for the comparison
+    # verb: bool, optional
+    #       prints information about differences
+    # """
 
 
 def compare_ids(X, Y, field=None, ignore_version=True, verb=True, output={}):
     """
-    Iterate over every field and compare values depending on the type of field.
+    The function compares two ids objects and returns whether they are identical or not, along with a  dictionary of differences.
 
-    Parameters
-    ----------
-    X, Y: IDS like objects
-          IDSs (or sub-structures) objects being compared
-    field: str, optional
-          name of the IDS (or sub-structure) being compared
-    ignore_version: bool, optional
-          ignore content of ids_properties.version_put for the comparison
-    verb: bool, optional
-          prints information about differences
+    Args:
+        X: The first input ids object to compare.
+        Y: The second input ids object to compare.
+        field: The name of the field being compared in the IDSes.
+        ignore_version: A boolean parameter that determines whether to ignore the "version_put" attribute when comparing the two objects. If set to True, the function will ignore this attribute. Defaults to True
+        verb: a boolean indicating whether to print log messages during the comparison process. Defaults to True
+        output: A dictionary that stores the output of the function, which includes information about any differences found between the two input objects.
+
+    Returns:
+        tuple containing a boolean value indicating whether the two input objects are identical, and a dictionary containing information about any differences found during the comparison.
     """
     identical = True
     if hasattr(X, "__name__") and hasattr(Y, "__name__"):
@@ -322,6 +271,17 @@ def compare_ids(X, Y, field=None, ignore_version=True, verb=True, output={}):
 
 
 def xyz2cyl(rvec):
+    """
+    The function converts a set of 3D Cartesian coordinates to cylindrical coordinates.
+
+    Args:
+        rvec: rvec is a numpy array containing the coordinates of points in 3D space in the Cartesian coordinate system (x, y, z). The function xyz2cyl converts these coordinates to cylindrical coordinates (r, phi, z) and returns them as a numpy array with the same shape as the `rvec`
+
+    Returns:
+        The function `xyz2cyl` returns a numpy array `rcyl` which contains the cylindrical coordinates (radius, azimuthal angle, and height) of the input vector `rvec` which is in Cartesian coordinates.
+
+    .. todo: need to refactor naming of the variables
+    """
     rvec_shape = rvec.shape
     rcyl = np.reshape(rvec, (-1, 3))
     R = np.sqrt(rcyl[:, 0] ** 2 + rcyl[:, 1] ** 2)
@@ -336,6 +296,15 @@ def xyz2cyl(rvec):
 
 
 def cyl2xyz(rcyl):
+    """
+    The function cyl2xyz converts cylindrical coordinates to Cartesian coordinates.
+
+    Args:
+        rcyl: rcyl is a numpy array containing cylindrical coordinates (r, theta, z) of points in 3D space. The function cyl2xyz converts these cylindrical coordinates to Cartesian coordinates (x, y, z) and returns a numpy array of the same shape as rcyl.
+
+    Returns:
+        The function `cyl2xyz` returns a numpy array with the same shape as the input `rcyl` array, but with the cylindrical coordinates converted to Cartesian coordinates.
+    """
     rcyl_shape = rcyl.shape
     rvec = np.reshape(rcyl, (-1, 3))
     x = rvec[:, 0] * np.cos(rvec[:, 1])
@@ -357,6 +326,20 @@ def line_polygon_intersection(  # input
     # keyword parameter
     close=True,
 ):
+    """
+    This function calculates the intersection points between a line and a polygon.
+
+    Args:
+        line_p: A numpy array representing the starting point of the line segment(s) to be intersected with the polygon. It has shape (n,3) where n is the number of line segments and each row represents the x, y, z coordinates of the starting point of the line segment.
+        line_dir: The direction vector(s) of the line(s) for which intersection with the polygon is being calculated. It is a numpy array of shape (n,3) where n is the number of lines and each row represents the direction vector of a line.
+        polygon_data: The coordinates of the vertices of a polygon in 3D space.
+        close: A boolean parameter that determines whether the polygon is closed or not. If set to True (default), the polygon is assumed to be closed, otherwise, it is assumed to be open. Defaults to True
+
+    Returns:
+        two arrays: n_xp and xp_data.
+
+    .. todo: need to refactor this code and the documentation
+    """
     # routine to provide points of intersection between contour polygon(2D)
     # and specified line (3D)
     # toroidal symmetry assumed
@@ -633,13 +616,28 @@ def line_polygon_intersection(  # input
     return n_xp, xp_data
 
 
-# calculate beam width for given w,Rcur and length along ray (lambda_ray)
 def calcw(wt, Rt, lambda_ray, freq=np.double(170.0e9)):
-    # wt, Rt width and curvature radius at start point in m
-    # Rt < 0 : beam will pass focus, >0 : purely diverging
-    # the focus is at lambda_ray = -Rt
-    # lambda_ray length along ray in m
-    # freq: wave frequency im Hz (not rad/s)
+    """
+    The function calculates the width of a laser beam based on its initial width, curvature radius, length along the ray, and frequency.
+
+    Args:
+        wt: width at the start point of the ray in meters
+        Rt: Curvature radius at start point in meters. If Rt is negative, the beam will pass through the focus, and if it is positive, the beam will purely diverge. The focus is located at lambda_ray =-Rt.
+        lambda_ray: length along the ray in meters
+        freq: wave frequency in Hz (not rad/s)
+
+    Returns:
+        the value of the beam width w at a given length along the ray, calculated based on the input parameters of width and curvature radius at the start point, the length along the ray, and the frequency of the wave.
+
+    Note:
+        calculates beam width for given w,Rcur and length along ray (lambda_ray)
+
+        - wt, Rt width and curvature radius at start point in m
+        - Rt < 0 : beam will pass focus, >0 : purely diverging
+        - the focus is at lambda_ray = -Rt
+        - lambda_ray length along ray in m
+        - freq: wave frequency im Hz (not rad/s)
+    """
     c = np.double(2.998e8)  # speed of light in vacuum in m/s
     # assume vacuum conditionas at edge of plasma
     sr = np.pi * wt**2 / (c / freq)
@@ -647,21 +645,44 @@ def calcw(wt, Rt, lambda_ray, freq=np.double(170.0e9)):
     return w
 
 
-# calculate ellipses on wall segment
 def ell_on_wall(xpout, w1, w2, gamma, e_k, wall2d):
-    # input:  xpout   array of data type xp_dt
-    #                 (as defined in routine line_polygon_intersection above)
-    #         w1,w2   widths of beam at cross section (calculated with calcw)
-    #         gamma   rotation of the ellipse
-    #         e_k     unit vector direction of ray
-    #         wall2d  R,z values of Polygone
-    # output: rl      center of the Ellipse (R*Phi [m], l(ength along polygone) [m]
-    #         g1l,g2l generating vectors of the ellips (not orthogonal)
-    # Ellipse rl + g1l*cos(t) + g2l*sin(t)
-    #         xpout,w1,w2,gamma are assumed to have the same shape
-    #         e_k has the same shape but is a 3d vector
-    #         rl,g1l,g2l same shape, 2d vectors
-    #
+    """
+    This function calculates the center and generating vectors of an ellipse on a 2D polygon given
+    certain input parameters.
+
+    Args:
+        xpout: an array of data type xp_dt, as defined in the routine line_polygon_intersection
+        w1: width of the beam at cross section
+        w2: The width of the beam at the cross section.
+        gamma: rotation of the ellipse
+        e_k: unit vector direction of ray
+        wall2d: R,z values of a polygon representing a wall in 2D space
+
+    Returns:
+        four arrays: g1l, g2l, rl, and sl.
+
+    Note:
+        calculates ellipses on wall segment
+        input
+
+        - xpout   array of data type xp_dt  (as defined in routine line_polygon_intersection)
+        - w1,w2   widths of beam at cross section (calculated with calcw)
+        - gamma   rotation of the ellipse
+        - e_k     unit vector direction of ray
+        - wall2d  R,z values of Polygone
+
+        output
+
+        - rl      center of the Ellipse (R*Phi [m], l(ength along polygone) [m]
+        - g1l,g2l generating vectors of the ellips (not orthogonal)
+        - Ellipse rl + g1l*cos(t) + g2l*sin(t)
+        - xpout,w1,w2,gamma are assumed to have the same shape
+        - e_k has the same shape but is a 3d vector
+        - rl,g1l,g2l same shape, 2d vectors
+
+    .. todo:need to refactor code, renaming and documentation
+    """
+
     # First we collapse to 1-D vectors
     xp_shape = xpout.shape
     xpout = np.reshape(xpout, (-1))
