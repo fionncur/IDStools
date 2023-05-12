@@ -14,7 +14,7 @@ from idstools2.compute.core_profiles.basic import CoreProfilesCompute
 from idstools2.compute.equilibrium.basic import EquilibriumCompute
 from idstools2.compute.waves.basic import WavesCompute
 
-from idstools2.database.basic import read_ids
+from idstools2.database.basic import readScenario
 
 from idstools2.view.common.basic import Canvas
 from idstools2.view.core_profiles.basic import CoreProfilesView
@@ -76,10 +76,10 @@ else:
     )
 hostdir = os.environ["HOSTNAME"] + ":" + database_abs_path
 
-connection = imas.DBEntry(
+connectionIn = imas.DBEntry(
     get_backend_id(args.backend), args.database, args.shot, args.run, args.user
 )
-err, n = connection.open()
+err, n = connectionIn.open()
 if err != 0:
     # TODO chek if you can raise exception or just print or may be use logger
     print(
@@ -114,7 +114,14 @@ check_rays_into_divertor(wall2d, beam_output)
 # # Calculates where the beams cross the wall
 beam_wall = beam_wall_crossing(wall2d, launching_parameters, beam_output)
 
-equilibrium_ids, core_profiles_ids, waves_ids = read_ids(scenario_file)
+inIDSList, outIDSDict = readScenario(
+    scenarioFilePath=scenario_file,
+    inIDSList=["equilibrium", "core_profiles"],
+    outIDSList=["waves"], 
+)
+equilibrium_ids = inIDSList["equilibrium"]
+core_profiles_ids = inIDSList["core_profiles"]
+waves_ids = outIDSDict["waves"]
 
 
 # TODO Is it wise to get common timestamp and make zero hold of other timestamps?

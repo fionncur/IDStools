@@ -52,7 +52,7 @@ if __name__ == "__main__":
     # if args.verbose:
     #    print(pulses)
 
-    df = DatabaseTools.get_idsdata_in_dataframes_from_pulses(
+    df = DatabaseTools.getIdsDataFrameFromPulseDatabase(
         args.user, args.database, args.version, backend, args.idspath, pulses
     )
 

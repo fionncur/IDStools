@@ -1,12 +1,13 @@
 # src/database/functions.py ok
 import imas
 import pandas as pd
+import os, imas, yaml
 
 progbar = True
 try:
     from tqdm import tqdm
 except ModuleNotFoundError:
-    print(f"Install tqdm to enable progress bar")
+    print("Install tqdm to enable progress bar")
     progbar = False
 
 
@@ -15,60 +16,50 @@ class DatabaseTools:
         pass
 
     @staticmethod
-    def get_idsdata_in_dataframes_from_pulses(
-        dbuser, database, version, backend, idspath, pulses
-    ):
-        """Function that returns a pandas dataframe displaying all values of given IDSs extracted by the function.
-
-        Parameters
-        ---------
-        user: str
-        Status of user: either public or local. A public user should just be left as public, whereas a local user should write their proper identifier
-
-        database: str
-            Name of database where the data is harbored
-
-        version: str
-            String of number of data version
-
-        backend: int
-            ID of backend of the database in which the data is harbored
-
-        idspath: str
-            IDS path (starting with IDS name) to the desired data to be collected (e.g 'equilibrium/time')
-
-        pulses: list of tuples
-            List of tuples containing (Pulse, Run)
-
-        Returns
-        -------
-        pandas DataFrame
+    def getIdsDataFrameFromPulseDatabase(
+        dbuser: str,
+        database: str,
+        version: str,
+        backend: int,
+        idspath: str,
+        pulses: tuple,
+    ) -> pd.DataFrame:
         """
+        This function retrieves pandas dataframe displaying all values of given IDSs extracted by the function.
 
-        values = []
+        Args:
+            dbuser (str): The username to access the Pulse database. A public user should just be left as public, whereas a local user should write their proper identifier
+            database (str): The name of the database where the data is harbored
+            version (str): String of number of data version
+            backend (int): ID of backend of the database in which the data is harbored
+            idspath (str): IDS path (starting with IDS name) to the desired data to be collected (e.g 'equilibrium/time')
+            pulses (tuple): List of tuples containing (Pulse, Run)
+
+        Returns:
+            a pandas DataFrame containing information about the specified pulses and their associated values from a pulse database.
+        """
         idsname = idspath.split("/")[0]
         valpath = idspath[1 + len(idsname) :]
         dbtools = DatabaseTools()
         pulses = pulses[:4]
-        for entry in tqdm(pulses) if progbar else pulses:
-            values.append(
-                dbtools.get_data_from_ids(
-                    backend,
-                    database,
-                    entry[0],
-                    entry[1],
-                    dbuser,
-                    version,
-                    idsname,
-                    valpath,
-                )
+        values = [
+            dbtools.getIdsDataFromPulseDatabase(
+                backend,
+                database,
+                entry[0],
+                entry[1],
+                dbuser,
+                version,
+                idsname,
+                valpath,
             )
-
+            for entry in (tqdm(pulses) if progbar else pulses)
+        ]
         df = pd.DataFrame(pulses, columns=["PULSE", "RUN"])
         df["VALUE"] = values
         return df
 
-    def get_data_from_ids(
+    def getIdsDataFromPulseDatabase(
         self, backend, database, pulse, run, dbuser, version, idsname, valpath
     ):
         connection = imas.DBEntry(backend, database, pulse, run, dbuser, version)
@@ -81,61 +72,69 @@ class DatabaseTools:
         return value
 
 
+def readScenario(
+    scenarioFilePath: str,
+    inIDSList: list = None,
+    outIDSList: list = None,
+    testMode: bool = False,
+    **testArgs
+):
+    """
+    This function reads a scenario file and takes in optional input and output IDs lists, as well as a  test mode flag and additional test arguments.
 
-def read_ids(scenario_file_path):
+    Args:
+        scenarioFilePath (str): The file path of the scenario file that contains the test cases.
+        inIDSList (list): A list of input IDS names that should be read from the scenario file.
+        outIDSList (list): A list of output IDS names  It is used to specify the list of output IDs that the function should read from the scenario file. If this parameter is not provided, the function will read all output IDs from the scenario file.
+        testMode (bool): A boolean flag indicating whether the function is being called in test mode or not. If testMode is True, the function will execute in a way that is suitable for testing purposes. Defaults to False
+    """
+    testArgsList = list(testArgs.values())
 
-    import os, imas, yaml
+    inIDSDict = {}
+    outIDSDict = {}
+    if inIDSList is None:
+        inIDSList = []
 
-    testmode = 0
-    # Initial values of time slice and beam index
-    time_slice = 35.0
-    beam_index = 6
-    # Read scenario.yaml used for the simulation to know where to find
-    # the IMAS output datafile
-    scenario_file = open(scenario_file_path, "r")
-    config = yaml.load(scenario_file, Loader=yaml.CLoader)
-    scenario_file.close()
-
-    # Find output datafile from the configuration parameters
-    output_user_or_path = ""
-    if config["output_user_or_path"] == "default":
-        output_user_or_path = os.getenv("USER")
-        config["output_user_or_path"] = os.getenv("USER")
-    else:
-        output_user_or_path = config["output_user_or_path"]
+    if outIDSList is None:
+        outIDSList = []
+    with open(scenarioFilePath, "r") as scenario_file:
+        config = yaml.load(scenario_file, Loader=yaml.CLoader)
 
     # Read the equilibrium and core_profiles IDSs from the input datafile
-    input = imas.DBEntry(
+    connectionIn = imas.DBEntry(
         imas.imasdef.MDSPLUS_BACKEND,
         config["input_database"],
         config["shot"],
         config["run_in"],
         config["input_user_or_path"],
     )
-    input.open()
-    if testmode == 1:
-        time_slice = 100.0
-        equilibrium = input.get_slice("equilibrium", time_slice, 2)
-        core_profiles = input.get_slice("core_profiles", 100.0, 2)
-    else:
-        equilibrium = input.get("equilibrium")
-        core_profiles = input.get("core_profiles")
+    connectionIn.open()
+    for idsName in inIDSList:
+        if testMode:
+            ids = connectionIn.get_slice(idsName, testArgsList)
+        else:
+            ids = connectionIn.get(idsName)
+        inIDSDict[idsName] = ids
 
-    input.close()
+    connectionIn.close()
 
-    # Read the waves IDS from the output datafile
-    output = imas.DBEntry(
+    # Read the out IDS from the output datafile
+    connectionOut = imas.DBEntry(
         imas.imasdef.MDSPLUS_BACKEND,
         config["output_database"],
         config["shot"],
         config["run_out"],
-        config["output_user_or_path"],
+        os.getenv("USER")
+        if config["output_user_or_path"] == "default"
+        else config["output_user_or_path"],
     )
-    output.open()
-    if testmode == 1:
-        waves = output.get_slice("waves", time_slice, 2)
-    else:
-        waves = output.get("waves")
-    output.close()
+    connectionOut.open()
+    for idsName in outIDSList:
+        if testMode:
+            ids = connectionOut.get_slice(idsName, testArgsList)
+        else:
+            ids = connectionOut.get(idsName)
+        outIDSDict[idsName] = ids
+    connectionOut.close()
 
-    return equilibrium, core_profiles, waves
+    return inIDSDict, outIDSDict
