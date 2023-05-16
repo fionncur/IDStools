@@ -1,4 +1,6 @@
+import itertools
 import numpy as np
+from scipy import constants, interpolate
 
 from idstools2.compute.equilibrium.basic import EquilibriumCompute
 from idstools2.compute.waves.basic import WavesCompute
@@ -6,92 +8,175 @@ from idstools2.compute.common.basic import nearest
 
 
 class EcStrayCompute:
-    def __init__(self, equilibrium_ids, core_profiles_ids, waves_ids):
-        super().__init__()
-        self.equilibrium_ids = equilibrium_ids
-        self.core_profiles_ids = core_profiles_ids
-        self.waves_ids = waves_ids
+    def __init__(
+        self, equilibriumIds: object, coreProfilesIds: object, wavesIds: object
+    ):
+        self.equilibriumIds = equilibriumIds
+        self.coreProfilesIds = coreProfilesIds
+        self.wavesIds = wavesIds
 
-    @property
-    def index(self):
-        return self._index
+        self.equilibriumCompute = EquilibriumCompute(equilibriumIds)
+        # self.coreProfilesCompute = coreProfilesIds
+        self.wavesCompute = WavesCompute(wavesIds)
 
-    @index.setter
-    def index(self, value):
-        if value < 0:
-            raise ValueError("Value is not appropriate")
-        self._index = value
+    def getResonanceLayer(
+        self, timeIndexWaves: int = 0, timeIndexEquilibrium: int = 0, nHarm=None
+    ):
+        """This function calculates and returns a dictionary (Resonance Layer) containing r and z values corresponding to the resonance points based on the provided nHarm values, BResonance, and bTotal arrays.
 
-    def get_resonance_layer(self, time_index_wv, time_index_eq):
-        # TODO Why different time slices
-        eqcomputeobj = EquilibriumCompute(self.equilibrium_ids)
+        Args:
+            timeIndexWaves (int): time index for waves, default is 0
+            timeIndexEquilibrium (int): time index of equilibrium, default is 0
+            nHarm (list, optional):  integer values that represent the order or index of harmonics in a series. Defaults to [1, 2, 3, 4].
 
-        ieq_rect, b_tot = eqcomputeobj.getBTotal(time_index_eq)
-        r = eqcomputeobj.ids.time_slice[time_index_eq].profiles_2d[ieq_rect].grid.dim1
-        z = eqcomputeobj.ids.time_slice[time_index_eq].profiles_2d[ieq_rect].grid.dim2
-        wavecompute = WavesCompute(self.waves_ids)
-        wavecompute.index = 0
-        B_res = wavecompute.getBResonance(time_index_wv)
-        n_harm = [1, 2, 3, 4]
+        Returns:
+            dict: returns dictionary of  resonance layer for specific harmonics
 
-        [nr, nz] = np.shape(b_tot)
-        b_err = 10 / nr
-        res_layer = {}
-        for i_harm in range(len(n_harm)):
-            res_layer[i_harm] = {}
-            res_layer[i_harm]["r"] = []
-            res_layer[i_harm]["z"] = []
-            for iz in range(nz):
-                [ir, rloc] = nearest(b_tot[:, iz], B_res[i_harm])
-                if np.abs(b_tot[ir, iz] - B_res[i_harm]) < b_err:
-                    res_layer[i_harm]["r"].append(r[ir])
-                    res_layer[i_harm]["z"].append(z[iz])
+        Examples:
+            .. code-block:: python
 
-        return res_layer
+                import imas
+                # add necessary imports
+                connection = imas.DBEntry(imas.imasdef.MDSPLUS_BACKEND,'ITER',134173,106,'public')
+                connection.open()
+                equilibriumIds = connection.get('equilibrium')
+                coreProfilesIds = connection.get('waves')
+                wavesIds = connection.get('core_profiles')
 
-    def get_cutoff_layer(self, time_index_wv=0, time_index_cp=0, time_index_eq=0):
-        from scipy import constants, interpolate
+                ecstrayView = EcStrayView(equilibriumIds, coreProfilesIds, wavesIds)
 
-        wavecompute = WavesCompute(self.waves_ids)
-        omega_ec = wavecompute.getOmegaEC(time_index_wv)
+                resonance_layer = ecstrayView.getResonanceLayer()
 
-        # Find (R,Z) rectangular grid of B-field
-        eqcomputeobj = EquilibriumCompute(self.equilibrium_ids)
-        ieq_rect, b_tot = eqcomputeobj.getBTotal(time_index_eq)
+                {0: {'r': [5.4375, 5.4375, 5.4375, 5.4375, 5.4375, 5.4375, 5.4375, 5.4375, 5.4375, 5.4375, 5.4375,
+                5.4375, 5.4375, 5.4375, 5.4375, 5.4375, 5.4375, 5.4375, 5.4375, 5.4375, 5.4375],
+                'z': [-6.0, -5.90625, -5.8125, -5.71875, -5.625, -5.53125, -5.4375, -5.34375, -5.25, -5.15625,
+                5.71875, 5.8125, 5.90625, 6.0]}, 1: {'r': [], 'z': []}, 2: {'r': [], 'z': []}, 3: {'r': [], 'z': []}}
 
-        # B(R,Z) evaluation
+        """
+        if nHarm is None:
+            nHarm = [1, 2, 3, 4]
+        profile2dIndex, bTotal = self.equilibriumCompute.getBTotal(timeIndexEquilibrium)
         r = (
-            self.equilibrium_ids.time_slice[time_index_eq]
-            .profiles_2d[ieq_rect]
+            self.equilibriumCompute.ids.time_slice[timeIndexEquilibrium]
+            .profiles_2d[profile2dIndex]
             .grid.dim1
         )
         z = (
-            self.equilibrium_ids.time_slice[time_index_eq]
-            .profiles_2d[ieq_rect]
+            self.equilibriumCompute.ids.time_slice[timeIndexEquilibrium]
+            .profiles_2d[profile2dIndex]
+            .grid.dim2
+        )
+        self.wavesCompute.index = 0
+        BResonance = self.wavesCompute.getBResonance(timeIndexWaves)
+
+        [nr, nz] = np.shape(bTotal)
+        b_err = 10 / nr
+        resonanceLayer = {}
+        for indexHarm in range(len(nHarm)):
+            resonanceLayer[indexHarm] = {"r": [], "z": []}
+            for iz in range(nz):
+                [ir, rloc] = nearest(bTotal[:, iz], BResonance[indexHarm])
+                if np.abs(bTotal[ir, iz] - BResonance[indexHarm]) < b_err:
+                    resonanceLayer[indexHarm]["r"].append(r[ir])
+                    resonanceLayer[indexHarm]["z"].append(z[iz])
+
+        return resonanceLayer
+
+    def getCutoffLayer(
+        self,
+        timeIndexWaves: int = 0,
+        timeIndexCoreProfiles: int = 0,
+        timeIndexEquilibrium: int = 0,
+    ):
+        """The cutoff layer is a region in a plasma where certain frequencies or modes of wave propagation are prevented from propagating or transmitting due to the plasma's properties.
+
+        Args:
+            timeIndexWaves (int, optional): time index for waves. Defaults to 0.
+            timeIndexCoreProfiles (int, optional): time index for core_profiles. Defaults to 0.
+            timeIndexEquilibrium (int, optional): time index for equilibrium. Defaults to 0.
+
+        Returns:
+            dict: cut off layer in dictionary format
+
+        Notes:
+
+            ω_R = √[(eB/m_e/2)^2 + n_e * e^2/(ε_0 * m_e)] + eB/m_e/2
+
+            electron cyclotron frequency in plasma physics. It is denoted by ω_R and can be calculated using the equation
+
+            where:
+
+            - ``ω_R`` is the electron cyclotron frequency
+            - ``e`` is the elementary charge
+            - ``B`` is the magnetic field strength
+            - ``m_e`` is the mass of an electron
+            - ``n_e`` is the electron number density
+            - ``ε_0`` is the vacuum permittivity
+
+        Examples:
+            .. code-block:: python
+
+                import imas
+                connection = imas.DBEntry(imas.imasdef.MDSPLUS_BACKEND,'ITER',134173,106,'public')
+                connection.open()
+                equilibriumIds = connection.get('equilibrium')
+                coreProfilesIds = connection.get('waves')
+                wavesIds = connection.get('core_profiles')
+
+                ecstrayView = EcStrayView(equilibriumIds, coreProfilesIds, wavesIds)
+
+                cut_off_layer = ecstrayView.getCutoffLayer()
+
+                {'r': [5.625, 5.4375, 5.53125, 5.53125, 5.53125, 5.53125, 5.53125, 5.53125, 5.53125, 5.53125, 5.53125, 5.53125, 5.53125, 5.53125,
+                5.53125, 5.53125, 5.53125, 5.53125, 5.53125, 5.53125, 5.53125, 5.53125, 5.53125, 5.4375],
+                'z': [-2.15625, -2.0625, -1.96875, -1.875, -1.78125, -1.6875, -1.59375, -1.5, -1.40625, -1.3125, -1.21875,
+                1.03125, 1.125, 1.21875, 1.3125, 1.40625, 1.5, 1.59375, 1.6875, 1.78125, 1.875, 1.96875, 2.0625, 2.15625]}
+
+        """
+        # wavecompute = WavesCompute(self.wavesIds)
+        omega_ec = self.wavesCompute.getOmegaEC(timeIndexWaves)
+
+        # Find (R,Z) rectangular grid of B-field
+        # eqcomputeobj = EquilibriumCompute(self.equilibriumIds)
+        profile2dIndex, bTotal = self.equilibriumCompute.getBTotal(timeIndexEquilibrium)
+
+        # B(R,Z) evaluation
+        r = (
+            self.equilibriumIds.time_slice[timeIndexEquilibrium]
+            .profiles_2d[profile2dIndex]
+            .grid.dim1
+        )
+        z = (
+            self.equilibriumIds.time_slice[timeIndexEquilibrium]
+            .profiles_2d[profile2dIndex]
             .grid.dim2
         )
 
         # Ne(psi) in core_profiles IDS
-        rho1d_cp = self.core_profiles_ids.profiles_1d[time_index_cp].grid.rho_tor_norm
+        rho1d_cp = self.coreProfilesIds.profiles_1d[
+            timeIndexCoreProfiles
+        ].grid.rho_tor_norm
         psi1d_cp = (
-            self.core_profiles_ids.profiles_1d[time_index_cp].grid.psi
-            - self.core_profiles_ids.profiles_1d[time_index_cp].grid.psi[-1]
+            self.coreProfilesIds.profiles_1d[timeIndexCoreProfiles].grid.psi
+            - self.coreProfilesIds.profiles_1d[timeIndexCoreProfiles].grid.psi[-1]
         ) / (
-            self.core_profiles_ids.profiles_1d[time_index_cp].grid.psi[0]
-            - self.core_profiles_ids.profiles_1d[time_index_cp].grid.psi[-1]
+            self.coreProfilesIds.profiles_1d[timeIndexCoreProfiles].grid.psi[0]
+            - self.coreProfilesIds.profiles_1d[timeIndexCoreProfiles].grid.psi[-1]
         )
-        ne_cp = self.core_profiles_ids.profiles_1d[time_index_cp].electrons.density
+        ne_cp = self.coreProfilesIds.profiles_1d[
+            timeIndexCoreProfiles
+        ].electrons.density
 
         # Ne(psi) interpolated over equilibrium IDS
-        rho1d_eq = self.equilibrium_ids.time_slice[
-            time_index_eq
+        rho1d_eq = self.equilibriumIds.time_slice[
+            timeIndexEquilibrium
         ].profiles_1d.rho_tor_norm
         psi1d_eq = (
-            self.equilibrium_ids.time_slice[time_index_eq].profiles_1d.psi
-            - self.equilibrium_ids.time_slice[time_index_eq].profiles_1d.psi[-1]
+            self.equilibriumIds.time_slice[timeIndexEquilibrium].profiles_1d.psi
+            - self.equilibriumIds.time_slice[timeIndexEquilibrium].profiles_1d.psi[-1]
         ) / (
-            self.equilibrium_ids.time_slice[time_index_eq].profiles_1d.psi[0]
-            - self.equilibrium_ids.time_slice[time_index_eq].profiles_1d.psi[-1]
+            self.equilibriumIds.time_slice[timeIndexEquilibrium].profiles_1d.psi[0]
+            - self.equilibriumIds.time_slice[timeIndexEquilibrium].profiles_1d.psi[-1]
         )
         ne_eq = np.zeros(len(psi1d_eq))
         ne_interp = interpolate.interp1d(psi1d_cp, ne_cp, kind="linear")
@@ -99,42 +184,38 @@ class EcStrayCompute:
             ne_eq[i] = float(ne_interp(psi1d_eq[i]))
 
         # Ne(R,Z) deduced for each point over B(R,Z) in equilibrium IDS
-        psi1d_eq = self.equilibrium_ids.time_slice[time_index_eq].profiles_1d.psi
+        psi1d_eq = self.equilibriumIds.time_slice[timeIndexEquilibrium].profiles_1d.psi
         psi2d_eq = (
-            self.equilibrium_ids.time_slice[time_index_eq].profiles_2d[ieq_rect].psi
+            self.equilibriumIds.time_slice[timeIndexEquilibrium]
+            .profiles_2d[profile2dIndex]
+            .psi
         )
         ne_from_psi = interpolate.interp1d(psi1d_eq, ne_eq, kind="linear")
         ne2d_eq = np.zeros(np.shape(psi2d_eq))
-        omega_r = np.zeros(np.shape(psi2d_eq))
-        for ir in range(len(r)):
-            for iz in range(len(z)):
-                try:  # Inside LCFS
-                    ne2d_eq[ir, iz] = ne_from_psi(psi2d_eq[ir, iz])
-                    # omega_R = sqrt[(eB/m_e/2)**2 + n_e *e**2/(epsilon_0*m_e)] + eB/m_e/2
-                    omega_r[ir, iz] = np.sqrt(
-                        (constants.e * b_tot[ir, iz] / (2 * constants.m_e)) ** 2
-                        + ne2d_eq[ir, iz]
-                        * constants.e**2
-                        / (constants.epsilon_0 * constants.m_e)
-                    ) + constants.e * b_tot[ir, iz] / (2 * constants.m_e)
-                except:  # Not defined outside LCFS
-                    ne2d_eq[ir, iz] = -1  # np.NaN
-                    omega_r[ir, iz] = -1  # np.NaN
+        omegaR = np.zeros(np.shape(psi2d_eq))
+        for ir, iz in itertools.product(range(len(r)), range(len(z))):
+            try:  # Inside LCFS
+                ne2d_eq[ir, iz] = ne_from_psi(psi2d_eq[ir, iz])
+                # omega_R = sqrt[(eB/m_e/2)**2 + n_e *e**2/(epsilon_0*m_e)] + eB/m_e/2
+                omegaR[ir, iz] = np.sqrt(
+                    (constants.e * bTotal[ir, iz] / (2 * constants.m_e)) ** 2
+                    + ne2d_eq[ir, iz]
+                    * constants.e**2
+                    / (constants.epsilon_0 * constants.m_e)
+                ) + constants.e * bTotal[ir, iz] / (2 * constants.m_e)
+            except Exception:  # Not defined outside LCFS
+                ne2d_eq[ir, iz] = -1  # np.NaN
+                omegaR[ir, iz] = -1  # np.NaN
 
         # Find (R,Z) where omega_R = omega_EC (within the tolerance omega_err)
-        [nr, nz] = np.shape(omega_r)
-        omega_err = 100 / nr
+        [nr, nz] = np.shape(omegaR)
+        omegaErr = 100 / nr
 
-        cutoff_layer = {}
-        cutoff_layer["r"] = []
-        cutoff_layer["z"] = []
+        cutoffLayer = {"r": [], "z": []}
         for iz in range(nz):
-            [ir, rloc] = nearest(omega_r[:, iz], omega_ec)
-            if np.abs((omega_r[ir, iz] - omega_ec) / omega_r[ir, iz]) < omega_err:
-                cutoff_layer["r"].append(r[ir])
-                cutoff_layer["z"].append(z[iz])
+            [ir, rloc] = nearest(omegaR[:, iz], omega_ec)
+            if np.abs((omegaR[ir, iz] - omega_ec) / omegaR[ir, iz]) < omegaErr:
+                cutoffLayer["r"].append(r[ir])
+                cutoffLayer["z"].append(z[iz])
 
-        # import pdb
-        # pdb.set_trace()
-
-        return cutoff_layer
+        return cutoffLayer

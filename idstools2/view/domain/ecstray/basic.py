@@ -2,7 +2,9 @@ from ....domain.ecstray.basic import EcStrayCompute
 
 
 class EcStrayView:
-    def __init__(self, equilibrium_ids, core_profiles_ids, waves_ids):
+    def __init__(
+        self, equilibrium_ids: object, core_profiles_ids: object, waves_ids: object
+    ):
         self.ecstray_object = EcStrayCompute(
             equilibrium_ids, core_profiles_ids, waves_ids
         )
@@ -13,10 +15,11 @@ class EcStrayView:
     def plot_resonance_layer(
         self, ax, time_index_wv, time_index_eq, init=1, verbose=False
     ):
-        res_layer = self.ecstray_object.get_resonance_layer(
-            time_index_wv, time_index_eq
-        )
+        res_layer = self.ecstray_object.getResonanceLayer(time_index_wv, time_index_eq)
 
+        print("-----------res_layer-------------")
+        print(res_layer)
+        print("------------------------")
         for i_harm in range(len(res_layer)):
             if len(res_layer[i_harm]["r"]) > 1:
                 if verbose == True:
@@ -42,10 +45,12 @@ class EcStrayView:
         verbose=False,
     ):
         # Calculate density cutoff layer position
-        cutoff_layer = self.ecstray_object.get_cutoff_layer(
+        cutoff_layer = self.ecstray_object.getCutoffLayer(
             time_index_wv, time_index_cp, time_index_eq
         )
-
+        print("-----------cutoff_layer-------------")
+        print(cutoff_layer)
+        print("------------------------")
         if init == 1:
             (ax_polview_plot_cut,) = ax.plot(
                 cutoff_layer["r"], cutoff_layer["z"], color="g", linewidth=2

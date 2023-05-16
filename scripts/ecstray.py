@@ -92,9 +92,9 @@ if err != 0:
     exit()
 
 
-time_index_eq = 0
-time_index_cp = 0
-beamTracingTimeIndex = 0
+timeIndexEquilibrium = 0
+timeIndexCoreProfiles = 0
+timeIndexWaves = 0
 
 current_file_path = os.path.dirname(os.path.abspath(__file__))
 
@@ -108,7 +108,7 @@ wall2d = read_wall(wallfile)
 # # Read launching parameters from EC waveform file
 launching_parameters = read_launching_parameters(filelaunchers)
 # # Read beam extra variables from Torbeam output ascii files
-beam_output, time_array_wv = read_torbeam_output(launching_parameters, path_result)
+beam_output, timeArrayWaves = read_torbeam_output(launching_parameters, path_result)
 # # Check if rays go into the divertor
 check_rays_into_divertor(wall2d, beam_output)
 # # Calculates where the beams cross the wall
@@ -117,77 +117,79 @@ beam_wall = beam_wall_crossing(wall2d, launching_parameters, beam_output)
 inIDSList, outIDSDict = readScenario(
     scenarioFilePath=scenario_file,
     inIDSList=["equilibrium", "core_profiles"],
-    outIDSList=["waves"], 
+    outIDSList=["waves"],
 )
-equilibrium_ids = inIDSList["equilibrium"]
-core_profiles_ids = inIDSList["core_profiles"]
-waves_ids = outIDSDict["waves"]
+equilibriumIds = inIDSList["equilibrium"]
+coreProfilesIds = inIDSList["core_profiles"]
+wavesIds = outIDSDict["waves"]
 
 
 # TODO Is it wise to get common timestamp and make zero hold of other timestamps?
-# Or just follow what we have here. This is ellegant in terms of performance
+# Or just follow what we have here. This is elegant in terms of performance
 def iround(x, xi):
     return np.argmin(np.abs(x - xi))
 
 
-eqcomputeobj = EquilibriumCompute(equilibrium_ids)
-coreprofilesobj = CoreProfilesCompute(core_profiles_ids)
-waveobj = WavesCompute(waves_ids)
+# equilibriumCompute = EquilibriumCompute(equilibriumIds)
+# coreProfilesCompute = CoreProfilesCompute(coreProfilesIds)
+# wavesCompute = WavesCompute(wavesIds)
 
-time_array_eq = eqcomputeobj.ids.time  # Plot Ip
-time_array_cp = coreprofilesobj.ids_object.time
-time_array_wv = waveobj.ids.time
+timeArrayEquilibrium = equilibriumIds.time  # Plot Ip
+timeArrayCoreProfiles = coreProfilesIds.time
+timeArrayWaves = wavesIds.time
 
-time_slice = 5.0
+timeSlice = 5.0
 
 # # Indices for time arrays in equilibrium, core_profiles, waves IDSs
-time_index_eq = iround(time_array_eq, time_slice)
-time_index_cp = iround(time_array_cp, time_slice)
-beamTracingTimeIndex = iround(time_array_wv, time_slice)
+timeIndexEquilibrium = iround(timeArrayEquilibrium, timeSlice)
+timeIndexCoreProfiles = iround(timeArrayCoreProfiles, timeSlice)
+timeIndexWaves = iround(timeArrayWaves, timeSlice)
 
 canvas = Canvas(3, 2)
 
 # Subplot waveforms versus time
-equillibriumview = EquilibriumView(equilibrium_ids)
-coreprofilesview = CoreProfilesView(core_profiles_ids)
-wavesview = WavesView(waves_ids)
-ecstrayview = EcStrayView(equilibrium_ids, core_profiles_ids, waves_ids)
+equilibriumView = EquilibriumView(equilibriumIds)
+coreProfilesView = CoreProfilesView(coreProfilesIds)
+wavesView = WavesView(wavesIds)
+ecstrayView = EcStrayView(equilibriumIds, coreProfilesIds, wavesIds)
 
 ax_waveform = canvas.add_axes(
     title="Waveforms", xlabel="Time [s]", row=0, col=0, colspan=1
 )
-equillibriumview.plotIP(ax_waveform)  # Plot Ip
-coreprofilesview.plotElectronDensityNe0(ax_waveform)
+equilibriumView.plotIP(ax_waveform)  # Plot Ip
+coreProfilesView.plotElectronDensityNe0(ax_waveform)
 
 ax_beam_index = canvas.add_axes(
     title="Beam_Index", xlabel="Beam index", row=0, col=1, colspan=1
 )
-wavesview.plot_beam_index(ax_beam_index)
+wavesView.plotBeamIndex(ax_beam_index)
 
 ax_pol_view = canvas.add_axes(
     title="Poloidal view (R,Z)", xlabel="R [m]", ylabel="Z [m]", row=1, col=0, rowspan=1
 )
-equillibriumview.plotPoloidalEquilibrium(ax_pol_view, time_index_eq)
+equilibriumView.plotPoloidalEquilibrium(ax_pol_view, timeIndexEquilibrium)
 
 beamIndex = 0
-wavesview.plotPoloidalTraces(ax_pol_view, beamTracingTimeIndex, beamIndex, verbose=True)
+wavesView.plotPoloidalTraces(ax_pol_view, timeIndexWaves, beamIndex, verbose=True)
 
-ecstrayview.plot_resonance_layer(
-    ax_pol_view, beamTracingTimeIndex, time_index_eq, verbose=True
+ecstrayView.plot_resonance_layer(
+    ax_pol_view, timeIndexWaves, timeIndexEquilibrium, verbose=True
 )
 
-ecstrayview.plot_cutoff_layer(
-    ax_pol_view, beamTracingTimeIndex, time_index_cp, time_index_eq
+ecstrayView.plot_cutoff_layer(
+    ax_pol_view, timeIndexWaves, timeIndexCoreProfiles, timeIndexEquilibrium
 )
 
 ax_top_view = canvas.add_axes(
     title="Top View (X,Y)", xlabel="X [m]", ylabel="Y [m]", row=1, col=1, rowspan=1
 )
 
-ax_topview_plot_eq = equillibriumview.plotTopviewEquilibrium(ax_top_view, time_index_eq)
+ax_topview_plot_eq = equilibriumView.plotTopviewEquilibrium(
+    ax_top_view, timeIndexEquilibrium
+)
 
-ax_topview_plot_traces = wavesview.plotTopviewTraces(
-    ax_top_view, beamTracingTimeIndex, beamIndex
+ax_topview_plot_traces = wavesView.plotTopviewTraces(
+    ax_top_view, timeIndexWaves, beamIndex
 )
 
 # Subplot profiles
@@ -198,8 +200,8 @@ ax_density = canvas.add_axes(
     col=0,
     rowspan=1,
 )
-ax_density_plot_dens, nmax = coreprofilesview.plotDensityProfile(
-    ax_density, time_index_cp
+ax_density_plot_dens, nmax = coreProfilesView.plotDensityProfile(
+    ax_density, timeIndexCoreProfiles
 )
 
 tbdView = TbdView()
@@ -214,7 +216,7 @@ ax_polygon = canvas.add_axes(
 )
 # Subplot polygon graph for beam footprints
 ax_polygon_plot_pol = tbdView.plot_polygon(
-    ax_polygon, wall2d, beam_wall, beamIndex, beamTracingTimeIndex, beamTracingTimeIndex
+    ax_polygon, wall2d, beam_wall, beamIndex, timeIndexWaves, timeIndexWaves
 )
 canvas.show()
 print("done")

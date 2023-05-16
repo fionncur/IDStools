@@ -8,12 +8,19 @@ logger = logging.getLogger(f"module.{__name__}")
 
 
 class WavesView:
-    def __init__(self, ids_object):
-        self.waves_object = WavesCompute(ids_object)
-        self.ids_object = ids_object
+    def __init__(self, ids):
+        self.wavesCompute = WavesCompute(ids)
+        self.ids = ids
 
-    def plot_beam_index(self, ax):
-        beam_array = self.waves_object.getBeamArray()
+    def plotBeamIndex(self, ax):
+        """
+        This function plots a bar graph of beam indices with a fixed height of 20.
+
+        Args:
+            ax: ax is a matplotlib axis object
+        """
+        #TODO add callback function which can be called whenever there is update requested on timeline
+        beam_array = self.wavesCompute.getBeamArray()
         ax.bar(beam_array, 20, color="g", width=0.5)
 
         ax.set_xlim(beam_array[0] - 1, beam_array[-1] + 1)
@@ -25,7 +32,7 @@ class WavesView:
         self, ax, beamTracingTimeIndex, beamIndex, verbose=False, update=1
     ):
         # Read beam tracing from waves IDS
-        beam_tracing = self.waves_object.getBeamTracing(beamTracingTimeIndex)
+        beam_tracing = self.wavesCompute.getBeamTracing(beamTracingTimeIndex)
         nbeam = beam_tracing["nbeam"]
         nbeam_active = beam_tracing["nbeam_active"]
         nray = beam_tracing["nray"]
@@ -80,7 +87,7 @@ class WavesView:
         self, ax, beamTracingTimeIndex, beamIndex, verbose=False, update=True
     ):
         # Read beam tracing from waves IDS
-        beam_tracing = self.waves_object.getBeamTracing(beamTracingTimeIndex)
+        beam_tracing = self.wavesCompute.getBeamTracing(beamTracingTimeIndex)
         nbeam = beam_tracing["nbeam"]
         is_active = beam_tracing["is_active"]
         len_ray = beam_tracing["len_ray"]
