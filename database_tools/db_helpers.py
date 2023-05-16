@@ -30,13 +30,30 @@ def get_status(path):
     return metadata['status']
     
 
+def pulseList2Dict(pulselist):
+    """ Utility function that returns a dict from a list of pairs (pulse,run)
 
+    Parameters
+    ----------
+    pulselist: list of tuples 
+        List of tuples (pulse,run) 
 
-def mdsListPulseRun(locpath, with_status=None):
+    Returns
+    -------
+    dict key=pulse:value=[runs]
+    """
+    pulsedict={}
+    for pulse,run in pulselist:
+        pulsedict.setdefault(pulse,[]).append(run)
+    return pulsedict
+        
+    
+
+def mdsListPulseRun(locpath, with_status=None, as_dict=False):
     """ Function that lists Pulse and Run numbers from a given database, in MDSPLUS
 
     Parameters
-    ---------
+    ----------
     locpath: str or Path
         Path in which the database files are stored
     with_status: str
