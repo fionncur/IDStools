@@ -43,9 +43,9 @@ class EcStrayCompute:
                 coreProfilesIds = connection.get('waves')
                 wavesIds = connection.get('core_profiles')
 
-                ecstrayView = EcStrayView(equilibriumIds, coreProfilesIds, wavesIds)
+                ecstrayCompute = EcStrayCompute(equilibriumIds, coreProfilesIds, wavesIds)
 
-                resonance_layer = ecstrayView.getResonanceLayer()
+                resonance_layer = ecstrayCompute.getResonanceLayer()
 
                 {0: {'r': [5.4375, 5.4375, 5.4375, 5.4375, 5.4375, 5.4375, 5.4375, 5.4375, 5.4375, 5.4375, 5.4375,
                 5.4375, 5.4375, 5.4375, 5.4375, 5.4375, 5.4375, 5.4375, 5.4375, 5.4375, 5.4375],
@@ -117,15 +117,16 @@ class EcStrayCompute:
             .. code-block:: python
 
                 import imas
+
                 connection = imas.DBEntry(imas.imasdef.MDSPLUS_BACKEND,'ITER',134173,106,'public')
                 connection.open()
                 equilibriumIds = connection.get('equilibrium')
                 coreProfilesIds = connection.get('waves')
                 wavesIds = connection.get('core_profiles')
 
-                ecstrayView = EcStrayView(equilibriumIds, coreProfilesIds, wavesIds)
+                ecStrayCompute = EcStrayCompute(equilibriumIds, coreProfilesIds, wavesIds)
 
-                cut_off_layer = ecstrayView.getCutoffLayer()
+                cut_off_layer = ecStrayCompute.getCutoffLayer()
 
                 {'r': [5.625, 5.4375, 5.53125, 5.53125, 5.53125, 5.53125, 5.53125, 5.53125, 5.53125, 5.53125, 5.53125, 5.53125, 5.53125, 5.53125,
                 5.53125, 5.53125, 5.53125, 5.53125, 5.53125, 5.53125, 5.53125, 5.53125, 5.53125, 5.4375],

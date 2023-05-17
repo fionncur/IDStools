@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import argparse
 import imas
 import logging
@@ -16,7 +18,7 @@ from idstools2.compute.common.basic import nearest
 
 
 parser = argparse.ArgumentParser(
-    description="---- Display the plasma equilibrium from the equilibrium IDS",
+    description="---- Display the plasma equilibrium from the equilibrium IDS. It also shows pf coils position overlay if exists",
     parents=[imas_parser],
 )
 parser.add_argument("-s", "--shot", help="Shot number", required=True, type=int)
@@ -31,17 +33,26 @@ parser.add_argument(
     type=int,
     default=0,
 )
-parser.add_argument("-p", "--plotrho", help="Plots rho(R,Z)", action="store_true")
 parser.add_argument(
-    "-a",
-    "--allInfo",
-    help="Adds all extra provenance info to the plot",
+    "--rho",
+    help="Show pf coils overlay on the plot",
     action="store_true",
 )
 parser.add_argument(
-    "-c",
     "--pfcoils",
     help="Show pf coils overlay on the plot",
+    action="store_true",
+)
+
+parser.add_argument(
+    "--save",
+    help="Save figure at default location",
+    action="store_true",
+)
+parser.add_argument(
+    "-i",
+    "--info",
+    help="Adds all extra provenance info to the plot",
     action="store_true",
 )
 args = parser.parse_args()
@@ -88,26 +99,25 @@ if args.pfcoils is True:
     idsObjPfActive.coil = connection.partial_get("pf_active", "coil")
     ViewPfCoils = PFActiveView(idsObjPfActive)
     ViewPfCoils.viewActivePfCoils(ax)
-    title += "Active PF Coils"
+    title += " Active PF Coils"
 
 idsObjEquilibrium = connection.get("equilibrium")
 ViewEquilibrium = EquilibriumView(idsObjEquilibrium)
-ViewEquilibrium.viewMagneticPoloidalFlux(ax)
+ViewEquilibrium.viewMagneticPoloidalFlux(ax, plotRho=args.rho)
 
-if args.allInfo is True:
-    ViewEquilibrium.viewPulseInfo(
-        ax, title, hostdir, args.shot, args.run, args.time
-    )
-
+if args.info is True:
+    ViewEquilibrium.viewPulseInfo(ax, title, hostdir, args.shot, args.run, args.time)
+ax.set_title(title)
 ax.plot()
 
-try:
-    fname = "Equilibrium_shot_{0}_run_{1}_time_{2:.1f}.png".format(
-        args.shot, args.run, args.time
-    )
-    canvas.save(fname)
-    logger.info(f"----> Figure saved to {fname}")
-except Exception:
-    logger.error("The figure could not be saved (check local permissions).")
+if args.save:
+    try:
+        fname = "Equilibrium_shot_{0}_run_{1}_time_{2:.1f}.png".format(
+            args.shot, args.run, args.time
+        )
+        canvas.save(fname)
+        logger.info(f"----> Figure saved to {fname}")
+    except Exception:
+        logger.error("The figure could not be saved (check local permissions).")
 
 canvas.show()

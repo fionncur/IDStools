@@ -1,5 +1,11 @@
 from ...input_processing.basic import l2r
 import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.colorbar as cbar
+
+# import matplotlib
+# matplotlib.use('TKagg')
+from matplotlib.colors import LogNorm
 
 
 # TODO Need to work on this as we do't have IDS here
@@ -8,13 +14,6 @@ class TbdView:
         pass
 
     def plot_polygon(self, ax, wall2d, beam_wall, ib, its, ite, init=1):
-        import matplotlib.pyplot as plt
-        import matplotlib.colorbar as cbar
-
-        # import matplotlib
-        # matplotlib.use('TKagg')
-        from matplotlib.colors import LogNorm
-
         g1e = beam_wall["g1e"]
         g2e = beam_wall["g2e"]
         re = beam_wall["re"]

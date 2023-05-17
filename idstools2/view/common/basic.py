@@ -1,4 +1,3 @@
-
 import matplotlib, os, sys
 
 if "DISPLAY" not in os.environ:

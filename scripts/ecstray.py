@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import argparse
 import imas
 import numpy as np
@@ -9,10 +10,6 @@ sys.path.append(root_path)
 
 from idstools.cli import get_backend_id
 from idstools.cli import imas_parser
-
-from idstools2.compute.core_profiles.basic import CoreProfilesCompute
-from idstools2.compute.equilibrium.basic import EquilibriumCompute
-from idstools2.compute.waves.basic import WavesCompute
 
 from idstools2.database.basic import readScenario
 
@@ -32,34 +29,12 @@ from idstools2.input_processing.basic import (
 )
 
 parser = argparse.ArgumentParser(
-    description="---- Display the plasma equilibrium from the equilibrium IDS",
+    description="---- Shows electron cyclotron stray radiation information by showing different plots",
     parents=[imas_parser],
 )
 parser.add_argument("-s", "--shot", help="Shot number", required=True, type=int)
 parser.add_argument("-r", "--run", help="Run number", required=True, type=int)
-parser.add_argument(
-    "-t", "--time", help="Time (default=middle)", type=float, default=-99.0
-)
-parser.add_argument(
-    "-o",
-    "--occurrence",
-    help="Occurrence number (default=%(default)s)",
-    type=int,
-    default=0,
-)
-parser.add_argument("-p", "--plotrho", help="Plots rho(R,Z)", action="store_true")
-parser.add_argument(
-    "-a",
-    "--allInfo",
-    help="Adds all extra provenance info to the plot",
-    action="store_true",
-)
-parser.add_argument(
-    "-c",
-    "--pfcoils",
-    help="Show pf coils overlay on the plot",
-    action="store_true",
-)
+
 args = parser.parse_args()
 
 database_abs_path = ""
@@ -130,10 +105,6 @@ def iround(x, xi):
     return np.argmin(np.abs(x - xi))
 
 
-# equilibriumCompute = EquilibriumCompute(equilibriumIds)
-# coreProfilesCompute = CoreProfilesCompute(coreProfilesIds)
-# wavesCompute = WavesCompute(wavesIds)
-
 timeArrayEquilibrium = equilibriumIds.time  # Plot Ip
 timeArrayCoreProfiles = coreProfilesIds.time
 timeArrayWaves = wavesIds.time
@@ -172,14 +143,13 @@ equilibriumView.plotPoloidalEquilibrium(ax_pol_view, timeIndexEquilibrium)
 beamIndex = 0
 wavesView.plotPoloidalTraces(ax_pol_view, timeIndexWaves, beamIndex, verbose=True)
 
-ecstrayView.plot_resonance_layer(
+ecstrayView.plotResonanceLayer(
     ax_pol_view, timeIndexWaves, timeIndexEquilibrium, verbose=True
 )
 
-ecstrayView.plot_cutoff_layer(
+ecstrayView.plotCutOffLayer(
     ax_pol_view, timeIndexWaves, timeIndexCoreProfiles, timeIndexEquilibrium
 )
-
 ax_top_view = canvas.add_axes(
     title="Top View (X,Y)", xlabel="X [m]", ylabel="Y [m]", row=1, col=1, rowspan=1
 )

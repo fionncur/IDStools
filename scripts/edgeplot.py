@@ -1,3 +1,7 @@
+#!/usr/bin/env python3
+
+#TODO Refactor this code
+#TODO Receive arguement from user
 import imas
 import numpy as np
 import math

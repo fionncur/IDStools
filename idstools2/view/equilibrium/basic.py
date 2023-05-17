@@ -24,7 +24,7 @@ class EquilibriumView(BasePlot):
         self.ids = ids
         self.computeObj = EquilibriumCompute(ids)
 
-    def viewMagneticPoloidalFlux(self, ax: plt.Axes):
+    def viewMagneticPoloidalFlux(self, ax: plt.Axes, plotRho: bool = False):
         """
         This function plots the magnetic poloidal flux contours on a 2D Cartesian grid.
 
@@ -57,23 +57,22 @@ class EquilibriumView(BasePlot):
 
         See also:
             :func:`idstools2.compute.equilibrium.basic.EquilibriumCompute.get2DCartesianGrid`
-            :func:`idstools2.compute.equilibrium.basic.EquilibriumCompute.EquilibriumCompute.getRho2D`
+            :func:`idstools2.compute.equilibrium.basic.EquilibriumCompute.getRho2D`
 
             :meth:`plot_ip`
         """
         cartestionGrid = self.computeObj.get2DCartesianGrid()
         if cartestionGrid is not None:
-            rho = self.computeObj.getRho2D()
             levels = 30
-
-            if rho:
-                ax.contour(
-                    cartestionGrid["r2d"],
-                    cartestionGrid["z2d"],
-                    cartestionGrid["rho2d"],
-                    levels,
-                    colors="r",
-                )
+            if plotRho:
+                if rho := self.computeObj.getRho2D():
+                    ax.contour(
+                        cartestionGrid["r2d"],
+                        cartestionGrid["z2d"],
+                        cartestionGrid["rho2d"],
+                        levels,
+                        colors="r",
+                    )
             ax.contour(
                 cartestionGrid["r2d"],
                 cartestionGrid["z2d"],
