@@ -1,5 +1,5 @@
 """ 
-This module provides compute functions and classes for equilibrium ids data
+This module provides compute functions and classes for edge_profiles ids data
 
 `more about edge_profiles ids <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/CI/imas-3.37.2/edge_profiles.html>`_.
 
@@ -126,7 +126,7 @@ class EdgeProfilesCompute:
 
         return data
 
-    def getLabels(self, timeSlice=0):  
+    def getLabels(self, timeSlice:int=0):  
         """
         This function returns a list of labels for all species in a given time slice.
         
@@ -158,7 +158,7 @@ class EdgeProfilesCompute:
         return labels
 
     @functools.lru_cache(maxsize=128)
-    def get_a(self, timeSlice=0, elementIndex=0) -> list:  
+    def get_a(self, timeSlice:int=0, elementIndex:int=0) -> list:  
         """
         This function returns a list of atomic masses for a given slice and element index.
 
@@ -192,7 +192,7 @@ class EdgeProfilesCompute:
         return a
 
     @functools.lru_cache(maxsize=128)
-    def get_z(self, timeSlice=0, elementIndex=0) -> list:   
+    def get_z(self, timeSlice:int=0, elementIndex:int=0) -> list:   
         """
         This function returns a list of nuclear charges for each species in a given slice and element
         index.
@@ -229,7 +229,7 @@ class EdgeProfilesCompute:
         logger.debug(f"Nuclear charge each species : {z}")
         return z
 
-    def getStates(self, timeSlice=0):
+    def getStates(self, timeSlice:int=0):
         """
         This function returns quantities related to the different states of the species (ionisation, energy, excitation, ...) for each species
         
@@ -259,7 +259,7 @@ class EdgeProfilesCompute:
             for iSpecies in range(nspecies)
         ]
 
-    def getStatesData(self, timeSlice=0) -> dict:   
+    def getStatesData(self, timeSlice:int=0) -> dict:   
         """
         This function returns a dictionary containing data on the states and densities of different species in a plasma simulation.
         
@@ -342,7 +342,7 @@ class EdgeProfilesCompute:
             states_data[str(species_index)] = species_data
         return states_data
 
-    def get_ne(self, timeSlice=0) -> float:   
+    def get_ne(self, timeSlice:int=0) -> float:   
         """
         This function calculates the total number of electrons (ne) based on the volume and electron density of a given slice.
         
@@ -572,7 +572,7 @@ class EdgeProfilesCompute:
         return densityIon
 
     @functools.lru_cache(maxsize=128)
-    def getSpeciesDensity(self, timeSlice=0) -> tuple:  
+    def getSpeciesDensity(self, timeSlice:int=0) -> tuple:  
         """
         This function calculates the density of different species in a given slice and returns a tuple containing the species density list, the total density, and the index of the species with the maximum density.
         
@@ -651,7 +651,6 @@ class EdgeProfilesCompute:
             
         Returns:
             The function `getNspecOverNtot` is returning the ratio of the list of species densities to the  total density (`ntot`).
-            
             
         Example:                 
             .. code-block:: python

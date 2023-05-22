@@ -21,7 +21,7 @@ class CoreProfilesView(Console):
         print("core_profiles")
         print("   ------------")
         composition_data = (
-            CoreProfilesCompute.get_plasma_composition_with_species_concentration(
+            CoreProfilesCompute.getPlasmaCompositionWithSpeciesConcentration(
                 ids_object, slice_index, volume=volume
             )
         )
