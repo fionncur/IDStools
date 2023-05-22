@@ -1,8 +1,5 @@
-#  src/compute/core_profiles/functions.py ok
-
 import numpy as np
 import database_tools.init_mendeleiev as mend
-import sys
 import logging
 import functools
 

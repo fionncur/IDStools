@@ -1,12 +1,10 @@
 """
-src/compute/common/functions.py.orig Ok
-This is a common module which has common functions which can be used across ll IDSes
+This is a common module which has common functions
 
 """
 import logging
 import numpy as np
 from packaging import version
-import csv
 
 ARRAY_EQUAL_KWARGS = (
     "equal_nan=True" if version.parse(np.__version__) > version.parse("1.19") else ""
@@ -14,9 +12,9 @@ ARRAY_EQUAL_KWARGS = (
 logger = logging.getLogger("module")
 
 
-def nearest(array: np.ndarray, value: float) -> tuple:
+def getClosestOfGivenValueFromArray(array: np.ndarray, value: float) -> tuple:
     """
-    The function "nearest" takes in a numpy array and a value, and returns the index and value of the element in the array that is closest to the given value.
+    Find the index of the element in the array that is closest to the given value using the minimum absolute difference.
 
     Args:
         array (np.ndarray): A NumPy array of numbers.
@@ -33,7 +31,7 @@ def nearest(array: np.ndarray, value: float) -> tuple:
     return index, array[index]
 
 
-def middle(array: np.ndarray) -> tuple:
+def getMiddleElementFromArray(array: np.ndarray) -> tuple:
     """
     The "middle" function returns the index and value of the middle element in a given numpy array.
 
@@ -52,23 +50,8 @@ def middle(array: np.ndarray) -> tuple:
     value = array[index]
     return index, value
 
-    # """
-    # Iterate over every field and compare values depending on the type of field.
 
-    # Parameters
-    # ----------
-    # X, Y: IDS like objects
-    #       IDSs (or sub-structures) objects being compared
-    # field: str, optional
-    #       name of the IDS (or sub-structure) being compared
-    # ignore_version: bool, optional
-    #       ignore content of ids_properties.version_put for the comparison
-    # verb: bool, optional
-    #       prints information about differences
-    # """
-
-
-def compare_ids(X, Y, field=None, ignore_version=True, verb=True, output={}):
+def compareIds(X, Y, field=None, ignore_version=True, verb=True, output={}):
     """
     The function compares two ids objects and returns whether they are identical or not, along with a  dictionary of differences.
 
@@ -168,7 +151,7 @@ def compare_ids(X, Y, field=None, ignore_version=True, verb=True, output={}):
                 attrname = Xo.__name__
             else:
                 attrname = Xo._base_path
-            identical_result, output = compare_ids(
+            identical_result, output = compareIds(
                 Xo,
                 Yo,
                 field=f"{field}.{attrname}",
@@ -199,7 +182,7 @@ def compare_ids(X, Y, field=None, ignore_version=True, verb=True, output={}):
             else:
                 for i in range(len(Xo)):
                     if "structArrayElement" in type(Xo[i]).__name__:
-                        identical_result, output = compare_ids(
+                        identical_result, output = compareIds(
                             Xo[i],
                             Yo[i],
                             field=f"{field}[{i}]",
@@ -270,6 +253,7 @@ def compare_ids(X, Y, field=None, ignore_version=True, verb=True, output={}):
     return identical, output
 
 
+# TODO rename variable and refactor code in smaller reusable methods
 def xyz2cyl(rvec):
     """
     The function converts a set of 3D Cartesian coordinates to cylindrical coordinates.
@@ -295,6 +279,7 @@ def xyz2cyl(rvec):
     return rcyl
 
 
+# TODO rename variable
 def cyl2xyz(rcyl):
     """
     The function cyl2xyz converts cylindrical coordinates to Cartesian coordinates.
@@ -314,6 +299,7 @@ def cyl2xyz(rcyl):
     return rvec
 
 
+# TODO rename variable and refactor code in smaller reusable methods
 def line_polygon_intersection(  # input
     line_p,  # arbitrary point on line (3D) [*,3]
     line_dir,  # direction of line  (3D)
@@ -645,6 +631,7 @@ def calcw(wt, Rt, lambda_ray, freq=np.double(170.0e9)):
     return w
 
 
+# TODO rename variable and refactor code in smaller reusable methods remove unused code
 def ell_on_wall(xpout, w1, w2, gamma, e_k, wall2d):
     """
     This function calculates the center and generating vectors of an ellipse on a 2D polygon given

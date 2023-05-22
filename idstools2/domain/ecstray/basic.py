@@ -4,7 +4,7 @@ from scipy import constants, interpolate
 
 from idstools2.compute.equilibrium.basic import EquilibriumCompute
 from idstools2.compute.waves.basic import WavesCompute
-from idstools2.compute.common.basic import nearest
+from idstools2.compute.common.basic import getClosestOfGivenValueFromArray
 
 
 class EcStrayCompute:
@@ -75,7 +75,9 @@ class EcStrayCompute:
         for indexHarm in range(len(nHarm)):
             resonanceLayer[indexHarm] = {"r": [], "z": []}
             for iz in range(nz):
-                [ir, rloc] = nearest(bTotal[:, iz], BResonance[indexHarm])
+                [ir, rloc] = getClosestOfGivenValueFromArray(
+                    bTotal[:, iz], BResonance[indexHarm]
+                )
                 if np.abs(bTotal[ir, iz] - BResonance[indexHarm]) < b_err:
                     resonanceLayer[indexHarm]["r"].append(r[ir])
                     resonanceLayer[indexHarm]["z"].append(z[iz])
@@ -214,7 +216,7 @@ class EcStrayCompute:
 
         cutoffLayer = {"r": [], "z": []}
         for iz in range(nz):
-            [ir, rloc] = nearest(omegaR[:, iz], omega_ec)
+            [ir, rloc] = getClosestOfGivenValueFromArray(omegaR[:, iz], omega_ec)
             if np.abs((omegaR[ir, iz] - omega_ec) / omegaR[ir, iz]) < omegaErr:
                 cutoffLayer["r"].append(r[ir])
                 cutoffLayer["z"].append(z[iz])

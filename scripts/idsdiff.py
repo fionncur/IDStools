@@ -18,7 +18,7 @@ from io import BytesIO
 
 root_path = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(root_path)
-from idstools2.compute.common.basic import compare_ids
+from idstools2.compute.common.basic import compareIds
 from idstools2.utils.dd_helper import DDHelper
 
 THRESHOLD_PERCENT = 2
@@ -537,7 +537,7 @@ if __name__ == "__main__":
     for idsname in args.ids:
         idsA = inputA.get(idsname)
         idsB = inputB.get(idsname)
-        compare_result, output = compare_ids(
+        compare_result, output = compareIds(
             idsA, idsB, field=idsname, ignore_version=args.skip_provenance, output={}
         )
         data[idsname] = (compare_result, output)

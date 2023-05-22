@@ -37,20 +37,6 @@ parser.add_argument("-r", "--run", help="Run number", required=True, type=int)
 
 args = parser.parse_args()
 
-database_abs_path = ""
-if args.user == "public":
-    database_abs_path = (
-        os.environ["IMAS_HOME"] + "/shared/imasdb/" + args.database + "/3"
-    )
-else:
-    database_abs_path = (
-        os.path.expanduser("~{}".format(args.user))
-        + "/public/imasdb/"
-        + args.database
-        + "/3"
-    )
-hostdir = os.environ["HOSTNAME"] + ":" + database_abs_path
-
 connectionIn = imas.DBEntry(
     get_backend_id(args.backend), args.database, args.shot, args.run, args.user
 )

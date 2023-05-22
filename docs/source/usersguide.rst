@@ -195,6 +195,7 @@ Example
         :alt: image not found
         :align: center
 
+
     .. image:: _static/images/idsdiff_2.png
         :alt: image not found
         :align: center

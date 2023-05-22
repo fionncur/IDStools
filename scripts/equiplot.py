@@ -14,7 +14,7 @@ from cli_helper import get_backend_id, imas_parser, setup_logger
 from idstools2.view.common.basic import Canvas
 from idstools2.view.equilibrium.basic import EquilibriumView
 from idstools2.view.pf_active.basic import PFActiveView
-from idstools2.compute.common.basic import nearest
+from idstools2.compute.common.basic import getClosestOfGivenValueFromArray
 
 
 parser = argparse.ArgumentParser(
@@ -85,7 +85,9 @@ if err != 0:
 
 idsObjEquilibrium = imas.equilibrium()
 idsObjEquilibrium.time = connection.partial_get("equilibrium", "time", args.occurrence)
-timeIndex, timeValue = nearest(idsObjEquilibrium.time, args.time)
+timeIndex, timeValue = getClosestOfGivenValueFromArray(
+    idsObjEquilibrium.time, args.time
+)
 idsObjEquilibrium.time_slice.resize(1)
 idsObjEquilibrium.time_slice[0] = connection.partial_get(
     "equilibrium", f"time_slice({str(timeIndex)})", args.occurrence
