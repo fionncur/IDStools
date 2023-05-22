@@ -17,7 +17,7 @@ class EdgeProfilesView(Console):
         print("edge_profiles")
         print("   ------------")
         composition_data = (
-            EdgeProfilesCompute.get_plasma_composition_with_species_concentration(
+            EdgeProfilesCompute.getPlasmaCompositionWithSpeciesConcentration(
                 ids_object, slice_index
             )
         )
