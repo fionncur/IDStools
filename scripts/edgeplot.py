@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 # TODO Edgeplot is added in develop2.0 developed by Anna https://confluence.iter.org/display/IMP/How+to+plot+data+from+edge_profiles
-# TODO Refactor code
+# TODO modularised code in compute and view functions
 import argparse
 import contextlib
 import imas

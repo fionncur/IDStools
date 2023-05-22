@@ -147,7 +147,7 @@ class EquilibriumView(BasePlot):
         Returns:
             list containing two plot objects: ax_topview_plot_eq1 and ax_topview_plot_eq2.
         """
-        # TODO: Refcator update mechanism of the plot
+        # TODO: Refactor update mechanism of the plot
         data = self.computeObj.getTopView(timeIndex)
         ax_topview_plot_eq1 = 0
         ax_topview_plot_eq2 = 0

@@ -67,7 +67,7 @@ class WavesView:
         # ax_polview_plot_traces[ibeam] = {}
         if is_active[beamIndex] == 1:
             for iray in range(nray):
-                # TODO: update mechanism needs to be centralied
+                # TODO: update mechanism needs to be centralized
                 if update == True:
                     (ax_polview_plot_traces[iray],) = ax.plot(
                         r_ray[beamIndex, iray, : len_ray[beamIndex, iray]],

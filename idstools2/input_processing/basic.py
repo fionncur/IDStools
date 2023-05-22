@@ -9,7 +9,7 @@ def read_wall(wallfile):
     return wall2d
 
 
-# TODO Confused about these functions where should we put them
+# TODO We will wait till we have new ids then will move these functions under that ids
 def read_launching_parameters(filelaunchers):
 
     # read launching parameters
@@ -107,7 +107,7 @@ def read_torbeam_output(launching_parameters, path_result):
     from functools import cmp_to_key
 
     # Sort the list of files according to the time slices
-    # TODO This logic can break easily
+    # TODO This logic can break easily if file names are not according to logic
     def mysort(x):
         return float(os.path.split(x)[1].split("_")[2].replace("t", ""))
 
@@ -123,7 +123,7 @@ def read_torbeam_output(launching_parameters, path_result):
     # this reqires a mapping between output and input
     # ec_launchers.beam[mapl[i]] contains the input data for output beam i
     # default is a 1:1 mapping (all launchers active)
-    # TODO EC launchers are not defined
+    # FIXME EC launchers are not defined, refactoring is needed with discussion with Mireille
     mapl = np.arange(nlaunchers, dtype=np.int_)
     if nlaunchers != lec_launchers:
         j = 0

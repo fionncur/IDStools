@@ -8,7 +8,7 @@ import matplotlib.colorbar as cbar
 from matplotlib.colors import LogNorm
 
 
-# TODO Need to work on this as we do't have IDS here
+# TODO Wait till we have new ids and then refactor
 class TbdView:
     def __init__(self):
         pass
@@ -46,7 +46,7 @@ class TbdView:
         imax = np.where(lwall >= lmax)[0][0]
         # find Rmax
         irmax = np.argmax(edges[imin : imax + 1, 0]) + imin
-        # TODO edge is not defined
+        # FIXME edge is not defined here, might raise runtime error
         if irmax == imin:
             Rmax = edge[imin, 0] + (lmin - lwall[imin]) / (
                 lwall[imin + 1] - lwall[imin]
