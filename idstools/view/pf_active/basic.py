@@ -34,8 +34,8 @@ class PFActiveView:
             .. code-block:: python
 
                 import imas
-                from idstools2.view.pf_active.basic import PFActiveView
-                from idstools2.view.common.basic import Canvas
+                from idstools.view.pf_active.basic import PFActiveView
+                from idstools.view.common.basic import Canvas
 
                 input = imas.DBEntry(imas.imasdef.MDSPLUS_BACKEND,'ITER',135005,4,'public')
                 input.open()

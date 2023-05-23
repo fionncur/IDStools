@@ -11,10 +11,10 @@ sys.path.append(root_path)
 
 from cli_helper import get_backend_id, imas_parser, setup_logger
 
-from idstools2.view.common.basic import Canvas
-from idstools2.view.equilibrium.basic import EquilibriumView
-from idstools2.view.pf_active.basic import PFActiveView
-from idstools2.compute.common.basic import getClosestOfGivenValueFromArray
+from idstools.view.common.basic import Canvas
+from idstools.view.equilibrium.basic import EquilibriumView
+from idstools.view.pf_active.basic import PFActiveView
+from idstools.compute.common.basic import getClosestOfGivenValueFromArray
 
 
 parser = argparse.ArgumentParser(

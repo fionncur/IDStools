@@ -11,8 +11,8 @@ for additional information and examples.
    :caption: Overview 
 
 
-   idstools2.compute
-   idstools2.view
-   idstools2.domain
+   idstools.compute
+   idstools.view
+   idstools.domain
 
 

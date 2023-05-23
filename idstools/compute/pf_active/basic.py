@@ -32,8 +32,8 @@ class PfActiveCompute:
 
                 import pprint
                 import imas
-                from idstools2.compute.pf_active.basic import PfActiveCompute
-                from idstools2.view.common.basic import Canvas
+                from idstools.compute.pf_active.basic import PfActiveCompute
+                from idstools.view.common.basic import Canvas
 
                 connection = imas.DBEntry(imas.imasdef.MDSPLUS_BACKEND,'ITER',135005,4,'public')
                 connection.open()

@@ -12,7 +12,6 @@
 #    n_over_ne:    4.45e-06  0.387     0.414     5.89e-07  9.58e-03  0.020     0.010
 #    n_over_n_maj: 1.07e-05  0.933     1.000     1.42e-06  0.023     0.048     0.024
 
-# from idstools.cli import *
 import argparse
 import logging
 import imas
@@ -25,8 +24,8 @@ from cli_helper import imas_parser, get_backend_id
 
 root_path = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(root_path)
-from idstools2.view.core_profiles.basic import CoreProfilesView
-from idstools2.view.edge_profiles.basic import EdgeProfilesView
+from idstools.view.core_profiles.basic import CoreProfilesView
+from idstools.view.edge_profiles.basic import EdgeProfilesView
 
 parser = argparse.ArgumentParser(
     description="---- Display the plasma composition from the core_profiles IDS",
@@ -103,8 +102,7 @@ if core_profiles_ids.time is not None:
         "core_profiles", f"profiles_1d({slice_index})"
     )
     logger.info(
-        "core_profiles IDS:Using time slice where maximum electrons density is present, Time slice:"
-        + str(slice_index)
+        f"core_profiles IDS:Using time slice where maximum electrons density is present, Time slice:{slice_index}"
     )
     core_profiles_ids.profiles_1d.resize(1)
     core_profiles_ids.profiles_1d[0] = profiles_1d_slice
@@ -143,8 +141,7 @@ else:
 
 if edge_profiles_ids.time is not None:
     logger.info(
-        "edge_profiles IDS:Using time slice where maximum electrons density is present in core, Time slice:"
-        + str(slice_index)
+        f"edge_profiles IDS:Using time slice where maximum electrons density is present in core, Time slice:{slice_index}"
     )
     edge_profiles_ids.ggd.resize(1)
     edge_profiles_ids.ggd[0] = connection.partial_get(
@@ -202,8 +199,7 @@ if edge_profiles_ids.time is not None:
                     index_counter = index_counter + 1
             if len(elements) != 0:
                 logger.info(
-                    "edge_profiles IDS:Using nearby time slice in edge where maximum electrons density is present in core, Time slice:"
-                    + str(time_slice)
+                    f"edge_profiles IDS:Using nearby time slice in edge where maximum electrons density is present in core, Time slice:{time_slice}"
                 )
                 edge_profiles_ids.ggd.resize(1)
                 edge_profiles_ids.ggd[0] = connection.partial_get(
@@ -236,12 +232,9 @@ else:
         "edge_profiles IDS:No edge_profiles IDS in the data-entry. --> Abort."
     )
 
-profile_availability_string = ""
-if core_profile_exists is False:
-    profile_availability_string += "core -\t"
-else:
-    profile_availability_string += "core +\t"
-
+profile_availability_string = "" + (
+    "core -\t" if not core_profile_exists else "core +\t"
+)
 if edge_profile_exists is False:
     profile_availability_string += "edge -\t"
 else:

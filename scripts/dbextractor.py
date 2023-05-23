@@ -10,7 +10,7 @@ from database_tools.db_helpers import *
 
 root_path = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(root_path)
-from idstools2.database.basic import DatabaseTools
+from idstools.database.basic import DatabaseTools
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(

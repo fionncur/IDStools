@@ -10,7 +10,6 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-import idstools
 import os
 import sys
 
@@ -26,10 +25,10 @@ project = "IDSTools"
 copyright = "2023, ITER Organization"
 author = "ITER Organization"
 
-# The full version, including alpha/beta/rc tags
-release = idstools.__version__
 
-
+# import idstools
+# release = idstools.__version__
+release = "1.0.0"
 # -- General configuration ---------------------------------------------------
 
 # Add any Sphinx extension module names here, as strings. They can be
@@ -125,13 +124,15 @@ html_sidebars = {
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
+# The full version, including alpha/beta/rc tags
+
 html_title = f"{project} v{release} Manual"
 
 html_static_path = ["_static"]
 html_css_files = ["idstools.css"]
 # html_context = {"default_mode": "light"}
 html_file_suffix = ".html"
-htmlhelp_basename = "idstools"
+htmlhelp_basename = "IDSTools"
 
 # Configuration of sphinx.ext.autosummary
 # https://www.sphinx-doc.org/en/master/usage/extensions/autosummary.html

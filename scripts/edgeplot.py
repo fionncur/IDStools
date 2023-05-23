@@ -7,7 +7,7 @@ import contextlib
 import imas
 import logging
 import numpy as np
-import matplotlib, os
+import matplotlib, os,sys
 
 if "DISPLAY" not in os.environ:
     matplotlib.use("agg")
@@ -16,6 +16,9 @@ else:
 import matplotlib.pyplot as plt
 from scipy import interpolate
 from scipy.spatial import ConvexHull, convex_hull_plot_2d
+
+root_path = os.path.dirname(os.path.dirname(__file__))
+sys.path.append(root_path)
 from idstools.cli import get_backend_id
 from idstools.cli import imas_parser
 from cli_helper import setup_logger

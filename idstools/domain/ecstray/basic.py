@@ -2,9 +2,9 @@ import itertools
 import numpy as np
 from scipy import constants, interpolate
 
-from idstools2.compute.equilibrium.basic import EquilibriumCompute
-from idstools2.compute.waves.basic import WavesCompute
-from idstools2.compute.common.basic import getClosestOfGivenValueFromArray
+from idstools.compute.equilibrium.basic import EquilibriumCompute
+from idstools.compute.waves.basic import WavesCompute
+from idstools.compute.common.basic import getClosestOfGivenValueFromArray
 
 
 class EcStrayCompute:

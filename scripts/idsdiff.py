@@ -13,13 +13,13 @@ import sys
 import tempfile
 import time
 
-from idstools.cli import get_backend_id, imas_parser
 from io import BytesIO
 
 root_path = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(root_path)
-from idstools2.compute.common.basic import compareIds
-from idstools2.utils.dd_helper import DDHelper
+from idstools.compute.common.basic import compareIds
+from idstools.utils.dd_helper import DDHelper
+from idstools.cli import get_backend_id, imas_parser
 
 THRESHOLD_PERCENT = 2
 

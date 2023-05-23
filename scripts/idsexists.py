@@ -1,9 +1,15 @@
 #!/usr/bin/env python3
-
 import argparse
+import os
+import sys
+
 import imas
-from idstools import idslist
+
+root_path = os.path.dirname(os.path.dirname(__file__))
+sys.path.append(root_path)
+
 from database_tools import db_helpers
+from idstools import idslist
 from idstools.cli import get_backend_id, imas_parser
 
 progbar = True

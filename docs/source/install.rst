@@ -4,8 +4,21 @@ Installation
 Because *IDSTools* is a Python package, the Python environment is required. Its functioning depends on IMAS and the data dictionary. 
 As a result, before running *IDSTools* scripts, the IMAS environment must be loaded.
 
-Installing on the ITER cluster
-------------------------------
+For users
+---------
+
+Install using pip
+
+.. code-block:: bash
+
+    git clone ssh://git@git.iter.org/imas/idstools.git
+    cd idstools
+    pip install --upgrade pip
+    pip install --upgrade wheel setuptools
+    pip install .
+
+.. note::
+    If you are using ITER sdcc cluster then IDSTools is available by doing module load as shown below
 
 .. code-block:: bash
 
@@ -20,18 +33,10 @@ In addition, several versions of *IDSTools* are available on the cluster.
     # IDStools/1.14.0-gfbf-2022b
     # IDStools/1.14.0-intel-2020b
 
-Local installation
-------------------
-.. code-block:: bash
 
-    git clone ssh://git@git.iter.org/imas/idstools.git
-    cd idstools
-    pip install --upgrade pip
-    pip install --upgrade wheel setuptools
-    pip install .
 
-Development installation
-------------------------
+For Developers
+--------------
 
 Clone *IDSTools* repository. 
 
@@ -45,8 +50,8 @@ The *IDSTools* test suite should be run as follows.:
 
 .. code-block:: bash
 
-   cd idstools
-   pytest
+    cd idstools
+    pytest
 
 To build the *IDSTools* documentation, execute:
 

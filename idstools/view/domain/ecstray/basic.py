@@ -51,7 +51,7 @@ class EcStrayView:
                 :align: center
 
         See also:
-            :func:`idstools2.domain.ecstray.basic.EcStrayCompute.getResonanceLayer`
+            :func:`idstools.domain.ecstray.basic.EcStrayCompute.getResonanceLayer`
 
         """
         res_layer = self.ecstray_object.getResonanceLayer(time_index_wv, time_index_eq)
@@ -118,7 +118,7 @@ class EcStrayView:
                 :align: center
 
         See also:
-            :func:`idstools2.domain.ecstray.basic.EcStrayCompute.getCutoffLayer`
+            :func:`idstools.domain.ecstray.basic.EcStrayCompute.getCutoffLayer`
         """
         # Calculate density cutoff layer position
         cutoff_layer = self.ecstray_object.getCutoffLayer(

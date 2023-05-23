@@ -35,8 +35,8 @@ class EquilibriumView(BasePlot):
             .. code-block:: python
 
                 import imas
-                from idstools2.view.equilibrium.basic import EquilibriumView
-                from idstools2.view.common.basic import Canvas
+                from idstools.view.equilibrium.basic import EquilibriumView
+                from idstools.view.common.basic import Canvas
 
                 input = imas.DBEntry(imas.imasdef.MDSPLUS_BACKEND,'ITER',134173,106,'public')
                 input.open()
@@ -56,8 +56,8 @@ class EquilibriumView(BasePlot):
                 :align: center
 
         See also:
-            :func:`idstools2.compute.equilibrium.basic.EquilibriumCompute.get2DCartesianGrid`
-            :func:`idstools2.compute.equilibrium.basic.EquilibriumCompute.getRho2D`
+            :func:`idstools.compute.equilibrium.basic.EquilibriumCompute.get2DCartesianGrid`
+            :func:`idstools.compute.equilibrium.basic.EquilibriumCompute.getRho2D`
 
             :meth:`plot_ip`
         """
