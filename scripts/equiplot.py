@@ -9,13 +9,14 @@ import os
 root_path = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(root_path)
 
-from cli_helper import get_backend_id, imas_parser, setup_logger
+
 
 from idstools.view.common.basic import Canvas
 from idstools.view.equilibrium.basic import EquilibriumView
 from idstools.view.pf_active.basic import PFActiveView
 from idstools.compute.common.basic import getClosestOfGivenValueFromArray
-
+from idstools.helper import setup_logger
+from idstools.cli import get_backend_id, imas_parser
 
 parser = argparse.ArgumentParser(
     description="---- Display the plasma equilibrium from the equilibrium IDS. It also shows pf coils position overlay if exists",

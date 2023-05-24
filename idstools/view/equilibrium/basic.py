@@ -24,7 +24,13 @@ class EquilibriumView(BasePlot):
         self.ids = ids
         self.computeObj = EquilibriumCompute(ids)
 
-    def viewMagneticPoloidalFlux(self, ax: plt.Axes, plotRho: bool = False):
+    def viewMagneticPoloidalFlux(
+        self,
+        ax: plt.Axes,
+        timeSlice: int = 0,
+        profiles2DIndex: int = 0,
+        plotRho: bool = False,
+    ):
         """
         This function plots the magnetic poloidal flux contours on a 2D Cartesian grid.
 
@@ -61,7 +67,9 @@ class EquilibriumView(BasePlot):
 
             :meth:`plot_ip`
         """
-        cartestionGrid = self.computeObj.get2DCartesianGrid()
+        cartestionGrid = self.computeObj.get2DCartesianGrid(
+            timeSlice, profiles2DIndex
+        )
         if cartestionGrid is not None:
             levels = 30
             if plotRho:

@@ -7,12 +7,12 @@ import numpy
 import os
 import sys
 
-from cli_helper import setup_logger
 
 root_path = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(root_path)
 
 from idstools.cli import get_backend_id, imas_parser
+from idstools.helper import setup_logger
 
 logger = setup_logger("module", logging.WARN)
 

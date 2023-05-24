@@ -40,13 +40,18 @@ if __name__ == "__main__":
             "/work/imas/shared/imasdb/ITER/3/0", with_status="active"
         )
 
-    for pulse in (
-        track(pulselist, description="Analyzing DB...") if progbar else pulselist
-    ):
-        db = imas.DBEntry(
-            get_backend_id(args.backend), args.database, pulse[0], pulse[1], args.user
-        )
-        db.open()
-        ids_list = idslist.available_in_dbentry(db)
-        if any(args.ids in ids for ids in ids_list):
-            print(pulse)
+    if pulselist is not None:
+        for pulse in (
+            track(pulselist, description="Analyzing DB...") if progbar else pulselist
+        ):
+            db = imas.DBEntry(
+                get_backend_id(args.backend),
+                args.database,
+                pulse[0],
+                pulse[1],
+                args.user,
+            )
+            db.open()
+            ids_list = idslist.available_in_dbentry(db)
+            if any(args.ids in ids for ids in ids_list):
+                print(pulse)

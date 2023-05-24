@@ -21,7 +21,7 @@ root_path = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(root_path)
 from idstools.cli import get_backend_id
 from idstools.cli import imas_parser
-from cli_helper import setup_logger
+from idstools.helper import setup_logger
 
 parser = argparse.ArgumentParser(
     description="---- Edge Profile plot",

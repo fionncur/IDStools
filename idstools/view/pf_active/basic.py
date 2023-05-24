@@ -12,8 +12,10 @@ from ...compute.pf_active.basic import PfActiveCompute
 
 logger = logging.getLogger("module")
 
+
 class PFActiveView:
     """This class provides view functions for pf_active ids"""
+
     def __init__(self, idsObj: object):
         """Initialization PFActiveView object.
 
@@ -23,13 +25,13 @@ class PFActiveView:
         self.idsObj = idsObj
         self.computeObj = PfActiveCompute(idsObj)
 
-    def viewActivePfCoils(self, ax:plt.axes):
+    def viewActivePfCoils(self, ax: plt.axes):
         """
         This function plots and annotates the active PF coils on a existing plot.
-        
+
         Args:
             ax (plt.axes): `ax` is a parameter of type `plt.axes`, It is used to add patches (such as rectangles) and annotations to the plot.
-        
+
         Example:
             .. code-block:: python
 
@@ -49,7 +51,7 @@ class PFActiveView:
 
                 ax.plot()
                 canvas.show()
-                
+
             .. image:: ../../_static/images/PFActiveView_viewActivePfCoils.png
                 :alt: image not found
                 :align: center
@@ -72,6 +74,7 @@ class PFActiveView:
                         ha="center",
                         va="center",
                     )
+            ax.set_aspect("equal", adjustable="box")
 
         else:
             logger.error("No PF Coils found in the IDS data")

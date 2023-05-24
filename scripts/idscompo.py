@@ -19,13 +19,13 @@ import numpy as np
 import os
 import sys
 
-from cli_helper import setup_logger
-from cli_helper import imas_parser, get_backend_id
 
 root_path = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(root_path)
 from idstools.view.core_profiles.basic import CoreProfilesView
 from idstools.view.edge_profiles.basic import EdgeProfilesView
+from idstools.helper import setup_logger
+from idstools.cli import imas_parser, get_backend_id
 
 parser = argparse.ArgumentParser(
     description="---- Display the plasma composition from the core_profiles IDS",
