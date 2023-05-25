@@ -21,9 +21,16 @@ help:
 	@echo Running '$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)'
 	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O) -Tvv
 
+clean: Makefile
+	@echo Running '$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)'
+	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
+	
 apidocs: Makefile
-	sphinx-apidoc --implicit-namespaces -o "$(GENERATEDDIR)" "$(PROJECT_ROOT)/src/"
+	sphinx-apidoc --implicit-namespaces -o "$(GENERATEDDIR)" "$(PROJECT_ROOT)/idstools/"
 
 # Sphinx will run this automatically
 autogen: Makefile
 	sphinx-autogen -o "$(GENERATEDDIR)" $(SOURCEDIR)/*.rst
+
+realclean: Makefile clean
+	rm -rf $(SOURCEDIR)/_autosummary $(GENERATEDDIR) $(SOURCEDIR)/_build/

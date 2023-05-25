@@ -1,0 +1,102 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+import argparse
+import imas
+import logging
+import numpy
+import os
+import sys
+
+
+root_path = os.path.dirname(os.path.dirname(__file__))
+sys.path.append(root_path)
+
+from idstools.cli import get_backend_id, imas_parser
+from idstools.helper import setup_logger
+
+logger = setup_logger("module", logging.WARN)
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        description="Prints content of an IDS onto the terminal",
+        formatter_class=argparse.RawTextHelpFormatter,
+        parents=[imas_parser],
+    )
+
+    parser.add_argument("-s", "--shot", help="Shot number", required=True, type=int)
+    parser.add_argument("-r", "--run", help="Run number", required=True, type=int)
+    parser.add_argument(
+        "ids",
+        type=str,
+        help="Name of the IDS to dump",
+    )
+    parser.add_argument("path", nargs="?", type=str, help="Data path", default=None)
+    parser.add_argument(
+        "-f",
+        "--full",
+        action="store_true",
+        help="Print all array elements (can be very slow for large data)",
+    )
+
+    args = parser.parse_args()
+
+    if args.full:
+        numpy.set_printoptions(threshold=sys.maxsize)
+
+    connection = imas.DBEntry(
+        get_backend_id(args.backend),
+        args.database,
+        args.shot,
+        args.run,
+        args.user,
+    )
+    status, _ = connection.open()
+    if status != 0:
+        logger.error(
+            f"Shot {args.shot}, run {args.run} for user={args.user} and database={args.database} does not exists"
+        )
+        exit(1)
+
+    nameocc = args.ids.split("/")
+    if len(nameocc) == 1:
+        occurrence = 0
+    elif len(nameocc) == 2:
+        occurrence = int(nameocc[1])
+    else:
+        logger.error(f'ERROR: "{args.ids}" syntax error!')
+        exit(1)
+    idsname = nameocc[0]
+
+    if args.path is None:
+        ids = connection.get(idsname, occurrence)
+        print(ids)
+    else:
+        try:
+            result = connection.partial_get(idsname, args.path, occurrence)
+        except Exception as exc:
+            logger.error(exc)
+            exit(1)
+
+        resultType = type(result)
+        print(f"Type: {resultType}")
+        if result.__class__ == numpy.ndarray:
+            print(f"Shape: {result.shape}")
+            print(f"Data type: {result.dtype.name}")
+
+        print("----------------------------------------------")
+        if result.__class__ == numpy.ndarray and len(result) < 1:
+            exit(0)
+
+        print("----------------------------------------------")
+        if (
+            result.__class__ == numpy.ndarray
+            and result[0].__class__.__module__ != "numpy"
+        ):
+            for i in range(len(result)):
+                idsDump = result[i]
+                print(idsDump)
+                print("-------------------------")
+        else:
+            print(result)
+    connection.close()

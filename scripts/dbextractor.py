@@ -1,19 +1,19 @@
 # Return values of an IDS in all data entries of a database
 
-import sys
-from imas import imasdef
-import pandas as pd
 import argparse
+import os
+import sys
 from pathlib import Path
-from idstools.cli import *
-from database_tools.db_helpers import *
+import pandas as pd
+from imas import imasdef
 
 root_path = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(root_path)
-from src.database.functions import DatabaseTools
+from database_tools.db_helpers import getDBPath, hdf5ListPulseRun, mdsListPulseRun
+from idstools.cli import get_backend_id, imas_parser
+from idstools.database.basic import DatabaseTools
 
 if __name__ == "__main__":
-
     parser = argparse.ArgumentParser(
         description="Extracts given quantities from all data entries of a given database",
         parents=[imas_parser],
@@ -41,7 +41,8 @@ if __name__ == "__main__":
     #    print(f"database located in {locpath}")
 
     backend = get_backend_id(args.backend)
-
+    
+    pluses=None
     if backend == imasdef.MDSPLUS_BACKEND:
         pulses = mdsListPulseRun(locpath, with_status=args.status)
     elif backend == imasdef.HDF5_BACKEND:
@@ -52,16 +53,16 @@ if __name__ == "__main__":
 
     # if args.verbose:
     #    print(pulses)
+    if pulses is not None:
+        df = DatabaseTools.getIdsDataFrameFromPulseDatabase(
+            args.user, args.database, args.version, backend, args.idspath, tuple(pulses)
+        )
 
-    df = DatabaseTools.get_idsdata_in_dataframes_from_pulses(
-        args.user, args.database, args.version, backend, args.idspath, pulses
-    )
-
-    if args.saveas:
-        if not Path(args.saveas).parent.exists():
-            raise FileNotFoundError(
-                "The path provided does not exist or has no such database file or directory. Please check spelling."
-            )
-        df.to_csv(args.saveas, na_rep="None", index=True, header=True)
-    else:
-        print(df.to_markdown())
+        if args.saveas:
+            if not Path(args.saveas).parent.exists():
+                raise FileNotFoundError(
+                    "The path provided does not exist or has no such database file or directory. Please check spelling."
+                )
+            df.to_csv(args.saveas, na_rep="None", index=True, header=True)
+        else:
+            print(df.to_markdown())

@@ -1,21 +1,25 @@
+#!/usr/bin/env python3
+
 import argparse
 import imas
+import logging
 import sys
 import os
 
 root_path = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(root_path)
 
-from idstools.cli import get_backend_id
-from idstools.cli import imas_parser
 
-from src.view.common.functions import Canvas
-from src.view.equilibrium.functions import EquilibriumView
-from src.view.pf_active.functions import PFCoilsView
-from src.compute.common.functions import nearest
+
+from idstools.view.common.basic import Canvas
+from idstools.view.equilibrium.basic import EquilibriumView
+from idstools.view.pf_active.basic import PFActiveView
+from idstools.compute.common.basic import getClosestOfGivenValueFromArray
+from idstools.helper import setup_logger
+from idstools.cli import get_backend_id, imas_parser
 
 parser = argparse.ArgumentParser(
-    description="---- Display the plasma equilibrium from the equilibrium IDS",
+    description="---- Display the plasma equilibrium from the equilibrium IDS. It also shows pf coils position overlay if exists",
     parents=[imas_parser],
 )
 parser.add_argument("-s", "--shot", help="Shot number", required=True, type=int)
@@ -30,33 +34,38 @@ parser.add_argument(
     type=int,
     default=0,
 )
-parser.add_argument("-p", "--plotrho", help="Plots rho(R,Z)", action="store_true")
 parser.add_argument(
-    "-a",
-    "--allInfo",
-    help="Adds all extra provenance info to the plot",
+    "--rho",
+    help="Show pf coils overlay on the plot",
     action="store_true",
 )
 parser.add_argument(
-    "-c",
     "--pfcoils",
     help="Show pf coils overlay on the plot",
     action="store_true",
 )
+
+parser.add_argument(
+    "--save",
+    help="Save figure at default location",
+    action="store_true",
+)
+parser.add_argument(
+    "-i",
+    "--info",
+    help="Adds all extra provenance info to the plot",
+    action="store_true",
+)
 args = parser.parse_args()
 
+logger = setup_logger("module", logging.WARN)
+
 database_abs_path = ""
-if args.user == "public":
-    database_abs_path = (
-        os.environ["IMAS_HOME"] + "/shared/imasdb/" + args.database + "/3"
-    )
-else:
-    database_abs_path = (
-        os.path.expanduser("~{}".format(args.user))
-        + "/public/imasdb/"
-        + args.database
-        + "/3"
-    )
+database_abs_path = (
+    (os.environ["IMAS_HOME"] + "/shared/imasdb/" + args.database + "/3")
+    if args.user == "public"
+    else f'{os.path.expanduser(f"~{args.user}")}/public/imasdb/{args.database}/3'
+)
 hostdir = os.environ["HOSTNAME"] + ":" + database_abs_path
 
 connection = imas.DBEntry(
@@ -64,50 +73,54 @@ connection = imas.DBEntry(
 )
 err, n = connection.open()
 if err != 0:
-    # TODO chek if you can raise exception or just print or may be use logger
-    print(
+    logger.error(
         "Shot {0}, run {1} for user={2} and database={3} does not exists".format(
             args.shot, args.run, args.user, args.database
-        ),
-        file=sys.stderr,
+        )
     )
-    print("----> Aborted.", file=sys.stderr)
-    exit()
+    raise FileNotFoundError(
+        "Shot {0}, run {1} for user={2} and database={3} does not exists".format(
+            args.shot, args.run, args.user, args.database
+        )
+    )
 
-# Get ids Object - equilibrium
-equilibrium_ids = imas.equilibrium()
-equilibrium_ids.time = connection.partial_get("equilibrium", "time", args.occurrence)
-time_index, time_value = nearest(equilibrium_ids.time, args.time)
-equilibrium_ids.time_slice.resize(1)
-equilibrium_ids.time_slice[0] = connection.partial_get(
-    "equilibrium", "time_slice(" + str(time_index) + ")", args.occurrence
+idsObjEquilibrium = imas.equilibrium()
+idsObjEquilibrium.time = connection.partial_get("equilibrium", "time", args.occurrence)
+timeIndex, timeValue = getClosestOfGivenValueFromArray(
+    idsObjEquilibrium.time, args.time
 )
-# Get ids Object - pf active
-pf_active_ids = connection.get("pf_active")
-
+idsObjEquilibrium.time_slice.resize(1)
+idsObjEquilibrium.time_slice[0] = connection.partial_get(
+    "equilibrium", f"time_slice({str(timeIndex)})", args.occurrence
+)
+title = "2D Equilibrium"
 canvas = Canvas(1, 1)
-ax = canvas.add_axes(title="PF Coils", xlabel="", row=0, col=0)
-# if args.pfcoils is True:
-pfcoilsview = PFCoilsView(pf_active_ids)
-pfcoilsview.view_pf_coils(ax)
+ax = canvas.add_axes(title="", xlabel="", row=0, col=0)
 
-equilibriumview = EquilibriumView(equilibrium_ids)
+if args.pfcoils is True:
+    idsObjPfActive = imas.pf_active()
+    idsObjPfActive.coil = connection.partial_get("pf_active", "coil")
+    ViewPfCoils = PFActiveView(idsObjPfActive)
+    ViewPfCoils.viewActivePfCoils(ax)
+    title += " Active PF Coils"
 
-equilibriumview.view_magnetic_poloidal_flux(ax)
-if args.allInfo is True:
-    equilibriumview.view_database_info(
-        ax, "2D Equilibrium", hostdir, args.shot, args.run, args.time
-    )
+idsObjEquilibrium = connection.get("equilibrium")
+ViewEquilibrium = EquilibriumView(idsObjEquilibrium)
+ViewEquilibrium.viewMagneticPoloidalFlux(ax, plotRho=args.rho)
 
+if args.info is True:
+    ViewEquilibrium.viewPulseInfo(ax, title, hostdir, args.shot, args.run, args.time)
+ax.set_title(title)
 ax.plot()
 
-try:
-    fname = "Equilibrium_shot_{0}_run_{1}_time_{2:.1f}.png".format(
-        args.shot, args.run, args.time
-    )
-    canvas.save(fname)
-    print("----> Figure saved to " + fname, file=sys.stderr)
-except:
-    print("The figure could not be saved (check local permissions).", file=sys.stderr)
+if args.save:
+    try:
+        fname = "Equilibrium_shot_{0}_run_{1}_time_{2:.1f}.png".format(
+            args.shot, args.run, args.time
+        )
+        canvas.save(fname)
+        logger.info(f"----> Figure saved to {fname}")
+    except Exception:
+        logger.error("The figure could not be saved (check local permissions).")
 
 canvas.show()

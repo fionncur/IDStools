@@ -32,10 +32,10 @@ script_files.append("idstools/idsdef.py")
 
 
 setup(
-    name="IMAS IDS Tools",
+    name="IDStools",
     version=versioneer.get_version(),
     cmdclass=versioneer.get_cmdclass(),
-    description="IMAS IDS Python tools",
+    description="IMAS Python tools for IDSs",
     author="ITER Organization",
     author_email="imas-support@iter.org",
     url="https://imas.iter.org/",
