@@ -49,6 +49,178 @@ Example
     n_over_n_maj: 1.07e-05  0.933     1.000     1.42e-06  0.023     0.048     0.024
 
 
+idscp
+-----
+
+*idscp* tool helps you to copy  ids from one pulse to another
+
+
+Syntax
+~~~~~~
+
+    .. code-block:: bash
+
+        $ python scripts/idscp.py -h
+        usage: idscp.py [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] -si SHOT_INPUT -ri
+                        RUN_INPUT -so SHOT_OUTPUT -ro RUN_OUTPUT [-do DATABASE_OUTPUT] [-bo BACKEND_OUTPUT] [-f]
+                        [--setDatasetVersion] [-a | -o OUTPUTOCCURRENCE]
+                        [ids [ids ...]]
+
+        Copy IDSs from a data-entry into another one
+
+        positional arguments:
+        ids                   IDSs to copy (leave empty to select all IDSs with default occurrence, or append "/n" to
+                                copy a specific occurrence "n")
+
+        optional arguments:
+        -h, --help            show this help message and exit
+        -u USER, --user_or_path USER
+                                user (default=sawantp1)
+        --database DATABASE, -d DATABASE
+                                database name (default=ITER)
+        --backend BACKEND, -b BACKEND
+                                backend format (default=MDSPLUS)
+        --version VERSION, -v VERSION
+                                data version (default=3)
+        -si SHOT_INPUT, --shot_input SHOT_INPUT
+                                Input shot number
+        -ri RUN_INPUT, --run_input RUN_INPUT
+                                Input run number
+        -so SHOT_OUTPUT, --shot_output SHOT_OUTPUT
+                                Output shot number
+        -ro RUN_OUTPUT, --run_output RUN_OUTPUT
+                                Output run number
+        -do DATABASE_OUTPUT, --database_output DATABASE_OUTPUT
+                                Database name for the destination data-entry
+        -bo BACKEND_OUTPUT, --backend_output BACKEND_OUTPUT
+                                Backend name for the destination data-entry
+        -f, --force           Force the creation of destination data-entry (existing data will be lost)
+        --setDatasetVersion   Store current DD version into dataset_description IDS if it exists
+        -a, --allOccurrences  Copy all occurrences available in the source into the destination
+        -o OUTPUTOCCURRENCE, --outputOccurrence OUTPUTOCCURRENCE
+                                Copy the selected source into the specified occurrence at the destination
+
+Example
+~~~~~~~
+
+
+    .. code-block:: bash
+
+        $ python scripts/idscp.py -si 131024 -ri 10 -so 145000 -ro 2
+        Copying equilibrium
+
+idsdiff
+----------
+
+*idsdiff* script shows ids level differences between two runs. It stores result in html document. For signals differences it is also shown as graph.
+
+Syntax
+~~~~~~
+.. code-block:: bash
+
+    $ python idsdiff.py -h
+    usage: idsdiff.py [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION]
+                    [--backendB BACKENDB] [--databaseB DATABASEB] [--userB USERB] [--skip-provenance]
+                    [--generate-html] [--report-dir REPORT_DIR]
+                    shotA runA shotB runB [ids [ids ...]]
+
+    Compare a IDS from 2 datasets
+
+    positional arguments:
+    shotA                 shot number of first dataset
+    runA                  run number of first dataset
+    shotB                 shot number of second dataset
+    runB                  run number of second dataset
+    ids                   Name (or space separated list of names) of IDS to compare (leave empty to compare all IDSs)
+
+    optional arguments:
+    -h,         --help            show this help message and exit
+    -u USER,    --user_or_path USER
+                            user (default=public)
+    --database DATABASE, -d DATABASE
+                            database name (default=ITER)
+    --backend BACKEND, -b BACKEND
+                            backend format (default=MDSPLUS)
+    --version VERSION, -v VERSION
+                            data version (default=3)
+    --backendB BACKENDB   Specifies the backend of second dataset (default: same as first dataset)
+    --databaseB DATABASEB
+                            Specifies the database name of second dataset (default: same as first dataset)
+    --userB USERB         Specifies the owner (username) of second dataset (default: same as first dataset)
+    --skip-provenance     Discards provenance data differences (optional)
+    --generate-html       Generate static html page for showing difference including plots
+    --report-dir REPORT_DIR
+                            Specifies directory where report should be stored
+
+Example
+~~~~~~~
+    .. code-block:: bash
+
+        python scripts/idsdiff.py --generate-html 122525 1 122525 2 summary
+
+    .. image:: _static/images/idsdiff_1.png
+        :alt: image not found
+        :align: center
+
+
+    .. image:: _static/images/idsdiff_2.png
+        :alt: image not found
+        :align: center
+
+
+idsdump
+-------
+
+*idsdump* is a utility that, as the name implies, dumps or prints all data on the console.
+It is handy if you need to rapidly verify if specific fields or attributes have been 
+filled out or empty . The output can also be saved to a file using extraction.
+
+
+Syntax
+~~~~~~
+
+    .. code-block:: bash     
+
+        $ python scripts/idsdump.py -h
+        usage: idsdump.py [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] -s SHOT -r RUN [-f] ids
+
+        Prints content of an IDS onto the terminal
+
+        positional arguments:
+        ids                   Name of the IDS to dump
+
+        optional arguments:
+        -h, --help            show this help message and exit
+        -u USER, --user_or_path USER
+                                user            (default=public)
+        --database DATABASE, -d DATABASE
+                                database name   (default=ITER)
+        --backend BACKEND, -b BACKEND
+                                backend format  (default=MDSPLUS)
+        --version VERSION, -v VERSION
+                                data version    (default=3)
+        -s SHOT, --shot SHOT  Shot number
+        -r RUN, --run RUN     Run number
+        -f, --full            Print all array elements (can be very slow for large data)
+
+
+Example
+~~~~~~~
+
+    .. code-block:: bash
+
+        python scripts/idsdump.py -s 134174 -r 117 equilibrium
+
+        class equilibrium
+        Attribute ids_properties
+            class ids_properties
+            Attribute comment: 
+            Attribute homogeneous_time: 1
+            Attribute source: 
+            Attribute provider: 
+            Attribute creation_date: 
+            Attribute version_put
+
 idsexists
 -----------
 
@@ -141,66 +313,6 @@ Example
         :alt: image not found
         :align: center
 
-
-idsdiff
-----------
-
-*idsdiff* script shows ids level differences between two runs. It stores result in html document. For signals differences it is also shown as graph.
-
-Syntax
-~~~~~~
-.. code-block:: bash
-
-    $ python idsdiff.py -h
-    usage: idsdiff.py [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION]
-                    [--backendB BACKENDB] [--databaseB DATABASEB] [--userB USERB] [--skip-provenance]
-                    [--generate-html] [--report-dir REPORT_DIR]
-                    shotA runA shotB runB [ids [ids ...]]
-
-    Compare a IDS from 2 datasets
-
-    positional arguments:
-    shotA                 shot number of first dataset
-    runA                  run number of first dataset
-    shotB                 shot number of second dataset
-    runB                  run number of second dataset
-    ids                   Name (or space separated list of names) of IDS to compare (leave empty to compare all IDSs)
-
-    optional arguments:
-    -h,         --help            show this help message and exit
-    -u USER,    --user_or_path USER
-                            user (default=public)
-    --database DATABASE, -d DATABASE
-                            database name (default=ITER)
-    --backend BACKEND, -b BACKEND
-                            backend format (default=MDSPLUS)
-    --version VERSION, -v VERSION
-                            data version (default=3)
-    --backendB BACKENDB   Specifies the backend of second dataset (default: same as first dataset)
-    --databaseB DATABASEB
-                            Specifies the database name of second dataset (default: same as first dataset)
-    --userB USERB         Specifies the owner (username) of second dataset (default: same as first dataset)
-    --skip-provenance     Discards provenance data differences (optional)
-    --generate-html       Generate static html page for showing difference including plots
-    --report-dir REPORT_DIR
-                            Specifies directory where report should be stored
-
-Example
-~~~~~~~
-    .. code-block:: bash
-
-        python scripts/idsdiff.py --generate-html 122525 1 122525 2 summary
-
-    .. image:: _static/images/idsdiff_1.png
-        :alt: image not found
-        :align: center
-
-
-    .. image:: _static/images/idsdiff_2.png
-        :alt: image not found
-        :align: center
-
-
 ecstray
 -------
 
@@ -241,118 +353,43 @@ Example
         :align: center
 
 
-
-idsdump
+listids
 -------
 
-*idsdump* is a utility that, as the name implies, dumps or prints all data on the console.
-It is handy if you need to rapidly verify if specific fields or attributes have been 
-filled out or empty . The output can also be saved to a file using extraction.
+*listids* script shows available IDSes in the pulse data and their corresponding time arrays from an IDS object
 
 
 Syntax
 ~~~~~~
+    .. code-block:: bash
 
-    .. code-block:: bash     
+        $ python scripts/listidss.py  -h
+        usage: listidss.py [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] -s SHOT -r RUN
 
-        $ python scripts/idsdump.py -h
-        usage: idsdump.py [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] -s SHOT -r RUN [-f] ids
-
-        Prints content of an IDS onto the terminal
-
-        positional arguments:
-        ids                   Name of the IDS to dump
+        ---- List available IDSes in the pulse
 
         optional arguments:
         -h, --help            show this help message and exit
         -u USER, --user_or_path USER
-                                user            (default=public)
-        --database DATABASE, -d DATABASE
-                                database name   (default=ITER)
-        --backend BACKEND, -b BACKEND
-                                backend format  (default=MDSPLUS)
-        --version VERSION, -v VERSION
-                                data version    (default=3)
-        -s SHOT, --shot SHOT  Shot number
-        -r RUN, --run RUN     Run number
-        -f, --full            Print all array elements (can be very slow for large data)
-
-
-
-
-
-Example
-~~~~~~~
-
-    .. code-block:: bash
-
-        python scripts/idsdump.py -s 134174 -r 117 equilibrium
-
-        class equilibrium
-        Attribute ids_properties
-            class ids_properties
-            Attribute comment: 
-            Attribute homogeneous_time: 1
-            Attribute source: 
-            Attribute provider: 
-            Attribute creation_date: 
-            Attribute version_put
-
-
-idscp
-
-*idscp* tool helps you to copy  ids from one pulse to another
-
-
-Syntax
-~~~~~~
-
-    .. code-block:: bash
-
-        $ python scripts/idscp.py -h
-        usage: idscp.py [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] -si SHOT_INPUT -ri
-                        RUN_INPUT -so SHOT_OUTPUT -ro RUN_OUTPUT [-do DATABASE_OUTPUT] [-bo BACKEND_OUTPUT] [-f]
-                        [--setDatasetVersion] [-a | -o OUTPUTOCCURRENCE]
-                        [ids [ids ...]]
-
-        Copy IDSs from a data-entry into another one
-
-        positional arguments:
-        ids                   IDSs to copy (leave empty to select all IDSs with default occurrence, or append "/n" to
-                                copy a specific occurrence "n")
-
-        optional arguments:
-        -h, --help            show this help message and exit
-        -u USER, --user_or_path USER
-                                user (default=sawantp1)
+                                user (default=public)
         --database DATABASE, -d DATABASE
                                 database name (default=ITER)
         --backend BACKEND, -b BACKEND
                                 backend format (default=MDSPLUS)
         --version VERSION, -v VERSION
                                 data version (default=3)
-        -si SHOT_INPUT, --shot_input SHOT_INPUT
-                                Input shot number
-        -ri RUN_INPUT, --run_input RUN_INPUT
-                                Input run number
-        -so SHOT_OUTPUT, --shot_output SHOT_OUTPUT
-                                Output shot number
-        -ro RUN_OUTPUT, --run_output RUN_OUTPUT
-                                Output run number
-        -do DATABASE_OUTPUT, --database_output DATABASE_OUTPUT
-                                Database name for the destination data-entry
-        -bo BACKEND_OUTPUT, --backend_output BACKEND_OUTPUT
-                                Backend name for the destination data-entry
-        -f, --force           Force the creation of destination data-entry (existing data will be lost)
-        --setDatasetVersion   Store current DD version into dataset_description IDS if it exists
-        -a, --allOccurrences  Copy all occurrences available in the source into the destination
-        -o OUTPUTOCCURRENCE, --outputOccurrence OUTPUTOCCURRENCE
-                                Copy the selected source into the specified occurrence at the destination
+        -s SHOT, --shot SHOT  Shot number
+        -r RUN, --run RUN     Run number
+
 
 Example
 ~~~~~~~
-
     .. code-block:: bash
 
-        $ python scripts/idscp.py -si 131024 -ri 10 -so 145000 -ro 2
-        Copying equilibrium
+        python scripts/listids.py  -s 134173 -r 106
+
+        core_profiles  : 871   slices: [  3.99   3.99   3.99 ... 792.   792.   792.  ]
+        core_sources   : 871   slices: [  3.99   3.99   3.99 ... 792.   792.   792.  ]
+        core_transport : 871   slices: [  3.99   3.99   3.99 ... 792.   792.   792.  ]
+        equilibrium    : 871   slices: [  1.2    1.4    1.6  ... 797.92 798.42 798.92]
+        summary        : 871   slices: [  3.99   3.99   3.99 ... 792.   792.   792.  ]
