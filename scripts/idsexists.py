@@ -9,8 +9,8 @@ root_path = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(root_path)
 
 from database_tools import db_helpers
-from idstools import idslist
 from idstools.cli import get_backend_id, imas_parser
+from idstools.utils.idshelper import getAvailableIdsAndOccurrences
 
 progbar = True
 try:
@@ -44,14 +44,14 @@ if __name__ == "__main__":
         for pulse in (
             track(pulselist, description="Analyzing DB...") if progbar else pulselist
         ):
-            db = imas.DBEntry(
+            connection = imas.DBEntry(
                 get_backend_id(args.backend),
                 args.database,
                 pulse[0],
                 pulse[1],
                 args.user,
             )
-            db.open()
-            ids_list = idslist.available_in_dbentry(db)
+            connection.open()
+            ids_list = getAvailableIdsAndOccurrences(connection)
             if any(args.ids in ids for ids in ids_list):
                 print(pulse)

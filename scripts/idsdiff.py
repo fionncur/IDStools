@@ -3,23 +3,23 @@ import argparse
 import base64
 import datetime
 import difflib
-import imas
 import logging
-import matplotlib.pyplot as plt
-import numpy as np
 import os
 import re
 import sys
 import tempfile
 import time
-
 from io import BytesIO
+
+import imas
+import matplotlib.pyplot as plt
+import numpy as np
 
 root_path = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(root_path)
-from idstools.compute.common.basic import compareIds
-from idstools.utils.dd_helper import DDHelper
 from idstools.cli import get_backend_id, imas_parser
+from idstools.utils.ddhelper import DDHelper
+from idstools.utils.idshelper import compareIds
 
 THRESHOLD_PERCENT = 2
 
@@ -75,7 +75,7 @@ def get_filename(name, file_title, log_dir):
 def generate_html(file_path, data, shotA, runA, shotB, runB):
     logger.info("Writing to html file :" + file_path)
 
-    dd_helper = DDHelper()
+    ddhelper = DDHelper()
 
     file_object = open(file_path, "w")
 
@@ -164,7 +164,7 @@ def generate_html(file_path, data, shotA, runA, shotB, runB):
                         field_path = re.sub("\[(.*?)\]", "", key)
                         field_path = field_path[field_path.index(".") + 1 :]
                         field_path = field_path.replace(".", "/")
-                        coordinate_path = dd_helper.get_coordinate(idsname, field_path)
+                        coordinate_path = ddhelper.get_coordinate(idsname, field_path)
                         if coordinate_path[0] == r"/":
                             coordinate_path = coordinate_path[1:]
                         if "itime" in coordinate_path:
