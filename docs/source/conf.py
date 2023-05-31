@@ -28,7 +28,7 @@ author = "ITER Organization"
 
 # import idstools
 # release = idstools.__version__
-release = "1.0.0"
+release = "2.0.0"
 # -- General configuration ---------------------------------------------------
 
 # Add any Sphinx extension module names here, as strings. They can be
@@ -110,6 +110,11 @@ html_theme_options = {
     },
     "show_prev_next": False,
     "navigation_with_keys": False,
+    "switcher": {
+        "version_match": release,
+        "json_url": "_static/versions.json",
+    },
+    "navbar_end": ["theme-switcher", "version-switcher", "navbar-icon-links"]
 }
 html_sidebars = {
     "**": [
