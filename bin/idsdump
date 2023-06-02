@@ -10,7 +10,7 @@ import argparse
 
 if __name__ == '__main__':
 
-    parser = argparse.ArgumentParser(description="Prints content of an IDS onto the terminal", 
+    parser = argparse.ArgumentParser(description="Prints content of an IDS onto the terminal",
                                      formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument("USER", type=str, help="User name")
     parser.add_argument("DATABASE", type=str, help="Database name")
@@ -18,9 +18,9 @@ if __name__ == '__main__':
     parser.add_argument("SHOT", type=int, help="Shot number")
     parser.add_argument("RUN", type=int, help="Run number")
     parser.add_argument("IDS", type=str, help="IDS name")
-    parser.add_argument("-f", "--full", action='store_true', help="Print all array elements (can be very slow for large data)")
-    parser.add_argument("-s", "--show-empty", action='store_true', dest='show_empty',help="Show empty fields of ids")
-    parser.add_argument("-b", "--backend", type=str, default="MDSPLUS", 
+    parser.add_argument("-f", "--full", action='store_true',help="Print all array elements (can be very slow for large data)")
+    parser.add_argument("-e", "--show-empty", action='store_true', dest='show_empty',help="Show empty fields of ids")
+    parser.add_argument("-b", "--backend", type=str, default="MDSPLUS",
                         help="backend format \t(default=%(default)s)")
     args=parser.parse_args()
 
@@ -28,7 +28,7 @@ if __name__ == '__main__':
         numpy.set_printoptions(threshold=sys.maxsize)
     else:
         numpy.set_printoptions(threshold=10)
-        
+
     input = imas.DBEntry(getattr(imas.imasdef,args.backend+"_BACKEND"),args.DATABASE,args.SHOT,args.RUN,args.USER)
     status,_ = input.open()
     if (status!=0):
@@ -44,6 +44,12 @@ if __name__ == '__main__':
 
     ids = input.get(idsname,occurrence)
 
-    ids.dump(print_empty=args.show_empty)
+    try:
+        ids.dump(print_empty=args.show_empty)
+    except AttributeError:
+        print(ids)
+
+
+    print('==========')
 
     input.close()
