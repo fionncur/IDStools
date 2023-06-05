@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 from os import path, getenv
-import glob
+from glob import glob
 import logging
 import inspect
 
@@ -159,7 +159,7 @@ class ScenarioValidator:
         """
 
         dd0 = [dd for dd in self.DD if dd.get("name") == idsname][0]
-
+        ret = {}
         for fpath, schemas in self.SCHEMA.items():
             for key, schema in schemas.items():
                 if key == idsname:
@@ -192,6 +192,7 @@ class ScenarioValidator:
                         # verbose=args.verbose,
                         check_all=True,
                     )
+                    #
                     if fmt == "log":
                         if flag:
                             logger.info("- OK")
@@ -201,6 +202,9 @@ class ScenarioValidator:
                             )
                     else:
                         print(idschk.dict_to_yaml(dout))
+                    #
+                    ret[ids.__name__+"/"+str(occ)] = flag
+        return ret
 
     def validate_db(self, db, time=-99.0, fmt=""):
         """
@@ -221,10 +225,13 @@ class ScenarioValidator:
 
         ids_oc = available_in_dbentry(db)
         logger.debug("ids_oc= {}".format(ids_oc))
+        ret = {}
 
         for (idsname, occ) in ids_oc:
-            self.validate(db, idsname, occ=occ, time=time, fmt=fmt)
+           d = self.validate(db, idsname, occ=occ, time=time, fmt=fmt)
+           ret.update(d)
 
+        return ret
 
 # ----------------------------------------------------------------------
 
@@ -261,29 +268,31 @@ def db_validator(
 
     logger.info("loading schema...")
 
-    schema_files = []
+    schema = []
     if not schema_path:
         # Load default validation schema in case of "schema_path" not given
-        import os
-        current_file_path = os.path.dirname(os.path.realpath(__file__))
-        p = "../../../../bin/validation_schemas"
-        schema_dir = os.path.join(current_file_path, p)
+        current_fpath = path.dirname(path.realpath(__file__))
+        schema_dir = path.join(current_fpath, "../../../../bin/validation_schemas")
         if path.isdir(schema_dir):
-            schema_files.extend(sorted(glob.glob(schema_dir + "/ITER/*.y*ml", recursive=True)))
+            schema = sorted(glob(schema_dir + "/ITER/*.y*ml", recursive=True))
+            schema1 = sorted(glob(schema_dir + "/generic/*.y*ml", recursive=True))
+            # Avoid Duplication of Schema Files
+            w = [path.basename(f) for f in schema]
+            schema += [f for f in schema1 if path.basename(f) not in w]
     else:
         for p in schema_path:
             if path.isdir(p):
                 # Find yaml files in the dir recursively
-                schema_files.extend(sorted(glob.glob(p + "/**/*.y*ml", recursive=True)))
+                schema.extend(sorted(glob(p + "/**/*.y*ml", recursive=True)))
             elif path.isfile(p):
                 # Add the path if found
-                schema_files.append(p)
+                schema.append(p)
 
-    if len(schema_files) < 1:
+    if len(schema) < 1:
         raise OSError("not found schema: {}".format(schema_path))
 
     # Initialize Scenario Validator
-    sv = ScenarioValidator(schema_path=schema_files)
+    sv = ScenarioValidator(schema_path=schema)
 
     # Load scenario table in case of "pulse" not given
     logger.info("loading scenario table...")

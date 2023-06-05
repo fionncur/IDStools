@@ -23,7 +23,7 @@ class GEQDSK:
     GEQDSK module for IMAS
 
     [1] L.L. Lao, "G EQDSK FORMAT", https://w3.pppl.gov/ntcc/TORAY/G_EQDSK.pdf
-    [2] O. Sauter and S.Yu. Medvevdev, "Tokamak Coordinate Conventions : COCOS",
+    [2] O. Sauter and S.Yu. Medvedev, "Tokamak Coordinate Conventions : COCOS",
         Comput. Physics Commun. 184 (2013) 293
 
     Attributes

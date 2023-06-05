@@ -25,7 +25,7 @@ def comment_for_schema():
     print('# 1) in YAML format, comments starting with "#" and blank lines are allowed.')
     print('# 2) 1st level lists IDS name, 2nd one is for path_doc and 3rd is for validation rule')
     print('#')
-    print('# IDS validation schema is listed as below, also default schema of Cerberus can be used. The schema is presumed')
+    print('# IDS validation schema is listed as below, also default schemas in Cerberus can be used. The schema is presumed')
     print('# in the form of "A:B", where A is name of rule, B is in type of boolean or float. Regarding the rules having B')
     print('# as "false", an error will be reported in case the validation fails, otherwise ignored with "true".')
     print('#        A:               B')
@@ -41,10 +41,12 @@ def comment_for_schema():
     print('#        ids_q_like:      true/false')
     print('#        ids_ip_like:     true/false')
     print('#        ids_dPdpsi_like: true/false')
-    print('#        ids_dim_like:    true/false')
+    print('#        ids_dim:         true/false')
+    print('#        ids_bool:        true/false')
+    print('#        ids_eq:          float/int')
+    print('#        ids_cocos:       int')
     print('#')
     print('# *) The validation rules "ids_nan" and "ids_inf" are default so that the validation scripts as "idschk" and')
-    print('#    "validate_db_entry" can validate all data to the rules implicitly.')
 
 
 def main():

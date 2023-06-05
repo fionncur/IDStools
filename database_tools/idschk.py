@@ -10,8 +10,8 @@ from xml.etree import ElementTree as ET
 import cerberus
 import numpy as np
 import logging
+import copy
 import imas
-
 
 logger = logging.getLogger(__name__)
 
@@ -54,13 +54,13 @@ required_fields_eq = {
         "empty": False,
     },
     "ids.time_slice[itime].profiles_2d": {"minlength": 1},
-    "ids.time_slice[itime].profiles_2d[0].b_field_z": {
+    "ids.time_slice[itime].profiles_2d[i1].b_field_z": {
         "empty": False,
     },
-    "ids.time_slice[itime].profiles_2d[0].psi": {
+    "ids.time_slice[itime].profiles_2d[i1].psi": {
         "empty": False,
     },
-    "ids.time_slice[itime].profiles_2d[0].r": {
+    "ids.time_slice[itime].profiles_2d[i1].r": {
         "empty": False,
         "ids_gt": 0.0,
     },
@@ -125,7 +125,7 @@ class COCOS:
     """
     COCOS module in Python
 
-    [1] O. Sauter and S.Yu. Medvevdev, "Tokamak Coordinate Conventions : COCOS",
+    [1] O. Sauter and S.Yu. Medvedev, "Tokamak Coordinate Conventions : COCOS",
         Comput. Physics Commun. 184 (2013) 293
     [2] cocos_module.f90 (CHEASE)
 
@@ -466,7 +466,7 @@ def path2py(p, rm_last_bracket=False, header=False, idx=None):
         p = p.replace(")", "]")
 
         if idx is not None:
-            keys = idx.data.keys()
+            keys = idx.__dict__.keys()
             for k in keys:
                 s = idx_header + k
                 p = p.replace(s, str(eval(s)))
@@ -502,35 +502,7 @@ class IdxDict(dict):
 
         for m in re.finditer("\((\w+)\)", p):  # find subscripts and set as attribute
             it = m.group()[1:-1]
-            idict.append("'" + it + "': None")  # initial value = None
-
-        d = eval("{" + ",".join(idict) + "}")
-        super(IdxDict, self).__setattr__("data", d)
-
-    def __setattr__(self, k, v):
-        """
-        Parameters
-        ----------
-        k: str
-            Names of subsript for IDS array
-        v: dict
-            Values of subsript for IDS array
-        """
-
-        self.data[k] = v
-
-    def __getattr__(self, k):
-        """
-        Parameters
-        ----------
-        k: str
-            Names of subsript for IDS array
-        """
-
-        try:
-            return self.data[k]
-        except KeyError:
-            raise AttributeError
+            setattr(self, it, None)  # initial value = None
 
 
 # ----------------------------------------------------------------------
@@ -552,10 +524,29 @@ class IDSValidator(cerberus.Validator):
         number of dimension
     """
 
+    ids = None
+    idx = None
     cocos = {}
     # shape = []
     # coord = []
     ndim = None
+
+    def __init__(self, *args, **kwargs):
+        """ """
+        # assign configuration value to instance property
+        #self.ids = kwargs.get("ids")
+        #self.idx = kwargs.get("idx")
+
+        # pass all data to the base classes
+        super(IDSValidator, self).__init__(*args, **kwargs)
+
+    def set_ids(self, ids):
+        """ """
+        self.ids = ids
+
+    def set_idx(self, idx):
+        """ """
+        self.idx = idx
 
     def set_cocos(self, cocos):
         """ """
@@ -643,14 +634,18 @@ class IDSValidator(cerberus.Validator):
 
     def _validate_ids_psi_like(self, constraint, field, value):
         """{'nullable': False }"""
-        try:
-            v = np.atleast_1d(value).flatten()
-            psi_like = self.cocos["sigma_Ip"] * self.cocos["sigma_Bp"]
-            if np.sign(v[-1] - v[0]) != psi_like:
-                if not constraint:
-                    self._error(field, "Sign expected as {}".format(psi_like))
-        except ValueError:
-            pass
+        if (value.ndim != 1) or (value.size < 2):
+            self._error(field, "ndim is expected as 1, and size as greater than 1")
+            return
+        else:
+            try:
+                v = np.atleast_1d(value).flatten()
+                psi_like = self.cocos["sigma_Ip"] * self.cocos["sigma_Bp"]
+                if np.sign(v[-1] - v[0]) != psi_like:
+                    if not constraint:
+                        self._error(field, "Sign expected as {}".format(psi_like))
+            except ValueError:
+                pass
 
     def _validate_ids_b0_like(self, constraint, field, value):
         """{'nullable': False }"""
@@ -725,6 +720,32 @@ class IDSValidator(cerberus.Validator):
             except ValueError:
                 pass
 
+    def _validate_ids_bool(self, constraint, field, value):
+        """{'nullable': False }"""
+        try:
+            if not np.all(constraint):
+                self._error(field, "false boolean expression")
+        except ValueError:
+            pass
+
+    def _validate_ids_eq(self, constraint, field, value):
+        """{'nullable': False }"""
+        try:
+            if value != constraint:
+                self._error(field, "Must be equal to {}".format(constraint))
+        except ValueError:
+            pass
+
+    def _validate_ids_cocos(self, constraint, field, value):
+        """{'nullable': False }"""
+        try:
+            if self.ids.__name__ == "equilibrium":
+                val = compute_COCOS(self.ids, self.idx.itime, self.idx.i1)
+                if val["COCOS"] != constraint:
+                    msg = "COCOS computed {}, expected as {}".format(val["COCOS"], constraint)
+                    self._error(field, msg)
+        except ValueError:
+            pass
 
 # ----------------------------------------------------------------------
 
@@ -766,21 +787,24 @@ def validator(field, path_doc, ids, schema, cocos, idx):
 
     # add default schema
     schema[path_doc].update(default_schema)
+    schemaw = copy.deepcopy(schema) 
 
     # eval for schema value in case of validation between data
     for key, value in schema[path_doc].items():
         if isinstance(value, str):
-            val = re.sub("_([a-z]+\w+)_", idx_header + r"\1", value)
+            val = re.sub("_(i+\w+)_", idx_header + r"\1", value)
             val = val.replace(ids.__name__ + ".", ids_header)
             try:
-                schema[path_doc][key] = eval(val)
+                schemaw[path_doc][key] = eval(val)
             except:
                 print("eval error on value {}, ignored".format(val))
 
     # Initialization
-    v_ids = IDSValidator({path_doc: schema[path_doc]})
+    v_ids = IDSValidator({path_doc: schemaw[path_doc]})
     v_ids.set_dim(field, ids, data, idx)
     v_ids.set_cocos(cocos)
+    v_ids.set_ids(ids)
+    v_ids.set_idx(idx)
 
     # Validation
     d = {path_doc: data}
@@ -832,11 +856,11 @@ def path_iterator(field, nodes, ids, schema, cocos, idx=None, level=0):
         # for dynamic array (e.g. path(itime)/to(i1)/array(i2))
         if result is not None:
             try:
-                wk = eval(path2py(p, rm_last_bracket=True, header=True))
+                wk = eval(path2py(p, rm_last_bracket=True, header=True, idx=idx))
                 for i in range(len(wk)):
                     idxname = result.group(2)[1:-1]
-                    # increment the index in global scope
-                    exec(idxname + "=" + str(i), idx.data)
+                    # increment the index
+                    idx.__dict__[idxname] = i
                     path_iterator(
                         field,
                         nodes,
@@ -848,8 +872,8 @@ def path_iterator(field, nodes, ids, schema, cocos, idx=None, level=0):
                     )
                     if not args_check_all:
                         break
-            except:
-                pass
+            except Exception as e:
+                print("Error at calling path_iterator: {}".format(e))
 
         # for node (e.g. path(itime)/to(i1)/node)
         else:
@@ -862,14 +886,20 @@ def path_iterator(field, nodes, ids, schema, cocos, idx=None, level=0):
 # ----------------------------------------------------------------------
 
 
-def validate_COCOS(ids, schema, itime, cocos=None):
+def validate_COCOS(ids, schema, itime, i1, cocos=None):
     """Compute COCOS values using stored data in IDS/equilibrium
 
     Parameters
     ----------
     ids: IDS
         IDS for COCOS estimation
-    cocos_check: COCOS=None
+    schema: dict
+        Cerberus schema loaded as type dict
+    itime: int|None
+        Index of struct_array time_slice in IDS/equilibrium
+    i1: int=0
+        Index of struct_array profiles_2d in IDS/equilibrium
+    cocos: COCOS=None
         Validate IDS wrt COCOS if given
 
     Returns
@@ -900,13 +930,17 @@ def validate_COCOS(ids, schema, itime, cocos=None):
 # ----------------------------------------------------------------------
 
 
-def compute_COCOS(ids, cocos_check=None):
+def compute_COCOS(ids, itime=None, i1=0, cocos_check=None):
     """Compute COCOS values using experimental data in IDS/equilibrium
 
     Parameters
     ----------
     ids: IDS
-        IDS for COCOS estimation
+        IDS/equilibrium for COCOS estimation
+    itime: int|None
+        Index of struct_array time_slice in IDS/equilibrium
+    i1: int=0
+        Index of struct_array profiles_2d in IDS/equilibrium
     cocos_check: COCOS=None
         Validate IDS wrt COCOS if given
 
@@ -916,16 +950,17 @@ def compute_COCOS(ids, cocos_check=None):
     """
 
     # COCOS Values in the middle of time sequence
-    itime = int(np.floor(float(len(ids.time_slice)) / 2.0))
+    if itime is None:
+        itime = int(np.floor(float(len(ids.time_slice)) / 2.0))
 
     # Check IDS/eq
-    validate_COCOS(ids, required_fields_eq, itime)
+    validate_COCOS(ids, required_fields_eq, itime, i1)
     if cocos_check:
-        validate_COCOS(ids, required_fields_cocos, itime, cocos=cocos_check)
+        validate_COCOS(ids, required_fields_cocos, itime, i1, cocos=cocos_check)
 
     # Sign(Ip) and Sign(B0) from input
     ipsign = np.sign(ids.time_slice[itime].global_quantities.ip)
-    b0sign = np.sign(ids.vacuum_toroidal_field.b0[0])
+    b0sign = np.sign(ids.vacuum_toroidal_field.b0[itime])
 
     #1 Eq.(22)
     dpsi = (
@@ -947,9 +982,9 @@ def compute_COCOS(ids, cocos_check=None):
     sign_pprime_pos = np.sign(np.sum(np.sign(dpressure_dpsi))) * ipsign
 
     #5 sigma_RphiZ from Eq.(19)
-    bz = ids.time_slice[itime].profiles_2d[0].b_field_z
-    psi2d = ids.time_slice[itime].profiles_2d[0].psi
-    r2d = ids.time_slice[itime].profiles_2d[0].r
+    bz = ids.time_slice[itime].profiles_2d[i1].b_field_z
+    psi2d = ids.time_slice[itime].profiles_2d[i1].psi
+    r2d = ids.time_slice[itime].profiles_2d[i1].r
 
     dpsi2d = np.gradient(psi2d)
     dr2d = np.gradient(r2d)
@@ -957,7 +992,7 @@ def compute_COCOS(ids, cocos_check=None):
 
     # todo - reduce num. of data for COCOS discrimination
     #      - compute rtol(s) instead of fixed ones.
-    dim2 = ids.time_slice[itime].profiles_2d[0].grid.dim2
+    dim2 = ids.time_slice[itime].profiles_2d[i1].grid.dim2
     z_axis = ids.time_slice[itime].global_quantities.magnetic_axis.z
     psi_axis = ids.time_slice[itime].profiles_1d.psi[0]
 
@@ -1260,7 +1295,7 @@ def init_schema_coordinate(idsname, dd=None, rule={"ids_dim": False}):
         data_type = field.attrib.get("data_type")
         path_doc = field.attrib.get("path_doc")
 
-        # validata for data_type = INT_*D and FLT_*D
+        # validate for data_type = INT_*D and FLT_*D
         if data_type and re.search("^(INT|FLT)_([1-9])D$", data_type) is not None:
 
             # skip validation for error_upper and error_lower
@@ -1372,13 +1407,17 @@ def ids_coordinate_check(ids, verbose=False):
 # ----------------------------------------------------------------------
 
 
-def ids_cocos_check(ids, verbose=False):
+def ids_cocos_check(ids, itime=None, i1=0, verbose=False):
     """Function Interface for IDS Validation on COCOS
 
     Parameters
     ----------
     ids: IDS
         IDS for validation
+    itime: int|None
+        Index of struct_array time_slice in IDS/equilibrium
+    i1: int=0
+        Index of struct_array profiles_2d in IDS/equilibrium
     verbose: boolean=False
         Increase output verbosity if true
 
@@ -1396,7 +1435,7 @@ def ids_cocos_check(ids, verbose=False):
 
     if ids.__name__ == "equilibrium":
         try:
-            cocos = compute_COCOS(ids)
+            cocos = compute_COCOS(ids, itime, i1)
         except Exception as e:
             exit("Cannot compute COCOS: {}".format(e))
         # set remark
@@ -1417,13 +1456,17 @@ def ids_cocos_check(ids, verbose=False):
 # ----------------------------------------------------------------------
 
 
-def ids_compute_cocos(ids):
+def ids_compute_cocos(ids, itime=None, i1=0):
     """Function Interface for computing COCOS
 
     Parameters
     ----------
     ids: IDS
         IDS for cocos estimation
+    itime: int|None
+        Index of struct_array time_slice in IDS/equilibrium
+    i1: int=0
+        Index of struct_array profiles_2d in IDS/equilibrium
 
     Returns
     -------
@@ -1435,7 +1478,7 @@ def ids_compute_cocos(ids):
 
     if ids.__name__ == "equilibrium":
         try:
-            cocos = compute_COCOS(ids)
+            cocos = compute_COCOS(ids, itime, i1)
         except Exception as e:
             logger.error(traceback.format_exc())
 

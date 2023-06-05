@@ -60,9 +60,6 @@ summary:
     global_quantities/v_loop/value(:):
         empty: False
         ids_ip_like: False
-    local/separatrix/n_e/value(:):
-        empty: False
-        ids_ge: 0.0
     local/separatrix/zeff/value(:):
         empty: False
 #
@@ -79,6 +76,12 @@ summary:
     #    empty: False
     #   ids_ge: 0.0
     local/separatrix/t_e/value(:):
+        empty: False
+        ids_ge: 0.0
+    local/separatrix_average/n_e/value(:):
+        empty: False
+        ids_ge: 0.0
+    local/separatrix_average/t_e/value(:):
         empty: False
         ids_ge: 0.0
     code/output_flag(:):
