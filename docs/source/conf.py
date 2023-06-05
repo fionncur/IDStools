@@ -13,10 +13,12 @@
 import os
 import sys
 
-root_path = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+root_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 sys.path.insert(0, root_path)
+import idstools
 
+print("root path:", root_path)
 print("python exec:", sys.executable)
 print("sys.path:", sys.path)
 # -- Project information -----------------------------------------------------
@@ -26,9 +28,8 @@ copyright = "2023, ITER Organization"
 author = "ITER Organization"
 
 
-# import idstools
-# release = idstools.__version__
-release = "1.0.0"
+release = idstools.__version__
+
 # -- General configuration ---------------------------------------------------
 
 # Add any Sphinx extension module names here, as strings. They can be

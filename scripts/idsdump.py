@@ -27,6 +27,13 @@ if __name__ == "__main__":
     parser.add_argument("-s", "--shot", help="Shot number", required=True, type=int)
     parser.add_argument("-r", "--run", help="Run number", required=True, type=int)
     parser.add_argument(
+        "-e",
+        "--show-empty",
+        action="store_true",
+        dest="show_empty",
+        help="Show empty fields of ids",
+    )
+    parser.add_argument(
         "ids",
         type=str,
         help="Name of the IDS to dump",
@@ -43,6 +50,8 @@ if __name__ == "__main__":
 
     if args.full:
         numpy.set_printoptions(threshold=sys.maxsize)
+    else:
+        numpy.set_printoptions(threshold=10)
 
     connection = imas.DBEntry(
         get_backend_id(args.backend),
@@ -70,7 +79,10 @@ if __name__ == "__main__":
 
     if args.path is None:
         ids = connection.get(idsname, occurrence)
-        print(ids)
+        try:
+            ids.dump(print_empty=args.show_empty)
+        except Exception:
+            print(ids)
     else:
         try:
             result = connection.partial_get(idsname, args.path, occurrence)

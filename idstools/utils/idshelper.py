@@ -75,7 +75,6 @@ def getAvailableIdsAndOccurrences(dbEntryObject: imas.DBEntry, time_mode=None):
     Returns:
         a list of pairs (idstype:str,occurrence:int) with data in the given DBEntry.
     """
-    print(type(dbEntryObject))
     presentidslist = []
     for idstype in getIdsTypes():
         for occ in range(getattr(imas, idstype)().getMaxOccurrences()):
@@ -86,7 +85,6 @@ def getAvailableIdsAndOccurrences(dbEntryObject: imas.DBEntry, time_mode=None):
                 time_mode is None or time_mode == homogeneous_time
             ):
                 presentidslist.append((idstype, occ))
-    print(presentidslist)
     return presentidslist
 
 
@@ -310,7 +308,7 @@ def compareIds(X, Y, field=None, ignore_version=True, verb=True, output={}):
                             Xo,
                             Yo,
                             data_type,
-                            "missing in the IDS " + missing[1],
+                            f"missing in the IDS {missing[1]}",
                         )
                     else:
                         logger.error("Duplicate key found")

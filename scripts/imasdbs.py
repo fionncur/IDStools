@@ -1,17 +1,18 @@
 #!/usr/bin/env python
 
-# @author: H.-J. Klingshirn
-from __future__ import print_function
-import optparse
+import argparse
 import os
 import sys
 import numpy
+import textwrap
 
-root_path = os.path.dirname(os.path.dirname(__file__))
+
+root_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(root_path)
-
-import idstools.db_tools as dbtools
-
+from idstools.utils.db_helper import getDatabaseFiles, getDatabases2, getDatabases
+from idstools.cli import imas_parser
+from idstools.helper import setup_logger
+import idstools.ids_tools as ct
 
 TAB = " " * 3
 SHOT_STR_LEN = 6
@@ -87,9 +88,7 @@ def print_list(dbs, shotnum=None, compact=False, timestamp=False):
                         )
 
 
-def print_times(dbs, opts, printTimes=False, shotnum=None, runnum=None):
-    import idstools.ids_tools as ct
-
+def print_times(dbs, arguements, printTimes=False, shot=None, run=None):
     for dbname, dvs in dbs:
         printed_database = False
         for dv, dbbackends in dvs:
@@ -98,15 +97,15 @@ def print_times(dbs, opts, printTimes=False, shotnum=None, runnum=None):
                 printed_backend = False
                 for shot, runs in dbs:
                     # If a shotnum and/or runnum is given, only display these
-                    if shotnum is not None:
-                        if shot != shotnum:
+                    if shot is not None:
+                        if shot != shot:
                             continue
 
                     printed_shot = False
                     justruns = [r[0] for r in runs]
                     for run in justruns:
-                        if runnum is not None:
-                            if run != runnum:
+                        if run is not None:
+                            if run != run:
                                 continue
 
                         if not printed_database:
@@ -124,7 +123,13 @@ def print_times(dbs, opts, printTimes=False, shotnum=None, runnum=None):
 
                         print(TAB * 4 + " Run: " + extended(str(run), RUN_STR_LEN))
                         db = ct.ImasDb(
-                            shot, run, opts.user, dbname, dv, True, backend == "hdf5"
+                            shot,
+                            run,
+                            arguements.user,
+                            dbname,
+                            dv,
+                            True,
+                            backend == "hdf5",
                         )
                         alltimes = db.all_times()
                         for idsname, times in alltimes:
@@ -172,57 +177,34 @@ def print_times(dbs, opts, printTimes=False, shotnum=None, runnum=None):
                         db.close()
 
 
-p = optparse.OptionParser(
-    usage="%prog [OPTIONS] [COMMAND]\n\
-\n\
-This program lists existing IMAS databases.\n\
-\n\
-Possible commands are: \n\
-\tlist <shot number>- list existing databases \n\
-\tslices <shot number> <run number> - list existing databases, including number of timeslices and time range for time-dependent IDSs\n\
-\ttimes <shot number> <run number> - list existing databases, including number of timeslices their time points for time-dependent IDSs \n\
-\tdatabases - list existing databases (with data versions)\n\
-\tdataversions - list existing dataversions (with databases)\n\
-\n\
-If the optional arguments shot number and run number are given, only databases with these numbers will be shown.\n\
-\n\
-If no command is given, the list command is performed. \n\
-\n\
-To see databases stored in the public imas database, use 'public' as the user name.\
-"
+# argparse.ArgumentParser
+parser = argparse.ArgumentParser(
+    prog="imasdbs",
+    formatter_class=argparse.RawDescriptionHelpFormatter,
+    description=textwrap.dedent(
+        """            
+            This program lists existing IMAS databases.
+
+            Possible commands are: 
+            list <shot number>- list existing databases 
+            slices <shot number> <run number> - list existing databases, including number of timeslices and time range for time-dependent IDSs
+            times <shot number> <run number> - list existing databases, including number of timeslices their time points for time-dependent IDSs 
+            databases - list existing databases (with data versions)
+            dataversions - list existing dataversions (with databases)
+
+            If the optional arguments shot number and run number are given, only databases with these numbers will be shown.
+
+            If no command is given, the list command is performed. 
+
+            To see databases stored in the public imas database, use 'public' as the user name."""
+    ),
 )
-p.add_option(
-    "-u", "--user", dest="user", default=None, help="Show databases of specified user"
-)
-p.add_option(
-    "-t",
-    "--tokamak",
-    dest="dbname",
-    default=None,
-    help="[DEPRECATED, use -d instead] Show only databases with specified tokamak",
-)
-p.add_option(
-    "-d",
-    "--database",
-    dest="dbname",
-    default=None,
-    help="Show only databases with specified name",
-)
-p.add_option(
-    "-v",
-    "--version",
-    dest="version",
-    default=None,
-    help="Show only databases for specified major data version",
-)
-p.add_option(
-    "--backend",
-    dest="backend",
-    default=None,
-    help="Show databases written with given backend(s). \n\
-Comma-separated list of backends (Currently supported: mdsplus, hdf5). By default all backends are shown.",
-)
-p.add_option(
+subparsers = parser.add_subparsers(help="sub-commands help")
+
+subparserList = subparsers.add_parser("list", help="list databases")
+subparserList.set_defaults(cmd="list")
+
+subparserList.add_argument(
     "-c",
     "--compact",
     action="store_true",
@@ -230,7 +212,7 @@ p.add_option(
     default=False,
     help="Compact/reduced output",
 )
-p.add_option(
+subparserList.add_argument(
     "-M",
     "--lastModifiedDate",
     action="store_true",
@@ -238,78 +220,87 @@ p.add_option(
     default=False,
     help="Show (and sort per) date of last modification of the runs",
 )
+subparserList.add_argument("shot", nargs="?", help="Shot number", type=int)
+
+subparserSlices = subparsers.add_parser("slices", help="list slices")
+subparserSlices.set_defaults(cmd="slices")
+subparserSlices.add_argument("shot", nargs="?", help="Shot number", type=int)
+subparserSlices.add_argument("run", nargs="?", help="Run number", type=int)
+subparserTimes = subparsers.add_parser("times", help="list times")
+subparserTimes.set_defaults(cmd="times")
+subparserTimes.add_argument("shot", nargs="?", help="Shot number", type=int)
+subparserTimes.add_argument("run", nargs="?", help="Run number", type=int)
+
+subparserDatabases = subparsers.add_parser("databases", help="print databases")
+subparserDatabases.set_defaults(cmd="databases")
+
+subparserDataVersions = subparsers.add_parser(
+    "dataversions", help="print data versions"
+)
+subparserDataVersions.set_defaults(cmd="dataversions")
+
+parser.add_argument(
+    "-u",
+    "--user",
+    dest="user",
+    default=None,
+    help="Show databases of specified user \t\t(default=%(default)s)",
+)
+parser.add_argument(
+    "-d",
+    "--database",
+    dest="database",
+    default=None,
+    help="Show only databases with specified name \t(default=%(default)s)",
+)
+parser.add_argument(
+    "-v",
+    "--version",
+    dest="version",
+    default=None,
+    help="Show only databases for specified major data version \t(default=%(default)s)",
+)
+parser.add_argument(
+    "--backend",
+    dest="backend",
+    default=None,
+    help="Show databases written with given backend(s). \n\
+Comma-separated list of backends (Currently supported: mdsplus, hdf5). By default all backends are shown. \t(default=%(default)s)",
+)
 
 
-opts, args = p.parse_args()
+parser.add_argument("positionalArgs", nargs="?", default=os.getcwd())
 
-if not args or args[0] == "list" or args[0] == "slices" or args[0] == "times":
-    # Default action: show databases
-    shotnum = None
-    if len(args) > 1:
-        try:
-            shotnum = int(args[1])
-        except Exception:
-            print("Second argument must be an integer", file=sys.stderr)
-            sys.exit(1)
+args = parser.parse_args()
 
-    runnum = None
-    if len(args) > 2:
-        try:
-            runnum = int(args[2])
-        except Exception:
-            print("Third argument must be an integer", file=sys.stderr)
-            sys.exit(1)
+try:
+    if args.cmd is None:
+        parser.print_help()
+        exit(1)
+except AttributeError:
+    parser.print_help()
+    exit(1)
 
-    if len(args) > 0 and args[0] in ["slices", "times"]:
-        envdv = (os.getenv("IMAS_VERSION")).split(".")[0]
+backends = args.backend.split(",") if args.backend else None
+dbs = getDatabaseFiles(args.user, args.database, args.version, backends)
+if args.cmd == "list":
+    print_list(dbs, args.shot, args.compact, args.timestamp)
+if args.cmd == "slices":
+    print_times(dbs, args, printTimes=False, shot=args.shot, run=args.run)
 
-        if opts.version != None and envdv != opts.version:
-            print(
-                "Cannot access IDS times for data version differing from current major version "
-                + envdv,
-                file=sys.stderr,
-            )
-            sys.exit(1)
+if args.cmd == "times":
+    print_times(dbs, args, printTimes=True, shot=args.shot, run=args.run)
 
-    backends = opts.backend.split(",") if opts.backend else None
-    dbs = dbtools.list_databases(opts.user, opts.dbname, opts.version, backends)
-
-    if args and args[0] == "slices":
-        print_times(dbs, opts, printTimes=False, shotnum=shotnum, runnum=runnum)
-    elif args and args[0] == "times":
-        print_times(dbs, opts, printTimes=True, shotnum=shotnum, runnum=runnum)
-    else:
-        print_list(dbs, shotnum, opts.compact, opts.timestamp)
-
-elif args[0] == "tokamaks":
-    print(
-        'Warning: "tokamaks" command is being deprecated and should be replaced by "databases"'
-    )
-    for dbname, dvs in dbtools.list_tokamaks(opts.user, opts.version):
+if args.cmd == "databases":
+    for dbname, dvs in getDatabases(args.user, args.version):
         print(
             extended(dbname, DATABASE_STR_LEN)
             + " "
             + print_vector(dvs, VERSION_STR_LEN)
         )
 
-elif args[0] == "databases":
-    for dbname, dvs in dbtools.list_tokamaks(opts.user, opts.version):
+if args.cmd == "dataversions":
+    for dv, dbname in getDatabases2(args.user):
         print(
-            extended(dbname, DATABASE_STR_LEN)
-            + " "
-            + print_vector(dvs, VERSION_STR_LEN)
+            f"{extended(dv, VERSION_STR_LEN)} {print_vector(dbname, DATABASE_STR_LEN)}"
         )
-
-elif args[0] == "dataversions":
-    for dv, dbname in dbtools.list_dataversions(opts.user):
-        print(
-            extended(dv, VERSION_STR_LEN) + " " + print_vector(dbname, DATABASE_STR_LEN)
-        )
-
-else:
-    print(
-        "Unknown command: "
-        + args[0]
-        + ". Possible commands are (none), list, slices, times, databases, dataversions",
-        file=sys.stderr,
-    )
