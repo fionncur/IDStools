@@ -201,7 +201,7 @@ class COCOS:
                 val = (-1, -1, +1, +1, +1)
             else:
                 # Should not be here since all cases defined
-                raise ValueError("error: COCOS = {} does not exist".format(COCOS))
+                raise ValueError(f"error: COCOS = {COCOS} does not exist")
                 return
 
             (
@@ -283,7 +283,7 @@ class COCOS:
                 COCOS = [8, 18]
             else:
                 # Should not be here since all cases defined
-                raise ValueError("error: COCOS Values not match {}".format(val))
+                raise ValueError(f"error: COCOS Values not match {val}")
                 return
 
             theta_sign_clockwise = sigma_RphiZ * sigma_rhothetaphi
@@ -601,7 +601,7 @@ class IDSValidator(cerberus.Validator):
         try:
             v = np.atleast_1d(value).flatten()
             if np.any(v > max_value):
-                self._error(field, "Must be smaller than {}".format(max_value))
+                self._error(field, f"Must be smaller than {max_value}")
         except ValueError:
             pass
 
@@ -610,7 +610,7 @@ class IDSValidator(cerberus.Validator):
         try:
             v = np.atleast_1d(value).flatten()
             if np.any(v < min_value):
-                self._error(field, "Must be larger than {}".format(min_value))
+                self._error(field, f"Must be larger than {min_value}")
         except ValueError:
             pass
 
@@ -619,7 +619,7 @@ class IDSValidator(cerberus.Validator):
         try:
             v = np.atleast_1d(value).flatten()
             if np.any(v >= max_value):
-                self._error(field, "Must be smaller than {}".format(max_value))
+                self._error(field, f"Must be smaller than {max_value}")
         except ValueError:
             pass
 
@@ -628,7 +628,7 @@ class IDSValidator(cerberus.Validator):
         try:
             v = np.atleast_1d(value).flatten()
             if np.any(v <= min_value):
-                self._error(field, "Must be larger than {}".format(min_value))
+                self._error(field, f"Must be larger than {min_value}")
         except ValueError:
             pass
 
@@ -643,7 +643,7 @@ class IDSValidator(cerberus.Validator):
                 psi_like = self.cocos["sigma_Ip"] * self.cocos["sigma_Bp"]
                 if np.sign(v[-1] - v[0]) != psi_like:
                     if not constraint:
-                        self._error(field, "Sign expected as {}".format(psi_like))
+                        self._error(field, f"Sign expected as {psi_like}")
             except ValueError:
                 pass
 
@@ -654,7 +654,7 @@ class IDSValidator(cerberus.Validator):
             b0_like = self.cocos["sigma_B0"]
             if np.any(np.sign(v) != b0_like):
                 if not constraint:
-                    self._error(field, "Sign expected as {}".format(b0_like))
+                    self._error(field, f"Sign expected as {b0_like}")
         except ValueError:
             pass
 
@@ -665,7 +665,7 @@ class IDSValidator(cerberus.Validator):
             dodpsi_like = -self.cocos["sigma_Ip"] * self.cocos["sigma_Bp"]
             if np.any(np.sign(v) != dodpsi_like):
                 if not constraint:
-                    self._error(field, "Sign expected as {}".format(dodpsi_like))
+                    self._error(field, f"Sign expected as {dodpsi_like}")
         except ValueError:
             pass
 
@@ -680,7 +680,7 @@ class IDSValidator(cerberus.Validator):
             )
             if np.any(np.sign(v) != q_like):
                 if not constraint:
-                    self._error(field, "Sign expected as {}".format(q_like))
+                    self._error(field, f"Sign expected as {q_like}")
         except ValueError:
             pass
 
@@ -691,7 +691,7 @@ class IDSValidator(cerberus.Validator):
             ip_like = self.cocos["sigma_Ip"]
             if any(np.sign(v) != ip_like):
                 if not constraint:
-                    self._error(field, "Sign expected as {}".format(ip_like))
+                    self._error(field, f"Sign expected as {ip_like}")
         except ValueError:
             pass
 
@@ -702,7 +702,7 @@ class IDSValidator(cerberus.Validator):
             dodpsi_like = -self.cocos["sigma_Ip"] * self.cocos["sigma_Bp"]
             if np.sign(np.sum(np.sign(v))) != dodpsi_like:
                 if not constraint:
-                    self._error(field, "avg(Sign) expected as {}".format(dodpsi_like))
+                    self._error(field, f"avg(Sign) expected as {dodpsi_like}")
         except ValueError:
             pass
 
@@ -732,7 +732,7 @@ class IDSValidator(cerberus.Validator):
         """{'nullable': False }"""
         try:
             if value != constraint:
-                self._error(field, "Must be equal to {}".format(constraint))
+                self._error(field, f"Must be equal to {constraint}")
         except ValueError:
             pass
 
@@ -782,7 +782,7 @@ def validator(field, path_doc, ids, schema, cocos, idx):
     try:
         data = eval(p)
     except:
-        print("eval error on key {}, skipped".format(p))
+        print(f"eval error on key {p}, skipped")
         return
 
     # add default schema
@@ -797,7 +797,7 @@ def validator(field, path_doc, ids, schema, cocos, idx):
             try:
                 schemaw[path_doc][key] = eval(val)
             except:
-                print("eval error on value {}, ignored".format(val))
+                print(f"eval error on value {val}, ignored")
 
     # Initialization
     v_ids = IDSValidator({path_doc: schemaw[path_doc]})
@@ -873,7 +873,7 @@ def path_iterator(field, nodes, ids, schema, cocos, idx=None, level=0):
                     if not args_check_all:
                         break
             except Exception as e:
-                print("Error at calling path_iterator: {}".format(e))
+                print(f"Error at calling path_iterator: {e}")
 
         # for node (e.g. path(itime)/to(i1)/node)
         else:
@@ -916,7 +916,7 @@ def validate_COCOS(ids, schema, itime, i1, cocos=None):
         try:
             data = eval(key)
         except:
-            print("eval error on key {}".format(key))
+            print(f"eval error on key {key}")
             return
 
         remark = v_ids.validate({key: data})
@@ -1082,7 +1082,7 @@ def load_XML(fpath):
     if path.isfile(fpath):
         root = ET.parse(fpath).getroot()
     else:
-        exit("file not found:{}".format(fpath))
+        exit(f"file not found:{fpath}")
 
     return root
 
@@ -1107,11 +1107,11 @@ def load_YAML(fpath):
     try:
         f = open(fpath, mode="r")
     except:
-        exit("can not open file:{}".format(fpath))
+        exit(f"can not open file:{fpath}")
     try:
         d = yaml.safe_load(f)
     except:
-        exit("invalid yaml in:{}".format(fpath))
+        exit(f"invalid yaml in:{fpath}")
 
     return d
 
@@ -1215,9 +1215,9 @@ def ids_iterator(ids, schema, dd, cocos, occ=0):
         if occ in range(maxoc):
             range_oc = [occ]
         else:
-            exit("value error:{}".format(occ))
+            exit(f"value error:{occ}")
     else:
-        exit("type error:{}".format(occ))
+        exit(f"type error:{occ}")
 
     for oc in range_oc:
         report_buf = {}
@@ -1349,7 +1349,7 @@ def ids_validator(
     elif isinstance(schema, str):
         schema = load_YAML(schema)
     else:
-        exit("type error:{}".format(schema))
+        exit(f"type error:{schema}")
 
     # DD Initialization for Target IDS
     if ET.iselement(dd):
@@ -1357,7 +1357,7 @@ def ids_validator(
     elif dd is None:
         dd = load_DD(ids.__name__)
     else:
-        exit("type error:{}".format(dd))
+        exit(f"type error:{dd}")
 
     # COCOS Initialization
     index = {"COCOS": IDS_COCOS, "ipsign": ipsign, "b0sign": b0sign}
@@ -1437,7 +1437,7 @@ def ids_cocos_check(ids, itime=None, i1=0, verbose=False):
         try:
             cocos = compute_COCOS(ids, itime, i1)
         except Exception as e:
-            exit("Cannot compute COCOS: {}".format(e))
+            exit(f"Cannot compute COCOS: {e}")
         # set remark
         if cocos[key] == IDS_COCOS:
             remark = True
@@ -1448,7 +1448,7 @@ def ids_cocos_check(ids, itime=None, i1=0, verbose=False):
         else:
             error = {key: cocos[key]}
     else:
-        exit("equilibrium instead of {}".format(ids.__name__))
+        exit(f"equilibrium instead of {ids.__name__}")
 
     return remark, error
 
@@ -1483,7 +1483,7 @@ def ids_compute_cocos(ids, itime=None, i1=0):
             logger.error(traceback.format_exc())
 
     else:
-        exit("equilibrium instead of {}".format(ids.__name__))
+        exit(f"equilibrium instead of {ids.__name__}")
 
     return cocos[key]
 

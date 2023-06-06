@@ -28,9 +28,7 @@ def main():
     status, _ = db.open()
     if status != 0:
         exit(
-            "can not open backend={}, user_or_path={}, database={}, shot={}, run={}".format(
-                args.backend, args.user, args.database, args.shot, args.run
-            )
+            f"can not open backend={args.backend}, user_or_path={args.user}, database={args.database}, shot={args.shot}, run={args.run}"
         )
 
     # Initialization for yaml Dumper
@@ -64,12 +62,12 @@ def main():
                         time, itime = find_time(idstime, args.time)
                         ids = db.get_slice(idsname, time, 1, occurrence=occ)
                 except Exception as e:
-                    print("Cannot retrieve IDS/{}: {}".format(idsname, e))
+                    print(f"Cannot retrieve IDS/{idsname}: {e}")
                 #
                 try:
                     flag, dump = idschk.ids_cocos_check(ids, verbose=args.verbose)
                 except Exception as e:
-                    exit("Cannot compute COCOS: {}".format(e))
+                    exit(f"Cannot compute COCOS: {e}")
                 #
                 buf.update({"occurence(" + str(occ) + ")": dump})
 

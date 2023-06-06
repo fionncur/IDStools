@@ -21,7 +21,7 @@ def comment_for_schema():
     """Add comments in stdout
     """
 
-    print('# Schema File for IDS Validation Tool ({})'.format(path.basename(__file__)))
+    print(f'# Schema File for IDS Validation Tool ({path.basename(__file__)})')
     print('# 1) in YAML format, comments starting with "#" and blank lines are allowed.')
     print('# 2) 1st level lists IDS name, 2nd one is for path_doc and 3rd is for validation rule')
     print('#')

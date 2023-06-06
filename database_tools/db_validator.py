@@ -110,10 +110,10 @@ class ScenarioValidator:
         try:
             self.DD = idschk.load_XML(fpath)
         except:
-            raise OSError("can not load DD: {}".format(fpath))
+            raise OSError(f"can not load DD: {fpath}")
 
-        logger.debug(" DD= {}".format(fpath))
-        logger.debug(" self.DD= {}".format(self.DD))
+        logger.debug(f" DD= {fpath}")
+        logger.debug(f" self.DD= {self.DD}")
 
     def load_schema(self, yaml):
         """
@@ -132,10 +132,10 @@ class ScenarioValidator:
             for f in yaml:
                 self.SCHEMA[f] = idschk.load_YAML(f)
         except:
-            raise OSError("failed to load Schema: {}".format(yaml))
+            raise OSError(f"failed to load Schema: {yaml}")
 
-        logger.debug(" schema file= {}".format(f))
-        logger.debug(" schema = {}".format(self.SCHEMA))
+        logger.debug(f" schema file= {f}")
+        logger.debug(f" schema = {self.SCHEMA}")
 
     def validate(self, db, idsname, occ=0, time=-99.0, fmt=""):
         """
@@ -182,7 +182,7 @@ class ScenarioValidator:
                             tm, itm = find_time(idstime, time)
                             ids = db.get_slice(idsname, tm, 1, occurrence=occ)
                     except Exception as e:
-                        print("Cannot retrieve IDS/{}: {}".format(idsname, e))
+                        print(f"Cannot retrieve IDS/{idsname}: {e}")
                     #
                     flag, dout = idschk.ids_validator(
                         ids,
@@ -224,7 +224,7 @@ class ScenarioValidator:
         """
 
         ids_oc = available_in_dbentry(db)
-        logger.debug("ids_oc= {}".format(ids_oc))
+        logger.debug(f"ids_oc= {ids_oc}")
         ret = {}
 
         for (idsname, occ) in ids_oc:
@@ -289,7 +289,7 @@ def db_validator(
                 schema.append(p)
 
     if len(schema) < 1:
-        raise OSError("not found schema: {}".format(schema_path))
+        raise OSError(f"not found schema: {schema_path}")
 
     # Initialize Scenario Validator
     sv = ScenarioValidator(schema_path=schema)
@@ -315,18 +315,12 @@ def db_validator(
         status, _ = db.open()
         if status != 0:
             raise OSError(
-                "can not open backend={}, user_or_path={}, database={}, shot={}, run={}".format(
-                    backend, user, database, shot, run
-                )
+                f"can not open backend={backend}, user_or_path={user}, database={database}, shot={shot}, run={run}"
             )
 
-        logger.info("-----------------------------------------------------------")
-        logger.info(
-            "{}/{} ({}%) {}/{}".format(
-                i + 1, npulse, int((i + 1) / npulse * 100), shot, run
-            )
-        )
-        logger.info("-----------------------------------------------------------")
+        logger.info(f"-----------------------------------------------------------")
+        logger.info(f"{i+1}/{npulse} ({(i+1)//npulse*100}%) {shot}/{run}")
+        logger.info(f"-----------------------------------------------------------")
 
         # Scenario Validation
         sv.validate_db(db, fmt="log")
