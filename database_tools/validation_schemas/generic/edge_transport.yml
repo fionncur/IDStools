@@ -82,18 +82,18 @@ edge_transport:
     model(i1)/ggd(itime)/ion(i2)/element(i3)/atoms_n:
         empty: False
         ids_gt: 0.0
-    model(i1)/ggd(itime)/ion(i2)/state(i3)/particles/flux(:):
-        empty: False
-    model(i1)/ggd(itime)/ion(i2)/state(i3)/energy/flux(:):
-        empty: False
+    #model(i1)/ggd(itime)/ion(i2)/state(i3)/particles/flux(i4)/values(:):
+    #    empty: False
+    #model(i1)/ggd(itime)/ion(i2)/state(i3)/energy/flux(i4)/values(:):
+    #    empty: False
 
     # For each neutral[:].state[:] structure:
     model(i1)/ggd(itime)/neutral(i2)/state(i3)/neutral_type/name:
         empty: False
-    model(i1)/ggd(itime)/neutral(i2)/state(i3)/energy/flux(i4)/values(:):
-        empty: False
-    model(i1)/ggd(itime)/neutral(i2)/state(i3)/particles/flux(i4)/values(:):
-        empty: False
+    #model(i1)/ggd(itime)/neutral(i2)/state(i3)/energy/flux(i4)/values(:):
+    #    empty: False
+    #model(i1)/ggd(itime)/neutral(i2)/state(i3)/particles/flux(i4)/values(:):
+    #    empty: False
 
     # IMAS-3393
     grid_ggd(itime)/space(i1)/identifier/index:
