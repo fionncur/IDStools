@@ -29,6 +29,3 @@ equilibrium:
         #>ITER
         ids_b0_like: False
         #<ITER
-    time_slice(itime)/profiles_2d(i1)/grid_type/index:
-        ids_eq: 1
-        ids_cocos: 11
