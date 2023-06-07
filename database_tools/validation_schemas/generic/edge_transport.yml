@@ -14,12 +14,12 @@ edge_transport:
         empty: False
 
     # Within each model[:].ggd[:] structure:
-    model(i1)/ggd(itime)/electrons/energy/flux(i2)/values(:):
-        empty: False
-        ids_bool: len(edge_transport.grid_ggd)>0
-    model(i1)/ggd(itime)/electrons/particles/flux(i2)/values(:):
-        empty: False
-        ids_bool: len(edge_transport.grid_ggd)>0
+    #model(i1)/ggd(itime)/electrons/energy/flux(i2)/values(:):
+    #    empty: False
+    #    ids_bool: len(edge_transport.grid_ggd)>0
+    #model(i1)/ggd(itime)/electrons/particles/flux(i2)/values(:):
+    #    empty: False
+    #    ids_bool: len(edge_transport.grid_ggd)>0
     model(i1)/ggd(itime)/ion(i2)/element(i3)/a:
         empty: False
         ids_gt: 0.0

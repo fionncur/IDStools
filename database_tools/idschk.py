@@ -87,7 +87,19 @@ default_schema = {
 # FUNCTION TO FIND THE INDEX OF THE DESIRED TIME SLICE IN THE TIME ARRAY
 def find_nearest(a, a0):
     """
-    Element in nd array 'a' closest to the scalar value 'a0'
+    Element in ndarray 'a' closest to the scalar value 'a0'
+
+    Attributes
+    ----------
+    a: numpy.ndarray
+        A list or array of values
+    a0: float
+        The value to find a close value and its index in the ndarray given
+
+    Returns
+    -------
+    tuple
+        A tuple containing a value and its index in the ndarray given
     """
 
     idx = np.abs(a - a0).argmin()
@@ -97,22 +109,33 @@ def find_nearest(a, a0):
 def find_time(timevec, time):
     """
     Return time slice and its index in time vector
+
+    Attributes
+    ----------
+    timevec: numpy.ndarray
+        A list or array of time values
+    time: float
+        The time value to search for in the time vector
+
+    Returns
+    -------
+    tuple
+        A tuple containing the time slice and its index in the time vector
     """
 
     if len(timevec) > 1:
         if time >= 0:
             [tc, it] = find_nearest(timevec, time)
         else:
-            it = int(len(timevec) / 2)
+            it = len(timevec) // 2
             tc = timevec[it]
-        time = tc
     else:
         if len(timevec) > 0:
             tc = timevec[0]
         else:
             tc = 0
         it = 0
-        time = tc
+    time = tc
 
     return time, it
 
