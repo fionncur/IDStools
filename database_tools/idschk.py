@@ -23,7 +23,6 @@ logger = logging.getLogger(__name__)
 IMAS_PREFIX = "IMAS_PREFIX"
 FILE_IDSDef = getenv(IMAS_PREFIX) + "/include/IDSDef.xml"
 TARGET_TAG = "IDS"
-report_buf = {}
 ids_header = "ids."
 idx_header = "idx."
 IDS_COCOS = 11
@@ -451,8 +450,6 @@ def path2py(p, rm_last_bracket=False, header=False, idx=None):
         Field path in Python
     """
 
-    global report_buf
-
     result = re.search("^(\d)\.\.\.(\d)$", p)
     if result is not None:  # constant coordinate definition (e.g. 1...3)
         return "range(" + str(result.group(2)) + ")"
@@ -750,7 +747,7 @@ class IDSValidator(cerberus.Validator):
 # ----------------------------------------------------------------------
 
 
-def validator(field, path_doc, ids, schema, cocos, idx):
+def validator(field, path_doc, ids, schema, cocos, buf, idx):
     """Check the consistency of IDS quantities w.r.t. Schema and COCOS
 
     Parameters
@@ -765,6 +762,8 @@ def validator(field, path_doc, ids, schema, cocos, idx):
         Cerberus schema loaded as type dict
     cocos: COCOS
         COCOS input for validation
+    buf: dict
+        Result of validation for logging
     idx: IdxDict=None
         DD Sub-Indices (e.g. itime, i1, ..., etc.)
 
@@ -772,7 +771,6 @@ def validator(field, path_doc, ids, schema, cocos, idx):
     -------
     remark: boolean
     """
-    global report_buf
 
     data_size = 0
 
@@ -816,10 +814,10 @@ def validator(field, path_doc, ids, schema, cocos, idx):
         report = {}
         report["remark"] = remark
         report["errors"] = errors
-        report_buf.update({path2py(path_doc, idx=idx): report})
+        buf.update({path2py(path_doc, idx=idx): report})
     else:
         if not remark:
-            report_buf.update({path2py(path_doc, idx=idx): errors[list(errors)[0]]})
+            buf.update({path2py(path_doc, idx=idx): errors[list(errors)[0]]})
 
     # Result
     return remark
@@ -828,7 +826,7 @@ def validator(field, path_doc, ids, schema, cocos, idx):
 # ----------------------------------------------------------------------
 
 
-def path_iterator(field, nodes, ids, schema, cocos, idx=None, level=0):
+def path_iterator(field, nodes, ids, schema, cocos, buf, idx=None, level=0):
     """Iterate Recursively over Sub-Indices of IDS Path (e.g. itime, i1, ..., etc.)
 
     Parameters
@@ -843,6 +841,8 @@ def path_iterator(field, nodes, ids, schema, cocos, idx=None, level=0):
         Cerberus schema loaded as type dict
     cocos: COCOS
         COCOS input for validation
+    buf: dict
+        Result of validation for logging
     idx: IdxDict=None
         DD Sub-Indices (e.g. itime, i1, ..., etc.)
     level: int=0
@@ -867,6 +867,7 @@ def path_iterator(field, nodes, ids, schema, cocos, idx=None, level=0):
                         ids,
                         schema,
                         cocos,
+                        buf,
                         idx=idx,
                         level=level + 1,
                     )
@@ -877,10 +878,10 @@ def path_iterator(field, nodes, ids, schema, cocos, idx=None, level=0):
 
         # for node (e.g. path(itime)/to(i1)/node)
         else:
-            path_iterator(field, nodes, ids, schema, cocos, idx=idx, level=level + 1)
+            path_iterator(field, nodes, ids, schema, cocos, buf, idx=idx, level=level + 1)
 
     else:
-        validator(field, p, ids, schema, cocos, idx)
+        validator(field, p, ids, schema, cocos, buf, idx)
 
 
 # ----------------------------------------------------------------------
@@ -1204,7 +1205,6 @@ def ids_iterator(ids, schema, dd, cocos, occ=0):
         Result of validation in type dict
     """
 
-    global report_buf
     idsname = ids.__name__
     maxoc = ids.getMaxOccurrences()
     buf = {}
@@ -1245,6 +1245,7 @@ def ids_iterator(ids, schema, dd, cocos, occ=0):
                         ids,
                         schema[idsname],
                         cocos,
+                        report_buf,
                         idx=IdxDict(path),
                     )
 
