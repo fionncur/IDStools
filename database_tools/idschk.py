@@ -762,7 +762,7 @@ class IDSValidator(cerberus.Validator):
             if self.ids.__name__ == "equilibrium":
                 val = compute_COCOS(self.ids, self.idx.itime, self.idx.i1)
                 if val["COCOS"] != constraint:
-                    msg = "COCOS computed {}, expected as {}".format(val["COCOS"], constraint)
+                    msg = f"COCOS computed {val['COCOS']}, expected as {constraint}"
                     self._error(field, msg)
         except ValueError:
             pass
@@ -807,7 +807,10 @@ def validator(field, path_doc, ids, schema, cocos, buf, idx):
         return
 
     # add default schema
-    schema[path_doc].update(default_schema)
+    if schema[path_doc]:
+        schema[path_doc].update(default_schema)
+    else:
+        schema[path_doc] = default_schema
     schemaw = copy.deepcopy(schema) 
 
     # eval for schema value in case of validation between data

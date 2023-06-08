@@ -274,11 +274,12 @@ def db_validator(
         current_fpath = path.dirname(path.realpath(__file__))
         schema_dir = path.join(current_fpath, "../../../../bin/validation_schemas")
         if path.isdir(schema_dir):
-            schema = sorted(glob(schema_dir + "/ITER/*.y*ml", recursive=True))
-            schema1 = sorted(glob(schema_dir + "/generic/*.y*ml", recursive=True))
+            schema_ITER = sorted(glob(schema_dir + "/ITER/*.y*ml", recursive=True))
+            schema_generic = sorted(glob(schema_dir + "/generic/*.y*ml", recursive=True))
             # Avoid Duplication of Schema Files
-            w = [path.basename(f) for f in schema]
-            schema += [f for f in schema1 if path.basename(f) not in w]
+            w = [path.basename(f) for f in schema_ITER]
+            schema_ITER += [f for f in schema_generic if path.basename(f) not in w]
+            schema = schema_ITER
     else:
         for p in schema_path:
             if path.isdir(p):
