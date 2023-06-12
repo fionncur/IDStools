@@ -523,112 +523,37 @@ type     = "tbd"
 # ----------------------------------------------------------------------
 # Check IDSs
 
-import yaml
 import logging
 from idstools.set_logger import set_logger
 
 # Initialize logger
 logger = set_logger(__name__)
 
-IDS_COCOS = 11
 
-def subproc(cmd, cwd=None, env=None, exit=None):
-    """ Run subprocess and return the output """
-    from subprocess import check_output, CalledProcessError
+# Validate Input Database
+if not args.wo_validation:
+    from database_tools.db_validator import ScenarioValidator
+    from glob import glob
 
-    out = None
-    try:
-        #logging.info(check_output(cmd, cwd=cwd, env=env).decode("utf-8").strip())
-        out = check_output(cmd, cwd=cwd, env=env).decode("utf-8").strip()
-        print(out)
-    except CalledProcessError as e:
-        logging.error("'%s' failed, returned code %d" % (cmd, e.returncode))
-        if exit:
-            sys.exit(1)
-    except OSError as e:
-        logging.critical("failed to execute program '%s': '%s'" % (cmd, str(e)))
-        sys.exit(1)
+    current_fpath = path.dirname(path.realpath(__file__))
+    schema_dir = path.join(current_fpath, "validation_schemas")
 
-    return out
+    schema = sorted(glob(schema_dir + "/ITER/*.y*ml", recursive=True))
+    schema1 = sorted(glob(schema_dir + "/generic/*.y*ml", recursive=True))
 
+    # Avoid Duplication of Schema Files
+    w = [path.basename(f) for f in schema]
+    schema += [f for f in schema1 if path.basename(f) not in w]
 
-def schema_path(f_name):
-    """ Return path to schema file """
+    # Initialize Class ScenarioValidator
+    sv = ScenarioValidator(schema_path=schema)
 
-    p = path.dirname(path.realpath(__file__)) + "/validation_schemas/" + f_name
+    # Validation for Class imas.DBEntry
+    ret = sv.validate_db(input)
 
-    if path.exists(p): 
-        return p
-    else:
-        sys.exit("not found: '%s'" % (p))
-
-
-def eval_COCOS(s):
-    """ Return True if COCOS validates """
-
-    flag = True
-    if s:
-        d_ids = yaml.safe_load(s)
-        for k_ids, d_occ in d_ids.items():
-            for k_occ, val in d_occ.items():
-                if val != IDS_COCOS:
-                    flag = False
-                    break
-            if not flag:
-                break
-    return flag
-
-
-def eval_IDSs(s):
-    """ Return True if IDSs validate """
-
-    flag = True
-    if s:
-        d_ids = yaml.safe_load(s)
-        for k_ids, d_occ in d_ids.items():
-            for k_occ, val in d_occ.items():
-                if val:
-                    flag = False
-                    break
-            if not flag:
-                break
-    return flag
-
-
-def main_idschk(ids_core, ids_edge, ids_eq):
-    """ Validate IDSs with idschk command """
-
-    com = [
-        'idschk',
-        '-u', args.user,
-        '-d', args.database,
-        '-b', args.backend,
-        '-s', str(args.shot),
-        '-r', str(args.run),]
-
-    flag_core = flag_edge = flag_cocos = True
-         
-    if ids_core:
-        print("----> " + "(idschk) core")
-        flag_core = eval_IDSs(subproc(com + ['-f', schema_path('required_fields_core.yml')]))
-    
-    if ids_edge:
-        print("----> " + "(idschk) edge")
-        flag_edge = eval_IDSs(subproc(com + ['-f', schema_path('required_fields_edge.yml')]))
-
-    if ids_eq:
-        print("----> " + "(idschk) COCOS")
-        flag_cocos = eval_COCOS(subproc(com + ['-c']))
-    
-
-    if not (flag_cocos & flag_core & flag_edge):
+    if not all(ret.values()):
         logging.error("IDS validation failed. Use '--disable-validation' for generating yaml and watcher files anyway")
         sys.exit(1)
-
-
-if not args.wo_validation:
-    logging.basicConfig(level=logging.WARNING)
-    main_idschk(core_present, edge_present, eq_present)
 
 # ----------------------------------------------------------------------
 

@@ -1,67 +1,65 @@
 ﻿# https://confluence.iter.org/display/IMP/Required+fields+in+a+dataset+to+be+imported+in+a+scenario+database
 #
 edge_sources:
-    ids_properties/homogeneous_time:
-        empty: False
-        ids_ge: 0
-        ids_le: 2
-    time(:):
-        empty: False
-    code/output_flag(:):
-        empty: False
-
     # Within each source[:].ggd[:] structure:
     sources(i1)/ggd(itime)/ion(i2)/element(i3)/a:
-        empty: False
         ids_gt: 0.0
+        ids_bool: len(edge_sources.grid_ggd)>0
+        # check ion_index and neutral_index that they point to a species that has the same elemental make-up (IMAS-3933)
+        ids_eq: edge_sources.sources[_i1_].ggd[_itime_].neutral[edge_sources.sources[_i1_].ggd[_itime_].ion[_i2_].neutral_index-1].element[_i3_].a
     sources(i1)/ggd(itime)/ion(i2)/element(i3)/z_n:
-        empty: False
         ids_gt: 0.0
+        ids_bool: len(edge_sources.grid_ggd)>0
     sources(i1)/ggd(itime)/ion(i2)/element(i3)/atoms_n:
-        empty: False
         ids_gt: 0
+        ids_bool: len(edge_sources.grid_ggd)>0
     sources(i1)/ggd(itime)/ion(i2)/multiple_states_flag:
-        empty: False
         ids_ge: 0
         ids_le: 1
+        ids_bool: len(edge_sources.grid_ggd)>0
     sources(i1)/ggd(itime)/neutral(i2)/ion_index:
-        empty: False
         ids_ge: 0
         ids_le: len(edge_sources.sources[_i1_].ggd[_itime_].ion)
+        ids_bool: len(edge_sources.grid_ggd)>0
     sources(i1)/ggd(itime)/neutral(i2)/element(i3)/a:
-        empty: False
         ids_gt: 0.0
+        ids_bool: len(edge_sources.grid_ggd)>0
+        # check ion_index and neutral_index that they point to a species that has the same elemental make-up (IMAS-3933)
+        ids_eq: edge_sources.sources[_i1_].ggd[_itime_].ion[edge_sources.sources[_i1_].ggd[_itime_].neutral[_i2_].ion_index-1].element[_i3_].a
     sources(i1)/ggd(itime)/neutral(i2)/element(i3)/z_n:
-        empty: False
         ids_gt: 0.0
+        ids_bool: len(edge_sources.grid_ggd)>0
     sources(i1)/ggd(itime)/neutral(i2)/element(i3)/atoms_n:
-        empty: False
         ids_gt: 0
+        ids_bool: len(edge_sources.grid_ggd)>0
     sources(i1)/ggd(itime)/neutral(i2)/multiple_states_flag:
-        empty: False
         ids_ge: 0
         ids_le: 1
+        ids_bool: len(edge_sources.grid_ggd)>0
 
     # For each ion[:].state[:] structure:
 
     sources(i1)/species/ion/state/z_min:
-        empty: False
         ids_gt: 0.0
     sources(i1)/species/ion/state/z_max: # ambiguous roles with z_n, to be done 
-        empty: False
         ids_gt: 0.0
         ids_ge: edge_sources.sources[_i1_].species.ion.state.z_min
     sources(i1)/species/ion/elements(i2)/a:
-        empty: False
         ids_gt: 0.0
     sources(i1)/species/ion/elements(i2)/z_n:
-        empty: False
         ids_gt: 0.0
     sources(i1)/species/ion/elements(i2)/atoms_n:
-        empty: False
         ids_gt: 0
 
     # For each neutral[:].state[:] structure:
 
-    sources(i1)/species/neutral/state/neutral_type/name:
-        empty: False
+    # IMAS-3393
+    grid_ggd(itime)/space(i1)/identifier/index:
+        ids_gt: imas.imasdef.EMPTY_INT
+    grid_ggd(itime)/space(i1)/geometry_type/index:
+        ids_gt: imas.imasdef.EMPTY_INT
+    grid_ggd(itime)/space(i1)/coordinates_types:
+        ids_gt: imas.imasdef.EMPTY_INT
+        ids_bool: len(edge_sources.grid_ggd[_itime_].space)==len(edge_sources.grid_ggd[_itime_].space[_i1_].coordinate_type)
+    grid_ggd(itime)/space(i1)/objects_per_dimension(i2)/geometry_content/index:
+        ids_gt: imas.imasdef.EMPTY_INT

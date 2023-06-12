@@ -23,7 +23,7 @@ class GEQDSK:
     GEQDSK module for IMAS
 
     [1] L.L. Lao, "G EQDSK FORMAT", https://w3.pppl.gov/ntcc/TORAY/G_EQDSK.pdf
-    [2] O. Sauter and S.Yu. Medvevdev, "Tokamak Coordinate Conventions : COCOS",
+    [2] O. Sauter and S.Yu. Medvedev, "Tokamak Coordinate Conventions : COCOS",
         Comput. Physics Commun. 184 (2013) 293
 
     Attributes
@@ -107,12 +107,12 @@ class GEQDSK:
             raise FileNotFoundError(fpath)
 
         if os.stat(fpath).st_size == 0:
-            raise IOError("file size is zero: {}".format(fpath))
+            raise IOError(f"file size is zero: {fpath}")
 
         try:
             fp = open(fpath, "r")
         except OSError:
-            raise IOError("cannot open/read file: {}".format(fpath))
+            raise IOError(f"cannot open/read file: {fpath}")
 
         fmt00 = FortranRecordReader("6a8,3i4")
         fmt20 = FortranRecordReader("5e16.9")
@@ -125,7 +125,7 @@ class GEQDSK:
         rec = fmt00.read(header)
         data["CASE"] = rec[0:6]
         if len(header) != 60:
-            logger.warning("irregular length of header: %d", len(header))
+            logger.warning(f"irregular length of header: {len(header)}")
             header = header.split()
             data["IDUM"] = np.int(header[-3])
             data["NW"] = nw = np.int(header[-2])
@@ -488,7 +488,7 @@ def geqdsk2ids(fpath, ipsign=0, b0sign=0, cocos_in=None):
     # Check if COCOS is equal to IDS_COCOS
     if cocos["COCOS"] != IDS_COCOS:
         raise ValueError(
-            "COCOS transformed = {}, expected {}".format(cocos["COCOS"], IDS_COCOS)
+            f"COCOS transformed = {cocos['COCOS']}, expected {IDS_COCOS}"
         )
 
     return eq

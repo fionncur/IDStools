@@ -29,14 +29,12 @@ def main():
     status, _ = db.create()
     if status != 0:
         raise OSError(
-            "can not open backend={}, user_or_path={}, database={}, shot={}, run={}".format(
-                args.backend, args.user, args.database, args.shot, args.run
-            )
+            f"can not open backend={args.backend}, user_or_path={args.user}, database={args.database}, shot={args.shot}, run={args.run}"
         )
     db.put(eq)
     db.close()
     logger.info(
-        "IDS/equilibrium populated in shot/run = {}/{}.".format(args.shot, args.run)
+        f"IDS/equilibrium populated in shot/run = {args.shot}/{args.run}."
     )
 
 
@@ -52,7 +50,7 @@ if __name__ == "__main__":
         formatter_class=argparse.RawDescriptionHelpFormatter,
         parents=[imas_parser],
         description=textwrap.dedent(
-            """\
+            f"""\
             (I) Command Line Interface for EQDSK Convertor ({0})
             -----------------------------------------------------------
             Usage:
@@ -72,7 +70,7 @@ if __name__ == "__main__":
                 4) Coerce input COCOS index
                 $ {0} -g path_to_gfile -s 12345 -r 1 -u userid -d ITER --cocos_in 7
 
-            (II) Functional Interface in Python (database_tools/{0}.py)
+            (II) Functional Interface in Python (database_tools/{prog}.py)
             --------------------------------------------------------------
             Usage:
                 0) Initialization
@@ -86,9 +84,7 @@ if __name__ == "__main__":
  
                 3) Convert Gfile with COCOS input (=1) coerced
                 >>> eq = eqdsk2ids(gfile='path/to/gfile', cocos_in=1)
-            """.format(
-                prog
-            )
+            """
         ),
     )
     parser.add_argument(

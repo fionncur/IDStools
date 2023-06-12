@@ -1,86 +1,90 @@
 ﻿# https://confluence.iter.org/display/IMP/Required+fields+in+a+dataset+to+be+imported+in+a+scenario+database
 #
 edge_profiles:
-    ids_properties/homogeneous_time:
-        empty: False
-        ids_ge: 0
-        ids_le: 2
-    time(:):
-        empty: False
-    vacuum_toroidal_field/b0(:):
-        empty: False
     vacuum_toroidal_field/r0:
-        empty: False
         ids_gt: 0.0
-    code/output_flag(:):
-        empty: False
 
     # Within the ggd[:] structure, if present:
     ggd(itime)/electrons/temperature(i1)/values(:):
-        empty: False
         ids_ge: 0.0
+        ids_bool: len(edge_profiles.grid_ggd)>0
     ggd(itime)/electrons/velocity(i1)/values(:):
-        empty: False
+        ids_bool: len(edge_profiles.grid_ggd)>0
     ggd(itime)/phi_potential(i1)/values(:):
-        empty: False
+        ids_bool: len(edge_profiles.grid_ggd)>0
     ggd(itime)/ion(i1)/element(i2)/a:
-        empty: False
         ids_gt: 0.0
+        ids_bool: len(edge_profiles.grid_ggd)>0
     ggd(itime)/ion(i1)/element(i2)/z_n:
-        empty: False
         ids_gt: 0.0
+        ids_bool: len(edge_profiles.grid_ggd)>0
     ggd(itime)/ion(i1)/element(i2)/atoms_n:
-        empty: False
         ids_gt: 0
+        ids_bool: len(edge_profiles.grid_ggd)>0
     ggd(itime)/ion(i1)/multiple_states_flag:
-        empty: False
         ids_ge: 0
         ids_le: 1
+        ids_bool: len(edge_profiles.grid_ggd)>0
     ggd(itime)/neutral(i1)/ion_index:
-        empty: False
         ids_ge: 0
         ids_le: len(edge_profiles.ggd[_itime_].neutral)
+        ids_bool: len(edge_profiles.grid_ggd)>0
     ggd(itime)/neutral(i1)/element(i2)/a:
-        empty: False
         ids_gt: 0.0
+        ids_bool: len(edge_profiles.grid_ggd)>0
+        # check ion_index and neutral_index that they point to a species that has the same elemental make-up (IMAS-3933)
+        ids_eq: edge_profiles.ggd[_itime_].ion[edge_profiles.ggd[_itime_].neutral[_i1_].ion_index-1].element[_i2_].a
     ggd(itime)/neutral(i1)/element(i2)/z_n:
-        empty: False
         ids_gt: 0.0
+        ids_bool: len(edge_profiles.grid_ggd)>0
     ggd(itime)/neutral(i1)/element(i2)/atoms_n:
-        empty: False
         ids_gt: 0
+        ids_bool: len(edge_profiles.grid_ggd)>0
     ggd(itime)/neutral(i1)/multiple_states_flag:
-        empty: False
         ids_ge: 0
         ids_le: 1
+        ids_bool: len(edge_profiles.grid_ggd)>0
     ggd(itime)/neutral(i1)/density(i2)/values(:):
-        empty: False
         ids_ge: 0.0
+        ids_bool: len(edge_profiles.grid_ggd)>0
 
     # For each ion[:].state[:] structure:
     ggd(itime)/ion(i1)/state(i2)/z_min: 
-        empty: False
         ids_gt: 0.0
+        ids_bool: len(edge_profiles.grid_ggd)>0
     ggd(itime)/ion(i1)/state(i2)/z_max: 
-        empty: False
         ids_gt: 0.0
         ids_ge: edge_profiles.ggd[_itime_].ion[_i1_].state[_i2_].z_min
+        ids_bool: len(edge_profiles.grid_ggd)>0
     ggd(itime)/ion(i1)/element(i2)/a:
-        empty: False
         ids_gt: 0.0
+        ids_bool: len(edge_profiles.grid_ggd)>0
+        # check ion_index and neutral_index that they point to a species that has the same elemental make-up (IMAS-3933)
+        ids_eq: edge_profiles.ggd[_itime_].neutral[edge_profiles.ggd[_itime_].ion[_i1_].neutral_index-1].element[_i2_].a
     ggd(itime)/ion(i1)/element(i2)/z_n:
-        empty: False
         ids_gt: 0.0
+        ids_bool: len(edge_profiles.grid_ggd)>0
     ggd(itime)/ion(i1)/element(i2)/atoms_n:
-        empty: False
         ids_gt: 0.0
+        ids_bool: len(edge_profiles.grid_ggd)>0
     ggd(itime)/ion(i1)/state(i2)/density(i3)/values(:): 
-        empty: False
         ids_ge: 0.0
+        ids_bool: len(edge_profiles.grid_ggd)>0
     ggd(itime)/ion(i1)/state(i2)/velocity(i3)/values(:): 
-        empty: False
+        ids_bool: len(edge_profiles.grid_ggd)>0
 
     # For each neutral[:].state[:] structure:
     ggd(itime)/neutral(i1)/state(i2)/neutral_type/name: 
-        empty: False
+        ids_bool: len(edge_profiles.grid_ggd)>0
     # particle_flux, energy_flux not found
+
+    # IMAS-3393
+    grid_ggd(itime)/space(i1)/identifier/index:
+        ids_gt: imas.imasdef.EMPTY_INT
+    grid_ggd(itime)/space(i1)/geometry_type/index:
+        ids_gt: imas.imasdef.EMPTY_INT
+    grid_ggd(itime)/space(i1)/coordinates_types:
+        ids_gt: imas.imasdef.EMPTY_INT
+        ids_bool: len(edge_profiles.grid_ggd[_itime_].space)==len(edge_profiles.grid_ggd[_itime_].space[_i1_].coordinate_type)
+    grid_ggd(itime)/space(i1)/objects_per_dimension(i2)/geometry_content/index:
+        ids_gt: imas.imasdef.EMPTY_INT
