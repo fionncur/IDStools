@@ -72,8 +72,7 @@ class ScenarioValidator:
 
     DD = {}
     SCHEMA = {}
-    schema_path = []
-    dd_path = ""
+    SCHEMA_PATH = []
 
     def __init__(self, dd_path=idschk.FILE_IDSDef, schema_path=[]):
         """
@@ -88,11 +87,11 @@ class ScenarioValidator:
         -------
         """
 
-        self.DD or self.load_DD(dd_path)
+        ScenarioValidator.DD or self.load_DD(dd_path)
 
-        if schema_path != self.schema_path:
+        if schema_path != ScenarioValidator.SCHEMA_PATH:
             self.load_schema(schema_path)
-            self.schema_path = schema_path
+            ScenarioValidator.SCHEMA_PATH = schema_path
 
     def load_DD(self, fpath):
         """

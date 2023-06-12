@@ -572,7 +572,7 @@ class IDSValidator(cerberus.Validator):
         """ """
         self.cocos = cocos
 
-    def set_dim(self, field, ids, data, idx):
+    def set_dim(self, field, ids, data):
         """ """
         dtype = re.search("^(INT|FLT)_([1-9])D$", field.get("data_type"))
         if dtype is not None:
@@ -825,7 +825,7 @@ def validator(field, path_doc, ids, schema, cocos, buf, idx):
 
     # Initialization
     v_ids = IDSValidator({path_doc: schemaw[path_doc]})
-    v_ids.set_dim(field, ids, data, idx)
+    v_ids.set_dim(field, ids, data)
     v_ids.set_cocos(cocos)
     v_ids.set_ids(ids)
     v_ids.set_idx(idx)
