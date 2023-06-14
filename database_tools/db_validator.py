@@ -54,6 +54,36 @@ def load_scenario(user, database, version, backend):
 # ----------------------------------------------------------------------
 
 
+def merge_dict(d1, d2):
+    """
+    Merge two python dicts
+
+    Parameters
+    ----------
+    d1: dict
+        Type dict with IDS name as key and schema as value
+    d2: dict
+        Type dict with IDS name as key and schema as value
+
+    Returns
+    -------
+    dict
+        Merged input dicts
+    """
+
+    inter_keys = set(d1.keys()) & set(d2.keys())
+
+    d = {**d1, **d2}
+
+    for k in inter_keys:
+        d[k] = {**d1.get(k), **d2.get(k)}
+
+    return d
+
+
+# ----------------------------------------------------------------------
+
+
 class ScenarioValidator:
     """
     Scenario Validator for IMASDB
@@ -133,8 +163,39 @@ class ScenarioValidator:
         except:
             raise OSError(f"failed to load Schema: {yaml}")
 
+        self.SCHEMA = self.arrange_schema(self.SCHEMA)
+
         logger.debug(f" schema file= {f}")
         logger.debug(f" schema = {self.SCHEMA}")
+
+    def arrange_schema(self, *args):
+        """
+        Merge validation schemas of same IDS
+    
+        Parameters
+        ----------
+        *args: dict
+            Validation schemas in type dict with fpath of yaml files as key
+    
+        Returns
+        -------
+        dict
+            Validation schema merged in type dict
+        """
+    
+        dw = {}
+        for a in args:
+            dw.update(a)
+    
+        d = {}
+        for _, schemas in dw.items():
+            for idsname in schemas:
+                if idsname in d.keys():
+                    d[idsname] = merge_dict(d[idsname], schemas[idsname])
+                else:
+                    d[idsname] = schemas[idsname]
+    
+        return {"schema":d}
 
     def validate(self, db, idsname, occ=0, time=-99.0, fmt=""):
         """
@@ -273,12 +334,8 @@ def db_validator(
         current_fpath = path.dirname(path.realpath(__file__))
         schema_dir = path.join(current_fpath, "../../../../bin/validation_schemas")
         if path.isdir(schema_dir):
-            schema_ITER = sorted(glob(schema_dir + "/ITER/*.y*ml", recursive=True))
-            schema_generic = sorted(glob(schema_dir + "/generic/*.y*ml", recursive=True))
-            # Avoid Duplication of Schema Files
-            w = [path.basename(f) for f in schema_ITER]
-            schema_ITER += [f for f in schema_generic if path.basename(f) not in w]
-            schema = schema_ITER
+            schema += sorted(glob(schema_dir + "/generic/*.y*ml", recursive=True))
+            schema += sorted(glob(schema_dir + "/ITER/*.y*ml", recursive=True))
     else:
         for p in schema_path:
             if path.isdir(p):
