@@ -5,16 +5,8 @@ core_profiles:
         ids_ge: 0.0
     global_quantities/beta_tor_norm(:):
         ids_ge: 0.0
-    global_quantities/current_bootstrap(:):
-        ids_ip_like: False
-    global_quantities/current_non_inductive(:):
-        ids_ip_like: False
     global_quantities/energy_diamagnetic(:):
         ids_ge: 0.0
-    global_quantities/ip(:):
-        ids_ip_like: False
-    global_quantities/v_loop(:):
-        ids_ip_like: False
     profiles_1d(itime)/electrons/density(:):
         ids_ge: 0.0
     profiles_1d(itime)/electrons/pressure(:):
@@ -30,8 +22,6 @@ core_profiles:
     profiles_1d(itime)/grid/rho_tor_norm(:):
         ids_ge: 0.0
         ids_le: 1.0
-    profiles_1d(itime)/grid/psi(:):
-        ids_psi_like: False
     profiles_1d(itime)/grid/volume(:):
         ids_ge: 0.0
     profiles_1d(itime)/ion(i1)/density(:):
@@ -56,8 +46,6 @@ core_profiles:
         ids_ge: 0.0
     profiles_1d(itime)/pressure_perpendicular(:):
         ids_ge: 0.0
-    profiles_1d(itime)/q(:):
-        ids_q_like: False
     profiles_1d(itime)/t_i_average(:):
         ids_ge: 0.0
     profiles_1d(itime)/zeff(:):

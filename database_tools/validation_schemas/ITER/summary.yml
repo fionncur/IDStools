@@ -2,13 +2,19 @@
 #
 summary:
     global_quantities/b0/value(:):
-        #>ITER
-        #ids_b0_like: False
         ids_lt: 0.0
-        #<ITER
+        #ids_b0_like: False
     global_quantities/ip/value(:):
-        #>ITER
         ids_gt: -17.0e6
         ids_le: 0.0
+        #ids_ip_like: False
+    global_quantities/current_bootstrap/value(:):
         ids_ip_like: False
-        #<ITER
+    global_quantities/current_no_inductive/value(:):
+        ids_ip_like: False
+    global_quantities/current_ohm/value(:):
+        ids_ip_like: False
+    global_quantities/v_loop/value(:):
+        ids_ip_like: False
+    global_quantities/q_95/value(:):
+        ids_q_like: False
