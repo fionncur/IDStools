@@ -38,6 +38,8 @@ def load_scenario(user, database, version, backend):
         List of pulses in tuple as (shot, run)
     """
 
+    logger.info("loading scenario table...")
+
     scenarios = []
     if backend == "MDSPLUS":
         scenarios = db_helpers.mdsListPulseRun(
@@ -351,18 +353,16 @@ def db_validator(
     # Initialize Scenario Validator
     sv = ScenarioValidator(schema_path=schema)
 
-    # Load scenario table in case of "pulse" not given
-    logger.info("loading scenario table...")
-    scenarios = load_scenario(user, database, version, backend)
     pulses = []
     if len(pulse) >= 1:
         for shot, run in pulse:
             if shot > 0 and run >= 0:
                 pulses.extend([(shot, run)])
             if shot > 0 and run < 0:
+                scenarios =  load_scenario(user, database, version, backend)
                 pulses.extend([(s, r) for s, r in scenarios if shot == s])
     else:
-        pulses = scenarios
+        pulses =  load_scenario(user, database, version, backend)
 
     # Scenario Validation for Pulses
     npulse = len(pulses)

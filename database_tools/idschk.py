@@ -820,8 +820,9 @@ def validator(field, path_doc, ids, schema, cocos, buf, idx):
             val = val.replace(ids.__name__ + ".", ids_header)
             try:
                 schemaw[path_doc][key] = eval(val)
-            except:
-                print(f"eval error on value {val}, ignored")
+            except Exception as e:
+                print(f"eval error on value {val}, ignored: {e}")
+                return
 
     # Initialization
     v_ids = IDSValidator({path_doc: schemaw[path_doc]})
