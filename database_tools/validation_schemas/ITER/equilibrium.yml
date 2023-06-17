@@ -2,11 +2,5 @@
 #
 equilibrium:
     time_slice(itime)/global_quantities/ip:
-        #>ITER
         ids_gt: -17.0e6
         ids_le: 0.0
-        #<ITER
-    vacuum_toroidal_field/b0(:):
-        #>ITER
-        ids_b0_like: False
-        #<ITER

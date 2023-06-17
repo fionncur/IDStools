@@ -2,7 +2,4 @@
 #
 edge_profiles:
     vacuum_toroidal_field/b0(:):
-        #>ITER
-        #ids_b0_like: False
         ids_lt: 0.0
-        #<ITER

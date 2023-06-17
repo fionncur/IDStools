@@ -4,14 +4,3 @@ core_profiles:
     global_quantities/ip(:):
         ids_gt: -17.0e6
         ids_le: 0.0
-        #ids_ip_like: False
-    global_quantities/current_bootstrap(:):
-        ids_ip_like: False
-    global_quantities/current_non_inductive(:):
-        ids_ip_like: False
-    global_quantities/v_loop(:):
-        ids_ip_like: False
-    profiles_1d(itime)/grid/psi(:):
-        ids_psi_like: False
-    profiles_1d(itime)/q(:):
-        ids_q_like: False

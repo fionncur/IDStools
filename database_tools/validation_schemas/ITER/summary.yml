@@ -3,18 +3,6 @@
 summary:
     global_quantities/b0/value(:):
         ids_lt: 0.0
-        #ids_b0_like: False
     global_quantities/ip/value(:):
         ids_gt: -17.0e6
         ids_le: 0.0
-        #ids_ip_like: False
-    global_quantities/current_bootstrap/value(:):
-        ids_ip_like: False
-    global_quantities/current_no_inductive/value(:):
-        ids_ip_like: False
-    global_quantities/current_ohm/value(:):
-        ids_ip_like: False
-    global_quantities/v_loop/value(:):
-        ids_ip_like: False
-    global_quantities/q_95/value(:):
-        ids_q_like: False
