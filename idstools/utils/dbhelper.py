@@ -1,5 +1,5 @@
 """Library for retrieving IMAS database information.
-
+#Original source idstools/db_tools.py
 @author H.-J. Klingshirn"""
 from __future__ import print_function
 import logging
@@ -251,9 +251,7 @@ def list_databases_hdf5(user, database, version):
                         run,
                         datetime.fromtimestamp(
                             getmtime(
-                                get_dbfiles_hdf5(user, database, version, shot, run)[
-                                    1
-                                ]
+                                get_dbfiles_hdf5(user, database, version, shot, run)[1]
                             )
                         ).replace(microsecond=0),
                     )
