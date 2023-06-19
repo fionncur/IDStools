@@ -57,7 +57,7 @@ def main():
     if path.isfile(FILE_IDSDef):
         root = ET.parse(FILE_IDSDef).getroot()
     else:
-        exit("file not found:{}".format(FILE_IDSDef))
+        exit(f"file not found:{FILE_IDSDef}")
 
     # Initialization for yaml.Dumper
     yaml.Dumper.ignore_aliases = lambda *args: True

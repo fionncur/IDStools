@@ -61,5 +61,5 @@ for idsname, oc in idslist.available_in_dbentry(db):
             print("     time:             [" + str(times[0]) + "]")
     elif homogeneous_time == 2:
         print("  " + idsnameoc + ":")
-        print("     time_step_number: " + str(len(times)))
+        print("     time_step_number: 0")
         print("     time:             [static]")

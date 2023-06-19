@@ -156,14 +156,6 @@ if __name__ == "__main__":
         nargs="*",
     )
     parser.add_argument(
-        "-p",
-        "--properties",
-        action="store_true",
-        dest="prop",
-        help="report only ids_properties",
-        required=False,
-    )
-    parser.add_argument(
         "-t",
         "--time",
         dest="time",
