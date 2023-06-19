@@ -1,4 +1,3 @@
-# TODO can be deleted, migrated to utils.idshelper
 import numpy as np
 from packaging import version
 ARRAY_EQUAL_KWARGS = "equal_nan=True" if version.parse(np.__version__)>version.parse("1.19") else ""
