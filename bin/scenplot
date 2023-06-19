@@ -639,7 +639,7 @@ if args.noProfiles:
     ax = plt.gca()
     xmin, xmax = ax.get_xlim()
     ymin, ymax = ax.get_ylim()
-    plt.text(xmax,ymin-0.5*(ymax-ymin),hostdir+' - Shot '+str(args.shot)+' / '+' Run '+str(args.run),fontdict=font,fontsize=6,color='black',ha='right')
+    plt.text(xmax,ymin-0.5*(ymax-ymin),hostdir+' - Shot '+str(args.shot)+' / '+' Run '+str(args.run),fontsize=6,color='black',ha='right')
 
 if args.Title:
     try:
@@ -694,7 +694,7 @@ if not args.noProfiles:
     ax = plt.gca()
     xmin, xmax = ax.get_xlim()
     ymin, ymax = ax.get_ylim()
-    plt.text(xmax,ymin-0.5*(ymax-ymin),hostdir+' - Shot '+str(args.shot)+' / '+' Run '+str(args.run), fontdict=font,fontsize=6,color='black',ha='right')
+    plt.text(xmax,ymin-0.5*(ymax-ymin),hostdir+' - Shot '+str(args.shot)+' / '+' Run '+str(args.run),fontsize=6,color='black',ha='right')
 
     # Equilibrium
     ax5 = plt.subplot2grid((nline,ncol), (0,3), rowspan=2)

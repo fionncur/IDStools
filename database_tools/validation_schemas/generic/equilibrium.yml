@@ -1,0 +1,19 @@
+﻿# https://confluence.iter.org/display/IMP/Required+fields+in+a+dataset+to+be+imported+in+a+scenario+database
+#
+equilibrium:
+    #time_slice(itime)/global_quantities/ip:
+    #    empty: False
+    #time_slice(itime)/profiles_2d(i1)/phi(:,:):
+    #    empty: False
+    #time_slice(itime)/profiles_2d(i1)/psi(:,:):
+    #    empty: False
+    time_slice(itime)/profiles_2d(i1)/r(:,:):
+    #    empty: False
+        ids_gt: 0.0
+    #time_slice(itime)/profiles_2d(i1)/z(:,:):
+    #    empty: False
+    vacuum_toroidal_field/r0:
+    #    empty: False
+        ids_gt: 0.0
+    #vacuum_toroidal_field/b0(:):
+    #    empty: False

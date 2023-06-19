@@ -1,0 +1,78 @@
+﻿# https://confluence.iter.org/display/IMP/Required+fields+in+a+dataset+to+be+imported+in+a+scenario+database
+#
+edge_transport:
+    model(i1)/flux_multiplier:
+        ids_gt: 0.0
+
+    # Within each model[:].ggd[:] structure:
+    #model(i1)/ggd(itime)/electrons/energy/flux(i2)/values(:):
+    #    empty: False
+    #    ids_bool: len(edge_transport.grid_ggd)>0
+    #model(i1)/ggd(itime)/electrons/particles/flux(i2)/values(:):
+    #    empty: False
+    #    ids_bool: len(edge_transport.grid_ggd)>0
+    model(i1)/ggd(itime)/ion(i2)/element(i3)/a:
+        ids_gt: 0.0
+        ids_bool: len(edge_transport.grid_ggd)>0
+        # check ion_index and neutral_index that they point to a species that has the same elemental make-up (IMAS-3933)
+        ids_eq: edge_transport.model[_i1_].ggd[_itime_].neutral[edge_transport.model[_i1_].ggd[_itime_].ion[_i2_].neutral_index-1].element[_i3_].a
+    model(i1)/ggd(itime)/ion(i2)/element(i3)/z_n:
+        ids_gt: 0.0
+        ids_bool: len(edge_transport.grid_ggd)>0
+    model(i1)/ggd(itime)/ion(i2)/element(i3)/atoms_n:
+        ids_gt: 0
+        ids_bool: len(edge_transport.grid_ggd)>0
+    model(i1)/ggd(itime)/ion(i2)/multiple_states_flag:
+        ids_ge: 0
+        ids_le: 1
+        ids_bool: len(edge_transport.grid_ggd)>0
+    model(i1)/ggd(itime)/neutral(i2)/ion_index:
+        ids_ge: 0
+        ids_le: len(edge_transport.model[_i1_].ggd[_itime_].ion)
+        ids_bool: len(edge_transport.grid_ggd)>0
+    model(i1)/ggd(itime)/neutral(i2)/element(i3)/a:
+        ids_gt: 0.0
+        ids_bool: len(edge_transport.grid_ggd)>0
+        # check ion_index and neutral_index that they point to a species that has the same elemental make-up (IMAS-3933)
+        ids_eq: edge_transport.model[_i1_].ggd[_itime_].ion[edge_transport.model[_i1_].ggd[_itime_].neutral[_i2_].ion_index-1].element[_i3_].a
+    model(i1)/ggd(itime)/neutral(i2)/element(i3)/z_n:
+        ids_gt: 0.0
+        ids_bool: len(edge_transport.grid_ggd)>0
+    model(i1)/ggd(itime)/neutral(i2)/element(i3)/atoms_n:
+        ids_gt: 0
+        ids_bool: len(edge_transport.grid_ggd)>0
+    model(i1)/ggd(itime)/neutral(i2)/multiple_states_flag:
+        ids_ge: 0
+        ids_le: 1
+        ids_bool: len(edge_transport.grid_ggd)>0
+
+    # For each ion[:].state[:] structure:
+    model(i1)/ggd(itime)/ion(i2)/state(i3)/z_min:
+        ids_gt: 0.0
+    model(i1)/ggd(itime)/ion(i2)/state(i3)/z_max:
+        ids_gt: 0.0
+        ids_ge: edge_transport.model[_i1_].ggd[_itime_].ion[_i2_].state[_i3_].z_min
+
+    model(i1)/ggd(itime)/ion(i2)/element(i3)/a:
+        ids_gt: 0.0
+    model(i1)/ggd(itime)/ion(i2)/element(i3)/z_n:
+        ids_gt: 0.0
+    model(i1)/ggd(itime)/ion(i2)/element(i3)/atoms_n:
+        ids_gt: 0.0
+    #model(i1)/ggd(itime)/ion(i2)/state(i3)/particles/flux(i4)/values(:):
+    #    empty: False
+    #model(i1)/ggd(itime)/ion(i2)/state(i3)/energy/flux(i4)/values(:):
+    #    empty: False
+
+    # For each neutral[:].state[:] structure:
+
+    # IMAS-3393
+    grid_ggd(itime)/space(i1)/identifier/index:
+        ids_gt: imas.imasdef.EMPTY_INT
+    grid_ggd(itime)/space(i1)/geometry_type/index:
+        ids_gt: imas.imasdef.EMPTY_INT
+    grid_ggd(itime)/space(i1)/coordinates_types:
+        ids_gt: imas.imasdef.EMPTY_INT
+        ids_bool: len(edge_transport.grid_ggd[_itime_].space)==len(edge_transport.grid_ggd[_itime_].space[_i1_].coordinate_type)
+    grid_ggd(itime)/space(i1)/objects_per_dimension(i2)/geometry_content/index:
+        ids_gt: imas.imasdef.EMPTY_INT

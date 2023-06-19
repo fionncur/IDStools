@@ -5,6 +5,7 @@ import os, sys, glob, yaml, argparse, re, imas
 from operator import itemgetter
 from stat import *
 from numpy import *
+from idstools.cli import *
 
 # ----------------------------------------------------------------------
 
@@ -17,58 +18,41 @@ def find_nearest(a, a0):
 
 # Management of input arguments
 parser = argparse.ArgumentParser(description=\
-    '---- Display the plasma kinetic profiles from the core_profiles IDSs')
-parser.add_argument('-u','--user_or_path',help='User or absolute path name of the DB where the data-entry is located', required=False)
-parser.add_argument('-d','--database',help='Database name of the targeted data-entry', required=False)
+                                 '---- Display the plasma kinetic profiles from the core_profiles IDSs',
+                                 parents=[imas_parser])
 parser.add_argument('-s','--shot',help='Shot number', required=True,type=int)
 parser.add_argument('-r','--run',help='Run number',required=True,type=int)
-parser.add_argument('-t','--time',help='Time', required=False,type=float)
-args = vars(parser.parse_args())
+parser.add_argument('-t','--time',help='Time', required=False,type=float, default=-99.0)
+
+args = parser.parse_args()
 
 # For execution from python shell
 #args = {'run': 0, 'database': None, 'user_or_path': None, 'time': None, 'shot': 121003}
 
-shot = args['shot']
-run  = args['run']
-
-# User or absolute path name
-if args['user_or_path'] != None:
-    user_or_path = args['user_or_path']
-else:
-    user_or_path = 'public'
-
-# Database name
-if args['database'] != None:
-    database = args['database']
-else:
-    database = 'iterdb'
-
-# Time
-if args['time'] != None:
-    time = args['time']
-else:
-    time = -99.
 
 # -----------------------------------------------
 # Open the database and read the necessary IDSs
 # -----------------------------------------------
-version = os.getenv('IMAS_VERSION')[0]
-input=imas.ids(shot,run)
-[err,n]=input.open_env(user_or_path,database,version,silent=True)
+input = imas.DBEntry(get_backend_id(args.backend),args.database,args.shot,args.run,user_name=args.user,data_version=args.version)
+err,n = input.open()
 if err != 0:
-    print('Shot ' + str(shot) + ', run ' + str(run) +' for user_or_path = '+user_or_path+' and database = '+database+' does not exist', file=sys.stderr)
+    print('Shot ' + str(args.shot) + ', run ' + str(args.run) +' for user_or_path = '+args.user+' and database = '+args.database+' does not exist', file=sys.stderr)
     print('----> Aborted.', file=sys.stderr)
     exit()
 
-if user_or_path == 'public':
-    DB_ABS_PATH = '/work/imas/shared/'+str(database)+'/3/0'
+if args.user == 'public':
+    publichome = os.getenv("IMAS_HOME")
+    if (publichome == None):
+        print("Environment variable IMAS_HOME is not defined. Quitting.", file=sys.stderr)
+        sys.exit(1)
+    DB_ABS_PATH = publichome+'/shared/imasdb/'+args.database+'/'+args.version
 else:
-    DB_ABS_PATH = os.path.expanduser("~{}".format(user_or_path))+"/public/imasdb/"+str(database)+"/3/0"
+    DB_ABS_PATH = os.path.expanduser("~{}".format(args.user))+"/public/imasdb/"+args.database+"/"+args.version
 
 try:
     #input.core_profiles.get()
-    core_profiles = input.core_profiles
-    core_profiles.time=input.core_profiles.partialGet('time')
+    core_profiles = imas.core_profiles()
+    core_profiles.time=input.partial_get('core_profiles','time')
     if core_profiles.time is None:
         print('No core_profiles IDS in the data-entry --> Abort.', file=sys.stderr)
         exit()
@@ -85,6 +69,7 @@ hostdir = hostdir[:-2]
 # -------------------------------------------
 # Search for adequate time slice for display
 # -------------------------------------------
+time = args.time
 ntime = len(core_profiles.time)
 timevec = core_profiles.time
 if ntime >= 1:
@@ -113,7 +98,7 @@ time = tc
 # Read 1D-profiles for this time slice
 # -------------------------------------
 core_profiles.profiles_1d.resize(1)
-core_profiles.profiles_1d[0] = input.core_profiles.partialGet('profiles_1d('+str(it)+')')
+core_profiles.profiles_1d[0] = input.partial_get('core_profiles',f'profiles_1d({it})')
 
 # ----------------------------------------------------------------------
 
@@ -350,7 +335,7 @@ nice(plt,r'$\rho/\rho_0$',r'P (MPa)',fontsize)
 legend = plt.legend(bbox_to_anchor=(legx_pos-0.3,legy_pos-0.05))
 CustomLegend_wf(legend)
 plt.title('Profiles displayed for t = '+'%.1f' % time+' s', fontdict=font)
-Signature(hostdir,shot,run,plt)
+Signature(hostdir,args.shot,args.run,plt)
 
 ax2 = plt.subplot2grid((nline,ncol), (1,0), colspan=1)
 plt.plot(rho_tor_norm,pressure_ion_thermal*factor,label='Thermal ion')
@@ -360,7 +345,7 @@ plt.ylim(0,max_ion*factor)
 nice(plt,r'$\rho/\rho_0$',r'P (MPa)',fontsize)
 legend = plt.legend(bbox_to_anchor=(legx_pos+0.4,legy_pos-0.05))
 CustomLegend_wf(legend)
-Signature(hostdir,shot,run,plt)
+Signature(hostdir,args.shot,args.run,plt)
 
 ax3 = plt.subplot2grid((nline,ncol), (2,0), colspan=1)
 plt.plot(rho_tor_norm,pressure_electron_total*factor,label='Total electron')
@@ -371,19 +356,19 @@ plt.ylim(0,max_el*factor)
 nice(plt,r'$\rho/\rho_0$',r'P (MPa)',fontsize)
 legend = plt.legend(bbox_to_anchor=(legx_pos+0.5,legy_pos-0.05))
 CustomLegend_wf(legend)
-Signature(hostdir,shot,run,plt)
+Signature(hostdir,args.shot,args.run,plt)
 
 ax = plt.gca()
 xmin, xmax = ax.get_xlim()
 ymin, ymax = ax.get_ylim()
-plt.text(xmax-0.4*(xmax-xmin),ymin-0.6*(ymax-ymin),hostdir+' - Shot '+str(shot)+' / '+' Run '+str(run), fontdict=font,fontsize=6,color='black')
+plt.text(xmax-0.4*(xmax-xmin),ymin-0.6*(ymax-ymin),hostdir+' - Shot '+str(args.shot)+' / '+' Run '+str(args.run),fontsize=6,color='black')
 
 fig = plt.gcf()
 fig.tight_layout()
 
 try:
-    fig.savefig('Pressure'+'_shot_'+str(shot)+'_run_'+str(run)+'_time_'+'%.1f' % time+'.png', dpi=100)
-    print('----> Figure saved to '+'Pressure'+'_shot_'+str(shot)+'_run_'+str(run)+'_time_'+'%.1f' % time+'.png', file=sys.stderr)
+    fig.savefig('Pressure'+'_shot_'+str(args.shot)+'_run_'+str(args.run)+'_time_'+'%.1f' % time+'.png', dpi=100)
+    print('----> Figure saved to '+'Pressure'+'_shot_'+str(args.shot)+'_run_'+str(args.run)+'_time_'+'%.1f' % time+'.png', file=sys.stderr)
 except:
     print('The figure could not be saved (check local permissions).', file=sys.stderr)
 

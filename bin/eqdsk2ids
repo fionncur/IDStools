@@ -1,0 +1,147 @@
+#!/usr/bin/env python
+import os
+import argparse
+import textwrap
+import traceback
+
+import imas
+from idstools.cli import imas_parser, get_backend_id
+from idstools.set_logger import set_logger
+from database_tools.eqdsk2ids import geqdsk2ids
+
+
+# ----------------------------------------------------------------------
+
+
+def main():
+    """
+    EQDSK Converter to IDS/equilibrium (eqdsk2ids)
+    """
+
+    # Convert GEQDSK to IDS/equilibrium
+    eq = geqdsk2ids(args.gpath, args.ipsign, args.b0sign, args.cocos_in)
+
+    # Create the output datafile
+    logger.info("creating output datafile ...")
+    db = imas.DBEntry(
+        get_backend_id(args.backend), args.database, args.shot, args.run, args.user
+    )
+    status, _ = db.create()
+    if status != 0:
+        raise OSError(
+            f"can not open backend={args.backend}, user_or_path={args.user}, database={args.database}, shot={args.shot}, run={args.run}"
+        )
+    db.put(eq)
+    db.close()
+    logger.info(
+        f"IDS/equilibrium populated in shot/run = {args.shot}/{args.run}."
+    )
+
+
+# ----------------------------------------------------------------------
+
+
+if __name__ == "__main__":
+
+    # Parse for command line options
+    prog = os.path.basename(__file__)
+    parser = argparse.ArgumentParser(
+        prog=prog,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        parents=[imas_parser],
+        description=textwrap.dedent(
+            f"""\
+            (I) Command Line Interface for EQDSK Convertor ({0})
+            -----------------------------------------------------------
+            Usage:
+                0) Load IMAS and install fortranformat and Cerberus (if not done before)
+                $ module load IMAS
+                $ pip install fortranformat cerberus
+
+                1) Compute COCOS and create IDS data file in local database
+                $ {0} -g path_to_gfile -s 12345 -r 1 -u userid -d ITER
+
+                2) Enforce signs of Ip and/or B0 in output
+                $ {0} -g path_to_gfile -s 12345 -r 1 -u userid -d ITER --ipsign -1 --b0sign -1
+
+                3) Increase verbosity to see information as COCOS index and transformation coeff.
+                $ {0} -g path_to_gfile -s 12345 -r 1 -u userid -d ITER --verbose
+
+                4) Coerce input COCOS index
+                $ {0} -g path_to_gfile -s 12345 -r 1 -u userid -d ITER --cocos_in 7
+
+            (II) Functional Interface in Python (database_tools/{prog}.py)
+            --------------------------------------------------------------
+            Usage:
+                0) Initialization
+                >>> from database_tools.eqdsk2ids import eqdsk2ids
+ 
+                1) Convert Gfile
+                >>> eq = eqdsk2ids(gfile='path/to/gfile')
+ 
+                2) Convert Gfile and alter signs both for Ip & B0
+                >>> eq = eqdsk2ids(gfile='path/to/gfile', ipsign=-1, b0sign=-1)
+ 
+                3) Convert Gfile with COCOS input (=1) coerced
+                >>> eq = eqdsk2ids(gfile='path/to/gfile', cocos_in=1)
+            """
+        ),
+    )
+    parser.add_argument(
+        "-s", "--shot", dest="shot", help="Shot number", required=True, type=int
+    )
+    parser.add_argument(
+        "-r", "--run", dest="run", help="Run number", required=True, type=int
+    )
+    parser.add_argument(
+        "-g",
+        "--gfile",
+        dest="gpath",
+        help="path to GEQDSK file",
+        required=True,
+        default=None,
+    )
+    parser.add_argument(
+        "--log",
+        dest="log",
+        default="WARNING",
+        choices=["DEBUG","INFO","WARNING", "ERROR","CRITICAL"],
+        help="Configure the logging level, default=%(default)s",
+    )
+    parser.add_argument(
+        "--ipsign",
+        dest="ipsign",
+        help="transform input data to obtain desired sign for Ip on the output, default=%(default)s uses input",
+        required=False,
+        type=int,
+        default=0,
+        choices=[-1, 0, 1],
+    )
+    parser.add_argument(
+        "--b0sign",
+        dest="b0sign",
+        help="transform input data to obtain desired sign for B0 on the output, default=%(default)s uses input",
+        required=False,
+        type=int,
+        default=0,
+        choices=[-1, 0, 1],
+    )
+    parser.add_argument(
+        "--cocos_in",
+        dest="cocos_in",
+        help="coerced COCOS index, otherwise default=%(default)s computes COCOS in GEQDSK file [1,3,5,7]",
+        required=False,
+        type=int,
+        default=None,
+        choices=[*range(1, 9), *range(11, 19)],
+    )
+    parser.set_defaults(user=os.environ["USER"])
+    args = parser.parse_args()
+
+    # Initialize logger
+    logger = set_logger(__name__, level=args.log)
+
+    try:
+        main()
+    except Exception as e:
+        logger.error(traceback.format_exc())

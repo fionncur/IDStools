@@ -23,6 +23,8 @@ parser.add_argument('-f','--force',action='store_true',
                     help='Force the creation of destination data-entry (existing data will be lost)')
 parser.add_argument('--setDatasetVersion',action='store_true',
                     help='Store current DD version into dataset_description IDS if it exists')
+parser.add_argument("-i","--interactive",action="store_true",
+                    help="Prompt the user before overwriting an ids (by default destination IDSs are overwriten)",)
 occgroup = parser.add_mutually_exclusive_group()
 occgroup.add_argument('-a','--allOccurrences',action='store_true',
                       help='Copy all occurrences available in the source into the destination')
@@ -102,14 +104,23 @@ for idsname in args.ids:
     idsid = idsname.split('/')
     if len(idsid) == 2:
         inocc = int(idsid[1])
-  
+
+       
     idsobj = src.get(idsid[0],occurrence=inocc)
     if args.setDatasetVersion and idsid[0]=='dataset_description':
         idsobj.dd_version = os.environ['IMAS_VERSION']
     try:
         if idsobj.ids_properties.homogeneous_time != imas.imasdef.EMPTY_INT:
-            print(f'Copying {idsname}')
             outocc = inocc if args.outputOccurrence is None else args.outputOccurrence
+            if args.interactive:
+                if dest.partial_get(idsid[0],"ids_properties/homogeneous_time",occurrence=outocc)!=imas.imasdef.EMPTY_INT:
+                    user_choice = ""
+                    while user_choice not in ["y", "n"]:
+                        user_choice = input(f"{idsid[0]}/{outocc} already exists, do you want to overwrite it (y/n)? :")
+                    if user_choice == "n":
+                        print(f"skip {idsid[0]}")
+                        continue
+            print(f'Copying {idsname}')
             dest.put(idsobj,occurrence=outocc)
     except Exception as exc:
         print(str(exc),file=sys.stderr)

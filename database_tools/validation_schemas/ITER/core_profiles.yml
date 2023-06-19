@@ -1,0 +1,68 @@
+﻿# https://confluence.iter.org/display/IMP/Required+fields+in+a+dataset+to+be+imported+in+a+scenario+database
+#
+core_profiles:
+    global_quantities/beta_pol(:):
+        ids_ge: 0.0
+    global_quantities/beta_tor_norm(:):
+        ids_ge: 0.0
+    global_quantities/current_bootstrap(:):
+        ids_ip_like: False
+    global_quantities/current_non_inductive(:):
+        ids_ip_like: False
+    global_quantities/energy_diamagnetic(:):
+        ids_ge: 0.0
+    global_quantities/ip(:):
+        ids_ip_like: False
+        #>ITER
+        ids_gt: -17.0e6
+        ids_le: 0.0
+        #<ITER
+    global_quantities/v_loop(:):
+        ids_ip_like: False
+    profiles_1d(itime)/electrons/density(:):
+        ids_ge: 0.0
+    profiles_1d(itime)/electrons/pressure(:):
+        ids_ge: 0.0
+    profiles_1d(itime)/electrons/pressure_fast_parallel(:):
+        ids_ge: 0.0
+    profiles_1d(itime)/electrons/pressure_fast_perpendicular(:):
+        ids_ge: 0.0
+    profiles_1d(itime)/electrons/pressure_thermal(:):
+        ids_ge: 0.0
+    profiles_1d(itime)/electrons/temperature(:):
+        ids_ge: 0.0
+    profiles_1d(itime)/grid/rho_tor_norm(:):
+        ids_ge: 0.0
+        ids_le: 1.0
+    profiles_1d(itime)/grid/psi(:):
+        ids_psi_like: False
+    profiles_1d(itime)/grid/volume(:):
+        ids_ge: 0.0
+    profiles_1d(itime)/ion(i1)/density(:):
+        ids_ge: 0.0
+    profiles_1d(itime)/ion(i1)/element(i2)/a:
+        ids_gt: 0.0
+    profiles_1d(itime)/ion(i1)/element(i2)/z_n:
+        ids_gt: 0.0
+    profiles_1d(itime)/ion(i1)/pressure(:):
+        ids_ge: 0.0
+    profiles_1d(itime)/ion(i1)/pressure_fast_parallel(:):
+        ids_ge: 0.0
+    profiles_1d(itime)/ion(i1)/pressure_fast_perpendicular(:):
+        ids_ge: 0.0
+    profiles_1d(itime)/ion(i1)/pressure_thermal(:):
+        ids_ge: 0.0
+    profiles_1d(itime)/ion(i1)/temperature(:):
+        ids_ge: 0.0
+    profiles_1d(itime)/pressure(:):
+        ids_ge: 0.0
+    profiles_1d(itime)/pressure_parallel(:):
+        ids_ge: 0.0
+    profiles_1d(itime)/pressure_perpendicular(:):
+        ids_ge: 0.0
+    profiles_1d(itime)/q(:):
+        ids_q_like: False
+    profiles_1d(itime)/t_i_average(:):
+        ids_ge: 0.0
+    profiles_1d(itime)/zeff(:):
+        ids_ge: 1.0

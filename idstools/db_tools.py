@@ -149,17 +149,30 @@ def list_databases_mdsplus(user, tokamak, dataversion):
 
     dbs = dict()
     for root, dirnames, filenames in os.walk(mdsplusdir):
-        for filename in fnmatch.filter(filenames, '*.tree'):
+        for filename in fnmatch.filter(filenames, '*.datafile'):
             try:
-                base, rundir = split(root)
-                numStartPos = filename.find('_') + 1
-                numEndPos = filename.rfind('.')
-                num = int(filename[numStartPos:numEndPos])
-                shot = int(num / 10000)
-                run = int(rundir) * 10000 + (num % 10000)
+                file = root + "/" + filename
+                rundirs = (root[len(mdsplusdir)+1:]).split('/')
+                if len(rundirs)==1: #AL4 layout
+                    numStartPos = filename.find( '_' ) + 1
+                    numEndPos = filename.rfind( '.' )
+                    num = int( filename[numStartPos:numEndPos] )
+                    shot = int( num / 10000 )
+                    run = int( rundirs[0] ) * 10000 + (num % 10000)
+                else: #AL5 layout
+                    assert(filename=="ids_001.datafile")
+                    if os.path.islink(file):
+                        continue
+                    run = root.split('/')[-1]
+                    run = int(run)
+                    shot = root.split('/')[-2]
+                    shot = int(shot)
+
+                file_time = getmtime(file)
+                file_date = datetime.fromtimestamp(file_time).replace(microsecond=0)
                 if shot not in dbs:
                     dbs[shot] = list()
-                dbs[shot].append((run,datetime.fromtimestamp(getmtime(get_dbfiles_mdsplus(user, tokamak, dataversion, shot, run)[1])).replace(microsecond=0)))
+                dbs[shot].append((run, file_date))
             except:
                  print("EXC: ", sys.exc_info(), file=sys.stderr)
                  logging.warn("Malformed MDSPlus database filename: " + join(root, filename))
@@ -181,10 +194,12 @@ def get_dbfiles_stem_mdsplus(user, tokamak, dataversion, shot, run):
         stem = join(mdsplusdir, str(int(run / 10000)), 'ids_' + str(shot) + run_string.zfill(4))
     return stem
 
+
 def get_dbfiles_mdsplus(user, tokamak, dataversion, shot, run):
     """Return the MDS+ database filenames for a given IMAS database"""
     stem = get_dbfiles_stem_mdsplus(user, tokamak, dataversion, shot, run)
     return (stem + ".characteristics", stem + ".datafile", stem + ".tree")
+
 
 def list_databases_hdf5(user, tokamak, dataversion):
     """List all HDF5 databases for a given user, tokamak, dataversion."""

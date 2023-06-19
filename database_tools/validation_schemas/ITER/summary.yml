@@ -1,0 +1,57 @@
+﻿# https://confluence.iter.org/display/IMP/Required+fields+in+a+dataset+to+be+imported+in+a+scenario+database
+#
+summary:
+    global_quantities/b0/value(:):
+        #>ITER
+        #ids_b0_like: False
+        ids_lt: 0.0
+        #<ITER
+    global_quantities/r0/value:
+        ids_gt: 0.0
+    global_quantities/beta_pol/value(:):
+        ids_ge: 0.0
+    global_quantities/beta_tor_norm/value(:):
+        ids_ge: 0.0
+    global_quantities/current_bootstrap/value(:):
+        ids_ip_like: False
+    global_quantities/current_no_inductive/value(:):
+        ids_ip_like: False
+    global_quantities/current_ohm/value(:):
+        ids_ip_like: False
+    global_quantities/energy_diamagnetic/value(:):
+        ids_ge: 0.0
+    global_quantities/energy_thermal/value(:):
+        ids_ge: 0.0
+    global_quantities/energy_total/value(:):
+        ids_ge: 0.0
+    global_quantities/h_98/value(:):
+        ids_ge: 0.0
+    global_quantities/h_mode/value(:):
+        ids_ge: 0
+        ids_le: 1
+    global_quantities/ip/value(:):
+        #>ITER
+        ids_gt: -17.0e6
+        ids_le: 0.0
+        ids_ip_like: False
+        #<ITER
+    global_quantities/tau_energy/value(:):
+        ids_ge: 0.0
+    global_quantities/v_loop/value(:):
+        ids_ip_like: False
+#
+    global_quantities/q_95/value(:):
+        ids_q_like: False
+    global_quantities/power_loss/value(:):
+        ids_ge: 0.0
+    local/separatrix/n_e/value(:):
+        ids_ge: 0.0
+    #local/separatrix/n_i/*/value(:):
+    #    empty: False
+    #   ids_ge: 0.0
+    local/separatrix/t_e/value(:):
+        ids_ge: 0.0
+    local/separatrix_average/n_e/value(:):
+        ids_ge: 0.0
+    local/separatrix_average/t_e/value(:):
+        ids_ge: 0.0

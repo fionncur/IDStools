@@ -49,7 +49,7 @@ def find_children(shotrun,data,family):
 if args['folder'] != None:
     folder = args['folder']
 else:
-    folder = '/work/imas/shared/imasdb/ITER_MD/3/0'
+    folder = '/work/imas/shared/imasdb/ITER_MD/3'
 
 file = open(folder+'/md_summary.yaml', 'r')
 data = yaml.load(file,Loader=yaml.CLoader)

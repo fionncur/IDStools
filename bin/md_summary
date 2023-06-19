@@ -34,6 +34,7 @@ parser.add_argument("-c","--choice", help=\
                     "        ro                     = Name of the diagnostic responsible officer\n"\
                     "        ro_email               = E-mail of the diagnostic responsible officer\n"\
                     "        description            = Description of the data\n"\
+                    "        backend                = Backend used to store de IDS\n"\
                     "        provenance             = Data provenance\n"\
                     "        replaces               = Old shot/run this one replaces\n"\
                     "        reason_for_replacement = Comment on why this shot/run replaces the previous one\n"\
@@ -45,7 +46,7 @@ args = vars(parser.parse_args())
 if args['folder'] != None:
     folder = args['folder']
 else:
-    folder = '/work/imas/shared/imasdb/ITER_MD/3/0'
+    folder = '/work/imas/shared/imasdb/ITER_MD/3'
 
 # FILTER
 if args['selection'] != None:
@@ -66,12 +67,9 @@ if args['choice'] != None:
         print("------------------------------------------------------------------", file=sys.stderr)
         sys.exit(1)
 else:
-    choice = ['pbs','ids','description']
-
-# PRINT THE ARGUMENTS OF THE DEFAULT CALL TO THE FUNCTION
-if args['choice'] == None:
+    choice = ['pbs','ids','description','backend']
     print("""----> Default call equivalent to: """)
-    print("""      md_summary -c pbs,ids,description""")
+    print("""      md_summary -c pbs,ids,description,backend""")
 
 # ------------------------------------------------------------------------------------------------------
 
@@ -90,6 +88,7 @@ class tab_init():
       self.value['replaced_by']            = ' '
       self.value['replaces']               = ' '
       self.value['reason_for_replacement'] = ' '
+      self.value['backend']                = ' '
       self.value['status']                 = ' '
 
 def tab_adjust(data):

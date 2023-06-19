@@ -1,0 +1,124 @@
+#!/usr/bin/env python
+import os
+import argparse
+import textwrap
+import traceback
+import re
+import time
+
+import imas
+from idstools.cli import imas_parser
+from idstools.set_logger import set_logger
+from database_tools import idschk
+from database_tools.db_validator import db_validator
+
+
+# ----------------------------------------------------------------------
+
+
+def main():
+    """
+    Validation of IDSs 
+    """
+    
+
+    # Set validator for given (shot, run), otherwise whole pulses found
+    if args.shot:
+        pulse = [(args.shot, args.run)]
+    else:
+        pulse = []
+
+    logger.info(f"-----------------------------------------------------------")
+    logger.info(f"START: {__file__}")
+    logger.info(f"-----------------------------------------------------------")
+    st = time.time()
+
+    # Validation in IMASDB
+    res = db_validator(
+        args.user, args.database, args.version, args.backend, args.path, pulse,
+    )
+
+    et = time.time()
+    logger.info(f"-----------------------------------------------------------")
+    logger.info(f"END: {__file__} [total elapsed time(s): {et-st:.2f}]")
+    logger.info(f"-----------------------------------------------------------")
+
+
+# ----------------------------------------------------------------------
+
+
+if __name__ == "__main__":
+
+    # Parse for command line options
+    prog = os.path.basename(__file__)
+    parser = argparse.ArgumentParser(
+        prog=prog,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        parents=[imas_parser],
+        description=textwrap.dedent(
+            """\
+            Validation Tool for ITER Scenario DB
+            -----------------------------------------------------------
+            Usage:
+                0) Load IMAS
+                $ module load IMAS
+
+                1) Validate all pulses in IMAS database against default schemas with output file
+                $ {0} -o output.log
+
+                2) Check the validity of all pulses in IMAS database against schemas
+                $ {0} -p /path/to/schema1.yaml /path/to/schema2.yaml
+ 
+                3) Validate all pulses in local database to default schemas
+                $ {0} -u username -d database 
+
+                4) Validate one pulse in IMAS database to schemas in the directory
+                $ {0} -s 131024 -r 40 -p /path/to/schema/dir
+
+                5) Validate all pulses having the shot number specified
+                $ {0} -s 131024 -p /path/to/schema/dir
+            """.format(
+                prog
+            )
+        ),
+    )
+    parser.add_argument(
+        "--shot", "-s", dest="shot", help="Shot number", required=False, type=int
+    )
+    parser.add_argument(
+        "--run", "-r", dest="run", help="Run number", required=False, type=int, default=-1
+    )
+    parser.add_argument(
+        "--log",
+        dest="log",
+        help="Logging level, default=%(default)s",
+        required=False,
+        default="INFO",
+        choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
+    )
+    parser.add_argument(
+        "--output",
+        "-o",
+        dest="output",
+        help="file name of IDS validation, no file output unless given",
+        required=False,
+        default=None,
+    )
+    parser.add_argument(
+        "--path",
+        "-p",
+        dest="path",
+        help="list of schema file and/or directory paths from which schema files are recursively loaded",
+        required=False,
+        nargs="+",
+        default=[],
+    )
+    args = parser.parse_args()
+
+    # Initialize logger
+    logger = set_logger(__name__, logfile=args.output, level=args.log)
+
+    try:
+        main()
+    except Exception as e:
+        logger.error(traceback.format_exc())

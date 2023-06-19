@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
+
 from setuptools import setup
 import os, glob
 import pathlib
-import subprocess
 import versioneer
 
 current_directory = pathlib.Path(__file__).parent.resolve()
@@ -15,27 +15,38 @@ script_files = glob.glob("bin/*")
 script_files.append("database_tools/ids_shift_eq.py")
 script_files.append("database_tools/ids_rescale_eq.py")
 script_files.append("database_tools/rosettacode.py")
+script_files.append("database_tools/db_converter.py")
+script_files.append("database_tools/db_extractor.py")
 script_files.append("idstools/idsdef.py")
 
+# Generate list of data files
+source_folder = "database_tools"
+target_folder = "bin"
+types = ("*.yml", "*.csv")  # the tuple of file types
 
-# # Get version by PKGVERSION, .version file, or git describe
-# def get_version():
-#     version = os.getenv("PKGVERSION")
-#     if not version and os.path.isfile(".version"):
-#         version = open(".version").read()
-#     if not version and os.path.isdir(".git"):
-#         version = subprocess.check_output(["git", "describe"]).strip().decode("ascii")
-#         if "-" in version:
-#             p = version.split("-")
-#             version = p[0] + ".dev" + p[1] + "+" + "".join(p[2:])
-#     return version
+files_grabbed = []
+for typename in types:
+    files_grabbed.extend(glob.glob(source_folder + "/**/" + typename, recursive=True))
 
+# create dictionary from glob files
+files = {}
+for file_path in files_grabbed:
+    folder_name = os.path.dirname(file_path)
+    folder_name = folder_name.replace(source_folder, target_folder)
+    if folder_name not in files.keys():
+        files[folder_name] = []
+    files[folder_name].append(file_path)
+
+# Create data structure which setup file is needed
+data_files = []
+for file_path, list_of_files in files.items():
+    data_files.append((file_path, list_of_files))
 
 setup(
-    name="IDStools",
+    name="iteridstools",
     version=versioneer.get_version(),
     cmdclass=versioneer.get_cmdclass(),
-    description="IMAS Python tools for IDSs",
+    description="IMAS IDS Python tools",
     author="ITER Organization",
     author_email="imas-support@iter.org",
     url="https://imas.iter.org/",
@@ -43,14 +54,5 @@ setup(
     py_modules=[],
     scripts=script_files,
     keywords="IMAS, IDS",
-    data_files=[
-        ("bin/mappings", ["database_tools/mappings/h-mode-db-mapping.csv"]),
-        (
-            "bin/validation_schemas",
-            [
-                "database_tools/validation_schemas/required_fields_core.yml",
-                "database_tools/validation_schemas/required_fields_edge.yml",
-            ],
-        ),
-    ],
+    data_files=data_files,
 )
