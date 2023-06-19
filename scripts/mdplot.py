@@ -10,9 +10,9 @@ from idstools.cli import get_backend_id
 from idstools.cli import imas_parser
 from idstools.set_logger import set_logger
 
-from src.view.common.functions import Canvas
-from src.view.pf_active.functions import PFCoilsView
-from src.view.wall.functions import WallView
+from idstools.view.common.basic import Canvas
+from idstools.view.pf_active.basic import PFActiveView
+from idstools.view.wall.basic import WallView
 
 
 # ----------------------------------------------------------------------
@@ -66,8 +66,8 @@ def plotMD(d):
     # Plot Overlay
     # for k, v in d.items():
 
-    pfcoilsview = PFCoilsView(d["111001/102"]["data"])
-    pfcoilsview.view_pf_coils(ax)
+    pfcoilsview = PFActiveView(d["111001/102"]["data"])
+    pfcoilsview.viewActivePfCoils(ax)
 
     wallview = WallView(d["116000/2"]["data"])
     wallview.view_wall(ax)
