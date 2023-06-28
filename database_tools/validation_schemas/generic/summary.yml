@@ -7,12 +7,6 @@ summary:
         ids_ge: 0.0
     global_quantities/beta_tor_norm/value(:):
         ids_ge: 0.0
-    global_quantities/current_bootstrap/value(:):
-        ids_ip_like: False
-    global_quantities/current_no_inductive/value(:):
-        ids_ip_like: False
-    global_quantities/current_ohm/value(:):
-        ids_ip_like: False
     global_quantities/energy_diamagnetic/value(:):
         ids_ge: 0.0
     global_quantities/energy_thermal/value(:):
@@ -24,15 +18,9 @@ summary:
     global_quantities/h_mode/value(:):
         ids_ge: 0
         ids_le: 1
-    global_quantities/ip/value(:):
-        ids_ip_like: False
     global_quantities/tau_energy/value(:):
         ids_ge: 0.0
-    global_quantities/v_loop/value(:):
-        ids_ip_like: False
 #
-    global_quantities/q_95/value(:):
-        ids_q_like: False
     global_quantities/power_loss/value(:):
         ids_ge: 0.0
     local/separatrix/n_e/value(:):
