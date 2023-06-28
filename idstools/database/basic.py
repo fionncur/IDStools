@@ -1,74 +1,127 @@
+import os
+from glob import glob
+from pathlib import Path
+
 import imas
-import pandas as pd
-import os, imas, yaml
-
-progbar = True
-try:
-    from tqdm import tqdm
-except ModuleNotFoundError:
-    print("Install tqdm to enable progress bar")
-    progbar = False
+import yaml
 
 
-class DatabaseTools:
-    def __init__(self):
-        pass
-
-    @staticmethod
-    def getIdsDataFrameFromPulseDatabase(
-        dbuser: str,
-        database: str,
-        version: str,
-        backend: int,
-        idspath: str,
-        pulses: tuple,
-    ) -> pd.DataFrame:
+class DBMaster:
+    def __init__(self, user, database, version):
         """
-        This function retrieves pandas dataframe displaying all values of given IDSs extracted by the function.
+        The function initializes an object with user, database, and version attributes, and sets the  locpath attribute based on the provided user, database, and version.
 
         Args:
-            dbuser (str): The username to access the Pulse database. A public user should just be left as public, whereas a local user should write their proper identifier
-            database (str): The name of the database where the data is harbored
-            version (str): String of number of data version
-            backend (int): ID of backend of the database in which the data is harbored
-            idspath (str): IDS path (starting with IDS name) to the desired data to be collected (e.g 'equilibrium/time')
-            pulses (tuple): List of tuples containing (Pulse, Run)
+            user: The "user" parameter represents the username of the user accessing the database. It can be either "public" or a specific username.
+            database: The `database` parameter is a string that represents the name of the database. It is used to specify which database/tokamak to connect to or retrieve data from.
+            version: The `version` parameter is used to specify the version of the database/tokamak that you want to access. It is a string that represents the version number or identifier of the database.
+        """
+        self.user = user
+        self.database = database
+        self.version = version
+        self.locpath = None
+
+        if user == "public":
+            _locpath = (
+                os.environ["IMAS_HOME"] + "/shared/imasdb/" + database + "/" + version
+            )
+        else:
+            _locpath = (
+                os.path.expanduser("~" + user)
+                + "/public/imasdb/"
+                + database
+                + "/"
+                + version
+            )
+        if os.path.exists(_locpath):
+            self.locpath = _locpath
+        else:
+            raise FileNotFoundError(
+                "The path provided does not exist or has no such database file or directory. Please check spelling."
+            )
+
+    def getHdf5Pulses(self):
+        """
+        The function `getHdf5Pulses` retrieves a list of pulses from HDF5 master files.
 
         Returns:
-            a pandas DataFrame containing information about the specified pulses and their associated values from a pulse database.
+            a list of tuples. Each tuple contains the following elements, The tuple includes the pulse number, run number, HDF5_BACKEND backend, database, user, version, and data file path.
         """
-        idsname = idspath.split("/")[0]
-        valpath = idspath[1 + len(idsname) :]
-        dbtools = DatabaseTools()
-        pulses = pulses[:4]
-        values = [
-            dbtools.getIdsDataFromPulseDatabase(
-                backend,
-                database,
-                entry[0],
-                entry[1],
-                dbuser,
-                version,
-                idsname,
-                valpath,
+        pulses = []
+        hdf5MasterFilePaths = glob(f"{self.locpath}/**/*master.h5", recursive=True)
+        for hdf5MasterFilePath in hdf5MasterFilePaths:
+            pulse = int(str(hdf5MasterFilePath).split("/")[-3])
+            run = int(str(hdf5MasterFilePath).split("/")[-2])
+            pulses.append(
+                (
+                    pulse,
+                    run,
+                    imas.imasdef.HDF5_BACKEND,
+                    self.database,
+                    self.user,
+                    self.version,
+                    hdf5MasterFilePath,
+                )
             )
-            for entry in (tqdm(pulses) if progbar else pulses)
-        ]
-        df = pd.DataFrame(pulses, columns=["PULSE", "RUN"])
-        df["VALUE"] = values
-        return df
 
-    def getIdsDataFromPulseDatabase(
-        self, backend, database, pulse, run, dbuser, version, idsname, valpath
-    ):
-        connection = imas.DBEntry(backend, database, pulse, run, dbuser, version)
-        connection.open()
+        return pulses
+
+    def getMdsPlusPulses(self, status=None):
+        """
+        The function `getMdsPlusPulses` retrieves a list of MDSPlus pulses based on the given status.
+
+        Args:
+            status: The `status` parameter is used to filter the pulses based on their status. If `status` is `None`, then all pulses are considered. Otherwise, only pulses with the specified status are included in the result.
+
+        Returns:
+            a list of tuples, where each tuple contains information about a pulse. The tuple includes the pulse number, run number, MDSPLUS backend, database, user, version, and data file path.
+        """
+        pulses = []
+        datafilePaths = glob(f"{self.locpath}/**/*.datafile", recursive=True)
+        for datafilePath in datafilePaths:
+            if (status is None) or (
+                status == self.getPulseStatus(Path(datafilePath).with_suffix(".yaml"))
+            ):
+                if os.path.islink(datafilePath):
+                    continue
+                pulseRunNumber = datafilePath.split("/")[-1].split("_")[1].split(".")[0]
+                pulse = 0 if len(pulseRunNumber) <= 4 else int(pulseRunNumber[:-4])
+                run = int(pulseRunNumber[-4:]) + 10000 * int(
+                    datafilePath.split("/")[-2]
+                )
+                pulses.append(
+                    (
+                        pulse,
+                        run,
+                        imas.imasdef.MDSPLUS_BACKEND,
+                        self.database,
+                        self.user,
+                        self.version,
+                        datafilePath,
+                    )
+                )
+        return pulses
+
+    @staticmethod
+    def getPulseStatus(path):
+        """
+        The function `getPulseStatus` reads a YAML file from a given path and returns the value of the
+        "status" key in the file's metadata.
+
+        Args:
+            path: The `path` parameter is a string that represents the file path to a YAML file.
+
+        Returns:
+            the value of the "status" key from the metadata dictionary.
+        """
+        p = Path(path)
         try:
-            value = connection.partial_get(idsname, valpath)
-        except Exception:
-            value = None
-        connection.close()
-        return value
+            with open(p, "r") as f:
+                metadata = yaml.safe_load(f)
+        except FileNotFoundError as exc:
+            print(exc)
+            return "unknown"
+        return metadata["status"]
 
 
 def readScenario(
@@ -76,7 +129,7 @@ def readScenario(
     inIDSList: list = None,
     outIDSList: list = None,
     testMode: bool = False,
-    **testArgs
+    **testArgs,
 ):
     """
     This function reads a scenario file and takes in optional input and output IDs lists, as well as a  test mode flag and additional test arguments.

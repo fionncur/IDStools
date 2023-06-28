@@ -8,12 +8,19 @@ import types
 
 import imas
 import numpy as np
+import pandas as pd
 from packaging import version
 
 logger = logging.getLogger("module")
 ARRAY_EQUAL_KWARGS = (
     "equal_nan=True" if version.parse(np.__version__) > version.parse("1.19") else ""
 )
+progbar = True
+try:
+    from tqdm import tqdm
+except ModuleNotFoundError:
+    print(f"Install tqdm to enable progress bar")
+    progbar = False
 
 
 def isIdsField(idstype: type) -> bool:
@@ -330,3 +337,39 @@ def compareIds(X, Y, field=None, ignore_version=True, verb=True, output={}):
                     identical = False
 
     return identical, output
+
+
+def getQuantitiesFromPulses(idspath: str,    pulses: tuple,) -> pd.DataFrame:
+    """
+    The function `getQuantitiesFromPulses` retrieves values from a specified IDS path for a given set of
+    pulses and returns a DataFrame containing the pulse, run, and corresponding values.
+    
+    Args:
+        idspath (str): The `idspath` parameter is a string that represents the path to the IDS node from which the quantities will be extracted.
+        pulses (tuple): The `pulses` parameter is a tuple containing information about each pulse. Each element in the tuple is itself a tuple with the following elements:pulse, run, backend, database, user, version, _ 
+    
+    Returns:
+        a pandas DataFrame containing the columns "PULSE", "RUN", and "VALUE".
+    """
+    idsname = idspath.split("/")[0]
+    valpath = idspath[1 + len(idsname) :]
+    pulses = pulses[:4]
+
+    values = []
+    for pulseTuple in tqdm(pulses) if progbar else pulses:
+        pulse, run, backend, database, user, version, _ = pulseTuple
+        connection = imas.DBEntry(backend, database, pulse, run, user, version)
+        connection.open()
+        try:
+            values.append(connection.partial_get(idsname, valpath))
+        except Exception:
+            values.append(None)
+        connection.close()
+
+    df = pd.DataFrame(
+        pulses,
+        columns=["PULSE", "RUN", "BACKEND", "DATABASE", "USER", "VERSION", "FILEPATH"],
+    )
+    df["VALUE"] = values
+    dfExtract = df[["PULSE", "RUN", "VALUE"]]
+    return dfExtract

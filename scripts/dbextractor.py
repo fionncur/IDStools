@@ -4,14 +4,15 @@ import argparse
 import os
 import sys
 from pathlib import Path
+
 import pandas as pd
 from imas import imasdef
 
 root_path = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(root_path)
-from database_tools.db_helpers import getDBPath, hdf5ListPulseRun, mdsListPulseRun
 from idstools.cli import get_backend_id, imas_parser
-from idstools.database.basic import DatabaseTools
+from idstools.database.basic import DBMaster
+from idstools.utils.idshelper import getQuantitiesFromPulses
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
@@ -36,28 +37,24 @@ if __name__ == "__main__":
     parser.add_argument("--verbose", action="store_true", help="Verbose mode")
     args = parser.parse_args()
 
-    locpath = getDBPath(args.user, args.database, args.version)
-    # if args.verbose:
-    #    print(f"database located in {locpath}")
-
     backend = get_backend_id(args.backend)
-    
-    pluses=None
+    dbmaster = DBMaster(args.user, args.database, args.version)
+    if args.verbose:
+        print(f"database located in {dbmaster.locpath}")
+    pulses = None
     if backend == imasdef.MDSPLUS_BACKEND:
-        pulses = mdsListPulseRun(locpath, with_status=args.status)
+        pulses = dbmaster.getMdsPlusPulses(status=args.status)
     elif backend == imasdef.HDF5_BACKEND:
-        pulses = hdf5ListPulseRun(locpath)
+        pulses = dbmaster.getHdf5Pulses()
     else:
         print(f"Functionality not yet implemented for backend {args.backend}")
         sys.exit()
 
-    # if args.verbose:
-    #    print(pulses)
-    if pulses is not None:
-        df = DatabaseTools.getIdsDataFrameFromPulseDatabase(
-            args.user, args.database, args.version, backend, args.idspath, tuple(pulses)
-        )
+    if args.verbose:
+        print(pulses)
 
+    if pulses is not None:
+        df = getQuantitiesFromPulses(args.idspath, tuple(pulses))
         if args.saveas:
             if not Path(args.saveas).parent.exists():
                 raise FileNotFoundError(

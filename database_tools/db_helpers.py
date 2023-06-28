@@ -1,3 +1,7 @@
+#########################################################################################
+# Deprecated, moved all functions idstools/database/basic.py
+# TODO migrated to develop2
+#########################################################################################
 from pathlib import Path
 from glob import glob 
 import yaml
@@ -8,8 +12,6 @@ try:
 except ModuleNotFoundError:
     print(f"Install tqdm to enable progress bar")
     progbar = False
-
-
 
 
 def get_status(path):
