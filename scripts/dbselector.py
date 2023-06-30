@@ -9,7 +9,7 @@ root_path = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(root_path)
 
 from idstools.database.basic import DBMaster
-from idstools.cli import get_backend_id, imas_parser
+from idstools.utils.clihelper import get_backend_id, imas_parser
 from idstools.utils.idshelper import getAvailableIdsAndOccurrences
 
 progbar = True

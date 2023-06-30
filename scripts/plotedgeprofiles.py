@@ -19,9 +19,9 @@ from scipy.spatial import ConvexHull, convex_hull_plot_2d
 
 root_path = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(root_path)
-from idstools.cli import get_backend_id
-from idstools.cli import imas_parser
-from idstools.helper import setup_logger
+from idstools.utils.clihelper import get_backend_id
+from idstools.utils.clihelper import imas_parser
+from idstools.utils.idslogger import setup_logger
 
 parser = argparse.ArgumentParser(
     description="---- Edge Profile plot",
@@ -32,7 +32,7 @@ parser.add_argument("-r", "--run", help="Run number", required=True, type=int)
 
 args = parser.parse_args()
 
-logger = setup_logger("module", logging.DEBUG)
+logger = setup_logger("module")
 
 connection = imas.DBEntry(
     get_backend_id(args.backend), args.database, args.shot, args.run, args.user

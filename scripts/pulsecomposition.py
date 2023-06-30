@@ -24,8 +24,8 @@ root_path = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(root_path)
 from idstools.view.core_profiles.basic import CoreProfilesView
 from idstools.view.edge_profiles.basic import EdgeProfilesView
-from idstools.helper import setup_logger
-from idstools.cli import imas_parser, get_backend_id
+from idstools.utils.idslogger import setup_logger
+from idstools.utils.clihelper import imas_parser, get_backend_id
 
 parser = argparse.ArgumentParser(
     description="---- Display the plasma composition from the core_profiles IDS",
@@ -43,7 +43,7 @@ if args.info:
     level = logging.INFO
 if args.debug:
     level = logging.DEBUG
-logger = setup_logger("module", level)
+logger = setup_logger("module", stdout_level=level)
 
 logger.info("----------------------------------------------------------------")
 logger.info(

@@ -6,8 +6,8 @@ import os
 root_path = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(root_path)
 
-from idstools.cli import get_backend_id
-from idstools.cli import imas_parser
+from idstools.utils.clihelper import get_backend_id
+from idstools.utils.clihelper import imas_parser
 from idstools.set_logger import set_logger
 
 from idstools.view.common.basic import Canvas

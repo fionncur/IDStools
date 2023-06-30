@@ -2,6 +2,7 @@
 This module 
 
 """
+
 import inspect
 import logging
 import types
@@ -19,7 +20,7 @@ progbar = True
 try:
     from tqdm import tqdm
 except ModuleNotFoundError:
-    print(f"Install tqdm to enable progress bar")
+    print("Install tqdm to enable progress bar")
     progbar = False
 
 

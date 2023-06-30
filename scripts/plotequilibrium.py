@@ -15,8 +15,8 @@ from idstools.view.common.basic import Canvas
 from idstools.view.equilibrium.basic import EquilibriumView
 from idstools.view.pf_active.basic import PFActiveView
 from idstools.compute.common.basic import getClosestOfGivenValueFromArray
-from idstools.helper import setup_logger
-from idstools.cli import get_backend_id, imas_parser
+from idstools.utils.idslogger import setup_logger
+from idstools.utils.clihelper import get_backend_id, imas_parser
 
 parser = argparse.ArgumentParser(
     description="---- Display the plasma equilibrium from the equilibrium IDS. It also shows pf coils position overlay if exists",
@@ -58,7 +58,7 @@ parser.add_argument(
 )
 args = parser.parse_args()
 
-logger = setup_logger("module", logging.WARN)
+logger = setup_logger("module")
 
 database_abs_path = ""
 database_abs_path = (

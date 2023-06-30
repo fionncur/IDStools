@@ -12,7 +12,7 @@ import imas
 root_path = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(root_path)
 
-from idstools.cli import get_backend_id, imas_parser
+from idstools.utils.clihelper import get_backend_id, imas_parser
 from idstools.utils.idslogger import setup_logger
 
 logger = setup_logger("module")

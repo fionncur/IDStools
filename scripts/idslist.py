@@ -11,7 +11,7 @@ root_path = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(root_path)
 
 
-from idstools.cli import imas_parser
+from idstools.utils.clihelper import imas_parser
 from idstools.utils.idshelper import getAvailableIdsAndTimes
 from idstools.utils.idslogger import setup_logger
 

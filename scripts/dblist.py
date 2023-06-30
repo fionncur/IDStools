@@ -10,7 +10,7 @@ import textwrap
 root_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(root_path)
 from idstools.utils.dbhelper import getDatabaseFiles, getDatabases2, getDatabases
-from idstools.cli import imas_parser
+from idstools.utils.clihelper import imas_parser
 # import idstools.ids_tools as ct
 
 TAB = " " * 3
