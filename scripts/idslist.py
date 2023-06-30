@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 
 import argparse
-import inspect
-import logging
 import os
 import sys
 
@@ -14,11 +12,11 @@ sys.path.append(root_path)
 
 
 from idstools.cli import imas_parser
-from idstools.helper import setup_logger
 from idstools.utils.idshelper import getAvailableIdsAndTimes
+from idstools.utils.idslogger import setup_logger
 
-logger = setup_logger("module", logging.WARN)
-np.set_printoptions(threshold=1, precision=2, suppress=True)
+logger = setup_logger("module")
+np.set_printoptions(threshold=1, precision=2, suppress=True)  
 
 
 parser = argparse.ArgumentParser(
@@ -31,7 +29,7 @@ parser.add_argument("-r", "--run", help="Run number", required=True, type=int)
 args = parser.parse_args()
 
 
-idsObject = imas.ids(
+idsObject = imas.ids(  
     args.shot,
     args.run,
 )

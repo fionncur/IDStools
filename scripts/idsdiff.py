@@ -20,34 +20,9 @@ sys.path.append(root_path)
 from idstools.cli import get_backend_id, imas_parser
 from idstools.utils.ddhelper import DDHelper
 from idstools.utils.idshelper import compareIds
+from idstools.utils.idslogger import setup_logger
 
 THRESHOLD_PERCENT = 2
-
-
-def setup_logger(name, log_file, verbose=False, fmt=None):
-    logger = logging.getLogger(name)
-    logger.setLevel(logging.WARN)  # default
-    if verbose:
-        logger.setLevel(logging.DEBUG)
-    # Create stream handler for logging to stdout (log all five levels)
-    stdout_handler = logging.StreamHandler(sys.stdout)
-    stdout_handler.setLevel(logging.DEBUG)
-    stdout_handler.setFormatter(logging.Formatter("%(message)s"))
-    logger.addHandler(stdout_handler)
-
-    """Add a file handler for this logger with the specified `name` (and store the log file
-    under `log_dir`)."""
-    # Format for file log
-    if fmt is None:
-        fmt = "%(asctime)s | %(levelname)9s | %(filename)s:%(lineno)d | %(message)s"
-    formatter = logging.Formatter(fmt)
-
-    # Create file handler for logging to a file (log all five levels)
-    file_handler = logging.FileHandler(log_file)
-    file_handler.setLevel(logging.DEBUG)
-    file_handler.setFormatter(formatter)
-    logger.addHandler(file_handler)
-    return logger
 
 
 def get_filename(name, file_title, log_dir):
@@ -531,7 +506,7 @@ if __name__ == "__main__":
     file_path = get_filename("", file_title, report_dir)
     log_file = file_path + ".log"
     html_file = file_path + ".html"
-    logger = setup_logger("module", log_file=log_file, verbose=True, fmt="%(message)s")
+    logger = setup_logger("module", log_file=log_file, fmt="%(message)s")
     st = time.time()
     data = {}
     for idsname in args.ids:

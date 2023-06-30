@@ -82,7 +82,7 @@ def getAvailableIdsAndOccurrences(dbEntryObject: imas.DBEntry, time_mode=None):
     Returns:
         a list of pairs (idstype:str,occurrence:int) with data in the given DBEntry.
     """
-    presentidslist = []
+    availableidslist = []
     for idstype in getIdsTypes():
         for occ in range(getattr(imas, idstype)().getMaxOccurrences()):
             homogeneous_time = dbEntryObject.partial_get(
@@ -91,8 +91,8 @@ def getAvailableIdsAndOccurrences(dbEntryObject: imas.DBEntry, time_mode=None):
             if homogeneous_time != imas.imasdef.EMPTY_INT and (
                 time_mode is None or time_mode == homogeneous_time
             ):
-                presentidslist.append((idstype, occ))
-    return presentidslist
+                availableidslist.append((idstype, occ))
+    return availableidslist
 
 
 def getAvailableIdsAndTimes(idsObject: imas.ids) -> list:
@@ -353,7 +353,6 @@ def getQuantitiesFromPulses(idspath: str,    pulses: tuple,) -> pd.DataFrame:
     """
     idsname = idspath.split("/")[0]
     valpath = idspath[1 + len(idsname) :]
-    pulses = pulses[:4]
 
     values = []
     for pulseTuple in tqdm(pulses) if progbar else pulses:
