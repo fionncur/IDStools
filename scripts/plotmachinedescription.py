@@ -6,8 +6,8 @@ import os
 root_path = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(root_path)
 
-from idstools.utils.clihelper import get_backend_id
-from idstools.utils.clihelper import imas_parser
+from idstools.utils.clihelper import getBackendID
+from idstools.utils.clihelper import imasParser
 from idstools.set_logger import set_logger
 
 from idstools.view.common.basic import Canvas
@@ -30,7 +30,7 @@ def loadMD(d, s):
 
         shot, run = k.split("/")
         db = imas.DBEntry(
-            get_backend_id(args.backend), args.database, int(shot), int(run), args.user
+            getBackendID(args.backend), args.database, int(shot), int(run), args.user
         )
 
         err, n = db.open()
@@ -126,7 +126,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(
         description="---- Display the plasma equilibrium from the equilibrium IDS",
-        parents=[imas_parser],
+        parents=[imasParser],
     )
     args = parser.parse_args()
     main()

@@ -1,7 +1,13 @@
 import logging
 import sys
 
-def setup_logger(name, log_file=None, log_file_level=logging.DEBUG, stdout_level=logging.WARN,fmt=None):
+def setupLogger(
+    name,
+    log_file=None,
+    log_file_level=logging.DEBUG,
+    stdout_level=logging.WARN,
+    fmt=None,
+):
     logger = logging.getLogger(name)
     logger.setLevel(stdout_level)
     # Create stream handler for logging to stdout (log all five levels)

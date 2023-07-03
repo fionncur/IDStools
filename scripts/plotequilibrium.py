@@ -2,7 +2,6 @@
 
 import argparse
 import imas
-import logging
 import sys
 import os
 
@@ -10,17 +9,16 @@ root_path = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(root_path)
 
 
-
 from idstools.view.common.basic import Canvas
 from idstools.view.equilibrium.basic import EquilibriumView
 from idstools.view.pf_active.basic import PFActiveView
 from idstools.compute.common.basic import getClosestOfGivenValueFromArray
-from idstools.utils.idslogger import setup_logger
-from idstools.utils.clihelper import get_backend_id, imas_parser
+from idstools.utils.idslogger import setupLogger
+from idstools.utils.clihelper import getBackendID, imasParser
 
 parser = argparse.ArgumentParser(
     description="---- Display the plasma equilibrium from the equilibrium IDS. It also shows pf coils position overlay if exists",
-    parents=[imas_parser],
+    parents=[imasParser],
 )
 parser.add_argument("-s", "--shot", help="Shot number", required=True, type=int)
 parser.add_argument("-r", "--run", help="Run number", required=True, type=int)
@@ -58,7 +56,7 @@ parser.add_argument(
 )
 args = parser.parse_args()
 
-logger = setup_logger("module")
+logger = setupLogger("module")
 
 database_abs_path = ""
 database_abs_path = (
@@ -69,7 +67,7 @@ database_abs_path = (
 hostdir = os.environ["HOSTNAME"] + ":" + database_abs_path
 
 connection = imas.DBEntry(
-    get_backend_id(args.backend), args.database, args.shot, args.run, args.user
+    getBackendID(args.backend), args.database, args.shot, args.run, args.user
 )
 err, n = connection.open()
 if err != 0:
@@ -86,41 +84,46 @@ if err != 0:
 
 idsObjEquilibrium = imas.equilibrium()
 idsObjEquilibrium.time = connection.partial_get("equilibrium", "time", args.occurrence)
-timeIndex, timeValue = getClosestOfGivenValueFromArray(
-    idsObjEquilibrium.time, args.time
-)
-idsObjEquilibrium.time_slice.resize(1)
-idsObjEquilibrium.time_slice[0] = connection.partial_get(
-    "equilibrium", f"time_slice({str(timeIndex)})", args.occurrence
-)
-title = "2D Equilibrium"
-canvas = Canvas(1, 1)
-ax = canvas.add_axes(title="", xlabel="", row=0, col=0)
+if idsObjEquilibrium.time is not None:
+    timeIndex, timeValue = getClosestOfGivenValueFromArray(
+        idsObjEquilibrium.time, args.time
+    )
+    idsObjEquilibrium.time_slice.resize(1)
+    idsObjEquilibrium.time_slice[0] = connection.partial_get(
+        "equilibrium", f"time_slice({str(timeIndex)})", args.occurrence
+    )
+    title = "2D Equilibrium"
+    canvas = Canvas(1, 1)
+    ax = canvas.add_axes(title="", xlabel="", row=0, col=0)
 
-if args.pfcoils is True:
-    idsObjPfActive = imas.pf_active()
-    idsObjPfActive.coil = connection.partial_get("pf_active", "coil")
-    ViewPfCoils = PFActiveView(idsObjPfActive)
-    ViewPfCoils.viewActivePfCoils(ax)
-    title += " Active PF Coils"
+    if args.pfcoils is True:
+        idsObjPfActive = imas.pf_active()
+        idsObjPfActive.coil = connection.partial_get("pf_active", "coil")
+        ViewPfCoils = PFActiveView(idsObjPfActive)
+        ViewPfCoils.viewActivePfCoils(ax)
+        title += " Active PF Coils"
 
-idsObjEquilibrium = connection.get("equilibrium")
-ViewEquilibrium = EquilibriumView(idsObjEquilibrium)
-ViewEquilibrium.viewMagneticPoloidalFlux(ax, plotRho=args.rho)
+    idsObjEquilibrium = connection.get("equilibrium")
+    ViewEquilibrium = EquilibriumView(idsObjEquilibrium)
+    ViewEquilibrium.viewMagneticPoloidalFlux(ax, plotRho=args.rho)
 
-if args.info is True:
-    ViewEquilibrium.viewPulseInfo(ax, title, hostdir, args.shot, args.run, args.time)
-ax.set_title(title)
-ax.plot()
+    if args.info is True:
+        ViewEquilibrium.viewPulseInfo(ax, title, hostdir, args.shot, args.run, args.time)
+    ax.set_title(title)
+    ax.plot()
 
-if args.save:
-    try:
-        fname = "Equilibrium_shot_{0}_run_{1}_time_{2:.1f}.png".format(
-            args.shot, args.run, args.time
-        )
-        canvas.save(fname)
-        logger.info(f"----> Figure saved to {fname}")
-    except Exception:
-        logger.error("The figure could not be saved (check local permissions).")
-
-canvas.show()
+    if args.save:
+        try:
+            fname = "Equilibrium_shot_{0}_run_{1}_time_{2:.1f}.png".format(
+                args.shot, args.run, args.time
+            )
+            canvas.save(fname)
+            logger.info(f"----> Figure saved to {fname}")
+        except Exception:
+            logger.error("The figure could not be saved (check local permissions).")
+    else:
+        canvas.show()
+else:
+    logger.warning(
+        "Can not produce plot, equilibrium/time is None"
+    )

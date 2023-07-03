@@ -12,15 +12,15 @@ import imas
 root_path = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(root_path)
 
-from idstools.utils.clihelper import get_backend_id, imas_parser
-from idstools.utils.idslogger import setup_logger
+from idstools.utils.clihelper import getBackendID, imasParser
+from idstools.utils.idslogger import setupLogger
 
-logger = setup_logger("module")
+logger = setupLogger("module")
 # Management of input arguments
 parser = argparse.ArgumentParser(
     description="Copy IDSs from a data-entry into another one",
     formatter_class=argparse.RawDescriptionHelpFormatter,
-    parents=[imas_parser],
+    parents=[imasParser],
 )
 
 parser.add_argument(
@@ -107,7 +107,7 @@ if args.ids == []:
 
 # OPEN SOURCE
 src_connection = imas.DBEntry(
-    get_backend_id(args.backend),
+    getBackendID(args.backend),
     args.database,
     args.shot_input,
     args.run_input,
@@ -120,7 +120,7 @@ if status != 0:
 
 
 dest_connection = imas.DBEntry(
-    get_backend_id(args.backend_output),
+    getBackendID(args.backend_output),
     args.database_output,
     args.shot_output,
     args.run_output,

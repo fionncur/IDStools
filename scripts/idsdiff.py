@@ -17,10 +17,10 @@ import numpy as np
 
 root_path = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(root_path)
-from idstools.utils.clihelper import get_backend_id, imas_parser
+from idstools.utils.clihelper import getBackendID, imasParser
 from idstools.utils.ddhelper import DDHelper
 from idstools.utils.idshelper import compareIds
-from idstools.utils.idslogger import setup_logger
+from idstools.utils.idslogger import setupLogger
 
 THRESHOLD_PERCENT = 2
 
@@ -414,7 +414,7 @@ def generate_html(file_path, data, shotA, runA, shotB, runB):
 if __name__ == "__main__":
     # Management of input arguments
     parser = argparse.ArgumentParser(
-        description="Compare a IDS from 2 datasets", parents=[imas_parser]
+        description="Compare a IDS from 2 datasets", parents=[imasParser]
     )
     parser.add_argument("shotA", type=int, help="shot number of first dataset")
     parser.add_argument("runA", type=int, help="run number of first dataset")
@@ -471,7 +471,7 @@ if __name__ == "__main__":
         args.userB = args.user
 
     inputA = imas.DBEntry(
-        get_backend_id(args.backend),
+        getBackendID(args.backend),
         args.database,
         args.shotA,
         args.runA,
@@ -483,7 +483,7 @@ if __name__ == "__main__":
         sys.exit(status)
 
     inputB = imas.DBEntry(
-        get_backend_id(args.backendB),
+        getBackendID(args.backendB),
         args.databaseB,
         args.shotB,
         args.runB,
@@ -506,7 +506,7 @@ if __name__ == "__main__":
     file_path = get_filename("", file_title, report_dir)
     log_file = file_path + ".log"
     html_file = file_path + ".html"
-    logger = setup_logger("module", log_file=log_file, fmt="%(message)s")
+    logger = setupLogger("module", log_file=log_file, fmt="%(message)s")
     st = time.time()
     data = {}
     for idsname in args.ids:

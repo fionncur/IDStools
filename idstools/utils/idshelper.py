@@ -340,24 +340,30 @@ def compareIds(X, Y, field=None, ignore_version=True, verb=True, output={}):
     return identical, output
 
 
-def getQuantitiesFromPulses(idspath: str,    pulses: tuple,) -> pd.DataFrame:
+def getQuantitiesFromPulses(idspath: str,    pulses: tuple, listCount:int=0, verbose:bool=False) -> pd.DataFrame:
     """
-    The function `getQuantitiesFromPulses` retrieves values from a specified IDS path for a given set of
-    pulses and returns a DataFrame containing the pulse, run, and corresponding values.
+    The `getQuantitiesFromPulses` function retrieves values from a specified IDS path for a given set of pulses and returns a DataFrame containing the pulse, run, and corresponding values.
     
     Args:
-        idspath (str): The `idspath` parameter is a string that represents the path to the IDS node from which the quantities will be extracted.
-        pulses (tuple): The `pulses` parameter is a tuple containing information about each pulse. Each element in the tuple is itself a tuple with the following elements:pulse, run, backend, database, user, version, _ 
+        idspath (str): The `idspath` parameter is a string that represents the path to the IDS node from which the quantities will be extracted. It is used to specify the location of the data in the IDS
+        pulses (tuple): The `pulses` parameter is a tuple containing information about each pulse. Each element in the tuple is itself a tuple with the following elements: pulse, run, backend, database, user, version, and file path.
+        listCount (int): The `listCount` parameter is an optional parameter that specifies the number of pulses to retrieve values for. If `listCount` is set to 0 (default), values will be retrieved for all pulses in the `pulses` tuple. If `listCount` is set to a positive integer, values will be retrieved for first `listCount` pulses in the `pulses` tuple. Defaults to 0
+        verbose (bool): print debug information
     
     Returns:
-        a pandas DataFrame containing the columns "PULSE", "RUN", and "VALUE".
+        The function `getQuantitiesFromPulses` returns a pandas DataFrame containing the columns "PULSE", "RUN", and "VALUE".
     """
     idsname = idspath.split("/")[0]
     valpath = idspath[1 + len(idsname) :]
-
+    if listCount!=0:
+        pulses = pulses[:listCount]
     values = []
+
     for pulseTuple in tqdm(pulses) if progbar else pulses:
+        
         pulse, run, backend, database, user, version, _ = pulseTuple
+        if verbose:
+            print(f"fetching data from {pulse}, {run}")
         connection = imas.DBEntry(backend, database, pulse, run, user, version)
         connection.open()
         try:

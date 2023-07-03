@@ -9,7 +9,7 @@ root_path = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(root_path)
 
 from idstools.database.basic import DBMaster
-from idstools.utils.clihelper import get_backend_id, imas_parser
+from idstools.utils.clihelper import getBackendID, imasParser
 from idstools.utils.idshelper import getAvailableIdsAndOccurrences
 
 progbar = True
@@ -21,7 +21,7 @@ except ModuleNotFoundError:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Checks if spciefied ids is exists in scenario database",
-        parents=[imas_parser],
+        parents=[imasParser],
     )
     parser.add_argument(
         "ids",
@@ -36,7 +36,7 @@ if __name__ == "__main__":
         help="Will list only data entries with specified status (if such metadata is available)",
     )
     args = parser.parse_args()
-    backend = get_backend_id(args.backend)
+    backend = getBackendID(args.backend)
     dbmaster = DBMaster(args.user, args.database, args.version)
     if args.verbose:
         print(f"database located in {dbmaster.locpath}")
@@ -55,7 +55,7 @@ if __name__ == "__main__":
             track(pulses, description="Analyzing DB...") if progbar else pulses
         ):
             connection = imas.DBEntry(
-                get_backend_id(args.backend),
+                getBackendID(args.backend),
                 args.database,
                 pulse[0],
                 pulse[1],

@@ -11,17 +11,17 @@ import sys
 root_path = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(root_path)
 
-from idstools.utils.clihelper import get_backend_id, imas_parser
-from idstools.utils.idslogger import setup_logger
+from idstools.utils.clihelper import getBackendID, imasParser
+from idstools.utils.idslogger import setupLogger
 
-logger = setup_logger("module")
+logger = setupLogger("module")
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Prints content of an IDS onto the terminal",
         formatter_class=argparse.RawTextHelpFormatter,
-        parents=[imas_parser],
+        parents=[imasParser],
     )
 
     parser.add_argument("-s", "--shot", help="Shot number", required=True, type=int)
@@ -54,7 +54,7 @@ if __name__ == "__main__":
         numpy.set_printoptions(threshold=10)
 
     connection = imas.DBEntry(
-        get_backend_id(args.backend),
+        getBackendID(args.backend),
         args.database,
         args.shot,
         args.run,

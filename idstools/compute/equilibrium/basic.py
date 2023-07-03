@@ -84,7 +84,7 @@ class EquilibriumCompute:
 
         return {"r2d": r2d, "z2d": z2d, "psi2d": psi2d}
 
-    def getRho2D(self, timeSlice: int = 0, profiles2DIndex: int = 0) -> dict:
+    def getRho2D(self, timeSlice: int = 0, profiles2DIndex: int = 0) -> np.ndarray:
         """
         This function calculates rho(R,Z) using toroidal flux  and returns a dictionary containing the result.
 
@@ -119,7 +119,8 @@ class EquilibriumCompute:
                 f"equilibrium.time_slice[{timeSlice}].profiles_2d[{profiles2DIndex}].phi not available"
             )
             return None
-
+        if np.isnan(profiles2D_phi).all() is not True:
+            return None
         return np.sqrt(profiles2D_phi / np.amax(profiles2D_phi))
 
     def getBTotal(self, timeSlice: int) -> tuple:

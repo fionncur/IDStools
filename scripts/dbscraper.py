@@ -10,14 +10,14 @@ from imas import imasdef
 
 root_path = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(root_path)
-from idstools.utils.clihelper import get_backend_id, imas_parser
+from idstools.utils.clihelper import getBackendID, imasParser
 from idstools.database.basic import DBMaster
 from idstools.utils.idshelper import getQuantitiesFromPulses
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Extracts given quantities from all data entries of a given database",
-        parents=[imas_parser],
+        parents=[imasParser],
     )
     parser.add_argument(
         "idspath",
@@ -34,10 +34,15 @@ if __name__ == "__main__":
         type=str,
         help="Will list only data entries with specified status (if such metadata is available)",
     )
+    parser.add_argument(
+        "--list-count",
+        type=int,
+        help="number of entries user needs to display",
+    )
     parser.add_argument("--verbose", action="store_true", help="Verbose mode")
     args = parser.parse_args()
 
-    backend = get_backend_id(args.backend)
+    backend = getBackendID(args.backend)
     dbmaster = DBMaster(args.user, args.database, args.version)
     if args.verbose:
         print(f"database located in {dbmaster.locpath}")
@@ -53,8 +58,9 @@ if __name__ == "__main__":
     if args.verbose:
         print(pulses)
 
+    print(args.list_count)
     if pulses is not None:
-        df = getQuantitiesFromPulses(args.idspath, tuple(pulses))
+        df = getQuantitiesFromPulses(args.idspath, tuple(pulses),args.list_count, True)
         if args.saveas:
             if not Path(args.saveas).parent.exists():
                 raise FileNotFoundError(

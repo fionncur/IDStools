@@ -4,7 +4,6 @@ This module provides view functions and classes for equilibrium ids data
 `more about equilibrium ids <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/CI/imas-3.37.2/equilibrium.html>`_.
 
 """
-
 import matplotlib.pyplot as plt
 from ...view.common.basic import BasePlot
 from ...compute.equilibrium.basic import EquilibriumCompute
@@ -73,11 +72,12 @@ class EquilibriumView(BasePlot):
         if cartestionGrid is not None:
             levels = 30
             if plotRho:
-                if rho := self.computeObj.getRho2D():
+                rho2d = self.computeObj.getRho2D()
+                if rho2d is not None:
                     ax.contour(
                         cartestionGrid["r2d"],
                         cartestionGrid["z2d"],
-                        cartestionGrid["rho2d"],
+                        rho2d,
                         levels,
                         colors="r",
                     )

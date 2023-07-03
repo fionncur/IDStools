@@ -10,7 +10,7 @@ import textwrap
 root_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(root_path)
 from idstools.utils.dbhelper import getDatabaseFiles, getDatabases2, getDatabases
-from idstools.utils.clihelper import imas_parser
+from idstools.utils.clihelper import imasParser
 # import idstools.ids_tools as ct
 
 TAB = " " * 3
@@ -181,7 +181,8 @@ parser = argparse.ArgumentParser(
     prog="imasdbs",
     formatter_class=argparse.RawDescriptionHelpFormatter,
     description=textwrap.dedent(
-        """            
+        """  
+            [Previously known as imasdbs]
             This program lists existing IMAS databases.
 
             Possible commands are: 

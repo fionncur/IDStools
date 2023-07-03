@@ -8,8 +8,8 @@ import sys
 root_path = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(root_path)
 
-from idstools.utils.clihelper import get_backend_id
-from idstools.utils.clihelper import imas_parser
+from idstools.utils.clihelper import getBackendID
+from idstools.utils.clihelper import imasParser
 
 from idstools.database.basic import readScenario
 
@@ -30,7 +30,7 @@ from idstools.input_processing.basic import (
 
 parser = argparse.ArgumentParser(
     description="---- Shows electron cyclotron stray radiation information by showing different plots",
-    parents=[imas_parser],
+    parents=[imasParser],
 )
 parser.add_argument("-s", "--shot", help="Shot number", required=True, type=int)
 parser.add_argument("-r", "--run", help="Run number", required=True, type=int)
@@ -38,7 +38,7 @@ parser.add_argument("-r", "--run", help="Run number", required=True, type=int)
 args = parser.parse_args()
 
 connectionIn = imas.DBEntry(
-    get_backend_id(args.backend), args.database, args.shot, args.run, args.user
+    getBackendID(args.backend), args.database, args.shot, args.run, args.user
 )
 err, n = connectionIn.open()
 if err != 0:

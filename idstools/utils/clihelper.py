@@ -2,8 +2,8 @@ import argparse
 from imas import imasdef
 
 # default parent parser for all idstools scripts
-imas_parser = argparse.ArgumentParser(add_help=False)
-imas_parser.add_argument(
+imasParser = argparse.ArgumentParser(add_help=False)
+imasParser.add_argument(
     "-u",
     "--user_or_path",
     dest="user",
@@ -11,7 +11,7 @@ imas_parser.add_argument(
     default="public",  # os.environ["USER"],
     help="user \t\t(default=%(default)s)",
 )
-db_group = imas_parser.add_mutually_exclusive_group()
+db_group = imasParser.add_mutually_exclusive_group()
 db_group.add_argument(
     "--database",
     "-d",
@@ -19,14 +19,14 @@ db_group.add_argument(
     default="ITER",
     help="database name \t(default=%(default)s)",
 )
-imas_parser.add_argument(
+imasParser.add_argument(
     "--backend",
     "-b",
     type=str,
     default="MDSPLUS",
     help="backend format \t(default=%(default)s)",
 )
-imas_parser.add_argument(
+imasParser.add_argument(
     "--version",
     "-v",
     type=str,
@@ -35,9 +35,9 @@ imas_parser.add_argument(
 )
 
 
-def get_backend_id(name):
+def getBackendID(name):
     return getattr(imasdef, f"{name}_BACKEND")
 
 
-def get_slice_mode(name):
+def getSliceMode(name):
     return getattr(imasdef, f"{name}_INTERP")
