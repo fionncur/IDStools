@@ -88,7 +88,7 @@ else:
         args.shot,
         args.run,
     )
-
+    print(args.user)
     err, _ = idsObject.open_env(args.user, args.database, args.version)
     if err != 0:
         logger.critical(

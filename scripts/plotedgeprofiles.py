@@ -63,14 +63,16 @@ try:
     # TODO Confirm about fixed wall IDS
     # wall of the tokamak
     # wall = imas.DBEntry(get_backend_id(args.backend), args.database, 121014, 11, args.user)
-    # wall.open()
-    # inter = wall.get("wall")
-    # wall.close()
+    wall = imas.DBEntry(getBackendID(args.backend), args.database, 102308, 1, args.user)
+    wall.open()
+    inter = wall.get("wall")
+    wall.close()
     wallIds = connection.get("wall")
 except:
     logger.error("wall ids is not present")
     raise Exception("edge_profiles ids is not present")
 
+print(inter)
 ntime = len(time_array)
 
 index = np.argmin(abs(plot_time - time_array))

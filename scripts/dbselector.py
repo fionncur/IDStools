@@ -35,21 +35,31 @@ if __name__ == "__main__":
         type=str,
         help="Will list only data entries with specified status (if such metadata is available)",
     )
+    parser.add_argument(
+        "--list-count",
+        type=int,
+        default=0,
+        help="number of entries user needs to display",
+    )
     args = parser.parse_args()
     backend = getBackendID(args.backend)
-    dbmaster = DBMaster(args.user, args.database, args.version)
+    dbmaster = DBMaster()
     if args.verbose:
         print(f"database located in {dbmaster.locpath}")
         
     pulses = None
     if backend == imas.imasdef.MDSPLUS_BACKEND:
-        pulses = dbmaster.getMdsPlusPulses(status=args.status)
+        pulses = dbmaster.getMdsPlusPulses(args.user, args.database, args.version, status=args.status)
     elif backend == imas.imasdef.HDF5_BACKEND:
-        pulses = dbmaster.getHdf5Pulses()
+        pulses = dbmaster.getHdf5Pulses(args.user, args.database, args.version)
     else:
         print(f"Functionality not yet implemented for backend {args.backend}")
         sys.exit()
 
+    listCount = args.list_count
+    if listCount!=0:
+        pulses = pulses[:listCount]
+    
     if pulses is not None:
         for pulse in (
             track(pulses, description="Analyzing DB...") if progbar else pulses

@@ -358,10 +358,13 @@ def getQuantitiesFromPulses(idspath: str,    pulses: tuple, listCount:int=0, ver
     if listCount!=0:
         pulses = pulses[:listCount]
     values = []
-
     for pulseTuple in tqdm(pulses) if progbar else pulses:
-        
-        pulse, run, backend, database, user, version, _ = pulseTuple
+        pulse = pulseTuple[0]
+        run = pulseTuple[1]
+        backend = pulseTuple[2]
+        database = pulseTuple[3]
+        user = pulseTuple[4]
+        version = pulseTuple[5]
         if verbose:
             print(f"fetching data from {pulse}, {run}")
         connection = imas.DBEntry(backend, database, pulse, run, user, version)
@@ -374,7 +377,7 @@ def getQuantitiesFromPulses(idspath: str,    pulses: tuple, listCount:int=0, ver
 
     df = pd.DataFrame(
         pulses,
-        columns=["PULSE", "RUN", "BACKEND", "DATABASE", "USER", "VERSION", "FILEPATH"],
+        columns=["PULSE", "RUN", "BACKEND", "DATABASE", "USER", "VERSION", "FILEPATH", "FILETIME"],
     )
     df["VALUE"] = values
     dfExtract = df[["PULSE", "RUN", "VALUE"]]

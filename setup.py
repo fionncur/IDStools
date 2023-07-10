@@ -30,10 +30,19 @@ setup(
     keywords="IMAS, IDS",
     # data_files=data_files,
     entry_points={  # Using internal Python automated script option
-        "console_scripts": ["idsdef=data_dictionary.idsdef:main"]
+        "console_scripts": [
+            "dbscraper=scripts.dbscrapper:main",
+            "dbselector=scripts.dbselector:main",
+            "dblist=scripts.dblist:main",
+            "pulsecomposition=scripts.pulsecomposition:main",
+            "plotequilibrium=scripts.plotequilibrium:main",
+            "idscat=scripts.idscat:main",
+            "idscp=scripts.idscp:main",
+            "idsdiff=scripts.idsdiff:main",
+            "idslist=scripts.idslist:main",
+        ]
     },
 )
-
 
 
 # Generate list of python scripts

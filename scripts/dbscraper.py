@@ -43,14 +43,14 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     backend = getBackendID(args.backend)
-    dbmaster = DBMaster(args.user, args.database, args.version)
+    dbmaster = DBMaster()
     if args.verbose:
         print(f"database located in {dbmaster.locpath}")
     pulses = None
     if backend == imasdef.MDSPLUS_BACKEND:
-        pulses = dbmaster.getMdsPlusPulses(status=args.status)
+        pulses = dbmaster.getMdsPlusPulses(args.user, args.database, args.version,status=args.status)
     elif backend == imasdef.HDF5_BACKEND:
-        pulses = dbmaster.getHdf5Pulses()
+        pulses = dbmaster.getHdf5Pulses(args.user, args.database, args.version)
     else:
         print(f"Functionality not yet implemented for backend {args.backend}")
         sys.exit()
@@ -58,7 +58,6 @@ if __name__ == "__main__":
     if args.verbose:
         print(pulses)
 
-    print(args.list_count)
     if pulses is not None:
         df = getQuantitiesFromPulses(args.idspath, tuple(pulses),args.list_count, True)
         if args.saveas:
