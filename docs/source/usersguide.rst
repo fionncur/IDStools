@@ -2,19 +2,83 @@ User's Guide
 ============
 Following are the different command line tools available in the *IDSTools*.
 
-pulsecomposition
-----------
 
-*pulsecomposition* script gathers ion composition from core and edge profiles and print it on the screen
+
+dbscraper
+-------
+
+The *dbscraper* script scrapes data from a particular IDS path for a specified series of pulses and displays the pulse along with the value.
+
+
+Syntax
+~~~~~~
+    .. code-block:: bash
+
+        $ python scripts/dbscraper.py -h
+
+        Install tqdm to enable progress bar
+        usage: dbscraper.py [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] [--saveas SAVEAS]
+                            [--status STATUS] [--list-count LIST_COUNT] [--verbose]
+                            idspath
+
+        Extracts given quantities from all data entries of a given database
+
+        positional arguments:
+        idspath               IDS path (starting with IDS name) to the desired data to be collected, e.g equilibrium/time
+
+        optional arguments:
+        -h, --help            show this help message and exit
+        -u USER, --user_or_path USER
+                                user (default=public)
+        --database DATABASE, -d DATABASE
+                                database name (default=ITER)
+        --backend BACKEND, -b BACKEND
+                                backend format (default=MDSPLUS)
+        --version VERSION, -v VERSION
+                                data version (default=3)
+        --saveas SAVEAS       File in which to store the results of this query, in csv format
+        --status STATUS       Will list only data entries with specified status (if such metadata is available)
+        --list-count LIST_COUNT
+                                number of entries user needs to display
+        --verbose             Verbose mode
+
+Example
+~~~~~~~
+    .. code-block:: bash
+
+        $ python scripts/dbscraper.py "equilibrium/time_slice(0)/global_quantities/volume" --list-count 10 
+
+        |    |   PULSE |   RUN |   VALUE |
+        |---:|--------:|------:|--------:|
+        |  0 |  121014 |    11 | 810.044 |
+        |  1 |  101004 |    70 | 809.715 |
+        |  2 |  123148 |     4 | nan     |
+        |  3 |  110501 |     1 | 315.004 |
+        |  4 |  123285 |     1 |  -9e+40 |
+        |  5 |  123166 |     2 | nan     |
+        |  6 |  123138 |     2 |  -9e+40 |
+        |  7 |  121005 |    20 | 832.297 |
+        |  8 |  134110 |    23 | 786.301 |
+        |  9 |  112325 |     3 |  -9e+40 |
+
+
+dbselector
+-----------
+
+*dbselector* script shows lists of all scenarios where specified ids is exists. Just provide idsname as input arguement to the script.
 
 Syntax
 ~~~~~~
 .. code-block:: bash
 
-    python pulsecomposition.py -h
-    usage: pulsecomposition.py [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] -s SHOT -r RUN [-i] [--debug]
+    $ python dbselector.py -h
+    Install tqdm to enable progress bar
+    usage: dbselector.py [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] ids
 
-    ---- Display the plasma composition from the core_profiles IDS
+    Checks if spciefied ids is exists in scenario database
+
+    positional arguments:
+    ids                   Name of the IDS to check if it is available in scenario
 
     optional arguments:
     -h, --help            show this help message and exit
@@ -26,28 +90,135 @@ Syntax
                             backend format (default=MDSPLUS)
     --version VERSION, -v VERSION
                             data version (default=3)
-    -s SHOT, --shot SHOT  Shot number
-    -r RUN, --run RUN     Run number
-    -i, --info            Show information
-    --debug               Show debugging
+
 
 Example
 ~~~~~~~
 .. code-block:: bash
 
-    $ pulsecomposition -s 131047 -r 4
-    !   No edge_profiles IDS in the data-entry.
-    core +  edge  -
-    ------------
-    core_profiles
-    ------------
-    species:      H         D         T         He3       He4       Be        Ne
-    a:            1.0       2.0       3.0       3.0       4.0       9.0       20.0
-    z:            1.0       1.0       1.0       2.0       2.0       4.0       10.0
-    n_over_ntot:  5.29e-06  0.460     0.493     7.01e-07  0.011     0.024     0.012
-    n_over_ne:    4.45e-06  0.387     0.414     5.89e-07  9.58e-03  0.020     0.010
-    n_over_n_maj: 1.07e-05  0.933     1.000     1.42e-06  0.023     0.048     0.024
+    $ python dbselector.py edge_profiles
+    (123148, 4)
+    (123285, 1)
+    (123166, 2)
+    (112325, 3)
+    (102425, 2)
+    (123305, 1)
+    (103034, 3)
 
+
+dblist
+------
+This program lists existing IMAS databases.
+
+Possible commands are:
+list <shot number>- list existing databases
+slices <shot number> <run number> - list existing databases, including number of timeslices and time range for time-dependent IDSs
+times <shot number> <run number> - list existing databases, including number of timeslices their time points for time-dependent IDSs
+databases - list existing databases (with data versions)
+dataversions - list existing dataversions (with databases)
+
+If the optional arguments shot number and run number are given, only databases with these numbers will be shown.
+
+If no command is given, the list command is performed.
+
+To see databases stored in the public imas database, use 'public' as the user name.
+
+Example
+~~~~~~~
+.. code-block:: bash
+
+    $ dblist databases
+    ITER      3
+    ITER_MD      3
+    TORBEAM      3
+    test      3
+
+Syntax
+~~~~~~
+
+.. code-block:: bash
+
+    $ dblist
+    usage: imasdbs [-h] [-u USER] [-d DATABASE] [-v VERSION] [--backend BACKEND]
+                {list,slices,times,databases,dataversions} ... [positionalArgs]
+
+    [Previously known as imasdbs]
+
+
+    positional arguments:
+    {list,slices,times,databases,dataversions}
+                            sub-commands help
+        list                list databases
+        slices              list slices
+        times               list times
+        databases           print databases
+        dataversions        print data versions
+    positionalArgs
+
+    optional arguments:
+    -h, --help            show this help message and exit
+    -u USER, --user USER  Show databases of specified user (default=sawantp1)
+    -d DATABASE, --database DATABASE
+                            Show only databases with specified name (default=None)
+    -v VERSION, --version VERSION
+                            Show only databases for specified major data version (default=None)
+    --backend BACKEND     Show databases written with given backend(s). Comma-separated list of backends (Currently
+                            supported: mdsplus, hdf5). By default all backends are shown. (default=None)
+
+
+
+idscat
+-------
+
+*idscat* is a utility that, as the name implies, dumps or prints all data on the console.
+It is handy if you need to rapidly verify if specific fields or attributes have been 
+filled out or empty . The output can also be saved to a file using extraction.
+
+
+Syntax
+~~~~~~
+
+    .. code-block:: bash     
+
+        $ python scripts/idscat.py -h
+        usage: idscat.py [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] -s SHOT -r RUN [-f] ids
+
+        Prints content of an IDS onto the terminal
+
+        positional arguments:
+        ids                   Name of the IDS to dump
+
+        optional arguments:
+        -h, --help            show this help message and exit
+        -u USER, --user_or_path USER
+                                user            (default=public)
+        --database DATABASE, -d DATABASE
+                                database name   (default=ITER)
+        --backend BACKEND, -b BACKEND
+                                backend format  (default=MDSPLUS)
+        --version VERSION, -v VERSION
+                                data version    (default=3)
+        -s SHOT, --shot SHOT  Shot number
+        -r RUN, --run RUN     Run number
+        -f, --full            Print all array elements (can be very slow for large data)
+
+
+Example
+~~~~~~~
+
+    .. code-block:: bash
+
+        python scripts/idscat.py -s 134174 -r 117 equilibrium
+
+        class equilibrium
+        Attribute ids_properties
+            class ids_properties
+            Attribute comment: 
+            Attribute homogeneous_time: 1
+            Attribute source: 
+            Attribute provider: 
+            Attribute creation_date: 
+            Attribute version_put
 
 idscp
 -----
@@ -109,6 +280,7 @@ Example
         $ python scripts/idscp.py -si 131024 -ri 10 -so 145000 -ro 2
         Copying equilibrium
 
+
 idsdiff
 ----------
 
@@ -167,77 +339,19 @@ Example
         :alt: image not found
         :align: center
 
+pulsecomposition
+----------------
 
-idscat
--------
-
-*idscat* is a utility that, as the name implies, dumps or prints all data on the console.
-It is handy if you need to rapidly verify if specific fields or attributes have been 
-filled out or empty . The output can also be saved to a file using extraction.
-
-
-Syntax
-~~~~~~
-
-    .. code-block:: bash     
-
-        $ python scripts/idscat.py -h
-        usage: idscat.py [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] -s SHOT -r RUN [-f] ids
-
-        Prints content of an IDS onto the terminal
-
-        positional arguments:
-        ids                   Name of the IDS to dump
-
-        optional arguments:
-        -h, --help            show this help message and exit
-        -u USER, --user_or_path USER
-                                user            (default=public)
-        --database DATABASE, -d DATABASE
-                                database name   (default=ITER)
-        --backend BACKEND, -b BACKEND
-                                backend format  (default=MDSPLUS)
-        --version VERSION, -v VERSION
-                                data version    (default=3)
-        -s SHOT, --shot SHOT  Shot number
-        -r RUN, --run RUN     Run number
-        -f, --full            Print all array elements (can be very slow for large data)
-
-
-Example
-~~~~~~~
-
-    .. code-block:: bash
-
-        python scripts/idscat.py -s 134174 -r 117 equilibrium
-
-        class equilibrium
-        Attribute ids_properties
-            class ids_properties
-            Attribute comment: 
-            Attribute homogeneous_time: 1
-            Attribute source: 
-            Attribute provider: 
-            Attribute creation_date: 
-            Attribute version_put
-
-dbselector
------------
-
-*dbselector* script shows lists of all scenarios where specified ids is exists. Just provide idsname as input arguement to the script.
+*pulsecomposition* script gathers ion composition from core and edge profiles and print it on the screen
 
 Syntax
 ~~~~~~
 .. code-block:: bash
 
-    $ python dbselector.py -h
-    Install tqdm to enable progress bar
-    usage: dbselector.py [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] ids
+    python pulsecomposition.py -h
+    usage: pulsecomposition.py [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] -s SHOT -r RUN [-i] [--debug]
 
-    Checks if spciefied ids is exists in scenario database
-
-    positional arguments:
-    ids                   Name of the IDS to check if it is available in scenario
+    ---- Display the plasma composition from the core_profiles IDS
 
     optional arguments:
     -h, --help            show this help message and exit
@@ -249,20 +363,30 @@ Syntax
                             backend format (default=MDSPLUS)
     --version VERSION, -v VERSION
                             data version (default=3)
-
+    -s SHOT, --shot SHOT  Shot number
+    -r RUN, --run RUN     Run number
+    -i, --info            Show information
+    --debug               Show debugging
 
 Example
 ~~~~~~~
 .. code-block:: bash
 
-    $ python dbselector.py edge_profiles
-    (123148, 4)
-    (123285, 1)
-    (123166, 2)
-    (112325, 3)
-    (102425, 2)
-    (123305, 1)
-    (103034, 3)
+    $ pulsecomposition -s 131047 -r 4
+    !   No edge_profiles IDS in the data-entry.
+    core +  edge  -
+    ------------
+    core_profiles
+    ------------
+    species:      H         D         T         He3       He4       Be        Ne
+    a:            1.0       2.0       3.0       3.0       4.0       9.0       20.0
+    z:            1.0       1.0       1.0       2.0       2.0       4.0       10.0
+    n_over_ntot:  5.29e-06  0.460     0.493     7.01e-07  0.011     0.024     0.012
+    n_over_ne:    4.45e-06  0.387     0.414     5.89e-07  9.58e-03  0.020     0.010
+    n_over_n_maj: 1.07e-05  0.933     1.000     1.42e-06  0.023     0.048     0.024
+
+
+
 
 plotequilibrium
 ----------
@@ -396,60 +520,3 @@ Example
         equilibrium    : 871   slices: [  1.2    1.4    1.6  ... 797.92 798.42 798.92]
         summary        : 871   slices: [  3.99   3.99   3.99 ... 792.   792.   792.  ]
 
-
-dbscraper
--------
-
-The *dbscraper* script scrapes data from a particular IDS path for a specified series of pulses and displays the pulse along with the value.
-
-
-Syntax
-~~~~~~
-    .. code-block:: bash
-
-        $ python scripts/dbscraper.py -h
-
-        Install tqdm to enable progress bar
-        usage: dbscraper.py [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] [--saveas SAVEAS]
-                            [--status STATUS] [--list-count LIST_COUNT] [--verbose]
-                            idspath
-
-        Extracts given quantities from all data entries of a given database
-
-        positional arguments:
-        idspath               IDS path (starting with IDS name) to the desired data to be collected, e.g equilibrium/time
-
-        optional arguments:
-        -h, --help            show this help message and exit
-        -u USER, --user_or_path USER
-                                user (default=public)
-        --database DATABASE, -d DATABASE
-                                database name (default=ITER)
-        --backend BACKEND, -b BACKEND
-                                backend format (default=MDSPLUS)
-        --version VERSION, -v VERSION
-                                data version (default=3)
-        --saveas SAVEAS       File in which to store the results of this query, in csv format
-        --status STATUS       Will list only data entries with specified status (if such metadata is available)
-        --list-count LIST_COUNT
-                                number of entries user needs to display
-        --verbose             Verbose mode
-
-Example
-~~~~~~~
-    .. code-block:: bash
-
-        $ python scripts/dbscraper.py "equilibrium/time_slice(0)/global_quantities/volume" --list-count 10 
-
-        |    |   PULSE |   RUN |   VALUE |
-        |---:|--------:|------:|--------:|
-        |  0 |  121014 |    11 | 810.044 |
-        |  1 |  101004 |    70 | 809.715 |
-        |  2 |  123148 |     4 | nan     |
-        |  3 |  110501 |     1 | 315.004 |
-        |  4 |  123285 |     1 |  -9e+40 |
-        |  5 |  123166 |     2 | nan     |
-        |  6 |  123138 |     2 |  -9e+40 |
-        |  7 |  121005 |    20 | 832.297 |
-        |  8 |  134110 |    23 | 786.301 |
-        |  9 |  112325 |     3 |  -9e+40 |
