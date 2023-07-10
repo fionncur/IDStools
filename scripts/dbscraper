@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # Return values of an IDS in all data entries of a database
 
 import argparse

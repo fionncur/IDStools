@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 import pathlib
-
+import os
 from setuptools import setup
+from setuptools import find_packages
 
 import versioneer
 
@@ -26,22 +27,21 @@ setup(
         "Programming Language :: Python :: 3",
         "Topic :: Scientific/Engineering :: Physics",
     ],
-    packages=["idstools"],
+    packages=find_packages(),
     keywords="IMAS, IDS",
+    include_package_data=True,
+    scripts=[
+        "scripts/dbscraper",
+        "scripts/dbselector",
+        "scripts/dblist",
+        "scripts/pulsecomposition",
+        "scripts/plotequilibrium",
+        "scripts/idscat",
+        "scripts/idscp",
+        "scripts/idsdiff",
+        "scripts/idslist"
+    ]
     # data_files=data_files,
-    entry_points={  # Using internal Python automated script option
-        "console_scripts": [
-            "dbscraper=scripts.dbscrapper:main",
-            "dbselector=scripts.dbselector:main",
-            "dblist=scripts.dblist:main",
-            "pulsecomposition=scripts.pulsecomposition:main",
-            "plotequilibrium=scripts.plotequilibrium:main",
-            "idscat=scripts.idscat:main",
-            "idscp=scripts.idscp:main",
-            "idsdiff=scripts.idsdiff:main",
-            "idslist=scripts.idslist:main",
-        ]
-    },
 )
 
 
