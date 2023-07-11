@@ -47,14 +47,13 @@ with open('_static/version.json', 'w') as file:
 # ones.
 extensions = [
     "sphinx.ext.autodoc",
-    "sphinx.ext.autosectionlabel",
+    # "sphinx.ext.autosectionlabel",
     "sphinx.ext.todo",
     "sphinx.ext.githubpages",
     "sphinx.ext.viewcode",
     "sphinx.ext.extlinks",
     "sphinx.ext.graphviz",
     "sphinx.ext.napoleon",
-    "sphinx.ext.autosummary",
     "sphinx.ext.mathjax",
     "sphinx_autodoc_typehints",
     "sphinx_toolbox.collapse",
@@ -124,6 +123,7 @@ html_theme_options = {
     "switcher": {
         "version_match": release,
         "json_url": "https://sharepoint.iter.org/departments/POP/CM/IMDesign/Code%20Documentation/idstools-doc/versions.json",
+        # "json_url": "_static/version.json",
     },
     "navbar_end": ["theme-switcher", "version-switcher", "navbar-icon-links"]
 }
@@ -153,7 +153,7 @@ htmlhelp_basename = "IDSTools"
 
 # Configuration of sphinx.ext.autosummary
 # https://www.sphinx-doc.org/en/master/usage/extensions/autosummary.html
-autosummary_generate = True
+# autosummary_generate = True
 
 
 # Configuration of sphinx.ext.napoleon

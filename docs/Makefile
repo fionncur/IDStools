@@ -33,4 +33,4 @@ autogen: Makefile
 	sphinx-autogen -o "$(GENERATEDDIR)" $(SOURCEDIR)/*.rst
 
 realclean: Makefile clean
-	rm -rf $(SOURCEDIR)/_autosummary $(GENERATEDDIR) $(SOURCEDIR)/_build/
+	rm -rf $(GENERATEDDIR) $(SOURCEDIR)/_build/
