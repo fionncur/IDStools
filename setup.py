@@ -21,7 +21,7 @@ setup(
     url="https://imas.iter.org/",
     classifiers=[
         "Development Status :: 2 - Beta",
-        "Intended Audience :: Physicist, Plasma Analysts",
+        "Intended Audience :: Users/Developers",
         "Intended Audience :: Science/Research",
         "License :: Other/Proprietary License",
         "Programming Language :: Python :: 3",

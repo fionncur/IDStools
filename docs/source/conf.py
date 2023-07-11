@@ -10,9 +10,10 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
+import json
 import os
 import sys
-
+import re
 root_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 sys.path.insert(0, root_path)
@@ -28,7 +29,16 @@ copyright = "2023, ITER Organization"
 author = "ITER Organization"
 
 
-release = idstools.__version__
+version = idstools.__version__
+release = version
+if versionMatch := re.match(r'^v?(\d+\.\d+\.\d+)', release):
+    release = versionMatch[1]
+version_string = {'version': release, 'url': f'https://sharepoint.iter.org/departments/POP/CM/IMDesign/Code%20Documentation/idstools-doc/{release}/index.html'}
+
+# Open a file in write mode
+with open('_static/version.json', 'w') as file:
+    json.dump(version_string, file)
+
 
 # -- General configuration ---------------------------------------------------
 
@@ -111,7 +121,13 @@ html_theme_options = {
     },
     "show_prev_next": False,
     "navigation_with_keys": False,
+    "switcher": {
+        "version_match": release,
+        "json_url": "https://sharepoint.iter.org/departments/POP/CM/IMDesign/Code%20Documentation/idstools-doc/versions.json",
+    },
+    "navbar_end": ["theme-switcher", "version-switcher", "navbar-icon-links"]
 }
+# https://sharepoint.iter.org/departments/POP/CM/IMDesign/Code%20Documentation/idstools-doc/versions.json
 html_sidebars = {
     "**": [
         "search-field.html",
