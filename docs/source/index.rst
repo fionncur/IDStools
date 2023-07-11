@@ -18,6 +18,7 @@ Following are the pages that shows tools available in the IDSTools and how to ut
 
 
 .. toctree::
+   :maxdepth: 2
    :caption: API documentation
 
    api_docs
