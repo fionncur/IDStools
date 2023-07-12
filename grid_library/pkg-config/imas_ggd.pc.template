@@ -1,5 +1,0 @@
-Name: imas_ggd_@OBJECTCODE@
-Description: Fortran Library for reading and writing data in the IMAS General Grid Description (defined within the IDSs data descriptions). Compiled with @OBJECTCODE@
-Version: @GGDVERSION@
-Libs: -L@GGDPATH@/lib -limas_ggd
-Cflags: -I@GGDPATH@/include

@@ -2,7 +2,7 @@ matplotlib
 numpy
 pandas
 cerberus
-yaml
+pyyaml
 packaging
 pyparsing
 six

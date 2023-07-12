@@ -7,5 +7,5 @@
 
 # run tests
 cd tests
-chmod +x test.sh
-try bash test.sh
+chmod +x testscripts.sh
+try bash testscripts.sh

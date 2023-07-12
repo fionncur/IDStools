@@ -1,7 +1,7 @@
 Sphinx
-sphinx-autodoc-typehints
-pydata-sphinx-theme
-sphinx-toolbox
 numpy
+pydata-sphinx-theme
 pyparsing 
 python-dateutil
+sphinx-autodoc-typehints
+sphinx-toolbox

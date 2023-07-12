@@ -1,14 +1,20 @@
 #!/usr/bin/env python
-import pathlib
 import os
-from setuptools import setup
-from setuptools import find_packages
+import pathlib
+
+from setuptools import find_packages, setup
 
 import versioneer
 
 current_directory = pathlib.Path(__file__).parent.resolve()
 long_description = (current_directory / "README.md").read_text(encoding="utf-8")
 
+requirement_path = f"{current_directory}/requirements.txt"
+install_requires = [] 
+if os.path.isfile(requirement_path):
+    with open(requirement_path) as f:
+        install_requires = f.read().splitlines()
+        
 setup(
     name="IDSTools",
     version=versioneer.get_version(),
@@ -29,7 +35,7 @@ setup(
     ],
     packages=find_packages(),
     keywords="IMAS, IDS",
-    include_package_data=True,
+    install_requires=install_requires,
     scripts=[
         "scripts/dbscraper",
         "scripts/dbselector",

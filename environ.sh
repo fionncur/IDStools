@@ -8,7 +8,7 @@ function yell ()
 
 function die () 
 { 
-  yell "$*"; exit 1
+  yell "$*"; # exit 1
 }
 
 function try () 
@@ -27,7 +27,7 @@ then
 fi
 echo "Toolchain: $toolchain"
 
-# Default to production config. (Will use idv components from system instead of sources.)
+# Default to production config. 
 if [[ "$2" == "prod" || -z $2 ]];
 then
     config=prod

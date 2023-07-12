@@ -5,7 +5,7 @@
 # Set up environment
 source ci-build/st00-header.sh $* || exit 1
 
-# Create a virtualized environment for installing iplotlogging
+# Create a virtualized environment for installing idstools
 if [ -d "${PREFIX_DIR}" ];
 then
     try rm -r ${PREFIX_DIR}
@@ -14,7 +14,7 @@ fi
 try mkdir ${PREFIX_DIR}
 
 # Test install command
-try python3 -m pip --disable-pip-version-check install --no-deps . --prefix=${PREFIX_DIR}
+try python3 -m pip install . --prefix=${PREFIX_DIR}
 
 export PYTHONPATH=${PYTHONPATH}:$(get_abs_filename "./${PREFIX_DIR}")
 try python3 -c "from idstools.idsdef import IDSDef; dd=IDSDef(); f = dd.query(\"amns_data\", None) "
