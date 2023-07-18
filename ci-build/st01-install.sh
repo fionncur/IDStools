@@ -16,8 +16,11 @@ try mkdir ${PREFIX_DIR}
 # Test install command
 try python3 -m pip install . --prefix=${PREFIX_DIR}
 
-export PYTHONPATH=${PYTHONPATH}:$(get_abs_filename "./${PREFIX_DIR}")
+export PYTHONPATH=$(get_abs_filename "./${PREFIX_DIR}"):${PYTHONPATH}
 try python3 -c "from idstools.idsdef import IDSDef; dd=IDSDef(); f = dd.query(\"amns_data\", None) "
+
+chmod +x ./tests/testscripts.sh
+try bash ./tests/testscripts.sh
 
 # Stash
 tar -cvzf ${PREFIX_DIR}.tar.gz ./${PREFIX_DIR}
