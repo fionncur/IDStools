@@ -19,11 +19,15 @@ try python3 -m pip install . --prefix=${PREFIX_DIR}
 export PYTHONPATH=$(get_abs_filename "./${PREFIX_DIR}"):${PYTHONPATH}
 try python3 -c "from idstools.idsdef import IDSDef; dd=IDSDef(); f = dd.query(\"amns_data\", None) "
 
+try python3 setup.py bdist_wheel || echo "Command bdist_wheel may not be found, it is harmless." 
+try python3 setup.py sdist
+
+try 
 chmod +x ./tests/testscripts.sh
 try bash ./tests/testscripts.sh
 
 # Stash
-tar -cvzf ${PREFIX_DIR}.tar.gz ./${PREFIX_DIR}
+tar -cvzf ${PREFIX_DIR}.tar.gz ./${PREFIX_DIR} ./dist
 
 # Clean up
 try rm -r ${PREFIX_DIR}
