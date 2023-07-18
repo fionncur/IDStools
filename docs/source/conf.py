@@ -122,8 +122,8 @@ html_theme_options = {
     "navigation_with_keys": False,
     "switcher": {
         "version_match": release,
-        # "json_url": "https://sharepoint.iter.org/departments/POP/CM/IMDesign/Code%20Documentation/idstools-doc/versions.json",
-        "json_url": "_static/version.json",
+        "json_url": "https://sharepoint.iter.org/departments/POP/CM/IMDesign/Code%20Documentation/idstools-doc/versions.json",
+        # "json_url": "_static/version.json",
     },
     "navbar_end": ["theme-switcher", "version-switcher", "navbar-icon-links"]
 }
