@@ -19,9 +19,9 @@ root_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__fi
 sys.path.insert(0, root_path)
 import idstools
 
-print("root path:", root_path)
-print("python exec:", sys.executable)
-print("sys.path:", sys.path)
+print(f"root path:{root_path}" )
+print(f"python exec:{sys.executable}" )
+print(f"sys.path:{sys.path}" )
 # -- Project information -----------------------------------------------------
 
 project = "IDSTools"
@@ -30,10 +30,13 @@ author = "ITER Organization"
 
 
 version = idstools.__version__
+print( f"idstools.__version__{idstools.__version__}")
 release = version
 if versionMatch := re.match(r'^v?(\d+\.\d+\.\d+)', release):
     release = versionMatch[1]
 version_string = {'version': release, 'url': f'https://sharepoint.iter.org/departments/POP/CM/IMDesign/Code%20Documentation/idstools-doc/{release}/index.html'}
+print(f"release : {release}")
+print(f"version_string : {version_string}")
 
 # Open a file in write mode
 with open('_static/version.json', 'w') as file:
@@ -87,7 +90,7 @@ exclude_patterns = []
 # a list of builtin themes.
 #
 html_theme = "pydata_sphinx_theme"
-html_favicon = "_static/favicon/favicon.ico"
+html_favicon = "_static/favicon/favicon_ico.ico"
 html_logo = "_static/logo.png"
 # html_theme_options = {
 #     "logo": {
