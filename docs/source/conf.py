@@ -36,12 +36,13 @@ if versionMatch := re.match(r'^v?(\d+\.\d+\.\d+)', release):
     release = versionMatch[1]
 
 version_string = {"name":release, 'version': release, 'url': f'https://sharepoint.iter.org/departments/POP/CM/IMDesign/Code Documentation/idstools-doc/{release}/index.html'}
+version_string1 = {"name":"1.13.1", 'version': "1.13.1", 'url': 'https://sharepoint.iter.org/departments/POP/CM/IMDesign/Code Documentation/idstools-doc/1.13.1/index.html'}
 print(f"release : {release}")
 print(f"version_string : {version_string}")
 
 # Open a file in write mode
 with open('_static/version.json', 'w') as file:
-    json.dump(version_string, file)
+    json.dump(version_string + "," + version_string1, file)
 
 
 # -- General configuration ---------------------------------------------------
