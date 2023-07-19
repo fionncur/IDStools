@@ -128,7 +128,8 @@ html_theme_options = {
     "switcher": {
         "version_match": release,
         # "json_url": "https://sharepoint.iter.org/departments/POP/CM/IMDesign/Code%20Documentation/idstools-doc/versions.json",
-        "json_url": "https://numpy.org/doc/_static/versions.json",
+        "json_url": "https://sharepoint.iter.org/departments/POP/CM/IMDesign/_layouts/15/download.aspx?UniqueId=432dca31a38d49369622ef94f0777e2b",
+        # "json_url": "https://numpy.org/doc/_static/versions.json",
     },
     "navbar_end": ["theme-switcher", "version-switcher", "navbar-icon-links"]
 }
