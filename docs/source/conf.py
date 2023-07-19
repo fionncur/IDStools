@@ -34,8 +34,8 @@ print( f"idstools.__version__{idstools.__version__}")
 release = version
 if versionMatch := re.match(r'^v?(\d+\.\d+\.\d+)', release):
     release = versionMatch[1]
-release="1.14.3"
-version_string = {'version': release, 'url': f'https://sharepoint.iter.org/departments/POP/CM/IMDesign/Code Documentation/idstools-doc/{release}/index.html'}
+release="1.14.4"
+version_string = {"name":release, 'version': release, 'url': f'https://sharepoint.iter.org/departments/POP/CM/IMDesign/Code%20Documentation/idstools-doc/{release}/index.html'}
 print(f"release : {release}")
 print(f"version_string : {version_string}")
 
