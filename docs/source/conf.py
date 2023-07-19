@@ -34,7 +34,7 @@ print( f"idstools.__version__{idstools.__version__}")
 release = version
 if versionMatch := re.match(r'^v?(\d+\.\d+\.\d+)', release):
     release = versionMatch[1]
-release="1.14.2"
+release="1.14.3"
 version_string = {'version': release, 'url': f'https://sharepoint.iter.org/departments/POP/CM/IMDesign/Code Documentation/idstools-doc/{release}/index.html'}
 print(f"release : {release}")
 print(f"version_string : {version_string}")
@@ -150,7 +150,7 @@ html_sidebars = {
 html_title = f"{project} v{release} Manual"
 
 html_static_path = ["_static"]
-html_css_files = ["idstools.css"]
+# html_css_files = ["idstools.css"]
 # html_context = {"default_mode": "light"}
 html_file_suffix = ".html"
 htmlhelp_basename = "IDSTools"
