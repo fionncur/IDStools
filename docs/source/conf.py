@@ -31,11 +31,20 @@ author = "ITER Organization"
 
 version = idstools.__version__
 print( f"idstools.__version__{idstools.__version__}")
-release = version
-if versionMatch := re.match(r'^v?(\d+\.\d+\.\d+)', release):
-    release = versionMatch[1]
 
-version_string = {"name":release, 'version': release, 'url': f'https://sharepoint.iter.org/departments/POP/CM/IMDesign/Code%20Documentation/idstools-doc/{release}/'}
+version = re.sub(r'(\d+\.\d+)\.\d+(.*)', r'\1\2', idstools.__version__)
+version = re.sub(r'(\.dev\d+).*?$', r'\1', version)
+
+release = idstools.__version__
+print(f"{version}, {release}")
+
+switcher_version = ""
+if ".dev" in version:
+    switcher_version = "devdocs"
+else:
+    switcher_version = f"{version}"
+
+version_string = {"name":release, 'version': release, 'url': f'https://sharepoint.iter.org/departments/POP/CM/IMDesign/Code%20Documentation/idstools-doc/{version}/'}
 
 print(f"release : {release}")
 print(f"version_string : {version_string}")
@@ -126,14 +135,11 @@ html_theme_options = {
     "show_prev_next": False,
     "navigation_with_keys": False,
     "switcher": {
-        "version_match": release,
-        # "json_url": "https://sharepoint.iter.org/departments/POP/CM/IMDesign/Code%20Documentation/idstools-doc/versions.json",
+        "version_match": switcher_version,
         "json_url": "https://sharepoint.iter.org/departments/POP/CM/IMDesign/_layouts/15/download.aspx?UniqueId=432dca31a38d49369622ef94f0777e2b",
-        # "json_url": "https://numpy.org/doc/_static/versions.json",
     },
     "navbar_end": ["theme-switcher", "version-switcher", "navbar-icon-links"]
 }
-# https://sharepoint.iter.org/departments/POP/CM/IMDesign/Code%20Documentation/idstools-doc/versions.json
 html_sidebars = {
     "**": [
         "search-field.html",
