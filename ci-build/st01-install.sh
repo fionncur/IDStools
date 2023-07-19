@@ -22,7 +22,7 @@ try python3 -c "from idstools.idsdef import IDSDef; dd=IDSDef(); f = dd.query(\"
 try python3 setup.py bdist_wheel || echo "Command bdist_wheel may not be found, it is harmless." 
 try python3 setup.py sdist
 
-try 
+
 chmod +x ./tests/testscripts.sh
 try bash ./tests/testscripts.sh
 
