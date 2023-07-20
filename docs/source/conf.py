@@ -39,6 +39,7 @@ if len(versionList)==1:
 if len(versionList)==2:
     version=f"{versionList[0]}dev"
 
+version = "1.14.1"
 print(f"version : {version}, release : {release}")
 
 switcher_version = ""
