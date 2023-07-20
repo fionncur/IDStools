@@ -7,12 +7,6 @@ import sys
 import numpy as np
 import pytest
 
-root_path = os.path.dirname(
-    os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
-)
-
-sys.path.append(root_path)
-
 from idstools.compute.common.basic import getClosestOfGivenValueFromArray, getMiddleElementFromArray
 
 array = [

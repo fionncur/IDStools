@@ -182,7 +182,7 @@ def printTimes(dbs, args, print_times=False, shotNumber=None, runNumber=None):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        prog="imasdbs",
+        prog="dblist",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         description=textwrap.dedent(
             """

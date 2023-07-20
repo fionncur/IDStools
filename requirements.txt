@@ -8,4 +8,5 @@ pyparsing
 six
 python-dateutil
 fortranformat
+tabulate
 
