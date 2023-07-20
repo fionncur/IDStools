@@ -140,7 +140,7 @@ html_theme_options = {
     "navigation_with_keys": False,
     "switcher": {
         "version_match": switcher_version,
-        "json_url": "https://sharepoint.iter.org/departments/POP/CM/IMDesign/_layouts/15/download.aspx?UniqueId=432dca31a38d49369622ef94f0777e2b",
+        "json_url": "https://sharepoint.iter.org/departments/POP/CM/IMDesign/_layouts/15/download.aspx?UniqueId=15778d46932e404096c0cf73fd4510b4",
         # "json_url": "_static/versions.json",
     },
     "navbar_end": ["theme-switcher", "version-switcher", "navbar-icon-links"]
