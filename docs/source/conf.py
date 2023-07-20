@@ -10,10 +10,12 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
+import datetime
 import json
 import os
-import sys
 import re
+import sys
+
 root_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 sys.path.insert(0, root_path)
@@ -25,7 +27,7 @@ print(f"sys.path:{sys.path}" )
 # -- Project information -----------------------------------------------------
 
 project = "IDSTools"
-copyright = "2023, ITER Organization"
+copyright =  f"{datetime.datetime.now().year}, ITER Organization"
 author = "ITER Organization"
 
 # Get release
@@ -34,10 +36,16 @@ release = idstools.__version__
 # Get version
 versionList = idstools.__version__.split("+")
 version=""
+is_develop=False
 if len(versionList)==1:
     version=versionList[0]
 if len(versionList)==2:
     version=f"{versionList[0]}dev"
+    is_develop = True
+
+html_context = {
+    "is_develop": is_develop
+}
 
 print(f"version : {version}, release : {release}")
 
