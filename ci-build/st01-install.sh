@@ -13,7 +13,6 @@ fi
 
 try mkdir ${PREFIX_DIR}
 
-try rm -r build_venv
 
 # Test install command
 try python3 -m pip install . --target=${PREFIX_DIR} --upgrade
@@ -25,12 +24,12 @@ try python3 -c 'import sys; print("Python version in virtual env : %d.%d"% sys.v
 
 try python3 -c "from idstools.idsdef import IDSDef; dd=IDSDef(); f = dd.query(\"amns_data\", None) "
 
+rm -r dist
 try python3 setup.py bdist_wheel || echo "Command bdist_wheel may not be found, it is harmless." 
 try python3 setup.py sdist
 
-
 # Stash
-tar -cvzf ${PREFIX_DIR}.tar.gz ./${PREFIX_DIR} ./dist
+tar -cvzf ${PREFIX_DIR}.tar.gz ./${PREFIX_DIR} ./dist >/dev/null 2>&1
 
 # Clean up
 try rm -r ${PREFIX_DIR}
