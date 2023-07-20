@@ -50,12 +50,13 @@ for s in S.source:
         print('     energy %13.6e' % (np.trapz(i.energy, s.profiles_1d[0].grid.volume)))
     # ions
     for i in s.profiles_1d[0].ion:
-        print("    ", i.element[0].a, i.element[0].z_n, i.z_ion, end='')
-        if len(i.particles) == 0:
-           print('     particles     --       ', end='')
-        else:
-           print('     particles %13.6e' % (np.trapz(i.particles, s.profiles_1d[0].grid.volume)), end='')
-        if len(i.energy) == 0:
-           print('     energy     --     ')
-        else:
-           print('     energy %13.6e' % (np.trapz(i.energy, s.profiles_1d[0].grid.volume)))
+        if len(i.element) > 0:
+            print("    ", i.element[0].a, i.element[0].z_n, i.z_ion, end='')
+            if len(i.particles) == 0:
+                print('     particles     --       ', end='')
+            else:
+                print('     particles %13.6e' % (np.trapz(i.particles, s.profiles_1d[0].grid.volume)), end='')
+            if len(i.energy) == 0:
+                print('     energy     --     ')
+            else:
+                print('     energy %13.6e' % (np.trapz(i.energy, s.profiles_1d[0].grid.volume)))
