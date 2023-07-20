@@ -28,23 +28,27 @@ project = "IDSTools"
 copyright = "2023, ITER Organization"
 author = "ITER Organization"
 
-
-version = idstools.__version__
-print( f"idstools.__version__{idstools.__version__}")
-
-version = re.sub(r'(\d+\.\d+)\.\d+(.*)', r'\1\2', idstools.__version__)
-version = re.sub(r'(\.dev\d+).*?$', r'\1', version)
-
+# Get release
 release = idstools.__version__
-print(f"{version}, {release}")
+
+# Get version
+versionList = idstools.__version__.split("+")
+version=""
+if len(versionList)==1:
+    version=versionList[0]
+if len(versionList)==2:
+    version=f"{versionList[0]}dev"
+
+print(f"version : {version}, release : {release}")
 
 switcher_version = ""
-if ".dev" in version:
+if "dev" in version:
     switcher_version = "devdocs"
+    version_string = {"name":"devdocs", 'version': release, 'url': 'https://sharepoint.iter.org/departments/POP/CM/IMDesign/Code%20Documentation/idstools-doc/devdocs/'}
 else:
     switcher_version = f"{version}"
+    version_string = {"name":version, 'version': release, 'url': f'https://sharepoint.iter.org/departments/POP/CM/IMDesign/Code%20Documentation/idstools-doc/{version}/'}
 
-version_string = {"name":release, 'version': release, 'url': f'https://sharepoint.iter.org/departments/POP/CM/IMDesign/Code%20Documentation/idstools-doc/{version}/'}
 
 print(f"release : {release}")
 print(f"version_string : {version_string}")
@@ -73,7 +77,6 @@ extensions = [
     "sphinx_toolbox.collapse",
     # "sphinxcontrib.mermaid",
 ]
-
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -137,6 +140,7 @@ html_theme_options = {
     "switcher": {
         "version_match": switcher_version,
         "json_url": "https://sharepoint.iter.org/departments/POP/CM/IMDesign/_layouts/15/download.aspx?UniqueId=432dca31a38d49369622ef94f0777e2b",
+        # "json_url": "_static/versions.json",
     },
     "navbar_end": ["theme-switcher", "version-switcher", "navbar-icon-links"]
 }
