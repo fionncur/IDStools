@@ -5,27 +5,22 @@
 # Set up environment
 . ci-build/st00-header.sh $* || exit 1
 
-tar xvf ${PREFIX_DIR}.tar.gz 
+# Unzip artifact
+tar -xvzf ${PREFIX_DIR}.tar.gz  ./${PREFIX_DIR}
 
-python3 -m venv build_venv
-source build_venv/bin/activate
-python3 -c 'import sys; print("Python version in virtual env : %d.%d"% sys.version_info[0:2])'
+# run tests
+export PYVERSION=$(python3 -c 'import sys; print("%d.%d"% sys.version_info[0:2])')
+echo "PYVERSION :" $PYVERSION
+export PYTHONPATH=$(get_abs_filename "./${PREFIX_DIR}")/lib/python${PYVERSION}/site-packages:${PYTHONPATH}
+echo "PYTHONPATH :" $PYTHONPATH | grep -i idstools
+export PATH=$(get_abs_filename "./${PREFIX_DIR}")/bin:${PATH}
+echo "PATH :" $PATH | grep -i idstools
 
-pip3 install --upgrade pip
-pip3 install -r requirements.txt
-array=( dist/*.whl )
-echo "${arrray[0]}"
+chmod +x ./tests/testscripts.sh 
+try source ./tests/testscripts.sh || exit 1
 
-pip3 install dist/${arrray[0]} --upgrade
-pip list
-
-chmod +x ./tests/testscripts.sh
-try bash ./tests/testscripts.sh
-
-pytest tests 
+try python3 -m pytest --junit-xml=${PREFIX_DIR}/test_report.xml tests
 
 
-deactivate
-try rm -r build_venv
 
 

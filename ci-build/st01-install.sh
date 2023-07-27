@@ -13,24 +13,19 @@ fi
 
 try mkdir ${PREFIX_DIR}
 
+export PYVERSION=$(python3 -c 'import sys; print("%d.%d"% sys.version_info[0:2])')
+echo "PYVERSION :" $PYVERSION
+export PYTHONPATH=$(get_abs_filename "./${PREFIX_DIR}")/lib/python${PYVERSION}/site-packages:${PYTHONPATH}
+echo "PYTHONPATH :" $PYTHONPATH | grep -i idstools
+export PATH=$(get_abs_filename "./${PREFIX_DIR}")/bin:${PATH}
+echo "PATH :" $PATH | grep -i idstools
 
-# Test install command
-try python3 -m pip install . --target=${PREFIX_DIR} --upgrade
-
-export PYTHONPATH=$(get_abs_filename "./${PREFIX_DIR}"):${PYTHONPATH}
-echo $PYTHONPATH
-
-try python3 -c 'import sys; print("Python version in virtual env : %d.%d"% sys.version_info[0:2])'
-
-try python3 -c "from idstools.idsdef import IDSDef; dd=IDSDef(); f = dd.query(\"amns_data\", None) "
-
-rm -r dist
-try python3 setup.py bdist_wheel || echo "Command bdist_wheel may not be found, it is harmless." 
-try python3 setup.py sdist
+echo "Installing idstools in the local directory"
+try python3 -m pip --disable-pip-version-check install --no-deps . --prefix=${PREFIX_DIR} || exit 1
+try python3 -c "import idstools.compute.common" || exit 1
 
 # Stash
-tar -cvzf ${PREFIX_DIR}.tar.gz ./${PREFIX_DIR} ./dist >/dev/null 2>&1
+tar -cvzf ${PREFIX_DIR}.tar.gz ./${PREFIX_DIR} ./tests
 
 # Clean up
 try rm -r ${PREFIX_DIR}
-try rm -r dist
