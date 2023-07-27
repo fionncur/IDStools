@@ -1,3 +1,5 @@
+#!/bin/bash
+# Bamboo script
 # Set up environment such that module files can be loaded
 . /usr/share/Modules/init/sh
 # Purge modules and load IMAS module
