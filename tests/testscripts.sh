@@ -12,33 +12,33 @@ tests+=("134174;117")
 #db tools test
 echo =====================================dbscraper=====================================================
 echo TESTING: dbscraper "core_profiles/profiles_1d(0)/electrons/temperature"
-test $(dbscraper "core_profiles/profiles_1d(0)/electrons/temperature" --verbose --list-count 10 2>&1 | tee output.log  | grep -ciE "err|fault|error[ :]|exception|severe") -eq 0 && echo "ok passed" || cat output.log && exit 1
+dbscraper "core_profiles/profiles_1d(0)/electrons/temperature" --verbose --list-count 10  || exit 1
 
 echo TESTING: dbscraper "equilibrium/time_slice(0)/global_quantities/volume"
-test $(dbscraper "equilibrium/time_slice(0)/global_quantities/volume" --verbose --list-count 10 2>&1 | tee output.log  | grep -ciE "err|fault|error[ :]|exception|severe") -eq 0 && echo "ok passed" || cat output.log && exit 1
+dbscraper "equilibrium/time_slice(0)/global_quantities/volume" --verbose --list-count 10 || exit 1 
 
 echo =====================================dbselector=====================================================
 echo TESTING: dbselector core_profiles
-test $(dbselector core_profiles --list-count 10 2>&1 | tee output.log  | grep -ciE "err|fault|error[ :]|exception|severe") -eq 0 && echo "ok passed" || cat output.log && exit 1
+dbselector core_profiles --list-count 10 || exit 1 
 
 echo TESTING: dbselector summary
-test $(dbselector summary --list-count 10 2>&1 | tee output.log  | grep -ciE "err|fault|error[ :]|exception|severe") -eq 0 && echo "ok passed" || cat output.log && exit 1
+dbselector summary --list-count 10 || exit 1 
 
 echo =====================================dblist=====================================================
 echo TESTING: dblist list
-test $(dblist -u public list  2>&1 | tee output.log  | grep -ciE "err|fault|error[ :]|exception|severe") -eq 0 && echo "ok passed" || cat output.log && exit 1
-test $(dblist -u public list -c  2>&1 | tee output.log  | grep -ciE "err|fault|error[ :]|exception|severe") -eq 0 && echo "ok passed" || cat output.log && exit 1
-test $(dblist -u public list -M  2>&1 | tee output.log  | grep -ciE "err|fault|error[ :]|exception|severe") -eq 0 && echo "ok passed" || cat output.log && exit 1
+dblist -u public list  || exit 1 
+dblist -u public list -c  || exit 1 
+dblist -u public list -M  || exit 1 
 echo TESTING: dblist  --database ITER list
-test $(dblist -u public  --database ITER list 2>&1 | tee output.log  | grep -ciE "err|fault|error[ :]|exception|severe") -eq 0 && echo "ok passed" || cat output.log && exit 1
+dblist -u public  --database ITER list || exit 1 
 echo TESTING: dblist -u public databases
-test $(dblist  databases 2>&1 | tee output.log  | grep -ciE "err|fault|error[ :]|exception|severe") -eq 0 && echo "ok passed" || cat output.log && exit 1
+dblist  databases || exit 1 
 echo TESTING: dblist -u public  dataversions
-test $(dblist  dataversions  2>&1 | tee output.log  | grep -ciE "err|fault|error[ :]|exception|severe") -eq 0 && echo "ok passed" || cat output.log && exit 1
+dblist  dataversions  || exit 1 
 # echo TESTING: dblist -u public slices
-# test $(dblist -u public slices  2>&1 | tee output.log  | grep -ciE "err|fault|error[ :]|exception|severe") -eq 0 && echo "ok passed" || cat output.log && exit 1
+# dblist -u public slices  || exit 1 
 # echo TESTING: dblist -u public  times
-# test $(dblist -u public times 2>&1 | tee output.log  | grep -ciE "err|fault|error[ :]|exception|severe") -eq 0 && echo "ok passed" || cat output.log && exit 1
+# dblist -u public times || exit 1 
 
 # pulse tests
 for i in ${tests[@]}
@@ -48,36 +48,36 @@ do
     run=${arr[1]}
     echo =====================================pulsecomposition=====================================================
     echo TESTING: shot=$shot : run=$run  pulsecomposition -s $shot -r $run
-    test $(pulsecomposition -s $shot -r $run 2>&1 | tee output.log  | grep -ciE "err|fault|error[ :]|exception|severe") -eq 0 && echo "ok passed" || cat output.log && exit 1
+    pulsecomposition -s $shot -r $run || exit 1 
     echo ==========================================================================================
     echo TESTING: shot=$shot : run=$run pulsecomposition -s $shot -r $run --i
-    test $(pulsecomposition -s $shot -r $run --i 2>&1 | tee output.log  | grep -ciE "err|fault|error[ :]|exception|severe") -eq 0 && echo "ok passed" || cat output.log && exit 1 
+    pulsecomposition -s $shot -r $run --i || exit 1  
     echo ==========================================================================================
     echo TESTING: shot=$shot : run=$run pulsecomposition -s $shot -r $run --debug
-    test $(pulsecomposition -s $shot -r $run --debug 2>&1 | tee output.log  | grep -ciE "err|fault|error[ :]|exception|severe") -eq 0 && echo "ok passed" || cat output.log && exit 1
+    pulsecomposition -s $shot -r $run --debug || exit 1 
 
     echo =====================================plotequilibrium=====================================================
     echo TESTING: shot=$shot : run=$run plotequilibrium -s $shot -r $run --rho --pfcoils --info --save
-    test $(plotequilibrium -s $shot -r $run --rho --pfcoils --info --save 2>&1 | tee output.log  | grep -ciE "err|fault|error[ :]|exception|severe") -eq 0 && echo "ok passed" || cat output.log && exit 1
+    plotequilibrium -s $shot -r $run --rho --pfcoils --info --save || exit 1 
 
     echo =====================================idscat=====================================================
     echo TESTING: idscat -s $shot -r $run  equilibrium
-    idscat -s $shot -r $run  equilibrium || cat output.log && exit 1
+    idscat -s $shot -r $run  equilibrium || exit 1  
 
     echo =====================================idscp=====================================================
     echo TESTING: idscp -si 131024 -ri 10 -so 145000 -ro 2 -f
-    test $(idscp -si 131024 -ri 10 -so 145000 -ro 2 2>&1 | tee output.log  | grep -ciE "err|fault|error[ :]|exception|severe") -eq 0 && echo "ok passed" || cat output.log && exit 1
+    idscp -si 131024 -ri 10 -so 145000 -ro 2 || exit 1 
 
     # echo =====================================idsdiff=====================================================
     # echo TESTING: idsdiff 122525 1 122525 2 summary
-    # test $(idsdiff 122525 1 122525 2 summary 2>&1 | tee output.log  | grep -ciE "err|fault|error[ :]|exception|severe") -eq 0 && echo "ok passed" || cat output.log && exit 1
+    # idsdiff 122525 1 122525 2 summary || exit 1 
 
     echo =====================================idslist=====================================================
     echo TESTING: idslist -s $shot -r $run  
-    test $(idslist -s $shot -r $run   2>&1 | tee output.log  | grep -ciE "err|fault|error[ :]|exception|severe") -eq 0 && echo "ok passed" || cat output.log && exit 1
+    idslist -s $shot -r $run   || exit 1 
 
     echo TESTING: idslist -s $shot -r $run  --yaml-format 
-    test $(idslist -s $shot -r $run  --yaml-format  2>&1 | tee output.log  | grep -ciE "err|fault|error[ :]|exception|severe") -eq 0 && echo "ok passed" || cat output.log && exit 1
+    idslist -s $shot -r $run  --yaml-format  || exit 1 
 
 done
 
