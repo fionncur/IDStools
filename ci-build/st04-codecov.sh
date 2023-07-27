@@ -1,3 +1,7 @@
+#!/bin/bash
+# Bamboo script
+# Stage 4 : Code coverage of unit tests
+
 # Set up environment
 . ci-build/st00-header.sh $* || exit 1
 
