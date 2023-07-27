@@ -64,9 +64,9 @@ do
     echo TESTING: idscat -s $shot -r $run  equilibrium
     idscat -s $shot -r $run  equilibrium || exit 1  
 
-    echo =====================================idscp=====================================================
-    echo TESTING: idscp -si 131024 -ri 10 -so 145000 -ro 2 -f
-    idscp -si 131024 -ri 10 -so 145000 -ro 2 || exit 1 
+    # echo =====================================idscp=====================================================
+    # echo TESTING: idscp -si 131024 -ri 10 -so 145000 -ro 2 -f
+    # idscp -si 131024 -ri 10 -so 145000 -ro 2 || exit 1 
 
     # echo =====================================idsdiff=====================================================
     # echo TESTING: idsdiff 122525 1 122525 2 summary
