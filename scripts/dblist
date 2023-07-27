@@ -247,7 +247,7 @@ if __name__ == "__main__":
         "-u",
         "--user",
         dest="user",
-        default=os.getenv("USER"),
+        default="public", #os.getenv("USER"),
         help="Show databases of specified user \t\t(default=%(default)s)",
     )
     parser.add_argument(
