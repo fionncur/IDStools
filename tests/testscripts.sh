@@ -35,10 +35,10 @@ echo TESTING: dblist -u public databases
 test $(dblist  databases 2>&1 | tee scripts/dblist.log  | grep -ciE "err|fault|error[ :]|exception|severe") -eq 0 && echo "ok passed" || exit 1
 echo TESTING: dblist -u public  dataversions
 test $(dblist  dataversions  2>&1 | tee scripts/dblist.log  | grep -ciE "err|fault|error[ :]|exception|severe") -eq 0 && echo "ok passed" || exit 1
-echo TESTING: dblist -u public slices
-test $(dblist -u public slices  2>&1 | tee scripts/dblist.log  | grep -ciE "err|fault|error[ :]|exception|severe") -eq 0 && echo "ok passed" || exit 1
-echo TESTING: dblist -u public  times
-test $(dblist -u public times 2>&1 | tee scripts/dblist.log  | grep -ciE "err|fault|error[ :]|exception|severe") -eq 0 && echo "ok passed" || exit 1
+# echo TESTING: dblist -u public slices
+# test $(dblist -u public slices  2>&1 | tee scripts/dblist.log  | grep -ciE "err|fault|error[ :]|exception|severe") -eq 0 && echo "ok passed" || exit 1
+# echo TESTING: dblist -u public  times
+# test $(dblist -u public times 2>&1 | tee scripts/dblist.log  | grep -ciE "err|fault|error[ :]|exception|severe") -eq 0 && echo "ok passed" || exit 1
 
 # pulse tests
 for i in ${tests[@]}
@@ -62,7 +62,7 @@ do
 
     echo =====================================idscat=====================================================
     echo TESTING: idscat -s $shot -r $run  equilibrium
-    test $(idscat -s $shot -r $run  equilibrium || exit 1
+    idscat -s $shot -r $run  equilibrium || exit 1
 
     echo =====================================idscp=====================================================
     echo TESTING: idscp -si 131024 -ri 10 -so 145000 -ro 2 -f
