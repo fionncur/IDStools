@@ -64,7 +64,10 @@ database_abs_path = (
     if args.user == "public"
     else f'{os.path.expanduser(f"~{args.user}")}/public/imasdb/{args.database}/3'
 )
-hostdir = os.environ["HOSTNAME"] + ":" + database_abs_path
+if "HOSTNAME" in os.environ:
+    hostdir = os.environ["HOSTNAME"] + ":" + database_abs_path
+else:
+    hostdir = database_abs_path
 
 connection = imas.DBEntry(
     getBackendID(args.backend), args.database, args.shot, args.run, args.user
