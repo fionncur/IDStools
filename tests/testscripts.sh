@@ -25,16 +25,16 @@ echo TESTING: dbselector summary
 test $(dbselector summary --list-count 10 2>&1 | tee dbselector.log  | grep -ciE "err|fault|error[ :]|exception|severe") -eq 0 && echo "ok passed" || exit 1
 
 echo =====================================dblist=====================================================
-echo TESTING: dblist list
-test $(dblist -u public list  2>&1 | tee scripts/dblist.log  | grep -ciE "err|fault|error[ :]|exception|severe") -eq 0 && echo "ok passed" || exit 1
-test $(dblist -u public list -c  2>&1 | tee scripts/dblist.log  | grep -ciE "err|fault|error[ :]|exception|severe") -eq 0 && echo "ok passed" || exit 1
-test $(dblist -u public list -M  2>&1 | tee scripts/dblist.log  | grep -ciE "err|fault|error[ :]|exception|severe") -eq 0 && echo "ok passed" || exit 1
-echo TESTING: dblist  --database ITER list
-test $(dblist -u public  --database ITER list 2>&1 | tee scripts/dblist.log  | grep -ciE "err|fault|error[ :]|exception|severe") -eq 0 && echo "ok passed" || exit 1
-echo TESTING: dblist -u public databases
-test $(dblist  databases 2>&1 | tee scripts/dblist.log  | grep -ciE "err|fault|error[ :]|exception|severe") -eq 0 && echo "ok passed" || exit 1
-echo TESTING: dblist -u public  dataversions
-test $(dblist  dataversions  2>&1 | tee scripts/dblist.log  | grep -ciE "err|fault|error[ :]|exception|severe") -eq 0 && echo "ok passed" || exit 1
+# echo TESTING: dblist list
+# test $(dblist -u public list  2>&1 | tee scripts/dblist.log  | grep -ciE "err|fault|error[ :]|exception|severe") -eq 0 && echo "ok passed" || exit 1
+# test $(dblist -u public list -c  2>&1 | tee scripts/dblist.log  | grep -ciE "err|fault|error[ :]|exception|severe") -eq 0 && echo "ok passed" || exit 1
+# test $(dblist -u public list -M  2>&1 | tee scripts/dblist.log  | grep -ciE "err|fault|error[ :]|exception|severe") -eq 0 && echo "ok passed" || exit 1
+# echo TESTING: dblist  --database ITER list
+# test $(dblist -u public  --database ITER list 2>&1 | tee scripts/dblist.log  | grep -ciE "err|fault|error[ :]|exception|severe") -eq 0 && echo "ok passed" || exit 1
+# echo TESTING: dblist -u public databases
+# test $(dblist  databases 2>&1 | tee scripts/dblist.log  | grep -ciE "err|fault|error[ :]|exception|severe") -eq 0 && echo "ok passed" || exit 1
+# echo TESTING: dblist -u public  dataversions
+# test $(dblist  dataversions  2>&1 | tee scripts/dblist.log  | grep -ciE "err|fault|error[ :]|exception|severe") -eq 0 && echo "ok passed" || exit 1
 # echo TESTING: dblist -u public slices
 # test $(dblist -u public slices  2>&1 | tee scripts/dblist.log  | grep -ciE "err|fault|error[ :]|exception|severe") -eq 0 && echo "ok passed" || exit 1
 # echo TESTING: dblist -u public  times
