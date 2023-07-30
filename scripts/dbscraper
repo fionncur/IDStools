@@ -45,8 +45,6 @@ if __name__ == "__main__":
 
     backend = getBackendID(args.backend)
     dbmaster = DBMaster()
-    if args.verbose:
-        print(f"database located in {dbmaster.locpath}")
     pulses = None
     if backend == imasdef.MDSPLUS_BACKEND:
         pulses = dbmaster.getMdsPlusPulses(args.user, args.database, args.version,status=args.status)

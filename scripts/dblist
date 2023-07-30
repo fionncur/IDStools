@@ -182,7 +182,7 @@ def printTimes(dbs, args, print_times=False, shotNumber=None, runNumber=None):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        prog="imasdbs",
+        prog="dblist",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         description=textwrap.dedent(
             """
@@ -247,7 +247,7 @@ if __name__ == "__main__":
         "-u",
         "--user",
         dest="user",
-        default=os.getlogin(),
+        default="public", #os.getenv("USER"),
         help="Show databases of specified user \t\t(default=%(default)s)",
     )
     parser.add_argument(

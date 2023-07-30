@@ -10,30 +10,56 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
+import datetime
 import json
 import os
-import sys
 import re
+import sys
+
 root_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 sys.path.insert(0, root_path)
 import idstools
 
-print("root path:", root_path)
-print("python exec:", sys.executable)
-print("sys.path:", sys.path)
+print(f"root path:{root_path}" )
+print(f"python exec:{sys.executable}" )
+print(f"sys.path:{sys.path}" )
 # -- Project information -----------------------------------------------------
 
 project = "IDSTools"
-copyright = "2023, ITER Organization"
+copyright =  f"{datetime.datetime.now().year}, ITER Organization"
 author = "ITER Organization"
 
+# Get release
+release = idstools.__version__
 
-version = idstools.__version__
-release = version
-if versionMatch := re.match(r'^v?(\d+\.\d+\.\d+)', release):
-    release = versionMatch[1]
-version_string = {'version': release, 'url': f'https://sharepoint.iter.org/departments/POP/CM/IMDesign/Code%20Documentation/idstools-doc/{release}/index.html'}
+# Get version
+versionList = idstools.__version__.split("+")
+version=""
+is_develop=False
+if len(versionList)==1:
+    version=versionList[0]
+if len(versionList)==2:
+    version=f"{versionList[0]}dev"
+    is_develop = True
+
+html_context = {
+    "is_develop": is_develop
+}
+
+print(f"version : {version}, release : {release}")
+
+switcher_version = ""
+if "dev" in version:
+    switcher_version = "devdocs"
+    version_string = {"name":"devdocs", 'version': release, 'url': 'https://sharepoint.iter.org/departments/POP/CM/IMDesign/Code%20Documentation/idstools-doc/devdocs/'}
+else:
+    switcher_version = f"{version}"
+    version_string = {"name":version, 'version': release, 'url': f'https://sharepoint.iter.org/departments/POP/CM/IMDesign/Code%20Documentation/idstools-doc/{version}/'}
+
+
+print(f"release : {release}")
+print(f"version_string : {version_string}")
 
 # Open a file in write mode
 with open('_static/version.json', 'w') as file:
@@ -59,7 +85,6 @@ extensions = [
     "sphinx_toolbox.collapse",
     # "sphinxcontrib.mermaid",
 ]
-
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -87,7 +112,7 @@ exclude_patterns = []
 # a list of builtin themes.
 #
 html_theme = "pydata_sphinx_theme"
-html_favicon = "_static/favicon/favicon.ico"
+html_favicon = "_static/favicon/favicon_ico.ico"
 html_logo = "_static/logo.png"
 # html_theme_options = {
 #     "logo": {
@@ -121,13 +146,12 @@ html_theme_options = {
     "show_prev_next": False,
     "navigation_with_keys": False,
     "switcher": {
-        "version_match": release,
-        # "json_url": "https://sharepoint.iter.org/departments/POP/CM/IMDesign/Code%20Documentation/idstools-doc/versions.json",
-        "json_url": "_static/version.json",
+        "version_match": switcher_version,
+        "json_url": "https://sharepoint.iter.org/departments/POP/CM/IMDesign/_layouts/15/download.aspx?UniqueId=15778d46932e404096c0cf73fd4510b4",
+        # "json_url": "_static/versions.json",
     },
     "navbar_end": ["theme-switcher", "version-switcher", "navbar-icon-links"]
 }
-# https://sharepoint.iter.org/departments/POP/CM/IMDesign/Code%20Documentation/idstools-doc/versions.json
 html_sidebars = {
     "**": [
         "search-field.html",
@@ -146,7 +170,7 @@ html_sidebars = {
 html_title = f"{project} v{release} Manual"
 
 html_static_path = ["_static"]
-html_css_files = ["idstools.css"]
+# html_css_files = ["idstools.css"]
 # html_context = {"default_mode": "light"}
 html_file_suffix = ".html"
 htmlhelp_basename = "IDSTools"

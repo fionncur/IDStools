@@ -22,7 +22,7 @@ Syntax
 .. code-block:: bash
 
     $ dblist
-    usage: imasdbs [-h] [-u USER] [-d DATABASE] [-v VERSION] [--backend BACKEND]
+    usage: dblist [-h] [-u USER] [-d DATABASE] [-v VERSION] [--backend BACKEND]
                 {list,slices,times,databases,dataversions} ... [positionalArgs]
 
     [Previously known as imasdbs]

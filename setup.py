@@ -46,7 +46,9 @@ setup(
         "scripts/idscp",
         "scripts/idsdiff",
         "scripts/idslist"
-    ]
+    ],
+    setup_requires=['pytest-runner'],
+    tests_require=['pytest'],
     # data_files=data_files,
 )
 
