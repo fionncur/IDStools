@@ -5,6 +5,7 @@ This module
 
 import inspect
 import logging
+import time
 import types
 
 import imas
@@ -61,7 +62,85 @@ def getIdsAttributes(idsobj: object) -> list:
     else:
         return []
 
+def getIDSSize(dbEntryObject: imas.DBEntry, idsNames=None)->dict:
+    """
+    The function `getIDSSize` retrieves the size of IDS objects from a database entry and returns a dictionary containing the size in bytes and the time taken to read each object.
+    
+    Args:
+        dbEntryObject (imas.DBEntry): The `dbEntryObject` parameter is an object of type `imas.DBEntry`. It is used to access the data in the IMAS database.
+        idsNames: idsNames is a list of IDS names. If it is not provided, it defaults to None.
+    
+    Returns:
+        a dictionary containing information about the size and time taken to read IDS objects from a database entry. The dictionary has the following structure:
+    """
+    if idsNames is None:
+        idsNames = [i.value for i in imas.IDSName]
+    if type(idsNames) is str:
+        idsNames = idsNames.split(",")
+    idsSizeDict = {}
+    for idsName in idsNames:
+        occurrencesCount = eval(f"imas.{idsName}.getMaxOccurrences()")
+        for o in range(occurrencesCount+1):
+            homogeneousTime = dbEntryObject.partial_get(idsName, 'ids_properties/homogeneous_time', occurrence=o)
+            if homogeneousTime >= 0:
+                field = f"{idsName}/{o}"
+                idsSizeDict[field] = {}
+                startTime = time.time()
+                idsObject = dbEntryObject.get(idsName, occurrence=o)
+                idsSizeDict[field]['time'] = time.time() - startTime
+                idsSizeDict[field]['bytes'] = getObjectSize(idsObject)
+                print('Reading %0.3f MB of data for %s took %0.2f seconds' % ( idsSizeDict[field]['bytes']/1024**2, field, idsSizeDict[field]['time']))
+                del idsObject
+    return idsSizeDict
 
+def getAllIDSSize(dbEntryObject: imas.DBEntry):
+    """
+    The function `getAllIDSSize` calculates the total size in bytes of all IDS in a given `dbEntryObject`.
+    
+    Args:
+        dbEntryObject (imas.DBEntry): The parameter `dbEntryObject` is of type `imas.DBEntry`.
+    
+    Returns:
+        the total size in bytes of all the IDS in the given `dbEntryObject`.
+    """
+    idsSizeDict = getIDSSize(dbEntryObject)
+    totalBytes = np.array([ids['bytes'] for ids in idsSizeDict.values()]).sum()
+    return totalBytes
+
+def getAllIDSGetTime(dbEntryObject: imas.DBEntry):
+    """
+    The function `getAllIDSGetTime` calculates the total time for all IDS in a given `dbEntryObject`.
+    
+    Args:
+        dbEntryObject (imas.DBEntry): The parameter `dbEntryObject` is of type `imas.DBEntry`.
+    
+    Returns:
+        the total time to get all the IDSes in the given `dbEntryObject`.
+    """
+    idsSizeDict = getIDSSize(dbEntryObject)
+    return np.array([ids['time']  for ids in idsSizeDict.values()]).sum()
+
+def getObjectSize(obj: object) -> int:
+    objectSize = 0
+    if type(obj) == str: 
+        objectSize += len(obj)
+    elif type(obj) == np.ndarray:
+        objectSize += obj.nbytes
+    elif type(obj) == int:
+        objectSize += 4
+    elif type(obj) == float:
+        objectSize += 8
+    elif type(obj) == list:
+        for objItem in obj:
+            objectSize += getObjectSize(objItem)
+    elif type(obj) == dict:
+        for objValue in obj.values():
+            objectSize += getObjectSize(objValue)
+    else:
+        for objValue in obj.__dict__.values():
+            objectSize += getObjectSize(objValue)
+    return objectSize
+    
 def getIdsTypes():
     """
     This function returns list of strings corresponding to all ids types for each IDSName object in the imas module.

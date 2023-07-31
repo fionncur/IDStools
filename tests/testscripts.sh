@@ -79,5 +79,10 @@ do
     echo TESTING: idslist -s $shot -r $run  --yaml-format 
     idslist -s $shot -r $run  --yaml-format  || exit 1 
 
+    echo TESTING: idssize -s $shot -r $run   equilibrium
+    idssize -s $shot -r $run  equilibrium || exit 1 
+
+    echo TESTING: idssize -s $shot -r $run  
+    idssize -s $shot -r $run  || exit 1 
 done
 

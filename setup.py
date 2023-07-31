@@ -46,6 +46,7 @@ setup(
         "scripts/idscp",
         "scripts/idsdiff",
         "scripts/idslist"
+        "scripts/idssize"
     ],
     setup_requires=['pytest-runner'],
     tests_require=['pytest'],
