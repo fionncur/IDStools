@@ -7,7 +7,11 @@ import numpy
 import os
 import sys
 
-
+try:
+    import StringIO 
+except ImportError:
+    from io import StringIO 
+    
 root_path = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(root_path)
 
@@ -45,7 +49,12 @@ if __name__ == "__main__":
         action="store_true",
         help="Print all array elements (can be very slow for large data)",
     )
-
+    parser.add_argument(
+        "-c",
+        "--compact",
+        action="store_true",
+        help="Print only names which has data",
+    )
     args = parser.parse_args()
 
     if args.full:
@@ -79,10 +88,39 @@ if __name__ == "__main__":
 
     if args.path is None:
         ids = connection.get(idsname, occurrence)
-        try:
-            ids.dump(print_empty=args.show_empty)
-        except Exception:
-            print(ids)
+        if args.compact:
+            try:
+                output = StringIO()
+                sys.stdout = open(os.devnull, 'w')
+
+                ids.dump(print_empty=args.show_empty, file=output)
+                
+                sys.stdout = sys.__stdout__
+                output.seek(0)
+
+                for line in output.readlines():
+                    if "[" in line:
+                        continue
+                    if "]" in line:
+                        continue
+                    if "class" in line:
+                        continue
+                    if "value" in line:
+                        continue
+                    if ":" in line:
+                        line = line.split(":")[0] + "\n"
+                    line = line.replace("Attribute", "")
+                    line = line.replace("class", "")
+                    line = line.replace("\t", "  ")
+                    print(line, end="")
+                output.close()
+            except Exception as e: print(e)
+        else:
+            try:
+                ids.dump(print_empty=args.show_empty)
+            except Exception:
+                print(ids)
+        
     else:
         try:
             result = connection.partial_get(idsname, args.path, occurrence)
