@@ -98,10 +98,13 @@ if __name__ == "__main__":
                 sys.stdout = sys.__stdout__
                 output.seek(0)
 
+                
                 for line in output.readlines():
-                    if "[" in line:
+                    if "[" in line and  "]" not in line:
                         continue
-                    if "]" in line:
+                    if "]" in line and  "[" not in line:
+                        continue
+                    if "]" in line and  "[" in line and "." in line:
                         continue
                     if "class" in line:
                         continue
@@ -111,6 +114,7 @@ if __name__ == "__main__":
                         line = line.split(":")[0] + "\n"
                     line = line.replace("Attribute", "")
                     line = line.replace("class", "")
+                    line = line.replace("=", "")
                     line = line.replace("\t", "  ")
                     print(line, end="")
                 output.close()
