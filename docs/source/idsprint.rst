@@ -1,7 +1,7 @@
-idscat
+idsprint
 ======
 
-*idscat* is a utility that, as the name implies, dumps or prints all data on the console.
+*idsprint* is a utility that, as the name implies, dumps or prints all data on the console.
 It is handy if you need to rapidly verify if specific fields or attributes have been 
 filled out or empty . The output can also be saved to a file using extraction.
 
@@ -11,8 +11,8 @@ Syntax
 
     .. code-block:: bash     
 
-        $ python scripts/idscat.py -h
-        usage: idscat.py [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] -s SHOT -r RUN [-f] ids
+        $ python scripts/idsprint.py -h
+        usage: idsprint.py [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] -s SHOT -r RUN [-f] ids
 
         Prints content of an IDS onto the terminal
 
@@ -39,7 +39,7 @@ Example
 
     .. code-block:: bash
 
-        python scripts/idscat.py -s 134174 -r 117 equilibrium
+        python scripts/idsprint.py -s 134174 -r 117 equilibrium
 
         class equilibrium
         Attribute ids_properties

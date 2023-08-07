@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# ids_content and listidss is merged
 
 import argparse
 import os
@@ -28,6 +29,7 @@ parser = argparse.ArgumentParser(
 )
 parser.add_argument("-s", "--shot", help="Shot number", required=True, type=int)
 parser.add_argument("-r", "--run", help="Run number", required=True, type=int)
+parser.add_argument("-f", "--fullarray",action="store_true", help="Show full time array values")
 parser.add_argument(
     "-y",
     "--yaml-format",
@@ -88,7 +90,6 @@ else:
         args.shot,
         args.run,
     )
-    print(args.user)
     err, _ = idsObject.open_env(args.user, args.database, args.version)
     if err != 0:
         logger.critical(
@@ -104,4 +105,6 @@ else:
         elif len(timeArray) == 1 and timeArray[0] == np.NINF:
             print(f"{idsName:15}:  {question_string:5} slices: time independent IDS ")
         else:
+            if args.fullarray is True:
+                np.set_printoptions(threshold=sys.maxsize)
             print(f"{idsName:15}: {str(len(timeArray)):5} slices: {timeArray} ")

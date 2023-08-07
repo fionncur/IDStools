@@ -46,23 +46,23 @@ do
     arr=(${i//;/ })
     shot=${arr[0]}
     run=${arr[1]}
-    echo =====================================pulsecomposition=====================================================
-    echo TESTING: shot=$shot : run=$run  pulsecomposition -s $shot -r $run
-    pulsecomposition -s $shot -r $run || exit 1 
+    echo =====================================idscompo=====================================================
+    echo TESTING: shot=$shot : run=$run  idscompo -s $shot -r $run
+    idscompo -s $shot -r $run || exit 1 
     echo ==========================================================================================
-    echo TESTING: shot=$shot : run=$run pulsecomposition -s $shot -r $run --i
-    pulsecomposition -s $shot -r $run --i || exit 1  
+    echo TESTING: shot=$shot : run=$run idscompo -s $shot -r $run --i
+    idscompo -s $shot -r $run --i || exit 1  
     echo ==========================================================================================
-    echo TESTING: shot=$shot : run=$run pulsecomposition -s $shot -r $run --debug
-    pulsecomposition -s $shot -r $run --debug || exit 1 
+    echo TESTING: shot=$shot : run=$run idscompo -s $shot -r $run --debug
+    idscompo -s $shot -r $run --debug || exit 1 
 
     echo =====================================plotequilibrium=====================================================
     echo TESTING: shot=$shot : run=$run plotequilibrium -s $shot -r $run --rho --pfcoils --info --save
     plotequilibrium -s $shot -r $run --rho --pfcoils --info --save || exit 1 
 
-    echo =====================================idscat=====================================================
-    echo TESTING: idscat -s $shot -r $run  equilibrium
-    idscat -s $shot -r $run  equilibrium || exit 1  
+    echo =====================================idsprint=====================================================
+    echo TESTING: idsprint -s $shot -r $run  equilibrium
+    idsprint -s $shot -r $run  equilibrium || exit 1  
 
     # echo =====================================idscp=====================================================
     # echo TESTING: idscp -si 131024 -ri 10 -so 145000 -ro 2 -f

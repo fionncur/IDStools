@@ -1,14 +1,14 @@
-pulsecomposition
+idscompo
 ================
 
-*pulsecomposition* script gathers ion composition from core and edge profiles and print it on the screen
+*idscompo* script gathers ion composition from core and edge profiles and print it on the screen
 
 Syntax
 ~~~~~~
 .. code-block:: bash
 
-    python pulsecomposition.py -h
-    usage: pulsecomposition.py [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] -s SHOT -r RUN [-i] [--debug]
+    python idscompo.py -h
+    usage: idscompo.py [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] -s SHOT -r RUN [-i] [--debug]
 
     ---- Display the plasma composition from the core_profiles IDS
 
@@ -31,7 +31,7 @@ Example
 ~~~~~~~
 .. code-block:: bash
 
-    $ pulsecomposition -s 131047 -r 4
+    $ idscompo -s 131047 -r 4
     !   No edge_profiles IDS in the data-entry.
     core +  edge  -
     ------------

@@ -40,9 +40,9 @@ setup(
         "scripts/dbscraper",
         "scripts/dbselector",
         "scripts/dblist",
-        "scripts/pulsecomposition",
+        "scripts/idscompo",
         "scripts/plotequilibrium",
-        "scripts/idscat",
+        "scripts/idsprint",
         "scripts/idscp",
         "scripts/idsdiff",
         "scripts/idslist"

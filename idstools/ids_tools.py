@@ -112,6 +112,7 @@ class ImasDb():
         (status, times) = self.db.getTimes(idsName)
         return times
 
+    #TODO to be removed.. migrated to idshelper.getAvailableIdsAndTimes
     def all_times(self):
         """Returns a list of existing timeslices for all time-dependent IDSs present in the database."""
         import inspect
