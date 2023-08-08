@@ -62,14 +62,15 @@ def getIdsAttributes(idsobj: object) -> list:
     else:
         return []
 
-def getIDSSize(dbEntryObject: imas.DBEntry, idsNames=None)->dict:
+
+def getIDSSize(dbEntryObject: imas.DBEntry, idsNames=None) -> dict:
     """
     The function `getIDSSize` retrieves the size of IDS objects from a database entry and returns a dictionary containing the size in bytes and the time taken to read each object.
-    
+
     Args:
         dbEntryObject (imas.DBEntry): The `dbEntryObject` parameter is an object of type `imas.DBEntry`. It is used to access the data in the IMAS database.
         idsNames: idsNames is a list of IDS names. If it is not provided, it defaults to None.
-    
+
     Returns:
         a dictionary containing information about the size and time taken to read IDS objects from a database entry. The dictionary has the following structure:
     """
@@ -80,49 +81,61 @@ def getIDSSize(dbEntryObject: imas.DBEntry, idsNames=None)->dict:
     idsSizeDict = {}
     for idsName in idsNames:
         occurrencesCount = eval(f"imas.{idsName}.getMaxOccurrences()")
-        for o in range(occurrencesCount+1):
-            homogeneousTime = dbEntryObject.partial_get(idsName, 'ids_properties/homogeneous_time', occurrence=o)
+        for o in range(occurrencesCount + 1):
+            homogeneousTime = dbEntryObject.partial_get(
+                idsName, "ids_properties/homogeneous_time", occurrence=o
+            )
             if homogeneousTime >= 0:
                 field = f"{idsName}/{o}"
                 idsSizeDict[field] = {}
                 startTime = time.time()
                 idsObject = dbEntryObject.get(idsName, occurrence=o)
-                idsSizeDict[field]['time'] = time.time() - startTime
-                idsSizeDict[field]['bytes'] = getObjectSize(idsObject)
-                print('Reading %0.3f MB of data for %s took %0.2f seconds' % ( idsSizeDict[field]['bytes']/1024**2, field, idsSizeDict[field]['time']))
+                idsSizeDict[field]["time"] = time.time() - startTime
+                idsSizeDict[field]["bytes"] = getObjectSize(idsObject)
+                print(
+                    "Reading %0.3f MB of data for %s took %0.2f seconds"
+                    % (
+                        idsSizeDict[field]["bytes"] / 1024**2,
+                        field,
+                        idsSizeDict[field]["time"],
+                    )
+                )
                 del idsObject
     return idsSizeDict
+
 
 def getAllIDSSize(dbEntryObject: imas.DBEntry):
     """
     The function `getAllIDSSize` calculates the total size in bytes of all IDS in a given `dbEntryObject`.
-    
+
     Args:
         dbEntryObject (imas.DBEntry): The parameter `dbEntryObject` is of type `imas.DBEntry`.
-    
+
     Returns:
         the total size in bytes of all the IDS in the given `dbEntryObject`.
     """
     idsSizeDict = getIDSSize(dbEntryObject)
-    totalBytes = np.array([ids['bytes'] for ids in idsSizeDict.values()]).sum()
+    totalBytes = np.array([ids["bytes"] for ids in idsSizeDict.values()]).sum()
     return totalBytes
+
 
 def getAllIDSGetTime(dbEntryObject: imas.DBEntry):
     """
     The function `getAllIDSGetTime` calculates the total time for all IDS in a given `dbEntryObject`.
-    
+
     Args:
         dbEntryObject (imas.DBEntry): The parameter `dbEntryObject` is of type `imas.DBEntry`.
-    
+
     Returns:
         the total time to get all the IDSes in the given `dbEntryObject`.
     """
     idsSizeDict = getIDSSize(dbEntryObject)
-    return np.array([ids['time']  for ids in idsSizeDict.values()]).sum()
+    return np.array([ids["time"] for ids in idsSizeDict.values()]).sum()
+
 
 def getObjectSize(obj: object) -> int:
     objectSize = 0
-    if type(obj) == str: 
+    if type(obj) == str:
         objectSize += len(obj)
     elif type(obj) == np.ndarray:
         objectSize += obj.nbytes
@@ -140,7 +153,8 @@ def getObjectSize(obj: object) -> int:
         for objValue in obj.__dict__.values():
             objectSize += getObjectSize(objValue)
     return objectSize
-    
+
+
 def getIdsTypes():
     """
     This function returns list of strings corresponding to all ids types for each IDSName object in the imas module.
@@ -214,6 +228,62 @@ def getAvailableIdsAndTimes(idsObject: imas.ids) -> list:
             if timeArray is not None and len(timeArray):
                 result.append((idsName, timeArray))
     return result
+
+
+def resampleIndices(
+    dbin: str, dbout: str, idsname: str, start: int = 0, stop: int = None, step: int = 1
+):
+    """
+    The function resampleIndices takes in a database input, database output, and an idsname, and resamples the data based on the specified start, stop, and step values.
+
+    Args:
+        dbin (str): The parameter "dbin" is a string that represents the input database name. It is the database from which the data will be read.
+        dbout (str): The parameter `dbout` is a string that represents the name of the output database. It is the database where the resampled data will be stored.
+        idsname (str): The parameter "idsname" is a string that represents the ids that you want to resample.
+        start (int): The start parameter is the index of the first time value to be resampled.
+        stop (int): The `stop` parameter is used to specify the index at which the resampling should stop. If `stop` is not provided, the resampling will continue until the end of the `times` array.
+        step (int): The `step` parameter determines the interval between the indices that are selected from the `times` array. For example, if `step` is set to 2, every second index will be selected. If `step` is set to 3, every third index will be selected, and so. Defaults to 1
+    """
+    times = dbin.partial_get(idsname, "time")
+    for timeVal in times[range(start, len(times) if stop is None else stop, step)]:
+        dataSlice = dbin.get_slice(idsname, timeVal, imas.imasdef.PREVIOUS_INTERP)
+        dbout.put_slice(dataSlice)
+
+
+def resampleTimes(
+    dbin: str,
+    dbout: str,
+    idsname: str,
+    start: int = None,
+    stop: int = None,
+    step: int = None,
+):
+    """
+    The function resampleTimes takes in a database input, database output, idsname, start, stop, and
+    step parameters, and resamples the times in the input database based on the specified parameters,
+    and puts the resampled data into the output database.
+
+    Args:
+        dbin (str): The parameter "dbin" is a string that represents the input database name. It is the database from which the data will be read.
+        dbout (str): The parameter `dbout` is a string that represents the name of the output database. It is the database where the resampled data will be stored.
+        idsname (str): The parameter "idsname" is a string that represents the ids that you want to resample.
+        start (int): The start parameter is the index of the first time value to be resampled.
+        stop (int): The `stop` parameter is used to specify the index at which the resampling should stop. If `stop` is not provided, the resampling will continue until the end of the `times` array.
+        step (int): The `step` parameter determines the interval between the indices that are selected from the `times` array. For example, if `step` is set to 2, every second index will be selected. If `step` is set to 3, every third index will be selected, and so. Defaults to 1
+    """
+    times = dbin.partial_get(idsname, "time")
+    if step is None:  # work on indices
+        rstart = 0 if start is None else np.argmax(times >= start)
+        rstop = len(times) if stop is None else (np.argmax(times > stop) - 1)
+        rtimes = [times[range(rstart, rstop, 1)]]
+    else:
+        rstart = times[0] if start is None else start
+        rstop = times[-1] if stop is None else stop
+        rtimes = np.arange(rstart, rstop, step)
+
+    for timeVal in rtimes:
+        dataSlice = dbin.get_slice(idsname, timeVal, imas.imasdef.PREVIOUS_INTERP)
+        dbout.put_slice(dataSlice)
 
 
 def compareIds(X, Y, field=None, ignore_version=True, verb=True, output={}):
@@ -419,22 +489,24 @@ def compareIds(X, Y, field=None, ignore_version=True, verb=True, output={}):
     return identical, output
 
 
-def getQuantitiesFromPulses(idspath: str,    pulses: tuple, listCount:int=0, verbose:bool=False) -> pd.DataFrame:
+def getQuantitiesFromPulses(
+    idspath: str, pulses: tuple, listCount: int = 0, verbose: bool = False
+) -> pd.DataFrame:
     """
     The `getQuantitiesFromPulses` function retrieves values from a specified IDS path for a given set of pulses and returns a DataFrame containing the pulse, run, and corresponding values.
-    
+
     Args:
         idspath (str): The `idspath` parameter is a string that represents the path to the IDS node from which the quantities will be extracted. It is used to specify the location of the data in the IDS
         pulses (tuple): The `pulses` parameter is a tuple containing information about each pulse. Each element in the tuple is itself a tuple with the following elements: pulse, run, backend, database, user, version, and file path.
         listCount (int): The `listCount` parameter is an optional parameter that specifies the number of pulses to retrieve values for. If `listCount` is set to 0 (default), values will be retrieved for all pulses in the `pulses` tuple. If `listCount` is set to a positive integer, values will be retrieved for first `listCount` pulses in the `pulses` tuple. Defaults to 0
         verbose (bool): print debug information
-    
+
     Returns:
         The function `getQuantitiesFromPulses` returns a pandas DataFrame containing the columns "PULSE", "RUN", and "VALUE".
     """
     idsname = idspath.split("/")[0]
     valpath = idspath[1 + len(idsname) :]
-    if listCount!=0:
+    if listCount != 0:
         pulses = pulses[:listCount]
     values = []
     for pulseTuple in tqdm(pulses) if progbar else pulses:
@@ -456,7 +528,16 @@ def getQuantitiesFromPulses(idspath: str,    pulses: tuple, listCount:int=0, ver
 
     df = pd.DataFrame(
         pulses,
-        columns=["PULSE", "RUN", "BACKEND", "DATABASE", "USER", "VERSION", "FILEPATH", "FILETIME"],
+        columns=[
+            "PULSE",
+            "RUN",
+            "BACKEND",
+            "DATABASE",
+            "USER",
+            "VERSION",
+            "FILEPATH",
+            "FILETIME",
+        ],
     )
     df["VALUE"] = values
     dfExtract = df[["PULSE", "RUN", "VALUE"]]

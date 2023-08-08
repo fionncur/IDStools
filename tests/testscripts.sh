@@ -64,14 +64,6 @@ do
     echo TESTING: idsprint -s $shot -r $run  equilibrium
     idsprint -s $shot -r $run  equilibrium || exit 1  
 
-    # echo =====================================idscp=====================================================
-    # echo TESTING: idscp -si 131024 -ri 10 -so 145000 -ro 2 -f
-    # idscp -si 131024 -ri 10 -so 145000 -ro 2 || exit 1 
-
-    # echo =====================================idsdiff=====================================================
-    # echo TESTING: idsdiff 122525 1 122525 2 summary
-    # idsdiff 122525 1 122525 2 summary || exit 1 
-
     echo =====================================idslist=====================================================
     echo TESTING: idslist -s $shot -r $run  
     idslist -s $shot -r $run   || exit 1 
@@ -86,3 +78,14 @@ do
     idssize -s $shot -r $run  || exit 1 
 done
 
+# echo =====================================idscp=====================================================
+# echo TESTING: idscp -si 131024 -ri 10 -so 145000 -ro 2 -f
+# idscp -si 131024 -ri 10 -so 145000 -ro 2 || exit 1 
+
+# echo =====================================idsdiff=====================================================
+# echo TESTING: idsdiff 122525 1 122525 2 summary
+# idsdiff 122525 1 122525 2 summary || exit 1 
+
+# echo =====================================idsresample=====================================================
+# echo TESTING: idsresample -si 131024 -ri 10 -so 145000 -ro 2
+# idsresample -si 131024 -ri 10 -so 145000 -ro 2 || exit 1 

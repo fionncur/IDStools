@@ -10,11 +10,11 @@ current_directory = pathlib.Path(__file__).parent.resolve()
 long_description = (current_directory / "README.md").read_text(encoding="utf-8")
 
 requirement_path = f"{current_directory}/requirements.txt"
-install_requires = [] 
+install_requires = []
 if os.path.isfile(requirement_path):
     with open(requirement_path) as f:
         install_requires = f.read().splitlines()
-        
+
 setup(
     name="IDSTools",
     version=versioneer.get_version(),
@@ -45,11 +45,10 @@ setup(
         "scripts/idsprint",
         "scripts/idscp",
         "scripts/idsdiff",
-        "scripts/idslist"
-        "scripts/idssize"
+        "scripts/idslist" "scripts/idssize" "scripts/idsresample",
     ],
-    setup_requires=['pytest-runner'],
-    tests_require=['pytest'],
+    setup_requires=["pytest-runner"],
+    tests_require=["pytest"],
     # data_files=data_files,
 )
 

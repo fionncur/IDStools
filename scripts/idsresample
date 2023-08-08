@@ -1,0 +1,171 @@
+#!/usr/bin/env python3
+import argparse
+import os
+import sys
+
+import imas
+import numpy as np
+
+root_path = os.path.dirname(os.path.dirname(__file__))
+sys.path.append(root_path)
+from idstools.utils.clihelper import getBackendID, imasParser
+from idstools.utils.idshelper import resampleIndices, resampleTimes
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        description="Resample IDSs from a data-entry and save them into another data-entry",
+        parents=[imasParser],
+    )
+    parser.add_argument(
+        "-si", "--shot_input", help="Input shot number", required=True, type=int
+    )
+    parser.add_argument(
+        "-ri", "--run_input", help="Input run number", required=True, type=int
+    )
+    parser.add_argument(
+        "-so", "--shot_output", help="Output shot number", required=True, type=int
+    )
+    parser.add_argument(
+        "-ro", "--run_output", help="Output run number", required=True, type=int
+    )
+    # default user from parent parser is 'public',
+    # which is fine for exploration scripts but less
+    # for management scripts
+    parser.set_defaults(user=os.environ["USER"])
+    parser.add_argument(
+        "-do",
+        "--database_output",
+        type=str,
+        default=None,
+        help="Database name for the destination data-entry",
+    )
+    parser.add_argument(
+        "-bo",
+        "--backend_output",
+        type=str,
+        help="Backend name for the destination data-entry",
+    )
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument(
+        "--index-range",
+        type=str,
+        help='Specified range of slices index as "start,stop,step". If omitted, start=0, stop=len(timebase),step=1, e.g. "0,,10" to keep 1 every 10 slices. Works only for IDS with homogeneous timebase. (Default)',
+    )
+    group.add_argument(
+        "--time-range",
+        type=str,
+        help='Specified range of times as "start,stop,step". If omitted, start=time[0], stop=time[-1]), while omitting step will keep of slices between start and stop, e.g. "10.,50.," to keep all times between 10. and 50. secondes). Works only for IDS with homogeneous timebase unless all three values are specified.',
+    )
+    parser.add_argument(
+        "ids",
+        nargs="*",
+        type=str,
+        help="IDSs to resample (leave empty to resample all)",
+    )
+    args = parser.parse_args()
+
+    if args.database_output is None:
+        args.database_output = args.database
+
+    if args.backend_output is None:
+        args.backend_output = args.backend
+
+    if (
+        args.shot_input == args.shot_output
+        and args.run_input == args.run_output
+        and args.user == os.environ["USER"]
+        and args.database == args.database_output
+        and args.backend == args.backend_output
+    ):
+        print(
+            "Can not use the same data-entry as source and destination!",
+            file=sys.stderr,
+        )
+        exit()
+
+    if args.ids == []:
+        args.ids = [ids.value for ids in list(imas.IDSName)]
+
+    src = imas.DBEntry(
+        getBackendID(args.backend),
+        args.database,
+        args.shot_input,
+        args.run_input,
+        user_name=args.user,
+    )
+    status, _ = src.open()
+    if status != 0:
+        print("Error opening source pulse! Please check existence.", file=sys.stderr)
+        sys.exit(status)
+
+    tmp = imas.DBEntry(imas.imasdef.MEMORY_BACKEND, "tmp", 1, 1)
+    status, _ = tmp.create()
+    if status != 0:
+        print("Error creating temporary data-entry in memory!", file=sys.stderr)
+        sys.exit(status)
+
+    dest = imas.DBEntry(
+        getBackendID(args.backend_output),
+        args.database_output,
+        args.shot_output,
+        args.run_output,
+        user_name=os.environ["USER"],
+    )
+
+    status, _ = dest.create()
+    if status != 0:
+        print(
+            "Error creating destination pulse! Please check parameters and permissions.",
+            file=sys.stderr,
+        )
+        sys.exit(status)
+
+    for idsName in args.ids:
+        homogeneousTime = src.partial_get(idsName, "ids_properties/homogeneous_time")
+        if homogeneousTime == 1:
+            if args.time_range is None:
+                if args.index_range is None:
+                    args.index_range = ",,"
+                timeRange = args.index_range.split(",")
+                start = int(timeRange[0]) if timeRange[0] != "" else 0
+                stop = int(timeRange[1]) if timeRange[1] != "" else None
+                step = int(timeRange[2]) if timeRange[2] != "" else 1
+                print(f"resampling indices :{idsName}")
+                resampleIndices(src, tmp, idsName, start=start, stop=stop, step=step)
+            else:
+                timeRange = args.time_range.split(",")
+                start = int(timeRange[0]) if timeRange[0] != "" else 0
+                stop = int(timeRange[1]) if timeRange[1] != "" else None
+                step = int(timeRange[2]) if timeRange[2] != "" else 1
+                print(f"resampling times :{idsName}")
+                resampleTimes(src, tmp, idsName, start=start, stop=stop, step=step)
+        elif homogeneousTime == 0:
+            if args.time_range != None:
+                timeRange = args.time_range.split(",")
+                if timeRange[0] != "" and timeRange[1] != "" and timeRange[2] != "":
+                    print(f"resampling times :{idsName}")
+                    resampleTimes(
+                        src,
+                        tmp,
+                        idsName,
+                        start=timeRange[0],
+                        stop=timeRange[1],
+                        step=timeRange[2],
+                    )
+                else:
+                    print(
+                        f"Skipping IDS {idsName} because its homogeneous_time={homogeneousTime}",
+                        file=sys.stderr,
+                    )
+                    continue
+            else:
+                print(
+                    f"Skipping IDS {idsName} because its homogeneous_time={homogeneousTime}",
+                    file=sys.stderr,
+                )
+                continue
+        else:
+            # print(f'Skipping IDS {idsname} because its homogeneous_time={homogeneous}',file=sys.stderr)
+            continue
+
+        dest.put(tmp.get(idsName))
