@@ -74,15 +74,16 @@ MODULE_FULL_VERSION=$MODULE_NAME-$VERSION-$TOOLCHAIN_NAME-$TOOLCHAIN_VERSION.eb
 
 echo "COMMITHASH :" $COMMITHASH
 echo "VERSION :" $VERSION
+echo "MODULE_FULL_VERSION :" $MODULE_FULL_VERSION
 
-sed -e 's;__COMMITHASH__;$(COMMITHASH);'\
-    -e 's;__VERSION__;$(VERSION);' \
-    -e 's;__TOOLCHAIN_NAME__;$(TOOLCHAIN_NAME);' \
-    -e 's;__TOOLCHAIN_VERSION__;$(TOOLCHAIN_VERSION);' \
-    ./ci-build/files/idstools.eb.in > ./ci-build/files/$(MODULE_FULL_VERSION)
+sed -e 's;__COMMITHASH__;$COMMITHASH;'\
+    -e 's;__VERSION__;$VERSION;' \
+    -e 's;__TOOLCHAIN_NAME__;$TOOLCHAIN_NAME;' \
+    -e 's;__TOOLCHAIN_VERSION__;$TOOLCHAIN_VERSION;' \
+    ./ci-build/files/idstools.eb.in > ./ci-build/files/$MODULE_FULL_VERSION
 
 echo "content of eb file"
-cat ./ci-build/files/$(MODULE_FULL_VERSION)
-eb ./ci-build/files/$(MODULE_FULL_VERSION) -f ${EB_OPTS} ${EB_HTTP_OPTS}
+cat ./ci-build/files/$MODULE_FULL_VERSION
+eb ./ci-build/files/$MODULE_FULL_VERSION -f ${EB_OPTS} ${EB_HTTP_OPTS}
 
 del_headers_file
