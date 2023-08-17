@@ -25,7 +25,7 @@ try python3 -m pip --disable-pip-version-check install --no-deps . --prefix=${PR
 try python3 -c "import idstools.compute.common" || exit 1
 
 # Stash
-tar -cvzf ${PREFIX_DIR}.tar.gz ./${PREFIX_DIR} ./tests
+tar -cvzf ${PREFIX_DIR}.tar.gz ./${PREFIX_DIR} ./tests ./ci-build
 
 # Clean up
 try rm -r ${PREFIX_DIR}
