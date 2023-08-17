@@ -66,18 +66,23 @@ write_headers_file
 set -e
 set -v
 MODULE_NAME=IDSTools
-COMMITHASH=$(git rev-parse HEAD) 
-VERSION=$(git describe)
+COMMITHASH=$(awk -F "=" '/COMMITHASH/ {print $2}' versioninfo.txt)
+VERSION=$(awk -F "=" '/VERSION/ {print $2}' versioninfo.txt)
 TOOLCHAIN_NAME=foss
 TOOLCHAIN_VERSION=2020b
 MODULE_FULL_VERSION=$(MODULE_NAME)-VERSION-$(TOOLCHAIN_NAME)-$(TOOLCHAIN_VERSION).eb
-toolchain = {'name': 'foss', 'version': '2020b'}
+
+echo "COMMITHASH :" $COMMITHASH
+echo "VERSION :" $VERSION
+
 sed -e 's;__COMMITHASH__;$(COMMITHASH);'\
     -e 's;__VERSION__;$(VERSION);' \
     -e 's;__TOOLCHAIN_NAME__;$(TOOLCHAIN_NAME);' \
     -e 's;__TOOLCHAIN_VERSION__;$(TOOLCHAIN_VERSION);' \
     ci-build/files/idstools.eb.in > ci-build/files/$(MODULE_FULL_VERSION)
 
+echo "content of eb file"
+cat ci-build/files/$(MODULE_FULL_VERSION)
 eb ci-build/files/$(MODULE_FULL_VERSION) -f ${EB_OPTS} ${EB_HTTP_OPTS}
 
 del_headers_file
