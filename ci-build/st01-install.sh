@@ -26,12 +26,12 @@ try python3 -c "import idstools.compute.common" || exit 1
 
 COMMITHASH=$(git rev-parse HEAD)
 VERSION=$(git describe)
-cat >> versioninfo.txt << EOF
+cat >> ./ci-build/versioninfo.txt << EOF
 COMMITHASH=$COMMITHASH
 VERSION=$VERSION
 EOF
 # Stash
-tar -cvzf ${PREFIX_DIR}.tar.gz ./${PREFIX_DIR} ./tests ./ci-build versioninfo.txt
+tar -cvzf ${PREFIX_DIR}.tar.gz ./${PREFIX_DIR} ./tests ./ci-build
 
 # Clean up
 try rm -r ${PREFIX_DIR}
