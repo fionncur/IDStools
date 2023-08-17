@@ -5,9 +5,10 @@ easyblock = 'PythonBundle'
 
 name = 'IDStools'
 local_commit = '__COMMITHASH__'
-version = '__VERSION__'
+local_version = '__VERSION__'
 if len(local_version.split("-")) >1:
     version=local_version.split("-")[0]
+    version=version.strip()
     version=version+"dev"
 
 homepage = 'https://git.iter.org/projects/IMAS/repos/idstools'
