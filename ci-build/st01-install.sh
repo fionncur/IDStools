@@ -30,4 +30,3 @@ tar -cvzf ${PREFIX_DIR}.tar.gz ./${PREFIX_DIR} ./tests
 # Clean up
 try rm -r ${PREFIX_DIR}
 
-tar -cvzf ${PREFIX_DIR}_repo.tar.gz .
