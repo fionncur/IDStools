@@ -72,11 +72,11 @@ TOOLCHAIN_NAME=foss
 TOOLCHAIN_VERSION=2020b
 MODULE_FULL_VERSION=$(MODULE_NAME)-VERSION-$(TOOLCHAIN_NAME)-$(TOOLCHAIN_VERSION).eb
 toolchain = {'name': 'foss', 'version': '2020b'}
-	sed -e 's;__COMMITHASH__;$(COMMITHASH);'\
-		-e 's;__VERSION__;$(VERSION);' \
-		-e 's;__TOOLCHAIN_NAME__;$(TOOLCHAIN_NAME);' \
-		-e 's;__TOOLCHAIN_VERSION__;$(TOOLCHAIN_VERSION);' \
-		ci-build/files/idstools.eb.in > ci-build/files/$(MODULE_FULL_VERSION)
+sed -e 's;__COMMITHASH__;$(COMMITHASH);'\
+    -e 's;__VERSION__;$(VERSION);' \
+    -e 's;__TOOLCHAIN_NAME__;$(TOOLCHAIN_NAME);' \
+    -e 's;__TOOLCHAIN_VERSION__;$(TOOLCHAIN_VERSION);' \
+    ci-build/files/idstools.eb.in > ci-build/files/$(MODULE_FULL_VERSION)
 
 eb ci-build/files/$(MODULE_FULL_VERSION) -f ${EB_OPTS} ${EB_HTTP_OPTS}
 

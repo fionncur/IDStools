@@ -24,8 +24,14 @@ echo "Installing idstools in the local directory"
 try python3 -m pip --disable-pip-version-check install --no-deps . --prefix=${PREFIX_DIR} || exit 1
 try python3 -c "import idstools.compute.common" || exit 1
 
+COMMITHASH=$(git rev-parse HEAD)
+VERSION=$(git describe)
+cat >> versioninfo.txt << EOF
+COMMITHASH=$COMMITHASH
+VERSION=$VERSION
+EOF
 # Stash
-tar -cvzf ${PREFIX_DIR}.tar.gz ./${PREFIX_DIR} ./tests ./ci-build
+tar -cvzf ${PREFIX_DIR}.tar.gz ./${PREFIX_DIR} ./tests ./ci-build versioninfo.txt
 
 # Clean up
 try rm -r ${PREFIX_DIR}
