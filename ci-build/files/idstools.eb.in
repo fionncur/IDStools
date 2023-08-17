@@ -1,0 +1,42 @@
+# Author: ITER
+# License: License
+
+easyblock = 'PythonBundle'
+
+name = 'IDStools'
+local_commit = '__COMMITHASH__'
+version = '__VERSION__'
+if len(local_version.split()) >1:
+    version=local_version.split()[0]
+
+homepage = 'https://git.iter.org/projects/IMAS/repos/idstools'
+description = """Tools associated with IDSs"""
+
+toolchain = {'name': '__TOOLCHAIN_NAME__', 'version': '__TOOLCHAIN_VERSION__'}
+
+dependencies = [
+    ('Python', '3.8.6'),
+    ('SciPy-bundle', '2020.11'),
+]
+
+use_pip = True
+exts_download_dep_fail = True
+sanity_pip_check = False
+# use_pip_requirement = True
+
+exts_list = [
+    (name, version, {
+        'source_urls': ['https://git.iter.org/rest/api/latest/projects/IMAS/repos/%(namelower)s/archive?at=' + local_commit +'&filename=%(namelower)s-%(version)s.zip'],
+        'sources':  [SOURCE_ZIP],
+    }),
+]
+
+sanity_check_paths = {
+    'files' : [],
+    'dirs': ['/work/imas/'],
+}
+
+sanity_check_commands = ["python3 -c 'import idstools.compute.common'"]
+
+moduleclass = 'data'
+
