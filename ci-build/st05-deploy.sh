@@ -82,7 +82,7 @@ tabulate
 EOF
 
 echo "Contents of requirements.txt"
-cat requirements.txt
+cat requirements
 
 MODULE_NAME=IDSTools
 COMMITHASH=$(awk -F "=" '/COMMITHASH/ {print $2}' ./ci-build/versioninfo.txt)
