@@ -1,7 +1,7 @@
 # Author: ITER
 # License: License
 
-easyblock = 'PythonBundle'
+easyblock = 'PythonPackage'
 
 name = 'IDStools'
 local_commit = '__COMMITHASH__'
