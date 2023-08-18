@@ -1,7 +1,7 @@
 # Author: ITER
 # License: License
 
-easyblock = 'PythonPackage'
+easyblock = 'PythonBundle'
 
 name = 'IDStools'
 local_commit = '__COMMITHASH__'
@@ -24,30 +24,19 @@ dependencies = [
     ('SciPy-bundle', '__SCIPY_VERSION__'),
 ]
 
-# this is a bundle of Python packages
-exts_defaultclass = 'PythonPackage'
-exts_default_options = {
-    'filter': ('python -c "import %(ext_name)s"', ''),
-    'download_dep_fail': True,  # True
-    'source_urls': [PYPI_SOURCE],
-    'use_pip': True,
-    'sanity_pip_check':  True,
-    'use_pip_for_deps': False,  # False
-}
-#use_pip = True
-#use_pip_for_deps = True
-#exts_download_dep_fail = True
-#sanity_pip_check = True
-#use_pip_requirement = True
 
-#sources=['requirements.txt']
-#source_urls = ['https://git.iter.org/rest/api/latest/projects/IMAS/repos/%(namelower)s/archive?at=' + local_commit +'&filename=%(namelower)s-%(version)s.zip']
-#exts_list = [
-#    (name, version, {
-#        'source_urls': ['https://git.iter.org/rest/api/latest/projects/IMAS/repos/%(namelower)s/archive?at=' + local_commit +'&filename=%(namelower)s-%(version)s.zip'],
-#        'sources':  [SOURCE_ZIP],
-#    }),
-#]
+use_pip = True
+use_pip_for_deps = True
+exts_download_dep_fail = True
+sanity_pip_check = False
+use_pip_requirement = False
+
+exts_list = [
+    (name, version, {
+        'source_urls': ['https://git.iter.org/rest/api/latest/projects/IMAS/repos/%(namelower)s/archive?at=' + local_commit +'&filename=%(namelower)s-%(version)s.zip'],
+        'sources':  [SOURCE_ZIP],
+    }),
+]
 
 sanity_check_paths = {
     'files' : [],

@@ -67,23 +67,6 @@ set -v
 echo "Contents of versioninfo.txt"
 cat ./ci-build/versioninfo.txt
 
-cat >> requirements.txt << EOF
-matplotlib
-numpy
-pandas
-cerberus
-pyyaml
-packaging
-pyparsing
-six
-python-dateutil
-fortranformat
-tabulate
-EOF
-
-echo "Contents of requirements.txt"
-cat requirements.txt
-
 MODULE_NAME=IDSTools
 COMMITHASH=$(awk -F "=" '/COMMITHASH/ {print $2}' ./ci-build/versioninfo.txt)
 RAWVERSION=$(awk -F "=" '/VERSION/ {print $2}' ./ci-build/versioninfo.txt)
