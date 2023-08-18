@@ -26,6 +26,7 @@ try python3 -c "import idstools.compute.common" || exit 1
 
 COMMITHASH=$(git rev-parse HEAD)
 VERSION=$(git describe  --tags --always)
+rm -f ./ci-build/versioninfo.txt
 cat >> ./ci-build/versioninfo.txt << EOF
 COMMITHASH=$COMMITHASH
 VERSION=$VERSION

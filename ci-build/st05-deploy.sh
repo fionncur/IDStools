@@ -57,7 +57,7 @@ mkdir -p /mnt/bamboo_deploy/easybuild || exit 1
 echo "----------------------------------------------------------"
 
 chmod -R u+w /mnt/bamboo_deploy/easybuild
-rm -rf /mnt/bamboo_deploy/easybuild
+# rm -rf /mnt/bamboo_deploy/easybuild
 EB_OPTS="--modules-tool=EnvironmentModules --module-syntax=Tcl --allow-modules-tool-mismatch --allow-use-as-root-and-accept-consequences --prefix=/mnt/bamboo_deploy/easybuild"
 write_headers_file
 
@@ -70,13 +70,17 @@ cat ./ci-build/versioninfo.txt
 MODULE_NAME=IDSTools
 COMMITHASH=$(awk -F "=" '/COMMITHASH/ {print $2}' ./ci-build/versioninfo.txt)
 RAWVERSION=$(awk -F "=" '/VERSION/ {print $2}' ./ci-build/versioninfo.txt)
-RAWVERSION=$(echo "$RAWVERSION" | sed 's/-/_/g')
+
+RAWVERSION="${RAWVERSION//./\\.}"
+RAWVERSION="${RAWVERSION//-/\\-}"
+
 VERSION=$RAWVERSION
-if [[ $RAWVERSION == *_* ]]; then
+if [[ $RAWVERSION == *-* ]]; then
     VERSION=dev
 fi
 
 echo "COMMITHASH :" $COMMITHASH
+echo "RAWVERSION :" $RAWVERSION
 echo "VERSION :" $VERSION
 
 echo "creating foss-2020b module"
