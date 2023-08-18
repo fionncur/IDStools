@@ -86,6 +86,8 @@ echo "MODULE_FULL_VERSION :" $MODULE_FULL_VERSION
 sed -e "s;__COMMITHASH__;${COMMITHASH};"\
     -e "s;__VERSION__;${VERSION};" \
     -e "s;__RAWVERSION__;${RAWVERSION};" \
+    -e "s;__PYTHON_VERSION__;${PYTHON_VERSION};" \
+    -e "s;__SCIPY_VERSION__;${SCIPY_VERSION};" \
     -e "s;__TOOLCHAIN_NAME__;${TOOLCHAIN_NAME};" \
     -e "s;__TOOLCHAIN_VERSION__;${TOOLCHAIN_VERSION};" \
     ./ci-build/files/idstools.eb.in > ./ci-build/files/$MODULE_FULL_VERSION
@@ -108,6 +110,8 @@ echo "MODULE_FULL_VERSION :" $MODULE_FULL_VERSION
 sed -e "s;__COMMITHASH__;${COMMITHASH};"\
     -e "s;__VERSION__;${VERSION};" \
     -e "s;__RAWVERSION__;${RAWVERSION};" \
+    -e "s;__PYTHON_VERSION__;${PYTHON_VERSION};" \
+    -e "s;__SCIPY_VERSION__;${SCIPY_VERSION};" \
     -e "s;__TOOLCHAIN_NAME__;${TOOLCHAIN_NAME};" \
     -e "s;__TOOLCHAIN_VERSION__;${TOOLCHAIN_VERSION};" \
     ./ci-build/files/idstools.eb.in > ./ci-build/files/$MODULE_FULL_VERSION
@@ -130,6 +134,8 @@ echo "MODULE_FULL_VERSION :" $MODULE_FULL_VERSION
 sed -e "s;__COMMITHASH__;${COMMITHASH};"\
     -e "s;__VERSION__;${VERSION};" \
     -e "s;__RAWVERSION__;${RAWVERSION};" \
+    -e "s;__PYTHON_VERSION__;${PYTHON_VERSION};" \
+    -e "s;__SCIPY_VERSION__;${SCIPY_VERSION};" \
     -e "s;__TOOLCHAIN_NAME__;${TOOLCHAIN_NAME};" \
     -e "s;__TOOLCHAIN_VERSION__;${TOOLCHAIN_VERSION};" \
     ./ci-build/files/idstools.eb.in > ./ci-build/files/$MODULE_FULL_VERSION
