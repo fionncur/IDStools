@@ -25,7 +25,7 @@ try python3 -m pip --disable-pip-version-check install --no-deps . --prefix=${PR
 try python3 -c "import idstools.compute.common" || exit 1
 
 COMMITHASH=$(git rev-parse HEAD)
-VERSION=$(git describe)
+VERSION=$(git describe  --tags --always)
 cat >> ./ci-build/versioninfo.txt << EOF
 COMMITHASH=$COMMITHASH
 VERSION=$VERSION

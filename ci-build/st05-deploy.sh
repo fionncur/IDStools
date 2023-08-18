@@ -45,8 +45,6 @@ if [ -e ${HTTPHEADERS} ]; then
 fi
 }
 
-
-
 echo "listing contents of current directory"
 ls
 
@@ -65,15 +63,24 @@ write_headers_file
 
 set -e
 set -v
+
 MODULE_NAME=IDSTools
 COMMITHASH=$(awk -F "=" '/COMMITHASH/ {print $2}' ./ci-build/versioninfo.txt)
-VERSION=$(awk -F "=" '/VERSION/ {print $2}' ./ci-build/versioninfo.txt)
-TOOLCHAIN_NAME=foss
-TOOLCHAIN_VERSION=2020b
-MODULE_FULL_VERSION=$MODULE_NAME-$VERSION-$TOOLCHAIN_NAME-$TOOLCHAIN_VERSION.eb
+RAWVERSION=$(awk -F "=" '/VERSION/ {print $2}' ./ci-build/versioninfo.txt)
+VERSION=$RAWVERSION
+if [[ $RAWVERSION == *-* ]]; then
+    VERSION=dev
+fi
 
 echo "COMMITHASH :" $COMMITHASH
 echo "VERSION :" $VERSION
+
+echo "creating foss-2020b module"
+TOOLCHAIN_NAME=foss
+TOOLCHAIN_VERSION=2020b
+PYTHON_VERSION=3.8.6
+SCIPY_VERSION=2020.11
+MODULE_FULL_VERSION=$MODULE_NAME-$VERSION-$TOOLCHAIN_NAME-$TOOLCHAIN_VERSION.eb
 echo "MODULE_FULL_VERSION :" $MODULE_FULL_VERSION
 
 sed -e "s;__COMMITHASH__;${COMMITHASH};"\
@@ -82,10 +89,57 @@ sed -e "s;__COMMITHASH__;${COMMITHASH};"\
     -e "s;__TOOLCHAIN_VERSION__;${TOOLCHAIN_VERSION};" \
     ./ci-build/files/idstools.eb.in > ./ci-build/files/$MODULE_FULL_VERSION
 
-echo "contents of eb file"
+echo "contents of eb file" $MODULE_FULL_VERSION
 echo "-----------------------START--------------------------------"
 cat ./ci-build/files/$MODULE_FULL_VERSION
-echo "-----------------------END--------------------------------"
+echo "-----------------------END----------------------------------"
 eb ./ci-build/files/$MODULE_FULL_VERSION -f ${EB_OPTS} ${EB_HTTP_OPTS}
+echo $MODULE_FULL_VERSION "Installed"
+
+echo "creating gfbf-2022b module"
+TOOLCHAIN_NAME=gfbf
+TOOLCHAIN_VERSION=2020b
+PYTHON_VERSION=3.10.8
+SCIPY_VERSION=2023.02
+MODULE_FULL_VERSION=$MODULE_NAME-$VERSION-$TOOLCHAIN_NAME-$TOOLCHAIN_VERSION.eb
+echo "MODULE_FULL_VERSION :" $MODULE_FULL_VERSION
+
+sed -e "s;__COMMITHASH__;${COMMITHASH};"\
+    -e "s;__VERSION__;${VERSION};" \
+    -e "s;__TOOLCHAIN_NAME__;${TOOLCHAIN_NAME};" \
+    -e "s;__TOOLCHAIN_VERSION__;${TOOLCHAIN_VERSION};" \
+    ./ci-build/files/idstools.eb.in > ./ci-build/files/$MODULE_FULL_VERSION
+
+echo "contents of eb file" $MODULE_FULL_VERSION
+echo "-----------------------START--------------------------------"
+cat ./ci-build/files/$MODULE_FULL_VERSION
+echo "-----------------------END----------------------------------"
+eb ./ci-build/files/$MODULE_FULL_VERSION -f ${EB_OPTS} ${EB_HTTP_OPTS}
+echo $MODULE_FULL_VERSION "Installed"
+
+echo "creating intel-2020b module"
+TOOLCHAIN_NAME=intel
+TOOLCHAIN_VERSION=2020b
+PYTHON_VERSION=3.8.6
+SCIPY_VERSION=2020.11
+MODULE_FULL_VERSION=$MODULE_NAME-$VERSION-$TOOLCHAIN_NAME-$TOOLCHAIN_VERSION.eb
+echo "MODULE_FULL_VERSION :" $MODULE_FULL_VERSION
+
+sed -e "s;__COMMITHASH__;${COMMITHASH};"\
+    -e "s;__VERSION__;${VERSION};" \
+    -e "s;__TOOLCHAIN_NAME__;${TOOLCHAIN_NAME};" \
+    -e "s;__TOOLCHAIN_VERSION__;${TOOLCHAIN_VERSION};" \
+    ./ci-build/files/idstools.eb.in > ./ci-build/files/$MODULE_FULL_VERSION
+
+echo "contents of eb file" $MODULE_FULL_VERSION
+echo "-----------------------START--------------------------------"
+cat ./ci-build/files/$MODULE_FULL_VERSION
+echo "-----------------------END----------------------------------"
+eb ./ci-build/files/$MODULE_FULL_VERSION -f ${EB_OPTS} ${EB_HTTP_OPTS}
+echo $MODULE_FULL_VERSION "Installed"
+
+echo "check available idstools modules"
+module use -p /work/imas/opt/bamboo_deploy/easybuild/modules/all
+module avail -i idstools
 
 del_headers_file

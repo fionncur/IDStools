@@ -11,14 +11,21 @@ if len(local_version.split("-")) >1:
     version=version.strip()
     version=version+"dev"
 
-homepage = 'https://git.iter.org/projects/IMAS/repos/idstools'
-description = """Tools associated with IDSs"""
+homepage = 'https://sharepoint.iter.org/departments/POP/CM/IMDesign/Code%20Documentation/idstools-doc/devdocs/index.html'
+description = """IDSTools is a collection of apps for modifying and getting valuable information
+from Interface Data Structures (IDSs). It includes a library of routines for retrieving relevant data from IDSes. 
+It also offers readily available various forms of visualizations. These tools were created in conjunction with scientists 
+and software developers from the fusion community. The goal of having a common set of functions in the IDSTools is to 
+reduce the work of reinventing the wheel by utilizing accessible functions
+
+Git Repo : https://git.iter.org/projects/IMAS/repos/idstools
+"""
 
 toolchain = {'name': '__TOOLCHAIN_NAME__', 'version': '__TOOLCHAIN_VERSION__'}
 
 dependencies = [
-    ('Python', '3.8.6'),
-    ('SciPy-bundle', '2020.11'),
+    ('Python', '__PYTHON_VERSION__'),
+    ('SciPy-bundle', '__SCIPY_VERSION__'),
 ]
 
 use_pip = True
