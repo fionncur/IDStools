@@ -30,7 +30,7 @@ exts_download_dep_fail = True
 sanity_pip_check = True
 use_pip_requirement = True
 
-sources = ['requirements.txt']
+sources = ['requirements']
 source_urls = ['https://git.iter.org/rest/api/latest/projects/IMAS/repos/%(namelower)s/archive?at=' + local_commit +'&filename=%(namelower)s-%(version)s.zip']
 #exts_list = [
 #    (name, version, {

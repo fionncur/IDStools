@@ -67,7 +67,7 @@ set -v
 echo "Contents of versioninfo.txt"
 cat ./ci-build/versioninfo.txt
 
-cat >> requirements.txt << EOF
+cat >> requirements << EOF
 matplotlib
 numpy
 pandas
