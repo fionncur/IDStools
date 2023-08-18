@@ -57,7 +57,7 @@ mkdir -p /mnt/bamboo_deploy/easybuild || exit 1
 echo "----------------------------------------------------------"
 
 chmod -R u+w /mnt/bamboo_deploy/easybuild
-
+# rm -rf /mnt/bamboo_deploy/easybuild
 EB_OPTS="--modules-tool=EnvironmentModules --module-syntax=Tcl --allow-modules-tool-mismatch --allow-use-as-root-and-accept-consequences --prefix=/mnt/bamboo_deploy/easybuild"
 write_headers_file
 
@@ -84,6 +84,8 @@ TOOLCHAIN_VERSION=2020b
 PYTHON_VERSION=3\.8\.6
 SCIPY_VERSION=2020\.11
 MODULE_FULL_VERSION=$MODULE_NAME-$VERSION-$TOOLCHAIN_NAME-$TOOLCHAIN_VERSION.eb
+echo "PYTHON_VERSION :" $PYTHON_VERSION
+echo "SCIPY_VERSION :" $SCIPY_VERSION
 echo "MODULE_FULL_VERSION :" $MODULE_FULL_VERSION
 
 sed -e "s;__COMMITHASH__;${COMMITHASH};" \
