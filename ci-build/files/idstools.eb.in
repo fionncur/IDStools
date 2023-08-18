@@ -25,9 +25,10 @@ dependencies = [
 ]
 
 use_pip = True
+use_pip_for_deps = True
 exts_download_dep_fail = True
-sanity_pip_check = False
-# use_pip_requirement = True
+sanity_pip_check = True
+use_pip_requirement = True
 
 exts_list = [
     (name, version, {
