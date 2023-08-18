@@ -31,12 +31,13 @@ sanity_pip_check = True
 use_pip_requirement = True
 
 sources = ['requirements.txt']
-exts_list = [
-    (name, version, {
-        'source_urls': ['https://git.iter.org/rest/api/latest/projects/IMAS/repos/%(namelower)s/archive?at=' + local_commit +'&filename=%(namelower)s-%(version)s.zip'],
-        'sources':  [SOURCE_ZIP],
-    }),
-]
+source_urls = ['https://git.iter.org/rest/api/latest/projects/IMAS/repos/%(namelower)s/archive?at=' + local_commit +'&filename=%(namelower)s-%(version)s.zip']
+#exts_list = [
+#    (name, version, {
+#        'source_urls': ['https://git.iter.org/rest/api/latest/projects/IMAS/repos/%(namelower)s/archive?at=' + local_commit +'&filename=%(namelower)s-%(version)s.zip'],
+#        'sources':  [SOURCE_ZIP],
+#    }),
+#]
 
 sanity_check_paths = {
     'files' : [],
