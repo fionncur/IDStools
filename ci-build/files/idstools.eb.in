@@ -5,14 +5,10 @@ easyblock = 'PythonBundle'
 
 name = 'IDStools'
 local_commit = '__COMMITHASH__'
-local_version = '__VERSION__'
-if len(local_version.split("-")) >1:
-    version=local_version.split("-")[0]
-    version=version.strip()
-    version=version+"dev"
+version = '__VERSION__'
 
 homepage = 'https://sharepoint.iter.org/departments/POP/CM/IMDesign/Code%20Documentation/idstools-doc/devdocs/index.html'
-description = """IDSTools is a collection of apps for modifying and getting valuable information
+description = """IDSTools Version (__RAWVERSION__) is a collection of apps for modifying and getting valuable information
 from Interface Data Structures (IDSs). It includes a library of routines for retrieving relevant data from IDSes. 
 It also offers readily available various forms of visualizations. These tools were created in conjunction with scientists 
 and software developers from the fusion community. The goal of having a common set of functions in the IDSTools is to 
