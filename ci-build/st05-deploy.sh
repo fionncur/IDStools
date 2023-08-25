@@ -155,11 +155,11 @@ eb ./ci-build/files/$MODULE_FULL_VERSION -f ${EB_OPTS} ${EB_HTTP_OPTS}
 echo $MODULE_FULL_VERSION "Installed"
 
 echo "check if /work/imas/opt/bamboo_deploy/easybuild/ path is accessible"
-ls -ltr /work/imas/opt/bamboo_deploy/easybuild/
+ls -ltr /mnt/bamboo_deploy/easybuild/
 
 echo "replace mnt with /work/imas/opt/ to work internal path on sdcc" 
-chmod -R u+w /work/imas/opt/bamboo_deploy/easybuild
-find /work/imas/opt/bamboo_deploy/easybuild/ -type f -not -path '*/\.*' -exec sed -i -- 's/mnt/work\/imas\/opt/g' {} +
+chmod -R u+w /mnt/bamboo_deploy/easybuild
+find /mnt/bamboo_deploy/easybuild/ -type f -not -path '*/\.*' -exec sed -i -- 's/mnt/work\/imas\/opt/g' {} +
 
 echo "check available idstools modules"
 module use -p /work/imas/opt/bamboo_deploy/easybuild/modules/all
