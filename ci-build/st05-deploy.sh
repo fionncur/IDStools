@@ -158,7 +158,7 @@ echo "check if /work/imas/opt/bamboo_deploy/easybuild/ path is accessible"
 ls -ltr /work/imas/opt/bamboo_deploy/easybuild/
 
 echo "replace mnt with /work/imas/opt/ to work internal path on sdcc" 
-# sed -i -- 's/mnt/work\/imas\/opt/g' /work/imas/opt/bamboo_deploy/easybuild/*.*
+chmod -R u+w /work/imas/opt/bamboo_deploy/easybuild
 find /work/imas/opt/bamboo_deploy/easybuild/ -type f -not -path '*/\.*' -exec sed -i -- 's/mnt/work\/imas\/opt/g' {} +
 
 echo "check available idstools modules"
