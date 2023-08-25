@@ -154,6 +154,9 @@ echo "-----------------------END----------------------------------"
 eb ./ci-build/files/$MODULE_FULL_VERSION -f ${EB_OPTS} ${EB_HTTP_OPTS}
 echo $MODULE_FULL_VERSION "Installed"
 
+echo "replace mnt with /work/imas/opt/ to work internal path on sdcc" 
+sed -i -- 's/mnt/work\/imas\/opt/g' /work/imas/opt/bamboo_deploy/easybuild/*
+
 echo "check available idstools modules"
 module use -p /work/imas/opt/bamboo_deploy/easybuild/modules/all
 module avail -i idstools
