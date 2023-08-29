@@ -11,7 +11,7 @@ Syntax
 
     .. code-block:: bash     
 
-        $ python scripts/idssize --help
+        $ idssize --help
         Install tqdm to enable progress bar
         usage: idssize [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION]
                     shot run [ids [ids ...]]
@@ -41,7 +41,7 @@ Example
 
     .. code-block:: bash
 
-        $ dbsize 134174 117
+        $ idssize 134174 117
         Install tqdm to enable progress bar
         Examining data for public, ITER, 3, 134174, 117
         Reading 16.903 MB of data for core_profiles/0 took 1.05 seconds
