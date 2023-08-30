@@ -72,10 +72,10 @@ do
     idslist -s $shot -r $run  --yaml-format  || exit 1 
 
     echo TESTING: idssize -s $shot -r $run   equilibrium
-    idssize $shot $run  equilibrium || exit 1 
+    idssize -s $shot -r $run  equilibrium || exit 1 
 
     echo TESTING: idssize -s $shot -r $run  
-    idssize $shot $run  || exit 1 
+    idssize -s $shot -r $run  || exit 1 
 done
 
 # echo =====================================idscp=====================================================
