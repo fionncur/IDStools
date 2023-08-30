@@ -3,8 +3,8 @@ dbselector
 
 *dbselector* script shows lists of all scenarios where specified ids is exists. Just provide idsname as input arguement to the script.
 
-Syntax
-~~~~~~
+Syntax dbselector
+~~~~~~~~~~~~~~~~~
 .. code-block:: bash
 
     $ python dbselector.py -h
@@ -28,8 +28,8 @@ Syntax
                             data version (default=3)
 
 
-Example
-~~~~~~~
+Example dbselector
+~~~~~~~~~~~~~~~~~~
 .. code-block:: bash
 
     $ python dbselector.py edge_profiles

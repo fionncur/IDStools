@@ -6,8 +6,8 @@ ecstray
 .. note::
     This program is experimental and current in development.
 
-Syntax
-~~~~~~
+Syntax ecstray
+~~~~~~~~~~~~~~
 .. code-block:: bash
 
     $ python scripts/ecstray.py -h
@@ -29,8 +29,8 @@ Syntax
     -s SHOT, --shot SHOT  Shot number
     -r RUN, --run RUN     Run number
 
-Example
-~~~~~~~
+Example ecstray
+~~~~~~~~~~~~~~~
     .. code-block:: bash
 
         python scripts/ecstray.py -s 134174 -r 117

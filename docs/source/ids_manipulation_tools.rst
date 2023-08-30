@@ -10,3 +10,4 @@ IDS Manipulation tools allow you to manipulate data within IDSes by copying, mov
    idsdiff
    idslist
    idssize
+   idsresample

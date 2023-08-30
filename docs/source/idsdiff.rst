@@ -3,8 +3,8 @@ idsdiff
 
 *idsdiff* script shows ids level differences between two runs. It stores result in html document. For signals differences it is also shown as graph.
 
-Syntax
-~~~~~~
+Syntax idsdiff
+~~~~~~~~~~~~~~
 .. code-block:: bash
 
     $ python idsdiff.py -h
@@ -41,8 +41,8 @@ Syntax
     --report-dir REPORT_DIR
                             Specifies directory where report should be stored
 
-Example
-~~~~~~~
+Example idsdiff
+~~~~~~~~~~~~~~~
     .. code-block:: bash
 
         python scripts/idsdiff.py --generate-html 122525 1 122525 2 summary

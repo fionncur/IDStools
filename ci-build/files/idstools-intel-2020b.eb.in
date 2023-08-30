@@ -17,11 +17,11 @@ reduce the work of reinventing the wheel by utilizing accessible functions
 Git Repo : https://git.iter.org/projects/IMAS/repos/idstools
 """
 
-toolchain = {'name': '__TOOLCHAIN_NAME__', 'version': '__TOOLCHAIN_VERSION__'}
+toolchain = {'name': 'intel', 'version': '2020b'}
 
 dependencies = [
-    ('Python', '__PYTHON_VERSION__'),
-    ('SciPy-bundle', '__SCIPY_VERSION__'),
+    ('Python', '3.8.6'),
+    ('SciPy-bundle', '2020.11'),
 ]
 
 
@@ -31,6 +31,13 @@ sanity_pip_check = False
 # use_pip_requirement = False
 
 exts_list = [
+    ('Cerberus', '1.3.4', {
+        'source_urls': ['https://pypi.python.org/packages/source/%(nameletterlower)s/%(namelower)s'],
+        'checksums': ['d1b21b3954b2498d9a79edf16b3170a3ac1021df88d197dc2ce5928ba519237c'],
+    }),
+    ('fortranformat', '1.2.2', {
+        'checksums': ['a8c41ab39bb40444e6ca17f38755d64df51799b064206833c137a28bbdca1b2b'],
+    }),
     (name, version, {
         'source_urls': ['https://git.iter.org/rest/api/latest/projects/IMAS/repos/%(namelower)s/archive?at=' + local_commit +'&filename=%(namelower)s-%(version)s.zip'],
         'sources':  [SOURCE_ZIP],
@@ -43,6 +50,10 @@ sanity_check_paths = {
 }
 
 sanity_check_commands = ["python3 -c 'import idstools.compute.common'"]
+
+post_install = [ # Add a post-installation script to handle man pages
+    "cp -r ${SOURCE_DIR}/man/man1 ${DEST_DIR}/share/man/man1",
+]
 
 moduleclass = 'data'
 

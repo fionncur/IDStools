@@ -4,8 +4,8 @@ dbscraper
 The *dbscraper* script scrapes data from a particular IDS path for a specified series of pulses and displays the pulse along with the value.
 
 
-Syntax
-~~~~~~
+dbscraper Syntax
+~~~~~~~~~~~~~~~~
     .. code-block:: bash
 
         $ python scripts/dbscraper.py -h
@@ -36,8 +36,8 @@ Syntax
                                 number of entries user needs to display
         --verbose             Verbose mode
 
-Example
-~~~~~~~
+dbscraper Example
+~~~~~~~~~~~~~~~~~
     .. code-block:: bash
 
         $ python scripts/dbscraper.py "equilibrium/time_slice(0)/global_quantities/volume" --list-count 10 

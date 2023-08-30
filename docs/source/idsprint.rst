@@ -1,13 +1,13 @@
 idsprint
-======
+========
 
 *idsprint* is a utility that, as the name implies, dumps or prints all data on the console.
 It is handy if you need to rapidly verify if specific fields or attributes have been 
 filled out or empty . The output can also be saved to a file using extraction.
 
 
-Syntax
-~~~~~~
+Syntax idsprint
+~~~~~~~~~~~~~~~
 
     .. code-block:: bash     
 
@@ -34,8 +34,8 @@ Syntax
         -f, --full            Print all array elements (can be very slow for large data)
 
 
-Example
-~~~~~~~
+Example idsprint
+~~~~~~~~~~~~~~~~
 
     .. code-block:: bash
 

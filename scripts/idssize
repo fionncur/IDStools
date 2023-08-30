@@ -1,7 +1,7 @@
 #! /usr/bin/env python3
 
 """Show size and time of IDSs.
-
+Author : David.Coster@ipp.mpg.de
 
 The module retrieves the size of IDS objects from a database entry and shows IDS size in bytes and the time taken to read each object. 
 It also shows total size of all IDS objects in the data entry. It shows total time taken to read all objects from the data entry
@@ -10,29 +10,31 @@ Example:
     Following is the example how to use dbsize module
     literal blocks::
 
-        $ idssize 134174 117
-          Install tqdm to enable progress bar
-          Examining data for public, ITER, 3, 134174, 117
-          Reading 16.903 MB of data for core_profiles/0 took 1.05 seconds
-          Reading 30.329 MB of data for core_sources/0 took 2.62 seconds
-          Reading 24.918 MB of data for core_transport/0 took 1.64 seconds
-          Reading 337.810 MB of data for edge_profiles/0 took 86.52 seconds
-          Reading 153.541 MB of data for edge_sources/0 took 75.28 seconds
-          Reading 85.343 MB of data for edge_transport/0 took 67.64 seconds
-          Reading 48.121 MB of data for equilibrium/0 took 0.62 seconds
-          Reading 0.056 MB of data for summary/0 took 0.10 seconds
-          Total reading time = 235.47 s
-          Total data size = 697.0 MB
-          Fractions of the total size for public/ITER/3/134174/117
-          % bytes    IDS
-          2.4 %     core_profiles/0
-          4.4 %     core_sources/0
-          3.6 %     core_transport/0
-          48.5 %     edge_profiles/0
-          22.0 %     edge_sources/0
-          12.2 %     edge_transport/0
-          6.9 %     equilibrium/0
-          0.0 %     summary/0
+        $ python scripts/idssize -s 122525 -r 1
+        Install tqdm to enable progress bar
+        Examining data for public, ITER, 3, 122525, 1
+        Reading 0.001 MB of data for dataset_description/0 took 0.00 seconds
+        Reading 0.003 MB of data for divertors/0 took 0.02 seconds
+        Reading 35.431 MB of data for edge_profiles/0 took 5.58 seconds
+        Reading 27.630 MB of data for edge_sources/0 took 5.62 seconds
+        Reading 14.335 MB of data for edge_transport/0 took 4.48 seconds
+        Reading 3.057 MB of data for equilibrium/0 took 0.02 seconds
+        Reading 5.578 MB of data for radiation/0 took 3.94 seconds
+        Reading 0.016 MB of data for summary/0 took 0.12 seconds
+        Reading 0.011 MB of data for wall/0 took 0.01 seconds
+        Total reading time = 19.79 s
+        Total data size =  86.1 MB
+        Fractions of the total size for public/ITER/3/122525/1
+        % bytes    IDS
+         0.00 %    dataset_description/0
+         0.00 %    divertors/0
+        41.17 %    edge_profiles/0
+        32.11 %    edge_sources/0
+        16.66 %    edge_transport/0
+         3.55 %    equilibrium/0
+         6.48 %    radiation/0
+         0.02 %    summary/0
+         0.01 %    wall/0
 
 
 Attributes:
@@ -44,49 +46,62 @@ Todo:
 
 """
 
-### David.Coster@ipp.mpg.de
+
 import numpy as np
 import imas
 import argparse
-import os,sys
+import os, sys
 
 root_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(root_path)
 from idstools.utils.clihelper import imasParser, getBackendID
-from idstools.utils.idshelper import  getIDSSize
+from idstools.utils.idshelper import getIDSSize
 
-parser = argparse.ArgumentParser(description="Show size and time of IDSs", epilog
-="""
-""", formatter_class=argparse.RawTextHelpFormatter, parents=[imasParser])
-parser.add_argument("shot", type=int, help="Shot number")
-parser.add_argument("run", type=int, help="Run number")
+parser = argparse.ArgumentParser(
+    description="Show size and time of IDSs",
+    epilog="""
+""",
+    formatter_class=argparse.RawTextHelpFormatter,
+    parents=[imasParser],
+)
+parser.add_argument("-s", "--shot", help="Shot number", required=True, type=int)
+parser.add_argument("-r", "--run", help="Run number", required=True, type=int)
+
 parser.add_argument(
     "ids",
     nargs="*",
     type=str,
     help="Name (or space separated list of names) of IDS to (leave empty to show size of all IDSs)",
 )
-args=parser.parse_args()
+args = parser.parse_args()
 
-connection = imas.DBEntry(getBackendID(args.backend), args.database, args.shot, args.run, user_name=args.user)
-status,idx = connection.open()
+connection = imas.DBEntry(
+    getBackendID(args.backend), args.database, args.shot, args.run, user_name=args.user
+)
+status, idx = connection.open()
 
-print(f"Examining data for {args.user}, {args.database}, {args.version}, {args.shot}, {args.run}")
+print(
+    f"Examining data for {args.user}, {args.database}, {args.version}, {args.shot}, {args.run}"
+)
 
-if status!=0:
-  print('Error opening pulse! Please check existence.')
-  sys.exit(status)
+if status != 0:
+    print("Error opening pulse! Please check existence.")
+    sys.exit(status)
 
 if args.ids == []:
     args.ids = [ids.value for ids in list(imas.IDSName)]
 
 idsSizeDict = getIDSSize(connection, args.ids)
-totalBytes = np.array([v['bytes'] for v in idsSizeDict.values()]).sum()
-totalTime  = np.array([v['time']  for v in idsSizeDict.values()]).sum()
+totalBytes = np.array([v["bytes"] for v in idsSizeDict.values()]).sum()
+totalTime = np.array([v["time"] for v in idsSizeDict.values()]).sum()
 
-print('Total reading time = %0.2f s' % (totalTime))
-print('Total data size = %4.1f MB' % (totalBytes/1024**2))
-print(f'Fractions of the total size for {args.user}/{args.database}/{args.version}/{args.shot}/{args.run}')
-print('% bytes    IDS')
+print(f"Total reading time = {totalTime:0.2f} s")
+
+print(f"Total data size = {totalBytes/1024**2:5.1f} MB")
+print(
+    f"Fractions of the total size for {args.user}/{args.database}/{args.version}/{args.shot}/{args.run}"
+)
+print("% bytes    IDS")
 for idsSize in idsSizeDict:
-  print('%4.1f %%     %s' % (idsSizeDict[idsSize]['bytes']/totalBytes*100, idsSize))
+    bytesData = idsSizeDict[idsSize]["bytes"] / totalBytes * 100
+    print(f"{bytesData:5.2f} %    {idsSize}")

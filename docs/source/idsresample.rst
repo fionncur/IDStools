@@ -1,12 +1,12 @@
 idsresample
-======
+===========
 
 *idsresample* Resample IDSs from a data-entry and save them into another data-entry based on `PREVIOUS_INTERP` method..
 more about `imas.imasdef.PREVIOUS_INTERP`:
 Interpolation method that returns the previous time slice if the requested time does not exactly exist in the original IDS
 
-Syntax
-~~~~~~
+Syntax idsresample
+~~~~~~~~~~~~~~~~~~
 
     .. code-block:: bash     
 
@@ -55,8 +55,8 @@ Syntax
                                 all three values are specified.
 
 
-Example
-~~~~~~~
+Example idsresample
+~~~~~~~~~~~~~~~~~~~
 
     .. code-block:: bash
 

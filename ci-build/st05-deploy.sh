@@ -58,7 +58,7 @@ echo "----------------------------------------------------------"
 
 chmod -R u+w /mnt/bamboo_deploy/easybuild
 # rm -rf /mnt/bamboo_deploy/easybuild
-EB_OPTS="--modules-tool=EnvironmentModules --module-syntax=Tcl --allow-modules-tool-mismatch --allow-use-as-root-and-accept-consequences --prefix=/mnt/bamboo_deploy/easybuild"
+EB_OPTS="--inject-checksums --check-style --modules-tool=EnvironmentModules --module-syntax=Tcl --allow-modules-tool-mismatch --allow-use-as-root-and-accept-consequences --prefix=/mnt/bamboo_deploy/easybuild --optarch=Intel:axAVX,CORE-AVX2;GCC:march=sandybridge"
 write_headers_file
 
 set -e
@@ -86,8 +86,6 @@ echo "VERSION :" $VERSION
 echo "creating foss-2020b module"
 TOOLCHAIN_NAME=foss
 TOOLCHAIN_VERSION=2020b
-PYTHON_VERSION=3\\.8\\.6
-SCIPY_VERSION=2020\\.11
 MODULE_FULL_VERSION=$MODULE_NAME-$VERSION-$TOOLCHAIN_NAME-$TOOLCHAIN_VERSION.eb
 echo "PYTHON_VERSION :" $PYTHON_VERSION
 echo "SCIPY_VERSION :" $SCIPY_VERSION
@@ -96,11 +94,7 @@ echo "MODULE_FULL_VERSION :" $MODULE_FULL_VERSION
 sed -e "s;__COMMITHASH__;${COMMITHASH};" \
     -e "s;__VERSION__;${VERSION};" \
     -e "s;__RAWVERSION__;${RAWVERSION};" \
-    -e "s;__PYTHON_VERSION__;${PYTHON_VERSION};" \
-    -e "s;__SCIPY_VERSION__;${SCIPY_VERSION};" \
-    -e "s;__TOOLCHAIN_NAME__;${TOOLCHAIN_NAME};" \
-    -e "s;__TOOLCHAIN_VERSION__;${TOOLCHAIN_VERSION};" \
-    ./ci-build/files/idstools.eb.in > ./ci-build/files/$MODULE_FULL_VERSION
+    ./ci-build/files/idstools-foss-2020b.eb.in > ./ci-build/files/$MODULE_FULL_VERSION
 
 echo "contents of eb file" $MODULE_FULL_VERSION
 echo "-----------------------START--------------------------------"
@@ -112,19 +106,13 @@ echo $MODULE_FULL_VERSION "Installed"
 echo "creating gfbf-2022b module"
 TOOLCHAIN_NAME=gfbf
 TOOLCHAIN_VERSION=2022b
-PYTHON_VERSION=3\\.10\\.8
-SCIPY_VERSION=2023\\.02
 MODULE_FULL_VERSION=$MODULE_NAME-$VERSION-$TOOLCHAIN_NAME-$TOOLCHAIN_VERSION.eb
 echo "MODULE_FULL_VERSION :" $MODULE_FULL_VERSION
 
 sed -e "s;__COMMITHASH__;${COMMITHASH};" \
     -e "s;__VERSION__;${VERSION};" \
     -e "s;__RAWVERSION__;${RAWVERSION};" \
-    -e "s;__PYTHON_VERSION__;${PYTHON_VERSION};" \
-    -e "s;__SCIPY_VERSION__;${SCIPY_VERSION};" \
-    -e "s;__TOOLCHAIN_NAME__;${TOOLCHAIN_NAME};" \
-    -e "s;__TOOLCHAIN_VERSION__;${TOOLCHAIN_VERSION};" \
-    ./ci-build/files/idstools.eb.in > ./ci-build/files/$MODULE_FULL_VERSION
+    ./ci-build/files/idstools-gfbf-2022b.eb.in > ./ci-build/files/$MODULE_FULL_VERSION
 
 echo "contents of eb file" $MODULE_FULL_VERSION
 echo "-----------------------START--------------------------------"
@@ -136,19 +124,13 @@ echo $MODULE_FULL_VERSION "Installed"
 echo "creating intel-2020b module"
 TOOLCHAIN_NAME=intel
 TOOLCHAIN_VERSION=2020b
-PYTHON_VERSION=3\\.8\\.6
-SCIPY_VERSION=2020\\.11
 MODULE_FULL_VERSION=$MODULE_NAME-$VERSION-$TOOLCHAIN_NAME-$TOOLCHAIN_VERSION.eb
 echo "MODULE_FULL_VERSION :" $MODULE_FULL_VERSION
 
 sed -e "s;__COMMITHASH__;${COMMITHASH};" \
     -e "s;__VERSION__;${VERSION};" \
     -e "s;__RAWVERSION__;${RAWVERSION};" \
-    -e "s;__PYTHON_VERSION__;${PYTHON_VERSION};" \
-    -e "s;__SCIPY_VERSION__;${SCIPY_VERSION};" \
-    -e "s;__TOOLCHAIN_NAME__;${TOOLCHAIN_NAME};" \
-    -e "s;__TOOLCHAIN_VERSION__;${TOOLCHAIN_VERSION};" \
-    ./ci-build/files/idstools.eb.in > ./ci-build/files/$MODULE_FULL_VERSION
+    ./ci-build/files/idstools-intel-2020b.eb.in > ./ci-build/files/$MODULE_FULL_VERSION
 
 echo "contents of eb file" $MODULE_FULL_VERSION
 echo "-----------------------START--------------------------------"

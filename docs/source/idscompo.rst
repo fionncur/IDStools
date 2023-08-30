@@ -3,8 +3,8 @@ idscompo
 
 *idscompo* script gathers ion composition from core and edge profiles and print it on the screen
 
-Syntax
-~~~~~~
+Syntax idscompo
+~~~~~~~~~~~~~~~
 .. code-block:: bash
 
     python idscompo.py -h
@@ -27,8 +27,8 @@ Syntax
     -i, --info            Show information
     --debug               Show debugging
 
-Example
-~~~~~~~
+Example idscompo
+~~~~~~~~~~~~~~~~
 .. code-block:: bash
 
     $ idscompo -s 131047 -r 4

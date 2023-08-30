@@ -4,8 +4,8 @@ idscp
 *idscp* tool helps you to copy  ids from one pulse to another
 
 
-Syntax
-~~~~~~
+Syntax idscp
+~~~~~~~~~~~~
 
     .. code-block:: bash
 
@@ -49,8 +49,8 @@ Syntax
         -o OUTPUTOCCURRENCE, --outputOccurrence OUTPUTOCCURRENCE
                                 Copy the selected source into the specified occurrence at the destination
 
-Example
-~~~~~~~
+Example idscp
+~~~~~~~~~~~~~
 
 
     .. code-block:: bash

@@ -207,7 +207,7 @@ class WavesCompute:
         Returns:
             a dictionary named "beam_tracing" which contains various arrays and values related to the beam tracing data. Following are the values returned by the function
 
-            .. collapse:: return values
+            return values
 
                 - nbeam
                 - nbeam_active
@@ -236,7 +236,7 @@ class WavesCompute:
                 waveobj = WavesCompute(waves_ids)
                 print(waveobj.getBeamTracing())
 
-            .. collapse:: Output
+            Output
 
                 .. code-block:: python
 

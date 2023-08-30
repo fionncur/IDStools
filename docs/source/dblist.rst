@@ -16,8 +16,8 @@ If no command is given, the list command is performed.
 
 To see databases stored in the public imas database, use 'public' as the user name.
 
-Syntax
-~~~~~~
+Syntax dblist
+~~~~~~~~~~~~~
 
 .. code-block:: bash
 
@@ -49,8 +49,8 @@ Syntax
                             supported: mdsplus, hdf5). By default all backends are shown. (default=None)
 
 
-Example
-~~~~~~~
+Example dblist
+~~~~~~~~~~~~~~
 .. code-block:: bash
 
     $ dblist databases

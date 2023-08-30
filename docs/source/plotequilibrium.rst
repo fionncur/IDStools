@@ -3,8 +3,8 @@ plotequilibrium
 
 *plotequilibrium* script shows plasma equilibrium. Optionally it also shows pf coils position and toroidal flux.
 
-Syntax
-~~~~~~
+Syntax plotequilibrium
+~~~~~~~~~~~~~~~~~~~~~~
 .. code-block:: bash
 
     $ python scripts/plotequilibrium.py -h
@@ -33,8 +33,8 @@ Syntax
     --save                Save figure at default location
     -i, --info            Adds all extra provenance info to the plot
 
-Example
-~~~~~~~
+Example plotequilibrium
+~~~~~~~~~~~~~~~~~~~~~~~
     .. code-block:: bash
 
         python plotequilibrium.py -s 134174 -r 117 --rho --pfcoils --info
