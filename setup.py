@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import os
 import pathlib
+import subprocess
 
 from setuptools import find_packages, setup
 
@@ -15,6 +16,15 @@ if os.path.isfile(requirement_path):
     with open(requirement_path) as f:
         install_requires = f.read().splitlines()
 
+data_files = []
+
+# Create man page and append in data_files
+subprocess.run([os.path.join(current_directory, "manpages.sh"), ""], shell=True)
+man_path = os.path.join(current_directory, "docs/_build/man/idstools.1")
+if os.path.exists(man_path):
+    data_files.append(("share/man", [man_path]))
+
+print(versioneer.get_cmdclass())
 setup(
     name="IDSTools",
     version=versioneer.get_version(),
@@ -51,7 +61,7 @@ setup(
     ],
     setup_requires=["pytest-runner"],
     tests_require=["pytest"],
-    # data_files=data_files,
+    data_files=data_files,
 )
 
 

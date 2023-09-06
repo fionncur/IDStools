@@ -21,6 +21,7 @@ cd docs
 make realclean
 make autogen
 make apidocs html 
+make man
 cd ..
 deactivate
 rm -rf build_venv
