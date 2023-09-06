@@ -22,9 +22,8 @@ data_files = []
 subprocess.run([os.path.join(current_directory, "manpages.sh"), ""], shell=True)
 man_path = os.path.join(current_directory, "docs/_build/man/idstools.1")
 if os.path.exists(man_path):
-    data_files.append(("share/man", [man_path]))
+    data_files.append(("share/man/man1/", [man_path]))
 
-print(versioneer.get_cmdclass())
 setup(
     name="IDSTools",
     version=versioneer.get_version(),

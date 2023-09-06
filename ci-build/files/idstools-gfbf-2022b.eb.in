@@ -7,12 +7,15 @@ name = 'IDStools'
 local_commit = '__COMMITHASH__'
 version = '__VERSION__'
 
-homepage = 'https://sharepoint.iter.org/departments/POP/CM/IMDesign/Code%20Documentation/idstools-doc/devdocs/index.html'
-description = """IDSTools Version (__RAWVERSION__) is a collection of apps for modifying and getting valuable information
-from Interface Data Structures (IDSs). It includes a library of routines for retrieving relevant data from IDSes. 
-It also offers readily available various forms of visualizations. These tools were created in conjunction with scientists 
-and software developers from the fusion community. The goal of having a common set of functions in the IDSTools is to 
-reduce the work of reinventing the wheel by utilizing accessible functions
+homepage = (
+    "https://sharepoint.iter.org/departments/POP/CM/IMDesign/"
+    "Code%20Documentation/idstools-doc/devdocs/index.html"
+)
+description = """IDSTools Version (__RAWVERSION__) is a collection of apps for modifying and getting valuable 
+information from Interface Data Structures (IDSs). It includes a library of routines for retrieving relevant 
+data from IDSes. It also offers readily available various forms of visualizations. These tools were created 
+in conjunction with scientists and software developers from the fusion community. The goal of having a common 
+set of functions in the IDSTools is to reduce the work of reinventing the wheel by utilizing accessible functions
 
 Git Repo : https://git.iter.org/projects/IMAS/repos/idstools
 """
@@ -49,9 +52,4 @@ sanity_check_paths = {
 
 sanity_check_commands = ["python3 -c 'import idstools.compute.common'"]
 
-post_install = [ # Add a post-installation script to handle man pages
-    "cp -r ${SOURCE_DIR}/man/man1 ${DEST_DIR}/share/man/man1",
-]
-
 moduleclass = 'data'
-
