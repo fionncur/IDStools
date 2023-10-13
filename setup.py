@@ -53,6 +53,7 @@ setup(
         "scripts/idscp",
         "scripts/idsdiff",
         "scripts/idslist",
+        "scripts/idsperf",
         "scripts/idsprint",
         "scripts/idsresample",
         "scripts/idssize",

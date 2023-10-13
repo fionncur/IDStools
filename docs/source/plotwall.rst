@@ -3,10 +3,10 @@ plotwall
 
 *plotwall* script shows wall outline plot using limiter and vessel properties found in 2D description of Wall IDS. Here
 Vessel is mechanical structure of the vacuum vessel. The script uses annular represenation. You can specify wall using wall 
-command or you can specify database entry to retrive wall details
+command or you can specify database entry to retrive wall details. more information about wall ids is here
 https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/CI/imas-3.37.2/wall.html
 
-Syntax plotequilibrium
+Syntax plotwall
 ~~~~~~~~~~~~~~~~~~~~~~
 .. code-block:: bash
 

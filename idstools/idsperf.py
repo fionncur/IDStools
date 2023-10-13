@@ -1,94 +1,88 @@
-import imas
 import cProfile
 import timeit
+
+import imas
 import numpy as np
 
-def get_ids(db,idsname,occ=0,times=None,interp=imas.imasdef.PREVIOUS_INTERP,verbose=False):
-    """Function that reads an IDS from a given DBEntry, entirely or slices at selected times.
 
-    Parameters
-    ----------
-    db: imas.DBEntry object
-        the open data-entry for which the IDS will be read from
-    idsname: str
-        name of the IDS to be read
-    occ: int, optional
-        occurrence number of the IDS to be read
-    times: list, optional 
-        list of times at which to read a single slice (reads the entire IDS if times=None)
-    interp: int, optional
-        slicing interpolation mode
-    verbose: bool, optional
-        prints some information
+def get_ids(
+    db, idsname, occ=0, times=None, interp=imas.imasdef.PREVIOUS_INTERP, verbose=False
+):
+    """
+    The function `get_ids` reads an IDS from a given DBEntry, either the entire IDS or slices at selected times, and returns the IDS object or a list of IDS slices.
 
-    Returns
-    -------
-    idsobj: full IDS or list of slices of an IDS
+    Args:
+        db: The `db` parameter is an `imas.DBEntry` object, which represents an open data-entry for which the IDS will be read from. This object provides access to the data stored in the IMAS  database.
+        idsname: The `idsname` parameter is a string that represents the name of the IDS that you want to read from the database.
+        occ: The `occ` parameter is the occurrence number of the IDS to be read. It is an optional parameter and its default value is 0.
+        times: A list of times at which to read a single slice of the IDS. If this parameter is not provided or set to None, the function will read the entire IDS.
+        interp: The `interp` parameter is an optional parameter that specifies the slicing interpolation mode. It determines how the data is interpolated when reading a single slice at a specific time. The default value is `imas.imasdef.PREVIOUS_INTERP`, which means that the data is interpolated using the previous time slice
+        verbose: Verbose information
+
+    Returns:
+        either a full IDS object or a list of slices of an IDS object.
     """
     if times is None:
-        if verbose: print(f"getting {idsname}")
-        idsobj = db.get(idsname,occurrence=occ)
-        if verbose: print(f"got {len(idsobj.time)} slices")
+        if verbose:
+            print(f"getting {idsname}")
+        idsobj = db.get(idsname, occurrence=occ)
+        if verbose:
+            print(f"got {len(idsobj.time)} slices")
     else:
-        idsobj=[]
+        idsobj = []
         for t in times:
-            if verbose: print(f"getting a slice of {idsname} at time {t}")
-            idsobj.append(db.get_slice(idsname,t,interp,occurrence=occ))
-        if verbose: print(f"got {len(time)}")
-        
-    return idsobj;
+            if verbose:
+                print(f"getting a slice of {idsname} at time {t}")
+            dataSlice = db.get_slice(idsname, t, interp, occurrence=occ)
+            idsobj.append(dataSlice)
+            if verbose:
+                print(f"got {dataSlice.time}")
+
+    return idsobj
 
 
-
-def get_timings(db,idsname,occ=0,dbout=None,times=None,repeat=5,verbose=False,profile=False):
-    """Function that performs the timing of various I/O operation for an IDS.
-
-    Parameters
-    ----------
-    db: imas.DBEntry object
-        the open data-entry for which the IDS will be read from
-    idsname: str
-        name of the IDS to be read
-    occ: int, optional
-        occurrence number of the IDS to be read
-    times: list, optional 
-        list of times at which to read a single slice (reads the entire IDS if times=None)
-    repeat: int, optional
-        number of timings being measured (to allow statistics)
-    verbose: bool, optional
-        prints some information
-    profile: bool, optional
-        prints even more information by running the command under cProfile
-
-    Returns
-    -------
-    timings: list
-        list of len==repeat of individual timing measurements 
+def get_timings(
+    db, idsname, occ=0, dbout=None, times=None, repeat=5, verbose=False, profile=False
+):
     """
-    
-    if (dbout is not None):
-        if verbose: print("profiles put")
-        idsobj = get_ids(db,idsname,occ,times,verbose)
+    The function `get_timings` performs timing measurements for various I/O operations on an IDS in an IMAS database.
+
+    Args:
+        db: The `db` parameter is an `imas.DBEntry` object, which represents an open data-entry for which the IDS will be read from.
+        idsname: The `idsname` parameter is a string that represents the name of the IDS to be read from the database.
+        occ: The `occ` parameter is the occurrence number of the IDS to be read. It specifies which occurrence of the IDS to read from the database. By default, it is set to 0, which means the first occurrence. Defaults to 0
+        dbout: The `dbout` parameter is an optional argument that specifies the output database where the IDS will be written to. If `dbout` is provided, the IDS will be written to the specified database.
+        times: The `times` parameter is a list of times at which to read a single slice of the IDS. If `times` is set to `None`, the entire IDS will be read.
+        repeat: The `repeat` parameter specifies the number of timings being measured. It allows for collecting statistics by repeating the timing measurement multiple times. Defaults to 5
+        verbose: Verbose information
+        profile: A boolean parameter that determines whether or not to print additional information by running the command under cProfile.
+
+    Returns:
+        The function `get_timings` returns a list of timing measurements. The length of the list is equal to the `repeat` parameter, which specifies the number of timings being measured. Each timing measurement represents the time taken to perform the specified I/O operation for the IDS.
+    """
+    if dbout is not None:
+        if verbose:
+            print("profiles put")
+        idsobj = get_ids(db, idsname, occ, times, verbose)
         cmd = "dbout.put(idsobj)"
     else:
         cmd = f"get_ids(db,'{idsname}',occ=occ,times=times,verbose=verbose)"
 
     # Default timing
     # TODO: more fine grained control of imported symbols to avoid issues?
-    t = timeit.Timer(cmd,globals={**locals(),**globals()})
+    t = timeit.Timer(cmd, globals={**locals(), **globals()})
     #'from __main__ import get_ids,db,dbout,verbose,times,idsobj')
-    timings = t.repeat(repeat=repeat,number=1)
+    timings = t.repeat(repeat=repeat, number=1)
 
     # Profiling
     if profile:
-        cProfile.run(cmd)
+        cProfile.runctx(cmd, globals(), locals())
 
     return timings
-    
 
 
 def byte_size(obj):
-    """Calculates recursively the approximated size of data of an IDS or its sub-structures. 
+    """Calculates recursively the approximated size of data of an IDS or its sub-structures.
     Does not take into account the overhead of the various containers.
 
     Parameters
@@ -99,10 +93,10 @@ def byte_size(obj):
     Returns
     -------
     S: int
-        estimated data size in bytes 
+        estimated data size in bytes
     """
     S = 0
-    if type(obj) == str: 
+    if type(obj) == str:
         S += len(obj)
     elif type(obj) == np.ndarray:
         S += obj.nbytes
