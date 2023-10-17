@@ -18,8 +18,8 @@ if __name__ == "__main__":
                            help="Use get_slice with selected time(s)")
     timegroup.add_argument('-a','--allSlices',action='store_true',
                            help="Use get_slice with all available times")
-    #parser.add_argument('-m','--memoryBackend',action='store_true',
-    #                  help="Use MEMORY_BACKEND for this test (involve reading from file and loading in memory first)")
+    parser.add_argument('-m','--memoryBackend',action='store_true',
+                        help="Use MEMORY_BACKEND for this test (involve reading from file and loading in memory first)")
     parser.add_argument('-do','--database_output',type=str,default=None,
                         help='Database name for the destination data-entry')
     parser.add_argument('-bo','--backend_output',type=str,
@@ -43,7 +43,40 @@ if __name__ == "__main__":
     # 
     args = parser.parse_args()
 
+    
+    if args.ids == []:
+        allidss = [ids.value for ids in list(imas.IDSName)]
+        # TODO: treat occurrences
+        args.ids = [ids for ids in allidss if db.partial_get(ids,'ids_properties/homogeneous_time')!=imas.imasdef.EMPTY_INT]
 
+    # For memory backend need to read the full IDS and load it into memory 
+    if (args.memoryBackend):
+        print('First import data into memory...',file=sys.stderr)
+        #sys.exit(1)
+        dbref = imas.DBEntry(get_backend_id(args.backend),args.database,
+                             args.shot,args.run,user_name=args.user)
+        status,_ = dbref.open()
+        if status!=0:
+            print('Error opening source pulse! Please check existence.',file=sys.stderr)
+            sys.exit(status)
+
+        dbm = imas.DBEntry(imas.imasdef.MEMORY_BACKEND,args.database,
+                      args.shot,args.run,user_name=args.user)
+        status,_ = dbm.create()
+        if status!=0:
+            print('Error opening source pulse! Please check existence.',file=sys.stderr)
+            sys.exit(status)
+
+        for idsname in args.ids:
+            nameocc = idsname.split('/')
+            idsname = nameocc[0]
+            occ = 0
+            if len(nameocc)==2: occ = int(nameocc[1])
+            dbm.put(dbref.get(idsname,occ))
+            
+        args.backend = "MEMORY"
+
+        
     # Open pulse
     db = imas.DBEntry(get_backend_id(args.backend),args.database,
                       args.shot,args.run,user_name=args.user)
@@ -52,19 +85,7 @@ if __name__ == "__main__":
         print('Error opening source pulse! Please check existence.',file=sys.stderr)
         sys.exit(status)
 
-        
-    if args.ids == []:
-        allidss = [ids.value for ids in list(imas.IDSName)]
-        # TODO: treat occurrences
-        args.ids = [ids for ids in allidss if db.partial_get(ids,'ids_properties/homogeneous_time')!=imas.imasdef.EMPTY_INT]
-
-
     
-    # For memory backend need to read the full IDS and load it into memory 
-    if (args.backend == imas.imasdef.MEMORY_BACKEND):
-        print('Not yet implemented.',file=sys.stderr)
-        sys.exit(1)
-        
 
     idsobj = None
     dbout = None
