@@ -55,7 +55,7 @@ Example idsperf (all idses)
 
     .. code-block:: bash
 
-        $ idsperf -s 134174 -r 117
+        $ idsperf 134174 117
         core_profiles best time = 1.0308142956346273 s
         core_sources best time = 2.8891310710459948 s
         core_transport best time = 1.7229742156341672 s
@@ -71,7 +71,7 @@ Example idsperf (one ids)
 
     .. code-block:: bash
 
-        $ idsperf -s 134174 -r 117
+        $ idsperf 134174 117 equilibrium
         equilibrium best time = 0.6310763321816921 s
 
 Example idsperf (Show statistics --showStats --repeat)

@@ -3,6 +3,7 @@ This is a common module which has mathematical or physics functions
 
 """
 import logging
+from typing import Tuple, Union
 import numpy as np
 from packaging import version
 
@@ -10,7 +11,54 @@ from packaging import version
 logger = logging.getLogger("module")
 
 
-def getClosestOfGivenValueFromArray(array: np.ndarray, value: float) -> tuple:
+def getNearestTime(timeArray: np.ndarray, requestedTime: float) -> Tuple[float, float]:
+    """
+    The function `getNearestTime` takes an array of time values and a requested time, and returns the index and value of the nearest time in the array to the requested time.
+
+    Args:
+        timeArray (np.ndarray): The `timeArray` parameter is a numpy array containing a list of time
+    values.
+        requestedTime (float): The `requestedTime` parameter is the time value that you want to find the  nearest value to in the `timeArray`.
+
+    Returns:
+        The function `getNearestTime` returns a tuple containing the time index and time value.
+    """
+    ntime = len(timeArray)
+    if ntime >= 1:
+        if requestedTime >= 0:
+            idx = abs(timeArray - requestedTime).argmin()
+            [timeValue, timeIndex] = timeArray.flat[idx], idx
+        else:
+            timeIndex = ntime // 2
+            timeValue = timeArray[timeIndex]
+        requestedTime = timeValue
+        if ntime > 1:
+            logger.info(
+                "   Time  = "
+                + "%.2f" % timeValue
+                + " s in range ["
+                + "%.2f" % timeArray[0]
+                + ","
+                + "%.2f" % timeArray[ntime - 1]
+                + "] s",
+            )
+            logger.info("   Index = ", timeIndex)
+            logger.info(
+                "   Averaged resolution = ",
+                (timeArray[ntime - 1] - timeArray[0]) / (ntime - 1),
+                " s",
+            )
+        else:
+            logger.info("   Time  = " + "%.2f" % timeValue + " s")
+    else:
+        timeValue = timeArray[0] if len(timeArray) > 0 else 0
+        timeIndex = 0
+    return timeIndex, timeValue
+
+
+def getClosestOfGivenValueFromArray(
+    array: np.ndarray, value: float
+) -> Union[None, tuple]:
     """
     Find the index of the element in the array that is closest to the given value using the minimum absolute difference.
 
@@ -29,7 +77,7 @@ def getClosestOfGivenValueFromArray(array: np.ndarray, value: float) -> tuple:
     return index, array[index]
 
 
-def getMiddleElementFromArray(array: np.ndarray) -> tuple:
+def getMiddleElementFromArray(array: np.ndarray) -> Union[None, tuple]:
     """
     The "middle" function returns the index and value of the middle element in a given numpy array.
 

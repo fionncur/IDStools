@@ -1,4 +1,6 @@
 import argparse
+import os
+import sys
 from imas import imasdef
 
 # default parent parser for all idstools scripts
@@ -41,3 +43,27 @@ def getBackendID(name):
 
 def getSliceMode(name):
     return getattr(imasdef, f"{name}_INTERP")
+
+
+def getDatabasePath(args) -> str:
+    """
+    The function `getDatabasePath` returns the absolute path of a database based on the provided arguments.
+
+    Args:
+        args: The `args` parameter is an object or dictionary that contains the following attributes:
+
+    Returns:
+        the absolute path of the database.
+    """
+    if args.user == "public":
+        publichome = os.getenv("IMAS_HOME", default="")
+        if publichome is None:
+            return None
+        databaseAbsolutePath = (
+            f"{publichome}/shared/imasdb/{args.database}/{args.version}"
+        )
+    else:
+        databaseAbsolutePath = f'{os.path.expanduser(f"~{args.user_or_path}")}/public/imasdb/{str(args.database)}/3'
+    hostdir = os.environ["HOSTNAME"] + ":" + databaseAbsolutePath
+    hostdir = hostdir[:-2]
+    return hostdir

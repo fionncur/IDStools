@@ -60,6 +60,7 @@ setup(
         "scripts/plotedgeprofiles",
         "scripts/plotequilibrium",
         "scripts/plotmachinedescription",
+        "scripts/plotneutron",
         "scripts/plotwall",
     ],
     setup_requires=["pytest-runner"],
