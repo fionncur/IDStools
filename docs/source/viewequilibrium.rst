@@ -1,14 +1,14 @@
-plotequilibrium
+viewequilibrium
 ===============
 
-*plotequilibrium* script shows plasma equilibrium. Optionally it also shows pf coils position and toroidal flux.
+*viewequilibrium* script shows plasma equilibrium. Optionally it also shows pf coils position and toroidal flux.
 
-Syntax plotequilibrium
+Syntax viewequilibrium
 ~~~~~~~~~~~~~~~~~~~~~~
 .. code-block:: bash
 
-    $ python scripts/plotequilibrium.py -h
-    usage: plotequilibrium.py [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] -s SHOT -r RUN
+    $ python scripts/viewequilibrium.py -h
+    usage: viewequilibrium.py [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] -s SHOT -r RUN
                     [-t TIME] [-o OCCURRENCE] [--rho] [--pfcoils] [--save] [-i]
 
     ---- Display the plasma equilibrium from the equilibrium IDS. It also shows pf coils position overlay if exists
@@ -33,11 +33,11 @@ Syntax plotequilibrium
     --save                Save figure at default location
     -i, --info            Adds all extra provenance info to the plot
 
-Example plotequilibrium
+Example viewequilibrium
 ~~~~~~~~~~~~~~~~~~~~~~~
     .. code-block:: bash
 
-        python plotequilibrium.py -s 134174 -r 117 --rho --pfcoils --info
+        python viewequilibrium.py -s 134174 -r 117 --rho --pfcoils --info
 
     .. image:: _static/images/EquilibriumView_viewMagneticPoloidalFlux.png
         :alt: image not found

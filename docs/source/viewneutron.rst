@@ -1,17 +1,17 @@
-plotneutron
+viewneutron
 ===========
 
-*plotneutron*  plots particles vs normalised toroidal flux coordinate. It retrieves from `distribution_sources` IDS.
+*viewneutron*  plots particles vs normalised toroidal flux coordinate. It retrieves from `distribution_sources` IDS.
 https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/CI/imas-3.37.2/distribution_sources.html
 
 
-Syntax plotneutron
+Syntax viewneutron
 ~~~~~~~~~~~~~~~
 
     .. code-block:: bash   
 
-        $ plotneutron -h
-        usage: plotneutron [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] -s SHOT -r RUN [-t TIME] [--save] [-i]
+        $ viewneutron -h
+        usage: viewneutron [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] -s SHOT -r RUN [-t TIME] [--save] [-i]
 
         ---- Display the neutron profiles from the distribution_sources IDSs
 
@@ -37,7 +37,7 @@ Example
 
     .. code-block:: bash
 
-        $ plotneutron -s 121014 -r 11 -t 450 --info
+        $ viewneutron -s 121014 -r 11 -t 450 --info
         Time  = 482.00 s
         Distribution_sources contains 9 sources
         D + D -> He3 + n(2.45 MeV); Total; P = 136.60 kW

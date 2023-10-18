@@ -10,13 +10,13 @@ Example:
     literal blocks::
 
         $ python scripts/idssize -s 122525 -r 1
-        # python scripts/plotwall -u public --database ITER_MD -s 116000 -r 2
-        # python scripts/plotwall -u fleuryl --database west -s 54178 -r 0
-        # python scripts/plotwall -u fleuryl --database tcv -s 64770 -r 1
-        # python scripts/plotwall -u costerd --database aug -s 40866 -r 1
-        # python scripts/plotwall -u schneim --database jet -s 92436 -r 271
-        # python scripts/plotwall -u schneim --database JT-60U -s 33654 -r 1
-        # python scripts/plotwall -u smiths --database D3D -s 133221 -r 0
+        # python scripts/viewwall -u public --database ITER_MD -s 116000 -r 2
+        # python scripts/viewwall -u fleuryl --database west -s 54178 -r 0
+        # python scripts/viewwall -u fleuryl --database tcv -s 64770 -r 1
+        # python scripts/viewwall -u costerd --database aug -s 40866 -r 1
+        # python scripts/viewwall -u schneim --database jet -s 92436 -r 271
+        # python scripts/viewwall -u schneim --database JT-60U -s 33654 -r 1
+        # python scripts/viewwall -u smiths --database D3D -s 133221 -r 0
         # https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/CI/imas-3.37.2/wall.html
 
 

@@ -1,16 +1,16 @@
-ecstray
-=======
+viewecstrayradiation
+====================
 
-*ecstray* script shows electron cyclotron stray radiation information by showing different plots. It shows cut off layer, resonance layer, top view equilibrium.
+*viewecstrayradiation* script shows electron cyclotron stray radiation information by showing different plots. It shows cut off layer, resonance layer, top view equilibrium.
 
 .. note::
     This program is experimental and current in development.
 
-Syntax ecstray
-~~~~~~~~~~~~~~
+Syntax viewecstrayradiation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .. code-block:: bash
 
-    $ python scripts/ecstray.py -h
+    $ viewecstrayradiation -h
     Install tqdm to enable progress bar
     usage: ecstray.py [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] -s SHOT -r RUN
 
@@ -33,7 +33,7 @@ Example ecstray
 ~~~~~~~~~~~~~~~
     .. code-block:: bash
 
-        python scripts/ecstray.py -s 134174 -r 117
+        $ viewecstrayradiation -s 134174 -r 117
 
     .. image:: _static/images/ecstray.png
         :alt: image not found

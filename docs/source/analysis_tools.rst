@@ -5,8 +5,10 @@ Analysis tools aid in the examination of IDS data in terms of plasma composition
 .. toctree::
    :maxdepth: 1
 
-   ecstray
-   idscompo
-   plotequilibrium
-   plotneutron
-   plotwall
+   viewidscompo
+   viewecstrayradiation
+   viewequilibrium
+   viewfluxes
+   viewneutron
+   viewpressure
+   viewwall

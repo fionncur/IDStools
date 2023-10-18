@@ -1,14 +1,14 @@
-idscompo
+viewidscompo
 ================
 
-*idscompo* script gathers ion composition from core and edge profiles and print it on the screen
+*viewidscompo* script gathers ion composition from core and edge profiles and print it on the screen
 
-Syntax idscompo
+Syntax viewidscompo
 ~~~~~~~~~~~~~~~
 .. code-block:: bash
 
-    python idscompo.py -h
-    usage: idscompo.py [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] -s SHOT -r RUN [-i] [--debug]
+    python viewidscompo.py -h
+    usage: viewidscompo.py [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] -s SHOT -r RUN [-i] [--debug]
 
     ---- Display the plasma composition from the core_profiles IDS
 
@@ -27,11 +27,11 @@ Syntax idscompo
     -i, --info            Show information
     --debug               Show debugging
 
-Example idscompo
+Example viewidscompo
 ~~~~~~~~~~~~~~~~
 .. code-block:: bash
 
-    $ idscompo -s 131047 -r 4
+    $ viewidscompo -s 131047 -r 4
     !   No edge_profiles IDS in the data-entry.
     core +  edge  -
     ------------

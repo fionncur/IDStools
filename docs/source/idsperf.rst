@@ -109,3 +109,12 @@ Example idsperf (put operation)
 
         $ idsperf 134174 117 equilibrium -do HBD -bo MDSPLUS -o 412
         equilibrium best time = 0.5791653310880065 s
+
+Example idsperf (memory backend)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    .. code-block:: bash
+
+        $ idsperf 134174 117 equilibrium  -s 50 -m
+        First import data into memory...
+        equilibrium best time = 0.005069989711046219 s
