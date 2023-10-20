@@ -14,6 +14,30 @@ class CoreTransportCompute:
         self.ids = ids
 
     def getFluxes(self):
+        """
+        The function `getFluxes` returns a dictionary containing information about fluxes in a model,
+        including particle and energy fluxes for electrons and ions.
+
+        Returns:
+            a dictionary called `fluxesDict`. Following is the structure
+            {0:
+                {
+                    'energy_flux': None,
+                    'flux_multiplier': -9e+40,
+                    'ions':
+                        {0:
+                            {'a': 2.0,
+                            'energy_flux': None,
+                            'particles_flux': None,
+                            'z_ion': -9e+40,
+                            'z_n': 1.0
+                            },
+                        },
+                        'name': 'combined',
+                        'particles_flux': None
+                },
+            }
+        """
         fluxesDict = {}
         for modelIndex, model in enumerate(self.ids.model):
             fluxDict = {
@@ -22,13 +46,9 @@ class CoreTransportCompute:
             }
             if len(model.profiles_1d[0].electrons.particles.flux) != 0:
                 fluxDict["particles_flux"] = (
-                    model.flux_multiplier(
-                        (
-                            model.profiles_1d[0].electrons.particles.flux
-                            * model.profiles_1d[0].grid_flux.surface
-                        )[-1]
-                    ),
-                )
+                    model.profiles_1d[0].electrons.particles.flux
+                    * model.profiles_1d[0].grid_flux.surface
+                )[-1]
             else:
                 fluxDict["particles_flux"] = None
             if len(model.profiles_1d[0].electrons.energy.flux) != 0:

@@ -1,39 +1,40 @@
 import logging
 
-from ...compute.core_transport.basic import CoreTransportCompute
+from ...compute.core_sources.basic import CoreSourcesCompute
 
 logger = logging.getLogger(f"module.{__name__}")
 
 
-class CoreTransportView:
+class CoreSourcesView:
     def __init__(self, ids):
-        self.coreTransportCompute = CoreTransportCompute(ids)
+        self.coreSourcesCompute = CoreSourcesCompute(ids)
         self.ids = ids
 
-    def viewFluxes(self):
+    def viewSources(self):
         """
-        The `viewFluxes` function prints out flux information for electrons and ions.
+        The `viewSources` function prints information about sources, including their name, electron
+        flux, energy flux, and ion flux.
         """
-        fluxesDict = self.coreTransportCompute.getFluxes()
+        sourcesDict = self.coreSourcesCompute.getSources()
 
-        for _, fluxDict in fluxesDict.items():
-            print(f'{fluxDict["name"]} ({fluxDict["flux_multiplier"]})')
+        for _, sourceDict in sourcesDict.items():
+            print(f'{sourceDict["name"]}')
             print(f"{'electrons': >30}", end="")
             # electrons
-            if fluxDict["particles_flux"] is None:
+            if sourceDict["particles_flux"] is None:
                 print(f"{'particles(--)' : >25}", end="")
             else:
-                print("     particles %13.6e" % (fluxDict["particles_flux"]), end="")
-            if fluxDict["energy_flux"] is None:
+                print("     particles %13.6e" % (sourceDict["particles_flux"]), end="")
+            if sourceDict["energy_flux"] is None:
                 print(f"{'energy(--)' : >25}")
             else:
-                print("     energy %13.6e" % ((fluxDict["energy_flux"])))
+                print("     energy %13.6e" % ((sourceDict["energy_flux"])))
             # ions
             print(
                 f"{'a' : >10}{'z_n' : >10}{'z_ion' : >10}{'particles' : >25}{'energy' : >25}"
             ),
 
-            for _, ionDict in fluxDict["ions"].items():
+            for _, ionDict in sourceDict["ions"].items():
                 print(
                     f"{ionDict['a'] : >10}{ionDict['z_n'] : >10}{ionDict['z_ion'] : >10}",
                     end="",
