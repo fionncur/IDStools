@@ -66,6 +66,9 @@ idsSliceCoreTransport = connection.get_slice(
     slicingMethods[args.slicingmethod],
     occurrence=args.occurrence,
 )
+if len(idsSliceCoreTransport.time) == 0:
+    logger.critical("Time vector is empty! aborting")
+    sys.exit(status)
 
 print(
     "\nTime = %0.3f for %s/%s/%s/%s/%s\n"

@@ -2,10 +2,10 @@
 declare -a tests
 
 tests+=("122525;1")
-# tests+=("123170;2")
-# tests+=("123276;1")
-# tests+=("120014;1")
-# tests+=("131047;7")
+tests+=("123170;2")
+tests+=("123276;1")
+tests+=("120014;1")
+tests+=("131047;7")
 # tests+=("134174;117")
 
 #db tools test
