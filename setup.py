@@ -63,6 +63,7 @@ setup(
         "scripts/viewmachinedescription",
         "scripts/viewneutron",
         "scripts/viewpressure",
+        "scripts/viewsources",
         "scripts/viewwall",
     ],
     setup_requires=["pytest-runner"],

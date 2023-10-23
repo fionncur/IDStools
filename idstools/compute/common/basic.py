@@ -42,11 +42,9 @@ def getNearestTime(timeArray: np.ndarray, requestedTime: float) -> Tuple[float, 
                 + "%.2f" % timeArray[ntime - 1]
                 + "] s",
             )
-            logger.info("   Index = ", timeIndex)
+            logger.info(f"   Index = {timeIndex}")
             logger.info(
-                "   Averaged resolution = ",
-                (timeArray[ntime - 1] - timeArray[0]) / (ntime - 1),
-                " s",
+                f"   Averaged resolution = {(timeArray[ntime - 1] - timeArray[0]) / (ntime - 1) } s",
             )
         else:
             logger.info("   Time  = " + "%.2f" % timeValue + " s")

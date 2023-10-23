@@ -1,8 +1,10 @@
 # plot_ne0 and plot density profile function
 # not ok src/view/core_profiles/functions.py
-
+import logging
 from ...compute.core_profiles.basic import CoreProfilesCompute
 from ...view.common.basic import Console
+
+logger = logging.getLogger("module")
 
 
 class CoreProfilesView(Console):
@@ -253,3 +255,189 @@ class CoreProfilesView(Console):
                 ax.set_ylim(top=nmax)
                 ax.set_data(radial_coordinate, electronDensity)
             return ax_density_plot_dens, nmax
+
+    def plotIonPressureProperties(self, ax):
+        FACTOR = 1.0e-6
+        rhoTorNorm = self.coreProfilesCompute.getRhoTorNorm()  # Rho profile (mandatory)
+        nrho = len(rhoTorNorm)
+        if nrho == 0:
+            logger.critical(
+                "core_profiles.profiles_1d[0].grid.rho_tor/core_profiles.profiles_1d[0].grid.rho_tor_norm) is empty",
+            )
+            logger.critical("----> Aborted.")
+            exit()
+
+        volume = self.coreProfilesCompute.getVolume()  # Volume profile (not mandatory)
+
+        dictIonPressureProperties = self.coreProfilesCompute.getIonPressureProperties()
+        maximaIon = dictIonPressureProperties["maximaIon"]
+        pressureIonThermal = dictIonPressureProperties["pressureIonThermal"]
+        pressureIonFastParallel = dictIonPressureProperties["pressureIonFastParallel"]
+        pressureIonFastPerpendicular = dictIonPressureProperties[
+            "pressureIonFastPerpendicular"
+        ]
+
+        fontArgs = {
+            "fontfamily": "serif",
+            "color": "darkred",
+            "fontweight": "normal",
+            "fontsize": 12,
+        }
+
+        ax.plot(rhoTorNorm, pressureIonThermal * FACTOR, label="Thermal ion")
+        ax.plot(rhoTorNorm, pressureIonFastParallel * FACTOR, label="Fast parallel ion")
+        ax.plot(
+            rhoTorNorm,
+            pressureIonFastPerpendicular * FACTOR,
+            label="Fast perpendicular ion",
+        )
+        ax.set_ylim(0, maximaIon * FACTOR)
+        ax.tick_params(
+            which="both",
+            labelsize=12,
+        )
+        ax.set_xlabel(r"$\rho/\rho_0$", fontArgs, labelpad=1)
+        ax.set_ylabel(r"P (MPa)", fontArgs, labelpad=0)
+        # set legend
+        # legx_pos = 1.35
+        # legy_pos = 1.05
+        legend = ax.legend(
+            loc="upper right"
+        )  # bbox_to_anchor=(legx_pos - 0.4, legy_pos - 0.05)
+        frame = legend.get_frame()
+        frame.set_facecolor("0.95")
+        for label in legend.get_texts():
+            label.set_fontsize(7)
+        for label in legend.get_lines():
+            label.set_linewidth(1.5)
+        ax.set_title("Ion Pressure Properties", loc="left")
+
+    def showInfoOnPlot(self, ax, info: str = ""):
+        xmin, xmax = ax.get_xlim()
+        ymin, ymax = ax.get_ylim()
+        # plt.text(xmax+0.01*abs(xmax),ymax-0.03*abs(ymax-ymin),hostdir[:-2]+' - Shot '+str(shot)+' / '+' Run '+str(run),fontsize=6,rotation=90)
+        ax.text(
+            xmax + 0.01 * abs(xmax - xmin) + 0.01,
+            ymax - 0.03 * abs(ymax - ymin),
+            info,
+            fontsize=5,
+            rotation=90,
+        )
+
+    def plotElectronPressureProperties(self, ax, **kwargs):
+        FACTOR = 1.0e-6
+        rhoTorNorm = self.coreProfilesCompute.getRhoTorNorm()  # Rho profile (mandatory)
+        nrho = len(rhoTorNorm)
+        if nrho == 0:
+            logger.critical(
+                "core_profiles.profiles_1d[0].grid.rho_tor/core_profiles.profiles_1d[0].grid.rho_tor_norm) is empty",
+            )
+            logger.critical("----> Aborted.")
+
+        dictElectronsPressureProperties = (
+            self.coreProfilesCompute.getElectronsPressureProperties()
+        )
+        maximaElectrons = dictElectronsPressureProperties["maximaElectrons"]
+        pressureElectronTotal = dictElectronsPressureProperties["pressureElectronTotal"]
+        pressureElectronThermal = dictElectronsPressureProperties[
+            "pressureElectronThermal"
+        ]
+        pressureElectronFastParallel = dictElectronsPressureProperties[
+            "pressureElectronFastParallel"
+        ]
+        pressureElectronFastPerpendicular = dictElectronsPressureProperties[
+            "pressureElectronFastPerpendicular"
+        ]
+        fontArgs = {
+            "fontfamily": "serif",
+            "color": "darkred",
+            "fontweight": "normal",
+            "fontsize": 12,
+        }
+        ax.plot(rhoTorNorm, pressureElectronTotal * FACTOR, label="Total electron")
+        ax.plot(rhoTorNorm, pressureElectronThermal * FACTOR, label="Thermal electron")
+        ax.plot(
+            rhoTorNorm,
+            pressureElectronFastParallel * FACTOR,
+            label="Fast parallel electron",
+        )
+        ax.plot(
+            rhoTorNorm,
+            pressureElectronFastPerpendicular * FACTOR,
+            label="Fast perpendicular electron",
+        )
+        ax.set_ylim(0, maximaElectrons * FACTOR)
+
+        ax.tick_params(
+            which="both",
+            labelsize=12,
+        )
+        ax.set_xlabel(r"$\rho/\rho_0$", fontArgs, labelpad=1)
+        ax.set_ylabel(r"P (MPa)", fontArgs, labelpad=0)
+        # set legend
+        # legx_pos = 1.35
+        # legy_pos = 1.05
+        legend = ax.legend(
+            loc="upper right"
+        )  # bbox_to_anchor=(legx_pos - 0.5, legy_pos - 0.05)
+        frame = legend.get_frame()
+        frame.set_facecolor("0.95")
+        for label in legend.get_texts():
+            label.set_fontsize(7)
+        for label in legend.get_lines():
+            label.set_linewidth(1.5)
+        ax.set_title("Electrons Pressure Properties", loc="left")
+
+    def plotTotalPressureProperties(self, ax, **kwargs):
+        FACTOR = 1.0e-6
+        rhoTorNorm = self.coreProfilesCompute.getRhoTorNorm()  # Rho profile (mandatory)
+        nrho = len(rhoTorNorm)
+        if nrho == 0:
+            logger.critical(
+                "core_profiles.profiles_1d[0].grid.rho_tor/core_profiles.profiles_1d[0].grid.rho_tor_norm) is empty",
+            )
+            return
+
+        dictPressure = self.coreProfilesCompute.getPressure()
+        maximaTotal = dictPressure["maximaTotal"]
+        pressureTotal = dictPressure["pressureTotal"]
+        pressureThermal = dictPressure["pressureThermal"]
+        pressureParallel = dictPressure["pressureParallel"]
+        pressurePerpendicular = dictPressure["pressurePerpendicular"]
+
+        if maximaTotal == 0:
+            logger.critical("No pressure profile found")
+            return
+        ax.plot(rhoTorNorm, pressureTotal * FACTOR, label="Total")
+        ax.plot(rhoTorNorm, pressureThermal * FACTOR, label="Thermal")
+        ax.plot(rhoTorNorm, pressureParallel * FACTOR, label="Parallel")
+        ax.plot(rhoTorNorm, pressurePerpendicular * FACTOR, label="Pperpendicular")
+        ax.set_xlim(rhoTorNorm[0], rhoTorNorm[nrho - 1])
+        ax.set_ylim(0, maximaTotal * FACTOR)
+
+        # Set Plot properties
+        fontArgs = {
+            "fontfamily": "serif",
+            "color": "darkred",
+            "fontweight": "normal",
+            "fontsize": 12,
+        }
+        ax.tick_params(
+            which="both",
+            labelsize=12,
+        )
+        ax.set_xlabel(r"$\rho/\rho_0$", fontArgs, labelpad=1)
+        ax.set_ylabel(r"P (MPa)", fontArgs, labelpad=0)
+        # set legend
+        # legx_pos = 1.35
+        # legy_pos = 1.05
+        legend = ax.legend(
+            loc="upper right"
+        )  # bbox_to_anchor=(legx_pos - 0.35, legy_pos - 0.05)
+        frame = legend.get_frame()
+        frame.set_facecolor("0.95")
+        for label in legend.get_texts():
+            label.set_fontsize(7)
+        for label in legend.get_lines():
+            label.set_linewidth(1.5)
+        ax.set_title("Total Pressure Properties", loc="left")
