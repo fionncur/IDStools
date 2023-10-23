@@ -66,6 +66,9 @@ idsSliceCoreSources = connection.get_slice(
     slicingMethods[args.slicingmethod],
     occurrence=args.occurrence,
 )
+if len(idsSliceCoreSources.time) == 0:
+    logger.critical("Time vector is empty! aborting")
+    sys.exit(status)
 
 print(
     "\nTime = %0.3f for %s/%s/%s/%s/%s\n"
@@ -81,41 +84,3 @@ print(
 )
 coreSourcesView = CoreSourcesView(idsSliceCoreSources)
 coreSourcesView.viewSources()
-
-
-# for s in S.source:
-#     print(s.identifier.name)
-#     print("       electrons", end="")
-#     # electrons
-#     i = s.profiles_1d[0].electrons
-#     if len(i.particles) == 0:
-#         print("     particles     --       ", end="")
-#     else:
-#         print(
-#             "     particles %13.6e"
-#             % (np.trapz(i.particles, s.profiles_1d[0].grid.volume)),
-#             end="",
-#         )
-#     if len(i.energy) == 0:
-#         print("     energy     --       ")
-#     else:
-#         print("     energy %13.6e" % (np.trapz(i.energy, s.profiles_1d[0].grid.volume)))
-#     # ions
-#     for i in s.profiles_1d[0].ion:
-#         if len(i.element) > 0:
-#             print("    ", i.element[0].a, i.element[0].z_n, i.z_ion, end="")
-#             if len(i.particles) == 0:
-#                 print("     particles     --       ", end="")
-#             else:
-#                 print(
-#                     "     particles %13.6e"
-#                     % (np.trapz(i.particles, s.profiles_1d[0].grid.volume)),
-#                     end="",
-#                 )
-#             if len(i.energy) == 0:
-#                 print("     energy     --     ")
-#             else:
-#                 print(
-#                     "     energy %13.6e"
-#                     % (np.trapz(i.energy, s.profiles_1d[0].grid.volume))
-#                 )
