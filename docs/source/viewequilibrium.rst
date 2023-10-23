@@ -37,7 +37,7 @@ Example viewequilibrium
 ~~~~~~~~~~~~~~~~~~~~~~~
     .. code-block:: bash
 
-        python viewequilibrium.py -s 134174 -r 117 --rho --pfcoils --info
+        $ viewequilibrium -s 134174 -r 117 --rho --pfcoils --info
 
     .. image:: _static/images/EquilibriumView_viewMagneticPoloidalFlux.png
         :alt: image not found

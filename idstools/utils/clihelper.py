@@ -1,6 +1,8 @@
 import argparse
 import os
+import socket
 import sys
+
 from imas import imasdef
 
 # default parent parser for all idstools scripts
@@ -64,6 +66,6 @@ def getDatabasePath(args) -> str:
         )
     else:
         databaseAbsolutePath = f'{os.path.expanduser(f"~{args.user_or_path}")}/public/imasdb/{str(args.database)}/3'
-    hostdir = os.environ["HOSTNAME"] + ":" + databaseAbsolutePath
+    hostdir = f"{socket.gethostname()}:{databaseAbsolutePath}"
     hostdir = hostdir[:-2]
     return hostdir

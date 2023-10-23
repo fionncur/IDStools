@@ -315,13 +315,14 @@ class CoreProfilesView(Console):
     def showInfoOnPlot(self, ax, info: str = ""):
         xmin, xmax = ax.get_xlim()
         ymin, ymax = ax.get_ylim()
-        # plt.text(xmax+0.01*abs(xmax),ymax-0.03*abs(ymax-ymin),hostdir[:-2]+' - Shot '+str(shot)+' / '+' Run '+str(run),fontsize=6,rotation=90)
         ax.text(
-            xmax + 0.01 * abs(xmax - xmin) + 0.01,
-            ymax - 0.03 * abs(ymax - ymin),
+            xmax + 0.01 * abs(xmax),
+            ymin + 0.5 * abs(ymax - ymin),
             info,
+            horizontalalignment="left",
+            verticalalignment="center",
+            rotation="vertical",
             fontsize=5,
-            rotation=90,
         )
 
     def plotElectronPressureProperties(self, ax, **kwargs):

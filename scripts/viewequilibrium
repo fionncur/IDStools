@@ -11,7 +11,7 @@ sys.path.append(root_path)
 
 
 from idstools.compute.common.basic import getNearestTime
-from idstools.utils.clihelper import getBackendID, imasParser
+from idstools.utils.clihelper import getBackendID, imasParser, getDatabasePath
 from idstools.utils.idslogger import setupLogger
 from idstools.view.common.basic import Canvas
 from idstools.view.equilibrium.basic import EquilibriumView
@@ -59,17 +59,6 @@ args = parser.parse_args()
 
 logger = setupLogger("module")
 
-database_abs_path = ""
-database_abs_path = (
-    (os.environ["IMAS_HOME"] + "/shared/imasdb/" + args.database + "/3")
-    if args.user == "public"
-    else f'{os.path.expanduser(f"~{args.user}")}/public/imasdb/{args.database}/3'
-)
-if "HOSTNAME" in os.environ:
-    hostdir = os.environ["HOSTNAME"] + ":" + database_abs_path
-else:
-    hostdir = database_abs_path
-
 connection = imas.DBEntry(
     getBackendID(args.backend), args.database, args.shot, args.run, args.user
 )
@@ -110,6 +99,7 @@ if idsObjEquilibrium.time is not None:
     ViewEquilibrium.viewMagneticPoloidalFlux(ax, plotRho=args.rho)
 
     if args.info is True:
+        hostdir = getDatabasePath(args)
         ViewEquilibrium.viewPulseInfo(
             ax, title, hostdir, args.shot, args.run, args.time
         )
@@ -117,14 +107,10 @@ if idsObjEquilibrium.time is not None:
     ax.plot()
 
     if args.save:
-        try:
-            fname = "Equilibrium_shot_{0}_run_{1}_time_{2:.1f}.png".format(
-                args.shot, args.run, args.time
-            )
-            canvas.save(fname)
-            logger.info(f"----> Figure saved to {fname}")
-        except Exception:
-            logger.error("The figure could not be saved (check local permissions).")
+        fname = "Equilibrium_shot_{0}_run_{1}_time_{2:.1f}.png".format(
+            args.shot, args.run, args.time
+        )
+        canvas.save(fname)
     else:
         canvas.show()
 else:
