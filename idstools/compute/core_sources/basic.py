@@ -21,7 +21,7 @@ class CoreSourcesCompute:
         Returns:
             The function `getSources` returns a dictionary containing information about the sources. The dictionary has the following structure:
             {0: {'energy_flux': 22081836.173650958,
-                'ions': {0: 
+                'ions': {0:
                             {'a': 2.0,
                             'energy_flux': None,
                             'particles_flux': 4.947616643196025e+21,
@@ -38,41 +38,55 @@ class CoreSourcesCompute:
         for sourceIndex, source in enumerate(self.ids.source):
             sourceDict = {
                 "name": source.identifier.name,
+                "particles_flux": None,
+                "energy_flux": None,
+                "ions": {},
             }
-            if len(source.profiles_1d[0].electrons.particles) != 0:
-                sourceDict["particles_flux"] = np.trapz(
-                    source.profiles_1d[0].electrons.particles,
-                    source.profiles_1d[0].grid.volume,
-                )
-            else:
-                sourceDict["particles_flux"] = None
-            if len(source.profiles_1d[0].electrons.energy) != 0:
-                sourceDict["energy_flux"] = np.trapz(
-                    source.profiles_1d[0].electrons.energy,
-                    source.profiles_1d[0].grid.volume,
-                )
-            else:
-                sourceDict["energy_flux"] = None
-            ionsDict = {}
-            for ionIndex, ion in enumerate(source.profiles_1d[0].ion):
-                ionDict = {
-                    "a": ion.element[0].a,
-                    "z_n": ion.element[0].z_n,
-                    "z_ion": ion.z_ion,
-                }
-                if len(ion.particles) != 0:
-                    ionDict["particles_flux"] = np.trapz(
-                        ion.particles, source.profiles_1d[0].grid.volume
+            if (len(source.profiles_1d)) != 0:
+                if len(source.profiles_1d[0].electrons.particles) != 0:
+                    gridVolume = (
+                        np.asarray(
+                            [np.nan] * len(source.profiles_1d[0].electrons.particles)
+                        )
+                        if len(source.profiles_1d[0].grid.volume) == 0
+                        else source.profiles_1d[0].grid.volume
                     )
-                else:
-                    ionDict["particles_flux"] = None
-                if len(ion.energy) != 0:
-                    ionDict["energy_flux"] = np.trapz(
-                        ion.energy, source.profiles_1d[0].grid.volume
+                    sourceDict["particles_flux"] = np.trapz(
+                        source.profiles_1d[0].electrons.particles,
+                        gridVolume,
                     )
-                else:
-                    ionDict["energy_flux"] = None
-                ionsDict[ionIndex] = ionDict
-            sourceDict["ions"] = ionsDict
+                if len(source.profiles_1d[0].electrons.energy) != 0:
+                    gridVolume = (
+                        np.asarray(
+                            [np.nan] * len(source.profiles_1d[0].electrons.energy)
+                        )
+                        if len(source.profiles_1d[0].grid.volume) == 0
+                        else source.profiles_1d[0].grid.volume
+                    )
+                    sourceDict["energy_flux"] = np.trapz(
+                        source.profiles_1d[0].electrons.energy,
+                        gridVolume,
+                    )
+                ionsDict = {}
+                for ionIndex, ion in enumerate(source.profiles_1d[0].ion):
+                    ionDict = {
+                        "a": ion.element[0].a,
+                        "z_n": ion.element[0].z_n,
+                        "z_ion": ion.z_ion,
+                    }
+                    if len(ion.particles) != 0:
+                        ionDict["particles_flux"] = np.trapz(
+                            ion.particles, source.profiles_1d[0].grid.volume
+                        )
+                    else:
+                        ionDict["particles_flux"] = None
+                    if len(ion.energy) != 0:
+                        ionDict["energy_flux"] = np.trapz(
+                            ion.energy, source.profiles_1d[0].grid.volume
+                        )
+                    else:
+                        ionDict["energy_flux"] = None
+                    ionsDict[ionIndex] = ionDict
+                sourceDict["ions"] = ionsDict
             sourcesDict[sourceIndex] = sourceDict
         return sourcesDict
