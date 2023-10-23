@@ -706,19 +706,24 @@ class CoreProfilesCompute:
         pressureIonFastParallel = 0.0
         pressureIonFastPerpendicular = 0.0
         for ion in self.ids.profiles_1d[0].ion:
+            if len(ion.pressure_thermal) == 0:
+                logger.warn("Empty profiles_1d[0].ion.pressure_thermal")
+            if len(ion.pressure_fast_parallel) == 0:
+                logger.warn("Empty profiles_1d[0].ion.pressure_fast_parallel")
+            if len(ion.pressure_fast_perpendicular) == 0:
+                logger.warn("Empty profiles_1d[0].ion.pressure_fast_perpendicular")
             pressureIonThermal = pressureIonThermal + ion.pressure_thermal
             pressureIonFastParallel = (
-                pressureIonFastParallel + ion.pressure_fast_parallel
+                pressureIonFastParallel + np.asarray([np.nan] * nrho)
+                if len(ion.pressure_fast_parallel) == 0
+                else ion.pressure_fast_parallel
             )
             pressureIonFastPerpendicular = (
-                pressureIonFastPerpendicular + ion.pressure_fast_perpendicular
+                pressureIonFastPerpendicular + np.asarray([np.nan] * nrho)
+                if len(ion.pressure_fast_perpendicular) == 0
+                else ion.pressure_fast_perpendicular
             )
-        if len(pressureIonThermal) == 0:
-            logger.warn("Empty profiles_1d[0].ion.pressure_thermal")
-        if len(pressureIonFastParallel) == 0:
-            logger.warn("Empty profiles_1d[0].ion.pressure_fast_parallel")
-        if len(pressureIonFastPerpendicular) == 0:
-            logger.warn("Empty profiles_1d[0].ion.pressure_fast_perpendicular")
+
         pressureIonThermal = (
             np.asarray([np.nan] * nrho)
             if len(pressureIonThermal) == 0

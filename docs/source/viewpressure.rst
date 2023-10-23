@@ -4,7 +4,7 @@ viewpressure
 *viewpressure* Display the plasma kinetic profiles from the core_profiles IDSs, It shows ion and electrons pressure properties from core_profiles. 
 
 
-Syntax viewneutron
+Syntax viewpressure
 ~~~~~~~~~~~~~~~~~~
 
     .. code-block:: bash   
