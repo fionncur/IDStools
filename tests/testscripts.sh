@@ -92,8 +92,8 @@ for i in ${tests[@]}; do
 
 done
 
-echo TESTING: viewwall.py wall iter
-viewwall.py wall iter || exit 1
+echo TESTING: viewwall wall iter
+viewwall wall iter || exit 1
 
 # echo =====================================idscp=====================================================
 # echo TESTING: idscp -si 131024 -ri 10 -so 145000 -ro 2 -f
