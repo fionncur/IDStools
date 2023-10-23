@@ -74,7 +74,26 @@ for i in ${tests[@]}; do
 
     echo TESTING: idssize -s $shot -r $run
     idssize -s $shot -r $run || exit 1
+
+    echo TESTING: idsperf $shot $run equilibrium
+    idsperf $shot $run equilibrium || exit 1
+
+    echo TESTING: viewfluxes $shot $run -m CLOSEST
+    viewfluxes $shot $run -m CLOSEST || exit 1
+
+    echo TESTING: viewneutron -s $shot -r $run -t 450 --save
+    viewneutron -s $shot -r $run -t 450 --save || exit 1
+
+    echo TESTING: viewpressure $shot $run --save
+    viewpressure $shot $run --save || exit 1
+
+    echo TESTING: viewsources $shot $run --save
+    viewsources $shot $run --save || exit 1
+
 done
+
+echo TESTING: viewwall.py wall iter
+viewwall.py wall iter || exit 1
 
 # echo =====================================idscp=====================================================
 # echo TESTING: idscp -si 131024 -ri 10 -so 145000 -ro 2 -f

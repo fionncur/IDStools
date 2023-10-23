@@ -27,7 +27,7 @@ Example viewwall
 ~~~~~~~~~~~~~~~~
     .. code-block:: bash
 
-        python viewwall.py wall iter
+        $ viewwall wall iter
 
     .. image:: _static/images/wallview_iter.png
         :alt: image not found
@@ -35,7 +35,7 @@ Example viewwall
 
     .. code-block:: bash
 
-        python viewwall.py database -u schneim --database jet -s 92436 -r 271
+        $ viewwall database -u schneim --database jet -s 92436 -r 271
 
     .. image:: _static/images/wallview_jet.png
         :alt: image not found
