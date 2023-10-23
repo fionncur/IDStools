@@ -5,6 +5,7 @@ This module provides compute functions and classes for core_transport ids data
 
 """
 import logging
+import numpy as np
 
 logger = logging.getLogger("module")
 
@@ -45,16 +46,30 @@ class CoreTransportCompute:
                 "flux_multiplier": model.flux_multiplier,
             }
             if len(model.profiles_1d[0].electrons.particles.flux) != 0:
+                gridFluxSurface = (
+                    np.asarray(
+                        [np.nan] * len(model.profiles_1d[0].electrons.particles.flux)
+                    )
+                    if len(model.profiles_1d[0].grid_flux.surface) == 0
+                    else model.profiles_1d[0].grid_flux.surface
+                )
+
                 fluxDict["particles_flux"] = (
-                    model.profiles_1d[0].electrons.particles.flux
-                    * model.profiles_1d[0].grid_flux.surface
+                    model.profiles_1d[0].electrons.particles.flux * gridFluxSurface
                 )[-1]
             else:
                 fluxDict["particles_flux"] = None
             if len(model.profiles_1d[0].electrons.energy.flux) != 0:
+                gridFluxSurface = (
+                    np.asarray(
+                        [np.nan] * len(model.profiles_1d[0].electrons.energy.flux)
+                    )
+                    if len(model.profiles_1d[0].grid_flux.surface) == 0
+                    else model.profiles_1d[0].grid_flux.surface
+                )
+
                 fluxDict["energy_flux"] = (
-                    model.profiles_1d[0].electrons.energy.flux
-                    * model.profiles_1d[0].grid_flux.surface
+                    model.profiles_1d[0].electrons.energy.flux * gridFluxSurface
                 )[-1]
             else:
                 fluxDict["energy_flux"] = None
