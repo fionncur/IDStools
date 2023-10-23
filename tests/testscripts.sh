@@ -88,7 +88,7 @@ for i in ${tests[@]}; do
     viewpressure $shot $run --save || exit 1
 
     echo TESTING: viewsources $shot $run
-    viewsources $shot $run --save || exit 1
+    viewsources $shot $run || exit 1
 
 done
 
