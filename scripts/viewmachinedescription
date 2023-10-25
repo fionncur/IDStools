@@ -11,9 +11,9 @@ from idstools.utils.clihelper import getBackendID
 from idstools.utils.clihelper import imasParser
 from idstools.set_logger import set_logger
 
-from idstools.view.common.basic import Canvas
-from idstools.view.pf_active.basic import PFActiveView
-from idstools.view.wall.basic import WallView
+from idstools.view.common import Canvas
+from idstools.view.pf_active import PFActiveView
+from idstools.view.wall import WallView
 
 
 # ----------------------------------------------------------------------
@@ -24,7 +24,6 @@ logger = set_logger("mdplot", level="INFO")
 
 
 def loadMD(d, s):
-
     for k, v in d.items():
         if k not in s:
             continue
@@ -53,7 +52,6 @@ def loadMD(d, s):
 
 
 def plotMD(d):
-
     # Initialization
     canvas = Canvas(1, 1)
     ax = canvas.add_axes(
@@ -92,7 +90,6 @@ def plotMD(d):
 
 
 def main():
-
     logger.info("Start of MDPLOT")
 
     #
@@ -124,7 +121,6 @@ def main():
 
 
 if __name__ == "__main__":
-
     parser = argparse.ArgumentParser(
         description="---- Display the plasma equilibrium from the equilibrium IDS",
         parents=[imasParser],

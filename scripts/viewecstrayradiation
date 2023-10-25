@@ -11,16 +11,16 @@ sys.path.append(root_path)
 from idstools.utils.clihelper import getBackendID
 from idstools.utils.clihelper import imasParser
 
-from idstools.database.basic import readScenario
+from idstools.database import readScenario
 
-from idstools.view.common.basic import Canvas
-from idstools.view.core_profiles.basic import CoreProfilesView
-from idstools.view.domain.ecstray.basic import EcStrayView
-from idstools.view.equilibrium.basic import EquilibriumView
-from idstools.view.tbd.basic import TbdView
-from idstools.view.waves.basic import WavesView
+from idstools.view.common import Canvas
+from idstools.view.core_profiles import CoreProfilesView
+from idstools.view.domain.ecstray import EcStrayView
+from idstools.view.equilibrium import EquilibriumView
+from idstools.view.tbd import TbdView
+from idstools.view.waves import WavesView
 
-from idstools.input_processing.basic import (
+from idstools.input_processing import (
     beam_wall_crossing,
     check_rays_into_divertor,
     read_launching_parameters,

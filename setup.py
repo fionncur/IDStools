@@ -49,7 +49,7 @@ setup(
         "scripts/dblist",
         "scripts/dbscraper",
         "scripts/dbselector",
-        "scripts/viewidscompo",
+        "scripts/viewplasmacompo",
         "scripts/idscp",
         "scripts/idsdiff",
         "scripts/idslist",

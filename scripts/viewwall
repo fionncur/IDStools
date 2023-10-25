@@ -19,8 +19,8 @@ import imas
 
 from idstools.utils.clihelper import getBackendID, imasParser
 from idstools.utils.idslogger import setupLogger
-from idstools.view.common.basic import Canvas
-from idstools.view.wall.basic import WallView
+from idstools.view.common import Canvas
+from idstools.view.wall import WallView
 
 WallDetails = {
     "iter": ("ITER_MD", 116000, 2, "public"),

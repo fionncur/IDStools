@@ -10,7 +10,7 @@ import numpy as np
 
 root_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(root_path)
-from idstools.database.basic import DBMaster
+from idstools.database import DBMaster
 from idstools.utils.idshelper import getAvailableIdsAndTimes
 from idstools.utils.idslogger import setupLogger
 
@@ -128,7 +128,7 @@ def printTimes(dbs, args, print_times=False, shotNumber=None, runNumber=None):
                             shot,
                             run,
                         )
-                        err, _ = idsObject.open_env(args.user,dbname, dv)
+                        err, _ = idsObject.open_env(args.user, dbname, dv)
                         if err != 0:
                             logger.critical(
                                 f"Shot {shot}, run {run} for user {args.user} and database {dbname} is not reachable ----> abort!",
@@ -179,6 +179,7 @@ def printTimes(dbs, args, print_times=False, shotNumber=None, runNumber=None):
                                 )
 
                         idsObject.close()
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
@@ -247,7 +248,7 @@ if __name__ == "__main__":
         "-u",
         "--user",
         dest="user",
-        default="public", #os.getenv("USER"),
+        default="public",  # os.getenv("USER"),
         help="Show databases of specified user \t\t(default=%(default)s)",
     )
     parser.add_argument(
@@ -287,17 +288,23 @@ if __name__ == "__main__":
     dbs = DBMaster.getDatabaseFiles(args.user, args.database, args.version, backends)
     if args.cmd == "list":
         print_list(dbs, args.shot, args.compact, args.timestamp)
-        
+
     if args.cmd == "slices":
-        printTimes(dbs, args, print_times=False, shotNumber=args.shot, runNumber=args.run)
+        printTimes(
+            dbs, args, print_times=False, shotNumber=args.shot, runNumber=args.run
+        )
 
     if args.cmd == "times":
-        printTimes(dbs, args, print_times=True, shotNumber=args.shot, runNumber=args.run)
+        printTimes(
+            dbs, args, print_times=True, shotNumber=args.shot, runNumber=args.run
+        )
 
     if args.cmd == "databases":
         databasesWithVersions = DBMaster.getDatabasesWithVersions(args.user)
         if args.version is not None:
-            databasesWithVersions = filter(lambda x: (args.version in x[1]), databasesWithVersions)
+            databasesWithVersions = filter(
+                lambda x: (args.version in x[1]), databasesWithVersions
+            )
         for databaseName, versions in databasesWithVersions:
             print(
                 extended(databaseName, DATABASE_STR_LEN)

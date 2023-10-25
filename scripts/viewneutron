@@ -9,11 +9,11 @@ import imas
 
 root_path = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(root_path)
-from idstools.compute.common.basic import getNearestTime
+from idstools.compute.common import getNearestTime
 from idstools.utils.clihelper import getBackendID, getDatabasePath, imasParser
 from idstools.utils.idslogger import setupLogger
-from idstools.view.common.basic import Canvas
-from idstools.view.distribution_sources.basic import DistributionSourcesView
+from idstools.view.common import Canvas
+from idstools.view.distribution_sources import DistributionSourcesView
 
 # Management of input arguments
 parser = argparse.ArgumentParser(

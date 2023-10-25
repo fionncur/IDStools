@@ -5,7 +5,7 @@ Analysis tools aid in the examination of IDS data in terms of plasma composition
 .. toctree::
    :maxdepth: 1
 
-   viewidscompo
+   viewplasmacompo
    viewecstrayradiation
    viewequilibrium
    viewfluxes

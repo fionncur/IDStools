@@ -44,15 +44,15 @@ for i in ${tests[@]}; do
     arr=(${i//;/ })
     shot=${arr[0]}
     run=${arr[1]}
-    echo =====================================viewidscompo=====================================================
-    echo TESTING: shot=$shot : run=$run viewidscompo -s $shot -r $run
-    viewidscompo -s $shot -r $run || exit 1
+    echo =====================================viewplasmacompo=====================================================
+    echo TESTING: shot=$shot : run=$run viewplasmacompo -s $shot -r $run
+    viewplasmacompo -s $shot -r $run || exit 1
     echo ==========================================================================================
-    echo TESTING: shot=$shot : run=$run viewidscompo -s $shot -r $run --i
-    viewidscompo -s $shot -r $run --i || exit 1
+    echo TESTING: shot=$shot : run=$run viewplasmacompo -s $shot -r $run --i
+    viewplasmacompo -s $shot -r $run --i || exit 1
     echo ==========================================================================================
-    echo TESTING: shot=$shot : run=$run viewidscompo -s $shot -r $run --debug
-    viewidscompo -s $shot -r $run --debug || exit 1
+    echo TESTING: shot=$shot : run=$run viewplasmacompo -s $shot -r $run --debug
+    viewplasmacompo -s $shot -r $run --debug || exit 1
 
     echo =====================================viewequilibrium=====================================================
     echo TESTING: shot=$shot : run=$run viewequilibrium -s $shot -r $run --rho --pfcoils --info --save

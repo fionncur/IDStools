@@ -14,7 +14,7 @@ sys.path.append(root_path)
 
 from idstools.utils.clihelper import getBackendID, imasParser
 from idstools.utils.idslogger import setupLogger
-from idstools.view.core_transport.basic import CoreTransportView
+from idstools.view.core_transport import CoreTransportView
 
 logger = setupLogger("module", stdout_level=logging.INFO)
 
