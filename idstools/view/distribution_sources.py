@@ -3,8 +3,8 @@ import logging
 
 import matplotlib.pyplot as plt
 
-from ..compute.distribution_sources import DistributionSourcesCompute
-from .common import BasePlot
+from idstools.compute.distribution_sources import DistributionSourcesCompute
+from idstools.view.common import BasePlot
 
 logger = logging.getLogger(f"module.{__name__}")
 

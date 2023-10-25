@@ -1,5 +1,5 @@
-from ..compute.edge_profiles import EdgeProfilesCompute
-from .common import Console
+from idstools.compute.edge_profiles import EdgeProfilesCompute
+from idstools.view.common import Console
 
 
 class EdgeProfilesView(Console):

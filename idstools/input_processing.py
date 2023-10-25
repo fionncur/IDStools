@@ -21,7 +21,7 @@ def read_launching_parameters(filelaunchers):
     # and have no time base (in ec_waveforms.yaml the only time point is 0.0 sec).
 
     from waveform_cooker import add_dynamic
-    from ..compute.common import xyz2cyl, cyl2xyz
+    from idstools.compute.common import xyz2cyl, cyl2xyz
 
     launching_parameters = {}
 

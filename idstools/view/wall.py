@@ -1,6 +1,6 @@
 import matplotlib.patches as patches
 from matplotlib.path import Path
-from ..compute.wall import WallCompute
+from idstools.compute.wall import WallCompute
 
 
 class WallView:

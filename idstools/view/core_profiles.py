@@ -1,8 +1,9 @@
 # plot_ne0 and plot density profile function
 # not ok src/view/core_profiles/functions.py
 import logging
-from ..compute.core_profiles import CoreProfilesCompute
-from .common import Console
+
+from idstools.compute.core_profiles import CoreProfilesCompute
+from idstools.view.common import Console
 
 logger = logging.getLogger("module")
 
