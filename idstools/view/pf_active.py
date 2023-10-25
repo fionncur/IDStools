@@ -8,7 +8,7 @@ import logging
 from matplotlib.patches import Rectangle
 import matplotlib.pyplot as plt
 
-from idstools.compute.pf_active import PfActiveCompute
+from ..compute.pf_active import PfActiveCompute
 
 logger = logging.getLogger("module")
 

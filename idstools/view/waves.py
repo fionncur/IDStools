@@ -1,5 +1,5 @@
 from idstools.view.common import BasePlot
-from idstools.compute.waves import WavesCompute
+from ..compute.waves import WavesCompute
 
 
 import logging

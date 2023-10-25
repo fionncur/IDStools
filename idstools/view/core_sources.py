@@ -1,6 +1,6 @@
 import logging
 
-from idstools.compute.core_sources import CoreSourcesCompute
+from ..compute.core_sources import CoreSourcesCompute
 
 logger = logging.getLogger(f"module.{__name__}")
 

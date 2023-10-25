@@ -1,4 +1,4 @@
-from idstools.compute.edge_profiles import EdgeProfilesCompute
+from ..compute.edge_profiles import EdgeProfilesCompute
 from idstools.view.common import Console
 
 

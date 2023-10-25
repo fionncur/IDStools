@@ -1,6 +1,6 @@
 import logging
 
-from idstools.compute.core_transport import CoreTransportCompute
+from ..compute.core_transport import CoreTransportCompute
 
 logger = logging.getLogger(f"module.{__name__}")
 
