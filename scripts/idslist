@@ -14,7 +14,6 @@ sys.path.append(root_path)
 
 
 from idstools.utils.idshelper import (
-    getAvailableIdsAndTimes,
     getAvailableIdsAndOccurrences,
 )
 from idstools.utils.idslogger import setupLogger
@@ -87,13 +86,15 @@ if args.yaml_format:
             print("     time:             [static]")
 
 else:
-    idsObject = imas.DBEntry(
-        args.backend,
+    connection = imas.DBEntry(
+        getBackendID(args.backend),
         args.database,
         args.shot,
         args.run,
+        user_name=args.user,
+        data_version=args.version,
     )
-    err, n = idsObject.open()
+    err, n = connection.open()
     if err != 0:
         logger.critical(
             f"Shot {str(args.shot)}, run {str(args.run)} for user_or_path = {args.user} and database = {args.database} does not exist",
@@ -102,10 +103,14 @@ else:
             "----> Aborted.",
         )
         exit()
-
-    availableIdsAndTimes = getAvailableIdsAndTimes(idsObject)
     question_string = "?"
-    for idsName, timeArray in availableIdsAndTimes:
+
+    for idsName, oc in getAvailableIdsAndOccurrences(connection):
+        homogeneous_time = connection.partial_get(
+            idsName, "ids_properties/homogeneous_time", occurrence=oc
+        )
+        timeArray = connection.partial_get(idsName, "time", occurrence=oc)
+        
         if len(timeArray) == 1 and np.isnan(timeArray[0]):
             print(f"{idsName:15}:  {question_string:5} slices: heterogeneous IDS ")
         elif len(timeArray) == 1 and timeArray[0] == np.NINF:

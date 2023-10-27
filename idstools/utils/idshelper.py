@@ -189,47 +189,6 @@ def getAvailableIdsAndOccurrences(dbEntryObject: imas.DBEntry, time_mode=None):
     return availableidslist
 
 
-def getAvailableIdsAndTimes(idsObject) -> list:
-    """
-    This function retrieves available IDs and their corresponding time arrays from an IDS object.
-
-    Args:
-        idsObject : The `idsObject` is used to access idses. This function takes this object as input and returns a list of tuples containing available IDS names and their corresponding time arrays.
-
-    Returns:
-        a list of tuples, where each tuple contains an IDS name and an array of times associated with that IDS.
-    """
-
-    def idsProperties(obj):
-        try:
-            obj.__getattribute__("ids_properties")
-            return True
-        except Exception:
-            return False
-
-    predicateIdsProperties = lambda x: idsProperties(x)
-    idsWithPropertiesDict = inspect.getmembers(idsObject, predicateIdsProperties)
-    result = []
-    for _idsName, idsPropertiesObject in idsWithPropertiesDict:
-        try:
-            maxOccurrences = idsPropertiesObject.getMaxOccurrences()
-
-        except AttributeError:
-            maxOccurrences = 1
-        for occurrence in range(maxOccurrences + 1):
-            idsName = _idsName if occurrence == 0 else f"{_idsName}/{str(occurrence)}"
-            try:
-                (_, timeArray) = idsObject.getTimes(idsName)
-            except Exception as exc:
-                timeArray = []
-                logger.critical(
-                    f"ERROR! IDS {idsName} : Reading time array fails due to following problem : {exc}"
-                )
-            if timeArray is not None and len(timeArray):
-                result.append((idsName, timeArray))
-    return result
-
-
 def resampleIndices(
     dbin: str, dbout: str, idsname: str, start: int = 0, stop: int = None, step: int = 1
 ):
