@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
 # $ ids_compo -s 131047 -r 4
-# !   No edge_profiles IDS in the data-entry.
+# No edge_profiles IDS in the data-entry.
 # core +  edge  -
 #    ------------
 # core_profiles

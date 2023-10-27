@@ -20,6 +20,9 @@ echo "Tools testing"
 chmod +x ./tests/testscripts.sh 
 try source ./tests/testscripts.sh || exit 1
 
+try module load IMAS
+try module unload -f IDStools
+
 echo "Run pytest for functions testing"
 try python3 -m pytest --junit-xml=${PREFIX_DIR}/test_report.xml tests || exit 1
 
