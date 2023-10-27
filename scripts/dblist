@@ -124,16 +124,21 @@ def printTimes(dbs, args, print_times=False, shotNumber=None, runNumber=None):
                             printed_shot = True
 
                         print(TAB * 4 + " Run: " + extended(str(run), RUN_STR_LEN))
-                        idsObject = imas.ids(
+                        idsObject = imas.DBEntry(
+                            backend,
+                            dbname,
                             shot,
                             run,
                         )
-                        err, _ = idsObject.open_env(args.user, dbname, dv)
+                        err, n = idsObject.open()
                         if err != 0:
                             logger.critical(
-                                f"Shot {shot}, run {run} for user {args.user} and database {dbname} is not reachable ----> abort!",
+                                f"Shot {str(shot)}, run {str(run)} for user_or_path = {args.user} and database = {dbname} does not exist",
                             )
-                            sys.exit(err)
+                            logger.critical(
+                                "----> Aborted.",
+                            )
+                            exit()
 
                         availableIdsAndTimes = getAvailableIdsAndTimes(idsObject)
                         for idsname, times in availableIdsAndTimes:

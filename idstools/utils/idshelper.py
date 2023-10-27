@@ -189,12 +189,12 @@ def getAvailableIdsAndOccurrences(dbEntryObject: imas.DBEntry, time_mode=None):
     return availableidslist
 
 
-def getAvailableIdsAndTimes(idsObject: imas.ids) -> list:
+def getAvailableIdsAndTimes(idsObject) -> list:
     """
     This function retrieves available IDs and their corresponding time arrays from an IDS object.
 
     Args:
-        idsObject (imas.ids): The `idsObject` <class 'imas.ids.ids'> parameter is an object of the `imas.ids` class, which is used to access idses. This function takes this object as input and returns a list of tuples containing available IDS names and their corresponding time arrays.
+        idsObject : The `idsObject` is used to access idses. This function takes this object as input and returns a list of tuples containing available IDS names and their corresponding time arrays.
 
     Returns:
         a list of tuples, where each tuple contains an IDS name and an array of times associated with that IDS.
