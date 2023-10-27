@@ -58,7 +58,7 @@ echo "----------------------------------------------------------"
 
 chmod -R u+w /mnt/bamboo_deploy/easybuild
 # rm -rf /mnt/bamboo_deploy/easybuild
-EB_OPTS="--check-style --modules-tool=EnvironmentModules --module-syntax=Tcl --allow-modules-tool-mismatch --allow-use-as-root-and-accept-consequences --prefix=/mnt/bamboo_deploy/easybuild --optarch=Intel:axAVX,CORE-AVX2;GCC:march=sandybridge"
+EB_OPTS="--debug --check-style --modules-tool=EnvironmentModules --module-syntax=Tcl --allow-modules-tool-mismatch --allow-use-as-root-and-accept-consequences --prefix=/mnt/bamboo_deploy/easybuild --optarch=Intel:axAVX,CORE-AVX2;GCC:march=sandybridge"
 write_headers_file
 
 set -e
