@@ -28,7 +28,7 @@ Syntax viewequilibrium
     -t TIME, --time TIME  Time (default=middle)
     -o OCCURRENCE, --occurrence OCCURRENCE
                             Occurrence number (default=0)
-    --rho                 Show pf coils overlay on the plot
+    --rho                 Show rho overlay on the plot
     --pfcoils             Show pf coils overlay on the plot
     --save                Save figure at default location
     -i, --info            Adds all extra provenance info to the plot

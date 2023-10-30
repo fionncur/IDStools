@@ -76,8 +76,8 @@ if __name__ == "__main__":
     parser.add_argument(
         "-o", "--outputRun", type=int, help="Output run number for checking perf of put"
     )
-    parser.add_argument("shot", type=int, help="Shot number")
-    parser.add_argument("run", type=int, help="Run number")
+    parser.add_argument("-s", "--shot", help="Shot number", required=True, type=int)
+    parser.add_argument("-r", "--run", help="Run number", required=True, type=int)
     parser.add_argument(
         "ids",
         nargs="*",

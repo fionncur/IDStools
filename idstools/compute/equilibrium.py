@@ -76,6 +76,9 @@ class EquilibriumCompute:
             for ir in range(nr):
                 z2d[ir, :] = z1d
 
+        if np.all(psi2d==0.0):
+            logger.error("All values of psi2d are 0. No contour levels were found within the data range, Can not plot contour")
+            return None
         if np.size(r2d) != np.size(z2d) or np.size(r2d) != np.size(psi2d):
             logger.error(
                 f"r, z and psi have not the same dimension in equilibrium.time_slice[{timeSlice}].profiles_2d[{profiles2DIndex}]"

@@ -36,7 +36,7 @@ parser.add_argument(
 )
 parser.add_argument(
     "--rho",
-    help="Show pf coils overlay on the plot",
+    help="Show rho overlay on the plot",
     action="store_true",
 )
 parser.add_argument(
@@ -84,19 +84,24 @@ if idsObjEquilibrium.time is not None:
     idsObjEquilibrium.time_slice[0] = connection.partial_get(
         "equilibrium", f"time_slice({str(timeIndex)})", args.occurrence
     )
-    title = "2D Equilibrium"
-    canvas = Canvas(1, 1)
-    ax = canvas.add_axes(title="", xlabel="", row=0, col=0)
+    idsObjEquilibrium = connection.get("equilibrium")
+    ViewEquilibrium = EquilibriumView(idsObjEquilibrium)
 
     if args.pfcoils is True:
         idsObjPfActive = imas.pf_active()
         idsObjPfActive.coil = connection.partial_get("pf_active", "coil")
         ViewPfCoils = PFActiveView(idsObjPfActive)
+
+
+
+    title = "2D Equilibrium"
+    canvas = Canvas(1, 1)
+    ax = canvas.add_axes(title="", xlabel="", row=0, col=0)
+    
+    if args.pfcoils is True:
         ViewPfCoils.viewActivePfCoils(ax)
         title += " Active PF Coils"
-
-    idsObjEquilibrium = connection.get("equilibrium")
-    ViewEquilibrium = EquilibriumView(idsObjEquilibrium)
+    
     ViewEquilibrium.viewMagneticPoloidalFlux(ax, plotRho=args.rho)
 
     if args.info is True:
@@ -105,7 +110,6 @@ if idsObjEquilibrium.time is not None:
             ax, title, hostdir, args.shot, args.run, args.time
         )
     ax.set_title(title)
-    ax.plot()
 
     if args.save:
         fname = "Equilibrium_shot_{0}_run_{1}_time_{2:.1f}.png".format(

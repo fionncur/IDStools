@@ -35,9 +35,7 @@ git checkout -b feature/your-feature
 #### Code organization
  - Code is organized in two main packages, `compute` and `view`
  - All calculation operations on IDS to get meaningful data are added to `compute`
- - `compute` and `view` package is divided as per idses
- - For all basic operations you can add functions in `Compute` class in `basic.py` module
- - if you have complex function which doesn't fit in `basic.py`, you can alway add new module and class with meaningful name
+ - There is a distinct module in the `compute` and `view` packages for every IDS.
  - Each `Compute` class receives respective ids object to operate on
  - `domain` package is used if you have operations on 2 or more idses and need return the result
 

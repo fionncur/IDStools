@@ -48,7 +48,7 @@ for i in ${tests[@]}; do
     echo =====================================viewplasmacompo=====================================================
     echo TESTING: shot=$shot : run=$run viewplasmacompo -s $shot -r $run
     viewplasmacompo -s $shot -r $run || exit 1
-    echo ==========================================================================================
+    echo =========================================================================================================
     echo TESTING: shot=$shot : run=$run viewplasmacompo -s $shot -r $run --i
     viewplasmacompo -s $shot -r $run --i || exit 1
     echo ==========================================================================================
@@ -63,33 +63,41 @@ for i in ${tests[@]}; do
     echo TESTING: idsprint -s $shot -r $run equilibrium
     idsprint -s $shot -r $run equilibrium || exit 1
 
-    echo =====================================idslist=====================================================
+    echo =====================================idslist============================================================
     echo TESTING: idslist -s $shot -r $run
     idslist -s $shot -r $run || exit 1
 
+    echo ================================================idslist=========================================================
     echo TESTING: idslist -s $shot -r $run --yaml-format
     idslist -s $shot -r $run --yaml-format || exit 1
 
+    echo ============================================idssize=============================================================
     echo TESTING: idssize -s $shot -r $run equilibrium
     idssize -s $shot -r $run equilibrium || exit 1
 
+    echo =========================================================================================================
     echo TESTING: idssize -s $shot -r $run
     idssize -s $shot -r $run || exit 1
 
-    echo TESTING: idsperf $shot $run equilibrium
-    idsperf $shot $run equilibrium || exit 1
+    echo =============================================idsperf============================================================
+    echo TESTING: idsperf -s $shot -r $run equilibrium
+    idsperf -s $shot -r $run equilibrium || exit 1
 
-    echo TESTING: viewfluxes $shot $run -m CLOSEST
-    viewfluxes $shot $run -m CLOSEST || exit 1
+    echo =============================================viewfluxes============================================================
+    echo TESTING: viewfluxes -s $shot -r $run -m CLOSEST
+    viewfluxes -s $shot -r $run -m CLOSEST || exit 1
 
+    echo ================================================viewneutron=========================================================
     echo TESTING: viewneutron -s $shot -r $run -t 450 --save
     viewneutron -s $shot -r $run -t 450 --save || exit 1
 
-    echo TESTING: viewpressure $shot $run --save
-    viewpressure $shot $run --save || exit 1
+    echo ============================================viewpressure=============================================================
+    echo TESTING: viewpressure -s $shot -r $run --save
+    viewpressure -s $shot -r $run --save || exit 1
 
-    echo TESTING: viewsources $shot $run
-    viewsources $shot $run || exit 1
+    echo =============================================viewsources============================================================
+    echo TESTING: viewsources -s $shot -r $run
+    viewsources -s $shot -r $run || exit 1
 
 done
 
