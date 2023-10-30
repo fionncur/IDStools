@@ -188,6 +188,42 @@ def getAvailableIdsAndOccurrences(dbEntryObject: imas.DBEntry, time_mode=None):
                 availableidslist.append((idstype, occ))
     return availableidslist
 
+def getAvailableIdsAndTimes(dbEntryObject: imas.DBEntry) -> list:
+    """
+    The function `getAvailableIdsAndTimes` retrieves available IDS names and corresponding time arrays from a given `dbEntryObject`.
+    
+    Args:
+        dbEntryObject (imas.DBEntry): The `dbEntryObject` parameter is an object of type `imas.DBEntry`.
+    
+    Returns:
+        a list of tuples. Each tuple contains an IDS name and a corresponding time array.
+    """
+
+    result = []
+    for _idsName in getIdsTypes():
+        maxOccurrences = eval(f"imas.{_idsName}.getMaxOccurrences()")
+        for occurrence in range(maxOccurrences + 1):
+            timeArray = None
+            idsName = _idsName if occurrence == 0 else f"{_idsName}/{occurrence}"
+            try:
+                homogeneous_time = dbEntryObject.partial_get(
+                    _idsName, "ids_properties/homogeneous_time", occurrence=occurrence
+                    )
+                if homogeneous_time == imas.imasdef.IDS_TIME_MODE_UNKNOWN:
+                    timeArray =  []
+                if homogeneous_time == imas.imasdef.IDS_TIME_MODE_HETEROGENEOUS:
+                    timeArray =  [np.NaN] 
+                if homogeneous_time == imas.imasdef.IDS_TIME_MODE_HOMOGENEOUS:
+                    timeArray = dbEntryObject.partial_get(_idsName, "time")
+                if homogeneous_time == imas.imasdef.IDS_TIME_MODE_INDEPENDENT:
+                    timeArray =  [np.NINF] 
+            except Exception as exc:
+                timeArray = []
+                logger.info(f"ERROR! IDS {idsName} : Reading time array fails due to following problem : {exc}")
+            if timeArray is not None and len(timeArray):
+                result.append((idsName, timeArray))
+    return result
+
 
 def resampleIndices(
     dbin: str, dbout: str, idsname: str, start: int = 0, stop: int = None, step: int = 1

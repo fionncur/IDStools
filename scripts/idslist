@@ -14,7 +14,7 @@ sys.path.append(root_path)
 
 
 from idstools.utils.idshelper import (
-    getAvailableIdsAndOccurrences,
+    getAvailableIdsAndOccurrences,getAvailableIdsAndTimes
 )
 from idstools.utils.idslogger import setupLogger
 from idstools.utils.clihelper import getBackendID, imasParser
@@ -105,11 +105,9 @@ else:
         exit()
     question_string = "?"
 
-    for idsName, oc in getAvailableIdsAndOccurrences(connection):
-        homogeneous_time = connection.partial_get(
-            idsName, "ids_properties/homogeneous_time", occurrence=oc
-        )
-        timeArray = connection.partial_get(idsName, "time", occurrence=oc)
+    availableIdsAndTimes = getAvailableIdsAndTimes(connection)
+    question_string = "?"
+    for idsName, timeArray in availableIdsAndTimes:
         
         if len(timeArray) == 1 and np.isnan(timeArray[0]):
             print(f"{idsName:15}:  {question_string:5} slices: heterogeneous IDS ")

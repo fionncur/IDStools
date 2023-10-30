@@ -12,10 +12,9 @@ import numpy as np
 root_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(root_path)
 from idstools.database import DBMaster
-from idstools.utils.idshelper import getAvailableIdsAndOccurrences
+from idstools.utils.idshelper import getAvailableIdsAndTimes
 from idstools.utils.idslogger import setupLogger
 from idstools.utils.clihelper import getBackendID
-
 logger = setupLogger("module")
 
 TAB = " " * 3
@@ -107,6 +106,7 @@ def printTimes(dbs, args, print_times=False, shotNumber=None, runNumber=None):
 
                     printed_shot = False
                     justruns = [r[1] for r in runs]
+                    justruns.sort()
                     for run in justruns:
                         if runNumber is not None:
                             if run != runNumber:
@@ -126,24 +126,19 @@ def printTimes(dbs, args, print_times=False, shotNumber=None, runNumber=None):
                             printed_shot = True
 
                         print(TAB * 4 + " Run: " + extended(str(run), RUN_STR_LEN))
-
                         connection = imas.DBEntry(backend_id=getBackendID(backend.upper()), db_name=dbname, shot=shot, run=run, user_name=args.user, data_version=dv)
                         err, n = connection.open()
                         if err != 0:
                             logger.critical(
                                 f"Shot {str(shot)}, run {str(run)} for user_or_path = {args.user} and database = {dbname} does not exist",
                             )
-                            logger.critical(
-                                "----> Aborted.",
-                            )
-                            exit()
 
-                        for idsName, oc in getAvailableIdsAndOccurrences(connection):
-                            times = connection.partial_get(idsName, "time", occurrence=oc)
+                        availableIdsAndTimes = getAvailableIdsAndTimes(connection)
+                        for idsname, times in availableIdsAndTimes:
                             if len(times) == 1 and np.isnan(times[0]):
                                 print(
                                     TAB * 5
-                                    + extended(idsName, IDSNAME_STR_LEN)
+                                    + extended(idsname, IDSNAME_STR_LEN)
                                     + ": "
                                     + extended("?", SLICENUM_STR_LEN)
                                     + " slices ( "
@@ -152,7 +147,7 @@ def printTimes(dbs, args, print_times=False, shotNumber=None, runNumber=None):
                             elif len(times) == 1 and times[0] == np.NINF:
                                 print(
                                     TAB * 5
-                                    + extended(idsName, IDSNAME_STR_LEN)
+                                    + extended(idsname, IDSNAME_STR_LEN)
                                     + ": "
                                     + extended("?", SLICENUM_STR_LEN)
                                     + " slices ( "
@@ -161,7 +156,7 @@ def printTimes(dbs, args, print_times=False, shotNumber=None, runNumber=None):
                             elif print_times:
                                 print(
                                     TAB * 5
-                                    + extended(idsName, IDSNAME_STR_LEN)
+                                    + extended(idsname, IDSNAME_STR_LEN)
                                     + ": "
                                     + extended(str(len(times)), SLICENUM_STR_LEN)
                                     + " slices ("
@@ -171,7 +166,7 @@ def printTimes(dbs, args, print_times=False, shotNumber=None, runNumber=None):
                             else:
                                 print(
                                     TAB * 5
-                                    + extended(idsName, IDSNAME_STR_LEN)
+                                    + extended(idsname, IDSNAME_STR_LEN)
                                     + ": "
                                     + extended(str(len(times)), SLICENUM_STR_LEN)
                                     + " slices ("
