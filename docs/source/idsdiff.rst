@@ -45,7 +45,7 @@ Example idsdiff
 ~~~~~~~~~~~~~~~
     .. code-block:: bash
 
-        python scripts/idsdiff.py --generate-html 122525 1 122525 2 summary
+        $ idsdiff --generate-html 122525 1 122525 2 summary
 
     .. image:: _static/images/idsdiff_1.png
         :alt: image not found

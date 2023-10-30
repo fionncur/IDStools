@@ -8,39 +8,37 @@ Syntax viewfluxes
 ~~~~~~~~~~~~~~~~~~~~~~
 .. code-block:: bash
 
-    $ python scripts/viewfluxes -h
-    usage: viewfluxes [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] [-m {CLOSEST,PREVIOUS,LINEAR}]
-                    [-o OCCURRENCE] [-t TIME]
-                    shot run
+    $ viewfluxes -h
+    usage: viewfluxes [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] [-m {CLOSEST,PREVIOUS,LINEAR}] [-o OCCURRENCE] -s SHOT -r RUN
+                  [-t TIME]
 
     View information about fluxes
 
-    positional arguments:
-    shot                  Shot number
-    run                   Run number
-
     optional arguments:
-    -h, --help            show this help message and exit
-    -u USER, --user_or_path USER
+      -h, --help            show this help message and exit
+      -u USER, --user_or_path USER
                             user            (default=public)
-    --database DATABASE, -d DATABASE
+      --database DATABASE, -d DATABASE
                             database name   (default=ITER)
-    --backend BACKEND, -b BACKEND
+      --backend BACKEND, -b BACKEND
                             backend format  (default=MDSPLUS)
-    --version VERSION, -v VERSION
+      --version VERSION, -v VERSION
                             data version    (default=3)
-    -m {CLOSEST,PREVIOUS,LINEAR}, --slicingmethod {CLOSEST,PREVIOUS,LINEAR}
+      -m {CLOSEST,PREVIOUS,LINEAR}, --slicingmethod {CLOSEST,PREVIOUS,LINEAR}
                             Slicing method  (default=CLOSEST)
-    -o OCCURRENCE, --occurrence OCCURRENCE
+      -o OCCURRENCE, --occurrence OCCURRENCE
                             occurrence
-    -t TIME, --time TIME  Time
+      -s SHOT, --shot SHOT  Shot number
+      -r RUN, --run RUN     Run number
+      -t TIME, --time TIME  Time
+
 
 Example viewfluxes
 ~~~~~~~~~~~~~~~~~~~~~~~
 
     .. code-block:: bash
 
-        $ viewfluxes 134174  117 -m CLOSEST
+        $ viewfluxes -s 134174 -r  117 -m CLOSEST
 
         Time = 10.599 for public/ITER/3/134174/117
 

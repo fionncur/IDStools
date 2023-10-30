@@ -33,7 +33,7 @@ Syntax viewneutron
 
 
 Example 
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~
 
     .. code-block:: bash
 

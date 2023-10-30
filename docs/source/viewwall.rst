@@ -10,7 +10,7 @@ Syntax viewwall
 ~~~~~~~~~~~~~~~~~~~~~~
 .. code-block:: bash
 
-    $ python scripts/viewwall -h
+    $ viewwall -h
     usage: viewwall [-h] {wall,database} ...
 
     Wall plot

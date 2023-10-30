@@ -7,7 +7,7 @@ Syntax viewequilibrium
 ~~~~~~~~~~~~~~~~~~~~~~
 .. code-block:: bash
 
-    $ python scripts/viewequilibrium.py -h
+    $ viewequilibrium -h
     usage: viewequilibrium.py [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] -s SHOT -r RUN
                     [-t TIME] [-o OCCURRENCE] [--rho] [--pfcoils] [--save] [-i]
 

@@ -11,7 +11,7 @@ Syntax idsprint
 
     .. code-block:: bash     
 
-        $ python scripts/idsprint.py -h
+        $ idsprint -h
         usage: idsprint.py [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] -s SHOT -r RUN [-f] ids
 
         Prints content of an IDS onto the terminal
@@ -39,7 +39,7 @@ Example idsprint
 
     .. code-block:: bash
 
-        python scripts/idsprint.py -s 134174 -r 117 equilibrium
+        $ idsprint -s 134174 -r 117 equilibrium
 
         class equilibrium
         Attribute ids_properties

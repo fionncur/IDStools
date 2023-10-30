@@ -9,15 +9,10 @@ Syntax viewsources
 .. code-block:: bash
 
     $ viewsources -h
-    usage: viewsources [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] [-m {CLOSEST,PREVIOUS,LINEAR}]
-                      [-o OCCURRENCE] [-t TIME]
-                      shot run
+    usage: viewsources [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] [-m {CLOSEST,PREVIOUS,LINEAR}] [-o OCCURRENCE] -s SHOT -r RUN
+    [-t TIME]
 
     View information about sources
-
-    positional arguments:
-      shot                  Shot number
-      run                   Run number
 
     optional arguments:
       -h, --help            show this help message and exit
@@ -33,6 +28,8 @@ Syntax viewsources
                             Slicing method  (default=CLOSEST)
       -o OCCURRENCE, --occurrence OCCURRENCE
                             occurrence
+      -s SHOT, --shot SHOT  Shot number
+      -r RUN, --run RUN     Run number
       -t TIME, --time TIME  Time
 
 
@@ -41,7 +38,7 @@ Example viewsources
 
     .. code-block:: bash
 
-        $ viewsources 134174  117
+        $ viewsources -s 134174 -r  117
         Time = 10.599 for public/ITER/3/134174/117
         total
                             electrons            particles(--)     energy  2.499896e+06
@@ -136,7 +133,7 @@ Example viewsources
 
     .. code-block:: bash
 
-        $ viewsources 134174  117 -m PREVIOUS -t 50
+        $ viewsources -s 134174 -r 117 -m PREVIOUS -t 50
 
         Time = 48.938 for public/ITER/3/134174/117
         total
