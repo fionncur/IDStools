@@ -58,7 +58,7 @@ echo "----------------------------------------------------------"
 
 chmod -R u+w /mnt/bamboo_deploy/easybuild
 # rm -rf /mnt/bamboo_deploy/easybuild
-EB_OPTS="--debug --check-style --modules-tool=EnvironmentModules --module-syntax=Tcl --allow-modules-tool-mismatch --allow-use-as-root-and-accept-consequences --prefix=/mnt/bamboo_deploy/easybuild --optarch=Intel:axAVX,CORE-AVX2;GCC:march=sandybridge"
+EB_OPTS="-f -l --debug --check-style --modules-tool=EnvironmentModules --module-syntax=Tcl --allow-modules-tool-mismatch --allow-use-as-root-and-accept-consequences --prefix=/mnt/bamboo_deploy/easybuild --optarch=Intel:axAVX,CORE-AVX2;GCC:march=sandybridge"
 write_headers_file
 
 set -e
@@ -100,7 +100,7 @@ echo "contents of eb file" $MODULE_FULL_VERSION
 echo "-----------------------START--------------------------------"
 cat ./ci-build/files/$MODULE_FULL_VERSION
 echo "-----------------------END----------------------------------"
-eb ./ci-build/files/$MODULE_FULL_VERSION -f ${EB_OPTS} ${EB_HTTP_OPTS}
+eb ./ci-build/files/$MODULE_FULL_VERSION ${EB_OPTS} ${EB_HTTP_OPTS}
 echo $MODULE_FULL_VERSION "Installed"
 
 echo "creating gfbf-2022b module"
