@@ -7,7 +7,8 @@ tests+=("123170;2")
 tests+=("123276;1")
 tests+=("120014;1")
 tests+=("131047;7")
-# tests+=("134174;117")
+tests+=("135014;1")
+tests+=("134174;117")
 
 #db tools test
 echo =====================================dbscraper=====================================================
@@ -59,6 +60,8 @@ for i in ${tests[@]}; do
     echo TESTING: shot=$shot : run=$run viewequilibrium -s $shot -r $run --rho --pfcoils --info --save
     viewequilibrium -s $shot -r $run --rho --pfcoils --info --save || exit 1
 
+    echo TESTING: shot=$shot : run=$run viewequilibrium -s $shot -r $run --info --save
+    viewequilibrium -s $shot -r $run --info --save
     echo =====================================idsprint=====================================================
     echo TESTING: idsprint -s $shot -r $run equilibrium
     idsprint -s $shot -r $run equilibrium || exit 1
@@ -111,6 +114,7 @@ viewwall wall iter || exit 1
 echo =====================================idsdiff=====================================================
 echo TESTING: idsdiff 122525 1 122525 2 summary
 idsdiff 122525 1 122525 2 summary || exit 1
+idsdiff 130011 6 130012 4 summary || exit 1
 
 # echo =====================================idsresample=====================================================
 # echo TESTING: idsresample -si 131024 -ri 10 -so 145000 -ro 2
