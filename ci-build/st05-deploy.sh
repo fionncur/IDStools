@@ -60,10 +60,16 @@ chmod -R u+w /mnt/bamboo_deploy/easybuild
 
 echo "For the development version, delete the previous zip file because easybuild uses the available zip file."
 rm -f /mnt/bamboo_deploy/easybuild/sources/i/IDStools/extensions/IDStools-dev.zip
-ll /mnt/bamboo_deploy/easybuild/modules/all
+rm -rf /mnt/bamboo_deploy/easybuild/software/IDStools/dev-foss-2020b
+rm -rf /mnt/bamboo_deploy/easybuild/software/IDStools/dev-intel-2020b
+rm -rf /mnt/bamboo_deploy/easybuild/software/IDStools/dev-gfbf-2022b
+
+echo "Check folder contents after removing development version"
+ls /mnt/bamboo_deploy/easybuild/sources/i/IDStools/extensions/
+ls /mnt/bamboo_deploy/easybuild/software/IDStools
 echo "----------------------------------------------------------"
 
-EB_OPTS="--force --check-style --modules-tool=EnvironmentModules --module-syntax=Tcl --allow-modules-tool-mismatch --allow-use-as-root-and-accept-consequences --prefix=/mnt/bamboo_deploy/easybuild --optarch=Intel:axAVX,CORE-AVX2;GCC:march=sandybridge"
+EB_OPTS="--force --modules-tool=EnvironmentModules --module-syntax=Tcl --allow-modules-tool-mismatch --allow-use-as-root-and-accept-consequences --prefix=/mnt/bamboo_deploy/easybuild --optarch=Intel:axAVX,CORE-AVX2;GCC:march=sandybridge"
 write_headers_file
 
 set -e
