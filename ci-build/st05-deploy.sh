@@ -57,8 +57,13 @@ mkdir -p /mnt/bamboo_deploy/easybuild || exit 1
 echo "----------------------------------------------------------"
 
 chmod -R u+w /mnt/bamboo_deploy/easybuild
-# rm -rf /mnt/bamboo_deploy/easybuild
-EB_OPTS="-f -l --debug --check-style --modules-tool=EnvironmentModules --module-syntax=Tcl --allow-modules-tool-mismatch --allow-use-as-root-and-accept-consequences --prefix=/mnt/bamboo_deploy/easybuild --optarch=Intel:axAVX,CORE-AVX2;GCC:march=sandybridge"
+
+echo "For the development version, delete the previous zip file because easybuild uses the available zip file."
+rm -f /mnt/bamboo_deploy/easybuild/sources/i/IDStools/extensions/IDStools-dev.zip
+ll /mnt/bamboo_deploy/easybuild/modules/all
+echo "----------------------------------------------------------"
+
+EB_OPTS="--force --check-style --modules-tool=EnvironmentModules --module-syntax=Tcl --allow-modules-tool-mismatch --allow-use-as-root-and-accept-consequences --prefix=/mnt/bamboo_deploy/easybuild --optarch=Intel:axAVX,CORE-AVX2;GCC:march=sandybridge"
 write_headers_file
 
 set -e

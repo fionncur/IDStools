@@ -274,13 +274,12 @@ if __name__ == "__main__":
     parser.add_argument("positionalArgs", nargs="?", default=os.getcwd())
 
     args = parser.parse_args()
-    try:
-        if args.cmd is None:
-            parser.print_help()
-            exit(1)
-    except AttributeError:
-        parser.print_help()
-        exit(1)
+    # Default command if not provided
+    if "cmd" not in args.__dict__:
+        backends = args.backend.split(",") if args.backend else None
+        dbs = DBMaster.getDatabaseFiles(args.user, args.database, args.version, backends)
+        print_list(dbs)
+        exit(0)
 
     backends = args.backend.split(",") if args.backend else None
     dbs = DBMaster.getDatabaseFiles(args.user, args.database, args.version, backends)
