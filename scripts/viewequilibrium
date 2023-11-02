@@ -4,7 +4,7 @@
 import argparse
 import os
 import sys
-
+import logging
 import imas
 
 root_path = os.path.dirname(os.path.dirname(__file__))
@@ -58,8 +58,7 @@ parser.add_argument(
 )
 args = parser.parse_args()
 
-logger = setupLogger("module")
-
+logger = setupLogger("module", stdout_level=logging.INFO)
 connection = imas.DBEntry(
     getBackendID(args.backend), args.database, args.shot, args.run, args.user
 )
@@ -75,7 +74,6 @@ if err != 0:
             args.shot, args.run, args.user, args.database
         )
     )
-
 idsObjEquilibrium = imas.equilibrium()
 idsObjEquilibrium.time = connection.partial_get("equilibrium", "time", args.occurrence)
 if idsObjEquilibrium.time is not None:
@@ -84,7 +82,6 @@ if idsObjEquilibrium.time is not None:
     idsObjEquilibrium.time_slice[0] = connection.partial_get(
         "equilibrium", f"time_slice({str(timeIndex)})", args.occurrence
     )
-    idsObjEquilibrium = connection.get("equilibrium")
     ViewEquilibrium = EquilibriumView(idsObjEquilibrium)
 
     if args.pfcoils is True:
@@ -94,7 +91,7 @@ if idsObjEquilibrium.time is not None:
 
 
 
-    title = "2D Equilibrium"
+    title = f"2D Equilibrium at time {timeValue:.1f}" 
     canvas = Canvas(1, 1)
     ax = canvas.add_axes(title="", xlabel="", row=0, col=0)
     
