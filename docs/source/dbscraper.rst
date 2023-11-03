@@ -11,7 +11,7 @@ dbscraper Syntax
         $ dbscraper -h
 
         Install tqdm to enable progress bar
-        usage: dbscraper.py [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] [--saveas SAVEAS]
+        usage: dbscraper [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] [--saveas SAVEAS]
                             [--status STATUS] [--list-count LIST_COUNT] [--verbose]
                             idspath
 

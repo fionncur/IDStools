@@ -7,8 +7,8 @@ Syntax viewplasmacompo
 ~~~~~~~~~~~~~~~
 .. code-block:: bash
 
-    python viewplasmacompo.py -h
-    usage: viewplasmacompo.py [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] -s SHOT -r RUN [-i] [--debug]
+    $ viewplasmacompo -h
+    usage: viewplasmacompo [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] -s SHOT -r RUN [-i] [--debug]
 
     ---- Display the plasma composition from the core_profiles IDS
 

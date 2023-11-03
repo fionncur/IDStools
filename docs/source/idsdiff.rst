@@ -7,8 +7,8 @@ Syntax idsdiff
 ~~~~~~~~~~~~~~
 .. code-block:: bash
 
-    $ python idsdiff.py -h
-    usage: idsdiff.py [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION]
+    $ idsdiff -h
+    usage: idsdiff [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION]
                     [--backendB BACKENDB] [--databaseB DATABASEB] [--userB USERB] [--skip-provenance]
                     [--generate-html] [--report-dir REPORT_DIR]
                     shotA runA shotB runB [ids [ids ...]]

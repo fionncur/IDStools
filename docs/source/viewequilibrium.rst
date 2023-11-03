@@ -8,7 +8,7 @@ Syntax viewequilibrium
 .. code-block:: bash
 
     $ viewequilibrium -h
-    usage: viewequilibrium.py [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] -s SHOT -r RUN
+    usage: viewequilibrium [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] -s SHOT -r RUN
                     [-t TIME] [-o OCCURRENCE] [--rho] [--pfcoils] [--save] [-i]
 
     ---- Display the plasma equilibrium from the equilibrium IDS. It also shows pf coils position overlay if exists

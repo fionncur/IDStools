@@ -12,7 +12,7 @@ Syntax idsprint
     .. code-block:: bash     
 
         $ idsprint -h
-        usage: idsprint.py [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] -s SHOT -r RUN [-f] ids
+        usage: idsprint [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] -s SHOT -r RUN [-f] ids
 
         Prints content of an IDS onto the terminal
 

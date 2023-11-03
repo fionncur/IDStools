@@ -1,5 +1,5 @@
 import logging
-
+import numpy as np
 from ..compute.core_transport import CoreTransportCompute
 
 logger = logging.getLogger(f"module.{__name__}")
@@ -38,11 +38,15 @@ class CoreTransportView:
                     f"{ionDict['a'] : >10}{ionDict['z_n'] : >10}{ionDict['z_ion'] : >10}",
                     end="",
                 )
-                if ionDict["particles_flux"] is None:
+                if ionDict["particles_flux"] is None or all(
+                    np.isnan(ionDict["particles_flux"])
+                ):
                     print(f"{'--' : >25}", end="")
                 else:
                     print(f"{ionDict['particles_flux'] : >25.6e}", end="")
-                if ionDict["energy_flux"] is None:
+                if ionDict["energy_flux"] is None or all(
+                    np.isnan(ionDict["energy_flux"])
+                ):
                     print(f"{'--' : >25}")
                 else:
                     print(f"{ionDict['energy_flux'] : >25.6e}")

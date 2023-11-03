@@ -10,7 +10,7 @@ Syntax idscp
     .. code-block:: bash
 
         $ idscp -h
-        usage: idscp.py [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] -si SHOT_INPUT -ri
+        usage: idscp [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] -si SHOT_INPUT -ri
                         RUN_INPUT -so SHOT_OUTPUT -ro RUN_OUTPUT [-do DATABASE_OUTPUT] [-bo BACKEND_OUTPUT] [-f]
                         [--setDatasetVersion] [-a | -o OUTPUTOCCURRENCE]
                         [ids [ids ...]]
