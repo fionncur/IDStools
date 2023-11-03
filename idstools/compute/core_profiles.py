@@ -857,7 +857,9 @@ class CoreProfilesCompute:
         pressureElectronTotal = dictElectronsPressureProperties["pressureElectronTotal"]
 
         pressureIonTotal = self.getPressureIonTotal()
-        pressureTotal = pressureIonTotal + pressureElectronTotal
+        pressureTotal = pressureElectronTotal
+        if pressureIonTotal is not None:
+            pressureTotal += pressureIonTotal
 
         # Minima and maxima calculations for plots
         maximaTotal = max(
