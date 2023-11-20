@@ -49,9 +49,9 @@ class DistributionSourcesView(BasePlot):
         ax.grid(b=True)
 
         # set legend
-        legx_pos = 1.35
-        legy_pos = 1.05
-        legend = ax.legend(bbox_to_anchor=(legx_pos - 0.35, legy_pos - 0.05))
+        # legx_pos = 1.35
+        # legy_pos = 1.05
+        legend = ax.legend(loc="upper right")
         frame = legend.get_frame()
         frame.set_facecolor("0.95")
         for label in legend.get_texts():

@@ -21,7 +21,7 @@ except ModuleNotFoundError:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="Checks if spciefied ids is exists in scenario database",
+        description="Check if specified ids is exists in scenario database",
         parents=[imasParser],
     )
     parser.add_argument(

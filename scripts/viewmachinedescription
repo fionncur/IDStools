@@ -124,7 +124,7 @@ def main():
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="---- Display the plasma equilibrium from the equilibrium IDS",
+        description="---- View machine description",
         parents=[imasParser],
     )
     args = parser.parse_args()

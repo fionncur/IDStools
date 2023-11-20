@@ -73,7 +73,7 @@ except:
     logger.error("wall ids is not present")
     raise Exception("edge_profiles ids is not present")
 
-print(inter)
+# print(inter)
 ntime = len(time_array)
 
 index = np.argmin(abs(plot_time - time_array))

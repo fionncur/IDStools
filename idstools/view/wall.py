@@ -44,7 +44,6 @@ class WallView:
                 if data:
                     for element_key, element_data in data.items():
                         r, z = element_data
-                        print("r=", r, "z=", z)
                         self.addWallMarkings(ax, r, z, **kwargs)
 
         else:

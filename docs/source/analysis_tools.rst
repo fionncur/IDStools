@@ -9,6 +9,7 @@ Analysis tools aid in the examination of IDS data in terms of plasma composition
    viewecstrayradiation
    viewequilibrium
    viewfluxes
+   viewmachinedescription
    viewneutron
    viewpressure
    viewsources
