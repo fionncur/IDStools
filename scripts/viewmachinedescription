@@ -2,130 +2,231 @@
 # -*- coding: utf-8 -*-
 
 import argparse
-import imas
-import sys
 import os
+import sys
+from typing import Any, Optional
+import typing
+
+import imas
+import yaml
 
 root_path = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(root_path)
 
-from idstools.utils.clihelper import getBackendID
-from idstools.utils.clihelper import imasParser
-from idstools.set_logger import set_logger
 
+from idstools.set_logger import set_logger
+from idstools.utils.clihelper import getBackendID, imasParser
 from idstools.view.common import Canvas
 from idstools.view.pf_active import PFActiveView
 from idstools.view.wall import WallView
 
-
 # ----------------------------------------------------------------------
 
-import yaml
 
 logger = set_logger("mdplot", level="INFO")
 
 
-def loadMD(d, s):
-    for k, v in d.items():
-        if k not in s:
-            continue
+class Connection:
+    def __init__(self, backend, database, shot, run, user, version):
+        self.backend = backend
+        self.database = database
+        self.shot = shot
+        self.run = run
+        self.user = user
+        self.version = version
 
-        shot, run = k.split("/")
-        db = imas.DBEntry(
-            getBackendID(args.backend), args.database, int(shot), int(run), args.user
+
+class MachineDescription:
+    mdSummaryPath = r"/work/imas/shared/imasdb/ITER_MD/3/md_summary.yaml"
+
+    def __init__(
+        self, mdSummaryPath: str = "", connection: Optional[Connection] = None
+    ) -> None:
+        self.connection = connection
+        self.mdSummaryYaml = {}
+        if not mdSummaryPath:
+            _mdSummaryPath = MachineDescription.mdSummaryPath
+        else:
+            _mdSummaryPath = mdSummaryPath
+        with open(_mdSummaryPath, "r") as stream:
+            try:
+                self.mdSummaryYaml = yaml.safe_load(stream)
+            except yaml.YAMLError as exc:
+                print(exc)
+
+    def getMachineDatabaseData(self, pulseList):
+        """
+        The `getMachineDatabaseData` method is responsible for retrieving machine database data for the specified pulse list. It iterates over each pulse in the `mdSummaryYaml` dictionary and checks if the pulse is present in the `pulseList`. If the pulse is not in the `pulseList`, it skips to the next pulse.
+        """
+        pulsesData: typing.Dict[str, typing.Dict] = {}
+        for pulse, config in self.mdSummaryYaml.items():
+            self.connection.shot, self.connection.run = pulse.split("/")
+            if pulse not in pulseList:
+                continue
+
+            pulsesData[pulse] = {}
+
+            pulsesData[pulse]["data"] = self.getIdsData(config["ids"])
+            pulsesData[pulse]["config"] = config
+        return pulsesData
+
+    def getIdsData(self, idsname):
+        """
+        The `getIdsData` method is responsible for retrieving data from the specified IDS name using the provided connection information. It creates an instance of `imas.DBEntry` with the backend ID, database name, shot number, run number, user, and version provided in the `Connection` object. It then opens the connection to the IDS database using the `open()` method. If the connection is successful, it retrieves the data for the specified IDS name using the `get()` method of the `conn` object. If the connection fails, it logs an error message and returns `None` as the data.
+        """
+        conn = imas.DBEntry(
+            getBackendID(self.connection.backend),
+            self.connection.database,
+            int(self.connection.shot),
+            int(self.connection.run),
+            self.connection.user,
+            self.connection.version,
+        )
+        err, n = conn.open()
+        if err != 0:
+            logger.error(
+                "Shot {0}, run {1} for user={2} and database={3} does not exists".format(
+                    self.connection.shot,
+                    self.connection.run,
+                    self.connection.user,
+                    self.connection.database,
+                )
+            )
+            data = None
+        else:
+            data = conn.get(idsname)
+        return data
+
+    def readMDSummary(
+        self,
+        idsNames=[],
+        addObsoelete=False,
+        checkValidity=False,
+    ):
+        """
+        The `readMDSummary` method is responsible for reading the machine description summary and retrieving data for the specified IDS names.
+        """
+        pulsesData: typing.Dict[str, typing.Dict] = {}
+        for pulse, config in self.mdSummaryYaml.items():
+            if idsNames:
+                if config["ids"] not in idsNames:
+                    continue
+
+            if addObsoelete is False:
+                if config["status"] == "obsolete":
+                    continue
+
+            pulsesData[pulse] = {}
+            pulsesData[pulse]["data"] = None
+            if checkValidity:
+                pulsesData[pulse]["data"] = None
+                if self.connection is not None:
+                    self.connection.shot, self.connection.run = pulse.split("/")
+
+                    pulsesData[pulse]["data"] = self.getIdsData(config["ids"])
+
+            pulsesData[pulse]["config"] = config
+        return pulsesData
+
+    def plotMachineDescription(self, pulseList):
+        """
+        The `plotMachineDescription` method is responsible for plotting the machine description based on the provided pulse list.
+        """
+        data = self.getMachineDatabaseData(pulseList)
+        # Initialization
+        canvas = Canvas(1, 1)
+        ax = canvas.add_axes(
+            title="Machine Description", xlabel="R (m)", ylabel="Z (m)", row=0, col=0
         )
 
-        err, n = db.open()
+        # Custom settings
+        canvas.fig.set_size_inches(7.5, 10.0)
+        ax.set_aspect("equal", adjustable="box")
 
-        if err != 0:
-            # TODO chek if you can raise exception or just print or may be use logger
-            print(
-                "Shot {0}, run {1} for user={2} and database={3} does not exists".format(
-                    shot, run, args.user, args.database
-                ),
-                file=sys.stderr,
-            )
-            print("----> Aborted.", file=sys.stderr)
-            exit()
+        # Plot Overlay
+        for pulse, pulseData in data.items():
+            if pulseData["config"]["ids"] == "pf_active":
+                pfcoilsview = PFActiveView(pulseData["data"])
+                pfcoilsview.viewActivePfCoils(ax)
 
-        d[k]["data"] = db.get(v["ids"])
+            if pulseData["config"]["ids"] == "wall":
+                wallview = WallView(pulseData["data"])
+                wallview.view_wall(ax)
 
-    return d
+        # wallview.view_DIR(ax)
+        # wallview.view_TS(ax)
+        # wallview.view_Cryostat(ax)
 
-
-def plotMD(d):
-    # Initialization
-    canvas = Canvas(1, 1)
-    ax = canvas.add_axes(
-        title="Machine Description", xlabel="R (m)", ylabel="Z (m)", row=0, col=0
-    )
-
-    # Custom settings
-    canvas.fig.set_size_inches(7.5, 10.0)
-    ax.set_aspect("equal", adjustable="box")
-
-    # Plot Overlay
-    # for k, v in d.items():
-
-    pfcoilsview = PFActiveView(d["111001/102"]["data"])
-    pfcoilsview.viewActivePfCoils(ax)
-
-    wallview = WallView(d["116000/2"]["data"])
-    wallview.view_wall(ax)
-
-    # wallview.view_DIR(ax)
-    # wallview.view_TS(ax)
-    # wallview.view_Cryostat(ax)
-
-    ax.plot()
-
-    # try:
-    #    fname = "Equilibrium_shot_{0}_run_{1}_time_{2:.1f}.png".format(
-    #        args.shot, args.run, args.time
-    #    )
-    #    canvas.save(fname)
-    #    print("----> Figure saved to " + fname, file=sys.stderr)
-    # except:
-    #    print("The figure could not be saved (check local permissions).", file=sys.stderr)
-
-    canvas.show()
-
-
-def main():
-    logger.info("Start of MDPLOT")
-
-    #
-    logger.info("Reading meta data of MD")
-    fpath = "/work/imas/shared/imasdb/ITER_MD/3/md_summary.yaml"
-    with open(fpath, "r") as stream:
-        try:
-            mdin = yaml.safe_load(stream)
-        except yaml.YAMLError as exc:
-            print(exc)
-
-    #
-    logger.info("Set target components")
-    target = ["111001/102", "116000/2"]
-
-    #
-    logger.info("Loading MD database")
-    data = loadMD(mdin, target)
-
-    #
-    logger.info("Plotting MD")
-    plotMD(data)
-
-    #
-    logger.info("End of MDPLOT")
-
-
-# ----------------------------------------------------------------------
+        ax.plot()
+        if args.save:
+            fname = "MachineDescriptionPlot.png"
+            canvas.save(fname)
+        else:
+            canvas.show()
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="---- View machine description",
+        description="---- View machine description by getting information of data from md_summary file",
         parents=[imasParser],
     )
+    subparsers = parser.add_subparsers(help="sub-commands help")
+
+    subparserList = subparsers.add_parser(
+        "list", help="list machine description databases"
+    )
+    subparserList.set_defaults(cmd="list")
+    subparserList.add_argument(
+        "ids",
+        nargs="*",
+        type=str,
+        help="IDS names",
+    )
+    subparserList.add_argument(
+        "--obsolete",
+        help="Shows obsolete files",
+        action="store_true",
+    )
+    subparserList.add_argument(
+        "--checkValidity",
+        help="Checks if database exists and also tries to retrive ids",
+        action="store_true",
+    )
+    subparserPlot = subparsers.add_parser(
+        "plot", help="Plot Machine description databases"
+    )
+    subparserPlot.set_defaults(cmd="plot")
+    subparserPlot.add_argument(
+        "list",
+        nargs="*",
+        help="Provide Pulse list here.. Space separated values for example : 111001/102 116000/2 ",
+    )
+    subparserPlot.add_argument(
+        "--save",
+        help="Save figure at default location",
+        action="store_true",
+    )
     args = parser.parse_args()
-    main()
+
+    if args.database == "ITER":
+        args.database = "ITER_MD"
+
+    connection = Connection(args.backend, args.database, 0, 0, args.user, args.version)
+    machineDescription = MachineDescription(connection=connection)
+    if args.cmd == "list":
+        data = machineDescription.readMDSummary(
+            args.ids, args.obsolete, args.checkValidity
+        )
+        print(f"{'Pulse': >11} | {'IDS Name' : >30} | {'Status' : >25}")
+        print(
+            f"--------------------------------------------------------------------------"
+        )
+        for pulse, pulseData in data.items():
+            idsname = pulseData["config"]["ids"]
+            status = pulseData["config"]["status"]
+            print(f"{pulse : >11} | {idsname : >30} | {status: >25}")
+
+    if args.cmd == "plot":
+        if not args.list:
+            args.list = ["111001/102", "116000/2"]
+        machineDescription.plotMachineDescription(args.list)

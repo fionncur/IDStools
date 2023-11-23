@@ -59,7 +59,7 @@ database_command_parser.add_argument(
 args = parser.parse_args()
 if args.cmd == "wall":
     args.machine = args.machine.lower()
-    if args.machine.lower() not in WallDetails:
+    if args.machine not in WallDetails:
         print(
             f"Wall details are not present of machine {args.machine}, Present predefined wall information of different tokamaks : iter, tcs, west, aug, jet, jt60, d3d"
         )
