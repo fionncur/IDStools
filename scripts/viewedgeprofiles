@@ -5,10 +5,14 @@
 # TODO modularised code in compute and view functions
 import argparse
 import contextlib
-import imas
 import logging
+import os
+import sys
+
+import imas
+import matplotlib
 import numpy as np
-import matplotlib, os,sys
+from imas import imasdef
 
 if "DISPLAY" not in os.environ:
     matplotlib.use("agg")
@@ -20,8 +24,7 @@ from scipy.spatial import ConvexHull, convex_hull_plot_2d
 
 root_path = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(root_path)
-from idstools.utils.clihelper import getBackendID
-from idstools.utils.clihelper import imasParser
+from idstools.utils.clihelper import getBackendID, imasParser
 from idstools.utils.idslogger import setupLogger
 
 parser = argparse.ArgumentParser(
@@ -47,13 +50,13 @@ if err != 0:
         f"Shot {args.shot}, run {args.run} for user={args.user} and database={args.database} does not exists"
     )
 
-plot_time = 3  # s
+plot_time = 44 # s
 
+    
 edgeProfileIds = None
 wallIds = None
 
 try:
-    edgeProfileIds = connection.get("edge_profiles")
     time_array = connection.partial_get("edge_profiles", "time")
 except:
     logger.error("edge_profiles ids is not present")
@@ -77,16 +80,17 @@ except:
 ntime = len(time_array)
 
 index = np.argmin(abs(plot_time - time_array))
-
+edgeProfileIds = connection.get_slice("edge_profiles", plot_time, imasdef.CLOSEST_INTERP)
 # Read edge data from edge_profiles and interpolate on rectangular grid:
 # read positions
+
 num_vertices = len(
-    edgeProfileIds.grid_ggd[index].space[0].objects_per_dimension[0].object
+    edgeProfileIds.grid_ggd[0].space[0].objects_per_dimension[0].object
 )
 vertex_coords = np.zeros((num_vertices, 2))
 for vertex_id in range(num_vertices):
     vertex_coords[vertex_id, :] = (
-        edgeProfileIds.grid_ggd[index]
+        edgeProfileIds.grid_ggd[0]
         .space[0]
         .objects_per_dimension[0]
         .object[vertex_id]
