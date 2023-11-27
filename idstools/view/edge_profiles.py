@@ -1,10 +1,12 @@
-from ..compute.edge_profiles import EdgeProfilesCompute
+from compute.edge_profiles import EdgeProfilesCompute
+import numpy as np
+
 from idstools.view.common import Console
 
 
 class EdgeProfilesView(Console):
-    def __init__(self):
-        pass
+    def __init__(self, edgeProfileIds=None):
+        self.edgeProfilesCompute = EdgeProfilesCompute(edgeProfileIds)
 
     @staticmethod
     def view_plasma_composition_with_species_concentration(
@@ -172,3 +174,109 @@ class EdgeProfilesView(Console):
                     format("%.6f" % (state_data["n_ni"])),
                 )
                 istate += 1
+
+    def viewElectronsDensity(self, ax, timeSlice=0):
+        """
+        The function `viewElectronsDensity` plots the electron density on a rectangular grid and adds a separatrix line.
+
+        Args:
+            ax: The parameter "ax" is an instance of the matplotlib Axes class. It represents the axes on  which the electron density plot will be drawn.
+            timeSlice: The `timeSlice` parameter represents the time slice at which the neutral density will be plotted. It is an optional parameter with a default value of 0. Defaults to 0
+
+        Returns:
+            the pcolormesh object 'c'.
+        """
+        x, y = self.edgeProfilesCompute.getRectangularGrid(500)
+        separatrix = self.edgeProfilesCompute.getSeparatix(timeSlice)
+        ne_edge = self.edgeProfilesCompute.getElectronDensity(timeSlice, x, y)
+        ax.grid(False)
+        c = ax.pcolormesh(x, y, ne_edge, vmin=0, vmax=5e19, shading="auto")
+        ax.fill(
+            separatrix[:, 0],
+            separatrix[:, 1],
+            facecolor="w",
+            edgecolor="r",
+            linewidth=3,
+        )
+
+        ax.set_xlabel("R,m")
+        ax.set_ylabel("Z,m")
+        ax.set_title("Electron density")
+        return c
+
+    def viewIonDensity(self, ax, timeSlice=0):
+        """
+        The function `viewIonDensity` plots the ion density on a rectangular grid and adds a separatrix line.
+
+        Args:
+            ax: The parameter "ax" is an instance of the matplotlib Axes class. It represents the axes on  which the ion density plot will be drawn.
+            timeSlice: The `timeSlice` parameter represents the time slice at which the neutral density will be plotted. It is an optional parameter with a default value of 0. Defaults to 0
+
+        Returns:
+            the pcolormesh object 'c'.
+        """
+        x, y = self.edgeProfilesCompute.getRectangularGrid(500)
+        separatrix = self.edgeProfilesCompute.getSeparatix(timeSlice)
+        ni_edge = self.edgeProfilesCompute.getIonDensity(timeSlice, x, y)
+
+        ax.grid(False)
+        c = ax.pcolormesh(x, y, ni_edge, vmin=0, vmax=5e19, shading="auto")
+        ax.fill(
+            separatrix[:, 0],
+            separatrix[:, 1],
+            facecolor="w",
+            edgecolor="r",
+            linewidth=3,
+        )
+
+        ax.set_xlabel("R,m")
+        ax.set_ylabel("Z,m")
+        ax.set_title("Ion density")
+        return c
+
+    def viewNeutralDensity(self, ax, timeSlice=0):
+        """
+        The function `viewNeutralDensity` plots the neutral density on a rectangular grid and adds a separatrix line.
+
+        Args:
+            ax: The parameter "ax" is an instance of the matplotlib Axes class. It represents the axes on  which the plot will be drawn.
+            timeSlice: The `timeSlice` parameter represents the time slice at which the neutral density will be plotted. It is an optional parameter with a default value of 0. Defaults to 0
+
+        Returns:
+            the pcolormesh object 'c'.
+        """
+        x, y = self.edgeProfilesCompute.getRectangularGrid(500)
+        separatrix = self.edgeProfilesCompute.getSeparatix(timeSlice)
+        n_neutral_edge = self.edgeProfilesCompute.getNeutralDensity(timeSlice, x, y)
+
+        ax.grid(False)
+        c = ax.pcolormesh(x, y, n_neutral_edge, vmin=0, vmax=5e19, shading="auto")
+        ax.fill(
+            separatrix[:, 0],
+            separatrix[:, 1],
+            facecolor="w",
+            edgecolor="r",
+            linewidth=3,
+        )
+
+        ax.set_xlabel("R,m")
+        ax.set_ylabel("Z,m")
+        ax.set_title("Neutral density")
+        return c
+
+    def viewEquatorialPlaneAndDiverterDensity(self, ax, timeSlice=0):
+        x, y = self.edgeProfilesCompute.getRectangularGrid(500)
+        ne_edge = self.edgeProfilesCompute.getElectronDensity(timeSlice, x, y)
+        # choose Z position for a radial profile:
+        Z0 = 0.0
+        ind = np.argmin(abs(y[:, 0] - Z0))
+        ax.plot(x[ind, :], ne_edge[ind, :], label="Equatorial plane")
+
+        Z0 = -4.0
+        ind = np.argmin(abs(y[:, 0] - Z0))
+        ax.plot(x[ind, :], ne_edge[ind, :], label="Divertor")
+
+        ax.set_title("Electron density")
+        ax.set_xlabel("R,m")
+        ax.set_ylim([0, 1.5e21])
+        ax.legend()

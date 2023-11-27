@@ -21,6 +21,14 @@ class WallCompute:
     def __init__(self, ids_object):
         self.ids_object = ids_object
 
+    def getWall(self,iunit: int = 0):
+        if len(self.ids_object.description_2d[0].vessel.unit) <= iunit:
+            return None
+        r = self.ids_object.description_2d[0].vessel.unit[iunit].annular.centreline.r
+        z = self.ids_object.description_2d[0].vessel.unit[iunit].annular.centreline.z
+        h = self.ids_object.description_2d[0].vessel.unit[iunit].annular.thickness
+        return {"r": r, "z":z, "h":h}
+        
     def get_vessel(
         self, iunit: int = 0, add_endpoint: bool = False
     ) -> Union[dict, None]:
@@ -34,11 +42,8 @@ class WallCompute:
         Returns:
             a dictionary containing the coordinates of the vessel elements. Each element is represented by a key-value pair in the dictionary, where the key is a string in the format "element{element_counter}" and the value is a list of two lists: rw (list of x-coordinates) and zw (list of y-coordinates).
         """
-        if len(self.ids_object.description_2d[0].vessel.unit) <= iunit:
-            return None
-        r = self.ids_object.description_2d[0].vessel.unit[iunit].annular.centreline.r
-        z = self.ids_object.description_2d[0].vessel.unit[iunit].annular.centreline.z
-        h = self.ids_object.description_2d[0].vessel.unit[iunit].annular.thickness
+        wallDict = self.getWall(iunit)
+        r,z,h = wallDict["r"], wallDict["z"], wallDict["h"]
         if len(r) == 0 or len(z) == 0 or len(h) == 0:
             return None
 

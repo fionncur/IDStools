@@ -102,6 +102,9 @@ for i in ${tests[@]}; do
     echo TESTING: viewsources -s $shot -r $run
     viewsources -s $shot -r $run || exit 1
 
+    echo =============================================viewedgeprofiles============================================================
+    echo TESTING: viewedgeprofiles -s $shot -r $run
+    viewedgeprofiles -s $shot -r $run --time 60 || exit 1
 done
 
 echo TESTING: viewwall wall iter

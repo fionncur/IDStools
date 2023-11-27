@@ -6,6 +6,7 @@ import os
 import sys
 from typing import Any, Optional
 import typing
+from database import Connection, MachineDescription
 
 import imas
 import yaml
@@ -26,143 +27,41 @@ from idstools.view.wall import WallView
 logger = set_logger("mdplot", level="INFO")
 
 
-class Connection:
-    def __init__(self, backend, database, shot, run, user, version):
-        self.backend = backend
-        self.database = database
-        self.shot = shot
-        self.run = run
-        self.user = user
-        self.version = version
+def plotMachineDescription(data):
+    """
+    The `plotMachineDescription` method is responsible for plotting the machine description based on the provided pulse list.
+    """
 
+    # Initialization
+    canvas = Canvas(1, 1)
+    ax = canvas.add_axes(
+        title="Machine Description", xlabel="R (m)", ylabel="Z (m)", row=0, col=0
+    )
 
-class MachineDescription:
-    mdSummaryPath = r"/work/imas/shared/imasdb/ITER_MD/3/md_summary.yaml"
+    # Custom settings
+    canvas.fig.set_size_inches(7.5, 10.0)
+    ax.set_aspect("equal", adjustable="box")
 
-    def __init__(
-        self, mdSummaryPath: str = "", connection: Optional[Connection] = None
-    ) -> None:
-        self.connection = connection
-        self.mdSummaryYaml = {}
-        if not mdSummaryPath:
-            _mdSummaryPath = MachineDescription.mdSummaryPath
-        else:
-            _mdSummaryPath = mdSummaryPath
-        with open(_mdSummaryPath, "r") as stream:
-            try:
-                self.mdSummaryYaml = yaml.safe_load(stream)
-            except yaml.YAMLError as exc:
-                print(exc)
+    # Plot Overlay
+    for pulse, pulseData in data.items():
+        if pulseData["config"]["ids"] == "pf_active":
+            pfcoilsview = PFActiveView(pulseData["data"])
+            pfcoilsview.viewActivePfCoils(ax)
 
-    def getMachineDatabaseData(self, pulseList):
-        """
-        The `getMachineDatabaseData` method is responsible for retrieving machine database data for the specified pulse list. It iterates over each pulse in the `mdSummaryYaml` dictionary and checks if the pulse is present in the `pulseList`. If the pulse is not in the `pulseList`, it skips to the next pulse.
-        """
-        pulsesData: typing.Dict[str, typing.Dict] = {}
-        for pulse, config in self.mdSummaryYaml.items():
-            self.connection.shot, self.connection.run = pulse.split("/")
-            if pulse not in pulseList:
-                continue
+        if pulseData["config"]["ids"] == "wall":
+            wallview = WallView(pulseData["data"])
+            wallview.view_wall(ax)
 
-            pulsesData[pulse] = {}
+    # wallview.view_DIR(ax)
+    # wallview.view_TS(ax)
+    # wallview.view_Cryostat(ax)
 
-            pulsesData[pulse]["data"] = self.getIdsData(config["ids"])
-            pulsesData[pulse]["config"] = config
-        return pulsesData
-
-    def getIdsData(self, idsname):
-        """
-        The `getIdsData` method is responsible for retrieving data from the specified IDS name using the provided connection information. It creates an instance of `imas.DBEntry` with the backend ID, database name, shot number, run number, user, and version provided in the `Connection` object. It then opens the connection to the IDS database using the `open()` method. If the connection is successful, it retrieves the data for the specified IDS name using the `get()` method of the `conn` object. If the connection fails, it logs an error message and returns `None` as the data.
-        """
-        conn = imas.DBEntry(
-            getBackendID(self.connection.backend),
-            self.connection.database,
-            int(self.connection.shot),
-            int(self.connection.run),
-            self.connection.user,
-            self.connection.version,
-        )
-        err, n = conn.open()
-        if err != 0:
-            logger.error(
-                "Shot {0}, run {1} for user={2} and database={3} does not exists".format(
-                    self.connection.shot,
-                    self.connection.run,
-                    self.connection.user,
-                    self.connection.database,
-                )
-            )
-            data = None
-        else:
-            data = conn.get(idsname)
-        return data
-
-    def readMDSummary(
-        self,
-        idsNames=[],
-        addObsoelete=False,
-        checkValidity=False,
-    ):
-        """
-        The `readMDSummary` method is responsible for reading the machine description summary and retrieving data for the specified IDS names.
-        """
-        pulsesData: typing.Dict[str, typing.Dict] = {}
-        for pulse, config in self.mdSummaryYaml.items():
-            if idsNames:
-                if config["ids"] not in idsNames:
-                    continue
-
-            if addObsoelete is False:
-                if config["status"] == "obsolete":
-                    continue
-
-            pulsesData[pulse] = {}
-            pulsesData[pulse]["data"] = None
-            if checkValidity:
-                pulsesData[pulse]["data"] = None
-                if self.connection is not None:
-                    self.connection.shot, self.connection.run = pulse.split("/")
-
-                    pulsesData[pulse]["data"] = self.getIdsData(config["ids"])
-
-            pulsesData[pulse]["config"] = config
-        return pulsesData
-
-    def plotMachineDescription(self, pulseList):
-        """
-        The `plotMachineDescription` method is responsible for plotting the machine description based on the provided pulse list.
-        """
-        data = self.getMachineDatabaseData(pulseList)
-        # Initialization
-        canvas = Canvas(1, 1)
-        ax = canvas.add_axes(
-            title="Machine Description", xlabel="R (m)", ylabel="Z (m)", row=0, col=0
-        )
-
-        # Custom settings
-        canvas.fig.set_size_inches(7.5, 10.0)
-        ax.set_aspect("equal", adjustable="box")
-
-        # Plot Overlay
-        for pulse, pulseData in data.items():
-            if pulseData["config"]["ids"] == "pf_active":
-                pfcoilsview = PFActiveView(pulseData["data"])
-                pfcoilsview.viewActivePfCoils(ax)
-
-            if pulseData["config"]["ids"] == "wall":
-                wallview = WallView(pulseData["data"])
-                wallview.view_wall(ax)
-
-        # wallview.view_DIR(ax)
-        # wallview.view_TS(ax)
-        # wallview.view_Cryostat(ax)
-
-        ax.plot()
-        if args.save:
-            fname = "MachineDescriptionPlot.png"
-            canvas.save(fname)
-        else:
-            canvas.show()
+    ax.plot()
+    if args.save:
+        fname = "MachineDescriptionPlot.png"
+        canvas.save(fname)
+    else:
+        canvas.show()
 
 
 if __name__ == "__main__":
@@ -214,19 +113,23 @@ if __name__ == "__main__":
     connection = Connection(args.backend, args.database, 0, 0, args.user, args.version)
     machineDescription = MachineDescription(connection=connection)
     if args.cmd == "list":
-        data = machineDescription.readMDSummary(
+        data = machineDescription.getMDSummary(
             args.ids, args.obsolete, args.checkValidity
         )
-        print(f"{'Pulse': >11} | {'IDS Name' : >30} | {'Status' : >25}")
+        print(
+            f"{'Pulse': >11} | {'IDS Name' : >28} | {'Status': >10} | {'description'}"
+        )
         print(
             f"--------------------------------------------------------------------------"
         )
         for pulse, pulseData in data.items():
             idsname = pulseData["config"]["ids"]
             status = pulseData["config"]["status"]
-            print(f"{pulse : >11} | {idsname : >30} | {status: >25}")
+            description = pulseData["config"]["description"]
+            print(f"{pulse : >11} | {idsname : >28} | {status: >10} | {description}")
 
     if args.cmd == "plot":
         if not args.list:
             args.list = ["111001/102", "116000/2"]
-        machineDescription.plotMachineDescription(args.list)
+        data = machineDescription.getMDDataByPulseList("wAll")
+        plotMachineDescription(data)
