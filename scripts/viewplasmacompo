@@ -40,7 +40,7 @@ parser.add_argument("--debug", action="store_true", help="Show debugging")
 
 args = parser.parse_args()
 
-level = logging.WARN
+level = logging.ERROR
 if args.info:
     level = logging.INFO
 if args.debug:
@@ -154,7 +154,9 @@ if edge_profiles_ids.time is not None:
     edge_profiles_ids.grid_ggd[0] = connection.partial_get(
         "edge_profiles", f"grid_ggd({slice_index})"
     )
-
+    print("----------------")
+    print("edge_profiles")
+    print("----------------")
     returnstatus = EdgeProfilesView.view_plasma_composition_with_species_concentration(
         edge_profiles_ids, 0
     )

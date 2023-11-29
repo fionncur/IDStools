@@ -15,9 +15,6 @@ class EdgeProfilesView(Console):
         """
         Nice display of plasma composition with species concentrations
         """
-        print("   ------------")
-        print("edge_profiles")
-        print("   ------------")
         composition_data = (
             EdgeProfilesCompute.getPlasmaCompositionWithSpeciesConcentration(
                 ids_object, slice_index
@@ -35,12 +32,12 @@ class EdgeProfilesView(Console):
         return composition_data
 
     def _print_plasma_composition(self, composition_data):
-        disp_species = "   species:      "
-        disp_a = "   a:            "
-        disp_z = "   z:            "
-        disp_nspec_over_ntot = "   n_over_ntot:  "
-        disp_nspec_over_ne = "   n_over_ne:    "
-        disp_nspec_over_nmaj = "   n_over_n_maj: "
+        disp_species = f"{'species:': <15}"
+        disp_a = f"{'a:': <15}"
+        disp_z = f"{'z:': <15}"
+        disp_nspec_over_ntot = f"{'n_over_ntot:': <15}"
+        disp_nspec_over_ne = f"{'n_over_ne:': <15}"
+        disp_nspec_over_nmaj = f"{'n_over_n_maj:': <15}"
         main_species = ""
 
         for species_key, species_data in composition_data.items():
@@ -50,89 +47,38 @@ class EdgeProfilesView(Console):
                 else:
                     main_species = main_species + "-" + species_data["species"]
             if species_data["nspec_over_ne"] > 0.0:
-                disp_species = (
-                    disp_species
-                    + species_data["species"]
-                    + " ("
-                    + species_data["label"]
-                    + ")"
-                    + " "
-                    * (
-                        self.tabsize
-                        - len(
-                            species_data["species"] + " (" + species_data["label"] + ")"
-                        )
-                    )
-                )
-                disp_a = (
-                    disp_a
-                    + format("%.1f" % species_data["a"])
-                    + " " * (self.tabsize - len(format("%.1f" % species_data["a"])))
-                )
-                disp_z = (
-                    disp_z
-                    + format("%.1f" % species_data["z"])
-                    + " " * (self.tabsize - len(format("%.1f" % species_data["z"])))
-                )
+                species_name = f"{species_data['species']}({species_data['label']})"
+                species_name = species_name[:11]
+                disp_species = f"{disp_species} {species_name : >12}"
+                a = f"{species_data['a'] :.1f}"
+                disp_a = f"{disp_a} {a : >12}"
+                z = f"{species_data['z'] :.1f}"
+                disp_z = f"{disp_z} {z : >12}"
                 if species_data["nspec_over_ntot"] < 1.0e-2:
+                    nspec_over_ntot = f"{species_data['nspec_over_ntot'] :.2e}"
                     disp_nspec_over_ntot = (
-                        disp_nspec_over_ntot
-                        + format("%.2e" % species_data["nspec_over_ntot"])
-                        + " "
-                        * (
-                            self.tabsize
-                            - len(format("%.2e" % species_data["nspec_over_ntot"]))
-                        )
+                        f"{disp_nspec_over_ntot} {nspec_over_ntot : >12}"
                     )
                 else:
+                    nspec_over_ntot = f"{species_data['nspec_over_ntot'] :.3f}"
                     disp_nspec_over_ntot = (
-                        disp_nspec_over_ntot
-                        + format("%.3f" % species_data["nspec_over_ntot"])
-                        + " "
-                        * (
-                            self.tabsize
-                            - len(format("%.3f" % species_data["nspec_over_ntot"]))
-                        )
+                        f"{disp_nspec_over_ntot} {nspec_over_ntot : >12}"
                     )
                 if species_data["nspec_over_ne"] < 1.0e-2:
-                    disp_nspec_over_ne = (
-                        disp_nspec_over_ne
-                        + format("%.2e" % species_data["nspec_over_ne"])
-                        + " "
-                        * (
-                            self.tabsize
-                            - len(format("%.2e" % species_data["nspec_over_ne"]))
-                        )
-                    )
+                    nspec_over_ne = f"{species_data['nspec_over_ne'] :.2e}"
+                    disp_nspec_over_ne = f"{disp_nspec_over_ne} {nspec_over_ne : >12}"
                 else:
-                    disp_nspec_over_ne = (
-                        disp_nspec_over_ne
-                        + format("%.3f" % species_data["nspec_over_ne"])
-                        + " "
-                        * (
-                            self.tabsize
-                            - len(format("%.3f" % species_data["nspec_over_ne"]))
-                        )
-                    )
+                    nspec_over_ne = f"{species_data['nspec_over_ne'] :.3f}"
+                    disp_nspec_over_ne = f"{disp_nspec_over_ne} {nspec_over_ne : >12}"
                 if species_data["nspec_over_nmaj"] < 1.0e-2:
+                    nspec_over_nmaj = f"{species_data['nspec_over_nmaj'] :.2e}"
                     disp_nspec_over_nmaj = (
-                        disp_nspec_over_nmaj
-                        + format("%.2e" % species_data["nspec_over_nmaj"])
-                        + " "
-                        * (
-                            self.tabsize
-                            - len(format("%.2e" % species_data["nspec_over_nmaj"]))
-                        )
+                        f"{disp_nspec_over_nmaj} {nspec_over_nmaj : >12}"
                     )
                 else:
+                    nspec_over_nmaj = f"{species_data['nspec_over_nmaj'] :.3f}"
                     disp_nspec_over_nmaj = (
-                        disp_nspec_over_nmaj
-                        + format("%.3f" % species_data["nspec_over_nmaj"])
-                        + " "
-                        * (
-                            self.tabsize
-                            - len(format("%.3f" % species_data["nspec_over_nmaj"]))
-                        )
+                        f"{disp_nspec_over_nmaj} {nspec_over_nmaj : >12}"
                     )
 
         print(disp_species)
@@ -160,18 +106,12 @@ class EdgeProfilesView(Console):
                 )
             istate = 0
             for state_key, state_data in states.items():
+                n_ni = f"{state_data['n_ni']:.6f}"
+                label_space = 0
+                if state_data["label"].strip() != "":
+                    label_space = 7
                 print(
-                    self.TAB,
-                    "state ",
-                    str(istate + 1),
-                    (" " * (5 - len(str(istate + 1)))),
-                    state_data["label"],
-                    (" " * (7 - len(str(state_data["label"])))),
-                    "z =",
-                    state_data["z_average"],
-                    (" " * (7 - len(str(state_data["z_average"])))),
-                    "   n/ni, % :",
-                    format("%.6f" % (state_data["n_ni"])),
+                    f"\t {'state' +str(istate + 1) : <8}{state_data['label']: <{label_space}}z : {state_data['z_average']: <10} n/ni, % :{n_ni : >12}"
                 )
                 istate += 1
 

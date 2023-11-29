@@ -405,11 +405,10 @@ class EdgeProfilesCompute:
             .grid_subset[IDENTIFIER_CELLS_INDEX]
             .identifier.name
         )
-        logger.info(grid_subset_name)
         # check if grid_subset[4] identifier name is cells, if not, find out 'cells' index
         index_counter = 0
         if grid_subset_name.lower() != "cells":
-            logger.warning(
+            logger.debug(
                 "edge_profiles IDS:cells not found in grid subset at 4th index, Checking index of cells in the grid subset"
             )
             for subset in self.ids.grid_ggd[timeSlice].grid_subset:
@@ -430,7 +429,7 @@ class EdgeProfilesCompute:
                 index_counter = index_counter + 1
         num_vertices = len(elements)
         if num_vertices == 0:
-            logger.critical("edge_profiles IDS:No element found in grid subset")
+            logger.warning("edge_profiles IDS:No element found in grid subset")
             return None
         volumes = [0] * num_vertices
 
@@ -460,7 +459,7 @@ class EdgeProfilesCompute:
                     # The third element contains the volume, read the same
                     volumes[ielement] = obj_dim.geometry[2]
         if np.any(volumes) == False:
-            logger.warning(
+            logger.debug(
                 "edge_profiles IDS:volume is not available in cells (face_indices_volume).. Calculating manually from nodes "
             )
             # Get volume from nodes if volumes are still empty
