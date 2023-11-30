@@ -9,8 +9,6 @@ import textwrap
 import imas
 import numpy as np
 
-root_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.append(root_path)
 from idstools.database import DBMaster
 from idstools.utils.idshelper import getAvailableIdsAndTimes
 from idstools.utils.idslogger import setupLogger

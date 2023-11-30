@@ -4,17 +4,13 @@
 # Return values of an IDS in all data entries of a database
 
 import argparse
-import os
 import sys
 from pathlib import Path
 
-import pandas as pd
 from imas import imasdef
 
-root_path = os.path.dirname(os.path.dirname(__file__))
-sys.path.append(root_path)
-from idstools.utils.clihelper import getBackendID, imasParser
 from idstools.database import DBMaster
+from idstools.utils.clihelper import getBackendID, imasParser
 from idstools.utils.idshelper import getQuantitiesFromPulses
 
 if __name__ == "__main__":

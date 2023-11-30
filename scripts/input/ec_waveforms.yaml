@@ -20,8 +20,8 @@ ids: ec_launchers
  
 database:
    shot: 120000
-   run: 203
-   user: sawantp1
+   run: 204
+   user: public
    db: ITER_MD
  
 #time: [ 0, 50, 60, 320, 350, 400 ]

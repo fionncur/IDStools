@@ -48,14 +48,13 @@ Todo:
 """
 
 
-import numpy as np
-import imas
 import argparse
-import os, sys
+import sys
 
-root_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.append(root_path)
-from idstools.utils.clihelper import imasParser, getBackendID
+import imas
+import numpy as np
+
+from idstools.utils.clihelper import getBackendID, imasParser
 from idstools.utils.idshelper import getIDSSize
 
 parser = argparse.ArgumentParser(

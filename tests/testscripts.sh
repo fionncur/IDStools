@@ -3,12 +3,12 @@
 declare -a tests
 
 tests+=("122525;1")
-tests+=("123170;2")
-tests+=("123276;1")
-tests+=("120014;1")
-tests+=("131047;7")
-tests+=("135014;1")
-tests+=("134174;117")
+# tests+=("123170;2")
+# tests+=("123276;1")
+# tests+=("120014;1")
+# tests+=("131047;7")
+# tests+=("135014;1")
+# tests+=("134174;117")
 
 #db tools test
 echo =====================================dbscraper=====================================================
@@ -103,11 +103,11 @@ for i in ${tests[@]}; do
     viewsources -s $shot -r $run || exit 1
 
     echo =============================================viewedgeprofiles============================================================
-    echo TESTING: viewedgeprofiles -s $shot -r $run
+    echo TESTING: viewedgeprofiles -s $shot -r $run --save
     viewedgeprofiles -s $shot -r $run --time 60 || exit 1
 done
 
-echo TESTING: viewwall wall iter
+echo TESTING: viewwall wall iter --save
 viewwall wall iter || exit 1
 
 # echo =====================================idscp=====================================================

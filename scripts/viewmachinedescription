@@ -2,21 +2,10 @@
 # -*- coding: utf-8 -*-
 
 import argparse
-import os
-import sys
-from typing import Any, Optional
-import typing
 from database import Connection, MachineDescription
 
-import imas
-import yaml
-
-root_path = os.path.dirname(os.path.dirname(__file__))
-sys.path.append(root_path)
-
-
 from idstools.set_logger import set_logger
-from idstools.utils.clihelper import getBackendID, imasParser
+from idstools.utils.clihelper import imasParser
 from idstools.view.common import Canvas
 from idstools.view.pf_active import PFActiveView
 from idstools.view.wall import WallView
@@ -106,7 +95,6 @@ if __name__ == "__main__":
         action="store_true",
     )
     args = parser.parse_args()
-
     if args.database == "ITER":
         args.database = "ITER_MD"
 

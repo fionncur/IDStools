@@ -18,12 +18,8 @@ import argparse
 import logging
 import imas
 import numpy as np
-import os
 import sys
 
-
-root_path = os.path.dirname(os.path.dirname(__file__))
-sys.path.append(root_path)
 from idstools.view.core_profiles import CoreProfilesView
 from idstools.view.edge_profiles import EdgeProfilesView
 from idstools.utils.idslogger import setupLogger

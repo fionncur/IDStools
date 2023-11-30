@@ -2,17 +2,11 @@
 # -*- coding: utf-8 -*-
 
 import argparse
-import os
-import sys
 import logging
 import imas
 
-root_path = os.path.dirname(os.path.dirname(__file__))
-sys.path.append(root_path)
-
-
 from idstools.compute.common import getNearestTime
-from idstools.utils.clihelper import getBackendID, imasParser, getDatabasePath
+from idstools.utils.clihelper import getBackendID, getDatabasePath, imasParser
 from idstools.utils.idslogger import setupLogger
 from idstools.view.common import Canvas
 from idstools.view.equilibrium import EquilibriumView

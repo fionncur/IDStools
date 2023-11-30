@@ -1,4 +1,4 @@
-from compute.edge_profiles import EdgeProfilesCompute
+from idstools.compute.edge_profiles import EdgeProfilesCompute
 import numpy as np
 
 from idstools.view.common import Console

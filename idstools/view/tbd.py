@@ -1,4 +1,4 @@
-from ..input_processing import l2r
+from idstools.input_processing import l2r
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.colorbar as cbar

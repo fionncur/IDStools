@@ -8,10 +8,6 @@ import sys
 
 import imas
 
-root_path = os.path.dirname(os.path.dirname(__file__))
-sys.path.append(root_path)
-
-
 from idstools import idsperf
 from idstools.utils.clihelper import getBackendID, imasParser
 

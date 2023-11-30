@@ -5,14 +5,10 @@
 
 import argparse
 import logging
-import os
 import sys
 
 import imas
 from imas import imasdef
-
-root_path = os.path.dirname(os.path.dirname(__file__))
-sys.path.append(root_path)
 
 from idstools.utils.clihelper import getBackendID, imasParser
 from idstools.utils.idslogger import setupLogger

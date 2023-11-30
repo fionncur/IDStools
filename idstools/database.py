@@ -8,7 +8,7 @@ import logging
 import imas
 import yaml
 
-from utils.clihelper import getBackendID
+from idstools.utils.clihelper import getBackendID
 
 logger = logging.getLogger(f"module.{__name__}")
 
@@ -506,6 +506,10 @@ def readScenario(
         if config["output_user_or_path"] == "default"
         else config["output_user_or_path"],
     )
+    print(config["output_database"])
+    print(config["shot"])
+    print(config["run_out"])
+    print(config["output_user_or_path"])
     connectionOut.open()
     for idsName in outIDSList:
         if testMode:

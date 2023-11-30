@@ -1,4 +1,4 @@
-from ....domain.ecstray import EcStrayCompute
+from idstools.domain.ecstray import EcStrayCompute
 
 
 class EcStrayView:
