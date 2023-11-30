@@ -55,7 +55,11 @@ database_command_parser.add_argument(
 database_command_parser.add_argument(
     "-r", "--run", help="Run number", required=True, type=int
 )
-
+parser.add_argument(
+    "--save",
+    help="Save figure at default location",
+    action="store_true",
+)
 args = parser.parse_args()
 if args.cmd == "wall":
     args.machine = args.machine.lower()
@@ -108,4 +112,16 @@ wallview = WallView(wallIds)
 wallview.view_wall(ax, linewidth=2, edgecolor="green")
 ax.plot()
 
-canvas.show()
+if args.save:
+    fname = (
+        "MachineDescription"
+        + "_shot_"
+        + str(args.shot)
+        + "_run_"
+        + str(args.run)
+        + ".png"
+    )
+    canvas.save(fname)
+else:
+    canvas.show()
+    
