@@ -1,0 +1,249 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+# python scripts/dbscraper -u schneim -d HCD core_sources
+
+import argparse
+import logging
+import sys
+
+import imas
+
+from idstools.compute.common import getNearestTime
+from idstools.utils.clihelper import getBackendID, getDatabasePath, imasParser
+from idstools.utils.idslogger import setupLogger
+from idstools.view.common import Canvas
+from idstools.view.core_sources import CoreSourcesView
+
+logger = setupLogger("module", stdout_level=logging.INFO)
+
+parser = argparse.ArgumentParser(
+    description="---- Display core_sources results", parents=[imasParser]
+)
+parser.add_argument("-s", "--shot", help="Shot number", required=True, type=int)
+parser.add_argument("-r", "--run", help="Run number", required=True, type=int)
+parser.add_argument(
+    "-t", "--time", help="time", required=False, type=float, default=-99.0
+)
+parser.add_argument(
+    "--save",
+    help="Save figure at default location",
+    action="store_true",
+)
+parser.add_argument(
+    "-i",
+    "--info",
+    help="Adds all extra provenance info to the plot",
+    action="store_true",
+)
+args = parser.parse_args()
+
+connection = imas.DBEntry(
+    getBackendID(args.backend),
+    args.database,
+    args.shot,
+    args.run,
+    user_name=args.user,
+    data_version=args.version,
+)
+err, n = connection.open()
+if err != 0:
+    print(
+        "Shot "
+        + str(args.shot)
+        + ", run "
+        + str(args.run)
+        + " for user_or_path = "
+        + args.user
+        + " and database = "
+        + args.database
+        + " does not exist",
+        file=sys.stderr,
+    )
+    print("----> Aborted.", file=sys.stderr)
+    exit()
+# input.core_sources.get()
+core_sources = imas.core_sources()
+core_sources.time = connection.partial_get("core_sources", "time")
+if core_sources.time is None:
+    print("No core_sources IDS in the data-entry --> Abort.", file=sys.stderr)
+    exit()
+
+timeArray = core_sources.time
+timeIndex, timeValue = getNearestTime(timeArray, args.time)
+ntime = len(timeArray)
+
+# Read quantities for this time slice
+cs_slice = connection.get_slice("core_sources", timeValue, 1)
+nsources = len(cs_slice.source)
+
+if nsources > 1:
+    print(f"Core_sources contains {nsources} sources", file=sys.stderr)
+else:
+    print(f"Core_sources contains {nsources} source", file=sys.stderr)
+
+core_sources.source.resize(nsources)
+for isource in range(nsources):
+    core_sources.source[isource].profiles_1d.resize(1)
+    # core_sources.source[isource].global_quantities.resize(1)
+    core_sources.source[isource].profiles_1d[0] = cs_slice.source[isource].profiles_1d[
+        0
+    ]
+    try:
+        core_sources.source[isource].global_quantities = connection.partial_get(
+            "core_sources", f"source({isource})/global_quantities"
+        )
+    except Exception:
+        print(
+            f"source({str(isource)}) does not have global_quantities",
+            file=sys.stderr,
+        )
+        core_sources.source[isource].global_quantities.resize(0)
+    core_sources.source[isource].identifier.name = cs_slice.source[
+        isource
+    ].identifier.name
+
+nsources = len(core_sources.source)
+
+coreSourceView = CoreSourcesView(core_sources)
+
+
+canvas = Canvas(1, 1)
+axPowerProfiles = canvas.add_axes(title=r"Power Profiles [MW/M3]", row=0, col=0)
+coreSourceView.viewPowerProfiles(axPowerProfiles)
+
+canvas.fig.set_size_inches(5, 4)
+canvas.fig.tight_layout()
+if args.save:
+    fname = (
+        "CS_power_profiles_shot_"
+        + str(args.shot)
+        + "_run_"
+        + str(args.run)
+        + "_time_"
+        + "%.1f" % timeValue
+        + ".png"
+    )
+    canvas.save(fname)
+else:
+    canvas.show(block=False)
+    
+canvas = Canvas(1, 1)
+axParticlesProfiles = canvas.add_axes(
+    title=r"PARTICLES PROFILES [/M3/S]", row=0, col=0
+)
+coreSourceView.viewParticlesProfiles(axParticlesProfiles)
+canvas.fig.set_size_inches(5, 4)
+canvas.fig.tight_layout()
+if args.save:
+    fname = (
+        "CS_particles_profiles_shot_"
+        + str(args.shot)
+        + "_run_"
+        + str(args.run)
+        + "_time_"
+        + "%.1f" % timeValue
+        + ".png"
+    )
+    canvas.save(fname)
+else:
+    canvas.show(block=False)
+
+canvas = Canvas(1, 1)
+axCurrentProfiles = canvas.add_axes(title=r"CURRENT PROFILES [KA/M2]", row=0, col=0)
+coreSourceView.viewCurrentProfiles(axCurrentProfiles)
+
+canvas.fig.set_size_inches(5, 4)
+canvas.fig.tight_layout()
+if args.save:
+    fname = (
+        "CS_current_profiles_shot_"
+        + str(args.shot)
+        + "_run_"
+        + str(args.run)
+        + "_time_"
+        + "%.1f" % timeValue
+        + ".png"
+    )
+    canvas.save(fname)
+else:
+    canvas.show(block=False)
+
+canvas = Canvas(1, 1)
+axPowerAndParticleWaveforms = canvas.add_axes(
+    title="POWER AND PARTICLE WAVEFORMS", row=0, col=0
+)
+coreSourceView.viewPowerAndParticleWaveforms(axPowerAndParticleWaveforms)
+canvas.fig.set_size_inches(5, 4)
+canvas.fig.tight_layout()
+if args.save:
+    fname = (
+        "CS_power_waveforms_shot_"
+        + str(args.shot)
+        + "_run_"
+        + str(args.run)
+        + "_time_"
+        + "%.1f" % timeValue
+        + ".png"
+    )
+    canvas.save(fname)
+else:
+    canvas.show(block=False)
+
+canvas = Canvas(1, 1)
+axParticlesWaveform = canvas.add_axes(title="PARTICLES WAVEFORM", row=0, col=0)
+coreSourceView.viewParticlesWaveform(axParticlesWaveform)
+canvas.fig.set_size_inches(5, 4)
+canvas.fig.tight_layout()
+if args.save:
+    fname = (
+        "CS_particles_waveforms_shot_"
+        + str(args.shot)
+        + "_run_"
+        + str(args.run)
+        + "_time_"
+        + "%.1f" % timeValue
+        + ".png"
+    )
+    canvas.save(fname)
+else:
+    canvas.show(block=False)
+
+canvas = Canvas(1, 1)
+axCurrentWaveform = canvas.add_axes(title=r"CURRENT WAVEFORM", row=0, col=0)
+coreSourceView.viewCurrentWaveform(axCurrentWaveform)
+canvas.fig.set_size_inches(5, 4)
+canvas.fig.tight_layout()
+if args.save:
+    fname = (
+        "CS_current_waveforms_shot_"
+        + str(args.shot)
+        + "_run_"
+        + str(args.run)
+        + "_time_"
+        + "%.1f" % timeValue
+        + ".png"
+    )
+    canvas.save(fname)
+else:
+    canvas.show(block=False)
+
+canvas = Canvas(1, 1)
+axTorqueWaveform = canvas.add_axes(row=0, col=0)
+coreSourceView.viewTorqueWaveform(axTorqueWaveform)
+canvas.fig.set_size_inches(5, 4)
+canvas.fig.tight_layout()
+if args.save:
+    fname = (
+        "CS_torque_waveforms_shot_"
+        + str(args.shot)
+        + "_run_"
+        + str(args.run)
+        + "_time_"
+        + "%.1f" % timeValue
+        + ".png"
+    )
+    canvas.save(fname)
+else:
+    canvas.show(block=False)
+
+input("Press any key to close!!")

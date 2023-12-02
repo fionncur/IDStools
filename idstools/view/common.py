@@ -429,8 +429,8 @@ class Canvas:
                 file=sys.stderr,
             )
 
-    def show(self):
-        plt.show()
+    def show(self, *args, **kwargs):
+        plt.show(*args, **kwargs)
 
 
 class BasePlot:
