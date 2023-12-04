@@ -785,6 +785,7 @@ class EdgeProfilesCompute:
         SUBSET_INDEX = 17
         num_sep = len(self.ids.grid_ggd[timeSlice].grid_subset[SUBSET_INDEX].element)
         sep_coords = np.zeros((num_sep, 2))
+
         for i in range(num_sep):
             sep_coords[i, :] = (
                 self.ids.grid_ggd[timeSlice]
@@ -797,8 +798,11 @@ class EdgeProfilesCompute:
                     .object[0]
                     .index
                 ]
-                .geometry[:]
+                .geometry[:2]
             )
+        # Note : For  geometry_content=11 node coordinates (first 2 elements), then connection
+        # length, and distance in the poloidal plane to the nearest solid surface outside
+        # the separatrix
         hull = ConvexHull(
             sep_coords[0 : num_sep - 1, :]
         )  # find a closed separatrix contour
@@ -824,8 +828,11 @@ class EdgeProfilesCompute:
                 .space[0]
                 .objects_per_dimension[0]
                 .object[vertex_id]
-                .geometry[:]
+                .geometry[:2]
             )
+        # Note : For  geometry_content=11 node coordinates (first 2 elements), then connection
+        # length, and distance in the poloidal plane to the nearest solid surface outside
+        # the separatrix
         r_edge = vertex_coords[:, 0]
         z_edge = vertex_coords[:, 1]
         return r_edge, z_edge
