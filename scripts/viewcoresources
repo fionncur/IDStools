@@ -250,4 +250,5 @@ if ret == 0:
     else:
         canvas.show(block=False)
 
-input("Press any key to close!!")
+if not args.save:
+    input("Press any key to close!!")
