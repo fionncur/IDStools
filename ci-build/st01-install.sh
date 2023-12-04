@@ -21,8 +21,8 @@ export PATH=$(get_abs_filename "./${PREFIX_DIR}")/bin:${PATH}
 echo "PATH :" $PATH | grep -i idstools
 
 echo "Installing idstools in the local directory"
-try python3 -m pip --disable-pip-version-check install --no-deps . --prefix=${PREFIX_DIR} || exit 1
-try python3 -c "import idstools.compute.common" || exit 1
+die python3 -m pip --disable-pip-version-check install --no-deps . --prefix=${PREFIX_DIR} || exit 1
+die python3 -c "import idstools.compute.common" || exit 1
 
 COMMITHASH=$(git rev-parse HEAD)
 VERSION=$(git describe  --tags --always)

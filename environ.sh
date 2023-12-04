@@ -8,7 +8,7 @@ function yell ()
 
 function die () 
 { 
-  yell "$*"; # exit 1
+  yell "$*"; exit 1
 }
 
 function try () 

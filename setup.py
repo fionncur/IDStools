@@ -56,7 +56,7 @@ setup(
         "scripts/idsprint",
         "scripts/idsresample",
         "scripts/idssize",
-        "scripts/viewcoresources"
+        "scripts/viewcoresources",
         "scripts/viewedgeprofiles",
         "scripts/viewequilibrium",
         "scripts/viewfluxes",
