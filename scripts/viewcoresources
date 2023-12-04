@@ -9,7 +9,7 @@ import sys
 import imas
 
 from idstools.compute.common import getNearestTime
-from idstools.utils.clihelper import getBackendID, getDatabasePath, imasParser
+from idstools.utils.clihelper import getBackendID, imasParser
 from idstools.utils.idslogger import setupLogger
 from idstools.view.common import Canvas
 from idstools.view.core_sources import CoreSourcesView
@@ -106,144 +106,148 @@ nsources = len(core_sources.source)
 
 coreSourceView = CoreSourcesView(core_sources)
 
-
 canvas = Canvas(1, 1)
-axPowerProfiles = canvas.add_axes(title=r"Power Profiles [MW/M3]", row=0, col=0)
+ret = axPowerProfiles = canvas.add_axes(title=r"Power Profiles [MW/M3]", row=0, col=0)
 coreSourceView.viewPowerProfiles(axPowerProfiles)
 
 canvas.fig.set_size_inches(5, 4)
 canvas.fig.tight_layout()
-if args.save:
-    fname = (
-        "CS_power_profiles_shot_"
-        + str(args.shot)
-        + "_run_"
-        + str(args.run)
-        + "_time_"
-        + "%.1f" % timeValue
-        + ".png"
-    )
-    canvas.save(fname)
-else:
-    canvas.show(block=False)
-    
+if ret == 0:
+    if args.save:
+        fname = (
+            "CS_power_profiles_shot_"
+            + str(args.shot)
+            + "_run_"
+            + str(args.run)
+            + "_time_"
+            + "%.1f" % timeValue
+            + ".png"
+        )
+        canvas.save(fname)
+    else:
+        canvas.show(block=False)
+
 canvas = Canvas(1, 1)
-axParticlesProfiles = canvas.add_axes(
-    title=r"PARTICLES PROFILES [/M3/S]", row=0, col=0
-)
-coreSourceView.viewParticlesProfiles(axParticlesProfiles)
+axParticlesProfiles = canvas.add_axes(title=r"PARTICLES PROFILES [/M3/S]", row=0, col=0)
+ret = coreSourceView.viewParticlesProfiles(axParticlesProfiles)
 canvas.fig.set_size_inches(5, 4)
 canvas.fig.tight_layout()
-if args.save:
-    fname = (
-        "CS_particles_profiles_shot_"
-        + str(args.shot)
-        + "_run_"
-        + str(args.run)
-        + "_time_"
-        + "%.1f" % timeValue
-        + ".png"
-    )
-    canvas.save(fname)
-else:
-    canvas.show(block=False)
+if ret == 0:
+    if args.save:
+        fname = (
+            "CS_particles_profiles_shot_"
+            + str(args.shot)
+            + "_run_"
+            + str(args.run)
+            + "_time_"
+            + "%.1f" % timeValue
+            + ".png"
+        )
+        canvas.save(fname)
+    else:
+        canvas.show(block=False)
 
 canvas = Canvas(1, 1)
 axCurrentProfiles = canvas.add_axes(title=r"CURRENT PROFILES [KA/M2]", row=0, col=0)
-coreSourceView.viewCurrentProfiles(axCurrentProfiles)
+ret = coreSourceView.viewCurrentProfiles(axCurrentProfiles)
 
 canvas.fig.set_size_inches(5, 4)
 canvas.fig.tight_layout()
-if args.save:
-    fname = (
-        "CS_current_profiles_shot_"
-        + str(args.shot)
-        + "_run_"
-        + str(args.run)
-        + "_time_"
-        + "%.1f" % timeValue
-        + ".png"
-    )
-    canvas.save(fname)
-else:
-    canvas.show(block=False)
+if ret == 0:
+    if args.save:
+        fname = (
+            "CS_current_profiles_shot_"
+            + str(args.shot)
+            + "_run_"
+            + str(args.run)
+            + "_time_"
+            + "%.1f" % timeValue
+            + ".png"
+        )
+        canvas.save(fname)
+    else:
+        canvas.show(block=False)
 
 canvas = Canvas(1, 1)
 axPowerAndParticleWaveforms = canvas.add_axes(
     title="POWER AND PARTICLE WAVEFORMS", row=0, col=0
 )
-coreSourceView.viewPowerAndParticleWaveforms(axPowerAndParticleWaveforms)
+ret = coreSourceView.viewPowerAndParticleWaveforms(axPowerAndParticleWaveforms)
 canvas.fig.set_size_inches(5, 4)
 canvas.fig.tight_layout()
-if args.save:
-    fname = (
-        "CS_power_waveforms_shot_"
-        + str(args.shot)
-        + "_run_"
-        + str(args.run)
-        + "_time_"
-        + "%.1f" % timeValue
-        + ".png"
-    )
-    canvas.save(fname)
-else:
-    canvas.show(block=False)
+if ret == 0:
+    if args.save:
+        fname = (
+            "CS_power_waveforms_shot_"
+            + str(args.shot)
+            + "_run_"
+            + str(args.run)
+            + "_time_"
+            + "%.1f" % timeValue
+            + ".png"
+        )
+        canvas.save(fname)
+    else:
+        canvas.show(block=False)
 
 canvas = Canvas(1, 1)
 axParticlesWaveform = canvas.add_axes(title="PARTICLES WAVEFORM", row=0, col=0)
-coreSourceView.viewParticlesWaveform(axParticlesWaveform)
+ret = coreSourceView.viewParticlesWaveform(axParticlesWaveform)
 canvas.fig.set_size_inches(5, 4)
 canvas.fig.tight_layout()
-if args.save:
-    fname = (
-        "CS_particles_waveforms_shot_"
-        + str(args.shot)
-        + "_run_"
-        + str(args.run)
-        + "_time_"
-        + "%.1f" % timeValue
-        + ".png"
-    )
-    canvas.save(fname)
-else:
-    canvas.show(block=False)
+if ret == 0:
+    if args.save:
+        fname = (
+            "CS_particles_waveforms_shot_"
+            + str(args.shot)
+            + "_run_"
+            + str(args.run)
+            + "_time_"
+            + "%.1f" % timeValue
+            + ".png"
+        )
+        canvas.save(fname)
+    else:
+        canvas.show(block=False)
 
 canvas = Canvas(1, 1)
 axCurrentWaveform = canvas.add_axes(title=r"CURRENT WAVEFORM", row=0, col=0)
-coreSourceView.viewCurrentWaveform(axCurrentWaveform)
+ret = coreSourceView.viewCurrentWaveform(axCurrentWaveform)
 canvas.fig.set_size_inches(5, 4)
 canvas.fig.tight_layout()
-if args.save:
-    fname = (
-        "CS_current_waveforms_shot_"
-        + str(args.shot)
-        + "_run_"
-        + str(args.run)
-        + "_time_"
-        + "%.1f" % timeValue
-        + ".png"
-    )
-    canvas.save(fname)
-else:
-    canvas.show(block=False)
+if ret == 0:
+    if args.save:
+        fname = (
+            "CS_current_waveforms_shot_"
+            + str(args.shot)
+            + "_run_"
+            + str(args.run)
+            + "_time_"
+            + "%.1f" % timeValue
+            + ".png"
+        )
+        canvas.save(fname)
+    else:
+        canvas.show(block=False)
 
 canvas = Canvas(1, 1)
 axTorqueWaveform = canvas.add_axes(row=0, col=0)
-coreSourceView.viewTorqueWaveform(axTorqueWaveform)
+ret = coreSourceView.viewTorqueWaveform(axTorqueWaveform)
 canvas.fig.set_size_inches(5, 4)
 canvas.fig.tight_layout()
-if args.save:
-    fname = (
-        "CS_torque_waveforms_shot_"
-        + str(args.shot)
-        + "_run_"
-        + str(args.run)
-        + "_time_"
-        + "%.1f" % timeValue
-        + ".png"
-    )
-    canvas.save(fname)
-else:
-    canvas.show(block=False)
+if ret == 0:
+    if args.save:
+        fname = (
+            "CS_torque_waveforms_shot_"
+            + str(args.shot)
+            + "_run_"
+            + str(args.run)
+            + "_time_"
+            + "%.1f" % timeValue
+            + ".png"
+        )
+        canvas.save(fname)
+    else:
+        canvas.show(block=False)
 
 input("Press any key to close!!")

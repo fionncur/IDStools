@@ -108,7 +108,7 @@ for i in ${tests[@]}; do
 
     echo =============================================viewcoresources============================================================
     echo TESTING: viewcoresources -s $shot -r $run --save
-    viewcoresources -s $shot -r $run -save || exit 1
+    viewcoresources -s $shot -r $run --save || exit 1
 done
 
 echo TESTING: viewwall wall iter --save

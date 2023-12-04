@@ -8,6 +8,7 @@ import logging
 import numpy as np
 import functools
 from typing import Dict
+
 logger = logging.getLogger("module")
 
 
@@ -137,12 +138,9 @@ class CoreSourcesCompute:
             source = {}
             if len(sourceInfo.global_quantities) > 0:
                 source["valid"] = True
-                source["active"] = True if sourceInfo.global_quantities[0].power > 0 else False
-                print(sourceInfo.global_quantities[0].power)
-                print(sourceInfo.global_quantities[1].power)
-                print(sourceInfo.global_quantities[2].power)
-                print(sourceInfo.global_quantities[3].power)
-                print(sourceInfo.global_quantities[4].power)
+                source["active"] = (
+                    True if sourceInfo.global_quantities[0].power > 0 else False
+                )
             else:
                 source["valid"] = False
                 source["active"] = False
@@ -161,7 +159,6 @@ class CoreSourcesCompute:
             a boolean value. It is checking if there are any active sources in the list of valid and active sources and returning True if there is at least one active source, and False otherwise.
         """
         sources = self.getValidAndActiveSources()
-        print(sources)
         return any(source["active"] for _, source in sources.items())
 
     def getSourceNames(self) -> Dict:
@@ -421,7 +418,7 @@ class CoreSourcesCompute:
     def getSingleAndTotalElectronsWaveforms(self):
         """
         The function `getSingleAndTotalElectronsWaveforms` calculates and returns waveforms for total electron power, total electron particles, single electron power, and single electron particles.
-        
+
         Returns:
             a dictionary with the following keys and values:
             "total_electron_power_waveform": total_electron_power_waveform,
@@ -503,7 +500,7 @@ class CoreSourcesCompute:
     def getSingleAndTotalIonsWaveforms(self):
         """
         The function `getSingleAndTotalIonsWaveforms` calculates and returns the waveforms for single ion power, single ion particles, total ion power, and total ion particles.
-        
+
         Returns:
             a dictionary with four key-value pairs. The keys are "single_ion_power_waveform", "single_ion_particles_waveform", "total_ion_power_waveform", and "total_ion_particles_waveform". The corresponding values are the waveforms for single ion power, single ion particles, total ion power, and total ion particles, respectively.
         """
@@ -580,7 +577,7 @@ class CoreSourcesCompute:
     def getSingleAndTotalCurrentTorque(self):
         """
         The function `getSingleAndTotalCurrentTorque` calculates the total and individual current and torque waveforms for a given set of sources.
-        
+
         Returns:
             a dictionary with the following keys and values:
             "total_current_waveform": total_current_waveform,
