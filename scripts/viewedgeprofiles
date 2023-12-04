@@ -78,6 +78,9 @@ try:
 except:
     logger.error("edge_profiles ids is not present")
     exit(0)
+if timeArray is None:
+    logger.error("edge_profiles ids : time is not present")
+    exit(0)
 
 timeIndex, timeValue = getNearestTime(timeArray, args.time)
 
