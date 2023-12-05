@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import argparse
-from database import Connection, MachineDescription
+from idstools.database import Connection, MachineDescription
 
 from idstools.set_logger import set_logger
 from idstools.utils.clihelper import imasParser
