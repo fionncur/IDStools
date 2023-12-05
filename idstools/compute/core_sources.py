@@ -185,22 +185,21 @@ class CoreSourcesCompute:
         # single_power_profile               = dict()    # profile
         # single_particles_profile           = dict()    # profile
         nrho = len(self.getRhoTorNorm())
-        totalCurrentProfile = np.zeros(nrho)  # profile
+        totalCurrentProfile = np.zeros(nrho)
         singleCurrentProfile = {}
         sources = self.getValidAndActiveSources()
         for sourceIndex, source in sources.items():  # range(nsources):
-            if (
-                source["valid"] == True
-                and source["active"] == True
-                and len(self.ids.source[sourceIndex].profiles_1d[0].j_parallel > 0)
-            ):
-                totalCurrentProfile = (
-                    totalCurrentProfile
-                    + self.ids.source[sourceIndex].profiles_1d[0].j_parallel
-                )
-                singleCurrentProfile[sourceIndex] = (
-                    self.ids.source[sourceIndex].profiles_1d[0].j_parallel
-                )
+            if source["valid"] == True and source["active"] == True:
+                if len(self.ids.source[sourceIndex].profiles_1d[0].j_parallel) > 0:
+                    totalCurrentProfile = (
+                        totalCurrentProfile
+                        + self.ids.source[sourceIndex].profiles_1d[0].j_parallel
+                    )
+                    singleCurrentProfile[sourceIndex] = (
+                        self.ids.source[sourceIndex].profiles_1d[0].j_parallel
+                    )
+                else:
+                    singleCurrentProfile[sourceIndex] = np.zeros(nrho)
         return {
             "totalCurrentProfile": totalCurrentProfile,
             "singleCurrentProfile": singleCurrentProfile,

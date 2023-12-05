@@ -56,59 +56,54 @@ class CoreSourcesView:
             ax: The parameter `ax` is an instance of the `Axes` class from the `matplotlib.pyplot` module. It represents the axes on which the power profiles will be plotted.
         """
         if self.coreSourcesCompute.isActiveSourceAvailable():
-            ntime = len(self.ids.time)
-            if ntime == 1:
-                logger.warning("Only one time slice --> Waveforms not displayed")
-            else:
-                rho_tor_norm = self.coreSourcesCompute.getRhoTorNorm()
-                singleAndTotalElectronsProfiles = (
-                    self.coreSourcesCompute.getSingleAndTotalElectronsProfiles()
-                )
-                singleAndTotalIonProfiles = (
-                    self.coreSourcesCompute.getSingleAndTotalIonProfiles()
-                )
-                sourceNames = self.coreSourcesCompute.getSourceNames()
-                ax.set_title("Power Profiles [MW/M3]")
+            rho_tor_norm = self.coreSourcesCompute.getRhoTorNorm()
+            singleAndTotalElectronsProfiles = (
+                self.coreSourcesCompute.getSingleAndTotalElectronsProfiles()
+            )
+            singleAndTotalIonProfiles = (
+                self.coreSourcesCompute.getSingleAndTotalIonProfiles()
+            )
+            sourceNames = self.coreSourcesCompute.getSourceNames()
+            ax.set_title("Power Profiles [MW/M3]")
+            ax.plot(
+                rho_tor_norm,
+                singleAndTotalElectronsProfiles["totalElectronPowerProfile"] * 1.0e-6,
+                label=r"Total to electrons",
+            )
+            ax.plot(
+                rho_tor_norm,
+                singleAndTotalIonProfiles["totalIonPowerProfile"] * 1.0e-6,
+                "--",
+                label=r"Total to ions",
+            )
+            for isource, name in sourceNames.items():
                 ax.plot(
                     rho_tor_norm,
-                    singleAndTotalElectronsProfiles["totalElectronPowerProfile"]
+                    singleAndTotalElectronsProfiles["singleElectronPowerProfile"][
+                        isource
+                    ]
                     * 1.0e-6,
-                    label=r"Total to electrons",
+                    label=name + " [" + str(isource) + "]" + " to electrons",
                 )
                 ax.plot(
                     rho_tor_norm,
-                    singleAndTotalIonProfiles["totalIonPowerProfile"] * 1.0e-6,
+                    singleAndTotalIonProfiles["singleIonPowerProfile"][isource]
+                    * 1.0e-6,
                     "--",
-                    label=r"Total to ions",
+                    label=name + " [" + str(isource) + "]" + " to ions",
                 )
-                for isource, name in sourceNames.items():
-                    ax.plot(
-                        rho_tor_norm,
-                        singleAndTotalElectronsProfiles["singleElectronPowerProfile"][
-                            isource
-                        ]
-                        * 1.0e-6,
-                        label=name + " [" + str(isource) + "]" + " to electrons",
-                    )
-                    ax.plot(
-                        rho_tor_norm,
-                        singleAndTotalIonProfiles["singleIonPowerProfile"][isource]
-                        * 1.0e-6,
-                        "--",
-                        label=name + " [" + str(isource) + "]" + " to ions",
-                    )
-                ax.set_ylabel("Power to bulk $\mathrm{[MW/m^{3}]}$")
-                ax.set_xlabel("Normalized toroidal flux coordinate")
-                ax.grid(b=True)
-                # set legend
-                legend = ax.legend()
-                frame = legend.get_frame()
-                frame.set_facecolor("0.95")
-                for label in legend.get_texts():
-                    label.set_fontsize(7)
-                for label in legend.get_lines():
-                    label.set_linewidth(1.5)
-                return 0
+            ax.set_ylabel("Power to bulk $\mathrm{[MW/m^{3}]}$")
+            ax.set_xlabel("Normalized toroidal flux coordinate")
+            ax.grid(b=True)
+            # set legend
+            legend = ax.legend()
+            frame = legend.get_frame()
+            frame.set_facecolor("0.95")
+            for label in legend.get_texts():
+                label.set_fontsize(7)
+            for label in legend.get_lines():
+                label.set_linewidth(1.5)
+            return 0
         else:
             logger.warning("viewPowerProfiles:No active sources available")
         return -1
@@ -121,59 +116,55 @@ class CoreSourcesView:
             ax: The parameter `ax` is an instance of the `Axes` class from the `matplotlib.pyplot` module. It represents the axes on which the particles profiles will be plotted.
         """
         if self.coreSourcesCompute.isActiveSourceAvailable():
-            ntime = len(self.ids.time)
-            if ntime == 1:
-                logger.warning("Only one time slice --> Waveforms not displayed")
-            else:
-                rho_tor_norm = self.coreSourcesCompute.getRhoTorNorm()
-                singleAndTotalElectronsProfiles = (
-                    self.coreSourcesCompute.getSingleAndTotalElectronsProfiles()
-                )
-                singleAndTotalIonProfiles = (
-                    self.coreSourcesCompute.getSingleAndTotalIonProfiles()
-                )
-                sourceNames = self.coreSourcesCompute.getSourceNames()
-                ax.set_title("PARTICLES PROFILES [/M3/S]")
+            rho_tor_norm = self.coreSourcesCompute.getRhoTorNorm()
+            singleAndTotalElectronsProfiles = (
+                self.coreSourcesCompute.getSingleAndTotalElectronsProfiles()
+            )
+            singleAndTotalIonProfiles = (
+                self.coreSourcesCompute.getSingleAndTotalIonProfiles()
+            )
+            sourceNames = self.coreSourcesCompute.getSourceNames()
+            ax.set_title("PARTICLES PROFILES [/M3/S]")
+            ax.plot(
+                rho_tor_norm,
+                singleAndTotalElectronsProfiles["totalElectronParticlesProfile"]
+                * 1.0e-6,
+                label=r"Total to electrons",
+            )
+            ax.plot(
+                rho_tor_norm,
+                singleAndTotalIonProfiles["totalIonParticlesProfile"] * 1.0e-6,
+                "--",
+                label=r"Total to ions",
+            )
+            for isource, name in sourceNames.items():
                 ax.plot(
                     rho_tor_norm,
-                    singleAndTotalElectronsProfiles["totalElectronParticlesProfile"]
+                    singleAndTotalElectronsProfiles["singleElectronParticlesProfile"][
+                        isource
+                    ]
                     * 1.0e-6,
-                    label=r"Total to electrons",
+                    label=name + " [" + str(isource) + "]" + " electrons",
                 )
                 ax.plot(
                     rho_tor_norm,
-                    singleAndTotalIonProfiles["totalIonParticlesProfile"] * 1.0e-6,
+                    singleAndTotalIonProfiles["singleIonParticlesProfile"][isource]
+                    * 1.0e-6,
                     "--",
-                    label=r"Total to ions",
+                    label=name + " [" + str(isource) + "]" + " ions",
                 )
-                for isource, name in sourceNames.items():
-                    ax.plot(
-                        rho_tor_norm,
-                        singleAndTotalElectronsProfiles[
-                            "singleElectronParticlesProfile"
-                        ][isource]
-                        * 1.0e-6,
-                        label=name + " [" + str(isource) + "]" + " electrons",
-                    )
-                    ax.plot(
-                        rho_tor_norm,
-                        singleAndTotalIonProfiles["singleIonParticlesProfile"][isource]
-                        * 1.0e-6,
-                        "--",
-                        label=name + " [" + str(isource) + "]" + " ions",
-                    )
-                ax.set_ylabel("Density $\mathrm{[m^{-3}.s^{-1}]}$")
-                ax.set_xlabel("Normalized toroidal flux coordinate")
-                ax.grid(b=True)
-                # set legend
-                legend = ax.legend()
-                frame = legend.get_frame()
-                frame.set_facecolor("0.95")
-                for label in legend.get_texts():
-                    label.set_fontsize(7)
-                for label in legend.get_lines():
-                    label.set_linewidth(1.5)
-                return 0
+            ax.set_ylabel("Density $\mathrm{[m^{-3}.s^{-1}]}$")
+            ax.set_xlabel("Normalized toroidal flux coordinate")
+            ax.grid(b=True)
+            # set legend
+            legend = ax.legend()
+            frame = legend.get_frame()
+            frame.set_facecolor("0.95")
+            for label in legend.get_texts():
+                label.set_fontsize(7)
+            for label in legend.get_lines():
+                label.set_linewidth(1.5)
+            return 0
         else:
             logger.warning("viewParticlesProfiles:No active sources available")
         return -1
@@ -186,51 +177,46 @@ class CoreSourcesView:
             ax: The parameter `ax` is an instance of the `Axes` class from the `matplotlib.pyplot` module. It represents the axes on which the current profiles will be plotted.
         """
         if self.coreSourcesCompute.isActiveSourceAvailable():
-            ntime = len(self.ids.time)
-            if ntime == 1:
-                logger.warning("Only one time slice --> Waveforms not displayed")
-            else:
-                rho_tor_norm = self.coreSourcesCompute.getRhoTorNorm()
-                singleAndTotalElectronsAndIonsProfiles = (
-                    self.coreSourcesCompute.getSingleAndTotalElectronsAndIonsProfiles()
-                )
-                sourceNames = self.coreSourcesCompute.getSourceNames()
-                ax.set_title("CURRENT PROFILES [KA/M2]")
-                ax.plot(
-                    rho_tor_norm,
-                    singleAndTotalElectronsAndIonsProfiles["totalCurrentProfile"]
-                    * 1.0e-3,
-                    label=r"Total current",
-                )
-                for isource, name in sourceNames.items():
-                    if (
-                        len(
-                            singleAndTotalElectronsAndIonsProfiles[
-                                "singleCurrentProfile"
-                            ][isource]
-                        )
-                        > 0
-                    ):
-                        ax.plot(
-                            rho_tor_norm,
-                            singleAndTotalElectronsAndIonsProfiles[
-                                "singleCurrentProfile"
-                            ][isource]
-                            * 1.0e-3,
-                            label=name + str(isource),
-                        )
-                ax.set_ylabel("Current density $\mathrm{[kA/m^{2}]}$")
-                ax.set_xlabel("Normalized toroidal flux coordinate")
-                ax.grid(b=True)
-                # set legend
-                legend = ax.legend()
-                frame = legend.get_frame()
-                frame.set_facecolor("0.95")
-                for label in legend.get_texts():
-                    label.set_fontsize(7)
-                for label in legend.get_lines():
-                    label.set_linewidth(1.5)
-                return 0
+            rho_tor_norm = self.coreSourcesCompute.getRhoTorNorm()
+            singleAndTotalElectronsAndIonsProfiles = (
+                self.coreSourcesCompute.getSingleAndTotalElectronsAndIonsProfiles()
+            )
+            sourceNames = self.coreSourcesCompute.getSourceNames()
+            ax.set_title("CURRENT PROFILES [KA/M2]")
+            ax.plot(
+                rho_tor_norm,
+                singleAndTotalElectronsAndIonsProfiles["totalCurrentProfile"] * 1.0e-3,
+                label=r"Total current",
+            )
+            for isource, name in sourceNames.items():
+                if (
+                    len(
+                        singleAndTotalElectronsAndIonsProfiles["singleCurrentProfile"][
+                            isource
+                        ]
+                    )
+                    > 0
+                ):
+                    ax.plot(
+                        rho_tor_norm,
+                        singleAndTotalElectronsAndIonsProfiles["singleCurrentProfile"][
+                            isource
+                        ]
+                        * 1.0e-3,
+                        label=name + str(isource),
+                    )
+            ax.set_ylabel("Current density $\mathrm{[kA/m^{2}]}$")
+            ax.set_xlabel("Normalized toroidal flux coordinate")
+            ax.grid(b=True)
+            # set legend
+            legend = ax.legend()
+            frame = legend.get_frame()
+            frame.set_facecolor("0.95")
+            for label in legend.get_texts():
+                label.set_fontsize(7)
+            for label in legend.get_lines():
+                label.set_linewidth(1.5)
+            return 0
         else:
             logger.warning("viewCurrentProfiles:No active sources available")
         return -1
