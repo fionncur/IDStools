@@ -103,7 +103,11 @@ if len(edgeProfileIds.grid_ggd[0].space) == 0:
 
 wallCompute = WallCompute(wallIds)
 wallDict = wallCompute.getWall()
-r, z, h = wallDict["r"], wallDict["z"], wallDict["h"]
+r = None
+z = None
+h = None
+if wallDict is not None:
+    r, z, h = wallDict["r"], wallDict["z"], wallDict["h"]
 
 edgeProfilesView = EdgeProfilesView(edgeProfileIds)
 title = "Edge Profiles displayed for t = " + "%.1f" % timeValue + " s"

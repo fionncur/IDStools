@@ -45,6 +45,8 @@ class WallCompute:
             a dictionary containing the coordinates of the vessel elements. Each element is represented by a key-value pair in the dictionary, where the key is a string in the format "element{element_counter}" and the value is a list of two lists: rw (list of x-coordinates) and zw (list of y-coordinates).
         """
         wallDict = self.getWall(iunit)
+        if wallDict is None:
+            return None
         r, z, h = wallDict["r"], wallDict["z"], wallDict["h"]
         if len(r) == 0 or len(z) == 0 or len(h) == 0:
             return None
