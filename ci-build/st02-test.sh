@@ -22,6 +22,10 @@ try source ./tests/testscripts.sh || exit 1
 
 echo "-------------------------------------------------------------------------"
 echo "Tools testing with testscripts with IMAS Access Layer 5"
+
+# Purge modules and load IMAS module
+module purge
+
 try module load IMAS/3.39.0-5.0.0-intel-2020b
 try module unload -f IDStools
 try source ./tests/testscripts.sh || exit 1
