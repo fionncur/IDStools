@@ -8,10 +8,10 @@ dbscraper Syntax
 ~~~~~~~~~~~~~~~~
     .. code-block:: bash
 
-        $ python scripts/dbscraper.py -h
+        $ dbscraper -h
 
         Install tqdm to enable progress bar
-        usage: dbscraper.py [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] [--saveas SAVEAS]
+        usage: dbscraper [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] [--saveas SAVEAS]
                             [--status STATUS] [--list-count LIST_COUNT] [--verbose]
                             idspath
 
@@ -40,7 +40,7 @@ dbscraper Example
 ~~~~~~~~~~~~~~~~~
     .. code-block:: bash
 
-        $ python scripts/dbscraper.py "equilibrium/time_slice(0)/global_quantities/volume" --list-count 10 
+        $ dbscraper "equilibrium/time_slice(0)/global_quantities/volume" --list-count 10 
 
         |    |   PULSE |   RUN |   VALUE |
         |---:|--------:|------:|--------:|

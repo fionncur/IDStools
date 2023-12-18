@@ -7,9 +7,9 @@ Syntax dbselector
 ~~~~~~~~~~~~~~~~~
 .. code-block:: bash
 
-    $ python dbselector.py -h
+    $ dbselector -h
     Install tqdm to enable progress bar
-    usage: dbselector.py [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] ids
+    usage: dbselector [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] ids
 
     Checks if spciefied ids is exists in scenario database
 
@@ -32,7 +32,7 @@ Example dbselector
 ~~~~~~~~~~~~~~~~~~
 .. code-block:: bash
 
-    $ python dbselector.py edge_profiles
+    $ dbselector edge_profiles
     (123148, 4)
     (123285, 1)
     (123166, 2)

@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
 import argparse
 import os
 import sys
 
 import imas
-import numpy as np
 
-root_path = os.path.dirname(os.path.dirname(__file__))
-sys.path.append(root_path)
 from idstools.utils.clihelper import getBackendID, imasParser
 from idstools.utils.idshelper import resampleIndices, resampleTimes
 

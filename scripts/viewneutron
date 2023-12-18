@@ -1,0 +1,178 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+# migrated from neutronplot
+import argparse
+import logging
+import os
+import sys
+
+import imas
+
+from idstools.compute.common import getNearestTime
+from idstools.utils.clihelper import getBackendID, getDatabasePath, imasParser
+from idstools.utils.idslogger import setupLogger
+from idstools.view.common import Canvas
+from idstools.view.distribution_sources import DistributionSourcesView
+
+# Management of input arguments
+parser = argparse.ArgumentParser(
+    description="---- Display the neutron profiles from the distribution_sources IDSs",
+    parents=[imasParser],
+)
+parser.add_argument("-s", "--shot", help="Shot number", required=True, type=int)
+parser.add_argument("-r", "--run", help="Run number", required=True, type=int)
+parser.add_argument(
+    "-t", "--time", help="Time", required=False, type=float, default=-99.0
+)
+parser.add_argument(
+    "--save",
+    help="Save figure at default location",
+    action="store_true",
+)
+parser.add_argument(
+    "-i",
+    "--info",
+    help="Adds all extra provenance info to the plot",
+    action="store_true",
+)
+args = parser.parse_args()
+logger = setupLogger("module", stdout_level=logging.INFO)
+
+
+# Open the database and read the necessary IDSs
+connection = imas.DBEntry(
+    getBackendID(args.backend),
+    args.database,
+    args.shot,
+    args.run,
+    user_name=args.user,
+    data_version=args.version,
+)
+err, n = connection.open()
+if err != 0:
+    logger.critical(
+        f"Shot {str(args.shot)}, run {str(args.run)} for user_or_path = {args.user} and database = {args.database} does not exist",
+    )
+    logger.critical(
+        "----> Aborted.",
+    )
+    exit()
+
+hostdir = getDatabasePath(args)
+if hostdir is None:
+    logger.critical(
+        "Environment variable IMAS_HOME is not defined. Quitting.",
+    )
+    exit(1)
+
+try:
+    # connection.distribution_sources.get()
+    idsDistributionSources = imas.distribution_sources()
+    idsDistributionSources.time = connection.partial_get("distribution_sources", "time")
+    if idsDistributionSources.time is None:
+        logger.critical(
+            "No distribution_sources IDS in the data-entry --> Abort.",
+        )
+        exit()
+
+except Exception:
+    logger.critical(
+        "The distribution_sources IDS is absent from the input data-entry",
+    )
+    logger.critical(
+        "----> Aborted.",
+    )
+    exit()
+
+timeArray = idsDistributionSources.time
+timeIndex, timeValue = getNearestTime(timeArray, args.time)
+
+idsSliceDistributionSources = connection.get_slice("distribution_sources", timeValue, 1)
+
+nsources = len(idsSliceDistributionSources.source)
+if nsources > 1:
+    logger.info(
+        f"Distribution_sources contains {nsources} sources",
+    )
+else:
+    logger.info(
+        f"Distribution_sources contains {nsources} source",
+    )
+
+
+active = [1] * nsources  # A priori all sources are active
+idsDistributionSources.source.resize(nsources)
+for isource in range(nsources):
+    idsDistributionSources.source[isource].profiles_1d.resize(1)
+    idsDistributionSources.source[isource].global_quantities.resize(1)
+    idsDistributionSources.source[isource].process.resize(1)
+    try:
+        idsDistributionSources.source[isource].profiles_1d[
+            0
+        ] = idsSliceDistributionSources.source[isource].profiles_1d[0]
+    except Exception:
+        logger.warning(
+            f"Source {str(isource)} has no profiles_1d -> considered as inactive",
+        )
+        active[isource] = 0
+    try:
+        idsDistributionSources.source[isource].global_quantities[
+            0
+        ] = idsSliceDistributionSources.source[isource].global_quantities[0]
+    except Exception:
+        if active[isource] == 1:
+            logger.warning(
+                f"Source {str(isource)} has no global_quantities -> considered as inactive",
+            )
+            active[isource] = 0
+    try:
+        idsDistributionSources.source[isource].process[
+            0
+        ] = idsSliceDistributionSources.source[isource].process[0]
+    except Exception:
+        if active[isource] == 1:
+            logger.warning(
+                f"Source {str(isource)} has no process -> considered as inactive",
+            )
+            active[isource] = 0
+
+if sum(active) == 0:
+    logger.critical("No active neutron sources --> Leave.")
+    exit()
+
+title = "Profiles displayed for t = " + "%.1f" % timeValue + " s"
+canvas = Canvas(1, 1)
+ax = canvas.add_axes(title="", xlabel="", row=0, col=0)
+distributionSourcesView = DistributionSourcesView(idsDistributionSources)
+distributionSourcesView.viewNeutrons(ax)
+distributionSourcesView.viewTime(ax, timeValue)
+if args.info:
+    distributionSourcesView.viewPulseInfo(
+        ax, title, hostdir, args.shot, args.run, timeValue
+    )
+
+ax.set_title(
+    title,
+    fontdict={
+        "fontfamily": "serif",
+        "color": "darkred",
+        "fontweight": "normal",
+        "fontsize": 12,
+    },
+)
+
+if args.save:
+    fname = (
+        "Neutrons"
+        + "_shot_"
+        + str(args.shot)
+        + "_run_"
+        + str(args.run)
+        + "_time_"
+        + "%.1f" % timeValue
+        + ".png"
+    )
+    canvas.save(fname)
+else:
+    canvas.show()

@@ -5,9 +5,10 @@ IDS Manipulation tools allow you to manipulate data within IDSes by copying, mov
 .. toctree::
    :maxdepth: 1
 
-   idsprint
    idscp
    idsdiff
    idslist
-   idssize
+   idsperf
+   idsprint
    idsresample
+   idssize

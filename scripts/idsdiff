@@ -1,4 +1,5 @@
-# #!/usr/bin/env python3
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 import argparse
 import base64
 import datetime
@@ -15,8 +16,6 @@ import imas
 import matplotlib.pyplot as plt
 import numpy as np
 
-root_path = os.path.dirname(os.path.dirname(__file__))
-sys.path.append(root_path)
 from idstools.utils.clihelper import getBackendID, imasParser
 from idstools.utils.ddhelper import DDHelper
 from idstools.utils.idshelper import compareIds
@@ -506,7 +505,7 @@ if __name__ == "__main__":
     file_path = get_filename("", file_title, report_dir)
     log_file = file_path + ".log"
     html_file = file_path + ".html"
-    logger = setupLogger("module", log_file=log_file, fmt="%(message)s")
+    logger = setupLogger("module", log_file=log_file, fmt="%(message)s", log_file_level=logging.INFO, stdout_level=logging.INFO)
     st = time.time()
     data = {}
     for idsname in args.ids:

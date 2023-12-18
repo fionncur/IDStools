@@ -11,38 +11,38 @@ module load EasyBuild
 HTTPHEADERS=http-headers.txt
 
 write_headers_file() {
-# Taken from https://git.iter.org/projects/IMEX/repos/easybuild-easyconfigs/pull-requests/121/diff
-# EB v4.3.3 supports --http-header-fields-urlpat=FILE, construct a file for
-# git.iter.org url patterns (makes CI MAGIC:http_auth_hooks.sh unnecessary)
-# but to avoid exposure of the hash to the CI logs, use a PASSWORD variable.
-# Also delete the file after use.
-rm -rf "$HTTPHEADERS"  # Start anew
-# Preformatted header for use with access tokens on git.iter.org
-if [ "x$bamboo_HTTP_AUTH_BEARER_PASSWORD" != "x" ]; then
-    cat >> $HTTPHEADERS <<EOF
+    # Taken from https://git.iter.org/projects/IMEX/repos/easybuild-easyconfigs/pull-requests/121/diff
+    # EB v4.3.3 supports --http-header-fields-urlpat=FILE, construct a file for
+    # git.iter.org url patterns (makes CI MAGIC:http_auth_hooks.sh unnecessary)
+    # but to avoid exposure of the hash to the CI logs, use a PASSWORD variable.
+    # Also delete the file after use.
+    rm -rf "$HTTPHEADERS" # Start anew
+    # Preformatted header for use with access tokens on git.iter.org
+    if [ "x$bamboo_HTTP_AUTH_BEARER_PASSWORD" != "x" ]; then
+        cat >>$HTTPHEADERS <<EOF
 iter.org::Authorization: Bearer $bamboo_HTTP_AUTH_BEARER_PASSWORD
 EOF
-    EB_HTTP_OPTS="--http-header-fields-urlpat=${HTTPHEADERS}"
-fi
+        EB_HTTP_OPTS="--http-header-fields-urlpat=${HTTPHEADERS}"
+    fi
 
-# Add one custom HTTP HEADER line at a time (urlpat::header_field)
-# Expose the value of urlpat, but not the header_field, this allows later
-# line-by-line maintenance in the CI build plan variables.
-# for N in {1..9} ;do
-#     var_urlpat=bamboo_HTTP_HEADER_URLPAT_${N}
-#     var_field=bamboo_HTTP_HEADER_URLPAT_${N}_PASSWORD
-#     if test "x${!var_urlpat}" != "x" -a "x${!var_field}" != "x" ;then
-#         cat >> $HTTPHEADERS <<EOF
-# ${!var_urlpat}::${!var_field}
-# EOF
-#     fi
-# done
+    # Add one custom HTTP HEADER line at a time (urlpat::header_field)
+    # Expose the value of urlpat, but not the header_field, this allows later
+    # line-by-line maintenance in the CI build plan variables.
+    # for N in {1..9} ;do
+    #     var_urlpat=bamboo_HTTP_HEADER_URLPAT_${N}
+    #     var_field=bamboo_HTTP_HEADER_URLPAT_${N}_PASSWORD
+    #     if test "x${!var_urlpat}" != "x" -a "x${!var_field}" != "x" ;then
+    #         cat >> $HTTPHEADERS <<EOF
+    # ${!var_urlpat}::${!var_field}
+    # EOF
+    #     fi
+    # done
 }
 
 del_headers_file() {
-if [ -e ${HTTPHEADERS} ]; then
-    rm ${HTTPHEADERS}
-fi
+    if [ -e ${HTTPHEADERS} ]; then
+        rm ${HTTPHEADERS}
+    fi
 }
 
 echo "listing contents of current directory"
@@ -52,13 +52,24 @@ echo "listing contents of :" /mnt/bamboo_deploy
 ls /mnt/bamboo_deploy
 echo "----------------------------------------------------------"
 
-echo "creating directory :/mnt/bamboo_deploy/easybuild" 
+echo "creating directory :/mnt/bamboo_deploy/easybuild"
 mkdir -p /mnt/bamboo_deploy/easybuild || exit 1
 echo "----------------------------------------------------------"
 
 chmod -R u+w /mnt/bamboo_deploy/easybuild
-# rm -rf /mnt/bamboo_deploy/easybuild
-EB_OPTS="--inject-checksums --check-style --modules-tool=EnvironmentModules --module-syntax=Tcl --allow-modules-tool-mismatch --allow-use-as-root-and-accept-consequences --prefix=/mnt/bamboo_deploy/easybuild --optarch=Intel:axAVX,CORE-AVX2;GCC:march=sandybridge"
+
+echo "For the development version, delete the previous zip file because easybuild uses the available zip file."
+rm -f /mnt/bamboo_deploy/easybuild/sources/i/IDStools/extensions/IDStools-dev.zip
+rm -rf /mnt/bamboo_deploy/easybuild/software/IDStools/dev-foss-2020b
+rm -rf /mnt/bamboo_deploy/easybuild/software/IDStools/dev-intel-2020b
+rm -rf /mnt/bamboo_deploy/easybuild/software/IDStools/dev-gfbf-2022b
+
+echo "Check folder contents after removing development version"
+ls /mnt/bamboo_deploy/easybuild/sources/i/IDStools/extensions/
+ls /mnt/bamboo_deploy/easybuild/software/IDStools
+echo "----------------------------------------------------------"
+
+EB_OPTS="--force --modules-tool=EnvironmentModules --module-syntax=Tcl --allow-modules-tool-mismatch --allow-use-as-root-and-accept-consequences --prefix=/mnt/bamboo_deploy/easybuild --optarch=Intel:axAVX,CORE-AVX2;GCC:march=sandybridge"
 write_headers_file
 
 set -e
@@ -94,13 +105,13 @@ echo "MODULE_FULL_VERSION :" $MODULE_FULL_VERSION
 sed -e "s;__COMMITHASH__;${COMMITHASH};" \
     -e "s;__VERSION__;${VERSION};" \
     -e "s;__RAWVERSION__;${RAWVERSION};" \
-    ./ci-build/files/idstools-foss-2020b.eb.in > ./ci-build/files/$MODULE_FULL_VERSION
+    ./ci-build/files/idstools-foss-2020b.eb.in >./ci-build/files/$MODULE_FULL_VERSION
 
 echo "contents of eb file" $MODULE_FULL_VERSION
 echo "-----------------------START--------------------------------"
 cat ./ci-build/files/$MODULE_FULL_VERSION
 echo "-----------------------END----------------------------------"
-eb ./ci-build/files/$MODULE_FULL_VERSION -f ${EB_OPTS} ${EB_HTTP_OPTS}
+eb ./ci-build/files/$MODULE_FULL_VERSION ${EB_OPTS} ${EB_HTTP_OPTS}
 echo $MODULE_FULL_VERSION "Installed"
 
 echo "creating gfbf-2022b module"
@@ -112,7 +123,7 @@ echo "MODULE_FULL_VERSION :" $MODULE_FULL_VERSION
 sed -e "s;__COMMITHASH__;${COMMITHASH};" \
     -e "s;__VERSION__;${VERSION};" \
     -e "s;__RAWVERSION__;${RAWVERSION};" \
-    ./ci-build/files/idstools-gfbf-2022b.eb.in > ./ci-build/files/$MODULE_FULL_VERSION
+    ./ci-build/files/idstools-gfbf-2022b.eb.in >./ci-build/files/$MODULE_FULL_VERSION
 
 echo "contents of eb file" $MODULE_FULL_VERSION
 echo "-----------------------START--------------------------------"
@@ -130,7 +141,7 @@ echo "MODULE_FULL_VERSION :" $MODULE_FULL_VERSION
 sed -e "s;__COMMITHASH__;${COMMITHASH};" \
     -e "s;__VERSION__;${VERSION};" \
     -e "s;__RAWVERSION__;${RAWVERSION};" \
-    ./ci-build/files/idstools-intel-2020b.eb.in > ./ci-build/files/$MODULE_FULL_VERSION
+    ./ci-build/files/idstools-intel-2020b.eb.in >./ci-build/files/$MODULE_FULL_VERSION
 
 echo "contents of eb file" $MODULE_FULL_VERSION
 echo "-----------------------START--------------------------------"
@@ -142,7 +153,7 @@ echo $MODULE_FULL_VERSION "Installed"
 echo "check if /work/imas/opt/bamboo_deploy/easybuild/ path is accessible"
 ls -ltr /mnt/bamboo_deploy/easybuild/
 
-echo "replace mnt with /work/imas/opt/ to work internal path on sdcc" 
+echo "replace mnt with /work/imas/opt/ to work internal path on sdcc"
 chmod -R u+w /mnt/bamboo_deploy/easybuild
 find /mnt/bamboo_deploy/easybuild/ -type f -not -path '*/\.*' -exec sed -i -- 's/mnt/work\/imas\/opt/g' {} +
 

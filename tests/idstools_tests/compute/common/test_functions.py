@@ -7,7 +7,10 @@ import sys
 import numpy as np
 import pytest
 
-from idstools.compute.common.basic import getClosestOfGivenValueFromArray, getMiddleElementFromArray
+from idstools.compute.common import (
+    getClosestOfGivenValueFromArray,
+    getMiddleElementFromArray,
+)
 
 array = [
     0.21069679,

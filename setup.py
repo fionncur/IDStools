@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import os
 import pathlib
 import subprocess
@@ -46,17 +46,25 @@ setup(
     keywords="IMAS, IDS",
     install_requires=install_requires,
     scripts=[
+        "scripts/dblist",
         "scripts/dbscraper",
         "scripts/dbselector",
-        "scripts/dblist",
-        "scripts/idscompo",
-        "scripts/plotequilibrium",
-        "scripts/idsprint",
+        "scripts/viewplasmacompo",
         "scripts/idscp",
         "scripts/idsdiff",
         "scripts/idslist",
-        "scripts/idssize",
+        "scripts/idsperf",
+        "scripts/idsprint",
         "scripts/idsresample",
+        "scripts/idssize",
+        "scripts/viewedgeprofiles",
+        "scripts/viewequilibrium",
+        "scripts/viewfluxes",
+        "scripts/viewmachinedescription",
+        "scripts/viewneutron",
+        "scripts/viewpressure",
+        "scripts/viewsources",
+        "scripts/viewwall",
     ],
     setup_requires=["pytest-runner"],
     tests_require=["pytest"],

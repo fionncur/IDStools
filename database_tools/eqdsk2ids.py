@@ -66,9 +66,16 @@ class GEQDSK:
 
         # 3. Confer COCOS
         if cocos_in:
-            self.cocos = COCOS(index={"COCOS": cocos_in})
+            self.cocos = COCOS(
+                index={
+                    "COCOS": cocos_in,
+                    "ipsign": np.sign(self.data["CURRENT"]),
+                    "b0sign": np.sign(self.data["BCENTR"]),
+                }
+            )
         else:
             self.cocos = self._set_cocos(self.data)
+
         logger.info(
             "GEQDSK COCOS: \n%s",
             pformat(self.cocos.__dict__, indent=2, sort_dicts=False),
@@ -487,9 +494,7 @@ def geqdsk2ids(fpath, ipsign=0, b0sign=0, cocos_in=None):
 
     # Check if COCOS is equal to IDS_COCOS
     if cocos["COCOS"] != IDS_COCOS:
-        raise ValueError(
-            f"COCOS transformed = {cocos['COCOS']}, expected {IDS_COCOS}"
-        )
+        raise ValueError(f"COCOS transformed = {cocos['COCOS']}, expected {IDS_COCOS}")
 
     return eq
 

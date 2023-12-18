@@ -1,0 +1,123 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+import argparse
+from database import Connection, MachineDescription
+
+from idstools.set_logger import set_logger
+from idstools.utils.clihelper import imasParser
+from idstools.view.common import Canvas
+from idstools.view.pf_active import PFActiveView
+from idstools.view.wall import WallView
+
+# ----------------------------------------------------------------------
+
+
+logger = set_logger("mdplot", level="INFO")
+
+
+def plotMachineDescription(data):
+    """
+    The `plotMachineDescription` method is responsible for plotting the machine description based on the provided pulse list.
+    """
+
+    # Initialization
+    canvas = Canvas(1, 1)
+    ax = canvas.add_axes(
+        title="Machine Description", xlabel="R (m)", ylabel="Z (m)", row=0, col=0
+    )
+
+    # Custom settings
+    canvas.fig.set_size_inches(7.5, 10.0)
+    ax.set_aspect("equal", adjustable="box")
+
+    # Plot Overlay
+    for pulse, pulseData in data.items():
+        if pulseData["config"]["ids"] == "pf_active":
+            pfcoilsview = PFActiveView(pulseData["data"])
+            pfcoilsview.viewActivePfCoils(ax)
+
+        if pulseData["config"]["ids"] == "wall":
+            wallview = WallView(pulseData["data"])
+            wallview.view_wall(ax)
+
+    # wallview.view_DIR(ax)
+    # wallview.view_TS(ax)
+    # wallview.view_Cryostat(ax)
+
+    ax.plot()
+    if args.save:
+        fname = "MachineDescriptionPlot.png"
+        canvas.save(fname)
+    else:
+        canvas.show()
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        description="---- View machine description by getting information of data from md_summary file",
+        parents=[imasParser],
+    )
+    subparsers = parser.add_subparsers(help="sub-commands help")
+
+    subparserList = subparsers.add_parser(
+        "list", help="list machine description databases"
+    )
+    subparserList.set_defaults(cmd="list")
+    subparserList.add_argument(
+        "ids",
+        nargs="*",
+        type=str,
+        help="IDS names",
+    )
+    subparserList.add_argument(
+        "--obsolete",
+        help="Shows obsolete files",
+        action="store_true",
+    )
+    subparserList.add_argument(
+        "--checkValidity",
+        help="Checks if database exists and also tries to retrive ids",
+        action="store_true",
+    )
+    subparserPlot = subparsers.add_parser(
+        "plot", help="Plot Machine description databases"
+    )
+    subparserPlot.set_defaults(cmd="plot")
+    subparserPlot.add_argument(
+        "list",
+        nargs="*",
+        help="Provide Pulse list here.. Space separated values for example : 111001/102 116000/2 ",
+    )
+    subparserPlot.add_argument(
+        "--save",
+        help="Save figure at default location",
+        action="store_true",
+    )
+    args = parser.parse_args()
+    if args.database == "ITER":
+        args.database = "ITER_MD"
+
+    connection = Connection(args.backend, args.database, 0, 0, args.user, args.version)
+    machineDescription = MachineDescription(connection=connection)
+    if args.cmd == "list":
+        data = machineDescription.getMDSummary(
+            args.ids, args.obsolete, args.checkValidity
+        )
+        print(
+            f"{'Pulse': >11} | {'IDS Name' : >28} | {'Status': >10} | {'description'}"
+        )
+        print(
+            f"--------------------------------------------------------------------------"
+        )
+        for pulse, pulseData in data.items():
+            idsname = pulseData["config"]["ids"]
+            status = pulseData["config"]["status"]
+            description = pulseData["config"]["description"]
+            print(f"{pulse : >11} | {idsname : >28} | {status: >10} | {description}")
+
+    if args.cmd == "plot":
+        if not args.list:
+            args.list = ["111001/102", "116000/2"]
+        data = machineDescription.getMDDataByPulseList("wAll")
+        plotMachineDescription(data)

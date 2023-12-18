@@ -51,7 +51,7 @@ if __name__ == "__main__":
         parents=[imas_parser],
         description=textwrap.dedent(
             f"""\
-            (I) Command Line Interface for EQDSK Convertor ({0})
+            (I) Command Line Interface for EQDSK Convertor (eqdsk2ids)
             -----------------------------------------------------------
             Usage:
                 0) Load IMAS and install fortranformat and Cerberus (if not done before)
@@ -59,18 +59,18 @@ if __name__ == "__main__":
                 $ pip install fortranformat cerberus
 
                 1) Compute COCOS and create IDS data file in local database
-                $ {0} -g path_to_gfile -s 12345 -r 1 -u userid -d ITER
+                $ eqdsk2ids -g path_to_gfile -s 12345 -r 1 -u userid -d ITER
 
                 2) Enforce signs of Ip and/or B0 in output
-                $ {0} -g path_to_gfile -s 12345 -r 1 -u userid -d ITER --ipsign -1 --b0sign -1
+                $ eqdsk2ids -g path_to_gfile -s 12345 -r 1 -u userid -d ITER --ipsign -1 --b0sign -1
 
                 3) Increase verbosity to see information as COCOS index and transformation coeff.
-                $ {0} -g path_to_gfile -s 12345 -r 1 -u userid -d ITER --verbose
+                $ eqdsk2ids -g path_to_gfile -s 12345 -r 1 -u userid -d ITER --log INFO
 
                 4) Coerce input COCOS index
-                $ {0} -g path_to_gfile -s 12345 -r 1 -u userid -d ITER --cocos_in 7
+                $ eqdsk2ids -g path_to_gfile -s 12345 -r 1 -u userid -d ITER --cocos_in 7
 
-            (II) Functional Interface in Python (database_tools/{prog}.py)
+            (II) Functional Interface in Python (database_tools/eqdsk2ids.py)
             --------------------------------------------------------------
             Usage:
                 0) Initialization

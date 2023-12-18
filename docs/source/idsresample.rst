@@ -10,7 +10,7 @@ Syntax idsresample
 
     .. code-block:: bash     
 
-        $ python scripts/idsresample --help
+        $ idsresample --help
         Install tqdm to enable progress bar
         usage: idsresample [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] -si SHOT_INPUT -ri
                         RUN_INPUT -so SHOT_OUTPUT -ro RUN_OUTPUT [-do DATABASE_OUTPUT] [-bo BACKEND_OUTPUT]
@@ -60,7 +60,7 @@ Example idsresample
 
     .. code-block:: bash
 
-        $ python scripts/idsresample -si 131024 -ri 10 -so 145000 -ro 2
+        $ idsresample -si 131024 -ri 10 -so 145000 -ro 2
         Install tqdm to enable progress bar
         resampling indices :equilibrium
 

@@ -1,18 +1,16 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
 # Return values of an IDS in all data entries of a database
 
 import argparse
-import os
 import sys
 from pathlib import Path
 
-import pandas as pd
 from imas import imasdef
 
-root_path = os.path.dirname(os.path.dirname(__file__))
-sys.path.append(root_path)
+from idstools.database import DBMaster
 from idstools.utils.clihelper import getBackendID, imasParser
-from idstools.database.basic import DBMaster
 from idstools.utils.idshelper import getQuantitiesFromPulses
 
 if __name__ == "__main__":
@@ -47,7 +45,9 @@ if __name__ == "__main__":
     dbmaster = DBMaster()
     pulses = None
     if backend == imasdef.MDSPLUS_BACKEND:
-        pulses = dbmaster.getMdsPlusPulses(args.user, args.database, args.version,status=args.status)
+        pulses = dbmaster.getMdsPlusPulses(
+            args.user, args.database, args.version, status=args.status
+        )
     elif backend == imasdef.HDF5_BACKEND:
         pulses = dbmaster.getHdf5Pulses(args.user, args.database, args.version)
     else:
@@ -58,7 +58,7 @@ if __name__ == "__main__":
         print(pulses)
 
     if pulses is not None:
-        df = getQuantitiesFromPulses(args.idspath, tuple(pulses),args.list_count, True)
+        df = getQuantitiesFromPulses(args.idspath, tuple(pulses), args.list_count, True)
         if args.saveas:
             if not Path(args.saveas).parent.exists():
                 raise FileNotFoundError(

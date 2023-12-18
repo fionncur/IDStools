@@ -21,13 +21,13 @@ root_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__fi
 sys.path.insert(0, root_path)
 import idstools
 
-print(f"root path:{root_path}" )
-print(f"python exec:{sys.executable}" )
-print(f"sys.path:{sys.path}" )
+print(f"root path:{root_path}")
+print(f"python exec:{sys.executable}")
+print(f"sys.path:{sys.path}")
 # -- Project information -----------------------------------------------------
 
 project = "IDSTools"
-copyright =  f"{datetime.datetime.now().year}, ITER Organization"
+copyright = f"{datetime.datetime.now().year}, ITER Organization"
 author = "ITER Organization"
 
 # Get release
@@ -35,34 +35,40 @@ release = idstools.__version__
 
 # Get version
 versionList = idstools.__version__.split("+")
-version=""
-is_develop=False
-if len(versionList)==1:
-    version=versionList[0]
-if len(versionList)==2:
-    version=f"{versionList[0]}dev"
+version = ""
+is_develop = False
+if len(versionList) == 1:
+    version = versionList[0]
+if len(versionList) == 2:
+    version = f"{versionList[0]}dev"
     is_develop = True
 
-html_context = {
-    "is_develop": is_develop
-}
+html_context = {"is_develop": is_develop}
 
 print(f"version : {version}, release : {release}")
 
 switcher_version = ""
 if "dev" in version:
     switcher_version = "devdocs"
-    version_string = {"name":"devdocs", 'version': release, 'url': 'https://sharepoint.iter.org/departments/POP/CM/IMDesign/Code%20Documentation/idstools-doc/devdocs/'}
+    version_string = {
+        "name": "devdocs",
+        "version": release,
+        "url": "https://sharepoint.iter.org/departments/POP/CM/IMDesign/Code%20Documentation/idstools-doc/devdocs/",
+    }
 else:
     switcher_version = f"{version}"
-    version_string = {"name":version, 'version': release, 'url': f'https://sharepoint.iter.org/departments/POP/CM/IMDesign/Code%20Documentation/idstools-doc/{version}/'}
+    version_string = {
+        "name": version,
+        "version": release,
+        "url": f"https://sharepoint.iter.org/departments/POP/CM/IMDesign/Code%20Documentation/idstools-doc/{version}/",
+    }
 
 
 print(f"release : {release}")
 print(f"version_string : {version_string}")
 
 # Open a file in write mode
-with open('_static/version.json', 'w') as file:
+with open("_static/version.json", "w") as file:
     json.dump(version_string, file)
 
 
@@ -150,7 +156,7 @@ html_theme_options = {
         "json_url": "https://sharepoint.iter.org/departments/POP/CM/IMDesign/_layouts/15/download.aspx?UniqueId=15778d46932e404096c0cf73fd4510b4",
         # "json_url": "_static/versions.json",
     },
-    "navbar_end": ["theme-switcher", "version-switcher", "navbar-icon-links"]
+    "navbar_end": ["theme-switcher", "version-switcher", "navbar-icon-links"],
 }
 html_sidebars = {
     "**": [

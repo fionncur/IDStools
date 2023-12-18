@@ -1,0 +1,171 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+import argparse
+import os
+import sys
+
+import imas
+import numpy as np
+
+from idstools.database import readScenario
+from idstools.input_processing import (beam_wall_crossing,
+                                       check_rays_into_divertor,
+                                       read_launching_parameters,
+                                       read_torbeam_output, read_wall)
+from idstools.utils.clihelper import getBackendID, imasParser
+from idstools.view.common import Canvas
+from idstools.view.core_profiles import CoreProfilesView
+from idstools.view.domain.ecstray import EcStrayView
+from idstools.view.equilibrium import EquilibriumView
+from idstools.view.tbd import TbdView
+from idstools.view.waves import WavesView
+
+parser = argparse.ArgumentParser(
+    description="---- Shows electron cyclotron stray radiation information by showing different plots",
+    parents=[imasParser],
+)
+parser.add_argument("-s", "--shot", help="Shot number", required=True, type=int)
+parser.add_argument("-r", "--run", help="Run number", required=True, type=int)
+
+args = parser.parse_args()
+
+connectionIn = imas.DBEntry(
+    getBackendID(args.backend), args.database, args.shot, args.run, args.user
+)
+err, n = connectionIn.open()
+if err != 0:
+    # TODO chek if you can raise exception or just print or may be use logger
+    print(
+        "Shot {0}, run {1} for user={2} and database={3} does not exists".format(
+            args.shot, args.run, args.user, args.database
+        ),
+        file=sys.stderr,
+    )
+    print("----> Aborted.", file=sys.stderr)
+    exit()
+
+
+timeIndexEquilibrium = 0
+timeIndexCoreProfiles = 0
+timeIndexWaves = 0
+
+current_file_path = os.path.dirname(os.path.abspath(__file__))
+
+scenario_file = os.path.join(current_file_path, "input/scenario.yaml")
+wallfile = os.path.join(current_file_path, "input/wall2d.txt")
+filelaunchers = os.path.join(current_file_path, "input/ec_waveforms.yaml")
+path_result = os.path.join(current_file_path, "results/")
+
+wall2d = read_wall(wallfile)
+
+# # Read launching parameters from EC waveform file
+launching_parameters = read_launching_parameters(filelaunchers)
+# # Read beam extra variables from Torbeam output ascii files
+beam_output, timeArrayWaves = read_torbeam_output(launching_parameters, path_result)
+# # Check if rays go into the divertor
+check_rays_into_divertor(wall2d, beam_output)
+# # Calculates where the beams cross the wall
+beam_wall = beam_wall_crossing(wall2d, launching_parameters, beam_output)
+
+inIDSList, outIDSDict = readScenario(
+    scenarioFilePath=scenario_file,
+    inIDSList=["equilibrium", "core_profiles"],
+    outIDSList=["waves"],
+)
+equilibriumIds = inIDSList["equilibrium"]
+coreProfilesIds = inIDSList["core_profiles"]
+wavesIds = outIDSDict["waves"]
+
+
+# TODO Is it wise to get common timestamp and make zero hold of other timestamps?
+# Or just follow what we have here. This is elegant in terms of performance
+def iround(x, xi):
+    return np.argmin(np.abs(x - xi))
+
+
+timeArrayEquilibrium = equilibriumIds.time  # Plot Ip
+timeArrayCoreProfiles = coreProfilesIds.time
+timeArrayWaves = wavesIds.time
+
+timeSlice = 5.0
+
+# # Indices for time arrays in equilibrium, core_profiles, waves IDSs
+timeIndexEquilibrium = iround(timeArrayEquilibrium, timeSlice)
+timeIndexCoreProfiles = iround(timeArrayCoreProfiles, timeSlice)
+timeIndexWaves = iround(timeArrayWaves, timeSlice)
+
+canvas = Canvas(3, 2)
+
+# Subplot waveforms versus time
+equilibriumView = EquilibriumView(equilibriumIds)
+coreProfilesView = CoreProfilesView(coreProfilesIds)
+wavesView = WavesView(wavesIds)
+ecstrayView = EcStrayView(equilibriumIds, coreProfilesIds, wavesIds)
+
+ax_waveform = canvas.add_axes(
+    title="Waveforms", xlabel="Time [s]", row=0, col=0, colspan=1
+)
+equilibriumView.plotIP(ax_waveform)  # Plot Ip
+coreProfilesView.plotElectronDensityNe0(ax_waveform)
+
+ax_beam_index = canvas.add_axes(
+    title="Beam_Index", xlabel="Beam index", row=0, col=1, colspan=1
+)
+wavesView.plotBeamIndex(ax_beam_index)
+
+ax_pol_view = canvas.add_axes(
+    title="Poloidal view (R,Z)", xlabel="R [m]", ylabel="Z [m]", row=1, col=0, rowspan=1
+)
+equilibriumView.plotPoloidalEquilibrium(ax_pol_view, timeIndexEquilibrium)
+
+beamIndex = 0
+wavesView.plotPoloidalTraces(ax_pol_view, timeIndexWaves, beamIndex, verbose=True)
+
+ecstrayView.plotResonanceLayer(
+    ax_pol_view, timeIndexWaves, timeIndexEquilibrium, verbose=True
+)
+
+ecstrayView.plotCutOffLayer(
+    ax_pol_view, timeIndexWaves, timeIndexCoreProfiles, timeIndexEquilibrium
+)
+ax_top_view = canvas.add_axes(
+    title="Top View (X,Y)", xlabel="X [m]", ylabel="Y [m]", row=1, col=1, rowspan=1
+)
+
+ax_topview_plot_eq = equilibriumView.plotTopviewEquilibrium(
+    ax_top_view, timeIndexEquilibrium
+)
+
+ax_topview_plot_traces = wavesView.plotTopviewTraces(
+    ax_top_view, timeIndexWaves, beamIndex
+)
+
+# Subplot profiles
+ax_density = canvas.add_axes(
+    xlabel=r"Normalised $\rho_{tor}$ [-]",
+    ylabel="Density [m-3]",
+    row=2,
+    col=0,
+    rowspan=1,
+)
+ax_density_plot_dens, nmax = coreProfilesView.plotDensityProfile(
+    ax_density, timeIndexCoreProfiles
+)
+
+tbdView = TbdView()
+# Subplot polygon graph for beam footprints
+ax_polygon = canvas.add_axes(
+    title="Beam footprints on the wall",
+    xlabel=r"$\phi \times R_{max}$ [Rad.m]",
+    ylabel="Length along polygon [m]",
+    row=2,
+    col=1,
+    rowspan=1,
+)
+# Subplot polygon graph for beam footprints
+ax_polygon_plot_pol = tbdView.plot_polygon(
+    ax_polygon, wall2d, beam_wall, beamIndex, timeIndexWaves, timeIndexWaves
+)
+canvas.show()
+print("done")

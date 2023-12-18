@@ -1,0 +1,116 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+# migrated from pressureplot
+
+import argparse
+import logging
+import os
+import sys
+
+import imas
+
+from idstools.compute.common import getNearestTime
+from idstools.utils.clihelper import getBackendID, getDatabasePath, imasParser
+from idstools.utils.idslogger import setupLogger
+from idstools.view.common import Canvas
+from idstools.view.core_profiles import CoreProfilesView
+
+logger = setupLogger("module", stdout_level=logging.INFO)
+
+# Management of input arguments
+parser = argparse.ArgumentParser(
+    description="Display the plasma kinetic profiles from the core_profiles IDSs",
+    epilog="""
+""",
+    formatter_class=argparse.RawTextHelpFormatter,
+    parents=[imasParser],
+)
+
+parser.add_argument("-s", "--shot", help="Shot number", required=True, type=int)
+parser.add_argument("-r", "--run", help="Run number", required=True, type=int)
+parser.add_argument("-t", "--time", type=float, help="Time", default=-99)
+parser.add_argument(
+    "--save",
+    help="Save figure at default location",
+    action="store_true",
+)
+parser.add_argument(
+    "-i",
+    "--info",
+    help="Adds all extra provenance info to the plot",
+    action="store_true",
+)
+args = parser.parse_args()
+
+connection = imas.DBEntry(
+    getBackendID(args.backend),
+    args.database,
+    args.shot,
+    args.run,
+    user_name=args.user,
+)
+status, idx = connection.open()
+
+if status != 0:
+    logger.critical("Error opening pulse! Please check existence.")
+    sys.exit(status)
+
+hostdir = getDatabasePath(args)
+
+
+try:
+    # input.core_profiles.get()
+    idsCoreProfiles = imas.core_profiles()
+    idsCoreProfiles.time = connection.partial_get("core_profiles", "time")
+    if idsCoreProfiles.time is None:
+        logger.critical("No core_profiles IDS in the data-entry --> Abort.")
+        exit()
+except Exception:
+    logger.critical("The core_profiles IDS is absent from the input data-entry")
+    logger.critical("----> Aborted.")
+    exit()
+
+timeArray = idsCoreProfiles.time
+timeIndex, timeValue = getNearestTime(timeArray, args.time)
+
+idsCoreProfiles.profiles_1d.resize(1)  # Read 1D-profiles for this time slice
+idsCoreProfiles.profiles_1d[0] = connection.partial_get(
+    "core_profiles", f"profiles_1d({timeIndex})"
+)
+title = "Profiles displayed for t = " + "%.1f" % timeValue + " s"
+canvas = Canvas(3, 1)
+canvas.fig.suptitle(title, size=12)
+
+ax1 = canvas.add_axes(title="", xlabel="", row=0, col=0, colspan=1)
+ax2 = canvas.add_axes(title="", xlabel="", row=1, col=0, colspan=1)
+ax3 = canvas.add_axes(title="", xlabel="", row=2, col=0, colspan=1)
+
+coreprofilesView = CoreProfilesView(idsCoreProfiles)
+
+coreprofilesView.plotTotalPressureProperties(ax1)
+if args.info:
+    coreprofilesView.showInfoOnPlot(ax1, f"Shot {args.shot} /  Run {args.run}")
+
+coreprofilesView.plotIonPressureProperties(ax2)
+if args.info:
+    coreprofilesView.showInfoOnPlot(ax2, f"Shot {args.shot} /  Run {args.run}")
+
+coreprofilesView.plotElectronPressureProperties(ax3)
+if args.info:
+    coreprofilesView.showInfoOnPlot(ax3, f"Shot {args.shot} /  Run {args.run}")
+
+if args.save:
+    fname = (
+        "Pressure"
+        + "_shot_"
+        + str(args.shot)
+        + "_run_"
+        + str(args.run)
+        + "_time_"
+        + "%.1f" % timeValue
+        + ".png"
+    )
+    canvas.save(fname)
+else:
+    canvas.show()

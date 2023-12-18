@@ -11,7 +11,7 @@ Syntax idslist
 
     .. code-block:: bash   
           
-        $ python scripts/idslist -h
+        $ idslist -h
         Install tqdm to enable progress bar
         usage: idslist [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] -s SHOT -r RUN [-f] [-y]
 
@@ -39,7 +39,7 @@ Example idslist
 
     .. code-block:: bash
 
-        $ python scripts/idslist -s 134174 -r 117
+        $ idslist -s 134174 -r 117
         Install tqdm to enable progress bar
         core_profiles  : 106   slices: [10.6 10.6 10.6 ... 75.  75.  75. ]
         core_sources   : 106   slices: [10.6 10.6 10.6 ... 75.  75.  75. ]

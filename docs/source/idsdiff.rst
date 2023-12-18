@@ -7,8 +7,8 @@ Syntax idsdiff
 ~~~~~~~~~~~~~~
 .. code-block:: bash
 
-    $ python idsdiff.py -h
-    usage: idsdiff.py [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION]
+    $ idsdiff -h
+    usage: idsdiff [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION]
                     [--backendB BACKENDB] [--databaseB DATABASEB] [--userB USERB] [--skip-provenance]
                     [--generate-html] [--report-dir REPORT_DIR]
                     shotA runA shotB runB [ids [ids ...]]
@@ -45,7 +45,7 @@ Example idsdiff
 ~~~~~~~~~~~~~~~
     .. code-block:: bash
 
-        python scripts/idsdiff.py --generate-html 122525 1 122525 2 summary
+        $ idsdiff --generate-html 122525 1 122525 2 summary
 
     .. image:: _static/images/idsdiff_1.png
         :alt: image not found

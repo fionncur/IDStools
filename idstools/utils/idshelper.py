@@ -188,43 +188,38 @@ def getAvailableIdsAndOccurrences(dbEntryObject: imas.DBEntry, time_mode=None):
                 availableidslist.append((idstype, occ))
     return availableidslist
 
-
-def getAvailableIdsAndTimes(idsObject: imas.ids) -> list:
+def getAvailableIdsAndTimes(dbEntryObject: imas.DBEntry) -> list:
     """
-    This function retrieves available IDs and their corresponding time arrays from an IDS object.
-
+    The function `getAvailableIdsAndTimes` retrieves available IDS names and corresponding time arrays from a given `dbEntryObject`.
+    
     Args:
-        idsObject (imas.ids): The `idsObject` <class 'imas.ids.ids'> parameter is an object of the `imas.ids` class, which is used to access idses. This function takes this object as input and returns a list of tuples containing available IDS names and their corresponding time arrays.
-
+        dbEntryObject (imas.DBEntry): The `dbEntryObject` parameter is an object of type `imas.DBEntry`.
+    
     Returns:
-        a list of tuples, where each tuple contains an IDS name and an array of times associated with that IDS.
+        a list of tuples. Each tuple contains an IDS name and a corresponding time array.
     """
 
-    def idsProperties(obj):
-        try:
-            obj.__getattribute__("ids_properties")
-            return True
-        except Exception:
-            return False
-
-    predicateIdsProperties = lambda x: idsProperties(x)
-    idsWithPropertiesDict = inspect.getmembers(idsObject, predicateIdsProperties)
     result = []
-    for _idsName, idsPropertiesObject in idsWithPropertiesDict:
-        try:
-            maxOccurrences = idsPropertiesObject.getMaxOccurrences()
-
-        except AttributeError:
-            maxOccurrences = 1
+    for _idsName in getIdsTypes():
+        maxOccurrences = eval(f"imas.{_idsName}.getMaxOccurrences()")
         for occurrence in range(maxOccurrences + 1):
-            idsName = _idsName if occurrence == 0 else f"{_idsName}/{str(occurrence)}"
+            timeArray = None
+            idsName = _idsName if occurrence == 0 else f"{_idsName}/{occurrence}"
             try:
-                (_, timeArray) = idsObject.getTimes(idsName)
+                homogeneous_time = dbEntryObject.partial_get(
+                    _idsName, "ids_properties/homogeneous_time", occurrence=occurrence
+                    )
+                if homogeneous_time == imas.imasdef.IDS_TIME_MODE_UNKNOWN:
+                    timeArray =  []
+                if homogeneous_time == imas.imasdef.IDS_TIME_MODE_HETEROGENEOUS:
+                    timeArray =  [np.NaN] 
+                if homogeneous_time == imas.imasdef.IDS_TIME_MODE_HOMOGENEOUS:
+                    timeArray = dbEntryObject.partial_get(_idsName, "time")
+                if homogeneous_time == imas.imasdef.IDS_TIME_MODE_INDEPENDENT:
+                    timeArray =  [np.NINF] 
             except Exception as exc:
                 timeArray = []
-                logger.critical(
-                    f"ERROR! IDS {idsName} : Reading time array fails due to following problem : {exc}"
-                )
+                logger.info(f"ERROR! IDS {idsName} : Reading time array fails due to following problem : {exc}")
             if timeArray is not None and len(timeArray):
                 result.append((idsName, timeArray))
     return result

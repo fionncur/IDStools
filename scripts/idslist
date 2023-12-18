@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 # ids_content and listidss is merged
 
 import argparse
@@ -8,13 +9,8 @@ import sys
 import imas
 import numpy as np
 
-root_path = os.path.dirname(os.path.dirname(__file__))
-sys.path.append(root_path)
-
-
 from idstools.utils.idshelper import (
-    getAvailableIdsAndTimes,
-    getAvailableIdsAndOccurrences,
+    getAvailableIdsAndOccurrences,getAvailableIdsAndTimes
 )
 from idstools.utils.idslogger import setupLogger
 from idstools.utils.clihelper import getBackendID, imasParser
@@ -86,20 +82,29 @@ if args.yaml_format:
             print("     time:             [static]")
 
 else:
-    idsObject = imas.ids(
+    connection = imas.DBEntry(
+        getBackendID(args.backend),
+        args.database,
         args.shot,
         args.run,
+        user_name=args.user,
+        data_version=args.version,
     )
-    err, _ = idsObject.open_env(args.user, args.database, args.version)
+    err, n = connection.open()
     if err != 0:
         logger.critical(
-            f"Shot {args.shot}, run {args.run} for user {args.user} and database {args.database} is not reachable ----> abort!",
+            f"Shot {str(args.shot)}, run {str(args.run)} for user_or_path = {args.user} and database = {args.database} does not exist",
         )
-        sys.exit(err)
+        logger.critical(
+            "----> Aborted.",
+        )
+        exit()
+    question_string = "?"
 
-    availableIdsAndTimes = getAvailableIdsAndTimes(idsObject)
+    availableIdsAndTimes = getAvailableIdsAndTimes(connection)
     question_string = "?"
     for idsName, timeArray in availableIdsAndTimes:
+        
         if len(timeArray) == 1 and np.isnan(timeArray[0]):
             print(f"{idsName:15}:  {question_string:5} slices: heterogeneous IDS ")
         elif len(timeArray) == 1 and timeArray[0] == np.NINF:

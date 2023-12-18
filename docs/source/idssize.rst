@@ -40,7 +40,7 @@ Example idssize
 
     .. code-block:: bash
 
-        $ python scripts/idssize -s 122525 -r 1
+        $ idssize -s 122525 -r 1
         Install tqdm to enable progress bar
         Examining data for public, ITER, 3, 122525, 1
         Reading 0.001 MB of data for dataset_description/0 took 0.00 seconds
