@@ -121,7 +121,6 @@ class CoreProfilesCompute:
 
                 [2.0, 3.0, 4.0, 9.0, 183.84, 40.0, 20.0]
         """
-        # TODO why always element_index = 0 we are picking up
         nspecies = len(self.ids.profiles_1d[timeSlice].ion)
         a = [0] * nspecies
         for ispecies in range(nspecies):
@@ -902,3 +901,4 @@ class CoreProfilesCompute:
                     "core_profiles.profiles_1d[0].ion[0].pressure could not be read",
                 )
         return pressureIonTotal
+

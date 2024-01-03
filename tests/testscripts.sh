@@ -105,6 +105,10 @@ for i in ${tests[@]}; do
     echo =============================================viewedgeprofiles============================================================
     echo TESTING: viewedgeprofiles -s $shot -r $run --save
     viewedgeprofiles -s $shot -r $run --time 60 || exit 1
+
+    echo =============================================viewrotation============================================================
+    echo TESTING: viewrotation -s $shot -r $run --info --save
+    viewrotation -s $shot -r $run --time 60 || exit 1
 done
 
 echo TESTING: viewwall wall iter --save
