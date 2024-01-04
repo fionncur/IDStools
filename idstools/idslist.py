@@ -1,4 +1,4 @@
-#TODO There are nonmigrated some scripts which uses following functions, so keeping this file.. These functions are already migrated to utils/idshelper.py.. 
+# TODO There are nonmigrated scripts that use the following functions, so keep this file. These functions are already migrated to utils/idshelper.py.
 import imas
 import inspect
 import types
