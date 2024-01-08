@@ -3,6 +3,7 @@
 declare -a tests
 
 tests+=("122525;1")
+tests+=("122525;1")
 # tests+=("123170;2")
 # tests+=("123276;1")
 # tests+=("120014;1")
