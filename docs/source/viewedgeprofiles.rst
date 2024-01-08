@@ -1,7 +1,7 @@
 viewedgeprofiles
 ================
 
-*viewedgeprofiles* script shows edge profiles plots by interpolating on rectangular grid. It shows Electrons, Ions and Neutral densitiy plots.
+*viewedgeprofiles* script shows edge profiles plots by interpolating on rectangular grid. It shows Electrons, Ions and Neutral density plots.
 
 Syntax viewedgeprofiles
 ~~~~~~~~~~~~~~~~~~~~~~~
