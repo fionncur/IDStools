@@ -104,13 +104,13 @@ r, z, h = wallDict["r"], wallDict["z"], wallDict["h"]
 
 edgeProfilesView = EdgeProfilesView(edgeProfileIds)
 title = "Edge Profiles displayed for t = " + "%.1f" % timeValue + " s"
-canvas = Canvas(1, 4)
+canvas = Canvas(4, 3)
 canvas.fig.suptitle(title, size=12)
 
-ax1 = canvas.add_axes(title="", xlabel="", row=0, col=0, colspan=1)
-ax2 = canvas.add_axes(title="", xlabel="", row=0, col=1, colspan=1)
-ax3 = canvas.add_axes(title="", xlabel="", row=0, col=2, colspan=1)
-ax4 = canvas.add_axes(title="", xlabel="", row=0, col=3, colspan=1)
+ax1 = canvas.add_axes(title="", xlabel="", row=0, col=0, rowspan=3)
+ax2 = canvas.add_axes(title="", xlabel="", row=0, col=1, rowspan=3)
+ax3 = canvas.add_axes(title="", xlabel="", row=0, col=2, rowspan=3)
+ax4 = canvas.add_axes(title="", xlabel="", row=3, col=0, colspan=2)
 c1 = edgeProfilesView.viewElectronsDensity(ax1, timeSlice=0)
 canvas.fig.colorbar(c1, ax=ax1)
 

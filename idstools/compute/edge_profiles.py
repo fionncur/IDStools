@@ -797,7 +797,7 @@ class EdgeProfilesCompute:
                     .object[0]
                     .index
                 ]
-                .geometry[:]
+                .geometry[:2]
             )
         hull = ConvexHull(
             sep_coords[0 : num_sep - 1, :]
@@ -824,7 +824,7 @@ class EdgeProfilesCompute:
                 .space[0]
                 .objects_per_dimension[0]
                 .object[vertex_id]
-                .geometry[:]
+                .geometry[:2]
             )
         r_edge = vertex_coords[:, 0]
         z_edge = vertex_coords[:, 1]
