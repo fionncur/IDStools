@@ -184,8 +184,12 @@ class DBMaster:
         pulses = {} if asDictionary else []
         hdf5MasterFilePaths = glob(f"{versionDir}/**/*master.h5", recursive=True)
         for hdf5MasterFilePath in hdf5MasterFilePaths:
-            pulse = int(str(hdf5MasterFilePath).split("/")[-3])
-            run = int(str(hdf5MasterFilePath).split("/")[-2])
+            try:
+                pulse = int(str(hdf5MasterFilePath).split("/")[-3])
+                run = int(str(hdf5MasterFilePath).split("/")[-2])
+            except:
+                print(f"Malformed database path {hdf5MasterFilePath}")
+                continue
             fileTime = datetime.fromtimestamp(
                 os.path.getmtime(hdf5MasterFilePath)
             ).replace(microsecond=0)
@@ -253,21 +257,24 @@ class DBMaster:
                     == DBMaster.getPulseStatus(Path(dataFilePath).with_suffix(".yaml"))
                 ):
                     runList = (root[len(mdsplusDir) + 1 :]).split("/")
-                    if len(runList) == 1:  # AL4 layout
-                        numStartPos = datafile.find("_") + 1
-                        numEndPos = datafile.rfind(".")
-                        num = int(datafile[numStartPos:numEndPos])
-                        pulse = num // 10000
-                        run = int(runList[0]) * 10000 + (num % 10000)
-                    else:  # AL5 layout
-                        assert datafile == "ids_001.datafile"
-                        if os.path.islink(dataFilePath):
-                            continue
-                        run = root.split("/")[-1]
-                        run = int(run)
-                        pulse = root.split("/")[-2]
-                        pulse = int(pulse)
-
+                    try:
+                        if len(runList) == 1:  # AL4 layout
+                            numStartPos = datafile.find("_") + 1
+                            numEndPos = datafile.rfind(".")
+                            num = int(datafile[numStartPos:numEndPos])
+                            pulse = num // 10000
+                            run = int(runList[0]) * 10000 + (num % 10000)
+                        else:  # AL5 layout
+                            assert datafile == "ids_001.datafile"
+                            if os.path.islink(dataFilePath):
+                                continue
+                            run = root.split("/")[-1]
+                            run = int(run)
+                            pulse = root.split("/")[-2]
+                            pulse = int(pulse)
+                    except:
+                        print(f"Malformed database path {root}")
+                        continue
                     fileTime = datetime.fromtimestamp(
                         os.path.getmtime(dataFilePath)
                     ).replace(microsecond=0)
