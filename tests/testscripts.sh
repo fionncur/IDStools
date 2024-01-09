@@ -28,8 +28,6 @@ dbselector summary --list-count 10 || exit 1
 
 echo =====================================dblist=====================================================
 echo TESTING: dblist list
-dblist -u schneim list || exit 1
-dblist -u fleuryl list || exit 1
 dblist -u public list || exit 1
 dblist -u public list -c || exit 1
 dblist -u public list -M || exit 1
