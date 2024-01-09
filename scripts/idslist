@@ -118,31 +118,34 @@ if args.cmd == "yaml":
             idsname, "ids_properties/homogeneous_time", occurrence=oc
         )
         times = connection.partial_get(idsname, "time", occurrence=oc)
-
+        
         # Format idsname
         idsnameoc = f"{idsname}/{str(oc)}" if oc > 0 else idsname
         # For every homogeneous_time [0,1,2]
         if homogeneous_time == 0:
             print(f"  {idsnameoc}:")
-            print(f"     time_step_number: {len(times)}")
+            if times is not None:
+                print(f"     time_step_number: {len(times)}")
             print("     time:             [unhomogeneous]")
         elif homogeneous_time == 1:
-            if len(times) > 1:
-                time_step = (times[len(times) - 1] - times[0]) / (len(times) - 1)
-                start_time = times[0]
-                end_time = times[len(times) - 1]
-                print(f"  {idsnameoc}:")
-                print(f"     time_step_number: {len(times)}")
-                print(
-                    f"     start_end_step:   [{str(start_time)} {str(end_time)} {str(time_step)}]"
-                )
-            elif len(times) == 1:
-                print(f"  {idsnameoc}:")
-                print(f"     time_step_number: {len(times)}")
-                print(f"     time:             [{str(times[0])}]")
+            if times is not None:
+                if len(times) > 1:
+                    time_step = (times[len(times) - 1] - times[0]) / (len(times) - 1)
+                    start_time = times[0]
+                    end_time = times[len(times) - 1]
+                    print(f"  {idsnameoc}:")
+                    print(f"     time_step_number: {len(times)}")
+                    print(
+                        f"     start_end_step:   [{str(start_time)} {str(end_time)} {str(time_step)}]"
+                    )
+                elif len(times) == 1:
+                    print(f"  {idsnameoc}:")
+                    print(f"     time_step_number: {len(times)}")
+                    print(f"     time:             [{str(times[0])}]")
         elif homogeneous_time == 2:
             print(f"  {idsnameoc}:")
-            print(f"     time_step_number: {len(times)}")
+            if times is not None:
+                print(f"     time_step_number: {len(times)}")
             print("     time:             [static]")
     connection.close()
     exit(0)
