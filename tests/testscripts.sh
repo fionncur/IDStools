@@ -121,9 +121,9 @@ idsdiff 122525 1 122525 2 summary || exit 1
 idsdiff 130011 6 130012 4 summary || exit 1
 
 echo =====================================viewmachinedescription=====================================================
-viewmachinedescription list pf_active --checkValidity
-viewmachinedescription list pf_active --obsolete
-viewmachinedescription plot --save
+viewmachinedescription list pf_active --checkValidity  || exit 1
+viewmachinedescription list pf_active --obsolete || exit 1
+viewmachinedescription plot --save || exit 1
 # echo =====================================idsresample=====================================================
 # echo TESTING: idsresample -si 131024 -ri 10 -so 145000 -ro 2
 # idsresample -si 131024 -ri 10 -so 145000 -ro 2 || exit 1

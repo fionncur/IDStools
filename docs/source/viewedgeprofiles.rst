@@ -8,7 +8,7 @@ Syntax viewedgeprofiles
 .. code-block:: bash
 
     $ viewedgeprofiles -h
-    usage: viewedgeprofiles [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] -s SHOT -r RUN [-t TIME] [--save]
+    usage: viewedgeprofiles [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] -s SHOT -r RUN [-t TIME] [--separatix] [--save]
 
     ---- Edge Profile plot
 
@@ -25,7 +25,9 @@ Syntax viewedgeprofiles
     -s SHOT, --shot SHOT  Shot number
     -r RUN, --run RUN     Run number
     -t TIME, --time TIME  Time
+    --separatix           Show separtix
     --save                Save figure at default location
+
 
 Example viewedgeprofiles
 ~~~~~~~~~~~~~~~~~~~~~~~~
