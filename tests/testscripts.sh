@@ -72,8 +72,12 @@ for i in ${tests[@]}; do
     idslist -s $shot -r $run || exit 1
 
     echo ================================================idslist=========================================================
-    echo TESTING: idslist -s $shot -r $run --yaml-format
-    idslist -s $shot -r $run --yaml-format || exit 1
+    echo TESTING: idslist -s $shot -r $run yaml
+    idslist -s $shot -r $run yaml || exit 1
+
+    echo ================================================idslist=========================================================
+    echo TESTING: idslist -s $shot -r $run occ
+    idslist -s $shot -r $run occ || exit 1
 
     echo ============================================idssize=============================================================
     echo TESTING: idssize -s $shot -r $run equilibrium

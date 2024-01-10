@@ -5,12 +5,14 @@
 import argparse
 import os
 import sys
+import textwrap
 
 import imas
 import numpy as np
 
 from idstools.utils.idshelper import (
-    getAvailableIdsAndOccurrences,getAvailableIdsAndTimes
+    getAvailableIdsAndOccurrences,
+    getAvailableIdsAndTimes,
 )
 from idstools.utils.idslogger import setupLogger
 from idstools.utils.clihelper import getBackendID, imasParser
@@ -20,68 +22,51 @@ np.set_printoptions(threshold=1, precision=2, suppress=True)
 
 
 parser = argparse.ArgumentParser(
-    description="---- List available IDSes in the pulse",
+    prog="idslist",
+    formatter_class=argparse.RawDescriptionHelpFormatter,
+    description=textwrap.dedent(
+        """
+        List available IDSes in the pulse. By deafult it prints all IDSes alone with their time length. fullarray option allows you to print complete time array.
+        
+        Possible commands are:
+        yaml - List ids content for yaml files aimed at describing a scenario
+        occ <--ids> <--comment> - List ids with their number of occurrences"""
+    ),
     parents=[imasParser],
 )
 parser.add_argument("-s", "--shot", help="Shot number", required=True, type=int)
 parser.add_argument("-r", "--run", help="Run number", required=True, type=int)
-parser.add_argument("-f", "--fullarray",action="store_true", help="Show full time array values")
 parser.add_argument(
-    "-y",
-    "--yaml-format",
+    "-f",
+    "--fullarray",
     action="store_true",
-    dest="yaml_format",
-    help="List ids content for yaml files aimed at describing a scenario",
+    help="Show full time array values",
 )
+
+subparsers = parser.add_subparsers(help="sub-commands help")
+
+subparserYaml = subparsers.add_parser(
+    "yaml", help="List ids content for yaml files aimed at describing a scenario"
+)
+subparserYaml.set_defaults(cmd="yaml")
+
+subparserOcc = subparsers.add_parser(
+    "occ", help="List ids with their number of occurrences"
+)
+subparserOcc.add_argument("-i", "--ids", required=False, type=str, help="IDS name")
+subparserOcc.add_argument(
+    "-c",
+    "--comment",
+    required=False,
+    action="store_true",
+    help="Output ids_properties.comment field for each found occurrence",
+)
+
+subparserOcc.set_defaults(cmd="occ")
 
 args = parser.parse_args()
 
-if args.yaml_format:
-    # Open the database and read the necessary IDSs
-    connection = imas.DBEntry(
-        getBackendID(args.backend), args.database, args.shot, args.run, args.user
-    )
-    status, _ = connection.open()
-
-    if status != 0:
-        logger.error(
-            f"Shot {str(args.shot)}, run {str(args.run)} for user_or_path = {args.user} and database = {args.database} does not exist",
-        )
-        exit()
-
-    for idsname, oc in getAvailableIdsAndOccurrences(connection):
-        homogeneous_time = connection.partial_get(
-            idsname, "ids_properties/homogeneous_time", occurrence=oc
-        )
-        times = connection.partial_get(idsname, "time", occurrence=oc)
-
-        # Format idsname
-        idsnameoc = f"{idsname}/{str(oc)}" if oc > 0 else idsname
-        # For every homogeneous_time [0,1,2]
-        if homogeneous_time == 0:
-            print(f"  {idsnameoc}:")
-            print(f"     time_step_number: {len(times)}")
-            print("     time:             [unhomogeneous]")
-        elif homogeneous_time == 1:
-            if len(times) > 1:
-                time_step = (times[len(times) - 1] - times[0]) / (len(times) - 1)
-                start_time = times[0]
-                end_time = times[len(times) - 1]
-                print(f"  {idsnameoc}:")
-                print(f"     time_step_number: {len(times)}")
-                print(
-                    f"     start_end_step:   [{str(start_time)} {str(end_time)} {str(time_step)}]"
-                )
-            elif len(times) == 1:
-                print(f"  {idsnameoc}:")
-                print(f"     time_step_number: {len(times)}")
-                print(f"     time:             [{str(times[0])}]")
-        elif homogeneous_time == 2:
-            print(f"  {idsnameoc}:")
-            print(f"     time_step_number: {len(times)}")
-            print("     time:             [static]")
-
-else:
+if "cmd" not in args.__dict__:
     connection = imas.DBEntry(
         getBackendID(args.backend),
         args.database,
@@ -104,7 +89,6 @@ else:
     availableIdsAndTimes = getAvailableIdsAndTimes(connection)
     question_string = "?"
     for idsName, timeArray in availableIdsAndTimes:
-        
         if len(timeArray) == 1 and np.isnan(timeArray[0]):
             print(f"{idsName:15}:  {question_string:5} slices: heterogeneous IDS ")
         elif len(timeArray) == 1 and timeArray[0] == np.NINF:
@@ -113,3 +97,85 @@ else:
             if args.fullarray is True:
                 np.set_printoptions(threshold=sys.maxsize)
             print(f"{idsName:15}: {str(len(timeArray)):5} slices: {timeArray} ")
+    connection.close()
+    exit(0)
+
+if args.cmd == "yaml":
+    # Open the database and read the necessary IDSs
+    connection = imas.DBEntry(
+        getBackendID(args.backend), args.database, args.shot, args.run, args.user
+    )
+    status, _ = connection.open()
+
+    if status != 0:
+        logger.error(
+            f"Shot {str(args.shot)}, run {str(args.run)} for user_or_path = {args.user} and database = {args.database} does not exist",
+        )
+        exit()
+
+    for idsname, oc in getAvailableIdsAndOccurrences(connection):
+        homogeneous_time = connection.partial_get(
+            idsname, "ids_properties/homogeneous_time", occurrence=oc
+        )
+        times = connection.partial_get(idsname, "time", occurrence=oc)
+        
+        # Format idsname
+        idsnameoc = f"{idsname}/{str(oc)}" if oc > 0 else idsname
+        # For every homogeneous_time [0,1,2]
+        if homogeneous_time == 0:
+            print(f"  {idsnameoc}:")
+            if times is not None:
+                print(f"     time_step_number: {len(times)}")
+            print("     time:             [unhomogeneous]")
+        elif homogeneous_time == 1:
+            if times is not None:
+                if len(times) > 1:
+                    time_step = (times[len(times) - 1] - times[0]) / (len(times) - 1)
+                    start_time = times[0]
+                    end_time = times[len(times) - 1]
+                    print(f"  {idsnameoc}:")
+                    print(f"     time_step_number: {len(times)}")
+                    print(
+                        f"     start_end_step:   [{str(start_time)} {str(end_time)} {str(time_step)}]"
+                    )
+                elif len(times) == 1:
+                    print(f"  {idsnameoc}:")
+                    print(f"     time_step_number: {len(times)}")
+                    print(f"     time:             [{str(times[0])}]")
+        elif homogeneous_time == 2:
+            print(f"  {idsnameoc}:")
+            if times is not None:
+                print(f"     time_step_number: {len(times)}")
+            print("     time:             [static]")
+    connection.close()
+    exit(0)
+
+
+if args.cmd == "occ":
+    # Open the database and read the necessary IDSs
+    connection = imas.DBEntry(
+        getBackendID(args.backend), args.database, args.shot, args.run, args.user
+    )
+    status, _ = connection.open()
+
+    if status != 0:
+        logger.error(
+            f"Shot {str(args.shot)}, run {str(args.run)} for user_or_path = {args.user} and database = {args.database} does not exist",
+        )
+        exit()
+
+    for idsname, oc, comment in getAvailableIdsAndOccurrences(
+        connection, getComment=True
+    ):
+        # If user wants to check specific ids type
+        if args.ids:
+            if idsname != args.ids:
+                continue
+        # Format idsname
+        idsnameoc = f"{idsname}/{str(oc)}"
+        if args.comment:
+            print(f"  {idsnameoc}: {comment}")
+        else:
+            print(f"  {idsnameoc}")
+    connection.close()
+    exit(0)
