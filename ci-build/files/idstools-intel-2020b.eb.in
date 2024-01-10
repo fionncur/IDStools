@@ -28,7 +28,10 @@ dependencies = [
     ("matplotlib", "3.5.1"),
 ]
 
-sanity_pip_check = True
+use_pip = True
+exts_download_dep_fail = True
+# sanity_pip_check = True
+# use_pip_requirement = False
 
 exts_list = [
     (
