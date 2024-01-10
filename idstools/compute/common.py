@@ -11,7 +11,7 @@ from packaging import version
 logger = logging.getLogger("module")
 
 
-def getNearestTime(timeArray: np.ndarray, requestedTime: float) -> Tuple[float, float]:
+def getNearestTime(timeArray: np.ndarray, requestedTime: float) -> Tuple[int, float]:
     """
     The function `getNearestTime` takes an array of time values and a requested time, and returns the index and value of the nearest time in the array to the requested time.
 
@@ -26,7 +26,7 @@ def getNearestTime(timeArray: np.ndarray, requestedTime: float) -> Tuple[float, 
     ntime = len(timeArray)
     if ntime >= 1:
         if requestedTime >= 0:
-            idx = abs(timeArray - requestedTime).argmin()
+            idx = int(abs(timeArray - requestedTime).argmin())
             [timeValue, timeIndex] = timeArray.flat[idx], idx
         else:
             timeIndex = ntime // 2

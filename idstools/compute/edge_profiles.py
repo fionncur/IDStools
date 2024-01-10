@@ -396,37 +396,14 @@ class EdgeProfilesCompute:
                 0.0002505748085483,
                 0.00021528820409221]
         """
-        IDENTIFIER_CELLS_INDEX = 4  # cells identifier
-        elements = (
-            self.ids.grid_ggd[timeSlice].grid_subset[IDENTIFIER_CELLS_INDEX].element
-        )
-        grid_subset_name = (
-            self.ids.grid_ggd[timeSlice]
-            .grid_subset[IDENTIFIER_CELLS_INDEX]
-            .identifier.name
-        )
-        # check if grid_subset[4] identifier name is cells, if not, find out 'cells' index
-        index_counter = 0
-        if grid_subset_name.lower() != "cells":
-            logger.debug(
-                "edge_profiles IDS:cells not found in grid subset at 4th index, Checking index of cells in the grid subset"
-            )
-            for subset in self.ids.grid_ggd[timeSlice].grid_subset:
-                if subset.identifier.name.lower() == "cells":
-                    elements = (
-                        self.ids.grid_ggd[timeSlice].grid_subset[index_counter].element
-                    )
-                    grid_subset_name = (
-                        self.ids.grid_ggd[timeSlice]
-                        .grid_subset[index_counter]
-                        .identifier.name
-                    )
-                    IDENTIFIER_CELLS_INDEX = index_counter
-                    logger.warning(
-                        f"edge_profiles IDS:cells found in grid subset at {IDENTIFIER_CELLS_INDEX} index"
-                    )
-                    break
-                index_counter = index_counter + 1
+        IDENTIFIER_CELLS_INDEX = 5  # cells identifier
+        cellsGridSubset = None
+        for grid_subset in self.ids.grid_ggd[timeSlice].grid_subset:
+            if grid_subset.identifier.index == IDENTIFIER_CELLS_INDEX:
+                cellsGridSubset = grid_subset
+                
+        elements = cellsGridSubset.element
+
         num_vertices = len(elements)
         if num_vertices == 0:
             logger.warning("edge_profiles IDS:No element found in grid subset")
@@ -782,27 +759,38 @@ class EdgeProfilesCompute:
                 nspecOverNmaj[jspecies] = 0
 
     def getSeparatix(self, timeSlice=0):
-        SUBSET_INDEX = 17
-        num_sep = len(self.ids.grid_ggd[timeSlice].grid_subset[SUBSET_INDEX].element)
-        sep_coords = np.zeros((num_sep, 2))
+        SUBSET_INDEX = 16 # separatix
 
-        for i in range(num_sep):
-            sep_coords[i, :] = (
-                self.ids.grid_ggd[timeSlice]
-                .space[0]
-                .objects_per_dimension[0]
-                .object[
+        separatixGridSubset = None
+        for grid_subset in self.ids.grid_ggd[timeSlice].grid_subset:
+            if grid_subset.identifier.index == SUBSET_INDEX:
+                separatixGridSubset = grid_subset
+        
+                logger.info(f"Found Grid subset for separatix name:{grid_subset.identifier.name}, Index: {grid_subset.identifier.index}")
+        if separatixGridSubset is None:
+            logger.warning("edge_profiles IDS:Separatix not found")
+            return None
+        num_sep = len(separatixGridSubset.element)
+        if num_sep == 0:
+            logger.warning("edge_profiles IDS:No element found in separatix grid subset")
+            return None
+        sep_coords = np.zeros((num_sep, 2))
+       
+        for ielement, element in enumerate(separatixGridSubset.element):
+            for obj in element.object: 
+                index = obj.index -1 
+                space = obj.space -1
+                dim = 0 # choosing nodes 1=nodes, 2=edges, 3=faces, 4=cells/volumes
+
+                sep_coords[ielement, :] = (
                     self.ids.grid_ggd[timeSlice]
-                    .grid_subset[SUBSET_INDEX]
-                    .element[i]
-                    .object[0]
-                    .index
-                ]
-                .geometry[:2]
-            )
-        # Note : For  geometry_content=11 node coordinates (first 2 elements), then connection
-        # length, and distance in the poloidal plane to the nearest solid surface outside
-        # the separatrix
+                    .space[space]
+                    .objects_per_dimension[dim]
+                    .object[index
+                    ]
+                    .geometry[:2]
+                )
+
         hull = ConvexHull(
             sep_coords[0 : num_sep - 1, :]
         )  # find a closed separatrix contour
@@ -819,7 +807,7 @@ class EdgeProfilesCompute:
             two arrays: r_edge and z_edge.
         """
         num_vertices = len(
-            self.ids.grid_ggd[timeSlice].space[0].objects_per_dimension[0].object
+            self.ids.grid_ggd[timeSlice].space[0].objects_per_dimension[0].object # nodes dimension
         )
         vertex_coords = np.zeros((num_vertices, 2))
         for vertex_id in range(num_vertices):
@@ -865,7 +853,15 @@ class EdgeProfilesCompute:
             the electron density at the given coordinates (x, y).
         """
         r_edge, z_edge = self.getRZ(timeSlice)
-        temp = self.ids.ggd[timeSlice].electrons.density[0].values
+        temp = None
+        
+        for electronsDensity in self.ids.ggd[timeSlice].electrons.density:
+            if electronsDensity.grid_subset_index == 1: #  nodes
+                temp = electronsDensity.values
+        if temp is None:
+            #TODO if nodes grid_subset is not available is it possible to get coordinated from other subsets?
+            logger.warning("edge_profiles : electrons density values not found for nodes grid_subset")
+            return None
         ne_edge = interpolate.griddata((r_edge, z_edge), temp, (x, y))
         return ne_edge
 
@@ -881,7 +877,14 @@ class EdgeProfilesCompute:
             the ion density at the given coordinates (x, y).
         """
         r_edge, z_edge = self.getRZ(timeSlice)
-        temp = self.ids.ggd[timeSlice].ion[0].density[0].values
+        temp = None
+        for ionDensity in self.ids.ggd[timeSlice].ion[0].density:
+            if ionDensity.grid_subset_index == 1: #  nodes
+                temp = ionDensity.values
+            
+        if temp is None:
+            logger.warning("edge_profiles : ion density values not found for nodes grid_subset")
+            return None
         ni_edge = interpolate.griddata((r_edge, z_edge), temp, (x, y))
         return ni_edge
 
@@ -898,6 +901,15 @@ class EdgeProfilesCompute:
             the neutral density at the given coordinates (x, y).
         """
         r_edge, z_edge = self.getRZ(timeSlice)
-        temp = self.ids.ggd[timeSlice].neutral[0].density[0].values
+        
+        temp = None
+        for neutralDensity in self.ids.ggd[timeSlice].neutral[0].density:
+            if neutralDensity.grid_subset_index == 1: #  nodes
+                temp = neutralDensity.values
+        
+        if temp is None:
+            logger.warning("edge_profiles : neutral.density values not found for nodes grid_subset")
+            return None
+        
         n_neutral_edge = interpolate.griddata((r_edge, z_edge), temp, (x, y))
         return n_neutral_edge

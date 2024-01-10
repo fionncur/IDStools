@@ -14,5 +14,6 @@ Analysis tools aid in the examination of IDS data in terms of plasma composition
    viewneutron
    viewplasmacompo
    viewpressure
+   viewrotation
    viewsources
    viewwall

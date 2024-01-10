@@ -3,6 +3,7 @@
 declare -a tests
 
 tests+=("122525;1")
+tests+=("123314;1")
 # tests+=("123170;2")
 # tests+=("123276;1")
 # tests+=("120014;1")
@@ -72,8 +73,12 @@ for i in ${tests[@]}; do
     idslist -s $shot -r $run || exit 1
 
     echo ================================================idslist=========================================================
-    echo TESTING: idslist -s $shot -r $run --yaml-format
-    idslist -s $shot -r $run --yaml-format || exit 1
+    echo TESTING: idslist -s $shot -r $run yaml
+    idslist -s $shot -r $run yaml || exit 1
+
+    echo ================================================idslist=========================================================
+    echo TESTING: idslist -s $shot -r $run occ
+    idslist -s $shot -r $run occ || exit 1
 
     echo ============================================idssize=============================================================
     echo TESTING: idssize -s $shot -r $run equilibrium
@@ -107,6 +112,10 @@ for i in ${tests[@]}; do
     echo TESTING: viewedgeprofiles -s $shot -r $run --save
     viewedgeprofiles -s $shot -r $run --time 60 || exit 1
 
+    echo =============================================viewrotation============================================================
+    echo TESTING: viewrotation -s $shot -r $run --info --save
+    viewrotation -s $shot -r $run --time 60 || exit 1
+
     echo =============================================viewcoresources============================================================
     echo TESTING: viewcoresources -s $shot -r $run --save
     viewcoresources -s $shot -r $run --save || exit 1
@@ -125,10 +134,9 @@ idsdiff 122525 1 122525 2 summary || exit 1
 idsdiff 130011 6 130012 4 summary || exit 1
 
 echo =====================================viewmachinedescription=====================================================
-viewmachinedescription list pf_active --checkValidity
-viewmachinedescription list pf_active --obsolete
-viewmachinedescription plot --save
-
+viewmachinedescription list pf_active --checkValidity  || exit 1
+viewmachinedescription list pf_active --obsolete || exit 1
+viewmachinedescription plot --save || exit 1
 # echo =====================================idsresample=====================================================
 # echo TESTING: idsresample -si 131024 -ri 10 -so 145000 -ro 2
 # idsresample -si 131024 -ri 10 -so 145000 -ro 2 || exit 1

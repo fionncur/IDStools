@@ -1,7 +1,7 @@
 # plot_ne0 and plot density profile function
 # not ok src/view/core_profiles/functions.py
 import logging
-
+import numpy as np
 from idstools.compute.core_profiles import CoreProfilesCompute
 from idstools.view.common import Console
 
@@ -379,3 +379,194 @@ class CoreProfilesView(Console):
         for label in legend.get_lines():
             label.set_linewidth(1.5)
         ax.set_title("Total Pressure Properties", loc="left")
+
+
+    def plotEfieldProfile(self, ax, **kwargs):
+        FACTOR = 1.e-3
+        rhoTorNorm = self.coreProfilesCompute.getRhoTorNorm()  # Rho profile (mandatory)
+        nrho = len(rhoTorNorm)
+        if nrho == 0:
+            logger.critical(
+                "core_profiles.profiles_1d[0].grid.rho_tor/core_profiles.profiles_1d[0].grid.rho_tor_norm) is empty",
+            )
+            return
+        if len(self.ids.profiles_1d[0].e_field.radial) < 1:
+            logger.critical('core_profiles.profiles_1d[0].e_field.radial could not be read')
+            self.ids.profiles_1d[0].e_field.radial = np.asarray([np.nan]*nrho)
+        ax.plot(rhoTorNorm,self.ids.profiles_1d[0].e_field.radial*FACTOR,label = "E-field")
+        ax.set_xlim(rhoTorNorm[0],rhoTorNorm[nrho-1])
+
+        # Set Plot properties
+        fontArgs = {
+            "fontfamily": "serif",
+            "color": "darkred",
+            "fontweight": "normal",
+            "fontsize": 12,
+        }
+        ax.tick_params(
+            which="both",
+            labelsize=12,
+        )
+        ax.set_xlabel(r"$\rho/\rho_0$", fontArgs, labelpad=1)
+        ax.set_ylabel(r"E-field ($kV/m$)", fontArgs, labelpad=0)
+        # set legend
+        # legx_pos = 1.35
+        # legy_pos = 1.05
+        legend = ax.legend(
+            loc="upper right"
+        )  # bbox_to_anchor=(legx_pos - 0.35, legy_pos - 0.05)
+        frame = legend.get_frame()
+        frame.set_facecolor("0.95")
+        for label in legend.get_texts():
+            label.set_fontsize(7)
+        for label in legend.get_lines():
+            label.set_linewidth(1.5)
+        ax.set_title("Electric field profile", loc="left")
+
+    def plotToroidalVelocityProfile(self, ax, **kwargs):
+        FACTOR = 1.e-3
+        rhoTorNorm = self.coreProfilesCompute.getRhoTorNorm()  # Rho profile (mandatory)
+        nrho = len(rhoTorNorm)
+        if nrho == 0:
+            logger.critical(
+                "core_profiles.profiles_1d[0].grid.rho_tor/core_profiles.profiles_1d[0].grid.rho_tor_norm) is empty",
+            )
+            return
+        
+        nions = len(self.ids.profiles_1d[0].ion)
+        species = self.coreProfilesCompute.getSpecies(0)
+        for ionIndex in range(nions):
+            if len(self.ids.profiles_1d[0].ion[ionIndex].velocity.toroidal) < 1:
+                logger.critical(f'core_profiles.profiles_1d[0].ion[{ionIndex}].velocity.toroidal could not be read')
+                self.ids.profiles_1d[0].ion[ionIndex].velocity.toroidal = np.asarray([np.nan]*nrho)
+            ax.plot(rhoTorNorm,self.ids.profiles_1d[0].ion[ionIndex].velocity.toroidal*FACTOR,label = species[ionIndex])
+            
+        ax.set_xlim(rhoTorNorm[0],rhoTorNorm[nrho-1])
+
+        # Set Plot properties
+        fontArgs = {
+            "fontfamily": "serif",
+            "color": "darkred",
+            "fontweight": "normal",
+            "fontsize": 12,
+        }
+        ax.tick_params(
+            which="both",
+            labelsize=12,
+        )
+        ax.set_xlabel(r"$\rho/\rho_0$", fontArgs, labelpad=1)
+        ax.set_ylabel(r"$v_{tor}$ ($km/s$)", fontArgs, labelpad=0)
+        #TODO update
+        # ax2.yaxis.tick_right()
+        # ax2.yaxis.set_label_position("right")
+        # set legend
+        # legx_pos = 1.35
+        # legy_pos = 1.05
+        legend = ax.legend(
+            loc="upper right"
+        )  # bbox_to_anchor=(legx_pos - 0.35, legy_pos - 0.05)
+        frame = legend.get_frame()
+        frame.set_facecolor("0.95")
+        for label in legend.get_texts():
+            label.set_fontsize(7)
+        for label in legend.get_lines():
+            label.set_linewidth(1.5)
+        ax.set_title("Toroidal velocity profile", loc="left")
+        
+    def plotPoloidalVelocityProfile(self, ax, **kwargs):
+        FACTOR = 1.e-3
+        rhoTorNorm = self.coreProfilesCompute.getRhoTorNorm()  # Rho profile (mandatory)
+        nrho = len(rhoTorNorm)
+        if nrho == 0:
+            logger.critical(
+                "core_profiles.profiles_1d[0].grid.rho_tor/core_profiles.profiles_1d[0].grid.rho_tor_norm) is empty",
+            )
+            return
+        
+        nions = len(self.ids.profiles_1d[0].ion)
+        species = self.coreProfilesCompute.getSpecies(0)
+        for ionIndex in range(nions):
+            if len(self.ids.profiles_1d[0].ion[ionIndex].velocity.poloidal) < 1:
+                logger.critical(f'core_profiles.profiles_1d[0].ion[{ionIndex}].velocity.poloidal could not be read')
+                self.ids.profiles_1d[0].ion[ionIndex].velocity.poloidal = np.asarray([np.nan]*nrho)
+            ax.plot(rhoTorNorm,self.ids.profiles_1d[0].ion[ionIndex].velocity.poloidal*FACTOR,label = species[ionIndex])
+            
+        ax.set_xlim(rhoTorNorm[0],rhoTorNorm[nrho-1])
+
+        # Set Plot properties
+        fontArgs = {
+            "fontfamily": "serif",
+            "color": "darkred",
+            "fontweight": "normal",
+            "fontsize": 12,
+        }
+        ax.tick_params(
+            which="both",
+            labelsize=12,
+        )
+        ax.set_xlabel(r"$\rho/\rho_0$", fontArgs, labelpad=1)
+        ax.set_ylabel(r"$v_{pol}$ ($km/s$)", fontArgs, labelpad=0)
+  
+        # set legend
+        # legx_pos = 1.35
+        # legy_pos = 1.05
+        legend = ax.legend(
+            loc="upper right"
+        )  # bbox_to_anchor=(legx_pos - 0.35, legy_pos - 0.05)
+        frame = legend.get_frame()
+        frame.set_facecolor("0.95")
+        for label in legend.get_texts():
+            label.set_fontsize(7)
+        for label in legend.get_lines():
+            label.set_linewidth(1.5)
+        ax.set_title("Poloidal velocity profile", loc="left")
+        
+        
+    def plotDiamagneticVelocityProfile(self, ax, **kwargs):
+        FACTOR = 1.e-3
+        rhoTorNorm = self.coreProfilesCompute.getRhoTorNorm()  # Rho profile (mandatory)
+        nrho = len(rhoTorNorm)
+        if nrho == 0:
+            logger.critical(
+                "core_profiles.profiles_1d[0].grid.rho_tor/core_profiles.profiles_1d[0].grid.rho_tor_norm) is empty",
+            )
+            return
+        
+        nions = len(self.ids.profiles_1d[0].ion)
+        species = self.coreProfilesCompute.getSpecies(0)
+        for ionIndex in range(nions):
+            if len(self.ids.profiles_1d[0].ion[ionIndex].velocity.diamagnetic) < 1:
+                logger.critical(f'core_profiles.profiles_1d[0].ion[{ionIndex}].velocity.diamagnetic could not be read')
+                self.ids.profiles_1d[0].ion[ionIndex].velocity.diamagnetic = np.asarray([np.nan]*nrho)
+            ax.plot(rhoTorNorm,self.ids.profiles_1d[0].ion[ionIndex].velocity.diamagnetic*FACTOR,label = species[ionIndex])
+            
+        ax.set_xlim(rhoTorNorm[0],rhoTorNorm[nrho-1])
+        # ax4.yaxis.tick_right()
+        # ax4.yaxis.set_label_position("right")
+        # Set Plot properties
+        fontArgs = {
+            "fontfamily": "serif",
+            "color": "darkred",
+            "fontweight": "normal",
+            "fontsize": 12,
+        }
+        ax.tick_params(
+            which="both",
+            labelsize=12,
+        )
+        ax.set_xlabel(r"$\rho/\rho_0$", fontArgs, labelpad=1)
+        ax.set_ylabel(r"$v_{dia}$ ($km/s$)", fontArgs, labelpad=0)
+
+        # set legend
+        # legx_pos = 1.35
+        # legy_pos = 1.05
+        legend = ax.legend(
+            loc="upper right"
+        )  # bbox_to_anchor=(legx_pos - 0.35, legy_pos - 0.05)
+        frame = legend.get_frame()
+        frame.set_facecolor("0.95")
+        for label in legend.get_texts():
+            label.set_fontsize(7)
+        for label in legend.get_lines():
+            label.set_linewidth(1.5)
+        ax.set_title(f"Diamagnetic velocity profile", loc="left")
