@@ -54,7 +54,7 @@ def print_list(dbs, shotnum=None, compact=False, timestamp=False):
                         print(f"{TAB}Data version: {dv}")
                         printed_dataversion = True
                     if not printed_backend:
-                        print(TAB * 2 + "UAL Backend: " + backend)
+                        print(TAB * 2 + "Backend: " + backend)
                         printed_backend = True
                     if compact:
                         print(
@@ -117,7 +117,7 @@ def printTimes(dbs, args, print_times=False, shotNumber=None, runNumber=None):
                             print(f"{TAB}Data version: {dv}")
                             printed_dataversion = True
                         if not printed_backend:
-                            print(TAB * 2 + "UAL Backend: " + backend)
+                            print(TAB * 2 + "Backend: " + backend)
                             printed_backend = True
                         if not printed_shot:
                             print(TAB * 3 + "Shot " + extended(str(shot), SHOT_STR_LEN))
