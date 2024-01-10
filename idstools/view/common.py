@@ -414,12 +414,13 @@ class Canvas:
     def save(
         self,
         fname,
-        width=4.5,
-        height=6.5,
+        width=None,
+        height=None,
         dpi=100,
     ):
         fig = plt.gcf()
-        fig.set_size_inches(width, height)
+        if width is not None and height is not None:
+            fig.set_size_inches(width, height)
         try:
             fig.savefig(fname, dpi=dpi)
             print(f"----> Figure saved to {fname}", file=sys.stderr)
