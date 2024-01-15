@@ -64,6 +64,7 @@ setup(
         "scripts/viewneutron",
         "scripts/viewpressure",
         "scripts/viewscenario",
+        "scripts/viewrotation",
         "scripts/viewsources",
         "scripts/viewwall",
     ],

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import argparse
-from database import Connection, MachineDescription
+from idstools.database import Connection, MachineDescription
 
 from idstools.set_logger import set_logger
 from idstools.utils.clihelper import imasParser
@@ -95,6 +95,13 @@ if __name__ == "__main__":
         action="store_true",
     )
     args = parser.parse_args()
+     # Default command if not provided
+    if "cmd" not in args.__dict__:
+        args.cmd = "list"
+        args.obsolete = False
+        args.checkValidity = False
+        args.ids = []
+        
     if args.database == "ITER":
         args.database = "ITER_MD"
 
@@ -119,5 +126,5 @@ if __name__ == "__main__":
     if args.cmd == "plot":
         if not args.list:
             args.list = ["111001/102", "116000/2"]
-        data = machineDescription.getMDDataByPulseList("wAll")
+        data = machineDescription.getMDDataByPulseList(args.list)
         plotMachineDescription(data)

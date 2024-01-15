@@ -165,14 +165,16 @@ def getIdsTypes():
     return [ids.value for ids in list(imas.IDSName)]
 
 
-def getAvailableIdsAndOccurrences(dbEntryObject: imas.DBEntry, time_mode=None):
+def getAvailableIdsAndOccurrences(
+    dbEntryObject: imas.DBEntry, timeMode=None, getComment=False
+):
     """
     This function returns a list of pairs of available IDS types and their occurrences in a given DBEntry object.
 
     Args:
         dbEntryObject (imas.DBEntry): An object of the class imas.DBEntry, which represents an open DBEntry in which available IDSs will be looked for.
-        time_mode: The time mode of interest for the IDSs in the given DBEntry. It can be one of the following values:(imas.imasdef.IDS_TIME_MODE_HETEROGENEOUS, IDS_TIME_MODE_HOMOGENEOUS or IDS_TIME_MODE_INDEPENDENT)
-
+        timeMode: The time mode of interest for the IDSs in the given DBEntry. It can be one of the following values:(imas.imasdef.IDS_TIME_MODE_HETEROGENEOUS, IDS_TIME_MODE_HOMOGENEOUS or IDS_TIME_MODE_INDEPENDENT)
+        getComment: Output ids_properties.comment field for each found occurrence
     Returns:
         a list of pairs (idstype:str,occurrence:int) with data in the given DBEntry.
     """
@@ -182,19 +184,26 @@ def getAvailableIdsAndOccurrences(dbEntryObject: imas.DBEntry, time_mode=None):
             homogeneous_time = dbEntryObject.partial_get(
                 idstype, "ids_properties/homogeneous_time", occurrence=occ
             )
+            comment = dbEntryObject.partial_get(
+                idstype, "ids_properties/comment", occurrence=occ
+            )
             if homogeneous_time != imas.imasdef.EMPTY_INT and (
-                time_mode is None or time_mode == homogeneous_time
+                timeMode is None or timeMode == homogeneous_time
             ):
-                availableidslist.append((idstype, occ))
+                if getComment is True:
+                    availableidslist.append((idstype, occ, comment))
+                else:
+                    availableidslist.append((idstype, occ))
     return availableidslist
+
 
 def getAvailableIdsAndTimes(dbEntryObject: imas.DBEntry) -> list:
     """
     The function `getAvailableIdsAndTimes` retrieves available IDS names and corresponding time arrays from a given `dbEntryObject`.
-    
+
     Args:
         dbEntryObject (imas.DBEntry): The `dbEntryObject` parameter is an object of type `imas.DBEntry`.
-    
+
     Returns:
         a list of tuples. Each tuple contains an IDS name and a corresponding time array.
     """
@@ -208,18 +217,20 @@ def getAvailableIdsAndTimes(dbEntryObject: imas.DBEntry) -> list:
             try:
                 homogeneous_time = dbEntryObject.partial_get(
                     _idsName, "ids_properties/homogeneous_time", occurrence=occurrence
-                    )
+                )
                 if homogeneous_time == imas.imasdef.IDS_TIME_MODE_UNKNOWN:
-                    timeArray =  []
+                    timeArray = []
                 if homogeneous_time == imas.imasdef.IDS_TIME_MODE_HETEROGENEOUS:
-                    timeArray =  [np.NaN] 
+                    timeArray = [np.NaN]
                 if homogeneous_time == imas.imasdef.IDS_TIME_MODE_HOMOGENEOUS:
                     timeArray = dbEntryObject.partial_get(_idsName, "time")
                 if homogeneous_time == imas.imasdef.IDS_TIME_MODE_INDEPENDENT:
-                    timeArray =  [np.NINF] 
+                    timeArray = [np.NINF]
             except Exception as exc:
                 timeArray = []
-                logger.info(f"ERROR! IDS {idsName} : Reading time array fails due to following problem : {exc}")
+                logger.info(
+                    f"ERROR! IDS {idsName} : Reading time array fails due to following problem : {exc}"
+                )
             if timeArray is not None and len(timeArray):
                 result.append((idsName, timeArray))
     return result
