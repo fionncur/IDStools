@@ -205,3 +205,32 @@ class SummaryCompute:
             waveform[k][waveform[k] == imasdef.EMPTY_DOUBLE] = np.nan
 
         return waveform
+    
+    def getHModeInfo(self):
+        """
+        The function `getHModeInfo` checks if the `h_mode` values are present in the `global_quantities`  and returns information about the presence of HMode, as well as the minimum and maximum time        values where HMode is present.
+        
+        Returns:
+            a dictionary with three keys: "HModePresent", "th_min", and "th_max". The values associated with these keys are the boolean value indicating whether HMode is present, the minimum value of time when HMode is present, and the maximum value of time when HMode is present, respectively.
+        """
+        stime = len(self.ids.time)
+        if len(self.ids.global_quantities.h_mode.value) < 1:
+            logger.critical('summary.global_quantities.h_mode.value could not be read')
+            self.ids.global_quantities.h_mode.value = np.asarray([np.nan]*stime)
+            
+        h_mode = self.ids.global_quantities.h_mode.value.astype(float)
+        th_min = None
+        th_max = None
+        if np.size(h_mode[2:]) > 2:
+            def indices(a, func):
+                return [i for (i, val) in enumerate(a) if func(val)]
+            h_mode_indices  = indices(h_mode[2:], lambda h_mode_flag: h_mode_flag>0)
+            if len(h_mode_indices) > 0:
+                HModePresent = True
+                th_min = self.ids.time[h_mode_indices[0]]
+                th_max = self.ids.time[h_mode_indices[-1]]
+            else:
+                HModePresent = False
+        else:
+            HModePresent = False
+        return {"HModePresent":HModePresent, "th_min": th_min, "th_max":th_max}

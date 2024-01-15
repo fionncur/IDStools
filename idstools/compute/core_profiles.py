@@ -906,6 +906,7 @@ class CoreProfilesCompute:
 
 
     def getProfiles(self, sliceIndex=0):
+   
         rhoTorNorm = self.getRhoTorNorm(timeSlice=0)
         if rhoTorNorm is None:
             logger.critical('core_profiles.profiles_1d[:].grid.rho_tor_norm and rho_tor are empty')

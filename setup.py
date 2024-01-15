@@ -63,6 +63,7 @@ setup(
         "scripts/viewmachinedescription",
         "scripts/viewneutron",
         "scripts/viewpressure",
+        "scripts/viewscenario",
         "scripts/viewsources",
         "scripts/viewwall",
     ],
