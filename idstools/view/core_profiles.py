@@ -390,7 +390,6 @@ class CoreProfilesView(Console):
             label.set_linewidth(1.5)
         ax.set_title("Total Pressure Properties", loc="left")
 
-<<<<<<< HEAD
     def viewQProfileAndMagneticShearProfile(self, ax, **kwargs):
         """
         The function `viewQProfileAndMagneticShearProfile` plots the q-profile and magnetic shear profile using the given axis.
@@ -435,7 +434,6 @@ class CoreProfilesView(Console):
         ax.set_ylabel(r"$j\/[\mathrm{kA/m^2}]$")
         ax.set_xlim(0, 1)
         ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
-=======
 
     def plotEfieldProfile(self, ax, **kwargs):
         FACTOR = 1.e-3
@@ -626,4 +624,3 @@ class CoreProfilesView(Console):
         for label in legend.get_lines():
             label.set_linewidth(1.5)
         ax.set_title(f"Diamagnetic velocity profile", loc="left")
->>>>>>> 00469b20748aba39ccb47b68e09fc065bd66ec9f

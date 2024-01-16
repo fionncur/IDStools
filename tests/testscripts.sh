@@ -3,11 +3,8 @@
 declare -a tests
 
 tests+=("122525;1")
-<<<<<<< HEAD
 # tests+=("122525;1")
-=======
 tests+=("123314;1")
->>>>>>> 00469b20748aba39ccb47b68e09fc065bd66ec9f
 # tests+=("123170;2")
 # tests+=("123276;1")
 # tests+=("120014;1")
@@ -115,16 +112,13 @@ for i in ${tests[@]}; do
     echo TESTING: viewedgeprofiles -s $shot -r $run --save
     viewedgeprofiles -s $shot -r $run --time 60 || exit 1
 
-<<<<<<< HEAD
     echo =============================================viewscenario============================================================
     echo TESTING: viewscenario -s $shot -r $run --save
     viewscenario -s $shot -r $run --time 60 || exit 1
     viewscenario -s $shot -r $run --noProfiles || exit 1
-=======
     echo =============================================viewrotation============================================================
     echo TESTING: viewrotation -s $shot -r $run --info --save
     viewrotation -s $shot -r $run --time 60 || exit 1
->>>>>>> 00469b20748aba39ccb47b68e09fc065bd66ec9f
 done
 
 echo TESTING: viewwall wall iter --save
