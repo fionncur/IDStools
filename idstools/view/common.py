@@ -27,9 +27,9 @@ import matplotlib.pyplot as plt
 # plt.rcParams["legend.handlelength"] = lhandle
 
 # plt.rcParams["lines.linewidth"] = 1
-if os.path.exists(os.path.join(sys.prefix, r"/share/styles/scientific.mplstyle")):
+if os.path.exists(os.path.join(sys.prefix, r"share/styles/scientific.mplstyle")):
     plt.style.use(
-        os.path.join(sys.prefix, r"/share/styles/scientific.mplstyle")
+        os.path.join(sys.prefix, r"share/styles/scientific.mplstyle")
     )
 else:
     current_directory = os.path.abspath(os.path.dirname(__file__))
