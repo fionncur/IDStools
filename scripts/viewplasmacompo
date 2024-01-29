@@ -66,8 +66,7 @@ connection = imas.DBEntry(
 err, _ = connection.open()
 if err != 0:
     logger.critical(
-        f"Shot {args.shot}, run {args.run} for user {args.user} and database {args.database} is not reachable ----> abort!",
-        file=sys.stderr,
+        f"Shot {args.shot}, run {args.run} for user {args.user} and database {args.database} is not reachable ----> abort!"
     )
     sys.exit(err)
 

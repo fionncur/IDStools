@@ -452,8 +452,8 @@ class Canvas:
     def setSupTitle(self, text="", *args, **kwargs):
         plt.suptitle(text, *args, **kwargs)
 
-    def show(self):
-        plt.show()
+    def show(self, *args, **kwargs):
+        plt.show(*args, **kwargs)
 
 
 class BasePlot:

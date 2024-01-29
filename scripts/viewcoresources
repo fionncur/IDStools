@@ -47,7 +47,7 @@ connection = imas.DBEntry(
 )
 err, n = connection.open()
 if err != 0:
-    print(
+    logger.warning(
         "Shot "
         + str(args.shot)
         + ", run "
@@ -57,15 +57,14 @@ if err != 0:
         + " and database = "
         + args.database
         + " does not exist",
-        file=sys.stderr,
     )
-    print("----> Aborted.", file=sys.stderr)
+    logger.critical("----> Aborted.")
     exit()
 # input.core_sources.get()
 core_sources = imas.core_sources()
 core_sources.time = connection.partial_get("core_sources", "time")
 if core_sources.time is None:
-    print("No core_sources IDS in the data-entry --> Abort.", file=sys.stderr)
+    logger.critical("No core_sources IDS in the data-entry --> Abort.")
     exit()
 
 timeArray = core_sources.time
@@ -77,9 +76,9 @@ cs_slice = connection.get_slice("core_sources", timeValue, 1)
 nsources = len(cs_slice.source)
 
 if nsources > 1:
-    print(f"Core_sources contains {nsources} sources", file=sys.stderr)
+    logger.info(f"Core_sources contains {nsources} sources")
 else:
-    print(f"Core_sources contains {nsources} source", file=sys.stderr)
+    logger.info(f"Core_sources contains {nsources} source")
 
 core_sources.source.resize(nsources)
 for isource in range(nsources):
@@ -94,9 +93,8 @@ for isource in range(nsources):
                 "core_sources", f"source({isource})/global_quantities"
             )
         except Exception:
-            print(
+            logger.critical(
                 f"source({str(isource)}) does not have global_quantities",
-                file=sys.stderr,
             )
             core_sources.source[isource].global_quantities.resize(0)
         core_sources.source[isource].identifier.name = cs_slice.source[

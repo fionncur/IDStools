@@ -83,23 +83,23 @@ if not args.noProfiles:
         )
         if idsCoreProfiles.time is None:
             logger.critical(
-                "No core_profiles IDS in the data-entry --> Abort.", file=sys.stderr
+                "No core_profiles IDS in the data-entry --> Abort."
             )
             exit()
     except:
         logger.critical(
-            "The core_profiles IDS is absent from the input data-entry", file=sys.stderr
+            "The core_profiles IDS is absent from the input data-entry"
         )
-        logger.critical("----> Aborted.", file=sys.stderr)
+        logger.critical("----> Aborted.")
         exit()
 
     try:
         idsEquilibrium = imas.equilibrium()  # To initialise the empty IDS structure
     except:
         logger.critical(
-            "The equilibrium IDS is absent from the input data-entry", file=sys.stderr
+            "The equilibrium IDS is absent from the input data-entry"
         )
-        logger.critical("----> Aborted.", file=sys.stderr)
+        logger.critical("----> Aborted.")
         exit()
 
     # Search for adequate time slice for display
@@ -123,9 +123,9 @@ try:
     idsSummary = connection.get("summary")
 except:
     logger.critical(
-        "The summary IDS is absent from the input data-entry", file=sys.stderr
+        "The summary IDS is absent from the input data-entry"
     )
-    logger.critical("----> Aborted.", file=sys.stderr)
+    logger.critical("----> Aborted.")
     exit(1)
 
 
@@ -133,9 +133,9 @@ summaryTime = len(idsSummary.time)
 
 if summaryTime < 1:
     logger.critical(
-        "The summary IDS is absent from the input data-entry", file=sys.stderr
+        "The summary IDS is absent from the input data-entry"
     )
-    logger.critical("----> Aborted.", file=sys.stderr)
+    logger.critical("----> Aborted.")
     exit(1)
 
 
@@ -253,140 +253,3 @@ if args.save:
 else:
     canvas.show()
 
-
-# if args.noProfiles:
-#     ax = plt.gca()
-#     xmin, xmax = ax.get_xlim()
-#     ymin, ymax = ax.get_ylim()
-#     plt.text(xmax,ymin-0.5*(ymax-ymin),hostdir+' - Shot '+str(args.shot)+' / '+' Run '+str(args.run),fontsize=6,color='black',ha='right')
-
-# if args.Title:
-#     try:
-#         dataset_description = connection.get('dataset_description')
-#         if dataset_description.ids_properties.homogeneous_time==imas.imasdef.EMPTY_INT:
-#             got_dataset_description = False
-#         else:
-#             got_dataset_description = True
-#     except:
-#         print('Warning: The dataset_description IDS is absent from the input data-entry', file=sys.stderr)
-#         got_dataset_description = False
-#     # F4F specific?
-#     if got_dataset_description:
-#         plt.suptitle('%s / %s / %s ; %s / %s\nprovider=%s, shot_date_time=%s\ndata_dictionary=%s, access_layer-%s' % (args.user, args.database, args.version, args.shot, args.run, summary.ids_properties.provider, dataset_description.pulse_time_begin, summary.ids_properties.version_put.data_dictionary, summary.ids_properties.version_put.access_layer))
-#     else:
-#         additional_data = ''
-#         if summary.tag.name != '':
-#             try:
-#                 additional_data = json.loads(summary.tag.name)
-#             except:
-#                 additional_data = ''
-#         if 'date' in additional_data:
-#             plt.suptitle('%s / %s / %s ; %s / %s\nprovider=%s, shot_date=%s, shot_time=%s\ndata_dictionary=%s, access_layer=%s' % (args.user, args.database, args.version, args.shot, args.run, summary.ids_properties.provider, additional_data['date'], additional_data['time'], summary.ids_properties.version_put.data_dictionary, summary.ids_properties.version_put.access_layer))
-#         else:
-#             plt.suptitle('%s / %s / %s ; %s / %s\nprovider=%s, creation_date=%s\ndata_dictionary=%s, access_layer=%s' % (args.user, args.database, args.version, args.shot, args.run, summary.ids_properties.provider, summary.ids_properties.creation_date, summary.ids_properties.version_put.data_dictionary, summary.ids_properties.version_put.access_layer))
-
-# # extra plots
-
-
-# plt.subplots_adjust(left=0.1, bottom=None, right=0.85, top=None, wspace=0.1, hspace=0.1)
-# #for ax in [ax1, ax2, ax3]:
-# #    plt.setp(ax.get_xticklabels(), visible=False)
-#     # The y-ticks will overlap with "hspace=0", so we'll hide the bottom tick
-# #    ax.set_yticks(ax.get_yticks()[1:])
-# Signature(hostdir,args.shot,args.run,plt)
-
-# fig = plt.gcf()
-# fig.set_size_inches(10,8)
-
-
-# try:
-#     if args.noProfiles:
-#         fname = 'summary_%s_%s_%s_%s_%s.png' % (args.user, args.database, args.version, args.shot, args.run)
-#     else:
-#         fname = 'Scenario'+'_shot_'+str(args.shot)+'_run_'+str(args.run)+'_time_'+'%.1f' % time+'.png'
-#     fig.savefig(fname, dpi=100)
-#     print('----> Figure saved to '+fname, file=sys.stderr)
-# except:
-#     print('The figure could not be saved (check local permissions).', file=sys.stderr)
-
-# plt.show()
-
-# Starts plotting
-# import matplotlib
-
-# if 'DISPLAY' not in os.environ:
-#     matplotlib.use('agg')
-# else:
-#     matplotlib.use('TKagg')
-# import matplotlib.pyplot as plt
-# import matplotlib.ticker as mtick
-
-# # Tick size and X and Y axes
-# ticksize = 12
-# fontsize = 12
-
-# # Font definition
-# font = {'family': 'serif','color':  'darkred','weight': 'normal','size': fontsize}
-
-# # Frame configuration
-# nline = 4
-# if args.noProfiles:
-#     ncol = 2
-# else:
-#     ncol = 4
-# legx_pos = 1.28
-# legy_pos = 1.05
-
-# # Plot signature
-# def Signature(hostdir,shot,run,plt):
-#     ax = plt.gca()
-#     xmin, xmax = ax.get_xlim()
-#     ymin, ymax = ax.get_ylim()
-#     #plt.text(xmax+0.01*abs(xmax),ymax,hostdir[:-2]+' - Shot '+str(shot)+' / '+' Run '+str(run),fontsize=6,rotation=90)
-#     plt.text(xmax+0.01*abs(xmax-xmin)+0.01,ymax-0.97*abs(ymax-ymin),'Shot '+str(shot)+' / '+' Run '+str(run),fontsize=5,rotation=90)
-#     return
-
-# # Legend customization
-# def CustomLegend_wf(legend,fontsize):
-#     frame = legend.get_frame()
-#     frame.set_facecolor('0.95')
-#     for label in legend.get_texts():
-#         label.set_fontsize(fontsize)
-#     for label in legend.get_lines():
-#         label.set_linewidth(1.5)  # the legend line width
-#     return
-
-# def CustomLegend_pr(legend):
-#     frame = legend.get_frame()
-#     frame.set_facecolor('0.95')
-#     for label in legend.get_texts():
-#         label.set_fontsize(7)
-#     for label in legend.get_lines():
-#         label.set_linewidth(1.5)  # the legend line width
-#     return
-
-# # Plot customization
-# def nice(plt,x_label_string,y_label_string,fontsize):
-#     font = {'family': 'serif','color':  'darkred','weight': 'normal','size': fontsize}
-#     plt.xticks(fontsize = ticksize)
-#     plt.yticks(fontsize = ticksize)
-#     plt.xlabel(x_label_string, fontdict=font, labelpad = 5)
-#     plt.ylabel(y_label_string, fontdict=font, labelpad = 0)
-#     plt.grid()
-#     if len(x_label_string) < 1:
-#         plt.tick_params(axis='x',which='both',bottom=False,top=False,labelbottom=False)
-
-# def hmode_display(plot,thmin,thmax):
-#     ymin = plot.gca().get_ylim()[0]
-#     ymax = plot.gca().get_ylim()[1]
-#     fill([th_min,th_max,th_max,th_min],[ymin,ymin,ymax,ymax],\
-#          'lightyellow',  edgecolor='k',linewidth=0.08,label=r'$H_{mode}$')
-#     plt.gca().set_ylim(ymin,ymax)
-#     return
-
-# def time_display(plot,time):
-#     ymin = plot.gca().get_ylim()[0]
-#     ymax = plot.gca().get_ylim()[1]
-#     plot.plot([time,time],[ymin,ymax],color='gray',linestyle='--',linewidth=2,label=r'$t_{slice}$')
-#     plt.gca().set_ylim(ymin,ymax)
-# # Display the figure
