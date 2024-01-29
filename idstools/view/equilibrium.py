@@ -87,9 +87,9 @@ class EquilibriumView(BasePlot):
                 levels,
             )
             ax.set_aspect("equal", adjustable="box")
-            ax.set_xlabel("$R$ [m]", fontdict=BasePlot.font)
-            ax.set_ylabel("$Z$ [m]", fontdict=BasePlot.font)
-            ax.tick_params(axis="both", which="major", labelsize=BasePlot.ticksize)
+            ax.set_xlabel("$R$ [m]")
+            ax.set_ylabel("$Z$ [m]")
+            ax.tick_params(axis="both", which="major")
 
     def viewPulseInfo(
         self, ax: plt.axes, title: str, hostdir: str, shot: int, run: int, t: float
