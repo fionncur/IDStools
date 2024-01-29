@@ -25,8 +25,8 @@ toolchain = {"name": "foss", "version": "2020b"}
 dependencies = [
     ("Python", "3.8.6"),
     ("SciPy-bundle", "2020.11"),
-    ("matplotlib", "3.5.1"),
 ]
+
 use_pip = True
 exts_download_dep_fail = True
 # sanity_pip_check = True

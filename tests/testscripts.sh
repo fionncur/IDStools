@@ -38,6 +38,7 @@ echo TESTING: dblist -u public databases
 dblist databases || exit 1
 echo TESTING: dblist -u public dataversions
 dblist dataversions || exit 1
+
 # echo TESTING: dblist -u public slices
 # dblist -u public slices  || exit 1
 # echo TESTING: dblist -u public  times
@@ -119,6 +120,10 @@ for i in ${tests[@]}; do
     echo =============================================viewrotation============================================================
     echo TESTING: viewrotation -s $shot -r $run --info --save
     viewrotation -s $shot -r $run --time 60 || exit 1
+
+    echo =============================================viewcoresources============================================================
+    echo TESTING: viewcoresources -s $shot -r $run --save
+    viewcoresources -s $shot -r $run --save || exit 1
 done
 
 echo TESTING: viewwall wall iter --save

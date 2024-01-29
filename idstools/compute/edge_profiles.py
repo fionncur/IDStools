@@ -818,6 +818,9 @@ class EdgeProfilesCompute:
                 .object[vertex_id]
                 .geometry[:2]
             )
+        # Note : For  geometry_content=11 node coordinates (first 2 elements), then connection
+        # length, and distance in the poloidal plane to the nearest solid surface outside
+        # the separatrix
         r_edge = vertex_coords[:, 0]
         z_edge = vertex_coords[:, 1]
         return r_edge, z_edge
