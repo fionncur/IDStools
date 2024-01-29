@@ -27,14 +27,20 @@ import matplotlib.pyplot as plt
 # plt.rcParams["legend.handlelength"] = lhandle
 
 # plt.rcParams["lines.linewidth"] = 1
-if os.path.exists(os.path.join(sys.prefix, r"share/styles/scientific.mplstyle")):
+
+current_directory = os.path.abspath(os.path.dirname(__file__))
+# reach to `share` directory (sys.prefix won't work if using --prefix option)
+share_directory =  os.path.abspath(os.path.join(current_directory, "../../../../../")) 
+mplstyle_filepath = os.path.join(share_directory, r"share/styles/scientific.mplstyle")
+
+if os.path.exists(mplstyle_filepath):
     plt.style.use(
-        os.path.join(sys.prefix, r"share/styles/scientific.mplstyle")
+        os.path.join(mplstyle_filepath)
     )
 else:
-    current_directory = os.path.abspath(os.path.dirname(__file__))
+    mplstyle_filepath = os.path.join(current_directory, r"styles/scientific.mplstyle")
     plt.style.use(
-        os.path.join(current_directory, r"styles/scientific.mplstyle")
+        os.path.join(mplstyle_filepath)
     )
 import logging
 import math
