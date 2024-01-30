@@ -1,9 +1,10 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
-import imas, yaml, pdb, argparse, re
-import os, sys, subprocess, glob
+import argparse
+import re
+import sys
 
-# ----------------------------------------------------------------------------
+from idstools.machinedescription import MachineDescription
 
 
 # FOR BETTER FORMATTING OF INPUT ARGUMENT LISTING IN THE HELP OF THE FUNCTION
@@ -13,8 +14,6 @@ class SmartFormatter(argparse.HelpFormatter):
             return text[2:].splitlines()
         return argparse.HelpFormatter._split_lines(self, text, width)
 
-
-# ----------------------------------------------------------------------------
 
 # INPUT ARGUMENTS
 parser = argparse.ArgumentParser(
@@ -32,6 +31,16 @@ parser.add_argument(
     required=False,
 )
 parser.add_argument(
+    "--obsolete",
+    help="Shows obsolete files",
+    action="store_true",
+)
+parser.add_argument(
+    "--matchcase",
+    help="Match case with selection criteria, default is false",
+    action="store_true",
+)
+parser.add_argument(
     "-c",
     "--choice",
     help="R|list of variables to display, e.g.: pbs,ids,description\n"
@@ -45,7 +54,9 @@ parser.add_argument(
     "        description            = Description of the data\n"
     "        backend                = Backend used to store de IDS\n"
     "        provenance             = Data provenance\n"
+    "        status                 = Status of the machine description\n"
     "        replaces               = Old shot/run this one replaces\n"
+    "        replaced_by            = Replaced by shot/run \n"
     "        reason_for_replacement = Comment on why this shot/run replaces the previous one\n",
     required=False,
 )
@@ -54,13 +65,13 @@ args = vars(parser.parse_args())
 
 # FOLDER
 if args["folder"] != None:
-    folder = args["folder"]
+    machineDescriptionFolder = args["folder"]
 else:
-    folder = "/work/imas/shared/imasdb/ITER_MD/3"
+    machineDescriptionFolder = "/work/imas/shared/imasdb/ITER_MD/3"
 
 # FILTER
 if args["selection"] != None:
-    selection = args["selection"]
+    selection = args["selection"].lower()
 else:
     selection = None
 
@@ -92,113 +103,70 @@ else:
     print("""----> Default call equivalent to: """)
     print("""      md_summary -c pbs,ids,description,backend""")
 
-# ------------------------------------------------------------------------------------------------------
+# add shot/run number
+choice.append("id")
+
+mdObject = MachineDescription(machineDescriptionFolder)
+yamlData = mdObject.mdSummaryYaml
+
+df = mdObject.getPandasDataFrame()
 
 
-class tab_init:
-    def __init__(self):
-        self.value = {}
-        self.value["case"] = " "
-        self.value["pbs"] = " "
-        self.value["ids"] = " "
-        self.value["data_provider"] = " "
-        self.value["data_provider_email"] = " "
-        self.value["ro"] = " "
-        self.value["ro_email"] = " "
-        self.value["description"] = " "
-        self.value["provenance"] = " "
-        self.value["replaced_by"] = " "
-        self.value["replaces"] = " "
-        self.value["reason_for_replacement"] = " "
-        self.value["backend"] = " "
-        self.value["status"] = " "
+# Search basec on selection
+if selection:
 
+    def stringExists(row):
+        searchList = selection.split(",")
+        found_substrings = set()
+        for text in row:
+            text = str(text).lower()
+            for searchString in searchList:
+                if searchString in text:
+                    found_substrings.add(searchString)
+        if len(searchList) == len(found_substrings):
+            return True
+        return False
 
-def tab_adjust(data):
-    tab_array = {}
-    tab_array["max"] = tab_init().value
-    for case in data:
-        if len(case) > len(tab_array["max"]["case"]):
-            tab_array["max"]["case"] = " " * (len(case) + 1)
-        for subkey in data[case]:
-            if data[case][subkey] is None:
-                data[case][subkey] = " "
-            if len(data[case][subkey]) > len(tab_array["max"][subkey]):
-                tab_array["max"][subkey] = " " * (len(data[case][subkey]) + 1)
-    for case in data:
-        tab_array[case] = tab_init().value
-        tab_array[case]["case"] = " " * (len(tab_array["max"]["case"]) - len(case) + 1)
-        for subkey in data[case]:
-            if data[case][subkey] is None:
-                data[case][subkey] = " "
-            tab_array[case][subkey] = " " * (
-                len(tab_array["max"][subkey]) - len(data[case][subkey]) + 1
-            )
-    return tab_array
+    df = df[
+        df.apply(
+            lambda row: stringExists(row),
+            axis=1,
+        )
+    ]
+#
+# check of need to add obsolete
+if not args["obsolete"]:
+    df = df[df["status"] == "active"]
 
+# Columns filtering
+selected_df = df[choice]
 
-# MAIN STUFF
-file = open(folder + "/md_summary.yaml", "r")
-data = yaml.load(file, Loader=yaml.CLoader)
-file.close()
+# rename headers
+headerMappings = {
+    "ids": "IDS",
+    "pbs": "PBS",
+    "data_provider": "DATA PROVIDER",
+    "data_provider_email": "DATA PROVIDER EMAIL",
+    "ro": "RO",
+    "ro_email": "RO EMAIL",
+    "description": "DESCRIPTION",
+    "provenance": "PROVENANCE",
+    "status": "STATUS",
+    "replaced_by": "REPLACED BY",
+    "replaces": "REPLACES",
+    "reason_for_replacement": "REASON FOR REPLACEMENT",
+    "backend": "BACKEND",
+    "id": "SHOT/RUN",
+}
+selected_df = selected_df.rename(columns=headerMappings)
 
-tab_array = tab_adjust(data)
-column_names = ""
-for ichoice in choice:
-    column_names = (
-        column_names
-        + ichoice.upper()
-        + " " * (len(tab_array["max"][ichoice]) - len(ichoice) + 1)
+# align text left aligned
+for index, _ in enumerate(choice):
+    max_length = selected_df.iloc[:, index].map(len).max()
+    selected_df.iloc[:, index] = selected_df.iloc[:, index].apply(
+        lambda x: f"{x:<{max_length}}"
     )
-column_names = (
-    column_names
-    + "SHOT/RUN"
-    + " " * (len(tab_array["max"]["case"]) - len("SHOT/RUN") + 1)
-)
-line = "-" * len(column_names)
-table = {}
-table[0] = line
-table[1] = column_names
-table[2] = line
-j = 2
-for case in data:
-    if data[case]["status"] == "active":
-        toprint = ""
-        for ichoice in choice:
-            if data[case][ichoice] is not None:
-                toprint = toprint + data[case][ichoice] + tab_array[case][ichoice]
-        toprint = toprint + case + tab_array[case]["case"]
-        j += 1
-        table[j] = toprint
-table[j + 1] = line
+# displaye results
+print(selected_df.to_string(index=False, justify="left"))
 
-# FINAL FILTERING IF ANY
-if selection != None:
-    filtered_table = []
-    filter = eval(str("""['""" + re.sub(""",""", r"""','""", selection) + """']"""))
-    criterion = "zip("
-    for ifilter in range(len(filter)):
-        if ifilter == 0:
-            criterion = (
-                criterion
-                + """re.findall('"""
-                + str(filter[ifilter])
-                + """',table[iline])"""
-            )
-        else:
-            criterion = (
-                criterion
-                + """,re.findall('"""
-                + str(filter[ifilter])
-                + """',table[iline])"""
-            )
-    criterion = criterion + """)"""
-    for iline in range(len(table)):
-        if iline in [0, 1, 2, j + 1] or len(list(eval(criterion))) > 0:
-            filtered_table.append(table[iline])
-    table = filtered_table
-
-# DISPLAY THE CLEAN FORMATTED TABLE
-for i in range(len(table)):
-    print(table[i])
 print(" NOTE: Read entry from MD database using user = 'public', database = 'ITER_MD'")

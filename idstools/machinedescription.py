@@ -113,6 +113,19 @@ class MachineDescription:
             pulsesData[pulse]["config"] = config
         return pulsesData
 
+    def getPandasDataFrame(self):
+        """
+        The function `getPandasDataFrame` converts a dictionary into a pandas DataFrame.
+        
+        Returns:
+          a pandas DataFrame object.
+        """
+        import pandas as pd
+
+        dataList = [{"id": key, **value} for key, value in self.mdSummaryYaml.items()]
+        df = pd.DataFrame(dataList)
+        return df
+
     def getStatus(self, shot: int, run: int):
         """
         The function `getStatus` takes in two parameters, `shot` and `run`, and returns the value of the key "status" from the `yaml` object dictionary using the `shot` and `run` as keys.

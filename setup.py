@@ -49,6 +49,8 @@ setup(
         "scripts/dblist",
         "scripts/dbscraper",
         "scripts/dbselector",
+        "scripts/mdstatus",
+        "scripts/mdsummary",
         "scripts/idscp",
         "scripts/idsdiff",
         "scripts/idslist",
