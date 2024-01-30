@@ -30,18 +30,14 @@ import matplotlib.pyplot as plt
 
 current_directory = os.path.abspath(os.path.dirname(__file__))
 # reach to `share` directory (sys.prefix won't work if using --prefix option)
-share_directory =  os.path.abspath(os.path.join(current_directory, "../../../../../")) 
+share_directory = os.path.abspath(os.path.join(current_directory, "../../../../../"))
 mplstyle_filepath = os.path.join(share_directory, r"share/styles/scientific.mplstyle")
 
 if os.path.exists(mplstyle_filepath):
-    plt.style.use(
-        os.path.join(mplstyle_filepath)
-    )
+    plt.style.use(os.path.join(mplstyle_filepath))
 else:
     mplstyle_filepath = os.path.join(current_directory, r"styles/scientific.mplstyle")
-    plt.style.use(
-        os.path.join(mplstyle_filepath)
-    )
+    plt.style.use(os.path.join(mplstyle_filepath))
 import logging
 import math
 import weakref
@@ -454,6 +450,9 @@ class Canvas:
 
     def show(self, *args, **kwargs):
         plt.show(*args, **kwargs)
+
+    def get_current_fig_manager(self):
+        return plt.get_current_fig_manager()
 
 
 class BasePlot:

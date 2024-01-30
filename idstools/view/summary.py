@@ -231,6 +231,7 @@ class SummaryView(BasePlot):
             label=r"$t_{slice}$",
         )
         ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
+        ax.set_ylim(ymin, ymax)
 
     def viewHmode(self, ax):
         """
@@ -240,6 +241,7 @@ class SummaryView(BasePlot):
             ax: The parameter `ax` is an instance of the `Axes` class from the `matplotlib` library. It represents the axes on which the plot is being drawn.
         """
         ymin, ymax = ax.get_ylim()
+
         hModeDict = self.computeObj.getHModeInfo()
         HModePresent, th_min, th_max = (
             hModeDict["HModePresent"],
@@ -255,4 +257,6 @@ class SummaryView(BasePlot):
                 linewidth=0.08,
                 label=r"$H_{mode}$",
             )
-        logger.warning("HMode is not present")
+            ax.set_ylim(ymin, ymax)
+        else:
+            logger.warning("HMode is not present")
