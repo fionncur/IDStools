@@ -6,3 +6,4 @@ Machine Description Database tools to inspect various information from machine d
    :maxdepth: 1
 
    mdstatus
+   mdsummary

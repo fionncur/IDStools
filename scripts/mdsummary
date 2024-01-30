@@ -27,7 +27,7 @@ parser.add_argument(
     "-s",
     "--selection",
     help="R|list of fields to filter: e.g. PBS-55,ece\n"
-    "----> Select only MD data filling these criteria",
+    "----> Select only machine description data that fulfils these criteria. comma-separated values match all criteria in a YAML record.",
     required=False,
 )
 parser.add_argument(
@@ -101,9 +101,9 @@ if args["choice"] != None:
 else:
     choice = ["pbs", "ids", "description", "backend"]
     print("""----> Default call equivalent to: """)
-    print("""      md_summary -c pbs,ids,description,backend""")
+    print("""      mdsummary -c pbs,ids,description,backend""")
 
-# add shot/run number
+# add shot/run number because pandas is stores id as unique key
 choice.append("id")
 
 mdObject = MachineDescription(machineDescriptionFolder)
@@ -112,7 +112,7 @@ yamlData = mdObject.mdSummaryYaml
 df = mdObject.getPandasDataFrame()
 
 
-# Search basec on selection
+# Search based on selection
 if selection:
 
     def stringExists(row):
@@ -133,7 +133,6 @@ if selection:
             axis=1,
         )
     ]
-#
 # check of need to add obsolete
 if not args["obsolete"]:
     df = df[df["status"] == "active"]
@@ -166,7 +165,8 @@ for index, _ in enumerate(choice):
     selected_df.iloc[:, index] = selected_df.iloc[:, index].apply(
         lambda x: f"{x:<{max_length}}"
     )
-# displaye results
+
+# display results
 print(selected_df.to_string(index=False, justify="left"))
 
 print(" NOTE: Read entry from MD database using user = 'public', database = 'ITER_MD'")

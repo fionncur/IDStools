@@ -140,6 +140,10 @@ viewmachinedescription plot --save || exit 1
 
 echo -------mdstatus-------
 mdstatus -s 116000 -r 3 || exit 1
+
+echo -------mdsummary-------
+mdsummary -s 150502/102 || exit 1
+mdsummary -s nbi,on-on || exit 1
 # echo -------idsresample-------
 # echo TESTING: idsresample -si 131024 -ri 10 -so 145000 -ro 2
 # idsresample -si 131024 -ri 10 -so 145000 -ro 2 || exit 1
