@@ -9,7 +9,7 @@ from imas import imasdef
 
 from idstools.compute.common import getNearestTime
 from idstools.compute.wall import WallCompute
-from idstools.database import MachineDescription
+from idstools.machinedescription import MachineDescription
 from idstools.utils.clihelper import getBackendID, getDatabasePath, imasParser
 from idstools.utils.idslogger import setupLogger
 from idstools.view.common import Canvas
