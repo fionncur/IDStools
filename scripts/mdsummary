@@ -26,16 +26,22 @@ parser.add_argument(
 parser.add_argument(
     "-s",
     "--selection",
+    nargs="*",
+    type=str,
     help="R|list of fields to filter: e.g. PBS-55,ece\n"
-    "----> Select only machine description data that fulfils these criteria. comma-separated values match all criteria in a YAML record.",
+    "fields listed together (-s A,B) means selecting for both A and B\n"
+    "fields listed separately (-s A B) means selecting for either A or B\n"
+    "----> Select only machine description data filling these criteria",
     required=False,
 )
 parser.add_argument(
+    "-o",
     "--obsolete",
     help="Shows obsolete files",
     action="store_true",
 )
 parser.add_argument(
+    "-m",
     "--matchcase",
     help="Match case with selection criteria, default is false",
     action="store_true",
@@ -69,11 +75,22 @@ if args["folder"] != None:
 else:
     machineDescriptionFolder = "/work/imas/shared/imasdb/ITER_MD/3"
 
+# MATCHCASE
+matchcase = args["matchcase"]
+
 # FILTER
 if args["selection"] != None:
-    selection = args["selection"].lower()
+    selectionOperation = "OR"
+    selection = args["selection"]
+    if "," in selection[0]:
+        selection = selection[0].split(",")
+        selectionOperation = "AND"
+
+    if not matchcase:
+        selection = [str(x).lower() for x in selection]
 else:
     selection = None
+
 
 # CHOICE OF VARIABLES TO DISPLAY
 if args["choice"] != None:
@@ -102,7 +119,7 @@ else:
     choice = ["pbs", "ids", "description", "backend"]
     print("""----> Default call equivalent to: """)
     print("""      mdsummary -c pbs,ids,description,backend""")
-
+    print(""" """)
 # add shot/run number because pandas is stores id as unique key
 choice.append("id")
 
@@ -116,15 +133,25 @@ df = mdObject.getPandasDataFrame()
 if selection:
 
     def stringExists(row):
-        searchList = selection.split(",")
-        found_substrings = set()
-        for text in row:
-            text = str(text).lower()
-            for searchString in searchList:
-                if searchString in text:
-                    found_substrings.add(searchString)
-        if len(searchList) == len(found_substrings):
-            return True
+        if selectionOperation == "AND":
+            found_substrings = set()
+            for text in row:
+                text = str(text)
+                if not matchcase:
+                    text = text.lower()
+                for searchString in selection:
+                    if searchString in text:
+                        found_substrings.add(searchString)
+            if len(selection) == len(found_substrings):
+                return True
+        if selectionOperation == "OR":
+            for text in row:
+                text = str(text)
+                if not matchcase:
+                    text = str(text).lower()
+                for searchString in selection:
+                    if searchString in text:
+                        return True
         return False
 
     df = df[
@@ -166,7 +193,12 @@ for index, _ in enumerate(choice):
         lambda x: f"{x:<{max_length}}"
     )
 
-# display results
-print(selected_df.to_string(index=False, justify="left"))
+if not selected_df.empty:
+    # display results
+    print(selected_df.to_string(index=False, justify="center"))
+else:
+    print(" No records found matching mentioned criteria")
 
-print(" NOTE: Read entry from MD database using user = 'public', database = 'ITER_MD'")
+print(
+    "\n NOTE: Read entry from MD database using user = 'public', database = 'ITER_MD'"
+)
