@@ -296,3 +296,17 @@ class EquilibriumCompute:
         topViewDict["xplap"] = (r0 + amin) * np.cos(phit)
         topViewDict["yplap"] = (r0 + amin) * np.sin(phit)
         return topViewDict
+
+    # def getEquilibriumQuantities(self):
+    #     """
+    #     The function "getEquilibriumQuantities" returns a dictionary containing the 2D profiles of r, z,  and psi.
+        
+    #     Returns:
+    #         a dictionary with keys "r2d", "z2d", and "psi2d", and their corresponding values are the  variables r2d, z2d, and psi2d, respectively.
+    #     """
+    #     r2d   = self.ids.time_slice[0].profiles_2d[0].r
+    #     z2d   = self.ids.time_slice[0].profiles_2d[0].z
+    #     psi2d = self.ids.time_slice[0].profiles_2d[0].psi
+        
+    #     return({"r2d":r2d, "z2d", z2d, "psi2d", psi2d})
+        

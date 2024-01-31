@@ -142,7 +142,7 @@ class CoreProfilesView(Console):
         ne0 = self.coreProfilesCompute.getElectronDensityNe0()
         time_array = self.ids.time
 
-        ax.plot(time_array, ne0, color="r", label="$n_{e0} [10^{19}.m^{-3}]$")
+        ax.plot(time_array, ne0, color="r", label=r"$n_{e0} [10^{19}.m^{-3}]$")
 
         ax.set_xlim(min(time_array), max(time_array))
         # ax_waveform.set_ylim(0,max(ip)*1.2)
@@ -249,18 +249,28 @@ class CoreProfilesView(Console):
             label.set_linewidth(1.5)
         ax.set_title("Ion Pressure Properties", loc="left")
 
-    def showInfoOnPlot(self, ax, info: str = ""):
+    def showInfoOnPlot(self, ax, info: str = "", location="right"):
         xmin, xmax = ax.get_xlim()
         ymin, ymax = ax.get_ylim()
-        ax.text(
-            xmax + 0.01 * abs(xmax),
-            ymin + 0.5 * abs(ymax - ymin),
-            info,
-            horizontalalignment="left",
-            verticalalignment="center",
-            rotation="vertical",
-            fontsize=5,
-        )
+        if location == "top":
+            ax.text(
+                xmin,
+                ymax + 0.2,
+                info,
+                horizontalalignment="left",
+                rotation="horizontal",
+                fontsize=5,
+            )
+        else:
+            ax.text(
+                xmax + 0.01 * abs(xmax),
+                ymin + 0.01 * abs(ymax - ymin),
+                info,
+                horizontalalignment="left",
+                verticalalignment="center",
+                rotation="vertical",
+                fontsize=5,
+            )
 
     def plotElectronPressureProperties(self, ax, **kwargs):
         FACTOR = 1.0e-6
@@ -349,7 +359,7 @@ class CoreProfilesView(Console):
         ax.plot(rhoTorNorm, pressureTotal * FACTOR, label="Total")
         ax.plot(rhoTorNorm, pressureThermal * FACTOR, label="Thermal")
         ax.plot(rhoTorNorm, pressureParallel * FACTOR, label="Parallel")
-        ax.plot(rhoTorNorm, pressurePerpendicular * FACTOR, label="Pperpendicular")
+        ax.plot(rhoTorNorm, pressurePerpendicular * FACTOR, label="Perpendicular")
         ax.set_xlim(rhoTorNorm[0], rhoTorNorm[nrho - 1])
         ax.set_ylim(0, maximaTotal * FACTOR)
 
@@ -380,6 +390,50 @@ class CoreProfilesView(Console):
             label.set_linewidth(1.5)
         ax.set_title("Total Pressure Properties", loc="left")
 
+    def viewQProfileAndMagneticShearProfile(self, ax, **kwargs):
+        """
+        The function `viewQProfileAndMagneticShearProfile` plots the q-profile and magnetic shear profile using the given axis.
+
+        Args:
+            ax: The parameter "ax" is an instance of the matplotlib Axes class. It represents the axes on which the plot will be drawn.
+        """
+        profiles = self.coreProfilesCompute.getProfiles()
+
+        # q-profile and magnetic shear profile
+        ax.plot(profiles["rhonorm"], profiles["q"], label=r"$q$")
+        ax.plot(
+            profiles["rhonorm"],
+            profiles["magnetic_shear"],
+            label=r"$s=\frac{1}{q}\frac{dq}{d\rho}$",
+        )
+
+        ax.set_ylabel(r"$q,\/s$")
+        ax.set_xlim(0, 1)
+        ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
+
+    # Current density profiles
+
+    def viewCurrentDesnityProfiles(self, ax, **kwargs):
+        """
+        The function `viewCurrentDesnityProfiles` plots various current density profiles on a given axis.
+
+        Args:
+            ax: The parameter "ax" is an instance of the matplotlib Axes class. It represents the axes on which the plot will be drawn.
+        """
+        profiles = self.coreProfilesCompute.getProfiles()
+        ax.plot(profiles["rhonorm"], profiles["j_total"] * 1.0e-3, label=r"$j_{TOT}$")
+        ax.plot(
+            profiles["rhonorm"], profiles["j_non_inductive"] * 1.0e-3, label=r"$j_{NI}$"
+        )
+        ax.plot(
+            profiles["rhonorm"], profiles["j_bootstrap"] * 1.0e-3, label=r"$j_{BOOT}$"
+        )
+        ax.plot(profiles["rhonorm"], profiles["j_ohmic"] * 1.0e-3, label=r"$j_{OHM}$")
+
+        ax.set_xlabel(r"$\rho/\rho_0$")
+        ax.set_ylabel(r"$j\/[\mathrm{kA/m^2}]$")
+        ax.set_xlim(0, 1)
+        ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
 
     def plotEfieldProfile(self, ax, **kwargs):
         FACTOR = 1.e-3
