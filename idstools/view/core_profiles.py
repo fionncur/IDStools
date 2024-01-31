@@ -142,7 +142,7 @@ class CoreProfilesView(Console):
         ne0 = self.coreProfilesCompute.getElectronDensityNe0()
         time_array = self.ids.time
 
-        ax.plot(time_array, ne0, color="r", label="$n_{e0} [10^{19}.m^{-3}]$")
+        ax.plot(time_array, ne0, color="r", label=r"$n_{e0} [10^{19}.m^{-3}]$")
 
         ax.set_xlim(min(time_array), max(time_array))
         # ax_waveform.set_ylim(0,max(ip)*1.2)

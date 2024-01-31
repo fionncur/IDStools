@@ -10,7 +10,6 @@ from idstools.compute.summary import SummaryCompute
 
 logger = logging.getLogger("module")
 
-
 class SummaryView(BasePlot):
     def __init__(self, ids: object):
         """
@@ -107,7 +106,7 @@ class SummaryView(BasePlot):
                 label=r"$P_{STEADY}$",
             )
         ax.set_xlim(self.ids.time[0], self.ids.time[-1])
-        ax.set_ylabel("$P\/[\mathrm{MW}]$", fontdict={"color": "darkred"})
+        ax.set_ylabel(r"$P\/[\mathrm{MW}]$", fontdict={"color": "darkred"})
         ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
 
     def viewIpB0Waveforms(self, ax):
@@ -167,7 +166,7 @@ class SummaryView(BasePlot):
         )
 
         ax.set_xlim(self.ids.time[0], self.ids.time[-1])
-        ax.set_ylabel(r"$W\/[\mathrm{MJ}]}$", fontdict={"color": "darkred"})
+        ax.set_ylabel(r"$W\/[\mathrm{MJ}]$", fontdict={"color": "darkred"})
         ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
 
     def viewVloopWaveforms(self, ax):
@@ -184,7 +183,7 @@ class SummaryView(BasePlot):
         ax.plot(
             waveform["time"], waveform["tau_energy"], plotstyle, label=r"$\tau_{E}$"
         )
-        ax.set_xlabel("$Time\/[\mathrm{s}]$", fontdict={"color": "darkred"})
+        ax.set_xlabel(r"$Time\/[\mathrm{s}]$", fontdict={"color": "darkred"})
         ax.set_ylabel(
             r"$V\/[\mathrm{V}],\/H,\/\tau\/[\mathrm{s}]$", fontdict={"color": "darkred"}
         )
