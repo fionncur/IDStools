@@ -49,6 +49,7 @@ setup(
         "scripts/dblist",
         "scripts/dbscraper",
         "scripts/dbselector",
+        "scripts/dbstatus",
         "scripts/idscp",
         "scripts/idsdiff",
         "scripts/idslist",

@@ -1,10 +1,9 @@
 from idstools.compute.edge_profiles import EdgeProfilesCompute
 import numpy as np
 
-from idstools.view.common import Console
 
 
-class EdgeProfilesView(Console):
+class EdgeProfilesView():
     def __init__(self, edgeProfileIds=None):
         self.edgeProfilesCompute = EdgeProfilesCompute(edgeProfileIds)
 

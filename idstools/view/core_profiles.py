@@ -3,12 +3,11 @@
 import logging
 import numpy as np
 from idstools.compute.core_profiles import CoreProfilesCompute
-from idstools.view.common import Console
 
 logger = logging.getLogger("module")
 
 
-class CoreProfilesView(Console):
+class CoreProfilesView():
     def __init__(self, ids):
         self.ids = ids
         self.coreProfilesCompute = CoreProfilesCompute(ids)

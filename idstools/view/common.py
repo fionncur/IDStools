@@ -1,4 +1,7 @@
-import matplotlib, os, sys
+import os
+import sys
+
+import matplotlib
 
 if "DISPLAY" not in os.environ:
     matplotlib.use("agg")
@@ -35,9 +38,18 @@ import logging
 import math
 import weakref
 
+import matplotlib.pyplot as _plt
 import numpy
 
-import matplotlib.pyplot as _plt
+try:
+    import rich
+    from rich.console import Console
+    from rich.panel import Panel
+    from rich.pretty import Pretty, pprint
+
+    richAvailable = True
+except ImportError:
+    richAvailable = False
 
 
 class MplInteraction(object):
@@ -467,10 +479,26 @@ class BasePlot:
         # self.ax.add_artist(anchored_text)
 
 
-class Console:
+class Terminal:
     tabsize = 10
     TAB = " " * 16
     LINE = "-" * 8
 
     def __init__(self) -> None:
-        pass
+        if richAvailable:
+            self.console = Console()
+
+    def print(self, text, style=None, panel=False, pretty=False):
+        if type(text) is dict:
+            pprint(text, expand_all=True)
+            return
+        if style is None:
+            style = "green"
+        if richAvailable:
+            if pretty:
+                text = Pretty(text)
+            if panel:
+                text = Panel(text)
+            self.console.print(text, style=style, highlight=False)
+            return
+        print(text)
