@@ -1,0 +1,4 @@
+#!/bin/bash
+echo "scenario_summary will shortly be deprecated. Use dbsummary"
+# Call the Python script with arguments
+dbsummary "$@"

@@ -1,0 +1,4 @@
+#!/bin/bash
+echo "scenario_status will shortly be deprecated. Use dbstatus.""
+# Call the Python script with arguments
+dbstatus "$@"

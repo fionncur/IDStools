@@ -50,6 +50,7 @@ setup(
         "scripts/dbscraper",
         "scripts/dbselector",
         "scripts/dbstatus",
+        "scripts/dbsummary",
         "scripts/idscp",
         "scripts/idsdiff",
         "scripts/idslist",
@@ -68,6 +69,8 @@ setup(
         "scripts/viewrotation",
         "scripts/viewsources",
         "scripts/viewwall",
+        "scripts/scenario_status",
+        "scripts/scenario_summary"
     ],
     setup_requires=["pytest-runner"],
     tests_require=["pytest"],

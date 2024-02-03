@@ -44,7 +44,7 @@ dbstatus -s 130012 -r 4 || exit 1
 
 echo =====================================dbsummary=====================================================
 echo TESTING: dbsummary
-dblist dbsummary || exit 1
+dbsummary || exit 1
 
 # echo TESTING: dblist -u public slices
 # dblist -u public slices  || exit 1

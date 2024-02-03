@@ -3,7 +3,7 @@ dbsummary
 
 `dbsummary` list available scenarios in a specific folder with search facility
 
-Syntax mdsummary
+Syntax dbsummary
 ~~~~~~~~~~~~~~~
 
 .. code-block:: bash
