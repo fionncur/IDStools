@@ -38,6 +38,14 @@ dblist databases || exit 1
 echo TESTING: dblist -u public dataversions
 dblist dataversions || exit 1
 
+echo =====================================dbstatus=====================================================
+echo TESTING: dbstatus -s 130012 -r 4
+dbstatus -s 130012 -r 4 || exit 1
+
+echo =====================================dbsummary=====================================================
+echo TESTING: dbsummary
+dblist dbsummary || exit 1
+
 # echo TESTING: dblist -u public slices
 # dblist -u public slices  || exit 1
 # echo TESTING: dblist -u public  times
@@ -134,7 +142,7 @@ idsdiff 122525 1 122525 2 summary || exit 1
 idsdiff 130011 6 130012 4 summary || exit 1
 
 echo =====================================viewmachinedescription=====================================================
-viewmachinedescription list pf_active --checkValidity  || exit 1
+viewmachinedescription list pf_active --checkValidity || exit 1
 viewmachinedescription list pf_active --obsolete || exit 1
 viewmachinedescription plot --save || exit 1
 # echo =====================================idsresample=====================================================

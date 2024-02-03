@@ -1,9 +1,6 @@
 #!/usr/bin/env python3
 import argparse
-import logging
-
-from rich import print
-
+import os
 from idstools.scenariodescription import ScenarioDescription
 from idstools.utils.idslogger import setupLogger
 from idstools.view.common import Terminal
@@ -42,16 +39,17 @@ run = args["run"]
 folder = ""
 if args["folder"] != None:
     folder = args["folder"]
-
+else:
+    folder = os.environ["IMAS_HOME"] + "/shared/imasdb/ITER/3/0"
+    lowlevelVersion = int(os.environ["UAL_VERSION"][0])
+    if lowlevelVersion < 4:
+        folder = os.environ["IMAS_HOME"] + "/shared/iterdb/3/0"
 sdObject = ScenarioDescription(shot, run, folder)
 if args["print"] == True:
     sdObject.printYaml()
     exit(0)
 
-
-# ------------------------------------------------------------------------------------------------------------
 family = sdObject.getFamily()
-
 
 terminal = Terminal()
 
@@ -65,9 +63,13 @@ for iparent in range(len(family["parents"]["shot"])):
     terminal.print(
         f" {family['parents']['shot'][iparent]:<7} {family['parents']['run'][iparent]:<5}{family['parents']['status'][iparent]:<10}{family['parents']['comment'][iparent]}"
     )
-terminal.print(
-    f"*{shot:<7} {run:<5}{sdObject.yamlData['status']:<10}{sdObject.yamlData['database_relations']['replaces']}"
-)
+if "database_relations" in sdObject.yamlData.keys():
+    if "replaced_by" in sdObject.yamlData["database_relations"].keys():
+        terminal.print(
+            f"*{shot:<7} {run:<5}{sdObject.yamlData['status']:<10}{sdObject.yamlData['database_relations']['replaces']}"
+        )
+else:
+    terminal.print(f"database_relations not found", "bold red")
 for ichild in range(len(family["children"]["shot"])):
     terminal.print(
         f" {family['children']['shot'][ichild]:<7}{family['children']['run'][ichild]:<5}{family['children']['status'][ichild]:<10}{family['children']['comment'][ichild]}"
