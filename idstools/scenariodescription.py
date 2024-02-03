@@ -81,7 +81,7 @@ class ScenarioDescriptionBase:
         return yamlData
 
     @staticmethod
-    def getDataFrameFromYaml(self, yamlFilePath, addObsolete=False):
+    def getDataFrameFromYaml(yamlFilePath, addObsolete=False):
         """
         The function `getDataFrameFromYaml` takes a YAML file path, reads the data from the file, checks if the status is active (unless `addObsolete` is set to True), converts the data into a flat table, and returns it as a pandas DataFrame.
         
@@ -92,7 +92,7 @@ class ScenarioDescriptionBase:
         Returns:
             a pandas DataFrame object.
         """
-        yamlData = self.getYamlData(yamlFilePath)
+        yamlData = ScenarioDescriptionBase.getYamlData(yamlFilePath)
         if addObsolete is False:
             if yamlData["status"] != "active":
                 return None
@@ -102,7 +102,7 @@ class ScenarioDescriptionBase:
         dataFrame = pd.DataFrame(flatTable)
         return dataFrame
 
-    def getDataframesFromFiles(self, extension=".yaml", addObsolete=False):
+    def getDataframesFromFiles(self,extension=".yaml", addObsolete=False):
         """
         The function `getDataframesFromFiles` retrieves data from YAML files, creates dataframes, adds additional information, and returns a concatenated dataframe.
         
@@ -116,10 +116,9 @@ class ScenarioDescriptionBase:
         """
         files = glob.glob(f"{self.folderPath}/**/*{extension}", recursive=True)
         if extension == ".yaml":
-            files = files[:10]
             dataFrames = []
             for yamlFile in files:
-                df = self.getDataFrameFromYaml(yamlFile, addObsolete=addObsolete)
+                df = ScenarioDescriptionBase.getDataFrameFromYaml(yamlFile, addObsolete=addObsolete)
                 if df is not None:
                     df["location"] = yamlFile
                     localTime = time.ctime(os.path.getmtime(yamlFile))

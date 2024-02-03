@@ -203,10 +203,15 @@ df = scenarioDescriptionObj.getDataframesFromFiles(extension = ".yaml", addObsol
 # check of need to add obsolete
 if not args["obsolete"]:
     df = df[df["status"] == "active"]
-    
+
+df["date"] = df["date"].dt.strftime("%Y-%m-%d %H:%M:%S")
+
+df["ref_name"] = df["ref_name"].str.slice(0, 50)
+# Columns filtering
+df = df[choice]
+
 # Search based on selection
 if selection:
-    print(selection)
     def stringExists(row):
         if selectionOperation == "AND":
             found_substrings = set()
@@ -240,16 +245,9 @@ if selection:
 if sort:
     df = df.sort_values(by=sort)
 
-# -------------------------------------------------
-# Display formatting
-df["date"] = df["date"].dt.strftime("%Y-%m-%d %H:%M:%S")
-
-df["ref_name"] = df["ref_name"].str.slice(0, 50)
-# Columns filtering
-selected_df = df[choice]
 
 # rename headers for display
-selected_df = selected_df.rename(columns=displayMapping)
+selected_df = df.rename(columns=displayMapping)
 # Convert all values to string
 selected_df = selected_df.applymap(lambda x: str(x))
 
@@ -264,3 +262,4 @@ if not selected_df.empty:
     print(selected_df.to_string(index=False, justify="center"), )
 else:
     print(" No records found matching mentioned criteria")
+print(f" NOTE: Read Scenario database from {defaultFolderPath}" )
