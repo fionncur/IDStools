@@ -14,15 +14,13 @@ parser.add_argument(
     required=False,
 )
 parser.add_argument("-s", "--shot", help="shot number", required=True, type=int)
-# currently limiting run < 10000 because of the search path /3/0
+
 parser.add_argument(
     "-r",
     "--run",
     help="run number",
     required=True,
     type=int,
-    choices=range(0, 9999),
-    metavar="[0-9999]",
 )
 args = vars(parser.parse_args())
 shot = args["shot"]
