@@ -1,0 +1,4 @@
+#!/bin/bash
+echo "md_summary is renamed as mdsummary. You can also use mdsummary"
+# Call the Python script with arguments
+mdsummary "$@"

@@ -1,0 +1,4 @@
+#!/bin/bash
+echo "md_status is renamed as mdstatus. You can also use mdstatus"
+# Call the Python script with arguments
+mdstatus "$@"
