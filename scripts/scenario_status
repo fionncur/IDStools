@@ -1,4 +1,77 @@
-#!/bin/bash
-echo "scenario_status will shortly be deprecated. Use dbstatus.""
-# Call the Python script with arguments
-dbstatus "$@"
+#!/usr/bin/env python3
+import argparse
+import os
+from idstools.scenariodescription import ScenarioDescription
+from idstools.utils.idslogger import setupLogger
+from idstools.view.common import Terminal
+
+# Management of input arguments
+parser = argparse.ArgumentParser(
+    description="---- Show status and potential parent and children for a given simulation stored in ITER database folder"
+)
+parser.add_argument(
+    "-f", "--folder", help="folder where to search for scenarios", required=False
+)
+parser.add_argument("-s", "--shot", help="shot number", required=True, type=int)
+# currently limiting run < 10000 because of the search path /3/0
+parser.add_argument(
+    "-r",
+    "--run",
+    help="run number",
+    required=True,
+    type=int,
+    choices=range(0, 9999),
+    metavar="[0-9999]",
+)
+parser.add_argument(
+    "--print",
+    help="print yaml on console",
+    action="store_true",
+)
+args = vars(parser.parse_args())
+
+logger = setupLogger("module")
+
+shot = args["shot"]
+run = args["run"]
+
+# FOLDER
+folder = ""
+if args["folder"] != None:
+    folder = args["folder"]
+else:
+    folder = os.environ["IMAS_HOME"] + "/shared/imasdb/ITER/3/0"
+    lowlevelVersion = int(os.environ["UAL_VERSION"][0])
+    if lowlevelVersion < 4:
+        folder = os.environ["IMAS_HOME"] + "/shared/iterdb/3/0"
+sdObject = ScenarioDescription(shot, run, folder)
+if args["print"] == True:
+    sdObject.printYaml()
+    exit(0)
+
+family = sdObject.getFamily()
+
+terminal = Terminal()
+
+terminal.print("-----------------------------------------------------------------")
+terminal.print(
+    f" {'SCENARIO':<12} {'STATUS':<10} REASON WHY IT REPLACES PREVIOUS",
+    "bold magenta",
+)
+terminal.print("-----------------------------------------------------------------")
+for iparent in range(len(family["parents"]["shot"])):
+    terminal.print(
+        f" {family['parents']['shot'][iparent]:<7} {family['parents']['run'][iparent]:<5}{family['parents']['status'][iparent]:<10}{family['parents']['comment'][iparent]}"
+    )
+if "database_relations" in sdObject.yamlData.keys():
+    if "replaced_by" in sdObject.yamlData["database_relations"].keys():
+        terminal.print(
+            f"*{shot:<7} {run:<5}{sdObject.yamlData['status']:<10}{sdObject.yamlData['database_relations']['replaces']}"
+        )
+else:
+    terminal.print(f"database_relations not found", "bold red")
+for ichild in range(len(family["children"]["shot"])):
+    terminal.print(
+        f" {family['children']['shot'][ichild]:<7}{family['children']['run'][ichild]:<5}{family['children']['status'][ichild]:<10}{family['children']['comment'][ichild]}"
+    )
+terminal.print("-----------------------------------------------------------------")

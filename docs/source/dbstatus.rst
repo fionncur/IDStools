@@ -1,16 +1,16 @@
-dbstatus
+scenario_status
 ========
 
-`dbstatus` program provides information about scenario of specified shot and run number from scenario database.
+`scenario_status` program provides information about scenario of specified shot and run number from scenario database.
 It shows status and potential parent and children for a given simulation stored in ITER scenario description database folder
 
-Syntax dbstatus
+Syntax scenario_status
 ~~~~~~~~~~~~~~~
 
 .. code-block:: bash
 
-    $ ddbstatus -h
-    usage: dbstatus [-h] [-f FOLDER] -s SHOT -r [0-9999] [--print]
+    $ dscenario_status -h
+    usage: scenario_status [-h] [-f FOLDER] -s SHOT -r [0-9999] [--print]
 
     ---- Show status and potential parent and children for a given simulation stored in ITER database folder
 
@@ -25,12 +25,12 @@ Syntax dbstatus
 
 
 
-Example dbstatus
+Example scenario_status
 ~~~~~~~~~~~~~~~~
 
 .. code-block:: bash
 
-    $ dbstatus -s 134174 -r 117
+    $ scenario_status -s 134174 -r 117
     -----------------------------------------------------------------
      SCENARIO     STATUS     REASON WHY IT REPLACES PREVIOUS
     -----------------------------------------------------------------
@@ -45,7 +45,7 @@ Example dbstatus
 
 .. code-block:: bash
 
-    $ dbstatus -s 130012 -r 4 --print
+    $ scenario_status -s 130012 -r 4 --print
     {
     │   'status': 'active',
     │   'reference_name': 'ITER-baseline-DT_more_stable_q95>2',

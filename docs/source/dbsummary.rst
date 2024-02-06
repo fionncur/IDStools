@@ -1,15 +1,15 @@
-dbsummary
+scenario_summary
 =========
 
-`dbsummary` list available scenarios in a specific folder with search facility
+`scenario_summary` list available scenarios in a specific folder with search facility
 
-Syntax dbsummary
+Syntax scenario_summary
 ~~~~~~~~~~~~~~~
 
 .. code-block:: bash
 
-    $ dbsummary -h
-    usage: dbsummary [-h] [-f FOLDER] [-s [SELECTION [SELECTION ...]]] [--sort SORT] [-m] [-o] [-c CHOICE]
+    $ scenario_summary -h
+    usage: scenario_summary [-h] [-f FOLDER] [-s [SELECTION [SELECTION ...]]] [--sort SORT] [-m] [-o] [-c CHOICE]
 
     ---- Script to list available scenarios in a specific folder ----
 
@@ -57,11 +57,11 @@ Syntax dbsummary
                                     date        = Date of last modification of the dataset
 
 
-Example dbsummary
+Example scenario_summary
 ~~~~~~~~~~~~~~~~~
 .. code-block:: bash
 
-    $ dbsummary -s He4,2.65
+    $ scenario_summary -s He4,2.65
     ----> Default call equivalent to:
         scenario_summary -c shot,run,database,ref_name,ip,b0,fuelling,confinement,workflow,date
     Pulse  Run Database                      Reference                      Ip[MA] B0[T]  Fuelling Confinement             Workflow                     Date
@@ -83,7 +83,7 @@ Example dbsummary
 
 .. code-block:: bash
 
-    $ dbsummary -s He4,2.65 -c shot,run,database,composition
+    $ scenario_summary -s He4,2.65 -c shot,run,database,composition
     Pulse  Run Database                                    Composition X[ni/ne]
     131042  11   ITER    D(0.497),T(0.456),Be(0.020),He4(0.015),Ne(2.50e-03),Xe(2.65e-05),H(1.54e-05),W(7.02e-06)
     131042  12   ITER    D(0.497),T(0.456),Be(0.020),He4(0.015),Ne(2.50e-03),Xe(2.65e-05),H(1.54e-05),W(7.02e-06)
@@ -91,7 +91,7 @@ Example dbsummary
 
 .. code-block:: bash
 
-    $ dbsummary -s He4 2.65
+    $ scenario_summary -s He4 2.65
     ----> Default call equivalent to:
         scenario_summary -c shot,run,database,ref_name,ip,b0,fuelling,confinement,workflow,date
     Pulse  Run Database                      Reference                       Ip[MA] B0[T]  Fuelling   Confinement               Workflow                     Date

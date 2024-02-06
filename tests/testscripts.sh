@@ -38,13 +38,13 @@ dblist databases || exit 1
 echo TESTING: dblist -u public dataversions
 dblist dataversions || exit 1
 
-echo =====================================dbstatus=====================================================
-echo TESTING: dbstatus -s 130012 -r 4
-dbstatus -s 130012 -r 4 || exit 1
+echo =====================================scenario_status=====================================================
+echo TESTING: scenario_status -s 130012 -r 4
+scenario_status -s 130012 -r 4 || exit 1
 
-echo =====================================dbsummary=====================================================
-echo TESTING: dbsummary
-dbsummary || exit 1
+echo =====================================scenario_summary=====================================================
+echo TESTING: scenario_summary
+scenario_summary || exit 1
 
 # echo TESTING: dblist -u public slices
 # dblist -u public slices  || exit 1
