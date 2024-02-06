@@ -5,5 +5,5 @@ Machine Description Database tools to inspect various information from machine d
 .. toctree::
    :maxdepth: 1
 
-   mdstatus
-   mdsummary
+   md_status
+   md_summary

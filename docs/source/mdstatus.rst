@@ -1,17 +1,17 @@
-mdstatus
+md_status
 ========
 
-`mdstatus` program provides information about machine description of specified shot and run number from machine description database.
+`md_status` program provides information about machine description of specified shot and run number from machine description database.
 It show status and potential parent and children for a given simulation stored in ITER machine description database folder
 It helps to see when particular machine description information become outdated and which one is in active state.
 
-Syntax mdstatus
+Syntax md_status
 ~~~~~~~~~~~~~~~
 
 .. code-block:: bash
 
-    $ mdstatus -h
-    usage: mdstatus [-h] [-f FOLDER] -s SHOT -r [0-9999]
+    $ md_status -h
+    usage: md_status [-h] [-f FOLDER] -s SHOT -r [0-9999]
 
     ---- Show status and potential parent and children for a given simulation stored in ITER machine description database folder
 
@@ -25,11 +25,11 @@ Syntax mdstatus
 
 
 
-Example mdstatus
+Example md_status
 ~~~~~~~~~~~~~~~~
 .. code-block:: bash
 
-    $ mdstatus -s 116000 -r 3
+    $ md_status -s 116000 -r 3
     -----------------------------------------------------------------
       DATASET       STATUS          REASON WHY IT REPLACES PREVIOUS
     -----------------------------------------------------------------

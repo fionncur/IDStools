@@ -1,15 +1,15 @@
-mdsummary
+md_summary
 =========
 
-`mdsummary` list available machine description data in a specific folder with search facility
+`md_summary` list available machine description data in a specific folder with search facility
 
-Syntax mdsummary
+Syntax md_summary
 ~~~~~~~~~~~~~~~
 
 .. code-block:: bash
 
-    $ mdsummary  -h
-    usage: mdsummary [-h] [-f FOLDER] [-s [SELECTION [SELECTION ...]]] [-o] [-m] [-c CHOICE]
+    $ md_summary  -h
+    usage: md_summary [-h] [-f FOLDER] [-s [SELECTION [SELECTION ...]]] [-o] [-m] [-c CHOICE]
 
     ---- Script to list available MD data in a specific folder ----
 
@@ -42,13 +42,13 @@ Syntax mdsummary
                                     reason_for_replacement = Comment on why this shot/run replaces the previous one
 
 
-Example mdstatus
-~~~~~~~~~~~~~~~~
+Example md_summary
+~~~~~~~~~~~~~~~~~~
 .. code-block:: bash
 
-    $ mdsummary  -s 150502/102
+    $ md_summary  -s 150502/102
     ----> Default call equivalent to:
-        mdsummary -c pbs,ids,description,backend
+        md_summary -c pbs,ids,description,backend
     PBS        IDS             DESCRIPTION                                                           BACKEND       SHOT/RUN
     PBS-55.E2  camera_visible  H-alpha view C0 (EP12 left) - Geometry matrix w/o reflections         hdf5          150502/1020
     PBS-55.E2  camera_visible  H-alpha view C0 (EP12 left) - Interpolated geometry matrix at 400 nm  hdf5          150502/1021
@@ -64,18 +64,18 @@ Example mdstatus
 
 .. code-block:: bash
 
-    $ mdsummary  -s nbi,on-on
+    $ md_summary  -s nbi,on-on
     ----> Default call equivalent to:
-        mdsummary -c pbs,ids,description,backend
+        md_summary -c pbs,ids,description,backend
     PBS     IDS  DESCRIPTION                                      BACKEND       SHOT/RUN
     PBS-53  nbi  Heating Neutral Beams (HNB) - HNB1-HNB2 = on-on  mdsplus,hdf5  130000/2501
 
 
 .. code-block:: bash
 
-    $ mdsummary  -s nbi on-on
+    $ md_summary  -s nbi on-on
     ----> Default call equivalent to:
-        mdsummary -c pbs,ids,description,backend
+        md_summary -c pbs,ids,description,backend
 
     PBS   IDS                     DESCRIPTION                        BACKEND      SHOT/RUN
     PBS-53  nbi  Heating Neutral Beams (HNB) - HNB1-HNB2 = off-off  mdsplus,hdf5  130000/2201
