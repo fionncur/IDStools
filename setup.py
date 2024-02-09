@@ -24,6 +24,11 @@ man_path = os.path.join(current_directory, "docs/_build/man/idstools.1")
 if os.path.exists(man_path):
     data_files.append(("share/man/man1/", [man_path]))
 
+
+scientific_mplstyle = os.path.join(current_directory, "idstools/view/styles/scientific.mplstyle")
+if os.path.exists(scientific_mplstyle):
+    data_files.append(("share/styles/", [scientific_mplstyle]))
+        
 setup(
     name="IDSTools",
     version=versioneer.get_version(),
@@ -51,6 +56,8 @@ setup(
         "scripts/dbselector",
         "scripts/scenario_status",
         "scripts/scenario_summary",
+        "scripts/md_status",
+        "scripts/md_summary",
         "scripts/idscp",
         "scripts/idsdiff",
         "scripts/idslist",
@@ -66,6 +73,7 @@ setup(
         "scripts/viewneutron",
         "scripts/viewplasmacompo",
         "scripts/viewpressure",
+        "scripts/viewscenario",
         "scripts/viewrotation",
         "scripts/viewsources",
         "scripts/viewwall",

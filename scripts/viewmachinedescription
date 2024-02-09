@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 
 import argparse
-from idstools.database import Connection, MachineDescription
-
+from idstools.database import Connection
+from idstools.machinedescription import MachineDescription
 from idstools.set_logger import set_logger
 from idstools.utils.clihelper import imasParser
 from idstools.view.common import Canvas

@@ -4,6 +4,7 @@ This module provides view functions and classes for equilibrium ids data
 `more about equilibrium ids <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/CI/imas-3.37.2/equilibrium.html>`_.
 
 """
+from matplotlib.patches import Rectangle
 import matplotlib.pyplot as plt
 from idstools.view.common import BasePlot
 from idstools.compute.equilibrium import EquilibriumCompute
@@ -86,9 +87,9 @@ class EquilibriumView(BasePlot):
                 levels,
             )
             ax.set_aspect("equal", adjustable="box")
-            ax.set_xlabel("$R$ [m]", fontdict=BasePlot.font)
-            ax.set_ylabel("$Z$ [m]", fontdict=BasePlot.font)
-            ax.tick_params(axis="both", which="major", labelsize=BasePlot.ticksize)
+            ax.set_xlabel("$R$ [m]")
+            ax.set_ylabel("$Z$ [m]")
+            ax.tick_params(axis="both", which="major")
 
     def viewPulseInfo(
         self, ax: plt.axes, title: str, hostdir: str, shot: int, run: int, t: float
@@ -184,3 +185,44 @@ class EquilibriumView(BasePlot):
             ax[1].set_data(data["xplap"], data["yplap"])
         if update == True:
             return [ax_topview_plot_eq1, ax_topview_plot_eq2]
+
+    def viewEquilibrium(self, ax):
+        quantities = self.computeObj.get2DCartesianGrid()
+        if quantities != None:
+            r2d, z2d, psi2d = (
+                quantities["r2d"],
+                quantities["z2d"],
+                quantities["psi2d"],
+            )
+            ax.xaxis.tick_top()
+            ax.xaxis.set_label_position("top")
+
+            ax.contour(r2d, z2d, psi2d, 50)  # ,label=r'$\Psi_{pol}$')
+            ax.set_xlim(r2d.min(), r2d.max())
+            ax.set_aspect("equal", adjustable="box")
+            ax.set_xlabel("R (m)")
+            ax.set_ylabel("Z (m)")
+
+            ax.set_xlabel("$R\/\mathrm{[m]}$")
+            # ax.tick_params(axis='both',which='major',labelsize=ticksize)
+            ax.set_ylabel(r"$Z\/\mathrm{[m]}$")
+            # ax.tick_params(
+            #     axis="x", which="both", bottom=False, top=False, labelbottom=False
+            # )
+            ax.set_title("2D equilibrium")
+        else:
+            ax.text(0.2, 0.5, "2D equilibrium", fontsize=10)
+            ax.text(0.2, 0.45, "not available", fontsize=10)
+
+    def showInfoOnPlot(self, ax, info: str = "", location="right"):
+        xmin, xmax = ax.get_xlim()
+        ymin, ymax = ax.get_ylim()
+
+        ax.text(
+            (xmax) + 0.2,
+            (ymax / 4) + 0.01,
+            info,
+            verticalalignment="center",
+            rotation="vertical",
+            fontsize=6,
+        )

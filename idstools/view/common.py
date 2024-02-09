@@ -9,31 +9,38 @@ else:
     matplotlib.use("TKagg")
 import matplotlib.pyplot as plt
 
-fsize = 8
-tsize = 10
-tdir = "in"
-major = 5.0
-minor = 3.0
-lwidth = 0.8
-lhandle = 2.0
-plt.style.use("default")
-# plt.rcParams["text.usetex"] = True
-plt.rcParams["font.size"] = fsize
-plt.rcParams["legend.fontsize"] = tsize
-plt.rcParams["xtick.direction"] = tdir
-plt.rcParams["ytick.direction"] = tdir
-plt.rcParams["xtick.major.size"] = major
-plt.rcParams["xtick.minor.size"] = minor
-plt.rcParams["ytick.major.size"] = 5.0
-plt.rcParams["ytick.minor.size"] = 3.0
-plt.rcParams["axes.linewidth"] = lwidth
-plt.rcParams["legend.handlelength"] = lhandle
+# fsize = 8
+# tsize = 10
+# tdir = "in"
+# major = 5.0
+# minor = 3.0
+# lwidth = 0.8
+# lhandle = 2.0
+# plt.style.use("default")
+# # plt.rcParams["text.usetex"] = True
+# plt.rcParams["font.size"] = fsize
+# plt.rcParams["legend.fontsize"] = tsize
+# plt.rcParams["xtick.direction"] = tdir
+# plt.rcParams["ytick.direction"] = tdir
+# plt.rcParams["xtick.major.size"] = major
+# plt.rcParams["xtick.minor.size"] = minor
+# plt.rcParams["ytick.major.size"] = 5.0
+# plt.rcParams["ytick.minor.size"] = 3.0
+# plt.rcParams["axes.linewidth"] = lwidth
+# plt.rcParams["legend.handlelength"] = lhandle
 
-plt.rcParams["lines.linewidth"] = 1
+# plt.rcParams["lines.linewidth"] = 1
 
-# plt.style.use(["dark_background"])
+current_directory = os.path.abspath(os.path.dirname(__file__))
+# reach to `share` directory (sys.prefix won't work if using --prefix option)
+share_directory = os.path.abspath(os.path.join(current_directory, "../../../../../"))
+mplstyle_filepath = os.path.join(share_directory, r"share/styles/scientific.mplstyle")
 
-
+if os.path.exists(mplstyle_filepath):
+    plt.style.use(os.path.join(mplstyle_filepath))
+else:
+    mplstyle_filepath = os.path.join(current_directory, r"styles/scientific.mplstyle")
+    plt.style.use(os.path.join(mplstyle_filepath))
 import logging
 import math
 import weakref
@@ -382,30 +389,28 @@ def figure_pz(*args, **kwargs):
 
 
 class Canvas:
-    # Tick size and X and Y axes
-    ticksize = 15
-
-    # Font definition
-    font = {
-        "family": "serif",
-        "color": "darkred",
-        "weight": "normal",
-        "size": 18,
-    }
     # https://matplotlib.org/stable/tutorials/intermediate/arranging_axes.html
 
-    def __init__(self, nrows=1, ncols=1) -> None:
+    def __init__(self, nrows=1, ncols=1, *args, **kwargs) -> None:
         # self.fig, self.axes_array = plt.subplots(nrows, ncols)
         self.nrows = nrows
         self.ncols = ncols
-        self.fig = figure_pz()
+        self.fig = figure_pz(*args, **kwargs)
         self.fig.subplots_adjust(hspace=0.5, wspace=0.5)
 
     # Share axes
     # https://matplotlib.org/stable/gallery/subplots_axes_and_figures/shared_axis_demo.html#sphx-glr-gallery-subplots-axes-and-figures-shared-axis-demo-py
     # https://matplotlib.org/stable/gallery/subplots_axes_and_figures/share_axis_lims_views.html#sphx-glr-gallery-subplots-axes-and-figures-share-axis-lims-views-py
     def add_axes(
-        self, title=None, xlabel=None, ylabel=None, row=0, col=0, rowspan=1, colspan=1
+        self,
+        title=None,
+        xlabel=None,
+        ylabel=None,
+        row=0,
+        col=0,
+        rowspan=1,
+        colspan=1,
+        **kwargs,
     ):
         ax = plt.subplot2grid(
             shape=(self.nrows, self.ncols),
@@ -413,6 +418,7 @@ class Canvas:
             rowspan=rowspan,
             colspan=colspan,
             fig=self.fig,
+            **kwargs,
         )
         if title is not None:
             ax.set_title(title)
@@ -442,23 +448,30 @@ class Canvas:
                 file=sys.stderr,
             )
 
+    def setText(self, x=0.5, y=0.01, text=""):
+        plt.figtext(
+            0.5,
+            0.01,
+            text,
+            ha="center",
+            fontsize=7,
+        )
+
+    def setSupTitle(self, text="", *args, **kwargs):
+        plt.suptitle(text, *args, **kwargs)
+
     def show(self, *args, **kwargs):
         plt.show(*args, **kwargs)
 
+    def get_current_fig_manager(self):
+        return plt.get_current_fig_manager()
+
 
 class BasePlot:
-    font = {
-        "family": "serif",
-        "color": "darkred",
-        "weight": "normal",
-        "size": 12,
-    }
-    ticksize = 10
-
     def database_info(self, ax, title, hostdir, shot, run, t):
         plottitle = title
         plottitle += " (t={:.3f})".format(t)
-        ax.set_title(plottitle, fontdict=BasePlot.font)
+        ax.set_title(plottitle)
 
         xmin, xmax = ax.get_xlim()
         ymin, ymax = ax.get_ylim()

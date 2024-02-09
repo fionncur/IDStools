@@ -902,3 +902,67 @@ class CoreProfilesCompute:
                 )
         return pressureIonTotal
 
+
+
+    def getProfiles(self, sliceIndex=0):
+   
+        rhoTorNorm = self.getRhoTorNorm(timeSlice=0)
+        if rhoTorNorm is None:
+            logger.critical('core_profiles.profiles_1d[:].grid.rho_tor_norm and rho_tor are empty')
+            logger.critical('----> Aborted.')
+            return None
+        
+        nrho=len(rhoTorNorm)
+    
+        # J_bootstrap profile
+        if len(self.ids.profiles_1d[sliceIndex].j_bootstrap) < 1:
+            logger.critical('core_profiles.profiles_1d['+str(sliceIndex)+'].j_bootstrap could not be read')
+            self.ids.profiles_1d[sliceIndex].j_bootstrap = np.asarray([np.nan]*nrho)
+
+        # J_non_inductive profile
+        if len(self.ids.profiles_1d[sliceIndex].j_non_inductive) < 1:
+            logger.critical('core_profiles.profiles_1d['+str(sliceIndex)+'].j_non_inductive could not be read')
+            self.ids.profiles_1d[sliceIndex].j_non_inductive = np.asarray([np.nan]*nrho)
+
+        # J_ohmic profile
+        if len(self.ids.profiles_1d[0].j_ohmic) < 1:
+            logger.critical('core_profiles.profiles_1d['+str(sliceIndex)+'].j_ohmic could not be read')
+            self.ids.profiles_1d[0].j_ohmic = np.asarray([np.nan]*nrho)
+
+        # J_total profile
+        if len(self.ids.profiles_1d[0].j_total) < 1:
+            logger.critical('core_profiles.profiles_1d['+str(sliceIndex)+'].j_total could not be read')
+            self.ids.profiles_1d[0].j_total = np.asarray([np.nan]*nrho)
+
+        # q-profile
+        if len(self.ids.profiles_1d[0].q) < 1:
+            logger.critical('core_profiles.profiles_1d['+str(sliceIndex)+'].q could not be read')
+            self.ids.profiles_1d[0].q = np.asarray([np.nan]*nrho)
+
+        # Magnetic shear profile
+        if len(self.ids.profiles_1d[0].magnetic_shear) < 1:
+            logger.critical('core_profiles.profiles_1d['+str(sliceIndex)+'].magnetic_shear could not be read')
+            self.ids.profiles_1d[0].magnetic_shear = np.asarray([np.nan]*nrho)
+
+        if len(self.ids.profiles_1d[0].q) != nrho:
+            logger.critical('--------------------------------------------------------------')
+            logger.critical('Dimensions of input core profiles are not consistent:')
+            logger.critical('  core_profiles.profiles_1d[0].grid.rho_tor(_norm)')
+            logger.critical('  and core_profiles.profiles_1d[0].q')
+            logger.critical('  have different dimensions:')
+            logger.critical(f'- len(core_profiles.profiles_1d[0].grid.rho_tor(_norm))= {nrho}')
+            logger.critical(f'- len(core_profiles.profiles_1d[0].q = {len(self.ids.profiles_1d[0].q)}')
+            logger.critical('----> Aborted.')
+            logger.critical('--------------------------------------------------------------')
+            return None
+
+        # Create the dictionary defining the list of profiles that can be displayed
+        profiles = {}
+        profiles['rhonorm'] = rhoTorNorm
+        profiles['j_bootstrap'] = self.ids.profiles_1d[0].j_bootstrap
+        profiles['j_non_inductive'] = self.ids.profiles_1d[0].j_non_inductive
+        profiles['j_ohmic'] = self.ids.profiles_1d[0].j_ohmic
+        profiles['j_total'] = self.ids.profiles_1d[0].j_total
+        profiles['q'] = self.ids.profiles_1d[0].q
+        profiles['magnetic_shear'] = self.ids.profiles_1d[0].magnetic_shear
+        return profiles

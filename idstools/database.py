@@ -1,14 +1,15 @@
+import fnmatch
+import logging
 import os
+
 from datetime import datetime
 from glob import glob
 from pathlib import Path
-import fnmatch
-import typing
-import logging
+
 import imas
 import yaml
 
-from idstools.utils.clihelper import getBackendID
+
 
 logger = logging.getLogger(f"module.{__name__}")
 
@@ -538,100 +539,3 @@ class Connection:
         self.user = user
         self.version = version
 
-
-class MachineDescription:
-    mdSummaryPath = r"/work/imas/shared/imasdb/ITER_MD/3/md_summary.yaml"
-
-    def __init__(
-        self, mdSummaryPath: str = "", connection: typing.Optional[Connection] = None
-    ) -> None:
-        self.connection = connection
-        self.mdSummaryYaml = {}
-        if not mdSummaryPath:
-            _mdSummaryPath = MachineDescription.mdSummaryPath
-        else:
-            _mdSummaryPath = mdSummaryPath
-        with open(_mdSummaryPath, "r") as stream:
-            try:
-                self.mdSummaryYaml = yaml.safe_load(stream)
-            except yaml.YAMLError as exc:
-                print(exc)
-
-    def getMDDataByPulseList(self, pulseList):
-        """
-        The `getMachineDatabaseData` method is responsible for retrieving machine database data for the specified pulse list. It iterates over each pulse in the `mdSummaryYaml` dictionary and checks if the pulse is present in the `pulseList`. If the pulse is not in the `pulseList`, it skips to the next pulse.
-        """
-        pulsesData: typing.Dict[str, typing.Dict] = {}
-        for pulse, config in self.mdSummaryYaml.items():
-            self.connection.shot, self.connection.run = pulse.split("/")
-            if pulse not in pulseList:
-                continue
-
-            pulsesData[pulse] = {}
-
-            pulsesData[pulse]["data"] = self._getIdsData(config["ids"])
-            pulsesData[pulse]["config"] = config
-        return pulsesData
-
-    def _getIdsData(self, idsname):
-        """
-        The `getIdsData` method is responsible for retrieving data from the specified IDS name using the provided connection information. It creates an instance of `imas.DBEntry` with the backend ID, database name, shot number, run number, user, and version provided in the `Connection` object. It then opens the connection to the IDS database using the `open()` method. If the connection is successful, it retrieves the data for the specified IDS name using the `get()` method of the `conn` object. If the connection fails, it logs an error message and returns `None` as the data.
-        """
-        conn = imas.DBEntry(
-            getBackendID(self.connection.backend),
-            self.connection.database,
-            int(self.connection.shot),
-            int(self.connection.run),
-            self.connection.user,
-            self.connection.version,
-        )
-        err, n = conn.open()
-        if err != 0:
-            logger.error(
-                "Shot {0}, run {1} for user={2} and database={3} does not exists".format(
-                    self.connection.shot,
-                    self.connection.run,
-                    self.connection.user,
-                    self.connection.database,
-                )
-            )
-            data = None
-        else:
-            data = conn.get(idsname)
-        return data
-
-    def getMDSummary(
-        self,
-        idsNames: typing.Union[typing.List, str] = "",
-        addObsoelete=False,
-        checkValidity=False,
-    ):
-        """
-        The `readMDSummary` method is responsible for reading the machine description summary and retrieving data for the specified IDS names.
-        """
-        # if provided just single string then convert to list with single string
-        if type(idsNames) == str:
-            idsNames = [idsNames]
-        # lower case provided ids names
-        idsNames = list(map(lambda x: x.lower(), idsNames))
-        pulsesData: typing.Dict[str, typing.Dict] = {}
-        for pulse, config in self.mdSummaryYaml.items():
-            if idsNames:
-                if config["ids"] not in idsNames:
-                    continue
-
-            if addObsoelete is False:
-                if config["status"] == "obsolete":
-                    continue
-
-            pulsesData[pulse] = {}
-            pulsesData[pulse]["data"] = None
-            if checkValidity:
-                pulsesData[pulse]["data"] = None
-                if self.connection is not None:
-                    self.connection.shot, self.connection.run = pulse.split("/")
-
-                    pulsesData[pulse]["data"] = self._getIdsData(config["ids"])
-
-            pulsesData[pulse]["config"] = config
-        return pulsesData
