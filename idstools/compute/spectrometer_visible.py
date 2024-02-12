@@ -1,82 +1,115 @@
 import numpy as np
-from typing import Union
+from typing import List, Set, Union
+import logging
+import re
+
+logger = logging.getLogger("module")
+
+
+LABEL_RADIANCE = "Spectral Radiance (ph s^-1 m^-2 sr^-1 nm^-1)"
+LABEL_INTENSITY = "Intensity (counts)"
+CHANNEL_NAME_PATTERN = r"^(\d{2}\.\w{2}) CH#(\d{2}) Spectrum (\d{1})$"
+
 
 class SpectrometerVisibleCompute:
     def __init__(self, ids_object):
         self.ids_object = ids_object
 
-    def get_vessel(
-        self, iunit: int = 0, add_endpoint: bool = False
-    ) -> Union[dict, None]:
-        # Deduce the number of spectra from the channel name (not safe but no other method yet)
-list_of_spectra = []
-for channel in ids.channel:
-    if len(channel.name.split("Spectrum ")) > 1:
-        spectrum_index = channel.name.split("Spectrum ")[1]
-    else:
-        spectrum_index = 1
-    if spectrum_index not in list_of_spectra:
-        list_of_spectra.append(spectrum_index)
-n_spectra = len(list_of_spectra)
+    def getValidSpectrometers(self):
+        """
+        The function `getValidSpectrometers` returns a list of valid spectrometers by extracting the names from the `channel` objects.
 
-for n in range(n_spectra):
-    wavelengths: np.ndarray = None
-    diagnostic: str = None
-    min_wavelength: float = None
-    max_wavelength: float = None
+        Returns:
+            a list of valid spectrometers.
+        """
+        spectrometers = []
+        for channel in self.ids_object.channel:
+            if len(channel.name.split("Spectrum ")) > 1:
+                spectrometers.append(channel.name.split("Spectrum ")[1])
+            else:
+                spectrometers.append(1)
+        return list(set(spectrometers))
 
-    figure_radiance, axes_radiance = plt.subplots(tight_layout=True)
-    figure_intensity, axes_intensity = plt.subplots(tight_layout=True)
+    def getChannels(self, channelNamePattern=CHANNEL_NAME_PATTERN):
+        """
+        The `getChannels` function retrieves information about channels based on a given channel name pattern.
 
-    for channel in ids.channel:
-        match = CHANNEL_NAME_PATTERN.fullmatch(channel.name)
+        Args:
+            channelNamePattern: The `channelNamePattern` parameter is a regular expression pattern used to  match the names of channels. It is used to filter out channels whose names do not match the specified pattern.
 
-        if match is None:
-            logger.error(
-                f"Channel's name {channel.name} does not math pattern "
-                f"{CHANNEL_NAME_PATTERN.pattern}"
-            )
-            raise ValueError()
+        Returns:
+            a dictionary called "channels".
+        """
+        channels = {}
+        for channel in self.ids_object.channel:
+            channelInfo = {}
+            match = re.compile(CHANNEL_NAME_PATTERN).fullmatch(channel.name)
 
-        if diagnostic is None:
+            if match is None:
+                logger.warning(
+                    f"Channel's name {channel.name} does not math pattern "
+                    f"{CHANNEL_NAME_PATTERN.pattern}"
+                )
+                continue
+
             diagnostic = match[1]
 
-        identifier = int(match[2])
-        spectrum_n = int(match[3])
+            identifier = int(match[2])
+            spectrum_n = int(match[3])
+            gs = channel.grating_spectrometer
+            if not gs.wavelengths.size:
+                logger.warning(
+                    f"{channel.name} grating_spectrometer.wavelengths is empty."
+                )
+                continue
 
-        if spectrum_n != n + 1:
-            continue
-
-        gs = channel.grating_spectrometer
-        if not gs.wavelengths.size:
-            logger.warning(f"{channel.name} grating_spectrometer.wavelengths is empty.")
-            continue
-
-        if wavelengths is None:
             wavelengths = gs.wavelengths * 1e9
             delta = (wavelengths[1] - wavelengths[0]) / 2.0
             min_wavelength = wavelengths[0] - delta
             max_wavelength = wavelengths[-1] + delta
 
-        if not gs.radiance_spectral.data.size:
-            logging.warning(
-                f"{channel.name} grating_spectrometer.radiance_spectral.data is empty."
-            )
-            continue
-        radiance_spectral = gs.radiance_spectral.data[:, 0] * 1e-9
+            if not gs.radiance_spectral.data.size:
+                logging.warning(
+                    f"{channel.name} grating_spectrometer.radiance_spectral.data is empty."
+                )
+                radiance_spectral = None
+            else:
+                radiance_spectral = gs.radiance_spectral.data[:, 0] * 1e-9
 
-        if not gs.intensity_spectrum.data.size:
-            logging.warning(
-                f"{channel.name} grating_spectrometer.intensity_spectrum.data is empty."
-            )
-            continue
-        intensity_spectrum = gs.intensity_spectrum.data[:, 0]
+            if not gs.intensity_spectrum.data.size:
+                logging.warning(
+                    f"{channel.name} grating_spectrometer.intensity_spectrum.data is empty."
+                )
+                intensity_spectrum = None
+            else:
+                intensity_spectrum = gs.intensity_spectrum.data[:, 0]
 
-        if not gs.exposure_time:
-            logging.warning(
-                f"{channel.name} grating_spectrometer.exposure_time is empty."
-            )
-            continue
-        exposure_time = gs.exposure_time
+            if not gs.exposure_time:
+                logging.warning(
+                    f"{channel.name} grating_spectrometer.exposure_time is empty."
+                )
+                exposure_time = None
+            else:
+                exposure_time = gs.exposure_time
 
-        radius = channel.line_of_sight.second_point.r
+            radius = channel.line_of_sight.second_point.r
+
+            channelInfo["channel_name"] = channel.name
+            channelInfo["diagnostic"] = diagnostic
+            channelInfo["identifier"] = identifier
+            channelInfo["spectrum_n"] = spectrum_n
+
+            channelInfo["wavelengths"] = wavelengths
+            channelInfo["delta"] = delta
+            channelInfo["min_wavelength"] = min_wavelength
+            channelInfo["max_wavelength"] = max_wavelength
+            channelInfo["radiance_spectral"] = radiance_spectral
+
+            channelInfo["intensity_spectrum"] = intensity_spectrum
+            channelInfo["exposure_time"] = exposure_time
+            channelInfo["radius"] = radius
+            if spectrum_n not in channels.keys():
+                channels[spectrum_n] = {}
+            channels[spectrum_n][identifier] = channelInfo
+
+        return channels
