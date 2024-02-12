@@ -60,7 +60,7 @@ spectrometersCount = svCompute.getValidSpectrometers()
 
 svView = SpectrometerVisibleView(idsSpectrometerVisible)
 
-counter = 0
+
 scenario = f"{args.shot}/{args.run}/{timeValue:.2f}"
 for spectroIndex in spectrometersCount:
     toptitle = f"Spectrum (Radiance) from spectrometer_visible"
@@ -80,6 +80,7 @@ for spectroIndex in spectrometersCount:
     else:
         canvasRadiance.show(block=False)
 
+holdPlotWindow = 0  # Used for blocking matplotlib last window
 for spectroIndex in spectrometersCount:
     toptitle = f"Spectrum (Intensity) from spectrometer_visible "
     canvasIntensity = Canvas(1, 1)
@@ -90,13 +91,13 @@ for spectroIndex in spectrometersCount:
 
     intensityFileName = svView.viewIntensity(ax, spectroIndex, scenario)
 
-    counter = counter + 1
+    holdPlotWindow = holdPlotWindow + 1
     if args.save:
         wm = canvasIntensity.get_current_fig_manager()
         wm.resize(1024, 768)
         canvasIntensity.save(os.path.join("", f"{intensityFileName}_intensity.png"))
     else:
-        if counter == len(spectrometersCount):
+        if holdPlotWindow == len(spectrometersCount):
             canvasIntensity.show(block=True)
         else:
             canvasIntensity.show(block=False)
