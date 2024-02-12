@@ -60,66 +60,43 @@ spectrometersCount = svCompute.getValidSpectrometers()
 
 svView = SpectrometerVisibleView(idsSpectrometerVisible)
 
-title = f"Spectrum (Radiance) from spectrometer_visible {args.shot}/{args.run}/{timeValue:.2f}"
-canvasRadiance = Canvas(1, 3)
-canvasRadiance.fig.suptitle(title, size=12)
+counter = 0
+scenario = f"{args.shot}/{args.run}/{timeValue:.2f}"
+for spectroIndex in spectrometersCount:
+    toptitle = f"Spectrum (Radiance) from spectrometer_visible"
 
-AxesListRadiance = []
-for index, _ in enumerate(spectrometersCount):
-    AxesListRadiance.append(
-        canvasRadiance.add_axes(title="", xlabel="", row=0, col=index, colspan=1)
-    )
+    canvasRadiance = Canvas(1, 1)
+    if not args.save:
+        canvasRadiance.fig.suptitle(toptitle, size=12)
 
+    ax = canvasRadiance.add_axes(title="", xlabel="", row=0, col=0, colspan=1)
 
-radianceFileName = svView.viewRadiance(AxesListRadiance)
+    radianceFileName = svView.viewRadiance(ax, spectroIndex, scenario)
 
-if args.save:
-    canvasRadiance.save(radianceFileName)
-else:
-    wm = canvasRadiance.get_current_fig_manager()
-    wm.resize(1920, 1080)
-    canvasRadiance.show(block=False)
+    if args.save:
+        wm = canvasRadiance.get_current_fig_manager()
+        wm.resize(1024, 768)
+        canvasRadiance.save(os.path.join("", f"{radianceFileName}_radiance.png"))
+    else:
+        canvasRadiance.show(block=False)
 
-title = f"Spectrum (Intensity) from spectrometer_visible {args.shot}/{args.run}/{timeValue:.2f}"
-canvasIntensity = Canvas(1, 3)
-canvasIntensity.fig.suptitle(title, size=12)
+for spectroIndex in spectrometersCount:
+    toptitle = f"Spectrum (Intensity) from spectrometer_visible "
+    canvasIntensity = Canvas(1, 1)
+    if not args.save:
+        canvasIntensity.fig.suptitle(toptitle, size=12)
 
-AxesListIntensity = []
-for index, _ in enumerate(spectrometersCount):
-    AxesListIntensity.append(
-        canvasIntensity.add_axes(title="", xlabel="", row=0, col=index, colspan=1)
-    )
+    ax = canvasIntensity.add_axes(title="", xlabel="", row=0, col=0, colspan=1)
 
-intensityFileName = svView.viewIntensity(AxesListIntensity)
+    intensityFileName = svView.viewIntensity(ax, spectroIndex, scenario)
 
-if args.save:
-    os.path.join("", f"{intensityFileName}_radiance.png")
-    canvasIntensity.save(intensityFileName)
-else:
-    wm = canvasIntensity.get_current_fig_manager()
-    wm.resize(1920, 1080)
-    canvasIntensity.show()
-
-
-# try:
-#     figure_radiance.savefig(os.path.join("", f"{filename}_radiance.png"), dpi=300)
-#     print(
-#         "----> Figure saved to " + os.path.join("", f"{filename}_radiance.png"),
-#         file=sys.stderr,
-#     )
-# except:
-#     print("The figure could not be saved (check local permissions).", file=sys.stderr)
-
-# try:
-#     figure_intensity.savefig(os.path.join("", f"{filename}_intensity.png"), dpi=300)
-#     print(
-#         "----> Figure saved to " + os.path.join("", f"{filename}_intensity.png"),
-#         file=sys.stderr,
-#     )
-# except:
-#     print("The figure could not be saved (check local permissions).", file=sys.stderr)
-# plt.show()
-# if n < n_spectra - 1:
-#     plt.show(block=False)
-# else:
-#     plt.show(block=True)
+    counter = counter + 1
+    if args.save:
+        wm = canvasIntensity.get_current_fig_manager()
+        wm.resize(1024, 768)
+        canvasIntensity.save(os.path.join("", f"{intensityFileName}_intensity.png"))
+    else:
+        if counter == len(spectrometersCount):
+            canvasIntensity.show(block=True)
+        else:
+            canvasIntensity.show(block=False)

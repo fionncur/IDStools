@@ -29,7 +29,7 @@ class SpectrometerVisibleView:
         self.idsObj = idsObj
         self.computeObj = SpectrometerVisibleCompute(idsObj)
 
-    def viewRadiance(self, ax: List[plt.axes]):
+    def viewRadiance(self, ax: plt.axes, spectroIndex, title=""):
         """
         The function `viewRadiance` plots radiance data from multiple spectrometers on separate axes.
 
@@ -41,42 +41,42 @@ class SpectrometerVisibleView:
         """
         filename = ""
         spectros = self.computeObj.getChannels()
-        spectrosCounter = len(spectros) - 1
-        if len(ax) < spectrosCounter:
-            logger.warning(
-                "There are {spectrosCounter} valid spectrometers available, Please provide axes to plot rest of the spectrometers data"
-            )
-        for sIndex, channels in spectros.items():
-            if spectrosCounter < len(ax):
-                singleax = ax[spectrosCounter]
-                spectrosCounter = spectrosCounter - 1
-            for _, channelinfo in channels.items():
-                singleax.plot(
-                    channelinfo["wavelengths"],
-                    channelinfo["radiance_spectral"],
-                    linewidth=1.0,
-                    label=f"CH#{channelinfo['identifier']:0>2g} R {channelinfo['radius']:0>0.2f} m",
-                )
-            singleax.set_ylim(bottom=0.0)
+        channels = spectros[int(spectroIndex)]
 
-            singleax.set_title(
-                "\n".join((channelinfo["diagnostic"], f"Spectrum {sIndex}"))
+        for _, channelinfo in channels.items():
+            ax.plot(
+                channelinfo["wavelengths"],
+                channelinfo["radiance_spectral"],
+                linewidth=1.0,
+                label=f"CH#{channelinfo['identifier']:0>2g} R {channelinfo['radius']:0>0.2f} m",
             )
-            singleax.set_xlabel("Wavelength (nm)")
-            singleax.set_ylabel(LABEL_RADIANCE)
-            singleax.grid(True)
+            filename = "_".join(
+                [
+                    channelinfo["diagnostic"].replace(".", "_"),
+                    f"{channelinfo['min_wavelength']:0.2f}",
+                    f"{channelinfo['max_wavelength']:0.2f}",
+                ]
+            )
+        ax.set_ylim(bottom=0.0)
 
-            singleax.legend(
-                bbox_to_anchor=(1.0, 0.5),
-                loc="center left",
-                borderaxespad=0.0,
-                frameon=False,
-                fontsize="x-small",
-            )
+        ax.set_title(
+            "\n".join([channelinfo["diagnostic"], f"Spectrum {spectroIndex}", title])
+        )
+        ax.set_xlabel("Wavelength (nm)")
+        ax.set_ylabel(LABEL_RADIANCE)
+        ax.grid(True)
+
+        ax.legend(
+            bbox_to_anchor=(1.0, 0.5),
+            loc="center left",
+            borderaxespad=0.0,
+            frameon=False,
+            fontsize="x-small",
+        )
 
         return filename
 
-    def viewIntensity(self, ax: List[plt.axes]):
+    def viewIntensity(self, ax: plt.axes, spectroIndex, title=""):
         """
         The `viewIntensity` function plots intensity of spectrom from multiple spectrometers.
 
@@ -88,44 +88,36 @@ class SpectrometerVisibleView:
         """
         filename = ""
         spectros = self.computeObj.getChannels()
-        spectrosCounter = len(spectros) - 1
-        if len(ax) < spectrosCounter:
-            logger.warning(
-                "There are {spectrosCounter} valid spectrometers available, Please provide axes to plot rest of the spectrometers data"
+        channels = spectros[int(spectroIndex)]
+        for _, channelinfo in channels.items():
+            ax.plot(
+                channelinfo["wavelengths"],
+                channelinfo["intensity_spectrum"] * channelinfo["exposure_time"],
+                linewidth=1.0,
+                label=f"CH#{channelinfo['identifier']:0>2g} R {channelinfo['radius']:0>0.2f} m",
             )
-        for sIndex, channels in spectros.items():
-            if spectrosCounter < len(ax):
-                singleax = ax[spectrosCounter]
-                spectrosCounter = spectrosCounter - 1
-            for _, channelinfo in channels.items():
-                singleax.plot(
-                    channelinfo["wavelengths"],
-                    channelinfo["intensity_spectrum"] * channelinfo["exposure_time"],
-                    linewidth=1.0,
-                    label=f"CH#{channelinfo['identifier']:0>2g} R {channelinfo['radius']:0>0.2f} m",
-                )
-                filename = "_".join(
-                    [
-                        channelinfo["diagnostic"].replace(".", "_"),
-                        f"{channelinfo['min_wavelength']:0.2f}",
-                        f"{channelinfo['max_wavelength']:0.2f}",
-                    ]
-                )
-            singleax.set_ylim(bottom=0.0)
+            filename = "_".join(
+                [
+                    channelinfo["diagnostic"].replace(".", "_"),
+                    f"{channelinfo['min_wavelength']:0.2f}",
+                    f"{channelinfo['max_wavelength']:0.2f}",
+                ]
+            )
+        ax.set_ylim(bottom=0.0)
 
-            singleax.set_title(
-                "\n".join((channelinfo["diagnostic"], f"Spectrum {sIndex}"))
-            )
-            singleax.set_xlabel("Wavelength (nm)")
-            singleax.set_ylabel(LABEL_RADIANCE)
-            singleax.grid(True)
+        ax.set_title(
+            "\n".join([channelinfo["diagnostic"], f"Spectrum {spectroIndex}", title])
+        )
+        ax.set_xlabel("Wavelength (nm)")
+        ax.set_ylabel(LABEL_RADIANCE)
+        ax.grid(True)
 
-            singleax.legend(
-                bbox_to_anchor=(1.0, 0.5),
-                loc="center left",
-                borderaxespad=0.0,
-                frameon=False,
-                fontsize="x-small",
-            )
+        ax.legend(
+            bbox_to_anchor=(1.0, 0.5),
+            loc="center left",
+            borderaxespad=0.0,
+            frameon=False,
+            fontsize="x-small",
+        )
 
         return filename
