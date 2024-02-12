@@ -25,10 +25,12 @@ if os.path.exists(man_path):
     data_files.append(("share/man/man1/", [man_path]))
 
 
-scientific_mplstyle = os.path.join(current_directory, "idstools/view/styles/scientific.mplstyle")
+scientific_mplstyle = os.path.join(
+    current_directory, "idstools/view/styles/scientific.mplstyle"
+)
 if os.path.exists(scientific_mplstyle):
     data_files.append(("share/styles/", [scientific_mplstyle]))
-        
+
 setup(
     name="IDSTools",
     version=versioneer.get_version(),
@@ -65,6 +67,7 @@ setup(
         "scripts/idsprint",
         "scripts/idsresample",
         "scripts/idssize",
+        "scripts/show_db_entry",
         "scripts/viewcoresources",
         "scripts/viewedgeprofiles",
         "scripts/viewequilibrium",
