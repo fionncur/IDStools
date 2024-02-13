@@ -76,8 +76,10 @@ class EquilibriumCompute:
             for ir in range(nr):
                 z2d[ir, :] = z1d
 
-        if np.all(psi2d==0.0):
-            logger.error("All values of psi2d are 0. No contour levels were found within the data range, Can not plot contour")
+        if np.all(psi2d == 0.0):
+            logger.error(
+                "All values of psi2d are 0. No contour levels were found within the data range, Can not plot contour"
+            )
             return None
         if np.size(r2d) != np.size(z2d) or np.size(r2d) != np.size(psi2d):
             logger.error(
@@ -151,7 +153,7 @@ class EquilibriumCompute:
         Notes:
 
             .. math:: bTotal = \sqrt{b\_field\_r^2 + b\_field\_z^2 + b\_field\_tor^2}
-            
+
             ``profiles_2d`` has information about following fields
             ``b_field_r`` (R component of the poloidal magnetic field)
             ``b_field_z`` (Z component of the poloidal magnetic field)
@@ -297,16 +299,39 @@ class EquilibriumCompute:
         topViewDict["yplap"] = (r0 + amin) * np.sin(phit)
         return topViewDict
 
+    def getgm3(self, r, timeSlice: int = 0):
+        rho_tor_sep = self.ids.time_slice[timeSlice].profiles_1d.rho_tor[timeSlice]
+        gm3 = (
+            np.interp(
+                r,
+                self.ids.time_slice[timeSlice].profiles_1d.rho_tor_norm,
+                self.ids.time_slice[timeSlice].profiles_1d.gm3,
+            )
+            / rho_tor_sep**2
+        )
+        return gm3
+
+    def getgm7(self, r, timeSlice: int = 0):
+        rho_tor_sep = self.ids.time_slice[timeSlice].profiles_1d.rho_tor[timeSlice]
+        gm7 = (
+            np.interp(
+                r,
+                self.ids.time_slice[timeSlice].profiles_1d.rho_tor_norm,
+                self.ids.time_slice[timeSlice].profiles_1d.gm7,
+            )
+            / rho_tor_sep
+        )
+        return gm7
+
     # def getEquilibriumQuantities(self):
     #     """
     #     The function "getEquilibriumQuantities" returns a dictionary containing the 2D profiles of r, z,  and psi.
-        
+
     #     Returns:
     #         a dictionary with keys "r2d", "z2d", and "psi2d", and their corresponding values are the  variables r2d, z2d, and psi2d, respectively.
     #     """
     #     r2d   = self.ids.time_slice[0].profiles_2d[0].r
     #     z2d   = self.ids.time_slice[0].profiles_2d[0].z
     #     psi2d = self.ids.time_slice[0].profiles_2d[0].psi
-        
+
     #     return({"r2d":r2d, "z2d", z2d, "psi2d", psi2d})
-        

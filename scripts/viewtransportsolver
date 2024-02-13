@@ -1,0 +1,348 @@
+#!/usr/bin/env python3
+### David.Coster@ipp.mpg.de
+# migrated from check_transport by David.Coster@ipp.mpg.de
+
+# V' [-D Y' <|grad(rho_tor_norm)|^2> + v Y <|grad(rho_tor_norm)|>]
+# gm3(:) 	Flux surface averaged |grad_rho_tor|^2 {dynamic} [-]
+# gm7(:) 	Flux surface averaged |grad_rho_tor| {dynamic} [-]
+# V' [-D Y' gm3 + v Y gm7]
+
+import argparse
+import logging
+import os
+import sys
+from idstools.compute.common import getNearestTime
+from idstools.compute.equilibrium import EquilibriumCompute
+
+import imas
+import matplotlib
+import numpy as np
+import scipy.constants.codata as codata
+from imas import imasdef
+
+from idstools.utils.clihelper import getBackendID, imasParser
+from idstools.utils.idslogger import setupLogger
+
+if "DISPLAY" not in os.environ:
+    matplotlib.use("agg")
+else:
+    matplotlib.use("TKagg")
+
+import matplotlib.pyplot as plt
+
+logger = setupLogger("module", stdout_level=logging.INFO)
+
+slicingMethods = {
+    "CLOSEST": imasdef.CLOSEST_INTERP,
+    "PREVIOUS": imasdef.PREVIOUS_INTERP,
+    "LINEAR": imasdef.LINEAR_INTERP,
+}
+# Management of input arguments
+parser = argparse.ArgumentParser(
+    description="Check match between transport fluxes and a simple calculation",
+    epilog="""
+""",
+    formatter_class=argparse.RawTextHelpFormatter,
+    parents=[imasParser],
+)
+
+parser.add_argument(
+    "-m",
+    "--slicingmethod",
+    type=str,
+    default="CLOSEST",
+    choices=["CLOSEST", "PREVIOUS", "LINEAR"],
+    help="Slicing method \t(default=%(default)s)",
+)
+
+parser.add_argument("-o", "--occurrence", type=int, default=0, help="occurrence")
+parser.add_argument("-s", "--shot", help="Shot number", required=True, type=int)
+parser.add_argument("-r", "--run", help="Run number", required=True, type=int)
+parser.add_argument("-t", "--time", type=float, help="Time", default=-99)
+args = parser.parse_args()
+
+connection = imas.DBEntry(
+    getBackendID(args.backend),
+    args.database,
+    args.shot,
+    args.run,
+    user_name=args.user,
+)
+status, idx = connection.open()
+
+if status != 0:
+    logger.critical("Error opening pulse! Please check existence.")
+    sys.exit(status)
+
+idsSliceCoreTransport = connection.get_slice(
+    "core_transport",
+    args.time,
+    slicingMethods[args.slicingmethod],
+    occurrence=args.occurrence,
+)
+if len(idsSliceCoreTransport.time) == 0:
+    logger.critical("IDS:core_transport Time vector is empty! aborting")
+    sys.exit(status)
+
+idsSliceCoreProfiles = connection.get_slice(
+    "core_profiles",
+    args.time,
+    slicingMethods[args.slicingmethod],
+    occurrence=args.occurrence,
+)
+if len(idsSliceCoreProfiles.time) == 0:
+    logger.critical("IDS:core_profiles Time vector is empty! aborting")
+    sys.exit(status)
+
+idsSliceEquilibrium = connection.get_slice(
+    "equilibrium",
+    args.time,
+    slicingMethods[args.slicingmethod],
+    occurrence=args.occurrence,
+)
+if len(idsSliceEquilibrium.time) == 0:
+    logger.critical("IDS:equilibrium Time vector is empty! aborting")
+    sys.exit(status)
+
+LABEL = "\n%s/%s/%s/%s/%s @ %0.3f" % (
+    args.user,
+    args.database,
+    args.version,
+    args.shot,
+    args.run,
+    idsSliceCoreTransport.time,
+)
+
+try:
+    model_index = [t.identifier.name for t in idsSliceCoreTransport.model].index(
+        "transport_solver"
+    )
+    logger.info(f'Found model "transport_solver" as model {model_index}')
+except:
+    logger.critical('"transport_solver" not found in the transport models')
+    exit()
+
+QE = codata.physical_constants["elementary charge"][0]
+
+Tm = idsSliceCoreTransport.model[model_index]
+
+V = Tm.profiles_1d[-1].grid_d.volume
+r = Tm.profiles_1d[-1].grid_d.rho_tor_norm
+S = Tm.profiles_1d[-1].grid_d.area
+
+Vp_per_S = np.gradient(V, r) / S
+
+eCompute = EquilibriumCompute(idsSliceEquilibrium)
+gm3 = eCompute.getgm3(r, timeSlice=-1)
+gm7 = eCompute.getgm7(r, timeSlice=-1)
+
+# rho_tor_sep = idsSliceEquilibrium.time_slice[-1].profiles_1d.rho_tor[-1]
+
+# gm3 = (
+#     np.interp(
+#         r,
+#         idsSliceEquilibrium.time_slice[-1].profiles_1d.rho_tor_norm,
+#         idsSliceEquilibrium.time_slice[-1].profiles_1d.gm3,
+#     )
+#     / rho_tor_sep**2
+# )
+# gm7 = (
+#     np.interp(
+#         r,
+#         idsSliceEquilibrium.time_slice[-1].profiles_1d.rho_tor_norm,
+#         idsSliceEquilibrium.time_slice[-1].profiles_1d.gm7,
+#     )
+#     / rho_tor_sep
+# )
+
+for T_i, C_i in zip(Tm.profiles_1d[-1].ion, idsSliceCoreProfiles.profiles_1d[-1].ion):
+    plt.figure()
+    if len(C_i.density) < 1:
+        logger.critical(f"core_profiles.profiles_1d[-1].ion.density could not be read")
+        C_i.density = np.asarray([np.nan] * r)
+
+    if len(r) != len(C_i.density):
+        logger.critical(
+            f"core_profiles.profiles_1d[-1].ion.density length is not the same as rho_tor_norm length, correcting the length"
+        )
+        C_i.density = C_i.density[: len(r)]
+    if len(C_i.temperature) < 1:
+        logger.critical(
+            f"core_profiles.profiles_1d[-1].ion.temperature could not be read"
+        )
+        C_i.temperature = np.asarray([np.nan] * r)
+    if len(r) != len(C_i.temperature):
+        logger.critical(
+            f"core_profiles.profiles_1d[-1].ion.temperature length is not the same as rho_tor_norm length, correcting the length"
+        )
+        C_i.temperature = C_i.temperature[: len(r)]
+
+    if len(T_i.particles.d) < 1:
+        logger.critical(
+            f"core_transport.model[{model_index}].ion.particles.d could not be read"
+        )
+        T_i.particles.d = np.asarray([np.nan] * r)
+    if len(T_i.particles.v) < 1:
+        logger.critical(
+            f"core_transport.model[{model_index}].ion.particles.v could not be read"
+        )
+        T_i.particles.v = np.asarray([np.nan] * r)
+    if len(T_i.particles.flux) < 1:
+        logger.critical(
+            f"core_transport.model[{model_index}].ion.particles.flux could not be read"
+        )
+        T_i.particles.flux = np.asarray([np.nan] * r)
+    if len(T_i.energy.d) < 1:
+        logger.critical(
+            f"core_transport.model[{model_index}].ion.energy.d could not be read"
+        )
+        T_i.energy.d = np.asarray([np.nan] * r)
+    if len(T_i.energy.v) < 1:
+        logger.critical(
+            f"core_transport.model[{model_index}].ion.energy.v could not be read"
+        )
+        T_i.energy.v = np.asarray([np.nan] * r)
+    if len(T_i.energy.flux) < 1:
+        logger.critical(
+            f"core_transport.model[{model_index}].ion.energy.flux could not be read"
+        )
+        T_i.energy.flux = np.asarray([np.nan] * r)
+
+    Gamma_i = Vp_per_S * (
+        -T_i.particles.d * np.gradient(C_i.density, r) * gm3
+        + C_i.density * T_i.particles.v * gm7
+    )
+    plt.plot(r, Gamma_i, label="Direct evaluation")
+    plt.plot(r, T_i.particles.flux, label="Transport code")
+    plt.title(
+        "Particle fluxes for %s/%s %s" % (T_i.element[0].z_n, T_i.element[0].a, LABEL)
+    )
+    plt.xlabel("rho_tor_norm")
+    plt.ylabel("Particle flux density")
+    plt.legend(loc=0)
+
+    plt.figure()
+
+    Q_i_conductive = (
+        Vp_per_S
+        * (
+            -T_i.energy.d * np.gradient(C_i.temperature, r) * gm3
+            + C_i.temperature * T_i.energy.v * gm7
+        )
+        * C_i.density
+        * QE
+    )
+    Q_i_convective = Gamma_i * C_i.temperature * QE
+    plt.plot(r, Q_i_conductive, label="Direct evaluation (conductive)")
+    (base_line,) = plt.plot(
+        r, Q_i_convective * 1.5, label="Direct evaluation (convective)"
+    )
+    plt.fill_between(
+        r,
+        Q_i_convective * 0.0,
+        Q_i_convective * 2.5,
+        facecolor=base_line.get_color(),
+        alpha=0.2,
+    )
+    (base_line,) = plt.plot(
+        r, Q_i_conductive + Q_i_convective * 1.5, label="Direct evaluation"
+    )
+    plt.fill_between(
+        r,
+        Q_i_conductive + Q_i_convective * 0.0,
+        Q_i_conductive + Q_i_convective * 2.5,
+        facecolor=base_line.get_color(),
+        alpha=0.2,
+    )
+    plt.plot(r, T_i.energy.flux, label="Transport code")
+    plt.title(
+        "Energy fluxes for %s/%s %s" % (T_i.element[0].z_n, T_i.element[0].a, LABEL)
+    )
+    plt.xlabel("rho_tor_norm")
+    plt.ylabel("Energy flux density")
+    plt.legend(loc=0)
+
+# fmt: off
+T_e = Tm.profiles_1d[-1].electrons
+C_e = idsSliceCoreProfiles.profiles_1d[-1].electrons
+# fmt: on
+
+if len(r) != len(C_e.density):
+    logger.critical(
+        f"core_profiles.profiles_1d[-1].electrons.density could not be read"
+    )
+    C_e.density = C_i.density[: len(r)]
+if len(r) != len(C_e.temperature):
+    logger.critical(
+        f"core_profiles.profiles_1d[-1].electrons.temperature could not be read"
+    )
+    C_e.temperature = C_i.temperature[: len(r)]
+if len(T_e.particles.flux) < 1:
+    logger.critical(
+        f"core_transport.model[{model_index}].profiles_1d[-1].electrons.particles.flux could not be read"
+    )
+    T_e.particles.flux = np.asarray([np.nan] * r)
+if len(T_e.energy.d) < 1:
+    logger.critical(
+        f"core_transport.model[{model_index}].profiles_1d[-1].electrons.energy.d could not be read"
+    )
+    T_e.energy.d = np.asarray([np.nan] * r)
+if len(T_e.energy.v) < 1:
+    logger.critical(
+        f"core_transport.model[{model_index}].profiles_1d[-1].electrons.energy.v could not be read"
+    )
+    T_e.energy.v = np.asarray([np.nan] * r)
+if len(T_e.energy.flux) < 1:
+    logger.critical(
+        f"core_transport.model[{model_index}].profiles_1d[-1].electrons.energy.flux could not be read"
+    )
+    T_e.energy.flux = np.asarray([np.nan] * r)
+plt.figure()
+Gamma_e = np.array([t.particles.flux * t.z_ion for t in Tm.profiles_1d[-1].ion]).sum(
+    axis=0
+)
+plt.plot(r, Gamma_e, label="Ambipolar Transport code fluxes")
+plt.plot(r, T_e.particles.flux, label="Transport code")
+plt.title("Particle fluxes for electrons %s" % (LABEL))
+plt.xlabel("rho_tor_norm")
+plt.ylabel("Particle flux density")
+plt.legend(loc=0)
+
+plt.figure()
+
+Q_e_conductive = (
+    Vp_per_S
+    * (
+        -T_e.energy.d * np.gradient(C_e.temperature, r) * gm3
+        + C_e.temperature * T_e.energy.v * gm7
+    )
+    * C_e.density
+    * QE
+)
+Q_e_convective = Gamma_e * C_e.temperature * QE
+plt.plot(r, Q_e_conductive, label="Direct evaluation (conductive)")
+(base_line,) = plt.plot(r, Q_e_convective * 1.5, label="Direct evaluation (convective)")
+plt.fill_between(
+    r,
+    Q_e_convective * 0.0,
+    Q_e_convective * 2.5,
+    facecolor=base_line.get_color(),
+    alpha=0.2,
+)
+(base_line,) = plt.plot(
+    r, Q_e_conductive + Q_e_convective * 1.5, label="Direct evaluation"
+)
+plt.fill_between(
+    r,
+    Q_e_conductive + Q_e_convective * 0.0,
+    Q_e_conductive + Q_e_convective * 2.5,
+    facecolor=base_line.get_color(),
+    alpha=0.2,
+)
+plt.plot(r, T_e.energy.flux, label="Transport code")
+plt.title("Energy fluxes for electrons %s" % (LABEL))
+plt.xlabel("rho_tor_norm")
+plt.ylabel("Energy flux density")
+plt.legend(loc=0)
+
+plt.show()
