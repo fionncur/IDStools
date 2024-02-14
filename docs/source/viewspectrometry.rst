@@ -37,6 +37,18 @@ Example
 
         $ viewspectrometry --shot 150512 --run 3 --database ITER_MD
 
+
+    .. code-block:: bash
+
+        $ viewspectrometry -u schneim -d 55.EC -s 134000 -r 37
+
+
     .. image:: _static/images/viewspectrometry.png
         :alt: image not found
         :align: center
+
+
+
+
+
+
