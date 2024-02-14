@@ -88,7 +88,7 @@ for spectroIndex in spectrometersList:
 if args.save:
     wm = canvasRadiance.get_current_fig_manager()
     wm.resize(1024, 768)
-    canvasRadiance.save(os.path.join("", f"{radianceFileName}_radiance.png"))
+    canvasRadiance.save(os.path.join("", f"{scenario}_radiance.png"))
 else:
     canvasRadiance.show(block=False)
 
@@ -114,6 +114,6 @@ for spectroIndex in spectrometersList:
 if args.save:
     wm = canvasIntensity.get_current_fig_manager()
     wm.resize(1024, 768)
-    canvasIntensity.save(os.path.join("", f"{intensityFileName}_intensity.png"))
+    canvasIntensity.save(os.path.join("", f"{scenario}_intensity.png"))
 else:
     canvasIntensity.show(block=True)
