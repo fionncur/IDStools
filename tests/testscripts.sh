@@ -159,6 +159,9 @@ md_status -s 116000 -r 3 || exit 1
 echo -------md_summary-------
 md_summary -s 150502/102 || exit 1
 md_summary -s nbi,on-on || exit 1
+
+echo -------viewwavepropndepo-------
+viewwavespropndepo -u schneim -d TORBEAM -s 134173 -r 2326 || exit 1
 # echo -------idsresample-------
 # echo TESTING: idsresample -si 131024 -ri 10 -so 145000 -ro 2
 # idsresample -si 131024 -ri 10 -so 145000 -ro 2 || exit 1

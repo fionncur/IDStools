@@ -55,22 +55,25 @@ class EcStrayCompute:
         """
         if nHarm is None:
             nHarm = [1, 2, 3, 4]
+        BResonance = self.wavesCompute.getBResonance(
+            timeIndex=timeIndexWaves, harmonicFrequencies=nHarm
+        )
         profile2dIndex, bTotal = self.equilibriumCompute.getBTotal(timeIndexEquilibrium)
-        r = (
-            self.equilibriumCompute.ids.time_slice[timeIndexEquilibrium]
-            .profiles_2d[profile2dIndex]
-            .grid.dim1
-        )
-        z = (
-            self.equilibriumCompute.ids.time_slice[timeIndexEquilibrium]
-            .profiles_2d[profile2dIndex]
-            .grid.dim2
-        )
-        self.wavesCompute.index = 0
-        BResonance = self.wavesCompute.getBResonance(timeIndexWaves)
+        if profile2dIndex != -99:
+            r = (
+                self.equilibriumCompute.ids.time_slice[timeIndexEquilibrium]
+                .profiles_2d[profile2dIndex]
+                .grid.dim1
+            )
+            z = (
+                self.equilibriumCompute.ids.time_slice[timeIndexEquilibrium]
+                .profiles_2d[profile2dIndex]
+                .grid.dim2
+            )
 
         [nr, nz] = np.shape(bTotal)
         b_err = 10 / nr
+
         resonanceLayer = {}
         for indexHarm in range(len(nHarm)):
             resonanceLayer[indexHarm] = {"r": [], "z": []}
@@ -82,7 +85,7 @@ class EcStrayCompute:
                     resonanceLayer[indexHarm]["r"].append(r[ir])
                     resonanceLayer[indexHarm]["z"].append(z[iz])
 
-        return resonanceLayer
+        return {"profile2dIndex": profile2dIndex, "resonanceLayer": resonanceLayer}
 
     def getCutoffLayer(
         self,

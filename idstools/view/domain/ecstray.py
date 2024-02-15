@@ -1,4 +1,16 @@
+from idstools.compute.equilibrium import EquilibriumCompute
 from idstools.domain.ecstray import EcStrayCompute
+import logging
+
+# Font/Colour definition
+fontsize = 9
+bndcolor = "chocolate"
+shotcolors = ["b", "r", "c", "y", "m", "b"]
+shotstyle = ["-", "--", "-.", ":", ".", ","]
+colorcounter = 0
+lpad = -1
+
+logger = logging.getLogger("module")
 
 
 class EcStrayView:
@@ -6,6 +18,7 @@ class EcStrayView:
         self, equilibriumIds: object, coreProfilesIds: object, wavesIds: object
     ):
         self.ecstray_object = EcStrayCompute(equilibriumIds, coreProfilesIds, wavesIds)
+        self.equilibriumCompute = EquilibriumCompute(equilibriumIds)
         self.equilibriumIds = equilibriumIds
         self.coreProfilesIds = coreProfilesIds
         self.wavesIds = wavesIds
@@ -69,6 +82,44 @@ class EcStrayView:
                     return ax_polview_plot_res
                 else:
                     ax.set_data(res_layer[i_harm]["r"], res_layer[i_harm]["z"])
+
+    def plotPoloidalView(self, ax, timeSlice=0):
+        n_harm = [1, 2, 3, 4]
+
+        resonanceData = self.ecstray_object.getResonanceLayer(nHarm=n_harm)
+        profile2dIndex = resonanceData["profile2dIndex"]
+        resonanceLayer = resonanceData["resonanceLayer"]
+
+        gridData = self.equilibriumCompute.get2DCartesianGrid(
+            timeSlice=timeSlice, profiles2DIndex=profile2dIndex
+        )
+        r2d = gridData["r2d"]
+        z2d = gridData["z2d"]
+        psi2d = gridData["psi2d"]
+        rho2d = self.equilibriumCompute.getRho2D(
+            timeSlice=timeSlice, profiles2DIndex=profile2dIndex
+        )
+
+        # Poloidal view plot
+        ax.contour(r2d, z2d, psi2d, 50, cmap="summer")
+        if len(rho2d) > 0:
+            ax.contour(r2d, z2d, rho2d, 50, cmap="YlOrBr")
+        # ax_polview.set_xlim(r2d.min(),r2d.max())
+        ax.set_title("Poloidal view (R,Z)", fontsize=fontsize)
+        ax.set_xlabel("R [m]", fontsize=fontsize, labelpad=lpad)
+        ax.set_ylabel("Z [m]", fontsize=fontsize, labelpad=lpad)
+        ax.set_xlim(3.4, r2d.max())
+        ax.set_ylim(z2d.min() * 0.7, z2d.max() * 0.7)
+        ax.set_aspect("equal", adjustable="box")
+        for i_harm in range(len(n_harm)):
+            if len(resonanceLayer[i_harm]["r"]) > 1:
+                logger.info(f"Resonance at n = {i_harm}")
+                ax.plot(
+                    resonanceLayer[i_harm]["r"],
+                    resonanceLayer[i_harm]["z"],
+                    color="r",
+                    linewidth=2,
+                )
 
     def plotCutOffLayer(
         self,

@@ -7,6 +7,9 @@ This module provides compute functions and classes for waves ids data
 
 import functools
 import numpy as np
+import logging
+
+logger = logging.getLogger("module")
 
 
 class WavesCompute:
@@ -138,7 +141,7 @@ class WavesCompute:
         )
 
     @functools.lru_cache(maxsize=128)
-    def getActiveBeams(self, beamTracingTimeIndex: int = 0):
+    def getBeams(self, beamTracingTimeIndex: int = 0):
         """
         This function returns a dictionary of active beams with their respective properties.
 
@@ -173,7 +176,7 @@ class WavesCompute:
                 9: {'active': True, 'total_beams': 5},
                 10: {'active': True, 'total_beams': 5}}
         """
-        activeBeams = {}
+        beams = {}
 
         for beamIndex in range(len(self.ids.coherent_wave)):
             beamDict = {
@@ -183,6 +186,8 @@ class WavesCompute:
                     .beam
                 ),
             }
+            # Check if any beam has power
+            beamDict["active"] = False
             for rayIndex in range(beamDict["total_beams"]):
                 if (
                     self.ids.coherent_wave[beamIndex]
@@ -191,11 +196,10 @@ class WavesCompute:
                     .power_initial
                     > 0
                 ):
-                    # todo: this will loop and overwrite value, is it intended?
                     beamDict["active"] = True
-            activeBeams[beamIndex] = beamDict
+            beams[beamIndex] = beamDict
 
-        return activeBeams
+        return beams
 
     def getBeamTracing(self, beamTracingTimeIndex: int = 0):
         """
@@ -206,23 +210,6 @@ class WavesCompute:
 
         Returns:
             a dictionary named "beam_tracing" which contains various arrays and values related to the beam tracing data. Following are the values returned by the function
-
-            return values
-
-                - nbeam
-                - nbeam_active
-                - nray
-                - is_active
-                - len_ray
-                - x_ray
-                - y_ray
-                - z_ray
-                - r_ray
-                - phi_ray
-                - central_ray_power
-                - central_ray_powerpar
-                - central_ray_powerperp
-                - central_ray_length
 
         Example:
             .. code-block:: python
@@ -236,36 +223,23 @@ class WavesCompute:
                 waveobj = WavesCompute(waves_ids)
                 print(waveobj.getBeamTracing())
 
-            Output
-
-                .. code-block:: python
-
-                    {'central_ray_length': array([[0.        , 0.01
-                    'central_ray_power': array([[     0.        ,
-                    'central_ray_powerpar': array([[0., 0., 0., ..., 0., 0., 0.],
-                    'central_ray_powerperp': array([[0., 0., 0., ..., 0., 0., 0.],
-                    'is_active': [True,
-                    'len_ray': array([[1762, 1762, 1762, 1762, 1762],
-                    'nbeam': 11,
-                    'nbeam_active': 11,
-                    'nray': 5,
-                    'phi_ray': array([[[-1.49735105, -1.49767271, -1.49799498, ...,  0.
-                    'r_ray': array([[[9.98118786, 9.97171675, 9.96224668, ..., 0.
-                    'x_ray': array([[[ 0.73241223,  0.72851836,  0.72462449, ...,  0.
-                    'y_ray': array([[[-9.95427965, -9.94506893, -9.9358582 , ...,  0.
-                    'z_ray': array([[[ 1.25254314,  1.25252628,  1.25250942, ...,  0.
         """
-        # TODO This is long function but due to the data retrival in for loop it makes easy to continue in the same function
         # Count number of active beams and their number of rays
-        activeBeamsDict = self.getActiveBeams(beamTracingTimeIndex)
-        totalWaves = len(activeBeamsDict.keys())
-        activeBeamsArray = [data["active"] for _, data in activeBeamsDict.items()]
-        totalBeamsArray = [data["total_beams"] for _, data in activeBeamsDict.items()]
+        beamsDict = self.getBeams(beamTracingTimeIndex)
+
+        totalWaves = len(beamsDict.keys())
+        beamActivaStatusList = [data["active"] for _, data in beamsDict.items()]
+        totalBeamsInEachWaveList = [
+            data["total_beams"] for _, data in beamsDict.items()
+        ]
+        activeBeamsCount = len(
+            [data["active"] for _, data in beamsDict.items() if data["active"] is True]
+        )
 
         # We assume the same number of rays for each beam, to simplify (and this is usually the case)
-        maxTotalBeams = max(totalBeamsArray)
+        maxTotalBeams = max(totalBeamsInEachWaveList)
 
-        arrayLength = max(
+        beamDataLength = max(
             max(
                 [
                     len(
@@ -279,12 +253,15 @@ class WavesCompute:
                 for beamIndex in range(totalWaves)
             )
         )
-        len_ray = np.array(
-            [[0.0 for _ in range(maxTotalBeams)] for _ in range(totalWaves)]
-        ).astype(int)
+        beamDataLengthForEachWave = np.array(
+            [[0 for _ in range(maxTotalBeams)] for _ in range(totalWaves)]
+        )
+        beamElectronsLengthForEachWave = np.array(
+            [[0 for _ in range(maxTotalBeams)] for _ in range(totalWaves)]
+        )
         x_ray = np.array(
             [
-                [[0.0 for _ in range(arrayLength)] for _ in range(maxTotalBeams)]
+                [[0.0 for _ in range(beamDataLength)] for _ in range(maxTotalBeams)]
                 for _ in range(totalWaves)
             ]
         )
@@ -295,133 +272,80 @@ class WavesCompute:
             np.ndarray.copy(x_ray),
         )
 
-        central_ray_power = np.array(
-            [[0.0 for _ in range(arrayLength)] for _ in range(totalWaves)]
+        (
+            electronspower,
+            powerparallel,
+            powerperpendicular,
+            length,
+        ) = (
+            np.ndarray.copy(x_ray),
+            np.ndarray.copy(x_ray),
+            np.ndarray.copy(x_ray),
+            np.ndarray.copy(x_ray),
         )
-        central_ray_powerpar, central_ray_powerperp, central_ray_length = (
-            np.ndarray.copy(central_ray_power),
-            np.ndarray.copy(central_ray_power),
-            np.ndarray.copy(central_ray_power),
-        )
-        wr = []
         for beamIndex in range(totalWaves):
-            if activeBeamsArray[beamIndex] == 1:
+            # To reduce looping
+            if beamActivaStatusList[beamIndex] is True:
                 for iray in range(maxTotalBeams):
-                    if (
+                    ray = (
                         self.ids.coherent_wave[beamIndex]
                         .beam_tracing[beamTracingTimeIndex]
                         .beam[iray]
-                        .power_initial
-                        != 0
-                    ):
-                        wr = (
-                            self.ids.coherent_wave[beamIndex]
-                            .beam_tracing[beamTracingTimeIndex]
-                            .beam[iray]
-                            .position.r
-                        )
-                        wphi = (
-                            self.ids.coherent_wave[beamIndex]
-                            .beam_tracing[beamTracingTimeIndex]
-                            .beam[iray]
-                            .position.phi
-                        )
-                        wz = (
-                            self.ids.coherent_wave[beamIndex]
-                            .beam_tracing[beamTracingTimeIndex]
-                            .beam[iray]
-                            .position.z
-                        )
-                        len_ray[beamIndex, iray] = len(wr)
+                    )
+                    if ray.power_initial != 0:  # check individual beam for power check
+                        wr = ray.position.r
+                        wphi = ray.position.phi
+                        wz = ray.position.z
+
+                        beamDataLengthForEachWave[beamIndex, iray] = len(wr)
+
                         r_ray[beamIndex, iray, : len(wr)] = np.array(wr)
                         phi_ray[beamIndex, iray, : len(wphi)] = np.array(wphi)
                         z_ray[beamIndex, iray, : len(wz)] = np.array(wz)
+
                         x_ray[beamIndex, iray, :] = r_ray[beamIndex, iray, :] * np.cos(
                             phi_ray[beamIndex, iray, :]
                         )
                         y_ray[beamIndex, iray, :] = r_ray[beamIndex, iray, :] * np.sin(
                             phi_ray[beamIndex, iray, :]
                         )
-                    npath = len(
-                        self.ids.coherent_wave[beamIndex]
-                        .beam_tracing[beamTracingTimeIndex]
-                        .beam[0]
-                        .electrons.power
-                    )
-                if (
-                    len(
-                        self.ids.coherent_wave[beamIndex]
-                        .beam_tracing[beamTracingTimeIndex]
-                        .beam[0]
-                        .electrons.power
-                    )
-                    > 0
-                ):
-                    central_ray_power[beamIndex, 0:npath] = (
-                        self.ids.coherent_wave[beamIndex]
-                        .beam_tracing[beamTracingTimeIndex]
-                        .beam[0]
-                        .electrons.power
-                    )
-                if (
-                    len(
-                        self.ids.coherent_wave[beamIndex]
-                        .beam_tracing[beamTracingTimeIndex]
-                        .beam[0]
-                        .power_flow_norm.parallel
-                    )
-                    > 0
-                ):
-                    central_ray_powerpar[beamIndex, 0:npath] = (
-                        self.ids.coherent_wave[beamIndex]
-                        .beam_tracing[beamTracingTimeIndex]
-                        .beam[0]
-                        .power_flow_norm.parallel
-                    )
-                if (
-                    len(
-                        self.ids.coherent_wave[beamIndex]
-                        .beam_tracing[beamTracingTimeIndex]
-                        .beam[0]
-                        .power_flow_norm.perpendicular
-                    )
-                    > 0
-                ):
-                    central_ray_powerperp[beamIndex, 0:npath] = (
-                        self.ids.coherent_wave[beamIndex]
-                        .beam_tracing[beamTracingTimeIndex]
-                        .beam[0]
-                        .power_flow_norm.perpendicular
-                    )
-                if (
-                    len(
-                        self.ids.coherent_wave[beamIndex]
-                        .beam_tracing[beamTracingTimeIndex]
-                        .beam[0]
-                        .length
-                    )
-                    > 0
-                ):
-                    central_ray_length[beamIndex, 0:npath] = (
-                        self.ids.coherent_wave[beamIndex]
-                        .beam_tracing[beamTracingTimeIndex]
-                        .beam[0]
-                        .length
-                    )
+
+                        npath = len(
+                            self.ids.coherent_wave[beamIndex]
+                            .beam_tracing[beamTracingTimeIndex]
+                            .beam[iray]
+                            .electrons.power
+                        )
+                        beamElectronsLengthForEachWave[beamIndex, iray] = npath
+                        if len(ray.electrons.power) > 0:
+                            electronspower[
+                                beamIndex, iray, :npath
+                            ] = ray.electrons.power
+                        if len(ray.power_flow_norm.parallel) > 0:
+                            powerparallel[
+                                beamIndex, iray, :npath
+                            ] = ray.power_flow_norm.parallel
+                        if len(ray.power_flow_norm.perpendicular) > 0:
+                            powerperpendicular[
+                                beamIndex, iray, :npath
+                            ] = ray.power_flow_norm.perpendicular
+                        if len(ray.length) > 0:
+                            length[beamIndex, iray, :npath] = ray.length
 
         beam_tracing = {"nbeam": totalWaves}
-        beam_tracing["nbeam_active"] = len(activeBeamsArray)
-        beam_tracing["nray"] = maxTotalBeams
-        beam_tracing["is_active"] = activeBeamsArray
-        beam_tracing["len_ray"] = len_ray
+        beam_tracing["maxTotalBeams"] = maxTotalBeams
+        beam_tracing["activeBeamsCount"] = activeBeamsCount
+        beam_tracing["beamActivaStatusList"] = beamActivaStatusList
+        beam_tracing["beamDataLengthForEachWave"] = beamDataLengthForEachWave
+        beam_tracing["beamElectronsLengthForEachWave"] = beamElectronsLengthForEachWave
         beam_tracing["x_ray"] = x_ray
         beam_tracing["y_ray"] = y_ray
         beam_tracing["z_ray"] = z_ray
         beam_tracing["r_ray"] = r_ray
-        beam_tracing["phi_ray"] = phi_ray[:, :, : len(wr)]
-        beam_tracing["central_ray_power"] = central_ray_power
-        beam_tracing["central_ray_powerpar"] = central_ray_powerpar
-        beam_tracing["central_ray_powerperp"] = central_ray_powerperp
-        beam_tracing["central_ray_length"] = central_ray_length
+        beam_tracing["phi_ray"] = phi_ray
+        beam_tracing["electronspower"] = electronspower
+        beam_tracing["powerparallel"] = powerparallel
+        beam_tracing["powerperpendicular"] = powerperpendicular
+        beam_tracing["length"] = length
 
         return beam_tracing
