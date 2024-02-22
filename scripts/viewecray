@@ -201,4 +201,6 @@ if args.save:
     fname = f"EC_rays {global_label}_time_" + "%.1f" % timeValue + ".png"
     canvas.save(fname)
 else:
+    wm = canvas.get_current_fig_manager()
+    wm.resize(1024, 768)
     canvas.show()

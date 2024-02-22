@@ -349,3 +349,292 @@ class WavesCompute:
         beam_tracing["length"] = length
 
         return beam_tracing
+
+    def GetECLaunchersInfo(
+        self,
+        timeIndex: int = 0,
+    ):
+        ecLauncherInfo = {}
+        data = self.getRadialGridInfo(timeIndex)
+        activeLaunchers = {
+            key: value for key, value in data.items() if value["isActive"] is True
+        }
+        _, firstItemValue = next(iter(activeLaunchers.items()))
+        nrho = firstItemValue["nrho"]
+
+        timeArray = self.ids.time
+        ntime = len(timeArray)
+        # LOOP OVER ALL EC LAUNCHERS
+        single_ec_launcher_name = dict()
+        single_injected_power = dict()  # for the chosen time slice
+        single_absorbed_power = dict()  # for the chosen time slice
+        single_eccd = dict()  # for the chosen time slice
+        total_injected_power = 0  # for the chosen time slice
+
+        total_power_density_profile = [0] * nrho  # profile
+        total_current_density_profile = [0] * nrho  # profile
+        single_power_density_profile = dict()  # profile
+        single_current_density_profile = dict()  # profile
+
+        total_power_waveform = [0] * ntime  # waveform
+        total_current_waveform = [0] * ntime  # waveform
+        single_power_waveform = dict()  # waveform
+        single_current_waveform = dict()  # waveform
+
+        for iwave in range(len(self.ids.coherent_wave)):
+            if len(self.ids.coherent_wave[iwave].identifier.antenna_name) > 0:
+                single_ec_launcher_name[iwave] = self.ids.coherent_wave[
+                    iwave
+                ].identifier.antenna_name
+            else:
+                single_ec_launcher_name[iwave] = f"Launcher{iwave+1}"
+            if np.size(self.ids.coherent_wave[iwave].global_quantities) > 0:
+                if self.ids.coherent_wave[iwave].global_quantities[0].power > 0:
+                    single_power_waveform[iwave] = []
+                    single_current_waveform[iwave] = []
+                    for itime in range(len(timeArray)):
+                        single_power_waveform[iwave].append(
+                            self.ids.coherent_wave[iwave]
+                            .global_quantities[itime]
+                            .electrons.power_thermal
+                        )
+                        single_current_waveform[iwave].append(
+                            self.ids.coherent_wave[iwave]
+                            .global_quantities[itime]
+                            .current_tor
+                        )
+                        total_power_waveform[itime] = (
+                            total_power_waveform[itime]
+                            + self.ids.coherent_wave[iwave]
+                            .global_quantities[itime]
+                            .electrons.power_thermal
+                        )
+                        total_current_waveform[itime] = (
+                            total_current_waveform[itime]
+                            + self.ids.coherent_wave[iwave]
+                            .global_quantities[itime]
+                            .current_tor
+                        )
+                    total_power_density_profile = (
+                        total_power_density_profile
+                        + self.ids.coherent_wave[iwave]
+                        .profiles_1d[timeIndex]
+                        .power_density
+                    )
+                    single_power_density_profile[iwave] = (
+                        self.ids.coherent_wave[iwave]
+                        .profiles_1d[timeIndex]
+                        .power_density
+                    )
+                    total_current_density_profile = (
+                        total_current_density_profile
+                        + self.ids.coherent_wave[iwave]
+                        .profiles_1d[timeIndex]
+                        .current_parallel_density
+                    )
+                    single_current_density_profile[iwave] = (
+                        self.ids.coherent_wave[iwave]
+                        .profiles_1d[timeIndex]
+                        .current_parallel_density
+                    )
+                    single_injected_power[iwave] = 0.0
+                    for ibeam in range(
+                        len(self.ids.coherent_wave[iwave].beam_tracing[timeIndex].beam)
+                    ):
+                        if (
+                            self.ids.coherent_wave[iwave]
+                            .beam_tracing[timeIndex]
+                            .beam[ibeam]
+                            .power_initial
+                            > 0
+                        ):
+                            total_injected_power = (
+                                total_injected_power
+                                + self.ids.coherent_wave[iwave]
+                                .beam_tracing[timeIndex]
+                                .beam[ibeam]
+                                .power_initial
+                            )
+                            single_injected_power[iwave] = (
+                                single_injected_power[iwave]
+                                + self.ids.coherent_wave[iwave]
+                                .beam_tracing[timeIndex]
+                                .beam[ibeam]
+                                .power_initial
+                            )
+                    single_absorbed_power[iwave] = (
+                        self.ids.coherent_wave[iwave].global_quantities[timeIndex].power
+                    )
+                    single_eccd[iwave] = (
+                        self.ids.coherent_wave[iwave]
+                        .global_quantities[timeIndex]
+                        .current_tor
+                    )
+
+        ecLauncherInfo["single_ec_launcher_name"] = single_ec_launcher_name
+        ecLauncherInfo[
+            "single_injected_power"
+        ] = single_injected_power  # for the chosen time slice
+        ecLauncherInfo[
+            "single_absorbed_power"
+        ] = single_absorbed_power  # for the chosen time slice
+        ecLauncherInfo["single_eccd"] = single_eccd  # for the chosen time slice
+        ecLauncherInfo[
+            "total_injected_power"
+        ] = total_injected_power  # for the chosen time slice
+
+        ecLauncherInfo[
+            "total_power_density_profile"
+        ] = total_power_density_profile  # profile
+        ecLauncherInfo[
+            "total_current_density_profile"
+        ] = total_current_density_profile  # profile
+        ecLauncherInfo[
+            "single_power_density_profile"
+        ] = single_power_density_profile  # profile
+        ecLauncherInfo[
+            "single_current_density_profile"
+        ] = single_current_density_profile  # profile
+
+        ecLauncherInfo["total_power_waveform"] = total_power_waveform  # waveform
+        ecLauncherInfo["total_current_waveform"] = total_current_waveform  # waveform
+        ecLauncherInfo["single_power_waveform"] = single_power_waveform  # waveform
+        ecLauncherInfo["single_current_waveform"] = single_current_waveform
+        return ecLauncherInfo
+
+    def getRadialGridInfo(self, timeIndex: int = 0, usepsi=False):
+        """
+        The function `getRadialGridInfo` retrieves radial grid information for coherent waves, with an option to use psi as a radial coordinate.
+
+        Args:
+            timeIndex (int): The `timeIndex` parameter
+            usepsi: The `usepsi` parameter tells whether to use the psi radial coordinate for the grid information.
+
+        Returns:
+            The function `getRadialGridInfo` returns a dictionary `data` containing information about the radial grid for each coherent wave in the object. If no active waves are found, it returns `None`.
+        """
+        data = {}
+        activeFound = False
+        for iwave in range(len(self.ids.coherent_wave)):
+            waveData = {}
+            waveData["isActive"] = False
+            waveData["isPsiAvailable"] = False
+            waveData["npsi"] = None
+            waveData["nrho"] = None
+            waveData["psi1d"] = None
+            waveData["psiBased"] = False
+            waveData["rho_tor_norm"] = None
+
+            if np.size(self.ids.coherent_wave[iwave].global_quantities) > 0:
+                if self.ids.coherent_wave[iwave].global_quantities[0].power > 0:
+                    waveData["isActive"] = True
+                    activeFound = True
+                    try:
+                        if (
+                            len(
+                                self.ids.coherent_wave[iwave]
+                                .profiles_1d[timeIndex]
+                                .grid.rho_tor_norm
+                            )
+                            > 0
+                        ):
+                            waveData["nrho"] = len(
+                                self.ids.coherent_wave[iwave]
+                                .profiles_1d[timeIndex]
+                                .grid.rho_tor_norm
+                            )
+                            waveData["rho_tor_norm"] = (
+                                self.ids.coherent_wave[iwave]
+                                .profiles_1d[timeIndex]
+                                .grid.rho_tor_norm
+                            )
+                        elif (
+                            len(
+                                self.ids.coherent_wave[iwave]
+                                .profiles_1d[timeIndex]
+                                .grid.rho_tor
+                            )
+                            > 0
+                        ):
+                            waveData["nrho"] = len(
+                                self.ids.coherent_wave[iwave]
+                                .profiles_1d[timeIndex]
+                                .grid.rho_tor
+                            )
+                            waveData["rho_tor_norm"] = (
+                                self.ids.coherent_wave[iwave]
+                                .profiles_1d[timeIndex]
+                                .grid.rho_tor
+                                / self.ids.coherent_wave[iwave]
+                                .profiles_1d[timeIndex]
+                                .grid.rho_tor[nrho - 1]
+                            )
+                        elif (
+                            len(
+                                self.ids.coherent_wave[iwave]
+                                .profiles_1d[timeIndex]
+                                .grid.psi
+                            )
+                            > 0
+                        ):
+                            waveData["psiBased"] = True
+                            waveData["nrho"] = len(
+                                self.ids.coherent_wave[iwave]
+                                .profiles_1d[timeIndex]
+                                .grid.psi
+                            )
+                            waveData["rho_tor_norm"] = (
+                                -self.ids.coherent_wave[iwave]
+                                .profiles_1d[timeIndex]
+                                .grid.psi
+                            )
+                    except:
+                        logger.error(
+                            "waves.coherent_wave[iwave].profiles_1d[it].grid.rho_tor_norm, rho_tor and psi could not be read"
+                        )
+                        return None
+                    if waveData["nrho"] == 0:
+                        logger.error(
+                            "waves.coherent_wave[iwave].profiles_1d[it].grid.rho_tor_norm, rho_tor and psi are empty"
+                        )
+                        return None
+                    if (
+                        len(
+                            self.ids.coherent_wave[iwave]
+                            .profiles_1d[timeIndex]
+                            .grid.psi
+                        )
+                        > 0
+                    ):
+                        waveData["isPsiAvailable"] = True
+                        waveData["npsi"] = len(
+                            self.ids.coherent_wave[iwave]
+                            .profiles_1d[timeIndex]
+                            .grid.psi
+                        )
+                        waveData["psi1d"] = (
+                            -self.ids.coherent_wave[iwave]
+                            .profiles_1d[timeIndex]
+                            .grid.psi
+                        )
+            else:
+                logger.error(
+                    "waves.coherent_wave[iwave].global_quantities has not been allocated"
+                )
+                return None
+
+            if usepsi is True:
+                if waveData["isPsiAvailable"] is False:
+                    logger.error(
+                        "The psi radial coordinate forced but the 1D psi profile is not filled"
+                    )
+                    return None
+                else:
+                    waveData["nrho"] = waveData["npsi"]
+                    waveData["rho_tor_norm"] = waveData["psi1d"]
+                    waveData["psiBased"] = True
+            data[iwave] = waveData
+
+        if not activeFound:
+            return None
+        return data

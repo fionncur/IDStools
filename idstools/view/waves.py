@@ -1,3 +1,4 @@
+from idstools.compute.common import findMaxima, findMinima, findfwhm
 from idstools.view.common import BasePlot
 from idstools.compute.waves import WavesCompute
 
@@ -42,8 +43,8 @@ class WavesView:
         self, ax, timeIndex, color="b", style="-", label="", fontsize=9, labelpad=-1
     ):
         ax.set_title("Top View (X,Y)", fontsize=fontsize)
-        ax.set_xlabel("X [m]", fontsize=fontsize, labelpad=labelpad)
-        ax.set_ylabel("Y [m]", fontsize=fontsize, labelpad=labelpad)
+        ax.set_xlabel("X [m]")
+        ax.set_ylabel("Y [m]")
 
         beamTracingDict = self.wavesCompute.getBeamTracing(timeIndex)
         beamDataLengthForEachWave = beamTracingDict["beamDataLengthForEachWave"]
@@ -72,8 +73,8 @@ class WavesView:
         self, ax, timeIndex, color="b", style="-", label="", fontsize=9, labelpad=-1
     ):
         ax.set_title("Power along the beams", fontsize=fontsize)
-        ax.set_xlabel("Path length [m]", fontsize=fontsize, labelpad=labelpad)
-        ax.set_ylabel("P$_{electrons}$ [MW]", fontsize=fontsize, labelpad=labelpad)
+        ax.set_xlabel("Path length [m]")
+        ax.set_ylabel("P$_{electrons}$ [MW]")
 
         beamTracingDict = self.wavesCompute.getBeamTracing(timeIndex)
         beamElectronsLengthForEachWave = beamTracingDict[
@@ -104,11 +105,9 @@ class WavesView:
     def plotPowerFlowNormal(
         self, ax, timeIndex, color="b", style="-", label="", fontsize=9, labelpad=-1
     ):
-        ax.set_ylabel(
-            "P$_\parallel$/P$_{max}$ [-]", fontsize=fontsize, labelpad=labelpad
-        )
-        ax.set_xlabel("Path length [m]", fontsize=fontsize, labelpad=labelpad)
-        ax.set_ylabel("P$_\perp$/P$_{max}$ [-]", fontsize=fontsize, labelpad=labelpad)
+        ax.set_ylabel("P$_\parallel$/P$_{max}$ [-]")
+        ax.set_xlabel("Path length [m]")
+        ax.set_ylabel("P$_\perp$/P$_{max}$ [-]")
 
         beamTracingDict = self.wavesCompute.getBeamTracing(timeIndex)
         beamElectronsLengthForEachWave = beamTracingDict[
@@ -139,8 +138,216 @@ class WavesView:
                 )
         ax.legend(loc="upper left", shadow=True, fancybox=True)
 
+    def plotECRHProfiles(
+        self,
+        ax,
+        timeIndex,
+        verbose=False,
+    ):
+        # ECRH PROFILE [MA/M2]
+        ecLauncherInfo = self.wavesCompute.GetECLaunchersInfo(timeIndex)
+        radialGrid = self.wavesCompute.getRadialGridInfo(timeIndex)
+        activeLaunchers = {
+            key: value for key, value in radialGrid.items() if value["isActive"] is True
+        }
+        _, firstRadialGridInfo = next(iter(activeLaunchers.items()))
 
-# -----------------------------------------------------------------------------------------------------------------------
+        codeName = self.ids.code.name.upper()
+        ax.set_title("ECRH Profiles")
+        lenActiveLaunchers = len(activeLaunchers)
+        if lenActiveLaunchers != 0:
+            totalx1 = firstRadialGridInfo["rho_tor_norm"]
+            totaly1 = ecLauncherInfo["total_power_density_profile"] * 1.0e-6
+            totallabel1 = f"Total-{codeName}"
+
+            ax.plot(totalx1, totaly1, label=totallabel1)
+            if verbose:
+                maxima = findMaxima(totaly1)
+                logger.info(f"There are {len(maxima)-1} maxima")
+                fwhm = []
+                # fmt: off
+                for i in range(len(maxima)):
+                    if i == 0:
+                        fwhm.append(findfwhm(totalx1,totaly1,maxima[0],0,(maxima[0] + maxima[1]) // 2,))
+                    elif i == len(maxima) - 1:
+                        fwhm.append(findfwhm(totalx1,totaly1,maxima[i],(maxima[i - 1] + maxima[i]) // 2,len(totaly1),))
+                        logger.info(f"({totalx1[maxima[i]]}, {totaly1[maxima[i]]} --- fwhm: {fwhm[i]})")
+                    else:
+                        fwhm.append(findfwhm(totalx1,totaly1,maxima[i],(maxima[i - 1] + maxima[i]) // 2,(maxima[i] + maxima[i + 1]) // 2,))
+                        logger.info(f"({totalx1[maxima[i]]}, {totaly1[maxima[i]]} --- fwhm: {fwhm[i]})")
+                # fmt: on
+
+            for iWave, _ in activeLaunchers.items():
+                ax.plot(
+                    firstRadialGridInfo["rho_tor_norm"],
+                    ecLauncherInfo["single_power_density_profile"][iWave] * 1.0e-6,
+                    linestyle="--",
+                    label=ecLauncherInfo["single_ec_launcher_name"][iWave],
+                )
+            ax.set_ylabel("Absorbed power $\mathrm{[MW/m^{3}]}$")
+            if firstRadialGridInfo["psiBased"] is False:
+                ax.set_xlabel("Normalized toroidal flux coordinate")
+            else:
+                ax.set_xlabel("-(Poloidal flux coordinate) [Wb]")
+            ax.legend()
+
+    def plotECCDProfiles(
+        self,
+        ax,
+        timeIndex,
+        verbose=False,
+    ):
+        # ECCD PROFILE [MA/M2]
+        ecLauncherInfo = self.wavesCompute.GetECLaunchersInfo(timeIndex)
+
+        radialGrid = self.wavesCompute.getRadialGridInfo(timeIndex)
+        activeLaunchers = {
+            key: value for key, value in radialGrid.items() if value["isActive"] is True
+        }
+        _, firstRadialGridInfo = next(iter(activeLaunchers.items()))
+
+        codeName = self.ids.code.name.upper()
+        ax.set_title("ECCD Profiles")
+
+        lenActiveLaunchers = len(activeLaunchers)
+        if lenActiveLaunchers != 0:
+            totalx2 = firstRadialGridInfo["rho_tor_norm"]
+            totaly2 = ecLauncherInfo["total_current_density_profile"] * 1.0e-6
+            totallabel = f"Total-{codeName}"
+            ax.plot(totalx2, totaly2, label=totallabel)
+            if verbose:
+                minima = findMinima(totaly2)
+                logger.info(f"There are {len(minima)} minima")
+                fwhm = []
+                # fmt: off
+                for i in range(len(minima)):
+                    if (i == 0):
+                        fwhm.append(findfwhm(totalx2,totaly2,minima[0],0,(minima[0]+minima[1])//2))
+                    elif (i == len(minima) - 1):
+                        fwhm.append(findfwhm(totalx2,totaly2,minima[i],(minima[i-1]+minima[i])//2,len(totaly2)))
+                    else:
+                        fwhm.append(findfwhm(totalx2,totaly2,minima[i],(minima[i-1]+minima[i])//2,(minima[i]+minima[i+1])//2))
+                    logger.info(f'({totalx2[minima[i]]}, {totaly2[minima[i]]} --- fwhm: {fwhm[i]})')
+                # fmt: on
+            # logger.debug(fwhm)
+        for iWave, _ in activeLaunchers.items():
+            ax.plot(
+                firstRadialGridInfo["rho_tor_norm"],
+                ecLauncherInfo["single_current_density_profile"][iWave] * 1.0e-6,
+                linestyle="--",
+                label=ecLauncherInfo["single_ec_launcher_name"][iWave],
+            )
+        ax.set_ylabel("$\mathrm{ECCD} [MA/m^{2}]}$")
+        if firstRadialGridInfo["psiBased"] is False:
+            ax.set_xlabel("Normalized toroidal flux coordinate")
+        else:
+            ax.set_xlabel("-(Poloidal flux coordinate) [Wb]")
+        ax.legend()
+
+    def plotECRHWaveform(
+        self,
+        ax,
+        timeIndex,
+    ):
+        timeArray = self.ids.time
+        ntime = len(self.ids.time)
+        ecLauncherInfo = self.wavesCompute.GetECLaunchersInfo(timeIndex)
+
+        radialGrid = self.wavesCompute.getRadialGridInfo(timeIndex)
+        activeLaunchers = {
+            key: value for key, value in radialGrid.items() if value["isActive"] is True
+        }
+
+        codeName = self.ids.code.name.upper()
+
+        ax.set_title("ECRH Waveforms")
+
+        if ntime == 1:
+            logger.error(
+                "Only one time slice --> ECRH and ECCD waveforms not displayed"
+            )
+            return -1
+        else:
+            ax.set_title("ECRH Waveforms")
+            ax.set_ylabel("Power to the electrons $\mathrm{[MW]}$")
+            ax.set_xlabel("Time (s)")
+            # EC POWER WAVEFORM
+            if len(activeLaunchers) > 0:
+                ax.plot(
+                    timeArray,
+                    np.array(ecLauncherInfo["total_power_waveform"]) * 1.0e-6,
+                    label=f"Total-{codeName}",
+                )
+            for iWave, _ in activeLaunchers.items():
+                ax.plot(
+                    timeArray,
+                    np.array(ecLauncherInfo["single_power_waveform"][iWave]) * 1.0e-6,
+                    linestyle="--",
+                    label=ecLauncherInfo["single_ec_launcher_name"][iWave],
+                )
+            ax.legend()
+            return 0
+
+    def plotECCDWaveform(
+        self,
+        ax,
+        timeIndex,
+    ):
+        timeArray = self.ids.time
+        ntime = len(self.ids.time)
+        ecLauncherInfo = self.wavesCompute.GetECLaunchersInfo(timeIndex)
+
+        radialGrid = self.wavesCompute.getRadialGridInfo(timeIndex)
+        activeLaunchers = {
+            key: value for key, value in radialGrid.items() if value["isActive"] is True
+        }
+
+        codeName = self.ids.code.name.upper()
+
+        ax.set_title("ECCD Waveforms")
+
+        if ntime == 1:
+            logger.error("Only one time slice --> ECCD waveforms not displayed")
+            return -1
+        else:
+            ax.set_title("ECCD Waveforms")
+            ax.set_ylabel("ECCD $\mathrm{[kA]}$")
+            ax.set_xlabel("Time (s)")
+            # EC POWER WAVEFORM
+            if len(activeLaunchers) > 0:
+                ax.plot(
+                    timeArray,
+                    np.array(ecLauncherInfo["total_current_waveform"]) * 1.0e-3,
+                    label=f"Total-{codeName}",
+                )
+            for iWave, _ in activeLaunchers.items():
+                ax.plot(
+                    timeArray,
+                    np.array(ecLauncherInfo["single_current_waveform"][iWave]) * 1.0e-6,
+                    linestyle="--",
+                    label=ecLauncherInfo["single_ec_launcher_name"][iWave],
+                )
+            ax.legend()
+            return 0
+
+    def displayECLaunchersInfo(self, timeIndex):
+        ecLauncherInfo = self.wavesCompute.GetECLaunchersInfo(timeIndex)
+
+        launchers = self.wavesCompute.getRadialGridInfo(timeIndex)
+
+        for iWave, waveData in launchers.items():
+            if waveData["isActive"] is True:
+                logger.info(
+                    f"{ecLauncherInfo['single_ec_launcher_name'][iWave]} is active with a power of {ecLauncherInfo['single_injected_power'][iWave]*1.e-6:.2f} MW --> Absorbed power = {ecLauncherInfo['single_absorbed_power'][iWave]*1.e-6:.2f} MW"
+                )
+                logger.info(
+                    f"--> ECCD =  {ecLauncherInfo['single_eccd'][iWave]*1.e-3:.2f} kA"
+                )
+            else:
+                logger.info(
+                    f"{ecLauncherInfo['single_ec_launcher_name'][iWave]} is off"
+                )
+
 
 #       def plotBeamIndex(self, ax):
 #         """
