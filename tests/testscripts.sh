@@ -160,6 +160,9 @@ echo -------md_summary-------
 md_summary -s 150502/102 || exit 1
 md_summary -s nbi,on-on || exit 1
 
+echo -------show_db_entry-------
+show_db_entry -s 134174 -r 117 || exit 1
+
 echo -------viewspectrometry-------
 viewspectrometry -u schneim -d 55.EC -s 134000 -r 37 --database ITER_MD --save || exit 1
 # echo -------idsresample-------
