@@ -161,7 +161,7 @@ md_summary -s 150502/102 || exit 1
 md_summary -s nbi,on-on || exit 1
 
 echo -------viewspectrometry-------
-viewspectrometry --shot 150512 --run 3 --database ITER_MD || exit 1
+viewspectrometry -u schneim -d 55.EC -s 134000 -r 37 --database ITER_MD --save || exit 1
 # echo -------idsresample-------
 # echo TESTING: idsresample -si 131024 -ri 10 -so 145000 -ro 2
 # idsresample -si 131024 -ri 10 -so 145000 -ro 2 || exit 1

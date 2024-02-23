@@ -29,7 +29,7 @@ class SpectrometerVisibleView:
         self.idsObj = idsObj
         self.computeObj = SpectrometerVisibleCompute(idsObj)
 
-    def viewRadiance(self, ax: plt.axes, spectroIndex, title=""):
+    def viewRadiance(self, ax: plt.axes, spectroIndex):
         """
         The function `viewRadiance` plots radiance data from multiple spectrometers on separate axes.
 
@@ -61,9 +61,8 @@ class SpectrometerVisibleView:
             )
         ax.set_ylim(bottom=0.0)
 
-        ax.set_title(
-            "\n".join([channelinfo["diagnostic"], f"Spectrum {spectroIndex}", title])
-        )
+        ax.set_title(f"{channelinfo['diagnostic']}, Spectrum {spectroIndex}")
+
         ax.set_xlabel("Wavelength (nm)")
         ax.set_ylabel(LABEL_RADIANCE)
         ax.grid(True)
@@ -78,7 +77,7 @@ class SpectrometerVisibleView:
 
         return filename
 
-    def viewIntensity(self, ax: plt.axes, spectroIndex, title=""):
+    def viewIntensity(self, ax: plt.axes, spectroIndex):
         """
         The `viewIntensity` function plots intensity of spectrom from multiple spectrometers.
 
@@ -109,12 +108,10 @@ class SpectrometerVisibleView:
             )
         ax.set_ylim(bottom=0.0)
 
-        ax.set_title(
-            "\n".join([channelinfo["diagnostic"], f"Spectrum {spectroIndex}", title])
-        )
+        ax.set_title(f"{channelinfo['diagnostic']}, Spectrum {spectroIndex}")
+
         ax.set_xlabel("Wavelength (nm)")
         ax.set_ylabel(LABEL_RADIANCE)
-        ax.grid(True)
 
         ax.legend(
             bbox_to_anchor=(1.0, 0.5),

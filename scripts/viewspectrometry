@@ -71,10 +71,10 @@ columnCounter = 0
 scenario = f"{args.shot}/{args.run}/{timeValue:.2f}"
 
 for spectroIndex in spectrometersList:
-    toptitle = f"Spectrum (Radiance) from spectrometer_visible"
+    toptitle = f"Spectrum (Radiance) from spectrometer_visible {scenario}"
 
     if not args.save:
-        canvasRadiance.fig.suptitle(toptitle, size=12)
+        canvasRadiance.fig.suptitle(toptitle)
 
     ax = canvasRadiance.add_axes(
         title="", xlabel="", row=rowCounter, col=columnCounter, colspan=1
@@ -83,11 +83,19 @@ for spectroIndex in spectrometersList:
     if columnCounter == 3:
         columnCounter = 0
         rowCounter = rowCounter + 1
-    radianceFileName = svView.viewRadiance(ax, spectroIndex, scenario)
+    radianceFileName = svView.viewRadiance(ax, spectroIndex)
+    if columnCounter != 0:
+        ax.get_legend().remove()
 
+canvasRadiance.fig.subplots_adjust(
+    top=0.88, bottom=0.11, left=0.065, right=0.893, hspace=0.497, wspace=0.243
+)
+wm = canvasRadiance.get_current_fig_manager()
+window = wm.window
+screen_y = window.winfo_screenheight()
+screen_x = window.winfo_screenwidth()
+wm.resize(screen_x, screen_y)
 if args.save:
-    wm = canvasRadiance.get_current_fig_manager()
-    wm.resize(1024, 768)
     canvasRadiance.save(os.path.join("", f"{scenario}_radiance.png"))
 else:
     canvasRadiance.show(block=False)
@@ -97,10 +105,10 @@ canvasIntensity = Canvas(rows, columns)
 rowCounter = 0
 columnCounter = 0
 for spectroIndex in spectrometersList:
-    toptitle = f"Spectrum (Intensity) from spectrometer_visible "
+    toptitle = f"Spectrum (Intensity) from spectrometer_visible {scenario}"
 
     if not args.save:
-        canvasIntensity.fig.suptitle(toptitle, size=12)
+        canvasIntensity.fig.suptitle(toptitle)
 
     ax = canvasIntensity.add_axes(
         title="", xlabel="", row=rowCounter, col=columnCounter, colspan=1
@@ -109,11 +117,24 @@ for spectroIndex in spectrometersList:
     if columnCounter == 3:
         columnCounter = 0
         rowCounter = rowCounter + 1
-    intensityFileName = svView.viewIntensity(ax, spectroIndex, scenario)
+    intensityFileName = svView.viewIntensity(ax, spectroIndex)
+    if columnCounter != 0:
+        ax.get_legend().remove()
 
+canvasIntensity.fig.subplots_adjust(
+    top=0.88, bottom=0.076, left=0.065, right=0.928, hspace=0.497, wspace=0.243
+)
+
+canvasIntensity.fig.subplots_adjust(
+    top=0.88, bottom=0.11, left=0.065, right=0.893, hspace=0.497, wspace=0.243
+)
+wm = canvasIntensity.get_current_fig_manager()
+window = wm.window
+screen_y = window.winfo_screenheight()
+screen_x = window.winfo_screenwidth()
+wm.resize(screen_x, screen_y)
+scenario
 if args.save:
-    wm = canvasIntensity.get_current_fig_manager()
-    wm.resize(1024, 768)
     canvasIntensity.save(os.path.join("", f"{scenario}_intensity.png"))
 else:
     canvasIntensity.show(block=True)
