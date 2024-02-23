@@ -160,6 +160,9 @@ echo -------md_summary-------
 md_summary -s 150502/102 || exit 1
 md_summary -s nbi,on-on || exit 1
 
+echo -------show_db_entry-------
+show_db_entry -s 134174 -r 117 || exit 1
+
 echo -------vieweccomposition and viewecray-------
 viewecray -u schneim -d TORBEAM -s 134173 -r 2326 --save || exit 1
 vieweccomposition -u schneim -d TORBEAM -s 134173 -r 2326 --save || exit 1

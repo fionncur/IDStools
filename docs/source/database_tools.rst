@@ -10,3 +10,4 @@ You can use database tools to search, extract, or convert hdf5 or mdsplus databa
    dbselector
    scenario_status
    scenario_summary
+   show_db_entry

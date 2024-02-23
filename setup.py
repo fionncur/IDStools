@@ -67,6 +67,7 @@ setup(
         "scripts/idsprint",
         "scripts/idsresample",
         "scripts/idssize",
+        "scripts/show_db_entry",
         "scripts/viewcoresources",
         "scripts/viewedgeprofiles",
         "scripts/viewequilibrium",
