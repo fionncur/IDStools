@@ -1,10 +1,10 @@
-viewwavepropndepo
-=================
+viewecray
+=========
 
-*viewwavepropndepo* shows plots for RF Waves and depositions. This script uses output of TORBEAM code.
+*viewecray* shows plots for RF Waves and depositions. This script uses output of TORBEAM code.
 
-Syntax viewwavepropndepo
-~~~~~~~~~~~~~~~~~~~~~~~~
+Syntax viewecray
+~~~~~~~~~~~~~~~~~
 
 .. code-block:: bash
 
@@ -29,14 +29,15 @@ Syntax viewwavepropndepo
     --wall                Wall display flag
     --save                Save figure at default location
 
-Example viewwavepropndepo
-~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Example viewecray
+~~~~~~~~~~~~~~~~~
 
     .. code-block:: bash
 
-        $ viewwavespropndepo -u schneim -d TORBEAM -s 134173 -r 2326 
+        $ viewecray -d TEST -s 134173 -r 2326 
 
-    .. image:: _static/images/viewwavepropndepo.png
+    .. image:: _static/images/viewecray.png
         :alt: image not found
         :align: center
 
