@@ -96,7 +96,17 @@ screen_y = window.winfo_screenheight()
 screen_x = window.winfo_screenwidth()
 wm.resize(screen_x, screen_y)
 if args.save:
-    canvasRadiance.save(os.path.join("", f"{scenario}_radiance.png"))
+    fname = (
+        "radiance"
+        + "_shot_"
+        + str(args.shot)
+        + "_run_"
+        + str(args.run)
+        + "_time_"
+        + "%.1f" % timeValue
+        + ".png"
+    )
+    canvasRadiance.save(fname, width=11.7, height=8.3)
 else:
     canvasRadiance.show(block=False)
 
@@ -133,8 +143,17 @@ window = wm.window
 screen_y = window.winfo_screenheight()
 screen_x = window.winfo_screenwidth()
 wm.resize(screen_x, screen_y)
-scenario
 if args.save:
-    canvasIntensity.save(os.path.join("", f"{scenario}_intensity.png"))
+    fname = (
+        "intensity"
+        + "_shot_"
+        + str(args.shot)
+        + "_run_"
+        + str(args.run)
+        + "_time_"
+        + "%.1f" % timeValue
+        + ".png"
+    )
+    canvasIntensity.save(fname, width=11.7, height=8.3)
 else:
     canvasIntensity.show(block=True)

@@ -434,7 +434,7 @@ class Canvas:
         fname,
         width=None,
         height=None,
-        dpi=100,
+        dpi="figure",
     ):
         fig = plt.gcf()
         if width is not None and height is not None:
@@ -442,9 +442,9 @@ class Canvas:
         try:
             fig.savefig(fname, dpi=dpi)
             print(f"----> Figure saved to {fname}", file=sys.stderr)
-        except Exception:
+        except Exception as e:
             print(
-                "The figure could not be saved (check local permissions).",
+                e,
                 file=sys.stderr,
             )
 
