@@ -168,7 +168,7 @@ viewspectrometry -d TEST -s 134000 -r 37 --save || exit 1
 
 echo -------viewcoretransport-------
 viewcoretransport -s 134000 -r 40 --save || exit 1
-
+viewcoretransport -u costerd -d jet_reference_g2tjohns -s 92436 -r 850 --save || exit 1
 # echo -------idsresample-------
 # echo TESTING: idsresample -si 131024 -ri 10 -so 145000 -ro 2
 # idsresample -si 131024 -ri 10 -so 145000 -ro 2 || exit 1
