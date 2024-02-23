@@ -1,16 +1,16 @@
-viewtransportsolver
+viewcoretransport
 ===================
 
-*viewtransportsolver* Displays the Core plasma transport of particles, energy, momentum and poloidal flux. 
+*viewcoretransport* Displays the Core plasma transport of particles, energy, momentum and poloidal flux. 
 
 
-Syntax viewtransportsolver
+Syntax viewcoretransport
 ~~~~~~~~~~~~~~~~~~
 
     .. code-block:: bash   
 
-        $ viewtransportsolver -h
-        usage: viewtransportsolver [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] [-m {CLOSEST,PREVIOUS,LINEAR}] [-o OCCURRENCE] -s SHOT -r RUN [-t TIME]
+        $ viewcoretransport -h
+        usage: viewcoretransport [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] [-m {CLOSEST,PREVIOUS,LINEAR}] [-o OCCURRENCE] -s SHOT -r RUN [-t TIME]
 
         Check match between transport fluxes and a simple calculation
 
@@ -38,4 +38,8 @@ Example
 
     .. code-block:: bash
 
-        $ viewtransportsolver -s 134000 -r 40
+        $ viewcoretransport -u costerd -d jet_reference_g2tjohns -s 92436 -r 850
+
+    .. image:: _static/images/viewcoretransport.png
+        :alt: image not found
+        :align: center

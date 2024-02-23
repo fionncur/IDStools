@@ -78,7 +78,7 @@ setup(
         "scripts/viewscenario",
         "scripts/viewrotation",
         "scripts/viewsources",
-        "scripts/viewtransportsolver",
+        "scripts/viewcoretransport",
         "scripts/viewwall",
     ],
     setup_requires=["pytest-runner"],

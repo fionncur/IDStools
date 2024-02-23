@@ -13,6 +13,7 @@ import os
 import sys
 from idstools.compute.common import getNearestTime
 from idstools.compute.equilibrium import EquilibriumCompute
+from idstools.view.common import Canvas
 from idstools.view.core_transport import CoreTransportView
 
 import imas
@@ -110,14 +111,8 @@ if len(idsSliceEquilibrium.time) == 0:
     logger.critical("IDS:equilibrium Time vector is empty! aborting")
     sys.exit(status)
 
-LABEL = "\n%s/%s/%s/%s/%s @ %0.3f" % (
-    args.user,
-    args.database,
-    args.version,
-    args.shot,
-    args.run,
-    idsSliceCoreTransport.time,
-)
+timeValue = idsSliceCoreTransport.time[0]
+title = f"Core transport {args.user}/{args.database}/{args.version}/{args.shot}/{args.run} @ {timeValue:0.3f}"
 
 try:
     modelIndex = [t.identifier.name for t in idsSliceCoreTransport.model].index(
@@ -128,11 +123,63 @@ except:
     logger.critical('"transport_solver" not found in the transport models')
     exit()
 
+# define columns and rows for subplots based on ions
+columns = len(idsSliceCoreTransport.model[modelIndex].profiles_1d[-1].ion)
+canvas = Canvas(3, columns)
+canvas.fig.suptitle(title)
+electronsParticleFluxesAxes = canvas.add_axes(
+    title="", xlabel="", row=0, col=0, colspan=1
+)
+electronsEnergyFluxesAxes = canvas.add_axes(
+    title="", xlabel="", row=0, col=1, colspan=1
+)
+
+ionsParticleFluxesAxes = [
+    canvas.add_axes(title="", xlabel="", row=1, col=x, colspan=1)
+    for x in range(columns)
+]
+ionsEnergyFluxesAxes = [
+    canvas.add_axes(title="", xlabel="", row=2, col=x, colspan=1)
+    for x in range(columns)
+]
 
 ctView = CoreTransportView(idsSliceCoreTransport)
+
+ctView.viewIonsParticleFluxes(
+    ionsParticleFluxesAxes,
+    idsSliceCoreTransport,
+    idsSliceCoreProfiles,
+    idsSliceEquilibrium,
+    -1,
+    modelIndex,
+)
+ctView.viewIonsEnergyFluxes(
+    ionsEnergyFluxesAxes,
+    idsSliceCoreTransport,
+    idsSliceCoreProfiles,
+    idsSliceEquilibrium,
+    -1,
+    modelIndex,
+)
+ctView.viewParticleFluxesForElectrons(
+    electronsParticleFluxesAxes,
+    idsSliceCoreTransport,
+    idsSliceCoreProfiles,
+    -1,
+    modelIndex,
+)
+ctView.viewEnergyFluxesForElectrons(
+    electronsEnergyFluxesAxes,
+    idsSliceCoreTransport,
+    idsSliceCoreProfiles,
+    idsSliceEquilibrium,
+    -1,
+    modelIndex,
+)
+
 if args.save:
     fname = (
-        "_shot_"
+        "core_transport_shot_"
         + str(args.shot)
         + "_run_"
         + str(args.run)
@@ -140,78 +187,15 @@ if args.save:
         + "%.1f" % idsSliceCoreTransport.time
         + ".png"
     )
-    ctView.viewIonsParticleFluxes(
-        idsSliceCoreTransport,
-        idsSliceCoreProfiles,
-        idsSliceEquilibrium,
-        -1,
-        modelIndex,
-        scenarioInfo="",
-        save=True,
-        fname=fname,
-    )
-    ctView.viewIonsEnergyFluxes(
-        idsSliceCoreTransport,
-        idsSliceCoreProfiles,
-        idsSliceEquilibrium,
-        -1,
-        modelIndex,
-        scenarioInfo="",
-        save=True,
-        fname=fname,
-    )
-    ctView.viewParticleFluxesForElectrons(
-        idsSliceCoreTransport,
-        idsSliceCoreProfiles,
-        -1,
-        modelIndex,
-        scenarioInfo="",
-        save=True,
-        fname=fname,
-    )
-    ctView.viewEnergyFluxesForElectrons(
-        idsSliceCoreTransport,
-        idsSliceCoreProfiles,
-        idsSliceEquilibrium,
-        -1,
-        modelIndex,
-        scenarioInfo="",
-        save=True,
-        fname=fname,
-    )
+    canvas.save(fname)
 else:
-    ctView.viewIonsParticleFluxes(
-        idsSliceCoreTransport,
-        idsSliceCoreProfiles,
-        idsSliceEquilibrium,
-        -1,
-        modelIndex,
-        scenarioInfo="",
-        blockWindow=False,
+    wm = canvas.get_current_fig_manager()
+    window = wm.window
+    screen_y = window.winfo_screenheight()
+    screen_x = window.winfo_screenwidth()
+    wm.resize(screen_x, screen_y)
+
+    canvas.fig.subplots_adjust(
+        top=0.9, bottom=0.094, left=0.035, right=0.948, hspace=0.417, wspace=0.117
     )
-    ctView.viewIonsEnergyFluxes(
-        idsSliceCoreTransport,
-        idsSliceCoreProfiles,
-        idsSliceEquilibrium,
-        -1,
-        modelIndex,
-        scenarioInfo="",
-        blockWindow=False,
-    )
-    ctView.viewParticleFluxesForElectrons(
-        idsSliceCoreTransport,
-        idsSliceCoreProfiles,
-        -1,
-        modelIndex,
-        scenarioInfo="",
-        blockWindow=False,
-    )
-    ctView.viewEnergyFluxesForElectrons(
-        idsSliceCoreTransport,
-        idsSliceCoreProfiles,
-        idsSliceEquilibrium,
-        -1,
-        modelIndex,
-        scenarioInfo="",
-        blockWindow=True,
-    )
+    canvas.show()

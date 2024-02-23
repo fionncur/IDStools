@@ -160,8 +160,8 @@ echo -------md_summary-------
 md_summary -s 150502/102 || exit 1
 md_summary -s nbi,on-on || exit 1
 
-echo -------viewtransportsolver-------
-viewtransportsolver -s 134000 -r 40 --save || exit 1
+echo -------viewcoretransport-------
+viewcoretransport -s 134000 -r 40 --save || exit 1
 
 # echo -------idsresample-------
 # echo TESTING: idsresample -si 131024 -ri 10 -so 145000 -ro 2

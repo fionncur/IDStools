@@ -60,15 +60,12 @@ class CoreTransportView:
 
     def viewIonsParticleFluxes(
         self,
+        axes,
         idsCoreTransport,
         idsCoreProfiles,
         idsEquilibrium,
         timeIndex,
         modelIndex,
-        scenarioInfo="",
-        blockWindow=False,
-        save=False,
-        fname="",
     ):
         Tm = idsCoreTransport.model[modelIndex]
         V = Tm.profiles_1d[timeIndex].grid_d.volume
@@ -80,7 +77,7 @@ class CoreTransportView:
         gm3 = eCompute.getgm3(r, timeSlice=timeIndex)
         gm7 = eCompute.getgm7(r, timeSlice=timeIndex)
 
-        FileCounter = 0
+        counter = 0
         for T_i, C_i in zip(
             Tm.profiles_1d[-1].ion,
             idsCoreProfiles.profiles_1d[timeIndex].ion,
@@ -91,34 +88,23 @@ class CoreTransportView:
                 -T_i.particles.d * np.gradient(C_i.density, r) * gm3
                 + C_i.density * T_i.particles.v * gm7
             )
-            canvas = Canvas(1, 1)
-            ax = canvas.add_axes(title="", xlabel="", row=0, col=0, colspan=1)
+            ax = axes[counter]
+            counter = counter + 1
             ax.plot(r, Gamma_i, label="Direct evaluation")
             ax.plot(r, T_i.particles.flux, label="Transport code")
-            ax.set_title(
-                f"Particle fluxes for {T_i.element[0].z_n}/{T_i.element[0].a} {scenarioInfo}"
-            )
+            ax.set_title(f"Particle fluxes for {T_i.element[0].z_n}/{T_i.element[0].a}")
             ax.set_xlabel("rho_tor_norm")
             ax.set_ylabel("Particle flux density")
-            ax.legend(loc=0)
-            if save:
-                filename = f"TS_Ion_Particle_Fluxes_{FileCounter}" + fname
-                canvas.save(filename)
-                FileCounter = FileCounter + 1
-            else:
-                canvas.show(block=blockWindow)
+            ax.legend()
 
     def viewIonsEnergyFluxes(
         self,
+        axes,
         idsCoreTransport,
         idsCoreProfiles,
         idsEquilibrium,
         timeIndex,
         modelIndex,
-        scenarioInfo="",
-        blockWindow=False,
-        save=False,
-        fname="",
     ):
         Tm = idsCoreTransport.model[modelIndex]
         V = Tm.profiles_1d[timeIndex].grid_d.volume
@@ -130,7 +116,7 @@ class CoreTransportView:
         gm3 = eCompute.getgm3(r, timeSlice=timeIndex)
         gm7 = eCompute.getgm7(r, timeSlice=timeIndex)
 
-        FileCounter = 0
+        counter = 0
         for T_i, C_i in zip(
             Tm.profiles_1d[-1].ion,
             idsCoreProfiles.profiles_1d[timeIndex].ion,
@@ -141,9 +127,8 @@ class CoreTransportView:
                 + C_i.density * T_i.particles.v * gm7
             )
 
-            canvas = Canvas(1, 1)
-            ax = canvas.add_axes(title="", xlabel="", row=0, col=0, colspan=1)
-
+            ax = axes[counter]
+            counter = counter + 1
             Q_i_conductive = (
                 Vp_per_S
                 * (
@@ -176,31 +161,19 @@ class CoreTransportView:
                 alpha=0.2,
             )
             ax.plot(r, T_i.energy.flux, label="Transport code")
-            ax.set_title(
-                "Energy fluxes for %s/%s %s"
-                % (T_i.element[0].z_n, T_i.element[0].a, scenarioInfo)
-            )
+            ax.set_title(f"Energy fluxes for {T_i.element[0].z_n}/{T_i.element[0].a}")
             ax.set_xlabel("rho_tor_norm")
             ax.set_ylabel("Energy flux density")
-            ax.legend(loc=0)
-            if save:
-                filename = f"TS_Ion_Energy_Fluxes_{FileCounter}" + fname
-                canvas.save(filename)
-                FileCounter = FileCounter + 1
-            else:
-                canvas.show(block=blockWindow)
+            ax.legend()
 
     def viewEnergyFluxesForElectrons(
         self,
+        ax,
         idsCoreTransport,
         idsCoreProfiles,
         idsEquilibrium,
         timeIndex,
         modelIndex,
-        scenarioInfo="",
-        blockWindow=False,
-        save=False,
-        fname="",
     ):
         Tm = idsCoreTransport.model[modelIndex]
         V = Tm.profiles_1d[timeIndex].grid_d.volume
@@ -229,8 +202,6 @@ class CoreTransportView:
         ).sum(axis=0)
         Q_e_convective = Gamma_e * C_e.temperature * QE
 
-        canvas = Canvas(1, 1)
-        ax = canvas.add_axes(title="", xlabel="", row=0, col=0, colspan=1)
         ax.plot(r, Q_e_conductive, label="Direct evaluation (conductive)")
         (base_line,) = ax.plot(
             r, Q_e_convective * 1.5, label="Direct evaluation (convective)"
@@ -253,26 +224,18 @@ class CoreTransportView:
             alpha=0.2,
         )
         ax.plot(r, T_e.energy.flux, label="Transport code")
-        ax.set_title("Energy fluxes for electrons %s" % (scenarioInfo))
+        ax.set_title("Energy fluxes for electrons")
         ax.set_xlabel("rho_tor_norm")
         ax.set_ylabel("Energy flux density")
-        ax.legend(loc=0)
-        if save:
-            fname = "TS_Electrons_Energy_Fluxes" + fname
-            canvas.save(fname)
-        else:
-            canvas.show(block=blockWindow)
+        ax.legend()
 
     def viewParticleFluxesForElectrons(
         self,
+        ax,
         idsCoreTransport,
         idsCoreProfiles,
         timeIndex,
         modelIndex,
-        scenarioInfo="",
-        blockWindow=False,
-        save=False,
-        fname="",
     ):
         Tm = idsCoreTransport.model[modelIndex]
         r = Tm.profiles_1d[timeIndex].grid_d.rho_tor_norm
@@ -284,20 +247,12 @@ class CoreTransportView:
             [t.particles.flux * t.z_ion for t in Tm.profiles_1d[-1].ion]
         ).sum(axis=0)
 
-        canvas = Canvas(1, 1)
-        ax = canvas.add_axes(title="", xlabel="", row=0, col=0, colspan=1)
-
         ax.plot(r, Gamma_e, label="Ambipolar Transport code fluxes")
         ax.plot(r, T_e.particles.flux, label="Transport code")
-        ax.set_title("Particle fluxes for electrons %s" % (scenarioInfo))
+        ax.set_title("Particle fluxes for electrons")
         ax.set_xlabel("rho_tor_norm")
         ax.set_ylabel("Particle flux density")
-        ax.legend(loc=0)
-        if save:
-            fname = "TS_Electrons_Particle_Fluxes" + fname
-            canvas.save(fname)
-        else:
-            canvas.show(block=blockWindow)
+        ax.legend()
 
     def _validateElectrons(self, T_e, C_e, r, modelIndex):
         if len(r) != len(C_e.density):
