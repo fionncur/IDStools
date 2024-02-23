@@ -13,6 +13,10 @@ fi
 
 try mkdir ${PREFIX_DIR}
 
+try mkdir dependencies
+python3 -m pip install --target=dependencies -r requirements.txt
+export PYTHONPATH=$(get_abs_filename "./dependencies"):${PYTHONPATH}
+
 export PYVERSION=$(python3 -c 'import sys; print("%d.%d"% sys.version_info[0:2])')
 echo "PYVERSION :" $PYVERSION
 export PYTHONPATH=$(get_abs_filename "./${PREFIX_DIR}")/lib/python${PYVERSION}/site-packages:${PYTHONPATH}

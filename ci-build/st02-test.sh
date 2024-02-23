@@ -8,6 +8,10 @@
 # Unzip artifact
 tar -xvzf ${PREFIX_DIR}.tar.gz ./${PREFIX_DIR}
 
+try mkdir dependencies
+python3 -m pip install --target=dependencies -r requirements.txt
+export PYTHONPATH=$(get_abs_filename "./dependencies"):${PYTHONPATH}
+
 # run tests
 echo "Check environement for AL4"
 export PYVERSION=$(python3 -c 'import sys; print("%d.%d"% sys.version_info[0:2])')

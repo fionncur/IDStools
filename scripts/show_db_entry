@@ -1,0 +1,51 @@
+#!/usr/bin/env python3
+
+import argparse
+import logging
+from rich.console import Console
+from rich.syntax import Syntax
+
+logger = logging.getLogger("module")
+
+# Management of input arguments
+parser = argparse.ArgumentParser(
+    description="---- Show full description file for a given simulation stored in ITER DB folder"
+)
+parser.add_argument(
+    "-f", "--folder", help="folder where to search for scenarios", required=False
+)
+parser.add_argument("-s", "--shot", help="shot number", required=True, type=int)
+parser.add_argument("-r", "--run", help="run number", required=True, type=int)
+args = vars(parser.parse_args())
+shot = args["shot"]
+run = args["run"]
+
+# ------------------------------------------------------------------------------------------------------------
+
+# Set up the name of the yaml file
+add0 = ""
+add0_length = 4 - len(str(run))
+for i in range(add0_length):
+    add0 = add0 + "0"
+
+filename = "ids_" + str(shot) + add0 + str(run) + ".yaml"
+
+
+def printYamlContents(filename):
+    try:
+        with open(filename, "r") as file:
+            file_contents = file.read()
+            console = Console()
+            syntax = Syntax(file_contents, "yaml")
+            console.print(syntax)
+    except FileNotFoundError:
+        logger.error(f"File '{filename}' not found")
+
+
+# Folder
+if args["folder"] != None:
+    folder = args["folder"]
+    printYamlContents(folder + "/" + filename)
+else:
+    folder = "/work/imas/shared/imasdb/ITER"
+    printYamlContents(folder + "/3/0/" + filename)
