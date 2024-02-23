@@ -81,6 +81,7 @@ setup(
         "scripts/viewsources",
         "scripts/viewecray",
         "scripts/vieweccomposition",
+        "scripts/viewspectrometry",
         "scripts/viewwall",
     ],
     setup_requires=["pytest-runner"],
