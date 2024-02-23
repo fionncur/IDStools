@@ -84,6 +84,7 @@ class WavesView:
         lengthData = beamTracingDict["length"]
         electronspowerData = beamTracingDict["electronspower"]
         displayLabelOnce = True
+        label = "Electrons Power [W]"
         for i in range(len(lengthData)):
             for j in range(len(lengthData[i])):
                 dlength = beamElectronsLengthForEachWave[i][j]
@@ -100,14 +101,13 @@ class WavesView:
                 if displayLabelOnce is True:
                     displayLabelOnce = False
                     label = ""
-        ax.legend(loc="upper left", shadow=True, fancybox=True)
+        ax.legend()
 
     def plotPowerFlowNormal(
         self, ax, timeIndex, color="b", style="-", label="", fontsize=9, labelpad=-1
     ):
-        ax.set_ylabel("P$_\parallel$/P$_{max}$ [-]")
+        ax.set_title("Power flow to the magnetic field", fontsize=fontsize)
         ax.set_xlabel("Path length [m]")
-        ax.set_ylabel("P$_\perp$/P$_{max}$ [-]")
 
         beamTracingDict = self.wavesCompute.getBeamTracing(timeIndex)
         beamElectronsLengthForEachWave = beamTracingDict[
@@ -117,26 +117,36 @@ class WavesView:
         lengthData = beamTracingDict["length"]
         powerparallelData = beamTracingDict["powerparallel"]
         powerperpendicularData = beamTracingDict["powerperpendicular"]
+        perplabel = "P$_\perp$/P$_{max}$ [-]"
+        parlabel = "P$_\parallel$/P$_{max}$ [-]"
+        displayLabelOnce = True
         for i in range(len(lengthData)):
             for j in range(len(lengthData[i])):
                 dlength = beamElectronsLengthForEachWave[i][j]
                 length = lengthData[i][j]
                 powerparallel = powerparallelData[i][j]
                 powerperpendicular = powerperpendicularData[i][j]
-
+                print(powerparallel)
+                print(powerperpendicular)
                 ax.plot(
                     length[:dlength],
                     powerparallel[:dlength],
-                    color=color,
+                    color="b",
                     linestyle=style,
+                    label=parlabel,
                 )
                 ax.plot(
                     length[:dlength],
                     powerperpendicular[:dlength],
-                    color=color,
+                    color="r",
                     linestyle=style,
+                    label=perplabel,
                 )
-        ax.legend(loc="upper left", shadow=True, fancybox=True)
+                if displayLabelOnce is True:
+                    displayLabelOnce = False
+                    perplabel = ""
+                    parlabel = ""
+        ax.legend()
 
     def plotECRHProfiles(
         self,

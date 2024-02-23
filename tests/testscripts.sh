@@ -164,8 +164,8 @@ echo -------show_db_entry-------
 show_db_entry -s 134174 -r 117 || exit 1
 
 echo -------vieweccomposition and viewecray-------
-viewecray -u schneim -d TORBEAM -s 134173 -r 2326 --save || exit 1
-vieweccomposition -u schneim -d TORBEAM -s 134173 -r 2326 --save || exit 1
+viewecray -d TEST -s 134173 -r 2326 --save || exit 1
+vieweccomposition -d TEST -s 134173 -r 2326 --save || exit 1
 # echo -------idsresample-------
 # echo TESTING: idsresample -si 131024 -ri 10 -so 145000 -ro 2
 # idsresample -si 131024 -ri 10 -so 145000 -ro 2 || exit 1
