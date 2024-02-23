@@ -1,0 +1,159 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+# migrated from svplot
+
+import argparse
+import logging
+import os
+import sys
+
+import imas
+
+from idstools.compute.common import getNearestTime
+from idstools.compute.spectrometer_visible import SpectrometerVisibleCompute
+from idstools.utils.clihelper import getBackendID, imasParser
+from idstools.utils.idslogger import setupLogger
+from idstools.view.common import Canvas
+from idstools.view.spectrometer_visible import SpectrometerVisibleView
+
+logger = setupLogger("module", stdout_level=logging.INFO)
+
+parser = argparse.ArgumentParser(
+    description="---- Display spectrum from spectrometer_visible", parents=[imasParser]
+)
+parser.add_argument("-s", "--shot", help="Shot number", required=True, type=int)
+parser.add_argument("-r", "--run", help="Run number", required=True, type=int)
+parser.add_argument(
+    "-t", "--time", help="Time", required=False, type=float, default=-99.0
+)
+parser.add_argument(
+    "--save",
+    help="Save figure at default location",
+    action="store_true",
+)
+args = parser.parse_args()
+
+connection = imas.DBEntry(
+    getBackendID(args.backend),
+    args.database,
+    args.shot,
+    args.run,
+    user_name=args.user,
+    data_version=args.version,
+)
+status, _ = connection.open()
+if status != 0:
+    logger.critical(
+        f"Shot {args.shot}, run {args.run} for user {args.user} and database {args.database} is not reachable ----> abort."
+    )
+    sys.exit(status)
+
+idsSpectrometerVisible = connection.get("spectrometer_visible")
+connection.close()
+
+timeArray = idsSpectrometerVisible.time
+timeIndex, timeValue = getNearestTime(timeArray, args.time)
+
+svCompute = SpectrometerVisibleCompute(idsSpectrometerVisible)
+spectrometersList = svCompute.getValidSpectrometers()
+totalSpectrometers = len(spectrometersList)
+
+svView = SpectrometerVisibleView(idsSpectrometerVisible)
+columns = 3
+if totalSpectrometers / 3 == totalSpectrometers // 3:
+    rows = int(totalSpectrometers / 3)
+else:
+    rows = int(totalSpectrometers / 3) + 1
+canvasRadiance = Canvas(rows, columns)
+rowCounter = 0
+columnCounter = 0
+scenario = f"{args.shot}/{args.run}/{timeValue:.2f}"
+
+for spectroIndex in spectrometersList:
+    toptitle = f"Spectrum (Radiance) from spectrometer_visible {scenario}"
+
+    if not args.save:
+        canvasRadiance.fig.suptitle(toptitle)
+
+    ax = canvasRadiance.add_axes(
+        title="", xlabel="", row=rowCounter, col=columnCounter, colspan=1
+    )
+    columnCounter = columnCounter + 1
+    if columnCounter == 3:
+        columnCounter = 0
+        rowCounter = rowCounter + 1
+    radianceFileName = svView.viewRadiance(ax, spectroIndex)
+    if columnCounter != 0:
+        ax.get_legend().remove()
+
+canvasRadiance.fig.subplots_adjust(
+    top=0.88, bottom=0.11, left=0.065, right=0.893, hspace=0.497, wspace=0.243
+)
+wm = canvasRadiance.get_current_fig_manager()
+window = wm.window
+screen_y = window.winfo_screenheight()
+screen_x = window.winfo_screenwidth()
+wm.resize(screen_x, screen_y)
+if args.save:
+    fname = (
+        "radiance"
+        + "_shot_"
+        + str(args.shot)
+        + "_run_"
+        + str(args.run)
+        + "_time_"
+        + "%.1f" % timeValue
+        + ".png"
+    )
+    canvasRadiance.save(fname, width=11.7, height=8.3)
+else:
+    canvasRadiance.show(block=False)
+
+canvasIntensity = Canvas(rows, columns)
+
+rowCounter = 0
+columnCounter = 0
+for spectroIndex in spectrometersList:
+    toptitle = f"Spectrum (Intensity) from spectrometer_visible {scenario}"
+
+    if not args.save:
+        canvasIntensity.fig.suptitle(toptitle)
+
+    ax = canvasIntensity.add_axes(
+        title="", xlabel="", row=rowCounter, col=columnCounter, colspan=1
+    )
+    columnCounter = columnCounter + 1
+    if columnCounter == 3:
+        columnCounter = 0
+        rowCounter = rowCounter + 1
+    intensityFileName = svView.viewIntensity(ax, spectroIndex)
+    if columnCounter != 0:
+        ax.get_legend().remove()
+
+canvasIntensity.fig.subplots_adjust(
+    top=0.88, bottom=0.076, left=0.065, right=0.928, hspace=0.497, wspace=0.243
+)
+
+canvasIntensity.fig.subplots_adjust(
+    top=0.88, bottom=0.11, left=0.065, right=0.893, hspace=0.497, wspace=0.243
+)
+wm = canvasIntensity.get_current_fig_manager()
+window = wm.window
+screen_y = window.winfo_screenheight()
+screen_x = window.winfo_screenwidth()
+wm.resize(screen_x, screen_y)
+if args.save:
+    fname = (
+        "intensity"
+        + "_shot_"
+        + str(args.shot)
+        + "_run_"
+        + str(args.run)
+        + "_time_"
+        + "%.1f" % timeValue
+        + ".png"
+    )
+    canvasIntensity.save(fname, width=11.7, height=8.3)
+else:
+    canvasIntensity.show(block=True)

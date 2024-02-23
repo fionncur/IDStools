@@ -79,6 +79,7 @@ setup(
         "scripts/viewscenario",
         "scripts/viewrotation",
         "scripts/viewsources",
+        "scripts/viewspectrometry",
         "scripts/viewcoretransport",
         "scripts/viewwall",
     ],
