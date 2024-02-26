@@ -89,11 +89,7 @@ for spectroIndex in spectrometersList:
 canvasRadiance.fig.subplots_adjust(
     top=0.88, bottom=0.11, left=0.065, right=0.893, hspace=0.497, wspace=0.243
 )
-wm = canvasRadiance.get_current_fig_manager()
-window = wm.window
-screen_y = window.winfo_screenheight()
-screen_x = window.winfo_screenwidth()
-wm.resize(screen_x, screen_y)
+
 if args.save:
     fname = (
         "radiance"
@@ -107,6 +103,11 @@ if args.save:
     )
     canvasRadiance.save(fname, width=11.7, height=8.3)
 else:
+    wm = canvasRadiance.get_current_fig_manager()
+    window = wm.window
+    screen_y = window.winfo_screenheight()
+    screen_x = window.winfo_screenwidth()
+    wm.resize(screen_x, screen_y)
     canvasRadiance.show(block=False)
 
 canvasIntensity = Canvas(rows, columns)
