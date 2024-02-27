@@ -140,7 +140,7 @@ class EquilibriumView(BasePlot):
 
         return cntr
 
-    def plotTopviewEquilibrium(self, ax, timeIndex, update=True):
+    def plotTopviewEquilibrium(self, ax, timeIndex, label="Plasma Boundaries"):
         """
         This function plots the top view equilibrium of a plasma and updates the plot if specified.
 
@@ -156,35 +156,23 @@ class EquilibriumView(BasePlot):
         """
         # TODO: Refactor update mechanism of the plot
         data = self.computeObj.getTopView(timeIndex)
-        ax_topview_plot_eq1 = 0
-        ax_topview_plot_eq2 = 0
-        if update == True:
-            bndcolor = "chocolate"
-            colorcounter = 0
+        bndcolor = "chocolate"
+        colorcounter = 0
 
-            if colorcounter == 1:
-                (ax_topview_plot_eq1,) = ax.plot(
-                    data["xpla"],
-                    data["ypla"],
-                    color=bndcolor,
-                    label="Plasma Boundaries",
-                )
-            else:
-                (ax_topview_plot_eq1,) = ax.plot(
-                    data["xpla"], data["ypla"], color=bndcolor
-                )
-            (ax_topview_plot_eq2,) = ax.plot(
-                data["xplap"], data["yplap"], color=bndcolor
+        if colorcounter == 1:
+            ax.plot(
+                data["xpla"],
+                data["ypla"],
+                color=bndcolor,
+                label=label,
             )
-            ax.set_xlim(
-                (-data["r0"] - data["amin"]) * 1.1, (data["r0"] + data["amin"]) * 1.1
-            )
-            ax.set_aspect("equal")
         else:
-            ax[0].set_data(data["xpla"], data["ypla"])
-            ax[1].set_data(data["xplap"], data["yplap"])
-        if update == True:
-            return [ax_topview_plot_eq1, ax_topview_plot_eq2]
+            ax.plot(data["xpla"], data["ypla"], color=bndcolor)
+        ax.plot(data["xplap"], data["yplap"], color=bndcolor)
+        ax.set_xlim(
+            (-data["r0"] - data["amin"]) * 1.1, (data["r0"] + data["amin"]) * 1.1
+        )
+        ax.set_aspect("equal")
 
     def viewEquilibrium(self, ax):
         quantities = self.computeObj.get2DCartesianGrid()

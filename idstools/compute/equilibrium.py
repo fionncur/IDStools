@@ -5,6 +5,7 @@ This module provides compute functions and classes for equilibrium ids data
 
 """
 import logging
+from typing import Union
 import numpy as np
 
 logger = logging.getLogger("module")
@@ -21,7 +22,9 @@ class EquilibriumCompute:
         """
         self.ids = ids
 
-    def get2DCartesianGrid(self, timeSlice: int = 0, profiles2DIndex: int = 0) -> dict:
+    def get2DCartesianGrid(
+        self, timeSlice: int = 0, profiles2DIndex: int = 0
+    ) -> Union[dict, None]:
         """
         This function returns a dictionary containing 2D Cartesian grid coordinates and psi values from
         an equilibrium IDS object.
@@ -55,7 +58,7 @@ class EquilibriumCompute:
             ]  # using https://docs.python.org/2/glossary.html#term-eafp style
         except IndexError:
             logger.error(
-                f"equilibrium.time_slice[{timeSlice}].profiles_2d[{profiles2DIndex}] not available"
+                f"equilibrium.time_slice[{timeSlice}].profiles_2d[{profiles2DIndex}] is not available"
             )
             return None
 
@@ -65,6 +68,9 @@ class EquilibriumCompute:
         psi2d = profiles2D.psi
 
         if profiles2D.grid_type.index == 1 and np.size(r2d) == 0:
+            logger.warning(
+                f"profiles_2d[{profiles2DIndex}].r is not available and grid type is 1.. Calculating from grid"
+            )
             r1d = profiles2D.grid.dim1
             z1d = profiles2D.grid.dim2
             nr = len(r1d)
@@ -89,7 +95,9 @@ class EquilibriumCompute:
 
         return {"r2d": r2d, "z2d": z2d, "psi2d": psi2d}
 
-    def getRho2D(self, timeSlice: int = 0, profiles2DIndex: int = 0) -> np.ndarray:
+    def getRho2D(
+        self, timeSlice: int = 0, profiles2DIndex: int = 0
+    ) -> Union[np.ndarray, None]:
         """
         This function calculates rho(R,Z) using toroidal flux  and returns a dictionary containing the result.
 
@@ -112,21 +120,25 @@ class EquilibriumCompute:
 
                 array([[]])
         """
-        profiles2D_phi = None
+        phi = None
         try:  # using https://docs.python.org/2/glossary.html#term-eafp style
-            profiles2D_phi = (
-                self.ids.time_slice[timeSlice].profiles_2d[profiles2DIndex].phi
-            )
-            if len(profiles2D_phi) == 0:
-                raise IndexError
+            phi = self.ids.time_slice[timeSlice].profiles_2d[profiles2DIndex].phi
+            if len(phi) == 0:
+                logger.error(
+                    f"equilibrium.time_slice[{timeSlice}].profiles_2d[{profiles2DIndex}].phi not available"
+                )
+                return None
         except IndexError:
             logger.error(
                 f"equilibrium.time_slice[{timeSlice}].profiles_2d[{profiles2DIndex}].phi not available"
             )
             return None
-        if np.isnan(profiles2D_phi).all() is not True:
+        if np.isnan(phi).all() is True:
+            logger.error(
+                f"all values are nan for equilibrium.time_slice[{timeSlice}].profiles_2d[{profiles2DIndex}].phi "
+            )
             return None
-        return np.sqrt(profiles2D_phi / np.amax(profiles2D_phi))
+        return np.sqrt(phi / np.amax(phi))
 
     def getBTotal(self, timeSlice: int) -> tuple:
         """
@@ -162,6 +174,8 @@ class EquilibriumCompute:
         """
         listOfProfiles = self.get2DProfilesIndices(timeSlice)
         bTotal = None
+        profile2dIndex = -99
+
         if listOfProfiles is not None:
             # TODO Check if we should always pick up first profile
             profile2dIndex = listOfProfiles[0]
@@ -173,6 +187,11 @@ class EquilibriumCompute:
                 + self.ids.time_slice[timeSlice].profiles_2d[profile2dIndex].b_field_tor
                 ** 2
             )
+        else:
+            print("------------------------------------------------")
+            print("No rectangular R,Z grid found in equilibrium IDS")
+            print("--> Abort.")
+            print("------------------------------------------------")
         return profile2dIndex, bTotal
 
     def get2DProfilesIndices(self, timeSlice: int, gridType: int = 1) -> list:
