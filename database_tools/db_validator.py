@@ -15,7 +15,6 @@ logger = logging.getLogger(__name__)
 
 # ----------------------------------------------------------------------
 
-
 def load_scenario(user, database, version, backend):
     """
     Return a list of pulses as tuple (shot,run) by using database_tools.db_helper
@@ -240,7 +239,7 @@ class ScenarioValidator:
                         if (time < 0.0) or (idstime is None):
                             ids = db.get(idsname, occurrence=occ)
                         else:
-                            tm, itm = find_time(idstime, time)
+                            tm, itm = idschk.find_time(idstime, time)
                             ids = db.get_slice(idsname, tm, 1, occurrence=occ)
                     except Exception as e:
                         print(f"Cannot retrieve IDS/{idsname}: {e}")

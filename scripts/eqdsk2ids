@@ -12,7 +12,6 @@ from database_tools.eqdsk2ids import geqdsk2ids
 
 # ----------------------------------------------------------------------
 
-
 def main():
     """
     EQDSK Converter to IDS/equilibrium (eqdsk2ids)
