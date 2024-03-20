@@ -913,3 +913,35 @@ class EdgeProfilesCompute:
         
         n_neutral_edge = interpolate.griddata((r_edge, z_edge), temp, (x, y))
         return n_neutral_edge
+
+    def getOuterMidplaneArrayIndex(self):
+        """
+        This function searches for a specific grid subset with an index of 11 and returns its position  within the list of subsets.
+        
+        Returns:
+            The function `getOuterMidplaneArrayIndex` returns the index of the grid subset that has an identifier index of 11, representing the outer midplane GGD grid subset. If the subset is found,
+        it returns the index of that subset. If the subset is not found, it logs a warning message and
+        returns `None`.
+        """
+        subsetIndex = None
+        nsubsets = len(self.ids.grid_ggd[0].grid_subset)
+        for iset in range(nsubsets):
+            if self.ids.grid_ggd[0].grid_subset[iset].identifier.index == 11:
+                subsetIndex = iset
+        if subsetIndex is None:
+            logger.warning('Did not find outer_midplane GGD grid subset.')
+        else:
+            logger.debug(f'Outer midplane GGD grid subset is number {subsetIndex+1} of {nsubsets}')
+        return subsetIndex
+    
+    
+    def getnrho(self, sliceIndex=0):
+        nrho = None
+        try:
+            if len(self.ids.profiles_1d[sliceIndex].grid.rho_tor_norm) > 0:
+                nrho = len(self.ids.profiles_1d[sliceIndex].grid.rho_tor_norm)
+            elif len(self.ids.profiles_1d[sliceIndex].grid.rho_tor) > 0:
+                nrho = len(self.ids.profiles_1d[sliceIndex].grid.rho_tor)
+        except:
+            logger.warning('edge_profiles.profiles_1d[:].grid.rho_tor_norm and rho_tor could not be read.')
+        return nrho

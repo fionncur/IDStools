@@ -297,6 +297,14 @@ class EquilibriumCompute:
         topViewDict["yplap"] = (r0 + amin) * np.sin(phit)
         return topViewDict
 
+    def getmrho(self, timeSlice: int = 0):
+        mrho=0
+        for i in range(len(self.ids.time_slice[0].profiles_1d.rho_tor_norm)):
+            if self.ids.time_slice[0].profiles_1d.rho_tor_norm[i] < 0:
+                mrho = mrho + 1
+        
+        return mrho
+            
     # def getEquilibriumQuantities(self):
     #     """
     #     The function "getEquilibriumQuantities" returns a dictionary containing the 2D profiles of r, z,  and psi.
