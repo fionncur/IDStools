@@ -8,8 +8,7 @@ import imas
 from database_tools import db_helpers
 from database_tools import idschk
 from idstools.idslist import available_in_dbentry
-from idstools.cli import get_backend_id
-
+from idstools.utils.clihelper import getBackendID
 
 logger = logging.getLogger(__name__)
 
@@ -368,7 +367,7 @@ def db_validator(
     npulse = len(pulses)
     for i, (shot, run) in enumerate(pulses):
 
-        db = imas.DBEntry(get_backend_id(backend), database, shot, run, user)
+        db = imas.DBEntry(getBackendID(backend), database, shot, run, user)
         status, _ = db.open()
         if status != 0:
             raise OSError(

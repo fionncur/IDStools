@@ -6,7 +6,7 @@ from imas import imasdef
 import os
 import argparse
 import pandas as pd
-from idstools.cli import *
+from idstools.utils.clihelper import getBackendID, imasParser
 from pathlib import Path
 from database_tools.db_helpers import mdsListPulseRun, hdf5ListPulseRun, getDBPath
 from database_tools.idschk import ids_validator
@@ -21,7 +21,7 @@ except ModuleNotFoundError:
     progbar = False
 
 
-parser = argparse.ArgumentParser(description='Copy all data-entries from one database into another one', parents=[imas_parser])
+parser = argparse.ArgumentParser(description='Copy all data-entries from one database into another one', parents=[imasParser])
 parser.add_argument("-do", "--database_out", type=str, required=True, help="Name of destination database")
 parser.add_argument("-bo", "--backend_output", type=str, required=True, help="Desired backend for destination data-entry")
 parser.add_argument("--skip-obsolete", action="store_true", help="Do not copy data that have been marked obsolete (ITER scenarios only)")
@@ -30,7 +30,7 @@ args = parser.parse_args()
 
 locpath = getDBPath(args.user, args.database, args.version)
 
-backend = get_backend_id(args.backend)
+backend = getBackendID(args.backend)
 
 log = []
 
@@ -44,7 +44,7 @@ for pulse in tqdm(files) if progbar else files:
     run = pulse[1]
     src = imas.DBEntry(backend, args.database, pulse[0], run, args.user)
     src.open()
-    dest = imas.DBEntry(get_backend_id(args.backend_output), args.database_out, pulse[0], run)
+    dest = imas.DBEntry(getBackendID(args.backend_output), args.database_out, pulse[0], run)
     dest.create()
     avids = available_in_dbentry(src)
     for ids in tqdm(avids, desc=f"Pulse {pulse}") if progbar else avids:

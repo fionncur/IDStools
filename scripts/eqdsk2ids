@@ -5,7 +5,7 @@ import textwrap
 import traceback
 
 import imas
-from idstools.cli import imas_parser, get_backend_id
+from idstools.utils.clihelper import getBackendID,  imasParser
 from idstools.set_logger import set_logger
 from database_tools.eqdsk2ids import geqdsk2ids
 
@@ -24,7 +24,7 @@ def main():
     # Create the output datafile
     logger.info("creating output datafile ...")
     db = imas.DBEntry(
-        get_backend_id(args.backend), args.database, args.shot, args.run, args.user
+        getBackendID(args.backend), args.database, args.shot, args.run, args.user
     )
     status, _ = db.create()
     if status != 0:
@@ -48,7 +48,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         prog=prog,
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        parents=[imas_parser],
+        parents=[imasParser],
         description=textwrap.dedent(
             f"""\
             (I) Command Line Interface for EQDSK Convertor (eqdsk2ids)

@@ -247,11 +247,11 @@ def equilibrium_rescale(equin, rescale):
 
 
 if __name__ == "__main__":
-    from idstools.cli import *
+    from idstools.utils.clihelper import getBackendID
     # This script imports an equilibrium IDS, rescales its magnetic field components,
     # and then stores it to the output IDS
     # Management of input arguments
-    parser = argparse.ArgumentParser(description='Rescaling an equilibrium magnetic field, storing the output into another entry of the same DB', parents=[imas_parser])
+    parser = argparse.ArgumentParser(description='Rescaling an equilibrium magnetic field, storing the output into another entry of the same DB', parents=[imasParser])
     parser.add_argument('-si','--shot_input',
                         help='Input shot number', required=True,type=int)
     parser.add_argument('-ri','--run_input',
@@ -282,7 +282,7 @@ if __name__ == "__main__":
         sys.exit(1)
 
     # OPEN INPUT
-    input = imas.DBEntry(get_backend_id(args.backend),args.database,
+    input = imas.DBEntry(getBackendID(args.backend),args.database,
                          args.shot_input,args.run_input,args.user)
     status,_ = input.open()
     if (status!=0):
@@ -292,7 +292,7 @@ if __name__ == "__main__":
     equin = input.get("equilibrium")
 
     # OPEN OUTPUT
-    output = imas.DBEntry(get_backend_id(args.backend),args.database_output,
+    output = imas.DBEntry(getBackendID(args.backend),args.database_output,
                           args.shot_output,args.run_output,user_name=os.environ['USER'])
     status,_ = output.open()
     if (status!=0):

@@ -5,7 +5,7 @@ import argparse
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
-from idstools.cli import *
+from idstools.utils.clihelper import getBackendID,  imasParser
 from pathlib import Path
 from database_tools.db_helpers import getDBPath, mdsListPulseRun, hdf5ListPulseRun
 from idstools.idsperf import get_timings, byte_size
@@ -22,7 +22,7 @@ except ModuleNotFoundError:
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(
-        description='Times IDS getting of given Pulse and Run, contrasts with IDS size and slices', parents=[imas_parser])
+        description='Times IDS getting of given Pulse and Run, contrasts with IDS size and slices', parents=[imasParser])
     parser.add_argument("-md", "--mdsdatabase", type=str, help="Path to database in MDSPLUS (if separate to HDF5)")
     parser.add_argument("-mdu", "--mdsuser", type=str, help="User harboring database in MDSPLUS (if separate to HDF5)")
     parser.add_argument("-hd", "--hdf5database", type=str, help="Path to database in HDF5 (if separate to MDSPLUS)")
