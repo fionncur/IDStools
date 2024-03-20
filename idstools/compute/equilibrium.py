@@ -5,6 +5,7 @@ This module provides compute functions and classes for equilibrium ids data
 
 """
 import logging
+from typing import Union
 import numpy as np
 
 logger = logging.getLogger("module")
@@ -21,7 +22,9 @@ class EquilibriumCompute:
         """
         self.ids = ids
 
-    def get2DCartesianGrid(self, timeSlice: int = 0, profiles2DIndex: int = 0) -> dict:
+    def get2DCartesianGrid(
+        self, timeSlice: int = 0, profiles2DIndex: int = 0
+    ) -> Union[dict, None]:
         """
         This function returns a dictionary containing 2D Cartesian grid coordinates and psi values from
         an equilibrium IDS object.
@@ -55,7 +58,7 @@ class EquilibriumCompute:
             ]  # using https://docs.python.org/2/glossary.html#term-eafp style
         except IndexError:
             logger.error(
-                f"equilibrium.time_slice[{timeSlice}].profiles_2d[{profiles2DIndex}] not available"
+                f"equilibrium.time_slice[{timeSlice}].profiles_2d[{profiles2DIndex}] is not available"
             )
             return None
 
@@ -65,6 +68,9 @@ class EquilibriumCompute:
         psi2d = profiles2D.psi
 
         if profiles2D.grid_type.index == 1 and np.size(r2d) == 0:
+            logger.warning(
+                f"profiles_2d[{profiles2DIndex}].r is not available and grid type is 1.. Calculating from grid"
+            )
             r1d = profiles2D.grid.dim1
             z1d = profiles2D.grid.dim2
             nr = len(r1d)
@@ -76,8 +82,10 @@ class EquilibriumCompute:
             for ir in range(nr):
                 z2d[ir, :] = z1d
 
-        if np.all(psi2d==0.0):
-            logger.error("All values of psi2d are 0. No contour levels were found within the data range, Can not plot contour")
+        if np.all(psi2d == 0.0):
+            logger.error(
+                "All values of psi2d are 0. No contour levels were found within the data range, Can not plot contour"
+            )
             return None
         if np.size(r2d) != np.size(z2d) or np.size(r2d) != np.size(psi2d):
             logger.error(
@@ -87,7 +95,9 @@ class EquilibriumCompute:
 
         return {"r2d": r2d, "z2d": z2d, "psi2d": psi2d}
 
-    def getRho2D(self, timeSlice: int = 0, profiles2DIndex: int = 0) -> np.ndarray:
+    def getRho2D(
+        self, timeSlice: int = 0, profiles2DIndex: int = 0
+    ) -> Union[np.ndarray, None]:
         """
         This function calculates rho(R,Z) using toroidal flux  and returns a dictionary containing the result.
 
@@ -110,21 +120,25 @@ class EquilibriumCompute:
 
                 array([[]])
         """
-        profiles2D_phi = None
+        phi = None
         try:  # using https://docs.python.org/2/glossary.html#term-eafp style
-            profiles2D_phi = (
-                self.ids.time_slice[timeSlice].profiles_2d[profiles2DIndex].phi
-            )
-            if len(profiles2D_phi) == 0:
-                raise IndexError
+            phi = self.ids.time_slice[timeSlice].profiles_2d[profiles2DIndex].phi
+            if len(phi) == 0:
+                logger.error(
+                    f"equilibrium.time_slice[{timeSlice}].profiles_2d[{profiles2DIndex}].phi not available"
+                )
+                return None
         except IndexError:
             logger.error(
                 f"equilibrium.time_slice[{timeSlice}].profiles_2d[{profiles2DIndex}].phi not available"
             )
             return None
-        if np.isnan(profiles2D_phi).all() is not True:
+        if np.isnan(phi).all() is True:
+            logger.error(
+                f"all values are nan for equilibrium.time_slice[{timeSlice}].profiles_2d[{profiles2DIndex}].phi "
+            )
             return None
-        return np.sqrt(profiles2D_phi / np.amax(profiles2D_phi))
+        return np.sqrt(phi / np.amax(phi))
 
     def getBTotal(self, timeSlice: int) -> tuple:
         """
@@ -151,7 +165,7 @@ class EquilibriumCompute:
         Notes:
 
             .. math:: bTotal = \sqrt{b\_field\_r^2 + b\_field\_z^2 + b\_field\_tor^2}
-            
+
             ``profiles_2d`` has information about following fields
             ``b_field_r`` (R component of the poloidal magnetic field)
             ``b_field_z`` (Z component of the poloidal magnetic field)
@@ -160,6 +174,8 @@ class EquilibriumCompute:
         """
         listOfProfiles = self.get2DProfilesIndices(timeSlice)
         bTotal = None
+        profile2dIndex = -99
+
         if listOfProfiles is not None:
             # TODO Check if we should always pick up first profile
             profile2dIndex = listOfProfiles[0]
@@ -171,6 +187,11 @@ class EquilibriumCompute:
                 + self.ids.time_slice[timeSlice].profiles_2d[profile2dIndex].b_field_tor
                 ** 2
             )
+        else:
+            print("------------------------------------------------")
+            print("No rectangular R,Z grid found in equilibrium IDS")
+            print("--> Abort.")
+            print("------------------------------------------------")
         return profile2dIndex, bTotal
 
     def get2DProfilesIndices(self, timeSlice: int, gridType: int = 1) -> list:
@@ -305,16 +326,39 @@ class EquilibriumCompute:
         
         return mrho
             
+    def getgm3(self, r, timeSlice: int = 0):
+        rho_tor_sep = self.ids.time_slice[timeSlice].profiles_1d.rho_tor[timeSlice]
+        gm3 = (
+            np.interp(
+                r,
+                self.ids.time_slice[timeSlice].profiles_1d.rho_tor_norm,
+                self.ids.time_slice[timeSlice].profiles_1d.gm3,
+            )
+            / rho_tor_sep**2
+        )
+        return gm3
+
+    def getgm7(self, r, timeSlice: int = 0):
+        rho_tor_sep = self.ids.time_slice[timeSlice].profiles_1d.rho_tor[timeSlice]
+        gm7 = (
+            np.interp(
+                r,
+                self.ids.time_slice[timeSlice].profiles_1d.rho_tor_norm,
+                self.ids.time_slice[timeSlice].profiles_1d.gm7,
+            )
+            / rho_tor_sep
+        )
+        return gm7
+
     # def getEquilibriumQuantities(self):
     #     """
     #     The function "getEquilibriumQuantities" returns a dictionary containing the 2D profiles of r, z,  and psi.
-        
+
     #     Returns:
     #         a dictionary with keys "r2d", "z2d", and "psi2d", and their corresponding values are the  variables r2d, z2d, and psi2d, respectively.
     #     """
     #     r2d   = self.ids.time_slice[0].profiles_2d[0].r
     #     z2d   = self.ids.time_slice[0].profiles_2d[0].z
     #     psi2d = self.ids.time_slice[0].profiles_2d[0].psi
-        
+
     #     return({"r2d":r2d, "z2d", z2d, "psi2d", psi2d})
-        

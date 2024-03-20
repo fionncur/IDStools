@@ -11,6 +11,12 @@ from packaging import version
 logger = logging.getLogger("module")
 
 
+def findNearest(a, a0):
+    "Element in nd array `a` closest to the scalar value `a0`"
+    idx = abs(a - a0).argmin()
+    return a.flat[idx], idx
+
+
 def getNearestTime(timeArray: np.ndarray, requestedTime: float) -> Tuple[int, float]:
     """
     The function `getNearestTime` takes an array of time values and a requested time, and returns the index and value of the nearest time in the array to the requested time.
@@ -139,6 +145,35 @@ def cyl2xyz(rcyl):
     rvec[:, 0] = x
     rvec = np.reshape(rvec, rcyl_shape)
     return rvec
+
+
+def findMinima(y):
+    # mindex = sig.argrelextrema(y,np.less)
+    mindex = []
+    t = len(y) // 50
+    for i in range(t, len(y) - t):
+        if y[i - t] > y[i - 1] > y[i] < y[i + 1] < y[i + t]:
+            mindex.append(i)
+    return mindex
+
+
+def findMaxima(y):
+    # maxdex = sig.argrelextrema(y,np.greater)
+    maxdex = []
+    t = len(y) // 50
+    for i in range(t, len(y) - t):
+        if y[i - t] < y[i - 1] < y[i] > y[i + 1] > y[i + t]:
+            maxdex.append(i)
+    return maxdex
+
+
+def findfwhm(x, y, maxind, lowbnd, uppbnd):
+    npyleft = np.array(y[lowbnd:maxind])
+    npyright = np.array(y[maxind:uppbnd])
+    lindex = lowbnd + findNearest(npyleft, y[maxind] / 2)[1]
+    rindex = maxind + findNearest(npyright, y[maxind] / 2)[1]
+    fwhm = x[rindex] - x[lindex]
+    return fwhm
 
 
 # TODO rename variable and refactor code in smaller reusable methods

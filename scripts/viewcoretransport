@@ -1,0 +1,189 @@
+#!/usr/bin/env python3
+### David.Coster@ipp.mpg.de
+# migrated from check_transport by David.Coster@ipp.mpg.de
+
+# V' [-D Y' <|grad(rho_tor_norm)|^2> + v Y <|grad(rho_tor_norm)|>]
+# gm3(:) 	Flux surface averaged |grad_rho_tor|^2 {dynamic} [-]
+# gm7(:) 	Flux surface averaged |grad_rho_tor| {dynamic} [-]
+# V' [-D Y' gm3 + v Y gm7]
+
+import argparse
+import logging
+import sys
+
+
+import imas
+from imas import imasdef
+
+from idstools.utils.clihelper import getBackendID, imasParser
+from idstools.utils.idslogger import setupLogger
+from idstools.view.common import Canvas
+from idstools.view.core_transport import CoreTransportView
+
+logger = setupLogger("module", stdout_level=logging.INFO)
+
+slicingMethods = {
+    "CLOSEST": imasdef.CLOSEST_INTERP,
+    "PREVIOUS": imasdef.PREVIOUS_INTERP,
+    "LINEAR": imasdef.LINEAR_INTERP,
+}
+# Management of input arguments
+parser = argparse.ArgumentParser(
+    description="Check match between transport fluxes and a simple calculation",
+    epilog="""
+""",
+    formatter_class=argparse.RawTextHelpFormatter,
+    parents=[imasParser],
+)
+
+parser.add_argument(
+    "-m",
+    "--slicingmethod",
+    type=str,
+    default="CLOSEST",
+    choices=["CLOSEST", "PREVIOUS", "LINEAR"],
+    help="Slicing method \t(default=%(default)s)",
+)
+
+parser.add_argument("-o", "--occurrence", type=int, default=0, help="occurrence")
+parser.add_argument("-s", "--shot", help="Shot number", required=True, type=int)
+parser.add_argument("-r", "--run", help="Run number", required=True, type=int)
+parser.add_argument("-t", "--time", type=float, help="Time", default=-99)
+parser.add_argument(
+    "--save",
+    help="Save figure at default location",
+    action="store_true",
+)
+args = parser.parse_args()
+
+connection = imas.DBEntry(
+    getBackendID(args.backend),
+    args.database,
+    args.shot,
+    args.run,
+    user_name=args.user,
+)
+status, idx = connection.open()
+
+if status != 0:
+    logger.critical("Error opening pulse! Please check existence.")
+    sys.exit(status)
+
+idsSliceCoreTransport = connection.get_slice(
+    "core_transport",
+    args.time,
+    slicingMethods[args.slicingmethod],
+    occurrence=args.occurrence,
+)
+if len(idsSliceCoreTransport.time) == 0:
+    logger.critical("IDS:core_transport Time vector is empty! aborting")
+    sys.exit(status)
+
+idsSliceCoreProfiles = connection.get_slice(
+    "core_profiles",
+    args.time,
+    slicingMethods[args.slicingmethod],
+    occurrence=args.occurrence,
+)
+if len(idsSliceCoreProfiles.time) == 0:
+    logger.critical("IDS:core_profiles Time vector is empty! aborting")
+    sys.exit(status)
+
+idsSliceEquilibrium = connection.get_slice(
+    "equilibrium",
+    args.time,
+    slicingMethods[args.slicingmethod],
+    occurrence=args.occurrence,
+)
+if len(idsSliceEquilibrium.time) == 0:
+    logger.critical("IDS:equilibrium Time vector is empty! aborting")
+    sys.exit(status)
+
+timeValue = idsSliceCoreTransport.time[0]
+title = f"Core transport {args.user}/{args.database}/{args.version}/{args.shot}/{args.run} @ {timeValue:0.3f}"
+
+try:
+    modelIndex = [t.identifier.name for t in idsSliceCoreTransport.model].index(
+        "transport_solver"
+    )
+    logger.info(f'Found model "transport_solver" as model {modelIndex}')
+except:
+    logger.critical('"transport_solver" not found in the transport models')
+    exit()
+
+# define columns and rows for subplots based on ions
+columns = len(idsSliceCoreTransport.model[modelIndex].profiles_1d[-1].ion)
+canvas = Canvas(3, columns)
+canvas.fig.suptitle(title)
+electronsParticleFluxesAxes = canvas.add_axes(
+    title="", xlabel="", row=0, col=0, colspan=1
+)
+electronsEnergyFluxesAxes = canvas.add_axes(
+    title="", xlabel="", row=0, col=1, colspan=1
+)
+
+ionsParticleFluxesAxes = [
+    canvas.add_axes(title="", xlabel="", row=1, col=x, colspan=1)
+    for x in range(columns)
+]
+ionsEnergyFluxesAxes = [
+    canvas.add_axes(title="", xlabel="", row=2, col=x, colspan=1)
+    for x in range(columns)
+]
+
+ctView = CoreTransportView(idsSliceCoreTransport)
+
+ctView.viewIonsParticleFluxes(
+    ionsParticleFluxesAxes,
+    idsSliceCoreTransport,
+    idsSliceCoreProfiles,
+    idsSliceEquilibrium,
+    -1,
+    modelIndex,
+)
+ctView.viewIonsEnergyFluxes(
+    ionsEnergyFluxesAxes,
+    idsSliceCoreTransport,
+    idsSliceCoreProfiles,
+    idsSliceEquilibrium,
+    -1,
+    modelIndex,
+)
+ctView.viewParticleFluxesForElectrons(
+    electronsParticleFluxesAxes,
+    idsSliceCoreTransport,
+    idsSliceCoreProfiles,
+    -1,
+    modelIndex,
+)
+ctView.viewEnergyFluxesForElectrons(
+    electronsEnergyFluxesAxes,
+    idsSliceCoreTransport,
+    idsSliceCoreProfiles,
+    idsSliceEquilibrium,
+    -1,
+    modelIndex,
+)
+
+if args.save:
+    fname = (
+        "core_transport_shot_"
+        + str(args.shot)
+        + "_run_"
+        + str(args.run)
+        + "_time_"
+        + "%.1f" % idsSliceCoreTransport.time
+        + ".png"
+    )
+    canvas.save(fname)
+else:
+    wm = canvas.get_current_fig_manager()
+    window = wm.window
+    screen_y = window.winfo_screenheight()
+    screen_x = window.winfo_screenwidth()
+    wm.resize(screen_x, screen_y)
+
+    canvas.fig.subplots_adjust(
+        top=0.9, bottom=0.094, left=0.035, right=0.948, hspace=0.417, wspace=0.117
+    )
+    canvas.show()

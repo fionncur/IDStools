@@ -163,8 +163,16 @@ md_summary -s nbi,on-on || exit 1
 echo -------show_db_entry-------
 show_db_entry -s 134174 -r 117 || exit 1
 
+echo -------vieweccomposition and viewecray-------
+viewecray -d TEST -s 134173 -r 2326 --save || exit 1
+vieweccomposition -d TEST -s 134173 -r 2326 --save || exit 1
+
 echo -------viewspectrometry-------
-viewspectrometry -u schneim -d 55.EC -s 134000 -r 37 --save || exit 1
+viewspectrometry -d TEST -s 134000 -r 37 --save || exit 1
+
+echo -------viewcoretransport-------
+viewcoretransport -s 134000 -r 40 --save || exit 1
+viewcoretransport -u public -d TEST -s 92436 -r 850 --save || exit 1
 # echo -------idsresample-------
 # echo TESTING: idsresample -si 131024 -ri 10 -so 145000 -ro 2
 # idsresample -si 131024 -ri 10 -so 145000 -ro 2 || exit 1

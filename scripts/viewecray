@@ -1,0 +1,211 @@
+#!/usr/bin/env python3
+# Example of call:
+# ecray -s [130012,130012] -r [24,23] -u schneim -d iter
+
+import argparse
+import logging
+import sys
+
+import imas
+
+from idstools.compute.common import getNearestTime
+from idstools.compute.waves import WavesCompute
+from idstools.machinedescription import MachineDescription
+from idstools.utils.clihelper import getBackendID, imasParser
+from idstools.utils.idslogger import setupLogger
+from idstools.view.common import Canvas
+from idstools.view.domain.ecstray import EcStrayView
+from idstools.view.equilibrium import EquilibriumView
+from idstools.view.wall import WallView
+from idstools.view.waves import WavesView
+
+
+def StrToList(string):
+    if string[0] == "[":
+        slist = string.split(",")
+        slist[0] = slist[0][1:]
+        slist[-1] = slist[-1][:-1]
+        slist = [int(slist[i]) for i in range(len(slist))]
+        return slist
+    else:
+        return [int(string)]
+
+
+parser = argparse.ArgumentParser(
+    description="---- Display EC wave ray-tracing results", parents=[imasParser]
+)
+parser.add_argument(
+    "-s", "--shot", help="Shot number list, ex: [130012,130013]", required=True
+)
+parser.add_argument(
+    "-r", "--run", help="Run number list, ex: [23,24]", required=True, type=str
+)
+parser.add_argument(
+    "-t", "--time", help="Time", required=False, type=float, default=-99.0
+)
+parser.add_argument(
+    "--wall",
+    help="Wall display flag",
+    action="store_true",
+)
+
+parser.add_argument(
+    "--save",
+    help="Save figure at default location",
+    action="store_true",
+)
+args = parser.parse_args()
+
+logger = setupLogger("module", stdout_level=logging.INFO)
+
+shotString, runString = args.shot, args.run
+shotList, runList = StrToList(shotString), StrToList(runString)
+assert len(shotList) <= len(
+    runList
+), "There must be a run number corresponding to each shot"
+if len(runList) > len(shotList):
+    assert (
+        len(shotList) == 1
+    ), "Either give a shot for each run or give a single shot for every run"
+    shot = len(runList) * shotList
+
+wallIds = None
+if args.wall:
+    machineDescription = MachineDescription()
+    wallMDDict = machineDescription.getMDSummary("wall")
+
+    # Get wall of the tokamak
+    for pulse, config in wallMDDict.items():
+        if "wall and divertor" in config["config"]["description"]:
+            mdShot, mdRun = pulse.split("/")
+            try:
+                mdConnection = imas.DBEntry(
+                    getBackendID(args.backend),
+                    "ITER_MD",
+                    int(mdShot),
+                    int(mdRun),
+                    "public",
+                )
+                err, n = mdConnection.open()
+                if err != 0:
+                    logger.error(
+                        f"Shot {mdShot}, run {mdRun} for user={args.user} and database=ITER_MD does not exists"
+                    )
+                    raise Exception(
+                        f"Shot {mdShot}, run {mdRun}  for user={args.user} and database=ITER_MD does not exists"
+                    )
+
+                wallIds = mdConnection.get("wall")
+                mdConnection.close()
+                break
+            except:
+                continue
+    if wallIds is None:
+        logger.error("wall ids is not present")
+
+
+# Font/Colour definition
+fontsize = 9
+bndcolor = "chocolate"
+shotcolors = ["b", "r", "c", "y", "m", "b"]
+shotstyle = ["-", "--", "-.", ":", ".", ","]
+colorcounter = 0
+lpad = -1
+
+canvas = Canvas(1, 4)
+ax_polview = canvas.add_axes(title="", xlabel="", row=0, col=0)
+ax_topview = canvas.add_axes(title="", xlabel="", row=0, col=1)
+ax_powview = canvas.add_axes(title="", xlabel="", row=0, col=2)
+ax_powparview = canvas.add_axes(title="", xlabel="", row=0, col=3)
+
+
+# Looping over shots and runs
+global_label = ""
+for i in range(len(shotList)):
+    ishot = shotList[i]
+    irun = runList[i]
+
+    # Color management
+    color = shotcolors[colorcounter % len(shotcolors)]
+    style = shotstyle[colorcounter % len(shotcolors)]
+    colorcounter += 1
+
+    # Reading in data from run in shot
+    logger.info(
+        f"Open pulse: {ishot}/{irun} in DB {args.user}/{args.database}/{args.version}"
+    )
+    conn = imas.DBEntry(
+        getBackendID(args.backend), args.database, ishot, irun, args.user
+    )
+    status, _ = conn.open()
+    if status != 0:
+        logger.critical(
+            f"Pulse {ishot}/{irun} in DB {args.user}/{args.database}/{args.version} does not exist"
+        )
+        sys.exit(status)
+    idsWaves = conn.get("waves")
+    # Search for adequate time slice for display
+    timeArray = idsWaves.time
+    ntime = len(idsWaves.time)
+    timeIndex, timeValue = getNearestTime(timeArray, args.time)
+    # Reading in waves ids and equilibrium ids
+    idsWaves = conn.get_slice("waves", timeValue, 1)
+    idsCoreProfiles = conn.get_slice("core_profiles", timeValue, 1)
+    idsEquilibrium = conn.get_slice("equilibrium", timeValue, 1)
+
+    if len(idsWaves.code.name) > 0:
+        logger.info(f"Code name = {idsWaves.code.name.upper()}")
+        labelCode = idsWaves.code.name.upper()
+    else:
+        labelCode = str(ishot) + "," + str(irun)
+    ecstraView = EcStrayView(
+        equilibriumIds=idsEquilibrium,
+        coreProfilesIds=idsCoreProfiles,
+        wavesIds=idsWaves,
+    )
+    equiView = EquilibriumView(ids=idsEquilibrium)
+    waveView = WavesView(idsWaves)
+    waveCompute = WavesCompute(idsWaves)
+
+    beamTracingDict = waveCompute.getBeamTracing(timeIndex)
+    logger.info(
+        f"There are {beamTracingDict['activeBeamsCount']} active beam(s) and each beam has {beamTracingDict['maxTotalBeams']} ray(s)"
+    )
+
+    ecstraView.plotPoloidalView(ax_polview)
+    if args.wall:
+        wallview = WallView(wallIds)
+        wallview.view_wall(ax_polview, linewidth=2, edgecolor="grey")
+    waveView.plotPolViewTraces(
+        ax_polview,
+        timeIndex=0,
+        color=color,
+        style=style,
+        fontsize=fontsize,
+        labelpad=lpad,
+    )
+
+    equiView.plotTopviewEquilibrium(ax=ax_topview, timeIndex=0)
+    waveView.plotTopViewTraces(
+        ax_topview, timeIndex=0, color=color, style=style, label=labelCode
+    )
+
+    waveView.plotElectronPower(ax_powview, timeIndex=0, color=color, style=style)
+    waveView.plotPowerFlowNormal(ax_powparview, timeIndex=0, color=color, style=style)
+
+
+if args.save:
+    fname = f"EC_rays {global_label}_time_" + "%.1f" % timeValue + ".png"
+    canvas.save(fname)
+else:
+    wm = canvas.get_current_fig_manager()
+    window = wm.window
+    screen_y = window.winfo_screenheight()
+    screen_x = window.winfo_screenwidth()
+    wm.resize(screen_x, screen_y)
+
+    canvas.fig.subplots_adjust(
+        top=0.95, bottom=0.097, left=0.042, right=0.925, hspace=0.2, wspace=0.2
+    )
+
+    canvas.show()
