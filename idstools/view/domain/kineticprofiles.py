@@ -24,7 +24,7 @@ class KineticProfilesView:
             self.plotstyle = KineticProfilesView.single_style
 
     @staticmethod
-    def customizeLegend(legend, facecolor="0.95", textFont=8, lineWidth=1.5):
+    def customizeLegend(legend, facecolor="0.95", textFont=10, lineWidth=1.5):
         frame = legend.get_frame()
         frame.set_facecolor(facecolor)
         for label in legend.get_texts():
