@@ -85,7 +85,7 @@ if kpView.kProfiles.isCoreProfilesPresent:
     screen_x = window.winfo_screenwidth()
     wm.resize(screen_x, screen_y)
     canvas.fig.subplots_adjust(
-        top=0.928, bottom=0.11, left=0.033, right=0.912, hspace=0.435, wspace=0.518
+        top=0.928, bottom=0.11, left=0.033, right=0.91, hspace=0.435, wspace=0.518
     )
 
     if not args.save:

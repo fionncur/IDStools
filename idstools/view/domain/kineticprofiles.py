@@ -81,6 +81,7 @@ class KineticProfilesView:
         KineticProfilesView.viewTimeLine(ax, self.kProfiles.commonTime)
         ax.set_xlabel("$Time\/[\mathrm{s}]$")
         ax.set_ylabel("$T\/[\mathrm{keV}]$")
+        # ax.ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
         legend = ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
         KineticProfilesView.customizeLegend(legend)
         ax.set_title(
@@ -135,6 +136,7 @@ class KineticProfilesView:
                 self.kProfiles.commonTimeArray[0],
                 self.kProfiles.commonTimeArray[self.kProfiles.commonTimeLength - 1],
             )
+        # ax.ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
         legend = ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
         KineticProfilesView.customizeLegend(legend)
 
@@ -163,6 +165,7 @@ class KineticProfilesView:
                 self.kProfiles.commonTimeArray[0],
                 self.kProfiles.commonTimeArray[self.kProfiles.commonTimeLength - 1],
             )
+        # ax.ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
         legend = ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
         KineticProfilesView.customizeLegend(legend)
 
@@ -207,6 +210,7 @@ class KineticProfilesView:
             ax.set_xlabel(r"$R_{maj}\/[\mathrm{m}]$")
             ax.set_ylabel("$T\/[\mathrm{keV}]$")
         ax.set_xlim(self.kProfiles.xbeg, self.kProfiles.xend)
+        # ax.ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
         ax.set_title("t = " + "%.1f" % self.kProfiles.commonTime + " s")
         legend = ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
         KineticProfilesView.customizeLegend(legend)
@@ -284,6 +288,7 @@ class KineticProfilesView:
             ax.set_xlabel(r"$R_{maj}\/[\mathrm{m}]$")
             ax.set_ylabel("$n\/[\mathrm{m^{-3}}]$")
         ax.set_xlim(self.kProfiles.xbeg, self.kProfiles.xend)
+        # ax.ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
         ax.set_title("t = " + "%.1f" % self.kProfiles.commonTime + " s")
         legend = ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
         KineticProfilesView.customizeLegend(legend)
@@ -316,6 +321,7 @@ class KineticProfilesView:
             ax.set_xlabel(r"$R_{maj}\/[\mathrm{m}]$")
             ax.set_ylabel("$Z_{eff}$")
         ax.set_xlim(self.kProfiles.xbeg, self.kProfiles.xend)
+        # ax.ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
         ax.set_title("t = " + "%.1f" % self.kProfiles.commonTime + " s")
         legend = ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
         KineticProfilesView.customizeLegend(legend)
@@ -380,7 +386,7 @@ class KineticProfilesView:
             if self.kProfiles.max_vtor > self.kProfiles.min_vtor:
                 ax.set_ylim(self.kProfiles.min_vtor, self.kProfiles.max_vtor * 1.1)
 
-            ax.yaxis.set_major_formatter(mtick.FormatStrFormatter("%.0d"))
+            ax.ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
             ax.set_title("t = " + "%.1f" % self.kProfiles.commonTime + " s")
             legend = ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
             KineticProfilesView.customizeLegend(legend)
@@ -445,7 +451,7 @@ class KineticProfilesView:
             if self.kProfiles.max_vpol > self.kProfiles.min_vpol:
                 ax.set_ylim(self.kProfiles.min_vpol, self.kProfiles.max_vpol * 1.1)
 
-            ax.yaxis.set_major_formatter(mtick.FormatStrFormatter("%.0d"))
+            ax.ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
             ax.set_title("t = " + "%.1f" % self.kProfiles.commonTime + " s")
             legend = ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
             KineticProfilesView.customizeLegend(legend)
