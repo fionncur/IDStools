@@ -390,6 +390,8 @@ class KineticProfilesView:
             ax.set_title("t = " + "%.1f" % self.kProfiles.commonTime + " s")
             legend = ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
             KineticProfilesView.customizeLegend(legend)
+        else:
+            ax.remove()
 
     def viewVpolProfile(self, ax):
         """
@@ -455,3 +457,5 @@ class KineticProfilesView:
             ax.set_title("t = " + "%.1f" % self.kProfiles.commonTime + " s")
             legend = ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
             KineticProfilesView.customizeLegend(legend)
+        else:
+            ax.remove()
