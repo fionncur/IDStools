@@ -358,6 +358,143 @@ class WavesView:
                     f"{ecLauncherInfo['single_ec_launcher_name'][iWave]} is off"
                 )
 
+    @staticmethod
+    def customizeLegend(legend):
+        frame = legend.get_frame()
+        frame.set_facecolor("0.95")
+        for label in legend.get_texts():
+            label.set_fontsize(6)
+        for label in legend.get_lines():
+            label.set_linewidth(1.5)  # the legend line width
+        return
+
+    # CD WAVEFORM
+    def viewCDWaveform(self, ax, timeIndex, usepsi=False):
+        timeArray = self.ids.time
+        ecLauncherInfo = self.wavesCompute.GetECLaunchersInfo(timeIndex, usepsi)
+
+        radialGrid = self.wavesCompute.getRadialGridInfo(timeIndex, usepsi)
+
+        activeLaunchers = {
+            key: value for key, value in radialGrid.items() if value["isActive"] is True
+        }
+        lenActiveLaunchers = len(activeLaunchers)
+        ax.set_title("Current density waveform")
+        if lenActiveLaunchers != 0:
+            ax.plot(
+                timeArray,
+                np.array(ecLauncherInfo["total_current_waveform"]) * 1.0e-3,
+                label=r"Total",
+            )
+        for iwave, _ in activeLaunchers.items():
+            ax.plot(
+                timeArray,
+                np.array(ecLauncherInfo["single_current_waveform"][iwave]) * 1.0e-3,
+                label=ecLauncherInfo["single_ec_launcher_name"][iwave],
+            )
+        ax.set_ylabel("Current Density $\mathrm{[kA]}$")
+        ax.set_xlabel("Time (s)")
+        legend = ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
+        WavesView.customizeLegend(legend)
+        ax.set_ylim(0, max(np.array(ecLauncherInfo["total_current_waveform"])) * 1.2e-3)
+
+    # EC POWER WAVEFORM
+    def viewECPowerWaveform(self, ax, timeIndex, usepsi=False):
+        timeArray = self.ids.time
+        ecLauncherInfo = self.wavesCompute.GetECLaunchersInfo(timeIndex, usepsi)
+
+        radialGrid = self.wavesCompute.getRadialGridInfo(timeIndex, usepsi)
+
+        activeLaunchers = {
+            key: value for key, value in radialGrid.items() if value["isActive"] is True
+        }
+        lenActiveLaunchers = len(activeLaunchers)
+        ax.set_title("EC Power Waveform")
+        if lenActiveLaunchers != 0:
+            ax.plot(
+                timeArray,
+                np.array(ecLauncherInfo["total_power_waveform"]) * 1.0e-6,
+                label=r"Total",
+            )
+        for iwave, _ in activeLaunchers.items():
+            ax.plot(
+                timeArray,
+                np.array(ecLauncherInfo["single_power_waveform"][iwave]) * 1.0e-6,
+                label=ecLauncherInfo["single_ec_launcher_name"][iwave],
+            )
+        ax.set_ylabel("Power to the electrons $\mathrm{[MW]}$")
+        ax.set_xlabel("Time (s)")
+        legend = ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
+        WavesView.customizeLegend(legend)
+
+    # CD PROFILE [MA/M2]
+    def viewCDProfile(self, ax, timeIndex, usepsi=False):
+        timeArray = self.ids.time
+        ecLauncherInfo = self.wavesCompute.GetECLaunchersInfo(timeIndex, usepsi)
+
+        radialGrid = self.wavesCompute.getRadialGridInfo(timeIndex, usepsi)
+
+        activeLaunchers = {
+            key: value for key, value in radialGrid.items() if value["isActive"] is True
+        }
+        _, firstRadialGridInfo = next(iter(activeLaunchers.items()))
+        lenActiveLaunchers = len(activeLaunchers)
+        ax.set_title("Current density profile")
+        if lenActiveLaunchers != 0:
+            ax.plot(
+                firstRadialGridInfo["rho_tor_norm"],
+                ecLauncherInfo["total_current_density_profile"] * 1.0e-6,
+                label=r"Total",
+            )
+        for iwave, _ in activeLaunchers.items():
+            if iwave in ecLauncherInfo["single_current_density_profile"]:
+                ax.plot(
+                    firstRadialGridInfo["rho_tor_norm"],
+                    ecLauncherInfo["single_current_density_profile"][iwave] * 1.0e-6,
+                    label=ecLauncherInfo["single_ec_launcher_name"][iwave],
+                )
+        ax.set_ylabel("$\mathrm{CD} [MA/m^{2}]}$")
+        if firstRadialGridInfo["psiBased"] is False and usepsi == False:
+            ax.set_xlabel("Normalized toroidal flux coordinate")
+        else:
+            ax.set_xlabel("-(Poloidal flux coordinate) [Wb]")
+        legend = ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
+        WavesView.customizeLegend(legend)
+
+    # PROFILE OF ABSORBED POWER DENSITY [MW/M3]
+    def viewAbsorbedPowerDensityProfile(self, ax, timeIndex, usepsi=False):
+        timeArray = self.ids.time
+        ecLauncherInfo = self.wavesCompute.GetECLaunchersInfo(timeIndex, usepsi, True)
+
+        radialGrid = self.wavesCompute.getRadialGridInfo(timeIndex, usepsi)
+
+        activeLaunchers = {
+            key: value for key, value in radialGrid.items() if value["isActive"] is True
+        }
+        _, firstRadialGridInfo = next(iter(activeLaunchers.items()))
+        lenActiveLaunchers = len(activeLaunchers)
+        ax.set_title("Absorbed power density profile")
+        if lenActiveLaunchers != 0:
+            ax.plot(
+                firstRadialGridInfo["rho_tor_norm"],
+                ecLauncherInfo["total_power_density_profile"] * 1.0e-6,
+                label=r"Total",
+            )
+        for iwave, _ in activeLaunchers.items():
+            if iwave in ecLauncherInfo["single_power_density_profile"]:
+                ax.plot(
+                    firstRadialGridInfo["rho_tor_norm"],
+                    ecLauncherInfo["single_power_density_profile"][iwave] * 1.0e-6,
+                    label=ecLauncherInfo["single_ec_launcher_name"][iwave],
+                )
+        ax.set_ylabel("Absorbed power $\mathrm{[MW/m^{3}]}$")
+        if firstRadialGridInfo["psiBased"] is False and usepsi == False:
+            ax.set_xlabel("Normalized toroidal flux coordinate")
+        else:
+            ax.set_xlabel("-(Poloidal flux coordinate) [Wb]")
+        legend = ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
+        WavesView.customizeLegend(legend)
+
 
 #       def plotBeamIndex(self, ax):
 #         """

@@ -1,0 +1,152 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+import argparse
+import logging
+import sys
+
+import imas
+
+from idstools.compute.common import getNearestTime
+from idstools.compute.waves import WavesCompute
+from idstools.utils.clihelper import getBackendID, imasParser
+from idstools.utils.idslogger import setupLogger
+from idstools.view.common import Canvas
+from idstools.view.waves import WavesView
+
+logger = setupLogger("module", stdout_level=logging.INFO)
+
+parser = argparse.ArgumentParser(
+    description="---- Display EC results", parents=[imasParser]
+)
+parser.add_argument("-s", "--shot", help="Shot number", required=True, type=int)
+parser.add_argument("-r", "--run", help="Run number", required=True)
+parser.add_argument(
+    "-t", "--time", help="Time", required=False, type=float, default=-99.0
+)
+parser.add_argument(
+    "-f",
+    "--force_psi",
+    help="force displaying the profiles versus poloidal flux",
+    action="store_true",
+)
+parser.add_argument(
+    "-l", "--hide_legend", help="remove the legend from graphs", action="store_true"
+)
+parser.add_argument(
+    "--save",
+    help="Save figure at default location",
+    action="store_true",
+)
+args = parser.parse_args()
+
+
+logger = setupLogger("module", stdout_level=logging.INFO)
+
+shot = args.shot
+run = args.run
+
+# To handle multiple datafiles (for scans)
+if "-" in run:
+    [runmin, runmax] = [int(x) for x in run.split("-")]  # int(run.split('-'))
+else:
+    runmin = int(run)
+    runmax = int(run)
+
+for irun in range(runmin, runmax + 1):
+    logger.info(
+        f"Open pulse: {shot}/{irun} in DB {args.user}/{args.database}/{args.version}"
+    )
+    conn = imas.DBEntry(
+        getBackendID(args.backend), args.database, int(shot), irun, args.user
+    )
+    status, _ = conn.open()
+    if status != 0:
+        logger.critical(
+            f"Pulse {shot}/{irun} in DB {args.user}/{args.database}/{args.version} does not exist"
+        )
+        sys.exit(status)
+
+    idsWaves = conn.get("waves")
+    conn.close()
+
+    wavesCompute = WavesCompute(idsWaves)
+
+    timeArray = idsWaves.time
+    ntime = len(timeArray)
+    timeIndex, timeValue = getNearestTime(idsWaves.time, args.time)
+    time = timeValue
+    nwaves = len(idsWaves.coherent_wave)
+
+    radialGrid = wavesCompute.getRadialGridInfo(timeIndex, args.force_psi)
+    if radialGrid is None:
+        logger.critical("Radial grid information is empty ----> Abort.")
+        continue
+    activeLaunchers = {
+        key: value for key, value in radialGrid.items() if value["isActive"] is True
+    }
+    _, firstRadialGridInfo = next(iter(activeLaunchers.items()))
+    lenActiveLaunchers = len(activeLaunchers)
+    if lenActiveLaunchers == 0:
+        logger.critical("The waves IDS appears empty ----> Abort.")
+        continue
+
+    rows = 2
+    if ntime == 1:
+        logger.error("Only one time slice --> ECCD and ECRH waveforms not displayed")
+        rows = 1
+    canvas = Canvas(rows, 2)
+    canvas.setSupTitle(
+        f"HCD Waves Plot [Shot {args.shot} / Run {args.run}] Time : {timeValue:.1f}"
+    )
+
+    ax1 = canvas.add_axes(title="", xlabel="", row=0, col=0)
+    ax2 = canvas.add_axes(title="", xlabel="", row=0, col=1)
+    if ntime != 1:
+        ax3 = canvas.add_axes(title="", xlabel="", row=1, col=0)
+        ax4 = canvas.add_axes(title="", xlabel="", row=1, col=1)
+
+    wavesView = WavesView(idsWaves)
+    wavesView.viewAbsorbedPowerDensityProfile(ax1, timeIndex, args.force_psi)
+    if args.hide_legend:
+        ax1.get_legend().remove()
+    else:
+        ax1.get_legend().remove()
+    wavesView.viewCDProfile(ax2, timeIndex, args.force_psi)
+    if args.hide_legend:
+        ax2.get_legend().remove()
+    if ntime != 1:
+        wavesView.viewECPowerWaveform(ax3, timeIndex, args.force_psi)
+        if args.hide_legend:
+            ax3.get_legend().remove()
+        else:
+            ax3.get_legend().remove()
+        wavesView.viewCDWaveform(ax4, timeIndex, args.force_psi)
+        if args.hide_legend:
+            ax4.get_legend().remove()
+        else:
+            ax4.get_legend().remove()
+
+    if args.save:
+        fname = f"ECRH_profile_time_{shot}_{irun}_" + "%.1f" % timeValue + ".png"
+        canvas.save(fname, width=5, height=4, dpi=300)
+    else:
+        wm = canvas.get_current_fig_manager()
+        window = wm.window
+        screen_y = window.winfo_screenheight()
+        screen_x = window.winfo_screenwidth()
+        wm.resize(screen_x, screen_y)
+        rightAdjustParam = 0.898
+        if args.hide_legend:
+            rightAdjustParam = 0.955
+        canvas.fig.subplots_adjust(
+            top=0.92,
+            bottom=0.122,
+            left=0.037,
+            right=rightAdjustParam,
+            hspace=0.2,
+            wspace=0.13,
+        )
+        if irun == runmax:
+            canvas.show(block=True)
+        else:
+            canvas.show(block=False)

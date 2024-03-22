@@ -176,3 +176,7 @@ viewcoretransport -u public -d TEST -s 92436 -r 850 --save || exit 1
 # echo -------idsresample-------
 # echo TESTING: idsresample -si 131024 -ri 10 -so 145000 -ro 2
 # idsresample -si 131024 -ri 10 -so 145000 -ro 2 || exit 1
+
+echo -------viewhcdwaves-------
+viewhcdwaves -s 104104 -r 2-5 -u schneim -d TORBEAM_XMODE
+viewhcdwaves -s 105039 -r 1 -u schneim -d SAVE
