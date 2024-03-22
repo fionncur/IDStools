@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # Converts an IMAS database (all its data-entries) to the specified folder and backend
 
 import imas
@@ -10,13 +10,14 @@ from idstools.utils.clihelper import getBackendID, imasParser
 from pathlib import Path
 from database_tools.db_helpers import mdsListPulseRun, hdf5ListPulseRun, getDBPath
 from database_tools.idschk import ids_validator
-from idstools.idsdiff import compare
+from idstools.utils.idshelper import compareIds
 from idstools.idslist import available_in_dbentry
 from datetime import datetime
 progbar = True
 try:
     from tqdm import tqdm
 except ModuleNotFoundError:
+    print(f"Install tqdm to enable progress bar")
     progbar = False
 
 
@@ -54,7 +55,7 @@ for pulse in tqdm(files) if progbar else files:
 
         if args.validate:
             idsobj2 = dest.get(idsname, occurrence=inocc)
-            same = compare(idsobj, idsobj2, verb=False)
+            same, _ = compareIds(idsobj, idsobj2, output={}, verb=False)
             idsinf.append((idsname, same, ids_validator(idsobj, os.path.abspath(os.path.dirname(__file__))+'/required_fields_core.yml')[0]))
 
     src.close()
