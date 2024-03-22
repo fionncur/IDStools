@@ -7,13 +7,13 @@ import numpy as np
 import sys
 from os import system, path
 from sys import exit
-from idstools.cli import *
+from idstools.utils.clihelper import getBackendID, imasParser
 
 # ----------------------------------------------------------------------
 
 # Management of input arguments
 parser = argparse.ArgumentParser(description=\
-	 '---- Auto-generated yaml scenario and watcher files (!!! STILL TO BE COMPLETED BY HAND !!!)',parents=[imas_parser])
+	 '---- Auto-generated yaml scenario and watcher files (!!! STILL TO BE COMPLETED BY HAND !!!)',parents=[imasParser])
 parser.add_argument('-s','--shot',help='shot number',required=True,type=int)
 parser.add_argument('-r','--run',help='run number',required=True,type=int)
 parser.add_argument('--disable-validation',help='disable IDS validation',required=False,action='store_true',dest="wo_validation")
@@ -22,7 +22,7 @@ args = parser.parse_args()
 
 # Open the database and read the necessary IDSs
 input = imas.DBEntry(
-    get_backend_id(args.backend), args.database, args.shot, args.run, args.user
+    getBackendID(args.backend), args.database, args.shot, args.run, args.user
 )
 status, _ = input.open()
 if status != 0:

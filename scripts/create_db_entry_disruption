@@ -7,7 +7,7 @@ import numpy as np
 import sys
 from os import system,getenv
 from sys import exit
-from idstools.cli import *
+from idstools.utils.clihelper import getBackendID, imasParser
 
 # --------------------------------------------------------------------------------
 # --- Creates an entry for the Disruption database (adapted from create_db_entry
@@ -20,7 +20,7 @@ from idstools.cli import *
 # Management of input arguments
 parser = argparse.ArgumentParser(description=\
 	                         '---- Auto-generated yaml scenario and watcher files (!!! STILL TO BE COMPLETED BY HAND !!!)',
-                                 parents=[imas_parser])
+                                 parents=[imasParser])
 parser.add_argument('-s' ,'--shot',         help='shot number', required=True,type=int)
 parser.add_argument('-r' ,'--run',          help='run number',required=True,type=int)
 parser.add_argument('-st','--status',       help='active/obsolete',required=False,type=str,default="draft")
@@ -30,7 +30,7 @@ args = parser.parse_args()
 
 
 # Open the database and read the necessary IDSs
-input = imas.DBEntry(get_backend_id(args.backend),args.database,args.shot,args.run,user_name=args.user,data_version=args.version)
+input = imas.DBEntry(getBackendID(args.backend),args.database,args.shot,args.run,user_name=args.user,data_version=args.version)
 err,n = input.open()
 if err != 0:
     print('Shot ' + str(args.shot) + ', run ' + str(args.run) + ' does not exist', file=sys.stderr)
