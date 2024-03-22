@@ -134,13 +134,13 @@ class GEQDSK:
         if len(header) != 60:
             logger.warning(f"irregular length of header: {len(header)}")
             header = header.split()
-            data["IDUM"] = np.int(header[-3])
-            data["NW"] = nw = np.int(header[-2])
-            data["NH"] = nh = np.int(header[-1])
+            data["IDUM"] = int(header[-3])
+            data["NW"] = nw = int(header[-2])
+            data["NH"] = nh = int(header[-1])
         else:
-            data["IDUM"] = np.int(header[48:52])
-            data["NW"] = nw = np.int(header[52:56])
-            data["NH"] = nh = np.int(header[56:60])
+            data["IDUM"] = int(header[48:52])
+            data["NW"] = nw = int(header[52:56])
+            data["NH"] = nh = int(header[56:60])
 
         #
         rec = np.float64(fmt20.read(fp.readline()))

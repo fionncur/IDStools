@@ -7,7 +7,7 @@ import pandas as pd
 import argparse
 import math
 import sys
-from idstools.cli import get_backend_id
+from idstools.utils.clihelper import getBackendID
 import os
 import requests
 progbar = True
@@ -135,7 +135,7 @@ rows = [args.row] if args.row != None else db.index
 if not progbar: print(f"Starts mapping of the DB {args.inputCSV}, please be patient...")
 for row in tqdm(rows) if progbar else rows:
     DBVAR = db.iloc[row]
-    de = imas.DBEntry(get_backend_id(args.backend), args.database, 1, row)
+    de = imas.DBEntry(getBackendID(args.backend), args.database, 1, row)
     de.create()
 
     iod = {}

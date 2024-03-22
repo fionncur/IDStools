@@ -8,14 +8,12 @@ import imas
 from database_tools import db_helpers
 from database_tools import idschk
 from idstools.idslist import available_in_dbentry
-from idstools.cli import get_backend_id
-
+from idstools.utils.clihelper import getBackendID
 
 logger = logging.getLogger(__name__)
 
 
 # ----------------------------------------------------------------------
-
 
 def load_scenario(user, database, version, backend):
     """
@@ -241,7 +239,7 @@ class ScenarioValidator:
                         if (time < 0.0) or (idstime is None):
                             ids = db.get(idsname, occurrence=occ)
                         else:
-                            tm, itm = find_time(idstime, time)
+                            tm, itm = idschk.find_time(idstime, time)
                             ids = db.get_slice(idsname, tm, 1, occurrence=occ)
                     except Exception as e:
                         print(f"Cannot retrieve IDS/{idsname}: {e}")
@@ -368,7 +366,7 @@ def db_validator(
     npulse = len(pulses)
     for i, (shot, run) in enumerate(pulses):
 
-        db = imas.DBEntry(get_backend_id(backend), database, shot, run, user)
+        db = imas.DBEntry(getBackendID(backend), database, shot, run, user)
         status, _ = db.open()
         if status != 0:
             raise OSError(

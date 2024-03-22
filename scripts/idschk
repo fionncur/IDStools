@@ -1,20 +1,19 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 from os import getenv, path
 from sys import exit
 from sys import stdout
 import argparse
 import textwrap
 import yaml
+from idstools.utils.clihelper import getBackendID,  imasParser
 
 import imas
-from idstools.cli import imas_parser, get_backend_id
 from idstools.idslist import available_in_dbentry
 from database_tools import idschk
 from database_tools.db_validator import ScenarioValidator
 
 
 # ----------------------------------------------------------------------
-
 
 def main():
     """
@@ -23,7 +22,7 @@ def main():
 
     # Open the database
     db = imas.DBEntry(
-        get_backend_id(args.backend), args.database, args.shot, args.run, args.user
+        getBackendID(args.backend), args.database, args.shot, args.run, args.user
     )
     status, _ = db.open()
     if status != 0:
@@ -59,7 +58,7 @@ def main():
                     if (args.time is None) or (idstime is None):
                         ids = db.get(idsname, occurrence=occ)
                     else:
-                        time, itime = find_time(idstime, args.time)
+                        time, itime = idschk.find_time(idstime, args.time)
                         ids = db.get_slice(idsname, time, 1, occurrence=occ)
                 except Exception as e:
                     print(f"Cannot retrieve IDS/{idsname}: {e}")
@@ -90,7 +89,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         prog="idschk",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        parents=[imas_parser],
+        parents=[imasParser],
         description=textwrap.dedent(
             """\
             Load IMAS and install Cerberus (if not done before)

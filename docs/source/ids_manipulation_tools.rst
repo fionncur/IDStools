@@ -5,6 +5,8 @@ IDS Manipulation tools allow you to manipulate data within IDSes by copying, mov
 .. toctree::
    :maxdepth: 1
 
+   eqdsk2ids
+   idschk
    idscp
    idsdiff
    idslist
