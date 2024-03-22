@@ -11,7 +11,6 @@ Syntax viewecstrayradiation
 .. code-block:: bash
 
     $ viewecstrayradiation -h
-    Install tqdm to enable progress bar
     usage: ecstray [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] -s SHOT -r RUN
 
     ---- Shows electron cyclotron stray radiation information by showing different plots

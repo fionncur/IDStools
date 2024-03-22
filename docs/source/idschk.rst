@@ -10,7 +10,6 @@ Syntax idschk
     .. code-block:: bash     
 
         $ idschk -h
-        Install tqdm to enable progress bar
         usage: idschk [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] -s SHOT -r RUN [-l [IDSLIST [IDSLIST ...]]] [-t [TIME]] [-f SCHEMA_FILE] [--ipsign {-1,1}]
                     [--b0sign {-1,1}] [--verbose] [-c]
 
@@ -48,7 +47,6 @@ Example idschk
 
         $ idschk -s 134174 -r 117 -f /home/ITER/sawantp1/git/idstools/database_tools/validation_schemas/generic/core_profiles.yml
 
-        Install tqdm to enable progress bar
         core_profiles:
             occurence(0):
                 profiles_1d[0].grid.rho_tor_norm[:]:

@@ -12,7 +12,6 @@ Syntax idssize
     .. code-block:: bash     
 
         $ idssize --help
-        Install tqdm to enable progress bar
         usage: idssize [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] -s SHOT -r RUN
                     [ids [ids ...]]
 
@@ -41,7 +40,6 @@ Example idssize
     .. code-block:: bash
 
         $ idssize -s 122525 -r 1
-        Install tqdm to enable progress bar
         Examining data for public, ITER, 3, 122525, 1
         Reading 0.001 MB of data for dataset_description/0 took 0.00 seconds
         Reading 0.003 MB of data for divertors/0 took 0.02 seconds

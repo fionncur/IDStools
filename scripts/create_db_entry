@@ -1,4 +1,6 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
 from __future__ import print_function
 
 import argparse, imas, pdb
@@ -699,17 +701,17 @@ f.write("   DD version: "+dd_version+"\n")
 f.write("""\n""")
 f.write("""# ------------------------------------------------------------------------------\n""")
 f.write("""# List of filled IDSs with time quantities in seconds (start, end, step)\n""")
-f.write("""# It should be the output of the "ids_content" script, adapted from\n""")
+f.write("""# It should be the output of the "idslist" script, adapted from\n""")
 f.write("""# listidss, see IMAS-1010 (note: the data-entry has to be copied to a personal\n""")
 f.write("""# database for the script to work, see the example below):\n""")
-f.write("""#  ids_content -u schneim -d test -s 4321 -r 1\n""")
+f.write("""#  idslist -u schneim -d test -s 4321 -r 1 yaml\n""")
 f.write("""# ------------------------------------------------------------------------------\n""")
 f.write("""idslist:\n""")
 f.close()
 
-# Complete the yaml file with the output of ids_content
-system('ids_content -u ' + args.user + ' -d ' + args.database + ' -b ' + args.backend \
-          + ' -s ' + str(args.shot) + ' -r ' + str(args.run) + ' >> ' + filename)
+# Complete the yaml file with the output of idslist
+system('idslist -u ' + args.user + ' -d ' + args.database + ' -b ' + args.backend \
+          + ' -s ' + str(args.shot) + ' -r ' + str(args.run) + ' yaml >> ' + filename)
 
 print("----> " + filename + " created.", file=sys.stdout)
 

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # python scripts/dbscraper -u schneim -d HCD core_sources
 
