@@ -62,10 +62,10 @@ def getDatabasePath(args) -> str:
         if publichome is None:
             return None
         databaseAbsolutePath = (
-            f"{publichome}/shared/imasdb/{args.database}/{args.version}"
+            f"{publichome}/shared/imasdb/{args.database}/{args.version}/{args.run//10000}"
         )
     else:
-        databaseAbsolutePath = f'{os.path.expanduser(f"~{args.user_or_path}")}/public/imasdb/{str(args.database)}/{args.version}'
+        databaseAbsolutePath = f'{os.path.expanduser(f"~{args.user}")}/public/imasdb/{str(args.database)}/{args.version}/{args.run//10000}'
     hostdir = f"{socket.gethostname()}:{databaseAbsolutePath}"
     hostdir = hostdir[:-2]
     return hostdir

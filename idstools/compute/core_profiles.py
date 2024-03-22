@@ -997,3 +997,14 @@ class CoreProfilesCompute:
         profiles["q"] = self.ids.profiles_1d[0].q
         profiles["magnetic_shear"] = self.ids.profiles_1d[0].magnetic_shear
         return profiles
+
+    def getnrho(self, sliceIndex=0):
+        nrho = None
+        try:
+            if len(self.ids.profiles_1d[sliceIndex].grid.rho_tor_norm) > 0:
+                nrho = len(self.ids.profiles_1d[sliceIndex].grid.rho_tor_norm)
+            elif len(self.ids.profiles_1d[sliceIndex].grid.rho_tor) > 0:
+                nrho = len(self.ids.profiles_1d[sliceIndex].grid.rho_tor)
+        except:
+            logger.warning('core_profiles.profiles_1d[:].grid.rho_tor_norm and rho_tor could not be read.')
+        return nrho

@@ -1,0 +1,100 @@
+#!/usr/bin/env python3
+
+import argparse
+import logging
+
+import imas
+
+from idstools.utils.clihelper import getBackendID, getDatabasePath, imasParser
+from idstools.utils.idslogger import setupLogger
+from idstools.view.common import Canvas
+from idstools.view.domain.kineticprofiles import KineticProfilesView
+
+
+# Management of input arguments
+parser = argparse.ArgumentParser(
+    description="---- Display the plasma kinetic profiles from the core_profiles IDSs",
+    parents=[imasParser],
+)
+parser.add_argument("-s", "--shot", help="Shot number", required=True, type=int)
+parser.add_argument("-r", "--run", help="Run number", required=True, type=int)
+parser.add_argument(
+    "-t", "--time", help="Time", required=False, type=float, default=-99.0
+)
+parser.add_argument(
+    "-e", "--edge", help="Add edge profiles if available", action="store_true"
+)
+parser.add_argument("--verbose", help="Verbose output", action="store_true")
+parser.add_argument(
+    "--save",
+    help="Save figure at default location",
+    action="store_true",
+)
+args = parser.parse_args()
+if args.verbose:
+    logger = setupLogger("module", stdout_level=logging.DEBUG)
+else:
+    logger = setupLogger("module", stdout_level=logging.INFO)
+
+connection = imas.DBEntry(
+    getBackendID(args.backend),
+    args.database,
+    args.shot,
+    args.run,
+    user_name=args.user,
+    data_version=args.version,
+)
+err, n = connection.open()
+if err != 0:
+    logger.critical(
+        f"Shot {args.shot}, run {args.run} for user {args.user} and database {args.database} does not exist"
+    )
+    logger.critical("----> Aborted.")
+    exit()
+
+kpView = KineticProfilesView(connection, args.edge, args.time)
+
+hostdir = getDatabasePath(args)
+
+canvas = Canvas(3, 4)
+ax1 = canvas.add_axes(title="", xlabel="", row=0, col=0, colspan=2)
+ax2 = canvas.add_axes(title="", xlabel="", row=1, col=0, colspan=2)
+ax3 = canvas.add_axes(title="", xlabel="", row=2, col=0, colspan=2)
+ax4 = canvas.add_axes(title="", xlabel="", row=0, col=2)
+ax5 = canvas.add_axes(title="", xlabel="", row=1, col=2)
+ax6 = canvas.add_axes(title="", xlabel="", row=2, col=2)
+ax7 = canvas.add_axes(title="", xlabel="", row=0, col=3)
+ax8 = canvas.add_axes(title="", xlabel="", row=1, col=3)
+
+if kpView.kProfiles.isCoreProfilesPresent:
+    kpView.viewCentralTemperatureWaveforms(ax1)  # Central temperature waveforms
+    kpView.viewCentralDensityWaveforms(ax2)  # Central density waveforms
+    kpView.viewCentralZeffWaveform(ax3)  # Central Zeff waveform
+    kpView.viewTemperatureProfiles(ax4)  # Temperature profiles
+    kpView.viewZeffProfile(ax5)  # Zeff profiles
+    kpView.viewVpolProfile(ax6)  # Vpol profiles
+    kpView.viewDensityProfiles(ax7)  # Density profiles
+    kpView.viewVtorProfile(ax8)  # Vtol profiles
+    scenario = f"shot {args.shot},{args.run} time:{kpView.kProfiles.commonTime:.2f}"
+
+    canvas.setText(text=f"{hostdir} ({scenario})")
+
+    wm = canvas.get_current_fig_manager()
+    window = wm.window
+    screen_y = window.winfo_screenheight()
+    screen_x = window.winfo_screenwidth()
+    wm.resize(screen_x, screen_y)
+    canvas.fig.subplots_adjust(
+        top=0.928, bottom=0.11, left=0.033, right=0.91, hspace=0.435, wspace=0.518
+    )
+
+    if not args.save:
+        toptitle = f"Plasma kinetic profiles ({scenario})"
+        canvas.fig.suptitle(toptitle)
+
+    if args.save:
+        fname = f"Kinetic_shot_{args.shot}_run_{args.run}_time_{args.time}.png"
+        canvas.fig.set_size_inches(12, 7)
+        canvas.save(fname)
+    else:
+        canvas.show()

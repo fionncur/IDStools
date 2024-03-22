@@ -74,6 +74,7 @@ setup(
         "scripts/viewedgeprofiles",
         "scripts/viewequilibrium",
         "scripts/viewfluxes",
+        "scripts/viewkineticprofiles",
         "scripts/viewhcdwaves",
         "scripts/viewmachinedescription",
         "scripts/viewneutron",

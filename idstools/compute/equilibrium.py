@@ -318,6 +318,14 @@ class EquilibriumCompute:
         topViewDict["yplap"] = (r0 + amin) * np.sin(phit)
         return topViewDict
 
+    def getmrho(self, timeSlice: int = 0):
+        mrho=0
+        for i in range(len(self.ids.time_slice[0].profiles_1d.rho_tor_norm)):
+            if self.ids.time_slice[0].profiles_1d.rho_tor_norm[i] < 0:
+                mrho = mrho + 1
+        
+        return mrho
+            
     def getgm3(self, r, timeSlice: int = 0):
         rho_tor_sep = self.ids.time_slice[timeSlice].profiles_1d.rho_tor[timeSlice]
         gm3 = (
