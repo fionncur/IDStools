@@ -1,7 +1,0 @@
-#!/bin/csh -f
-
-echo "---------------------------------------------------"
-echo "ecplot is deprecated and replaced by hcd_waves_plot"
-echo "which works exactly the same way"
-echo "---------------------------------------------------"
-
