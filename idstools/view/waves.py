@@ -396,7 +396,6 @@ class WavesView:
         ax.set_xlabel("Time (s)")
         legend = ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
         WavesView.customizeLegend(legend)
-        ax.set_ylim(0, max(np.array(ecLauncherInfo["total_current_waveform"])) * 1.2e-3)
 
     # EC POWER WAVEFORM
     def viewECPowerWaveform(self, ax, timeIndex, usepsi=False):

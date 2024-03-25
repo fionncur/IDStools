@@ -180,3 +180,7 @@ viewcoretransport -u public -d TEST -s 92436 -r 850 --save || exit 1
 echo -------viewhcdwaves-------
 viewhcdwaves -s 104104 -r 2-5 -u schneim -d TORBEAM_XMODE
 viewhcdwaves -s 105039 -r 1 -u schneim -d SAVE
+
+echo -------viewhcddistributions-------
+viewhcddistributions -s 130012 -r 15 -u schneim -d SPOT
+viewhcddistributions -s 100015 -r 108 -u schneim -d SPOT
