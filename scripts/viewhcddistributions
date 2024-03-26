@@ -3,19 +3,14 @@
 import argparse
 import logging
 import sys
-from idstools.compute.distributions import DistributionsCompute
-from idstools.view.distributions import DistributionsView
 
 import imas
 
 from idstools.compute.common import getNearestTime
-
-# from idstools.compute.waves import WavesCompute
 from idstools.utils.clihelper import getBackendID, imasParser
 from idstools.utils.idslogger import setupLogger
 from idstools.view.common import Canvas
-
-# from idstools.view.waves import WavesView
+from idstools.view.distributions import DistributionsView
 
 logger = setupLogger("module", stdout_level=logging.INFO)
 
@@ -72,6 +67,7 @@ for irun in range(runmin, runmax + 1):
     ndistributions = len(idsDistributions.distribution)
 
     canvas = Canvas(3, 2)
+    # canvas.setStyle(style="retro")
     canvas.setSupTitle(
         f"HCD Distributions Plot [Shot {args.shot} / Run {args.run}] Time : {timeValue:.1f}"
     )

@@ -95,6 +95,7 @@ for irun in range(runmin, runmax + 1):
         logger.error("Only one time slice --> ECCD and ECRH waveforms not displayed")
         rows = 1
     canvas = Canvas(rows, 2)
+    # canvas.setStyle(style="retro")
     canvas.setSupTitle(
         f"HCD Waves Plot [Shot {args.shot} / Run {args.run}] Time : {timeValue:.1f}"
     )

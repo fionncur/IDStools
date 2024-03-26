@@ -466,6 +466,109 @@ class Canvas:
     def get_current_fig_manager(self):
         return plt.get_current_fig_manager()
 
+    def setStyle(self, style="default"):
+        """
+        The function `setStyle` in allows you to set different color schemes for plots using Matplotlib based on the specified style parameter. Available styles are vibrant, retro, muted, high-vis, contrast, bright
+
+        Args:
+            style: The `setStyle` function allows you to set different color schemes for your plots based on the `style` parameter you provide. Defaults to default
+        """
+        if style == "default":
+            # Standard SciencePlots color cycle
+
+            # Set color cycle: blue, green, yellow, red, violet, gray
+            matplotlib.rcParams["axes.prop_cycle"] = matplotlib.cycler(
+                "color",
+                ["0C5DA5", "00B945", "FF9500", "FF2C00", "845B97", "474747", "9e9e9e"],
+            )
+        if style == "vibrant":
+            # Vibrant color scheme
+            # color-blind safe
+            # from Paul Tot's website: https://personal.sron.nl/~pault/
+
+            # Set color cycle
+            matplotlib.rcParams["axes.prop_cycle"] = matplotlib.cycler(
+                "color",
+                ["EE7733", "0077BB", "33BBEE", "EE3377", "CC3311", "009988", "BBBBBB"],
+            )
+        if style == "retro":
+            # Retro color style
+
+            # Set color cycle
+            matplotlib.rcParams["axes.prop_cycle"] = matplotlib.cycler(
+                "color", ["4165c0", "e770a2", "5ac3be", "696969", "f79a1e", "ba7dcd"]
+            )
+        if style == "muted":
+            # Muted color scheme
+            # color-blind safe
+            # from Paul Tot's website: https://personal.sron.nl/~pault/
+
+            # Set color cycle
+            matplotlib.rcParams["axes.prop_cycle"] = matplotlib.cycler(
+                "color",
+                [
+                    "CC6677",
+                    "332288",
+                    "DDCC77",
+                    "117733",
+                    "88CCEE",
+                    "882255",
+                    "44AA99",
+                    "999933",
+                    "AA4499",
+                    "DDDDDD",
+                ],
+            )
+        if style == "light":
+            # Light color scheme
+            # color-blind safe
+            # from Paul Tot's website: https://personal.sron.nl/~pault/
+
+            # Set color cycle
+            matplotlib.rcParams["axes.prop_cycle"] = matplotlib.cycler(
+                "color",
+                [
+                    "77AADD",
+                    "EE8866",
+                    "EEDD88",
+                    "FFAABB",
+                    "99DDFF",
+                    "44BB99",
+                    "BBCC33",
+                    "AAAA00",
+                    "DDDDDD",
+                ],
+            )
+
+        if style == "high-vis":
+            # Matplotlib style for high visability plots (i.e., bright colors!!!)
+
+            # Set color cycle
+            matplotlib.rcParams["axes.prop_cycle"] = matplotlib.cycler(
+                "color", ["0d49fb", "e6091c", "26eb47", "8936df", "fec32d", "25d7fd"]
+            ) + matplotlib.cycler("ls", ["-", "--", "-.", ":", "-", "--"])
+
+        if style == "contrast":
+            # High-contrast color scheme
+            # color-blind safe
+            # from Paul Tot's website: https://personal.sron.nl/~pault/
+
+            # Set color cycle
+            matplotlib.rcParams["axes.prop_cycle"] = matplotlib.cycler(
+                "color", ["004488", "DDAA33", "BB5566"]
+            )
+
+        if style == "bright":
+            # Bright color scheme
+            # color-blind safe
+            # from Paul Tot's website: https://personal.sron.nl/~pault/
+
+            # Set color cycle
+            matplotlib.rcParams["axes.prop_cycle"] = matplotlib.cycler(
+                "color",
+                ["4477AA", "EE6677", "228833", "CCBB44", "66CCEE", "AA3377", "BBBBBB"],
+            )
+
 
 class BasePlot:
     def database_info(self, ax, title, hostdir, shot, run, t):

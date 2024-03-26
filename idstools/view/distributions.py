@@ -1,7 +1,8 @@
-from idstools.compute.distributions import DistributionsCompute
+import logging
 
 import numpy as np
-import logging
+
+from idstools.compute.distributions import DistributionsCompute
 
 logger = logging.getLogger(f"module.{__name__}")
 
