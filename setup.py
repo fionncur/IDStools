@@ -75,6 +75,7 @@ setup(
         "scripts/viewequilibrium",
         "scripts/viewfluxes",
         "scripts/viewhcddistributions",
+        "scripts/viewhcdplots",
         "scripts/viewkineticprofiles",
         "scripts/viewhcdwaves",
         "scripts/viewmachinedescription",

@@ -11,6 +11,7 @@ Analysis tools aid in the examination of IDS data in terms of plasma composition
    viewequilibrium
    viewfluxes
    viewkineticprofiles
+   viewhcdplots
    viewhcdwaves
    viewhcddistributions
    viewmachinedescription
