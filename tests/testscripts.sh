@@ -131,8 +131,8 @@ for i in ${tests[@]}; do
     viewcoresources -s $shot -r $run --save || exit 1
 done
 
-echo TESTING: viewwall wall iter --save
-viewwall wall iter --save || exit 1
+echo TESTING: viewwall --save wall iter 
+viewwall --save wall iter  || exit 1
 
 # echo -------idscp-------
 # echo TESTING: idscp -si 131024 -ri 10 -so 145000 -ro 2 -f
