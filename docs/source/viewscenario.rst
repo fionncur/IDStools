@@ -9,7 +9,7 @@ the core_profiles and equilibrium IDSs.
  Syntax viewscenario
 *********************
 
-   .. code:: bash
+   .. code-block:: bash
 
       $ viewscenario -h
       usage: viewscenario [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] -s SHOT -r RUN [-t TIME | -n] [-i] [--save]
@@ -37,7 +37,7 @@ the core_profiles and equilibrium IDSs.
  Example
 *********
 
-   .. code:: bash
+   .. code-block:: bash
 
       $ viewpressure -s 134174 -r 117
       Time  = 71.44 s in range [10.60,75.00] s

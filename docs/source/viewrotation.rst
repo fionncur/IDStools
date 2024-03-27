@@ -9,7 +9,7 @@ core_profiles IDSs.
  Syntax viewrotation
 *********************
 
-   .. code:: bash
+   .. code-block:: bash
 
       $ viewrotation -h
       usage: viewrotation [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] -s SHOT -r RUN [-t TIME] [--save] [-i]
@@ -36,7 +36,7 @@ core_profiles IDSs.
  Example
 *********
 
-   .. code:: bash
+   .. code-block:: bash
 
       $ viewrotation -s 134174 -r 117
       Time  = 75.00 s in range [10.60,75.00] s

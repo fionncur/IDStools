@@ -12,7 +12,7 @@ along with particles and energy flux of ions.
  Syntax viewsources
 ********************
 
-.. code:: bash
+.. code-block:: bash
 
    $ viewsources -h
    usage: viewsources [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] [-m {CLOSEST,PREVIOUS,LINEAR}] [-o OCCURRENCE] -s SHOT -r RUN
@@ -42,7 +42,7 @@ along with particles and energy flux of ions.
  Example viewsources
 *********************
 
-   .. code:: bash
+   .. code-block:: bash
 
       $ viewsources -s 134174 -r  117
       Time = 10.599 for public/ITER/3/134174/117
@@ -137,7 +137,7 @@ along with particles and energy flux of ions.
             3.0       1.0    -9e+40             0.000000e+00                       --
             9.0       4.0    -9e+40             0.000000e+00                       --
 
-   .. code:: bash
+   .. code-block:: bash
 
       $ viewsources -s 134174 -r 117 -m PREVIOUS -t 50
 

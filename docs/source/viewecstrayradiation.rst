@@ -14,7 +14,7 @@ resonance layer, top view equilibrium.
  Syntax viewecstrayradiation
 *****************************
 
-.. code:: bash
+.. code-block:: bash
 
    $ viewecstrayradiation -h
    Install tqdm to enable progress bar
@@ -39,7 +39,7 @@ resonance layer, top view equilibrium.
  Example ecstray
 *****************
 
-   .. code:: bash
+   .. code-block:: bash
 
       $ viewecstrayradiation -s 134174 -r 117
 

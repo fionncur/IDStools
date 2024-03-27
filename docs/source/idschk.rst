@@ -8,7 +8,7 @@
  Syntax idschk
 ***************
 
-   .. code:: bash
+   .. code-block:: bash
 
       $ idschk -h
       Install tqdm to enable progress bar
@@ -46,7 +46,7 @@
  Example idschk
 ****************
 
-   .. code:: bash
+   .. code-block:: bash
 
       $ idschk -s 134174 -r 117 -f /home/ITER/sawantp1/git/idstools/database_tools/validation_schemas/generic/core_profiles.yml
 
@@ -64,7 +64,7 @@
               profiles_1d[4].grid.rho_tor_norm[:]:
               - Must be larger than 0.0
 
-   .. code:: bash
+   .. code-block:: bash
 
       # Command Line Interface for IDS Data Validation (idschk)
       # Examples:
@@ -81,7 +81,7 @@
       # Check IDS/equilibrium with COCOS values
       $ idschk -s 131024 -r 40 -c --verbose
 
-   .. code:: python
+   .. code-block:: python
 
       # Functional Interface in Python (database_tools/idschk.py)
       # Examples:

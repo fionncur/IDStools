@@ -9,7 +9,7 @@ core_profiles IDSs
  Syntax viewkineticprofiles
 ****************************
 
-.. code:: bash
+.. code-block:: bash
 
    $ viewkineticprofiles -h
    usage: viewkineticprofiles [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] -s SHOT -r RUN [-t TIME] [-e] [--verbose] [--save]
@@ -37,7 +37,7 @@ core_profiles IDSs
  Example viewkineticprofiles
 *****************************
 
-   .. code:: bash
+   .. code-block:: bash
 
       $ viewkineticprofiles -s 134174 -r 117
       Time  = 71.44 s in range [10.60,75.00] s

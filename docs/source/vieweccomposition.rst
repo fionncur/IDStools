@@ -8,7 +8,7 @@
  Syntax vieweccomposition
 **************************
 
-.. code:: bash
+.. code-block:: bash
 
    $ viieweccomposition -h
    usage: vieweccomposition [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] -s SHOT -r RUN [-t TIME] [-f FORCE_PSI] [--verbose] [--save]
@@ -37,7 +37,7 @@
  Example vieweccomposition
 ***************************
 
-   .. code:: bash
+   .. code-block:: bash
 
       $ vieweccomposition -u schneim -d TORBEAM -s 134173 -r 2326
 

@@ -13,7 +13,7 @@ loaded.
 
 Install using pip
 
-.. code:: bash
+.. code-block:: bash
 
    git clone ssh://git@git.iter.org/imas/idstools.git
    cd idstools
@@ -26,7 +26,7 @@ Install using pip
    If you are using ITER sdcc cluster then IDSTools is available by
    doing module load as shown below
 
-.. code:: bash
+.. code-block:: bash
 
    module load IMAS
    module load IDStools/1.14.0-intel-2020b
@@ -34,7 +34,7 @@ Install using pip
 In addition, several versions of *IDSTools* are available on the
 cluster.
 
-.. code:: bash
+.. code-block:: bash
 
    module av -i idstools
    # IDStools/1.14.0-gfbf-2022b
@@ -46,7 +46,7 @@ cluster.
 
 Clone *IDSTools* repository.
 
-.. code:: bash
+.. code-block:: bash
 
    git clone ssh://git@git.iter.org/imas/idstools.git
 
@@ -55,13 +55,13 @@ submit pull requests.
 
 The *IDSTools* test suite should be run as follows.:
 
-.. code:: bash
+.. code-block:: bash
 
    cd idstools
    pytest
 
 To build the *IDSTools* documentation, execute:
 
-.. code:: bash
+.. code-block:: bash
 
    make -C docs html

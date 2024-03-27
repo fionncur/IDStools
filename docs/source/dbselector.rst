@@ -9,7 +9,7 @@ exists. Just provide idsname as input arguement to the script.
  Syntax dbselector
 *******************
 
-.. code:: bash
+.. code-block:: bash
 
    $ dbselector -h
    Install tqdm to enable progress bar
@@ -35,7 +35,7 @@ exists. Just provide idsname as input arguement to the script.
  Example dbselector
 ********************
 
-.. code:: bash
+.. code-block:: bash
 
    $ dbselector edge_profiles
    (123148, 4)

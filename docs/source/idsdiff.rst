@@ -10,7 +10,7 @@ graph.
  Syntax idsdiff
 ****************
 
-.. code:: bash
+.. code-block:: bash
 
    $ idsdiff -h
    usage: idsdiff [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION]
@@ -50,7 +50,7 @@ graph.
  Example idsdiff
 *****************
 
-   .. code:: bash
+   .. code-block:: bash
 
       $ idsdiff --generate-html 122525 1 122525 2 summary
 

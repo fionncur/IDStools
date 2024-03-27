@@ -9,7 +9,7 @@ search facility
  Syntax scenario_summary
 *************************
 
-.. code:: bash
+.. code-block:: bash
 
    $ scenario_summary -h
    usage: scenario_summary [-h] [-f FOLDER] [-s [SELECTION [SELECTION ...]]] [--sort SORT] [-m] [-o] [-c CHOICE]
@@ -63,7 +63,7 @@ search facility
  Example scenario_summary
 **************************
 
-.. code:: bash
+.. code-block:: bash
 
    $ scenario_summary -s He4,2.65
    ----> Default call equivalent to:
@@ -83,14 +83,14 @@ search facility
    114103  33   ITER    Vasilli He 7.5MA 2.65T L-H transition               -7.5   -2.65    He4      H-mode    JINTRAC mkimas + spider-inverse  2023-02-10 14:15:04
    114103  43   ITER    Vasilli He 7.5MA 2.65T L-H transition               -7.5   -2.65    He4      H-mode    JINTRAC mkimas + spider-inverse  2023-02-10 14:15:12
 
-.. code:: bash
+.. code-block:: bash
 
    $ scenario_summary -s He4,2.65 -c shot,run,database,composition
    Pulse  Run Database                                    Composition X[ni/ne]
    131042  11   ITER    D(0.497),T(0.456),Be(0.020),He4(0.015),Ne(2.50e-03),Xe(2.65e-05),H(1.54e-05),W(7.02e-06)
    131042  12   ITER    D(0.497),T(0.456),Be(0.020),He4(0.015),Ne(2.50e-03),Xe(2.65e-05),H(1.54e-05),W(7.02e-06)
 
-.. code:: bash
+.. code-block:: bash
 
    $ scenario_summary -s He4 2.65
    ----> Default call equivalent to:

@@ -12,7 +12,7 @@ along with particles and nergy flux of ions.
  Syntax viewfluxes
 *******************
 
-.. code:: bash
+.. code-block:: bash
 
    $ viewfluxes -h
    usage: viewfluxes [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] [-m {CLOSEST,PREVIOUS,LINEAR}] [-o OCCURRENCE] -s SHOT -r RUN
@@ -42,7 +42,7 @@ along with particles and nergy flux of ions.
  Example viewfluxes
 ********************
 
-   .. code:: bash
+   .. code-block:: bash
 
       $ viewfluxes -s 134174 -r  117 -m CLOSEST
 
@@ -76,7 +76,7 @@ along with particles and nergy flux of ions.
           3.0       1.0    -9e+40                       --                       --
           9.0       4.0    -9e+40                       --                       --
 
-   .. code:: bash
+   .. code-block:: bash
 
       $ viewfluxes 134174  117 -m PREVIOUS -t 50
 

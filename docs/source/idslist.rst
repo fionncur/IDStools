@@ -11,7 +11,7 @@ values or generate output in YAML format.
  Syntax idslist
 ****************
 
-   .. code:: bash
+   .. code-block:: bash
 
       $ idslist -h
       Install tqdm to enable progress bar
@@ -46,7 +46,7 @@ values or generate output in YAML format.
  Example idslist
 *****************
 
-   .. code:: bash
+   .. code-block:: bash
 
       $ idslist -s 134174 -r 117
       Install tqdm to enable progress bar
@@ -59,7 +59,7 @@ values or generate output in YAML format.
       equilibrium    : 106   slices: [  1.2    1.5    1.8  ... 146.44 147.94 149.44]
       summary        : 106   slices: [10.3 10.3 10.3 ... 75.  75.  75. ]
 
-   .. code:: bash
+   .. code-block:: bash
 
       $ idslist -s 134174 -r 117 yaml
       Install tqdm to enable progress bar
@@ -88,7 +88,7 @@ values or generate output in YAML format.
           time_step_number: 106
           start_end_step:   [10.299692307692405 75.00005602665553 0.6161939401806011]
 
-   .. code:: bash
+   .. code-block:: bash
 
       $ idslist -s 134174 -r 117 occ
       Install tqdm to enable progress bar

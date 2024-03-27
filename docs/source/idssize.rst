@@ -12,7 +12,7 @@ performance check of ids objects.
  Syntax idssize
 ****************
 
-   .. code:: bash
+   .. code-block:: bash
 
       $ idssize --help
       Install tqdm to enable progress bar
@@ -41,7 +41,7 @@ performance check of ids objects.
  Example idssize
 *****************
 
-   .. code:: bash
+   .. code-block:: bash
 
       $ idssize -s 122525 -r 1
       Install tqdm to enable progress bar

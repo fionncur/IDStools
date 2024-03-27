@@ -9,7 +9,7 @@ profiles and print it on the screen
  Syntax viewplasmacompo
 ************************
 
-.. code:: bash
+.. code-block:: bash
 
    $ viewplasmacompo -h
    usage: viewplasmacompo [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] -s SHOT -r RUN [-i] [--debug]
@@ -35,7 +35,7 @@ profiles and print it on the screen
  Example viewplasmacompo
 *************************
 
-.. code:: bash
+.. code-block:: bash
 
    $ viewplasmacompo -s 131047 -r 4
    !   No edge_profiles IDS in the data-entry.

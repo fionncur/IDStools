@@ -9,7 +9,7 @@ rectangular grid. It shows Electrons, Ions and Neutral density plots.
  Syntax viewedgeprofiles
 *************************
 
-.. code:: bash
+.. code-block:: bash
 
    $ viewedgeprofiles -h
    usage: viewedgeprofiles [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] -s SHOT -r RUN [-t TIME] [--separatix] [--save]
@@ -36,7 +36,7 @@ rectangular grid. It shows Electrons, Ions and Neutral density plots.
  Example viewedgeprofiles
 **************************
 
-   .. code:: bash
+   .. code-block:: bash
 
       $ viewedgeprofiles -s 123314 -r 1
 

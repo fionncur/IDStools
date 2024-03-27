@@ -8,7 +8,7 @@
  Syntax eqdsk2ids
 ******************
 
-   .. code:: bash
+   .. code-block:: bash
 
       $ eqdsk2ids -h
       usage: eqdsk2ids [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] -s SHOT -r RUN -g GPATH [--log {DEBUG,INFO,WARNING,ERROR,CRITICAL}] [--ipsign {-1,0,1}]
@@ -39,7 +39,7 @@
  Example eqdsk2ids
 *******************
 
-   .. code:: bash
+   .. code-block:: bash
 
       $ eqdsk2ids -s 134174 -r 117 -g /home/ITER/sawantp1/git/idstools/tests/geqdsk/example.gfile -u sawantp1 -d ITER --log INFO
       24/03/20 17:19:44 INFO: loading GEQDSK file ...
@@ -80,7 +80,7 @@
       24/03/20 17:19:44 INFO: creating output datafile ...
       24/03/20 17:19:44 INFO: IDS/equilibrium populated in shot/run = 134174/117.
 
-   .. code:: bash
+   .. code-block:: bash
 
       # Command Line Interface for EQDSK Convertor (eqdsk2ids)
       # Usage:
@@ -97,7 +97,7 @@
       # 4) Coerce input COCOS index
       $ eqdsk2ids -g path_to_gfile -s 12345 -r 1 -u userid -d ITER --cocos_in 7
 
-   .. code:: python
+   .. code-block:: python
 
       # Functional Interface in Python (database_tools/eqdsk2ids.py)
       # Usage:

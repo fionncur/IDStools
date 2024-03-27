@@ -9,7 +9,7 @@ folder with search facility
  Syntax md_summary
 *******************
 
-.. code:: bash
+.. code-block:: bash
 
    $ md_summary  -h
    usage: md_summary [-h] [-f FOLDER] [-s [SELECTION [SELECTION ...]]] [-o] [-m] [-c CHOICE]
@@ -48,7 +48,7 @@ folder with search facility
  Example md_summary
 ********************
 
-.. code:: bash
+.. code-block:: bash
 
    $ md_summary  -s 150502/102
    ----> Default call equivalent to:
@@ -65,7 +65,7 @@ folder with search facility
    PBS-55.E2  camera_visible  H-alpha - Field of View geometry                                      mdsplus,hdf5  150502/102
    NOTE: Read entry from MD database using user = 'public', database = 'ITER_MD'
 
-.. code:: bash
+.. code-block:: bash
 
    $ md_summary  -s nbi,on-on
    ----> Default call equivalent to:
@@ -73,7 +73,7 @@ folder with search facility
    PBS     IDS  DESCRIPTION                                      BACKEND       SHOT/RUN
    PBS-53  nbi  Heating Neutral Beams (HNB) - HNB1-HNB2 = on-on  mdsplus,hdf5  130000/2501
 
-.. code:: bash
+.. code-block:: bash
 
    $ md_summary  -s nbi on-on
    ----> Default call equivalent to:

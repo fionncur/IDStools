@@ -9,7 +9,7 @@ energy, momentum and poloidal flux.
  Syntax viewcoretransport
 **************************
 
-   .. code:: bash
+   .. code-block:: bash
 
       $ viewcoretransport -h
       usage: viewcoretransport [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] [-m {CLOSEST,PREVIOUS,LINEAR}] [-o OCCURRENCE] -s SHOT -r RUN [-t TIME]
@@ -38,7 +38,7 @@ energy, momentum and poloidal flux.
  Example
 *********
 
-   .. code:: bash
+   .. code-block:: bash
 
       $ viewcoretransport -u costerd -d jet_reference_g2tjohns -s 92436 -r 850
 

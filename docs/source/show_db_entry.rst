@@ -9,7 +9,7 @@ folder
  Syntax show_db_entry
 **********************
 
-.. code:: bash
+.. code-block:: bash
 
    $ show_db_entry -h
    usage: show_db_entry [-h] [-f FOLDER] -s SHOT -r RUN
@@ -27,7 +27,7 @@ folder
  Example show_db_entry
 ***********************
 
-.. code:: bash
+.. code-block:: bash
 
    $ show_db_entry -s 134174 -r 117
    # ------------------------------------------------------------------

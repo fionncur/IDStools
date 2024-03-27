@@ -11,7 +11,7 @@ scenario description database folder
  Syntax scenario_status
 ************************
 
-.. code:: bash
+.. code-block:: bash
 
    $ dscenario_status -h
    usage: scenario_status [-h] [-f FOLDER] -s SHOT -r [0-9999] [--print]
@@ -31,7 +31,7 @@ scenario description database folder
  Example scenario_status
 *************************
 
-.. code:: bash
+.. code-block:: bash
 
    $ scenario_status -s 134174 -r 117
    -----------------------------------------------------------------
@@ -45,7 +45,7 @@ scenario description database folder
    *134174  117  active    (134174,107)
    -----------------------------------------------------------------
 
-.. code:: bash
+.. code-block:: bash
 
    $ scenario_status -s 130012 -r 4 --print
    {

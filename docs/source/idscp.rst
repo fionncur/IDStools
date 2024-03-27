@@ -8,7 +8,7 @@
  Syntax idscp
 **************
 
-   .. code:: bash
+   .. code-block:: bash
 
       $ idscp -h
       usage: idscp [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] -si SHOT_INPUT -ri
@@ -54,7 +54,7 @@
  Example idscp
 ***************
 
-   .. code:: bash
+   .. code-block:: bash
 
       $ idscp -si 131024 -ri 10 -so 145000 -ro 2
       Copying equilibrium

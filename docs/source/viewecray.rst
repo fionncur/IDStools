@@ -9,7 +9,7 @@ output of TORBEAM code.
  Syntax viewecray
 ******************
 
-.. code:: bash
+.. code-block:: bash
 
    $ viewwavespropndepo -h
    usage: viewwavespropndepo [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] -s SHOT -r RUN [-t TIME] [--wall] [--save]
@@ -36,7 +36,7 @@ output of TORBEAM code.
  Example viewecray
 *******************
 
-   .. code:: bash
+   .. code-block:: bash
 
       $ viewecray -d TEST -s 134173 -r 2326
 

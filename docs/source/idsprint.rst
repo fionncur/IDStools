@@ -11,7 +11,7 @@ can also be saved to a file using extraction.
  Syntax idsprint
 *****************
 
-   .. code:: bash
+   .. code-block:: bash
 
       $ idsprint -h
       usage: idsprint [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] -s SHOT -r RUN [-f] ids
@@ -39,7 +39,7 @@ can also be saved to a file using extraction.
  Example idsprint
 ******************
 
-   .. code:: bash
+   .. code-block:: bash
 
       $ idsprint -s 134174 -r 117 equilibrium
 

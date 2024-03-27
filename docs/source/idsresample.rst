@@ -12,7 +12,7 @@ original IDS
  Syntax idsresample
 ********************
 
-   .. code:: bash
+   .. code-block:: bash
 
       $ idsresample --help
       Install tqdm to enable progress bar
@@ -62,7 +62,7 @@ original IDS
  Example idsresample
 *********************
 
-   .. code:: bash
+   .. code-block:: bash
 
       $ idsresample -si 131024 -ri 10 -so 145000 -ro 2
       Install tqdm to enable progress bar

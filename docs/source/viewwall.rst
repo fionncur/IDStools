@@ -14,7 +14,7 @@ https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/CI/imas-3.3
  Syntax viewwall
 *****************
 
-.. code:: bash
+.. code-block:: bash
 
    $ viewwall -h
    usage: viewwall [-h] {wall,database} ...
@@ -33,7 +33,7 @@ https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/CI/imas-3.3
  Example viewwall
 ******************
 
-   .. code:: bash
+   .. code-block:: bash
 
       $ viewwall wall iter
 
@@ -41,7 +41,7 @@ https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/CI/imas-3.3
       :alt: image not found
       :align: center
 
-   .. code:: bash
+   .. code-block:: bash
 
       $ viewwall database -u schneim --database jet -s 92436 -r 271
 

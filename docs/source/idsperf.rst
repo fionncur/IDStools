@@ -10,7 +10,7 @@ IDS data with the IMAS Python Access Layer
  Syntax idsperf
 ****************
 
-   .. code:: bash
+   .. code-block:: bash
 
       $ idsperf -h
       usage: idsperf [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] [-t SLICETIME [SLICETIME ...] | -a] [-m] [-do DATABASE_OUTPUT]
@@ -54,7 +54,7 @@ IDS data with the IMAS Python Access Layer
  Example idsperf (all idses)
 *****************************
 
-   .. code:: bash
+   .. code-block:: bash
 
       $ idsperf -s 134174 -r 117
       core_profiles best time = 1.0308142956346273 s
@@ -70,7 +70,7 @@ IDS data with the IMAS Python Access Layer
  Example idsperf (one ids)
 ***************************
 
-   .. code:: bash
+   .. code-block:: bash
 
       $ idsperf -s 134174 -r 117 equilibrium
       equilibrium best time = 0.6310763321816921 s
@@ -79,7 +79,7 @@ IDS data with the IMAS Python Access Layer
  Example idsperf (Show statistics --showStats --repeat)
 ********************************************************
 
-   .. code:: bash
+   .. code-block:: bash
 
       $ idsperf -s 134174 -r 117 equilibrium --showStats --repeat 2
       All timings  = [0.6093323398381472, 0.5525227133184671]
@@ -92,7 +92,7 @@ IDS data with the IMAS Python Access Layer
  Example idsperf (All slices get_slice performance)
 ****************************************************
 
-   .. code:: bash
+   .. code-block:: bash
 
       $ idsperf -s 134174 -r 117 equilibrium  -a
       equilibrium best time = 0.9812253648415208 s
@@ -101,7 +101,7 @@ IDS data with the IMAS Python Access Layer
  Example idsperf (single SLICETIME get_slice performance)
 **********************************************************
 
-   .. code:: bash
+   .. code-block:: bash
 
       $ idsperf -s 134174 -r 117 equilibrium  -t 50
       equilibrium best time = 0.022071588784456253 s
@@ -110,7 +110,7 @@ IDS data with the IMAS Python Access Layer
  Example idsperf (put operation)
 *********************************
 
-   .. code:: bash
+   .. code-block:: bash
 
       $ idsperf -s 134174 -r 117 equilibrium -do HBD -bo MDSPLUS -o 412
       equilibrium best time = 0.5791653310880065 s
@@ -119,7 +119,7 @@ IDS data with the IMAS Python Access Layer
  Example idsperf (memory backend)
 **********************************
 
-   .. code:: bash
+   .. code-block:: bash
 
       $ idsperf -s 134174 -r 117 equilibrium  -t 50 -m
       First import data into memory...

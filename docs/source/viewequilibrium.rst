@@ -9,7 +9,7 @@ shows pf coils position and toroidal flux.
  Syntax viewequilibrium
 ************************
 
-.. code:: bash
+.. code-block:: bash
 
    $ viewequilibrium -h
    usage: viewequilibrium [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] -s SHOT -r RUN
@@ -41,7 +41,7 @@ shows pf coils position and toroidal flux.
  Example viewequilibrium
 *************************
 
-   .. code:: bash
+   .. code-block:: bash
 
       $ viewequilibrium -s 134174 -r 117 --rho --pfcoils --info
 

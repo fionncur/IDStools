@@ -10,7 +10,7 @@ different windows.
  Syntax viewspectrometry
 *************************
 
-   .. code:: bash
+   .. code-block:: bash
 
       $ viewspectrometry -h
       usage: viewspectrometry [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] -s SHOT -r RUN [-t TIME] [--save]
@@ -36,11 +36,11 @@ different windows.
  Example
 *********
 
-   .. code:: bash
+   .. code-block:: bash
 
       $ viewspectrometry --shot 150512 --run 3 --database ITER_MD
 
-   .. code:: bash
+   .. code-block:: bash
 
       $ viewspectrometry -u schneim -d 55.EC -s 134000 -r 37
 

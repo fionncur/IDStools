@@ -10,7 +10,7 @@ https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/CI/imas-3.3
  Syntax viewneutron
 ********************
 
-   .. code:: bash
+   .. code-block:: bash
 
       $ viewneutron -h
       usage: viewneutron [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] -s SHOT -r RUN [-t TIME] [--save] [-i]
@@ -37,7 +37,7 @@ https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/CI/imas-3.3
  Example
 *********
 
-   .. code:: bash
+   .. code-block:: bash
 
       $ viewneutron -s 121014 -r 11 -t 450 --info
       Time  = 482.00 s

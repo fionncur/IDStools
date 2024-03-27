@@ -10,7 +10,7 @@ core_profiles.
  Syntax viewpressure
 *********************
 
-   .. code:: bash
+   .. code-block:: bash
 
       $ viewpressure -h
       usage: viewpressure [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] -s SHOT -r RUN [-t TIME] [--save] [-i]
@@ -37,7 +37,7 @@ core_profiles.
  Example
 *********
 
-   .. code:: bash
+   .. code-block:: bash
 
       $ viewpressure -s 134174 -r 117
       Time  = 71.44 s in range [10.60,75.00] s

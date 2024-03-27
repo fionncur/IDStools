@@ -13,7 +13,7 @@ is in active state.
  Syntax md_status
 ******************
 
-.. code:: bash
+.. code-block:: bash
 
    $ md_status -h
    usage: md_status [-h] [-f FOLDER] -s SHOT -r [0-9999]
@@ -32,7 +32,7 @@ is in active state.
  Example md_status
 *******************
 
-.. code:: bash
+.. code-block:: bash
 
    $ md_status -s 116000 -r 3
    -----------------------------------------------------------------

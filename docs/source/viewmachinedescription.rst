@@ -9,7 +9,7 @@ databases
  Syntax viewmachinedescription
 *******************************
 
-   .. code:: bash
+   .. code-block:: bash
 
       $ viewmachinedescription -h
       usage: viewmachinedescription [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] {list,plot} ...
@@ -36,7 +36,7 @@ databases
  Example
 *********
 
-   .. code:: bash
+   .. code-block:: bash
 
       $ viewmachinedescription -d ITER_MD
       23/11/20 23:20:26 WARNING: VS3U : pf_active.coil.element.geometry.rectangle is empty
@@ -49,7 +49,7 @@ databases
       :alt: image not found
       :align: center
 
-   .. code:: bash
+   .. code-block:: bash
 
       $ viewmachinedescription list pf_active --obsolete
           Pulse |                       IDS Name |                    Status
@@ -65,7 +65,7 @@ databases
       111001/103 |                      pf_active |                    active
       111001/203 |                      pf_active |                    active
 
-   .. code:: bash
+   .. code-block:: bash
 
       $ viewmachinedescription list wall pf_active
             Pulse |                       IDS Name |                    Status

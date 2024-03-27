@@ -9,7 +9,7 @@ specified series of pulses and displays the pulse along with the value.
  dbscraper Syntax
 ******************
 
-   .. code:: bash
+   .. code-block:: bash
 
       $ dbscraper -h
 
@@ -43,7 +43,7 @@ specified series of pulses and displays the pulse along with the value.
  dbscraper Example
 *******************
 
-   .. code:: bash
+   .. code-block:: bash
 
       $ dbscraper "equilibrium/time_slice(0)/global_quantities/volume" --list-count 10
 

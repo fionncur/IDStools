@@ -9,7 +9,7 @@
  Syntax viewcoresources
 ************************
 
-.. code:: bash
+.. code-block:: bash
 
    $ viewcoresources -h
    usage: viewcoresources [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] -s SHOT -r RUN [-t TIME] [--save] [-i]
@@ -36,7 +36,7 @@
  Example viewcoresources
 *************************
 
-   .. code:: bash
+   .. code-block:: bash
 
       $ viewcoresources -s 130012 -r 5 -u username -d ITER
       Time  = 190.82 s in range [31.20,328.18] s

@@ -24,7 +24,7 @@ user name.
  Syntax dblist
 ***************
 
-.. code:: bash
+.. code-block:: bash
 
    $ dblist
    usage: dblist [-h] [-u USER] [-d DATABASE] [-v VERSION] [--backend BACKEND]
@@ -57,7 +57,7 @@ user name.
  Example dblist
 ****************
 
-.. code:: bash
+.. code-block:: bash
 
    $ dblist databases
    ITER      3
