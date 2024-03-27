@@ -178,9 +178,8 @@ viewcoretransport -u public -d TEST -s 92436 -r 850 --save || exit 1
 # idsresample -si 131024 -ri 10 -so 145000 -ro 2 || exit 1
 
 echo -------viewhcdwaves-------
-viewhcdwaves -s 104104 -r 2-5 -u schneim -d TORBEAM_XMODE
-viewhcdwaves -s 105039 -r 1 -u schneim -d SAVE
+viewhcdwaves -s 134173 -r 101 -u public -d TEST || exit 1
 
 echo -------viewhcddistributions-------
-viewhcddistributions -s 130012 -r 15 -u schneim -d SPOT
-viewhcddistributions -s 100015 -r 108 -u schneim -d SPOT
+viewhcddistributions -s 130012 -r 115 -u public -d TEST || exit 1
+
