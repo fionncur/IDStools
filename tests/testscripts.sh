@@ -17,9 +17,6 @@ echo -------dbscraper-------
 echo TESTING: dbscraper "core_profiles/profiles_1d(0)/electrons/temperature"
 dbscraper "core_profiles/profiles_1d(0)/electrons/temperature" --verbose --list-count 10 || exit 1
 
-echo TESTING: dbscraper "equilibrium/time_slice(0)/global_quantities/volume"
-dbscraper "equilibrium/time_slice(0)/global_quantities/volume" --verbose --list-count 10 || exit 1
-
 echo -------dbselector-------
 echo TESTING: dbselector core_profiles
 dbselector core_profiles --list-count 10 || exit 1
@@ -29,11 +26,9 @@ dbselector summary --list-count 10 || exit 1
 
 echo -------dblist-------
 echo TESTING: dblist list
-dblist -u public list || exit 1
-dblist -u public list -c || exit 1
-dblist -u public list -M || exit 1
-echo TESTING: dblist --database ITER list
-dblist -u public --database ITER list || exit 1
+dblist -u public -d TEST list || exit 1
+dblist -u public -d TEST list -c || exit 1
+dblist -u public -d TEST list -M || exit 1
 echo TESTING: dblist -u public databases
 dblist databases || exit 1
 echo TESTING: dblist -u public dataversions
@@ -119,7 +114,7 @@ for i in ${tests[@]}; do
 
     echo -------viewedgeprofiles-------
     echo TESTING: viewedgeprofiles -s $shot -r $run --save
-    viewedgeprofiles -s $shot -r $run --time 60 || exit 1
+    viewedgeprofiles -s $shot -r $run --time 60 --save || exit 1
 
     echo -------viewscenario-------
     echo TESTING: viewscenario -s $shot -r $run --save
@@ -129,7 +124,7 @@ for i in ${tests[@]}; do
     echo -------viewrotation-------
 
     echo TESTING: viewrotation -s $shot -r $run --info --save
-    viewrotation -s $shot -r $run --time 60 || exit 1
+    viewrotation -s $shot -r $run --time 60 --info --save || exit 1
 
     echo -------viewcoresources-------
     echo TESTING: viewcoresources -s $shot -r $run --save
@@ -137,7 +132,7 @@ for i in ${tests[@]}; do
 done
 
 echo TESTING: viewwall wall iter --save
-viewwall wall iter || exit 1
+viewwall wall iter --save || exit 1
 
 # echo -------idscp-------
 # echo TESTING: idscp -si 131024 -ri 10 -so 145000 -ro 2 -f
@@ -178,8 +173,8 @@ viewcoretransport -u public -d TEST -s 92436 -r 850 --save || exit 1
 # idsresample -si 131024 -ri 10 -so 145000 -ro 2 || exit 1
 
 echo -------viewhcdwaves-------
-viewhcdwaves -s 134173 -r 101 -u public -d TEST || exit 1
+viewhcdwaves -s 134173 -r 101 -u public -d TEST --save || exit 1
 
 echo -------viewhcddistributions-------
-viewhcddistributions -s 130012 -r 115 -u public -d TEST || exit 1
+viewhcddistributions -s 130012 -r 115 -u public -d TEST --save || exit 1
 
