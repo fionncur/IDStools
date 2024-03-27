@@ -16,6 +16,8 @@ import os
 import re
 import sys
 
+import sphinx_autosummary_accessors
+
 root_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 sys.path.insert(0, root_path)
@@ -26,7 +28,7 @@ print(f"python exec:{sys.executable}")
 print(f"sys.path:{sys.path}")
 # -- Project information -----------------------------------------------------
 
-project = "IDSTools"
+project = "IDStools"
 copyright = f"{datetime.datetime.now().year}, ITER Organization"
 author = "ITER Organization"
 
@@ -46,6 +48,8 @@ if len(versionList) == 2:
 html_context = {"is_develop": is_develop}
 
 print(f"version : {version}, release : {release}")
+
+language = "en"
 
 switcher_version = ""
 if "dev" in version:
@@ -71,6 +75,15 @@ print(f"version_string : {version_string}")
 with open("_static/version.json", "w") as file:
     json.dump(version_string, file)
 
+# -- Intersphinx configuration -----------------------------------------------
+# https://www.sphinx-doc.org/en/master/usage/extensions/intersphinx.html#configuration
+
+# intersphinx_mapping = {
+#     "python": ("https://docs.python.org/3", None),
+#     "numpy": ("https://numpy.org/doc/stable/", None),
+#     "pandas": ("https://pandas.pydata.org/docs/", None),
+#     "scipy": ("https://docs.scipy.org/doc/scipy/", None),
+# }
 
 # -- General configuration ---------------------------------------------------
 
@@ -81,19 +94,24 @@ extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.autosectionlabel",
     "sphinx.ext.todo",
-    "sphinx.ext.githubpages",
-    "sphinx.ext.viewcode",
-    "sphinx.ext.extlinks",
-    "sphinx.ext.graphviz",
+    # "sphinx.ext.githubpages",
+    "sphinx.ext.intersphinx",
+    "sphinx.ext.autosummary",
+    # "sphinx.ext.viewcode",
+    # "sphinx.ext.extlinks",
+    # "sphinx.ext.graphviz",
     "sphinx.ext.napoleon",
     "sphinx.ext.mathjax",
-    "sphinx_autodoc_typehints",
-    "sphinx_toolbox.collapse",
+    # "sphinx_autodoc_typehints",
+    # "sphinx_toolbox.collapse",
     # "sphinxcontrib.mermaid",
+    "sphinx_immaterial",
+    "sphinx_immaterial.apidoc.python.apigen",
 ]
 
+
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ["_templates"]
+# templates_path = ["_templates", sphinx_autosummary_accessors.templates_path]
 
 # The suffix of source filenames.
 source_suffix = {
@@ -105,19 +123,20 @@ source_suffix = {
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = []
+exclude_patterns = ["_build"]
 
 
 # -- Extension configuration -------------------------------------------------
 # Configuration of sphinx.ext.autodoc
 # https://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html
+autodoc_class_signature = "separated"
 
 # -- Options for HTML output -------------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = "pydata_sphinx_theme"
+html_theme = "sphinx_immaterial"
 html_favicon = "_static/favicon/favicon_ico.ico"
 html_logo = "_static/logo.png"
 # html_theme_options = {
@@ -131,41 +150,77 @@ html_logo = "_static/logo.png"
 #     "navbar_end": ["theme-switcher", "version-switcher", "navbar-icon-links"],
 # }
 html_theme_options = {
-    "search_bar_text": "Search the Docs...",
-    "external_links": [
+    "site_url": "https://sharepoint.iter.org/departments/POP/CM/IMDesign/Code%20Documentation/idstools-doc/devdocs/index.html",
+    "repo_url": "https://git.iter.org/projects/IMAS/repos/idstools",
+    "repo_name": "IDStools",
+    "icon": {
+        "repo": "fontawesome/brands/bitbucket",
+    },
+    "features": [
+        # "navigation.expand",
+        # "navigation.tabs",
+        "navigation.sections",
+        "navigation.instant",
+        # "header.autohide",
+        "navigation.top",
+        # "navigation.tracking",
+        # "search.highlight",
+        # "search.share",
+        # "toc.integrate",
+        "toc.follow",
+        "toc.sticky",
+        # "content.tabs.link",
+        "announce.dismiss",
+    ],
+    # "toc_title_is_page_title": True,
+    # "globaltoc_collapse": True,
+    "palette": [
         {
-            "name": "IMAS Getting Started",
-            "url": "https://confluence.iter.org/display/IMP/Getting+Started",
+            "media": "(prefers-color-scheme: light)",
+            "scheme": "default",
+            "primary": "light-green",
+            "accent": "light-blue",
+            "toggle": {
+                "icon": "material/lightbulb-outline",
+                "name": "Switch to dark mode",
+            },
         },
         {
-            "name": "IMAS Data Dictionary",
-            "url": "https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/CI/imas-3.37.2/html_documentation.html",
+            "media": "(prefers-color-scheme: dark)",
+            "scheme": "slate",
+            "primary": "deep-orange",
+            "accent": "lime",
+            "toggle": {
+                "icon": "material/lightbulb",
+                "name": "Switch to light mode",
+            },
         },
     ],
-    "bitbucket_url": "https://git.iter.org/projects/IMAS/repos/idstools/browse",
-    "primary_sidebar_end": ["indices.html", "sidebar-ethical-ads.html"],
-    "collapse_navigation": True,
-    "logo": {
-        "image_light": "_static/logo.png",
-        "image_dark": "_static/logo.png",
-    },
-    "show_prev_next": False,
-    "navigation_with_keys": False,
-    "switcher": {
-        "version_match": switcher_version,
-        "json_url": "https://sharepoint.iter.org/departments/POP/CM/IMDesign/_layouts/15/download.aspx?UniqueId=15778d46932e404096c0cf73fd4510b4",
-        # "json_url": "_static/versions.json",
-    },
-    "navbar_end": ["theme-switcher", "version-switcher", "navbar-icon-links"],
+    "version_dropdown": True,
+    "version_json": [
+        {
+            "version": "https://sharepoint.iter.org/departments/POP/CM/IMDesign/Code%20Documentation/idstools-doc/devdocs/index.html",
+            "title": "devdocs",
+            "aliases": [],
+        },
+    ],
 }
-html_sidebars = {
-    "**": [
-        "search-field.html",
-        # "sidebar-nav-bs.html",
-        # "sidebar-ethical-ads.html",
-        "globaltoc.html",
-    ]
-}
+# templates_path = ["_templates"]
+object_description_options = []
+
+# BEGIN: sphinx_immaterial.apidoc.format_signatures extension options
+object_description_options.append(("py:.*", dict(wrap_signatures_with_css=True)))
+# END: sphinx_immaterial.apidoc.format_signatures extension options
+
+
+# html_sidebars = {
+#     "**": [
+#         "search-field.html",
+#         # "sidebar-nav-bs.html",
+#         # "sidebar-ethical-ads.html",
+#         "globaltoc.html",
+#     ]
+# }
 # ['globaltoc.html', 'sourcelink.html', 'searchbox.html'],
 #    'using/windows': ['windowssidebar.html', 'searchbox.html']
 # Add any paths that contain custom static files (such as style sheets) here,

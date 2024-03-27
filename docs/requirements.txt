@@ -1,7 +1,10 @@
 Sphinx
 numpy
-pydata-sphinx-theme
+sphinx-immaterial
+sphinx_toolbox
 pyparsing 
 python-dateutil
 sphinx-autodoc-typehints
 sphinx-toolbox
+sphinx_autosummary_accessors
+rst2pdf

@@ -1,42 +1,48 @@
-viewecstrayradiation
-====================
+######################
+ viewecstrayradiation
+######################
 
-*viewecstrayradiation* script shows electron cyclotron stray radiation information by showing different plots. It shows cut off layer, resonance layer, top view equilibrium.
+*viewecstrayradiation* script shows electron cyclotron stray radiation
+information by showing different plots. It shows cut off layer,
+resonance layer, top view equilibrium.
 
 .. note::
-    This program is experimental and current in development.
 
-Syntax viewecstrayradiation
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-.. code-block:: bash
+   This program is experimental and current in development.
 
-    $ viewecstrayradiation -h
-    Install tqdm to enable progress bar
-    usage: ecstray [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] -s SHOT -r RUN
+*****************************
+ Syntax viewecstrayradiation
+*****************************
 
-    ---- Shows electron cyclotron stray radiation information by showing different plots
+.. code:: bash
 
-    optional arguments:
-    -h, --help            show this help message and exit
-    -u USER, --user_or_path USER
-                            user (default=public)
-    --database DATABASE, -d DATABASE
-                            database name (default=ITER)
-    --backend BACKEND, -b BACKEND
-                            backend format (default=MDSPLUS)
-    --version VERSION, -v VERSION
-                            data version (default=3)
-    -s SHOT, --shot SHOT  Shot number
-    -r RUN, --run RUN     Run number
+   $ viewecstrayradiation -h
+   Install tqdm to enable progress bar
+   usage: ecstray [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] -s SHOT -r RUN
 
-Example ecstray
-~~~~~~~~~~~~~~~
-    .. code-block:: bash
+   ---- Shows electron cyclotron stray radiation information by showing different plots
 
-        $ viewecstrayradiation -s 134174 -r 117
+   optional arguments:
+   -h, --help            show this help message and exit
+   -u USER, --user_or_path USER
+                           user (default=public)
+   --database DATABASE, -d DATABASE
+                           database name (default=ITER)
+   --backend BACKEND, -b BACKEND
+                           backend format (default=MDSPLUS)
+   --version VERSION, -v VERSION
+                           data version (default=3)
+   -s SHOT, --shot SHOT  Shot number
+   -r RUN, --run RUN     Run number
 
-    .. image:: _static/images/ecstray.png
-        :alt: image not found
-        :align: center
+*****************
+ Example ecstray
+*****************
 
+   .. code:: bash
 
+      $ viewecstrayradiation -s 134174 -r 117
+
+   .. image:: _static/images/ecstray.png
+      :alt: image not found
+      :align: center

@@ -1,60 +1,67 @@
-Installation
-============
+##############
+ Installation
+##############
 
-Because *IDSTools* is a Python package, the Python environment is required. Its functioning depends on IMAS and the data dictionary. 
-As a result, before running *IDSTools* scripts, the IMAS environment must be loaded.
+Because *IDSTools* is a Python package, the Python environment is
+required. Its functioning depends on IMAS and the data dictionary. As a
+result, before running *IDSTools* scripts, the IMAS environment must be
+loaded.
 
-For users
----------
+***********
+ For users
+***********
 
 Install using pip
 
-.. code-block:: bash
+.. code:: bash
 
-    git clone ssh://git@git.iter.org/imas/idstools.git
-    cd idstools
-    pip install --upgrade pip
-    pip install --upgrade wheel setuptools
-    pip install .
+   git clone ssh://git@git.iter.org/imas/idstools.git
+   cd idstools
+   pip install --upgrade pip
+   pip install --upgrade wheel setuptools
+   pip install .
 
 .. note::
-    If you are using ITER sdcc cluster then IDSTools is available by doing module load as shown below
 
-.. code-block:: bash
+   If you are using ITER sdcc cluster then IDSTools is available by
+   doing module load as shown below
 
-    module load IMAS
-    module load IDStools/1.14.0-intel-2020b
+.. code:: bash
 
-In addition, several versions of *IDSTools* are available on the cluster.
+   module load IMAS
+   module load IDStools/1.14.0-intel-2020b
 
-.. code-block:: bash
+In addition, several versions of *IDSTools* are available on the
+cluster.
 
-    module av -i idstools
-    # IDStools/1.14.0-gfbf-2022b
-    # IDStools/1.14.0-intel-2020b
+.. code:: bash
 
+   module av -i idstools
+   # IDStools/1.14.0-gfbf-2022b
+   # IDStools/1.14.0-intel-2020b
 
+****************
+ For Developers
+****************
 
-For Developers
---------------
+Clone *IDSTools* repository.
 
-Clone *IDSTools* repository. 
+.. code:: bash
 
-.. code-block:: bash
+   git clone ssh://git@git.iter.org/imas/idstools.git
 
-    git clone ssh://git@git.iter.org/imas/idstools.git
-
-If you wish to include additional tools or expanded functionalities, submit pull requests.
+If you wish to include additional tools or expanded functionalities,
+submit pull requests.
 
 The *IDSTools* test suite should be run as follows.:
 
-.. code-block:: bash
+.. code:: bash
 
-    cd idstools
-    pytest
+   cd idstools
+   pytest
 
 To build the *IDSTools* documentation, execute:
 
-.. code-block:: bash
+.. code:: bash
 
-    make -C docs html
+   make -C docs html

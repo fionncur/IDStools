@@ -1,6 +1,9 @@
-Tools
-=====
-Following are the different command line tools available in the *IDSTools*.
+#######
+ Tools
+#######
+
+Following are the different command line tools available in the
+*IDSTools*.
 
 .. toctree::
    :maxdepth: 2
