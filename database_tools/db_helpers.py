@@ -1,14 +1,8 @@
-from pathlib import Path
-from glob import glob 
-import yaml
 import os
-progbar = True
-try:
-    from tqdm import tqdm
-except ModuleNotFoundError:
-    progbar = False
+from glob import glob
+from pathlib import Path
 
-
+import yaml
 
 
 def get_status(path):

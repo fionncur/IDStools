@@ -1,25 +1,22 @@
 #!/usr/bin/env python3
 # Converts an IMAS database (all its data-entries) to the specified folder and backend
 
-import imas
-from imas import imasdef
-import os
 import argparse
-import pandas as pd
-from idstools.utils.clihelper import getBackendID, imasParser
-from pathlib import Path
-from database_tools.db_helpers import mdsListPulseRun, hdf5ListPulseRun, getDBPath
-from database_tools.idschk import ids_validator
-from idstools.utils.idshelper import compareIds
-from idstools.idslist import available_in_dbentry
+import os
 from datetime import datetime
-progbar = True
-try:
-    from tqdm import tqdm
-except ModuleNotFoundError:
-    print(f"Install tqdm to enable progress bar")
-    progbar = False
+from pathlib import Path
 
+import imas
+import pandas as pd
+from imas import imasdef
+from rich.progress import track
+
+from database_tools.db_helpers import (getDBPath, hdf5ListPulseRun,
+                                       mdsListPulseRun)
+from database_tools.idschk import ids_validator
+from idstools.idslist import available_in_dbentry
+from idstools.utils.clihelper import getBackendID, imasParser
+from idstools.utils.idshelper import compareIds
 
 parser = argparse.ArgumentParser(description='Copy all data-entries from one database into another one', parents=[imasParser])
 parser.add_argument("-do", "--database_out", type=str, required=True, help="Name of destination database")
@@ -39,7 +36,7 @@ if backend == imas.imasdef.MDSPLUS_BACKEND:
 elif backend == imas.imasdef.HDF5_BACKEND:
     files = hdf5ListPulseRun(locpath)
 
-for pulse in tqdm(files) if progbar else files:
+for pulse in track(files, description="[green]Processing..."):
     idsinf = []
     run = pulse[1]
     src = imas.DBEntry(backend, args.database, pulse[0], run, args.user)
@@ -47,7 +44,7 @@ for pulse in tqdm(files) if progbar else files:
     dest = imas.DBEntry(getBackendID(args.backend_output), args.database_out, pulse[0], run)
     dest.create()
     avids = available_in_dbentry(src)
-    for ids in tqdm(avids, desc=f"Pulse {pulse}") if progbar else avids:
+    for ids in track(avids, description="[orange]Processing pulse {pulse}..."):
         idsname = ids[0]
         inocc = ids[1]
         idsobj = src.get(idsname, occurrence=inocc)

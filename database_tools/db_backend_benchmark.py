@@ -1,22 +1,20 @@
 # Evaluates MDSPLUS and HDF5 Backends on IDS getting
 
-import imas
 import argparse
-import pandas as pd
+from datetime import datetime
+from pathlib import Path
+
+import imas
 import matplotlib.pyplot as plt
 import numpy as np
-from idstools.utils.clihelper import getBackendID,  imasParser
-from pathlib import Path
-from database_tools.db_helpers import getDBPath, mdsListPulseRun, hdf5ListPulseRun
-from idstools.idsperf import get_timings, byte_size
-from idstools.idslist import available_in_dbentry
-from datetime import datetime
-progbar = True
-try:
-    from tqdm import tqdm
-except ModuleNotFoundError:
-    progbar = False
+import pandas as pd
+from rich.progress import track
 
+from database_tools.db_helpers import (getDBPath, hdf5ListPulseRun,
+                                       mdsListPulseRun)
+from idstools.idslist import available_in_dbentry
+from idstools.idsperf import byte_size, get_timings
+from idstools.utils.clihelper import getBackendID, imasParser
 
 if __name__ == '__main__':
 
@@ -93,8 +91,7 @@ if __name__ == '__main__':
                 excludep = [int(x) for x in args.excludep]
                 pulses = list(set(pulses) - set(excludep))
 
-
-        for entry in tqdm(pulses) if progbar else pulses:
+        for entry in track(pulses, description="[green]Processing..."):
 
             pulse = entry[0]
             run = entry[1]
@@ -120,7 +117,7 @@ if __name__ == '__main__':
                 print('HDF5 database entry opened')
                 print(idslist)
 
-            for ids in tqdm(idslist) if progbar else idslist:
+            for ids in track(idslist, description="[green]Processing..."):
                 idsname = ids[0]
                 size = (byte_size(hdfde.get(idsname)) / 1024**2)
                 if args.slicevtime:
