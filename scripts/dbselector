@@ -13,14 +13,14 @@ from idstools.utils.idshelper import getAvailableIdsAndOccurrences
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="Check if specified ids is exists in scenario database",
+        description="Check if a given IDS exists in a database",
         parents=[imasParser],
     )
     parser.add_argument(
         "ids",
         type=str,
         default=None,
-        help="Name of the IDS to check if it is available in scenario",
+        help="Name of the IDS whose availability is being checked",
     )
     parser.add_argument("--verbose", action="store_true", help="Verbose mode")
     parser.add_argument(
@@ -32,13 +32,13 @@ if __name__ == "__main__":
         "--list-count",
         type=int,
         default=0,
-        help="number of entries user needs to display",
+        help="Number of entries user needs to display",
     )
     args = parser.parse_args()
     backend = getBackendID(args.backend)
     dbmaster = DBMaster()
     if args.verbose:
-        print(f"database located in {dbmaster.locpath}")
+        print(f"Database located in {dbmaster.getDatabaseDir(args.database,args.user)}")
         
     pulses = None
     if backend == imas.imasdef.MDSPLUS_BACKEND:
