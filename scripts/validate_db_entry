@@ -1,4 +1,5 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 import os
 import argparse
 import textwrap
@@ -7,7 +8,7 @@ import re
 import time
 
 import imas
-from idstools.cli import imas_parser
+from idstools.utils.clihelper import getBackendID, imasParser
 from idstools.set_logger import set_logger
 from database_tools import idschk
 from database_tools.db_validator import db_validator
@@ -54,7 +55,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         prog=prog,
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        parents=[imas_parser],
+        parents=[imasParser],
         description=textwrap.dedent(
             """\
             Validation Tool for ITER Scenario DB

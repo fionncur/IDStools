@@ -8,7 +8,6 @@ Syntax dbselector
 .. code-block:: bash
 
     $ dbselector -h
-    Install tqdm to enable progress bar
     usage: dbselector [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] ids
 
     Checks if spciefied ids is exists in scenario database

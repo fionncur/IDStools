@@ -12,17 +12,12 @@ import imas
 import numpy as np
 import pandas as pd
 from packaging import version
+from rich.progress import track
 
 logger = logging.getLogger("module")
 ARRAY_EQUAL_KWARGS = (
     "equal_nan=True" if version.parse(np.__version__) > version.parse("1.19") else ""
 )
-progbar = True
-try:
-    from tqdm import tqdm
-except ModuleNotFoundError:
-    print("Install tqdm to enable progress bar")
-    progbar = False
 
 
 def isIdsField(idstype: type) -> bool:
@@ -79,7 +74,7 @@ def getIDSSize(dbEntryObject: imas.DBEntry, idsNames=None) -> dict:
     if type(idsNames) is str:
         idsNames = idsNames.split(",")
     idsSizeDict = {}
-    for idsName in idsNames:
+    for idsName in track(idsNames, description="[green]Processing..."):
         occurrencesCount = eval(f"imas.{idsName}.getMaxOccurrences()")
         for o in range(occurrencesCount + 1):
             homogeneousTime = dbEntryObject.partial_get(
@@ -515,7 +510,7 @@ def getQuantitiesFromPulses(
     if listCount != 0:
         pulses = pulses[:listCount]
     values = []
-    for pulseTuple in tqdm(pulses) if progbar else pulses:
+    for pulseTuple in track(pulses, description="[green]Processing..."):
         pulse = pulseTuple[0]
         run = pulseTuple[1]
         backend = pulseTuple[2]
