@@ -2,20 +2,24 @@
  Overview
 ##########
 
-*IDSTools* is a collection of apps for modifying and getting valuable
+*IDStools* is a collection of apps for modifying and getting valuable
 information from Interface Data Structures (IDSs). It includes a library
 of routines for retrieving relevant data from IDSes. It also offers
 readily available various forms of visualizations. These tools were
 created in conjunction with scientists and software developers from the
 fusion community. The goal of having a common set of functions in the
-*IDSTools* is to reduce the work of reinventing the wheel by utilizing
+*IDStools* is to reduce the work of reinventing the wheel by utilizing
 accessible functions.
 
-*IDSTools* includes 1. Database tools 2. IDS Tools 3. Plasma Physics
-Tools
+*IDStools* is categorized into three parts
+1. Database tools provides data entry related operations
+2. IDS tools provides ids manipulation in the data entry
+3. Analysis tools provides plasma physics routines and visualization scripts
 
 Advantages:
 
--  Scripts for daily use of IMAS operations
--  A set of quickly available functions and libraries, as well as an
-   additional set of readily available visualization scripts.
+-  Different tools readiy available for for daily use of IMAS operations
+-  A set of physics functions and libraries, as well as visualization 
+scripts.
+-  IDStools is ready reference if you want to develop new routines and
+contribute

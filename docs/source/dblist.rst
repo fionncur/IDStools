@@ -32,7 +32,6 @@ user name.
 
    [Previously known as imasdbs]
 
-
    positional arguments:
    {list,slices,times,databases,dataversions}
                            sub-commands help
@@ -59,8 +58,74 @@ user name.
 
 .. code-block:: bash
 
+   # Show available databases
    $ dblist databases
    ITER      3
    ITER_MD      3
    TORBEAM      3
    test      3
+
+.. code-block:: bash
+
+   # Show available dataversions with databases from specific user database
+   $ dblist -u <username> dataversions
+   0 jet_reference
+   3        DEBUG         GRAY          HCD         ITER      TORBEAM         
+
+.. code-block:: bash
+
+   # Show available dataversions with databases from specific user database
+   $ dblist -u <username> databases
+      DEBUG    3
+      GRAY     3
+      HCD      3
+      ITER     3
+      TORBEAM  3
+      aug      3
+
+.. code-block:: bash
+
+   # Show available time slices with ids names from specific user database
+   $ dblist -u <username> slices
+   Database: DEBUG
+      Data version: 3
+         Backend: mdsplus
+            Shot 130012
+               Run:    26
+                        core_profiles:    1 slices (149.98919999999998 - 149.98919999999998)
+                        core_sources:    1 slices (149.98919999999998 - 149.98919999999998)
+                  distribution_sources:    1 slices (149.98919999999998 - 149.98919999999998)
+                        distributions:    1 slices (149.98919999999998 - 149.98919999999998)
+                                 waves:    1 slices (149.98919999999998 - 149.98919999999998)
+            Shot 134173
+               Run:    26
+
+.. code-block:: bash
+
+   # Show available time slices with ids names from specific user database with specific shot/run
+   $ dblist -u sawantp1 slices 130012 26
+   Database: DEBUG
+      Data version: 3
+         Backend: mdsplus
+            Shot 130012
+               Run:    26
+                              core_profiles:    1 slices (149.98919999999998 - 149.98919999999998)
+                              core_sources:    1 slices (149.98919999999998 - 149.98919999999998)
+                        distribution_sources:    1 slices (149.98919999999998 - 149.98919999999998)
+                              distributions:    1 slices (149.98919999999998 - 149.98919999999998)
+                                       waves:    1 slices (149.98919999999998 - 149.98919999999998)
+
+.. code-block:: bash
+
+   # Show last modified databases with compact output from  specific user database
+   dblist -u <username>  list -M -c 
+   Database: DEBUG
+      Data version: 3
+         Backend: mdsplus
+            Shot 130012:    1 runs
+            Shot 134173:    1 runs
+   Database: GRAY
+      Data version: 3
+         Backend: mdsplus
+            Shot      0:    1 runs
+            Shot 100000:    1 runs

@@ -18,14 +18,14 @@ except ModuleNotFoundError:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="Check if specified ids is exists in scenario database",
+        description="Check if specified ids is exists in the scenario database and returns shot and pulse",
         parents=[imasParser],
     )
     parser.add_argument(
         "ids",
         type=str,
         default=None,
-        help="Name of the IDS to check if it is available in scenario",
+        help="Name of the comma separated IDSes to check if it is available in scenario",
     )
     parser.add_argument("--verbose", action="store_true", help="Verbose mode")
     parser.add_argument(
@@ -40,10 +40,9 @@ if __name__ == "__main__":
         help="number of entries user needs to display",
     )
     args = parser.parse_args()
+    idsestoSearch=args.ids.split(",")
     backend = getBackendID(args.backend)
     dbmaster = DBMaster()
-    if args.verbose:
-        print(f"database located in {dbmaster.locpath}")
         
     pulses = None
     if backend == imas.imasdef.MDSPLUS_BACKEND:
@@ -71,5 +70,10 @@ if __name__ == "__main__":
             )
             connection.open()
             ids_list = getAvailableIdsAndOccurrences(connection)
-            if any(args.ids in ids for ids in ids_list):
+            foundCounter=0
+            for idsToSearch in idsestoSearch:
+                if any(idsToSearch in ids for ids in ids_list):
+                    foundCounter=foundCounter+1
+                    
+            if foundCounter == len(idsestoSearch):
                 print((pulse[0], pulse[1]))

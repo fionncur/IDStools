@@ -14,7 +14,6 @@ values or generate output in YAML format.
    .. code-block:: bash
 
       $ idslist -h
-      Install tqdm to enable progress bar
       usage: idslist [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] -s SHOT -r RUN [-f] {yaml,occ} ...
 
       List available IDSes in the pulse. By deafult it prints all IDSes alone with their time length. fullarray option allows you to print complete time array.
@@ -49,7 +48,6 @@ values or generate output in YAML format.
    .. code-block:: bash
 
       $ idslist -s 134174 -r 117
-      Install tqdm to enable progress bar
       core_profiles  : 106   slices: [10.6 10.6 10.6 ... 75.  75.  75. ]
       core_sources   : 106   slices: [10.6 10.6 10.6 ... 75.  75.  75. ]
       core_transport : 106   slices: [10.6 10.6 10.6 ... 75.  75.  75. ]
@@ -62,7 +60,6 @@ values or generate output in YAML format.
    .. code-block:: bash
 
       $ idslist -s 134174 -r 117 yaml
-      Install tqdm to enable progress bar
       core_profiles:
           time_step_number: 106
           start_end_step:   [10.599230769230868 75.00005602665553 0.6133411929278538]
@@ -91,7 +88,6 @@ values or generate output in YAML format.
    .. code-block:: bash
 
       $ idslist -s 134174 -r 117 occ
-      Install tqdm to enable progress bar
       core_profiles/0
       core_sources/0
       core_transport/0

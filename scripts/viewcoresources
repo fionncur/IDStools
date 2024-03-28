@@ -17,7 +17,7 @@ from idstools.view.core_sources import CoreSourcesView
 logger = setupLogger("module", stdout_level=logging.INFO)
 
 parser = argparse.ArgumentParser(
-    description="---- Display core_sources results", parents=[imasParser]
+    description="---- Display core_sources results [Previously known as csplot]", parents=[imasParser]
 )
 parser.add_argument("-s", "--shot", help="Shot number", required=True, type=int)
 parser.add_argument("-r", "--run", help="Run number", required=True, type=int)

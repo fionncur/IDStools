@@ -78,7 +78,7 @@ set -v
 echo "Contents of versioninfo.txt"
 cat ./ci-build/versioninfo.txt
 
-MODULE_NAME=IDSTools
+MODULE_NAME=IDStools
 COMMITHASH=$(awk -F "=" '/COMMITHASH/ {print $2}' ./ci-build/versioninfo.txt)
 RAWVERSION=$(awk -F "=" '/VERSION/ {print $2}' ./ci-build/versioninfo.txt)
 

@@ -15,7 +15,6 @@ original IDS
    .. code-block:: bash
 
       $ idsresample --help
-      Install tqdm to enable progress bar
       usage: idsresample [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] -si SHOT_INPUT -ri
                       RUN_INPUT -so SHOT_OUTPUT -ro RUN_OUTPUT [-do DATABASE_OUTPUT] [-bo BACKEND_OUTPUT]
                       [--index-range INDEX_RANGE | --time-range TIME_RANGE]
@@ -65,5 +64,4 @@ original IDS
    .. code-block:: bash
 
       $ idsresample -si 131024 -ri 10 -so 145000 -ro 2
-      Install tqdm to enable progress bar
       resampling indices :equilibrium

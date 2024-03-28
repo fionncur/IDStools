@@ -13,7 +13,6 @@ specified series of pulses and displays the pulse along with the value.
 
       $ dbscraper -h
 
-      Install tqdm to enable progress bar
       usage: dbscraper [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] [--saveas SAVEAS]
                           [--status STATUS] [--list-count LIST_COUNT] [--verbose]
                           idspath
@@ -59,3 +58,20 @@ specified series of pulses and displays the pulse along with the value.
       |  7 |  121005 |    20 | 832.297 |
       |  8 |  134110 |    23 | 786.301 |
       |  9 |  112325 |     3 |  -9e+40 |
+
+   .. code-block:: bash
+
+      $ dbscraper "equilibrium/time_slice(0)/global_quantities/volume" --list-count 10 --saveas output.csv
+
+      output.csv
+      ,PULSE,RUN,VALUE
+      0,121014,11,810.0438344549426
+      1,101004,70,809.7149892105133
+      2,123148,4,None
+      3,110501,1,315.004
+      4,123285,1,-9e+40
+      5,123166,2,None
+      6,123138,2,-9e+40
+      7,121005,20,832.2970980146007
+      8,134110,23,786.301207265036
+      9,112325,3,-9e+40

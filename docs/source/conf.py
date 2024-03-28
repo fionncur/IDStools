@@ -234,7 +234,7 @@ html_static_path = ["_static"]
 # html_css_files = ["idstools.css"]
 # html_context = {"default_mode": "light"}
 html_file_suffix = ".html"
-htmlhelp_basename = "IDSTools"
+htmlhelp_basename = "IDStools"
 
 # Configuration of sphinx.ext.autosummary
 # https://www.sphinx-doc.org/en/master/usage/extensions/autosummary.html

@@ -5,10 +5,10 @@
    contain the root `toctree` directive.
 
 ##########
- IDSTools
+ IDStools
 ##########
 
-Following are the pages that shows tools available in the IDSTools and
+Following are the pages that shows tools available in the IDStools and
 how to utilize them. It also gives API documentation to help with
 knowledge of core functionalities.
 

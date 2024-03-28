@@ -21,7 +21,6 @@ progbar = True
 try:
     from tqdm import tqdm
 except ModuleNotFoundError:
-    print("Install tqdm to enable progress bar")
     progbar = False
 
 

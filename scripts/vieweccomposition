@@ -27,7 +27,7 @@ def StrToList(string):
 # MANAGEMENT OF INPUT ARGUMENTS
 # ------------------------------
 parser = argparse.ArgumentParser(
-    description="---- Display EC results", parents=[imasParser]
+    description="---- Display EC results [previously known as eccomp]", parents=[imasParser]
 )
 parser.add_argument(
     "-s",

@@ -413,7 +413,7 @@ def generate_html(file_path, data, shotA, runA, shotB, runB):
 if __name__ == "__main__":
     # Management of input arguments
     parser = argparse.ArgumentParser(
-        description="Compare a IDS from 2 datasets", parents=[imasParser]
+        description="Compare a IDS from 2 date entries and returns True or False with option of generating html page with comparisen", parents=[imasParser]
     )
     parser.add_argument("shotA", type=int, help="shot number of first dataset")
     parser.add_argument("runA", type=int, help="run number of first dataset")
