@@ -9,6 +9,7 @@ composition, allowing you to depict various trends and plasma physics.
    :maxdepth: 1
 
    viewcoresources
+   viewecray
    viewecstrayradiation
    viewedgeprofiles
    viewequilibrium

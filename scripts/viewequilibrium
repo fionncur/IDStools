@@ -13,7 +13,7 @@ from idstools.view.equilibrium import EquilibriumView
 from idstools.view.pf_active import PFActiveView
 
 parser = argparse.ArgumentParser(
-    description="---- Display the plasma equilibrium from the equilibrium IDS. It also shows pf coils position overlay if exists",
+    description="---- Display the plasma equilibrium from the equilibrium IDS. It also shows pf coils position overlay if exists [Previously known as equiplot]",
     parents=[imasParser],
 )
 parser.add_argument("-s", "--shot", help="Shot number", required=True, type=int)

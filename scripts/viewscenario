@@ -18,7 +18,7 @@ from idstools.view.summary import SummaryView
 
 # Management of input arguments
 parser = argparse.ArgumentParser(
-    description="---- Display the plasma kinetic profiles and equilibrium from the core_profiles and equilibrium IDSs",
+    description="---- Display the plasma kinetic profiles and equilibrium from the core_profiles and equilibrium IDSs [previously known as scenplot]",
     parents=[imasParser],
 )
 parser.add_argument("-s", "--shot", help="Shot number", required=True, type=int)

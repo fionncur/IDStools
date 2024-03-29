@@ -32,7 +32,7 @@ def StrToList(string):
 
 
 parser = argparse.ArgumentParser(
-    description="---- Display EC wave ray-tracing results", parents=[imasParser]
+    description="---- Display EC wave ray-tracing results [Previously known as ecray]", parents=[imasParser]
 )
 parser.add_argument(
     "-s", "--shot", help="Shot number list, ex: [130012,130013]", required=True
