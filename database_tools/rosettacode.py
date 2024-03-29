@@ -1,22 +1,19 @@
 #!/usr/bin/env python
 # THE ROSETTA CODE
-import numpy as np
-import imas
-from imas import imasdef
-import pandas as pd
 import argparse
 import math
-import sys
-from idstools.utils.clihelper import getBackendID
 import os
+import sys
+
+import imas
+import numpy as np
+import pandas as pd
 import requests
-progbar = True
-try:
-    from tqdm import tqdm
-except ModuleNotFoundError:
-    print(f"Install tqdm to enable progress-bar")
-    progbar = False
-    
+from imas import imasdef
+from rich.progress import track
+
+from idstools.utils.clihelper import getBackendID
+
 
 def ids_setter(IDS, path, val):
     """Set a value in a field of the given IDS.
@@ -132,8 +129,8 @@ db = db.replace(to_replace=np.nan, value=None)
 
 rows = [args.row] if args.row != None else db.index
 
-if not progbar: print(f"Starts mapping of the DB {args.inputCSV}, please be patient...")
-for row in tqdm(rows) if progbar else rows:
+# print(f"Starts mapping of the DB {args.inputCSV}, please be patient...")
+for row in track(rows, description="[green]Processing..."):
     DBVAR = db.iloc[row]
     de = imas.DBEntry(getBackendID(args.backend), args.database, 1, row)
     de.create()

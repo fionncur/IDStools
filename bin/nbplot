@@ -1,7 +1,0 @@
-#!/bin/csh -f
-
-echo "-----------------------------------------------------------"
-echo "nbplot is deprecated and replaced by hcd_distributions_plot"
-echo "which works exactly the same way"
-echo "-----------------------------------------------------------"
-

@@ -5,16 +5,11 @@ import os
 import sys
 
 import imas
+from rich.progress import track
 
 from idstools.database import DBMaster
 from idstools.utils.clihelper import getBackendID, imasParser
 from idstools.utils.idshelper import getAvailableIdsAndOccurrences
-
-progbar = True
-try:
-    from rich.progress import track
-except ModuleNotFoundError:
-    progbar = False
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
@@ -37,12 +32,14 @@ if __name__ == "__main__":
         "--list-count",
         type=int,
         default=0,
-        help="number of entries user needs to display",
+        help="Number of entries user needs to display",
     )
     args = parser.parse_args()
     idsestoSearch=args.ids.split(",")
     backend = getBackendID(args.backend)
     dbmaster = DBMaster()
+    if args.verbose:
+        print(f"Database located in {dbmaster.getDatabaseDir(args.database,args.user)}")
         
     pulses = None
     if backend == imas.imasdef.MDSPLUS_BACKEND:
@@ -59,7 +56,7 @@ if __name__ == "__main__":
     
     if pulses is not None:
         for pulse in (
-            track(pulses, description="Analyzing DB...") if progbar else pulses
+            track(pulses, description="[green]Analyzing DB...") 
         ):
             connection = imas.DBEntry(
                 getBackendID(args.backend),
