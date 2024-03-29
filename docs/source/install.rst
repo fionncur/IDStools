@@ -44,7 +44,7 @@ Also it is possible to install it in Python virtual environemnt
    $ module load IMAS
    $ module load IDStools/1.14.0-intel-2020b
 
-.. info::
+.. note::
 
    There are development versions of IDStools on SDCC. These can be used if 
    you need functionlities/bug fixes before next release
@@ -61,7 +61,7 @@ Also it is possible to install it in Python virtual environemnt
  For Developers
 ****************
 
-.. info ::
+.. note ::
    Get access to https://git.iter.org/projects/IMAS/repos/idstools 
    repository if you don't have already
 

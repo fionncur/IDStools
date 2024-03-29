@@ -193,7 +193,7 @@ IDStools. :download:`download cheatsheet here <_static/cheatsheet.pdf>`
 |                            |                                                              |
 |                            | .. code-block:: bash                                         |
 |                            |                                                              |
-|                            |    $ viewspectrometry -u schneim -d 55.EC -s 134000 -r 37    |
+|                            |    $ viewspectrometry -d TEST -s 134000 -r 37                |
 |                            |    $ viewspectrometry --shot 150512 --run 3 --database       |
 |                            |      ITER_MD                                                 |
 +----------------------------+--------------------------------------------------------------+

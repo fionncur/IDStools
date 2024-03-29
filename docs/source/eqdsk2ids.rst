@@ -17,7 +17,7 @@
        optional arguments:
       -h, --help            show this help message and exit
       -u USER, --user_or_path USER
-                              user (default=sawantp1)
+                              user (default=username)
       --database DATABASE, -d DATABASE
                               database name (default=ITER)
       --backend BACKEND, -b BACKEND
@@ -41,7 +41,7 @@
 
    .. code-block:: bash
 
-      $ eqdsk2ids -s 134174 -r 117 -g /home/ITER/sawantp1/git/idstools/tests/geqdsk/example.gfile -u sawantp1 -d ITER --log INFO
+      $ eqdsk2ids -s 134174 -r 117 -g example.gfile -u <username> -d ITER --log INFO
       24/03/20 17:19:44 INFO: loading GEQDSK file ...
       24/03/20 17:19:44 INFO: GEQDSK COCOS:
       { 'COCOS': 1,

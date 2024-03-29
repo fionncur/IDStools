@@ -25,7 +25,7 @@
       optional arguments:
       -h, --help            show this help message and exit
       -u USER, --user_or_path USER
-                              user (default=sawantp1)
+                              user (default=username)
       --database DATABASE, -d DATABASE
                               database name (default=ITER)
       --backend BACKEND, -b BACKEND

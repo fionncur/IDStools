@@ -40,7 +40,7 @@
 
    .. code-block:: bash
 
-      $ vieweccomposition -u schneim -d TORBEAM -s 134173 -r 2326
+      $ vieweccomposition -d TEST -s 134173 -r 2326
 
    .. image:: _static/images/vieweccomposition.png
       :alt: image not found

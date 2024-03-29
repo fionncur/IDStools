@@ -47,7 +47,7 @@
 
    .. code-block:: bash
 
-      $ idschk -s 134174 -r 117 -f /home/ITER/sawantp1/git/idstools/database_tools/validation_schemas/generic/core_profiles.yml
+      $ idschk -s 134174 -r 117 -f core_profiles.yml
 
       core_profiles:
           occurence(0):

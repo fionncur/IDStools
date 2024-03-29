@@ -4,9 +4,9 @@
 
 Validation Tool for ITER Scenario DB
 
-************************
+**************************
  Syntax validate_db_entry
-************************
+**************************
 
 .. code-block:: bash
 

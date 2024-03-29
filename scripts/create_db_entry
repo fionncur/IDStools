@@ -704,7 +704,7 @@ f.write("""# List of filled IDSs with time quantities in seconds (start, end, st
 f.write("""# It should be the output of the "idslist" script, adapted from\n""")
 f.write("""# listidss, see IMAS-1010 (note: the data-entry has to be copied to a personal\n""")
 f.write("""# database for the script to work, see the example below):\n""")
-f.write("""#  idslist -u schneim -d test -s 4321 -r 1 yaml\n""")
+f.write("""#  idslist -u <username> -d test -s 4321 -r 1 yaml\n""")
 f.write("""# ------------------------------------------------------------------------------\n""")
 f.write("""idslist:\n""")
 f.close()

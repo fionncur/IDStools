@@ -6,8 +6,9 @@ Following are the different command line tools available in the
 *IDStools*.
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
-   database_tools
-   ids_manipulation_tools
    analysis_tools
+   ids_manipulation_tools
+   database_tools
+   scenario_database_tools

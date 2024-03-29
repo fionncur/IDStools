@@ -5,6 +5,7 @@
 *viewspectrometry* Display the spectrum from spectrometer_visible idses.
 It shows plots of radiance and intensity of the spectrom.
 `refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`
+
 *************************
  Syntax viewspectrometry
 *************************
@@ -31,9 +32,9 @@ It shows plots of radiance and intensity of the spectrom.
       -t TIME, --time TIME  Time
       --save                Save figure at default location
 
-*********
- Example
-*********
+***************************
+ Example viewspectrometry
+***************************
 
    .. code-block:: bash
 
@@ -41,7 +42,7 @@ It shows plots of radiance and intensity of the spectrom.
 
    .. code-block:: bash
 
-      $ viewspectrometry -u schneim -d 55.EC -s 134000 -r 37
+      $ viewspectrometry -d TEST -s 134000 -r 37
 
    .. image:: _static/images/viewspectrometry.png
       :alt: image not found

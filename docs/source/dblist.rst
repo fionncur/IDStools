@@ -44,7 +44,7 @@ user name.
 
    optional arguments:
    -h, --help            show this help message and exit
-   -u USER, --user USER  Show databases of specified user (default=sawantp1)
+   -u USER, --user USER  Show databases of specified user (default=username)
    -d DATABASE, --database DATABASE
                            Show only databases with specified name (default=None)
    -v VERSION, --version VERSION
@@ -103,7 +103,7 @@ user name.
 .. code-block:: bash
 
    # Show available time slices with ids names from specific user database with specific shot/run
-   $ dblist -u sawantp1 slices 130012 26
+   $ dblist -u <username> slices 130012 26
    Database: DEBUG
       Data version: 3
          Backend: mdsplus

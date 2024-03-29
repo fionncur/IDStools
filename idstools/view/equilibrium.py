@@ -57,7 +57,7 @@ class EquilibriumView(BasePlot):
                 ax.plot()
                 canvas.show()
 
-            .. image:: ../../_static/images/EquilibriumView_viewMagneticPoloidalFlux.png
+            .. image:: ../_static/images/EquilibriumView_viewMagneticPoloidalFlux.png
                 :alt: image not found
                 :align: center
 
