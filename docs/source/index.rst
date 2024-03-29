@@ -28,9 +28,8 @@ knowledge of core functionalities.
    :maxdepth: 1
    :caption: API documentation
 
-   generated/idstools.compute.rst
-   generated/idstools.domain.rst
-   generated/idstools.view.rst
+   ...
+   autoapi/index
 
 *********
  License
