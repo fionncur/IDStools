@@ -11,8 +11,3 @@ mdsplus databases.
    dblist
    dbscraper
    dbselector
-   scenario_status
-   scenario_summary
-   show_db_entry
-   md_status
-   md_summary
