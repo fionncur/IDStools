@@ -1,7 +1,7 @@
 """ 
 This module provides view functions and classes for spectrometer_visible ids data
 
-`more about pf_active ids <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/CI/imas-3.37.2/spectrometer_visible.html>`_
+`refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`
 
 """
 import logging

@@ -3,10 +3,10 @@
 ############
 
 *viewfluxes* script shows flux information from available transport
-models. It uses `core_transport ids
-<https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/CI/imas-3.37.2/core_transport.html>`
+models. It uses core_transport ids
 It gives information about Mass of atom, Nuclear charge and Ion charge
 along with particles and nergy flux of ions.
+`refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`
 
 *******************
  Syntax viewfluxes

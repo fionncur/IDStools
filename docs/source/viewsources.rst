@@ -2,11 +2,12 @@
  viewsources
 #############
 
-*viewsources* script shows source information from available sources. It
-uses `core_sources ids
-<https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/CI/imas-3.37.2/core_sources.html>`
+*viewsources* script shows source information from available sources. 
 It gives information about Mass of atom, Nuclear charge and Ion charge
 along with particles and energy flux of ions.
+It uses core_sources ids
+
+`refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`
 
 ********************
  Syntax viewsources

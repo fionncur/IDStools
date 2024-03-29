@@ -2,8 +2,9 @@
  viewcoresources
 #################
 
-*viewcoresources* plot core_sources results. It uses `core_sources ids
-<https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/CI/imas-3.37.2/core_sources.html>`
+*viewcoresources* plot core_sources results.It plots Current, Torque and Particles waveform along with 
+Power, particle and current profiles.
+`refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`
 
 ************************
  Syntax viewcoresources

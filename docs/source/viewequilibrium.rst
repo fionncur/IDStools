@@ -4,6 +4,7 @@
 
 *viewequilibrium* script shows plasma equilibrium. Optionally it also
 shows pf coils position and toroidal flux.
+`refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`
 
 ************************
  Syntax viewequilibrium

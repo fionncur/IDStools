@@ -3,8 +3,8 @@
 #############
 
 *viewneutron* plots particles vs normalised toroidal flux coordinate. It
-retrieves from `distribution_sources` IDS.
-https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/CI/imas-3.37.2/distribution_sources.html
+retrieves from distribution_sources IDS
+`refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`
 
 ********************
  Syntax viewneutron

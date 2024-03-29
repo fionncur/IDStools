@@ -4,6 +4,7 @@
 
 *viewcoretransport* Displays the Core plasma transport of particles,
 energy, momentum and poloidal flux.
+`refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`
 
 **************************
  Syntax viewcoretransport

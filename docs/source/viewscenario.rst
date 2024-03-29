@@ -4,6 +4,7 @@
 
 *viewscenario* Display the plasma kinetic profiles and equilibrium from
 the core_profiles and equilibrium IDSs.
+`refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`
 
 *********************
  Syntax viewscenario

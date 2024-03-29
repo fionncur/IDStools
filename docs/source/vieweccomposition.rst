@@ -2,7 +2,8 @@
  vieweccomposition
 ###################
 
-*vieweccomposition* shows EC results
+*vieweccomposition* shows ECRH and ECCD profiles and waveforms
+`refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`
 
 **************************
  Syntax vieweccomposition

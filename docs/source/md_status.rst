@@ -5,7 +5,7 @@
 `md_status` program provides information about machine description of
 specified shot and run number from machine description database. It show
 status and potential parent and children for a given simulation stored
-in ITER machine description database folder It helps to see when
+in ITER machine description database folder. It helps to see when
 particular machine description information become outdated and which one
 is in active state.
 
