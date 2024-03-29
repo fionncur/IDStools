@@ -41,7 +41,7 @@ energy, momentum and poloidal flux.
 
    .. code-block:: bash
 
-      $ viewcoretransport -u costerd -d jet_reference_g2tjohns -s 92436 -r 850
+      $ viewcoretransport -u public -d TEST -s 92436 -r 850
 
    .. image:: _static/images/viewcoretransport.png
       :alt: image not found

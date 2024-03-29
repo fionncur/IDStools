@@ -203,8 +203,8 @@ IDStools. :download:`download cheatsheet here <_static/cheatsheet.pdf>`
 |                            |                                                              |
 |                            | .. code-block:: bash                                         |
 |                            |                                                              |
-|                            |    $ viewcoretransport -u costerd -d jet_reference_g2tjohns  |
-|                            |     -s 92436 -r 850                                          |
+|                            |    $ viewcoretransport -u public -d TEST -s 92436 -r 850     |
+|                            |                                                              |
 +----------------------------+--------------------------------------------------------------+
 | ``viewwall``               | Shows outline plot using limiter and vessel properties found | 
 |                            | in 2D description of Wall IDS.                               | 
