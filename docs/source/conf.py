@@ -95,7 +95,7 @@ extensions = [
     # "sphinx.ext.githubpages",
     "sphinx.ext.intersphinx",
     "sphinx.ext.autosummary",
-    # "sphinx.ext.viewcode",
+    "sphinx.ext.viewcode",
     # "sphinx.ext.extlinks",
     # "sphinx.ext.graphviz",
     "sphinx.ext.napoleon",
@@ -128,15 +128,16 @@ exclude_patterns = ["_build"]
 # Configuration of sphinx.ext.autodoc
 # https://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html
 autodoc_class_signature = "separated"
-
+# autodoc_default_flags = ['members', 'undoc-members']
+templates_path = ["_templates"]
 # -- Options for HTML output -------------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
 html_theme = "sphinx_immaterial"
-html_favicon = "_static/favicon/favicon_ico.ico"
-html_logo = "_static/logo.png"
+# html_favicon = "_static/favicon/favicon_ico.ico"
+html_logo = "_static/idstools-48.png"
 # html_theme_options = {
 #     "logo": {
 #         "image_light": "logo.svg",
@@ -236,7 +237,7 @@ htmlhelp_basename = "IDStools"
 
 # Configuration of sphinx.ext.autosummary
 # https://www.sphinx-doc.org/en/master/usage/extensions/autosummary.html
-# autosummary_generate = True
+autosummary_generate = True
 
 
 # Configuration of sphinx.ext.napoleon

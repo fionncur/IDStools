@@ -25,11 +25,12 @@ knowledge of core functionalities.
    support
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: API documentation
 
-   api_docs
-
+   generated/idstools.compute.rst
+   generated/idstools.domain.rst
+   generated/idstools.view.rst
 
 *********
  License

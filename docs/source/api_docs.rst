@@ -5,4 +5,6 @@
 .. toctree::
    :maxdepth: 2
 
-   generated/modules.rst
+   generated/idstools.compute.rst
+   generated/idstools.domain.rst
+   generated/idstools.view.rst
