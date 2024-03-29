@@ -5,7 +5,7 @@
 *viewpressure* Display the plasma kinetic profiles from the
 core_profiles IDSs, It shows ion and electrons pressure properties from
 core_profiles.
-`refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`
+`refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`_.
 
 *********************
  Syntax viewpressure

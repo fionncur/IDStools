@@ -4,7 +4,7 @@
 
 *viewedgeprofiles* script shows edge profiles plots by interpolating on
 rectangular grid. It shows Electrons, Ions and Neutral density plots.
-`refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`
+`refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`_.
 
 *************************
  Syntax viewedgeprofiles

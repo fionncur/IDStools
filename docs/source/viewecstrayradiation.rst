@@ -5,7 +5,7 @@
 *viewecstrayradiation* script shows electron cyclotron stray radiation
 information by showing different plots. It shows cut off layer,
 resonance layer, top view equilibrium.
-`refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`
+`refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`_.
 
 .. note::
 

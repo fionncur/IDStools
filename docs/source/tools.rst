@@ -11,4 +11,4 @@ Following are the different command line tools available in the
    analysis_tools
    ids_manipulation_tools
    database_tools
-   scenario_database_tools
+   scenariodb_tools

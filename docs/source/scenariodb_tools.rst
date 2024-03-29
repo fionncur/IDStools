@@ -10,13 +10,13 @@ Use simdb tool to upload/find scenario database
    :maxdepth: 1
 
    create_db_entry
+   create_db_entry_disruption
    create_validation_schema
-   validate_db_entry
-   show_db_entry
-   scenario_status
-   scenario_summary
-   watch_db_entry
+   disruption_summary
    md_status
    md_summary
-   create_db_entry_disruption
-   disruption_summary
+   scenario_status
+   scenario_summary
+   show_db_entry
+   validate_db_entry
+   watch_db_entry

@@ -4,7 +4,7 @@
 
 *viewcoresources* plot core_sources results.It plots Current, Torque and Particles waveform along with 
 Power, particle and current profiles.
-`refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`
+`refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`_.
 
 ************************
  Syntax viewcoresources

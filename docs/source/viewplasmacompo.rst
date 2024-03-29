@@ -4,7 +4,7 @@
 
 *viewplasmacompo* script gathers ion composition from core and edge
 profiles and print it on the screen
-`refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`
+`refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`_.
 
 ************************
  Syntax viewplasmacompo

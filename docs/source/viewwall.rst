@@ -7,7 +7,7 @@ properties found in 2D description of Wall IDS. Here Vessel is
 mechanical structure of the vacuum vessel. The script uses annular
 represenation. You can specify wall using wall command or you can
 specify database entry to retrive wall details. it uses wall ids
-`refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`
+`refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`_.
 
 *****************
  Syntax viewwall

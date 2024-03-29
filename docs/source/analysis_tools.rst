@@ -9,6 +9,8 @@ composition, allowing you to depict various trends and plasma physics.
    :maxdepth: 1
 
    viewcoresources
+   viewcoretransport
+   vieweccomposition
    viewecray
    viewecstrayradiation
    viewedgeprofiles
@@ -19,9 +21,8 @@ composition, allowing you to depict various trends and plasma physics.
    viewneutron
    viewplasmacompo
    viewpressure
-   viewscenario
    viewrotation
+   viewscenario
    viewsources
    viewspectrometry
-   viewcoretransport
    viewwall
