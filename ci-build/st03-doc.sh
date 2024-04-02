@@ -20,7 +20,7 @@ pip list
 cd docs
 make realclean
 make autogen
-make apidocs html 
+make html 
 make man
 cd ..
 deactivate
