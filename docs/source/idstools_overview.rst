@@ -12,6 +12,7 @@ fusion community. The goal of having a common set of functions in the
 accessible functions.
 
 *IDStools* is categorized into three parts
+
 -  Database tools provides data entry related operations
 -  IDS tools provides ids manipulation in the data entry
 -  Analysis tools provides plasma physics routines and visualization scripts
