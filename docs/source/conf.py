@@ -90,7 +90,7 @@ with open("_static/version.json", "w") as file:
 # ones.
 extensions = [
     "autoapi.extension",
-    # "sphinx.ext.autodoc",
+    "sphinx.ext.autodoc",
     # "sphinx.ext.autosectionlabel",
     "sphinx.ext.todo",
     # "sphinx.ext.githubpages",
@@ -111,6 +111,8 @@ extensions = [
 autoapi_dirs = ['/home/ITER/sawantp1/git/idstools/idstools']
 autoapi_type = "python"
 autoapi_template_dir = "_templates/autoapi"
+
+autodoc_typehints = 'description'
 # Add any paths that contain templates here, relative to this directory.
 # templates_path = ["_templates", sphinx_autosummary_accessors.templates_path]
 
