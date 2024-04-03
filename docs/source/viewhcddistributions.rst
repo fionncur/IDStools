@@ -36,18 +36,9 @@ Example viewhcddistributions
 
     .. code-block:: bash
 
-        $ viewhcddistributions -s 100015 -r 108 -u schneim -d SPOT
+        $ viewhcddistributions -s 130012 -r 115 -u public -d TEST
 
-    .. image:: _static/images/viewhcddistributions.png
-        :alt: image not found
-        :align: center
-
-
-    .. code-block:: bash
-
-        $ viewhcddistributions -s 130012 -r 15 -u schneim -d SPOT
-
-    .. image:: _static/images/viewhcdwaves2.png
+    .. image:: _static/images/viewhcddistributions2.png
         :alt: image not found
         :align: center
 

@@ -36,20 +36,8 @@ Example viewhcdwaves
 
     .. code-block:: bash
 
-        $ viewhcdwaves -s 105039 -r 1 -u schneim -d SAVE -t 25
+        $ viewhcdwaves -s 134173 -r 101 -u public -d TEST
 
     .. image:: _static/images/viewhcdwaves2.png
         :alt: image not found
         :align: center
-
-
-    .. code-block:: bash
-
-        $ viewhcdwaves -s 104104 -r 2-5 -u schneim -d TORBEAM_XMODE 
-
-    .. image:: _static/images/viewhcdwaves2.png
-        :alt: image not found
-        :align: center
-
-
-

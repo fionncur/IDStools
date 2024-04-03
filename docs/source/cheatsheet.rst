@@ -5,13 +5,196 @@
 This cheat sheet provides quick references for commonly used commands in
 IDStools. :download:`download cheatsheet here <_static/cheatsheet.pdf>`
 
-***********
- IDS Tools
-***********
+
+****************
+ Analysis Tools
+****************
+
++----------------------------+--------------------------------------------------------------+
+| Command                    | Description                                                  |
++============================+==============================================================+
+|``viewcoresources``         | (csplot) Plots core_sources results.                         |
++----------------------------+--------------------------------------------------------------+
+|                            |                                                              |
+|                            | .. code-block:: bash                                         |
+|                            |                                                              |
+|                            |    $ viewcoresources -s 130012 -r 5 -u username -d ITER      |
++----------------------------+--------------------------------------------------------------+
+| ``viewcoretransport``      | (check_transport) Core plasma transport of particles, energy,|
+|                            | momentum and poloidal flux.                                  |
++----------------------------+--------------------------------------------------------------+
+|                            |                                                              |
+|                            | .. code-block:: bash                                         |
+|                            |                                                              |
+|                            |    $ viewcoretransport -u public -d TEST -s 92436 -r 850     |
+|                            |                                                              |
++----------------------------+--------------------------------------------------------------+
+|``vieweccomposition``       | (eccomp) Display ec results.                                |
++----------------------------+--------------------------------------------------------------+
+|                            |                                                              |
+|                            | .. code-block:: bash                                         |
+|                            |                                                              |
+|                            |    $ vieweccomposition -d TEST -s 134173 -r 2326             |
++----------------------------+--------------------------------------------------------------+
+|``viewecray``               | (ecray) Display EC wave ray-tracing results.                 |
++----------------------------+--------------------------------------------------------------+
+|                            |                                                              |
+|                            | .. code-block:: bash                                         |
+|                            |                                                              |
+|                            |    $ viewecray -d TEST -s 134173 -r 2326                     |
++----------------------------+--------------------------------------------------------------+
+|``viewecstrayradiation``    | Shows electron cyclotron stray radiation.           |
++----------------------------+--------------------------------------------------------------+
+|                            |                                                              |
+|                            | .. code-block:: bash                                         |
+|                            |                                                              |
+|                            |    $ viewecstrayradiation -s 134174 -r 117                   |
++----------------------------+--------------------------------------------------------------+
+| ``viewedgeprofiles``       | Shows edge profiles plots by interpolating on rectangular    |
+|                            | grid.                                                        |
++----------------------------+--------------------------------------------------------------+
+|                            |                                                              |
+|                            | .. code-block:: bash                                         |
+|                            |                                                              |
+|                            |    $ viewedgeprofiles -s 123314 -r 1                         |
++----------------------------+--------------------------------------------------------------+
+| ``viewequilibrium``        | (equiplot) Shows plasma equilibrium.                         |
++----------------------------+--------------------------------------------------------------+
+|                            |                                                              |
+|                            | .. code-block:: bash                                         |
+|                            |                                                              |
+|                            |    $ viewequilibrium -s 134174 -r 117 --rho --pfcoils --info |
++----------------------------+--------------------------------------------------------------+
+| ``viewfluxes``             | (print_fluxes) Shows flux information from available         |
+|                            | transport models.                                            |
++----------------------------+--------------------------------------------------------------+
+|                            |                                                              |
+|                            | .. code-block:: bash                                         |
+|                            |                                                              |
+|                            |    $ viewfluxes -s 134174 -r  117 -m CLOSEST                 |
++----------------------------+--------------------------------------------------------------+
+| ``viewkineticprofiles``    | (kinplot) Shows plasma kinetic profiles from the core        |
+|                            | profiles.                                                    |
++----------------------------+--------------------------------------------------------------+
+|                            |                                                              |
+|                            | .. code-block:: bash                                         |
+|                            |                                                              |
+|                            |    $ viewkineticprofiles -s 134174 -r 117                    |
++----------------------------+--------------------------------------------------------------+
+| ``viewhcdplots``           | (hcd_plot) shows plots from distributions and waves for      |
+|                            | different data entries for analysis                          |
++----------------------------+--------------------------------------------------------------+
+|                            |                                                              |
+|                            | .. code-block:: bash                                         |
+|                            |                                                              |
+|                            |    $ hcd_plot -ech 104104/2/schneim/MDSPLUS/TORBEAM_XMODE/3  |
+|                            |    -nbi 130012/15/schneim/MDSPLUS/SPOT/3                     |
++----------------------------+--------------------------------------------------------------+
+| ``viewhcdwaves``           | (hcd_waves_plot) shows waveforms                             |
+|                            |                                                              |
++----------------------------+--------------------------------------------------------------+
+|                            |                                                              |
+|                            | .. code-block:: bash                                         |
+|                            |                                                              |
+|                            |    $  viewhcdwaves -s 134173 -r 101 -u public -d TEST        |
++----------------------------+--------------------------------------------------------------+
+| ``viewhcddistributions``    | (hcd_distributions_plot) shows waveforms                    |
+|                            |                                                              |
++----------------------------+--------------------------------------------------------------+
+|                            |                                                              |
+|                            | .. code-block:: bash                                         |
+|                            |                                                              |
+|                            |    $ viewhcddistributions -s 130012 -r 115 -u public -d TEST |
++----------------------------+--------------------------------------------------------------+
+| ``viewmachinedescription`` | (mdplot) Plots machine description data stored in databases. |
++----------------------------+--------------------------------------------------------------+
+|                            |                                                              |
+|                            | .. code-block:: bash                                         |
+|                            |                                                              |
+|                            |    $ viewmachinedescription -d ITER_MD                       |
++----------------------------+--------------------------------------------------------------+
+| ``viewneutron``            | (neutronplot) Plots particles vs normalised toroidal         |
+|                            | flux coordinate.                                             |
++----------------------------+--------------------------------------------------------------+
+|                            |                                                              |
+|                            | .. code-block:: bash                                         |
+|                            |                                                              |
+|                            |    $ viewneutron -s 121014 -r 11 -t 450 --info               |
++----------------------------+--------------------------------------------------------------+
+| ``viewplasmacompo``        | (ids_compo) Display the plasma composition from the          |
+|                            | core_profiles IDS                                            |
++----------------------------+--------------------------------------------------------------+
+|                            |                                                              |
+|                            | .. code-block:: bash                                         |
+|                            |                                                              |
+|                            |    $ viewplasmacompo -s 131047 -r 4                          |
++----------------------------+--------------------------------------------------------------+
+| ``viewpressure``           | (pressureplot) Display the plasma kinetic profiles from .    |
+|                            | the core_profiles                                            |
++----------------------------+--------------------------------------------------------------+
+|                            |                                                              |
+|                            | .. code-block:: bash                                         |
+|                            |                                                              |
+|                            |    $ viewpressure -s 134174 -r 117                           |
++----------------------------+--------------------------------------------------------------+
+| ``viewrotation``           | (rotationplot) Plasma kinetic profiles from the core_profiles|
++----------------------------+--------------------------------------------------------------+
+|                            |                                                              |
+|                            | .. code-block:: bash                                         |
+|                            |                                                              |
+|                            |    $ viewrotation -s 134174 -r 117                           |
++----------------------------+--------------------------------------------------------------+
+| ``viewscenario``           | (scenplot) Display the plasma kinetic profiles and           |   
+|                            | equilibrium from the core_profiles and equilibrium           |                                                                         
++----------------------------+--------------------------------------------------------------+
+|                            |                                                              |
+|                            | .. code-block:: bash                                         |
+|                            |                                                              |
+|                            |    $ viewscenario -s 134174 -r 117                           |
++----------------------------+--------------------------------------------------------------+
+| ``viewsources``            | (print_sources) Shows source information from available      |
+|                            |  sources.                                                    |
++----------------------------+--------------------------------------------------------------+
+|                            |                                                              |
+|                            | .. code-block:: bash                                         |
+|                            |                                                              |
+|                            |    $ viewsources -s 134174 -r  117                           |
++----------------------------+--------------------------------------------------------------+
+| ``viewspectrometry``       | (svplot) Displays the spectrum, displaying plots of radiance |
+|                            | and intensity in two different windows.                      |   
++----------------------------+--------------------------------------------------------------+
+|                            |                                                              |
+|                            | .. code-block:: bash                                         |
+|                            |                                                              |
+|                            |    $ viewspectrometry -d TEST -s 134000 -r 37                |
+|                            |    $ viewspectrometry --shot 150512 --run 3 --database       |
+|                            |      ITER_MD                                                 |
++----------------------------+--------------------------------------------------------------+
+| ``viewwall``               | Shows outline plot using limiter and vessel properties found | 
+|                            | in 2D description of Wall IDS.                               | 
++----------------------------+--------------------------------------------------------------+
+|                            |                                                              |
+|                            | .. code-block:: bash                                         |
+|                            |                                                              |
+|                            |    $ viewwall wall iter                                      |
++----------------------------+--------------------------------------------------------------+
+
+
+************************
+ IDS Manipulation Tools
+************************
 
 +---------------------+---------------------------------------------------------------------+
 | Command             | Description and Example Usage                                       |
 +=====================+=====================================================================+
+| ``eqdsk2ids``       | EQDSK Convertor.                                                    | 
++---------------------+---------------------------------------------------------------------+
+|                     |                                                                     |
+|                     | .. code-block:: bash                                                |
+|                     |                                                                     |
+|                     |    $ eqdsk2ids -s 134174 -r 117 -g example.gfile -u <user> -d ITER  |
+|                     |    --log INFO                                                       |
++---------------------+---------------------------------------------------------------------+
 | ``idschk``          | Validate ids fields against rules defined in yaml file              |
 +---------------------+---------------------------------------------------------------------+
 |                     |                                                                     |
@@ -35,6 +218,8 @@ IDStools. :download:`download cheatsheet here <_static/cheatsheet.pdf>`
 |                     |    $ idsdiff --generate-html 122525 1 122525 2 summary              |
 +---------------------+---------------------------------------------------------------------+
 | ``idslist``         | Shows list of all idses along with count of time slices.            |
+|                     | [ids_content(yaml), listidss (with time slices), idsoccurrences(occ)|    
+|                     | merged into one script]                                             |                                            
 +---------------------+---------------------------------------------------------------------+
 |                     |                                                                     |  
 |                     | .. code-block:: bash                                                |
@@ -57,9 +242,9 @@ IDStools. :download:`download cheatsheet here <_static/cheatsheet.pdf>`
 |                     |    $ idsperf -s 134174 -r 117 equilibrium -do HBD -bo MDSPLUS -o 412|
 |                     |    $ idsperf -s 134174 -r 117 equilibrium  -t 50 -m                 |
 +---------------------+---------------------------------------------------------------------+
-| ``idsprint``        | Dumps or prints all data on the console. Check if specific fields   |
-|                     | or attributes have been filled out or empty . The output can also   |
-|                     | be saved to a file using extraction                                 |
+| ``idsprint``        | (idsdump, idsdumppath) Dumps or prints all data on the console.     |
+|                     | Check if specific fields or attributes have been filled out or empty|
+|                     | The output can also be saved to a file using extraction             |
 +---------------------+---------------------------------------------------------------------+
 |                     |                                                                     |
 |                     | .. code-block:: bash                                                |
@@ -84,151 +269,7 @@ IDStools. :download:`download cheatsheet here <_static/cheatsheet.pdf>`
 |                     |                                                                     |
 |                     |    $ idssize -s 122525 -r 1                                         |
 +---------------------+---------------------------------------------------------------------+
-| ``eqdsk2ids``       | EQDSK Convertor.                                                    |                                                                                                                                                                                                                                                                                                                                
-+---------------------+---------------------------------------------------------------------+
-|                     |                                                                     |
-|                     | .. code-block:: bash                                                |
-|                     |                                                                     |
-|                     |    $ eqdsk2ids -s 134174 -r 117 -g example.gfile -u <user> -d ITER  |
-|                     |    --log INFO                                                       |
-+---------------------+---------------------------------------------------------------------+
 
-
-****************
- Analysis Tools
-****************
-
-+----------------------------+--------------------------------------------------------------+
-| Command                    | Description                                                  |
-+============================+==============================================================+
-|``viewcoresources``         | Plots core_sources results.                                  |
-+----------------------------+--------------------------------------------------------------+
-|                            |                                                              |
-|                            | .. code-block:: bash                                         |
-|                            |                                                              |
-|                            |    $ viewcoresources -s 130012 -r 5 -u username -d ITER      |
-+----------------------------+--------------------------------------------------------------+
-|``viewecstrayradiation``    | Shows electron cyclotron stray radiation.                    |
-+----------------------------+--------------------------------------------------------------+
-|                            |                                                              |
-|                            | .. code-block:: bash                                         |
-|                            |                                                              |
-|                            |    $ viewecstrayradiation -s 134174 -r 117                   |
-+----------------------------+--------------------------------------------------------------+
-| ``viewedgeprofiles``       | Shows edge profiles plots by interpolating on rectangular    |
-|                            | grid.                                                        |
-+----------------------------+--------------------------------------------------------------+
-|                            |                                                              |
-|                            | .. code-block:: bash                                         |
-|                            |                                                              |
-|                            |    $ viewedgeprofiles -s 123314 -r 1                         |
-+----------------------------+--------------------------------------------------------------+
-| ``viewequilibrium``        | Shows plasma equilibrium.                                    |
-+----------------------------+--------------------------------------------------------------+
-|                            |                                                              |
-|                            | .. code-block:: bash                                         |
-|                            |                                                              |
-|                            |    $ viewequilibrium -s 134174 -r 117 --rho --pfcoils --info |
-+----------------------------+--------------------------------------------------------------+
-| ``viewfluxes``             | Shows flux information from available transport models.      |
-+----------------------------+--------------------------------------------------------------+
-|                            |                                                              |
-|                            | .. code-block:: bash                                         |
-|                            |                                                              |
-|                            |    $ viewfluxes -s 134174 -r  117 -m CLOSEST                 |
-+----------------------------+--------------------------------------------------------------+
-| ``viewkineticprofiles``    | Shows plasma kinetic profiles from the core profiles.        |
-+----------------------------+--------------------------------------------------------------+
-|                            |                                                              |
-|                            | .. code-block:: bash                                         |
-|                            |                                                              |
-|                            |    $ viewkineticprofiles -s 134174 -r 117                    |
-+----------------------------+--------------------------------------------------------------+
-| ``viewmachinedescription`` | Plots machine description data stored in databases.          |
-+----------------------------+--------------------------------------------------------------+
-|                            |                                                              |
-|                            | .. code-block:: bash                                         |
-|                            |                                                              |
-|                            |    $ viewmachinedescription -d ITER_MD                       |
-+----------------------------+--------------------------------------------------------------+
-| ``viewneutron``            | Plots particles vs normalised toroidal flux coordinate.      |
-+----------------------------+--------------------------------------------------------------+
-|                            |                                                              |
-|                            | .. code-block:: bash                                         |
-|                            |                                                              |
-|                            |    $ viewneutron -s 121014 -r 11 -t 450 --info               |
-+----------------------------+--------------------------------------------------------------+
-| ``viewpressure``           | Display the plasma kinetic profiles from the core_profiles.  |
-+----------------------------+--------------------------------------------------------------+
-|                            |                                                              |
-|                            | .. code-block:: bash                                         |
-|                            |                                                              |
-|                            |    $ viewpressure -s 134174 -r 117                           |
-+----------------------------+--------------------------------------------------------------+
-| ``viewscenario``           | Display the plasma kinetic profiles and equilibrium from .   |   
-|                            | the core_profiles and equilibrium                            |                                                                         
-+----------------------------+--------------------------------------------------------------+
-|                            |                                                              |
-|                            | .. code-block:: bash                                         |
-|                            |                                                              |
-|                            |    $ viewscenario -s 134174 -r 117                           |
-+----------------------------+--------------------------------------------------------------+
-| ``viewrotation``           | Plasma kinetic profiles from the core_profiles.              |
-+----------------------------+--------------------------------------------------------------+
-|                            |                                                              |
-|                            | .. code-block:: bash                                         |
-|                            |                                                              |
-|                            |    $ viewrotation -s 134174 -r 117                           |
-+----------------------------+--------------------------------------------------------------+
-| ``viewsources``            | Shows source information from available sources.             |
-+----------------------------+--------------------------------------------------------------+
-|                            |                                                              |
-|                            | .. code-block:: bash                                         |
-|                            |                                                              |
-|                            |    $ viewsources -s 134174 -r  117                           |
-+----------------------------+--------------------------------------------------------------+
-| ``viewspectrometry``       | Displays the spectrum, displaying plots of radiance and      |
-|                            | intensity in two different windows.                          |   
-+----------------------------+--------------------------------------------------------------+
-|                            |                                                              |
-|                            | .. code-block:: bash                                         |
-|                            |                                                              |
-|                            |    $ viewspectrometry -d TEST -s 134000 -r 37                |
-|                            |    $ viewspectrometry --shot 150512 --run 3 --database       |
-|                            |      ITER_MD                                                 |
-+----------------------------+--------------------------------------------------------------+
-| ``viewcoretransport``      | Core plasma transport of particles, energy, momentum and     |
-|                            | poloidal flux.                                               |
-+----------------------------+--------------------------------------------------------------+
-|                            |                                                              |
-|                            | .. code-block:: bash                                         |
-|                            |                                                              |
-|                            |    $ viewcoretransport -u public -d TEST -s 92436 -r 850     |
-|                            |                                                              |
-+----------------------------+--------------------------------------------------------------+
-| ``viewwall``               | Shows outline plot using limiter and vessel properties found | 
-|                            | in 2D description of Wall IDS.                               | 
-+----------------------------+--------------------------------------------------------------+
-|                            |                                                              |
-|                            | .. code-block:: bash                                         |
-|                            |                                                              |
-|                            |    $ viewwall wall iter                                      |
-+----------------------------+--------------------------------------------------------------+
-| ``viewhcddistributions``   | Shows plot of distributions                                  |
-+----------------------------+--------------------------------------------------------------+
-|                            |                                                              |
-|                            | .. code-block:: bash                                         |
-|                            |                                                              |
-|                            |    $ viewhcddistributions -s 130012 -r 5 -u username -d ITER |
-+----------------------------+--------------------------------------------------------------+
-| ``viewhcdplots``           | Shows plots from distributions and waves for different data  |
-|                            | entries for analysis.                                        |
-+----------------------------+--------------------------------------------------------------+
-|                            |                                                              |
-|                            | .. code-block:: bash                                         |
-|                            |                                                              |
-|                            |    $ viewhcdplots -s 130012 -r 5 -u username -d ITER         |
-+----------------------------+--------------------------------------------------------------+
 
 ****************
  Database Tools
@@ -237,16 +278,16 @@ IDStools. :download:`download cheatsheet here <_static/cheatsheet.pdf>`
 +---------------------+---------------------------------------------------------------------+
 | Command             | Description                                                         |
 +=====================+=====================================================================+
-| ``dblist``          | Lists existing IMAS databases.                                      |
+| ``dblist``          | (imasdbs) Lists existing IMAS databases.                            |
 +---------------------+---------------------------------------------------------------------+
 |                     |                                                                     |
 |                     | .. code-block:: bash                                                |
 |                     |                                                                     |
 |                     |    $ dblist databases                                               |
 +---------------------+---------------------------------------------------------------------+
-| ``dbscraper``       | The `dbscraper` script scrapes data from a particular IDS path for  |
-|                     | a specified series of pulses and displays the pulse along with the  |
-|                     | value.                                                              |
+| ``dbscraper``       | (db_extractor) The `dbscraper` script scrapes data from a particular|
+|                     | IDS path for a specified series of pulses and displays the pulse    |
+|                     | along with the value.                                               |
 +---------------------+---------------------------------------------------------------------+
 |                     |                                                                     |
 |                     | .. code-block:: bash                                                |
@@ -263,6 +304,15 @@ IDStools. :download:`download cheatsheet here <_static/cheatsheet.pdf>`
 |                     |                                                                     |
 |                     |    $ dbselector edge_profiles                                       |
 +---------------------+---------------------------------------------------------------------+
+
+*************************
+ Scenario Database Tools
+*************************
+
++---------------------+---------------------------------------------------------------------+
+| Command             | Description                                                         |
++=====================+=====================================================================+
+
 | ``scenario_status`` | The `scenario_status` program provides information about the        |
 |                     | scenario of specified shot and run number from the scenario         |
 |                     | database. It shows status and potential parent and children for a   |
