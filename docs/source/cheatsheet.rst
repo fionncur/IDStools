@@ -13,14 +13,14 @@ IDStools. :download:`download cheatsheet here <_static/cheatsheet.pdf>`
 +----------------------------+--------------------------------------------------------------+
 | Command                    | Description                                                  |
 +============================+==============================================================+
-|``viewcoresources``         | (csplot) Plots core_sources results.                         |
+|``viewcoresources``         | csplot Plots core_sources results.                           |
 +----------------------------+--------------------------------------------------------------+
 |                            |                                                              |
 |                            | .. code-block:: bash                                         |
 |                            |                                                              |
 |                            |    $ viewcoresources -s 130012 -r 5 -u username -d ITER      |
 +----------------------------+--------------------------------------------------------------+
-| ``viewcoretransport``      | (check_transport) Core plasma transport of particles, energy,|
+| ``viewcoretransport``      | check_transport Core plasma transport of particles, energy,  |
 |                            | momentum and poloidal flux.                                  |
 +----------------------------+--------------------------------------------------------------+
 |                            |                                                              |
@@ -29,21 +29,21 @@ IDStools. :download:`download cheatsheet here <_static/cheatsheet.pdf>`
 |                            |    $ viewcoretransport -u public -d TEST -s 92436 -r 850     |
 |                            |                                                              |
 +----------------------------+--------------------------------------------------------------+
-|``vieweccomposition``       | (eccomp) Display ec results.                                |
+|``vieweccomposition``       | *eccomp* Display ec results.                                 |
 +----------------------------+--------------------------------------------------------------+
 |                            |                                                              |
 |                            | .. code-block:: bash                                         |
 |                            |                                                              |
 |                            |    $ vieweccomposition -d TEST -s 134173 -r 2326             |
 +----------------------------+--------------------------------------------------------------+
-|``viewecray``               | (ecray) Display EC wave ray-tracing results.                 |
+|``viewecray``               | *ecray* Display EC wave ray-tracing results.                 |
 +----------------------------+--------------------------------------------------------------+
 |                            |                                                              |
 |                            | .. code-block:: bash                                         |
 |                            |                                                              |
 |                            |    $ viewecray -d TEST -s 134173 -r 2326                     |
 +----------------------------+--------------------------------------------------------------+
-|``viewecstrayradiation``    | Shows electron cyclotron stray radiation.           |
+|``viewecstrayradiation``    | Shows electron cyclotron stray radiation.                    |
 +----------------------------+--------------------------------------------------------------+
 |                            |                                                              |
 |                            | .. code-block:: bash                                         |
@@ -58,14 +58,14 @@ IDStools. :download:`download cheatsheet here <_static/cheatsheet.pdf>`
 |                            |                                                              |
 |                            |    $ viewedgeprofiles -s 123314 -r 1                         |
 +----------------------------+--------------------------------------------------------------+
-| ``viewequilibrium``        | (equiplot) Shows plasma equilibrium.                         |
+| ``viewequilibrium``        | *equiplot* Shows plasma equilibrium.                         |
 +----------------------------+--------------------------------------------------------------+
 |                            |                                                              |
 |                            | .. code-block:: bash                                         |
 |                            |                                                              |
 |                            |    $ viewequilibrium -s 134174 -r 117 --rho --pfcoils --info |
 +----------------------------+--------------------------------------------------------------+
-| ``viewfluxes``             | (print_fluxes) Shows flux information from available         |
+| ``viewfluxes``             | *print_fluxes* Shows flux information from available         |
 |                            | transport models.                                            |
 +----------------------------+--------------------------------------------------------------+
 |                            |                                                              |
@@ -73,7 +73,7 @@ IDStools. :download:`download cheatsheet here <_static/cheatsheet.pdf>`
 |                            |                                                              |
 |                            |    $ viewfluxes -s 134174 -r  117 -m CLOSEST                 |
 +----------------------------+--------------------------------------------------------------+
-| ``viewkineticprofiles``    | (kinplot) Shows plasma kinetic profiles from the core        |
+| ``viewkineticprofiles``    | *kinplot* Shows plasma kinetic profiles from the core        |
 |                            | profiles.                                                    |
 +----------------------------+--------------------------------------------------------------+
 |                            |                                                              |
@@ -81,7 +81,7 @@ IDStools. :download:`download cheatsheet here <_static/cheatsheet.pdf>`
 |                            |                                                              |
 |                            |    $ viewkineticprofiles -s 134174 -r 117                    |
 +----------------------------+--------------------------------------------------------------+
-| ``viewhcdplots``           | (hcd_plot) shows plots from distributions and waves for      |
+| ``viewhcdplots``           | *hcd_plot* shows plots from distributions and waves for      |
 |                            | different data entries for analysis                          |
 +----------------------------+--------------------------------------------------------------+
 |                            |                                                              |
@@ -90,7 +90,7 @@ IDStools. :download:`download cheatsheet here <_static/cheatsheet.pdf>`
 |                            |    $ hcd_plot -ech 104104/2/schneim/MDSPLUS/TORBEAM_XMODE/3  |
 |                            |    -nbi 130012/15/schneim/MDSPLUS/SPOT/3                     |
 +----------------------------+--------------------------------------------------------------+
-| ``viewhcdwaves``           | (hcd_waves_plot) shows waveforms                             |
+| ``viewhcdwaves``           | *hcd_waves_plot* shows waveforms                             |
 |                            |                                                              |
 +----------------------------+--------------------------------------------------------------+
 |                            |                                                              |
@@ -98,7 +98,7 @@ IDStools. :download:`download cheatsheet here <_static/cheatsheet.pdf>`
 |                            |                                                              |
 |                            |    $  viewhcdwaves -s 134173 -r 101 -u public -d TEST        |
 +----------------------------+--------------------------------------------------------------+
-| ``viewhcddistributions``    | (hcd_distributions_plot) shows waveforms                    |
+| ``viewhcddistributions``   | *hcd_distributions_plot* shows waveforms                     |
 |                            |                                                              |
 +----------------------------+--------------------------------------------------------------+
 |                            |                                                              |
@@ -106,14 +106,14 @@ IDStools. :download:`download cheatsheet here <_static/cheatsheet.pdf>`
 |                            |                                                              |
 |                            |    $ viewhcddistributions -s 130012 -r 115 -u public -d TEST |
 +----------------------------+--------------------------------------------------------------+
-| ``viewmachinedescription`` | (mdplot) Plots machine description data stored in databases. |
+| ``viewmachinedescription`` | *mdplot* Plots machine description data stored in databases. |
 +----------------------------+--------------------------------------------------------------+
 |                            |                                                              |
 |                            | .. code-block:: bash                                         |
 |                            |                                                              |
 |                            |    $ viewmachinedescription -d ITER_MD                       |
 +----------------------------+--------------------------------------------------------------+
-| ``viewneutron``            | (neutronplot) Plots particles vs normalised toroidal         |
+| ``viewneutron``            | *neutronplot* Plots particles vs normalised toroidal         |
 |                            | flux coordinate.                                             |
 +----------------------------+--------------------------------------------------------------+
 |                            |                                                              |
@@ -121,7 +121,7 @@ IDStools. :download:`download cheatsheet here <_static/cheatsheet.pdf>`
 |                            |                                                              |
 |                            |    $ viewneutron -s 121014 -r 11 -t 450 --info               |
 +----------------------------+--------------------------------------------------------------+
-| ``viewplasmacompo``        | (ids_compo) Display the plasma composition from the          |
+| ``viewplasmacompo``        | *ids_compo* Display the plasma composition from the          |
 |                            | core_profiles IDS                                            |
 +----------------------------+--------------------------------------------------------------+
 |                            |                                                              |
@@ -129,7 +129,7 @@ IDStools. :download:`download cheatsheet here <_static/cheatsheet.pdf>`
 |                            |                                                              |
 |                            |    $ viewplasmacompo -s 131047 -r 4                          |
 +----------------------------+--------------------------------------------------------------+
-| ``viewpressure``           | (pressureplot) Display the plasma kinetic profiles from .    |
+| ``viewpressure``           | *pressureplot* Display the plasma kinetic profiles from .    |
 |                            | the core_profiles                                            |
 +----------------------------+--------------------------------------------------------------+
 |                            |                                                              |
@@ -137,22 +137,22 @@ IDStools. :download:`download cheatsheet here <_static/cheatsheet.pdf>`
 |                            |                                                              |
 |                            |    $ viewpressure -s 134174 -r 117                           |
 +----------------------------+--------------------------------------------------------------+
-| ``viewrotation``           | (rotationplot) Plasma kinetic profiles from the core_profiles|
+| ``viewrotation``           | *rotationplot* Plasma kinetic profiles from the core_profiles|
 +----------------------------+--------------------------------------------------------------+
 |                            |                                                              |
 |                            | .. code-block:: bash                                         |
 |                            |                                                              |
 |                            |    $ viewrotation -s 134174 -r 117                           |
 +----------------------------+--------------------------------------------------------------+
-| ``viewscenario``           | (scenplot) Display the plasma kinetic profiles and           |   
-|                            | equilibrium from the core_profiles and equilibrium           |                                                                         
+| ``viewscenario``           | *scenplot* Display the plasma kinetic profiles and           | 
+|                            | equilibrium from the core_profiles and equilibrium           | 
 +----------------------------+--------------------------------------------------------------+
 |                            |                                                              |
 |                            | .. code-block:: bash                                         |
 |                            |                                                              |
 |                            |    $ viewscenario -s 134174 -r 117                           |
 +----------------------------+--------------------------------------------------------------+
-| ``viewsources``            | (print_sources) Shows source information from available      |
+| ``viewsources``            | *print_sources* Shows source information from available      |
 |                            |  sources.                                                    |
 +----------------------------+--------------------------------------------------------------+
 |                            |                                                              |
@@ -160,7 +160,7 @@ IDStools. :download:`download cheatsheet here <_static/cheatsheet.pdf>`
 |                            |                                                              |
 |                            |    $ viewsources -s 134174 -r  117                           |
 +----------------------------+--------------------------------------------------------------+
-| ``viewspectrometry``       | (svplot) Displays the spectrum, displaying plots of radiance |
+| ``viewspectrometry``       | *svplot* Displays the spectrum, displaying plots of radiance |
 |                            | and intensity in two different windows.                      |   
 +----------------------------+--------------------------------------------------------------+
 |                            |                                                              |
@@ -218,7 +218,7 @@ IDStools. :download:`download cheatsheet here <_static/cheatsheet.pdf>`
 |                     |    $ idsdiff --generate-html 122525 1 122525 2 summary              |
 +---------------------+---------------------------------------------------------------------+
 | ``idslist``         | Shows list of all idses along with count of time slices.            |
-|                     | [ids_content(yaml), listidss (with time slices), idsoccurrences(occ)|    
+|                     | [ids_content*yaml*, listidss *with time slices*, idsoccurrences*occ*|    
 |                     | merged into one script]                                             |                                            
 +---------------------+---------------------------------------------------------------------+
 |                     |                                                                     |  
@@ -242,7 +242,7 @@ IDStools. :download:`download cheatsheet here <_static/cheatsheet.pdf>`
 |                     |    $ idsperf -s 134174 -r 117 equilibrium -do HBD -bo MDSPLUS -o 412|
 |                     |    $ idsperf -s 134174 -r 117 equilibrium  -t 50 -m                 |
 +---------------------+---------------------------------------------------------------------+
-| ``idsprint``        | (idsdump, idsdumppath) Dumps or prints all data on the console.     |
+| ``idsprint``        | *idsdump, idsdumppath* Dumps or prints all data on the console.     |
 |                     | Check if specific fields or attributes have been filled out or empty|
 |                     | The output can also be saved to a file using extraction             |
 +---------------------+---------------------------------------------------------------------+
@@ -278,21 +278,21 @@ IDStools. :download:`download cheatsheet here <_static/cheatsheet.pdf>`
 +---------------------+---------------------------------------------------------------------+
 | Command             | Description                                                         |
 +=====================+=====================================================================+
-| ``dblist``          | (imasdbs) Lists existing IMAS databases.                            |
+| ``dblist``          | *imasdbs* Lists existing IMAS databases.                            |
 +---------------------+---------------------------------------------------------------------+
 |                     |                                                                     |
 |                     | .. code-block:: bash                                                |
 |                     |                                                                     |
 |                     |    $ dblist databases                                               |
 +---------------------+---------------------------------------------------------------------+
-| ``dbscraper``       | (db_extractor) The `dbscraper` script scrapes data from a particular|
+| ``dbscraper``       | *db_extractor* The `dbscraper` script scrapes data from a particular|
 |                     | IDS path for a specified series of pulses and displays the pulse    |
 |                     | along with the value.                                               |
 +---------------------+---------------------------------------------------------------------+
 |                     |                                                                     |
 |                     | .. code-block:: bash                                                |
 |                     |                                                                     |
-|                     |    $ dbscraper "equilibrium/time_slice(0)/global_quantities/volume" |
+|                     |    $ dbscraper "equilibrium/time_slice*0*/global_quantities/volume" |
 |                     |    --list-count 10                                                  |
 +---------------------+---------------------------------------------------------------------+
 | ``dbselector``      | The `dbselector` script shows lists of all scenarios where          |
@@ -312,7 +312,6 @@ IDStools. :download:`download cheatsheet here <_static/cheatsheet.pdf>`
 +---------------------+---------------------------------------------------------------------+
 | Command             | Description                                                         |
 +=====================+=====================================================================+
-
 | ``scenario_status`` | The `scenario_status` program provides information about the        |
 |                     | scenario of specified shot and run number from the scenario         |
 |                     | database. It shows status and potential parent and children for a   |
