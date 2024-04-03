@@ -11,17 +11,17 @@ IDStools. :download:`download cheatsheet here <_static/cheatsheet.pdf>`
 ****************
 
 +----------------------------+--------------------------------------------------------------+
-| Command                    | Description                                                  |
+| Command                    | Description and Example Usage                                |
 +============================+==============================================================+
-|``viewcoresources``         | csplot Plots core_sources results.                           |
+|``viewcoresources``         | Plots core_sources results (replaces csplot).                |
 +----------------------------+--------------------------------------------------------------+
 |                            |                                                              |
 |                            | .. code-block:: bash                                         |
 |                            |                                                              |
 |                            |    $ viewcoresources -s 130012 -r 5 -u username -d ITER      |
 +----------------------------+--------------------------------------------------------------+
-| ``viewcoretransport``      | check_transport Core plasma transport of particles, energy,  |
-|                            | momentum and poloidal flux.                                  |
+| ``viewcoretransport``      | Core plasma transport of particles, energy,                  |
+|                            | momentum and poloidal flux (replaces check_transport).       |
 +----------------------------+--------------------------------------------------------------+
 |                            |                                                              |
 |                            | .. code-block:: bash                                         |
@@ -29,14 +29,14 @@ IDStools. :download:`download cheatsheet here <_static/cheatsheet.pdf>`
 |                            |    $ viewcoretransport -u public -d TEST -s 92436 -r 850     |
 |                            |                                                              |
 +----------------------------+--------------------------------------------------------------+
-|``vieweccomposition``       | *eccomp* Display ec results.                                 |
+|``vieweccomposition``       | Display ec results (replaces eccomp).                        |
 +----------------------------+--------------------------------------------------------------+
 |                            |                                                              |
 |                            | .. code-block:: bash                                         |
 |                            |                                                              |
 |                            |    $ vieweccomposition -d TEST -s 134173 -r 2326             |
 +----------------------------+--------------------------------------------------------------+
-|``viewecray``               | *ecray* Display EC wave ray-tracing results.                 |
+|``viewecray``               | Display EC wave ray-tracing results (replaces ecray).        |
 +----------------------------+--------------------------------------------------------------+
 |                            |                                                              |
 |                            | .. code-block:: bash                                         |
@@ -58,39 +58,40 @@ IDStools. :download:`download cheatsheet here <_static/cheatsheet.pdf>`
 |                            |                                                              |
 |                            |    $ viewedgeprofiles -s 123314 -r 1                         |
 +----------------------------+--------------------------------------------------------------+
-| ``viewequilibrium``        | *equiplot* Shows plasma equilibrium.                         |
+| ``viewequilibrium``        | Shows plasma equilibrium  (replaces equiplot).               |
 +----------------------------+--------------------------------------------------------------+
 |                            |                                                              |
 |                            | .. code-block:: bash                                         |
 |                            |                                                              |
 |                            |    $ viewequilibrium -s 134174 -r 117 --rho --pfcoils --info |
 +----------------------------+--------------------------------------------------------------+
-| ``viewfluxes``             | *print_fluxes* Shows flux information from available         |
-|                            | transport models.                                            |
+| ``viewfluxes``             | Shows flux information from available                        |
+|                            | transport models  (replaces print_fluxes).                   |
 +----------------------------+--------------------------------------------------------------+
 |                            |                                                              |
 |                            | .. code-block:: bash                                         |
 |                            |                                                              |
 |                            |    $ viewfluxes -s 134174 -r  117 -m CLOSEST                 |
 +----------------------------+--------------------------------------------------------------+
-| ``viewkineticprofiles``    | *kinplot* Shows plasma kinetic profiles from the core        |
-|                            | profiles.                                                    |
+| ``viewkineticprofiles``    | Shows plasma kinetic profiles from the core                  |
+|                            | profiles  (replaces kinplot).                                |
 +----------------------------+--------------------------------------------------------------+
 |                            |                                                              |
 |                            | .. code-block:: bash                                         |
 |                            |                                                              |
 |                            |    $ viewkineticprofiles -s 134174 -r 117                    |
 +----------------------------+--------------------------------------------------------------+
-| ``viewhcdplots``           | *hcd_plot* shows plots from distributions and waves for      |
-|                            | different data entries for analysis                          |
+| ``viewhcdplots``           | shows plots from distributions and waves for                 |
+|                            | different data entries for analysis   (replaces hcd_plot).   |
 +----------------------------+--------------------------------------------------------------+
 |                            |                                                              |
 |                            | .. code-block:: bash                                         |
 |                            |                                                              |
-|                            |    $ hcd_plot -ech 104104/2/schneim/MDSPLUS/TORBEAM_XMODE/3  |
+|                            |    $ viewhcdplots                                            |
+|                            |    -ech 104104/2/schneim/MDSPLUS/TORBEAM_XMODE/3             |
 |                            |    -nbi 130012/15/schneim/MDSPLUS/SPOT/3                     |
 +----------------------------+--------------------------------------------------------------+
-| ``viewhcdwaves``           | *hcd_waves_plot* shows waveforms                             |
+| ``viewhcdwaves``           | shows waveforms  (replaces hcd_waves_plot).                  |
 |                            |                                                              |
 +----------------------------+--------------------------------------------------------------+
 |                            |                                                              |
@@ -98,7 +99,7 @@ IDStools. :download:`download cheatsheet here <_static/cheatsheet.pdf>`
 |                            |                                                              |
 |                            |    $  viewhcdwaves -s 134173 -r 101 -u public -d TEST        |
 +----------------------------+--------------------------------------------------------------+
-| ``viewhcddistributions``   | *hcd_distributions_plot* shows waveforms                     |
+| ``viewhcddistributions``   | shows waveforms  (replaces hcd_distributions_plot).          |
 |                            |                                                              |
 +----------------------------+--------------------------------------------------------------+
 |                            |                                                              |
@@ -106,62 +107,64 @@ IDStools. :download:`download cheatsheet here <_static/cheatsheet.pdf>`
 |                            |                                                              |
 |                            |    $ viewhcddistributions -s 130012 -r 115 -u public -d TEST |
 +----------------------------+--------------------------------------------------------------+
-| ``viewmachinedescription`` | *mdplot* Plots machine description data stored in databases. |
+| ``viewmachinedescription`` | Plots machine description data stored in databases.          |
+|                            | (replaces mdplot)                                            |
 +----------------------------+--------------------------------------------------------------+
 |                            |                                                              |
 |                            | .. code-block:: bash                                         |
 |                            |                                                              |
 |                            |    $ viewmachinedescription -d ITER_MD                       |
 +----------------------------+--------------------------------------------------------------+
-| ``viewneutron``            | *neutronplot* Plots particles vs normalised toroidal         |
-|                            | flux coordinate.                                             |
+| ``viewneutron``            | Plots particles vs normalised toroidal                       |
+|                            | flux coordinate  (replaces neutronplot).                     |
 +----------------------------+--------------------------------------------------------------+
 |                            |                                                              |
 |                            | .. code-block:: bash                                         |
 |                            |                                                              |
 |                            |    $ viewneutron -s 121014 -r 11 -t 450 --info               |
 +----------------------------+--------------------------------------------------------------+
-| ``viewplasmacompo``        | *ids_compo* Display the plasma composition from the          |
-|                            | core_profiles IDS                                            |
+| ``viewplasmacompo``        | Display the plasma composition from the                      |
+|                            | core_profiles IDS  (replaces ids_compo).                     |
 +----------------------------+--------------------------------------------------------------+
 |                            |                                                              |
 |                            | .. code-block:: bash                                         |
 |                            |                                                              |
 |                            |    $ viewplasmacompo -s 131047 -r 4                          |
 +----------------------------+--------------------------------------------------------------+
-| ``viewpressure``           | *pressureplot* Display the plasma kinetic profiles from .    |
-|                            | the core_profiles                                            |
+| ``viewpressure``           | Display the plasma kinetic profiles from .                   |
+|                            | the core_profiles  (replaces pressureplot).                  |
 +----------------------------+--------------------------------------------------------------+
 |                            |                                                              |
 |                            | .. code-block:: bash                                         |
 |                            |                                                              |
 |                            |    $ viewpressure -s 134174 -r 117                           |
 +----------------------------+--------------------------------------------------------------+
-| ``viewrotation``           | *rotationplot* Plasma kinetic profiles from the core_profiles|
+| ``viewrotation``           | Plasma kinetic profiles from the core_profiles               |
+|                            | (replaces rotationplot)                                      |
 +----------------------------+--------------------------------------------------------------+
 |                            |                                                              |
 |                            | .. code-block:: bash                                         |
 |                            |                                                              |
 |                            |    $ viewrotation -s 134174 -r 117                           |
 +----------------------------+--------------------------------------------------------------+
-| ``viewscenario``           | *scenplot* Display the plasma kinetic profiles and           | 
-|                            | equilibrium from the core_profiles and equilibrium           | 
+| ``viewscenario``           | Display the plasma kinetic profiles and equilibrium from     | 
+|                            | the core_profiles and equilibrium  (replaces scenplot).      | 
 +----------------------------+--------------------------------------------------------------+
 |                            |                                                              |
 |                            | .. code-block:: bash                                         |
 |                            |                                                              |
 |                            |    $ viewscenario -s 134174 -r 117                           |
 +----------------------------+--------------------------------------------------------------+
-| ``viewsources``            | *print_sources* Shows source information from available      |
-|                            |  sources.                                                    |
+| ``viewsources``            | Shows source information from available                      |
+|                            |  sources (replaces print_sources).                           |
 +----------------------------+--------------------------------------------------------------+
 |                            |                                                              |
 |                            | .. code-block:: bash                                         |
 |                            |                                                              |
 |                            |    $ viewsources -s 134174 -r  117                           |
 +----------------------------+--------------------------------------------------------------+
-| ``viewspectrometry``       | *svplot* Displays the spectrum, displaying plots of radiance |
-|                            | and intensity in two different windows.                      |   
+| ``viewspectrometry``       | Displays the spectrum, displaying plots of radiance          |
+|                            | and intensity in two different windows (replaces svplot).    |   
 +----------------------------+--------------------------------------------------------------+
 |                            |                                                              |
 |                            | .. code-block:: bash                                         |
@@ -218,8 +221,8 @@ IDStools. :download:`download cheatsheet here <_static/cheatsheet.pdf>`
 |                     |    $ idsdiff --generate-html 122525 1 122525 2 summary              |
 +---------------------+---------------------------------------------------------------------+
 | ``idslist``         | Shows list of all idses along with count of time slices.            |
-|                     | [ids_content*yaml*, listidss *with time slices*, idsoccurrences*occ*|    
-|                     | merged into one script]                                             |                                            
+|                     | (replaces ids_content(yaml), listidss (with time slices),           |    
+|                     | idsoccurrences(occ) merged into one script)                         |                                            
 +---------------------+---------------------------------------------------------------------+
 |                     |                                                                     |  
 |                     | .. code-block:: bash                                                |
@@ -242,9 +245,10 @@ IDStools. :download:`download cheatsheet here <_static/cheatsheet.pdf>`
 |                     |    $ idsperf -s 134174 -r 117 equilibrium -do HBD -bo MDSPLUS -o 412|
 |                     |    $ idsperf -s 134174 -r 117 equilibrium  -t 50 -m                 |
 +---------------------+---------------------------------------------------------------------+
-| ``idsprint``        | *idsdump, idsdumppath* Dumps or prints all data on the console.     |
+| ``idsprint``        | Dumps or prints all data on the console.                            |
 |                     | Check if specific fields or attributes have been filled out or empty|
 |                     | The output can also be saved to a file using extraction             |
+|                     | (Replaces idsdump, idsdumppath)                                     |
 +---------------------+---------------------------------------------------------------------+
 |                     |                                                                     |
 |                     | .. code-block:: bash                                                |
@@ -276,18 +280,18 @@ IDStools. :download:`download cheatsheet here <_static/cheatsheet.pdf>`
 ****************
 
 +---------------------+---------------------------------------------------------------------+
-| Command             | Description                                                         |
+| Command             | Description and Example Usage                                       |
 +=====================+=====================================================================+
-| ``dblist``          | *imasdbs* Lists existing IMAS databases.                            |
+| ``dblist``          | Lists existing IMAS databases (Replaces imasdbs).                   |
 +---------------------+---------------------------------------------------------------------+
 |                     |                                                                     |
 |                     | .. code-block:: bash                                                |
 |                     |                                                                     |
 |                     |    $ dblist databases                                               |
 +---------------------+---------------------------------------------------------------------+
-| ``dbscraper``       | *db_extractor* The `dbscraper` script scrapes data from a particular|
+| ``dbscraper``       | The `dbscraper` script scrapes data from a particular               |
 |                     | IDS path for a specified series of pulses and displays the pulse    |
-|                     | along with the value.                                               |
+|                     | along with the value.  (Replaces db_extractor)                      |
 +---------------------+---------------------------------------------------------------------+
 |                     |                                                                     |
 |                     | .. code-block:: bash                                                |
@@ -309,36 +313,54 @@ IDStools. :download:`download cheatsheet here <_static/cheatsheet.pdf>`
  Scenario Database Tools
 *************************
 
-+---------------------+---------------------------------------------------------------------+
-| Command             | Description                                                         |
-+=====================+=====================================================================+
-| ``scenario_status`` | The `scenario_status` program provides information about the        |
-|                     | scenario of specified shot and run number from the scenario         |
-|                     | database. It shows status and potential parent and children for a   |
-|                     | given simulation stored in ITER scenario description database       |
-|                     | folder                                                              |
-+---------------------+---------------------------------------------------------------------+
-|                     |                                                                     |
-|                     | .. code-block:: bash                                                |
-|                     |                                                                     |
-|                     |    $ scenario_status -s 134174 -r 117                               |
-|                     |    $ scenario_status -s 130012 -r 4 --print                         |
-+---------------------+---------------------------------------------------------------------+
-| ``scenario_summary``| The `scenario_summary` lists available scenarios in a specific      |
-|                     | folder with search facility.                                        |
-+---------------------+---------------------------------------------------------------------+
-|                     |                                                                     |
-|                     | .. code-block:: bash                                                |
-|                     |                                                                     |
-|                     |    $ scenario_summary -s He4,2.65                                   |
-|                     |    $ scenario_summary -s He4,2.65 -c shot,run,database,composition  |
-|                     |    $ scenario_summary -s He4 2.65                                   |
-+---------------------+---------------------------------------------------------------------+
-| ``show_db_entry``   | Show full description file for a given simulation stored in ITER DB |
-|                     | folder.                                                             |
-+---------------------+---------------------------------------------------------------------+
-|                     |                                                                     |
-|                     | .. code-block:: bash                                                |
-|                     |                                                                     |
-|                     |    $ show_db_entry -s 134174 -r 117                                 |
-+---------------------+---------------------------------------------------------------------+
++--------------------------------+---------------------------------------------------------------------+
+| Command                        | Description and Example Usage                                       |
++================================+=====================================================================+
+| ``create_db_entry``            | Auto-generated yaml scenario and watcher files                      |
++--------------------------------+---------------------------------------------------------------------+
+| ``create_db_entry_disruption`` | Auto-generated yaml scenario and watcher files for disruption       |
+|                                | database                                                            |
++--------------------------------+---------------------------------------------------------------------+
+| ``create_validation_schema``   | Create validation schema using data dictionary validation attributes|
++--------------------------------+---------------------------------------------------------------------+
+| ``disruption_summary``         | Script to list available disruptions in a specific folder           |
++--------------------------------+---------------------------------------------------------------------+
+| ``md_status``                  | Show status and potential parent and children for a given           |
+|                                | simulation stored in ITER machine description database folder       |
++--------------------------------+---------------------------------------------------------------------+
+| ``md_summary``                 | md_summary list available machine description data in a specific    |
+|                                | folder with search facility                                         |
++--------------------------------+---------------------------------------------------------------------+
+| ``scenario_status``            | The `scenario_status` program provides information about the        |
+|                                | scenario of specified shot and run number from the scenario         |
+|                                | database. It shows status and potential parent and children for a   |
+|                                | given simulation stored in ITER scenario description database       |
+|                                | folder                                                              |
+|                                |                                                                     |
+|                                | .. code-block:: bash                                                |
+|                                |                                                                     |
+|                                |    $ scenario_status -s 134174 -r 117                               |
+|                                |    $ scenario_status -s 130012 -r 4 --print                         |
++--------------------------------+---------------------------------------------------------------------+
+| ``scenario_summary``           | The `scenario_summary` lists available scenarios in a specific      |
+|                                | folder with search facility.                                        |
+|                                |                                                                     |
+|                                | .. code-block:: bash                                                |
+|                                |                                                                     |
+|                                |    $ scenario_summary -s He4,2.65                                   |
+|                                |    $ scenario_summary -s He4,2.65 -c shot,run,database,composition  |
+|                                |    $ scenario_summary -s He4 2.65                                   |
++--------------------------------+---------------------------------------------------------------------+
+| ``show_db_entry``              | Show full description file for a given simulation stored in ITER DB |
+|                                | folder.                                                             |
+|                                |                                                                     |
+|                                | .. code-block:: bash                                                |
+|                                |                                                                     |
+|                                |    $ show_db_entry -s 134174 -r 117                                 |
++--------------------------------+---------------------------------------------------------------------+
+| ``validate_db_entry``          | Validation Tool for ITER Scenario DB                                |
++--------------------------------+---------------------------------------------------------------------+
+| ``watch_db_entry``             | Subscribe/unsubscribe as a watcher to a simulation file             |
+|                                | stored in IMAS DB                                                   |
++--------------------------------+---------------------------------------------------------------------+
+
