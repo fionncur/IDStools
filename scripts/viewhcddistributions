@@ -1,0 +1,113 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+import argparse
+import logging
+import sys
+
+import imas
+
+from idstools.compute.common import getNearestTime
+from idstools.utils.clihelper import getBackendID, imasParser
+from idstools.utils.idslogger import setupLogger
+from idstools.view.common import Canvas
+from idstools.view.distributions import DistributionsView
+
+logger = setupLogger("module", stdout_level=logging.INFO)
+
+
+def showPlots(args):
+    shot = args.shot
+    run = args.run
+
+    # To handle multiple datafiles (for scans)
+    if "-" in run:
+        [runmin, runmax] = [int(x) for x in run.split("-")]  # int(run.split('-'))
+    else:
+        runmin = int(run)
+        runmax = int(run)
+
+    for irun in range(runmin, runmax + 1):
+        logger.info(
+            f"Open pulse: {shot}/{irun} in DB {args.user}/{args.database}/{args.version}"
+        )
+        conn = imas.DBEntry(
+            getBackendID(args.backend), args.database, int(shot), irun, args.user
+        )
+        status, _ = conn.open()
+        if status != 0:
+            logger.critical(
+                f"Pulse {shot}/{irun} in DB {args.user}/{args.database}/{args.version} does not exist"
+            )
+            sys.exit(status)
+
+        idsDistributions = conn.get("distributions")
+        conn.close()
+
+        timeArray = idsDistributions.time
+        ntime = len(timeArray)
+        timeIndex, timeValue = getNearestTime(idsDistributions.time, args.time)
+        time = timeValue
+        ndistributions = len(idsDistributions.distribution)
+
+        canvas = Canvas(3, 2)
+        # canvas.setStyle(style="retro")
+        canvas.setSupTitle(
+            f"HCD Distributions Plot [Shot {args.shot} / Run {args.run}] Time : {timeValue:.1f}"
+        )
+        if ntime == 1:
+            logger.info("Only one time slice --> Power and CD waveforms not displayed")
+        ax1 = canvas.add_axes(title="", xlabel="", row=0, col=0)
+        ax2 = canvas.add_axes(title="", xlabel="", row=1, col=0)
+        ax3 = canvas.add_axes(title="", xlabel="", row=2, col=0)
+        distributionsView = DistributionsView(idsDistributions)
+        distributionsView.plotAbsorbedPowerDensityIndividual(ax1, timeIndex)
+        distributionsView.plotAbsorbedPowerDensity(ax2, timeIndex)
+        distributionsView.plotCDProfile(ax3, timeIndex)
+        if ntime != 1:
+            ax4 = canvas.add_axes(title="", xlabel="", row=0, col=1)
+            ax5 = canvas.add_axes(title="", xlabel="", row=1, col=1)
+            distributionsView.plotNBIFusPowerAndCDWaveforms(ax4, timeIndex)
+            distributionsView.plotCDWaveform(ax5, timeIndex)
+
+        if args.save:
+            fname = (
+                f"Distributions_profile_time_{shot}_{irun}_"
+                + "%.1f" % timeValue
+                + ".png"
+            )
+            canvas.save(fname, width=5, height=4, dpi=300)
+        else:
+            wm = canvas.get_current_fig_manager()
+            window = wm.window
+            screen_y = window.winfo_screenheight()
+            screen_x = window.winfo_screenwidth()
+            wm.resize(screen_x, screen_y)
+            canvas.fig.subplots_adjust(
+                top=0.92,
+                bottom=0.122,
+                left=0.044,
+                right=0.886,
+                hspace=0.438,
+                wspace=0.328,
+            )
+            canvas.show()
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        description="---- Display EC results", parents=[imasParser]
+    )
+    parser.add_argument("-s", "--shot", help="Shot number", required=True, type=int)
+    parser.add_argument("-r", "--run", help="Run number", required=True)
+    parser.add_argument(
+        "-t", "--time", help="Time", required=False, type=float, default=-99.0
+    )
+
+    parser.add_argument(
+        "--save",
+        help="Save figure at default location",
+        action="store_true",
+    )
+    args = parser.parse_args()
+
+    showPlots(args)

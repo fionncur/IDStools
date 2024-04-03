@@ -8,6 +8,7 @@ This module provides compute functions and classes for waves ids data
 import functools
 import numpy as np
 import logging
+import imas
 
 logger = logging.getLogger("module")
 
@@ -350,12 +351,9 @@ class WavesCompute:
 
         return beam_tracing
 
-    def GetECLaunchersInfo(
-        self,
-        timeIndex: int = 0,
-    ):
+    def GetECLaunchersInfo(self, timeIndex: int = 0, usepsi=False, verbose=False):
         ecLauncherInfo = {}
-        data = self.getRadialGridInfo(timeIndex)
+        data = self.getRadialGridInfo(timeIndex, usepsi)
         activeLaunchers = {
             key: value for key, value in data.items() if value["isActive"] is True
         }
@@ -371,6 +369,8 @@ class WavesCompute:
         single_eccd = dict()  # for the chosen time slice
         total_injected_power = 0  # for the chosen time slice
 
+        total_absorbed_power = 0
+        total_eccd = 0
         total_power_density_profile = [0] * nrho  # profile
         total_current_density_profile = [0] * nrho  # profile
         single_power_density_profile = dict()  # profile
@@ -389,7 +389,7 @@ class WavesCompute:
             else:
                 single_ec_launcher_name[iwave] = f"Launcher{iwave+1}"
             if np.size(self.ids.coherent_wave[iwave].global_quantities) > 0:
-                if self.ids.coherent_wave[iwave].global_quantities[0].power > 0:
+                if self.isActiveDuringPulse(iwave) is True:
                     single_power_waveform[iwave] = []
                     single_current_waveform[iwave] = []
                     for itime in range(len(timeArray)):
@@ -415,53 +415,101 @@ class WavesCompute:
                             .global_quantities[itime]
                             .current_tor
                         )
-                    total_power_density_profile = (
-                        total_power_density_profile
-                        + self.ids.coherent_wave[iwave]
-                        .profiles_1d[timeIndex]
-                        .power_density
-                    )
-                    single_power_density_profile[iwave] = (
-                        self.ids.coherent_wave[iwave]
-                        .profiles_1d[timeIndex]
-                        .power_density
-                    )
-                    total_current_density_profile = (
-                        total_current_density_profile
-                        + self.ids.coherent_wave[iwave]
-                        .profiles_1d[timeIndex]
-                        .current_parallel_density
-                    )
-                    single_current_density_profile[iwave] = (
-                        self.ids.coherent_wave[iwave]
-                        .profiles_1d[timeIndex]
-                        .current_parallel_density
-                    )
-                    single_injected_power[iwave] = 0.0
-                    for ibeam in range(
-                        len(self.ids.coherent_wave[iwave].beam_tracing[timeIndex].beam)
-                    ):
-                        if (
+                    if (
+                        len(
                             self.ids.coherent_wave[iwave]
-                            .beam_tracing[timeIndex]
-                            .beam[ibeam]
-                            .power_initial
-                            > 0
+                            .profiles_1d[timeIndex]
+                            .power_density
+                        )
+                        > 0
+                    ):
+                        total_power_density_profile = (
+                            total_power_density_profile
+                            + self.ids.coherent_wave[iwave]
+                            .profiles_1d[timeIndex]
+                            .power_density
+                        )
+                    if (
+                        len(
+                            self.ids.coherent_wave[iwave]
+                            .profiles_1d[timeIndex]
+                            .power_density
+                        )
+                        > 0
+                    ):
+                        single_power_density_profile[iwave] = (
+                            self.ids.coherent_wave[iwave]
+                            .profiles_1d[timeIndex]
+                            .power_density
+                        )
+                    if (
+                        len(
+                            self.ids.coherent_wave[iwave]
+                            .profiles_1d[timeIndex]
+                            .current_parallel_density
+                        )
+                        > 0
+                    ):
+                        total_current_density_profile = (
+                            total_current_density_profile
+                            + self.ids.coherent_wave[iwave]
+                            .profiles_1d[timeIndex]
+                            .current_parallel_density
+                        )
+                        single_current_density_profile[iwave] = (
+                            self.ids.coherent_wave[iwave]
+                            .profiles_1d[timeIndex]
+                            .current_parallel_density
+                        )
+                    single_injected_power[iwave] = 0.0
+                    if len(self.ids.coherent_wave[iwave].beam_tracing) > 0:
+                        for ibeam in range(
+                            len(
+                                self.ids.coherent_wave[iwave]
+                                .beam_tracing[timeIndex]
+                                .beam
+                            )
                         ):
-                            total_injected_power = (
-                                total_injected_power
-                                + self.ids.coherent_wave[iwave]
+                            if imas.imasdef.isFieldValid(
+                                self.ids.coherent_wave[iwave]
                                 .beam_tracing[timeIndex]
                                 .beam[ibeam]
                                 .power_initial
-                            )
-                            single_injected_power[iwave] = (
-                                single_injected_power[iwave]
-                                + self.ids.coherent_wave[iwave]
+                            ) and (
+                                self.ids.coherent_wave[iwave]
                                 .beam_tracing[timeIndex]
                                 .beam[ibeam]
                                 .power_initial
-                            )
+                                > 0
+                            ):
+                                total_injected_power = (
+                                    total_injected_power
+                                    + self.ids.coherent_wave[iwave]
+                                    .beam_tracing[timeIndex]
+                                    .beam[ibeam]
+                                    .power_initial
+                                )
+                                single_injected_power[iwave] = (
+                                    single_injected_power[iwave]
+                                    + self.ids.coherent_wave[iwave]
+                                    .beam_tracing[timeIndex]
+                                    .beam[ibeam]
+                                    .power_initial
+                                )
+
+                                total_absorbed_power = (
+                                    total_absorbed_power
+                                    + self.ids.coherent_wave[iwave]
+                                    .global_quantities[timeIndex]
+                                    .power
+                                )
+                                total_eccd = (
+                                    total_eccd
+                                    + self.ids.coherent_wave[iwave]
+                                    .global_quantities[timeIndex]
+                                    .current_tor
+                                )
+
                     single_absorbed_power[iwave] = (
                         self.ids.coherent_wave[iwave].global_quantities[timeIndex].power
                     )
@@ -470,6 +518,46 @@ class WavesCompute:
                         .global_quantities[timeIndex]
                         .current_tor
                     )
+                    if verbose:
+                        logger.info(
+                            " "
+                            + single_ec_launcher_name[iwave]
+                            + " is active with a power of {:.2f}".format(
+                                single_injected_power[iwave] * 1.0e-6
+                            )
+                            + " MW"
+                        )
+                        logger.info(
+                            "   --> Absorbed power = {:.2f}".format(
+                                single_absorbed_power[iwave] * 1.0e-6
+                            )
+                            + " MW"
+                        )
+                        logger.info(
+                            "   --> Curent Drive =  {:.2e}".format(
+                                single_eccd[iwave] * 1.0e-3
+                            )
+                            + " kA"
+                        )
+                        logger.info(
+                            "Total injected power = {:.2f}".format(
+                                total_injected_power * 1.0e-6
+                            )
+                            + " MW"
+                        )
+                        logger.info(
+                            "Total absorbed power = {:.2f}".format(
+                                total_absorbed_power * 1.0e-6
+                            )
+                            + " MW"
+                        )
+                        logger.info(
+                            "Total ECCD           = {:.2f}".format(total_eccd * 1.0e-6)
+                            + " MA"
+                        )
+                else:
+                    if verbose:
+                        logger.info(" " + single_ec_launcher_name[iwave] + " is off")
 
         ecLauncherInfo["single_ec_launcher_name"] = single_ec_launcher_name
         ecLauncherInfo[
@@ -482,6 +570,11 @@ class WavesCompute:
         ecLauncherInfo[
             "total_injected_power"
         ] = total_injected_power  # for the chosen time slice
+
+        ecLauncherInfo[
+            "total_absorbed_power"
+        ] = total_absorbed_power  # for the chosen time slice
+        ecLauncherInfo["total_eccd"] = total_eccd
 
         ecLauncherInfo[
             "total_power_density_profile"
@@ -526,97 +619,32 @@ class WavesCompute:
             waveData["rho_tor_norm"] = None
 
             if np.size(self.ids.coherent_wave[iwave].global_quantities) > 0:
-                if self.ids.coherent_wave[iwave].global_quantities[0].power > 0:
+                if self.isActiveDuringPulse(iwave) is True:
                     waveData["isActive"] = True
                     activeFound = True
+                    # fmt: off
                     try:
-                        if (
-                            len(
-                                self.ids.coherent_wave[iwave]
-                                .profiles_1d[timeIndex]
-                                .grid.rho_tor_norm
-                            )
-                            > 0
-                        ):
-                            waveData["nrho"] = len(
-                                self.ids.coherent_wave[iwave]
-                                .profiles_1d[timeIndex]
-                                .grid.rho_tor_norm
-                            )
-                            waveData["rho_tor_norm"] = (
-                                self.ids.coherent_wave[iwave]
-                                .profiles_1d[timeIndex]
-                                .grid.rho_tor_norm
-                            )
-                        elif (
-                            len(
-                                self.ids.coherent_wave[iwave]
-                                .profiles_1d[timeIndex]
-                                .grid.rho_tor
-                            )
-                            > 0
-                        ):
-                            waveData["nrho"] = len(
-                                self.ids.coherent_wave[iwave]
-                                .profiles_1d[timeIndex]
-                                .grid.rho_tor
-                            )
-                            waveData["rho_tor_norm"] = (
-                                self.ids.coherent_wave[iwave]
-                                .profiles_1d[timeIndex]
-                                .grid.rho_tor
-                                / self.ids.coherent_wave[iwave]
-                                .profiles_1d[timeIndex]
-                                .grid.rho_tor[nrho - 1]
-                            )
-                        elif (
-                            len(
-                                self.ids.coherent_wave[iwave]
-                                .profiles_1d[timeIndex]
-                                .grid.psi
-                            )
-                            > 0
-                        ):
-                            waveData["psiBased"] = True
-                            waveData["nrho"] = len(
-                                self.ids.coherent_wave[iwave]
-                                .profiles_1d[timeIndex]
-                                .grid.psi
-                            )
-                            waveData["rho_tor_norm"] = (
-                                -self.ids.coherent_wave[iwave]
-                                .profiles_1d[timeIndex]
-                                .grid.psi
-                            )
+                        if (len(self.ids.coherent_wave[iwave].profiles_1d[timeIndex].grid.rho_tor_norm) > 0):
+                            waveData["nrho"] = len(self.ids.coherent_wave[iwave].profiles_1d[timeIndex].grid.rho_tor_norm)
+                            waveData["rho_tor_norm"] = (self.ids.coherent_wave[iwave].profiles_1d[timeIndex].grid.rho_tor_norm)
+                        elif (len(self.ids.coherent_wave[iwave].profiles_1d[timeIndex].grid.rho_tor) > 0):
+                            waveData["nrho"] = len(self.ids.coherent_wave[iwave].profiles_1d[timeIndex].grid.rho_tor)
+                            waveData["rho_tor_norm"] = (self.ids.coherent_wave[iwave].profiles_1d[timeIndex].grid.rho_tor / self.ids.coherent_wave[iwave].profiles_1d[timeIndex].grid.rho_tor[waveData["nrho"] - 1])
+                        elif (len(self.ids.coherent_wave[iwave].profiles_1d[timeIndex].grid.psi) > 0):
+                            waveData["psiBased"] = True 
+                            waveData["nrho"] = len(self.ids.coherent_wave[iwave].profiles_1d[timeIndex].grid.psi)
+                            waveData["rho_tor_norm"] = (-self.ids.coherent_wave[iwave].profiles_1d[timeIndex].grid.psi)
                     except:
-                        logger.error(
-                            "waves.coherent_wave[iwave].profiles_1d[it].grid.rho_tor_norm, rho_tor and psi could not be read"
-                        )
+                        logger.error("waves.coherent_wave[iwave].profiles_1d[it].grid.rho_tor_norm, rho_tor and psi could not be read")
                         return None
                     if waveData["nrho"] == 0:
-                        logger.error(
-                            "waves.coherent_wave[iwave].profiles_1d[it].grid.rho_tor_norm, rho_tor and psi are empty"
-                        )
+                        logger.error("waves.coherent_wave[iwave].profiles_1d[it].grid.rho_tor_norm, rho_tor and psi are empty")
                         return None
-                    if (
-                        len(
-                            self.ids.coherent_wave[iwave]
-                            .profiles_1d[timeIndex]
-                            .grid.psi
-                        )
-                        > 0
-                    ):
+                    if (len(self.ids.coherent_wave[iwave].profiles_1d[timeIndex].grid.psi) > 0):
                         waveData["isPsiAvailable"] = True
-                        waveData["npsi"] = len(
-                            self.ids.coherent_wave[iwave]
-                            .profiles_1d[timeIndex]
-                            .grid.psi
-                        )
-                        waveData["psi1d"] = (
-                            -self.ids.coherent_wave[iwave]
-                            .profiles_1d[timeIndex]
-                            .grid.psi
-                        )
+                        waveData["npsi"] = len(self.ids.coherent_wave[iwave].profiles_1d[timeIndex].grid.psi)
+                        waveData["psi1d"] = (-self.ids.coherent_wave[iwave].profiles_1d[timeIndex].grid.psi)
+                    # fmt: on
             else:
                 logger.error(
                     "waves.coherent_wave[iwave].global_quantities has not been allocated"
@@ -638,3 +666,9 @@ class WavesCompute:
         if not activeFound:
             return None
         return data
+
+    def isActiveDuringPulse(self, waveIndex):
+        for itime in range(len(self.ids.time)):
+            if self.ids.coherent_wave[waveIndex].global_quantities[itime].power > 0:
+                return True
+        return False

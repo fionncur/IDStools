@@ -17,6 +17,9 @@ composition, allowing you to depict various trends and plasma physics.
    viewequilibrium
    viewfluxes
    viewkineticprofiles
+   viewhcdplots
+   viewhcdwaves
+   viewhcddistributions
    viewmachinedescription
    viewneutron
    viewplasmacompo
