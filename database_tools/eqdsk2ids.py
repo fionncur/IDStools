@@ -158,19 +158,19 @@ class GEQDSK:
         data["SIBRY"] = rec[3]
         data["BCENTR"] = rec[4]
 
-        #
+        # skip reading same data for 2nd time
         rec = np.float64(fmt20.read(fp.readline()))
         data["CURRENT"] = rec[0]
-        data["SIMAG"] = rec[1]
+        #data["SIMAG"] = rec[1]
         data["XDUM"] = rec[2]
-        data["RMAXIS"] = rec[3]
+        #data["RMAXIS"] = rec[3]
         data["XDUM"] = rec[4]
 
-        #
+        # skip reading same data for 2nd time
         rec = np.float64(fmt20.read(fp.readline()))
-        data["ZMAXIS"] = rec[0]
+        #data["ZMAXIS"] = rec[0]
         data["XDUM"] = rec[1]
-        data["SIBRY"] = rec[2]
+        #data["SIBRY"] = rec[2]
         data["XDUM"] = rec[3]
         data["XDUM"] = rec[4]
 

@@ -111,7 +111,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--ipsign",
         dest="ipsign",
-        help="transform input data to obtain desired sign for Ip on the output, default=%(default)s uses input",
+        help="transform input data to obtain desired sign for Ip on the output, (default=%(default)s) uses input",
         required=False,
         type=int,
         default=0,
@@ -120,7 +120,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--b0sign",
         dest="b0sign",
-        help="transform input data to obtain desired sign for B0 on the output, default=%(default)s uses input",
+        help="transform input data to obtain desired sign for B0 on the output, (default=%(default)s) uses input",
         required=False,
         type=int,
         default=0,
