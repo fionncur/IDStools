@@ -5,7 +5,29 @@ import sys
 
 from imas import imasdef
 
+
+def getIMASVersion():
+    lowlevelVersion = int(os.environ["UAL_VERSION"][0])
+    return lowlevelVersion
+
+
 # default parent parser for all idstools scripts
+uriParser = argparse.ArgumentParser(add_help=False)
+uriParser.add_argument(
+    "-path",
+    "--path",
+    type=str,
+    help="path \t\t(default=%(default)s)",
+)
+uriParser.add_argument(
+    "-mode",
+    "--mode",
+    nargs="?",
+    type=str,
+    choices=["r", "a", "w", "x"],
+    default="r",
+    help="mode \t\t(default=%(default)s)",
+)
 imasParser = argparse.ArgumentParser(add_help=False)
 imasParser.add_argument(
     "-u",
@@ -37,6 +59,19 @@ imasParser.add_argument(
     default="3",
     help="data version \t(default=%(default)s)",
 )
+parents = [imasParser]
+if getIMASVersion() > 4:
+    parents.append(uriParser)
+dbentryParser = argparse.ArgumentParser(add_help=False, parents=parents)
+if getIMASVersion() > 4:
+    dbentryParser.add_argument(
+        "-s", "--shot", "--pulse", dest="pulse", help="Shot number", type=int
+    )
+else:
+    dbentryParser.add_argument(
+        "-s", "--shot", "--pulse", dest="shot", help="Shot number", type=int
+    )
+dbentryParser.add_argument("-r", "--run", help="Run number", type=int)
 
 
 def getBackendID(name):
@@ -61,9 +96,7 @@ def getDatabasePath(args) -> str:
         publichome = os.getenv("IMAS_HOME", default="")
         if publichome is None:
             return None
-        databaseAbsolutePath = (
-            f"{publichome}/shared/imasdb/{args.database}/{args.version}/{args.run//10000}"
-        )
+        databaseAbsolutePath = f"{publichome}/shared/imasdb/{args.database}/{args.version}/{args.run//10000}"
     else:
         databaseAbsolutePath = f'{os.path.expanduser(f"~{args.user}")}/public/imasdb/{str(args.database)}/{args.version}/{args.run//10000}'
     hostdir = f"{socket.gethostname()}:{databaseAbsolutePath}"

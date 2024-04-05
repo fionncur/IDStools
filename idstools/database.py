@@ -5,10 +5,10 @@ import os
 from datetime import datetime
 from glob import glob
 from pathlib import Path
+from idstools.utils.clihelper import getBackendID
 
 import imas
 import yaml
-
 
 
 logger = logging.getLogger(f"module.{__name__}")
@@ -457,6 +457,49 @@ class DBMaster:
         else:
             raise NotImplementedError(f"Unsupported backend: {backend}")
 
+    @classmethod
+    def getIMASVersion(cls):
+        lowlevelVersion = int(os.environ["UAL_VERSION"][0])
+        return lowlevelVersion
+
+    @classmethod
+    def getConnection(cls, args):
+        imasVersion = DBMaster.getIMASVersion()
+        if imasVersion > 4:
+            if args.path is None:
+                if args.pulse is None or args.run is None:
+                    logger.error("Both the path or the shot/pulse and run are missing.")
+                    return None
+                connection = imas.DBEntry(
+                    getBackendID(args.backend),
+                    args.database,
+                    args.pulse,
+                    args.run,
+                    args.user,
+                )
+            else:
+                if args.pulse is not None and args.run is not None:
+                    logger.warning(
+                        "Both path and legacy parameters are provided. Using path for accessing data entry"
+                    )
+                connection = imas.DBEntry(args.path, args.mode)
+        else:
+            if args.shot is None or args.run is None:
+                logger.error("There is no shot and run available")
+                return None
+            connection = imas.DBEntry(
+                getBackendID(args.backend),
+                args.database,
+                args.shot,
+                args.run,
+                args.user,
+            )
+        status, _ = connection.open()
+        if status != 0:
+            logger.error(f"The specified database is not available")
+            return None
+        return connection
+
 
 def readScenario(
     scenarioFilePath: str,
@@ -538,4 +581,3 @@ class Connection:
         self.run = run
         self.user = user
         self.version = version
-

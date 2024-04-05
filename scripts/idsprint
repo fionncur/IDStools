@@ -8,25 +8,23 @@ import imas
 import numpy
 
 try:
-    import StringIO 
+    import StringIO
 except ImportError:
-    from io import StringIO 
+    from io import StringIO
 
-from idstools.utils.clihelper import getBackendID, imasParser
+from idstools.database import DBMaster
+from idstools.utils.clihelper import getBackendID, dbentryParser
 from idstools.utils.idslogger import setupLogger
 
 logger = setupLogger("module")
-
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Prints content of an IDS onto the terminal",
         formatter_class=argparse.RawTextHelpFormatter,
-        parents=[imasParser],
+        parents=[dbentryParser],
     )
 
-    parser.add_argument("-s", "--shot", help="Shot number", required=True, type=int)
-    parser.add_argument("-r", "--run", help="Run number", required=True, type=int)
     parser.add_argument(
         "-e",
         "--show-empty",
@@ -39,7 +37,9 @@ if __name__ == "__main__":
         type=str,
         help="Name of the IDS to dump",
     )
-    parser.add_argument("path", nargs="?", type=str, help="Data path", default=None)
+    parser.add_argument(
+        "idspath", nargs="?", type=str, help="IDS data path", default=None
+    )
     parser.add_argument(
         "-f",
         "--full",
@@ -53,25 +53,13 @@ if __name__ == "__main__":
         help="Print only names which has data",
     )
     args = parser.parse_args()
-
+    connection = DBMaster.getConnection(args)
+    if connection is None:
+        exit(0)
     if args.full:
         numpy.set_printoptions(threshold=sys.maxsize)
     else:
         numpy.set_printoptions(threshold=10)
-
-    connection = imas.DBEntry(
-        getBackendID(args.backend),
-        args.database,
-        args.shot,
-        args.run,
-        args.user,
-    )
-    status, _ = connection.open()
-    if status != 0:
-        logger.error(
-            f"Shot {args.shot}, run {args.run} for user={args.user} and database={args.database} does not exists"
-        )
-        exit(1)
 
     nameocc = args.ids.split("/")
     if len(nameocc) == 1:
@@ -83,25 +71,24 @@ if __name__ == "__main__":
         exit(1)
     idsname = nameocc[0]
 
-    if args.path is None:
+    if args.idspath is None:
         ids = connection.get(idsname, occurrence)
         if args.compact:
             try:
                 output = StringIO()
-                sys.stdout = open(os.devnull, 'w')
+                sys.stdout = open(os.devnull, "w")
 
                 ids.dump(print_empty=args.show_empty, file=output)
-                
+
                 sys.stdout = sys.__stdout__
                 output.seek(0)
 
-                
                 for line in output.readlines():
-                    if "[" in line and  "]" not in line:
+                    if "[" in line and "]" not in line:
                         continue
-                    if "]" in line and  "[" not in line:
+                    if "]" in line and "[" not in line:
                         continue
-                    if "]" in line and  "[" in line and "." in line:
+                    if "]" in line and "[" in line and "." in line:
                         continue
                     if "class" in line:
                         continue
@@ -115,16 +102,17 @@ if __name__ == "__main__":
                     line = line.replace("\t", "  ")
                     print(line, end="")
                 output.close()
-            except Exception as e: print(e)
+            except Exception as e:
+                print(e)
         else:
             try:
                 ids.dump(print_empty=args.show_empty)
             except Exception:
                 print(ids)
-        
+
     else:
         try:
-            result = connection.partial_get(idsname, args.path, occurrence)
+            result = connection.partial_get(idsname, args.idspath, occurrence)
         except Exception as exc:
             logger.error(exc)
             exit(1)
