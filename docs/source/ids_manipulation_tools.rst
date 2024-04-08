@@ -14,4 +14,5 @@ IDS Manipulation tools allow you to manipulate data within IDSes by copying, mov
    idsperf
    idsprint
    idsresample
+   idsrescale_equilibrium
    idssize

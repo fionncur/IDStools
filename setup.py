@@ -65,6 +65,7 @@ setup(
         "scripts/idsperf",
         "scripts/idsprint",
         "scripts/idsresample",
+        "scripts/idsrescale_equilibrium",
         "scripts/idssize",
         "scripts/viewcoresources",
         "scripts/viewedgeprofiles",
