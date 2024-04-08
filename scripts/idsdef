@@ -1,0 +1,66 @@
+#!/usr/bin/env python3
+import argparse
+
+from rich.console import Console
+from rich.syntax import Syntax
+from rich.table import Table
+
+from idstools.utils.ddhelper import DDHelper
+from idstools.utils.idslogger import setupLogger
+from rich_argparse import RichHelpFormatter
+
+logger = setupLogger("module")
+console = Console()
+
+parser = argparse.ArgumentParser(
+    description="Query the IDS XML Definition for documentation",
+    formatter_class=RichHelpFormatter,
+)
+parser.add_argument("ids", type=str, help="IDS name")
+parser.add_argument(
+    "path",
+    type=str,
+    nargs="?",
+    default=None,
+    help="Path for field of interest within the IDS",
+)
+opt = parser.add_mutually_exclusive_group()
+opt.add_argument("-a", "--all", action="store_true", help="Print all attributes")
+opt.add_argument(
+    "-s",
+    "--select",
+    type=str,
+    default="documentation",
+    help="Select attribute to be printed \t(default=%(default)s)",
+)
+parser.add_argument(
+    "-m",
+    "--metaData",
+    action="store_true",
+    help="Print associated meta-data (version and cocos)",
+)
+args = parser.parse_args()
+
+try:
+    dd = DDHelper()
+    f = dd.query(args.ids, args.path)
+except ValueError as ve:
+    logger.critical(f"{ve}")
+
+if args.metaData:
+    mstr = f"This is Data Dictionary version = [magenta]{dd.version}[/magenta], following COCOS = [magenta]{dd.cocos}[/magenta]"
+    console.print(mstr, style="green")
+    console.print("=" * len(mstr))
+
+if args.all:
+    table = Table(
+        title=f"Attributes of ({args.ids}{'-' + args.path if args.path is not None else ''})"
+    )
+    table.add_column("Attribute", style="magenta")
+    table.add_column("Value", style="green")
+
+    for a in f.keys():
+        table.add_row(f"{a}", f"{f[a]}")
+    console.print(table)
+else:
+    console.print(f"[green]{f[args.select]}[/green]")

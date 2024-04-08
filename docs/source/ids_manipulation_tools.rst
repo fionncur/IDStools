@@ -8,6 +8,7 @@ IDS Manipulation tools allow you to manipulate data within IDSes by copying, mov
    eqdsk2ids
    idschk
    idscp
+   idsdef
    idsdiff
    idslist
    idsperf

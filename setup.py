@@ -58,6 +58,7 @@ setup(
         "scripts/dbselector",
         "scripts/eqdsk2ids",
         "scripts/idscp",
+        "scripts/idsdef",
         "scripts/idschk",
         "scripts/idsdiff",
         "scripts/idslist",
