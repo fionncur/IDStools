@@ -5,7 +5,7 @@ import logging
 import inspect
 
 import imas
-from database_tools import db_helpers
+from idstools.database import DBMaster
 from database_tools import idschk
 from idstools.idslist import available_in_dbentry
 from idstools.utils.clihelper import getBackendID
@@ -40,12 +40,12 @@ def load_scenario(user, database, version, backend):
 
     scenarios = []
     if backend == "MDSPLUS":
-        scenarios = db_helpers.mdsListPulseRun(
-            db_helpers.getDBPath(user, database, version), with_status="active"
+        scenarios = DBMaster.mdsListPulseRun(
+            DBMaster.getDBPath(user, database, version), with_status="active"
         )
     elif backend == "HDF5":
-        scenarios = db_helpers.hdf5ListPulseRun(
-            db_helpers.getDBPath(user, database, version)
+        scenarios = DBMaster.hdf5ListPulseRun(
+            DBMaster.getDBPath(user, database, version)
         )
 
     return scenarios

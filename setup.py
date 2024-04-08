@@ -53,6 +53,7 @@ setup(
     keywords="IMAS, IDS",
     install_requires=install_requires,
     scripts=[
+        "scripts/dbconverter",
         "scripts/dblist",
         "scripts/dbscraper",
         "scripts/dbselector",
@@ -67,6 +68,7 @@ setup(
         "scripts/idsresample",
         "scripts/idsrescale_equilibrium",
         "scripts/idssize",
+        "scripts/idsshift_equilibrium",
         "scripts/viewcoresources",
         "scripts/viewedgeprofiles",
         "scripts/viewequilibrium",

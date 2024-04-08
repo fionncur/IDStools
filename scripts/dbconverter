@@ -1,0 +1,169 @@
+#!/usr/bin/env python3
+# Converts an IMAS database (all its data-entries) to the specified folder and backend
+
+import argparse
+import logging
+import os
+import traceback
+from datetime import datetime
+from glob import glob
+from os import path
+from pathlib import Path
+
+import imas
+import pandas as pd
+from imas import imasdef
+from rich.console import Console
+from rich.progress import track
+
+from database_tools.idschk import ids_validator
+from idstools.database import DBMaster
+from idstools.idslist import available_in_dbentry
+from idstools.utils.clihelper import getBackendID, imasParser
+from idstools.utils.idshelper import compareIds
+from idstools.utils.idslogger import setupLogger
+
+logger = setupLogger("module", stdout_level=logging.INFO)
+console = Console()
+
+parser = argparse.ArgumentParser(
+    description="Copy all data-entries from one database into another one",
+    parents=[imasParser],
+)
+parser.add_argument(
+    "-do",
+    "--database_out",
+    type=str,
+    required=True,
+    help="Name of destination database",
+)
+parser.add_argument(
+    "-bo",
+    "--backend_output",
+    type=str,
+    required=True,
+    help="Desired backend for destination data-entry",
+)
+parser.add_argument(
+    "--skip-obsolete",
+    action="store_true",
+    help="Do not copy data that have been marked obsolete (ITER scenarios only)",
+)
+parser.add_argument(
+    "--validate",
+    action="store_true",
+    help="Performs diff and validation of the migrated data",
+)
+args = parser.parse_args()
+locpath = DBMaster.getDBPath(args.user, args.database, args.version)
+
+backend = getBackendID(args.backend)
+
+log = []
+
+if backend == imas.imasdef.MDSPLUS_BACKEND:
+    files = DBMaster.mdsListPulseRun(
+        locpath, with_status="active" if args.skip_obsolete else None
+    )
+elif backend == imas.imasdef.HDF5_BACKEND:
+    files = DBMaster.hdf5ListPulseRun(locpath)
+
+schema = []
+current_fpath = path.dirname(path.realpath(__file__))
+schema_dir = path.join(current_fpath, "../../../../bin/validation_schemas")
+if not path.isdir(schema_dir):
+    current_fpath = path.dirname(path.dirname(path.realpath(__file__)))
+    schema_dir = path.join(current_fpath, "database_tools/validation_schemas")
+ 
+if path.isdir(schema_dir):
+    schema += sorted(glob(schema_dir + "/generic/*.y*ml", recursive=True))
+
+schemaDict = {}
+# Iterate through the file paths
+for file_path in schema:
+    # Get the filename without extension
+    filename = os.path.splitext(os.path.basename(file_path))[0]
+    # Add to the dictionary with filename as key and path as value
+    schemaDict[filename] = file_path
+
+for pulse in track(files, description="[green]Processing..."):
+    console.print("----------------------------------------")
+    console.print(f"Processing {pulse}")
+    try:
+        
+        idsinf = []
+        run = pulse[1]
+        src = imas.DBEntry(backend, args.database, pulse[0], run, args.user)
+        status, idx = src.open()
+
+        if status != 0:
+            console.print("Error opening pulse! Please check existence.")
+            log.append("Error opening pulse!")
+            continue
+
+        dest = imas.DBEntry(
+            getBackendID(args.backend_output), args.database_out, pulse[0], run
+        )
+        status, idx = dest.create()
+        if status != 0:
+            console.print(
+                f"Error creating pulse! status={status} backend={args.backend_output} database={args.database_out} shot={pulse[0]} run={run}"
+            )
+            log.append("Error creating pulse!")
+            continue
+        avids = available_in_dbentry(src)
+        for ids in avids: 
+            idsname = ids[0]
+            inocc = ids[1]
+            idsobj = src.get(idsname, occurrence=inocc)
+            dest.put(idsobj, occurrence=inocc)
+
+            if args.validate:
+                idsobj2 = dest.get(idsname, occurrence=inocc)
+                same, _ = compareIds(idsobj, idsobj2, output={}, verb=False)
+                
+                if idsname in schemaDict.keys():
+                    idsinf.append(
+                        (
+                            idsname,
+                            same,
+                            ids_validator(
+                                idsobj,schemaDict[idsname]
+                            )[0],
+                        )
+                    )
+                else:
+                    idsinf.append(
+                        (
+                            idsname,
+                            same,
+                            "No Schema",
+                        )
+                    )
+                    logger.warning(f"could not find schema for {idsname}")
+
+        src.close()
+        dest.close()
+
+        log.append(idsinf)
+        console.print("")
+        console.print(f"successfully converted, backend={args.backend_output} database={args.database_out} shot={pulse[0]} run={run}")
+    except Exception as ex:
+        log.append(idsinf)
+        console.print(f"Could not convert : backend={args.backend_output} database={args.database_out} shot={pulse[0]} run={run} {traceback.format_exc()}" )
+        continue
+
+
+if args.validate:
+    df = pd.DataFrame(files, columns=["PULSE", "RUN"])
+    df["IDS STATUS | Validation"] = log
+    date = datetime.now().strftime("%Y_%m_%d-%I:%M:%S_%p")
+    df.to_csv(
+        args.database_out + " migration_log--" + date + ".csv",
+        na_rep="None",
+        index=False,
+        header=True,
+    )
+    print(args.database_out + " migration_log--" + date + ".csv")
+    
+
