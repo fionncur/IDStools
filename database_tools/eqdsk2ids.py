@@ -494,7 +494,7 @@ def geqdsk2ids(fpath, ipsign=0, b0sign=0, cocos_in=None):
 
     # Check if COCOS is equal to IDS_COCOS
     if cocos["COCOS"] != IDS_COCOS:
-        raise ValueError(f"COCOS transformed = {cocos['COCOS']}, expected {IDS_COCOS}")
+        raise ValueError(f"COCOS in IDS/equilibrium mismatch with Data Dictionary ({IDS_COCOS})")
 
     return eq
 
