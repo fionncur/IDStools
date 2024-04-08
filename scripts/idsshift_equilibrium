@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
+# ids_shift_eq -si 131035 -ri 124 -so 123001 -ro 1 -s -0.01 -u bonninx -d iter
+
 import argparse
+import copy
 import logging
 import os
 import sys
@@ -12,10 +15,11 @@ from idstools.utils.clihelper import getBackendID, imasParser
 from idstools.utils.idslogger import setupLogger
 
 logger = setupLogger("module", stdout_level=logging.INFO)
+#
 
 # Management of input arguments
 parser = argparse.ArgumentParser(
-    description="Rescaling an equilibrium magnetic field, storing the output into another entry of the same DB",
+    description="Rigidly shifts vertically an equilibrium, storing the output into another entry of the same DB",
     parents=[imasParser],
     formatter_class=RichHelpFormatter,
 )
@@ -45,25 +49,17 @@ parser.add_argument(
     help="Backend name for the destination data-entry",
 )
 parser.add_argument(
-    "--rescale",
-    help="Rescaling factor of the equilibrium magnetic field",
-    type=float,
-    required=True,
+    "--shift", help="Upward shift of equilibrium (m)", type=float, required=True
 )
 
 args = parser.parse_args()
-
 if args.database_output == None:
     args.database_output = args.database
 
 if args.backend_output == None:
     args.backend_output = args.backend
 
-rescale = args.rescale
-
-if rescale == 0:
-    logger.critical("Rescale factor cannot be zero!")
-    sys.exit(1)
+shiftParam = args.shift
 
 # OPEN INPUT
 connection = imas.DBEntry(
@@ -73,7 +69,7 @@ connection = imas.DBEntry(
     args.run_input,
     args.user,
 )
-status, _ = connection.open()
+status, idx = connection.open()
 if status != 0:
     logger.critical("Can't open the input pulse file!")
     sys.exit(1)
@@ -81,33 +77,35 @@ if status != 0:
 idsEquilibrium = connection.get("equilibrium")
 
 # OPEN OUTPUT
-outputConnection = imas.DBEntry(
+connectionOutput = imas.DBEntry(
     getBackendID(args.backend),
     args.database_output,
     args.shot_output,
     args.run_output,
     user_name=os.environ["USER"],
 )
-status, _ = outputConnection.open()
+status, idx = connectionOutput.open()
 if status != 0:
     logger.warning("Can't open the output pulse file!, Trying to create a new one")
-    status, _ = outputConnection.create()
+    status, idx = connectionOutput.create()
     if status != 0:
         logger.critical("Can't create the output pulse file!")
         sys.exit(1)
 
-logger.info(f"Rescaling equilibrium magnetic field by {rescale}")
+logger.info(f"Shifting equilibrium by {shiftParam} m")
+logger.info(
+    "Values for wall gaps, locations of strike-points and closest wall points are no longer guaranteed!"
+)
 equilibriumCompute = EquilibriumCompute(idsEquilibrium)
-equout = equilibriumCompute.rescale(rescale)
+equout = equilibriumCompute.z_shift(shiftParam)
 
 # PUT IDS INTO OUTPUT
-outputConnection.put(equout)
+connectionOutput.put(equout)
 
 # CLOSE FILES
 connection.close()
-outputConnection.close()
-
-logger.info(f"Equilibrium IDS is rescaled successfully.")
+connectionOutput.close()
+logger.info(f"Equilibrium IDS is upward shifted successfully.")
 logger.info(
     f"Output database details database={args.database_output}, shot={args.shot_output}, run={args.run_output}, user={os.environ['USER']}"
 )

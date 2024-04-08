@@ -994,6 +994,217 @@ class EquilibriumCompute:
         )
         return equout
 
+    def z_shift(self, shift):
+        """Rigidly shift an equilibrium
+        Args:
+            equil (equilibrium IDS): initial equilibrium
+            shift (float): vertical shift in meters
+        Returns:
+            equilibrium IDS: vertically shifted equilibrium
+        """
+        import distutils.version as version
+        from copy import deepcopy
+
+        equout = deepcopy(self.ids)
+        for itime in range(len(self.ids.time_slice)):
+            for iz in range(len(self.ids.time_slice[itime].boundary.outline.z)):
+                equout.time_slice[itime].boundary.outline.z[iz] = (
+                    self.ids.time_slice[itime].boundary.outline.z[iz] + shift
+                )
+
+            for iz in range(len(self.ids.time_slice[itime].boundary.lcfs.z)):
+                equout.time_slice[itime].boundary.lcfs.z[iz] = (
+                    self.ids.time_slice[itime].boundary.lcfs.z[iz] + shift
+                )
+            equout.time_slice[itime].boundary.geometric_axis.z = (
+                self.ids.time_slice[itime].boundary.geometric_axis.z + shift
+            )
+
+            for ixpt in range(len(self.ids.time_slice[itime].boundary.x_point)):
+                equout.time_slice[itime].boundary.x_point[ixpt].z = (
+                    self.ids.time_slice[itime].boundary.x_point[ixpt].z + shift
+                )
+
+            for istr in range(len(self.ids.time_slice[itime].boundary.strike_point)):
+                equout.time_slice[itime].boundary.strike_point[istr].z = (
+                    self.ids.time_slice[itime].boundary.strike_point[istr].z + shift
+                )
+            equout.time_slice[itime].boundary.active_limiter_point.z = (
+                self.ids.time_slice[itime].boundary.active_limiter_point.z + shift
+            )
+
+            for iz in range(
+                len(self.ids.time_slice[itime].boundary_separatrix.outline.z)
+            ):
+                equout.time_slice[itime].boundary_separatrix.outline.z[iz] = (
+                    self.ids.time_slice[itime].boundary_separatrix.outline.z[iz] + shift
+                )
+            equout.time_slice[itime].boundary_separatrix.geometric_axis.z = (
+                self.ids.time_slice[itime].boundary_separatrix.geometric_axis.z + shift
+            )
+
+            for ixpt in range(
+                len(self.ids.time_slice[itime].boundary_separatrix.x_point)
+            ):
+                equout.time_slice[itime].boundary_separatrix.x_point[ixpt].z = (
+                    self.ids.time_slice[itime].boundary_separatrix.x_point[ixpt].z
+                    + shift
+                )
+
+            for istr in range(
+                len(self.ids.time_slice[itime].boundary_separatrix.strike_point)
+            ):
+                equout.time_slice[itime].boundary_separatrix.strike_point[istr].z = (
+                    self.ids.time_slice[itime].boundary_separatrix.strike_point[istr].z
+                    + shift
+                )
+            equout.time_slice[itime].boundary_separatrix.active_limiter_point.z = (
+                self.ids.time_slice[itime].boundary_separatrix.active_limiter_point.z
+                + shift
+            )
+            equout.time_slice[itime].boundary_separatrix.closest_wall_point.z = (
+                self.ids.time_slice[itime].boundary_separatrix.closest_wall_point.z
+                + shift
+            )
+            equout.time_slice[itime].boundary_separatrix.dr_dz_zero_point.z = (
+                self.ids.time_slice[itime].boundary_separatrix.dr_dz_zero_point.z
+                + shift
+            )
+
+            for iz in range(
+                len(self.ids.time_slice[itime].boundary_secondary_separatrix.outline.z)
+            ):
+                equout.time_slice[itime].boundary_secondary_separatrix.outline.z[iz] = (
+                    self.ids.time_slice[itime].boundary_secondary_separatrix.outline.z[
+                        iz
+                    ]
+                    + shift
+                )
+
+            for ixpt in range(
+                len(self.ids.time_slice[itime].boundary_secondary_separatrix.x_point)
+            ):
+                equout.time_slice[itime].boundary_secondary_separatrix.x_point[
+                    ixpt
+                ].z = (
+                    self.ids.time_slice[itime]
+                    .boundary_secondary_separatrix.x_point[ixpt]
+                    .z
+                    + shift
+                )
+
+            for istr in range(
+                len(
+                    self.ids.time_slice[
+                        itime
+                    ].boundary_secondary_separatrix.strike_point
+                )
+            ):
+                equout.time_slice[itime].boundary_secondary_separatrix.strike_point[
+                    istr
+                ].z = (
+                    self.ids.time_slice[itime]
+                    .boundary_secondary_separatrix.strike_point[istr]
+                    .z
+                    + shift
+                )
+
+            for iq in range(len(self.ids.time_slice[itime].constraints.q)):
+                equout.time_slice[itime].constraints.q[iq].position.z = (
+                    self.ids.time_slice[itime].constraints.q[iq].position.z + shift
+                )
+
+            for ixpt in range(len(self.ids.time_slice[itime].constraints.x_point)):
+                equout.time_slice[itime].constraints.x_point[
+                    ixpt
+                ].position_measured.z = (
+                    self.ids.time_slice[itime]
+                    .constraints.x_point[ixpt]
+                    .position_measured.z
+                    + shift
+                )
+                equout.time_slice[itime].constraints.x_point[
+                    ixpt
+                ].position_reconstructed.z = (
+                    self.ids.time_slice[itime]
+                    .constraints.x_point[ixpt]
+                    .position_reconstructed.z
+                    + shift
+                )
+
+            for istr in range(len(self.ids.time_slice[itime].constraints.strike_point)):
+                equout.time_slice[itime].constraints.strike_point[
+                    istr
+                ].position_measured.z = (
+                    self.ids.time_slice[itime]
+                    .constraints.strike_point[istr]
+                    .position_measured.z
+                    + shift
+                )
+            equout.time_slice[itime].global_quantities.magnetic_axis.z = (
+                self.ids.time_slice[itime].global_quantities.magnetic_axis.z + shift
+            )
+
+            for iz in range(
+                len(self.ids.time_slice[itime].profiles_1d.geometric_axis.z)
+            ):
+                equout.time_slice[itime].profiles_1d.geometric_axis.z[iz] = (
+                    self.ids.time_slice[itime].profiles_1d.geometric_axis.z[iz] + shift
+                )
+
+            for i2d in range(len(self.ids.time_slice[itime].profiles_2d)):
+                if self.ids.time_slice[itime].profiles_2d[i2d].grid_type == 1:
+                    for iz in range(
+                        len(self.ids.time_slice[itime].profiles_2d[i2d].grid.dim2)
+                    ):
+                        equout.time_slice[itime].profiles_2d[i2d].grid.dim2[iz] = (
+                            self.ids.time_slice[itime].profiles_2d[i2d].grid.dim2[iz]
+                            + shift
+                        )
+
+                for i1 in range(len(self.ids.time_slice[itime].profiles_2d[i2d].z)):
+                    for i2 in range(
+                        len(self.ids.time_slice[itime].profiles_2d[i2d].z[i1])
+                    ):
+                        equout.time_slice[itime].profiles_2d[i2d].z[i1][i2] = (
+                            self.ids.time_slice[itime].profiles_2d[i2d].z[i1][i2]
+                            + shift
+                        )
+
+            for iggd in range(len(self.ids.time_slice[itime].ggd)):
+                for iz in range(len(self.ids.time_slice[itime].ggd[iggd].z)):
+                    for i in range(
+                        len(self.ids.time_slice[itime].ggd[iggd].z[iz].values)
+                    ):
+                        equout.time_slice[itime].ggd[iggd].z[iz].values[i] = (
+                            self.ids.time_slice[itime].ggd[iggd].z[iz].values[i] + shift
+                        )
+
+            if self.ids.time_slice[itime].coordinate_system.grid_type == 1:
+                for iz in range(
+                    len(self.ids.time_slice[itime].coordinate_system.grid.dim2)
+                ):
+                    equout.time_slice[itime].coordinate_system.grid.dim2[iz] = (
+                        self.ids.time_slice[itime].coordinate_system.grid.dim2[iz]
+                        + shift
+                    )
+
+            for i1 in range(len(self.ids.time_slice[itime].coordinate_system.z)):
+                for i2 in range(
+                    len(self.ids.time_slice[itime].coordinate_system.z[i1])
+                ):
+                    equout.time_slice[itime].coordinate_system.z[i1][i2] = (
+                        self.ids.time_slice[itime].coordinate_system.z[i1][i2] + shift
+                    )
+
+        equout.ids_properties.comment = (
+            self.ids.ids_properties.comment
+            + " (shifted vertically by "
+            + str(shift)
+            + " m)"
+        )
+        return equout
+
     # def getEquilibriumQuantities(self):
     #     """
     #     The function "getEquilibriumQuantities" returns a dictionary containing the 2D profiles of r, z,  and psi.
