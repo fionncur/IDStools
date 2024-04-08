@@ -19,7 +19,7 @@ logger = setupLogger("module", stdout_level=logging.INFO)
 
 # Management of input arguments
 parser = argparse.ArgumentParser(
-    description="Rigidly shifts vertically an equilibrium, storing the output into another entry of the same DB",
+    description="Rigidly shifts vertically an equilibrium, storing the output into another entry of the same DB. replaced by ids_shift_eq",
     parents=[imasParser],
     formatter_class=RichHelpFormatter,
 )

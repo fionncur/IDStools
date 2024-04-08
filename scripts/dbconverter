@@ -15,6 +15,7 @@ import pandas as pd
 from imas import imasdef
 from rich.console import Console
 from rich.progress import track
+from rich_argparse import RichHelpFormatter
 
 from database_tools.idschk import ids_validator
 from idstools.database import DBMaster
@@ -29,6 +30,7 @@ console = Console()
 parser = argparse.ArgumentParser(
     description="Copy all data-entries from one database into another one",
     parents=[imasParser],
+    formatter_class=RichHelpFormatter,
 )
 parser.add_argument(
     "-do",

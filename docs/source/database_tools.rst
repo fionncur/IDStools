@@ -7,6 +7,7 @@ You can use database tools to search, extract, or convert hdf5 or mdsplus databa
 
    dbconverter
    dblist
+   dbperf
    dbscraper
    dbselector
    scenario_status

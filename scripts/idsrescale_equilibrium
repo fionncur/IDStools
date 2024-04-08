@@ -15,7 +15,7 @@ logger = setupLogger("module", stdout_level=logging.INFO)
 
 # Management of input arguments
 parser = argparse.ArgumentParser(
-    description="Rescaling an equilibrium magnetic field, storing the output into another entry of the same DB",
+    description="Rescaling an equilibrium magnetic field, storing the output into another entry of the same DB. replaced by ids_rescale_eq",
     parents=[imasParser],
     formatter_class=RichHelpFormatter,
 )
