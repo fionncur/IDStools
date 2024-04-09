@@ -179,7 +179,7 @@ echo -------viewhcddistributions-------
 viewhcddistributions -s 130012 -r 115 -u public -d TEST --save || exit 1
 
 echo -------idsrescale_equilibrium-------
-idsrescale_equilibrium -si 134174 -ri 117 -r 5 -so 122222 -ro 22 || exit 1
+idsrescale_equilibrium -si 134174 -ri 117 -so 122222 -ro 22 --rescale 2 || exit 1
 
 echo -------idsshift_equilibrium-------
-idsshift_equilibrium -si 134174 -ri 117 -so 123001 -ro 1 --shift -0.01
+idsshift_equilibrium -si 134174 -ri 117 -so 123001 -ro 1 --shift -0.01 || exit 1

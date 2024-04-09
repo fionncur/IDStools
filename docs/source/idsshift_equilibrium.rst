@@ -11,9 +11,9 @@ Syntax idsshift_equilibrium
 
         $ idsshift_equilibrium -h
         Usage: idsshift_equilibrium [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] -si SHOT_INPUT -ri RUN_INPUT -so SHOT_OUTPUT -ro
-                            RUN_OUTPUT [-do DATABASE_OUTPUT] [-bo BACKEND_OUTPUT] --shift SHIFT
+                                    RUN_OUTPUT [-do DATABASE_OUTPUT] [-bo BACKEND_OUTPUT] --shift SHIFT
 
-        Rigidly shifts vertically an equilibrium, storing the output into another entry of the same DB
+        Rigidly shifts vertically an equilibrium, storing the output into another entry of the same DB. replaced by ids_shift_eq
 
         Optional Arguments:
         -h, --help            show this help message and exit
@@ -39,12 +39,13 @@ Syntax idsshift_equilibrium
                                 Backend name for the destination data-entry
         --shift SHIFT         Upward shift of equilibrium (m)
 
+
 Example idsshift_equilibrium
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     .. code-block:: bash
 
-        $ idsshift_equilibrium -si 134174 -ri 117 -so 123001 -ro 1 --shift -0.01
+        $ idsshift_equilibrium -si 134174 -ri 117 -so 123001 -ro 1 --shift -0.01 
         [04/08/24 11:33:06] INFO     Shifting equilibrium by -0.01 m                                                                                  idsshift_equilibrium:95
                             INFO     Values for wall gaps, locations of strike-points and closest wall points are no longer guaranteed!               idsshift_equilibrium:96
         [04/08/24 11:33:08] INFO     Equilibrium IDS is upward shifted successfully.                                                                 idsshift_equilibrium:108
