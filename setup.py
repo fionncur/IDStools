@@ -83,7 +83,6 @@ setup(
         "scripts/dbselector",
         "scripts/eqdsk2ids",
         "scripts/idscp",
-        "scripts/idsdef",
         "scripts/idschk",
         "scripts/idsdiff",
         "scripts/idslist",
@@ -129,15 +128,4 @@ setup(
     tests_require=["pytest"],
     data_files=data_files,
 )
-
-
-# Generate list of python scripts
-# script_files = glob.glob("bin/*")
-# script_files.append("database_tools/ids_shift_eq.py")
-# script_files.append("database_tools/ids_rescale_eq.py")
-# script_files.append("database_tools/rosettacode.py")
-# script_files.append("database_tools/db_converter.py")
-# script_files.append("database_tools/db_extractor.py")
-# script_files.append("idstools/idsdef.py")
-
 

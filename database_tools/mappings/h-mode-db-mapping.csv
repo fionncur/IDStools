@@ -99,7 +99,7 @@
 98,PNBI,Total injected neutral beam power minus shine-through,summary/heating_current_drive/nbi(0)/power/value,,,,,
 99,PFLOSS,Neutral beam power lost from the plasma through charge exchange and unconfined orbits,,,,,PENDING,
 100,ECHFREQ,ECRH frequency,summary/heating_current_drive/ec(0)/frequency/value,Frequency,,,Yes,
-101,ECHMODE,Mode of ECRH waves,ec_launchers/launcher(0)/mode/data,"Identifier for the main plasma wave mode excited by the EC beam. For the ordinary mode (O-mode), mode/data=1. For the extraordinary mode (X-mode), mode/data=-1",,"{'NONE':0, 'OFF':0, 'O':1, 'X':-1, 'X+O':2, 'UNKNOWN':999}[DBVAR['ECHMODE']]",Yes,
+101,ECHMODE,Mode of ECRH waves,ec_launchers/beam(0)/mode,"Identifier for the main plasma wave mode excited by the EC beam. For the ordinary mode (O-mode), mode/data=1. For the extraordinary mode (X-mode), mode/data=-1",,"{'NONE':0, 'OFF':0, 'O':1, 'X':-1, 'X+O':2, 'UNKNOWN':999}[DBVAR['ECHMODE']]",Yes,
 102,ECHLOC,Location of ECRH launch,,Launching position of the beam,,,PENDING,"Discussion, maybe ids_properties/comment (applies to more launchers) talk to ITPA"
 103,PECRHC,ECRH power coupled to the plasma,summary/heating_current_drive/ec(0)/power_launched/value,,,,Yes,
 104,PECRH,ECRH power absorbed by the plasma,summary/heating_current_drive/power_ec/value,,could also be stored in summary/heating_current_drive/ec(1)/power,,Yes,Discussion

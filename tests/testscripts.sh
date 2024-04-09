@@ -178,10 +178,6 @@ viewhcdwaves -s 134173 -r 101 -u public -d TEST --save || exit 1
 echo -------viewhcddistributions-------
 viewhcddistributions -s 130012 -r 115 -u public -d TEST --save || exit 1
 
-echo -------idsdef-------
-idsdef equilibrium -a || exit 1
-idsdef edge_profiles -m || exit 1
-
 echo -------idsrescale_equilibrium-------
 idsrescale_equilibrium -si 134174 -ri 117 -r 5 -so 122222 -ro 22 || exit 1
 
