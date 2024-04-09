@@ -7,26 +7,19 @@ from imas import imasdef
 
 
 def getIMASVersion():
-    lowlevelVersion = int(os.environ["UAL_VERSION"][0])
+    lowlevelVersion = 4
+    if "AL_VERSION" in os.environ:
+        lowlevelVersion = int(os.environ["AL_VERSION"][0])
     return lowlevelVersion
 
 
 # default parent parser for all idstools scripts
 uriParser = argparse.ArgumentParser(add_help=False)
 uriParser.add_argument(
-    "-path",
-    "--path",
+    "-uri",
+    "--uri",
     type=str,
-    help="path \t\t(default=%(default)s)",
-)
-uriParser.add_argument(
-    "-mode",
-    "--mode",
-    nargs="?",
-    type=str,
-    choices=["r", "a", "w", "x"],
-    default="r",
-    help="mode \t\t(default=%(default)s)",
+    help="uri \t\t(default=%(default)s)",
 )
 imasParser = argparse.ArgumentParser(add_help=False)
 imasParser.add_argument(
@@ -67,6 +60,16 @@ if getIMASVersion() > 4:
     dbentryParser.add_argument(
         "-s", "--shot", "--pulse", dest="pulse", help="Shot number", type=int
     )
+    dbentryParser.add_argument(
+    "-mode",
+    "--mode",
+    nargs="?",
+    type=str,
+    choices=["r", "a", "w", "x"],
+    default="r",
+    help="mode \t\t(default=%(default)s)",
+)
+
 else:
     dbentryParser.add_argument(
         "-s", "--shot", "--pulse", dest="shot", help="Shot number", type=int

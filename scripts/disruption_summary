@@ -272,7 +272,10 @@ if __name__ == "__main__":
     if args['folder'] != None:
         folder = args['folder']
     else:
-        LL_version=int(os.environ['UAL_VERSION'][0])
+        if "AL_VERSION" in os.environ:
+            LL_version=int(os.environ['AL_VERSION'][0])
+        elif "UAL_VERSION" in os.environ:
+            LL_version=int(os.environ['UAL_VERSION'][0])
         if LL_version < 4:
             folder = '/work/imas/shared/iterdb/3/0'
         else:

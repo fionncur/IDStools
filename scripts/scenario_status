@@ -42,7 +42,10 @@ if args["folder"] != None:
     folder = args["folder"]
 else:
     folder = os.environ["IMAS_HOME"] + "/shared/imasdb/ITER/3/0"
-    lowlevelVersion = int(os.environ["UAL_VERSION"][0])
+    if "AL_VERSION" in os.environ:
+        lowlevelVersion=int(os.environ['AL_VERSION'][0])
+    elif "UAL_VERSION" in os.environ:
+        lowlevelVersion=int(os.environ['UAL_VERSION'][0])
     if lowlevelVersion < 4:
         folder = os.environ["IMAS_HOME"] + "/shared/iterdb/3/0"
 sdObject = ScenarioDescription(shot, run, folder)

@@ -342,7 +342,10 @@ def map_GEQDSK_to_IDS(geqdsk, eq):
         )
         ids.ids_properties.provider = os.getenv("USER")
         ids.ids_properties.version_put.data_dictionary = os.getenv("IMAS_VERSION")
-        ids.ids_properties.version_put.access_layer = os.getenv("UAL_VERSION")
+        if "AL_VERSION" in os.environ:
+            ids.ids_properties.version_put.access_layer = os.getenv("AL_VERSION")
+        elif "UAL_VERSION" in os.environ:
+            ids.ids_properties.version_put.access_layer = os.getenv("UAL_VERSION")
         ids.ids_properties.version_put.access_layer_language = version
 
         ids.ids_properties.provenance.node.resize(1)
