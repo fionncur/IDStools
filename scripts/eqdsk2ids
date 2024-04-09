@@ -105,7 +105,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--cocos_in",
         dest="cocos_in",
-        help="Coordinate convention (COCOS) describing input data, otherwise default=%(default)s and COCOS is computed from GEQDSK file [1,3,5,7]",
+        help="Tokamak coordinate conventions (COCOS) describing input data, otherwise default=%(default)s and computed from GEQDSK file [1,3,5,7]",
         required=False,
         type=int,
         default=None,
