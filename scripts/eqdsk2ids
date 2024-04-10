@@ -103,6 +103,7 @@ if __name__ == "__main__":
         help="Configure the logging level, default=%(default)s",
     )
     parser.add_argument(
+        "-c",
         "--cocos_in",
         dest="cocos_in",
         help="Tokamak coordinate conventions (COCOS) describing input data",
