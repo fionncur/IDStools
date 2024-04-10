@@ -146,6 +146,9 @@ class SummaryCompute:
 
         p_hcd = p_ec + p_ic + p_nbi + p_lh
 
+        if sum(p_hcd) == 0 and sum(self.ids.heating_current_drive.power_additional.value) != 0:
+            p_hcd = self.ids.heating_current_drive.power_additional.value
+
         # Fusion power
         p_fus = np.asarray([0.0]*stime)
         if len(self.ids.fusion.power.value) > 0:
