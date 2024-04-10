@@ -459,13 +459,12 @@ class DBMaster:
 
     @classmethod
     def getIMASVersion(cls):
-        lowlevelVersion = 4
-        if "AL_VERSION" in os.environ:
-            lowlevelVersion = int(os.environ["AL_VERSION"][0])
+        lowlevelVersion=int((os.getenv("AL_VERSION") or os.getenv("UAL_VERSION"))[0])
         return lowlevelVersion
 
     @classmethod
     def getConnection(cls, args):
+        
         imasVersion = DBMaster.getIMASVersion()
         if imasVersion > 4:
             if args.uri is None:
@@ -484,7 +483,11 @@ class DBMaster:
                     logger.warning(
                         "Both uri and legacy parameters are provided. Using path for accessing data entry"
                     )
-                connection = imas.DBEntry(args.uri, args.mode)
+                if "mode" in args.__dict__:
+                    connection = imas.DBEntry(args.uri, args.mode)
+                else:
+                    connection = imas.DBEntry(args.uri, "r")
+                    
         else:
             if args.shot is None or args.run is None:
                 logger.error("There is no shot and run available")

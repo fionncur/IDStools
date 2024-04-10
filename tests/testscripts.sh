@@ -178,3 +178,4 @@ viewhcdwaves -s 134173 -r 101 -u public -d TEST --save || exit 1
 echo -------viewhcddistributions-------
 viewhcddistributions -s 130012 -r 115 -u public -d TEST --save || exit 1
 
+# idsprint --uri "imas:mdsplus?user=public;shot=131024;run=41;database=ITER;version=3" summary 

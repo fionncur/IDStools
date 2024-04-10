@@ -7,9 +7,7 @@ from imas import imasdef
 
 
 def getIMASVersion():
-    lowlevelVersion = 4
-    if "AL_VERSION" in os.environ:
-        lowlevelVersion = int(os.environ["AL_VERSION"][0])
+    lowlevelVersion = int((os.getenv("AL_VERSION") or os.getenv("UAL_VERSION"))[0])
     return lowlevelVersion
 
 
@@ -58,18 +56,8 @@ if getIMASVersion() > 4:
 dbentryParser = argparse.ArgumentParser(add_help=False, parents=parents)
 if getIMASVersion() > 4:
     dbentryParser.add_argument(
-        "-s", "--shot", "--pulse", dest="pulse", help="Shot number", type=int
+        "-s", "--shot", "--pulse", dest="pulse", help="Pulse number", type=int
     )
-    dbentryParser.add_argument(
-    "-mode",
-    "--mode",
-    nargs="?",
-    type=str,
-    choices=["r", "a", "w", "x"],
-    default="r",
-    help="mode \t\t(default=%(default)s)",
-)
-
 else:
     dbentryParser.add_argument(
         "-s", "--shot", "--pulse", dest="shot", help="Shot number", type=int
