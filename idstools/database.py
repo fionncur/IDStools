@@ -468,7 +468,7 @@ class DBMaster:
     def getConnection(cls, args):
         imasVersion = DBMaster.getIMASVersion()
         if imasVersion > 4:
-            if args.path is None:
+            if args.uri is None:
                 if args.pulse is None or args.run is None:
                     logger.error("Both the path or the shot/pulse and run are missing.")
                     return None
