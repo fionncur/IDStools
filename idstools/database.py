@@ -469,7 +469,7 @@ class DBMaster:
         if imasVersion > 4:
             if args.uri is None:
                 if args.pulse is None or args.run is None:
-                    logger.error("Both the path or the shot/pulse and run are missing.")
+                    logger.error("Both the uri or the shot/pulse and run are missing.")
                     return None
                 connection = imas.DBEntry(
                     getBackendID(args.backend),
@@ -481,7 +481,7 @@ class DBMaster:
             else:
                 if args.pulse is not None and args.run is not None:
                     logger.warning(
-                        "Both uri and legacy parameters are provided. Using path for accessing data entry"
+                        "Both uri and legacy parameters are provided. Using uri for accessing data entry"
                     )
                 if "mode" in args.__dict__:
                     connection = imas.DBEntry(args.uri, args.mode)
