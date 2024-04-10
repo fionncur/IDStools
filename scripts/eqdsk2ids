@@ -105,15 +105,14 @@ if __name__ == "__main__":
     parser.add_argument(
         "--cocos_in",
         dest="cocos_in",
-        help="Tokamak coordinate conventions (COCOS) describing input data, otherwise default=%(default)s and computed from GEQDSK file [1,3,5,7]",
-        required=False,
+        help="Tokamak coordinate conventions (COCOS) describing input data",
+        required=True,
         type=int,
         default=None,
         choices=[*range(1, 9), *range(11, 19)],
     )
     parser.set_defaults(user=os.environ["USER"])
     args = parser.parse_args()
-
     # Initialize logger
     logger = set_logger(__name__, level=args.log)
 

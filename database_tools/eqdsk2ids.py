@@ -495,7 +495,7 @@ def geqdsk2ids(fpath, ipsign=0, b0sign=0, cocos_in=None):
     # Check if COCOS is equal to IDS_COCOS
     if cocos["COCOS"] != IDS_COCOS:
         logger.warning("COCOS Target= {}, Output= {}, Input= {}".format(IDS_COCOS, cocos["COCOS"], geqdsk.cocos.COCOS))
-        raise SystemExit("Terminated due to COCOS mismatch in output. Try to coerce COCOS or use another value with '--cocos_in' option.")
+        raise SystemExit("Input COCOS is inconsistent between GEQDSK file and COCOS with the option '--cocos_in'.")
     return eq
 
 
