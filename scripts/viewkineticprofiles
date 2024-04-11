@@ -2,14 +2,18 @@
 # -*- coding: utf-8 -*-
 import argparse
 import logging
+import sys
 
-import imas
-
-from idstools.utils.clihelper import getBackendID, getDatabasePath, dbentryParser
+from idstools.database import DBMaster
+from idstools.utils.clihelper import (
+    dbentryParser,
+    getDatabasePath,
+    getFileName,
+    getTitle,
+)
 from idstools.utils.idslogger import setupLogger
 from idstools.view.common import Canvas
 from idstools.view.domain.kineticprofiles import KineticProfilesView
-
 
 # Management of input arguments
 parser = argparse.ArgumentParser(
@@ -35,21 +39,10 @@ if args.verbose:
 else:
     logger = setupLogger("module", stdout_level=logging.INFO)
 
-connection = imas.DBEntry(
-    getBackendID(args.backend),
-    args.database,
-    args.shot,
-    args.run,
-    user_name=args.user,
-    data_version=args.version,
-)
-err, n = connection.open()
-if err != 0:
-    logger.critical(
-        f"Shot {args.shot}, run {args.run} for user {args.user} and database {args.database} does not exist"
-    )
+connection = DBMaster.getConnection(args)
+if connection is None:
     logger.critical("----> Aborted.")
-    exit()
+    exit(1)
 
 kpView = KineticProfilesView(connection, args.edge, args.time)
 
@@ -74,26 +67,22 @@ if kpView.kProfiles.isCoreProfilesPresent:
     kpView.viewVpolProfile(ax6)  # Vpol profiles
     kpView.viewDensityProfiles(ax7)  # Density profiles
     kpView.viewVtorProfile(ax8)  # Vtol profiles
-    scenario = f"shot {args.shot},{args.run} time:{kpView.kProfiles.commonTime:.2f}"
 
-    canvas.setText(text=f"{hostdir} ({scenario})")
+    canvas.setText(
+        text=f"{getDatabasePath(args, timeValue=kpView.kProfiles.commonTime)}"
+    )
 
-    wm = canvas.get_current_fig_manager()
-    window = wm.window
-    screen_y = window.winfo_screenheight()
-    screen_x = window.winfo_screenwidth()
-    wm.resize(screen_x, screen_y)
     canvas.fig.subplots_adjust(
         top=0.928, bottom=0.11, left=0.033, right=0.91, hspace=0.435, wspace=0.518
     )
+    canvas.get_current_fig_manager().set_window_title(sys.argv[0])
 
-    if not args.save:
-        toptitle = f"Plasma kinetic profiles ({scenario})"
-        canvas.fig.suptitle(toptitle)
+    canvas.fig.suptitle(
+        getTitle(args, "Plasma kinetic profiles ", kpView.kProfiles.commonTime), size=12
+    )
 
     if args.save:
-        fname = f"Kinetic_shot_{args.shot}_run_{args.run}_time_{args.time}.png"
-        canvas.fig.set_size_inches(12, 7)
+        fname = getFileName(args, "Kinetic", kpView.kProfiles.commonTime)
         canvas.save(fname)
     else:
         canvas.show()

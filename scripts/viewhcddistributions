@@ -16,7 +16,6 @@ logger = setupLogger("module", stdout_level=logging.INFO)
 
 
 def showPlots(args):
-
     logger.info(
         f"Open pulse: {shot}/{run} in DB {args.user}/{args.database}/{args.version}"
     )
@@ -61,9 +60,7 @@ def showPlots(args):
 
     if args.save:
         fname = (
-            f"Distributions_profile_time_{shot}_{run}_"
-            + "%.1f" % timeValue
-            + ".png"
+            f"Distributions_profile_time_{shot}_{run}_" + "%.1f" % timeValue + ".png"
         )
         canvas.save(fname, width=5, height=4, dpi=300)
     else:
@@ -101,7 +98,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     showPlots(args)
-
 
     # shot = args.shot
     # run = args.run

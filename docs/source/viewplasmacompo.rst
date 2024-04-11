@@ -8,7 +8,7 @@ Syntax viewplasmacompo
 .. code-block:: bash
 
     $ viewplasmacompo -h
-    usage: viewplasmacompo [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] -s SHOT -r RUN [-i] [--debug]
+    usage: viewplasmacompo [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] [-uri URI] [-s PULSE] [-r RUN] [-i] [--debug]
 
     ---- Display the plasma composition from the core_profiles IDS
 
@@ -22,7 +22,9 @@ Syntax viewplasmacompo
                             backend format (default=MDSPLUS)
     --version VERSION, -v VERSION
                             data version (default=3)
-    -s SHOT, --shot SHOT  Shot number
+    -uri URI, --uri URI   uri (default=None)
+    -s PULSE, --shot PULSE, --pulse PULSE
+                            Pulse number
     -r RUN, --run RUN     Run number
     -i, --info            Show information
     --debug               Show debugging
@@ -32,6 +34,7 @@ Example viewplasmacompo
 .. code-block:: bash
 
     $ viewplasmacompo -s 131047 -r 4
+    $ viewplasmacompo --uri "imas:mdsplus?user=public;shot=134174;run=117;database=ITER;version=3"
     !   No edge_profiles IDS in the data-entry.
     core +  edge  -
     ------------

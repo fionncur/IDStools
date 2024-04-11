@@ -182,6 +182,10 @@ viewhcddistributions -s 130012 -r 115 -u public -d TEST --save || exit 1
 echo -------viewcore_sources-------
 viewcoresources -s 130012 -r 105 -d TEST
 # viewequilibrium -s 134174 -r 117 --rho --pfcoils
+# viewkineticprofiles --uri "imas:mdsplus?user=public;shot=134174;run=117;database=ITER;version=3"
+# viewpressure --uri "imas:mdsplus?user=public;shot=134174;run=117;database=ITER;version=3"
+# viewneutron --uri "imas:mdsplus?user=public;shot=121014;run=11;database=ITER;version=3"
+#viewplasmacompo --uri "imas:mdsplus?user=public;shot=134174;run=117;database=ITER;version=3"
 # viewrotation --uri "imas:mdsplus?user=public;shot=134174;run=117;database=ITER;version=3"
 # viewsources --uri "imas:mdsplus?user=public;shot=134174;run=117;database=ITER;version=3"
 # viewscenario --uri "imas:mdsplus?user=public;shot=134174;run=117;database=ITER;version=3"

@@ -16,14 +16,16 @@
 
 import argparse
 import logging
-import imas
-import numpy as np
 import sys
 
+import imas
+import numpy as np
+
+from idstools.database import DBMaster
+from idstools.utils.clihelper import dbentryParser
+from idstools.utils.idslogger import setupLogger
 from idstools.view.core_profiles import CoreProfilesView
 from idstools.view.edge_profiles import EdgeProfilesView
-from idstools.utils.idslogger import setupLogger
-from idstools.utils.clihelper import dbentryParser, getBackendID
 
 parser = argparse.ArgumentParser(
     description="---- Display the plasma composition from the core_profiles IDS",
@@ -53,20 +55,10 @@ logger.info(
     nspec_over_nmaj : Species density list / Species density[Index of Maximum Density Species]"""
 )
 logger.info("----------------------------------------------------------------")
-connection = imas.DBEntry(
-    getBackendID(args.backend),
-    args.database,
-    args.shot,
-    args.run,
-    user_name=args.user,
-    data_version=args.version,
-)
-err, _ = connection.open()
-if err != 0:
-    logger.critical(
-        f"Shot {args.shot}, run {args.run} for user {args.user} and database {args.database} is not reachable ----> abort!"
-    )
-    sys.exit(err)
+connection = DBMaster.getConnection(args)
+if connection is None:
+    logger.critical("----> Aborted.")
+    exit(1)
 
 # Prepare IDS with highest density data from core profiles
 core_profiles_ids = imas.core_profiles()
