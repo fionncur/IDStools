@@ -10,7 +10,7 @@ Syntax viewspectrometry
     .. code-block:: bash   
 
         $ viewspectrometry -h
-        usage: viewspectrometry [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] -s SHOT -r RUN [-t TIME] [--save]
+        usage: viewspectrometry [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] [-uri URI] [-s PULSE] [-r RUN] [-t TIME] [--save]
 
         ---- Display spectrum from spectrometer_visible
 
@@ -24,7 +24,9 @@ Syntax viewspectrometry
                                 backend format (default=MDSPLUS)
         --version VERSION, -v VERSION
                                 data version (default=3)
-        -s SHOT, --shot SHOT  Shot number
+        -uri URI, --uri URI   uri (default=None)
+        -s PULSE, --shot PULSE, --pulse PULSE
+                                Pulse number
         -r RUN, --run RUN     Run number
         -t TIME, --time TIME  Time
         --save                Save figure at default location
@@ -35,12 +37,8 @@ Example
 
     .. code-block:: bash
 
-        $ viewspectrometry --shot 150512 --run 3 --database ITER_MD
-
-
-    .. code-block:: bash
-
-        $ viewspectrometry -u schneim -d 55.EC -s 134000 -r 37
+        $ viewspectrometry -d TEST -s 134000 -r 37
+        $ viewspectrometry --uri "imas:mdsplus?user=public;shot=134000;run=37;database=TEST;version=3"
 
 
     .. image:: _static/images/viewspectrometry.png

@@ -4,11 +4,16 @@ import argparse
 import json
 import logging
 import sys
-
 import imas
 
 from idstools.compute.common import getNearestTime
-from idstools.utils.clihelper import getBackendID, getDatabasePath, imasParser
+from idstools.database import DBMaster
+from idstools.utils.clihelper import (
+    dbentryParser,
+    getDatabasePath,
+    getFileName,
+    getTitle,
+)
 from idstools.utils.idslogger import setupLogger
 from idstools.view.common import Canvas
 from idstools.view.core_profiles import CoreProfilesView
@@ -20,10 +25,9 @@ from idstools.view.summary import SummaryView
 # Management of input arguments
 parser = argparse.ArgumentParser(
     description="---- Display the plasma kinetic profiles and equilibrium from the core_profiles and equilibrium IDSs",
-    parents=[imasParser],
+    parents=[dbentryParser],
 )
-parser.add_argument("-s", "--shot", help="Shot number", required=True, type=int)
-parser.add_argument("-r", "--run", help="Run number", required=True, type=int)
+
 group = parser.add_mutually_exclusive_group()
 group.add_argument(
     "-t", "--time", help="Time for profiles", required=False, type=float, default=-99.0
@@ -49,31 +53,10 @@ args = parser.parse_args()
 logger = setupLogger("module", stdout_level=logging.INFO)
 
 # Open the database and read the necessary IDSs
-connection = imas.DBEntry(
-    getBackendID(args.backend),
-    args.database,
-    args.shot,
-    args.run,
-    user_name=args.user,
-    data_version=args.version,
-)
-err, n = connection.open()
-if err != 0:
-    logger.critical(
-        f"Shot {str(args.shot)}, run {str(args.run)} for user_or_path = {args.user} and database = {args.database} does not exist",
-    )
-    logger.critical(
-        "----> Aborted.",
-    )
-    exit(0)
-
-hostdir = getDatabasePath(args)
-if hostdir is None:
-    logger.critical(
-        "Environment variable IMAS_HOME is not defined. Quitting.",
-    )
+connection = DBMaster.getConnection(args)
+if connection is None:
+    logger.critical("----> Aborted.")
     exit(1)
-
 
 if not args.noProfiles:
     try:
@@ -191,7 +174,7 @@ if not args.noProfiles:
 
     ViewEquilibrium = EquilibriumView(idsEquilibrium)
     ViewEquilibrium.viewEquilibrium(ax5)
-
+title = getTitle(args, "Scenario", timeValue)
 if args.info:
     try:
         dataset_description = connection.get("dataset_description")
@@ -209,11 +192,10 @@ if args.info:
         got_dataset_description = False
     # F4F specific?
     if got_dataset_description:
-        canvas.setSupTitle(
-            f"{args.user} / {args.database} / {args.version} ; {args.shot} / {args.run}\nprovider={idsSummary.ids_properties.provider}, shot_date_time={dataset_description.pulse_time_begin}\ndata_dictionary={idsSummary.ids_properties.version_put.data_dictionary}, access_layer-{idsSummary.ids_properties.version_put.access_layer}"
-        )
+        title += f"\nprovider={idsSummary.ids_properties.provider}, shot_date_time={dataset_description.pulse_time_begin}\ndata_dictionary={idsSummary.ids_properties.version_put.data_dictionary}, access_layer-{idsSummary.ids_properties.version_put.access_layer}"
     else:
         additional_data = ""
+
         if idsSummary.tag.name != "":
             try:
                 additional_data = json.loads(idsSummary.tag.name)
@@ -222,26 +204,26 @@ if args.info:
         if "date" in additional_data:
             txtdate = additional_data["date"]
             txttime = additional_data["time"]
-            canvas.setSupTitle(
-                f"{args.user} / {args.database} / {args.version} ; {args.shot} / {args.run}\nprovider={idsSummary.ids_properties.provider}, shot_date={txtdate}, shot_time={txttime}\ndata_dictionary={idsSummary.ids_properties.version_put.data_dictionary}, access_layer={idsSummary.ids_properties.version_put.access_layer}"
-            )
-        else:
-            canvas.setSupTitle(
-                f"{args.user} / {args.database} / {args.version} ; {args.shot} / {args.run}\nprovider={idsSummary.ids_properties.provider}, creation_date={idsSummary.ids_properties.creation_date}\ndata_dictionary={idsSummary.ids_properties.version_put.data_dictionary}, access_layer={idsSummary.ids_properties.version_put.access_layer}"
-            )
 
-if not args.noProfiles:
-    canvas.setText(
-        text=f"{hostdir} Shot {args.shot} / Run {args.run} - Time {timeValue:.1f}"
-    )
+            title += f"\nprovider={idsSummary.ids_properties.provider}, shot_date={txtdate}, shot_time={txttime}\ndata_dictionary={idsSummary.ids_properties.version_put.data_dictionary}, access_layer={idsSummary.ids_properties.version_put.access_layer}"
+
+        else:
+            title += f"\nprovider={idsSummary.ids_properties.provider}, creation_date={idsSummary.ids_properties.creation_date}\ndata_dictionary={idsSummary.ids_properties.version_put.data_dictionary}, access_layer={idsSummary.ids_properties.version_put.access_layer}"
+
+
+canvas.setText(text=f"{getDatabasePath(args, timeValue=timeValue)}")
+canvas.setSupTitle(title)
+canvas.get_current_fig_manager().set_window_title(sys.argv[0])
+canvas.fig.subplots_adjust(
+    top=0.914, bottom=0.099, left=0.042, right=0.9, hspace=0.113, wspace=0.26
+)
+
 if args.save:
     if args.noProfiles:
-        fname = f"summary_{args.user}_{args.database}_{args.version}_{args.shot}_{args.run}.png"
+        fname = getFileName(args, "summary", timeValue)
     else:
-        fname = f"Scenario_shot_{args.shot}_run_{args.run}_time_{timeValue:.1f}.png"
+        fname = getFileName(args, "Scenario_shot", timeValue)
 
     canvas.save(fname)
 else:
-    wm = canvas.get_current_fig_manager()
-    wm.resize(1024, 768)
     canvas.show()

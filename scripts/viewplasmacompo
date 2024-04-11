@@ -23,14 +23,12 @@ import sys
 from idstools.view.core_profiles import CoreProfilesView
 from idstools.view.edge_profiles import EdgeProfilesView
 from idstools.utils.idslogger import setupLogger
-from idstools.utils.clihelper import imasParser, getBackendID
+from idstools.utils.clihelper import dbentryParser, getBackendID
 
 parser = argparse.ArgumentParser(
     description="---- Display the plasma composition from the core_profiles IDS",
-    parents=[imasParser],
+    parents=[dbentryParser],
 )
-parser.add_argument("-s", "--shot", help="Shot number", required=True, type=int)
-parser.add_argument("-r", "--run", help="Run number", required=True, type=int)
 parser.add_argument("-i", "--info", action="store_true", help="Show information")
 parser.add_argument("--debug", action="store_true", help="Show debugging")
 

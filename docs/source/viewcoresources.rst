@@ -1,7 +1,7 @@
 viewcoresources
 ===============
 
-*viewcoresources* plot core_sources results. It uses `core_sources ids <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/CI/imas-3.37.2/core_sources.html>`
+*viewcoresources* plot core sources results. It uses `core_sources ids <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/CI/imas-3.37.2/core_sources.html>`
 
 
 Syntax viewcoresources
@@ -9,7 +9,7 @@ Syntax viewcoresources
 .. code-block:: bash
 
     $ viewcoresources -h
-    usage: viewcoresources [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] -s SHOT -r RUN [-t TIME] [--save] [-i]
+    usage: viewcoresources [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] [-uri URI] [-s PULSE] [-r RUN] [-t TIME] [--save]
 
     ---- Display core_sources results
 
@@ -23,11 +23,12 @@ Syntax viewcoresources
                             backend format (default=MDSPLUS)
     --version VERSION, -v VERSION
                             data version (default=3)
-    -s SHOT, --shot SHOT  Shot number
+    -uri URI, --uri URI   uri (default=None)
+    -s PULSE, --shot PULSE, --pulse PULSE
+                            Pulse number
     -r RUN, --run RUN     Run number
     -t TIME, --time TIME  time
     --save                Save figure at default location
-    -i, --info            Adds all extra provenance info to the plot
 
 
 Example viewcoresources
@@ -35,17 +36,15 @@ Example viewcoresources
 
     .. code-block:: bash
 
-        $ viewcoresources -s 130012 -r 5 -u username -d ITER
+        $ viewcoresources -s 130012 -r 105 -d TEST
+        $ viewcoresources --uri "imas:mdsplus?user=public;shot=130012;run=105;database=TEST;version=3"
         Time  = 190.82 s in range [31.20,328.18] s
         Index = 8
         Averaged resolution = 19.79856 s
         Core_sources contains 1 source
         
 
-    .. image:: _static/images/viewcoresources1.png
+    .. image:: _static/images/viewcoresources.png
         :alt: image not found
         :align: center
 
-    .. image:: _static/images/viewcoresources2.png
-        :alt: image not found
-        :align: center

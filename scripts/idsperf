@@ -9,12 +9,12 @@ import sys
 import imas
 
 from idstools import idsperf
-from idstools.utils.clihelper import getBackendID, imasParser
+from idstools.utils.clihelper import getBackendID, dbentryParser
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="This script gives simple timing and performance information for different types of operations on IDS data with the IMAS Python Access Layer (get/get_slice/put depending on selected options)",
-        parents=[imasParser],
+        parents=[dbentryParser],
     )
     timegroup = parser.add_mutually_exclusive_group()
     timegroup.add_argument(
@@ -71,8 +71,6 @@ if __name__ == "__main__":
     parser.add_argument(
         "-o", "--outputRun", type=int, help="Output run number for checking perf of put"
     )
-    parser.add_argument("-s", "--shot", help="Shot number", required=True, type=int)
-    parser.add_argument("-r", "--run", help="Run number", required=True, type=int)
     parser.add_argument(
         "ids",
         nargs="*",

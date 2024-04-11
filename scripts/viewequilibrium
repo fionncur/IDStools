@@ -3,10 +3,17 @@
 
 import argparse
 import logging
+
 import imas
 
 from idstools.compute.common import getNearestTime
-from idstools.utils.clihelper import getBackendID, getDatabasePath, imasParser
+from idstools.database import DBMaster
+from idstools.utils.clihelper import (
+    dbentryParser,
+    getDatabasePath,
+    getFileName,
+    getTitle,
+)
 from idstools.utils.idslogger import setupLogger
 from idstools.view.common import Canvas
 from idstools.view.equilibrium import EquilibriumView
@@ -14,10 +21,9 @@ from idstools.view.pf_active import PFActiveView
 
 parser = argparse.ArgumentParser(
     description="---- Display the plasma equilibrium from the equilibrium IDS. It also shows pf coils position overlay if exists",
-    parents=[imasParser],
+    parents=[dbentryParser],
 )
-parser.add_argument("-s", "--shot", help="Shot number", required=True, type=int)
-parser.add_argument("-r", "--run", help="Run number", required=True, type=int)
+
 parser.add_argument(
     "-t", "--time", help="Time (default=middle)", type=float, default=-99.0
 )
@@ -44,30 +50,15 @@ parser.add_argument(
     help="Save figure at default location",
     action="store_true",
 )
-parser.add_argument(
-    "-i",
-    "--info",
-    help="Adds all extra provenance info to the plot",
-    action="store_true",
-)
+
 args = parser.parse_args()
 
 logger = setupLogger("module", stdout_level=logging.INFO)
-connection = imas.DBEntry(
-    getBackendID(args.backend), args.database, args.shot, args.run, args.user
-)
-err, n = connection.open()
-if err != 0:
-    logger.error(
-        "Shot {0}, run {1} for user={2} and database={3} does not exists".format(
-            args.shot, args.run, args.user, args.database
-        )
-    )
-    raise FileNotFoundError(
-        "Shot {0}, run {1} for user={2} and database={3} does not exists".format(
-            args.shot, args.run, args.user, args.database
-        )
-    )
+connection = DBMaster.getConnection(args)
+if connection is None:
+    logger.critical("----> Aborted.")
+    exit(0)
+
 idsObjEquilibrium = imas.equilibrium()
 idsObjEquilibrium.time = connection.partial_get("equilibrium", "time", args.occurrence)
 if idsObjEquilibrium.time is not None:
@@ -83,29 +74,22 @@ if idsObjEquilibrium.time is not None:
         idsObjPfActive.coil = connection.partial_get("pf_active", "coil")
         ViewPfCoils = PFActiveView(idsObjPfActive)
 
-
-
-    title = f"2D Equilibrium at time {timeValue:.1f}" 
+    title = f"2D Equilibrium at time {timeValue:.1f}"
     canvas = Canvas(1, 1)
     ax = canvas.add_axes(title="", xlabel="", row=0, col=0)
-    
+
     if args.pfcoils is True:
         ViewPfCoils.viewActivePfCoils(ax)
         title += " Active PF Coils"
-    
+
     ViewEquilibrium.viewMagneticPoloidalFlux(ax, plotRho=args.rho)
 
-    if args.info is True:
-        hostdir = getDatabasePath(args)
-        ViewEquilibrium.viewPulseInfo(
-            ax, title, hostdir, args.shot, args.run, args.time
-        )
     ax.set_title(title)
 
+    canvas.setText(text=f"{getDatabasePath(args, timeValue=timeValue)}")
+    canvas.fig.suptitle(getTitle(args, "Equilibrium", timeValue), size=12)
     if args.save:
-        fname = "Equilibrium_shot_{0}_run_{1}_time_{2:.1f}.png".format(
-            args.shot, args.run, args.time
-        )
+        fname = getFileName(args, "Equilibrium", timeValue)
         canvas.save(fname)
     else:
         canvas.show()

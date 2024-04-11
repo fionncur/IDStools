@@ -3,6 +3,8 @@
 
 # Edgeplot is added in develop2.0 developed by Anna https://confluence.iter.org/display/IMP/How+to+plot+data+from+edge_profiles
 import argparse
+import copy
+from idstools.database import DBMaster
 
 import imas
 from imas import imasdef
@@ -10,17 +12,22 @@ from imas import imasdef
 from idstools.compute.common import getNearestTime
 from idstools.compute.wall import WallCompute
 from idstools.machinedescription import MachineDescription
-from idstools.utils.clihelper import getBackendID, getDatabasePath, imasParser
+from idstools.utils.clihelper import (
+    getBackendID,
+    getDatabasePath,
+    dbentryParser,
+    getFileName,
+    getTitle,
+)
 from idstools.utils.idslogger import setupLogger
 from idstools.view.common import Canvas
 from idstools.view.edge_profiles import EdgeProfilesView
 
 parser = argparse.ArgumentParser(
     description="---- Edge Profile plot",
-    parents=[imasParser],
+    parents=[dbentryParser],
 )
-parser.add_argument("-s", "--shot", help="Shot number", required=True, type=int)
-parser.add_argument("-r", "--run", help="Run number", required=True, type=int)
+
 parser.add_argument("-t", "--time", type=float, help="Time", default=-99)
 parser.add_argument(
     "--separatix",
@@ -36,56 +43,48 @@ args = parser.parse_args()
 
 logger = setupLogger("module")
 
-connection = imas.DBEntry(
-    getBackendID(args.backend), args.database, args.shot, args.run, args.user
-)
-err, n = connection.open()
-if err != 0:
-    logger.error(
-        f"Shot {args.shot}, run {args.run} for user={args.user} and database={args.database} does not exists"
-    )
-    raise Exception(
-        f"Shot {args.shot}, run {args.run} for user={args.user} and database={args.database} does not exists"
-    )
+args = parser.parse_args()
+connection = DBMaster.getConnection(args)
+if connection is None:
+    logger.critical("----> Aborted.")
+    exit(0)
 
 
 machineDescription = MachineDescription()
 wallMDDict = machineDescription.getMDSummary("wall")
+
 wallIds = None
+mdargs = copy.deepcopy(args)
 # Get wall of the tokamak
 for pulse, config in wallMDDict.items():
-    shot, run = pulse.split("/")
-    try:
-        mdConnection = imas.DBEntry(
-            getBackendID(args.backend), "ITER_MD", int(shot), int(run), args.user
-        )
-        err, n = mdConnection.open()
-        if err != 0:
-            logger.error(
-                f"Shot {shot}, run {run} for user={args.user} and database=ITER_MD does not exists"
-            )
-            raise Exception(
-                f"Shot {shot}, run {run}  for user={args.user} and database=ITER_MD does not exists"
-            )
-
+    mdargs.pulse, mdargs.run = pulse.split("/")
+    mdargs.pulse, mdargs.run = int(mdargs.pulse), int(mdargs.run)
+    mdargs.database = "ITER_MD"
+    mdargs.uri = f"imas:mdsplus?user=public;shot={mdargs.pulse};run={mdargs.run};database={mdargs.database};version={mdargs.version}"
+    mdConnection = DBMaster.getConnection(mdargs)
+    # print(mdConnection)
+    if mdConnection is not None:
         wallIds = mdConnection.get("wall")
         mdConnection.close()
-        break
-    except:
-        continue
+        if wallIds is None:
+            continue
+        else:
+            break
+
+
 if wallIds is None:
     logger.error("wall ids is not present")
-    exit(0)
+    exit(1)
 
 timeArray = None
 try:
     timeArray = connection.partial_get("edge_profiles", "time")
 except:
     logger.error("edge_profiles ids is not present")
-    exit(0)
+    exit(1)
 if timeArray is None:
     logger.error("edge_profiles ids : time is not present")
-    exit(0)
+    exit(1)
 
 timeIndex, timeValue = getNearestTime(timeArray, args.time)
 
@@ -123,48 +122,38 @@ ax1 = canvas.add_axes(title="", xlabel="", row=0, col=0, rowspan=3)
 ax2 = canvas.add_axes(title="", xlabel="", row=0, col=1, rowspan=3)
 ax3 = canvas.add_axes(title="", xlabel="", row=0, col=2, rowspan=3)
 ax4 = canvas.add_axes(title="", xlabel="", row=3, col=0, colspan=2)
-c1 = edgeProfilesView.viewElectronsDensity(ax1, timeSlice=0, showSeparatix=args.separatix)
-hostdir = getDatabasePath(args)
-axisText = f"{hostdir}, Shot {args.shot} /  Run {args.run}"
-# edgeProfilesView.showInfoOnPlot(ax1, axisText)
+c1 = edgeProfilesView.viewElectronsDensity(
+    ax1, timeSlice=0, showSeparatix=args.separatix
+)
 if c1 is not None:
-    
     canvas.fig.colorbar(c1, ax=ax1)
-
     if r is not None and z is not None:
         ax1.plot(r, z, "silver")
 
 c2 = edgeProfilesView.viewIonDensity(ax2, timeSlice=0, showSeparatix=args.separatix)
-# edgeProfilesView.showInfoOnPlot(ax2, axisText)
 if c2 is not None:
-    
     canvas.fig.colorbar(c2, ax=ax2)
-
     if r is not None and z is not None:
         ax2.plot(r, z, "silver")
 
 c3 = edgeProfilesView.viewNeutralDensity(ax3, timeSlice=0, showSeparatix=args.separatix)
-# edgeProfilesView.showInfoOnPlot(ax3, axisText)
 if c3 is not None:
-    
     canvas.fig.colorbar(c3, ax=ax3)
-
     if r is not None and z is not None:
         ax3.plot(r, z, "silver")
 
 edgeProfilesView.viewEquatorialPlaneAndDiverterDensity(ax4, timeSlice=0)
-edgeProfilesView.showInfoOnPlot(ax4, axisText)
+
+canvas.setText(text=f"{getDatabasePath(args, timeValue=timeValue)}")
+
+canvas.fig.subplots_adjust(
+    top=0.916, bottom=0.09, left=0.044, right=0.953, hspace=0.287, wspace=0.2
+)
+
+canvas.fig.suptitle(getTitle(args, "Edge Profiles", timeValue), size=12)
+
 if args.save:
-    fname = (
-        "EdgeProfiles"
-        + "_shot_"
-        + str(args.shot)
-        + "_run_"
-        + str(args.run)
-        + "_time_"
-        + "%.1f" % timeValue
-        + ".png"
-    )
-    canvas.save(fname, width=11.7, height=8.3)
+    fname = getFileName(args, "edge_profiles", timeValue)
+    canvas.save(fname)
 else:
     canvas.show()

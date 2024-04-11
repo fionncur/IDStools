@@ -5,13 +5,18 @@
 
 import argparse
 import logging
-import os
 import sys
 
 import imas
 
 from idstools.compute.common import getNearestTime
-from idstools.utils.clihelper import getBackendID, getDatabasePath, imasParser
+from idstools.database import DBMaster
+from idstools.utils.clihelper import (
+    dbentryParser,
+    getDatabasePath,
+    getFileName,
+    getTitle,
+)
 from idstools.utils.idslogger import setupLogger
 from idstools.view.common import Canvas
 from idstools.view.core_profiles import CoreProfilesView
@@ -24,43 +29,25 @@ parser = argparse.ArgumentParser(
     epilog="""
 """,
     formatter_class=argparse.RawTextHelpFormatter,
-    parents=[imasParser],
+    parents=[dbentryParser],
 )
 
-parser.add_argument("-s", "--shot", help="Shot number", required=True, type=int)
-parser.add_argument("-r", "--run", help="Run number", required=True, type=int)
 parser.add_argument("-t", "--time", type=float, help="Time", default=-99)
 parser.add_argument(
     "--save",
     help="Save figure at default location",
     action="store_true",
 )
-parser.add_argument(
-    "-i",
-    "--info",
-    help="Adds all extra provenance info to the plot",
-    action="store_true",
-)
+
 args = parser.parse_args()
 
-connection = imas.DBEntry(
-    getBackendID(args.backend),
-    args.database,
-    args.shot,
-    args.run,
-    user_name=args.user,
-)
-status, idx = connection.open()
-
-if status != 0:
-    logger.critical("Error opening pulse! Please check existence.")
-    sys.exit(status)
-
-hostdir = getDatabasePath(args)
+connection = DBMaster.getConnection(args)
+if connection is None:
+    logger.critical("----> Aborted.")
+    exit(1)
 
 
 try:
-    # input.core_profiles.get()
     idsCoreProfiles = imas.core_profiles()
     idsCoreProfiles.time = connection.partial_get("core_profiles", "time")
     if idsCoreProfiles.time is None:
@@ -69,7 +56,7 @@ try:
 except Exception:
     logger.critical("The core_profiles IDS is absent from the input data-entry")
     logger.critical("----> Aborted.")
-    exit()
+    exit(1)
 
 timeArray = idsCoreProfiles.time
 timeIndex, timeValue = getNearestTime(timeArray, args.time)
@@ -89,28 +76,18 @@ ax3 = canvas.add_axes(title="", xlabel="", row=2, col=0, colspan=1)
 coreprofilesView = CoreProfilesView(idsCoreProfiles)
 
 coreprofilesView.plotTotalPressureProperties(ax1)
-if args.info:
-    coreprofilesView.showInfoOnPlot(ax1, f"Shot {args.shot} /  Run {args.run}")
-
 coreprofilesView.plotIonPressureProperties(ax2)
-if args.info:
-    coreprofilesView.showInfoOnPlot(ax2, f"Shot {args.shot} /  Run {args.run}")
-
 coreprofilesView.plotElectronPressureProperties(ax3)
-if args.info:
-    coreprofilesView.showInfoOnPlot(ax3, f"Shot {args.shot} /  Run {args.run}")
 
+canvas.setText(text=f"{getDatabasePath(args, timeValue=timeValue)}")
+
+canvas.fig.subplots_adjust(
+    top=0.916, bottom=0.09, left=0.044, right=0.953, hspace=0.287, wspace=0.2
+)
+canvas.get_current_fig_manager().set_window_title(sys.argv[0])
+canvas.fig.suptitle(getTitle(args, "Pressure", timeValue), size=12)
 if args.save:
-    fname = (
-        "Pressure"
-        + "_shot_"
-        + str(args.shot)
-        + "_run_"
-        + str(args.run)
-        + "_time_"
-        + "%.1f" % timeValue
-        + ".png"
-    )
+    fname = getFileName(args, "Pressure", timeValue)
     canvas.save(fname)
 else:
     canvas.show()

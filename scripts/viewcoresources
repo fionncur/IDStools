@@ -9,7 +9,13 @@ import sys
 import imas
 
 from idstools.compute.common import getNearestTime
-from idstools.utils.clihelper import getBackendID, imasParser
+from idstools.database import DBMaster
+from idstools.utils.clihelper import (
+    dbentryParser,
+    getDatabasePath,
+    getFileName,
+    getTitle,
+)
 from idstools.utils.idslogger import setupLogger
 from idstools.view.common import Canvas
 from idstools.view.core_sources import CoreSourcesView
@@ -17,10 +23,9 @@ from idstools.view.core_sources import CoreSourcesView
 logger = setupLogger("module", stdout_level=logging.INFO)
 
 parser = argparse.ArgumentParser(
-    description="---- Display core_sources results", parents=[imasParser]
+    description="---- Display core_sources results", parents=[dbentryParser]
 )
-parser.add_argument("-s", "--shot", help="Shot number", required=True, type=int)
-parser.add_argument("-r", "--run", help="Run number", required=True, type=int)
+
 parser.add_argument(
     "-t", "--time", help="time", required=False, type=float, default=-99.0
 )
@@ -29,38 +34,13 @@ parser.add_argument(
     help="Save figure at default location",
     action="store_true",
 )
-parser.add_argument(
-    "-i",
-    "--info",
-    help="Adds all extra provenance info to the plot",
-    action="store_true",
-)
-args = parser.parse_args()
 
-connection = imas.DBEntry(
-    getBackendID(args.backend),
-    args.database,
-    args.shot,
-    args.run,
-    user_name=args.user,
-    data_version=args.version,
-)
-err, n = connection.open()
-if err != 0:
-    logger.warning(
-        "Shot "
-        + str(args.shot)
-        + ", run "
-        + str(args.run)
-        + " for user_or_path = "
-        + args.user
-        + " and database = "
-        + args.database
-        + " does not exist",
-    )
+args = parser.parse_args()
+connection = DBMaster.getConnection(args)
+if connection is None:
     logger.critical("----> Aborted.")
-    exit()
-# input.core_sources.get()
+    exit(1)
+
 core_sources = imas.core_sources()
 core_sources.time = connection.partial_get("core_sources", "time")
 if core_sources.time is None:
@@ -105,149 +85,39 @@ nsources = len(core_sources.source)
 
 coreSourceView = CoreSourcesView(core_sources)
 
-canvas = Canvas(1, 1)
+canvas = Canvas(2, 4)
 ret = axPowerProfiles = canvas.add_axes(title=r"Power Profiles [MW/M3]", row=0, col=0)
 coreSourceView.viewPowerProfiles(axPowerProfiles)
 
-canvas.fig.set_size_inches(5, 4)
-canvas.fig.tight_layout()
-if ret == 0:
-    if args.save:
-        fname = (
-            "CS_power_profiles_shot_"
-            + str(args.shot)
-            + "_run_"
-            + str(args.run)
-            + "_time_"
-            + "%.1f" % timeValue
-            + ".png"
-        )
-        canvas.save(fname)
-    else:
-        canvas.show(block=False)
-
-canvas = Canvas(1, 1)
-axParticlesProfiles = canvas.add_axes(title=r"PARTICLES PROFILES [/M3/S]", row=0, col=0)
+axParticlesProfiles = canvas.add_axes(title=r"PARTICLES PROFILES [/M3/S]", row=0, col=1)
 ret = coreSourceView.viewParticlesProfiles(axParticlesProfiles)
-canvas.fig.set_size_inches(5, 4)
-canvas.fig.tight_layout()
-if ret == 0:
-    if args.save:
-        fname = (
-            "CS_particles_profiles_shot_"
-            + str(args.shot)
-            + "_run_"
-            + str(args.run)
-            + "_time_"
-            + "%.1f" % timeValue
-            + ".png"
-        )
-        canvas.save(fname)
-    else:
-        canvas.show(block=False)
 
-canvas = Canvas(1, 1)
-axCurrentProfiles = canvas.add_axes(title=r"CURRENT PROFILES [KA/M2]", row=0, col=0)
+axCurrentProfiles = canvas.add_axes(title=r"CURRENT PROFILES [KA/M2]", row=0, col=2)
 ret = coreSourceView.viewCurrentProfiles(axCurrentProfiles)
 
-canvas.fig.set_size_inches(5, 4)
-canvas.fig.tight_layout()
-if ret == 0:
-    if args.save:
-        fname = (
-            "CS_current_profiles_shot_"
-            + str(args.shot)
-            + "_run_"
-            + str(args.run)
-            + "_time_"
-            + "%.1f" % timeValue
-            + ".png"
-        )
-        canvas.save(fname)
-    else:
-        canvas.show(block=False)
-
-canvas = Canvas(1, 1)
 axPowerAndParticleWaveforms = canvas.add_axes(
-    title="POWER AND PARTICLE WAVEFORMS", row=0, col=0
+    title="POWER AND PARTICLE WAVEFORMS", row=1, col=0
 )
 ret = coreSourceView.viewPowerAndParticleWaveforms(axPowerAndParticleWaveforms)
-canvas.fig.set_size_inches(5, 4)
-canvas.fig.tight_layout()
-if ret == 0:
-    if args.save:
-        fname = (
-            "CS_power_waveforms_shot_"
-            + str(args.shot)
-            + "_run_"
-            + str(args.run)
-            + "_time_"
-            + "%.1f" % timeValue
-            + ".png"
-        )
-        canvas.save(fname)
-    else:
-        canvas.show(block=False)
 
-canvas = Canvas(1, 1)
-axParticlesWaveform = canvas.add_axes(title="PARTICLES WAVEFORM", row=0, col=0)
+axParticlesWaveform = canvas.add_axes(title="PARTICLES WAVEFORM", row=1, col=1)
 ret = coreSourceView.viewParticlesWaveform(axParticlesWaveform)
-canvas.fig.set_size_inches(5, 4)
-canvas.fig.tight_layout()
-if ret == 0:
-    if args.save:
-        fname = (
-            "CS_particles_waveforms_shot_"
-            + str(args.shot)
-            + "_run_"
-            + str(args.run)
-            + "_time_"
-            + "%.1f" % timeValue
-            + ".png"
-        )
-        canvas.save(fname)
-    else:
-        canvas.show(block=False)
 
-canvas = Canvas(1, 1)
-axCurrentWaveform = canvas.add_axes(title=r"CURRENT WAVEFORM", row=0, col=0)
+axCurrentWaveform = canvas.add_axes(title=r"CURRENT WAVEFORM", row=1, col=2)
 ret = coreSourceView.viewCurrentWaveform(axCurrentWaveform)
-canvas.fig.set_size_inches(5, 4)
-canvas.fig.tight_layout()
-if ret == 0:
-    if args.save:
-        fname = (
-            "CS_current_waveforms_shot_"
-            + str(args.shot)
-            + "_run_"
-            + str(args.run)
-            + "_time_"
-            + "%.1f" % timeValue
-            + ".png"
-        )
-        canvas.save(fname)
-    else:
-        canvas.show(block=False)
 
-canvas = Canvas(1, 1)
-axTorqueWaveform = canvas.add_axes(row=0, col=0)
+axTorqueWaveform = canvas.add_axes(row=1, col=3)
 ret = coreSourceView.viewTorqueWaveform(axTorqueWaveform)
-canvas.fig.set_size_inches(5, 4)
-canvas.fig.tight_layout()
-if ret == 0:
-    if args.save:
-        fname = (
-            "CS_torque_waveforms_shot_"
-            + str(args.shot)
-            + "_run_"
-            + str(args.run)
-            + "_time_"
-            + "%.1f" % timeValue
-            + ".png"
-        )
-        canvas.save(fname)
-    else:
-        canvas.show(block=False)
 
-if not args.save:
-    input("Press any key to close!!")
+canvas.setText(text=f"{getDatabasePath(args, timeValue=timeValue)}")
+
+canvas.fig.subplots_adjust(
+    top=0.916, bottom=0.09, left=0.044, right=0.953, hspace=0.287, wspace=0.2
+)
+canvas.get_current_fig_manager().set_window_title(sys.argv[0])
+canvas.fig.suptitle(getTitle(args, "Core sources", timeValue), size=12)
+if args.save:
+    fname = getFileName(args, "core_sources", timeValue)
+    canvas.save(fname)
+else:
+    canvas.show()

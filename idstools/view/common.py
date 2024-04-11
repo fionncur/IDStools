@@ -58,6 +58,7 @@ try:
 except ImportError:
     richAvailable = False
 
+
 class Canvas:
     # https://matplotlib.org/stable/tutorials/intermediate/arranging_axes.html
 
@@ -102,13 +103,12 @@ class Canvas:
     def save(
         self,
         fname,
-        width=None,
-        height=None,
+        width=11.69,
+        height=8.27,
         dpi="figure",
     ):
         fig = plt.gcf()
-        if width is not None and height is not None:
-            fig.set_size_inches(width, height)
+        fig.set_size_inches(width, height)
         try:
             fig.savefig(fname, dpi=dpi)
             print(f"----> Figure saved to {fname}", file=sys.stderr)
@@ -118,19 +118,24 @@ class Canvas:
                 file=sys.stderr,
             )
 
-    def setText(self, x=0.5, y=0.01, text=""):
+    def setText(self, x=0.001, y=0.985, text="", ha="left", fontsize=7):
         plt.figtext(
-            0.5,
-            0.01,
+            0.001,
+            0.985,
             text,
-            ha="center",
-            fontsize=7,
+            ha=ha,
+            fontsize=fontsize,
         )
 
     def setSupTitle(self, text="", *args, **kwargs):
         plt.suptitle(text, *args, **kwargs)
 
     def show(self, *args, **kwargs):
+        wm = self.get_current_fig_manager()
+        window = wm.window
+        screen_y = window.winfo_screenheight()
+        screen_x = window.winfo_screenwidth()
+        wm.resize(screen_x, screen_y)
         plt.show(*args, **kwargs)
 
     def get_current_fig_manager(self):

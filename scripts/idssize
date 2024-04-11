@@ -53,7 +53,7 @@ import sys
 import imas
 import numpy as np
 
-from idstools.utils.clihelper import getBackendID, imasParser
+from idstools.utils.clihelper import getBackendID, dbentryParser
 from idstools.utils.idshelper import getIDSSize
 
 parser = argparse.ArgumentParser(
@@ -61,10 +61,8 @@ parser = argparse.ArgumentParser(
     epilog="""
 """,
     formatter_class=argparse.RawTextHelpFormatter,
-    parents=[imasParser],
+    parents=[dbentryParser],
 )
-parser.add_argument("-s", "--shot", help="Shot number", required=True, type=int)
-parser.add_argument("-r", "--run", help="Run number", required=True, type=int)
 
 parser.add_argument(
     "ids",

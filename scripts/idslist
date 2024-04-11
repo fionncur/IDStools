@@ -15,7 +15,7 @@ from idstools.utils.idshelper import (
     getAvailableIdsAndTimes,
 )
 from idstools.utils.idslogger import setupLogger
-from idstools.utils.clihelper import getBackendID, imasParser
+from idstools.utils.clihelper import getBackendID, dbentryParser
 
 logger = setupLogger("module")
 np.set_printoptions(threshold=1, precision=2, suppress=True)
@@ -32,10 +32,8 @@ parser = argparse.ArgumentParser(
         yaml - List ids content for yaml files aimed at describing a scenario
         occ <--ids> <--comment> - List ids with their number of occurrences"""
     ),
-    parents=[imasParser],
+    parents=[dbentryParser],
 )
-parser.add_argument("-s", "--shot", help="Shot number", required=True, type=int)
-parser.add_argument("-r", "--run", help="Run number", required=True, type=int)
 parser.add_argument(
     "-f",
     "--fullarray",

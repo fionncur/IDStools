@@ -60,7 +60,7 @@ if getIMASVersion() > 4:
     )
 else:
     dbentryParser.add_argument(
-        "-s", "--shot", "--pulse", dest="shot", help="Shot number", type=int
+        "-s", "--shot", "--pulse", dest="pulse", help="Shot number", type=int
     )
 dbentryParser.add_argument("-r", "--run", help="Run number", type=int)
 
@@ -73,7 +73,61 @@ def getSliceMode(name):
     return getattr(imasdef, f"{name}_INTERP")
 
 
-def getDatabasePath(args) -> str:
+def getPulseRunfromURI(uri):
+    import re
+
+    param = {}
+    user_pattern = r"user=([^;]+)"
+    database_pattern = r"database=([^;]+)"
+    version_pattern = r"version=([^;]+)"
+    shot_pattern = r"shot=(\d+)"
+    run_pattern = r"run=(\d+)"
+
+    user_match = re.search(user_pattern, uri)
+    database_match = re.search(database_pattern, uri)
+    version_match = re.search(version_pattern, uri)
+    shot_match = re.search(shot_pattern, uri)
+    run_match = re.search(run_pattern, uri)
+
+    param["user"] = user_match.group(1) if user_match else None
+    param["database"] = database_match.group(1) if database_match else None
+    param["version"] = version_match.group(1) if version_match else None
+    param["pulse"] = shot_match.group(1) if shot_match else None
+    param["run"] = run_match.group(1) if run_match else None
+
+    return param
+
+
+def getTitle(args, title="", timeValue=None):
+    _title = ""
+    if title:
+        _title += f"{title} "
+    if "uri" in args.__dict__ and args.uri:
+        param = getPulseRunfromURI(args.uri)
+        _title += f"(pulse={param['pulse']},{param['run']})"
+    else:
+        _title += f"(pulse={args.pulse},{args.run})"
+    if timeValue:
+        _title += f" time:{timeValue:.1f}"
+    return _title
+
+
+def getFileName(args, title="", timeValue=None):
+    _fileName = ""
+    if title:
+        _fileName += f"{title}_"
+    if "uri" in args.__dict__ and args.uri:
+        param = getPulseRunfromURI(args.uri)
+        _fileName += f"pulse_{param['pulse']}_run_{param['run']}_"
+    else:
+        _fileName += f"pulse_{args.pulse}_run_{args.run}_"
+    if timeValue:
+        _fileName += f"time_{timeValue:.1f}"
+    _fileName += ".png"
+    return _fileName
+
+
+def getDatabasePath(args, timeValue=None) -> str:
     """
     The function `getDatabasePath` returns the absolute path of a database based on the provided arguments.
 
@@ -83,13 +137,35 @@ def getDatabasePath(args) -> str:
     Returns:
         the absolute path of the database.
     """
-    if args.user == "public":
+    database = version = pulse = run = user = None
+    if "uri" in args.__dict__ and args.uri:
+        param = getPulseRunfromURI(args.uri)
+        database = param["database"]
+        version = param["version"]
+        pulse = int(param["pulse"])
+        run = int(param["run"])
+        user = param["user"]
+    else:
+        database = args.database
+        version = args.version
+
+        pulse = int(args.pulse)
+        run = int(args.run)
+        user = args.user
+
+    if user == "public":
         publichome = os.getenv("IMAS_HOME", default="")
         if publichome is None:
             return None
-        databaseAbsolutePath = f"{publichome}/shared/imasdb/{args.database}/{args.version}/{args.run//10000}"
+        databaseAbsolutePath = (
+            f"{publichome}/shared/imasdb/{database}/{version}/{run//10000}"
+        )
     else:
-        databaseAbsolutePath = f'{os.path.expanduser(f"~{args.user}")}/public/imasdb/{str(args.database)}/{args.version}/{args.run//10000}'
-    hostdir = f"{socket.gethostname()}:{databaseAbsolutePath}"
-    hostdir = hostdir[:-2]
+        databaseAbsolutePath = f'{os.path.expanduser(f"~{user}")}/public/imasdb/{str(database)}/{version}/{run//10000}'
+    databaseAbsolutePath = databaseAbsolutePath[:-2]
+    timeString = ""
+    if timeValue:
+        timeString = f"time:{timeValue:.2f})"
+    hostdir = f"{socket.gethostname()}:{databaseAbsolutePath} (pulse {pulse},{run} {timeString})"
+    #
     return hostdir

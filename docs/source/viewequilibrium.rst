@@ -8,8 +8,8 @@ Syntax viewequilibrium
 .. code-block:: bash
 
     $ viewequilibrium -h
-    usage: viewequilibrium [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] -s SHOT -r RUN
-                    [-t TIME] [-o OCCURRENCE] [--rho] [--pfcoils] [--save] [-i]
+    usage: viewequilibrium [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] [-uri URI] [-s PULSE] [-r RUN] [-t TIME] [-o OCCURRENCE]
+                        [--rho] [--pfcoils] [--save]
 
     ---- Display the plasma equilibrium from the equilibrium IDS. It also shows pf coils position overlay if exists
 
@@ -23,7 +23,9 @@ Syntax viewequilibrium
                             backend format (default=MDSPLUS)
     --version VERSION, -v VERSION
                             data version (default=3)
-    -s SHOT, --shot SHOT  Shot number
+    -uri URI, --uri URI   uri (default=None)
+    -s PULSE, --shot PULSE, --pulse PULSE
+                            Pulse number
     -r RUN, --run RUN     Run number
     -t TIME, --time TIME  Time (default=middle)
     -o OCCURRENCE, --occurrence OCCURRENCE
@@ -31,13 +33,13 @@ Syntax viewequilibrium
     --rho                 Show rho overlay on the plot
     --pfcoils             Show pf coils overlay on the plot
     --save                Save figure at default location
-    -i, --info            Adds all extra provenance info to the plot
 
 Example viewequilibrium
 ~~~~~~~~~~~~~~~~~~~~~~~
     .. code-block:: bash
 
-        $ viewequilibrium -s 134174 -r 117 --rho --pfcoils --info
+        $ viewequilibrium -s 134174 -r 117 --rho --pfcoils
+        $ viewequilibrium --uri "imas:mdsplus?user=public;shot=134174;run=117;database=ITER;version=3"
 
     .. image:: _static/images/EquilibriumView_viewMagneticPoloidalFlux.png
         :alt: image not found

@@ -5,7 +5,7 @@ import logging
 
 import imas
 
-from idstools.utils.clihelper import getBackendID, getDatabasePath, imasParser
+from idstools.utils.clihelper import getBackendID, getDatabasePath, dbentryParser
 from idstools.utils.idslogger import setupLogger
 from idstools.view.common import Canvas
 from idstools.view.domain.kineticprofiles import KineticProfilesView
@@ -14,10 +14,9 @@ from idstools.view.domain.kineticprofiles import KineticProfilesView
 # Management of input arguments
 parser = argparse.ArgumentParser(
     description="---- Display the plasma kinetic profiles from the core_profiles IDSs",
-    parents=[imasParser],
+    parents=[dbentryParser],
 )
-parser.add_argument("-s", "--shot", help="Shot number", required=True, type=int)
-parser.add_argument("-r", "--run", help="Run number", required=True, type=int)
+
 parser.add_argument(
     "-t", "--time", help="Time", required=False, type=float, default=-99.0
 )

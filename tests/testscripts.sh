@@ -131,8 +131,8 @@ for i in ${tests[@]}; do
     viewcoresources -s $shot -r $run --save || exit 1
 done
 
-echo TESTING: viewwall --save wall iter 
-viewwall --save wall iter  || exit 1
+echo TESTING: viewwall --save wall iter
+viewwall --save wall iter || exit 1
 
 # echo -------idscp-------
 # echo TESTING: idscp -si 131024 -ri 10 -so 145000 -ro 2 -f
@@ -167,7 +167,8 @@ viewspectrometry -d TEST -s 134000 -r 37 --save || exit 1
 
 echo -------viewcoretransport-------
 viewcoretransport -s 134000 -r 40 --save || exit 1
-viewcoretransport -u public -d TEST -s 92436 -r 850 --save || exit 1
+viewcoretransport -d TEST -s 92436 -r 850 --save || exit 1
+
 # echo -------idsresample-------
 # echo TESTING: idsresample -si 131024 -ri 10 -so 145000 -ro 2
 # idsresample -si 131024 -ri 10 -so 145000 -ro 2 || exit 1
@@ -178,4 +179,15 @@ viewhcdwaves -s 134173 -r 101 -u public -d TEST --save || exit 1
 echo -------viewhcddistributions-------
 viewhcddistributions -s 130012 -r 115 -u public -d TEST --save || exit 1
 
-# idsprint --uri "imas:mdsplus?user=public;shot=131024;run=41;database=ITER;version=3" summary 
+echo -------viewcore_sources-------
+viewcoresources -s 130012 -r 105 -d TEST
+# viewequilibrium -s 134174 -r 117 --rho --pfcoils
+# viewrotation --uri "imas:mdsplus?user=public;shot=134174;run=117;database=ITER;version=3"
+# viewsources --uri "imas:mdsplus?user=public;shot=134174;run=117;database=ITER;version=3"
+# viewscenario --uri "imas:mdsplus?user=public;shot=134174;run=117;database=ITER;version=3"
+# viewspectrometry --uri "imas:mdsplus?user=public;shot=134000;run=37;database=TEST;version=3"
+# viewfluxes --uri "imas:mdsplus?user=public;shot=134174;run=117;database=ITER;version=3"
+# viewequilibrium --uri "imas:mdsplus?user=public;shot=134174;run=117;database=ITER;version=3"
+# viewcoretransport --uri "imas:mdsplus?user=public;shot=92436;run=850;database=TEST;version=3"
+# viewcoresources --uri "imas:mdsplus?user=public;shot=130012;run=105;database=TEST;version=3"
+# idsprint --uri "imas:mdsplus?user=public;shot=131024;run=41;database=ITER;version=3" summary

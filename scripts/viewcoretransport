@@ -12,11 +12,15 @@ import argparse
 import logging
 import sys
 
-
-import imas
 from imas import imasdef
 
-from idstools.utils.clihelper import getBackendID, imasParser
+from idstools.database import DBMaster
+from idstools.utils.clihelper import (
+    dbentryParser,
+    getDatabasePath,
+    getFileName,
+    getTitle,
+)
 from idstools.utils.idslogger import setupLogger
 from idstools.view.common import Canvas
 from idstools.view.core_transport import CoreTransportView
@@ -34,7 +38,7 @@ parser = argparse.ArgumentParser(
     epilog="""
 """,
     formatter_class=argparse.RawTextHelpFormatter,
-    parents=[imasParser],
+    parents=[dbentryParser],
 )
 
 parser.add_argument(
@@ -47,8 +51,6 @@ parser.add_argument(
 )
 
 parser.add_argument("-o", "--occurrence", type=int, default=0, help="occurrence")
-parser.add_argument("-s", "--shot", help="Shot number", required=True, type=int)
-parser.add_argument("-r", "--run", help="Run number", required=True, type=int)
 parser.add_argument("-t", "--time", type=float, help="Time", default=-99)
 parser.add_argument(
     "--save",
@@ -57,18 +59,9 @@ parser.add_argument(
 )
 args = parser.parse_args()
 
-connection = imas.DBEntry(
-    getBackendID(args.backend),
-    args.database,
-    args.shot,
-    args.run,
-    user_name=args.user,
-)
-status, idx = connection.open()
-
-if status != 0:
-    logger.critical("Error opening pulse! Please check existence.")
-    sys.exit(status)
+connection = DBMaster.getConnection(args)
+if connection is None:
+    exit(1)
 
 idsSliceCoreTransport = connection.get_slice(
     "core_transport",
@@ -78,7 +71,7 @@ idsSliceCoreTransport = connection.get_slice(
 )
 if len(idsSliceCoreTransport.time) == 0:
     logger.critical("IDS:core_transport Time vector is empty! aborting")
-    sys.exit(status)
+    sys.exit(1)
 
 idsSliceCoreProfiles = connection.get_slice(
     "core_profiles",
@@ -88,7 +81,7 @@ idsSliceCoreProfiles = connection.get_slice(
 )
 if len(idsSliceCoreProfiles.time) == 0:
     logger.critical("IDS:core_profiles Time vector is empty! aborting")
-    sys.exit(status)
+    sys.exit(1)
 
 idsSliceEquilibrium = connection.get_slice(
     "equilibrium",
@@ -98,10 +91,9 @@ idsSliceEquilibrium = connection.get_slice(
 )
 if len(idsSliceEquilibrium.time) == 0:
     logger.critical("IDS:equilibrium Time vector is empty! aborting")
-    sys.exit(status)
+    sys.exit(1)
 
 timeValue = idsSliceCoreTransport.time[0]
-title = f"Core transport {args.user}/{args.database}/{args.version}/{args.shot}/{args.run} @ {timeValue:0.3f}"
 
 try:
     modelIndex = [t.identifier.name for t in idsSliceCoreTransport.model].index(
@@ -115,7 +107,6 @@ except:
 # define columns and rows for subplots based on ions
 columns = len(idsSliceCoreTransport.model[modelIndex].profiles_1d[-1].ion)
 canvas = Canvas(3, columns)
-canvas.fig.suptitle(title)
 electronsParticleFluxesAxes = canvas.add_axes(
     title="", xlabel="", row=0, col=0, colspan=1
 )
@@ -165,26 +156,14 @@ ctView.viewEnergyFluxesForElectrons(
     -1,
     modelIndex,
 )
-
+canvas.setText(text=f"{getDatabasePath(args, timeValue=timeValue)}")
+canvas.fig.suptitle(getTitle(args, "Core transport", timeValue), size=12)
+canvas.fig.subplots_adjust(
+    top=0.9, bottom=0.094, left=0.035, right=0.948, hspace=0.417, wspace=0.117
+)
+canvas.get_current_fig_manager().set_window_title(sys.argv[0])
 if args.save:
-    fname = (
-        "core_transport_shot_"
-        + str(args.shot)
-        + "_run_"
-        + str(args.run)
-        + "_time_"
-        + "%.1f" % idsSliceCoreTransport.time
-        + ".png"
-    )
+    fname = getFileName(args, "core_transport", timeValue)
     canvas.save(fname)
 else:
-    wm = canvas.get_current_fig_manager()
-    window = wm.window
-    screen_y = window.winfo_screenheight()
-    screen_x = window.winfo_screenwidth()
-    wm.resize(screen_x, screen_y)
-
-    canvas.fig.subplots_adjust(
-        top=0.9, bottom=0.094, left=0.035, right=0.948, hspace=0.417, wspace=0.117
-    )
     canvas.show()

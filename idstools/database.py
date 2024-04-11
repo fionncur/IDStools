@@ -459,17 +459,17 @@ class DBMaster:
 
     @classmethod
     def getIMASVersion(cls):
-        lowlevelVersion=int((os.getenv("AL_VERSION") or os.getenv("UAL_VERSION"))[0])
+        lowlevelVersion = int((os.getenv("AL_VERSION") or os.getenv("UAL_VERSION"))[0])
         return lowlevelVersion
 
     @classmethod
     def getConnection(cls, args):
-        
         imasVersion = DBMaster.getIMASVersion()
+
         if imasVersion > 4:
             if args.uri is None:
                 if args.pulse is None or args.run is None:
-                    logger.error("Both the uri or the shot/pulse and run are missing.")
+                    logger.error("Both the uri or the pulse and run are missing.")
                     return None
                 connection = imas.DBEntry(
                     getBackendID(args.backend),
@@ -487,18 +487,19 @@ class DBMaster:
                     connection = imas.DBEntry(args.uri, args.mode)
                 else:
                     connection = imas.DBEntry(args.uri, "r")
-                    
+
         else:
-            if args.shot is None or args.run is None:
-                logger.error("There is no shot and run available")
+            if args.pulse is None or args.run is None:
+                logger.error("There is no pulse and run available")
                 return None
             connection = imas.DBEntry(
                 getBackendID(args.backend),
                 args.database,
-                args.shot,
+                args.pulse,
                 args.run,
                 args.user,
             )
+
         status, _ = connection.open()
         if status != 0:
             logger.error(f"The specified database is not available")

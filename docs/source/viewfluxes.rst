@@ -9,8 +9,8 @@ Syntax viewfluxes
 .. code-block:: bash
 
     $ viewfluxes -h
-    usage: viewfluxes [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] [-m {CLOSEST,PREVIOUS,LINEAR}] [-o OCCURRENCE] -s SHOT -r RUN
-                  [-t TIME]
+    usage: viewfluxes [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] [-uri URI] [-s PULSE] [-r RUN] [-m {CLOSEST,PREVIOUS,LINEAR}]
+                      [-o OCCURRENCE] [-t TIME]
 
     View information about fluxes
 
@@ -24,13 +24,16 @@ Syntax viewfluxes
                             backend format  (default=MDSPLUS)
       --version VERSION, -v VERSION
                             data version    (default=3)
+      -uri URI, --uri URI   uri             (default=None)
+      -s PULSE, --shot PULSE, --pulse PULSE
+                            Pulse number
+      -r RUN, --run RUN     Run number
       -m {CLOSEST,PREVIOUS,LINEAR}, --slicingmethod {CLOSEST,PREVIOUS,LINEAR}
                             Slicing method  (default=CLOSEST)
       -o OCCURRENCE, --occurrence OCCURRENCE
                             occurrence
-      -s SHOT, --shot SHOT  Shot number
-      -r RUN, --run RUN     Run number
       -t TIME, --time TIME  Time
+
 
 
 Example viewfluxes
@@ -39,8 +42,9 @@ Example viewfluxes
     .. code-block:: bash
 
         $ viewfluxes -s 134174 -r  117 -m CLOSEST
+        $ viewfluxes --uri "imas:mdsplus?user=public;shot=134174;run=117;database=ITER;version=3"
 
-        Time = 10.599 for public/ITER/3/134174/117
+        Showing details for sdcc-login01.iter.org:/work/imas/shared/imasdb/ITER/3 (pulse 134174,117 time:10.60))
 
         combined (-9e+40)
                             electrons            particles(--)               energy(--)
@@ -76,7 +80,7 @@ Example viewfluxes
 
         $ viewfluxes 134174  117 -m PREVIOUS -t 50
 
-        Time = 48.938 for public/ITER/3/134174/117
+        Showing details for sdcc-login01.iter.org:/work/imas/shared/imasdb/ITER/3 (pulse 134174,117 time:48.938))
 
         combined (-9e+40)
                             electrons            particles(--)               energy(--)

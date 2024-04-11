@@ -9,8 +9,8 @@ Syntax viewsources
 .. code-block:: bash
 
     $ viewsources -h
-    usage: viewsources [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] [-m {CLOSEST,PREVIOUS,LINEAR}] [-o OCCURRENCE] -s SHOT -r RUN
-    [-t TIME]
+    usage: viewsources [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] [-uri URI] [-s PULSE] [-r RUN] [-m {CLOSEST,PREVIOUS,LINEAR}]
+                      [-o OCCURRENCE] [-t TIME]
 
     View information about sources
 
@@ -24,12 +24,14 @@ Syntax viewsources
                             backend format  (default=MDSPLUS)
       --version VERSION, -v VERSION
                             data version    (default=3)
+      -uri URI, --uri URI   uri             (default=None)
+      -s PULSE, --shot PULSE, --pulse PULSE
+                            Pulse number
+      -r RUN, --run RUN     Run number
       -m {CLOSEST,PREVIOUS,LINEAR}, --slicingmethod {CLOSEST,PREVIOUS,LINEAR}
                             Slicing method  (default=CLOSEST)
       -o OCCURRENCE, --occurrence OCCURRENCE
                             occurrence
-      -s SHOT, --shot SHOT  Shot number
-      -r RUN, --run RUN     Run number
       -t TIME, --time TIME  Time
 
 
@@ -39,7 +41,7 @@ Example viewsources
     .. code-block:: bash
 
         $ viewsources -s 134174 -r  117
-        Time = 10.599 for public/ITER/3/134174/117
+        Showing details for sdcc-login01.iter.org:/work/imas/shared/imasdb/ITER/3 (pulse 134174,117 time:10.60))
         total
                             electrons            particles(--)     energy  2.499896e+06
                 a       z_n     z_ion                particles                   energy
@@ -135,7 +137,7 @@ Example viewsources
 
         $ viewsources -s 134174 -r 117 -m PREVIOUS -t 50
 
-        Time = 48.938 for public/ITER/3/134174/117
+        Showing details for sdcc-login01.iter.org:/work/imas/shared/imasdb/ITER/3 (pulse 134174,117 time:48.938))
         total
                             electrons            particles(--)     energy  2.203519e+07
                 a       z_n     z_ion                particles                   energy

@@ -4,13 +4,18 @@
 # migrated from neutronplot
 import argparse
 import logging
-import os
 import sys
 
 import imas
 
 from idstools.compute.common import getNearestTime
-from idstools.utils.clihelper import getBackendID, getDatabasePath, imasParser
+from idstools.database import DBMaster
+from idstools.utils.clihelper import (
+    dbentryParser,
+    getDatabasePath,
+    getFileName,
+    getTitle,
+)
 from idstools.utils.idslogger import setupLogger
 from idstools.view.common import Canvas
 from idstools.view.distribution_sources import DistributionSourcesView
@@ -18,10 +23,9 @@ from idstools.view.distribution_sources import DistributionSourcesView
 # Management of input arguments
 parser = argparse.ArgumentParser(
     description="---- Display the neutron profiles from the distribution_sources IDSs",
-    parents=[imasParser],
+    parents=[dbentryParser],
 )
-parser.add_argument("-s", "--shot", help="Shot number", required=True, type=int)
-parser.add_argument("-r", "--run", help="Run number", required=True, type=int)
+
 parser.add_argument(
     "-t", "--time", help="Time", required=False, type=float, default=-99.0
 )
@@ -30,34 +34,16 @@ parser.add_argument(
     help="Save figure at default location",
     action="store_true",
 )
-parser.add_argument(
-    "-i",
-    "--info",
-    help="Adds all extra provenance info to the plot",
-    action="store_true",
-)
+
 args = parser.parse_args()
 logger = setupLogger("module", stdout_level=logging.INFO)
 
 
 # Open the database and read the necessary IDSs
-connection = imas.DBEntry(
-    getBackendID(args.backend),
-    args.database,
-    args.shot,
-    args.run,
-    user_name=args.user,
-    data_version=args.version,
-)
-err, n = connection.open()
-if err != 0:
-    logger.critical(
-        f"Shot {str(args.shot)}, run {str(args.run)} for user_or_path = {args.user} and database = {args.database} does not exist",
-    )
-    logger.critical(
-        "----> Aborted.",
-    )
-    exit()
+connection = DBMaster.getConnection(args)
+if connection is None:
+    logger.critical("----> Aborted.")
+    exit(1)
 
 hostdir = getDatabasePath(args)
 if hostdir is None:
@@ -141,38 +127,21 @@ if sum(active) == 0:
     logger.critical("No active neutron sources --> Leave.")
     exit()
 
-title = "Profiles displayed for t = " + "%.1f" % timeValue + " s"
 canvas = Canvas(1, 1)
 ax = canvas.add_axes(title="", xlabel="", row=0, col=0)
 distributionSourcesView = DistributionSourcesView(idsDistributionSources)
 distributionSourcesView.viewNeutrons(ax)
 distributionSourcesView.viewTime(ax, timeValue)
-if args.info:
-    distributionSourcesView.viewPulseInfo(
-        ax, title, hostdir, args.shot, args.run, timeValue
-    )
 
-ax.set_title(
-    title,
-    fontdict={
-        "fontfamily": "serif",
-        "color": "darkred",
-        "fontweight": "normal",
-        "fontsize": 12,
-    },
+canvas.setText(text=f"{getDatabasePath(args, timeValue=timeValue)}")
+
+canvas.fig.subplots_adjust(
+    top=0.916, bottom=0.09, left=0.044, right=0.953, hspace=0.287, wspace=0.2
 )
-
+canvas.get_current_fig_manager().set_window_title(sys.argv[0])
+canvas.fig.suptitle(getTitle(args, "Neutrons profiles", timeValue), size=12)
 if args.save:
-    fname = (
-        "Neutrons"
-        + "_shot_"
-        + str(args.shot)
-        + "_run_"
-        + str(args.run)
-        + "_time_"
-        + "%.1f" % timeValue
-        + ".png"
-    )
+    fname = getFileName(args, "Neutrons", timeValue)
     canvas.save(fname)
 else:
     canvas.show()
