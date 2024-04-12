@@ -1,7 +1,7 @@
 """ 
 This module provides view functions and classes for pf_active ids data
 
-`more about pf_active ids <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/CI/imas-3.37.2/pf_active.html>`_
+`refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`_.
 
 """
 import logging
@@ -52,7 +52,7 @@ class PFActiveView:
                 ax.plot()
                 canvas.show()
 
-            .. image:: ../../_static/images/PFActiveView_viewActivePfCoils.png
+            .. image:: ../_static/images/PFActiveView_viewActivePfCoils.png
                 :alt: image not found
                 :align: center
         """

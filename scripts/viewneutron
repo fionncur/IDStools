@@ -17,7 +17,7 @@ from idstools.view.distribution_sources import DistributionSourcesView
 
 # Management of input arguments
 parser = argparse.ArgumentParser(
-    description="---- Display the neutron profiles from the distribution_sources IDSs",
+    description="---- Display the neutron profiles from the distribution_sources IDSs [previously known as neutronplot]",
     parents=[imasParser],
 )
 parser.add_argument("-s", "--shot", help="Shot number", required=True, type=int)

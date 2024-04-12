@@ -26,11 +26,14 @@ parser = argparse.ArgumentParser(
     formatter_class=argparse.RawDescriptionHelpFormatter,
     description=textwrap.dedent(
         """
-        List available IDSes in the pulse. By deafult it prints all IDSes alone with their time length. fullarray option allows you to print complete time array.
+        List available IDSes in the pulse. By default it prints all IDSes along with its time length. fullarray option allows you to print complete time array.
         
         Possible commands are:
         yaml - List ids content for yaml files aimed at describing a scenario
-        occ <--ids> <--comment> - List ids with their number of occurrences"""
+        occ <--ids> <--comment> - List ids with their number of occurrences
+        
+        [ids_content(yaml), listidss (with time slices), idsoccurrences(occ) merged into one script]
+        """
     ),
     parents=[imasParser],
 )

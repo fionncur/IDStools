@@ -1,11 +1,14 @@
-Tools
-=====
-Following are the different command line tools available in the *IDSTools*.
+#######
+ Tools
+#######
+
+Following are the different command line tools available in the
+*IDStools*.
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
-   database_tools
-   machine_description_tools
-   ids_manipulation_tools
    analysis_tools
+   ids_manipulation_tools
+   database_tools
+   scenariodb_tools

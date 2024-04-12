@@ -1,7 +1,7 @@
 """ 
 This module provides compute functions and classes for edge_profiles ids data
 
-`more about edge_profiles ids <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/CI/imas-3.37.2/edge_profiles.html>`_.
+`refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`_.
 
 """
 

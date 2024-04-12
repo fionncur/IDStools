@@ -1,5 +1,5 @@
-# Contributing Guidelines for IDSTools
-Thank you for your interest in contributing to IDSTools. We welcome contributions from the fusion community to help each other . Please take a moment to review the following guidelines to ensure a smooth and productive collaboration.
+# Contributing Guidelines for IDStools
+Thank you for your interest in contributing to IDStools. We welcome contributions from the fusion community to help each other . Please take a moment to review the following guidelines to ensure a smooth and productive collaboration.
 
 ## Getting Started
 
@@ -97,4 +97,4 @@ Join our Discussion Forum here to engage with the community.
 Participate in project-related discussions and share your insights.
 
 ## Acknowledgment
-Thank you for your contributions to IDSTools project!
+Thank you for your contributions to IDStools project!

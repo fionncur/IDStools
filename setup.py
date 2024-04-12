@@ -56,7 +56,7 @@ if os.path.exists(scientific_mplstyle):
     data_files.append(("share/styles/", [scientific_mplstyle]))
 
 setup(
-    name="IDSTools",
+    name="IDStools",
     version=versioneer.get_version(),
     cmdclass=versioneer.get_cmdclass(),
     description="Python based collection of data analysis and visualization tools written IMAS framework",

@@ -2,10 +2,13 @@
 # -*- coding: utf-8 -*-
 import argparse
 import logging
+
 from rich.console import Console
 from rich.syntax import Syntax
 
-logger = logging.getLogger("module")
+from idstools.utils.idslogger import setupLogger
+
+logger = setupLogger("module", stdout_level=logging.INFO)
 
 # Management of input arguments
 parser = argparse.ArgumentParser(

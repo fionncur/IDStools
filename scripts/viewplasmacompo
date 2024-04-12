@@ -26,7 +26,7 @@ from idstools.utils.idslogger import setupLogger
 from idstools.utils.clihelper import imasParser, getBackendID
 
 parser = argparse.ArgumentParser(
-    description="---- Display the plasma composition from the core_profiles IDS",
+    description="---- Display the plasma composition from the core_profiles IDS [previously known as ids_compo]",
     parents=[imasParser],
 )
 parser.add_argument("-s", "--shot", help="Shot number", required=True, type=int)

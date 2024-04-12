@@ -30,7 +30,7 @@ slicingMethods = {
 }
 # Management of input arguments
 parser = argparse.ArgumentParser(
-    description="Check match between transport fluxes and a simple calculation",
+    description="Check match between transport fluxes and a simple calculation [previously known as check_transport]",
     epilog="""
 """,
     formatter_class=argparse.RawTextHelpFormatter,

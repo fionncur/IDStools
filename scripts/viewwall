@@ -3,8 +3,7 @@
 
 """
 Plot wall dimension using description
-https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/CI/imas-3.37.2/wall.html
-
+`refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`_.
 Example:
 
 $ python scripts/viewwall -u public --database ITER_MD -s 116000 -r 2
