@@ -9,11 +9,11 @@ Syntax eqdsk2ids
 
     .. code-block:: bash     
 
-        $ eqdsk2ids -h 
-        usage: eqdsk2ids [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] -s SHOT -r RUN -g GPATH [--log {DEBUG,INFO,WARNING,ERROR,CRITICAL}] [--ipsign {-1,0,1}]
-                 [--b0sign {-1,0,1}] [--cocos_in {1,2,3,4,5,6,7,8,11,12,13,14,15,16,17,18}]
+        $ qdsk2ids -h
+        usage: eqdsk2ids [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] [-uri URI] [-s PULSE] [-r RUN] -g GPATH
+                        [--log {DEBUG,INFO,WARNING,ERROR,CRITICAL}] [--ipsign {-1,0,1}] [--b0sign {-1,0,1}] [--cocos_in {1,2,3,4,5,6,7,8,11,12,13,14,15,16,17,18}]
 
-         optional arguments:
+        optional arguments:
         -h, --help            show this help message and exit
         -u USER, --user_or_path USER
                                 user (default=sawantp1)
@@ -23,7 +23,9 @@ Syntax eqdsk2ids
                                 backend format (default=MDSPLUS)
         --version VERSION, -v VERSION
                                 data version (default=3)
-        -s SHOT, --shot SHOT  Shot number
+        -uri URI, --uri URI   uri (default=None)
+        -s PULSE, --shot PULSE, --pulse PULSE
+                                Pulse number
         -r RUN, --run RUN     Run number
         -g GPATH, --gfile GPATH
                                 path to GEQDSK file
@@ -36,12 +38,14 @@ Syntax eqdsk2ids
 
 
 
+
 Example eqdsk2ids
 ~~~~~~~~~~~~~~~~
 
     .. code-block:: bash
 
-        $ eqdsk2ids -s 134174 -r 117 -g /home/ITER/sawantp1/git/idstools/tests/geqdsk/example.gfile -u sawantp1 -d ITER --log INFO
+        $ eqdsk2ids -s 134174 -r 117 -g geqdsk/example.gfile -u sawantp1 -d ITER --log INFO
+        $ eqdsk2ids --uri "imas:mdsplus?user=username;shot=134174;run=117;database=ITER;version=3" -g geqdsk/example.gfile --log INFO
         24/03/20 17:19:44 INFO: loading GEQDSK file ...
         24/03/20 17:19:44 INFO: GEQDSK COCOS:
         { 'COCOS': 1,
@@ -78,7 +82,7 @@ Example eqdsk2ids
         'sign_q_pos': 1,
         'theta_sign_clockwise': 1}
         24/03/20 17:19:44 INFO: creating output datafile ...
-        24/03/20 17:19:44 INFO: IDS/equilibrium populated in shot/run = 134174/117.
+        24/03/20 17:19:44 INFO: IDS/equilibrium populated in pulse/run = sdcc-login01.iter.org:/home/ITER/sawantp1/public/imasdb/ITER/3 (pulse 134174,117 ).
 
 
     .. code-block:: bash

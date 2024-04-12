@@ -1,13 +1,12 @@
+import copy
 import logging
 import os
 import re
 import typing
 
-import imas
 import yaml
 
-from idstools.database import Connection
-from idstools.utils.clihelper import getBackendID
+from idstools.database import DBMaster
 
 logger = logging.getLogger(f"module.{__name__}")
 
@@ -15,10 +14,11 @@ logger = logging.getLogger(f"module.{__name__}")
 class MachineDescription:
     mdSummaryPath = r"/work/imas/shared/imasdb/ITER_MD/3/md_summary.yaml"
 
-    def __init__(
-        self, mdSummaryPath: str = "", connection: typing.Optional[Connection] = None
-    ) -> None:
-        self.connection = connection
+    def __init__(self, connectionArgs, mdSummaryPath: str = "") -> None:
+        self.mdArgs = connectionArgs
+        if "database" in self.mdArgs.__dict__ and self.mdArgs.database == "ITER":
+            self.mdArgs.database = "ITER_MD"
+
         self.mdSummaryYaml = {}
         if not mdSummaryPath:
             _mdSummaryPath = MachineDescription.mdSummaryPath
@@ -34,48 +34,53 @@ class MachineDescription:
             except yaml.YAMLError as exc:
                 print(exc)
 
-    def getMDDataByPulseList(self, pulseList):
+    def getLatestIdsData(self, idsName: str):
+        mdIdsDict = self.getMDSummary(idsName)
+        idsData = None
+        config = None
+        # Get wall of the tokamak
+        for pulse, _config in mdIdsDict.items():
+            if idsName == _config["config"]["ids"]:
+                self.mdArgs.pulse, self.mdArgs.run = pulse.split("/")
+                self.mdArgs.pulse, self.mdArgs.run = int(self.mdArgs.pulse), int(
+                    self.mdArgs.run
+                )
+                self.mdArgs.uri = f"imas:mdsplus?user=public;shot={self.mdArgs.pulse};run={self.mdArgs.run};database={self.mdArgs.database};version={self.mdArgs.version}"
+                mdConnection = DBMaster.getConnection(self.mdArgs)
+
+                # print(mdConnection)
+                if mdConnection is not None:
+                    idsData = mdConnection.get(idsName)
+                    mdConnection.close()
+                    if idsData is None:
+                        continue
+                    else:
+                        config = _config["config"]
+                        break
+        return {
+            "idsData": idsData,
+            "yamlConfig": config,
+            "connectionArgs": copy.deepcopy(self.mdArgs),
+        }
+
+    def getMDDataByIdsList(self, mdIdsList=[]):
         """
         The `getMachineDatabaseData` method is responsible for retrieving machine database data for the specified pulse list. It iterates over each pulse in the `mdSummaryYaml` dictionary and checks if the pulse is present in the `pulseList`. If the pulse is not in the `pulseList`, it skips to the next pulse.
         """
-        pulsesData: typing.Dict[str, typing.Dict] = {}
-        for pulse, config in self.mdSummaryYaml.items():
-            self.connection.shot, self.connection.run = pulse.split("/")
-            if pulse not in pulseList:
-                continue
-
-            pulsesData[pulse] = {}
-
-            pulsesData[pulse]["data"] = self._getIdsData(config["ids"])
-            pulsesData[pulse]["config"] = config
-        return pulsesData
-
-    def _getIdsData(self, idsname):
-        """
-        The `getIdsData` method is responsible for retrieving data from the specified IDS name using the provided connection information. It creates an instance of `imas.DBEntry` with the backend ID, database name, shot number, run number, user, and version provided in the `Connection` object. It then opens the connection to the IDS database using the `open()` method. If the connection is successful, it retrieves the data for the specified IDS name using the `get()` method of the `conn` object. If the connection fails, it logs an error message and returns `None` as the data.
-        """
-        conn = imas.DBEntry(
-            getBackendID(self.connection.backend),
-            self.connection.database,
-            int(self.connection.shot),
-            int(self.connection.run),
-            self.connection.user,
-            self.connection.version,
-        )
-        err, n = conn.open()
-        if err != 0:
-            logger.error(
-                "Shot {0}, run {1} for user={2} and database={3} does not exists".format(
-                    self.connection.shot,
-                    self.connection.run,
-                    self.connection.user,
-                    self.connection.database,
-                )
+        idsData = {}
+        for idsName in mdIdsList:
+            outputDict = self.getLatestIdsData(idsName)
+            idsData[idsName] = {}
+            (
+                idsData[idsName]["idsData"],
+                idsData[idsName]["yamlConfig"],
+                idsData[idsName]["connectionArgs"],
+            ) = (
+                outputDict["idsData"],
+                outputDict["yamlConfig"],
+                outputDict["connectionArgs"],
             )
-            data = None
-        else:
-            data = conn.get(idsname)
-        return data
+        return idsData
 
     def getMDSummary(
         self,
@@ -104,11 +109,17 @@ class MachineDescription:
             pulsesData[pulse] = {}
             pulsesData[pulse]["data"] = None
             if checkValidity:
-                pulsesData[pulse]["data"] = None
-                if self.connection is not None:
-                    self.connection.shot, self.connection.run = pulse.split("/")
-
-                    pulsesData[pulse]["data"] = self._getIdsData(config["ids"])
+                self.mdArgs.pulse, self.mdArgs.run = pulse.split("/")
+                self.mdArgs.pulse, self.mdArgs.run = int(self.mdArgs.pulse), int(
+                    self.mdArgs.run
+                )
+                self.mdArgs.uri = f"imas:mdsplus?user=public;shot={self.mdArgs.pulse};run={self.mdArgs.run};database={self.mdArgs.database};version={self.mdArgs.version}"
+                mdConnection = DBMaster.getConnection(self.mdArgs)
+                if mdConnection is not None:
+                    idsData = mdConnection.get(config["ids"])
+                    if idsData is not None:
+                        pulsesData[pulse]["data"]
+                    mdConnection.close()
 
             pulsesData[pulse]["config"] = config
         return pulsesData
@@ -116,7 +127,7 @@ class MachineDescription:
     def getPandasDataFrame(self):
         """
         The function `getPandasDataFrame` converts a dictionary into a pandas DataFrame.
-        
+
         Returns:
           a pandas DataFrame object.
         """

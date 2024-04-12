@@ -1,5 +1,5 @@
 viewwall
-===============
+========
 
 *viewwall* script shows wall outline plot using limiter and vessel properties found in 2D description of Wall IDS. Here
 Vessel is mechanical structure of the vacuum vessel. The script uses annular represenation. You can specify wall using wall 
@@ -7,7 +7,7 @@ command or you can specify database entry to retrive wall details. more informat
 https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/CI/imas-3.37.2/wall.html
 
 Syntax viewwall
-~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~
 .. code-block:: bash
 
     $ viewwall -h
@@ -36,6 +36,7 @@ Example viewwall
     .. code-block:: bash
 
         $ viewwall database -u schneim --database jet -s 92436 -r 271
+        $ viewwall database --uri "imas:mdsplus?user=schneim;shot=92436;run=271;database=jet;version=3"
 
     .. image:: _static/images/wallview_jet.png
         :alt: image not found

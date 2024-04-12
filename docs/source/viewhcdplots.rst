@@ -29,7 +29,7 @@ Example viewhcdplots
 
     .. code-block:: bash
 
-        $ hcd_plot -ech 104104/2/schneim/MDSPLUS/TORBEAM_XMODE/3 -nbi 130012/15/schneim/MDSPLUS/SPOT/3 -fus 130012/15/schneim/MDSPLUS/SPOT/3 -icrh 130012/15/schneim/MDSPLUS/SPOT/3
+        $ viewhcdplots -ech 104104/2/schneim/MDSPLUS/TORBEAM_XMODE/3 -nbi 130012/15/schneim/MDSPLUS/SPOT/3 -fus 130012/15/schneim/MDSPLUS/SPOT/3 -icrh 130012/15/schneim/MDSPLUS/SPOT/3
 
 
 

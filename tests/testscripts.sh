@@ -146,7 +146,7 @@ idsdiff 130011 6 130012 4 summary || exit 1
 echo -------viewmachinedescription-------
 viewmachinedescription list pf_active --checkValidity || exit 1
 viewmachinedescription list pf_active --obsolete || exit 1
-viewmachinedescription plot --save || exit 1
+viewmachinedescription plot wall --save || exit 1
 
 echo -------md_status-------
 md_status -s 116000 -r 3 || exit 1
@@ -182,16 +182,31 @@ viewhcddistributions -s 130012 -r 115 -u public -d TEST --save || exit 1
 echo -------viewcore_sources-------
 viewcoresources -s 130012 -r 105 -d TEST
 # viewequilibrium -s 134174 -r 117 --rho --pfcoils
-# viewkineticprofiles --uri "imas:mdsplus?user=public;shot=134174;run=117;database=ITER;version=3"
-# viewpressure --uri "imas:mdsplus?user=public;shot=134174;run=117;database=ITER;version=3"
-# viewneutron --uri "imas:mdsplus?user=public;shot=121014;run=11;database=ITER;version=3"
-#viewplasmacompo --uri "imas:mdsplus?user=public;shot=134174;run=117;database=ITER;version=3"
-# viewrotation --uri "imas:mdsplus?user=public;shot=134174;run=117;database=ITER;version=3"
-# viewsources --uri "imas:mdsplus?user=public;shot=134174;run=117;database=ITER;version=3"
-# viewscenario --uri "imas:mdsplus?user=public;shot=134174;run=117;database=ITER;version=3"
-# viewspectrometry --uri "imas:mdsplus?user=public;shot=134000;run=37;database=TEST;version=3"
-# viewfluxes --uri "imas:mdsplus?user=public;shot=134174;run=117;database=ITER;version=3"
-# viewequilibrium --uri "imas:mdsplus?user=public;shot=134174;run=117;database=ITER;version=3"
-# viewcoretransport --uri "imas:mdsplus?user=public;shot=92436;run=850;database=TEST;version=3"
+
 # viewcoresources --uri "imas:mdsplus?user=public;shot=130012;run=105;database=TEST;version=3"
+# viewcoretransport --uri "imas:mdsplus?user=public;shot=92436;run=850;database=TEST;version=3"
+# vieweccomposition --uri "imas:mdsplus?user=public;shot=134173;run=2326;database=TEST;version=3"
+# viewecray --uri "imas:mdsplus?user=public;shot=134173;run=2326;database=TEST;version=3"
+# viewedgeprofiles --uri "imas:mdsplus?user=public;shot=134174;run=117;database=ITER;version=3" --separatix --wall --time 60
+# viewequilibrium --uri "imas:mdsplus?user=public;shot=134174;run=117;database=ITER;version=3"
+# viewfluxes --uri "imas:mdsplus?user=public;shot=134174;run=117;database=ITER;version=3"
+# viewhcddistributions --uri "imas:mdsplus?user=public;shot=130012;run=115;database=TEST;version=3".
+# viewhcdplots -ech 134173/101/public/MDSPLUS/TEST/3 -nbi 130012/115/public/MDSPLUS/TEST/3 -fus 130012/115/public/MDSPLUS/TEST/3 -icrh 130012/15/public/MDSPLUS/TEST/3
+# viewhcdwaves --uri "imas:mdsplus?user=public;shot=134173;run=101;database=TEST;version=3"
+# viewkineticprofiles --uri "imas:mdsplus?user=public;shot=134174;run=117;database=ITER;version=3"
+# viewmachinedescription plot wall pf_active
+# viewneutron --uri "imas:mdsplus?user=public;shot=121014;run=11;database=ITER;version=3"
+# viewplasmacompo --uri "imas:mdsplus?user=public;shot=134174;run=117;database=ITER;version=3"
+# viewpressure --uri "imas:mdsplus?user=public;shot=134174;run=117;database=ITER;version=3"
+# viewrotation --uri "imas:mdsplus?user=public;shot=134174;run=117;database=ITER;version=3"
+# viewscenario --uri "imas:mdsplus?user=public;shot=134174;run=117;database=ITER;version=3"
+# viewsources --uri "imas:mdsplus?user=public;shot=134174;run=117;database=ITER;version=3"
+# viewspectrometry --uri "imas:mdsplus?user=public;shot=134000;run=37;database=TEST;version=3"
+# viewall database --uri "imas:mdsplus?user=schneim;shot=92436;run=271;database=jet;version=3"
+
+# eqdsk2ids -s 134174 -r 117 -g /home/ITER/sawantp1/git/idstools/tests/geqdsk/example.gfile -u sawantp1 -d ITER --log INFO
+# eqdsk2ids --uri "imas:mdsplus?user=public;shot=134174;run=117;database=ITER;version=3" -g /home/ITER/sawantp1/git/idstools/tests/geqdsk/example.gfile -u sawantp1 -d ITER --log INFO
+# eqdsk2ids --uri "imas:mdsplus?user=sawantp1;shot=134174;run=117;database=ITER;version=3" -g /home/ITER/sawantp1/git/idstools/asset/geqdsk/example.gfile -u sawantp1 -d ITER --log INFO
+# idschk --uri "imas:mdsplus?user=public;shot=134174;run=117;database=ITER;version=3" -f /home/ITER/sawantp1/git/idstools/database_tools/validation_schemas/generic/core_profiles.yml
+
 # idsprint --uri "imas:mdsplus?user=public;shot=131024;run=41;database=ITER;version=3" summary

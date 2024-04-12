@@ -4,18 +4,16 @@
 # Edgeplot is added in develop2.0 developed by Anna https://confluence.iter.org/display/IMP/How+to+plot+data+from+edge_profiles
 import argparse
 import copy
-from idstools.database import DBMaster
 
-import imas
 from imas import imasdef
 
 from idstools.compute.common import getNearestTime
 from idstools.compute.wall import WallCompute
+from idstools.database import DBMaster
 from idstools.machinedescription import MachineDescription
 from idstools.utils.clihelper import (
-    getBackendID,
-    getDatabasePath,
     dbentryParser,
+    getDatabasePath,
     getFileName,
     getTitle,
 )
@@ -35,6 +33,11 @@ parser.add_argument(
     action="store_true",
 )
 parser.add_argument(
+    "--wall",
+    help="Show wall",
+    action="store_true",
+)
+parser.add_argument(
     "--save",
     help="Save figure at default location",
     action="store_true",
@@ -49,32 +52,21 @@ if connection is None:
     logger.critical("----> Aborted.")
     exit(0)
 
+if args.wall:
+    machineDescription = MachineDescription(copy.deepcopy(args))
+    wallMDDict = machineDescription.getLatestIdsData("wall")
+    wallIds = wallMDDict["idsData"]
 
-machineDescription = MachineDescription()
-wallMDDict = machineDescription.getMDSummary("wall")
-
-wallIds = None
-mdargs = copy.deepcopy(args)
-# Get wall of the tokamak
-for pulse, config in wallMDDict.items():
-    mdargs.pulse, mdargs.run = pulse.split("/")
-    mdargs.pulse, mdargs.run = int(mdargs.pulse), int(mdargs.run)
-    mdargs.database = "ITER_MD"
-    mdargs.uri = f"imas:mdsplus?user=public;shot={mdargs.pulse};run={mdargs.run};database={mdargs.database};version={mdargs.version}"
-    mdConnection = DBMaster.getConnection(mdargs)
-    # print(mdConnection)
-    if mdConnection is not None:
-        wallIds = mdConnection.get("wall")
-        mdConnection.close()
-        if wallIds is None:
-            continue
-        else:
-            break
-
-
-if wallIds is None:
-    logger.error("wall ids is not present")
-    exit(1)
+    if wallIds is None:
+        logger.error("wall ids is not present")
+    else:
+        wallCompute = WallCompute(wallIds)
+        wallDict = wallCompute.getWall()
+        r = None
+        z = None
+        h = None
+        if wallDict is not None:
+            r, z, h = wallDict["r"], wallDict["z"], wallDict["h"]
 
 timeArray = None
 try:
@@ -93,61 +85,56 @@ edgeProfileIds = connection.get_slice(
 )
 
 if len(edgeProfileIds.grid_ggd) == 0:
-    print(
+    logger.error(
         f"No values in grid_ggd  at time {timeValue}, Can not plot! Choose different time with option --time, timerange [{timeArray.min()}-{timeArray.max()}]"
     )
     exit(0)
 
 if len(edgeProfileIds.grid_ggd[0].space) == 0:
-    print(
+    logger.error(
         f"No values in grid_ggd[0].space at time {timeValue}, Can not plot! Choose different time with option --time, timerange [{timeArray.min()}-{timeArray.max()}]"
     )
     exit(0)
 
 
-wallCompute = WallCompute(wallIds)
-wallDict = wallCompute.getWall()
-r = None
-z = None
-h = None
-if wallDict is not None:
-    r, z, h = wallDict["r"], wallDict["z"], wallDict["h"]
-
 edgeProfilesView = EdgeProfilesView(edgeProfileIds)
-title = "Edge Profiles displayed for t = " + "%.1f" % timeValue + " s"
-canvas = Canvas(4, 3)
-canvas.fig.suptitle(title, size=12)
+canvas = Canvas(2, 4)
 
-ax1 = canvas.add_axes(title="", xlabel="", row=0, col=0, rowspan=3)
-ax2 = canvas.add_axes(title="", xlabel="", row=0, col=1, rowspan=3)
-ax3 = canvas.add_axes(title="", xlabel="", row=0, col=2, rowspan=3)
-ax4 = canvas.add_axes(title="", xlabel="", row=3, col=0, colspan=2)
+
+ax4 = canvas.add_axes(title="", xlabel="", row=0, col=0)
+ax1 = canvas.add_axes(title="", xlabel="", row=0, col=1, rowspan=2)
+ax2 = canvas.add_axes(title="", xlabel="", row=0, col=2, rowspan=2)
+ax3 = canvas.add_axes(title="", xlabel="", row=0, col=3, rowspan=2)
+
 c1 = edgeProfilesView.viewElectronsDensity(
     ax1, timeSlice=0, showSeparatix=args.separatix
 )
 if c1 is not None:
     canvas.fig.colorbar(c1, ax=ax1)
-    if r is not None and z is not None:
-        ax1.plot(r, z, "silver")
+    if args.wall:
+        if r is not None and z is not None:
+            ax1.plot(r, z, "silver")
 
 c2 = edgeProfilesView.viewIonDensity(ax2, timeSlice=0, showSeparatix=args.separatix)
 if c2 is not None:
     canvas.fig.colorbar(c2, ax=ax2)
-    if r is not None and z is not None:
-        ax2.plot(r, z, "silver")
+    if args.wall:
+        if r is not None and z is not None:
+            ax2.plot(r, z, "silver")
 
 c3 = edgeProfilesView.viewNeutralDensity(ax3, timeSlice=0, showSeparatix=args.separatix)
 if c3 is not None:
     canvas.fig.colorbar(c3, ax=ax3)
-    if r is not None and z is not None:
-        ax3.plot(r, z, "silver")
+    if args.wall:
+        if r is not None and z is not None:
+            ax3.plot(r, z, "silver")
 
 edgeProfilesView.viewEquatorialPlaneAndDiverterDensity(ax4, timeSlice=0)
 
 canvas.setText(text=f"{getDatabasePath(args, timeValue=timeValue)}")
 
 canvas.fig.subplots_adjust(
-    top=0.916, bottom=0.09, left=0.044, right=0.953, hspace=0.287, wspace=0.2
+    top=0.93, bottom=0.067, left=0.026, right=0.953, hspace=0.287, wspace=0.12
 )
 
 canvas.fig.suptitle(getTitle(args, "Edge Profiles", timeValue), size=12)

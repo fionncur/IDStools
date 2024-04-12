@@ -126,8 +126,7 @@ class WavesView:
                 length = lengthData[i][j]
                 powerparallel = powerparallelData[i][j]
                 powerperpendicular = powerperpendicularData[i][j]
-                print(powerparallel)
-                print(powerperpendicular)
+
                 ax.plot(
                     length[:dlength],
                     powerparallel[:dlength],

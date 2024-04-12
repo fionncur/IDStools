@@ -4,14 +4,17 @@ import os
 import argparse
 import textwrap
 import traceback
+from idstools.database import DBMaster
 
-import imas
-from idstools.utils.clihelper import getBackendID,  imasParser
 from idstools.set_logger import set_logger
 from database_tools.eqdsk2ids import geqdsk2ids
-
+from idstools.utils.clihelper import (
+    dbentryParser,
+    getDatabasePath,
+)
 
 # ----------------------------------------------------------------------
+
 
 def main():
     """
@@ -23,32 +26,26 @@ def main():
 
     # Create the output datafile
     logger.info("creating output datafile ...")
-    db = imas.DBEntry(
-        getBackendID(args.backend), args.database, args.shot, args.run, args.user
-    )
-    status, _ = db.create()
-    if status != 0:
-        raise OSError(
-            f"can not open backend={args.backend}, user_or_path={args.user}, database={args.database}, shot={args.shot}, run={args.run}"
-        )
+    db = DBMaster.createConnection(args)
+    if db is None:
+        logger.critical("----> Aborted.")
+        exit(1)
+
     db.put(eq)
     db.close()
-    logger.info(
-        f"IDS/equilibrium populated in shot/run = {args.shot}/{args.run}."
-    )
+    logger.info(f"IDS/equilibrium populated in  {getDatabasePath(args)}.")
 
 
 # ----------------------------------------------------------------------
 
 
 if __name__ == "__main__":
-
     # Parse for command line options
     prog = os.path.basename(__file__)
     parser = argparse.ArgumentParser(
         prog=prog,
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        parents=[imasParser],
+        parents=[dbentryParser],
         description=textwrap.dedent(
             f"""\
             (I) Command Line Interface for EQDSK Convertor (eqdsk2ids)
@@ -88,12 +85,6 @@ if __name__ == "__main__":
         ),
     )
     parser.add_argument(
-        "-s", "--shot", dest="shot", help="Shot number", required=True, type=int
-    )
-    parser.add_argument(
-        "-r", "--run", dest="run", help="Run number", required=True, type=int
-    )
-    parser.add_argument(
         "-g",
         "--gfile",
         dest="gpath",
@@ -105,7 +96,7 @@ if __name__ == "__main__":
         "--log",
         dest="log",
         default="WARNING",
-        choices=["DEBUG","INFO","WARNING", "ERROR","CRITICAL"],
+        choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
         help="Configure the logging level, default=%(default)s",
     )
     parser.add_argument(

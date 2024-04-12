@@ -2,12 +2,18 @@
 import argparse
 import logging
 import sys
+from idstools.database import DBMaster
 
 import imas
 
 from idstools.compute.common import getNearestTime
 from idstools.compute.waves import WavesCompute
-from idstools.utils.clihelper import getBackendID
+from idstools.utils.clihelper import (
+    getBackendID,
+    getDatabasePath,
+    getFileName,
+    getTitle,
+)
 from idstools.utils.idslogger import setupLogger
 from idstools.view.common import Canvas
 from idstools.view.distributions import DistributionsView
@@ -17,7 +23,7 @@ logger = setupLogger("module", stdout_level=logging.INFO)
 
 
 def showWavesPlots(args, hold=False):
-    shot = args["shot"]
+    pulse = args["pulse"]
     run = args["run"]
 
     # To handle multiple datafiles (for scans)
@@ -29,21 +35,21 @@ def showWavesPlots(args, hold=False):
 
     for irun in range(runmin, runmax + 1):
         logger.info(
-            f"Open pulse: {shot}/{irun} in DB {args['user']}/{args['database']}/{args['version']}"
+            f"Open pulse: {pulse}/{irun} in DB {args['user']}/{args['database']}/{args['version']}"
         )
-        conn = imas.DBEntry(
-            getBackendID(args["backend"]),
-            args["database"],
-            int(shot),
-            irun,
-            args["user"],
-        )
-        status, _ = conn.open()
-        if status != 0:
-            logger.critical(
-                f"Pulse {shot}/{irun} in DB {args['user']}/{args['database']}/{args['version']} does not exist"
-            )
-            sys.exit(status)
+        connargs = argparse.Namespace()
+        connargs.backend = args["backend"]
+        connargs.pulse = int(pulse)
+        connargs.run = int(irun)
+        connargs.user = args["user"]
+        connargs.database = args["database"]
+        connargs.version = args["version"]
+        connargs.uri = f"imas:{args['backend'].lower()}?user={connargs.user };shot={connargs.pulse};run={connargs.run};database={connargs.database};version={connargs.version}"
+
+        conn = DBMaster.getConnection(connargs)
+        if conn is None:
+            logger.critical("----> Aborted.")
+            exit(1)
 
         idsWaves = conn.get("waves")
         conn.close()
@@ -53,8 +59,6 @@ def showWavesPlots(args, hold=False):
         timeArray = idsWaves.time
         ntime = len(timeArray)
         timeIndex, timeValue = getNearestTime(idsWaves.time, args["time"])
-        time = timeValue
-        nwaves = len(idsWaves.coherent_wave)
 
         radialGrid = wavesCompute.getRadialGridInfo(timeIndex, args["force_psi"])
         if radialGrid is None:
@@ -63,7 +67,6 @@ def showWavesPlots(args, hold=False):
         activeLaunchers = {
             key: value for key, value in radialGrid.items() if value["isActive"] is True
         }
-        _, firstRadialGridInfo = next(iter(activeLaunchers.items()))
         lenActiveLaunchers = len(activeLaunchers)
         if lenActiveLaunchers == 0:
             logger.critical("The waves IDS appears empty ----> Abort.")
@@ -78,7 +81,7 @@ def showWavesPlots(args, hold=False):
         canvas = Canvas(rows, 2)
         # canvas.setStyle(style="retro")
         canvas.setSupTitle(
-            f"HCD Waves Plot [Shot {args['shot']} / Run {args['run']}] Time : {timeValue:.1f}"
+            f"HCD Waves Plot [pulse {args['pulse']} / Run {args['run']}] Time : {timeValue:.1f}"
         )
 
         ax1 = canvas.add_axes(title="", xlabel="", row=0, col=0)
@@ -108,31 +111,27 @@ def showWavesPlots(args, hold=False):
             else:
                 ax4.get_legend().remove()
 
+        canvas.setText(text=f"{getDatabasePath(connargs, timeValue=timeValue)}")
+
+        canvas.fig.subplots_adjust(
+            top=0.92,
+            bottom=0.122,
+            left=0.05,
+            right=0.896,
+            hspace=0.2,
+            wspace=0.13,
+        )
+        canvas.get_current_fig_manager().set_window_title(sys.argv[0])
+        canvas.fig.suptitle(getTitle(connargs, "HCD Waves Plot", timeValue), size=12)
         if args["save"]:
-            fname = f"ECRH_profile_time_{shot}_{irun}_" + "%.1f" % timeValue + ".png"
+            fname = getFileName(connargs, "ECRH_profile_time", timeValue)
             canvas.save(fname, width=5, height=4, dpi=300)
         else:
-            wm = canvas.get_current_fig_manager()
-            window = wm.window
-            screen_y = window.winfo_screenheight()
-            screen_x = window.winfo_screenwidth()
-            wm.resize(screen_x, screen_y)
-            rightAdjustParam = 0.898
-            if args["hide_legend"]:
-                rightAdjustParam = 0.955
-            canvas.fig.subplots_adjust(
-                top=0.92,
-                bottom=0.122,
-                left=0.037,
-                right=rightAdjustParam,
-                hspace=0.2,
-                wspace=0.13,
-            )
             canvas.show(block=hold)
 
 
 def showDistributionPlots(args, hold=False):
-    shot = args["shot"]
+    pulse = args["pulse"]
     run = args["run"]
 
     # To handle multiple datafiles (for scans)
@@ -144,21 +143,21 @@ def showDistributionPlots(args, hold=False):
 
     for irun in range(runmin, runmax + 1):
         logger.info(
-            f"Open pulse: {shot}/{irun} in DB {args['user']}/{args['database']}/{args['version']}"
+            f"Open pulse: {pulse}/{irun} in DB {args['user']}/{args['database']}/{args['version']}"
         )
-        conn = imas.DBEntry(
-            getBackendID(args["backend"]),
-            args["database"],
-            int(shot),
-            irun,
-            args["user"],
-        )
-        status, _ = conn.open()
-        if status != 0:
-            logger.critical(
-                f"Pulse {shot}/{irun} in DB {args['user']}/{args['database']}/{args['version']} does not exist"
-            )
-            sys.exit(status)
+        connargs = argparse.Namespace()
+        connargs.backend = args["backend"]
+        connargs.pulse = int(pulse)
+        connargs.run = int(irun)
+        connargs.user = args["user"]
+        connargs.database = args["database"]
+        connargs.version = args["version"]
+        connargs.uri = f"imas:{args['backend'].lower()}?user={connargs.user };shot={connargs.pulse};run={connargs.run};database={connargs.database};version={connargs.version}"
+
+        conn = DBMaster.getConnection(connargs)
+        if conn is None:
+            logger.critical("----> Aborted.")
+            exit(1)
 
         idsDistributions = conn.get("distributions")
         conn.close()
@@ -166,13 +165,11 @@ def showDistributionPlots(args, hold=False):
         timeArray = idsDistributions.time
         ntime = len(timeArray)
         timeIndex, timeValue = getNearestTime(idsDistributions.time, args["time"])
-        time = timeValue
-        ndistributions = len(idsDistributions.distribution)
 
         canvas = Canvas(3, 2)
         # canvas.setStyle(style="retro")
         canvas.setSupTitle(
-            f"HCD Distributions Plot [Shot {args['shot']} / Run {args['run']}] Time : {timeValue:.1f}"
+            f"HCD Distributions Plot [pulse {args['pulse']} / Run {args['run']}] Time : {timeValue:.1f}"
         )
         if ntime == 1:
             logger.info("Only one time slice --> Power and CD waveforms not displayed")
@@ -189,27 +186,24 @@ def showDistributionPlots(args, hold=False):
             distributionsView.plotNBIFusPowerAndCDWaveforms(ax4, timeIndex)
             distributionsView.plotCDWaveform(ax5, timeIndex)
 
+        canvas.setText(text=f"{getDatabasePath(connargs, timeValue=timeValue)}")
+
+        canvas.fig.subplots_adjust(
+            top=0.92,
+            bottom=0.122,
+            left=0.044,
+            right=0.886,
+            hspace=0.438,
+            wspace=0.328,
+        )
+        canvas.get_current_fig_manager().set_window_title(sys.argv[0])
+        canvas.fig.suptitle(
+            getTitle(connargs, "HCD Distributions Plot", timeValue), size=12
+        )
         if args["save"]:
-            fname = (
-                f"Distributions_profile_time_{shot}_{irun}_"
-                + "%.1f" % timeValue
-                + ".png"
-            )
-            canvas.save(fname, width=5, height=4, dpi=300)
+            fname = getFileName(connargs, "Distributions_profile_time", timeValue)
+            canvas.save(fname)
         else:
-            wm = canvas.get_current_fig_manager()
-            window = wm.window
-            screen_y = window.winfo_screenheight()
-            screen_x = window.winfo_screenwidth()
-            wm.resize(screen_x, screen_y)
-            canvas.fig.subplots_adjust(
-                top=0.92,
-                bottom=0.122,
-                left=0.044,
-                right=0.886,
-                hspace=0.438,
-                wspace=0.328,
-            )
             canvas.show(block=hold)
 
 
@@ -224,36 +218,40 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "-ech",
-        help="shot/run/user/backend/database/[time] for ECH results (waves)",
+        help="pulse/run/user/backend/database/[time] for ECH results (waves)",
         required=False,
         type=str,
     )
     parser.add_argument(
         "-icrh",
-        help="shot/run/user/backend/database/version/[time] for ICRH results (distributions)",
+        help="pulse/run/user/backend/database/version/[time] for ICRH results (distributions)",
         required=False,
         type=str,
     )
     parser.add_argument(
         "-nbi",
-        help="shot/run/user/backend/database/version/[time] for NBI results (distributions)",
+        help="pulse/run/user/backend/database/version/[time] for NBI results (distributions)",
         required=False,
         type=str,
     )
     parser.add_argument(
         "-fus",
-        help="shot/run/user/backend/database/version/[time] for fusion products (distributionss)",
+        help="pulse/run/user/backend/database/version/[time] for fusion products (distributionss)",
         required=False,
         type=str,
     )
-
+    parser.add_argument(
+        "--save",
+        help="Save figure at default location",
+        action="store_true",
+    )
     args = vars(parser.parse_args())
 
     hcd_sources = {
         "ech": {
             "input": "",
-            "shot": 0,
-            "run": 0,
+            "pulse": 0,
+            "run": "",
             "backend": "MDSPLUS",
             "user": "public",
             "database": "ITER",
@@ -261,8 +259,8 @@ if __name__ == "__main__":
         },
         "icrh": {
             "input": "",
-            "shot": 0,
-            "run": 0,
+            "pulse": 0,
+            "run": "",
             "backend": "MDSPLUS",
             "user": "public",
             "database": "ITER",
@@ -270,8 +268,8 @@ if __name__ == "__main__":
         },
         "nbi": {
             "input": "",
-            "shot": 0,
-            "run": 0,
+            "pulse": 0,
+            "run": "",
             "backend": "MDSPLUS",
             "user": "public",
             "database": "ITER",
@@ -279,8 +277,8 @@ if __name__ == "__main__":
         },
         "fus": {
             "input": "",
-            "shot": 0,
-            "run": 0,
+            "pulse": 0,
+            "run": "",
             "backend": "MDSPLUS",
             "user": "public",
             "database": "ITER",
@@ -293,7 +291,7 @@ if __name__ == "__main__":
             hcd_sources[source]["input"] = args[source]
             if len(hcd_sources[source]["input"].split("/")) == 6:
                 (
-                    hcd_sources[source]["shot"],
+                    hcd_sources[source]["pulse"],
                     hcd_sources[source]["run"],
                     hcd_sources[source]["user"],
                     hcd_sources[source]["backend"],
@@ -303,7 +301,7 @@ if __name__ == "__main__":
                 hcd_sources[source]["time"] = -99.0
             elif len(hcd_sources[source]["input"].split("/")) == 7:
                 (
-                    hcd_sources[source]["shot"],
+                    hcd_sources[source]["pulse"],
                     hcd_sources[source]["run"],
                     hcd_sources[source]["user"],
                     hcd_sources[source]["backend"],
@@ -319,14 +317,14 @@ if __name__ == "__main__":
                     "Bad input format: " + hcd_sources[source]["input"] + " not valid"
                 )
                 logger.critical(
-                    "Arguments should be formatted like shot/run/user/database"
+                    "Arguments should be formatted like pulse/run/user/database"
                 )
                 logger.critical("--> Exit.")
                 logger.critical(
                     "-------------------------------------------------------------"
                 )
                 exit()
-            hcd_sources[source]["shot"] = int(hcd_sources[source]["shot"])
+            hcd_sources[source]["pulse"] = int(hcd_sources[source]["pulse"])
             del hcd_sources[source]["input"]
 
     nsource = 0
@@ -339,27 +337,27 @@ if __name__ == "__main__":
         logger.warning("--> Exit.")
 
     # ECH
-    if hcd_sources["ech"] != None:
+    if hcd_sources["ech"]["run"]:
         ec_args = hcd_sources["ech"]
         ec_args["force_psi"] = None
         ec_args["hide_legend"] = False
-        ec_args["save"] = False
+        ec_args["save"] = args["save"]
         showWavesPlots(ec_args)
 
     # NUCLEAR REACTIONS
-    if hcd_sources["fus"] != None:
+    if hcd_sources["fus"]["run"]:
         fus_args = hcd_sources["fus"]
-        fus_args["save"] = False
+        fus_args["save"] = args["save"]
         showDistributionPlots(fus_args)
 
     # NBI
-    if hcd_sources["nbi"] != None:
+    if hcd_sources["nbi"]["run"]:
         nbi_args = hcd_sources["nbi"]
-        nbi_args["save"] = False
+        nbi_args["save"] = args["save"]
         showDistributionPlots(nbi_args)
 
     # ICRH
-    if hcd_sources["icrh"] != None:
+    if hcd_sources["icrh"]["run"]:
         icrh_args = hcd_sources["icrh"]
-        icrh_args["save"] = False
+        icrh_args["save"] = args["save"]
         showDistributionPlots(icrh_args, hold=True)

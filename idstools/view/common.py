@@ -120,8 +120,8 @@ class Canvas:
 
     def setText(self, x=0.001, y=0.985, text="", ha="left", fontsize=7):
         plt.figtext(
-            0.001,
-            0.985,
+            x,
+            y,
             text,
             ha=ha,
             fontsize=fontsize,

@@ -2,17 +2,22 @@
 # -*- coding: utf-8 -*-
 
 import argparse
+import logging
 import os
 import sys
+from idstools.utils.idslogger import setupLogger
 
 import imas
 import numpy as np
 
-from idstools.database import readScenario
-from idstools.input_processing import (beam_wall_crossing,
-                                       check_rays_into_divertor,
-                                       read_launching_parameters,
-                                       read_torbeam_output, read_wall)
+from idstools.database import DBMaster, readScenario
+from idstools.input_processing import (
+    beam_wall_crossing,
+    check_rays_into_divertor,
+    read_launching_parameters,
+    read_torbeam_output,
+    read_wall,
+)
 from idstools.utils.clihelper import getBackendID, dbentryParser
 from idstools.view.common import Canvas
 from idstools.view.core_profiles import CoreProfilesView
@@ -21,6 +26,8 @@ from idstools.view.equilibrium import EquilibriumView
 from idstools.view.tbd import TbdView
 from idstools.view.waves import WavesView
 
+logger = setupLogger("module", stdout_level=logging.INFO)
+
 parser = argparse.ArgumentParser(
     description="---- Shows electron cyclotron stray radiation information by showing different plots",
     parents=[dbentryParser],
@@ -28,20 +35,25 @@ parser = argparse.ArgumentParser(
 
 args = parser.parse_args()
 
-connectionIn = imas.DBEntry(
-    getBackendID(args.backend), args.database, args.shot, args.run, args.user
-)
-err, n = connectionIn.open()
-if err != 0:
-    # TODO chek if you can raise exception or just print or may be use logger
-    print(
-        "Shot {0}, run {1} for user={2} and database={3} does not exists".format(
-            args.shot, args.run, args.user, args.database
-        ),
-        file=sys.stderr,
-    )
-    print("----> Aborted.", file=sys.stderr)
-    exit()
+connectionIn = DBMaster.getConnection(args)
+if connectionIn is None:
+    logger.critical("----> Aborted.")
+    exit(1)
+
+# connectionIn = imas.DBEntry(
+#     getBackendID(args.backend), args.database, args.shot, args.run, args.user
+# )
+# err, n = connectionIn.open()
+# if err != 0:
+#     # TODO chek if you can raise exception or just print or may be use logger
+#     print(
+#         "Shot {0}, run {1} for user={2} and database={3} does not exists".format(
+#             args.shot, args.run, args.user, args.database
+#         ),
+#         file=sys.stderr,
+#     )
+#     print("----> Aborted.", file=sys.stderr)
+#     exit()
 
 
 timeIndexEquilibrium = 0

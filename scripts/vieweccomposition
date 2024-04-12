@@ -4,44 +4,22 @@ import argparse
 import logging
 import sys
 
-import imas
-
 from idstools.compute.common import getNearestTime
-from idstools.utils.clihelper import getBackendID, imasParser
+from idstools.database import DBMaster
+from idstools.utils.clihelper import (
+    dbentryParser,
+    getDatabasePath,
+    getFileName,
+    getTitle,
+)
 from idstools.utils.idslogger import setupLogger
 from idstools.view.common import Canvas
 from idstools.view.waves import WavesView
 
-
-def StrToList(string):
-    if string[0] == "[":
-        slist = string.split(",")
-        slist[0] = slist[0][1:]
-        slist[-1] = slist[-1][:-1]
-        slist = [int(slist[i]) for i in range(len(slist))]
-        return slist
-    else:
-        return [int(string)]
-
-
 # MANAGEMENT OF INPUT ARGUMENTS
 # ------------------------------
 parser = argparse.ArgumentParser(
-    description="---- Display EC results", parents=[imasParser]
-)
-parser.add_argument(
-    "-s",
-    "--shot",
-    help="Shot number, either int 130012, or list [130012,130012]",
-    required=True,
-    type=str,
-)
-parser.add_argument(
-    "-r",
-    "--run",
-    help="Run number, either int 23, or list [23,24]",
-    required=True,
-    type=str,
+    description="---- Display EC results", parents=[dbentryParser]
 )
 parser.add_argument(
     "-t",
@@ -72,79 +50,83 @@ args = parser.parse_args()
 logger = setupLogger("module", stdout_level=logging.INFO)
 
 
-shotString, runString = args.shot, args.run
-shotList, runList = StrToList(shotString), StrToList(runString)
-assert len(shotList) <= len(
-    runList
-), "There must be a run number corresponding to each shot"
-
-if len(runList) > len(shotList):
-    assert (
-        len(shotList) == 1
-    ), "Either give a shot for each run or give a single shot for every run"
-    shotList = len(runList) * shotList
-
 verbose = args.verbose
 # Flag to force psi radial coordinate to be used
 force_psi = int(args.force_psi)
 
-nsimu = len(shotList)
-for isimu in range(len(shotList)):
-    ishot = shotList[isimu]
-    irun = runList[isimu]
-    # Reading in data from run in shot
-    logger.info(
-        f"Open pulse: {ishot}/{irun} in DB {args.user}/{args.database}/{args.version}"
-    )
-    conn = imas.DBEntry(
-        getBackendID(args.backend), args.database, ishot, irun, args.user
-    )
-    status, _ = conn.open()
-    if status != 0:
-        logger.critical(
-            f"Pulse {ishot}/{irun} in DB {args.user}/{args.database}/{args.version} does not exist"
-        )
-        sys.exit(status)
 
-    idsWaves = conn.get("waves")
-    conn.close()
+conn = DBMaster.getConnection(args)
+if conn is None:
+    logger.critical("----> Aborted.")
+    exit(1)
 
-    # TIME VECTOR AND TIME INDEX
-    # ---------------------------
-    timeArray = idsWaves.time
-    ntime = len(timeArray)
-    timeIndex, timeValue = getNearestTime(timeArray, args.time)
-    time = timeValue
-    rows = 2
-    if ntime == 1:
-        logger.error("Only one time slice --> ECCD and ECRH waveforms not displayed")
-        rows = 1
-    canvas = Canvas(rows, 2)
-    ax1 = canvas.add_axes(title="", xlabel="", row=0, col=0)
-    ax2 = canvas.add_axes(title="", xlabel="", row=0, col=1)
-    if ntime != 1:
-        ax3 = canvas.add_axes(title="", xlabel="", row=1, col=0)
-        ax4 = canvas.add_axes(title="", xlabel="", row=1, col=1)
+idsWaves = conn.get("waves")
+conn.close()
 
-    wavesView = WavesView(idsWaves)
+# TIME VECTOR AND TIME INDEX
+# ---------------------------
+timeArray = idsWaves.time
+ntime = len(timeArray)
+timeIndex, timeValue = getNearestTime(timeArray, args.time)
+time = timeValue
+rows = 2
+if ntime == 1:
+    logger.error("Only one time slice --> ECCD and ECRH waveforms not displayed")
+    rows = 1
+canvas = Canvas(rows, 2)
+ax1 = canvas.add_axes(title="", xlabel="", row=0, col=0)
+ax2 = canvas.add_axes(title="", xlabel="", row=0, col=1)
+if ntime != 1:
+    ax3 = canvas.add_axes(title="", xlabel="", row=1, col=0)
+    ax4 = canvas.add_axes(title="", xlabel="", row=1, col=1)
 
-    wavesView.displayECLaunchersInfo(timeIndex=timeIndex)
-    wavesView.plotECRHProfiles(ax1, timeIndex=timeIndex, verbose=args.verbose)
-    wavesView.plotECCDProfiles(ax2, timeIndex=timeIndex, verbose=args.verbose)
-    if ntime != 1:
-        wavesView.plotECRHWaveform(ax3, timeIndex=timeIndex)
-        wavesView.plotECCDWaveform(ax4, timeIndex=timeIndex)
+wavesView = WavesView(idsWaves)
 
-    if args.save:
-        fname = f"EC_Composition_time_" + "%.1f" % timeValue + ".png"
-        canvas.save(fname)
-    else:
-        wm = canvas.get_current_fig_manager()
-        window = wm.window
-        screen_y = window.winfo_screenheight()
-        screen_x = window.winfo_screenwidth()
-        wm.resize(screen_x, screen_y)
-        canvas.fig.subplots_adjust(
-            top=0.941, bottom=0.122, left=0.052, right=0.925, hspace=0.2, wspace=0.2
-        )
-        canvas.show()
+wavesView.displayECLaunchersInfo(timeIndex=timeIndex)
+wavesView.plotECRHProfiles(ax1, timeIndex=timeIndex, verbose=args.verbose)
+wavesView.plotECCDProfiles(ax2, timeIndex=timeIndex, verbose=args.verbose)
+if ntime != 1:
+    wavesView.plotECRHWaveform(ax3, timeIndex=timeIndex)
+    wavesView.plotECCDWaveform(ax4, timeIndex=timeIndex)
+
+canvas.setText(text=f"{getDatabasePath(args, timeValue=timeValue)}")
+canvas.fig.suptitle(getTitle(args, "EC Composition", timeValue), size=12)
+canvas.fig.subplots_adjust(
+    top=0.941, bottom=0.122, left=0.052, right=0.925, hspace=0.2, wspace=0.2
+)
+canvas.get_current_fig_manager().set_window_title(sys.argv[0])
+if args.save:
+    fname = getFileName(args, "EC_Composition", timeValue)
+    canvas.save(fname)
+else:
+    canvas.show()
+
+
+# def StrToList(string):
+#     if string[0] == "[":
+#         slist = string.split(",")
+#         slist[0] = slist[0][1:]
+#         slist[-1] = slist[-1][:-1]
+#         slist = [int(slist[i]) for i in range(len(slist))]
+#         return slist
+#     else:
+#         return [int(string)]
+# shotString, runString = args.shot, args.run
+# shotList, runList = StrToList(shotString), StrToList(runString)
+# assert len(shotList) <= len(
+#     runList
+# ), "There must be a run number corresponding to each shot"
+
+# if len(runList) > len(shotList):
+#     assert (
+#         len(shotList) == 1
+#     ), "Either give a shot for each run or give a single shot for every run"
+#     shotList = len(runList) * shotList
+# nsimu = len(shotList)
+# for isimu in range(len(shotList)):
+#     ishot = shotList[isimu]
+#     irun = runList[isimu]
+#     # Reading in data from run in shot
+#     logger.info(
+#         f"Open pulse: {ishot}/{irun} in DB {args.user}/{args.database}/{args.version}"
+#     )

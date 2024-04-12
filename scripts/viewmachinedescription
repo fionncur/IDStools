@@ -2,10 +2,12 @@
 # -*- coding: utf-8 -*-
 
 import argparse
-from idstools.database import Connection
+import logging
+import sys
 from idstools.machinedescription import MachineDescription
 from idstools.set_logger import set_logger
-from idstools.utils.clihelper import imasParser
+from idstools.utils.clihelper import dbentryParser, getDatabasePath
+from idstools.utils.idslogger import setupLogger
 from idstools.view.common import Canvas
 from idstools.view.pf_active import PFActiveView
 from idstools.view.wall import WallView
@@ -13,41 +15,67 @@ from idstools.view.wall import WallView
 # ----------------------------------------------------------------------
 
 
-logger = set_logger("mdplot", level="INFO")
+logger = setupLogger("module", stdout_level=logging.INFO)
 
 
-def plotMachineDescription(data):
+def plotMachineDescription(idsData):
     """
     The `plotMachineDescription` method is responsible for plotting the machine description based on the provided pulse list.
     """
 
     # Initialization
     canvas = Canvas(1, 1)
-    ax = canvas.add_axes(
-        title="Machine Description", xlabel="R (m)", ylabel="Z (m)", row=0, col=0
-    )
+    ax = canvas.add_axes(title="", xlabel="R (m)", ylabel="Z (m)", row=0, col=0)
 
-    # Custom settings
-    canvas.fig.set_size_inches(7.5, 10.0)
     ax.set_aspect("equal", adjustable="box")
 
+    databasePath = ""
     # Plot Overlay
-    for pulse, pulseData in data.items():
-        if pulseData["config"]["ids"] == "pf_active":
-            pfcoilsview = PFActiveView(pulseData["data"])
+    for idsName, idsDataAndConfig in idsData.items():
+        if idsDataAndConfig["yamlConfig"] is None:
+            logger.error(f"Could not retrieve machine description for {idsName}")
+            databasePath += f"{idsName} = not found"
+            continue
+        if idsName == "pf_active":
+            pfcoilsview = PFActiveView(idsDataAndConfig["idsData"])
             pfcoilsview.viewActivePfCoils(ax)
+            databasePath += (
+                "pf_active = "
+                + getDatabasePath(idsDataAndConfig["connectionArgs"])
+                + "\n"
+            )
 
-        if pulseData["config"]["ids"] == "wall":
-            wallview = WallView(pulseData["data"])
+        elif idsName == "wall":
+            wallview = WallView(idsDataAndConfig["idsData"])
             wallview.view_wall(ax)
+            databasePath += (
+                "wall = " + getDatabasePath(idsDataAndConfig["connectionArgs"]) + "\n"
+            )
+        else:
+            databasePath += (
+                f"{idsName} = "
+                + getDatabasePath(idsDataAndConfig["connectionArgs"])
+                + "No visualization yet\n"
+            )
+            logger.info(
+                f"Visualization is not implemented yet for machine description {idsName}"
+            )
 
     # wallview.view_DIR(ax)
     # wallview.view_TS(ax)
     # wallview.view_Cryostat(ax)
 
     ax.plot()
+
+    canvas.setText(text=databasePath, y=0.95)
+
+    canvas.fig.subplots_adjust(
+        top=0.916, bottom=0.09, left=0.044, right=0.953, hspace=0.287, wspace=0.2
+    )
+    canvas.get_current_fig_manager().set_window_title(sys.argv[0])
+    canvas.fig.suptitle("ITER Machine Description", size=12)
     if args.save:
-        fname = "MachineDescriptionPlot.png"
+        fname = "machine_description_plot.png"
         canvas.save(fname)
     else:
         canvas.show()
@@ -56,12 +84,11 @@ def plotMachineDescription(data):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="---- View machine description by getting information of data from md_summary file",
-        parents=[imasParser],
     )
     subparsers = parser.add_subparsers(help="sub-commands help")
 
     subparserList = subparsers.add_parser(
-        "list", help="list machine description databases"
+        "list", help="list machine description databases", parents=[dbentryParser]
     )
     subparserList.set_defaults(cmd="list")
     subparserList.add_argument(
@@ -81,13 +108,13 @@ if __name__ == "__main__":
         action="store_true",
     )
     subparserPlot = subparsers.add_parser(
-        "plot", help="Plot Machine description databases"
+        "plot", help="Plot Machine description databases", parents=[dbentryParser]
     )
     subparserPlot.set_defaults(cmd="plot")
     subparserPlot.add_argument(
-        "list",
+        "idslist",
         nargs="*",
-        help="Provide Pulse list here.. Space separated values for example : 111001/102 116000/2 ",
+        help="Provide ids list here.. Space separated values for example :  pf_active wall",
     )
     subparserPlot.add_argument(
         "--save",
@@ -95,18 +122,14 @@ if __name__ == "__main__":
         action="store_true",
     )
     args = parser.parse_args()
-     # Default command if not provided
+    # Default command if not provided
     if "cmd" not in args.__dict__:
         args.cmd = "list"
         args.obsolete = False
         args.checkValidity = False
         args.ids = []
-        
-    if args.database == "ITER":
-        args.database = "ITER_MD"
 
-    connection = Connection(args.backend, args.database, 0, 0, args.user, args.version)
-    machineDescription = MachineDescription(connection=connection)
+    machineDescription = MachineDescription(args)
     if args.cmd == "list":
         data = machineDescription.getMDSummary(
             args.ids, args.obsolete, args.checkValidity
@@ -124,7 +147,10 @@ if __name__ == "__main__":
             print(f"{pulse : >11} | {idsname : >28} | {status: >10} | {description}")
 
     if args.cmd == "plot":
-        if not args.list:
-            args.list = ["111001/102", "116000/2"]
-        data = machineDescription.getMDDataByPulseList(args.list)
-        plotMachineDescription(data)
+        if args.idslist:
+            idsData = machineDescription.getMDDataByIdsList(args.idslist)
+            plotMachineDescription(idsData)
+        else:
+            logger.info(
+                "Provde machine description idses that you want to plot e.g pf_active, wall etc "
+            )

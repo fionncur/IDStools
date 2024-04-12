@@ -10,7 +10,7 @@ Syntax viewhcddistributions
 .. code-block:: bash
 
     $ viewhcddistributions -h
-    usage: viewhcddistributions [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] -s SHOT -r RUN [-t TIME] [--save]
+    usage: viewhcddistributions [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] [-uri URI] [-s PULSE] [-r RUN] [-t TIME] [--save]
 
     ---- Display EC results
 
@@ -24,11 +24,12 @@ Syntax viewhcddistributions
                             backend format (default=MDSPLUS)
     --version VERSION, -v VERSION
                             data version (default=3)
-    -s SHOT, --shot SHOT  Shot number
+    -uri URI, --uri URI   uri (default=None)
+    -s PULSE, --shot PULSE, --pulse PULSE
+                            Pulse number
     -r RUN, --run RUN     Run number
     -t TIME, --time TIME  Time
     --save                Save figure at default location
-
 
 
 Example viewhcddistributions
@@ -37,6 +38,7 @@ Example viewhcddistributions
     .. code-block:: bash
 
         $ viewhcddistributions -s 100015 -r 108 -u schneim -d SPOT
+        
 
     .. image:: _static/images/viewhcddistributions.png
         :alt: image not found
@@ -45,9 +47,10 @@ Example viewhcddistributions
 
     .. code-block:: bash
 
-        $ viewhcddistributions -s 130012 -r 15 -u schneim -d SPOT
+        $ viewhcddistributions -s 130012 -r 115 -d TEST
+        $ viewhcddistributions --uri "imas:mdsplus?user=public;shot=130012;run=115;database=TEST;version=3" 
 
-    .. image:: _static/images/viewhcdwaves2.png
+    .. image:: _static/images/viewhcddistributions2.png
         :alt: image not found
         :align: center
 

@@ -1,17 +1,17 @@
 # ---------------------------------
 # PARAMETERS OF THE INPUT SCENARIO
 # ---------------------------------
-shot:                134173
-run_in:              106
-input_user_or_path:  public
-input_database:      ITER
+shot: 134173
+run_in: 106
+input_user_or_path: schneim
+input_database: ITER
 
 # -----------------------------------
 # PARAMETERS TO SAVE THE OUTPUT DATA
 # -----------------------------------
 output_user_or_path: default
-output_database:     TORBEAM
-run_out:             22
+output_database: ITER
+run_out: 22
 
 # -----------------------------------
 # PARAMETERS FOR OPTIONAL TIME LOOP
@@ -49,8 +49,3 @@ debug: 0
 
 # Sandbox manual settings
 sandbox_manual: 1
-
-
-
-
-

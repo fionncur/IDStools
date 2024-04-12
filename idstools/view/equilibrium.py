@@ -172,7 +172,7 @@ class EquilibriumView(BasePlot):
         ax.set_xlim(
             (-data["r0"] - data["amin"]) * 1.1, (data["r0"] + data["amin"]) * 1.1
         )
-        ax.set_aspect("equal")
+        ax.set_aspect("equal", adjustable="box")
 
     def viewEquilibrium(self, ax):
         quantities = self.computeObj.get2DCartesianGrid()

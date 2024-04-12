@@ -464,6 +464,26 @@ class DBMaster:
 
     @classmethod
     def getConnection(cls, args):
+        connection = DBMaster.getDBEntryObject(args)
+        status, _ = connection.open()
+        if status != 0:
+            logger.error(f"The specified database is not available")
+            return None
+        return connection
+
+    @classmethod
+    def createConnection(cls, args):
+        if "mode" not in args.__dict__:
+            args.mode = "w"
+        connection = DBMaster.getDBEntryObject(args)
+        status, _ = connection.create()
+        if status != 0:
+            logger.error(f"Can not create database backend")
+            return None
+        return connection
+
+    @classmethod
+    def getDBEntryObject(cls, args):
         imasVersion = DBMaster.getIMASVersion()
 
         if imasVersion > 4:
@@ -499,11 +519,6 @@ class DBMaster:
                 args.run,
                 args.user,
             )
-
-        status, _ = connection.open()
-        if status != 0:
-            logger.error(f"The specified database is not available")
-            return None
         return connection
 
 
@@ -577,13 +592,3 @@ def readScenario(
     connectionOut.close()
 
     return inIDSDict, outIDSDict
-
-
-class Connection:
-    def __init__(self, backend, database, shot, run, user, version):
-        self.backend = backend
-        self.database = database
-        self.shot = shot
-        self.run = run
-        self.user = user
-        self.version = version

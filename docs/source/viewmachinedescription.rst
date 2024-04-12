@@ -36,7 +36,7 @@ Example
 
     .. code-block:: bash
 
-        $ viewmachinedescription -d ITER_MD 
+        $ viewmachinedescription plot wall pf_active 
         23/11/20 23:20:26 WARNING: VS3U : pf_active.coil.element.geometry.rectangle is empty
         23/11/20 23:20:26 WARNING: VS3L : pf_active.coil.element.geometry.rectangle is empty
         23/11/20 23:20:26 WARNING: TF coil busbars (equivalent coil) : pf_active.coil.element.geometry.rectangle is empty

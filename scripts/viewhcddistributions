@@ -4,10 +4,15 @@ import argparse
 import logging
 import sys
 
-import imas
 
 from idstools.compute.common import getNearestTime
-from idstools.utils.clihelper import getBackendID, imasParser
+from idstools.database import DBMaster
+from idstools.utils.clihelper import (
+    getDatabasePath,
+    getFileName,
+    getTitle,
+    dbentryParser,
+)
 from idstools.utils.idslogger import setupLogger
 from idstools.view.common import Canvas
 from idstools.view.distributions import DistributionsView
@@ -16,18 +21,10 @@ logger = setupLogger("module", stdout_level=logging.INFO)
 
 
 def showPlots(args):
-    logger.info(
-        f"Open pulse: {shot}/{run} in DB {args.user}/{args.database}/{args.version}"
-    )
-    conn = imas.DBEntry(
-        getBackendID(args.backend), args.database, int(shot), run, args.user
-    )
-    status, _ = conn.open()
-    if status != 0:
-        logger.critical(
-            f"Pulse {shot}/{run} in DB {args.user}/{args.database}/{args.version} does not exist"
-        )
-        sys.exit(status)
+    conn = DBMaster.getConnection(args)
+    if conn is None:
+        logger.critical("----> Aborted.")
+        exit(1)
 
     idsDistributions = conn.get("distributions")
     conn.close()
@@ -40,9 +37,7 @@ def showPlots(args):
 
     canvas = Canvas(3, 2)
     # canvas.setStyle(style="retro")
-    canvas.setSupTitle(
-        f"HCD Distributions Plot [Shot {args.shot} / Run {args.run}] Time : {timeValue:.1f}"
-    )
+
     if ntime == 1:
         logger.info("Only one time slice --> Power and CD waveforms not displayed")
     ax1 = canvas.add_axes(title="", xlabel="", row=0, col=0)
@@ -58,34 +53,29 @@ def showPlots(args):
         distributionsView.plotNBIFusPowerAndCDWaveforms(ax4, timeIndex)
         distributionsView.plotCDWaveform(ax5, timeIndex)
 
+    canvas.setText(text=f"{getDatabasePath(args, timeValue=timeValue)}")
+
+    canvas.fig.subplots_adjust(
+        top=0.92,
+        bottom=0.122,
+        left=0.044,
+        right=0.886,
+        hspace=0.438,
+        wspace=0.328,
+    )
+    canvas.get_current_fig_manager().set_window_title(sys.argv[0])
+    canvas.fig.suptitle(getTitle(args, "Distributions profile", timeValue), size=12)
     if args.save:
-        fname = (
-            f"Distributions_profile_time_{shot}_{run}_" + "%.1f" % timeValue + ".png"
-        )
-        canvas.save(fname, width=5, height=4, dpi=300)
+        fname = getFileName(args, "Distributions_profile", timeValue)
+        canvas.save(fname)
     else:
-        wm = canvas.get_current_fig_manager()
-        window = wm.window
-        screen_y = window.winfo_screenheight()
-        screen_x = window.winfo_screenwidth()
-        wm.resize(screen_x, screen_y)
-        canvas.fig.subplots_adjust(
-            top=0.92,
-            bottom=0.122,
-            left=0.044,
-            right=0.886,
-            hspace=0.438,
-            wspace=0.328,
-        )
         canvas.show()
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="---- Display EC results", parents=[imasParser]
+        description="---- Display EC results", parents=[dbentryParser]
     )
-    parser.add_argument("-s", "--shot", help="Shot number", required=True, type=int)
-    parser.add_argument("-r", "--run", help="Run number", required=True)
     parser.add_argument(
         "-t", "--time", help="Time", required=False, type=float, default=-99.0
     )

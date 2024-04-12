@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 
 # ----------------------------------------------------------------------
 
+
 def load_scenario(user, database, version, backend):
     """
     Return a list of pulses as tuple (shot,run) by using database_tools.db_helper
@@ -171,22 +172,22 @@ class ScenarioValidator:
     def arrange_schema(self, *args):
         """
         Merge validation schemas of same IDS
-    
+
         Parameters
         ----------
         *args: dict
             Validation schemas in type dict with fpath of yaml files as key
-    
+
         Returns
         -------
         dict
             Validation schema merged in type dict
         """
-    
+
         dw = {}
         for a in args:
             dw.update(a)
-    
+
         d = {}
         for _, schemas in dw.items():
             for idsname in schemas:
@@ -194,8 +195,8 @@ class ScenarioValidator:
                     d[idsname] = merge_dict(d[idsname], schemas[idsname])
                 else:
                     d[idsname] = schemas[idsname]
-    
-        return {"schema":d}
+
+        return {"schema": d}
 
     def validate(self, db, idsname, occ=0, time=-99.0, fmt=""):
         """
@@ -223,17 +224,28 @@ class ScenarioValidator:
         for fpath, schemas in self.SCHEMA.items():
             for key, schema in schemas.items():
                 if key == idsname:
-                    #
-                    try:
+                    ids = None
+
+                    if "uri" in db.__dict__:
+                        logger.info(
+                            "- {}/{}/{} < {}".format(
+                                db.__dict__["uri"],
+                                idsname,
+                                occ,
+                                path.relpath(fpath),
+                            )
+                        )
+                    else:
                         logger.info(
                             "- {}/{}/{}/{} < {}".format(
-                                db.__dict__["shot"],
+                                db.__dict__["pulse"],
                                 db.__dict__["run"],
                                 idsname,
                                 occ,
                                 path.relpath(fpath),
                             )
                         )
+                    try:
                         idstime = db.partial_get(idsname, "time", occurrence=occ)
                         #
                         if (time < 0.0) or (idstime is None):
@@ -257,13 +269,11 @@ class ScenarioValidator:
                         if flag:
                             logger.info("- OK")
                         else:
-                            logger.error(
-                                "\n{}".format(idschk.dict_to_yaml(dout))
-                            )
+                            logger.error("\n{}".format(idschk.dict_to_yaml(dout)))
                     else:
                         print(idschk.dict_to_yaml(dout))
                     #
-                    ret[ids.__name__+"/"+str(occ)] = flag
+                    ret[ids.__name__ + "/" + str(occ)] = flag
         return ret
 
     def validate_db(self, db, time=-99.0, fmt=""):
@@ -287,11 +297,12 @@ class ScenarioValidator:
         logger.debug(f"ids_oc= {ids_oc}")
         ret = {}
 
-        for (idsname, occ) in ids_oc:
-           d = self.validate(db, idsname, occ=occ, time=time, fmt=fmt)
-           ret.update(d)
+        for idsname, occ in ids_oc:
+            d = self.validate(db, idsname, occ=occ, time=time, fmt=fmt)
+            ret.update(d)
 
         return ret
+
 
 # ----------------------------------------------------------------------
 
@@ -357,15 +368,14 @@ def db_validator(
             if shot > 0 and run >= 0:
                 pulses.extend([(shot, run)])
             if shot > 0 and run < 0:
-                scenarios =  load_scenario(user, database, version, backend)
+                scenarios = load_scenario(user, database, version, backend)
                 pulses.extend([(s, r) for s, r in scenarios if shot == s])
     else:
-        pulses =  load_scenario(user, database, version, backend)
+        pulses = load_scenario(user, database, version, backend)
 
     # Scenario Validation for Pulses
     npulse = len(pulses)
     for i, (shot, run) in enumerate(pulses):
-
         db = imas.DBEntry(getBackendID(backend), database, shot, run, user)
         status, _ = db.open()
         if status != 0:

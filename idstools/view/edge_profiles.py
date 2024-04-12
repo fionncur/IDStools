@@ -2,8 +2,7 @@ from idstools.compute.edge_profiles import EdgeProfilesCompute
 import numpy as np
 
 
-
-class EdgeProfilesView():
+class EdgeProfilesView:
     def __init__(self, edgeProfileIds=None):
         self.edgeProfilesCompute = EdgeProfilesCompute(edgeProfileIds)
 
@@ -126,7 +125,7 @@ class EdgeProfilesView():
             the pcolormesh object 'c'.
         """
         x, y = self.edgeProfilesCompute.getRectangularGrid(500)
-        
+
         ne_edge = self.edgeProfilesCompute.getElectronDensity(timeSlice, x, y)
         if ne_edge is not None:
             ax.grid(False)
@@ -137,11 +136,11 @@ class EdgeProfilesView():
                     ax.fill(
                         separatrix[:, 0],
                         separatrix[:, 1],
-                        facecolor="w",
+                        facecolor="none",
                         edgecolor="r",
                         linewidth=3,
                     )
-
+            ax.set_aspect("equal", adjustable="box")
             ax.set_xlabel("R,m")
             ax.set_ylabel("Z,m")
             ax.set_title("Electron density")
@@ -150,8 +149,8 @@ class EdgeProfilesView():
             xmin, xmax = ax.get_xlim()
             ymin, ymax = ax.get_ylim()
             ax.text(
-                (xmax + xmin)/2,
-                (ymax + ymin)/2,
+                (xmax + xmin) / 2,
+                (ymax + ymin) / 2,
                 "No data",
                 horizontalalignment="left",
                 verticalalignment="center",
@@ -171,7 +170,7 @@ class EdgeProfilesView():
             the pcolormesh object 'c'.
         """
         x, y = self.edgeProfilesCompute.getRectangularGrid(500)
-        
+
         ni_edge = self.edgeProfilesCompute.getIonDensity(timeSlice, x, y)
         if ni_edge is not None:
             ax.grid(False)
@@ -182,11 +181,12 @@ class EdgeProfilesView():
                     ax.fill(
                         separatrix[:, 0],
                         separatrix[:, 1],
-                        facecolor="w",
+                        facecolor="none",
                         edgecolor="r",
-                        linewidth=3,
+                        linewidth=2,
                     )
 
+            ax.set_aspect("equal", adjustable="box")
             ax.set_xlabel("R,m")
             ax.set_ylabel("Z,m")
             ax.set_title("Ion density")
@@ -195,8 +195,8 @@ class EdgeProfilesView():
             xmin, xmax = ax.get_xlim()
             ymin, ymax = ax.get_ylim()
             ax.text(
-                (xmax + xmin)/2,
-                (ymax + ymin)/2,
+                (xmax + xmin) / 2,
+                (ymax + ymin) / 2,
                 "No data",
                 horizontalalignment="left",
                 verticalalignment="center",
@@ -216,7 +216,7 @@ class EdgeProfilesView():
             the pcolormesh object 'c'.
         """
         x, y = self.edgeProfilesCompute.getRectangularGrid(500)
-        
+
         n_neutral_edge = self.edgeProfilesCompute.getNeutralDensity(timeSlice, x, y)
 
         if n_neutral_edge is not None:
@@ -228,11 +228,11 @@ class EdgeProfilesView():
                     ax.fill(
                         separatrix[:, 0],
                         separatrix[:, 1],
-                        facecolor="w",
+                        facecolor="none",
                         edgecolor="r",
-                        linewidth=3,
+                        linewidth=2,
                     )
-
+            ax.set_aspect("equal", adjustable="box")
             ax.set_xlabel("R,m")
             ax.set_ylabel("Z,m")
             ax.set_title("Neutral density")
@@ -241,15 +241,14 @@ class EdgeProfilesView():
             xmin, xmax = ax.get_xlim()
             ymin, ymax = ax.get_ylim()
             ax.text(
-                (xmax + xmin)/2,
-                (ymax + ymin)/2,
+                (xmax + xmin) / 2,
+                (ymax + ymin) / 2,
                 "No data",
                 horizontalalignment="left",
                 verticalalignment="center",
                 fontsize=10,
             )
             return None
-            
 
     def viewEquatorialPlaneAndDiverterDensity(self, ax, timeSlice=0):
         x, y = self.edgeProfilesCompute.getRectangularGrid(500)
@@ -272,21 +271,21 @@ class EdgeProfilesView():
             xmin, xmax = ax.get_xlim()
             ymin, ymax = ax.get_ylim()
             ax.text(
-                (xmax + xmin)/2,
-                (ymax + ymin)/2,
+                (xmax + xmin) / 2,
+                (ymax + ymin) / 2,
                 "No data",
                 horizontalalignment="left",
                 verticalalignment="center",
                 fontsize=10,
             )
             return None
-        
+
     def showInfoOnPlot(self, ax, info: str = ""):
         xmin, xmax = ax.get_xlim()
         ymin, ymax = ax.get_ylim()
-        
-        left, width = xmin, xmax-xmin
-        bottom, height = ymin, ymax-ymin
+
+        left, width = xmin, xmax - xmin
+        bottom, height = ymin, ymax - ymin
         right = left + width
         top = bottom + height
         ax.text(

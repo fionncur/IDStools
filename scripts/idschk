@@ -6,7 +6,8 @@ from sys import stdout
 import argparse
 import textwrap
 import yaml
-from idstools.utils.clihelper import getBackendID,  imasParser
+from idstools.database import DBMaster
+from idstools.utils.clihelper import dbentryParser
 
 import imas
 from idstools.idslist import available_in_dbentry
@@ -16,20 +17,15 @@ from database_tools.db_validator import ScenarioValidator
 
 # ----------------------------------------------------------------------
 
+
 def main():
     """
     Command Interface of IDS Data Validation Tool w.r.t. DD (IDSDef.xml)
     """
-
-    # Open the database
-    db = imas.DBEntry(
-        getBackendID(args.backend), args.database, args.shot, args.run, args.user
-    )
-    status, _ = db.open()
-    if status != 0:
-        exit(
-            f"can not open backend={args.backend}, user_or_path={args.user}, database={args.database}, shot={args.shot}, run={args.run}"
-        )
+    db = DBMaster.getConnection(args)
+    if db is None:
+        print("----> Aborted.")
+        exit(1)
 
     # Initialization for yaml Dumper
     yaml.Dumper.ignore_aliases = lambda *args: True
@@ -43,7 +39,6 @@ def main():
 
     # Validate COCOS in IDS/equilibrium
     if args.cocos:
-
         idsname = "equilibrium"
         dd0 = [dd for dd in root if dd.get("name") == idsname][0]
         maxoc = int(dd0.get("maxoccur"))
@@ -75,7 +70,6 @@ def main():
 
     # IDS Validation
     if args.schema_file:
-
         # Initialize Scenario Validator
         sv = ScenarioValidator(schema_path=[path.abspath(args.schema_file)])
 
@@ -90,7 +84,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         prog="idschk",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        parents=[imasParser],
+        parents=[dbentryParser],
         description=textwrap.dedent(
             """\
             Load IMAS and install Cerberus (if not done before)
@@ -139,12 +133,6 @@ if __name__ == "__main__":
                 >>> flag, log = ids_cocos_check(equilibrium, verbose=True)
             """
         ),
-    )
-    parser.add_argument(
-        "-s", "--shot", dest="shot", help="Shot number", required=True, type=int
-    )
-    parser.add_argument(
-        "-r", "--run", dest="run", help="Run number", required=True, type=int
     )
     parser.add_argument(
         "-l",

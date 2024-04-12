@@ -10,12 +10,8 @@ Syntax idschk
     .. code-block:: bash     
 
         $ idschk -h
-        usage: idschk [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] -s SHOT -r RUN [-l [IDSLIST [IDSLIST ...]]] [-t [TIME]] [-f SCHEMA_FILE] [--ipsign {-1,1}]
-                    [--b0sign {-1,1}] [--verbose] [-c]
-
-        Load IMAS and install Cerberus (if not done before)
-            $ module load IMAS
-            $ pip install cerberus
+        usage: idschk [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] [-uri URI] [-s PULSE] [-r RUN] [-l [IDSLIST [IDSLIST ...]]] [-t [TIME]]
+                    [-f SCHEMA_FILE] [--ipsign {-1,1}] [--b0sign {-1,1}] [--verbose] [-c]
 
         optional arguments:
         -h, --help            show this help message and exit
@@ -27,7 +23,9 @@ Syntax idschk
                                 backend format (default=MDSPLUS)
         --version VERSION, -v VERSION
                                 data version (default=3)
-        -s SHOT, --shot SHOT  Shot number
+        -uri URI, --uri URI   uri (default=None)
+        -s PULSE, --shot PULSE, --pulse PULSE
+                                Pulse number
         -r RUN, --run RUN     Run number
         -l [IDSLIST [IDSLIST ...]], --list [IDSLIST [IDSLIST ...]]
                                 IDS names to be checked

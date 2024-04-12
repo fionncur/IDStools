@@ -1,15 +1,16 @@
 vieweccomposition
 =================
 
-*vieweccomposition* shows EC results
+*vieweccomposition* shows EC composition (ECRH and ECCD profiles)
 
 Syntax vieweccomposition
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: bash
 
-    $ viieweccomposition -h
-    usage: vieweccomposition [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] -s SHOT -r RUN [-t TIME] [-f FORCE_PSI] [--verbose] [--save]
+    $ vieweccomposition -h
+    usage: vieweccomposition [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] [-uri URI] [-s PULSE] [-r RUN] [-t TIME] [-f FORCE_PSI]
+                            [--verbose] [--save]
 
     ---- Display EC results
 
@@ -23,8 +24,10 @@ Syntax vieweccomposition
                             backend format (default=MDSPLUS)
     --version VERSION, -v VERSION
                             data version (default=3)
-    -s SHOT, --shot SHOT  Shot number, either int 130012, or list [130012,130012]
-    -r RUN, --run RUN     Run number, either int 23, or list [23,24]
+    -uri URI, --uri URI   uri (default=None)
+    -s PULSE, --shot PULSE, --pulse PULSE
+                            Pulse number
+    -r RUN, --run RUN     Run number
     -t TIME, --time TIME  Time for which profiles are displayed
     -f FORCE_PSI, --force_psi FORCE_PSI
                             = 1 to force displaying the profiles versus poloidal flux
@@ -37,7 +40,8 @@ Example vieweccomposition
 
     .. code-block:: bash
 
-        $ vieweccomposition -u schneim -d TORBEAM -s 134173 -r 2326 
+        $ vieweccomposition -d TEST -s 134173 -r 2326 
+        $ vieweccomposition --uri "imas:mdsplus?user=public;shot=134173;run=2326;database=TEST;version=3"
 
     .. image:: _static/images/vieweccomposition.png
         :alt: image not found
