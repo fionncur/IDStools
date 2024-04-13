@@ -4,34 +4,26 @@
 from __future__ import print_function
 
 import argparse, imas, pdb
+from idstools.database import DBMaster
 import database_tools.init_mendeleiev as mend
 import numpy as np
 import sys
 from os import system, path
 from sys import exit
-from idstools.utils.clihelper import getBackendID, imasParser
+from idstools.utils.clihelper import getBackendID, dbentryParser
 
 # ----------------------------------------------------------------------
 
 # Management of input arguments
 parser = argparse.ArgumentParser(description=\
-	 '---- Auto-generated yaml scenario and watcher files (!!! STILL TO BE COMPLETED BY HAND !!!)',parents=[imasParser])
-parser.add_argument('-s','--shot',help='shot number',required=True,type=int)
-parser.add_argument('-r','--run',help='run number',required=True,type=int)
+	 '---- Auto-generated yaml scenario and watcher files (!!! STILL TO BE COMPLETED BY HAND !!!)',parents=[dbentryParser])
 parser.add_argument('--disable-validation',help='disable IDS validation',required=False,action='store_true',dest="wo_validation")
 args = parser.parse_args()
 
-
-# Open the database and read the necessary IDSs
-input = imas.DBEntry(
-    getBackendID(args.backend), args.database, args.shot, args.run, args.user
-)
-status, _ = input.open()
-if status != 0:
-    print('Shot ' + str(args.shot) + ', run ' + str(args.run) + ' does not exist', file=sys.stderr)
-    print('----> Aborted.', file=sys.stderr)
-    exit()
-
+input = DBMaster.getConnection(args)
+if input is None:
+    print("----> Aborted.")
+    exit(1)
 # ----------------------------------------------------------------------
 
 # Read necessary IDSs from database
@@ -561,7 +553,7 @@ add0_length = 4-len(str(args.run))
 for i in range(add0_length):
     add0 = add0+"0"
 
-filename = "ids_"+str(args.shot)+add0+str(args.run)+".yaml"
+filename = "ids_"+str(args.pulse)+add0+str(args.run)+".yaml"
 
 # Go for it: fill the yaml file
 f = open(filename, 'w')
@@ -592,7 +584,7 @@ f.write("""# Code: code name in case of simulation, 0 in case of experiment\n"""
 f.write("""# Machine: database name\n""")
 f.write("""# ------------------------------------------------------------------\n""")
 f.write("""characteristics:\n""")
-f.write("""    shot: %i\n""" % args.shot)
+f.write("""    shot: %i\n""" % args.pulse)
 f.write("""    run: %i\n""" % args.run)
 f.write("""    type: %s\n""" % type)
 f.write("""    workflow: %s\n""" % workflow)
@@ -711,12 +703,12 @@ f.close()
 
 # Complete the yaml file with the output of idslist
 system('idslist -u ' + args.user + ' -d ' + args.database + ' -b ' + args.backend \
-          + ' -s ' + str(args.shot) + ' -r ' + str(args.run) + ' yaml >> ' + filename)
+          + ' -s ' + str(args.pulse) + ' -r ' + str(args.run) + ' yaml >> ' + filename)
 
 print("----> " + filename + " created.", file=sys.stdout)
 
 # Associated WATCHER file
-filename = "ids_"+str(args.shot)+add0+str(args.run)+".watcher"
+filename = "ids_"+str(args.pulse)+add0+str(args.run)+".watcher"
 f = open(filename, 'w')
 if 1 == 1: # Done for alignment
    f.write("""----------------------------------------------------------------------------------\n""")

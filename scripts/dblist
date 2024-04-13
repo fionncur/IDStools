@@ -12,7 +12,7 @@ import numpy as np
 from idstools.database import DBMaster
 from idstools.utils.idshelper import getAvailableIdsAndTimes
 from idstools.utils.idslogger import setupLogger
-from idstools.utils.clihelper import getBackendID
+from idstools.utils.clihelper import getBackendID, getIMASVersion
 logger = setupLogger("module")
 
 TAB = " " * 3
@@ -59,7 +59,7 @@ def print_list(dbs, shotnum=None, compact=False, timestamp=False):
                     if compact:
                         print(
                             TAB * 3
-                            + "Shot "
+                            + "Pulse "
                             + extended(str(shot), SHOT_STR_LEN)
                             + ": "
                             + extended(str(len(sorted(runs))), RUNNUM_STR_LEN)
@@ -67,7 +67,7 @@ def print_list(dbs, shotnum=None, compact=False, timestamp=False):
                         )
 
                     elif timestamp:
-                        print(TAB * 3 + "Shot " + extended(str(shot), SHOT_STR_LEN))
+                        print(TAB * 3 + "Pulse " + extended(str(shot), SHOT_STR_LEN))
                         runs.sort(reverse=True, key=lambda x: x[1])
                         for r in runs:
                             print(
@@ -82,7 +82,7 @@ def print_list(dbs, shotnum=None, compact=False, timestamp=False):
                     else:
                         print(
                             TAB * 3
-                            + "Shot "
+                            + "Pulse "
                             + extended(str(shot), SHOT_STR_LEN)
                             + " Runs: "
                             + printVector(sorted([r[1] for r in runs]), RUN_STR_LEN)
@@ -120,17 +120,22 @@ def printTimes(dbs, args, print_times=False, shotNumber=None, runNumber=None):
                             print(TAB * 2 + "Backend: " + backend)
                             printed_backend = True
                         if not printed_shot:
-                            print(TAB * 3 + "Shot " + extended(str(shot), SHOT_STR_LEN))
+                            print(TAB * 3 + "Pulse " + extended(str(shot), SHOT_STR_LEN))
                             printed_shot = True
 
                         print(TAB * 4 + " Run: " + extended(str(run), RUN_STR_LEN))
-                        connection = imas.DBEntry(backend_id=getBackendID(backend.upper()), db_name=dbname, shot=shot, run=run, user_name=args.user, data_version=dv)
-                        err, n = connection.open()
-                        if err != 0:
-                            logger.critical(
-                                f"Shot {str(shot)}, run {str(run)} for user_or_path = {args.user} and database = {dbname} does not exist",
-                            )
-
+                        connargs = argparse.Namespace()
+                        connargs.backend = backend.upper()
+                        connargs.pulse = shot
+                        connargs.run = run
+                        connargs.user = args.user
+                        connargs.database = dbname
+                        connargs.version = dv
+                        if getIMASVersion() > 4:
+                            connargs.uri = f"imas:{backend.lower()}?user={args.user};shot={shot};run={run};database={dbname};version={dv}"
+                        
+                        connection = DBMaster.getConnection(connargs)
+                
                         availableIdsAndTimes = getAvailableIdsAndTimes(connection)
                         for idsname, times in availableIdsAndTimes:
                             if len(times) == 1 and np.isnan(times[0]):
@@ -220,16 +225,16 @@ if __name__ == "__main__":
         default=False,
         help="Show (and sort per) date of last modification of the runs",
     )
-    subparserList.add_argument("shot", nargs="?", help="Shot number", type=int)
+    subparserList.add_argument("pulse", nargs="?", help="Pulse number", type=int)
 
     subparserSlices = subparsers.add_parser("slices", help="list slices")
     subparserSlices.set_defaults(cmd="slices")
-    subparserSlices.add_argument("shot", nargs="?", help="Shot number", type=int)
+    subparserSlices.add_argument("pulse", nargs="?", help="Pulse number", type=int)
     subparserSlices.add_argument("run", nargs="?", help="Run number", type=int)
 
     subparserTimes = subparsers.add_parser("times", help="list times")
     subparserTimes.set_defaults(cmd="times")
-    subparserTimes.add_argument("shot", nargs="?", help="Shot number", type=int)
+    subparserTimes.add_argument("pulse", nargs="?", help="Pulse number", type=int)
     subparserTimes.add_argument("run", nargs="?", help="Run number", type=int)
 
     subparserDatabases = subparsers.add_parser("databases", help="print databases")
@@ -282,16 +287,16 @@ if __name__ == "__main__":
     backends = args.backend.split(",") if args.backend else None
     dbs = DBMaster.getDatabaseFiles(args.user, args.database, args.version, backends)
     if args.cmd == "list":
-        print_list(dbs, args.shot, args.compact, args.timestamp)
+        print_list(dbs, args.pulse, args.compact, args.timestamp)
 
     if args.cmd == "slices":
         printTimes(
-            dbs, args, print_times=False, shotNumber=args.shot, runNumber=args.run
+            dbs, args, print_times=False, shotNumber=args.pulse, runNumber=args.run
         )
 
     if args.cmd == "times":
         printTimes(
-            dbs, args, print_times=True, shotNumber=args.shot, runNumber=args.run
+            dbs, args, print_times=True, shotNumber=args.pulse, runNumber=args.run
         )
 
     if args.cmd == "databases":

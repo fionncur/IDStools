@@ -6,6 +6,7 @@ import argparse
 import os
 import sys
 import textwrap
+from idstools.database import DBMaster
 
 import imas
 import numpy as np
@@ -65,23 +66,11 @@ subparserOcc.set_defaults(cmd="occ")
 args = parser.parse_args()
 
 if "cmd" not in args.__dict__:
-    connection = imas.DBEntry(
-        getBackendID(args.backend),
-        args.database,
-        args.shot,
-        args.run,
-        user_name=args.user,
-        data_version=args.version,
-    )
-    err, n = connection.open()
-    if err != 0:
-        logger.critical(
-            f"Shot {str(args.shot)}, run {str(args.run)} for user_or_path = {args.user} and database = {args.database} does not exist",
-        )
-        logger.critical(
-            "----> Aborted.",
-        )
-        exit()
+    connection = DBMaster.getConnection(args)
+    if connection is None:
+        print("----> Aborted.")
+        exit(1)
+
     question_string = "?"
 
     availableIdsAndTimes = getAvailableIdsAndTimes(connection)
@@ -100,23 +89,17 @@ if "cmd" not in args.__dict__:
 
 if args.cmd == "yaml":
     # Open the database and read the necessary IDSs
-    connection = imas.DBEntry(
-        getBackendID(args.backend), args.database, args.shot, args.run, args.user
-    )
-    status, _ = connection.open()
-
-    if status != 0:
-        logger.error(
-            f"Shot {str(args.shot)}, run {str(args.run)} for user_or_path = {args.user} and database = {args.database} does not exist",
-        )
-        exit()
+    connection = DBMaster.getConnection(args)
+    if connection is None:
+        print("----> Aborted.")
+        exit(1)
 
     for idsname, oc in getAvailableIdsAndOccurrences(connection):
         homogeneous_time = connection.partial_get(
             idsname, "ids_properties/homogeneous_time", occurrence=oc
         )
         times = connection.partial_get(idsname, "time", occurrence=oc)
-        
+
         # Format idsname
         idsnameoc = f"{idsname}/{str(oc)}" if oc > 0 else idsname
         # For every homogeneous_time [0,1,2]
@@ -151,16 +134,10 @@ if args.cmd == "yaml":
 
 if args.cmd == "occ":
     # Open the database and read the necessary IDSs
-    connection = imas.DBEntry(
-        getBackendID(args.backend), args.database, args.shot, args.run, args.user
-    )
-    status, _ = connection.open()
-
-    if status != 0:
-        logger.error(
-            f"Shot {str(args.shot)}, run {str(args.run)} for user_or_path = {args.user} and database = {args.database} does not exist",
-        )
-        exit()
+    connection = DBMaster.getConnection(args)
+    if connection is None:
+        print("----> Aborted.")
+        exit(1)
 
     for idsname, oc, comment in getAvailableIdsAndOccurrences(
         connection, getComment=True

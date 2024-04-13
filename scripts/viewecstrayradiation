@@ -40,21 +40,6 @@ if connectionIn is None:
     logger.critical("----> Aborted.")
     exit(1)
 
-# connectionIn = imas.DBEntry(
-#     getBackendID(args.backend), args.database, args.shot, args.run, args.user
-# )
-# err, n = connectionIn.open()
-# if err != 0:
-#     # TODO chek if you can raise exception or just print or may be use logger
-#     print(
-#         "Shot {0}, run {1} for user={2} and database={3} does not exists".format(
-#             args.shot, args.run, args.user, args.database
-#         ),
-#         file=sys.stderr,
-#     )
-#     print("----> Aborted.", file=sys.stderr)
-#     exit()
-
 
 timeIndexEquilibrium = 0
 timeIndexCoreProfiles = 0

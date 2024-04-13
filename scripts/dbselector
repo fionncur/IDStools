@@ -3,12 +3,12 @@
 import argparse
 import os
 import sys
-
+import copy
 import imas
 from rich.progress import track
 
 from idstools.database import DBMaster
-from idstools.utils.clihelper import getBackendID, imasParser
+from idstools.utils.clihelper import getBackendID, getIMASVersion, imasParser
 from idstools.utils.idshelper import getAvailableIdsAndOccurrences
 
 if __name__ == "__main__":
@@ -39,10 +39,12 @@ if __name__ == "__main__":
     dbmaster = DBMaster()
     if args.verbose:
         print(f"Database located in {dbmaster.getDatabaseDir(args.database,args.user)}")
-        
+
     pulses = None
     if backend == imas.imasdef.MDSPLUS_BACKEND:
-        pulses = dbmaster.getMdsPlusPulses(args.user, args.database, args.version, status=args.status)
+        pulses = dbmaster.getMdsPlusPulses(
+            args.user, args.database, args.version, status=args.status
+        )
     elif backend == imas.imasdef.HDF5_BACKEND:
         pulses = dbmaster.getHdf5Pulses(args.user, args.database, args.version)
     else:
@@ -50,21 +52,24 @@ if __name__ == "__main__":
         sys.exit()
 
     listCount = args.list_count
-    if listCount!=0:
+    if listCount != 0:
         pulses = pulses[:listCount]
-    
+
     if pulses is not None:
-        for pulse in (
-            track(pulses, description="[green]Analyzing DB...") 
-        ):
-            connection = imas.DBEntry(
-                getBackendID(args.backend),
-                args.database,
-                pulse[0],
-                pulse[1],
-                args.user,
-            )
-            connection.open()
+        for pulse in track(pulses, description="[green]Analyzing DB..."):
+            connargs = argparse.Namespace()
+            connargs.backend = args.backend
+            connargs.pulse = pulse[0]
+            connargs.run = pulse[1]
+            connargs.user = args.user
+            connargs.database = args.database
+            connargs.version = args.version
+            if getIMASVersion() > 4:
+                connargs.uri = f"imas:{args.backend.lower()}?user={args.user};shot={pulse[0]};run={pulse[1]};database={args.database};version={args.version}"
+            connection = DBMaster.getConnection(connargs)
+            if connection is None:
+                continue
+
             ids_list = getAvailableIdsAndOccurrences(connection)
             if any(args.ids in ids for ids in ids_list):
                 print((pulse[0], pulse[1]))

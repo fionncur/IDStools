@@ -3,12 +3,13 @@
 from __future__ import print_function
 
 import argparse, imas, pdb
+from idstools.database import DBMaster
 import database_tools.init_mendeleiev as mend
 import numpy as np
 import sys
 from os import system,getenv
 from sys import exit
-from idstools.utils.clihelper import getBackendID, imasParser
+from idstools.utils.clihelper import dbentryParser
 
 # --------------------------------------------------------------------------------
 # --- Creates an entry for the Disruption database (adapted from create_db_entry
@@ -21,9 +22,7 @@ from idstools.utils.clihelper import getBackendID, imasParser
 # Management of input arguments
 parser = argparse.ArgumentParser(description=\
 	                         '---- Auto-generated yaml scenario and watcher files (!!! STILL TO BE COMPLETED BY HAND !!!)',
-                                 parents=[imasParser])
-parser.add_argument('-s' ,'--shot',         help='shot number', required=True,type=int)
-parser.add_argument('-r' ,'--run',          help='run number',required=True,type=int)
+                                 parents=[dbentryParser])
 parser.add_argument('-st','--status',       help='active/obsolete',required=False,type=str,default="draft")
 parser.add_argument('-ro','--ro',           help='Name of responsible officer',required=False,type=str,default="")
 
@@ -31,12 +30,10 @@ args = parser.parse_args()
 
 
 # Open the database and read the necessary IDSs
-input = imas.DBEntry(getBackendID(args.backend),args.database,args.shot,args.run,user_name=args.user,data_version=args.version)
-err,n = input.open()
-if err != 0:
-    print('Shot ' + str(args.shot) + ', run ' + str(args.run) + ' does not exist', file=sys.stderr)
-    print('----> Aborted.', file=sys.stderr)
-    exit()
+input = DBMaster.getConnection(args)
+if input is None:
+    print("----> Aborted.")
+    exit(1)
 
 # Read necessary IDSs from database
 try:

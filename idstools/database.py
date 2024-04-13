@@ -465,10 +465,11 @@ class DBMaster:
     @classmethod
     def getConnection(cls, args):
         connection = DBMaster.getDBEntryObject(args)
-        status, _ = connection.open()
-        if status != 0:
-            logger.error(f"The specified database is not available")
-            return None
+        if connection is not None:
+            status, _ = connection.open()
+            if status != 0:
+                logger.error(f"The specified database is not available")
+                return None
         return connection
 
     @classmethod

@@ -12,7 +12,7 @@ Syntax idslist
     .. code-block:: bash   
           
         $ idslist -h
-        usage: idslist [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] -s SHOT -r RUN [-f] {yaml,occ} ...
+        usage: idslist [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] [-uri URI] [-s PULSE] [-r RUN] [-f] {yaml,occ} ...
 
         List available IDSes in the pulse. By deafult it prints all IDSes alone with their time length. fullarray option allows you to print complete time array.
 
@@ -35,9 +35,12 @@ Syntax idslist
                                 backend format (default=MDSPLUS)
         --version VERSION, -v VERSION
                                 data version (default=3)
-        -s SHOT, --shot SHOT  Shot number
+        -uri URI, --uri URI   uri (default=None)
+        -s PULSE, --shot PULSE, --pulse PULSE
+                                Pulse number
         -r RUN, --run RUN     Run number
         -f, --fullarray       Show full time array values
+
 
 
 Example idslist
@@ -46,6 +49,7 @@ Example idslist
     .. code-block:: bash
 
         $ idslist -s 134174 -r 117
+        $ idslist --uri "imas:mdsplus?user=public;shot=134174;run=117;database=ITER;version=3"
         core_profiles  : 106   slices: [10.6 10.6 10.6 ... 75.  75.  75. ]
         core_sources   : 106   slices: [10.6 10.6 10.6 ... 75.  75.  75. ]
         core_transport : 106   slices: [10.6 10.6 10.6 ... 75.  75.  75. ]
@@ -59,6 +63,7 @@ Example idslist
     .. code-block:: bash
 
         $ idslist -s 134174 -r 117 yaml
+        $ idslist --uri "imas:mdsplus?user=public;shot=134174;run=117;database=ITER;version=3" yaml
         core_profiles:
             time_step_number: 106
             start_end_step:   [10.599230769230868 75.00005602665553 0.6133411929278538]
@@ -88,6 +93,7 @@ Example idslist
     .. code-block:: bash
 
         $ idslist -s 134174 -r 117 occ
+        $ idslist --uri "imas:mdsplus?user=public;shot=134174;run=117;database=ITER;version=3" occ
         core_profiles/0
         core_sources/0
         core_transport/0

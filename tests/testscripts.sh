@@ -217,3 +217,4 @@ viewcoresources -s 130012 -r 105 -d TEST
 # idsperf --uri "imas:mdsplus?user=public;shot=131024;run=41;database=ITER;version=3" summary --verbose --outputRun 5 --showStats --repeat 2 --uriOut "imas:mdsplus?user=sawantp1;shot=131024;run=20;database=ITER;version=3" --memoryBackend
 # idsresample --input_uri "imas:mdsplus?user=public;shot=131024;run=10;database=ITER;version=3" --output_uri "imas:mdsplus?user=sawantp1;shot=131024;run=2;database=ITER;version=3"
 # idssize --uri "imas:mdsplus?user=public;shot=131024;run=41;database=ITER;version=3"
+# idslist --uri "imas:mdsplus?user=public;shot=131024;run=41;database=ITER;version=3"

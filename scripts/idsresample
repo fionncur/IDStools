@@ -117,17 +117,6 @@ if __name__ == "__main__":
         print("Error opening source pulse! Please check existence.")
         sys.exit()
 
-    # src = imas.DBEntry(
-    #     getBackendID(args.backend),
-    #     args.database,
-    #     args.pulse_input,
-    #     args.run_input,
-    #     user_name=args.user,
-    # )
-    # status, _ = src.open()
-    # if status != 0:
-    #     print("Error opening source pulse! Please check existence.", file=sys.stderr)
-    #     sys.exit(status)
     if getIMASVersion() > 4:
         # tmp = imas.DBEntry("imas:memory?user=;shot=q;run=q;database=tmp;version=", "w")
         tmp = imas.DBEntry(imas.imasdef.MEMORY_BACKEND, "tmp", 1, 1)
@@ -154,21 +143,6 @@ if __name__ == "__main__":
     if dest is None:
         print("Error creating pulse! Please check existence.")
         sys.exit()
-    # dest = imas.DBEntry(
-    #     getBackendID(args.backend_output),
-    #     args.database_output,
-    #     args.pulse_output,
-    #     args.run_output,
-    #     user_name=os.environ["USER"],
-    # )
-
-    # status, _ = dest.create()
-    # if status != 0:
-    #     print(
-    #         "Error creating destination pulse! Please check parameters and permissions.",
-    #         file=sys.stderr,
-    #     )
-    #     sys.exit(status)
 
     for idsName in args.ids:
         homogeneousTime = src.partial_get(idsName, "ids_properties/homogeneous_time")

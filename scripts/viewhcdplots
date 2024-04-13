@@ -12,6 +12,7 @@ from idstools.utils.clihelper import (
     getBackendID,
     getDatabasePath,
     getFileName,
+    getIMASVersion,
     getTitle,
 )
 from idstools.utils.idslogger import setupLogger
@@ -37,6 +38,7 @@ def showWavesPlots(args, hold=False):
         logger.info(
             f"Open pulse: {pulse}/{irun} in DB {args['user']}/{args['database']}/{args['version']}"
         )
+        
         connargs = argparse.Namespace()
         connargs.backend = args["backend"]
         connargs.pulse = int(pulse)
@@ -44,7 +46,8 @@ def showWavesPlots(args, hold=False):
         connargs.user = args["user"]
         connargs.database = args["database"]
         connargs.version = args["version"]
-        connargs.uri = f"imas:{args['backend'].lower()}?user={connargs.user };shot={connargs.pulse};run={connargs.run};database={connargs.database};version={connargs.version}"
+        if getIMASVersion() > 4:
+            connargs.uri = f"imas:{args['backend'].lower()}?user={connargs.user };shot={connargs.pulse};run={connargs.run};database={connargs.database};version={connargs.version}"
 
         conn = DBMaster.getConnection(connargs)
         if conn is None:
@@ -152,7 +155,8 @@ def showDistributionPlots(args, hold=False):
         connargs.user = args["user"]
         connargs.database = args["database"]
         connargs.version = args["version"]
-        connargs.uri = f"imas:{args['backend'].lower()}?user={connargs.user };shot={connargs.pulse};run={connargs.run};database={connargs.database};version={connargs.version}"
+        if getIMASVersion() > 4:
+            connargs.uri = f"imas:{args['backend'].lower()}?user={connargs.user };shot={connargs.pulse};run={connargs.run};database={connargs.database};version={connargs.version}"
 
         conn = DBMaster.getConnection(connargs)
         if conn is None:
