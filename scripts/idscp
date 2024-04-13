@@ -126,7 +126,7 @@ if getIMASVersion() > 4:
         inputargs.uri = f"imas:{args.backend.lower()}?user={args.user };shot={args.pulse_input};run={args.run_input};database={args.database};version={args.version}"
     else:
         inputargs.uri = args.input_uri
-print(inputargs)
+
 src_connection = DBMaster.getConnection(inputargs)
 if src_connection is None:
     logger.error("Error opening source pulse! Please check existence.")

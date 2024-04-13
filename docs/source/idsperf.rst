@@ -1,5 +1,5 @@
 idsperf
-========
+=======
 
 *idsperf* profile performance of access layer operations on dataset. timing and performance information for different 
 types of operations on IDS data with the IMAS Python Access Layer 
@@ -11,8 +11,8 @@ Syntax idsperf
     .. code-block:: bash   
 
         $ idsperf -h
-        usage: idsperf [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] [-t SLICETIME [SLICETIME ...] | -a] [-m] [-do DATABASE_OUTPUT]
-                    [-bo BACKEND_OUTPUT] [--repeat REPEAT] [--verbose] [--showStats] [--profile] [-o OUTPUTRUN] -s SHOT -r RUN
+        usage: idsperf [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] [-uri URI] [-s PULSE] [-r RUN] [-t SLICETIME [SLICETIME ...] | -a] [-m]
+                    [-do DATABASE_OUTPUT] [-bo BACKEND_OUTPUT] [--repeat REPEAT] [--verbose] [--showStats] [--profile] [-o OUTPUTRUN] [-uriOut URIOUT]
                     [ids [ids ...]]
 
         This script gives simple timing and performance information for different types of operations on IDS data with the IMAS Python Access Layer (get/get_slice/put
@@ -31,6 +31,10 @@ Syntax idsperf
                                 backend format (default=MDSPLUS)
         --version VERSION, -v VERSION
                                 data version (default=3)
+        -uri URI, --uri URI   uri (default=None)
+        -s PULSE, --shot PULSE, --pulse PULSE
+                                Pulse number
+        -r RUN, --run RUN     Run number
         -t SLICETIME [SLICETIME ...], --sliceTime SLICETIME [SLICETIME ...]
                                 Use get_slice with selected time(s)
         -a, --allSlices       Use get_slice with all available times
@@ -45,15 +49,22 @@ Syntax idsperf
         --profile             Also do full profile of the selected operation, via cProfile
         -o OUTPUTRUN, --outputRun OUTPUTRUN
                                 Output run number for checking perf of put
-        -s SHOT, --shot SHOT  Shot number
-        -r RUN, --run RUN     Run number
+        -uriOut URIOUT, --uriOut URIOUT
+                                uri out (default=None)
+
 
 Example idsperf (all idses)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     .. code-block:: bash
 
+        $ idsperf --uri "imas:mdsplus?user=public;shot=134174;run=117;database=ITER;version=3" summary
+        
+    .. code-block:: bash
+
         $ idsperf -s 134174 -r 117
+
+
         core_profiles best time = 1.0308142956346273 s
         core_sources best time = 2.8891310710459948 s
         core_transport best time = 1.7229742156341672 s

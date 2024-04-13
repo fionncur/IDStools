@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """Small utility script to profile performance of some AL operations on any dataset."""
 import argparse
+import copy
 import os
 import statistics as stat
 import sys
@@ -9,7 +10,8 @@ import sys
 import imas
 
 from idstools import idsperf
-from idstools.utils.clihelper import getBackendID, dbentryParser
+from idstools.database import DBMaster
+from idstools.utils.clihelper import dbentryParser, getIMASVersion
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
@@ -77,40 +79,40 @@ if __name__ == "__main__":
         type=str,
         help='IDS name(s) (leave empty to select all IDSs with default occurrence, or append "/n" to copy a specific occurrence "n")',
     )
-    #
+    if getIMASVersion() > 4:
+        parser.add_argument(
+            "-uriOut",
+            "--uriOut",
+            type=str,
+            help="uri out \t\t(default=%(default)s)",
+        )
     args = parser.parse_args()
 
+    if not args.database_output:
+        args.database_output = args.database
+
+    if not args.backend_output:
+        args.backend_output = args.backend
     # For memory backend need to read the full IDS and load it into memory
     if args.memoryBackend:
         print("First import data into memory...", file=sys.stderr)
         # sys.exit(1)
-        dbref = imas.DBEntry(
-            getBackendID(args.backend),
-            args.database,
-            args.shot,
-            args.run,
-            user_name=args.user,
-        )
-        status, _ = dbref.open()
-        if status != 0:
-            print(
-                "Error opening source pulse! Please check existence.", file=sys.stderr
-            )
-            sys.exit(status)
+        dbref = DBMaster.getConnection(args)
+        if dbref is None:
+            print("----> Aborted.")
+            exit(1)
 
-        dbm = imas.DBEntry(
-            imas.imasdef.MEMORY_BACKEND,
-            args.database,
-            args.shot,
-            args.run,
-            user_name=args.user,
-        )
-        status, _ = dbm.create()
-        if status != 0:
-            print(
-                "Error opening source pulse! Please check existence.", file=sys.stderr
-            )
-            sys.exit(status)
+        args.backend = "MEMORY"
+        if "uri" in args.__dict__ and args.uri is not None:
+            startIndex = args.uri.index(":") + 1
+            endIndex = args.uri.index("?")
+
+            # Replace the substring between ':' and '?' with 'memory'
+            args.uri = args.uri[:startIndex] + "memory" + args.uri[endIndex:]
+        dbm = DBMaster.createConnection(args)
+        if dbm is None:
+            print("----> Aborted.")
+            exit(1)
 
         for idsname in args.ids:
             nameocc = idsname.split("/")
@@ -119,21 +121,12 @@ if __name__ == "__main__":
             if len(nameocc) == 2:
                 occ = int(nameocc[1])
             dbm.put(dbref.get(idsname, occ))
+        args.mode = "r"
 
-        args.backend = "MEMORY"
-    # Open pulse
-    db = imas.DBEntry(
-        getBackendID(args.backend),
-        args.database,
-        args.shot,
-        args.run,
-        user_name=args.user,
-    )
-
-    status, _ = db.open()
-    if status != 0:
-        print("Error opening source pulse! Please check existence.", file=sys.stderr)
-        sys.exit(status)
+    db = DBMaster.getConnection(args)
+    if db is None:
+        print("----> Aborted.")
+        exit(1)
 
     if args.ids == []:
         allidss = [ids.value for ids in list(imas.IDSName)]
@@ -149,16 +142,26 @@ if __name__ == "__main__":
 
     # Set command
     if args.outputRun != None:
-        dbout = imas.DBEntry(
-            getBackendID(args.backend),
-            args.database,
-            args.shot,
-            args.outputRun,
-            os.environ["USER"],
-        )
+        dboutArgs = argparse.Namespace()
+        dboutArgs.user = os.environ["USER"]
+        dboutArgs.database = args.database_output
+        dboutArgs.backend = args.backend_output
+        dboutArgs.version = args.version
+        dboutArgs.run = args.outputRun
+        dboutArgs.pulse = args.pulse
+        if getIMASVersion() > 4:
+            if args.uriOut is not None:
+                dboutArgs.uri = args.uriOut
+                if args.verbose:
+                    print("Using out URI given")
+            else:
+                dboutArgs.uri = f"imas:{dboutArgs.backend.lower()}?user={dboutArgs.user};shot={dboutArgs.pulse};run={dboutArgs.run};database={dboutArgs.database};version={dboutArgs.version}"
+        dbout = DBMaster.createConnection(dboutArgs)
+        if dbout is None:
+            print("----> Aborted.")
+            exit(1)
         if args.verbose:
             print("Create pulse for put operation")
-        dbout.create()
 
     for idsname in args.ids:
         nameocc = idsname.split("/")

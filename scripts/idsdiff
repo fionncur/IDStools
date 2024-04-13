@@ -16,7 +16,8 @@ import imas
 import matplotlib.pyplot as plt
 import numpy as np
 
-from idstools.utils.clihelper import getBackendID, imasParser
+from idstools.database import DBMaster
+from idstools.utils.clihelper import getIMASVersion, getPulseRunfromURI, imasParser
 from idstools.utils.ddhelper import DDHelper
 from idstools.utils.idshelper import compareIds
 from idstools.utils.idslogger import setupLogger
@@ -46,14 +47,14 @@ def get_filename(name, file_title, log_dir):
     return os.path.join(log_dir, file_name)
 
 
-def generate_html(file_path, data, shotA, runA, shotB, runB):
+def generate_html(file_path, data, pulseA, runA, pulseB, runB):
     logger.info("Writing to html file :" + file_path)
 
     ddhelper = DDHelper()
 
     file_object = open(file_path, "w")
 
-    report_title = f"Differences : {shotA}/{runA} ~ {shotB}/{runB}"
+    report_title = f"Differences : {pulseA}/{runA} ~ {pulseB}/{runB}"
     report_header_string = (
         """<head>
                 <meta charset="utf-8">
@@ -69,8 +70,8 @@ def generate_html(file_path, data, shotA, runA, shotB, runB):
     <thead class="table-primary">
     <tr>
                         <th>Field Name</th>
-                        <th>{shotA}/{runA}</th>
-                        <th>{shotB}/{runB}</th>
+                        <th>{pulseA}/{runA}</th>
+                        <th>{pulseB}/{runB}</th>
                         <th>Comments</th>
                         <th>Details</th>
                         <tr>
@@ -221,7 +222,7 @@ def generate_html(file_path, data, shotA, runA, shotB, runB):
                                     values[0],
                                     marker="o",
                                     color="r",
-                                    label=f"{shotA}/{runA}",
+                                    label=f"{pulseA}/{runA}",
                                     linewidth="0.5",
                                     ms=2,
                                 )
@@ -230,7 +231,7 @@ def generate_html(file_path, data, shotA, runA, shotB, runB):
                                     ax_timeA,
                                     values[0],
                                     color="r",
-                                    label=f"{shotA}/{runA}",
+                                    label=f"{pulseA}/{runA}",
                                     linewidth="0.5",
                                     ms=2,
                                 )
@@ -240,7 +241,7 @@ def generate_html(file_path, data, shotA, runA, shotB, runB):
                                     values[1],
                                     marker="D",
                                     color="b",
-                                    label=f"{shotB}/{runB}",
+                                    label=f"{pulseB}/{runB}",
                                     linewidth="0.5",
                                     ms=2,
                                 )
@@ -249,7 +250,7 @@ def generate_html(file_path, data, shotA, runA, shotB, runB):
                                     ax_timeB,
                                     values[1],
                                     color="b",
-                                    label=f"{shotB}/{runB}",
+                                    label=f"{pulseB}/{runB}",
                                     linewidth="0.5",
                                     ms=2,
                                 )
@@ -266,8 +267,8 @@ def generate_html(file_path, data, shotA, runA, shotB, runB):
                                                         <thead class="table-primary">
                                                             <tr>
                                                             <th>Attribute Name</th>
-                                                            <th>{shotA}/{runA}</th>
-                                                            <th>{shotB}/{runB} </th>
+                                                            <th>{pulseA}/{runA}</th>
+                                                            <th>{pulseB}/{runB} </th>
                                                             </tr>
                                                         </thead>
                                                         <tbody>
@@ -415,10 +416,27 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Compare a IDS from 2 datasets", parents=[imasParser]
     )
-    parser.add_argument("shotA", type=int, help="shot number of first dataset")
-    parser.add_argument("runA", type=int, help="run number of first dataset")
-    parser.add_argument("shotB", type=int, help="shot number of second dataset")
-    parser.add_argument("runB", type=int, help="run number of second dataset")
+    if getIMASVersion() > 4:
+        parser.add_argument(
+            "-uriA",
+            "--uriA",
+            type=str,
+            help="first uri \t\t(default=%(default)s)",
+        )
+        parser.add_argument(
+            "-uriB",
+            "--uriB",
+            type=str,
+            help="second uri \t\t(default=%(default)s)",
+        )
+    parser.add_argument(
+        "-sA", "--pulseA", type=int, help="shot number of first dataset"
+    )
+    parser.add_argument("-rA", "--runA", type=int, help="run number of first dataset")
+    parser.add_argument(
+        "-sB", "--pulseB", type=int, help="shot number of second dataset"
+    )
+    parser.add_argument("-rB", "--runB", type=int, help="run number of second dataset")
     parser.add_argument(
         "ids",
         nargs="*",
@@ -469,29 +487,41 @@ if __name__ == "__main__":
     if args.userB is None:
         args.userB = args.user
 
-    inputA = imas.DBEntry(
-        getBackendID(args.backend),
-        args.database,
-        args.shotA,
-        args.runA,
-        user_name=args.user,
-    )
-    status, _ = inputA.open()
-    if status != 0:
-        print("Error opening first dataset! Please check existence.", file=sys.stderr)
-        sys.exit(status)
+    argsA = argparse.Namespace()
+    argsA.backend = args.backend
+    argsA.pulse = args.pulseA
+    argsA.run = args.runA
+    argsA.user = args.user
+    argsA.database = args.database
+    argsA.version = args.version
+    if getIMASVersion() > 4:
+        if args.uriA is None:
+            argsA.uri = f"imas:{args.backend.lower()}?user={args.user};shot={args.pulseA};run={args.runA};database={args.database};version={args.version}"
+        else:
+            argsA.uri = args.uriA
+    print(args)
+    inputA = DBMaster.getConnection(argsA)
+    if inputA is None:
+        print("Error opening source pulse! Please check existence.")
+        sys.exit()
 
-    inputB = imas.DBEntry(
-        getBackendID(args.backendB),
-        args.databaseB,
-        args.shotB,
-        args.runB,
-        user_name=args.userB,
-    )
-    status, _ = inputB.open()
-    if status != 0:
-        print("Error opening second dataset! Please check existence.", file=sys.stderr)
-        sys.exit(status)
+    argsB = argparse.Namespace()
+    argsB.backend = args.backendB
+    argsB.pulse = args.pulseB
+    argsB.run = args.runB
+    argsB.user = args.userB
+    argsB.database = args.databaseB
+    argsB.version = args.version
+    if getIMASVersion() > 4:
+        if args.uriA is None:
+            argsB.uri = f"imas:{args.backendB.lower()}?user={args.userB};shot={args.pulseB};run={args.runB};database={args.databaseB};version={args.version}"
+        else:
+            argsB.uri = args.uriB
+
+    inputB = DBMaster.getConnection(argsB)
+    if inputB is None:
+        print("Error opening second dataset! Please check existence.")
+        sys.exit()
 
     if args.ids == []:
         args.ids = [ids.value for ids in list(imas.IDSName)]
@@ -501,11 +531,28 @@ if __name__ == "__main__":
         if os.path.exists(args.report_dir):
             report_dir = args.report_dir
 
-    file_title = f"_{args.shotA}_{args.runA}_{args.shotB}_{args.runB}"
+    pulseA, runA, pulseB, runB = args.pulseA, args.runA, args.pulseB, args.runB
+    if getIMASVersion() > 4:
+        if args.uriA is not None and args.uriB is not None:
+            paramADict = getPulseRunfromURI(args.uriA)
+            paramBDict = getPulseRunfromURI(args.uriB)
+            pulseA, runA, pulseB, runB = (
+                paramADict["pulse"],
+                paramADict["run"],
+                paramBDict["pulse"],
+                paramBDict["run"],
+            )
+    file_title = f"_{pulseA}_{runA}_{pulseB}_{runB}"
     file_path = get_filename("", file_title, report_dir)
     log_file = file_path + ".log"
     html_file = file_path + ".html"
-    logger = setupLogger("module", log_file=log_file, fmt="%(message)s", log_file_level=logging.INFO, stdout_level=logging.INFO)
+    logger = setupLogger(
+        "module",
+        log_file=log_file,
+        fmt="%(message)s",
+        log_file_level=logging.INFO,
+        stdout_level=logging.INFO,
+    )
     st = time.time()
     data = {}
     for idsname in args.ids:
@@ -523,7 +570,8 @@ if __name__ == "__main__":
     if bool(data):
         if args.generate_html is True:
             st = time.time()
-            generate_html(html_file, data, args.shotA, args.runA, args.shotB, args.runB)
+            generate_html(html_file, data, pulseA, runA, pulseB, runB)
+
             et = time.time()
             elapsed_time = et - st
             try:

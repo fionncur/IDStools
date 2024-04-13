@@ -4,10 +4,11 @@
 import argparse
 import os
 import sys
+from idstools.database import DBMaster
 
 import imas
 
-from idstools.utils.clihelper import getBackendID, imasParser
+from idstools.utils.clihelper import getIMASVersion, imasParser
 from idstools.utils.idshelper import resampleIndices, resampleTimes
 
 if __name__ == "__main__":
@@ -15,18 +16,24 @@ if __name__ == "__main__":
         description="Resample IDSs from a data-entry and save them into another data-entry",
         parents=[imasParser],
     )
-    parser.add_argument(
-        "-si", "--shot_input", help="Input shot number", required=True, type=int
-    )
-    parser.add_argument(
-        "-ri", "--run_input", help="Input run number", required=True, type=int
-    )
-    parser.add_argument(
-        "-so", "--shot_output", help="Output shot number", required=True, type=int
-    )
-    parser.add_argument(
-        "-ro", "--run_output", help="Output run number", required=True, type=int
-    )
+    if getIMASVersion() > 4:
+        parser.add_argument(
+            "-iuri",
+            "--input_uri",
+            type=str,
+            help="input uri \t\t(default=%(default)s)",
+        )
+        parser.add_argument(
+            "-ouri",
+            "--output_uri",
+            type=str,
+            help="output uri \t\t(default=%(default)s)",
+        )
+
+    parser.add_argument("-si", "--pulse_input", help="Input pulse number", type=int)
+    parser.add_argument("-ri", "--run_input", help="Input run number", type=int)
+    parser.add_argument("-so", "--pulse_output", help="Output pulse number", type=int)
+    parser.add_argument("-ro", "--run_output", help="Output run number", type=int)
     # default user from parent parser is 'public',
     # which is fine for exploration scripts but less
     # for management scripts
@@ -69,55 +76,99 @@ if __name__ == "__main__":
     if args.backend_output is None:
         args.backend_output = args.backend
 
-    if (
-        args.shot_input == args.shot_output
-        and args.run_input == args.run_output
-        and args.user == os.environ["USER"]
-        and args.database == args.database_output
-        and args.backend == args.backend_output
-    ):
-        print(
-            "Can not use the same data-entry as source and destination!",
-            file=sys.stderr,
-        )
-        exit()
+    isUriCheckDone = False
+    if getIMASVersion() > 4:
+        if args.input_uri is not None and args.output_uri is not None:
+            isUriCheckDone = True
+            if args.input_uri == args.output_uri:
+                print("Can not use the same uri as source and destination!")
+                exit()
+    if isUriCheckDone is False:
+        if (
+            args.pulse_input == args.pulse_output
+            and args.run_input == args.run_output
+            and args.user == os.environ["USER"]
+            and args.database == args.database_output
+            and args.backend == args.backend_output
+        ):
+            print(
+                "Can not use the same data-entry as source and destination!",
+                file=sys.stderr,
+            )
+            exit()
 
     if args.ids == []:
         args.ids = [ids.value for ids in list(imas.IDSName)]
 
-    src = imas.DBEntry(
-        getBackendID(args.backend),
-        args.database,
-        args.shot_input,
-        args.run_input,
-        user_name=args.user,
-    )
-    status, _ = src.open()
-    if status != 0:
-        print("Error opening source pulse! Please check existence.", file=sys.stderr)
-        sys.exit(status)
+    inputargs = argparse.Namespace()
+    inputargs.backend = args.backend
+    inputargs.pulse = args.pulse_input
+    inputargs.run = args.run_input
+    inputargs.user = args.user
+    inputargs.database = args.database
+    inputargs.version = args.version
+    if getIMASVersion() > 4:
+        if args.input_uri is None:
+            inputargs.uri = f"imas:{args.backend.lower()}?user={args.user };shot={args.pulse_input};run={args.run_input};database={args.database};version={args.version}"
+        else:
+            inputargs.uri = args.input_uri
+    src = DBMaster.getConnection(inputargs)
+    if src is None:
+        print("Error opening source pulse! Please check existence.")
+        sys.exit()
 
-    tmp = imas.DBEntry(imas.imasdef.MEMORY_BACKEND, "tmp", 1, 1)
+    # src = imas.DBEntry(
+    #     getBackendID(args.backend),
+    #     args.database,
+    #     args.pulse_input,
+    #     args.run_input,
+    #     user_name=args.user,
+    # )
+    # status, _ = src.open()
+    # if status != 0:
+    #     print("Error opening source pulse! Please check existence.", file=sys.stderr)
+    #     sys.exit(status)
+    if getIMASVersion() > 4:
+        # tmp = imas.DBEntry("imas:memory?user=;shot=q;run=q;database=tmp;version=", "w")
+        tmp = imas.DBEntry(imas.imasdef.MEMORY_BACKEND, "tmp", 1, 1)
+    else:
+        tmp = imas.DBEntry(imas.imasdef.MEMORY_BACKEND, "tmp", 1, 1)
     status, _ = tmp.create()
     if status != 0:
         print("Error creating temporary data-entry in memory!", file=sys.stderr)
         sys.exit(status)
 
-    dest = imas.DBEntry(
-        getBackendID(args.backend_output),
-        args.database_output,
-        args.shot_output,
-        args.run_output,
-        user_name=os.environ["USER"],
-    )
+    outputargs = argparse.Namespace()
+    outputargs.backend = args.backend_output
+    outputargs.pulse = args.pulse_output
+    outputargs.run = args.run_output
+    outputargs.user = os.environ["USER"]
+    outputargs.database = args.database_output
+    outputargs.version = args.version
+    if getIMASVersion() > 4:
+        if args.output_uri is None:
+            outputargs.uri = f"imas:{args.backend_output.lower()}?user={os.environ['USER']};shot={args.pulse_output};run={args.run_output};database={args.database_output};version={args.version}"
+        else:
+            outputargs.uri = args.output_uri
+    dest = DBMaster.getConnection(outputargs)
+    if dest is None:
+        print("Error creating pulse! Please check existence.")
+        sys.exit()
+    # dest = imas.DBEntry(
+    #     getBackendID(args.backend_output),
+    #     args.database_output,
+    #     args.pulse_output,
+    #     args.run_output,
+    #     user_name=os.environ["USER"],
+    # )
 
-    status, _ = dest.create()
-    if status != 0:
-        print(
-            "Error creating destination pulse! Please check parameters and permissions.",
-            file=sys.stderr,
-        )
-        sys.exit(status)
+    # status, _ = dest.create()
+    # if status != 0:
+    #     print(
+    #         "Error creating destination pulse! Please check parameters and permissions.",
+    #         file=sys.stderr,
+    #     )
+    #     sys.exit(status)
 
     for idsName in args.ids:
         homogeneousTime = src.partial_get(idsName, "ids_properties/homogeneous_time")

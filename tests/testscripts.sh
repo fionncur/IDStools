@@ -209,4 +209,11 @@ viewcoresources -s 130012 -r 105 -d TEST
 # eqdsk2ids --uri "imas:mdsplus?user=sawantp1;shot=134174;run=117;database=ITER;version=3" -g /home/ITER/sawantp1/git/idstools/asset/geqdsk/example.gfile -u sawantp1 -d ITER --log INFO
 # idschk --uri "imas:mdsplus?user=public;shot=134174;run=117;database=ITER;version=3" -f /home/ITER/sawantp1/git/idstools/database_tools/validation_schemas/generic/core_profiles.yml
 # idscp --input_uri "imas:mdsplus?user=public;shot=131024;run=10;database=ITER;version=3" --output_uri "imas:mdsplus?user=sawantp1;shot=131024;run=2;database=ITER;version=3"
+# idsdiff --uriA "imas:mdsplus?user=public;shot=122525;run=1;database=ITER;version=3" --uriB "imas:mdsplus?user=public;shot=122525;run=2;database=ITER;version=3" summary --generate-html
+# idsdiff --pulseA 122525 --runA  1 --pulseB 122525 --runB 2 summary --generate-html
 # idsprint --uri "imas:mdsplus?user=public;shot=131024;run=41;database=ITER;version=3" summary
+# idsperf --uri "imas:mdsplus?user=public;shot=131024;run=41;database=ITER;version=3" summary
+# idsperf --uri "imas:mdsplus?user=public;shot=131024;run=41;database=ITER;version=3" summary --verbose --outputRun 5 --showStats --repeat 2
+# idsperf --uri "imas:mdsplus?user=public;shot=131024;run=41;database=ITER;version=3" summary --verbose --outputRun 5 --showStats --repeat 2 --uriOut "imas:mdsplus?user=sawantp1;shot=131024;run=20;database=ITER;version=3" --memoryBackend
+# idsresample --input_uri "imas:mdsplus?user=public;shot=131024;run=10;database=ITER;version=3" --output_uri "imas:mdsplus?user=sawantp1;shot=131024;run=2;database=ITER;version=3"
+# idssize --uri "imas:mdsplus?user=public;shot=131024;run=41;database=ITER;version=3"

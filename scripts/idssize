@@ -49,11 +49,17 @@ Todo:
 
 import argparse
 import sys
+from idstools.database import DBMaster
 
 import imas
 import numpy as np
 
-from idstools.utils.clihelper import getBackendID, dbentryParser
+from idstools.utils.clihelper import (
+    getBackendID,
+    dbentryParser,
+    getIMASVersion,
+    getPulseRunfromURI,
+)
 from idstools.utils.idshelper import getIDSSize
 
 parser = argparse.ArgumentParser(
@@ -72,18 +78,10 @@ parser.add_argument(
 )
 args = parser.parse_args()
 
-connection = imas.DBEntry(
-    getBackendID(args.backend), args.database, args.shot, args.run, user_name=args.user
-)
-status, idx = connection.open()
-
-print(
-    f"Examining data for {args.user}, {args.database}, {args.version}, {args.shot}, {args.run}"
-)
-
-if status != 0:
-    print("Error opening pulse! Please check existence.")
-    sys.exit(status)
+connection = DBMaster.getConnection(args)
+if connection is None:
+    print("----> Aborted.")
+    exit(1)
 
 if args.ids == []:
     args.ids = [ids.value for ids in list(imas.IDSName)]
@@ -95,9 +93,30 @@ totalTime = np.array([v["time"] for v in idsSizeDict.values()]).sum()
 print(f"Total reading time = {totalTime:0.2f} s")
 
 print(f"Total data size = {totalBytes/1024**2:5.1f} MB")
-print(
-    f"Fractions of the total size for {args.user}/{args.database}/{args.version}/{args.shot}/{args.run}"
-)
+if getIMASVersion() > 4:
+    pulse, run, database, user, version = (
+        args.pulse,
+        args.run,
+        args.database,
+        args.user,
+        args.version,
+    )
+    if args.uri is not None:
+        paramDict = getPulseRunfromURI(args.uri)
+        pulse, run, database, user, version = (
+            paramDict["pulse"],
+            paramDict["run"],
+            paramDict["database"],
+            paramDict["user"],
+            paramDict["version"],
+        )
+        print(
+            f"Fractions of the total size for {user}/{database}/{version}/{pulse}/{run}"
+        )
+else:
+    print(
+        f"Fractions of the total size for {args.user}/{args.database}/{args.version}/{args.pulse}/{args.run}"
+    )
 print("% bytes    IDS")
 for idsSize in idsSizeDict:
     bytesData = idsSizeDict[idsSize]["bytes"] / totalBytes * 100

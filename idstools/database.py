@@ -499,10 +499,10 @@ class DBMaster:
                     args.user,
                 )
             else:
-                if args.pulse is not None and args.run is not None:
-                    logger.warning(
-                        "Both uri and legacy parameters are provided. Using uri for accessing data entry"
-                    )
+                # if args.pulse is not None and args.run is not None:
+                #     logger.warning(
+                #         "Both uri and legacy parameters are provided. Using uri for accessing data entry"
+                #     )
                 if "mode" in args.__dict__:
                     connection = imas.DBEntry(args.uri, args.mode)
                 else:

@@ -12,7 +12,7 @@ Syntax idsprint
     .. code-block:: bash     
 
         $ idsprint -h
-        usage: idsprint [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] [-s SHOT] [-r RUN] [-e] [-f] [-c] ids [idspath]
+        usage: idsprint [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] [-uri URI] [-s PULSE] [-r RUN] [-e] [-f] [-c] ids [idspath]
 
         Prints content of an IDS onto the terminal
 
@@ -30,8 +30,9 @@ Syntax idsprint
                                 backend format  (default=MDSPLUS)
         --version VERSION, -v VERSION
                                 data version    (default=3)
-        -s SHOT, --shot SHOT, --pulse SHOT
-                                Shot number
+        -uri URI, --uri URI   uri             (default=None)
+        -s PULSE, --shot PULSE, --pulse PULSE
+                                Pulse number
         -r RUN, --run RUN     Run number
         -e, --show-empty      Show empty fields of ids
         -f, --full            Print all array elements (can be very slow for large data)

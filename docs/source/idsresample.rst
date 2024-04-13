@@ -10,9 +10,9 @@ Syntax idsresample
 
     .. code-block:: bash     
 
-        $ idsresample --help
-        usage: idsresample [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] -si SHOT_INPUT -ri
-                        RUN_INPUT -so SHOT_OUTPUT -ro RUN_OUTPUT [-do DATABASE_OUTPUT] [-bo BACKEND_OUTPUT]
+        $ idsresample -h
+        usage: idsresample [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] [-iuri INPUT_URI] [-ouri OUTPUT_URI] [-si PULSE_INPUT]
+                        [-ri RUN_INPUT] [-so PULSE_OUTPUT] [-ro RUN_OUTPUT] [-do DATABASE_OUTPUT] [-bo BACKEND_OUTPUT]
                         [--index-range INDEX_RANGE | --time-range TIME_RANGE]
                         [ids [ids ...]]
 
@@ -31,12 +31,16 @@ Syntax idsresample
                                 backend format (default=MDSPLUS)
         --version VERSION, -v VERSION
                                 data version (default=3)
-        -si SHOT_INPUT, --shot_input SHOT_INPUT
-                                Input shot number
+        -iuri INPUT_URI, --input_uri INPUT_URI
+                                input uri (default=None)
+        -ouri OUTPUT_URI, --output_uri OUTPUT_URI
+                                output uri (default=None)
+        -si PULSE_INPUT, --pulse_input PULSE_INPUT
+                                Input pulse number
         -ri RUN_INPUT, --run_input RUN_INPUT
                                 Input run number
-        -so SHOT_OUTPUT, --shot_output SHOT_OUTPUT
-                                Output shot number
+        -so PULSE_OUTPUT, --pulse_output PULSE_OUTPUT
+                                Output pulse number
         -ro RUN_OUTPUT, --run_output RUN_OUTPUT
                                 Output run number
         -do DATABASE_OUTPUT, --database_output DATABASE_OUTPUT
@@ -44,14 +48,12 @@ Syntax idsresample
         -bo BACKEND_OUTPUT, --backend_output BACKEND_OUTPUT
                                 Backend name for the destination data-entry
         --index-range INDEX_RANGE
-                                Specified range of slices index as "start,stop,step". If omitted, start=0,
-                                stop=len(timebase),step=1, e.g. "0,,10" to keep 1 every 10 slices. Works only for IDS with
-                                homogeneous timebase. (Default)
+                                Specified range of slices index as "start,stop,step". If omitted, start=0, stop=len(timebase),step=1, e.g. "0,,10" to keep 1 every 10
+                                slices. Works only for IDS with homogeneous timebase. (Default)
         --time-range TIME_RANGE
-                                Specified range of times as "start,stop,step". If omitted, start=time[0], stop=time[-1]),
-                                while omitting step will keep of slices between start and stop, e.g. "10.,50.," to keep all
-                                times between 10. and 50. secondes). Works only for IDS with homogeneous timebase unless
-                                all three values are specified.
+                                Specified range of times as "start,stop,step". If omitted, start=time[0], stop=time[-1]), while omitting step will keep of slices between
+                                start and stop, e.g. "10.,50.," to keep all times between 10. and 50. secondes). Works only for IDS with homogeneous timebase unless all
+                                three values are specified.
 
 
 Example idsresample
@@ -63,4 +65,6 @@ Example idsresample
         resampling indices :equilibrium
 
 
+    .. code-block:: bash
 
+        $ idsresample --input_uri "imas:mdsplus?user=public;shot=131024;run=10;database=ITER;version=3" --output_uri "imas:mdsplus?user=sawantp1;shot=131024;run=2;database=ITER;version=3"

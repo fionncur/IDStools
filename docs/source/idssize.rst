@@ -11,9 +11,8 @@ Syntax idssize
 
     .. code-block:: bash     
 
-        $ idssize --help
-        usage: idssize [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] -s SHOT -r RUN
-                    [ids [ids ...]]
+        $ idssize -h
+        usage: idssize [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] [-uri URI] [-s PULSE] [-r RUN] [ids [ids ...]]
 
         Show size and time of IDSs
 
@@ -30,7 +29,9 @@ Syntax idssize
                                 backend format  (default=MDSPLUS)
         --version VERSION, -v VERSION
                                 data version    (default=3)
-        -s SHOT, --shot SHOT  Shot number
+        -uri URI, --uri URI   uri             (default=None)
+        -s PULSE, --shot PULSE, --pulse PULSE
+                                Pulse number
         -r RUN, --run RUN     Run number
 
 
