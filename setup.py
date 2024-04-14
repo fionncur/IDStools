@@ -20,7 +20,7 @@ if os.path.isfile(requirement_path):
 
 
 # Generate list of data files
-source_folder = "database_tools"
+source_folder = "idstools"
 target_folder = "bin"
 types = ("*.yml", "*.csv")  # the tuple of file types
 

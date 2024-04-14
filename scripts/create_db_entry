@@ -5,7 +5,7 @@ from __future__ import print_function
 
 import argparse, imas, pdb
 from idstools.database import DBMaster
-import database_tools.init_mendeleiev as mend
+import idstools.init_mendeleiev as mend
 import numpy as np
 import sys
 from os import system, path
@@ -526,7 +526,7 @@ logger = set_logger(__name__)
 
 # Validate Input Database
 if not args.wo_validation:
-    from database_tools.db_validator import ScenarioValidator
+    from idstools.db_validator import ScenarioValidator
     from glob import glob
 
     current_fpath = path.dirname(path.realpath(__file__))

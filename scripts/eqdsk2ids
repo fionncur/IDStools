@@ -7,7 +7,7 @@ import traceback
 from idstools.database import DBMaster
 
 from idstools.set_logger import set_logger
-from database_tools.eqdsk2ids import geqdsk2ids
+from idstools.eqdsk2ids import geqdsk2ids
 from idstools.utils.clihelper import (
     dbentryParser,
     getDatabasePath,
@@ -67,11 +67,11 @@ if __name__ == "__main__":
                 4) Coerce input COCOS index
                 $ eqdsk2ids -g path_to_gfile -s 12345 -r 1 -u userid -d ITER --cocos_in 7
 
-            (II) Functional Interface in Python (database_tools/eqdsk2ids.py)
+            (II) Functional Interface in Python (idstools/eqdsk2ids.py)
             --------------------------------------------------------------
             Usage:
                 0) Initialization
-                >>> from database_tools.eqdsk2ids import eqdsk2ids
+                >>> from idstools.eqdsk2ids import eqdsk2ids
  
                 1) Convert Gfile
                 >>> eq = eqdsk2ids(gfile='path/to/gfile')

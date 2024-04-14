@@ -13,7 +13,7 @@ import numpy as np
 from scipy import interpolate
 from scipy.spatial import ConvexHull
 
-import database_tools.init_mendeleiev as mend
+import idstools.init_mendeleiev as mend
 
 logger = logging.getLogger("module")
 

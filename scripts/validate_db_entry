@@ -10,8 +10,8 @@ import time
 import imas
 from idstools.utils.clihelper import getBackendID, imasParser
 from idstools.set_logger import set_logger
-from database_tools import idschk
-from database_tools.db_validator import db_validator
+from idstools import idschk
+from idstools.db_validator import db_validator
 
 
 # ----------------------------------------------------------------------

@@ -23,7 +23,7 @@ Syntax idsrosettacode
                                 Path to csv file containing the external database content (default=HDB5.2.3.csv, the H-mode DB will be downloaded from
                                 https://osf.io/zhwa3/ automatically if not present)
           -m MAPPING, --mapping MAPPING
-                                Path to csv-formatted mapping file (default=/home/ITER/sawantp1/git/idstools/database_tools/mappings/h-mode-db-mapping.csv)
+                                Path to csv-formatted mapping file (default=/home/ITER/sawantp1/git/idstools/idstools/mappings/h-mode-db-mapping.csv)
           --varCol VARCOL       Name of the column of the mapping file listing all DB variables (default=DB_VARIABLE)
           --pathCol PATHCOL     Name of the column of the mapping file listing the paths to store all DB variables into IDS fields (default=IDS_PATH)
           --traCol TRACOL       Name of the column of the mapping file listing the transformations to be done on DB variables (default = summary) (default=TRANSFORMATION)

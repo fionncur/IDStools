@@ -6,7 +6,7 @@ import inspect
 
 import imas
 from idstools.database import DBMaster
-from database_tools import idschk
+from idstools import idschk
 from idstools.idslist import available_in_dbentry
 from idstools.utils.clihelper import getBackendID
 
@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 def load_scenario(user, database, version, backend):
     """
-    Return a list of pulses as tuple (shot,run) by using database_tools.db_helper
+    Return a list of pulses as tuple (shot,run) by using idstools.db_helper
 
     Parameters
     ----------

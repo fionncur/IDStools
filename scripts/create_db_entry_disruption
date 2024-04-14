@@ -4,7 +4,7 @@ from __future__ import print_function
 
 import argparse, imas, pdb
 from idstools.database import DBMaster
-import database_tools.init_mendeleiev as mend
+import idstools.init_mendeleiev as mend
 import numpy as np
 import sys
 from os import system,getenv

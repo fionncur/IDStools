@@ -104,10 +104,10 @@ Example eqdsk2ids
 
    .. code-block:: python
 
-      # Functional Interface in Python (database_tools/eqdsk2ids.py)
+      # Functional Interface in Python (idstools/eqdsk2ids.py)
       # Usage:
       # 0) Initialization
-      from database_tools.eqdsk2ids import eqdsk2ids
+      from idstools.eqdsk2ids import eqdsk2ids
 
       # 1) Convert Gfile
       eq = eqdsk2ids(gfile="path/to/gfile")

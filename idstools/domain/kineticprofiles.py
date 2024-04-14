@@ -1656,7 +1656,7 @@ class KineticProfilesCompute:
         }
 
     def getSpeciesList(self):
-        import database_tools.init_mendeleiev as mend
+        import idstools.init_mendeleiev as mend
 
         # Mendeleiev table
         table_mendeleiev = mend.create_table_mendeleiev()

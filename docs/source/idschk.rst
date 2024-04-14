@@ -79,11 +79,11 @@
 
    .. code-block:: python
 
-      # Functional Interface in Python (database_tools/idschk.py)
+      # Functional Interface in Python (idstools/idschk.py)
       # Examples:
       # 0) Initialization
       import imas
-      from database_tools.idschk import *
+      from idstools.idschk import *
 
       input = imas.DBEntry(imas.imasdef.MDSPLUS_BACKEND, "ITER", 131024, 40, "public")
       input.open()

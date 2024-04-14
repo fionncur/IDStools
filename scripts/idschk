@@ -11,8 +11,8 @@ from idstools.utils.clihelper import dbentryParser
 
 import imas
 from idstools.idslist import available_in_dbentry
-from database_tools import idschk
-from database_tools.db_validator import ScenarioValidator
+from idstools import idschk
+from idstools.db_validator import ScenarioValidator
 
 
 # ----------------------------------------------------------------------
@@ -107,12 +107,12 @@ if __name__ == "__main__":
                 4) Check IDS/equilibrium with COCOS values
                 $ idschk -s 131024 -r 40 -c --verbose
 
-            (II) Functional Interface in Python (database_tools/idschk.py)
+            (II) Functional Interface in Python (idstools/idschk.py)
             --------------------------------------------------------------
             Examples: 
                 0) Initialization
                 >>> import imas
-                >>> from database_tools.idschk import * 
+                >>> from idstools.idschk import * 
                 >>> input = imas.DBEntry(imas.imasdef.MDSPLUS_BACKEND,"ITER",131024,40,"public")
                 >>> input.open()
                 >>> equilibrium=input.get("equilibrium")

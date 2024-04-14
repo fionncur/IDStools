@@ -7,7 +7,7 @@ This module provides compute functions and classes for core_profiles ids data
 import contextlib
 from typing import Union
 import numpy as np
-import database_tools.init_mendeleiev as mend
+import idstools.init_mendeleiev as mend
 import logging
 import functools
 

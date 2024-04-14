@@ -1,4 +1,18 @@
 #!/bin/bash
+# Bamboo deploy script using Easybuild
+# Execute script from root directory
+
+# expand aliases
+shopt -s expand_aliases
+
+#print hostname
+hostname -f
+
+# Note Disable set -e option when using on local as it will exit the shell on error
+if [[ "$(uname -n)" == *"bamboo"* ]]; then
+    set -e -o pipefail
+fi
+
 # Test on existing  databases
 declare -a tests
 
@@ -12,40 +26,23 @@ tests+=("123314;1")
 # tests+=("135014;1")
 # tests+=("134174;117")
 
+set -x
 #db tools test
-echo -------dbscraper-------
-echo TESTING: dbscraper "core_profiles/profiles_1d(0)/electrons/temperature"
-dbscraper "core_profiles/profiles_1d(0)/electrons/temperature" --verbose --list-count 10 || exit 1
-
-echo -------dbselector-------
-echo TESTING: dbselector core_profiles
-dbselector core_profiles --list-count 10 || exit 1
-
-echo TESTING: dbselector summary
-dbselector summary --list-count 10 || exit 1
-
-echo -------dblist-------
-echo TESTING: dblist list
-dblist -u public -d TEST list || exit 1
-dblist -u public -d TEST list -c || exit 1
-dblist -u public -d TEST list -M || exit 1
-echo TESTING: dblist -u public databases
-dblist databases || exit 1
-echo TESTING: dblist -u public dataversions
-dblist dataversions || exit 1
-
-echo =====================================scenario_status=====================================================
-echo TESTING: scenario_status -s 130012 -r 4
-scenario_status -s 130012 -r 4 || exit 1
-
-echo =====================================scenario_summary=====================================================
-echo TESTING: scenario_summary
-scenario_summary || exit 1
+dbscraper "core_profiles/profiles_1d(0)/electrons/temperature" --verbose --list-count 10 
+dbselector core_profiles --list-count 10 
+dbselector summary --list-count 10 
+dblist -u public -d TEST list 
+dblist -u public -d TEST list -c 
+dblist -u public -d TEST list -M 
+dblist databases 
+dblist dataversions 
+scenario_status -s 130012 -r 4 
+scenario_summary 
 
 # echo TESTING: dblist -u public slices
-# dblist -u public slices  || exit 1
+# dblist -u public slices  
 # echo TESTING: dblist -u public  times
-# dblist -u public times || exit 1
+# dblist -u public times 
 
 # pulse tests
 for i in ${tests[@]}; do
@@ -54,132 +51,132 @@ for i in ${tests[@]}; do
     run=${arr[1]}
     echo -------viewplasmacompo-------
     echo TESTING: shot=$shot : run=$run viewplasmacompo -s $shot -r $run
-    viewplasmacompo -s $shot -r $run || exit 1
+    viewplasmacompo -s $shot -r $run 
     echo --------------
     echo TESTING: shot=$shot : run=$run viewplasmacompo -s $shot -r $run --i
-    viewplasmacompo -s $shot -r $run --i || exit 1
+    viewplasmacompo -s $shot -r $run --i 
     echo --------------
     echo TESTING: shot=$shot : run=$run viewplasmacompo -s $shot -r $run --debug
-    viewplasmacompo -s $shot -r $run --debug || exit 1
+    viewplasmacompo -s $shot -r $run --debug 
 
     echo -------viewequilibrium-------
     echo TESTING: shot=$shot : run=$run viewequilibrium -s $shot -r $run --rho --pfcoils --info --save
-    viewequilibrium -s $shot -r $run --rho --pfcoils --info --save || exit 1
+    viewequilibrium -s $shot -r $run --rho --pfcoils --info --save 
 
     echo TESTING: shot=$shot : run=$run viewequilibrium -s $shot -r $run --info --save
-    viewequilibrium -s $shot -r $run --info --save || exit 1
+    viewequilibrium -s $shot -r $run --info --save 
     echo -------idsprint-------
     echo TESTING: idsprint -s $shot -r $run equilibrium
-    idsprint -s $shot -r $run equilibrium || exit 1
+    idsprint -s $shot -r $run equilibrium 
 
     echo -------idslist-------
     echo TESTING: idslist -s $shot -r $run
-    idslist -s $shot -r $run || exit 1
+    idslist -s $shot -r $run 
 
     echo -------idslist-------
     echo TESTING: idslist -s $shot -r $run yaml
-    idslist -s $shot -r $run yaml || exit 1
+    idslist -s $shot -r $run yaml 
 
     echo -------idslist-------
     echo TESTING: idslist -s $shot -r $run occ
-    idslist -s $shot -r $run occ || exit 1
+    idslist -s $shot -r $run occ 
 
     echo -------idssize-------
     echo TESTING: idssize -s $shot -r $run equilibrium
-    idssize -s $shot -r $run equilibrium || exit 1
+    idssize -s $shot -r $run equilibrium 
 
     echo --------------
     echo TESTING: idssize -s $shot -r $run
-    idssize -s $shot -r $run || exit 1
+    idssize -s $shot -r $run 
 
     echo -------idsperf-------
     echo TESTING: idsperf -s $shot -r $run equilibrium
-    idsperf -s $shot -r $run equilibrium || exit 1
+    idsperf -s $shot -r $run equilibrium 
 
     echo -------viewfluxes-------
     echo TESTING: viewfluxes -s $shot -r $run -m CLOSEST
-    viewfluxes -s $shot -r $run -m CLOSEST || exit 1
+    viewfluxes -s $shot -r $run -m CLOSEST 
 
     echo -------viewneutron-------
     echo TESTING: viewneutron -s $shot -r $run -t 450 --save
-    viewneutron -s $shot -r $run -t 450 --save || exit 1
+    viewneutron -s $shot -r $run -t 450 --save 
 
     echo -------viewpressure-------
     echo TESTING: viewpressure -s $shot -r $run --save
-    viewpressure -s $shot -r $run --save || exit 1
+    viewpressure -s $shot -r $run --save 
 
     echo -------viewsources-------
     echo TESTING: viewsources -s $shot -r $run
-    viewsources -s $shot -r $run || exit 1
+    viewsources -s $shot -r $run 
 
     echo -------viewedgeprofiles-------
     echo TESTING: viewedgeprofiles -s $shot -r $run --save
-    viewedgeprofiles -s $shot -r $run --time 60 --save || exit 1
+    viewedgeprofiles -s $shot -r $run --time 60 --save 
 
     echo -------viewscenario-------
     echo TESTING: viewscenario -s $shot -r $run --save
-    viewscenario -s $shot -r $run --time 60 || exit 1
-    viewscenario -s $shot -r $run --noProfiles || exit 1
+    viewscenario -s $shot -r $run --time 60 
+    viewscenario -s $shot -r $run --noProfiles 
 
     echo -------viewrotation-------
 
     echo TESTING: viewrotation -s $shot -r $run --info --save
-    viewrotation -s $shot -r $run --time 60 --info --save || exit 1
+    viewrotation -s $shot -r $run --time 60 --info --save 
 
     echo -------viewcoresources-------
     echo TESTING: viewcoresources -s $shot -r $run --save
-    viewcoresources -s $shot -r $run --save || exit 1
+    viewcoresources -s $shot -r $run --save 
 done
 
 echo TESTING: viewwall --save wall iter
-viewwall --save wall iter || exit 1
+viewwall --save wall iter 
 echo TESTING: viewwall --save wall iter
-viewwall --save wall iter || exit 1
+viewwall --save wall iter 
 
 # echo -------idscp-------
 # echo TESTING: idscp -si 131024 -ri 10 -so 145000 -ro 2 -f
-# idscp -si 131024 -ri 10 -so 145000 -ro 2 || exit 1
+# idscp -si 131024 -ri 10 -so 145000 -ro 2 
 
 echo -------idsdiff-------
 echo TESTING: idsdiff 122525 1 122525 2 summary
-idsdiff 122525 1 122525 2 summary || exit 1
-idsdiff 130011 6 130012 4 summary || exit 1
+idsdiff 122525 1 122525 2 summary 
+idsdiff 130011 6 130012 4 summary 
 
 echo -------viewmachinedescription-------
-viewmachinedescription list pf_active --checkValidity || exit 1
-viewmachinedescription list pf_active --obsolete || exit 1
-viewmachinedescription plot wall --save || exit 1
+viewmachinedescription list pf_active --checkValidity 
+viewmachinedescription list pf_active --obsolete 
+viewmachinedescription plot wall --save 
 
 echo -------md_status-------
-md_status -s 116000 -r 3 || exit 1
+md_status -s 116000 -r 3 
 
 echo -------md_summary-------
-md_summary -s 150502/102 || exit 1
-md_summary -s nbi,on-on || exit 1
+md_summary -s 150502/102 
+md_summary -s nbi,on-on 
 
 echo -------show_db_entry-------
-show_db_entry -s 134174 -r 117 || exit 1
+show_db_entry -s 134174 -r 117 
 
 echo -------vieweccomposition and viewecray-------
-viewecray -d TEST -s 134173 -r 2326 --save || exit 1
-vieweccomposition -d TEST -s 134173 -r 2326 --save || exit 1
+viewecray -d TEST -s 134173 -r 2326 --save 
+vieweccomposition -d TEST -s 134173 -r 2326 --save 
 
 echo -------viewspectrometry-------
-viewspectrometry -d TEST -s 134000 -r 37 --save || exit 1
+viewspectrometry -d TEST -s 134000 -r 37 --save 
 
 echo -------viewcoretransport-------
-viewcoretransport -s 134000 -r 40 --save || exit 1
-viewcoretransport -d TEST -s 92436 -r 850 --save || exit 1
+viewcoretransport -s 134000 -r 40 --save 
+viewcoretransport -d TEST -s 92436 -r 850 --save 
 
 # echo -------idsresample-------
 # echo TESTING: idsresample -si 131024 -ri 10 -so 145000 -ro 2
-# idsresample -si 131024 -ri 10 -so 145000 -ro 2 || exit 1
+# idsresample -si 131024 -ri 10 -so 145000 -ro 2 
 
 echo -------viewhcdwaves-------
-viewhcdwaves -s 134173 -r 101 -u public -d TEST --save || exit 1
+viewhcdwaves -s 134173 -r 101 -u public -d TEST --save 
 
 echo -------viewhcddistributions-------
-viewhcddistributions -s 130012 -r 115 -u public -d TEST --save || exit 1
+viewhcddistributions -s 130012 -r 115 -u public -d TEST --save 
 
 echo -------viewcore_sources-------
 viewcoresources -s 130012 -r 105 -d TEST
@@ -209,7 +206,7 @@ viewcoresources -s 130012 -r 105 -d TEST
 # eqdsk2ids -s 134174 -r 117 -g /home/ITER/sawantp1/git/idstools/tests/geqdsk/example.gfile -u sawantp1 -d ITER --log INFO
 # eqdsk2ids --uri "imas:mdsplus?user=public;shot=134174;run=117;database=ITER;version=3" -g /home/ITER/sawantp1/git/idstools/tests/geqdsk/example.gfile -u sawantp1 -d ITER --log INFO
 # eqdsk2ids --uri "imas:mdsplus?user=sawantp1;shot=134174;run=117;database=ITER;version=3" -g /home/ITER/sawantp1/git/idstools/asset/geqdsk/example.gfile -u sawantp1 -d ITER --log INFO
-# idschk --uri "imas:mdsplus?user=public;shot=134174;run=117;database=ITER;version=3" -f /home/ITER/sawantp1/git/idstools/database_tools/validation_schemas/generic/core_profiles.yml
+# idschk --uri "imas:mdsplus?user=public;shot=134174;run=117;database=ITER;version=3" -f /home/ITER/sawantp1/git/idstools/idstools/validation_schemas/generic/core_profiles.yml
 # idscp --input_uri "imas:mdsplus?user=public;shot=131024;run=10;database=ITER;version=3" --output_uri "imas:mdsplus?user=sawantp1;shot=131024;run=2;database=ITER;version=3"
 # idsdiff --uriA "imas:mdsplus?user=public;shot=122525;run=1;database=ITER;version=3" --uriB "imas:mdsplus?user=public;shot=122525;run=2;database=ITER;version=3" summary --generate-html
 # idsdiff --pulseA 122525 --runA  1 --pulseB 122525 --runB 2 summary --generate-html
@@ -221,7 +218,7 @@ viewcoresources -s 130012 -r 105 -d TEST
 # idssize --uri "imas:mdsplus?user=public;shot=131024;run=41;database=ITER;version=3"
 # idslist --uri "imas:mdsplus?user=public;shot=131024;run=41;database=ITER;version=3"
 echo -------idsrescale_equilibrium-------
-idsrescale_equilibrium -si 134174 -ri 117 -so 122222 -ro 22 --rescale 2 || exit 1
+idsrescale_equilibrium -si 134174 -ri 117 -so 122222 -ro 22 --rescale 2 
 
 echo -------idsshift_equilibrium-------
-idsshift_equilibrium -si 134174 -ri 117 -so 123001 -ro 1 --shift -0.01 || exit 1
+idsshift_equilibrium -si 134174 -ri 117 -so 123001 -ro 1 --shift -0.01 

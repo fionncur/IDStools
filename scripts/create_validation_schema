@@ -8,7 +8,7 @@ import argparse
 
 import imas
 from xml.etree import ElementTree as ET
-from database_tools.idschk import init_schema_coordinate
+from idstools.idschk import init_schema_coordinate
 
 
 IMAS_DIR = "IMAS_PREFIX"

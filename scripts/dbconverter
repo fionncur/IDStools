@@ -17,7 +17,7 @@ from rich.console import Console
 from rich.progress import track
 from rich_argparse import RichHelpFormatter
 
-from database_tools.idschk import ids_validator
+from idstools.idschk import ids_validator
 from idstools.database import DBMaster
 from idstools.idslist import available_in_dbentry
 from idstools.utils.clihelper import getBackendID, imasParser
@@ -75,7 +75,7 @@ current_fpath = path.dirname(path.realpath(__file__))
 schema_dir = path.join(current_fpath, "../../../../bin/validation_schemas")
 if not path.isdir(schema_dir):
     current_fpath = path.dirname(path.dirname(path.realpath(__file__)))
-    schema_dir = path.join(current_fpath, "database_tools/validation_schemas")
+    schema_dir = path.join(current_fpath, "idstools/validation_schemas")
  
 if path.isdir(schema_dir):
     schema += sorted(glob(schema_dir + "/generic/*.y*ml", recursive=True))

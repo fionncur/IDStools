@@ -302,7 +302,7 @@ class DistributionsCompute:
     def getPowerAbsorbedtoIndividualIons(self, timeIndex, verbose=False):
         if self.isRadialGridInfoProcessed is False:
             self.getRadialGridInfo(timeIndex)
-        import database_tools.init_mendeleiev as mend
+        import idstools.init_mendeleiev as mend
 
         table_mendeleiev = mend.create_table_mendeleiev()
         powerAbsorbed = {}

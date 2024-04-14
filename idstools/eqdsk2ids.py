@@ -9,7 +9,7 @@ from pprint import pformat
 from fortranformat import FortranRecordReader
 
 import imas
-from database_tools.idschk import IDS_COCOS, COCOS, compute_COCOS
+from idstools.idschk import IDS_COCOS, COCOS, compute_COCOS
 
 
 logger = logging.getLogger(__name__)
