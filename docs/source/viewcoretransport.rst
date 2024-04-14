@@ -1,19 +1,22 @@
-viewcoretransport
-===================
+###################
+ viewcoretransport
+###################
 
-*viewcoretransport* Displays the Core plasma transport of particles, energy, momentum and poloidal flux. 
+*viewcoretransport* Displays the Core plasma transport of particles,
+energy, momentum and poloidal flux.
+`refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`_.
 
+**************************
+ Syntax viewcoretransport
+**************************
 
-Syntax viewcoretransport
-~~~~~~~~~~~~~~~~~~
-
-    .. code-block:: bash   
+   .. code-block:: bash
 
         $ viewcoretransport -h
         usage: viewcoretransport [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] [-uri URI] [-s PULSE] [-r RUN] [-m {CLOSEST,PREVIOUS,LINEAR}]
                                 [-o OCCURRENCE] [-t TIME] [--save]
 
-        Check match between transport fluxes and a simple calculation
+      Check match between transport fluxes and a simple calculation
 
         optional arguments:
         -h, --help            show this help message and exit
@@ -36,15 +39,15 @@ Syntax viewcoretransport
         -t TIME, --time TIME  Time
         --save                Save figure at default location
 
+***************************
+ Example viewcoretransport
+***************************
 
-Example 
-~~~~~~~
-
-    .. code-block:: bash
+   .. code-block:: bash
 
         $ viewcoretransport -d TEST -s 92436 -r 850
         $ viewcoretransport --uri "imas:mdsplus?user=public;shot=92436;run=850;database=TEST;version=3" 
 
-    .. image:: _static/images/viewcoretransport.png
-        :alt: image not found
-        :align: center
+   .. image:: _static/images/viewcoretransport.png
+      :alt: image not found
+      :align: center

@@ -19,7 +19,7 @@ from idstools.view.waves import WavesView
 # MANAGEMENT OF INPUT ARGUMENTS
 # ------------------------------
 parser = argparse.ArgumentParser(
-    description="---- Display EC results", parents=[dbentryParser]
+    description="---- Display EC results [previously known as eccomp]", parents=[dbentryParser]
 )
 parser.add_argument(
     "-t",

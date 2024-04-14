@@ -1,7 +1,9 @@
 Sphinx
 numpy
-pydata-sphinx-theme
 pyparsing 
 python-dateutil
+rst2pdf
 sphinx-autodoc-typehints
+sphinx-immaterial
 sphinx-toolbox
+sphinx-autoapi

@@ -1,7 +1,7 @@
 """ 
 This module provides compute functions and classes for core_sources ids data
 
-`more about core_profiles ids https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/CI/imas-3.37.2/core_sources.html_.
+`refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`_.
 
 """
 import logging

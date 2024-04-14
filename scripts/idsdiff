@@ -414,7 +414,7 @@ def generate_html(file_path, data, pulseA, runA, pulseB, runB):
 if __name__ == "__main__":
     # Management of input arguments
     parser = argparse.ArgumentParser(
-        description="Compare a IDS from 2 datasets", parents=[imasParser]
+        description="Compare a IDS from 2 date entries and returns True or False with option of generating html page with comparisen", parents=[imasParser]
     )
     if getIMASVersion() > 4:
         parser.add_argument(

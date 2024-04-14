@@ -133,6 +133,8 @@ done
 
 echo TESTING: viewwall --save wall iter
 viewwall --save wall iter || exit 1
+echo TESTING: viewwall --save wall iter
+viewwall --save wall iter || exit 1
 
 # echo -------idscp-------
 # echo TESTING: idscp -si 131024 -ri 10 -so 145000 -ro 2 -f
@@ -218,3 +220,8 @@ viewcoresources -s 130012 -r 105 -d TEST
 # idsresample --input_uri "imas:mdsplus?user=public;shot=131024;run=10;database=ITER;version=3" --output_uri "imas:mdsplus?user=sawantp1;shot=131024;run=2;database=ITER;version=3"
 # idssize --uri "imas:mdsplus?user=public;shot=131024;run=41;database=ITER;version=3"
 # idslist --uri "imas:mdsplus?user=public;shot=131024;run=41;database=ITER;version=3"
+echo -------idsrescale_equilibrium-------
+idsrescale_equilibrium -si 134174 -ri 117 -so 122222 -ro 22 --rescale 2 || exit 1
+
+echo -------idsshift_equilibrium-------
+idsshift_equilibrium -si 134174 -ri 117 -so 123001 -ro 1 --shift -0.01 || exit 1

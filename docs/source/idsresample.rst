@@ -1,14 +1,18 @@
-idsresample
-===========
+#############
+ idsresample
+#############
 
-*idsresample* Resample IDSs from a data-entry and save them into another data-entry based on `PREVIOUS_INTERP` method..
-more about `imas.imasdef.PREVIOUS_INTERP`:
-Interpolation method that returns the previous time slice if the requested time does not exactly exist in the original IDS
+*idsresample* Resample IDSs from a data-entry and save them into another
+data-entry based on `PREVIOUS_INTERP` method.. more about
+`imas.imasdef.PREVIOUS_INTERP`: Interpolation method that returns the
+previous time slice if the requested time does not exactly exist in the
+original IDS
 
-Syntax idsresample
-~~~~~~~~~~~~~~~~~~
+********************
+ Syntax idsresample
+********************
 
-    .. code-block:: bash     
+   .. code-block:: bash
 
         $ idsresample -h
         usage: idsresample [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] [-iuri INPUT_URI] [-ouri OUTPUT_URI] [-si PULSE_INPUT]
@@ -16,10 +20,10 @@ Syntax idsresample
                         [--index-range INDEX_RANGE | --time-range TIME_RANGE]
                         [ids [ids ...]]
 
-        Resample IDSs from a data-entry and save them into another data-entry
+      Resample IDSs from a data-entry and save them into another data-entry
 
-        positional arguments:
-        ids                   IDSs to resample (leave empty to resample all)
+      positional arguments:
+      ids                   IDSs to resample (leave empty to resample all)
 
         optional arguments:
         -h, --help            show this help message and exit
@@ -64,6 +68,9 @@ Example idsresample
         $ idsresample -si 131024 -ri 10 -so 145000 -ro 2
         resampling indices :equilibrium
 
+*********************
+ Example idsresample
+*********************
 
     .. code-block:: bash
 

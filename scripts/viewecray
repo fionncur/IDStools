@@ -28,7 +28,7 @@ from idstools.view.waves import WavesView
 
 
 parser = argparse.ArgumentParser(
-    description="---- Display EC wave ray-tracing results", parents=[dbentryParser]
+    description="---- Display EC wave ray-tracing results [Previously known as ecray]", parents=[dbentryParser]
 )
 
 parser.add_argument(

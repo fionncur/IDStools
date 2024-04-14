@@ -1,18 +1,22 @@
-viewkineticprofiles
-===================
+#####################
+ viewkineticprofiles
+#####################
 
-*viewkineticprofiles* shows plasma kinetic profiles from the core_profiles IDSs
+*viewkineticprofiles* shows plasma kinetic profiles from the
+core_profiles IDSs
+`refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`_.
 
+****************************
+ Syntax viewkineticprofiles
+****************************
 
-Syntax viewkineticprofiles
-~~~~~~~~~~~~~~~~~~~~~~
 .. code-block:: bash
 
     $ viewkineticprofiles -h
     usage: viewkineticprofiles [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] [-uri URI] [-s PULSE] [-r RUN] [-t TIME] [-e] [--verbose]
                             [--save]
 
-    ---- Display the plasma kinetic profiles from the core_profiles IDSs
+   ---- Display the plasma kinetic profiles from the core_profiles IDSs
 
     optional arguments:
     -h, --help            show this help message and exit
@@ -33,11 +37,11 @@ Syntax viewkineticprofiles
     --verbose             Verbose output
     --save                Save figure at default location
 
+*****************************
+ Example viewkineticprofiles
+*****************************
 
-Example viewkineticprofiles
-~~~~~~~~~~~~~~~~~~~~~~~
-
-    .. code-block:: bash
+   .. code-block:: bash
 
         $ viewkineticprofiles -s 134174 -r 117 
         $ viewkineticprofiles --uri "imas:mdsplus?user=public;shot=134174;run=117;database=ITER;version=3"
@@ -56,10 +60,6 @@ Example viewkineticprofiles
         n_over_ne:    0.502   0.494   0.001
         n_over_n_maj: 1.000   0.984   0.002
 
-        
-
-    .. image:: _static/images/viewkineticprofiles.png
-        :alt: image not found
-        :align: center
-
-
+   .. image:: _static/images/viewkineticprofiles.png
+      :alt: image not found
+      :align: center

@@ -1,9 +1,11 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # THE ROSETTA CODE
 import argparse
 import math
 import os
 import sys
+
+from rich_argparse import RichHelpFormatter
 
 import imas
 import numpy as np
@@ -52,7 +54,7 @@ def ids_setter(IDS, path, val):
         elif leaftype == np.ndarray:
             setattr(dodi, str(leaf), (np.array([val], dtype=(getattr(dodi, leaf)).dtype)))
         else:
-            raise AttributeError(f"The type {nodetype} of {idspath} is currently not supported")
+            raise AttributeError(f"The type {leaftype} of {idspath} is currently not supported")
     except AttributeError:
         raise AttributeError(f"The leaf '{node}' could not be found in {path} for IDS {IDS._base_path}. Please check spelling.")
 
@@ -78,12 +80,10 @@ def evaluate(expr):
         print(f"Syntax error {se} for expression '{expr}'")
     return result
 
-
-
-parser = argparse.ArgumentParser(description="This script applies mapping of a non-IDS database content (e.g. ITPA DBs) into IDS rules.")
+parser = argparse.ArgumentParser(description="This script applies mapping of a non-IDS database content (e.g. ITPA DBs) into IDS rules. replaced by ids_rosetta_code.py", formatter_class=RichHelpFormatter)
 parser.add_argument("-i", "--inputCSV", type=str, default="HDB5.2.3.csv",
                     help="Path to csv file containing the external database content \t(default=%(default)s, the H-mode DB will be downloaded from https://osf.io/zhwa3/ automatically if not present)")
-parser.add_argument("-m", "--mapping", type=str, default=os.path.dirname(os.path.realpath(__file__))+"/mappings/h-mode-db-mapping.csv",
+parser.add_argument("-m", "--mapping", type=str, default=os.path.dirname(os.path.dirname(os.path.realpath(__file__)))+"/database_tools/mappings/h-mode-db-mapping.csv",
                     help="Path to csv-formatted mapping file \t(default=%(default)s)")
 parser.add_argument("--varCol", type=str, default='DB_VARIABLE',
                     help="Name of the column of the mapping file listing all DB variables \t(default=%(default)s)")
@@ -113,7 +113,7 @@ try:
 except FileNotFoundError:
     print(f"Downloading {args.inputCSV} from https://osf.io/ (CC BY 4.0 @ Geert Verdoolaege and Stanley Kaye)")
     url = "https://osf.io/zhwa3/download"
-    dl = requests.get(url,allow_redirects=True,verify="/work/imas/etc/iter.pem")
+    dl = requests.get(url,allow_redirects=True) # ,verify="/work/imas/etc/iter.pem"
     open(args.inputCSV,'wb').write(dl.content)
 
 mf = pd.read_csv(args.mapping, keep_default_na=False, usecols=[args.varCol, args.pathCol, args.traCol])
@@ -136,9 +136,10 @@ for row in track(rows, description="[green]Processing..."):
     de.create()
 
     iod = {}
+    
+    
     for ids in list(imas.IDSName):
         iod[ids.value] = getattr(imas, ids.value)()
-
     for var in mf.loc[:, args.varCol]:
         idspath = mf[mf[args.varCol] == var].iloc[0].at[args.pathCol] 
         transformation = mf[mf[args.varCol] == var].iloc[0].at[args.traCol]

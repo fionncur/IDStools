@@ -23,7 +23,7 @@ slicingMethods = {
 }
 # Management of input arguments
 parser = argparse.ArgumentParser(
-    description="View information about sources",
+    description="View information about sources [previsouly known as print_sources]",
     epilog="""
 """,
     formatter_class=argparse.RawTextHelpFormatter,

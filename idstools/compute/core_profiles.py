@@ -1,7 +1,7 @@
 """ 
 This module provides compute functions and classes for core_profiles ids data
 
-`more about core_profiles ids <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/CI/imas-3.37.2/core_profiles.html>`_.
+`refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`_.
 
 """
 import contextlib
@@ -325,9 +325,9 @@ class CoreProfilesCompute:
                 # TODO Couldn't retrive state desnity should we calculate n/ni?
                 # In that case density is always 0 and no meaning of n/ni
                 # We can also get weired errors
-                #  /home/ITER/sawantp1/imasrepo/checkinfolder/idstools/src/compute/core_profiles/functions.py:230: RuntimeWarning: invalid value encountered in double_scalars
+                #  idstools/src/compute/core_profiles/functions.py:230: RuntimeWarning: invalid value encountered in double_scalars
                 #   100 * states_density[state_index] / species_density[species_index]
-                # /home/ITER/sawantp1/imasrepo/checkinfolder/idstools/src/compute/core_profiles/functions.py:230: RuntimeWarning: divide by zero encountered in double_scalars
+                # idstools/src/compute/core_profiles/functions.py:230: RuntimeWarning: divide by zero encountered in double_scalars
                 #   100 * states_density[state_index] / species_density[species_index]
                 state_data["states_density"] = states_density
                 logger.debug(

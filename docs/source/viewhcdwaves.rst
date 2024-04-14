@@ -54,6 +54,3 @@ Example viewhcdwaves
     .. image:: _static/images/viewhcdwaves2.png
         :alt: image not found
         :align: center
-
-
-

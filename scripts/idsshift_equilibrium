@@ -1,0 +1,111 @@
+#!/usr/bin/env python3
+# ids_shift_eq -si 131035 -ri 124 -so 123001 -ro 1 -s -0.01 -u bonninx -d iter
+
+import argparse
+import copy
+import logging
+import os
+import sys
+
+import imas
+from rich_argparse import RichHelpFormatter
+
+from idstools.compute.equilibrium import EquilibriumCompute
+from idstools.utils.clihelper import getBackendID, imasParser
+from idstools.utils.idslogger import setupLogger
+
+logger = setupLogger("module", stdout_level=logging.INFO)
+#
+
+# Management of input arguments
+parser = argparse.ArgumentParser(
+    description="Rigidly shifts vertically an equilibrium, storing the output into another entry of the same DB. replaced by ids_shift_eq",
+    parents=[imasParser],
+    formatter_class=RichHelpFormatter,
+)
+parser.add_argument(
+    "-si", "--shot_input", help="Input shot number", required=True, type=int
+)
+parser.add_argument(
+    "-ri", "--run_input", help="Input run number", required=True, type=int
+)
+parser.add_argument(
+    "-so", "--shot_output", help="Output shot number", required=True, type=int
+)
+parser.add_argument(
+    "-ro", "--run_output", help="Output run number", required=True, type=int
+)
+parser.add_argument(
+    "-do",
+    "--database_output",
+    type=str,
+    default=None,
+    help="Database name for the destination data-entry",
+)
+parser.add_argument(
+    "-bo",
+    "--backend_output",
+    type=str,
+    help="Backend name for the destination data-entry",
+)
+parser.add_argument(
+    "--shift", help="Upward shift of equilibrium (m)", type=float, required=True
+)
+
+args = parser.parse_args()
+if args.database_output == None:
+    args.database_output = args.database
+
+if args.backend_output == None:
+    args.backend_output = args.backend
+
+shiftParam = args.shift
+
+# OPEN INPUT
+connection = imas.DBEntry(
+    getBackendID(args.backend),
+    args.database,
+    args.shot_input,
+    args.run_input,
+    args.user,
+)
+status, idx = connection.open()
+if status != 0:
+    logger.critical("Can't open the input pulse file!")
+    sys.exit(1)
+
+idsEquilibrium = connection.get("equilibrium")
+
+# OPEN OUTPUT
+connectionOutput = imas.DBEntry(
+    getBackendID(args.backend),
+    args.database_output,
+    args.shot_output,
+    args.run_output,
+    user_name=os.environ["USER"],
+)
+status, idx = connectionOutput.open()
+if status != 0:
+    logger.warning("Can't open the output pulse file!, Trying to create a new one")
+    status, idx = connectionOutput.create()
+    if status != 0:
+        logger.critical("Can't create the output pulse file!")
+        sys.exit(1)
+
+logger.info(f"Shifting equilibrium by {shiftParam} m")
+logger.info(
+    "Values for wall gaps, locations of strike-points and closest wall points are no longer guaranteed!"
+)
+equilibriumCompute = EquilibriumCompute(idsEquilibrium)
+equout = equilibriumCompute.z_shift(shiftParam)
+
+# PUT IDS INTO OUTPUT
+connectionOutput.put(equout)
+
+# CLOSE FILES
+connection.close()
+connectionOutput.close()
+logger.info(f"Equilibrium IDS is upward shifted successfully.")
+logger.info(
+    f"Output database details database={args.database_output}, shot={args.shot_output}, run={args.run_output}, user={os.environ['USER']}"
+)

@@ -1,12 +1,18 @@
-.. idstools documentation master file, created by
+..
+   idstools documentation master file, created by
    sphinx-quickstart on Wed Apr 26 08:39:37 2023.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-IDSTools
-========
-Following are the pages that shows tools available in the IDSTools and how to utilize them. It also gives API documentation to help with knowledge of core functionalities.
+##########
+ IDStools
+##########
 
+Following are the pages that shows tools available in the IDStools and
+how to utilize them. It also gives API documentation to help with
+knowledge of core functionalities.
+
+:download:`download cheatsheet here <_static/cheatsheet.pdf>`
 
 .. toctree::
    :maxdepth: 2
@@ -15,24 +21,27 @@ Following are the pages that shows tools available in the IDSTools and how to ut
    idstools_overview
    install
    tools
-   support.rst
-
+   cheatsheet
+   support
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: API documentation
 
-   api_docs
+   ...
+   autoapi/index
 
-License
--------
+*********
+ License
+*********
 
 .. literalinclude:: ../../LICENSE.md
    :language: text
 
-Sitemap
--------
+*********
+ Sitemap
+*********
 
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+-  :ref:`genindex`
+-  :ref:`modindex`
+-  :ref:`search`

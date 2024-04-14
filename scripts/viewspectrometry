@@ -22,7 +22,7 @@ from idstools.view.spectrometer_visible import SpectrometerVisibleView
 logger = setupLogger("module", stdout_level=logging.INFO)
 
 parser = argparse.ArgumentParser(
-    description="---- Display spectrum from spectrometer_visible",
+    description="---- Display spectrum from spectrometer_visible [previsouly known as svplot]",
     parents=[dbentryParser],
 )
 

@@ -1,7 +1,7 @@
 """ 
 This module provides view functions and classes for equilibrium ids data
 
-`more about equilibrium ids <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/CI/imas-3.37.2/equilibrium.html>`_.
+`refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`_.
 
 """
 from matplotlib.patches import Rectangle
@@ -57,7 +57,7 @@ class EquilibriumView(BasePlot):
                 ax.plot()
                 canvas.show()
 
-            .. image:: ../../_static/images/EquilibriumView_viewMagneticPoloidalFlux.png
+            .. image:: ../_static/images/EquilibriumView_viewMagneticPoloidalFlux.png
                 :alt: image not found
                 :align: center
 

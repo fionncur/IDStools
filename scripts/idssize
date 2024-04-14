@@ -63,7 +63,7 @@ from idstools.utils.clihelper import (
 from idstools.utils.idshelper import getIDSSize
 
 parser = argparse.ArgumentParser(
-    description="Show size and time of IDSs",
+    description="Show size and time of IDSs [previously knwon as analyze_db_sizes]",
     epilog="""
 """,
     formatter_class=argparse.RawTextHelpFormatter,

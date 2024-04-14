@@ -1,7 +1,7 @@
 """ 
 This module provides compute functions and classes for waves ids data
 
-`more about waves ids <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/CI/imas-3.37.2/waves.html>`_.
+`refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`_.
 
 """
 

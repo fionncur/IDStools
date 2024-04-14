@@ -20,7 +20,7 @@ from idstools.view.common import Canvas
 from idstools.view.core_profiles import CoreProfilesView
 
 parser = argparse.ArgumentParser(
-    description="---- Display the plasma kinetic profiles from the core_profiles IDSs",
+    description="---- Display the efield, toroidal, polidal velocities from the core_profiles IDSs [previously known as rotationplot]",
     parents=[dbentryParser],
 )
 

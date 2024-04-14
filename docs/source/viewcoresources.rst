@@ -1,17 +1,21 @@
-viewcoresources
-===============
+#################
+ viewcoresources
+#################
 
-*viewcoresources* plot core sources results. It uses `core_sources ids <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/CI/imas-3.37.2/core_sources.html>`
+*viewcoresources* plot core sources results.It plots Current, Torque and Particles waveform along with 
+Power, particle and current profiles.
+`refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`_.
 
+************************
+ Syntax viewcoresources
+************************
 
-Syntax viewcoresources
-~~~~~~~~~~~~~~~~~~~~~~
 .. code-block:: bash
 
     $ viewcoresources -h
     usage: viewcoresources [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] [-uri URI] [-s PULSE] [-r RUN] [-t TIME] [--save]
 
-    ---- Display core_sources results
+   ---- Display core_sources results
 
     optional arguments:
     -h, --help            show this help message and exit
@@ -30,11 +34,11 @@ Syntax viewcoresources
     -t TIME, --time TIME  time
     --save                Save figure at default location
 
+*************************
+ Example viewcoresources
+*************************
 
-Example viewcoresources
-~~~~~~~~~~~~~~~~~~~~~~~
-
-    .. code-block:: bash
+   .. code-block:: bash
 
         $ viewcoresources -s 130012 -r 105 -d TEST
         $ viewcoresources --uri "imas:mdsplus?user=public;shot=130012;run=105;database=TEST;version=3"

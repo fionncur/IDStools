@@ -1,18 +1,21 @@
-viewscenario
-============
+##############
+ viewscenario
+##############
 
-*viewscenario* Display the plasma kinetic profiles and equilibrium from the core_profiles and equilibrium IDSs. 
+*viewscenario* Display the plasma kinetic profiles and equilibrium from
+the core_profiles and equilibrium IDSs.
+`refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`_.
 
+*********************
+ Syntax viewscenario
+*********************
 
-Syntax viewscenario
-~~~~~~~~~~~~~~~~~~
-
-    .. code-block:: bash   
+   .. code-block:: bash
 
         $ viewscenario -h
         usage: viewscenario [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] [-uri URI] [-s PULSE] [-r RUN] [-t TIME | -n] [-i] [--save]
 
-        ---- Display the plasma kinetic profiles and equilibrium from the core_profiles and equilibrium IDSs
+      ---- Display the plasma kinetic profiles and equilibrium from the core_profiles and equilibrium IDSs
 
         optional arguments:
         -h, --help            show this help message and exit
@@ -36,7 +39,7 @@ Syntax viewscenario
 Example 
 ~~~~~~~
 
-    .. code-block:: bash
+   .. code-block:: bash
 
         $ viewscenario -s 134174 -r 117
         $ viewscenario --uri "imas:mdsplus?user=public;shot=134174;run=117;database=ITER;version=3" 
@@ -49,6 +52,6 @@ Example
         HMode is not present
         HMode is not present
 
-    .. image:: _static/images/viewscenario.png
-        :alt: image not found
-        :align: center
+   .. image:: _static/images/viewscenario.png
+      :alt: image not found
+      :align: center

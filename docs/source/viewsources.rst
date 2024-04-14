@@ -1,18 +1,25 @@
-viewsources
-==========
+#############
+ viewsources
+#############
 
-*viewsources* script shows source information from available sources. It uses `core_sources ids <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/CI/imas-3.37.2/core_sources.html>`
-It gives information about Mass of atom, Nuclear charge and Ion charge along with particles and energy flux of ions.
+*viewsources* script shows source information from available sources. 
+It gives information about Mass of atom, Nuclear charge and Ion charge
+along with particles and energy flux of ions.
+It uses core_sources ids
 
-Syntax viewsources
-~~~~~~~~~~~~~~~~~~~~~~
+`refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`_.
+
+********************
+ Syntax viewsources
+********************
+
 .. code-block:: bash
 
     $ viewsources -h
     usage: viewsources [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] [-uri URI] [-s PULSE] [-r RUN] [-m {CLOSEST,PREVIOUS,LINEAR}]
                       [-o OCCURRENCE] [-t TIME]
 
-    View information about sources
+   View information about sources
 
     optional arguments:
       -h, --help            show this help message and exit
@@ -34,11 +41,11 @@ Syntax viewsources
                             occurrence
       -t TIME, --time TIME  Time
 
+*********************
+ Example viewsources
+*********************
 
-Example viewsources
-~~~~~~~~~~~~~~~~~~~
-
-    .. code-block:: bash
+   .. code-block:: bash
 
         $ viewsources -s 134174 -r  117
         Showing details for sdcc-login01.iter.org:/work/imas/shared/imasdb/ITER/3 (pulse 134174,117 time:10.60))
@@ -133,9 +140,9 @@ Example viewsources
               3.0       1.0    -9e+40             0.000000e+00                       --
               9.0       4.0    -9e+40             0.000000e+00                       --
 
-    .. code-block:: bash
+   .. code-block:: bash
 
-        $ viewsources -s 134174 -r 117 -m PREVIOUS -t 50
+      $ viewsources -s 134174 -r 117 -m PREVIOUS -t 50
 
         Showing details for sdcc-login01.iter.org:/work/imas/shared/imasdb/ITER/3 (pulse 134174,117 time:48.938))
         total

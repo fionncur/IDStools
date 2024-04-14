@@ -19,7 +19,7 @@ logger = setupLogger("module")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="Prints content of an IDS onto the terminal",
+        description="Prints content of an IDS onto the terminal [previously known as idsdump and idsdumppath]",
         formatter_class=argparse.RawTextHelpFormatter,
         parents=[dbentryParser],
     )

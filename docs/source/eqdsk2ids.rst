@@ -1,13 +1,14 @@
-eqdsk2ids
-=========
+###########
+ eqdsk2ids
+###########
 
 *eqdsk2ids* EQDSK Convertor
 
+******************
+ Syntax eqdsk2ids
+******************
 
-Syntax eqdsk2ids
-~~~~~~~~~~~~~~~
-
-    .. code-block:: bash     
+   .. code-block:: bash
 
         $ qdsk2ids -h
         usage: eqdsk2ids [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] [-uri URI] [-s PULSE] [-r RUN] -g GPATH
@@ -42,9 +43,9 @@ Syntax eqdsk2ids
 Example eqdsk2ids
 ~~~~~~~~~~~~~~~~
 
-    .. code-block:: bash
+   .. code-block:: bash
 
-        $ eqdsk2ids -s 134174 -r 117 -g geqdsk/example.gfile -u sawantp1 -d ITER --log INFO
+        $ eqdsk2ids -s 134174 -r 117 -g geqdsk/example.gfile -u <username>  -d ITER --log INFO
         $ eqdsk2ids --uri "imas:mdsplus?user=username;shot=134174;run=117;database=ITER;version=3" -g geqdsk/example.gfile --log INFO
         24/03/20 17:19:44 INFO: loading GEQDSK file ...
         24/03/20 17:19:44 INFO: GEQDSK COCOS:
@@ -84,37 +85,35 @@ Example eqdsk2ids
         24/03/20 17:19:44 INFO: creating output datafile ...
         24/03/20 17:19:44 INFO: IDS/equilibrium populated in pulse/run = sdcc-login01.iter.org:/home/ITER/sawantp1/public/imasdb/ITER/3 (pulse 134174,117 ).
 
+   .. code-block:: bash
 
-    .. code-block:: bash
+      # Command Line Interface for EQDSK Convertor (eqdsk2ids)
+      # Usage:
+      # 0) Load IMAS and install fortranformat and Cerberus (if not done before)
+      # 1) Compute COCOS and create IDS data file in local database
+      $ eqdsk2ids -g path_to_gfile -s 12345 -r 1 -u userid -d ITER
 
-        # Command Line Interface for EQDSK Convertor (eqdsk2ids)
-        # Usage:
-        # 0) Load IMAS and install fortranformat and Cerberus (if not done before)
-        # 1) Compute COCOS and create IDS data file in local database
-        $ eqdsk2ids -g path_to_gfile -s 12345 -r 1 -u userid -d ITER
+      # 2) Enforce signs of Ip and/or B0 in output
+      $ eqdsk2ids -g path_to_gfile -s 12345 -r 1 -u userid -d ITER --ipsign -1 --b0sign -1
 
-        # 2) Enforce signs of Ip and/or B0 in output
-        $ eqdsk2ids -g path_to_gfile -s 12345 -r 1 -u userid -d ITER --ipsign -1 --b0sign -1
+      # 3) Increase verbosity to see information as COCOS index and transformation coeff.
+      $ eqdsk2ids -g path_to_gfile -s 12345 -r 1 -u userid -d ITER --log INFO
 
-        # 3) Increase verbosity to see information as COCOS index and transformation coeff.
-        $ eqdsk2ids -g path_to_gfile -s 12345 -r 1 -u userid -d ITER --log INFO
+      # 4) Coerce input COCOS index
+      $ eqdsk2ids -g path_to_gfile -s 12345 -r 1 -u userid -d ITER --cocos_in 7
 
-        # 4) Coerce input COCOS index
-        $ eqdsk2ids -g path_to_gfile -s 12345 -r 1 -u userid -d ITER --cocos_in 7
+   .. code-block:: python
 
+      # Functional Interface in Python (database_tools/eqdsk2ids.py)
+      # Usage:
+      # 0) Initialization
+      from database_tools.eqdsk2ids import eqdsk2ids
 
-    .. code-block:: python
-        
-        # Functional Interface in Python (database_tools/eqdsk2ids.py)
-        # Usage:
-        #0) Initialization
-        from database_tools.eqdsk2ids import eqdsk2ids
+      # 1) Convert Gfile
+      eq = eqdsk2ids(gfile="path/to/gfile")
 
-        #1) Convert Gfile
-        eq = eqdsk2ids(gfile='path/to/gfile')
+      # 2) Convert Gfile and alter signs both for Ip & B0
+      eq = eqdsk2ids(gfile="path/to/gfile", ipsign=-1, b0sign=-1)
 
-        #2) Convert Gfile and alter signs both for Ip & B0
-        eq = eqdsk2ids(gfile='path/to/gfile', ipsign=-1, b0sign=-1)
-
-        #3) Convert Gfile with COCOS input (=1) coerced
-        eq = eqdsk2ids(gfile='path/to/gfile', cocos_in=1)
+      # 3) Convert Gfile with COCOS input (=1) coerced
+      eq = eqdsk2ids(gfile="path/to/gfile", cocos_in=1)

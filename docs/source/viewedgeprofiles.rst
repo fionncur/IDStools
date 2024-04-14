@@ -1,17 +1,22 @@
-viewedgeprofiles
-================
+##################
+ viewedgeprofiles
+##################
 
-*viewedgeprofiles* script shows edge profiles plots by interpolating on rectangular grid. It shows Electrons, Ions and Neutral density plots.
+*viewedgeprofiles* script shows edge profiles plots by interpolating on
+rectangular grid. It shows Electrons, Ions and Neutral density plots.
+`refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`_.
 
-Syntax viewedgeprofiles
-~~~~~~~~~~~~~~~~~~~~~~~
+*************************
+ Syntax viewedgeprofiles
+*************************
+
 .. code-block:: bash
 
     $ viewedgeprofiles -h
     usage: viewedgeprofiles [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] [-uri URI] [-s PULSE] [-r RUN] [-t TIME] [--separatix]
                             [--wall] [--save]
 
-    ---- Edge Profile plot
+   ---- Edge Profile plot
 
     optional arguments:
     -h, --help            show this help message and exit
@@ -32,16 +37,15 @@ Syntax viewedgeprofiles
     --wall                Show wall
     --save                Save figure at default location
 
+**************************
+ Example viewedgeprofiles
+**************************
 
-Example viewedgeprofiles
-~~~~~~~~~~~~~~~~~~~~~~~~
-    .. code-block:: bash
+   .. code-block:: bash
 
         $ viewedgeprofiles -s 123314 -r 1 --separatix --wall
         $ viewedgeprofiles --uri "imas:mdsplus?user=public;shot=134174;run=117;database=ITER;version=3" --separatix --wall --time 60
 
-    .. image:: _static/images/viewedgeprofiles.png
-        :alt: image not found
-        :align: center
-
-
+   .. image:: _static/images/viewedgeprofiles.png
+      :alt: image not found
+      :align: center

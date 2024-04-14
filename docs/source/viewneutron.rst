@@ -1,19 +1,21 @@
-viewneutron
-===========
+#############
+ viewneutron
+#############
 
-*viewneutron*  plots particles vs normalised toroidal flux coordinate. It retrieves from `distribution_sources` IDS.
-https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/CI/imas-3.37.2/distribution_sources.html
+*viewneutron* plots particles vs normalised toroidal flux coordinate. It
+retrieves from distribution_sources IDS
+`refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`_.
 
+********************
+ Syntax viewneutron
+********************
 
-Syntax viewneutron
-~~~~~~~~~~~~~~~
-
-    .. code-block:: bash   
+   .. code-block:: bash
 
         $ viewneutron -h
         usage: viewneutron [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] [-uri URI] [-s PULSE] [-r RUN] [-t TIME] [--save]
 
-        ---- Display the neutron profiles from the distribution_sources IDSs
+      ---- Display the neutron profiles from the distribution_sources IDSs
 
         optional arguments:
         -h, --help            show this help message and exit
@@ -32,11 +34,11 @@ Syntax viewneutron
         -t TIME, --time TIME  Time
         --save                Save figure at default location
 
+*********
+ Example
+*********
 
-Example 
-~~~~~~~
-
-    .. code-block:: bash
+   .. code-block:: bash
 
         $ viewneutron -s 121014 -r 11 -t 450
         $ viewneutron --uri "imas:mdsplus?user=public;shot=121014;run=11;database=ITER;version=3"
@@ -56,4 +58,3 @@ Example
     .. image:: _static/images/viewneutron.png
         :alt: image not found
         :align: center
-

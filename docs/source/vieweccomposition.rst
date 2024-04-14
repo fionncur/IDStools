@@ -1,10 +1,12 @@
-vieweccomposition
-=================
+###################
+ vieweccomposition
+###################
 
 *vieweccomposition* shows EC composition (ECRH and ECCD profiles)
 
-Syntax vieweccomposition
-~~~~~~~~~~~~~~~~~~~~~~~~
+**************************
+ Syntax vieweccomposition
+**************************
 
 .. code-block:: bash
 
@@ -12,7 +14,7 @@ Syntax vieweccomposition
     usage: vieweccomposition [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] [-uri URI] [-s PULSE] [-r RUN] [-t TIME] [-f FORCE_PSI]
                             [--verbose] [--save]
 
-    ---- Display EC results
+   ---- Display EC results
 
     optional arguments:
     -h, --help            show this help message and exit
@@ -34,21 +36,15 @@ Syntax vieweccomposition
     --verbose             = 1 to display numerical analysis of gaussian profiles
     --save                Save figure at default location
 
+***************************
+ Example vieweccomposition
+***************************
 
-Example vieweccomposition
-~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    .. code-block:: bash
+   .. code-block:: bash
 
         $ vieweccomposition -d TEST -s 134173 -r 2326 
         $ vieweccomposition --uri "imas:mdsplus?user=public;shot=134173;run=2326;database=TEST;version=3"
 
-    .. image:: _static/images/vieweccomposition.png
-        :alt: image not found
-        :align: center
-
-
-
-
-
-
+   .. image:: _static/images/vieweccomposition.png
+      :alt: image not found
+      :align: center

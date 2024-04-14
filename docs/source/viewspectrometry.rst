@@ -1,18 +1,21 @@
-viewspectrometry
-================
+##################
+ viewspectrometry
+##################
 
-*viewspectrometry* Display the spectrum from spectrometer_visible idses. It shows plots of radiance and intensity of the spectrom in two different windows.
+*viewspectrometry* Display the spectrum from spectrometer_visible idses.
+It shows plots of radiance and intensity of the spectrom.
+`refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`_.
 
+*************************
+ Syntax viewspectrometry
+*************************
 
-Syntax viewspectrometry
-~~~~~~~~~~~~~~~~~~~~~~~
-
-    .. code-block:: bash   
+   .. code-block:: bash
 
         $ viewspectrometry -h
         usage: viewspectrometry [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] [-uri URI] [-s PULSE] [-r RUN] [-t TIME] [--save]
 
-        ---- Display spectrum from spectrometer_visible
+      ---- Display spectrum from spectrometer_visible
 
         optional arguments:
         -h, --help            show this help message and exit
@@ -31,22 +34,16 @@ Syntax viewspectrometry
         -t TIME, --time TIME  Time
         --save                Save figure at default location
 
+***************************
+ Example viewspectrometry
+***************************
 
-Example 
-~~~~~~~
-
-    .. code-block:: bash
+   .. code-block:: bash
 
         $ viewspectrometry -d TEST -s 134000 -r 37
         $ viewspectrometry --uri "imas:mdsplus?user=public;shot=134000;run=37;database=TEST;version=3"
 
 
-    .. image:: _static/images/viewspectrometry.png
-        :alt: image not found
-        :align: center
-
-
-
-
-
-
+   .. image:: _static/images/viewspectrometry.png
+      :alt: image not found
+      :align: center
