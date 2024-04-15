@@ -94,7 +94,6 @@ class CoreSourcesView:
                 )
             ax.set_ylabel("Power to bulk $\mathrm{[MW/m^{3}]}$")
             ax.set_xlabel("Normalized toroidal flux coordinate")
-            ax.grid(b=True)
             # set legend
             legend = ax.legend()
             frame = legend.get_frame()
@@ -155,7 +154,6 @@ class CoreSourcesView:
                 )
             ax.set_ylabel("Density $\mathrm{[m^{-3}.s^{-1}]}$")
             ax.set_xlabel("Normalized toroidal flux coordinate")
-            ax.grid(b=True)
             # set legend
             legend = ax.legend()
             frame = legend.get_frame()
@@ -207,7 +205,6 @@ class CoreSourcesView:
                     )
             ax.set_ylabel("Current density $\mathrm{[kA/m^{2}]}$")
             ax.set_xlabel("Normalized toroidal flux coordinate")
-            ax.grid(b=True)
             # set legend
             legend = ax.legend()
             frame = legend.get_frame()
@@ -290,7 +287,6 @@ class CoreSourcesView:
                     )
                 ax.set_ylabel("Power waveforms $\mathrm{[MW]}$")
                 ax.set_xlabel("Time (s)")
-                ax.grid(b=True)
                 # set legend
                 legend = ax.legend()
                 frame = legend.get_frame()
@@ -373,7 +369,6 @@ class CoreSourcesView:
                     )
                 ax.set_ylabel("Particles waveforms $\mathrm{[s^{-1}]}$")
                 ax.set_xlabel("Time (s)")
-                ax.grid(b=True)
                 # set legend
                 legend = ax.legend()
                 frame = legend.get_frame()
@@ -421,7 +416,6 @@ class CoreSourcesView:
 
                 ax.set_ylabel("Current waveforms $\mathrm{[kA.m]}$")
                 ax.set_xlabel("Time (s)")
-                ax.grid(b=True)
                 # set legend
                 legend = ax.legend()
                 frame = legend.get_frame()
@@ -469,7 +463,6 @@ class CoreSourcesView:
 
                 ax.set_ylabel("Torque waveforms $\mathrm{[kg.m^2.s^{-2}]}$")
                 ax.set_xlabel("Time (s)")
-                ax.grid(b=True)
                 # set legend
                 legend = ax.legend()
                 frame = legend.get_frame()

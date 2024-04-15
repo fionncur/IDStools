@@ -46,7 +46,6 @@ class DistributionSourcesView(BasePlot):
         ax.set_xlim(rhoTorNorm[0], rhoTorNorm[nrho - 1])
         ax.set_xlabel(r"$\rho/\rho_0$", fontArgs, labelpad=1)
         ax.set_ylabel(r"Neutron rate ($s^{-1}.m{^{-3}}$)", fontArgs, labelpad=0)
-        ax.grid(b=True)
 
         # set legend
         # legx_pos = 1.35
