@@ -12,13 +12,14 @@ hostname -f
 LOG_DIR=$PWD/"logs"
 rm -rf "$LOG_DIR"
 mkdir -p "$LOG_DIR"
+# "viewedgeprofiles -s 123314 -r 1 --separatix --wall --save"
+# 15-Apr-2024 17:31:03	./tests/st00_common.sh: line 19: 1898494 Illegal instruction     (core dumped) viewedgeprofiles -s 123314 -r 1 --separatix --wall --save
 
 SCRIPTS=(
 "viewcoresources -s 130012 -r 105 -d TEST  --save"
 "viewcoretransport -s 92436 -r 850  -d TEST --save" 
 "vieweccomposition -s 134173 -r 2326 -d TEST --save" 
 "viewecray -s 134173 -r 2326 -d TEST --save" 
-"viewedgeprofiles -s 123314 -r 1 --separatix --wall --save"
 "viewequilibrium -s 134174 -r 117 --rho --pfcoils --save"
 "viewfluxes -s 134174 -r  117 -m CLOSEST"
 "viewhcddistributions -s 130012 -r 115 -d TEST --save" 
