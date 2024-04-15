@@ -50,7 +50,7 @@ args = parser.parse_args()
 connection = DBMaster.getConnection(args)
 if connection is None:
     logger.critical("----> Aborted.")
-    exit(0)
+    exit(1)
 
 if args.wall:
     machineDescription = MachineDescription(copy.deepcopy(args))
@@ -88,13 +88,13 @@ if len(edgeProfileIds.grid_ggd) == 0:
     logger.error(
         f"No values in grid_ggd  at time {timeValue}, Can not plot! Choose different time with option --time, timerange [{timeArray.min()}-{timeArray.max()}]"
     )
-    exit(0)
+    exit(1)
 
 if len(edgeProfileIds.grid_ggd[0].space) == 0:
     logger.error(
         f"No values in grid_ggd[0].space at time {timeValue}, Can not plot! Choose different time with option --time, timerange [{timeArray.min()}-{timeArray.max()}]"
     )
-    exit(0)
+    exit(1)
 
 
 edgeProfilesView = EdgeProfilesView(edgeProfileIds)

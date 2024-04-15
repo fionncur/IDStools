@@ -52,7 +52,7 @@ graph.
 
    .. code-block:: bash
 
-      $ idsdiff --generate-html 122525 1 122525 2 summary
+      $ idsdiff --pulseA 122525 --runA  1 --pulseB 122525 --runB 2 summary --generate-html
 
    .. image:: _static/images/idsdiff_1.png
       :alt: image not found

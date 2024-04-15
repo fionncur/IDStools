@@ -499,7 +499,7 @@ if __name__ == "__main__":
             argsA.uri = f"imas:{args.backend.lower()}?user={args.user};shot={args.pulseA};run={args.runA};database={args.database};version={args.version}"
         else:
             argsA.uri = args.uriA
-    print(args)
+
     inputA = DBMaster.getConnection(argsA)
     if inputA is None:
         print("Error opening source pulse! Please check existence.")

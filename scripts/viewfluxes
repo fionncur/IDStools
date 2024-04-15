@@ -46,7 +46,7 @@ args = parser.parse_args()
 connection = DBMaster.getConnection(args)
 if connection is None:
     logger.critical("----> Aborted.")
-    exit(0)
+    exit(1)
 
 idsSliceCoreTransport = connection.get_slice(
     "core_transport",
@@ -56,7 +56,7 @@ idsSliceCoreTransport = connection.get_slice(
 )
 if len(idsSliceCoreTransport.time) == 0:
     logger.critical("Time vector is empty! aborting")
-    sys.exit(0)
+    sys.exit(1)
 
 print(f"Showing details for {getDatabasePath(args, idsSliceCoreTransport.time[0])}")
 

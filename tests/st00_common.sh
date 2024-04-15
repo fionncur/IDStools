@@ -1,0 +1,51 @@
+#!/bin/bash
+
+execute_scripts() {
+    declare -A SCRIPT_STATUS
+    declare -A SCRIPT_TIME
+
+    local SCRIPTS=("$@")
+
+    # Loop through each script and execute
+    for script in "${SCRIPTS[@]}"; do
+        # Set the log file for each script
+        executable=$(echo "$script" | awk '{print $1}')
+        LOG_FILE="$LOG_DIR/${executable}.log"
+
+        echo "Executing $script"
+        echo "$script" >>"$LOG_DIR/${executable}.log"
+        start_time=$(date +%s.%N)
+        # Execute the script and redirect both stdout and stderr to the log file
+        eval "$script">>"$LOG_FILE" 2>&1
+        output=$?
+        # Calculate execution time
+        end_time=$(date +%s.%N)
+        SCRIPT_TIME["$script"]=$(echo "$end_time - $start_time" | bc)
+
+        # Check if the script exited with an error
+        if [ "$output" -ne 0 ]; then
+            echo "Error occurred while executing $script."
+            echo "Log saved to $LOG_FILE."
+            echo "Error log :"
+            SCRIPT_STATUS["$script"]="FAIL"
+            cat "$LOG_FILE"
+        else
+            echo "$script executed successfully."
+            echo "Log saved to $LOG_FILE."
+            SCRIPT_STATUS["$script"]="PASS"
+        fi
+        echo "----------------------------------------------------" >> "$LOG_FILE"
+        echo ""
+    done
+
+    RETURN_STATUS=0
+    printf "%-10s %-5s %-50s\n" "Status" "Time" "Script"
+    for script in "${SCRIPTS[@]}"; do
+        printf "%-10s %.2f %-50s\n" "${SCRIPT_STATUS[$script]}" "${SCRIPT_TIME[$script]}" "$script"
+        if [ "${SCRIPT_STATUS[$script]}" == "FAIL" ]; then
+            RETURN_STATUS=1
+        fi
+    done
+
+    return $RETURN_STATUS
+}

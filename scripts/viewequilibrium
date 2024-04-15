@@ -57,7 +57,7 @@ logger = setupLogger("module", stdout_level=logging.INFO)
 connection = DBMaster.getConnection(args)
 if connection is None:
     logger.critical("----> Aborted.")
-    exit(0)
+    exit(1)
 
 idsObjEquilibrium = imas.equilibrium()
 idsObjEquilibrium.time = connection.partial_get("equilibrium", "time", args.occurrence)

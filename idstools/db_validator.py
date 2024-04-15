@@ -225,26 +225,24 @@ class ScenarioValidator:
             for key, schema in schemas.items():
                 if key == idsname:
                     ids = None
-
+                    dbEntryDetails=""
                     if "uri" in db.__dict__:
-                        logger.info(
-                            "- {}/{}/{} < {}".format(
-                                db.__dict__["uri"],
-                                idsname,
-                                occ,
-                                path.relpath(fpath),
-                            )
-                        )
+                        dbEntryDetails=db.__dict__["uri"]
                     else:
-                        logger.info(
-                            "- {}/{}/{}/{} < {}".format(
-                                db.__dict__["pulse"],
-                                db.__dict__["run"],
-                                idsname,
-                                occ,
-                                path.relpath(fpath),
-                            )
+                        if "pulse" in db.__dict__:
+                            dbEntryDetails = f"{db.__dict__['pulse']}/{db.__dict__['run']}"
+                        if "shot" in db.__dict__:
+                            dbEntryDetails = f"{db.__dict__['shot']}/{db.__dict__['run']}"
+                        
+                    logger.info(
+                        "- {}/{}/{} < {}".format(
+                            dbEntryDetails,
+                            idsname,
+                            occ,
+                            path.relpath(fpath),
                         )
+                    )
+
                     try:
                         idstime = db.partial_get(idsname, "time", occurrence=occ)
                         #

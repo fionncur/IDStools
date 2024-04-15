@@ -65,7 +65,7 @@ Example idsresample
 
     .. code-block:: bash
 
-        $ idsresample -si 131024 -ri 10 -so 145000 -ro 2
+        $ idsresample -si 131024 -ri 10 -so 145000 -ro 2 -u public
         resampling indices :equilibrium
 
 *********************

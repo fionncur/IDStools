@@ -163,7 +163,8 @@ class DistributionsView:
         ax.set_ylabel("Power to the bulk $\mathrm{[MW]}$")
         ax.set_xlabel("Time (s)")
         ax.set_title("NBI/FUS power waveform")
-        ax.set_ylim(0, max(profiles["all_injectors_total_power_waveform"]) * 1.2e-6)
+        if profiles is not None:
+            ax.set_ylim(0, max(profiles["all_injectors_total_power_waveform"]) * 1.2e-6)
         legend = ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
         DistributionsView.customizeLegend(legend)
 

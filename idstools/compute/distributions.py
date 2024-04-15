@@ -100,6 +100,8 @@ class DistributionsCompute:
             for key, value in radialGridInfo.items()
             if value["is_active"] == 1
         }
+        if not radialGridInfo:
+            return None
         self.nrho = radialGridInfo[0]["nrho"]
         self.rho_tor_norm = radialGridInfo[0]["rho_tor_norm"]
         self.cur_calc = radialGridInfo[0]["cur_calc"]
@@ -108,6 +110,8 @@ class DistributionsCompute:
         return radialGridInfo
 
     def getProfiles(self, timeIndex=0):
+        if self.nrho is None:
+            return None
         timeArray = self.ids.time
         ntime = len(timeArray)
         if self.isRadialGridInfoProcessed is False:

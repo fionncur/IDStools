@@ -118,8 +118,8 @@ if __name__ == "__main__":
         sys.exit()
 
     if getIMASVersion() > 4:
-        # tmp = imas.DBEntry("imas:memory?user=;shot=q;run=q;database=tmp;version=", "w")
-        tmp = imas.DBEntry(imas.imasdef.MEMORY_BACKEND, "tmp", 1, 1)
+        tmp = imas.DBEntry("imas:memory?path=tmp/1/1","w")
+        # tmp = imas.DBEntry(imas.imasdef.MEMORY_BACKEND, "tmp", 1, 1)
     else:
         tmp = imas.DBEntry(imas.imasdef.MEMORY_BACKEND, "tmp", 1, 1)
     status, _ = tmp.create()

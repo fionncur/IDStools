@@ -46,7 +46,7 @@ args = parser.parse_args()
 connection = DBMaster.getConnection(args)
 if connection is None:
     logger.critical("----> Aborted.")
-    exit(0)
+    exit(1)
 
 idsSliceCoreSources = connection.get_slice(
     "core_sources",

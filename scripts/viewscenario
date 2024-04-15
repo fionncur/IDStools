@@ -174,7 +174,12 @@ if not args.noProfiles:
 
     ViewEquilibrium = EquilibriumView(idsEquilibrium)
     ViewEquilibrium.viewEquilibrium(ax5)
-title = getTitle(args, "Scenario", timeValue)
+    
+title = getTitle(args, "Scenario")
+if not args.noProfiles:
+    title = getTitle(args, "Scenario", timeValue)
+else:
+    title = getTitle(args, "Scenario")
 if args.info:
     try:
         dataset_description = connection.get("dataset_description")
@@ -210,8 +215,10 @@ if args.info:
         else:
             title += f"\nprovider={idsSummary.ids_properties.provider}, creation_date={idsSummary.ids_properties.creation_date}\ndata_dictionary={idsSummary.ids_properties.version_put.data_dictionary}, access_layer={idsSummary.ids_properties.version_put.access_layer}"
 
-
-canvas.setText(text=f"{getDatabasePath(args, timeValue=timeValue)}")
+if not args.noProfiles:
+    canvas.setText(text=f"{getDatabasePath(args, timeValue=timeValue)}")
+else:
+    canvas.setText(text=f"{getDatabasePath(args)}")
 canvas.setSupTitle(title)
 canvas.get_current_fig_manager().set_window_title(sys.argv[0])
 canvas.fig.subplots_adjust(
@@ -219,10 +226,10 @@ canvas.fig.subplots_adjust(
 )
 
 if args.save:
-    if args.noProfiles:
+    if not args.noProfiles:
         fname = getFileName(args, "summary", timeValue)
     else:
-        fname = getFileName(args, "Scenario_shot", timeValue)
+        fname = getFileName(args, "Scenario_shot")
 
     canvas.save(fname)
 else:

@@ -95,7 +95,7 @@ def showPlots(args):
     canvas.fig.suptitle(getTitle(args, "HCD Waves Plot", timeValue), size=12)
     if args.save:
         fname = getFileName(args, "ECRH_profile_time", timeValue)
-        canvas.save(fname, width=5, height=4, dpi=300)
+        canvas.save(fname)
     else:
         canvas.show()
 

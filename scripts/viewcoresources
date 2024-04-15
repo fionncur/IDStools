@@ -3,17 +3,14 @@
 
 import argparse
 import logging
+import sys
 
 import imas
 
 from idstools.compute.common import getNearestTime
 from idstools.database import DBMaster
-from idstools.utils.clihelper import (
-    dbentryParser,
-    getDatabasePath,
-    getFileName,
-    getTitle,
-)
+from idstools.utils.clihelper import (dbentryParser, getDatabasePath,
+                                      getFileName, getTitle)
 from idstools.utils.idslogger import setupLogger
 from idstools.view.common import Canvas
 from idstools.view.core_sources import CoreSourcesView

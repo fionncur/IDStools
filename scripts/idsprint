@@ -54,7 +54,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     connection = DBMaster.getConnection(args)
     if connection is None:
-        exit(0)
+        exit(1)
     if args.full:
         numpy.set_printoptions(threshold=sys.maxsize)
     else:
