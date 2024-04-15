@@ -1,75 +1,62 @@
 #!/bin/bash
-# Bamboo script
-# Stage 2 : Unit tests
+# Bamboo CI script to test IDS tools on different toolchains
+# Execute script from root directory
+source ./ci-build/utils.sh
 
-# Set up environment
-. ci-build/st00-header.sh $* || exit 1
+##########################################################################################
+#                     Set environment based on toolchain                                 #
+##########################################################################################
+. /usr/share/Modules/init/sh
+module use /work/imas/etc/modules/all
 
-# Unzip artifact
-tar -xvzf ${PREFIX_DIR}.tar.gz ./${PREFIX_DIR}
+module purge
 
-try mkdir dependencies
-python3 -m pip install --target=dependencies -r requirements.txt
-export PYTHONPATH=$(get_abs_filename "./dependencies"):${PYTHONPATH}
+# expand aliases
+shopt -s expand_aliases
 
-# run tests
-echo "Check environment for AL4"
-export PYVERSION=$(python3 -c 'import sys; print("%d.%d"% sys.version_info[0:2])')
-echo "PYVERSION :" $PYVERSION
-export PYTHONPATH=$(get_abs_filename "./${PREFIX_DIR}")/lib/python${PYVERSION}/site-packages:${PYTHONPATH}
-echo "PYTHONPATH :" $PYTHONPATH | grep -i idstools
-export PATH=$(get_abs_filename "./${PREFIX_DIR}")/bin:${PATH}
-echo "PATH :" $PATH | grep -i idstools
+#print hostname
+hostname -f
 
-echo "Tools testing with testscripts with default IMAS Access Layer"
-chmod +x ./tests/st01_test_ids_scripts.sh
-chmod +x ./tests/st02_test_db_scripts.sh
-chmod +x ./tests/st03_test_analysis_scripts.sh
-try source ./tests/st01_test_ids_scripts.sh 
-try source ./tests/st02_test_db_scripts.sh 
-try source ./tests/st03_test_analysis_scripts.sh 
+# Get toolchain version
+if [ -z "$1" ]; then
+    TOOLCHAIN_VERSION="intel-2020b"
+else
+    TOOLCHAIN_VERSION="$1"
+fi
 
-echo "Run pytest for functions testing"
-try python3 -m pytest --junit-xml=${PREFIX_DIR}/test_report.xml tests 
+# Get AL version
+if [ -z "$2" ]; then
+    ACCESS_LAYER_VERSION="4"
+else
+    ACCESS_LAYER_VERSION="$2"
+fi
 
+echo "Testing for $TOOLCHAIN_VERSION and Access Layer $ACCESS_LAYER_VERSION"
 
-echo "-------------------------------------------------------------------------"
-echo "Tools testing with testscripts with IMAS Access Layer 5"
-try module purge
-try module unload -f IMAS
-try module load IMAS/3.41.0-4.11.10-foss-2023b
-try module unload -f IDStools
-echo module list | grep IMAS
+ENVIRONEMNT_NAME=env"$TOOLCHAIN_VERSION"_"$ACCESS_LAYER_VERSION"
+IMAS_MODULE_VERSION=$(getIMASModuleName "$TOOLCHAIN_VERSION" "$ACCESS_LAYER_VERSION")
+# load IMAS module first
+module load "$IMAS_MODULE_VERSION"
+module unload -f IDStools
 
-echo "Check environment for AL5 2023b"
-export PYVERSION=$(python3 -c 'import sys; print("%d.%d"% sys.version_info[0:2])')
-echo "PYVERSION :" $PYVERSION
-export PYTHONPATH=$(get_abs_filename "./${PREFIX_DIR}")/lib/python${PYVERSION}/site-packages:${PYTHONPATH}
-echo "PYTHONPATH :" $PYTHONPATH | grep -i idstools
-export PATH=$(get_abs_filename "./${PREFIX_DIR}")/bin:${PATH}
-echo "PATH :" $PATH | grep -i idstools
+rm -rf "$ENVIRONEMNT_NAME"
+python -m venv "$ENVIRONEMNT_NAME"
 
-try source ./tests/st01_test_ids_scripts.sh 
-try source ./tests/st02_test_db_scripts.sh 
-try source ./tests/st03_test_analysis_scripts.sh 
+. "$ENVIRONEMNT_NAME"/bin/activate
+python --version
+pip install --upgrade pip
+pip install .
+export  PYTHONPATH
+echo "Testing ids manipulation scripts"
+source ./tests/st01_test_ids_scripts.sh 
+echo ""
+echo "Testing db scripts"
+source ./tests/st02_test_db_scripts.sh 
+echo ""
+echo "Testing analysis scripts"
+source ./tests/st03_test_analysis_scripts.sh 
+echo ""
+deactivate
+rm -rf "$ENVIRONEMNT_NAME"
 
-echo "-------------------------------------------------------------------------"
-echo "Tools testing with testscripts with IMAS Access Layer 5"
-try module purge
-try module unload -f IMAS
-try module load IMAS/3.40.1-5.1.0-foss-2020b
-try module unload -f IDStools
-echo module list | grep IMAS
-
-echo "Check environment for AL5"
-export PYVERSION=$(python3 -c 'import sys; print("%d.%d"% sys.version_info[0:2])')
-echo "PYVERSION :" $PYVERSION
-export PYTHONPATH=$(get_abs_filename "./${PREFIX_DIR}")/lib/python${PYVERSION}/site-packages:${PYTHONPATH}
-echo "PYTHONPATH :" $PYTHONPATH | grep -i idstools
-export PATH=$(get_abs_filename "./${PREFIX_DIR}")/bin:${PATH}
-echo "PATH :" $PATH | grep -i idstools
-
-try source ./tests/st01_test_ids_scripts.sh 
-try source ./tests/st02_test_db_scripts.sh 
-try source ./tests/st03_test_analysis_scripts.sh 
-
+echo "done"
