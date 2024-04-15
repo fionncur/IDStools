@@ -41,5 +41,12 @@ echo "Configuration: $config"
 try module load coverage/5.5-GCCcore-10.2.0 
 
 #IMAS Requirement
-try module load IMAS
+if [[ "$1" == "foss" || -z $1 ]];
+then
+    try module load IMAS/3.41.0-4.11.10-foss-2020b
+elif [[ "$1" == "intel" ]];
+then
+    try module load IMAS/3.41.0-4.11.10-intel-2020b
+fi
+
 try module unload -f IDStools
