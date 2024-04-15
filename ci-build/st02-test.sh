@@ -29,6 +29,9 @@ try source ./tests/st01_test_ids_scripts.sh
 try source ./tests/st02_test_db_scripts.sh 
 try source ./tests/st03_test_analysis_scripts.sh 
 
+echo "Run pytest for functions testing"
+try python3 -m pytest --junit-xml=${PREFIX_DIR}/test_report.xml tests 
+
 
 echo "-------------------------------------------------------------------------"
 echo "Tools testing with testscripts with IMAS Access Layer 5"
@@ -70,5 +73,3 @@ try source ./tests/st01_test_ids_scripts.sh
 try source ./tests/st02_test_db_scripts.sh 
 try source ./tests/st03_test_analysis_scripts.sh 
 
-echo "Run pytest for functions testing"
-try python3 -m pytest --junit-xml=${PREFIX_DIR}/test_report.xml tests || exit 1

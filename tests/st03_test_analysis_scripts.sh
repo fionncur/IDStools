@@ -43,7 +43,9 @@ SCRIPTS=(
 execute_scripts "${SCRIPTS[@]}"
 STATUS=$?
 if [[ "$(uname -n)" == *"bamboo"* ]]; then
-    exit "$STATUS"
+    if [ "$STATUS" -ne 0 ]; then
+        exit "$STATUS"
+    fi
 fi
 
 
