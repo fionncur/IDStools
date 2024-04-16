@@ -35,28 +35,60 @@ echo "Testing for $TOOLCHAIN_VERSION and Access Layer $ACCESS_LAYER_VERSION"
 
 ENVIRONEMNT_NAME=env"$TOOLCHAIN_VERSION"_"$ACCESS_LAYER_VERSION"
 IMAS_MODULE_VERSION=$(getIMASModuleName "$TOOLCHAIN_VERSION" "$ACCESS_LAYER_VERSION")
-# load IMAS module first
+# load IMAS module
 module load "$IMAS_MODULE_VERSION"
 module unload -f IDStools
 
-rm -rf "$ENVIRONEMNT_NAME"
 python -m venv "$ENVIRONEMNT_NAME"
 
 . "$ENVIRONEMNT_NAME"/bin/activate
-python --version
+PYTHON_VERSION=$(python --version)
+version_script=$(cat <<END
+import numpy as np
+import scipy
+import matplotlib
+
+print("NumPy version:", np.__version__)
+print("SciPy version:", scipy.__version__)
+print("Matplotlib version:", matplotlib.__version__)
+END
+)
+python3 -c "$version_script"
+
 pip install --upgrade pip
 pip install .
-export  PYTHONPATH
-echo "Testing ids manipulation scripts"
+
+echo "Testing ids manipulation scripts with $IMAS_MODULE_VERSION and Python $PYTHON_VERSION"
 source ./tests/st01_test_ids_scripts.sh 
-echo ""
-echo "Testing db scripts"
+echo "---------------------------------------------------------------------"
+echo "Testing db scripts with $IMAS_MODULE_VERSION and Python $PYTHON_VERSION"
 source ./tests/st02_test_db_scripts.sh 
-echo ""
-echo "Testing analysis scripts"
+echo "---------------------------------------------------------------------"
+echo "Testing analysis scripts  with $IMAS_MODULE_VERSION and Python $PYTHON_VERSION"
 source ./tests/st03_test_analysis_scripts.sh 
-echo ""
+echo "---------------------------------------------------------------------"
+echo "Run pytest for functions testing with $IMAS_MODULE_VERSION and Python $PYTHON_VERSION"
+python3 -m pytest --junit-xml=logs/test_report.xml tests 
 deactivate
 rm -rf "$ENVIRONEMNT_NAME"
 
-echo "done"
+ARTIFACT="./testlog.tar.gz"
+# Check if the *.tar.gz exists before attempting to remove it
+if [ -f "$ARTIFACT" ]; then
+    rm "$ARTIFACT"
+    echo "$ARTIFACT removed successfully."
+fi
+
+# Create acrtifact
+tar -cvzf testlog.tar.gz logs >/dev/null 2>&1
+if [ -f "$ARTIFACT" ]; then
+    echo "Artifact $ARTIFACT created successfully."
+fi
+
+# show contents of artifact
+tar -tzvf testlog.tar.gz
+
+# Cleanup
+
+echo "Done"
+

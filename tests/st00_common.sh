@@ -12,7 +12,7 @@ execute_scripts() {
         executable=$(echo "$script" | awk '{print $1}')
         LOG_FILE="$LOG_DIR/${executable}.log"
 
-        echo "Executing $script"
+        
         echo "$script" >>"$LOG_DIR/${executable}.log"
         start_time=$(date +%s.%N)
         # Execute the script and redirect both stdout and stderr to the log file
@@ -25,17 +25,14 @@ execute_scripts() {
         # Check if the script exited with an error
         if [ "$output" -ne 0 ]; then
             echo "Error occurred while executing $script."
-            echo "Log saved to $LOG_FILE."
             echo "Error log :"
             SCRIPT_STATUS["$script"]="FAIL"
             cat "$LOG_FILE"
         else
-            echo "$script executed successfully."
-            echo "Log saved to $LOG_FILE."
+            echo "$script executed successfully"
             SCRIPT_STATUS["$script"]="PASS"
         fi
         echo "----------------------------------------------------" >> "$LOG_FILE"
-        echo ""
     done
 
     RETURN_STATUS=0
