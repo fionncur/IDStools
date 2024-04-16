@@ -53,26 +53,37 @@ print("SciPy version:", scipy.__version__)
 print("Matplotlib version:", matplotlib.__version__)
 END
 )
+
+ISAL5=$(echo "$AL_VERSION" | grep -E '^5')
+
 python3 -c "$version_script"
 
 pip install --upgrade pip
 pip install .
+pip install packaging
 
-echo "Testing ids manipulation scripts with $IMAS_MODULE_VERSION and Python $PYTHON_VERSION"
+echo "Testing ids manipulation scripts with $IMAS_MODULE_VERSION and $PYTHON_VERSION"
 source ./tests/st01_test_ids_scripts.sh 
+if [[ "$ISAL5" -gt 4 ]]; then
+    source ./tests/st01_test_ids_scripts_with_uri.sh 
+fi
 echo "---------------------------------------------------------------------"
-echo "Testing db scripts with $IMAS_MODULE_VERSION and Python $PYTHON_VERSION"
+echo "Testing db scripts with $IMAS_MODULE_VERSION and $PYTHON_VERSION"
 source ./tests/st02_test_db_scripts.sh 
 echo "---------------------------------------------------------------------"
-echo "Testing analysis scripts  with $IMAS_MODULE_VERSION and Python $PYTHON_VERSION"
+echo "Testing analysis scripts  with $IMAS_MODULE_VERSION and $PYTHON_VERSION"
 source ./tests/st03_test_analysis_scripts.sh 
+if [[ "$ISAL5" -gt 4 ]]; then
+    source ./tests/st03_test_analysis_scripts_with_uri.sh 
+fi
 echo "---------------------------------------------------------------------"
-echo "Run pytest for functions testing with $IMAS_MODULE_VERSION and Python $PYTHON_VERSION"
-python3 -m pytest --junit-xml=logs/test_report.xml tests 
+echo "Run pytest for functions testing with $IMAS_MODULE_VERSION and $PYTHON_VERSION"
+pip install pytest
+python -m pytest --junit-xml=logs/test_report.xml tests 
 deactivate
 rm -rf "$ENVIRONEMNT_NAME"
 
-ARTIFACT="./testlog.tar.gz"
+ARTIFACT="./testlogs.tar.gz"
 # Check if the *.tar.gz exists before attempting to remove it
 if [ -f "$ARTIFACT" ]; then
     rm "$ARTIFACT"
@@ -80,13 +91,13 @@ if [ -f "$ARTIFACT" ]; then
 fi
 
 # Create acrtifact
-tar -cvzf testlog.tar.gz logs >/dev/null 2>&1
+tar -cvzf testlogs.tar.gz logs >/dev/null 2>&1
 if [ -f "$ARTIFACT" ]; then
     echo "Artifact $ARTIFACT created successfully."
 fi
 
 # show contents of artifact
-tar -tzvf testlog.tar.gz
+tar -tzvf testlogs.tar.gz
 
 # Cleanup
 

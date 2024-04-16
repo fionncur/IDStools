@@ -29,20 +29,22 @@ execute_scripts() {
             SCRIPT_STATUS["$script"]="FAIL"
             cat "$LOG_FILE"
         else
-            echo "$script executed successfully"
+            echo "$script executed successfully!"
             SCRIPT_STATUS["$script"]="PASS"
         fi
         echo "----------------------------------------------------" >> "$LOG_FILE"
     done
 
     RETURN_STATUS=0
+    echo "----------------------------------------------------"
     printf "%-10s %-5s %-50s\n" "Status" "Time" "Script"
+    echo "----------------------------------------------------"
     for script in "${SCRIPTS[@]}"; do
         printf "%-10s %.2f %-50s\n" "${SCRIPT_STATUS[$script]}" "${SCRIPT_TIME[$script]}" "$script"
         if [ "${SCRIPT_STATUS[$script]}" == "FAIL" ]; then
             RETURN_STATUS=1
         fi
     done
-
+    echo "----------------------------------------------------"
     return $RETURN_STATUS
 }
