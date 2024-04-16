@@ -61,14 +61,14 @@ print("SciPy version:", scipy.__version__)
 print("Matplotlib version:", matplotlib.__version__)
 END
 )
-AL_VERSION_LOCAL="${AL_VERSION//./}"
+al_major_version="${AL_VERSION%%.*}"
 
 python3 -c "$version_script"
 
 echo "Testing ids manipulation scripts with $IMAS_MODULE_VERSION and $PYTHON_VERSION"
 source ./tests/st01_test_ids_scripts.sh 
 
-if [ "$AL_VERSION_LOCAL" -ge "500" ]; then
+if (( al_major_version > 4 )); then
     source ./tests/st01_test_ids_scripts_with_uri.sh 
 fi
 echo "---------------------------------------------------------------------"
