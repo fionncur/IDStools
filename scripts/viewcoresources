@@ -5,6 +5,8 @@ import argparse
 import logging
 import sys
 
+from rich_argparse import RichHelpFormatter
+
 import imas
 
 from idstools.compute.common import getNearestTime
@@ -18,7 +20,7 @@ from idstools.view.core_sources import CoreSourcesView
 logger = setupLogger("module", stdout_level=logging.INFO)
 
 parser = argparse.ArgumentParser(
-    description="---- Display core_sources results [Previously known as csplot]", parents=[dbentryParser]
+    description="---- Display core_sources results [Previously known as csplot]", parents=[dbentryParser],formatter_class=RichHelpFormatter
 )
 
 parser.add_argument(

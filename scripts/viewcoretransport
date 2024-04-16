@@ -12,6 +12,8 @@ import argparse
 import logging
 import sys
 
+from rich_argparse import RichHelpFormatter
+
 from imas import imasdef
 
 from idstools.database import DBMaster
@@ -34,7 +36,7 @@ slicingMethods = {
 }
 # Management of input arguments
 parser = argparse.ArgumentParser(
-    description="Check match between transport fluxes and a simple calculation [previously known as check_transport]",
+    description="Check match between transport fluxes and a simple calculation [previously known as check_transport]",formatter_class=RichHelpFormatter
     epilog="""
 """,
     formatter_class=argparse.RawTextHelpFormatter,

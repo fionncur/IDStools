@@ -5,6 +5,7 @@ from sys import exit
 from sys import stdout
 import argparse
 import textwrap
+from rich_argparse import RichHelpFormatter
 import yaml
 from idstools.database import DBMaster
 from idstools.utils.clihelper import dbentryParser
@@ -83,7 +84,7 @@ def main():
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         prog="idschk",
-        formatter_class=argparse.RawDescriptionHelpFormatter,
+        formatter_class=RichHelpFormatter,
         parents=[dbentryParser],
         description=textwrap.dedent(
             """\
@@ -95,17 +96,17 @@ if __name__ == "__main__":
             -----------------------------------------------------------
             Examples:
                 1) Validate if ITER Scenario meets with physics requirements
-                $ idschk -s 131024 -r 40 -f path/to/schema_file/required_fields_core.yml
+                $ idschk -p 131024 -r 40 -f path/to/schema_file/required_fields_core.yml
 
                 2) Same with 1) and only for one time slice. Specify time, otherwise middle point if blank
-                $ idschk -s 131024 -r 40 -f path/to/schema_file/required_fields_core.yml -t 100.
-                $ idschk -s 131024 -r 40 -f path/to/schema_file/required_fields_core.yml -t
+                $ idschk -p 131024 -r 40 -f path/to/schema_file/required_fields_core.yml -t 100.
+                $ idschk -p 131024 -r 40 -f path/to/schema_file/required_fields_core.yml -t
 
                 3) Check IDS/equilibrium for COCOS
-                $ idschk -s 131024 -r 40 -c
+                $ idschk -p 131024 -r 40 -c
 
                 4) Check IDS/equilibrium with COCOS values
-                $ idschk -s 131024 -r 40 -c --verbose
+                $ idschk -p 131024 -r 40 -c --verbose
 
             (II) Functional Interface in Python (idstools/idschk.py)
             --------------------------------------------------------------

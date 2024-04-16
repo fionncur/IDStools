@@ -4,6 +4,8 @@ import argparse
 import logging
 import os
 import sys
+
+from rich_argparse import RichHelpFormatter
 from idstools.database import DBMaster
 
 import imas
@@ -16,7 +18,7 @@ logger = setupLogger("module")
 # Management of input arguments
 parser = argparse.ArgumentParser(
     description="Copy IDSs from a data-entry into another one",
-    formatter_class=argparse.RawDescriptionHelpFormatter,
+    formatter_class=RichHelpFormatter,
     parents=[imasParser],
 )
 if getIMASVersion() > 4:
@@ -122,10 +124,7 @@ inputargs.user = args.user
 inputargs.database = args.database
 inputargs.version = args.version
 if getIMASVersion() > 4:
-    if args.input_uri is None:
-        inputargs.uri = f"imas:{args.backend.lower()}?user={args.user };shot={args.pulse_input};run={args.run_input};database={args.database};version={args.version}"
-    else:
-        inputargs.uri = args.input_uri
+    inputargs.uri = args.input_uri
 
 src_connection = DBMaster.getConnection(inputargs)
 if src_connection is None:
@@ -139,10 +138,7 @@ outputargs.user = os.environ["USER"]
 outputargs.database = args.database_output
 outputargs.version = args.version
 if getIMASVersion() > 4:
-    if args.output_uri is None:
-        outputargs.uri = f"imas:{args.backend_output.lower()}?user={os.environ['USER']};shot={args.pulse_output};run={args.run_output};database={args.database_output};version={args.version}"
-    else:
-        outputargs.uri = args.output_uri
+    outputargs.uri = args.output_uri
 
 
 dest_connection = DBMaster.getDBEntryObject(outputargs)

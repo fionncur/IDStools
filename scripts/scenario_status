@@ -2,18 +2,20 @@
 # -*- coding: utf-8 -*-
 import argparse
 import os
+
+from rich_argparse import RichHelpFormatter
 from idstools.scenariodescription import ScenarioDescription
 from idstools.utils.idslogger import setupLogger
 from idstools.view.common import Terminal
 
 # Management of input arguments
 parser = argparse.ArgumentParser(
-    description="---- Show status and potential parent and children for a given simulation stored in ITER database folder"
+    description="---- Show status and potential parent and children for a given simulation stored in ITER database folder",formatter_class=RichHelpFormatter,
 )
 parser.add_argument(
     "-f", "--folder", help="folder where to search for scenarios", required=False
 )
-parser.add_argument("-s", "--shot", help="shot number", required=True, type=int)
+parser.add_argument("-p", "--pulse", help="pulse number", required=True, type=int)
 # currently limiting run < 10000 because of the search path /3/0
 parser.add_argument(
     "-r",
@@ -33,7 +35,7 @@ args = vars(parser.parse_args())
 
 logger = setupLogger("module")
 
-shot = args["shot"]
+pulse = args["pulse"]
 run = args["run"]
 
 # FOLDER
@@ -45,7 +47,7 @@ else:
     lowlevelVersion = int((os.getenv("AL_VERSION") or os.getenv("UAL_VERSION"))[0])
     if lowlevelVersion < 4:
         folder = os.environ["IMAS_HOME"] + "/shared/iterdb/3/0"
-sdObject = ScenarioDescription(shot, run, folder)
+sdObject = ScenarioDescription(pulse, run, folder)
 if args["print"] == True:
     sdObject.printYaml()
     exit(0)
@@ -60,19 +62,19 @@ terminal.print(
     "bold magenta",
 )
 terminal.print("-----------------------------------------------------------------")
-for iparent in range(len(family["parents"]["shot"])):
+for iparent in range(len(family["parents"]["pulse"])):
     terminal.print(
-        f" {family['parents']['shot'][iparent]:<7} {family['parents']['run'][iparent]:<5}{family['parents']['status'][iparent]:<10}{family['parents']['comment'][iparent]}"
+        f" {family['parents']['pulse'][iparent]:<7} {family['parents']['run'][iparent]:<5}{family['parents']['status'][iparent]:<10}{family['parents']['comment'][iparent]}"
     )
 if "database_relations" in sdObject.yamlData.keys():
     if "replaced_by" in sdObject.yamlData["database_relations"].keys():
         terminal.print(
-            f"*{shot:<7} {run:<5}{sdObject.yamlData['status']:<10}{sdObject.yamlData['database_relations']['replaces']}"
+            f"*{pulse:<7} {run:<5}{sdObject.yamlData['status']:<10}{sdObject.yamlData['database_relations']['replaces']}"
         )
 else:
     terminal.print(f"database_relations not found", "bold red")
-for ichild in range(len(family["children"]["shot"])):
+for ichild in range(len(family["children"]["pulse"])):
     terminal.print(
-        f" {family['children']['shot'][ichild]:<7}{family['children']['run'][ichild]:<5}{family['children']['status'][ichild]:<10}{family['children']['comment'][ichild]}"
+        f" {family['children']['pulse'][ichild]:<7}{family['children']['run'][ichild]:<5}{family['children']['status'][ichild]:<10}{family['children']['comment'][ichild]}"
     )
 terminal.print("-----------------------------------------------------------------")

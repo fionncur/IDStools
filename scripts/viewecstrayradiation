@@ -5,6 +5,8 @@ import argparse
 import logging
 import os
 import sys
+
+from rich_argparse import RichHelpFormatter
 from idstools.utils.idslogger import setupLogger
 
 import imas
@@ -31,6 +33,7 @@ logger = setupLogger("module", stdout_level=logging.INFO)
 parser = argparse.ArgumentParser(
     description="---- Shows electron cyclotron stray radiation information by showing different plots",
     parents=[dbentryParser],
+    formatter_class=RichHelpFormatter,
 )
 
 args = parser.parse_args()

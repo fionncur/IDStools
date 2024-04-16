@@ -4,6 +4,8 @@
 import argparse
 import logging
 
+from rich_argparse import RichHelpFormatter
+
 import imas
 
 from idstools.compute.common import getNearestTime
@@ -22,6 +24,7 @@ from idstools.view.pf_active import PFActiveView
 parser = argparse.ArgumentParser(
     description="---- Display the plasma equilibrium from the equilibrium IDS. It also shows pf coils position overlay if exists [Previously known as equiplot]",
     parents=[dbentryParser],
+    formatter_class=RichHelpFormatter,
 )
 
 parser.add_argument(

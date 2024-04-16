@@ -3,6 +3,7 @@
 from os import getenv, path
 import sys
 import re
+from rich_argparse import RichHelpFormatter
 import yaml
 import argparse
 
@@ -88,7 +89,7 @@ def main():
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="create validation schema wrt DD")
+    parser = argparse.ArgumentParser(description="create validation schema wrt DD",formatter_class=RichHelpFormatter)
     parser.add_argument(
         "-i",
         "--idslist",

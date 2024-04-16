@@ -6,6 +6,8 @@
 import argparse
 import logging
 import sys
+
+from rich_argparse import RichHelpFormatter
 from idstools.compute.common import getNearestTime
 from idstools.compute.spectrometer_visible import SpectrometerVisibleCompute
 from idstools.database import DBMaster
@@ -24,6 +26,7 @@ logger = setupLogger("module", stdout_level=logging.INFO)
 parser = argparse.ArgumentParser(
     description="---- Display spectrum from spectrometer_visible [previsouly known as svplot]",
     parents=[dbentryParser],
+    formatter_class=RichHelpFormatter,
 )
 
 parser.add_argument(

@@ -4,6 +4,8 @@ import argparse
 import os
 import sys
 import copy
+
+from rich_argparse import RichHelpFormatter
 import imas
 from rich.progress import track
 
@@ -15,6 +17,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Check if specified ids is exists in the scenario database and returns shot and pulse",
         parents=[imasParser],
+        formatter_class=RichHelpFormatter,
     )
     parser.add_argument(
         "ids",

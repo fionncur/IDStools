@@ -4,6 +4,8 @@ import os
 import argparse
 import textwrap
 import traceback
+
+from rich_argparse import RichHelpFormatter
 from idstools.database import DBMaster
 
 from idstools.set_logger import set_logger
@@ -44,7 +46,7 @@ if __name__ == "__main__":
     prog = os.path.basename(__file__)
     parser = argparse.ArgumentParser(
         prog=prog,
-        formatter_class=argparse.RawDescriptionHelpFormatter,
+        formatter_class=RichHelpFormatter,
         parents=[dbentryParser],
         description=textwrap.dedent(
             f"""\
@@ -56,16 +58,16 @@ if __name__ == "__main__":
                 $ pip install fortranformat cerberus
 
                 1) Compute COCOS and create IDS data file in local database
-                $ eqdsk2ids -g path_to_gfile -s 12345 -r 1 -u userid -d ITER
+                $ eqdsk2ids -g path_to_gfile -p 12345 -r 1 -u userid -d ITER
 
                 2) Enforce signs of Ip and/or B0 in output
-                $ eqdsk2ids -g path_to_gfile -s 12345 -r 1 -u userid -d ITER --ipsign -1 --b0sign -1
+                $ eqdsk2ids -g path_to_gfile -p 12345 -r 1 -u userid -d ITER --ipsign -1 --b0sign -1
 
                 3) Increase verbosity to see information as COCOS index and transformation coeff.
-                $ eqdsk2ids -g path_to_gfile -s 12345 -r 1 -u userid -d ITER --log INFO
+                $ eqdsk2ids -g path_to_gfile -p 12345 -r 1 -u userid -d ITER --log INFO
 
                 4) Coerce input COCOS index
-                $ eqdsk2ids -g path_to_gfile -s 12345 -r 1 -u userid -d ITER --cocos_in 7
+                $ eqdsk2ids -g path_to_gfile -p 12345 -r 1 -u userid -d ITER --cocos_in 7
 
             (II) Functional Interface in Python (idstools/eqdsk2ids.py)
             --------------------------------------------------------------

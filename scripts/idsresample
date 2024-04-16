@@ -4,6 +4,8 @@
 import argparse
 import os
 import sys
+
+from rich_argparse import RichHelpFormatter
 from idstools.database import DBMaster
 
 import imas
@@ -15,6 +17,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Resample IDSs from a data-entry and save them into another data-entry [previously known as ids_resampling]",
         parents=[imasParser],
+        formatter_class=RichHelpFormatter,
     )
     if getIMASVersion() > 4:
         parser.add_argument(
@@ -108,10 +111,7 @@ if __name__ == "__main__":
     inputargs.database = args.database
     inputargs.version = args.version
     if getIMASVersion() > 4:
-        if args.input_uri is None:
-            inputargs.uri = f"imas:{args.backend.lower()}?user={args.user };shot={args.pulse_input};run={args.run_input};database={args.database};version={args.version}"
-        else:
-            inputargs.uri = args.input_uri
+        inputargs.uri = args.input_uri
     src = DBMaster.getConnection(inputargs)
     if src is None:
         print("Error opening source pulse! Please check existence.")
@@ -119,7 +119,6 @@ if __name__ == "__main__":
 
     if getIMASVersion() > 4:
         tmp = imas.DBEntry("imas:memory?path=tmp/1/1","w")
-        # tmp = imas.DBEntry(imas.imasdef.MEMORY_BACKEND, "tmp", 1, 1)
     else:
         tmp = imas.DBEntry(imas.imasdef.MEMORY_BACKEND, "tmp", 1, 1)
     status, _ = tmp.create()
@@ -135,11 +134,9 @@ if __name__ == "__main__":
     outputargs.database = args.database_output
     outputargs.version = args.version
     if getIMASVersion() > 4:
-        if args.output_uri is None:
-            outputargs.uri = f"imas:{args.backend_output.lower()}?user={os.environ['USER']};shot={args.pulse_output};run={args.run_output};database={args.database_output};version={args.version}"
-        else:
-            outputargs.uri = args.output_uri
-    dest = DBMaster.getConnection(outputargs)
+        outputargs.mode="w"
+        outputargs.uri = args.output_uri
+    dest = DBMaster.createConnection(outputargs)
     if dest is None:
         print("Error creating pulse! Please check existence.")
         sys.exit()

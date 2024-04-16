@@ -3,20 +3,22 @@
 
 from __future__ import print_function
 
-import argparse, imas, pdb
+import argparse, imas
+
+from rich_argparse import RichHelpFormatter
 from idstools.database import DBMaster
 import idstools.init_mendeleiev as mend
 import numpy as np
 import sys
 from os import system, path
 from sys import exit
-from idstools.utils.clihelper import getBackendID, dbentryParser
+from idstools.utils.clihelper import dbentryParser
 
 # ----------------------------------------------------------------------
 
 # Management of input arguments
 parser = argparse.ArgumentParser(description=\
-	 '---- Auto-generated yaml scenario and watcher files (!!! STILL TO BE COMPLETED BY HAND !!!)',parents=[dbentryParser])
+	 '---- Auto-generated yaml scenario and watcher files (!!! STILL TO BE COMPLETED BY HAND !!!)',parents=[dbentryParser],formatter_class=RichHelpFormatter)
 parser.add_argument('--disable-validation',help='disable IDS validation',required=False,action='store_true',dest="wo_validation")
 args = parser.parse_args()
 
@@ -696,14 +698,14 @@ f.write("""# List of filled IDSs with time quantities in seconds (start, end, st
 f.write("""# It should be the output of the "idslist" script, adapted from\n""")
 f.write("""# listidss, see IMAS-1010 (note: the data-entry has to be copied to a personal\n""")
 f.write("""# database for the script to work, see the example below):\n""")
-f.write("""#  idslist -u <username> -d test -s 4321 -r 1 yaml\n""")
+f.write("""#  idslist -u <username> -d test -p 4321 -r 1 yaml\n""")
 f.write("""# ------------------------------------------------------------------------------\n""")
 f.write("""idslist:\n""")
 f.close()
 
 # Complete the yaml file with the output of idslist
 system('idslist -u ' + args.user + ' -d ' + args.database + ' -b ' + args.backend \
-          + ' -s ' + str(args.pulse) + ' -r ' + str(args.run) + ' yaml >> ' + filename)
+          + ' -p ' + str(args.pulse) + ' -r ' + str(args.run) + ' yaml >> ' + filename)
 
 print("----> " + filename + " created.", file=sys.stdout)
 

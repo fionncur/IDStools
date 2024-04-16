@@ -4,6 +4,8 @@ import argparse
 import logging
 import sys
 
+from rich_argparse import RichHelpFormatter
+
 from idstools.database import DBMaster
 from idstools.utils.clihelper import (
     dbentryParser,
@@ -19,6 +21,7 @@ from idstools.view.domain.kineticprofiles import KineticProfilesView
 parser = argparse.ArgumentParser(
     description="---- Display the plasma kinetic profiles from the core_profiles IDSs [previously known as kinplot]",
     parents=[dbentryParser],
+    formatter_class=RichHelpFormatter,
 )
 
 parser.add_argument(

@@ -56,11 +56,7 @@ if getIMASVersion() > 4:
 dbentryParser = argparse.ArgumentParser(add_help=False, parents=parents)
 if getIMASVersion() > 4:
     dbentryParser.add_argument(
-        "-s", "--shot", "--pulse", dest="pulse", help="Pulse number", type=int
-    )
-else:
-    dbentryParser.add_argument(
-        "-s", "--shot", "--pulse", dest="pulse", help="Shot number", type=int
+        "-p", "--pulse", dest="pulse", help="Pulse number", type=int
     )
 dbentryParser.add_argument("-r", "--run", help="Run number", type=int)
 

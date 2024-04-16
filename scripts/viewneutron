@@ -6,6 +6,8 @@ import argparse
 import logging
 import sys
 
+from rich_argparse import RichHelpFormatter
+
 import imas
 
 from idstools.compute.common import getNearestTime
@@ -24,6 +26,7 @@ from idstools.view.distribution_sources import DistributionSourcesView
 parser = argparse.ArgumentParser(
     description="---- Display the neutron profiles from the distribution_sources IDSs [previously known as neutronplot]",
     parents=[dbentryParser],
+    formatter_class=RichHelpFormatter,
 )
 
 parser.add_argument(

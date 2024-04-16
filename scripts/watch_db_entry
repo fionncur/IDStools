@@ -3,11 +3,13 @@
 
 import argparse, sys
 
+from rich_argparse import RichHelpFormatter
+
 # Management of input arguments
 parser = argparse.ArgumentParser(
-    description="---- Subscribe/unsubscribe as a watcher to a simulation file stored in IMAS DB"
+    description="---- Subscribe/unsubscribe as a watcher to a simulation file stored in IMAS DB", formatter_class=RichHelpFormatter,
 )
-parser.add_argument("-s", "--shot", help="shot number", required=True, type=int)
+parser.add_argument("-p", "--pulse", help="pulse number", required=True, type=int)
 parser.add_argument("-r", "--run", help="run number", required=True, type=int)
 parser.add_argument(
     "-d", "--delete", help="email to remove from watcher list", required=False, type=str
@@ -19,7 +21,7 @@ parser.add_argument("-n", "--name", help="user name", required=False, type=str)
 parser.add_argument("-e", "--email", help="user e-mail", required=False, type=str)
 args = vars(parser.parse_args())
 
-shot = args["shot"]
+pulse = args["pulse"]
 run = args["run"]
 firstname = args["firstname"]
 name = args["name"]
@@ -50,7 +52,7 @@ add0_length = 4 - len(str(run))
 for i in range(add0_length):
     add0 = add0 + "0"
 
-filename = "ids_" + str(shot) + add0 + str(run) + ".watcher"
+filename = "ids_" + str(pulse) + add0 + str(run) + ".watcher"
 folder = "/work/imas/shared/imasdb/ITER"
 fullpath = folder + "/3/0/" + filename
 
@@ -65,8 +67,8 @@ if delflag == 0:
         + firstname
         + " "
         + name
-        + " added for shot "
-        + str(shot)
+        + " added for pulse "
+        + str(pulse)
         + " run "
         + str(run)
         + "."
@@ -86,8 +88,8 @@ else:
     print(
         "----> Watcher with email address "
         + del_email
-        + "removed for shot "
-        + str(shot)
+        + "removed for pulse "
+        + str(pulse)
         + " run "
         + str(run)
         + "."

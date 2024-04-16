@@ -4,6 +4,8 @@
 import argparse
 import logging
 import sys
+
+from rich_argparse import RichHelpFormatter
 from idstools.machinedescription import MachineDescription
 from idstools.set_logger import set_logger
 from idstools.utils.clihelper import dbentryParser, getDatabasePath
@@ -83,7 +85,7 @@ def plotMachineDescription(idsData):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="---- View machine description by getting information of data from md_summary file",
+        description="---- View machine description by getting information of data from md_summary file",formatter_class=RichHelpFormatter,
     )
     subparsers = parser.add_subparsers(help="sub-commands help")
 

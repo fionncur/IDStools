@@ -6,6 +6,8 @@
 import argparse
 import logging
 import sys
+
+from rich_argparse import RichHelpFormatter
 from idstools.database import DBMaster
 
 from imas import imasdef
@@ -26,7 +28,7 @@ parser = argparse.ArgumentParser(
     description="View information about fluxes [Previously known as print_fluxes]",
     epilog="""
 """,
-    formatter_class=argparse.RawTextHelpFormatter,
+    formatter_class=RichHelpFormatter,
     parents=[dbentryParser],
 )
 

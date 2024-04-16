@@ -6,6 +6,8 @@ import argparse
 import os
 import sys
 import textwrap
+
+from rich_argparse import RichHelpFormatter
 from idstools.database import DBMaster
 
 import imas
@@ -24,7 +26,7 @@ np.set_printoptions(threshold=1, precision=2, suppress=True)
 
 parser = argparse.ArgumentParser(
     prog="idslist",
-    formatter_class=argparse.RawDescriptionHelpFormatter,
+    formatter_class=RichHelpFormatter,
     description=textwrap.dedent(
         """
         List available IDSes in the pulse. By default it prints all IDSes along with its time length. fullarray option allows you to print complete time array.

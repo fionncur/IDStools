@@ -2,14 +2,13 @@
 import argparse
 import logging
 import sys
-from idstools.database import DBMaster
 
-import imas
+from rich_argparse import RichHelpFormatter
+from idstools.database import DBMaster
 
 from idstools.compute.common import getNearestTime
 from idstools.compute.waves import WavesCompute
 from idstools.utils.clihelper import (
-    getBackendID,
     getDatabasePath,
     getFileName,
     getIMASVersion,
@@ -218,7 +217,7 @@ if __name__ == "__main__":
         + "- Time is also optional \n"
         + "- Example: \n"
         + "  hcdplot -ech 134713/200/schneim/MDSPLUS/TORBEAM/3 -nbi 130012/122/schneim/nf_fopla_synergy \n",
-        formatter_class=argparse.RawDescriptionHelpFormatter,
+        formatter_class=RichHelpFormatter,
     )
     parser.add_argument(
         "-ech",

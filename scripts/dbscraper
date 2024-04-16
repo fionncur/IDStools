@@ -7,6 +7,8 @@ import argparse
 import sys
 from pathlib import Path
 
+from rich_argparse import RichHelpFormatter
+
 from imas import imasdef
 
 from idstools.database import DBMaster
@@ -17,6 +19,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Extracts given quantities from all data entries of a given database [Previously known as idstools/db_extractor.py]",
         parents=[imasParser],
+        formatter_class=RichHelpFormatter,
     )
     parser.add_argument(
         "idspath",

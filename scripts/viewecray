@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # Example of call:
-# ecray -s [130012,130012] -r [24,23] -u schneim -d iter
+# ecray -p [130012,130012] -r [24,23] -u schneim -d iter
 
 import argparse
 import copy
 import logging
 import sys
+
+from rich_argparse import RichHelpFormatter
 from idstools.database import DBMaster
 
 
@@ -28,7 +30,7 @@ from idstools.view.waves import WavesView
 
 
 parser = argparse.ArgumentParser(
-    description="---- Display EC wave ray-tracing results [Previously known as ecray]", parents=[dbentryParser]
+    description="---- Display EC wave ray-tracing results [Previously known as ecray]", parents=[dbentryParser],formatter_class=RichHelpFormatter
 )
 
 parser.add_argument(
@@ -180,17 +182,17 @@ else:
 #     else:
 #         return [int(string)]
 
-# shotString, runString = args.shot, args.run
-# shotList, runList = StrToList(shotString), StrToList(runString)
-# assert len(shotList) <= len(
+# pulseString, runString = args.pulse, args.run
+# pulseList, runList = StrToList(pulseString), StrToList(runString)
+# assert len(pulseList) <= len(
 #     runList
-# ), "There must be a run number corresponding to each shot"
-# if len(runList) > len(shotList):
+# ), "There must be a run number corresponding to each pulse"
+# if len(runList) > len(pulseList):
 #     assert (
-#         len(shotList) == 1
-#     ), "Either give a shot for each run or give a single shot for every run"
-#     shot = len(runList) * shotList
+#         len(pulseList) == 1
+#     ), "Either give a pulse for each run or give a single pulse for every run"
+#     pulse = len(runList) * pulseList
 
-# for i in range(len(shotList)):
-#     ishot = shotList[i]
+# for i in range(len(pulseList)):
+#     ipulse = pulseList[i]
 #     irun = runList[i]

@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
-# ids_shift_eq -si 131035 -ri 124 -so 123001 -ro 1 -s -0.01 -u bonninx -d iter
+# ids_shift_eq -pi 131035 -ri 124 -po 123001 -ro 1 --shift -0.01 -u bonninx -d iter
 
 import argparse
 import copy
 import logging
 import os
 import sys
+from idstools.database import DBMaster
 
-import imas
 from rich_argparse import RichHelpFormatter
 
 from idstools.compute.equilibrium import EquilibriumCompute
-from idstools.utils.clihelper import getBackendID, imasParser
+from idstools.utils.clihelper import getIMASVersion, imasParser
 from idstools.utils.idslogger import setupLogger
 
 logger = setupLogger("module", stdout_level=logging.INFO)
@@ -23,17 +23,31 @@ parser = argparse.ArgumentParser(
     parents=[imasParser],
     formatter_class=RichHelpFormatter,
 )
+if getIMASVersion() > 4:
+    parser.add_argument(
+        "-iuri",
+        "--input_uri",
+        type=str,
+        help="input uri \t\t(default=%(default)s)",
+    )
+    parser.add_argument(
+        "-ouri",
+        "--output_uri",
+        type=str,
+        help="output uri \t\t(default=%(default)s)",
+    )
+    
 parser.add_argument(
-    "-si", "--shot_input", help="Input shot number", required=True, type=int
+    "-pi", "--pulse_input", help="Input pulse number",  type=int
 )
 parser.add_argument(
-    "-ri", "--run_input", help="Input run number", required=True, type=int
+    "-ri", "--run_input", help="Input run number", type=int
 )
 parser.add_argument(
-    "-so", "--shot_output", help="Output shot number", required=True, type=int
+    "-po", "--pulse_output", help="Output pulse number", type=int
 )
 parser.add_argument(
-    "-ro", "--run_output", help="Output run number", required=True, type=int
+    "-ro", "--run_output", help="Output run number", type=int
 )
 parser.add_argument(
     "-do",
@@ -62,35 +76,38 @@ if args.backend_output == None:
 shiftParam = args.shift
 
 # OPEN INPUT
-connection = imas.DBEntry(
-    getBackendID(args.backend),
-    args.database,
-    args.shot_input,
-    args.run_input,
-    args.user,
-)
-status, idx = connection.open()
-if status != 0:
-    logger.critical("Can't open the input pulse file!")
-    sys.exit(1)
-
+inputargs = argparse.Namespace()
+inputargs.backend = args.backend
+inputargs.pulse = args.pulse_input
+inputargs.run = args.run_input
+inputargs.user = args.user
+inputargs.database = args.database
+inputargs.version = args.version
+if getIMASVersion() > 4:
+    inputargs.uri = args.input_uri
+connection = DBMaster.getConnection(inputargs)
+if connection is None:
+    sys.exit()
+    
 idsEquilibrium = connection.get("equilibrium")
 
-# OPEN OUTPUT
-connectionOutput = imas.DBEntry(
-    getBackendID(args.backend),
-    args.database_output,
-    args.shot_output,
-    args.run_output,
-    user_name=os.environ["USER"],
-)
-status, idx = connectionOutput.open()
-if status != 0:
-    logger.warning("Can't open the output pulse file!, Trying to create a new one")
-    status, idx = connectionOutput.create()
-    if status != 0:
-        logger.critical("Can't create the output pulse file!")
-        sys.exit(1)
+outputargs = argparse.Namespace()
+outputargs.backend = args.backend_output
+outputargs.pulse = args.pulse_output
+outputargs.run = args.run_output
+outputargs.user = os.environ["USER"]
+outputargs.database = args.database_output
+outputargs.version = args.version
+if getIMASVersion() > 4:
+    outputargs.mode="w"
+    outputargs.uri = args.output_uri
+        
+outputConnection = DBMaster.getConnection(outputargs)
+if outputConnection is None:
+    outputConnection = DBMaster.createConnection(outputargs)
+    if outputConnection is None:
+        sys.exit()
+        
 
 logger.info(f"Shifting equilibrium by {shiftParam} m")
 logger.info(
@@ -100,12 +117,18 @@ equilibriumCompute = EquilibriumCompute(idsEquilibrium)
 equout = equilibriumCompute.z_shift(shiftParam)
 
 # PUT IDS INTO OUTPUT
-connectionOutput.put(equout)
+outputConnection.put(equout)
 
 # CLOSE FILES
 connection.close()
-connectionOutput.close()
+outputConnection.close()
 logger.info(f"Equilibrium IDS is upward shifted successfully.")
-logger.info(
-    f"Output database details database={args.database_output}, shot={args.shot_output}, run={args.run_output}, user={os.environ['USER']}"
-)
+
+if getIMASVersion() > 4:
+    logger.info(
+        f"Output database details database={outputargs.uri}"
+    )
+else:
+    logger.info(
+        f"Output database details database={args.database_output}, pulse={args.pulse_output}, run={args.run_output}, user={os.environ['USER']}"
+    )

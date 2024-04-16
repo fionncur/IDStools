@@ -7,6 +7,8 @@ import os
 import statistics as stat
 import sys
 
+from rich_argparse import RichHelpFormatter
+
 import imas
 
 from idstools import idsperf
@@ -17,6 +19,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="This script gives simple timing and performance information for different types of operations on IDS data with the IMAS Python Access Layer (get/get_slice/put depending on selected options)",
         parents=[dbentryParser],
+        formatter_class=RichHelpFormatter,
     )
     timegroup = parser.add_mutually_exclusive_group()
     timegroup.add_argument(

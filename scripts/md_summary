@@ -61,9 +61,9 @@ parser.add_argument(
     "        backend                = Backend used to store de IDS\n"
     "        provenance             = Data provenance\n"
     "        status                 = Status of the machine description\n"
-    "        replaces               = Old shot/run this one replaces\n"
-    "        replaced_by            = Replaced by shot/run \n"
-    "        reason_for_replacement = Comment on why this shot/run replaces the previous one\n",
+    "        replaces               = Old pulse/run this one replaces\n"
+    "        replaced_by            = Replaced by pulse/run \n"
+    "        reason_for_replacement = Comment on why this pulse/run replaces the previous one\n",
     required=False,
 )
 
@@ -120,7 +120,7 @@ else:
     print("""----> Default call equivalent to: """)
     print("""      md_summary -c pbs,ids,description,backend""")
     print(""" """)
-# add shot/run number because pandas is stores id as unique key
+# add pulse/run number because pandas is stores id as unique key
 choice.append("id")
 
 mdObject = MachineDescription(machineDescriptionFolder)

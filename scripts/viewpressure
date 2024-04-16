@@ -7,6 +7,8 @@ import argparse
 import logging
 import sys
 
+from rich_argparse import RichHelpFormatter
+
 import imas
 
 from idstools.compute.common import getNearestTime
@@ -28,7 +30,7 @@ parser = argparse.ArgumentParser(
     description="Display the plasma pressure properties from the core_profiles IDS [previsouly known as pressureplot]",
     epilog="""
 """,
-    formatter_class=argparse.RawTextHelpFormatter,
+    formatter_class=RichHelpFormatter,
     parents=[dbentryParser],
 )
 

@@ -4,6 +4,8 @@ import argparse
 import logging
 import sys
 
+from rich_argparse import RichHelpFormatter
+
 from idstools.compute.common import getNearestTime
 from idstools.database import DBMaster
 from idstools.utils.clihelper import (
@@ -19,7 +21,7 @@ from idstools.view.waves import WavesView
 # MANAGEMENT OF INPUT ARGUMENTS
 # ------------------------------
 parser = argparse.ArgumentParser(
-    description="---- Display EC results [previously known as eccomp]", parents=[dbentryParser]
+    description="---- Display EC results [previously known as eccomp]", parents=[dbentryParser],formatter_class=RichHelpFormatter,
 )
 parser.add_argument(
     "-t",
@@ -111,22 +113,22 @@ else:
 #         return slist
 #     else:
 #         return [int(string)]
-# shotString, runString = args.shot, args.run
-# shotList, runList = StrToList(shotString), StrToList(runString)
-# assert len(shotList) <= len(
+# pulseString, runString = args.pulse, args.run
+# pulseList, runList = StrToList(pulseString), StrToList(runString)
+# assert len(pulseList) <= len(
 #     runList
-# ), "There must be a run number corresponding to each shot"
+# ), "There must be a run number corresponding to each pulse"
 
-# if len(runList) > len(shotList):
+# if len(runList) > len(pulseList):
 #     assert (
-#         len(shotList) == 1
-#     ), "Either give a shot for each run or give a single shot for every run"
-#     shotList = len(runList) * shotList
-# nsimu = len(shotList)
-# for isimu in range(len(shotList)):
-#     ishot = shotList[isimu]
+#         len(pulseList) == 1
+#     ), "Either give a pulse for each run or give a single pulse for every run"
+#     pulseList = len(runList) * pulseList
+# nsimu = len(pulseList)
+# for isimu in range(len(pulseList)):
+#     ipulse = pulseList[isimu]
 #     irun = runList[isimu]
-#     # Reading in data from run in shot
+#     # Reading in data from run in pulse
 #     logger.info(
-#         f"Open pulse: {ishot}/{irun} in DB {args.user}/{args.database}/{args.version}"
+#         f"Open pulse: {ipulse}/{irun} in DB {args.user}/{args.database}/{args.version}"
 #     )

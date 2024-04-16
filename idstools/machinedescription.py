@@ -14,7 +14,7 @@ logger = logging.getLogger(f"module.{__name__}")
 class MachineDescription:
     mdSummaryPath = r"/work/imas/shared/imasdb/ITER_MD/3/md_summary.yaml"
 
-    def __init__(self, connectionArgs, mdSummaryPath: str = "") -> None:
+    def __init__(self, connectionArgs= None, mdSummaryPath: str = "") -> None:
         self.mdArgs = connectionArgs
         if "database" in self.mdArgs.__dict__ and self.mdArgs.database == "ITER":
             self.mdArgs.database = "ITER_MD"

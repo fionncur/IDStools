@@ -7,6 +7,8 @@ import argparse
 import logging
 import sys
 
+from rich_argparse import RichHelpFormatter
+
 from imas import imasdef
 
 from idstools.database import DBMaster
@@ -26,7 +28,7 @@ parser = argparse.ArgumentParser(
     description="View information about sources [previsouly known as print_sources]",
     epilog="""
 """,
-    formatter_class=argparse.RawTextHelpFormatter,
+    formatter_class=RichHelpFormatter,
     parents=[dbentryParser],
 )
 

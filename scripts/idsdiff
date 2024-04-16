@@ -12,6 +12,8 @@ import tempfile
 import time
 from io import BytesIO
 
+from rich_argparse import RichHelpFormatter
+
 import imas
 import matplotlib.pyplot as plt
 import numpy as np
@@ -414,7 +416,7 @@ def generate_html(file_path, data, pulseA, runA, pulseB, runB):
 if __name__ == "__main__":
     # Management of input arguments
     parser = argparse.ArgumentParser(
-        description="Compare a IDS from 2 date entries and returns True or False with option of generating html page with comparisen", parents=[imasParser]
+        description="Compare a IDS from 2 date entries and returns True or False with option of generating html page with comparisen", parents=[imasParser], formatter_class=RichHelpFormatter,
     )
     if getIMASVersion() > 4:
         parser.add_argument(
@@ -430,11 +432,11 @@ if __name__ == "__main__":
             help="second uri \t\t(default=%(default)s)",
         )
     parser.add_argument(
-        "-sA", "--pulseA", type=int, help="shot number of first dataset"
+        "-sA", "--pulseA", type=int, help="pulse number of first dataset"
     )
     parser.add_argument("-rA", "--runA", type=int, help="run number of first dataset")
     parser.add_argument(
-        "-sB", "--pulseB", type=int, help="shot number of second dataset"
+        "-sB", "--pulseB", type=int, help="pulse number of second dataset"
     )
     parser.add_argument("-rB", "--runB", type=int, help="run number of second dataset")
     parser.add_argument(
@@ -495,10 +497,7 @@ if __name__ == "__main__":
     argsA.database = args.database
     argsA.version = args.version
     if getIMASVersion() > 4:
-        if args.uriA is None:
-            argsA.uri = f"imas:{args.backend.lower()}?user={args.user};shot={args.pulseA};run={args.runA};database={args.database};version={args.version}"
-        else:
-            argsA.uri = args.uriA
+        argsA.uri = args.uriA
 
     inputA = DBMaster.getConnection(argsA)
     if inputA is None:
@@ -513,10 +512,7 @@ if __name__ == "__main__":
     argsB.database = args.databaseB
     argsB.version = args.version
     if getIMASVersion() > 4:
-        if args.uriA is None:
-            argsB.uri = f"imas:{args.backendB.lower()}?user={args.userB};shot={args.pulseB};run={args.runB};database={args.databaseB};version={args.version}"
-        else:
-            argsB.uri = args.uriB
+        argsB.uri = args.uriB
 
     inputB = DBMaster.getConnection(argsB)
     if inputB is None:

@@ -4,6 +4,8 @@ import argparse
 import os
 import sys
 
+from rich_argparse import RichHelpFormatter
+
 import numpy
 
 try:
@@ -20,7 +22,7 @@ logger = setupLogger("module")
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Prints content of an IDS onto the terminal [previously known as idsdump and idsdumppath]",
-        formatter_class=argparse.RawTextHelpFormatter,
+        formatter_class=RichHelpFormatter,
         parents=[dbentryParser],
     )
 

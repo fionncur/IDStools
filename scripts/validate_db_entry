@@ -7,6 +7,8 @@ import traceback
 import re
 import time
 
+from rich_argparse import RichHelpFormatter
+
 import imas
 from idstools.utils.clihelper import getBackendID, imasParser
 from idstools.set_logger import set_logger
@@ -23,9 +25,9 @@ def main():
     """
     
 
-    # Set validator for given (shot, run), otherwise whole pulses found
-    if args.shot:
-        pulse = [(args.shot, args.run)]
+    # Set validator for given (pulse, run), otherwise whole pulses found
+    if args.pulse:
+        pulse = [(args.pulse, args.run)]
     else:
         pulse = []
 
@@ -54,7 +56,7 @@ if __name__ == "__main__":
     prog = os.path.basename(__file__)
     parser = argparse.ArgumentParser(
         prog=prog,
-        formatter_class=argparse.RawDescriptionHelpFormatter,
+        formatter_class=RichHelpFormatter,
         parents=[imasParser],
         description=textwrap.dedent(
             """\
@@ -74,17 +76,17 @@ if __name__ == "__main__":
                 $ {0} -u username -d database 
 
                 4) Validate one pulse in IMAS database to schemas in the directory
-                $ {0} -s 131024 -r 40 -p /path/to/schema/dir
+                $ {0} -p 131024 -r 40 -p /path/to/schema/dir
 
-                5) Validate all pulses having the shot number specified
-                $ {0} -s 131024 -p /path/to/schema/dir
+                5) Validate all pulses having the pulse number specified
+                $ {0} -p 131024 -p /path/to/schema/dir
             """.format(
                 prog
             )
         ),
     )
     parser.add_argument(
-        "--shot", "-s", dest="shot", help="Shot number", required=False, type=int
+        "--pulse", "-p", dest="pulse", help="Shot number", required=False, type=int
     )
     parser.add_argument(
         "--run", "-r", dest="run", help="Run number", required=False, type=int, default=-1

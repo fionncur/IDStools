@@ -11,7 +11,7 @@ Example:
     Following is the example how to use dbsize module
     literal blocks::
 
-        $ python scripts/idssize -s 122525 -r 1
+        $ python scripts/idssize -p 122525 -r 1
         Examining data for public, ITER, 3, 122525, 1
         Reading 0.001 MB of data for dataset_description/0 took 0.00 seconds
         Reading 0.003 MB of data for divertors/0 took 0.02 seconds
@@ -38,7 +38,7 @@ Example:
 
 
 Attributes:
-    shot (int): shot number
+    pulse (int): pulse number
     run (int): run number
 
 Todo:
@@ -49,6 +49,8 @@ Todo:
 
 import argparse
 import sys
+
+from rich_argparse import RichHelpFormatter
 from idstools.database import DBMaster
 
 import imas
@@ -66,7 +68,7 @@ parser = argparse.ArgumentParser(
     description="Show size and time of IDSs [previously knwon as analyze_db_sizes]",
     epilog="""
 """,
-    formatter_class=argparse.RawTextHelpFormatter,
+    formatter_class=RichHelpFormatter,
     parents=[dbentryParser],
 )
 

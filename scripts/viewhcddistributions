@@ -4,6 +4,8 @@ import argparse
 import logging
 import sys
 
+from rich_argparse import RichHelpFormatter
+
 
 from idstools.compute.common import getNearestTime
 from idstools.database import DBMaster
@@ -74,7 +76,7 @@ def showPlots(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="---- Display EC results", parents=[dbentryParser]
+        description="---- Display EC results", parents=[dbentryParser],formatter_class=RichHelpFormatter,
     )
     parser.add_argument(
         "-t", "--time", help="Time", required=False, type=float, default=-99.0
@@ -89,7 +91,7 @@ if __name__ == "__main__":
 
     showPlots(args)
 
-    # shot = args.shot
+    # pulse = args.pulse
     # run = args.run
 
     # To handle multiple datafiles (for scans)

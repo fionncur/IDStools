@@ -5,6 +5,8 @@ import os
 import sys
 import textwrap
 
+from rich_argparse import RichHelpFormatter
+
 
 import imas
 import numpy as np
@@ -34,17 +36,17 @@ def printVector(vec, wlen):
     return " ".join([f"{str(x):>{wlen}s}" for x in vec])
 
 
-def print_list(dbs, shotnum=None, compact=False, timestamp=False):
+def print_list(dbs, pulsenum=None, compact=False, timestamp=False):
     for dbname, dvs in dbs:
         printed_database = False
         for dv, dbbackends in dvs:
             printed_dataversion = False
             for backend, dbs in dbbackends:
                 printed_backend = False
-                for shot, runs in sorted(dbs.items()):
-                    if shotnum is not None:
-                        # if a shotnum is given, only display databases with this shot number
-                        if shot != shotnum:
+                for pulse, runs in sorted(dbs.items()):
+                    if pulsenum is not None:
+                        # if a pulsenum is given, only display databases with this pulse number
+                        if pulse != pulsenum:
                             continue
 
                     if not printed_database:
@@ -60,14 +62,14 @@ def print_list(dbs, shotnum=None, compact=False, timestamp=False):
                         print(
                             TAB * 3
                             + "Pulse "
-                            + extended(str(shot), SHOT_STR_LEN)
+                            + extended(str(pulse), SHOT_STR_LEN)
                             + ": "
                             + extended(str(len(sorted(runs))), RUNNUM_STR_LEN)
                             + " runs"
                         )
 
                     elif timestamp:
-                        print(TAB * 3 + "Pulse " + extended(str(shot), SHOT_STR_LEN))
+                        print(TAB * 3 + "Pulse " + extended(str(pulse), SHOT_STR_LEN))
                         runs.sort(reverse=True, key=lambda x: x[1])
                         for r in runs:
                             print(
@@ -83,26 +85,26 @@ def print_list(dbs, shotnum=None, compact=False, timestamp=False):
                         print(
                             TAB * 3
                             + "Pulse "
-                            + extended(str(shot), SHOT_STR_LEN)
+                            + extended(str(pulse), SHOT_STR_LEN)
                             + " Runs: "
                             + printVector(sorted([r[1] for r in runs]), RUN_STR_LEN)
                         )
 
 
-def printTimes(dbs, args, print_times=False, shotNumber=None, runNumber=None):
+def printTimes(dbs, args, print_times=False, pulseNumber=None, runNumber=None):
     for dbname, dvs in dbs:
         printed_database = False
         for dv, dbbackends in dvs:
             printed_dataversion = False
             for backend, dbs in dbbackends:
                 printed_backend = False
-                for shot, runs in sorted(dbs.items()):
-                    # If a shotnum and/or runnum is given, only display these
-                    if shotNumber is not None:
-                        if shot != shotNumber:
+                for pulse, runs in sorted(dbs.items()):
+                    # If a pulsenum and/or runnum is given, only display these
+                    if pulseNumber is not None:
+                        if pulse != pulseNumber:
                             continue
 
-                    printed_shot = False
+                    printed_pulse = False
                     justruns = [r[1] for r in runs]
                     justruns.sort()
                     for run in justruns:
@@ -119,20 +121,20 @@ def printTimes(dbs, args, print_times=False, shotNumber=None, runNumber=None):
                         if not printed_backend:
                             print(TAB * 2 + "Backend: " + backend)
                             printed_backend = True
-                        if not printed_shot:
-                            print(TAB * 3 + "Pulse " + extended(str(shot), SHOT_STR_LEN))
-                            printed_shot = True
+                        if not printed_pulse:
+                            print(TAB * 3 + "Pulse " + extended(str(pulse), SHOT_STR_LEN))
+                            printed_pulse = True
 
                         print(TAB * 4 + " Run: " + extended(str(run), RUN_STR_LEN))
                         connargs = argparse.Namespace()
                         connargs.backend = backend.upper()
-                        connargs.pulse = shot
+                        connargs.pulse = pulse
                         connargs.run = run
                         connargs.user = args.user
                         connargs.database = dbname
                         connargs.version = dv
                         if getIMASVersion() > 4:
-                            connargs.uri = f"imas:{backend.lower()}?user={args.user};shot={shot};run={run};database={dbname};version={dv}"
+                            connargs.uri = f"imas:{backend.lower()}?user={args.user};pulse={pulse};run={run};database={dbname};version={dv}"
                         
                         connection = DBMaster.getConnection(connargs)
                 
@@ -185,24 +187,24 @@ def printTimes(dbs, args, print_times=False, shotNumber=None, runNumber=None):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         prog="dblist",
-        formatter_class=argparse.RawDescriptionHelpFormatter,
+        formatter_class=RichHelpFormatter,
         description=textwrap.dedent(
             """
                 This program lists existing IMAS databases.
 
                 Possible commands are:
-                list <shot number>                  list existing databases
-                slices <shot number> <run number>   list existing databases, including number of timeslices and time range for time-dependent IDSs
-                times <shot number> <run number>    list existing databases, including number of timeslices their time points for time-dependent IDSs
+                list <pulse number>                  list existing databases
+                slices <pulse number> <run number>   list existing databases, including number of timeslices and time range for time-dependent IDSs
+                times <pulse number> <run number>    list existing databases, including number of timeslices their time points for time-dependent IDSs
                 databases                           list existing databases (with data versions)
                 dataversions                        list existing dataversions (with databases)
 
-                If the optional arguments shot number and run number are given, only databases with these numbers will be shown.
+                If the optional arguments pulse number and run number are given, only databases with these numbers will be shown.
                 If no command is given, the list command is performed.
                 To see databases stored in the public imas database, use 'public' as the user name.
                 
                 [Previously known as imasdbs]"""
-        ),
+        )
     )
     subparsers = parser.add_subparsers(help="sub-commands help")
 
@@ -290,12 +292,12 @@ if __name__ == "__main__":
 
     if args.cmd == "slices":
         printTimes(
-            dbs, args, print_times=False, shotNumber=args.pulse, runNumber=args.run
+            dbs, args, print_times=False, pulseNumber=args.pulse, runNumber=args.run
         )
 
     if args.cmd == "times":
         printTimes(
-            dbs, args, print_times=True, shotNumber=args.pulse, runNumber=args.run
+            dbs, args, print_times=True, pulseNumber=args.pulse, runNumber=args.run
         )
 
     if args.cmd == "databases":
