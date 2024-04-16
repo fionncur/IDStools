@@ -61,14 +61,14 @@ print("SciPy version:", scipy.__version__)
 print("Matplotlib version:", matplotlib.__version__)
 END
 )
-
-ISAL5=$(echo "$AL_VERSION" | grep -E '^5')
+AL_VERSION_LOCAL="${AL_VERSION//./}"
 
 python3 -c "$version_script"
 
 echo "Testing ids manipulation scripts with $IMAS_MODULE_VERSION and $PYTHON_VERSION"
 source ./tests/st01_test_ids_scripts.sh 
-if [[ "$ISAL5" -gt 4 ]]; then
+
+if [ "$AL_VERSION_LOCAL" -ge "500" ]; then
     source ./tests/st01_test_ids_scripts_with_uri.sh 
 fi
 echo "---------------------------------------------------------------------"
@@ -77,7 +77,7 @@ source ./tests/st02_test_db_scripts.sh
 echo "---------------------------------------------------------------------"
 echo "Testing analysis scripts  with $IMAS_MODULE_VERSION and $PYTHON_VERSION"
 source ./tests/st03_test_analysis_scripts.sh 
-if [[ "$ISAL5" -gt 4 ]]; then
+if [ "$AL_VERSION_LOCAL" -ge "500" ]; then
     source ./tests/st03_test_analysis_scripts_with_uri.sh 
 fi
 echo "---------------------------------------------------------------------"

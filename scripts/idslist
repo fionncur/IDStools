@@ -12,7 +12,7 @@ from idstools.database import DBMaster
 
 import imas
 import numpy as np
-
+from rich.markdown import Markdown
 from idstools.utils.idshelper import (
     getAvailableIdsAndOccurrences,
     getAvailableIdsAndTimes,
@@ -23,21 +23,20 @@ from idstools.utils.clihelper import getBackendID, dbentryParser
 logger = setupLogger("module")
 np.set_printoptions(threshold=1, precision=2, suppress=True)
 
+description="""
+List available IDSes in the pulse. By default it prints all IDSes along with its time length. The fullarray option allows you to print the complete time array.
 
+Possible commands are:
+
+- ``yaml``: List IDS content for YAML files aimed at describing a scenario.
+- ``occ <--ids> <--comment>``: List IDS with their number of occurrences.
+
+[``ids_content(yaml)``, ``listidss`` (with time slices), ``idsoccurrences(occ)`` merged into one script]
+"""
 parser = argparse.ArgumentParser(
     prog="idslist",
     formatter_class=RichHelpFormatter,
-    description=textwrap.dedent(
-        """
-        List available IDSes in the pulse. By default it prints all IDSes along with its time length. fullarray option allows you to print complete time array.
-        
-        Possible commands are:
-        yaml - List ids content for yaml files aimed at describing a scenario
-        occ <--ids> <--comment> - List ids with their number of occurrences
-        
-        [ids_content(yaml), listidss (with time slices), idsoccurrences(occ) merged into one script]
-        """
-    ),
+    description=Markdown(description, style="argparse.text"),
     parents=[dbentryParser],
 )
 parser.add_argument(

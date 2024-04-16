@@ -5,6 +5,7 @@ from sys import exit
 from sys import stdout
 import argparse
 import textwrap
+from rich.markdown import Markdown
 from rich_argparse import RichHelpFormatter
 import yaml
 from idstools.database import DBMaster
@@ -77,7 +78,90 @@ def main():
         # Validation for Class imas.DBEntry
         sv.validate_db(db)
 
+description="""
+Load IMAS and install Cerberus (if not done before)
+----------------------------------------------------
 
+.. code-block:: bash
+
+    $ module load IMAS
+    $ pip install cerberus
+
+(I) Command Line Interface for IDS Data Validation (idschk)
+-----------------------------------------------------------
+
+Examples:
+
+1) Validate if ITER Scenario meets with physics requirements
+
+.. code-block:: bash
+
+    $ idschk -p 131024 -r 40 -f path/to/schema_file/required_fields_core.yml
+
+2) Same with 1) and only for one time slice. Specify time, otherwise middle point if blank
+
+.. code-block:: bash
+
+    $ idschk -p 131024 -r 40 -f path/to/schema_file/required_fields_core.yml -t 100.
+    $ idschk -p 131024 -r 40 -f path/to/schema_file/required_fields_core.yml -t
+
+3) Check IDS/equilibrium for COCOS
+
+.. code-block:: bash
+
+    $ idschk -p 131024 -r 40 -c
+
+4) Check IDS/equilibrium with COCOS values
+
+.. code-block:: bash
+
+    $ idschk -p 131024 -r 40 -c --verbose
+
+(II) Functional Interface in Python (idstools/idschk.py)
+--------------------------------------------------------
+
+Examples: 
+
+0) Initialization
+
+.. code-block:: python
+
+    >>> import imas
+    >>> from idstools.idschk import * 
+    >>> input = imas.DBEntry(imas.imasdef.MDSPLUS_BACKEND,"ITER",131024,40,"public")
+    >>> input.open()
+    >>> equilibrium=input.get("equilibrium")
+
+1) Validate if ITER Scenario meets with physics requirements
+
+.. code-block:: python
+
+    >>> flag, log = ids_validator(equilibrium, 'path/to/schema_file/required_fields_core.yml')
+
+2) Validate length of coordinate for INT_*D and FLT_*D
+
+.. code-block:: python
+
+    >>> flag, log = ids_coordinate_check(equilibrium)
+
+3) Same with 2), increasing verbosity,
+
+.. code-block:: python
+
+    >>> flag, log = ids_coordinate_check(equilibrium, verbose=True)
+
+4) Compute COCOS
+
+.. code-block:: python
+
+    >>> cocos = ids_compute_cocos(equilibrium)
+
+5) Get COCOS values
+
+.. code-block:: python
+
+    >>> flag, log = ids_cocos_check(equilibrium, verbose=True)
+"""
 # ----------------------------------------------------------------------
 
 
@@ -86,54 +170,7 @@ if __name__ == "__main__":
         prog="idschk",
         formatter_class=RichHelpFormatter,
         parents=[dbentryParser],
-        description=textwrap.dedent(
-            """\
-            Load IMAS and install Cerberus (if not done before)
-                $ module load IMAS
-                $ pip install cerberus
-
-            (I) Command Line Interface for IDS Data Validation (idschk)
-            -----------------------------------------------------------
-            Examples:
-                1) Validate if ITER Scenario meets with physics requirements
-                $ idschk -p 131024 -r 40 -f path/to/schema_file/required_fields_core.yml
-
-                2) Same with 1) and only for one time slice. Specify time, otherwise middle point if blank
-                $ idschk -p 131024 -r 40 -f path/to/schema_file/required_fields_core.yml -t 100.
-                $ idschk -p 131024 -r 40 -f path/to/schema_file/required_fields_core.yml -t
-
-                3) Check IDS/equilibrium for COCOS
-                $ idschk -p 131024 -r 40 -c
-
-                4) Check IDS/equilibrium with COCOS values
-                $ idschk -p 131024 -r 40 -c --verbose
-
-            (II) Functional Interface in Python (idstools/idschk.py)
-            --------------------------------------------------------------
-            Examples: 
-                0) Initialization
-                >>> import imas
-                >>> from idstools.idschk import * 
-                >>> input = imas.DBEntry(imas.imasdef.MDSPLUS_BACKEND,"ITER",131024,40,"public")
-                >>> input.open()
-                >>> equilibrium=input.get("equilibrium")
-
-                1) Validate if ITER Scenario meets with physics requirements
-                >>> flag, log = ids_validator(equilibrium, 'path/to/schema_file/required_fields_core.yml')
-
-                2) Validate length of coordinate for INT_*D and FLT_*D
-                >>> flag, log = ids_coordinate_check(equilibrium)
-
-                3) Same with 2), increasing verbosity,
-                >>> flag, log = ids_coordinate_check(equilibrium, verbose=True)
-
-                4) Compute COCOS
-                >>> cocos = ids_compute_cocos(equilibrium)
-
-                5) Get COCOS values
-                >>> flag, log = ids_cocos_check(equilibrium, verbose=True)
-            """
-        ),
+        description=Markdown(description, style="argparse.text")
     )
     parser.add_argument(
         "-l",

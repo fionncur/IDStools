@@ -6,7 +6,7 @@ import sys
 import textwrap
 
 from rich_argparse import RichHelpFormatter
-
+from rich.markdown import Markdown
 
 import imas
 import numpy as np
@@ -183,28 +183,25 @@ def printTimes(dbs, args, print_times=False, pulseNumber=None, runNumber=None):
 
                         connection.close()
 
+description="""
+This program lists existing IMAS databases.
 
+Possible commands are:
+
+- ``list <pulse number>``: list existing databases
+- ``slices <pulse number> <run number>``: list existing databases, including number of timeslices and time range for time-dependent IDSs
+- ``times <pulse number> <run number>``: list existing databases, including number of timeslices their time points for time-dependent IDSs
+- ``databases``: list existing databases (with data versions)
+- ``dataversions``: list existing dataversions (with databases)
+
+If the optional arguments pulse number and run number are given, only databases with these numbers will be shown. If no command is given, the list command is performed. To see databases stored in the public imas database, use 'public' as the user name.
+
+[Previously known as imasdbs]"""
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         prog="dblist",
         formatter_class=RichHelpFormatter,
-        description=textwrap.dedent(
-            """
-                This program lists existing IMAS databases.
-
-                Possible commands are:
-                list <pulse number>                  list existing databases
-                slices <pulse number> <run number>   list existing databases, including number of timeslices and time range for time-dependent IDSs
-                times <pulse number> <run number>    list existing databases, including number of timeslices their time points for time-dependent IDSs
-                databases                           list existing databases (with data versions)
-                dataversions                        list existing dataversions (with databases)
-
-                If the optional arguments pulse number and run number are given, only databases with these numbers will be shown.
-                If no command is given, the list command is performed.
-                To see databases stored in the public imas database, use 'public' as the user name.
-                
-                [Previously known as imasdbs]"""
-        )
+        description=Markdown(description, style="argparse.text")
     )
     subparsers = parser.add_subparsers(help="sub-commands help")
 

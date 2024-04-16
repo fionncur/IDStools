@@ -6,7 +6,7 @@ import textwrap
 import traceback
 import re
 import time
-
+from rich.markdown import Markdown
 from rich_argparse import RichHelpFormatter
 
 import imas
@@ -49,7 +49,49 @@ def main():
 
 # ----------------------------------------------------------------------
 
+description=f"""
+Validation Tool for ITER Scenario DB
+-------------------------------------
 
+Usage:
+~~~~~~
+
+0) Load IMAS
+
+.. code-block:: bash
+
+    $ module load IMAS
+
+1) Validate all pulses in IMAS database against default schemas with output file
+
+.. code-block:: bash
+
+    $ {os.path.basename(__file__)} -o output.log
+
+2) Check the validity of all pulses in IMAS database against schemas
+
+.. code-block:: bash
+
+    $ {os.path.basename(__file__)} -p /path/to/schema1.yaml /path/to/schema2.yaml
+
+3) Validate all pulses in local database to default schemas
+
+.. code-block:: bash
+
+    $ {os.path.basename(__file__)} -u username -d database 
+
+4) Validate one pulse in IMAS database to schemas in the directory
+
+.. code-block:: bash
+
+    $ {os.path.basename(__file__)} -p 131024 -r 40 -p /path/to/schema/dir
+
+5) Validate all pulses having the pulse number specified
+
+.. code-block:: bash
+
+    $ {os.path.basename(__file__)} -p 131024 -p /path/to/schema/dir
+"""
 if __name__ == "__main__":
 
     # Parse for command line options
@@ -58,32 +100,7 @@ if __name__ == "__main__":
         prog=prog,
         formatter_class=RichHelpFormatter,
         parents=[imasParser],
-        description=textwrap.dedent(
-            """\
-            Validation Tool for ITER Scenario DB
-            -----------------------------------------------------------
-            Usage:
-                0) Load IMAS
-                $ module load IMAS
-
-                1) Validate all pulses in IMAS database against default schemas with output file
-                $ {0} -o output.log
-
-                2) Check the validity of all pulses in IMAS database against schemas
-                $ {0} -p /path/to/schema1.yaml /path/to/schema2.yaml
- 
-                3) Validate all pulses in local database to default schemas
-                $ {0} -u username -d database 
-
-                4) Validate one pulse in IMAS database to schemas in the directory
-                $ {0} -p 131024 -r 40 -p /path/to/schema/dir
-
-                5) Validate all pulses having the pulse number specified
-                $ {0} -p 131024 -p /path/to/schema/dir
-            """.format(
-                prog
-            )
-        ),
+        description=Markdown(description, style="argparse.text"),
     )
     parser.add_argument(
         "--pulse", "-p", dest="pulse", help="Shot number", required=False, type=int
@@ -109,7 +126,6 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--path",
-        "-p",
         dest="path",
         help="list of schema file and/or directory paths from which schema files are recursively loaded",
         required=False,
