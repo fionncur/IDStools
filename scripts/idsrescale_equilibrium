@@ -34,13 +34,13 @@ if getIMASVersion() > 4:
     )
         
 parser.add_argument(
-    "-si", "--pulse_input", help="Input pulse number", type=int
+    "-pi", "--pulse_input", help="Input pulse number", type=int
 )
 parser.add_argument(
     "-ri", "--run_input", help="Input run number", type=int
 )
 parser.add_argument(
-    "-so", "--pulse_output", help="Output pulse number", type=int
+    "-po", "--pulse_output", help="Output pulse number", type=int
 )
 parser.add_argument(
     "-ro", "--run_output", help="Output run number", type=int
@@ -127,6 +127,16 @@ connection.close()
 outputConnection.close()
 
 logger.info(f"Equilibrium IDS is rescaled successfully.")
-logger.info(
-    f"Output database details database={args.database_output}, pulse={args.pulse_output}, run={args.run_output}, user={os.environ['USER']}"
-)
+if getIMASVersion() > 4:
+    if args.output_uri is not None:
+        logger.info(
+        f"Output database details {args.output_uri}"
+    )
+    else:
+        logger.info(
+        f"Output database details database={args.database_output}, pulse={args.pulse_output}, run={args.run_output}, user={os.environ['USER']}"
+    )
+else:
+    logger.info(
+        f"Output database details database={args.database_output}, pulse={args.pulse_output}, run={args.run_output}, user={os.environ['USER']}"
+    )

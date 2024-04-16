@@ -42,7 +42,15 @@ module unload -f IDStools
 python -m venv "$ENVIRONEMNT_NAME"
 
 . "$ENVIRONEMNT_NAME"/bin/activate
+
+#install packages
+pip install --upgrade pip
+pip install .
+pip install packaging
+
 PYTHON_VERSION=$(python --version)
+
+# display versions
 version_script=$(cat <<END
 import numpy as np
 import scipy
@@ -57,10 +65,6 @@ END
 ISAL5=$(echo "$AL_VERSION" | grep -E '^5')
 
 python3 -c "$version_script"
-
-pip install --upgrade pip
-pip install .
-pip install packaging
 
 echo "Testing ids manipulation scripts with $IMAS_MODULE_VERSION and $PYTHON_VERSION"
 source ./tests/st01_test_ids_scripts.sh 

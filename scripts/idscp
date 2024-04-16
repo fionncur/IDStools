@@ -35,9 +35,9 @@ if getIMASVersion() > 4:
         help="output uri \t\t(default=%(default)s)",
     )
 
-parser.add_argument("-si", "--pulse_input", help="Input pulse number", type=int)
+parser.add_argument("-pi", "--pulse_input", help="Input pulse number", type=int)
 parser.add_argument("-ri", "--run_input", help="Input run number", type=int)
-parser.add_argument("-so", "--pulse_output", help="Output pulse number", type=int)
+parser.add_argument("-po", "--pulse_output", help="Output pulse number", type=int)
 parser.add_argument("-ro", "--run_output", help="Output run number", type=int)
 # default user from parent parser is 'public', which is fine for exploration scripts but less for management scripts
 parser.set_defaults(user=os.environ["USER"])

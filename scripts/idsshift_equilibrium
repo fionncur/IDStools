@@ -125,8 +125,13 @@ outputConnection.close()
 logger.info(f"Equilibrium IDS is upward shifted successfully.")
 
 if getIMASVersion() > 4:
-    logger.info(
-        f"Output database details database={outputargs.uri}"
+    if args.output_uri is not None:
+        logger.info(
+        f"Output database details {args.output_uri}"
+    )
+    else:
+        logger.info(
+        f"Output database details database={args.database_output}, pulse={args.pulse_output}, run={args.run_output}, user={os.environ['USER']}"
     )
 else:
     logger.info(

@@ -24,8 +24,7 @@ execute_scripts() {
 
         # Check if the script exited with an error
         if [ "$output" -ne 0 ]; then
-            echo "Error occurred while executing $script."
-            echo "Error log :"
+            echo "Error occurred while executing $script"
             SCRIPT_STATUS["$script"]="FAIL"
             cat "$LOG_FILE"
         else
