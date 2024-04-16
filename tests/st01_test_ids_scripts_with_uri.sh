@@ -33,7 +33,7 @@ SCRIPTS=(
 "idsperf --uri \"imas:mdsplus?user=public;shot=122525;run=1;database=ITER;version=3\" summary --verbose --outputRun 5 --showStats --repeat 2" 
 "idsperf --uri \"imas:mdsplus?user=public;shot=122525;run=1;database=ITER;version=3\" summary --verbose --outputRun 5 --showStats --repeat 2 --uriOut \"imas:mdsplus?user=$USERNAME;shot=131024;run=20;database=ITER;version=3\" --memoryBackend" 
 "idsprint --uri \"imas:mdsplus?user=public;shot=122525;run=1;database=ITER;version=3\" equilibrium" 
-"idssize --uri \"imas:mdsplus?user=public;shot=122525;run=1;database=ITER;version=3 equilibrium\"" 
+"idssize --uri \"imas:mdsplus?user=public;shot=122525;run=1;database=ITER;version=3\" equilibrium" 
 "idssize --uri \"imas:mdsplus?user=public;shot=131024;run=10;database=ITER;version=3\"")
 
 execute_scripts "${SCRIPTS[@]}"

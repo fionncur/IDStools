@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import os
+import re
 import argparse
 import textwrap
 import traceback
@@ -13,6 +14,7 @@ from idstools.eqdsk2ids import geqdsk2ids
 from idstools.utils.clihelper import (
     dbentryParser,
     getDatabasePath,
+    getIMASVersion,
 )
 
 # ----------------------------------------------------------------------
@@ -28,7 +30,22 @@ def main():
 
     # Create the output datafile
     logger.info("creating output datafile ...")
-    db = DBMaster.createConnection(args)
+
+    outputargs = argparse.Namespace()
+    outputargs.backend = args.backend
+    outputargs.pulse = args.pulse
+    outputargs.run = args.run
+    outputargs.user = os.environ["USER"]
+    outputargs.database = args.database
+    outputargs.version = args.version
+    if getIMASVersion() > 4:
+        outputargs.mode="w"
+        if args.output_uri is None:
+            outputargs.uri =  f"imas:mdsplus?user={outputargs.user};shot={outputargs.pulse};run={outputargs.run};database={outputargs.database};version={outputargs.version}"
+        else:
+            outputargs.uri = args.output_uri
+ 
+    db = DBMaster.createConnection(outputargs)
     if db is None:
         logger.critical("----> Aborted.")
         exit(1)
@@ -86,6 +103,12 @@ if __name__ == "__main__":
             """
         ),
     )
+    parser.add_argument(
+            "-ouri",
+            "--output_uri",
+            type=str,
+            help="output uri \t\t(default=%(default)s)",
+        )
     parser.add_argument(
         "-g",
         "--gfile",
