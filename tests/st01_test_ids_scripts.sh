@@ -23,7 +23,7 @@ mkdir -p "$LOG_DIR"
 SCRIPTS=(
     "eqdsk2ids -p 134174 -r 117 -g resources/geqdsk/example.gfile -u $USERNAME -d ITER --log INFO"
     "idschk -p 134174 -r 117 -f resources/validation_schemas/ITER/core_profiles.yml"
-    "idscp -pi 131024 -ri 10 -po 145000 -ro 2 -u public" 
+    "idscp -sp 131024 -sr 10 -dp 145000 -dr 2 -u public" 
     "idsdiff --pulseA 122525 --runA  1 --pulseB 122525 --runB 2 summary"
     "idsdiff --pulseA 130011 --runA  6 --pulseB 130012 --runB 4 summary"
     "idsresample -pi 131024 -ri 10 -po 145000 -ro 2 -u public"
