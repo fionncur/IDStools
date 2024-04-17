@@ -4,9 +4,9 @@
 # Edgeplot is added in develop2.0 developed by Anna https://confluence.iter.org/display/IMP/How+to+plot+data+from+edge_profiles
 import argparse
 import copy
-
+import os
 from rich_argparse import RichHelpFormatter
-
+import sys
 from imas import imasdef
 
 from idstools.compute.common import getNearestTime
@@ -44,6 +44,11 @@ parser.add_argument(
     "--save",
     help="Save figure at default location",
     action="store_true",
+)
+parser.add_argument(
+    "--directory",
+    help="Directory to save the figure",
+    default=None, 
 )
 args = parser.parse_args()
 
@@ -141,9 +146,14 @@ canvas.fig.subplots_adjust(
 )
 
 canvas.fig.suptitle(getTitle(args, "Edge Profiles", timeValue), size=12)
+canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
 
 if args.save:
-    fname = getFileName(args, "edge_profiles", timeValue)
+    fname = getFileName(args, os.path.basename(__file__)+"_edge_profiles", timeValue)
+    if args.directory:
+        if not os.path.exists(args.directory):
+            os.makedirs(args.directory)
+        fname=os.path.join(args.directory,fname)
     canvas.save(fname)
 else:
     canvas.show()

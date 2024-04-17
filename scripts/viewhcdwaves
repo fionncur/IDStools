@@ -3,7 +3,7 @@
 import argparse
 import logging
 import sys
-
+import os
 from rich_argparse import RichHelpFormatter
 
 from idstools.compute.common import getNearestTime
@@ -93,14 +93,18 @@ def showPlots(args):
         hspace=0.2,
         wspace=0.13,
     )
-    canvas.get_current_fig_manager().set_window_title(sys.argv[0])
+    canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
     canvas.fig.suptitle(getTitle(args, "HCD Waves Plot", timeValue), size=12)
+
     if args.save:
-        fname = getFileName(args, "ECRH_profile_time", timeValue)
+        fname = getFileName(args,  os.path.basename(__file__)+"_ECRH_profile_time", timeValue)
+        if args.directory:
+            if not os.path.exists(args.directory):
+                os.makedirs(args.directory)
+            fname=os.path.join(args.directory,fname)
         canvas.save(fname)
     else:
         canvas.show()
-
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
@@ -122,6 +126,11 @@ if __name__ == "__main__":
         "--save",
         help="Save figure at default location",
         action="store_true",
+    )
+    parser.add_argument(
+        "--directory",
+        help="Directory to save the figure",
+        default=None, 
     )
     args = parser.parse_args()
     showPlots(args)

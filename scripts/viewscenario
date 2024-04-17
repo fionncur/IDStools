@@ -4,7 +4,7 @@ import argparse
 import json
 import logging
 import sys
-
+import os
 from rich_argparse import RichHelpFormatter
 import imas
 
@@ -51,6 +51,11 @@ parser.add_argument(
     "--save",
     help="Save figure at default location",
     action="store_true",
+)
+parser.add_argument(
+    "--directory",
+    help="Directory to save the figure",
+    default=None, 
 )
 args = parser.parse_args()
 logger = setupLogger("module", stdout_level=logging.INFO)
@@ -223,17 +228,21 @@ if not args.noProfiles:
 else:
     canvas.setText(text=f"{getDatabasePath(args)}")
 canvas.setSupTitle(title)
-canvas.get_current_fig_manager().set_window_title(sys.argv[0])
+canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
 canvas.fig.subplots_adjust(
     top=0.914, bottom=0.099, left=0.042, right=0.9, hspace=0.113, wspace=0.26
 )
 
+
 if args.save:
     if not args.noProfiles:
-        fname = getFileName(args, "summary", timeValue)
+        fname = getFileName(args, os.path.basename(__file__) + "_summary", timeValue)
     else:
-        fname = getFileName(args, "Scenario_shot")
-
+        fname = getFileName(args, os.path.basename(__file__) + "_Scenario_shot")
+    if args.directory:
+        if not os.path.exists(args.directory):
+            os.makedirs(args.directory)
+        fname=os.path.join(args.directory,fname)
     canvas.save(fname)
 else:
     canvas.show()

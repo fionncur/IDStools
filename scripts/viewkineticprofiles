@@ -3,7 +3,7 @@
 import argparse
 import logging
 import sys
-
+import os
 from rich_argparse import RichHelpFormatter
 
 from idstools.database import DBMaster
@@ -35,6 +35,11 @@ parser.add_argument(
     "--save",
     help="Save figure at default location",
     action="store_true",
+)
+parser.add_argument(
+    "--directory",
+    help="Directory to save the figure",
+    default=None, 
 )
 args = parser.parse_args()
 if args.verbose:
@@ -78,14 +83,18 @@ if kpView.kProfiles.isCoreProfilesPresent:
     canvas.fig.subplots_adjust(
         top=0.928, bottom=0.11, left=0.033, right=0.91, hspace=0.435, wspace=0.518
     )
-    canvas.get_current_fig_manager().set_window_title(sys.argv[0])
+    canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
 
     canvas.fig.suptitle(
         getTitle(args, "Plasma kinetic profiles ", kpView.kProfiles.commonTime), size=12
     )
 
     if args.save:
-        fname = getFileName(args, "Kinetic", kpView.kProfiles.commonTime)
+        fname = getFileName(args,  os.path.basename(__file__)+"_Kinetic", kpView.kProfiles.commonTime)
+        if args.directory:
+            if not os.path.exists(args.directory):
+                os.makedirs(args.directory)
+            fname=os.path.join(args.directory,fname)
         canvas.save(fname)
     else:
         canvas.show()

@@ -6,7 +6,7 @@
 import argparse
 import logging
 import sys
-
+import os
 from rich_argparse import RichHelpFormatter
 
 import imas
@@ -40,7 +40,11 @@ parser.add_argument(
     help="Save figure at default location",
     action="store_true",
 )
-
+parser.add_argument(
+    "--directory",
+    help="Directory to save the figure",
+    default=None, 
+)
 args = parser.parse_args()
 
 connection = DBMaster.getConnection(args)
@@ -86,10 +90,15 @@ canvas.setText(text=f"{getDatabasePath(args, timeValue=timeValue)}")
 canvas.fig.subplots_adjust(
     top=0.916, bottom=0.09, left=0.044, right=0.953, hspace=0.287, wspace=0.2
 )
-canvas.get_current_fig_manager().set_window_title(sys.argv[0])
+canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
 canvas.fig.suptitle(getTitle(args, "Pressure", timeValue), size=12)
+
 if args.save:
-    fname = getFileName(args, "Pressure", timeValue)
+    fname = getFileName(args, os.path.basename(__file__)+"_Pressure", timeValue)
+    if args.directory:
+        if not os.path.exists(args.directory):
+            os.makedirs(args.directory)
+        fname=os.path.join(args.directory,fname)
     canvas.save(fname)
 else:
     canvas.show()

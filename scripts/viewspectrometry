@@ -6,7 +6,7 @@
 import argparse
 import logging
 import sys
-
+import os
 from rich_argparse import RichHelpFormatter
 from idstools.compute.common import getNearestTime
 from idstools.compute.spectrometer_visible import SpectrometerVisibleCompute
@@ -36,6 +36,11 @@ parser.add_argument(
     "--save",
     help="Save figure at default location",
     action="store_true",
+)
+parser.add_argument(
+    "--directory",
+    help="Directory to save the figure",
+    default=None, 
 )
 args = parser.parse_args()
 
@@ -83,13 +88,17 @@ canvasRadiance.setText(text=f"{getDatabasePath(args, timeValue=timeValue)}")
 canvasRadiance.fig.suptitle(
     getTitle(args, "Spectrum (Radiance) from spectrometer_visible", timeValue), size=12
 )
-canvasRadiance.get_current_fig_manager().set_window_title(sys.argv[0] + "-radiance")
+canvasRadiance.get_current_fig_manager().set_window_title(os.path.basename(__file__) + "-radiance")
+
 if args.save:
-    fname = fname = getFileName(args, "radiance", timeValue)
+    fname = getFileName(args, os.path.basename(__file__) + "-radiance", timeValue)
+    if args.directory:
+        if not os.path.exists(args.directory):
+            os.makedirs(args.directory)
+        fname=os.path.join(args.directory,fname)
     canvasRadiance.save(fname)
 else:
     canvasRadiance.show(block=False)
-
 canvasIntensity = Canvas(rows, columns)
 
 rowCounter = 0
@@ -113,9 +122,14 @@ canvasIntensity.fig.suptitle(
 canvasIntensity.fig.subplots_adjust(
     top=0.88, bottom=0.113, left=0.033, right=0.891, hspace=0.497, wspace=0.18
 )
-canvasIntensity.get_current_fig_manager().set_window_title(sys.argv[0] + "-intensity")
+canvasIntensity.get_current_fig_manager().set_window_title(os.path.basename(__file__) + "-intensity")
+
 if args.save:
-    fname = fname = getFileName(args, "intensity", timeValue)
+    fname = getFileName(args, os.path.basename(__file__) +"_intensity", timeValue)
+    if args.directory:
+        if not os.path.exists(args.directory):
+            os.makedirs(args.directory)
+        fname=os.path.join(args.directory,fname)
     canvasIntensity.save(fname)
 else:
     canvasIntensity.show(block=True)

@@ -12,9 +12,14 @@ hostname -f
 USERNAME=$(whoami)
 
 # create log directory
-LOG_DIR=$PWD/"logs"
-rm -rf "$LOG_DIR"
+if [ -z "$1" ]; then
+    LOG_DIR=$PWD/"logs"
+else
+    LOG_DIR="$1"
+fi
 mkdir -p "$LOG_DIR"
+
+
 
 
 SCRIPTS=(

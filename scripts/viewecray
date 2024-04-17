@@ -7,7 +7,7 @@ import argparse
 import copy
 import logging
 import sys
-
+import os
 from rich_argparse import RichHelpFormatter
 from idstools.database import DBMaster
 
@@ -46,6 +46,11 @@ parser.add_argument(
     "--save",
     help="Save figure at default location",
     action="store_true",
+)
+parser.add_argument(
+    "--directory",
+    help="Directory to save the figure",
+    default=None, 
 )
 args = parser.parse_args()
 
@@ -163,14 +168,18 @@ canvas.setText(text=f"{getDatabasePath(args, timeValue=timeValue)}")
 canvas.fig.subplots_adjust(
     top=0.95, bottom=0.097, left=0, right=0.948, hspace=0.2, wspace=0.108
 )
-canvas.get_current_fig_manager().set_window_title(sys.argv[0])
+canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
 canvas.fig.suptitle(getTitle(args, "EC rays", timeValue), size=12)
+
 if args.save:
-    fname = getFileName(args, "EC_rays", timeValue)
+    fname = getFileName(args, os.path.basename(__file__)+"_EC_rays", timeValue)
+    if args.directory:
+        if not os.path.exists(args.directory):
+            os.makedirs(args.directory)
+        fname=os.path.join(args.directory,fname)
     canvas.save(fname)
 else:
     canvas.show()
-
 
 # def StrToList(string):
 #     if string[0] == "[":

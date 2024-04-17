@@ -15,8 +15,7 @@ module purge
 shopt -s expand_aliases
 
 #print hostname
-hostname -f
-
+echo "Executing on : $(hostname -f)"
 # Get toolchain version
 if [ -z "$1" ]; then
     TOOLCHAIN_VERSION="intel-2020b"
@@ -43,6 +42,10 @@ python -m venv "$ENVIRONEMNT_NAME"
 
 . "$ENVIRONEMNT_NAME"/bin/activate
 
+LOG_DIR="$PWD"/"$ENVIRONEMNT_NAME""_logs"/
+
+mkdir -p "$LOG_DIR"
+
 #install packages
 pip install --upgrade pip
 pip install .
@@ -62,28 +65,42 @@ print("Matplotlib version:", matplotlib.__version__)
 END
 )
 al_major_version="${AL_VERSION%%.*}"
-
+echo "====================================================================="
 python3 -c "$version_script"
-
+echo "====================================================================="
+echo ""
+echo ""
+echo "====================================================================="
 echo "Testing ids manipulation scripts with $IMAS_MODULE_VERSION and $PYTHON_VERSION"
-source ./tests/st01_test_ids_scripts.sh 
+echo "====================================================================="
+source ./tests/st01_test_ids_scripts.sh "$LOG_DIR"
 
 if (( al_major_version > 4 )); then
-    source ./tests/st01_test_ids_scripts_with_uri.sh 
+    source ./tests/st01_test_ids_scripts_with_uri.sh "$LOG_DIR"
 fi
-echo "---------------------------------------------------------------------"
+echo ""
+echo ""
+echo "====================================================================="
 echo "Testing db scripts with $IMAS_MODULE_VERSION and $PYTHON_VERSION"
-source ./tests/st02_test_db_scripts.sh 
-echo "---------------------------------------------------------------------"
+echo "====================================================================="
+source ./tests/st02_test_db_scripts.sh "$LOG_DIR"
+echo ""
+echo ""
+echo "====================================================================="
 echo "Testing analysis scripts  with $IMAS_MODULE_VERSION and $PYTHON_VERSION"
-source ./tests/st03_test_analysis_scripts.sh 
+echo "====================================================================="
+source ./tests/st03_test_analysis_scripts.sh  "$LOG_DIR"
 if (( al_major_version > 4 )); then
-    source ./tests/st03_test_analysis_scripts_with_uri.sh 
+    source ./tests/st03_test_analysis_scripts_with_uri.sh "$LOG_DIR"
 fi
-echo "---------------------------------------------------------------------"
+echo ""
+echo ""
+echo "====================================================================="
 echo "Run pytest for functions testing with $IMAS_MODULE_VERSION and $PYTHON_VERSION"
+echo "====================================================================="
 pip install pytest
-python -m pytest --junit-xml=logs/test_report.xml tests 
+python -m pytest --junit-xml="$LOG_DIR"/test_report.xml tests 
+echo "---------------------------------------------------------------------"
 deactivate
 rm -rf "$ENVIRONEMNT_NAME"
 
@@ -95,7 +112,7 @@ if [ -f "$ARTIFACT" ]; then
 fi
 
 # Create acrtifact
-tar -cvzf testlogs.tar.gz logs >/dev/null 2>&1
+tar -cvzf testlogs.tar.gz "$LOG_DIR" >/dev/null 2>&1
 if [ -f "$ARTIFACT" ]; then
     echo "Artifact $ARTIFACT created successfully."
 fi
