@@ -77,7 +77,7 @@ source ./tests/st02_test_db_scripts.sh
 echo "---------------------------------------------------------------------"
 echo "Testing analysis scripts  with $IMAS_MODULE_VERSION and $PYTHON_VERSION"
 source ./tests/st03_test_analysis_scripts.sh 
-if [ "$AL_VERSION_LOCAL" -ge "500" ]; then
+if (( al_major_version > 4 )); then
     source ./tests/st03_test_analysis_scripts_with_uri.sh 
 fi
 echo "---------------------------------------------------------------------"
