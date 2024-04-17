@@ -468,7 +468,7 @@ class DBMaster:
         if connection is not None:
             status, _ = connection.open()
             if status != 0:
-                logger.error(f"The specified database is not available")
+                logger.error(f"Can not find data entry {args}")
                 return None
         return connection
 
@@ -479,7 +479,7 @@ class DBMaster:
         connection = DBMaster.getDBEntryObject(args)
         status, _ = connection.create()
         if status != 0:
-            logger.error(f"Can not create database backend")
+            logger.error(f"Can not create database entry {args}")
             return None
         return connection
 

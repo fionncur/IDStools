@@ -85,18 +85,13 @@ coreprofilesView.plotToroidalVelocityProfile(ax2)
 coreprofilesView.plotPoloidalVelocityProfile(ax3)
 coreprofilesView.plotDiamagneticVelocityProfile(ax4)
 
-
-ax3.get_shared_x_axes().join(ax1, ax3)
-ax1.set_xticklabels([])
-ax1.set_xlabel(None)
-ax4.get_shared_x_axes().join(ax2, ax4)
-ax2.set_xticklabels([])
-ax2.set_xlabel(None)
+ax1.sharex(ax3)
+ax2.sharex(ax4)
 
 canvas.setText(text=f"{getDatabasePath(args, timeValue=timeValue)}")
 
 canvas.fig.subplots_adjust(
-    top=0.916, bottom=0.09, left=0.044, right=0.953, hspace=0.113, wspace=0.117
+    top=0.916, bottom=0.09, left=0.044, right=0.953, hspace=0.174, wspace=0.117
 )
 canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
 canvas.fig.suptitle(getTitle(args, "Kinetic profiles", timeValue), size=12)
