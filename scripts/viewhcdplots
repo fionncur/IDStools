@@ -2,7 +2,7 @@
 import argparse
 import logging
 import sys
-
+import os
 from rich_argparse import RichHelpFormatter
 from idstools.database import DBMaster
 
@@ -204,7 +204,7 @@ def showDistributionPlots(args, hold=False):
             getTitle(connargs, "HCD Distributions Plot", timeValue), size=12
         )
         if args["save"]:
-            fname = getFileName(connargs, "Distributions_profile_time", timeValue)
+            fname = getFileName(connargs, os.path.basename(__file__) +"_Distributions_profile_time", timeValue)
             canvas.save(fname)
         else:
             canvas.show(block=hold)

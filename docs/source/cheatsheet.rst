@@ -18,15 +18,16 @@ IDStools. :download:`download cheatsheet here <_static/cheatsheet.pdf>`
 |                            |                                                              |
 |                            | .. code-block:: bash                                         |
 |                            |                                                              |
-|                            |    $ viewcoresources -s 130012 -r 5 -u username -d ITER      |
+|                            |    $ viewcoresources -p 130012 -r 5 -d TEST                  |
 +----------------------------+--------------------------------------------------------------+
 | ``viewcoretransport``      | Core plasma transport of particles, energy,                  |
 |                            | momentum and poloidal flux (replaces check_transport).       |
+|                            |                                                              |
 +----------------------------+--------------------------------------------------------------+
 |                            |                                                              |
 |                            | .. code-block:: bash                                         |
 |                            |                                                              |
-|                            |    $ viewcoretransport -u public -d TEST -s 92436 -r 850     |
+|                            |    $ viewcoretransport -u public -d TEST -p 92436 -r 850     |
 |                            |                                                              |
 +----------------------------+--------------------------------------------------------------+
 |``vieweccomposition``       | Display ec results (replaces eccomp).                        |
@@ -34,21 +35,21 @@ IDStools. :download:`download cheatsheet here <_static/cheatsheet.pdf>`
 |                            |                                                              |
 |                            | .. code-block:: bash                                         |
 |                            |                                                              |
-|                            |    $ vieweccomposition -d TEST -s 134173 -r 2326             |
+|                            |    $ vieweccomposition -d TEST -p 134173 -r 2326             |
 +----------------------------+--------------------------------------------------------------+
 |``viewecray``               | Display EC wave ray-tracing results (replaces ecray).        |
 +----------------------------+--------------------------------------------------------------+
 |                            |                                                              |
 |                            | .. code-block:: bash                                         |
 |                            |                                                              |
-|                            |    $ viewecray -d TEST -s 134173 -r 2326                     |
+|                            |    $ viewecray -d TEST -p 134173 -r 2326                     |
 +----------------------------+--------------------------------------------------------------+
 |``viewecstrayradiation``    | Shows electron cyclotron stray radiation.                    |
 +----------------------------+--------------------------------------------------------------+
 |                            |                                                              |
 |                            | .. code-block:: bash                                         |
 |                            |                                                              |
-|                            |    $ viewecstrayradiation -s 134174 -r 117                   |
+|                            |    $ viewecstrayradiation -p 134174 -r 117                   |
 +----------------------------+--------------------------------------------------------------+
 | ``viewedgeprofiles``       | Shows edge profiles plots by interpolating on rectangular    |
 |                            | grid.                                                        |
@@ -56,14 +57,14 @@ IDStools. :download:`download cheatsheet here <_static/cheatsheet.pdf>`
 |                            |                                                              |
 |                            | .. code-block:: bash                                         |
 |                            |                                                              |
-|                            |    $ viewedgeprofiles -s 123314 -r 1                         |
+|                            |    $ viewedgeprofiles -p 123314 -r 1 --separatix --wall      |
 +----------------------------+--------------------------------------------------------------+
 | ``viewequilibrium``        | Shows plasma equilibrium  (replaces equiplot).               |
 +----------------------------+--------------------------------------------------------------+
 |                            |                                                              |
 |                            | .. code-block:: bash                                         |
 |                            |                                                              |
-|                            |    $ viewequilibrium -s 134174 -r 117 --rho --pfcoils --info |
+|                            |    $ viewequilibrium -p 134174 -r 117 --rho --pfcoils --info |
 +----------------------------+--------------------------------------------------------------+
 | ``viewfluxes``             | Shows flux information from available                        |
 |                            | transport models  (replaces print_fluxes).                   |
@@ -71,33 +72,7 @@ IDStools. :download:`download cheatsheet here <_static/cheatsheet.pdf>`
 |                            |                                                              |
 |                            | .. code-block:: bash                                         |
 |                            |                                                              |
-|                            |    $ viewfluxes -s 134174 -r  117 -m CLOSEST                 |
-+----------------------------+--------------------------------------------------------------+
-| ``viewkineticprofiles``    | Shows plasma kinetic profiles from the core                  |
-|                            | profiles  (replaces kinplot).                                |
-+----------------------------+--------------------------------------------------------------+
-|                            |                                                              |
-|                            | .. code-block:: bash                                         |
-|                            |                                                              |
-|                            |    $ viewkineticprofiles -s 134174 -r 117                    |
-+----------------------------+--------------------------------------------------------------+
-| ``viewhcdplots``           | shows plots from distributions and waves for                 |
-|                            | different data entries for analysis   (replaces hcd_plot).   |
-+----------------------------+--------------------------------------------------------------+
-|                            |                                                              |
-|                            | .. code-block:: bash                                         |
-|                            |                                                              |
-|                            |    $ viewhcdplots                                            |
-|                            |    -ech 104104/2/schneim/MDSPLUS/TORBEAM_XMODE/3             |
-|                            |    -nbi 130012/15/schneim/MDSPLUS/SPOT/3                     |
-+----------------------------+--------------------------------------------------------------+
-| ``viewhcdwaves``           | shows waveforms  (replaces hcd_waves_plot).                  |
-|                            |                                                              |
-+----------------------------+--------------------------------------------------------------+
-|                            |                                                              |
-|                            | .. code-block:: bash                                         |
-|                            |                                                              |
-|                            |    $  viewhcdwaves -s 134173 -r 101 -u public -d TEST        |
+|                            |    $ viewfluxes -p 134174 -r  117 -m CLOSEST                 |
 +----------------------------+--------------------------------------------------------------+
 | ``viewhcddistributions``   | shows waveforms  (replaces hcd_distributions_plot).          |
 |                            |                                                              |
@@ -105,7 +80,34 @@ IDStools. :download:`download cheatsheet here <_static/cheatsheet.pdf>`
 |                            |                                                              |
 |                            | .. code-block:: bash                                         |
 |                            |                                                              |
-|                            |    $ viewhcddistributions -s 130012 -r 115 -u public -d TEST |
+|                            |    $ viewhcddistributions -p 130012 -r 115 -d TEST           |
++----------------------------+--------------------------------------------------------------+
+| ``viewhcdplots``           | shows plots from distributions and waves for                 |
+|                            | different data entries for analysis   (replaces hcd_plot).   |
++----------------------------+--------------------------------------------------------------+
+|                            |                                                              |
+|                            | .. code-block:: bash                                         |
+|                            |                                                              |
+|                            |    $ viewhcdplots  -ech 134173/101/public/MDSPLUS/TEST/3     |
+|                            |    -nbi 130012/115/public/MDSPLUS/TEST/3                     |
+|                            |    -fus 130012/115/public/MDSPLUS/TEST/3                     |
+|                            |    -icrh 130012/15/public/MDSPLUS/TEST/3                     |
++----------------------------+--------------------------------------------------------------+
+| ``viewhcdwaves``           | shows waveforms  (replaces hcd_waves_plot).                  |
+|                            |                                                              |
++----------------------------+--------------------------------------------------------------+
+|                            |                                                              |
+|                            | .. code-block:: bash                                         |
+|                            |                                                              |
+|                            |    $ viewhcdwaves -p 134173 -r 101 -d TEST                   |
++----------------------------+--------------------------------------------------------------+
+| ``viewkineticprofiles``    | Shows plasma kinetic profiles from the core                  |
+|                            | profiles  (replaces kinplot).                                |
++----------------------------+--------------------------------------------------------------+
+|                            |                                                              |
+|                            | .. code-block:: bash                                         |
+|                            |                                                              |
+|                            |    $ viewkineticprofiles -p 134174 -r 117                    |
 +----------------------------+--------------------------------------------------------------+
 | ``viewmachinedescription`` | Plots machine description data stored in databases.          |
 |                            | (replaces mdplot)                                            |
@@ -113,7 +115,9 @@ IDStools. :download:`download cheatsheet here <_static/cheatsheet.pdf>`
 |                            |                                                              |
 |                            | .. code-block:: bash                                         |
 |                            |                                                              |
-|                            |    $ viewmachinedescription -d ITER_MD                       |
+|                            |    $ viewmachinedescription plot wall pf_active              |
+|                            |    $ viewmachinedescription list pf_active                   |
+|                            |    $ viewmachinedescription plot wall                        |
 +----------------------------+--------------------------------------------------------------+
 | ``viewneutron``            | Plots particles vs normalised toroidal                       |
 |                            | flux coordinate  (replaces neutronplot).                     |
@@ -121,7 +125,7 @@ IDStools. :download:`download cheatsheet here <_static/cheatsheet.pdf>`
 |                            |                                                              |
 |                            | .. code-block:: bash                                         |
 |                            |                                                              |
-|                            |    $ viewneutron -s 121014 -r 11 -t 450 --info               |
+|                            |    $ viewneutron -p 121014 -r 11 -t 450                      |
 +----------------------------+--------------------------------------------------------------+
 | ``viewplasmacompo``        | Display the plasma composition from the                      |
 |                            | core_profiles IDS  (replaces ids_compo).                     |
@@ -129,7 +133,7 @@ IDStools. :download:`download cheatsheet here <_static/cheatsheet.pdf>`
 |                            |                                                              |
 |                            | .. code-block:: bash                                         |
 |                            |                                                              |
-|                            |    $ viewplasmacompo -s 131047 -r 4                          |
+|                            |    $ viewplasmacompo -p 131047 -r 4                          |
 +----------------------------+--------------------------------------------------------------+
 | ``viewpressure``           | Display the plasma kinetic profiles from .                   |
 |                            | the core_profiles  (replaces pressureplot).                  |
@@ -137,7 +141,7 @@ IDStools. :download:`download cheatsheet here <_static/cheatsheet.pdf>`
 |                            |                                                              |
 |                            | .. code-block:: bash                                         |
 |                            |                                                              |
-|                            |    $ viewpressure -s 134174 -r 117                           |
+|                            |    $ viewpressure -p 134174 -r 117                           |
 +----------------------------+--------------------------------------------------------------+
 | ``viewrotation``           | Plasma kinetic profiles from the core_profiles               |
 |                            | (replaces rotationplot)                                      |
@@ -145,7 +149,7 @@ IDStools. :download:`download cheatsheet here <_static/cheatsheet.pdf>`
 |                            |                                                              |
 |                            | .. code-block:: bash                                         |
 |                            |                                                              |
-|                            |    $ viewrotation -s 134174 -r 117                           |
+|                            |    $ viewrotation -p 134174 -r 117                           |
 +----------------------------+--------------------------------------------------------------+
 | ``viewscenario``           | Display the plasma kinetic profiles and equilibrium from     | 
 |                            | the core_profiles and equilibrium  (replaces scenplot).      | 
@@ -153,7 +157,8 @@ IDStools. :download:`download cheatsheet here <_static/cheatsheet.pdf>`
 |                            |                                                              |
 |                            | .. code-block:: bash                                         |
 |                            |                                                              |
-|                            |    $ viewscenario -s 134174 -r 117                           |
+|                            |    $ viewscenario -p 134174 -r 117                           |
+|                            |    $ viewscenario -p 134174 -r 117 --noProfiles              |
 +----------------------------+--------------------------------------------------------------+
 | ``viewsources``            | Shows source information from available                      |
 |                            |  sources (replaces print_sources).                           |
@@ -161,7 +166,7 @@ IDStools. :download:`download cheatsheet here <_static/cheatsheet.pdf>`
 |                            |                                                              |
 |                            | .. code-block:: bash                                         |
 |                            |                                                              |
-|                            |    $ viewsources -s 134174 -r  117                           |
+|                            |    $ viewsources -p 134174 -r  117                           |
 +----------------------------+--------------------------------------------------------------+
 | ``viewspectrometry``       | Displays the spectrum, displaying plots of radiance          |
 |                            | and intensity in two different windows (replaces svplot).    |   
@@ -169,9 +174,7 @@ IDStools. :download:`download cheatsheet here <_static/cheatsheet.pdf>`
 |                            |                                                              |
 |                            | .. code-block:: bash                                         |
 |                            |                                                              |
-|                            |    $ viewspectrometry -d TEST -s 134000 -r 37                |
-|                            |    $ viewspectrometry --shot 150512 --run 3 --database       |
-|                            |      ITER_MD                                                 |
+|                            |    $ viewspectrometry -d TEST -p 134000 -r 37                |
 +----------------------------+--------------------------------------------------------------+
 | ``viewwall``               | Shows outline plot using limiter and vessel properties found | 
 |                            | in 2D description of Wall IDS.                               | 
@@ -195,22 +198,23 @@ IDStools. :download:`download cheatsheet here <_static/cheatsheet.pdf>`
 |                     |                                                                     |
 |                     | .. code-block:: bash                                                |
 |                     |                                                                     |
-|                     |    $ eqdsk2ids -s 134174 -r 117 -g example.gfile -u <user> -d ITER  |
-|                     |    --log INFO                                                       |
+|                     |    $ eqdsk2ids -p 134174 -r 117 -g resources/geqdsk/example.gfile   |
+|                     |    -u $USERNAME -d ITER                                             |
 +---------------------+---------------------------------------------------------------------+
 | ``idschk``          | Validate ids fields against rules defined in yaml file              |
 +---------------------+---------------------------------------------------------------------+
 |                     |                                                                     |
 |                     | .. code-block:: bash                                                |
 |                     |                                                                     |
-|                     |    $ idschk -s 134174 -r 117 -f core_profiles.yml                   |
+|                     |    $ idschk -p 134174 -r 117 -f resources/validation_schemas/ITER   |
+|                     |    /core_profiles.yml                                               |
 +---------------------+---------------------------------------------------------------------+
 | ``idscp``           | Copy ids from one pulse to another                                  |
 +---------------------+---------------------------------------------------------------------+
 |                     |                                                                     |
 |                     | .. code-block:: bash                                                |
 |                     |                                                                     |
-|                     |    $ idscp -si 131024 -ri 10 -so 145000 -ro 2                       |
+|                     |    $ idscp -pi 131024 -ri 10 -po 145000 -ro 2                       |
 +---------------------+---------------------------------------------------------------------+
 | ``idsdiff``         | Shows ids level differences between two runs. It stores result in   |
 |                     | html document. For signals differences it is also shown as graph.   |  
@@ -218,7 +222,8 @@ IDStools. :download:`download cheatsheet here <_static/cheatsheet.pdf>`
 |                     |                                                                     |
 |                     | .. code-block:: bash                                                |
 |                     |                                                                     |
-|                     |    $ idsdiff --generate-html 122525 1 122525 2 summary              |
+|                     |    $ idsdiff --generate-html --pulseA 122525 --runA 1 122525 2      |
+|                     |    --pulseB 122525 --runB 2 summary                                 |
 +---------------------+---------------------------------------------------------------------+
 | ``idslist``         | Shows list of all idses along with count of time slices.            |
 |                     | (replaces ids_content(yaml), listidss (with time slices),           |    
@@ -227,9 +232,9 @@ IDStools. :download:`download cheatsheet here <_static/cheatsheet.pdf>`
 |                     |                                                                     |  
 |                     | .. code-block:: bash                                                |
 |                     |                                                                     |
-|                     |    $ idslist -s 134174 -r 117                                       |
-|                     |    $ idslist -s 134174 -r 117 yaml                                  |
-|                     |    $ idslist -s 134174 -r 117 occ                                   |                                                                                                                                                                                                                                                                                
+|                     |    $ idslist -p 134174 -r 117                                       |
+|                     |    $ idslist -p 134174 -r 117 yaml                                  |
+|                     |    $ idslist -p 134174 -r 117 occ                                   |                                                                                                                                                                                                                                                                                
 +---------------------+---------------------------------------------------------------------+
 | ``idsperf``         | Shows performance of access layer operations on dataset. timing and |
 |                     | performance information for different types of operations on IDS    |
@@ -238,12 +243,12 @@ IDStools. :download:`download cheatsheet here <_static/cheatsheet.pdf>`
 |                     |                                                                     |
 |                     | .. code-block:: bash                                                |
 |                     |                                                                     |
-|                     |    $ idsperf -s 134174 -r 117                                       |
-|                     |    $ idsperf -s 134174 -r 117 equilibrium                           |
-|                     |    $ idsperf -s 134174 -r 117 equilibrium --showStats --repeat 2    |
-|                     |    $ idsperf -s 134174 -r 117 equilibrium  -a                       |
-|                     |    $ idsperf -s 134174 -r 117 equilibrium -do HBD -bo MDSPLUS -o 412|
-|                     |    $ idsperf -s 134174 -r 117 equilibrium  -t 50 -m                 |
+|                     |    $ idsperf -p 134174 -r 117                                       |
+|                     |    $ idsperf -p 134174 -r 117 equilibrium                           |
+|                     |    $ idsperf -p 134174 -r 117 equilibrium --showStats --repeat 2    |
+|                     |    $ idsperf -p 134174 -r 117 equilibrium  -a                       |
+|                     |    $ idsperf -p 134174 -r 117 equilibrium -do HBD -bo MDSPLUS -o 412|
+|                     |    $ idsperf -p 134174 -r 117 equilibrium  -t 50 -m                 |
 +---------------------+---------------------------------------------------------------------+
 | ``idsprint``        | Dumps or prints all data on the console.                            |
 |                     | Check if specific fields or attributes have been filled out or empty|
@@ -253,7 +258,7 @@ IDStools. :download:`download cheatsheet here <_static/cheatsheet.pdf>`
 |                     |                                                                     |
 |                     | .. code-block:: bash                                                |
 |                     |                                                                     |
-|                     |    $ idsprint -s 134174 -r 117 equilibrium                          |
+|                     |    $ idsprint -p 134174 -r 117 equilibrium                          |
 +---------------------+---------------------------------------------------------------------+
 | ``idsresample``     | Resample IDSs from a data-entry and save them into another          |
 |                     | data-entry based on PREVIOUS_INTERP method.                         |
@@ -261,7 +266,24 @@ IDStools. :download:`download cheatsheet here <_static/cheatsheet.pdf>`
 |                     |                                                                     |
 |                     | .. code-block:: bash                                                |
 |                     |                                                                     |                                                                                                                                                                                                                                                                                                                                                
-|                     |    $ idsresample -si 131024 -ri 10 -so 145000 -ro 2                 |                                                                                                                                                                                                                                 
+|                     |    $ idsresample -pi 131024 -ri 10 -po 145000 -ro 2 -u public       |                                                                                                                                                                                                                                 
++---------------------+---------------------------------------------------------------------+
+| ``idsrescale``      | Rescaling an equilibrium magnetic field, storing the output into    |
+| ``_equilibrium``    | another entry of the same DB. replaced by ids_rescale_eq            |
++---------------------+---------------------------------------------------------------------+
+|                     |                                                                     |
+|                     | .. code-block:: bash                                                |
+|                     |                                                                     |                                                                                                                                                                                                                                                                                                                                                
+|                     |    $ idsresample -pi 131024 -ri 10 -po 145000 -ro 2                 |                                                                                                                                                                                                                                 
++---------------------+---------------------------------------------------------------------+
+| ``idsshift``        | Rigidly shifts vertically an equilibrium, storing the output into   |
+| ``_equilibrium``    | another entry of the same DB. replaced by ids_shift_eq              |
++---------------------+---------------------------------------------------------------------+
+|                     |                                                                     |
+|                     | .. code-block:: bash                                                |
+|                     |                                                                     |                                                                                                                                                                                                                                                                                                                                                
+|                     |    $ idsshift_equilibrium -pi 122525 -ri 1 -po 123001 -ro 1         |                                                                                                                                                                                                                                 
+|                     |    --shift -0.01                                                    |                                                                                                                                                                                                                                 
 +---------------------+---------------------------------------------------------------------+
 | ``idssize``         | IDS size in bytes and the time taken to read each object. It also   |
 |                     | shows total size of all IDS objects in the data entry. It shows     |
@@ -271,7 +293,7 @@ IDStools. :download:`download cheatsheet here <_static/cheatsheet.pdf>`
 |                     |                                                                     |
 |                     | .. code-block:: bash                                                |
 |                     |                                                                     |
-|                     |    $ idssize -s 122525 -r 1                                         |
+|                     |    $ idssize -p 122525 -r 1                                         |
 +---------------------+---------------------------------------------------------------------+
 
 
@@ -287,7 +309,18 @@ IDStools. :download:`download cheatsheet here <_static/cheatsheet.pdf>`
 |                     |                                                                     |
 |                     | .. code-block:: bash                                                |
 |                     |                                                                     |
+|                     |    $ dblist -u public -d TEST list                                  |
+|                     |    $ dblist -u public -d TEST list -c                               |
+|                     |    $ dblist -u public -d TEST list -M                               |
 |                     |    $ dblist databases                                               |
+|                     |    $ dblist dataversions                                            |
++---------------------+---------------------------------------------------------------------+
+| ``dbperf``          | Chck performance of database                                        |
++---------------------+---------------------------------------------------------------------+
+|                     |                                                                     |
+|                     | .. code-block:: bash                                                |
+|                     |                                                                     |
+|                     |   $ dbperf -d TEST                                                   |
 +---------------------+---------------------------------------------------------------------+
 | ``dbscraper``       | The `dbscraper` script scrapes data from a particular               |
 |                     | IDS path for a specified series of pulses and displays the pulse    |
@@ -297,7 +330,9 @@ IDStools. :download:`download cheatsheet here <_static/cheatsheet.pdf>`
 |                     | .. code-block:: bash                                                |
 |                     |                                                                     |
 |                     |    $ dbscraper "equilibrium/time_slice*0*/global_quantities/volume" |
-|                     |    --list-count 10                                                  |
+|                     |    --list-count 2                                                   |
+|                     |    dbscraper \"core_profiles/profiles_1d(0)/electrons/temperature\" |
+|                     |    --list-count 2                                                   |
 +---------------------+---------------------------------------------------------------------+
 | ``dbselector``      | The `dbselector` script shows lists of all scenarios where          |
 |                     | specified ids exists. Just provide idsname as input argument to the |
@@ -306,7 +341,8 @@ IDStools. :download:`download cheatsheet here <_static/cheatsheet.pdf>`
 |                     |                                                                     |
 |                     | .. code-block:: bash                                                |
 |                     |                                                                     |
-|                     |    $ dbselector edge_profiles                                       |
+|                     |    $ dbselector -d TEST core_profiles --list-count 2                |
+|                     |    $ dbselector -d TEST summary --list-count 2                      |
 +---------------------+---------------------------------------------------------------------+
 
 *************************
@@ -339,24 +375,24 @@ IDStools. :download:`download cheatsheet here <_static/cheatsheet.pdf>`
 |                                |                                                                     |
 |                                | .. code-block:: bash                                                |
 |                                |                                                                     |
-|                                |    $ scenario_status -s 134174 -r 117                               |
-|                                |    $ scenario_status -s 130012 -r 4 --print                         |
+|                                |    $ scenario_status -p 134174 -r 117                               |
+|                                |    $ scenario_status -p 130012 -r 4 --print                         |
 +--------------------------------+---------------------------------------------------------------------+
 | ``scenario_summary``           | The `scenario_summary` lists available scenarios in a specific      |
 |                                | folder with search facility.                                        |
 |                                |                                                                     |
 |                                | .. code-block:: bash                                                |
 |                                |                                                                     |
-|                                |    $ scenario_summary -s He4,2.65                                   |
-|                                |    $ scenario_summary -s He4,2.65 -c shot,run,database,composition  |
-|                                |    $ scenario_summary -s He4 2.65                                   |
+|                                |    $ scenario_summary -p He4,2.65                                   |
+|                                |    $ scenario_summary -p He4,2.65 -c shot,run,database,composition  |
+|                                |    $ scenario_summary -p He4 2.65                                   |
 +--------------------------------+---------------------------------------------------------------------+
 | ``show_db_entry``              | Show full description file for a given simulation stored in ITER DB |
 |                                | folder.                                                             |
 |                                |                                                                     |
 |                                | .. code-block:: bash                                                |
 |                                |                                                                     |
-|                                |    $ show_db_entry -s 134174 -r 117                                 |
+|                                |    $ show_db_entry -p 134174 -r 117                                 |
 +--------------------------------+---------------------------------------------------------------------+
 | ``validate_db_entry``          | Validation Tool for ITER Scenario DB                                |
 +--------------------------------+---------------------------------------------------------------------+
