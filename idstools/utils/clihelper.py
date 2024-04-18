@@ -30,22 +30,22 @@ imasParser.add_argument(
 )
 db_group = imasParser.add_mutually_exclusive_group()
 db_group.add_argument(
-    "--database",
     "-d",
+    "--database",
     type=str,
     default="ITER",
     help="database name \t(default=%(default)s)",
 )
 imasParser.add_argument(
-    "--backend",
     "-b",
+    "--backend",
     type=str,
     default="MDSPLUS",
     help="backend format \t(default=%(default)s)",
 )
 imasParser.add_argument(
-    "--version",
     "-v",
+    "--version",
     type=str,
     default="3",
     help="data version \t(default=%(default)s)",

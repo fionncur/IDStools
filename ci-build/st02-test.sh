@@ -42,7 +42,7 @@ python -m venv "$ENVIRONEMNT_NAME"
 
 . "$ENVIRONEMNT_NAME"/bin/activate
 
-LOG_DIR="$PWD"/"$ENVIRONEMNT_NAME""_logs"/
+LOG_DIR="$PWD"/"$ENVIRONEMNT_NAME"/
 
 mkdir -p "$LOG_DIR"
 

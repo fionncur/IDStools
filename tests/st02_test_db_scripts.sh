@@ -16,9 +16,9 @@ else
     LOG_DIR="$1"
 fi
 mkdir -p "$LOG_DIR"
-
+# Not executing on bamboo as it creates data entry in the home directory
+# "dbconverter --u public --database TEST -do MYDB -bo MDSPLUS --validate"
 SCRIPTS=(
-    # "dbconverter --u public --database TEST -do MYDB -bo MDSPLUS --validate"
     "dblist -u public -d TEST list" 
     "dblist -u public -d TEST list -c" 
     "dblist -u public -d TEST list -M" 

@@ -19,38 +19,38 @@ logger = setupLogger("module")
 parser = argparse.ArgumentParser(
     description="Copy IDSs from a data-entry into another one",
     formatter_class=RichHelpFormatter,
-    parents=[imasParser],
+    parents=[imasParser]
 )
 if getIMASVersion() > 4:
     parser.add_argument(
-        "-suri",
-        "--source_uri",
+        "-su",
+        "--src",
         type=str,
         help="source uri \t\t(default=%(default)s)",
     )
     parser.add_argument(
-        "-duri",
-        "--destination_uri",
+        "-du",
+        "--dest",
         type=str,
         help="destination uri \t\t(default=%(default)s)",
     )
 
-parser.add_argument("-sp", "--source_pulse", help="Source pulse number", type=int)
-parser.add_argument("-sr", "--source_run", help="Source run number", type=int)
-parser.add_argument("-dp", "--destination_pulse", help="Destination pulse number", type=int)
-parser.add_argument("-dr", "--destination_run", help="Destination run number", type=int)
+parser.add_argument("-sp", "--src_pulse", help="Source pulse number", type=int)
+parser.add_argument("-sr", "--src_run", help="Source run number", type=int)
+parser.add_argument("-dp", "--dest_pulse", help="Destination pulse number", type=int)
+parser.add_argument("-dr", "--dest_run", help="Destination run number", type=int)
 # default user from parent parser is 'public', which is fine for exploration scripts but less for management scripts
 parser.set_defaults(user=os.environ["USER"])
 parser.add_argument(
-    "-dd",
-    "--destination_database",
+    "-destd",
+    "--dest_database",
     type=str,
     default=None,
     help="Database name for the destination data-entry",
 )
 parser.add_argument(
-    "-db",
-    "--destination_backend",
+    "-destb",
+    "--dest_backend",
     type=str,
     help="Backend name for the destination data-entry",
 )
@@ -88,28 +88,28 @@ parser.add_argument(
     help='IDSs to copy (leave empty to select all IDSs with default occurrence, or append "/n" to copy a specific occurrence "n")',
 )
 args = parser.parse_args()
-if args.destination_database is None:
-    args.destination_database = args.database
+if args.dest_database is None:
+    args.dest_database = args.database
 
 
-if args.destination_backend is None:
-    args.destination_backend = args.backend
+if args.dest_backend is None:
+    args.dest_backend = args.backend
 
 isUriCheckDone = False
 if getIMASVersion() > 4:
-    if args.source_uri is not None and args.destination_uri is not None:
+    if args.src is not None and args.dest is not None:
         isUriCheckDone = True
-        if args.source_uri == args.destination_uri:
+        if args.src == args.dest:
             logger.error("Can not use the same uri as source and destination!")
             exit()
 
 if isUriCheckDone is False:
     if (
-        args.source_pulse == args.destination_pulse
-        and args.source_run == args.destination_run
+        args.src_pulse == args.dest_pulse
+        and args.src_run == args.dest_run
         and args.user == os.environ["USER"]
-        and args.database == args.destination_database
-        and args.backend == args.destination_backend
+        and args.database == args.dest_database
+        and args.backend == args.dest_backend
     ):
         logger.error("Can not use the same data-entry as source and destination!")
         exit()
@@ -120,27 +120,27 @@ if args.ids == []:
 
 inputargs = argparse.Namespace()
 inputargs.backend = args.backend
-inputargs.pulse = args.source_pulse
-inputargs.run = args.source_run
+inputargs.pulse = args.src_pulse
+inputargs.run = args.src_run
 inputargs.user = args.user
 inputargs.database = args.database
 inputargs.version = args.version
 if getIMASVersion() > 4:
-    inputargs.uri = args.source_uri
+    inputargs.uri = args.src
 
 src_connection = DBMaster.getConnection(inputargs)
 if src_connection is None:
     logger.error("Error opening source pulse! Please check existence.")
     sys.exit()
 outputargs = argparse.Namespace()
-outputargs.backend = args.destination_backend
-outputargs.pulse = args.destination_pulse
-outputargs.run = args.destination_run
+outputargs.backend = args.dest_backend
+outputargs.pulse = args.dest_pulse
+outputargs.run = args.dest_run
 outputargs.user = os.environ["USER"]
-outputargs.database = args.destination_database
+outputargs.database = args.dest_database
 outputargs.version = args.version
 if getIMASVersion() > 4:
-    outputargs.uri = args.destination_uri
+    outputargs.uri = args.dest
 
 
 dest_connection = DBMaster.getDBEntryObject(outputargs)

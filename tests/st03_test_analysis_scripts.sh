@@ -16,7 +16,6 @@ else
 fi
 mkdir -p "$LOG_DIR"
 
-# 15-Apr-2024 17:31:03	./tests/st00_common.sh: line 19: 1898494 Illegal instruction     (core dumped) viewedgeprofiles -p 123314 -r 1 --separatix --wall --save
 
 SCRIPTS=(
 "viewcoresources -p 130012 -r 105 -d TEST  --save --directory $LOG_DIR"

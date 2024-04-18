@@ -21,36 +21,36 @@ if __name__ == "__main__":
     )
     if getIMASVersion() > 4:
         parser.add_argument(
-            "-iuri",
-            "--input_uri",
+            "-su",
+            "--src",
             type=str,
-            help="input uri \t\t(default=%(default)s)",
+            help="souce uri \t\t(default=%(default)s)",
         )
         parser.add_argument(
-            "-ouri",
-            "--output_uri",
+            "-du",
+            "--dest",
             type=str,
-            help="output uri \t\t(default=%(default)s)",
+            help="destination uri \t\t(default=%(default)s)",
         )
 
-    parser.add_argument("-pi", "--pulse_input", help="Input pulse number", type=int)
-    parser.add_argument("-ri", "--run_input", help="Input run number", type=int)
-    parser.add_argument("-po", "--pulse_output", help="Output pulse number", type=int)
-    parser.add_argument("-ro", "--run_output", help="Output run number", type=int)
+    parser.add_argument("-sp", "--src_pulse", help="Source pulse number", type=int)
+    parser.add_argument("-sr", "--src_run", help="Source run number", type=int)
+    parser.add_argument("-dp", "--dest_pulse", help="Destination pulse number", type=int)
+    parser.add_argument("-dr", "--dest_run", help="Destination run number", type=int)
     # default user from parent parser is 'public',
     # which is fine for exploration scripts but less
     # for management scripts
     parser.set_defaults(user=os.environ["USER"])
     parser.add_argument(
-        "-do",
-        "--database_output",
+        "-destd",
+        "--dest_database",
         type=str,
         default=None,
         help="Database name for the destination data-entry",
     )
     parser.add_argument(
-        "-bo",
-        "--backend_output",
+        "-destb",
+        "--dest_backend",
         type=str,
         help="Backend name for the destination data-entry",
     )
@@ -73,26 +73,26 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    if args.database_output is None:
-        args.database_output = args.database
+    if args.dest_database is None:
+        args.dest_database = args.database
 
-    if args.backend_output is None:
-        args.backend_output = args.backend
+    if args.dest_backend is None:
+        args.dest_backend = args.backend
 
     isUriCheckDone = False
     if getIMASVersion() > 4:
-        if args.input_uri is not None and args.output_uri is not None:
+        if args.src is not None and args.dest is not None:
             isUriCheckDone = True
-            if args.input_uri == args.output_uri:
+            if args.src == args.dest:
                 print("Can not use the same uri as source and destination!")
                 exit()
     if isUriCheckDone is False:
         if (
-            args.pulse_input == args.pulse_output
-            and args.run_input == args.run_output
+            args.src_pulse == args.dest_pulse
+            and args.src_run == args.dest_run
             and args.user == os.environ["USER"]
-            and args.database == args.database_output
-            and args.backend == args.backend_output
+            and args.database == args.dest_database
+            and args.backend == args.dest_backend
         ):
             print(
                 "Can not use the same data-entry as source and destination!",
@@ -105,13 +105,13 @@ if __name__ == "__main__":
 
     inputargs = argparse.Namespace()
     inputargs.backend = args.backend
-    inputargs.pulse = args.pulse_input
-    inputargs.run = args.run_input
+    inputargs.pulse = args.src_pulse
+    inputargs.run = args.src_run
     inputargs.user = args.user
     inputargs.database = args.database
     inputargs.version = args.version
     if getIMASVersion() > 4:
-        inputargs.uri = args.input_uri
+        inputargs.uri = args.src
     src = DBMaster.getConnection(inputargs)
     if src is None:
         print("Error opening source pulse! Please check existence.")
@@ -127,15 +127,15 @@ if __name__ == "__main__":
         sys.exit(status)
 
     outputargs = argparse.Namespace()
-    outputargs.backend = args.backend_output
-    outputargs.pulse = args.pulse_output
-    outputargs.run = args.run_output
+    outputargs.backend = args.dest_backend
+    outputargs.pulse = args.dest_pulse
+    outputargs.run = args.dest_run
     outputargs.user = os.environ["USER"]
-    outputargs.database = args.database_output
+    outputargs.database = args.dest_database
     outputargs.version = args.version
     if getIMASVersion() > 4:
         outputargs.mode="w"
-        outputargs.uri = args.output_uri
+        outputargs.uri = args.dest
     dest = DBMaster.createConnection(outputargs)
     if dest is None:
         print("Error creating pulse! Please check existence.")

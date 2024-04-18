@@ -25,40 +25,32 @@ parser = argparse.ArgumentParser(
 )
 if getIMASVersion() > 4:
     parser.add_argument(
-        "-iuri",
-        "--input_uri",
+        "-su",
+        "--src",
         type=str,
         help="input uri \t\t(default=%(default)s)",
     )
     parser.add_argument(
-        "-ouri",
-        "--output_uri",
+        "-du",
+        "--dest",
         type=str,
         help="output uri \t\t(default=%(default)s)",
     )
     
+parser.add_argument("-sp", "--src_pulse", help="Source pulse number", type=int)
+parser.add_argument("-sr", "--src_run", help="Source run number", type=int)
+parser.add_argument("-dp", "--dest_pulse", help="Destination pulse number", type=int)
+parser.add_argument("-dr", "--dest_run", help="Destination run number", type=int)
 parser.add_argument(
-    "-pi", "--pulse_input", help="Input pulse number",  type=int
-)
-parser.add_argument(
-    "-ri", "--run_input", help="Input run number", type=int
-)
-parser.add_argument(
-    "-po", "--pulse_output", help="Output pulse number", type=int
-)
-parser.add_argument(
-    "-ro", "--run_output", help="Output run number", type=int
-)
-parser.add_argument(
-    "-do",
-    "--database_output",
+    "-destd",
+    "--dest_database",
     type=str,
     default=None,
     help="Database name for the destination data-entry",
 )
 parser.add_argument(
-    "-bo",
-    "--backend_output",
+    "-destb",
+    "--dest_backend",
     type=str,
     help="Backend name for the destination data-entry",
 )
@@ -67,24 +59,25 @@ parser.add_argument(
 )
 
 args = parser.parse_args()
-if args.database_output == None:
-    args.database_output = args.database
+if args.dest_database is None:
+    args.dest_database = args.database
 
-if args.backend_output == None:
-    args.backend_output = args.backend
+
+if args.dest_backend is None:
+    args.dest_backend = args.backend
 
 shiftParam = args.shift
 
 # OPEN INPUT
 inputargs = argparse.Namespace()
 inputargs.backend = args.backend
-inputargs.pulse = args.pulse_input
-inputargs.run = args.run_input
+inputargs.pulse = args.src_pulse
+inputargs.run = args.src_run
 inputargs.user = args.user
 inputargs.database = args.database
 inputargs.version = args.version
 if getIMASVersion() > 4:
-    inputargs.uri = args.input_uri
+    inputargs.uri = args.src
 connection = DBMaster.getConnection(inputargs)
 if connection is None:
     sys.exit()
@@ -92,15 +85,15 @@ if connection is None:
 idsEquilibrium = connection.get("equilibrium")
 
 outputargs = argparse.Namespace()
-outputargs.backend = args.backend_output
-outputargs.pulse = args.pulse_output
-outputargs.run = args.run_output
+outputargs.backend = args.dest_backend
+outputargs.pulse = args.dest_pulse
+outputargs.run = args.dest_run
 outputargs.user = os.environ["USER"]
-outputargs.database = args.database_output
+outputargs.database = args.dest_database
 outputargs.version = args.version
 if getIMASVersion() > 4:
     outputargs.mode="w"
-    outputargs.uri = args.output_uri
+    outputargs.uri = args.dest
         
 outputConnection = DBMaster.getConnection(outputargs)
 if outputConnection is None:
@@ -125,15 +118,15 @@ outputConnection.close()
 logger.info(f"Equilibrium IDS is upward shifted successfully.")
 
 if getIMASVersion() > 4:
-    if args.output_uri is not None:
+    if args.dest is not None:
         logger.info(
-        f"Output database details {args.output_uri}"
+        f"Output database details {args.dest}"
     )
     else:
         logger.info(
-        f"Output database details database={args.database_output}, pulse={args.pulse_output}, run={args.run_output}, user={os.environ['USER']}"
+        f"Output database details database={args.dest_database}, pulse={args.dest_pulse}, run={args.dest_run}, user={os.environ['USER']}"
     )
 else:
     logger.info(
-        f"Output database details database={args.database_output}, pulse={args.pulse_output}, run={args.run_output}, user={os.environ['USER']}"
+        f"Output database details database={args.dest_database}, pulse={args.dest_pulse}, run={args.dest_run}, user={os.environ['USER']}"
     )

@@ -138,7 +138,7 @@ class EdgeProfilesView:
                         separatrix[:, 1],
                         facecolor="none",
                         edgecolor="r",
-                        linewidth=3,
+                        linewidth=2,
                     )
             ax.set_aspect("equal", adjustable="box")
             ax.set_xlabel("R,m")

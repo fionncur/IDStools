@@ -20,15 +20,17 @@ else
 fi
 mkdir -p "$LOG_DIR"
 
+
+# Not executing on bamboo as it creates data entry in the home directory
+# "idscp -sp 131024 -sr 10 -dp 145000 -dr 32 -u public"
+# "idsresample -sp 131024 -sr 10 -dp 145000 -dr 2 -u public"
+# "idsrescale_equilibrium -sp 134174 -sr 117 -dp 122222 -dr 22 --rescale 2"
+# "idsshift_equilibrium -sp 122525 -sr 1 -dp 123001 -dr 21 --shift -0.01"
 SCRIPTS=(
     "eqdsk2ids -p 134174 -r 117 -g resources/geqdsk/example.gfile -u $USERNAME -d ITER --log INFO"
     "idschk -p 134174 -r 117 -f resources/validation_schemas/ITER/core_profiles.yml"
-    "idscp -sp 131024 -sr 10 -dp 145000 -dr 32 -u public" 
     "idsdiff --pulseA 122525 --runA  1 --pulseB 122525 --runB 2 summary"
     "idsdiff --pulseA 130011 --runA  6 --pulseB 130012 --runB 4 summary"
-    "idsresample -pi 131024 -ri 10 -po 145000 -ro 10 -u public"
-    "idsrescale_equilibrium -pi 122525 -ri 1 -po 122222 -ro 22 --rescale 2"
-    "idsshift_equilibrium -pi 122525 -ri 1 -po 123001 -ro 21 --shift -0.01"
     "idslist -p 122525 -r 1"
     "idslist -p 122525 -r 1 yaml"
     "idslist -p 122525 -r 1 occ"
