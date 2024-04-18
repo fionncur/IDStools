@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 import os
 import re
+import getpass
 import argparse
 import textwrap
 import traceback
@@ -15,6 +16,7 @@ from idstools.utils.clihelper import (
     dbentryParser,
     getDatabasePath,
     getIMASVersion,
+    getPulseRunfromURI,
 )
 
 # ----------------------------------------------------------------------
@@ -26,7 +28,7 @@ def main():
     """
 
     # Convert GEQDSK to IDS/equilibrium
-    eq = geqdsk2ids(args.gpath, args.ipsign, args.b0sign, args.cocos_in)
+    eq = geqdsk2ids(args.gpath, cocos_in=args.cocos_in)
 
     # Create the output datafile
     logger.info("creating output datafile ...")
@@ -40,10 +42,10 @@ def main():
     outputargs.version = args.version
     if getIMASVersion() > 4:
         outputargs.mode="w"
-        if args.output_uri is None:
-            outputargs.uri =  f"imas:mdsplus?user={outputargs.user};shot={outputargs.pulse};run={outputargs.run};database={outputargs.database};version={outputargs.version}"
-        else:
-            outputargs.uri = args.output_uri
+        if args.dest is None:
+            if args.uri is not None:
+                args.dest = re.sub(r'user=public', f'user={getpass.getuser()}', args.uri)
+        outputargs.uri = args.dest
  
     db = DBMaster.createConnection(outputargs)
     if db is None:
@@ -52,7 +54,7 @@ def main():
 
     db.put(eq)
     db.close()
-    logger.info(f"IDS/equilibrium populated in  {getDatabasePath(args)}.")
+    logger.info(f"IDS/equilibrium populated in  {getDatabasePath(outputargs)}.")
 
 
 # ----------------------------------------------------------------------
@@ -73,15 +75,11 @@ description=r"""
 
     > eqdsk2ids -g path_to_gfile -p 12345 -r 1 -u userid -d ITER
 
-2) Enforce signs of Ip and/or B0 in output
-
-    > eqdsk2ids -g path_to_gfile -p 12345 -r 1 -u userid -d ITER --ipsign -1 --b0sign -1
-
-3) Increase verbosity to see information such as COCOS index and transformation coefficients.
+2) Increase verbosity to see information as COCOS index and transformation coeff.
 
     > eqdsk2ids -g path_to_gfile -p 12345 -r 1 -u userid -d ITER --log INFO
 
-4) Coerce input COCOS index
+3) Coerce input COCOS index
 
     > eqdsk2ids -g path_to_gfile -p 12345 -r 1 -u userid -d ITER --cocos_in 7
 
@@ -98,11 +96,7 @@ description=r"""
 
     > eq = eqdsk2ids(gfile='path/to/gfile')
  
-2) Convert Gfile and alter signs both for Ip & B0
-
-    > eq = eqdsk2ids(gfile='path/to/gfile', ipsign=-1, b0sign=-1)
- 
-3) Convert Gfile with COCOS input (set to 1) coerced
+2) Convert Gfile with COCOS input (=1) coerced
 
     > eq = eqdsk2ids(gfile='path/to/gfile', cocos_in=1)"""
 if __name__ == "__main__":
@@ -115,10 +109,10 @@ if __name__ == "__main__":
         description=Markdown(description, style="argparse.text")
     )
     parser.add_argument(
-            "-ouri",
-            "--output_uri",
+            "-du",
+            "--dest",
             type=str,
-            help="output uri \t\t(default=%(default)s)",
+            help="destination uri \t\t(default=%(default)s)",
         )
     parser.add_argument(
         "-g",
@@ -136,35 +130,17 @@ if __name__ == "__main__":
         help="Configure the logging level, default=%(default)s",
     )
     parser.add_argument(
-        "--ipsign",
-        dest="ipsign",
-        help="transform input data to obtain desired sign for Ip on the output, default=%(default)s uses input",
-        required=False,
-        type=int,
-        default=0,
-        choices=[-1, 0, 1],
-    )
-    parser.add_argument(
-        "--b0sign",
-        dest="b0sign",
-        help="transform input data to obtain desired sign for B0 on the output, default=%(default)s uses input",
-        required=False,
-        type=int,
-        default=0,
-        choices=[-1, 0, 1],
-    )
-    parser.add_argument(
+        "-c",
         "--cocos_in",
         dest="cocos_in",
-        help="coerced COCOS index, otherwise default=%(default)s computes COCOS in GEQDSK file [1,3,5,7]",
-        required=False,
+        help="Tokamak coordinate conventions (COCOS) describing input data",
+        required=True,
         type=int,
         default=None,
         choices=[*range(1, 9), *range(11, 19)],
     )
     parser.set_defaults(user=os.environ["USER"])
     args = parser.parse_args()
-
     # Initialize logger
     logger = set_logger(__name__, level=args.log)
 

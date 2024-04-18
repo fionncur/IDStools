@@ -161,16 +161,16 @@ class GEQDSK:
         #
         rec = np.float64(fmt20.read(fp.readline()))
         data["CURRENT"] = rec[0]
-        data["SIMAG"] = rec[1]
+        #data["SIMAG"] = rec[1]
         data["XDUM"] = rec[2]
-        data["RMAXIS"] = rec[3]
+        #data["RMAXIS"] = rec[3]
         data["XDUM"] = rec[4]
 
         #
         rec = np.float64(fmt20.read(fp.readline()))
-        data["ZMAXIS"] = rec[0]
+        #data["ZMAXIS"] = rec[0]
         data["XDUM"] = rec[1]
-        data["SIBRY"] = rec[2]
+        #data["SIBRY"] = rec[2]
         data["XDUM"] = rec[3]
         data["XDUM"] = rec[4]
 
@@ -494,8 +494,8 @@ def geqdsk2ids(fpath, ipsign=0, b0sign=0, cocos_in=None):
 
     # Check if COCOS is equal to IDS_COCOS
     if cocos["COCOS"] != IDS_COCOS:
-        raise ValueError(f"COCOS transformed = {cocos['COCOS']}, expected {IDS_COCOS}")
-
+        logger.warning("COCOS Target= {}, Output= {}, Input= {}".format(IDS_COCOS, cocos["COCOS"], geqdsk.cocos.COCOS))
+        raise SystemExit("Input COCOS is inconsistent between GEQDSK file and COCOS with the option '--cocos_in'.")
     return eq
 
 
