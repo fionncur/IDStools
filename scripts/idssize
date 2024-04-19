@@ -48,20 +48,13 @@ Todo:
 
 
 import argparse
-import sys
-
-from rich_argparse import RichHelpFormatter
-from idstools.database import DBMaster
 
 import imas
 import numpy as np
+from rich_argparse import RichHelpFormatter
 
-from idstools.utils.clihelper import (
-    getBackendID,
-    dbentryParser,
-    getIMASVersion,
-    getPulseRunfromURI,
-)
+from idstools.database import DBMaster
+from idstools.utils.clihelper import dbentryParser, getIMASVersion
 from idstools.utils.idshelper import getIDSSize
 
 parser = argparse.ArgumentParser(
@@ -96,24 +89,11 @@ print(f"Total reading time = {totalTime:0.2f} s")
 
 print(f"Total data size = {totalBytes/1024**2:5.1f} MB")
 if getIMASVersion() > 4:
-    pulse, run, database, user, version = (
-        args.pulse,
-        args.run,
-        args.database,
-        args.user,
-        args.version,
-    )
     if args.uri is not None:
-        paramDict = getPulseRunfromURI(args.uri)
-        pulse, run, database, user, version = (
-            paramDict["pulse"],
-            paramDict["run"],
-            paramDict["database"],
-            paramDict["user"],
-            paramDict["version"],
-        )
+        print(f"Fractions of the total size for {args.uri}")
+    else:
         print(
-            f"Fractions of the total size for {user}/{database}/{version}/{pulse}/{run}"
+            f"Fractions of the total size for {args.user}/{args.database}/{args.version}/{args.pulse}/{args.run}"
         )
 else:
     print(

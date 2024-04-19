@@ -68,7 +68,7 @@ def getSliceMode(name):
     return getattr(imasdef, f"{name}_INTERP")
 
 
-def getPulseRunfromURI(uri):
+def getDetailsfromURI(uri):
     import re
 
     param = {}
@@ -77,19 +77,26 @@ def getPulseRunfromURI(uri):
     version_pattern = r"version=([^;]+)"
     shot_pattern = r"shot=(\d+)"
     run_pattern = r"run=(\d+)"
+    path_pattern = r'path=(.*)'
 
     user_match = re.search(user_pattern, uri)
     database_match = re.search(database_pattern, uri)
     version_match = re.search(version_pattern, uri)
     shot_match = re.search(shot_pattern, uri)
     run_match = re.search(run_pattern, uri)
+    path_match = re.search(path_pattern, uri)
 
     param["user"] = user_match.group(1) if user_match else None
     param["database"] = database_match.group(1) if database_match else None
     param["version"] = version_match.group(1) if version_match else None
     param["pulse"] = shot_match.group(1) if shot_match else None
     param["run"] = run_match.group(1) if run_match else None
-
+    if path_match:
+        param["path"] = path_match.group(1)
+        param["pathPresent"] = True
+    else:
+        param["pathPresent"] = False
+    
     return param
 
 
@@ -98,8 +105,11 @@ def getTitle(args, title="", timeValue=None):
     if title:
         _title += f"{title} "
     if "uri" in args.__dict__ and args.uri:
-        param = getPulseRunfromURI(args.uri)
-        _title += f"(pulse={param['pulse']},{param['run']})"
+        param = getDetailsfromURI(args.uri)
+        if param["pathPresent"]:
+            _title += f"(path={param['path']})"
+        else:
+            _title += f"(pulse={param['pulse']},{param['run']})"
     else:
         _title += f"(pulse={args.pulse},{args.run})"
     if timeValue:
@@ -112,8 +122,11 @@ def getFileName(args, title="", timeValue=None):
     if title:
         _fileName += f"{title}_"
     if "uri" in args.__dict__ and args.uri:
-        param = getPulseRunfromURI(args.uri)
-        _fileName += f"pulse_{param['pulse']}_run_{param['run']}_"
+        param = getDetailsfromURI(args.uri)
+        if param["pathPresent"]:
+            _fileName += f"(path={param['path']})"
+        else:
+            _fileName += f"pulse_{param['pulse']}_run_{param['run']}_"
     else:
         _fileName += f"pulse_{args.pulse}_run_{args.run}_"
     if timeValue:
@@ -133,6 +146,7 @@ def getDatabasePath(args, timeValue=None) -> str:
         the absolute path of the database.
     """
     pulseInfo=""
+    databaseAbsolutePath=""
     if "uri" in args.__dict__ and args.uri:
         databaseAbsolutePath=args.uri
         

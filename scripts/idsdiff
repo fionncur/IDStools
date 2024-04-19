@@ -11,15 +11,19 @@ import sys
 import tempfile
 import time
 from io import BytesIO
-
+import numpy as np
+from rich.text import Text
+from rich.console import Console
+from rich.syntax import Syntax
+from rich.table import Table
 from rich_argparse import RichHelpFormatter
-
+from rich.progress import track
 import imas
 import matplotlib.pyplot as plt
 import numpy as np
 
 from idstools.database import DBMaster
-from idstools.utils.clihelper import getIMASVersion, getPulseRunfromURI, imasParser
+from idstools.utils.clihelper import getIMASVersion, getDetailsfromURI, imasParser
 from idstools.utils.ddhelper import DDHelper
 from idstools.utils.idshelper import compareIds
 from idstools.utils.idslogger import setupLogger
@@ -27,14 +31,11 @@ from idstools.utils.idslogger import setupLogger
 THRESHOLD_PERCENT = 2
 
 
-def get_filename(name, file_title, log_dir):
+def get_filename(file_title, log_dir):
     # Determine log path and file name; create log path if it does not exist
 
     now = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-    if name == "":
-        file_name = f"{now}_{file_title}"
-    else:
-        file_name = f'{str(name).replace(" ", "_")}_{now}_{file_title}'
+    file_name = f"{now}_{file_title}"
     if not os.path.exists(log_dir):
         try:
             os.makedirs(log_dir)
@@ -49,14 +50,15 @@ def get_filename(name, file_title, log_dir):
     return os.path.join(log_dir, file_name)
 
 
-def generate_html(file_path, data, pulseA, runA, pulseB, runB):
+def generate_html(file_path, compareData):
     logger.info("Writing to html file :" + file_path)
 
     ddhelper = DDHelper()
 
     file_object = open(file_path, "w")
-
-    report_title = f"Differences : {pulseA}/{runA} ~ {pulseB}/{runB}"
+    (pulseA,pulseB, inputA, inputB), data = next(iter(compareData.items()))
+    
+    report_title = f"Differences : {pulseA} ~ {pulseB}"
     report_header_string = (
         """<head>
                 <meta charset="utf-8">
@@ -72,8 +74,8 @@ def generate_html(file_path, data, pulseA, runA, pulseB, runB):
     <thead class="table-primary">
     <tr>
                         <th>Field Name</th>
-                        <th>{pulseA}/{runA}</th>
-                        <th>{pulseB}/{runB}</th>
+                        <th>{pulseA}</th>
+                        <th>{pulseB}</th>
                         <th>Comments</th>
                         <th>Details</th>
                         <tr>
@@ -224,7 +226,7 @@ def generate_html(file_path, data, pulseA, runA, pulseB, runB):
                                     values[0],
                                     marker="o",
                                     color="r",
-                                    label=f"{pulseA}/{runA}",
+                                    label=f"{pulseA}",
                                     linewidth="0.5",
                                     ms=2,
                                 )
@@ -233,7 +235,7 @@ def generate_html(file_path, data, pulseA, runA, pulseB, runB):
                                     ax_timeA,
                                     values[0],
                                     color="r",
-                                    label=f"{pulseA}/{runA}",
+                                    label=f"{pulseA}",
                                     linewidth="0.5",
                                     ms=2,
                                 )
@@ -243,7 +245,7 @@ def generate_html(file_path, data, pulseA, runA, pulseB, runB):
                                     values[1],
                                     marker="D",
                                     color="b",
-                                    label=f"{pulseB}/{runB}",
+                                    label=f"{pulseB}",
                                     linewidth="0.5",
                                     ms=2,
                                 )
@@ -252,7 +254,7 @@ def generate_html(file_path, data, pulseA, runA, pulseB, runB):
                                     ax_timeB,
                                     values[1],
                                     color="b",
-                                    label=f"{pulseB}/{runB}",
+                                    label=f"{pulseB}",
                                     linewidth="0.5",
                                     ms=2,
                                 )
@@ -269,8 +271,8 @@ def generate_html(file_path, data, pulseA, runA, pulseB, runB):
                                                         <thead class="table-primary">
                                                             <tr>
                                                             <th>Attribute Name</th>
-                                                            <th>{pulseA}/{runA}</th>
-                                                            <th>{pulseB}/{runB} </th>
+                                                            <th>{pulseA}</th>
+                                                            <th>{pulseB}</th>
                                                             </tr>
                                                         </thead>
                                                         <tbody>
@@ -416,52 +418,33 @@ def generate_html(file_path, data, pulseA, runA, pulseB, runB):
 if __name__ == "__main__":
     # Management of input arguments
     parser = argparse.ArgumentParser(
-        description="Compare a IDS from 2 date entries and returns True or False with option of generating html page with comparisen", parents=[imasParser], formatter_class=RichHelpFormatter,
+        description="--- Compare a IDS from multiple date entries and returns True or False with option of generating html page with comparisen \n"
+        + "- Example: \n"
+        + "  idsdiff -pulses 130011/6/public/MDSPLUS/ITER/3 130012/4/public/MDSPLUS/ITER/3 \n"
+        + "  idsdiff -pulses 130011/6/public/MDSPLUS/ITER/3 130012/4///ITER \n",
+        formatter_class=RichHelpFormatter,
+    )
+    parser.add_argument(
+        "-pulses",
+        "--pulse-list",
+        nargs="*",
+        type=str,
+        help="Provide space separated list  pulse/run/user/backend/database/version",
     )
     if getIMASVersion() > 4:
         parser.add_argument(
-            "-uriA",
-            "--uriA",
+            "-uri",
+            "--uri-list",
+            nargs="*",
             type=str,
-            help="first uri \t\t(default=%(default)s)",
+            help="uri separated by spaces \t\t(default=%(default)s)",
         )
-        parser.add_argument(
-            "-uriB",
-            "--uriB",
-            type=str,
-            help="second uri \t\t(default=%(default)s)",
-        )
-    parser.add_argument(
-        "-sA", "--pulseA", type=int, help="pulse number of first dataset"
-    )
-    parser.add_argument("-rA", "--runA", type=int, help="run number of first dataset")
-    parser.add_argument(
-        "-sB", "--pulseB", type=int, help="pulse number of second dataset"
-    )
-    parser.add_argument("-rB", "--runB", type=int, help="run number of second dataset")
+
     parser.add_argument(
         "ids",
         nargs="*",
         type=str,
         help="Name (or space separated list of names) of IDS to compare (leave empty to compare all IDSs)",
-    )
-    parser.add_argument(
-        "--backendB",
-        type=str,
-        default=None,
-        help="Specifies the backend of second dataset (default: same as first dataset)",
-    )
-    parser.add_argument(
-        "--databaseB",
-        type=str,
-        default=None,
-        help="Specifies the database name of second dataset (default: same as first dataset)",
-    )
-    parser.add_argument(
-        "--userB",
-        type=str,
-        default=None,
-        help="Specifies the owner (username) of second dataset (default: same as first dataset)",
     )
     parser.add_argument(
         "--skip-provenance",
@@ -474,72 +457,68 @@ if __name__ == "__main__":
         help="Generate static html page for showing difference including plots",
     )
     parser.add_argument(
-        "--report-dir",
-        type=str,
-        default=None,
+        "--directory",
         help="Specifies directory where report should be stored",
+        default="idsdiff_reports", 
     )
     args = parser.parse_args()
 
-    # set defaults for second dataset
-    if args.databaseB is None:
-        args.databaseB = args.database
-    if args.backendB is None:
-        args.backendB = args.backend
-    if args.userB is None:
-        args.userB = args.user
+    connections = []
+    if args.pulse_list is not None:
+        for pulseinfo in args.pulse_list:
+            details=pulseinfo.split("/")
+            pulse=None 
+            run = None
+            user = "public"
+            backend = "MDSPLUS"
+            database = "ITER"
+            version = "3"
+            if len(details)<2:
+                print(f"Looks like not enough details provided {details}")
+                continue
+            if len(details)==6:pulse, run, _user, _backend, _database, _version = details
+            if len(details)==5:pulse, run, _user, _backend, _database = details
+            if len(details)==4:pulse, run, _user, _backend= details
+            if len(details)==3:pulse, run, _user= details
+            if len(details)==2:pulse, run = details
+            pulse, run=int(pulse), int(run)
+            if _user: user=_user
+            if _backend: backend=_backend
+            if _database: database=_database
+            if _version: version=_version
+            _pulseArgs = argparse.Namespace()
+            _pulseArgs.backend = backend
+            _pulseArgs.pulse = pulse
+            _pulseArgs.run = run
+            _pulseArgs.user = user
+            _pulseArgs.database = database
+            _pulseArgs.version = version
+            if getIMASVersion() > 4:
+                _pulseArgs.uri = None
+            _connection = DBMaster.getConnection(_pulseArgs)
+            if _connection is None:
+                print(f"Error opening pulse! Please check existence : {pulseinfo}")
+                continue
+            connections.append((pulseinfo,_connection))
 
-    argsA = argparse.Namespace()
-    argsA.backend = args.backend
-    argsA.pulse = args.pulseA
-    argsA.run = args.runA
-    argsA.user = args.user
-    argsA.database = args.database
-    argsA.version = args.version
     if getIMASVersion() > 4:
-        argsA.uri = args.uriA
-
-    inputA = DBMaster.getConnection(argsA)
-    if inputA is None:
-        print("Error opening source pulse! Please check existence.")
-        sys.exit()
-
-    argsB = argparse.Namespace()
-    argsB.backend = args.backendB
-    argsB.pulse = args.pulseB
-    argsB.run = args.runB
-    argsB.user = args.userB
-    argsB.database = args.databaseB
-    argsB.version = args.version
-    if getIMASVersion() > 4:
-        argsB.uri = args.uriB
-
-    inputB = DBMaster.getConnection(argsB)
-    if inputB is None:
-        print("Error opening second dataset! Please check existence.")
-        sys.exit()
+        if args.uri_list is not None:
+            for uriinfo in args.uri_list:
+                _uriArgs = argparse.Namespace()
+                _uriArgs.uri=uriinfo
+                _connection = DBMaster.getConnection(_uriArgs)
+                if _connection is None:
+                    print(f"Error opening uri! Please check existence : {uriinfo}")
+                    continue
+                connections.append((uriinfo,_connection))
+        
+    if not connections:
+        print("No valid connections found! Please validate pulse details")
 
     if args.ids == []:
         args.ids = [ids.value for ids in list(imas.IDSName)]
 
-    report_dir = "report"
-    if args.report_dir is not None:
-        if os.path.exists(args.report_dir):
-            report_dir = args.report_dir
-
-    pulseA, runA, pulseB, runB = args.pulseA, args.runA, args.pulseB, args.runB
-    if getIMASVersion() > 4:
-        if args.uriA is not None and args.uriB is not None:
-            paramADict = getPulseRunfromURI(args.uriA)
-            paramBDict = getPulseRunfromURI(args.uriB)
-            pulseA, runA, pulseB, runB = (
-                paramADict["pulse"],
-                paramADict["run"],
-                paramBDict["pulse"],
-                paramBDict["run"],
-            )
-    file_title = f"_{pulseA}_{runA}_{pulseB}_{runB}"
-    file_path = get_filename("", file_title, report_dir)
+    file_path = get_filename("compare_report", args.directory)
     log_file = file_path + ".log"
     html_file = file_path + ".html"
     logger = setupLogger(
@@ -550,32 +529,58 @@ if __name__ == "__main__":
         stdout_level=logging.INFO,
     )
     st = time.time()
-    data = {}
-    for idsname in args.ids:
-        idsA = inputA.get(idsname)
-        idsB = inputB.get(idsname)
-        compare_result, output = compareIds(
-            idsA, idsB, field=idsname, ignore_version=args.skip_provenance, output={}
-        )
-        data[idsname] = (compare_result, output)
+    totalData={}
+    for i in track(range(len(connections)), description="[green]Comparing Data Entries..."):
+        for j in range(i + 1, len(connections)):
+            if connections[i][0] != connections[j][0]:
+                compareData = {}
+                for idsname in args.ids:
+                    idsA = connections[i][1].get(idsname)
+                    idsB = connections[j][1].get(idsname)
+                    compare_result, output = compareIds(
+                        idsA, idsB, field=idsname, ignore_version=args.skip_provenance, verb=False, nameX=connections[i][0],nameY=connections[j][0],output={}
+                    )
+                    compareData[idsname] = (compare_result, output)
+                totalData[(connections[i][0],connections[j][0],connections[i][1],connections[j][1])]= compareData
+
     et = time.time()
     elapsed_time = et - st
-    # logger.debug(
-    #     "ids difference is calculated in:" + "{:10.2f}".format(elapsed_time) + "seconds"
-    # )
-    if bool(data):
+
+    if bool(totalData):
+        different={}
+        for cmpName, cmpResult in totalData.items():
+            for idsName, resultData in cmpResult.items():
+                for k, v in resultData[1].items():
+                    different[(k, v[3])]=(v[0],v[1])
+        print("")
+        strConnection = '\n'
+        strConnection+='\n'.join([x[0] for x in connections])
+        console = Console()
+        table = Table(
+            
+            title=Text(f"Comparisen between {strConnection}", style="bold blue")
+        )
+        table.add_column("ids field name", style="magenta")
+        table.add_column("Comment", style="green")
+
+        for field, _ in different.items():
+            _field, _comment = field
+            table.add_row(f"{_field}", f"{_comment}")
+        console.print(table)
+    
         if args.generate_html is True:
-            st = time.time()
-            generate_html(html_file, data, pulseA, runA, pulseB, runB)
+            if len(connections)>2:
+                logger.info("HTML file generation is available for two data entries currently")
+            else:
+                st = time.time()
+                generate_html(html_file, totalData)
 
-            et = time.time()
-            elapsed_time = et - st
-            try:
-                import webbrowser
+                et = time.time()
+                elapsed_time = et - st
+                try:
+                    import webbrowser
 
-                webbrowser.open(html_file)
-            except:
-                pass
-            # logger.info(
-            #     "HTML file is generated in:" + "{:10.2f}".format(elapsed_time) + "seconds."
-            # )
+                    webbrowser.open(html_file)
+                except:
+                    pass
+            

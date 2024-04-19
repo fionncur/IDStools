@@ -486,7 +486,7 @@ class DBMaster:
     @classmethod
     def getDBEntryObject(cls, args):
         imasVersion = DBMaster.getIMASVersion()
-
+        connection=None
         if imasVersion > 4:
             if args.uri is None:
                 if args.pulse is None or args.run is None:

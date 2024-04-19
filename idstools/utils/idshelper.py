@@ -287,7 +287,7 @@ def resampleTimes(
         dbout.put_slice(dataSlice)
 
 
-def compareIds(X, Y, field=None, ignore_version=True, verb=True, output={}):
+def compareIds(X, Y, field=None, ignore_version=True, verb=True,nameX="first",nameY="second", output={}):
     """
     The function compares two ids objects and returns whether they are identical or not, along with a  dictionary of differences.
 
@@ -302,7 +302,7 @@ def compareIds(X, Y, field=None, ignore_version=True, verb=True, output={}):
     Returns:
         tuple containing a boolean value indicating whether the two input objects are identical, and a dictionary containing information about any differences found during the comparison.
     """
-
+    
     identical = True
     if hasattr(X, "__name__") and hasattr(Y, "__name__"):
         if X.__name__ == Y.__name__:
@@ -344,7 +344,7 @@ def compareIds(X, Y, field=None, ignore_version=True, verb=True, output={}):
                 output[field + "." + key] = (
                     field + "." + key,
                     field + "." + key,
-                    "not present in first ids",
+                    f"not present in {nameX} ids",
                 )
             else:
                 logger.error("Duplicate key found")
@@ -358,7 +358,7 @@ def compareIds(X, Y, field=None, ignore_version=True, verb=True, output={}):
                 output[field + "." + key] = (
                     field + "." + key,
                     field + "." + key,
-                    "not present in second ids",
+                    f"not present in {nameY} ids",
                 )
             else:
                 logger.error("Duplicate key found")
@@ -375,7 +375,7 @@ def compareIds(X, Y, field=None, ignore_version=True, verb=True, output={}):
                     Xo,
                     Yo,
                     None,
-                    f"different type first type(Xo), second type(Yo) ",
+                    f"different type {nameX} type(Xo), {nameY} type(Yo) ",
                 )
             else:
                 logger.error("Duplicate key found")
@@ -394,6 +394,8 @@ def compareIds(X, Y, field=None, ignore_version=True, verb=True, output={}):
                 field=f"{field}.{attrname}",
                 ignore_version=ignore_version,
                 verb=verb,
+                nameX=nameX,
+                nameY=nameY,
                 output=output,
             )
             identical &= identical_result
@@ -425,6 +427,8 @@ def compareIds(X, Y, field=None, ignore_version=True, verb=True, output={}):
                             field=f"{field}[{i}]",
                             ignore_version=ignore_version,
                             verb=verb,
+                            nameX=nameX,
+                            nameY=nameY,
                             output=output,
                         )
                         identical &= identical_result
@@ -447,18 +451,18 @@ def compareIds(X, Y, field=None, ignore_version=True, verb=True, output={}):
                 if isinstance(Xo, np.ndarray):
                     data_type = np.ndarray
                     if Xo.size == 0:
-                        missing = [True, "first"]
+                        missing = [True, nameX]
                     elif Yo.size == 0:
-                        missing = [True, "second"]
+                        missing = [True, nameY]
                 else:
                     missmap = {int: -999999999, float: -9e40}
                     for t in missmap:
                         if isinstance(Xo, t):
                             data_type = t
                             if Xo == missmap[t]:
-                                missing = [True, "first"]
+                                missing = [True, nameX]
                             elif Yo == missmap[t]:
-                                missing = [True, "second"]
+                                missing = [True, nameY]
 
                 if missing[0]:
                     if field + "." + key not in output.keys():
@@ -466,7 +470,7 @@ def compareIds(X, Y, field=None, ignore_version=True, verb=True, output={}):
                             Xo,
                             Yo,
                             data_type,
-                            f"missing in the IDS {missing[1]}",
+                            f"missing in the IDS of {missing[1]}",
                         )
                     else:
                         logger.error("Duplicate key found")

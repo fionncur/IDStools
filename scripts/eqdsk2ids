@@ -16,7 +16,6 @@ from idstools.utils.clihelper import (
     dbentryParser,
     getDatabasePath,
     getIMASVersion,
-    getPulseRunfromURI,
 )
 
 # ----------------------------------------------------------------------
