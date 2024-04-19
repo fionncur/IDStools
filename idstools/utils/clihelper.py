@@ -132,35 +132,25 @@ def getDatabasePath(args, timeValue=None) -> str:
     Returns:
         the absolute path of the database.
     """
-    database = version = pulse = run = user = None
+    pulseInfo=""
     if "uri" in args.__dict__ and args.uri:
-        param = getPulseRunfromURI(args.uri)
-        database = param["database"]
-        version = param["version"]
-        pulse = int(param["pulse"])
-        run = int(param["run"])
-        user = param["user"]
+        databaseAbsolutePath=args.uri
+        
     else:
-        database = args.database
-        version = args.version
-
-        pulse = int(args.pulse)
-        run = int(args.run)
-        user = args.user
-
-    if user == "public":
-        publichome = os.getenv("IMAS_HOME", default="")
-        if publichome is None:
-            return None
-        databaseAbsolutePath = (
-            f"{publichome}/shared/imasdb/{database}/{version}/{run//10000}"
-        )
-    else:
-        databaseAbsolutePath = f'{os.path.expanduser(f"~{user}")}/public/imasdb/{str(database)}/{version}/{run//10000}'
-    databaseAbsolutePath = databaseAbsolutePath[:-2]
+        if args.user == "public":
+            publichome = os.getenv("IMAS_HOME", default="")
+            if publichome is None:
+                return None
+            databaseAbsolutePath = (
+                f"{publichome}/shared/imasdb/{args.database}/{args.version}/{args.run//10000}"
+            )
+        else:
+            databaseAbsolutePath = f'{os.path.expanduser(f"~{args.user}")}/public/imasdb/{str(args.database)}/{args.version}/{args.run//10000}'
+        pulseInfo=f"pulse {args.pulse},{args.run}"
+        databaseAbsolutePath = databaseAbsolutePath[:-2]
     timeString = ""
     if timeValue:
         timeString = f"time:{timeValue:.2f})"
-    hostdir = f"{socket.gethostname()}:{databaseAbsolutePath} (pulse {pulse},{run} {timeString})"
+    hostdir = f"{socket.gethostname()}:{databaseAbsolutePath} ({pulseInfo} {timeString})"
     #
     return hostdir
