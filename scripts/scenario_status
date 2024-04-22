@@ -2,12 +2,13 @@
 # -*- coding: utf-8 -*-
 import argparse
 import os
-
+from rich.console import Console
+from rich.syntax import Syntax
+from rich.table import Table
 from rich_argparse import RichHelpFormatter
 from idstools.scenariodescription import ScenarioDescription
 from idstools.utils.idslogger import setupLogger
-from idstools.view.common import Terminal
-
+console = Console()
 # Management of input arguments
 parser = argparse.ArgumentParser(
     description="---- Show status and potential parent and children for a given simulation stored in ITER database folder",formatter_class=RichHelpFormatter,
@@ -54,27 +55,27 @@ if args["print"] == True:
 
 family = sdObject.getFamily()
 
-terminal = Terminal()
-
-terminal.print("-----------------------------------------------------------------")
-terminal.print(
-    f" {'SCENARIO':<12} {'STATUS':<10} REASON WHY IT REPLACES PREVIOUS",
-    "bold magenta",
+table = Table(
+    title=f"Scenario Status"
 )
-terminal.print("-----------------------------------------------------------------")
+table.add_column("SCENARIO", style="magenta")
+table.add_column("STATUS", style="green")
+table.add_column("REASON WHY IT REPLACES PREVIOUS", style="green")
+
 for iparent in range(len(family["parents"]["pulse"])):
-    terminal.print(
-        f" {family['parents']['pulse'][iparent]:<7} {family['parents']['run'][iparent]:<5}{family['parents']['status'][iparent]:<10}{family['parents']['comment'][iparent]}"
+    table.add_row(
+        f" {family['parents']['pulse'][iparent]:>7}{family['parents']['run'][iparent]:>5}", f"{family['parents']['status'][iparent]:<10}", f"{family['parents']['comment'][iparent]}"
     )
 if "database_relations" in sdObject.yamlData.keys():
     if "replaced_by" in sdObject.yamlData["database_relations"].keys():
-        terminal.print(
-            f"*{pulse:<7} {run:<5}{sdObject.yamlData['status']:<10}{sdObject.yamlData['database_relations']['replaces']}"
+        table.add_row(
+            f"*{pulse:>7}{run:>5}",f"{sdObject.yamlData['status']:<10}",f"{sdObject.yamlData['database_relations']['replaces']}"
         )
 else:
-    terminal.print(f"database_relations not found", "bold red")
+    logger.warn(f"database relations not found")
 for ichild in range(len(family["children"]["pulse"])):
-    terminal.print(
-        f" {family['children']['pulse'][ichild]:<7}{family['children']['run'][ichild]:<5}{family['children']['status'][ichild]:<10}{family['children']['comment'][ichild]}"
+    table.add_row(
+        f" {family['children']['pulse'][ichild]:>7}{family['children']['run'][ichild]:>5}",f"{family['children']['status'][ichild]:<10}",f"{family['children']['comment'][ichild]}"
     )
-terminal.print("-----------------------------------------------------------------")
+    
+console.print(table)

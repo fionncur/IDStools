@@ -19,7 +19,7 @@ scenario description database folder
 
 .. code-block:: bash
 
-   $ scenario_status -s 134174 -r 117
+   $ scenario_status -p 134174 -r 117
    -----------------------------------------------------------------
     SCENARIO     STATUS     REASON WHY IT REPLACES PREVIOUS
    -----------------------------------------------------------------
@@ -33,7 +33,7 @@ scenario description database folder
 
 .. code-block:: bash
 
-   $ scenario_status -s 130012 -r 4 --print
+   $ scenario_status -p 130012 -r 4 --print
    {
    │   'status': 'active',
    │   'reference_name': 'ITER-baseline-DT_more_stable_q95>2',

@@ -21,7 +21,7 @@ is in active state.
 
 .. code-block:: bash
 
-   $ md_status -s 116000 -r 3
+   $ md_status -p 116000 -r 3
    -----------------------------------------------------------------
      DATASET       STATUS          REASON WHY IT REPLACES PREVIOUS
    -----------------------------------------------------------------

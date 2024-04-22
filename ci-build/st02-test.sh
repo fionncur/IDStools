@@ -69,23 +69,8 @@ END
 al_major_version="${AL_VERSION%%.*}"
 echo "====================================================================="
 python3 -c "$version_script"
-# echo "====================================================================="
-# echo ""
-# echo ""
-# echo "====================================================================="
-# echo "Testing ids manipulation scripts with $IMAS_MODULE_VERSION and $PYTHON_VERSION"
-# echo "====================================================================="
-# source ./tests/st01_test_ids_scripts.sh "$LOG_DIR" "$DB_DIR"
-
-# if (( al_major_version > 4 )); then
-#     source ./tests/st01_test_ids_scripts_with_uri.sh "$LOG_DIR" "$DB_DIR"
-# fi
-# echo ""
-# echo ""
-# echo "====================================================================="
-# echo "Testing db scripts with $IMAS_MODULE_VERSION and $PYTHON_VERSION"
-# echo "====================================================================="
-# source ./tests/st02_test_db_scripts.sh "$LOG_DIR" "$DB_DIR"
+echo "====================================================================="
+#---------------------------------------------------------------------------
 echo ""
 echo ""
 echo "====================================================================="
@@ -95,6 +80,33 @@ source ./tests/st03_test_analysis_scripts.sh  "$LOG_DIR" "$DB_DIR"
 if (( al_major_version > 4 )); then
     source ./tests/st03_test_analysis_scripts_with_uri.sh "$LOG_DIR" "$DB_DIR"
 fi
+#---------------------------------------------------------------------------
+echo ""
+echo ""
+echo "====================================================================="
+echo "Testing ids manipulation scripts with $IMAS_MODULE_VERSION and $PYTHON_VERSION"
+echo "====================================================================="
+source ./tests/st01_test_ids_scripts.sh "$LOG_DIR" "$DB_DIR"
+
+if (( al_major_version > 4 )); then
+    source ./tests/st01_test_ids_scripts_with_uri.sh "$LOG_DIR" "$DB_DIR"
+fi
+# ---------------------------------------------------------------------------
+echo ""
+echo ""
+echo "====================================================================="
+echo "Testing db scripts with $IMAS_MODULE_VERSION and $PYTHON_VERSION"
+echo "====================================================================="
+source ./tests/st02_test_db_scripts.sh "$LOG_DIR" "$DB_DIR"
+
+# ---------------------------------------------------------------------------
+echo ""
+echo ""
+echo "====================================================================="
+echo "Testing scenario scripts with $IMAS_MODULE_VERSION and $PYTHON_VERSION"
+echo "====================================================================="
+source ./tests/st04_test_scenario_scripts.sh "$LOG_DIR" "$DB_DIR"
+
 echo ""
 echo ""
 echo "====================================================================="

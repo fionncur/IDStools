@@ -14,10 +14,11 @@ logger = logging.getLogger(f"module.{__name__}")
 class MachineDescription:
     mdSummaryPath = r"/work/imas/shared/imasdb/ITER_MD/3/md_summary.yaml"
 
-    def __init__(self, connectionArgs= None, mdSummaryPath: str = "") -> None:
+    def __init__(self, mdSummaryPath: str = "",connectionArgs= None) -> None:
         self.mdArgs = connectionArgs
-        if "database" in self.mdArgs.__dict__ and self.mdArgs.database == "ITER":
-            self.mdArgs.database = "ITER_MD"
+        if self.mdArgs:
+            if "database" in self.mdArgs.__dict__ and self.mdArgs.database == "ITER":
+                self.mdArgs.database = "ITER_MD"
 
         self.mdSummaryYaml = {}
         if not mdSummaryPath:
@@ -113,7 +114,7 @@ class MachineDescription:
                 self.mdArgs.pulse, self.mdArgs.run = int(self.mdArgs.pulse), int(
                     self.mdArgs.run
                 )
-                self.mdArgs.uri = f"imas:mdsplus?user=public;shot={self.mdArgs.pulse};run={self.mdArgs.run};database={self.mdArgs.database};version={self.mdArgs.version}"
+                self.mdArgs.uri = f"imas:mdsplus?user=public;pulse={self.mdArgs.pulse};run={self.mdArgs.run};database={self.mdArgs.database};version={self.mdArgs.version}"
                 mdConnection = DBMaster.getConnection(self.mdArgs)
                 if mdConnection is not None:
                     idsData = mdConnection.get(config["ids"])
@@ -137,129 +138,129 @@ class MachineDescription:
         df = pd.DataFrame(dataList)
         return df
 
-    def getStatus(self, shot: int, run: int):
+    def getStatus(self, pulse: int, run: int):
         """
-        The function `getStatus` takes in two parameters, `shot` and `run`, and returns the value of the key "status" from the `yaml` object dictionary using the `shot` and `run` as keys.
+        The function `getStatus` takes in two parameters, `pulse` and `run`, and returns the value of the key "status" from the `yaml` object dictionary using the `pulse` and `run` as keys.
 
         Args:
-            shot (int): The "shot" parameter represents the number of shots taken.
-            run (int): The "run" parameter represents the number of runs in a particular shot.
+            pulse (int): The "pulse" parameter represents the number of pulses taken.
+            run (int): The "run" parameter represents the number of runs in a particular pulse.
 
         Returns:
             The method `getStatus` returns the value of `"status"` if `yaml` object is not `None`, otherwise it returns `None`.
         """
-        shotrun = str(shot) + r"/" + str(run)
+        pulserun = str(pulse) + r"/" + str(run)
         if self.mdSummaryYaml:
-            return self.mdSummaryYaml[shotrun]["status"]
+            return self.mdSummaryYaml[pulserun]["status"]
         else:
             return None
 
-    def getReasonForReplacement(self, shot: int, run: int):
+    def getReasonForReplacement(self, pulse: int, run: int):
         """
-        The function `getReasonForReplacement` takes in two parameters, `shot` and `run`, and returns the value of the key "reason_for_replacement" from the `yaml` object dictionary using the `shot` and `run` as keys.
+        The function `getReasonForReplacement` takes in two parameters, `pulse` and `run`, and returns the value of the key "reason_for_replacement" from the `yaml` object dictionary using the `pulse` and `run` as keys.
 
         Args:
-            shot (int): The "shot" parameter represents the number of shots taken.
-            run (int): The "run" parameter represents the number of runs in a particular shot.
+            pulse (int): The "pulse" parameter represents the number of pulses taken.
+            run (int): The "run" parameter represents the number of runs in a particular pulse.
 
         Returns:
             The method `getReasonForReplacement` returns the value of `"reason_for_replacement"` if `yaml` object is not `None`, otherwise it returns `None`.
         """
-        shotrun = str(shot) + r"/" + str(run)
+        pulserun = str(pulse) + r"/" + str(run)
         if self.mdSummaryYaml:
-            return self.mdSummaryYaml[shotrun]["reason_for_replacement"]
+            return self.mdSummaryYaml[pulserun]["reason_for_replacement"]
         else:
             return None
 
-    def getReplacedBy(self, shot: int, run: int):
+    def getReplacedBy(self, pulse: int, run: int):
         """
-        The function `getReplacedBy` takes in two parameters, `shot` and `run`, and returns the value of the key "replaced_by" from the `yaml` object dictionary using the `shot` and `run` as keys.
+        The function `getReplacedBy` takes in two parameters, `pulse` and `run`, and returns the value of the key "replaced_by" from the `yaml` object dictionary using the `pulse` and `run` as keys.
 
         Args:
-            shot (int): The "shot" parameter represents the number of shots taken.
-            run (int): The "run" parameter represents the number of runs in a particular shot.
+            pulse (int): The "pulse" parameter represents the number of pulses taken.
+            run (int): The "run" parameter represents the number of runs in a particular pulse.
 
         Returns:
             The method `getReplacedBy` returns the value of `"replaced_by"` if `yaml` object is not `None`, otherwise it returns `None`.
         """
-        shotrun = str(shot) + r"/" + str(run)
+        pulserun = str(pulse) + r"/" + str(run)
         if self.mdSummaryYaml:
-            return self.mdSummaryYaml[shotrun]["replaced_by"]
+            return self.mdSummaryYaml[pulserun]["replaced_by"]
         else:
             return None
 
-    def getReplaces(self, shot: int, run: int):
+    def getReplaces(self, pulse: int, run: int):
         """
-        The function `getReplaces` takes in two parameters, `shot` and `run`, and returns the value of the key "replaces" from the `yaml` object dictionary using the `shot` and `run` as keys.
+        The function `getReplaces` takes in two parameters, `pulse` and `run`, and returns the value of the key "replaces" from the `yaml` object dictionary using the `pulse` and `run` as keys.
 
         Args:
-            shot (int): The "shot" parameter represents the number of shots taken.
-            run (int): The "run" parameter represents the number of runs in a particular shot.
+            pulse (int): The "pulse" parameter represents the number of pulses taken.
+            run (int): The "run" parameter represents the number of runs in a particular pulse.
 
         Returns:
             The method `getReplaces` returns the value of `"replaces"` if `yaml` object is not `None`, otherwise it returns `None`.
         """
-        shotrun = str(shot) + r"/" + str(run)
+        pulserun = str(pulse) + r"/" + str(run)
         if self.mdSummaryYaml:
-            return self.mdSummaryYaml[shotrun]["replaces"]
+            return self.mdSummaryYaml[pulserun]["replaces"]
         else:
             return None
 
-    def getChildren(self, shot: int, run: int, dictToFill={}):
+    def getChildren(self, pulse: int, run: int, dictToFill={}):
         """
-        The function `getChildren` recursively retrieves information about replaced shots and runs from a dictionary and stores it in a new dictionary.
+        The function `getChildren` recursively retrieves information about replaced pulses and runs from a dictionary and stores it in a new dictionary.
 
         Args:
-            shot (int): The "shot" parameter is an integer that represents a shot number.
+            pulse (int): The "pulse" parameter is an integer that represents a pulse number.
             run (int): The `run` parameter in the `getChildren` method represents the run number.
-            dictToFill: The `dictToFill` parameter is a dictionary that is used to store the information about the children of a given shot and run. It is initially an empty dictionary and is passed as an argument to the function to accumulate the information about the children.
+            dictToFill: The `dictToFill` parameter is a dictionary that is used to store the information about the children of a given pulse and run. It is initially an empty dictionary and is passed as an argument to the function to accumulate the information about the children.
 
         Returns:
-            a dictionary `dictToFill` that contains information about the children of a given shot and run. The dictionary has keys "shot", "run", "status", and "reason_for_replacement", and the corresponding values are lists that store the information for each child.
+            a dictionary `dictToFill` that contains information about the children of a given pulse and run. The dictionary has keys "pulse", "run", "status", and "reason_for_replacement", and the corresponding values are lists that store the information for each child.
         """
-        replaced_by = self.getReplacedBy(shot, run)
+        replaced_by = self.getReplacedBy(pulse, run)
         if replaced_by is not None:
             string_list = re.findall(r"\d+", replaced_by)
-            shotc = string_list[0]
+            pulsec = string_list[0]
             runc = string_list[1]
-            shotrunc = shotc + "/" + runc
-            if not "shot" in dictToFill.keys():
-                dictToFill["shot"] = []
+            pulserunc = pulsec + "/" + runc
+            if not "pulse" in dictToFill.keys():
+                dictToFill["pulse"] = []
             if not "run" in dictToFill.keys():
                 dictToFill["run"] = []
             if not "status" in dictToFill.keys():
                 dictToFill["status"] = []
             if not "reason_for_replacement" in dictToFill.keys():
                 dictToFill["reason_for_replacement"] = []
-            dictToFill["shot"].append(shotc)
+            dictToFill["pulse"].append(pulsec)
             dictToFill["run"].append(runc)
-            dictToFill["status"].append(self.mdSummaryYaml[shotrunc]["status"])
+            dictToFill["status"].append(self.mdSummaryYaml[pulserunc]["status"])
             dictToFill["reason_for_replacement"].append(
-                self.mdSummaryYaml[shotrunc]["reason_for_replacement"]
+                self.mdSummaryYaml[pulserunc]["reason_for_replacement"]
             )
-            dictToFill = self.getChildren(int(shotc), int(runc), dictToFill)
+            dictToFill = self.getChildren(int(pulsec), int(runc), dictToFill)
         return dictToFill
 
-    def getParents(self, shot: int, run: int, dictToFill={}):
+    def getParents(self, pulse: int, run: int, dictToFill={}):
         """
-        The `getParents` function recursively retrieves the parent information for a given shot and run, populating a dictionary with the parent shot, parent run, status, and reason for replacement.
+        The `getParents` function recursively retrieves the parent information for a given pulse and run, populating a dictionary with the parent pulse, parent run, status, and reason for replacement.
 
         Args:
-            shot (int): The `shot` parameter is an integer that represents a shot number.
+            pulse (int): The `pulse` parameter is an integer that represents a pulse number.
             run (int): The `run` parameter is an integer that represents the run number.
-            dictToFill: The `dictToFill` parameter is a dictionary that is used to store the information about the parents of a given shot and run. It is initially an empty dictionary and is passed as an argument to the `getParents` function. The function fills this dictionary with the parent   information and returns it.
+            dictToFill: The `dictToFill` parameter is a dictionary that is used to store the information about the parents of a given pulse and run. It is initially an empty dictionary and is passed as an argument to the `getParents` function. The function fills this dictionary with the parent   information and returns it.
 
         Returns:
-            a dictionary `dictToFill` that contains information about the parents of a given shot and run.
+            a dictionary `dictToFill` that contains information about the parents of a given pulse and run.
         """
-        replaces = self.getReplaces(shot, run)
+        replaces = self.getReplaces(pulse, run)
         if replaces is not None:
             string_list = re.findall(r"\d+", replaces)
-            shotp = string_list[0]
+            pulsep = string_list[0]
             runp = string_list[1]
-            shotrunp = shotp + "/" + runp
-            if not "shot" in dictToFill.keys():
-                dictToFill["shot"] = []
+            pulserunp = pulsep + "/" + runp
+            if not "pulse" in dictToFill.keys():
+                dictToFill["pulse"] = []
             if not "run" in dictToFill.keys():
                 dictToFill["run"] = []
             if not "status" in dictToFill.keys():
@@ -267,43 +268,43 @@ class MachineDescription:
             if not "reason_for_replacement" in dictToFill.keys():
                 dictToFill["reason_for_replacement"] = []
 
-            dictToFill["shot"].insert(0, shotp)  # Order to be reversed for parents
+            dictToFill["pulse"].insert(0, pulsep)  # Order to be reversed for parents
             dictToFill["run"].insert(0, runp)
-            dictToFill["status"].insert(0, self.mdSummaryYaml[shotrunp]["status"])
+            dictToFill["status"].insert(0, self.mdSummaryYaml[pulserunp]["status"])
             dictToFill["reason_for_replacement"].insert(
-                0, self.mdSummaryYaml[shotrunp]["reason_for_replacement"]
+                0, self.mdSummaryYaml[pulserunp]["reason_for_replacement"]
             )
-            dictToFill = self.getParents(int(shotp), int(runp), dictToFill)
+            dictToFill = self.getParents(int(pulsep), int(runp), dictToFill)
         return dictToFill
 
-    def getFamily(self, shot: int, run: int):
+    def getFamily(self, pulse: int, run: int):
         """
-        The function "getFamily" returns a dictionary containing the parents and children of a given shot and run.
+        The function "getFamily" returns a dictionary containing the parents and children of a given pulse and run.
 
         Args:
-            shot (int): The "shot" parameter represents the shot number
+            pulse (int): The "pulse" parameter represents the pulse number
             run (int): The "run" parameter is an integer that represents the run number.
 
         Returns:
-            a dictionary called `familyDict` which contains two keys: "parents" and "children". The values associated with these keys are the results of calling the `getParents` and `getChildren` methods with the given `shot` and `run` parameters.
+            a dictionary called `familyDict` which contains two keys: "parents" and "children". The values associated with these keys are the results of calling the `getParents` and `getChildren` methods with the given `pulse` and `run` parameters.
         """
         familyDict = {}
-        familyDict["parents"] = self.getParents(shot, run)
-        familyDict["children"] = self.getChildren(shot, run)
+        familyDict["parents"] = self.getParents(pulse, run)
+        familyDict["children"] = self.getChildren(pulse, run)
         return familyDict
 
-    def checkIfExist(self, shot: int, run: int):
+    def checkIfExist(self, pulse: int, run: int):
         """
-        The function checks if a given shot and run combination exists in a yaml dictionary.
+        The function checks if a given pulse and run combination exists in a yaml dictionary.
 
         Args:
-            shot (int): The "shot" parameter is an integer representing the number.
+            pulse (int): The "pulse" parameter is an integer representing the number.
             run (int): The parameter "run" is an integer representing the number.
 
         Returns:
-            a boolean value. If the `shotrun` key is present in the `yaml` object dictionary, it will  return `True`. Otherwise, it will return `False`.
+            a boolean value. If the `pulserun` key is present in the `yaml` object dictionary, it will  return `True`. Otherwise, it will return `False`.
         """
-        shotrun = str(shot) + r"/" + str(run)
-        if shotrun not in self.mdSummaryYaml.keys():
+        pulserun = str(pulse) + r"/" + str(run)
+        if pulserun not in self.mdSummaryYaml.keys():
             return False
         return True

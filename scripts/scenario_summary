@@ -4,7 +4,8 @@ import argparse
 import os
 import re
 import sys
-
+from rich.console import Console
+from rich.table import Table
 from idstools.scenariodescription import ScenarioDescriptionBase
 from idstools.view.common import Terminal
 
@@ -249,18 +250,21 @@ if sort:
 
 # rename headers for display
 selected_df = df.rename(columns=displayMapping)
-# Convert all values to string
-selected_df = selected_df.applymap(lambda x: str(x))
-
-# align text left aligned
-for index, _ in enumerate(choice):
-    max_length = selected_df.iloc[:, index].map(len).max()
-    selected_df.iloc[:, index] = selected_df.iloc[:, index].apply(
-        lambda x: f"{x:<{max_length}}"
-    )
 
 if not selected_df.empty:
-    print(selected_df.to_string(index=False, justify="center"), )
+    # print(selected_df.to_string(index=False, justify="center"), )
+    table = Table()
+    for columnName in choice:
+        table.add_column(columnName, justify="left", style="green")
+
+    for _, row in df.iterrows():
+        x=[]
+        for columnName in choice:
+            x.append(str(row[columnName]))
+        table.add_row(*x)  # Even row style
+
+    console = Console()
+    console.print(table)
 else:
     print(" No records found matching mentioned criteria")
 print(f" NOTE: Read Scenario database from {defaultFolderPath}" )

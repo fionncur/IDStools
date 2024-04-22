@@ -61,7 +61,7 @@ if connection is None:
     exit(1)
 
 if args.wall:
-    machineDescription = MachineDescription(copy.deepcopy(args))
+    machineDescription = MachineDescription(connectionArgs=copy.deepcopy(args))
     wallMDDict = machineDescription.getLatestIdsData("wall")
     wallIds = wallMDDict["idsData"]
 

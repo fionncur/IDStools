@@ -140,7 +140,7 @@ if __name__ == "__main__":
         args.checkValidity = False
         args.ids = []
 
-    machineDescription = MachineDescription(args)
+    machineDescription = MachineDescription(connectionArgs=args)
     if args.cmd == "list":
         data = machineDescription.getMDSummary(
             args.ids, args.obsolete, args.checkValidity

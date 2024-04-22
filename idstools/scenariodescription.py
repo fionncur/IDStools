@@ -15,7 +15,7 @@ logger = logging.getLogger("module")
 yamlMapping = {
     "reference_name": "ref_name",
     "responsible_name": "ro_name",
-    "characteristics.shot": "shot",
+    "characteristics.shot": "pulse",
     "characteristics.run": "run",
     "characteristics.type": "type",
     "characteristics.workflow": "workflow",
@@ -161,17 +161,17 @@ class ScenarioDescriptionBase:
         
 # The class ScenarioDescription is a subclass of ScenarioDescriptionBase.
 class ScenarioDescription(ScenarioDescriptionBase):
-    def __init__(self, shot: int, run: int, folderPath: str = "") -> None:
+    def __init__(self, pulse: int, run: int, folderPath: str = "") -> None:
         """
-        The above function initializes an object with a shot, run, and folder path, and attempts to load YAML data from a file based on the shot and run numbers.
+        The above function initializes an object with a pulse, run, and folder path, and attempts to load YAML data from a file based on the pulse and run numbers.
 
         Args:
-            shot (int): The "shot" parameter is an integer that represents a shot number. It is used to construct the filename for the YAML file that will be loaded.
+            pulse (int): The "pulse" parameter is an integer that represents a pulse number. It is used to construct the filename for the YAML file that will be loaded.
             run (int): The `run` parameter is an integer that represents the run number.
             folderPath (str): The `folderPath` parameter is a string that represents the path to a folder where the YAML file is located.
         """
         super().__init__(folderPath)
-        yamlFileName = self.folderPath + f'/ids_{shot}{str(run).rjust(4,"0")}.yaml'
+        yamlFileName = self.folderPath + f'/ids_{pulse}{str(run).rjust(4,"0")}.yaml'
         self.yamlData = None
         try:
             with open(yamlFileName, "r") as f:
@@ -194,8 +194,8 @@ class ScenarioDescription(ScenarioDescriptionBase):
         if "database_relations" in yamlData.keys():
             if "replaced_by" in yamlData["database_relations"].keys():
                 replaced_by = yamlData["database_relations"]["replaced_by"]
-        if not "shot" in dictToFill.keys():
-            dictToFill["shot"] = []
+        if not "pulse" in dictToFill.keys():
+            dictToFill["pulse"] = []
         if not "run" in dictToFill.keys():
             dictToFill["run"] = []
         if not "status" in dictToFill.keys():
@@ -204,12 +204,12 @@ class ScenarioDescription(ScenarioDescriptionBase):
             dictToFill["comment"] = []
         if replaced_by is not None:
             string_list = re.findall(r"\d+", replaced_by)
-            shotc = string_list[0]
+            pulsec = string_list[0]
             runc = string_list[1]
-            scenarioDescription = ScenarioDescription(shotc, runc, self.folderPath)
+            scenarioDescription = ScenarioDescription(pulsec, runc, self.folderPath)
 
             if scenarioDescription.yamlData is not None:
-                dictToFill["shot"].append(shotc)
+                dictToFill["pulse"].append(pulsec)
                 dictToFill["run"].append(runc)
                 dictToFill["status"].append(scenarioDescription.yamlData["status"])
                 dictToFill["comment"].append(
@@ -233,8 +233,8 @@ class ScenarioDescription(ScenarioDescriptionBase):
         if "database_relations" in yamlData.keys():
             if "replaces" in yamlData["database_relations"].keys():
                 replaces = yamlData["database_relations"]["replaces"]
-        if not "shot" in dictToFill.keys():
-            dictToFill["shot"] = []
+        if not "pulse" in dictToFill.keys():
+            dictToFill["pulse"] = []
         if not "run" in dictToFill.keys():
             dictToFill["run"] = []
         if not "status" in dictToFill.keys():
@@ -243,12 +243,12 @@ class ScenarioDescription(ScenarioDescriptionBase):
             dictToFill["comment"] = []
         if replaces is not None:
             string_list = re.findall(r"\d+", replaces)
-            shotp = string_list[0]
+            pulsep = string_list[0]
             runp = string_list[1]
-            scenarioDescription = ScenarioDescription(shotp, runp, self.folderPath)
+            scenarioDescription = ScenarioDescription(pulsep, runp, self.folderPath)
 
             if scenarioDescription.yamlData is not None:
-                dictToFill["shot"].insert(0, shotp)  # Order to be reversed for parents
+                dictToFill["pulse"].insert(0, pulsep)  # Order to be reversed for parents
                 dictToFill["run"].insert(0, runp)
                 dictToFill["status"].insert(0, scenarioDescription.yamlData["status"])
                 dictToFill["comment"].insert(
@@ -275,3 +275,9 @@ class ScenarioDescription(ScenarioDescriptionBase):
         """
         terminal = Terminal()
         terminal.print(self.yamlData)
+
+
+if __name__ == "__main__":
+    defaultFolderPath=r"/work/imas/shared/imasdb/ITER/3/0"
+    scenarioDescriptionObj = ScenarioDescriptionBase(folderPath=defaultFolderPath)
+    df = scenarioDescriptionObj.getDataframesFromFiles(extension = ".yaml", addObsolete=False)

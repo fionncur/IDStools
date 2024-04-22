@@ -123,7 +123,7 @@ else:
 # add pulse/run number because pandas is stores id as unique key
 choice.append("id")
 
-mdObject = MachineDescription(machineDescriptionFolder)
+mdObject = MachineDescription(machineDescriptionFolder, connectionArgs=None)
 yamlData = mdObject.mdSummaryYaml
 
 df = mdObject.getPandasDataFrame()
