@@ -10,41 +10,7 @@ graph.
  Syntax idsdiff
 ****************
 
-.. code-block:: bash
-
-   $ idsdiff -h
-   usage: idsdiff [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION]
-                   [--backendB BACKENDB] [--databaseB DATABASEB] [--userB USERB] [--skip-provenance]
-                   [--generate-html] [--report-dir REPORT_DIR]
-                   shotA runA shotB runB [ids [ids ...]]
-
-   Compare a IDS from 2 datasets
-
-   positional arguments:
-   shotA                 shot number of first dataset
-   runA                  run number of first dataset
-   shotB                 shot number of second dataset
-   runB                  run number of second dataset
-   ids                   Name (or space separated list of names) of IDS to compare (leave empty to compare all IDSs)
-
-   optional arguments:
-   -h,         --help            show this help message and exit
-   -u USER,    --user_or_path USER
-                           user (default=public)
-   --database DATABASE, -d DATABASE
-                           database name (default=ITER)
-   --backend BACKEND, -b BACKEND
-                           backend format (default=MDSPLUS)
-   --version VERSION, -v VERSION
-                           data version (default=3)
-   --backendB BACKENDB   Specifies the backend of second dataset (default: same as first dataset)
-   --databaseB DATABASEB
-                           Specifies the database name of second dataset (default: same as first dataset)
-   --userB USERB         Specifies the owner (username) of second dataset (default: same as first dataset)
-   --skip-provenance     Discards provenance data differences (optional)
-   --generate-html       Generate static html page for showing difference including plots
-   --report-dir REPORT_DIR
-                           Specifies directory where report should be stored
+   .. command-output:: idsdiff -h
 
 *****************
  Example idsdiff
@@ -52,7 +18,13 @@ graph.
 
    .. code-block:: bash
 
-      $ idsdiff --pulseA 122525 --runA  1 --pulseB 122525 --runB 2 summary --generate-html
+      $ idsdiff summary -pulses 122502/1/public/MDSPLUS/ITER/3 122502/2/public/MDSPLUS/ITER/3
+      $ idsdiff summary -pulses 130011/6/public/MDSPLUS/ITER/3 130012/4/public/MDSPLUS/ITER/3
+
+   .. code-block:: bash
+
+      $ idsdiff summary --uri "imas:mdsplus?user=public;shot=122525;run=1;database=ITER;version=3" "imas:mdsplus?user=public;shot=122525;run=2;database=ITER;version=3"
+      $ idsdiff summary --uri "imas:mdsplus?user=public;shot=130011;run=6;database=ITER;version=3" "imas:mdsplus?user=public;shot=130012;run=4;database=ITER;version=3"
 
    .. image:: _static/images/idsdiff_1.png
       :alt: image not found

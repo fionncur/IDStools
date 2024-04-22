@@ -8,36 +8,8 @@
  Syntax idschk
 ***************
 
-   .. code-block:: bash
+   .. command-output:: idschk -h
 
-        $ idschk -h
-        usage: idschk [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] [-uri URI] [-s PULSE] [-r RUN] [-l [IDSLIST [IDSLIST ...]]] [-t [TIME]]
-                    [-f SCHEMA_FILE] [--ipsign {-1,1}] [--b0sign {-1,1}] [--verbose] [-c]
-
-        optional arguments:
-        -h, --help            show this help message and exit
-        -u USER, --user_or_path USER
-                                user (default=public)
-        --database DATABASE, -d DATABASE
-                                database name (default=ITER)
-        --backend BACKEND, -b BACKEND
-                                backend format (default=MDSPLUS)
-        --version VERSION, -v VERSION
-                                data version (default=3)
-        -uri URI, --uri URI   uri (default=None)
-        -s PULSE, --shot PULSE, --pulse PULSE
-                                Pulse number
-        -r RUN, --run RUN     Run number
-        -l [IDSLIST [IDSLIST ...]], --list [IDSLIST [IDSLIST ...]]
-                                IDS names to be checked
-        -t [TIME], --time [TIME]
-                                time (default=middle)
-        -f SCHEMA_FILE, --schema_file SCHEMA_FILE
-                                file name of validation schema
-        --ipsign {-1,1}       sign(Ip), default=-1
-        --b0sign {-1,1}       sign(B0), default=-1
-        --verbose             increase output verbosity
-        -c, --cocos           compute COCOS values from IDS/equilibrium
 
 ****************
  Example idschk
@@ -45,7 +17,7 @@
 
    .. code-block:: bash
 
-      $ idschk -s 134174 -r 117 -f core_profiles.yml
+      $ idschk -p 134174 -r 117 -f resources/validation_schemas/ITER/core_profiles.yml
 
       core_profiles:
           occurence(0):
@@ -62,20 +34,24 @@
 
    .. code-block:: bash
 
+      idschk --uri "imas:mdsplus?user=public;shot=134174;run=117;database=ITER;version=3" -f resources/validation_schemas/generic/core_profiles.yml
+
+   .. code-block:: bash
+
       # Command Line Interface for IDS Data Validation (idschk)
       # Examples:
       #Validate if ITER Scenario meets with physics requirements
-      $ idschk -s 131024 -r 40 -f path/to/schema_file/required_fields_core.yml
+      $ idschk -p 131024 -r 40 -f path/to/schema_file/required_fields_core.yml
 
       #Same with 1) and only for one time slice. Specify time, otherwise middle point if blank
-      $ idschk -s 131024 -r 40 -f path/to/schema_file/required_fields_core.yml -t 100.
-      $ idschk -s 131024 -r 40 -f path/to/schema_file/required_fields_core.yml -t
+      $ idschk -p 131024 -r 40 -f path/to/schema_file/required_fields_core.yml -t 100.
+      $ idschk -p 131024 -r 40 -f path/to/schema_file/required_fields_core.yml -t
 
       #Check IDS/equilibrium for COCOS
-      $ idschk -s 131024 -r 40 -c
+      $ idschk -p 131024 -r 40 -c
 
       # Check IDS/equilibrium with COCOS values
-      $ idschk -s 131024 -r 40 -c --verbose
+      $ idschk -p 131024 -r 40 -c --verbose
 
    .. code-block:: python
 

@@ -11,21 +11,7 @@ scenario description database folder
  Syntax scenario_status
 ************************
 
-.. code-block:: bash
-
-   $ dscenario_status -h
-   usage: scenario_status [-h] [-f FOLDER] -s SHOT -r [0-9999] [--print]
-
-   ---- Show status and potential parent and children for a given simulation stored in ITER database folder
-
-   optional arguments:
-   -h, --help            show this help message and exit
-   -f FOLDER, --folder FOLDER
-                           folder where to search for scenarios
-   -s SHOT, --shot SHOT  shot number
-   -r [0-9999], --run [0-9999]
-                           run number
-   --print               print yaml on console
+   .. command-output:: scenario_status -h
 
 *************************
  Example scenario_status

@@ -9,40 +9,7 @@ folder with search facility
  Syntax md_summary
 *******************
 
-.. code-block:: bash
-
-   $ md_summary  -h
-   usage: md_summary [-h] [-f FOLDER] [-s [SELECTION [SELECTION ...]]] [-o] [-m] [-c CHOICE]
-
-   ---- Script to list available MD data in a specific folder ----
-
-   optional arguments:
-   -h, --help            show this help message and exit
-   -f FOLDER, --folder FOLDER
-                           folder where to search for MD data
-   -s [SELECTION [SELECTION ...]], --selection [SELECTION [SELECTION ...]]
-                           list of fields to filter: e.g. PBS-55,ece
-                           fields listed together (-s A,B) means selecting for both A and B
-                           fields listed separately (-s A B) means selecting for either A or B
-                           ----> Select only machine description data filling these criteria
-   -o, --obsolete        Shows obsolete files
-   -m, --matchcase       Match case with selection criteria, default is false
-   -c CHOICE, --choice CHOICE
-                           list of variables to display, e.g.: pbs,ids,description
-                           ... available among following variables:
-                                   pbs                    = Plant Breakdown Structure number
-                                   ids                    = Name of the IDS
-                                   data_provider          = Name of the data provider
-                                   data_provider_email    = E-mail of the data provider
-                                   ro                     = Name of the diagnostic responsible officer
-                                   ro_email               = E-mail of the diagnostic responsible officer
-                                   description            = Description of the data
-                                   backend                = Backend used to store de IDS
-                                   provenance             = Data provenance
-                                   status                 = Status of the machine description
-                                   replaces               = Old shot/run this one replaces
-                                   replaced_by            = Replaced by shot/run
-                                   reason_for_replacement = Comment on why this shot/run replaces the previous one
+   .. command-output:: md_summary -h
 
 ********************
  Example md_summary

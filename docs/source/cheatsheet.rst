@@ -320,7 +320,7 @@ IDStools. :download:`download cheatsheet here <_static/cheatsheet.pdf>`
 |                     |                                                                     |
 |                     | .. code-block:: bash                                                |
 |                     |                                                                     |
-|                     |   $ dbperf -d TEST                                                   |
+|                     |   $ dbperf -d TEST                                                  |
 +---------------------+---------------------------------------------------------------------+
 | ``dbscraper``       | The `dbscraper` script scrapes data from a particular               |
 |                     | IDS path for a specified series of pulses and displays the pulse    |

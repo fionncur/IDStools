@@ -106,6 +106,7 @@ extensions = [
     # "sphinxcontrib.mermaid",
     "sphinx_immaterial",
     "sphinx_immaterial.apidoc.python.apigen",
+    "sphinxcontrib.programoutput",
 ]
 
 autoapi_dirs = ['../../idstools']

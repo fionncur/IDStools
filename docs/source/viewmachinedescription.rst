@@ -10,28 +10,7 @@ databases
  Syntax viewmachinedescription
 *******************************
 
-   .. code-block:: bash
-
-      $ viewmachinedescription -h
-      usage: viewmachinedescription [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] {list,plot} ...
-
-      ---- View machine description by getting information of data from md_summary file
-
-      positional arguments:
-      {list,plot}           sub-commands help
-          list                list machine description databases
-          plot                Plot Machine description databases
-
-      optional arguments:
-      -h, --help            show this help message and exit
-      -u USER, --user_or_path USER
-                              user (default=public)
-      --database DATABASE, -d DATABASE
-                              database name (default=ITER)
-      --backend BACKEND, -b BACKEND
-                              backend format (default=MDSPLUS)
-      --version VERSION, -v VERSION
-                              data version (default=3)
+   .. command-output:: viewmachinedescription -h
 
 *********
  Example

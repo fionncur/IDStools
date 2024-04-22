@@ -13,33 +13,7 @@ It uses core_sources ids
  Syntax viewsources
 ********************
 
-.. code-block:: bash
-
-    $ viewsources -h
-    usage: viewsources [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] [-uri URI] [-s PULSE] [-r RUN] [-m {CLOSEST,PREVIOUS,LINEAR}]
-                      [-o OCCURRENCE] [-t TIME]
-
-   View information about sources
-
-    optional arguments:
-      -h, --help            show this help message and exit
-      -u USER, --user_or_path USER
-                            user            (default=public)
-      --database DATABASE, -d DATABASE
-                            database name   (default=ITER)
-      --backend BACKEND, -b BACKEND
-                            backend format  (default=MDSPLUS)
-      --version VERSION, -v VERSION
-                            data version    (default=3)
-      -uri URI, --uri URI   uri             (default=None)
-      -s PULSE, --shot PULSE, --pulse PULSE
-                            Pulse number
-      -r RUN, --run RUN     Run number
-      -m {CLOSEST,PREVIOUS,LINEAR}, --slicingmethod {CLOSEST,PREVIOUS,LINEAR}
-                            Slicing method  (default=CLOSEST)
-      -o OCCURRENCE, --occurrence OCCURRENCE
-                            occurrence
-      -t TIME, --time TIME  Time
+   .. command-output:: viewsources -h
 
 *********************
  Example viewsources
@@ -47,8 +21,9 @@ It uses core_sources ids
 
    .. code-block:: bash
 
-        $ viewsources -s 134174 -r  117
-        Showing details for sdcc-login01.iter.org:/work/imas/shared/imasdb/ITER/3 (pulse 134174,117 time:10.60))
+        $ viewsources -p 134174 -r  117
+        $ viewsources --uri "imas:mdsplus?user=public;shot=134174;run=117;database=ITER;version=3"
+        Showing details for sdcc-login01.iter.org:/work/imas/shared/imasdb/ITER/3 (pulse 134174,117 time:10.60)
         total
                             electrons            particles(--)     energy  2.499896e+06
                 a       z_n     z_ion                particles                   energy
@@ -142,7 +117,7 @@ It uses core_sources ids
 
    .. code-block:: bash
 
-      $ viewsources -s 134174 -r 117 -m PREVIOUS -t 50
+      $ viewsources -p 134174 -r 117 -m PREVIOUS -t 50
 
         Showing details for sdcc-login01.iter.org:/work/imas/shared/imasdb/ITER/3 (pulse 134174,117 time:48.938))
         total

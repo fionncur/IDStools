@@ -10,32 +10,7 @@ core_profiles IDSs
  Syntax viewkineticprofiles
 ****************************
 
-.. code-block:: bash
-
-    $ viewkineticprofiles -h
-    usage: viewkineticprofiles [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] [-uri URI] [-s PULSE] [-r RUN] [-t TIME] [-e] [--verbose]
-                            [--save]
-
-   ---- Display the plasma kinetic profiles from the core_profiles IDSs
-
-    optional arguments:
-    -h, --help            show this help message and exit
-    -u USER, --user_or_path USER
-                            user (default=public)
-    --database DATABASE, -d DATABASE
-                            database name (default=ITER)
-    --backend BACKEND, -b BACKEND
-                            backend format (default=MDSPLUS)
-    --version VERSION, -v VERSION
-                            data version (default=3)
-    -uri URI, --uri URI   uri (default=None)
-    -s PULSE, --shot PULSE, --pulse PULSE
-                            Pulse number
-    -r RUN, --run RUN     Run number
-    -t TIME, --time TIME  Time
-    -e, --edge            Add edge profiles if available
-    --verbose             Verbose output
-    --save                Save figure at default location
+   .. command-output:: viewkineticprofiles -h
 
 *****************************
  Example viewkineticprofiles
@@ -43,7 +18,7 @@ core_profiles IDSs
 
    .. code-block:: bash
 
-        $ viewkineticprofiles -s 134174 -r 117 
+        $ viewkineticprofiles -p 134174 -r 117 
         $ viewkineticprofiles --uri "imas:mdsplus?user=public;shot=134174;run=117;database=ITER;version=3"
         Time  = 71.44 s in range [10.60,75.00] s
         Index = 53

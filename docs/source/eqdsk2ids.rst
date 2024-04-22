@@ -8,45 +8,15 @@
  Syntax eqdsk2ids
 ******************
 
-   .. code-block:: bash
-
-        $ qdsk2ids -h
-        usage: eqdsk2ids [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] [-uri URI] [-s PULSE] [-r RUN] -g GPATH
-                        [--log {DEBUG,INFO,WARNING,ERROR,CRITICAL}] [--ipsign {-1,0,1}] [--b0sign {-1,0,1}] [--cocos_in {1,2,3,4,5,6,7,8,11,12,13,14,15,16,17,18}]
-
-        optional arguments:
-        -h, --help            show this help message and exit
-        -u USER, --user_or_path USER
-                                user (default=sawantp1)
-        --database DATABASE, -d DATABASE
-                                database name (default=ITER)
-        --backend BACKEND, -b BACKEND
-                                backend format (default=MDSPLUS)
-        --version VERSION, -v VERSION
-                                data version (default=3)
-        -uri URI, --uri URI   uri (default=None)
-        -s PULSE, --shot PULSE, --pulse PULSE
-                                Pulse number
-        -r RUN, --run RUN     Run number
-        -g GPATH, --gfile GPATH
-                                path to GEQDSK file
-        --log {DEBUG,INFO,WARNING,ERROR,CRITICAL}
-                                Configure the logging level, default=WARNING
-        --ipsign {-1,0,1}     transform input data to obtain desired sign for Ip on the output, default=0 uses input
-        --b0sign {-1,0,1}     transform input data to obtain desired sign for B0 on the output, default=0 uses input
-        --cocos_in {1,2,3,4,5,6,7,8,11,12,13,14,15,16,17,18}
-                                coerced COCOS index, otherwise default=None computes COCOS in GEQDSK file [1,3,5,7]
-
-
-
+   .. command-output:: eqdsk2ids -h
 
 Example eqdsk2ids
 ~~~~~~~~~~~~~~~~
 
    .. code-block:: bash
 
-        $ eqdsk2ids -s 134174 -r 117 -g geqdsk/example.gfile -u <username>  -d ITER --log INFO
-        $ eqdsk2ids --uri "imas:mdsplus?user=username;shot=134174;run=117;database=ITER;version=3" -g geqdsk/example.gfile --log INFO
+        $ eqdsk2ids -c 11 -p 134174 -r 117 -c 11 -g resources/geqdsk/example.gfile -u <username> -d ITER --log INFO   
+        $ eqdsk2ids -c 11 --uri "imas:mdsplus?user=username;shot=134174;run=117;database=ITER;version=3" -g resources/geqdsk/example.gfile --log INFO
         24/03/20 17:19:44 INFO: loading GEQDSK file ...
         24/03/20 17:19:44 INFO: GEQDSK COCOS:
         { 'COCOS': 1,

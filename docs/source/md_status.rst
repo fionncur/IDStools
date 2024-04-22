@@ -13,20 +13,7 @@ is in active state.
  Syntax md_status
 ******************
 
-.. code-block:: bash
-
-   $ md_status -h
-   usage: md_status [-h] [-f FOLDER] -s SHOT -r [0-9999]
-
-   ---- Show status and potential parent and children for a given simulation stored in ITER machine description database folder
-
-   optional arguments:
-   -h, --help            show this help message and exit
-   -f FOLDER, --folder FOLDER
-                           folder where to search for machine description data
-   -s SHOT, --shot SHOT  shot number
-   -r [0-9999], --run [0-9999]
-                           run number
+   .. command-output:: md_status -h
 
 *******************
  Example md_status

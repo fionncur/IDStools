@@ -9,19 +9,7 @@ folder
  Syntax show_db_entry
 **********************
 
-.. code-block:: bash
-
-   $ show_db_entry -h
-   usage: show_db_entry [-h] [-f FOLDER] -s SHOT -r RUN
-
-   ---- Show full description file for a given simulation stored in ITER DB folder
-
-   optional arguments:
-   -h, --help            show this help message and exit
-   -f FOLDER, --folder FOLDER
-                           folder where to search for scenarios
-   -s SHOT, --shot SHOT  shot number
-   -r RUN, --run RUN     run number
+   .. command-output:: show_db_entry -h
 
 ***********************
  Example show_db_entry

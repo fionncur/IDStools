@@ -24,33 +24,7 @@ user name.
  Syntax dblist
 ***************
 
-.. code-block:: bash
-
-   $ dblist
-   usage: dblist [-h] [-u USER] [-d DATABASE] [-v VERSION] [--backend BACKEND]
-               {list,slices,times,databases,dataversions} ... [positionalArgs]
-
-   [Previously known as imasdbs]
-
-   positional arguments:
-   {list,slices,times,databases,dataversions}
-                           sub-commands help
-       list                list databases
-       slices              list slices
-       times               list times
-       databases           print databases
-       dataversions        print data versions
-   positionalArgs
-
-   optional arguments:
-   -h, --help            show this help message and exit
-   -u USER, --user USER  Show databases of specified user (default=username)
-   -d DATABASE, --database DATABASE
-                           Show only databases with specified name (default=None)
-   -v VERSION, --version VERSION
-                           Show only databases for specified major data version (default=None)
-   --backend BACKEND     Show databases written with given backend(s). Comma-separated list of backends (Currently
-                           supported: mdsplus, hdf5). By default all backends are shown. (default=None)
+    .. command-output:: dblist -h
 
 ****************
  Example dblist

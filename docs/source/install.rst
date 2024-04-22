@@ -41,8 +41,8 @@ Also it is possible to install it in Python virtual environemnt
 
 .. code-block:: bash
 
-   $ module load IMAS
    $ module load IDStools/1.14.0-intel-2020b
+   $ module load IMAS
 
 .. note::
 

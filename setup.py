@@ -91,6 +91,7 @@ setup(
         "scripts/idsprint",
         "scripts/idsresample",
         "scripts/idsrescale_equilibrium",
+        "scripts/idsrosettacode",
         "scripts/idssize",
         "scripts/idsshift_equilibrium",
         "scripts/viewcoresources",

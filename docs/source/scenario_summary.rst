@@ -9,55 +9,7 @@ search facility
  Syntax scenario_summary
 *************************
 
-.. code-block:: bash
-
-   $ scenario_summary -h
-   usage: scenario_summary [-h] [-f FOLDER] [-s [SELECTION [SELECTION ...]]] [--sort SORT] [-m] [-o] [-c CHOICE]
-
-   ---- Script to list available scenarios in a specific folder ----
-
-   optional arguments:
-   -h, --help            show this help message and exit
-   -f FOLDER, --folder FOLDER
-                           folder where to search for scenarios (recursive)
-   -s [SELECTION [SELECTION ...]], --selection [SELECTION [SELECTION ...]]
-                           list of fields to filter: e.g. He4,2.65
-                           fields listed together (-s A,B) means selecting for both A and B
-                           fields listed separately (-s A B) means selecting for either A or B
-                           ----> Select only scenarios filling these criteria
-   --sort SORT           sort by specific column
-   -m, --matchcase       Match case with selection criteria, default is false
-   -o, --obsolete        Shows obsolete files
-   -c CHOICE, --choice CHOICE
-                           list of variables to display, e.g.: shot,run,ip,b0
-                           ... available among following variables:
-                                   ref_name    = dataset reference name
-                                   ro_name     = responsible officer name
-                                   shot        = shot number
-                                   run         = run number
-                                   type        = data type (experimental,predictive,interpretative)
-                                   workflow    = suite of codes used to compute these data
-                                   database    = database name
-                                   confinement = confinement regime (L or H)
-                                   ip          = plasma current
-                                   b0          = central magnetic field
-                                   fuelling    = plasma fuelling species
-                                   ne0         = central electron density
-                                   nesep       = midplane separatrix electron density
-                                   zeff        = central Zeff
-                                   zeff_sep    = midplane separatrix Zeff
-                                   npeak       = density peaking
-                                   p_hcd       = total H&CD power
-                                   p_ec        = EC power
-                                   p_ic        = IC power
-                                   p_nbi       = NBI power
-                                   p_lh        = LH power
-                                   p_sol       = SOL power
-                                   idslist     = List of IDSs available in the data-entry
-                                   tsteps      = Number of time steps in the scenario
-                                   location    = Location of the full description file
-                                   composition = Plasma composition
-                                   date        = Date of last modification of the dataset
+   .. command-output:: scenario_summary -h
 
 **************************
  Example scenario_summary

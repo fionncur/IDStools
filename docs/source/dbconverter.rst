@@ -6,30 +6,7 @@ Copy all data-entries from one database into another one
 Syntax dbconverter
 ~~~~~~~~~~~~~~~~~~~
 
-.. code-block:: bash
-
-    $ dbconverter -h
-    usage: dbconverter [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] -do DATABASE_OUT -bo BACKEND_OUTPUT [--skip-obsolete] [--validate]
-
-    Copy all data-entries from one database into another one
-
-    optional arguments:
-    -h, --help            show this help message and exit
-    -u USER, --user_or_path USER
-                            user (default=public)
-    --database DATABASE, -d DATABASE
-                            database name (default=ITER)
-    --backend BACKEND, -b BACKEND
-                            backend format (default=MDSPLUS)
-    --version VERSION, -v VERSION
-                            data version (default=3)
-    -do DATABASE_OUT, --database_out DATABASE_OUT
-                            Name of destination database
-    -bo BACKEND_OUTPUT, --backend_output BACKEND_OUTPUT
-                            Desired backend for destination data-entry
-    --skip-obsolete       Do not copy data that have been marked obsolete (ITER scenarios only)
-    --validate            Performs diff and validation of the migrated data
-
+    .. command-output:: dbconverter -h
 
 
 Example dbconverter
@@ -65,7 +42,7 @@ Example dbconverter
 
     .. code-block:: bash
 
-        dbconverter --user sawantp1 --database ITER -do MYDB -bo MDSPLUS --validate
+        $ dbconverter --user sawantp1 --database ITER -do MYDB -bo MDSPLUS --validate
         Processing (100027, 1)
         Processing... ━━━━╸━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  12% -:--:--[04/08/24 16:19:45]                                                                                 dbconverter:130
         WARNING:module:could not find schema for core_transport

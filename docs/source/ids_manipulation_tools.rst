@@ -16,5 +16,7 @@ copying, moving, or comparing differences etc.
    idsperf
    idsprint
    idsresample
+   idsrosettacode
    idsrescale_equilibrium
+   idsshift_equilibrium
    idssize

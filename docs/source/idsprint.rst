@@ -11,34 +11,8 @@ can also be saved to a file using extraction.
  Syntax idsprint
 *****************
 
-   .. code-block:: bash
+   .. command-output:: idsprint -h
 
-        $ idsprint -h
-        usage: idsprint [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] [-uri URI] [-s PULSE] [-r RUN] [-e] [-f] [-c] ids [idspath]
-
-      Prints content of an IDS onto the terminal
-
-        positional arguments:
-        ids                   Name of the IDS to dump
-        idspath               IDS data path
-
-        optional arguments:
-        -h, --help            show this help message and exit
-        -u USER, --user_or_path USER
-                                user            (default=public)
-        --database DATABASE, -d DATABASE
-                                database name   (default=ITER)
-        --backend BACKEND, -b BACKEND
-                                backend format  (default=MDSPLUS)
-        --version VERSION, -v VERSION
-                                data version    (default=3)
-        -uri URI, --uri URI   uri             (default=None)
-        -s PULSE, --shot PULSE, --pulse PULSE
-                                Pulse number
-        -r RUN, --run RUN     Run number
-        -e, --show-empty      Show empty fields of ids
-        -f, --full            Print all array elements (can be very slow for large data)
-        -c, --compact         Print only names which has data
 
 ******************
  Example idsprint
@@ -46,7 +20,8 @@ can also be saved to a file using extraction.
 
    .. code-block:: bash
 
-      $ idsprint -s 134174 -r 117 equilibrium
+      $ idsprint -p 134174 -r 117 equilibrium
+      $ idsprint --uri "imas:mdsplus?user=public;shot=122525;run=1;database=ITER;version=3" equilibrium
 
       class equilibrium
       Attribute ids_properties

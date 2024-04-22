@@ -6,22 +6,26 @@
 # Purge modules and load IMAS module
 module purge
 module load IMAS
-# Create python virtual environment and install dependencies
-rm -rf build_venv
-python -m venv build_venv
+module unload -f IDStools
 
-. build_venv/bin/activate
+ENVIRONEMNT_NAME=envDocGen
+
+# Create python virtual environment and install dependencies
+rm -rf "$ENVIRONEMNT_NAME"
+python -m venv "$ENVIRONEMNT_NAME"
+
+. $ENVIRONEMNT_NAME/bin/activate
 python --version
 pip install --upgrade pip
+pip install .
 pip install -r docs/requirements.txt
 pip list
 
 # Build documentation
-cd docs
-make realclean
-make autogen
-make html 
-make man
-cd ..
+make -C docs realclean
+make -C docs autogen
+make -C docs html 
+make -C docs man
+
 deactivate
-rm -rf build_venv
+rm -rf "$ENVIRONEMNT_NAME"

@@ -5,36 +5,15 @@ viewplasmacompo
 
 Syntax viewplasmacompo
 ~~~~~~~~~~~~~~~
-.. code-block:: bash
 
-    $ viewplasmacompo -h
-    usage: viewplasmacompo [-h] [-u USER] [--database DATABASE] [--backend BACKEND] [--version VERSION] [-uri URI] [-s PULSE] [-r RUN] [-i] [--debug]
-
-    ---- Display the plasma composition from the core_profiles IDS
-
-    optional arguments:
-    -h, --help            show this help message and exit
-    -u USER, --user_or_path USER
-                            user (default=public)
-    --database DATABASE, -d DATABASE
-                            database name (default=ITER)
-    --backend BACKEND, -b BACKEND
-                            backend format (default=MDSPLUS)
-    --version VERSION, -v VERSION
-                            data version (default=3)
-    -uri URI, --uri URI   uri (default=None)
-    -s PULSE, --shot PULSE, --pulse PULSE
-                            Pulse number
-    -r RUN, --run RUN     Run number
-    -i, --info            Show information
-    --debug               Show debugging
+   .. command-output:: viewplasmacompo -h
 
 Example viewplasmacompo
 ~~~~~~~~~~~~~~~~
 .. code-block:: bash
 
-    $ viewplasmacompo -s 131047 -r 4
-    $ viewplasmacompo --uri "imas:mdsplus?user=public;shot=134174;run=117;database=ITER;version=3"
+    $ viewplasmacompo -p 131047 -r 4
+    $ viewplasmacompo --uri "imas:mdsplus?user=public;shot=131047;run=4;database=ITER;version=3"
     !   No edge_profiles IDS in the data-entry.
     core +  edge  -
     ------------
