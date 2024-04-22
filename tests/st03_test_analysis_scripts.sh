@@ -11,10 +11,17 @@ hostname -f
 # create log directory
 if [ -z "$1" ]; then
     LOG_DIR=$PWD/"logs"
+    mkdir -p "$LOG_DIR"
 else
-    LOG_DIR="$1"/"logs"
+    LOG_DIR="$1"
 fi
-mkdir -p "$LOG_DIR"
+
+if [ -z "$2" ]; then
+    DATABASE_DIR=$PWD/"db"
+    mkdir -p "$DATABASE_DIR"
+else
+    DATABASE_DIR="$2"
+fi
 
 
 SCRIPTS=(

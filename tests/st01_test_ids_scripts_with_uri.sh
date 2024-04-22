@@ -14,12 +14,19 @@ USERNAME=$(whoami)
 # create log directory
 if [ -z "$1" ]; then
     LOG_DIR=$PWD/"logs"
-    DATABASE_DIR=$PWD/"db"
+    mkdir -p "$LOG_DIR"
 else
-    LOG_DIR="$1"/"logs"
-    DATABASE_DIR="$1"/"db"
+    LOG_DIR="$1"
 fi
-mkdir -p "$LOG_DIR"
+
+if [ -z "$2" ]; then
+    DATABASE_DIR=$PWD/"db"
+    mkdir -p "$DATABASE_DIR"
+else
+    DATABASE_DIR="$2"
+fi
+
+
 
 
 SCRIPTS=(

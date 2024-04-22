@@ -42,9 +42,11 @@ python -m venv "$ENVIRONEMNT_NAME"
 
 . "$ENVIRONEMNT_NAME"/bin/activate
 
-LOG_DIR="$PWD"/"$ENVIRONEMNT_NAME"/
-
+LOG_DIR="$PWD"/"$ENVIRONEMNT_NAME"/logs
 mkdir -p "$LOG_DIR"
+
+DB_DIR="$PWD"/"$ENVIRONEMNT_NAME"/db
+mkdir -p "$DB_DIR"
 
 #install packages
 pip install --upgrade pip
@@ -73,25 +75,25 @@ echo ""
 echo "====================================================================="
 echo "Testing ids manipulation scripts with $IMAS_MODULE_VERSION and $PYTHON_VERSION"
 echo "====================================================================="
-source ./tests/st01_test_ids_scripts.sh "$LOG_DIR"
+source ./tests/st01_test_ids_scripts.sh "$LOG_DIR" "$DB_DIR"
 
 if (( al_major_version > 4 )); then
-    source ./tests/st01_test_ids_scripts_with_uri.sh "$LOG_DIR"
+    source ./tests/st01_test_ids_scripts_with_uri.sh "$LOG_DIR" "$DB_DIR"
 fi
 echo ""
 echo ""
 echo "====================================================================="
 echo "Testing db scripts with $IMAS_MODULE_VERSION and $PYTHON_VERSION"
 echo "====================================================================="
-source ./tests/st02_test_db_scripts.sh "$LOG_DIR"
+source ./tests/st02_test_db_scripts.sh "$LOG_DIR" "$DB_DIR"
 echo ""
 echo ""
 echo "====================================================================="
 echo "Testing analysis scripts  with $IMAS_MODULE_VERSION and $PYTHON_VERSION"
 echo "====================================================================="
-source ./tests/st03_test_analysis_scripts.sh  "$LOG_DIR"
+source ./tests/st03_test_analysis_scripts.sh  "$LOG_DIR" "$DB_DIR"
 if (( al_major_version > 4 )); then
-    source ./tests/st03_test_analysis_scripts_with_uri.sh "$LOG_DIR"
+    source ./tests/st03_test_analysis_scripts_with_uri.sh "$LOG_DIR" "$DB_DIR"
 fi
 echo ""
 echo ""
@@ -104,7 +106,7 @@ echo "---------------------------------------------------------------------"
 deactivate
 rm -rf "$ENVIRONEMNT_NAME"
 
-ARTIFACT="./testlogs.tar.gz"
+ARTIFACT=./$ENVIRONEMNT_NAME"_testlogs.tar.gz"
 # Check if the *.tar.gz exists before attempting to remove it
 if [ -f "$ARTIFACT" ]; then
     rm "$ARTIFACT"
@@ -112,13 +114,13 @@ if [ -f "$ARTIFACT" ]; then
 fi
 
 # Create acrtifact
-tar -cvzf testlogs.tar.gz "$LOG_DIR" >/dev/null 2>&1
+tar -cvzf "$ENVIRONEMNT_NAME"_testlogs.tar.gz "$LOG_DIR" >/dev/null 2>&1
 if [ -f "$ARTIFACT" ]; then
     echo "Artifact $ARTIFACT created successfully."
 fi
 
 # show contents of artifact
-tar -tzvf testlogs.tar.gz
+tar -tzvf "$ENVIRONEMNT_NAME"_testlogs.tar.gz
 
 # Cleanup
 
