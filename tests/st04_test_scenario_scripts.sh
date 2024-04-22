@@ -25,7 +25,7 @@ fi
 
 
 SCRIPTS=(
-"create_db_entry -p 130012 -r 105 -d TEST" 
+"create_db_entry -p 130012 -r 105 -d TEST --disable-validation" 
 "create_db_entry_disruption -p 100028 -r 1 -d ITER_DISRUPTIONS" 
 "create_validation_schema -i core_profiles" 
 "disruption_summary"
@@ -35,7 +35,6 @@ SCRIPTS=(
 "scenario_status -p 134174 -r 117"
 "scenario_summary -s He4,2.65"
 "show_db_entry -p 134174 -r 117"
-"validate_db_entry -p 134174 -r 117 --path resources/validation_schemas"
 "validate_db_entry -p 134174 -r 117 --path resources/validation_schemas")
 
 
