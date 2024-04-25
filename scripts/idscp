@@ -191,7 +191,7 @@ for idsname in args.ids:
             user_choice = ""
             while user_choice not in ["y", "n"]:
                 user_choice = input(
-                    f"{idsid[0]} is already exists, do you want to overwrite (y/n)? :"
+                    f"{idsid[0]} already exists, do you want to overwrite it (y/n)? :"
                 )
             if user_choice == "n":
                 print(f"skip {idsid[0]}")
