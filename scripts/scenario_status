@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 import argparse
 import os
+from idstools.database import DBMaster
+from idstools.utils.clihelper import getCoreVersion
 from rich.console import Console
 from rich.syntax import Syntax
 from rich.table import Table
@@ -45,7 +47,8 @@ if args["folder"] != None:
     folder = args["folder"]
 else:
     folder = os.environ["IMAS_HOME"] + "/shared/imasdb/ITER/3/0"
-    lowlevelVersion = int((os.getenv("AL_VERSION") or os.getenv("UAL_VERSION"))[0])
+    lowlevelVersion = DBMaster.getCoreVersion()
+    lowlevelVersion = int(lowlevelVersion.split(".")[0])
     if lowlevelVersion < 4:
         folder = os.environ["IMAS_HOME"] + "/shared/iterdb/3/0"
 sdObject = ScenarioDescription(pulse, run, folder)

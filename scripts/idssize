@@ -54,7 +54,7 @@ import numpy as np
 from rich_argparse import RichHelpFormatter
 
 from idstools.database import DBMaster
-from idstools.utils.clihelper import dbentryParser, getIMASVersion
+from idstools.utils.clihelper import dbentryParser, getCoreVersion
 from idstools.utils.idshelper import getIDSSize
 
 parser = argparse.ArgumentParser(
@@ -88,7 +88,7 @@ totalTime = np.array([v["time"] for v in idsSizeDict.values()]).sum()
 print(f"Total reading time = {totalTime:0.2f} s")
 
 print(f"Total data size = {totalBytes/1024**2:5.1f} MB")
-if getIMASVersion() > 4:
+if getCoreVersion() > 4:
     if args.uri is not None:
         print(f"Fractions of the total size for {args.uri}")
     else:

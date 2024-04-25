@@ -1,15 +1,23 @@
 import argparse
 import os
 import socket
-import sys
-
+import re
+import imas
 from imas import imasdef
 
-
-def getIMASVersion():
-    lowlevelVersion = int((os.getenv("AL_VERSION") or os.getenv("UAL_VERSION"))[0])
+def getCoreVersion():
+    _lowlevelVersion=""
+    if "_al_lowlevel" in imas.__dict__:
+        _lowlevelVersion=imas.get_al_version()
+    if "_ual_lowlevel" in imas.__dict__:
+        rawCoreVersion=imas._ual_lowlevel.__name__ # '__name__': 'imas_3_41_0_ual_4_11_10._ual_lowlevel
+        rawCoreVersion, _ = rawCoreVersion.split(".")
+        match = re.search(r'\d+_\d+_\d+$', rawCoreVersion)
+        if match:
+            _lowlevelVersion = match.group()
+            _lowlevelVersion=_lowlevelVersion.replace("_", ".")
+    lowlevelVersion = int(_lowlevelVersion.split(".")[0])
     return lowlevelVersion
-
 
 # default parent parser for all idstools scripts
 uriParser = argparse.ArgumentParser(add_help=False)
@@ -51,7 +59,8 @@ imasParser.add_argument(
     help="data version \t(default=%(default)s)",
 )
 parents = [imasParser]
-if getIMASVersion() > 4:
+
+if getCoreVersion() > 4:
     parents.append(uriParser)
 dbentryParser = argparse.ArgumentParser(add_help=False, parents=parents)
 dbentryParser.add_argument(

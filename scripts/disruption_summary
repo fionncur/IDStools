@@ -4,6 +4,9 @@
 import os, sys, glob, yaml, argparse, re
 from operator import itemgetter
 from stat import *
+from idstools.database import DBMaster
+
+from idstools.utils.clihelper import getCoreVersion
 
 # ----------------------------------------------------------------------------
 
@@ -272,7 +275,8 @@ if __name__ == "__main__":
     if args['folder'] != None:
         folder = args['folder']
     else:
-        LL_version = int((os.getenv("AL_VERSION") or os.getenv("UAL_VERSION"))[0])
+        LL_version = DBMaster.getCoreVersion()
+        LL_version = int(LL_version.split(".")[0])
         if LL_version < 4:
             folder = '/work/imas/shared/iterdb/3/0'
         else:

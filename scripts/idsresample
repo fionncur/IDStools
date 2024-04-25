@@ -10,7 +10,7 @@ from idstools.database import DBMaster
 
 import imas
 
-from idstools.utils.clihelper import getIMASVersion, imasParser
+from idstools.utils.clihelper import getCoreVersion, imasParser
 from idstools.utils.idshelper import resampleIndices, resampleTimes
 
 if __name__ == "__main__":
@@ -19,7 +19,7 @@ if __name__ == "__main__":
         parents=[imasParser],
         formatter_class=RichHelpFormatter,
     )
-    if getIMASVersion() > 4:
+    if getCoreVersion() > 4:
         parser.add_argument(
             "-su",
             "--src",
@@ -80,7 +80,7 @@ if __name__ == "__main__":
         args.dest_backend = args.backend
 
     isUriCheckDone = False
-    if getIMASVersion() > 4:
+    if getCoreVersion() > 4:
         if args.src is not None and args.dest is not None:
             isUriCheckDone = True
             if args.src == args.dest:
@@ -110,14 +110,14 @@ if __name__ == "__main__":
     inputargs.user = args.user
     inputargs.database = args.database
     inputargs.version = args.version
-    if getIMASVersion() > 4:
+    if getCoreVersion() > 4:
         inputargs.uri = args.src
     src = DBMaster.getConnection(inputargs)
     if src is None:
         print("Error opening source pulse! Please check existence.")
         sys.exit()
 
-    if getIMASVersion() > 4:
+    if getCoreVersion() > 4:
         tmp = imas.DBEntry("imas:memory?path=tmp/1/1","w")
     else:
         tmp = imas.DBEntry(imas.imasdef.MEMORY_BACKEND, "tmp", 1, 1)
@@ -133,7 +133,7 @@ if __name__ == "__main__":
     outputargs.user = os.environ["USER"]
     outputargs.database = args.dest_database
     outputargs.version = args.version
-    if getIMASVersion() > 4:
+    if getCoreVersion() > 4:
         outputargs.mode="w"
         outputargs.uri = args.dest
     dest = DBMaster.createConnection(outputargs)

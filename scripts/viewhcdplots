@@ -11,7 +11,7 @@ from idstools.compute.waves import WavesCompute
 from idstools.utils.clihelper import (
     getDatabasePath,
     getFileName,
-    getIMASVersion,
+    getCoreVersion,
     getTitle,
 )
 from idstools.utils.idslogger import setupLogger
@@ -45,7 +45,7 @@ def showWavesPlots(args, hold=False):
         connargs.user = args["user"]
         connargs.database = args["database"]
         connargs.version = args["version"]
-        if getIMASVersion() > 4:
+        if getCoreVersion() > 4:
             connargs.uri = f"imas:{args['backend'].lower()}?user={connargs.user };shot={connargs.pulse};run={connargs.run};database={connargs.database};version={connargs.version}"
 
         conn = DBMaster.getConnection(connargs)
@@ -154,7 +154,7 @@ def showDistributionPlots(args, hold=False):
         connargs.user = args["user"]
         connargs.database = args["database"]
         connargs.version = args["version"]
-        if getIMASVersion() > 4:
+        if getCoreVersion() > 4:
             connargs.uri = f"imas:{args['backend'].lower()}?user={connargs.user };shot={connargs.pulse};run={connargs.run};database={connargs.database};version={connargs.version}"
 
         conn = DBMaster.getConnection(connargs)

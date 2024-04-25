@@ -8,6 +8,7 @@ import logging
 import os
 
 from typing import Union
+from idstools.database import DBMaster
 
 import numpy as np
 from imas import imasdef
@@ -372,12 +373,7 @@ class EquilibriumCompute:
 
         equout = deepcopy(self.ids)
 
-        imas_version = os.getenv("IMAS_VERSION")
-        if imas_version == None:
-            logger.critical(
-                "Environment variable IMAS_VERSION is not defined. Quitting."
-            )
-            return None
+        imas_version = DBMaster.getDDVersion() 
 
         equout.ids_properties.version_put.data_dictionary = imas_version
 

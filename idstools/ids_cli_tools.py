@@ -6,6 +6,8 @@ This will be extended quite a bit in 2012.
 import optparse
 import os
 
+from idstools.database import DBMaster
+
 def read_env():
     parser = setup_parser()
     pars, opts, args = parse_cli(parser)
@@ -124,7 +126,8 @@ def setDefaultParameters():
     default = {}
     default["user"] = os.getenv("USER")
     default["tokamakname"] = "iter" 
-    default["dataversion"] = os.getenv("IMAS_VERSION").split(".")[0]
+    data_version=DBMaster.getDDVersion()
+    default["dataversion"] = data_version.split(".")[0]
     default["hdf5"] = False
     default["debug"] = False
 

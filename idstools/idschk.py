@@ -8,6 +8,7 @@ import yaml
 import statistics
 from xml.etree import ElementTree as ET
 import cerberus
+from idstools.utils.ddhelper import DDHelper
 import numpy as np
 import logging
 import copy
@@ -20,8 +21,8 @@ logger = logging.getLogger(__name__)
 
 
 # Global Constants
-IMAS_PREFIX = "IMAS_PREFIX"
-FILE_IDSDef = getenv(IMAS_PREFIX) + "/include/IDSDef.xml"
+
+FILE_IDSDef = DDHelper.getIDSDefPath() 
 TARGET_TAG = "IDS"
 ids_header = "ids."
 idx_header = "idx."

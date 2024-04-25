@@ -23,7 +23,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from idstools.database import DBMaster
-from idstools.utils.clihelper import getIMASVersion, getDetailsfromURI, imasParser
+from idstools.utils.clihelper import getCoreVersion, getDetailsfromURI, imasParser
 from idstools.utils.ddhelper import DDHelper
 from idstools.utils.idshelper import compareIds
 from idstools.utils.idslogger import setupLogger
@@ -431,7 +431,7 @@ if __name__ == "__main__":
         type=str,
         help="Provide space separated list  pulse/run/user/backend/database/version",
     )
-    if getIMASVersion() > 4:
+    if getCoreVersion() > 4:
         parser.add_argument(
             "-uri",
             "--uri-list",
@@ -493,7 +493,7 @@ if __name__ == "__main__":
             _pulseArgs.user = user
             _pulseArgs.database = database
             _pulseArgs.version = version
-            if getIMASVersion() > 4:
+            if getCoreVersion() > 4:
                 _pulseArgs.uri = None
             _connection = DBMaster.getConnection(_pulseArgs)
             if _connection is None:
@@ -501,7 +501,7 @@ if __name__ == "__main__":
                 continue
             connections.append((pulseinfo,_connection))
 
-    if getIMASVersion() > 4:
+    if getCoreVersion() > 4:
         if args.uri_list is not None:
             for uriinfo in args.uri_list:
                 _uriArgs = argparse.Namespace()

@@ -6,7 +6,7 @@ from datetime import datetime
 from glob import glob
 from pathlib import Path
 from idstools.utils.clihelper import getBackendID
-
+import re
 import imas
 import yaml
 
@@ -458,10 +458,35 @@ class DBMaster:
             raise NotImplementedError(f"Unsupported backend: {backend}")
 
     @classmethod
-    def getIMASVersion(cls):
-        lowlevelVersion = int((os.getenv("AL_VERSION") or os.getenv("UAL_VERSION"))[0])
+    def getCoreVersion(cls):
+        _lowlevelVersion=""
+        if "_al_lowlevel" in imas.__dict__:
+            _lowlevelVersion=imas.get_al_version()
+        elif "_ual_lowlevel" in imas.__dict__:
+            rawCoreVersion=imas._ual_lowlevel.__name__ # '__name__': 'imas_3_41_0_ual_4_11_10._ual_lowlevel
+            rawCoreVersion, _ = rawCoreVersion.split(".")
+            match = re.search(r'\d+_\d+_\d+$', rawCoreVersion)
+            if match:
+                _lowlevelVersion = match.group()
+                _lowlevelVersion=_lowlevelVersion.replace("_", ".")
+        lowlevelVersion=_lowlevelVersion
         return lowlevelVersion
 
+    @classmethod
+    def getDDVersion(cls):
+        _lowlevelVersion=""
+        if "_al_lowlevel" in imas.__dict__:
+            _lowlevelVersion=imas.al_dd_version
+        elif "_ual_lowlevel" in imas.__dict__:
+            rawDDVersion=imas._ual_lowlevel.__name__ # '__name__': 'imas_3_41_0_ual_4_11_10._ual_lowlevel
+            rawDDVersion, _ = rawDDVersion.split(".")
+            match = re.search(r'\d+_\d+_\d+', rawDDVersion)
+            if match:
+                _lowlevelVersion = match.group()
+                _lowlevelVersion=_lowlevelVersion.replace("_", ".")
+        lowlevelVersion=_lowlevelVersion
+        return lowlevelVersion
+    
     @classmethod
     def getConnection(cls, args):
         connection = DBMaster.getDBEntryObject(args)
@@ -485,7 +510,8 @@ class DBMaster:
 
     @classmethod
     def getDBEntryObject(cls, args):
-        imasVersion = DBMaster.getIMASVersion()
+        imasVersion = DBMaster.getCoreVersion()
+        imasVersion = int(imasVersion.split(".")[0])
         connection=None
         if imasVersion > 4:
             if args.uri is None:

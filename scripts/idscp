@@ -10,7 +10,7 @@ from idstools.database import DBMaster
 
 import imas
 
-from idstools.utils.clihelper import imasParser, getIMASVersion
+from idstools.utils.clihelper import imasParser, getCoreVersion
 from idstools.utils.idslogger import setupLogger
 
 logger = setupLogger("module")
@@ -21,7 +21,7 @@ parser = argparse.ArgumentParser(
     formatter_class=RichHelpFormatter,
     parents=[imasParser]
 )
-if getIMASVersion() > 4:
+if getCoreVersion() > 4:
     parser.add_argument(
         "-su",
         "--src",
@@ -96,7 +96,7 @@ if args.dest_backend is None:
     args.dest_backend = args.backend
 
 isUriCheckDone = False
-if getIMASVersion() > 4:
+if getCoreVersion() > 4:
     if args.src is not None and args.dest is not None:
         isUriCheckDone = True
         if args.src == args.dest:
@@ -125,7 +125,7 @@ inputargs.run = args.src_run
 inputargs.user = args.user
 inputargs.database = args.database
 inputargs.version = args.version
-if getIMASVersion() > 4:
+if getCoreVersion() > 4:
     inputargs.uri = args.src
 
 src_connection = DBMaster.getConnection(inputargs)
@@ -139,7 +139,7 @@ outputargs.run = args.dest_run
 outputargs.user = os.environ["USER"]
 outputargs.database = args.dest_database
 outputargs.version = args.version
-if getIMASVersion() > 4:
+if getCoreVersion() > 4:
     outputargs.uri = args.dest
 
 
@@ -198,7 +198,7 @@ for idsname in args.ids:
                 continue
     idsobj = src_connection.get(idsid[0], occurrence=inocc)
     if args.setDatasetVersion and idsid[0] == "dataset_description":
-        idsobj.dd_version = os.environ["IMAS_VERSION"]
+        idsobj.dd_version = DBMaster.getDDVersion() 
     try:
         if idsobj.ids_properties.homogeneous_time != imas.imasdef.EMPTY_INT:
             print(f"Copying {idsname}")

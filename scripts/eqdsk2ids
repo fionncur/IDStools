@@ -15,7 +15,7 @@ from idstools.eqdsk2ids import geqdsk2ids
 from idstools.utils.clihelper import (
     dbentryParser,
     getDatabasePath,
-    getIMASVersion,
+    getCoreVersion,
 )
 
 # ----------------------------------------------------------------------
@@ -39,7 +39,7 @@ def main():
     outputargs.user = os.environ["USER"]
     outputargs.database = args.database
     outputargs.version = args.version
-    if getIMASVersion() > 4:
+    if getCoreVersion() > 4:
         outputargs.mode="w"
         if args.dest is None:
             if args.uri is not None:

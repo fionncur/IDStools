@@ -13,7 +13,7 @@ import imas
 
 from idstools import idsperf
 from idstools.database import DBMaster
-from idstools.utils.clihelper import dbentryParser, getIMASVersion
+from idstools.utils.clihelper import dbentryParser, getCoreVersion
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
@@ -82,7 +82,7 @@ if __name__ == "__main__":
         type=str,
         help='IDS name(s) (leave empty to select all IDSs with default occurrence, or append "/n" to copy a specific occurrence "n")',
     )
-    if getIMASVersion() > 4:
+    if getCoreVersion() > 4:
         parser.add_argument(
             "-uriOut",
             "--uriOut",
@@ -152,7 +152,7 @@ if __name__ == "__main__":
         dboutArgs.version = args.version
         dboutArgs.run = args.outputRun
         dboutArgs.pulse = args.pulse
-        if getIMASVersion() > 4:
+        if getCoreVersion() > 4:
             if args.uriOut is not None:
                 dboutArgs.uri = args.uriOut
                 if args.verbose:

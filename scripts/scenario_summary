@@ -4,6 +4,7 @@ import argparse
 import os
 import re
 import sys
+from idstools.utils.clihelper import getCoreVersion
 from rich.console import Console
 from rich.table import Table
 from idstools.scenariodescription import ScenarioDescriptionBase
@@ -134,7 +135,7 @@ if args["folder"] != None:
     folder = args["folder"]
 else:
     defaultFolderPath = os.environ["IMAS_HOME"] + "/shared/imasdb/ITER/3/0"
-    lowlevelVersion=int((os.getenv("AL_VERSION") or os.getenv("UAL_VERSION"))[0])
+    lowlevelVersion=getCoreVersion()
 
     if lowlevelVersion < 4:
         defaultFolderPath = os.environ["IMAS_HOME"] + "/shared/iterdb/3/0"

@@ -1,7 +1,10 @@
 import logging
 from os import getenv, path
+import os
+import sys
 from xml.etree import ElementTree as ET
-
+from pathlib import Path
+import imas
 logger = logging.getLogger("module")
 
 
@@ -17,7 +20,7 @@ class DDHelper(object):
 
     def __init__(self):
         """Simple class which allows to query meta-data from the definition of IDSs as expressed in IDSDef.xml."""
-        self.ids_def = getenv("IMAS_PREFIX") + "/include/IDSDef.xml"
+        self.ids_def = DDHelper.getIDSDefPath() 
         self.root = None
         if path.isfile(self.ids_def):
             self.root = ET.parse(self.ids_def).getroot()
@@ -29,6 +32,43 @@ class DDHelper(object):
             )
             raise FileNotFoundError(f"file not found:{self.ids_def}")
 
+    @classmethod
+    def getIDSDefPath(cls):
+        # Find and parse XML definitions
+        idsdef_path = ""
+        if not idsdef_path:
+            imas_fpath = os.path.dirname(imas.__file__)
+            # Newer approach : IMAS/<VERSION>/lib/python3.8/site-packages/data_dictionary/idsinfo.py
+            _idsdef_path = os.path.join(imas_fpath, r"../../../../include/IDSDef.xml")
+            if os.path.isfile(_idsdef_path):
+                idsdef_path=os.path.abspath(_idsdef_path)
+            else:
+                
+                # Legacy approach : IMAS/<VERSION>/python/lib/data_dictionary/idsino.py
+                _idsdef_path = os.path.join(imas_fpath, r"../../../include/IDSDef.xml")
+                if os.path.isfile(_idsdef_path):
+                    idsdef_path=os.path.abspath(_idsdef_path)
+
+        # Search using IDSDEF_PATH env variable
+        if not idsdef_path:
+            if "IDSDEF_PATH" in os.environ:
+                _idsdef_path=os.environ["IDSDEF_PATH"]
+                if os.path.isfile(_idsdef_path):
+                    idsdef_path = _idsdef_path
+
+        # Search using IMAS_PREFIX env variable
+        if not idsdef_path:
+            if "IMAS_PREFIX" in os.environ:
+                _idsdef_path=os.path.join(os.environ["IMAS_PREFIX"], r"include/IDSDef.xml")
+                if os.path.isfile(_idsdef_path):
+                    idsdef_path = _idsdef_path
+        
+        if not idsdef_path:
+            print(
+                "Error accessing IDSDef.xml.  Make sure its location is defined in your environment, e.g. by loading an IMAS module."
+            )
+        return idsdef_path
+    
     def get_coordinate(self, idsname="", field_path=""):
         if self.root is None:
             return None
@@ -80,16 +120,4 @@ class DDHelper(object):
 
         return f.attrib
 
-    # def __init__(self):
-    #     # parse the XML def
-    #     try:
-    #         imaspref = os.environ["IMAS_PREFIX"]
-    #         tree = ET.parse(imaspref + "/include/IDSDef.xml")
-    #         self.root = tree.getroot()
-    #         self.version = self.root.findtext("./version", default="N/A")
-    #         self.cocos = self.root.findtext("./cocos", default="N/A")
-    #     except:
-    #         print(
-    #             "Error while trying to access IDSDef.xml, make sure you've loaded IMAS module",
-    #             file=sys.stderr,
-    #         )
+
