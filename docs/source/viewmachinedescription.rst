@@ -25,7 +25,7 @@ databases
         23/11/20 23:20:26 WARNING: VC1 : pf_active.coil.element.geometry.rectangle is empty
         23/11/20 23:20:26 WARNING: VC2 : pf_active.coil.element.geometry.rectangle is empty
 
-   .. image:: _static/images/machine_description.png
+   .. thumbnail:: _static/images/machine_description.png
       :alt: image not found
       :align: center
 

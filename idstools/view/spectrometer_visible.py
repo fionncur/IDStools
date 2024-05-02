@@ -36,7 +36,6 @@ class SpectrometerVisibleView:
         Args:
             ax (List[plt.axes]): The parameter `ax` is a list of `plt.axes` objects. These objects represent the axes on which the radiance data will be plotted. The function `viewRadiance` takes these axes as input and plots the radiance data on each of them.
             spectroIndex: The `spectroIndex` parameter represents the index of the spectrometer for which the intensity spectra will be plotted. It is used to select the appropriate channels from the spectrometers.
-            title: The `title` parameter is a string that represents the title of the plot.
 
         Returns:
             the value of the variable "filename".
@@ -84,7 +83,6 @@ class SpectrometerVisibleView:
         Args:
             ax (List[plt.axes]): The parameter `ax` is a list of `plt.axes` objects. These objects represent the axes on which the intensity spectra will be plotted. The function `viewIntensity` takes these axes as input and plots the intensity spectra on them.
             spectroIndex: The `spectroIndex` parameter represents the index of the spectrometer for which the intensity spectra will be plotted. It is used to select the appropriate channels from the spectrometers.
-            title: The `title` parameter is a string that represents the title of the plot.
 
         Returns:
             a string variable named "filename".

@@ -28,6 +28,6 @@ Example
         HMode is not present
         HMode is not present
 
-   .. image:: _static/images/viewscenario.png
+   .. thumbnail:: _static/images/viewscenario.png
       :alt: image not found
       :align: center

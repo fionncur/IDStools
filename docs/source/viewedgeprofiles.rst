@@ -22,6 +22,6 @@ rectangular grid. It shows Electrons, Ions and Neutral density plots.
         $ viewedgeprofiles -p 123314 -r 1 --separatix --wall
         $ viewedgeprofiles --uri "imas:mdsplus?user=public;shot=134174;run=117;database=ITER;version=3" --separatix --wall --time 60
 
-   .. image:: _static/images/viewedgeprofiles.png
+   .. thumbnail:: _static/images/viewedgeprofiles.png
       :alt: image not found
       :align: center

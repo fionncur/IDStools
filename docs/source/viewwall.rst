@@ -23,7 +23,7 @@ specify database entry to retrive wall details. it uses wall ids
 
       $ viewwall wall iter
 
-   .. image:: _static/images/wallview_iter.png
+   .. thumbnail:: _static/images/wallview_iter.png
       :alt: image not found
       :align: center
 
@@ -32,6 +32,6 @@ specify database entry to retrive wall details. it uses wall ids
         $ viewwall database -u schneim --database jet -p 92436 -r 271
         $ viewwall database --uri "imas:mdsplus?user=schneim;shot=92436;run=271;database=jet;version=3"
 
-   .. image:: _static/images/wallview_jet.png
+   .. thumbnail:: _static/images/wallview_jet.png
       :alt: image not found
       :align: center

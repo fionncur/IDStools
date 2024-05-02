@@ -107,12 +107,13 @@ extensions = [
     "sphinx_immaterial",
     "sphinx_immaterial.apidoc.python.apigen",
     "sphinxcontrib.programoutput",
+    'sphinxcontrib.images',
 ]
 
 autoapi_dirs = ['../../idstools']
 autoapi_type = "python"
 autoapi_template_dir = "_templates/autoapi"
-
+autoapi_keep_files = True
 autoapi_member_order = 'groupwise'
 
 # Add any paths that contain templates here, relative to this directory.

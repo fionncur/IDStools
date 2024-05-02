@@ -175,7 +175,7 @@ class ScenarioValidator:
 
         Parameters
         ----------
-        *args: dict
+        args: dict
             Validation schemas in type dict with fpath of yaml files as key
 
         Returns

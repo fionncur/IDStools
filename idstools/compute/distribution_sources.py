@@ -16,7 +16,7 @@ class DistributionSourcesCompute:
     def __init__(self, ids):
         self.ids = ids
 
-    def getRhoTorNorm(self) -> Union[None, np.ndarray]:
+    def getRhoTorNorm(self, timeSlice:int=0) -> Union[None, np.ndarray]:
         """
         The function `getRhoTorNorm` returns the normalized toroidal rho values from a given time slice
         of a source.
@@ -29,15 +29,15 @@ class DistributionSourcesCompute:
         """
         rho_tor_norm = None
         try:
-            rho_tor_norm = self.ids.source[0].profiles_1d[0].grid.rho_tor_norm
+            rho_tor_norm = self.ids.source[0].profiles_1d[timeSlice].grid.rho_tor_norm
             if (
                 len(rho_tor_norm) == 0
-                and len(self.ids.source[0].profiles_1d[0].grid.rho_tor) > 0
+                and len(self.ids.source[0].profiles_1d[timeSlice].grid.rho_tor) > 0
             ):
-                nrho = len(self.ids.source[0].profiles_1d[0].grid.rho_tor)
+                nrho = len(self.ids.source[0].profiles_1d[timeSlice].grid.rho_tor)
                 rho_tor_norm = (
-                    self.ids.source[0].profiles_1d[0].grid.rho_tor
-                    / self.ids.source[0].profiles_1d[0].grid.rho_tor[nrho - 1]
+                    self.ids.source[0].profiles_1d[timeSlice].grid.rho_tor
+                    / self.ids.source[0].profiles_1d[timeSlice].grid.rho_tor[nrho - 1]
                 )
         except Exception:
             logger.critical(
@@ -45,7 +45,7 @@ class DistributionSourcesCompute:
             )
         return rho_tor_norm
 
-    def getVolume(self) -> Union[None, np.ndarray]:
+    def getVolume(self, timeSlice:int=0) -> Union[None, np.ndarray]:
         """
         The function `getVolume` retrieves the volume from a specific time slice of a source's profiles.
 
@@ -57,10 +57,10 @@ class DistributionSourcesCompute:
         """
         volume = None
         try:
-            volume = self.ids.source[0].profiles_1d[0].grid.volume
+            volume = self.ids.source[0].profiles_1d[timeSlice].grid.volume
         except Exception:
             logger.critical(
-                "distribution_sources.source[0].profiles_1d[0].grid.volume could not be read"
+                f"distribution_sources.source[0].profiles_1d[{timeSlice}].grid.volume could not be read"
             )
         return volume
 

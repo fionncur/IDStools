@@ -139,12 +139,23 @@ class CoreProfilesView():
             ax: The parameter "ax" is a matplotlib axis object, which is used to plot the electron density data.
         """
         ne0 = self.coreProfilesCompute.getElectronDensityNe0()
+        import pprint
+        pprint.pprint(ne0)
         time_array = self.ids.time
-
-        ax.plot(time_array, ne0, color="r", label=r"$n_{e0} [10^{19}.m^{-3}]$")
-
-        ax.set_xlim(min(time_array), max(time_array))
+        if len(ne0) <= 3:
+            ax.plot(time_array, ne0, color="r",marker='o', label=r"$n_{e0} [10^{19}.m^{-3}]$")
+        else:
+            ax.plot(time_array, ne0, color="r", label=r"$n_{e0} [10^{19}.m^{-3}]$")
+        if len(time_array) !=1:
+            ax.set_xlim(min(time_array), max(time_array))
         # ax_waveform.set_ylim(0,max(ip)*1.2)
+        ax.legend(
+            bbox_to_anchor=(1.0, 0.5),
+            loc="center left",
+            borderaxespad=0.0,
+            frameon=False,
+            fontsize="x-small",
+        )
         ax.set_ylim(0, 20)
 
     def plotDensityProfile(self, ax, timeIndex, psiCordinate=False, update=True):
@@ -187,9 +198,14 @@ class CoreProfilesView():
                 )
                 # ax_density.set_ylim(bottom=0,top=max(electron_density))
             else:
-                ax.legend(loc="upper right", shadow=True, fancybox=True)
                 ax.set_ylim(top=nmax)
                 ax.set_data(radial_coordinate, electronDensity)
+            ax.legend(
+                bbox_to_anchor=(1.0, 0.5),
+                loc="center left",
+                borderaxespad=0.0,
+                frameon=False,
+            )
             return ax_density_plot_dens, nmax
 
     def plotIonPressureProperties(self, ax):

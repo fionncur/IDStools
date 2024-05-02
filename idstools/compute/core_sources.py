@@ -21,20 +21,28 @@ class CoreSourcesCompute:
         The `getFluxInfoFromSources` function retrieves information about sources, including their name, particle flux, energy flux, and ion properties, and returns a dictionary containing this information.
 
         Returns:
-            The function `getFluxInfoFromSources` returns a dictionary containing information about the sources. The dictionary has the following structure:
-            {0: {'energy_flux': 22081836.173650958,
-                'ions': {0:
-                            {'a': 2.0,
-                            'energy_flux': None,
-                            'particles_flux': 4.947616643196025e+21,
-                            'z_ion': -9e+40,
-                            'z_n': 1.0
+            The function `getFluxInfoFromSources` returns a dictionary containing
+            information about the sources. The dictionary has the following
+            structure: 
+            
+            .. code-block:: python
+            
+                {
+                    0: {
+                        "energy_flux": 22081836.173650958,
+                        "ions": {
+                            0: {
+                                "a": 2.0,
+                                "energy_flux": None,
+                                "particles_flux": 4.947616643196025e21,
+                                "z_ion": -9e40,
+                                "z_n": 1.0,
                             },
-                        'name': 'total',
-                        'particles_flux': None
+                            "name": "total",
+                            "particles_flux": None,
                         },
+                    }
                 }
-            }
         """
         sourcesDict = {}
         for sourceIndex, source in enumerate(self.ids.source):

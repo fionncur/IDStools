@@ -9,14 +9,12 @@ Script to list available disruptions in a specific folder
 ***************************
 
   .. command-output:: disruption_summary -h
-
-
-
-********************
+    
+****************************
  Example disruption_summary
-********************
+****************************
 
-  .. code-block:: bash
+   .. code:: bash
 
       $ disruption_summary
       ----> Default call equivalent to:

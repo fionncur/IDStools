@@ -19,6 +19,6 @@
         $ vieweccomposition -p 134173 -r 2326  -d TEST 
         $ vieweccomposition --uri "imas:mdsplus?user=public;shot=134173;run=2326;database=TEST;version=3"
 
-   .. image:: _static/images/vieweccomposition.png
+   .. thumbnail:: _static/images/vieweccomposition.png
       :alt: image not found
       :align: center

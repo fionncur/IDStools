@@ -2,16 +2,16 @@
 # PARAMETERS OF THE INPUT SCENARIO
 # ---------------------------------
 shot: 134173
-run_in: 106
-input_user_or_path: schneim
-input_database: ITER
+run_in: 2326
+input_user_or_path: public
+input_database: TEST
 
 # -----------------------------------
 # PARAMETERS TO SAVE THE OUTPUT DATA
 # -----------------------------------
-output_user_or_path: default
-output_database: ITER
-run_out: 22
+output_user_or_path: public
+output_database: TEST
+run_out: 2326
 
 # -----------------------------------
 # PARAMETERS FOR OPTIONAL TIME LOOP

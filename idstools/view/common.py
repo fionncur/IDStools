@@ -37,10 +37,9 @@ share_directory = os.path.abspath(os.path.join(current_directory, "../../../../.
 mplstyle_filepath = os.path.join(share_directory, r"share/styles/scientific.mplstyle")
 
 if os.path.exists(mplstyle_filepath):
-    plt.style.use(os.path.join(mplstyle_filepath))
+    plt.style.use(mplstyle_filepath)
 else:
-    mplstyle_filepath = os.path.join(current_directory, r"styles/scientific.mplstyle")
-    plt.style.use(os.path.join(mplstyle_filepath))
+    plt.style.use(os.path.join(current_directory, r"styles/scientific.mplstyle"))
 import logging
 import math
 import weakref

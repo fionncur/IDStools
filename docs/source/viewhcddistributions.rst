@@ -19,7 +19,7 @@ Example viewhcddistributions
         $ viewhcddistributions -p 130012 -r 115 -d TEST
         $ viewhcddistributions --uri "imas:mdsplus?user=public;shot=130012;run=115;database=TEST;version=3" 
 
-    .. image:: _static/images/viewhcddistributions2.png
+    .. thumbnail:: _static/images/viewhcddistributions2.png
         :alt: image not found
         :align: center
 
@@ -28,7 +28,7 @@ Example viewhcddistributions
         $ viewhcddistributions -p 100015 -r 108 -u schneim -d SPOT
         
 
-    .. image:: _static/images/viewhcddistributions.png
+    .. thumbnail:: _static/images/viewhcddistributions.png
         :alt: image not found
         :align: center
 

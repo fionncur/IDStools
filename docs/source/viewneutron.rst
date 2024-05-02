@@ -33,6 +33,6 @@ retrieves from distribution_sources IDS
         D + T(1 MeV) -> He4 + n(14.1 MeV); Total; P = -90000000000000011196554993145437224960.00 kW
 
 
-    .. image:: _static/images/viewneutron.png
+    .. thumbnail:: _static/images/viewneutron.png
         :alt: image not found
         :align: center

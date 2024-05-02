@@ -23,8 +23,8 @@ resonance layer, top view equilibrium.
 
    .. code-block:: bash
 
-      $ viewecstrayradiation -p 134174 -r 117
+      $ viewecstrayradiation -p 134173 -r 2326 -d TEST
 
-   .. image:: _static/images/ecstray.png
+   .. thumbnail:: _static/images/viewecstrayradiation.png
       :alt: image not found
       :align: center

@@ -141,8 +141,9 @@ class TbdView:
             ax.invert_xaxis()
             ax.invert_yaxis()
             # colorbar erzeugen
-            cax, _ = cbar.make_axes(plt.gca())
+            cax, _ = cbar.make_axes(ax)
             cb2 = cbar.ColorbarBase(cax, cmap=chosen_cmap, norm=normal)
+            
             return ax_polygon_plot_pol
         else:
             ax.set_data(xydata[:, 0], xydata[:, 1])

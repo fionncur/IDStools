@@ -57,7 +57,7 @@ class EquilibriumView(BasePlot):
                 ax.plot()
                 canvas.show()
 
-            .. image:: ../_static/images/EquilibriumView_viewMagneticPoloidalFlux.png
+            .. thumbnail:: _static/images/EquilibriumView_viewMagneticPoloidalFlux.png
                 :alt: image not found
                 :align: center
 
@@ -105,11 +105,20 @@ class EquilibriumView(BasePlot):
         """
         plasmaCurrent = self.computeObj.getIP()
         time_array = self.ids.time
-
-        ax.plot(time_array, plasmaCurrent, color="b", label="$I_p$ [MA]")
-
-        ax.set_xlim(min(time_array), max(time_array))
+        if len(plasmaCurrent) <= 3:
+            ax.plot(time_array, plasmaCurrent, color="b", marker='o', label="$I_p$ [MA]")
+        else:
+            ax.plot(time_array, plasmaCurrent, color="b", label="$I_p$ [MA]")
+        if len(time_array) !=1:
+            ax.set_xlim(min(time_array), max(time_array))
         # ax_waveform.set_ylim(0,max(plasmaCurrent)*1.2)
+        ax.legend(
+            bbox_to_anchor=(1.0, 0.5),
+            loc="center left",
+            borderaxespad=0.0,
+            frameon=False,
+            fontsize="x-small",
+        )
         ax.set_ylim(0, 20)
 
     def plotPoloidalEquilibrium(self, ax, timeSlice: int):
@@ -147,9 +156,6 @@ class EquilibriumView(BasePlot):
         Args:
             ax: `ax` is a matplotlib axis object.
             timeIndex: The time index is an integer
-            update: `update` is a boolean parameter that determines whether the plot should be updated or
-        not. If `update` is `True`, the plot will be updated with new data. If `update` is `False`, the
-        existing plot will be modified with new data. Defaults to True
 
         Returns:
             list containing two plot objects: ax_topview_plot_eq1 and ax_topview_plot_eq2.

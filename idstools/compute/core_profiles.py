@@ -104,7 +104,7 @@ class CoreProfilesCompute:
 
         Args:
             timeSlice (int, optional): The index of the slice in the `ggd` list that contains the ion information.Defaults to 0
-            elementIndex (int, optional): Element index, It is used to access the 'a' attribute of the element object. Defaults to 0
+            element_index (int, optional): Element index, It is used to access the 'a' attribute of the element object. Defaults to 0
 
         Returns:
             a list of atomic masses for each species in the given slice index and element index.
@@ -693,12 +693,15 @@ class CoreProfilesCompute:
 
         Returns:
             a dictionary with the following keys and values:
-            {
-                "maximaIon": maximaIon,
-                "pressureIonThermal": pressureIonThermal,
-                "pressureIonFastParallel": pressureIonFastParallel,
-                "pressureIonFastPerpendicular": pressureIonFastPerpendicular,
-            }
+            
+            .. code-block:: python
+            
+                {
+                    "maximaIon": maximaIon,
+                    "pressureIonThermal": pressureIonThermal,
+                    "pressureIonFastParallel": pressureIonFastParallel,
+                    "pressureIonFastPerpendicular": pressureIonFastPerpendicular,
+                }
         """
         nrho = len(self.getRhoTorNorm())
         pressureIonThermal = 0.0
@@ -758,13 +761,8 @@ class CoreProfilesCompute:
 
         Returns:
             The function `getElectronsPressureProperties` returns a dictionary with the following key-value pairs:
-            {
-                "maximaElectrons": maximaElectrons,
-                "pressureElectronTotal": pressureElectronTotal,
-                "pressureElectronThermal": pressureElectronThermal,
-                "pressureElectronFastParallel": pressureElectronFastParallel,
-                "pressureElectronFastPerpendicular": pressureElectronFastPerpendicular,
-            }
+            maximaElectrons, pressureElectronTotal, pressureElectronThermal,pressureElectronFastParallel, pressureElectronFastPerpendicular
+
         """
         nrho = len(self.getRhoTorNorm())
         pressureElectronTotal = self.ids.profiles_1d[0].electrons.pressure
@@ -825,6 +823,7 @@ class CoreProfilesCompute:
 
         Returns:
             a dictionary with three key-value pairs. The keys are "pressureThermal", "pressureParallel",and "pressurePerpendicular", and the values are the corresponding variables pressureThermal, pressureParallel, and pressurePerpendicular.
+            
         """
         nrho = len(self.getRhoTorNorm())
         pressureThermal = self.ids.profiles_1d[0].pressure_thermal

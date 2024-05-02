@@ -11,7 +11,7 @@
    .. command-output:: eqdsk2ids -h
 
 Example eqdsk2ids
-~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~
 
    .. code-block:: bash
 

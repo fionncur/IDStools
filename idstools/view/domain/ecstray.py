@@ -59,7 +59,7 @@ class EcStrayView:
                 ax.plot()
                 canvas.show()
 
-            .. image:: ../_static/images/EcstrayView_plotResonanceLayer.png
+            .. thumbnail:: _static/images/EcstrayView_plotResonanceLayer.png
                 :alt: image not found
                 :align: center
 
@@ -67,7 +67,9 @@ class EcStrayView:
             :func:`idstools.domain.ecstray.EcStrayCompute.getResonanceLayer`
 
         """
-        res_layer = self.ecstray_object.getResonanceLayer(time_index_wv, time_index_eq)
+        resultDict = self.ecstray_object.getResonanceLayer(time_index_wv, time_index_eq)
+        res_layer=resultDict["resonanceLayer"]
+
         for i_harm in range(len(res_layer)):
             if len(res_layer[i_harm]["r"]) > 1:
                 if verbose == True:
@@ -164,7 +166,7 @@ class EcStrayView:
                 ax.plot()
                 canvas.show()
 
-            .. image:: ../_static/images/EcstrayView_plotCutOffLayer.png
+            .. thumbnail:: _static/images/EcstrayView_plotCutOffLayer.png
                 :alt: image not found
                 :align: center
 

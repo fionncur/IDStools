@@ -3,8 +3,9 @@ numpy
 pyparsing 
 python-dateutil
 rst2pdf
+sphinx-autoapi
 sphinx-autodoc-typehints
 sphinx-immaterial
 sphinx-toolbox
-sphinx-autoapi
+sphinxcontrib-images
 sphinxcontrib-programoutput

@@ -95,6 +95,7 @@ setup(
         "scripts/idssize",
         "scripts/idsshift_equilibrium",
         "scripts/viewcoresources",
+        "scripts/viewecstrayradiation",
         "scripts/viewedgeprofiles",
         "scripts/viewequilibrium",
         "scripts/viewfluxes",

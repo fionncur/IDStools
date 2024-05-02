@@ -21,6 +21,6 @@ output of TORBEAM code.
         $ viewecray -p 134173 -r 2326  -d TEST 
         $ viewecray --uri "imas:mdsplus?user=public;shot=134173;run=2326;database=TEST;version=3"
 
-   .. image:: _static/images/viewecray.png
+   .. thumbnail:: _static/images/viewecray.png
       :alt: image not found
       :align: center

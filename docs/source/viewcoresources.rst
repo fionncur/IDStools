@@ -26,7 +26,7 @@ Power, particle and current profiles.
         Core_sources contains 1 source
         
 
-    .. image:: _static/images/viewcoresources.png
+    .. thumbnail:: _static/images/viewcoresources.png
         :alt: image not found
         :align: center
 

@@ -24,7 +24,7 @@ class GEQDSK:
 
     [1] L.L. Lao, "G EQDSK FORMAT", https://w3.pppl.gov/ntcc/TORAY/G_EQDSK.pdf
     [2] O. Sauter and S.Yu. Medvedev, "Tokamak Coordinate Conventions : COCOS",
-        Comput. Physics Commun. 184 (2013) 293
+    Comput. Physics Commun. 184 (2013) 293
 
     Attributes
     ----------
@@ -463,9 +463,9 @@ def geqdsk2ids(fpath, ipsign=0, b0sign=0, cocos_in=None):
     ----------
     fpath: str
         Path to GEQDSK file
-    ipsign_out: int=0, optional
+    ipsign: int=0, optional
         Desired sign(Ip) in output
-    b0sign_out: int=0, optional
+    b0sign: int=0, optional
         Desired sign(B0) in output
     cocos_in: int=None, optional
         Coerce input COCOS
@@ -508,10 +508,10 @@ def eqdsk2ids(gfile=None, afile=None, ipsign=0, b0sign=0, cocos_in=None):
     gfile: str
         Path to GEQDSK file
     afile: str
-        Path to AEQDSK file (*not in use)
-    ipsign_out: int=0, optional
+        Path to AEQDSK file (not in use)
+    ipsign: int=0, optional
         Desired sign(Ip) in output
-    b0sign_out: int=0, optional
+    b0sign: int=0, optional
         Desired sign(B0) in output
     cocos_in: int=None, optional
         Coerce input COCOS

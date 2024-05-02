@@ -831,7 +831,7 @@ class EdgeProfilesCompute:
         The function `getRectangularGrid` returns two arrays `x` and `y` that represent a meshgrid of points within a specified range.
 
         Args:
-            num_points: The `NumPoints` parameter is an optional integer argument that specifies the number of points to generate in the x and y directions. By default, it is set to 400.
+            NumPoints: The `NumPoints` parameter is an optional integer argument that specifies the number of points to generate in the x and y directions. By default, it is set to 400.
 
         Returns:
             two arrays, x and y.

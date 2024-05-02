@@ -35,6 +35,6 @@ core_profiles IDSs
         n_over_ne:    0.502   0.494   0.001
         n_over_n_maj: 1.000   0.984   0.002
 
-   .. image:: _static/images/viewkineticprofiles.png
+   .. thumbnail:: _static/images/viewkineticprofiles.png
       :alt: image not found
       :align: center

@@ -87,7 +87,7 @@ def byte_size(obj):
 
     Parameters
     ----------
-    idsstruct: object (IDS or sub-structures)
+    obj: object (IDS or sub-structures)
         object from which data size is being measured
 
     Returns

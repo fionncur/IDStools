@@ -260,6 +260,9 @@ class WavesCompute:
         beamElectronsLengthForEachWave = np.array(
             [[0 for _ in range(maxTotalBeams)] for _ in range(totalWaves)]
         )
+        len_ray = np.array(
+                [[0.0 for iray in range(maxTotalBeams)] for ibeam in range(totalWaves)]
+            ).astype(int)
         x_ray = np.array(
             [
                 [[0.0 for _ in range(beamDataLength)] for _ in range(maxTotalBeams)]
@@ -310,7 +313,7 @@ class WavesCompute:
                         y_ray[beamIndex, iray, :] = r_ray[beamIndex, iray, :] * np.sin(
                             phi_ray[beamIndex, iray, :]
                         )
-
+                        len_ray[beamIndex, iray] = len(wr)
                         npath = len(
                             self.ids.coherent_wave[beamIndex]
                             .beam_tracing[beamTracingTimeIndex]
@@ -340,6 +343,7 @@ class WavesCompute:
         beam_tracing["beamDataLengthForEachWave"] = beamDataLengthForEachWave
         beam_tracing["beamElectronsLengthForEachWave"] = beamElectronsLengthForEachWave
         beam_tracing["x_ray"] = x_ray
+        beam_tracing["len_ray"] = len_ray
         beam_tracing["y_ray"] = y_ray
         beam_tracing["z_ray"] = z_ray
         beam_tracing["r_ray"] = r_ray

@@ -110,7 +110,7 @@ def read_torbeam_output(launching_parameters, path_result):
 
     beam_output = {}
     lec_launchers = launching_parameters["lec_launchers"]
-    print(np.array(sorted(glob.glob(path_result + "/s*.txt"))))
+    # print(np.array(sorted(glob.glob(path_result + "/s*.txt"))))
     # read torbeam output files
     time_slices = np.array(sorted(glob.glob(path_result + "/s*.txt"), key=mysort))
     launchers = np.genfromtxt(time_slices[0], usecols=0, dtype=str)

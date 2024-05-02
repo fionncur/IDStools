@@ -242,7 +242,7 @@ class DBMaster:
             database (str): The `database` parameter is a string that represents the name of the database. It is used to specify the directory where the MDSplus pulses are stored.
             version (str): The `version` parameter is used to specify the version of the MDSplus database. It is a string that represents the version number.
             status (str): The "status" parameter is used to filter the pulses based on their status. If a status is provided, only pulses with that status will be included in the result. If no status is provided, all pulses will be included.
-            asDictionary (bool): The `asDictionary` parameter is a boolean flag that determines the format of the returned pulses. If `asDictionary` is set to `True`, the pulses will be returned as a dictionary where the keys are the pulse numbers and the values are lists of runs associated with each pulse. If `as. Defaults to False
+            asDictionary (bool): The `asDictionary` parameter is a boolean flag that determines the format of the returned pulses. If `asDictionary` is set to `True`, the pulses will be returned as a dictionary where the keys are the pulse numbers and the values are lists of runs associated with each pulse.Defaults to False
 
         Returns:
             a list of pulses.
@@ -319,7 +319,7 @@ class DBMaster:
         "status" key in the file's metadata.
 
         Args:
-            path: The `path` parameter is a string that represents the file path to a YAML file.
+            yamlFilePath: The `path` parameter is a string that represents the file path to a YAML file.
 
         Returns:
             the value of the "status" key from the metadata dictionary.
@@ -339,13 +339,13 @@ class DBMaster:
         The function `getDatabaseFiles` retrieves a list of database files based on the specified user,  database, version, and backends.
 
         Args:
-            user: The `user` parameter is used to specify the user for whom the database files are being retrieved. If no user is specified, it defaults to `None`.
-            database: The `database` parameter is used to specify the name of the database.
-            version: The `version` parameter is used to specify a specific version of the database.
-            backends: The `backends` parameter is a list of strings that specifies the database backends to retrieve files from. The possible values for `backends` are "hdf5" and "mdsplus". If `backends` is not provided, it defaults to `DBMaster.ALL_BACKENDS
+            user: The ``user`` parameter is used to specify the user for whom the database files are being retrieved. If no user is specified, it defaults to ``None``.
+            database: The ``database`` parameter is used to specify the name of the database.
+            version: The ``version`` parameter is used to specify a specific version of the database.
+            backends: The ``backends`` parameter is a list of strings that specifies the database backends to retrieve files from. The possible values for ``backends`` are ``hdf5`` and ``mdsplus``. If ``backends`` is not provided, it defaults to ``DBMaster.ALL_BACKENDS``
 
         Returns:
-            The function `getDatabaseFiles` returns a list of tuples. Each tuple contains the name of a database, followed by a list of tuples. Each inner tuple contains a version number, followed by a list of tuples. Each innermost tuple contains the name of a backend (either "hdf5" or "mdsplus"), followed by a dictionary of database files.
+            The function ``getDatabaseFiles`` returns a list of tuples. Each tuple contains the name of a database, followed by a list of tuples. Each inner tuple contains a version number, followed by a list of tuples. Each innermost tuple contains the name of a backend (either ``hdf5`` or ``mdsplus``), followed by a dictionary of database files.
         """
         result = []
 
@@ -740,10 +740,10 @@ def readScenario(
         if config["output_user_or_path"] == "default"
         else config["output_user_or_path"],
     )
-    print(config["output_database"])
-    print(config["shot"])
-    print(config["run_out"])
-    print(config["output_user_or_path"])
+    # print(config["output_database"])
+    # print(config["shot"])
+    # print(config["run_out"])
+    # print(config["output_user_or_path"])
     connectionOut.open()
     for idsName in outIDSList:
         if testMode:
@@ -752,5 +752,62 @@ def readScenario(
             ids = connectionOut.get(idsName)
         outIDSDict[idsName] = ids
     connectionOut.close()
+    import argparse
+    inputargs = argparse.Namespace()
+    inputargs.backend = imas.imasdef.MDSPLUS_BACKEND
+    inputargs.pulse = config["shot"]
+    inputargs.run = config["run_in"]
+    inputargs.user =config["input_user_or_path"]
+    inputargs.database = config["input_database"]
+    inputargs.version = 3
+    inputargs.uri = None
+    
+    return inIDSDict, outIDSDict, inputargs
+
+
+
+def readScenarioWithArgs(
+    args,
+    inIDSList: list = None,
+    outIDSList: list = None,
+    testMode: bool = False,
+    **testArgs,
+):
+    """
+    This function reads a scenario file and takes in optional input and output IDs lists, as well as a  test mode flag and additional test arguments.
+
+    Args:
+        scenarioFilePath (str): The file path of the scenario file that contains the test cases.
+        inIDSList (list): A list of input IDS names that should be read from the scenario file.
+        outIDSList (list): A list of output IDS names  It is used to specify the list of output IDs that the function should read from the scenario file. If this parameter is not provided, the function will read all output IDs from the scenario file.
+        testMode (bool): A boolean flag indicating whether the function is being called in test mode or not. If testMode is True, the function will execute in a way that is suitable for testing purposes. Defaults to False
+    """
+    testArgsList = list(testArgs.values())
+
+    inIDSDict = {}
+    outIDSDict = {}
+    if inIDSList is None:
+        inIDSList = []
+
+    if outIDSList is None:
+        outIDSList = []
+    connection = DBMaster.getConnection(args)
+
+    if connection is None:
+        return None
+    for idsName in inIDSList:
+        if testMode:
+            ids = connection.get_slice(idsName, testArgsList)
+        else:
+            ids = connection.get(idsName)
+        inIDSDict[idsName] = ids
+
+    for idsName in outIDSList:
+        if testMode:
+            ids = connection.get_slice(idsName, testArgsList)
+        else:
+            ids = connection.get(idsName)
+        outIDSDict[idsName] = ids
+    connection.close()
 
     return inIDSDict, outIDSDict

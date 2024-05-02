@@ -21,23 +21,27 @@ class CoreTransportCompute:
 
         Returns:
             a dictionary called `fluxesDict`. Following is the structure
-            {0:
-                {
-                    'energy_flux': None,
-                    'flux_multiplier': -9e+40,
-                    'ions':
-                        {0:
-                            {'a': 2.0,
-                            'energy_flux': None,
-                            'particles_flux': None,
-                            'z_ion': -9e+40,
-                            'z_n': 1.0
+            
+            .. code-block:: python
+            
+                {0:
+                    {
+                        'energy_flux': None,
+                        'flux_multiplier': -9e+40,
+                        'ions':
+                            {0:
+                                {'a': 2.0,
+                                'energy_flux': None,
+                                'particles_flux': None,
+                                'z_ion': -9e+40,
+                                'z_n': 1.0
+                                },
                             },
-                        },
-                        'name': 'combined',
-                        'particles_flux': None
-                },
-            }
+                            'name': 'combined',
+                            'particles_flux': None
+                    },
+                }
+                
         """
         fluxesDict = {}
 

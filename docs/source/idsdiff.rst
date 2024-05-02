@@ -26,10 +26,10 @@ graph.
       $ idsdiff summary --uri "imas:mdsplus?user=public;shot=122525;run=1;database=ITER;version=3" "imas:mdsplus?user=public;shot=122525;run=2;database=ITER;version=3"
       $ idsdiff summary --uri "imas:mdsplus?user=public;shot=130011;run=6;database=ITER;version=3" "imas:mdsplus?user=public;shot=130012;run=4;database=ITER;version=3"
 
-   .. image:: _static/images/idsdiff_1.png
+   .. thumbnail:: _static/images/idsdiff_1.png
       :alt: image not found
       :align: center
 
-   .. image:: _static/images/idsdiff_2.png
+   .. thumbnail:: _static/images/idsdiff_2.png
       :alt: image not found
       :align: center

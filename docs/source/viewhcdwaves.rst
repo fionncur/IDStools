@@ -16,7 +16,7 @@ Example viewhcdwaves
         $ viewhcdwaves -p 134173 -r 101  -d TEST 
         $ viewhcdwaves --uri "imas:mdsplus?user=public;shot=134173;run=101;database=TEST;version=3"
 
-    .. image:: _static/images/viewhcdwaves.png
+    .. thumbnail:: _static/images/viewhcdwaves.png
         :alt: image not found
         :align: center
 
@@ -25,6 +25,6 @@ Example viewhcdwaves
 
         $ viewhcdwaves -p 105039 -r 1 -u schneim -d SAVE -t 25
 
-    .. image:: _static/images/viewhcdwaves2.png
+    .. thumbnail:: _static/images/viewhcdwaves2.png
         :alt: image not found
         :align: center
