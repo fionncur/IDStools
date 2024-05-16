@@ -304,6 +304,13 @@ IDStools. :download:`download cheatsheet here <_static/cheatsheet.pdf>`
 +---------------------+---------------------------------------------------------------------+
 | Command             | Description and Example Usage                                       |
 +=====================+=====================================================================+
+| ``dbconverter``     | Copy all data-entries from one database into another one            |
++---------------------+---------------------------------------------------------------------+
+|                     |                                                                     |
+|                     | .. code-block:: bash                                                |
+|                     |                                                                     |
+|                     |   $ dbconverter --user <username> --database ITER -do MYDB -bo HDF5 |
++---------------------+---------------------------------------------------------------------+
 | ``dblist``          | Lists existing IMAS databases (Replaces imasdbs).                   |
 +---------------------+---------------------------------------------------------------------+
 |                     |                                                                     |
@@ -315,7 +322,7 @@ IDStools. :download:`download cheatsheet here <_static/cheatsheet.pdf>`
 |                     |    $ dblist databases                                               |
 |                     |    $ dblist dataversions                                            |
 +---------------------+---------------------------------------------------------------------+
-| ``dbperf``          | Chck performance of database                                        |
+| ``dbperf``          | Check performance of database                                       |
 +---------------------+---------------------------------------------------------------------+
 |                     |                                                                     |
 |                     | .. code-block:: bash                                                |
