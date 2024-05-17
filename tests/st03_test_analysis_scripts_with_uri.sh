@@ -30,7 +30,7 @@ SCRIPTS=(
 "vieweccomposition --uri \"imas:mdsplus?user=public;shot=134173;run=2326;database=TEST;version=3\" --save --directory $LOG_DIR" 
 "viewecray --uri \"imas:mdsplus?user=public;shot=134173;run=2326;database=TEST;version=3\" --save --directory $LOG_DIR" 
 "viewedgeprofiles --uri \"imas:mdsplus?user=public;shot=134174;run=117;database=ITER;version=3\" --separatix --wall --time 60 --save --directory $LOG_DIR" 
-"viewequilibrium --uri \"imas:mdsplus?user=public;shot=134174;run=117;database=ITER;version=3\" --save --directory $LOG_DIR" 
+"viewequilibrium --uri \"imas:mdsplus?user=public;shot=134174;run=117;database=ITER;version=3\" --save --directory $LOG_DIR"  pf_active wall
 "viewfluxes --uri \"imas:mdsplus?user=public;shot=134174;run=117;database=ITER;version=3\" -m CLOSEST" 
 "viewhcddistributions --uri \"imas:mdsplus?user=public;shot=130012;run=115;database=TEST;version=3\" --save --directory $LOG_DIR" 
 "viewhcdplots -ech 134173/101/public/MDSPLUS/TEST/3 -nbi 130012/115/public/MDSPLUS/TEST/3 -fus 130012/115/public/MDSPLUS/TEST/3 -icrh 130012/15/public/MDSPLUS/TEST/3 --save --directory $LOG_DIR" 

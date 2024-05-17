@@ -64,7 +64,7 @@ IDStools. :download:`download cheatsheet here <_static/cheatsheet.pdf>`
 |                            |                                                              |
 |                            | .. code-block:: bash                                         |
 |                            |                                                              |
-|                            |    $ viewequilibrium -p 134174 -r 117 --rho --pfcoils --info |
+|                            |    $ viewequilibrium -p 134174 -r 117 --rho                  |
 +----------------------------+--------------------------------------------------------------+
 | ``viewfluxes``             | Shows flux information from available                        |
 |                            | transport models  (replaces print_fluxes).                   |

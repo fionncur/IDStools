@@ -79,7 +79,6 @@ class PfActiveCompute:
                 logger.warning(
                     f"{coil.identifier} : pf_active.coil.element.geometry.rectangle is empty"
                 )
-
         if not coils:
             logger.warning("pf_active.coil is empty")
         return coils

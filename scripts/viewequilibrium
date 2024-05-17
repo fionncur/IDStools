@@ -44,16 +44,6 @@ parser.add_argument(
     help="Show rho overlay on the plot",
     action="store_true",
 )
-# parser.add_argument(
-#     "--pfcoils",
-#     help="Show pf coils overlay on the plot",
-#     action="store_true",
-# )
-# parser.add_argument(
-#     "--wall",
-#     help="Show wall overlay on the plot",
-#     action="store_true",
-# )
 parser.add_argument(
         "mdidslist",
         nargs="*",
@@ -142,6 +132,3 @@ if idsObjEquilibrium.time is not None:
         canvas.show()
 else:
     logger.warning("Can not produce plot, equilibrium/time is None")
-                        
-            # idsObjPfActive = imas.pf_active()
-            # idsObjPfActive.coil = connection.partial_get("pf_active", "coil")

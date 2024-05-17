@@ -30,7 +30,7 @@ SCRIPTS=(
 "vieweccomposition -p 134173 -r 2326 -d TEST --save --directory $LOG_DIR" 
 "viewecray -p 134173 -r 2326 -d TEST --save --directory $LOG_DIR" 
 "viewedgeprofiles -p 123314 -r 1 --separatix --wall --save --directory $LOG_DIR"
-"viewequilibrium -p 134174 -r 117 --rho --pfcoils --save --directory $LOG_DIR"
+"viewequilibrium -p 134174 -r 117 --rho --save --directory $LOG_DIR" pf_active wall
 "viewfluxes -p 134174 -r  117 -m CLOSEST"
 "viewhcddistributions -p 130012 -r 115 -d TEST --save --directory $LOG_DIR" 
 "viewhcdplots -ech 134173/101/public/MDSPLUS/TEST/3 -nbi 130012/115/public/MDSPLUS/TEST/3 -fus 130012/115/public/MDSPLUS/TEST/3 -icrh 130012/15/public/MDSPLUS/TEST/3 --save --directory $LOG_DIR"

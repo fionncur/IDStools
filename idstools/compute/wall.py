@@ -100,8 +100,8 @@ class WallCompute:
         if len(self.ids_object.description_2d) == 0:
             logger.error("wall.description_2d is empty")
             return None
-        if len(self.ids_object.description_2d[0].vessel.unit) <= iunit:
-            logger.error(f"wall.description_2d[0].vessel.unit is less than iunit {iunit}")
+        if len(self.ids_object.description_2d[0].limiter.unit) <= iunit:
+            logger.error(f"wall.description_2d[0].limiter.unit is less than iunit {iunit}")
             return None
         
         r = self.ids_object.description_2d[0].limiter.unit[iunit].outline.r
