@@ -1,5 +1,6 @@
 import numpy as np
 from typing import Union
+import logging
 
 wallIndexMapping = {
     "VVIS": 0,
@@ -16,6 +17,7 @@ wallIndexMapping = {
     "DIV": 1,
 }
 
+logger = logging.getLogger(f"module.{__name__}")
 
 class WallCompute:
     def __init__(self, ids_object):
@@ -95,9 +97,13 @@ class WallCompute:
         Returns:
             a dictionary of FW (limiter) and its data.
         """
-
-        if len(self.ids_object.description_2d[0].limiter.unit) <= iunit:
+        if len(self.ids_object.description_2d) == 0:
+            logger.error("wall.description_2d is empty")
             return None
+        if len(self.ids_object.description_2d[0].vessel.unit) <= iunit:
+            logger.error(f"wall.description_2d[0].vessel.unit is less than iunit {iunit}")
+            return None
+        
         r = self.ids_object.description_2d[0].limiter.unit[iunit].outline.r
         z = self.ids_object.description_2d[0].limiter.unit[iunit].outline.z
         return None if len(r) == 0 or len(z) == 0 else {"element0": [r, z]}

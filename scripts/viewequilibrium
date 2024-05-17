@@ -5,13 +5,15 @@ import argparse
 import logging
 import os
 from rich_argparse import RichHelpFormatter
-import sys
+import copy
+from idstools.view.wall import WallView
 import imas
 
 from idstools.compute.common import getNearestTime
 from idstools.database import DBMaster
 from idstools.utils.clihelper import (
     dbentryParser,
+    getConnectionArgsFromString,
     getDatabasePath,
     getFileName,
     getTitle,
@@ -42,11 +44,21 @@ parser.add_argument(
     help="Show rho overlay on the plot",
     action="store_true",
 )
+# parser.add_argument(
+#     "--pfcoils",
+#     help="Show pf coils overlay on the plot",
+#     action="store_true",
+# )
+# parser.add_argument(
+#     "--wall",
+#     help="Show wall overlay on the plot",
+#     action="store_true",
+# )
 parser.add_argument(
-    "--pfcoils",
-    help="Show pf coils overlay on the plot",
-    action="store_true",
-)
+        "mdidslist",
+        nargs="*",
+        help="Provide machine descriptions that you need to plot (/pulse/run/user/backend/database/version is optional):  pf_active/pulse/run/user/backend/database/version wall/pulse/run/user/backend/database/version",
+    )
 
 parser.add_argument(
     "--save",
@@ -76,28 +88,51 @@ if idsObjEquilibrium.time is not None:
     )
     ViewEquilibrium = EquilibriumView(idsObjEquilibrium)
 
-    if args.pfcoils is True:
-        idsObjPfActive = imas.pf_active()
-        idsObjPfActive.coil = connection.partial_get("pf_active", "coil")
-        ViewPfCoils = PFActiveView(idsObjPfActive)
 
     title = f"2D Equilibrium at time {timeValue:.1f}"
+    databaseText = ""
     canvas = Canvas(1, 1)
     ax = canvas.add_axes(title="", xlabel="", row=0, col=0)
 
-    if args.pfcoils is True:
-        ViewPfCoils.viewActivePfCoils(ax)
-        title += " Active PF Coils"
+    for mdidsInfo in args.mdidslist:
+        inputargs = copy.deepcopy(args)
+        _idsName, inputargs = getConnectionArgsFromString(mdidsInfo, inputargs)
+        if _idsName == "pf_active":
+            connection = DBMaster.getConnection(inputargs)
+            if connection is not None:
+                data = {}
+                _idsData = connection.get(_idsName)
+                connection.close()
+                ViewPfCoils = PFActiveView(_idsData)
+                ViewPfCoils.viewActivePfCoils(ax)
+                title += "with Active PF Coils"
+                databaseText += f"{_idsName}={getDatabasePath(inputargs)}\n"
+            else:
+                logger.warning("f{_idsName} ids is not present")
+
+        if _idsName == "wall":
+            connection = DBMaster.getConnection(inputargs)
+            if connection is not None:
+                data = {}
+                _idsData = connection.get(_idsName)
+                connection.close()
+                wallview = WallView(_idsData)
+                if foundData := wallview.view_wall(ax):
+                    title += ", with Wall"
+                    databaseText += f"{_idsName}={getDatabasePath(inputargs)}\n"
+            else:
+                logger.warning(f"{_idsName} ids is not present")
 
     ViewEquilibrium.viewMagneticPoloidalFlux(ax, plotRho=args.rho)
-
     ax.set_title(title)
 
-    canvas.setText(text=f"{getDatabasePath(args, timeValue=timeValue)}")
+    canvas.setText(text=f"{getDatabasePath(args, timeValue=timeValue)}\n{databaseText}", y =0.900)
     canvas.fig.suptitle(getTitle(args, "Equilibrium", timeValue), size=12)
     canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
     if args.save:
-        fname = getFileName(args, os.path.basename(__file__)+"_Equilibrium", timeValue)
+        fname = getFileName(
+            args, f"{os.path.basename(__file__)}_Equilibrium", timeValue
+        )
         if args.directory:
             if not os.path.exists(args.directory):
                 os.makedirs(args.directory)
@@ -107,3 +142,6 @@ if idsObjEquilibrium.time is not None:
         canvas.show()
 else:
     logger.warning("Can not produce plot, equilibrium/time is None")
+                        
+            # idsObjPfActive = imas.pf_active()
+            # idsObjPfActive.coil = connection.partial_get("pf_active", "coil")

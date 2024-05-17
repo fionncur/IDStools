@@ -72,7 +72,7 @@ if args.wall:
             mdargs.database = "ITER_MD"
             mdargs.uri = f"imas:mdsplus?user=public;shot={mdargs.pulse};run={mdargs.run};database={mdargs.database};version={mdargs.version}"
             mdConnection = DBMaster.getConnection(mdargs)
-            # print(mdConnection)
+
             if mdConnection is not None:
                 wallIds = mdConnection.get("wall")
                 mdConnection.close()

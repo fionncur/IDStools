@@ -39,12 +39,15 @@ class WallView:
         the wall will be plotted.
             kwargs: This is useful to update properties of patch (Wall marking on the plot). You can find it here https://matplotlib.org/stable/api/_as_gen/matplotlib.patches.PathPatch.html.. most useful are linewidth, linestyle, visible, animated, edgecolor, fill or facecolor
         """
+        foundData=False
         if wall_data := self.wall_object.get_wall():
             for key, data in wall_data.items():
                 if data:
                     for element_key, element_data in data.items():
+                        foundData=True
                         r, z = element_data
                         self.addWallMarkings(ax, r, z, **kwargs)
 
         else:
             print("!  No Wall found")
+        return foundData

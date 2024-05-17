@@ -177,3 +177,66 @@ def getDatabasePath(imasargs, timeValue=None) -> str:
     hostdir = f"{socket.gethostname()}:{databaseAbsolutePath} ({pulseInfo} {timeString})"
     #
     return hostdir
+
+def getConnectionArgsFromString(connectionstring, inputargs=None) -> str:
+    """
+    This function parses a connection string in a `idsname/pulse/run/user/backend/database/version` format and returns the connection details as
+    argparse Namespace.
+    """
+    if inputargs is None:
+        inputargs=argparse.Namespace()
+    _idsName = connectionstring.split('/', 1)[0]
+    if len(connectionstring.split('/')) > 1:
+        _idsInfo = connectionstring.split('/', 1)[1]
+        if len(_idsInfo.split("/")) == 6:
+            (
+            inputargs.pulse,
+            inputargs.run,
+            inputargs.user,
+            inputargs.backend,
+            inputargs.database,
+            inputargs.version,
+        ) = _idsInfo.split("/")
+        
+        elif len(_idsInfo.split("/")) == 5:
+            (
+            inputargs.pulse,
+            inputargs.run,
+            inputargs.user,
+            inputargs.backend,
+            inputargs.database,
+        ) = _idsInfo.split("/")
+
+        elif len(_idsInfo.split("/")) == 4:
+            (
+            inputargs.pulse,
+            inputargs.run,
+            inputargs.user,
+            inputargs.backend,
+        ) = _idsInfo.split("/")
+        
+        elif len(_idsInfo.split("/")) == 3:
+            (
+            inputargs.pulse,
+            inputargs.run,
+            inputargs.user,
+        ) = _idsInfo.split("/")     
+            
+        elif len(_idsInfo.split("/")) == 2:
+            (
+            inputargs.pulse,
+            inputargs.run,
+        ) = _idsInfo.split("/") 
+        
+        elif len(_idsInfo.split("/")) == 1:
+            inputargs.uri = _idsInfo
+        else:
+            print(
+                f"Bad input format: {connectionstring} not valid, Arguments should be formatted like idsname/pulse/run/user/backend/database/version"
+            )
+            return None
+        if inputargs.pulse is not None:
+            inputargs.pulse = int(inputargs.pulse)
+        if inputargs.run is not None:
+            inputargs.run = int(inputargs.run)
+    return _idsName, inputargs

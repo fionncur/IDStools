@@ -19,13 +19,11 @@ shows pf coils position and toroidal flux.
 
    .. code-block:: bash
 
-        $ viewequilibrium -p 134174 -r 117 --rho --pfcoils
-        $ viewequilibrium --uri "imas:mdsplus?user=public;shot=134174;run=117;database=ITER;version=3" --rho --pfcoils
+        $ viewequilibrium -p 134174 -r 117 --rho 
+        $ viewequilibrium --uri "imas:mdsplus?user=public;shot=134174;run=117;database=ITER;version=3" --rho pf_active wall
+        $ viewequilibrium -p 134174 -r 117 --rho pf_active/111001/103/public/MDSPLUS/ITER_MD/3 wall/"imas:mdsplus?user=public;shot=116000;run=4;database=ITER_MD;version=3"
 
-   .. thumbnail:: _static/images/EquilibriumView_viewMagneticPoloidalFlux.png
+   .. thumbnail:: _static/images/viewequilibrium.png
       :alt: image not found
       :align: center
 
-   .. thumbnail:: _static/images/PFActiveView_viewActivePfCoils.png
-      :alt: image not found
-      :align: center
