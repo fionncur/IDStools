@@ -2,8 +2,16 @@
  viewmachinedescription
 ########################
 
-*viewmachinedescription* plots machine description data stored in
-databases
+*viewmachinedescription* lists machine description data entries 
+Plots machine description data 
+Retrieve machine description from yaml file
+viewmachinedescription plot pf_active wall
+
+Specify particular data entry with optional format <idsname>/pulse/run/user/backend/database/version
+viewmachinedescription plot <idsname>/pulse/run/user/backend/database/version
+
+Specify URI 
+viewmachinedescription plot pf_active/111001/103 wall/"imas:mdsplus?user=public;shot=116000;run=4;database=ITER_MD;version=3"
 `refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`_.
 
 *******************************
@@ -57,3 +65,9 @@ databases
       116100/2001 |                           wall |                    active
       116100/3001 |                           wall |                    active
          116612/1 |                           wall |                    active
+
+   .. code-block:: bash
+
+      $ viewmachinedescription plot pf_active wall
+      $ viewmachinedescription plot pf_active/111001/103/public/MDSPLUS/ITER_MD/3
+      $ viewmachinedescription plot pf_active/111001/103 wall/"imas:mdsplus?user=public;shot=116000;run=4;database=ITER_MD;version=3"

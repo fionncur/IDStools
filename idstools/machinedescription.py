@@ -70,19 +70,23 @@ class MachineDescription:
         """
         idsData = {}
         for idsName in mdIdsList:
-            outputDict = self.getLatestIdsData(idsName)
-            idsData[idsName] = {}
-            (
-                idsData[idsName]["idsData"],
-                idsData[idsName]["yamlConfig"],
-                idsData[idsName]["connectionArgs"],
-            ) = (
-                outputDict["idsData"],
-                outputDict["yamlConfig"],
-                outputDict["connectionArgs"],
-            )
+            idsData[idsName] = self.getMDDataByIds(idsName)
         return idsData
 
+    def getMDDataByIds(self, idsName: str):
+        outputDict = self.getLatestIdsData(idsName)
+        data = {}
+        (
+            data["idsData"],
+            data["yamlConfig"],
+            data["connectionArgs"],
+        ) = (
+            outputDict["idsData"],
+            outputDict["yamlConfig"],
+            outputDict["connectionArgs"],
+        )
+        return data
+    
     def getMDSummary(
         self,
         idsNames: typing.Union[typing.List, str] = "",

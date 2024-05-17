@@ -3,12 +3,13 @@
 
 import argparse
 import logging
-import sys
+import copy
 import os
 from rich_argparse import RichHelpFormatter
+from idstools.database import DBMaster
 from idstools.machinedescription import MachineDescription
 from idstools.set_logger import set_logger
-from idstools.utils.clihelper import dbentryParser, getDatabasePath
+from idstools.utils.clihelper import dbentryParser, getCoreVersion, getDatabasePath
 from idstools.utils.idslogger import setupLogger
 from idstools.view.common import Canvas
 from idstools.view.pf_active import PFActiveView
@@ -34,10 +35,10 @@ def plotMachineDescription(idsData):
     databasePath = ""
     # Plot Overlay
     for idsName, idsDataAndConfig in idsData.items():
-        if idsDataAndConfig["yamlConfig"] is None:
-            logger.error(f"Could not retrieve machine description for {idsName}")
-            databasePath += f"{idsName} = not found"
-            continue
+        # if idsDataAndConfig["yamlConfig"] is None:
+        #     logger.error(f"Could not retrieve machine description for {idsName}")
+        #     databasePath += f"{idsName} = not found"
+        #     continue
         if idsName == "pf_active":
             pfcoilsview = PFActiveView(idsDataAndConfig["idsData"])
             pfcoilsview.viewActivePfCoils(ax)
@@ -120,8 +121,9 @@ if __name__ == "__main__":
     subparserPlot.add_argument(
         "idslist",
         nargs="*",
-        help="Provide ids list here.. Space separated values for example :  pf_active wall",
+        help="Provide ids list with optional pulse and run.. Space separated values for example :  pf_active/pulse/run/user/backend/database/version wall/pulse/run/user/backend/database/version",
     )
+    # pulse/run/user/backend/database/version/
     subparserPlot.add_argument(
         "--save",
         help="Save figure at default location",
@@ -159,7 +161,106 @@ if __name__ == "__main__":
 
     if args.cmd == "plot":
         if args.idslist:
-            idsData = machineDescription.getMDDataByIdsList(args.idslist)
+            if "database" in args.__dict__ and args.database == "ITER":
+                args.database = "ITER_MD"
+            
+            idsData = {}
+            for idsInfo in args.idslist:
+                # Specify default args
+                inputargs = copy.deepcopy(args)
+                _idsName = idsInfo.split('/', 1)[0]
+                # if specific pulse/run information is provided then update args
+                if len(idsInfo.split('/')) > 1:
+                    _idsInfo = idsInfo.split('/', 1)[1]
+                    if len(_idsInfo.split("/")) == 6:
+                        (
+                        inputargs.pulse,
+                        inputargs.run,
+                        inputargs.user,
+                        inputargs.backend,
+                        inputargs.database,
+                        inputargs.version,
+                    ) = _idsInfo.split("/")
+                    
+                    elif len(_idsInfo.split("/")) == 5:
+                        (
+                        inputargs.pulse,
+                        inputargs.run,
+                        inputargs.user,
+                        inputargs.backend,
+                        inputargs.database,
+                    ) = _idsInfo.split("/")
+
+                    elif len(_idsInfo.split("/")) == 4:
+                        (
+                        inputargs.pulse,
+                        inputargs.run,
+                        inputargs.user,
+                        inputargs.backend,
+                    ) = _idsInfo.split("/")
+                    
+                    elif len(_idsInfo.split("/")) == 3:
+                        (
+                        inputargs.pulse,
+                        inputargs.run,
+                        inputargs.user,
+                    ) = _idsInfo.split("/")     
+                        
+                    elif len(_idsInfo.split("/")) == 2:
+                        (
+                        inputargs.pulse,
+                        inputargs.run,
+                    ) = _idsInfo.split("/") 
+                    
+                    elif len(_idsInfo.split("/")) == 1:
+                        inputargs.uri = _idsInfo
+                    else:
+                        logger.critical(
+                            "Bad input format: " + idsInfo + " not valid, Arguments should be formatted like pulse/run/user/database"
+                        )
+                    if inputargs.pulse is not None:
+                        inputargs.pulse = int(inputargs.pulse)
+                    if inputargs.run is not None:
+                        inputargs.run = int(inputargs.run)
+                    
+                useduri=False
+                usedpulserun=False
+                if getCoreVersion() > 4:
+                    if inputargs.uri is not None:
+                        useduri=True
+                    else:
+                        if inputargs.pulse is not None and inputargs.run is not None:
+                            usedpulserun=True
+                else:
+                    if inputargs.pulse is not None and inputargs.run is not None:
+                        usedpulserun=True   
+                if usedpulserun is True or useduri is True:
+                    # Get data from user defined arguments
+                    logger.info(f"DB Entry parameters for {_idsName}: {inputargs.__dict__}")
+                    connection = DBMaster.getConnection(inputargs)
+                    if connection is not None:
+                        data = {}
+                        _idsData = connection.get(_idsName)
+                        connection.close()
+                        if _idsData is not None:
+                            (
+                            data["idsData"],
+                            data["yamlConfig"],
+                            data["connectionArgs"],
+                            ) = (
+                                _idsData,
+                                None,
+                                inputargs,
+                            )
+                            idsData[_idsName]=data
+                # Not provided by user then get from summary file (ITER_MD)        
+                else: 
+                    idsData[_idsName] = machineDescription.getMDDataByIds(_idsName)
+                    connectionArgs=idsData[_idsName]["connectionArgs"]
+                    logger.info(f"DB Entry parameters for {_idsName}: {connectionArgs.__dict__}")
+                    args.pulse = None
+                    args.run = None
+                    args.uri = None
             plotMachineDescription(idsData)
         else:
             logger.info(

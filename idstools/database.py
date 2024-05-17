@@ -488,63 +488,63 @@ class DBMaster:
         return lowlevelVersion
     
     @classmethod
-    def getConnection(cls, args):
-        connection = DBMaster.getDBEntryObject(args)
+    def getConnection(cls, imasargs):
+        connection = DBMaster.getDBEntryObject(imasargs)
         if connection is not None:
             status, _ = connection.open()
             if status != 0:
-                logger.error(f"Can not find data entry {args}")
+                logger.error(f"Can not find data entry {imasargs}")
                 return None
         return connection
 
     @classmethod
-    def createConnection(cls, args):
-        if "mode" not in args.__dict__:
-            args.mode = "w"
-        connection = DBMaster.getDBEntryObject(args)
+    def createConnection(cls, imasargs):
+        if "mode" not in imasargs.__dict__:
+            imasargs.mode = "w"
+        connection = DBMaster.getDBEntryObject(imasargs)
         status, _ = connection.create()
         if status != 0:
-            logger.error(f"Can not create database entry {args}")
+            logger.error(f"Can not create database entry {imasargs}")
             return None
         return connection
 
     @classmethod
-    def getDBEntryObject(cls, args):
+    def getDBEntryObject(cls, imasargs):
         imasVersion = DBMaster.getCoreVersion()
         imasVersion = int(imasVersion.split(".")[0])
         connection=None
         if imasVersion > 4:
-            if args.uri is None:
-                if args.pulse is None or args.run is None:
+            if imasargs.uri is None:
+                if imasargs.pulse is None or imasargs.run is None:
                     logger.error("Both the uri or the pulse and run are missing.")
                     return None
                 connection = imas.DBEntry(
-                    getBackendID(args.backend),
-                    args.database,
-                    args.pulse,
-                    args.run,
-                    args.user,
+                    getBackendID(imasargs.backend),
+                    imasargs.database,
+                    imasargs.pulse,
+                    imasargs.run,
+                    imasargs.user,
                 )
             else:
-                # if args.pulse is not None and args.run is not None:
+                # if imasargs.pulse is not None and imasargs.run is not None:
                 #     logger.warning(
                 #         "Both uri and legacy parameters are provided. Using uri for accessing data entry"
                 #     )
-                if "mode" in args.__dict__:
-                    connection = imas.DBEntry(args.uri, args.mode)
+                if "mode" in imasargs.__dict__:
+                    connection = imas.DBEntry(imasargs.uri, imasargs.mode)
                 else:
-                    connection = imas.DBEntry(args.uri, "r")
+                    connection = imas.DBEntry(imasargs.uri, "r")
 
         else:
-            if args.pulse is None or args.run is None:
+            if imasargs.pulse is None or imasargs.run is None:
                 logger.error("There is no pulse and run available")
                 return None
             connection = imas.DBEntry(
-                getBackendID(args.backend),
-                args.database,
-                args.pulse,
-                args.run,
-                args.user,
+                getBackendID(imasargs.backend),
+                imasargs.database,
+                imasargs.pulse,
+                imasargs.run,
+                imasargs.user,
             )
         return connection
 
@@ -767,7 +767,7 @@ def readScenario(
 
 
 def readScenarioWithArgs(
-    args,
+    imasargs,
     inIDSList: list = None,
     outIDSList: list = None,
     testMode: bool = False,
@@ -791,7 +791,7 @@ def readScenarioWithArgs(
 
     if outIDSList is None:
         outIDSList = []
-    connection = DBMaster.getConnection(args)
+    connection = DBMaster.getConnection(imasargs)
 
     if connection is None:
         return None

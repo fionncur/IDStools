@@ -109,67 +109,67 @@ def getDetailsfromURI(uri):
     return param
 
 
-def getTitle(args, title="", timeValue=None):
+def getTitle(imasargs, title="", timeValue=None):
     _title = ""
     if title:
         _title += f"{title} "
-    if "uri" in args.__dict__ and args.uri:
-        param = getDetailsfromURI(args.uri)
+    if "uri" in imasargs.__dict__ and imasargs.uri:
+        param = getDetailsfromURI(imasargs.uri)
         if param["pathPresent"]:
             _title += f"(path={param['path']})"
         else:
             _title += f"(pulse={param['pulse']},{param['run']})"
     else:
-        _title += f"(pulse={args.pulse},{args.run})"
+        _title += f"(pulse={imasargs.pulse},{imasargs.run})"
     if timeValue:
         _title += f" time:{timeValue:.1f}"
     return _title
 
 
-def getFileName(args, title="", timeValue=None):
+def getFileName(imasargs, title="", timeValue=None):
     _fileName = ""
     if title:
         _fileName += f"{title}_"
-    if "uri" in args.__dict__ and args.uri:
-        param = getDetailsfromURI(args.uri)
+    if "uri" in imasargs.__dict__ and imasargs.uri:
+        param = getDetailsfromURI(imasargs.uri)
         if param["pathPresent"]:
             _fileName += f"(path={param['path']})"
         else:
             _fileName += f"pulse_{param['pulse']}_run_{param['run']}_"
     else:
-        _fileName += f"pulse_{args.pulse}_run_{args.run}_"
+        _fileName += f"pulse_{imasargs.pulse}_run_{imasargs.run}_"
     if timeValue:
         _fileName += f"time_{timeValue:.1f}"
     _fileName += ".png"
     return _fileName
 
 
-def getDatabasePath(args, timeValue=None) -> str:
+def getDatabasePath(imasargs, timeValue=None) -> str:
     """
     The function `getDatabasePath` returns the absolute path of a database based on the provided arguments.
 
     Args:
-        args: The `args` parameter is an object or dictionary that contains the following attributes:
+        imasargs: The `imasargs` parameter is an object or dictionary that contains the following attributes:
 
     Returns:
         the absolute path of the database.
     """
     pulseInfo=""
     databaseAbsolutePath=""
-    if "uri" in args.__dict__ and args.uri:
-        databaseAbsolutePath=args.uri
+    if "uri" in imasargs.__dict__ and imasargs.uri:
+        databaseAbsolutePath=imasargs.uri
         
     else:
-        if args.user == "public":
+        if imasargs.user == "public":
             publichome = os.getenv("IMAS_HOME", default="")
             if publichome is None:
                 return None
             databaseAbsolutePath = (
-                f"{publichome}/shared/imasdb/{args.database}/{args.version}/{args.run//10000}"
+                f"{publichome}/shared/imasdb/{imasargs.database}/{imasargs.version}/{imasargs.run//10000}"
             )
         else:
-            databaseAbsolutePath = f'{os.path.expanduser(f"~{args.user}")}/public/imasdb/{str(args.database)}/{args.version}/{args.run//10000}'
-        pulseInfo=f"pulse {args.pulse},{args.run}"
+            databaseAbsolutePath = f'{os.path.expanduser(f"~{imasargs.user}")}/public/imasdb/{str(imasargs.database)}/{imasargs.version}/{imasargs.run//10000}'
+        pulseInfo=f"pulse {imasargs.pulse},{imasargs.run}"
         databaseAbsolutePath = databaseAbsolutePath[:-2]
     timeString = ""
     if timeValue:
