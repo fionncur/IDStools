@@ -32,7 +32,7 @@ from idstools.view.common import Canvas
 from idstools.view.wall import WallView
 
 WallDetails = {
-    "iter": ("ITER_MD", 116000, 2, "public", 3),
+    "iter": ("ITER_MD", 116000, 4, "public", 3),
     "west": ("west", 54178, 0, "fleuryl", 3),
     "tcv": ("tcv", 64770, 1, "fleuryl", 3),
     "aug": ("aug", 40866, 1, "costerd", 3),
@@ -42,7 +42,8 @@ WallDetails = {
 }
 logger = setupLogger("module", stdout_level=logging.INFO)
 parser = argparse.ArgumentParser(
-    description="Wall plot",formatter_class=RichHelpFormatter,
+    description="Wall plot",
+    formatter_class=RichHelpFormatter,
 )
 subparsers = parser.add_subparsers(help="Commands")
 predefined_wall_parser = subparsers.add_parser(
@@ -50,7 +51,12 @@ predefined_wall_parser = subparsers.add_parser(
     help="Predefined wall information of different tokamaks : iter, tcs, west, aug, jet, jt60, d3d",
 )
 predefined_wall_parser.set_defaults(cmd="wall")
-predefined_wall_parser.add_argument("machine", help="Machine name", type=str)
+predefined_wall_parser.add_argument("-m", "--machine", help="Machine name", type=str)
+predefined_wall_parser.add_argument(
+    "--show-labels",
+    help="Save figure at default location",
+    action="store_true",
+)
 database_command_parser = subparsers.add_parser(
     "database", help="Get wall information from given database", parents=[dbentryParser]
 )
@@ -64,7 +70,7 @@ parser.add_argument(
 parser.add_argument(
     "--directory",
     help="Directory to save the figure",
-    default=None, 
+    default=None,
 )
 args = parser.parse_args()
 if "cmd" not in args.__dict__:
@@ -85,7 +91,7 @@ if args.cmd == "wall":
     args.user = wallDetails[3]
     args.version = wallDetails[4]
     args.backend = "MDSPLUS"
-    args.uri = f"imas:mdsplus?user=public;shot={args.pulse};run={args.run};database={args.database};version={args.version}"
+    args.uri = f"imas:mdsplus?user={args.user};shot={args.pulse};run={args.run};database={args.database};version={args.version}"
 
 connection = DBMaster.getConnection(args)
 if connection is None:
@@ -102,7 +108,7 @@ ax = canvas.add_axes(title="", xlabel="R (m)", ylabel="Z (m)", row=0, col=0)
 ax.set_aspect("equal", adjustable="box")
 
 wallview = WallView(wallIds)
-wallview.view_wall(ax, linewidth=2, edgecolor="green")
+wallview.view_wall(ax, showLabels=args.show_labels)
 ax.plot()
 canvas.setText(text=f"{getDatabasePath(args)}")
 
@@ -113,11 +119,11 @@ canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
 canvas.fig.suptitle(getTitle(args, "Machine description"), size=12)
 
 if args.save:
-    fname = getFileName(args, os.path.basename(__file__) +"_MachineDescription")
+    fname = getFileName(args, os.path.basename(__file__) + "_MachineDescription")
     if args.directory:
         if not os.path.exists(args.directory):
             os.makedirs(args.directory)
-        fname=os.path.join(args.directory,fname)
+        fname = os.path.join(args.directory, fname)
     canvas.save(fname, width=7.5, height=10)
 else:
     canvas.show()

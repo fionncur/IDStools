@@ -5,7 +5,7 @@ import os
 from datetime import datetime
 from glob import glob
 from pathlib import Path
-from idstools.utils.clihelper import getBackendID
+from idstools.utils.clihelper import getBackendID, getDetailsfromURI
 import re
 import imas
 import yaml
@@ -513,31 +513,30 @@ class DBMaster:
         imasVersion = DBMaster.getCoreVersion()
         imasVersion = int(imasVersion.split(".")[0])
         connection=None
-        if imasVersion > 4:
-            if imasargs.uri is None:
-                if imasargs.pulse is None or imasargs.run is None:
-                    logger.error("Both the uri or the pulse and run are missing.")
-                    return None
-                connection = imas.DBEntry(
-                    getBackendID(imasargs.backend),
-                    imasargs.database,
-                    imasargs.pulse,
-                    imasargs.run,
-                    imasargs.user,
-                )
-            else:
-                # if imasargs.pulse is not None and imasargs.run is not None:
-                #     logger.warning(
-                #         "Both uri and legacy parameters are provided. Using uri for accessing data entry"
-                #     )
+        # 
+        if imasargs.uri:
+            if imasVersion > 4:
                 if "mode" in imasargs.__dict__:
                     connection = imas.DBEntry(imasargs.uri, imasargs.mode)
                 else:
                     connection = imas.DBEntry(imasargs.uri, "r")
-
+            else:
+                param=getDetailsfromURI(imasargs.uri)
+                if param["pathPresent"] is False:
+                    connection = imas.DBEntry(
+                        getBackendID(param["backend"]),
+                        param["database"],
+                        param["pulse"],
+                        param["run"],
+                        param["user"] ,
+                        param["version"] 
+                    )
+                else:
+                    logger.error("Path in URI is not supported in AL4")
+                    return None
         else:
             if imasargs.pulse is None or imasargs.run is None:
-                logger.error("There is no pulse and run available")
+                logger.error("Both the uri or the pulse and run are missing.")
                 return None
             connection = imas.DBEntry(
                 getBackendID(imasargs.backend),
@@ -545,6 +544,7 @@ class DBMaster:
                 imasargs.pulse,
                 imasargs.run,
                 imasargs.user,
+                imasargs.version,
             )
         return connection
 

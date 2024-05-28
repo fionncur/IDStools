@@ -4,6 +4,7 @@ This module provides view functions and classes for pf_active ids data
 `refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`_.
 
 """
+
 import logging
 from matplotlib.patches import Rectangle
 import matplotlib.pyplot as plt
@@ -25,7 +26,7 @@ class PFActiveView:
         self.idsObj = idsObj
         self.computeObj = PfActiveCompute(idsObj)
 
-    def viewActivePfCoils(self, ax: plt.axes):
+    def viewActivePfCoils(self,ax: plt.axes, showLabels=False):
         """
         This function plots and annotates the active PF coils on a existing plot.
 
@@ -56,25 +57,52 @@ class PFActiveView:
                 :alt: image not found
                 :align: center
         """
-        if dictCoils := self.computeObj.getActivePfCoils():
-            for coilIdentifier, coilElements in dictCoils.items():
-                for _, dimension in coilElements.items():
-                    cew, ceh, cec = dimension
-                    rectangle = Rectangle(cec, cew, ceh)
+        if coilsDict := self.computeObj.getActivePfCoils():
+            for _, coilInfo in coilsDict.items():
+                coilElements = coilInfo["elements"]
+                for _, elementInfo in coilElements.items():
+                    cew, ceh, cec = (
+                        elementInfo["horizontalWidth"],
+                        elementInfo["horizontalHeight"],
+                        elementInfo["cec"],
+                    )
+                    rectangle = Rectangle(
+                        cec, cew, ceh, edgecolor="#fd7e14", facecolor="#fd7e14"
+                    )
 
                     ax.add_patch(rectangle)
                     rx, ry = rectangle.get_xy()
                     cx = rx + rectangle.get_width() / 2.0
                     cy = ry + rectangle.get_height() / 2.0
-                    ax.annotate(
-                        coilIdentifier,
-                        (cx, cy),
-                        color="black",
-                        weight="bold",
-                        ha="center",
-                        va="center",
-                    )
-            ax.set_aspect("equal", adjustable="box")
+                    
+                    if showLabels:
+                        name = ""
+                        if coilInfo["identifier"]:
+                            name = coilInfo["identifier"]
+                        elif coilInfo["name"]:
+                            name = f"{coilInfo['name']}"
 
-        else:
-            logger.error("No PF Coils found in the IDS data")
+                        if len(name) > 10:
+                            ax.annotate(
+                                name,
+                                xy=(cx, cy),
+                                xytext=(-cx - 12, cy) if cx < 6.0 else (cx + 12, cy),
+                                color="black",
+                                fontsize=10,
+                                arrowprops=dict(
+                                    arrowstyle="->",
+                                    connectionstyle="arc3,rad=0.",
+                                    color="black",
+                                    lw=1,
+                                ),
+                            )
+                        else:
+                            ax.annotate(
+                                name,
+                                xy=(cx, cy),
+                                ha="center",
+                                va="center",
+                                color="black",
+                                fontsize=10,
+                            )
+            ax.set_aspect("equal", adjustable="box")

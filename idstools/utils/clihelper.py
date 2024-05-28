@@ -58,10 +58,8 @@ imasParser.add_argument(
     default="3",
     help="data version \t(default=%(default)s)",
 )
-parents = [imasParser]
+parents = [imasParser, uriParser]
 
-if getCoreVersion() > 4:
-    parents.append(uriParser)
 dbentryParser = argparse.ArgumentParser(add_help=False, parents=parents)
 dbentryParser.add_argument(
     "-p", "--pulse", dest="pulse", help="Pulse number", type=int
@@ -84,22 +82,37 @@ def getDetailsfromURI(uri):
     user_pattern = r"user=([^;]+)"
     database_pattern = r"database=([^;]+)"
     version_pattern = r"version=([^;]+)"
+    backend_pattern = r'imas:(.*?)\?'
     shot_pattern = r"shot=(\d+)"
+    pulse_pattern = r"pulse=(\d+)"
     run_pattern = r"run=(\d+)"
     path_pattern = r'path=(.*)'
 
     user_match = re.search(user_pattern, uri)
     database_match = re.search(database_pattern, uri)
     version_match = re.search(version_pattern, uri)
+    backend_match = re.search(backend_pattern, uri)
     shot_match = re.search(shot_pattern, uri)
+    pulse_match = re.search(pulse_pattern, uri)
     run_match = re.search(run_pattern, uri)
     path_match = re.search(path_pattern, uri)
 
     param["user"] = user_match.group(1) if user_match else None
     param["database"] = database_match.group(1) if database_match else None
     param["version"] = version_match.group(1) if version_match else None
-    param["pulse"] = shot_match.group(1) if shot_match else None
+    param["backend"] = backend_match.group(1) if backend_match else None
+    shot = shot_match.group(1) if shot_match else None
+    pulse = pulse_match.group(1) if pulse_match else None
+    param["pulse"]=None
+    if shot is not None:
+        param["pulse"]=shot
+    elif pulse is not None:
+        param["pulse"]=pulse
     param["run"] = run_match.group(1) if run_match else None
+    
+    param["backend"]=param["backend"].upper()
+    param["pulse"]=int(param["pulse"])
+    param["run"]=int(param["run"])
     if path_match:
         param["path"] = path_match.group(1)
         param["pathPresent"] = True
@@ -178,65 +191,3 @@ def getDatabasePath(imasargs, timeValue=None) -> str:
     #
     return hostdir
 
-def getConnectionArgsFromString(connectionstring, inputargs=None) -> str:
-    """
-    This function parses a connection string in a `idsname/pulse/run/user/backend/database/version` format and returns the connection details as
-    argparse Namespace.
-    """
-    if inputargs is None:
-        inputargs=argparse.Namespace()
-    _idsName = connectionstring.split('/', 1)[0]
-    if len(connectionstring.split('/')) > 1:
-        _idsInfo = connectionstring.split('/', 1)[1]
-        if len(_idsInfo.split("/")) == 6:
-            (
-            inputargs.pulse,
-            inputargs.run,
-            inputargs.user,
-            inputargs.backend,
-            inputargs.database,
-            inputargs.version,
-        ) = _idsInfo.split("/")
-        
-        elif len(_idsInfo.split("/")) == 5:
-            (
-            inputargs.pulse,
-            inputargs.run,
-            inputargs.user,
-            inputargs.backend,
-            inputargs.database,
-        ) = _idsInfo.split("/")
-
-        elif len(_idsInfo.split("/")) == 4:
-            (
-            inputargs.pulse,
-            inputargs.run,
-            inputargs.user,
-            inputargs.backend,
-        ) = _idsInfo.split("/")
-        
-        elif len(_idsInfo.split("/")) == 3:
-            (
-            inputargs.pulse,
-            inputargs.run,
-            inputargs.user,
-        ) = _idsInfo.split("/")     
-            
-        elif len(_idsInfo.split("/")) == 2:
-            (
-            inputargs.pulse,
-            inputargs.run,
-        ) = _idsInfo.split("/") 
-        
-        elif len(_idsInfo.split("/")) == 1:
-            inputargs.uri = _idsInfo
-        else:
-            print(
-                f"Bad input format: {connectionstring} not valid, Arguments should be formatted like idsname/pulse/run/user/backend/database/version"
-            )
-            return None
-        if inputargs.pulse is not None:
-            inputargs.pulse = int(inputargs.pulse)
-        if inputargs.run is not None:
-            inputargs.run = int(inputargs.run)
-    return _idsName, inputargs

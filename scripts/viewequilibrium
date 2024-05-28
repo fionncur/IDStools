@@ -1,20 +1,23 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# python scripts/viewequilibrium -p 134174 -r 117
+# -mdesc "imas:mdsplus?user=public;shot=116000;run=2;database=ITER_MD;version=3#wall"
+# "imas:mdsplus?user=public;shot=111001;run=102;database=ITER_MD;version=3#pf_active"
 
 import argparse
+import copy
 import logging
 import os
-from rich_argparse import RichHelpFormatter
-import copy
-from idstools.view.wall import WallView
+
 import imas
+from rich_argparse import RichHelpFormatter
 
 from idstools.compute.common import getNearestTime
 from idstools.database import DBMaster
 from idstools.utils.clihelper import (
     dbentryParser,
-    getConnectionArgsFromString,
     getDatabasePath,
+    getDetailsfromURI,
     getFileName,
     getTitle,
 )
@@ -22,12 +25,14 @@ from idstools.utils.idslogger import setupLogger
 from idstools.view.common import Canvas
 from idstools.view.equilibrium import EquilibriumView
 from idstools.view.pf_active import PFActiveView
+from idstools.view.wall import WallView
 
 parser = argparse.ArgumentParser(
     description="---- Display the plasma equilibrium from the equilibrium IDS. It also shows pf coils position overlay if exists [Previously known as equiplot]",
     parents=[dbentryParser],
     formatter_class=RichHelpFormatter,
 )
+
 
 parser.add_argument(
     "-t", "--time", help="Time (default=middle)", type=float, default=-99.0
@@ -45,11 +50,17 @@ parser.add_argument(
     action="store_true",
 )
 parser.add_argument(
-        "mdidslist",
-        nargs="*",
-        help="Provide machine descriptions that you need to plot (/pulse/run/user/backend/database/version is optional):  pf_active/pulse/run/user/backend/database/version wall/pulse/run/user/backend/database/version",
-    )
-
+    "-mdesc",
+    "--machine-desc",
+    nargs="*",
+    default=[],
+    help="Provide machine descriptions that you need to plot with uris",
+)
+parser.add_argument(
+    "--show-labels",
+    help="Save figure at default location",
+    action="store_true",
+)
 parser.add_argument(
     "--save",
     help="Save figure at default location",
@@ -58,15 +69,15 @@ parser.add_argument(
 parser.add_argument(
     "--directory",
     help="Directory to save the figure",
-    default=None, 
+    default=None,
 )
 args = parser.parse_args()
-
 logger = setupLogger("module", stdout_level=logging.INFO)
 connection = DBMaster.getConnection(args)
 if connection is None:
     logger.critical("----> Aborted.")
     exit(1)
+
 
 idsObjEquilibrium = imas.equilibrium()
 idsObjEquilibrium.time = connection.partial_get("equilibrium", "time", args.occurrence)
@@ -78,45 +89,59 @@ if idsObjEquilibrium.time is not None:
     )
     ViewEquilibrium = EquilibriumView(idsObjEquilibrium)
 
-
     title = f"2D Equilibrium at time {timeValue:.1f}"
     databaseText = ""
     canvas = Canvas(1, 1)
     ax = canvas.add_axes(title="", xlabel="", row=0, col=0)
 
-    for mdidsInfo in args.mdidslist:
+    for mdidsInfo in args.machine_desc:
         inputargs = copy.deepcopy(args)
-        _idsName, inputargs = getConnectionArgsFromString(mdidsInfo, inputargs)
+        splittedmsIdsInfo = mdidsInfo.split("#")
+        _idsName = ""
+        _mdUri = None
+        if len(splittedmsIdsInfo) == 2:
+            _mdUri, _idsName = splittedmsIdsInfo
+            mdargs = argparse.Namespace()
+            param = getDetailsfromURI(_mdUri)
+            mdargs.backend = param["backend"]
+            mdargs.database = param["database"]
+            mdargs.pulse = param["pulse"]
+            mdargs.run = param["run"]
+            mdargs.user = param["user"]
+            mdargs.version = param["version"]
+            mdargs.uri = _mdUri
+            inputargs = mdargs
+        if len(splittedmsIdsInfo) == 1:
+            _idsName = splittedmsIdsInfo[0]
+        if _idsName == "wall":
+            connection = DBMaster.getConnection(inputargs)
+            if connection is not None:
+                _idsData = connection.get(_idsName)
+                connection.close()
+                wallview = WallView(_idsData)
+                if foundData := wallview.view_wall(ax, args.show_labels):
+                    title += ", with Wall"
+                    databaseText += f"{_idsName}={getDatabasePath(inputargs)}\n"
+            else:
+                logger.warning(f"{_idsName} ids is not present")
         if _idsName == "pf_active":
             connection = DBMaster.getConnection(inputargs)
             if connection is not None:
-                data = {}
                 _idsData = connection.get(_idsName)
                 connection.close()
                 ViewPfCoils = PFActiveView(_idsData)
-                ViewPfCoils.viewActivePfCoils(ax)
+                ViewPfCoils.viewActivePfCoils(ax, args.show_labels)
                 title += "with Active PF Coils"
                 databaseText += f"{_idsName}={getDatabasePath(inputargs)}\n"
             else:
                 logger.warning("f{_idsName} ids is not present")
 
-        if _idsName == "wall":
-            connection = DBMaster.getConnection(inputargs)
-            if connection is not None:
-                data = {}
-                _idsData = connection.get(_idsName)
-                connection.close()
-                wallview = WallView(_idsData)
-                if foundData := wallview.view_wall(ax):
-                    title += ", with Wall"
-                    databaseText += f"{_idsName}={getDatabasePath(inputargs)}\n"
-            else:
-                logger.warning(f"{_idsName} ids is not present")
-
     ViewEquilibrium.viewMagneticPoloidalFlux(ax, plotRho=args.rho)
     ax.set_title(title)
 
-    canvas.setText(text=f"{getDatabasePath(args, timeValue=timeValue)}\n{databaseText}", y =0.900)
+    canvas.setText(
+        text=f"{getDatabasePath(args, timeValue=timeValue)}\n{databaseText}", y=0.900
+    )
     canvas.fig.suptitle(getTitle(args, "Equilibrium", timeValue), size=12)
     canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
     if args.save:
@@ -126,7 +151,7 @@ if idsObjEquilibrium.time is not None:
         if args.directory:
             if not os.path.exists(args.directory):
                 os.makedirs(args.directory)
-            fname=os.path.join(args.directory,fname)
+            fname = os.path.join(args.directory, fname)
         canvas.save(fname)
     else:
         canvas.show()
