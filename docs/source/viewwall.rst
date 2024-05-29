@@ -21,7 +21,7 @@ specify database entry to retrive wall details. it uses wall ids
 
    .. code-block:: bash
 
-      $ viewwall wall iter
+      $ viewwall wall -m iter
 
    .. thumbnail:: _static/images/wallview_iter.png
       :alt: image not found

@@ -9,7 +9,11 @@ from rich_argparse import RichHelpFormatter
 from idstools.database import DBMaster
 from idstools.machinedescription import MachineDescription
 from idstools.set_logger import set_logger
-from idstools.utils.clihelper import dbentryParser, getConnectionArgsFromString, getCoreVersion, getDatabasePath
+from idstools.utils.clihelper import (
+    dbentryParser,
+    getDatabasePath,
+    getDetailsfromURI,
+)
 from idstools.utils.idslogger import setupLogger
 from idstools.view.common import Canvas
 from idstools.view.pf_active import PFActiveView
@@ -21,7 +25,7 @@ from idstools.view.wall import WallView
 logger = setupLogger("module", stdout_level=logging.INFO)
 
 
-def plotMachineDescription(idsData):
+def plotMachineDescription(idsData, showLabels=False):
     """
     The `plotMachineDescription` method is responsible for plotting the machine description based on the provided pulse list.
     """
@@ -41,7 +45,7 @@ def plotMachineDescription(idsData):
         #     continue
         if idsName == "pf_active":
             pfcoilsview = PFActiveView(idsDataAndConfig["idsData"])
-            pfcoilsview.viewActivePfCoils(ax)
+            pfcoilsview.viewActivePfCoils(ax, showLabels=showLabels)
             databasePath += (
                 "pf_active = "
                 + getDatabasePath(idsDataAndConfig["connectionArgs"])
@@ -50,7 +54,7 @@ def plotMachineDescription(idsData):
 
         elif idsName == "wall":
             wallview = WallView(idsDataAndConfig["idsData"])
-            wallview.view_wall(ax)
+            wallview.view_wall(ax, showLabels=showLabels)
             databasePath += (
                 "wall = " + getDatabasePath(idsDataAndConfig["connectionArgs"]) + "\n"
             )
@@ -76,13 +80,13 @@ def plotMachineDescription(idsData):
         top=0.916, bottom=0.09, left=0.044, right=0.953, hspace=0.287, wspace=0.2
     )
     canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
-    canvas.fig.suptitle("ITER Machine Description", size=12)
+    canvas.fig.suptitle("Machine Description", size=12)
     if args.save:
-        fname = os.path.basename(__file__) + "_iter_machine_description.png"
+        fname = os.path.basename(__file__) + "_machine_description.png"
         if args.directory:
             if not os.path.exists(args.directory):
                 os.makedirs(args.directory)
-            fname=os.path.join(args.directory,fname)
+            fname = os.path.join(args.directory, fname)
         canvas.save(fname)
     else:
         canvas.show()
@@ -90,126 +94,80 @@ def plotMachineDescription(idsData):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="---- View machine description by getting information of data from md_summary file",formatter_class=RichHelpFormatter,
+        description="---- View machine description",
+        formatter_class=RichHelpFormatter,
+        parents=[dbentryParser],
     )
-    subparsers = parser.add_subparsers(help="sub-commands help")
-
-    subparserList = subparsers.add_parser(
-        "list", help="list machine description databases", parents=[dbentryParser]
-    )
-    subparserList.set_defaults(cmd="list")
-    subparserList.add_argument(
-        "ids",
+    parser.add_argument(
+        "-mdesc",
+        "--machine-desc",
         nargs="*",
-        type=str,
-        help="IDS names",
+        default=[],
+        help="""Provide machine descriptions that you need to plot 
+    with uris for example
+    "imas:mdsplus?user=costerd;shot=40866;run=1;database=aug;version=3#wall"
+    or just names e.g wall pf_active
+    """,
     )
-    subparserList.add_argument(
-        "--obsolete",
-        help="Shows obsolete files",
+    parser.add_argument(
+        "--show-labels",
+        help="Save figure at default location",
         action="store_true",
     )
-    subparserList.add_argument(
-        "--checkValidity",
-        help="Checks if database exists and also tries to retrive ids",
-        action="store_true",
-    )
-    subparserPlot = subparsers.add_parser(
-        "plot", help="Plot Machine description databases", parents=[dbentryParser]
-    )
-    subparserPlot.set_defaults(cmd="plot")
-    subparserPlot.add_argument(
-        "idslist",
-        nargs="*",
-        help="Provide ids list with optional pulse and run.. Space separated values for example :  pf_active/pulse/run/user/backend/database/version wall/pulse/run/user/backend/database/version",
-    )
-    # pulse/run/user/backend/database/version/
-    subparserPlot.add_argument(
+    parser.add_argument(
         "--save",
         help="Save figure at default location",
         action="store_true",
     )
-    subparserPlot.add_argument(
+    parser.add_argument(
         "--directory",
         help="Directory to save the figure",
-        default=None, 
+        default=None,
     )
     args = parser.parse_args()
-    # Default command if not provided
-    if "cmd" not in args.__dict__:
-        args.cmd = "list"
-        args.obsolete = False
-        args.checkValidity = False
-        args.ids = []
-
-    machineDescription = MachineDescription(connectionArgs=args)
-    if args.cmd == "list":
-        data = machineDescription.getMDSummary(
-            args.ids, args.obsolete, args.checkValidity
-        )
-        print(
-            f"{'Pulse': >11} | {'IDS Name' : >28} | {'Status': >10} | {'description'}"
-        )
-        print(
-            f"--------------------------------------------------------------------------"
-        )
-        for pulse, pulseData in data.items():
-            idsname = pulseData["config"]["ids"]
-            status = pulseData["config"]["status"]
-            description = pulseData["config"]["description"]
-            print(f"{pulse : >11} | {idsname : >28} | {status: >10} | {description}")
-
-    if args.cmd == "plot":
-        if args.idslist:
-            if "database" in args.__dict__ and args.database == "ITER":
-                args.database = "ITER_MD"
-            
-            idsData = {}
-            for idsInfo in args.idslist:
-                # Specify default args
-                inputargs = copy.deepcopy(args)
-                
-                _idsName, inputargs = getConnectionArgsFromString(idsInfo, inputargs)
-                useduri=False
-                usedpulserun=False
-                if getCoreVersion() > 4:
-                    if inputargs.uri is not None:
-                        useduri=True
-                    else:
-                        if inputargs.pulse is not None and inputargs.run is not None:
-                            usedpulserun=True
-                else:
-                    if inputargs.pulse is not None and inputargs.run is not None:
-                        usedpulserun=True   
-                if usedpulserun is True or useduri is True:
-                    # Get data from user defined arguments
-                    logger.info(f"DB Entry parameters for {_idsName}: {inputargs.__dict__}")
-                    connection = DBMaster.getConnection(inputargs)
-                    if connection is not None:
-                        data = {}
-                        _idsData = connection.get(_idsName)
-                        connection.close()
-                        if _idsData is not None:
-                            (
-                            data["idsData"],
-                            data["yamlConfig"],
-                            data["connectionArgs"],
-                            ) = (
-                                _idsData,
-                                None,
-                                inputargs,
-                            )
-                            idsData[_idsName]=data
-                # Not provided by user then get from summary file (ITER_MD)        
-                else: 
-                    idsData[_idsName] = machineDescription.getMDDataByIds(_idsName)
-                    connectionArgs=idsData[_idsName]["connectionArgs"]
-                    logger.info(f"DB Entry parameters for {_idsName}: {connectionArgs.__dict__}")
-                    args.pulse = None
-                    args.run = None
-                    args.uri = None
-            plotMachineDescription(idsData)
-        else:
+    machineDescription = MachineDescription()
+    idsData = {}
+    for mdidsInfo in args.machine_desc:
+        inputargs = copy.deepcopy(args)
+        splittedmsIdsInfo = mdidsInfo.split("#")
+        _idsName = ""
+        _mdUri = None
+        if len(splittedmsIdsInfo) == 2:
+            _mdUri, _idsName = splittedmsIdsInfo
+            mdargs = argparse.Namespace()
+            param = getDetailsfromURI(_mdUri)
+            mdargs.backend = param["backend"]
+            mdargs.database = param["database"]
+            mdargs.pulse = param["pulse"]
+            mdargs.run = param["run"]
+            mdargs.user = param["user"]
+            mdargs.version = param["version"]
+            mdargs.uri = _mdUri
+            inputargs = mdargs
+        if len(splittedmsIdsInfo) == 1:
+            _idsName = splittedmsIdsInfo[0]
+        connection = DBMaster.getConnection(inputargs)
+        idsFound = False
+        if connection is not None:
+            _idsData = connection.get(_idsName)
+            connection.close()
+            data = {}
+            if _idsData is not None:
+                idsFound = True
+                (
+                    data["idsData"],
+                    data["yamlConfig"],
+                    data["connectionArgs"],
+                ) = (
+                    _idsData,
+                    None,
+                    inputargs,
+                )
+                idsData[_idsName] = data
+        if not idsFound:
             logger.info(
-                "Provde machine description idses that you want to plot e.g pf_active, wall etc "
+                f"Data entry for {_idsName} is not given, retrieving from ITER machine description"
             )
+            idsData[_idsName] = machineDescription.getMDDataByIds(_idsName)
+
+    plotMachineDescription(idsData, args.show_labels)

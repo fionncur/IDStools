@@ -14,7 +14,7 @@ logger = logging.getLogger(f"module.{__name__}")
 class MachineDescription:
     mdSummaryPath = r"/work/imas/shared/imasdb/ITER_MD/3/md_summary.yaml"
 
-    def __init__(self, mdSummaryPath: str = "",connectionArgs= None) -> None:
+    def __init__(self, mdSummaryPath: str = "", connectionArgs=None) -> None:
         self.mdArgs = connectionArgs
         if self.mdArgs:
             if "database" in self.mdArgs.__dict__ and self.mdArgs.database == "ITER":
@@ -40,14 +40,22 @@ class MachineDescription:
         idsData = None
         config = None
         # Get wall of the tokamak
+        import argparse
+
+        mdArgs = argparse.Namespace()
+        mdArgs.backend = 12
+        mdArgs.pulse = 0
+        mdArgs.run = 0
+        mdArgs.user = "public"
+        mdArgs.database = "ITER_MD"
+        mdArgs.version = 3
+        mdArgs.uri = None
         for pulse, _config in mdIdsDict.items():
             if idsName == _config["config"]["ids"]:
-                self.mdArgs.pulse, self.mdArgs.run = pulse.split("/")
-                self.mdArgs.pulse, self.mdArgs.run = int(self.mdArgs.pulse), int(
-                    self.mdArgs.run
-                )
-                self.mdArgs.uri = f"imas:mdsplus?user=public;shot={self.mdArgs.pulse};run={self.mdArgs.run};database={self.mdArgs.database};version={self.mdArgs.version}"
-                mdConnection = DBMaster.getConnection(self.mdArgs)
+                mdArgs.pulse, mdArgs.run = pulse.split("/")
+                mdArgs.pulse, mdArgs.run = int(mdArgs.pulse), int(mdArgs.run)
+                mdArgs.uri = f"imas:mdsplus?user={mdArgs.user};shot={mdArgs.pulse};run={mdArgs.run};database={mdArgs.database};version={mdArgs.version}"
+                mdConnection = DBMaster.getConnection(mdArgs)
 
                 # print(mdConnection)
                 if mdConnection is not None:
@@ -61,7 +69,7 @@ class MachineDescription:
         return {
             "idsData": idsData,
             "yamlConfig": config,
-            "connectionArgs": copy.deepcopy(self.mdArgs),
+            "connectionArgs": copy.deepcopy(mdArgs),
         }
 
     def getMDDataByIdsList(self, mdIdsList=[]):
@@ -86,7 +94,7 @@ class MachineDescription:
             outputDict["connectionArgs"],
         )
         return data
-    
+
     def getMDSummary(
         self,
         idsNames: typing.Union[typing.List, str] = "",
@@ -118,7 +126,7 @@ class MachineDescription:
                 self.mdArgs.pulse, self.mdArgs.run = int(self.mdArgs.pulse), int(
                     self.mdArgs.run
                 )
-                self.mdArgs.uri = f"imas:mdsplus?user=public;pulse={self.mdArgs.pulse};run={self.mdArgs.run};database={self.mdArgs.database};version={self.mdArgs.version}"
+                self.mdArgs.uri = f"imas:mdsplus?user={self.mdArgs.user};pulse={self.mdArgs.pulse};run={self.mdArgs.run};database={self.mdArgs.database};version={self.mdArgs.version}"
                 mdConnection = DBMaster.getConnection(self.mdArgs)
                 if mdConnection is not None:
                     idsData = mdConnection.get(config["ids"])

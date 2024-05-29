@@ -42,7 +42,7 @@ WallDetails = {
 }
 logger = setupLogger("module", stdout_level=logging.INFO)
 parser = argparse.ArgumentParser(
-    description="Wall plot",
+    description="This script allows you to plot wall from different tokamaks",
     formatter_class=RichHelpFormatter,
 )
 subparsers = parser.add_subparsers(help="Commands")
@@ -91,7 +91,7 @@ if args.cmd == "wall":
     args.user = wallDetails[3]
     args.version = wallDetails[4]
     args.backend = "MDSPLUS"
-    args.uri = f"imas:mdsplus?user={args.user};shot={args.pulse};run={args.run};database={args.database};version={args.version}"
+    args.uri = f"imas:{args.backend.lower()}?user={args.user};shot={args.pulse};run={args.run};database={args.database};version={args.version}"
 
 connection = DBMaster.getConnection(args)
 if connection is None:

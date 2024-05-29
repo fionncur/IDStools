@@ -74,6 +74,11 @@ class WallView:
             for _, description2d in vesselUnits.items():
                 for vIndex, vesselUnit in description2d["vesselunits"].items():
                     showLabelFlag = True
+                    vname = ""
+                    if vesselUnit["identifier"]:
+                        vname = vesselUnit["identifier"]
+                    elif vesselUnit["name"]:
+                        vname = vesselUnit["name"]
                     if vesselUnit["rectangle_coordinates"]:
                         for rw, zw in vesselUnit["rectangle_coordinates"]:
                             if showLabelFlag:
@@ -82,7 +87,7 @@ class WallView:
                                     rw,
                                     zw,
                                     showLabels=showLabels,
-                                    label=vesselUnit["name"],
+                                    label=vname,
                                     fill=False,
                                     color=colors[vIndex % 20],
                                     **kwargs,
@@ -119,3 +124,4 @@ class WallView:
             frameon=False,
             fontsize="x-small",
         )
+        return True

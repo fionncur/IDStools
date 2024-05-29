@@ -94,7 +94,7 @@ class WallCompute:
 
             description2dInfo["limiterunits"] = unitInfos
             description2dInfos[description2dIndex] = description2dInfo
-        
+
         return description2dInfos
 
     @staticmethod
@@ -134,82 +134,3 @@ class WallCompute:
 
             rectangleCoordinates.append((rw, zw))
         return rectangleCoordinates
-
-        # def get_limiter(self, iunit=0) -> Union[dict, None]:
-        #     """
-        #     The function `get_limiter` returns a dictionary containing the outline coordinates of a limiter unit.
-
-        #     Args:
-        #         iunit: The `iunit` parameter is an optional integer parameter that specifies the index of the limiter unit. It is used to access a specific limiter unit within the `self.ids_object.description_2d[0].limiter.unit` list. If `iunit` is not provided, it. Defaults to 0
-
-        #     Returns:
-        #         a dictionary of FW (limiter) and its data.
-        #     """
-        #     if len(self.ids_object.description_2d) == 0:
-        #         logger.error("wall.description_2d is empty")
-        #         return None
-        #     if len(self.ids_object.description_2d[0].limiter.unit) <= iunit:
-        #         logger.error(
-        #             f"wall.description_2d[0].limiter.unit is less than iunit {iunit}"
-        #         )
-        #         return None
-
-        #     r = self.ids_object.description_2d[0].limiter.unit[iunit].outline.r
-        #     z = self.ids_object.description_2d[0].limiter.unit[iunit].outline.z
-        #     return None if len(r) == 0 or len(z) == 0 else {"element0": [r, z]}
-
-        # def get_wall(self) -> dict:
-        #     """
-        #     The function `get_wall` returns a dictionary containing data for various vessels and limiters.
-
-        #     Returns:
-        #         a dictionary containing the VV (Vacuum Vessel) and its data. The dictionary includes the VVIS, VVOS, TS, DIR, Cryostat, CTR1, CTR2, CTR3, CTR4, UCTS, FW (First Wall), and DIV (Divertor) data.
-        #     """
-        #     wall = {
-        #         "VVIS": self.get_vessel(iunit=wallIndexMapping["VVIS"], add_endpoint=True)
-        #     }
-
-        # wall["VVOS"] = self.get_vessel(
-        #     iunit=wallIndexMapping["VVOS"], add_endpoint=True
-        # )
-        # wall["TS"] = self.get_vessel(iunit=wallIndexMapping["TS"])
-        # wall["DIR"] = self.get_vessel(iunit=wallIndexMapping["DIR"])
-
-        # wall["Cryostat"] = self.get_vessel(iunit=wallIndexMapping["Cryostat"])
-        # wall["CTR1"] = self.get_vessel(iunit=wallIndexMapping["CTR1"])
-        # wall["CTR2"] = self.get_vessel(iunit=wallIndexMapping["CTR2"])
-        # wall["CTR3"] = self.get_vessel(iunit=wallIndexMapping["CTR3"])
-        # wall["CTR4"] = self.get_vessel(iunit=wallIndexMapping["CTR4"])
-        # wall["UCTS"] = self.get_vessel(iunit=wallIndexMapping["UCTS"])
-
-        # wall["FW"] = self.get_limiter(iunit=wallIndexMapping["FW"])
-        # wall["DIV"] = self.get_limiter(iunit=wallIndexMapping["DIV"])
-
-        return wall
-
-    # def get_vessel(
-    #     self, iunit: int = 0, add_endpoint: bool = False
-    # ) -> Union[dict, None]:
-    #     """
-    #     The `get_vessel` function returns a dictionary containing the data of a VV (vessel) object.
-
-    #     Args:
-    #         iunit: The `iunit` parameter is an optional integer parameter that specifies the index of the VV unit for which you want to retrieve the data. By default, it is set to 0, which means the first VV unit. You can change this parameter to retrieve data for a different VV. Defaults to 0
-    #         add_endpoint: The `add_endpoint` parameter is a boolean flag that determines whether or not to add an endpoint to the vessel data. If `add_endpoint` is `True`, an additional point will be added to the vessel data to close the shape. If `add_endpoint` is `False`, the vessel data. Defaults to False
-
-    #     Returns:
-    #         a dictionary containing the coordinates of the vessel elements. Each element is represented by a key-value pair in the dictionary, where the key is a string in the format "element{element_counter}" and the value is a list of two lists: rw (list of x-coordinates) and zw (list of y-coordinates).
-    #     """
-    #     print("get_vessel called")
-    #     wallDict = self.getWall()
-    #     if wallDict is None:
-    #         return None
-    #     r, z, h = wallDict["r"], wallDict["z"], wallDict["h"]
-    #     if len(r) == 0 or len(z) == 0 or len(h) == 0:
-    #         return None
-
-    #     if add_endpoint:
-    #         r = np.append(r, r[0])
-    #         z = np.append(z, z[0])
-
-    #     return element_dict

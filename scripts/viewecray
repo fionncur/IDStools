@@ -70,7 +70,7 @@ if args.wall:
             mdargs.pulse, mdargs.run = pulse.split("/")
             mdargs.pulse, mdargs.run = int(mdargs.pulse), int(mdargs.run)
             mdargs.database = "ITER_MD"
-            mdargs.uri = f"imas:mdsplus?user=public;shot={mdargs.pulse};run={mdargs.run};database={mdargs.database};version={mdargs.version}"
+            mdargs.uri = f"imas:mdsplus?user={mdargs.pulse};shot={mdargs.pulse};run={mdargs.run};database={mdargs.database};version={mdargs.version}"
             mdConnection = DBMaster.getConnection(mdargs)
 
             if mdConnection is not None:

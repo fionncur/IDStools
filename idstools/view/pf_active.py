@@ -26,7 +26,7 @@ class PFActiveView:
         self.idsObj = idsObj
         self.computeObj = PfActiveCompute(idsObj)
 
-    def viewActivePfCoils(self,ax: plt.axes, showLabels=False):
+    def viewActivePfCoils(self, ax: plt.axes, showLabels=False):
         """
         This function plots and annotates the active PF coils on a existing plot.
 
@@ -74,7 +74,7 @@ class PFActiveView:
                     rx, ry = rectangle.get_xy()
                     cx = rx + rectangle.get_width() / 2.0
                     cy = ry + rectangle.get_height() / 2.0
-                    
+
                     if showLabels:
                         name = ""
                         if coilInfo["identifier"]:
@@ -88,7 +88,7 @@ class PFActiveView:
                                 xy=(cx, cy),
                                 xytext=(-cx - 12, cy) if cx < 6.0 else (cx + 12, cy),
                                 color="black",
-                                fontsize=10,
+                                fontsize="x-small",
                                 arrowprops=dict(
                                     arrowstyle="->",
                                     connectionstyle="arc3,rad=0.",
@@ -103,6 +103,6 @@ class PFActiveView:
                                 ha="center",
                                 va="center",
                                 color="black",
-                                fontsize=10,
+                                fontsize="x-small",
                             )
             ax.set_aspect("equal", adjustable="box")
