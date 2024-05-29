@@ -151,12 +151,24 @@ if __name__ == "__main__":
         dboutArgs.version = args.version
         dboutArgs.run = args.outputRun
         dboutArgs.pulse = args.pulse
+        dboutArgs.uri = args.uri
         if args.uriOut is not None:
             dboutArgs.uri = args.uriOut
             if args.verbose:
                 print("Using out URI given")
         else:
-            dboutArgs.uri = f"imas:{dboutArgs.backend.lower()}?user={dboutArgs.user};shot={dboutArgs.pulse};run={dboutArgs.run};database={dboutArgs.database};version={dboutArgs.version}"
+            if dboutArgs.uri is None:
+                dboutArgs.uri = f"imas:{dboutArgs.backend.lower()}?user={dboutArgs.user};shot={dboutArgs.pulse};run={dboutArgs.run};database={dboutArgs.database};version={dboutArgs.version}"
+            else:
+                import re
+
+                dboutArgs.uri = re.sub(
+                    r"user=[^;]+", f"user={dboutArgs.user}", dboutArgs.uri
+                )
+                dboutArgs.uri = re.sub(
+                    r"run=[^;]+", f"run={args.outputRun}", dboutArgs.uri
+                )
+
         dbout = DBMaster.createConnection(dboutArgs)
         if dbout is None:
             print("----> Aborted.")

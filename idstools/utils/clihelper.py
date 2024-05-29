@@ -120,11 +120,16 @@ def getDetailsfromURI(uri):
         param["pathPresent"] = True
     else:
         param["pathPresent"] = False
-
-    param["legacyPresent"] = not all(
-        param[key] is None
-        for key in ["run", "pulse", "database", "backend", "user", "version"]
-    )
+    param["legacyPresent"] = True
+    if (
+        param["run"] is None
+        or param["pulse"] is None
+        or param["database"] is None
+        or param["backend"] is None
+        or param["user"] is None
+        or param["version"] is None
+    ):
+        param["legacyPresent"] = False
 
     return param
 

@@ -54,7 +54,7 @@ predefined_wall_parser.set_defaults(cmd="wall")
 predefined_wall_parser.add_argument("-m", "--machine", help="Machine name", type=str)
 predefined_wall_parser.add_argument(
     "--show-labels",
-    help="Save figure at default location",
+    help="Show labels",
     action="store_true",
 )
 database_command_parser = subparsers.add_parser(
