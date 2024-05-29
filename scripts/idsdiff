@@ -23,7 +23,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from idstools.database import DBMaster
-from idstools.utils.clihelper import getCoreVersion, getDetailsfromURI, imasParser
+from idstools.utils.clihelper import getDetailsfromURI, imasParser
 from idstools.utils.ddhelper import DDHelper
 from idstools.utils.idshelper import compareIds
 from idstools.utils.idslogger import setupLogger
@@ -39,7 +39,7 @@ def get_filename(file_title, log_dir):
     if not os.path.exists(log_dir):
         try:
             os.makedirs(log_dir)
-        except:
+        except Exception as e:
             print(
                 f"Cannot create directory {log_dir}. ",
                 end="",
@@ -56,8 +56,8 @@ def generate_html(file_path, compareData):
     ddhelper = DDHelper()
 
     file_object = open(file_path, "w")
-    (pulseA,pulseB, inputA, inputB), data = next(iter(compareData.items()))
-    
+    (pulseA, pulseB, inputA, inputB), data = next(iter(compareData.items()))
+
     report_title = f"Differences : {pulseA} ~ {pulseB}"
     report_header_string = (
         """<head>
@@ -353,7 +353,7 @@ def generate_html(file_path, compareData):
                         try:
                             with open(idsA, "wb") as f:
                                 f.write(bytes(values[0], "UTF-8"))
-                        except:
+                        except Exception as e:
                             if os.path.exists(idsA):
                                 os.unlink(idsA)
                             raise
@@ -361,7 +361,7 @@ def generate_html(file_path, compareData):
                         try:
                             with open(idsB, "wb") as f:
                                 f.write(bytes(values[1], "UTF-8"))
-                        except:
+                        except Exception as e:
                             if os.path.exists(idsB):
                                 os.unlink(idsB)
                             raise
@@ -431,14 +431,13 @@ if __name__ == "__main__":
         type=str,
         help="Provide space separated list  pulse/run/user/backend/database/version",
     )
-    if getCoreVersion() > 4:
-        parser.add_argument(
-            "-uri",
-            "--uri-list",
-            nargs="*",
-            type=str,
-            help="uri separated by spaces \t\t(default=%(default)s)",
-        )
+    parser.add_argument(
+        "-uri",
+        "--uri-list",
+        nargs="*",
+        type=str,
+        help="uri separated by spaces \t\t(default=%(default)s)",
+    )
 
     parser.add_argument(
         "ids",
@@ -459,33 +458,42 @@ if __name__ == "__main__":
     parser.add_argument(
         "--directory",
         help="Specifies directory where report should be stored",
-        default="idsdiff_reports", 
+        default="idsdiff_reports",
     )
     args = parser.parse_args()
 
     connections = []
     if args.pulse_list is not None:
         for pulseinfo in args.pulse_list:
-            details=pulseinfo.split("/")
-            pulse=None 
+            details = pulseinfo.split("/")
+            pulse = None
             run = None
             user = "public"
             backend = "MDSPLUS"
             database = "ITER"
             version = "3"
-            if len(details)<2:
+            if len(details) < 2:
                 print(f"Looks like not enough details provided {details}")
                 continue
-            if len(details)==6:pulse, run, _user, _backend, _database, _version = details
-            if len(details)==5:pulse, run, _user, _backend, _database = details
-            if len(details)==4:pulse, run, _user, _backend= details
-            if len(details)==3:pulse, run, _user= details
-            if len(details)==2:pulse, run = details
-            pulse, run=int(pulse), int(run)
-            if _user: user=_user
-            if _backend: backend=_backend
-            if _database: database=_database
-            if _version: version=_version
+            if len(details) == 6:
+                pulse, run, _user, _backend, _database, _version = details
+            if len(details) == 5:
+                pulse, run, _user, _backend, _database = details
+            if len(details) == 4:
+                pulse, run, _user, _backend = details
+            if len(details) == 3:
+                pulse, run, _user = details
+            if len(details) == 2:
+                pulse, run = details
+            pulse, run = int(pulse), int(run)
+            if _user:
+                user = _user
+            if _backend:
+                backend = _backend
+            if _database:
+                database = _database
+            if _version:
+                version = _version
             _pulseArgs = argparse.Namespace()
             _pulseArgs.backend = backend
             _pulseArgs.pulse = pulse
@@ -493,25 +501,23 @@ if __name__ == "__main__":
             _pulseArgs.user = user
             _pulseArgs.database = database
             _pulseArgs.version = version
-            if getCoreVersion() > 4:
-                _pulseArgs.uri = None
+            _pulseArgs.uri = None
             _connection = DBMaster.getConnection(_pulseArgs)
             if _connection is None:
                 print(f"Error opening pulse! Please check existence : {pulseinfo}")
                 continue
-            connections.append((pulseinfo,_connection))
+            connections.append((pulseinfo, _connection))
 
-    if getCoreVersion() > 4:
-        if args.uri_list is not None:
-            for uriinfo in args.uri_list:
-                _uriArgs = argparse.Namespace()
-                _uriArgs.uri=uriinfo
-                _connection = DBMaster.getConnection(_uriArgs)
-                if _connection is None:
-                    print(f"Error opening uri! Please check existence : {uriinfo}")
-                    continue
-                connections.append((uriinfo,_connection))
-        
+    if args.uri_list is not None:
+        for uriinfo in args.uri_list:
+            _uriArgs = argparse.Namespace()
+            _uriArgs.uri = uriinfo
+            _connection = DBMaster.getConnection(_uriArgs)
+            if _connection is None:
+                print(f"Error opening uri! Please check existence : {uriinfo}")
+                continue
+            connections.append((uriinfo, _connection))
+
     if not connections:
         print("No valid connections found! Please validate pulse details")
 
@@ -529,8 +535,10 @@ if __name__ == "__main__":
         stdout_level=logging.INFO,
     )
     st = time.time()
-    totalData={}
-    for i in track(range(len(connections)), description="[green]Comparing Data Entries..."):
+    totalData = {}
+    for i in track(
+        range(len(connections)), description="[green]Comparing Data Entries..."
+    ):
         for j in range(i + 1, len(connections)):
             if connections[i][0] != connections[j][0]:
                 compareData = {}
@@ -538,26 +546,39 @@ if __name__ == "__main__":
                     idsA = connections[i][1].get(idsname)
                     idsB = connections[j][1].get(idsname)
                     compare_result, output = compareIds(
-                        idsA, idsB, field=idsname, ignore_version=args.skip_provenance, verb=False, nameX=connections[i][0],nameY=connections[j][0],output={}
+                        idsA,
+                        idsB,
+                        field=idsname,
+                        ignore_version=args.skip_provenance,
+                        verb=False,
+                        nameX=connections[i][0],
+                        nameY=connections[j][0],
+                        output={},
                     )
                     compareData[idsname] = (compare_result, output)
-                totalData[(connections[i][0],connections[j][0],connections[i][1],connections[j][1])]= compareData
+                totalData[
+                    (
+                        connections[i][0],
+                        connections[j][0],
+                        connections[i][1],
+                        connections[j][1],
+                    )
+                ] = compareData
 
     et = time.time()
     elapsed_time = et - st
 
     if bool(totalData):
-        different={}
+        different = {}
         for cmpName, cmpResult in totalData.items():
             for idsName, resultData in cmpResult.items():
                 for k, v in resultData[1].items():
-                    different[(k, v[3])]=(v[0],v[1])
+                    different[(k, v[3])] = (v[0], v[1])
         print("")
-        strConnection = '\n'
-        strConnection+='\n'.join([x[0] for x in connections])
+        strConnection = "\n"
+        strConnection += "\n".join([x[0] for x in connections])
         console = Console()
         table = Table(
-            
             title=Text(f"Comparisen between {strConnection}", style="bold blue")
         )
         table.add_column("ids field name", style="magenta")
@@ -567,10 +588,12 @@ if __name__ == "__main__":
             _field, _comment = field
             table.add_row(f"{_field}", f"{_comment}")
         console.print(table)
-    
+
         if args.generate_html is True:
-            if len(connections)>2:
-                logger.info("HTML file generation is available for two data entries currently")
+            if len(connections) > 2:
+                logger.info(
+                    "HTML file generation is available for two data entries currently"
+                )
             else:
                 st = time.time()
                 generate_html(html_file, totalData)
@@ -581,6 +604,5 @@ if __name__ == "__main__":
                     import webbrowser
 
                     webbrowser.open(html_file)
-                except:
+                except Exception as e:
                     pass
-            

@@ -13,7 +13,7 @@ import imas
 
 from idstools import idsperf
 from idstools.database import DBMaster
-from idstools.utils.clihelper import dbentryParser, getCoreVersion
+from idstools.utils.clihelper import dbentryParser
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
@@ -82,13 +82,12 @@ if __name__ == "__main__":
         type=str,
         help='IDS name(s) (leave empty to select all IDSs with default occurrence, or append "/n" to copy a specific occurrence "n")',
     )
-    if getCoreVersion() > 4:
-        parser.add_argument(
-            "-uriOut",
-            "--uriOut",
-            type=str,
-            help="uri out \t\t(default=%(default)s)",
-        )
+    parser.add_argument(
+        "-uriOut",
+        "--uriOut",
+        type=str,
+        help="uri out \t\t(default=%(default)s)",
+    )
     args = parser.parse_args()
 
     if not args.database_output:
@@ -152,13 +151,12 @@ if __name__ == "__main__":
         dboutArgs.version = args.version
         dboutArgs.run = args.outputRun
         dboutArgs.pulse = args.pulse
-        if getCoreVersion() > 4:
-            if args.uriOut is not None:
-                dboutArgs.uri = args.uriOut
-                if args.verbose:
-                    print("Using out URI given")
-            else:
-                dboutArgs.uri = f"imas:{dboutArgs.backend.lower()}?user={dboutArgs.user};shot={dboutArgs.pulse};run={dboutArgs.run};database={dboutArgs.database};version={dboutArgs.version}"
+        if args.uriOut is not None:
+            dboutArgs.uri = args.uriOut
+            if args.verbose:
+                print("Using out URI given")
+        else:
+            dboutArgs.uri = f"imas:{dboutArgs.backend.lower()}?user={dboutArgs.user};shot={dboutArgs.pulse};run={dboutArgs.run};database={dboutArgs.database};version={dboutArgs.version}"
         dbout = DBMaster.createConnection(dboutArgs)
         if dbout is None:
             print("----> Aborted.")

@@ -261,8 +261,8 @@ class WavesCompute:
             [[0 for _ in range(maxTotalBeams)] for _ in range(totalWaves)]
         )
         len_ray = np.array(
-                [[0.0 for iray in range(maxTotalBeams)] for ibeam in range(totalWaves)]
-            ).astype(int)
+            [[0.0 for iray in range(maxTotalBeams)] for ibeam in range(totalWaves)]
+        ).astype(int)
         x_ray = np.array(
             [
                 [[0.0 for _ in range(beamDataLength)] for _ in range(maxTotalBeams)]
@@ -322,17 +322,17 @@ class WavesCompute:
                         )
                         beamElectronsLengthForEachWave[beamIndex, iray] = npath
                         if len(ray.electrons.power) > 0:
-                            electronspower[
-                                beamIndex, iray, :npath
-                            ] = ray.electrons.power
+                            electronspower[beamIndex, iray, :npath] = (
+                                ray.electrons.power
+                            )
                         if len(ray.power_flow_norm.parallel) > 0:
-                            powerparallel[
-                                beamIndex, iray, :npath
-                            ] = ray.power_flow_norm.parallel
+                            powerparallel[beamIndex, iray, :npath] = (
+                                ray.power_flow_norm.parallel
+                            )
                         if len(ray.power_flow_norm.perpendicular) > 0:
-                            powerperpendicular[
-                                beamIndex, iray, :npath
-                            ] = ray.power_flow_norm.perpendicular
+                            powerperpendicular[beamIndex, iray, :npath] = (
+                                ray.power_flow_norm.perpendicular
+                            )
                         if len(ray.length) > 0:
                             length[beamIndex, iray, :npath] = ray.length
 
@@ -564,34 +564,34 @@ class WavesCompute:
                         logger.info(" " + single_ec_launcher_name[iwave] + " is off")
 
         ecLauncherInfo["single_ec_launcher_name"] = single_ec_launcher_name
-        ecLauncherInfo[
-            "single_injected_power"
-        ] = single_injected_power  # for the chosen time slice
-        ecLauncherInfo[
-            "single_absorbed_power"
-        ] = single_absorbed_power  # for the chosen time slice
+        ecLauncherInfo["single_injected_power"] = (
+            single_injected_power  # for the chosen time slice
+        )
+        ecLauncherInfo["single_absorbed_power"] = (
+            single_absorbed_power  # for the chosen time slice
+        )
         ecLauncherInfo["single_eccd"] = single_eccd  # for the chosen time slice
-        ecLauncherInfo[
-            "total_injected_power"
-        ] = total_injected_power  # for the chosen time slice
+        ecLauncherInfo["total_injected_power"] = (
+            total_injected_power  # for the chosen time slice
+        )
 
-        ecLauncherInfo[
-            "total_absorbed_power"
-        ] = total_absorbed_power  # for the chosen time slice
+        ecLauncherInfo["total_absorbed_power"] = (
+            total_absorbed_power  # for the chosen time slice
+        )
         ecLauncherInfo["total_eccd"] = total_eccd
 
-        ecLauncherInfo[
-            "total_power_density_profile"
-        ] = total_power_density_profile  # profile
-        ecLauncherInfo[
-            "total_current_density_profile"
-        ] = total_current_density_profile  # profile
-        ecLauncherInfo[
-            "single_power_density_profile"
-        ] = single_power_density_profile  # profile
-        ecLauncherInfo[
-            "single_current_density_profile"
-        ] = single_current_density_profile  # profile
+        ecLauncherInfo["total_power_density_profile"] = (
+            total_power_density_profile  # profile
+        )
+        ecLauncherInfo["total_current_density_profile"] = (
+            total_current_density_profile  # profile
+        )
+        ecLauncherInfo["single_power_density_profile"] = (
+            single_power_density_profile  # profile
+        )
+        ecLauncherInfo["single_current_density_profile"] = (
+            single_current_density_profile  # profile
+        )
 
         ecLauncherInfo["total_power_waveform"] = total_power_waveform  # waveform
         ecLauncherInfo["total_current_waveform"] = total_current_waveform  # waveform
@@ -638,7 +638,7 @@ class WavesCompute:
                             waveData["psiBased"] = True 
                             waveData["nrho"] = len(self.ids.coherent_wave[iwave].profiles_1d[timeIndex].grid.psi)
                             waveData["rho_tor_norm"] = (-self.ids.coherent_wave[iwave].profiles_1d[timeIndex].grid.psi)
-                    except:
+                    except Exception as e:
                         logger.error("waves.coherent_wave[iwave].profiles_1d[it].grid.rho_tor_norm, rho_tor and psi could not be read")
                         return None
                     if waveData["nrho"] == 0:

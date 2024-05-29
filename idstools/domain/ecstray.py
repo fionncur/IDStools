@@ -209,7 +209,7 @@ class EcStrayCompute:
                     * constants.e**2
                     / (constants.epsilon_0 * constants.m_e)
                 ) + constants.e * bTotal[ir, iz] / (2 * constants.m_e)
-            except Exception:  # Not defined outside LCFS
+            except Exception as e:  # Not defined outside LCFS
                 ne2d_eq[ir, iz] = -1  # np.NaN
                 omegaR[ir, iz] = -1  # np.NaN
 

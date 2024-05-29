@@ -99,7 +99,7 @@ if args["choice"] != None:
         choice = eval(
             str("""['""" + re.sub(""",""", r"""','""", input_choice) + """']""")
         )
-    except:
+    except Exception as e:
         print(
             "------------------------------------------------------------------",
             file=sys.stderr,

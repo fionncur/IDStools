@@ -40,7 +40,7 @@ parser.add_argument(
 parser.add_argument(
     "--directory",
     help="Directory to save the figure",
-    default=None, 
+    default=None,
 )
 args = parser.parse_args()
 logger = setupLogger("module", stdout_level=logging.INFO)
@@ -69,7 +69,7 @@ try:
         )
         exit()
 
-except Exception:
+except Exception as e:
     logger.critical(
         "The distribution_sources IDS is absent from the input data-entry",
     )
@@ -101,29 +101,29 @@ for isource in range(nsources):
     idsDistributionSources.source[isource].global_quantities.resize(1)
     idsDistributionSources.source[isource].process.resize(1)
     try:
-        idsDistributionSources.source[isource].profiles_1d[
-            0
-        ] = idsSliceDistributionSources.source[isource].profiles_1d[0]
-    except Exception:
+        idsDistributionSources.source[isource].profiles_1d[0] = (
+            idsSliceDistributionSources.source[isource].profiles_1d[0]
+        )
+    except Exception as e:
         logger.warning(
             f"Source {str(isource)} has no profiles_1d -> considered as inactive",
         )
         active[isource] = 0
     try:
-        idsDistributionSources.source[isource].global_quantities[
-            0
-        ] = idsSliceDistributionSources.source[isource].global_quantities[0]
-    except Exception:
+        idsDistributionSources.source[isource].global_quantities[0] = (
+            idsSliceDistributionSources.source[isource].global_quantities[0]
+        )
+    except Exception as e:
         if active[isource] == 1:
             logger.warning(
                 f"Source {str(isource)} has no global_quantities -> considered as inactive",
             )
             active[isource] = 0
     try:
-        idsDistributionSources.source[isource].process[
-            0
-        ] = idsSliceDistributionSources.source[isource].process[0]
-    except Exception:
+        idsDistributionSources.source[isource].process[0] = (
+            idsSliceDistributionSources.source[isource].process[0]
+        )
+    except Exception as e:
         if active[isource] == 1:
             logger.warning(
                 f"Source {str(isource)} has no process -> considered as inactive",
@@ -153,7 +153,7 @@ if args.save:
     if args.directory:
         if not os.path.exists(args.directory):
             os.makedirs(args.directory)
-        fname=os.path.join(args.directory,fname)
+        fname = os.path.join(args.directory, fname)
     canvas.save(fname)
 else:
     canvas.show()

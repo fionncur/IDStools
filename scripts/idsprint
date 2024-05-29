@@ -108,7 +108,7 @@ if __name__ == "__main__":
         else:
             try:
                 ids.dump(print_empty=args.show_empty)
-            except Exception:
+            except Exception as e:
                 print(ids)
 
     else:

@@ -188,7 +188,7 @@ class DBMaster:
             try:
                 pulse = int(str(hdf5MasterFilePath).split("/")[-3])
                 run = int(str(hdf5MasterFilePath).split("/")[-2])
-            except:
+            except Exception as e:
                 print(f"Malformed database path {hdf5MasterFilePath}")
                 continue
             fileTime = datetime.fromtimestamp(
@@ -273,7 +273,7 @@ class DBMaster:
                             run = int(run)
                             pulse = root.split("/")[-2]
                             pulse = int(pulse)
-                    except:
+                    except Exception as e:
                         print(f"Malformed database path {root}")
                         continue
                     fileTime = datetime.fromtimestamp(
@@ -459,34 +459,38 @@ class DBMaster:
 
     @classmethod
     def getCoreVersion(cls):
-        _lowlevelVersion=""
+        _lowlevelVersion = ""
         if "_al_lowlevel" in imas.__dict__:
-            _lowlevelVersion=imas.get_al_version()
+            _lowlevelVersion = imas.get_al_version()
         elif "_ual_lowlevel" in imas.__dict__:
-            rawCoreVersion=imas._ual_lowlevel.__name__ # '__name__': 'imas_3_41_0_ual_4_11_10._ual_lowlevel
+            rawCoreVersion = (
+                imas._ual_lowlevel.__name__
+            )  # '__name__': 'imas_3_41_0_ual_4_11_10._ual_lowlevel
             rawCoreVersion, _ = rawCoreVersion.split(".")
-            match = re.search(r'\d+_\d+_\d+$', rawCoreVersion)
+            match = re.search(r"\d+_\d+_\d+$", rawCoreVersion)
             if match:
                 _lowlevelVersion = match.group()
-                _lowlevelVersion=_lowlevelVersion.replace("_", ".")
-        lowlevelVersion=_lowlevelVersion
+                _lowlevelVersion = _lowlevelVersion.replace("_", ".")
+        lowlevelVersion = _lowlevelVersion
         return lowlevelVersion
 
     @classmethod
     def getDDVersion(cls):
-        _lowlevelVersion=""
+        _lowlevelVersion = ""
         if "_al_lowlevel" in imas.__dict__:
-            _lowlevelVersion=imas.al_dd_version
+            _lowlevelVersion = imas.al_dd_version
         elif "_ual_lowlevel" in imas.__dict__:
-            rawDDVersion=imas._ual_lowlevel.__name__ # '__name__': 'imas_3_41_0_ual_4_11_10._ual_lowlevel
+            rawDDVersion = (
+                imas._ual_lowlevel.__name__
+            )  # '__name__': 'imas_3_41_0_ual_4_11_10._ual_lowlevel
             rawDDVersion, _ = rawDDVersion.split(".")
-            match = re.search(r'\d+_\d+_\d+', rawDDVersion)
+            match = re.search(r"\d+_\d+_\d+", rawDDVersion)
             if match:
                 _lowlevelVersion = match.group()
-                _lowlevelVersion=_lowlevelVersion.replace("_", ".")
-        lowlevelVersion=_lowlevelVersion
+                _lowlevelVersion = _lowlevelVersion.replace("_", ".")
+        lowlevelVersion = _lowlevelVersion
         return lowlevelVersion
-    
+
     @classmethod
     def getConnection(cls, imasargs):
         connection = DBMaster.getDBEntryObject(imasargs)
@@ -501,6 +505,7 @@ class DBMaster:
     def createConnection(cls, imasargs):
         if "mode" not in imasargs.__dict__:
             imasargs.mode = "w"
+
         connection = DBMaster.getDBEntryObject(imasargs)
         status, _ = connection.create()
         if status != 0:
@@ -512,8 +517,8 @@ class DBMaster:
     def getDBEntryObject(cls, imasargs):
         imasVersion = DBMaster.getCoreVersion()
         imasVersion = int(imasVersion.split(".")[0])
-        connection=None
-        # 
+        connection = None
+        #
         if imasargs.uri:
             if imasVersion > 4:
                 if "mode" in imasargs.__dict__:
@@ -521,18 +526,19 @@ class DBMaster:
                 else:
                     connection = imas.DBEntry(imasargs.uri, "r")
             else:
-                param=getDetailsfromURI(imasargs.uri)
-                if param["pathPresent"] is False:
+                param = getDetailsfromURI(imasargs.uri)
+                if param["legacyPresent"]:
                     connection = imas.DBEntry(
                         getBackendID(param["backend"]),
                         param["database"],
                         param["pulse"],
                         param["run"],
-                        param["user"] ,
-                        param["version"] 
+                        param["user"],
+                        param["version"],
                     )
                 else:
-                    logger.error("Path in URI is not supported in AL4")
+                    if param["pathPresent"]:
+                        logger.error("Path in URI is not supported in Access Layer 4")
                     return None
         else:
             if imasargs.pulse is None or imasargs.run is None:
@@ -736,9 +742,11 @@ def readScenario(
         config["output_database"],
         config["shot"],
         config["run_out"],
-        os.getenv("USER")
-        if config["output_user_or_path"] == "default"
-        else config["output_user_or_path"],
+        (
+            os.getenv("USER")
+            if config["output_user_or_path"] == "default"
+            else config["output_user_or_path"]
+        ),
     )
     # print(config["output_database"])
     # print(config["shot"])
@@ -753,17 +761,17 @@ def readScenario(
         outIDSDict[idsName] = ids
     connectionOut.close()
     import argparse
+
     inputargs = argparse.Namespace()
     inputargs.backend = imas.imasdef.MDSPLUS_BACKEND
     inputargs.pulse = config["shot"]
     inputargs.run = config["run_in"]
-    inputargs.user =config["input_user_or_path"]
+    inputargs.user = config["input_user_or_path"]
     inputargs.database = config["input_database"]
     inputargs.version = 3
     inputargs.uri = None
-    
-    return inIDSDict, outIDSDict, inputargs
 
+    return inIDSDict, outIDSDict, inputargs
 
 
 def readScenarioWithArgs(

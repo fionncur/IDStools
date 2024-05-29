@@ -103,9 +103,9 @@ if __name__ == "__main__":
         "--machine-desc",
         nargs="*",
         default=[],
-        help="""Provide machine descriptions that you need to plot 
-    with uris for example
-    "imas:mdsplus?user=costerd;shot=40866;run=1;database=aug;version=3#wall"
+        help="""Provide machine descriptions that you need to plot\n
+    with uris for example\n
+    "imas:mdsplus?user=costerd;shot=40866;run=1;database=aug;version=3#wall"\n
     or just names e.g wall pf_active
     """,
     )

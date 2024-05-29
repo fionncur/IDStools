@@ -44,6 +44,7 @@ class WallView:
         Args:
             ax: `ax` is an instance of the `matplotlib.axes.Axes` class. It represents the axes on which
         the wall will be plotted.
+            showLabels:shows labels on the plot
             kwargs: This is useful to update properties of patch (Wall marking on the plot). You can find it here https://matplotlib.org/stable/api/_as_gen/matplotlib.patches.PathPatch.html.. most useful are linewidth, linestyle, visible, animated, edgecolor, fill or facecolor
         """
         # These are the colors that will be used in the plot

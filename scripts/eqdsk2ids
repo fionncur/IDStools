@@ -15,7 +15,6 @@ from idstools.eqdsk2ids import geqdsk2ids
 from idstools.utils.clihelper import (
     dbentryParser,
     getDatabasePath,
-    getCoreVersion,
 )
 
 # ----------------------------------------------------------------------
@@ -39,13 +38,12 @@ def main():
     outputargs.user = os.environ["USER"]
     outputargs.database = args.database
     outputargs.version = args.version
-    if getCoreVersion() > 4:
-        outputargs.mode="w"
-        if args.dest is None:
-            if args.uri is not None:
-                args.dest = re.sub(r'user=public', f'user={getpass.getuser()}', args.uri)
-        outputargs.uri = args.dest
- 
+    outputargs.mode = "w"
+    if args.dest is None:
+        if args.uri is not None:
+            args.dest = re.sub(r"user=public", f"user={getpass.getuser()}", args.uri)
+    outputargs.uri = args.dest
+
     db = DBMaster.createConnection(outputargs)
     if db is None:
         logger.critical("----> Aborted.")
@@ -58,7 +56,7 @@ def main():
 
 # ----------------------------------------------------------------------
 
-description=r"""
+description = r"""
 (I) Command Line Interface for EQDSK Converter (eqdsk2ids)
 ------------------------------------------------------------
 
@@ -105,14 +103,14 @@ if __name__ == "__main__":
         prog=prog,
         formatter_class=RichHelpFormatter,
         parents=[dbentryParser],
-        description=Markdown(description, style="argparse.text")
+        description=Markdown(description, style="argparse.text"),
     )
     parser.add_argument(
-            "-du",
-            "--dest",
-            type=str,
-            help="destination uri \t\t(default=%(default)s)",
-        )
+        "-du",
+        "--dest",
+        type=str,
+        help="destination uri \t\t(default=%(default)s)",
+    )
     parser.add_argument(
         "-g",
         "--gfile",

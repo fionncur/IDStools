@@ -4,6 +4,7 @@ This module provides compute functions and classes for core_sources ids data
 `refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`_.
 
 """
+
 import logging
 import numpy as np
 import functools
@@ -23,10 +24,10 @@ class CoreSourcesCompute:
         Returns:
             The function `getFluxInfoFromSources` returns a dictionary containing
             information about the sources. The dictionary has the following
-            structure: 
-            
+            structure:
+
             .. code-block:: python
-            
+
                 {
                     0: {
                         "energy_flux": 22081836.173650958,
@@ -121,7 +122,7 @@ class CoreSourcesCompute:
                     self.ids.source[0].profiles_1d[0].grid.rho_tor
                     / self.ids.source[0].profiles_1d[0].grid.rho_tor[nrho - 1]
                 )
-        except Exception:
+        except Exception as e:
             logger.critical(
                 "core_sources.source[isource].profiles_1d[0].grid.rho_tor_norm and rho_tor could not be read"
             )
@@ -239,16 +240,16 @@ class CoreSourcesCompute:
                     len(self.ids.source[sourceIndex].profiles_1d[0].electrons.energy)
                     < 1
                 ):
-                    self.ids.source[sourceIndex].profiles_1d[
-                        0
-                    ].electrons.energy = np.zeros(nrho)
+                    self.ids.source[sourceIndex].profiles_1d[0].electrons.energy = (
+                        np.zeros(nrho)
+                    )
                 if (
                     len(self.ids.source[sourceIndex].profiles_1d[0].electrons.particles)
                     < 1
                 ):
-                    self.ids.source[sourceIndex].profiles_1d[
-                        0
-                    ].electrons.particles = np.zeros(nrho)
+                    self.ids.source[sourceIndex].profiles_1d[0].electrons.particles = (
+                        np.zeros(nrho)
+                    )
 
                 totalElectronPowerProfile = (
                     totalElectronPowerProfile

@@ -83,7 +83,7 @@ class DistributionsCompute:
                             .profiles_1d[timeIndex]
                             .grid.rho_tor[distributionsData["nrho"] - 1]
                         )
-                except:
+                except Exception as e:
                     logger.warning(
                         "distributions.distribution[idistrib].profiles_1d[it].grid.rho_tor_norm and rho_tor could not be read"
                     )

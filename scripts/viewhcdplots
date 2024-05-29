@@ -1,19 +1,16 @@
 #!/usr/bin/env python3
 import argparse
 import logging
-import sys
 import os
+import sys
+
 from rich_argparse import RichHelpFormatter
-from idstools.database import DBMaster
 
 from idstools.compute.common import getNearestTime
 from idstools.compute.waves import WavesCompute
-from idstools.utils.clihelper import (
-    getDatabasePath,
-    getFileName,
-    getCoreVersion,
-    getTitle,
-)
+from idstools.database import DBMaster
+from idstools.utils.clihelper import (getDatabasePath,
+                                      getFileName, getTitle)
 from idstools.utils.idslogger import setupLogger
 from idstools.view.common import Canvas
 from idstools.view.distributions import DistributionsView
@@ -45,8 +42,7 @@ def showWavesPlots(args, hold=False):
         connargs.user = args["user"]
         connargs.database = args["database"]
         connargs.version = args["version"]
-        if getCoreVersion() > 4:
-            connargs.uri = f"imas:{args['backend'].lower()}?user={connargs.user };shot={connargs.pulse};run={connargs.run};database={connargs.database};version={connargs.version}"
+        connargs.uri = f"imas:{args['backend'].lower()}?user={connargs.user };shot={connargs.pulse};run={connargs.run};database={connargs.database};version={connargs.version}"
 
         conn = DBMaster.getConnection(connargs)
         if conn is None:
@@ -154,8 +150,7 @@ def showDistributionPlots(args, hold=False):
         connargs.user = args["user"]
         connargs.database = args["database"]
         connargs.version = args["version"]
-        if getCoreVersion() > 4:
-            connargs.uri = f"imas:{args['backend'].lower()}?user={connargs.user };shot={connargs.pulse};run={connargs.run};database={connargs.database};version={connargs.version}"
+        connargs.uri = f"imas:{args['backend'].lower()}?user={connargs.user };shot={connargs.pulse};run={connargs.run};database={connargs.database};version={connargs.version}"
 
         conn = DBMaster.getConnection(connargs)
         if conn is None:

@@ -16,7 +16,7 @@ class DistributionSourcesCompute:
     def __init__(self, ids):
         self.ids = ids
 
-    def getRhoTorNorm(self, timeSlice:int=0) -> Union[None, np.ndarray]:
+    def getRhoTorNorm(self, timeSlice: int = 0) -> Union[None, np.ndarray]:
         """
         The function `getRhoTorNorm` returns the normalized toroidal rho values from a given time slice
         of a source.
@@ -39,13 +39,13 @@ class DistributionSourcesCompute:
                     self.ids.source[0].profiles_1d[timeSlice].grid.rho_tor
                     / self.ids.source[0].profiles_1d[timeSlice].grid.rho_tor[nrho - 1]
                 )
-        except Exception:
+        except Exception as e:
             logger.critical(
                 "distribution_sources.source[0].profiles_1d[0].grid.rho_tor(_norm) could not be read"
             )
         return rho_tor_norm
 
-    def getVolume(self, timeSlice:int=0) -> Union[None, np.ndarray]:
+    def getVolume(self, timeSlice: int = 0) -> Union[None, np.ndarray]:
         """
         The function `getVolume` retrieves the volume from a specific time slice of a source's profiles.
 
@@ -58,7 +58,7 @@ class DistributionSourcesCompute:
         volume = None
         try:
             volume = self.ids.source[0].profiles_1d[timeSlice].grid.volume
-        except Exception:
+        except Exception as e:
             logger.critical(
                 f"distribution_sources.source[0].profiles_1d[{timeSlice}].grid.volume could not be read"
             )
@@ -67,7 +67,7 @@ class DistributionSourcesCompute:
     def getSourceInfo(self):
         """
         The function `getSourceInfo` retrieves information about sources, including labels, particle data, and power, and returns it in a dictionary format.
-        
+
         Returns:
             a dictionary called `sourcesDict`.
         """

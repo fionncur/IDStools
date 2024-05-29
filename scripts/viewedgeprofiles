@@ -48,7 +48,7 @@ parser.add_argument(
 parser.add_argument(
     "--directory",
     help="Directory to save the figure",
-    default=None, 
+    default=None,
 )
 args = parser.parse_args()
 
@@ -68,18 +68,22 @@ if args.wall:
     if wallIds is None:
         logger.error("wall ids is not present")
     else:
-        wallCompute = WallCompute(wallIds)
-        wallDict = wallCompute.getWall()
         r = None
         z = None
         h = None
-        if wallDict is not None:
-            r, z, h = wallDict["r"], wallDict["z"], wallDict["h"]
+        wallCompute = WallCompute(wallIds)
+        if vesselUnits := wallCompute.getVesselUnits(nameFilter="VV IS"):
+            for _, description2d in vesselUnits.items():
+                for vIndex, vesselUnit in description2d["vesselunits"].items():
+                    r = vesselUnit["r"]
+                    z = vesselUnit["z"]
+                    h = vesselUnit["h"]
+                    break
 
 timeArray = None
 try:
     timeArray = connection.partial_get("edge_profiles", "time")
-except:
+except Exception as e:
     logger.error("edge_profiles ids is not present")
     exit(1)
 if timeArray is None:
@@ -149,11 +153,11 @@ canvas.fig.suptitle(getTitle(args, "Edge Profiles", timeValue), size=12)
 canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
 
 if args.save:
-    fname = getFileName(args, os.path.basename(__file__)+"_edge_profiles", timeValue)
+    fname = getFileName(args, os.path.basename(__file__) + "_edge_profiles", timeValue)
     if args.directory:
         if not os.path.exists(args.directory):
             os.makedirs(args.directory)
-        fname=os.path.join(args.directory,fname)
+        fname = os.path.join(args.directory, fname)
     canvas.save(fname)
 else:
     canvas.show()

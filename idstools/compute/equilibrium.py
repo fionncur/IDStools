@@ -4,6 +4,7 @@ This module provides compute functions and classes for equilibrium ids data
 `refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`_.
 
 """
+
 import logging
 import os
 
@@ -368,12 +369,12 @@ class EquilibriumCompute:
 
         try:
             dd_version = self.ids.ids_properties.version_put.data_dictionary
-        except:
+        except Exception as e:
             dd_version = "0.0.0"
 
         equout = deepcopy(self.ids)
 
-        imas_version = DBMaster.getDDVersion() 
+        imas_version = DBMaster.getDDVersion()
 
         equout.ids_properties.version_put.data_dictionary = imas_version
 

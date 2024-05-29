@@ -157,7 +157,7 @@ class KineticProfilesCompute:
                 else:
                     logger.critical(f"No {idsName} IDS in the data-entry.")
                     idsPresent = False
-            except:
+            except Exception as e:
                 logger.critical(
                     f"The {idsName} IDS is absent from the input data-entry."
                 )
@@ -232,7 +232,7 @@ class KineticProfilesCompute:
                     "edge_profiles", f"profiles_1d({timeIndexEdgeProfiles})"
                 )
                 teme = timeValueEdgeProfiles
-            except:
+            except Exception as e:
                 logger.warning("No profiles_1d information found in edge_profiles IDS.")
                 if self.isEquilibriumPresent and len(self.equilibrium.time) > 0:
                     self.equilibrium.time_slice.resize(1)
@@ -246,12 +246,13 @@ class KineticProfilesCompute:
                     ):
                         self.edge_profiles.grid_ggd.resize(1)
                         try:
-                            self.edge_profiles.grid_ggd[
-                                0
-                            ] = self.connection.partial_get(
-                                "edge_profiles", f"grid_ggd({timeIndexEdgeProfiles})"
+                            self.edge_profiles.grid_ggd[0] = (
+                                self.connection.partial_get(
+                                    "edge_profiles",
+                                    f"grid_ggd({timeIndexEdgeProfiles})",
+                                )
                             )
-                        except:
+                        except Exception as e:
                             self.isEdgeProfilesPresent = False
                             logger.warning(
                                 "No grid_ggd information found in edge_profiles IDS."
@@ -261,7 +262,7 @@ class KineticProfilesCompute:
                             self.edge_profiles.ggd[0] = self.connection.partial_get(
                                 "edge_profiles", f"ggd({timeIndexEdgeProfiles})"
                             )
-                        except:
+                        except Exception as e:
                             self.isEdgeProfilesPresent = False
                             logger.warning(
                                 "No ggd information found in edge_profiles IDS."
@@ -280,12 +281,13 @@ class KineticProfilesCompute:
                     else:
                         self.edge_profiles.grid_ggd.resize(1)
                         try:
-                            self.edge_profiles.grid_ggd[
-                                0
-                            ] = self.connection.partial_get(
-                                "edge_profiles", f"grid_ggd({timeIndexEdgeProfiles})"
+                            self.edge_profiles.grid_ggd[0] = (
+                                self.connection.partial_get(
+                                    "edge_profiles",
+                                    f"grid_ggd({timeIndexEdgeProfiles})",
+                                )
                             )
-                        except:
+                        except Exception as e:
                             self.isEdgeProfilesPresent = False
                             logger.warning(
                                 "No grid_ggd information found in edge_profiles IDS."
@@ -295,7 +297,7 @@ class KineticProfilesCompute:
                             self.edge_profiles.ggd[0] = self.connection.partial_get(
                                 "edge_profiles", f"ggd({timeIndexEdgeProfiles})"
                             )
-                        except:
+                        except Exception as e:
                             self.isEdgeProfilesPresent = False
                             logger.warning(
                                 "No ggd information found in edge_profiles IDS."
@@ -320,7 +322,7 @@ class KineticProfilesCompute:
                     logger.warning(
                         "Edge and core profile midplane coordinates are not aligned!"
                     )
-            except:
+            except Exception as e:
                 logger.warning(
                     "Edge_profiles midplane location not specified! Coordinates may be misaligned."
                 )
@@ -466,7 +468,7 @@ class KineticProfilesCompute:
         if self.isCoreProfilesPresent:
             try:
                 nspeciesCore = len(self.core_profiles.profiles_1d[0].ion)
-            except:
+            except Exception as e:
                 logger.critical("core_profiles.profiles_1d[0].ion could not be read.")
                 return None
 
@@ -497,7 +499,7 @@ class KineticProfilesCompute:
                     a[ispecies] = int(
                         self.core_profiles.profiles_1d[0].ion[ispecies].element[0].a
                     )
-            except:
+            except Exception as e:
                 logger.warning(
                     "core_profiles.profiles_1d[:].ion[0].element[0].a could not be read."
                 )
@@ -509,7 +511,7 @@ class KineticProfilesCompute:
                         a[ispecies] = int(
                             self.edge_profiles.profiles_1d[0].ion[ispecies].element[0].a
                         )
-                except:
+                except Exception as e:
                     logger.warning(
                         "edge_profiles.profiles_1d[:].ion[0].element[0].a could not be read."
                     )
@@ -520,7 +522,7 @@ class KineticProfilesCompute:
                         a[ispecies] = int(
                             self.edge_profiles.ggd[0].ion[ispecies].element[0].a
                         )
-                except:
+                except Exception as e:
                     logger.warning(
                         "edge_profiles.ggd[:].ion[0].element[0].a could not be read."
                     )
@@ -535,7 +537,7 @@ class KineticProfilesCompute:
                     z[ispecies] = int(
                         self.core_profiles.profiles_1d[0].ion[ispecies].element[0].z_n
                     )
-            except:
+            except Exception as e:
                 logger.warning(
                     "core_profiles.profiles_1d[:].ion[0].element[0].z_n could not be read."
                 )
@@ -550,7 +552,7 @@ class KineticProfilesCompute:
                             .element[0]
                             .z_n
                         )
-                except:
+                except Exception as e:
                     logger.warning(
                         "edge_profiles.profiles_1d[:].ion[0].element[0].z_n could not be read."
                     )
@@ -561,7 +563,7 @@ class KineticProfilesCompute:
                         z[ispecies] = int(
                             self.edge_profiles.ggd[0].ion[ispecies].element[0].z_n
                         )
-                except:
+                except Exception as e:
                     logger.warning(
                         "edge_profiles.ggd[:].ion[0].element[0].z_n could not be read."
                     )
@@ -579,7 +581,7 @@ class KineticProfilesCompute:
                         .element[0]
                         .atoms_n
                     )
-            except:
+            except Exception as e:
                 logger.warning(
                     "core_profiles.profiles_1d[:].ion[0].element[0].atoms_n could not be read."
                 )
@@ -594,7 +596,7 @@ class KineticProfilesCompute:
                             .element[0]
                             .atoms_n
                         )
-                except:
+                except Exception as e:
                     logger.warning(
                         "edge_profiles.profiles_1d[:].ion[0].element[0].atoms_n could not be read."
                     )
@@ -605,7 +607,7 @@ class KineticProfilesCompute:
                         n[ispecies] = (
                             self.edge_profiles.ggd[0].ion[ispecies].element[0].atoms_n
                         )
-                except:
+                except Exception as e:
                     logger.warning(
                         "edge_profiles.ggd[:].ion[0].element[0].atoms_n could not be read."
                     )
@@ -709,11 +711,11 @@ class KineticProfilesCompute:
             else:
                 try:
                     equilibrium = self.connection.equilibrium
-                    equilibrium.time_slice[
-                        0
-                    ].profiles_1d.volume = self.connection.partial_get(
-                        "equilibrium",
-                        f"time_slice({self.commonTimeIndex})/profiles_1d/volume",
+                    equilibrium.time_slice[0].profiles_1d.volume = (
+                        self.connection.partial_get(
+                            "equilibrium",
+                            f"time_slice({self.commonTimeIndex})/profiles_1d/volume",
+                        )
                     )
                     for i in range(self.nrho):
                         volume[i] = equilibrium.time_slice[0].profiles_1d.volume[i]
@@ -729,7 +731,7 @@ class KineticProfilesCompute:
                         logger.warning(
                             "   (possible because the resolution is the same, but maybe not correct)"
                         )
-                except:
+                except Exception as e:
                     logger.warning(
                         "core_profiles.profiles_1d[:].grid.volume could not be read."
                     )
@@ -813,9 +815,9 @@ class KineticProfilesCompute:
                     logger.warning(
                         "edge_profiles.ggd[:].electrons.density could not be read."
                     )
-                    self.edge_profiles.ggd[0].electrons.density[
-                        self.gset
-                    ].values = np.asarray([np.NaN] * self.erho)
+                    self.edge_profiles.ggd[0].electrons.density[self.gset].values = (
+                        np.asarray([np.NaN] * self.erho)
+                    )
                 for i in range(self.erho):
                     electron_density[self.nrho + i] = (
                         self.edge_profiles.ggd[0].electrons.density[self.gset].values[i]
@@ -848,9 +850,9 @@ class KineticProfilesCompute:
                     logger.warning(
                         "edge_profiles.profiles_1d[:].electrons.temperature could not be read."
                     )
-                    self.edge_profiles.profiles_1d[
-                        0
-                    ].electrons.temperature = np.asarray([np.NaN] * self.erho)
+                    self.edge_profiles.profiles_1d[0].electrons.temperature = (
+                        np.asarray([np.NaN] * self.erho)
+                    )
                 for i in range(self.erho):
                     electron_temperature[self.nrho + i] = (
                         self.edge_profiles.profiles_1d[0].electrons.temperature[i]
@@ -912,9 +914,9 @@ class KineticProfilesCompute:
                     logger.warning(
                         "edge_profiles.ggd[:].t_i_average could not be read."
                     )
-                    self.edge_profiles.ggd[0].t_i_average[
-                        self.gset
-                    ].values = np.asarray([np.NaN] * self.erho)
+                    self.edge_profiles.ggd[0].t_i_average[self.gset].values = (
+                        np.asarray([np.NaN] * self.erho)
+                    )
                 else:
                     ti_e_flag = 1
 
@@ -931,9 +933,9 @@ class KineticProfilesCompute:
                         logger.warning(
                             f"Size mismatch: rho_tor_norm = {self.nrho}, ion[{ispecies}].temperature = {len(self.core_profiles.profiles_1d[0].ion[ispecies].temperature)}"
                         )
-                        self.core_profiles.profiles_1d[0].ion[
-                            ispecies
-                        ].temperature = np.asarray([np.NaN] * self.nrho)
+                        self.core_profiles.profiles_1d[0].ion[ispecies].temperature = (
+                            np.asarray([np.NaN] * self.nrho)
+                        )
                     else:
                         ti_flag = 2
                 if self.isEdgeProfilesPresent and ti_e_flag == 0:
@@ -1035,9 +1037,9 @@ class KineticProfilesCompute:
                     logger.warning(
                         f"Size mismatch: rho_tor_norm = {self.nrho}, ion[{ispecies}].density = {len(self.core_profiles.profiles_1d[0].ion[ispecies].density)}"
                     )
-                    self.core_profiles.profiles_1d[0].ion[
-                        ispecies
-                    ].density = np.asarray([np.NaN] * self.nrho)
+                    self.core_profiles.profiles_1d[0].ion[ispecies].density = (
+                        np.asarray([np.NaN] * self.nrho)
+                    )
                 for i in range(self.nrho):
                     ion_density[ispecies][i] = (
                         self.core_profiles.profiles_1d[0].ion[ispecies].density[i]
@@ -1204,9 +1206,9 @@ class KineticProfilesCompute:
                     logger.warning(
                         f"Size mismatch: rho_tor_norm = {self.nrho}, ion[{ispecies}].velocity_tor = {len(self.core_profiles.profiles_1d[0].ion[ispecies].velocity_tor)}"
                     )
-                    self.core_profiles.profiles_1d[0].ion[
-                        ispecies
-                    ].velocity_tor = np.asarray([np.NaN] * self.nrho)
+                    self.core_profiles.profiles_1d[0].ion[ispecies].velocity_tor = (
+                        np.asarray([np.NaN] * self.nrho)
+                    )
                 else:
                     if vtor_flag == 0:
                         vtor_flag = 2
@@ -1242,7 +1244,7 @@ class KineticProfilesCompute:
                                             .velocity.toroidal[i]
                                         )
                                     vtor_e_flag = 1
-                            except:
+                            except Exception as e:
                                 logger.warning(
                                     f"edge_profiles.profiles_1d[:].ion[{jspecies}].velocity.toroidal could not be read."
                                 )
@@ -1263,7 +1265,7 @@ class KineticProfilesCompute:
                                                 .velocity_tor[i]
                                             )
                                         vtor_e_flag = 2
-                                except:
+                                except Exception as e:
                                     logger.warning(
                                         f"edge_profiles.profiles_1d[:].ion[{jspecies}].velocity_tor could not be read."
                                     )
@@ -1311,7 +1313,7 @@ class KineticProfilesCompute:
                                                     ]
                                                 )
                                         vtor_e_flag = 1
-                                except:
+                                except Exception as e:
                                     logger.warning(
                                         f"edge_profiles.profiles_1d[:].ion[{jspecies}].state[{istate}].velocity.toroidal could not be read."
                                     )
@@ -1358,7 +1360,7 @@ class KineticProfilesCompute:
                                                         ]
                                                     )
                                             vtor_e_flag = 2
-                                    except:
+                                    except Exception as e:
                                         logger.warning(
                                             f"edge_profiles.profiles_1d[:].ion[{jspecies}].state[{istate}].velocity_tor could not be read."
                                         )
@@ -1386,7 +1388,7 @@ class KineticProfilesCompute:
                                             .toroidal[i]
                                         )
                                     vtor_e_flag = 1
-                            except:
+                            except Exception as e:
                                 logger.warning(
                                     f"edge_profiles.ggd[:].ion[{jspecies}].velocity.toroidal could not be read."
                                 )
@@ -1431,7 +1433,7 @@ class KineticProfilesCompute:
                                                     ]
                                                 )
                                         vtor_e_flag = 1
-                                except:
+                                except Exception as e:
                                     logger.warning(
                                         f"edge_profiles.ggd[:].ion[{jspecies}].state[{istate}].velocity.toroidal could not be read."
                                     )
@@ -1485,9 +1487,9 @@ class KineticProfilesCompute:
                     logger.warning(
                         f"Size mismatch: rho_tor_norm = {self.nrho}, ion[{ispecies}].velocity_pol = {len(self.core_profiles.profiles_1d[0].ion[ispecies].velocity_pol)}"
                     )
-                    self.core_profiles.profiles_1d[0].ion[
-                        ispecies
-                    ].velocity_pol = np.asarray([np.NaN] * self.nrho)
+                    self.core_profiles.profiles_1d[0].ion[ispecies].velocity_pol = (
+                        np.asarray([np.NaN] * self.nrho)
+                    )
                 else:
                     if vpol_flag == 0:
                         vpol_flag = 2
@@ -1523,7 +1525,7 @@ class KineticProfilesCompute:
                                             .velocity.poloidal[i]
                                         )
                                     vpol_e_flag = 1
-                            except:
+                            except Exception as e:
                                 logger.warning(
                                     f"edge_profiles.profiles_1d[:].ion[{jspecies}].velocity.poloidal could not be read."
                                 )
@@ -1571,7 +1573,7 @@ class KineticProfilesCompute:
                                                     ]
                                                 )
                                         vpol_e_flag = 1
-                                except:
+                                except Exception as e:
                                     logger.warning(
                                         f"edge_profiles.profiles_1d[:].ion[{jspecies}].state[{istate}].velocity.poloidal could not be read."
                                     )
@@ -1598,7 +1600,7 @@ class KineticProfilesCompute:
                                             .poloidal[i]
                                         )
                                     vpol_e_flag = 1
-                            except:
+                            except Exception as e:
                                 logger.warning(
                                     "edge_profiles.ggd[:].ion[{jspecies}].velocity.poloidal could not be read."
                                 )
@@ -1643,7 +1645,7 @@ class KineticProfilesCompute:
                                                     ]
                                                 )
                                         vpol_e_flag = 1
-                                except:
+                                except Exception as e:
                                     logger.warning(
                                         "edge_profiles.ggd[:].ion[{jspecies}].state[{istate}].velocity.poloidal could not be read."
                                     )
@@ -2093,7 +2095,7 @@ class KineticProfilesCompute:
                         )
                         * 1e-3
                     )
-                except:
+                except Exception as e:
                     waveform["ti"]["central"] = [np.NaN] * self.commonTimeLength
 
             waveform["ne"]["central"] = self.connection.partial_get(
@@ -2150,7 +2152,7 @@ class KineticProfilesCompute:
                                 "core_profiles",
                                 f"profiles_1d(:)/ion({ispecies})/velocity_tor(0)",
                             )
-                    except:
+                    except Exception as e:
                         waveform["n_species"][self.species[ispecies]]["density"][
                             "central"
                         ] = [np.NaN] * self.commonTimeLength

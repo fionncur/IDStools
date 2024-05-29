@@ -1,26 +1,7 @@
 import logging
-from typing import Union
+import time
 
 import numpy as np
-from shapely.affinity import rotate, translate
-from shapely.geometry import LineString, box
-import time
-from itertools import starmap
-
-wallIndexMapping = {
-    "VVIS": 0,
-    "VVOS": 1,
-    "TS": 2,
-    "DIR": 3,
-    "Cryostat": 4,
-    "CTR1": 5,
-    "CTR2": 6,
-    "CTR3": 7,
-    "CTR4": 8,
-    "UCTS": 9,
-    "FW": 0,
-    "DIV": 1,
-}
 
 logger = logging.getLogger(f"module.{__name__}")
 
@@ -41,7 +22,7 @@ class WallCompute:
     def __init__(self, ids_object):
         self.ids_object = ids_object
 
-    def getVesselUnits(self):
+    def getVesselUnits(self, nameFilter=None):
         description2dInfos = {}
         for description2dIndex, description2d in enumerate(
             self.ids_object.description_2d
@@ -67,7 +48,14 @@ class WallCompute:
                     vUnit.annular.thickness,
                     vUnit.annular.centreline.closed,
                 )
-                unitInfos[vUnitIndex] = unitInfo
+                if nameFilter is not None:
+                    if (
+                        nameFilter.lower() in vUnit.name.lower()
+                        or nameFilter.lower() in vUnit.identifier.lower()
+                    ):
+                        unitInfos[vUnitIndex] = unitInfo
+                else:
+                    unitInfos[vUnitIndex] = unitInfo
             description2dInfo["vesselunits"] = unitInfos
             description2dInfos[description2dIndex] = description2dInfo
 

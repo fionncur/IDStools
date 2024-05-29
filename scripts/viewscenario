@@ -55,7 +55,7 @@ parser.add_argument(
 parser.add_argument(
     "--directory",
     help="Directory to save the figure",
-    default=None, 
+    default=None,
 )
 args = parser.parse_args()
 logger = setupLogger("module", stdout_level=logging.INFO)
@@ -76,14 +76,14 @@ if not args.noProfiles:
         if idsCoreProfiles.time is None:
             logger.critical("No core_profiles IDS in the data-entry --> Abort.")
             exit()
-    except:
+    except Exception as e:
         logger.critical("The core_profiles IDS is absent from the input data-entry")
         logger.critical("----> Aborted.")
         exit()
 
     try:
         idsEquilibrium = imas.equilibrium()  # To initialise the empty IDS structure
-    except:
+    except Exception as e:
         logger.critical("The equilibrium IDS is absent from the input data-entry")
         logger.critical("----> Aborted.")
         exit()
@@ -107,7 +107,7 @@ if not args.noProfiles:
 
 try:
     idsSummary = connection.get("summary")
-except:
+except Exception as e:
     logger.critical("The summary IDS is absent from the input data-entry")
     logger.critical("----> Aborted.")
     exit(1)
@@ -182,7 +182,7 @@ if not args.noProfiles:
 
     ViewEquilibrium = EquilibriumView(idsEquilibrium)
     ViewEquilibrium.viewEquilibrium(ax5)
-    
+
 title = getTitle(args, "Scenario")
 if not args.noProfiles:
     title = getTitle(args, "Scenario", timeValue)
@@ -198,7 +198,7 @@ if args.info:
             got_dataset_description = False
         else:
             got_dataset_description = True
-    except:
+    except Exception as e:
         logger.warning(
             "Warning: The dataset_description IDS is absent from the input data-entry"
         )
@@ -212,7 +212,7 @@ if args.info:
         if idsSummary.tag.name != "":
             try:
                 additional_data = json.loads(idsSummary.tag.name)
-            except:
+            except Exception as e:
                 additional_data = ""
         if "date" in additional_data:
             txtdate = additional_data["date"]
@@ -242,7 +242,7 @@ if args.save:
     if args.directory:
         if not os.path.exists(args.directory):
             os.makedirs(args.directory)
-        fname=os.path.join(args.directory,fname)
+        fname = os.path.join(args.directory, fname)
     canvas.save(fname)
 else:
     canvas.show()

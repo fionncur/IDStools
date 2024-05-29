@@ -66,17 +66,17 @@ class ScenarioDescriptionBase:
     def getYamlData(yamlFilePath):
         """
         The function `getYamlData` reads a YAML file and returns its contents as a Python object.
-        
+
         Args:
             yamlFilePath: The `yamlFilePath` parameter is a string that represents the file path of the YAML file that you want to load and retrieve data from.
-        
+
         Returns:
             the data loaded from the YAML file.
         """
         with open(yamlFilePath, "r") as fileHandle:
             try:
                 yamlData = yaml.load(fileHandle, Loader=yaml.CLoader)
-            except:
+            except Exception as e:
                 yamlData = None
         return yamlData
 
@@ -84,11 +84,11 @@ class ScenarioDescriptionBase:
     def getDataFrameFromYaml(yamlFilePath, addObsolete=False):
         """
         The function `getDataFrameFromYaml` takes a YAML file path, reads the data from the file, checks if the status is active (unless `addObsolete` is set to True), converts the data into a flat table, and returns it as a pandas DataFrame.
-        
+
         Args:
             yamlFilePath: The path to the YAML file from which you want to create a DataFrame.
             addObsolete: The addObsolete parameter is a boolean flag that determines whether or not to include obsolete data in the resulting DataFrame.
-        
+
         Returns:
             a pandas DataFrame object.
         """
@@ -102,15 +102,15 @@ class ScenarioDescriptionBase:
         dataFrame = pd.DataFrame(flatTable)
         return dataFrame
 
-    def getDataframesFromFiles(self,extension=".yaml", addObsolete=False):
+    def getDataframesFromFiles(self, extension=".yaml", addObsolete=False):
         """
         The function `getDataframesFromFiles` retrieves data from YAML files, creates dataframes, adds additional information, and returns a concatenated dataframe.
-        
+
         Args:
-            extension: The "extension" parameter is a string that specifies the file extension to search for. 
+            extension: The "extension" parameter is a string that specifies the file extension to search for.
             addObsolete: The "addObsolete" parameter is a boolean flag that determines whether or not to
-        include obsolete data in the resulting dataframes. 
-        
+        include obsolete data in the resulting dataframes.
+
         Returns:
             a pandas DataFrame object.
         """
@@ -118,11 +118,13 @@ class ScenarioDescriptionBase:
         if extension == ".yaml":
             dataFrames = []
             for yamlFile in files:
-                df = ScenarioDescriptionBase.getDataFrameFromYaml(yamlFile, addObsolete=addObsolete)
+                df = ScenarioDescriptionBase.getDataFrameFromYaml(
+                    yamlFile, addObsolete=addObsolete
+                )
                 if df is not None:
                     df["location"] = yamlFile
                     localTime = time.ctime(os.path.getmtime(yamlFile))
-                    df["lastmodified"] = pd.to_datetime(localTime) 
+                    df["lastmodified"] = pd.to_datetime(localTime)
                     self._extractInformation(df)
                     dataFrames.append(df)
 
@@ -130,35 +132,41 @@ class ScenarioDescriptionBase:
         df = df.rename(columns=yamlMapping)
         return df
 
-    def _extractInformation(self,df):
+    def _extractInformation(self, df):
         """
         The function `_extractInformation` extracts information from a DataFrame and adds new columns based on the extracted data.
-        
+
         Args:
             df: The parameter `df` is a pandas DataFrame object.
         """
         if "idslist.summary.time_step_number" in df.columns:
             df["tsteps"] = df["idslist.summary.time_step_number"]
-        
-        idslist= set([x.split(".")[1] for x in df.columns if "idslist" in x])
+
+        idslist = set([x.split(".")[1] for x in df.columns if "idslist" in x])
         df["idslist"] = ",".join(idslist)
         species = n_over_ne = None
         if "plasma_composition.species" in df.columns:
             species = str(df["plasma_composition.species"][0])
         if "plasma_composition.n_over_ne" in df.columns:
-            n_over_ne=str(df["plasma_composition.n_over_ne"][0])
+            n_over_ne = str(df["plasma_composition.n_over_ne"][0])
 
         if species is not None and n_over_ne is not None:
-            species=species.split()
-            n_over_ne=n_over_ne.split()
-            
+            species = species.split()
+            n_over_ne = n_over_ne.split()
+
             speciesDict = {k: v for k, v in zip(species, n_over_ne)}
-            sorted_dict = dict(sorted(speciesDict.items(), key=lambda item: float(item[1]), reverse=True))
-            df["composition"] = ','.join([f"{key}({value})" for key,value in sorted_dict.items()])
+            sorted_dict = dict(
+                sorted(
+                    speciesDict.items(), key=lambda item: float(item[1]), reverse=True
+                )
+            )
+            df["composition"] = ",".join(
+                [f"{key}({value})" for key, value in sorted_dict.items()]
+            )
         else:
             df["composition"] = "None"
-            
-        
+
+
 # The class ScenarioDescription is a subclass of ScenarioDescriptionBase.
 class ScenarioDescription(ScenarioDescriptionBase):
     def __init__(self, pulse: int, run: int, folderPath: str = "") -> None:
@@ -248,7 +256,9 @@ class ScenarioDescription(ScenarioDescriptionBase):
             scenarioDescription = ScenarioDescription(pulsep, runp, self.folderPath)
 
             if scenarioDescription.yamlData is not None:
-                dictToFill["pulse"].insert(0, pulsep)  # Order to be reversed for parents
+                dictToFill["pulse"].insert(
+                    0, pulsep
+                )  # Order to be reversed for parents
                 dictToFill["run"].insert(0, runp)
                 dictToFill["status"].insert(0, scenarioDescription.yamlData["status"])
                 dictToFill["comment"].insert(
@@ -278,6 +288,8 @@ class ScenarioDescription(ScenarioDescriptionBase):
 
 
 if __name__ == "__main__":
-    defaultFolderPath=r"/work/imas/shared/imasdb/ITER/3/0"
+    defaultFolderPath = r"/work/imas/shared/imasdb/ITER/3/0"
     scenarioDescriptionObj = ScenarioDescriptionBase(folderPath=defaultFolderPath)
-    df = scenarioDescriptionObj.getDataframesFromFiles(extension = ".yaml", addObsolete=False)
+    df = scenarioDescriptionObj.getDataframesFromFiles(
+        extension=".yaml", addObsolete=False
+    )

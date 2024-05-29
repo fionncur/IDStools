@@ -92,7 +92,7 @@ class EdgeProfilesCompute:
         try:
             ids.ggd[timeSlice]
 
-        except Exception:
+        except Exception as e:
             logger.critical("edge_profiles IDS:slice not found")
             return 0
 
@@ -401,7 +401,7 @@ class EdgeProfilesCompute:
         for grid_subset in self.ids.grid_ggd[timeSlice].grid_subset:
             if grid_subset.identifier.index == IDENTIFIER_CELLS_INDEX:
                 cellsGridSubset = grid_subset
-                
+
         elements = cellsGridSubset.element
 
         num_vertices = len(elements)
@@ -759,35 +759,38 @@ class EdgeProfilesCompute:
                 nspecOverNmaj[jspecies] = 0
 
     def getSeparatix(self, timeSlice=0):
-        SUBSET_INDEX = 16 # separatix
+        SUBSET_INDEX = 16  # separatix
 
         separatixGridSubset = None
         for grid_subset in self.ids.grid_ggd[timeSlice].grid_subset:
             if grid_subset.identifier.index == SUBSET_INDEX:
                 separatixGridSubset = grid_subset
-        
-                logger.info(f"Found Grid subset for separatix name:{grid_subset.identifier.name}, Index: {grid_subset.identifier.index}")
+
+                logger.info(
+                    f"Found Grid subset for separatix name:{grid_subset.identifier.name}, Index: {grid_subset.identifier.index}"
+                )
         if separatixGridSubset is None:
             logger.warning("edge_profiles IDS:Separatix not found")
             return None
         num_sep = len(separatixGridSubset.element)
         if num_sep == 0:
-            logger.warning("edge_profiles IDS:No element found in separatix grid subset")
+            logger.warning(
+                "edge_profiles IDS:No element found in separatix grid subset"
+            )
             return None
         sep_coords = np.zeros((num_sep, 2))
-       
+
         for ielement, element in enumerate(separatixGridSubset.element):
-            for obj in element.object: 
-                index = obj.index -1 
-                space = obj.space -1
-                dim = 0 # choosing nodes 1=nodes, 2=edges, 3=faces, 4=cells/volumes
+            for obj in element.object:
+                index = obj.index - 1
+                space = obj.space - 1
+                dim = 0  # choosing nodes 1=nodes, 2=edges, 3=faces, 4=cells/volumes
 
                 sep_coords[ielement, :] = (
                     self.ids.grid_ggd[timeSlice]
                     .space[space]
                     .objects_per_dimension[dim]
-                    .object[index
-                    ]
+                    .object[index]
                     .geometry[:2]
                 )
 
@@ -807,7 +810,10 @@ class EdgeProfilesCompute:
             two arrays: r_edge and z_edge.
         """
         num_vertices = len(
-            self.ids.grid_ggd[timeSlice].space[0].objects_per_dimension[0].object # nodes dimension
+            self.ids.grid_ggd[timeSlice]
+            .space[0]
+            .objects_per_dimension[0]
+            .object  # nodes dimension
         )
         vertex_coords = np.zeros((num_vertices, 2))
         for vertex_id in range(num_vertices):
@@ -854,13 +860,15 @@ class EdgeProfilesCompute:
         """
         r_edge, z_edge = self.getRZ(timeSlice)
         temp = None
-        
+
         for electronsDensity in self.ids.ggd[timeSlice].electrons.density:
-            if electronsDensity.grid_subset_index == 1: #  nodes
+            if electronsDensity.grid_subset_index == 1:  #  nodes
                 temp = electronsDensity.values
         if temp is None:
-            #TODO if nodes grid_subset is not available is it possible to get coordinated from other subsets?
-            logger.warning("edge_profiles : electrons density values not found for nodes grid_subset")
+            # TODO if nodes grid_subset is not available is it possible to get coordinated from other subsets?
+            logger.warning(
+                "edge_profiles : electrons density values not found for nodes grid_subset"
+            )
             return None
         ne_edge = interpolate.griddata((r_edge, z_edge), temp, (x, y))
         return ne_edge
@@ -879,11 +887,13 @@ class EdgeProfilesCompute:
         r_edge, z_edge = self.getRZ(timeSlice)
         temp = None
         for ionDensity in self.ids.ggd[timeSlice].ion[0].density:
-            if ionDensity.grid_subset_index == 1: #  nodes
+            if ionDensity.grid_subset_index == 1:  #  nodes
                 temp = ionDensity.values
-            
+
         if temp is None:
-            logger.warning("edge_profiles : ion density values not found for nodes grid_subset")
+            logger.warning(
+                "edge_profiles : ion density values not found for nodes grid_subset"
+            )
             return None
         ni_edge = interpolate.griddata((r_edge, z_edge), temp, (x, y))
         return ni_edge
@@ -901,23 +911,25 @@ class EdgeProfilesCompute:
             the neutral density at the given coordinates (x, y).
         """
         r_edge, z_edge = self.getRZ(timeSlice)
-        
+
         temp = None
         for neutralDensity in self.ids.ggd[timeSlice].neutral[0].density:
-            if neutralDensity.grid_subset_index == 1: #  nodes
+            if neutralDensity.grid_subset_index == 1:  #  nodes
                 temp = neutralDensity.values
-        
+
         if temp is None:
-            logger.warning("edge_profiles : neutral.density values not found for nodes grid_subset")
+            logger.warning(
+                "edge_profiles : neutral.density values not found for nodes grid_subset"
+            )
             return None
-        
+
         n_neutral_edge = interpolate.griddata((r_edge, z_edge), temp, (x, y))
         return n_neutral_edge
 
     def getOuterMidplaneArrayIndex(self):
         """
         This function searches for a specific grid subset with an index of 11 and returns its position  within the list of subsets.
-        
+
         Returns:
             The function `getOuterMidplaneArrayIndex` returns the index of the grid subset that has an identifier index of 11, representing the outer midplane GGD grid subset. If the subset is found,
         it returns the index of that subset. If the subset is not found, it logs a warning message and
@@ -929,12 +941,13 @@ class EdgeProfilesCompute:
             if self.ids.grid_ggd[0].grid_subset[iset].identifier.index == 11:
                 subsetIndex = iset
         if subsetIndex is None:
-            logger.warning('Did not find outer_midplane GGD grid subset.')
+            logger.warning("Did not find outer_midplane GGD grid subset.")
         else:
-            logger.debug(f'Outer midplane GGD grid subset is number {subsetIndex+1} of {nsubsets}')
+            logger.debug(
+                f"Outer midplane GGD grid subset is number {subsetIndex+1} of {nsubsets}"
+            )
         return subsetIndex
-    
-    
+
     def getnrho(self, sliceIndex=0):
         nrho = None
         try:
@@ -942,6 +955,8 @@ class EdgeProfilesCompute:
                 nrho = len(self.ids.profiles_1d[sliceIndex].grid.rho_tor_norm)
             elif len(self.ids.profiles_1d[sliceIndex].grid.rho_tor) > 0:
                 nrho = len(self.ids.profiles_1d[sliceIndex].grid.rho_tor)
-        except:
-            logger.warning('edge_profiles.profiles_1d[:].grid.rho_tor_norm and rho_tor could not be read.')
+        except Exception as e:
+            logger.warning(
+                "edge_profiles.profiles_1d[:].grid.rho_tor_norm and rho_tor could not be read."
+            )
         return nrho

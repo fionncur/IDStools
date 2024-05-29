@@ -10,7 +10,7 @@ import imas
 from rich.progress import track
 
 from idstools.database import DBMaster
-from idstools.utils.clihelper import getBackendID, getCoreVersion, imasParser
+from idstools.utils.clihelper import getBackendID, imasParser
 from idstools.utils.idshelper import getAvailableIdsAndOccurrences
 
 if __name__ == "__main__":
@@ -68,8 +68,7 @@ if __name__ == "__main__":
             connargs.user = args.user
             connargs.database = args.database
             connargs.version = args.version
-            if getCoreVersion() > 4:
-                connargs.uri = f"imas:{args.backend.lower()}?user={args.user};shot={pulse[0]};run={pulse[1]};database={args.database};version={args.version}"
+            connargs.uri = f"imas:{args.backend.lower()}?user={args.user};shot={pulse[0]};run={pulse[1]};database={args.database};version={args.version}"
             connection = DBMaster.getConnection(connargs)
             if connection is None:
                 continue

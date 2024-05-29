@@ -227,7 +227,7 @@ if __name__ == "__main__":
                         slices.append(
                             get_timings(hdfde, idsname, times=[10], repeat=args.repeat)
                         )
-                    except Exception:
+                    except Exception as e:
                         slices.append(None)
                         print(
                             idsname

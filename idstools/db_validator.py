@@ -139,7 +139,7 @@ class ScenarioValidator:
 
         try:
             self.DD = idschk.load_XML(fpath)
-        except:
+        except Exception as e:
             raise OSError(f"can not load DD: {fpath}")
 
         logger.debug(f" DD= {fpath}")
@@ -161,7 +161,7 @@ class ScenarioValidator:
         try:
             for f in yaml:
                 self.SCHEMA[f] = idschk.load_YAML(f)
-        except:
+        except Exception as e:
             raise OSError(f"failed to load Schema: {yaml}")
 
         self.SCHEMA = self.arrange_schema(self.SCHEMA)
@@ -225,15 +225,19 @@ class ScenarioValidator:
             for key, schema in schemas.items():
                 if key == idsname:
                     ids = None
-                    dbEntryDetails=""
+                    dbEntryDetails = ""
                     if "uri" in db.__dict__:
-                        dbEntryDetails=db.__dict__["uri"]
+                        dbEntryDetails = db.__dict__["uri"]
                     else:
                         if "pulse" in db.__dict__:
-                            dbEntryDetails = f"{db.__dict__['pulse']}/{db.__dict__['run']}"
+                            dbEntryDetails = (
+                                f"{db.__dict__['pulse']}/{db.__dict__['run']}"
+                            )
                         if "shot" in db.__dict__:
-                            dbEntryDetails = f"{db.__dict__['shot']}/{db.__dict__['run']}"
-                        
+                            dbEntryDetails = (
+                                f"{db.__dict__['shot']}/{db.__dict__['run']}"
+                            )
+
                     logger.info(
                         "- {}/{}/{} < {}".format(
                             dbEntryDetails,

@@ -4,6 +4,7 @@ This module provides compute functions and classes for core_profiles ids data
 `refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`_.
 
 """
+
 import contextlib
 from typing import Union
 import numpy as np
@@ -31,7 +32,7 @@ class CoreProfilesCompute:
         try:
             ids.profiles_1d[timeSlice]
 
-        except Exception:
+        except Exception as e:
             return 0
 
         coreProfileCompute = CoreProfilesCompute(ids, volume=volume)
@@ -693,9 +694,9 @@ class CoreProfilesCompute:
 
         Returns:
             a dictionary with the following keys and values:
-            
+
             .. code-block:: python
-            
+
                 {
                     "maximaIon": maximaIon,
                     "pressureIonThermal": pressureIonThermal,
@@ -823,7 +824,7 @@ class CoreProfilesCompute:
 
         Returns:
             a dictionary with three key-value pairs. The keys are "pressureThermal", "pressureParallel",and "pressurePerpendicular", and the values are the corresponding variables pressureThermal, pressureParallel, and pressurePerpendicular.
-            
+
         """
         nrho = len(self.getRhoTorNorm())
         pressureThermal = self.ids.profiles_1d[0].pressure_thermal
@@ -1004,6 +1005,8 @@ class CoreProfilesCompute:
                 nrho = len(self.ids.profiles_1d[sliceIndex].grid.rho_tor_norm)
             elif len(self.ids.profiles_1d[sliceIndex].grid.rho_tor) > 0:
                 nrho = len(self.ids.profiles_1d[sliceIndex].grid.rho_tor)
-        except:
-            logger.warning('core_profiles.profiles_1d[:].grid.rho_tor_norm and rho_tor could not be read.')
+        except Exception as e:
+            logger.warning(
+                "core_profiles.profiles_1d[:].grid.rho_tor_norm and rho_tor could not be read."
+            )
         return nrho

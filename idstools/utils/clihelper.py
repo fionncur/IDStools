@@ -5,19 +5,23 @@ import re
 import imas
 from imas import imasdef
 
+
 def getCoreVersion():
-    _lowlevelVersion=""
+    _lowlevelVersion = ""
     if "_al_lowlevel" in imas.__dict__:
-        _lowlevelVersion=imas.get_al_version()
+        _lowlevelVersion = imas.get_al_version()
     if "_ual_lowlevel" in imas.__dict__:
-        rawCoreVersion=imas._ual_lowlevel.__name__ # '__name__': 'imas_3_41_0_ual_4_11_10._ual_lowlevel
+        rawCoreVersion = (
+            imas._ual_lowlevel.__name__
+        )  # '__name__': 'imas_3_41_0_ual_4_11_10._ual_lowlevel
         rawCoreVersion, _ = rawCoreVersion.split(".")
-        match = re.search(r'\d+_\d+_\d+$', rawCoreVersion)
+        match = re.search(r"\d+_\d+_\d+$", rawCoreVersion)
         if match:
             _lowlevelVersion = match.group()
-            _lowlevelVersion=_lowlevelVersion.replace("_", ".")
+            _lowlevelVersion = _lowlevelVersion.replace("_", ".")
     lowlevelVersion = int(_lowlevelVersion.split(".")[0])
     return lowlevelVersion
+
 
 # default parent parser for all idstools scripts
 uriParser = argparse.ArgumentParser(add_help=False)
@@ -61,9 +65,7 @@ imasParser.add_argument(
 parents = [imasParser, uriParser]
 
 dbentryParser = argparse.ArgumentParser(add_help=False, parents=parents)
-dbentryParser.add_argument(
-    "-p", "--pulse", dest="pulse", help="Pulse number", type=int
-)
+dbentryParser.add_argument("-p", "--pulse", dest="pulse", help="Pulse number", type=int)
 dbentryParser.add_argument("-r", "--run", help="Run number", type=int)
 
 
@@ -81,12 +83,12 @@ def getDetailsfromURI(uri):
     param = {}
     user_pattern = r"user=([^;]+)"
     database_pattern = r"database=([^;]+)"
-    version_pattern = r"version=([^;]+)"
-    backend_pattern = r'imas:(.*?)\?'
+    version_pattern = r"version=(\d+)"
+    backend_pattern = r"imas:(.*?)\?"
     shot_pattern = r"shot=(\d+)"
     pulse_pattern = r"pulse=(\d+)"
     run_pattern = r"run=(\d+)"
-    path_pattern = r'path=(.*)'
+    path_pattern = r"path=([^?]+)"
 
     user_match = re.search(user_pattern, uri)
     database_match = re.search(database_pattern, uri)
@@ -103,22 +105,27 @@ def getDetailsfromURI(uri):
     param["backend"] = backend_match.group(1) if backend_match else None
     shot = shot_match.group(1) if shot_match else None
     pulse = pulse_match.group(1) if pulse_match else None
-    param["pulse"]=None
+    param["pulse"] = None
     if shot is not None:
-        param["pulse"]=shot
+        param["pulse"] = int(shot)
     elif pulse is not None:
-        param["pulse"]=pulse
+        param["pulse"] = int(pulse)
     param["run"] = run_match.group(1) if run_match else None
-    
-    param["backend"]=param["backend"].upper()
-    param["pulse"]=int(param["pulse"])
-    param["run"]=int(param["run"])
+
+    param["backend"] = param["backend"].upper()
+    if param["run"] is not None:
+        param["run"] = int(param["run"])
     if path_match:
         param["path"] = path_match.group(1)
         param["pathPresent"] = True
     else:
         param["pathPresent"] = False
-    
+
+    param["legacyPresent"] = not all(
+        param[key] is None
+        for key in ["run", "pulse", "database", "backend", "user", "version"]
+    )
+
     return param
 
 
@@ -167,27 +174,26 @@ def getDatabasePath(imasargs, timeValue=None) -> str:
     Returns:
         the absolute path of the database.
     """
-    pulseInfo=""
-    databaseAbsolutePath=""
+    pulseInfo = ""
+    databaseAbsolutePath = ""
     if "uri" in imasargs.__dict__ and imasargs.uri:
-        databaseAbsolutePath=imasargs.uri
-        
+        databaseAbsolutePath = imasargs.uri
+
     else:
         if imasargs.user == "public":
             publichome = os.getenv("IMAS_HOME", default="")
             if publichome is None:
                 return None
-            databaseAbsolutePath = (
-                f"{publichome}/shared/imasdb/{imasargs.database}/{imasargs.version}/{imasargs.run//10000}"
-            )
+            databaseAbsolutePath = f"{publichome}/shared/imasdb/{imasargs.database}/{imasargs.version}/{imasargs.run//10000}"
         else:
             databaseAbsolutePath = f'{os.path.expanduser(f"~{imasargs.user}")}/public/imasdb/{str(imasargs.database)}/{imasargs.version}/{imasargs.run//10000}'
-        pulseInfo=f"pulse {imasargs.pulse},{imasargs.run}"
+        pulseInfo = f"pulse {imasargs.pulse},{imasargs.run}"
         databaseAbsolutePath = databaseAbsolutePath[:-2]
     timeString = ""
     if timeValue:
         timeString = f"time:{timeValue:.2f})"
-    hostdir = f"{socket.gethostname()}:{databaseAbsolutePath} ({pulseInfo} {timeString})"
+    hostdir = (
+        f"{socket.gethostname()}:{databaseAbsolutePath} ({pulseInfo} {timeString})"
+    )
     #
     return hostdir
-

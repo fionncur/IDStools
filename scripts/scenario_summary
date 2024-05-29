@@ -135,7 +135,7 @@ if args["folder"] != None:
     folder = args["folder"]
 else:
     defaultFolderPath = os.environ["IMAS_HOME"] + "/shared/imasdb/ITER/3/0"
-    lowlevelVersion=getCoreVersion()
+    lowlevelVersion = getCoreVersion()
 
     if lowlevelVersion < 4:
         defaultFolderPath = os.environ["IMAS_HOME"] + "/shared/iterdb/3/0"
@@ -174,7 +174,7 @@ if args["choice"] != None:
         choice = eval(
             str("""['""" + re.sub(""",""", r"""','""", input_choice) + """']""")
         )
-    except:
+    except Exception as e:
         print(
             "------------------------------------------------------------------",
             file=sys.stderr,
@@ -191,7 +191,18 @@ if args["choice"] != None:
         )
         sys.exit(1)
 else:
-    choice = ['pulse','run','database','ref_name','ip','b0','fuelling','confinement','workflow','date']
+    choice = [
+        "pulse",
+        "run",
+        "database",
+        "ref_name",
+        "ip",
+        "b0",
+        "fuelling",
+        "confinement",
+        "workflow",
+        "date",
+    ]
 
 # Print the arguments of the default call to the function
 if args["choice"] == None:
@@ -201,7 +212,9 @@ if args["choice"] == None:
     )
 
 scenarioDescriptionObj = ScenarioDescriptionBase(folderPath=defaultFolderPath)
-df = scenarioDescriptionObj.getDataframesFromFiles(extension = ".yaml", addObsolete=obsolete)
+df = scenarioDescriptionObj.getDataframesFromFiles(
+    extension=".yaml", addObsolete=obsolete
+)
 
 # check of need to add obsolete
 if not args["obsolete"]:
@@ -215,6 +228,7 @@ df = df[choice]
 
 # Search based on selection
 if selection:
+
     def stringExists(row):
         if selectionOperation == "AND":
             found_substrings = set()
@@ -259,7 +273,7 @@ if not selected_df.empty:
         table.add_column(columnName, justify="left", style="green")
 
     for _, row in df.iterrows():
-        x=[]
+        x = []
         for columnName in choice:
             x.append(str(row[columnName]))
         table.add_row(*x)  # Even row style
@@ -268,4 +282,4 @@ if not selected_df.empty:
     console.print(table)
 else:
     print(" No records found matching mentioned criteria")
-print(f" NOTE: Read Scenario database from {defaultFolderPath}" )
+print(f" NOTE: Read Scenario database from {defaultFolderPath}")

@@ -43,7 +43,7 @@ parser.add_argument(
 parser.add_argument(
     "--directory",
     help="Directory to save the figure",
-    default=None, 
+    default=None,
 )
 args = parser.parse_args()
 
@@ -59,7 +59,7 @@ try:
     if idsCoreProfiles.time is None:
         logger.critical("No core_profiles IDS in the data-entry --> Abort.")
         exit()
-except Exception:
+except Exception as e:
     logger.critical("The core_profiles IDS is absent from the input data-entry")
     logger.critical("----> Aborted.")
     exit(1)
@@ -94,11 +94,11 @@ canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
 canvas.fig.suptitle(getTitle(args, "Pressure", timeValue), size=12)
 
 if args.save:
-    fname = getFileName(args, os.path.basename(__file__)+"_Pressure", timeValue)
+    fname = getFileName(args, os.path.basename(__file__) + "_Pressure", timeValue)
     if args.directory:
         if not os.path.exists(args.directory):
             os.makedirs(args.directory)
-        fname=os.path.join(args.directory,fname)
+        fname = os.path.join(args.directory, fname)
     canvas.save(fname)
 else:
     canvas.show()

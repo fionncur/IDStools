@@ -287,7 +287,16 @@ def resampleTimes(
         dbout.put_slice(dataSlice)
 
 
-def compareIds(X, Y, field=None, ignore_version=True, verb=True,nameX="first",nameY="second", output={}):
+def compareIds(
+    X,
+    Y,
+    field=None,
+    ignore_version=True,
+    verb=True,
+    nameX="first",
+    nameY="second",
+    output={},
+):
     """
     The function compares two ids objects and returns whether they are identical or not, along with a  dictionary of differences.
 
@@ -302,7 +311,7 @@ def compareIds(X, Y, field=None, ignore_version=True, verb=True,nameX="first",na
     Returns:
         tuple containing a boolean value indicating whether the two input objects are identical, and a dictionary containing information about any differences found during the comparison.
     """
-    
+
     identical = True
     if hasattr(X, "__name__") and hasattr(Y, "__name__"):
         if X.__name__ == Y.__name__:
@@ -527,7 +536,7 @@ def getQuantitiesFromPulses(
         connection.open()
         try:
             values.append(connection.partial_get(idsname, valpath))
-        except Exception:
+        except Exception as e:
             values.append(None)
         connection.close()
 

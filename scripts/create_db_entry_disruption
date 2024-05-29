@@ -9,24 +9,35 @@ from idstools.database import DBMaster
 import idstools.init_mendeleiev as mend
 import numpy as np
 import sys
-from os import system,getenv
+from os import system, getenv
 from sys import exit
 from idstools.utils.clihelper import dbentryParser
 
 # --------------------------------------------------------------------------------
 # --- Creates an entry for the Disruption database (adapted from create_db_entry
-# --- by J. Artola). For the moment it has only been used for DINA simulations   
-# --- and would need further refinements. The quantities such as Ip or ne0 are 
+# --- by J. Artola). For the moment it has only been used for DINA simulations
+# --- and would need further refinements. The quantities such as Ip or ne0 are
 # --- taken at the first time slice. Thus it is expected the the first time
 # --- slice corresponds to the plasma right before the disruption
 # -------------------------------------------------------------------------------
 
 # Management of input arguments
-parser = argparse.ArgumentParser(description=\
-	                         '---- Auto-generated yaml scenario and watcher files (!!! STILL TO BE COMPLETED BY HAND !!!)',
-                                 parents=[dbentryParser],formatter_class=RichHelpFormatter)
-parser.add_argument('-st','--status',       help='active/obsolete',required=False,type=str,default="draft")
-parser.add_argument('-ro','--ro',           help='Name of responsible officer',required=False,type=str,default="")
+parser = argparse.ArgumentParser(
+    description="---- Auto-generated yaml scenario and watcher files (!!! STILL TO BE COMPLETED BY HAND !!!)",
+    parents=[dbentryParser],
+    formatter_class=RichHelpFormatter,
+)
+parser.add_argument(
+    "-st", "--status", help="active/obsolete", required=False, type=str, default="draft"
+)
+parser.add_argument(
+    "-ro",
+    "--ro",
+    help="Name of responsible officer",
+    required=False,
+    type=str,
+    default="",
+)
 
 args = parser.parse_args()
 
@@ -39,156 +50,164 @@ if input is None:
 
 # Read necessary IDSs from database
 try:
-    core_profiles = input.get('core_profiles')
+    core_profiles = input.get("core_profiles")
     if core_profiles.ids_properties.homogeneous_time != imas.imasdef.EMPTY_INT:
-      core_present = 1
+        core_present = 1
     else:
-      core_present = 0
-except:
+        core_present = 0
+except Exception as e:
     print("The core_profiles IDS is absent from the input data-entry", file=sys.stdout)
     core_present = 0
 
 try:
-    summary = input.get('summary')
-except:
+    summary = input.get("summary")
+except Exception as e:
     print("The summary IDS is absent from the input data-entry", file=sys.stdout)
     print("----> H&CD waveforms not filled (to be completed by hand)", file=sys.stdout)
 
 
-if core_present==1:
+if core_present == 1:
     try:
-        ne0 = input.partial_get('core_profiles','profiles_1d(:)/electrons/density(0)')
+        ne0 = input.partial_get("core_profiles", "profiles_1d(:)/electrons/density(0)")
         central_electron_density = ne0[0]
-       
-    except:
-       print("core_profiles.profiles_1d[:].electrons.density[0] could not be read", file=sys.stderr)
-       ne0 = 0
+
+    except Exception as e:
+        print(
+            "core_profiles.profiles_1d[:].electrons.density[0] could not be read",
+            file=sys.stderr,
+        )
+        ne0 = 0
 
 try:
-    equilibrium = input.get('equilibrium')
+    equilibrium = input.get("equilibrium")
     if equilibrium.ids_properties.homogeneous_time != imas.imasdef.EMPTY_INT:
-       eq_present = 1
+        eq_present = 1
     else:
-       eq_present = 0
+        eq_present = 0
 
-except:
+except Exception as e:
     print("The equilibrium IDS is absent from the input data-entry", file=sys.stdout)
     eq_present = 0
 
 try:
-    dataset_description = input.get('dataset_description')
-    comment = str.replace(dataset_description.ids_properties.comment,'\n','\n   ')
+    dataset_description = input.get("dataset_description")
+    comment = str.replace(dataset_description.ids_properties.comment, "\n", "\n   ")
     dd_version = dataset_description.dd_version
-except:
+except Exception as e:
     print("----> dataset_description does not exist", file=sys.stderr)
-    comment = ''
-    dd_version = ''
+    comment = ""
+    dd_version = ""
 
 # Code name
 try:
     workflow = summary.code.name
-except:
+except Exception as e:
     workflow = "tbd"
 
 # Case reference name
 try:
     ref_name = summary.ids_properties.source
-except: 
+except Exception as e:
     ref_name = "tbd"
 
 # Major Disruption or VDE?
 split_name = ref_name.split("/")[-1]
-if 'MD' in split_name:
-    dis_type = 'MD' 
-elif 'VDE' in split_name:
-    dis_type = 'VDE'
+if "MD" in split_name:
+    dis_type = "MD"
+elif "VDE" in split_name:
+    dis_type = "VDE"
 else:
-    dis_type = 'tbd' 
+    dis_type = "tbd"
 
 # Check the plasma direction (needs better criteria)
-if 'up' in split_name:
-    VD_direction = 'up' 
-elif 'dw' in split_name:
-    VD_direction = 'down'
+if "up" in split_name:
+    VD_direction = "up"
+elif "dw" in split_name:
+    VD_direction = "down"
 else:
-    VD_direction = 'tbd' 
+    VD_direction = "tbd"
 
 # Check the maximum RE current
 try:
-    REmax = 1.e-6* max(summary.runaways.current.value,key=abs)
-except:
+    REmax = 1.0e-6 * max(summary.runaways.current.value, key=abs)
+except Exception as e:
     REmax = 0.0
- 
+
 # Btor
 if eq_present == 1:
-   try:
-      if min(np.sign(equilibrium.vacuum_toroidal_field.b0)) < 0:
-         magnetic_field = min(equilibrium.vacuum_toroidal_field.b0)
-      else:
-         magnetic_field = max(equilibrium.vacuum_toroidal_field.b0)
-   except:
-      print("equilibrium.vacuum_toroidal_field.b0 could not be read", file=sys.stderr)
-      magnetic_field=0
+    try:
+        if min(np.sign(equilibrium.vacuum_toroidal_field.b0)) < 0:
+            magnetic_field = min(equilibrium.vacuum_toroidal_field.b0)
+        else:
+            magnetic_field = max(equilibrium.vacuum_toroidal_field.b0)
+    except Exception as e:
+        print("equilibrium.vacuum_toroidal_field.b0 could not be read", file=sys.stderr)
+        magnetic_field = 0
 else:
-   try:
-      if min(np.sign(summary.global_quantities.b0.value)) < 0:
-         magnetic_field = min(summary.global_quantities.b0.value)
-      else:
-         magnetic_field = max(summary.global_quantities.b0.value)
-   except:
-      print("summary.global_quantities.b0.value[:] could not be read", file=sys.stderr)
-      magnetic_field=0
+    try:
+        if min(np.sign(summary.global_quantities.b0.value)) < 0:
+            magnetic_field = min(summary.global_quantities.b0.value)
+        else:
+            magnetic_field = max(summary.global_quantities.b0.value)
+    except Exception as e:
+        print(
+            "summary.global_quantities.b0.value[:] could not be read", file=sys.stderr
+        )
+        magnetic_field = 0
 
 # Ip
 try:
-   plasma_current = 1e-99
-   plasma_current = summary.global_quantities.ip.value[0]*1.e-6
+    plasma_current = 1e-99
+    plasma_current = summary.global_quantities.ip.value[0] * 1.0e-6
 
-except:
-   print("summary.global_quantities.ip could not be read", file=sys.stderr)
-   print("Plasma current will need to be provided by hand.", file=sys.stderr)
+except Exception as e:
+    print("summary.global_quantities.ip could not be read", file=sys.stderr)
+    print("Plasma current will need to be provided by hand.", file=sys.stderr)
 
 # Ihalo
 try:
-   halo_current = 0
-   disruption = input.get("disruption")
-   halo_current = max(disruption.global_quantities.current_halo_pol, key=abs)
-except:
-   print("disruption.global_quantities.current_halo_pol could not be read", file=sys.stderr)
+    halo_current = 0
+    disruption = input.get("disruption")
+    halo_current = max(disruption.global_quantities.current_halo_pol, key=abs)
+except Exception as e:
+    print(
+        "disruption.global_quantities.current_halo_pol could not be read",
+        file=sys.stderr,
+    )
 
 
 # Misc
-type     = "tbd"
+type = "tbd"
 
 # Set up the name of the yaml file
 add0 = ""
-add0_length = 4-len(str(args.run))
+add0_length = 4 - len(str(args.run))
 for i in range(add0_length):
-    add0 = add0+"0"
+    add0 = add0 + "0"
 
-filename = "ids_"+str(args.pulse)+add0+str(args.run)+".yaml"
+filename = "ids_" + str(args.pulse) + add0 + str(args.run) + ".yaml"
 
 # Go for it: fill the yaml file
-f = open(filename, 'w')
+f = open(filename, "w")
 f.write("""# ------------------------------------------------------------------\n""")
 f.write("""# Status is "draft" when auto-generated by the create_yam function,\n""")
 f.write("""# to be changed to "active" once simulation and yaml files are ready\n""")
 f.write("""# to be changed to "obsolete" if the simulation becomes obsolete\n""")
 f.write("""# ------------------------------------------------------------------\n""")
 f.write("""status: \n""")
-f.write("""   """ + args.status + "\n""")
+f.write("""   """ + args.status + "\n" "")
 f.write("""\n""")
 f.write("""# -----------------------------------------------\n""")
 f.write("""# Reference name describing the simulation\n""")
 f.write("""# -----------------------------------------------\n""")
 f.write("""reference_name:\n""")
-f.write("""   """ + ref_name + "\n""")
+f.write("""   """ + ref_name + "\n" "")
 f.write("""\n""")
 f.write("""# ---------------------------------------------------------\n""")
 f.write("""# Responsible officer name(s), can be separated by commas\n""")
 f.write("""# ---------------------------------------------------------\n""")
 f.write("""responsible_name:\n""")
-f.write("""   """ + args.ro + "\n""")
+f.write("""   """ + args.ro + "\n" "")
 f.write("""\n""")
 f.write("""# ------------------------------------------------------------------\n""")
 f.write("""# Shot number, run numbers, type, code, database attributes\n""")
@@ -208,7 +227,7 @@ f.write("""# Relations to other entries in this database (if any)\n""")
 f.write("""# referred to by (shot,run) pairs\n""")
 f.write("""# ------------------------------------------------------------------\n""")
 f.write("""database_relations:\n""")
-f.write("""    replaces: \n""" )
+f.write("""    replaces: \n""")
 f.write("""    replaced_by: \n""")
 f.write("""\n""")
 f.write("""# --------------------------------------------------\n""")
@@ -217,7 +236,7 @@ f.write("""# (scenario keys can be completed here if relevant)\n""")
 f.write("""# Units are [T], [-], [MA], [m-3] respectively\n""")
 f.write("""# --------------------------------------------------\n""")
 f.write("""scenario_key_parameters:\n""")
-#f.write("""    confinement_regime: %s\n""" % confinement_regime)
+# f.write("""    confinement_regime: %s\n""" % confinement_regime)
 f.write("""    disruption_type: %s\n""" % dis_type)
 f.write("""    VD_direction: %s\n""" % VD_direction)
 f.write("""    magnetic_field: %.2f\n""" % magnetic_field)
@@ -229,11 +248,11 @@ if plasma_current == 0:
     f.write("""    halo_fraction: tbd \n""")
 else:
     f.write("""    plasma_current: %.2f \n""" % plasma_current)
-    halo_fraction =  1.e-6*abs(float(halo_current)/float(plasma_current))
-    if (halo_fraction > 0.5): 
-        print(disruption.global_quantities.current_halo_pol*1.e-6)
-        print("Ip="+str(plasma_current)+"   halo_cur="+str(halo_current*1.e-6) )
-    f.write("""    halo_fraction:  %.2f \n""" %  halo_fraction)
+    halo_fraction = 1.0e-6 * abs(float(halo_current) / float(plasma_current))
+    if halo_fraction > 0.5:
+        print(disruption.global_quantities.current_halo_pol * 1.0e-6)
+        print("Ip=" + str(plasma_current) + "   halo_cur=" + str(halo_current * 1.0e-6))
+    f.write("""    halo_fraction:  %.2f \n""" % halo_fraction)
 
 if core_present == 1:
     f.write("""    central_electron_density: %.2e\n""" % central_electron_density)
@@ -245,34 +264,54 @@ f.write("""# Content description\n""")
 f.write("""# --------------------\n""")
 # Vertical bar is necessary here to deal with long lines in free description
 f.write("""free_description: |\n""")
-f.write("   "+comment+"\n")
-f.write("   DD version: "+args.version+"\n")
+f.write("   " + comment + "\n")
+f.write("   DD version: " + args.version + "\n")
 f.write("""\n""")
-f.write("""# ------------------------------------------------------------------------------\n""")
-f.write("""# List of filled IDSs with time quantities in seconds (start, end, step)\n""")
+f.write(
+    """# ------------------------------------------------------------------------------\n"""
+)
+f.write(
+    """# List of filled IDSs with time quantities in seconds (start, end, step)\n"""
+)
 f.write("""# It should be the output of the "idslist" script, adapted from\n""")
-f.write("""# listidss, see IMAS-1010 (note: the data-entry has to be copied to a personal\n""")
+f.write(
+    """# listidss, see IMAS-1010 (note: the data-entry has to be copied to a personal\n"""
+)
 f.write("""# database for the script to work, see the example below):\n""")
 f.write("""#  idslist -u <username> -d test -p 4321 -r 1 yaml\n""")
-f.write("""# ------------------------------------------------------------------------------\n""")
+f.write(
+    """# ------------------------------------------------------------------------------\n"""
+)
 f.write("""idslist:\n""")
 f.close()
 
 # Complete the yaml file with the output of idslist
-system('idslist -u ' + args.user + ' -d ' + args.database \
-          + ' -p ' + str(args.pulse) + ' -r ' + str(args.run) + ' yaml >> ' + filename)
+system(
+    "idslist -u "
+    + args.user
+    + " -d "
+    + args.database
+    + " -p "
+    + str(args.pulse)
+    + " -r "
+    + str(args.run)
+    + " yaml >> "
+    + filename
+)
 
 print("----> " + filename + " created.", file=sys.stdout)
 
 # Associated WATCHER file
-filename = "ids_"+str(args.pulse)+add0+str(args.run)+".watcher"
-f = open(filename, 'w')
-if 1 == 1: # Done for alignment
-   f.write("""----------------------------------------------------------------------------------\n""")
-   f.write(""" Firstname		Name			E-mail\n""")
-   f.write("""----------------------------------------------------------------------------------\n""")
-   f.write(""" Javier			Artola   		javier.artola@iter.org\n""")
+filename = "ids_" + str(args.pulse) + add0 + str(args.run) + ".watcher"
+f = open(filename, "w")
+if 1 == 1:  # Done for alignment
+    f.write(
+        """----------------------------------------------------------------------------------\n"""
+    )
+    f.write(""" Firstname		Name			E-mail\n""")
+    f.write(
+        """----------------------------------------------------------------------------------\n"""
+    )
+    f.write(""" Javier			Artola   		javier.artola@iter.org\n""")
 f.close()
 print("----> " + filename + " created.", file=sys.stdout)
-
-

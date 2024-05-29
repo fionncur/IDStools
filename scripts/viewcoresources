@@ -11,8 +11,12 @@ import imas
 
 from idstools.compute.common import getNearestTime
 from idstools.database import DBMaster
-from idstools.utils.clihelper import (dbentryParser, getDatabasePath,
-                                      getFileName, getTitle)
+from idstools.utils.clihelper import (
+    dbentryParser,
+    getDatabasePath,
+    getFileName,
+    getTitle,
+)
 from idstools.utils.idslogger import setupLogger
 from idstools.view.common import Canvas
 from idstools.view.core_sources import CoreSourcesView
@@ -20,7 +24,9 @@ from idstools.view.core_sources import CoreSourcesView
 logger = setupLogger("module", stdout_level=logging.INFO)
 
 parser = argparse.ArgumentParser(
-    description="---- Display core_sources results [Previously known as csplot]", parents=[dbentryParser],formatter_class=RichHelpFormatter
+    description="---- Display core_sources results [Previously known as csplot]",
+    parents=[dbentryParser],
+    formatter_class=RichHelpFormatter,
 )
 
 parser.add_argument(
@@ -34,7 +40,7 @@ parser.add_argument(
 parser.add_argument(
     "--directory",
     help="Directory to save the figure",
-    default=None, 
+    default=None,
 )
 
 args = parser.parse_args()
@@ -74,7 +80,7 @@ for isource in range(nsources):
             core_sources.source[isource].global_quantities = connection.partial_get(
                 "core_sources", f"source({isource})/global_quantities"
             )
-        except Exception:
+        except Exception as e:
             logger.critical(
                 f"source({str(isource)}) does not have global_quantities",
             )
@@ -119,11 +125,11 @@ canvas.fig.subplots_adjust(
 canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
 canvas.fig.suptitle(getTitle(args, "Core sources", timeValue), size=12)
 if args.save:
-    fname = getFileName(args, os.path.basename(__file__)+"_core_sources", timeValue)
+    fname = getFileName(args, os.path.basename(__file__) + "_core_sources", timeValue)
     if args.directory:
         if not os.path.exists(args.directory):
             os.makedirs(args.directory)
-        fname=os.path.join(args.directory,fname)
+        fname = os.path.join(args.directory, fname)
     canvas.save(fname)
 else:
     canvas.show()

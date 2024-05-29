@@ -56,7 +56,8 @@ pip install packaging
 PYTHON_VERSION=$(python --version)
 
 # display versions
-version_script=$(cat <<END
+version_script=$(
+    cat <<END
 import numpy as np
 import scipy
 import matplotlib
@@ -76,10 +77,10 @@ echo ""
 echo "====================================================================="
 echo "Testing analysis scripts  with $IMAS_MODULE_VERSION and $PYTHON_VERSION"
 echo "====================================================================="
-source ./tests/st03_test_analysis_scripts.sh  "$LOG_DIR" "$DB_DIR"
-if (( al_major_version > 4 )); then
-    source ./tests/st03_test_analysis_scripts_with_uri.sh "$LOG_DIR" "$DB_DIR"
-fi
+source ./tests/st03_test_analysis_scripts.sh "$LOG_DIR" "$DB_DIR"
+
+source ./tests/st03_test_analysis_scripts_with_uri.sh "$LOG_DIR" "$DB_DIR"
+
 #---------------------------------------------------------------------------
 echo ""
 echo ""
@@ -88,9 +89,8 @@ echo "Testing ids manipulation scripts with $IMAS_MODULE_VERSION and $PYTHON_VER
 echo "====================================================================="
 source ./tests/st01_test_ids_scripts.sh "$LOG_DIR" "$DB_DIR"
 
-if (( al_major_version > 4 )); then
-    source ./tests/st01_test_ids_scripts_with_uri.sh "$LOG_DIR" "$DB_DIR"
-fi
+source ./tests/st01_test_ids_scripts_with_uri.sh "$LOG_DIR" "$DB_DIR"
+
 # ---------------------------------------------------------------------------
 echo ""
 echo ""
@@ -113,7 +113,7 @@ echo "====================================================================="
 echo "Run pytest for functions testing with $IMAS_MODULE_VERSION and $PYTHON_VERSION"
 echo "====================================================================="
 pip install pytest
-python -m pytest --junit-xml="$LOG_DIR"/test_report.xml tests 
+python -m pytest --junit-xml="$LOG_DIR"/test_report.xml tests
 echo "---------------------------------------------------------------------"
 deactivate
 rm -rf "$ENVIRONEMNT_NAME"
@@ -137,4 +137,3 @@ tar -tzvf "$ENVIRONEMNT_NAME"_testlogs.tar.gz
 # Cleanup
 
 echo "Done"
-

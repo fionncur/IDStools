@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 # Global Constants
 
-FILE_IDSDef = DDHelper.getIDSDefPath() 
+FILE_IDSDef = DDHelper.getIDSDefPath()
 TARGET_TAG = "IDS"
 ids_header = "ids."
 idx_header = "idx."
@@ -392,8 +392,12 @@ class COCOS:
         sigma_B0_in = np.sign(B0_in)
 
         # Get COCOS related parameters
-        CVI = COCOS(index={"COCOS": COCOS_in, "ipsign": sigma_Ip_in, "b0sign": sigma_B0_in}).get()
-        CVO = COCOS(index={"COCOS": COCOS_out, "ipsign": Ipsign_out, "b0sign": B0sign_out}).get()
+        CVI = COCOS(
+            index={"COCOS": COCOS_in, "ipsign": sigma_Ip_in, "b0sign": sigma_B0_in}
+        ).get()
+        CVO = COCOS(
+            index={"COCOS": COCOS_out, "ipsign": Ipsign_out, "b0sign": B0sign_out}
+        ).get()
 
         # Define effective variables: sigma_Ip_eff, si1gma_B0_eff, sigma_Bp_eff,
         # exp_Bp_eff as in Appendix C
@@ -556,8 +560,8 @@ class IDSValidator(cerberus.Validator):
     def __init__(self, *args, **kwargs):
         """ """
         # assign configuration value to instance property
-        #self.ids = kwargs.get("ids")
-        #self.idx = kwargs.get("idx")
+        # self.ids = kwargs.get("ids")
+        # self.idx = kwargs.get("idx")
 
         # pass all data to the base classes
         super(IDSValidator, self).__init__(*args, **kwargs)
@@ -592,7 +596,7 @@ class IDSValidator(cerberus.Validator):
                     try:
                         crd = eval(c)
                         lcrd = len(crd)
-                    except:
+                    except Exception as e:
                         lcrd = -1
 
                 self.shape.append(lcrd)
@@ -769,6 +773,7 @@ class IDSValidator(cerberus.Validator):
         except ValueError:
             pass
 
+
 # ----------------------------------------------------------------------
 
 
@@ -804,7 +809,7 @@ def validator(field, path_doc, ids, schema, cocos, buf, idx):
     # eval for target data
     try:
         data = eval(p)
-    except:
+    except Exception as e:
         print(f"eval error on key {p}, skipped")
         return
 
@@ -813,7 +818,7 @@ def validator(field, path_doc, ids, schema, cocos, buf, idx):
         schema[path_doc].update(default_schema)
     else:
         schema[path_doc] = default_schema
-    schemaw = copy.deepcopy(schema) 
+    schemaw = copy.deepcopy(schema)
 
     # eval for schema value in case of validation between data
     for key, value in schema[path_doc].items():
@@ -823,8 +828,8 @@ def validator(field, path_doc, ids, schema, cocos, buf, idx):
             try:
                 schemaw[path_doc][key] = eval(val)
             except Exception as e:
-                #print(f"eval error on value {val}, ignored: {e}")
-                #return
+                # print(f"eval error on value {val}, ignored: {e}")
+                # return
                 pass
 
     # Initialization
@@ -908,7 +913,9 @@ def path_iterator(field, nodes, ids, schema, cocos, buf, idx=None, level=0):
 
         # for node (e.g. path(itime)/to(i1)/node)
         else:
-            path_iterator(field, nodes, ids, schema, cocos, buf, idx=idx, level=level + 1)
+            path_iterator(
+                field, nodes, ids, schema, cocos, buf, idx=idx, level=level + 1
+            )
 
     else:
         validator(field, p, ids, schema, cocos, buf, idx)
@@ -946,7 +953,7 @@ def validate_COCOS(ids, schema, itime, i1, cocos=None):
 
         try:
             data = eval(key)
-        except:
+        except Exception as e:
             print(f"eval error on key {key}")
             return
 
@@ -993,26 +1000,26 @@ def compute_COCOS(ids, itime=None, i1=0, cocos_check=None):
     ipsign = np.sign(ids.time_slice[itime].global_quantities.ip)
     b0sign = np.sign(ids.vacuum_toroidal_field.b0[itime])
 
-    #1 Eq.(22)
+    # 1 Eq.(22)
     dpsi = (
         ids.time_slice[itime].profiles_1d.psi[-1]
         - ids.time_slice[itime].profiles_1d.psi[0]
     )
     sigma_Bp = np.sign(dpsi) * ipsign
 
-    #2 Eq.(22)
+    # 2 Eq.(22)
     q = ids.time_slice[itime].profiles_1d.q
     sign_q = np.sign(np.sum(np.sign(q)))
     sign_q_pos = sign_q * ipsign * b0sign
 
-    #3 Eq.(22)
+    # 3 Eq.(22)
     sigma_rhothetaphi = sign_q_pos
 
-    #4 Eq.(22)
+    # 4 Eq.(22)
     dpressure_dpsi = ids.time_slice[itime].profiles_1d.dpressure_dpsi
     sign_pprime_pos = np.sign(np.sum(np.sign(dpressure_dpsi))) * ipsign
 
-    #5 sigma_RphiZ from Eq.(19)
+    # 5 sigma_RphiZ from Eq.(19)
     bz = ids.time_slice[itime].profiles_2d[i1].b_field_z
     psi2d = ids.time_slice[itime].profiles_2d[i1].psi
     r2d = ids.time_slice[itime].profiles_2d[i1].r
@@ -1046,7 +1053,7 @@ def compute_COCOS(ids, itime=None, i1=0, cocos_check=None):
     )
     sigma_RphiZ = np.sign(np.sum(np.sign(twopi_expBp_sigma_RphiZ)))
 
-    #6 exp_Bp from Eq.(19)
+    # 6 exp_Bp from Eq.(19)
     x = np.average(twopi_expBp_sigma_RphiZ * sigma_RphiZ)
     exp_Bp = np.where(np.isclose(x, 2.0 * np.pi, rtol=0.5), 1, 0)
 
@@ -1137,11 +1144,11 @@ def load_YAML(fpath):
     # Load Schema File
     try:
         f = open(fpath, mode="r")
-    except:
+    except Exception as e:
         exit(f"can not open file:{fpath}")
     try:
         d = yaml.safe_load(f)
-    except:
+    except Exception as e:
         exit(f"invalid yaml in:{fpath}")
 
     return d
