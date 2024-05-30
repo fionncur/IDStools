@@ -7,6 +7,7 @@ import copy
 import os
 from rich_argparse import RichHelpFormatter
 from idstools.database import DBMaster
+from idstools.idslist import available_in_dbentry
 from idstools.machinedescription import MachineDescription
 from idstools.set_logger import set_logger
 from idstools.utils.clihelper import (
@@ -23,6 +24,7 @@ from idstools.view.wall import WallView
 
 
 logger = setupLogger("module", stdout_level=logging.INFO)
+IDSES = "wall,pf_active"
 
 
 def plotMachineDescription(idsData, showLabels=False):
@@ -43,6 +45,7 @@ def plotMachineDescription(idsData, showLabels=False):
         #     logger.error(f"Could not retrieve machine description for {idsName}")
         #     databasePath += f"{idsName} = not found"
         #     continue
+        idsURI, idsName = idsName.split("#")
         if idsName == "pf_active":
             pfcoilsview = PFActiveView(idsDataAndConfig["idsData"])
             pfcoilsview.viewActivePfCoils(ax, showLabels=showLabels)
@@ -94,19 +97,18 @@ def plotMachineDescription(idsData, showLabels=False):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="---- View machine description",
+        description="---- View and plot machine description with one or more URIs as data entries",
         formatter_class=RichHelpFormatter,
-        parents=[dbentryParser],
     )
     parser.add_argument(
-        "-mdesc",
-        "--machine-desc",
+        "-u",
+        "--uri",
         nargs="*",
         default=[],
         help="""Provide machine descriptions that you need to plot\n
     with uris for example\n
-    "imas:mdsplus?user=costerd;shot=40866;run=1;database=aug;version=3#wall"\n
-    or just names e.g wall pf_active
+    "imas:mdsplus?user=public;shot=116000;run=4;database=ITER_MD;version=3#wall"\n
+    "imas:mdsplus?user=public;shot=116000;run=4;database=ITER_MD;version=3"\n
     """,
     )
     parser.add_argument(
@@ -127,47 +129,54 @@ if __name__ == "__main__":
     args = parser.parse_args()
     machineDescription = MachineDescription()
     idsData = {}
-    for mdidsInfo in args.machine_desc:
-        inputargs = copy.deepcopy(args)
+    for mdidsInfo in args.uri:
+        mdargs = argparse.Namespace()
         splittedmsIdsInfo = mdidsInfo.split("#")
-        _idsName = ""
+        _idsNames = ""
         _mdUri = None
         if len(splittedmsIdsInfo) == 2:
-            _mdUri, _idsName = splittedmsIdsInfo
-            mdargs = argparse.Namespace()
-            param = getDetailsfromURI(_mdUri)
-            mdargs.backend = param["backend"]
-            mdargs.database = param["database"]
-            mdargs.pulse = param["pulse"]
-            mdargs.run = param["run"]
-            mdargs.user = param["user"]
-            mdargs.version = param["version"]
-            mdargs.uri = _mdUri
-            inputargs = mdargs
+            _mdUri, _idsNames = splittedmsIdsInfo
         if len(splittedmsIdsInfo) == 1:
-            _idsName = splittedmsIdsInfo[0]
-        connection = DBMaster.getConnection(inputargs)
-        idsFound = False
-        if connection is not None:
-            _idsData = connection.get(_idsName)
+            _mdUri = splittedmsIdsInfo[0]
+        param = getDetailsfromURI(_mdUri)
+        mdargs.backend = param["backend"]
+        mdargs.database = param["database"]
+        mdargs.pulse = param["pulse"]
+        mdargs.run = param["run"]
+        mdargs.user = param["user"]
+        mdargs.version = param["version"]
+        mdargs.uri = _mdUri
+        print(mdargs)
+        connection = DBMaster.getConnection(mdargs)
+        if connection:
+            allIDSesList = [item for item, _ in available_in_dbentry(connection)]
+            if _idsNames == "":
+                _idsNames = IDSES
+            for _idsName in _idsNames.split(","):
+                idsFound = False
+                if connection is not None:
+                    if _idsName in allIDSesList:
+                        _idsData = connection.get(_idsName)
+
+                        data = {}
+                        if _idsData is not None:
+                            idsFound = True
+                            (
+                                data["idsData"],
+                                data["yamlConfig"],
+                                data["connectionArgs"],
+                            ) = (
+                                _idsData,
+                                None,
+                                mdargs,
+                            )
+                            idsData[f"{_mdUri}#{_idsName}"] = data
+                if not idsFound:
+                    logger.info(
+                        f"Data entry for {_idsName} is not given, retrieving from ITER machine description"
+                    )
+                    _mdData = machineDescription.getMDDataByIds(_idsName)
+                    idsData[f"{_mdData['connectionArgs'].uri}#{_idsName}"] = _mdData
             connection.close()
-            data = {}
-            if _idsData is not None:
-                idsFound = True
-                (
-                    data["idsData"],
-                    data["yamlConfig"],
-                    data["connectionArgs"],
-                ) = (
-                    _idsData,
-                    None,
-                    inputargs,
-                )
-                idsData[_idsName] = data
-        if not idsFound:
-            logger.info(
-                f"Data entry for {_idsName} is not given, retrieving from ITER machine description"
-            )
-            idsData[_idsName] = machineDescription.getMDDataByIds(_idsName)
 
     plotMachineDescription(idsData, args.show_labels)

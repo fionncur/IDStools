@@ -26,7 +26,7 @@ def getCoreVersion():
 # default parent parser for all idstools scripts
 uriParser = argparse.ArgumentParser(add_help=False)
 uriParser.add_argument(
-    "-uri",
+    "-u",
     "--uri",
     type=str,
     help="uri \t\t(default=%(default)s)",
@@ -62,11 +62,8 @@ imasParser.add_argument(
     default="3",
     help="data version \t(default=%(default)s)",
 )
-parents = [imasParser, uriParser]
 
-dbentryParser = argparse.ArgumentParser(add_help=False, parents=parents)
-dbentryParser.add_argument("-p", "--pulse", dest="pulse", help="Pulse number", type=int)
-dbentryParser.add_argument("-r", "--run", help="Run number", type=int)
+dbentryParser = argparse.ArgumentParser(add_help=False, parents=[uriParser])
 
 
 def getBackendID(name):
@@ -111,8 +108,8 @@ def getDetailsfromURI(uri):
     elif pulse is not None:
         param["pulse"] = int(pulse)
     param["run"] = run_match.group(1) if run_match else None
-
-    param["backend"] = param["backend"].upper()
+    if param["backend"] is not None:
+        param["backend"] = param["backend"].upper()
     if param["run"] is not None:
         param["run"] = int(param["run"])
     if path_match:

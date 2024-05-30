@@ -518,40 +518,28 @@ class DBMaster:
         imasVersion = DBMaster.getCoreVersion()
         imasVersion = int(imasVersion.split(".")[0])
         connection = None
-        #
-        if imasargs.uri:
-            if imasVersion > 4:
-                if "mode" in imasargs.__dict__:
-                    connection = imas.DBEntry(imasargs.uri, imasargs.mode)
-                else:
-                    connection = imas.DBEntry(imasargs.uri, "r")
+
+        if imasVersion > 4:
+            if "mode" in imasargs.__dict__:
+                connection = imas.DBEntry(imasargs.uri, imasargs.mode)
             else:
-                param = getDetailsfromURI(imasargs.uri)
-                if param["legacyPresent"]:
-                    connection = imas.DBEntry(
-                        getBackendID(param["backend"]),
-                        param["database"],
-                        param["pulse"],
-                        param["run"],
-                        param["user"],
-                        param["version"],
-                    )
-                else:
-                    if param["pathPresent"]:
-                        logger.error("Path in URI is not supported in Access Layer 4")
-                    return None
+                connection = imas.DBEntry(imasargs.uri, "r")
         else:
-            if imasargs.pulse is None or imasargs.run is None:
-                logger.error("Both the uri or the pulse and run are missing.")
+            param = getDetailsfromURI(imasargs.uri)
+
+            if param["legacyPresent"]:
+                connection = imas.DBEntry(
+                    getBackendID(param["backend"]),
+                    param["database"],
+                    param["pulse"],
+                    param["run"],
+                    param["user"],
+                    param["version"],
+                )
+            else:
+                if param["pathPresent"]:
+                    logger.error("Path in URI is not supported in Access Layer 4")
                 return None
-            connection = imas.DBEntry(
-                getBackendID(imasargs.backend),
-                imasargs.database,
-                imasargs.pulse,
-                imasargs.run,
-                imasargs.user,
-                imasargs.version,
-            )
         return connection
 
     @staticmethod

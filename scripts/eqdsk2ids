@@ -32,16 +32,10 @@ def main():
     logger.info("creating output datafile ...")
 
     outputargs = argparse.Namespace()
-    outputargs.backend = args.backend
-    outputargs.pulse = args.pulse
-    outputargs.run = args.run
     outputargs.user = os.environ["USER"]
-    outputargs.database = args.database
-    outputargs.version = args.version
     outputargs.mode = "w"
     if args.dest is None:
-        if args.uri is not None:
-            args.dest = re.sub(r"user=public", f"user={getpass.getuser()}", args.uri)
+        args.dest = re.sub(r"user=public", f"user={getpass.getuser()}", args.uri)
     outputargs.uri = args.dest
 
     db = DBMaster.createConnection(outputargs)
@@ -102,11 +96,16 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         prog=prog,
         formatter_class=RichHelpFormatter,
-        parents=[dbentryParser],
         description=Markdown(description, style="argparse.text"),
     )
     parser.add_argument(
-        "-du",
+        "-s",
+        "--src",
+        type=str,
+        help="source uri \t\t(default=%(default)s)",
+    )
+    parser.add_argument(
+        "-d",
         "--dest",
         type=str,
         help="destination uri \t\t(default=%(default)s)",
@@ -136,7 +135,6 @@ if __name__ == "__main__":
         default=None,
         choices=[*range(1, 9), *range(11, 19)],
     )
-    parser.set_defaults(user=os.environ["USER"])
     args = parser.parse_args()
     # Initialize logger
     logger = set_logger(__name__, level=args.log)

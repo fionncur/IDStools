@@ -7,6 +7,7 @@ import typing
 import yaml
 
 from idstools.database import DBMaster
+from idstools.utils.clihelper import getBackendID
 
 logger = logging.getLogger(f"module.{__name__}")
 
@@ -43,7 +44,7 @@ class MachineDescription:
         import argparse
 
         mdArgs = argparse.Namespace()
-        mdArgs.backend = 12
+        mdArgs.backend = "MDSPLUS"
         mdArgs.pulse = 0
         mdArgs.run = 0
         mdArgs.user = "public"
@@ -54,7 +55,7 @@ class MachineDescription:
             if idsName == _config["config"]["ids"]:
                 mdArgs.pulse, mdArgs.run = pulse.split("/")
                 mdArgs.pulse, mdArgs.run = int(mdArgs.pulse), int(mdArgs.run)
-                mdArgs.uri = f"imas:mdsplus?user={mdArgs.user};shot={mdArgs.pulse};run={mdArgs.run};database={mdArgs.database};version={mdArgs.version}"
+                mdArgs.uri = f"imas:{mdArgs.backend.lower()}?user={mdArgs.user};shot={mdArgs.pulse};run={mdArgs.run};database={mdArgs.database};version={mdArgs.version}"
                 mdConnection = DBMaster.getConnection(mdArgs)
 
                 # print(mdConnection)

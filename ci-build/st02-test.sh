@@ -74,17 +74,13 @@ echo "====================================================================="
 #---------------------------------------------------------------------------
 echo ""
 echo ""
-echo "====================================================================="
-echo "Testing analysis scripts  with $IMAS_MODULE_VERSION and $PYTHON_VERSION"
-echo "====================================================================="
-source ./tests/st03_test_analysis_scripts.sh "$LOG_DIR" "$DB_DIR"
 
 echo "====================================================================="
 echo "Testing analysis scripts  with URI $IMAS_MODULE_VERSION and $PYTHON_VERSION"
 echo "====================================================================="
 source ./tests/st03_test_analysis_scripts_with_uri.sh "$LOG_DIR" "$DB_DIR"
 
-if (( al_major_version > 4 )); then
+if ((al_major_version > 4)); then
     echo "====================================================================="
     echo "Testing analysis scripts  with URI PATH $IMAS_MODULE_VERSION and $PYTHON_VERSION"
     echo "====================================================================="
@@ -96,8 +92,6 @@ echo ""
 echo "====================================================================="
 echo "Testing ids manipulation scripts with $IMAS_MODULE_VERSION and $PYTHON_VERSION"
 echo "====================================================================="
-source ./tests/st01_test_ids_scripts.sh "$LOG_DIR" "$DB_DIR"
-
 source ./tests/st01_test_ids_scripts_with_uri.sh "$LOG_DIR" "$DB_DIR"
 
 # ---------------------------------------------------------------------------

@@ -19,40 +19,20 @@ logger = setupLogger("module")
 parser = argparse.ArgumentParser(
     description="Copy IDSs from a data-entry into another one",
     formatter_class=RichHelpFormatter,
-    parents=[imasParser],
 )
 parser.add_argument(
-    "-su",
+    "-s",
     "--src",
     type=str,
     help="source uri \t\t(default=%(default)s)",
 )
 parser.add_argument(
-    "-du",
+    "-d",
     "--dest",
     type=str,
     help="destination uri \t\t(default=%(default)s)",
 )
 
-parser.add_argument("-sp", "--src_pulse", help="Source pulse number", type=int)
-parser.add_argument("-sr", "--src_run", help="Source run number", type=int)
-parser.add_argument("-dp", "--dest_pulse", help="Destination pulse number", type=int)
-parser.add_argument("-dr", "--dest_run", help="Destination run number", type=int)
-# default user from parent parser is 'public', which is fine for exploration scripts but less for management scripts
-parser.set_defaults(user=os.environ["USER"])
-parser.add_argument(
-    "-destd",
-    "--dest_database",
-    type=str,
-    default=None,
-    help="Database name for the destination data-entry",
-)
-parser.add_argument(
-    "-destb",
-    "--dest_backend",
-    type=str,
-    help="Backend name for the destination data-entry",
-)
 parser.add_argument(
     "-f",
     "--force",
@@ -91,29 +71,10 @@ parser.add_argument(
     help='IDSs to copy (leave empty to select all IDSs with default occurrence, or append "/n" to copy a specific occurrence "n")',
 )
 args = parser.parse_args()
-if args.dest_database is None:
-    args.dest_database = args.database
 
-
-if args.dest_backend is None:
-    args.dest_backend = args.backend
-
-isUriCheckDone = False
 if args.src is not None and args.dest is not None:
-    isUriCheckDone = True
     if args.src == args.dest:
         logger.error("Can not use the same uri as source and destination!")
-        exit()
-
-if isUriCheckDone is False:
-    if (
-        args.src_pulse == args.dest_pulse
-        and args.src_run == args.dest_run
-        and args.user == os.environ["USER"]
-        and args.database == args.dest_database
-        and args.backend == args.dest_backend
-    ):
-        logger.error("Can not use the same data-entry as source and destination!")
         exit()
 
 if args.ids == []:
@@ -121,12 +82,6 @@ if args.ids == []:
 
 
 inputargs = argparse.Namespace()
-inputargs.backend = args.backend
-inputargs.pulse = args.src_pulse
-inputargs.run = args.src_run
-inputargs.user = args.user
-inputargs.database = args.database
-inputargs.version = args.version
 inputargs.uri = args.src
 
 src_connection = DBMaster.getConnection(inputargs)
@@ -134,12 +89,6 @@ if src_connection is None:
     logger.error("Error opening source pulse! Please check existence.")
     sys.exit()
 outputargs = argparse.Namespace()
-outputargs.backend = args.dest_backend
-outputargs.pulse = args.dest_pulse
-outputargs.run = args.dest_run
-outputargs.user = os.environ["USER"]
-outputargs.database = args.dest_database
-outputargs.version = args.version
 outputargs.uri = args.dest
 
 

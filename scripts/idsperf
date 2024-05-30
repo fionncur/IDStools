@@ -42,19 +42,6 @@ if __name__ == "__main__":
         help="Use MEMORY_BACKEND for this test (involve reading from file and loading in memory first)",
     )
     parser.add_argument(
-        "-do",
-        "--database_output",
-        type=str,
-        default=None,
-        help="Database name for the destination data-entry",
-    )
-    parser.add_argument(
-        "-bo",
-        "--backend_output",
-        type=str,
-        help="Backend name for the destination data-entry",
-    )
-    parser.add_argument(
         "--repeat",
         type=int,
         default=1,
@@ -90,11 +77,6 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    if not args.database_output:
-        args.database_output = args.database
-
-    if not args.backend_output:
-        args.backend_output = args.backend
     # For memory backend need to read the full IDS and load it into memory
     if args.memoryBackend:
         print("First import data into memory...", file=sys.stderr)
@@ -143,31 +125,20 @@ if __name__ == "__main__":
     dbout = None
 
     # Set command
-    if args.outputRun != None:
-        dboutArgs = argparse.Namespace()
-        dboutArgs.user = os.environ["USER"]
-        dboutArgs.database = args.database_output
-        dboutArgs.backend = args.backend_output
-        dboutArgs.version = args.version
-        dboutArgs.run = args.outputRun
-        dboutArgs.pulse = args.pulse
-        dboutArgs.uri = args.uri
-        if args.uriOut is not None:
+    dboutArgs = argparse.Namespace()
+    if args.uriOut or args.outputRun:
+        if args.uriOut:
             dboutArgs.uri = args.uriOut
             if args.verbose:
                 print("Using out URI given")
-        else:
-            if dboutArgs.uri is None:
-                dboutArgs.uri = f"imas:{dboutArgs.backend.lower()}?user={dboutArgs.user};shot={dboutArgs.pulse};run={dboutArgs.run};database={dboutArgs.database};version={dboutArgs.version}"
-            else:
-                import re
+        elif args.outputRun:
+            import re
 
-                dboutArgs.uri = re.sub(
-                    r"user=[^;]+", f"user={dboutArgs.user}", dboutArgs.uri
-                )
-                dboutArgs.uri = re.sub(
-                    r"run=[^;]+", f"run={args.outputRun}", dboutArgs.uri
-                )
+            dboutArgs.uri = args.uri
+            dboutArgs.uri = re.sub(
+                r"user=[^;]+", f"user={os.environ['USER']}", dboutArgs.uri
+            )
+            dboutArgs.uri = re.sub(r"run=[^;]+", f"run={args.outputRun}", dboutArgs.uri)
 
         dbout = DBMaster.createConnection(dboutArgs)
         if dbout is None:

@@ -11,19 +11,17 @@ import sys
 import tempfile
 import time
 from io import BytesIO
-import numpy as np
-from rich.text import Text
-from rich.console import Console
-from rich.syntax import Syntax
-from rich.table import Table
-from rich_argparse import RichHelpFormatter
-from rich.progress import track
+
 import imas
 import matplotlib.pyplot as plt
 import numpy as np
+from rich.console import Console
+from rich.progress import track
+from rich.table import Table
+from rich.text import Text
+from rich_argparse import RichHelpFormatter
 
 from idstools.database import DBMaster
-from idstools.utils.clihelper import getDetailsfromURI, imasParser
 from idstools.utils.ddhelper import DDHelper
 from idstools.utils.idshelper import compareIds
 from idstools.utils.idslogger import setupLogger
@@ -418,22 +416,15 @@ def generate_html(file_path, compareData):
 if __name__ == "__main__":
     # Management of input arguments
     parser = argparse.ArgumentParser(
-        description="--- Compare a IDS from multiple date entries and returns True or False with option of generating html page with comparisen \n"
+        description="""--- Compare a IDS from multiple date entries and returns True or False with option of generating html page with comparisen \n"
         + "- Example: \n"
-        + "  idsdiff -pulses 130011/6/public/MDSPLUS/ITER/3 130012/4/public/MDSPLUS/ITER/3 \n"
-        + "  idsdiff -pulses 130011/6/public/MDSPLUS/ITER/3 130012/4///ITER \n",
+        + "  idsdiff summary --uri \"imas:mdsplus?user=public;shot=122525;run=1;database=ITER;version=3\" \"imas:mdsplus?user=public;shot=122525;run=2;database=ITER;version=3\" \n"
+        + "  \n""",
         formatter_class=RichHelpFormatter,
     )
     parser.add_argument(
-        "-pulses",
-        "--pulse-list",
-        nargs="*",
-        type=str,
-        help="Provide space separated list  pulse/run/user/backend/database/version",
-    )
-    parser.add_argument(
-        "-uri",
-        "--uri-list",
+        "-u",
+        "--uri",
         nargs="*",
         type=str,
         help="uri separated by spaces \t\t(default=%(default)s)",
@@ -463,53 +454,9 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     connections = []
-    if args.pulse_list is not None:
-        for pulseinfo in args.pulse_list:
-            details = pulseinfo.split("/")
-            pulse = None
-            run = None
-            user = "public"
-            backend = "MDSPLUS"
-            database = "ITER"
-            version = "3"
-            if len(details) < 2:
-                print(f"Looks like not enough details provided {details}")
-                continue
-            if len(details) == 6:
-                pulse, run, _user, _backend, _database, _version = details
-            if len(details) == 5:
-                pulse, run, _user, _backend, _database = details
-            if len(details) == 4:
-                pulse, run, _user, _backend = details
-            if len(details) == 3:
-                pulse, run, _user = details
-            if len(details) == 2:
-                pulse, run = details
-            pulse, run = int(pulse), int(run)
-            if _user:
-                user = _user
-            if _backend:
-                backend = _backend
-            if _database:
-                database = _database
-            if _version:
-                version = _version
-            _pulseArgs = argparse.Namespace()
-            _pulseArgs.backend = backend
-            _pulseArgs.pulse = pulse
-            _pulseArgs.run = run
-            _pulseArgs.user = user
-            _pulseArgs.database = database
-            _pulseArgs.version = version
-            _pulseArgs.uri = None
-            _connection = DBMaster.getConnection(_pulseArgs)
-            if _connection is None:
-                print(f"Error opening pulse! Please check existence : {pulseinfo}")
-                continue
-            connections.append((pulseinfo, _connection))
 
-    if args.uri_list is not None:
-        for uriinfo in args.uri_list:
+    if args.uri is not None:
+        for uriinfo in args.uri:
             _uriArgs = argparse.Namespace()
             _uriArgs.uri = uriinfo
             _connection = DBMaster.getConnection(_uriArgs)
