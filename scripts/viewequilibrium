@@ -28,7 +28,7 @@ from idstools.view.pf_active import PFActiveView
 from idstools.view.wall import WallView
 
 parser = argparse.ArgumentParser(
-    description="---- Display the plasma equilibrium from the equilibrium IDS. It also shows pf coils position overlay if exists [Previously known as equiplot]",
+    description="---- Display the plasma equilibrium from the equilibrium IDS. It also shows pf coils and wall position overlay if exists [Previously known as equiplot]",
     parents=[dbentryParser],
     formatter_class=RichHelpFormatter,
 )
@@ -52,8 +52,10 @@ parser.add_argument(
     "-mdesc",
     "--mdesc",
     nargs="*",
-    default=[],
+    default=["wall", "pf_active"],
     help="""Provide machine descriptions that you need to plot\n
+with ids names for example\n
+wall pf_active
 with uris for example\n
 "imas:mdsplus?user=public;shot=116000;run=4;database=ITER_MD;version=3#wall"\n
 "imas:mdsplus?user=public;shot=116000;run=4;database=ITER_MD;version=3"\n
@@ -77,7 +79,6 @@ parser.add_argument(
 args = parser.parse_args()
 logger = setupLogger("module", stdout_level=logging.INFO)
 
-print(args)
 connection = DBMaster.getConnection(args)
 if connection is None:
     logger.critical("----> Aborted.")
@@ -124,7 +125,9 @@ if idsObjEquilibrium.time is not None:
                 _idsData = connection.get(_idsName)
                 connection.close()
                 wallview = WallView(_idsData)
-                if foundData := wallview.view_wall(ax, args.show_labels, color="gray"):
+                if foundData := wallview.view_wall(
+                    ax, args.show_labels, wallcolor="slategray"
+                ):
                     title += " wall"
                     databaseText += f"{_idsName}={getDatabasePath(inputargs)}\n"
             else:

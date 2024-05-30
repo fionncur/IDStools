@@ -12,14 +12,14 @@ import numpy as np
 import sys
 from os import system, path
 from sys import exit
-from idstools.utils.clihelper import dbentryParser
+from idstools.utils.clihelper import imasParser
 
 # ----------------------------------------------------------------------
 
 # Management of input arguments
 parser = argparse.ArgumentParser(
     description="---- Auto-generated yaml scenario and watcher files (!!! STILL TO BE COMPLETED BY HAND !!!)",
-    parents=[dbentryParser],
+    parents=[imasParser],
     formatter_class=RichHelpFormatter,
 )
 parser.add_argument("-p", "--pulse", dest="pulse", help="Pulse number", type=int)

@@ -11,7 +11,7 @@ import numpy as np
 import sys
 from os import system, getenv
 from sys import exit
-from idstools.utils.clihelper import dbentryParser
+from idstools.utils.clihelper import imasParser
 
 # --------------------------------------------------------------------------------
 # --- Creates an entry for the Disruption database (adapted from create_db_entry
@@ -24,7 +24,7 @@ from idstools.utils.clihelper import dbentryParser
 # Management of input arguments
 parser = argparse.ArgumentParser(
     description="---- Auto-generated yaml scenario and watcher files (!!! STILL TO BE COMPLETED BY HAND !!!)",
-    parents=[dbentryParser],
+    parents=[imasParser],
     formatter_class=RichHelpFormatter,
 )
 parser.add_argument("-p", "--pulse", dest="pulse", help="Pulse number", type=int)

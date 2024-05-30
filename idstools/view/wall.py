@@ -25,7 +25,7 @@ class WallView:
         for i in range(n):
             p = (r[i], z[i])
             vertices.append(p)
-
+        # kwargs.setdefault("color", "darkgray")
         path = Path(vertices, codes)
         patch = patches.PathPatch(path, **kwargs)
         if showLabels:
@@ -37,7 +37,7 @@ class WallView:
             )
         ax.add_patch(patch)
 
-    def view_wall(self, ax, showLabels=False, color=None, **kwargs):
+    def view_wall(self, ax, showLabels=False, wallcolor=None, **kwargs):
         """
         The function `view_wall` prints the values of `r` and `z` for each element in the `wall_data` dictionary and calls the `addWallMarkings` function to add a patch to the given `ax` object.
 
@@ -73,10 +73,7 @@ class WallView:
         vIndex = 0
 
         if vesselUnits := self.computeObject.getVesselUnits():
-            if color:
-                wallcolor = color
-            else:
-                wallcolor = colors[vIndex % 20]
+
             for _, description2d in vesselUnits.items():
                 for vIndex, vesselUnit in description2d["vesselunits"].items():
                     showLabelFlag = True
@@ -85,8 +82,13 @@ class WallView:
                         vname = vesselUnit["identifier"]
                     elif vesselUnit["name"]:
                         vname = vesselUnit["name"]
+                    if wallcolor:
+                        kwargs.update({"color": wallcolor})
+                    else:
+                        kwargs.update({"color": colors[vIndex % 20]})
                     if vesselUnit["rectangle_coordinates"]:
                         for rw, zw in vesselUnit["rectangle_coordinates"]:
+
                             if showLabelFlag:
                                 self.addWallMarkings(
                                     ax,
@@ -95,7 +97,6 @@ class WallView:
                                     showLabels=showLabels,
                                     label=vname,
                                     fill=False,
-                                    color=wallcolor,
                                     **kwargs,
                                 )
                             else:
@@ -104,28 +105,23 @@ class WallView:
                                     rw,
                                     zw,
                                     fill=False,
-                                    color=wallcolor,
                                     **kwargs,
                                 )
                             showLabelFlag = False
 
         if limiterUnits := self.computeObject.getLimiterUnits():
-            lIndex = 0
-
-            if color:
-                wallcolor = color
-            else:
-                wallcolor = colors[(lIndex + vIndex + 1) % 20]
-
             for _, description2d in limiterUnits.items():
 
                 for lIndex, limiterUnit in description2d["limiterunits"].items():
+                    if wallcolor:
+                        kwargs.update({"color": wallcolor})
+                    else:
+                        kwargs.update({"color": colors[(lIndex + vIndex) % 20]})
                     self.addWallMarkings(
                         ax,
                         limiterUnit["r"],
                         limiterUnit["z"],
                         showLabels=showLabels,
-                        color=wallcolor,
                         fill=False,
                         label=limiterUnit["name"],
                         **kwargs,
