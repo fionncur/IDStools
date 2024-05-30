@@ -24,12 +24,14 @@ parser.add_argument(
     "-s",
     "--src",
     type=str,
+    required=True,
     help="source uri \t\t(default=%(default)s)",
 )
 parser.add_argument(
     "-d",
     "--dest",
     type=str,
+    required=True,
     help="destination uri \t\t(default=%(default)s)",
 )
 
@@ -90,7 +92,6 @@ if src_connection is None:
     sys.exit()
 outputargs = argparse.Namespace()
 outputargs.uri = args.dest
-
 
 dest_connection = DBMaster.getDBEntryObject(outputargs)
 

@@ -27,6 +27,8 @@ parser = argparse.ArgumentParser(
     parents=[dbentryParser],
     formatter_class=RichHelpFormatter,
 )
+parser.add_argument("-p", "--pulse", dest="pulse", help="Pulse number", type=int)
+parser.add_argument("-r", "--run", help="Run number", type=int)
 parser.add_argument(
     "-st", "--status", help="active/obsolete", required=False, type=str, default="draft"
 )

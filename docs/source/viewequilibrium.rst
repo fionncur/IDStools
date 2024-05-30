@@ -28,3 +28,6 @@ shows pf coils position and toroidal flux.
       :alt: image not found
       :align: center
 
+   .. thumbnail:: _static/images/viewequilibrium2.png
+      :alt: image not found
+      :align: center

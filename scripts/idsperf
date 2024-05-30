@@ -2,14 +2,12 @@
 # -*- coding: utf-8 -*-
 """Small utility script to profile performance of some AL operations on any dataset."""
 import argparse
-import copy
 import os
 import statistics as stat
 import sys
 
-from rich_argparse import RichHelpFormatter
-
 import imas
+from rich_argparse import RichHelpFormatter
 
 from idstools import idsperf
 from idstools.database import DBMaster
@@ -130,7 +128,7 @@ if __name__ == "__main__":
         if args.uriOut:
             dboutArgs.uri = args.uriOut
             if args.verbose:
-                print("Using out URI given")
+                print("Using given uriOut for checking put performance")
         elif args.outputRun:
             import re
 

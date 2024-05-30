@@ -33,6 +33,10 @@ viewmachinedescription plot pf_active/111001/103 wall/"imas:mdsplus?user=public;
         23/11/20 23:20:26 WARNING: VC1 : pf_active.coil.element.geometry.rectangle is empty
         23/11/20 23:20:26 WARNING: VC2 : pf_active.coil.element.geometry.rectangle is empty
 
+   .. thumbnail:: _static/images/viewmachinedescription.png
+      :alt: image not found
+      :align: center
+
    .. thumbnail:: _static/images/machine_description.png
       :alt: image not found
       :align: center

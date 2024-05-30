@@ -27,7 +27,7 @@ else
 fi
 
 SCRIPTS=(
-    "eqdsk2ids -c 11 --uri \"imas:mdsplus?user=public;shot=134174;run=117;database=ITER;version=3\" -g resources/geqdsk/example.gfile --dest \"imas:mdsplus?user=$USERNAME;shot=134174;run=117;database=ITER;version=3?path=$DATABASE_DIR\" --log INFO"
+    "eqdsk2ids -c 11 --src \"imas:mdsplus?user=public;shot=134174;run=117;database=ITER;version=3\" -g resources/geqdsk/example.gfile --dest \"imas:mdsplus?user=$USERNAME;shot=134174;run=117;database=ITER;version=3?path=$DATABASE_DIR\" --log INFO"
     "idschk --uri \"imas:mdsplus?user=public;shot=134174;run=117;database=ITER;version=3\" -f resources/validation_schemas/generic/core_profiles.yml"
     "idscp --src \"imas:mdsplus?user=public;shot=131024;run=10;database=ITER;version=3\" --dest \"imas:mdsplus?user=$USERNAME;shot=145000;run=5;database=ITER;version=3?path=$DATABASE_DIR\""
     "idsdiff summary --uri \"imas:mdsplus?user=public;shot=122525;run=1;database=ITER;version=3\" \"imas:mdsplus?user=public;shot=122525;run=2;database=ITER;version=3\""

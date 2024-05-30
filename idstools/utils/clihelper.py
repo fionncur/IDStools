@@ -29,7 +29,8 @@ uriParser.add_argument(
     "-u",
     "--uri",
     type=str,
-    help="uri \t\t(default=%(default)s)",
+    required=True,
+    help="uri",
 )
 imasParser = argparse.ArgumentParser(add_help=False)
 imasParser.add_argument(
@@ -194,8 +195,10 @@ def getDatabasePath(imasargs, timeValue=None) -> str:
     timeString = ""
     if timeValue:
         timeString = f"time:{timeValue:.2f})"
-    hostdir = (
-        f"{socket.gethostname()}:{databaseAbsolutePath} ({pulseInfo} {timeString})"
-    )
+    hostdir = f"{socket.gethostname()}:{databaseAbsolutePath} "
+    if pulseInfo:
+        hostdir += f"({pulseInfo})"
+    if timeString:
+        hostdir += f"#{timeString}"
     #
     return hostdir

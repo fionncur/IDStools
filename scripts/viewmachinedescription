@@ -3,15 +3,12 @@
 
 import argparse
 import logging
-import copy
 import os
 from rich_argparse import RichHelpFormatter
 from idstools.database import DBMaster
 from idstools.idslist import available_in_dbentry
 from idstools.machinedescription import MachineDescription
-from idstools.set_logger import set_logger
 from idstools.utils.clihelper import (
-    dbentryParser,
     getDatabasePath,
     getDetailsfromURI,
 )
@@ -146,7 +143,6 @@ if __name__ == "__main__":
         mdargs.user = param["user"]
         mdargs.version = param["version"]
         mdargs.uri = _mdUri
-        print(mdargs)
         connection = DBMaster.getConnection(mdargs)
         if connection:
             allIDSesList = [item for item, _ in available_in_dbentry(connection)]

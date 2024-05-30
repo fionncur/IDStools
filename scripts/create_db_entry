@@ -22,6 +22,8 @@ parser = argparse.ArgumentParser(
     parents=[dbentryParser],
     formatter_class=RichHelpFormatter,
 )
+parser.add_argument("-p", "--pulse", dest="pulse", help="Pulse number", type=int)
+parser.add_argument("-r", "--run", help="Run number", type=int)
 parser.add_argument(
     "--disable-validation",
     help="disable IDS validation",

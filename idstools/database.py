@@ -507,10 +507,11 @@ class DBMaster:
             imasargs.mode = "w"
 
         connection = DBMaster.getDBEntryObject(imasargs)
-        status, _ = connection.create()
-        if status != 0:
-            logger.error(f"Can not create database entry {imasargs}")
-            return None
+        if connection is not None:
+            status, _ = connection.create()
+            if status != 0:
+                logger.error(f"Can not create database entry {imasargs}")
+                return None
         return connection
 
     @classmethod
@@ -518,28 +519,28 @@ class DBMaster:
         imasVersion = DBMaster.getCoreVersion()
         imasVersion = int(imasVersion.split(".")[0])
         connection = None
-
-        if imasVersion > 4:
-            if "mode" in imasargs.__dict__:
-                connection = imas.DBEntry(imasargs.uri, imasargs.mode)
+        if imasargs.uri != "" and imasargs.uri is not None:
+            if imasVersion > 4:
+                if "mode" in imasargs.__dict__:
+                    connection = imas.DBEntry(imasargs.uri, imasargs.mode)
+                else:
+                    connection = imas.DBEntry(imasargs.uri, "r")
             else:
-                connection = imas.DBEntry(imasargs.uri, "r")
-        else:
-            param = getDetailsfromURI(imasargs.uri)
+                param = getDetailsfromURI(imasargs.uri)
 
-            if param["legacyPresent"]:
-                connection = imas.DBEntry(
-                    getBackendID(param["backend"]),
-                    param["database"],
-                    param["pulse"],
-                    param["run"],
-                    param["user"],
-                    param["version"],
-                )
-            else:
-                if param["pathPresent"]:
-                    logger.error("Path in URI is not supported in Access Layer 4")
-                return None
+                if param["legacyPresent"]:
+                    connection = imas.DBEntry(
+                        getBackendID(param["backend"]),
+                        param["database"],
+                        param["pulse"],
+                        param["run"],
+                        param["user"],
+                        param["version"],
+                    )
+                else:
+                    if param["pathPresent"]:
+                        logger.error("Path in URI is not supported in Access Layer 4")
+                    return None
         return connection
 
     @staticmethod

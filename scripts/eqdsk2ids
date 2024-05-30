@@ -1,19 +1,18 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+import argparse
+import getpass
 import os
 import re
-import getpass
-import argparse
-import textwrap
 import traceback
+
 from rich.markdown import Markdown
 from rich_argparse import RichHelpFormatter
-from idstools.database import DBMaster
 
-from idstools.set_logger import set_logger
+from idstools.database import DBMaster
 from idstools.eqdsk2ids import geqdsk2ids
+from idstools.set_logger import set_logger
 from idstools.utils.clihelper import (
-    dbentryParser,
     getDatabasePath,
 )
 
@@ -34,8 +33,8 @@ def main():
     outputargs = argparse.Namespace()
     outputargs.user = os.environ["USER"]
     outputargs.mode = "w"
-    if args.dest is None:
-        args.dest = re.sub(r"user=public", f"user={getpass.getuser()}", args.uri)
+    # if args.dest is None:
+    #     args.dest = re.sub(r"user=public", f"user={getpass.getuser()}", args.src)
     outputargs.uri = args.dest
 
     db = DBMaster.createConnection(outputargs)
@@ -102,13 +101,15 @@ if __name__ == "__main__":
         "-s",
         "--src",
         type=str,
-        help="source uri \t\t(default=%(default)s)",
+        required=True,
+        help="source uri",
     )
     parser.add_argument(
         "-d",
         "--dest",
         type=str,
-        help="destination uri \t\t(default=%(default)s)",
+        required=True,
+        help="destination uri",
     )
     parser.add_argument(
         "-g",
