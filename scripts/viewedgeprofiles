@@ -61,11 +61,15 @@ if connection is None:
     exit(1)
 
 if args.wall:
-    machineDescription = MachineDescription(connectionArgs=copy.deepcopy(args))
-    wallMDDict = machineDescription.getLatestIdsData("wall")
-    wallIds = wallMDDict["idsData"]
-
-    if wallIds is None:
+    
+    wallIds = connection.get("wall")
+   
+    if wallIds.ids_properties.homogeneous_time == imasdef.EMPTY_INT:
+        
+        machineDescription = MachineDescription(connectionArgs=copy.deepcopy(args))
+        wallMDDict = machineDescription.getLatestIdsData("wall")
+        wallIds = wallMDDict["idsData"]
+    if wallIds.ids_properties.homogeneous_time == imasdef.EMPTY_INT:
         logger.error("wall ids is not present")
     else:
         r = None

@@ -66,36 +66,6 @@ args = parser.parse_args()
 
 logger = setupLogger("module", stdout_level=logging.INFO)
 
-
-
-# wallIds = None
-# if args.wall:
-#     machineDescription = MachineDescription()
-#     wallMDDict = machineDescription.getMDSummary("wall")
-
-#     wallIds = None
-#     mdargs = copy.deepcopy(args)
-#     # Get wall of the tokamak
-#     for pulse, config in wallMDDict.items():
-#         if "wall and divertor" in config["config"]["description"]:
-#             mdargs.pulse, mdargs.run = pulse.split("/")
-#             mdargs.pulse, mdargs.run = int(mdargs.pulse), int(mdargs.run)
-#             mdargs.database = "ITER_MD"
-#             mdargs.uri = f"imas:mdsplus?user=public;shot={mdargs.pulse};run={mdargs.run};database={mdargs.database};version=3"
-#             mdConnection = DBMaster.getConnection(mdargs)
-
-#             if mdConnection is not None:
-#                 wallIds = mdConnection.get("wall")
-#                 mdConnection.close()
-#                 if wallIds is None:
-#                     continue
-#                 else:
-#                     break
-
-#     if wallIds is None:
-#         logger.error("wall ids is not present")
-
-
 # Font/Colour definition
 fontsize = 9
 bndcolor = "chocolate"

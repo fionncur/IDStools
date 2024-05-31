@@ -4,19 +4,18 @@
 import argparse
 import logging
 import os
-import sys
+
 from idstools.compute.common import getNearestTime
 
-import imas
-import numpy as np
+
 from rich_argparse import RichHelpFormatter
 
-from idstools.database import DBMaster, readScenario, readScenarioWithArgs
+from idstools.database import readScenario, readScenarioWithArgs
 from idstools.input_processing import (beam_wall_crossing,
                                        check_rays_into_divertor,
                                        read_launching_parameters,
                                        read_torbeam_output, read_wall)
-from idstools.utils.clihelper import dbentryParser, getBackendID, getDatabasePath, getFileName, getTitle
+from idstools.utils.clihelper import getDatabasePath, getFileName, getTitle
 from idstools.utils.idslogger import setupLogger
 from idstools.view.common import Canvas
 from idstools.view.core_profiles import CoreProfilesView
@@ -29,8 +28,13 @@ logger = setupLogger("module", stdout_level=logging.INFO)
 
 parser = argparse.ArgumentParser(
     description="---- Shows electron cyclotron stray radiation information by showing different plots",
-    parents=[dbentryParser],
     formatter_class=RichHelpFormatter,
+)
+parser.add_argument(
+    "-u",
+    "--uri",
+    type=str,
+    help="uri",
 )
 parser.add_argument(
     "-t", "--time", help="Time (default=middle)", type=float, default=-99.0
@@ -69,20 +73,16 @@ check_rays_into_divertor(wall2d, beam_output)
 # # Calculates where the beams cross the wall
 beam_wall = beam_wall_crossing(wall2d, launching_parameters, beam_output)
 
-if args.pulse is None:
+if args.uri is None:
     inIDSList, outIDSDict, inputargs = readScenario(
         scenarioFilePath=scenario_file,
         inIDSList=["equilibrium", "core_profiles"],
         outIDSList=["waves"],
     )
-    args.pulse=inputargs.pulse
-    args.run=inputargs.run
-    args.database=inputargs.database
-    args.backend=inputargs.backend
-    args.version=inputargs.version
+    args.uri = f"imas:mdsplus?user={inputargs.user};pulse={inputargs.pulse};run={inputargs.run};database={inputargs.database};version={inputargs.version}"
 else:
     data = readScenarioWithArgs(
-        args=args,
+        imasargs=args,
         inIDSList=["equilibrium", "core_profiles"],
         outIDSList=["waves"],
     )
