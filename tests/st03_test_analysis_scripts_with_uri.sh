@@ -29,6 +29,7 @@ SCRIPTS=(
     "viewcoretransport --uri \"imas:mdsplus?user=public;pulse=92436;run=850;database=TEST;version=3\" --save --directory $LOG_DIR"
     "vieweccomposition --uri \"imas:mdsplus?user=public;pulse=134173;run=2326;database=TEST;version=3\" --save --directory $LOG_DIR"
     "viewecray --uri \"imas:mdsplus?user=public;pulse=134173;run=2326;database=TEST;version=3\" --save --directory $LOG_DIR"
+    "viewecray --uri \"imas:mdsplus?user=public;pulse=134173;run=2326;database=TEST;version=3\" -mdesc wall --save --directory $LOG_DIR"
     "viewedgeprofiles --uri \"imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3\" --separatix --wall --time 60 --save --directory $LOG_DIR"
     "viewequilibrium --uri \"imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3\" -mdesc pf_active wall --save --directory $LOG_DIR"
     "viewfluxes --uri \"imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3\" -m CLOSEST"

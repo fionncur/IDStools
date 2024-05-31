@@ -37,7 +37,7 @@ class WallView:
             )
         ax.add_patch(patch)
 
-    def view_wall(self, ax, showLabels=False, wallcolor=None, **kwargs):
+    def view_wall(self, ax, showLabels=False, wallcolor=None, showLegend=False,**kwargs):
         """
         The function `view_wall` prints the values of `r` and `z` for each element in the `wall_data` dictionary and calls the `addWallMarkings` function to add a patch to the given `ax` object.
 
@@ -126,11 +126,12 @@ class WallView:
                         label=limiterUnit["name"],
                         **kwargs,
                     )
-        ax.legend(
-            bbox_to_anchor=(1.0, 0.5),
-            loc="center left",
-            borderaxespad=0.0,
-            frameon=False,
-            fontsize="x-small",
-        )
+        if showLegend:
+            ax.legend(
+                bbox_to_anchor=(1.0, 0.5),
+                loc="center left",
+                borderaxespad=0.0,
+                frameon=False,
+                fontsize="x-small",
+            )
         return True

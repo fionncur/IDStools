@@ -89,6 +89,8 @@ class EquilibriumView(BasePlot):
             ax.set_aspect("equal", adjustable="box")
             ax.set_xlabel("$R$ [m]")
             ax.set_ylabel("$Z$ [m]")
+            ax.set_xlim(3.4, cartestionGrid["r2d"].max())
+            ax.set_ylim(cartestionGrid["z2d"].min() * 0.7, cartestionGrid["z2d"].max() * 0.7)
             ax.tick_params(axis="both", which="major")
 
     def viewPulseInfo(

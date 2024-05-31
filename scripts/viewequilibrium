@@ -54,9 +54,8 @@ parser.add_argument(
     nargs="*",
     default=["wall", "pf_active"],
     help="""Provide machine descriptions that you need to plot\n
-with ids names for example\n
-wall pf_active
-with uris for example\n
+with ids names for example wall pf_active \n
+or with uris for example\n
 "imas:mdsplus?user=public;shot=116000;run=4;database=ITER_MD;version=3#wall"\n
 "imas:mdsplus?user=public;shot=116000;run=4;database=ITER_MD;version=3"\n
 """,
@@ -123,24 +122,32 @@ if idsObjEquilibrium.time is not None:
             connection = DBMaster.getConnection(inputargs)
             if connection is not None:
                 _idsData = connection.get(_idsName)
+                from imas import imasdef
+                if _idsData.ids_properties.homogeneous_time != imasdef.EMPTY_INT:
+                    wallview = WallView(_idsData)
+                    if foundData := wallview.view_wall(
+                        ax, args.show_labels, wallcolor="slategray"
+                    ):
+                        title += " wall"
+                        databaseText += f"{_idsName}={getDatabasePath(inputargs)}\n"
+                else:
+                    logger.warning(f"{_idsName} ids is empty in the dbentry")
                 connection.close()
-                wallview = WallView(_idsData)
-                if foundData := wallview.view_wall(
-                    ax, args.show_labels, wallcolor="slategray"
-                ):
-                    title += " wall"
-                    databaseText += f"{_idsName}={getDatabasePath(inputargs)}\n"
             else:
                 logger.warning(f"{_idsName} ids is not present")
         if _idsName == "pf_active":
             connection = DBMaster.getConnection(inputargs)
             if connection is not None:
                 _idsData = connection.get(_idsName)
+                from imas import imasdef
+                if _idsData.ids_properties.homogeneous_time != imasdef.EMPTY_INT:
+                    ViewPfCoils = PFActiveView(_idsData)
+                    ViewPfCoils.viewActivePfCoils(ax, args.show_labels)
+                    title += " Active PF Coils"
+                    databaseText += f"{_idsName}={getDatabasePath(inputargs)}\n"
+                else:
+                    logger.warning(f"{_idsName} ids is empty in the dbentry")
                 connection.close()
-                ViewPfCoils = PFActiveView(_idsData)
-                ViewPfCoils.viewActivePfCoils(ax, args.show_labels)
-                title += " Active PF Coils"
-                databaseText += f"{_idsName}={getDatabasePath(inputargs)}\n"
             else:
                 logger.warning("f{_idsName} ids is not present")
 

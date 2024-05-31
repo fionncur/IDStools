@@ -12,7 +12,7 @@ import numpy as np
 import sys
 from os import system, path
 from sys import exit
-from idstools.utils.clihelper import imasParser
+from idstools.utils.clihelper import getBackendID, imasParser
 
 # ----------------------------------------------------------------------
 
@@ -24,6 +24,7 @@ parser = argparse.ArgumentParser(
 )
 parser.add_argument("-p", "--pulse", dest="pulse", help="Pulse number", type=int)
 parser.add_argument("-r", "--run", help="Run number", type=int)
+
 parser.add_argument(
     "--disable-validation",
     help="disable IDS validation",
@@ -32,9 +33,20 @@ parser.add_argument(
     dest="wo_validation",
 )
 args = parser.parse_args()
+input = imas.DBEntry(getBackendID(args.backend),
+                args.database,
+                args.pulse,
+                args.run,
+                args.user,
+                args.version,
+            )
 
-input = DBMaster.getConnection(args)
-if input is None:
+if input is not None:
+    status, _ = input.open()
+    if status != 0:
+        print(f"Can not find data entry {args}")
+        exit(1)
+else:
     print("----> Aborted.")
     exit(1)
 # ----------------------------------------------------------------------
@@ -918,20 +930,8 @@ f.write("""idslist:\n""")
 f.close()
 
 # Complete the yaml file with the output of idslist
-system(
-    "idslist -u "
-    + args.user
-    + " -d "
-    + args.database
-    + " -b "
-    + args.backend
-    + " -p "
-    + str(args.pulse)
-    + " -r "
-    + str(args.run)
-    + " yaml >> "
-    + filename
-)
+inputuri = f"imas:{args.backend.lower()}?user={args.user};shot={args.pulse};run={args.run};database={args.database};version={args.version}"
+system("idslist --uri " + inputuri + " yaml >> " + filename)
 
 print("----> " + filename + " created.", file=sys.stdout)
 
