@@ -12,14 +12,14 @@ This cheat sheet provides quick reference of commonly used commands in IDStools.
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
 | Command                    | Description and Example Usage                                                                                                |
 +============================+==============================================================================================================================+
-| **viewcoresources**        | Plots core_sources results (replaces csplot).                                                                                |
+| *viewcoresources*          | Plots core_sources results (replaces csplot).                                                                                |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
 |                            |                                                                                                                              |
 |                            | .. code-block:: bash                                                                                                         |
 |                            |                                                                                                                              |
 |                            |    $ viewcoresources --uri "imas:mdsplus?user=public;pulse=130012;run=105;database=TEST;version=3"                           |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
-| **viewcoretransport**      | Core plasma transport of particles, energy,                                                                                  |
+| *viewcoretransport*        | Core plasma transport of particles, energy,                                                                                  |
 |                            | momentum and poloidal flux (replaces check_transport).                                                                       |
 |                            |                                                                                                                              |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
@@ -29,14 +29,14 @@ This cheat sheet provides quick reference of commonly used commands in IDStools.
 |                            |    $ viewcoretransport --uri "imas:mdsplus?user=public;pulse=92436;run=850;database=TEST;version=3"                          |
 |                            |                                                                                                                              |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
-|**vieweccomposition**       | Display ec results (replaces eccomp).                                                                                        |
+|*vieweccomposition*         | Display ec results (replaces eccomp).                                                                                        |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
 |                            |                                                                                                                              |
 |                            | .. code-block:: bash                                                                                                         |
 |                            |                                                                                                                              |
 |                            |    $ vieweccomposition --uri "imas:mdsplus?user=public;pulse=134173;run=2326;database=TEST;version=3"                        |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
-|**viewecray**               | Display EC wave ray-tracing results (replaces ecray).                                                                        |
+|*viewecray*                 | Display EC wave ray-tracing results (replaces ecray).                                                                        |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
 |                            |                                                                                                                              |
 |                            | .. code-block:: bash                                                                                                         |
@@ -45,14 +45,14 @@ This cheat sheet provides quick reference of commonly used commands in IDStools.
 |                            |    $ viewecray --uri "imas:mdsplus?user=public;pulse=134173;run=2326;database=TEST;version=3"                                |
 |                            |    -mdesc "imas:hdf5?user=public;pulse=116000;run=4;database=ITER_MD;version=3#wall"                                         |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
-|**viewecstrayradiation**    | Shows electron cyclotron stray radiation.                                                                                    |
+|*viewecstrayradiation*      | Shows electron cyclotron stray radiation.                                                                                    |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
 |                            |                                                                                                                              |
 |                            | .. code-block:: bash                                                                                                         |
 |                            |                                                                                                                              |
 |                            |    $ viewecstrayradiation --uri "imas:mdsplus?user=public;pulse=134173;run=2326;database=TEST;version=3"                     |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
-| **viewedgeprofiles**       | Shows edge profiles plots by interpolating on rectangular                                                                    |
+| *viewedgeprofiles*         | Shows edge profiles plots by interpolating on rectangular                                                                    |
 |                            | grid.                                                                                                                        |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
 |                            |                                                                                                                              |
@@ -60,7 +60,7 @@ This cheat sheet provides quick reference of commonly used commands in IDStools.
 |                            |                                                                                                                              |
 |                            |    $ viewedgeprofiles --uri "imas:mdsplus?user=public;pulse=123314;run=1;database=ITER;version=3"--separatix --wall          |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
-| **viewequilibrium**        | Shows plasma equilibrium  (replaces equiplot).                                                                               |
+| *viewequilibrium*          | Shows plasma equilibrium  (replaces equiplot).                                                                               |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
 |                            |                                                                                                                              |
 |                            | .. code-block:: bash                                                                                                         |
@@ -69,7 +69,7 @@ This cheat sheet provides quick reference of commonly used commands in IDStools.
 |                            |    -mdesc "imas:mdsplus?user=public;pulse=111001;run=103;database=ITER_MD;version=3#pf_active"                               |
 |                            |    "imas:hdf5?user=public;pulse=116000;run=4;database=ITER_MD;version=3#wall" --rho                                          |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
-| **viewfluxes**             | Shows flux information from available                                                                                        |
+| *viewfluxes*               | Shows flux information from available                                                                                        |
 |                            | transport models  (replaces print_fluxes).                                                                                   |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
 |                            |                                                                                                                              |
@@ -77,7 +77,7 @@ This cheat sheet provides quick reference of commonly used commands in IDStools.
 |                            |                                                                                                                              |
 |                            |    $ viewfluxes --uri "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3" -m CLOSEST                     |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
-| **viewhcddistributions**   | shows waveforms  (replaces hcd_distributions_plot).                                                                          |
+| *viewhcddistributions*     | shows waveforms  (replaces hcd_distributions_plot).                                                                          |
 |                            |                                                                                                                              |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
 |                            |                                                                                                                              |
@@ -85,7 +85,7 @@ This cheat sheet provides quick reference of commonly used commands in IDStools.
 |                            |                                                                                                                              |
 |                            |    $ viewhcddistributions --uri "imas:mdsplus?user=public;pulse=130012;run=115;database=TEST;version=3"                      |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
-| **viewhcdplots**           | shows plots from distributions and waves for                                                                                 |
+| *viewhcdplots*             | shows plots from distributions and waves for                                                                                 |
 |                            | different data entries for analysis   (replaces hcd_plot).                                                                   |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
 |                            |                                                                                                                              |
@@ -96,7 +96,7 @@ This cheat sheet provides quick reference of commonly used commands in IDStools.
 |                            |    -fus 130012/115/public/MDSPLUS/TEST/3                                                                                     |
 |                            |    -icrh 130012/15/public/MDSPLUS/TEST/3                                                                                     |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
-| **viewhcdwaves**           | shows waveforms  (replaces hcd_waves_plot).                                                                                  |
+| *viewhcdwaves*             | shows waveforms  (replaces hcd_waves_plot).                                                                                  |
 |                            |                                                                                                                              |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
 |                            |                                                                                                                              |
@@ -104,7 +104,7 @@ This cheat sheet provides quick reference of commonly used commands in IDStools.
 |                            |                                                                                                                              |
 |                            |    $ viewhcdwaves --uri "imas:mdsplus?user=public;pulse=134173;run=101;database=TEST;version=3"                              |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
-| **viewkineticprofiles**    | Shows plasma kinetic profiles from the core                                                                                  |
+| *viewkineticprofiles*      | Shows plasma kinetic profiles from the core                                                                                  |
 |                            | profiles  (replaces kinplot).                                                                                                |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
 |                            |                                                                                                                              |
@@ -113,7 +113,7 @@ This cheat sheet provides quick reference of commonly used commands in IDStools.
 |                            |    $ viewkineticprofiles --uri "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3"                       |
 |                            |    $ viewkineticprofiles --uri "imas:mdsplus?path=/work/imas/shared/imasdb/ITER/3/134174/117" access layer 5 and above       |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
-| **viewmachinedescription** | Plots machine description data stored in databases.                                                                          |
+| *viewmachinedescription*   | Plots machine description data stored in databases.                                                                          |
 |                            | (replaces mdplot)                                                                                                            |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
 |                            |                                                                                                                              |
@@ -122,7 +122,7 @@ This cheat sheet provides quick reference of commonly used commands in IDStools.
 |                            |    $ viewmachinedescription --uri "imas:hdf5?user=public;pulse=116000;run=4;database=ITER_MD;version=3"                      |
 |                            |    $ viewmachinedescription --uri "imas:mdsplus?user=public;pulse=111001;run=103;database=ITER_MD;version=3#pf_active"       |               
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
-| **viewneutron**            | Plots particles vs normalised toroidal                                                                                       |
+| *viewneutron*              | Plots particles vs normalised toroidal                                                                                       |
 |                            | flux coordinate  (replaces neutronplot).                                                                                     |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
 |                            |                                                                                                                              |
@@ -130,7 +130,7 @@ This cheat sheet provides quick reference of commonly used commands in IDStools.
 |                            |                                                                                                                              |
 |                            |    $ viewneutron --uri "imas:mdsplus?user=public;pulse=121014run=11;database=ITER;version=3" -t 450                          |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
-| **viewplasmacompo**        | Display the plasma composition from the                                                                                      |
+| *viewplasmacompo*          | Display the plasma composition from the                                                                                      |
 |                            | core_profiles IDS  (replaces ids_compo).                                                                                     |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
 |                            |                                                                                                                              |
@@ -138,7 +138,7 @@ This cheat sheet provides quick reference of commonly used commands in IDStools.
 |                            |                                                                                                                              |
 |                            |    $ viewplasmacompo --uri "imas:mdsplus?user=public;pulse=131047;run=4;database=ITER;version=3"                             |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
-| **viewpressure**           | Display the plasma kinetic profiles from .                                                                                   |
+| *viewpressure*             | Display the plasma kinetic profiles from .                                                                                   |
 |                            | the core_profiles  (replaces pressureplot).                                                                                  |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
 |                            |                                                                                                                              |
@@ -147,7 +147,7 @@ This cheat sheet provides quick reference of commonly used commands in IDStools.
 |                            |    $ viewpressure --uri "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3"                              |
 |                            |    $ viewpressure --uri "imas:mdsplus?path=/work/imas/shared/imasdb/ITER/3/134174/117" access layer 5 and above              |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
-| **viewrotation**           | Plasma kinetic profiles from the core_profiles                                                                               |
+| *viewrotation*             | Plasma kinetic profiles from the core_profiles                                                                               |
 |                            | (replaces rotationplot)                                                                                                      |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
 |                            |                                                                                                                              |
@@ -155,7 +155,7 @@ This cheat sheet provides quick reference of commonly used commands in IDStools.
 |                            |                                                                                                                              |
 |                            |    $ viewrotation --uri "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3"                              |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
-| **viewscenario**           | Display the plasma kinetic profiles and equilibrium from                                                                     | 
+| *viewscenario*             | Display the plasma kinetic profiles and equilibrium from                                                                     | 
 |                            | the core_profiles and equilibrium  (replaces scenplot).                                                                      | 
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
 |                            |                                                                                                                              |
@@ -164,7 +164,7 @@ This cheat sheet provides quick reference of commonly used commands in IDStools.
 |                            |    $ viewscenario --uri "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3" --time 60                    |
 |                            |    $ viewscenario --uri "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3" --noProfiles                 |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
-| **viewsources**            | Shows source information from available                                                                                      |
+| *viewsources*              | Shows source information from available                                                                                      |
 |                            |  sources (replaces print_sources).                                                                                           |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
 |                            |                                                                                                                              |
@@ -172,7 +172,7 @@ This cheat sheet provides quick reference of commonly used commands in IDStools.
 |                            |                                                                                                                              |
 |                            |    $ viewsources --uri "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3"                               |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
-| **viewspectrometry**       | Displays the spectrum, displaying plots of radiance                                                                          |
+| *viewspectrometry*         | Displays the spectrum, displaying plots of radiance                                                                          |
 |                            | and intensity in two different windows (replaces svplot).                                                                    |   
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
 |                            |                                                                                                                              |
@@ -181,7 +181,7 @@ This cheat sheet provides quick reference of commonly used commands in IDStools.
 |                            |    $ viewspectrometry --uri "imas:mdsplus?user=public;pulse=134000;run=37;database=TEST;version=3"                           |
 |                            |    $ viewspectrometry --uri "imas:mdsplus?path=/work/imas/shared/imasdb/TEST/3/134000/37" access layer 5 and above           |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
-| **viewwall**               | Shows outline plot using limiter and vessel properties found                                                                 | 
+| *viewwall*                 | Shows outline plot using limiter and vessel properties found                                                                 | 
 |                            | in 2D description of Wall IDS.                                                                                               | 
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
 |                            |                                                                                                                              |
@@ -199,7 +199,7 @@ This cheat sheet provides quick reference of commonly used commands in IDStools.
 +-------------------------------+-------------------------------------------------------------------------------------------------------------------------------------+
 | Command                       | Description and Example Usage                                                                                                       |
 +===============================+=====================================================================================================================================+
-| **eqdsk2ids**                 | EQDSK Convertor.                                                                                                                    | 
+| *eqdsk2ids*                   | EQDSK Convertor.                                                                                                                    | 
 +-------------------------------+-------------------------------------------------------------------------------------------------------------------------------------+
 |                               |                                                                                                                                     |
 |                               | .. code-block:: bash                                                                                                                |
@@ -208,7 +208,7 @@ This cheat sheet provides quick reference of commonly used commands in IDStools.
 |                               |    -g resources/geqdsk/example.gfile --dest "imas:mdsplus?user=$USERNAME;pulse=134174;run=117;database=ITER;version=3"              | 
 |                               |    --log INFO                                                                                                                       |
 +-------------------------------+-------------------------------------------------------------------------------------------------------------------------------------+
-| **idschk**                    | Validate ids fields against rules defined in yaml file                                                                              |
+| *idschk*                      | Validate ids fields against rules defined in yaml file                                                                              |
 +-------------------------------+-------------------------------------------------------------------------------------------------------------------------------------+
 |                               |                                                                                                                                     |
 |                               | .. code-block:: bash                                                                                                                |
@@ -216,7 +216,7 @@ This cheat sheet provides quick reference of commonly used commands in IDStools.
 |                               |    $ idschk --uri "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3"                                           |
 |                               |    -f resources/validation_schemas/generic/core_profiles.yml                                                                        |                   
 +-------------------------------+-------------------------------------------------------------------------------------------------------------------------------------+
-| **idscp**                     | Copy ids from one pulse to another                                                                                                  |
+| *idscp*                       | Copy ids from one pulse to another                                                                                                  |
 +-------------------------------+-------------------------------------------------------------------------------------------------------------------------------------+
 |                               |                                                                                                                                     |
 |                               | .. code-block:: bash                                                                                                                |
@@ -224,7 +224,7 @@ This cheat sheet provides quick reference of commonly used commands in IDStools.
 |                               |    $ idscp --src "imas:mdsplus?user=public;pulse=131024;run=10;database=ITER;version=3"                                             |
 |                               |    --dest "imas:mdsplus?user=$USERNAME;pulse=145000;run=5;database=ITER;version=3"                                                  |
 +-------------------------------+-------------------------------------------------------------------------------------------------------------------------------------+
-| **idsdiff**                   | Shows ids level differences between two runs. It stores result in                                                                   |
+| *idsdiff*                     | Shows ids level differences between two runs. It stores result in                                                                   |
 |                               | html document. For signals differences it is also shown as graph.                                                                   |  
 +-------------------------------+-------------------------------------------------------------------------------------------------------------------------------------+
 |                               |                                                                                                                                     |
@@ -236,7 +236,7 @@ This cheat sheet provides quick reference of commonly used commands in IDStools.
 |                               |    $ idsdiff summary --uri "imas:mdsplus?user=public;pulse=130011;run=6;database=ITER;version=3"                                    |
 |                               |    "imas:mdsplus?user=public;pulse=130012;run=4;database=ITER;version=3"                                                            |
 +-------------------------------+-------------------------------------------------------------------------------------------------------------------------------------+
-| **idslist**                   | Shows list of all idses along with count of time slices.                                                                            |
+| *idslist*                     | Shows list of all idses along with count of time slices.                                                                            |
 |                               | (replaces ids_content(yaml), listidss (with time slices),                                                                           |    
 |                               | idsoccurrences(occ) merged into one script)                                                                                         |                                            
 +-------------------------------+-------------------------------------------------------------------------------------------------------------------------------------+
@@ -247,7 +247,7 @@ This cheat sheet provides quick reference of commonly used commands in IDStools.
 |                               |    $ idslist --uri "imas:mdsplus?user=public;pulse=122525;run=1;database=ITER;version=3" yaml                                       |
 |                               |    $ idslist --uri "imas:mdsplus?user=public;pulse=122525;run=1;database=ITER;version=3" occ                                        |                                                                                                                                                                                                                                                                              
 +-------------------------------+-------------------------------------------------------------------------------------------------------------------------------------+
-| **idsperf**                   | Shows performance of access layer operations on dataset. timing and                                                                 |
+| *idsperf*                     | Shows performance of access layer operations on dataset. timing and                                                                 |
 |                               | performance information for different types of operations on IDS                                                                    |
 |                               | data with the IMAS Python Access Layer.                                                                                             |
 +-------------------------------+-------------------------------------------------------------------------------------------------------------------------------------+
@@ -266,7 +266,7 @@ This cheat sheet provides quick reference of commonly used commands in IDStools.
 |                               |    --showStats --repeat 2                                                                                                           |
 |                               |    --uriOut "imas:mdsplus?user=$USERNAME;pulse=131024;run=25;database=ITER;version=3" --memoryBackend                               |
 +-------------------------------+-------------------------------------------------------------------------------------------------------------------------------------+
-| **idsprint**                  | Dumps or prints all data on the console.                                                                                            |
+| *idsprint*                    | Dumps or prints all data on the console.                                                                                            |
 |                               | Check if specific fields or attributes have been filled out or empty                                                                |
 |                               | The output can also be saved to a file using extraction                                                                             |
 |                               | (Replaces idsdump, idsdumppath)                                                                                                     |
@@ -276,7 +276,7 @@ This cheat sheet provides quick reference of commonly used commands in IDStools.
 |                               |                                                                                                                                     |
 |                               |    $ idsprint --uri "imas:mdsplus?user=public;pulse=122525;run=1;database=ITER;version=3" equilibrium                               |
 +-------------------------------+-------------------------------------------------------------------------------------------------------------------------------------+
-| **idsresample**               | Resample IDSs from a data-entry and save them into another                                                                          |
+| *idsresample*                 | Resample IDSs from a data-entry and save them into another                                                                          |
 |                               | data-entry based on PREVIOUS_INTERP method.                                                                                         |
 +-------------------------------+-------------------------------------------------------------------------------------------------------------------------------------+
 |                               |                                                                                                                                     |
@@ -285,7 +285,7 @@ This cheat sheet provides quick reference of commonly used commands in IDStools.
 |                               |    $ idsresample --src "imas:mdsplus?user=public;pulse=131024;run=10;database=ITER;version=3"                                       |
 |                               |    --dest "imas:mdsplus?user=$USERNAME;pulse=131024;run=5;database=ITER;version=3"                                                  |                                                                                                                                                                            
 +-------------------------------+-------------------------------------------------------------------------------------------------------------------------------------+
-| **idsrescale_equilibrium**    | Rescaling an equilibrium magnetic field, storing the output into                                                                    |
+| *idsrescale_equilibrium*      | Rescaling an equilibrium magnetic field, storing the output into                                                                    |
 |                               | another entry of the same DB. replaced by ids_rescale_eq                                                                            |
 +-------------------------------+-------------------------------------------------------------------------------------------------------------------------------------+
 |                               |                                                                                                                                     |
@@ -294,7 +294,7 @@ This cheat sheet provides quick reference of commonly used commands in IDStools.
 |                               |    $ idsrescale_equilibrium --src "imas:mdsplus?user=public;pulse=122525;run=1;database=ITER;version=3"                             |
 |                               |    --dest "imas:mdsplus?user=$USERNAME;pulse=122222;run=22;database=ITER;version=3"  --rescale 2                                    |                                                                                                                                                                                                           
 +-------------------------------+-------------------------------------------------------------------------------------------------------------------------------------+
-| **idsshift_equilibrium**      | Rigidly shifts vertically an equilibrium, storing the output into                                                                   |
+| *idsshift_equilibrium*        | Rigidly shifts vertically an equilibrium, storing the output into                                                                   |
 |                               | another entry of the same DB. replaced by ids_shift_eq                                                                              |
 +-------------------------------+-------------------------------------------------------------------------------------------------------------------------------------+
 |                               |                                                                                                                                     |
@@ -303,7 +303,7 @@ This cheat sheet provides quick reference of commonly used commands in IDStools.
 |                               |    $ idsshift_equilibrium --src "imas:mdsplus?user=public;pulse=122525;run=1;database=ITER;version=3"                               |
 |                               |    --dest "imas:mdsplus?user=$USERNAME;pulse=123001;run=1;database=ITER;version=3"  --shift -0.01                                   |                                                                                                                                                                                                        
 +-------------------------------+-------------------------------------------------------------------------------------------------------------------------------------+
-| **idssize**                   | IDS size in bytes and the time taken to read each object. It also                                                                   |
+| *idssize*                     | IDS size in bytes and the time taken to read each object. It also                                                                   |
 |                               | shows total size of all IDS objects in the data entry. It shows                                                                     |
 |                               | total time taken to read all objects from the data entry. It is                                                                     |
 |                               | helpful for performance check of IDS objects.                                                                                       |
@@ -317,21 +317,21 @@ This cheat sheet provides quick reference of commonly used commands in IDStools.
 
 
 
-****************                                                                          
-Database Tools                                                                    
-****************
+****************                                                                           
+Database Tools
+**************** 
 
 +---------------------+---------------------------------------------------------------------+
 | Command             | Description and Example Usage                                       |
 +=====================+=====================================================================+
-| **dbconverter**     | Copy all data-entries from one database into another one            |
+| *dbconverter*       | Copy all data-entries from one database into another one            |
 +---------------------+---------------------------------------------------------------------+
 |                     |                                                                     |
 |                     | .. code-block:: bash                                                |
 |                     |                                                                     |
 |                     |   $ dbconverter --user $USERNAME --database ITER -do MYDB -bo HDF5  |
 +---------------------+---------------------------------------------------------------------+
-| **dblist**          | Lists existing IMAS databases (Replaces imasdbs).                   |
+| *dblist*            | Lists existing IMAS databases (Replaces imasdbs).                   |
 +---------------------+---------------------------------------------------------------------+
 |                     |                                                                     |
 |                     | .. code-block:: bash                                                |
@@ -342,14 +342,14 @@ Database Tools
 |                     |    $ dblist databases                                               |
 |                     |    $ dblist dataversions                                            |
 +---------------------+---------------------------------------------------------------------+
-| **dbperf**          | Check performance of database                                       |
+| *dbperf*            | Check performance of database                                       |
 +---------------------+---------------------------------------------------------------------+
 |                     |                                                                     |
 |                     | .. code-block:: bash                                                |
 |                     |                                                                     |
 |                     |   $ dbperf -d TEST                                                  |
 +---------------------+---------------------------------------------------------------------+
-| **dbscraper**       | The `dbscraper` script scrapes data from a particular               |
+| *dbscraper*         | The `dbscraper` script scrapes data from a particular               |
 |                     | IDS path for a specified series of pulses and displays the pulse    |
 |                     | along with the value.  (Replaces db_extractor)                      |
 +---------------------+---------------------------------------------------------------------+
@@ -361,7 +361,7 @@ Database Tools
 |                     |    $ dbscraper "core_profiles/profiles_1d(0)/electrons/temperature" |
 |                     |    --list-count 2                                                   |
 +---------------------+---------------------------------------------------------------------+
-| **dbselector**      | The `dbselector` script shows lists of all scenarios where          |
+| *dbselector*        | The `dbselector` script shows lists of all scenarios where          |
 |                     | specified ids exists. Just provide idsname as input argument to the |
 |                     | script.                                                             |
 +---------------------+---------------------------------------------------------------------+
@@ -372,46 +372,46 @@ Database Tools
 |                     |    $ dbselector -d TEST summary --list-count 2                      |
 +---------------------+---------------------------------------------------------------------+
 
-*************************
+**************************
  Scenario Database Tools
-*************************
+**************************
 
 +--------------------------------+--------------------------------------------------------------------------------+
 | Command                        | Description and Example Usage                                                  |
 +================================+================================================================================+
-| **create_db_entry**            | Auto-generated yaml scenario and watcher files                                 |
+| *create_db_entry*              | Auto-generated yaml scenario and watcher files                                 |
 |                                |                                                                                |
 |                                | .. code-block:: bash                                                           |
 |                                |                                                                                |
 |                                |    $ create_db_entry -p 130012 -r 105 -d TEST --disable-validation             |
 +--------------------------------+--------------------------------------------------------------------------------+
-| **create_db_entry_disruption** | Auto-generated yaml scenario and watcher files for disruption                  |
+| *create_db_entry_disruption*   | Auto-generated yaml scenario and watcher files for disruption                  |
 |                                | database                                                                       |
 |                                |                                                                                |
 |                                | .. code-block:: bash                                                           |
 |                                |                                                                                |
 |                                |    $ create_db_entry_disruption -p 100028 -r 1 -d ITER_DISRUPTIONS             |
 +--------------------------------+--------------------------------------------------------------------------------+
-| **create_validation_schema**   | Create validation schema using data dictionary validation attributes           |
+| *create_validation_schema*     | Create validation schema using data dictionary validation attributes           |
 |                                |                                                                                |
 |                                | .. code-block:: bash                                                           |
 |                                |                                                                                |
 |                                |    $ create_validation_schema -i core_profiles                                 |
 +--------------------------------+--------------------------------------------------------------------------------+
-| **disruption_summary**         | Script to list available disruptions in a specific folder                      |
+| *disruption_summary*           | Script to list available disruptions in a specific folder                      |
 |                                |                                                                                |
 |                                | .. code-block:: bash                                                           |
 |                                |                                                                                |
 |                                |    $ disruption_summary                                                        |
 +--------------------------------+--------------------------------------------------------------------------------+
-| **md_status**                  | Show status and potential parent and children for a given                      |
+| *md_status*                    | Show status and potential parent and children for a given                      |
 |                                | simulation stored in ITER machine description database folder                  |
 |                                |                                                                                |
 |                                | .. code-block:: bash                                                           |
 |                                |                                                                                |
 |                                |    $ md_status -p 116000 -r 3                                                  |
 +--------------------------------+--------------------------------------------------------------------------------+
-| **md_summary**                 | md_summary list available machine description data in a specific               |
+| *md_summary*                   | md_summary list available machine description data in a specific               |
 |                                | folder with search facility                                                    |
 |                                |                                                                                |
 |                                | .. code-block:: bash                                                           |
@@ -419,7 +419,7 @@ Database Tools
 |                                |    $ md_summary  -s 150502/102                                                 |
 |                                |    $ md_summary  -s nbi on-on                                                  |
 +--------------------------------+--------------------------------------------------------------------------------+
-| **scenario_status**            | The `scenario_status` program provides information about the                   |
+| *scenario_status*              | The `scenario_status` program provides information about the                   |
 |                                | scenario of specified shot and run number from the scenario                    |
 |                                | database. It shows status and potential parent and children for a              |
 |                                | given simulation stored in ITER scenario description database                  |
@@ -430,7 +430,7 @@ Database Tools
 |                                |    $ scenario_status -p 134174 -r 117                                          |
 |                                |    $ scenario_status -p 130012 -r 4 --print                                    |
 +--------------------------------+--------------------------------------------------------------------------------+
-| **scenario_summary**           | The `scenario_summary` lists available scenarios in a specific                 |
+| *scenario_summary*             | The `scenario_summary` lists available scenarios in a specific                 |
 |                                | folder with search facility.                                                   |
 |                                |                                                                                |
 |                                | .. code-block:: bash                                                           |
@@ -439,20 +439,20 @@ Database Tools
 |                                |    $ scenario_summary -p He4,2.65 -c shot,run,database,composition             |
 |                                |    $ scenario_summary -p He4 2.65                                              |
 +--------------------------------+--------------------------------------------------------------------------------+
-| **show_db_entry**              | Show full description file for a given simulation stored in ITER DB            |
+| *show_db_entry*                | Show full description file for a given simulation stored in ITER DB            |
 |                                | folder.                                                                        |
 |                                |                                                                                |
 |                                | .. code-block:: bash                                                           |
 |                                |                                                                                |
 |                                |    $ show_db_entry -p 134174 -r 117                                            |
 +--------------------------------+--------------------------------------------------------------------------------+
-| **validate_db_entry**          | Validation Tool for ITER Scenario DB                                           |
+| *validate_db_entry*            | Validation Tool for ITER Scenario DB                                           |
 |                                |                                                                                |
 |                                | .. code-block:: bash                                                           |
 |                                |                                                                                |
 |                                |    $ validate_db_entry -p 134174 -r 117 --path resources/validation_schemas    |
 +--------------------------------+--------------------------------------------------------------------------------+
-| **watch_db_entry**             | Subscribe/unsubscribe as a watcher to a simulation file                        |
+| *watch_db_entry*               | Subscribe/unsubscribe as a watcher to a simulation file                        |
 |                                | stored in IMAS DB                                                              |
 +--------------------------------+--------------------------------------------------------------------------------+
 

@@ -18,8 +18,7 @@ energy, momentum and poloidal flux.
 
    .. code-block:: bash
 
-        $ viewcoretransport -p 92436 -r 850 -d TEST 
-        $ viewcoretransport --uri "imas:mdsplus?user=public;shot=92436;run=850;database=TEST;version=3" 
+        $ viewcoretransport --uri "imas:mdsplus?user=public;pulse=92436;run=850;database=TEST;version=3" 
 
    .. thumbnail:: _static/images/viewcoretransport.png
       :alt: image not found

@@ -20,8 +20,7 @@ Example idssize
 
     .. code-block:: bash
 
-        $ idssize -p 122525 -r 1
-        $ idssize --uri "imas:mdsplus?user=public;shot=122525;run=1;database=ITER;version=3"
+        $ idssize --uri "imas:mdsplus?user=public;pulse=122525;run=1;database=ITER;version=3"
         Examining data for public, ITER, 3, 122525, 1
         Reading 0.001 MB of data for dataset_description/0 took 0.00 seconds
         Reading 0.003 MB of data for divertors/0 took 0.02 seconds

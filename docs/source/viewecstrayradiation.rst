@@ -23,7 +23,7 @@ resonance layer, top view equilibrium.
 
    .. code-block:: bash
 
-      $ viewecstrayradiation -p 134173 -r 2326 -d TEST
+      $ viewecstrayradiation --uri "imas:mdsplus?user=public;pulse=134173;run=2326;database=TEST;version=3"
 
    .. thumbnail:: _static/images/viewecstrayradiation.png
       :alt: image not found

@@ -17,8 +17,7 @@ Example
 
    .. code-block:: bash
 
-        $ viewscenario -p 134174 -r 117
-        $ viewscenario --uri "imas:mdsplus?user=public;shot=134174;run=117;database=ITER;version=3" 
+        $ viewscenario --uri "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3" 
         Time  = 71.44 s in range [10.60,75.00] s
         Index = 53
         Averaged resolution = 0.6133411929278538 s

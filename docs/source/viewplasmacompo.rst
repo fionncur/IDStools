@@ -17,8 +17,7 @@ profiles and print it on the screen
 
 .. code:: bash
 
-   $ viewplasmacompo -p 131047 -r 4
-   $ viewplasmacompo --uri "imas:mdsplus?user=public;shot=131047;run=4;database=ITER;version=3"
+   $ viewplasmacompo --uri "imas:mdsplus?user=public;pulse=131047;run=4;database=ITER;version=3"
    !   No edge_profiles IDS in the data-entry.
    core +  edge  -
    ------------

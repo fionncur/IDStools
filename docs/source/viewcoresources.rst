@@ -18,8 +18,7 @@ Power, particle and current profiles.
 
    .. code-block:: bash
 
-        $ viewcoresources -p 130012 -r 105 -d TEST
-        $ viewcoresources --uri "imas:mdsplus?user=public;shot=130012;run=105;database=TEST;version=3"
+        $ viewcoresources --uri "imas:mdsplus?user=public;pulse=130012;run=105;database=TEST;version=3"
         Time  = 190.82 s in range [31.20,328.18] s
         Index = 8
         Averaged resolution = 19.79856 s

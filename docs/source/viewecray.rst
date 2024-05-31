@@ -18,8 +18,7 @@ output of TORBEAM code.
 
    .. code-block:: bash
 
-        $ viewecray -p 134173 -r 2326  -d TEST 
-        $ viewecray --uri "imas:mdsplus?user=public;shot=134173;run=2326;database=TEST;version=3"
+        $ viewecray --uri "imas:mdsplus?user=public;pulse=134173;run=2326;database=TEST;version=3" -mdesc wall
 
    .. thumbnail:: _static/images/viewecray.png
       :alt: image not found

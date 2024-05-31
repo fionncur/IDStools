@@ -18,8 +18,7 @@ core_profiles IDSs.
 
    .. code-block:: bash
 
-        $ viewrotation -p 134174 -r 117
-        $ viewrotation --uri "imas:mdsplus?user=public;shot=134174;run=117;database=ITER;version=3"
+        $ viewrotation --uri "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3"
         Time  = 75.00 s in range [10.60,75.00] s
         Index = 105
         Averaged resolution = 0.6133411929278538 s

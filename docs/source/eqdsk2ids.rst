@@ -16,7 +16,7 @@ Example eqdsk2ids
    .. code-block:: bash
 
         $ eqdsk2ids -c 11 -p 134174 -r 117 -c 11 -g resources/geqdsk/example.gfile -u <username> -d ITER --log INFO   
-        $ eqdsk2ids -c 11 --uri "imas:mdsplus?user=username;shot=134174;run=117;database=ITER;version=3" -g resources/geqdsk/example.gfile --log INFO
+        $ eqdsk2ids -c 11 --uri "imas:mdsplus?user=username;pulse=134174;run=117;database=ITER;version=3" -g resources/geqdsk/example.gfile --log INFO
         24/03/20 17:19:44 INFO: loading GEQDSK file ...
         24/03/20 17:19:44 INFO: GEQDSK COCOS:
         { 'COCOS': 1,
@@ -53,7 +53,7 @@ Example eqdsk2ids
         'sign_q_pos': 1,
         'theta_sign_clockwise': 1}
         24/03/20 17:19:44 INFO: creating output datafile ...
-        24/03/20 17:19:44 INFO: IDS/equilibrium populated in pulse/run = sdcc-login01.iter.org:/home/ITER/sawantp1/public/imasdb/ITER/3 (pulse 134174,117 ).
+        24/03/20 17:19:44 INFO: IDS/equilibrium populated in pulse/run = sdcc-login01.iter.org:/home/ITER/username/public/imasdb/ITER/3 (pulse 134174,117 ).
 
    .. code-block:: bash
 

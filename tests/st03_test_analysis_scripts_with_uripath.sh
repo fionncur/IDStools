@@ -23,7 +23,7 @@ else
     DATABASE_DIR="$2"
 fi
 
-# "viewall database --uri \"imas:mdsplus?user=schneim;shot=92436;run=271;database=jet;version=3\""
+# "viewall database --uri \"imas:mdsplus?user=schneim;pulse=92436;run=271;database=jet;version=3\""
 SCRIPTS=(
     "viewkineticprofiles --uri \"imas:mdsplus?path=/work/imas/shared/imasdb/ITER/3/134174/117\" --save --directory $LOG_DIR"
     "viewpressure --uri \"imas:mdsplus?path=/work/imas/shared/imasdb/ITER/3/134174/117\" --save --directory $LOG_DIR"

@@ -96,26 +96,26 @@ Examples:
 
 .. code-block:: bash
 
-    $ idschk -p 131024 -r 40 -f path/to/schema_file/required_fields_core.yml
+    $ idschk --uri "imas:mdsplus?user=public;shot=131024;run=40;database=ITER;version=3" -f path/to/schema_file/required_fields_core.yml
 
 2) Same with 1) and only for one time slice. Specify time, otherwise middle point if blank
 
 .. code-block:: bash
 
-    $ idschk -p 131024 -r 40 -f path/to/schema_file/required_fields_core.yml -t 100.
-    $ idschk -p 131024 -r 40 -f path/to/schema_file/required_fields_core.yml -t
+    $ idschk --uri "imas:mdsplus?user=public;shot=131024;run=40;database=ITER;version=3" -f path/to/schema_file/required_fields_core.yml -t 100.
+    $ idschk --uri "imas:mdsplus?user=public;shot=131024;run=40;database=ITER;version=3" -f path/to/schema_file/required_fields_core.yml -t
 
 3) Check IDS/equilibrium for COCOS
 
 .. code-block:: bash
 
-    $ idschk -p 131024 -r 40 -c
+    $ idschk --uri "imas:mdsplus?user=public;shot=131024;run=40;database=ITER;version=3" -c
 
 4) Check IDS/equilibrium with COCOS values
 
 .. code-block:: bash
 
-    $ idschk -p 131024 -r 40 -c --verbose
+    $ idschk --uri "imas:mdsplus?user=public;shot=131024;run=40;database=ITER;version=3" -c --verbose
 
 (II) Functional Interface in Python (idstools/idschk.py)
 --------------------------------------------------------

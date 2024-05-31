@@ -17,8 +17,7 @@
 
    .. code-block:: bash
 
-      $ idschk -p 134174 -r 117 -f resources/validation_schemas/ITER/core_profiles.yml
-
+      $ idschk --uri "imas:mdsplus?user=public;shot=134174;run=117;database=ITER;version=3" -f resources/validation_schemas/generic/core_profiles.yml
       core_profiles:
           occurence(0):
               profiles_1d[0].grid.rho_tor_norm[:]:
@@ -34,24 +33,20 @@
 
    .. code-block:: bash
 
-      idschk --uri "imas:mdsplus?user=public;shot=134174;run=117;database=ITER;version=3" -f resources/validation_schemas/generic/core_profiles.yml
-
-   .. code-block:: bash
-
       # Command Line Interface for IDS Data Validation (idschk)
       # Examples:
       #Validate if ITER Scenario meets with physics requirements
-      $ idschk -p 131024 -r 40 -f path/to/schema_file/required_fields_core.yml
+      $ idschk --uri "imas:mdsplus?user=public;shot=131024;run=40;database=ITER;version=3" -f path/to/schema_file/required_fields_core.yml
 
       #Same with 1) and only for one time slice. Specify time, otherwise middle point if blank
-      $ idschk -p 131024 -r 40 -f path/to/schema_file/required_fields_core.yml -t 100.
-      $ idschk -p 131024 -r 40 -f path/to/schema_file/required_fields_core.yml -t
+      $ idschk --uri "imas:mdsplus?user=public;shot=131024;run=40;database=ITER;version=3" -f path/to/schema_file/required_fields_core.yml -t 100.
+      $ idschk --uri "imas:mdsplus?user=public;shot=131024;run=40;database=ITER;version=3" -f path/to/schema_file/required_fields_core.yml -t
 
       #Check IDS/equilibrium for COCOS
-      $ idschk -p 131024 -r 40 -c
+      $ idschk --uri "imas:mdsplus?user=public;shot=131024;run=40;database=ITER;version=3" -c
 
       # Check IDS/equilibrium with COCOS values
-      $ idschk -p 131024 -r 40 -c --verbose
+      $ idschk --uri "imas:mdsplus?user=public;shot=131024;run=40;database=ITER;version=3" -c --verbose
 
    .. code-block:: python
 

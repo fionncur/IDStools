@@ -15,18 +15,10 @@ original IDS
    .. command-output:: idsresample -h
 
 
-Example idsresample
-~~~~~~~~~~~~~~~~~~~
-
-    .. code-block:: bash
-
-        $ idsresample -sp 131024 -sr 10 -dp 145000 -dr 2 -u public
-        resampling indices :equilibrium
-
 *********************
  Example idsresample
 *********************
 
     .. code-block:: bash
 
-        $ idsresample --src "imas:mdsplus?user=public;shot=131024;run=10;database=ITER;version=3" --dest "imas:mdsplus?user=sawantp1;shot=131024;run=2;database=ITER;version=3"
+        $ idsresample --src "imas:mdsplus?user=public;pulse=131024;run=10;database=ITER;version=3" --dest "imas:mdsplus?user=username;pulse=131024;run=2;database=ITER;version=3"

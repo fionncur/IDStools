@@ -20,8 +20,7 @@ can also be saved to a file using extraction.
 
    .. code-block:: bash
 
-      $ idsprint -p 134174 -r 117 equilibrium
-      $ idsprint --uri "imas:mdsplus?user=public;shot=122525;run=1;database=ITER;version=3" equilibrium
+      $ idsprint --uri "imas:mdsplus?user=public;pulse=122525;run=1;database=ITER;version=3" equilibrium
 
       class equilibrium
       Attribute ids_properties

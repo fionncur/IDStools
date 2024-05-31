@@ -15,4 +15,4 @@ Example dbperf
 
     .. code-block:: bash
 
-        $ dbperf -u <username> -d ITER
+        $ dbperf -u $USERNAME -d ITER

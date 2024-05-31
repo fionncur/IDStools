@@ -16,7 +16,7 @@ Copy all data-entries from one database into another one
 
    .. code:: bash
 
-      $ dbconverter --user <username> --database ITER -do MYDB -bo HDF5
+      $ dbconverter --user $USERNAME --database ITER -do MYDB -bo HDF5
       ----------------------------------------
       Processing (114101, 157)
       Processing... ━━━━━━━╺━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  18% 0:00:51
@@ -44,7 +44,7 @@ Copy all data-entries from one database into another one
 
    .. code:: bash
 
-      $ dbconverter --user sawantp1 --database ITER -do MYDB -bo MDSPLUS --validate
+      $ dbconverter --user $USERNAME --database ITER -do MYDB -bo MDSPLUS --validate
       Processing (100027, 1)
       Processing... ━━━━╸━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  12% -:--:--[04/08/24 16:19:45]                                                                                 dbconverter:130
       WARNING:module:could not find schema for core_transport

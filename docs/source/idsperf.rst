@@ -18,7 +18,7 @@ IDS data with the IMAS Python Access Layer
 
     .. code-block:: bash
 
-        $ idsperf -p 134174 -r 117
+        $ idsperf --uri "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3" summary
         core_profiles best time = 1.0308142956346273 s
         core_sources best time = 2.8891310710459948 s
         core_transport best time = 1.7229742156341672 s
@@ -28,10 +28,6 @@ IDS data with the IMAS Python Access Layer
         equilibrium best time = 0.6164609286934137 s
         summary best time = 0.1234514331
 
-    .. code-block:: bash
-
-        $ idsperf --uri "imas:mdsplus?user=public;shot=134174;run=117;database=ITER;version=3" summary
-
 
 ***************************
  Example idsperf (one ids)
@@ -39,7 +35,7 @@ IDS data with the IMAS Python Access Layer
 
    .. code-block:: bash
 
-      $ idsperf -p 134174 -r 117 equilibrium
+      $ idsperf --uri "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3" equilibrium
       equilibrium best time = 0.6310763321816921 s
 
 ********************************************************
@@ -48,7 +44,7 @@ IDS data with the IMAS Python Access Layer
 
    .. code-block:: bash
 
-      $ idsperf -p 134174 -r 117 equilibrium --showStats --repeat 2
+      $ idsperf --uri "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3" equilibrium --showStats --repeat 2
       All timings  = [0.6093323398381472, 0.5525227133184671]
       Mean         = 0.5809275265783072
       Standard dev = 0.04017047214874087
@@ -61,7 +57,7 @@ IDS data with the IMAS Python Access Layer
 
    .. code-block:: bash
 
-      $ idsperf -p 134174 -r 117 equilibrium  -a
+      $ idsperf --uri "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3" equilibrium  -a
       equilibrium best time = 0.9812253648415208 s
 
 **********************************************************
@@ -70,7 +66,7 @@ IDS data with the IMAS Python Access Layer
 
    .. code-block:: bash
 
-      $ idsperf -p 134174 -r 117 equilibrium  -t 50
+      $ idsperf --uri "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3" equilibrium  -t 50
       equilibrium best time = 0.022071588784456253 s
 
 *********************************
@@ -79,7 +75,7 @@ IDS data with the IMAS Python Access Layer
 
    .. code-block:: bash
 
-      $ idsperf -p 134174 -r 117 equilibrium -do HBD -bo MDSPLUS -o 412
+      $ idsperf --uri "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3" equilibrium -do HBD -bo MDSPLUS -o 412
       equilibrium best time = 0.5791653310880065 s
 
 **********************************
@@ -88,6 +84,6 @@ IDS data with the IMAS Python Access Layer
 
    .. code-block:: bash
 
-      $ idsperf -p 134174 -r 117 equilibrium  -t 50 -m
+      $ idsperf --uri "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3" equilibrium  -t 50 -m
       First import data into memory...
       equilibrium best time = 0.005069989711046219 s

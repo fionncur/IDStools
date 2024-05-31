@@ -20,8 +20,7 @@ Example viewfluxes
 
    .. code-block:: bash
 
-        $ viewfluxes -p 134174 -r  117 -m CLOSEST
-        $ viewfluxes --uri "imas:mdsplus?user=public;shot=134174;run=117;database=ITER;version=3"
+        $ viewfluxes --uri "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3" -m CLOSEST
 
         Showing details for sdcc-login01.iter.org:/work/imas/shared/imasdb/ITER/3 (pulse 134174,117 time:10.60))
 
@@ -55,7 +54,7 @@ Example viewfluxes
 
    .. code-block:: bash
 
-      $ viewfluxes -p 134174 -r 117 -m PREVIOUS -t 50
+      $ viewfluxes --uri "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3" -m PREVIOUS -t 50
 
         Showing details for sdcc-login01.iter.org:/work/imas/shared/imasdb/ITER/3 (pulse 134174,117 time:48.938))
 

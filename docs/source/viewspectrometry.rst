@@ -18,8 +18,7 @@ It shows plots of radiance and intensity of the spectrom.
 
    .. code-block:: bash
 
-        $ viewspectrometry -p 134000 -r 37 -d TEST 
-        $ viewspectrometry --uri "imas:mdsplus?user=public;shot=134000;run=37;database=TEST;version=3"
+        $ viewspectrometry --uri "imas:mdsplus?user=public;pulse=134000;run=37;database=TEST;version=3"
 
 
    .. thumbnail:: _static/images/viewspectrometry.png

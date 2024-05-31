@@ -29,8 +29,7 @@ specify database entry to retrive wall details. it uses wall ids
 
    .. code-block:: bash
 
-        $ viewwall database -u schneim --database jet -p 92436 -r 271
-        $ viewwall database --uri "imas:mdsplus?user=schneim;shot=92436;run=271;database=jet;version=3"
+        $ viewwall database --uri "imas:mdsplus?user=schneim;pulse=92436;run=271;database=jet;version=3"
 
    .. thumbnail:: _static/images/wallview_jet.png
       :alt: image not found
