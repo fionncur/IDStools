@@ -43,7 +43,7 @@ for file_path, list_of_files in files.items():
     data_files.append((file_path, list_of_files))
     
 # Create man page and append in data_files
-subprocess.run([os.path.join(current_directory, "manpages.sh"), ""], shell=True)
+# subprocess.run([os.path.join(current_directory, "manpages.sh"), ""], shell=True)
 man_path = os.path.join(current_directory, "docs/_build/man/idstools.1")
 if os.path.exists(man_path):
     data_files.append(("share/man/man1/", [man_path]))
@@ -114,7 +114,6 @@ setup(
         "scripts/vieweccomposition",
         "scripts/viewspectrometry",
         "scripts/viewcoretransport",
-        "scripts/viewwall",
         "scripts/create_db_entry",  # scenario db scripts
         "scripts/create_db_entry_disruption",
         "scripts/create_validation_schema",

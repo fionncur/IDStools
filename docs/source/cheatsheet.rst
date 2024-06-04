@@ -43,7 +43,7 @@ This cheat sheet provides quick reference of commonly used commands in IDStools.
 |                            |                                                                                                                              |
 |                            |    $ viewecray --uri "imas:mdsplus?user=public;pulse=134173;run=2326;database=TEST;version=3"                                |
 |                            |    $ viewecray --uri "imas:mdsplus?user=public;pulse=134173;run=2326;database=TEST;version=3"                                |
-|                            |    -mdesc "imas:hdf5?user=public;pulse=116000;run=4;database=ITER_MD;version=3#wall"                                         |
+|                            |    -md "imas:hdf5?user=public;pulse=116000;run=4;database=ITER_MD;version=3#wall"                                         |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
 |*viewecstrayradiation*      | Shows electron cyclotron stray radiation.                                                                                    |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
@@ -66,7 +66,7 @@ This cheat sheet provides quick reference of commonly used commands in IDStools.
 |                            | .. code-block:: bash                                                                                                         |
 |                            |                                                                                                                              |
 |                            |    $ viewequilibrium --uri "imas:mdsplus?user=public;pulse=134173;run=2326;database=TEST;version=3"                          |
-|                            |    -mdesc "imas:mdsplus?user=public;pulse=111001;run=103;database=ITER_MD;version=3#pf_active"                               |
+|                            |    -md "imas:mdsplus?user=public;pulse=111001;run=103;database=ITER_MD;version=3#pf_active"                               |
 |                            |    "imas:hdf5?user=public;pulse=116000;run=4;database=ITER_MD;version=3#wall" --rho                                          |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
 | *viewfluxes*               | Shows flux information from available                                                                                        |
@@ -180,14 +180,6 @@ This cheat sheet provides quick reference of commonly used commands in IDStools.
 |                            |                                                                                                                              |
 |                            |    $ viewspectrometry --uri "imas:mdsplus?user=public;pulse=134000;run=37;database=TEST;version=3"                           |
 |                            |    $ viewspectrometry --uri "imas:mdsplus?path=/work/imas/shared/imasdb/TEST/3/134000/37" access layer 5 and above           |
-+----------------------------+------------------------------------------------------------------------------------------------------------------------------+
-| *viewwall*                 | Shows outline plot using limiter and vessel properties found                                                                 | 
-|                            | in 2D description of Wall IDS.                                                                                               | 
-+----------------------------+------------------------------------------------------------------------------------------------------------------------------+
-|                            |                                                                                                                              |
-|                            | .. code-block:: bash                                                                                                         |
-|                            |                                                                                                                              |
-|                            |    $ viewwall wall -m iter                                                                                                   |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
 
 

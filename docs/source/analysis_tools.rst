@@ -28,4 +28,3 @@ composition, allowing you to depict various trends and plasma physics.
    viewscenario
    viewsources
    viewspectrometry
-   viewwall

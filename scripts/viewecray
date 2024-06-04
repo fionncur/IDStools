@@ -39,8 +39,8 @@ parser.add_argument(
     "-t", "--time", help="Time", required=False, type=float, default=-99.0
 )
 parser.add_argument(
-    "-mdesc",
-    "--mdesc",
+    "-md",
+    "--md",
     nargs="*",
     default=["wall", "pf_active"],
     help="""Provide machine descriptions that you need to plot\n

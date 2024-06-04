@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # python scripts/viewequilibrium -p 134174 -r 117
-# -mdesc "imas:mdsplus?user=public;shot=116000;run=2;database=ITER_MD;version=3#wall"
+# -md "imas:mdsplus?user=public;shot=116000;run=2;database=ITER_MD;version=3#wall"
 # "imas:mdsplus?user=public;shot=111001;run=102;database=ITER_MD;version=3#pf_active"
 
 import argparse
@@ -49,8 +49,8 @@ parser.add_argument(
     action="store_true",
 )
 parser.add_argument(
-    "-mdesc",
-    "--mdesc",
+    "-md",
+    "--md",
     nargs="*",
     default=["wall", "pf_active"],
     help="""Provide machine descriptions that you need to plot\n

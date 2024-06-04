@@ -37,7 +37,7 @@ getIMASModuleName() {
 # module use /work/imas/etc/modules/all
 # module use -p /work/imas/opt/bamboo_deploy/easybuild/modules/all
 # TEST
-# toolchain=intel-2020b
-# getIMASModuleName $toolchain 4
+# toolchain=intel-2023b
+# # getIMASModuleName $toolchain 4
 # getIMASModuleName $toolchain 5
 # getIMASModuleName $toolchain 5 3
