@@ -3,33 +3,25 @@
 # ids_content and listidss is merged
 
 import argparse
-import os
 import sys
-import textwrap
 
-from rich_argparse import RichHelpFormatter
-from idstools.database import DBMaster
-
-import imas
 import numpy as np
 from rich.markdown import Markdown
+from rich_argparse import RichHelpFormatter
+
+from idstools.database import DBMaster
+from idstools.utils.clihelper import dbentryParser
 from idstools.utils.idshelper import (
     getAvailableIdsAndOccurrences,
     getAvailableIdsAndTimes,
 )
 from idstools.utils.idslogger import setupLogger
-from idstools.utils.clihelper import getBackendID, dbentryParser
 
 logger = setupLogger("module")
 np.set_printoptions(threshold=1, precision=2, suppress=True)
 
-description="""
+description = """
 List available IDSes in the pulse. By default it prints all IDSes along with its time length. The fullarray option allows you to print the complete time array.
-
-Possible commands are:
-
-- ``yaml``: List IDS content for YAML files aimed at describing a scenario.
-- ``occ <--ids> <--comment>``: List IDS with their number of occurrences.
 
 [``ids_content(yaml)``, ``listidss`` (with time slices), ``idsoccurrences(occ)`` merged into one script]
 """
@@ -40,65 +32,51 @@ parser = argparse.ArgumentParser(
     parents=[dbentryParser],
 )
 parser.add_argument(
+    "-y",
+    "--yaml",
+    action="store_true",
+    help="List ids content for yaml files aimed at describing a scenario",
+)
+parser.add_argument(
+    "-o",
+    "--occ",
+    action="store_true",
+    help="List ids with their number of occurrences",
+)
+parser.add_argument("-i", "--ids", required=False, type=str, help="IDS name to filter")
+parser.add_argument(
     "-f",
     "--fullarray",
     action="store_true",
-    help="Show full time array values",
+    help="Show full time array values [Use with default]",
 )
 
-subparsers = parser.add_subparsers(help="sub-commands help")
-
-subparserYaml = subparsers.add_parser(
-    "yaml", help="List ids content for yaml files aimed at describing a scenario"
-)
-subparserYaml.set_defaults(cmd="yaml")
-
-subparserOcc = subparsers.add_parser(
-    "occ", help="List ids with their number of occurrences"
-)
-subparserOcc.add_argument("-i", "--ids", required=False, type=str, help="IDS name")
-subparserOcc.add_argument(
+parser.add_argument(
     "-c",
     "--comment",
     required=False,
     action="store_true",
-    help="Output ids_properties.comment field for each found occurrence",
+    help="Output ids_properties.comment field for each found occurrence [Use with -o --occ]",
 )
-
-subparserOcc.set_defaults(cmd="occ")
 
 args = parser.parse_args()
 
-if "cmd" not in args.__dict__:
-    connection = DBMaster.getConnection(args)
-    if connection is None:
-        print("----> Aborted.")
-        exit(1)
+connection = DBMaster.getConnection(args)
+if connection is None:
+    print("----> Aborted.")
+    exit(1)
 
-    question_string = "?"
-
-    availableIdsAndTimes = getAvailableIdsAndTimes(connection)
-    question_string = "?"
-    for idsName, timeArray in availableIdsAndTimes:
-        if len(timeArray) == 1 and np.isnan(timeArray[0]):
-            print(f"{idsName:15}:  {question_string:5} slices: heterogeneous IDS ")
-        elif len(timeArray) == 1 and timeArray[0] == np.NINF:
-            print(f"{idsName:15}:  {question_string:5} slices: time independent IDS ")
-        else:
-            if args.fullarray is True:
-                np.set_printoptions(threshold=sys.maxsize)
-            print(f"{idsName:15}: {str(len(timeArray)):5} slices: {timeArray} ")
-    connection.close()
-    exit(0)
-
-if args.cmd == "yaml":
-    # Open the database and read the necessary IDSs
-    connection = DBMaster.getConnection(args)
-    if connection is None:
-        print("----> Aborted.")
-        exit(1)
-
+if args.yaml is True:
+    if args.fullarray:
+        print(
+            "(-f fullarray) option is provided, can not show full array for yaml output"
+        )
+    if args.comment:
+        print("(-c comment) option is provided, use with -o (occurrences output)")
     for idsname, oc in getAvailableIdsAndOccurrences(connection):
+        if args.ids:
+            if idsname != args.ids:
+                continue
         homogeneous_time = connection.partial_get(
             idsname, "ids_properties/homogeneous_time", occurrence=oc
         )
@@ -136,12 +114,11 @@ if args.cmd == "yaml":
     exit(0)
 
 
-if args.cmd == "occ":
-    # Open the database and read the necessary IDSs
-    connection = DBMaster.getConnection(args)
-    if connection is None:
-        print("----> Aborted.")
-        exit(1)
+elif args.occ is True:
+    if args.fullarray:
+        print(
+            "(-f fullarray) option is provided, can not show full array for yaml output"
+        )
 
     for idsname, oc, comment in getAvailableIdsAndOccurrences(
         connection, getComment=True
@@ -156,5 +133,26 @@ if args.cmd == "occ":
             print(f"  {idsnameoc}: {comment}")
         else:
             print(f"  {idsnameoc}")
+    connection.close()
+    exit(0)
+else:
+    if args.comment:
+        print("(-c comment) option is provided, use with -o (occurrences output)")
+    question_string = "?"
+
+    availableIdsAndTimes = getAvailableIdsAndTimes(connection)
+    question_string = "?"
+    for idsName, timeArray in availableIdsAndTimes:
+        if args.ids:
+            if idsName != args.ids:
+                continue
+        if len(timeArray) == 1 and np.isnan(timeArray[0]):
+            print(f"{idsName:15}:  {question_string:5} slices: heterogeneous IDS ")
+        elif len(timeArray) == 1 and timeArray[0] == np.NINF:
+            print(f"{idsName:15}:  {question_string:5} slices: time independent IDS ")
+        else:
+            if args.fullarray is True:
+                np.set_printoptions(threshold=sys.maxsize)
+            print(f"{idsName:15}: {str(len(timeArray)):5} slices: {timeArray} ")
     connection.close()
     exit(0)
