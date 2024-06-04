@@ -32,7 +32,7 @@ Example idslist
 
    .. code-block:: bash
 
-        $ idslist --uri "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3" yaml
+        $ idslist --uri "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3" -y
         core_profiles:
             time_step_number: 106
             start_end_step:   [10.599230769230868 75.00005602665553 0.6133411929278538]
@@ -60,7 +60,7 @@ Example idslist
 
    .. code-block:: bash
 
-        $ idslist --uri "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3" occ
+        $ idslist --uri "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3" -o
         core_profiles/0
         core_sources/0
         core_transport/0

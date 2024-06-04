@@ -922,7 +922,7 @@ f.write(
     """# listidss, see IMAS-1010 (note: the data-entry has to be copied to a personal\n"""
 )
 f.write("""# database for the script to work, see the example below):\n""")
-f.write("""#  idslist -u <username> -d test -p 4321 -r 1 yaml\n""")
+f.write("""#  idslist --uri "imas:mdsplus?user=public;pulse=122525;run=1;database=ITER;version=3" -y\n""")
 f.write(
     """# ------------------------------------------------------------------------------\n"""
 )
@@ -931,7 +931,7 @@ f.close()
 
 # Complete the yaml file with the output of idslist
 inputuri = f"imas:{args.backend.lower()}?user={args.user};shot={args.pulse};run={args.run};database={args.database};version={args.version}"
-system("idslist --uri " + inputuri + " yaml >> " + filename)
+system("idslist --uri " + inputuri + " -y >> " + filename)
 
 print("----> " + filename + " created.", file=sys.stdout)
 
