@@ -82,27 +82,11 @@ class PFActiveView:
                         elif coilInfo["name"]:
                             name = f"{coilInfo['name']}"
 
-                        if len(name) > 10:
-                            ax.annotate(
-                                name,
-                                xy=(cx, cy),
-                                xytext=(-cx - 12, cy) if cx < 6.0 else (cx + 12, cy),
-                                color="black",
-                                fontsize="x-small",
-                                arrowprops=dict(
-                                    arrowstyle="->",
-                                    connectionstyle="arc3,rad=0.",
-                                    color="black",
-                                    lw=1,
-                                ),
-                            )
-                        else:
-                            ax.annotate(
-                                name,
-                                xy=(cx, cy),
-                                ha="center",
-                                va="center",
-                                color="black",
-                                fontsize="x-small",
-                            )
+                        ax.text(
+                            cx,
+                            cy,
+                            name,
+                            fontsize="x-small",
+                            rotation=90,
+                        )
             ax.set_aspect("equal", adjustable="box")

@@ -21,6 +21,7 @@ from idstools.utils.clihelper import (
     getDetailsfromURI,
     getFileName,
     getTitle,
+    mdParser
 )
 from idstools.utils.idslogger import setupLogger
 from idstools.view.common import Canvas
@@ -32,24 +33,11 @@ from idstools.view.waves import WavesView
 
 
 parser = argparse.ArgumentParser(
-    description="---- Display EC wave ray-tracing results [Previously known as ecray]", parents=[dbentryParser],formatter_class=RichHelpFormatter
+    description="---- Display EC wave ray-tracing results [Previously known as ecray]", parents=[dbentryParser, mdParser],formatter_class=RichHelpFormatter
 )
 
 parser.add_argument(
     "-t", "--time", help="Time", required=False, type=float, default=-99.0
-)
-parser.add_argument(
-    "-md",
-    "--md",
-    nargs="*",
-    default=["wall", "pf_active"],
-    help="""Provide machine descriptions that you need to plot\n
-with ids names for example\n
-wall pf_active
-with uris for example\n
-"imas:mdsplus?user=public;shot=116000;run=4;database=ITER_MD;version=3#wall"\n
-"imas:mdsplus?user=public;shot=116000;run=4;database=ITER_MD;version=3"\n
-""",
 )
 
 parser.add_argument(
@@ -124,7 +112,7 @@ logger.info(
 
 ecstraView.plotPoloidalView(ax_polview)
 
-for mdidsInfo in args.mdesc:
+for mdidsInfo in args.md:
     inputargs = copy.deepcopy(args)
     splittedmsIdsInfo = mdidsInfo.split("#")
     _idsName = ""

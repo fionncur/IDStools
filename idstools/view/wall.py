@@ -30,10 +30,11 @@ class WallView:
         patch = patches.PathPatch(path, **kwargs)
         if showLabels:
             ax.text(
-                r[n - 1],
-                z[n - 1],
+                r[n-1],
+                z[n-1],
                 kwargs.get("label"),
                 fontsize="x-small",
+                color=kwargs.get("color")
             )
         ax.add_patch(patch)
 
@@ -56,19 +57,19 @@ class WallView:
             "#9467bd",  # Purple
             "#8c564b",  # Brown
             "#e377c2",  # Pink
-            "#7f7f7f",  # Gray
+            "darkred",            # "#7f7f7f",  # Gray
             "#bcbd22",  # Olive
             "#17becf",  # Cyan
             "#17a2b8",  # Teal
-            "#b8e55d",  # Lime
+            "darkblue",  #b8e55d",  # Lime
             "#ff00ff",  # Magenta
-            "#ffdd44",  # Yellow
+            "navy",      # "#ffdd44",  # Yellow
             "#87ceeb",  # Sky Blue
             "#b57edc",  # Lavender
             "#40e0d0",  # Turquoise
             "#ffd700",  # Gold
             "#ff7f50",  # Coral
-            "#dc143c",  # Crimson
+            "darkgreen",  #dc143c",  # Crimson
         ]
         vIndex = 0
 

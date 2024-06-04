@@ -8,6 +8,7 @@ import argparse
 import copy
 import logging
 import os
+from idstools.utils.idshelper import getAvailableIdsAndTimes
 
 import imas
 from rich_argparse import RichHelpFormatter
@@ -52,7 +53,7 @@ parser.add_argument(
     "-md",
     "--md",
     nargs="*",
-    default=["wall", "pf_active"],
+    default=[],
     help="""Provide machine descriptions that you need to plot\n
 with ids names for example wall pf_active \n
 or with uris for example\n
@@ -99,13 +100,14 @@ if idsObjEquilibrium.time is not None:
     canvas = Canvas(1, 1)
     ax = canvas.add_axes(title="", xlabel="", row=0, col=0)
 
-    for mdidsInfo in args.mdesc:
+    for mdidsInfo in args.md:
         inputargs = copy.deepcopy(args)
         splittedmsIdsInfo = mdidsInfo.split("#")
-        _idsName = ""
+        _idsName = []
         _mdUri = None
         if len(splittedmsIdsInfo) == 2:
-            _mdUri, _idsName = splittedmsIdsInfo
+            _mdUri, idsName = splittedmsIdsInfo
+            _idsName.append(idsName)
             mdargs = argparse.Namespace()
             param = getDetailsfromURI(_mdUri)
             mdargs.backend = param["backend"]
@@ -117,12 +119,32 @@ if idsObjEquilibrium.time is not None:
             mdargs.uri = _mdUri
             inputargs = mdargs
         if len(splittedmsIdsInfo) == 1:
-            _idsName = splittedmsIdsInfo[0]
-        if _idsName == "wall":
+            if "imas:" in splittedmsIdsInfo[0]:
+                _mdUri = splittedmsIdsInfo[0]
+                mdargs = argparse.Namespace()
+                param = getDetailsfromURI(_mdUri)
+                mdargs.backend = param["backend"]
+                mdargs.database = param["database"]
+                mdargs.pulse = param["pulse"]
+                mdargs.run = param["run"]
+                mdargs.user = param["user"]
+                mdargs.version = param["version"]
+                mdargs.uri = _mdUri
+                inputargs = mdargs
+            else:
+                _idsName = splittedmsIdsInfo
+        if len(_idsName) == 0:
+            idsConnection = DBMaster.getConnection(inputargs)
+            availableIdsAndTimes = getAvailableIdsAndTimes(idsConnection)
+            for idsName, _ in availableIdsAndTimes:
+                _idsName.append(idsName)
+            idsConnection.close()
+        if "wall" in _idsName:
             connection = DBMaster.getConnection(inputargs)
             if connection is not None:
-                _idsData = connection.get(_idsName)
+                _idsData = connection.get("wall")
                 from imas import imasdef
+
                 if _idsData.ids_properties.homogeneous_time != imasdef.EMPTY_INT:
                     wallview = WallView(_idsData)
                     if foundData := wallview.view_wall(
@@ -135,11 +157,12 @@ if idsObjEquilibrium.time is not None:
                 connection.close()
             else:
                 logger.warning(f"{_idsName} ids is not present")
-        if _idsName == "pf_active":
+        if "pf_active" in _idsName:
             connection = DBMaster.getConnection(inputargs)
             if connection is not None:
-                _idsData = connection.get(_idsName)
+                _idsData = connection.get("pf_active")
                 from imas import imasdef
+
                 if _idsData.ids_properties.homogeneous_time != imasdef.EMPTY_INT:
                     ViewPfCoils = PFActiveView(_idsData)
                     ViewPfCoils.viewActivePfCoils(ax, args.show_labels)

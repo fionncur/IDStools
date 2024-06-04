@@ -95,6 +95,7 @@ def getMiddleElementFromArray(array: np.ndarray) -> Union[None, tuple]:
     return index, value
 
 
+
 # TODO rename variable and refactor code in smaller reusable methods
 def xyz2cyl(rvec):
     """

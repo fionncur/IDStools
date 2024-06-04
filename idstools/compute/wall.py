@@ -78,6 +78,10 @@ class WallCompute:
                 unitInfo["z"] = lUnit.outline.z
                 unitInfo["closed"] = lUnit.closed
                 unitInfo["resistivity"] = lUnit.resistivity
+
+                if lUnit.closed:
+                    unitInfo["r"] = np.append(unitInfo["r"], unitInfo["r"][0])
+                    unitInfo["z"] = np.append(unitInfo["z"], unitInfo["z"][0])
                 unitInfos[lUnitIndex] = unitInfo
 
             description2dInfo["limiterunits"] = unitInfos
@@ -116,6 +120,7 @@ class WallCompute:
                 w = np.dot(R2, item) + np.array([r[i], z[i]])
                 rw.append(w[0])
                 zw.append(w[1])
+
             if closed:
                 rw.append(rw[0])
                 zw.append(zw[0])
