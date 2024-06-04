@@ -6,23 +6,22 @@
 import argparse
 import copy
 import logging
-import sys
 import os
-from rich_argparse import RichHelpFormatter
-from idstools.database import DBMaster
 
+from rich_argparse import RichHelpFormatter
 
 from idstools.compute.common import getNearestTime
 from idstools.compute.waves import WavesCompute
-from idstools.machinedescription import MachineDescription
+from idstools.database import DBMaster
 from idstools.utils.clihelper import (
     dbentryParser,
     getDatabasePath,
     getDetailsfromURI,
     getFileName,
     getTitle,
-    mdParser
+    mdParser,
 )
+from idstools.utils.idshelper import getAvailableIdsAndTimes
 from idstools.utils.idslogger import setupLogger
 from idstools.view.common import Canvas
 from idstools.view.domain.ecstray import EcStrayView
@@ -31,9 +30,10 @@ from idstools.view.pf_active import PFActiveView
 from idstools.view.wall import WallView
 from idstools.view.waves import WavesView
 
-
 parser = argparse.ArgumentParser(
-    description="---- Display EC wave ray-tracing results [Previously known as ecray]", parents=[dbentryParser, mdParser],formatter_class=RichHelpFormatter
+    description="---- Display EC wave ray-tracing results [Previously known as ecray]",
+    parents=[dbentryParser, mdParser],
+    formatter_class=RichHelpFormatter,
 )
 
 parser.add_argument(
@@ -48,7 +48,7 @@ parser.add_argument(
 parser.add_argument(
     "--directory",
     help="Directory to save the figure",
-    default=None, 
+    default=None,
 )
 args = parser.parse_args()
 
@@ -115,10 +115,11 @@ ecstraView.plotPoloidalView(ax_polview)
 for mdidsInfo in args.md:
     inputargs = copy.deepcopy(args)
     splittedmsIdsInfo = mdidsInfo.split("#")
-    _idsName = ""
+    _idsName = []
     _mdUri = None
     if len(splittedmsIdsInfo) == 2:
-        _mdUri, _idsName = splittedmsIdsInfo
+        _mdUri, idsName = splittedmsIdsInfo
+        _idsName.append(idsName)
         mdargs = argparse.Namespace()
         param = getDetailsfromURI(_mdUri)
         mdargs.backend = param["backend"]
@@ -130,35 +131,61 @@ for mdidsInfo in args.md:
         mdargs.uri = _mdUri
         inputargs = mdargs
     if len(splittedmsIdsInfo) == 1:
-        _idsName = splittedmsIdsInfo[0]
-    if _idsName == "wall":
+        if "imas:" in splittedmsIdsInfo[0]:
+            _mdUri = splittedmsIdsInfo[0]
+            mdargs = argparse.Namespace()
+            param = getDetailsfromURI(_mdUri)
+            mdargs.backend = param["backend"]
+            mdargs.database = param["database"]
+            mdargs.pulse = param["pulse"]
+            mdargs.run = param["run"]
+            mdargs.user = param["user"]
+            mdargs.version = param["version"]
+            mdargs.uri = _mdUri
+            inputargs = mdargs
+        else:
+            _idsName = splittedmsIdsInfo
+    if len(_idsName) == 0:
+        idsConnection = DBMaster.getConnection(inputargs)
+        availableIdsAndTimes = getAvailableIdsAndTimes(idsConnection)
+        for idsName, _ in availableIdsAndTimes:
+            _idsName.append(idsName)
+        idsConnection.close()
+    if "wall" in _idsName:
         connection = DBMaster.getConnection(inputargs)
         if connection is not None:
-            _idsData = connection.get(_idsName)
+            _idsData = connection.get("wall")
             from imas import imasdef
+
             if _idsData.ids_properties.homogeneous_time != imasdef.EMPTY_INT:
                 wallview = WallView(_idsData)
-                wallview.view_wall(ax_polview, showLabels=False, wallcolor="slategray", showLegend=False)
+                wallview.view_wall(
+                    ax_polview,
+                    showLabels=False,
+                    wallcolor="slategray",
+                    showLegend=False,
+                )
             else:
                 logger.warning(f"{_idsName} ids is empty in the dbentry")
             connection.close()
         else:
             logger.warning(f"{_idsName} ids is not present")
-    if _idsName == "pf_active":
+    if "pf_active" in _idsName:
         connection = DBMaster.getConnection(inputargs)
         if connection is not None:
-            _idsData = connection.get(_idsName)
+            _idsData = connection.get("pf_active")
             from imas import imasdef
+
             if _idsData.ids_properties.homogeneous_time != imasdef.EMPTY_INT:
                 ViewPfCoils = PFActiveView(_idsData)
                 ViewPfCoils.viewActivePfCoils(ax_polview, showLabels=False)
             else:
                 logger.warning(f"{_idsName} ids is empty in the dbentry")
             connection.close()
-            
+
         else:
             logger.warning("f{_idsName} ids is not present")
-            
+
 
 waveView.plotPolViewTraces(
     ax_polview,
@@ -187,11 +214,11 @@ canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
 canvas.fig.suptitle(getTitle(args, "EC rays", timeValue), size=12)
 
 if args.save:
-    fname = getFileName(args, os.path.basename(__file__)+"_EC_rays", timeValue)
+    fname = getFileName(args, os.path.basename(__file__) + "_EC_rays", timeValue)
     if args.directory:
         if not os.path.exists(args.directory):
             os.makedirs(args.directory)
-        fname=os.path.join(args.directory,fname)
+        fname = os.path.join(args.directory, fname)
     canvas.save(fname)
 else:
     canvas.show()

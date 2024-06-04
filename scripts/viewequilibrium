@@ -8,7 +8,6 @@ import argparse
 import copy
 import logging
 import os
-from idstools.utils.idshelper import getAvailableIdsAndTimes
 
 import imas
 from rich_argparse import RichHelpFormatter
@@ -22,6 +21,7 @@ from idstools.utils.clihelper import (
     getFileName,
     getTitle,
 )
+from idstools.utils.idshelper import getAvailableIdsAndTimes
 from idstools.utils.idslogger import setupLogger
 from idstools.view.common import Canvas
 from idstools.view.equilibrium import EquilibriumView
@@ -177,9 +177,18 @@ if idsObjEquilibrium.time is not None:
     ViewEquilibrium.viewMagneticPoloidalFlux(ax, plotRho=args.rho)
     ax.set_title(title)
 
-    canvas.setText(
-        text=f"{getDatabasePath(args, timeValue=timeValue)}\n{databaseText}", y=0.900
+    xmin, xmax = ax.get_xlim()
+    ymin, ymax = ax.get_ylim()
+    ax.text(
+        xmax + 0.01 * abs(xmax),
+        ymin + 0.5 * abs(ymax - ymin),
+        f"{getDatabasePath(args, timeValue=timeValue)}\n{databaseText}",
+        horizontalalignment="left",
+        verticalalignment="center",
+        rotation="vertical",
+        fontsize=7,
     )
+
     canvas.fig.suptitle(getTitle(args, "Equilibrium", timeValue), size=12)
     canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
     if args.save:

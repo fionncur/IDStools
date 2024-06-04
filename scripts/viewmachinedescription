@@ -74,8 +74,17 @@ def plotMachineDescription(idsData, showLabels=False):
 
     ax.plot()
 
-    canvas.setText(text=databasePath, y=0.95)
-
+    xmin, xmax = ax.get_xlim()
+    ymin, ymax = ax.get_ylim()
+    ax.text(
+        xmax + 0.01 * abs(xmax),
+        ymin + 0.5 * abs(ymax - ymin),
+        f"{getDatabasePath(args)}\n{databasePath}",
+        horizontalalignment="left",
+        verticalalignment="center",
+        rotation="vertical",
+        fontsize=7,
+    )
     canvas.fig.subplots_adjust(
         top=0.916, bottom=0.09, left=0.044, right=0.953, hspace=0.287, wspace=0.2
     )
