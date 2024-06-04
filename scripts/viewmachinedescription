@@ -158,6 +158,8 @@ if __name__ == "__main__":
             if _idsNames == "":
                 _idsNames = IDSES
             for _idsName in _idsNames.split(","):
+                if _idsName not in IDSES:
+                    continue
                 idsFound = False
                 if connection is not None:
                     if _idsName in allIDSesList:
