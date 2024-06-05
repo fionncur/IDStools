@@ -84,7 +84,6 @@ if connection is None:
     logger.critical("----> Aborted.")
     exit(1)
 
-
 idsObjEquilibrium = imas.equilibrium()
 idsObjEquilibrium.time = connection.partial_get("equilibrium", "time", args.occurrence)
 if idsObjEquilibrium.time is not None:

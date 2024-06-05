@@ -41,7 +41,7 @@ SCRIPTS=(
     "idsperf --uri \"imas:mdsplus?user=public;pulse=122525;run=1;database=ITER;version=3\" summary"
     "idsperf --uri \"imas:mdsplus?user=public;pulse=122525;run=1;database=ITER;version=3\" summary --verbose --outputRun 5 --showStats --repeat 2"
     "idsperf --uri \"imas:mdsplus?user=public;pulse=122525;run=1;database=ITER;version=3\" summary --verbose --outputRun 5 --showStats --repeat 2 --uriOut \"imas:mdsplus?user=$USERNAME;pulse=131024;run=25;database=ITER;version=3?path=$DATABASE_DIR\" --memoryBackend"
-    "idsprint --uri \"imas:mdsplus?user=public;pulse=122525;run=1;database=ITER;version=3\" equilibrium"
+    "idsprint --uri \"imas:mdsplus?user=public;pulse=122525;run=1;database=ITER;version=3#equilibrium\""
     "idssize --uri \"imas:mdsplus?user=public;pulse=122525;run=1;database=ITER;version=3\" equilibrium"
     "idssize --uri \"imas:mdsplus?user=public;pulse=131024;run=10;database=ITER;version=3\"")
 

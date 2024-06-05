@@ -5,7 +5,6 @@ import os
 import sys
 
 from rich_argparse import RichHelpFormatter
-
 import numpy
 
 try:
@@ -21,25 +20,19 @@ logger = setupLogger("module")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="Prints content of an IDS onto the terminal [previously known as idsdump and idsdumppath]",
+        description="""Prints content of an IDS onto the terminal\n 
+        provide with fragment
+        e.g. -u imas:hdf5?path=/home/ITER/fleuryl/public/imasdb/west/3/54914/4#wall or #wall:0/description_2d | less
+        [previously known as idsdump and idsdumppath]""",
         formatter_class=RichHelpFormatter,
         parents=[dbentryParser],
     )
-
     parser.add_argument(
         "-e",
         "--show-empty",
         action="store_true",
         dest="show_empty",
         help="Show empty fields of ids",
-    )
-    parser.add_argument(
-        "ids",
-        type=str,
-        help="Name of the IDS to dump",
-    )
-    parser.add_argument(
-        "idspath", nargs="?", type=str, help="IDS data path", default=None
     )
     parser.add_argument(
         "-f",
@@ -54,26 +47,39 @@ if __name__ == "__main__":
         help="Print only names which has data",
     )
     args = parser.parse_args()
+    splittedIdsInfo = args.uri.split("#")
+
+    uri = splittedIdsInfo[0]
+    idsName = ""
+    idsPath = None
+    occurrence = 0
+    if len(splittedIdsInfo) == 2:
+        idsFragment = splittedIdsInfo[1]
+
+        splittedIdsFragment = idsFragment.split(":")
+        idsName = splittedIdsFragment[0]
+        if len(splittedIdsFragment) == 2:
+            idsPathFragment = splittedIdsFragment[1]
+
+            splittedIdsPathFragment = idsPathFragment.split("/", 1)
+            occurrence = int(splittedIdsPathFragment[0])
+            if len(splittedIdsPathFragment) == 2:
+                idsPath = splittedIdsPathFragment[1]
+    if idsName == "":
+        logger.error("Please provide ids name at the end of uri with hash")
+        exit(1)
+    args.uri = uri
     connection = DBMaster.getConnection(args)
     if connection is None:
+        logger.error("Please provide valid URI")
         exit(1)
     if args.full:
         numpy.set_printoptions(threshold=sys.maxsize)
     else:
         numpy.set_printoptions(threshold=10)
 
-    nameocc = args.ids.split("/")
-    if len(nameocc) == 1:
-        occurrence = 0
-    elif len(nameocc) == 2:
-        occurrence = int(nameocc[1])
-    else:
-        logger.error(f'ERROR: "{args.ids}" syntax error!')
-        exit(1)
-    idsname = nameocc[0]
-
-    if args.idspath is None:
-        ids = connection.get(idsname, occurrence)
+    if idsPath is None:
+        ids = connection.get(idsName, occurrence)
         if args.compact:
             try:
                 output = StringIO()
@@ -113,7 +119,7 @@ if __name__ == "__main__":
 
     else:
         try:
-            result = connection.partial_get(idsname, args.idspath, occurrence)
+            result = connection.partial_get(idsName, idsPath, occurrence)
         except Exception as exc:
             logger.error(exc)
             exit(1)
