@@ -37,7 +37,7 @@ viewmachinedescription plot pf_active/111001/103 wall/"imas:mdsplus?user=public;
       :alt: image not found
       :align: center
 
-   .. thumbnail:: _static/images/machine_description.png
+   .. thumbnail:: _static/images/viewmachinedescription2.png
       :alt: image not found
       :align: center
 

@@ -79,7 +79,7 @@ def plotMachineDescription(idsData, showLabels=False):
     ax.text(
         xmax + 0.01 * abs(xmax),
         ymin + 0.5 * abs(ymax - ymin),
-        f"{getDatabasePath(args)}\n{databasePath}",
+        f"{databasePath}",
         horizontalalignment="left",
         verticalalignment="center",
         rotation="vertical",

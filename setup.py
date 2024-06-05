@@ -29,7 +29,7 @@ for typename in types:
     files_grabbed.extend(glob(source_folder + "/**/" + typename, recursive=True))
 
 # create dictionary from glob files
-files:Dict[str,List] = {}
+files: Dict[str, List] = {}
 for file_path in files_grabbed:
     folder_name = os.path.dirname(file_path)
     folder_name = folder_name.replace(source_folder, target_folder)
@@ -41,9 +41,8 @@ for file_path in files_grabbed:
 data_files = []
 for file_path, list_of_files in files.items():
     data_files.append((file_path, list_of_files))
-    
-# Create man page and append in data_files
-# subprocess.run([os.path.join(current_directory, "manpages.sh"), ""], shell=True)
+
+# add man page if already created by script "manpages.sh"
 man_path = os.path.join(current_directory, "docs/_build/man/idstools.1")
 if os.path.exists(man_path):
     data_files.append(("share/man/man1/", [man_path]))
@@ -130,4 +129,3 @@ setup(
     tests_require=["pytest"],
     data_files=data_files,
 )
-
