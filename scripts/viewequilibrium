@@ -38,13 +38,6 @@ parser.add_argument(
     "-t", "--time", help="Time (default=middle)", type=float, default=-99.0
 )
 parser.add_argument(
-    "-o",
-    "--occurrence",
-    help="Occurrence number (default=%(default)s)",
-    type=int,
-    default=0,
-)
-parser.add_argument(
     "--rho",
     help="Show rho overlay on the plot",
     action="store_true",
@@ -77,6 +70,20 @@ parser.add_argument(
     default=None,
 )
 args = parser.parse_args()
+
+splittedIdsInfo = args.uri.split("#")
+uri = splittedIdsInfo[0]
+occurrence = 0
+if len(splittedIdsInfo) == 2:
+    idsFragment = splittedIdsInfo[1]
+
+    splittedIdsFragment = idsFragment.split(":")
+    if len(splittedIdsFragment) == 2:
+        idsPathFragment = splittedIdsFragment[1]
+
+        splittedIdsPathFragment = idsPathFragment.split("/", 1)
+        occurrence = int(splittedIdsPathFragment[0])
+
 logger = setupLogger("module", stdout_level=logging.INFO)
 
 connection = DBMaster.getConnection(args)
@@ -85,12 +92,12 @@ if connection is None:
     exit(1)
 
 idsObjEquilibrium = imas.equilibrium()
-idsObjEquilibrium.time = connection.partial_get("equilibrium", "time", args.occurrence)
+idsObjEquilibrium.time = connection.partial_get("equilibrium", "time", occurrence)
 if idsObjEquilibrium.time is not None:
     timeIndex, timeValue = getNearestTime(idsObjEquilibrium.time, args.time)
     idsObjEquilibrium.time_slice.resize(1)
     idsObjEquilibrium.time_slice[0] = connection.partial_get(
-        "equilibrium", f"time_slice({str(timeIndex)})", args.occurrence
+        "equilibrium", f"time_slice({str(timeIndex)})", occurrence
     )
     ViewEquilibrium = EquilibriumView(idsObjEquilibrium)
 

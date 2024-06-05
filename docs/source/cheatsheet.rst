@@ -266,7 +266,7 @@ This cheat sheet provides quick reference of commonly used commands in IDStools.
 |                               |                                                                                                                                     |
 |                               | .. code-block:: bash                                                                                                                |
 |                               |                                                                                                                                     |
-|                               |    $ idsprint --uri "imas:mdsplus?user=public;pulse=122525;run=1;database=ITER;version=3" equilibrium                               |
+|                               |    $ idsprint --uri "imas:mdsplus?user=public;pulse=122525;run=1;database=ITER;version=3#equilibrium"                                |
 +-------------------------------+-------------------------------------------------------------------------------------------------------------------------------------+
 | *idsresample*                 | Resample IDSs from a data-entry and save them into another                                                                          |
 |                               | data-entry based on PREVIOUS_INTERP method.                                                                                         |
