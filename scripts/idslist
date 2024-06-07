@@ -22,7 +22,7 @@ np.set_printoptions(threshold=1, precision=2, suppress=True)
 
 description = """
 By default this script lists available IDSes in the pulse. It prints all IDSes along with its time length. The fullarray option allows you to print the complete time array.
-with occurrence option you can view ids with their occurrences, its comment and occurrence type if present
+with comment option you can view ids with their occurrences, its comment and occurrence type if present
 yaml option is provided which is used by other scripts to provide list of idses with their time ranges in yaml format
 
 [``ids_content(yaml)``, ``listidss`` (with time slices), ``idsoccurrences(occ)`` merged into one script]
@@ -40,8 +40,8 @@ parser.add_argument(
     help="List ids content for yaml files aimed at describing a scenario",
 )
 parser.add_argument(
-    "-o",
-    "--occ",
+    "-c",
+    "--comment",
     action="store_true",
     help="List ids with their number of occurrences with comment and occurrence_type if available",
 )
@@ -106,10 +106,10 @@ if args.yaml is True:
     exit(0)
 
 
-elif args.occ is True:
+elif args.comment is True:
     if args.fullarray:
         print(
-            "(-f fullarray) option is provided, can not show full array for yaml output"
+            "(-f fullarray) option is provided, can not show full array for comment output"
         )
 
     for idsname, oc, comment in getAvailableIdsAndOccurrences(
