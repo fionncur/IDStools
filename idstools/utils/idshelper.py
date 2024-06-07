@@ -173,15 +173,34 @@ def getAvailableIdsAndOccurrences(
     Returns:
         a list of pairs (idstype:str,occurrence:int) with data in the given DBEntry.
     """
+    occ_type_dict = {
+        1: "reconstruction",
+        2: "prediction_fixed",
+        3: "prediction_free",
+        4: "mapping",
+    }
     availableidslist = []
     for idstype in getIdsTypes():
         for occ in range(getattr(imas, idstype)().getMaxOccurrences()):
+            homogeneous_time = ""
+            comment = ""
+            occ_type = ""
             homogeneous_time = dbEntryObject.partial_get(
                 idstype, "ids_properties/homogeneous_time", occurrence=occ
             )
             comment = dbEntryObject.partial_get(
                 idstype, "ids_properties/comment", occurrence=occ
             )
+            try:
+                occ_type_text = ""
+                occ_type = dbEntryObject.partial_get(
+                    idstype, "ids_properties/occurrence_type", occurrence=occ
+                )
+                if occ_type.index != imas.imasdef.EMPTY_INT:
+                    occ_type_text = occ_type_dict[occ_type.index]
+                    comment += f" [occurrence type = {occ_type_text}]"
+            except Exception as e:
+                pass
             if homogeneous_time != imas.imasdef.EMPTY_INT and (
                 timeMode is None or timeMode == homogeneous_time
             ):

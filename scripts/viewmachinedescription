@@ -179,11 +179,7 @@ if __name__ == "__main__":
                             )
                             idsData[f"{_mdUri}#{_idsName}"] = data
                 if not idsFound:
-                    logger.info(
-                        f"Data entry for {_idsName} is not given, retrieving from ITER machine description"
-                    )
-                    _mdData = machineDescription.getMDDataByIds(_idsName)
-                    idsData[f"{_mdData['connectionArgs'].uri}#{_idsName}"] = _mdData
+                    logger.info(f"Could not find {_idsName} in the given data entry")
             connection.close()
 
     plotMachineDescription(idsData, args.show_labels)

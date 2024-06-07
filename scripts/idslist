@@ -21,7 +21,9 @@ logger = setupLogger("module")
 np.set_printoptions(threshold=1, precision=2, suppress=True)
 
 description = """
-List available IDSes in the pulse. By default it prints all IDSes along with its time length. The fullarray option allows you to print the complete time array.
+By default this script lists available IDSes in the pulse. It prints all IDSes along with its time length. The fullarray option allows you to print the complete time array.
+with occurrence option you can view ids with their occurrences, its comment and occurrence type if present
+yaml option is provided which is used by other scripts to provide list of idses with their time ranges in yaml format
 
 [``ids_content(yaml)``, ``listidss`` (with time slices), ``idsoccurrences(occ)`` merged into one script]
 """
@@ -41,7 +43,7 @@ parser.add_argument(
     "-o",
     "--occ",
     action="store_true",
-    help="List ids with their number of occurrences",
+    help="List ids with their number of occurrences with comment and occurrence_type if available",
 )
 parser.add_argument("-i", "--ids", required=False, type=str, help="IDS name to filter")
 parser.add_argument(
@@ -49,14 +51,6 @@ parser.add_argument(
     "--fullarray",
     action="store_true",
     help="Show full time array values [Use with default]",
-)
-
-parser.add_argument(
-    "-c",
-    "--comment",
-    required=False,
-    action="store_true",
-    help="Output ids_properties.comment field for each found occurrence [Use with -o --occ]",
 )
 
 args = parser.parse_args()
@@ -71,8 +65,6 @@ if args.yaml is True:
         print(
             "(-f fullarray) option is provided, can not show full array for yaml output"
         )
-    if args.comment:
-        print("(-c comment) option is provided, use with -o (occurrences output)")
     for idsname, oc in getAvailableIdsAndOccurrences(connection):
         if args.ids:
             if idsname != args.ids:
@@ -129,15 +121,10 @@ elif args.occ is True:
                 continue
         # Format idsname
         idsnameoc = f"{idsname}/{str(oc)}"
-        if args.comment:
-            print(f"  {idsnameoc}: {comment}")
-        else:
-            print(f"  {idsnameoc}")
+        print(f"  {idsnameoc}: {comment}")
     connection.close()
     exit(0)
 else:
-    if args.comment:
-        print("(-c comment) option is provided, use with -o (occurrences output)")
     question_string = "?"
 
     availableIdsAndTimes = getAvailableIdsAndTimes(connection)
