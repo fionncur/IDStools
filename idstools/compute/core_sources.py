@@ -80,11 +80,14 @@ class CoreSourcesCompute:
                     )
                 ionsDict = {}
                 for ionIndex, ion in enumerate(source.profiles_1d[0].ion):
-                    ionDict = {
-                        "a": ion.element[0].a,
-                        "z_n": ion.element[0].z_n,
-                        "z_ion": ion.z_ion,
-                    }
+                    if len(ion.element) > 0:
+                        ionDict = {
+                            "a": ion.element[0].a,
+                            "z_n": ion.element[0].z_n,
+                            "z_ion": ion.z_ion,
+                        }
+                    else:
+                        ionDict = {"a": '--', "z_n": '--', "z_ion": '--'}
                     if len(ion.particles) != 0:
                         ionDict["particles_flux"] = np.trapz(
                             ion.particles, source.profiles_1d[0].grid.volume
