@@ -461,7 +461,10 @@ class DBMaster:
     def getCoreVersion(cls):
         _lowlevelVersion = ""
         if "_al_lowlevel" in imas.__dict__:
-            _lowlevelVersion = imas.get_al_version()
+            try:
+                _lowlevelVersion = imas.get_al_version()
+            except:
+                 _lowlevelVersion = imas.al_defs.AL_VERSION.decode('utf-8')
         elif "_ual_lowlevel" in imas.__dict__:
             rawCoreVersion = (
                 imas._ual_lowlevel.__name__
@@ -478,7 +481,10 @@ class DBMaster:
     def getDDVersion(cls):
         _lowlevelVersion = ""
         if "_al_lowlevel" in imas.__dict__:
-            _lowlevelVersion = imas.al_dd_version
+            try:
+                _lowlevelVersion = imas.al_dd_version
+            except:
+                _lowlevelVersion = imas.al_defs.DD_VERSION.decode('utf-8')
         elif "_ual_lowlevel" in imas.__dict__:
             rawDDVersion = (
                 imas._ual_lowlevel.__name__
