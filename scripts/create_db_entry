@@ -5,8 +5,7 @@ from __future__ import print_function
 
 import argparse, imas
 
-from rich_argparse import RichHelpFormatter
-from idstools.database import DBMaster
+from rich_argparse import RawDescriptionRichHelpFormatter
 import idstools.init_mendeleiev as mend
 import numpy as np
 import sys
@@ -18,9 +17,9 @@ from idstools.utils.clihelper import getBackendID, imasParser
 
 # Management of input arguments
 parser = argparse.ArgumentParser(
-    description="---- Auto-generated yaml scenario and watcher files (!!! STILL TO BE COMPLETED BY HAND !!!)",
+    description="""Auto-generated yaml scenario and watcher files (!!! STILL TO BE COMPLETED BY HAND !!!)\n\nImportant: The legacy create_db_entry tool is deprecated and will be removed in a future versions. It will remain available until simdb is fully adopted. more about simdb : https://simdb.iter.org/dashboard/""",
     parents=[imasParser],
-    formatter_class=RichHelpFormatter,
+    formatter_class=RawDescriptionRichHelpFormatter,
 )
 parser.add_argument("-s", "--shot", dest="shot", help="Shot number", type=int)
 parser.add_argument("-r", "--run", help="Run number", type=int)

@@ -17,7 +17,7 @@ class SmartFormatter(argparse.HelpFormatter):
 
 # INPUT ARGUMENTS
 parser = argparse.ArgumentParser(
-    description="---- Script to list available MD data in a specific folder ----",
+    description="""---- Script to list available MD data in a specific folder ----\n\nImportant: The legacy md_summary tool is deprecated and will be removed in a future versions. It will remain available until simdb is fully adopted.more about simdb : https://simdb.iter.org/dashboard/""",
     formatter_class=SmartFormatter,
 )
 parser.add_argument(

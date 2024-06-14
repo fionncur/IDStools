@@ -3,17 +3,15 @@
 import argparse
 import os
 from idstools.database import DBMaster
-from idstools.utils.clihelper import getCoreVersion
 from rich.console import Console
-from rich.syntax import Syntax
 from rich.table import Table
-from rich_argparse import RichHelpFormatter
+from rich_argparse import RawDescriptionRichHelpFormatter
 from idstools.scenariodescription import ScenarioDescription
 from idstools.utils.idslogger import setupLogger
 console = Console()
 # Management of input arguments
 parser = argparse.ArgumentParser(
-    description="---- Show status and potential parent and children for a given simulation stored in ITER database folder",formatter_class=RichHelpFormatter,
+    description="""---- Show status and potential parent and children for a given simulation stored in ITER database folder\n\nImportant: The legacy scenario_status tool is deprecated and will be removed in a future versions. It will remain available until simdb is fully adopted.more about simdb : https://simdb.iter.org/dashboard/""",formatter_class=RawDescriptionRichHelpFormatter,
 )
 parser.add_argument(
     "-f", "--folder", help="folder where to search for scenarios", required=False
