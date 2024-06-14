@@ -124,9 +124,8 @@ class WallCompute:
                 rw.append(w[0])
                 zw.append(w[1])
 
-            # if closed:
-            # rw.append(rw[0])
-            # zw.append(zw[0])
+            rw.append(rw[0])
+            zw.append(zw[0])
 
             rectangleCoordinates.append((rw, zw))
         return rectangleCoordinates
