@@ -67,7 +67,7 @@ class PFActiveView:
                         elementInfo["cec"],
                     )
                     rectangle = Rectangle(
-                        cec, cew, ceh, edgecolor="#fd7e14", facecolor="#fd7e14"
+                        cec, cew, ceh, edgecolor="#fd7e14", facecolor="#fd7e14", alpha=0.5
                     )
 
                     ax.add_patch(rectangle)
