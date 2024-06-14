@@ -27,6 +27,13 @@ from idstools.view.equilibrium import EquilibriumView
 from idstools.view.pf_active import PFActiveView
 from idstools.view.wall import WallView
 
+class MdAction(argparse.Action):
+    def __call__(self, parser, namespace, values, option_string=None):
+        if len(values) == 0:
+            setattr(namespace, self.dest, True)
+        else:
+            setattr(namespace, self.dest, values)
+            
 parser = argparse.ArgumentParser(
     description="---- Display the plasma equilibrium from the equilibrium IDS. It also shows pf coils and wall position overlay if exists [Previously known as equiplot]",
     parents=[dbentryParser],
@@ -45,6 +52,7 @@ parser.add_argument(
     "-md",
     "--md",
     nargs="*",
+    action=MdAction,
     default=[],
     help="""Provide machine descriptions that you need to plot\n
 with ids names for example wall pf_active \n
@@ -90,6 +98,15 @@ if connection is None:
     logger.critical("----> Aborted.")
     exit(1)
 
+# if md not provided then get it from list of idses
+if isinstance(args.md, bool) and args.md is True:
+    args.md=[]
+    _idsConnection = DBMaster.getConnection(args)
+    availableIdsAndTimes = getAvailableIdsAndTimes(_idsConnection)
+    for idsName, _ in availableIdsAndTimes:
+        args.md.append(idsName)
+    _idsConnection.close()
+    
 idsObjEquilibrium = imas.equilibrium()
 idsObjEquilibrium.time = connection.partial_get("equilibrium", "time", occurrence)
 if idsObjEquilibrium.time is not None:
