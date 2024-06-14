@@ -12,7 +12,7 @@ from idstools.scenariodescription import ScenarioDescriptionBase
 displayMapping = {
     "ref_name": "Reference",
     "ro_name": "RO(s)",
-    "shot": "Shot",
+    "pulse": "Pulse",
     "run": "Run",
     "type": "Type",
     "workflow": "Workflow",
@@ -95,11 +95,11 @@ parser.add_argument(
 parser.add_argument(
     "-c",
     "--choice",
-    help="R|list of variables to display, e.g.: shot,run,ip,b0\n"
+    help="R|list of variables to display, e.g.: pulse,run,ip,b0\n"
     "... available among following variables:\n"
     "        ref_name    = dataset reference name\n"
     "        ro_name     = responsible officer name\n"
-    "        shot        = shot number\n"
+    "        pulse       = pulse number\n"
     "        run         = run number\n"
     "        type        = data type (experimental,predictive,interpretative)\n"
     "        workflow    = suite of codes used to compute these data\n"
@@ -160,7 +160,7 @@ if args["sort"] != None:
     sort = args["sort"].split(",")
     sort = [x for x in sort if x in displayMapping.keys()]
 else:
-    sort = ["shot", "run"]
+    sort = ["pulse", "run"]
 
 if args["obsolete"] != None:
     obsolete = args["obsolete"]
@@ -181,7 +181,7 @@ if args["choice"] != None:
         print("Wrong way to write your list of variables to display", file=sys.stderr)
         print("You wrote " + str(args["choice"]), file=sys.stderr)
         print(
-            "Try e.g. this way: " + """ scenario_summary -c shot,run,workflow """,
+            "Try e.g. this way: " + """ scenario_summary -c pulse,run,workflow """,
             file=sys.stderr,
         )
         print(
@@ -191,7 +191,7 @@ if args["choice"] != None:
         sys.exit(1)
 else:
     choice = [
-        "shot",
+        "pulse",
         "run",
         "database",
         "ref_name",
@@ -207,7 +207,7 @@ else:
 if args["choice"] == None:
     print("""----> Default call equivalent to: """)
     print(
-        """      scenario_summary -c shot,run,database,ref_name,ip,b0,fuelling,confinement,workflow,date"""
+        """      scenario_summary -c pulse,run,database,ref_name,ip,b0,fuelling,confinement,workflow,date"""
     )
 
 scenarioDescriptionObj = ScenarioDescriptionBase(folderPath=defaultFolderPath)

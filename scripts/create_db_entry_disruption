@@ -310,7 +310,7 @@ system(
 print("----> " + filename + " created.", file=sys.stdout)
 
 # Associated WATCHER file
-filename = "ids_" + str(args.pulse) + add0 + str(args.run) + ".watcher"
+filename = "ids_" + str(args.shot) + add0 + str(args.run) + ".watcher"
 f = open(filename, "w")
 if 1 == 1:  # Done for alignment
     f.write(

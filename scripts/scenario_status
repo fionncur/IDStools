@@ -65,9 +65,9 @@ table.add_column("SCENARIO", style="magenta")
 table.add_column("STATUS", style="green")
 table.add_column("REASON WHY IT REPLACES PREVIOUS", style="green")
 
-for iparent in range(len(family["parents"]["shot"])):
+for iparent in range(len(family["parents"]["pulse"])):
     table.add_row(
-        f" {family['parents']['shot'][iparent]:>7}{family['parents']['run'][iparent]:>5}", f"{family['parents']['status'][iparent]:<10}", f"{family['parents']['comment'][iparent]}"
+        f" {family['parents']['pulse'][iparent]:>7}{family['parents']['run'][iparent]:>5}", f"{family['parents']['status'][iparent]:<10}", f"{family['parents']['comment'][iparent]}"
     )
 if "database_relations" in sdObject.yamlData.keys():
     if "replaced_by" in sdObject.yamlData["database_relations"].keys():
@@ -76,9 +76,9 @@ if "database_relations" in sdObject.yamlData.keys():
         )
 else:
     logger.warn("database relations not found")
-for ichild in range(len(family["children"]["shot"])):
+for ichild in range(len(family["children"]["pulse"])):
     table.add_row(
-        f" {family['children']['shot'][ichild]:>7}{family['children']['run'][ichild]:>5}",f"{family['children']['status'][ichild]:<10}",f"{family['children']['comment'][ichild]}"
+        f" {family['children']['pulse'][ichild]:>7}{family['children']['run'][ichild]:>5}",f"{family['children']['status'][ichild]:<10}",f"{family['children']['comment'][ichild]}"
     )
     
 console.print(table)
