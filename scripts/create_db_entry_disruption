@@ -27,7 +27,7 @@ parser = argparse.ArgumentParser(
     parents=[imasParser],
     formatter_class=RichHelpFormatter,
 )
-parser.add_argument("-p", "--pulse", dest="pulse", help="Pulse number", type=int)
+parser.add_argument("-s", "--shot", dest="shot", help="Shot number", type=int)
 parser.add_argument("-r", "--run", help="Run number", type=int)
 parser.add_argument(
     "-st", "--status", help="active/obsolete", required=False, type=str, default="draft"
@@ -46,7 +46,7 @@ args = parser.parse_args()
 # Open the database and read the necessary IDSs
 input = imas.DBEntry(getBackendID(args.backend),
                 args.database,
-                args.pulse,
+                args.shot,
                 args.run,
                 args.user,
                 args.version,
@@ -198,7 +198,7 @@ add0_length = 4 - len(str(args.run))
 for i in range(add0_length):
     add0 = add0 + "0"
 
-filename = "ids_" + str(args.pulse) + add0 + str(args.run) + ".yaml"
+filename = "ids_" + str(args.shot) + add0 + str(args.run) + ".yaml"
 
 # Go for it: fill the yaml file
 f = open(filename, "w")
@@ -229,7 +229,7 @@ f.write("""# Code: code name in case of simulation, 0 in case of experiment\n"""
 f.write("""# Machine: database name\n""")
 f.write("""# ------------------------------------------------------------------\n""")
 f.write("""characteristics:\n""")
-f.write("""    shot: %i\n""" % args.pulse)
+f.write("""    shot: %i\n""" % args.shot)
 f.write("""    run: %i\n""" % args.run)
 f.write("""    type: %s\n""" % type)
 f.write("""    workflow: %s\n""" % workflow)
@@ -291,7 +291,7 @@ f.write(
     """# listidss, see IMAS-1010 (note: the data-entry has to be copied to a personal\n"""
 )
 f.write("""# database for the script to work, see the example below):\n""")
-f.write("""#  idslist --uri "imas:mdsplus?user=public;pulse=122525;run=1;database=ITER;version=3" yaml\n""")
+f.write("""#  idslist --uri "imas:mdsplus?user=public;shot=122525;run=1;database=ITER;version=3" yaml\n""")
 f.write(
     """# ------------------------------------------------------------------------------\n"""
 )
@@ -299,7 +299,7 @@ f.write("""idslist:\n""")
 f.close()
 
 # Complete the yaml file with the output of idslist
-inputuri = f"imas:{args.backend.lower()}?user={args.user};shot={args.pulse};run={args.run};database={args.database};version={args.version}"
+inputuri = f"imas:{args.backend.lower()}?user={args.user};shot={args.shot};run={args.run};database={args.database};version={args.version}"
 system(
     "idslist --uri "
     + inputuri
