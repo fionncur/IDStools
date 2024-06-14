@@ -5,7 +5,6 @@ import os
 from datetime import datetime
 from glob import glob
 from pathlib import Path
-from idstools.utils.clihelper import getBackendID, getDetailsfromURI
 import re
 import imas
 import yaml
@@ -516,31 +515,12 @@ class DBMaster:
 
     @classmethod
     def getDBEntryObject(cls, imasargs):
-        imasVersion = DBMaster.getCoreVersion()
-        imasVersion = int(imasVersion.split(".")[0])
         connection = None
         if imasargs.uri != "" and imasargs.uri is not None:
-            if imasVersion > 4:
-                if "mode" in imasargs.__dict__:
-                    connection = imas.DBEntry(imasargs.uri, imasargs.mode)
-                else:
-                    connection = imas.DBEntry(imasargs.uri, "r")
+            if "mode" in imasargs.__dict__:
+                connection = imas.DBEntry(imasargs.uri, imasargs.mode)
             else:
-                param = getDetailsfromURI(imasargs.uri)
-
-                if param["legacyPresent"]:
-                    connection = imas.DBEntry(
-                        getBackendID(param["backend"]),
-                        param["database"],
-                        param["pulse"],
-                        param["run"],
-                        param["user"],
-                        param["version"],
-                    )
-                else:
-                    if param["pathPresent"]:
-                        logger.error("Path in URI is not supported in Access Layer 4")
-                    return None
+                connection = imas.DBEntry(imasargs.uri, "r")
         return connection
 
     @staticmethod

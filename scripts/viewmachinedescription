@@ -10,7 +10,6 @@ from idstools.idslist import available_in_dbentry
 from idstools.machinedescription import MachineDescription
 from idstools.utils.clihelper import (
     getDatabasePath,
-    getDetailsfromURI,
 )
 from idstools.utils.idslogger import setupLogger
 from idstools.view.common import Canvas
@@ -144,13 +143,6 @@ if __name__ == "__main__":
             _mdUri, _idsNames = splittedmsIdsInfo
         if len(splittedmsIdsInfo) == 1:
             _mdUri = splittedmsIdsInfo[0]
-        param = getDetailsfromURI(_mdUri)
-        mdargs.backend = param["backend"]
-        mdargs.database = param["database"]
-        mdargs.pulse = param["pulse"]
-        mdargs.run = param["run"]
-        mdargs.user = param["user"]
-        mdargs.version = param["version"]
         mdargs.uri = _mdUri
         connection = DBMaster.getConnection(mdargs)
         if connection:
