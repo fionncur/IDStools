@@ -40,10 +40,10 @@ class PFActiveView:
                 from idstools.view.pf_active import PFActiveView
                 from idstools.view.common import Canvas
 
-                input = imas.DBEntry(imas.imasdef.MDSPLUS_BACKEND,'ITER',135005,4,'public')
-                input.open()
-                idsObj = input.get('pf_active')
-
+                connection = imas.DBEntry("imas:mdsplus?user=public;pulse=135005;run=4;database=ITER;version=3", "r")
+                connection.open()
+                idsObj = connection.get('pf_active')
+                connection.close()
                 canvas = Canvas(1, 1) # create canvas
                 ax = canvas.add_axes(title="", xlabel="", row=0, col=0)
 

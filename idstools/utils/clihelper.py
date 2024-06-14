@@ -33,21 +33,6 @@ uriParser.add_argument(
     help="uri",
 )
 
-mdParser = argparse.ArgumentParser(add_help=False)
-mdParser.add_argument(
-    "-md",
-    "--md",
-    nargs="*",
-    default=["wall", "pf_active"],
-    help="""Provide machine descriptions that you need to plot\n
-with ids names for example\n
-wall pf_active
-with uris for example\n
-"imas:mdsplus?user=public;shot=116000;run=4;database=ITER_MD;version=3#wall"\n
-"imas:mdsplus?user=public;shot=116000;run=4;database=ITER_MD;version=3"\n
-""",
-)
-
 imasParser = argparse.ArgumentParser(add_help=False)
 imasParser.add_argument(
     "-u",

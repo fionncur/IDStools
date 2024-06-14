@@ -53,7 +53,7 @@ class WavesCompute:
                 import imas
                 from idstools.compute.waves import WavesCompute
 
-                connection = imas.DBEntry(imas.imasdef.MDSPLUS_BACKEND,'ITER',134174,117,'public')
+                connection = imas.DBEntry("imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3", "r")
                 connection.open()
                 idsObj = connection.get('waves')
                 waveobj = WavesCompute(waves_ids)
@@ -93,7 +93,7 @@ class WavesCompute:
                 import imas
                 from idstools.compute.waves import WavesCompute
 
-                connection = imas.DBEntry(imas.imasdef.MDSPLUS_BACKEND,'ITER',134174,117,'public')
+                connection = imas.DBEntry("imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3", "r")
                 connection.open()
                 idsObj = connection.get('waves')
                 waveobj = WavesCompute(waves_ids)
@@ -125,7 +125,7 @@ class WavesCompute:
                 import imas
                 from idstools.compute.waves import WavesCompute
 
-                connection = imas.DBEntry(imas.imasdef.MDSPLUS_BACKEND,'ITER',134174,117,'public')
+                connection = imas.DBEntry("imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3", "r")
                 connection.open()
                 idsObj = connection.get('waves')
                 waveobj = WavesCompute(waves_ids)
@@ -159,7 +159,7 @@ class WavesCompute:
                 import imas
                 from idstools.compute.waves import WavesCompute
 
-                connection = imas.DBEntry(imas.imasdef.MDSPLUS_BACKEND,'ITER',134174,117,'public')
+                connection = imas.DBEntry("imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3", "r")
                 connection.open()
                 idsObj = connection.get('waves')
                 waveobj = WavesCompute(waves_ids)
@@ -218,7 +218,7 @@ class WavesCompute:
                 import imas
                 from idstools.compute.waves import WavesCompute
 
-                connection = imas.DBEntry(imas.imasdef.MDSPLUS_BACKEND,'ITER',134174,117,'public')
+                connection = imas.DBEntry("imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3", "r")
                 connection.open()
                 idsObj = connection.get('waves')
                 waveobj = WavesCompute(waves_ids)

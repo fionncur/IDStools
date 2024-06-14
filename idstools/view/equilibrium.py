@@ -44,9 +44,9 @@ class EquilibriumView(BasePlot):
                 from idstools.view.equilibrium import EquilibriumView
                 from idstools.view.common import Canvas
 
-                input = imas.DBEntry(imas.imasdef.MDSPLUS_BACKEND,'ITER',134173,106,'public')
-                input.open()
-                idsObj = input.get('equilibrium')
+                connection = imas.DBEntry("imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3", "r")
+                connection.open()
+                idsObj = connection.get('equilibrium')
 
                 canvas = Canvas(1, 1) # create canvas
                 ax = canvas.add_axes(title="", xlabel="", row=0, col=0)
@@ -54,6 +54,7 @@ class EquilibriumView(BasePlot):
                 viewObj = EquilibriumView(idsObj)
                 viewObj.viewMagneticPoloidalFlux(ax) # plot contour on the canvas axes
 
+                ax.set_title("uri=imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3")
                 ax.plot()
                 canvas.show()
 
