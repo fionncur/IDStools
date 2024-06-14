@@ -50,13 +50,13 @@ class CoreTransportView:
                 ):
                     print(f"{'--' : >25}", end="")
                 else:
-                    print(f"{ionDict['particles_flux'] : >25.6e}", end="")
+                    print(f"{ionDict['particles_flux'][-1] : >25.6e}", end="")
                 if ionDict["energy_flux"] is None or all(
                     np.isnan(ionDict["energy_flux"])
                 ):
                     print(f"{'--' : >25}")
                 else:
-                    print(f"{ionDict['energy_flux'] : >25.6e}")
+                    print(f"{ionDict['energy_flux'][-1] : >25.6e}")
 
     def viewIonsParticleFluxes(
         self,
