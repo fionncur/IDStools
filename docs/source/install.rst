@@ -15,24 +15,24 @@ Install using pip
 
 .. code-block:: bash
 
-   $ module load IMAS
    $ git clone ssh://git@git.iter.org/imas/idstools.git
-   $ cd idstools
    $ pip install --upgrade pip
    $ pip install --upgrade wheel setuptools
    $ pip install .
 
-Also it is possible to install it in Python virtual environemnt
+Also it is possible to install it in the Python virtual environment
 
 .. code-block:: bash
 
-   $ module load IMAS
    $ git clone ssh://git@git.iter.org/imas/idstools.git
    $ cd idstools
    $ python -m venv idsenv
    $ source idsenv/bin/activate
+   $ pip install --upgrade pip
    $ pip install .
    $ deactivate
+
+   $ idslist -h
 
 .. note::
 
@@ -41,20 +41,18 @@ Also it is possible to install it in Python virtual environemnt
 
 .. code-block:: bash
 
-   $ module load IDStools/1.14.0-intel-2020b
-   $ module load IMAS
+   $ module load IDStools/*
 
 .. note::
 
    There are development versions of IDStools on SDCC. These can be used if 
-   you need functionlities/bug fixes before next release
+   you need functionalities/bug fixes before next release 
 
 .. code-block:: bash
 
    $ module av -i -t idstools/dev
    /work/imas/etc/modules/all:
-   IDStools/dev-gfbf-2022b  
-   IDStools/dev-intel-2020b
+   IDStools/dev-* 
 
 
 ****************
@@ -62,8 +60,8 @@ Also it is possible to install it in Python virtual environemnt
 ****************
 
 .. note ::
-   Get access to https://git.iter.org/projects/IMAS/repos/idstools 
-   repository if you don't have already
+   IDStools is currently hosted in ITER repository server 
+   Get access to https://git.iter.org/projects/IMAS/repos/idstools  repository if you don't it have already
 
 Clone *IDStools* repository.
 
@@ -71,22 +69,28 @@ Clone *IDStools* repository.
 
    $ git clone ssh://git@git.iter.org/imas/idstools.git
 
-If you wish to include additional tools or expanded functionalities,
+If you wish to include additional tools or expand functionalities,
 submit pull requests.
 
 The *IDStools* test suite should be run as follows.:
+To run pytest
 
 .. code-block:: bash
 
    $ cd idstools
    $ pytest
 
-To run example scripts and verify functionalities
+To run tests scripts and verify functionalities
 
 .. code-block:: bash
 
    $ cd idstools
-   $ source tests/testscripts.sh
+   $ tests/st01_test_ids_scripts_with_uri.sh
+   $ tests/st02_test_db_scripts.sh
+   $ tests/st01_test_ids_scripts_with_uri.sh
+   $ tests/st03_test_analysis_scripts_with_uripath.sh
+   $ tests/st03_test_analysis_scripts_with_uri.sh
+   $ tests/st04_test_scenario_scripts.sh
 
 To build the *IDStools* documentation, execute:
 
