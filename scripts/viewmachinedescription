@@ -10,7 +10,6 @@ from idstools.idslist import available_in_dbentry
 from idstools.machinedescription import MachineDescription
 from idstools.utils.clihelper import (
     getDatabasePath,
-    getDetailsfromURI,
 )
 from idstools.utils.idslogger import setupLogger
 from idstools.view.common import Canvas
@@ -113,8 +112,8 @@ if __name__ == "__main__":
         default=[],
         help="""Provide machine descriptions that you need to plot\n
     with uris for example\n
-    "imas:mdsplus?user=public;shot=116000;run=4;database=ITER_MD;version=3#wall"\n
-    "imas:mdsplus?user=public;shot=116000;run=4;database=ITER_MD;version=3"\n
+    "imas:mdsplus?user=public;pulse=116000;run=4;database=ITER_MD;version=3#wall"\n
+    "imas:mdsplus?user=public;pulse=116000;run=4;database=ITER_MD;version=3"\n
     """,
     )
     parser.add_argument(
@@ -144,13 +143,6 @@ if __name__ == "__main__":
             _mdUri, _idsNames = splittedmsIdsInfo
         if len(splittedmsIdsInfo) == 1:
             _mdUri = splittedmsIdsInfo[0]
-        param = getDetailsfromURI(_mdUri)
-        mdargs.backend = param["backend"]
-        mdargs.database = param["database"]
-        mdargs.pulse = param["pulse"]
-        mdargs.run = param["run"]
-        mdargs.user = param["user"]
-        mdargs.version = param["version"]
         mdargs.uri = _mdUri
         connection = DBMaster.getConnection(mdargs)
         if connection:

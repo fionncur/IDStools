@@ -42,19 +42,21 @@ class EcStrayView:
         Example:
             .. code-block:: python
 
+                from idstools.view.domain.ecstray import EcStrayView
                 import imas
-                # add necessary imports
-                connection = imas.DBEntry(imas.imasdef.MDSPLUS_BACKEND,'ITER',134173,106,'public')
+                from idstools.view.common import Canvas
+
+                connection = imas.DBEntry("imas:mdsplus?user=public;pulse=134173;run=2326;database=TEST;version=3", "r")
                 connection.open()
                 equilibriumIds = connection.get('equilibrium')
-                coreProfilesIds = connection.get('waves')
-                wavesIds = connection.get('core_profiles')
+                wavesIds = connection.get('waves')
+                coreProfilesIds = connection.get('core_profiles')
 
                 canvas = Canvas(1, 1) # create canvas
                 ax = canvas.add_axes(title="Resonance Layer", xlabel="R [m]", ylabel="Z [m]", row=0, col=0, rowspan=1)
-
+                ax.set_title("uri=imas:mdsplus?user=public;pulse=134173;run=2326;database=TEST;version=3")
                 ecstrayView = EcStrayView(equilibriumIds, coreProfilesIds, wavesIds)
-                ecstrayView.plotResonanceLayer(ax, timeIndexWaves=0, timeIndexEquilibrium=0, verbose=True)
+                ecstrayView.plotResonanceLayer(ax, time_index_wv=0, time_index_eq=0, verbose=True)
 
                 ax.plot()
                 canvas.show()
@@ -149,19 +151,21 @@ class EcStrayView:
         Example:
             .. code-block:: python
 
+                from idstools.view.domain.ecstray import EcStrayView
                 import imas
-                # add necessary imports
-                connection = imas.DBEntry(imas.imasdef.MDSPLUS_BACKEND,'ITER',134173,106,'public')
+                from idstools.view.common import Canvas
+
+                connection = imas.DBEntry("imas:mdsplus?user=public;pulse=134173;run=2326;database=TEST;version=3", "r")
                 connection.open()
                 equilibriumIds = connection.get('equilibrium')
-                coreProfilesIds = connection.get('waves')
-                wavesIds = connection.get('core_profiles')
+                wavesIds = connection.get('waves')
+                coreProfilesIds = connection.get('core_profiles')
 
                 canvas = Canvas(1, 1) # create canvas
-                ax = canvas.add_axes(title="Cut Off Layer", xlabel="R [m]", ylabel="Z [m]", row=0, col=0, rowspan=1)
-
+                ax = canvas.add_axes(title="Resonance Layer", xlabel="R [m]", ylabel="Z [m]", row=0, col=0, rowspan=1)
+                ax.set_title("uri=imas:mdsplus?user=public;pulse=134173;run=2326;database=TEST;version=3")
                 ecstrayView = EcStrayView(equilibriumIds, coreProfilesIds, wavesIds)
-                ecstrayView.plotCutOffLayer(ax, timeIndexWaves=0, timeIndexEquilibrium=0, verbose=True)
+                ecstrayView.plotCutOffLayer(ax, timeIndexWaves=0, timeIndexCoreProfiles=0, timeIndexEquilibrium=0,verbose=True)
 
                 ax.plot()
                 canvas.show()

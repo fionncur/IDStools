@@ -49,7 +49,7 @@ class EdgeProfilesCompute:
             .. code-block:: python
 
                 import imas
-                connection = imas.DBEntry(imas.imasdef.MDSPLUS_BACKEND,'ITER',123276,1,'public')
+                connection = imas.DBEntry("imas:mdsplus?user=public;pulse=123276;run=1;database=ITER;version=3", "r")
                 connection.open()
                 idsObj = connection.get('edge_profiles')
                 result = EdgeProfilesCompute.getPlasmaCompositionWithSpeciesConcentration(idsObj, 0)
@@ -142,7 +142,7 @@ class EdgeProfilesCompute:
             .. code-block:: python
 
                 import imas
-                connection = imas.DBEntry(imas.imasdef.MDSPLUS_BACKEND,'ITER',123276,1,'public')
+                connection = imas.DBEntry("imas:mdsplus?user=public;pulse=123276;run=1;database=ITER;version=3", "r")
                 connection.open()
                 idsObj = connection.get('edge_profiles')
                 computeObj = EdgeProfilesCompute(idsObj)
@@ -174,7 +174,7 @@ class EdgeProfilesCompute:
             .. code-block:: python
 
                 import imas
-                connection = imas.DBEntry(imas.imasdef.MDSPLUS_BACKEND,'ITER',123276,1,'public')
+                connection = imas.DBEntry("imas:mdsplus?user=public;pulse=123276;run=1;database=ITER;version=3", "r")
                 connection.open()
                 idsObj = connection.get('edge_profiles')
                 computeObj = EdgeProfilesCompute(idsObj)
@@ -207,7 +207,7 @@ class EdgeProfilesCompute:
             .. code-block:: python
 
                 import imas
-                connection = imas.DBEntry(imas.imasdef.MDSPLUS_BACKEND,'ITER',123276,1,'public')
+                connection = imas.DBEntry("imas:mdsplus?user=public;pulse=123276;run=1;database=ITER;version=3", "r")
                 connection.open()
                 idsObj = connection.get('edge_profiles')
                 computeObj = EdgeProfilesCompute(idsObj)
@@ -239,7 +239,7 @@ class EdgeProfilesCompute:
             .. code-block:: python
 
                 import imas
-                connection = imas.DBEntry(imas.imasdef.MDSPLUS_BACKEND,'ITER',123276,1,'public')
+                connection = imas.DBEntry("imas:mdsplus?user=public;pulse=123276;run=1;database=ITER;version=3", "r")
                 connection.open()
                 idsObj = connection.get('edge_profiles')
                 computeObj = EdgeProfilesCompute(idsObj)
@@ -269,7 +269,7 @@ class EdgeProfilesCompute:
             .. code-block:: python
 
                 import imas
-                connection = imas.DBEntry(imas.imasdef.MDSPLUS_BACKEND,'ITER',123276,1,'public')
+                connection = imas.DBEntry("imas:mdsplus?user=public;pulse=123276;run=1;database=ITER;version=3", "r")
                 connection.open()
                 idsObj = connection.get('edge_profiles')
                 computeObj = EdgeProfilesCompute(idsObj)
@@ -351,7 +351,7 @@ class EdgeProfilesCompute:
             .. code-block:: python
 
                 import imas
-                connection = imas.DBEntry(imas.imasdef.MDSPLUS_BACKEND,'ITER',123276,1,'public')
+                connection = imas.DBEntry("imas:mdsplus?user=public;pulse=123276;run=1;database=ITER;version=3", "r")
                 connection.open()
                 idsObj = connection.get('edge_profiles')
                 computeObj = EdgeProfilesCompute(idsObj)
@@ -379,7 +379,7 @@ class EdgeProfilesCompute:
             .. code-block:: python
 
                 import imas
-                connection = imas.DBEntry(imas.imasdef.MDSPLUS_BACKEND,'ITER',123276,1,'public')
+                connection = imas.DBEntry("imas:mdsplus?user=public;pulse=123276;run=1;database=ITER;version=3", "r")
                 connection.open()
                 idsObj = connection.get('edge_profiles')
                 computeObj = EdgeProfilesCompute(idsObj)
@@ -524,7 +524,7 @@ class EdgeProfilesCompute:
             .. code-block:: python
 
                 import imas
-                connection = imas.DBEntry(imas.imasdef.MDSPLUS_BACKEND,'ITER',123276,1,'public')
+                connection = imas.DBEntry("imas:mdsplus?user=public;pulse=123276;run=1;database=ITER;version=3", "r")
                 connection.open()
                 idsObj = connection.get('edge_profiles')
                 computeObj = EdgeProfilesCompute(idsObj)
@@ -561,7 +561,7 @@ class EdgeProfilesCompute:
             .. code-block:: python
 
                 import imas
-                connection = imas.DBEntry(imas.imasdef.MDSPLUS_BACKEND,'ITER',123276,1,'public')
+                connection = imas.DBEntry("imas:mdsplus?user=public;pulse=123276;run=1;database=ITER;version=3", "r")
                 connection.open()
                 idsObj = connection.get('edge_profiles')
                 computeObj = EdgeProfilesCompute(idsObj)
@@ -631,7 +631,7 @@ class EdgeProfilesCompute:
             .. code-block:: python
 
                 import imas
-                connection = imas.DBEntry(imas.imasdef.MDSPLUS_BACKEND,'ITER',123276,1,'public')
+                connection = imas.DBEntry("imas:mdsplus?user=public;pulse=123276;run=1;database=ITER;version=3", "r")
                 connection.open()
                 idsObj = connection.get('edge_profiles')
                 computeObj = EdgeProfilesCompute(idsObj)
@@ -657,7 +657,7 @@ class EdgeProfilesCompute:
             .. code-block:: python
 
                 import imas
-                connection = imas.DBEntry(imas.imasdef.MDSPLUS_BACKEND,'ITER',123276,1,'public')
+                connection = imas.DBEntry("imas:mdsplus?user=public;pulse=123276;run=1;database=ITER;version=3", "r")
                 connection.open()
                 idsObj = connection.get('edge_profiles')
                 computeObj = EdgeProfilesCompute(idsObj)
@@ -683,7 +683,7 @@ class EdgeProfilesCompute:
             .. code-block:: python
 
                 import imas
-                connection = imas.DBEntry(imas.imasdef.MDSPLUS_BACKEND,'ITER',123276,1,'public')
+                connection = imas.DBEntry("imas:mdsplus?user=public;pulse=123276;run=1;database=ITER;version=3", "r")
                 connection.open()
                 idsObj = connection.get('edge_profiles')
                 computeObj = EdgeProfilesCompute(idsObj)
@@ -713,7 +713,7 @@ class EdgeProfilesCompute:
             .. code-block:: python
 
                 import imas
-                connection = imas.DBEntry(imas.imasdef.MDSPLUS_BACKEND,'ITER',123276,1,'public')
+                connection = imas.DBEntry("imas:mdsplus?user=public;pulse=123276;run=1;database=ITER;version=3", "r")
                 connection.open()
                 idsObj = connection.get('edge_profiles')
                 computeObj = EdgeProfilesCompute(idsObj)

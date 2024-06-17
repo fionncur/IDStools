@@ -8,7 +8,6 @@ from idstools.utils.clihelper import getCoreVersion
 from rich.console import Console
 from rich.table import Table
 from idstools.scenariodescription import ScenarioDescriptionBase
-from idstools.view.common import Terminal
 
 displayMapping = {
     "ref_name": "Reference",
@@ -55,7 +54,7 @@ class SmartFormatter(argparse.HelpFormatter):
 
 # Input arguments
 parser = argparse.ArgumentParser(
-    description="---- Script to list available scenarios in a specific folder ----",
+    description="""---- Script to list available scenarios in a specific folder ----\n\nImportant: The legacy scenario_summary tool is deprecated and will be removed in a future versions. It will remain available until simdb is fully adopted.more about simdb : https://simdb.iter.org/dashboard/""",
     formatter_class=SmartFormatter,
 )
 parser.add_argument(
@@ -100,7 +99,7 @@ parser.add_argument(
     "... available among following variables:\n"
     "        ref_name    = dataset reference name\n"
     "        ro_name     = responsible officer name\n"
-    "        pulse        = pulse number\n"
+    "        pulse       = pulse number\n"
     "        run         = run number\n"
     "        type        = data type (experimental,predictive,interpretative)\n"
     "        workflow    = suite of codes used to compute these data\n"

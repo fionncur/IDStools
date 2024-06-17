@@ -74,7 +74,7 @@ def rec(
     # Names to be displayed
     disp_ref_name = "Reference"
     disp_ro_name = "RO(s)"
-    disp_shot = "Pulse"
+    disp_shot = "Shot"
     disp_run = "Run"
     disp_type = "Type"
     disp_dis_type = "Type"

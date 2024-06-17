@@ -25,11 +25,11 @@ def main():
     """
     
 
-    # Set validator for given (pulse, run), otherwise whole pulses found
-    if args.pulse:
-        pulse = [(args.pulse, args.run)]
+    # Set validator for given (shot, run), otherwise whole shots found
+    if args.shot:
+        shot = [(args.shot, args.run)]
     else:
-        pulse = []
+        shot = []
 
     logger.info(f"-----------------------------------------------------------")
     logger.info(f"START: {__file__}")
@@ -38,7 +38,7 @@ def main():
 
     # Validation in IMASDB
     res = db_validator(
-        args.user, args.database, args.version, args.backend, args.path, pulse,
+        args.user, args.database, args.version, args.backend, args.path, shot,
     )
 
     et = time.time()
@@ -62,35 +62,35 @@ Usage:
 
     $ module load IMAS
 
-1) Validate all pulses in IMAS database against default schemas with output file
+1) Validate all shots in IMAS database against default schemas with output file
 
 .. code-block:: bash
 
     $ {os.path.basename(__file__)} -o output.log
 
-2) Check the validity of all pulses in IMAS database against schemas
+2) Check the validity of all shots in IMAS database against schemas
 
 .. code-block:: bash
 
-    $ {os.path.basename(__file__)} -p /path/to/schema1.yaml /path/to/schema2.yaml
+    $ {os.path.basename(__file__)} -s /path/to/schema1.yaml /path/to/schema2.yaml
 
-3) Validate all pulses in local database to default schemas
+3) Validate all shots in local database to default schemas
 
 .. code-block:: bash
 
     $ {os.path.basename(__file__)} -u username -d database 
 
-4) Validate one pulse in IMAS database to schemas in the directory
+4) Validate one shot in IMAS database to schemas in the directory
 
 .. code-block:: bash
 
-    $ {os.path.basename(__file__)} -p 131024 -r 40 -p /path/to/schema/dir
+    $ {os.path.basename(__file__)} -s 131024 -r 40 -s /path/to/schema/dir
 
-5) Validate all pulses having the pulse number specified
+5) Validate all shots having the shot number specified
 
 .. code-block:: bash
 
-    $ {os.path.basename(__file__)} -p 131024 -p /path/to/schema/dir
+    $ {os.path.basename(__file__)} -s 131024 -s /path/to/schema/dir
 """
 if __name__ == "__main__":
 
@@ -103,7 +103,7 @@ if __name__ == "__main__":
         description=Markdown(description, style="argparse.text"),
     )
     parser.add_argument(
-        "--pulse", "-p", dest="pulse", help="Shot number", required=False, type=int
+        "--shot", "-s", dest="shot", help="Shot number", required=False, type=int
     )
     parser.add_argument(
         "--run", "-r", dest="run", help="Run number", required=False, type=int, default=-1

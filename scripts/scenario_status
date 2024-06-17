@@ -3,22 +3,20 @@
 import argparse
 import os
 from idstools.database import DBMaster
-from idstools.utils.clihelper import getCoreVersion
 from rich.console import Console
-from rich.syntax import Syntax
 from rich.table import Table
-from rich_argparse import RichHelpFormatter
+from rich_argparse import RawDescriptionRichHelpFormatter
 from idstools.scenariodescription import ScenarioDescription
 from idstools.utils.idslogger import setupLogger
 console = Console()
 # Management of input arguments
 parser = argparse.ArgumentParser(
-    description="---- Show status and potential parent and children for a given simulation stored in ITER database folder",formatter_class=RichHelpFormatter,
+    description="""---- Show status and potential parent and children for a given simulation stored in ITER database folder\n\nImportant: The legacy scenario_status tool is deprecated and will be removed in a future versions. It will remain available until simdb is fully adopted.more about simdb : https://simdb.iter.org/dashboard/""",formatter_class=RawDescriptionRichHelpFormatter,
 )
 parser.add_argument(
     "-f", "--folder", help="folder where to search for scenarios", required=False
 )
-parser.add_argument("-p", "--pulse", help="pulse number", required=True, type=int)
+parser.add_argument("-s", "--shot", help="Shot number", required=True, type=int)
 # currently limiting run < 10000 because of the search path /3/0
 parser.add_argument(
     "-r",
@@ -38,12 +36,12 @@ args = vars(parser.parse_args())
 
 logger = setupLogger("module")
 
-pulse = args["pulse"]
+shot = args["shot"]
 run = args["run"]
 
 # FOLDER
 folder = ""
-if args["folder"] != None:
+if args["folder"] is not None:
     folder = args["folder"]
 else:
     folder = os.environ["IMAS_HOME"] + "/shared/imasdb/ITER/3/0"
@@ -51,15 +49,15 @@ else:
     lowlevelVersion = int(lowlevelVersion.split(".")[0])
     if lowlevelVersion < 4:
         folder = os.environ["IMAS_HOME"] + "/shared/iterdb/3/0"
-sdObject = ScenarioDescription(pulse, run, folder)
-if args["print"] == True:
+sdObject = ScenarioDescription(shot, run, folder)
+if args["print"] is True:
     sdObject.printYaml()
     exit(0)
 
 family = sdObject.getFamily()
 
 table = Table(
-    title=f"Scenario Status"
+    title="Scenario Status"
 )
 table.add_column("SCENARIO", style="magenta")
 table.add_column("STATUS", style="green")
@@ -72,10 +70,10 @@ for iparent in range(len(family["parents"]["pulse"])):
 if "database_relations" in sdObject.yamlData.keys():
     if "replaced_by" in sdObject.yamlData["database_relations"].keys():
         table.add_row(
-            f"*{pulse:>7}{run:>5}",f"{sdObject.yamlData['status']:<10}",f"{sdObject.yamlData['database_relations']['replaces']}"
+            f"*{shot:>7}{run:>5}",f"{sdObject.yamlData['status']:<10}",f"{sdObject.yamlData['database_relations']['replaces']}"
         )
 else:
-    logger.warn(f"database relations not found")
+    logger.warn("database relations not found")
 for ichild in range(len(family["children"]["pulse"])):
     table.add_row(
         f" {family['children']['pulse'][ichild]:>7}{family['children']['run'][ichild]:>5}",f"{family['children']['status'][ichild]:<10}",f"{family['children']['comment'][ichild]}"

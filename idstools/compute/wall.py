@@ -73,13 +73,11 @@ class WallCompute:
             for lUnitIndex, lUnit in enumerate(description2d.limiter.unit):
                 unitInfo = {}
                 unitInfo["name"] = lUnit.name
-
                 unitInfo["r"] = lUnit.outline.r
                 unitInfo["z"] = lUnit.outline.z
                 unitInfo["closed"] = lUnit.closed
                 unitInfo["resistivity"] = lUnit.resistivity
-
-                if lUnit.closed:
+                if lUnit.closed == 1:
                     unitInfo["r"] = np.append(unitInfo["r"], unitInfo["r"][0])
                     unitInfo["z"] = np.append(unitInfo["z"], unitInfo["z"][0])
                 unitInfos[lUnitIndex] = unitInfo
@@ -94,8 +92,13 @@ class WallCompute:
         if len(r) == 0 or len(z) == 0 or len(h) == 0:
             return None
         rectangleCoordinates = []
-        n = len(r) - 1
-        for i in range(n):
+
+        if closed == 1:
+            r = np.append(r, r[0])
+            z = np.append(z, z[0])
+            h = np.append(h, h[0])
+
+        for i in range(len(r) - 1):
             x1 = r[i + 1] - r[i]
             y1 = z[i + 1] - z[i]
             d = np.sqrt(x1**2 + y1**2)
@@ -121,9 +124,8 @@ class WallCompute:
                 rw.append(w[0])
                 zw.append(w[1])
 
-            if closed:
-                rw.append(rw[0])
-                zw.append(zw[0])
+            rw.append(rw[0])
+            zw.append(zw[0])
 
             rectangleCoordinates.append((rw, zw))
         return rectangleCoordinates

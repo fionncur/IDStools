@@ -18,14 +18,14 @@ shopt -s expand_aliases
 echo "Executing on : $(hostname -f)"
 # Get toolchain version
 if [ -z "$1" ]; then
-    TOOLCHAIN_VERSION="intel-2020b"
+    TOOLCHAIN_VERSION="intel-2023b"
 else
     TOOLCHAIN_VERSION="$1"
 fi
 
 # Get AL version
 if [ -z "$2" ]; then
-    ACCESS_LAYER_VERSION="4"
+    ACCESS_LAYER_VERSION="5"
 else
     ACCESS_LAYER_VERSION="$2"
 fi
@@ -67,7 +67,6 @@ print("SciPy version:", scipy.__version__)
 print("Matplotlib version:", matplotlib.__version__)
 END
 )
-al_major_version="${AL_VERSION%%.*}"
 echo "====================================================================="
 python3 -c "$version_script"
 echo "====================================================================="
@@ -80,12 +79,10 @@ echo "Testing analysis scripts  with URI $IMAS_MODULE_VERSION and $PYTHON_VERSIO
 echo "====================================================================="
 source ./tests/st03_test_analysis_scripts_with_uri.sh "$LOG_DIR" "$DB_DIR"
 
-if ((al_major_version > 4)); then
-    echo "====================================================================="
-    echo "Testing analysis scripts  with URI PATH $IMAS_MODULE_VERSION and $PYTHON_VERSION"
-    echo "====================================================================="
-    source ./tests/st03_test_analysis_scripts_with_uripath.sh "$LOG_DIR" "$DB_DIR"
-fi
+echo "====================================================================="
+echo "Testing analysis scripts  with URI PATH $IMAS_MODULE_VERSION and $PYTHON_VERSION"
+echo "====================================================================="
+source ./tests/st03_test_analysis_scripts_with_uripath.sh "$LOG_DIR" "$DB_DIR"
 #---------------------------------------------------------------------------
 echo ""
 echo ""

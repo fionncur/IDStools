@@ -35,8 +35,7 @@ class PfActiveCompute:
                 import imas
                 from idstools.compute.pf_active import PfActiveCompute
                 from idstools.view.common import Canvas
-
-                connection = imas.DBEntry(imas.imasdef.MDSPLUS_BACKEND,'ITER',135005,4,'public')
+                connection = imas.DBEntry("imas:mdsplus?user=public;pulse=135005;run=4;database=ITER;version=3", "r")
                 connection.open()
                 idsObj = connection.get('pf_active')
 

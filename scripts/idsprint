@@ -55,16 +55,20 @@ if __name__ == "__main__":
     occurrence = 0
     if len(splittedIdsInfo) == 2:
         idsFragment = splittedIdsInfo[1]
-
-        splittedIdsFragment = idsFragment.split(":")
-        idsName = splittedIdsFragment[0]
-        if len(splittedIdsFragment) == 2:
-            idsPathFragment = splittedIdsFragment[1]
-
-            splittedIdsPathFragment = idsPathFragment.split("/", 1)
-            occurrence = int(splittedIdsPathFragment[0])
-            if len(splittedIdsPathFragment) == 2:
-                idsPath = splittedIdsPathFragment[1]
+        if ":" in idsFragment:
+            splittedIdsFragment = idsFragment.split(":")
+            idsName = splittedIdsFragment[0]
+            if len(splittedIdsFragment) == 2:
+                idsPathFragment = splittedIdsFragment[1]
+                splittedIdsPathFragment = idsPathFragment.split("/", 1)
+                occurrence = int(splittedIdsPathFragment[0])
+                if len(splittedIdsPathFragment) == 2:
+                    idsPath = splittedIdsPathFragment[1]
+        else:
+            splittedIdsFragment = idsFragment.split("/", 1)
+            idsName = splittedIdsFragment[0]
+            if len(splittedIdsFragment) == 2:
+                idsPath = splittedIdsFragment[1]
     if idsName == "":
         logger.error("Please provide ids name at the end of uri with hash")
         exit(1)

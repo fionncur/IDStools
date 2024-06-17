@@ -43,7 +43,7 @@ This cheat sheet provides quick reference of commonly used commands in IDStools.
 |                            |                                                                                                                              |
 |                            |    $ viewecray --uri "imas:mdsplus?user=public;pulse=134173;run=2326;database=TEST;version=3"                                |
 |                            |    $ viewecray --uri "imas:mdsplus?user=public;pulse=134173;run=2326;database=TEST;version=3"                                |
-|                            |    -md "imas:hdf5?user=public;pulse=116000;run=4;database=ITER_MD;version=3#wall"                                         |
+|                            |    -md "imas:hdf5?user=public;pulse=116000;run=4;database=ITER_MD;version=3#wall"                                            |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
 |*viewecstrayradiation*      | Shows electron cyclotron stray radiation.                                                                                    |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
@@ -66,7 +66,7 @@ This cheat sheet provides quick reference of commonly used commands in IDStools.
 |                            | .. code-block:: bash                                                                                                         |
 |                            |                                                                                                                              |
 |                            |    $ viewequilibrium --uri "imas:mdsplus?user=public;pulse=134173;run=2326;database=TEST;version=3"                          |
-|                            |    -md "imas:mdsplus?user=public;pulse=111001;run=103;database=ITER_MD;version=3#pf_active"                               |
+|                            |    -md "imas:mdsplus?user=public;pulse=111001;run=103;database=ITER_MD;version=3#pf_active"                                  |
 |                            |    "imas:hdf5?user=public;pulse=116000;run=4;database=ITER_MD;version=3#wall" --rho                                          |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
 | *viewfluxes*               | Shows flux information from available                                                                                        |
@@ -266,7 +266,7 @@ This cheat sheet provides quick reference of commonly used commands in IDStools.
 |                               |                                                                                                                                     |
 |                               | .. code-block:: bash                                                                                                                |
 |                               |                                                                                                                                     |
-|                               |    $ idsprint --uri "imas:mdsplus?user=public;pulse=122525;run=1;database=ITER;version=3#equilibrium"                                |
+|                               |    $ idsprint --uri "imas:mdsplus?user=public;pulse=122525;run=1;database=ITER;version=3#equilibrium"                               |
 +-------------------------------+-------------------------------------------------------------------------------------------------------------------------------------+
 | *idsresample*                 | Resample IDSs from a data-entry and save them into another                                                                          |
 |                               | data-entry based on PREVIOUS_INTERP method.                                                                                         |
@@ -375,14 +375,14 @@ Database Tools
 |                                |                                                                                |
 |                                | .. code-block:: bash                                                           |
 |                                |                                                                                |
-|                                |    $ create_db_entry -p 130012 -r 105 -d TEST --disable-validation             |
+|                                |    $ create_db_entry -s 130012 -r 105 -d TEST --disable-validation             |
 +--------------------------------+--------------------------------------------------------------------------------+
 | *create_db_entry_disruption*   | Auto-generated yaml scenario and watcher files for disruption                  |
 |                                | database                                                                       |
 |                                |                                                                                |
 |                                | .. code-block:: bash                                                           |
 |                                |                                                                                |
-|                                |    $ create_db_entry_disruption -p 100028 -r 1 -d ITER_DISRUPTIONS             |
+|                                |    $ create_db_entry_disruption -s 100028 -r 1 -d ITER_DISRUPTIONS             |
 +--------------------------------+--------------------------------------------------------------------------------+
 | *create_validation_schema*     | Create validation schema using data dictionary validation attributes           |
 |                                |                                                                                |
@@ -401,7 +401,7 @@ Database Tools
 |                                |                                                                                |
 |                                | .. code-block:: bash                                                           |
 |                                |                                                                                |
-|                                |    $ md_status -p 116000 -r 3                                                  |
+|                                |    $ md_status -s 116000 -r 3                                                  |
 +--------------------------------+--------------------------------------------------------------------------------+
 | *md_summary*                   | md_summary list available machine description data in a specific               |
 |                                | folder with search facility                                                    |
@@ -419,30 +419,30 @@ Database Tools
 |                                |                                                                                |
 |                                | .. code-block:: bash                                                           |
 |                                |                                                                                |
-|                                |    $ scenario_status -p 134174 -r 117                                          |
-|                                |    $ scenario_status -p 130012 -r 4 --print                                    |
+|                                |    $ scenario_status -s 134174 -r 117                                          |
+|                                |    $ scenario_status -s 130012 -r 4 --print                                    |
 +--------------------------------+--------------------------------------------------------------------------------+
 | *scenario_summary*             | The `scenario_summary` lists available scenarios in a specific                 |
 |                                | folder with search facility.                                                   |
 |                                |                                                                                |
 |                                | .. code-block:: bash                                                           |
 |                                |                                                                                |
-|                                |    $ scenario_summary -p He4,2.65                                              |
-|                                |    $ scenario_summary -p He4,2.65 -c shot,run,database,composition             |
-|                                |    $ scenario_summary -p He4 2.65                                              |
+|                                |    $ scenario_summary -s He4,2.65                                              |
+|                                |    $ scenario_summary -s He4,2.65 -c shot,run,database,composition             |
+|                                |    $ scenario_summary -s He4 2.65                                              |
 +--------------------------------+--------------------------------------------------------------------------------+
 | *show_db_entry*                | Show full description file for a given simulation stored in ITER DB            |
 |                                | folder.                                                                        |
 |                                |                                                                                |
 |                                | .. code-block:: bash                                                           |
 |                                |                                                                                |
-|                                |    $ show_db_entry -p 134174 -r 117                                            |
+|                                |    $ show_db_entry -s 134174 -r 117                                            |
 +--------------------------------+--------------------------------------------------------------------------------+
 | *validate_db_entry*            | Validation Tool for ITER Scenario DB                                           |
 |                                |                                                                                |
 |                                | .. code-block:: bash                                                           |
 |                                |                                                                                |
-|                                |    $ validate_db_entry -p 134174 -r 117 --path resources/validation_schemas    |
+|                                |    $ validate_db_entry -s 134174 -r 117 --path resources/validation_schemas    |
 +--------------------------------+--------------------------------------------------------------------------------+
 | *watch_db_entry*               | Subscribe/unsubscribe as a watcher to a simulation file                        |
 |                                | stored in IMAS DB                                                              |

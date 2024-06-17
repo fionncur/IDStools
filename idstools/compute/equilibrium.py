@@ -47,7 +47,7 @@ class EquilibriumCompute:
             .. code-block:: python
 
                 import imas
-                connection = imas.DBEntry(imas.imasdef.MDSPLUS_BACKEND,'ITER',134173,106,'public')
+                connection = imas.DBEntry("imas:mdsplus?user=public;pulse=134173;run=106;database=ITER;version=3", "r")
                 connection.open()
                 idsObj = connection.get('equilibrium')
                 computeObj = EquilibriumCompute(idsObj)
@@ -118,7 +118,7 @@ class EquilibriumCompute:
             .. code-block:: python
 
                 import imas
-                connection = imas.DBEntry(imas.imasdef.MDSPLUS_BACKEND,'ITER',134173,106,'public')
+                connection = imas.DBEntry("imas:mdsplus?user=public;pulse=134173;run=106;database=ITER;version=3", "r")
                 connection.open()
                 idsObj = connection.get('equilibrium')
                 computeObj = EquilibriumCompute(idsObj)
@@ -161,7 +161,7 @@ class EquilibriumCompute:
             .. code-block:: python
 
                 import imas
-                connection = imas.DBEntry(imas.imasdef.MDSPLUS_BACKEND,'ITER',134173,106,'public')
+                connection = imas.DBEntry("imas:mdsplus?user=public;pulse=134173;run=106;database=ITER;version=3", "r")
                 connection.open()
                 idsObj = connection.get('equilibrium')
                 computeObj = EquilibriumCompute(idsObj)
@@ -225,7 +225,7 @@ class EquilibriumCompute:
             .. code-block:: python
 
                 import imas
-                connection = imas.DBEntry(imas.imasdef.MDSPLUS_BACKEND,'ITER',134173,106,'public')
+                connection = imas.DBEntry("imas:mdsplus?user=public;pulse=134173;run=106;database=ITER;version=3", "r")
                 connection.open()
                 idsObj = connection.get('equilibrium')
                 computeObj = EquilibriumCompute(idsObj)
@@ -277,7 +277,7 @@ class EquilibriumCompute:
             .. code-block:: python
 
                 import imas
-                connection = imas.DBEntry(imas.imasdef.MDSPLUS_BACKEND,'ITER',134173,106,'public')
+                connection = imas.DBEntry("imas:mdsplus?user=public;pulse=134173;run=106;database=ITER;version=3", "r")
                 connection.open()
                 idsObj = connection.get('equilibrium')
                 computeObj = EquilibriumCompute(idsObj)

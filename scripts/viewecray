@@ -16,10 +16,8 @@ from idstools.database import DBMaster
 from idstools.utils.clihelper import (
     dbentryParser,
     getDatabasePath,
-    getDetailsfromURI,
     getFileName,
     getTitle,
-    mdParser,
 )
 from idstools.utils.idshelper import getAvailableIdsAndTimes
 from idstools.utils.idslogger import setupLogger
@@ -30,12 +28,31 @@ from idstools.view.pf_active import PFActiveView
 from idstools.view.wall import WallView
 from idstools.view.waves import WavesView
 
+class MdAction(argparse.Action):
+    def __call__(self, parser, namespace, values, option_string=None):
+        if len(values) == 0:
+            setattr(namespace, self.dest, True)
+        else:
+            setattr(namespace, self.dest, values)
+            
 parser = argparse.ArgumentParser(
     description="---- Display EC wave ray-tracing results [Previously known as ecray]",
-    parents=[dbentryParser, mdParser],
+    parents=[dbentryParser],
     formatter_class=RichHelpFormatter,
 )
-
+parser.add_argument(
+    "-md",
+    "--md",
+    nargs="*",
+    action=MdAction,
+    default=[],
+    help="""Provide machine descriptions that you need to plot\n
+with ids names for example wall pf_active \n
+or with uris for example\n
+"imas:mdsplus?user=public;shot=116000;run=4;database=ITER_MD;version=3#wall"\n
+"imas:mdsplus?user=public;shot=116000;run=4;database=ITER_MD;version=3"\n
+""",
+)
 parser.add_argument(
     "-t", "--time", help="Time", required=False, type=float, default=-99.0
 )
@@ -121,26 +138,12 @@ for mdidsInfo in args.md:
         _mdUri, idsName = splittedmsIdsInfo
         _idsName.append(idsName)
         mdargs = argparse.Namespace()
-        param = getDetailsfromURI(_mdUri)
-        mdargs.backend = param["backend"]
-        mdargs.database = param["database"]
-        mdargs.pulse = param["pulse"]
-        mdargs.run = param["run"]
-        mdargs.user = param["user"]
-        mdargs.version = param["version"]
         mdargs.uri = _mdUri
         inputargs = mdargs
     if len(splittedmsIdsInfo) == 1:
         if "imas:" in splittedmsIdsInfo[0]:
             _mdUri = splittedmsIdsInfo[0]
             mdargs = argparse.Namespace()
-            param = getDetailsfromURI(_mdUri)
-            mdargs.backend = param["backend"]
-            mdargs.database = param["database"]
-            mdargs.pulse = param["pulse"]
-            mdargs.run = param["run"]
-            mdargs.user = param["user"]
-            mdargs.version = param["version"]
             mdargs.uri = _mdUri
             inputargs = mdargs
         else:

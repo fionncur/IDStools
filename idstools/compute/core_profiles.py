@@ -83,9 +83,10 @@ class CoreProfilesCompute:
             .. code-block:: python
 
                 import imas
-                connection = imas.DBEntry(imas.imasdef.MDSPLUS_BACKEND,'ITER',105033,1,'public')
+                connection = imas.DBEntry("imas:mdsplus?user=public;pulse=105033;run=1;database=ITER;version=3", "r")
                 connection.open()
                 idsObj = connection.get('core_profiles')
+                connection.close()
                 computeObj = CoreProfilesCompute(idsObj)
                 result = computeObj.getElectronDensityNe0(timeSlice=0)
 
@@ -114,9 +115,11 @@ class CoreProfilesCompute:
             .. code-block:: python
 
                 import imas
-                connection = imas.DBEntry(imas.imasdef.MDSPLUS_BACKEND,'ITER',105033,1,'public')
+                connection = imas.DBEntry("imas:mdsplus?user=public;pulse=105033;run=1;database=ITER;version=3", "r")
                 connection.open()
+                
                 idsObj = connection.get('core_profiles')
+                connection.close()
                 computeObj = CoreProfilesCompute(idsObj)
                 result = computeObj.get_a(timeSlice=0)
 
@@ -148,9 +151,10 @@ class CoreProfilesCompute:
             .. code-block:: python
 
                 import imas
-                connection = imas.DBEntry(imas.imasdef.MDSPLUS_BACKEND,'ITER',105033,1,'public')
+                connection = imas.DBEntry("imas:mdsplus?user=public;pulse=105033;run=1;database=ITER;version=3", "r")
                 connection.open()
                 idsObj = connection.get('core_profiles')
+                connection.close()
                 computeObj = CoreProfilesCompute(idsObj)
                 result = computeObj.get_z(timeSlice=0)
 
@@ -180,9 +184,11 @@ class CoreProfilesCompute:
             .. code-block:: python
 
                 import imas
-                connection = imas.DBEntry(imas.imasdef.MDSPLUS_BACKEND,'ITER',105033,1,'public')
+                connection = imas.DBEntry("imas:mdsplus?user=public;pulse=105033;run=1;database=ITER;version=3", "r")
                 connection.open()
+                
                 idsObj = connection.get('core_profiles')
+                connection.close()
                 computeObj = CoreProfilesCompute(idsObj)
                 result = computeObj.getStates(timeSlice=0)
 
@@ -214,9 +220,10 @@ class CoreProfilesCompute:
             .. code-block:: python
 
                 import imas
-                connection = imas.DBEntry(imas.imasdef.MDSPLUS_BACKEND,'ITER',104010,2,'public')
+                connection = imas.DBEntry("imas:mdsplus?user=public;pulse=104010;run=2;database=ITER;version=3", "r")
                 connection.open()
                 idsObj = connection.get('core_profiles')
+                connection.close()
                 computeObj = CoreProfilesCompute(idsObj)
                 result = computeObj.getStateDensity(timeSlice=0, speciesIndex=0, stateIndex=0)
 
@@ -258,9 +265,10 @@ class CoreProfilesCompute:
             .. code-block:: python
 
                 import imas
-                connection = imas.DBEntry(imas.imasdef.MDSPLUS_BACKEND,'ITER',104010,2,'public')
+                connection = imas.DBEntry("imas:mdsplus?user=public;pulse=104010;run=2;database=ITER;version=3", "r")
                 connection.open()
                 idsObj = connection.get('core_profiles')
+                connection.close()
                 computeObj = CoreProfilesCompute(idsObj)
                 result = computeObj.getStatesData(timeSlice=0)
 
@@ -365,9 +373,10 @@ class CoreProfilesCompute:
             .. code-block:: python
 
                 import imas
-                connection = imas.DBEntry(imas.imasdef.MDSPLUS_BACKEND,'ITER',104010,2,'public')
+                connection = imas.DBEntry("imas:mdsplus?user=public;pulse=104010;run=2;database=ITER;version=3", "r")
                 connection.open()
                 idsObj = connection.get('core_profiles')
+                connection.close()
                 computeObj = CoreProfilesCompute(idsObj)
                 result = computeObj.get_ne(timeSlice=0)
 
@@ -394,9 +403,10 @@ class CoreProfilesCompute:
             .. code-block:: python
 
                 import imas
-                connection = imas.DBEntry(imas.imasdef.MDSPLUS_BACKEND,'ITER',104010,2,'public')
+                connection = imas.DBEntry("imas:mdsplus?user=public;pulse=104010;run=2;database=ITER;version=3", "r")
                 connection.open()
                 idsObj = connection.get('core_profiles')
+                connection.close()
                 computeObj = CoreProfilesCompute(idsObj)
                 result = computeObj.getVolume(timeSlice=0)
 
@@ -425,9 +435,10 @@ class CoreProfilesCompute:
             .. code-block:: python
 
                 import imas
-                connection = imas.DBEntry(imas.imasdef.MDSPLUS_BACKEND,'ITER',104010,2,'public')
+                connection = imas.DBEntry("imas:mdsplus?user=public;pulse=104010;run=2;database=ITER;version=3", "r")
                 connection.open()
                 idsObj = connection.get('core_profiles')
+                connection.close()
                 computeObj = CoreProfilesCompute(idsObj)
                 result = computeObj.getSpeciesDensity(timeSlice=0)
 
@@ -464,7 +475,8 @@ class CoreProfilesCompute:
             .. code-block:: python
 
                 import imas
-                connection = imas.DBEntry(imas.imasdef.MDSPLUS_BACKEND,'ITER',104010,2,'public')
+                connection = imas.DBEntry("imas:mdsplus?user=public;pulse=104010;run=2;database=ITER;version=3", "r")
+                connection = imas.DBEntry("imas:mdsplus?user=public;pulse=104010;run=2;database=ITER;version=3", "r")
                 connection.open()
                 idsObj = connection.get('core_profiles')
                 computeObj = CoreProfilesCompute(idsObj)
@@ -489,7 +501,7 @@ class CoreProfilesCompute:
             .. code-block:: python
 
                 import imas
-                connection = imas.DBEntry(imas.imasdef.MDSPLUS_BACKEND,'ITER',104010,2,'public')
+                connection = imas.DBEntry("imas:mdsplus?user=public;pulse=104010;run=2;database=ITER;version=3", "r")
                 connection.open()
                 idsObj = connection.get('core_profiles')
                 computeObj = CoreProfilesCompute(idsObj)
@@ -515,7 +527,7 @@ class CoreProfilesCompute:
             .. code-block:: python
 
                 import imas
-                connection = imas.DBEntry(imas.imasdef.MDSPLUS_BACKEND,'ITER',104010,2,'public')
+                connection = imas.DBEntry("imas:mdsplus?user=public;pulse=104010;run=2;database=ITER;version=3", "r")
                 connection.open()
                 idsObj = connection.get('core_profiles')
                 computeObj = CoreProfilesCompute(idsObj)
@@ -544,7 +556,7 @@ class CoreProfilesCompute:
             .. code-block:: python
 
                 import imas
-                connection = imas.DBEntry(imas.imasdef.MDSPLUS_BACKEND,'ITER',104010,2,'public')
+                connection = imas.DBEntry("imas:mdsplus?user=public;pulse=104010;run=2;database=ITER;version=3", "r")
                 connection.open()
                 idsObj = connection.get('core_profiles')
                 computeObj = CoreProfilesCompute(idsObj)
@@ -576,7 +588,7 @@ class CoreProfilesCompute:
             .. code-block:: python
 
                 import imas
-                connection = imas.DBEntry(imas.imasdef.MDSPLUS_BACKEND,'ITER',104010,2,'public')
+                connection = imas.DBEntry("imas:mdsplus?user=public;pulse=104010;run=2;database=ITER;version=3", "r")
                 connection.open()
                 idsObj = connection.get('core_profiles')
                 computeObj = CoreProfilesCompute(idsObj)
@@ -633,7 +645,7 @@ class CoreProfilesCompute:
             .. code-block:: python
 
                 import imas
-                connection = imas.DBEntry(imas.imasdef.MDSPLUS_BACKEND,'ITER',104010,2,'public')
+                connection = imas.DBEntry("imas:mdsplus?user=public;pulse=104010;run=2;database=ITER;version=3", "r")
                 connection.open()
                 idsObj = connection.get('core_profiles')
                 computeObj = CoreProfilesCompute(idsObj)
@@ -673,7 +685,7 @@ class CoreProfilesCompute:
             .. code-block:: python
 
                 import imas
-                connection = imas.DBEntry(imas.imasdef.MDSPLUS_BACKEND,'ITER',104010,2,'public')
+                connection = imas.DBEntry("imas:mdsplus?user=public;pulse=104010;run=2;database=ITER;version=3", "r")
                 connection.open()
                 idsObj = connection.get('core_profiles')
                 computeObj = CoreProfilesCompute(idsObj)

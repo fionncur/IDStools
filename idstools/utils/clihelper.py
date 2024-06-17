@@ -33,21 +33,6 @@ uriParser.add_argument(
     help="uri",
 )
 
-mdParser = argparse.ArgumentParser(add_help=False)
-mdParser.add_argument(
-    "-md",
-    "--md",
-    nargs="*",
-    default=["wall", "pf_active"],
-    help="""Provide machine descriptions that you need to plot\n
-with ids names for example\n
-wall pf_active
-with uris for example\n
-"imas:mdsplus?user=public;shot=116000;run=4;database=ITER_MD;version=3#wall"\n
-"imas:mdsplus?user=public;shot=116000;run=4;database=ITER_MD;version=3"\n
-""",
-)
-
 imasParser = argparse.ArgumentParser(add_help=False)
 imasParser.add_argument(
     "-u",
@@ -155,13 +140,13 @@ def getTitle(imasargs, title="", timeValue=None):
     if "uri" in imasargs.__dict__ and imasargs.uri:
         param = getDetailsfromURI(imasargs.uri)
         if param["pathPresent"]:
-            _title += f"(path={param['path']})"
+            _title += f"PATH={param['path']}"
         else:
-            _title += f"(pulse={param['pulse']},{param['run']})"
+            _title += f"(PULSE={param['pulse']},{param['run']})"
     else:
-        _title += f"(pulse={imasargs.pulse},{imasargs.run})"
+        _title += f"(PULSE={imasargs.pulse},{imasargs.run})"
     if timeValue:
-        _title += f" time:{timeValue:.1f}"
+        _title += f" TIME:{timeValue:.1f}"
     return _title
 
 
@@ -172,13 +157,13 @@ def getFileName(imasargs, title="", timeValue=None):
     if "uri" in imasargs.__dict__ and imasargs.uri:
         param = getDetailsfromURI(imasargs.uri)
         if param["pathPresent"]:
-            _fileName += f"(path={param['path']})"
+            _fileName += f"PATH_{param['path'].replace('/', '_')}_"
         else:
-            _fileName += f"pulse_{param['pulse']}_run_{param['run']}_"
+            _fileName += f"PULSE_{param['pulse']}_RUN_{param['run']}_"
     else:
-        _fileName += f"pulse_{imasargs.pulse}_run_{imasargs.run}_"
+        _fileName += f"PULSE_{imasargs.pulse}_RUN_{imasargs.run}_"
     if timeValue:
-        _fileName += f"time_{timeValue:.1f}"
+        _fileName += f"TIME_{timeValue:.1f}"
     _fileName += ".png"
     return _fileName
 
