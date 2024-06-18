@@ -25,7 +25,7 @@ fi
 
 # "viewall database --uri \"imas:mdsplus?user=schneim;pulse=92436;run=271;database=jet;version=3\""
 SCRIPTS=(
-    "viewcoresources --uri \"imas:mdsplus?user=public;pulse=130012;run=105;database=TEST;version=3\" --save --directory $LOG_DIR"
+    "viewcoresourcesplot --uri \"imas:mdsplus?user=public;pulse=130012;run=105;database=TEST;version=3\" --save --directory $LOG_DIR"
     "viewcoretransport --uri \"imas:mdsplus?user=public;pulse=92436;run=850;database=TEST;version=3\" --save --directory $LOG_DIR"
     "vieweccomposition --uri \"imas:mdsplus?user=public;pulse=134173;run=2326;database=TEST;version=3\" --save --directory $LOG_DIR"
     "viewecray --uri \"imas:mdsplus?user=public;pulse=134173;run=2326;database=TEST;version=3\" --save --directory $LOG_DIR"

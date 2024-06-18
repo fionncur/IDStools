@@ -93,7 +93,7 @@ setup(
         "scripts/idsrosettacode",
         "scripts/idssize",
         "scripts/idsshift_equilibrium",
-        "scripts/viewcoresources",
+        "scripts/viewcoresourcesplot",
         "scripts/viewecstrayradiation",
         "scripts/viewedgeprofiles",
         "scripts/viewequilibrium",

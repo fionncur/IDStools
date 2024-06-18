@@ -12,12 +12,12 @@ This cheat sheet provides quick reference of commonly used commands in IDStools.
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
 | Command                    | Description and Example Usage                                                                                                |
 +============================+==============================================================================================================================+
-| *viewcoresources*          | Plots core_sources results (replaces csplot).                                                                                |
+| *viewcoresourcesplot*          | Plots core_sources results (replaces csplot).                                                                                |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
 |                            |                                                                                                                              |
 |                            | .. code-block:: bash                                                                                                         |
 |                            |                                                                                                                              |
-|                            |    $ viewcoresources --uri "imas:mdsplus?user=public;pulse=130012;run=105;database=TEST;version=3"                           |
+|                            |    $ viewcoresourcesplot --uri "imas:mdsplus?user=public;pulse=130012;run=105;database=TEST;version=3"                           |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
 | *viewcoretransport*        | Core plasma transport of particles, energy,                                                                                  |
 |                            | momentum and poloidal flux (replaces check_transport).                                                                       |

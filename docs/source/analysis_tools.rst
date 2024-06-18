@@ -8,7 +8,7 @@ composition, allowing you to depict various trends and plasma physics.
 .. toctree::
    :maxdepth: 1
 
-   viewcoresources
+   viewcoresourcesplot
    viewcoretransport
    vieweccomposition
    viewecray
