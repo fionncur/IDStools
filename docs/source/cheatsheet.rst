@@ -12,12 +12,12 @@ This cheat sheet provides quick reference of commonly used commands in IDStools.
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
 | Command                    | Description and Example Usage                                                                                                |
 +============================+==============================================================================================================================+
-| *viewcoresourcesplot*          | Plots core_sources results (replaces csplot).                                                                                |
+| *viewcoresourcesplot*      | Plots core_sources results (replaces csplot).                                                                                |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
 |                            |                                                                                                                              |
 |                            | .. code-block:: bash                                                                                                         |
 |                            |                                                                                                                              |
-|                            |    $ viewcoresourcesplot --uri "imas:mdsplus?user=public;pulse=130012;run=105;database=TEST;version=3"                           |
+|                            |    $ viewcoresourcesplot --uri "imas:mdsplus?user=public;pulse=130012;run=105;database=TEST;version=3"                       |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
 | *viewcoretransport*        | Core plasma transport of particles, energy,                                                                                  |
 |                            | momentum and poloidal flux (replaces check_transport).                                                                       |
@@ -164,13 +164,13 @@ This cheat sheet provides quick reference of commonly used commands in IDStools.
 |                            |    $ viewscenario --uri "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3" --time 60                    |
 |                            |    $ viewscenario --uri "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3" --noProfiles                 |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
-| *viewcoresources*              | Shows source information from available                                                                                      |
+| *viewcoresources*          | Shows source information from available                                                                                      |
 |                            |  sources (replaces print_sources).                                                                                           |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
 |                            |                                                                                                                              |
 |                            | .. code-block:: bash                                                                                                         |
 |                            |                                                                                                                              |
-|                            |    $ viewcoresources --uri "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3"                               |
+|                            |    $ viewcoresources --uri "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3"                           |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
 | *viewspectrometry*         | Displays the spectrum, displaying plots of radiance                                                                          |
 |                            | and intensity in two different windows (replaces svplot).                                                                    |   

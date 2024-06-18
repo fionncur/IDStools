@@ -165,7 +165,9 @@ class CoreProfilesView:
         )
         ax.set_ylim(0, 20)
 
-    def plotDensityProfile(self, ax, timeIndex, psiCordinate=False, update=True):
+    def plotDensityProfile(
+        self, ax, timeIndex, psiCordinate=False, update=True, logscale=False
+    ):
         """
         This function plots the electron density profile as a function of either the normalized toroidal flux coordinate or the poloidal magnetic flux coordinate.
 
@@ -213,6 +215,8 @@ class CoreProfilesView:
                 borderaxespad=0.0,
                 frameon=False,
             )
+            if logscale:
+                ax.set_yscale("log")
             return ax_density_plot_dens, nmax
 
     def plotIonPressureProperties(self, ax):

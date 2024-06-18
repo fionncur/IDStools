@@ -33,6 +33,11 @@ parser.add_argument(
     "-t", "--time", help="Time", required=False, type=float, default=-99.0
 )
 parser.add_argument(
+    "--logscale",
+    help="Shows y axis with logarithmic scale wherever appropriate",
+    action="store_true",
+)
+parser.add_argument(
     "--save",
     help="Save figure at default location",
     action="store_true",
@@ -40,7 +45,7 @@ parser.add_argument(
 parser.add_argument(
     "--directory",
     help="Directory to save the figure",
-    default=None, 
+    default=None,
 )
 args = parser.parse_args()
 
@@ -77,7 +82,7 @@ for spectroIndex in spectrometersList:
     if columnCounter == 3:
         columnCounter = 0
         rowCounter = rowCounter + 1
-    radianceFileName = svView.viewRadiance(ax, spectroIndex)
+    radianceFileName = svView.viewRadiance(ax, spectroIndex, logscale=args.logscale)
     if columnCounter != 0:
         ax.get_legend().remove()
 
@@ -88,14 +93,16 @@ canvasRadiance.setText(text=f"{getDatabasePath(args, timeValue=timeValue)}")
 canvasRadiance.fig.suptitle(
     getTitle(args, "Spectrum (Radiance) from spectrometer_visible", timeValue), size=12
 )
-canvasRadiance.get_current_fig_manager().set_window_title(os.path.basename(__file__) + "-radiance")
+canvasRadiance.get_current_fig_manager().set_window_title(
+    os.path.basename(__file__) + "-radiance"
+)
 
 if args.save:
     fname = getFileName(args, os.path.basename(__file__) + "-radiance", timeValue)
     if args.directory:
         if not os.path.exists(args.directory):
             os.makedirs(args.directory)
-        fname=os.path.join(args.directory,fname)
+        fname = os.path.join(args.directory, fname)
     canvasRadiance.save(fname)
 else:
     canvasRadiance.show(block=False)
@@ -111,7 +118,7 @@ for spectroIndex in spectrometersList:
     if columnCounter == 3:
         columnCounter = 0
         rowCounter = rowCounter + 1
-    intensityFileName = svView.viewIntensity(ax, spectroIndex)
+    intensityFileName = svView.viewIntensity(ax, spectroIndex, logscale=args.logscale)
     if columnCounter != 0:
         ax.get_legend().remove()
 
@@ -122,14 +129,16 @@ canvasIntensity.fig.suptitle(
 canvasIntensity.fig.subplots_adjust(
     top=0.88, bottom=0.113, left=0.033, right=0.891, hspace=0.497, wspace=0.18
 )
-canvasIntensity.get_current_fig_manager().set_window_title(os.path.basename(__file__) + "-intensity")
+canvasIntensity.get_current_fig_manager().set_window_title(
+    os.path.basename(__file__) + "-intensity"
+)
 
 if args.save:
-    fname = getFileName(args, os.path.basename(__file__) +"_intensity", timeValue)
+    fname = getFileName(args, os.path.basename(__file__) + "_intensity", timeValue)
     if args.directory:
         if not os.path.exists(args.directory):
             os.makedirs(args.directory)
-        fname=os.path.join(args.directory,fname)
+        fname = os.path.join(args.directory, fname)
     canvasIntensity.save(fname)
 else:
     canvasIntensity.show(block=True)

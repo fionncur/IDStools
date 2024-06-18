@@ -11,10 +11,13 @@ from idstools.compute.common import getNearestTime
 from rich_argparse import RichHelpFormatter
 
 from idstools.database import readScenario, readScenarioWithArgs
-from idstools.input_processing import (beam_wall_crossing,
-                                       check_rays_into_divertor,
-                                       read_launching_parameters,
-                                       read_torbeam_output, read_wall)
+from idstools.input_processing import (
+    beam_wall_crossing,
+    check_rays_into_divertor,
+    read_launching_parameters,
+    read_torbeam_output,
+    read_wall,
+)
 from idstools.utils.clihelper import getDatabasePath, getFileName, getTitle
 from idstools.utils.idslogger import setupLogger
 from idstools.view.common import Canvas
@@ -40,6 +43,11 @@ parser.add_argument(
     "-t", "--time", help="Time (default=middle)", type=float, default=-99.0
 )
 parser.add_argument(
+    "--logscale",
+    help="Shows y axis with logarithmic scale wherever appropriate",
+    action="store_true",
+)
+parser.add_argument(
     "--save",
     help="Save figure at default location",
     action="store_true",
@@ -47,7 +55,7 @@ parser.add_argument(
 parser.add_argument(
     "--directory",
     help="Directory to save the figure",
-    default=None, 
+    default=None,
 )
 args = parser.parse_args()
 
@@ -57,10 +65,19 @@ timeIndexWaves = 0
 
 current_file_path = os.path.dirname(os.path.abspath(__file__))
 
-scenario_file = os.path.join(current_file_path, "input/scenario.yaml")
-wallfile = os.path.join(current_file_path, "input/wall2d.txt")
-filelaunchers = os.path.join(current_file_path, "input/ec_waveforms.yaml")
-path_result = os.path.join(current_file_path, "results/")
+scenario_file = os.path.join(current_file_path, "../resources/input/scenario.yaml")
+wallfile = os.path.join(current_file_path, "../resources/input/wall2d.txt")
+filelaunchers = os.path.join(current_file_path, "../resources/input/ec_waveforms.yaml")
+path_result = os.path.join(current_file_path, "../resources/results/")
+
+if not os.path.exists(scenario_file):
+    scenario_file = os.path.join(current_file_path, "input/scenario.yaml")
+if not os.path.exists(wallfile):
+    wallfile = os.path.join(current_file_path, "input/wall2d.txt")
+if not os.path.exists(filelaunchers):
+    filelaunchers = os.path.join(current_file_path, "input/ec_waveforms.yaml")
+if not os.path.exists(path_result):
+    path_result = os.path.join(current_file_path, "results/")
 
 wall2d = read_wall(wallfile)
 
@@ -88,7 +105,7 @@ else:
     )
     if data is not None:
         inIDSList, outIDSDict = data
-        
+
 equilibriumIds = inIDSList["equilibrium"]
 coreProfilesIds = inIDSList["core_profiles"]
 wavesIds = outIDSDict["waves"]
@@ -101,8 +118,12 @@ timeArrayWaves = wavesIds.time
 timeSlice = args.time
 
 # # Indices for time arrays in equilibrium, core_profiles, waves IDSs
-timeIndexEquilibrium, timeValueEquilibrium = getNearestTime(timeArrayEquilibrium, timeSlice)
-timeIndexCoreProfiles, timeValueCoreProfiles = getNearestTime(timeArrayCoreProfiles, timeSlice)
+timeIndexEquilibrium, timeValueEquilibrium = getNearestTime(
+    timeArrayEquilibrium, timeSlice
+)
+timeIndexCoreProfiles, timeValueCoreProfiles = getNearestTime(
+    timeArrayCoreProfiles, timeSlice
+)
 timeIndexWaves, timeValueWaves = getNearestTime(timeArrayWaves, timeSlice)
 # Subplot waveforms versus time
 equilibriumView = EquilibriumView(equilibriumIds)
@@ -157,7 +178,7 @@ ax_topview_plot_traces = wavesView.plotTopviewTracesUpdate(
     ax_top_view, timeIndexWaves, beamIndex
 )
 ax_density_plot_dens, nmax = coreProfilesView.plotDensityProfile(
-    ax_density, timeIndexCoreProfiles
+    ax_density, timeIndexCoreProfiles, logscale=args.logscale
 )
 
 tbdView = TbdView()
@@ -167,13 +188,13 @@ ax_polygon_plot_pol = tbdView.plot_polygon(
 
 canvas.setText(text=f"{getDatabasePath(args, timeValue=timeValueEquilibrium)}")
 canvas.fig.subplots_adjust(
-        top=0.88,
-        bottom=0.11,
-        left=0.035,
-        right=0.902,
-        hspace=0.458,
-        wspace=0.234,
-    )
+    top=0.88,
+    bottom=0.11,
+    left=0.035,
+    right=0.902,
+    hspace=0.458,
+    wspace=0.234,
+)
 canvas.fig.suptitle(getTitle(args, "EC Stray Radiation", timeValueEquilibrium), size=12)
 canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
 if args.save:
@@ -183,7 +204,7 @@ if args.save:
     if args.directory:
         if not os.path.exists(args.directory):
             os.makedirs(args.directory)
-        fname=os.path.join(args.directory,fname)
+        fname = os.path.join(args.directory, fname)
     canvas.save(fname)
 else:
     canvas.show()

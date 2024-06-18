@@ -32,6 +32,11 @@ parser.add_argument(
 )
 parser.add_argument("--verbose", help="Verbose output", action="store_true")
 parser.add_argument(
+    "--logscale",
+    help="Shows y axis with logarithmic scale wherever appropriate",
+    action="store_true",
+)
+parser.add_argument(
     "--save",
     help="Save figure at default location",
     action="store_true",
@@ -39,7 +44,7 @@ parser.add_argument(
 parser.add_argument(
     "--directory",
     help="Directory to save the figure",
-    default=None, 
+    default=None,
 )
 args = parser.parse_args()
 if args.verbose:
@@ -68,13 +73,15 @@ ax8 = canvas.add_axes(title="", xlabel="", row=1, col=3)
 
 if kpView.kProfiles.isCoreProfilesPresent:
     kpView.viewCentralTemperatureWaveforms(ax1)  # Central temperature waveforms
-    kpView.viewCentralDensityWaveforms(ax2)  # Central density waveforms
+    kpView.viewCentralDensityWaveforms(
+        ax2, logscale=args.logscale
+    )  # Central density waveforms
     kpView.viewCentralZeffWaveform(ax3)  # Central Zeff waveform
     kpView.viewTemperatureProfiles(ax4)  # Temperature profiles
     kpView.viewZeffProfile(ax5)  # Zeff profiles
-    kpView.viewVpolProfile(ax6)  # Vpol profiles
-    kpView.viewDensityProfiles(ax7)  # Density profiles
-    kpView.viewVtorProfile(ax8)  # Vtol profiles
+    kpView.viewVpolProfile(ax6, logscale=args.logscale)  # Vpol profiles
+    kpView.viewDensityProfiles(ax7, logscale=args.logscale)  # Density profiles
+    kpView.viewVtorProfile(ax8, logscale=args.logscale)  # Vtol profiles
 
     canvas.setText(
         text=f"{getDatabasePath(args, timeValue=kpView.kProfiles.commonTime)}"
@@ -90,11 +97,13 @@ if kpView.kProfiles.isCoreProfilesPresent:
     )
 
     if args.save:
-        fname = getFileName(args,  os.path.basename(__file__)+"_Kinetic", kpView.kProfiles.commonTime)
+        fname = getFileName(
+            args, os.path.basename(__file__) + "_Kinetic", kpView.kProfiles.commonTime
+        )
         if args.directory:
             if not os.path.exists(args.directory):
                 os.makedirs(args.directory)
-            fname=os.path.join(args.directory,fname)
+            fname = os.path.join(args.directory, fname)
         canvas.save(fname)
     else:
         canvas.show()

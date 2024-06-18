@@ -22,7 +22,7 @@ if os.path.isfile(requirement_path):
 # Generate list of data files
 source_folder = "resources"
 target_folder = "bin"
-types = ("*.yml", "*.csv", "*.gfile")  # the tuple of file types
+types = ("*.yml", "*.csv", "*.gfile", "*.txt", "*.yaml")  # the tuple of file types
 
 files_grabbed = []
 for typename in types:

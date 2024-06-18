@@ -65,4 +65,4 @@ print(f"Showing details for {getDatabasePath(args, idsSliceCoreSources.time[0])}
 
 
 coreSourcesView = CoreSourcesView(idsSliceCoreSources)
-coreSourcesView.viewcoresources()
+coreSourcesView.viewSources()

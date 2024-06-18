@@ -1,38 +1,211 @@
-#################
- viewcoresourcesplot
-#################
+#############
+ viewcoresources
+#############
 
-*viewcoresourcesplot* plot core sources results.It plots Current, Torque and Particles waveform along with 
-Power, particle and current profiles.
+*viewcoresources* script shows source information from available sources. 
+It gives information about Mass of atom, Nuclear charge and Ion charge
+along with particles and energy flux of ions.
+It uses core_sources ids
+
 `refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`_.
 
-************************
- Syntax viewcoresourcesplot
-************************
+********************
+ Syntax viewcoresources
+********************
 
-   .. command-output:: viewcoresourcesplot -h
+   .. command-output:: viewcoresources -h
 
-*************************
- Example viewcoresourcesplot
-*************************
-
-   .. code-block:: bash
-
-        $ viewcoresourcesplot --uri "imas:mdsplus?user=public;pulse=130012;run=105;database=TEST;version=3"
-
-    .. thumbnail:: _static/images/viewcoresourcesplot1.png
-        :alt: image not found
-        :align: center
-
-    .. thumbnail:: _static/images/viewcoresourcesplot2.png
-        :alt: image not found
-        :align: center
-
+*********************
+ Example viewcoresources
+*********************
 
    .. code-block:: bash
 
-        Time  = 190.82 s in range [31.20,328.18] s
-        Index = 8
-        Averaged resolution = 19.79856 s
-        Core_sources contains 1 source
-        
+        $ viewcoresources --uri "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3"
+        Showing details for sdcc-login01.iter.org:/work/imas/shared/imasdb/ITER/3 (pulse 134174,117 time:10.60)
+        total
+                            electrons            particles(--)     energy  2.499896e+06
+                a       z_n     z_ion                particles                   energy
+              2.0       1.0    -9e+40             6.564372e+21                       --
+              3.0       1.0    -9e+40             6.564375e+21                       --
+              9.0       4.0    -9e+40             0.000000e+00                       --
+        auxiliary
+                            electrons            particles(--)     energy  1.000030e+03
+                a       z_n     z_ion                particles                   energy
+              2.0       1.0    -9e+40                       --                       --
+              3.0       1.0    -9e+40                       --                       --
+              9.0       4.0    -9e+40                       --                       --
+        nbi
+                            electrons            particles(--)     energy  0.000000e+00
+                a       z_n     z_ion                particles                   energy
+              2.0       1.0    -9e+40             0.000000e+00                       --
+              3.0       1.0    -9e+40             0.000000e+00                       --
+              9.0       4.0    -9e+40             0.000000e+00                       --
+        ec
+                            electrons            particles(--)     energy  1.000030e+03
+                a       z_n     z_ion                particles                   energy
+              2.0       1.0    -9e+40                       --                       --
+              3.0       1.0    -9e+40                       --                       --
+              9.0       4.0    -9e+40                       --                       --
+        lh
+                            electrons            particles(--)     energy  0.000000e+00
+                a       z_n     z_ion                particles                   energy
+              2.0       1.0    -9e+40                       --                       --
+              3.0       1.0    -9e+40                       --                       --
+              9.0       4.0    -9e+40                       --                       --
+        ic
+                            electrons            particles(--)     energy  0.000000e+00
+                a       z_n     z_ion                particles                   energy
+              2.0       1.0    -9e+40                       --                       --
+              3.0       1.0    -9e+40                       --                       --
+              9.0       4.0    -9e+40                       --                       --
+        fusion
+                            electrons            particles(--)     energy  5.340175e-01
+                a       z_n     z_ion                particles                   energy
+              2.0       1.0    -9e+40            -1.012115e+12                       --
+              3.0       1.0    -9e+40            -9.713402e+11                       --
+              9.0       4.0    -9e+40             0.000000e+00                       --
+        ohmic
+                            electrons            particles(--)     energy  2.553747e+06
+                a       z_n     z_ion                particles                   energy
+              2.0       1.0    -9e+40                       --                       --
+              3.0       1.0    -9e+40                       --                       --
+              9.0       4.0    -9e+40                       --                       --
+        bootstrap_current
+                            electrons            particles(--)               energy(--)
+                a       z_n     z_ion                particles                   energy
+              2.0       1.0    -9e+40                       --                       --
+              3.0       1.0    -9e+40                       --                       --
+              9.0       4.0    -9e+40                       --                       --
+        radiation
+                            electrons            particles(--)     energy -2.312020e+04
+                a       z_n     z_ion                particles                   energy
+              2.0       1.0    -9e+40                       --                       --
+              3.0       1.0    -9e+40                       --                       --
+              9.0       4.0    -9e+40                       --                       --
+        synchrotron_radiation
+                            electrons            particles(--)     energy -3.646184e+02
+                a       z_n     z_ion                particles                   energy
+              2.0       1.0    -9e+40                       --                       --
+              3.0       1.0    -9e+40                       --                       --
+              9.0       4.0    -9e+40                       --                       --
+        collisional_equipartition
+                            electrons            particles(--)     energy -1.259825e+06
+                a       z_n     z_ion                particles                   energy
+              2.0       1.0    -9e+40                       --                       --
+              3.0       1.0    -9e+40                       --                       --
+              9.0       4.0    -9e+40                       --                       --
+        cold_neutrals
+                            electrons            particles(--)     energy -3.173155e+04
+                a       z_n     z_ion                particles                   energy
+              2.0       1.0    -9e+40             6.564372e+21                       --
+              3.0       1.0    -9e+40             6.564375e+21                       --
+              9.0       4.0    -9e+40             0.000000e+00                       --
+        charge_exchange
+                            electrons            particles(--)               energy(--)
+                a       z_n     z_ion                particles                   energy
+              2.0       1.0    -9e+40                       --                       --
+              3.0       1.0    -9e+40                       --                       --
+              9.0       4.0    -9e+40                       --                       --
+        pellet
+                            electrons            particles(--)               energy(--)
+                a       z_n     z_ion                particles                   energy
+              2.0       1.0    -9e+40             0.000000e+00                       --
+              3.0       1.0    -9e+40             0.000000e+00                       --
+              9.0       4.0    -9e+40             0.000000e+00                       --
+
+   .. code-block:: bash
+
+      $ viewsources --uri "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3" -m PREVIOUS -t 50
+
+        Showing details for sdcc-login01.iter.org:/work/imas/shared/imasdb/ITER/3 (pulse 134174,117 time:48.938))
+        total
+                            electrons            particles(--)     energy  2.203519e+07
+                a       z_n     z_ion                particles                   energy
+              2.0       1.0    -9e+40             4.710725e+21                       --
+              3.0       1.0    -9e+40             4.710724e+21                       --
+              9.0       4.0    -9e+40             0.000000e+00                       --
+        auxiliary
+                            electrons            particles(--)     energy  2.000062e+07
+                a       z_n     z_ion                particles                   energy
+              2.0       1.0    -9e+40                       --                       --
+              3.0       1.0    -9e+40                       --                       --
+              9.0       4.0    -9e+40                       --                       --
+        nbi
+                            electrons            particles(--)     energy  0.000000e+00
+                a       z_n     z_ion                particles                   energy
+              2.0       1.0    -9e+40             0.000000e+00                       --
+              3.0       1.0    -9e+40             0.000000e+00                       --
+              9.0       4.0    -9e+40             0.000000e+00                       --
+        ec
+                            electrons            particles(--)     energy  2.000062e+07
+                a       z_n     z_ion                particles                   energy
+              2.0       1.0    -9e+40                       --                       --
+              3.0       1.0    -9e+40                       --                       --
+              9.0       4.0    -9e+40                       --                       --
+        lh
+                            electrons            particles(--)     energy  0.000000e+00
+                a       z_n     z_ion                particles                   energy
+              2.0       1.0    -9e+40                       --                       --
+              3.0       1.0    -9e+40                       --                       --
+              9.0       4.0    -9e+40                       --                       --
+        ic
+                            electrons            particles(--)     energy  0.000000e+00
+                a       z_n     z_ion                particles                   energy
+              2.0       1.0    -9e+40                       --                       --
+              3.0       1.0    -9e+40                       --                       --
+              9.0       4.0    -9e+40                       --                       --
+        fusion
+                            electrons            particles(--)     energy  2.845680e+03
+                a       z_n     z_ion                particles                   energy
+              2.0       1.0    -9e+40            -6.465727e+15                       --
+              3.0       1.0    -9e+40            -6.293794e+15                       --
+              9.0       4.0    -9e+40             0.000000e+00                       --
+        ohmic
+                            electrons            particles(--)     energy  2.456604e+06
+                a       z_n     z_ion                particles                   energy
+              2.0       1.0    -9e+40                       --                       --
+              3.0       1.0    -9e+40                       --                       --
+              9.0       4.0    -9e+40                       --                       --
+        bootstrap_current
+                            electrons            particles(--)               energy(--)
+                a       z_n     z_ion                particles                   energy
+              2.0       1.0    -9e+40                       --                       --
+              3.0       1.0    -9e+40                       --                       --
+              9.0       4.0    -9e+40                       --                       --
+        radiation
+                            electrons            particles(--)     energy -3.902759e+05
+                a       z_n     z_ion                particles                   energy
+              2.0       1.0    -9e+40                       --                       --
+              3.0       1.0    -9e+40                       --                       --
+              9.0       4.0    -9e+40                       --                       --
+        synchrotron_radiation
+                            electrons            particles(--)     energy -1.699482e+05
+                a       z_n     z_ion                particles                   energy
+              2.0       1.0    -9e+40                       --                       --
+              3.0       1.0    -9e+40                       --                       --
+              9.0       4.0    -9e+40                       --                       --
+        collisional_equipartition
+                            electrons            particles(--)     energy -1.162582e+07
+                a       z_n     z_ion                particles                   energy
+              2.0       1.0    -9e+40                       --                       --
+              3.0       1.0    -9e+40                       --                       --
+              9.0       4.0    -9e+40                       --                       --
+        cold_neutrals
+                            electrons            particles(--)     energy -3.460606e+04
+                a       z_n     z_ion                particles                   energy
+              2.0       1.0    -9e+40             4.710731e+21                       --
+              3.0       1.0    -9e+40             4.710730e+21                       --
+              9.0       4.0    -9e+40             0.000000e+00                       --
+        charge_exchange
+                            electrons            particles(--)               energy(--)
+                a       z_n     z_ion                particles                   energy
+              2.0       1.0    -9e+40                       --                       --
+              3.0       1.0    -9e+40                       --                       --
+              9.0       4.0    -9e+40                       --                       --
+        pellet
+                            electrons            particles(--)               energy(--)
+                a       z_n     z_ion                particles                   energy
+              2.0       1.0    -9e+40             0.000000e+00                       --
+              3.0       1.0    -9e+40             0.000000e+00                       --
+              9.0       4.0    -9e+40             0.000000e+00                       --

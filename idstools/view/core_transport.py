@@ -66,6 +66,7 @@ class CoreTransportView:
         idsEquilibrium,
         timeIndex,
         modelIndex,
+        logscale=False,
     ):
         Tm = idsCoreTransport.model[modelIndex]
         V = Tm.profiles_1d[timeIndex].grid_d.volume
@@ -92,6 +93,8 @@ class CoreTransportView:
             counter = counter + 1
             ax.plot(r, Gamma_i, label="Direct evaluation")
             ax.plot(r, T_i.particles.flux, label="Transport code")
+            if logscale:
+                ax.set_yscale("log")
             ax.set_title(f"Particle fluxes for {T_i.element[0].z_n}/{T_i.element[0].a}")
             ax.set_xlabel("rho_tor_norm")
             ax.set_ylabel("Particle flux density")
@@ -105,6 +108,7 @@ class CoreTransportView:
         idsEquilibrium,
         timeIndex,
         modelIndex,
+        logscale=False,
     ):
         Tm = idsCoreTransport.model[modelIndex]
         V = Tm.profiles_1d[timeIndex].grid_d.volume
@@ -161,6 +165,8 @@ class CoreTransportView:
                 alpha=0.2,
             )
             ax.plot(r, T_i.energy.flux, label="Transport code")
+            if logscale:
+                ax.set_yscale("log")
             ax.set_title(f"Energy fluxes for {T_i.element[0].z_n}/{T_i.element[0].a}")
             ax.set_xlabel("rho_tor_norm")
             ax.set_ylabel("Energy flux density")
@@ -174,6 +180,7 @@ class CoreTransportView:
         idsEquilibrium,
         timeIndex,
         modelIndex,
+        logscale=False,
     ):
         Tm = idsCoreTransport.model[modelIndex]
         V = Tm.profiles_1d[timeIndex].grid_d.volume
@@ -224,6 +231,8 @@ class CoreTransportView:
             alpha=0.2,
         )
         ax.plot(r, T_e.energy.flux, label="Transport code")
+        if logscale:
+            ax.set_yscale("log")
         ax.set_title("Energy fluxes for electrons")
         ax.set_xlabel("rho_tor_norm")
         ax.set_ylabel("Energy flux density")
@@ -236,6 +245,7 @@ class CoreTransportView:
         idsCoreProfiles,
         timeIndex,
         modelIndex,
+        logscale=False,
     ):
         Tm = idsCoreTransport.model[modelIndex]
         r = Tm.profiles_1d[timeIndex].grid_d.rho_tor_norm
@@ -249,6 +259,8 @@ class CoreTransportView:
 
         ax.plot(r, Gamma_e, label="Ambipolar Transport code fluxes")
         ax.plot(r, T_e.particles.flux, label="Transport code")
+        if logscale:
+            ax.set_yscale("log")
         ax.set_title("Particle fluxes for electrons")
         ax.set_xlabel("rho_tor_norm")
         ax.set_ylabel("Particle flux density")
@@ -257,12 +269,12 @@ class CoreTransportView:
     def _validateElectrons(self, T_e, C_e, r, modelIndex):
         if len(r) != len(C_e.density):
             logger.critical(
-                f"core_profiles.profiles_1d[-1].electrons.density could not be read"
+                "core_profiles.profiles_1d[-1].electrons.density could not be read"
             )
             C_e.density = C_e.density[: len(r)]
         if len(r) != len(C_e.temperature):
             logger.critical(
-                f"core_profiles.profiles_1d[-1].electrons.temperature could not be read"
+                "core_profiles.profiles_1d[-1].electrons.temperature could not be read"
             )
             C_e.temperature = C_e.temperature[: len(r)]
         if len(T_e.particles.flux) < 1:
@@ -289,23 +301,23 @@ class CoreTransportView:
     def _validateIonsData(self, T_i, C_i, r, modelIndex):
         if len(C_i.density) < 1:
             logger.critical(
-                f"core_profiles.profiles_1d[-1].ion.density could not be read"
+                "core_profiles.profiles_1d[-1].ion.density could not be read"
             )
             C_i.density = np.asarray([np.nan] * r)
 
         if len(r) != len(C_i.density):
             logger.critical(
-                f"core_profiles.profiles_1d[-1].ion.density length is not the same as rho_tor_norm length, correcting the length"
+                "core_profiles.profiles_1d[-1].ion.density length is not the same as rho_tor_norm length, correcting the length"
             )
             C_i.density = C_i.density[: len(r)]
         if len(C_i.temperature) < 1:
             logger.critical(
-                f"core_profiles.profiles_1d[-1].ion.temperature could not be read"
+                "core_profiles.profiles_1d[-1].ion.temperature could not be read"
             )
             C_i.temperature = np.asarray([np.nan] * r)
         if len(r) != len(C_i.temperature):
             logger.critical(
-                f"core_profiles.profiles_1d[-1].ion.temperature length is not the same as rho_tor_norm length, correcting the length"
+                "core_profiles.profiles_1d[-1].ion.temperature length is not the same as rho_tor_norm length, correcting the length"
             )
             C_i.temperature = C_i.temperature[: len(r)]
 
