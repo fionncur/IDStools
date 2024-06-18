@@ -19,6 +19,19 @@ retrieves from distribution_sources IDS
    .. code-block:: bash
 
         $ viewneutron --uri "imas:mdsplus?user=public;pulse=121014;run=11;database=ITER;version=3" -t 450
+
+
+    .. thumbnail:: _static/images/viewneutron.png
+        :alt: image not found
+        :align: center
+
+    .. thumbnail:: _static/images/viewneutron2.png
+        :alt: image not found
+        :align: center
+
+   .. code-block:: bash
+
+
         Time  = 482.00 s
         Distribution_sources contains 9 sources
         D + D -> He3 + n(2.45 MeV); Total; P = 136.60 kW
@@ -31,11 +44,3 @@ retrieves from distribution_sources IDS
         D + T(1 MeV) -> He4 + n(14.1 MeV); Total; P = 29.37 kW
         D + T(1 MeV) -> He4 + n(14.1 MeV); Total; P = -90000000000000011196554993145437224960.00 kW
 
-
-    .. thumbnail:: _static/images/viewneutron.png
-        :alt: image not found
-        :align: center
-
-    .. thumbnail:: _static/images/viewneutron2.png
-        :alt: image not found
-        :align: center
