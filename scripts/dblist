@@ -4,7 +4,8 @@ import argparse
 import os
 import sys
 import textwrap
-
+from rich.console import Console
+from rich.table import Table
 from rich_argparse import RichHelpFormatter
 from rich.markdown import Markdown
 
@@ -91,7 +92,42 @@ def print_list(dbs, pulsenum=None, compact=False, timestamp=False):
                         )
 
 
-def printTimes(dbs, args, print_times=False, pulseNumber=None, runNumber=None):
+
+def print_urilist(dbs, pulsenum=None, compact=False, timestamp=False):
+    urichoice=["Sr. No.", "uri"]
+    if timestamp:
+        urichoice.append("timestamp")
+    table = Table()
+    for columnName in urichoice:
+        if columnName== "timestamp":
+            table.add_column(columnName, justify="left", style="red")
+        elif columnName== "uri":
+            table.add_column(columnName, justify="left", style="yellow")
+        else:
+            table.add_column(columnName, justify="left", style="green")
+    counter=0
+    for dbname, dvs in dbs:
+        for dv, dbbackends in dvs:
+            for backend, dbs in dbbackends:
+                for pulse, runs in sorted(dbs.items()):
+                    if pulsenum is not None:
+                        # if a pulsenum is given, only display databases with this pulse number
+                        if pulse != pulsenum:
+                            continue
+
+                    for r in sorted(runs , key=lambda x: x[1]):
+                        x=[]
+                        x.append(str(counter))
+                        counter=counter+1
+                        x.append(f"\"imas:{backend.lower()}?user={args.user};pulse={pulse};run={r[1]};database={dbname};version={dv}\"")
+                        if timestamp:
+                            x.append(str(r[7]))
+                        table.add_row(*x)
+    console = Console()
+    console.print(table)  
+
+def printTimes(dbs, args, print_times=False, pulseNumber=None, runNumber=None, showuri=False):
+    
     for dbname, dvs in dbs:
         printed_database = False
         for dv, dbbackends in dvs:
@@ -125,7 +161,8 @@ def printTimes(dbs, args, print_times=False, pulseNumber=None, runNumber=None):
                             print(TAB * 3 + "Pulse " + extended(str(pulse), SHOT_STR_LEN))
                             printed_pulse = True
 
-                        print(TAB * 4 + " Run: " + extended(str(run), RUN_STR_LEN))
+                        
+                        
                         connargs = argparse.Namespace()
                         connargs.backend = backend.upper()
                         connargs.pulse = pulse
@@ -136,7 +173,10 @@ def printTimes(dbs, args, print_times=False, pulseNumber=None, runNumber=None):
                         connargs.uri = f"imas:{backend.lower()}?user={args.user};pulse={pulse};run={run};database={dbname};version={dv}"
                         
                         connection = DBMaster.getConnection(connargs)
-                
+                        if showuri:
+                            print(TAB * 4 + "\"" +connargs.uri + "\"")
+                        else:
+                            print(TAB * 4 + " Run: " + extended(str(run), RUN_STR_LEN))
                         availableIdsAndTimes = getAvailableIdsAndTimes(connection)
                         for idsname, times in availableIdsAndTimes:
                             if len(times) == 1 and np.isnan(times[0]):
@@ -179,6 +219,7 @@ def printTimes(dbs, args, print_times=False, pulseNumber=None, runNumber=None):
                                     + extended(str(times[-1]), TIME_STR_LEN)
                                     + ")"
                                 )
+                        print("\n")
 
                         connection.close()
 
@@ -270,7 +311,12 @@ if __name__ == "__main__":
         help="Show databases written with given backend(s). \n\
     Comma-separated list of backends (Currently supported: mdsplus, hdf5). By default all backends are shown. \t(default=%(default)s)",
     )
-
+    parser.add_argument(
+        "-showuri",
+        "--showuri",
+        action="store_true",
+        help="Show uri",
+    )
     parser.add_argument("positionalArgs", nargs="?", default=os.getcwd())
 
     args = parser.parse_args()
@@ -284,16 +330,20 @@ if __name__ == "__main__":
     backends = args.backend.split(",") if args.backend else None
     dbs = DBMaster.getDatabaseFiles(args.user, args.database, args.version, backends)
     if args.cmd == "list":
-        print_list(dbs, args.pulse, args.compact, args.timestamp)
-
+        
+        if args.showuri:
+            print_urilist(dbs, args.pulse, args.compact, args.timestamp)
+        else:
+            print_list(dbs, args.pulse, args.compact, args.timestamp)
+            
     if args.cmd == "slices":
         printTimes(
-            dbs, args, print_times=False, pulseNumber=args.pulse, runNumber=args.run
+            dbs, args, print_times=False, pulseNumber=args.pulse, runNumber=args.run, showuri=args.showuri
         )
 
     if args.cmd == "times":
         printTimes(
-            dbs, args, print_times=True, pulseNumber=args.pulse, runNumber=args.run
+            dbs, args, print_times=True, pulseNumber=args.pulse, runNumber=args.run, showuri=args.showuri
         )
 
     if args.cmd == "databases":

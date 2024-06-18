@@ -35,3 +35,7 @@ retrieves from distribution_sources IDS
     .. thumbnail:: _static/images/viewneutron.png
         :alt: image not found
         :align: center
+
+    .. thumbnail:: _static/images/viewneutron2.png
+        :alt: image not found
+        :align: center

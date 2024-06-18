@@ -35,6 +35,6 @@ core_profiles.
         Empty profiles_1d[0].electrons.pressure_fast_parallel
         Empty profiles_1d[0].electrons.pressure_fast_perpendicular
 
-   .. thumbnail:: _static/images/plot_pressure.png
+   .. thumbnail:: _static/images/viewpressure.png
       :alt: image not found
       :align: center
