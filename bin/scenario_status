@@ -1,7 +1,11 @@
 #!/usr/bin/env python
 
-import os, argparse, yaml, re
-
+import os, argparse, re
+from yaml import load as yamlload
+try:
+    from yaml import CLoader as yamlLoader
+except ImportError:
+    from yaml import Loader as yamlLoader
 # Management of input arguments
 parser = argparse.ArgumentParser(description=\
 	 '---- Show status and potential parent and children for a given simulation stored in ITER DB folder')
@@ -17,7 +21,7 @@ run  = str(args['run'])
 if args['folder'] != None:
     folder = args['folder']
 else:
-    LL_version = int(os.environ['UAL_VERSION'][0])
+    LL_version = int(os.environ['AL_VERSION'][0])
     if LL_version < 4:
         folder = os.environ['IMAS_HOME']+'/shared/iterdb/3/0'
     else:
@@ -29,14 +33,14 @@ def read_yaml(shot,run,folder):
     filename = folder+f'/ids_{shot}{run.rjust(4,"0")}.yaml'
     try:
         with open(filename, 'r') as f:
-            data = yaml.load(f,Loader=yaml.CLoader)
+            data = yamlload(f,Loader=yamlLoader)
     except Exception as exc:
         if args['folder'] == None:
             print(f"Warning: {exc}")
             data = None
         else:
            try:
-               LL_version = int(os.environ['UAL_VERSION'][0])
+               LL_version = int(os.environ['AL_VERSION'][0])
                if LL_version < 4:
                    filename = os.environ['IMAS_HOME']+'/shared/iterdb/3/0'\
                              +f'/ids_{shot}{run.rjust(4,"0")}.yaml'
@@ -44,7 +48,7 @@ def read_yaml(shot,run,folder):
                    filename = os.environ['IMAS_HOME']+'/shared/imasdb/ITER/3/0'\
                              +f'/ids_{shot}{run.rjust(4,"0")}.yaml'
                with open(filename, 'r') as f:
-                   data = yaml.load(f,Loader=yaml.CLoader)
+                   data = yamlload(f,Loader=yamlLoader)
            except Exception as exc:
                print(f"Warning: {exc}")
                data = None

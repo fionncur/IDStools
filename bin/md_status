@@ -1,7 +1,11 @@
 #!/usr/bin/env python
 
-import os, argparse, yaml, re
-
+import os, argparse, re
+from yaml import load as yamlload
+try:
+    from yaml import CLoader as yamlLoader
+except ImportError:
+    from yaml import Loader as yamlLoader
 # Management of input arguments
 parser = argparse.ArgumentParser(description=\
 	 '---- Show status and potential parent and children for a given simulation stored in ITER DB folder')
@@ -52,7 +56,7 @@ else:
     folder = '/work/imas/shared/imasdb/ITER_MD/3'
 
 file = open(folder+'/md_summary.yaml', 'r')
-data = yaml.load(file,Loader=yaml.CLoader)
+data = yamlload(file,Loader=yamlLoader)
 file.close()
 
 shotrun = shot+'/'+run

@@ -63,7 +63,7 @@ include 'codata_2018.f90'      ! Recommended physical constants since 2018
   integer narg, cptArg, idx, status, shot, run, idxmd
   integer time_sind, num_time_slices, homogeneous_time
   character username*24, database*24, treename*24, version*24
-  character imas_version*132, ual_version*132, code_commit*132
+  character imas_version*132, al_version*132, code_commit*132
   character systemarg*512
   character*8 date
   character*10 ctime
@@ -124,7 +124,7 @@ include 'codata_2018.f90'      ! Recommended physical constants since 2018
   treename = 'ids'
   database = 'iter'
   call getenv ('USER', username)
-  call getenv ('UAL_VERSION', ual_version)
+  call getenv ('AL_VERSION', al_version)
   call getenv ('IMAS_VERSION', imas_version)
   call getenv ('EBVERSIONIDSTOOLS', code_commit)
   call date_and_time (date, ctime, zone, tvalues)
@@ -840,7 +840,7 @@ include 'codata_2018.f90'      ! Recommended physical constants since 2018
     allocate( properties%version_put%data_dictionary(1) )
     properties%version_put%data_dictionary = imas_version
     allocate( properties%version_put%access_layer(1) )
-    properties%version_put%access_layer = ual_version
+    properties%version_put%access_layer = al_version
     allocate( properties%version_put%access_layer_language(1) )
     properties%version_put%access_layer_language = 'FORTRAN'
     return

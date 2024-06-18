@@ -29,7 +29,7 @@ user_or_path = args["user_or_path"]
 database     = args["database"]
 version      = os.getenv('IMAS_VERSION')[0]
 imas_version = os.getenv('IMAS_VERSION')
-ual_version  = os.getenv('UAL_VERSION')
+al_version  = os.getenv('AL_VERSION')
 
 # CHECK PARAMETERS
 if shot_in == shot_out and run_in == run_out:
@@ -86,7 +86,7 @@ for ids in idslist:
   # COPY IDS FROM INPUT TO OUTPUT WHILE UPDATING DD AND UAL VERSIONS
   exec('output.'+ids+' = input.'+ids)
   exec('output.'+ids+'.ids_properties.version_put.data_dictionary = "'+imas_version+'"')
-  exec('output.'+ids+'.ids_properties.version_put.access_layer = "'+ual_version+'"')
+  exec('output.'+ids+'.ids_properties.version_put.access_layer = "'+al_version+'"')
   if (ids == "dataset_description"):
     exec('output.'+ids+'.dd_version = "'+imas_version+'"')
   eval('output.'+ids+'.setExpIdx(idx_out)')

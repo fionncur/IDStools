@@ -1,8 +1,12 @@
 #!/usr/bin/env python
 
-import imas, yaml, pdb, argparse, re
+import imas, pdb, argparse, re
 import os, sys, subprocess, glob
-
+from yaml import load as yamlload
+try:
+    from yaml import CLoader as yamlLoader
+except ImportError:
+    from yaml import Loader as yamlLoader
 # ----------------------------------------------------------------------------
 
 # FOR BETTER FORMATTING OF INPUT ARGUMENT LISTING IN THE HELP OF THE FUNCTION
@@ -113,7 +117,7 @@ def tab_adjust(data):
 
 # MAIN STUFF
 file = open(folder+'/md_summary.yaml', 'r')
-data = yaml.load(file,Loader=yaml.CLoader)
+data = yamlload(file,Loader=yamlLoader)
 file.close()
 
 tab_array = tab_adjust(data)
