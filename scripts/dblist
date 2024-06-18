@@ -2,20 +2,17 @@
 # -*- coding: utf-8 -*-
 import argparse
 import os
-import sys
-import textwrap
+
+import numpy as np
 from rich.console import Console
+from rich.markdown import Markdown
 from rich.table import Table
 from rich_argparse import RichHelpFormatter
-from rich.markdown import Markdown
-
-import imas
-import numpy as np
 
 from idstools.database import DBMaster
 from idstools.utils.idshelper import getAvailableIdsAndTimes
 from idstools.utils.idslogger import setupLogger
-from idstools.utils.clihelper import getBackendID
+
 logger = setupLogger("module")
 
 TAB = " " * 3
@@ -92,20 +89,19 @@ def print_list(dbs, pulsenum=None, compact=False, timestamp=False):
                         )
 
 
-
 def print_urilist(dbs, pulsenum=None, compact=False, timestamp=False):
-    urichoice=["Sr. No.", "uri"]
+    urichoice = ["Sr. No.", "uri"]
     if timestamp:
         urichoice.append("timestamp")
     table = Table()
     for columnName in urichoice:
-        if columnName== "timestamp":
+        if columnName == "timestamp":
             table.add_column(columnName, justify="left", style="red")
-        elif columnName== "uri":
+        elif columnName == "uri":
             table.add_column(columnName, justify="left", style="yellow")
         else:
             table.add_column(columnName, justify="left", style="green")
-    counter=0
+    counter = 0
     for dbname, dvs in dbs:
         for dv, dbbackends in dvs:
             for backend, dbs in dbbackends:
@@ -115,19 +111,24 @@ def print_urilist(dbs, pulsenum=None, compact=False, timestamp=False):
                         if pulse != pulsenum:
                             continue
 
-                    for r in sorted(runs , key=lambda x: x[1]):
-                        x=[]
+                    for r in sorted(runs, key=lambda x: x[1]):
+                        x = []
                         x.append(str(counter))
-                        counter=counter+1
-                        x.append(f"\"imas:{backend.lower()}?user={args.user};pulse={pulse};run={r[1]};database={dbname};version={dv}\"")
+                        counter = counter + 1
+                        x.append(
+                            f'"imas:{backend.lower()}?user={args.user};pulse={pulse};run={r[1]};database={dbname};version={dv}"'
+                        )
                         if timestamp:
                             x.append(str(r[7]))
                         table.add_row(*x)
     console = Console()
-    console.print(table)  
+    console.print(table)
 
-def printTimes(dbs, args, print_times=False, pulseNumber=None, runNumber=None, showuri=False):
-    
+
+def printTimes(
+    dbs, args, print_times=False, pulseNumber=None, runNumber=None, showuri=False
+):
+
     for dbname, dvs in dbs:
         printed_database = False
         for dv, dbbackends in dvs:
@@ -158,11 +159,11 @@ def printTimes(dbs, args, print_times=False, pulseNumber=None, runNumber=None, s
                             print(TAB * 2 + "Backend: " + backend)
                             printed_backend = True
                         if not printed_pulse:
-                            print(TAB * 3 + "Pulse " + extended(str(pulse), SHOT_STR_LEN))
+                            print(
+                                TAB * 3 + "Pulse " + extended(str(pulse), SHOT_STR_LEN)
+                            )
                             printed_pulse = True
 
-                        
-                        
                         connargs = argparse.Namespace()
                         connargs.backend = backend.upper()
                         connargs.pulse = pulse
@@ -171,10 +172,10 @@ def printTimes(dbs, args, print_times=False, pulseNumber=None, runNumber=None, s
                         connargs.database = dbname
                         connargs.version = dv
                         connargs.uri = f"imas:{backend.lower()}?user={args.user};pulse={pulse};run={run};database={dbname};version={dv}"
-                        
+
                         connection = DBMaster.getConnection(connargs)
                         if showuri:
-                            print(TAB * 4 + "\"" +connargs.uri + "\"")
+                            print(TAB * 4 + '"' + connargs.uri + '"')
                         else:
                             print(TAB * 4 + " Run: " + extended(str(run), RUN_STR_LEN))
                         availableIdsAndTimes = getAvailableIdsAndTimes(connection)
@@ -223,7 +224,8 @@ def printTimes(dbs, args, print_times=False, pulseNumber=None, runNumber=None, s
 
                         connection.close()
 
-description="""
+
+description = """
 This program lists existing IMAS databases.
 
 Possible commands are:
@@ -241,7 +243,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         prog="dblist",
         formatter_class=RichHelpFormatter,
-        description=Markdown(description, style="argparse.text")
+        description=Markdown(description, style="argparse.text"),
     )
     subparsers = parser.add_subparsers(help="sub-commands help")
 
@@ -323,27 +325,39 @@ if __name__ == "__main__":
     # Default command if not provided
     if "cmd" not in args.__dict__:
         backends = args.backend.split(",") if args.backend else None
-        dbs = DBMaster.getDatabaseFiles(args.user, args.database, args.version, backends)
+        dbs = DBMaster.getDatabaseFiles(
+            args.user, args.database, args.version, backends
+        )
         print_list(dbs)
         exit(0)
 
     backends = args.backend.split(",") if args.backend else None
     dbs = DBMaster.getDatabaseFiles(args.user, args.database, args.version, backends)
     if args.cmd == "list":
-        
+
         if args.showuri:
             print_urilist(dbs, args.pulse, args.compact, args.timestamp)
         else:
             print_list(dbs, args.pulse, args.compact, args.timestamp)
-            
+
     if args.cmd == "slices":
         printTimes(
-            dbs, args, print_times=False, pulseNumber=args.pulse, runNumber=args.run, showuri=args.showuri
+            dbs,
+            args,
+            print_times=False,
+            pulseNumber=args.pulse,
+            runNumber=args.run,
+            showuri=args.showuri,
         )
 
     if args.cmd == "times":
         printTimes(
-            dbs, args, print_times=True, pulseNumber=args.pulse, runNumber=args.run, showuri=args.showuri
+            dbs,
+            args,
+            print_times=True,
+            pulseNumber=args.pulse,
+            runNumber=args.run,
+            showuri=args.showuri,
         )
 
     if args.cmd == "databases":
