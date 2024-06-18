@@ -689,7 +689,7 @@ def readScenario(
     if outIDSList is None:
         outIDSList = []
     with open(scenarioFilePath, "r") as scenario_file:
-        config = yamlload(scenario_file, Loader=yamlCLoader)
+        config = yamlload(scenario_file, Loader=yamlLoader)
 
     # Read the equilibrium and core_profiles IDSs from the input datafile
     connectionIn = imas.DBEntry(

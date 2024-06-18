@@ -79,7 +79,7 @@ class ScenarioDescriptionBase:
         """
         with open(yamlFilePath, "r") as fileHandle:
             try:
-                yamlData = yamlload(fileHandle, Loader=yamlCLoader)
+                yamlData = yamlload(fileHandle, Loader=yamlLoader)
             except Exception as e:
                 yamlData = None
         return yamlData
@@ -187,7 +187,7 @@ class ScenarioDescription(ScenarioDescriptionBase):
         self.yamlData = None
         try:
             with open(yamlFileName, "r") as f:
-                self.yamlData = yamlload(f, Loader=yamlCLoader)
+                self.yamlData = yamlload(f, Loader=yamlLoader)
         except Exception as exc:
             logger.critical(f"Warning: {exc}")
 
