@@ -45,7 +45,7 @@ SCRIPTS=(
     "viewrotation --uri \"imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3\" --save --directory $LOG_DIR"
     "viewscenario --uri \"imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3\" --time 60 --save --directory $LOG_DIR"
     "viewscenario --uri \"imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3\" --noProfiles --save --directory $LOG_DIR"
-    "viewsources --uri \"imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3\""
+    "viewcoresources --uri \"imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3\""
     "viewspectrometry --uri \"imas:mdsplus?user=public;pulse=134000;run=37;database=TEST;version=3\" --save --directory $LOG_DIR")
 
 execute_scripts "${SCRIPTS[@]}"

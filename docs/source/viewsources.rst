@@ -1,8 +1,8 @@
 #############
- viewsources
+ viewcoresources
 #############
 
-*viewsources* script shows source information from available sources. 
+*viewcoresources* script shows source information from available sources. 
 It gives information about Mass of atom, Nuclear charge and Ion charge
 along with particles and energy flux of ions.
 It uses core_sources ids
@@ -10,18 +10,18 @@ It uses core_sources ids
 `refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`_.
 
 ********************
- Syntax viewsources
+ Syntax viewcoresources
 ********************
 
-   .. command-output:: viewsources -h
+   .. command-output:: viewcoresources -h
 
 *********************
- Example viewsources
+ Example viewcoresources
 *********************
 
    .. code-block:: bash
 
-        $ viewsources --uri "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3"
+        $ viewcoresources --uri "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3"
         Showing details for sdcc-login01.iter.org:/work/imas/shared/imasdb/ITER/3 (pulse 134174,117 time:10.60)
         total
                             electrons            particles(--)     energy  2.499896e+06
@@ -116,7 +116,7 @@ It uses core_sources ids
 
    .. code-block:: bash
 
-      $ viewsources --uri "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3" -m PREVIOUS -t 50
+      $ viewcoresources --uri "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3" -m PREVIOUS -t 50
 
         Showing details for sdcc-login01.iter.org:/work/imas/shared/imasdb/ITER/3 (pulse 134174,117 time:48.938))
         total

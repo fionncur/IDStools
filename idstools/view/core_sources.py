@@ -10,9 +10,9 @@ class CoreSourcesView:
         self.coreSourcesCompute = CoreSourcesCompute(ids)
         self.ids = ids
 
-    def viewSources(self):
+    def viewcoresources(self):
         """
-        The `viewSources` function prints information about sources, including their name, electron
+        The `viewcoresources` function prints information about sources, including their name, electron
         flux, energy flux, and ion flux.
         """
         sourcesDict = self.coreSourcesCompute.getFluxInfoFromSources()

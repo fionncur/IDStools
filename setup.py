@@ -108,7 +108,7 @@ setup(
         "scripts/viewpressure",
         "scripts/viewscenario",
         "scripts/viewrotation",
-        "scripts/viewsources",
+        "scripts/viewcoresources",
         "scripts/viewecray",
         "scripts/vieweccomposition",
         "scripts/viewspectrometry",

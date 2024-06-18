@@ -164,13 +164,13 @@ This cheat sheet provides quick reference of commonly used commands in IDStools.
 |                            |    $ viewscenario --uri "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3" --time 60                    |
 |                            |    $ viewscenario --uri "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3" --noProfiles                 |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
-| *viewsources*              | Shows source information from available                                                                                      |
+| *viewcoresources*              | Shows source information from available                                                                                      |
 |                            |  sources (replaces print_sources).                                                                                           |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
 |                            |                                                                                                                              |
 |                            | .. code-block:: bash                                                                                                         |
 |                            |                                                                                                                              |
-|                            |    $ viewsources --uri "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3"                               |
+|                            |    $ viewcoresources --uri "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3"                               |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
 | *viewspectrometry*         | Displays the spectrum, displaying plots of radiance                                                                          |
 |                            | and intensity in two different windows (replaces svplot).                                                                    |   

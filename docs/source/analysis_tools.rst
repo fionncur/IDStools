@@ -26,5 +26,5 @@ composition, allowing you to depict various trends and plasma physics.
    viewpressure
    viewrotation
    viewscenario
-   viewsources
+   viewcoresources
    viewspectrometry
