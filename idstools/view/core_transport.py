@@ -1,11 +1,10 @@
 import logging
-from idstools.compute.equilibrium import EquilibriumCompute
 
 import numpy as np
 import scipy.constants.codata as codata
 
 from idstools.compute.core_transport import CoreTransportCompute
-from idstools.view.common import Canvas
+from idstools.compute.equilibrium import EquilibriumCompute
 
 logger = logging.getLogger(f"module.{__name__}")
 
@@ -45,15 +44,13 @@ class CoreTransportView:
                     f"{ionDict['a'] : >10}{ionDict['z_n'] : >10}{ionDict['z_ion'] : >10}",
                     end="",
                 )
-                if ionDict["particles_flux"] is None or all(
-                    np.isnan(ionDict["particles_flux"])
+                if ionDict["particles_flux"] is None or np.isnan(
+                    ionDict["particles_flux"]
                 ):
                     print(f"{'--' : >25}", end="")
                 else:
                     print(f"{ionDict['particles_flux'] : >25.6e}", end="")
-                if ionDict["energy_flux"] is None or all(
-                    np.isnan(ionDict["energy_flux"])
-                ):
+                if ionDict["energy_flux"] is None or np.isnan(ionDict["energy_flux"]):
                     print(f"{'--' : >25}")
                 else:
                     print(f"{ionDict['energy_flux'] : >25.6e}")

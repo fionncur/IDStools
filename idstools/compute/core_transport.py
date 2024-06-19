@@ -4,6 +4,7 @@ This module provides compute functions and classes for core_transport ids data
 `refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`_.
 
 """
+
 import logging
 import numpy as np
 
@@ -21,9 +22,9 @@ class CoreTransportCompute:
 
         Returns:
             a dictionary called `fluxesDict`. Following is the structure
-            
+
             .. code-block:: python
-            
+
                 {0:
                     {
                         'energy_flux': None,
@@ -41,15 +42,17 @@ class CoreTransportCompute:
                             'particles_flux': None
                     },
                 }
-                
+
         """
         fluxesDict = {}
 
         for modelIndex, model in enumerate(self.ids.model):
             fluxDict = {
-                "name": "Not defined"
-                if model.identifier.name == ""
-                else model.identifier.name,
+                "name": (
+                    "Not defined"
+                    if model.identifier.name == ""
+                    else model.identifier.name
+                ),
                 "flux_multiplier": model.flux_multiplier,
             }
             if len(model.profiles_1d[0].electrons.particles.flux) != 0:
@@ -81,23 +84,26 @@ class CoreTransportCompute:
             else:
                 fluxDict["energy_flux"] = None
             ionsDict = {}
+            gridFluxSurface = (
+                np.nan
+                if len(model.profiles_1d[0].grid_flux.surface) == 0
+                else model.profiles_1d[0].grid_flux.surface
+            )
             for ionIndex, ion in enumerate(model.profiles_1d[0].ion):
-                gridFluxSurface = (
-                    np.nan
-                    if len(model.profiles_1d[0].grid_flux.surface) == 0
-                    else model.profiles_1d[0].grid_flux.surface[-1]
-                )
+
                 ionDict = {
                     "a": ion.element[0].a,
                     "z_n": ion.element[0].z_n,
                     "z_ion": ion.z_ion,
                 }
                 if len(ion.particles.flux) != 0:
-                    ionDict["particles_flux"] = ion.particles.flux * gridFluxSurface
+                    ionDict["particles_flux"] = (ion.particles.flux * gridFluxSurface)[
+                        -1
+                    ]
                 else:
                     ionDict["particles_flux"] = None
                 if len(ion.energy.flux) != 0:
-                    ionDict["energy_flux"] = ion.energy.flux * gridFluxSurface
+                    ionDict["energy_flux"] = (ion.energy.flux * gridFluxSurface)[-1]
                 else:
                     ionDict["energy_flux"] = None
                 ionsDict[ionIndex] = ionDict
