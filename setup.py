@@ -9,7 +9,12 @@ import versioneer
 current_directory = pathlib.Path(__file__).parent.resolve()
 long_description = (current_directory / "README.md").read_text(encoding="utf-8")
 
-
+requirement_path = f"{current_directory}/requirements.txt"
+install_requires = []
+if os.path.isfile(requirement_path):
+    with open(requirement_path) as f:
+        install_requires = f.read().splitlines()
+        
 # Generate list of python scripts
 script_files = glob.glob("bin/*")
 script_files.append("database_tools/ids_shift_eq.py")
@@ -54,5 +59,6 @@ setup(
     py_modules=[],
     scripts=script_files,
     keywords="IMAS, IDS",
+    install_requires=install_requires,
     data_files=data_files,
 )

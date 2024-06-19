@@ -2,5 +2,5 @@ matplotlib
 numpy
 pandas
 cerberus
-yaml
+pyyaml
 fortranformat
