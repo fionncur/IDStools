@@ -180,8 +180,8 @@ if not args.noProfiles:
 
     coreCoreProfilesView.viewCurrentDesnityProfiles(ax7)
 
-    ViewEquilibrium = EquilibriumView(idsEquilibrium)
-    ViewEquilibrium.viewEquilibrium(ax5)
+    plotequilibrium = EquilibriumView(idsEquilibrium)
+    plotequilibrium.plotequilibrium(ax5)
 
 title = getTitle(args, "Scenario")
 if not args.noProfiles:

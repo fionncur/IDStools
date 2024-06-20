@@ -1,30 +1,30 @@
 #################
- viewcoresourcesplot
+ plotcoresources
 #################
 
-*viewcoresourcesplot* plot core sources results.It plots Current, Torque and Particles waveform along with 
+*plotcoresources* plot core sources results.It plots Current, Torque and Particles waveform along with 
 Power, particle and current profiles.
 `refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`_.
 
 ************************
- Syntax viewcoresourcesplot
+ Syntax plotcoresources
 ************************
 
-   .. command-output:: viewcoresourcesplot -h
+   .. command-output:: plotcoresources -h
 
 *************************
- Example viewcoresourcesplot
+ Example plotcoresources
 *************************
 
    .. code-block:: bash
 
-        $ viewcoresourcesplot --uri "imas:mdsplus?user=public;pulse=130012;run=105;database=TEST;version=3"
+        $ plotcoresources --uri "imas:mdsplus?user=public;pulse=130012;run=105;database=TEST;version=3"
 
-    .. thumbnail:: _static/images/viewcoresourcesplot1.png
+    .. thumbnail:: _static/images/plotcoresources1.png
         :alt: image not found
         :align: center
 
-    .. thumbnail:: _static/images/viewcoresourcesplot2.png
+    .. thumbnail:: _static/images/plotcoresources2.png
         :alt: image not found
         :align: center
 

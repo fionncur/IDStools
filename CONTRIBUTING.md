@@ -52,7 +52,7 @@ Define clear and meaningful variable names `bTotal`, `profile2dIndex`
 *   Use camelCase for variables, function names
 
 ### Scripts Naming
-*   Visualization scripts (console print or plots) starts with `view` prefix e.g. `viewequilibrium`
+*   Visualization scripts (console print or plots) starts with `view` prefix e.g. `plotequilibrium`
 *   ids related operations like copy, performance, size prefix with `ids` e.g. `idscp`, `idsresample`
 *   database related operations prefix with `db` e.g. dblist
 

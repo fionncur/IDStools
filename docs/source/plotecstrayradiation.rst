@@ -1,8 +1,8 @@
 ######################
- viewecstrayradiation
+ plotecstrayradiation
 ######################
 
-*viewecstrayradiation* script shows electron cyclotron stray radiation
+*plotecstrayradiation* script shows electron cyclotron stray radiation
 information by showing different plots. It shows cut off layer,
 resonance layer, top view equilibrium.
 `refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`_.
@@ -12,10 +12,10 @@ resonance layer, top view equilibrium.
    This program is experimental and currently is in development.
 
 *****************************
- Syntax viewecstrayradiation
+ Syntax plotecstrayradiation
 *****************************
 
-   .. command-output:: viewecstrayradiation -h
+   .. command-output:: plotecstrayradiation -h
 
 *****************
  Example ecstray
@@ -23,8 +23,8 @@ resonance layer, top view equilibrium.
 
    .. code-block:: bash
 
-      $ viewecstrayradiation --uri "imas:mdsplus?user=public;pulse=134173;run=2326;database=TEST;version=3"
+      $ plotecstrayradiation --uri "imas:mdsplus?user=public;pulse=134173;run=2326;database=TEST;version=3"
 
-   .. thumbnail:: _static/images/viewecstrayradiation.png
+   .. thumbnail:: _static/images/plotecstrayradiation.png
       :alt: image not found
       :align: center

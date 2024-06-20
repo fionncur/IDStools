@@ -1,16 +1,16 @@
 #############
- viewneutron
+ plotneutron
 #############
 
-*viewneutron* plots particles vs normalised toroidal flux coordinate. It
+*plotneutron* plots particles vs normalised toroidal flux coordinate. It
 retrieves from distribution_sources IDS
 `refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`_.
 
 ********************
- Syntax viewneutron
+ Syntax plotneutron
 ********************
 
-   .. command-output:: viewneutron -h
+   .. command-output:: plotneutron -h
 
 *********
  Example
@@ -18,14 +18,14 @@ retrieves from distribution_sources IDS
 
    .. code-block:: bash
 
-        $ viewneutron --uri "imas:mdsplus?user=public;pulse=121014;run=11;database=ITER;version=3" -t 450
+        $ plotneutron --uri "imas:mdsplus?user=public;pulse=121014;run=11;database=ITER;version=3" -t 450
 
 
-    .. thumbnail:: _static/images/viewneutron.png
+    .. thumbnail:: _static/images/plotneutron.png
         :alt: image not found
         :align: center
 
-    .. thumbnail:: _static/images/viewneutron2.png
+    .. thumbnail:: _static/images/plotneutron2.png
         :alt: image not found
         :align: center
 

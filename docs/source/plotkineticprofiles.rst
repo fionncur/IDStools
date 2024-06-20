@@ -1,24 +1,24 @@
 #####################
- viewkineticprofiles
+ plotkineticprofiles
 #####################
 
-*viewkineticprofiles* shows plasma kinetic profiles from the
+*plotkineticprofiles* shows plasma kinetic profiles from the
 core_profiles IDSs
 `refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`_.
 
 ****************************
- Syntax viewkineticprofiles
+ Syntax plotkineticprofiles
 ****************************
 
-   .. command-output:: viewkineticprofiles -h
+   .. command-output:: plotkineticprofiles -h
 
 *****************************
- Example viewkineticprofiles
+ Example plotkineticprofiles
 *****************************
 
    .. code-block:: bash
 
-        $ viewkineticprofiles --uri "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3"
+        $ plotkineticprofiles --uri "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3"
         Time  = 71.44 s in range [10.60,75.00] s
         Index = 53
         Averaged resolution = 0.6133411929278538 s
@@ -34,6 +34,6 @@ core_profiles IDSs
         n_over_ne:    0.502   0.494   0.001
         n_over_n_maj: 1.000   0.984   0.002
 
-   .. thumbnail:: _static/images/viewkineticprofiles.png
+   .. thumbnail:: _static/images/plotkineticprofiles.png
       :alt: image not found
       :align: center

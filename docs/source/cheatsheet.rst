@@ -12,174 +12,174 @@ This cheat sheet provides quick reference of commonly used commands in IDStools.
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
 | Command                    | Description and Example Usage                                                                                                |
 +============================+==============================================================================================================================+
-| *viewcoresourcesplot*      | Plots core_sources results (replaces csplot).                                                                                |
+| *plotcoresources*      | Plots core_sources results (replaces csplot).                                                                                |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
 |                            |                                                                                                                              |
 |                            | .. code-block:: bash                                                                                                         |
 |                            |                                                                                                                              |
-|                            |    $ viewcoresourcesplot --uri "imas:mdsplus?user=public;pulse=130012;run=105;database=TEST;version=3"                       |
+|                            |    $ plotcoresources --uri "imas:mdsplus?user=public;pulse=130012;run=105;database=TEST;version=3"                       |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
-| *viewcoretransport*        | Core plasma transport of particles, energy,                                                                                  |
+| *plotcoretransport*        | Core plasma transport of particles, energy,                                                                                  |
 |                            | momentum and poloidal flux (replaces check_transport).                                                                       |
 |                            |                                                                                                                              |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
 |                            |                                                                                                                              |
 |                            | .. code-block:: bash                                                                                                         |
 |                            |                                                                                                                              |
-|                            |    $ viewcoretransport --uri "imas:mdsplus?user=public;pulse=92436;run=850;database=TEST;version=3"                          |
+|                            |    $ plotcoretransport --uri "imas:mdsplus?user=public;pulse=92436;run=850;database=TEST;version=3"                          |
 |                            |                                                                                                                              |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
-|*vieweccomposition*         | Display ec results (replaces eccomp).                                                                                        |
-+----------------------------+------------------------------------------------------------------------------------------------------------------------------+
-|                            |                                                                                                                              |
-|                            | .. code-block:: bash                                                                                                         |
-|                            |                                                                                                                              |
-|                            |    $ vieweccomposition --uri "imas:mdsplus?user=public;pulse=134173;run=2326;database=TEST;version=3"                        |
-+----------------------------+------------------------------------------------------------------------------------------------------------------------------+
-|*viewecray*                 | Display EC wave ray-tracing results (replaces ecray).                                                                        |
+|*ploteccomposition*         | Display ec results (replaces eccomp).                                                                                        |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
 |                            |                                                                                                                              |
 |                            | .. code-block:: bash                                                                                                         |
 |                            |                                                                                                                              |
-|                            |    $ viewecray --uri "imas:mdsplus?user=public;pulse=134173;run=2326;database=TEST;version=3"                                |
-|                            |    $ viewecray --uri "imas:mdsplus?user=public;pulse=134173;run=2326;database=TEST;version=3"                                |
+|                            |    $ ploteccomposition --uri "imas:mdsplus?user=public;pulse=134173;run=2326;database=TEST;version=3"                        |
++----------------------------+------------------------------------------------------------------------------------------------------------------------------+
+|*plotecray*                 | Display EC wave ray-tracing results (replaces ecray).                                                                        |
++----------------------------+------------------------------------------------------------------------------------------------------------------------------+
+|                            |                                                                                                                              |
+|                            | .. code-block:: bash                                                                                                         |
+|                            |                                                                                                                              |
+|                            |    $ plotecray --uri "imas:mdsplus?user=public;pulse=134173;run=2326;database=TEST;version=3"                                |
+|                            |    $ plotecray --uri "imas:mdsplus?user=public;pulse=134173;run=2326;database=TEST;version=3"                                |
 |                            |    -md "imas:hdf5?user=public;pulse=116000;run=4;database=ITER_MD;version=3#wall"                                            |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
-|*viewecstrayradiation*      | Shows electron cyclotron stray radiation.                                                                                    |
+|*plotecstrayradiation*      | Shows electron cyclotron stray radiation.                                                                                    |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
 |                            |                                                                                                                              |
 |                            | .. code-block:: bash                                                                                                         |
 |                            |                                                                                                                              |
-|                            |    $ viewecstrayradiation --uri "imas:mdsplus?user=public;pulse=134173;run=2326;database=TEST;version=3"                     |
+|                            |    $ plotecstrayradiation --uri "imas:mdsplus?user=public;pulse=134173;run=2326;database=TEST;version=3"                     |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
-| *viewedgeprofiles*         | Shows edge profiles plots by interpolating on rectangular                                                                    |
+| *plotedgeprofiles*         | Shows edge profiles plots by interpolating on rectangular                                                                    |
 |                            | grid.                                                                                                                        |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
 |                            |                                                                                                                              |
 |                            | .. code-block:: bash                                                                                                         |
 |                            |                                                                                                                              |
-|                            |    $ viewedgeprofiles --uri "imas:mdsplus?user=public;pulse=123314;run=1;database=ITER;version=3"--separatix --wall          |
+|                            |    $ plotedgeprofiles --uri "imas:mdsplus?user=public;pulse=123314;run=1;database=ITER;version=3"--separatix --wall          |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
-| *viewequilibrium*          | Shows plasma equilibrium  (replaces equiplot).                                                                               |
+| *plotequilibrium*          | Shows plasma equilibrium  (replaces equiplot).                                                                               |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
 |                            |                                                                                                                              |
 |                            | .. code-block:: bash                                                                                                         |
 |                            |                                                                                                                              |
-|                            |    $ viewequilibrium --uri "imas:mdsplus?user=public;pulse=134173;run=2326;database=TEST;version=3"                          |
+|                            |    $ plotequilibrium --uri "imas:mdsplus?user=public;pulse=134173;run=2326;database=TEST;version=3"                          |
 |                            |    -md "imas:mdsplus?user=public;pulse=111001;run=103;database=ITER_MD;version=3#pf_active"                                  |
 |                            |    "imas:hdf5?user=public;pulse=116000;run=4;database=ITER_MD;version=3#wall" --rho                                          |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
-| *viewfluxes*               | Shows flux information from available                                                                                        |
+| *printfluxes*               | Shows flux information from available                                                                                        |
 |                            | transport models  (replaces print_fluxes).                                                                                   |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
 |                            |                                                                                                                              |
 |                            | .. code-block:: bash                                                                                                         |
 |                            |                                                                                                                              |
-|                            |    $ viewfluxes --uri "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3" -m CLOSEST                     |
+|                            |    $ printfluxes --uri "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3" -m CLOSEST                     |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
-| *viewhcddistributions*     | shows waveforms  (replaces hcd_distributions_plot).                                                                          |
+| *plothcddistributions*     | shows waveforms  (replaces hcd_distributions_plot).                                                                          |
 |                            |                                                                                                                              |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
 |                            |                                                                                                                              |
 |                            | .. code-block:: bash                                                                                                         |
 |                            |                                                                                                                              |
-|                            |    $ viewhcddistributions --uri "imas:mdsplus?user=public;pulse=130012;run=115;database=TEST;version=3"                      |
+|                            |    $ plothcddistributions --uri "imas:mdsplus?user=public;pulse=130012;run=115;database=TEST;version=3"                      |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
-| *viewhcdplots*             | shows plots from distributions and waves for                                                                                 |
+| *plothcdplots*             | shows plots from distributions and waves for                                                                                 |
 |                            | different data entries for analysis   (replaces hcd_plot).                                                                   |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
 |                            |                                                                                                                              |
 |                            | .. code-block:: bash                                                                                                         |
 |                            |                                                                                                                              |
-|                            |    $ viewhcdplots  -ech 134173/101/public/MDSPLUS/TEST/3                                                                     |
+|                            |    $ plothcdplots  -ech 134173/101/public/MDSPLUS/TEST/3                                                                     |
 |                            |    -nbi 130012/115/public/MDSPLUS/TEST/3                                                                                     |
 |                            |    -fus 130012/115/public/MDSPLUS/TEST/3                                                                                     |
 |                            |    -icrh 130012/15/public/MDSPLUS/TEST/3                                                                                     |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
-| *viewhcdwaves*             | shows waveforms  (replaces hcd_waves_plot).                                                                                  |
+| *plothcdwaves*             | shows waveforms  (replaces hcd_waves_plot).                                                                                  |
 |                            |                                                                                                                              |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
 |                            |                                                                                                                              |
 |                            | .. code-block:: bash                                                                                                         |
 |                            |                                                                                                                              |
-|                            |    $ viewhcdwaves --uri "imas:mdsplus?user=public;pulse=134173;run=101;database=TEST;version=3"                              |
+|                            |    $ plothcdwaves --uri "imas:mdsplus?user=public;pulse=134173;run=101;database=TEST;version=3"                              |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
-| *viewkineticprofiles*      | Shows plasma kinetic profiles from the core                                                                                  |
+| *plotkineticprofiles*      | Shows plasma kinetic profiles from the core                                                                                  |
 |                            | profiles  (replaces kinplot).                                                                                                |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
 |                            |                                                                                                                              |
 |                            | .. code-block:: bash                                                                                                         |
 |                            |                                                                                                                              |
-|                            |    $ viewkineticprofiles --uri "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3"                       |
-|                            |    $ viewkineticprofiles --uri "imas:mdsplus?path=/work/imas/shared/imasdb/ITER/3/134174/117" access layer 5 and above       |
+|                            |    $ plotkineticprofiles --uri "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3"                       |
+|                            |    $ plotkineticprofiles --uri "imas:mdsplus?path=/work/imas/shared/imasdb/ITER/3/134174/117" access layer 5 and above       |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
-| *viewmachinedescription*   | Plots machine description data stored in databases.                                                                          |
+| *plotmachinedescription*   | Plots machine description data stored in databases.                                                                          |
 |                            | (replaces mdplot)                                                                                                            |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
 |                            |                                                                                                                              |
 |                            | .. code-block:: bash                                                                                                         |
 |                            |                                                                                                                              |
-|                            |    $ viewmachinedescription --uri "imas:hdf5?user=public;pulse=116000;run=4;database=ITER_MD;version=3"                      |
-|                            |    $ viewmachinedescription --uri "imas:mdsplus?user=public;pulse=111001;run=103;database=ITER_MD;version=3#pf_active"       |               
+|                            |    $ plotmachinedescription --uri "imas:hdf5?user=public;pulse=116000;run=4;database=ITER_MD;version=3"                      |
+|                            |    $ plotmachinedescription --uri "imas:mdsplus?user=public;pulse=111001;run=103;database=ITER_MD;version=3#pf_active"       |               
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
-| *viewneutron*              | Plots particles vs normalised toroidal                                                                                       |
+| *plotneutron*              | Plots particles vs normalised toroidal                                                                                       |
 |                            | flux coordinate  (replaces neutronplot).                                                                                     |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
 |                            |                                                                                                                              |
 |                            | .. code-block:: bash                                                                                                         |
 |                            |                                                                                                                              |
-|                            |    $ viewneutron --uri "imas:mdsplus?user=public;pulse=121014run=11;database=ITER;version=3" -t 450                          |
+|                            |    $ plotneutron --uri "imas:mdsplus?user=public;pulse=121014run=11;database=ITER;version=3" -t 450                          |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
-| *viewplasmacompo*          | Display the plasma composition from the                                                                                      |
+| *printplasmacompo*          | Display the plasma composition from the                                                                                      |
 |                            | core_profiles IDS  (replaces ids_compo).                                                                                     |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
 |                            |                                                                                                                              |
 |                            | .. code-block:: bash                                                                                                         |
 |                            |                                                                                                                              |
-|                            |    $ viewplasmacompo --uri "imas:mdsplus?user=public;pulse=131047;run=4;database=ITER;version=3"                             |
+|                            |    $ printplasmacompo --uri "imas:mdsplus?user=public;pulse=131047;run=4;database=ITER;version=3"                             |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
-| *viewpressure*             | Display the plasma kinetic profiles from .                                                                                   |
+| *plotpressure*             | Display the plasma kinetic profiles from .                                                                                   |
 |                            | the core_profiles  (replaces pressureplot).                                                                                  |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
 |                            |                                                                                                                              |
 |                            | .. code-block:: bash                                                                                                         |
 |                            |                                                                                                                              |
-|                            |    $ viewpressure --uri "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3"                              |
-|                            |    $ viewpressure --uri "imas:mdsplus?path=/work/imas/shared/imasdb/ITER/3/134174/117" access layer 5 and above              |
+|                            |    $ plotpressure --uri "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3"                              |
+|                            |    $ plotpressure --uri "imas:mdsplus?path=/work/imas/shared/imasdb/ITER/3/134174/117" access layer 5 and above              |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
-| *viewrotation*             | Plasma kinetic profiles from the core_profiles                                                                               |
+| *plotrotation*             | Plasma kinetic profiles from the core_profiles                                                                               |
 |                            | (replaces rotationplot)                                                                                                      |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
 |                            |                                                                                                                              |
 |                            | .. code-block:: bash                                                                                                         |
 |                            |                                                                                                                              |
-|                            |    $ viewrotation --uri "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3"                              |
+|                            |    $ plotrotation --uri "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3"                              |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
-| *viewscenario*             | Display the plasma kinetic profiles and equilibrium from                                                                     | 
+| *plotscenario*             | Display the plasma kinetic profiles and equilibrium from                                                                     | 
 |                            | the core_profiles and equilibrium  (replaces scenplot).                                                                      | 
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
 |                            |                                                                                                                              |
 |                            | .. code-block:: bash                                                                                                         |
 |                            |                                                                                                                              |
-|                            |    $ viewscenario --uri "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3" --time 60                    |
-|                            |    $ viewscenario --uri "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3" --noProfiles                 |
+|                            |    $ plotscenario --uri "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3" --time 60                    |
+|                            |    $ plotscenario --uri "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3" --noProfiles                 |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
-| *viewcoresources*          | Shows source information from available                                                                                      |
+| *printcoresources*          | Shows source information from available                                                                                      |
 |                            |  sources (replaces print_sources).                                                                                           |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
 |                            |                                                                                                                              |
 |                            | .. code-block:: bash                                                                                                         |
 |                            |                                                                                                                              |
-|                            |    $ viewcoresources --uri "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3"                           |
+|                            |    $ printcoresources --uri "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3"                           |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
-| *viewspectrometry*         | Displays the spectrum, displaying plots of radiance                                                                          |
+| *plotspectrometry*         | Displays the spectrum, displaying plots of radiance                                                                          |
 |                            | and intensity in two different windows (replaces svplot).                                                                    |   
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
 |                            |                                                                                                                              |
 |                            | .. code-block:: bash                                                                                                         |
 |                            |                                                                                                                              |
-|                            |    $ viewspectrometry --uri "imas:mdsplus?user=public;pulse=134000;run=37;database=TEST;version=3"                           |
-|                            |    $ viewspectrometry --uri "imas:mdsplus?path=/work/imas/shared/imasdb/TEST/3/134000/37" access layer 5 and above           |
+|                            |    $ plotspectrometry --uri "imas:mdsplus?user=public;pulse=134000;run=37;database=TEST;version=3"                           |
+|                            |    $ plotspectrometry --uri "imas:mdsplus?path=/work/imas/shared/imasdb/TEST/3/134000/37" access layer 5 and above           |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
 
 

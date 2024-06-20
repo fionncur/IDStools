@@ -1,23 +1,23 @@
 #################
- viewplasmacompo
+ printplasmacompo
 #################
 
-*viewplasmacompo* script gathers ion composition from core and edge
+*printplasmacompo* script gathers ion composition from core and edge
 profiles and print it on the screen
 
 ************************
- Syntax viewplasmacompo
+ Syntax printplasmacompo
 ************************
 
-   .. command-output:: viewplasmacompo -h
+   .. command-output:: printplasmacompo -h
       
 *************************
- Example viewplasmacompo
+ Example printplasmacompo
 *************************
 
 .. code:: bash
 
-   $ viewplasmacompo --uri "imas:mdsplus?user=public;pulse=131047;run=4;database=ITER;version=3"
+   $ printplasmacompo --uri "imas:mdsplus?user=public;pulse=131047;run=4;database=ITER;version=3"
    !   No edge_profiles IDS in the data-entry.
    core +  edge  -
    ------------

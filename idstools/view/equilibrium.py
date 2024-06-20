@@ -4,6 +4,7 @@ This module provides view functions and classes for equilibrium ids data
 `refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`_.
 
 """
+
 from matplotlib.patches import Rectangle
 import matplotlib.pyplot as plt
 from idstools.view.common import BasePlot
@@ -109,10 +110,12 @@ class EquilibriumView(BasePlot):
         plasmaCurrent = self.computeObj.getIP()
         time_array = self.ids.time
         if len(plasmaCurrent) <= 3:
-            ax.plot(time_array, plasmaCurrent, color="b", marker='o', label="$I_p$ [MA]")
+            ax.plot(
+                time_array, plasmaCurrent, color="b", marker="o", label="$I_p$ [MA]"
+            )
         else:
             ax.plot(time_array, plasmaCurrent, color="b", label="$I_p$ [MA]")
-        if len(time_array) !=1:
+        if len(time_array) != 1:
             ax.set_xlim(min(time_array), max(time_array))
         # ax_waveform.set_ylim(0,max(plasmaCurrent)*1.2)
         ax.legend(
@@ -152,7 +155,7 @@ class EquilibriumView(BasePlot):
 
         return cntr
 
-    def plotTopviewEquilibrium(self, ax, timeIndex, label="Plasma Boundaries"):
+    def plotTopplotequilibrium(self, ax, timeIndex, label="Plasma Boundaries"):
         """
         This function plots the top view equilibrium of a plasma and updates the plot if specified.
 
@@ -183,7 +186,7 @@ class EquilibriumView(BasePlot):
         )
         ax.set_aspect("equal", adjustable="box")
 
-    def viewEquilibrium(self, ax):
+    def plotequilibrium(self, ax):
         quantities = self.computeObj.get2DCartesianGrid()
         if quantities != None:
             r2d, z2d, psi2d = (

@@ -171,7 +171,7 @@ ecstrayView.plotResonanceLayer(
 ecstrayView.plotCutOffLayer(
     ax_pol_view, timeIndexWaves, timeIndexCoreProfiles, timeIndexEquilibrium
 )
-ax_topview_plot_eq = equilibriumView.plotTopviewEquilibrium(
+ax_topview_plot_eq = equilibriumView.plotTopplotequilibrium(
     ax_top_view, timeIndexEquilibrium
 )
 ax_topview_plot_traces = wavesView.plotTopviewTracesUpdate(

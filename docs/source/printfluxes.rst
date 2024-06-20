@@ -1,26 +1,26 @@
 ############
- viewfluxes
+ printfluxes
 ############
 
-*viewfluxes* script shows flux information from available transport
+*printfluxes* script shows flux information from available transport
 models. It uses core_transport ids
 It gives information about Mass of atom, Nuclear charge and Ion charge
 along with particles and nergy flux of ions.
 `refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`_.
 
 *******************
- Syntax viewfluxes
+ Syntax printfluxes
 *******************
 
-   .. command-output:: viewfluxes -h
+   .. command-output:: printfluxes -h
 
 
-Example viewfluxes
+Example printfluxes
 ~~~~~~~~~~~~~~~~~~~~~~~
 
    .. code-block:: bash
 
-        $ viewfluxes --uri "imas:mdsplus?user=public;pulse=92436;run=75;database=TEST;version=3"
+        $ printfluxes --uri "imas:mdsplus?user=public;pulse=92436;run=75;database=TEST;version=3"
         Showing details for sdcc-login01.iter.org:imas:mdsplus?user=public;pulse=92436;run=75;database=TEST;version=3 #time:49.00)
         ┌─────────────────────────┬───────────────────────────┬────────────────────────┬───────────────┬──────────────┐
         │ transport_solver (0.0)  │ particles (-8.607662e+23) │ energy (2.008753e+08)  │               │              │

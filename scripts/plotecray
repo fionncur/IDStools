@@ -28,13 +28,15 @@ from idstools.view.pf_active import PFActiveView
 from idstools.view.wall import WallView
 from idstools.view.waves import WavesView
 
+
 class MdAction(argparse.Action):
     def __call__(self, parser, namespace, values, option_string=None):
         if len(values) == 0:
             setattr(namespace, self.dest, True)
         else:
             setattr(namespace, self.dest, values)
-            
+
+
 parser = argparse.ArgumentParser(
     description="---- Display EC wave ray-tracing results [Previously known as ecray]",
     parents=[dbentryParser],
@@ -199,7 +201,7 @@ waveView.plotPolViewTraces(
     labelpad=lpad,
 )
 
-equiView.plotTopviewEquilibrium(ax=ax_topview, timeIndex=0)
+equiView.plotTopplotequilibrium(ax=ax_topview, timeIndex=0)
 waveView.plotTopViewTraces(
     ax_topview, timeIndex=0, color=color, style=style, label=labelCode
 )

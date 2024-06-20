@@ -1,25 +1,25 @@
 ###########
- viewecray
+ plotecray
 ###########
 
-*viewecray* shows plots for RF Waves and depositions. This script uses
+*plotecray* shows plots for RF Waves and depositions. This script uses
 output of TORBEAM code.
 `refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`_.
 
 ******************
- Syntax viewecray
+ Syntax plotecray
 ******************
 
-   .. command-output:: viewecray -h
+   .. command-output:: plotecray -h
 
 *******************
- Example viewecray
+ Example plotecray
 *******************
 
    .. code-block:: bash
 
-        $ viewecray --uri "imas:mdsplus?user=public;pulse=134173;run=2326;database=TEST;version=3" -md wall
+        $ plotecray --uri "imas:mdsplus?user=public;pulse=134173;run=2326;database=TEST;version=3" -md wall
 
-   .. thumbnail:: _static/images/viewecray.png
+   .. thumbnail:: _static/images/plotecray.png
       :alt: image not found
       :align: center

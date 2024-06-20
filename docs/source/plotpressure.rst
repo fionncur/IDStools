@@ -1,17 +1,17 @@
 ##############
- viewpressure
+ plotpressure
 ##############
 
-*viewpressure* Display the plasma kinetic profiles from the
+*plotpressure* Display the plasma kinetic profiles from the
 core_profiles IDSs, It shows ion and electrons pressure properties from
 core_profiles.
 `refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`_.
 
 *********************
- Syntax viewpressure
+ Syntax plotpressure
 *********************
 
-   .. command-output:: viewpressure -h
+   .. command-output:: plotpressure -h
 
 *********
  Example
@@ -19,7 +19,7 @@ core_profiles.
 
    .. code-block:: bash
 
-        $ viewpressure --uri "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3"
+        $ plotpressure --uri "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3"
         Time  = 71.44 s in range [10.60,75.00] s
         Index = 53
         Averaged resolution = 0.6133411929278538 s
@@ -35,6 +35,6 @@ core_profiles.
         Empty profiles_1d[0].electrons.pressure_fast_parallel
         Empty profiles_1d[0].electrons.pressure_fast_perpendicular
 
-   .. thumbnail:: _static/images/viewpressure.png
+   .. thumbnail:: _static/images/plotpressure.png
       :alt: image not found
       :align: center

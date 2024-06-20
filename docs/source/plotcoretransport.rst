@@ -1,25 +1,25 @@
 ###################
- viewcoretransport
+ plotcoretransport
 ###################
 
-*viewcoretransport* Displays the Core plasma transport of particles,
+*plotcoretransport* Displays the Core plasma transport of particles,
 energy, momentum and poloidal flux.
 `refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`_.
 
 **************************
- Syntax viewcoretransport
+ Syntax plotcoretransport
 **************************
 
-   .. command-output:: viewcoretransport -h
+   .. command-output:: plotcoretransport -h
 
 ***************************
- Example viewcoretransport
+ Example plotcoretransport
 ***************************
 
    .. code-block:: bash
 
-        $ viewcoretransport --uri "imas:mdsplus?user=public;pulse=92436;run=850;database=TEST;version=3" 
+        $ plotcoretransport --uri "imas:mdsplus?user=public;pulse=92436;run=850;database=TEST;version=3" 
 
-   .. thumbnail:: _static/images/viewcoretransport.png
+   .. thumbnail:: _static/images/plotcoretransport.png
       :alt: image not found
       :align: center

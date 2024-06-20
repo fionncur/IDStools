@@ -1,26 +1,26 @@
 ##################
- viewspectrometry
+ plotspectrometry
 ##################
 
-*viewspectrometry* Display the spectrum from spectrometer_visible idses.
+*plotspectrometry* Display the spectrum from spectrometer_visible idses.
 It shows plots of radiance and intensity of the spectrom.
 `refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`_.
 
 *************************
- Syntax viewspectrometry
+ Syntax plotspectrometry
 *************************
 
-   .. command-output:: viewspectrometry -h
+   .. command-output:: plotspectrometry -h
 
 ***************************
- Example viewspectrometry
+ Example plotspectrometry
 ***************************
 
    .. code-block:: bash
 
-        $ viewspectrometry --uri "imas:mdsplus?user=public;pulse=134000;run=37;database=TEST;version=3"
+        $ plotspectrometry --uri "imas:mdsplus?user=public;pulse=134000;run=37;database=TEST;version=3"
 
 
-   .. thumbnail:: _static/images/viewspectrometry.png
+   .. thumbnail:: _static/images/plotspectrometry.png
       :alt: image not found
       :align: center

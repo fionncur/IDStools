@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# python scripts/viewequilibrium -p 134174 -r 117
+# python scripts/plotequilibrium -p 134174 -r 117
 # -md "imas:mdsplus?user=public;shot=116000;run=2;database=ITER_MD;version=3#wall"
 # "imas:mdsplus?user=public;shot=111001;run=102;database=ITER_MD;version=3#pf_active"
 
@@ -27,13 +27,15 @@ from idstools.view.equilibrium import EquilibriumView
 from idstools.view.pf_active import PFActiveView
 from idstools.view.wall import WallView
 
+
 class MdAction(argparse.Action):
     def __call__(self, parser, namespace, values, option_string=None):
         if len(values) == 0:
             setattr(namespace, self.dest, True)
         else:
             setattr(namespace, self.dest, values)
-            
+
+
 parser = argparse.ArgumentParser(
     description="---- Display the plasma equilibrium from the equilibrium IDS. It also shows pf coils and wall position overlay if exists [Previously known as equiplot]",
     parents=[dbentryParser],
@@ -100,13 +102,13 @@ if connection is None:
 
 # if md not provided then get it from list of idses
 if isinstance(args.md, bool) and args.md is True:
-    args.md=[]
+    args.md = []
     _idsConnection = DBMaster.getConnection(args)
     availableIdsAndTimes = getAvailableIdsAndTimes(_idsConnection)
     for idsName, _ in availableIdsAndTimes:
         args.md.append(idsName)
     _idsConnection.close()
-    
+
 idsObjEquilibrium = imas.equilibrium()
 idsObjEquilibrium.time = connection.partial_get("equilibrium", "time", occurrence)
 if idsObjEquilibrium.time is not None:
@@ -115,7 +117,7 @@ if idsObjEquilibrium.time is not None:
     idsObjEquilibrium.time_slice[0] = connection.partial_get(
         "equilibrium", f"time_slice({str(timeIndex)})", occurrence
     )
-    ViewEquilibrium = EquilibriumView(idsObjEquilibrium)
+    plotequilibrium = EquilibriumView(idsObjEquilibrium)
 
     title = f"2D Equilibrium at time {timeValue:.1f}"
     databaseText = ""
@@ -182,7 +184,7 @@ if idsObjEquilibrium.time is not None:
             else:
                 logger.warning("f{_idsName} ids is not present")
 
-    ViewEquilibrium.viewMagneticPoloidalFlux(ax, plotRho=args.rho)
+    plotequilibrium.viewMagneticPoloidalFlux(ax, plotRho=args.rho)
     ax.set_title(title)
 
     xmin, xmax = ax.get_xlim()
