@@ -2,7 +2,10 @@ import logging
 
 import numpy as np
 import scipy.constants.codata as codata
-
+from rich.console import Console
+from rich.markdown import Markdown
+from rich.table import Table, Column
+from rich.align import Align
 from idstools.compute.core_transport import CoreTransportCompute
 from idstools.compute.equilibrium import EquilibriumCompute
 
@@ -21,39 +24,56 @@ class CoreTransportView:
         The `viewFluxes` function prints out flux information for electrons and ions.
         """
         fluxesDict = self.coreTransportCompute.getFluxes()
-
+        ionTable = Table(show_header=False)
         for _, fluxDict in fluxesDict.items():
-            print(f'{fluxDict["name"]} ({fluxDict["flux_multiplier"]})')
-            print(f"{'electrons': >30}", end="")
-            # electrons
             if fluxDict["particles_flux"] is None:
-                print(f"{'particles(--)' : >25}", end="")
+                eparticles_flux = "particles(--)"
             else:
-                print("     particles %13.6e" % (fluxDict["particles_flux"]), end="")
+                eparticles_flux = f"particles ({fluxDict['particles_flux'] : >.6e})"
             if fluxDict["energy_flux"] is None:
-                print(f"{'energy(--)' : >25}")
+                eenergy_flux = "energy(--)"
             else:
-                print("     energy %13.6e" % ((fluxDict["energy_flux"])))
-            # ions
-            print(
-                f"{'a' : >10}{'z_n' : >10}{'z_ion' : >10}{'particles' : >25}{'energy' : >25}"
-            ),
+                eenergy_flux = f"energy ({fluxDict['energy_flux']: >.6e})"
+            ionTable.add_row(
+                f'{fluxDict["name"]} ({fluxDict["flux_multiplier"]})',
+                eparticles_flux,
+                eenergy_flux,
+                "",
+                "",
+                style="bold magenta",
+            )
+            ionTable.add_section()
+            ionTable.add_row(
+                Align.right("a"),
+                Align.right("z_n"),
+                Align.right("z_ion"),
+                Align.right("particles"),
+                Align.right("energy"),
+                style="bold red",
+            )
 
             for _, ionDict in fluxDict["ions"].items():
-                print(
-                    f"{ionDict['a'] : >10}{ionDict['z_n'] : >10}{ionDict['z_ion'] : >10}",
-                    end="",
-                )
                 if ionDict["particles_flux"] is None or np.isnan(
                     ionDict["particles_flux"]
                 ):
-                    print(f"{'--' : >25}", end="")
+                    particles_flux = "--"
                 else:
-                    print(f"{ionDict['particles_flux'] : >25.6e}", end="")
+                    particles_flux = f"{ionDict['particles_flux'] : >.6e}"
                 if ionDict["energy_flux"] is None or np.isnan(ionDict["energy_flux"]):
-                    print(f"{'--' : >25}")
+                    energy_flux = "--"
                 else:
-                    print(f"{ionDict['energy_flux'] : >25.6e}")
+                    energy_flux = f"{ionDict['energy_flux'] : >.6e}"
+                ionTable.add_row(
+                    Align.right(str(ionDict["a"])),
+                    Align.right(str(ionDict["z_n"])),
+                    Align.right(str(ionDict["z_ion"])),
+                    Align.right(particles_flux),
+                    Align.right(energy_flux),
+                    style="bold green",
+                )
+            ionTable.add_section()
+        console = Console()
+        console.print(ionTable)
 
     def viewIonsParticleFluxes(
         self,
