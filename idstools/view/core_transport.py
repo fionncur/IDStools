@@ -2,10 +2,10 @@ import logging
 
 import numpy as np
 import scipy.constants.codata as codata
-from rich.console import Console
-from rich.markdown import Markdown
-from rich.table import Table, Column
 from rich.align import Align
+from rich.console import Console
+from rich.table import Table
+
 from idstools.compute.core_transport import CoreTransportCompute
 from idstools.compute.equilibrium import EquilibriumCompute
 

@@ -1,5 +1,10 @@
 import logging
 
+import numpy as np
+from rich.align import Align
+from rich.console import Console
+from rich.table import Table
+
 from idstools.compute.core_sources import CoreSourcesCompute
 
 logger = logging.getLogger(f"module.{__name__}")
@@ -16,37 +21,58 @@ class CoreSourcesView:
         flux, energy flux, and ion flux.
         """
         sourcesDict = self.coreSourcesCompute.getFluxInfoFromSources()
-
+        ionTable = Table(show_header=False)
         for _, sourceDict in sourcesDict.items():
-            print(f'{sourceDict["name"]}')
-            print(f"{'electrons': >30}", end="")
             # electrons
             if sourceDict["particles_flux"] is None:
-                print(f"{'particles(--)' : >25}", end="")
+                eparticles_flux = "particles(--)"
             else:
-                print("     particles %13.6e" % (sourceDict["particles_flux"]), end="")
+                eparticles_flux = f"particles ({sourceDict['particles_flux'] : >.6e})"
             if sourceDict["energy_flux"] is None:
-                print(f"{'energy(--)' : >25}")
+                eenergy_flux = "energy(--)"
             else:
-                print("     energy %13.6e" % ((sourceDict["energy_flux"])))
+                eenergy_flux = f"energy ({sourceDict['energy_flux']: >.6e})"
+            ionTable.add_row(
+                f'{sourceDict["name"]}',
+                eparticles_flux,
+                eenergy_flux,
+                "",
+                "",
+                style="bold magenta",
+            )
             # ions
-            print(
-                f"{'a' : >10}{'z_n' : >10}{'z_ion' : >10}{'particles' : >25}{'energy' : >25}"
-            ),
+            ionTable.add_section()
+            ionTable.add_row(
+                Align.right("a"),
+                Align.right("z_n"),
+                Align.right("z_ion"),
+                Align.right("particles"),
+                Align.right("energy"),
+                style="bold red",
+            )
 
             for _, ionDict in sourceDict["ions"].items():
-                print(
-                    f"{ionDict['a'] : >10}{ionDict['z_n'] : >10}{ionDict['z_ion'] : >10}",
-                    end="",
+                if ionDict["particles_flux"] is None or np.isnan(
+                    ionDict["particles_flux"]
+                ):
+                    particles_flux = "--"
+                else:
+                    particles_flux = f"{ionDict['particles_flux'] : >.6e}"
+                if ionDict["energy_flux"] is None or np.isnan(ionDict["energy_flux"]):
+                    energy_flux = "--"
+                else:
+                    energy_flux = f"{ionDict['energy_flux'] : >.6e}"
+                ionTable.add_row(
+                    Align.right(str(ionDict["a"])),
+                    Align.right(str(ionDict["z_n"])),
+                    Align.right(str(ionDict["z_ion"])),
+                    Align.right(particles_flux),
+                    Align.right(energy_flux),
+                    style="bold green",
                 )
-                if ionDict["particles_flux"] is None:
-                    print(f"{'--' : >25}", end="")
-                else:
-                    print(f"{ionDict['particles_flux'] : >25.6e}", end="")
-                if ionDict["energy_flux"] is None:
-                    print(f"{'--' : >25}")
-                else:
-                    print(f"{ionDict['energy_flux'] : >25.6e}")
+            ionTable.add_section()
+        console = Console()
+        console.print(ionTable)
 
     def viewPowerProfiles(self, ax, *args, **kwargs):
         """
