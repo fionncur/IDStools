@@ -89,19 +89,24 @@ pip install pytest
 python -m pytest --junit-xml="$LOG_DIR"/test_report.xml tests
 echo "---------------------------------------------------------------------"
 deactivate
+echo "removing $ENVIRONEMNT_NAME"
 rm -rf "$ENVIRONEMNT_NAME"
 
 ARTIFACT=./$ENVIRONEMNT_NAME"_testlogs.tar.gz"
+echo "creating artifact $ARTIFACT"
 # Check if the *.tar.gz exists before attempting to remove it
 if [ -f "$ARTIFACT" ]; then
     rm "$ARTIFACT"
     echo "$ARTIFACT removed successfully."
 fi
 
+echo "Log directory $LOG_DIR"
 # Create acrtifact
 tar -cvzf "$ENVIRONEMNT_NAME"_testlogs.tar.gz "$LOG_DIR" >/dev/null 2>&1
 if [ -f "$ARTIFACT" ]; then
     echo "Artifact $ARTIFACT created successfully."
+else
+    echo "Artifact $ARTIFACT not found."
 fi
 
 # show contents of artifact
