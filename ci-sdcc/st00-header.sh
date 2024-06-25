@@ -42,7 +42,7 @@ IMAS_MODULE_VERSION=$(getIMASModuleName "$TOOLCHAIN_VERSION" "$ACCESS_LAYER_VERS
 module load "$IMAS_MODULE_VERSION"
 
 GCCcore_VERSION=$(getGCCcoreVersion)
-
+module unload -f "$IMAS_MODULE_VERSION"
 dependencies="./ci-sdcc/dependencies.txt"
 
 # Check if the file exists
@@ -51,9 +51,7 @@ if [ ! -f "$dependencies" ]; then
     exit 1
 fi
 
-declare -a BUILDMODULES=()
 declare -a RUNMODULES=()
-declare -a EBBUILDMODULES=()
 declare -a EBBRUNMODULES=()
 
 # actors have version suffix so better to provide them as EXTERNAL_MODULE
@@ -67,32 +65,29 @@ while IFS= read -r line || [[ -n $line ]]; do
         continue
     fi
     # latest module version as it is not given
-    if [[ $line == *"IMAS"* ]]; then
+    if [[ $line == "IMAS" ]]; then
         echo "Using latest version of IMAS $IMAS_MODULE_VERSION"
-        BUILDMODULES["$counter"]="$IMAS_MODULE_VERSION"
-        EBBUILDMODULES["$counter"]="('$IMAS_MODULE_VERSION', EXTERNAL_MODULE),"
+        RUNMODULES["$counter"]="$IMAS_MODULE_VERSION"
+        EBBRUNMODULES["$counter"]="('$IMAS_MODULE_VERSION', EXTERNAL_MODULE),"
     else
         module_version=$(getModuleName "$line" "$TOOLCHAIN_VERSION" "$GCCcore_VERSION")
         echo "Using latest version of $line $module_version"
-        BUILDMODULES["$counter"]="$module_version"
-        EBBUILDMODULES["$counter"]=$(getModuleNameAndVersion "$module_version")
+        RUNMODULES["$counter"]="$module_version"
+        EBBRUNMODULES["$counter"]=$(getModuleNameAndVersion "$module_version")
 
     fi
     counter=$(("$counter" + 1))
 done <"$dependencies"
-
 
 echo "TOOLCHAIN_VERSION : $TOOLCHAIN_VERSION"
 echo "GCCcore_VERSION : $GCCcore_VERSION"
 echo "IMAS VERSION : $IMAS_MODULE_VERSION"
 echo "BUILDMODULES : " "${BUILDMODULES[@]}"
 echo "RUNMODULES : " "${RUNMODULES[@]}"
-echo "EBBUILDMODULES : " "${EBBUILDMODULES[@]}"
 echo "EBRUNMODULES : " "${EBBRUNMODULES[@]}"
 echo "Compiler : $FCOMPILER"
 
 echo "Loading modules..."
 module purge
-module load "${BUILDMODULES[@]}"
 module load "${RUNMODULES[@]}"
 echo "Done loading modules..."

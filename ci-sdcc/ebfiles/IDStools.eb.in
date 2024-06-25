@@ -2,21 +2,23 @@ easyblock = "PythonBundle"
 
 name = "IDStools"
 version = "__VERSION__"
-local_imasver = "__IMAS_VERSION__" + "-AL-" + "__AL_VERSION__"
-versionsuffix = "-DD-%s" % local_imasver
+
 local_commit = "__COMMITHASH__"
 
 homepage = (
     "https://sharepoint.iter.org/departments/POP/CM/IMDesign/"
     "Code%20Documentation/idstools-doc/devdocs/index.html"
 )
-description = """IDStools Version (__RAWVERSION__) is a collection of apps for modifying and getting valuable 
-information from Interface Data Structures (IDSs). It includes a library of routines for retrieving relevant 
-data from IDSes. It also offers readily available various forms of visualizations. These tools were created 
-in conjunction with scientists and software developers from the fusion community. The goal of having a common 
-set of functions in the IDStools is to reduce the work of reinventing the wheel by utilizing accessible functions
+description = """
+IDStools Version (__RAWVERSION__) is a collection of apps for modifying and 
+getting valuable information from Interface Data Structures (IDSs). It includes 
+a library of routines for retrieving relevant data from IDSes. It also offers 
+readily available various forms of visualizations. These tools were created in 
+conjunction with scientists and software developers from the fusion community. 
+The goal of having a common set of functions in the IDStools is to reduce the 
+work of reinventing the wheel by utilizing accessible functions.
 
-Git Repo : https://git.iter.org/projects/IMAS/repos/idstools
+Git Repo: https://git.iter.org/projects/IMAS/repos/idstools
 """
 
 toolchain = {"name": "__TOOLCHAIN_NAME__", "version": "__TOOLCHAIN_VERSION__"}
@@ -31,9 +33,8 @@ exts_list = [
         version,
         {
             "source_urls": [
-                "https://git.iter.org/rest/api/latest/projects/IMAS/repos/%(namelower)s/archive?at="
-                + local_commit
-                + "&filename=%(namelower)s-%(version)s.zip"
+                "https://git.iter.org/rest/api/latest/projects/IMAS/repos/%(namelower)s/"
+                "archive?at=" + local_commit + "&filename=%(namelower)s-%(version)s.zip"
             ],
             "sources": [SOURCE_ZIP],
             "modulename": "idstools",

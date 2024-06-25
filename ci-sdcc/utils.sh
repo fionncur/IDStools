@@ -40,7 +40,7 @@ getModuleName() {
     local TOOLCHAIN_VERSION=$2
     local GCCcore_VERSION=$3
     IFS='-' read -r TNAME TVERSION <<<"$TOOLCHAIN_VERSION"
-     
+
     module_versions=$(module av -t "$MODULE_NAME"/ 2>&1 | grep -E "$MODULE_NAME/[0-9]+\.[0-9]+\.[0-9]+|dev")
     # Check GCCcore version
     gcccore_filtered=$(echo "$module_versions" 2>&1 | grep "GCCcore-$GCCcore_VERSION")
@@ -106,7 +106,7 @@ getModuleNameAndVersion() {
         # gcccorename=$(echo "$input" | grep -oP '(?<=-)(GCCcore)(?=-)')
         gcccoreversion=$(echo "$input" | grep -oP '(?<=GCCcore-)[0-9]+\.[0-9]+\.[0-9]+$')
         echo "('$mname', '$version',  '', ('GCCcore', '$gcccoreversion')),"
-    elif [[ $input == *"intel"* ]] || [[ $input == *"foss"* ]] || [[ $input == *"gfbf"* ]] || [[ $input == *"GCC"* ]] || [[ $input == *"iimpi"* ]] || [[ $input == *"gompi"* ]]; then
+    elif [[ $input == *"intel"* ]] || [[ $input == *"foss"* ]] || [[ $input == *"gfbf"* ]] || [[ $input == *"GCC"* ]] || [[ $input == *"iimpi"* ]] || [[ $input == *"gompi"* ]] || [[ $input == *"iimkl"* ]]; then
         if [ -z "$mversionsuffix" ]; then
             echo "('$mname', '$version'),"
         else

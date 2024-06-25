@@ -14,10 +14,10 @@ hostname -f
 if [[ "$(uname -n)" == *"bamboo"* ]]; then
     set -e -o pipefail
 fi
-
-MODULE_NAME_LOWER=hcd-wf
+module unload -f IDStools
+MODULE_NAME_LOWER=IDStools
 # upper case
-MODULE_NAME=$(getUpperCase "$MODULE_NAME_LOWER")
+MODULE_NAME=$MODULE_NAME_LOWER
 ################################################################################################
 #                        Prepare Easybuild Modulefile                                          #
 ################################################################################################
@@ -34,7 +34,6 @@ IMAS_VERSION=$(awk -F "=" '/IMAS_VERSION/ {print $2}' $VERSION_FILE)
 AL_VERSION=$(awk -F "=" '/AL_VERSION/ {print $2}' $VERSION_FILE)
 TOOLCHAIN_VERSION=$(awk -F "=" '/TOOLCHAIN_VERSION/ {print $2}' $VERSION_FILE)
 
-EBBUILDMODULES=$(awk -F "=" '/EBBUILDMODULES/ {print $2}' $VERSION_FILE)
 EBRUNMODULES=$(awk -F "=" '/EBRUNMODULES/ {print $2}' $VERSION_FILE)
 
 # Get raw version
@@ -57,13 +56,12 @@ echo "MODULE_VERSION : $MODULE_VERSION"
 echo "IMAS_VERSION : $IMAS_VERSION"
 echo "AL_VERSION : $AL_VERSION"
 echo "TOOLCHAIN_VERSION : $TOOLCHAIN_VERSION"
-echo "EBBUILDMODULES : $EBBUILDMODULES"
 echo "EBRUNMODULES : $EBRUNMODULES"
 
 # Creating module"
 IFS='-' read -r TNAME TVERSION <<<"$TOOLCHAIN_VERSION"
 
-MODULE_FULL_VERSION=$MODULE_NAME-$MODULE_VERSION-$TNAME-$TVERSION-DD-$IMAS_VERSION-AL-$AL_VERSION.eb
+MODULE_FULL_VERSION=$MODULE_NAME-$MODULE_VERSION-$TNAME-$TVERSION.eb
 
 echo "$MODULE_FULL_VERSION"
 echo "--------------------------------------"
@@ -74,7 +72,6 @@ sed -e "s;__COMMITHASH__;${COMMITHASH};" \
     -e "s;__AL_VERSION__;${AL_VERSION};" \
     -e "s;__TOOLCHAIN_NAME__;${TNAME};" \
     -e "s;__TOOLCHAIN_VERSION__;${TVERSION};" \
-    -e "s;__EBBUILD_MODULES__;${EBBUILDMODULES};" \
     -e "s;__EBRUN_MODULES__;${EBRUNMODULES};" \
     ./ci-sdcc/ebfiles/"$MODULE_NAME".eb.in >./ci-sdcc/ebfiles/"$MODULE_FULL_VERSION"
 
@@ -152,7 +149,7 @@ eb ./ci-sdcc/ebfiles/"$MODULE_FULL_VERSION" --inject-checksums ${EB_OPTS[@]}
 eb ./ci-sdcc/ebfiles/"$MODULE_FULL_VERSION" --check-style ${EB_OPTS[@]}
 
 # # execute eb command
-eb ./ci-sdcc/ebfiles/"$MODULE_FULL_VERSION"  ${EB_OPTS[@]}
+eb ./ci-sdcc/ebfiles/"$MODULE_FULL_VERSION" ${EB_OPTS[@]}
 set +x
 
 if [ $? -eq 0 ]; then
