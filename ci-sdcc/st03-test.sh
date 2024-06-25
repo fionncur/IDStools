@@ -1,41 +1,14 @@
 #!/bin/bash
 # Bamboo CI script to test IDS tools on different toolchains
 # Execute script from root directory
-source ./ci-build/utils.sh
+source ./ci-sdcc/st00-header.sh $1 $2
 
-##########################################################################################
-#                     Set environment based on toolchain                                 #
-##########################################################################################
-. /usr/share/Modules/init/sh
-module use /work/imas/etc/modules/all
-
-module purge
-
-# expand aliases
-shopt -s expand_aliases
-
-#print hostname
-echo "Executing on : $(hostname -f)"
-# Get toolchain version
-if [ -z "$1" ]; then
-    TOOLCHAIN_VERSION="intel-2023b"
-else
-    TOOLCHAIN_VERSION="$1"
+# Note Disable set -e option when using on local as it will exit the shell on error
+if [[ "$(uname -n)" == *"bamboo"* ]]; then
+    set -e -u -o pipefail
 fi
-
-# Get AL version
-if [ -z "$2" ]; then
-    ACCESS_LAYER_VERSION="5"
-else
-    ACCESS_LAYER_VERSION="$2"
-fi
-
-echo "Testing for $TOOLCHAIN_VERSION and Access Layer $ACCESS_LAYER_VERSION"
 
 ENVIRONEMNT_NAME=env"$TOOLCHAIN_VERSION"_"$ACCESS_LAYER_VERSION"
-IMAS_MODULE_VERSION=$(getIMASModuleName "$TOOLCHAIN_VERSION" "$ACCESS_LAYER_VERSION")
-# load IMAS module
-module load "$IMAS_MODULE_VERSION"
 module unload -f IDStools
 
 python -m venv "$ENVIRONEMNT_NAME"

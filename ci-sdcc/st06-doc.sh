@@ -1,14 +1,16 @@
 #!/bin/bash
-# Bamboo script
-# Set up environment such that module files can be loaded
+# Bamboo CI script to build actor and run standalone program
+# Execute script from root directory
 
-. /usr/share/Modules/init/sh
-# Purge modules and load IMAS module
-module purge
-module load IMAS
+source ./ci-sdcc/st00-header.sh $1 $2
+
+# Note Disable set -e option when using on local as it will exit the shell on error
+if [[ "$(uname -n)" == *"bamboo"* ]]; then
+    set -e -u -o pipefail
+fi
+
 module unload -f IDStools
-
-ENVIRONEMNT_NAME=envDocGen
+ENVIRONEMNT_NAME=env"$TOOLCHAIN_VERSION"_"$ACCESS_LAYER_VERSION"
 
 # Create python virtual environment and install dependencies
 rm -rf "$ENVIRONEMNT_NAME"
@@ -29,3 +31,4 @@ make -C docs man
 
 deactivate
 rm -rf "$ENVIRONEMNT_NAME"
+echo "Done"

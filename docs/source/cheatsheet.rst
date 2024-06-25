@@ -12,12 +12,12 @@ This cheat sheet provides quick reference of commonly used commands in IDStools.
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
 | Command                    | Description and Example Usage                                                                                                |
 +============================+==============================================================================================================================+
-| *plotcoresources*      | Plots core_sources results (replaces csplot).                                                                                |
+| *plotcoresources*          | Plots core_sources results (replaces csplot).                                                                                |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
 |                            |                                                                                                                              |
 |                            | .. code-block:: bash                                                                                                         |
 |                            |                                                                                                                              |
-|                            |    $ plotcoresources --uri "imas:mdsplus?user=public;pulse=130012;run=105;database=TEST;version=3"                       |
+|                            |    $ plotcoresources --uri "imas:mdsplus?user=public;pulse=130012;run=105;database=TEST;version=3"                           |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
 | *plotcoretransport*        | Core plasma transport of particles, energy,                                                                                  |
 |                            | momentum and poloidal flux (replaces check_transport).                                                                       |
@@ -69,13 +69,13 @@ This cheat sheet provides quick reference of commonly used commands in IDStools.
 |                            |    -md "imas:mdsplus?user=public;pulse=111001;run=103;database=ITER_MD;version=3#pf_active"                                  |
 |                            |    "imas:hdf5?user=public;pulse=116000;run=4;database=ITER_MD;version=3#wall" --rho                                          |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
-| *printfluxes*               | Shows flux information from available                                                                                        |
+| *printfluxes*              | Shows flux information from available                                                                                        |
 |                            | transport models  (replaces print_fluxes).                                                                                   |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
 |                            |                                                                                                                              |
 |                            | .. code-block:: bash                                                                                                         |
 |                            |                                                                                                                              |
-|                            |    $ printfluxes --uri "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3" -m CLOSEST                     |
+|                            |    $ printfluxes --uri "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3" -m CLOSEST                    |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
 | *plothcddistributions*     | shows waveforms  (replaces hcd_distributions_plot).                                                                          |
 |                            |                                                                                                                              |
@@ -130,13 +130,13 @@ This cheat sheet provides quick reference of commonly used commands in IDStools.
 |                            |                                                                                                                              |
 |                            |    $ plotneutron --uri "imas:mdsplus?user=public;pulse=121014run=11;database=ITER;version=3" -t 450                          |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
-| *printplasmacompo*          | Display the plasma composition from the                                                                                      |
+| *printplasmacompo*         | Display the plasma composition from the                                                                                      |
 |                            | core_profiles IDS  (replaces ids_compo).                                                                                     |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
 |                            |                                                                                                                              |
 |                            | .. code-block:: bash                                                                                                         |
 |                            |                                                                                                                              |
-|                            |    $ printplasmacompo --uri "imas:mdsplus?user=public;pulse=131047;run=4;database=ITER;version=3"                             |
+|                            |    $ printplasmacompo --uri "imas:mdsplus?user=public;pulse=131047;run=4;database=ITER;version=3"                            |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
 | *plotpressure*             | Display the plasma kinetic profiles from .                                                                                   |
 |                            | the core_profiles  (replaces pressureplot).                                                                                  |
@@ -164,13 +164,13 @@ This cheat sheet provides quick reference of commonly used commands in IDStools.
 |                            |    $ plotscenario --uri "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3" --time 60                    |
 |                            |    $ plotscenario --uri "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3" --noProfiles                 |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
-| *printcoresources*          | Shows source information from available                                                                                      |
+| *printcoresources*          | Shows source information from available                                                                                     |
 |                            |  sources (replaces print_sources).                                                                                           |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
 |                            |                                                                                                                              |
 |                            | .. code-block:: bash                                                                                                         |
 |                            |                                                                                                                              |
-|                            |    $ printcoresources --uri "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3"                           |
+|                            |    $ printcoresources --uri "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3"                          |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
 | *plotspectrometry*         | Displays the spectrum, displaying plots of radiance                                                                          |
 |                            | and intensity in two different windows (replaces svplot).                                                                    |   

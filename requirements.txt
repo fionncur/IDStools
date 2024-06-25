@@ -11,3 +11,4 @@ rich
 rich-argparse
 six
 tabulate
+build
