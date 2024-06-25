@@ -14,7 +14,7 @@ hostname -f
 if [[ "$(uname -n)" == *"bamboo"* ]]; then
     set -e -o pipefail
 fi
-module unload -f IDStools
+
 MODULE_NAME_LOWER=IDStools
 # upper case
 MODULE_NAME=$MODULE_NAME_LOWER

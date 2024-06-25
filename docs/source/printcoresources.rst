@@ -1,6 +1,6 @@
-#############
+##################
  printcoresources
-#############
+##################
 
 *printcoresources* script shows source information from available sources. 
 It gives information about Mass of atom, Nuclear charge and Ion charge
@@ -9,15 +9,15 @@ It uses core_sources ids
 
 `refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`_.
 
-********************
+*************************
  Syntax printcoresources
-********************
+*************************
 
    .. command-output:: printcoresources -h
 
-*********************
+**************************
  Example printcoresources
-*********************
+**************************
 
    .. code-block:: bash
 
@@ -116,7 +116,7 @@ It uses core_sources ids
 
    .. code-block:: bash
 
-      $ plotsources --uri "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3" -m PREVIOUS -t 50
+      $ printcoresources --uri "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3" -m PREVIOUS -t 50
 
         Showing details for sdcc-login01.iter.org:/work/imas/shared/imasdb/ITER/3 (pulse 134174,117 time:48.938))
         total

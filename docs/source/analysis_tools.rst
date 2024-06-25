@@ -26,5 +26,5 @@ composition, allowing you to depict various trends and plasma physics.
    plotpressure
    plotrotation
    plotscenario
-   plotsources
+   printcoresources
    plotspectrometry
