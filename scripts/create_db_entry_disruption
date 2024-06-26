@@ -299,7 +299,7 @@ f.write("""idslist:\n""")
 f.close()
 
 # Complete the yaml file with the output of idslist
-inputuri = f"imas:{args.backend.lower()}?user={args.user};shot={args.shot};run={args.run};database={args.database};version={args.version}"
+inputuri = f"\"imas:{args.backend.lower()}?user={args.user};shot={args.shot};run={args.run};database={args.database};version={args.version}\""
 system(
     "idslist --uri "
     + inputuri
