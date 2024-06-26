@@ -161,7 +161,7 @@ fi
 # Replace mnt with /work/imas/opt/ to work internal path on sdcc"
 if [[ "$(uname -n)" != "sdcc"* ]]; then
     find "$EASYBUILD_DIR"/modules/all/"$MODULE_NAME" -type f -not -path '*/\.*' -exec sed -i -- 's/mnt/work\/imas\/opt/g' {} +
-    find "$EASYBUILD_DIR"/modules/phys/"$MODULE_NAME" -type f -not -path '*/\.*' -exec sed -i -- 's/mnt/work\/imas\/opt/g' {} +
+    find "$EASYBUILD_DIR"/modules/data/"$MODULE_NAME" -type f -not -path '*/\.*' -exec sed -i -- 's/mnt/work\/imas\/opt/g' {} +
 fi
 
 # Check available module"
