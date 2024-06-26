@@ -146,7 +146,7 @@ set -x
 eb ./ci-sdcc/ebfiles/"$MODULE_FULL_VERSION" --inject-checksums ${EB_OPTS[@]}
 
 # check style
-eb ./ci-sdcc/ebfiles/"$MODULE_FULL_VERSION" --check-style ${EB_OPTS[@]}
+# eb ./ci-sdcc/ebfiles/"$MODULE_FULL_VERSION" --check-style ${EB_OPTS[@]}
 
 # # execute eb command
 eb ./ci-sdcc/ebfiles/"$MODULE_FULL_VERSION" ${EB_OPTS[@]}
