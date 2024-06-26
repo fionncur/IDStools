@@ -1,0 +1,254 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+# Example of call:
+# ecray -p [130012,130012] -r [24,23] -u schneim -d iter
+
+import argparse
+import copy
+import logging
+import os
+
+from rich_argparse import RichHelpFormatter
+
+from idstools.compute.common import getNearestTime
+from idstools.compute.waves import WavesCompute
+from idstools.database import DBMaster
+from idstools.utils.clihelper import (
+    dbentryParser,
+    getDatabasePath,
+    getFileName,
+    getTitle,
+)
+from idstools.utils.idshelper import getAvailableIdsAndTimes
+from idstools.utils.idslogger import setupLogger
+from idstools.view.common import Canvas
+from idstools.view.domain.ecstray import EcStrayView
+from idstools.view.equilibrium import EquilibriumView
+from idstools.view.pf_active import PFActiveView
+from idstools.view.wall import WallView
+from idstools.view.waves import WavesView
+
+
+class MdAction(argparse.Action):
+    def __call__(self, parser, namespace, values, option_string=None):
+        if len(values) == 0:
+            setattr(namespace, self.dest, True)
+        else:
+            setattr(namespace, self.dest, values)
+
+
+parser = argparse.ArgumentParser(
+    description="---- Display EC wave ray-tracing results [Previously known as ecray]",
+    parents=[dbentryParser],
+    formatter_class=RichHelpFormatter,
+)
+parser.add_argument(
+    "-md",
+    "--md",
+    nargs="*",
+    action=MdAction,
+    default=[],
+    help="""Provide machine descriptions that you need to plot\n
+with ids names for example wall pf_active \n
+or with uris for example\n
+"imas:mdsplus?user=public;shot=116000;run=4;database=ITER_MD;version=3#wall"\n
+"imas:mdsplus?user=public;shot=116000;run=4;database=ITER_MD;version=3"\n
+""",
+)
+parser.add_argument(
+    "-t", "--time", help="Time", required=False, type=float, default=-99.0
+)
+
+parser.add_argument(
+    "--save",
+    help="Save figure at default location",
+    action="store_true",
+)
+parser.add_argument(
+    "--directory",
+    help="Directory to save the figure",
+    default=None,
+)
+args = parser.parse_args()
+
+logger = setupLogger("module", stdout_level=logging.INFO)
+
+# Font/Colour definition
+fontsize = 9
+bndcolor = "chocolate"
+shotcolors = ["b", "r", "c", "y", "m", "b"]
+shotstyle = ["-", "--", "-.", ":", ".", ","]
+colorcounter = 0
+lpad = -1
+
+canvas = Canvas(2, 3)
+ax_polview = canvas.add_axes(title="", xlabel="", row=0, col=0, rowspan=2)
+ax_topview = canvas.add_axes(title="", xlabel="", row=0, col=1, rowspan=2)
+ax_powview = canvas.add_axes(title="", xlabel="", row=0, col=2)
+ax_powparview = canvas.add_axes(title="", xlabel="", row=1, col=2)
+
+
+# Looping over shots and runs
+global_label = ""
+# Color management
+color = shotcolors[colorcounter % len(shotcolors)]
+style = shotstyle[colorcounter % len(shotcolors)]
+colorcounter += 1
+
+
+conn = DBMaster.getConnection(args)
+if conn is None:
+    logger.critical("----> Aborted.")
+    exit(1)
+idsWaves = conn.get("waves")
+# Search for adequate time slice for display
+timeArray = idsWaves.time
+ntime = len(idsWaves.time)
+timeIndex, timeValue = getNearestTime(timeArray, args.time)
+# Reading in waves ids and equilibrium ids
+idsWaves = conn.get_slice("waves", timeValue, 1)
+idsCoreProfiles = conn.get_slice("core_profiles", timeValue, 1)
+idsEquilibrium = conn.get_slice("equilibrium", timeValue, 1)
+
+if len(idsWaves.code.name) > 0:
+    logger.info(f"Code name = {idsWaves.code.name.upper()}")
+    labelCode = idsWaves.code.name.upper()
+else:
+    labelCode = getTitle(args)
+ecstraView = EcStrayView(
+    equilibriumIds=idsEquilibrium,
+    coreProfilesIds=idsCoreProfiles,
+    wavesIds=idsWaves,
+)
+equiView = EquilibriumView(ids=idsEquilibrium)
+waveView = WavesView(idsWaves)
+waveCompute = WavesCompute(idsWaves)
+
+beamTracingDict = waveCompute.getBeamTracing(timeIndex)
+logger.info(
+    f"There are {beamTracingDict['activeBeamsCount']} active beam(s) and each beam has {beamTracingDict['maxTotalBeams']} ray(s)"
+)
+
+ecstraView.plotPoloidalView(ax_polview)
+
+for mdidsInfo in args.md:
+    inputargs = copy.deepcopy(args)
+    splittedmsIdsInfo = mdidsInfo.split("#")
+    _idsName = []
+    _mdUri = None
+    if len(splittedmsIdsInfo) == 2:
+        _mdUri, idsName = splittedmsIdsInfo
+        _idsName.append(idsName)
+        mdargs = argparse.Namespace()
+        mdargs.uri = _mdUri
+        inputargs = mdargs
+    if len(splittedmsIdsInfo) == 1:
+        if "imas:" in splittedmsIdsInfo[0]:
+            _mdUri = splittedmsIdsInfo[0]
+            mdargs = argparse.Namespace()
+            mdargs.uri = _mdUri
+            inputargs = mdargs
+        else:
+            _idsName = splittedmsIdsInfo
+    if len(_idsName) == 0:
+        idsConnection = DBMaster.getConnection(inputargs)
+        availableIdsAndTimes = getAvailableIdsAndTimes(idsConnection)
+        for idsName, _ in availableIdsAndTimes:
+            _idsName.append(idsName)
+        idsConnection.close()
+    if "wall" in _idsName:
+        connection = DBMaster.getConnection(inputargs)
+        if connection is not None:
+            _idsData = connection.get("wall")
+            from imas import imasdef
+
+            if _idsData.ids_properties.homogeneous_time != imasdef.EMPTY_INT:
+                wallview = WallView(_idsData)
+                wallview.view_wall(
+                    ax_polview,
+                    showLabels=False,
+                    wallcolor="slategray",
+                    showLegend=False,
+                )
+            else:
+                logger.warning(f"{_idsName} ids is empty in the dbentry")
+            connection.close()
+        else:
+            logger.warning(f"{_idsName} ids is not present")
+    if "pf_active" in _idsName:
+        connection = DBMaster.getConnection(inputargs)
+        if connection is not None:
+            _idsData = connection.get("pf_active")
+            from imas import imasdef
+
+            if _idsData.ids_properties.homogeneous_time != imasdef.EMPTY_INT:
+                ViewPfCoils = PFActiveView(_idsData)
+                ViewPfCoils.viewActivePfCoils(ax_polview, showLabels=False)
+            else:
+                logger.warning(f"{_idsName} ids is empty in the dbentry")
+            connection.close()
+
+        else:
+            logger.warning("f{_idsName} ids is not present")
+
+
+waveView.plotPolViewTraces(
+    ax_polview,
+    timeIndex=0,
+    color=color,
+    style=style,
+    fontsize=fontsize,
+    labelpad=lpad,
+)
+
+equiView.plotTopplotequilibrium(ax=ax_topview, timeIndex=0)
+waveView.plotTopViewTraces(
+    ax_topview, timeIndex=0, color=color, style=style, label=labelCode
+)
+
+waveView.plotElectronPower(ax_powview, timeIndex=0, color=color, style=style)
+waveView.plotPowerFlowNormal(ax_powparview, timeIndex=0, color=color, style=style)
+
+
+canvas.setText(text=f"{getDatabasePath(args, timeValue=timeValue)}")
+
+canvas.fig.subplots_adjust(
+    top=0.95, bottom=0.097, left=0, right=0.948, hspace=0.2, wspace=0.108
+)
+canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
+canvas.fig.suptitle(getTitle(args, "EC rays", timeValue), size=12)
+
+if args.save:
+    fname = getFileName(args, os.path.basename(__file__) + "_EC_rays", timeValue)
+    if args.directory:
+        if not os.path.exists(args.directory):
+            os.makedirs(args.directory)
+        fname = os.path.join(args.directory, fname)
+    canvas.save(fname)
+else:
+    canvas.show()
+
+# def StrToList(string):
+#     if string[0] == "[":
+#         slist = string.split(",")
+#         slist[0] = slist[0][1:]
+#         slist[-1] = slist[-1][:-1]
+#         slist = [int(slist[i]) for i in range(len(slist))]
+#         return slist
+#     else:
+#         return [int(string)]
+
+# pulseString, runString = args.pulse, args.run
+# pulseList, runList = StrToList(pulseString), StrToList(runString)
+# assert len(pulseList) <= len(
+#     runList
+# ), "There must be a run number corresponding to each pulse"
+# if len(runList) > len(pulseList):
+#     assert (
+#         len(pulseList) == 1
+#     ), "Either give a pulse for each run or give a single pulse for every run"
+#     pulse = len(runList) * pulseList
+
+# for i in range(len(pulseList)):
+#     ipulse = pulseList[i]
+#     irun = runList[i]

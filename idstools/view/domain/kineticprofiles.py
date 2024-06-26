@@ -88,7 +88,7 @@ class KineticProfilesView:
             "Profiles displayed for t = " + "%.1f" % self.kProfiles.commonTime + " s"
         )
 
-    def viewCentralDensityWaveforms(self, ax):
+    def viewCentralDensityWaveforms(self, ax, logscale=False):
         """
         This function plots various density waveforms over time
 
@@ -139,6 +139,8 @@ class KineticProfilesView:
         # ax.ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
         legend = ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
         KineticProfilesView.customizeLegend(legend)
+        if logscale:
+            ax.set_yscale("log")
 
     def viewCentralZeffWaveform(self, ax):
         """
@@ -215,7 +217,7 @@ class KineticProfilesView:
         legend = ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
         KineticProfilesView.customizeLegend(legend)
 
-    def viewDensityProfiles(self, ax):
+    def viewDensityProfiles(self, ax, logscale=False):
         """
         This function plots density profiles for different species in a plasma based on provided kinetic profiles.
 
@@ -287,6 +289,8 @@ class KineticProfilesView:
         else:
             ax.set_xlabel(r"$R_{maj}\/[\mathrm{m}]$")
             ax.set_ylabel("$n\/[\mathrm{m^{-3}}]$")
+        if logscale:
+            ax.set_yscale("log")
         ax.set_xlim(self.kProfiles.xbeg, self.kProfiles.xend)
         # ax.ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
         ax.set_title("t = " + "%.1f" % self.kProfiles.commonTime + " s")
@@ -326,7 +330,7 @@ class KineticProfilesView:
         legend = ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
         KineticProfilesView.customizeLegend(legend)
 
-    def viewVtorProfile(self, ax):
+    def viewVtorProfile(self, ax, logscale=False):
         """
         This Python function plots the toroidal rotation velocity profiles for different species in a plasma simulation.
 
@@ -383,17 +387,20 @@ class KineticProfilesView:
                 ax.set_xlabel(r"$R_{maj}\/[\mathrm{m}]$")
                 ax.set_ylabel(r"$|v_{tor}|\/[\mathrm{m.s^{-1}}]$")
             ax.set_xlim(self.kProfiles.xbeg, self.kProfiles.xend)
-            if self.kProfiles.max_vtor > self.kProfiles.min_vtor:
-                ax.set_ylim(self.kProfiles.min_vtor, self.kProfiles.max_vtor * 1.1)
+            if logscale is False:
+                if self.kProfiles.max_vtor > self.kProfiles.min_vtor:
+                    ax.set_ylim(self.kProfiles.min_vtor, self.kProfiles.max_vtor * 1.1)
 
-            ax.ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
+            ax.ticklabel_format(axis="y", style="sci", scilimits=(0, 0))
             ax.set_title("t = " + "%.1f" % self.kProfiles.commonTime + " s")
             legend = ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
             KineticProfilesView.customizeLegend(legend)
+            if logscale:
+                ax.set_yscale("log")
         else:
             ax.remove()
 
-    def viewVpolProfile(self, ax):
+    def viewVpolProfile(self, ax, logscale=False):
         """
         This function plots the vpol profiles for different species based on certain conditions and customizes the legend and axis labels accordingly.
 
@@ -450,12 +457,15 @@ class KineticProfilesView:
                 ax.set_xlabel(r"$R_{maj}\/[\mathrm{m}]$")
                 ax.set_ylabel(r"$|v_{pol}|\/[\mathrm{m.s^{-1}}]$")
             ax.set_xlim(self.kProfiles.xbeg, self.kProfiles.xend)
-            if self.kProfiles.max_vpol > self.kProfiles.min_vpol:
-                ax.set_ylim(self.kProfiles.min_vpol, self.kProfiles.max_vpol * 1.1)
+            if logscale is False:
+                if self.kProfiles.max_vpol > self.kProfiles.min_vpol:
+                    ax.set_ylim(self.kProfiles.min_vpol, self.kProfiles.max_vpol * 1.1)
 
-            ax.ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
+            ax.ticklabel_format(axis="y", style="sci", scilimits=(0, 0))
             ax.set_title("t = " + "%.1f" % self.kProfiles.commonTime + " s")
             legend = ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
             KineticProfilesView.customizeLegend(legend)
+            if logscale:
+                ax.set_yscale("log")
         else:
             ax.remove()

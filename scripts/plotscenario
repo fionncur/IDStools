@@ -1,0 +1,248 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+import argparse
+import json
+import logging
+import sys
+import os
+from rich_argparse import RichHelpFormatter
+import imas
+
+from idstools.compute.common import getNearestTime
+from idstools.database import DBMaster
+from idstools.utils.clihelper import (
+    dbentryParser,
+    getDatabasePath,
+    getFileName,
+    getTitle,
+)
+from idstools.utils.idslogger import setupLogger
+from idstools.view.common import Canvas
+from idstools.view.core_profiles import CoreProfilesView
+from idstools.view.equilibrium import EquilibriumView
+from idstools.view.summary import SummaryView
+
+# ----------------------------------------------------------------------
+
+# Management of input arguments
+parser = argparse.ArgumentParser(
+    description="---- Display the plasma kinetic profiles and equilibrium from the core_profiles and equilibrium IDSs [previously known as scenplot]",
+    parents=[dbentryParser],
+    formatter_class=RichHelpFormatter,
+)
+
+group = parser.add_mutually_exclusive_group()
+group.add_argument(
+    "-t", "--time", help="Time for profiles", required=False, type=float, default=-99.0
+)
+group.add_argument(
+    "-n",
+    "--noProfiles",
+    action="store_true",
+    help="Do not plot profiles or equilibrium",
+)
+parser.add_argument(
+    "-i",
+    "--info",
+    action="store_true",
+    help="Add title with additional provenance information",
+)
+parser.add_argument(
+    "--save",
+    help="Save figure at default location",
+    action="store_true",
+)
+parser.add_argument(
+    "--directory",
+    help="Directory to save the figure",
+    default=None,
+)
+args = parser.parse_args()
+logger = setupLogger("module", stdout_level=logging.INFO)
+
+# Open the database and read the necessary IDSs
+connection = DBMaster.getConnection(args)
+if connection is None:
+    logger.critical("----> Aborted.")
+    exit(1)
+
+if not args.noProfiles:
+    try:
+        idsCoreProfiles = imas.core_profiles()  # To initialise the empty IDS structure
+        idsCoreProfiles.time = connection.partial_get("core_profiles", "time")
+        idsCoreProfiles.global_quantities = connection.partial_get(
+            "core_profiles", "global_quantities"
+        )
+        if idsCoreProfiles.time is None:
+            logger.critical("No core_profiles IDS in the data-entry --> Abort.")
+            exit()
+    except Exception as e:
+        logger.critical("The core_profiles IDS is absent from the input data-entry")
+        logger.critical("----> Aborted.")
+        exit()
+
+    try:
+        idsEquilibrium = imas.equilibrium()  # To initialise the empty IDS structure
+    except Exception as e:
+        logger.critical("The equilibrium IDS is absent from the input data-entry")
+        logger.critical("----> Aborted.")
+        exit()
+
+    # Search for adequate time slice for display
+    timeArray = idsCoreProfiles.time
+    ntime = len(idsCoreProfiles.time)
+    timeIndex, timeValue = getNearestTime(timeArray, args.time)
+
+    # Read 1D-profiles for this time slice
+    idsCoreProfiles.profiles_1d.resize(1)
+    idsCoreProfiles.profiles_1d[0] = connection.partial_get(
+        "core_profiles", "profiles_1d(" + str(timeIndex) + ")"
+    )
+
+    idsEquilibrium.time_slice.resize(1)
+    idsEquilibrium.time_slice[0].profiles_2d.resize(1)
+    idsEquilibrium.time_slice[0].profiles_2d = connection.partial_get(
+        "equilibrium", "time_slice(" + str(timeIndex) + ")/profiles_2d"
+    )
+
+try:
+    idsSummary = connection.get("summary")
+except Exception as e:
+    logger.critical("The summary IDS is absent from the input data-entry")
+    logger.critical("----> Aborted.")
+    exit(1)
+
+
+summaryTime = len(idsSummary.time)
+
+if summaryTime < 1:
+    logger.critical("The summary IDS is absent from the input data-entry")
+    logger.critical("----> Aborted.")
+    exit(1)
+
+
+if not args.noProfiles:
+    canvas = Canvas(4, 2)
+else:
+    canvas = Canvas(4, 1)
+ax1 = canvas.add_axes(title="", xlabel="", row=0, col=0)
+ax2 = canvas.add_axes(title="", xlabel="", row=1, col=0, sharex=ax1)
+ax3 = canvas.add_axes(title="", xlabel="", row=2, col=0, sharex=ax1)
+ax4 = canvas.add_axes(title="", xlabel="", row=3, col=0, sharex=ax1)
+if not args.noProfiles:
+    ax5 = canvas.add_axes(title="", xlabel="", row=0, col=1, rowspan=2)
+    ax6 = canvas.add_axes(title="", xlabel="", row=2, col=1)
+    ax7 = canvas.add_axes(title="", xlabel="", row=3, col=1)
+
+# H&CD waveforms
+objeSummaryView = SummaryView(idsSummary)
+objeSummaryView.viewHCDWaveforms(ax1)
+
+objeSummaryView.viewHmode(ax1)
+ax1.tick_params(
+    axis="x", which="both", bottom=False, top=False, right=False, labelbottom=False
+)
+
+if not args.noProfiles:
+    ax1.set_title("Profiles displayed for t = " + "%.1f" % timeValue + " s")
+    objeSummaryView.viewTimeLine(ax1, timeValue)
+
+objeSummaryView.viewIpB0Waveforms(ax2)
+
+objeSummaryView.viewHmode(ax2)
+ax2.tick_params(
+    axis="x", which="both", bottom=False, top=False, right=False, labelbottom=False
+)
+if not args.noProfiles:
+    objeSummaryView.viewTimeLine(ax2, timeValue)
+
+
+objeSummaryView.viewEnergyContentWaveforms(ax3)
+
+objeSummaryView.viewHmode(ax3)
+ax3.tick_params(
+    axis="x", which="both", bottom=False, top=False, right=False, labelbottom=False
+)
+if not args.noProfiles:
+    objeSummaryView.viewTimeLine(ax3, timeValue)
+
+objeSummaryView.viewVloopWaveforms(ax4)
+
+objeSummaryView.viewHmode(ax4)
+
+if not args.noProfiles:
+    objeSummaryView.viewTimeLine(ax4, timeValue)
+
+
+if not args.noProfiles:
+    coreCoreProfilesView = CoreProfilesView(idsCoreProfiles)
+    coreCoreProfilesView.viewQProfileAndMagneticShearProfile(ax6)
+
+    coreCoreProfilesView.viewCurrentDesnityProfiles(ax7)
+
+    plotequilibrium = EquilibriumView(idsEquilibrium)
+    plotequilibrium.plotequilibrium(ax5)
+
+title = getTitle(args, "Scenario")
+if not args.noProfiles:
+    title = getTitle(args, "Scenario", timeValue)
+else:
+    title = getTitle(args, "Scenario")
+if args.info:
+    try:
+        dataset_description = connection.get("dataset_description")
+        if (
+            dataset_description.ids_properties.homogeneous_time
+            == imas.imasdef.EMPTY_INT
+        ):
+            got_dataset_description = False
+        else:
+            got_dataset_description = True
+    except Exception as e:
+        logger.warning(
+            "Warning: The dataset_description IDS is absent from the input data-entry"
+        )
+        got_dataset_description = False
+    # F4F specific?
+    if got_dataset_description:
+        title += f"\nprovider={idsSummary.ids_properties.provider}, shot_date_time={dataset_description.pulse_time_begin}\ndata_dictionary={idsSummary.ids_properties.version_put.data_dictionary}, access_layer-{idsSummary.ids_properties.version_put.access_layer}"
+    else:
+        additional_data = ""
+
+        if idsSummary.tag.name != "":
+            try:
+                additional_data = json.loads(idsSummary.tag.name)
+            except Exception as e:
+                additional_data = ""
+        if "date" in additional_data:
+            txtdate = additional_data["date"]
+            txttime = additional_data["time"]
+
+            title += f"\nprovider={idsSummary.ids_properties.provider}, shot_date={txtdate}, shot_time={txttime}\ndata_dictionary={idsSummary.ids_properties.version_put.data_dictionary}, access_layer={idsSummary.ids_properties.version_put.access_layer}"
+
+        else:
+            title += f"\nprovider={idsSummary.ids_properties.provider}, creation_date={idsSummary.ids_properties.creation_date}\ndata_dictionary={idsSummary.ids_properties.version_put.data_dictionary}, access_layer={idsSummary.ids_properties.version_put.access_layer}"
+
+if not args.noProfiles:
+    canvas.setText(text=f"{getDatabasePath(args, timeValue=timeValue)}")
+else:
+    canvas.setText(text=f"{getDatabasePath(args)}")
+canvas.setSupTitle(title)
+canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
+canvas.fig.subplots_adjust(
+    top=0.914, bottom=0.099, left=0.042, right=0.9, hspace=0.113, wspace=0.26
+)
+
+
+if args.save:
+    if not args.noProfiles:
+        fname = getFileName(args, os.path.basename(__file__) + "_summary", timeValue)
+    else:
+        fname = getFileName(args, os.path.basename(__file__) + "_Scenario_shot")
+    if args.directory:
+        if not os.path.exists(args.directory):
+            os.makedirs(args.directory)
+        fname = os.path.join(args.directory, fname)
+    canvas.save(fname)
+else:
+    canvas.show()

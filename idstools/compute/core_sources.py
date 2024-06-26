@@ -9,6 +9,7 @@ import logging
 import numpy as np
 import functools
 from typing import Dict
+from typing import Optional
 
 logger = logging.getLogger("module")
 
@@ -53,7 +54,7 @@ class CoreSourcesCompute:
                 "energy_flux": None,
                 "ions": {},
             }
-            if (len(source.profiles_1d)) != 0:
+            if len(source.profiles_1d) != 0:
                 if len(source.profiles_1d[0].electrons.particles) != 0:
                     gridVolume = (
                         np.asarray(
@@ -106,7 +107,7 @@ class CoreSourcesCompute:
         return sourcesDict
 
     @functools.lru_cache(maxsize=128)
-    def getRhoTorNorm(self) -> np.ndarray:
+    def getRhoTorNorm(self) -> Optional[np.ndarray]:
         """
         The function `getRhoTorNorm` returns the value of `grid.rho_tor_norm` if it is not empty, otherwise it returns None.
 
@@ -238,7 +239,7 @@ class CoreSourcesCompute:
 
         sources = self.getValidAndActiveSources()
         for sourceIndex, source in sources.items():
-            if source["valid"] == True and source["active"] == True:
+            if source["valid"] and source["active"]:
                 if (
                     len(self.ids.source[sourceIndex].profiles_1d[0].electrons.energy)
                     < 1
@@ -297,7 +298,7 @@ class CoreSourcesCompute:
 
         sources = self.getValidAndActiveSources()
         for sourceIndex, source in sources.items():
-            if source["valid"] == True and source["active"] == True:
+            if source["valid"] and source["active"]:
                 singleIonPowerProfile[sourceIndex] = np.zeros(nrho)
                 singleIonParticlesProfile[sourceIndex] = np.zeros(nrho)
                 for ion in self.ids.source[sourceIndex].profiles_1d[0].ion:

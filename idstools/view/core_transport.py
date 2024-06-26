@@ -1,11 +1,13 @@
 import logging
-from idstools.compute.equilibrium import EquilibriumCompute
 
 import numpy as np
 import scipy.constants.codata as codata
+from rich.align import Align
+from rich.console import Console
+from rich.table import Table
 
 from idstools.compute.core_transport import CoreTransportCompute
-from idstools.view.common import Canvas
+from idstools.compute.equilibrium import EquilibriumCompute
 
 logger = logging.getLogger(f"module.{__name__}")
 
@@ -22,41 +24,56 @@ class CoreTransportView:
         The `viewFluxes` function prints out flux information for electrons and ions.
         """
         fluxesDict = self.coreTransportCompute.getFluxes()
-
+        ionTable = Table(show_header=False)
         for _, fluxDict in fluxesDict.items():
-            print(f'{fluxDict["name"]} ({fluxDict["flux_multiplier"]})')
-            print(f"{'electrons': >30}", end="")
-            # electrons
             if fluxDict["particles_flux"] is None:
-                print(f"{'particles(--)' : >25}", end="")
+                eparticles_flux = "particles(--)"
             else:
-                print("     particles %13.6e" % (fluxDict["particles_flux"]), end="")
+                eparticles_flux = f"particles ({fluxDict['particles_flux'] : >.6e})"
             if fluxDict["energy_flux"] is None:
-                print(f"{'energy(--)' : >25}")
+                eenergy_flux = "energy(--)"
             else:
-                print("     energy %13.6e" % ((fluxDict["energy_flux"])))
-            # ions
-            print(
-                f"{'a' : >10}{'z_n' : >10}{'z_ion' : >10}{'particles' : >25}{'energy' : >25}"
-            ),
+                eenergy_flux = f"energy ({fluxDict['energy_flux']: >.6e})"
+            ionTable.add_row(
+                f'{fluxDict["name"]} ({fluxDict["flux_multiplier"]})',
+                eparticles_flux,
+                eenergy_flux,
+                "",
+                "",
+                style="bold magenta",
+            )
+            ionTable.add_section()
+            ionTable.add_row(
+                Align.right("a"),
+                Align.right("z_n"),
+                Align.right("z_ion"),
+                Align.right("particles"),
+                Align.right("energy"),
+                style="bold red",
+            )
 
             for _, ionDict in fluxDict["ions"].items():
-                print(
-                    f"{ionDict['a'] : >10}{ionDict['z_n'] : >10}{ionDict['z_ion'] : >10}",
-                    end="",
+                if ionDict["particles_flux"] is None or np.isnan(
+                    ionDict["particles_flux"]
+                ):
+                    particles_flux = "--"
+                else:
+                    particles_flux = f"{ionDict['particles_flux'] : >.6e}"
+                if ionDict["energy_flux"] is None or np.isnan(ionDict["energy_flux"]):
+                    energy_flux = "--"
+                else:
+                    energy_flux = f"{ionDict['energy_flux'] : >.6e}"
+                ionTable.add_row(
+                    Align.right(str(ionDict["a"])),
+                    Align.right(str(ionDict["z_n"])),
+                    Align.right(str(ionDict["z_ion"])),
+                    Align.right(particles_flux),
+                    Align.right(energy_flux),
+                    style="bold green",
                 )
-                if ionDict["particles_flux"] is None or all(
-                    np.isnan(ionDict["particles_flux"])
-                ):
-                    print(f"{'--' : >25}", end="")
-                else:
-                    print(f"{ionDict['particles_flux'][-1] : >25.6e}", end="")
-                if ionDict["energy_flux"] is None or all(
-                    np.isnan(ionDict["energy_flux"])
-                ):
-                    print(f"{'--' : >25}")
-                else:
-                    print(f"{ionDict['energy_flux'][-1] : >25.6e}")
+            ionTable.add_section()
+        console = Console()
+        console.print(ionTable)
 
     def viewIonsParticleFluxes(
         self,
@@ -66,6 +83,7 @@ class CoreTransportView:
         idsEquilibrium,
         timeIndex,
         modelIndex,
+        logscale=False,
     ):
         Tm = idsCoreTransport.model[modelIndex]
         V = Tm.profiles_1d[timeIndex].grid_d.volume
@@ -92,6 +110,8 @@ class CoreTransportView:
             counter = counter + 1
             ax.plot(r, Gamma_i, label="Direct evaluation")
             ax.plot(r, T_i.particles.flux, label="Transport code")
+            if logscale:
+                ax.set_yscale("log")
             ax.set_title(f"Particle fluxes for {T_i.element[0].z_n}/{T_i.element[0].a}")
             ax.set_xlabel("rho_tor_norm")
             ax.set_ylabel("Particle flux density")
@@ -105,6 +125,7 @@ class CoreTransportView:
         idsEquilibrium,
         timeIndex,
         modelIndex,
+        logscale=False,
     ):
         Tm = idsCoreTransport.model[modelIndex]
         V = Tm.profiles_1d[timeIndex].grid_d.volume
@@ -161,6 +182,8 @@ class CoreTransportView:
                 alpha=0.2,
             )
             ax.plot(r, T_i.energy.flux, label="Transport code")
+            if logscale:
+                ax.set_yscale("log")
             ax.set_title(f"Energy fluxes for {T_i.element[0].z_n}/{T_i.element[0].a}")
             ax.set_xlabel("rho_tor_norm")
             ax.set_ylabel("Energy flux density")
@@ -174,6 +197,7 @@ class CoreTransportView:
         idsEquilibrium,
         timeIndex,
         modelIndex,
+        logscale=False,
     ):
         Tm = idsCoreTransport.model[modelIndex]
         V = Tm.profiles_1d[timeIndex].grid_d.volume
@@ -224,6 +248,8 @@ class CoreTransportView:
             alpha=0.2,
         )
         ax.plot(r, T_e.energy.flux, label="Transport code")
+        if logscale:
+            ax.set_yscale("log")
         ax.set_title("Energy fluxes for electrons")
         ax.set_xlabel("rho_tor_norm")
         ax.set_ylabel("Energy flux density")
@@ -236,6 +262,7 @@ class CoreTransportView:
         idsCoreProfiles,
         timeIndex,
         modelIndex,
+        logscale=False,
     ):
         Tm = idsCoreTransport.model[modelIndex]
         r = Tm.profiles_1d[timeIndex].grid_d.rho_tor_norm
@@ -249,6 +276,8 @@ class CoreTransportView:
 
         ax.plot(r, Gamma_e, label="Ambipolar Transport code fluxes")
         ax.plot(r, T_e.particles.flux, label="Transport code")
+        if logscale:
+            ax.set_yscale("log")
         ax.set_title("Particle fluxes for electrons")
         ax.set_xlabel("rho_tor_norm")
         ax.set_ylabel("Particle flux density")
@@ -257,12 +286,12 @@ class CoreTransportView:
     def _validateElectrons(self, T_e, C_e, r, modelIndex):
         if len(r) != len(C_e.density):
             logger.critical(
-                f"core_profiles.profiles_1d[-1].electrons.density could not be read"
+                "core_profiles.profiles_1d[-1].electrons.density could not be read"
             )
             C_e.density = C_e.density[: len(r)]
         if len(r) != len(C_e.temperature):
             logger.critical(
-                f"core_profiles.profiles_1d[-1].electrons.temperature could not be read"
+                "core_profiles.profiles_1d[-1].electrons.temperature could not be read"
             )
             C_e.temperature = C_e.temperature[: len(r)]
         if len(T_e.particles.flux) < 1:
@@ -289,23 +318,23 @@ class CoreTransportView:
     def _validateIonsData(self, T_i, C_i, r, modelIndex):
         if len(C_i.density) < 1:
             logger.critical(
-                f"core_profiles.profiles_1d[-1].ion.density could not be read"
+                "core_profiles.profiles_1d[-1].ion.density could not be read"
             )
             C_i.density = np.asarray([np.nan] * r)
 
         if len(r) != len(C_i.density):
             logger.critical(
-                f"core_profiles.profiles_1d[-1].ion.density length is not the same as rho_tor_norm length, correcting the length"
+                "core_profiles.profiles_1d[-1].ion.density length is not the same as rho_tor_norm length, correcting the length"
             )
             C_i.density = C_i.density[: len(r)]
         if len(C_i.temperature) < 1:
             logger.critical(
-                f"core_profiles.profiles_1d[-1].ion.temperature could not be read"
+                "core_profiles.profiles_1d[-1].ion.temperature could not be read"
             )
             C_i.temperature = np.asarray([np.nan] * r)
         if len(r) != len(C_i.temperature):
             logger.critical(
-                f"core_profiles.profiles_1d[-1].ion.temperature length is not the same as rho_tor_norm length, correcting the length"
+                "core_profiles.profiles_1d[-1].ion.temperature length is not the same as rho_tor_norm length, correcting the length"
             )
             C_i.temperature = C_i.temperature[: len(r)]
 

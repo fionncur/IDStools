@@ -5,7 +5,11 @@ import re
 import time
 
 import pandas as pd
-import yaml
+from yaml import load as yamlload
+try:
+    from yaml import CLoader as yamlLoader
+except ImportError:
+    from yaml import Loader as yamlLoader
 from pandas import json_normalize
 
 from idstools.view.common import Terminal
@@ -75,7 +79,7 @@ class ScenarioDescriptionBase:
         """
         with open(yamlFilePath, "r") as fileHandle:
             try:
-                yamlData = yaml.load(fileHandle, Loader=yaml.CLoader)
+                yamlData = yamlload(fileHandle, Loader=yamlLoader)
             except Exception as e:
                 yamlData = None
         return yamlData
@@ -183,7 +187,7 @@ class ScenarioDescription(ScenarioDescriptionBase):
         self.yamlData = None
         try:
             with open(yamlFileName, "r") as f:
-                self.yamlData = yaml.load(f, Loader=yaml.CLoader)
+                self.yamlData = yamlload(f, Loader=yamlLoader)
         except Exception as exc:
             logger.critical(f"Warning: {exc}")
 

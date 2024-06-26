@@ -1,0 +1,144 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+# migrated from svplot
+
+import argparse
+import logging
+import sys
+import os
+from rich_argparse import RichHelpFormatter
+from idstools.compute.common import getNearestTime
+from idstools.compute.spectrometer_visible import SpectrometerVisibleCompute
+from idstools.database import DBMaster
+from idstools.utils.clihelper import (
+    dbentryParser,
+    getDatabasePath,
+    getFileName,
+    getTitle,
+)
+from idstools.utils.idslogger import setupLogger
+from idstools.view.common import Canvas
+from idstools.view.spectrometer_visible import SpectrometerVisibleView
+
+logger = setupLogger("module", stdout_level=logging.INFO)
+
+parser = argparse.ArgumentParser(
+    description="---- Display spectrum from spectrometer_visible [previsouly known as svplot]",
+    parents=[dbentryParser],
+    formatter_class=RichHelpFormatter,
+)
+
+parser.add_argument(
+    "-t", "--time", help="Time", required=False, type=float, default=-99.0
+)
+parser.add_argument(
+    "--logscale",
+    help="Shows y axis with logarithmic scale wherever appropriate",
+    action="store_true",
+)
+parser.add_argument(
+    "--save",
+    help="Save figure at default location",
+    action="store_true",
+)
+parser.add_argument(
+    "--directory",
+    help="Directory to save the figure",
+    default=None,
+)
+args = parser.parse_args()
+
+
+connection = DBMaster.getConnection(args)
+if connection is None:
+    exit(1)
+
+idsSpectrometerVisible = connection.get("spectrometer_visible")
+connection.close()
+
+timeArray = idsSpectrometerVisible.time
+timeIndex, timeValue = getNearestTime(timeArray, args.time)
+
+svCompute = SpectrometerVisibleCompute(idsSpectrometerVisible)
+spectrometersList = svCompute.getValidSpectrometers()
+totalSpectrometers = len(spectrometersList)
+
+svView = SpectrometerVisibleView(idsSpectrometerVisible)
+columns = 3
+if totalSpectrometers / 3 == totalSpectrometers // 3:
+    rows = int(totalSpectrometers / 3)
+else:
+    rows = int(totalSpectrometers / 3) + 1
+canvasRadiance = Canvas(rows, columns)
+rowCounter = 0
+columnCounter = 0
+
+for spectroIndex in spectrometersList:
+    ax = canvasRadiance.add_axes(
+        title="", xlabel="", row=rowCounter, col=columnCounter, colspan=1
+    )
+    columnCounter = columnCounter + 1
+    if columnCounter == 3:
+        columnCounter = 0
+        rowCounter = rowCounter + 1
+    radianceFileName = svView.viewRadiance(ax, spectroIndex, logscale=args.logscale)
+    if columnCounter != 0:
+        ax.get_legend().remove()
+
+canvasRadiance.fig.subplots_adjust(
+    top=0.88, bottom=0.11, left=0.065, right=0.893, hspace=0.497, wspace=0.243
+)
+canvasRadiance.setText(text=f"{getDatabasePath(args, timeValue=timeValue)}")
+canvasRadiance.fig.suptitle(
+    getTitle(args, "Spectrum (Radiance) from spectrometer_visible", timeValue), size=12
+)
+canvasRadiance.get_current_fig_manager().set_window_title(
+    os.path.basename(__file__) + "-radiance"
+)
+
+if args.save:
+    fname = getFileName(args, os.path.basename(__file__) + "-radiance", timeValue)
+    if args.directory:
+        if not os.path.exists(args.directory):
+            os.makedirs(args.directory)
+        fname = os.path.join(args.directory, fname)
+    canvasRadiance.save(fname)
+else:
+    canvasRadiance.show(block=False)
+canvasIntensity = Canvas(rows, columns)
+
+rowCounter = 0
+columnCounter = 0
+for spectroIndex in spectrometersList:
+    ax = canvasIntensity.add_axes(
+        title="", xlabel="", row=rowCounter, col=columnCounter, colspan=1
+    )
+    columnCounter = columnCounter + 1
+    if columnCounter == 3:
+        columnCounter = 0
+        rowCounter = rowCounter + 1
+    intensityFileName = svView.viewIntensity(ax, spectroIndex, logscale=args.logscale)
+    if columnCounter != 0:
+        ax.get_legend().remove()
+
+canvasIntensity.setText(text=f"{getDatabasePath(args, timeValue=timeValue)}")
+canvasIntensity.fig.suptitle(
+    getTitle(args, "Spectrum (Intensity) from spectrometer_visible", timeValue), size=12
+)
+canvasIntensity.fig.subplots_adjust(
+    top=0.88, bottom=0.113, left=0.033, right=0.891, hspace=0.497, wspace=0.18
+)
+canvasIntensity.get_current_fig_manager().set_window_title(
+    os.path.basename(__file__) + "-intensity"
+)
+
+if args.save:
+    fname = getFileName(args, os.path.basename(__file__) + "_intensity", timeValue)
+    if args.directory:
+        if not os.path.exists(args.directory):
+            os.makedirs(args.directory)
+        fname = os.path.join(args.directory, fname)
+    canvasIntensity.save(fname)
+else:
+    canvasIntensity.show(block=True)

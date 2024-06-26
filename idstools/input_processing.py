@@ -138,7 +138,7 @@ def read_torbeam_output(launching_parameters, path_result):
                     j = j + 1
 
     ntimes = len(time_slices)
-    times = np.zeros(ntimes, dtype=np.float)
+    times = np.zeros(ntimes, dtype=float)
     r_t = np.zeros((ntimes, nlaunchers, 3), dtype=np.double)
     e_k = np.zeros((ntimes, nlaunchers, 3), dtype=np.double)
     P_in = np.zeros((ntimes, nlaunchers), dtype=np.double)

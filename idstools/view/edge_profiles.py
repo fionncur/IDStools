@@ -250,7 +250,7 @@ class EdgeProfilesView:
             )
             return None
 
-    def viewEquatorialPlaneAndDiverterDensity(self, ax, timeSlice=0):
+    def viewEquatorialPlaneAndDiverterDensity(self, ax, timeSlice=0, logscale=False):
         x, y = self.edgeProfilesCompute.getRectangularGrid(500)
         ne_edge = self.edgeProfilesCompute.getElectronDensity(timeSlice, x, y)
         if ne_edge is not None:
@@ -262,10 +262,11 @@ class EdgeProfilesView:
             Z0 = -4.0
             ind = np.argmin(abs(y[:, 0] - Z0))
             ax.plot(x[ind, :], ne_edge[ind, :], label="Divertor")
-
+            if logscale:
+                ax.set_yscale("log")
             ax.set_title("Electron density")
             ax.set_xlabel("R,m")
-            ax.set_ylim([0, 1.5e21])
+            # ax.set_ylim([0, 1.5e21])
             ax.legend()
         else:
             xmin, xmax = ax.get_xlim()

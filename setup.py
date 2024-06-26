@@ -22,7 +22,7 @@ if os.path.isfile(requirement_path):
 # Generate list of data files
 source_folder = "resources"
 target_folder = "bin"
-types = ("*.yml", "*.csv", "*.gfile")  # the tuple of file types
+types = ("*.yml", "*.csv", "*.gfile", "*.txt", "*.yaml")  # the tuple of file types
 
 files_grabbed = []
 for typename in types:
@@ -93,26 +93,26 @@ setup(
         "scripts/idsrosettacode",
         "scripts/idssize",
         "scripts/idsshift_equilibrium",
-        "scripts/viewcoresources",
-        "scripts/viewecstrayradiation",
-        "scripts/viewedgeprofiles",
-        "scripts/viewequilibrium",
-        "scripts/viewfluxes",
-        "scripts/viewhcddistributions",
-        "scripts/viewhcdplots",
-        "scripts/viewkineticprofiles",
-        "scripts/viewhcdwaves",
-        "scripts/viewmachinedescription",
-        "scripts/viewneutron",
-        "scripts/viewplasmacompo",
-        "scripts/viewpressure",
-        "scripts/viewscenario",
-        "scripts/viewrotation",
-        "scripts/viewsources",
-        "scripts/viewecray",
-        "scripts/vieweccomposition",
-        "scripts/viewspectrometry",
-        "scripts/viewcoretransport",
+        "scripts/plotcoresources",
+        "scripts/plotecstrayradiation",
+        "scripts/plotedgeprofiles",
+        "scripts/plotequilibrium",
+        "scripts/printfluxes",
+        "scripts/plothcddistributions",
+        "scripts/plothcdplots",
+        "scripts/plotkineticprofiles",
+        "scripts/plothcdwaves",
+        "scripts/plotmachinedescription",
+        "scripts/plotneutron",
+        "scripts/printplasmacompo",
+        "scripts/plotpressure",
+        "scripts/plotscenario",
+        "scripts/plotrotation",
+        "scripts/printcoresources",
+        "scripts/plotecray",
+        "scripts/ploteccomposition",
+        "scripts/plotspectrometry",
+        "scripts/plotcoretransport",
         "scripts/create_db_entry",  # scenario db scripts
         "scripts/create_db_entry_disruption",
         "scripts/create_validation_schema",

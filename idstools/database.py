@@ -7,7 +7,11 @@ from glob import glob
 from pathlib import Path
 import re
 import imas
-import yaml
+from yaml import load as yamlload
+try:
+    from yaml import CLoader as yamlLoader
+except ImportError:
+    from yaml import Loader as yamlLoader
 
 
 logger = logging.getLogger(f"module.{__name__}")
@@ -691,7 +695,7 @@ def readScenario(
     if outIDSList is None:
         outIDSList = []
     with open(scenarioFilePath, "r") as scenario_file:
-        config = yaml.load(scenario_file, Loader=yaml.CLoader)
+        config = yamlload(scenario_file, Loader=yamlLoader)
 
     # Read the equilibrium and core_profiles IDSs from the input datafile
     connectionIn = imas.DBEntry(

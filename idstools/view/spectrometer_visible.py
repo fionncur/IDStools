@@ -4,6 +4,7 @@ This module provides view functions and classes for spectrometer_visible ids dat
 `refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`_.
 
 """
+
 import logging
 from typing import List
 
@@ -29,7 +30,7 @@ class SpectrometerVisibleView:
         self.idsObj = idsObj
         self.computeObj = SpectrometerVisibleCompute(idsObj)
 
-    def viewRadiance(self, ax: plt.axes, spectroIndex):
+    def viewRadiance(self, ax: plt.axes, spectroIndex, logscale=False):
         """
         The function `viewRadiance` plots radiance data from multiple spectrometers on separate axes.
 
@@ -58,10 +59,12 @@ class SpectrometerVisibleView:
                     f"{channelinfo['max_wavelength']:0.2f}",
                 ]
             )
-        ax.set_ylim(bottom=0.0)
+        if logscale is False:
+            ax.set_ylim(bottom=0.0)
 
         ax.set_title(f"{channelinfo['diagnostic']}, Spectrum {spectroIndex}")
-
+        if logscale:
+            ax.set_yscale("log")
         ax.set_xlabel("Wavelength (nm)")
         ax.set_ylabel(LABEL_RADIANCE)
         ax.grid(True)
@@ -76,7 +79,7 @@ class SpectrometerVisibleView:
 
         return filename
 
-    def viewIntensity(self, ax: plt.axes, spectroIndex):
+    def viewIntensity(self, ax: plt.axes, spectroIndex, logscale=False):
         """
         The `viewIntensity` function plots intensity of spectrom from multiple spectrometers.
 
@@ -104,8 +107,11 @@ class SpectrometerVisibleView:
                     f"{channelinfo['max_wavelength']:0.2f}",
                 ]
             )
-        ax.set_ylim(bottom=0.0)
+        if logscale is False:
+            ax.set_ylim(bottom=0.0)
 
+        if logscale:
+            ax.set_yscale("log")
         ax.set_title(f"{channelinfo['diagnostic']}, Spectrum {spectroIndex}")
 
         ax.set_xlabel("Wavelength (nm)")

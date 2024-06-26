@@ -7,7 +7,7 @@ from idstools.compute.core_profiles import CoreProfilesCompute
 logger = logging.getLogger("module")
 
 
-class CoreProfilesView():
+class CoreProfilesView:
     def __init__(self, ids):
         self.ids = ids
         self.coreProfilesCompute = CoreProfilesCompute(ids)
@@ -140,13 +140,20 @@ class CoreProfilesView():
         """
         ne0 = self.coreProfilesCompute.getElectronDensityNe0()
         import pprint
+
         pprint.pprint(ne0)
         time_array = self.ids.time
         if len(ne0) <= 3:
-            ax.plot(time_array, ne0, color="r",marker='o', label=r"$n_{e0} [10^{19}.m^{-3}]$")
+            ax.plot(
+                time_array,
+                ne0,
+                color="r",
+                marker="o",
+                label=r"$n_{e0} [10^{19}.m^{-3}]$",
+            )
         else:
             ax.plot(time_array, ne0, color="r", label=r"$n_{e0} [10^{19}.m^{-3}]$")
-        if len(time_array) !=1:
+        if len(time_array) != 1:
             ax.set_xlim(min(time_array), max(time_array))
         # ax_waveform.set_ylim(0,max(ip)*1.2)
         ax.legend(
@@ -158,7 +165,9 @@ class CoreProfilesView():
         )
         ax.set_ylim(0, 20)
 
-    def plotDensityProfile(self, ax, timeIndex, psiCordinate=False, update=True):
+    def plotDensityProfile(
+        self, ax, timeIndex, psiCordinate=False, update=True, logscale=False
+    ):
         """
         This function plots the electron density profile as a function of either the normalized toroidal flux coordinate or the poloidal magnetic flux coordinate.
 
@@ -206,6 +215,8 @@ class CoreProfilesView():
                 borderaxespad=0.0,
                 frameon=False,
             )
+            if logscale:
+                ax.set_yscale("log")
             return ax_density_plot_dens, nmax
 
     def plotIonPressureProperties(self, ax):
@@ -375,7 +386,7 @@ class CoreProfilesView():
         ax.plot(rhoTorNorm, pressureThermal * FACTOR, label="Thermal")
         ax.plot(rhoTorNorm, pressureParallel * FACTOR, label="Parallel")
         ax.plot(rhoTorNorm, pressurePerpendicular * FACTOR, label="Perpendicular")
-        ax.set_xlim(rhoTorNorm[0], rhoTorNorm[nrho - 1])
+        # ax.set_xlim(rhoTorNorm[0], rhoTorNorm[nrho - 1])
         ax.set_ylim(0, maximaTotal * FACTOR)
 
         # Set Plot properties
@@ -451,7 +462,7 @@ class CoreProfilesView():
         ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
 
     def plotEfieldProfile(self, ax, **kwargs):
-        FACTOR = 1.e-3
+        FACTOR = 1.0e-3
         rhoTorNorm = self.coreProfilesCompute.getRhoTorNorm()  # Rho profile (mandatory)
         nrho = len(rhoTorNorm)
         if nrho == 0:
@@ -460,10 +471,14 @@ class CoreProfilesView():
             )
             return
         if len(self.ids.profiles_1d[0].e_field.radial) < 1:
-            logger.critical('core_profiles.profiles_1d[0].e_field.radial could not be read')
-            self.ids.profiles_1d[0].e_field.radial = np.asarray([np.nan]*nrho)
-        ax.plot(rhoTorNorm,self.ids.profiles_1d[0].e_field.radial*FACTOR,label = "E-field")
-        ax.set_xlim(rhoTorNorm[0],rhoTorNorm[nrho-1])
+            logger.critical(
+                "core_profiles.profiles_1d[0].e_field.radial could not be read"
+            )
+            self.ids.profiles_1d[0].e_field.radial = np.asarray([np.nan] * nrho)
+        ax.plot(
+            rhoTorNorm, self.ids.profiles_1d[0].e_field.radial * FACTOR, label="E-field"
+        )
+        ax.set_xlim(rhoTorNorm[0], rhoTorNorm[nrho - 1])
 
         # Set Plot properties
         fontArgs = {
@@ -493,7 +508,7 @@ class CoreProfilesView():
         ax.set_title("Electric field profile", loc="left")
 
     def plotToroidalVelocityProfile(self, ax, **kwargs):
-        FACTOR = 1.e-3
+        FACTOR = 1.0e-3
         rhoTorNorm = self.coreProfilesCompute.getRhoTorNorm()  # Rho profile (mandatory)
         nrho = len(rhoTorNorm)
         if nrho == 0:
@@ -501,16 +516,24 @@ class CoreProfilesView():
                 "core_profiles.profiles_1d[0].grid.rho_tor/core_profiles.profiles_1d[0].grid.rho_tor_norm) is empty",
             )
             return
-        
+
         nions = len(self.ids.profiles_1d[0].ion)
         species = self.coreProfilesCompute.getSpecies(0)
         for ionIndex in range(nions):
             if len(self.ids.profiles_1d[0].ion[ionIndex].velocity.toroidal) < 1:
-                logger.critical(f'core_profiles.profiles_1d[0].ion[{ionIndex}].velocity.toroidal could not be read')
-                self.ids.profiles_1d[0].ion[ionIndex].velocity.toroidal = np.asarray([np.nan]*nrho)
-            ax.plot(rhoTorNorm,self.ids.profiles_1d[0].ion[ionIndex].velocity.toroidal*FACTOR,label = species[ionIndex])
-            
-        ax.set_xlim(rhoTorNorm[0],rhoTorNorm[nrho-1])
+                logger.critical(
+                    f"core_profiles.profiles_1d[0].ion[{ionIndex}].velocity.toroidal could not be read"
+                )
+                self.ids.profiles_1d[0].ion[ionIndex].velocity.toroidal = np.asarray(
+                    [np.nan] * nrho
+                )
+            ax.plot(
+                rhoTorNorm,
+                self.ids.profiles_1d[0].ion[ionIndex].velocity.toroidal * FACTOR,
+                label=species[ionIndex],
+            )
+
+        ax.set_xlim(rhoTorNorm[0], rhoTorNorm[nrho - 1])
 
         # Set Plot properties
         fontArgs = {
@@ -525,7 +548,7 @@ class CoreProfilesView():
         )
         ax.set_xlabel(r"$\rho/\rho_0$", fontArgs, labelpad=1)
         ax.set_ylabel(r"$v_{tor}$ ($km/s$)", fontArgs, labelpad=0)
-        #TODO update
+        # TODO update
         # ax2.yaxis.tick_right()
         # ax2.yaxis.set_label_position("right")
         # set legend
@@ -541,9 +564,9 @@ class CoreProfilesView():
         for label in legend.get_lines():
             label.set_linewidth(1.5)
         ax.set_title("Toroidal velocity profile", loc="left")
-        
+
     def plotPoloidalVelocityProfile(self, ax, **kwargs):
-        FACTOR = 1.e-3
+        FACTOR = 1.0e-3
         rhoTorNorm = self.coreProfilesCompute.getRhoTorNorm()  # Rho profile (mandatory)
         nrho = len(rhoTorNorm)
         if nrho == 0:
@@ -551,16 +574,24 @@ class CoreProfilesView():
                 "core_profiles.profiles_1d[0].grid.rho_tor/core_profiles.profiles_1d[0].grid.rho_tor_norm) is empty",
             )
             return
-        
+
         nions = len(self.ids.profiles_1d[0].ion)
         species = self.coreProfilesCompute.getSpecies(0)
         for ionIndex in range(nions):
             if len(self.ids.profiles_1d[0].ion[ionIndex].velocity.poloidal) < 1:
-                logger.critical(f'core_profiles.profiles_1d[0].ion[{ionIndex}].velocity.poloidal could not be read')
-                self.ids.profiles_1d[0].ion[ionIndex].velocity.poloidal = np.asarray([np.nan]*nrho)
-            ax.plot(rhoTorNorm,self.ids.profiles_1d[0].ion[ionIndex].velocity.poloidal*FACTOR,label = species[ionIndex])
-            
-        ax.set_xlim(rhoTorNorm[0],rhoTorNorm[nrho-1])
+                logger.critical(
+                    f"core_profiles.profiles_1d[0].ion[{ionIndex}].velocity.poloidal could not be read"
+                )
+                self.ids.profiles_1d[0].ion[ionIndex].velocity.poloidal = np.asarray(
+                    [np.nan] * nrho
+                )
+            ax.plot(
+                rhoTorNorm,
+                self.ids.profiles_1d[0].ion[ionIndex].velocity.poloidal * FACTOR,
+                label=species[ionIndex],
+            )
+
+        ax.set_xlim(rhoTorNorm[0], rhoTorNorm[nrho - 1])
 
         # Set Plot properties
         fontArgs = {
@@ -575,7 +606,7 @@ class CoreProfilesView():
         )
         ax.set_xlabel(r"$\rho/\rho_0$", fontArgs, labelpad=1)
         ax.set_ylabel(r"$v_{pol}$ ($km/s$)", fontArgs, labelpad=0)
-  
+
         # set legend
         # legx_pos = 1.35
         # legy_pos = 1.05
@@ -589,10 +620,9 @@ class CoreProfilesView():
         for label in legend.get_lines():
             label.set_linewidth(1.5)
         ax.set_title("Poloidal velocity profile", loc="left")
-        
-        
+
     def plotDiamagneticVelocityProfile(self, ax, **kwargs):
-        FACTOR = 1.e-3
+        FACTOR = 1.0e-3
         rhoTorNorm = self.coreProfilesCompute.getRhoTorNorm()  # Rho profile (mandatory)
         nrho = len(rhoTorNorm)
         if nrho == 0:
@@ -600,16 +630,24 @@ class CoreProfilesView():
                 "core_profiles.profiles_1d[0].grid.rho_tor/core_profiles.profiles_1d[0].grid.rho_tor_norm) is empty",
             )
             return
-        
+
         nions = len(self.ids.profiles_1d[0].ion)
         species = self.coreProfilesCompute.getSpecies(0)
         for ionIndex in range(nions):
             if len(self.ids.profiles_1d[0].ion[ionIndex].velocity.diamagnetic) < 1:
-                logger.critical(f'core_profiles.profiles_1d[0].ion[{ionIndex}].velocity.diamagnetic could not be read')
-                self.ids.profiles_1d[0].ion[ionIndex].velocity.diamagnetic = np.asarray([np.nan]*nrho)
-            ax.plot(rhoTorNorm,self.ids.profiles_1d[0].ion[ionIndex].velocity.diamagnetic*FACTOR,label = species[ionIndex])
-            
-        ax.set_xlim(rhoTorNorm[0],rhoTorNorm[nrho-1])
+                logger.critical(
+                    f"core_profiles.profiles_1d[0].ion[{ionIndex}].velocity.diamagnetic could not be read"
+                )
+                self.ids.profiles_1d[0].ion[ionIndex].velocity.diamagnetic = np.asarray(
+                    [np.nan] * nrho
+                )
+            ax.plot(
+                rhoTorNorm,
+                self.ids.profiles_1d[0].ion[ionIndex].velocity.diamagnetic * FACTOR,
+                label=species[ionIndex],
+            )
+
+        ax.set_xlim(rhoTorNorm[0], rhoTorNorm[nrho - 1])
         # ax4.yaxis.tick_right()
         # ax4.yaxis.set_label_position("right")
         # Set Plot properties
