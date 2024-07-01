@@ -368,6 +368,9 @@ Database Tools
  Scenario Database Tools
 **************************
 
+.. warning::
+   Scenario Database tools are keeping their legacy arguments as they will be soon deprecated and replaced by SimDB.
+
 +--------------------------------+--------------------------------------------------------------------------------+
 | Command                        | Description and Example Usage                                                  |
 +================================+================================================================================+
