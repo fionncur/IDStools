@@ -96,4 +96,6 @@ To build the *IDStools* documentation, execute:
 
 .. code-block:: bash
 
-   $ make -C docs html
+   $ pip install .[docs]
+   $ pip install builddocs --format html
+   $ pip install builddocs --format man

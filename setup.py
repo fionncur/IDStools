@@ -1,63 +1,102 @@
 #!/usr/bin/env python3
-from glob import glob
+###########################################################
+# pip install .
+#
+# install docs requirements
+# pip install .[docs]
+# build docs
+# pip install builddocs
+###########################################################
 import os
 import pathlib
-import subprocess
+from glob import glob
 from typing import Dict, List
 
-from setuptools import find_packages, setup
-
+from setuptools import Command, find_packages, setup
 import versioneer
 
 current_directory = pathlib.Path(__file__).parent.resolve()
-long_description = (current_directory / "README.md").read_text(encoding="utf-8")
 
-requirement_path = f"{current_directory}/requirements.txt"
-install_requires = []
-if os.path.isfile(requirement_path):
-    with open(requirement_path) as f:
-        install_requires = f.read().splitlines()
+
+class BuildDocs(Command):
+    description = "Build Sphinx documentation"
+    user_options = [
+        ("format=", "f", "Provide format of the documentation (html or man)")
+    ]
+
+    def initialize_options(self):
+        self.format = "html"
+
+    def finalize_options(self):
+        if self.format not in ["html", "man"]:
+            raise ValueError("Please provide valid format ['html' or 'man']")
+
+    def run(self):
+        from sphinx.cmd.build import main as sphinx_main
+
+        source_dir = os.path.join(current_directory, "docs", "source")
+        build_dir = os.path.join(current_directory, "docs", "_build")
+        sphinx_args = ["-b", self.format, source_dir, build_dir]
+        sphinx_main(sphinx_args)
+
+
+long_description = (current_directory / "README.md").read_text(encoding="utf-8")
+requirements = f"{current_directory}/requirements.txt"
+requirementsdocs = f"{current_directory}/docs/requirements.txt"
+
+
+def getRequirements(filename):
+    with open(filename, "r") as f:
+        return f.read().splitlines()
 
 
 # Generate list of data files
-source_folder = "resources"
-target_folder = "bin"
-types = ("*.yml", "*.csv", "*.gfile", "*.txt", "*.yaml")  # the tuple of file types
+def getDataFiles():
+    source_folder = "resources"
+    target_folder = "bin"
+    types = ("*.yml", "*.csv", "*.gfile", "*.txt", "*.yaml")  # the tuple of file types
 
-files_grabbed = []
-for typename in types:
-    files_grabbed.extend(glob(source_folder + "/**/" + typename, recursive=True))
+    files_grabbed = []
+    for typename in types:
+        files_grabbed.extend(glob(source_folder + "/**/" + typename, recursive=True))
 
-# create dictionary from glob files
-files: Dict[str, List] = {}
-for file_path in files_grabbed:
-    folder_name = os.path.dirname(file_path)
-    folder_name = folder_name.replace(source_folder, target_folder)
-    if folder_name not in files.keys():
-        files[folder_name] = []
-    files[folder_name].append(file_path)
+    # create dictionary from glob files
+    files: Dict[str, List] = {}
+    for file_path in files_grabbed:
+        folder_name = os.path.dirname(file_path)
+        folder_name = folder_name.replace(source_folder, target_folder)
+        if folder_name not in files.keys():
+            files[folder_name] = []
+        files[folder_name].append(file_path)
 
-# Create data structure which setup file is needed
-data_files = []
-for file_path, list_of_files in files.items():
-    data_files.append((file_path, list_of_files))
+    # Create data structure which setup file is needed
+    data_files = []
+    for file_path, list_of_files in files.items():
+        data_files.append((file_path, list_of_files))
 
-# add man page if already created by script "manpages.sh"
-man_path = os.path.join(current_directory, "docs/_build/man/idstools.1")
-if os.path.exists(man_path):
-    data_files.append(("share/man/man1/", [man_path]))
+    # add man page if already created by script "manpages.sh"
+    man_path = os.path.join(current_directory, "docs/_build/man/idstools.1")
+    if os.path.exists(man_path):
+        data_files.append(("share/man/man1/", [man_path]))
+
+    scientific_mplstyle = os.path.join(
+        current_directory, "idstools/view/styles/scientific.mplstyle"
+    )
+    if os.path.exists(scientific_mplstyle):
+        data_files.append(("share/styles/", [scientific_mplstyle]))
+    return data_files
 
 
-scientific_mplstyle = os.path.join(
-    current_directory, "idstools/view/styles/scientific.mplstyle"
-)
-if os.path.exists(scientific_mplstyle):
-    data_files.append(("share/styles/", [scientific_mplstyle]))
+def getCmdClass():
+    cmdclass = versioneer.get_cmdclass()
+    cmdclass["builddocs"] = BuildDocs
+    return cmdclass
+
 
 setup(
     name="IDStools",
     version=versioneer.get_version(),
-    cmdclass=versioneer.get_cmdclass(),
+    cmdclass=getCmdClass(),
     description="Python based collection of data analysis and visualization tools written IMAS framework",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -74,7 +113,7 @@ setup(
     ],
     packages=find_packages(),
     keywords="IMAS, IDS",
-    install_requires=install_requires,
+    install_requires=getRequirements(requirements),
     scripts=[
         "scripts/dbconverter",
         "scripts/dblist",
@@ -127,5 +166,8 @@ setup(
     ],
     setup_requires=["pytest-runner"],
     tests_require=["pytest"],
-    data_files=data_files,
+    data_files=getDataFiles(),
+    extras_require={
+        "docs": getRequirements(requirementsdocs),
+    },
 )
