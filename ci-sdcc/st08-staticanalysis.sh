@@ -18,15 +18,12 @@ python -m venv "$ENVIRONEMNT_NAME"
 pip install --upgrade 'black >=24,<25' flake8 pylint
 
 echo "---------------------------------------------------------------------"
-black --check imaspy > black.log
+black --check idstools >black.log
 echo "---------------------------------------------------------------------"
-flake8 imaspy > flake8.log
+flake8 idstools >flake8.log
 echo "---------------------------------------------------------------------"
-pylint -E ./idstools > pylint.log
+pylint -E ./idstools >pylint.log
 echo "---------------------------------------------------------------------"
 deactivate
 rm -rf "$ENVIRONEMNT_NAME"
 echo "Done"
-
-
-
