@@ -53,7 +53,7 @@ class PFActiveView:
                 ax.plot()
                 canvas.show()
 
-            .. thumbnail:: _static/images/PFActiveView_viewActivePfCoils.png
+            .. thumbnail:: /_static/images/PFActiveView_viewActivePfCoils.png
                 :alt: image not found
                 :align: center
         """

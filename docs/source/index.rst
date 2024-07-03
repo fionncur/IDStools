@@ -28,7 +28,6 @@ knowledge of core functionalities.
    :maxdepth: 1
    :caption: API documentation
 
-   ...
    autoapi/idstools/index.rst
 
 *********

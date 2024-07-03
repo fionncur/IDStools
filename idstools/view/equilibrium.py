@@ -59,7 +59,7 @@ class EquilibriumView(BasePlot):
                 ax.plot()
                 canvas.show()
 
-            .. thumbnail:: _static/images/EquilibriumView_viewMagneticPoloidalFlux.png
+            .. thumbnail:: /_static/images/EquilibriumView_viewMagneticPoloidalFlux.png
                 :alt: image not found
                 :align: center
 
@@ -67,7 +67,7 @@ class EquilibriumView(BasePlot):
             :func:`idstools.compute.equilibrium.EquilibriumCompute.get2DCartesianGrid`
             :func:`idstools.compute.equilibrium.EquilibriumCompute.getRho2D`
 
-            :meth:`plot_ip`
+            :meth:`plotIP`
         """
         cartestionGrid = self.computeObj.get2DCartesianGrid(timeSlice, profiles2DIndex)
         if cartestionGrid is not None:
