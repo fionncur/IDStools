@@ -95,9 +95,7 @@ class EquilibriumView(BasePlot):
             # ax.set_ylim(cartestionGrid["z2d"].min() * 0.7, cartestionGrid["z2d"].max() * 0.7)
             ax.tick_params(axis="both", which="major")
 
-    def viewPulseInfo(
-        self, ax: plt.axes, title: str, hostdir: str, shot: int, run: int, t: float
-    ):
+    def viewPulseInfo(self, ax: plt.axes, title: str, hostdir: str, shot: int, run: int, t: float):
         self.database_info(ax, title, hostdir, shot, run, t)
 
     def plotIP(self, ax):
@@ -110,9 +108,7 @@ class EquilibriumView(BasePlot):
         plasmaCurrent = self.computeObj.getIP()
         time_array = self.ids.time
         if len(plasmaCurrent) <= 3:
-            ax.plot(
-                time_array, plasmaCurrent, color="b", marker="o", label="$I_p$ [MA]"
-            )
+            ax.plot(time_array, plasmaCurrent, color="b", marker="o", label="$I_p$ [MA]")
         else:
             ax.plot(time_array, plasmaCurrent, color="b", label="$I_p$ [MA]")
         if len(time_array) != 1:
@@ -181,9 +177,7 @@ class EquilibriumView(BasePlot):
         else:
             ax.plot(data["xpla"], data["ypla"], color=bndcolor)
         ax.plot(data["xplap"], data["yplap"], color=bndcolor)
-        ax.set_xlim(
-            (-data["r0"] - data["amin"]) * 1.1, (data["r0"] + data["amin"]) * 1.1
-        )
+        ax.set_xlim((-data["r0"] - data["amin"]) * 1.1, (data["r0"] + data["amin"]) * 1.1)
         ax.set_aspect("equal", adjustable="box")
 
     def plotequilibrium(self, ax):

@@ -5,9 +5,7 @@ import imas
 import numpy as np
 
 
-def get_ids(
-    db, idsname, occ=0, times=None, interp=imas.imasdef.PREVIOUS_INTERP, verbose=False
-):
+def get_ids(db, idsname, occ=0, times=None, interp=imas.imasdef.PREVIOUS_INTERP, verbose=False):
     """
     The function `get_ids` reads an IDS from a given DBEntry, either the entire IDS or slices at selected times, and returns the IDS object or a list of IDS slices.
 
@@ -41,9 +39,7 @@ def get_ids(
     return idsobj
 
 
-def get_timings(
-    db, idsname, occ=0, dbout=None, times=None, repeat=5, verbose=False, profile=False
-):
+def get_timings(db, idsname, occ=0, dbout=None, times=None, repeat=5, verbose=False, profile=False):
     """
     The function `get_timings` performs timing measurements for various I/O operations on an IDS in an IMAS database.
 

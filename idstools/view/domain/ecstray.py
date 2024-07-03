@@ -14,18 +14,14 @@ logger = logging.getLogger("module")
 
 
 class EcStrayView:
-    def __init__(
-        self, equilibriumIds: object, coreProfilesIds: object, wavesIds: object
-    ):
+    def __init__(self, equilibriumIds: object, coreProfilesIds: object, wavesIds: object):
         self.ecstray_object = EcStrayCompute(equilibriumIds, coreProfilesIds, wavesIds)
         self.equilibriumCompute = EquilibriumCompute(equilibriumIds)
         self.equilibriumIds = equilibriumIds
         self.coreProfilesIds = coreProfilesIds
         self.wavesIds = wavesIds
 
-    def plotResonanceLayer(
-        self, ax, time_index_wv, time_index_eq, init=1, verbose=False
-    ):
+    def plotResonanceLayer(self, ax, time_index_wv, time_index_eq, init=1, verbose=False):
         """
         Plot the resonance layer on the given `ax` object.
 
@@ -94,15 +90,11 @@ class EcStrayView:
         profile2dIndex = resonanceData["profile2dIndex"]
         resonanceLayer = resonanceData["resonanceLayer"]
 
-        gridData = self.equilibriumCompute.get2DCartesianGrid(
-            timeSlice=timeSlice, profiles2DIndex=profile2dIndex
-        )
+        gridData = self.equilibriumCompute.get2DCartesianGrid(timeSlice=timeSlice, profiles2DIndex=profile2dIndex)
         r2d = gridData["r2d"]
         z2d = gridData["z2d"]
         psi2d = gridData["psi2d"]
-        rho2d = self.equilibriumCompute.getRho2D(
-            timeSlice=timeSlice, profiles2DIndex=profile2dIndex
-        )
+        rho2d = self.equilibriumCompute.getRho2D(timeSlice=timeSlice, profiles2DIndex=profile2dIndex)
 
         # Poloidal view plot
         ax.contour(r2d, z2d, psi2d, 50, cmap="summer")
@@ -178,15 +170,11 @@ class EcStrayView:
             :func:`idstools.domain.ecstray.EcStrayCompute.getCutoffLayer`
         """
         # Calculate density cutoff layer position
-        cutoff_layer = self.ecstray_object.getCutoffLayer(
-            timeIndexWaves, timeIndexCoreProfiles, timeIndexEquilibrium
-        )
+        cutoff_layer = self.ecstray_object.getCutoffLayer(timeIndexWaves, timeIndexCoreProfiles, timeIndexEquilibrium)
 
         # TODO Work on this function to keep call back function and events and not to pass init=1
         if init == 1:
-            (ax_polview_plot_cut,) = ax.plot(
-                cutoff_layer["r"], cutoff_layer["z"], color="g", linewidth=2
-            )
+            (ax_polview_plot_cut,) = ax.plot(cutoff_layer["r"], cutoff_layer["z"], color="g", linewidth=2)
             return ax_polview_plot_cut
         else:
             ax.set_data(cutoff_layer["r"], cutoff_layer["z"])

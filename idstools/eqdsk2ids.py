@@ -60,9 +60,7 @@ class GEQDSK:
 
         # 2. Read GEQDSK file
         self.data = self._load(self.fpath)
-        logger.debug(
-            "GEQDSK data: \n%s", pformat(self.data, indent=2, sort_dicts=False)
-        )
+        logger.debug("GEQDSK data: \n%s", pformat(self.data, indent=2, sort_dicts=False))
 
         # 3. Confer COCOS
         if cocos_in:
@@ -337,9 +335,7 @@ def map_GEQDSK_to_IDS(geqdsk, eq):
         """ """
 
         ids.ids_properties.homogeneous_time = 1
-        ids.ids_properties.creation_date = datetime.datetime.now().strftime(
-            "%d/%m/%Y %H:%M"
-        )
+        ids.ids_properties.creation_date = datetime.datetime.now().strftime("%d/%m/%Y %H:%M")
         ids.ids_properties.provider = os.getenv("USER")
 
         ids.ids_properties.provenance.node.resize(1)
@@ -394,9 +390,9 @@ def map_GEQDSK_to_IDS(geqdsk, eq):
     simag = gdsk["SIMAG"]
     sibry = gdsk["SIBRY"]
     for i in range(nw):
-        eq.time_slice[0].profiles_1d.psi[i] = (
-            (1.0 - float(i) / float(nw - 1)) * (simag - sibry) + sibry
-        ) * coef["fact_psi"]
+        eq.time_slice[0].profiles_1d.psi[i] = ((1.0 - float(i) / float(nw - 1)) * (simag - sibry) + sibry) * coef[
+            "fact_psi"
+        ]
 
     # Boundary
     if gdsk["NBBBS"] > 0:
@@ -416,26 +412,18 @@ def map_GEQDSK_to_IDS(geqdsk, eq):
     eq.time_slice[0].profiles_2d[0].b_field_r.resize(nw, nh)
     eq.time_slice[0].profiles_2d[0].b_field_z.resize(nw, nh)
     for i in range(nw):
-        eq.time_slice[0].profiles_2d[0].grid.dim1[i] = (
-            float(i) / float(nw - 1) * gdsk["RDIM"] + gdsk["RLEFT"]
-        )
+        eq.time_slice[0].profiles_2d[0].grid.dim1[i] = float(i) / float(nw - 1) * gdsk["RDIM"] + gdsk["RLEFT"]
     for j in range(nh):
         eq.time_slice[0].profiles_2d[0].grid.dim2[j] = (
             float(j) / float(nh - 1) * gdsk["ZDIM"] - 0.5 * gdsk["ZDIM"] + gdsk["ZMID"]
         )
     for j in range(nh):
         for i in range(nw):
-            eq.time_slice[0].profiles_2d[0].psi[i, j] = (
-                gdsk["PSIRZ"][j, i] * coef["fact_psi"]
-            )
+            eq.time_slice[0].profiles_2d[0].psi[i, j] = gdsk["PSIRZ"][j, i] * coef["fact_psi"]
     for j in range(nh):
         for i in range(nw):
-            eq.time_slice[0].profiles_2d[0].r[i, j] = (
-                eq.time_slice[0].profiles_2d[0].grid.dim1[i]
-            )
-            eq.time_slice[0].profiles_2d[0].z[i, j] = (
-                eq.time_slice[0].profiles_2d[0].grid.dim2[j]
-            )
+            eq.time_slice[0].profiles_2d[0].r[i, j] = eq.time_slice[0].profiles_2d[0].grid.dim1[i]
+            eq.time_slice[0].profiles_2d[0].z[i, j] = eq.time_slice[0].profiles_2d[0].grid.dim2[j]
     # Eq. (19)
     fact = cocos.sigma_RphiZ * cocos.sigma_Bp / (2.0 * np.pi) ** cocos.exp_Bp
     dim1 = eq.time_slice[0].profiles_2d[0].grid.dim1
@@ -491,14 +479,8 @@ def geqdsk2ids(fpath, ipsign=0, b0sign=0, cocos_in=None):
 
     # Check if COCOS is equal to IDS_COCOS
     if cocos["COCOS"] != IDS_COCOS:
-        logger.warning(
-            "COCOS Target= {}, Output= {}, Input= {}".format(
-                IDS_COCOS, cocos["COCOS"], geqdsk.cocos.COCOS
-            )
-        )
-        raise SystemExit(
-            "Input COCOS is inconsistent between GEQDSK file and COCOS with the option '--cocos_in'."
-        )
+        logger.warning("COCOS Target= {}, Output= {}, Input= {}".format(IDS_COCOS, cocos["COCOS"], geqdsk.cocos.COCOS))
+        raise SystemExit("Input COCOS is inconsistent between GEQDSK file and COCOS with the option '--cocos_in'.")
     return eq
 
 

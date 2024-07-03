@@ -27,11 +27,7 @@ def list_attributes(idsobj):
     idsobj: IDS or substructure object
     """
     if "imas" in str(type(idsobj)):
-        return [
-            a[0]
-            for a in inspect.getmembers(idsobj)
-            if not a[0].startswith("_") and is_field(type(a[1]))
-        ]
+        return [a[0] for a in inspect.getmembers(idsobj) if not a[0].startswith("_") and is_field(type(a[1]))]
     else:
         return []
 
@@ -55,11 +51,7 @@ def available_in_dbentry(db, time_mode=None):
     presentidslist = []
     for idstype in all_ids_types():
         for occ in range(getattr(imas, idstype)().getMaxOccurrences()):
-            homogeneous_time = db.partial_get(
-                idstype, "ids_properties/homogeneous_time", occurrence=occ
-            )
-            if homogeneous_time != imas.imasdef.EMPTY_INT and (
-                time_mode == None or time_mode == homogeneous_time
-            ):
+            homogeneous_time = db.partial_get(idstype, "ids_properties/homogeneous_time", occurrence=occ)
+            if homogeneous_time != imas.imasdef.EMPTY_INT and (time_mode == None or time_mode == homogeneous_time):
                 presentidslist.append((idstype, occ))
     return presentidslist

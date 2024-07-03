@@ -23,9 +23,7 @@ class CoreProfilesCompute:
         self.volume = volume
 
     @staticmethod
-    def getPlasmaCompositionWithSpeciesConcentration(
-        ids, timeSlice=0, volume=None
-    ) -> dict:
+    def getPlasmaCompositionWithSpeciesConcentration(ids, timeSlice=0, volume=None) -> dict:
         """
         Function retrives composition and species concentration in below format
         """
@@ -50,9 +48,7 @@ class CoreProfilesCompute:
         nspec_over_nmaj = coreProfileCompute.getNspecOverNmaj()
         species = coreProfileCompute.getSpecies()
         labels = coreProfileCompute.getLabels()
-        coreProfileCompute.combine_species_when_appear_twice(
-            species, nspec_over_ntot, nspec_over_ne, nspec_over_nmaj
-        )
+        coreProfileCompute.combine_species_when_appear_twice(species, nspec_over_ntot, nspec_over_ne, nspec_over_nmaj)
         a = coreProfileCompute.get_a()
         z = coreProfileCompute.get_z()
         states_data = coreProfileCompute.getStatesData()
@@ -94,10 +90,7 @@ class CoreProfilesCompute:
         """
         ntime = len(self.ids.time)
 
-        return [
-            self.ids.profiles_1d[itime].electrons.density[0] * 1.0e-19
-            for itime in range(ntime)
-        ]
+        return [self.ids.profiles_1d[itime].electrons.density[0] * 1.0e-19 for itime in range(ntime)]
 
     @functools.lru_cache(maxsize=128)
     def get_a(self, timeSlice=0, element_index=0) -> list:
@@ -128,9 +121,7 @@ class CoreProfilesCompute:
         nspecies = len(self.ids.profiles_1d[timeSlice].ion)
         a = [0] * nspecies
         for ispecies in range(nspecies):
-            a[ispecies] = (
-                self.ids.profiles_1d[timeSlice].ion[ispecies].element[element_index].a
-            )
+            a[ispecies] = self.ids.profiles_1d[timeSlice].ion[ispecies].element[element_index].a
         logger.debug(f"Mass of atom : {a}")
         return a
 
@@ -164,9 +155,7 @@ class CoreProfilesCompute:
         nspecies = len(self.ids.profiles_1d[timeSlice].ion)
         z = [0] * nspecies
         for ispecies in range(nspecies):
-            z[ispecies] = int(
-                self.ids.profiles_1d[timeSlice].ion[ispecies].element[elementIndex].z_n
-            )
+            z[ispecies] = int(self.ids.profiles_1d[timeSlice].ion[ispecies].element[elementIndex].z_n)
         logger.debug(f"Nuclear charge each species : {z}")
         return z
 
@@ -197,14 +186,9 @@ class CoreProfilesCompute:
                 # class 'imas_3_38_1_ual_4_11_4.core_profiles.profiles_1d_ion_state__structArray'
         """
         nspecies = len(self.ids.profiles_1d[timeSlice].ion)
-        return [
-            self.ids.profiles_1d[timeSlice].ion[species_index].state
-            for species_index in range(nspecies)
-        ]
+        return [self.ids.profiles_1d[timeSlice].ion[species_index].state for species_index in range(nspecies)]
 
-    def getStateDensity(
-        self, timeSlice: int = 0, speciesIndex: int = 0, stateIndex: int = 0
-    ) -> np.ndarray:
+    def getStateDensity(self, timeSlice: int = 0, speciesIndex: int = 0, stateIndex: int = 0) -> np.ndarray:
         """
         This function returns the density of a specified state of a specified species at a specified time slice, or the thermal density if the former is not available.
 
@@ -231,21 +215,11 @@ class CoreProfilesCompute:
                 4.16751781e+19, 4.16983762e+19, 4.17344996e+19, 4.17944658e+19,
         """
         with contextlib.suppress(Exception):
-            density = (
-                self.ids.profiles_1d[timeSlice]
-                .ion[speciesIndex]
-                .state[stateIndex]
-                .density
-            )
+            density = self.ids.profiles_1d[timeSlice].ion[speciesIndex].state[stateIndex].density
             if len(density) != 0:
                 return density
         with contextlib.suppress(Exception):
-            density = (
-                self.ids.profiles_1d[timeSlice]
-                .ion[speciesIndex]
-                .state[stateIndex]
-                .density_thermal
-            )
+            density = self.ids.profiles_1d[timeSlice].ion[speciesIndex].state[stateIndex].density_thermal
             if len(density) != 0:
                 return density
         return None
@@ -298,15 +272,9 @@ class CoreProfilesCompute:
             states_density = [0] * nstates
             for state_index in range(nstates):
                 state_data = {
-                    "label": self.ids.profiles_1d[timeSlice]
-                    .ion[species_index]
-                    .state[state_index]
-                    .label,
+                    "label": self.ids.profiles_1d[timeSlice].ion[species_index].state[state_index].label,
                     "z_average": np.mean(
-                        self.ids.profiles_1d[timeSlice]
-                        .ion[species_index]
-                        .state[state_index]
-                        .z_average
+                        self.ids.profiles_1d[timeSlice].ion[species_index].state[state_index].z_average
                     ),
                 }
 
@@ -346,11 +314,7 @@ class CoreProfilesCompute:
                 )
                 # if species density is 0.0 then do not calculate n/ni
                 if species_density[species_index] != 0.0:
-                    state_data["n_ni"] = (
-                        100
-                        * states_density[state_index]
-                        / species_density[species_index]
-                    )
+                    state_data["n_ni"] = 100 * states_density[state_index] / species_density[species_index]
                 else:
                     state_data["n_ni"] = 0.0
                 species_data[str(state_index)] = state_data
@@ -569,10 +533,7 @@ class CoreProfilesCompute:
 
         a = list(map(int, self.get_a()))
         z = list(map(int, self.get_z()))
-        return [
-            table_mendeleiev[z[ispecies]][a[ispecies]].element
-            for ispecies in range(nspecies)
-        ]
+        return [table_mendeleiev[z[ispecies]][a[ispecies]].element for ispecies in range(nspecies)]
 
     def getLabels(self, timeSlice: int = 0) -> list:
         """
@@ -597,16 +558,11 @@ class CoreProfilesCompute:
                 ['H', 'He', 'Ne']
         """
         nspecies = len(self.ids.profiles_1d[timeSlice].ion)
-        labels = [
-            self.ids.profiles_1d[timeSlice].ion[ispecies].label
-            for ispecies in range(nspecies)
-        ]
+        labels = [self.ids.profiles_1d[timeSlice].ion[ispecies].label for ispecies in range(nspecies)]
         logger.debug(f"Species identification :{labels}")
         return labels
 
-    def combine_species_when_appear_twice(
-        self, species, nspecOverNtot, nspecOverNe, nspecOverNmaj, timeSlice=0
-    ):
+    def combine_species_when_appear_twice(self, species, nspecOverNtot, nspecOverNe, nspecOverNmaj, timeSlice=0):
         """
         This is helper function which checks if there are duplicate entries of species and combine the species. This is in place change of arrays
 
@@ -620,15 +576,11 @@ class CoreProfilesCompute:
         nspecies = len(self.ids.profiles_1d[timeSlice].ion)
         for ispecies, jspecies in itertools.product(range(nspecies), range(nspecies)):
             if (species[jspecies] == species[ispecies]) & (jspecies != ispecies):
-                nspecOverNtot[ispecies] = (
-                    nspecOverNtot[ispecies] + nspecOverNtot[jspecies]
-                )
+                nspecOverNtot[ispecies] = nspecOverNtot[ispecies] + nspecOverNtot[jspecies]
                 nspecOverNtot[jspecies] = 0
                 nspecOverNe[ispecies] = nspecOverNe[ispecies] + nspecOverNe[jspecies]
                 nspecOverNe[jspecies] = 0
-                nspecOverNmaj[ispecies] = (
-                    nspecOverNmaj[ispecies] + nspecOverNmaj[jspecies]
-                )
+                nspecOverNmaj[ispecies] = nspecOverNmaj[ispecies] + nspecOverNmaj[jspecies]
                 nspecOverNmaj[jspecies] = 0
 
     def getRhoTorNorm(self, timeSlice: int = 0) -> np.ndarray:
@@ -661,14 +613,9 @@ class CoreProfilesCompute:
             if len(self.ids.profiles_1d[timeSlice].grid.rho_tor_norm) > 0:
                 return self.ids.profiles_1d[timeSlice].grid.rho_tor_norm
             elif len(self.ids.profiles_1d[timeSlice].grid.rho_tor) > 0:
-                return (
-                    self.ids.profiles_1d[timeSlice].grid.rho_tor
-                    / self.ids.profiles_1d[timeSlice].grid.rho_tor[-1]
-                )
+                return self.ids.profiles_1d[timeSlice].grid.rho_tor / self.ids.profiles_1d[timeSlice].grid.rho_tor[-1]
         except IndexError:
-            logger.error(
-                f"core_profiles.profiles_1d[{timeSlice}].grid.rho_tor_norm or rho_tor is not available"
-            )
+            logger.error(f"core_profiles.profiles_1d[{timeSlice}].grid.rho_tor_norm or rho_tor is not available")
         return None
 
     def getPSI(self, timeSlice: int = 0) -> list:
@@ -739,20 +686,12 @@ class CoreProfilesCompute:
                 else ion.pressure_fast_perpendicular
             )
 
-        pressureIonThermal = (
-            np.asarray([np.nan] * nrho)
-            if len(pressureIonThermal) == 0
-            else pressureIonThermal
-        )
+        pressureIonThermal = np.asarray([np.nan] * nrho) if len(pressureIonThermal) == 0 else pressureIonThermal
         pressureIonFastParallel = (
-            np.asarray([np.nan] * nrho)
-            if len(pressureIonFastParallel) == 0
-            else pressureIonFastParallel
+            np.asarray([np.nan] * nrho) if len(pressureIonFastParallel) == 0 else pressureIonFastParallel
         )
         pressureIonFastPerpendicular = (
-            np.asarray([np.nan] * nrho)
-            if len(pressureIonFastPerpendicular) == 0
-            else pressureIonFastPerpendicular
+            np.asarray([np.nan] * nrho) if len(pressureIonFastPerpendicular) == 0 else pressureIonFastPerpendicular
         )
 
         maximaIon = max(
@@ -780,12 +719,8 @@ class CoreProfilesCompute:
         nrho = len(self.getRhoTorNorm())
         pressureElectronTotal = self.ids.profiles_1d[0].electrons.pressure
         pressureElectronThermal = self.ids.profiles_1d[0].electrons.pressure_thermal
-        pressureElectronFastParallel = self.ids.profiles_1d[
-            0
-        ].electrons.pressure_fast_parallel
-        pressureElectronFastPerpendicular = self.ids.profiles_1d[
-            0
-        ].electrons.pressure_fast_perpendicular
+        pressureElectronFastParallel = self.ids.profiles_1d[0].electrons.pressure_fast_parallel
+        pressureElectronFastPerpendicular = self.ids.profiles_1d[0].electrons.pressure_fast_perpendicular
         if len(pressureElectronTotal) == 0:
             logger.warn("Empty profiles_1d[0].electrons.pressure")
         if len(pressureElectronThermal) == 0:
@@ -795,19 +730,13 @@ class CoreProfilesCompute:
         if len(pressureElectronFastPerpendicular) == 0:
             logger.warn("Empty profiles_1d[0].electrons.pressure_fast_perpendicular")
         pressureElectronTotal = (
-            np.asarray([np.nan] * nrho)
-            if len(pressureElectronTotal) == 0
-            else pressureElectronTotal
+            np.asarray([np.nan] * nrho) if len(pressureElectronTotal) == 0 else pressureElectronTotal
         )
         pressureElectronThermal = (
-            np.asarray([np.nan] * nrho)
-            if len(pressureElectronThermal) == 0
-            else pressureElectronThermal
+            np.asarray([np.nan] * nrho) if len(pressureElectronThermal) == 0 else pressureElectronThermal
         )
         pressureElectronFastParallel = (
-            np.asarray([np.nan] * nrho)
-            if len(pressureElectronFastParallel) == 0
-            else pressureElectronFastParallel
+            np.asarray([np.nan] * nrho) if len(pressureElectronFastParallel) == 0 else pressureElectronFastParallel
         )
         pressureElectronFastPerpendicular = (
             np.asarray([np.nan] * nrho)
@@ -848,20 +777,10 @@ class CoreProfilesCompute:
             logger.warn("Empty profiles_1d[0].pressure_fast_parallel")
         if len(pressurePerpendicular) == 0:
             logger.warn("Empty profiles_1d[0].pressure_fast_perpendicular")
-        pressureThermal = (
-            np.asarray([np.nan] * nrho)
-            if len(pressureThermal) == 0
-            else pressureThermal
-        )
-        pressureParallel = (
-            np.asarray([np.nan] * nrho)
-            if len(pressureParallel) == 0
-            else pressureParallel
-        )
+        pressureThermal = np.asarray([np.nan] * nrho) if len(pressureThermal) == 0 else pressureThermal
+        pressureParallel = np.asarray([np.nan] * nrho) if len(pressureParallel) == 0 else pressureParallel
         pressurePerpendicular = (
-            np.asarray([np.nan] * nrho)
-            if len(pressurePerpendicular) == 0
-            else pressurePerpendicular
+            np.asarray([np.nan] * nrho) if len(pressurePerpendicular) == 0 else pressurePerpendicular
         )
 
         dictElectronsPressureProperties = self.getElectronsPressureProperties()
@@ -917,9 +836,7 @@ class CoreProfilesCompute:
     def getProfiles(self, sliceIndex=0):
         rhoTorNorm = self.getRhoTorNorm(timeSlice=0)
         if rhoTorNorm is None:
-            logger.critical(
-                "core_profiles.profiles_1d[:].grid.rho_tor_norm and rho_tor are empty"
-            )
+            logger.critical("core_profiles.profiles_1d[:].grid.rho_tor_norm and rho_tor are empty")
             logger.critical("----> Aborted.")
             return None
 
@@ -927,76 +844,44 @@ class CoreProfilesCompute:
 
         # J_bootstrap profile
         if len(self.ids.profiles_1d[sliceIndex].j_bootstrap) < 1:
-            logger.critical(
-                "core_profiles.profiles_1d["
-                + str(sliceIndex)
-                + "].j_bootstrap could not be read"
-            )
+            logger.critical("core_profiles.profiles_1d[" + str(sliceIndex) + "].j_bootstrap could not be read")
             self.ids.profiles_1d[sliceIndex].j_bootstrap = np.asarray([np.nan] * nrho)
 
         # J_non_inductive profile
         if len(self.ids.profiles_1d[sliceIndex].j_non_inductive) < 1:
-            logger.critical(
-                "core_profiles.profiles_1d["
-                + str(sliceIndex)
-                + "].j_non_inductive could not be read"
-            )
-            self.ids.profiles_1d[sliceIndex].j_non_inductive = np.asarray(
-                [np.nan] * nrho
-            )
+            logger.critical("core_profiles.profiles_1d[" + str(sliceIndex) + "].j_non_inductive could not be read")
+            self.ids.profiles_1d[sliceIndex].j_non_inductive = np.asarray([np.nan] * nrho)
 
         # J_ohmic profile
         if len(self.ids.profiles_1d[0].j_ohmic) < 1:
-            logger.critical(
-                "core_profiles.profiles_1d["
-                + str(sliceIndex)
-                + "].j_ohmic could not be read"
-            )
+            logger.critical("core_profiles.profiles_1d[" + str(sliceIndex) + "].j_ohmic could not be read")
             self.ids.profiles_1d[0].j_ohmic = np.asarray([np.nan] * nrho)
 
         # J_total profile
         if len(self.ids.profiles_1d[0].j_total) < 1:
-            logger.critical(
-                "core_profiles.profiles_1d["
-                + str(sliceIndex)
-                + "].j_total could not be read"
-            )
+            logger.critical("core_profiles.profiles_1d[" + str(sliceIndex) + "].j_total could not be read")
             self.ids.profiles_1d[0].j_total = np.asarray([np.nan] * nrho)
 
         # q-profile
         if len(self.ids.profiles_1d[0].q) < 1:
-            logger.critical(
-                "core_profiles.profiles_1d[" + str(sliceIndex) + "].q could not be read"
-            )
+            logger.critical("core_profiles.profiles_1d[" + str(sliceIndex) + "].q could not be read")
             self.ids.profiles_1d[0].q = np.asarray([np.nan] * nrho)
 
         # Magnetic shear profile
         if len(self.ids.profiles_1d[0].magnetic_shear) < 1:
-            logger.critical(
-                "core_profiles.profiles_1d["
-                + str(sliceIndex)
-                + "].magnetic_shear could not be read"
-            )
+            logger.critical("core_profiles.profiles_1d[" + str(sliceIndex) + "].magnetic_shear could not be read")
             self.ids.profiles_1d[0].magnetic_shear = np.asarray([np.nan] * nrho)
 
         if len(self.ids.profiles_1d[0].q) != nrho:
-            logger.critical(
-                "--------------------------------------------------------------"
-            )
+            logger.critical("--------------------------------------------------------------")
             logger.critical("Dimensions of input core profiles are not consistent:")
             logger.critical("  core_profiles.profiles_1d[0].grid.rho_tor(_norm)")
             logger.critical("  and core_profiles.profiles_1d[0].q")
             logger.critical("  have different dimensions:")
-            logger.critical(
-                f"- len(core_profiles.profiles_1d[0].grid.rho_tor(_norm))= {nrho}"
-            )
-            logger.critical(
-                f"- len(core_profiles.profiles_1d[0].q = {len(self.ids.profiles_1d[0].q)}"
-            )
+            logger.critical(f"- len(core_profiles.profiles_1d[0].grid.rho_tor(_norm))= {nrho}")
+            logger.critical(f"- len(core_profiles.profiles_1d[0].q = {len(self.ids.profiles_1d[0].q)}")
             logger.critical("----> Aborted.")
-            logger.critical(
-                "--------------------------------------------------------------"
-            )
+            logger.critical("--------------------------------------------------------------")
             return None
 
         # Create the dictionary defining the list of profiles that can be displayed
@@ -1018,7 +903,5 @@ class CoreProfilesCompute:
             elif len(self.ids.profiles_1d[sliceIndex].grid.rho_tor) > 0:
                 nrho = len(self.ids.profiles_1d[sliceIndex].grid.rho_tor)
         except Exception as e:
-            logger.warning(
-                "core_profiles.profiles_1d[:].grid.rho_tor_norm and rho_tor could not be read."
-            )
+            logger.warning("core_profiles.profiles_1d[:].grid.rho_tor_norm and rho_tor could not be read.")
         return nrho

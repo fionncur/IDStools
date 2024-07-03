@@ -3,9 +3,7 @@ import imas
 
 # ------------------------------------------------------------------------------------
 def ids_read(idsname, shot, run, user_or_path, database, occ=0):
-    input = imas.DBEntry(
-        imas.imasdef.MDSPLUS_BACKEND, database, shot, run, user_or_path
-    )
+    input = imas.DBEntry(imas.imasdef.MDSPLUS_BACKEND, database, shot, run, user_or_path)
     input.open()
     ids = input.get(idsname)
     input.close()
@@ -13,12 +11,8 @@ def ids_read(idsname, shot, run, user_or_path, database, occ=0):
 
 
 # ------------------------------------------------------------------------------------
-def ids_read_slice(
-    idsname, time_slice, shot, run, user_or_path, database, occ=0, interp_method=1
-):
-    input = imas.DBEntry(
-        imas.imasdef.MDSPLUS_BACKEND, database, shot, run, user_or_path
-    )
+def ids_read_slice(idsname, time_slice, shot, run, user_or_path, database, occ=0, interp_method=1):
+    input = imas.DBEntry(imas.imasdef.MDSPLUS_BACKEND, database, shot, run, user_or_path)
     input.open()
     ids = input.get_slice(idsname, time_slice, interp_method, occ)
     input.close()
@@ -27,102 +21,42 @@ def ids_read_slice(
 
 # ------------------------------------------------------------------------------------
 def ids_write(ids, shot, run, user_or_path, database, occ=0):
-    output = imas.DBEntry(
-        imas.imasdef.MDSPLUS_BACKEND, database, shot, run, user_or_path
-    )
+    output = imas.DBEntry(imas.imasdef.MDSPLUS_BACKEND, database, shot, run, user_or_path)
     retstatus, idx = output.open()
     if retstatus == 0:
         print(
-            "IDS appended to existing "
-            + str(shot)
-            + "/"
-            + str(run)
-            + "/"
-            + user_or_path
-            + "/"
-            + database
-            + " datafile"
+            "IDS appended to existing " + str(shot) + "/" + str(run) + "/" + user_or_path + "/" + database + " datafile"
         )
         output.put(ids)
         output.close()
     else:
-        print(
-            "New "
-            + str(shot)
-            + "/"
-            + str(run)
-            + "/"
-            + user_or_path
-            + "/"
-            + database
-            + " datafile created"
-        )
+        print("New " + str(shot) + "/" + str(run) + "/" + user_or_path + "/" + database + " datafile created")
         retstatus, idx = output.create()
         if retstatus == 0:
             output.put(ids)
             output.close()
         else:
-            print(
-                "Could not create "
-                + str(shot)
-                + "/"
-                + str(run)
-                + "/"
-                + user_or_path
-                + "/"
-                + database
-                + " datafile"
-            )
+            print("Could not create " + str(shot) + "/" + str(run) + "/" + user_or_path + "/" + database + " datafile")
 
 
 # ------------------------------------------------------------------------------------
 def ids_write_slice(ids, shot, run, user_or_path, database, occ=0):
-    output = imas.DBEntry(
-        imas.imasdef.MDSPLUS_BACKEND, database, shot, run, user_or_path
-    )
+    output = imas.DBEntry(imas.imasdef.MDSPLUS_BACKEND, database, shot, run, user_or_path)
     retstatus, idx = output.open()
     if retstatus == 0:
         print(
-            "IDS appended to existing "
-            + str(shot)
-            + "/"
-            + str(run)
-            + "/"
-            + user_or_path
-            + "/"
-            + database
-            + " datafile"
+            "IDS appended to existing " + str(shot) + "/" + str(run) + "/" + user_or_path + "/" + database + " datafile"
         )
         output.put_slice(ids)
         output.close()
     else:
-        print(
-            "New "
-            + str(shot)
-            + "/"
-            + str(run)
-            + "/"
-            + user_or_path
-            + "/"
-            + database
-            + " datafile created"
-        )
+        print("New " + str(shot) + "/" + str(run) + "/" + user_or_path + "/" + database + " datafile created")
         retstatus, idx = output.create()
         if retstatus == 0:
             output.put_slice(ids)
             output.close()
         else:
-            print(
-                "Could not create "
-                + str(shot)
-                + "/"
-                + str(run)
-                + "/"
-                + user_or_path
-                + "/"
-                + database
-                + " datafile"
-            )
+            print("Could not create " + str(shot) + "/" + str(run) + "/" + user_or_path + "/" + database + " datafile")
 
 
 # ------------------------------------------------------------------------------------
@@ -169,21 +103,11 @@ def idsprint(stringvar):
                                 if lenvar == 1:
                                     print("  " + stringvar + "." + key + "[0]")
                                 else:
-                                    print(
-                                        "  "
-                                        + stringvar
-                                        + "."
-                                        + key
-                                        + "[0:"
-                                        + str(lenvar - 1)
-                                        + "]"
-                                    )
+                                    print("  " + stringvar + "." + key + "[0:" + str(lenvar - 1) + "]")
                             else:
                                 print("  " + stringvar + "." + key + "[]")
                         else:
-                            print(
-                                "  " + stringvar + "." + key + "(" + str(lenvar) + ")"
-                            )
+                            print("  " + stringvar + "." + key + "(" + str(lenvar) + ")")
                     else:
                         print("  " + stringvar + "." + key)
     else:
@@ -228,25 +152,13 @@ def __idsrrprint(ids, stringvar):
                                 if lenvar == 1:
                                     print("  " + stringvar + "." + key + "[0]")
                                 else:
-                                    print(
-                                        "  "
-                                        + stringvar
-                                        + "."
-                                        + key
-                                        + "[0:"
-                                        + str(lenvar - 1)
-                                        + "]"
-                                    )
+                                    print("  " + stringvar + "." + key + "[0:" + str(lenvar - 1) + "]")
                             else:
                                 print("  " + stringvar + "." + key + "[]")
                             for i in range(lenvar):
-                                __idsrrprint(
-                                    ids, stringvar + "." + key + "[" + str(i) + "]"
-                                )
+                                __idsrrprint(ids, stringvar + "." + key + "[" + str(i) + "]")
                         else:
-                            print(
-                                "  " + stringvar + "." + key + "(" + str(lenvar) + ")"
-                            )
+                            print("  " + stringvar + "." + key + "(" + str(lenvar) + ")")
                     else:
                         print("  " + stringvar + "." + key)
                         __idsrrprint(ids, stringvar + "." + key)

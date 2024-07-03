@@ -124,9 +124,7 @@ class MachineDescription:
             pulsesData[pulse]["data"] = None
             if checkValidity:
                 self.mdArgs.pulse, self.mdArgs.run = pulse.split("/")
-                self.mdArgs.pulse, self.mdArgs.run = int(self.mdArgs.pulse), int(
-                    self.mdArgs.run
-                )
+                self.mdArgs.pulse, self.mdArgs.run = int(self.mdArgs.pulse), int(self.mdArgs.run)
                 self.mdArgs.uri = f"imas:mdsplus?user={self.mdArgs.user};pulse={self.mdArgs.pulse};run={self.mdArgs.run};database={self.mdArgs.database};version={self.mdArgs.version}"
                 mdConnection = DBMaster.getConnection(self.mdArgs)
                 if mdConnection is not None:
@@ -248,9 +246,7 @@ class MachineDescription:
             dictToFill["pulse"].append(pulsec)
             dictToFill["run"].append(runc)
             dictToFill["status"].append(self.mdSummaryYaml[pulserunc]["status"])
-            dictToFill["reason_for_replacement"].append(
-                self.mdSummaryYaml[pulserunc]["reason_for_replacement"]
-            )
+            dictToFill["reason_for_replacement"].append(self.mdSummaryYaml[pulserunc]["reason_for_replacement"])
             dictToFill = self.getChildren(int(pulsec), int(runc), dictToFill)
         return dictToFill
 
@@ -284,9 +280,7 @@ class MachineDescription:
             dictToFill["pulse"].insert(0, pulsep)  # Order to be reversed for parents
             dictToFill["run"].insert(0, runp)
             dictToFill["status"].insert(0, self.mdSummaryYaml[pulserunp]["status"])
-            dictToFill["reason_for_replacement"].insert(
-                0, self.mdSummaryYaml[pulserunp]["reason_for_replacement"]
-            )
+            dictToFill["reason_for_replacement"].insert(0, self.mdSummaryYaml[pulserunp]["reason_for_replacement"])
             dictToFill = self.getParents(int(pulsep), int(runp), dictToFill)
         return dictToFill
 

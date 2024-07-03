@@ -122,14 +122,9 @@ def parse_cli(p):
     opts, args = p.parse_args()
 
     if (
-        (opts.user is not None)
-        | (opts.tokamak is not None)
-        | (opts.database is not None)
-        | (opts.version is not None)
+        (opts.user is not None) | (opts.tokamak is not None) | (opts.database is not None) | (opts.version is not None)
     ) & opts.useHDF5:
-        raise SystemExit(
-            "HDF5 access method not allowed when specifying user, tokamak or data version."
-        )
+        raise SystemExit("HDF5 access method not allowed when specifying user, tokamak or data version.")
 
     pars = setDefaultParameters()
     if opts.user is not None:

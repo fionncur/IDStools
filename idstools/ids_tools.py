@@ -162,10 +162,7 @@ class ImasDb:
                 except Exception as exc:
                     times = []
                     print(
-                        "ERROR! IDS '"
-                        + idsname
-                        + "': Reading time array fails due to following problem : "
-                        + str(exc),
+                        "ERROR! IDS '" + idsname + "': Reading time array fails due to following problem : " + str(exc),
                         file=sys.stderr,
                     )
                 if times is not None and len(times):
@@ -252,9 +249,7 @@ class Ids:
             self._parentImasDb = parentImasDb
         else:
             # logging.debug("Creating exclusive ImasDb object for ids")
-            self._parentImasDb = ImasDb(
-                shot, run, user, tokamak, version, doOpen, useHDF5
-            )
+            self._parentImasDb = ImasDb(shot, run, user, tokamak, version, doOpen, useHDF5)
 
         self._idsUALDAO = idsUALDAO
 

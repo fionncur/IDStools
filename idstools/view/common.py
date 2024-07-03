@@ -228,9 +228,7 @@ class Canvas:
             # from Paul Tot's website: https://personal.sron.nl/~pault/
 
             # Set color cycle
-            matplotlib.rcParams["axes.prop_cycle"] = matplotlib.cycler(
-                "color", ["004488", "DDAA33", "BB5566"]
-            )
+            matplotlib.rcParams["axes.prop_cycle"] = matplotlib.cycler("color", ["004488", "DDAA33", "BB5566"])
 
         if style == "bright":
             # Bright color scheme

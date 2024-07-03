@@ -18,9 +18,7 @@ class DistributionSourcesView(BasePlot):
         rhoTorNorm = self.distributionSourcesCompute.getRhoTorNorm()
         nrho = len(rhoTorNorm)
         if rhoTorNorm is not None and nrho == 0:
-            logger.critical(
-                "distribution_sources.source[0].profiles_1d[0].grid.rho_tor_norm) is empty"
-            )
+            logger.critical("distribution_sources.source[0].profiles_1d[0].grid.rho_tor_norm) is empty")
             return
 
         sources = self.distributionSourcesCompute.getSourceInfo()
@@ -71,7 +69,5 @@ class DistributionSourcesView(BasePlot):
         )
         axTime.set_ylim(ymin, ymax)
 
-    def viewPulseInfo(
-        self, ax: plt.axes, title: str, hostdir: str, shot: int, run: int, t: float
-    ):
+    def viewPulseInfo(self, ax: plt.axes, title: str, hostdir: str, shot: int, run: int, t: float):
         self.database_info(ax, title, hostdir, shot, run, t)

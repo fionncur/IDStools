@@ -28,9 +28,7 @@ class DDHelper(object):
             self.version = self.root.findtext("./version", default="N/A")
             self.cocos = self.root.findtext("./cocos", default="N/A")
         else:
-            logger.error(
-                "Error while trying to access IDSDef.xml, make sure you've loaded IMAS module"
-            )
+            logger.error("Error while trying to access IDSDef.xml, make sure you've loaded IMAS module")
             raise FileNotFoundError(f"file not found:{self.ids_def}")
 
     @classmethod
@@ -60,9 +58,7 @@ class DDHelper(object):
         # Search using IMAS_PREFIX env variable
         if not idsdef_path:
             if "IMAS_PREFIX" in os.environ:
-                _idsdef_path = os.path.join(
-                    os.environ["IMAS_PREFIX"], r"include/IDSDef.xml"
-                )
+                _idsdef_path = os.path.join(os.environ["IMAS_PREFIX"], r"include/IDSDef.xml")
                 if os.path.isfile(_idsdef_path):
                     idsdef_path = _idsdef_path
 
@@ -107,9 +103,7 @@ class DDHelper(object):
         """Returns attributes of the selected ids/path node as a dictionary."""
         ids = self.root.find(f"./IDS[@name='{ids}']")
         if ids == None:
-            raise ValueError(
-                f"Error getting the IDS, please check that '{ids}' corresponds to a valid IDS name"
-            )
+            raise ValueError(f"Error getting the IDS, please check that '{ids}' corresponds to a valid IDS name")
 
         if path != None:
             fields = path.split("/")

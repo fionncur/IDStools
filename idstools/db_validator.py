@@ -41,13 +41,9 @@ def load_scenario(user, database, version, backend):
 
     scenarios = []
     if backend == "MDSPLUS":
-        scenarios = DBMaster.mdsListPulseRun(
-            DBMaster.getDBPath(user, database, version), with_status="active"
-        )
+        scenarios = DBMaster.mdsListPulseRun(DBMaster.getDBPath(user, database, version), with_status="active")
     elif backend == "HDF5":
-        scenarios = DBMaster.hdf5ListPulseRun(
-            DBMaster.getDBPath(user, database, version)
-        )
+        scenarios = DBMaster.hdf5ListPulseRun(DBMaster.getDBPath(user, database, version))
 
     return scenarios
 
@@ -230,13 +226,9 @@ class ScenarioValidator:
                         dbEntryDetails = db.__dict__["uri"]
                     else:
                         if "pulse" in db.__dict__:
-                            dbEntryDetails = (
-                                f"{db.__dict__['pulse']}/{db.__dict__['run']}"
-                            )
+                            dbEntryDetails = f"{db.__dict__['pulse']}/{db.__dict__['run']}"
                         if "shot" in db.__dict__:
-                            dbEntryDetails = (
-                                f"{db.__dict__['shot']}/{db.__dict__['run']}"
-                            )
+                            dbEntryDetails = f"{db.__dict__['shot']}/{db.__dict__['run']}"
 
                     logger.info(
                         "- {}/{}/{} < {}".format(

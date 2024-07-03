@@ -13,19 +13,15 @@ class CoreProfilesView:
         self.coreProfilesCompute = CoreProfilesCompute(ids)
 
     @staticmethod
-    def view_plasma_composition_with_species_concentration(
-        ids_object, slice_index=0, print_data=False, volume=None
-    ):
+    def view_plasma_composition_with_species_concentration(ids_object, slice_index=0, print_data=False, volume=None):
         """
         Nice display of plasma composition with species concentrations
         """
         print("---------------")
         print("core_profiles")
         print("---------------")
-        composition_data = (
-            CoreProfilesCompute.getPlasmaCompositionWithSpeciesConcentration(
-                ids_object, slice_index, volume=volume
-            )
+        composition_data = CoreProfilesCompute.getPlasmaCompositionWithSpeciesConcentration(
+            ids_object, slice_index, volume=volume
         )
         if composition_data != 0 and composition_data != -1:
             coreProfilesView = CoreProfilesView(ids_object)
@@ -64,14 +60,10 @@ class CoreProfilesView:
                 disp_z = f"{disp_z} {z : >12}"
                 if species_data["nspec_over_ntot"] < 1.0e-2:
                     nspec_over_ntot = f"{species_data['nspec_over_ntot'] :.2e}"
-                    disp_nspec_over_ntot = (
-                        f"{disp_nspec_over_ntot} {nspec_over_ntot : >12}"
-                    )
+                    disp_nspec_over_ntot = f"{disp_nspec_over_ntot} {nspec_over_ntot : >12}"
                 else:
                     nspec_over_ntot = f"{species_data['nspec_over_ntot'] :.3f}"
-                    disp_nspec_over_ntot = (
-                        f"{disp_nspec_over_ntot} {nspec_over_ntot : >12}"
-                    )
+                    disp_nspec_over_ntot = f"{disp_nspec_over_ntot} {nspec_over_ntot : >12}"
                 if species_data["nspec_over_ne"] < 1.0e-2:
                     nspec_over_ne = f"{species_data['nspec_over_ne'] :.2e}"
                     disp_nspec_over_ne = f"{disp_nspec_over_ne} {nspec_over_ne : >12}"
@@ -80,14 +72,10 @@ class CoreProfilesView:
                     disp_nspec_over_ne = f"{disp_nspec_over_ne} {nspec_over_ne : >12}"
                 if species_data["nspec_over_nmaj"] < 1.0e-2:
                     nspec_over_nmaj = f"{species_data['nspec_over_nmaj'] :.2e}"
-                    disp_nspec_over_nmaj = (
-                        f"{disp_nspec_over_nmaj} {nspec_over_nmaj : >12}"
-                    )
+                    disp_nspec_over_nmaj = f"{disp_nspec_over_nmaj} {nspec_over_nmaj : >12}"
                 else:
                     nspec_over_nmaj = f"{species_data['nspec_over_nmaj'] :.3f}"
-                    disp_nspec_over_nmaj = (
-                        f"{disp_nspec_over_nmaj} {nspec_over_nmaj : >12}"
-                    )
+                    disp_nspec_over_nmaj = f"{disp_nspec_over_nmaj} {nspec_over_nmaj : >12}"
 
         print(disp_species)
         print(disp_a)
@@ -118,9 +106,7 @@ class CoreProfilesView:
                 istate = 0
                 for state_key, state_data in states.items():
                     if state_data["density_available"] is False:
-                        print(
-                            f"\t!  core_profile IDS: Density is not available for state {istate + 1}"
-                        )
+                        print(f"\t!  core_profile IDS: Density is not available for state {istate + 1}")
                     else:
                         n_ni = f"{state_data['n_ni']:.6f}"
                         label_space = 0
@@ -165,9 +151,7 @@ class CoreProfilesView:
         )
         ax.set_ylim(0, 20)
 
-    def plotDensityProfile(
-        self, ax, timeIndex, psiCordinate=False, update=True, logscale=False
-    ):
+    def plotDensityProfile(self, ax, timeIndex, psiCordinate=False, update=True, logscale=False):
         """
         This function plots the electron density profile as a function of either the normalized toroidal flux coordinate or the poloidal magnetic flux coordinate.
 
@@ -236,9 +220,7 @@ class CoreProfilesView:
         maximaIon = dictIonPressureProperties["maximaIon"]
         pressureIonThermal = dictIonPressureProperties["pressureIonThermal"]
         pressureIonFastParallel = dictIonPressureProperties["pressureIonFastParallel"]
-        pressureIonFastPerpendicular = dictIonPressureProperties[
-            "pressureIonFastPerpendicular"
-        ]
+        pressureIonFastPerpendicular = dictIonPressureProperties["pressureIonFastPerpendicular"]
 
         fontArgs = {
             "fontfamily": "serif",
@@ -264,9 +246,7 @@ class CoreProfilesView:
         # set legend
         # legx_pos = 1.35
         # legy_pos = 1.05
-        legend = ax.legend(
-            loc="upper right"
-        )  # bbox_to_anchor=(legx_pos - 0.4, legy_pos - 0.05)
+        legend = ax.legend(loc="upper right")  # bbox_to_anchor=(legx_pos - 0.4, legy_pos - 0.05)
         frame = legend.get_frame()
         frame.set_facecolor("0.95")
         for label in legend.get_texts():
@@ -308,20 +288,12 @@ class CoreProfilesView:
             )
             logger.critical("----> Aborted.")
 
-        dictElectronsPressureProperties = (
-            self.coreProfilesCompute.getElectronsPressureProperties()
-        )
+        dictElectronsPressureProperties = self.coreProfilesCompute.getElectronsPressureProperties()
         maximaElectrons = dictElectronsPressureProperties["maximaElectrons"]
         pressureElectronTotal = dictElectronsPressureProperties["pressureElectronTotal"]
-        pressureElectronThermal = dictElectronsPressureProperties[
-            "pressureElectronThermal"
-        ]
-        pressureElectronFastParallel = dictElectronsPressureProperties[
-            "pressureElectronFastParallel"
-        ]
-        pressureElectronFastPerpendicular = dictElectronsPressureProperties[
-            "pressureElectronFastPerpendicular"
-        ]
+        pressureElectronThermal = dictElectronsPressureProperties["pressureElectronThermal"]
+        pressureElectronFastParallel = dictElectronsPressureProperties["pressureElectronFastParallel"]
+        pressureElectronFastPerpendicular = dictElectronsPressureProperties["pressureElectronFastPerpendicular"]
         fontArgs = {
             "fontfamily": "serif",
             "color": "darkred",
@@ -351,9 +323,7 @@ class CoreProfilesView:
         # set legend
         # legx_pos = 1.35
         # legy_pos = 1.05
-        legend = ax.legend(
-            loc="upper right"
-        )  # bbox_to_anchor=(legx_pos - 0.5, legy_pos - 0.05)
+        legend = ax.legend(loc="upper right")  # bbox_to_anchor=(legx_pos - 0.5, legy_pos - 0.05)
         frame = legend.get_frame()
         frame.set_facecolor("0.95")
         for label in legend.get_texts():
@@ -405,9 +375,7 @@ class CoreProfilesView:
         # set legend
         # legx_pos = 1.35
         # legy_pos = 1.05
-        legend = ax.legend(
-            loc="upper right"
-        )  # bbox_to_anchor=(legx_pos - 0.35, legy_pos - 0.05)
+        legend = ax.legend(loc="upper right")  # bbox_to_anchor=(legx_pos - 0.35, legy_pos - 0.05)
         frame = legend.get_frame()
         frame.set_facecolor("0.95")
         for label in legend.get_texts():
@@ -448,12 +416,8 @@ class CoreProfilesView:
         """
         profiles = self.coreProfilesCompute.getProfiles()
         ax.plot(profiles["rhonorm"], profiles["j_total"] * 1.0e-3, label=r"$j_{TOT}$")
-        ax.plot(
-            profiles["rhonorm"], profiles["j_non_inductive"] * 1.0e-3, label=r"$j_{NI}$"
-        )
-        ax.plot(
-            profiles["rhonorm"], profiles["j_bootstrap"] * 1.0e-3, label=r"$j_{BOOT}$"
-        )
+        ax.plot(profiles["rhonorm"], profiles["j_non_inductive"] * 1.0e-3, label=r"$j_{NI}$")
+        ax.plot(profiles["rhonorm"], profiles["j_bootstrap"] * 1.0e-3, label=r"$j_{BOOT}$")
         ax.plot(profiles["rhonorm"], profiles["j_ohmic"] * 1.0e-3, label=r"$j_{OHM}$")
 
         ax.set_xlabel(r"$\rho/\rho_0$")
@@ -471,13 +435,9 @@ class CoreProfilesView:
             )
             return
         if len(self.ids.profiles_1d[0].e_field.radial) < 1:
-            logger.critical(
-                "core_profiles.profiles_1d[0].e_field.radial could not be read"
-            )
+            logger.critical("core_profiles.profiles_1d[0].e_field.radial could not be read")
             self.ids.profiles_1d[0].e_field.radial = np.asarray([np.nan] * nrho)
-        ax.plot(
-            rhoTorNorm, self.ids.profiles_1d[0].e_field.radial * FACTOR, label="E-field"
-        )
+        ax.plot(rhoTorNorm, self.ids.profiles_1d[0].e_field.radial * FACTOR, label="E-field")
         ax.set_xlim(rhoTorNorm[0], rhoTorNorm[nrho - 1])
 
         # Set Plot properties
@@ -496,9 +456,7 @@ class CoreProfilesView:
         # set legend
         # legx_pos = 1.35
         # legy_pos = 1.05
-        legend = ax.legend(
-            loc="upper right"
-        )  # bbox_to_anchor=(legx_pos - 0.35, legy_pos - 0.05)
+        legend = ax.legend(loc="upper right")  # bbox_to_anchor=(legx_pos - 0.35, legy_pos - 0.05)
         frame = legend.get_frame()
         frame.set_facecolor("0.95")
         for label in legend.get_texts():
@@ -521,12 +479,8 @@ class CoreProfilesView:
         species = self.coreProfilesCompute.getSpecies(0)
         for ionIndex in range(nions):
             if len(self.ids.profiles_1d[0].ion[ionIndex].velocity.toroidal) < 1:
-                logger.critical(
-                    f"core_profiles.profiles_1d[0].ion[{ionIndex}].velocity.toroidal could not be read"
-                )
-                self.ids.profiles_1d[0].ion[ionIndex].velocity.toroidal = np.asarray(
-                    [np.nan] * nrho
-                )
+                logger.critical(f"core_profiles.profiles_1d[0].ion[{ionIndex}].velocity.toroidal could not be read")
+                self.ids.profiles_1d[0].ion[ionIndex].velocity.toroidal = np.asarray([np.nan] * nrho)
             ax.plot(
                 rhoTorNorm,
                 self.ids.profiles_1d[0].ion[ionIndex].velocity.toroidal * FACTOR,
@@ -554,9 +508,7 @@ class CoreProfilesView:
         # set legend
         # legx_pos = 1.35
         # legy_pos = 1.05
-        legend = ax.legend(
-            loc="upper right"
-        )  # bbox_to_anchor=(legx_pos - 0.35, legy_pos - 0.05)
+        legend = ax.legend(loc="upper right")  # bbox_to_anchor=(legx_pos - 0.35, legy_pos - 0.05)
         frame = legend.get_frame()
         frame.set_facecolor("0.95")
         for label in legend.get_texts():
@@ -579,12 +531,8 @@ class CoreProfilesView:
         species = self.coreProfilesCompute.getSpecies(0)
         for ionIndex in range(nions):
             if len(self.ids.profiles_1d[0].ion[ionIndex].velocity.poloidal) < 1:
-                logger.critical(
-                    f"core_profiles.profiles_1d[0].ion[{ionIndex}].velocity.poloidal could not be read"
-                )
-                self.ids.profiles_1d[0].ion[ionIndex].velocity.poloidal = np.asarray(
-                    [np.nan] * nrho
-                )
+                logger.critical(f"core_profiles.profiles_1d[0].ion[{ionIndex}].velocity.poloidal could not be read")
+                self.ids.profiles_1d[0].ion[ionIndex].velocity.poloidal = np.asarray([np.nan] * nrho)
             ax.plot(
                 rhoTorNorm,
                 self.ids.profiles_1d[0].ion[ionIndex].velocity.poloidal * FACTOR,
@@ -610,9 +558,7 @@ class CoreProfilesView:
         # set legend
         # legx_pos = 1.35
         # legy_pos = 1.05
-        legend = ax.legend(
-            loc="upper right"
-        )  # bbox_to_anchor=(legx_pos - 0.35, legy_pos - 0.05)
+        legend = ax.legend(loc="upper right")  # bbox_to_anchor=(legx_pos - 0.35, legy_pos - 0.05)
         frame = legend.get_frame()
         frame.set_facecolor("0.95")
         for label in legend.get_texts():
@@ -635,12 +581,8 @@ class CoreProfilesView:
         species = self.coreProfilesCompute.getSpecies(0)
         for ionIndex in range(nions):
             if len(self.ids.profiles_1d[0].ion[ionIndex].velocity.diamagnetic) < 1:
-                logger.critical(
-                    f"core_profiles.profiles_1d[0].ion[{ionIndex}].velocity.diamagnetic could not be read"
-                )
-                self.ids.profiles_1d[0].ion[ionIndex].velocity.diamagnetic = np.asarray(
-                    [np.nan] * nrho
-                )
+                logger.critical(f"core_profiles.profiles_1d[0].ion[{ionIndex}].velocity.diamagnetic could not be read")
+                self.ids.profiles_1d[0].ion[ionIndex].velocity.diamagnetic = np.asarray([np.nan] * nrho)
             ax.plot(
                 rhoTorNorm,
                 self.ids.profiles_1d[0].ion[ionIndex].velocity.diamagnetic * FACTOR,
@@ -667,9 +609,7 @@ class CoreProfilesView:
         # set legend
         # legx_pos = 1.35
         # legy_pos = 1.05
-        legend = ax.legend(
-            loc="upper right"
-        )  # bbox_to_anchor=(legx_pos - 0.35, legy_pos - 0.05)
+        legend = ax.legend(loc="upper right")  # bbox_to_anchor=(legx_pos - 0.35, legy_pos - 0.05)
         frame = legend.get_frame()
         frame.set_facecolor("0.95")
         for label in legend.get_texts():

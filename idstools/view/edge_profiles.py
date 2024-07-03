@@ -7,17 +7,11 @@ class EdgeProfilesView:
         self.edgeProfilesCompute = EdgeProfilesCompute(edgeProfileIds)
 
     @staticmethod
-    def view_plasma_composition_with_species_concentration(
-        ids_object, slice_index=0, print_data=False
-    ):
+    def view_plasma_composition_with_species_concentration(ids_object, slice_index=0, print_data=False):
         """
         Nice display of plasma composition with species concentrations
         """
-        composition_data = (
-            EdgeProfilesCompute.getPlasmaCompositionWithSpeciesConcentration(
-                ids_object, slice_index
-            )
-        )
+        composition_data = EdgeProfilesCompute.getPlasmaCompositionWithSpeciesConcentration(ids_object, slice_index)
         if composition_data != 0 and composition_data != -1:
             edgeProfilesView = EdgeProfilesView()
             edgeProfilesView._print_plasma_composition(composition_data)
@@ -54,14 +48,10 @@ class EdgeProfilesView:
                 disp_z = f"{disp_z} {z : >12}"
                 if species_data["nspec_over_ntot"] < 1.0e-2:
                     nspec_over_ntot = f"{species_data['nspec_over_ntot'] :.2e}"
-                    disp_nspec_over_ntot = (
-                        f"{disp_nspec_over_ntot} {nspec_over_ntot : >12}"
-                    )
+                    disp_nspec_over_ntot = f"{disp_nspec_over_ntot} {nspec_over_ntot : >12}"
                 else:
                     nspec_over_ntot = f"{species_data['nspec_over_ntot'] :.3f}"
-                    disp_nspec_over_ntot = (
-                        f"{disp_nspec_over_ntot} {nspec_over_ntot : >12}"
-                    )
+                    disp_nspec_over_ntot = f"{disp_nspec_over_ntot} {nspec_over_ntot : >12}"
                 if species_data["nspec_over_ne"] < 1.0e-2:
                     nspec_over_ne = f"{species_data['nspec_over_ne'] :.2e}"
                     disp_nspec_over_ne = f"{disp_nspec_over_ne} {nspec_over_ne : >12}"
@@ -70,14 +60,10 @@ class EdgeProfilesView:
                     disp_nspec_over_ne = f"{disp_nspec_over_ne} {nspec_over_ne : >12}"
                 if species_data["nspec_over_nmaj"] < 1.0e-2:
                     nspec_over_nmaj = f"{species_data['nspec_over_nmaj'] :.2e}"
-                    disp_nspec_over_nmaj = (
-                        f"{disp_nspec_over_nmaj} {nspec_over_nmaj : >12}"
-                    )
+                    disp_nspec_over_nmaj = f"{disp_nspec_over_nmaj} {nspec_over_nmaj : >12}"
                 else:
                     nspec_over_nmaj = f"{species_data['nspec_over_nmaj'] :.3f}"
-                    disp_nspec_over_nmaj = (
-                        f"{disp_nspec_over_nmaj} {nspec_over_nmaj : >12}"
-                    )
+                    disp_nspec_over_nmaj = f"{disp_nspec_over_nmaj} {nspec_over_nmaj : >12}"
 
         print(disp_species)
         print(disp_a)

@@ -28,9 +28,7 @@ class EquilibriumCompute:
         """
         self.ids = ids
 
-    def get2DCartesianGrid(
-        self, timeSlice: int = 0, profiles2DIndex: int = 0
-    ) -> Union[dict, None]:
+    def get2DCartesianGrid(self, timeSlice: int = 0, profiles2DIndex: int = 0) -> Union[dict, None]:
         """
         This function returns a dictionary containing 2D Cartesian grid coordinates and psi values from
         an equilibrium IDS object.
@@ -63,9 +61,7 @@ class EquilibriumCompute:
                 profiles2DIndex
             ]  # using https://docs.python.org/2/glossary.html#term-eafp style
         except IndexError:
-            logger.error(
-                f"equilibrium.time_slice[{timeSlice}].profiles_2d[{profiles2DIndex}] is not available"
-            )
+            logger.error(f"equilibrium.time_slice[{timeSlice}].profiles_2d[{profiles2DIndex}] is not available")
             return None
 
         profiles2D = self.ids.time_slice[timeSlice].profiles_2d[profiles2DIndex]
@@ -101,9 +97,7 @@ class EquilibriumCompute:
 
         return {"r2d": r2d, "z2d": z2d, "psi2d": psi2d}
 
-    def getRho2D(
-        self, timeSlice: int = 0, profiles2DIndex: int = 0
-    ) -> Union[np.ndarray, None]:
+    def getRho2D(self, timeSlice: int = 0, profiles2DIndex: int = 0) -> Union[np.ndarray, None]:
         """
         This function calculates rho(R,Z) using toroidal flux  and returns a dictionary containing the result.
 
@@ -130,14 +124,10 @@ class EquilibriumCompute:
         try:  # using https://docs.python.org/2/glossary.html#term-eafp style
             phi = self.ids.time_slice[timeSlice].profiles_2d[profiles2DIndex].phi
             if len(phi) == 0:
-                logger.error(
-                    f"equilibrium.time_slice[{timeSlice}].profiles_2d[{profiles2DIndex}].phi not available"
-                )
+                logger.error(f"equilibrium.time_slice[{timeSlice}].profiles_2d[{profiles2DIndex}].phi not available")
                 return None
         except IndexError:
-            logger.error(
-                f"equilibrium.time_slice[{timeSlice}].profiles_2d[{profiles2DIndex}].phi not available"
-            )
+            logger.error(f"equilibrium.time_slice[{timeSlice}].profiles_2d[{profiles2DIndex}].phi not available")
             return None
         if np.isnan(phi).all() is True:
             logger.error(
@@ -186,12 +176,9 @@ class EquilibriumCompute:
             # TODO Check if we should always pick up first profile
             profile2dIndex = listOfProfiles[0]
             bTotal = np.sqrt(
-                self.ids.time_slice[timeSlice].profiles_2d[profile2dIndex].b_field_r
-                ** 2
-                + self.ids.time_slice[timeSlice].profiles_2d[profile2dIndex].b_field_z
-                ** 2
-                + self.ids.time_slice[timeSlice].profiles_2d[profile2dIndex].b_field_tor
-                ** 2
+                self.ids.time_slice[timeSlice].profiles_2d[profile2dIndex].b_field_r ** 2
+                + self.ids.time_slice[timeSlice].profiles_2d[profile2dIndex].b_field_z ** 2
+                + self.ids.time_slice[timeSlice].profiles_2d[profile2dIndex].b_field_tor ** 2
             )
         else:
             print("------------------------------------------------")
@@ -236,8 +223,7 @@ class EquilibriumCompute:
         return [
             index
             for index in range(len(self.ids.time_slice[timeSlice].profiles_2d))
-            if self.ids.time_slice[timeSlice].profiles_2d[index].grid_type.index
-            == gridType
+            if self.ids.time_slice[timeSlice].profiles_2d[index].grid_type.index == gridType
         ] or None
 
     def getFluxSurfaces(self, timeSlice: int) -> dict:
@@ -311,12 +297,8 @@ class EquilibriumCompute:
         """
         # TODO Correct documentation and naming of return variables
         topViewDict = {}
-        topViewDict["r0"] = r0 = self.ids.time_slice[
-            timeSlice
-        ].boundary.geometric_axis.r
-        topViewDict["amin"] = amin = self.ids.time_slice[
-            timeSlice
-        ].boundary.minor_radius
+        topViewDict["r0"] = r0 = self.ids.time_slice[timeSlice].boundary.geometric_axis.r
+        topViewDict["amin"] = amin = self.ids.time_slice[timeSlice].boundary.minor_radius
         topViewDict["phit"] = phit = np.linspace(0, 2 * np.pi, 100)
         topViewDict["xpla"] = (r0 - amin) * np.cos(phit)
         topViewDict["ypla"] = (r0 - amin) * np.sin(phit)
@@ -379,15 +361,11 @@ class EquilibriumCompute:
         equout.ids_properties.version_put.data_dictionary = imas_version
 
         for itime in range(len(self.ids.vacuum_toroidal_field.b0)):
-            equout.vacuum_toroidal_field.b0[itime] = (
-                self.ids.vacuum_toroidal_field.b0[itime] * rescaleFactor
-            )
+            equout.vacuum_toroidal_field.b0[itime] = self.ids.vacuum_toroidal_field.b0[itime] * rescaleFactor
 
         for itime in range(len(self.ids.time_slice)):
             if imasdef.isFieldValid(self.ids.time_slice[itime].boundary.psi):
-                equout.time_slice[itime].boundary.psi = (
-                    self.ids.time_slice[itime].boundary.psi * rescaleFactor
-                )
+                equout.time_slice[itime].boundary.psi = self.ids.time_slice[itime].boundary.psi * rescaleFactor
 
             if imasdef.isFieldValid(self.ids.time_slice[itime].boundary_separatrix.psi):
                 equout.time_slice[itime].boundary_separatrix.psi = (
@@ -395,84 +373,53 @@ class EquilibriumCompute:
                 )
 
             if version.StrictVersion(dd_version) > version.StrictVersion("3.31.0"):
-                if imasdef.isFieldValid(
-                    self.ids.time_slice[itime].boundary_secondary_separatrix.psi
-                ):
+                if imasdef.isFieldValid(self.ids.time_slice[itime].boundary_secondary_separatrix.psi):
                     equout.time_slice[itime].boundary_secondary_separatrix.psi = (
-                        self.ids.time_slice[itime].boundary_secondary_separatrix.psi
-                        * rescaleFactor
+                        self.ids.time_slice[itime].boundary_secondary_separatrix.psi * rescaleFactor
                     )
 
-            if imasdef.isFieldValid(
-                self.ids.time_slice[itime].constraints.b_field_tor_vacuum_r.measured
-            ):
+            if imasdef.isFieldValid(self.ids.time_slice[itime].constraints.b_field_tor_vacuum_r.measured):
                 equout.time_slice[itime].constraints.b_field_tor_vacuum_r.measured = (
-                    self.ids.time_slice[itime].constraints.b_field_tor_vacuum_r.measured
-                    * rescaleFactor
+                    self.ids.time_slice[itime].constraints.b_field_tor_vacuum_r.measured * rescaleFactor
                 )
 
-            if imasdef.isFieldValid(
-                self.ids.time_slice[
-                    itime
-                ].constraints.b_field_tor_vacuum_r.reconstructed
-            ):
-                equout.time_slice[
-                    itime
-                ].constraints.b_field_tor_vacuum_r.reconstructed = (
-                    self.ids.time_slice[
-                        itime
-                    ].constraints.b_field_tor_vacuum_r.reconstructed
-                    * rescaleFactor
+            if imasdef.isFieldValid(self.ids.time_slice[itime].constraints.b_field_tor_vacuum_r.reconstructed):
+                equout.time_slice[itime].constraints.b_field_tor_vacuum_r.reconstructed = (
+                    self.ids.time_slice[itime].constraints.b_field_tor_vacuum_r.reconstructed * rescaleFactor
                 )
 
             for i1 in range(len(self.ids.time_slice[itime].constraints.bpol_probe)):
                 equout.time_slice[itime].constraints.bpol_probe[i1].measured = (
-                    self.ids.time_slice[itime].constraints.bpol_probe[i1].measured
-                    * rescaleFactor
+                    self.ids.time_slice[itime].constraints.bpol_probe[i1].measured * rescaleFactor
                 )
                 equout.time_slice[itime].constraints.bpol_probe[i1].reconstructed = (
-                    self.ids.time_slice[itime].constraints.bpol_probe[i1].reconstructed
-                    * rescaleFactor
+                    self.ids.time_slice[itime].constraints.bpol_probe[i1].reconstructed * rescaleFactor
                 )
 
-            if imasdef.isFieldValid(
-                self.ids.time_slice[itime].constraints.diamagnetic_flux.measured
-            ):
+            if imasdef.isFieldValid(self.ids.time_slice[itime].constraints.diamagnetic_flux.measured):
                 equout.time_slice[itime].constraints.diamagnetic_flux.measured = (
-                    self.ids.time_slice[itime].constraints.diamagnetic_flux.measured
-                    * rescaleFactor
+                    self.ids.time_slice[itime].constraints.diamagnetic_flux.measured * rescaleFactor
                 )
 
-            if imasdef.isFieldValid(
-                self.ids.time_slice[itime].constraints.diamagnetic_flux.reconstructed
-            ):
+            if imasdef.isFieldValid(self.ids.time_slice[itime].constraints.diamagnetic_flux.reconstructed):
                 equout.time_slice[itime].constraints.diamagnetic_flux.reconstructed = (
-                    self.ids.time_slice[
-                        itime
-                    ].constraints.diamagnetic_flux.reconstructed
-                    * rescaleFactor
+                    self.ids.time_slice[itime].constraints.diamagnetic_flux.reconstructed * rescaleFactor
                 )
 
             for i1 in range(len(self.ids.time_slice[itime].constraints.faraday_angle)):
                 equout.time_slice[itime].constraints.faraday_angle[i1].measured = (
-                    self.ids.time_slice[itime].constraints.faraday_angle[i1].measured
-                    * rescaleFactor
+                    self.ids.time_slice[itime].constraints.faraday_angle[i1].measured * rescaleFactor
                 )
                 equout.time_slice[itime].constraints.faraday_angle[i1].reconstructed = (
-                    self.ids.time_slice[itime]
-                    .constraints.faraday_angle[i1]
-                    .reconstructed
-                    * rescaleFactor
+                    self.ids.time_slice[itime].constraints.faraday_angle[i1].reconstructed * rescaleFactor
                 )
 
             for i1 in range(len(self.ids.time_slice[itime].constraints.flux_loop)):
                 equout.time_slice[itime].constraints.flux_loop[i1].measured = (
-                    self.ids.time_slice[itime].constraints.flux_loop[i1].measured
-                    * rescaleFactor
+                    self.ids.time_slice[itime].constraints.flux_loop[i1].measured * rescaleFactor
                 )
                 equout.time_slice[itime].constraints.flux_loop[i1].reconstructed = (
-                    self.ids.time_slice[itime].constraints.flux_loop[i1].reconstructed
-                    * rescaleFactor
+                    self.ids.time_slice[itime].constraints.flux_loop[i1].reconstructed * rescaleFactor
                 )
 
             if imasdef.isFieldValid(self.ids.time_slice[itime].constraints.ip.measured):
@@ -480,12 +427,9 @@ class EquilibriumCompute:
                     self.ids.time_slice[itime].constraints.ip.measured * rescaleFactor
                 )
 
-            if imasdef.isFieldValid(
-                self.ids.time_slice[itime].constraints.ip.reconstructed
-            ):
+            if imasdef.isFieldValid(self.ids.time_slice[itime].constraints.ip.reconstructed):
                 equout.time_slice[itime].constraints.ip.reconstructed = (
-                    self.ids.time_slice[itime].constraints.ip.reconstructed
-                    * rescaleFactor
+                    self.ids.time_slice[itime].constraints.ip.reconstructed * rescaleFactor
                 )
 
             if imasdef.isFieldValid(self.ids.time_slice[itime].global_quantities.ip):
@@ -493,58 +437,36 @@ class EquilibriumCompute:
                     self.ids.time_slice[itime].global_quantities.ip * rescaleFactor
                 )
 
-            if imasdef.isFieldValid(
-                self.ids.time_slice[itime].global_quantities.psi_axis
-            ):
+            if imasdef.isFieldValid(self.ids.time_slice[itime].global_quantities.psi_axis):
                 equout.time_slice[itime].global_quantities.psi_axis = (
-                    self.ids.time_slice[itime].global_quantities.psi_axis
-                    * rescaleFactor
+                    self.ids.time_slice[itime].global_quantities.psi_axis * rescaleFactor
                 )
 
-            if imasdef.isFieldValid(
-                self.ids.time_slice[itime].global_quantities.psi_boundary
-            ):
+            if imasdef.isFieldValid(self.ids.time_slice[itime].global_quantities.psi_boundary):
                 equout.time_slice[itime].global_quantities.psi_boundary = (
-                    self.ids.time_slice[itime].global_quantities.psi_boundary
-                    * rescaleFactor
+                    self.ids.time_slice[itime].global_quantities.psi_boundary * rescaleFactor
                 )
 
-            if imasdef.isFieldValid(
-                self.ids.time_slice[itime].global_quantities.magnetic_axis.b_field_tor
-            ):
+            if imasdef.isFieldValid(self.ids.time_slice[itime].global_quantities.magnetic_axis.b_field_tor):
                 equout.time_slice[itime].global_quantities.magnetic_axis.b_field_tor = (
-                    self.ids.time_slice[
-                        itime
-                    ].global_quantities.magnetic_axis.b_field_tor
-                    * rescaleFactor
+                    self.ids.time_slice[itime].global_quantities.magnetic_axis.b_field_tor * rescaleFactor
                 )
 
             if version.StrictVersion(dd_version) > version.StrictVersion("3.14.0"):
-                if imasdef.isFieldValid(
-                    self.ids.time_slice[itime].global_quantities.energy_mhd
-                ):
+                if imasdef.isFieldValid(self.ids.time_slice[itime].global_quantities.energy_mhd):
                     equout.time_slice[itime].global_quantities.energy_mhd = (
-                        self.ids.time_slice[itime].global_quantities.energy_mhd
-                        * rescaleFactor**2
+                        self.ids.time_slice[itime].global_quantities.energy_mhd * rescaleFactor**2
                     )
             else:
-                if imasdef.isFieldValid(
-                    self.ids.time_slice[itime].global_quantities.w_mhd
-                ):
+                if imasdef.isFieldValid(self.ids.time_slice[itime].global_quantities.w_mhd):
                     equout.time_slice[itime].global_quantities.energy_mhd = (
-                        self.ids.time_slice[itime].global_quantities.w_mhd
-                        * rescaleFactor**2
+                        self.ids.time_slice[itime].global_quantities.w_mhd * rescaleFactor**2
                     )
 
             if version.StrictVersion(dd_version) > version.StrictVersion("3.31.0"):
-                if imasdef.isFieldValid(
-                    self.ids.time_slice[itime].global_quantities.psi_external_average
-                ):
+                if imasdef.isFieldValid(self.ids.time_slice[itime].global_quantities.psi_external_average):
                     equout.time_slice[itime].global_quantities.psi_external_average = (
-                        self.ids.time_slice[
-                            itime
-                        ].global_quantities.psi_external_average
-                        * rescaleFactor
+                        self.ids.time_slice[itime].global_quantities.psi_external_average * rescaleFactor
                     )
 
             for i1d in range(len(self.ids.time_slice[itime].profiles_1d.psi)):
@@ -559,8 +481,7 @@ class EquilibriumCompute:
 
             for i1d in range(len(self.ids.time_slice[itime].profiles_1d.pressure)):
                 equout.time_slice[itime].profiles_1d.pressure[i1d] = (
-                    self.ids.time_slice[itime].profiles_1d.pressure[i1d]
-                    * rescaleFactor**2
+                    self.ids.time_slice[itime].profiles_1d.pressure[i1d] * rescaleFactor**2
                 )
 
             for i1d in range(len(self.ids.time_slice[itime].profiles_1d.f)):
@@ -568,18 +489,14 @@ class EquilibriumCompute:
                     self.ids.time_slice[itime].profiles_1d.f[i1d] * rescaleFactor
                 )
 
-            for i1d in range(
-                len(self.ids.time_slice[itime].profiles_1d.dpressure_dpsi)
-            ):
+            for i1d in range(len(self.ids.time_slice[itime].profiles_1d.dpressure_dpsi)):
                 equout.time_slice[itime].profiles_1d.dpressure_dpsi[i1d] = (
-                    self.ids.time_slice[itime].profiles_1d.dpressure_dpsi[i1d]
-                    * rescaleFactor
+                    self.ids.time_slice[itime].profiles_1d.dpressure_dpsi[i1d] * rescaleFactor
                 )
 
             for i1d in range(len(self.ids.time_slice[itime].profiles_1d.f_df_dpsi)):
                 equout.time_slice[itime].profiles_1d.f_df_dpsi[i1d] = (
-                    self.ids.time_slice[itime].profiles_1d.f_df_dpsi[i1d]
-                    * rescaleFactor
+                    self.ids.time_slice[itime].profiles_1d.f_df_dpsi[i1d] * rescaleFactor
                 )
 
             for i1d in range(len(self.ids.time_slice[itime].profiles_1d.j_tor)):
@@ -589,26 +506,22 @@ class EquilibriumCompute:
 
             for i1d in range(len(self.ids.time_slice[itime].profiles_1d.j_parallel)):
                 equout.time_slice[itime].profiles_1d.j_parallel[i1d] = (
-                    self.ids.time_slice[itime].profiles_1d.j_parallel[i1d]
-                    * rescaleFactor
+                    self.ids.time_slice[itime].profiles_1d.j_parallel[i1d] * rescaleFactor
                 )
 
             for i1d in range(len(self.ids.time_slice[itime].profiles_1d.dpsi_drho_tor)):
                 equout.time_slice[itime].profiles_1d.dpsi_drho_tor[i1d] = (
-                    self.ids.time_slice[itime].profiles_1d.dpsi_drho_tor[i1d]
-                    * rescaleFactor
+                    self.ids.time_slice[itime].profiles_1d.dpsi_drho_tor[i1d] * rescaleFactor
                 )
 
             for i1d in range(len(self.ids.time_slice[itime].profiles_1d.dvolume_dpsi)):
                 equout.time_slice[itime].profiles_1d.dvolume_dpsi[i1d] = (
-                    self.ids.time_slice[itime].profiles_1d.dvolume_dpsi[i1d]
-                    / rescaleFactor
+                    self.ids.time_slice[itime].profiles_1d.dvolume_dpsi[i1d] / rescaleFactor
                 )
 
             for i1d in range(len(self.ids.time_slice[itime].profiles_1d.darea_dpsi)):
                 equout.time_slice[itime].profiles_1d.darea_dpsi[i1d] = (
-                    self.ids.time_slice[itime].profiles_1d.darea_dpsi[i1d]
-                    / rescaleFactor
+                    self.ids.time_slice[itime].profiles_1d.darea_dpsi[i1d] / rescaleFactor
                 )
 
             for i1d in range(len(self.ids.time_slice[itime].profiles_1d.gm4)):
@@ -627,367 +540,169 @@ class EquilibriumCompute:
                 )
 
             if version.StrictVersion(dd_version) > version.StrictVersion("3.5.0"):
-                for i1d in range(
-                    len(self.ids.time_slice[itime].profiles_1d.b_field_average)
-                ):
+                for i1d in range(len(self.ids.time_slice[itime].profiles_1d.b_field_average)):
                     equout.time_slice[itime].profiles_1d.b_field_average[i1d] = (
-                        self.ids.time_slice[itime].profiles_1d.b_field_average[i1d]
-                        * rescaleFactor
+                        self.ids.time_slice[itime].profiles_1d.b_field_average[i1d] * rescaleFactor
                     )
             else:
                 for i1d in range(len(self.ids.time_slice[itime].profiles_1d.b_average)):
                     equout.time_slice[itime].profiles_1d.b_field_average[i1d] = (
-                        abs(self.ids.time_slice[itime].profiles_1d.b_average[i1d])
-                        * rescaleFactor
+                        abs(self.ids.time_slice[itime].profiles_1d.b_average[i1d]) * rescaleFactor
                     )
 
             if version.StrictVersion(dd_version) > version.StrictVersion("3.5.0"):
-                for i1d in range(
-                    len(self.ids.time_slice[itime].profiles_1d.b_field_min)
-                ):
+                for i1d in range(len(self.ids.time_slice[itime].profiles_1d.b_field_min)):
                     equout.time_slice[itime].profiles_1d.b_field_min[i1d] = (
-                        self.ids.time_slice[itime].profiles_1d.b_field_min[i1d]
-                        * rescaleFactor
+                        self.ids.time_slice[itime].profiles_1d.b_field_min[i1d] * rescaleFactor
                     )
             else:
                 for i1d in range(len(self.ids.time_slice[itime].profiles_1d.b_min)):
                     equout.time_slice[itime].profiles_1d.b_field_min[i1d] = (
-                        abs(self.ids.time_slice[itime].profiles_1d.b_min[i1d])
-                        * rescaleFactor
+                        abs(self.ids.time_slice[itime].profiles_1d.b_min[i1d]) * rescaleFactor
                     )
 
             if version.StrictVersion(dd_version) > version.StrictVersion("3.5.0"):
-                for i1d in range(
-                    len(self.ids.time_slice[itime].profiles_1d.b_field_max)
-                ):
+                for i1d in range(len(self.ids.time_slice[itime].profiles_1d.b_field_max)):
                     equout.time_slice[itime].profiles_1d.b_field_max[i1d] = (
-                        self.ids.time_slice[itime].profiles_1d.b_field_max[i1d]
-                        * rescaleFactor
+                        self.ids.time_slice[itime].profiles_1d.b_field_max[i1d] * rescaleFactor
                     )
             else:
                 for i1d in range(len(self.ids.time_slice[itime].profiles_1d.b_max)):
                     equout.time_slice[itime].profiles_1d.b_field_max[i1d] = (
-                        abs(self.ids.time_slice[itime].profiles_1d.b_max[i1d])
-                        * rescaleFactor
+                        abs(self.ids.time_slice[itime].profiles_1d.b_max[i1d]) * rescaleFactor
                     )
 
             for i2d in range(len(self.ids.time_slice[itime].profiles_2d)):
                 for ir in range(len(self.ids.time_slice[itime].profiles_2d[i2d].psi)):
-                    for iz in range(
-                        len(self.ids.time_slice[itime].profiles_2d[i2d].psi[ir])
-                    ):
+                    for iz in range(len(self.ids.time_slice[itime].profiles_2d[i2d].psi[ir])):
                         equout.time_slice[itime].profiles_2d[i2d].psi[ir][iz] = (
-                            self.ids.time_slice[itime].profiles_2d[i2d].psi[ir][iz]
-                            * rescaleFactor
+                            self.ids.time_slice[itime].profiles_2d[i2d].psi[ir][iz] * rescaleFactor
                         )
 
                 for ir in range(len(self.ids.time_slice[itime].profiles_2d[i2d].phi)):
-                    for iz in range(
-                        len(self.ids.time_slice[itime].profiles_2d[i2d].phi[ir])
-                    ):
+                    for iz in range(len(self.ids.time_slice[itime].profiles_2d[i2d].phi[ir])):
                         equout.time_slice[itime].profiles_2d[i2d].phi[ir][iz] = (
-                            self.ids.time_slice[itime].profiles_2d[i2d].phi[ir][iz]
-                            * rescaleFactor
+                            self.ids.time_slice[itime].profiles_2d[i2d].phi[ir][iz] * rescaleFactor
                         )
 
                 for ir in range(len(self.ids.time_slice[itime].profiles_2d[i2d].j_tor)):
-                    for iz in range(
-                        len(self.ids.time_slice[itime].profiles_2d[i2d].j_tor[ir])
-                    ):
+                    for iz in range(len(self.ids.time_slice[itime].profiles_2d[i2d].j_tor[ir])):
                         equout.time_slice[itime].profiles_2d[i2d].j_tor[ir][iz] = (
-                            self.ids.time_slice[itime].profiles_2d[i2d].j_tor[ir][iz]
-                            * rescaleFactor
+                            self.ids.time_slice[itime].profiles_2d[i2d].j_tor[ir][iz] * rescaleFactor
                         )
 
-                for ir in range(
-                    len(self.ids.time_slice[itime].profiles_2d[i2d].j_parallel)
-                ):
-                    for iz in range(
-                        len(self.ids.time_slice[itime].profiles_2d[i2d].j_parallel[ir])
-                    ):
+                for ir in range(len(self.ids.time_slice[itime].profiles_2d[i2d].j_parallel)):
+                    for iz in range(len(self.ids.time_slice[itime].profiles_2d[i2d].j_parallel[ir])):
                         equout.time_slice[itime].profiles_2d[i2d].j_parallel[ir][iz] = (
-                            self.ids.time_slice[itime]
-                            .profiles_2d[i2d]
-                            .j_parallel[ir][iz]
-                            * rescaleFactor
+                            self.ids.time_slice[itime].profiles_2d[i2d].j_parallel[ir][iz] * rescaleFactor
                         )
 
                 if version.StrictVersion(dd_version) > version.StrictVersion("3.5.0"):
-                    for ir in range(
-                        len(self.ids.time_slice[itime].profiles_2d[i2d].b_field_r)
-                    ):
-                        for iz in range(
-                            len(
-                                self.ids.time_slice[itime]
-                                .profiles_2d[i2d]
-                                .b_field_r[ir]
-                            )
-                        ):
-                            equout.time_slice[itime].profiles_2d[i2d].b_field_r[ir][
-                                iz
-                            ] = (
-                                self.ids.time_slice[itime]
-                                .profiles_2d[i2d]
-                                .b_field_r[ir][iz]
-                                * rescaleFactor
+                    for ir in range(len(self.ids.time_slice[itime].profiles_2d[i2d].b_field_r)):
+                        for iz in range(len(self.ids.time_slice[itime].profiles_2d[i2d].b_field_r[ir])):
+                            equout.time_slice[itime].profiles_2d[i2d].b_field_r[ir][iz] = (
+                                self.ids.time_slice[itime].profiles_2d[i2d].b_field_r[ir][iz] * rescaleFactor
                             )
                 else:
-                    for ir in range(
-                        len(self.ids.time_slice[itime].profiles_2d[i2d].b_r)
-                    ):
-                        for iz in range(
-                            len(self.ids.time_slice[itime].profiles_2d[i2d].b_r[ir])
-                        ):
-                            equout.time_slice[itime].profiles_2d[i2d].b_field_r[ir][
-                                iz
-                            ] = (
-                                self.ids.time_slice[itime].profiles_2d[i2d].b_r[ir][iz]
-                                * rescaleFactor
+                    for ir in range(len(self.ids.time_slice[itime].profiles_2d[i2d].b_r)):
+                        for iz in range(len(self.ids.time_slice[itime].profiles_2d[i2d].b_r[ir])):
+                            equout.time_slice[itime].profiles_2d[i2d].b_field_r[ir][iz] = (
+                                self.ids.time_slice[itime].profiles_2d[i2d].b_r[ir][iz] * rescaleFactor
                             )
 
                 if version.StrictVersion(dd_version) > version.StrictVersion("3.5.0"):
-                    for ir in range(
-                        len(self.ids.time_slice[itime].profiles_2d[i2d].b_field_z)
-                    ):
-                        for iz in range(
-                            len(
-                                self.ids.time_slice[itime]
-                                .profiles_2d[i2d]
-                                .b_field_z[ir]
-                            )
-                        ):
-                            equout.time_slice[itime].profiles_2d[i2d].b_field_z[ir][
-                                iz
-                            ] = (
-                                self.ids.time_slice[itime]
-                                .profiles_2d[i2d]
-                                .b_field_z[ir][iz]
-                                * rescaleFactor
+                    for ir in range(len(self.ids.time_slice[itime].profiles_2d[i2d].b_field_z)):
+                        for iz in range(len(self.ids.time_slice[itime].profiles_2d[i2d].b_field_z[ir])):
+                            equout.time_slice[itime].profiles_2d[i2d].b_field_z[ir][iz] = (
+                                self.ids.time_slice[itime].profiles_2d[i2d].b_field_z[ir][iz] * rescaleFactor
                             )
                 else:
-                    for ir in range(
-                        len(self.ids.time_slice[itime].profiles_2d[i2d].b_z)
-                    ):
-                        for iz in range(
-                            len(self.ids.time_slice[itime].profiles_2d[i2d].b_z[ir])
-                        ):
-                            equout.time_slice[itime].profiles_2d[i2d].b_field_z[ir][
-                                iz
-                            ] = (
-                                self.ids.time_slice[itime].profiles_2d[i2d].b_z[ir][iz]
-                                * rescaleFactor
+                    for ir in range(len(self.ids.time_slice[itime].profiles_2d[i2d].b_z)):
+                        for iz in range(len(self.ids.time_slice[itime].profiles_2d[i2d].b_z[ir])):
+                            equout.time_slice[itime].profiles_2d[i2d].b_field_z[ir][iz] = (
+                                self.ids.time_slice[itime].profiles_2d[i2d].b_z[ir][iz] * rescaleFactor
                             )
 
                 if version.StrictVersion(dd_version) > version.StrictVersion("3.5.0"):
-                    for ir in range(
-                        len(self.ids.time_slice[itime].profiles_2d[i2d].b_field_tor)
-                    ):
-                        for iz in range(
-                            len(
-                                self.ids.time_slice[itime]
-                                .profiles_2d[i2d]
-                                .b_field_tor[ir]
-                            )
-                        ):
-                            equout.time_slice[itime].profiles_2d[i2d].b_field_tor[ir][
-                                iz
-                            ] = (
-                                self.ids.time_slice[itime]
-                                .profiles_2d[i2d]
-                                .b_field_tor[ir][iz]
-                                * rescaleFactor
+                    for ir in range(len(self.ids.time_slice[itime].profiles_2d[i2d].b_field_tor)):
+                        for iz in range(len(self.ids.time_slice[itime].profiles_2d[i2d].b_field_tor[ir])):
+                            equout.time_slice[itime].profiles_2d[i2d].b_field_tor[ir][iz] = (
+                                self.ids.time_slice[itime].profiles_2d[i2d].b_field_tor[ir][iz] * rescaleFactor
                             )
                 else:
-                    for ir in range(
-                        len(self.ids.time_slice[itime].profiles_2d[i2d].b_tor)
-                    ):
-                        for iz in range(
-                            len(self.ids.time_slice[itime].profiles_2d[i2d].b_tor[ir])
-                        ):
-                            equout.time_slice[itime].profiles_2d[i2d].b_field_tor[ir][
-                                iz
-                            ] = (
-                                self.ids.time_slice[itime]
-                                .profiles_2d[i2d]
-                                .b_tor[ir][iz]
-                                * rescaleFactor
+                    for ir in range(len(self.ids.time_slice[itime].profiles_2d[i2d].b_tor)):
+                        for iz in range(len(self.ids.time_slice[itime].profiles_2d[i2d].b_tor[ir])):
+                            equout.time_slice[itime].profiles_2d[i2d].b_field_tor[ir][iz] = (
+                                self.ids.time_slice[itime].profiles_2d[i2d].b_tor[ir][iz] * rescaleFactor
                             )
 
             for iggd in range(len(self.ids.time_slice[itime].ggd)):
                 for i2 in range(len(self.ids.time_slice[itime].ggd[iggd].psi)):
-                    for i in range(
-                        len(self.ids.time_slice[itime].ggd[iggd].psi[i2].values)
-                    ):
+                    for i in range(len(self.ids.time_slice[itime].ggd[iggd].psi[i2].values)):
                         equout.time_slice[itime].ggd[iggd].psi[i2].values[i] = (
-                            self.ids.time_slice[itime].ggd[iggd].psi[i2].values[i]
-                            * rescaleFactor
+                            self.ids.time_slice[itime].ggd[iggd].psi[i2].values[i] * rescaleFactor
                         )
-                        for j in range(
-                            len(self.ids.time_slice[itime].ggd[iggd].psi[i2].values[i])
-                        ):
-                            equout.time_slice[itime].ggd[iggd].psi[i2].coefficients[i][
-                                j
-                            ] = (
-                                self.ids.time_slice[itime]
-                                .ggd[iggd]
-                                .psi[i2]
-                                .coefficients[i][j]
-                                * rescaleFactor
+                        for j in range(len(self.ids.time_slice[itime].ggd[iggd].psi[i2].values[i])):
+                            equout.time_slice[itime].ggd[iggd].psi[i2].coefficients[i][j] = (
+                                self.ids.time_slice[itime].ggd[iggd].psi[i2].coefficients[i][j] * rescaleFactor
                             )
 
-                    for i in range(
-                        len(self.ids.time_slice[itime].ggd[iggd].phi[i2].values)
-                    ):
+                    for i in range(len(self.ids.time_slice[itime].ggd[iggd].phi[i2].values)):
                         equout.time_slice[itime].ggd[iggd].phi[i2].values[i] = (
-                            self.ids.time_slice[itime].ggd[iggd].phi[i2].values[i]
-                            * rescaleFactor
+                            self.ids.time_slice[itime].ggd[iggd].phi[i2].values[i] * rescaleFactor
                         )
-                        for j in range(
-                            len(self.ids.time_slice[itime].ggd[iggd].phi[i2].values[i])
-                        ):
-                            equout.time_slice[itime].ggd[iggd].phi[i2].coefficients[i][
-                                j
-                            ] = (
-                                self.ids.time_slice[itime]
-                                .ggd[iggd]
-                                .phi[i2]
-                                .coefficients[i][j]
-                                * rescaleFactor
+                        for j in range(len(self.ids.time_slice[itime].ggd[iggd].phi[i2].values[i])):
+                            equout.time_slice[itime].ggd[iggd].phi[i2].coefficients[i][j] = (
+                                self.ids.time_slice[itime].ggd[iggd].phi[i2].coefficients[i][j] * rescaleFactor
                             )
 
-                    for i in range(
-                        len(self.ids.time_slice[itime].ggd[iggd].j_tor[i2].values)
-                    ):
+                    for i in range(len(self.ids.time_slice[itime].ggd[iggd].j_tor[i2].values)):
                         equout.time_slice[itime].ggd[iggd].j_tor[i2].values[i] = (
-                            self.ids.time_slice[itime].ggd[iggd].j_tor[i2].values[i]
-                            * rescaleFactor
+                            self.ids.time_slice[itime].ggd[iggd].j_tor[i2].values[i] * rescaleFactor
                         )
-                        for j in range(
-                            len(
-                                self.ids.time_slice[itime].ggd[iggd].j_tor[i2].values[i]
-                            )
-                        ):
-                            equout.time_slice[itime].ggd[iggd].j_tor[i2].coefficients[
-                                i
-                            ][j] = (
-                                self.ids.time_slice[itime]
-                                .ggd[iggd]
-                                .j_tor[i2]
-                                .coefficients[i][j]
-                                * rescaleFactor
+                        for j in range(len(self.ids.time_slice[itime].ggd[iggd].j_tor[i2].values[i])):
+                            equout.time_slice[itime].ggd[iggd].j_tor[i2].coefficients[i][j] = (
+                                self.ids.time_slice[itime].ggd[iggd].j_tor[i2].coefficients[i][j] * rescaleFactor
                             )
 
-                    for i in range(
-                        len(self.ids.time_slice[itime].ggd[iggd].j_parallel[i2].values)
-                    ):
+                    for i in range(len(self.ids.time_slice[itime].ggd[iggd].j_parallel[i2].values)):
                         equout.time_slice[itime].ggd[iggd].j_parallel[i2].values[i] = (
-                            self.ids.time_slice[itime]
-                            .ggd[iggd]
-                            .j_parallel[i2]
-                            .values[i]
-                            * rescaleFactor
+                            self.ids.time_slice[itime].ggd[iggd].j_parallel[i2].values[i] * rescaleFactor
                         )
-                        for j in range(
-                            len(
-                                self.ids.time_slice[itime]
-                                .ggd[iggd]
-                                .j_parallel[i2]
-                                .values[i]
-                            )
-                        ):
-                            equout.time_slice[itime].ggd[iggd].j_parallel[
-                                i2
-                            ].coefficients[i][j] = (
-                                self.ids.time_slice[itime]
-                                .ggd[iggd]
-                                .j_parallel[i2]
-                                .coefficients[i][j]
-                                * rescaleFactor
+                        for j in range(len(self.ids.time_slice[itime].ggd[iggd].j_parallel[i2].values[i])):
+                            equout.time_slice[itime].ggd[iggd].j_parallel[i2].coefficients[i][j] = (
+                                self.ids.time_slice[itime].ggd[iggd].j_parallel[i2].coefficients[i][j] * rescaleFactor
                             )
 
-                    for i in range(
-                        len(self.ids.time_slice[itime].ggd[iggd].b_field_r[i2].values)
-                    ):
+                    for i in range(len(self.ids.time_slice[itime].ggd[iggd].b_field_r[i2].values)):
                         equout.time_slice[itime].ggd[iggd].b_field_r[i2].values[i] = (
-                            self.ids.time_slice[itime].ggd[iggd].b_field_r[i2].values[i]
-                            * rescaleFactor
+                            self.ids.time_slice[itime].ggd[iggd].b_field_r[i2].values[i] * rescaleFactor
                         )
-                        for j in range(
-                            len(
-                                self.ids.time_slice[itime]
-                                .ggd[iggd]
-                                .b_field_r[i2]
-                                .values[i]
-                            )
-                        ):
-                            equout.time_slice[itime].ggd[iggd].b_field_r[
-                                i2
-                            ].coefficients[i][j] = (
-                                self.ids.time_slice[itime]
-                                .ggd[iggd]
-                                .b_field_r[i2]
-                                .coefficients[i][j]
-                                * rescaleFactor
+                        for j in range(len(self.ids.time_slice[itime].ggd[iggd].b_field_r[i2].values[i])):
+                            equout.time_slice[itime].ggd[iggd].b_field_r[i2].coefficients[i][j] = (
+                                self.ids.time_slice[itime].ggd[iggd].b_field_r[i2].coefficients[i][j] * rescaleFactor
                             )
 
-                    for i in range(
-                        len(self.ids.time_slice[itime].ggd[iggd].b_field_z[i2].values)
-                    ):
+                    for i in range(len(self.ids.time_slice[itime].ggd[iggd].b_field_z[i2].values)):
                         equout.time_slice[itime].ggd[iggd].b_field_z[i2].values[i] = (
-                            self.ids.time_slice[itime].ggd[iggd].b_field_z[i2].values[i]
-                            * rescaleFactor
+                            self.ids.time_slice[itime].ggd[iggd].b_field_z[i2].values[i] * rescaleFactor
                         )
-                        for j in range(
-                            len(
-                                self.ids.time_slice[itime]
-                                .ggd[iggd]
-                                .b_field_z[i2]
-                                .values[i]
-                            )
-                        ):
-                            equout.time_slice[itime].ggd[iggd].b_field_z[
-                                i2
-                            ].coefficients[i][j] = (
-                                self.ids.time_slice[itime]
-                                .ggd[iggd]
-                                .b_field_z[i2]
-                                .coefficients[i][j]
-                                * rescaleFactor
+                        for j in range(len(self.ids.time_slice[itime].ggd[iggd].b_field_z[i2].values[i])):
+                            equout.time_slice[itime].ggd[iggd].b_field_z[i2].coefficients[i][j] = (
+                                self.ids.time_slice[itime].ggd[iggd].b_field_z[i2].coefficients[i][j] * rescaleFactor
                             )
 
-                    for i in range(
-                        len(self.ids.time_slice[itime].ggd[iggd].b_field_tor[i2].values)
-                    ):
+                    for i in range(len(self.ids.time_slice[itime].ggd[iggd].b_field_tor[i2].values)):
                         equout.time_slice[itime].ggd[iggd].b_field_tor[i2].values[i] = (
-                            self.ids.time_slice[itime]
-                            .ggd[iggd]
-                            .b_field_tor[i2]
-                            .values[i]
-                            * rescaleFactor
+                            self.ids.time_slice[itime].ggd[iggd].b_field_tor[i2].values[i] * rescaleFactor
                         )
-                        for j in range(
-                            len(
-                                self.ids.time_slice[itime]
-                                .ggd[iggd]
-                                .b_field_tor[i2]
-                                .values[i]
-                            )
-                        ):
-                            equout.time_slice[itime].ggd[iggd].b_field_tor[
-                                i2
-                            ].coefficients[i][j] = (
-                                self.ids.time_slice[itime]
-                                .ggd[iggd]
-                                .b_field_tor[i2]
-                                .coefficients[i][j]
-                                * rescaleFactor
+                        for j in range(len(self.ids.time_slice[itime].ggd[iggd].b_field_tor[i2].values[i])):
+                            equout.time_slice[itime].ggd[iggd].b_field_tor[i2].coefficients[i][j] = (
+                                self.ids.time_slice[itime].ggd[iggd].b_field_tor[i2].coefficients[i][j] * rescaleFactor
                             )
 
         equout.ids_properties.comment = (
-            self.ids.ids_properties.comment
-            + " (field rescaled by "
-            + str(rescaleFactor)
-            + ")"
+            self.ids.ids_properties.comment + " (field rescaled by " + str(rescaleFactor) + ")"
         )
         return equout
 
@@ -1010,9 +725,7 @@ class EquilibriumCompute:
                 )
 
             for iz in range(len(self.ids.time_slice[itime].boundary.lcfs.z)):
-                equout.time_slice[itime].boundary.lcfs.z[iz] = (
-                    self.ids.time_slice[itime].boundary.lcfs.z[iz] + shift
-                )
+                equout.time_slice[itime].boundary.lcfs.z[iz] = self.ids.time_slice[itime].boundary.lcfs.z[iz] + shift
             equout.time_slice[itime].boundary.geometric_axis.z = (
                 self.ids.time_slice[itime].boundary.geometric_axis.z + shift
             )
@@ -1030,9 +743,7 @@ class EquilibriumCompute:
                 self.ids.time_slice[itime].boundary.active_limiter_point.z + shift
             )
 
-            for iz in range(
-                len(self.ids.time_slice[itime].boundary_separatrix.outline.z)
-            ):
+            for iz in range(len(self.ids.time_slice[itime].boundary_separatrix.outline.z)):
                 equout.time_slice[itime].boundary_separatrix.outline.z[iz] = (
                     self.ids.time_slice[itime].boundary_separatrix.outline.z[iz] + shift
                 )
@@ -1040,70 +751,38 @@ class EquilibriumCompute:
                 self.ids.time_slice[itime].boundary_separatrix.geometric_axis.z + shift
             )
 
-            for ixpt in range(
-                len(self.ids.time_slice[itime].boundary_separatrix.x_point)
-            ):
+            for ixpt in range(len(self.ids.time_slice[itime].boundary_separatrix.x_point)):
                 equout.time_slice[itime].boundary_separatrix.x_point[ixpt].z = (
-                    self.ids.time_slice[itime].boundary_separatrix.x_point[ixpt].z
-                    + shift
+                    self.ids.time_slice[itime].boundary_separatrix.x_point[ixpt].z + shift
                 )
 
-            for istr in range(
-                len(self.ids.time_slice[itime].boundary_separatrix.strike_point)
-            ):
+            for istr in range(len(self.ids.time_slice[itime].boundary_separatrix.strike_point)):
                 equout.time_slice[itime].boundary_separatrix.strike_point[istr].z = (
-                    self.ids.time_slice[itime].boundary_separatrix.strike_point[istr].z
-                    + shift
+                    self.ids.time_slice[itime].boundary_separatrix.strike_point[istr].z + shift
                 )
             equout.time_slice[itime].boundary_separatrix.active_limiter_point.z = (
-                self.ids.time_slice[itime].boundary_separatrix.active_limiter_point.z
-                + shift
+                self.ids.time_slice[itime].boundary_separatrix.active_limiter_point.z + shift
             )
             equout.time_slice[itime].boundary_separatrix.closest_wall_point.z = (
-                self.ids.time_slice[itime].boundary_separatrix.closest_wall_point.z
-                + shift
+                self.ids.time_slice[itime].boundary_separatrix.closest_wall_point.z + shift
             )
             equout.time_slice[itime].boundary_separatrix.dr_dz_zero_point.z = (
-                self.ids.time_slice[itime].boundary_separatrix.dr_dz_zero_point.z
-                + shift
+                self.ids.time_slice[itime].boundary_separatrix.dr_dz_zero_point.z + shift
             )
 
-            for iz in range(
-                len(self.ids.time_slice[itime].boundary_secondary_separatrix.outline.z)
-            ):
+            for iz in range(len(self.ids.time_slice[itime].boundary_secondary_separatrix.outline.z)):
                 equout.time_slice[itime].boundary_secondary_separatrix.outline.z[iz] = (
-                    self.ids.time_slice[itime].boundary_secondary_separatrix.outline.z[
-                        iz
-                    ]
-                    + shift
+                    self.ids.time_slice[itime].boundary_secondary_separatrix.outline.z[iz] + shift
                 )
 
-            for ixpt in range(
-                len(self.ids.time_slice[itime].boundary_secondary_separatrix.x_point)
-            ):
-                equout.time_slice[itime].boundary_secondary_separatrix.x_point[
-                    ixpt
-                ].z = (
-                    self.ids.time_slice[itime]
-                    .boundary_secondary_separatrix.x_point[ixpt]
-                    .z
-                    + shift
+            for ixpt in range(len(self.ids.time_slice[itime].boundary_secondary_separatrix.x_point)):
+                equout.time_slice[itime].boundary_secondary_separatrix.x_point[ixpt].z = (
+                    self.ids.time_slice[itime].boundary_secondary_separatrix.x_point[ixpt].z + shift
                 )
 
-            for istr in range(
-                len(
-                    self.ids.time_slice[
-                        itime
-                    ].boundary_secondary_separatrix.strike_point
-                )
-            ):
-                equout.time_slice[itime].boundary_secondary_separatrix.strike_point[
-                    istr
-                ].z = (
-                    self.ids.time_slice[itime]
-                    .boundary_secondary_separatrix.strike_point[istr]
-                    .z
-                    + shift
+            for istr in range(len(self.ids.time_slice[itime].boundary_secondary_separatrix.strike_point)):
+                equout.time_slice[itime].boundary_secondary_separatrix.strike_point[istr].z = (
+                    self.ids.time_slice[itime].boundary_secondary_separatrix.strike_point[istr].z + shift
                 )
 
             for iq in range(len(self.ids.time_slice[itime].constraints.q)):
@@ -1112,93 +791,60 @@ class EquilibriumCompute:
                 )
 
             for ixpt in range(len(self.ids.time_slice[itime].constraints.x_point)):
-                equout.time_slice[itime].constraints.x_point[
-                    ixpt
-                ].position_measured.z = (
-                    self.ids.time_slice[itime]
-                    .constraints.x_point[ixpt]
-                    .position_measured.z
-                    + shift
+                equout.time_slice[itime].constraints.x_point[ixpt].position_measured.z = (
+                    self.ids.time_slice[itime].constraints.x_point[ixpt].position_measured.z + shift
                 )
-                equout.time_slice[itime].constraints.x_point[
-                    ixpt
-                ].position_reconstructed.z = (
-                    self.ids.time_slice[itime]
-                    .constraints.x_point[ixpt]
-                    .position_reconstructed.z
-                    + shift
+                equout.time_slice[itime].constraints.x_point[ixpt].position_reconstructed.z = (
+                    self.ids.time_slice[itime].constraints.x_point[ixpt].position_reconstructed.z + shift
                 )
 
             for istr in range(len(self.ids.time_slice[itime].constraints.strike_point)):
-                equout.time_slice[itime].constraints.strike_point[
-                    istr
-                ].position_measured.z = (
-                    self.ids.time_slice[itime]
-                    .constraints.strike_point[istr]
-                    .position_measured.z
-                    + shift
+                equout.time_slice[itime].constraints.strike_point[istr].position_measured.z = (
+                    self.ids.time_slice[itime].constraints.strike_point[istr].position_measured.z + shift
                 )
             equout.time_slice[itime].global_quantities.magnetic_axis.z = (
                 self.ids.time_slice[itime].global_quantities.magnetic_axis.z + shift
             )
 
-            for iz in range(
-                len(self.ids.time_slice[itime].profiles_1d.geometric_axis.z)
-            ):
+            for iz in range(len(self.ids.time_slice[itime].profiles_1d.geometric_axis.z)):
                 equout.time_slice[itime].profiles_1d.geometric_axis.z[iz] = (
                     self.ids.time_slice[itime].profiles_1d.geometric_axis.z[iz] + shift
                 )
 
             for i2d in range(len(self.ids.time_slice[itime].profiles_2d)):
                 if self.ids.time_slice[itime].profiles_2d[i2d].grid_type == 1:
-                    for iz in range(
-                        len(self.ids.time_slice[itime].profiles_2d[i2d].grid.dim2)
-                    ):
+                    for iz in range(len(self.ids.time_slice[itime].profiles_2d[i2d].grid.dim2)):
                         equout.time_slice[itime].profiles_2d[i2d].grid.dim2[iz] = (
-                            self.ids.time_slice[itime].profiles_2d[i2d].grid.dim2[iz]
-                            + shift
+                            self.ids.time_slice[itime].profiles_2d[i2d].grid.dim2[iz] + shift
                         )
 
                 for i1 in range(len(self.ids.time_slice[itime].profiles_2d[i2d].z)):
-                    for i2 in range(
-                        len(self.ids.time_slice[itime].profiles_2d[i2d].z[i1])
-                    ):
+                    for i2 in range(len(self.ids.time_slice[itime].profiles_2d[i2d].z[i1])):
                         equout.time_slice[itime].profiles_2d[i2d].z[i1][i2] = (
-                            self.ids.time_slice[itime].profiles_2d[i2d].z[i1][i2]
-                            + shift
+                            self.ids.time_slice[itime].profiles_2d[i2d].z[i1][i2] + shift
                         )
 
             for iggd in range(len(self.ids.time_slice[itime].ggd)):
                 for iz in range(len(self.ids.time_slice[itime].ggd[iggd].z)):
-                    for i in range(
-                        len(self.ids.time_slice[itime].ggd[iggd].z[iz].values)
-                    ):
+                    for i in range(len(self.ids.time_slice[itime].ggd[iggd].z[iz].values)):
                         equout.time_slice[itime].ggd[iggd].z[iz].values[i] = (
                             self.ids.time_slice[itime].ggd[iggd].z[iz].values[i] + shift
                         )
 
             if self.ids.time_slice[itime].coordinate_system.grid_type == 1:
-                for iz in range(
-                    len(self.ids.time_slice[itime].coordinate_system.grid.dim2)
-                ):
+                for iz in range(len(self.ids.time_slice[itime].coordinate_system.grid.dim2)):
                     equout.time_slice[itime].coordinate_system.grid.dim2[iz] = (
-                        self.ids.time_slice[itime].coordinate_system.grid.dim2[iz]
-                        + shift
+                        self.ids.time_slice[itime].coordinate_system.grid.dim2[iz] + shift
                     )
 
             for i1 in range(len(self.ids.time_slice[itime].coordinate_system.z)):
-                for i2 in range(
-                    len(self.ids.time_slice[itime].coordinate_system.z[i1])
-                ):
+                for i2 in range(len(self.ids.time_slice[itime].coordinate_system.z[i1])):
                     equout.time_slice[itime].coordinate_system.z[i1][i2] = (
                         self.ids.time_slice[itime].coordinate_system.z[i1][i2] + shift
                     )
 
         equout.ids_properties.comment = (
-            self.ids.ids_properties.comment
-            + " (shifted vertically by "
-            + str(shift)
-            + " m)"
+            self.ids.ids_properties.comment + " (shifted vertically by " + str(shift) + " m)"
         )
         return equout
 

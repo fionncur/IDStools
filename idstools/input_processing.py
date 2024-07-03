@@ -203,9 +203,9 @@ def l2r(ldata, edges, lwall):
         # find larger edge
         il = np.where(lwall >= ldata[i])[0][0]
         # interpolate between lower and larger edge
-        rdata[i] = edges[il - 1, 0] + (ldata[i] - lwall[il - 1]) / (
-            lwall[il] - lwall[il - 1]
-        ) * (edges[il, 0] - edges[il - 1, 0])
+        rdata[i] = edges[il - 1, 0] + (ldata[i] - lwall[il - 1]) / (lwall[il] - lwall[il - 1]) * (
+            edges[il, 0] - edges[il - 1, 0]
+        )
         ldata = np.reshape(ldata, ldata_shape)
         rdata = np.reshape(rdata, ldata_shape)
     return rdata
@@ -411,16 +411,8 @@ def line_polygon_intersection(  # input
             dRz21 = dR21 * dz21
             # coefficients of quadratic equation
             aa = dz212 * egR2 - dR212 * egz2
-            bb = 2 * (
-                dz212 * rgegxy
-                - dR212 * eg[2] * dzrg1
-                - eg[2] * cp_edges[i_s, 0] * dRz21
-            )
-            cc = (
-                dz212 * (rgR2 - cp_edges[i_s, 0] ** 2)
-                - dR212 * (dzrg1**2)
-                - 2 * cp_edges[i_s, 0] * dRz21 * dzrg1
-            )
+            bb = 2 * (dz212 * rgegxy - dR212 * eg[2] * dzrg1 - eg[2] * cp_edges[i_s, 0] * dRz21)
+            cc = dz212 * (rgR2 - cp_edges[i_s, 0] ** 2) - dR212 * (dzrg1**2) - 2 * cp_edges[i_s, 0] * dRz21 * dzrg1
             if aa**2 < 1.0e-12:  # assume aa is zero
                 if dz212 * egz2 < 1.0e-10:
                     # error: segment is horizontal plate and line is horizontal
@@ -454,16 +446,12 @@ def line_polygon_intersection(  # input
                         # we calculate lambda_pol by the normalized dot product
                         # (r2-r1)dot(r-r1)/(r2-r1)^2
                         if np.abs(dR21 * drz1 - dz21 * drR1) / (dR212 + dz212) < 1.0e-6:
-                            s_arr[2 * i_s, 0] = (drR1 * dR21 + drz1 * dz21) / (
-                                dR212 + dz212
-                            )
+                            s_arr[2 * i_s, 0] = (drR1 * dR21 + drz1 * dz21) / (dR212 + dz212)
                         # this is lambda_pol, must be between 0 and 1
                         # if segment is relevant
                         if s_arr[2 * i_s, 0] >= 0.0 and s_arr[2 * i_s, 0] < 1.0:
                             # later it is helpful if 0 < lambda_pol < |r2-r1|
-                            s_arr[2 * i_s, 0] = s_arr[2 * i_s, 0] * np.sqrt(
-                                dR212 + dz212
-                            )
+                            s_arr[2 * i_s, 0] = s_arr[2 * i_s, 0] * np.sqrt(dR212 + dz212)
                             rPhi = np.arctan2(rvec[1], rvec[0], dtype=np.double)
                             if rPhi < 0:
                                 rPhi = rPhi + 2 * np.pi  # 0 <= rPhi < 2pi
@@ -506,15 +494,11 @@ def line_polygon_intersection(  # input
                         # we calculate lambda_pol by the normalized dot product
                         # (r2-r1)dot(r-r1)/(r2-r1)^2
                         if np.abs(dR21 * drz1 - dz21 * drR1) / (dR212 + dz212) < 1.0e-6:
-                            s_arr[2 * i_s, 0] = (drR1 * dR21 + drz1 * dz21) / (
-                                dR212 + dz212
-                            )
+                            s_arr[2 * i_s, 0] = (drR1 * dR21 + drz1 * dz21) / (dR212 + dz212)
                         # this is lambda_pol, must be between 0 and 1 if relevant
                         if s_arr[2 * i_s, 0] >= 0.0 and s_arr[2 * i_s, 0] < 1.0:
                             # later it is helpful if 0 < lambda_pol < |r2-r1|
-                            s_arr[2 * i_s, 0] = s_arr[2 * i_s, 0] * np.sqrt(
-                                dR212 + dz212
-                            )
+                            s_arr[2 * i_s, 0] = s_arr[2 * i_s, 0] * np.sqrt(dR212 + dz212)
                             rPhi = np.arctan2(rvec[1], rvec[0], dtype=np.double)
                             if rPhi < 0:
                                 rPhi = rPhi + 2 * np.pi
@@ -548,14 +532,10 @@ def line_polygon_intersection(  # input
                         # we calculate lambda_pol by the normalized dot product
                         # (r2-r1)dot(r-r1)/(r2-r1)^2
                         if np.abs(dR21 * drz1 - dz21 * drR1) / (dR212 + dz212) < 1.0e-6:
-                            s_arr[2 * i_s + 1, 0] = (drR1 * dR21 + drz1 * dz21) / (
-                                dR212 + dz212
-                            )
+                            s_arr[2 * i_s + 1, 0] = (drR1 * dR21 + drz1 * dz21) / (dR212 + dz212)
                         if s_arr[2 * i_s + 1, 0] >= 0.0 and s_arr[2 * i_s + 1, 0] < 1.0:
                             # later it is helpful if 0 < lambda_pol < |r2-r1|
-                            s_arr[2 * i_s + 1, 0] = s_arr[2 * i_s + 1, 0] * np.sqrt(
-                                dR212 + dz212
-                            )
+                            s_arr[2 * i_s + 1, 0] = s_arr[2 * i_s + 1, 0] * np.sqrt(dR212 + dz212)
                             rPhi = np.arctan2(rvec[1], rvec[0], dtype=np.double)
                             if rPhi < 0:
                                 rPhi = rPhi + 2 * np.pi
@@ -669,8 +649,7 @@ def ell_on_wall(xpout, w1, w2, gamma, e_k, wall2d):
             lwall[i] = 0.0
         else:
             lwall[i] = lwall[i - 1] + np.sqrt(
-                (wall2d[i, 0] - wall2d[i - 1, 0]) ** 2
-                + (wall2d[i, 1] - wall2d[i - 1, 1]) ** 2
+                (wall2d[i, 0] - wall2d[i - 1, 0]) ** 2 + (wall2d[i, 1] - wall2d[i - 1, 1]) ** 2
             )
 
     rl = np.zeros((len(e_k), 2), dtype=np.double)
@@ -716,9 +695,7 @@ def ell_on_wall(xpout, w1, w2, gamma, e_k, wall2d):
         #        print(np.dot(xpout['n_c'][i,:],peh),np.dot(xpout['n_c'][i,:],pev))
         ## tests ok
         #        x-direction on tangential plane
-        ephi = cyl2xyz(
-            np.array([1.0, xpout["r_cyl"][i, 1] + np.pi / 2.0, 0.0], dtype=np.double)
-        )
+        ephi = cyl2xyz(np.array([1.0, xpout["r_cyl"][i, 1] + np.pi / 2.0, 0.0], dtype=np.double))
         #        y-direction on tangential plane in direction of wall2d[i+1]-wall2d[i]
         if xpout["icorner"][i] < len(wall2d) - 1:
             el = wall2d[xpout["icorner"][i] + 1, :] - wall2d[xpout["icorner"][i], :]

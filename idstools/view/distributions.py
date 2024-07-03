@@ -31,16 +31,12 @@ class DistributionsView:
             for idistrib in range(self.distributionsCompute.ndistributions):
                 if radialGridInfo[idistrib]["is_active"]:
                     lbl = ""
-                    if (
-                        idistrib == 0
-                        or self.distributionsCompute.ndistributions - 1 == idistrib
-                    ):
+                    if idistrib == 0 or self.distributionsCompute.ndistributions - 1 == idistrib:
                         lbl = profiles["single_nf_source_name"][idistrib]
                     # ax.plot(self.distributionsCompute.rho_tor_norm, profiles['single_total_power_density_profile'][idistrib]*1.e-6,label=profiles['single_nf_source_name'][idistrib])
                     ax.plot(
                         self.distributionsCompute.rho_tor_norm,
-                        profiles["single_total_power_density_profile"][idistrib]
-                        * 1.0e-6,
+                        profiles["single_total_power_density_profile"][idistrib] * 1.0e-6,
                         label=lbl,
                     )
         ax.set_title("NBI/FUS power individual injectors profile")
@@ -101,15 +97,11 @@ class DistributionsView:
                 for idistrib in range(self.distributionsCompute.ndistributions):
                     if radialGridInfo[idistrib]["is_active"]:
                         lbl = ""
-                        if (
-                            idistrib == 0
-                            or self.distributionsCompute.ndistributions - 1 == idistrib
-                        ):
+                        if idistrib == 0 or self.distributionsCompute.ndistributions - 1 == idistrib:
                             lbl = profiles["single_nf_source_name"][idistrib]
                         ax.plot(
                             self.distributionsCompute.rho_tor_norm,
-                            profiles["single_total_power_density_profile"][idistrib]
-                            * 1.0e-6,
+                            profiles["single_total_power_density_profile"][idistrib] * 1.0e-6,
                             label=lbl,
                         )
         ax.set_ylabel("Current density $\mathrm{[MA/m^{2}]}$")
@@ -148,16 +140,12 @@ class DistributionsView:
         for idistrib in range(self.distributionsCompute.ndistributions):
             if radialGridInfo[idistrib]["is_active"]:
                 lbl = ""
-                if (
-                    idistrib == 0
-                    or self.distributionsCompute.ndistributions - 1 == idistrib
-                ):
+                if idistrib == 0 or self.distributionsCompute.ndistributions - 1 == idistrib:
                     lbl = profiles["single_nf_source_name"][idistrib]
                 # ax.plot(timeArray, np.array(profiles['single_total_power_waveform'][idistrib])*1.e-6,label=profiles['single_nf_source_name'][idistrib])
                 ax.plot(
                     timeArray,
-                    np.array(profiles["single_total_power_waveform"][idistrib])
-                    * 1.0e-6,
+                    np.array(profiles["single_total_power_waveform"][idistrib]) * 1.0e-6,
                     label=lbl,
                 )
         ax.set_ylabel("Power to the bulk $\mathrm{[MW]}$")
@@ -189,16 +177,12 @@ class DistributionsView:
             for idistrib in range(self.distributionsCompute.ndistributions):
                 if radialGridInfo[idistrib]["is_active"]:
                     lbl = ""
-                    if (
-                        idistrib == 0
-                        or self.distributionsCompute.ndistributions - 1 == idistrib
-                    ):
+                    if idistrib == 0 or self.distributionsCompute.ndistributions - 1 == idistrib:
                         lbl = profiles["single_nf_source_name"][idistrib]
                     # ax.plot(timeArray, np.array(profiles['single_current_waveform'][idistrib])*1.e-6,label=profiles['single_nf_source_name'][idistrib])
                     ax.plot(
                         timeArray,
-                        np.array(profiles["single_current_waveform"][idistrib])
-                        * 1.0e-6,
+                        np.array(profiles["single_current_waveform"][idistrib]) * 1.0e-6,
                         label=lbl,
                     )
             ax.set_ylabel("Current Drive $\mathrm{[MA]}$")

@@ -52,9 +52,7 @@ class CoreSourcesView:
             )
 
             for _, ionDict in sourceDict["ions"].items():
-                if ionDict["particles_flux"] is None or np.isnan(
-                    ionDict["particles_flux"]
-                ):
+                if ionDict["particles_flux"] is None or np.isnan(ionDict["particles_flux"]):
                     particles_flux = "--"
                 else:
                     particles_flux = f"{ionDict['particles_flux'] : >.6e}"
@@ -83,12 +81,8 @@ class CoreSourcesView:
         """
         if self.coreSourcesCompute.isActiveSourceAvailable():
             rho_tor_norm = self.coreSourcesCompute.getRhoTorNorm()
-            singleAndTotalElectronsProfiles = (
-                self.coreSourcesCompute.getSingleAndTotalElectronsProfiles()
-            )
-            singleAndTotalIonProfiles = (
-                self.coreSourcesCompute.getSingleAndTotalIonProfiles()
-            )
+            singleAndTotalElectronsProfiles = self.coreSourcesCompute.getSingleAndTotalElectronsProfiles()
+            singleAndTotalIonProfiles = self.coreSourcesCompute.getSingleAndTotalIonProfiles()
             sourceNames = self.coreSourcesCompute.getSourceNames()
             ax.set_title("Power Profiles [MW/M3]")
             ax.plot(
@@ -105,16 +99,12 @@ class CoreSourcesView:
             for isource, name in sourceNames.items():
                 ax.plot(
                     rho_tor_norm,
-                    singleAndTotalElectronsProfiles["singleElectronPowerProfile"][
-                        isource
-                    ]
-                    * 1.0e-6,
+                    singleAndTotalElectronsProfiles["singleElectronPowerProfile"][isource] * 1.0e-6,
                     label=name + " [" + str(isource) + "]" + " to electrons",
                 )
                 ax.plot(
                     rho_tor_norm,
-                    singleAndTotalIonProfiles["singleIonPowerProfile"][isource]
-                    * 1.0e-6,
+                    singleAndTotalIonProfiles["singleIonPowerProfile"][isource] * 1.0e-6,
                     "--",
                     label=name + " [" + str(isource) + "]" + " to ions",
                 )
@@ -142,18 +132,13 @@ class CoreSourcesView:
         """
         if self.coreSourcesCompute.isActiveSourceAvailable():
             rho_tor_norm = self.coreSourcesCompute.getRhoTorNorm()
-            singleAndTotalElectronsProfiles = (
-                self.coreSourcesCompute.getSingleAndTotalElectronsProfiles()
-            )
-            singleAndTotalIonProfiles = (
-                self.coreSourcesCompute.getSingleAndTotalIonProfiles()
-            )
+            singleAndTotalElectronsProfiles = self.coreSourcesCompute.getSingleAndTotalElectronsProfiles()
+            singleAndTotalIonProfiles = self.coreSourcesCompute.getSingleAndTotalIonProfiles()
             sourceNames = self.coreSourcesCompute.getSourceNames()
             ax.set_title("PARTICLES PROFILES [/M3/S]")
             ax.plot(
                 rho_tor_norm,
-                singleAndTotalElectronsProfiles["totalElectronParticlesProfile"]
-                * 1.0e-6,
+                singleAndTotalElectronsProfiles["totalElectronParticlesProfile"] * 1.0e-6,
                 label=r"Total to electrons",
             )
             ax.plot(
@@ -165,16 +150,12 @@ class CoreSourcesView:
             for isource, name in sourceNames.items():
                 ax.plot(
                     rho_tor_norm,
-                    singleAndTotalElectronsProfiles["singleElectronParticlesProfile"][
-                        isource
-                    ]
-                    * 1.0e-6,
+                    singleAndTotalElectronsProfiles["singleElectronParticlesProfile"][isource] * 1.0e-6,
                     label=name + " [" + str(isource) + "]" + " electrons",
                 )
                 ax.plot(
                     rho_tor_norm,
-                    singleAndTotalIonProfiles["singleIonParticlesProfile"][isource]
-                    * 1.0e-6,
+                    singleAndTotalIonProfiles["singleIonParticlesProfile"][isource] * 1.0e-6,
                     "--",
                     label=name + " [" + str(isource) + "]" + " ions",
                 )
@@ -202,9 +183,7 @@ class CoreSourcesView:
         """
         if self.coreSourcesCompute.isActiveSourceAvailable():
             rho_tor_norm = self.coreSourcesCompute.getRhoTorNorm()
-            singleAndTotalElectronsAndIonsProfiles = (
-                self.coreSourcesCompute.getSingleAndTotalElectronsAndIonsProfiles()
-            )
+            singleAndTotalElectronsAndIonsProfiles = self.coreSourcesCompute.getSingleAndTotalElectronsAndIonsProfiles()
             sourceNames = self.coreSourcesCompute.getSourceNames()
             ax.set_title("CURRENT PROFILES [KA/M2]")
             ax.plot(
@@ -213,20 +192,10 @@ class CoreSourcesView:
                 label=r"Total current",
             )
             for isource, name in sourceNames.items():
-                if (
-                    len(
-                        singleAndTotalElectronsAndIonsProfiles["singleCurrentProfile"][
-                            isource
-                        ]
-                    )
-                    > 0
-                ):
+                if len(singleAndTotalElectronsAndIonsProfiles["singleCurrentProfile"][isource]) > 0:
                     ax.plot(
                         rho_tor_norm,
-                        singleAndTotalElectronsAndIonsProfiles["singleCurrentProfile"][
-                            isource
-                        ]
-                        * 1.0e-3,
+                        singleAndTotalElectronsAndIonsProfiles["singleCurrentProfile"][isource] * 1.0e-3,
                         label=name + str(isource),
                     )
             ax.set_ylabel("Current density $\mathrm{[kA/m^{2}]}$")
@@ -257,27 +226,19 @@ class CoreSourcesView:
                 logger.warning("Only one time slice --> Waveforms not displayed")
             else:
                 timeArray = self.ids.time
-                singleAndTotalElectronsIonsWaveforms = (
-                    self.coreSourcesCompute.getSingleAndTotalElectronsIonsWaveforms()
-                )
-                singleAndTotalElectronsWaveforms = (
-                    self.coreSourcesCompute.getSingleAndTotalElectronsWaveforms()
-                )
-                singleAndTotalIonsWaveforms = (
-                    self.coreSourcesCompute.getSingleAndTotalIonsWaveforms()
-                )
+                singleAndTotalElectronsIonsWaveforms = self.coreSourcesCompute.getSingleAndTotalElectronsIonsWaveforms()
+                singleAndTotalElectronsWaveforms = self.coreSourcesCompute.getSingleAndTotalElectronsWaveforms()
+                singleAndTotalIonsWaveforms = self.coreSourcesCompute.getSingleAndTotalIonsWaveforms()
                 sourceNames = self.coreSourcesCompute.getSourceNames()
                 ax.set_title("POWER AND PARTICLE WAVEFORMS")
                 ax.plot(
                     timeArray,
-                    singleAndTotalElectronsIonsWaveforms["total_power_waveform"]
-                    * 1.0e-6,
+                    singleAndTotalElectronsIonsWaveforms["total_power_waveform"] * 1.0e-6,
                     label=r"Total electrons+ions",
                 )
                 ax.plot(
                     timeArray,
-                    singleAndTotalElectronsWaveforms["total_electron_power_waveform"]
-                    * 1.0e-6,
+                    singleAndTotalElectronsWaveforms["total_electron_power_waveform"] * 1.0e-6,
                     label=r"Total electrons",
                 )
                 ax.plot(
@@ -289,26 +250,17 @@ class CoreSourcesView:
                 for isource, name in sourceNames.items():
                     ax.plot(
                         timeArray,
-                        singleAndTotalElectronsIonsWaveforms["single_power_waveform"][
-                            isource
-                        ]
-                        * 1.0e-6,
+                        singleAndTotalElectronsIonsWaveforms["single_power_waveform"][isource] * 1.0e-6,
                         label=name + " [" + str(isource) + "]" + " electrons+ions",
                     )
                     ax.plot(
                         timeArray,
-                        singleAndTotalElectronsWaveforms[
-                            "single_electron_power_waveform"
-                        ][isource]
-                        * 1.0e-6,
+                        singleAndTotalElectronsWaveforms["single_electron_power_waveform"][isource] * 1.0e-6,
                         label=name + " [" + str(isource) + "]" + " electrons",
                     )
                     ax.plot(
                         timeArray,
-                        singleAndTotalIonsWaveforms["single_ion_power_waveform"][
-                            isource
-                        ]
-                        * 1.0e-6,
+                        singleAndTotalIonsWaveforms["single_ion_power_waveform"][isource] * 1.0e-6,
                         label=name + " [" + str(isource) + "]" + " ions",
                     )
                 ax.set_ylabel("Power waveforms $\mathrm{[MW]}$")
@@ -339,17 +291,11 @@ class CoreSourcesView:
                 logger.warning("Only one time slice --> Waveforms not displayed")
             else:
                 timeArray = self.ids.time
-                singleAndTotalElectronsIonsWaveforms = (
-                    self.coreSourcesCompute.getSingleAndTotalElectronsIonsWaveforms()
-                )
+                singleAndTotalElectronsIonsWaveforms = self.coreSourcesCompute.getSingleAndTotalElectronsIonsWaveforms()
 
-                singleAndTotalElectronsWaveforms = (
-                    self.coreSourcesCompute.getSingleAndTotalElectronsWaveforms()
-                )
+                singleAndTotalElectronsWaveforms = self.coreSourcesCompute.getSingleAndTotalElectronsWaveforms()
 
-                singleAndTotalIonsWaveforms = (
-                    self.coreSourcesCompute.getSingleAndTotalIonsWaveforms()
-                )
+                singleAndTotalIonsWaveforms = self.coreSourcesCompute.getSingleAndTotalIonsWaveforms()
 
                 sourceNames = self.coreSourcesCompute.getSourceNames()
                 ax.set_title("PARTICLES WAVEFORM")
@@ -360,9 +306,7 @@ class CoreSourcesView:
                 )
                 ax.plot(
                     timeArray,
-                    singleAndTotalElectronsWaveforms[
-                        "total_electron_particles_waveform"
-                    ],
+                    singleAndTotalElectronsWaveforms["total_electron_particles_waveform"],
                     label=r"Total electrons",
                 )
                 ax.plot(
@@ -374,23 +318,17 @@ class CoreSourcesView:
                 for isource, name in sourceNames.items():
                     ax.plot(
                         timeArray,
-                        singleAndTotalElectronsIonsWaveforms[
-                            "single_particles_waveform"
-                        ][isource],
+                        singleAndTotalElectronsIonsWaveforms["single_particles_waveform"][isource],
                         label=name + " [" + str(isource) + "]" + " electrons+ions",
                     )
                     ax.plot(
                         timeArray,
-                        singleAndTotalElectronsWaveforms[
-                            "single_electron_particles_waveform"
-                        ][isource],
+                        singleAndTotalElectronsWaveforms["single_electron_particles_waveform"][isource],
                         label=name + " [" + str(isource) + "]" + " electrons",
                     )
                     ax.plot(
                         timeArray,
-                        singleAndTotalIonsWaveforms["single_ion_particles_waveform"][
-                            isource
-                        ],
+                        singleAndTotalIonsWaveforms["single_ion_particles_waveform"][isource],
                         label=name + " [" + str(isource) + "]" + " ions",
                     )
                 ax.set_ylabel("Particles waveforms $\mathrm{[s^{-1}]}$")
@@ -421,9 +359,7 @@ class CoreSourcesView:
                 logger.warning("Only one time slice --> Waveforms not displayed")
             else:
                 timeArray = self.ids.time
-                singleAndTotalCurrentTorque = (
-                    self.coreSourcesCompute.getSingleAndTotalCurrentTorque()
-                )
+                singleAndTotalCurrentTorque = self.coreSourcesCompute.getSingleAndTotalCurrentTorque()
                 sourceNames = self.coreSourcesCompute.getSourceNames()
                 ax.set_title("CURRENT WAVEFORM")
                 ax.plot(
@@ -435,8 +371,7 @@ class CoreSourcesView:
                 for isource, name in sourceNames.items():
                     ax.plot(
                         timeArray,
-                        singleAndTotalCurrentTorque["single_current_waveform"][isource]
-                        * 1.0e-3,
+                        singleAndTotalCurrentTorque["single_current_waveform"][isource] * 1.0e-3,
                         label=name + " [" + str(isource) + "]" + " electrons+ions",
                     )
 
@@ -469,9 +404,7 @@ class CoreSourcesView:
                 logger.warning("Only one time slice --> Waveforms not displayed")
             else:
                 timeArray = self.ids.time
-                singleAndTotalCurrentTorque = (
-                    self.coreSourcesCompute.getSingleAndTotalCurrentTorque()
-                )
+                singleAndTotalCurrentTorque = self.coreSourcesCompute.getSingleAndTotalCurrentTorque()
                 sourceNames = self.coreSourcesCompute.getSourceNames()
                 # TORQUE WAVEFORM
                 ax.set_title("TORQUE WAVEFORM")

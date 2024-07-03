@@ -15,9 +15,7 @@ from packaging import version
 from rich.progress import track
 
 logger = logging.getLogger("module")
-ARRAY_EQUAL_KWARGS = (
-    "equal_nan=True" if version.parse(np.__version__) > version.parse("1.19") else ""
-)
+ARRAY_EQUAL_KWARGS = "equal_nan=True" if version.parse(np.__version__) > version.parse("1.19") else ""
 
 
 def isIdsField(idstype: type) -> bool:
@@ -49,11 +47,7 @@ def getIdsAttributes(idsobj: object) -> list:
         The function `getIdsAttributes` returns a list of attribute names for the given IDS object which are not private and are ids fields.
     """
     if "imas" in str(type(idsobj)):
-        return [
-            a[0]
-            for a in inspect.getmembers(idsobj)
-            if not a[0].startswith("_") and isIdsField(type(a[1]))
-        ]
+        return [a[0] for a in inspect.getmembers(idsobj) if not a[0].startswith("_") and isIdsField(type(a[1]))]
     else:
         return []
 
@@ -77,9 +71,7 @@ def getIDSSize(dbEntryObject: imas.DBEntry, idsNames=None) -> dict:
     for idsName in track(idsNames, description="[green]Processing..."):
         occurrencesCount = eval(f"imas.{idsName}.getMaxOccurrences()")
         for o in range(occurrencesCount + 1):
-            homogeneousTime = dbEntryObject.partial_get(
-                idsName, "ids_properties/homogeneous_time", occurrence=o
-            )
+            homogeneousTime = dbEntryObject.partial_get(idsName, "ids_properties/homogeneous_time", occurrence=o)
             if homogeneousTime >= 0:
                 field = f"{idsName}/{o}"
                 idsSizeDict[field] = {}
@@ -160,9 +152,7 @@ def getIdsTypes():
     return [ids.value for ids in list(imas.IDSName)]
 
 
-def getAvailableIdsAndOccurrences(
-    dbEntryObject: imas.DBEntry, timeMode=None, getComment=False
-):
+def getAvailableIdsAndOccurrences(dbEntryObject: imas.DBEntry, timeMode=None, getComment=False):
     """
     This function returns a list of pairs of available IDS types and their occurrences in a given DBEntry object.
 
@@ -185,25 +175,17 @@ def getAvailableIdsAndOccurrences(
             homogeneous_time = ""
             comment = ""
             occ_type = ""
-            homogeneous_time = dbEntryObject.partial_get(
-                idstype, "ids_properties/homogeneous_time", occurrence=occ
-            )
-            comment = dbEntryObject.partial_get(
-                idstype, "ids_properties/comment", occurrence=occ
-            )
+            homogeneous_time = dbEntryObject.partial_get(idstype, "ids_properties/homogeneous_time", occurrence=occ)
+            comment = dbEntryObject.partial_get(idstype, "ids_properties/comment", occurrence=occ)
             try:
                 occ_type_text = ""
-                occ_type = dbEntryObject.partial_get(
-                    idstype, "ids_properties/occurrence_type", occurrence=occ
-                )
+                occ_type = dbEntryObject.partial_get(idstype, "ids_properties/occurrence_type", occurrence=occ)
                 if occ_type.index != imas.imasdef.EMPTY_INT:
                     occ_type_text = occ_type_dict[occ_type.index]
                     comment += f" [occurrence type = {occ_type_text}]"
             except Exception as e:
                 pass
-            if homogeneous_time != imas.imasdef.EMPTY_INT and (
-                timeMode is None or timeMode == homogeneous_time
-            ):
+            if homogeneous_time != imas.imasdef.EMPTY_INT and (timeMode is None or timeMode == homogeneous_time):
                 if getComment is True:
                     availableidslist.append((idstype, occ, comment))
                 else:
@@ -242,17 +224,13 @@ def getAvailableIdsAndTimes(dbEntryObject: imas.DBEntry) -> list:
                     timeArray = [np.NINF]
             except Exception as exc:
                 timeArray = []
-                logger.info(
-                    f"ERROR! IDS {idsName} : Reading time array fails due to following problem : {exc}"
-                )
+                logger.info(f"ERROR! IDS {idsName} : Reading time array fails due to following problem : {exc}")
             if timeArray is not None and len(timeArray):
                 result.append((idsName, timeArray))
     return result
 
 
-def resampleIndices(
-    dbin: str, dbout: str, idsname: str, start: int = 0, stop: int = None, step: int = 1
-):
+def resampleIndices(dbin: str, dbout: str, idsname: str, start: int = 0, stop: int = None, step: int = 1):
     """
     The function resampleIndices takes in a database input, database output, and an idsname, and resamples the data based on the specified start, stop, and step values.
 
@@ -522,9 +500,7 @@ def compareIds(
     return identical, output
 
 
-def getQuantitiesFromPulses(
-    idspath: str, pulses: tuple, listCount: int = 0, verbose: bool = False
-) -> pd.DataFrame:
+def getQuantitiesFromPulses(idspath: str, pulses: tuple, listCount: int = 0, verbose: bool = False) -> pd.DataFrame:
     """
     The `getQuantitiesFromPulses` function retrieves values from a specified IDS path for a given set of pulses and returns a DataFrame containing the pulse, run, and corresponding values.
 

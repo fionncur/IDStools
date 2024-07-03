@@ -180,9 +180,7 @@ class COCOS:
         """
 
         if (index is None) and (values is None):
-            raise ValueError(
-                "Initialize COCOS with either index or values: both not given"
-            )
+            raise ValueError("Initialize COCOS with either index or values: both not given")
             return
 
         elif (index is not None) and (values is not None):
@@ -347,9 +345,7 @@ class COCOS:
         }
 
     @classmethod
-    def values_coefficients(
-        self, COCOS_in, COCOS_out, Ip_in, B0_in, Ipsign_out, B0sign_out
-    ):
+    def values_coefficients(self, COCOS_in, COCOS_out, Ip_in, B0_in, Ipsign_out, B0sign_out):
         """
         Provide transformation values for a set of quantities for a given pair
         of input/output COCOS numbers
@@ -392,12 +388,8 @@ class COCOS:
         sigma_B0_in = np.sign(B0_in)
 
         # Get COCOS related parameters
-        CVI = COCOS(
-            index={"COCOS": COCOS_in, "ipsign": sigma_Ip_in, "b0sign": sigma_B0_in}
-        ).get()
-        CVO = COCOS(
-            index={"COCOS": COCOS_out, "ipsign": Ipsign_out, "b0sign": B0sign_out}
-        ).get()
+        CVI = COCOS(index={"COCOS": COCOS_in, "ipsign": sigma_Ip_in, "b0sign": sigma_B0_in}).get()
+        CVO = COCOS(index={"COCOS": COCOS_out, "ipsign": Ipsign_out, "b0sign": B0sign_out}).get()
 
         # Define effective variables: sigma_Ip_eff, si1gma_B0_eff, sigma_Bp_eff,
         # exp_Bp_eff as in Appendix C
@@ -419,9 +411,7 @@ class COCOS:
 
         sigma_Bp_eff = float(CVO["sigma_Bp"] * CVI["sigma_Bp"])
         exp_Bp_eff = float(CVO["exp_Bp"] - CVI["exp_Bp"])
-        sigma_rhothetaphi_eff = float(
-            CVO["sigma_rhothetaphi"] * CVI["sigma_rhothetaphi"]
-        )
+        sigma_rhothetaphi_eff = float(CVO["sigma_rhothetaphi"] * CVI["sigma_rhothetaphi"])
         #
         # Note that sign(sigma_RphiZ*sigma_rhothetaphi) gives theta in clockwise or counter-clockwise respectively
         # Thus sigma_RphiZ_eff*sigma_rhothetaphi_eff negative if the direction of theta has changed from cocos_in to _out
@@ -699,11 +689,7 @@ class IDSValidator(cerberus.Validator):
         """{'nullable': False }"""
         try:
             v = np.atleast_1d(value).flatten()
-            q_like = (
-                self.cocos["sigma_Ip"]
-                * self.cocos["sigma_B0"]
-                * self.cocos["sigma_rhothetaphi"]
-            )
+            q_like = self.cocos["sigma_Ip"] * self.cocos["sigma_B0"] * self.cocos["sigma_rhothetaphi"]
             if np.any(np.sign(v) != q_like):
                 if not constraint:
                     self._error(field, f"Sign expected as {q_like}")
@@ -913,9 +899,7 @@ def path_iterator(field, nodes, ids, schema, cocos, buf, idx=None, level=0):
 
         # for node (e.g. path(itime)/to(i1)/node)
         else:
-            path_iterator(
-                field, nodes, ids, schema, cocos, buf, idx=idx, level=level + 1
-            )
+            path_iterator(field, nodes, ids, schema, cocos, buf, idx=idx, level=level + 1)
 
     else:
         validator(field, p, ids, schema, cocos, buf, idx)
@@ -1001,10 +985,7 @@ def compute_COCOS(ids, itime=None, i1=0, cocos_check=None):
     b0sign = np.sign(ids.vacuum_toroidal_field.b0[itime])
 
     # 1 Eq.(22)
-    dpsi = (
-        ids.time_slice[itime].profiles_1d.psi[-1]
-        - ids.time_slice[itime].profiles_1d.psi[0]
-    )
+    dpsi = ids.time_slice[itime].profiles_1d.psi[-1] - ids.time_slice[itime].profiles_1d.psi[0]
     sigma_Bp = np.sign(dpsi) * ipsign
 
     # 2 Eq.(22)
@@ -1048,9 +1029,7 @@ def compute_COCOS(ids, itime=None, i1=0, cocos_check=None):
     w = np.where(np.isclose(cols, iz, rtol=0.1))
 
     twopi_expBp_sigma_RphiZ = np.zeros(bz.shape)
-    twopi_expBp_sigma_RphiZ = (
-        -sigma_Bp * dpsi2drdr[rows[w], cols[w]] / bz[rows[w], cols[w]]
-    )
+    twopi_expBp_sigma_RphiZ = -sigma_Bp * dpsi2drdr[rows[w], cols[w]] / bz[rows[w], cols[w]]
     sigma_RphiZ = np.sign(np.sum(np.sign(twopi_expBp_sigma_RphiZ)))
 
     # 6 exp_Bp from Eq.(19)
@@ -1288,9 +1267,7 @@ def ids_iterator(ids, schema, dd, cocos, occ=0):
 
             if args_verbose:
                 if bool(report_buf):
-                    dictw["remark"] = all(
-                        {report_buf[x]["remark"] for x in report_buf.keys()}
-                    )
+                    dictw["remark"] = all({report_buf[x]["remark"] for x in report_buf.keys()})
             dictw.update(report_buf)
             buf.update({"occurence(" + str(oc) + ")": dictw})
 
@@ -1348,9 +1325,7 @@ def init_schema_coordinate(idsname, dd=None, rule={"ids_dim": False}):
 # ----------------------------------------------------------------------
 
 
-def ids_validator(
-    ids, schema, dd=None, occ=0, ipsign=-1, b0sign=-1, verbose=False, check_all=True
-):
+def ids_validator(ids, schema, dd=None, occ=0, ipsign=-1, b0sign=-1, verbose=False, check_all=True):
     """Function Interface for IDS Validation w.r.t. DD (IDSDef.xml)
 
     Parameters

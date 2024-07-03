@@ -34,8 +34,7 @@ class TbdView:
                 lwall[i] = 0.0
             else:
                 lwall[i] = lwall[i - 1] + np.sqrt(
-                    (edges[i, 0] - edges[i - 1, 0]) ** 2
-                    + (edges[i, 1] - edges[i - 1, 1]) ** 2
+                    (edges[i, 0] - edges[i - 1, 0]) ** 2 + (edges[i, 1] - edges[i - 1, 1]) ** 2
                 )
         lmin = lwall[0]
         lmax = lwall[len(lwall) - 1]
@@ -48,13 +47,13 @@ class TbdView:
         irmax = np.argmax(edges[imin : imax + 1, 0]) + imin
         # FIXME edge is not defined here, might raise runtime error
         if irmax == imin:
-            Rmax = edge[imin, 0] + (lmin - lwall[imin]) / (
-                lwall[imin + 1] - lwall[imin]
-            ) * (edge[imin + 1, 0] - edge[imin, 0])
+            Rmax = edge[imin, 0] + (lmin - lwall[imin]) / (lwall[imin + 1] - lwall[imin]) * (
+                edge[imin + 1, 0] - edge[imin, 0]
+            )
         elif irmax == imax:
-            Rmax = edge[imax - 1, 0] + (lmax - lwall[imax - 1]) / (
-                lwall[imax] - lwall[imax - 1]
-            ) * (edge[imax, 0] - edge[imax - 1, 0])
+            Rmax = edge[imax - 1, 0] + (lmax - lwall[imax - 1]) / (lwall[imax] - lwall[imax - 1]) * (
+                edge[imax, 0] - edge[imax - 1, 0]
+            )
         else:
             Rmax = edges[irmax, 0]
         # if at the edge, interpolate
@@ -96,11 +95,7 @@ class TbdView:
 
         # plot an entry pattern using g1e, g2e, re, se
         for i in range(len(tdata)):
-            xydata[i, :] = (
-                re[ib, :]
-                + np.cos(tdata[i]) * g1e[ib, :]
-                + np.sin(tdata[i]) * g2e[ib, :]
-            )
+            xydata[i, :] = re[ib, :] + np.cos(tdata[i]) * g1e[ib, :] + np.sin(tdata[i]) * g2e[ib, :]
         xydata[:, 0] = xydata[:, 0] + pi9 * (np.double(se[ib]) + 0.5) * Rmax
         if init == 1:
             ax.plot(xydata[:, 0], xydata[:, 1], label="L" + str(ib), color="0")
@@ -116,11 +111,7 @@ class TbdView:
         # for j in range(its, ite) :
         j = ite  # One time slice
         for i in range(len(tdata)):
-            xydata[i, :] = (
-                rl[j, ib, :]
-                + np.cos(tdata[i]) * g1l[j, ib, :]
-                + np.sin(tdata[i]) * g2l[j, ib, :]
-            )
+            xydata[i, :] = rl[j, ib, :] + np.cos(tdata[i]) * g1l[j, ib, :] + np.sin(tdata[i]) * g2l[j, ib, :]
         xydata[:, 0] = xydata[:, 0] + pi9 * (np.double(sl[j, ib]) + 0.5) * Rmax
 
         if init == 1:

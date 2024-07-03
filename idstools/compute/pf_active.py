@@ -75,9 +75,7 @@ class PfActiveCompute:
 
             coilInfo["elements"] = dictElements
             if not dictElements:
-                logger.warning(
-                    f"Coil index {coilIndex} : pf_active.coil.element.geometry.rectangle is empty"
-                )
+                logger.warning(f"Coil index {coilIndex} : pf_active.coil.element.geometry.rectangle is empty")
             coils[coilIndex] = coilInfo
         if not coils:
             logger.warning("pf_active.coil is empty")

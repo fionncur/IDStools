@@ -126,30 +126,22 @@ class KineticProfilesCompute:
         self.species = self.getSpeciesList()
         self.nspec_over_ne = self.getNSpecNverNe()
 
-        self.profiles = (
-            self.getProfiles()
-        )  # Create the dictionary defining the list of profiles
+        self.profiles = self.getProfiles()  # Create the dictionary defining the list of profiles
 
-        velocityProfiles = (
-            self.getMinMaxVelocityProfiles()
-        )  # Min and max of velocity profiles
+        velocityProfiles = self.getMinMaxVelocityProfiles()  # Min and max of velocity profiles
         self.max_vtor = velocityProfiles["max_vtor"]
         self.min_vtor = velocityProfiles["min_vtor"]
         self.max_vpol = velocityProfiles["max_vpol"]
         self.min_vpol = velocityProfiles["min_vpol"]
 
-        self.waveform = (
-            self.getWaveform()
-        )  # Create the dictionary defining the list of waveforms (central values)
+        self.waveform = self.getWaveform()  # Create the dictionary defining the list of waveforms (central values)
 
     def getIDS(self, idsName=""):
         idsPresent = False
         idsObject = None
         if idsName:
             try:
-                idsObject = eval(
-                    f"imas.{idsName}()"
-                )  # To initialise the empty IDS structure
+                idsObject = eval(f"imas.{idsName}()")  # To initialise the empty IDS structure
                 idsObject.time = self.connection.partial_get(idsName, "time")
                 if idsObject.time is not None:
                     if len(idsObject.time) > 0:
@@ -158,26 +150,18 @@ class KineticProfilesCompute:
                     logger.critical(f"No {idsName} IDS in the data-entry.")
                     idsPresent = False
             except Exception as e:
-                logger.critical(
-                    f"The {idsName} IDS is absent from the input data-entry."
-                )
+                logger.critical(f"The {idsName} IDS is absent from the input data-entry.")
                 idsPresent = False
         return idsObject, idsPresent
 
     def checkIDSes(self):
         self.core_profiles, self.isCoreProfilesPresent = self.getIDS("core_profiles")
         if self.edgeRequired:
-            self.edge_profiles, self.isEdgeProfilesPresent = self.getIDS(
-                "edge_profiles"
-            )
+            self.edge_profiles, self.isEdgeProfilesPresent = self.getIDS("edge_profiles")
             if self.isCoreProfilesPresent:
-                logger.info(
-                    "Found adjoining edge_profiles. Will attempt to add to plots."
-                )
+                logger.info("Found adjoining edge_profiles. Will attempt to add to plots.")
             else:
-                logger.info(
-                    "Found edge_profiles IDS in data-entry. Will only plot edge data."
-                )
+                logger.info("Found edge_profiles IDS in data-entry. Will only plot edge data.")
         self.equilibrium, self.isEquilibriumPresent = self.getIDS("equilibrium")
 
         if not self.isCoreProfilesPresent and not self.isEdgeProfilesPresent:
@@ -195,9 +179,7 @@ class KineticProfilesCompute:
             self.commonTimeLength = len(self.edge_profiles.time)
             self.commonTimeArray = self.edge_profiles.time
         self.commonTime = timeSlice
-        commonTimeIndex, commonTimeValue = getNearestTime(
-            self.commonTimeArray, timeSlice
-        )
+        commonTimeIndex, commonTimeValue = getNearestTime(self.commonTimeArray, timeSlice)
 
         self.commonTime = commonTimeValue
 
@@ -212,18 +194,14 @@ class KineticProfilesCompute:
         if self.isEquilibriumPresent:
             # ntimeEquilibrium = len(self.equilibrium.time)
             timeArrayEquilibrium = self.equilibrium.time
-            timeIndexEquilibrium, timeValueEquilibrium = getNearestTime(
-                timeArrayEquilibrium, self.commonTime
-            )
+            timeIndexEquilibrium, timeValueEquilibrium = getNearestTime(timeArrayEquilibrium, self.commonTime)
 
         # Add 1D-profiles edge data if present
 
         if self.isEdgeProfilesPresent:
             # ntimeEdgeProfiles = len(self.edge_profiles.time)
             timeArrayEdgeProfiles = self.edge_profiles.time
-            timeIndexEdgeProfiles, timeValueEdgeProfiles = getNearestTime(
-                timeArrayEdgeProfiles, self.commonTime
-            )
+            timeIndexEdgeProfiles, timeValueEdgeProfiles = getNearestTime(timeArrayEdgeProfiles, self.commonTime)
 
             # Read edge_profile data for this time slice
             try:
@@ -240,23 +218,16 @@ class KineticProfilesCompute:
                         "equilibrium", f"time_slice({timeIndexEquilibrium})"
                     )
                     # tqme = timeValueEquilibrium
-                    if (
-                        len(self.equilibrium.time_slice[0].profiles_1d.r_outboard) > 0
-                        or not self.isCoreProfilesPresent
-                    ):
+                    if len(self.equilibrium.time_slice[0].profiles_1d.r_outboard) > 0 or not self.isCoreProfilesPresent:
                         self.edge_profiles.grid_ggd.resize(1)
                         try:
-                            self.edge_profiles.grid_ggd[0] = (
-                                self.connection.partial_get(
-                                    "edge_profiles",
-                                    f"grid_ggd({timeIndexEdgeProfiles})",
-                                )
+                            self.edge_profiles.grid_ggd[0] = self.connection.partial_get(
+                                "edge_profiles",
+                                f"grid_ggd({timeIndexEdgeProfiles})",
                             )
                         except Exception as e:
                             self.isEdgeProfilesPresent = False
-                            logger.warning(
-                                "No grid_ggd information found in edge_profiles IDS."
-                            )
+                            logger.warning("No grid_ggd information found in edge_profiles IDS.")
                         self.edge_profiles.ggd.resize(1)
                         try:
                             self.edge_profiles.ggd[0] = self.connection.partial_get(
@@ -264,14 +235,10 @@ class KineticProfilesCompute:
                             )
                         except Exception as e:
                             self.isEdgeProfilesPresent = False
-                            logger.warning(
-                                "No ggd information found in edge_profiles IDS."
-                            )
+                            logger.warning("No ggd information found in edge_profiles IDS.")
                         if self.isEdgeProfilesPresent:
                             self.r_out_graph = True
-                            logger.info(
-                                "Attempting to use R_outboard coordinate instead."
-                            )
+                            logger.info("Attempting to use R_outboard coordinate instead.")
                     else:
                         if self.isCoreProfilesPresent:
                             self.isEdgeProfilesPresent = False
@@ -281,17 +248,13 @@ class KineticProfilesCompute:
                     else:
                         self.edge_profiles.grid_ggd.resize(1)
                         try:
-                            self.edge_profiles.grid_ggd[0] = (
-                                self.connection.partial_get(
-                                    "edge_profiles",
-                                    f"grid_ggd({timeIndexEdgeProfiles})",
-                                )
+                            self.edge_profiles.grid_ggd[0] = self.connection.partial_get(
+                                "edge_profiles",
+                                f"grid_ggd({timeIndexEdgeProfiles})",
                             )
                         except Exception as e:
                             self.isEdgeProfilesPresent = False
-                            logger.warning(
-                                "No grid_ggd information found in edge_profiles IDS."
-                            )
+                            logger.warning("No grid_ggd information found in edge_profiles IDS.")
                         self.edge_profiles.ggd.resize(1)
                         try:
                             self.edge_profiles.ggd[0] = self.connection.partial_get(
@@ -299,9 +262,7 @@ class KineticProfilesCompute:
                             )
                         except Exception as e:
                             self.isEdgeProfilesPresent = False
-                            logger.warning(
-                                "No ggd information found in edge_profiles IDS."
-                            )
+                            logger.warning("No ggd information found in edge_profiles IDS.")
                         if self.isEdgeProfilesPresent:
                             self.r_out_graph = True
                             logger.info("Attempting to use R coordinate instead.")
@@ -314,18 +275,10 @@ class KineticProfilesCompute:
                 self.isEdgeProfilesPresent = False
                 self.r_out_graph = False
             try:
-                if (
-                    self.edge_profiles.midplane.index != 1
-                    and self.r_out_graph
-                    and self.isCoreProfilesPresent
-                ):
-                    logger.warning(
-                        "Edge and core profile midplane coordinates are not aligned!"
-                    )
+                if self.edge_profiles.midplane.index != 1 and self.r_out_graph and self.isCoreProfilesPresent:
+                    logger.warning("Edge and core profile midplane coordinates are not aligned!")
             except Exception as e:
-                logger.warning(
-                    "Edge_profiles midplane location not specified! Coordinates may be misaligned."
-                )
+                logger.warning("Edge_profiles midplane location not specified! Coordinates may be misaligned.")
             return gset
         return None
 
@@ -336,9 +289,7 @@ class KineticProfilesCompute:
         if not self.r_out_graph and self.isCoreProfilesPresent:
             if len(self.core_profiles.profiles_1d[0].grid.rho_tor_norm) > 0:
                 for i in range(self.nrho):
-                    rho_tor_norm[i] = self.core_profiles.profiles_1d[
-                        0
-                    ].grid.rho_tor_norm[i]
+                    rho_tor_norm[i] = self.core_profiles.profiles_1d[0].grid.rho_tor_norm[i]
             elif len(self.core_profiles.profiles_1d[0].grid.rho_tor) > 0:
                 for i in range(self.nrho):
                     rho_tor_norm[i] = (
@@ -349,9 +300,7 @@ class KineticProfilesCompute:
             xend = 1
         elif self.isCoreProfilesPresent:
             for i in range(self.nrho):
-                rho_tor_norm[i] = self.equilibrium.time_slice[0].profiles_1d.r_outboard[
-                    self.mrho + i
-                ]
+                rho_tor_norm[i] = self.equilibrium.time_slice[0].profiles_1d.r_outboard[self.mrho + i]
             xbeg = min(xbeg, rho_tor_norm[self.nrho - 1], rho_tor_norm[0])
             xend = max(xend, rho_tor_norm[self.nrho - 1], rho_tor_norm[0])
 
@@ -359,94 +308,42 @@ class KineticProfilesCompute:
             if not self.r_out_graph:
                 if len(self.core_profiles.profiles_1d[0].grid.rho_tor_norm) > 0:
                     for i in range(self.erho):
-                        rho_tor_norm[self.nrho + i] = self.edge_profiles.profiles_1d[
-                            0
-                        ].rho_tor_norm[i]
+                        rho_tor_norm[self.nrho + i] = self.edge_profiles.profiles_1d[0].rho_tor_norm[i]
                 elif len(self.core_profiles.profiles_1d[0].grid.rho_tor) > 0:
                     for i in range(self.erho):
                         rho_tor_norm[self.nrho + i] = (
                             self.edge_profiles.profiles_1d[0].grid.rho_tor[i]
-                            / self.core_profiles.profiles_1d[0].grid.rho_tor[
-                                self.nrho - 1
-                            ]
+                            / self.core_profiles.profiles_1d[0].grid.rho_tor[self.nrho - 1]
                         )
-                xbeg = min(
-                    xbeg, rho_tor_norm[self.nrho + self.erho - 1], rho_tor_norm[0]
-                )
+                xbeg = min(xbeg, rho_tor_norm[self.nrho + self.erho - 1], rho_tor_norm[0])
                 xend = max(
                     xend,
                     rho_tor_norm[self.nrho + self.erho - 1],
                     rho_tor_norm[self.nrho],
                 )
             else:
-                if (
-                    self.edge_profiles.grid_ggd[0].grid_subset[self.gset].dimension
-                    == -999999999
-                ):
-                    logger.debug(
-                        "Dimensionality of Outer Midplane GGD subset is not defined !"
-                    )
-                    logger.debug(
-                        "Assuming the grid subset is made of edges (dimensionality 2)."
-                    )
+                if self.edge_profiles.grid_ggd[0].grid_subset[self.gset].dimension == -999999999:
+                    logger.debug("Dimensionality of Outer Midplane GGD subset is not defined !")
+                    logger.debug("Assuming the grid subset is made of edges (dimensionality 2).")
                 if self.edge_profiles.grid_ggd[0].grid_subset[self.gset].dimension == 1:
                     for i in range(self.erho):
-                        ielem = (
-                            self.edge_profiles.grid_ggd[0]
-                            .grid_subset[self.gset]
-                            .element[i]
-                            .object[0]
-                            .index
-                        )
-                        i1 = (
-                            self.edge_profiles.grid_ggd[0]
-                            .space[0]
-                            .objects_per_dimension[0]
-                            .object[ielem - 1]
-                            .nodes[0]
-                        )
+                        ielem = self.edge_profiles.grid_ggd[0].grid_subset[self.gset].element[i].object[0].index
+                        i1 = self.edge_profiles.grid_ggd[0].space[0].objects_per_dimension[0].object[ielem - 1].nodes[0]
                         rho_tor_norm[self.nrho + i] = (
-                            self.edge_profiles.grid_ggd[0]
-                            .space[0]
-                            .objects_per_dimension[0]
-                            .object[i1 - 1]
-                            .geometry[0]
+                            self.edge_profiles.grid_ggd[0].space[0].objects_per_dimension[0].object[i1 - 1].geometry[0]
                         )
                         xbeg = min(xbeg, rho_tor_norm[0])
                         xend = max(xend, rho_tor_norm[self.nrho + i])
                 elif (
                     self.edge_profiles.grid_ggd[0].grid_subset[self.gset].dimension == 2
-                    or self.edge_profiles.grid_ggd[0].grid_subset[self.gset].dimension
-                    == -999999999
+                    or self.edge_profiles.grid_ggd[0].grid_subset[self.gset].dimension == -999999999
                 ) and self.isEdgeProfilesPresent:
                     for i in range(self.erho):
-                        ielem = (
-                            self.edge_profiles.grid_ggd[0]
-                            .grid_subset[self.gset]
-                            .element[i]
-                            .object[0]
-                            .index
-                        )
-                        i1 = (
-                            self.edge_profiles.grid_ggd[0]
-                            .space[0]
-                            .objects_per_dimension[1]
-                            .object[ielem - 1]
-                            .nodes[0]
-                        )
-                        i2 = (
-                            self.edge_profiles.grid_ggd[0]
-                            .space[0]
-                            .objects_per_dimension[1]
-                            .object[ielem - 1]
-                            .nodes[1]
-                        )
+                        ielem = self.edge_profiles.grid_ggd[0].grid_subset[self.gset].element[i].object[0].index
+                        i1 = self.edge_profiles.grid_ggd[0].space[0].objects_per_dimension[1].object[ielem - 1].nodes[0]
+                        i2 = self.edge_profiles.grid_ggd[0].space[0].objects_per_dimension[1].object[ielem - 1].nodes[1]
                         rho_tor_norm[self.nrho + i] = (
-                            self.edge_profiles.grid_ggd[0]
-                            .space[0]
-                            .objects_per_dimension[0]
-                            .object[i1 - 1]
-                            .geometry[0]
+                            self.edge_profiles.grid_ggd[0].space[0].objects_per_dimension[0].object[i1 - 1].geometry[0]
                             + self.edge_profiles.grid_ggd[0]
                             .space[0]
                             .objects_per_dimension[0]
@@ -478,14 +375,8 @@ class KineticProfilesCompute:
                 nspeciesEdge = len(self.edge_profiles.profiles_1d[0].ion)
             else:
                 nspeciesEdge = len(self.edge_profiles.ggd[0].ion)
-        if (
-            nspeciesCore != nspeciesEdge
-            and self.isCoreProfilesPresent
-            and self.isEdgeProfilesPresent
-        ):
-            logger.warning(
-                "Warning: list of species in core and edge profiles data do not match!"
-            )
+        if nspeciesCore != nspeciesEdge and self.isCoreProfilesPresent and self.isEdgeProfilesPresent:
+            logger.warning("Warning: list of species in core and edge profiles data do not match!")
         if not self.isCoreProfilesPresent:
             nspeciesCore = nspeciesEdge
 
@@ -496,36 +387,24 @@ class KineticProfilesCompute:
         if self.isCoreProfilesPresent:
             try:
                 for ispecies in range(self.nspeciesCore):
-                    a[ispecies] = int(
-                        self.core_profiles.profiles_1d[0].ion[ispecies].element[0].a
-                    )
+                    a[ispecies] = int(self.core_profiles.profiles_1d[0].ion[ispecies].element[0].a)
             except Exception as e:
-                logger.warning(
-                    "core_profiles.profiles_1d[:].ion[0].element[0].a could not be read."
-                )
+                logger.warning("core_profiles.profiles_1d[:].ion[0].element[0].a could not be read.")
                 self.isCompositionAvailable = False  # plot_compo
         else:
             if not self.r_out_graph:
                 try:
                     for ispecies in range(self.nspeciesCoreEdge):
-                        a[ispecies] = int(
-                            self.edge_profiles.profiles_1d[0].ion[ispecies].element[0].a
-                        )
+                        a[ispecies] = int(self.edge_profiles.profiles_1d[0].ion[ispecies].element[0].a)
                 except Exception as e:
-                    logger.warning(
-                        "edge_profiles.profiles_1d[:].ion[0].element[0].a could not be read."
-                    )
+                    logger.warning("edge_profiles.profiles_1d[:].ion[0].element[0].a could not be read.")
                     self.isCompositionAvailable = False
             else:
                 try:
                     for ispecies in range(self.nspeciesCoreEdge):
-                        a[ispecies] = int(
-                            self.edge_profiles.ggd[0].ion[ispecies].element[0].a
-                        )
+                        a[ispecies] = int(self.edge_profiles.ggd[0].ion[ispecies].element[0].a)
                 except Exception as e:
-                    logger.warning(
-                        "edge_profiles.ggd[:].ion[0].element[0].a could not be read."
-                    )
+                    logger.warning("edge_profiles.ggd[:].ion[0].element[0].a could not be read.")
                     self.isCompositionAvailable = False
         return a
 
@@ -534,39 +413,24 @@ class KineticProfilesCompute:
         if self.isCoreProfilesPresent:
             try:
                 for ispecies in range(self.nspeciesCore):
-                    z[ispecies] = int(
-                        self.core_profiles.profiles_1d[0].ion[ispecies].element[0].z_n
-                    )
+                    z[ispecies] = int(self.core_profiles.profiles_1d[0].ion[ispecies].element[0].z_n)
             except Exception as e:
-                logger.warning(
-                    "core_profiles.profiles_1d[:].ion[0].element[0].z_n could not be read."
-                )
+                logger.warning("core_profiles.profiles_1d[:].ion[0].element[0].z_n could not be read.")
                 self.isCompositionAvailable = False
         else:
             if not self.r_out_graph:
                 try:
                     for ispecies in range(self.nspeciesEdge):
-                        z[ispecies] = int(
-                            self.edge_profiles.profiles_1d[0]
-                            .ion[ispecies]
-                            .element[0]
-                            .z_n
-                        )
+                        z[ispecies] = int(self.edge_profiles.profiles_1d[0].ion[ispecies].element[0].z_n)
                 except Exception as e:
-                    logger.warning(
-                        "edge_profiles.profiles_1d[:].ion[0].element[0].z_n could not be read."
-                    )
+                    logger.warning("edge_profiles.profiles_1d[:].ion[0].element[0].z_n could not be read.")
                     self.isCompositionAvailable = False
             else:
                 try:
                     for ispecies in range(self.nspeciesEdge):
-                        z[ispecies] = int(
-                            self.edge_profiles.ggd[0].ion[ispecies].element[0].z_n
-                        )
+                        z[ispecies] = int(self.edge_profiles.ggd[0].ion[ispecies].element[0].z_n)
                 except Exception as e:
-                    logger.warning(
-                        "edge_profiles.ggd[:].ion[0].element[0].z_n could not be read."
-                    )
+                    logger.warning("edge_profiles.ggd[:].ion[0].element[0].z_n could not be read.")
                     self.isCompositionAvailable = False
         return z
 
@@ -575,42 +439,24 @@ class KineticProfilesCompute:
         if self.isCoreProfilesPresent:
             try:
                 for ispecies in range(self.nspeciesCore):
-                    n[ispecies] = (
-                        self.core_profiles.profiles_1d[0]
-                        .ion[ispecies]
-                        .element[0]
-                        .atoms_n
-                    )
+                    n[ispecies] = self.core_profiles.profiles_1d[0].ion[ispecies].element[0].atoms_n
             except Exception as e:
-                logger.warning(
-                    "core_profiles.profiles_1d[:].ion[0].element[0].atoms_n could not be read."
-                )
+                logger.warning("core_profiles.profiles_1d[:].ion[0].element[0].atoms_n could not be read.")
                 logger.warning("Value of 1 assumed.")
         else:
             if not self.r_out_graph:
                 try:
                     for ispecies in range(self.nspeciesEdge):
-                        n[ispecies] = (
-                            self.edge_profiles.profiles_1d[0]
-                            .ion[ispecies]
-                            .element[0]
-                            .atoms_n
-                        )
+                        n[ispecies] = self.edge_profiles.profiles_1d[0].ion[ispecies].element[0].atoms_n
                 except Exception as e:
-                    logger.warning(
-                        "edge_profiles.profiles_1d[:].ion[0].element[0].atoms_n could not be read."
-                    )
+                    logger.warning("edge_profiles.profiles_1d[:].ion[0].element[0].atoms_n could not be read.")
                     logger.warning("Value of 1 assumed.")
             else:
                 try:
                     for ispecies in range(self.nspeciesEdge):
-                        n[ispecies] = (
-                            self.edge_profiles.ggd[0].ion[ispecies].element[0].atoms_n
-                        )
+                        n[ispecies] = self.edge_profiles.ggd[0].ion[ispecies].element[0].atoms_n
                 except Exception as e:
-                    logger.warning(
-                        "edge_profiles.ggd[:].ion[0].element[0].atoms_n could not be read."
-                    )
+                    logger.warning("edge_profiles.ggd[:].ion[0].element[0].atoms_n could not be read.")
                     logger.warning("Value of 1 assumed.")
         return n
 
@@ -621,37 +467,16 @@ class KineticProfilesCompute:
                 for jspecies in range(self.nspeciesEdge):
                     if self.r_out_graph == 0:
                         if (
-                            self.a[ispecies]
-                            == int(
-                                self.edge_profiles.profiles_1d[0]
-                                .ion[jspecies]
-                                .element[0]
-                                .a
-                            )
-                            and self.z[ispecies]
-                            == int(
-                                self.edge_profiles.profiles_1d[0]
-                                .ion[jspecies]
-                                .element[0]
-                                .z_n
-                            )
-                            and self.n[ispecies]
-                            == self.edge_profiles_1d[0].ion[jspecies].element[0].atoms_n
+                            self.a[ispecies] == int(self.edge_profiles.profiles_1d[0].ion[jspecies].element[0].a)
+                            and self.z[ispecies] == int(self.edge_profiles.profiles_1d[0].ion[jspecies].element[0].z_n)
+                            and self.n[ispecies] == self.edge_profiles_1d[0].ion[jspecies].element[0].atoms_n
                         ):
                             species_map[ispecies] = jspecies
                     else:
                         if (
-                            self.a[ispecies]
-                            == int(self.edge_profiles.ggd[0].ion[jspecies].element[0].a)
-                            and self.z[ispecies]
-                            == int(
-                                self.edge_profiles.ggd[0].ion[jspecies].element[0].z_n
-                            )
-                            and self.n[ispecies]
-                            == self.edge_profiles.ggd[0]
-                            .ion[jspecies]
-                            .element[0]
-                            .atoms_n
+                            self.a[ispecies] == int(self.edge_profiles.ggd[0].ion[jspecies].element[0].a)
+                            and self.z[ispecies] == int(self.edge_profiles.ggd[0].ion[jspecies].element[0].z_n)
+                            and self.n[ispecies] == self.edge_profiles.ggd[0].ion[jspecies].element[0].atoms_n
                         ):
                             species_map[ispecies] = jspecies
                 if species_map[ispecies] == -99 and self.isCoreProfilesPresent == 1:
@@ -670,9 +495,7 @@ class KineticProfilesCompute:
         if not self.r_out_graph and self.isCoreProfilesPresent:
             nrho = self.coreProfilesCompute.getnrho()
             if nrho is None or nrho == 0:
-                logger.error(
-                    "core_profiles.profiles_1d[:].grid.rho_tor_norm and rho_tor are empty."
-                )
+                logger.error("core_profiles.profiles_1d[:].grid.rho_tor_norm and rho_tor are empty.")
                 logger.error("----> Aborted.")
                 exit()
         else:
@@ -683,23 +506,16 @@ class KineticProfilesCompute:
                     nrho = len(self.equilibrium.time_slice[0].profiles_1d.rho_tor_norm)
                 else:
                     mrho = self.equlibriumCompute.getmrho()
-                    nrho = (
-                        len(self.equilibrium.time_slice[0].profiles_1d.rho_tor_norm)
-                        - mrho
-                    )
+                    nrho = len(self.equilibrium.time_slice[0].profiles_1d.rho_tor_norm) - mrho
 
         erho = 0
         if self.isEdgeProfilesPresent:
             if not self.r_out_graph:
                 erho = self.coreProfilesCompute.getnrho()
                 if nrho is None or nrho == 0:
-                    logger.warning(
-                        "edge_profiles.profiles_1d[:].grid.rho_tor_norm and rho_tor are empty."
-                    )
+                    logger.warning("edge_profiles.profiles_1d[:].grid.rho_tor_norm and rho_tor are empty.")
             else:
-                erho = len(
-                    self.edge_profiles.grid_ggd[0].grid_subset[self.gset].element
-                )
+                erho = len(self.edge_profiles.grid_ggd[0].grid_subset[self.gset].element)
         return nrho, mrho, erho
 
     def getVolumeProfile(self):
@@ -711,30 +527,18 @@ class KineticProfilesCompute:
             else:
                 try:
                     equilibrium = self.connection.equilibrium
-                    equilibrium.time_slice[0].profiles_1d.volume = (
-                        self.connection.partial_get(
-                            "equilibrium",
-                            f"time_slice({self.commonTimeIndex})/profiles_1d/volume",
-                        )
+                    equilibrium.time_slice[0].profiles_1d.volume = self.connection.partial_get(
+                        "equilibrium",
+                        f"time_slice({self.commonTimeIndex})/profiles_1d/volume",
                     )
                     for i in range(self.nrho):
                         volume[i] = equilibrium.time_slice[0].profiles_1d.volume[i]
-                    if len(volume) == len(
-                        self.core_profiles.profiles_1d[0].electrons.density
-                    ):
-                        logger.warning(
-                            "   core_profiles.profiles_1d[:].grid.volume could not be read."
-                        )
-                        logger.warning(
-                            "   ----> equilibrium.time_slice[:].profiles_1d.volume used instead."
-                        )
-                        logger.warning(
-                            "   (possible because the resolution is the same, but maybe not correct)"
-                        )
+                    if len(volume) == len(self.core_profiles.profiles_1d[0].electrons.density):
+                        logger.warning("   core_profiles.profiles_1d[:].grid.volume could not be read.")
+                        logger.warning("   ----> equilibrium.time_slice[:].profiles_1d.volume used instead.")
+                        logger.warning("   (possible because the resolution is the same, but maybe not correct)")
                 except Exception as e:
-                    logger.warning(
-                        "core_profiles.profiles_1d[:].grid.volume could not be read."
-                    )
+                    logger.warning("core_profiles.profiles_1d[:].grid.volume could not be read.")
                     self.isCompositionAvailable = False
         if self.isEdgeProfilesPresent and not self.r_out_graph:
             for i in range(self.erho):
@@ -749,136 +553,77 @@ class KineticProfilesCompute:
                 logger.warning(
                     f"Size mismatch: rho_tor_norm = {self.nrho}, zeff = {len(self.core_profiles.profiles_1d[0].zeff)}"
                 )
-                self.core_profiles.profiles_1d[0].zeff = np.asarray(
-                    [np.NaN] * self.nrho
-                )
+                self.core_profiles.profiles_1d[0].zeff = np.asarray([np.NaN] * self.nrho)
             for i in range(self.nrho):
                 zeff[i] = self.core_profiles.profiles_1d[0].zeff[i]
         if self.isEdgeProfilesPresent:
             if not self.r_out_graph:
                 if len(self.edge_profiles.profiles_1d[0].zeff) < 1:
-                    logger.warning(
-                        "edge_profiles.profiles_1d[:].zeff could not be read."
-                    )
-                    self.edge_profiles.profiles_1d[0].zeff = np.asarray(
-                        [np.NaN] * self.erho
-                    )
+                    logger.warning("edge_profiles.profiles_1d[:].zeff could not be read.")
+                    self.edge_profiles.profiles_1d[0].zeff = np.asarray([np.NaN] * self.erho)
                 for i in range(self.erho):
                     zeff[self.nrho + i] = self.edge_profiles.profiles_1d[0].zeff[i]
             else:
                 if len(self.edge_profiles.ggd[0].zeff[self.gset].values) < 1:
                     logger.warning("edge_profiles.ggd[:].zeff could not be read.")
-                    self.edge_profiles.ggd[0].zeff[self.gset].values = np.asarray(
-                        [np.NaN] * self.erho
-                    )
+                    self.edge_profiles.ggd[0].zeff[self.gset].values = np.asarray([np.NaN] * self.erho)
                 for i in range(self.erho):
-                    zeff[self.nrho + i] = (
-                        self.edge_profiles.ggd[0].zeff[self.gset].values[i]
-                    )
+                    zeff[self.nrho + i] = self.edge_profiles.ggd[0].zeff[self.gset].values[i]
         return zeff
 
     def getneProfile(self):
         electron_density = [0] * (self.nrho + self.erho)
         if self.isCoreProfilesPresent:
             if len(self.core_profiles.profiles_1d[0].electrons.density) != self.nrho:
-                logger.warning(
-                    "core_profiles.profiles_1d[:].electrons.density could not be read."
-                )
+                logger.warning("core_profiles.profiles_1d[:].electrons.density could not be read.")
                 logger.warning(
                     f"Size mismatch: rho_tor_norm = {self.nrho}, electrons.density = {len(self.core_profiles.profiles_1d[0].electrons.density)}"
                 )
-                self.core_profiles.profiles_1d[0].electrons.density = np.asarray(
-                    [np.NaN] * self.nrho
-                )
+                self.core_profiles.profiles_1d[0].electrons.density = np.asarray([np.NaN] * self.nrho)
             for i in range(self.nrho):
-                electron_density[i] = self.core_profiles.profiles_1d[
-                    0
-                ].electrons.density[i]
+                electron_density[i] = self.core_profiles.profiles_1d[0].electrons.density[i]
         if self.isEdgeProfilesPresent:
             if not self.r_out_graph:
                 if len(self.edge_profiles.profiles_1d[0].electrons.density) < 1:
-                    logger.warning(
-                        "edge_profiles.profiles_1d[:].electrons.density could not be read."
-                    )
-                    self.edge_profiles.profiles_1d[0].electrons.density = np.asarray(
-                        [np.NaN] * self.erho
-                    )
+                    logger.warning("edge_profiles.profiles_1d[:].electrons.density could not be read.")
+                    self.edge_profiles.profiles_1d[0].electrons.density = np.asarray([np.NaN] * self.erho)
                 for i in range(self.erho):
-                    electron_density[self.nrho + i] = self.edge_profiles.profiles_1d[
-                        0
-                    ].electrons.density[i]
+                    electron_density[self.nrho + i] = self.edge_profiles.profiles_1d[0].electrons.density[i]
             else:
-                if (
-                    len(self.edge_profiles.ggd[0].electrons.density[self.gset].values)
-                    < 1
-                ):
-                    logger.warning(
-                        "edge_profiles.ggd[:].electrons.density could not be read."
-                    )
-                    self.edge_profiles.ggd[0].electrons.density[self.gset].values = (
-                        np.asarray([np.NaN] * self.erho)
-                    )
+                if len(self.edge_profiles.ggd[0].electrons.density[self.gset].values) < 1:
+                    logger.warning("edge_profiles.ggd[:].electrons.density could not be read.")
+                    self.edge_profiles.ggd[0].electrons.density[self.gset].values = np.asarray([np.NaN] * self.erho)
                 for i in range(self.erho):
-                    electron_density[self.nrho + i] = (
-                        self.edge_profiles.ggd[0].electrons.density[self.gset].values[i]
-                    )
+                    electron_density[self.nrho + i] = self.edge_profiles.ggd[0].electrons.density[self.gset].values[i]
         return electron_density
 
     def getteProfile(self):
         electron_temperature = [0] * (self.nrho + self.erho)
         if self.isCoreProfilesPresent:
-            if (
-                len(self.core_profiles.profiles_1d[0].electrons.temperature)
-                != self.nrho
-            ):
-                logger.warning(
-                    "core_profiles.profiles_1d[:].electrons.temperature could not be read."
-                )
+            if len(self.core_profiles.profiles_1d[0].electrons.temperature) != self.nrho:
+                logger.warning("core_profiles.profiles_1d[:].electrons.temperature could not be read.")
                 logger.warning(
                     f"Size mismatch: rho_tor_norm = {self.nrho}, electrons.temperature = {len(self.core_profiles.profiles_1d[0].electrons.temperature)}"
                 )
-                self.core_profiles.profiles_1d[0].electrons.temperature = np.asarray(
-                    [np.NaN] * self.nrho
-                )
+                self.core_profiles.profiles_1d[0].electrons.temperature = np.asarray([np.NaN] * self.nrho)
             for i in range(self.nrho):
-                electron_temperature[i] = (
-                    self.core_profiles.profiles_1d[0].electrons.temperature[i] * 1.0e-3
-                )
+                electron_temperature[i] = self.core_profiles.profiles_1d[0].electrons.temperature[i] * 1.0e-3
         if self.isEdgeProfilesPresent:
             if not self.r_out_graph:
                 if len(self.edge_profiles.profiles_1d[0].electrons.temperature) < 1:
-                    logger.warning(
-                        "edge_profiles.profiles_1d[:].electrons.temperature could not be read."
-                    )
-                    self.edge_profiles.profiles_1d[0].electrons.temperature = (
-                        np.asarray([np.NaN] * self.erho)
-                    )
+                    logger.warning("edge_profiles.profiles_1d[:].electrons.temperature could not be read.")
+                    self.edge_profiles.profiles_1d[0].electrons.temperature = np.asarray([np.NaN] * self.erho)
                 for i in range(self.erho):
                     electron_temperature[self.nrho + i] = (
-                        self.edge_profiles.profiles_1d[0].electrons.temperature[i]
-                        * 1.0e-3
+                        self.edge_profiles.profiles_1d[0].electrons.temperature[i] * 1.0e-3
                     )
             else:
-                if (
-                    len(
-                        self.edge_profiles.ggd[0]
-                        .electrons.temperature[self.gset]
-                        .values
-                    )
-                    < 1
-                ):
-                    logger.warning(
-                        "edge_profiles.ggd[:].electrons.temperature could not be read."
-                    )
-                    self.edge_profiles.ggd[0].electrons.temperature[
-                        self.gset
-                    ].values = np.asarray([np.NaN] * self.erho)
+                if len(self.edge_profiles.ggd[0].electrons.temperature[self.gset].values) < 1:
+                    logger.warning("edge_profiles.ggd[:].electrons.temperature could not be read.")
+                    self.edge_profiles.ggd[0].electrons.temperature[self.gset].values = np.asarray([np.NaN] * self.erho)
                 for i in range(self.erho):
                     electron_temperature[self.nrho + i] = (
-                        self.edge_profiles.ggd[0]
-                        .electrons.temperature[self.gset]
-                        .values[i]
-                        * 1.0e-3
+                        self.edge_profiles.ggd[0].electrons.temperature[self.gset].values[i] * 1.0e-3
                     )
         return electron_temperature
 
@@ -886,91 +631,60 @@ class KineticProfilesCompute:
         ti_flag = 0
         if self.isCoreProfilesPresent:
             if len(self.core_profiles.profiles_1d[0].t_i_average) != self.nrho:
-                logger.warning(
-                    "core_profiles.profiles_1d[:].t_i_average could not be read."
-                )
+                logger.warning("core_profiles.profiles_1d[:].t_i_average could not be read.")
                 logger.warning(
                     f"Size mismatch: rho_tor_norm = {self.nrho}, t_i_average = {len(self.core_profiles.profiles_1d[0].t_i_average)}"
                 )
-                self.core_profiles.profiles_1d[0].t_i_average = np.asarray(
-                    [np.NaN] * self.nrho
-                )
+                self.core_profiles.profiles_1d[0].t_i_average = np.asarray([np.NaN] * self.nrho)
             else:
                 ti_flag = 1
         ti_e_flag = 0
         if self.isEdgeProfilesPresent:
             if not self.r_out_graph:
                 if len(self.edge_profiles.profiles_1d[0].t_i_average) < 1:
-                    logger.warning(
-                        "edge_profiles.profiles_1d[:].t_i_average could not be read."
-                    )
-                    self.edge_profiles.profiles_1d[0].t_i_average = np.asarray(
-                        [np.NaN] * self.erho
-                    )
+                    logger.warning("edge_profiles.profiles_1d[:].t_i_average could not be read.")
+                    self.edge_profiles.profiles_1d[0].t_i_average = np.asarray([np.NaN] * self.erho)
                 else:
                     ti_e_flag = 1
             else:
                 if len(self.edge_profiles.ggd[0].t_i_average[self.gset].values) < 1:
-                    logger.warning(
-                        "edge_profiles.ggd[:].t_i_average could not be read."
-                    )
-                    self.edge_profiles.ggd[0].t_i_average[self.gset].values = (
-                        np.asarray([np.NaN] * self.erho)
-                    )
+                    logger.warning("edge_profiles.ggd[:].t_i_average could not be read.")
+                    self.edge_profiles.ggd[0].t_i_average[self.gset].values = np.asarray([np.NaN] * self.erho)
                 else:
                     ti_e_flag = 1
 
         if ti_flag == 0:
             for ispecies in range(self.nspeciesCore):
                 if self.isCoreProfilesPresent:
-                    if (
-                        len(self.core_profiles.profiles_1d[0].ion[ispecies].temperature)
-                        != self.nrho
-                    ):
-                        logger.warning(
-                            f"core_profiles.profiles_1d[:].ion[{ispecies}].temperature could not be read."
-                        )
+                    if len(self.core_profiles.profiles_1d[0].ion[ispecies].temperature) != self.nrho:
+                        logger.warning(f"core_profiles.profiles_1d[:].ion[{ispecies}].temperature could not be read.")
                         logger.warning(
                             f"Size mismatch: rho_tor_norm = {self.nrho}, ion[{ispecies}].temperature = {len(self.core_profiles.profiles_1d[0].ion[ispecies].temperature)}"
                         )
-                        self.core_profiles.profiles_1d[0].ion[ispecies].temperature = (
-                            np.asarray([np.NaN] * self.nrho)
-                        )
+                        self.core_profiles.profiles_1d[0].ion[ispecies].temperature = np.asarray([np.NaN] * self.nrho)
                     else:
                         ti_flag = 2
                 if self.isEdgeProfilesPresent and ti_e_flag == 0:
                     jspecies = self.species_map[ispecies]
                     if jspecies != -99:
                         if not self.r_out_graph:
-                            if (
-                                len(
-                                    self.edge_profiles.profiles_1d[0]
-                                    .ion[jspecies]
-                                    .temperature
-                                )
-                                < 1
-                            ):
+                            if len(self.edge_profiles.profiles_1d[0].ion[jspecies].temperature) < 1:
                                 if ti_e_flag != 1:
                                     logger.warning(
                                         f"edge_profiles.profiles_1d[:].ion[{jspecies}].temperature could not be read."
                                     )
-                                    self.edge_profiles.profiles_1d[0].ion[
-                                        jspecies
-                                    ].temperature = np.asarray([np.NaN] * self.erho)
+                                    self.edge_profiles.profiles_1d[0].ion[jspecies].temperature = np.asarray(
+                                        [np.NaN] * self.erho
+                                    )
                             else:
                                 ti_e_flag = 2
                         else:
-                            if (
-                                len(self.edge_profiles.ggd[0].ion[jspecies].temperature)
-                                < 1
-                            ):
+                            if len(self.edge_profiles.ggd[0].ion[jspecies].temperature) < 1:
                                 if ti_e_flag != 1:
-                                    logger.warning(
-                                        "edge_profiles.ggd[:].ion[:].temperature could not be read."
+                                    logger.warning("edge_profiles.ggd[:].ion[:].temperature could not be read.")
+                                    self.edge_profiles.ggd[0].ion[jspecies].temperature[self.gset].values = np.asarray(
+                                        [np.NaN] * self.erho
                                     )
-                                    self.edge_profiles.ggd[0].ion[jspecies].temperature[
-                                        self.gset
-                                    ].values = np.asarray([np.NaN] * self.erho)
                             else:
                                 ti_e_flag = 2
 
@@ -983,42 +697,30 @@ class KineticProfilesCompute:
         ion_temperature = [0] * (self.nrho + self.erho)
         if self.ti_flag == 1:
             for i in range(self.nrho):
-                ion_temperature[i] = (
-                    self.core_profiles.profiles_1d[0].t_i_average[i] * 1.0e-3
-                )
+                ion_temperature[i] = self.core_profiles.profiles_1d[0].t_i_average[i] * 1.0e-3
         elif self.ti_flag == 2:
             for i in range(self.nrho):
-                ion_temperature[i] = (
-                    self.core_profiles.profiles_1d[0].ion[0].temperature[i] * 1.0e-3
-                )
+                ion_temperature[i] = self.core_profiles.profiles_1d[0].ion[0].temperature[i] * 1.0e-3
         if self.isEdgeProfilesPresent:
             if self.ti_e_flag == 1:
                 if not self.r_out_graph:
                     for i in range(self.erho):
-                        ion_temperature[self.nrho + i] = (
-                            self.edge_profiles.profiles_1d[0].t_i_average[i] * 1.0e-3
-                        )
+                        ion_temperature[self.nrho + i] = self.edge_profiles.profiles_1d[0].t_i_average[i] * 1.0e-3
                 else:
                     for i in range(self.erho):
                         ion_temperature[self.nrho + i] = (
-                            self.edge_profiles.ggd[0].t_i_average[self.gset].values[i]
-                            * 1.0e-3
+                            self.edge_profiles.ggd[0].t_i_average[self.gset].values[i] * 1.0e-3
                         )
             elif self.ti_e_flag == 2:
                 if not self.r_out_graph:
                     for i in range(self.erho):
                         ion_temperature[self.nrho + i] = (
-                            self.edge_profiles.profiles_1d[0].ion[0].temperature[i]
-                            * 1.0e-3
+                            self.edge_profiles.profiles_1d[0].ion[0].temperature[i] * 1.0e-3
                         )
                 else:
                     for i in range(self.erho):
                         ion_temperature[self.nrho + i] = (
-                            self.edge_profiles.ggd[0]
-                            .ion[0]
-                            .temperature[self.gset]
-                            .values[i]
-                            * 1.0e-3
+                            self.edge_profiles.ggd[0].ion[0].temperature[self.gset].values[i] * 1.0e-3
                         )
         return ion_temperature
 
@@ -1027,132 +729,64 @@ class KineticProfilesCompute:
         for ispecies in range(self.nspeciesCore):
             ion_density[ispecies] = [0] * (self.nrho + self.erho)
             if self.isCoreProfilesPresent:
-                if (
-                    len(self.core_profiles.profiles_1d[0].ion[ispecies].density)
-                    != self.nrho
-                ):
-                    logger.warning(
-                        f"core_profiles.profiles_1d[:].ion[{ispecies}].density could not be read."
-                    )
+                if len(self.core_profiles.profiles_1d[0].ion[ispecies].density) != self.nrho:
+                    logger.warning(f"core_profiles.profiles_1d[:].ion[{ispecies}].density could not be read.")
                     logger.warning(
                         f"Size mismatch: rho_tor_norm = {self.nrho}, ion[{ispecies}].density = {len(self.core_profiles.profiles_1d[0].ion[ispecies].density)}"
                     )
-                    self.core_profiles.profiles_1d[0].ion[ispecies].density = (
-                        np.asarray([np.NaN] * self.nrho)
-                    )
+                    self.core_profiles.profiles_1d[0].ion[ispecies].density = np.asarray([np.NaN] * self.nrho)
                 for i in range(self.nrho):
-                    ion_density[ispecies][i] = (
-                        self.core_profiles.profiles_1d[0].ion[ispecies].density[i]
-                    )
+                    ion_density[ispecies][i] = self.core_profiles.profiles_1d[0].ion[ispecies].density[i]
             if self.isEdgeProfilesPresent:
                 jspecies = self.species_map[ispecies]
                 if jspecies != -99:
                     if not self.r_out_graph:
-                        if (
-                            self.edge_profiles.profiles_1d[0]
-                            .ion[jspecies]
-                            .multiple_states_flag
-                            == 0
-                        ):
-                            if (
-                                len(
-                                    self.edge_profiles.profiles_1d[0]
-                                    .ion[jspecies]
-                                    .density
-                                )
-                                < 1
-                            ):
+                        if self.edge_profiles.profiles_1d[0].ion[jspecies].multiple_states_flag == 0:
+                            if len(self.edge_profiles.profiles_1d[0].ion[jspecies].density) < 1:
                                 logger.warning(
                                     f"edge_profiles.profiles_1d[:].ion[{jspecies}].density could not be read."
                                 )
-                                self.edge_profiles.profiles_1d[0].ion[
-                                    jspecies
-                                ].density = np.asarray([np.NaN] * self.erho)
+                                self.edge_profiles.profiles_1d[0].ion[jspecies].density = np.asarray(
+                                    [np.NaN] * self.erho
+                                )
                             for i in range(self.erho):
                                 ion_density[ispecies][self.nrho + i] = (
-                                    self.edge_profiles.profiles_1d[0]
-                                    .ion[jspecies]
-                                    .density[i]
+                                    self.edge_profiles.profiles_1d[0].ion[jspecies].density[i]
                                 )
                         else:
-                            for istate in range(
-                                len(
-                                    self.edge_profiles.profiles_1d[0]
-                                    .ion[jspecies]
-                                    .state
-                                )
-                            ):
-                                if (
-                                    len(
-                                        self.edge_profiles.profiles_1d[0]
-                                        .ion[jspecies]
-                                        .state[istate]
-                                        .density
-                                    )
-                                    < 1
-                                ):
+                            for istate in range(len(self.edge_profiles.profiles_1d[0].ion[jspecies].state)):
+                                if len(self.edge_profiles.profiles_1d[0].ion[jspecies].state[istate].density) < 1:
                                     logger.warning(
                                         f"edge_profiles.profiles_1d[:].ion[{jspecies}].state[{istate}].density could not be read."
                                     )
-                                    self.edge_profiles.profiles_1d[0].ion[
-                                        jspecies
-                                    ].state[istate].density = np.asarray(
+                                    self.edge_profiles.profiles_1d[0].ion[jspecies].state[istate].density = np.asarray(
                                         [0] * self.erho
                                     )
                                 for i in range(self.erho):
                                     ion_density[ispecies][self.nrho + i] = (
                                         ion_density[ispecies][self.nrho + i]
-                                        + self.edge_profiles.profiles_1d[0]
-                                        .ion[jspecies]
-                                        .state[istate]
-                                        .density[i]
+                                        + self.edge_profiles.profiles_1d[0].ion[jspecies].state[istate].density[i]
                                     )
                     else:
-                        if (
-                            self.edge_profiles.ggd[0].ion[jspecies].multiple_states_flag
-                            == 0
-                        ):
-                            if (
-                                len(
-                                    self.edge_profiles.ggd[0]
-                                    .ion[jspecies]
-                                    .density[self.gset]
-                                    .values
+                        if self.edge_profiles.ggd[0].ion[jspecies].multiple_states_flag == 0:
+                            if len(self.edge_profiles.ggd[0].ion[jspecies].density[self.gset].values) < 1:
+                                logger.warning(f"edge_profiles.ggd[:].ion[{jspecies}.density could not be read.")
+                                self.edge_profiles.ggd[0].ion[jspecies].density[self.gset].values = np.asarray(
+                                    [np.NaN] * self.erho
                                 )
-                                < 1
-                            ):
-                                logger.warning(
-                                    f"edge_profiles.ggd[:].ion[{jspecies}.density could not be read."
-                                )
-                                self.edge_profiles.ggd[0].ion[jspecies].density[
-                                    self.gset
-                                ].values = np.asarray([np.NaN] * self.erho)
                             for i in range(self.erho):
                                 ion_density[ispecies][self.nrho + i] = (
-                                    self.edge_profiles.ggd[0]
-                                    .ion[jspecies]
-                                    .density[self.gset]
-                                    .values[i]
+                                    self.edge_profiles.ggd[0].ion[jspecies].density[self.gset].values[i]
                                 )
                         else:
-                            for istate in range(
-                                len(self.edge_profiles.ggd[0].ion[jspecies].state)
-                            ):
-                                if (
-                                    len(
-                                        self.edge_profiles.ggd[0]
-                                        .ion[jspecies]
-                                        .state[istate]
-                                        .density
-                                    )
-                                    < 1
-                                ):
+                            for istate in range(len(self.edge_profiles.ggd[0].ion[jspecies].state)):
+                                if len(self.edge_profiles.ggd[0].ion[jspecies].state[istate].density) < 1:
                                     logger.warning(
                                         f"edge_profiles.ggd[:].ion[{jspecies}].state[{istate}].density could not be read."
                                     )
-                                    self.edge_profiles.ggd[0].ion[jspecies].state[
-                                        istate
-                                    ].density = np.asarray([0] * self.erho)
+                                    self.edge_profiles.ggd[0].ion[jspecies].state[istate].density = np.asarray(
+                                        [0] * self.erho
+                                    )
                                 for i in range(self.erho):
                                     ion_density[ispecies][self.nrho + i] = (
                                         ion_density[ispecies][self.nrho + i]
@@ -1171,77 +805,39 @@ class KineticProfilesCompute:
         for ispecies in range(self.nspeciesCore):
             ion_vtor[ispecies] = [0] * (self.nrho + self.erho)
             if self.isCoreProfilesPresent:
-                if (
-                    len(
-                        self.core_profiles.profiles_1d[0]
-                        .ion[ispecies]
-                        .velocity.toroidal
-                    )
-                    != self.nrho
-                ):
-                    logger.warning(
-                        f"core_profiles.profiles_1d[:].ion[{ispecies}].velocity.toroidal could not be read."
-                    )
+                if len(self.core_profiles.profiles_1d[0].ion[ispecies].velocity.toroidal) != self.nrho:
+                    logger.warning(f"core_profiles.profiles_1d[:].ion[{ispecies}].velocity.toroidal could not be read.")
                     logger.warning(
                         f"Size mismatch: rho_tor_norm = {self.nrho}, ion[{ispecies}].velocity.toroidal = {len(self.core_profiles.profiles_1d[0].ion[ispecies].velocity.toroidal)}"
                     )
-                    self.core_profiles.profiles_1d[0].ion[
-                        ispecies
-                    ].velocity.toroidal = np.asarray([np.NaN] * self.nrho)
+                    self.core_profiles.profiles_1d[0].ion[ispecies].velocity.toroidal = np.asarray([np.NaN] * self.nrho)
                 else:
                     vtor_flag = 1
                     for i in range(self.nrho):
                         ion_vtor[ispecies][i] = abs(
-                            self.core_profiles.profiles_1d[0]
-                            .ion[ispecies]
-                            .velocity.toroidal[i]
+                            self.core_profiles.profiles_1d[0].ion[ispecies].velocity.toroidal[i]
                         )
-                if (
-                    len(self.core_profiles.profiles_1d[0].ion[ispecies].velocity_tor)
-                    != self.nrho
-                ):
-                    logger.warning(
-                        f"core_profiles.profiles_1d[:].ion[{ispecies}].velocity_tor could not be read."
-                    )
+                if len(self.core_profiles.profiles_1d[0].ion[ispecies].velocity_tor) != self.nrho:
+                    logger.warning(f"core_profiles.profiles_1d[:].ion[{ispecies}].velocity_tor could not be read.")
                     logger.warning(
                         f"Size mismatch: rho_tor_norm = {self.nrho}, ion[{ispecies}].velocity_tor = {len(self.core_profiles.profiles_1d[0].ion[ispecies].velocity_tor)}"
                     )
-                    self.core_profiles.profiles_1d[0].ion[ispecies].velocity_tor = (
-                        np.asarray([np.NaN] * self.nrho)
-                    )
+                    self.core_profiles.profiles_1d[0].ion[ispecies].velocity_tor = np.asarray([np.NaN] * self.nrho)
                 else:
                     if vtor_flag == 0:
                         vtor_flag = 2
                         for i in range(self.nrho):
-                            ion_vtor[ispecies][i] = abs(
-                                self.core_profiles.profiles_1d[0]
-                                .ion[ispecies]
-                                .velocity_tor[i]
-                            )
+                            ion_vtor[ispecies][i] = abs(self.core_profiles.profiles_1d[0].ion[ispecies].velocity_tor[i])
             if self.isEdgeProfilesPresent:
                 jspecies = self.species_map[ispecies]
                 if jspecies != -99:
                     if not self.r_out_graph:
-                        if (
-                            self.edge_profiles.profiles_1d[0]
-                            .ion[jspecies]
-                            .multiple_states_flag
-                            == 0
-                        ):
+                        if self.edge_profiles.profiles_1d[0].ion[jspecies].multiple_states_flag == 0:
                             try:
-                                if (
-                                    len(
-                                        self.edge_profiles.profiles_1d[0]
-                                        .ion[jspecies]
-                                        .velocity.toroidal
-                                    )
-                                    == self.erho
-                                ):
+                                if len(self.edge_profiles.profiles_1d[0].ion[jspecies].velocity.toroidal) == self.erho:
                                     for i in range(self.erho):
                                         ion_vtor[ispecies][self.nrho + i] = abs(
-                                            self.edge_profiles.profiles_1d[0]
-                                            .ion[jspecies]
-                                            .velocity.toroidal[i]
+                                            self.edge_profiles.profiles_1d[0].ion[jspecies].velocity.toroidal[i]
                                         )
                                     vtor_e_flag = 1
                             except Exception as e:
@@ -1250,19 +846,10 @@ class KineticProfilesCompute:
                                 )
                             if vtor_e_flag != 1:
                                 try:
-                                    if (
-                                        len(
-                                            self.edge_profiles.profiles_1d[0]
-                                            .ion[jspecies]
-                                            .velocity_tor
-                                        )
-                                        == self.erho
-                                    ):
+                                    if len(self.edge_profiles.profiles_1d[0].ion[jspecies].velocity_tor) == self.erho:
                                         for i in range(self.erho):
                                             ion_vtor[ispecies][self.nrho + i] = abs(
-                                                self.edge_profiles.profiles_1d[0]
-                                                .ion[jspecies]
-                                                .velocity_tor[i]
+                                                self.edge_profiles.profiles_1d[0].ion[jspecies].velocity_tor[i]
                                             )
                                         vtor_e_flag = 2
                                 except Exception as e:
@@ -1270,13 +857,7 @@ class KineticProfilesCompute:
                                         f"edge_profiles.profiles_1d[:].ion[{jspecies}].velocity_tor could not be read."
                                     )
                         else:
-                            for istate in range(
-                                len(
-                                    self.edge_profiles.profiles_1d[0]
-                                    .ion[jspecies]
-                                    .state
-                                )
-                            ):
+                            for istate in range(len(self.edge_profiles.profiles_1d[0].ion[jspecies].state)):
                                 try:
                                     if (
                                         len(
@@ -1288,18 +869,11 @@ class KineticProfilesCompute:
                                         == self.erho
                                     ):
                                         for i in range(self.erho):
-                                            if (
-                                                self.ion_density[ispecies][
-                                                    self.nrho + i
-                                                ]
-                                                > 0.0
-                                            ):
+                                            if self.ion_density[ispecies][self.nrho + i] > 0.0:
                                                 ion_vtor[ispecies][self.nrho + i] = (
                                                     ion_vtor[ispecies][self.nrho + i]
                                                     + abs(
-                                                        self.edge_profiles.profiles_1d[
-                                                            0
-                                                        ]
+                                                        self.edge_profiles.profiles_1d[0]
                                                         .ion[jspecies]
                                                         .state[istate]
                                                         .velocity.toroidal[i]
@@ -1308,9 +882,7 @@ class KineticProfilesCompute:
                                                     .ion[jspecies]
                                                     .state[istate]
                                                     .density[i]
-                                                    / self.ion_density[ispecies][
-                                                        self.nrho + i
-                                                    ]
+                                                    / self.ion_density[ispecies][self.nrho + i]
                                                 )
                                         vtor_e_flag = 1
                                 except Exception as e:
@@ -1329,35 +901,20 @@ class KineticProfilesCompute:
                                             == self.erho
                                         ):
                                             for i in range(self.erho):
-                                                if (
-                                                    self.ion_density[ispecies][
-                                                        self.nrho + i
-                                                    ]
-                                                    > 0.0
-                                                ):
-                                                    ion_vtor[ispecies][
-                                                        self.nrho + i
-                                                    ] = (
-                                                        ion_vtor[ispecies][
-                                                            self.nrho + i
-                                                        ]
+                                                if self.ion_density[ispecies][self.nrho + i] > 0.0:
+                                                    ion_vtor[ispecies][self.nrho + i] = (
+                                                        ion_vtor[ispecies][self.nrho + i]
                                                         + abs(
-                                                            self.edge_profiles.profiles_1d[
-                                                                0
-                                                            ]
+                                                            self.edge_profiles.profiles_1d[0]
                                                             .ion[jspecies]
                                                             .state[istate]
                                                             .velocity_tor[i]
                                                         )
-                                                        * self.edge_profiles.profiles_1d[
-                                                            0
-                                                        ]
+                                                        * self.edge_profiles.profiles_1d[0]
                                                         .ion[jspecies]
                                                         .state[istate]
                                                         .density[i]
-                                                        / self.ion_density[ispecies][
-                                                            self.nrho + i
-                                                        ]
+                                                        / self.ion_density[ispecies][self.nrho + i]
                                                     )
                                             vtor_e_flag = 2
                                     except Exception as e:
@@ -1366,26 +923,15 @@ class KineticProfilesCompute:
                                         )
 
                     else:
-                        if (
-                            self.edge_profiles.ggd[0].ion[jspecies].multiple_states_flag
-                            == 0
-                        ):
+                        if self.edge_profiles.ggd[0].ion[jspecies].multiple_states_flag == 0:
                             try:
                                 if (
-                                    len(
-                                        self.edge_profiles.ggd[0]
-                                        .ion[jspecies]
-                                        .velocity[self.gset]
-                                        .toroidal
-                                    )
+                                    len(self.edge_profiles.ggd[0].ion[jspecies].velocity[self.gset].toroidal)
                                     == self.erho
                                 ):
                                     for i in range(self.erho):
                                         ion_vtor[ispecies][self.nrho + i] = abs(
-                                            self.edge_profiles.ggd[0]
-                                            .ion[jspecies]
-                                            .velocity[self.gset]
-                                            .toroidal[i]
+                                            self.edge_profiles.ggd[0].ion[jspecies].velocity[self.gset].toroidal[i]
                                         )
                                     vtor_e_flag = 1
                             except Exception as e:
@@ -1393,9 +939,7 @@ class KineticProfilesCompute:
                                     f"edge_profiles.ggd[:].ion[{jspecies}].velocity.toroidal could not be read."
                                 )
                         else:
-                            for istate in range(
-                                len(self.edge_profiles.ggd[0].ion[jspecies].state)
-                            ):
+                            for istate in range(len(self.edge_profiles.ggd[0].ion[jspecies].state)):
                                 try:
                                     if (
                                         len(
@@ -1408,12 +952,7 @@ class KineticProfilesCompute:
                                         == self.erho
                                     ):
                                         for i in range(self.erho):
-                                            if (
-                                                self.ion_density[ispecies][
-                                                    self.nrho + i
-                                                ]
-                                                > 0
-                                            ):
+                                            if self.ion_density[ispecies][self.nrho + i] > 0:
                                                 ion_vtor[ispecies][self.nrho + i] = (
                                                     ion_vtor[ispecies][self.nrho + i]
                                                     + abs(
@@ -1428,9 +967,7 @@ class KineticProfilesCompute:
                                                     .state[istate]
                                                     .density[self.gset]
                                                     .values[i]
-                                                    / self.ion_density[ispecies][
-                                                        self.nrho + i
-                                                    ]
+                                                    / self.ion_density[ispecies][self.nrho + i]
                                                 )
                                         vtor_e_flag = 1
                                 except Exception as e:
@@ -1452,77 +989,39 @@ class KineticProfilesCompute:
         for ispecies in range(self.nspeciesCore):
             ion_vpol[ispecies] = [0] * (self.nrho + self.erho)
             if self.isCoreProfilesPresent:
-                if (
-                    len(
-                        self.core_profiles.profiles_1d[0]
-                        .ion[ispecies]
-                        .velocity.poloidal
-                    )
-                    != self.nrho
-                ):
-                    logger.warning(
-                        f"core_profiles.profiles_1d[:].ion[{ispecies}].velocity.poloidal could not be read."
-                    )
+                if len(self.core_profiles.profiles_1d[0].ion[ispecies].velocity.poloidal) != self.nrho:
+                    logger.warning(f"core_profiles.profiles_1d[:].ion[{ispecies}].velocity.poloidal could not be read.")
                     logger.warning(
                         f"Size mismatch: rho_tor_norm = {self.nrho}, ion[{ispecies}].velocity.poloidal = {len(self.core_profiles.profiles_1d[0].ion[ispecies].velocity.poloidal)}"
                     )
-                    self.core_profiles.profiles_1d[0].ion[
-                        ispecies
-                    ].velocity.poloidal = np.asarray([np.NaN] * self.nrho)
+                    self.core_profiles.profiles_1d[0].ion[ispecies].velocity.poloidal = np.asarray([np.NaN] * self.nrho)
                 else:
                     vpol_flag = 1
                     for i in range(self.nrho):
                         ion_vpol[ispecies][i] = abs(
-                            self.core_profiles.profiles_1d[0]
-                            .ion[ispecies]
-                            .velocity.poloidal[i]
+                            self.core_profiles.profiles_1d[0].ion[ispecies].velocity.poloidal[i]
                         )
-                if (
-                    len(self.core_profiles.profiles_1d[0].ion[ispecies].velocity_pol)
-                    != self.nrho
-                ):
-                    logger.warning(
-                        f"core_profiles.profiles_1d[:].ion[{ispecies}].velocity_pol could not be read."
-                    )
+                if len(self.core_profiles.profiles_1d[0].ion[ispecies].velocity_pol) != self.nrho:
+                    logger.warning(f"core_profiles.profiles_1d[:].ion[{ispecies}].velocity_pol could not be read.")
                     logger.warning(
                         f"Size mismatch: rho_tor_norm = {self.nrho}, ion[{ispecies}].velocity_pol = {len(self.core_profiles.profiles_1d[0].ion[ispecies].velocity_pol)}"
                     )
-                    self.core_profiles.profiles_1d[0].ion[ispecies].velocity_pol = (
-                        np.asarray([np.NaN] * self.nrho)
-                    )
+                    self.core_profiles.profiles_1d[0].ion[ispecies].velocity_pol = np.asarray([np.NaN] * self.nrho)
                 else:
                     if vpol_flag == 0:
                         vpol_flag = 2
                         for i in range(self.nrho):
-                            ion_vpol[ispecies][i] = abs(
-                                self.core_profiles.profiles_1d[0]
-                                .ion[ispecies]
-                                .velocity_pol[i]
-                            )
+                            ion_vpol[ispecies][i] = abs(self.core_profiles.profiles_1d[0].ion[ispecies].velocity_pol[i])
             if self.isEdgeProfilesPresent:
                 jspecies = self.species_map[ispecies]
                 if jspecies != -99:
                     if not self.r_out_graph:
-                        if (
-                            self.edge_profiles.profiles_1d[0]
-                            .ion[jspecies]
-                            .multiple_states_flag
-                            == 0
-                        ):
+                        if self.edge_profiles.profiles_1d[0].ion[jspecies].multiple_states_flag == 0:
                             try:
-                                if (
-                                    len(
-                                        self.edge_profiles.profiles_1d[0]
-                                        .ion[jspecies]
-                                        .velocity.poloidal
-                                    )
-                                    == self.erho
-                                ):
+                                if len(self.edge_profiles.profiles_1d[0].ion[jspecies].velocity.poloidal) == self.erho:
                                     for i in range(self.erho):
                                         ion_vpol[ispecies][self.nrho + i] = abs(
-                                            self.edge_profiles.profiles_1d[0]
-                                            .ion[jspecies]
-                                            .velocity.poloidal[i]
+                                            self.edge_profiles.profiles_1d[0].ion[jspecies].velocity.poloidal[i]
                                         )
                                     vpol_e_flag = 1
                             except Exception as e:
@@ -1530,13 +1029,7 @@ class KineticProfilesCompute:
                                     f"edge_profiles.profiles_1d[:].ion[{jspecies}].velocity.poloidal could not be read."
                                 )
                         else:
-                            for istate in range(
-                                len(
-                                    self.edge_profiles.profiles_1d[0]
-                                    .ion[jspecies]
-                                    .state
-                                )
-                            ):
+                            for istate in range(len(self.edge_profiles.profiles_1d[0].ion[jspecies].state)):
                                 try:
                                     if (
                                         len(
@@ -1548,18 +1041,11 @@ class KineticProfilesCompute:
                                         == self.erho
                                     ):
                                         for i in range(self.erho):
-                                            if (
-                                                self.ion_density[ispecies][
-                                                    self.nrho + i
-                                                ]
-                                                > 0
-                                            ):
+                                            if self.ion_density[ispecies][self.nrho + i] > 0:
                                                 ion_vpol[ispecies][self.nrho + i] = (
                                                     ion_vpol[ispecies][self.nrho + i]
                                                     + abs(
-                                                        self.edge_profiles.profiles_1d[
-                                                            0
-                                                        ]
+                                                        self.edge_profiles.profiles_1d[0]
                                                         .ion[jspecies]
                                                         .state[istate]
                                                         .velocity.poloidal[i]
@@ -1568,9 +1054,7 @@ class KineticProfilesCompute:
                                                     .ion[jspecies]
                                                     .state[istate]
                                                     .density[i]
-                                                    / self.ion_density[ispecies][
-                                                        self.nrho + i
-                                                    ]
+                                                    / self.ion_density[ispecies][self.nrho + i]
                                                 )
                                         vpol_e_flag = 1
                                 except Exception as e:
@@ -1578,26 +1062,15 @@ class KineticProfilesCompute:
                                         f"edge_profiles.profiles_1d[:].ion[{jspecies}].state[{istate}].velocity.poloidal could not be read."
                                     )
                     else:
-                        if (
-                            self.edge_profiles.ggd[0].ion[jspecies].multiple_states_flag
-                            == 0
-                        ):
+                        if self.edge_profiles.ggd[0].ion[jspecies].multiple_states_flag == 0:
                             try:
                                 if (
-                                    len(
-                                        self.edge_profiles.ggd[0]
-                                        .ion[jspecies]
-                                        .velocity[self.gset]
-                                        .poloidal
-                                    )
+                                    len(self.edge_profiles.ggd[0].ion[jspecies].velocity[self.gset].poloidal)
                                     == self.erho
                                 ):
                                     for i in range(self.erho):
                                         ion_vpol[ispecies][self.nrho + i] = abs(
-                                            self.edge_profiles.ggd[0]
-                                            .ion[jspecies]
-                                            .velocity[self.gset]
-                                            .poloidal[i]
+                                            self.edge_profiles.ggd[0].ion[jspecies].velocity[self.gset].poloidal[i]
                                         )
                                     vpol_e_flag = 1
                             except Exception as e:
@@ -1605,9 +1078,7 @@ class KineticProfilesCompute:
                                     "edge_profiles.ggd[:].ion[{jspecies}].velocity.poloidal could not be read."
                                 )
                         else:
-                            for istate in range(
-                                len(self.edge_profiles.ggd[0].ion[jspecies].state)
-                            ):
+                            for istate in range(len(self.edge_profiles.ggd[0].ion[jspecies].state)):
                                 try:
                                     if (
                                         len(
@@ -1620,12 +1091,7 @@ class KineticProfilesCompute:
                                         == self.erho
                                     ):
                                         for i in range(self.erho):
-                                            if (
-                                                self.ion_density[ispecies][
-                                                    self.nrho + i
-                                                ]
-                                                > 0
-                                            ):
+                                            if self.ion_density[ispecies][self.nrho + i] > 0:
                                                 ion_vpol[ispecies][self.nrho + i] = (
                                                     ion_vpol[ispecies][self.nrho + i]
                                                     + abs(
@@ -1640,9 +1106,7 @@ class KineticProfilesCompute:
                                                     .state[istate]
                                                     .density[self.gset]
                                                     .values[i]
-                                                    / self.ion_density[ispecies][
-                                                        self.nrho + i
-                                                    ]
+                                                    / self.ion_density[ispecies][self.nrho + i]
                                                 )
                                         vpol_e_flag = 1
                                 except Exception as e:
@@ -1667,23 +1131,15 @@ class KineticProfilesCompute:
             species = []
             for ispecies in range(self.nspeciesCore):
                 if self.n[ispecies] == 1:
-                    species.append(
-                        table_mendeleiev[self.z[ispecies]][self.a[ispecies]].element
-                    )
+                    species.append(table_mendeleiev[self.z[ispecies]][self.a[ispecies]].element)
                 else:
                     if self.isCoreProfilesPresent:
-                        species.append(
-                            self.core_profiles.profiles_1d[0].ion[ispecies].label
-                        )
+                        species.append(self.core_profiles.profiles_1d[0].ion[ispecies].label)
                     else:
                         if not self.r_out_graph:
-                            species.append(
-                                self.edge_profiles.profiles_1d[0].ion[ispecies].label
-                            )
+                            species.append(self.edge_profiles.profiles_1d[0].ion[ispecies].label)
                         else:
-                            species.append(
-                                self.edge_profiles.ggd[0].ion[ispecies].label
-                            )
+                            species.append(self.edge_profiles.ggd[0].ion[ispecies].label)
             return species
         return None
 
@@ -1713,9 +1169,7 @@ class KineticProfilesCompute:
                 for ispecies in range(self.nspeciesCore):
                     species_density[ispecies] = sum(
                         self.volume[0 : self.nrho - 1]
-                        * self.core_profiles.profiles_1d[0]
-                        .ion[ispecies]
-                        .density[0 : self.nrho - 1]
+                        * self.core_profiles.profiles_1d[0].ion[ispecies].density[0 : self.nrho - 1]
                     )
                     ntot = ntot + species_density[ispecies]
                     if species_density[ispecies] > max_density:
@@ -1724,9 +1178,7 @@ class KineticProfilesCompute:
 
                 ne = sum(
                     self.volume[0 : self.nrho - 1]
-                    * self.core_profiles.profiles_1d[0].electrons.density[
-                        0 : self.nrho - 1
-                    ]
+                    * self.core_profiles.profiles_1d[0].electrons.density[0 : self.nrho - 1]
                 )
 
                 nspec_over_ntot = species_density / ntot
@@ -1739,20 +1191,12 @@ class KineticProfilesCompute:
             # When a species appears twice: combine
             for ispecies in range(self.nspeciesCore):
                 for jspecies in range(self.nspeciesCore):
-                    if (self.species[jspecies] == self.species[ispecies]) & (
-                        jspecies != ispecies
-                    ):
-                        nspec_over_ntot[ispecies] = (
-                            nspec_over_ntot[ispecies] + nspec_over_ntot[jspecies]
-                        )
+                    if (self.species[jspecies] == self.species[ispecies]) & (jspecies != ispecies):
+                        nspec_over_ntot[ispecies] = nspec_over_ntot[ispecies] + nspec_over_ntot[jspecies]
                         nspec_over_ntot[jspecies] = 0
-                        nspec_over_ne[ispecies] = (
-                            nspec_over_ne[ispecies] + nspec_over_ne[jspecies]
-                        )
+                        nspec_over_ne[ispecies] = nspec_over_ne[ispecies] + nspec_over_ne[jspecies]
                         nspec_over_ne[jspecies] = 0
-                        nspec_over_nmaj[ispecies] = (
-                            nspec_over_nmaj[ispecies] + nspec_over_nmaj[jspecies]
-                        )
+                        nspec_over_nmaj[ispecies] = nspec_over_nmaj[ispecies] + nspec_over_nmaj[jspecies]
                         nspec_over_nmaj[jspecies] = 0
 
             # Nice display of plasma composition with species concentrations
@@ -1765,11 +1209,7 @@ class KineticProfilesCompute:
             for ispecies in range(self.nspeciesCore):
                 if nspec_over_ne[ispecies] > 0.0:
                     tabsize = 8
-                    disp_species = (
-                        disp_species
-                        + self.species[ispecies]
-                        + " " * (tabsize - len(self.species[ispecies]))
-                    )
+                    disp_species = disp_species + self.species[ispecies] + " " * (tabsize - len(self.species[ispecies]))
                     disp_a = (
                         disp_a
                         + format("%.1f" % self.a[ispecies])
@@ -1783,20 +1223,17 @@ class KineticProfilesCompute:
                     disp_nspec_over_ntot = (
                         disp_nspec_over_ntot
                         + format("%.3f" % nspec_over_ntot[ispecies])
-                        + " "
-                        * (tabsize - len(format("%.3f" % nspec_over_ntot[ispecies])))
+                        + " " * (tabsize - len(format("%.3f" % nspec_over_ntot[ispecies])))
                     )
                     disp_nspec_over_ne = (
                         disp_nspec_over_ne
                         + format("%.3f" % nspec_over_ne[ispecies])
-                        + " "
-                        * (tabsize - len(format("%.3f" % nspec_over_ne[ispecies])))
+                        + " " * (tabsize - len(format("%.3f" % nspec_over_ne[ispecies])))
                     )
                     disp_nspec_over_nmaj = (
                         disp_nspec_over_nmaj
                         + format("%.3f" % nspec_over_nmaj[ispecies])
-                        + " "
-                        * (tabsize - len(format("%.3f" % nspec_over_nmaj[ispecies])))
+                        + " " * (tabsize - len(format("%.3f" % nspec_over_nmaj[ispecies])))
                     )
 
             if self.isCoreProfilesPresent == 1:
@@ -1855,68 +1292,44 @@ class KineticProfilesCompute:
             profiles["ni"] = [0] * self.nrho
             for ispecies in range(self.nspeciesCore):
                 if self.isCompositionAvailable is True:
-                    if (
-                        self.nspec_over_ne[ispecies]
-                        > KineticProfilesCompute.IMPURITY_LIMIT
-                    ):
-                        profiles["n_species"][self.species[ispecies]]["density"] = [
-                            0
-                        ] * self.nrho
+                    if self.nspec_over_ne[ispecies] > KineticProfilesCompute.IMPURITY_LIMIT:
+                        profiles["n_species"][self.species[ispecies]]["density"] = [0] * self.nrho
                         if self.vpol_flag != 0:
-                            profiles["n_species"][self.species[ispecies]]["vpol"] = [
-                                0
-                            ] * self.nrho
+                            profiles["n_species"][self.species[ispecies]]["vpol"] = [0] * self.nrho
                         if self.vtor_flag != 0:
-                            profiles["n_species"][self.species[ispecies]]["vtor"] = [
-                                0
-                            ] * self.nrho
+                            profiles["n_species"][self.species[ispecies]]["vtor"] = [0] * self.nrho
                         for i in range(self.nrho):
-                            profiles["n_species"][self.species[ispecies]]["density"][
-                                i
-                            ] = self.ion_density[ispecies][i]
+                            profiles["n_species"][self.species[ispecies]]["density"][i] = self.ion_density[ispecies][i]
                             if self.vpol_flag != 0:
-                                profiles["n_species"][self.species[ispecies]]["vpol"][
-                                    i
-                                ] = self.ion_vpol[ispecies][i]
+                                profiles["n_species"][self.species[ispecies]]["vpol"][i] = self.ion_vpol[ispecies][i]
                             if self.vtor_flag != 0:
-                                profiles["n_species"][self.species[ispecies]]["vtor"][
-                                    i
-                                ] = self.ion_vtor[ispecies][i]
+                                profiles["n_species"][self.species[ispecies]]["vtor"][i] = self.ion_vtor[ispecies][i]
             for i in range(self.nrho):
                 profiles["ni"][i] = profiles["ni"][i] + self.ion_density[ispecies][i]
         if self.isEdgeProfilesPresent:
             profiles["ni_e"] = [0] * self.erho
             for ispecies in range(self.nspeciesCore):
                 if self.species_map[ispecies] != -99:
-                    profiles["n_species"][self.species[ispecies]]["density_e"] = [
-                        0
-                    ] * self.erho
+                    profiles["n_species"][self.species[ispecies]]["density_e"] = [0] * self.erho
                     if self.vpol_e_flag != 0:
-                        profiles["n_species"][self.species[ispecies]]["vpol_e"] = [
-                            0
-                        ] * self.erho
+                        profiles["n_species"][self.species[ispecies]]["vpol_e"] = [0] * self.erho
                     if self.vtor_e_flag != 0:
-                        profiles["n_species"][self.species[ispecies]]["vtor_e"] = [
-                            0
-                        ] * self.erho
+                        profiles["n_species"][self.species[ispecies]]["vtor_e"] = [0] * self.erho
                     for i in range(self.erho):
-                        profiles["n_species"][self.species[ispecies]]["density_e"][
-                            i
-                        ] = self.ion_density[ispecies][self.nrho + i]
+                        profiles["n_species"][self.species[ispecies]]["density_e"][i] = self.ion_density[ispecies][
+                            self.nrho + i
+                        ]
                         if self.vpol_e_flag != 0:
-                            profiles["n_species"][self.species[ispecies]]["vpol_e"][
-                                i
-                            ] = self.ion_vpol[ispecies][self.nrho + i]
+                            profiles["n_species"][self.species[ispecies]]["vpol_e"][i] = self.ion_vpol[ispecies][
+                                self.nrho + i
+                            ]
                         if self.vtor_e_flag != 0:
-                            profiles["n_species"][self.species[ispecies]]["vtor_e"][
-                                i
-                            ] = self.ion_vtor[ispecies][self.nrho + i]
+                            profiles["n_species"][self.species[ispecies]]["vtor_e"][i] = self.ion_vtor[ispecies][
+                                self.nrho + i
+                            ]
                 if self.species_map[ispecies] != -99:
                     for i in range(self.erho):
-                        profiles["ni_e"][i] = (
-                            profiles["ni_e"][i]
-                            + self.ion_density[ispecies][self.nrho + i]
-                        )
+                        profiles["ni_e"][i] = profiles["ni_e"][i] + self.ion_density[ispecies][self.nrho + i]
         return profiles
 
     def getMinMaxVelocityProfiles(self):
@@ -1934,116 +1347,63 @@ class KineticProfilesCompute:
         min_vpol = 9e99
         for ispecies in range(self.nspeciesCore):
             if self.isCompositionAvailable and (
-                self.nspec_over_ne[ispecies] > KineticProfilesCompute.IMPURITY_LIMIT
-                or not self.isCoreProfilesPresent
+                self.nspec_over_ne[ispecies] > KineticProfilesCompute.IMPURITY_LIMIT or not self.isCoreProfilesPresent
             ):
                 if self.vtor_flag != 0:
-                    if (
-                        "vtor"
-                        in self.profiles["n_species"][self.species[ispecies]].keys()
-                    ):
+                    if "vtor" in self.profiles["n_species"][self.species[ispecies]].keys():
                         if max_vtor < max(
-                            self.profiles["n_species"][self.species[ispecies]]["vtor"][
-                                0 : self.nrho - 1
-                            ]
+                            self.profiles["n_species"][self.species[ispecies]]["vtor"][0 : self.nrho - 1]
                         ):
                             max_vtor = max(
-                                self.profiles["n_species"][self.species[ispecies]][
-                                    "vtor"
-                                ][0 : self.nrho - 1]
+                                self.profiles["n_species"][self.species[ispecies]]["vtor"][0 : self.nrho - 1]
                             )
                         if min_vtor > min(
-                            self.profiles["n_species"][self.species[ispecies]]["vtor"][
-                                0 : self.nrho - 1
-                            ]
+                            self.profiles["n_species"][self.species[ispecies]]["vtor"][0 : self.nrho - 1]
                         ):
                             min_vtor = min(
-                                self.profiles["n_species"][self.species[ispecies]][
-                                    "vtor"
-                                ][0 : self.nrho - 1]
+                                self.profiles["n_species"][self.species[ispecies]]["vtor"][0 : self.nrho - 1]
                             )
-                if (
-                    self.isEdgeProfilesPresent
-                    and self.species_map[ispecies] != -99
-                    and self.vtor_e_flag != 0
-                ):
-                    if (
-                        "vtor_e"
-                        in self.profiles["n_species"][self.species[ispecies]].keys()
-                    ):
+                if self.isEdgeProfilesPresent and self.species_map[ispecies] != -99 and self.vtor_e_flag != 0:
+                    if "vtor_e" in self.profiles["n_species"][self.species[ispecies]].keys():
                         if max_vtor < max(
-                            self.profiles["n_species"][self.species[ispecies]][
-                                "vtor_e"
-                            ][0 : self.erho - 1]
+                            self.profiles["n_species"][self.species[ispecies]]["vtor_e"][0 : self.erho - 1]
                         ):
                             max_vtor = max(
-                                self.profiles["n_species"][self.pecies[ispecies]][
-                                    "vtor_e"
-                                ][0 : self.erho - 1]
+                                self.profiles["n_species"][self.pecies[ispecies]]["vtor_e"][0 : self.erho - 1]
                             )
                         if min_vtor > min(
-                            self.profiles["n_species"][self.species[ispecies]][
-                                "vtor_e"
-                            ][0 : self.erho - 1]
+                            self.profiles["n_species"][self.species[ispecies]]["vtor_e"][0 : self.erho - 1]
                         ):
                             min_vtor = min(
-                                self.profiles["n_species"][self.species[ispecies]][
-                                    "vtor_e"
-                                ][0 : self.erho - 1]
+                                self.profiles["n_species"][self.species[ispecies]]["vtor_e"][0 : self.erho - 1]
                             )
                 if self.vpol_flag != 0:
-                    if (
-                        "vpol"
-                        in self.profiles["n_species"][self.species[ispecies]].keys()
-                    ):
+                    if "vpol" in self.profiles["n_species"][self.species[ispecies]].keys():
                         if max_vpol < max(
-                            self.profiles["n_species"][self.species[ispecies]]["vpol"][
-                                0 : self.nrho - 1
-                            ]
+                            self.profiles["n_species"][self.species[ispecies]]["vpol"][0 : self.nrho - 1]
                         ):
                             max_vpol = max(
-                                self.profiles["n_species"][self.species[ispecies]][
-                                    "vpol"
-                                ][0 : self.nrho - 1]
+                                self.profiles["n_species"][self.species[ispecies]]["vpol"][0 : self.nrho - 1]
                             )
                         if min_vpol > min(
-                            self.profiles["n_species"][self.species[ispecies]]["vpol"][
-                                0 : self.nrho - 1
-                            ]
+                            self.profiles["n_species"][self.species[ispecies]]["vpol"][0 : self.nrho - 1]
                         ):
                             min_vpol = min(
-                                self.profiles["n_species"][self.species[ispecies]][
-                                    "vpol"
-                                ][0 : self.nrho - 1]
+                                self.profiles["n_species"][self.species[ispecies]]["vpol"][0 : self.nrho - 1]
                             )
-                if (
-                    self.isEdgeProfilesPresent
-                    and self.species_map[ispecies] != -99
-                    and self.vpol_e_flag != 0
-                ):
-                    if (
-                        "vpol_e"
-                        in self.profiles["n_species"][self.species[ispecies]].keys()
-                    ):
+                if self.isEdgeProfilesPresent and self.species_map[ispecies] != -99 and self.vpol_e_flag != 0:
+                    if "vpol_e" in self.profiles["n_species"][self.species[ispecies]].keys():
                         if max_vpol < max(
-                            self.profiles["n_species"][self.species[ispecies]][
-                                "vpol_e"
-                            ][0 : self.erho - 1]
+                            self.profiles["n_species"][self.species[ispecies]]["vpol_e"][0 : self.erho - 1]
                         ):
                             max_vpol = max(
-                                self.profiles["n_species"][self.pecies[ispecies]][
-                                    "vpol_e"
-                                ][0 : self.erho - 1]
+                                self.profiles["n_species"][self.pecies[ispecies]]["vpol_e"][0 : self.erho - 1]
                             )
                         if min_vpol > min(
-                            self.profiles["n_species"][self.species[ispecies]][
-                                "vpol_e"
-                            ][0 : self.erho - 1]
+                            self.profiles["n_species"][self.species[ispecies]]["vpol_e"][0 : self.erho - 1]
                         ):
                             min_vpol = min(
-                                self.profiles["n_species"][self.species[ispecies]][
-                                    "vpol_e"
-                                ][0 : self.erho - 1]
+                                self.profiles["n_species"][self.species[ispecies]]["vpol_e"][0 : self.erho - 1]
                             )
 
         if self.vtor_flag != 0 or self.vtor_e_flag != 0:
@@ -2075,25 +1435,16 @@ class KineticProfilesCompute:
                 waveform[ikey] = self.createWaveForm(0)
 
             waveform["te"]["central"] = (
-                self.connection.partial_get(
-                    "core_profiles", "profiles_1d(:)/electrons/temperature(0)"
-                )
-                * 1e-3
+                self.connection.partial_get("core_profiles", "profiles_1d(:)/electrons/temperature(0)") * 1e-3
             )
             if self.ti_flag == 1:
                 waveform["ti"]["central"] = (
-                    self.connection.partial_get(
-                        "core_profiles", "profiles_1d(:)/t_i_average(0)"
-                    )
-                    * 1e-3
+                    self.connection.partial_get("core_profiles", "profiles_1d(:)/t_i_average(0)") * 1e-3
                 )
             else:
                 try:
                     waveform["ti"]["central"] = (
-                        self.connection.partial_get(
-                            "core_profiles", "profiles_1d(:)/ion(0)/temperature(0)"
-                        )
-                        * 1e-3
+                        self.connection.partial_get("core_profiles", "profiles_1d(:)/ion(0)/temperature(0)") * 1e-3
                     )
                 except Exception as e:
                     waveform["ti"]["central"] = [np.NaN] * self.commonTimeLength
@@ -2101,9 +1452,7 @@ class KineticProfilesCompute:
             waveform["ne"]["central"] = self.connection.partial_get(
                 "core_profiles", "profiles_1d(:)/electrons/density(0)"
             )
-            waveform["zeff"]["central"] = self.connection.partial_get(
-                "core_profiles", "profiles_1d(:)/zeff(0)"
-            )
+            waveform["zeff"]["central"] = self.connection.partial_get("core_profiles", "profiles_1d(:)/zeff(0)")
 
             waveform["n_species"] = {}
             waveform["ni"] = self.createWaveForm(self.commonTimeLength)
@@ -2118,57 +1467,55 @@ class KineticProfilesCompute:
                     }
 
                     try:
-                        waveform["n_species"][self.species[ispecies]]["density"][
-                            "central"
-                        ] = self.connection.partial_get(
-                            "core_profiles",
-                            f"profiles_1d(:)/ion({ispecies})/density(0)",
+                        waveform["n_species"][self.species[ispecies]]["density"]["central"] = (
+                            self.connection.partial_get(
+                                "core_profiles",
+                                f"profiles_1d(:)/ion({ispecies})/density(0)",
+                            )
                         )
                         if vpol_flag == 1:
-                            waveform["n_species"][self.species[ispecies]]["vpol"][
-                                "central"
-                            ] = self.connection.partial_get(
-                                "core_profiles",
-                                f"profiles_1d(:)/ion({ispecies})/velocity/poloidal(0)",
+                            waveform["n_species"][self.species[ispecies]]["vpol"]["central"] = (
+                                self.connection.partial_get(
+                                    "core_profiles",
+                                    f"profiles_1d(:)/ion({ispecies})/velocity/poloidal(0)",
+                                )
                             )
                         elif vpol_flag == 2:
-                            waveform["n_species"][self.species[ispecies]]["vpol"][
-                                "central"
-                            ] = self.connection.partial_get(
-                                "core_profiles",
-                                f"profiles_1d(:)/ion({ispecies})/velocity_pol(0)",
+                            waveform["n_species"][self.species[ispecies]]["vpol"]["central"] = (
+                                self.connection.partial_get(
+                                    "core_profiles",
+                                    f"profiles_1d(:)/ion({ispecies})/velocity_pol(0)",
+                                )
                             )
                         if vtor_flag == 1:
-                            waveform["n_species"][self.species[ispecies]]["vtor"][
-                                "central"
-                            ] = self.connection.partial_get(
-                                "core_profiles",
-                                f"profiles_1d(:)/ion({ispecies})/velocity/toroidal(0)",
+                            waveform["n_species"][self.species[ispecies]]["vtor"]["central"] = (
+                                self.connection.partial_get(
+                                    "core_profiles",
+                                    f"profiles_1d(:)/ion({ispecies})/velocity/toroidal(0)",
+                                )
                             )
                         elif vtor_flag == 2:
-                            waveform["n_species"][self.species[ispecies]]["vtor"][
-                                "central"
-                            ] = self.connection.partial_get(
-                                "core_profiles",
-                                f"profiles_1d(:)/ion({ispecies})/velocity_tor(0)",
+                            waveform["n_species"][self.species[ispecies]]["vtor"]["central"] = (
+                                self.connection.partial_get(
+                                    "core_profiles",
+                                    f"profiles_1d(:)/ion({ispecies})/velocity_tor(0)",
+                                )
                             )
                     except Exception as e:
-                        waveform["n_species"][self.species[ispecies]]["density"][
-                            "central"
-                        ] = [np.NaN] * self.commonTimeLength
-                        waveform["n_species"][self.species[ispecies]]["vpol"][
-                            "central"
-                        ] = [np.NaN] * self.commonTimeLength
-                        waveform["n_species"][self.species[ispecies]]["vtor"][
-                            "central"
-                        ] = [np.NaN] * self.commonTimeLength
+                        waveform["n_species"][self.species[ispecies]]["density"]["central"] = [
+                            np.NaN
+                        ] * self.commonTimeLength
+                        waveform["n_species"][self.species[ispecies]]["vpol"]["central"] = [
+                            np.NaN
+                        ] * self.commonTimeLength
+                        waveform["n_species"][self.species[ispecies]]["vtor"]["central"] = [
+                            np.NaN
+                        ] * self.commonTimeLength
 
                     for itime in range(self.commonTimeLength):
                         waveform["ni"]["central"][itime] = (
                             waveform["ni"]["central"][itime]
-                            + waveform["n_species"][self.species[ispecies]]["density"][
-                                "central"
-                            ][itime]
+                            + waveform["n_species"][self.species[ispecies]]["density"]["central"][itime]
                         )
             return waveform
         return None

@@ -35,21 +35,13 @@ class SummaryCompute:
 
         # Current_non_inductive waveform
         if len(self.ids.global_quantities.current_non_inductive.value) < 1:
-            logger.critical(
-                "summary.global_quantities.current_non_inductive.value could not be read"
-            )
-            self.ids.global_quantities.current_non_inductive.value = np.asarray(
-                [np.nan] * stime
-            )
+            logger.critical("summary.global_quantities.current_non_inductive.value could not be read")
+            self.ids.global_quantities.current_non_inductive.value = np.asarray([np.nan] * stime)
 
         # Current_bootstrap waveform
         if len(self.ids.global_quantities.current_bootstrap.value) < 1:
-            logger.critical(
-                "summary.global_quantities.current_bootstrap.value could not be read"
-            )
-            self.ids.global_quantities.current_bootstrap.value = np.asarray(
-                [np.nan] * stime
-            )
+            logger.critical("summary.global_quantities.current_bootstrap.value could not be read")
+            self.ids.global_quantities.current_bootstrap.value = np.asarray([np.nan] * stime)
 
         # V_loop waveform
         if len(self.ids.global_quantities.v_loop.value) < 1:
@@ -58,58 +50,38 @@ class SummaryCompute:
 
         # Beta_tor_norm waveform
         if len(self.ids.global_quantities.beta_tor_norm.value) < 1:
-            logger.critical(
-                "summary.global_quantities.beta_tor_norm.value could not be read"
-            )
-            self.ids.global_quantities.beta_tor_norm.value = np.asarray(
-                [np.nan] * stime
-            )
+            logger.critical("summary.global_quantities.beta_tor_norm.value could not be read")
+            self.ids.global_quantities.beta_tor_norm.value = np.asarray([np.nan] * stime)
 
         # Beta_pol waveform
         if len(self.ids.global_quantities.beta_pol.value) < 1:
-            logger.critical(
-                "summary.global_quantities.beta_pol.value could not be read"
-            )
+            logger.critical("summary.global_quantities.beta_pol.value could not be read")
             self.ids.global_quantities.beta_pol.value = np.asarray([np.nan] * stime)
 
         # Energy_diamagnetic waveform
         if len(self.ids.global_quantities.energy_diamagnetic.value) < 1:
-            logger.critical(
-                "summary.global_quantities.energy_diamagnetic.value could not be read"
-            )
-            self.ids.global_quantities.energy_diamagnetic.value = np.asarray(
-                [np.nan] * stime
-            )
+            logger.critical("summary.global_quantities.energy_diamagnetic.value could not be read")
+            self.ids.global_quantities.energy_diamagnetic.value = np.asarray([np.nan] * stime)
 
         # Energy_mhd waveform
         if len(self.ids.global_quantities.energy_mhd.value) < 1:
-            logger.critical(
-                "summary.global_quantities.energy_mhd.value could not be read"
-            )
+            logger.critical("summary.global_quantities.energy_mhd.value could not be read")
             self.ids.global_quantities.energy_mhd.value = np.asarray([np.nan] * stime)
 
         # Current_ohm waveform
         if len(self.ids.global_quantities.current_ohm.value) < 1:
-            logger.critical(
-                "summary.global_quantities.current_ohm.value could not be read"
-            )
+            logger.critical("summary.global_quantities.current_ohm.value could not be read")
             self.ids.global_quantities.current_ohm.value = np.asarray([np.nan] * stime)
 
         # Energy_total waveform
         if len(self.ids.global_quantities.energy_total.value) < 1:
-            logger.critical(
-                "summary.global_quantities.energy_total.value could not be read"
-            )
+            logger.critical("summary.global_quantities.energy_total.value could not be read")
             self.ids.global_quantities.energy_total.value = np.asarray([np.nan] * stime)
 
         # Energy_thermal waveform
         if len(self.ids.global_quantities.energy_thermal.value) < 1:
-            logger.critical(
-                "summary.global_quantities.energy_thermal.value could not be read"
-            )
-            self.ids.global_quantities.energy_thermal.value = np.asarray(
-                [np.nan] * stime
-            )
+            logger.critical("summary.global_quantities.energy_thermal.value could not be read")
+            self.ids.global_quantities.energy_thermal.value = np.asarray([np.nan] * stime)
 
         # B0 waveform
         if len(self.ids.global_quantities.b0.value) < 1:
@@ -123,9 +95,7 @@ class SummaryCompute:
 
         # Tau_energy waveform
         if len(self.ids.global_quantities.tau_energy.value) < 1:
-            logger.critical(
-                "summary.global_quantities.tau_energy.value could not be read"
-            )
+            logger.critical("summary.global_quantities.tau_energy.value could not be read")
             self.ids.global_quantities.tau_energy.value = np.asarray([np.nan] * stime)
 
         # H-mode flag
@@ -163,9 +133,7 @@ class SummaryCompute:
         if n_nbi > 0:
             for isource in range(n_nbi):
                 if len(self.ids.heating_current_drive.nbi[isource].power.value) > 0:
-                    p_nbi = (
-                        p_nbi + self.ids.heating_current_drive.nbi[isource].power.value
-                    )
+                    p_nbi = p_nbi + self.ids.heating_current_drive.nbi[isource].power.value
         else:
             if len(self.ids.heating_current_drive.power_nbi.value) > 0:
                 p_nbi = self.ids.heating_current_drive.power_nbi.value
@@ -180,10 +148,7 @@ class SummaryCompute:
 
         p_hcd = p_ec + p_ic + p_nbi + p_lh
 
-        if (
-            sum(p_hcd) == 0
-            and sum(self.ids.heating_current_drive.power_additional.value) != 0
-        ):
+        if sum(p_hcd) == 0 and sum(self.ids.heating_current_drive.power_additional.value) != 0:
             p_hcd = self.ids.heating_current_drive.power_additional.value
 
         # Fusion power
@@ -212,18 +177,12 @@ class SummaryCompute:
         waveform = {}
         waveform["time"] = self.ids.time  # timevec
         waveform["ip"] = self.ids.global_quantities.ip.value
-        waveform["current_non_inductive"] = (
-            self.ids.global_quantities.current_non_inductive.value
-        )
-        waveform["current_bootstrap"] = (
-            self.ids.global_quantities.current_bootstrap.value
-        )
+        waveform["current_non_inductive"] = self.ids.global_quantities.current_non_inductive.value
+        waveform["current_bootstrap"] = self.ids.global_quantities.current_bootstrap.value
         waveform["v_loop"] = self.ids.global_quantities.v_loop.value
         waveform["beta_tor_norm"] = self.ids.global_quantities.beta_tor_norm.value
         waveform["beta_pol"] = self.ids.global_quantities.beta_pol.value
-        waveform["energy_diamagnetic"] = (
-            self.ids.global_quantities.energy_diamagnetic.value
-        )
+        waveform["energy_diamagnetic"] = self.ids.global_quantities.energy_diamagnetic.value
         waveform["energy_mhd"] = self.ids.global_quantities.energy_mhd.value
         waveform["current_ohm"] = self.ids.global_quantities.current_ohm.value
         waveform["energy_total"] = self.ids.global_quantities.energy_total.value

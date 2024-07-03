@@ -38,9 +38,7 @@ class DBMaster:
             return f'{os.path.expanduser(f"~{user}")}/public/imasdb/'
         imasHomeDir = os.environ["IMAS_HOME"]
         if imasHomeDir is None:
-            raise FileNotFoundError(
-                "File path in the environment variable IMAS_HOME is not defined."
-            )
+            raise FileNotFoundError("File path in the environment variable IMAS_HOME is not defined.")
         return f"{imasHomeDir}/shared/imasdb/"
 
     @staticmethod
@@ -103,11 +101,7 @@ class DBMaster:
             a list of databases.
         """
         userDir = DBMaster.getUserDir(user)
-        databases = [
-            _database
-            for _database in os.listdir(userDir)
-            if os.path.isdir(os.path.join(userDir, _database))
-        ]
+        databases = [_database for _database in os.listdir(userDir) if os.path.isdir(os.path.join(userDir, _database))]
         return sorted(databases)
 
     @staticmethod
@@ -124,9 +118,7 @@ class DBMaster:
         """
         databaseDir = DBMaster.getDatabaseDir(database, user)
         versions = [
-            _version
-            for _version in os.listdir(databaseDir)
-            if os.path.isdir(os.path.join(databaseDir, _version))
+            _version for _version in os.listdir(databaseDir) if os.path.isdir(os.path.join(databaseDir, _version))
         ]
         return sorted(versions)
 
@@ -148,10 +140,7 @@ class DBMaster:
                 continue
             _databaseVersions = DBMaster.getVersions(_database, user)
             databasesDict[_database] = _databaseVersions
-        return [
-            (database, databasesDict[database])
-            for database in sorted(databasesDict.keys())
-        ]
+        return [(database, databasesDict[database]) for database in sorted(databasesDict.keys())]
 
     @staticmethod
     def getVersionsWithDatabases(user: str = None) -> list:
@@ -171,14 +160,10 @@ class DBMaster:
                 if _version not in databaseDict:
                     databaseDict[_version] = []
                 databaseDict[_version].append(database)
-        return [
-            (version, databaseDict[version]) for version in sorted(databaseDict.keys())
-        ]
+        return [(version, databaseDict[version]) for version in sorted(databaseDict.keys())]
 
     @staticmethod
-    def getHdf5Pulses(
-        user: str = None, database: str = None, version: str = None, asDictionary=False
-    ) -> list:
+    def getHdf5Pulses(user: str = None, database: str = None, version: str = None, asDictionary=False) -> list:
         """
         The function `getHdf5Pulses` retrieves a list of pulses from HDF5 master files. It needs to specify full path till version.
 
@@ -195,9 +180,7 @@ class DBMaster:
             except Exception as e:
                 print(f"Malformed database path {hdf5MasterFilePath}")
                 continue
-            fileTime = datetime.fromtimestamp(
-                os.path.getmtime(hdf5MasterFilePath)
-            ).replace(microsecond=0)
+            fileTime = datetime.fromtimestamp(os.path.getmtime(hdf5MasterFilePath)).replace(microsecond=0)
 
             if asDictionary:
                 if pulse not in pulses:
@@ -257,10 +240,7 @@ class DBMaster:
         for root, dirnames, filenames in os.walk(mdsplusDir):
             for datafile in fnmatch.filter(filenames, "*.datafile"):
                 dataFilePath = f"{root}/{datafile}"
-                if (status is None) or (
-                    status
-                    == DBMaster.getPulseStatus(Path(dataFilePath).with_suffix(".yaml"))
-                ):
+                if (status is None) or (status == DBMaster.getPulseStatus(Path(dataFilePath).with_suffix(".yaml"))):
                     runList = (root[len(mdsplusDir) + 1 :]).split("/")
                     try:
                         if len(runList) == 1:  # AL4 layout
@@ -280,9 +260,7 @@ class DBMaster:
                     except Exception as e:
                         print(f"Malformed database path {root}")
                         continue
-                    fileTime = datetime.fromtimestamp(
-                        os.path.getmtime(dataFilePath)
-                    ).replace(microsecond=0)
+                    fileTime = datetime.fromtimestamp(os.path.getmtime(dataFilePath)).replace(microsecond=0)
 
                     if asDictionary:
                         if pulse not in pulses:
@@ -364,13 +342,9 @@ class DBMaster:
                 pulses = []
                 for backend in backends:
                     if backend == "hdf5":
-                        dbs = DBMaster.getHdf5Pulses(
-                            user, database, _version, asDictionary=True
-                        )
+                        dbs = DBMaster.getHdf5Pulses(user, database, _version, asDictionary=True)
                     elif backend == "mdsplus":
-                        dbs = DBMaster.getMdsPlusPulses(
-                            user, database, _version, asDictionary=True
-                        )
+                        dbs = DBMaster.getMdsPlusPulses(user, database, _version, asDictionary=True)
                     else:
                         raise NotImplementedError(f"Unsupported backend: {backend}")
                     if dbs:
@@ -421,9 +395,7 @@ class DBMaster:
         # Examples: 1
         run_string = str(run % 10000)
         if pulse == 0:
-            mdsplusFileName = os.path.join(
-                mdsplusdir, str(int(run / 10000)), f"ids_{run_string.zfill(3)}"
-            )
+            mdsplusFileName = os.path.join(mdsplusdir, str(int(run / 10000)), f"ids_{run_string.zfill(3)}")
         else:
             mdsplusFileName = os.path.join(
                 mdsplusdir,
@@ -467,9 +439,7 @@ class DBMaster:
         if "_al_lowlevel" in imas.__dict__:
             _lowlevelVersion = imas.get_al_version()
         elif "_ual_lowlevel" in imas.__dict__:
-            rawCoreVersion = (
-                imas._ual_lowlevel.__name__
-            )  # '__name__': 'imas_3_41_0_ual_4_11_10._ual_lowlevel
+            rawCoreVersion = imas._ual_lowlevel.__name__  # '__name__': 'imas_3_41_0_ual_4_11_10._ual_lowlevel
             rawCoreVersion, _ = rawCoreVersion.split(".")
             match = re.search(r"\d+_\d+_\d+$", rawCoreVersion)
             if match:
@@ -484,9 +454,7 @@ class DBMaster:
         if "_al_lowlevel" in imas.__dict__:
             _lowlevelVersion = imas.al_dd_version
         elif "_ual_lowlevel" in imas.__dict__:
-            rawDDVersion = (
-                imas._ual_lowlevel.__name__
-            )  # '__name__': 'imas_3_41_0_ual_4_11_10._ual_lowlevel
+            rawDDVersion = imas._ual_lowlevel.__name__  # '__name__': 'imas_3_41_0_ual_4_11_10._ual_lowlevel
             rawDDVersion, _ = rawDDVersion.split(".")
             match = re.search(r"\d+_\d+_\d+", rawDDVersion)
             if match:
@@ -589,9 +557,7 @@ class DBMaster:
         # folder = Path(locpath).glob('**/*.datafile') # --> does not work with linked subfolders (https://bugs.python.org/issue33428)
         folder = glob(str(locpath) + "/**/*.datafile", recursive=True)
         for entry in folder:
-            if (with_status is None) or (
-                with_status == DBMaster.get_status(Path(entry).with_suffix(".yaml"))
-            ):
+            if (with_status is None) or (with_status == DBMaster.get_status(Path(entry).with_suffix(".yaml"))):
                 file = entry.split("/")[-1].split("_")[1].split(".")[0]
                 if len(file) <= 4:
                     pulse = 0
@@ -650,17 +616,9 @@ class DBMaster:
         """
 
         if user == "public":
-            locpath = Path(
-                os.environ["IMAS_HOME"] + "/shared/imasdb/" + database + "/" + version
-            )
+            locpath = Path(os.environ["IMAS_HOME"] + "/shared/imasdb/" + database + "/" + version)
         else:
-            locpath = Path(
-                os.path.expanduser("~" + user)
-                + "/public/imasdb/"
-                + database
-                + "/"
-                + version
-            )
+            locpath = Path(os.path.expanduser("~" + user) + "/public/imasdb/" + database + "/" + version)
         return locpath
 
 
@@ -716,11 +674,7 @@ def readScenario(
         config["output_database"],
         config["shot"],
         config["run_out"],
-        (
-            os.getenv("USER")
-            if config["output_user_or_path"] == "default"
-            else config["output_user_or_path"]
-        ),
+        (os.getenv("USER") if config["output_user_or_path"] == "default" else config["output_user_or_path"]),
     )
     # print(config["output_database"])
     # print(config["shot"])

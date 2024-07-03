@@ -123,9 +123,7 @@ class ScenarioDescriptionBase:
         if extension == ".yaml":
             dataFrames = []
             for yamlFile in files:
-                df = ScenarioDescriptionBase.getDataFrameFromYaml(
-                    yamlFile, addObsolete=addObsolete
-                )
+                df = ScenarioDescriptionBase.getDataFrameFromYaml(yamlFile, addObsolete=addObsolete)
                 if df is not None:
                     df["location"] = yamlFile
                     localTime = time.ctime(os.path.getmtime(yamlFile))
@@ -160,14 +158,8 @@ class ScenarioDescriptionBase:
             n_over_ne = n_over_ne.split()
 
             speciesDict = {k: v for k, v in zip(species, n_over_ne)}
-            sorted_dict = dict(
-                sorted(
-                    speciesDict.items(), key=lambda item: float(item[1]), reverse=True
-                )
-            )
-            df["composition"] = ",".join(
-                [f"{key}({value})" for key, value in sorted_dict.items()]
-            )
+            sorted_dict = dict(sorted(speciesDict.items(), key=lambda item: float(item[1]), reverse=True))
+            df["composition"] = ",".join([f"{key}({value})" for key, value in sorted_dict.items()])
         else:
             df["composition"] = "None"
 
@@ -225,9 +217,7 @@ class ScenarioDescription(ScenarioDescriptionBase):
                 dictToFill["pulse"].append(pulsec)
                 dictToFill["run"].append(runc)
                 dictToFill["status"].append(scenarioDescription.yamlData["status"])
-                dictToFill["comment"].append(
-                    scenarioDescription.yamlData["database_relations"]["replaces"]
-                )
+                dictToFill["comment"].append(scenarioDescription.yamlData["database_relations"]["replaces"])
                 dictToFill = self.getChildren(scenarioDescription.yamlData, dictToFill)
         return dictToFill
 
@@ -261,14 +251,10 @@ class ScenarioDescription(ScenarioDescriptionBase):
             scenarioDescription = ScenarioDescription(pulsep, runp, self.folderPath)
 
             if scenarioDescription.yamlData is not None:
-                dictToFill["pulse"].insert(
-                    0, pulsep
-                )  # Order to be reversed for parents
+                dictToFill["pulse"].insert(0, pulsep)  # Order to be reversed for parents
                 dictToFill["run"].insert(0, runp)
                 dictToFill["status"].insert(0, scenarioDescription.yamlData["status"])
-                dictToFill["comment"].insert(
-                    0, scenarioDescription.yamlData["database_relations"]["replaces"]
-                )
+                dictToFill["comment"].insert(0, scenarioDescription.yamlData["database_relations"]["replaces"])
                 dictToFill = self.getParents(scenarioDescription.yamlData, dictToFill)
         return dictToFill
 
@@ -295,6 +281,4 @@ class ScenarioDescription(ScenarioDescriptionBase):
 if __name__ == "__main__":
     defaultFolderPath = r"/work/imas/shared/imasdb/ITER/3/0"
     scenarioDescriptionObj = ScenarioDescriptionBase(folderPath=defaultFolderPath)
-    df = scenarioDescriptionObj.getDataframesFromFiles(
-        extension=".yaml", addObsolete=False
-    )
+    df = scenarioDescriptionObj.getDataframesFromFiles(extension=".yaml", addObsolete=False)

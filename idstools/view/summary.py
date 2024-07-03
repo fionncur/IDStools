@@ -121,16 +121,12 @@ class SummaryView(BasePlot):
         waveform = self.computeObj.getSummary()
         plotstyle = "-" if len(waveform["time"]) > 1 else "o"
         # Ip, B0 waveforms
-        ax.plot(
-            waveform["time"], abs(waveform["ip"]) * 1.0e-6, plotstyle, label=r"$|I_p|$"
-        )
+        ax.plot(waveform["time"], abs(waveform["ip"]) * 1.0e-6, plotstyle, label=r"$|I_p|$")
         # ax.plot(waveform['time'],waveform['current_non_inductive']*1.e-6,label=r'$J_{NI}$')
         # ax.plot(waveform['time'],waveform['current_bootstrap']*1.e-6,label=r'$J_{BOOT}$')
         # ax.plot(waveform['time'],waveform['current_ohm']*1.e-6,label=r'$J_{OHM}$')
         ax.plot(waveform["time"], abs(waveform["b0"]), plotstyle, label=r"$|B_0|$")
-        ax.set_ylabel(
-            r"$I_p\/[\mathrm{MA}], B_0\/[\mathrm{T}]$", fontdict={"color": "darkred"}
-        )
+        ax.set_ylabel(r"$I_p\/[\mathrm{MA}], B_0\/[\mathrm{T}]$", fontdict={"color": "darkred"})
         ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
 
     def viewEnergyContentWaveforms(self, ax):
@@ -182,13 +178,9 @@ class SummaryView(BasePlot):
         plotstyle = "-" if len(waveform["time"]) > 1 else "o"
         ax.plot(waveform["time"], waveform["v_loop"], plotstyle, label=r"$V_{LOOP}$")
         ax.plot(waveform["time"], waveform["h_98"], plotstyle, label=r"$H_{98}$")
-        ax.plot(
-            waveform["time"], waveform["tau_energy"], plotstyle, label=r"$\tau_{E}$"
-        )
+        ax.plot(waveform["time"], waveform["tau_energy"], plotstyle, label=r"$\tau_{E}$")
         ax.set_xlabel(r"$Time\/[\mathrm{s}]$", fontdict={"color": "darkred"})
-        ax.set_ylabel(
-            r"$V\/[\mathrm{V}],\/H,\/\tau\/[\mathrm{s}]$", fontdict={"color": "darkred"}
-        )
+        ax.set_ylabel(r"$V\/[\mathrm{V}],\/H,\/\tau\/[\mathrm{s}]$", fontdict={"color": "darkred"})
         ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
 
     def showInfoOnPlot(self, ax, info: str = "", location="right"):

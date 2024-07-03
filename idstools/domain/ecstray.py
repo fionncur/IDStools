@@ -8,9 +8,7 @@ from idstools.compute.common import getClosestOfGivenValueFromArray
 
 
 class EcStrayCompute:
-    def __init__(
-        self, equilibriumIds: object, coreProfilesIds: object, wavesIds: object
-    ):
+    def __init__(self, equilibriumIds: object, coreProfilesIds: object, wavesIds: object):
         self.equilibriumIds = equilibriumIds
         self.coreProfilesIds = coreProfilesIds
         self.wavesIds = wavesIds
@@ -19,9 +17,7 @@ class EcStrayCompute:
         # self.coreProfilesCompute = coreProfilesIds
         self.wavesCompute = WavesCompute(wavesIds)
 
-    def getResonanceLayer(
-        self, timeIndexWaves: int = 0, timeIndexEquilibrium: int = 0, nHarm=None
-    ):
+    def getResonanceLayer(self, timeIndexWaves: int = 0, timeIndexEquilibrium: int = 0, nHarm=None):
         """This function calculates and returns a dictionary (Resonance Layer) containing r and z values corresponding to the resonance points based on the provided nHarm values, BResonance, and bTotal arrays.
 
         Args:
@@ -55,21 +51,11 @@ class EcStrayCompute:
         """
         if nHarm is None:
             nHarm = [1, 2, 3, 4]
-        BResonance = self.wavesCompute.getBResonance(
-            timeIndex=timeIndexWaves, harmonicFrequencies=nHarm
-        )
+        BResonance = self.wavesCompute.getBResonance(timeIndex=timeIndexWaves, harmonicFrequencies=nHarm)
         profile2dIndex, bTotal = self.equilibriumCompute.getBTotal(timeIndexEquilibrium)
         if profile2dIndex != -99:
-            r = (
-                self.equilibriumCompute.ids.time_slice[timeIndexEquilibrium]
-                .profiles_2d[profile2dIndex]
-                .grid.dim1
-            )
-            z = (
-                self.equilibriumCompute.ids.time_slice[timeIndexEquilibrium]
-                .profiles_2d[profile2dIndex]
-                .grid.dim2
-            )
+            r = self.equilibriumCompute.ids.time_slice[timeIndexEquilibrium].profiles_2d[profile2dIndex].grid.dim1
+            z = self.equilibriumCompute.ids.time_slice[timeIndexEquilibrium].profiles_2d[profile2dIndex].grid.dim2
 
         [nr, nz] = np.shape(bTotal)
         b_err = 10 / nr
@@ -78,9 +64,7 @@ class EcStrayCompute:
         for indexHarm in range(len(nHarm)):
             resonanceLayer[indexHarm] = {"r": [], "z": []}
             for iz in range(nz):
-                [ir, rloc] = getClosestOfGivenValueFromArray(
-                    bTotal[:, iz], BResonance[indexHarm]
-                )
+                [ir, rloc] = getClosestOfGivenValueFromArray(bTotal[:, iz], BResonance[indexHarm])
                 if np.abs(bTotal[ir, iz] - BResonance[indexHarm]) < b_err:
                     resonanceLayer[indexHarm]["r"].append(r[ir])
                     resonanceLayer[indexHarm]["z"].append(z[iz])
@@ -147,21 +131,11 @@ class EcStrayCompute:
         profile2dIndex, bTotal = self.equilibriumCompute.getBTotal(timeIndexEquilibrium)
 
         # B(R,Z) evaluation
-        r = (
-            self.equilibriumIds.time_slice[timeIndexEquilibrium]
-            .profiles_2d[profile2dIndex]
-            .grid.dim1
-        )
-        z = (
-            self.equilibriumIds.time_slice[timeIndexEquilibrium]
-            .profiles_2d[profile2dIndex]
-            .grid.dim2
-        )
+        r = self.equilibriumIds.time_slice[timeIndexEquilibrium].profiles_2d[profile2dIndex].grid.dim1
+        z = self.equilibriumIds.time_slice[timeIndexEquilibrium].profiles_2d[profile2dIndex].grid.dim2
 
         # Ne(psi) in core_profiles IDS
-        rho1d_cp = self.coreProfilesIds.profiles_1d[
-            timeIndexCoreProfiles
-        ].grid.rho_tor_norm
+        rho1d_cp = self.coreProfilesIds.profiles_1d[timeIndexCoreProfiles].grid.rho_tor_norm
         psi1d_cp = (
             self.coreProfilesIds.profiles_1d[timeIndexCoreProfiles].grid.psi
             - self.coreProfilesIds.profiles_1d[timeIndexCoreProfiles].grid.psi[-1]
@@ -169,14 +143,10 @@ class EcStrayCompute:
             self.coreProfilesIds.profiles_1d[timeIndexCoreProfiles].grid.psi[0]
             - self.coreProfilesIds.profiles_1d[timeIndexCoreProfiles].grid.psi[-1]
         )
-        ne_cp = self.coreProfilesIds.profiles_1d[
-            timeIndexCoreProfiles
-        ].electrons.density
+        ne_cp = self.coreProfilesIds.profiles_1d[timeIndexCoreProfiles].electrons.density
 
         # Ne(psi) interpolated over equilibrium IDS
-        rho1d_eq = self.equilibriumIds.time_slice[
-            timeIndexEquilibrium
-        ].profiles_1d.rho_tor_norm
+        rho1d_eq = self.equilibriumIds.time_slice[timeIndexEquilibrium].profiles_1d.rho_tor_norm
         psi1d_eq = (
             self.equilibriumIds.time_slice[timeIndexEquilibrium].profiles_1d.psi
             - self.equilibriumIds.time_slice[timeIndexEquilibrium].profiles_1d.psi[-1]
@@ -191,11 +161,7 @@ class EcStrayCompute:
 
         # Ne(R,Z) deduced for each point over B(R,Z) in equilibrium IDS
         psi1d_eq = self.equilibriumIds.time_slice[timeIndexEquilibrium].profiles_1d.psi
-        psi2d_eq = (
-            self.equilibriumIds.time_slice[timeIndexEquilibrium]
-            .profiles_2d[profile2dIndex]
-            .psi
-        )
+        psi2d_eq = self.equilibriumIds.time_slice[timeIndexEquilibrium].profiles_2d[profile2dIndex].psi
         ne_from_psi = interpolate.interp1d(psi1d_eq, ne_eq, kind="linear")
         ne2d_eq = np.zeros(np.shape(psi2d_eq))
         omegaR = np.zeros(np.shape(psi2d_eq))
@@ -205,9 +171,7 @@ class EcStrayCompute:
                 # omega_R = sqrt[(eB/m_e/2)**2 + n_e *e**2/(epsilon_0*m_e)] + eB/m_e/2
                 omegaR[ir, iz] = np.sqrt(
                     (constants.e * bTotal[ir, iz] / (2 * constants.m_e)) ** 2
-                    + ne2d_eq[ir, iz]
-                    * constants.e**2
-                    / (constants.epsilon_0 * constants.m_e)
+                    + ne2d_eq[ir, iz] * constants.e**2 / (constants.epsilon_0 * constants.m_e)
                 ) + constants.e * bTotal[ir, iz] / (2 * constants.m_e)
             except Exception as e:  # Not defined outside LCFS
                 ne2d_eq[ir, iz] = -1  # np.NaN

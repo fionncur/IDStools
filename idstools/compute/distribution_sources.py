@@ -30,19 +30,14 @@ class DistributionSourcesCompute:
         rho_tor_norm = None
         try:
             rho_tor_norm = self.ids.source[0].profiles_1d[timeSlice].grid.rho_tor_norm
-            if (
-                len(rho_tor_norm) == 0
-                and len(self.ids.source[0].profiles_1d[timeSlice].grid.rho_tor) > 0
-            ):
+            if len(rho_tor_norm) == 0 and len(self.ids.source[0].profiles_1d[timeSlice].grid.rho_tor) > 0:
                 nrho = len(self.ids.source[0].profiles_1d[timeSlice].grid.rho_tor)
                 rho_tor_norm = (
                     self.ids.source[0].profiles_1d[timeSlice].grid.rho_tor
                     / self.ids.source[0].profiles_1d[timeSlice].grid.rho_tor[nrho - 1]
                 )
         except Exception as e:
-            logger.critical(
-                "distribution_sources.source[0].profiles_1d[0].grid.rho_tor(_norm) could not be read"
-            )
+            logger.critical("distribution_sources.source[0].profiles_1d[0].grid.rho_tor(_norm) could not be read")
         return rho_tor_norm
 
     def getVolume(self, timeSlice: int = 0) -> Union[None, np.ndarray]:
@@ -59,9 +54,7 @@ class DistributionSourcesCompute:
         try:
             volume = self.ids.source[0].profiles_1d[timeSlice].grid.volume
         except Exception as e:
-            logger.critical(
-                f"distribution_sources.source[0].profiles_1d[{timeSlice}].grid.volume could not be read"
-            )
+            logger.critical(f"distribution_sources.source[0].profiles_1d[{timeSlice}].grid.volume could not be read")
         return volume
 
     def getSourceInfo(self):
@@ -75,17 +68,13 @@ class DistributionSourcesCompute:
         sourcesDict = {}
         counter = 0
         for source in self.ids.source:
-            mlabel1 = unicodedata.normalize(
-                "NFKD", source.process[0].type.description
-            ).encode("ascii", "ignore")
-            mlabel2 = unicodedata.normalize(
-                "NFKD", source.process[0].reactant_energy.description
-            ).encode("ascii", "ignore")
+            mlabel1 = unicodedata.normalize("NFKD", source.process[0].type.description).encode("ascii", "ignore")
+            mlabel2 = unicodedata.normalize("NFKD", source.process[0].reactant_energy.description).encode(
+                "ascii", "ignore"
+            )
             particles = source.profiles_1d[0].particles
             if len(source.profiles_1d[0].particles) < 1:
-                logger.warning(
-                    "distribution_sources.source[isource].profiles_1d[0].particles could not be read"
-                )
+                logger.warning("distribution_sources.source[isource].profiles_1d[0].particles could not be read")
                 particles = np.asarray([np.nan] * nrho)
 
             sourceInfo = {

@@ -8,11 +8,7 @@ def is_sequence(arg):
 
     See http://stackoverflow.com/questions/1835018/python-check-if-an-object-is-a-list-or-tuple-but-not-string.
     """
-    return (
-        not hasattr(arg, "strip")
-        and hasattr(arg, "__getitem__")
-        or hasattr(arg, "__iter__")
-    )
+    return not hasattr(arg, "strip") and hasattr(arg, "__getitem__") or hasattr(arg, "__iter__")
 
 
 def make_sequence(arg):
