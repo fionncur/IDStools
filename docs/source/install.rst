@@ -78,6 +78,7 @@ To run pytest
 .. code-block:: bash
 
    $ cd idstools
+   $ export PYTHONPATH=$PWD:$PYTHONPATH
    $ pytest
 
 To run tests scripts and verify functionalities
@@ -87,7 +88,6 @@ To run tests scripts and verify functionalities
    $ cd idstools
    $ tests/st01_test_ids_scripts_with_uri.sh
    $ tests/st02_test_db_scripts.sh
-   $ tests/st01_test_ids_scripts_with_uri.sh
    $ tests/st03_test_analysis_scripts_with_uripath.sh
    $ tests/st03_test_analysis_scripts_with_uri.sh
    $ tests/st04_test_scenario_scripts.sh
@@ -96,4 +96,6 @@ To build the *IDStools* documentation, execute:
 
 .. code-block:: bash
 
-   $ make -C docs html
+   $ pip install .[docs]
+   $ python setup.py builddocs
+   $ python setup.py builddocs --format man
