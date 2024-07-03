@@ -2,6 +2,7 @@
 This is a common module which has mathematical or physics functions
 
 """
+
 import logging
 from typing import Tuple, Union
 import numpy as np
@@ -93,7 +94,6 @@ def getMiddleElementFromArray(array: np.ndarray) -> Union[None, tuple]:
     index = length // 2
     value = array[index]
     return index, value
-
 
 
 # TODO rename variable and refactor code in smaller reusable methods

@@ -4,11 +4,13 @@ This module provides view functions and classes for equilibrium ids data
 `refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`_.
 
 """
+
 import logging
 from idstools.view.common import BasePlot
 from idstools.compute.summary import SummaryCompute
 
 logger = logging.getLogger("module")
+
 
 class SummaryView(BasePlot):
     def __init__(self, ids: object):

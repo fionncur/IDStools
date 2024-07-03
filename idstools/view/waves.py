@@ -493,7 +493,6 @@ class WavesView:
         legend = ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
         WavesView.customizeLegend(legend)
 
-
     def plotBeamIndex(self, ax):
         """
         This function plots a bar graph of beam indices with a fixed height of 20.
@@ -503,11 +502,10 @@ class WavesView:
         """
         # TODO add callback function which can be called whenever there is update requested on timeline
         beam_array = self.wavesCompute.getBeamArray()
-        bars =ax.bar(beam_array, 20, color="g", width=0.5)
+        bars = ax.bar(beam_array, 20, color="g", width=0.5)
         ax.set_xlim(beam_array[0] - 1, beam_array[-1] + 1)
         ax.set_ylim(top=20)
 
-       
     def plotPoloidalTracesUpdate(
         self, ax, beamTracingTimeIndex, beamIndex, verbose=False, update=True
     ):
@@ -548,11 +546,11 @@ class WavesView:
         for ibeam in range(nbeam):
             # ax_polview_plot_traces[ibeam] = {}
             if is_active[ibeam] is True:
-                
+
                 for iray in range(nray):
                     # TODO: update mechanism needs to be centralized
                     if update is True:
-                        
+
                         (ax_polview_plot_traces[iray],) = ax.plot(
                             r_ray[ibeam, iray, : len_ray[ibeam, iray]],
                             z_ray[ibeam, iray, : len_ray[ibeam, iray]],

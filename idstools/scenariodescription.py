@@ -6,6 +6,7 @@ import time
 
 import pandas as pd
 from yaml import load as yamlload
+
 try:
     from yaml import CLoader as yamlLoader
 except ImportError:

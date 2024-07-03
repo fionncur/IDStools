@@ -70,7 +70,7 @@ class EcStrayView:
 
         """
         resultDict = self.ecstray_object.getResonanceLayer(time_index_wv, time_index_eq)
-        res_layer=resultDict["resonanceLayer"]
+        res_layer = resultDict["resonanceLayer"]
 
         for i_harm in range(len(res_layer)):
             if len(res_layer[i_harm]["r"]) > 1:

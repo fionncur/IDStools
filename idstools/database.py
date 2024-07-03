@@ -8,6 +8,7 @@ from pathlib import Path
 import re
 import imas
 from yaml import load as yamlload
+
 try:
     from yaml import CLoader as yamlLoader
 except ImportError:

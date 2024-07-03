@@ -117,7 +117,7 @@ class CoreProfilesCompute:
                 import imas
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=105033;run=1;database=ITER;version=3", "r")
                 connection.open()
-                
+
                 idsObj = connection.get('core_profiles')
                 connection.close()
                 computeObj = CoreProfilesCompute(idsObj)
@@ -186,7 +186,7 @@ class CoreProfilesCompute:
                 import imas
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=105033;run=1;database=ITER;version=3", "r")
                 connection.open()
-                
+
                 idsObj = connection.get('core_profiles')
                 connection.close()
                 computeObj = CoreProfilesCompute(idsObj)
