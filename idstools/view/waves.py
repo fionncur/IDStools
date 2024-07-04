@@ -159,7 +159,6 @@ class WavesView:
                 maxima = findMaxima(totaly1)
                 logger.info(f"There are {len(maxima)-1} maxima")
                 fwhm = []
-                # fmt: off
                 for i in range(len(maxima)):
                     if i == 0:
                         fwhm.append(
@@ -169,8 +168,8 @@ class WavesView:
                                 maxima[0],
                                 0,
                                 (maxima[0] + maxima[1]) // 2,
-                                )
                             )
+                        )
                     elif i == len(maxima) - 1:
                         fwhm.append(
                             findfwhm(
@@ -179,8 +178,8 @@ class WavesView:
                                 maxima[i],
                                 (maxima[i - 1] + maxima[i]) // 2,
                                 len(totaly1),
-                                )
                             )
+                        )
                         logger.info(f"({totalx1[maxima[i]]}, {totaly1[maxima[i]]} --- fwhm: {fwhm[i]})")
                     else:
                         fwhm.append(
@@ -190,10 +189,9 @@ class WavesView:
                                 maxima[i],
                                 (maxima[i - 1] + maxima[i]) // 2,
                                 (maxima[i] + maxima[i + 1]) // 2,
-                                )
                             )
+                        )
                         logger.info(f"({totalx1[maxima[i]]}, {totaly1[maxima[i]]} --- fwhm: {fwhm[i]})")
-                # fmt: on
 
             for iWave, _ in activeLaunchers.items():
                 ax.plot(
@@ -235,40 +233,24 @@ class WavesView:
                 minima = findMinima(totaly2)
                 logger.info(f"There are {len(minima)} minima")
                 fwhm = []
-                # fmt: off
                 for i in range(len(minima)):
-                    if (i == 0):
+                    if i == 0:
+                        fwhm.append(findfwhm(totalx2, totaly2, minima[0], 0, (minima[0] + minima[1]) // 2))
+                    elif i == len(minima) - 1:
                         fwhm.append(
-                            findfwhm(
-                                totalx2,
-                                totaly2,
-                                minima[0],
-                                0,
-                                (minima[0] + minima[1]) // 2
-                                )
-                            )
-                    elif (i == len(minima) - 1):
-                        fwhm.append(
-                            findfwhm(
-                                totalx2,
-                                totaly2,
-                                minima[i],
-                                (minima[i-1] + minima[i]) // 2,
-                                len(totaly2)
-                                )
-                            )
+                            findfwhm(totalx2, totaly2, minima[i], (minima[i - 1] + minima[i]) // 2, len(totaly2))
+                        )
                     else:
                         fwhm.append(
                             findfwhm(
                                 totalx2,
                                 totaly2,
                                 minima[i],
-                                (minima[i-1] + minima[i]) // 2,
-                                (minima[i] + minima[i+1]) // 2
-                                )
+                                (minima[i - 1] + minima[i]) // 2,
+                                (minima[i] + minima[i + 1]) // 2,
                             )
-                    logger.info(f'({totalx2[minima[i]]}, {totaly2[minima[i]]} --- fwhm: {fwhm[i]})')
-                # fmt: on
+                        )
+                    logger.info(f"({totalx2[minima[i]]}, {totaly2[minima[i]]} --- fwhm: {fwhm[i]})")
             # logger.debug(fwhm)
         for iWave, _ in activeLaunchers.items():
             ax.plot(

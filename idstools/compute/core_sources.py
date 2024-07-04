@@ -341,16 +341,11 @@ class CoreSourcesCompute:
                         + _quantities.total_ion_power
                     )
                     total_particles_waveform[timeIndex] = (
-                        total_electron_particles_waveform[timeIndex]
-                        + _quantities.electrons.particles
+                        total_electron_particles_waveform[timeIndex] + _quantities.electrons.particles
                     ) + _quantities.total_ion_particles
-                    single_power_waveform[sourceIndex].append(
-                        _quantities.electrons.power
-                        + _quantities.total_ion_power
-                    )
+                    single_power_waveform[sourceIndex].append(_quantities.electrons.power + _quantities.total_ion_power)
                     single_particles_waveform[sourceIndex].append(
-                        _quantities.electrons.particles
-                        + _quantities.total_ion_particles
+                        _quantities.electrons.particles + _quantities.total_ion_particles
                     )
                 single_power_waveform[sourceIndex] = np.array(single_power_waveform[sourceIndex])
                 single_particles_waveform[sourceIndex] = np.array(single_particles_waveform[sourceIndex])
@@ -396,19 +391,13 @@ class CoreSourcesCompute:
                         _quantities.electrons.particles = 0.0
 
                     total_electron_power_waveform[timeIndex] = (
-                        total_electron_power_waveform[timeIndex]
-                        + _quantities.electrons.power
+                        total_electron_power_waveform[timeIndex] + _quantities.electrons.power
                     )
                     total_electron_particles_waveform[timeIndex] = (
-                        total_electron_particles_waveform[timeIndex]
-                        + _quantities.electrons.particles
+                        total_electron_particles_waveform[timeIndex] + _quantities.electrons.particles
                     )
-                    single_electron_power_waveform[sourceIndex].append(
-                        _quantities.electrons.power
-                    )
-                    single_electron_particles_waveform[sourceIndex].append(
-                        _quantities.electrons.particles
-                    )
+                    single_electron_power_waveform[sourceIndex].append(_quantities.electrons.power)
+                    single_electron_particles_waveform[sourceIndex].append(_quantities.electrons.particles)
                 single_electron_power_waveform[sourceIndex] = np.array(single_electron_power_waveform[sourceIndex])
                 single_electron_particles_waveform[sourceIndex] = np.array(
                     single_electron_particles_waveform[sourceIndex]
@@ -454,19 +443,13 @@ class CoreSourcesCompute:
                         _quantities.total_ion_power = 0.0
                     if _quantities.total_ion_particles < 0:
                         _quantities.total_ion_particles = 0.0
-                    single_ion_power_waveform[sourceIndex].append(
-                        _quantities.total_ion_power
-                    )
-                    single_ion_particles_waveform[sourceIndex].append(
-                        _quantities.total_ion_particles
-                    )
+                    single_ion_power_waveform[sourceIndex].append(_quantities.total_ion_power)
+                    single_ion_particles_waveform[sourceIndex].append(_quantities.total_ion_particles)
                     total_ion_power_waveform[timeIndex] = (
-                        total_ion_power_waveform[timeIndex]
-                        + _quantities.total_ion_power
+                        total_ion_power_waveform[timeIndex] + _quantities.total_ion_power
                     )
                     total_ion_particles_waveform[timeIndex] = (
-                        total_ion_particles_waveform[timeIndex]
-                        + _quantities.total_ion_particles
+                        total_ion_particles_waveform[timeIndex] + _quantities.total_ion_particles
                     )
 
                 single_ion_power_waveform[sourceIndex] = np.array(single_ion_power_waveform[sourceIndex])
@@ -515,20 +498,10 @@ class CoreSourcesCompute:
                     if _quantities.torque_tor < 0:
                         _quantities.torque_tor = 0.0
 
-                    total_current_waveform[timeIndex] = (
-                        total_current_waveform[timeIndex]
-                        + _quantities.current_parallel
-                    )
-                    total_torque_waveform[timeIndex] = (
-                        total_torque_waveform[timeIndex]
-                        + _quantities.torque_tor
-                    )
-                    single_current_waveform[sourceIndex].append(
-                        _quantities.current_parallel
-                    )
-                    single_torque_waveform[sourceIndex].append(
-                        _quantities.torque_tor
-                    )
+                    total_current_waveform[timeIndex] = total_current_waveform[timeIndex] + _quantities.current_parallel
+                    total_torque_waveform[timeIndex] = total_torque_waveform[timeIndex] + _quantities.torque_tor
+                    single_current_waveform[sourceIndex].append(_quantities.current_parallel)
+                    single_torque_waveform[sourceIndex].append(_quantities.torque_tor)
                 single_current_waveform[sourceIndex] = np.array(single_current_waveform[sourceIndex])
                 single_torque_waveform[sourceIndex] = np.array(single_torque_waveform[sourceIndex])
 

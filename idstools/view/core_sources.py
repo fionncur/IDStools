@@ -187,8 +187,7 @@ class CoreSourcesView:
         """
         if self.coreSourcesCompute.isActiveSourceAvailable():
             rho_tor_norm = self.coreSourcesCompute.getRhoTorNorm()
-            singleAndTotalElectronsAndIonsProfiles = \
-                self.coreSourcesCompute.getSingleAndTotalElectronsAndIonsProfiles()
+            singleAndTotalElectronsAndIonsProfiles = self.coreSourcesCompute.getSingleAndTotalElectronsAndIonsProfiles()
             sourceNames = self.coreSourcesCompute.getSourceNames()
             ax.set_title("CURRENT PROFILES [KA/M2]")
             ax.plot(
@@ -233,8 +232,7 @@ class CoreSourcesView:
                 logger.warning("Only one time slice --> Waveforms not displayed")
             else:
                 timeArray = self.ids.time
-                singleAndTotalElectronsIonsWaveforms = \
-                    self.coreSourcesCompute.getSingleAndTotalElectronsIonsWaveforms()
+                singleAndTotalElectronsIonsWaveforms = self.coreSourcesCompute.getSingleAndTotalElectronsIonsWaveforms()
                 singleAndTotalElectronsWaveforms = self.coreSourcesCompute.getSingleAndTotalElectronsWaveforms()
                 singleAndTotalIonsWaveforms = self.coreSourcesCompute.getSingleAndTotalIonsWaveforms()
                 sourceNames = self.coreSourcesCompute.getSourceNames()
@@ -300,8 +298,7 @@ class CoreSourcesView:
                 logger.warning("Only one time slice --> Waveforms not displayed")
             else:
                 timeArray = self.ids.time
-                singleAndTotalElectronsIonsWaveforms = \
-                    self.coreSourcesCompute.getSingleAndTotalElectronsIonsWaveforms()
+                singleAndTotalElectronsIonsWaveforms = self.coreSourcesCompute.getSingleAndTotalElectronsIonsWaveforms()
 
                 singleAndTotalElectronsWaveforms = self.coreSourcesCompute.getSingleAndTotalElectronsWaveforms()
 

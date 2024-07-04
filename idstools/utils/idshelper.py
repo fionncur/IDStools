@@ -548,7 +548,7 @@ def getQuantitiesFromPulses(idspath: str, pulses: tuple, listCount: int = 0, ver
         and "VALUE".
     """
     idsname = idspath.split("/")[0]
-    valpath = idspath[1 + len(idsname):]
+    valpath = idspath[1 + len(idsname) :]
     if listCount != 0:
         pulses = pulses[:listCount]
     values = []

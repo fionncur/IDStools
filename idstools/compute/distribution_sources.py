@@ -60,8 +60,9 @@ class DistributionSourcesCompute:
             volume = self.ids.source[0].profiles_1d[timeSlice].grid.volume
         except Exception as e:
             logger.debug(f"{e}")
-            logger.critical(f"distribution_sources.source[0].profiles_1d[{timeSlice}].grid.volume"
-                            "could not be read {e}")
+            logger.critical(
+                f"distribution_sources.source[0].profiles_1d[{timeSlice}].grid.volume" "could not be read {e}"
+            )
         return volume
 
     def getSourceInfo(self):

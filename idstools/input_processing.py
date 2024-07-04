@@ -177,7 +177,7 @@ def read_torbeam_output(launching_parameters, path_result):
             e_k[j, i, :] = [vxn, vyn, vzn]
             e_k[j, i, :] = e_k[j, i, :] / np.sqrt(np.sum(e_k[j, i, :] ** 2))
             fstr = time_slices[j]
-            times[j] = fstr[fstr.find("_t") + 2: fstr.find("_p")]
+            times[j] = fstr[fstr.find("_t") + 2 : fstr.find("_p")]
     # collecting data completed
 
     beam_output["ntimes"] = ntimes
@@ -600,7 +600,7 @@ def line_polygon_intersection(  # input
 
     line_p = np.reshape(line_p, inshape)
     line_dir = np.reshape(line_dir, inshape)
-    nxpshape = inshape[0: len(inshape) - 1]
+    nxpshape = inshape[0 : len(inshape) - 1]
     n_xp = np.reshape(n_xp, nxpshape)
     xp_data = np.reshape(xp_data, nxpshape + tuple([2]))
     return n_xp, xp_data

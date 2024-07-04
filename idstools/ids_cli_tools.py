@@ -3,6 +3,7 @@ Helper routines to parse command line arguments for typical scripts that access 
 
 This will be extended quite a bit in 2012.
 """
+
 import optparse
 import os
 import logging

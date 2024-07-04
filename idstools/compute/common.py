@@ -459,7 +459,7 @@ def line_polygon_intersection(  # input
 
     line_p = np.reshape(line_p, inshape)
     line_dir = np.reshape(line_dir, inshape)
-    nxpshape = inshape[0: len(inshape) - 1]
+    nxpshape = inshape[0 : len(inshape) - 1]
     n_xp = np.reshape(n_xp, nxpshape)
     xp_data = np.reshape(xp_data, nxpshape + tuple([2]))
     return n_xp, xp_data

@@ -480,38 +480,43 @@ class WavesCompute:
                 if self.isActiveDuringPulse(iwave) is True:
                     waveData["isActive"] = True
                     activeFound = True
-                    # fmt: off
                     try:
-                        if (len(self.ids.coherent_wave[iwave].profiles_1d[timeIndex].grid.rho_tor_norm) > 0):
-                            waveData["nrho"] = \
-                                len(self.ids.coherent_wave[iwave].profiles_1d[timeIndex].grid.rho_tor_norm)
-                            waveData["rho_tor_norm"] = \
-                                (self.ids.coherent_wave[iwave].profiles_1d[timeIndex].grid.rho_tor_norm)
-                        elif (len(self.ids.coherent_wave[iwave].profiles_1d[timeIndex].grid.rho_tor) > 0):
-                            waveData["nrho"] = \
-                                len(self.ids.coherent_wave[iwave].profiles_1d[timeIndex].grid.rho_tor)
-                            waveData["rho_tor_norm"] = (
-                                self.ids.coherent_wave[iwave].profiles_1d[timeIndex].grid.rho_tor /
-                                self.ids.coherent_wave[iwave].profiles_1d[timeIndex].grid.rho_tor[waveData["nrho"] - 1]
+                        if len(self.ids.coherent_wave[iwave].profiles_1d[timeIndex].grid.rho_tor_norm) > 0:
+                            waveData["nrho"] = len(
+                                self.ids.coherent_wave[iwave].profiles_1d[timeIndex].grid.rho_tor_norm
                             )
-                        elif (len(self.ids.coherent_wave[iwave].profiles_1d[timeIndex].grid.psi) > 0):
+                            waveData["rho_tor_norm"] = (
+                                self.ids.coherent_wave[iwave].profiles_1d[timeIndex].grid.rho_tor_norm
+                            )
+                        elif len(self.ids.coherent_wave[iwave].profiles_1d[timeIndex].grid.rho_tor) > 0:
+                            waveData["nrho"] = len(self.ids.coherent_wave[iwave].profiles_1d[timeIndex].grid.rho_tor)
+                            waveData["rho_tor_norm"] = (
+                                self.ids.coherent_wave[iwave].profiles_1d[timeIndex].grid.rho_tor
+                                / self.ids.coherent_wave[iwave]
+                                .profiles_1d[timeIndex]
+                                .grid.rho_tor[waveData["nrho"] - 1]
+                            )
+                        elif len(self.ids.coherent_wave[iwave].profiles_1d[timeIndex].grid.psi) > 0:
                             waveData["psiBased"] = True
                             waveData["nrho"] = len(self.ids.coherent_wave[iwave].profiles_1d[timeIndex].grid.psi)
-                            waveData["rho_tor_norm"] = (-self.ids.coherent_wave[iwave].profiles_1d[timeIndex].grid.psi)
+                            waveData["rho_tor_norm"] = -self.ids.coherent_wave[iwave].profiles_1d[timeIndex].grid.psi
                     except Exception as e:
                         logger.debug(f"{e}")
-                        logger.error("waves.coherent_wave[iwave].profiles_1d[it].grid.rho_tor_norm, \
-                            rho_tor and psi could not be read")
+                        logger.error(
+                            "waves.coherent_wave[iwave].profiles_1d[it].grid.rho_tor_norm, \
+                            rho_tor and psi could not be read"
+                        )
                         return None
                     if waveData["nrho"] == 0:
-                        logger.error("waves.coherent_wave[iwave].profiles_1d[it].grid.rho_tor_norm, \
-                            rho_tor and psi are empty")
+                        logger.error(
+                            "waves.coherent_wave[iwave].profiles_1d[it].grid.rho_tor_norm, \
+                            rho_tor and psi are empty"
+                        )
                         return None
-                    if (len(self.ids.coherent_wave[iwave].profiles_1d[timeIndex].grid.psi) > 0):
+                    if len(self.ids.coherent_wave[iwave].profiles_1d[timeIndex].grid.psi) > 0:
                         waveData["isPsiAvailable"] = True
                         waveData["npsi"] = len(self.ids.coherent_wave[iwave].profiles_1d[timeIndex].grid.psi)
-                        waveData["psi1d"] = (-self.ids.coherent_wave[iwave].profiles_1d[timeIndex].grid.psi)
-                    # fmt: on
+                        waveData["psi1d"] = -self.ids.coherent_wave[iwave].profiles_1d[timeIndex].grid.psi
             else:
                 logger.error("waves.coherent_wave[iwave].global_quantities has not been allocated")
                 return None

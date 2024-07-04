@@ -766,7 +766,7 @@ class EdgeProfilesCompute:
                     self.ids.grid_ggd[timeSlice].space[space].objects_per_dimension[dim].object[index].geometry[:2]
                 )
 
-        hull = ConvexHull(sep_coords[0: num_sep - 1, :])  # find a closed separatrix contour
+        hull = ConvexHull(sep_coords[0 : num_sep - 1, :])  # find a closed separatrix contour
         separatrix = np.array([sep_coords[hull.vertices, 0], sep_coords[hull.vertices, 1]]).T
         return separatrix
 

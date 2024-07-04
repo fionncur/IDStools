@@ -1212,8 +1212,8 @@ class KineticProfilesCompute:
             if self.isCoreProfilesPresent:
                 for ispecies in range(self.nspeciesCore):
                     species_density[ispecies] = sum(
-                        self.volume[0: self.nrho - 1]
-                        * self.core_profiles.profiles_1d[0].ion[ispecies].density[0: self.nrho - 1]
+                        self.volume[0 : self.nrho - 1]
+                        * self.core_profiles.profiles_1d[0].ion[ispecies].density[0 : self.nrho - 1]
                     )
                     ntot = ntot + species_density[ispecies]
                     if species_density[ispecies] > max_density:
@@ -1221,8 +1221,8 @@ class KineticProfilesCompute:
                         imax = ispecies
 
                 ne = sum(
-                    self.volume[0: self.nrho - 1]
-                    * self.core_profiles.profiles_1d[0].electrons.density[0: self.nrho - 1]
+                    self.volume[0 : self.nrho - 1]
+                    * self.core_profiles.profiles_1d[0].electrons.density[0 : self.nrho - 1]
                 )
 
                 nspec_over_ntot = species_density / ntot
@@ -1253,8 +1253,7 @@ class KineticProfilesCompute:
             for ispecies in range(self.nspeciesCore):
                 if nspec_over_ne[ispecies] > 0.0:
                     tabsize = 8
-                    disp_species = disp_species + self.species[ispecies] + " " * \
-                        (tabsize - len(self.species[ispecies]))
+                    disp_species = disp_species + self.species[ispecies] + " " * (tabsize - len(self.species[ispecies]))
                     disp_a = (
                         disp_a
                         + format("%.1f" % self.a[ispecies])
@@ -1397,58 +1396,58 @@ class KineticProfilesCompute:
                 if self.vtor_flag != 0:
                     if "vtor" in self.profiles["n_species"][self.species[ispecies]].keys():
                         if max_vtor < max(
-                            self.profiles["n_species"][self.species[ispecies]]["vtor"][0: self.nrho - 1]
+                            self.profiles["n_species"][self.species[ispecies]]["vtor"][0 : self.nrho - 1]
                         ):
                             max_vtor = max(
-                                self.profiles["n_species"][self.species[ispecies]]["vtor"][0: self.nrho - 1]
+                                self.profiles["n_species"][self.species[ispecies]]["vtor"][0 : self.nrho - 1]
                             )
                         if min_vtor > min(
-                            self.profiles["n_species"][self.species[ispecies]]["vtor"][0: self.nrho - 1]
+                            self.profiles["n_species"][self.species[ispecies]]["vtor"][0 : self.nrho - 1]
                         ):
                             min_vtor = min(
-                                self.profiles["n_species"][self.species[ispecies]]["vtor"][0: self.nrho - 1]
+                                self.profiles["n_species"][self.species[ispecies]]["vtor"][0 : self.nrho - 1]
                             )
                 if self.isEdgeProfilesPresent and self.species_map[ispecies] != -99 and self.vtor_e_flag != 0:
                     if "vtor_e" in self.profiles["n_species"][self.species[ispecies]].keys():
                         if max_vtor < max(
-                            self.profiles["n_species"][self.species[ispecies]]["vtor_e"][0: self.erho - 1]
+                            self.profiles["n_species"][self.species[ispecies]]["vtor_e"][0 : self.erho - 1]
                         ):
                             max_vtor = max(
-                                self.profiles["n_species"][self.pecies[ispecies]]["vtor_e"][0: self.erho - 1]
+                                self.profiles["n_species"][self.pecies[ispecies]]["vtor_e"][0 : self.erho - 1]
                             )
                         if min_vtor > min(
-                            self.profiles["n_species"][self.species[ispecies]]["vtor_e"][0: self.erho - 1]
+                            self.profiles["n_species"][self.species[ispecies]]["vtor_e"][0 : self.erho - 1]
                         ):
                             min_vtor = min(
-                                self.profiles["n_species"][self.species[ispecies]]["vtor_e"][0: self.erho - 1]
+                                self.profiles["n_species"][self.species[ispecies]]["vtor_e"][0 : self.erho - 1]
                             )
                 if self.vpol_flag != 0:
                     if "vpol" in self.profiles["n_species"][self.species[ispecies]].keys():
                         if max_vpol < max(
-                            self.profiles["n_species"][self.species[ispecies]]["vpol"][0: self.nrho - 1]
+                            self.profiles["n_species"][self.species[ispecies]]["vpol"][0 : self.nrho - 1]
                         ):
                             max_vpol = max(
-                                self.profiles["n_species"][self.species[ispecies]]["vpol"][0: self.nrho - 1]
+                                self.profiles["n_species"][self.species[ispecies]]["vpol"][0 : self.nrho - 1]
                             )
                         if min_vpol > min(
-                            self.profiles["n_species"][self.species[ispecies]]["vpol"][0: self.nrho - 1]
+                            self.profiles["n_species"][self.species[ispecies]]["vpol"][0 : self.nrho - 1]
                         ):
                             min_vpol = min(
-                                self.profiles["n_species"][self.species[ispecies]]["vpol"][0: self.nrho - 1]
+                                self.profiles["n_species"][self.species[ispecies]]["vpol"][0 : self.nrho - 1]
                             )
                 if self.isEdgeProfilesPresent and self.species_map[ispecies] != -99 and self.vpol_e_flag != 0:
                     if "vpol_e" in self.profiles["n_species"][self.species[ispecies]].keys():
                         if max_vpol < max(
-                            self.profiles["n_species"][self.species[ispecies]]["vpol_e"][0: self.erho - 1]
+                            self.profiles["n_species"][self.species[ispecies]]["vpol_e"][0 : self.erho - 1]
                         ):
                             max_vpol = max(
-                                self.profiles["n_species"][self.pecies[ispecies]]["vpol_e"][0: self.erho - 1]
+                                self.profiles["n_species"][self.pecies[ispecies]]["vpol_e"][0 : self.erho - 1]
                             )
                         if min_vpol > min(
-                            self.profiles["n_species"][self.species[ispecies]]["vpol_e"][0: self.erho - 1]
+                            self.profiles["n_species"][self.species[ispecies]]["vpol_e"][0 : self.erho - 1]
                         ):
                             min_vpol = min(
-                                self.profiles["n_species"][self.species[ispecies]]["vpol_e"][0: self.erho - 1]
+                                self.profiles["n_species"][self.species[ispecies]]["vpol_e"][0 : self.erho - 1]
                             )
 
         if self.vtor_flag != 0 or self.vtor_e_flag != 0:

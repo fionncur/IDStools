@@ -192,7 +192,7 @@ def getDatabasePath(imasargs, timeValue=None) -> str:
         else:
             databaseAbsolutePath = (
                 f'{os.path.expanduser(f"~{imasargs.user}")}/public/imasdb/'
-                f'{str(imasargs.database)}/{imasargs.version}/{imasargs.run//10000}'
+                f"{str(imasargs.database)}/{imasargs.version}/{imasargs.run//10000}"
             )
         pulseInfo = f"pulse {imasargs.pulse},{imasargs.run}"
         databaseAbsolutePath = databaseAbsolutePath[:-2]

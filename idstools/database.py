@@ -273,7 +273,7 @@ class DBMaster:
             for datafile in fnmatch.filter(filenames, "*.datafile"):
                 dataFilePath = f"{root}/{datafile}"
                 if (status is None) or (status == DBMaster.getPulseStatus(Path(dataFilePath).with_suffix(".yaml"))):
-                    runList = (root[len(mdsplusDir) + 1:]).split("/")
+                    runList = (root[len(mdsplusDir) + 1 :]).split("/")
                     try:
                         if len(runList) == 1:  # AL4 layout
                             numStartPos = datafile.find("_") + 1

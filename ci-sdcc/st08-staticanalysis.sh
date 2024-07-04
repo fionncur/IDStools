@@ -22,7 +22,7 @@ echo "executing black"
 black --check -l 120 idstools >black.log
 echo "---------------------------------------------------------------------"
 echo "executing flake8"
-flake8 --max-line-length=120 idstools >flake8.log
+flake8 --max-line-length=120 --ignore=E203,W503 idstools >flake8.log
 echo "---------------------------------------------------------------------"
 # echo "executing pylint"
 # pylint --max-line-length=120 -E ./idstools >pylint.log

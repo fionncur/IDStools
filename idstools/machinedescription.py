@@ -56,7 +56,7 @@ class MachineDescription:
                 mdArgs.uri = (
                     f"imas:{mdArgs.backend.lower()}?user={mdArgs.user};shot={mdArgs.pulse};"
                     f"run={mdArgs.run};database={mdArgs.database};version={mdArgs.version}"
-                    )
+                )
                 mdConnection = DBMaster.getConnection(mdArgs)
 
                 # print(mdConnection)
@@ -133,7 +133,7 @@ class MachineDescription:
                 self.mdArgs.uri = (
                     f"imas:mdsplus?user={self.mdArgs.user};pulse={self.mdArgs.pulse};"
                     f"run={self.mdArgs.run};database={self.mdArgs.database};version={self.mdArgs.version}"
-                    )
+                )
                 mdConnection = DBMaster.getConnection(self.mdArgs)
                 if mdConnection is not None:
                     idsData = mdConnection.get(config["ids"])

@@ -44,7 +44,7 @@ class TbdView:
         imin = len(np.where(lwall <= lmin)[0]) - 1
         imax = np.where(lwall >= lmax)[0][0]
         # find Rmax
-        irmax = np.argmax(edges[imin: imax + 1, 0]) + imin
+        irmax = np.argmax(edges[imin : imax + 1, 0]) + imin
         # FIXME edge is not defined here, might raise runtime error
         if irmax == imin:
             Rmax = edges[imin, 0] + (lmin - lwall[imin]) / (lwall[imin + 1] - lwall[imin]) * (
