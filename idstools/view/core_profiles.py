@@ -113,7 +113,8 @@ class CoreProfilesView:
                         if state_data["label"].strip() != "":
                             label_space = 7
                         print(
-                            f"\t {'state' +str(istate + 1) : <8}{state_data['label']: <{label_space}}z : {state_data['z_average']: <10} n/ni, % :{n_ni : >12}"
+                            f"\t {'state' +str(istate + 1) : <8}{state_data['label']: <{label_space}}z : "
+                            f"{state_data['z_average']: <10} n/ni, % :{n_ni : >12}"
                         )
                     istate = istate + 1
 
@@ -153,17 +154,24 @@ class CoreProfilesView:
 
     def plotDensityProfile(self, ax, timeIndex, psiCordinate=False, update=True, logscale=False):
         """
-        This function plots the electron density profile as a function of either the normalized toroidal flux coordinate or the poloidal magnetic flux coordinate.
+        This function plots the electron density profile as a function of either the normalized toroidal flux
+        coordinate or the poloidal magnetic flux coordinate.
 
         Args:
             ax: ax is a matplotlib axis object where the density profile plot will be drawn.
-            timeIndex: The time index refers to the specific time step or snapshot of data that is being plotted. It is used to retrieve the electron density and other relevant data at that particular
+            timeIndex: The time index refers to the specific time step or snapshot of data that is being plotted.
+            It is used to retrieve the electron density and other relevant data at that particular
         time.
-            psiCordinate: A boolean parameter that determines whether the density profile should be plotted as a function of the poloidal flux coordinate (-psi) or the normalised toroidal flux coordinate (rho_tor). If psiCordinate is True, the density profile will be plotted as a function of -psi. Defaults to False
-            update: The `update` parameter is a boolean flag that determines whether the plot should be updated or created from scratch. If `update` is `True`, the function will create a new plot with the given data. If `update` is `False`, the function will update an existing plot with the new. Defaults to True
+            psiCordinate: A boolean parameter that determines whether the density profile should be plotted as a
+            function of the poloidal flux coordinate (-psi) or the normalised toroidal flux coordinate (rho_tor).
+            If psiCordinate is True, the density profile will be plotted as a function of -psi. Defaults to False
+            update: The `update` parameter is a boolean flag that determines whether the plot should be updated or
+            created from scratch. If `update` is `True`, the function will create a new plot with the given data.
+            If `update` is `False`, the function will update an existing plot with the new. Defaults to True
 
         Returns:
-            a tuple containing the matplotlib plot object for the electron density profile (ax_density_plot_dens) and the maximum electron density value (nmax).
+            a tuple containing the matplotlib plot object for the electron density profile (ax_density_plot_dens)
+            and the maximum electron density value (nmax).
         """
         rhoTorNorm = self.coreProfilesCompute.getRhoTorNorm(timeIndex)
         if rhoTorNorm is not None:
@@ -213,9 +221,6 @@ class CoreProfilesView:
             )
             logger.critical("----> Aborted.")
             return
-
-        volume = self.coreProfilesCompute.getVolume()  # Volume profile (not mandatory)
-
         dictIonPressureProperties = self.coreProfilesCompute.getIonPressureProperties()
         maximaIon = dictIonPressureProperties["maximaIon"]
         pressureIonThermal = dictIonPressureProperties["pressureIonThermal"]
@@ -386,10 +391,12 @@ class CoreProfilesView:
 
     def viewQProfileAndMagneticShearProfile(self, ax, **kwargs):
         """
-        The function `viewQProfileAndMagneticShearProfile` plots the q-profile and magnetic shear profile using the given axis.
+        The function `viewQProfileAndMagneticShearProfile` plots the q-profile and magnetic shear profile
+        using the given axis.
 
         Args:
-            ax: The parameter "ax" is an instance of the matplotlib Axes class. It represents the axes on which the plot will be drawn.
+            ax: The parameter "ax" is an instance of the matplotlib Axes class. It represents the axes
+            on which the plot will be drawn.
         """
         profiles = self.coreProfilesCompute.getProfiles()
 
@@ -412,7 +419,8 @@ class CoreProfilesView:
         The function `viewCurrentDesnityProfiles` plots various current density profiles on a given axis.
 
         Args:
-            ax: The parameter "ax" is an instance of the matplotlib Axes class. It represents the axes on which the plot will be drawn.
+            ax: The parameter "ax" is an instance of the matplotlib Axes class. It represents the axes
+            on which the plot will be drawn.
         """
         profiles = self.coreProfilesCompute.getProfiles()
         ax.plot(profiles["rhonorm"], profiles["j_total"] * 1.0e-3, label=r"$j_{TOT}$")
@@ -616,4 +624,4 @@ class CoreProfilesView:
             label.set_fontsize(7)
         for label in legend.get_lines():
             label.set_linewidth(1.5)
-        ax.set_title(f"Diamagnetic velocity profile", loc="left")
+        ax.set_title("Diamagnetic velocity profile", loc="left")

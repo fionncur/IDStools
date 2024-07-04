@@ -1,10 +1,8 @@
-import logging
-from os import getenv, path
-import os
-import sys
+from os import path
 from xml.etree import ElementTree as ET
-from pathlib import Path
 import imas
+import logging
+import os
 
 logger = logging.getLogger("module")
 
@@ -64,7 +62,8 @@ class DDHelper(object):
 
         if not idsdef_path:
             print(
-                "Error accessing IDSDef.xml.  Make sure its location is defined in your environment, e.g. by loading an IMAS module."
+                "Error accessing IDSDef.xml.  Make sure its location is defined in your environment,"
+                "e.g. by loading an IMAS module."
             )
         return idsdef_path
 
@@ -110,8 +109,9 @@ class DDHelper(object):
 
             try:
                 f = self.getField(ids, fields)
-            except Exception as exc:
-                raise ValueError("Error while accessing {path}: {str(exc)}")
+            except Exception as e:
+                logger.debug(f"{e}")
+                raise ValueError(f"Error while accessing {path}: {str(e)}")
         else:
             f = ids
 

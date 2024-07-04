@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-from sys import version
 import os
 import datetime
 import numpy as np
@@ -185,7 +184,7 @@ class GEQDSK:
         try:
             rec = np.int32(fmt22.read(fp.readline()))
         except Exception as e:
-            pass
+            logger.debug(f"{e}")
         data["NBBBS"] = nbbbs = rec[0]
         data["LIMITR"] = limitr = rec[1]
 

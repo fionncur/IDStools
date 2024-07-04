@@ -102,7 +102,6 @@ def read_launching_parameters(filelaunchers):
 def read_torbeam_output(launching_parameters, path_result):
     import os
     import glob
-    from functools import cmp_to_key
 
     # Sort the list of files according to the time slices
     # TODO This logic can break easily if file names are not according to logic
@@ -128,11 +127,11 @@ def read_torbeam_output(launching_parameters, path_result):
         for i in range(nlaunchers):
             lc = True
             while lc:
-                if launchers[i] == ec_launchers.beam[j].name:
+                if launchers[i] == launchers.beam[j].name:
                     mapl[i] = j
                     j = j + 1
                     lc = False
-                elif j >= len(ec_launchers.beam):
+                elif j >= len(launchers.beam):
                     print("error determinimg mapl !!!", i, j)
                     break
                 else:
@@ -178,7 +177,7 @@ def read_torbeam_output(launching_parameters, path_result):
             e_k[j, i, :] = [vxn, vyn, vzn]
             e_k[j, i, :] = e_k[j, i, :] / np.sqrt(np.sum(e_k[j, i, :] ** 2))
             fstr = time_slices[j]
-            times[j] = fstr[fstr.find("_t") + 2 : fstr.find("_p")]
+            times[j] = fstr[fstr.find("_t") + 2: fstr.find("_p")]
     # collecting data completed
 
     beam_output["ntimes"] = ntimes
@@ -287,7 +286,7 @@ def beam_wall_crossing(wall2d, launching_parameters, beam_output):
     xpvacout = bxpdata[:, 1]
     w1v = calcw(bwyb, brsyb, xpvacout["lambda_ray"])
     w2v = calcw(bwzb, brszb, xpvacout["lambda_ray"])
-    I0v = bP_in * 2.0 / np.pi * xpvacout["k_dot_n"] / (w1v * w2v)
+    # I0v = bP_in * 2.0 / np.pi * xpvacout["k_dot_n"] / (w1v * w2v)
     g1v, g2v, rv, sv = ell_on_wall(xpvacout, w1v, w2v, bgamma, be_k, wall2d)
 
     beam_wall["g1e"] = g1e
@@ -601,7 +600,7 @@ def line_polygon_intersection(  # input
 
     line_p = np.reshape(line_p, inshape)
     line_dir = np.reshape(line_dir, inshape)
-    nxpshape = inshape[0 : len(inshape) - 1]
+    nxpshape = inshape[0: len(inshape) - 1]
     n_xp = np.reshape(n_xp, nxpshape)
     xp_data = np.reshape(xp_data, nxpshape + tuple([2]))
     return n_xp, xp_data

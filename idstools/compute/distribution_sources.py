@@ -22,7 +22,8 @@ class DistributionSourcesCompute:
         of a source.
 
         Args:
-            timeSlice (int): The parameter "timeSlice" is an integer that represents the time slice for which you want to retrieve the value of "rho_tor_norm".
+            timeSlice (int): The parameter "timeSlice" is an integer that represents the time slice for
+            which you want to retrieve the value of "rho_tor_norm".
 
         Returns:
             the variable `rho_tor_norm`.
@@ -37,6 +38,7 @@ class DistributionSourcesCompute:
                     / self.ids.source[0].profiles_1d[timeSlice].grid.rho_tor[nrho - 1]
                 )
         except Exception as e:
+            logger.debug(f"{e}")
             logger.critical("distribution_sources.source[0].profiles_1d[0].grid.rho_tor(_norm) could not be read")
         return rho_tor_norm
 
@@ -45,21 +47,27 @@ class DistributionSourcesCompute:
         The function `getVolume` retrieves the volume from a specific time slice of a source's profiles.
 
         Args:
-            timeSlice (int): The parameter "timeSlice" is an optional integer that specifies the index of the time slice for which you want to retrieve the volume.
+            timeSlice (int): The parameter "timeSlice" is an optional integer that specifies the index of the time
+            slice for which you want to retrieve the volume.
 
         Returns:
-            the volume of a grid at a given time slice. The volume is obtained from the `distribution_sources.source[timeSlice].profiles_1d[0].grid.volume` attribute. If the volume cannot be read, the function returns `None`.
+            the volume of a grid at a given time slice. The volume is obtained from the
+            `distribution_sources.source[timeSlice].profiles_1d[0].grid.volume` attribute.If the volume cannot be read
+            , the function returns `None`.
         """
         volume = None
         try:
             volume = self.ids.source[0].profiles_1d[timeSlice].grid.volume
         except Exception as e:
-            logger.critical(f"distribution_sources.source[0].profiles_1d[{timeSlice}].grid.volume could not be read")
+            logger.debug(f"{e}")
+            logger.critical(f"distribution_sources.source[0].profiles_1d[{timeSlice}].grid.volume"
+                            "could not be read {e}")
         return volume
 
     def getSourceInfo(self):
         """
-        The function `getSourceInfo` retrieves information about sources, including labels, particle data, and power, and returns it in a dictionary format.
+        The function `getSourceInfo` retrieves information about sources, including labels, particle data, and power,
+        and returns it in a dictionary format.
 
         Returns:
             a dictionary called `sourcesDict`.

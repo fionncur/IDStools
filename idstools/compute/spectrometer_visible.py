@@ -1,5 +1,3 @@
-import numpy as np
-from typing import List, Set, Union
 import logging
 import re
 
@@ -17,7 +15,8 @@ class SpectrometerVisibleCompute:
 
     def getValidSpectrometers(self):
         """
-        The function `getValidSpectrometers` returns a list of valid spectrometers by extracting the names from the `channel` objects.
+        The function `getValidSpectrometers` returns a list of valid spectrometers by extracting
+        the names from the `channel` objects.
 
         Returns:
             a list of valid spectrometers.
@@ -35,7 +34,9 @@ class SpectrometerVisibleCompute:
         The `getChannels` function retrieves information about channels based on a given channel name pattern.
 
         Args:
-            channelNamePattern: The `channelNamePattern` parameter is a regular expression pattern used to  match the names of channels. It is used to filter out channels whose names do not match the specified pattern.
+            channelNamePattern: The `channelNamePattern` parameter is a regular expression pattern used to
+            match the names of channels. It is used to filter out channels whose names do not match th
+            specified pattern.
 
         Returns:
             a dictionary called "channels".
@@ -47,7 +48,7 @@ class SpectrometerVisibleCompute:
 
             if match is None:
                 logger.warning(
-                    f"Channel's name {channel.name} does not math pattern " f"{CHANNEL_NAME_PATTERN.pattern}"
+                    f"Channel's name {channel.name} does not math pattern {CHANNEL_NAME_PATTERN.pattern}"
                 )
                 continue
 

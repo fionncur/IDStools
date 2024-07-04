@@ -1,5 +1,3 @@
-import sys
-
 ncharge = 109
 nmass = 268
 

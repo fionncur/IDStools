@@ -6,7 +6,6 @@ This module provides compute functions and classes for equilibrium ids data
 """
 
 import logging
-import os
 
 from typing import Union
 from idstools.database import DBMaster
@@ -35,17 +34,21 @@ class EquilibriumCompute:
 
 
         Args:
-            timeSlice (int): The time slice index of the equilibrium data to be used for generating the 2D Cartesian grid. Defaults to 0
-            profiles2DIndex (int): `profiles2DIndex` is an integer parameter that represents the index of the ``profile_2d`` to be used in the calculation. It is used to access the specific 2D profile from the list of profiles in the `time_slice` object. Defaults to 0
+            timeSlice (int): The time slice index of the equilibrium data to be used for generating the
+            2D Cartesian grid. Defaults to 0
+            profiles2DIndex (int): `profiles2DIndex` is an integer parameter that represents the index of the
+            ``profile_2d`` to be used in the calculation. It is used to access the specific 2D profile from the
+            list of profiles in the `time_slice` object. Defaults to 0
 
         Returns:
-            A dictionary containing the 2D Cartesian grid coordinates (r2d and z2d) and the corresponding psi values (psi2d).
+            A dictionary containing the 2D Cartesian grid coordinates (r2d and z2d) and the corresponding psi
+            values (psi2d).
 
         Example:
             .. code-block:: python
 
                 import imas
-                connection = imas.DBEntry("imas:mdsplus?user=public;pulse=134173;run=106;database=ITER;version=3", "r")
+                connection = imas.DBEntry("imas:mdsplus?user=public;pulse=134173;run=106;database=ITER;version=3","r")
                 connection.open()
                 idsObj = connection.get('equilibrium')
                 computeObj = EquilibriumCompute(idsObj)
@@ -91,7 +94,8 @@ class EquilibriumCompute:
             return None
         if np.size(r2d) != np.size(z2d) or np.size(r2d) != np.size(psi2d):
             logger.error(
-                f"r, z and psi have not the same dimension in equilibrium.time_slice[{timeSlice}].profiles_2d[{profiles2DIndex}]"
+                f"r, z and psi have not the same dimension in \
+                equilibrium.time_slice[{timeSlice}].profiles_2d[{profiles2DIndex}]"
             )
             return None
 
@@ -102,11 +106,17 @@ class EquilibriumCompute:
         This function calculates rho(R,Z) using toroidal flux  and returns a dictionary containing the result.
 
         Args:
-            timeSlice (int): The time slice is an integer value that represents the index of the time slice in the equilibrium ids. It is used to select a specific time slice for the calculation of rho(R,Z). Defaults to 0
-            profiles2DIndex (int): `profiles2DIndex` is an integer parameter that represents the index of  the ``profiles_2d`` to be used for the calculation of rho(R,Z). It is used to access the `profiles_2d` list in the `time_slice` object. Defaults to 0
+            timeSlice (int): The time slice is an integer value that represents the index of the time slice in
+            the equilibrium ids. It is used to select a specific time slice for the calculation of rho(R,Z).
+            Defaults to 0
+            profiles2DIndex (int): `profiles2DIndex` is an integer parameter that represents the index of  the
+            ``profiles_2d`` to be used for the calculation of rho(R,Z). It is used to access the `profiles_2d`
+            list in the `time_slice` object. Defaults to 0
 
         Returns:
-            a value containing the square root of the toroidal flux values divided by the maximum toroidal flux value, if the length of toroidal flux  is greater than 0. If the length of toroidal flux is less than 1, it returns None.
+            a value containing the square root of the toroidal flux values divided by the maximum toroidal
+            flux value, if the length of toroidal flux  is greater than 0. If the length of toroidal flux is
+            less than 1, it returns None.
 
         Examples:
             .. code-block:: python
@@ -138,14 +148,18 @@ class EquilibriumCompute:
 
     def getBTotal(self, timeSlice: int) -> tuple:
         """
-        This function calculates the total magnetic field strength at a given time slice based on the radial, vertical, and toroidal components of the magnetic field.
+        This function calculates the total magnetic field strength at a given time slice based on the radial,
+        vertical, and toroidal components of the magnetic field.
 
         Args:
-            timeSlice (int): timeSlice is an integer parameter representing the index of the time slice for which the magnetic field is being calculated from profiles 2D.
+            timeSlice (int): timeSlice is an integer parameter representing the index of the time slice for which
+            the magnetic field is being calculated from profiles 2D.
 
         Returns:
             Index in `profiles_2d`
-            Array of total magnetic field strength (bTotal) at a given time slice, calculated using the square root of the sum of the squares of the radial, vertical, and toroidal components of the magnetic field. If there are no profiles available for the given time slice, the function returns None.
+            Array of total magnetic field strength (bTotal) at a given time slice, calculated using the square
+            root of the sum of the squares of the radial, vertical, and toroidal components of the magnetic field.
+            If there are no profiles available for the given time slice, the function returns None.
 
         Examples:
             .. code-block:: python
@@ -195,7 +209,8 @@ class EquilibriumCompute:
             gridType (int, optional): grid type. Defaults to 1.
 
         Returns:
-            list: list of indices of the 2D profiles at a given time slice. If no such 2D profiles are found, it returns None
+            list: list of indices of the 2D profiles at a given time slice. If no such 2D profiles are found,
+            it returns None
 
         Raises:
             AttributeError: The ``Raises`` section is a list of all exceptions that are relevant to the interface.
@@ -212,7 +227,7 @@ class EquilibriumCompute:
             .. code-block:: python
 
                 import imas
-                connection = imas.DBEntry("imas:mdsplus?user=public;pulse=134173;run=106;database=ITER;version=3", "r")
+                connection = imas.DBEntry("imas:mdsplus?user=public;pulse=134173;run=106;database=ITER;version=3","r")
                 connection.open()
                 idsObj = connection.get('equilibrium')
                 computeObj = EquilibriumCompute(idsObj)
@@ -231,10 +246,13 @@ class EquilibriumCompute:
         This function returns a dictionary containing 2D profiles and rho values for a given time slice.
 
         Args:
-            timeSlice (int): The time slice parameter represents the time step at which the flux surfaces are to be calculated.
+            timeSlice (int): The time slice parameter represents the time step at which the flux surfaces are to
+            be calculated.
 
         Returns:
-            a dictionary containing information about flux surfaces at a specific time slice. The dictionary includes a 2D Cartesian grid, a 2D profile index, and a 2D array of rho values. If no profiles are found, the function returns None.
+            a dictionary containing information about flux surfaces at a specific time slice. The dictionary includes
+            a 2D Cartesian grid, a 2D profile index, and a 2D array of rho values. If no profiles are found,
+            the function returns None.
         """
         GRID_TYPE_RECTANGULAR = 1
         listOfProfiles = self.get2DProfilesIndices(timeSlice, GRID_TYPE_RECTANGULAR)
@@ -263,7 +281,7 @@ class EquilibriumCompute:
             .. code-block:: python
 
                 import imas
-                connection = imas.DBEntry("imas:mdsplus?user=public;pulse=134173;run=106;database=ITER;version=3", "r")
+                connection = imas.DBEntry("imas:mdsplus?user=public;pulse=134173;run=106;database=ITER;version=3","r")
                 connection.open()
                 idsObj = connection.get('equilibrium')
                 computeObj = EquilibriumCompute(idsObj)
@@ -352,6 +370,7 @@ class EquilibriumCompute:
         try:
             dd_version = self.ids.ids_properties.version_put.data_dictionary
         except Exception as e:
+            logger.debug(f"{e}")
             dd_version = "0.0.0"
 
         equout = deepcopy(self.ids)
@@ -714,7 +733,6 @@ class EquilibriumCompute:
         Returns:
             equilibrium IDS: vertically shifted equilibrium
         """
-        import distutils.version as version
         from copy import deepcopy
 
         equout = deepcopy(self.ids)
@@ -853,7 +871,8 @@ class EquilibriumCompute:
     #     The function "getEquilibriumQuantities" returns a dictionary containing the 2D profiles of r, z,  and psi.
 
     #     Returns:
-    #         a dictionary with keys "r2d", "z2d", and "psi2d", and their corresponding values are the  variables r2d, z2d, and psi2d, respectively.
+    #         a dictionary with keys "r2d", "z2d", and "psi2d", and their corresponding values are the  variables
+    # r2d, z2d, and psi2d, respectively.
     #     """
     #     r2d   = self.ids.time_slice[0].profiles_2d[0].r
     #     z2d   = self.ids.time_slice[0].profiles_2d[0].z

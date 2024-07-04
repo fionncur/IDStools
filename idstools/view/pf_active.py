@@ -31,7 +31,8 @@ class PFActiveView:
         This function plots and annotates the active PF coils on a existing plot.
 
         Args:
-            ax (plt.axes): `ax` is a parameter of type `plt.axes`, It is used to add patches (such as rectangles) and annotations to the plot.
+            ax (plt.axes): `ax` is a parameter of type `plt.axes`, It is used to add patches (such as rectangles)
+            and annotations to the plot.
 
         Example:
             .. code-block:: python

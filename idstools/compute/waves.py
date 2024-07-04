@@ -31,15 +31,22 @@ class WavesCompute:
         harmonicFrequencies: list = None,
     ):
         """
-        This function calculates the B-resonance (magnetic field) for a given coherent wave index, time index, and list of harmonic frequencies.
+        This function calculates the B-resonance (magnetic field) for a given coherent wave index,
+        time index, and list of harmonic frequencies.
 
         Args:
-            coherentWaveIndex (int): The index of the coherent wave for which we want to calculate the B resonance. Defaults to 0
-            timeIndex (int): The index of the time step for which the bResonance is being calculated. Defaults to 0
-            harmonicFrequencies (list): A list of integers representing the harmonic frequencies for which the B-resonance values are to be calculated. If this parameter is not provided, the function uses the default values of [1, 2, 3, 4].
+            coherentWaveIndex (int): The index of the coherent wave for which we want to calculate the
+            B resonance. Defaults to 0
+            timeIndex (int): The index of the time step for which the bResonance is being calculated.
+            Defaults to 0
+            harmonicFrequencies (list): A list of integers representing the harmonic frequencies for
+            which the B-resonance values are to be calculated. If this parameter is not provided, the
+            function uses the default values of [1, 2, 3, 4].
 
         Returns:
-            A list of values for the magnetic field resonance frequencies for the given coherent wave index, time index, and harmonic frequencies. The length of the list is equal to the length of the input harmonic frequencies list.
+            A list of values for the magnetic field resonance frequencies for the given coherent wave
+            index, time index, and harmonic frequencies. The length of the list is equal to the length of
+            the input harmonic frequencies list.
 
 
         Notes:
@@ -53,7 +60,7 @@ class WavesCompute:
                 import imas
                 from idstools.compute.waves import WavesCompute
 
-                connection = imas.DBEntry("imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3", "r")
+                connection = imas.DBEntry("imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3","r")
                 connection.open()
                 idsObj = connection.get('waves')
                 waveobj = WavesCompute(waves_ids)
@@ -76,7 +83,8 @@ class WavesCompute:
         This function returns an array of beam indices based on the number of coherent waves.
 
         Returns:
-            a numpy array of equally spaced values from 0 to nbeam-1, where nbeam is the length of the list `waves.coherent_wave`. This array represents the indices of the beams.
+            a numpy array of equally spaced values from 0 to nbeam-1, where nbeam is the length of the list
+            `waves.coherent_wave`. This array represents the indices of the beams.
 
         Example:
             .. code-block:: python
@@ -84,7 +92,7 @@ class WavesCompute:
                 import imas
                 from idstools.compute.waves import WavesCompute
 
-                connection = imas.DBEntry("imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3", "r")
+                connection = imas.DBEntry("imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3","r")
                 connection.open()
                 idsObj = connection.get('waves')
                 waveobj = WavesCompute(waves_ids)
@@ -100,11 +108,15 @@ class WavesCompute:
         This function returns the angular frequency of a coherent wave at a specific time index.
 
         Args:
-            coherentWaveIndex (int): The index of the coherent wave for which the angular frequency needs to be calculated. Defaults to 0
-            timeIndex (int): The time index parameter is used to specify the time step for which the frequency of the coherent wave is to be retrieved. Defaults to 0
+            coherentWaveIndex (int): The index of the coherent wave for which the angular frequency needs to
+            be calculated. Defaults to 0
+            timeIndex (int): The time index parameter is used to specify the time step for which the frequency
+            of the coherent wave is to be retrieved. Defaults to 0
 
         Returns:
-            The value of the angular frequency (in radians per second) of a coherent wave at a specific time index. The value is calculated using the frequency of the coherent wave at the given time index and multiplying it by 2*pi.
+            The value of the angular frequency (in radians per second) of a coherent wave at a specific time
+            index. The value is calculated using the frequency of the coherent wave at the given time index
+            and multiplying it by 2*pi.
 
         Notes:
             .. math:: OmegaEC = \\ 2*pi*frequency
@@ -116,7 +128,7 @@ class WavesCompute:
                 import imas
                 from idstools.compute.waves import WavesCompute
 
-                connection = imas.DBEntry("imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3", "r")
+                connection = imas.DBEntry("imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3","r")
                 connection.open()
                 idsObj = connection.get('waves')
                 waveobj = WavesCompute(waves_ids)
@@ -132,10 +144,14 @@ class WavesCompute:
         This function returns a dictionary of active beams with their respective properties.
 
         Args:
-            beamTracingTimeIndex (int): The parameter `beamTracingTimeIndex` is an integer that represents the index of the beam tracing time. Defaults to 0
+            beamTracingTimeIndex (int): The parameter `beamTracingTimeIndex` is an integer that represents
+            the index of the beam tracing time. Defaults to 0
 
         Returns:
-            Dictionary called `activeBeams` which contains information about each beam in `waves.coherent_wave`. The dictionary has keys for each beam index and the values are  dictionaries containing the total number of beams and boolean indicating whether the beam is active or not. The function determines if a beam is active by checking if any of its rays have initial power greater than 0.
+            Dictionary called `activeBeams` which contains information about each beam in `waves.coherent_wave`.
+            The dictionary has keys for each beam index and the values are  dictionaries containing the total number
+            of beams and boolean indicating whether the beam is active or not. The function determines if a beam
+            is active by checking if any of its rays have initial power greater than 0.
 
         Example:
             .. code-block:: python
@@ -144,7 +160,7 @@ class WavesCompute:
                 import imas
                 from idstools.compute.waves import WavesCompute
 
-                connection = imas.DBEntry("imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3", "r")
+                connection = imas.DBEntry("imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3","r")
                 connection.open()
                 idsObj = connection.get('waves')
                 waveobj = WavesCompute(waves_ids)
@@ -185,10 +201,12 @@ class WavesCompute:
         This function returns a dictionary containing information about the beam tracing of a coherent wave.
 
         Args:
-            beamTracingTimeIndex (int): The index of the time step for which to retrieve the beam tracing data. Defaults to 0
+            beamTracingTimeIndex (int): The index of the time step for which to retrieve the beam tracing data.
+            Defaults to 0
 
         Returns:
-            a dictionary named "beam_tracing" which contains various arrays and values related to the beam tracing data. Following are the values returned by the function
+            a dictionary named "beam_tracing" which contains various arrays and values related to the beam tracing
+            data. Following are the values returned by the function
 
         Example:
             .. code-block:: python
@@ -196,7 +214,7 @@ class WavesCompute:
                 import imas
                 from idstools.compute.waves import WavesCompute
 
-                connection = imas.DBEntry("imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3", "r")
+                connection = imas.DBEntry("imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3","r")
                 connection.open()
                 idsObj = connection.get('waves')
                 waveobj = WavesCompute(waves_ids)
@@ -435,14 +453,16 @@ class WavesCompute:
 
     def getRadialGridInfo(self, timeIndex: int = 0, usepsi=False):
         """
-        The function `getRadialGridInfo` retrieves radial grid information for coherent waves, with an option to use psi as a radial coordinate.
+        The function `getRadialGridInfo` retrieves radial grid information for coherent waves, with an option
+        to use psi as a radial coordinate.
 
         Args:
             timeIndex (int): The `timeIndex` parameter
             usepsi: The `usepsi` parameter tells whether to use the psi radial coordinate for the grid information.
 
         Returns:
-            The function `getRadialGridInfo` returns a dictionary `data` containing information about the radial grid for each coherent wave in the object. If no active waves are found, it returns `None`.
+            The function `getRadialGridInfo` returns a dictionary `data` containing information about the
+            radial grid for each coherent wave in the object. If no active waves are found, it returns `None`.
         """
         data = {}
         activeFound = False
@@ -463,20 +483,29 @@ class WavesCompute:
                     # fmt: off
                     try:
                         if (len(self.ids.coherent_wave[iwave].profiles_1d[timeIndex].grid.rho_tor_norm) > 0):
-                            waveData["nrho"] = len(self.ids.coherent_wave[iwave].profiles_1d[timeIndex].grid.rho_tor_norm)
-                            waveData["rho_tor_norm"] = (self.ids.coherent_wave[iwave].profiles_1d[timeIndex].grid.rho_tor_norm)
+                            waveData["nrho"] = \
+                                len(self.ids.coherent_wave[iwave].profiles_1d[timeIndex].grid.rho_tor_norm)
+                            waveData["rho_tor_norm"] = \
+                                (self.ids.coherent_wave[iwave].profiles_1d[timeIndex].grid.rho_tor_norm)
                         elif (len(self.ids.coherent_wave[iwave].profiles_1d[timeIndex].grid.rho_tor) > 0):
-                            waveData["nrho"] = len(self.ids.coherent_wave[iwave].profiles_1d[timeIndex].grid.rho_tor)
-                            waveData["rho_tor_norm"] = (self.ids.coherent_wave[iwave].profiles_1d[timeIndex].grid.rho_tor / self.ids.coherent_wave[iwave].profiles_1d[timeIndex].grid.rho_tor[waveData["nrho"] - 1])
+                            waveData["nrho"] = \
+                                len(self.ids.coherent_wave[iwave].profiles_1d[timeIndex].grid.rho_tor)
+                            waveData["rho_tor_norm"] = (
+                                self.ids.coherent_wave[iwave].profiles_1d[timeIndex].grid.rho_tor /
+                                self.ids.coherent_wave[iwave].profiles_1d[timeIndex].grid.rho_tor[waveData["nrho"] - 1]
+                            )
                         elif (len(self.ids.coherent_wave[iwave].profiles_1d[timeIndex].grid.psi) > 0):
-                            waveData["psiBased"] = True 
+                            waveData["psiBased"] = True
                             waveData["nrho"] = len(self.ids.coherent_wave[iwave].profiles_1d[timeIndex].grid.psi)
                             waveData["rho_tor_norm"] = (-self.ids.coherent_wave[iwave].profiles_1d[timeIndex].grid.psi)
                     except Exception as e:
-                        logger.error("waves.coherent_wave[iwave].profiles_1d[it].grid.rho_tor_norm, rho_tor and psi could not be read")
+                        logger.debug(f"{e}")
+                        logger.error("waves.coherent_wave[iwave].profiles_1d[it].grid.rho_tor_norm, \
+                            rho_tor and psi could not be read")
                         return None
                     if waveData["nrho"] == 0:
-                        logger.error("waves.coherent_wave[iwave].profiles_1d[it].grid.rho_tor_norm, rho_tor and psi are empty")
+                        logger.error("waves.coherent_wave[iwave].profiles_1d[it].grid.rho_tor_norm, \
+                            rho_tor and psi are empty")
                         return None
                     if (len(self.ids.coherent_wave[iwave].profiles_1d[timeIndex].grid.psi) > 0):
                         waveData["isPsiAvailable"] = True

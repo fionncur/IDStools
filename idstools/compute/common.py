@@ -3,11 +3,9 @@ This is a common module which has mathematical or physics functions
 
 """
 
-import logging
 from typing import Tuple, Union
+import logging
 import numpy as np
-from packaging import version
-
 
 logger = logging.getLogger("module")
 
@@ -20,12 +18,13 @@ def findNearest(a, a0):
 
 def getNearestTime(timeArray: np.ndarray, requestedTime: float) -> Tuple[int, float]:
     """
-    The function `getNearestTime` takes an array of time values and a requested time, and returns the index and value of the nearest time in the array to the requested time.
+    The function `getNearestTime` takes an array of time values and a requested time, and returns the index
+    and value of the nearest time in the array to the requested time.
 
     Args:
-        timeArray (np.ndarray): The `timeArray` parameter is a numpy array containing a list of time
-    values.
-        requestedTime (float): The `requestedTime` parameter is the time value that you want to find the  nearest value to in the `timeArray`.
+        timeArray (np.ndarray): The `timeArray` parameter is a numpy array containing a list of time values.
+        requestedTime (float): The `requestedTime` parameter is the time value that you want to find the
+        nearest value to in the `timeArray`.
 
     Returns:
         The function `getNearestTime` returns a tuple containing the time index and time value.
@@ -55,14 +54,17 @@ def getNearestTime(timeArray: np.ndarray, requestedTime: float) -> Tuple[int, fl
 
 def getClosestOfGivenValueFromArray(array: np.ndarray, value: float) -> Union[None, tuple]:
     """
-    Find the index of the element in the array that is closest to the given value using the minimum absolute difference.
+    Find the index of the element in the array that is closest to the given value using the minimum absolute
+    difference.
 
     Args:
         array (np.ndarray): A NumPy array of numbers.
         value (float): The value to which we want to find the nearest element in the array.
 
     Returns:
-        The function `nearest` returns a tuple containing the index of the element in the input `array` that is closest to the input `value`, and the value of that element. If the input `array` is `None` or empty, the function returns `None`.
+        The function `nearest` returns a tuple containing the index of the element in the input `array` that
+        is closest to the input `value`, and the value of that element. If the input `array` is `None` or empty,
+        the function returns `None`.
     """
     if array is None:
         return None
@@ -80,7 +82,8 @@ def getMiddleElementFromArray(array: np.ndarray) -> Union[None, tuple]:
         array (np.ndarray): A NumPy array for which we want to find the middle element.
 
     Returns:
-        The function `middle` takes a numpy array as input and returns a tuple containing the index and value of the middle element of the array. If the input array is None or empty, the function returns None.
+        The function `middle` takes a numpy array as input and returns a tuple containing the index and value
+        of the middle element of the array. If the input array is None or empty, the function returns None.
     """
     if array is None:
         return None
@@ -98,10 +101,13 @@ def xyz2cyl(rvec):
     The function converts a set of 3D Cartesian coordinates to cylindrical coordinates.
 
     Args:
-        rvec: rvec is a numpy array containing the coordinates of points in 3D space in the Cartesian coordinate system (x, y, z). The function xyz2cyl converts these coordinates to cylindrical coordinates (r, phi, z) and returns them as a numpy array with the same shape as the `rvec`
+        rvec: rvec is a numpy array containing the coordinates of points in 3D space in the Cartesian
+        coordinate system (x, y, z). The function xyz2cyl converts these coordinates to cylindrical
+        coordinates (r, phi, z) and returns them as a numpy array with the same shape as the `rvec`
 
     Returns:
-        The function `xyz2cyl` returns a numpy array `rcyl` which contains the cylindrical coordinates (radius, azimuthal angle, and height) of the input vector `rvec` which is in Cartesian coordinates.
+        The function `xyz2cyl` returns a numpy array `rcyl` which contains the cylindrical coordinates
+        (radius, azimuthal angle, and height) of the input vector `rvec` which is in Cartesian coordinates.
 
     .. todo: need to refactor naming of the variables
     """
@@ -124,10 +130,13 @@ def cyl2xyz(rcyl):
     The function cyl2xyz converts cylindrical coordinates to Cartesian coordinates.
 
     Args:
-        rcyl: rcyl is a numpy array containing cylindrical coordinates (r, theta, z) of points in 3D space. The function cyl2xyz converts these cylindrical coordinates to Cartesian coordinates (x, y, z) and returns a numpy array of the same shape as rcyl.
+        rcyl: rcyl is a numpy array containing cylindrical coordinates (r, theta, z) of points in 3D space.
+        The function cyl2xyz converts these cylindrical coordinates to Cartesian coordinates (x, y, z) and
+        returns a numpy array of the same shape as rcyl.
 
     Returns:
-        The function `cyl2xyz` returns a numpy array with the same shape as the input `rcyl` array, but with the cylindrical coordinates converted to Cartesian coordinates.
+        The function `cyl2xyz` returns a numpy array with the same shape as the input `rcyl` array, but with
+        the cylindrical coordinates converted to Cartesian coordinates.
     """
     rcyl_shape = rcyl.shape
     rvec = np.reshape(rcyl, (-1, 3))
@@ -184,10 +193,16 @@ def line_polygon_intersection(  # input
     This function calculates the intersection points between a line and a polygon.
 
     Args:
-        line_p: A numpy array representing the starting point of the line segment(s) to be intersected with the polygon. It has shape (n,3) where n is the number of line segments and each row represents the x, y, z coordinates of the starting point of the line segment.
-        line_dir: The direction vector(s) of the line(s) for which intersection with the polygon is being calculated. It is a numpy array of shape (n,3) where n is the number of lines and each row represents the direction vector of a line.
-        polygon_data: The coordinates of the vertices of a polygon in 3D space.
-        close: A boolean parameter that determines whether the polygon is closed or not. If set to True (default), the polygon is assumed to be closed, otherwise, it is assumed to be open. Defaults to True
+        line_p: A numpy array representing the starting point of the line segment(s) to be intersected
+            with the polygon. It has shape (n,3) where n is the number of line segments and each row
+            represents the x, y, z coordinates of the starting point of the line segment.
+        line_dir: The direction vector(s) of the line(s) for which intersection with the polygon is
+            being calculated. It is a numpy array of shape (n,3) where n is the number of lines and each
+            row represents the direction vector of a line.
+            polygon_data: The coordinates of the vertices of a polygon in 3D space.
+        close: A boolean parameter that determines whether the polygon is closed or not. If set to
+            True (default), the polygon is assumed to be closed, otherwise, it is assumed to be open.
+            Defaults to True
 
     Returns:
         two arrays: n_xp and xp_data.
@@ -444,7 +459,7 @@ def line_polygon_intersection(  # input
 
     line_p = np.reshape(line_p, inshape)
     line_dir = np.reshape(line_dir, inshape)
-    nxpshape = inshape[0 : len(inshape) - 1]
+    nxpshape = inshape[0: len(inshape) - 1]
     n_xp = np.reshape(n_xp, nxpshape)
     xp_data = np.reshape(xp_data, nxpshape + tuple([2]))
     return n_xp, xp_data
@@ -452,16 +467,19 @@ def line_polygon_intersection(  # input
 
 def calcw(wt, Rt, lambda_ray, freq=np.double(170.0e9)):
     """
-    The function calculates the width of a laser beam based on its initial width, curvature radius, length along the ray, and frequency.
+    The function calculates the width of a laser beam based on its initial width, curvature radius, length
+    along the ray, and frequency.
 
     Args:
         wt: width at the start point of the ray in meters
-        Rt: Curvature radius at start point in meters. If Rt is negative, the beam will pass through the focus, and if it is positive, the beam will purely diverge. The focus is located at lambda_ray =-Rt.
+        Rt: Curvature radius at start point in meters. If Rt is negative, the beam will pass through the focus,
+        and if it is positive, the beam will purely diverge. The focus is located at lambda_ray =-Rt.
         lambda_ray: length along the ray in meters
         freq: wave frequency in Hz (not rad/s)
 
     Returns:
-        the value of the beam width w at a given length along the ray, calculated based on the input parameters of width and curvature radius at the start point, the length along the ray, and the frequency of the wave.
+        the value of the beam width w at a given length along the ray, calculated based on the input parameters of
+        width and curvature radius at the start point, the length along the ray, and the frequency of the wave.
 
     Note:
         calculates beam width for given w,Rcur and length along ray (lambda_ray)

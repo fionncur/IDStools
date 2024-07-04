@@ -3,11 +3,12 @@ Helper routines to parse command line arguments for typical scripts that access 
 
 This will be extended quite a bit in 2012.
 """
-
 import optparse
 import os
-
+import logging
 from idstools.database import DBMaster
+
+logger = logging.getLogger("module")
 
 
 def read_env():
@@ -95,6 +96,7 @@ def parseShotDescription(shotDesc):
         if len(parts) >= 3:
             pars["time"] = float(parts[2])
     except Exception as e:
+        logger.debug(f"{e}")
         raise SystemExit("Invalid shot description: " + shotDesc)
 
     return pars

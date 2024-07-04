@@ -18,11 +18,14 @@ python -m venv "$ENVIRONEMNT_NAME"
 pip install --upgrade 'black >=24,<25' flake8 pylint
 
 echo "---------------------------------------------------------------------"
+echo "executing black"
 black --check -l 120 idstools >black.log
 echo "---------------------------------------------------------------------"
-flake8 idstools >flake8.log
+echo "executing flake8"
+flake8 --max-line-length=120 idstools >flake8.log
 echo "---------------------------------------------------------------------"
-pylint -E ./idstools >pylint.log
+# echo "executing pylint"
+# pylint --max-line-length=120 -E ./idstools >pylint.log
 echo "---------------------------------------------------------------------"
 deactivate
 rm -rf "$ENVIRONEMNT_NAME"

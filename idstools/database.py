@@ -8,6 +8,7 @@ from pathlib import Path
 import re
 import imas
 from yaml import load as yamlload
+from yaml import safe_load
 
 try:
     from yaml import CLoader as yamlLoader
@@ -24,13 +25,18 @@ class DBMaster:
     @staticmethod
     def getUserDir(user: str = None):
         """
-        The function `getUserDir` returns the database directory path for a given user or the current user's directory path if no user is specified.
+        The function `getUserDir` returns the database directory path for a given user or the current user's directory
+        path if no user is specified.
 
         Args:
-            user (str): The `user` parameter is a string that represents the username of the user for whom the directory path is being retrieved. If the `user` parameter is not provided or is `None`, it will default to the current logged-in user obtained using `os.getlogin()`.
+            user (str): The `user` parameter is a string that represents the username of the user for whom the
+            directory path is being retrieved. If the `user` parameter is not provided or is `None`, it will
+            default to the current logged-in user obtained using `os.getlogin()`.
 
         Returns:
-            a file path. If the user is not specified or is "public", it returns the file path to the "public/imasdb/" directory in the user's home directory. If the user is not "public", it returns the file path to the "shared/imasdb/" directory in the IMAS_HOME directory.
+            a file path. If the user is not specified or is "public", it returns the file path to the
+            "public/imasdb/" directory in the user's home directory. If the user is not "public", itreturns the
+            file path to the "shared/imasdb/" directory in the IMAS_HOME directory.
         """
         if not user:
             user = os.getlogin()
@@ -44,14 +50,18 @@ class DBMaster:
     @staticmethod
     def getDatabaseDir(database: str, user: str = None):
         """
-        The function `getDatabaseDir` returns the directory path for a given database, and raises an error if the path does not exist.
+        The function `getDatabaseDir` returns the directory path for a given database, and raises an error
+        if the path does not exist.
 
         Args:
-            database (str): The `database` parameter is a string that represents the name of the database file or directory.
-            user (str): The `user` parameter is an optional parameter that represents the user for whom the database directory is being retrieved.
+            database (str): The `database` parameter is a string that represents the name of the database
+            file or directory.
+            user (str): The `user` parameter is an optional parameter that represents the user for whom the
+            database directory is being retrieved.
 
         Returns:
-            the directory path of the specified database if it exists. If the database does not exist, it raises a FileNotFoundError. If the database parameter is None, it returns None.
+            the directory path of the specified database if it exists. If the database does not exist, it
+            raises a FileNotFoundError. If the database parameter is None, it returns None.
         """
         userDir = DBMaster.getUserDir(user)
 
@@ -61,14 +71,16 @@ class DBMaster:
                 return userDatabaseDir
             else:
                 raise FileNotFoundError(
-                    "The path provided does not exist or has no such database file or directory. Please check spelling."
+                    "The path provided does not exist or has no such database file or directory. \
+                        Please check spelling."
                 )
         return None
 
     @staticmethod
     def getVersionDir(version: str, database: str, user: str = None):
         """
-        The function `getVersionDir` returns the directory path for a specific version of a database, given the version, database name, and optional user.
+        The function `getVersionDir` returns the directory path for a specific version of a database,
+        given the version, database name, and optional user.
 
         Args:
             version (str): The version parameter is a string that represents the version of the database.
@@ -76,7 +88,9 @@ class DBMaster:
             user (str): The `user` parameter is an optional parameter
 
         Returns:
-            the directory path for the specified version of a database. If the version directory exists, it returns the path. If the version directory does not exist, it raises a FileNotFoundError. If the version parameter is None, it returns None.
+            the directory path for the specified version of a database. If the version directory exists,
+            it returns the path. If the version directory does not exist, it raises a FileNotFoundError.
+            If the version parameter is None, it returns None.
         """
         databaseDir = DBMaster.getDatabaseDir(database, user)
         if version is not None:
@@ -85,7 +99,7 @@ class DBMaster:
                 return versionDir
             else:
                 raise FileNotFoundError(
-                    "The path provided does not exist or has no such database file or directory. Please check spelling."
+                    "The path provided does not exist or has no such database file or directory.Please check spelling"
                 )
         return None
 
@@ -95,7 +109,8 @@ class DBMaster:
         The function `getDatabases` returns a sorted list of databases in a user's directory.
 
         Args:
-            user (str): The `user` parameter is a string that represents the username of the user for whom the databases are being retrieved.
+            user (str): The `user` parameter is a string that represents the username of the user
+            for whom the databases are being retrieved.
 
         Returns:
             a list of databases.
@@ -125,13 +140,17 @@ class DBMaster:
     @staticmethod
     def getDatabasesWithVersions(user: str = None) -> list:
         """
-        The function `getDatabasesWithVersions` returns a list of tuples, where each tuple contains the  name of a database and a list of its versions, for a given user.
+        The function `getDatabasesWithVersions` returns a list of tuples, where each tuple contains
+        the  name of a database and a list of its versions, for a given user.
 
         Args:
-            user (str): The `user` parameter is a string that represents the username or identifier of the  user for whom the databases and their versions are being retrieved. It is an optional parameter and can be set to `None` if not applicable.
+            user (str): The `user` parameter is a string that represents the username or identifier of
+            the  user for whom the databases and their versions are being retrieved. It is an optional
+            parameter and can be set to `None` if not applicable.
 
         Returns:
-            a list of tuples. Each tuple contains the name of a database and a list of versions associated  with that database. The list is sorted by the database names.
+            a list of tuples. Each tuple contains the name of a database and a list of versions associated
+            with that database. The list is sorted by the database names.
         """
         userDir = DBMaster.getUserDir(user)
         databasesDict = {}
@@ -145,12 +164,14 @@ class DBMaster:
     @staticmethod
     def getVersionsWithDatabases(user: str = None) -> list:
         """
-        The function `getVersionsWithDatabases` returns a list of tuples, where each tuple contains a version number and a list of databases associated with that version.
+        The function `getVersionsWithDatabases` returns a list of tuples, where each tuple contains a version
+        number and a list of databases associated with that version.
 
         Args:
             user (str): The `user` parameter is an optional string
         Returns:
-            a list of tuples. Each tuple contains a version number and a list of databases that have that version. The list is sorted in ascending order based on the version numbers.
+            a list of tuples. Each tuple contains a version number and a list of databases that have that version.
+            The list is sorted in ascending order based on the version numbers.
         """
         databaseWithVersionsDict = DBMaster.getDatabasesWithVersions(user=user)
 
@@ -165,10 +186,12 @@ class DBMaster:
     @staticmethod
     def getHdf5Pulses(user: str = None, database: str = None, version: str = None, asDictionary=False) -> list:
         """
-        The function `getHdf5Pulses` retrieves a list of pulses from HDF5 master files. It needs to specify full path till version.
+        The function `getHdf5Pulses` retrieves a list of pulses from HDF5 master files. It needs to specify
+        full path till version.
 
         Returns:
-            a list of tuples. Each tuple contains the following elements, The tuple includes the pulse number, run number, HDF5_BACKEND backend, database, user, version, and data file path.
+            a list of tuples. Each tuple contains the following elements, The tuple includes the pulse number,
+            run number, HDF5_BACKEND backend, database, user, version, and data file path.
         """
         versionDir = DBMaster.getVersionDir(version, database, user)
         pulses = {} if asDictionary else []
@@ -179,6 +202,7 @@ class DBMaster:
                 run = int(str(hdf5MasterFilePath).split("/")[-2])
             except Exception as e:
                 print(f"Malformed database path {hdf5MasterFilePath}")
+                logger.debug(f"{e}")
                 continue
             fileTime = datetime.fromtimestamp(os.path.getmtime(hdf5MasterFilePath)).replace(microsecond=0)
 
@@ -221,15 +245,23 @@ class DBMaster:
         asDictionary=False,
     ) -> list:
         """
-        The function `getMdsPlusPulses` retrieves a list of MDSPlus pulses based on the provided user, database, version, and status parameters.
+        The function `getMdsPlusPulses` retrieves a list of MDSPlus pulses based on the provided user, database,
+        version, and status parameters.
 
         Args:
             user (str): The `user` parameter is a string that represents the user for whom the MDSPlus
         pulses are being retrieved.
-            database (str): The `database` parameter is a string that represents the name of the database. It is used to specify the directory where the MDSplus pulses are stored.
-            version (str): The `version` parameter is used to specify the version of the MDSplus database. It is a string that represents the version number.
-            status (str): The "status" parameter is used to filter the pulses based on their status. If a status is provided, only pulses with that status will be included in the result. If no status is provided, all pulses will be included.
-            asDictionary (bool): The `asDictionary` parameter is a boolean flag that determines the format of the returned pulses. If `asDictionary` is set to `True`, the pulses will be returned as a dictionary where the keys are the pulse numbers and the values are lists of runs associated with each pulse.Defaults to False
+            database (str): The `database` parameter is a string that represents the name of the database.
+            It is used to specify the directory where the MDSplus pulses are stored.
+            version (str): The `version` parameter is used to specify the version of the MDSplus database.
+            It is a string that represents the version number.
+            status (str): The "status" parameter is used to filter the pulses based on their status. If a
+            status is provided, only pulses with that status will be included in the result. If no status
+            is provided, all pulses will be included.
+            asDictionary (bool): The `asDictionary` parameter is a boolean flag that determines the format
+            of the returned pulses. If `asDictionary` is set to `True`, the pulses will be returned as a
+            dictionary where the keys are the pulse numbers and the values are lists of runs associated
+            with each pulse.Defaults to False
 
         Returns:
             a list of pulses.
@@ -241,7 +273,7 @@ class DBMaster:
             for datafile in fnmatch.filter(filenames, "*.datafile"):
                 dataFilePath = f"{root}/{datafile}"
                 if (status is None) or (status == DBMaster.getPulseStatus(Path(dataFilePath).with_suffix(".yaml"))):
-                    runList = (root[len(mdsplusDir) + 1 :]).split("/")
+                    runList = (root[len(mdsplusDir) + 1:]).split("/")
                     try:
                         if len(runList) == 1:  # AL4 layout
                             numStartPos = datafile.find("_") + 1
@@ -259,6 +291,7 @@ class DBMaster:
                             pulse = int(pulse)
                     except Exception as e:
                         print(f"Malformed database path {root}")
+                        logger.debug(f"{e}")
                         continue
                     fileTime = datetime.fromtimestamp(os.path.getmtime(dataFilePath)).replace(microsecond=0)
 
@@ -309,7 +342,7 @@ class DBMaster:
         _yamlFilePath = Path(yamlFilePath)
         try:
             with open(_yamlFilePath, "r") as fileHandle:
-                metadata = yaml.safe_load(fileHandle)
+                metadata = safe_load(fileHandle)
         except FileNotFoundError as exc:
             print(exc)
             return "unknown"
@@ -318,16 +351,23 @@ class DBMaster:
     @staticmethod
     def getDatabaseFiles(user=None, database=None, version=None, backends=None):
         """
-        The function `getDatabaseFiles` retrieves a list of database files based on the specified user,  database, version, and backends.
+        The function `getDatabaseFiles` retrieves a list of database files based on the specified user,
+        database, version, and backends.
 
         Args:
-            user: The ``user`` parameter is used to specify the user for whom the database files are being retrieved. If no user is specified, it defaults to ``None``.
+            user: The ``user`` parameter is used to specify the user for whom the database files are being
+            retrieved. If no user is specified, it defaults to ``None``.
             database: The ``database`` parameter is used to specify the name of the database.
             version: The ``version`` parameter is used to specify a specific version of the database.
-            backends: The ``backends`` parameter is a list of strings that specifies the database backends to retrieve files from. The possible values for ``backends`` are ``hdf5`` and ``mdsplus``. If ``backends`` is not provided, it defaults to ``DBMaster.ALL_BACKENDS``
+            backends: The ``backends`` parameter is a list of strings that specifies the database backends to
+            retrieve files from. The possible values for ``backends`` are ``hdf5`` and ``mdsplus``. If ``backends``
+            is not provided, it defaults to ``DBMaster.ALL_BACKENDS``
 
         Returns:
-            The function ``getDatabaseFiles`` returns a list of tuples. Each tuple contains the name of a database, followed by a list of tuples. Each inner tuple contains a version number, followed by a list of tuples. Each innermost tuple contains the name of a backend (either ``hdf5`` or ``mdsplus``), followed by a dictionary of database files.
+            The function ``getDatabaseFiles`` returns a list of tuples. Each tuple contains the name of a database,
+            followed by a list of tuples. Each inner tuple contains a version number, followed by a list of tuples.
+            Each innermost tuple contains the name of a backend (either ``hdf5`` or ``mdsplus``), followed by a
+            dictionary of database files.
         """
         result = []
 
@@ -358,13 +398,15 @@ class DBMaster:
     @staticmethod
     def getHDF5PhysicalFile(user, database, version, pulse, run):
         """
-        The function `getHDF5PhysicalFile` returns the path to an HDF5 file based on the user, database, version, pulse, and run.
+        The function `getHDF5PhysicalFile` returns the path to an HDF5 file based on the user, database, version,
+        pulse, and run.
 
         Args:
             user: The "user" parameter represents the name of the user who is accessing the HDF5 physical file.
             database: The "database" parameter refers to the name of the database where the HDF5 files are stored.
             version: The "version" parameter represents the version of the database.
-            pulse: The "pulse" parameter represents the pulse number. It is a numerical value that identifies a specific pulse in a dataset.
+            pulse: The "pulse" parameter represents the pulse number. It is a numerical value that identifies a
+            specific pulse in a dataset.
             run: The "run" parameter represents the run number.
 
         Returns:
@@ -387,7 +429,9 @@ class DBMaster:
             run: The "run" parameter is the run number.
 
         Returns:
-            The function `getMDSPlusPhysicalFiles` returns a tuple of three strings. The first string is the filename with the extension ".characteristics", the second string is the filename with the extension ".datafile", and the third string is the filename with the extension ".tree".
+            The function `getMDSPlusPhysicalFiles` returns a tuple of three strings. The first string is the
+            filename with the extension ".characteristics", the second string is the filename with the extension
+            ".datafile", and the third string is the filename with the extension ".tree".
         """
         mdsplusdir = os.path.join(DBMaster.getUserDir(user), database, version)
         # filename is ids_<shot><run> where run is last four digits of run number,
@@ -416,11 +460,16 @@ class DBMaster:
 
         Args:
             user: The user parameter represents the user who is requesting the physical files.
-            database: The "database" parameter refers to the name or identifier of the database for which you want to retrieve the physical files.
-            version: The version parameter represents the version of the database. It is used to retrieve the physical files associated with a specific version of the database.
-            pulse: The "pulse" parameter refers to a specific pulse or shot number in a database. It is used to identify a particular data acquisition event or experiment.
-            run: The "run" parameter is used to specify the run number or identifier for the database. It is likely used to retrieve the physical files associated with a specific run of the database.
-            backend: The "backend" parameter refers to the type of database backend being used. It can have two possible values: "mdsplus" or "hdf5".
+            database: The "database" parameter refers to the name or identifier of the database for which you
+            want to retrieve the physical files.
+            version: The version parameter represents the version of the database. It is used to retrieve the
+            physical files associated with a specific version of the database.
+            pulse: The "pulse" parameter refers to a specific pulse or shot number in a database. It is used to
+            identify a particular data acquisition event or experiment.
+            run: The "run" parameter is used to specify the run number or identifier for the database. It is
+            likely used to retrieve the physical files associated with a specific run of the database.
+            backend: The "backend" parameter refers to the type of database backend being used. It can have
+            two possible values: "mdsplus" or "hdf5".
 
         Returns:
             The function `getPhysicalFiles` returns the physical file path storing the specified database.
@@ -508,7 +557,7 @@ class DBMaster:
         p = Path(path)
         try:
             with open(p, "r") as f:
-                metadata = yaml.safe_load(f)
+                metadata = safe_load(f)
         except FileNotFoundError as exc:
             print(exc)
             return "unknown"
@@ -598,12 +647,14 @@ class DBMaster:
 
     @staticmethod
     def getDBPath(user, database, version):
-        """Function that returns a pathlib Path to desired database, depending on the user, database and version names.
+        """Function that returns a pathlib Path to desired database, depending on the user, database and
+        version names.
 
         Parameters
         ---------
         user: str
-            Status of user: either public or local. A public user should just be left as public, whereas a local user should write their proper identifier
+            Status of user: either public or local. A public user should just be left as public, whereas a
+            local user should write their proper identifier
 
         database: str
             Name of database where the data is harbored
@@ -631,13 +682,18 @@ def readScenario(
     **testArgs,
 ):
     """
-    This function reads a scenario file and takes in optional input and output IDs lists, as well as a  test mode flag and additional test arguments.
+    This function reads a scenario file and takes in optional input and output IDs lists, as well as a  test
+    mode flag and additional test arguments.
 
     Args:
         scenarioFilePath (str): The file path of the scenario file that contains the test cases.
         inIDSList (list): A list of input IDS names that should be read from the scenario file.
-        outIDSList (list): A list of output IDS names  It is used to specify the list of output IDs that the function should read from the scenario file. If this parameter is not provided, the function will read all output IDs from the scenario file.
-        testMode (bool): A boolean flag indicating whether the function is being called in test mode or not. If testMode is True, the function will execute in a way that is suitable for testing purposes. Defaults to False
+        outIDSList (list): A list of output IDS names  It is used to specify the list of output IDs that
+        the function should read from the scenario file. If this parameter is not provided, the function
+        will read all output IDs from the scenario file.
+        testMode (bool): A boolean flag indicating whether the function is being called in test mode or not.
+        If testMode is True, the function will execute in a way that is suitable for testing purposes.
+        Defaults to False
     """
     testArgsList = list(testArgs.values())
 
@@ -711,13 +767,18 @@ def readScenarioWithArgs(
     **testArgs,
 ):
     """
-    This function reads a scenario file and takes in optional input and output IDs lists, as well as a  test mode flag and additional test arguments.
+    This function reads a scenario file and takes in optional input and output IDs lists, as well as a
+    test mode flag and additional test arguments.
 
     Args:
         scenarioFilePath (str): The file path of the scenario file that contains the test cases.
         inIDSList (list): A list of input IDS names that should be read from the scenario file.
-        outIDSList (list): A list of output IDS names  It is used to specify the list of output IDs that the function should read from the scenario file. If this parameter is not provided, the function will read all output IDs from the scenario file.
-        testMode (bool): A boolean flag indicating whether the function is being called in test mode or not. If testMode is True, the function will execute in a way that is suitable for testing purposes. Defaults to False
+        outIDSList (list): A list of output IDS names  It is used to specify the list of output IDs that the
+        function should read from the scenario file. If this parameter is not provided, the function will read
+        all output IDs from the scenario file.
+        testMode (bool): A boolean flag indicating whether the function is being called in test mode or not.
+        If testMode is True, the function will execute in a way that is suitable for testing purposes.
+        Defaults to False
     """
     testArgsList = list(testArgs.values())
 

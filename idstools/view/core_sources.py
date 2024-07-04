@@ -77,7 +77,8 @@ class CoreSourcesView:
         The function `viewPowerProfiles` plots power profiles for different sources
 
         Args:
-            ax: The parameter `ax` is an instance of the `Axes` class from the `matplotlib.pyplot` module. It represents the axes on which the power profiles will be plotted.
+            ax: The parameter `ax` is an instance of the `Axes` class from the `matplotlib.pyplot` module.
+            It represents the axes on which the power profiles will be plotted.
         """
         if self.coreSourcesCompute.isActiveSourceAvailable():
             rho_tor_norm = self.coreSourcesCompute.getRhoTorNorm()
@@ -125,10 +126,12 @@ class CoreSourcesView:
 
     def viewParticlesProfiles(self, ax, *args, **kwargs):
         """
-        The function `viewParticlesProfiles` plots particle density profiles for electrons and ions at different sources as a function of normalized toroidal flux coordinate.
+        The function `viewParticlesProfiles` plots particle density profiles for electrons and ions at different
+        sources as a function of normalized toroidal flux coordinate.
 
         Args:
-            ax: The parameter `ax` is an instance of the `Axes` class from the `matplotlib.pyplot` module. It represents the axes on which the particles profiles will be plotted.
+            ax: The parameter `ax` is an instance of the `Axes` class from the `matplotlib.pyplot` module. It
+            represents the axes on which the particles profiles will be plotted.
         """
         if self.coreSourcesCompute.isActiveSourceAvailable():
             rho_tor_norm = self.coreSourcesCompute.getRhoTorNorm()
@@ -179,11 +182,13 @@ class CoreSourcesView:
         The function `viewCurrentProfiles` plots current profiles.
 
         Args:
-            ax: The parameter `ax` is an instance of the `Axes` class from the `matplotlib.pyplot` module. It represents the axes on which the current profiles will be plotted.
+            ax: The parameter `ax` is an instance of the `Axes` class from the `matplotlib.pyplot` module. It
+            represents the axes on which the current profiles will be plotted.
         """
         if self.coreSourcesCompute.isActiveSourceAvailable():
             rho_tor_norm = self.coreSourcesCompute.getRhoTorNorm()
-            singleAndTotalElectronsAndIonsProfiles = self.coreSourcesCompute.getSingleAndTotalElectronsAndIonsProfiles()
+            singleAndTotalElectronsAndIonsProfiles = \
+                self.coreSourcesCompute.getSingleAndTotalElectronsAndIonsProfiles()
             sourceNames = self.coreSourcesCompute.getSourceNames()
             ax.set_title("CURRENT PROFILES [KA/M2]")
             ax.plot(
@@ -215,10 +220,12 @@ class CoreSourcesView:
 
     def viewPowerAndParticleWaveforms(self, ax, *args, **kwargs):
         """
-        The function `viewPowerAndParticleWaveforms` plots power waveforms for different sources and particles over time.
+        The function `viewPowerAndParticleWaveforms` plots power waveforms for different sources and particles
+        over time.
 
         Args:
-            ax: The parameter `ax` is an instance of the `Axes` class from the `matplotlib.pyplot` module. It represents the axes on which the waveforms will be plotted.
+            ax: The parameter `ax` is an instance of the `Axes` class from the `matplotlib.pyplot` module. It
+            represents the axes on which the waveforms will be plotted.
         """
         if self.coreSourcesCompute.isActiveSourceAvailable():
             ntime = len(self.ids.time)
@@ -226,7 +233,8 @@ class CoreSourcesView:
                 logger.warning("Only one time slice --> Waveforms not displayed")
             else:
                 timeArray = self.ids.time
-                singleAndTotalElectronsIonsWaveforms = self.coreSourcesCompute.getSingleAndTotalElectronsIonsWaveforms()
+                singleAndTotalElectronsIonsWaveforms = \
+                    self.coreSourcesCompute.getSingleAndTotalElectronsIonsWaveforms()
                 singleAndTotalElectronsWaveforms = self.coreSourcesCompute.getSingleAndTotalElectronsWaveforms()
                 singleAndTotalIonsWaveforms = self.coreSourcesCompute.getSingleAndTotalIonsWaveforms()
                 sourceNames = self.coreSourcesCompute.getSourceNames()
@@ -283,7 +291,8 @@ class CoreSourcesView:
         The function `viewParticlesWaveform` plots the waveforms of particles (electrons and ions) over time.
 
         Args:
-            ax: The parameter "ax" is an instance of the matplotlib Axes class. It represents the axes on which the waveform plot will be drawn.
+            ax: The parameter "ax" is an instance of the matplotlib Axes class. It represents the axes on which
+            the waveform plot will be drawn.
         """
         if self.coreSourcesCompute.isActiveSourceAvailable():
             ntime = len(self.ids.time)
@@ -291,7 +300,8 @@ class CoreSourcesView:
                 logger.warning("Only one time slice --> Waveforms not displayed")
             else:
                 timeArray = self.ids.time
-                singleAndTotalElectronsIonsWaveforms = self.coreSourcesCompute.getSingleAndTotalElectronsIonsWaveforms()
+                singleAndTotalElectronsIonsWaveforms = \
+                    self.coreSourcesCompute.getSingleAndTotalElectronsIonsWaveforms()
 
                 singleAndTotalElectronsWaveforms = self.coreSourcesCompute.getSingleAndTotalElectronsWaveforms()
 
@@ -351,7 +361,8 @@ class CoreSourcesView:
         The function `viewCurrentWaveform` plots the current waveform for different sources and displays it.
 
         Args:
-            ax: The parameter `ax` is an instance of the `Axes` class from the `matplotlib.pyplot` module. It represents the axes on which the waveform plot will be drawn.
+            ax: The parameter `ax` is an instance of the `Axes` class from the `matplotlib.pyplot` module. It
+                represents the axes on which the waveform plot will be drawn.
         """
         if self.coreSourcesCompute.isActiveSourceAvailable():
             ntime = len(self.ids.time)
@@ -395,7 +406,8 @@ class CoreSourcesView:
         The function `viewTorqueWaveform` plots torque waveforms for different sources over time.
 
         Args:
-            ax: The parameter "ax" is an instance of the matplotlib Axes class. It represents the axes on which the torque waveform plot will be drawn.
+            ax: The parameter "ax" is an instance of the matplotlib Axes class. It represents the axes on which
+            the torque waveform plot will be drawn.
         """
 
         if self.coreSourcesCompute.isActiveSourceAvailable():

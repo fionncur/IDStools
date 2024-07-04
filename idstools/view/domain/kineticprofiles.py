@@ -1,6 +1,5 @@
 import logging
 
-import matplotlib.ticker as mtick
 
 from idstools.domain.kineticprofiles import KineticProfilesCompute
 
@@ -159,7 +158,8 @@ class KineticProfilesView:
 
     def viewTemperatureProfiles(self, ax):
         """
-        This function plots temperature profiles for electron and ion temperatures at the core and edge regions based on the provided data.
+        This function plots temperature profiles for electron and ion temperatures at the core and edge regions
+        based on the provided data.
 
         Args:
             ax: a matplotlib Axes object
@@ -304,7 +304,8 @@ class KineticProfilesView:
 
     def viewVtorProfile(self, ax, logscale=False):
         """
-        This Python function plots the toroidal rotation velocity profiles for different species in a plasma simulation.
+        This Python function plots the toroidal rotation velocity profiles for different species in a plasma
+        simulation.
 
         Args:
             ax: a matplotlib axis object.
@@ -355,7 +356,8 @@ class KineticProfilesView:
 
     def viewVpolProfile(self, ax, logscale=False):
         """
-        This function plots the vpol profiles for different species based on certain conditions and customizes the legend and axis labels accordingly.
+        This function plots the vpol profiles for different species based on certain conditions and customizes
+        the legend and axis labels accordingly.
 
         Args:
             ax: a matplotlib Axes object.

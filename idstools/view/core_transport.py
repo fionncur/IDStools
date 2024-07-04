@@ -292,7 +292,8 @@ class CoreTransportView:
 
         if len(r) != len(C_i.density):
             logger.critical(
-                "core_profiles.profiles_1d[-1].ion.density length is not the same as rho_tor_norm length, correcting the length"
+                "core_profiles.profiles_1d[-1].ion.density length is not the same as rho_tor_norm length,"
+                "correcting the length"
             )
             C_i.density = C_i.density[: len(r)]
         if len(C_i.temperature) < 1:
@@ -300,7 +301,8 @@ class CoreTransportView:
             C_i.temperature = np.asarray([np.nan] * r)
         if len(r) != len(C_i.temperature):
             logger.critical(
-                "core_profiles.profiles_1d[-1].ion.temperature length is not the same as rho_tor_norm length, correcting the length"
+                "core_profiles.profiles_1d[-1].ion.temperature length is not the same as rho_tor_norm length,"
+                "correcting the length"
             )
             C_i.temperature = C_i.temperature[: len(r)]
 

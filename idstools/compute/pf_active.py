@@ -23,10 +23,14 @@ class PfActiveCompute:
 
     def getActivePfCoils(self) -> dict:
         """
-        This function returns a dictionary of active PF coils and their corresponding elements dimensions and center coordinates.
+        This function returns a dictionary of active PF coils and their corresponding elements dimensions and
+        center coordinates.
 
         Returns:
-            a dictionary containing information about the active PF (poloidal field) coils. The keys of the dictionary are the identifiers of the coils, and the values are dictionaries containing information about the individual elements of each coil. The information about each element includes its horizontal width, vertical height, and center coordinates.
+            a dictionary containing information about the active PF (poloidal field) coils. The keys of the dictionary
+            are the identifiers of the coils, and the values are dictionaries containing information about the
+            individual elements of each coil. The information about each element includes its horizontal width,
+            vertical height, and center coordinates.
 
         Examples:
             .. code-block:: python

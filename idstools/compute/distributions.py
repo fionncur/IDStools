@@ -4,7 +4,6 @@ This module provides compute functions and classes for distributions ids data
 """
 
 import logging
-from typing import Dict
 
 
 logger = logging.getLogger("module")
@@ -57,8 +56,10 @@ class DistributionsCompute:
                         )
                 except Exception as e:
                     logger.warning(
-                        "distributions.distribution[idistrib].profiles_1d[it].grid.rho_tor_norm and rho_tor could not be read"
+                        "distributions.distribution[idistrib].profiles_1d[it].grid.rho_tor_norm and"
+                        "rho_tor could not be read"
                     )
+                    logger.debug(f"{e}")
                     return None
                 if distributionsData["nrho"] == 0:
                     logger.warning(

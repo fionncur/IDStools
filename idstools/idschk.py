@@ -1,19 +1,16 @@
 #!/usr/bin/env python
-from os import getenv, path
+
+from idstools.utils.ddhelper import DDHelper
+from os import path
 from sys import exit
-import re
-import argparse
-import traceback
-import yaml
-import statistics
 from xml.etree import ElementTree as ET
 import cerberus
-from idstools.utils.ddhelper import DDHelper
-import numpy as np
-import logging
 import copy
-import imas
-
+import logging
+import numpy as np
+import re
+import traceback
+import yaml
 logger = logging.getLogger(__name__)
 
 
@@ -400,21 +397,22 @@ class COCOS:
             sigma_Ip_eff = sigma_RphiZ_eff  # sign folllowing transformation
         else:
             sigma_Ip_eff = sigma_Ip_in * float(Ipsign_out)
-        sigma_Ip_out = sigma_Ip_in * sigma_Ip_eff
+        # sigma_Ip_out = sigma_Ip_in * sigma_Ip_eff
 
         # sign(B0) in output
         if B0sign_out == 0:
             sigma_B0_eff = sigma_RphiZ_eff  # sign folllowing transformation
         else:
             sigma_B0_eff = sigma_B0_in * float(B0sign_out)
-        sigma_B0_out = sigma_B0_in * sigma_B0_eff
+        # sigma_B0_out = sigma_B0_in * sigma_B0_eff
 
         sigma_Bp_eff = float(CVO["sigma_Bp"] * CVI["sigma_Bp"])
         exp_Bp_eff = float(CVO["exp_Bp"] - CVI["exp_Bp"])
         sigma_rhothetaphi_eff = float(CVO["sigma_rhothetaphi"] * CVI["sigma_rhothetaphi"])
         #
         # Note that sign(sigma_RphiZ*sigma_rhothetaphi) gives theta in clockwise or counter-clockwise respectively
-        # Thus sigma_RphiZ_eff*sigma_rhothetaphi_eff negative if the direction of theta has changed from cocos_in to _out
+        # Thus sigma_RphiZ_eff*sigma_rhothetaphi_eff negative if the direction of
+        # theta has changed from cocos_in to _out
         #
         fact_psi = sigma_Ip_eff * sigma_Bp_eff * (2.0 * np.pi) ** exp_Bp_eff
         fact_dpsi = sigma_Ip_eff * sigma_Bp_eff / (2.0 * np.pi) ** exp_Bp_eff
@@ -514,7 +512,7 @@ class IdxDict(dict):
             Field path
         """
 
-        idict = []
+        # idict = []
 
         for m in re.finditer("\\((\\w+)\\)", p):  # find subscripts and set as attribute
             it = m.group()[1:-1]
@@ -578,7 +576,7 @@ class IDSValidator(cerberus.Validator):
             #
             for i in range(data.ndim):
                 c = path2py(field.get("coordinate" + str(i + 1)), header=True)
-                homogeneous_time = ids.ids_properties.homogeneous_time
+                # homogeneous_time = ids.ids_properties.homogeneous_time
                 #
                 if re.search("1\\.\\.\\.", c):
                     lcrd = data.shape[i]
@@ -587,6 +585,7 @@ class IDSValidator(cerberus.Validator):
                         crd = eval(c)
                         lcrd = len(crd)
                     except Exception as e:
+                        logger.debug(f"{e}")
                         lcrd = -1
 
                 self.shape.append(lcrd)
@@ -788,7 +787,7 @@ def validator(field, path_doc, ids, schema, cocos, buf, idx):
     remark: boolean
     """
 
-    data_size = 0
+    # data_size = 0
 
     p = path2py(path_doc, header=True)
 
@@ -796,6 +795,7 @@ def validator(field, path_doc, ids, schema, cocos, buf, idx):
     try:
         data = eval(p)
     except Exception as e:
+        logger.debug(f"{e}")
         print(f"eval error on key {p}, skipped")
         return
 
@@ -814,6 +814,7 @@ def validator(field, path_doc, ids, schema, cocos, buf, idx):
             try:
                 schemaw[path_doc][key] = eval(val)
             except Exception as e:
+                logger.debug(f"{e}")
                 # print(f"eval error on value {val}, ignored: {e}")
                 # return
                 pass
@@ -895,6 +896,7 @@ def path_iterator(field, nodes, ids, schema, cocos, buf, idx=None, level=0):
                     if not args_check_all:
                         break
             except Exception as e:
+                logger.debug(f"{e}")
                 print(f"Error at calling path_iterator: {e}")
 
         # for node (e.g. path(itime)/to(i1)/node)
@@ -938,6 +940,7 @@ def validate_COCOS(ids, schema, itime, i1, cocos=None):
         try:
             data = eval(key)
         except Exception as e:
+            logger.debug(f"{e}")
             print(f"eval error on key {key}")
             return
 
@@ -1124,10 +1127,12 @@ def load_YAML(fpath):
     try:
         f = open(fpath, mode="r")
     except Exception as e:
+        logger.debug(f"{e}")
         exit(f"can not open file:{fpath}")
     try:
         d = yaml.safe_load(f)
     except Exception as e:
+        logger.debug(f"{e}")
         exit(f"invalid yaml in:{fpath}")
 
     return d
@@ -1450,6 +1455,7 @@ def ids_cocos_check(ids, itime=None, i1=0, verbose=False):
         try:
             cocos = compute_COCOS(ids, itime, i1)
         except Exception as e:
+            logger.debug(f"{e}")
             exit(f"Cannot compute COCOS: {e}")
         # set remark
         if cocos[key] == IDS_COCOS:
@@ -1493,6 +1499,7 @@ def ids_compute_cocos(ids, itime=None, i1=0):
         try:
             cocos = compute_COCOS(ids, itime, i1)
         except Exception as e:
+            logger.debug(f"{e}")
             logger.error(traceback.format_exc())
 
     else:

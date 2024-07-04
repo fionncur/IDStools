@@ -31,7 +31,8 @@ class SummaryView(BasePlot):
         The function `viewHCDWaveforms` plots various power waveforms on a given axis.
 
         Args:
-            ax: The `ax` parameter is an instance of the `Axes` class from the `matplotlib.pyplot` module. It represents the axes on which the waveforms will be plotted.
+            ax: The `ax` parameter is an instance of the `Axes` class from the `matplotlib.pyplot` module. It
+            represents the axes on which the waveforms will be plotted.
         """
         waveform = self.computeObj.getSummary()
         plotstyle = "-" if len(waveform["time"]) > 1 else "o"
@@ -116,7 +117,8 @@ class SummaryView(BasePlot):
         The function `viewIpB0Waveforms` plots the absolute values of the Ip and B0 waveforms on a given axis.
 
         Args:
-            ax: The parameter "ax" is an instance of the matplotlib Axes class. It represents the subplot where the Ip and B0 waveforms will be plotted.
+            ax: The parameter "ax" is an instance of the matplotlib Axes class. It represents the subplot where
+            the Ip and B0 waveforms will be plotted.
         """
         waveform = self.computeObj.getSummary()
         plotstyle = "-" if len(waveform["time"]) > 1 else "o"
@@ -134,7 +136,8 @@ class SummaryView(BasePlot):
         The function `viewEnergyContentWaveforms` plots energy content waveforms on a given axis.
 
         Args:
-            ax: The parameter "ax" is an instance of the matplotlib Axes class. It represents the axes on which the waveforms will be plotted.
+            ax: The parameter "ax" is an instance of the matplotlib Axes class. It represents the axes on which the
+            waveforms will be plotted.
         """
         waveform = self.computeObj.getSummary()
         plotstyle = "-" if len(waveform["time"]) > 1 else "o"
@@ -169,10 +172,12 @@ class SummaryView(BasePlot):
 
     def viewVloopWaveforms(self, ax):
         """
-        The function `viewVloopWaveforms` plots three waveforms (`V_LOOP`, `H_98`, and `TAU_ENERGY`)  against time on the given `ax` object.
+        The function `viewVloopWaveforms` plots three waveforms (`V_LOOP`, `H_98`, and `TAU_ENERGY`)  against time
+        on the given `ax` object.
 
         Args:
-            ax: The parameter "ax" is an instance of the matplotlib Axes class. It represents the axes on which the waveforms will be plotted.
+            ax: The parameter "ax" is an instance of the matplotlib Axes class. It represents the axes on which
+            the waveforms will be plotted.
         """
         waveform = self.computeObj.getSummary()
         plotstyle = "-" if len(waveform["time"]) > 1 else "o"
@@ -211,8 +216,10 @@ class SummaryView(BasePlot):
         The function `viewTimeLine` plots a vertical dashed line on a given matplotlib axis at a specified time.
 
         Args:
-            ax: The parameter "ax" is a reference to the second y-axis of a matplotlib figure. It is used to plot the timeline on the same figure as the other data.
-            time: The "time" parameter is the value at which you want to plot a vertical line on the timeline. It represents the specific point in time that you want to highlight on the timeline.
+            ax: The parameter "ax" is a reference to the second y-axis of a matplotlib figure. It is used to plot
+            the timeline on the same figure as the other data.
+            time: The "time" parameter is the value at which you want to plot a vertical line on the timeline. It
+            represents the specific point in time that you want to highlight on the timeline.
         """
         ymin, ymax = ax.get_ylim()
         ax.plot(
@@ -228,10 +235,12 @@ class SummaryView(BasePlot):
 
     def viewHmode(self, ax):
         """
-        The function `viewHmode` checks if HMode is present and fills the area between `th_min` and `th_max` on the y-axis with a light yellow color if it is, otherwise it logs a warning message.
+        The function `viewHmode` checks if HMode is present and fills the area between `th_min` and `th_max` on the
+        y-axis with a light yellow color if it is, otherwise it logs a warning message.
 
         Args:
-            ax: The parameter `ax` is an instance of the `Axes` class from the `matplotlib` library. It represents the axes on which the plot is being drawn.
+            ax: The parameter `ax` is an instance of the `Axes` class from the `matplotlib` library. It represents
+            the axes on which the plot is being drawn.
         """
         ymin, ymax = ax.get_ylim()
 

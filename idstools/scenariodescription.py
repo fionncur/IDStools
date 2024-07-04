@@ -73,7 +73,8 @@ class ScenarioDescriptionBase:
         The function `getYamlData` reads a YAML file and returns its contents as a Python object.
 
         Args:
-            yamlFilePath: The `yamlFilePath` parameter is a string that represents the file path of the YAML file that you want to load and retrieve data from.
+            yamlFilePath: The `yamlFilePath` parameter is a string that represents the file path of the YAML
+            file that you want to load and retrieve data from.
 
         Returns:
             the data loaded from the YAML file.
@@ -82,17 +83,21 @@ class ScenarioDescriptionBase:
             try:
                 yamlData = yamlload(fileHandle, Loader=yamlLoader)
             except Exception as e:
+                logger.debug(f"{e}")
                 yamlData = None
         return yamlData
 
     @staticmethod
     def getDataFrameFromYaml(yamlFilePath, addObsolete=False):
         """
-        The function `getDataFrameFromYaml` takes a YAML file path, reads the data from the file, checks if the status is active (unless `addObsolete` is set to True), converts the data into a flat table, and returns it as a pandas DataFrame.
+        The function `getDataFrameFromYaml` takes a YAML file path, reads the data from the file, checks if
+        the status is active (unless `addObsolete` is set to True), converts the data into a flat table, and
+        returns it as a pandas DataFrame.
 
         Args:
             yamlFilePath: The path to the YAML file from which you want to create a DataFrame.
-            addObsolete: The addObsolete parameter is a boolean flag that determines whether or not to include obsolete data in the resulting DataFrame.
+            addObsolete: The addObsolete parameter is a boolean flag that determines whether or not to include
+            obsolete data in the resulting DataFrame.
 
         Returns:
             a pandas DataFrame object.
@@ -109,7 +114,8 @@ class ScenarioDescriptionBase:
 
     def getDataframesFromFiles(self, extension=".yaml", addObsolete=False):
         """
-        The function `getDataframesFromFiles` retrieves data from YAML files, creates dataframes, adds additional information, and returns a concatenated dataframe.
+        The function `getDataframesFromFiles` retrieves data from YAML files, creates dataframes, adds additional
+        information, and returns a concatenated dataframe.
 
         Args:
             extension: The "extension" parameter is a string that specifies the file extension to search for.
@@ -137,7 +143,8 @@ class ScenarioDescriptionBase:
 
     def _extractInformation(self, df):
         """
-        The function `_extractInformation` extracts information from a DataFrame and adds new columns based on the extracted data.
+        The function `_extractInformation` extracts information from a DataFrame and adds new columns based
+        on the extracted data.
 
         Args:
             df: The parameter `df` is a pandas DataFrame object.
@@ -168,12 +175,15 @@ class ScenarioDescriptionBase:
 class ScenarioDescription(ScenarioDescriptionBase):
     def __init__(self, pulse: int, run: int, folderPath: str = "") -> None:
         """
-        The above function initializes an object with a pulse, run, and folder path, and attempts to load YAML data from a file based on the pulse and run numbers.
+        The above function initializes an object with a pulse, run, and folder path, and attempts to load
+        YAML data from a file based on the pulse and run numbers.
 
         Args:
-            pulse (int): The "pulse" parameter is an integer that represents a pulse number. It is used to construct the filename for the YAML file that will be loaded.
+            pulse (int): The "pulse" parameter is an integer that represents a pulse number. It is used to
+            construct the filename for the YAML file that will be loaded.
             run (int): The `run` parameter is an integer that represents the run number.
-            folderPath (str): The `folderPath` parameter is a string that represents the path to a folder where the YAML file is located.
+            folderPath (str): The `folderPath` parameter is a string that represents the path to a folder
+            where the YAML file is located.
         """
         super().__init__(folderPath)
         yamlFileName = self.folderPath + f'/ids_{pulse}{str(run).rjust(4,"0")}.yaml'
@@ -181,16 +191,20 @@ class ScenarioDescription(ScenarioDescriptionBase):
         try:
             with open(yamlFileName, "r") as f:
                 self.yamlData = yamlload(f, Loader=yamlLoader)
-        except Exception as exc:
-            logger.critical(f"Warning: {exc}")
+        except Exception as e:
+            logger.debug(f"{e}")
+            logger.critical(f"Warning: {e}")
 
     def getChildren(self, yamlData, dictToFill={}):
         """
-        The function `getChildren` recursively retrieves data from a YAML file and populates a dictionary with specific keys and values.
+        The function `getChildren` recursively retrieves data from a YAML file and populates a dictionary
+        with specific keys and values.
 
         Args:
             yamlData: The `yamlData` parameter is a dictionary that contains data in YAML format.
-            dictToFill: The `dictToFill` parameter is a dictionary that is used to store the values extracted from the `yaml data` . It is initially an empty dictionary and is passed as an argument to the `getChildren` function.
+            dictToFill: The `dictToFill` parameter is a dictionary that is used to store the values extracted
+            from the `yaml data` . It is initially an empty dictionary and is passed as an argument to the
+            `getChildren` function.
 
         Returns:
             the dictionary with scenario children.
@@ -223,11 +237,13 @@ class ScenarioDescription(ScenarioDescriptionBase):
 
     def getParents(self, yamlData, dictToFill={}):
         """
-        The function `getParents` retrieves parent data from a YAML file and populates a dictionary with the parent information.
+        The function `getParents` retrieves parent data from a YAML file and populates a dictionary with the
+        parent information.
 
         Args:
             yamlData: The `yamlData` parameter is a dictionary that contains data in YAML format.
-            dictToFill: The `dictToFill` parameter is a dictionary that is used to store the parents information. It is initially empty and is filled with parent data as the function recursively calls itself.
+            dictToFill: The `dictToFill` parameter is a dictionary that is used to store the parents information.
+            It is initially empty and is filled with parent data as the function recursively calls itself.
 
         Returns:
             the dictionary with scenario parents
@@ -260,10 +276,13 @@ class ScenarioDescription(ScenarioDescriptionBase):
 
     def getFamily(self):
         """
-        The function "getFamily" returns a dictionary containing the parents and children of a scenario based on the provided YAML data.
+        The function "getFamily" returns a dictionary containing the parents and children of a scenario based
+        on the provided YAML data.
 
         Returns:
-            a dictionary called `familyDict` which contains two keys: "parents" and "children". The values associated with these keys are the results of calling the `getParents` and `getChildren` methods, passing in `yaml data` as argument.
+            a dictionary called `familyDict` which contains two keys: "parents" and "children". The values
+            associated with these keys are the results of calling the `getParents` and `getChildren` methods,
+            passing in `yaml data` as argument.
         """
         familyDict = {}
         familyDict["parents"] = self.getParents(self.yamlData, {})

@@ -5,7 +5,6 @@ This module provides view functions and classes for equilibrium ids data
 
 """
 
-from matplotlib.patches import Rectangle
 import matplotlib.pyplot as plt
 from idstools.view.common import BasePlot
 from idstools.compute.equilibrium import EquilibriumCompute
@@ -45,7 +44,7 @@ class EquilibriumView(BasePlot):
                 from idstools.view.equilibrium import EquilibriumView
                 from idstools.view.common import Canvas
 
-                connection = imas.DBEntry("imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3", "r")
+                connection = imas.DBEntry("imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3","r")
                 connection.open()
                 idsObj = connection.get('equilibrium')
 
@@ -125,7 +124,8 @@ class EquilibriumView(BasePlot):
 
     def plotPoloidalEquilibrium(self, ax, timeSlice: int):
         """
-        This function plots a poloidal equilibrium contour plot using flux surface quantities extracted from the equilibrium.
+        This function plots a poloidal equilibrium contour plot using flux surface quantities extracted from the
+        equilibrium.
 
         Args:
             ax: `ax` is a matplotlib axis object.
@@ -138,7 +138,7 @@ class EquilibriumView(BasePlot):
         data = self.computeObj.getFluxSurfaces(timeSlice)
         r2d = data["r2d"]
         z2d = data["z2d"]
-        rho2d = data["rho2d"]
+        # rho2d = data["rho2d"]
         psi2d = data["psi2d"]
         cntr = ax.contour(r2d, z2d, psi2d, 50, cmap="summer")
         # if len(rho2d)>0:

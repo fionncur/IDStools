@@ -30,7 +30,7 @@ SCRIPTS=(
     "ploteccomposition --uri \"imas:mdsplus?user=public;pulse=134173;run=2326;database=TEST;version=3\" --save --directory $LOG_DIR"
     "plotecray --uri \"imas:mdsplus?user=public;pulse=134173;run=2326;database=TEST;version=3\" --save --directory $LOG_DIR"
     "plotecray --uri \"imas:mdsplus?user=public;pulse=134173;run=2326;database=TEST;version=3\" -md wall --save --directory $LOG_DIR"
-    "plotedgeprofiles --uri \"imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3\" --separatix --wall --time 60 --save --directory $LOG_DIR"
+    "plotedgeprofiles --uri \"imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3\" --separatrix --wall --time 60 --save --directory $LOG_DIR"
     "plotequilibrium --uri \"imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3\" -md pf_active wall --save --directory $LOG_DIR"
     "printfluxes --uri \"imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3\" -m CLOSEST"
     "plothcddistributions --uri \"imas:mdsplus?user=public;pulse=130012;run=115;database=TEST;version=3\" --save --directory $LOG_DIR"

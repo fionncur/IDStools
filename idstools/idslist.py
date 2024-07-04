@@ -47,7 +47,8 @@ def available_in_dbentry(db, time_mode=None):
     db: imas.DBEntry object
         an open DBEntry in which available IDSs will be looked for
     time_mode: int, optional
-        time_mode of interest (imas.imasdef.IDS_TIME_MODE_HETEROGENEOUS, IDS_TIME_MODE_HOMOGENEOUS or IDS_TIME_MODE_INDEPENDENT)
+        time_mode of interest (imas.imasdef.IDS_TIME_MODE_HETEROGENEOUS, IDS_TIME_MODE_HOMOGENEOUS or
+        IDS_TIME_MODE_INDEPENDENT)
         if not specified, occurrences of IDS in all time modes will be returned
     """
     presentidslist = []

@@ -6,7 +6,6 @@ import argparse
 import copy
 import os
 from rich_argparse import RichHelpFormatter
-import sys
 from imas import imasdef
 
 from idstools.compute.common import getNearestTime
@@ -31,7 +30,7 @@ parser = argparse.ArgumentParser(
 
 parser.add_argument("-t", "--time", type=float, help="Time", default=-99)
 parser.add_argument(
-    "--separatix",
+    "--separatrix",
     help="Show separtix",
     action="store_true",
 )
@@ -128,7 +127,7 @@ ax2 = canvas.add_axes(title="", xlabel="", row=0, col=2, rowspan=2)
 ax3 = canvas.add_axes(title="", xlabel="", row=0, col=3, rowspan=2)
 
 c1 = edgeProfilesView.viewElectronsDensity(
-    ax1, timeSlice=0, showSeparatix=args.separatix
+    ax1, timeSlice=0, showSeparatrix=args.separatrix
 )
 if c1 is not None:
     canvas.fig.colorbar(c1, ax=ax1)
@@ -136,14 +135,14 @@ if c1 is not None:
         if r is not None and z is not None:
             ax1.plot(r, z, "silver")
 
-c2 = edgeProfilesView.viewIonDensity(ax2, timeSlice=0, showSeparatix=args.separatix)
+c2 = edgeProfilesView.viewIonDensity(ax2, timeSlice=0, showSeparatrix=args.separatrix)
 if c2 is not None:
     canvas.fig.colorbar(c2, ax=ax2)
     if args.wall:
         if r is not None and z is not None:
             ax2.plot(r, z, "silver")
 
-c3 = edgeProfilesView.viewNeutralDensity(ax3, timeSlice=0, showSeparatix=args.separatix)
+c3 = edgeProfilesView.viewNeutralDensity(ax3, timeSlice=0, showSeparatrix=args.separatrix)
 if c3 is not None:
     canvas.fig.colorbar(c3, ax=ax3)
     if args.wall:

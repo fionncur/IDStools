@@ -19,7 +19,8 @@ class CoreSourcesCompute:
 
     def getFluxInfoFromSources(self):
         """
-        The `getFluxInfoFromSources` function retrieves information about sources, including their name, particle flux, energy flux, and ion properties, and returns a dictionary containing this information.
+        The `getFluxInfoFromSources` function retrieves information about sources, including their name,
+        particle flux, energy flux, and ion properties, and returns a dictionary containing this information.
 
         Returns:
             The function `getFluxInfoFromSources` returns a dictionary containing
@@ -98,9 +99,10 @@ class CoreSourcesCompute:
         return sourcesDict
 
     @functools.lru_cache(maxsize=128)
-    def getRhoTorNorm(self) -> np.ndarray:
+    def getRhoTorNorm(self) -> np.ndarray | None:
         """
-        The function `getRhoTorNorm` returns the value of `grid.rho_tor_norm` if it is not empty, otherwise it returns None.
+        The function `getRhoTorNorm` returns the value of `grid.rho_tor_norm` if it is not empty,
+        otherwise it returns None.
 
         Returns:
             the value of the variable `rhoTorNorm`.
@@ -121,6 +123,7 @@ class CoreSourcesCompute:
             logger.critical(
                 "core_sources.source[isource].profiles_1d[0].grid.rho_tor_norm and rho_tor could not be read"
             )
+            logger.debug(f"{e}")
             return None
         if rhoTorNorm is not None and len(rhoTorNorm) == 0:
             logger.critical("core_sources.source[isource].profiles_1d[0].grid.rho_tor_norm and rho_tor are empty")
@@ -130,10 +133,13 @@ class CoreSourcesCompute:
     @functools.lru_cache(maxsize=128)
     def getValidAndActiveSources(self) -> Dict[int, Dict[str, bool]]:
         """
-        The function `getValidAndActiveSources` returns a dictionary of valid and active sources, where each source is represented by a dictionary with the keys "valid" and "active".
+        The function `getValidAndActiveSources` returns a dictionary of valid and active sources, where each source
+        is represented by a dictionary with the keys "valid" and "active".
 
         Returns:
-            a dictionary of dictionaries. The outer dictionary has integer keys representing the index of each source, and the inner dictionaries have string keys ("valid" and "active") representing the validity and activity status of each source.
+            a dictionary of dictionaries. The outer dictionary has integer keys representing the index of each source,
+            and the inner dictionaries have string keys ("valid" and "active") representing the validity and
+            activity status of each source.
         """
         sources = {}
         for sourceIndex, sourceInfo in enumerate(self.ids.source):
@@ -154,7 +160,8 @@ class CoreSourcesCompute:
         The function checks if there is an active source available among the valid and active sources.
 
         Returns:
-            a boolean value. It is checking if there are any active sources in the list of valid and active sources and returning True if there is at least one active source, and False otherwise.
+            a boolean value. It is checking if there are any active sources in the list of valid and active sources
+            and returning True if there is at least one active source, and False otherwise.
         """
         sources = self.getValidAndActiveSources()
         return any(source["active"] for _, source in sources.items())
@@ -170,10 +177,14 @@ class CoreSourcesCompute:
     @functools.lru_cache(maxsize=128)
     def getSingleAndTotalElectronsAndIonsProfiles(self) -> Dict[str, np.ndarray]:
         """
-        The function `getSingleAndTotalElectronsAndIonsProfiles` returns the total current profile and the individual current profiles for each valid and active source.
+        The function `getSingleAndTotalElectronsAndIonsProfiles` returns the total current profile and the individual
+        current profiles for each valid and active source.
         SINGLE AND TOTAL PROFILES (ELECTRONS+IONS)
         Returns:
-            a dictionary with two keys: "totalCurrentProfile" and "singleCurrentProfile". The value associated with the "totalCurrentProfile" key is a numpy array representing the total current profile. The value associated with the "singleCurrentProfile" key is a dictionary where the keys are the indices of the sources and the values are numpy arrays representing the current profiles for each individual source.
+            a dictionary with two keys: "totalCurrentProfile" and "singleCurrentProfile". The value associated with
+            the "totalCurrentProfile" key is a numpy array representing the total current profile. The value associated
+            with the "singleCurrentProfile" key is a dictionary where the keys are the indices of the sources and the
+            values are numpy arrays representing the current profiles for each individual source.
         """
         # SINGLE AND TOTAL PROFILES (ELECTRONS+IONS)
         # total_power_profile                = [0]*nrho  # profile
@@ -199,10 +210,12 @@ class CoreSourcesCompute:
     @functools.lru_cache(maxsize=128)
     def getSingleAndTotalElectronsProfiles(self) -> Dict[str, np.ndarray]:
         """
-        The function `getSingleAndTotalElectronsProfiles` calculates and returns profiles of total  electron power, total electron particles, single electron power, and single electron particles.
+        The function `getSingleAndTotalElectronsProfiles` calculates and returns profiles of total  electron power,
+        total electron particles, single electron power, and single electron particles.
 
         Returns:
-            a dictionary with the following keys and values: totalElectronPowerProfile, totalElectronParticlesProfile, singleElectronPowerProfile, singleElectronParticlesProfile,
+            a dictionary with the following keys and values: totalElectronPowerProfile, totalElectronParticlesProfile,
+            singleElectronPowerProfile, singleElectronParticlesProfile,
         """
         # SINGLE AND TOTAL PROFILES (ELECTRONS)
         # totalElectronPowerProfile       = [0]*nrho  # profile
@@ -244,10 +257,12 @@ class CoreSourcesCompute:
 
     def getSingleAndTotalIonProfiles(self) -> Dict[str, np.ndarray]:
         """
-        The function `getSingleAndTotalIonProfiles` calculates the total and individual power and particle profiles for ions in a plasma simulation.
+        The function `getSingleAndTotalIonProfiles` calculates the total and individual power and particle profiles
+        for ions in a plasma simulation.
 
         Returns:
-            a dictionary with the following keys and values:totalIonPowerProfile, totalIonParticlesProfile, singleIonPowerProfile, singleIonParticlesProfile
+            a dictionary with the following keys and values:totalIonPowerProfile, totalIonParticlesProfile,
+            singleIonPowerProfile, singleIonParticlesProfile
         """
         # SINGLE AND TOTAL PROFILES (IONS)
         # total_ion_power_profile = [0] * nrho  # profile
@@ -305,10 +320,11 @@ class CoreSourcesCompute:
                 single_power_waveform[sourceIndex] = []
                 single_particles_waveform[sourceIndex] = []
                 for timeIndex in range(timeLength):
-                    electrons_power = self.ids.source[sourceIndex].global_quantities[timeIndex].electrons.power
-                    electrons_particles = self.ids.source[sourceIndex].global_quantities[timeIndex].electrons.particles
-                    total_ion_particles = self.ids.source[sourceIndex].global_quantities[timeIndex].total_ion_particles
-                    total_ion_power = self.ids.source[sourceIndex].global_quantities[timeIndex].total_ion_power
+                    _quantities = self.ids.source[sourceIndex].global_quantities[timeIndex]
+                    electrons_power = _quantities.electrons.power
+                    electrons_particles = _quantities.electrons.particles
+                    total_ion_particles = _quantities.total_ion_particles
+                    total_ion_power = _quantities.total_ion_power
 
                     if electrons_power < 0:
                         electrons_power = 0.0
@@ -321,20 +337,20 @@ class CoreSourcesCompute:
 
                     total_power_waveform[timeIndex] = (
                         total_electron_power_waveform[timeIndex]
-                        + self.ids.source[sourceIndex].global_quantities[timeIndex].electrons.power
-                        + self.ids.source[sourceIndex].global_quantities[timeIndex].total_ion_power
+                        + _quantities.electrons.power
+                        + _quantities.total_ion_power
                     )
                     total_particles_waveform[timeIndex] = (
                         total_electron_particles_waveform[timeIndex]
-                        + self.ids.source[sourceIndex].global_quantities[timeIndex].electrons.particles
-                    ) + self.ids.source[sourceIndex].global_quantities[timeIndex].total_ion_particles
+                        + _quantities.electrons.particles
+                    ) + _quantities.total_ion_particles
                     single_power_waveform[sourceIndex].append(
-                        self.ids.source[sourceIndex].global_quantities[timeIndex].electrons.power
-                        + self.ids.source[sourceIndex].global_quantities[timeIndex].total_ion_power
+                        _quantities.electrons.power
+                        + _quantities.total_ion_power
                     )
                     single_particles_waveform[sourceIndex].append(
-                        self.ids.source[sourceIndex].global_quantities[timeIndex].electrons.particles
-                        + self.ids.source[sourceIndex].global_quantities[timeIndex].total_ion_particles
+                        _quantities.electrons.particles
+                        + _quantities.total_ion_particles
                     )
                 single_power_waveform[sourceIndex] = np.array(single_power_waveform[sourceIndex])
                 single_particles_waveform[sourceIndex] = np.array(single_particles_waveform[sourceIndex])
@@ -347,7 +363,8 @@ class CoreSourcesCompute:
 
     def getSingleAndTotalElectronsWaveforms(self):
         """
-        The function `getSingleAndTotalElectronsWaveforms` calculates and returns waveforms for total electron power, total electron particles, single electron power, and single electron particles.
+        The function `getSingleAndTotalElectronsWaveforms` calculates and returns waveforms for total electron
+        power, total electron particles, single electron power, and single electron particles.
 
         Returns:
             a dictionary with the following keys and values:
@@ -372,24 +389,25 @@ class CoreSourcesCompute:
                 single_electron_power_waveform[sourceIndex] = []
                 single_electron_particles_waveform[sourceIndex] = []
                 for timeIndex in range(timeLength):
-                    if self.ids.source[sourceIndex].global_quantities[timeIndex].electrons.power < 0:
-                        self.ids.source[sourceIndex].global_quantities[timeIndex].electrons.power = 0.0
-                    if self.ids.source[sourceIndex].global_quantities[timeIndex].electrons.particles < 0:
-                        self.ids.source[sourceIndex].global_quantities[timeIndex].electrons.particles = 0.0
+                    _quantities = self.ids.source[sourceIndex].global_quantities[timeIndex]
+                    if _quantities.electrons.power < 0:
+                        _quantities.electrons.power = 0.0
+                    if _quantities.electrons.particles < 0:
+                        _quantities.electrons.particles = 0.0
 
                     total_electron_power_waveform[timeIndex] = (
                         total_electron_power_waveform[timeIndex]
-                        + self.ids.source[sourceIndex].global_quantities[timeIndex].electrons.power
+                        + _quantities.electrons.power
                     )
                     total_electron_particles_waveform[timeIndex] = (
                         total_electron_particles_waveform[timeIndex]
-                        + self.ids.source[sourceIndex].global_quantities[timeIndex].electrons.particles
+                        + _quantities.electrons.particles
                     )
                     single_electron_power_waveform[sourceIndex].append(
-                        self.ids.source[sourceIndex].global_quantities[timeIndex].electrons.power
+                        _quantities.electrons.power
                     )
                     single_electron_particles_waveform[sourceIndex].append(
-                        self.ids.source[sourceIndex].global_quantities[timeIndex].electrons.particles
+                        _quantities.electrons.particles
                     )
                 single_electron_power_waveform[sourceIndex] = np.array(single_electron_power_waveform[sourceIndex])
                 single_electron_particles_waveform[sourceIndex] = np.array(
@@ -405,10 +423,15 @@ class CoreSourcesCompute:
 
     def getSingleAndTotalIonsWaveforms(self):
         """
-        The function `getSingleAndTotalIonsWaveforms` calculates and returns the waveforms for single ion power, single ion particles, total ion power, and total ion particles.
+        The function `getSingleAndTotalIonsWaveforms` calculates and returns the waveforms for single ion power,
+        single ion particles, total ion power, and total ion particles.
 
         Returns:
-            a dictionary with four key-value pairs. The keys are "single_ion_power_waveform", "single_ion_particles_waveform", "total_ion_power_waveform", and "total_ion_particles_waveform". The corresponding values are the waveforms for single ion power, single ion particles, total ion power, and total ion particles, respectively.
+            a dictionary with four key-value pairs. The keys are
+            "single_ion_power_waveform", "single_ion_particles_waveform",
+            "total_ion_power_waveform", and "total_ion_particles_waveform". The corresponding values are the
+            waveforms for single ion power, single ion particles, total ion power, and total ion particles,
+            respectively.
         """
         # SINGLE AND TOTAL WAVEFORMS (IONS)
         # total_ion_power_waveform = [0] * ntime  # waveform
@@ -426,23 +449,24 @@ class CoreSourcesCompute:
                 single_ion_power_waveform[sourceIndex] = []
                 single_ion_particles_waveform[sourceIndex] = []
                 for timeIndex in range(timeLength):
-                    if self.ids.source[sourceIndex].global_quantities[timeIndex].total_ion_power < 0:
-                        self.ids.source[sourceIndex].global_quantities[timeIndex].total_ion_power = 0.0
-                    if self.ids.source[sourceIndex].global_quantities[timeIndex].total_ion_particles < 0:
-                        self.ids.source[sourceIndex].global_quantities[timeIndex].total_ion_particles = 0.0
+                    _quantities = self.ids.source[sourceIndex].global_quantities[timeIndex]
+                    if _quantities.total_ion_power < 0:
+                        _quantities.total_ion_power = 0.0
+                    if _quantities.total_ion_particles < 0:
+                        _quantities.total_ion_particles = 0.0
                     single_ion_power_waveform[sourceIndex].append(
-                        self.ids.source[sourceIndex].global_quantities[timeIndex].total_ion_power
+                        _quantities.total_ion_power
                     )
                     single_ion_particles_waveform[sourceIndex].append(
-                        self.ids.source[sourceIndex].global_quantities[timeIndex].total_ion_particles
+                        _quantities.total_ion_particles
                     )
                     total_ion_power_waveform[timeIndex] = (
                         total_ion_power_waveform[timeIndex]
-                        + self.ids.source[sourceIndex].global_quantities[timeIndex].total_ion_power
+                        + _quantities.total_ion_power
                     )
                     total_ion_particles_waveform[timeIndex] = (
                         total_ion_particles_waveform[timeIndex]
-                        + self.ids.source[sourceIndex].global_quantities[timeIndex].total_ion_particles
+                        + _quantities.total_ion_particles
                     )
 
                 single_ion_power_waveform[sourceIndex] = np.array(single_ion_power_waveform[sourceIndex])
@@ -456,7 +480,8 @@ class CoreSourcesCompute:
 
     def getSingleAndTotalCurrentTorque(self):
         """
-        The function `getSingleAndTotalCurrentTorque` calculates the total and individual current and torque waveforms for a given set of sources.
+        The function `getSingleAndTotalCurrentTorque` calculates the total and individual current and torque
+        waveforms for a given set of sources.
 
         Returns:
             a dictionary with the following keys and values:
@@ -484,24 +509,25 @@ class CoreSourcesCompute:
                 single_current_waveform[sourceIndex] = []
                 single_torque_waveform[sourceIndex] = []
                 for timeIndex in range(timeLength):
-                    if self.ids.source[sourceIndex].global_quantities[timeIndex].current_parallel < -1.0e40:
-                        self.ids.source[sourceIndex].global_quantities[timeIndex].current_parallel = 0.0
-                    if self.ids.source[sourceIndex].global_quantities[timeIndex].torque_tor < 0:
-                        self.ids.source[sourceIndex].global_quantities[timeIndex].torque_tor = 0.0
+                    _quantities = self.ids.source[sourceIndex].global_quantities[timeIndex]
+                    if _quantities.current_parallel < -1.0e40:
+                        _quantities.current_parallel = 0.0
+                    if _quantities.torque_tor < 0:
+                        _quantities.torque_tor = 0.0
 
                     total_current_waveform[timeIndex] = (
                         total_current_waveform[timeIndex]
-                        + self.ids.source[sourceIndex].global_quantities[timeIndex].current_parallel
+                        + _quantities.current_parallel
                     )
                     total_torque_waveform[timeIndex] = (
                         total_torque_waveform[timeIndex]
-                        + self.ids.source[sourceIndex].global_quantities[timeIndex].torque_tor
+                        + _quantities.torque_tor
                     )
                     single_current_waveform[sourceIndex].append(
-                        self.ids.source[sourceIndex].global_quantities[timeIndex].current_parallel
+                        _quantities.current_parallel
                     )
                     single_torque_waveform[sourceIndex].append(
-                        self.ids.source[sourceIndex].global_quantities[timeIndex].torque_tor
+                        _quantities.torque_tor
                     )
                 single_current_waveform[sourceIndex] = np.array(single_current_waveform[sourceIndex])
                 single_torque_waveform[sourceIndex] = np.array(single_torque_waveform[sourceIndex])

@@ -33,7 +33,9 @@ class DistributionsView:
                     lbl = ""
                     if idistrib == 0 or self.distributionsCompute.ndistributions - 1 == idistrib:
                         lbl = profiles["single_nf_source_name"][idistrib]
-                    # ax.plot(self.distributionsCompute.rho_tor_norm, profiles['single_total_power_density_profile'][idistrib]*1.e-6,label=profiles['single_nf_source_name'][idistrib])
+                    # ax.plot(self.distributionsCompute.rho_tor_norm,
+                    # profiles['single_total_power_density_profile'][idistrib]*1.e-6,
+                    # label=profiles['single_nf_source_name'][idistrib])
                     ax.plot(
                         self.distributionsCompute.rho_tor_norm,
                         profiles["single_total_power_density_profile"][idistrib] * 1.0e-6,
@@ -52,7 +54,6 @@ class DistributionsView:
         ax,
         timeIndex,
     ):
-        radialGridInfo = self.distributionsCompute.getRadialGridInfo(timeIndex)
         profiles = self.distributionsCompute.getProfiles(timeIndex)
 
         if len(self.distributionsCompute.activeDistributions) != 0:
@@ -142,7 +143,8 @@ class DistributionsView:
                 lbl = ""
                 if idistrib == 0 or self.distributionsCompute.ndistributions - 1 == idistrib:
                     lbl = profiles["single_nf_source_name"][idistrib]
-                # ax.plot(timeArray, np.array(profiles['single_total_power_waveform'][idistrib])*1.e-6,label=profiles['single_nf_source_name'][idistrib])
+                # ax.plot(timeArray, np.array(profiles['single_total_power_waveform'][idistrib])*1.e-6,
+                # label=profiles['single_nf_source_name'][idistrib])
                 ax.plot(
                     timeArray,
                     np.array(profiles["single_total_power_waveform"][idistrib]) * 1.0e-6,
@@ -179,7 +181,8 @@ class DistributionsView:
                     lbl = ""
                     if idistrib == 0 or self.distributionsCompute.ndistributions - 1 == idistrib:
                         lbl = profiles["single_nf_source_name"][idistrib]
-                    # ax.plot(timeArray, np.array(profiles['single_current_waveform'][idistrib])*1.e-6,label=profiles['single_nf_source_name'][idistrib])
+                    # ax.plot(timeArray, np.array(profiles['single_current_waveform'][idistrib])*1.e-6,label=
+                    # profiles['single_nf_source_name'][idistrib])
                     ax.plot(
                         timeArray,
                         np.array(profiles["single_current_waveform"][idistrib]) * 1.0e-6,

@@ -44,15 +44,15 @@ class TbdView:
         imin = len(np.where(lwall <= lmin)[0]) - 1
         imax = np.where(lwall >= lmax)[0][0]
         # find Rmax
-        irmax = np.argmax(edges[imin : imax + 1, 0]) + imin
+        irmax = np.argmax(edges[imin: imax + 1, 0]) + imin
         # FIXME edge is not defined here, might raise runtime error
         if irmax == imin:
-            Rmax = edge[imin, 0] + (lmin - lwall[imin]) / (lwall[imin + 1] - lwall[imin]) * (
-                edge[imin + 1, 0] - edge[imin, 0]
+            Rmax = edges[imin, 0] + (lmin - lwall[imin]) / (lwall[imin + 1] - lwall[imin]) * (
+                edges[imin + 1, 0] - edges[imin, 0]
             )
         elif irmax == imax:
-            Rmax = edge[imax - 1, 0] + (lmax - lwall[imax - 1]) / (lwall[imax] - lwall[imax - 1]) * (
-                edge[imax, 0] - edge[imax - 1, 0]
+            Rmax = edges[imax - 1, 0] + (lmax - lwall[imax - 1]) / (lwall[imax] - lwall[imax - 1]) * (
+                edges[imax, 0] - edges[imax - 1, 0]
             )
         else:
             Rmax = edges[irmax, 0]
@@ -133,7 +133,7 @@ class TbdView:
             ax.invert_yaxis()
             # colorbar erzeugen
             cax, _ = cbar.make_axes(ax)
-            cb2 = cbar.ColorbarBase(cax, cmap=chosen_cmap, norm=normal)
+            cbar.ColorbarBase(cax, cmap=chosen_cmap, norm=normal)
 
             return ax_polygon_plot_pol
         else:

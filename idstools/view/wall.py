@@ -1,7 +1,6 @@
 import matplotlib.patches as patches
 from matplotlib.path import Path
 from idstools.compute.wall import WallCompute
-import matplotlib.cm as cm
 
 
 class WallView:
@@ -11,13 +10,15 @@ class WallView:
 
     def addWallMarkings(self, ax, r, z, showLabels=False, **kwargs):
         """
-        The function adds a path(Wall marking) to a given matplotlib axis object using the provided radial and vertical coordinates.
+        The function adds a path(Wall marking) to a given matplotlib axis object using the provided radial and
+        vertical coordinates.
 
         Args:
             ax: The parameter "ax" is an instance of the Axes class in matplotlib. It represents the axes
         on which the patch will be added.
             r: The parameter "r" represents a list of x-coordinates for the vertices of the path.
-            z: The parameter "z" represents the z-coordinates of the points in the path. It is a list or  array containing the z-coordinates of the points.
+            z: The parameter "z" represents the z-coordinates of the points in the path. It is a list or  array
+            containing the z-coordinates of the points.
         """
         n = len(r)
         codes = [Path.MOVETO] + [Path.LINETO] * (n - 1)
@@ -40,13 +41,16 @@ class WallView:
 
     def view_wall(self, ax, showLabels=False, wallcolor=None, showLegend=False, **kwargs):
         """
-        The function `view_wall` prints the values of `r` and `z` for each element in the `wall_data` dictionary and calls the `addWallMarkings` function to add a patch to the given `ax` object.
+        The function `view_wall` prints the values of `r` and `z` for each element in the `wall_data` dictionary
+        and calls the `addWallMarkings` function to add a patch to the given `ax` object.
 
         Args:
             ax: `ax` is an instance of the `matplotlib.axes.Axes` class. It represents the axes on which
         the wall will be plotted.
             showLabels:shows labels on the plot
-            kwargs: This is useful to update properties of patch (Wall marking on the plot). You can find it here https://matplotlib.org/stable/api/_as_gen/matplotlib.patches.PathPatch.html.. most useful are linewidth, linestyle, visible, animated, edgecolor, fill or facecolor
+            kwargs: This is useful to update properties of patch (Wall marking on the plot). You can find it here
+            https://matplotlib.org/stable/api/_as_gen/matplotlib.patches.PathPatch.html.. most useful are linewidth,
+            linestyle, visible, animated, edgecolor, fill or facecolor
         """
         # These are the colors that will be used in the plot
         colors = [

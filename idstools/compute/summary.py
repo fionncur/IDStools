@@ -5,7 +5,6 @@ This module provides compute functions and classes for summary ids data
 
 """
 
-import functools
 import numpy as np
 import logging
 from imas import imasdef
@@ -212,10 +211,14 @@ class SummaryCompute:
 
     def getHModeInfo(self):
         """
-        The function `getHModeInfo` checks if the `h_mode` values are present in the `global_quantities`  and returns information about the presence of HMode, as well as the minimum and maximum time        values where HMode is present.
+        The function `getHModeInfo` checks if the `h_mode` values are present in the `global_quantities`
+        and returns information about the presence of HMode, as well as the minimum and maximum time
+        values where HMode is present.
 
         Returns:
-            a dictionary with three keys: "HModePresent", "th_min", and "th_max". The values associated with these keys are the boolean value indicating whether HMode is present, the minimum value of time when HMode is present, and the maximum value of time when HMode is present, respectively.
+            a dictionary with three keys: "HModePresent", "th_min", and "th_max". The values associated
+            with these keys are the boolean value indicating whether HMode is present, the minimum value
+            of time when HMode is present, and the maximum value of time when HMode is present, respectively.
         """
         stime = len(self.ids.time)
         if len(self.ids.global_quantities.h_mode.value) < 1:

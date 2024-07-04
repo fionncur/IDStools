@@ -81,11 +81,11 @@ def ids_write_slice(ids, shot, run, user_or_path, database, occ=0):
 # DISPLAY CONTENT OF AN IDS OR ONE OF ITS SUB-STRUCTURES
 def idsprint(stringvar):
     obj_compounds = stringvar.split(".")
-    ids = inspect.stack()[1][0].f_globals[obj_compounds[0]]
+    # ids = inspect.stack()[1][0].f_globals[obj_compounds[0]]
     obj_compounds[0] = "ids"
     var = eval(".".join(obj_compounds))
     if hasattr(var, "__dict__"):
-        nkeys = eval("len(var.__dict__.keys())")
+        # nkeys = eval("len(var.__dict__.keys())")
         for key in var.__dict__.keys():
             if key[0] != "_" and "_error_" not in key:
                 if hasattr(var, "__len__"):
@@ -133,7 +133,7 @@ def __idsrrprint(ids, stringvar):
     obj_compounds[0] = "ids"
     var = eval(".".join(obj_compounds))
     if hasattr(var, "__dict__"):
-        nkeys = eval("len(var.__dict__.keys())")
+        # nkeys = eval("len(var.__dict__.keys())")
         for key in var.__dict__.keys():
             if key[0] != "_" and "_error_" not in key:
                 if hasattr(var, "__len__"):

@@ -1,5 +1,4 @@
 from idstools.compute.common import findMaxima, findMinima, findfwhm
-from idstools.view.common import BasePlot
 from idstools.compute.waves import WavesCompute
 
 import numpy as np
@@ -163,12 +162,36 @@ class WavesView:
                 # fmt: off
                 for i in range(len(maxima)):
                     if i == 0:
-                        fwhm.append(findfwhm(totalx1,totaly1,maxima[0],0,(maxima[0] + maxima[1]) // 2,))
+                        fwhm.append(
+                            findfwhm(
+                                totalx1,
+                                totaly1,
+                                maxima[0],
+                                0,
+                                (maxima[0] + maxima[1]) // 2,
+                                )
+                            )
                     elif i == len(maxima) - 1:
-                        fwhm.append(findfwhm(totalx1,totaly1,maxima[i],(maxima[i - 1] + maxima[i]) // 2,len(totaly1),))
+                        fwhm.append(
+                            findfwhm(
+                                totalx1,
+                                totaly1,
+                                maxima[i],
+                                (maxima[i - 1] + maxima[i]) // 2,
+                                len(totaly1),
+                                )
+                            )
                         logger.info(f"({totalx1[maxima[i]]}, {totaly1[maxima[i]]} --- fwhm: {fwhm[i]})")
                     else:
-                        fwhm.append(findfwhm(totalx1,totaly1,maxima[i],(maxima[i - 1] + maxima[i]) // 2,(maxima[i] + maxima[i + 1]) // 2,))
+                        fwhm.append(
+                            findfwhm(
+                                totalx1,
+                                totaly1,
+                                maxima[i],
+                                (maxima[i - 1] + maxima[i]) // 2,
+                                (maxima[i] + maxima[i + 1]) // 2,
+                                )
+                            )
                         logger.info(f"({totalx1[maxima[i]]}, {totaly1[maxima[i]]} --- fwhm: {fwhm[i]})")
                 # fmt: on
 
@@ -215,11 +238,35 @@ class WavesView:
                 # fmt: off
                 for i in range(len(minima)):
                     if (i == 0):
-                        fwhm.append(findfwhm(totalx2,totaly2,minima[0],0,(minima[0]+minima[1])//2))
+                        fwhm.append(
+                            findfwhm(
+                                totalx2,
+                                totaly2,
+                                minima[0],
+                                0,
+                                (minima[0] + minima[1]) // 2
+                                )
+                            )
                     elif (i == len(minima) - 1):
-                        fwhm.append(findfwhm(totalx2,totaly2,minima[i],(minima[i-1]+minima[i])//2,len(totaly2)))
+                        fwhm.append(
+                            findfwhm(
+                                totalx2,
+                                totaly2,
+                                minima[i],
+                                (minima[i-1] + minima[i]) // 2,
+                                len(totaly2)
+                                )
+                            )
                     else:
-                        fwhm.append(findfwhm(totalx2,totaly2,minima[i],(minima[i-1]+minima[i])//2,(minima[i]+minima[i+1])//2))
+                        fwhm.append(
+                            findfwhm(
+                                totalx2,
+                                totaly2,
+                                minima[i],
+                                (minima[i-1] + minima[i]) // 2,
+                                (minima[i] + minima[i+1]) // 2
+                                )
+                            )
                     logger.info(f'({totalx2[minima[i]]}, {totaly2[minima[i]]} --- fwhm: {fwhm[i]})')
                 # fmt: on
             # logger.debug(fwhm)
@@ -325,7 +372,9 @@ class WavesView:
         for iWave, waveData in launchers.items():
             if waveData["isActive"] is True:
                 logger.info(
-                    f"{ecLauncherInfo['single_ec_launcher_name'][iWave]} is active with a power of {ecLauncherInfo['single_injected_power'][iWave]*1.e-6:.2f} MW --> Absorbed power = {ecLauncherInfo['single_absorbed_power'][iWave]*1.e-6:.2f} MW"
+                    f"{ecLauncherInfo['single_ec_launcher_name'][iWave]} is active with a power of"
+                    f"{ecLauncherInfo['single_injected_power'][iWave]*1.e-6:.2f} MW --> Absorbed power ="
+                    f"{ecLauncherInfo['single_absorbed_power'][iWave]*1.e-6:.2f} MW"
                 )
                 logger.info(f"--> ECCD =  {ecLauncherInfo['single_eccd'][iWave]*1.e-3:.2f} kA")
             else:
@@ -397,7 +446,6 @@ class WavesView:
 
     # CD PROFILE [MA/M2]
     def viewCDProfile(self, ax, timeIndex, usepsi=False):
-        timeArray = self.ids.time
         ecLauncherInfo = self.wavesCompute.GetECLaunchersInfo(timeIndex, usepsi)
 
         radialGrid = self.wavesCompute.getRadialGridInfo(timeIndex, usepsi)
@@ -420,7 +468,7 @@ class WavesView:
                     label=ecLauncherInfo["single_ec_launcher_name"][iwave],
                 )
         ax.set_ylabel("$\\mathrm{CD} [MA/m^{2}]}$")
-        if firstRadialGridInfo["psiBased"] is False and usepsi == False:
+        if firstRadialGridInfo["psiBased"] is False and usepsi is False:
             ax.set_xlabel("Normalized toroidal flux coordinate")
         else:
             ax.set_xlabel("-(Poloidal flux coordinate) [Wb]")
@@ -429,7 +477,6 @@ class WavesView:
 
     # PROFILE OF ABSORBED POWER DENSITY [MW/M3]
     def viewAbsorbedPowerDensityProfile(self, ax, timeIndex, usepsi=False):
-        timeArray = self.ids.time
         ecLauncherInfo = self.wavesCompute.GetECLaunchersInfo(timeIndex, usepsi, True)
 
         radialGrid = self.wavesCompute.getRadialGridInfo(timeIndex, usepsi)
@@ -452,7 +499,7 @@ class WavesView:
                     label=ecLauncherInfo["single_ec_launcher_name"][iwave],
                 )
         ax.set_ylabel("Absorbed power $\\mathrm{[MW/m^{3}]}$")
-        if firstRadialGridInfo["psiBased"] is False and usepsi == False:
+        if firstRadialGridInfo["psiBased"] is False and usepsi is False:
             ax.set_xlabel("Normalized toroidal flux coordinate")
         else:
             ax.set_xlabel("-(Poloidal flux coordinate) [Wb]")
@@ -468,7 +515,7 @@ class WavesView:
         """
         # TODO add callback function which can be called whenever there is update requested on timeline
         beam_array = self.wavesCompute.getBeamArray()
-        bars = ax.bar(beam_array, 20, color="g", width=0.5)
+        ax.bar(beam_array, 20, color="g", width=0.5)
         ax.set_xlim(beam_array[0] - 1, beam_array[-1] + 1)
         ax.set_ylim(top=20)
 
@@ -497,7 +544,7 @@ class WavesView:
                 )
             else:
                 logger.info(
-                    f"There is "
+                    "There is "
                     + str(nbeam_active)
                     + " active beam and each beam has "
                     + str(nray)
