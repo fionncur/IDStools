@@ -1,3 +1,4 @@
+import inspect
 import imas
 
 
@@ -75,7 +76,6 @@ def ids_write_slice(ids, shot, run, user_or_path, database, occ=0):
 # idsrprint works the same, only that it is recursive over the
 # sub-structure
 # ----------------------------------------------------------------
-import inspect
 
 
 # DISPLAY CONTENT OF AN IDS OR ONE OF ITS SUB-STRUCTURES

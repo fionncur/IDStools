@@ -105,8 +105,8 @@ class WavesView:
         lengthData = beamTracingDict["length"]
         powerparallelData = beamTracingDict["powerparallel"]
         powerperpendicularData = beamTracingDict["powerperpendicular"]
-        perplabel = "P$_\perp$/P$_{max}$ [-]"
-        parlabel = "P$_\parallel$/P$_{max}$ [-]"
+        perplabel = "P$_\\perp$/P$_{max}$ [-]"
+        parlabel = "P$_\\parallel$/P$_{max}$ [-]"
         displayLabelOnce = True
         for i in range(len(lengthData)):
             for j in range(len(lengthData[i])):
@@ -179,7 +179,7 @@ class WavesView:
                     linestyle="--",
                     label=ecLauncherInfo["single_ec_launcher_name"][iWave],
                 )
-            ax.set_ylabel("Absorbed power $\mathrm{[MW/m^{3}]}$")
+            ax.set_ylabel("Absorbed power $\\mathrm{[MW/m^{3}]}$")
             if firstRadialGridInfo["psiBased"] is False:
                 ax.set_xlabel("Normalized toroidal flux coordinate")
             else:
@@ -230,7 +230,7 @@ class WavesView:
                 linestyle="--",
                 label=ecLauncherInfo["single_ec_launcher_name"][iWave],
             )
-        ax.set_ylabel("$\mathrm{ECCD} [MA/m^{2}]}$")
+        ax.set_ylabel("$\\mathrm{ECCD} [MA/m^{2}]}$")
         if firstRadialGridInfo["psiBased"] is False:
             ax.set_xlabel("Normalized toroidal flux coordinate")
         else:
@@ -258,7 +258,7 @@ class WavesView:
             return -1
         else:
             ax.set_title("ECRH Waveforms")
-            ax.set_ylabel("Power to the electrons $\mathrm{[MW]}$")
+            ax.set_ylabel("Power to the electrons $\\mathrm{[MW]}$")
             ax.set_xlabel("Time (s)")
             # EC POWER WAVEFORM
             if len(activeLaunchers) > 0:
@@ -298,7 +298,7 @@ class WavesView:
             return -1
         else:
             ax.set_title("ECCD Waveforms")
-            ax.set_ylabel("ECCD $\mathrm{[kA]}$")
+            ax.set_ylabel("ECCD $\\mathrm{[kA]}$")
             ax.set_xlabel("Time (s)")
             # EC POWER WAVEFORM
             if len(activeLaunchers) > 0:
@@ -363,7 +363,7 @@ class WavesView:
                 np.array(ecLauncherInfo["single_current_waveform"][iwave]) * 1.0e-3,
                 label=ecLauncherInfo["single_ec_launcher_name"][iwave],
             )
-        ax.set_ylabel("Current Density $\mathrm{[kA]}$")
+        ax.set_ylabel("Current Density $\\mathrm{[kA]}$")
         ax.set_xlabel("Time (s)")
         legend = ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
         WavesView.customizeLegend(legend)
@@ -390,7 +390,7 @@ class WavesView:
                 np.array(ecLauncherInfo["single_power_waveform"][iwave]) * 1.0e-6,
                 label=ecLauncherInfo["single_ec_launcher_name"][iwave],
             )
-        ax.set_ylabel("Power to the electrons $\mathrm{[MW]}$")
+        ax.set_ylabel("Power to the electrons $\\mathrm{[MW]}$")
         ax.set_xlabel("Time (s)")
         legend = ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
         WavesView.customizeLegend(legend)
@@ -419,7 +419,7 @@ class WavesView:
                     ecLauncherInfo["single_current_density_profile"][iwave] * 1.0e-6,
                     label=ecLauncherInfo["single_ec_launcher_name"][iwave],
                 )
-        ax.set_ylabel("$\mathrm{CD} [MA/m^{2}]}$")
+        ax.set_ylabel("$\\mathrm{CD} [MA/m^{2}]}$")
         if firstRadialGridInfo["psiBased"] is False and usepsi == False:
             ax.set_xlabel("Normalized toroidal flux coordinate")
         else:
@@ -451,7 +451,7 @@ class WavesView:
                     ecLauncherInfo["single_power_density_profile"][iwave] * 1.0e-6,
                     label=ecLauncherInfo["single_ec_launcher_name"][iwave],
                 )
-        ax.set_ylabel("Absorbed power $\mathrm{[MW/m^{3}]}$")
+        ax.set_ylabel("Absorbed power $\\mathrm{[MW/m^{3}]}$")
         if firstRadialGridInfo["psiBased"] is False and usepsi == False:
             ax.set_xlabel("Normalized toroidal flux coordinate")
         else:
@@ -484,7 +484,7 @@ class WavesView:
         z_ray = beam_tracing["z_ray"]
         r_ray = beam_tracing["r_ray"]
 
-        if verbose == True:
+        if verbose:
             if nbeam_active > 1:
                 logger.info(
                     "There are "
@@ -538,7 +538,7 @@ class WavesView:
         y_ray = beam_tracing["y_ray"]
 
         nray = beam_tracing["maxTotalBeams"]
-        if verbose == True:
+        if verbose:
             nbeam_active = beam_tracing["nbeam_active"]
             if nbeam_active > 1:
                 print(

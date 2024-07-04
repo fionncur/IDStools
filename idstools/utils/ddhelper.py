@@ -87,7 +87,7 @@ class DDHelper(object):
     def getField(self, struct, field):
         """Recursive function which returns the node corresponding to a given field which is a descendant of struct."""
         elt = struct.find('./field[@name="' + field[0] + '"]')
-        if elt == None:
+        if elt is None:
             raise Exception("Element '" + field[0] + "' not found")
         if len(field) > 1:
             f = self.getField(elt, field[1:])
@@ -102,10 +102,10 @@ class DDHelper(object):
     def query(self, ids, path=None):
         """Returns attributes of the selected ids/path node as a dictionary."""
         ids = self.root.find(f"./IDS[@name='{ids}']")
-        if ids == None:
+        if ids is None:
             raise ValueError(f"Error getting the IDS, please check that '{ids}' corresponds to a valid IDS name")
 
-        if path != None:
+        if path is not None:
             fields = path.split("/")
 
             try:

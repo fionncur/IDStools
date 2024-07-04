@@ -1,5 +1,5 @@
 """
-This module 
+This module
 
 """
 
@@ -122,18 +122,19 @@ def getAllIDSGetTime(dbEntryObject: imas.DBEntry):
 
 def getObjectSize(obj: object) -> int:
     objectSize = 0
-    if type(obj) == str:
+
+    if isinstance(obj, str):
         objectSize += len(obj)
-    elif type(obj) == np.ndarray:
+    elif isinstance(obj, np.ndarray):
         objectSize += obj.nbytes
-    elif type(obj) == int:
+    elif isinstance(obj, int):
         objectSize += 4
-    elif type(obj) == float:
+    elif isinstance(obj, float):
         objectSize += 8
-    elif type(obj) == list:
+    elif isinstance(obj, list):
         for objItem in obj:
             objectSize += getObjectSize(objItem)
-    elif type(obj) == dict:
+    elif isinstance(obj, dict):
         for objValue in obj.values():
             objectSize += getObjectSize(objValue)
     else:
@@ -375,7 +376,7 @@ def compareIds(
 
         Xo = X.__dict__[key]
         Yo = Y.__dict__[key]
-        if type(Xo) != type(Yo):
+        if not isinstance(Xo, type(Yo)):
             if field + "." + key not in output.keys():
                 output[field + "." + key] = (
                     Xo,

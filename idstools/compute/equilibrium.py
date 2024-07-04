@@ -1,4 +1,4 @@
-""" 
+"""
 This module provides compute functions and classes for equilibrium ids data
 
 `refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`_.
@@ -160,7 +160,7 @@ class EquilibriumCompute:
 
         Notes:
 
-            .. math:: bTotal = \sqrt{b\_field\_r^2 + b\_field\_z^2 + b\_field\_tor^2}
+            .. math:: bTotal = \\sqrt{b\\_field\\_r^2 + b\\_field\\_z^2 + b\\_field\\_tor^2}
 
             ``profiles_2d`` has information about following fields
             ``b_field_r`` (R component of the poloidal magnetic field)

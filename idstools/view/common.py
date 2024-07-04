@@ -1,3 +1,7 @@
+import numpy
+import weakref
+import math
+import logging
 import os
 import sys
 
@@ -40,12 +44,7 @@ if os.path.exists(mplstyle_filepath):
     plt.style.use(mplstyle_filepath)
 else:
     plt.style.use(os.path.join(current_directory, r"styles/scientific.mplstyle"))
-import logging
-import math
-import weakref
 
-import matplotlib.pyplot as plt
-import numpy
 
 try:
     import rich

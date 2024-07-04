@@ -1,4 +1,4 @@
-""" 
+"""
 This module provides compute functions and classes for distribution_sources ids data
 
 """

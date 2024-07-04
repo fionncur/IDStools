@@ -40,7 +40,7 @@ class DistributionsView:
                         label=lbl,
                     )
         ax.set_title("NBI/FUS power individual injectors profile")
-        ax.set_ylabel("Absorbed power $\mathrm{[MW/m^{3}]}$")
+        ax.set_ylabel("Absorbed power $\\mathrm{[MW/m^{3}]}$")
         ax.set_xlabel("Normalized toroidal flux coordinate")
 
         legend = ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
@@ -72,7 +72,7 @@ class DistributionsView:
                 label=r"Ions",
             )
         ax.set_title("NBI/FUS power all injectors electrons ion profile")
-        ax.set_ylabel("Absorbed power $\mathrm{[MW/m^{3}]}$")
+        ax.set_ylabel("Absorbed power $\\mathrm{[MW/m^{3}]}$")
         ax.set_xlabel("Normalized toroidal flux coordinate")
 
         legend = ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
@@ -104,7 +104,7 @@ class DistributionsView:
                             profiles["single_total_power_density_profile"][idistrib] * 1.0e-6,
                             label=lbl,
                         )
-        ax.set_ylabel("Current density $\mathrm{[MA/m^{2}]}$")
+        ax.set_ylabel("Current density $\\mathrm{[MA/m^{2}]}$")
         ax.set_xlabel("Normalized toroidal flux coordinate")
         ax.set_title("NBI/FUS power profile")
 
@@ -148,7 +148,7 @@ class DistributionsView:
                     np.array(profiles["single_total_power_waveform"][idistrib]) * 1.0e-6,
                     label=lbl,
                 )
-        ax.set_ylabel("Power to the bulk $\mathrm{[MW]}$")
+        ax.set_ylabel("Power to the bulk $\\mathrm{[MW]}$")
         ax.set_xlabel("Time (s)")
         ax.set_title("NBI/FUS power waveform")
         if profiles is not None:
@@ -185,7 +185,7 @@ class DistributionsView:
                         np.array(profiles["single_current_waveform"][idistrib]) * 1.0e-6,
                         label=lbl,
                     )
-            ax.set_ylabel("Current Drive $\mathrm{[MA]}$")
+            ax.set_ylabel("Current Drive $\\mathrm{[MA]}$")
             ax.set_xlabel("Time (s)")
             ax.set_title("NBI/FUS Current Density waveform")
             # ax.set_ylim(0,max(profiles['all_injectors_current_waveform'])*1.2e-3)

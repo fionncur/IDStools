@@ -67,7 +67,7 @@ def get_timings(db, idsname, occ=0, dbout=None, times=None, repeat=5, verbose=Fa
     # Default timing
     # TODO: more fine grained control of imported symbols to avoid issues?
     t = timeit.Timer(cmd, globals={**locals(), **globals()})
-    #'from __main__ import get_ids,db,dbout,verbose,times,idsobj')
+    # 'from __main__ import get_ids,db,dbout,verbose,times,idsobj')
     timings = t.repeat(repeat=repeat, number=1)
 
     # Profiling
@@ -92,18 +92,19 @@ def byte_size(obj):
         estimated data size in bytes
     """
     S = 0
-    if type(obj) == str:
+
+    if isinstance(obj, str):
         S += len(obj)
-    elif type(obj) == np.ndarray:
+    elif isinstance(obj, np.ndarray):
         S += obj.nbytes
-    elif type(obj) == int:
+    elif isinstance(obj, int):
         S += 4
-    elif type(obj) == float:
+    elif isinstance(obj, float):
         S += 8
-    elif type(obj) == list:
+    elif isinstance(obj, list):
         for o in obj:
             S += byte_size(o)
-    elif type(obj) == dict:
+    elif isinstance(obj, dict):
         for o in obj.values():
             S += byte_size(o)
     else:

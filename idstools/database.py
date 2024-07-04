@@ -554,7 +554,8 @@ class DBMaster:
                 "The path provided does not exist or has no such database file or directory. Please check spelling."
             )
         pulses = []
-        # folder = Path(locpath).glob('**/*.datafile') # --> does not work with linked subfolders (https://bugs.python.org/issue33428)
+        # folder = Path(locpath).glob('**/*.datafile') # --> does not work with
+        # linked subfolders (https://bugs.python.org/issue33428)
         folder = glob(str(locpath) + "/**/*.datafile", recursive=True)
         for entry in folder:
             if (with_status is None) or (with_status == DBMaster.get_status(Path(entry).with_suffix(".yaml"))):

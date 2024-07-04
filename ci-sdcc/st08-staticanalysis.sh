@@ -18,7 +18,7 @@ python -m venv "$ENVIRONEMNT_NAME"
 pip install --upgrade 'black >=24,<25' flake8 pylint
 
 echo "---------------------------------------------------------------------"
-black --check idstools >black.log
+black --check -l 120 idstools >black.log
 echo "---------------------------------------------------------------------"
 flake8 idstools >flake8.log
 echo "---------------------------------------------------------------------"

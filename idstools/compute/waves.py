@@ -1,4 +1,4 @@
-""" 
+"""
 This module provides compute functions and classes for waves ids data
 
 `refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`_.
@@ -43,7 +43,7 @@ class WavesCompute:
 
 
         Notes:
-            .. math:: BResonance = \ 2*pi*ecfrequency*9.1e^-31/1.6e^-19/HarmonicFrequency
+            .. math:: BResonance = \\ 2*pi*ecfrequency*9.1e^-31/1.6e^-19/HarmonicFrequency
 
             Here harmonicFrequency is any value from [1,2,3,4]
 
@@ -107,7 +107,7 @@ class WavesCompute:
             The value of the angular frequency (in radians per second) of a coherent wave at a specific time index. The value is calculated using the frequency of the coherent wave at the given time index and multiplying it by 2*pi.
 
         Notes:
-            .. math:: OmegaEC = \ 2*pi*frequency
+            .. math:: OmegaEC = \\ 2*pi*frequency
 
         Example:
             .. code-block:: python

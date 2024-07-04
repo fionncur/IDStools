@@ -199,13 +199,13 @@ class ScenarioDescription(ScenarioDescriptionBase):
         if "database_relations" in yamlData.keys():
             if "replaced_by" in yamlData["database_relations"].keys():
                 replaced_by = yamlData["database_relations"]["replaced_by"]
-        if not "pulse" in dictToFill.keys():
+        if "pulse" not in dictToFill.keys():
             dictToFill["pulse"] = []
-        if not "run" in dictToFill.keys():
+        if "run" not in dictToFill.keys():
             dictToFill["run"] = []
-        if not "status" in dictToFill.keys():
+        if "status" not in dictToFill.keys():
             dictToFill["status"] = []
-        if not "comment" in dictToFill.keys():
+        if "comment" not in dictToFill.keys():
             dictToFill["comment"] = []
         if replaced_by is not None:
             string_list = re.findall(r"\d+", replaced_by)
@@ -236,13 +236,13 @@ class ScenarioDescription(ScenarioDescriptionBase):
         if "database_relations" in yamlData.keys():
             if "replaces" in yamlData["database_relations"].keys():
                 replaces = yamlData["database_relations"]["replaces"]
-        if not "pulse" in dictToFill.keys():
+        if "pulse" not in dictToFill.keys():
             dictToFill["pulse"] = []
-        if not "run" in dictToFill.keys():
+        if "run" not in dictToFill.keys():
             dictToFill["run"] = []
-        if not "status" in dictToFill.keys():
+        if "status" not in dictToFill.keys():
             dictToFill["status"] = []
-        if not "comment" in dictToFill.keys():
+        if "comment" not in dictToFill.keys():
             dictToFill["comment"] = []
         if replaces is not None:
             string_list = re.findall(r"\d+", replaces)

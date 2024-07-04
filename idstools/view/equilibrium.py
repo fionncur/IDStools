@@ -1,4 +1,4 @@
-""" 
+"""
 This module provides view functions and classes for equilibrium ids data
 
 `refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`_.
@@ -182,7 +182,7 @@ class EquilibriumView(BasePlot):
 
     def plotequilibrium(self, ax):
         quantities = self.computeObj.get2DCartesianGrid()
-        if quantities != None:
+        if quantities is not None:
             r2d, z2d, psi2d = (
                 quantities["r2d"],
                 quantities["z2d"],
@@ -197,7 +197,7 @@ class EquilibriumView(BasePlot):
             ax.set_xlabel("R (m)")
             ax.set_ylabel("Z (m)")
 
-            ax.set_xlabel("$R\/\mathrm{[m]}$")
+            ax.set_xlabel("$R\\/\\mathrm{[m]}$")
             # ax.tick_params(axis='both',which='major',labelsize=ticksize)
             ax.set_ylabel(r"$Z\/\mathrm{[m]}$")
             # ax.tick_params(

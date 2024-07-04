@@ -1,4 +1,4 @@
-""" 
+"""
 This module provides compute functions and classes for core_profiles ids data
 
 `refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`_.
@@ -285,7 +285,8 @@ class CoreProfilesCompute:
                         f"core_profile IDS: Density data for species {self.ids.profiles_1d[timeSlice].ion[species_index].label} and state {str(state_index)} is empty "
                     )
                 elif len(density) != 0:
-                    # if all density values in the array are 1.0 or 0.0 then do not calculate because it can be false values
+                    # if all density values in the array are 1.0 or 0.0 then do not calculate
+                    # because it can be false values
                     if np.all(density == 1.0) or np.all(density == 0.0):
                         logger.critical(
                             f"core_profile IDS: Density data for species {self.ids.profiles_1d[timeSlice].ion[species_index].label} and state {str(state_index)} all are ones or zeros "

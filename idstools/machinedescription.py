@@ -105,8 +105,9 @@ class MachineDescription:
         """
         The `readMDSummary` method is responsible for reading the machine description summary and retrieving data for the specified IDS names.
         """
+
         # if provided just single string then convert to list with single string
-        if type(idsNames) == str:
+        if isinstance(idsNames, str):
             idsNames = [idsNames]
         # lower case provided ids names
         idsNames = list(map(lambda x: x.lower(), idsNames))
@@ -235,13 +236,13 @@ class MachineDescription:
             pulsec = string_list[0]
             runc = string_list[1]
             pulserunc = pulsec + "/" + runc
-            if not "pulse" in dictToFill.keys():
+            if "pulse" not in dictToFill.keys():
                 dictToFill["pulse"] = []
-            if not "run" in dictToFill.keys():
+            if "run" not in dictToFill.keys():
                 dictToFill["run"] = []
-            if not "status" in dictToFill.keys():
+            if "status" not in dictToFill.keys():
                 dictToFill["status"] = []
-            if not "reason_for_replacement" in dictToFill.keys():
+            if "reason_for_replacement" not in dictToFill.keys():
                 dictToFill["reason_for_replacement"] = []
             dictToFill["pulse"].append(pulsec)
             dictToFill["run"].append(runc)
@@ -268,13 +269,13 @@ class MachineDescription:
             pulsep = string_list[0]
             runp = string_list[1]
             pulserunp = pulsep + "/" + runp
-            if not "pulse" in dictToFill.keys():
+            if "pulse" not in dictToFill.keys():
                 dictToFill["pulse"] = []
-            if not "run" in dictToFill.keys():
+            if "run" not in dictToFill.keys():
                 dictToFill["run"] = []
-            if not "status" in dictToFill.keys():
+            if "status" not in dictToFill.keys():
                 dictToFill["status"] = []
-            if not "reason_for_replacement" in dictToFill.keys():
+            if "reason_for_replacement" not in dictToFill.keys():
                 dictToFill["reason_for_replacement"] = []
 
             dictToFill["pulse"].insert(0, pulsep)  # Order to be reversed for parents

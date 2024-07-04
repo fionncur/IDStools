@@ -1,4 +1,4 @@
-""" 
+"""
 This module provides compute functions and classes for edge_profiles ids data
 
 `refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`_.
@@ -385,7 +385,8 @@ class EdgeProfilesCompute:
 
         for ielement, element in enumerate(elements):
             for obj in element.object:
-                # Get mapping information from element like, space, dimension and index which we need to look in space object
+                # Get mapping information from element like, space, dimension and index
+                # which we need to look in space object
                 space_index = obj.space - 1
                 dimension_index = obj.dimension - 1
                 object_index = obj.index - 1
@@ -415,7 +416,8 @@ class EdgeProfilesCompute:
             # Get volume from nodes if volumes are still empty
             for ielement, element in enumerate(elements):
                 for obj in element.object:
-                    # Get mapping information from element like, space, dimension and index which we need to look in space object
+                    # Get mapping information from element like, space, dimension and index
+                    # which we need to look in space object
                     space_index = obj.space - 1
                     dimension_index = obj.dimension - 1
                     object_index = obj.index - 1
@@ -794,7 +796,7 @@ class EdgeProfilesCompute:
         temp = None
 
         for electronsDensity in self.ids.ggd[timeSlice].electrons.density:
-            if electronsDensity.grid_subset_index == 1:  #  nodes
+            if electronsDensity.grid_subset_index == 1:  # nodes
                 temp = electronsDensity.values
         if temp is None:
             # TODO if nodes grid_subset is not available is it possible to get coordinated from other subsets?
@@ -817,7 +819,7 @@ class EdgeProfilesCompute:
         r_edge, z_edge = self.getRZ(timeSlice)
         temp = None
         for ionDensity in self.ids.ggd[timeSlice].ion[0].density:
-            if ionDensity.grid_subset_index == 1:  #  nodes
+            if ionDensity.grid_subset_index == 1:  # nodes
                 temp = ionDensity.values
 
         if temp is None:
@@ -842,7 +844,7 @@ class EdgeProfilesCompute:
 
         temp = None
         for neutralDensity in self.ids.ggd[timeSlice].neutral[0].density:
-            if neutralDensity.grid_subset_index == 1:  #  nodes
+            if neutralDensity.grid_subset_index == 1:  # nodes
                 temp = neutralDensity.values
 
         if temp is None:

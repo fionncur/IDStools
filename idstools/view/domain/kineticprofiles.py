@@ -76,8 +76,8 @@ class KineticProfilesView:
             )
 
         KineticProfilesView.viewTimeLine(ax, self.kProfiles.commonTime)
-        ax.set_xlabel("$Time\/[\mathrm{s}]$")
-        ax.set_ylabel("$T\/[\mathrm{keV}]$")
+        ax.set_xlabel("$Time\\/[\\mathrm{s}]$")
+        ax.set_ylabel("$T\\/[\\mathrm{keV}]$")
         # ax.ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
         legend = ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
         KineticProfilesView.customizeLegend(legend)
@@ -117,8 +117,8 @@ class KineticProfilesView:
                 )
 
         KineticProfilesView.viewTimeLine(ax, self.kProfiles.commonTime)
-        ax.set_xlabel("$Time\/[\mathrm{s}]$")
-        ax.set_ylabel("$n\/[\mathrm{m^{-3}}]$")
+        ax.set_xlabel("$Time\\/[\\mathrm{s}]$")
+        ax.set_ylabel("$n\\/[\\mathrm{m^{-3}}]$")
 
         if self.kProfiles.commonTimeArray[self.kProfiles.commonTimeLength - 1] > self.kProfiles.commonTimeArray[0]:
             ax.set_xlim(
@@ -193,10 +193,10 @@ class KineticProfilesView:
             )
         if not self.kProfiles.r_out_graph:
             ax.set_xlabel(r"$\rho/\rho_0$")
-            ax.set_ylabel("$T\/[\mathrm{keV}]$")
+            ax.set_ylabel("$T\\/[\\mathrm{keV}]$")
         else:
             ax.set_xlabel(r"$R_{maj}\/[\mathrm{m}]$")
-            ax.set_ylabel("$T\/[\mathrm{keV}]$")
+            ax.set_ylabel("$T\\/[\\mathrm{keV}]$")
         ax.set_xlim(self.kProfiles.xbeg, self.kProfiles.xend)
         # ax.ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
         ax.set_title("t = " + "%.1f" % self.kProfiles.commonTime + " s")
@@ -257,10 +257,10 @@ class KineticProfilesView:
                     )
         if not self.kProfiles.r_out_graph:
             ax.set_xlabel(r"$\rho/\rho_0$")
-            ax.set_ylabel("$n\/[\mathrm{m^{-3}}]$")
+            ax.set_ylabel("$n\\/[\\mathrm{m^{-3}}]$")
         else:
             ax.set_xlabel(r"$R_{maj}\/[\mathrm{m}]$")
-            ax.set_ylabel("$n\/[\mathrm{m^{-3}}]$")
+            ax.set_ylabel("$n\\/[\\mathrm{m^{-3}}]$")
         if logscale:
             ax.set_yscale("log")
         ax.set_xlim(self.kProfiles.xbeg, self.kProfiles.xend)

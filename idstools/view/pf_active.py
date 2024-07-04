@@ -1,4 +1,4 @@
-""" 
+"""
 This module provides view functions and classes for pf_active ids data
 
 `refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`_.

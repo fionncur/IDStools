@@ -1,4 +1,6 @@
-# TODO There are nonmigrated scripts that use the following functions, so keep this file. These functions are already migrated to utils/idshelper.py.
+# TODO There are nonmigrated scripts that use the following functions, so
+# keep this file. These functions are already migrated to
+# utils/idshelper.py.
 import imas
 import inspect
 import types
@@ -52,6 +54,6 @@ def available_in_dbentry(db, time_mode=None):
     for idstype in all_ids_types():
         for occ in range(getattr(imas, idstype)().getMaxOccurrences()):
             homogeneous_time = db.partial_get(idstype, "ids_properties/homogeneous_time", occurrence=occ)
-            if homogeneous_time != imas.imasdef.EMPTY_INT and (time_mode == None or time_mode == homogeneous_time):
+            if homogeneous_time != imas.imasdef.EMPTY_INT and (time_mode is None or time_mode == homogeneous_time):
                 presentidslist.append((idstype, occ))
     return presentidslist

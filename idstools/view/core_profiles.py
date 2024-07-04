@@ -169,20 +169,20 @@ class CoreProfilesView:
         if rhoTorNorm is not None:
             radial_coordinate = rhoTorNorm
             xlabel = ""
-            if update == True:
+            if update:
                 xlabel = r"Normalised $\rho_{tor}$ [-]"
-            if psiCordinate == True:
+            if psiCordinate:
                 psi = self.coreProfilesCompute.getPSI(timeIndex)
                 if psi is not None:
                     radial_coordinate = psi
-                    if update == True:
+                    if update:
                         xlabel = r"$-\psi$ [Wb]"
 
             ax.set_xlabel(xlabel)
             electronDensity = self.ids.profiles_1d[timeIndex].electrons.density
             nmax = max(electronDensity) * 1.2
             ax_density_plot_dens = None
-            if update == True:
+            if update:
                 (ax_density_plot_dens,) = ax.plot(
                     radial_coordinate,
                     electronDensity,

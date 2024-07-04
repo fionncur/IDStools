@@ -469,14 +469,14 @@ def path2py(p, rm_last_bracket=False, header=False, idx=None):
         Field path in Python
     """
 
-    result = re.search("^(\d)\.\.\.(\d)$", p)
+    result = re.search("^(\\d)\\.\\.\\.(\\d)$", p)
     if result is not None:  # constant coordinate definition (e.g. 1...3)
         return "range(" + str(result.group(2)) + ")"
 
     else:  # other coordinate definition
-        if rm_last_bracket == True:
+        if rm_last_bracket:
             p = p[: p.rfind("(")]
-        p = re.sub("\((\w+)\)", r"(" + idx_header + "\\1)", p)
+        p = re.sub("\\((\\w+)\\)", r"(" + idx_header + "\\1)", p)
         p = p.replace("/", ".")
         p = p.replace("(", "[")
         p = p.replace(")", "]")
@@ -516,7 +516,7 @@ class IdxDict(dict):
 
         idict = []
 
-        for m in re.finditer("\((\w+)\)", p):  # find subscripts and set as attribute
+        for m in re.finditer("\\((\\w+)\\)", p):  # find subscripts and set as attribute
             it = m.group()[1:-1]
             setattr(self, it, None)  # initial value = None
 
@@ -580,7 +580,7 @@ class IDSValidator(cerberus.Validator):
                 c = path2py(field.get("coordinate" + str(i + 1)), header=True)
                 homogeneous_time = ids.ids_properties.homogeneous_time
                 #
-                if re.search("1\.\.\.", c):
+                if re.search("1\\.\\.\\.", c):
                     lcrd = data.shape[i]
                 else:
                     try:
@@ -809,7 +809,7 @@ def validator(field, path_doc, ids, schema, cocos, buf, idx):
     # eval for schema value in case of validation between data
     for key, value in schema[path_doc].items():
         if isinstance(value, str):
-            val = re.sub("_(i+\w+)_", idx_header + r"\1", value)
+            val = re.sub("_(i+\\w+)_", idx_header + r"\1", value)
             val = val.replace(ids.__name__ + ".", ids_header)
             try:
                 schemaw[path_doc][key] = eval(val)
@@ -872,7 +872,7 @@ def path_iterator(field, nodes, ids, schema, cocos, buf, idx=None, level=0):
 
     p = "/".join(nodes[: level + 1])
     if level < len(nodes) - 1:
-        result = re.search("(\w+)(\(\w+\))$", p)
+        result = re.search("(\\w+)(\\(\\w+\\))$", p)
 
         # for dynamic array (e.g. path(itime)/to(i1)/array(i2))
         if result is not None:

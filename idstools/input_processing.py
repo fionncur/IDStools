@@ -100,7 +100,8 @@ def read_launching_parameters(filelaunchers):
 
 
 def read_torbeam_output(launching_parameters, path_result):
-    import os, glob
+    import os
+    import glob
     from functools import cmp_to_key
 
     # Sort the list of files according to the time slices
@@ -682,18 +683,18 @@ def ell_on_wall(xpout, w1, w2, gamma, e_k, wall2d):
         # begin test purposes only, tests ok
         #        print('test g1,g2')
         #        tg2t=2.*np.dot(g1,g2)/(np.sum(g1**2)-np.sum(g2**2))
-        ##        print(xpout[i]['icorner'],np.dot(ga,gb),np.sum(ga**2),np.sum(gb**2),(np.sum(ga**2)-np.sum(gb**2)))
-        ##    print(i,tg2t)
+        # print(xpout[i]['icorner'],np.dot(ga,gb),np.sum(ga**2),np.sum(gb**2),(np.sum(ga**2)-np.sum(gb**2)))
+        # print(i,tg2t)
         #        t1=0.5*np.arctan(tg2t,dtype=np.double)
         #        t2=t1+np.pi/2.
-        ##    print(i,t1,t2)
+        # print(i,t1,t2)
         #        a1=g1* np.cos(t1)+ g2* np.sin(t1)
         #        a2=g1* np.cos(t2)+ g2* np.sin(t2)
         #        sa1=np.sqrt(np.sum(a1**2))
         #        sa2=np.sqrt(np.sum(a2**2))
         #        print(i,w1[i],w2[i],sa1,sa2,sa1*sa2*xpout['k_dot_n'][i],w1[i]*w2[i])
         #        print(np.dot(xpout['n_c'][i,:],peh),np.dot(xpout['n_c'][i,:],pev))
-        ## tests ok
+        # tests ok
         #        x-direction on tangential plane
         ephi = cyl2xyz(np.array([1.0, xpout["r_cyl"][i, 1] + np.pi / 2.0, 0.0], dtype=np.double))
         #        y-direction on tangential plane in direction of wall2d[i+1]-wall2d[i]
@@ -710,18 +711,18 @@ def ell_on_wall(xpout, w1, w2, gamma, e_k, wall2d):
         # begin test purposes only, tests ok
         #        print('test g1l,g2l')
         #        tg2t=2.*np.dot(g1l[i],g2l[i])/(np.sum(g1l[i]**2)-np.sum(g2l[i]**2))
-        ##        print(xpout[i]['icorner'],np.dot(ga,gb),np.sum(ga**2),np.sum(gb**2),(np.sum(ga**2)-np.sum(gb**2)))
-        ##    print(i,tg2t)
+        # print(xpout[i]['icorner'],np.dot(ga,gb),np.sum(ga**2),np.sum(gb**2),(np.sum(ga**2)-np.sum(gb**2)))
+        # print(i,tg2t)
         #        t1=0.5*np.arctan(tg2t,dtype=np.double)
         #        t2=t1+np.pi/2.
-        ##    print(i,t1,t2)
+        # print(i,t1,t2)
         #        a1=g1l[i]* np.cos(t1)+ g2l[i]* np.sin(t1)
         #        a2=g1l[i]* np.cos(t2)+ g2l[i]* np.sin(t2)
         #        sa1=np.sqrt(np.sum(a1**2))
         #        sa2=np.sqrt(np.sum(a2**2))
         #        print(i,w1[i],w2[i],sa1,sa2,sa1*sa2*xpout['k_dot_n'][i],w1[i]*w2[i])
         #        print(np.dot(xpout['n_c'][i,:],peh),np.dot(xpout['n_c'][i,:],pev))
-        ## tests ok
+        # tests ok
         # now rl: first determine sector
         sl[i] = xpout["r_cyl"][i, 1] // (np.pi / 9.0)
         # dPhi with respect to midlle of sector

@@ -143,7 +143,9 @@ class ImasDb:
             except Exception as e:
                 return False
 
-        timedep_ids_test = lambda x: is_ids(x)
+        def timedep_ids_test(x):
+            return is_ids(x)
+
         timedep_idss = inspect.getmembers(self.db, timedep_ids_test)
 
         result = []

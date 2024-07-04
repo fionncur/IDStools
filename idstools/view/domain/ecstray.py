@@ -70,7 +70,7 @@ class EcStrayView:
 
         for i_harm in range(len(res_layer)):
             if len(res_layer[i_harm]["r"]) > 1:
-                if verbose == True:
+                if verbose:
                     print("Resonance at n = %i" % (i_harm + 1))
                 if init == 1:
                     (ax_polview_plot_res,) = ax.plot(

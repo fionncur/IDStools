@@ -1,4 +1,4 @@
-""" 
+"""
 This module provides compute functions and classes for core_sources ids data
 
 `refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`_.
@@ -163,7 +163,7 @@ class CoreSourcesCompute:
         sources = self.getValidAndActiveSources()
         single_source_name = {}
         for sourceIndex, source in sources.items():
-            if source["valid"] == True and source["active"] == True:
+            if source["valid"] and source["active"]:
                 single_source_name[sourceIndex] = self.ids.source[sourceIndex].identifier.name.upper()
         return single_source_name
 
@@ -185,7 +185,7 @@ class CoreSourcesCompute:
         singleCurrentProfile = {}
         sources = self.getValidAndActiveSources()
         for sourceIndex, source in sources.items():  # range(nsources):
-            if source["valid"] == True and source["active"] == True:
+            if source["valid"] and source["active"]:
                 if len(self.ids.source[sourceIndex].profiles_1d[0].j_parallel) > 0:
                     totalCurrentProfile = totalCurrentProfile + self.ids.source[sourceIndex].profiles_1d[0].j_parallel
                     singleCurrentProfile[sourceIndex] = self.ids.source[sourceIndex].profiles_1d[0].j_parallel
@@ -217,7 +217,7 @@ class CoreSourcesCompute:
 
         sources = self.getValidAndActiveSources()
         for sourceIndex, source in sources.items():
-            if source["valid"] == True and source["active"] == True:
+            if source["valid"] and source["active"]:
                 if len(self.ids.source[sourceIndex].profiles_1d[0].electrons.energy) < 1:
                     self.ids.source[sourceIndex].profiles_1d[0].electrons.energy = np.zeros(nrho)
                 if len(self.ids.source[sourceIndex].profiles_1d[0].electrons.particles) < 1:
@@ -262,7 +262,7 @@ class CoreSourcesCompute:
 
         sources = self.getValidAndActiveSources()
         for sourceIndex, source in sources.items():
-            if source["valid"] == True and source["active"] == True:
+            if source["valid"] and source["active"]:
                 singleIonPowerProfile[sourceIndex] = np.zeros(nrho)
                 singleIonParticlesProfile[sourceIndex] = np.zeros(nrho)
                 for ion in self.ids.source[sourceIndex].profiles_1d[0].ion:
@@ -301,7 +301,7 @@ class CoreSourcesCompute:
         total_electron_particles_waveform = dictSingleAndTotalElectronsWaveforms["total_electron_particles_waveform"]
         sources = self.getValidAndActiveSources()
         for sourceIndex, source in sources.items():
-            if source["valid"] == True and source["active"] == True:
+            if source["valid"] and source["active"]:
                 single_power_waveform[sourceIndex] = []
                 single_particles_waveform[sourceIndex] = []
                 for timeIndex in range(timeLength):
@@ -368,7 +368,7 @@ class CoreSourcesCompute:
         single_electron_particles_waveform = {}
         sources = self.getValidAndActiveSources()
         for sourceIndex, source in sources.items():
-            if source["valid"] == True and source["active"] == True:
+            if source["valid"] and source["active"]:
                 single_electron_power_waveform[sourceIndex] = []
                 single_electron_particles_waveform[sourceIndex] = []
                 for timeIndex in range(timeLength):
@@ -422,7 +422,7 @@ class CoreSourcesCompute:
         single_ion_particles_waveform = {}  # waveform
         sources = self.getValidAndActiveSources()
         for sourceIndex, source in sources.items():
-            if source["valid"] == True and source["active"] == True:
+            if source["valid"] and source["active"]:
                 single_ion_power_waveform[sourceIndex] = []
                 single_ion_particles_waveform[sourceIndex] = []
                 for timeIndex in range(timeLength):
@@ -480,7 +480,7 @@ class CoreSourcesCompute:
 
         sources = self.getValidAndActiveSources()
         for sourceIndex, source in sources.items():
-            if source["valid"] == True and source["active"] == True:
+            if source["valid"] and source["active"]:
                 single_current_waveform[sourceIndex] = []
                 single_torque_waveform[sourceIndex] = []
                 for timeIndex in range(timeLength):

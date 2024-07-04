@@ -108,7 +108,7 @@ class CoreSourcesView:
                     "--",
                     label=name + " [" + str(isource) + "]" + " to ions",
                 )
-            ax.set_ylabel("Power to bulk $\mathrm{[MW/m^{3}]}$")
+            ax.set_ylabel("Power to bulk $\\mathrm{[MW/m^{3}]}$")
             ax.set_xlabel("Normalized toroidal flux coordinate")
             # set legend
             legend = ax.legend()
@@ -159,7 +159,7 @@ class CoreSourcesView:
                     "--",
                     label=name + " [" + str(isource) + "]" + " ions",
                 )
-            ax.set_ylabel("Density $\mathrm{[m^{-3}.s^{-1}]}$")
+            ax.set_ylabel("Density $\\mathrm{[m^{-3}.s^{-1}]}$")
             ax.set_xlabel("Normalized toroidal flux coordinate")
             # set legend
             legend = ax.legend()
@@ -198,7 +198,7 @@ class CoreSourcesView:
                         singleAndTotalElectronsAndIonsProfiles["singleCurrentProfile"][isource] * 1.0e-3,
                         label=name + str(isource),
                     )
-            ax.set_ylabel("Current density $\mathrm{[kA/m^{2}]}$")
+            ax.set_ylabel("Current density $\\mathrm{[kA/m^{2}]}$")
             ax.set_xlabel("Normalized toroidal flux coordinate")
             # set legend
             legend = ax.legend()
@@ -263,7 +263,7 @@ class CoreSourcesView:
                         singleAndTotalIonsWaveforms["single_ion_power_waveform"][isource] * 1.0e-6,
                         label=name + " [" + str(isource) + "]" + " ions",
                     )
-                ax.set_ylabel("Power waveforms $\mathrm{[MW]}$")
+                ax.set_ylabel("Power waveforms $\\mathrm{[MW]}$")
                 ax.set_xlabel("Time (s)")
                 # set legend
                 legend = ax.legend()
@@ -331,7 +331,7 @@ class CoreSourcesView:
                         singleAndTotalIonsWaveforms["single_ion_particles_waveform"][isource],
                         label=name + " [" + str(isource) + "]" + " ions",
                     )
-                ax.set_ylabel("Particles waveforms $\mathrm{[s^{-1}]}$")
+                ax.set_ylabel("Particles waveforms $\\mathrm{[s^{-1}]}$")
                 ax.set_xlabel("Time (s)")
                 # set legend
                 legend = ax.legend()
@@ -375,7 +375,7 @@ class CoreSourcesView:
                         label=name + " [" + str(isource) + "]" + " electrons+ions",
                     )
 
-                ax.set_ylabel("Current waveforms $\mathrm{[kA.m]}$")
+                ax.set_ylabel("Current waveforms $\\mathrm{[kA.m]}$")
                 ax.set_xlabel("Time (s)")
                 # set legend
                 legend = ax.legend()
@@ -420,7 +420,7 @@ class CoreSourcesView:
                         label=name + " [" + str(isource) + "]" + " electrons+ions",
                     )
 
-                ax.set_ylabel("Torque waveforms $\mathrm{[kg.m^2.s^{-2}]}$")
+                ax.set_ylabel("Torque waveforms $\\mathrm{[kg.m^2.s^{-2}]}$")
                 ax.set_xlabel("Time (s)")
                 # set legend
                 legend = ax.legend()
