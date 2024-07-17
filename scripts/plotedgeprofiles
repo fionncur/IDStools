@@ -5,6 +5,7 @@
 import argparse
 import copy
 import os
+import logging
 from rich_argparse import RichHelpFormatter
 from imas import imasdef
 
@@ -21,6 +22,8 @@ from idstools.utils.clihelper import (
 from idstools.utils.idslogger import setupLogger
 from idstools.view.common import Canvas
 from idstools.view.edge_profiles import EdgeProfilesView
+
+logger = setupLogger("module", stdout_level=logging.INFO)
 
 parser = argparse.ArgumentParser(
     description="---- Edge Profile plot",
