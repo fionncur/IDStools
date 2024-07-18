@@ -11,7 +11,6 @@ import logging
 
 import numpy as np
 from scipy import interpolate
-from scipy.spatial import ConvexHull
 
 import idstools.init_mendeleiev as mend
 
@@ -737,7 +736,7 @@ class EdgeProfilesCompute:
 
     def getCoreBoundry(self, timeSlice=0):
         CORE_BOUNDRY_SUBSET_INDEX = 15  # core_boundry
-        CORE_SUBSET_INDEX = 22 # Core
+        CORE_SUBSET_INDEX = 22  # Core
         core_boundryGridSubset = None
         coreGridSubset = None
         for grid_subset in self.ids.grid_ggd[timeSlice].grid_subset:
@@ -754,18 +753,18 @@ class EdgeProfilesCompute:
                     {grid_subset.identifier.index}"
                 )
         if core_boundryGridSubset or coreGridSubset:
-            if core_boundryGridSubset is not None and len(core_boundryGridSubset.element) !=0:
-                gridSubset = core_boundryGridSubset 
-                
-            elif coreGridSubset is not None and len(coreGridSubset.element) !=0:
-                gridSubset = coreGridSubset 
-                
-        num_sep=len(gridSubset.element)
+            if core_boundryGridSubset is not None and len(core_boundryGridSubset.element) != 0:
+                gridSubset = core_boundryGridSubset
+
+            elif coreGridSubset is not None and len(coreGridSubset.element) != 0:
+                gridSubset = coreGridSubset
+
+        num_sep = len(gridSubset.element)
         sep_coords = np.zeros((num_sep, 2))
-    
+
         for ielement, element in enumerate(gridSubset.element):
             for obj in element.object:
-                index = obj.index - 1 # 1 based indexing
+                index = obj.index - 1  # 1 based indexing
                 space = obj.space - 1
                 dim = 0  # choosing nodes 1=nodes, 2=edges, 3=faces, 4=cells/volumes
                 sep_coords[ielement, :] = (
@@ -774,12 +773,12 @@ class EdgeProfilesCompute:
         # hull = ConvexHull(sep_coords[0 : num_sep - 1, :])  # find a closed core_boundry contour
         # core_boundry = np.array([sep_coords[hull.vertices, 0], sep_coords[hull.vertices, 1]]).T
         return sep_coords
-    
+
     def getSeparatrix(self, timeSlice=0):
         SUBSET_INDEX = 16  # separatrix
         separatixGridSubset = None
         for grid_subset in self.ids.grid_ggd[timeSlice].grid_subset:
-            
+
             if grid_subset.identifier.index == SUBSET_INDEX:
                 separatixGridSubset = grid_subset
                 logger.info(
@@ -794,10 +793,10 @@ class EdgeProfilesCompute:
         #     logger.warning("edge_profiles IDS:No element found in separatrix grid subset")
         #     return None
         sep_coords = np.zeros((num_sep, 2))
-    
+
         for ielement, element in enumerate(separatixGridSubset.element):
             for obj in element.object:
-                index = obj.index - 1 # 1 based indexing
+                index = obj.index - 1  # 1 based indexing
                 space = obj.space - 1
                 dim = 0  # choosing nodes 1=nodes, 2=edges, 3=faces, 4=cells/volumes
                 sep_coords[ielement, :] = (
@@ -805,7 +804,7 @@ class EdgeProfilesCompute:
                 )
         # hull = ConvexHull(sep_coords[0 : num_sep - 1, :])  # find a closed separatrix contour
         # separatrix = np.array([sep_coords[hull.vertices, 0], sep_coords[hull.vertices, 1]]).T
-        return sep_coords[0 : num_sep - 1, :]
+        return sep_coords
 
     def getRZ(self, timeSlice=0):
         """

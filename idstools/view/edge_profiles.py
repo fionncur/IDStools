@@ -1,7 +1,10 @@
 from idstools.compute.edge_profiles import EdgeProfilesCompute
 import numpy as np
 import logging
+
 logger = logging.getLogger("module")
+
+
 class EdgeProfilesView:
     def __init__(self, edgeProfileIds=None):
         self.edgeProfilesCompute = EdgeProfilesCompute(edgeProfileIds)
@@ -120,17 +123,15 @@ class EdgeProfilesView:
         if ne_edge is not None:
             ax.grid(False)
             c = ax.pcolormesh(x, y, ne_edge, vmin=0, vmax=5e19, shading="auto")
-            core_boundry=self.edgeProfilesCompute.getCoreBoundry(timeSlice)
-            ax.fill(core_boundry[:,0],core_boundry[:,1],facecolor='w', edgecolor='r', linewidth=0)
+            core_boundry = self.edgeProfilesCompute.getCoreBoundry(timeSlice)
+            ax.fill(core_boundry[:, 0], core_boundry[:, 1], facecolor="w", edgecolor="r", linewidth=0)
             if showSeparatrix:
                 separatrix = self.edgeProfilesCompute.getSeparatrix(timeSlice)
                 if separatrix is not None:
-                    ax.fill(
+                    ax.plot(
                         separatrix[:, 0],
                         separatrix[:, 1],
-                        facecolor="none",
-                        edgecolor="#FF1493",
-                        linewidth=2,
+                        color="#FF1493",
                     )
             ax.set_aspect("equal", adjustable="box")
             ax.set_xlabel("R,m")
@@ -169,17 +170,15 @@ class EdgeProfilesView:
         if ni_edge is not None:
             ax.grid(False)
             c = ax.pcolormesh(x, y, ni_edge, vmin=0, vmax=5e19, shading="auto")
-            core_boundry=self.edgeProfilesCompute.getCoreBoundry(timeSlice)
-            ax.fill(core_boundry[:,0],core_boundry[:,1],facecolor='w', edgecolor='r', linewidth=0)
+            core_boundry = self.edgeProfilesCompute.getCoreBoundry(timeSlice)
+            ax.fill(core_boundry[:, 0], core_boundry[:, 1], facecolor="w", edgecolor="r", linewidth=0)
             if showSeparatrix:
                 separatrix = self.edgeProfilesCompute.getSeparatrix(timeSlice)
                 if separatrix is not None:
-                    ax.fill(
+                    ax.plot(
                         separatrix[:, 0],
                         separatrix[:, 1],
-                        facecolor="none",
-                        edgecolor="#FF1493",
-                        linewidth=2,
+                        color="#FF1493",
                     )
 
             ax.set_aspect("equal", adjustable="box")
@@ -221,17 +220,15 @@ class EdgeProfilesView:
         if n_neutral_edge is not None:
             ax.grid(False)
             c = ax.pcolormesh(x, y, n_neutral_edge, vmin=0, vmax=5e19, shading="auto")
-            core_boundry=self.edgeProfilesCompute.getCoreBoundry(timeSlice)
-            ax.fill(core_boundry[:,0],core_boundry[:,1],facecolor='w', edgecolor='r', linewidth=0)
+            core_boundry = self.edgeProfilesCompute.getCoreBoundry(timeSlice)
+            ax.fill(core_boundry[:, 0], core_boundry[:, 1], facecolor="w", edgecolor="r", linewidth=0)
             if showSeparatrix:
                 separatrix = self.edgeProfilesCompute.getSeparatrix(timeSlice)
                 if separatrix is not None:
-                    ax.fill(
+                    ax.plot(
                         separatrix[:, 0],
                         separatrix[:, 1],
-                        facecolor="none",
-                        edgecolor="#FF1493",
-                        linewidth=2,
+                        color="#FF1493",
                     )
             ax.set_aspect("equal", adjustable="box")
             ax.set_xlabel("R,m")

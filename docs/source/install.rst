@@ -83,6 +83,12 @@ To run pytest
 
 To run tests scripts and verify functionalities
 
+you may need additional Linux commands if it is not installed e.g. bc
+
+.. code-block:: bash
+
+   sudo yum install bc
+
 .. code-block:: bash
 
    $ cd idstools
