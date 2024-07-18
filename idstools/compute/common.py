@@ -2,11 +2,10 @@
 This is a common module which has mathematical or physics functions
 
 """
-import logging
-from typing import Tuple, Union
-import numpy as np
-from packaging import version
 
+from typing import Tuple, Union
+import logging
+import numpy as np
 
 logger = logging.getLogger("module")
 
@@ -19,12 +18,13 @@ def findNearest(a, a0):
 
 def getNearestTime(timeArray: np.ndarray, requestedTime: float) -> Tuple[int, float]:
     """
-    The function `getNearestTime` takes an array of time values and a requested time, and returns the index and value of the nearest time in the array to the requested time.
+    The function `getNearestTime` takes an array of time values and a requested time, and returns the index
+    and value of the nearest time in the array to the requested time.
 
     Args:
-        timeArray (np.ndarray): The `timeArray` parameter is a numpy array containing a list of time
-    values.
-        requestedTime (float): The `requestedTime` parameter is the time value that you want to find the  nearest value to in the `timeArray`.
+        timeArray (np.ndarray): The `timeArray` parameter is a numpy array containing a list of time values.
+        requestedTime (float): The `requestedTime` parameter is the time value that you want to find the
+        nearest value to in the `timeArray`.
 
     Returns:
         The function `getNearestTime` returns a tuple containing the time index and time value.
@@ -39,9 +39,7 @@ def getNearestTime(timeArray: np.ndarray, requestedTime: float) -> Tuple[int, fl
             timeValue = timeArray[timeIndex]
         requestedTime = timeValue
         if ntime > 1:
-            logger.info(
-                f"Time  = {timeValue:.2f} s in range [{timeArray[0]:.2f},{timeArray[ntime - 1]}] s"
-            )
+            logger.info(f"Time  = {timeValue:.2f} s in range [{timeArray[0]:.2f},{timeArray[ntime - 1]}] s")
             logger.info(f"Index = {timeIndex}")
             logger.info(
                 f"Averaged resolution = {(timeArray[ntime - 1] - timeArray[0]) / (ntime - 1) } s",
@@ -54,18 +52,19 @@ def getNearestTime(timeArray: np.ndarray, requestedTime: float) -> Tuple[int, fl
     return timeIndex, timeValue
 
 
-def getClosestOfGivenValueFromArray(
-    array: np.ndarray, value: float
-) -> Union[None, tuple]:
+def getClosestOfGivenValueFromArray(array: np.ndarray, value: float) -> Union[None, tuple]:
     """
-    Find the index of the element in the array that is closest to the given value using the minimum absolute difference.
+    Find the index of the element in the array that is closest to the given value using the minimum absolute
+    difference.
 
     Args:
         array (np.ndarray): A NumPy array of numbers.
         value (float): The value to which we want to find the nearest element in the array.
 
     Returns:
-        The function `nearest` returns a tuple containing the index of the element in the input `array` that is closest to the input `value`, and the value of that element. If the input `array` is `None` or empty, the function returns `None`.
+        The function `nearest` returns a tuple containing the index of the element in the input `array` that
+        is closest to the input `value`, and the value of that element. If the input `array` is `None` or empty,
+        the function returns `None`.
     """
     if array is None:
         return None
@@ -83,7 +82,8 @@ def getMiddleElementFromArray(array: np.ndarray) -> Union[None, tuple]:
         array (np.ndarray): A NumPy array for which we want to find the middle element.
 
     Returns:
-        The function `middle` takes a numpy array as input and returns a tuple containing the index and value of the middle element of the array. If the input array is None or empty, the function returns None.
+        The function `middle` takes a numpy array as input and returns a tuple containing the index and value
+        of the middle element of the array. If the input array is None or empty, the function returns None.
     """
     if array is None:
         return None
@@ -95,17 +95,19 @@ def getMiddleElementFromArray(array: np.ndarray) -> Union[None, tuple]:
     return index, value
 
 
-
 # TODO rename variable and refactor code in smaller reusable methods
 def xyz2cyl(rvec):
     """
     The function converts a set of 3D Cartesian coordinates to cylindrical coordinates.
 
     Args:
-        rvec: rvec is a numpy array containing the coordinates of points in 3D space in the Cartesian coordinate system (x, y, z). The function xyz2cyl converts these coordinates to cylindrical coordinates (r, phi, z) and returns them as a numpy array with the same shape as the `rvec`
+        rvec: rvec is a numpy array containing the coordinates of points in 3D space in the Cartesian
+        coordinate system (x, y, z). The function xyz2cyl converts these coordinates to cylindrical
+        coordinates (r, phi, z) and returns them as a numpy array with the same shape as the `rvec`
 
     Returns:
-        The function `xyz2cyl` returns a numpy array `rcyl` which contains the cylindrical coordinates (radius, azimuthal angle, and height) of the input vector `rvec` which is in Cartesian coordinates.
+        The function `xyz2cyl` returns a numpy array `rcyl` which contains the cylindrical coordinates
+        (radius, azimuthal angle, and height) of the input vector `rvec` which is in Cartesian coordinates.
 
     .. todo: need to refactor naming of the variables
     """
@@ -128,10 +130,13 @@ def cyl2xyz(rcyl):
     The function cyl2xyz converts cylindrical coordinates to Cartesian coordinates.
 
     Args:
-        rcyl: rcyl is a numpy array containing cylindrical coordinates (r, theta, z) of points in 3D space. The function cyl2xyz converts these cylindrical coordinates to Cartesian coordinates (x, y, z) and returns a numpy array of the same shape as rcyl.
+        rcyl: rcyl is a numpy array containing cylindrical coordinates (r, theta, z) of points in 3D space.
+        The function cyl2xyz converts these cylindrical coordinates to Cartesian coordinates (x, y, z) and
+        returns a numpy array of the same shape as rcyl.
 
     Returns:
-        The function `cyl2xyz` returns a numpy array with the same shape as the input `rcyl` array, but with the cylindrical coordinates converted to Cartesian coordinates.
+        The function `cyl2xyz` returns a numpy array with the same shape as the input `rcyl` array, but with
+        the cylindrical coordinates converted to Cartesian coordinates.
     """
     rcyl_shape = rcyl.shape
     rvec = np.reshape(rcyl, (-1, 3))
@@ -188,10 +193,16 @@ def line_polygon_intersection(  # input
     This function calculates the intersection points between a line and a polygon.
 
     Args:
-        line_p: A numpy array representing the starting point of the line segment(s) to be intersected with the polygon. It has shape (n,3) where n is the number of line segments and each row represents the x, y, z coordinates of the starting point of the line segment.
-        line_dir: The direction vector(s) of the line(s) for which intersection with the polygon is being calculated. It is a numpy array of shape (n,3) where n is the number of lines and each row represents the direction vector of a line.
-        polygon_data: The coordinates of the vertices of a polygon in 3D space.
-        close: A boolean parameter that determines whether the polygon is closed or not. If set to True (default), the polygon is assumed to be closed, otherwise, it is assumed to be open. Defaults to True
+        line_p: A numpy array representing the starting point of the line segment(s) to be intersected
+            with the polygon. It has shape (n,3) where n is the number of line segments and each row
+            represents the x, y, z coordinates of the starting point of the line segment.
+        line_dir: The direction vector(s) of the line(s) for which intersection with the polygon is
+            being calculated. It is a numpy array of shape (n,3) where n is the number of lines and each
+            row represents the direction vector of a line.
+            polygon_data: The coordinates of the vertices of a polygon in 3D space.
+        close: A boolean parameter that determines whether the polygon is closed or not. If set to
+            True (default), the polygon is assumed to be closed, otherwise, it is assumed to be open.
+            Defaults to True
 
     Returns:
         two arrays: n_xp and xp_data.
@@ -259,16 +270,8 @@ def line_polygon_intersection(  # input
             dRz21 = dR21 * dz21
             # coefficients of quadratic equation
             aa = dz212 * egR2 - dR212 * egz2
-            bb = 2 * (
-                dz212 * rgegxy
-                - dR212 * eg[2] * dzrg1
-                - eg[2] * cp_edges[i_s, 0] * dRz21
-            )
-            cc = (
-                dz212 * (rgR2 - cp_edges[i_s, 0] ** 2)
-                - dR212 * (dzrg1**2)
-                - 2 * cp_edges[i_s, 0] * dRz21 * dzrg1
-            )
+            bb = 2 * (dz212 * rgegxy - dR212 * eg[2] * dzrg1 - eg[2] * cp_edges[i_s, 0] * dRz21)
+            cc = dz212 * (rgR2 - cp_edges[i_s, 0] ** 2) - dR212 * (dzrg1**2) - 2 * cp_edges[i_s, 0] * dRz21 * dzrg1
             if aa**2 < 1.0e-12:  # assume aa is zero
                 if dz212 * egz2 < 1.0e-10:
                     # error: segment is horizontal plate and line is horizontal
@@ -302,16 +305,12 @@ def line_polygon_intersection(  # input
                         # we calculate lambda_pol by the normalized dot product
                         # (r2-r1)dot(r-r1)/(r2-r1)^2
                         if np.abs(dR21 * drz1 - dz21 * drR1) / (dR212 + dz212) < 1.0e-6:
-                            s_arr[2 * i_s, 0] = (drR1 * dR21 + drz1 * dz21) / (
-                                dR212 + dz212
-                            )
+                            s_arr[2 * i_s, 0] = (drR1 * dR21 + drz1 * dz21) / (dR212 + dz212)
                         # this is lambda_pol, must be between 0 and 1
                         # if segment is relevant
                         if s_arr[2 * i_s, 0] >= 0.0 and s_arr[2 * i_s, 0] < 1.0:
                             # later it is helpful if 0 < lambda_pol < |r2-r1|
-                            s_arr[2 * i_s, 0] = s_arr[2 * i_s, 0] * np.sqrt(
-                                dR212 + dz212
-                            )
+                            s_arr[2 * i_s, 0] = s_arr[2 * i_s, 0] * np.sqrt(dR212 + dz212)
                             rPhi = np.arctan2(rvec[1], rvec[0], dtype=np.double)
                             if rPhi < 0:
                                 rPhi = rPhi + 2 * np.pi  # 0 <= rPhi < 2pi
@@ -354,15 +353,11 @@ def line_polygon_intersection(  # input
                         # we calculate lambda_pol by the normalized dot product
                         # (r2-r1)dot(r-r1)/(r2-r1)^2
                         if np.abs(dR21 * drz1 - dz21 * drR1) / (dR212 + dz212) < 1.0e-6:
-                            s_arr[2 * i_s, 0] = (drR1 * dR21 + drz1 * dz21) / (
-                                dR212 + dz212
-                            )
+                            s_arr[2 * i_s, 0] = (drR1 * dR21 + drz1 * dz21) / (dR212 + dz212)
                         # this is lambda_pol, must be between 0 and 1 if relevant
                         if s_arr[2 * i_s, 0] >= 0.0 and s_arr[2 * i_s, 0] < 1.0:
                             # later it is helpful if 0 < lambda_pol < |r2-r1|
-                            s_arr[2 * i_s, 0] = s_arr[2 * i_s, 0] * np.sqrt(
-                                dR212 + dz212
-                            )
+                            s_arr[2 * i_s, 0] = s_arr[2 * i_s, 0] * np.sqrt(dR212 + dz212)
                             rPhi = np.arctan2(rvec[1], rvec[0], dtype=np.double)
                             if rPhi < 0:
                                 rPhi = rPhi + 2 * np.pi
@@ -396,14 +391,10 @@ def line_polygon_intersection(  # input
                         # we calculate lambda_pol by the normalized dot product
                         # (r2-r1)dot(r-r1)/(r2-r1)^2
                         if np.abs(dR21 * drz1 - dz21 * drR1) / (dR212 + dz212) < 1.0e-6:
-                            s_arr[2 * i_s + 1, 0] = (drR1 * dR21 + drz1 * dz21) / (
-                                dR212 + dz212
-                            )
+                            s_arr[2 * i_s + 1, 0] = (drR1 * dR21 + drz1 * dz21) / (dR212 + dz212)
                         if s_arr[2 * i_s + 1, 0] >= 0.0 and s_arr[2 * i_s + 1, 0] < 1.0:
                             # later it is helpful if 0 < lambda_pol < |r2-r1|
-                            s_arr[2 * i_s + 1, 0] = s_arr[2 * i_s + 1, 0] * np.sqrt(
-                                dR212 + dz212
-                            )
+                            s_arr[2 * i_s + 1, 0] = s_arr[2 * i_s + 1, 0] * np.sqrt(dR212 + dz212)
                             rPhi = np.arctan2(rvec[1], rvec[0], dtype=np.double)
                             if rPhi < 0:
                                 rPhi = rPhi + 2 * np.pi
@@ -476,16 +467,19 @@ def line_polygon_intersection(  # input
 
 def calcw(wt, Rt, lambda_ray, freq=np.double(170.0e9)):
     """
-    The function calculates the width of a laser beam based on its initial width, curvature radius, length along the ray, and frequency.
+    The function calculates the width of a laser beam based on its initial width, curvature radius, length
+    along the ray, and frequency.
 
     Args:
         wt: width at the start point of the ray in meters
-        Rt: Curvature radius at start point in meters. If Rt is negative, the beam will pass through the focus, and if it is positive, the beam will purely diverge. The focus is located at lambda_ray =-Rt.
+        Rt: Curvature radius at start point in meters. If Rt is negative, the beam will pass through the focus,
+        and if it is positive, the beam will purely diverge. The focus is located at lambda_ray =-Rt.
         lambda_ray: length along the ray in meters
         freq: wave frequency in Hz (not rad/s)
 
     Returns:
-        the value of the beam width w at a given length along the ray, calculated based on the input parameters of width and curvature radius at the start point, the length along the ray, and the frequency of the wave.
+        the value of the beam width w at a given length along the ray, calculated based on the input parameters of
+        width and curvature radius at the start point, the length along the ray, and the frequency of the wave.
 
     Note:
         calculates beam width for given w,Rcur and length along ray (lambda_ray)
@@ -556,8 +550,7 @@ def ell_on_wall(xpout, w1, w2, gamma, e_k, wall2d):
             lwall[i] = 0.0
         else:
             lwall[i] = lwall[i - 1] + np.sqrt(
-                (wall2d[i, 0] - wall2d[i - 1, 0]) ** 2
-                + (wall2d[i, 1] - wall2d[i - 1, 1]) ** 2
+                (wall2d[i, 0] - wall2d[i - 1, 0]) ** 2 + (wall2d[i, 1] - wall2d[i - 1, 1]) ** 2
             )
 
     rl = np.zeros((len(e_k), 2), dtype=np.double)
@@ -590,22 +583,20 @@ def ell_on_wall(xpout, w1, w2, gamma, e_k, wall2d):
         # begin test purposes only, tests ok
         #        print('test g1,g2')
         #        tg2t=2.*np.dot(g1,g2)/(np.sum(g1**2)-np.sum(g2**2))
-        ##        print(xpout[i]['icorner'],np.dot(ga,gb),np.sum(ga**2),np.sum(gb**2),(np.sum(ga**2)-np.sum(gb**2)))
-        ##    print(i,tg2t)
+        # print(xpout[i]['icorner'],np.dot(ga,gb),np.sum(ga**2),np.sum(gb**2),(np.sum(ga**2)-np.sum(gb**2)))
+        # print(i,tg2t)
         #        t1=0.5*np.arctan(tg2t,dtype=np.double)
         #        t2=t1+np.pi/2.
-        ##    print(i,t1,t2)
+        # print(i,t1,t2)
         #        a1=g1* np.cos(t1)+ g2* np.sin(t1)
         #        a2=g1* np.cos(t2)+ g2* np.sin(t2)
         #        sa1=np.sqrt(np.sum(a1**2))
         #        sa2=np.sqrt(np.sum(a2**2))
         #        print(i,w1[i],w2[i],sa1,sa2,sa1*sa2*xpout['k_dot_n'][i],w1[i]*w2[i])
         #        print(np.dot(xpout['n_c'][i,:],peh),np.dot(xpout['n_c'][i,:],pev))
-        ## tests ok
+        # tests ok
         #        x-direction on tangential plane
-        ephi = cyl2xyz(
-            np.array([1.0, xpout["r_cyl"][i, 1] + np.pi / 2.0, 0.0], dtype=np.double)
-        )
+        ephi = cyl2xyz(np.array([1.0, xpout["r_cyl"][i, 1] + np.pi / 2.0, 0.0], dtype=np.double))
         #        y-direction on tangential plane in direction of wall2d[i+1]-wall2d[i]
         if xpout["icorner"][i] < len(wall2d) - 1:
             el = wall2d[xpout["icorner"][i] + 1, :] - wall2d[xpout["icorner"][i], :]
@@ -620,18 +611,18 @@ def ell_on_wall(xpout, w1, w2, gamma, e_k, wall2d):
         # begin test purposes only, tests ok
         #        print('test g1l,g2l')
         #        tg2t=2.*np.dot(g1l[i],g2l[i])/(np.sum(g1l[i]**2)-np.sum(g2l[i]**2))
-        ##        print(xpout[i]['icorner'],np.dot(ga,gb),np.sum(ga**2),np.sum(gb**2),(np.sum(ga**2)-np.sum(gb**2)))
-        ##    print(i,tg2t)
+        # print(xpout[i]['icorner'],np.dot(ga,gb),np.sum(ga**2),np.sum(gb**2),(np.sum(ga**2)-np.sum(gb**2)))
+        # print(i,tg2t)
         #        t1=0.5*np.arctan(tg2t,dtype=np.double)
         #        t2=t1+np.pi/2.
-        ##    print(i,t1,t2)
+        # print(i,t1,t2)
         #        a1=g1l[i]* np.cos(t1)+ g2l[i]* np.sin(t1)
         #        a2=g1l[i]* np.cos(t2)+ g2l[i]* np.sin(t2)
         #        sa1=np.sqrt(np.sum(a1**2))
         #        sa2=np.sqrt(np.sum(a2**2))
         #        print(i,w1[i],w2[i],sa1,sa2,sa1*sa2*xpout['k_dot_n'][i],w1[i]*w2[i])
         #        print(np.dot(xpout['n_c'][i,:],peh),np.dot(xpout['n_c'][i,:],pev))
-        ## tests ok
+        # tests ok
         # now rl: first determine sector
         sl[i] = xpout["r_cyl"][i, 1] // (np.pi / 9.0)
         # dPhi with respect to midlle of sector

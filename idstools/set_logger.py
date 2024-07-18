@@ -2,7 +2,7 @@ import logging
 
 # log_fmt = "%(asctime)s %(name)s (%(levelname)s): %(message)s"
 log_fmt = "%(asctime)s %(levelname)s: %(message)s"
-#log_fmt = "%(levelname)s %(asctime)s: %(message)s"
+# log_fmt = "%(levelname)s %(asctime)s: %(message)s"
 date_fmt = "%y/%m/%d %H:%M:%S"
 
 

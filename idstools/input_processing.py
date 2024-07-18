@@ -100,8 +100,8 @@ def read_launching_parameters(filelaunchers):
 
 
 def read_torbeam_output(launching_parameters, path_result):
-    import os, glob
-    from functools import cmp_to_key
+    import os
+    import glob
 
     # Sort the list of files according to the time slices
     # TODO This logic can break easily if file names are not according to logic
@@ -127,11 +127,11 @@ def read_torbeam_output(launching_parameters, path_result):
         for i in range(nlaunchers):
             lc = True
             while lc:
-                if launchers[i] == ec_launchers.beam[j].name:
+                if launchers[i] == launchers.beam[j].name:
                     mapl[i] = j
                     j = j + 1
                     lc = False
-                elif j >= len(ec_launchers.beam):
+                elif j >= len(launchers.beam):
                     print("error determinimg mapl !!!", i, j)
                     break
                 else:
@@ -203,9 +203,9 @@ def l2r(ldata, edges, lwall):
         # find larger edge
         il = np.where(lwall >= ldata[i])[0][0]
         # interpolate between lower and larger edge
-        rdata[i] = edges[il - 1, 0] + (ldata[i] - lwall[il - 1]) / (
-            lwall[il] - lwall[il - 1]
-        ) * (edges[il, 0] - edges[il - 1, 0])
+        rdata[i] = edges[il - 1, 0] + (ldata[i] - lwall[il - 1]) / (lwall[il] - lwall[il - 1]) * (
+            edges[il, 0] - edges[il - 1, 0]
+        )
         ldata = np.reshape(ldata, ldata_shape)
         rdata = np.reshape(rdata, ldata_shape)
     return rdata
@@ -286,7 +286,7 @@ def beam_wall_crossing(wall2d, launching_parameters, beam_output):
     xpvacout = bxpdata[:, 1]
     w1v = calcw(bwyb, brsyb, xpvacout["lambda_ray"])
     w2v = calcw(bwzb, brszb, xpvacout["lambda_ray"])
-    I0v = bP_in * 2.0 / np.pi * xpvacout["k_dot_n"] / (w1v * w2v)
+    # I0v = bP_in * 2.0 / np.pi * xpvacout["k_dot_n"] / (w1v * w2v)
     g1v, g2v, rv, sv = ell_on_wall(xpvacout, w1v, w2v, bgamma, be_k, wall2d)
 
     beam_wall["g1e"] = g1e
@@ -411,16 +411,8 @@ def line_polygon_intersection(  # input
             dRz21 = dR21 * dz21
             # coefficients of quadratic equation
             aa = dz212 * egR2 - dR212 * egz2
-            bb = 2 * (
-                dz212 * rgegxy
-                - dR212 * eg[2] * dzrg1
-                - eg[2] * cp_edges[i_s, 0] * dRz21
-            )
-            cc = (
-                dz212 * (rgR2 - cp_edges[i_s, 0] ** 2)
-                - dR212 * (dzrg1**2)
-                - 2 * cp_edges[i_s, 0] * dRz21 * dzrg1
-            )
+            bb = 2 * (dz212 * rgegxy - dR212 * eg[2] * dzrg1 - eg[2] * cp_edges[i_s, 0] * dRz21)
+            cc = dz212 * (rgR2 - cp_edges[i_s, 0] ** 2) - dR212 * (dzrg1**2) - 2 * cp_edges[i_s, 0] * dRz21 * dzrg1
             if aa**2 < 1.0e-12:  # assume aa is zero
                 if dz212 * egz2 < 1.0e-10:
                     # error: segment is horizontal plate and line is horizontal
@@ -454,16 +446,12 @@ def line_polygon_intersection(  # input
                         # we calculate lambda_pol by the normalized dot product
                         # (r2-r1)dot(r-r1)/(r2-r1)^2
                         if np.abs(dR21 * drz1 - dz21 * drR1) / (dR212 + dz212) < 1.0e-6:
-                            s_arr[2 * i_s, 0] = (drR1 * dR21 + drz1 * dz21) / (
-                                dR212 + dz212
-                            )
+                            s_arr[2 * i_s, 0] = (drR1 * dR21 + drz1 * dz21) / (dR212 + dz212)
                         # this is lambda_pol, must be between 0 and 1
                         # if segment is relevant
                         if s_arr[2 * i_s, 0] >= 0.0 and s_arr[2 * i_s, 0] < 1.0:
                             # later it is helpful if 0 < lambda_pol < |r2-r1|
-                            s_arr[2 * i_s, 0] = s_arr[2 * i_s, 0] * np.sqrt(
-                                dR212 + dz212
-                            )
+                            s_arr[2 * i_s, 0] = s_arr[2 * i_s, 0] * np.sqrt(dR212 + dz212)
                             rPhi = np.arctan2(rvec[1], rvec[0], dtype=np.double)
                             if rPhi < 0:
                                 rPhi = rPhi + 2 * np.pi  # 0 <= rPhi < 2pi
@@ -506,15 +494,11 @@ def line_polygon_intersection(  # input
                         # we calculate lambda_pol by the normalized dot product
                         # (r2-r1)dot(r-r1)/(r2-r1)^2
                         if np.abs(dR21 * drz1 - dz21 * drR1) / (dR212 + dz212) < 1.0e-6:
-                            s_arr[2 * i_s, 0] = (drR1 * dR21 + drz1 * dz21) / (
-                                dR212 + dz212
-                            )
+                            s_arr[2 * i_s, 0] = (drR1 * dR21 + drz1 * dz21) / (dR212 + dz212)
                         # this is lambda_pol, must be between 0 and 1 if relevant
                         if s_arr[2 * i_s, 0] >= 0.0 and s_arr[2 * i_s, 0] < 1.0:
                             # later it is helpful if 0 < lambda_pol < |r2-r1|
-                            s_arr[2 * i_s, 0] = s_arr[2 * i_s, 0] * np.sqrt(
-                                dR212 + dz212
-                            )
+                            s_arr[2 * i_s, 0] = s_arr[2 * i_s, 0] * np.sqrt(dR212 + dz212)
                             rPhi = np.arctan2(rvec[1], rvec[0], dtype=np.double)
                             if rPhi < 0:
                                 rPhi = rPhi + 2 * np.pi
@@ -548,14 +532,10 @@ def line_polygon_intersection(  # input
                         # we calculate lambda_pol by the normalized dot product
                         # (r2-r1)dot(r-r1)/(r2-r1)^2
                         if np.abs(dR21 * drz1 - dz21 * drR1) / (dR212 + dz212) < 1.0e-6:
-                            s_arr[2 * i_s + 1, 0] = (drR1 * dR21 + drz1 * dz21) / (
-                                dR212 + dz212
-                            )
+                            s_arr[2 * i_s + 1, 0] = (drR1 * dR21 + drz1 * dz21) / (dR212 + dz212)
                         if s_arr[2 * i_s + 1, 0] >= 0.0 and s_arr[2 * i_s + 1, 0] < 1.0:
                             # later it is helpful if 0 < lambda_pol < |r2-r1|
-                            s_arr[2 * i_s + 1, 0] = s_arr[2 * i_s + 1, 0] * np.sqrt(
-                                dR212 + dz212
-                            )
+                            s_arr[2 * i_s + 1, 0] = s_arr[2 * i_s + 1, 0] * np.sqrt(dR212 + dz212)
                             rPhi = np.arctan2(rvec[1], rvec[0], dtype=np.double)
                             if rPhi < 0:
                                 rPhi = rPhi + 2 * np.pi
@@ -669,8 +649,7 @@ def ell_on_wall(xpout, w1, w2, gamma, e_k, wall2d):
             lwall[i] = 0.0
         else:
             lwall[i] = lwall[i - 1] + np.sqrt(
-                (wall2d[i, 0] - wall2d[i - 1, 0]) ** 2
-                + (wall2d[i, 1] - wall2d[i - 1, 1]) ** 2
+                (wall2d[i, 0] - wall2d[i - 1, 0]) ** 2 + (wall2d[i, 1] - wall2d[i - 1, 1]) ** 2
             )
 
     rl = np.zeros((len(e_k), 2), dtype=np.double)
@@ -703,22 +682,20 @@ def ell_on_wall(xpout, w1, w2, gamma, e_k, wall2d):
         # begin test purposes only, tests ok
         #        print('test g1,g2')
         #        tg2t=2.*np.dot(g1,g2)/(np.sum(g1**2)-np.sum(g2**2))
-        ##        print(xpout[i]['icorner'],np.dot(ga,gb),np.sum(ga**2),np.sum(gb**2),(np.sum(ga**2)-np.sum(gb**2)))
-        ##    print(i,tg2t)
+        # print(xpout[i]['icorner'],np.dot(ga,gb),np.sum(ga**2),np.sum(gb**2),(np.sum(ga**2)-np.sum(gb**2)))
+        # print(i,tg2t)
         #        t1=0.5*np.arctan(tg2t,dtype=np.double)
         #        t2=t1+np.pi/2.
-        ##    print(i,t1,t2)
+        # print(i,t1,t2)
         #        a1=g1* np.cos(t1)+ g2* np.sin(t1)
         #        a2=g1* np.cos(t2)+ g2* np.sin(t2)
         #        sa1=np.sqrt(np.sum(a1**2))
         #        sa2=np.sqrt(np.sum(a2**2))
         #        print(i,w1[i],w2[i],sa1,sa2,sa1*sa2*xpout['k_dot_n'][i],w1[i]*w2[i])
         #        print(np.dot(xpout['n_c'][i,:],peh),np.dot(xpout['n_c'][i,:],pev))
-        ## tests ok
+        # tests ok
         #        x-direction on tangential plane
-        ephi = cyl2xyz(
-            np.array([1.0, xpout["r_cyl"][i, 1] + np.pi / 2.0, 0.0], dtype=np.double)
-        )
+        ephi = cyl2xyz(np.array([1.0, xpout["r_cyl"][i, 1] + np.pi / 2.0, 0.0], dtype=np.double))
         #        y-direction on tangential plane in direction of wall2d[i+1]-wall2d[i]
         if xpout["icorner"][i] < len(wall2d) - 1:
             el = wall2d[xpout["icorner"][i] + 1, :] - wall2d[xpout["icorner"][i], :]
@@ -733,18 +710,18 @@ def ell_on_wall(xpout, w1, w2, gamma, e_k, wall2d):
         # begin test purposes only, tests ok
         #        print('test g1l,g2l')
         #        tg2t=2.*np.dot(g1l[i],g2l[i])/(np.sum(g1l[i]**2)-np.sum(g2l[i]**2))
-        ##        print(xpout[i]['icorner'],np.dot(ga,gb),np.sum(ga**2),np.sum(gb**2),(np.sum(ga**2)-np.sum(gb**2)))
-        ##    print(i,tg2t)
+        # print(xpout[i]['icorner'],np.dot(ga,gb),np.sum(ga**2),np.sum(gb**2),(np.sum(ga**2)-np.sum(gb**2)))
+        # print(i,tg2t)
         #        t1=0.5*np.arctan(tg2t,dtype=np.double)
         #        t2=t1+np.pi/2.
-        ##    print(i,t1,t2)
+        # print(i,t1,t2)
         #        a1=g1l[i]* np.cos(t1)+ g2l[i]* np.sin(t1)
         #        a2=g1l[i]* np.cos(t2)+ g2l[i]* np.sin(t2)
         #        sa1=np.sqrt(np.sum(a1**2))
         #        sa2=np.sqrt(np.sum(a2**2))
         #        print(i,w1[i],w2[i],sa1,sa2,sa1*sa2*xpout['k_dot_n'][i],w1[i]*w2[i])
         #        print(np.dot(xpout['n_c'][i,:],peh),np.dot(xpout['n_c'][i,:],pev))
-        ## tests ok
+        # tests ok
         # now rl: first determine sector
         sl[i] = xpout["r_cyl"][i, 1] // (np.pi / 9.0)
         # dPhi with respect to midlle of sector

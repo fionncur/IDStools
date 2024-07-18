@@ -1,11 +1,10 @@
-""" 
+"""
 This module provides view functions and classes for equilibrium ids data
 
 `refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`_.
 
 """
 
-from matplotlib.patches import Rectangle
 import matplotlib.pyplot as plt
 from idstools.view.common import BasePlot
 from idstools.compute.equilibrium import EquilibriumCompute
@@ -45,7 +44,7 @@ class EquilibriumView(BasePlot):
                 from idstools.view.equilibrium import EquilibriumView
                 from idstools.view.common import Canvas
 
-                connection = imas.DBEntry("imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3", "r")
+                connection = imas.DBEntry("imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3","r")
                 connection.open()
                 idsObj = connection.get('equilibrium')
 
@@ -59,7 +58,7 @@ class EquilibriumView(BasePlot):
                 ax.plot()
                 canvas.show()
 
-            .. thumbnail:: _static/images/EquilibriumView_viewMagneticPoloidalFlux.png
+            .. thumbnail:: /_static/images/EquilibriumView_viewMagneticPoloidalFlux.png
                 :alt: image not found
                 :align: center
 
@@ -67,7 +66,7 @@ class EquilibriumView(BasePlot):
             :func:`idstools.compute.equilibrium.EquilibriumCompute.get2DCartesianGrid`
             :func:`idstools.compute.equilibrium.EquilibriumCompute.getRho2D`
 
-            :meth:`plot_ip`
+            :meth:`plotIP`
         """
         cartestionGrid = self.computeObj.get2DCartesianGrid(timeSlice, profiles2DIndex)
         if cartestionGrid is not None:
@@ -95,9 +94,7 @@ class EquilibriumView(BasePlot):
             # ax.set_ylim(cartestionGrid["z2d"].min() * 0.7, cartestionGrid["z2d"].max() * 0.7)
             ax.tick_params(axis="both", which="major")
 
-    def viewPulseInfo(
-        self, ax: plt.axes, title: str, hostdir: str, shot: int, run: int, t: float
-    ):
+    def viewPulseInfo(self, ax: plt.axes, title: str, hostdir: str, shot: int, run: int, t: float):
         self.database_info(ax, title, hostdir, shot, run, t)
 
     def plotIP(self, ax):
@@ -110,9 +107,7 @@ class EquilibriumView(BasePlot):
         plasmaCurrent = self.computeObj.getIP()
         time_array = self.ids.time
         if len(plasmaCurrent) <= 3:
-            ax.plot(
-                time_array, plasmaCurrent, color="b", marker="o", label="$I_p$ [MA]"
-            )
+            ax.plot(time_array, plasmaCurrent, color="b", marker="o", label="$I_p$ [MA]")
         else:
             ax.plot(time_array, plasmaCurrent, color="b", label="$I_p$ [MA]")
         if len(time_array) != 1:
@@ -129,7 +124,8 @@ class EquilibriumView(BasePlot):
 
     def plotPoloidalEquilibrium(self, ax, timeSlice: int):
         """
-        This function plots a poloidal equilibrium contour plot using flux surface quantities extracted from the equilibrium.
+        This function plots a poloidal equilibrium contour plot using flux surface quantities extracted from the
+        equilibrium.
 
         Args:
             ax: `ax` is a matplotlib axis object.
@@ -142,7 +138,7 @@ class EquilibriumView(BasePlot):
         data = self.computeObj.getFluxSurfaces(timeSlice)
         r2d = data["r2d"]
         z2d = data["z2d"]
-        rho2d = data["rho2d"]
+        # rho2d = data["rho2d"]
         psi2d = data["psi2d"]
         cntr = ax.contour(r2d, z2d, psi2d, 50, cmap="summer")
         # if len(rho2d)>0:
@@ -181,14 +177,12 @@ class EquilibriumView(BasePlot):
         else:
             ax.plot(data["xpla"], data["ypla"], color=bndcolor)
         ax.plot(data["xplap"], data["yplap"], color=bndcolor)
-        ax.set_xlim(
-            (-data["r0"] - data["amin"]) * 1.1, (data["r0"] + data["amin"]) * 1.1
-        )
+        ax.set_xlim((-data["r0"] - data["amin"]) * 1.1, (data["r0"] + data["amin"]) * 1.1)
         ax.set_aspect("equal", adjustable="box")
 
     def plotequilibrium(self, ax):
         quantities = self.computeObj.get2DCartesianGrid()
-        if quantities != None:
+        if quantities is not None:
             r2d, z2d, psi2d = (
                 quantities["r2d"],
                 quantities["z2d"],
@@ -203,7 +197,7 @@ class EquilibriumView(BasePlot):
             ax.set_xlabel("R (m)")
             ax.set_ylabel("Z (m)")
 
-            ax.set_xlabel("$R\/\mathrm{[m]}$")
+            ax.set_xlabel("$R\\/\\mathrm{[m]}$")
             # ax.tick_params(axis='both',which='major',labelsize=ticksize)
             ax.set_ylabel(r"$Z\/\mathrm{[m]}$")
             # ax.tick_params(

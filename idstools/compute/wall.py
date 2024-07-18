@@ -24,9 +24,7 @@ class WallCompute:
 
     def getVesselUnits(self, nameFilter=None):
         description2dInfos = {}
-        for description2dIndex, description2d in enumerate(
-            self.ids_object.description_2d
-        ):
+        for description2dIndex, description2d in enumerate(self.ids_object.description_2d):
             description2dInfo = {}
             description2dInfo["name"] = description2d.type.name
             description2dInfo["description"] = description2d.type.description
@@ -49,10 +47,7 @@ class WallCompute:
                     vUnit.annular.centreline.closed,
                 )
                 if nameFilter is not None:
-                    if (
-                        nameFilter.lower() in vUnit.name.lower()
-                        or nameFilter.lower() in vUnit.identifier.lower()
-                    ):
+                    if nameFilter.lower() in vUnit.name.lower() or nameFilter.lower() in vUnit.identifier.lower():
                         unitInfos[vUnitIndex] = unitInfo
                 else:
                     unitInfos[vUnitIndex] = unitInfo
@@ -63,9 +58,7 @@ class WallCompute:
 
     def getLimiterUnits(self):
         description2dInfos = {}
-        for description2dIndex, description2d in enumerate(
-            self.ids_object.description_2d
-        ):
+        for description2dIndex, description2d in enumerate(self.ids_object.description_2d):
             description2dInfo = {}
             description2dInfo["name"] = description2d.type.name
             description2dInfo["description"] = description2d.type.description

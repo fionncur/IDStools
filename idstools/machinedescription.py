@@ -4,10 +4,8 @@ import os
 import re
 import typing
 
-import yaml
-
+from yaml import safe_load, YAMLError
 from idstools.database import DBMaster
-from idstools.utils.clihelper import getBackendID
 
 logger = logging.getLogger(f"module.{__name__}")
 
@@ -32,8 +30,8 @@ class MachineDescription:
                 _mdSummaryPath = os.path.join(_mdSummaryPath, "md_summary.yaml")
         with open(_mdSummaryPath, "r") as stream:
             try:
-                self.mdSummaryYaml = yaml.safe_load(stream)
-            except yaml.YAMLError as exc:
+                self.mdSummaryYaml = safe_load(stream)
+            except YAMLError as exc:
                 print(exc)
 
     def getLatestIdsData(self, idsName: str):
@@ -55,7 +53,10 @@ class MachineDescription:
             if idsName == _config["config"]["ids"]:
                 mdArgs.pulse, mdArgs.run = pulse.split("/")
                 mdArgs.pulse, mdArgs.run = int(mdArgs.pulse), int(mdArgs.run)
-                mdArgs.uri = f"imas:{mdArgs.backend.lower()}?user={mdArgs.user};shot={mdArgs.pulse};run={mdArgs.run};database={mdArgs.database};version={mdArgs.version}"
+                mdArgs.uri = (
+                    f"imas:{mdArgs.backend.lower()}?user={mdArgs.user};shot={mdArgs.pulse};"
+                    f"run={mdArgs.run};database={mdArgs.database};version={mdArgs.version}"
+                )
                 mdConnection = DBMaster.getConnection(mdArgs)
 
                 # print(mdConnection)
@@ -75,7 +76,9 @@ class MachineDescription:
 
     def getMDDataByIdsList(self, mdIdsList=[]):
         """
-        The `getMachineDatabaseData` method is responsible for retrieving machine database data for the specified pulse list. It iterates over each pulse in the `mdSummaryYaml` dictionary and checks if the pulse is present in the `pulseList`. If the pulse is not in the `pulseList`, it skips to the next pulse.
+        The `getMachineDatabaseData` method is responsible for retrieving machine database data for the specified
+        pulse list. It iterates over each pulse in the `mdSummaryYaml` dictionary and checks if the pulse is present
+        in the `pulseList`. If the pulse is not in the `pulseList`, it skips to the next pulse.
         """
         idsData = {}
         for idsName in mdIdsList:
@@ -103,10 +106,12 @@ class MachineDescription:
         checkValidity=False,
     ):
         """
-        The `readMDSummary` method is responsible for reading the machine description summary and retrieving data for the specified IDS names.
+        The `readMDSummary` method is responsible for reading the machine description summary and retrieving
+        data for the specified IDS names.
         """
+
         # if provided just single string then convert to list with single string
-        if type(idsNames) == str:
+        if isinstance(idsNames, str):
             idsNames = [idsNames]
         # lower case provided ids names
         idsNames = list(map(lambda x: x.lower(), idsNames))
@@ -124,10 +129,11 @@ class MachineDescription:
             pulsesData[pulse]["data"] = None
             if checkValidity:
                 self.mdArgs.pulse, self.mdArgs.run = pulse.split("/")
-                self.mdArgs.pulse, self.mdArgs.run = int(self.mdArgs.pulse), int(
-                    self.mdArgs.run
+                self.mdArgs.pulse, self.mdArgs.run = int(self.mdArgs.pulse), int(self.mdArgs.run)
+                self.mdArgs.uri = (
+                    f"imas:mdsplus?user={self.mdArgs.user};pulse={self.mdArgs.pulse};"
+                    f"run={self.mdArgs.run};database={self.mdArgs.database};version={self.mdArgs.version}"
                 )
-                self.mdArgs.uri = f"imas:mdsplus?user={self.mdArgs.user};pulse={self.mdArgs.pulse};run={self.mdArgs.run};database={self.mdArgs.database};version={self.mdArgs.version}"
                 mdConnection = DBMaster.getConnection(self.mdArgs)
                 if mdConnection is not None:
                     idsData = mdConnection.get(config["ids"])
@@ -153,14 +159,16 @@ class MachineDescription:
 
     def getStatus(self, pulse: int, run: int):
         """
-        The function `getStatus` takes in two parameters, `pulse` and `run`, and returns the value of the key "status" from the `yaml` object dictionary using the `pulse` and `run` as keys.
+        The function `getStatus` takes in two parameters, `pulse` and `run`, and returns the value of the
+        key "status" from the `yaml` object dictionary using the `pulse` and `run` as keys.
 
         Args:
             pulse (int): The "pulse" parameter represents the number of pulses taken.
             run (int): The "run" parameter represents the number of runs in a particular pulse.
 
         Returns:
-            The method `getStatus` returns the value of `"status"` if `yaml` object is not `None`, otherwise it returns `None`.
+            The method `getStatus` returns the value of `"status"` if `yaml` object is not `None`,
+            otherwise it returns `None`.
         """
         pulserun = str(pulse) + r"/" + str(run)
         if self.mdSummaryYaml:
@@ -170,14 +178,17 @@ class MachineDescription:
 
     def getReasonForReplacement(self, pulse: int, run: int):
         """
-        The function `getReasonForReplacement` takes in two parameters, `pulse` and `run`, and returns the value of the key "reason_for_replacement" from the `yaml` object dictionary using the `pulse` and `run` as keys.
+        The function `getReasonForReplacement` takes in two parameters, `pulse` and `run`, and returns
+        the value of the key "reason_for_replacement" from the `yaml` object dictionary using the `pulse`
+        and `run` as keys.
 
         Args:
             pulse (int): The "pulse" parameter represents the number of pulses taken.
             run (int): The "run" parameter represents the number of runs in a particular pulse.
 
         Returns:
-            The method `getReasonForReplacement` returns the value of `"reason_for_replacement"` if `yaml` object is not `None`, otherwise it returns `None`.
+            The method `getReasonForReplacement` returns the value of `"reason_for_replacement"` if `yaml`
+            object is not `None`, otherwise it returns `None`.
         """
         pulserun = str(pulse) + r"/" + str(run)
         if self.mdSummaryYaml:
@@ -187,14 +198,16 @@ class MachineDescription:
 
     def getReplacedBy(self, pulse: int, run: int):
         """
-        The function `getReplacedBy` takes in two parameters, `pulse` and `run`, and returns the value of the key "replaced_by" from the `yaml` object dictionary using the `pulse` and `run` as keys.
+        The function `getReplacedBy` takes in two parameters, `pulse` and `run`, and returns the value of
+        the key "replaced_by" from the `yaml` object dictionary using the `pulse` and `run` as keys.
 
         Args:
             pulse (int): The "pulse" parameter represents the number of pulses taken.
             run (int): The "run" parameter represents the number of runs in a particular pulse.
 
         Returns:
-            The method `getReplacedBy` returns the value of `"replaced_by"` if `yaml` object is not `None`, otherwise it returns `None`.
+            The method `getReplacedBy` returns the value of `"replaced_by"` if `yaml` object is not `None`,
+            otherwise it returns `None`.
         """
         pulserun = str(pulse) + r"/" + str(run)
         if self.mdSummaryYaml:
@@ -204,14 +217,16 @@ class MachineDescription:
 
     def getReplaces(self, pulse: int, run: int):
         """
-        The function `getReplaces` takes in two parameters, `pulse` and `run`, and returns the value of the key "replaces" from the `yaml` object dictionary using the `pulse` and `run` as keys.
+        The function `getReplaces` takes in two parameters, `pulse` and `run`, and returns the value of the key
+        "replaces" from the `yaml` object dictionary using the `pulse` and `run` as keys.
 
         Args:
             pulse (int): The "pulse" parameter represents the number of pulses taken.
             run (int): The "run" parameter represents the number of runs in a particular pulse.
 
         Returns:
-            The method `getReplaces` returns the value of `"replaces"` if `yaml` object is not `None`, otherwise it returns `None`.
+            The method `getReplaces` returns the value of `"replaces"` if `yaml` object is not `None`, otherwise
+            it returns `None`.
         """
         pulserun = str(pulse) + r"/" + str(run)
         if self.mdSummaryYaml:
@@ -221,15 +236,20 @@ class MachineDescription:
 
     def getChildren(self, pulse: int, run: int, dictToFill={}):
         """
-        The function `getChildren` recursively retrieves information about replaced pulses and runs from a dictionary and stores it in a new dictionary.
+        The function `getChildren` recursively retrieves information about replaced pulses and runs from a
+        dictionary and stores it in a new dictionary.
 
         Args:
             pulse (int): The "pulse" parameter is an integer that represents a pulse number.
             run (int): The `run` parameter in the `getChildren` method represents the run number.
-            dictToFill: The `dictToFill` parameter is a dictionary that is used to store the information about the children of a given pulse and run. It is initially an empty dictionary and is passed as an argument to the function to accumulate the information about the children.
+            dictToFill: The `dictToFill` parameter is a dictionary that is used to store the information about
+            the children of a given pulse and run. It is initially an empty dictionary and is passed as an
+            argument to the function to accumulate the information about the children.
 
         Returns:
-            a dictionary `dictToFill` that contains information about the children of a given pulse and run. The dictionary has keys "pulse", "run", "status", and "reason_for_replacement", and the corresponding values are lists that store the information for each child.
+            a dictionary `dictToFill` that contains information about the children of a given pulse and run.
+            The dictionary has keys "pulse", "run", "status", and "reason_for_replacement", and the corresponding
+            values are lists that store the information for each child.
         """
         replaced_by = self.getReplacedBy(pulse, run)
         if replaced_by is not None:
@@ -237,31 +257,32 @@ class MachineDescription:
             pulsec = string_list[0]
             runc = string_list[1]
             pulserunc = pulsec + "/" + runc
-            if not "pulse" in dictToFill.keys():
+            if "pulse" not in dictToFill.keys():
                 dictToFill["pulse"] = []
-            if not "run" in dictToFill.keys():
+            if "run" not in dictToFill.keys():
                 dictToFill["run"] = []
-            if not "status" in dictToFill.keys():
+            if "status" not in dictToFill.keys():
                 dictToFill["status"] = []
-            if not "reason_for_replacement" in dictToFill.keys():
+            if "reason_for_replacement" not in dictToFill.keys():
                 dictToFill["reason_for_replacement"] = []
             dictToFill["pulse"].append(pulsec)
             dictToFill["run"].append(runc)
             dictToFill["status"].append(self.mdSummaryYaml[pulserunc]["status"])
-            dictToFill["reason_for_replacement"].append(
-                self.mdSummaryYaml[pulserunc]["reason_for_replacement"]
-            )
+            dictToFill["reason_for_replacement"].append(self.mdSummaryYaml[pulserunc]["reason_for_replacement"])
             dictToFill = self.getChildren(int(pulsec), int(runc), dictToFill)
         return dictToFill
 
     def getParents(self, pulse: int, run: int, dictToFill={}):
         """
-        The `getParents` function recursively retrieves the parent information for a given pulse and run, populating a dictionary with the parent pulse, parent run, status, and reason for replacement.
+        The `getParents` function recursively retrieves the parent information for a given pulse and run, populating
+        a dictionary with the parent pulse, parent run, status, and reason for replacement.
 
         Args:
             pulse (int): The `pulse` parameter is an integer that represents a pulse number.
             run (int): The `run` parameter is an integer that represents the run number.
-            dictToFill: The `dictToFill` parameter is a dictionary that is used to store the information about the parents of a given pulse and run. It is initially an empty dictionary and is passed as an argument to the `getParents` function. The function fills this dictionary with the parent   information and returns it.
+            dictToFill: The `dictToFill` parameter is a dictionary that is used to store the information about the
+            parents of a given pulse and run. It is initially an empty dictionary and is passed as an argument to
+            the `getParents` function. The function fills this dictionary with the parent information and returns it.
 
         Returns:
             a dictionary `dictToFill` that contains information about the parents of a given pulse and run.
@@ -272,21 +293,19 @@ class MachineDescription:
             pulsep = string_list[0]
             runp = string_list[1]
             pulserunp = pulsep + "/" + runp
-            if not "pulse" in dictToFill.keys():
+            if "pulse" not in dictToFill.keys():
                 dictToFill["pulse"] = []
-            if not "run" in dictToFill.keys():
+            if "run" not in dictToFill.keys():
                 dictToFill["run"] = []
-            if not "status" in dictToFill.keys():
+            if "status" not in dictToFill.keys():
                 dictToFill["status"] = []
-            if not "reason_for_replacement" in dictToFill.keys():
+            if "reason_for_replacement" not in dictToFill.keys():
                 dictToFill["reason_for_replacement"] = []
 
             dictToFill["pulse"].insert(0, pulsep)  # Order to be reversed for parents
             dictToFill["run"].insert(0, runp)
             dictToFill["status"].insert(0, self.mdSummaryYaml[pulserunp]["status"])
-            dictToFill["reason_for_replacement"].insert(
-                0, self.mdSummaryYaml[pulserunp]["reason_for_replacement"]
-            )
+            dictToFill["reason_for_replacement"].insert(0, self.mdSummaryYaml[pulserunp]["reason_for_replacement"])
             dictToFill = self.getParents(int(pulsep), int(runp), dictToFill)
         return dictToFill
 
@@ -299,7 +318,9 @@ class MachineDescription:
             run (int): The "run" parameter is an integer that represents the run number.
 
         Returns:
-            a dictionary called `familyDict` which contains two keys: "parents" and "children". The values associated with these keys are the results of calling the `getParents` and `getChildren` methods with the given `pulse` and `run` parameters.
+            a dictionary called `familyDict` which contains two keys: "parents" and "children". The values associated
+            with these keys are the results of calling the `getParents` and `getChildren` methods with the given
+            `pulse` and `run` parameters.
         """
         familyDict = {}
         familyDict["parents"] = self.getParents(pulse, run)
@@ -315,7 +336,8 @@ class MachineDescription:
             run (int): The parameter "run" is an integer representing the number.
 
         Returns:
-            a boolean value. If the `pulserun` key is present in the `yaml` object dictionary, it will  return `True`. Otherwise, it will return `False`.
+            a boolean value. If the `pulserun` key is present in the `yaml` object dictionary, it will  return
+            `True`. Otherwise, it will return `False`.
         """
         pulserun = str(pulse) + r"/" + str(run)
         if pulserun not in self.mdSummaryYaml.keys():

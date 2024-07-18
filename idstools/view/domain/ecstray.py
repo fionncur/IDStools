@@ -14,18 +14,14 @@ logger = logging.getLogger("module")
 
 
 class EcStrayView:
-    def __init__(
-        self, equilibriumIds: object, coreProfilesIds: object, wavesIds: object
-    ):
+    def __init__(self, equilibriumIds: object, coreProfilesIds: object, wavesIds: object):
         self.ecstray_object = EcStrayCompute(equilibriumIds, coreProfilesIds, wavesIds)
         self.equilibriumCompute = EquilibriumCompute(equilibriumIds)
         self.equilibriumIds = equilibriumIds
         self.coreProfilesIds = coreProfilesIds
         self.wavesIds = wavesIds
 
-    def plotResonanceLayer(
-        self, ax, time_index_wv, time_index_eq, init=1, verbose=False
-    ):
+    def plotResonanceLayer(self, ax, time_index_wv, time_index_eq, init=1, verbose=False):
         """
         Plot the resonance layer on the given `ax` object.
 
@@ -33,7 +29,8 @@ class EcStrayView:
             ax (matplotlib.axes.Axes): The matplotlib Axes object on which the resonance layer will be plotted.
             time_index_wv (int): The time index for accessing wave-related data.
             time_index_eq (int): The time index for accessing equilibrium-related data.
-            init (int): Indicates if the function is called for the initial setup. Set to 1 for initial setup. Default is 1.
+            init (int): Indicates if the function is called for the initial setup. Set to 1 for initial setup.
+            Default is 1.
             verbose (bool): Controls whether verbose output should be displayed. Default is False.
 
         Returns:
@@ -61,7 +58,7 @@ class EcStrayView:
                 ax.plot()
                 canvas.show()
 
-            .. thumbnail:: _static/images/EcstrayView_plotResonanceLayer.png
+            .. thumbnail:: /_static/images/EcstrayView_plotResonanceLayer.png
                 :alt: image not found
                 :align: center
 
@@ -70,11 +67,11 @@ class EcStrayView:
 
         """
         resultDict = self.ecstray_object.getResonanceLayer(time_index_wv, time_index_eq)
-        res_layer=resultDict["resonanceLayer"]
+        res_layer = resultDict["resonanceLayer"]
 
         for i_harm in range(len(res_layer)):
             if len(res_layer[i_harm]["r"]) > 1:
-                if verbose == True:
+                if verbose:
                     print("Resonance at n = %i" % (i_harm + 1))
                 if init == 1:
                     (ax_polview_plot_res,) = ax.plot(
@@ -94,15 +91,11 @@ class EcStrayView:
         profile2dIndex = resonanceData["profile2dIndex"]
         resonanceLayer = resonanceData["resonanceLayer"]
 
-        gridData = self.equilibriumCompute.get2DCartesianGrid(
-            timeSlice=timeSlice, profiles2DIndex=profile2dIndex
-        )
+        gridData = self.equilibriumCompute.get2DCartesianGrid(timeSlice=timeSlice, profiles2DIndex=profile2dIndex)
         r2d = gridData["r2d"]
         z2d = gridData["z2d"]
         psi2d = gridData["psi2d"]
-        rho2d = self.equilibriumCompute.getRho2D(
-            timeSlice=timeSlice, profiles2DIndex=profile2dIndex
-        )
+        rho2d = self.equilibriumCompute.getRho2D(timeSlice=timeSlice, profiles2DIndex=profile2dIndex)
 
         # Poloidal view plot
         ax.contour(r2d, z2d, psi2d, 50, cmap="summer")
@@ -142,7 +135,8 @@ class EcStrayView:
             timeIndexWaves (int): The time index for accessing wave-related data. Default is 0.
             timeIndexCoreProfiles (int): The time index for accessing core profile-related data. Default is 0.
             timeIndexEquilibrium (int): The time index for accessing equilibrium-related data. Default is 0.
-            init (int): Indicates if the function is called for the initial setup. Set to 1 for initial setup. Default is 1.
+            init (int): Indicates if the function is called for the initial setup. Set to 1 for initial setup.
+            Default is 1.
             verbose (bool): Controls whether verbose output should be displayed. Default is False.
 
         Returns:
@@ -165,12 +159,13 @@ class EcStrayView:
                 ax = canvas.add_axes(title="Resonance Layer", xlabel="R [m]", ylabel="Z [m]", row=0, col=0, rowspan=1)
                 ax.set_title("uri=imas:mdsplus?user=public;pulse=134173;run=2326;database=TEST;version=3")
                 ecstrayView = EcStrayView(equilibriumIds, coreProfilesIds, wavesIds)
-                ecstrayView.plotCutOffLayer(ax, timeIndexWaves=0, timeIndexCoreProfiles=0, timeIndexEquilibrium=0,verbose=True)
+                ecstrayView.plotCutOffLayer(ax, timeIndexWaves=0, timeIndexCoreProfiles=0,
+                timeIndexEquilibrium=0,verbose=True)
 
                 ax.plot()
                 canvas.show()
 
-            .. thumbnail:: _static/images/EcstrayView_plotCutOffLayer.png
+            .. thumbnail:: /_static/images/EcstrayView_plotCutOffLayer.png
                 :alt: image not found
                 :align: center
 
@@ -178,15 +173,11 @@ class EcStrayView:
             :func:`idstools.domain.ecstray.EcStrayCompute.getCutoffLayer`
         """
         # Calculate density cutoff layer position
-        cutoff_layer = self.ecstray_object.getCutoffLayer(
-            timeIndexWaves, timeIndexCoreProfiles, timeIndexEquilibrium
-        )
+        cutoff_layer = self.ecstray_object.getCutoffLayer(timeIndexWaves, timeIndexCoreProfiles, timeIndexEquilibrium)
 
         # TODO Work on this function to keep call back function and events and not to pass init=1
         if init == 1:
-            (ax_polview_plot_cut,) = ax.plot(
-                cutoff_layer["r"], cutoff_layer["z"], color="g", linewidth=2
-            )
+            (ax_polview_plot_cut,) = ax.plot(cutoff_layer["r"], cutoff_layer["z"], color="g", linewidth=2)
             return ax_polview_plot_cut
         else:
             ax.set_data(cutoff_layer["r"], cutoff_layer["z"])

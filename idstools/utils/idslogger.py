@@ -2,7 +2,6 @@ import logging
 import sys
 
 try:
-    import rich
     from rich.console import Console
     from rich.logging import RichHandler
 

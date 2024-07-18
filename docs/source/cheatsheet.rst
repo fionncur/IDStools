@@ -58,7 +58,7 @@ This cheat sheet provides quick reference of commonly used commands in IDStools.
 |                            |                                                                                                                              |
 |                            | .. code-block:: bash                                                                                                         |
 |                            |                                                                                                                              |
-|                            |    $ plotedgeprofiles --uri "imas:mdsplus?user=public;pulse=123314;run=1;database=ITER;version=3"--separatix --wall          |
+|                            |    $ plotedgeprofiles --uri "imas:mdsplus?user=public;pulse=123314;run=1;database=ITER;version=3" --wall                     |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
 | *plotequilibrium*          | Shows plasma equilibrium  (replaces equiplot).                                                                               |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+

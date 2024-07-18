@@ -1,5 +1,3 @@
-import numpy as np
-from typing import List, Set, Union
 import logging
 import re
 
@@ -17,7 +15,8 @@ class SpectrometerVisibleCompute:
 
     def getValidSpectrometers(self):
         """
-        The function `getValidSpectrometers` returns a list of valid spectrometers by extracting the names from the `channel` objects.
+        The function `getValidSpectrometers` returns a list of valid spectrometers by extracting
+        the names from the `channel` objects.
 
         Returns:
             a list of valid spectrometers.
@@ -35,7 +34,9 @@ class SpectrometerVisibleCompute:
         The `getChannels` function retrieves information about channels based on a given channel name pattern.
 
         Args:
-            channelNamePattern: The `channelNamePattern` parameter is a regular expression pattern used to  match the names of channels. It is used to filter out channels whose names do not match the specified pattern.
+            channelNamePattern: The `channelNamePattern` parameter is a regular expression pattern used to
+            match the names of channels. It is used to filter out channels whose names do not match th
+            specified pattern.
 
         Returns:
             a dictionary called "channels".
@@ -46,10 +47,7 @@ class SpectrometerVisibleCompute:
             match = re.compile(CHANNEL_NAME_PATTERN).fullmatch(channel.name)
 
             if match is None:
-                logger.warning(
-                    f"Channel's name {channel.name} does not math pattern "
-                    f"{CHANNEL_NAME_PATTERN.pattern}"
-                )
+                logger.warning(f"Channel's name {channel.name} does not math pattern {CHANNEL_NAME_PATTERN.pattern}")
                 continue
 
             diagnostic = match[1]
@@ -58,9 +56,7 @@ class SpectrometerVisibleCompute:
             spectrum_n = int(match[3])
             gs = channel.grating_spectrometer
             if not gs.wavelengths.size:
-                logger.warning(
-                    f"{channel.name} grating_spectrometer.wavelengths is empty."
-                )
+                logger.warning(f"{channel.name} grating_spectrometer.wavelengths is empty.")
                 continue
 
             wavelengths = gs.wavelengths * 1e9
@@ -69,25 +65,19 @@ class SpectrometerVisibleCompute:
             max_wavelength = wavelengths[-1] + delta
 
             if not gs.radiance_spectral.data.size:
-                logging.warning(
-                    f"{channel.name} grating_spectrometer.radiance_spectral.data is empty."
-                )
+                logging.warning(f"{channel.name} grating_spectrometer.radiance_spectral.data is empty.")
                 radiance_spectral = None
             else:
                 radiance_spectral = gs.radiance_spectral.data[:, 0] * 1e-9
 
             if not gs.intensity_spectrum.data.size:
-                logging.warning(
-                    f"{channel.name} grating_spectrometer.intensity_spectrum.data is empty."
-                )
+                logging.warning(f"{channel.name} grating_spectrometer.intensity_spectrum.data is empty.")
                 intensity_spectrum = None
             else:
                 intensity_spectrum = gs.intensity_spectrum.data[:, 0]
 
             if not gs.exposure_time:
-                logging.warning(
-                    f"{channel.name} grating_spectrometer.exposure_time is empty."
-                )
+                logging.warning(f"{channel.name} grating_spectrometer.exposure_time is empty.")
                 exposure_time = None
             else:
                 exposure_time = gs.exposure_time

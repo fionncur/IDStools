@@ -28,7 +28,7 @@ knowledge of core functionalities.
    :maxdepth: 1
    :caption: API documentation
 
-   autoapi/index
+   autoapi/idstools/index.rst
 
 *********
  License

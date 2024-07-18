@@ -5,13 +5,16 @@ Service classes for handling IDSs
 """
 
 from idstools.database import DBMaster
-from .helper import *
-import logging
+from idstools.helper import make_sequence
 import imas
+import logging
+import os
 import sys
 
 # List of all IDS names to be read if 'all' is supplied as a IDS name
 ALL_IDSS = "edge"
+
+logger = logging.getLogger("module")
 
 
 class ImasDb:
@@ -134,16 +137,18 @@ class ImasDb:
     def all_times(self):
         """Returns a list of existing timeslices for all time-dependent IDSs present in the database."""
         import inspect
-        import types
 
         def is_ids(obj):
             try:
                 obj.__getattribute__("ids_properties")
                 return True
             except Exception as e:
+                logger.debug(f"{e}")
                 return False
 
-        timedep_ids_test = lambda x: is_ids(x)
+        def timedep_ids_test(x):
+            return is_ids(x)
+
         timedep_idss = inspect.getmembers(self.db, timedep_ids_test)
 
         result = []
@@ -159,13 +164,11 @@ class ImasDb:
                     idsname = idsnameArray + "/" + str(occurrence)
                 try:
                     times = self.times(idsname)
-                except Exception as exc:
+                except Exception as e:
+                    logger.debug(f"{e}")
                     times = []
                     print(
-                        "ERROR! IDS '"
-                        + idsname
-                        + "': Reading time array fails due to following problem : "
-                        + str(exc),
+                        "ERROR! IDS '" + idsname + "': Reading time array fails due to following problem : " + str(e),
                         file=sys.stderr,
                     )
                 if times is not None and len(times):
@@ -252,9 +255,7 @@ class Ids:
             self._parentImasDb = parentImasDb
         else:
             # logging.debug("Creating exclusive ImasDb object for ids")
-            self._parentImasDb = ImasDb(
-                shot, run, user, tokamak, version, doOpen, useHDF5
-            )
+            self._parentImasDb = ImasDb(shot, run, user, tokamak, version, doOpen, useHDF5)
 
         self._idsUALDAO = idsUALDAO
 
@@ -326,7 +327,7 @@ class Ids:
 
         logging.debug("Retrieving IDS " + str(self))
 
-        db = self._parentImasDb.db
+        eval("db = + self._parentImasDb.db")
         self._idsUALDAO = eval("db." + self._idsName)
 
         if hasattr(self._idsUALDAO, "get"):
@@ -339,7 +340,7 @@ class Ids:
             # Time-dependent IDS
             if self._time is None:
                 raise ValueError("Need valid time for getting a time-dependent IDS")
-            self._idsUALDAO.getSlice(self._time, ual.ualdef.CLOSEST_SAMPLE)
+            self._idsUALDAO.getSlice(self._time, imas.imasdef.CLOSEST_INTERP)
         else:
             raise TypeError("Found unexpected type of IDS, check IDS name")
 
@@ -434,10 +435,10 @@ class IdsDescriptor:
 
     def __len__(self):
         """Return number of IDSs described by this descriptor."""
-        l = 1
+        product = 1
         for i in self._nPar:
-            l = l * i
-        return l
+            product = product * i
+        return product
 
     def __getitem__(self, ind):
         """Returns the IDS object for the given index as a Ids object."""
@@ -448,7 +449,7 @@ class IdsDescriptor:
         iCount = [
             1,
         ] * len(self._nPar)
-        for i in xrange(len(self._nPar) - 1):
+        for i in range(len(self._nPar) - 1):
             iCount[-i - 2] = iCount[-i - 1] * self._nPar[-i - 1]
 
         # From global index ind, compute local index tuple lInd (which is 0-based)
@@ -456,7 +457,7 @@ class IdsDescriptor:
             0,
         ] * len(self._nPar)
         tInd = ind
-        for i in xrange(len(self._nPar)):
+        for i in range(len(self._nPar)):
             lInd[i] = tInd / iCount[i]
             tInd -= lInd[i] * iCount[i]
 

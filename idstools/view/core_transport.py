@@ -53,9 +53,7 @@ class CoreTransportView:
             )
 
             for _, ionDict in fluxDict["ions"].items():
-                if ionDict["particles_flux"] is None or np.isnan(
-                    ionDict["particles_flux"]
-                ):
+                if ionDict["particles_flux"] is None or np.isnan(ionDict["particles_flux"]):
                     particles_flux = "--"
                 else:
                     particles_flux = f"{ionDict['particles_flux'] : >.6e}"
@@ -103,8 +101,7 @@ class CoreTransportView:
             self._validateIonsData(T_i, C_i, r, modelIndex)
 
             Gamma_i = Vp_per_S * (
-                -T_i.particles.d * np.gradient(C_i.density, r) * gm3
-                + C_i.density * T_i.particles.v * gm7
+                -T_i.particles.d * np.gradient(C_i.density, r) * gm3 + C_i.density * T_i.particles.v * gm7
             )
             ax = axes[counter]
             counter = counter + 1
@@ -144,26 +141,20 @@ class CoreTransportView:
         ):
             self._validateIonsData(T_i, C_i, r, modelIndex)
             Gamma_i = Vp_per_S * (
-                -T_i.particles.d * np.gradient(C_i.density, r) * gm3
-                + C_i.density * T_i.particles.v * gm7
+                -T_i.particles.d * np.gradient(C_i.density, r) * gm3 + C_i.density * T_i.particles.v * gm7
             )
 
             ax = axes[counter]
             counter = counter + 1
             Q_i_conductive = (
                 Vp_per_S
-                * (
-                    -T_i.energy.d * np.gradient(C_i.temperature, r) * gm3
-                    + C_i.temperature * T_i.energy.v * gm7
-                )
+                * (-T_i.energy.d * np.gradient(C_i.temperature, r) * gm3 + C_i.temperature * T_i.energy.v * gm7)
                 * C_i.density
                 * QE
             )
             Q_i_convective = Gamma_i * C_i.temperature * QE
             ax.plot(r, Q_i_conductive, label="Direct evaluation (conductive)")
-            (base_line,) = ax.plot(
-                r, Q_i_convective * 1.5, label="Direct evaluation (convective)"
-            )
+            (base_line,) = ax.plot(r, Q_i_convective * 1.5, label="Direct evaluation (convective)")
             ax.fill_between(
                 r,
                 Q_i_convective * 0.0,
@@ -171,9 +162,7 @@ class CoreTransportView:
                 facecolor=base_line.get_color(),
                 alpha=0.2,
             )
-            (base_line,) = ax.plot(
-                r, Q_i_conductive + Q_i_convective * 1.5, label="Direct evaluation"
-            )
+            (base_line,) = ax.plot(r, Q_i_conductive + Q_i_convective * 1.5, label="Direct evaluation")
             ax.fill_between(
                 r,
                 Q_i_conductive + Q_i_convective * 0.0,
@@ -214,22 +203,15 @@ class CoreTransportView:
 
         Q_e_conductive = (
             Vp_per_S
-            * (
-                -T_e.energy.d * np.gradient(C_e.temperature, r) * gm3
-                + C_e.temperature * T_e.energy.v * gm7
-            )
+            * (-T_e.energy.d * np.gradient(C_e.temperature, r) * gm3 + C_e.temperature * T_e.energy.v * gm7)
             * C_e.density
             * QE
         )
-        Gamma_e = np.array(
-            [t.particles.flux * t.z_ion for t in Tm.profiles_1d[-1].ion]
-        ).sum(axis=0)
+        Gamma_e = np.array([t.particles.flux * t.z_ion for t in Tm.profiles_1d[-1].ion]).sum(axis=0)
         Q_e_convective = Gamma_e * C_e.temperature * QE
 
         ax.plot(r, Q_e_conductive, label="Direct evaluation (conductive)")
-        (base_line,) = ax.plot(
-            r, Q_e_convective * 1.5, label="Direct evaluation (convective)"
-        )
+        (base_line,) = ax.plot(r, Q_e_convective * 1.5, label="Direct evaluation (convective)")
         ax.fill_between(
             r,
             Q_e_convective * 0.0,
@@ -237,9 +219,7 @@ class CoreTransportView:
             facecolor=base_line.get_color(),
             alpha=0.2,
         )
-        (base_line,) = ax.plot(
-            r, Q_e_conductive + Q_e_convective * 1.5, label="Direct evaluation"
-        )
+        (base_line,) = ax.plot(r, Q_e_conductive + Q_e_convective * 1.5, label="Direct evaluation")
         ax.fill_between(
             r,
             Q_e_conductive + Q_e_convective * 0.0,
@@ -270,9 +250,7 @@ class CoreTransportView:
         T_e = Tm.profiles_1d[timeIndex].electrons
         C_e = idsCoreProfiles.profiles_1d[timeIndex].electrons
         self._validateElectrons(T_e, C_e, r, modelIndex)
-        Gamma_e = np.array(
-            [t.particles.flux * t.z_ion for t in Tm.profiles_1d[-1].ion]
-        ).sum(axis=0)
+        Gamma_e = np.array([t.particles.flux * t.z_ion for t in Tm.profiles_1d[-1].ion]).sum(axis=0)
 
         ax.plot(r, Gamma_e, label="Ambipolar Transport code fluxes")
         ax.plot(r, T_e.particles.flux, label="Transport code")
@@ -285,14 +263,10 @@ class CoreTransportView:
 
     def _validateElectrons(self, T_e, C_e, r, modelIndex):
         if len(r) != len(C_e.density):
-            logger.critical(
-                "core_profiles.profiles_1d[-1].electrons.density could not be read"
-            )
+            logger.critical("core_profiles.profiles_1d[-1].electrons.density could not be read")
             C_e.density = C_e.density[: len(r)]
         if len(r) != len(C_e.temperature):
-            logger.critical(
-                "core_profiles.profiles_1d[-1].electrons.temperature could not be read"
-            )
+            logger.critical("core_profiles.profiles_1d[-1].electrons.temperature could not be read")
             C_e.temperature = C_e.temperature[: len(r)]
         if len(T_e.particles.flux) < 1:
             logger.critical(
@@ -300,14 +274,10 @@ class CoreTransportView:
             )
             T_e.particles.flux = np.asarray([np.nan] * r)
         if len(T_e.energy.d) < 1:
-            logger.critical(
-                f"core_transport.model[{modelIndex}].profiles_1d[-1].electrons.energy.d could not be read"
-            )
+            logger.critical(f"core_transport.model[{modelIndex}].profiles_1d[-1].electrons.energy.d could not be read")
             T_e.energy.d = np.asarray([np.nan] * r)
         if len(T_e.energy.v) < 1:
-            logger.critical(
-                f"core_transport.model[{modelIndex}].profiles_1d[-1].electrons.energy.v could not be read"
-            )
+            logger.critical(f"core_transport.model[{modelIndex}].profiles_1d[-1].electrons.energy.v could not be read")
             T_e.energy.v = np.asarray([np.nan] * r)
         if len(T_e.energy.flux) < 1:
             logger.critical(
@@ -317,54 +287,40 @@ class CoreTransportView:
 
     def _validateIonsData(self, T_i, C_i, r, modelIndex):
         if len(C_i.density) < 1:
-            logger.critical(
-                "core_profiles.profiles_1d[-1].ion.density could not be read"
-            )
+            logger.critical("core_profiles.profiles_1d[-1].ion.density could not be read")
             C_i.density = np.asarray([np.nan] * r)
 
         if len(r) != len(C_i.density):
             logger.critical(
-                "core_profiles.profiles_1d[-1].ion.density length is not the same as rho_tor_norm length, correcting the length"
+                "core_profiles.profiles_1d[-1].ion.density length is not the same as rho_tor_norm length,"
+                "correcting the length"
             )
             C_i.density = C_i.density[: len(r)]
         if len(C_i.temperature) < 1:
-            logger.critical(
-                "core_profiles.profiles_1d[-1].ion.temperature could not be read"
-            )
+            logger.critical("core_profiles.profiles_1d[-1].ion.temperature could not be read")
             C_i.temperature = np.asarray([np.nan] * r)
         if len(r) != len(C_i.temperature):
             logger.critical(
-                "core_profiles.profiles_1d[-1].ion.temperature length is not the same as rho_tor_norm length, correcting the length"
+                "core_profiles.profiles_1d[-1].ion.temperature length is not the same as rho_tor_norm length,"
+                "correcting the length"
             )
             C_i.temperature = C_i.temperature[: len(r)]
 
         if len(T_i.particles.d) < 1:
-            logger.critical(
-                f"core_transport.model[{modelIndex}].ion.particles.d could not be read"
-            )
+            logger.critical(f"core_transport.model[{modelIndex}].ion.particles.d could not be read")
             T_i.particles.d = np.asarray([np.nan] * r)
         if len(T_i.particles.v) < 1:
-            logger.critical(
-                f"core_transport.model[{modelIndex}].ion.particles.v could not be read"
-            )
+            logger.critical(f"core_transport.model[{modelIndex}].ion.particles.v could not be read")
             T_i.particles.v = np.asarray([np.nan] * r)
         if len(T_i.particles.flux) < 1:
-            logger.critical(
-                f"core_transport.model[{modelIndex}].ion.particles.flux could not be read"
-            )
+            logger.critical(f"core_transport.model[{modelIndex}].ion.particles.flux could not be read")
             T_i.particles.flux = np.asarray([np.nan] * r)
         if len(T_i.energy.d) < 1:
-            logger.critical(
-                f"core_transport.model[{modelIndex}].ion.energy.d could not be read"
-            )
+            logger.critical(f"core_transport.model[{modelIndex}].ion.energy.d could not be read")
             T_i.energy.d = np.asarray([np.nan] * r)
         if len(T_i.energy.v) < 1:
-            logger.critical(
-                f"core_transport.model[{modelIndex}].ion.energy.v could not be read"
-            )
+            logger.critical(f"core_transport.model[{modelIndex}].ion.energy.v could not be read")
             T_i.energy.v = np.asarray([np.nan] * r)
         if len(T_i.energy.flux) < 1:
-            logger.critical(
-                f"core_transport.model[{modelIndex}].ion.energy.flux could not be read"
-            )
+            logger.critical(f"core_transport.model[{modelIndex}].ion.energy.flux could not be read")
             T_i.energy.flux = np.asarray([np.nan] * r)

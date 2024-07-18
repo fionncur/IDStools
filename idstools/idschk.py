@@ -1,18 +1,16 @@
 #!/usr/bin/env python
-from os import getenv, path
+
+from idstools.utils.ddhelper import DDHelper
+from os import path
 from sys import exit
-import re
-import argparse
-import traceback
-import yaml
-import statistics
 from xml.etree import ElementTree as ET
 import cerberus
-from idstools.utils.ddhelper import DDHelper
-import numpy as np
-import logging
 import copy
-import imas
+import logging
+import numpy as np
+import re
+import traceback
+import yaml
 
 logger = logging.getLogger(__name__)
 
@@ -180,9 +178,7 @@ class COCOS:
         """
 
         if (index is None) and (values is None):
-            raise ValueError(
-                "Initialize COCOS with either index or values: both not given"
-            )
+            raise ValueError("Initialize COCOS with either index or values: both not given")
             return
 
         elif (index is not None) and (values is not None):
@@ -347,9 +343,7 @@ class COCOS:
         }
 
     @classmethod
-    def values_coefficients(
-        self, COCOS_in, COCOS_out, Ip_in, B0_in, Ipsign_out, B0sign_out
-    ):
+    def values_coefficients(self, COCOS_in, COCOS_out, Ip_in, B0_in, Ipsign_out, B0sign_out):
         """
         Provide transformation values for a set of quantities for a given pair
         of input/output COCOS numbers
@@ -392,12 +386,8 @@ class COCOS:
         sigma_B0_in = np.sign(B0_in)
 
         # Get COCOS related parameters
-        CVI = COCOS(
-            index={"COCOS": COCOS_in, "ipsign": sigma_Ip_in, "b0sign": sigma_B0_in}
-        ).get()
-        CVO = COCOS(
-            index={"COCOS": COCOS_out, "ipsign": Ipsign_out, "b0sign": B0sign_out}
-        ).get()
+        CVI = COCOS(index={"COCOS": COCOS_in, "ipsign": sigma_Ip_in, "b0sign": sigma_B0_in}).get()
+        CVO = COCOS(index={"COCOS": COCOS_out, "ipsign": Ipsign_out, "b0sign": B0sign_out}).get()
 
         # Define effective variables: sigma_Ip_eff, si1gma_B0_eff, sigma_Bp_eff,
         # exp_Bp_eff as in Appendix C
@@ -408,23 +398,22 @@ class COCOS:
             sigma_Ip_eff = sigma_RphiZ_eff  # sign folllowing transformation
         else:
             sigma_Ip_eff = sigma_Ip_in * float(Ipsign_out)
-        sigma_Ip_out = sigma_Ip_in * sigma_Ip_eff
+        # sigma_Ip_out = sigma_Ip_in * sigma_Ip_eff
 
         # sign(B0) in output
         if B0sign_out == 0:
             sigma_B0_eff = sigma_RphiZ_eff  # sign folllowing transformation
         else:
             sigma_B0_eff = sigma_B0_in * float(B0sign_out)
-        sigma_B0_out = sigma_B0_in * sigma_B0_eff
+        # sigma_B0_out = sigma_B0_in * sigma_B0_eff
 
         sigma_Bp_eff = float(CVO["sigma_Bp"] * CVI["sigma_Bp"])
         exp_Bp_eff = float(CVO["exp_Bp"] - CVI["exp_Bp"])
-        sigma_rhothetaphi_eff = float(
-            CVO["sigma_rhothetaphi"] * CVI["sigma_rhothetaphi"]
-        )
+        sigma_rhothetaphi_eff = float(CVO["sigma_rhothetaphi"] * CVI["sigma_rhothetaphi"])
         #
         # Note that sign(sigma_RphiZ*sigma_rhothetaphi) gives theta in clockwise or counter-clockwise respectively
-        # Thus sigma_RphiZ_eff*sigma_rhothetaphi_eff negative if the direction of theta has changed from cocos_in to _out
+        # Thus sigma_RphiZ_eff*sigma_rhothetaphi_eff negative if the direction of
+        # theta has changed from cocos_in to _out
         #
         fact_psi = sigma_Ip_eff * sigma_Bp_eff * (2.0 * np.pi) ** exp_Bp_eff
         fact_dpsi = sigma_Ip_eff * sigma_Bp_eff / (2.0 * np.pi) ** exp_Bp_eff
@@ -479,14 +468,14 @@ def path2py(p, rm_last_bracket=False, header=False, idx=None):
         Field path in Python
     """
 
-    result = re.search("^(\d)\.\.\.(\d)$", p)
+    result = re.search("^(\\d)\\.\\.\\.(\\d)$", p)
     if result is not None:  # constant coordinate definition (e.g. 1...3)
         return "range(" + str(result.group(2)) + ")"
 
     else:  # other coordinate definition
-        if rm_last_bracket == True:
+        if rm_last_bracket:
             p = p[: p.rfind("(")]
-        p = re.sub("\((\w+)\)", r"(" + idx_header + "\\1)", p)
+        p = re.sub("\\((\\w+)\\)", r"(" + idx_header + "\\1)", p)
         p = p.replace("/", ".")
         p = p.replace("(", "[")
         p = p.replace(")", "]")
@@ -524,9 +513,9 @@ class IdxDict(dict):
             Field path
         """
 
-        idict = []
+        # idict = []
 
-        for m in re.finditer("\((\w+)\)", p):  # find subscripts and set as attribute
+        for m in re.finditer("\\((\\w+)\\)", p):  # find subscripts and set as attribute
             it = m.group()[1:-1]
             setattr(self, it, None)  # initial value = None
 
@@ -588,15 +577,16 @@ class IDSValidator(cerberus.Validator):
             #
             for i in range(data.ndim):
                 c = path2py(field.get("coordinate" + str(i + 1)), header=True)
-                homogeneous_time = ids.ids_properties.homogeneous_time
+                # homogeneous_time = ids.ids_properties.homogeneous_time
                 #
-                if re.search("1\.\.\.", c):
+                if re.search("1\\.\\.\\.", c):
                     lcrd = data.shape[i]
                 else:
                     try:
                         crd = eval(c)
                         lcrd = len(crd)
                     except Exception as e:
+                        logger.debug(f"{e}")
                         lcrd = -1
 
                 self.shape.append(lcrd)
@@ -699,11 +689,7 @@ class IDSValidator(cerberus.Validator):
         """{'nullable': False }"""
         try:
             v = np.atleast_1d(value).flatten()
-            q_like = (
-                self.cocos["sigma_Ip"]
-                * self.cocos["sigma_B0"]
-                * self.cocos["sigma_rhothetaphi"]
-            )
+            q_like = self.cocos["sigma_Ip"] * self.cocos["sigma_B0"] * self.cocos["sigma_rhothetaphi"]
             if np.any(np.sign(v) != q_like):
                 if not constraint:
                     self._error(field, f"Sign expected as {q_like}")
@@ -802,7 +788,7 @@ def validator(field, path_doc, ids, schema, cocos, buf, idx):
     remark: boolean
     """
 
-    data_size = 0
+    # data_size = 0
 
     p = path2py(path_doc, header=True)
 
@@ -810,6 +796,7 @@ def validator(field, path_doc, ids, schema, cocos, buf, idx):
     try:
         data = eval(p)
     except Exception as e:
+        logger.debug(f"{e}")
         print(f"eval error on key {p}, skipped")
         return
 
@@ -823,11 +810,12 @@ def validator(field, path_doc, ids, schema, cocos, buf, idx):
     # eval for schema value in case of validation between data
     for key, value in schema[path_doc].items():
         if isinstance(value, str):
-            val = re.sub("_(i+\w+)_", idx_header + r"\1", value)
+            val = re.sub("_(i+\\w+)_", idx_header + r"\1", value)
             val = val.replace(ids.__name__ + ".", ids_header)
             try:
                 schemaw[path_doc][key] = eval(val)
             except Exception as e:
+                logger.debug(f"{e}")
                 # print(f"eval error on value {val}, ignored: {e}")
                 # return
                 pass
@@ -886,7 +874,7 @@ def path_iterator(field, nodes, ids, schema, cocos, buf, idx=None, level=0):
 
     p = "/".join(nodes[: level + 1])
     if level < len(nodes) - 1:
-        result = re.search("(\w+)(\(\w+\))$", p)
+        result = re.search("(\\w+)(\\(\\w+\\))$", p)
 
         # for dynamic array (e.g. path(itime)/to(i1)/array(i2))
         if result is not None:
@@ -909,13 +897,12 @@ def path_iterator(field, nodes, ids, schema, cocos, buf, idx=None, level=0):
                     if not args_check_all:
                         break
             except Exception as e:
+                logger.debug(f"{e}")
                 print(f"Error at calling path_iterator: {e}")
 
         # for node (e.g. path(itime)/to(i1)/node)
         else:
-            path_iterator(
-                field, nodes, ids, schema, cocos, buf, idx=idx, level=level + 1
-            )
+            path_iterator(field, nodes, ids, schema, cocos, buf, idx=idx, level=level + 1)
 
     else:
         validator(field, p, ids, schema, cocos, buf, idx)
@@ -954,6 +941,7 @@ def validate_COCOS(ids, schema, itime, i1, cocos=None):
         try:
             data = eval(key)
         except Exception as e:
+            logger.debug(f"{e}")
             print(f"eval error on key {key}")
             return
 
@@ -1001,10 +989,7 @@ def compute_COCOS(ids, itime=None, i1=0, cocos_check=None):
     b0sign = np.sign(ids.vacuum_toroidal_field.b0[itime])
 
     # 1 Eq.(22)
-    dpsi = (
-        ids.time_slice[itime].profiles_1d.psi[-1]
-        - ids.time_slice[itime].profiles_1d.psi[0]
-    )
+    dpsi = ids.time_slice[itime].profiles_1d.psi[-1] - ids.time_slice[itime].profiles_1d.psi[0]
     sigma_Bp = np.sign(dpsi) * ipsign
 
     # 2 Eq.(22)
@@ -1048,9 +1033,7 @@ def compute_COCOS(ids, itime=None, i1=0, cocos_check=None):
     w = np.where(np.isclose(cols, iz, rtol=0.1))
 
     twopi_expBp_sigma_RphiZ = np.zeros(bz.shape)
-    twopi_expBp_sigma_RphiZ = (
-        -sigma_Bp * dpsi2drdr[rows[w], cols[w]] / bz[rows[w], cols[w]]
-    )
+    twopi_expBp_sigma_RphiZ = -sigma_Bp * dpsi2drdr[rows[w], cols[w]] / bz[rows[w], cols[w]]
     sigma_RphiZ = np.sign(np.sum(np.sign(twopi_expBp_sigma_RphiZ)))
 
     # 6 exp_Bp from Eq.(19)
@@ -1145,10 +1128,12 @@ def load_YAML(fpath):
     try:
         f = open(fpath, mode="r")
     except Exception as e:
+        logger.debug(f"{e}")
         exit(f"can not open file:{fpath}")
     try:
         d = yaml.safe_load(f)
     except Exception as e:
+        logger.debug(f"{e}")
         exit(f"invalid yaml in:{fpath}")
 
     return d
@@ -1288,9 +1273,7 @@ def ids_iterator(ids, schema, dd, cocos, occ=0):
 
             if args_verbose:
                 if bool(report_buf):
-                    dictw["remark"] = all(
-                        {report_buf[x]["remark"] for x in report_buf.keys()}
-                    )
+                    dictw["remark"] = all({report_buf[x]["remark"] for x in report_buf.keys()})
             dictw.update(report_buf)
             buf.update({"occurence(" + str(oc) + ")": dictw})
 
@@ -1348,9 +1331,7 @@ def init_schema_coordinate(idsname, dd=None, rule={"ids_dim": False}):
 # ----------------------------------------------------------------------
 
 
-def ids_validator(
-    ids, schema, dd=None, occ=0, ipsign=-1, b0sign=-1, verbose=False, check_all=True
-):
+def ids_validator(ids, schema, dd=None, occ=0, ipsign=-1, b0sign=-1, verbose=False, check_all=True):
     """Function Interface for IDS Validation w.r.t. DD (IDSDef.xml)
 
     Parameters
@@ -1475,6 +1456,7 @@ def ids_cocos_check(ids, itime=None, i1=0, verbose=False):
         try:
             cocos = compute_COCOS(ids, itime, i1)
         except Exception as e:
+            logger.debug(f"{e}")
             exit(f"Cannot compute COCOS: {e}")
         # set remark
         if cocos[key] == IDS_COCOS:
@@ -1518,6 +1500,7 @@ def ids_compute_cocos(ids, itime=None, i1=0):
         try:
             cocos = compute_COCOS(ids, itime, i1)
         except Exception as e:
+            logger.debug(f"{e}")
             logger.error(traceback.format_exc())
 
     else:

@@ -116,6 +116,10 @@ autoapi_template_dir = "_templates/autoapi"
 autoapi_keep_files = True
 autoapi_member_order = 'groupwise'
 
+# Configure sphinxcontrib-images
+images_config = {
+    'default_image_path': '_static/images',
+}
 # Add any paths that contain templates here, relative to this directory.
 # templates_path = ["_templates", sphinx_autosummary_accessors.templates_path]
 

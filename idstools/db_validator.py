@@ -1,14 +1,13 @@
 #!/usr/bin/env python
-from os import path, getenv
-from glob import glob
-import logging
-import inspect
 
-import imas
-from idstools.database import DBMaster
+from glob import glob
 from idstools import idschk
+from idstools.database import DBMaster
 from idstools.idslist import available_in_dbentry
 from idstools.utils.clihelper import getBackendID
+from os import path
+import imas
+import logging
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +22,8 @@ def load_scenario(user, database, version, backend):
     Parameters
     ----------
     user: str="public"
-        Status of user: either public or local. A public user should just be left as public, whereas a local user should write their proper i    dentifier
+        Status of user: either public or local. A public user should just be left as public, whereas
+        a local user should write their proper identifier
     database: str="ITER"
         Name of database where the data is harbored
     version: str="3"
@@ -41,13 +41,9 @@ def load_scenario(user, database, version, backend):
 
     scenarios = []
     if backend == "MDSPLUS":
-        scenarios = DBMaster.mdsListPulseRun(
-            DBMaster.getDBPath(user, database, version), with_status="active"
-        )
+        scenarios = DBMaster.mdsListPulseRun(DBMaster.getDBPath(user, database, version), with_status="active")
     elif backend == "HDF5":
-        scenarios = DBMaster.hdf5ListPulseRun(
-            DBMaster.getDBPath(user, database, version)
-        )
+        scenarios = DBMaster.hdf5ListPulseRun(DBMaster.getDBPath(user, database, version))
 
     return scenarios
 
@@ -140,6 +136,7 @@ class ScenarioValidator:
         try:
             self.DD = idschk.load_XML(fpath)
         except Exception as e:
+            logger.debug(f"{e}")
             raise OSError(f"can not load DD: {fpath}")
 
         logger.debug(f" DD= {fpath}")
@@ -162,6 +159,7 @@ class ScenarioValidator:
             for f in yaml:
                 self.SCHEMA[f] = idschk.load_YAML(f)
         except Exception as e:
+            logger.debug(f"{e}")
             raise OSError(f"failed to load Schema: {yaml}")
 
         self.SCHEMA = self.arrange_schema(self.SCHEMA)
@@ -230,13 +228,9 @@ class ScenarioValidator:
                         dbEntryDetails = db.__dict__["uri"]
                     else:
                         if "pulse" in db.__dict__:
-                            dbEntryDetails = (
-                                f"{db.__dict__['pulse']}/{db.__dict__['run']}"
-                            )
+                            dbEntryDetails = f"{db.__dict__['pulse']}/{db.__dict__['run']}"
                         if "shot" in db.__dict__:
-                            dbEntryDetails = (
-                                f"{db.__dict__['shot']}/{db.__dict__['run']}"
-                            )
+                            dbEntryDetails = f"{db.__dict__['shot']}/{db.__dict__['run']}"
 
                     logger.info(
                         "- {}/{}/{} < {}".format(
@@ -256,6 +250,7 @@ class ScenarioValidator:
                             tm, itm = idschk.find_time(idstime, time)
                             ids = db.get_slice(idsname, tm, 1, occurrence=occ)
                     except Exception as e:
+                        logger.debug(f"{e}")
                         print(f"Cannot retrieve IDS/{idsname}: {e}")
                     #
                     flag, dout = idschk.ids_validator(
@@ -323,7 +318,8 @@ def db_validator(
     Parameters
     ---------
     user: str="public"
-        Status of user: either public or local. A public user should just be left as public, whereas a local user should write their proper i    dentifier
+        Status of user: either public or local. A public user should just be left as public,
+        whereas a local user should write their proper i    dentifier
     database: str="ITER"
         Name of database where the data is harbored
     version: str="3"
@@ -385,9 +381,9 @@ def db_validator(
                 f"can not open backend={backend}, user_or_path={user}, database={database}, shot={shot}, run={run}"
             )
 
-        logger.info(f"-----------------------------------------------------------")
+        logger.info("-----------------------------------------------------------")
         logger.info(f"{i+1}/{npulse} ({(i+1)//npulse*100}%) {shot}/{run}")
-        logger.info(f"-----------------------------------------------------------")
+        logger.info("-----------------------------------------------------------")
 
         # Scenario Validation
         sv.validate_db(db, fmt="log")

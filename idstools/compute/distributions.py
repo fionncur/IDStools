@@ -1,10 +1,9 @@
-""" 
+"""
 This module provides compute functions and classes for distributions ids data
 
 """
 
 import logging
-from typing import Dict
 
 
 logger = logging.getLogger("module")
@@ -32,61 +31,35 @@ class DistributionsCompute:
             distributionsData["cur_calc"] = 1
             distributionsData["nrho"] = 0
             distributionsData["rho_tor_norm"] = None
-            if (
-                len(self.ids.distribution[idistrib].global_quantities[0].collisions.ion)
-                > 0
-            ):
+            if len(self.ids.distribution[idistrib].global_quantities[0].collisions.ion) > 0:
                 distributionsData["is_active"] = 1
-                if (
-                    self.ids.distribution[idistrib].global_quantities[0].current_tor
-                    == -9e40
-                ):
+                if self.ids.distribution[idistrib].global_quantities[0].current_tor == -9e40:
                     distributionsData["cur_calc"] = 0
                 try:
                     distributionsData["rho_tor_norm"] = 0
-                    if (
-                        len(
-                            self.ids.distribution[idistrib]
-                            .profiles_1d[timeIndex]
-                            .grid.rho_tor_norm
-                        )
-                        > 0
-                    ):
+                    if len(self.ids.distribution[idistrib].profiles_1d[timeIndex].grid.rho_tor_norm) > 0:
                         distributionsData["nrho"] = len(
-                            self.ids.distribution[idistrib]
-                            .profiles_1d[timeIndex]
-                            .grid.rho_tor_norm
+                            self.ids.distribution[idistrib].profiles_1d[timeIndex].grid.rho_tor_norm
                         )
                         distributionsData["rho_tor_norm"] = (
-                            self.ids.distribution[idistrib]
-                            .profiles_1d[timeIndex]
-                            .grid.rho_tor_norm
+                            self.ids.distribution[idistrib].profiles_1d[timeIndex].grid.rho_tor_norm
                         )
-                    elif (
-                        len(
-                            self.ids.distribution[idistrib]
-                            .profiles_1d[timeIndex]
-                            .grid.rho_tor
-                        )
-                        > 0
-                    ):
+                    elif len(self.ids.distribution[idistrib].profiles_1d[timeIndex].grid.rho_tor) > 0:
                         distributionsData["nrho"] = len(
-                            self.ids.distribution[idistrib]
-                            .profiles_1d[timeIndex]
-                            .grid.rho_tor
+                            self.ids.distribution[idistrib].profiles_1d[timeIndex].grid.rho_tor
                         )
                         distributionsData["rho_tor_norm"] = (
-                            self.ids.distribution[idistrib]
-                            .profiles_1d[timeIndex]
-                            .grid.rho_tor
+                            self.ids.distribution[idistrib].profiles_1d[timeIndex].grid.rho_tor
                             / self.ids.distribution[idistrib]
                             .profiles_1d[timeIndex]
                             .grid.rho_tor[distributionsData["nrho"] - 1]
                         )
                 except Exception as e:
                     logger.warning(
-                        "distributions.distribution[idistrib].profiles_1d[it].grid.rho_tor_norm and rho_tor could not be read"
+                        "distributions.distribution[idistrib].profiles_1d[it].grid.rho_tor_norm and"
+                        "rho_tor could not be read"
                     )
+                    logger.debug(f"{e}")
                     return None
                 if distributionsData["nrho"] == 0:
                     logger.warning(
@@ -95,11 +68,7 @@ class DistributionsCompute:
                     return None
 
             radialGridInfo[idistrib] = distributionsData
-        self.activeDistributions = {
-            key: value
-            for key, value in radialGridInfo.items()
-            if value["is_active"] == 1
-        }
+        self.activeDistributions = {key: value for key, value in radialGridInfo.items() if value["is_active"] == 1}
         if not radialGridInfo:
             return None
         self.nrho = radialGridInfo[0]["nrho"]
@@ -145,9 +114,9 @@ class DistributionsCompute:
             # INJECTOR NAME
             if len(self.ids.distribution[idistrib].process) > 0:
                 if len(self.ids.distribution[idistrib].process[0].type.description) > 0:
-                    profiles["single_nf_source_name"][idistrib] = self.ids.distribution[
-                        idistrib
-                    ].process[0].type.description + str(idistrib)
+                    profiles["single_nf_source_name"][idistrib] = self.ids.distribution[idistrib].process[
+                        0
+                    ].type.description + str(idistrib)
                 else:
                     profiles["single_nf_source_name"][idistrib] = f"Beam_f{idistrib}"
             else:
@@ -158,20 +127,14 @@ class DistributionsCompute:
                 profiles["single_electron_power_waveform"][idistrib] = [0] * ntime
                 profiles["single_ion_power_waveform"][idistrib] = [0] * ntime
                 profiles["single_total_power_waveform"][idistrib] = [0] * ntime
-                nions = len(
-                    self.ids.distribution[idistrib].global_quantities[0].collisions.ion
-                )
+                nions = len(self.ids.distribution[idistrib].global_quantities[0].collisions.ion)
                 for itime in range(ntime):
                     if self.cur_calc == 1:
                         profiles["single_current_waveform"][idistrib][itime] = (
-                            self.ids.distribution[idistrib]
-                            .global_quantities[itime]
-                            .current_tor
+                            self.ids.distribution[idistrib].global_quantities[itime].current_tor
                         )
                     profiles["single_electron_power_waveform"][idistrib][itime] = (
-                        self.ids.distribution[idistrib]
-                        .global_quantities[itime]
-                        .collisions.electrons.power_thermal
+                        self.ids.distribution[idistrib].global_quantities[itime].collisions.electrons.power_thermal
                     )
                     for iion in range(nions):
                         profiles["single_ion_power_waveform"][idistrib][itime] = (
@@ -204,31 +167,20 @@ class DistributionsCompute:
                     )
                 # PROFILES
                 profiles["single_current_density_profile"][idistrib] = [0] * self.nrho
-                profiles["single_electron_power_density_profile"][idistrib] = [
-                    0
-                ] * self.nrho
+                profiles["single_electron_power_density_profile"][idistrib] = [0] * self.nrho
                 profiles["single_ion_power_density_profile"][idistrib] = [0] * self.nrho
-                profiles["single_total_power_density_profile"][idistrib] = [
-                    0
-                ] * self.nrho
+                profiles["single_total_power_density_profile"][idistrib] = [0] * self.nrho
                 if self.cur_calc == 1:
                     profiles["single_current_density_profile"][idistrib] = (
-                        self.ids.distribution[idistrib]
-                        .profiles_1d[timeIndex]
-                        .current_tor
+                        self.ids.distribution[idistrib].profiles_1d[timeIndex].current_tor
                     )
                 profiles["single_electron_power_density_profile"][idistrib] = (
-                    self.ids.distribution[idistrib]
-                    .profiles_1d[timeIndex]
-                    .collisions.electrons.power_thermal
+                    self.ids.distribution[idistrib].profiles_1d[timeIndex].collisions.electrons.power_thermal
                 )
                 for iion in range(nions):
                     profiles["single_ion_power_density_profile"][idistrib] = (
                         profiles["single_ion_power_density_profile"][idistrib]
-                        + self.ids.distribution[idistrib]
-                        .profiles_1d[timeIndex]
-                        .collisions.ion[iion]
-                        .power_thermal
+                        + self.ids.distribution[idistrib].profiles_1d[timeIndex].collisions.ion[iion].power_thermal
                     )
                 profiles["single_total_power_density_profile"][idistrib] = (
                     profiles["single_electron_power_density_profile"][idistrib]
@@ -253,29 +205,19 @@ class DistributionsCompute:
                 )
 
         logger.info(
-            " Total power  = {:.2f}".format(
-                profiles["all_injectors_total_power_waveform"][timeIndex] * 1.0e-6
-            )
+            " Total power  = {:.2f}".format(profiles["all_injectors_total_power_waveform"][timeIndex] * 1.0e-6) + " MW"
+        )
+        logger.info(
+            " To electrons = {:.2f}".format(profiles["all_injectors_electron_power_waveform"][timeIndex] * 1.0e-6)
             + " MW"
         )
         logger.info(
-            " To electrons = {:.2f}".format(
-                profiles["all_injectors_electron_power_waveform"][timeIndex] * 1.0e-6
-            )
-            + " MW"
-        )
-        logger.info(
-            " To ions      = {:.2f}".format(
-                profiles["all_injectors_ion_power_waveform"][timeIndex] * 1.0e-6
-            )
-            + " MW"
+            " To ions      = {:.2f}".format(profiles["all_injectors_ion_power_waveform"][timeIndex] * 1.0e-6) + " MW"
         )
 
         if self.cur_calc == 1:
             logger.info(
-                " Total CD        = {:.2f}".format(
-                    profiles["all_injectors_current_waveform"][timeIndex] * 1.0e-3
-                )
+                " Total CD        = {:.2f}".format(profiles["all_injectors_current_waveform"][timeIndex] * 1.0e-3)
                 + " kA"
             )
 
@@ -286,8 +228,7 @@ class DistributionsCompute:
                         " Distribution #"
                         + str(idistrib + 1)
                         + " - power = {:.2f}".format(
-                            profiles["single_total_power_waveform"][idistrib][timeIndex]
-                            * 1.0e-6
+                            profiles["single_total_power_waveform"][idistrib][timeIndex] * 1.0e-6
                         )
                         + " MW"
                     )
@@ -296,8 +237,7 @@ class DistributionsCompute:
                             " Distribution #"
                             + str(idistrib + 1)
                             + " - CD    = {:.2f}".format(
-                                profiles["single_current_waveform"][idistrib][timeIndex]
-                                * 1.0e-3
+                                profiles["single_current_waveform"][idistrib][timeIndex] * 1.0e-3
                             )
                             + " kA"
                         )
@@ -317,17 +257,11 @@ class DistributionsCompute:
         powerAbsorbed["element"] = [0] * nions
         powerAbsorbed["compo_detail"] = 0
         for distribIndex in range(self.ndistributions):
-            nions = len(
-                self.ids.distribution[distribIndex].global_quantities[0].collisions.ion
-            )
+            nions = len(self.ids.distribution[distribIndex].global_quantities[0].collisions.ion)
             if self.radialGridInfo[distribIndex]["is_active"]:
                 for ionIndex in range(nions):
-                    powerAbsorbed["all_injectors_total_power_waveform_per_ion"][
-                        ionIndex
-                    ] = (
-                        powerAbsorbed["all_injectors_total_power_waveform_per_ion"][
-                            ionIndex
-                        ]
+                    powerAbsorbed["all_injectors_total_power_waveform_per_ion"][ionIndex] = (
+                        powerAbsorbed["all_injectors_total_power_waveform_per_ion"][ionIndex]
                         + self.ids.distribution[distribIndex]
                         .global_quantities[timeIndex]
                         .collisions.ion[ionIndex]
@@ -357,18 +291,11 @@ class DistributionsCompute:
                             .element[0]
                             .z_n
                         )
-                        powerAbsorbed["element"][ionIndex] = table_mendeleiev[z][
-                            a
-                        ].element
+                        powerAbsorbed["element"][ionIndex] = table_mendeleiev[z][a].element
                         logger.info(
                             "      - "
                             + z["element"][ionIndex]
-                            + " = {:.2f}".format(
-                                z["all_injectors_total_power_waveform_per_ion"][
-                                    ionIndex
-                                ]
-                                * 1.0e-3
-                            )
+                            + " = {:.2f}".format(z["all_injectors_total_power_waveform_per_ion"][ionIndex] * 1.0e-3)
                             + " kW"
                         )
 

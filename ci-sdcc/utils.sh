@@ -20,6 +20,12 @@ getIMASModuleName() {
     fi
     #Semantic versioning
     IMASVERSIONSLIST=$(module av -t IMAS/ 2>&1 | grep -E "$DD_VERSION\.[0-9]+\.[0-9]+-$ACCESS_LAYER_VERSION\.[0-9]+\.[0-9]+-$TOOLCHAIN_VERSION")
+    if [ -f /etc/os-release ]; then
+        . /etc/os-release
+        if [[ "$ID" == "rhel" ]]; then
+            IMASVERSIONSLIST=$(module -r -t avail '^IMAS/' 2>&1 | grep -E "$DD_VERSION\.[0-9]+\.[0-9]+-$ACCESS_LAYER_VERSION\.[0-9]+\.[0-9]+-$TOOLCHAIN_VERSION")
+        fi
+    fi
     # CalVar versioning
     if [[ $ACCESS_LAYER_VERSION == "5" ]]; then
         IMASCALVERVERSIONSLIST=$(module av -t IMAS/ 2>&1 | grep -E "$DD_VERSION\.[0-9]+\.[0-9]+-[0-9]+\.[0-9]+-$TOOLCHAIN_VERSION")
@@ -30,7 +36,12 @@ getIMASModuleName() {
     if [[ $TOOLCHAIN_VERSION == *"foss"* ]]; then
         IMAS_MODULE_VERSION=$(echo "$IMASVERSIONSLIST"$'\n'"$IMASCALVERVERSIONSLIST" | grep "foss" | sort -rV | head -n 1)
     fi
-    echo "$IMAS_MODULE_VERSION" | sed 's/(.*//'
+    # IMAS_MODULE_VERSION="$IMAS_MODULE_VERSION" | sed 's/(.*//'
+    IMAS_MODULE_VERSION="${IMAS_MODULE_VERSION%%(*}"
+    IMAS_MODULE_VERSION="${IMAS_MODULE_VERSION//(default)/}"
+    IMAS_MODULE_VERSION="${IMAS_MODULE_VERSION// (D)/}"
+    IMAS_MODULE_VERSION="${IMAS_MODULE_VERSION// /}"
+    echo "${IMAS_MODULE_VERSION}"
 }
 
 getModuleName() {
@@ -41,7 +52,18 @@ getModuleName() {
     local GCCcore_VERSION=$3
     IFS='-' read -r TNAME TVERSION <<<"$TOOLCHAIN_VERSION"
 
-    module_versions=$(module av -t "$MODULE_NAME"/ 2>&1 | grep -E "$MODULE_NAME/[0-9]+\.[0-9]+\.[0-9]+|dev")
+    module_versions=$(module av -t "$MODULE_NAME"/ 2>&1 | grep -E "$MODULE_NAME/[0-9]+\.[0-9]+\.[0-9]+")
+    if [ -f /etc/os-release ]; then
+        . /etc/os-release
+        if [[ "$ID" == "rhel" ]]; then
+            if [[ $MODULE_NAME == *-* ]]; then
+                module_versions=$(module -t avail "$MODULE_NAME"/ 2>&1 | grep -E "$MODULE_NAME/[0-9]+\.[0-9]+\.[0-9]+")
+            else
+                module_versions=$(module -r -t avail ^"$MODULE_NAME"/ 2>&1 | grep -E "$MODULE_NAME/[0-9]+\.[0-9]+\.[0-9]+")
+            fi
+        fi
+    fi
+
     # Check GCCcore version
     gcccore_filtered=$(echo "$module_versions" 2>&1 | grep "GCCcore-$GCCcore_VERSION")
     MODULE_VERSION=$(echo "$gcccore_filtered" | sort -rV | head -n 1)
@@ -81,7 +103,10 @@ getModuleName() {
         modules_filtered=$(echo "$module_versions" 2>&1 | grep "$MODULE_NAME")
         MODULE_VERSION=$(echo "$modules_filtered" | sort -rV | head -n 1)
     fi
-    echo "${MODULE_VERSION//(default)/}"
+    MODULE_VERSION="${MODULE_VERSION//(default)/}"
+    MODULE_VERSION="${MODULE_VERSION// (D)/}"
+    MODULE_VERSION="${MODULE_VERSION// /}"
+    echo "${MODULE_VERSION}"
 }
 
 getGCCcoreVersion() {

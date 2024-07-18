@@ -1,5 +1,5 @@
 """
-This module 
+This module
 
 """
 
@@ -15,9 +15,7 @@ from packaging import version
 from rich.progress import track
 
 logger = logging.getLogger("module")
-ARRAY_EQUAL_KWARGS = (
-    "equal_nan=True" if version.parse(np.__version__) > version.parse("1.19") else ""
-)
+ARRAY_EQUAL_KWARGS = "equal_nan=True" if version.parse(np.__version__) > version.parse("1.19") else ""
 
 
 def isIdsField(idstype: type) -> bool:
@@ -28,7 +26,8 @@ def isIdsField(idstype: type) -> bool:
         idstype (type): The type of an attribute from an IDS or a substructure of an IDS.
 
     Returns:
-        The function isIdsField returns a boolean value indicating whether the passed type is a possible  field of an IDS or not.
+        The function isIdsField returns a boolean value indicating whether the passed type is a possible
+        field of an IDS or not.
     """
     return (
         idstype != types.MethodType
@@ -46,28 +45,28 @@ def getIdsAttributes(idsobj: object) -> list:
         idsobj (object): The IDS or substructure object for which the function will return a list of attribute names.
 
     Returns:
-        The function `getIdsAttributes` returns a list of attribute names for the given IDS object which are not private and are ids fields.
+        The function `getIdsAttributes` returns a list of attribute names for the given IDS object which are not
+        private and are ids fields.
     """
     if "imas" in str(type(idsobj)):
-        return [
-            a[0]
-            for a in inspect.getmembers(idsobj)
-            if not a[0].startswith("_") and isIdsField(type(a[1]))
-        ]
+        return [a[0] for a in inspect.getmembers(idsobj) if not a[0].startswith("_") and isIdsField(type(a[1]))]
     else:
         return []
 
 
 def getIDSSize(dbEntryObject: imas.DBEntry, idsNames=None) -> dict:
     """
-    The function `getIDSSize` retrieves the size of IDS objects from a database entry and returns a dictionary containing the size in bytes and the time taken to read each object.
+    The function `getIDSSize` retrieves the size of IDS objects from a database entry and returns a dictionary
+    containing the size in bytes and the time taken to read each object.
 
     Args:
-        dbEntryObject (imas.DBEntry): The `dbEntryObject` parameter is an object of type `imas.DBEntry`. It is used to access the data in the IMAS database.
+        dbEntryObject (imas.DBEntry): The `dbEntryObject` parameter is an object of type `imas.DBEntry`. It
+        is used to access the data in the IMAS database.
         idsNames: idsNames is a list of IDS names. If it is not provided, it defaults to None.
 
     Returns:
-        a dictionary containing information about the size and time taken to read IDS objects from a database entry. The dictionary has the following structure:
+        a dictionary containing information about the size and time taken to read IDS objects from a database
+        entry. The dictionary has the following structure:
     """
     if idsNames is None:
         idsNames = [i.value for i in imas.IDSName]
@@ -77,9 +76,7 @@ def getIDSSize(dbEntryObject: imas.DBEntry, idsNames=None) -> dict:
     for idsName in track(idsNames, description="[green]Processing..."):
         occurrencesCount = eval(f"imas.{idsName}.getMaxOccurrences()")
         for o in range(occurrencesCount + 1):
-            homogeneousTime = dbEntryObject.partial_get(
-                idsName, "ids_properties/homogeneous_time", occurrence=o
-            )
+            homogeneousTime = dbEntryObject.partial_get(idsName, "ids_properties/homogeneous_time", occurrence=o)
             if homogeneousTime >= 0:
                 field = f"{idsName}/{o}"
                 idsSizeDict[field] = {}
@@ -130,18 +127,19 @@ def getAllIDSGetTime(dbEntryObject: imas.DBEntry):
 
 def getObjectSize(obj: object) -> int:
     objectSize = 0
-    if type(obj) == str:
+
+    if isinstance(obj, str):
         objectSize += len(obj)
-    elif type(obj) == np.ndarray:
+    elif isinstance(obj, np.ndarray):
         objectSize += obj.nbytes
-    elif type(obj) == int:
+    elif isinstance(obj, int):
         objectSize += 4
-    elif type(obj) == float:
+    elif isinstance(obj, float):
         objectSize += 8
-    elif type(obj) == list:
+    elif isinstance(obj, list):
         for objItem in obj:
             objectSize += getObjectSize(objItem)
-    elif type(obj) == dict:
+    elif isinstance(obj, dict):
         for objValue in obj.values():
             objectSize += getObjectSize(objValue)
     else:
@@ -155,20 +153,21 @@ def getIdsTypes():
     This function returns list of strings corresponding to all ids types for each IDSName object in the imas module.
 
     Returns:
-        The function `getIdsTypes()` is returning a list of values of all the `value` attributes of the `IDSName` objects in the `imas` module.
+        The function `getIdsTypes()` is returning a list of values of all the `value` attributes of the `IDSName`
+        objects in the `imas` module.
     """
     return [ids.value for ids in list(imas.IDSName)]
 
 
-def getAvailableIdsAndOccurrences(
-    dbEntryObject: imas.DBEntry, timeMode=None, getComment=False
-):
+def getAvailableIdsAndOccurrences(dbEntryObject: imas.DBEntry, timeMode=None, getComment=False):
     """
     This function returns a list of pairs of available IDS types and their occurrences in a given DBEntry object.
 
     Args:
-        dbEntryObject (imas.DBEntry): An object of the class imas.DBEntry, which represents an open DBEntry in which available IDSs will be looked for.
-        timeMode: The time mode of interest for the IDSs in the given DBEntry. It can be one of the following values:(imas.imasdef.IDS_TIME_MODE_HETEROGENEOUS, IDS_TIME_MODE_HOMOGENEOUS or IDS_TIME_MODE_INDEPENDENT)
+        dbEntryObject (imas.DBEntry): An object of the class imas.DBEntry, which represents an open DBEntry in
+        which available IDSs will be looked for.
+        timeMode: The time mode of interest for the IDSs in the given DBEntry. It can be one of the following
+        values:(imas.imasdef.IDS_TIME_MODE_HETEROGENEOUS, IDS_TIME_MODE_HOMOGENEOUS or IDS_TIME_MODE_INDEPENDENT)
         getComment: Output ids_properties.comment field for each found occurrence
     Returns:
         a list of pairs (idstype:str,occurrence:int) with data in the given DBEntry.
@@ -185,25 +184,17 @@ def getAvailableIdsAndOccurrences(
             homogeneous_time = ""
             comment = ""
             occ_type = ""
-            homogeneous_time = dbEntryObject.partial_get(
-                idstype, "ids_properties/homogeneous_time", occurrence=occ
-            )
-            comment = dbEntryObject.partial_get(
-                idstype, "ids_properties/comment", occurrence=occ
-            )
+            homogeneous_time = dbEntryObject.partial_get(idstype, "ids_properties/homogeneous_time", occurrence=occ)
+            comment = dbEntryObject.partial_get(idstype, "ids_properties/comment", occurrence=occ)
             try:
                 occ_type_text = ""
-                occ_type = dbEntryObject.partial_get(
-                    idstype, "ids_properties/occurrence_type", occurrence=occ
-                )
+                occ_type = dbEntryObject.partial_get(idstype, "ids_properties/occurrence_type", occurrence=occ)
                 if occ_type.index != imas.imasdef.EMPTY_INT:
                     occ_type_text = occ_type_dict[occ_type.index]
                     comment += f" [occurrence type = {occ_type_text}]"
             except Exception as e:
-                pass
-            if homogeneous_time != imas.imasdef.EMPTY_INT and (
-                timeMode is None or timeMode == homogeneous_time
-            ):
+                logger.debug(f"{e}")
+            if homogeneous_time != imas.imasdef.EMPTY_INT and (timeMode is None or timeMode == homogeneous_time):
                 if getComment is True:
                     availableidslist.append((idstype, occ, comment))
                 else:
@@ -213,7 +204,8 @@ def getAvailableIdsAndOccurrences(
 
 def getAvailableIdsAndTimes(dbEntryObject: imas.DBEntry) -> list:
     """
-    The function `getAvailableIdsAndTimes` retrieves available IDS names and corresponding time arrays from a given `dbEntryObject`.
+    The function `getAvailableIdsAndTimes` retrieves available IDS names and corresponding time
+    arrays from a given `dbEntryObject`.
 
     Args:
         dbEntryObject (imas.DBEntry): The `dbEntryObject` parameter is an object of type `imas.DBEntry`.
@@ -240,29 +232,32 @@ def getAvailableIdsAndTimes(dbEntryObject: imas.DBEntry) -> list:
                     timeArray = dbEntryObject.partial_get(_idsName, "time")
                 if homogeneous_time == imas.imasdef.IDS_TIME_MODE_INDEPENDENT:
                     timeArray = [np.NINF]
-            except Exception as exc:
+            except Exception as e:
+                logger.debug(f"{e}")
                 timeArray = []
-                logger.info(
-                    f"ERROR! IDS {idsName} : Reading time array fails due to following problem : {exc}"
-                )
+                logger.info(f"ERROR! IDS {idsName} : Reading time array fails due to following problem : {e}")
             if timeArray is not None and len(timeArray):
                 result.append((idsName, timeArray))
     return result
 
 
-def resampleIndices(
-    dbin: str, dbout: str, idsname: str, start: int = 0, stop: int = None, step: int = 1
-):
+def resampleIndices(dbin: str, dbout: str, idsname: str, start: int = 0, stop: int = None, step: int = 1):
     """
-    The function resampleIndices takes in a database input, database output, and an idsname, and resamples the data based on the specified start, stop, and step values.
+    The function resampleIndices takes in a database input, database output, and an idsname, and resamples the
+    data based on the specified start, stop, and step values.
 
     Args:
-        dbin (str): The parameter "dbin" is a string that represents the input database name. It is the database from which the data will be read.
-        dbout (str): The parameter `dbout` is a string that represents the name of the output database. It is the database where the resampled data will be stored.
+        dbin (str): The parameter "dbin" is a string that represents the input database name. It is the
+        database from which the data will be read.
+        dbout (str): The parameter `dbout` is a string that represents the name of the output database.
+        It is the database where the resampled data will be stored.
         idsname (str): The parameter "idsname" is a string that represents the ids that you want to resample.
         start (int): The start parameter is the index of the first time value to be resampled.
-        stop (int): The `stop` parameter is used to specify the index at which the resampling should stop. If `stop` is not provided, the resampling will continue until the end of the `times` array.
-        step (int): The `step` parameter determines the interval between the indices that are selected from the `times` array. For example, if `step` is set to 2, every second index will be selected. If `step` is set to 3, every third index will be selected, and so. Defaults to 1
+        stop (int): The `stop` parameter is used to specify the index at which the resampling should stop.
+        If `stop` is not provided, the resampling will continue until the end of the `times` array.
+        step (int): The `step` parameter determines the interval between the indices that are selected from
+        the `times` array. For example, if `step` is set to 2, every second index will be selected. If `step`
+        is set to 3, every third index will be selected, and so. Defaults to 1
     """
     times = dbin.partial_get(idsname, "time")
     for timeVal in times[range(start, len(times) if stop is None else stop, step)]:
@@ -284,12 +279,17 @@ def resampleTimes(
     and puts the resampled data into the output database.
 
     Args:
-        dbin (str): The parameter "dbin" is a string that represents the input database name. It is the database from which the data will be read.
-        dbout (str): The parameter `dbout` is a string that represents the name of the output database. It is the database where the resampled data will be stored.
+        dbin (str): The parameter "dbin" is a string that represents the input database name. It is the
+        database from which the data will be read.
+        dbout (str): The parameter `dbout` is a string that represents the name of the output database.
+        It is the database where the resampled data will be stored.
         idsname (str): The parameter "idsname" is a string that represents the ids that you want to resample.
         start (int): The start parameter is the index of the first time value to be resampled.
-        stop (int): The `stop` parameter is used to specify the index at which the resampling should stop. If `stop` is not provided, the resampling will continue until the end of the `times` array.
-        step (int): The `step` parameter determines the interval between the indices that are selected from the `times` array. For example, if `step` is set to 2, every second index will be selected. If `step` is set to 3, every third index will be selected, and so. Defaults to 1
+        stop (int): The `stop` parameter is used to specify the index at which the resampling should stop.
+        If `stop` is not provided, the resampling will continue until the end of the `times` array.
+        step (int): The `step` parameter determines the interval between the indices that are selected from
+        the `times` array. For example, if `step` is set to 2, every second index will be selected. If `step`
+        is set to 3, every third index will be selected, and so. Defaults to 1
     """
     times = dbin.partial_get(idsname, "time")
     if step is None:  # work on indices
@@ -317,18 +317,22 @@ def compareIds(
     output={},
 ):
     """
-    The function compares two ids objects and returns whether they are identical or not, along with a  dictionary of differences.
+    The function compares two ids objects and returns whether they are identical or not, along with a
+    dictionary of differences.
 
     Args:
         X: The first input ids object to compare.
         Y: The second input ids object to compare.
         field: The name of the field being compared in the IDSes.
-        ignore_version: A boolean parameter that determines whether to ignore the "version_put" attribute when comparing the two objects. If set to True, the function will ignore this attribute. Defaults to True
+        ignore_version: A boolean parameter that determines whether to ignore the "version_put" attribute when
+        comparing the two objects. If set to True, the function will ignore this attribute. Defaults to True
         verb: a boolean indicating whether to print log messages during the comparison process. Defaults to True
-        output: A dictionary that stores the output of the function, which includes information about any differences found between the two input objects.
+        output: A dictionary that stores the output of the function, which includes information about any differences
+        found between the two input objects.
 
     Returns:
-        tuple containing a boolean value indicating whether the two input objects are identical, and a dictionary containing information about any differences found during the comparison.
+        tuple containing a boolean value indicating whether the two input objects are identical, and a dictionary
+        containing information about any differences found during the comparison.
     """
 
     identical = True
@@ -397,7 +401,7 @@ def compareIds(
 
         Xo = X.__dict__[key]
         Yo = Y.__dict__[key]
-        if type(Xo) != type(Yo):
+        if not isinstance(Xo, type(Yo)):
             if field + "." + key not in output.keys():
                 output[field + "." + key] = (
                     Xo,
@@ -522,20 +526,26 @@ def compareIds(
     return identical, output
 
 
-def getQuantitiesFromPulses(
-    idspath: str, pulses: tuple, listCount: int = 0, verbose: bool = False
-) -> pd.DataFrame:
+def getQuantitiesFromPulses(idspath: str, pulses: tuple, listCount: int = 0, verbose: bool = False) -> pd.DataFrame:
     """
-    The `getQuantitiesFromPulses` function retrieves values from a specified IDS path for a given set of pulses and returns a DataFrame containing the pulse, run, and corresponding values.
+    The `getQuantitiesFromPulses` function retrieves values from a specified IDS path for a given set of pulses and
+    returns a DataFrame containing the pulse, run, and corresponding values.
 
     Args:
-        idspath (str): The `idspath` parameter is a string that represents the path to the IDS node from which the quantities will be extracted. It is used to specify the location of the data in the IDS
-        pulses (tuple): The `pulses` parameter is a tuple containing information about each pulse. Each element in the tuple is itself a tuple with the following elements: pulse, run, backend, database, user, version, and file path.
-        listCount (int): The `listCount` parameter is an optional parameter that specifies the number of pulses to retrieve values for. If `listCount` is set to 0 (default), values will be retrieved for all pulses in the `pulses` tuple. If `listCount` is set to a positive integer, values will be retrieved for first `listCount` pulses in the `pulses` tuple. Defaults to 0
+        idspath (str): The `idspath` parameter is a string that represents the path to the IDS node from which the
+        quantities will be extracted. It is used to specify the location of the data in the IDS
+        pulses (tuple): The `pulses` parameter is a tuple containing information about each pulse. Each element in
+        the tuple is itself a tuple with the following elements: pulse, run, backend, database, user, version, and
+        file path.
+        listCount (int): The `listCount` parameter is an optional parameter that specifies the number of pulses to
+        retrieve values for. If `listCount` is set to 0 (default), values will be retrieved for all pulses in the
+        `pulses` tuple. If `listCount` is set to a positive integer, values will be retrieved for first `listCount`
+        pulses in the `pulses` tuple. Defaults to 0
         verbose (bool): print debug information
 
     Returns:
-        The function `getQuantitiesFromPulses` returns a pandas DataFrame containing the columns "PULSE", "RUN", and "VALUE".
+        The function `getQuantitiesFromPulses` returns a pandas DataFrame containing the columns "PULSE", "RUN",
+        and "VALUE".
     """
     idsname = idspath.split("/")[0]
     valpath = idspath[1 + len(idsname) :]
@@ -556,6 +566,7 @@ def getQuantitiesFromPulses(
         try:
             values.append(connection.partial_get(idsname, valpath))
         except Exception as e:
+            logger.debug(f"{e}")
             values.append(None)
         connection.close()
 

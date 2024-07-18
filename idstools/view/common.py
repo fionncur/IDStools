@@ -1,6 +1,6 @@
+import logging
 import os
 import sys
-
 import matplotlib
 
 if "DISPLAY" not in os.environ:
@@ -8,6 +8,8 @@ if "DISPLAY" not in os.environ:
 else:
     matplotlib.use("TKagg")
 import matplotlib.pyplot as plt
+
+logger = logging.getLogger("module")
 
 # fsize = 8
 # tsize = 10
@@ -40,15 +42,9 @@ if os.path.exists(mplstyle_filepath):
     plt.style.use(mplstyle_filepath)
 else:
     plt.style.use(os.path.join(current_directory, r"styles/scientific.mplstyle"))
-import logging
-import math
-import weakref
 
-import matplotlib.pyplot as plt
-import numpy
 
 try:
-    import rich
     from rich.console import Console
     from rich.panel import Panel
     from rich.pretty import Pretty, pprint
@@ -112,10 +108,7 @@ class Canvas:
             fig.savefig(fname, dpi=dpi)
             print(f"----> Figure saved to {fname}", file=sys.stderr)
         except Exception as e:
-            print(
-                e,
-                file=sys.stderr,
-            )
+            logger.debug(f"{e}")
 
     def setText(self, x=0.001, y=0.985, text="", ha="left", fontsize=7):
         plt.figtext(
@@ -142,10 +135,12 @@ class Canvas:
 
     def setStyle(self, style="default"):
         """
-        The function `setStyle` in allows you to set different color schemes for plots using Matplotlib based on the specified style parameter. Available styles are vibrant, retro, muted, high-vis, contrast, bright
+        The function `setStyle` in allows you to set different color schemes for plots using Matplotlib based
+        on the specified style parameter. Available styles are vibrant, retro, muted, high-vis, contrast, bright
 
         Args:
-            style: The `setStyle` function allows you to set different color schemes for your plots based on the `style` parameter you provide. Defaults to default
+            style: The `setStyle` function allows you to set different color schemes for your plots based on the
+            `style` parameter you provide. Defaults to default
         """
         if style == "default":
             # Standard SciencePlots color cycle
@@ -228,9 +223,7 @@ class Canvas:
             # from Paul Tot's website: https://personal.sron.nl/~pault/
 
             # Set color cycle
-            matplotlib.rcParams["axes.prop_cycle"] = matplotlib.cycler(
-                "color", ["004488", "DDAA33", "BB5566"]
-            )
+            matplotlib.rcParams["axes.prop_cycle"] = matplotlib.cycler("color", ["004488", "DDAA33", "BB5566"])
 
         if style == "bright":
             # Bright color scheme

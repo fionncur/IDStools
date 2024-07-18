@@ -1,5 +1,8 @@
 from idstools.compute.edge_profiles import EdgeProfilesCompute
 import numpy as np
+import logging
+
+logger = logging.getLogger("module")
 
 
 class EdgeProfilesView:
@@ -7,17 +10,11 @@ class EdgeProfilesView:
         self.edgeProfilesCompute = EdgeProfilesCompute(edgeProfileIds)
 
     @staticmethod
-    def view_plasma_composition_with_species_concentration(
-        ids_object, slice_index=0, print_data=False
-    ):
+    def view_plasma_composition_with_species_concentration(ids_object, slice_index=0, print_data=False):
         """
         Nice display of plasma composition with species concentrations
         """
-        composition_data = (
-            EdgeProfilesCompute.getPlasmaCompositionWithSpeciesConcentration(
-                ids_object, slice_index
-            )
-        )
+        composition_data = EdgeProfilesCompute.getPlasmaCompositionWithSpeciesConcentration(ids_object, slice_index)
         if composition_data != 0 and composition_data != -1:
             edgeProfilesView = EdgeProfilesView()
             edgeProfilesView._print_plasma_composition(composition_data)
@@ -54,14 +51,10 @@ class EdgeProfilesView:
                 disp_z = f"{disp_z} {z : >12}"
                 if species_data["nspec_over_ntot"] < 1.0e-2:
                     nspec_over_ntot = f"{species_data['nspec_over_ntot'] :.2e}"
-                    disp_nspec_over_ntot = (
-                        f"{disp_nspec_over_ntot} {nspec_over_ntot : >12}"
-                    )
+                    disp_nspec_over_ntot = f"{disp_nspec_over_ntot} {nspec_over_ntot : >12}"
                 else:
                     nspec_over_ntot = f"{species_data['nspec_over_ntot'] :.3f}"
-                    disp_nspec_over_ntot = (
-                        f"{disp_nspec_over_ntot} {nspec_over_ntot : >12}"
-                    )
+                    disp_nspec_over_ntot = f"{disp_nspec_over_ntot} {nspec_over_ntot : >12}"
                 if species_data["nspec_over_ne"] < 1.0e-2:
                     nspec_over_ne = f"{species_data['nspec_over_ne'] :.2e}"
                     disp_nspec_over_ne = f"{disp_nspec_over_ne} {nspec_over_ne : >12}"
@@ -70,14 +63,10 @@ class EdgeProfilesView:
                     disp_nspec_over_ne = f"{disp_nspec_over_ne} {nspec_over_ne : >12}"
                 if species_data["nspec_over_nmaj"] < 1.0e-2:
                     nspec_over_nmaj = f"{species_data['nspec_over_nmaj'] :.2e}"
-                    disp_nspec_over_nmaj = (
-                        f"{disp_nspec_over_nmaj} {nspec_over_nmaj : >12}"
-                    )
+                    disp_nspec_over_nmaj = f"{disp_nspec_over_nmaj} {nspec_over_nmaj : >12}"
                 else:
                     nspec_over_nmaj = f"{species_data['nspec_over_nmaj'] :.3f}"
-                    disp_nspec_over_nmaj = (
-                        f"{disp_nspec_over_nmaj} {nspec_over_nmaj : >12}"
-                    )
+                    disp_nspec_over_nmaj = f"{disp_nspec_over_nmaj} {nspec_over_nmaj : >12}"
 
         print(disp_species)
         print(disp_a)
@@ -109,17 +98,21 @@ class EdgeProfilesView:
                 if state_data["label"].strip() != "":
                     label_space = 7
                 print(
-                    f"\t {'state' +str(istate + 1) : <8}{state_data['label']: <{label_space}}z : {state_data['z_average']: <10} n/ni, % :{n_ni : >12}"
+                    f"\t {'state' +str(istate + 1) : <8}{state_data['label']: <{label_space}} z : "
+                    f"{state_data['z_average']: <10} n/ni, % :{n_ni : >12}"
                 )
                 istate += 1
 
-    def viewElectronsDensity(self, ax, timeSlice=0, showSeparatix=False):
+    def viewElectronsDensity(self, ax, timeSlice=0, showSeparatrix=False):
         """
-        The function `viewElectronsDensity` plots the electron density on a rectangular grid and adds a separatrix line.
+        The function `viewElectronsDensity` plots the electron density on a rectangular grid and adds a
+        separatrix line.
 
         Args:
-            ax: The parameter "ax" is an instance of the matplotlib Axes class. It represents the axes on  which the electron density plot will be drawn.
-            timeSlice: The `timeSlice` parameter represents the time slice at which the neutral density will be plotted. It is an optional parameter with a default value of 0. Defaults to 0
+            ax: The parameter "ax" is an instance of the matplotlib Axes class. It represents the axes on
+            which the electron density plot will be drawn.
+            timeSlice: The `timeSlice` parameter represents the time slice at which the neutral density will be
+            plotted. It is an optional parameter with a default value of 0. Defaults to 0
 
         Returns:
             the pcolormesh object 'c'.
@@ -130,16 +123,12 @@ class EdgeProfilesView:
         if ne_edge is not None:
             ax.grid(False)
             c = ax.pcolormesh(x, y, ne_edge, vmin=0, vmax=5e19, shading="auto")
-            if showSeparatix:
-                separatrix = self.edgeProfilesCompute.getSeparatix(timeSlice)
+            core_boundry = self.edgeProfilesCompute.getCoreBoundry(timeSlice)
+            ax.fill(core_boundry[:, 0], core_boundry[:, 1], facecolor="w", edgecolor="r", linewidth=0)
+            if showSeparatrix:
+                separatrix = self.edgeProfilesCompute.getSeparatrix(timeSlice)
                 if separatrix is not None:
-                    ax.fill(
-                        separatrix[:, 0],
-                        separatrix[:, 1],
-                        facecolor="none",
-                        edgecolor="r",
-                        linewidth=2,
-                    )
+                    ax.scatter(separatrix[:, 0], separatrix[:, 1], color="#FF1493", marker="x")
             ax.set_aspect("equal", adjustable="box")
             ax.set_xlabel("R,m")
             ax.set_ylabel("Z,m")
@@ -158,13 +147,15 @@ class EdgeProfilesView:
             )
             return None
 
-    def viewIonDensity(self, ax, timeSlice=0, showSeparatix=False):
+    def viewIonDensity(self, ax, timeSlice=0, showSeparatrix=False):
         """
         The function `viewIonDensity` plots the ion density on a rectangular grid and adds a separatrix line.
 
         Args:
-            ax: The parameter "ax" is an instance of the matplotlib Axes class. It represents the axes on  which the ion density plot will be drawn.
-            timeSlice: The `timeSlice` parameter represents the time slice at which the neutral density will be plotted. It is an optional parameter with a default value of 0. Defaults to 0
+            ax: The parameter "ax" is an instance of the matplotlib Axes class. It represents the axes on
+            which the ion density plot will be drawn.
+            timeSlice: The `timeSlice` parameter represents the time slice at which the neutral density will
+            be plotted. It is an optional parameter with a default value of 0. Defaults to 0
 
         Returns:
             the pcolormesh object 'c'.
@@ -175,16 +166,12 @@ class EdgeProfilesView:
         if ni_edge is not None:
             ax.grid(False)
             c = ax.pcolormesh(x, y, ni_edge, vmin=0, vmax=5e19, shading="auto")
-            if showSeparatix:
-                separatrix = self.edgeProfilesCompute.getSeparatix(timeSlice)
+            core_boundry = self.edgeProfilesCompute.getCoreBoundry(timeSlice)
+            ax.fill(core_boundry[:, 0], core_boundry[:, 1], facecolor="w", edgecolor="r", linewidth=0)
+            if showSeparatrix:
+                separatrix = self.edgeProfilesCompute.getSeparatrix(timeSlice)
                 if separatrix is not None:
-                    ax.fill(
-                        separatrix[:, 0],
-                        separatrix[:, 1],
-                        facecolor="none",
-                        edgecolor="r",
-                        linewidth=2,
-                    )
+                    ax.scatter(separatrix[:, 0], separatrix[:, 1], color="#FF1493", marker="x")
 
             ax.set_aspect("equal", adjustable="box")
             ax.set_xlabel("R,m")
@@ -204,13 +191,16 @@ class EdgeProfilesView:
             )
             return None
 
-    def viewNeutralDensity(self, ax, timeSlice=0, showSeparatix=False):
+    def viewNeutralDensity(self, ax, timeSlice=0, showSeparatrix=False):
         """
-        The function `viewNeutralDensity` plots the neutral density on a rectangular grid and adds a separatrix line.
+        The function `viewNeutralDensity` plots the neutral density on a rectangular grid and adds a
+        separatrix line.
 
         Args:
-            ax: The parameter "ax" is an instance of the matplotlib Axes class. It represents the axes on  which the plot will be drawn.
-            timeSlice: The `timeSlice` parameter represents the time slice at which the neutral density will be plotted. It is an optional parameter with a default value of 0. Defaults to 0
+            ax: The parameter "ax" is an instance of the matplotlib Axes class. It represents the axes
+            on  which the plot will be drawn.
+            timeSlice: The `timeSlice` parameter represents the time slice at which the neutral density
+            will be plotted. It is an optional parameter with a default value of 0. Defaults to 0
 
         Returns:
             the pcolormesh object 'c'.
@@ -222,16 +212,12 @@ class EdgeProfilesView:
         if n_neutral_edge is not None:
             ax.grid(False)
             c = ax.pcolormesh(x, y, n_neutral_edge, vmin=0, vmax=5e19, shading="auto")
-            if showSeparatix:
-                separatrix = self.edgeProfilesCompute.getSeparatix(timeSlice)
+            core_boundry = self.edgeProfilesCompute.getCoreBoundry(timeSlice)
+            ax.fill(core_boundry[:, 0], core_boundry[:, 1], facecolor="w", edgecolor="r", linewidth=0)
+            if showSeparatrix:
+                separatrix = self.edgeProfilesCompute.getSeparatrix(timeSlice)
                 if separatrix is not None:
-                    ax.fill(
-                        separatrix[:, 0],
-                        separatrix[:, 1],
-                        facecolor="none",
-                        edgecolor="r",
-                        linewidth=2,
-                    )
+                    ax.scatter(separatrix[:, 0], separatrix[:, 1], color="#FF1493", marker="x")
             ax.set_aspect("equal", adjustable="box")
             ax.set_xlabel("R,m")
             ax.set_ylabel("Z,m")

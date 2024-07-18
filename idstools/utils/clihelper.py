@@ -11,9 +11,7 @@ def getCoreVersion():
     if "_al_lowlevel" in imas.__dict__:
         _lowlevelVersion = imas.get_al_version()
     if "_ual_lowlevel" in imas.__dict__:
-        rawCoreVersion = (
-            imas._ual_lowlevel.__name__
-        )  # '__name__': 'imas_3_41_0_ual_4_11_10._ual_lowlevel
+        rawCoreVersion = imas._ual_lowlevel.__name__  # '__name__': 'imas_3_41_0_ual_4_11_10._ual_lowlevel
         rawCoreVersion, _ = rawCoreVersion.split(".")
         match = re.search(r"\d+_\d+_\d+$", rawCoreVersion)
         if match:
@@ -188,9 +186,14 @@ def getDatabasePath(imasargs, timeValue=None) -> str:
             publichome = os.getenv("IMAS_HOME", default="")
             if publichome is None:
                 return None
-            databaseAbsolutePath = f"{publichome}/shared/imasdb/{imasargs.database}/{imasargs.version}/{imasargs.run//10000}"
+            databaseAbsolutePath = (
+                f"{publichome}/shared/imasdb/{imasargs.database}/{imasargs.version}/{imasargs.run//10000}"
+            )
         else:
-            databaseAbsolutePath = f'{os.path.expanduser(f"~{imasargs.user}")}/public/imasdb/{str(imasargs.database)}/{imasargs.version}/{imasargs.run//10000}'
+            databaseAbsolutePath = (
+                f'{os.path.expanduser(f"~{imasargs.user}")}/public/imasdb/'
+                f"{str(imasargs.database)}/{imasargs.version}/{imasargs.run//10000}"
+            )
         pulseInfo = f"pulse {imasargs.pulse},{imasargs.run}"
         databaseAbsolutePath = databaseAbsolutePath[:-2]
     timeString = ""

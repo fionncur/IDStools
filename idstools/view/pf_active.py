@@ -1,4 +1,4 @@
-""" 
+"""
 This module provides view functions and classes for pf_active ids data
 
 `refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`_.
@@ -31,7 +31,8 @@ class PFActiveView:
         This function plots and annotates the active PF coils on a existing plot.
 
         Args:
-            ax (plt.axes): `ax` is a parameter of type `plt.axes`, It is used to add patches (such as rectangles) and annotations to the plot.
+            ax (plt.axes): `ax` is a parameter of type `plt.axes`, It is used to add patches (such as rectangles)
+            and annotations to the plot.
 
         Example:
             .. code-block:: python
@@ -53,7 +54,7 @@ class PFActiveView:
                 ax.plot()
                 canvas.show()
 
-            .. thumbnail:: _static/images/PFActiveView_viewActivePfCoils.png
+            .. thumbnail:: /_static/images/PFActiveView_viewActivePfCoils.png
                 :alt: image not found
                 :align: center
         """
@@ -66,9 +67,7 @@ class PFActiveView:
                         elementInfo["horizontalHeight"],
                         elementInfo["cec"],
                     )
-                    rectangle = Rectangle(
-                        cec, cew, ceh, edgecolor="#fd7e14", facecolor="#fd7e14", alpha=0.5
-                    )
+                    rectangle = Rectangle(cec, cew, ceh, edgecolor="#fd7e14", facecolor="#fd7e14", alpha=0.5)
 
                     ax.add_patch(rectangle)
                     rx, ry = rectangle.get_xy()
