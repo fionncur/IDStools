@@ -128,10 +128,11 @@ class EdgeProfilesView:
             if showSeparatrix:
                 separatrix = self.edgeProfilesCompute.getSeparatrix(timeSlice)
                 if separatrix is not None:
-                    ax.plot(
+                    ax.scatter(
                         separatrix[:, 0],
                         separatrix[:, 1],
                         color="#FF1493",
+                        marker='x'
                     )
             ax.set_aspect("equal", adjustable="box")
             ax.set_xlabel("R,m")
@@ -175,10 +176,11 @@ class EdgeProfilesView:
             if showSeparatrix:
                 separatrix = self.edgeProfilesCompute.getSeparatrix(timeSlice)
                 if separatrix is not None:
-                    ax.plot(
+                    ax.scatter(
                         separatrix[:, 0],
                         separatrix[:, 1],
                         color="#FF1493",
+                        marker='x'
                     )
 
             ax.set_aspect("equal", adjustable="box")
@@ -225,10 +227,11 @@ class EdgeProfilesView:
             if showSeparatrix:
                 separatrix = self.edgeProfilesCompute.getSeparatrix(timeSlice)
                 if separatrix is not None:
-                    ax.plot(
+                    ax.scatter(
                         separatrix[:, 0],
                         separatrix[:, 1],
                         color="#FF1493",
+                        marker='x'
                     )
             ax.set_aspect("equal", adjustable="box")
             ax.set_xlabel("R,m")
