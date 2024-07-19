@@ -79,6 +79,7 @@ pre-commit hooks are used in the repository, It just need to be configured
 Ensure pre-commit is aready installled 
 
 .. code-block:: bash
+
     $ pip install pre-commit
     $ pre-commit install
     pre-commit installed at .git/hooks/pre-commit

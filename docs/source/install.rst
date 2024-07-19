@@ -121,3 +121,16 @@ Configure git to ignore formatting related commits
 .. code-block:: bash
 
    $ git config blame.ignoreRevsFile .git-blame-ignore-revs
+
+pre-commit hooks are used in the repository, It just need to be configured
+Ensure pre-commit is aready installled 
+
+.. code-block:: bash
+
+   $ pip install pre-commit
+   $ pre-commit install
+   pre-commit installed at .git/hooks/pre-commit
+
+More information: 
+https://black.readthedocs.io/en/stable/integrations/source_version_control.html
+https://pre-commit.com/#install
