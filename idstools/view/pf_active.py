@@ -67,7 +67,9 @@ class PFActiveView:
                         elementInfo["horizontalHeight"],
                         elementInfo["cec"],
                     )
-                    rectangle = Rectangle(cec, cew, ceh, edgecolor="#fd7e14", facecolor="#fd7e14")
+                    rectangle = Rectangle(
+                        cec, cew, ceh, edgecolor="#fd7e14", facecolor="#fd7e14"
+                    )
 
                     ax.add_patch(rectangle)
                     rx, ry = rectangle.get_xy()
@@ -86,6 +88,5 @@ class PFActiveView:
                             cy,
                             name,
                             fontsize="x-small",
-                            rotation=90,
                         )
             ax.set_aspect("equal", adjustable="box")

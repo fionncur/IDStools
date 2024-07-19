@@ -81,10 +81,11 @@ Ensure pre-commit is aready installled
 .. code-block:: bash
     $ pip install pre-commit
     $ pre-commit install
+    pre-commit installed at .git/hooks/pre-commit
 
-More information: https://black.readthedocs.io/en/stable/integrations/source_version_control.html
-
-
+More information: 
+https://black.readthedocs.io/en/stable/integrations/source_version_control.html
+https://pre-commit.com/#install
 
 #### Type checking
 It is very important to type check variables to avoid last minute surprises. To check your code for static type checking you can use mypy.
