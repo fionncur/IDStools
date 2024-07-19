@@ -105,3 +105,32 @@ To build the *IDStools* documentation, execute:
    $ pip install .[docs]
    $ python setup.py builddocs
    $ python setup.py builddocs --format man
+
+
+Code formatting is done with the black
+
+.. code-block:: bash
+
+   black -l 120 idstools
+   
+Append commits related to the formatting of the code `.git-blame-ignore-revs` file which is 
+placed in the root of the repository
+
+Configure git to ignore formatting related commits
+
+.. code-block:: bash
+
+   $ git config blame.ignoreRevsFile .git-blame-ignore-revs
+
+pre-commit hooks are used in the repository, It just need to be configured
+Ensure pre-commit is aready installled 
+
+.. code-block:: bash
+
+   $ pip install pre-commit
+   $ pre-commit install
+   pre-commit installed at .git/hooks/pre-commit
+
+More information: 
+https://black.readthedocs.io/en/stable/integrations/source_version_control.html
+https://pre-commit.com/#install

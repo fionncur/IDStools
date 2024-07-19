@@ -48,8 +48,8 @@ class PFActiveView:
                 canvas = Canvas(1, 1) # create canvas
                 ax = canvas.add_axes(title="", xlabel="", row=0, col=0)
 
-                viewObj = PfActiveView(idsObj)
-                viewObj.viewActivePfCoils(ax) # plot contour on the canvas axes
+                viewObj = PFActiveView(idsObj)
+                viewObj.viewActivePfCoils(ax, showLabels=True) # plot contour on the canvas axes
 
                 ax.plot()
                 canvas.show()
@@ -86,6 +86,5 @@ class PFActiveView:
                             cy,
                             name,
                             fontsize="x-small",
-                            rotation=90,
                         )
             ax.set_aspect("equal", adjustable="box")
