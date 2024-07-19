@@ -105,3 +105,19 @@ To build the *IDStools* documentation, execute:
    $ pip install .[docs]
    $ python setup.py builddocs
    $ python setup.py builddocs --format man
+
+
+Code formatting is done with the black
+
+.. code-block:: bash
+
+   black -l 120 idstools
+   
+Append commits related to the formatting of the code `.git-blame-ignore-revs` file which is 
+placed in the root of the repository
+
+Configure git to ignore formatting related commits
+
+.. code-block:: bash
+
+   $ git config blame.ignoreRevsFile .git-blame-ignore-revs

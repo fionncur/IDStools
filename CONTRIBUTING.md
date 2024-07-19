@@ -59,6 +59,33 @@ Define clear and meaningful variable names `bTotal`, `profile2dIndex`
 #### Formatting
 Use black formatter https://black.readthedocs.io/en/stable/
 
+Code formatting is done with the black
+
+.. code-block:: bash
+
+   black -l 120 idstools
+   
+Append commits related to the formatting of the code `.git-blame-ignore-revs` file which is 
+placed in the root of the repository
+
+Configure git to ignore formatting related commits
+
+.. code-block:: bash
+
+   $ git config blame.ignoreRevsFile .git-blame-ignore-revs
+
+
+pre-commit hooks are used in the repository, It just need to be configured
+Ensure pre-commit is aready installled 
+
+.. code-block:: bash
+    $ pip install pre-commit
+    $ pre-commit install
+
+More information: https://black.readthedocs.io/en/stable/integrations/source_version_control.html
+
+
+
 #### Type checking
 It is very important to type check variables to avoid last minute surprises. To check your code for static type checking you can use mypy.
 https://mypy.readthedocs.io/en/stable/getting_started.html
