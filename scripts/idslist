@@ -17,7 +17,7 @@ from idstools.utils.idshelper import (
 )
 from idstools.utils.idslogger import setupLogger
 
-logger = setupLogger("module")
+logger = setup_logger("module")
 np.set_printoptions(threshold=1, precision=2, suppress=True)
 
 description = """
@@ -27,11 +27,11 @@ yaml option is provided which is used by other scripts to provide list of idses 
 
 [``ids_content(yaml)``, ``listidss`` (with time slices), ``idsoccurrences(occ)`` merged into one script]
 """
-parser = argparse.ArgumentParser(
+parser = argparse.argument_parser(
     prog="idslist",
-    formatter_class=RichHelpFormatter,
-    description=Markdown(description, style="argparse.text"),
-    parents=[dbentryParser],
+    formatter_class=rich_help_formatter,
+    description=markdown(description, style="argparse.text"),
+    parents=[dbentry_parser],
 )
 parser.add_argument(
     "-y",
@@ -55,7 +55,7 @@ parser.add_argument(
 
 args = parser.parse_args()
 
-connection = DBMaster.getConnection(args)
+connection = d_b_master.get_connection(args)
 if connection is None:
     print("----> Aborted.")
     exit(1)
@@ -65,7 +65,7 @@ if args.yaml is True:
         print(
             "(-f fullarray) option is provided, can not show full array for yaml output"
         )
-    for idsname, oc in getAvailableIdsAndOccurrences(connection):
+    for idsname, oc in get_available_ids_and_occurrences(connection):
         if args.ids:
             if idsname != args.ids:
                 continue
@@ -112,8 +112,8 @@ elif args.comment is True:
             "(-f fullarray) option is provided, can not show full array for comment output"
         )
 
-    for idsname, oc, comment in getAvailableIdsAndOccurrences(
-        connection, getComment=True
+    for idsname, oc, comment in get_available_ids_and_occurrences(
+        connection, get_comment=True
     ):
         # If user wants to check specific ids type
         if args.ids:
@@ -127,19 +127,19 @@ elif args.comment is True:
 else:
     question_string = "?"
 
-    availableIdsAndTimes = getAvailableIdsAndTimes(connection)
+    available_ids_and_times = get_available_ids_and_times(connection)
     question_string = "?"
-    for idsName, timeArray in availableIdsAndTimes:
+    for ids_name, time_array in available_ids_and_times:
         if args.ids:
-            if idsName != args.ids:
+            if ids_name != args.ids:
                 continue
-        if len(timeArray) == 1 and np.isnan(timeArray[0]):
-            print(f"{idsName:15}:  {question_string:5} slices: heterogeneous IDS ")
-        elif len(timeArray) == 1 and timeArray[0] == np.NINF:
-            print(f"{idsName:15}:  {question_string:5} slices: time independent IDS ")
+        if len(time_array) == 1 and np.isnan(time_array[0]):
+            print(f"{ids_name:15}:  {question_string:5} slices: heterogeneous IDS ")
+        elif len(time_array) == 1 and time_array[0] == np.n_i_n_f:
+            print(f"{ids_name:15}:  {question_string:5} slices: time independent IDS ")
         else:
             if args.fullarray is True:
                 np.set_printoptions(threshold=sys.maxsize)
-            print(f"{idsName:15}: {str(len(timeArray)):5} slices: {timeArray} ")
+            print(f"{ids_name:15}: {str(len(time_array)):5} slices: {time_array} ")
     connection.close()
     exit(0)

@@ -23,15 +23,15 @@ from idstools.utils.idslogger import setupLogger
 from idstools.view.common import Canvas
 from idstools.view.core_profiles import CoreProfilesView
 
-logger = setupLogger("module", stdout_level=logging.INFO)
+logger = setup_logger("module", stdout_level=logging.i_n_f_o)
 
 # Management of input arguments
-parser = argparse.ArgumentParser(
+parser = argparse.argument_parser(
     description="Display the plasma pressure properties from the core_profiles IDS [previsouly known as pressureplot]",
     epilog="""
 """,
-    formatter_class=RichHelpFormatter,
-    parents=[dbentryParser],
+    formatter_class=rich_help_formatter,
+    parents=[dbentry_parser],
 )
 
 parser.add_argument("-t", "--time", type=float, help="Time", default=-99)
@@ -47,16 +47,16 @@ parser.add_argument(
 )
 args = parser.parse_args()
 
-connection = DBMaster.getConnection(args)
+connection = d_b_master.get_connection(args)
 if connection is None:
     logger.critical("----> Aborted.")
     exit(1)
 
 
 try:
-    idsCoreProfiles = imas.core_profiles()
-    idsCoreProfiles.time = connection.partial_get("core_profiles", "time")
-    if idsCoreProfiles.time is None:
+    ids_core_profiles = imas.core_profiles()
+    ids_core_profiles.time = connection.partial_get("core_profiles", "time")
+    if ids_core_profiles.time is None:
         logger.critical("No core_profiles IDS in the data-entry --> Abort.")
         exit()
 except Exception as e:
@@ -64,37 +64,37 @@ except Exception as e:
     logger.critical("----> Aborted.")
     exit(1)
 
-timeArray = idsCoreProfiles.time
-timeIndex, timeValue = getNearestTime(timeArray, args.time)
+time_array = ids_core_profiles.time
+time_index, time_value = get_nearest_time(time_array, args.time)
 
-idsCoreProfiles.profiles_1d.resize(1)  # Read 1D-profiles for this time slice
-idsCoreProfiles.profiles_1d[0] = connection.partial_get(
-    "core_profiles", f"profiles_1d({timeIndex})"
+ids_core_profiles.profiles_1d.resize(1)  # Read 1D-profiles for this time slice
+ids_core_profiles.profiles_1d[0] = connection.partial_get(
+    "core_profiles", f"profiles_1d({time_index})"
 )
-title = "Profiles displayed for t = " + "%.1f" % timeValue + " s"
-canvas = Canvas(3, 1)
+title = "Profiles displayed for t = " + "%.1f" % time_value + " s"
+canvas = canvas(3, 1)
 canvas.fig.suptitle(title, size=12)
 
 ax1 = canvas.add_axes(title="", xlabel="", row=0, col=0, colspan=1)
 ax2 = canvas.add_axes(title="", xlabel="", row=1, col=0, colspan=1)
 ax3 = canvas.add_axes(title="", xlabel="", row=2, col=0, colspan=1)
 
-coreprofilesView = CoreProfilesView(idsCoreProfiles)
+coreprofiles_view = core_profiles_view(ids_core_profiles)
 
-coreprofilesView.plotTotalPressureProperties(ax1)
-coreprofilesView.plotIonPressureProperties(ax2)
-coreprofilesView.plotElectronPressureProperties(ax3)
+coreprofiles_view.plot_total_pressure_properties(ax1)
+coreprofiles_view.plot_ion_pressure_properties(ax2)
+coreprofiles_view.plot_electron_pressure_properties(ax3)
 
-canvas.setText(text=f"{getDatabasePath(args, timeValue=timeValue)}")
+canvas.set_text(text=f"{get_database_path(args, time_value=time_value)}")
 
 canvas.fig.subplots_adjust(
     top=0.916, bottom=0.09, left=0.044, right=0.953, hspace=0.287, wspace=0.2
 )
 canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
-canvas.fig.suptitle(getTitle(args, "Pressure", timeValue), size=12)
+canvas.fig.suptitle(get_title(args, "Pressure", time_value), size=12)
 
 if args.save:
-    fname = getFileName(args, os.path.basename(__file__) + "_Pressure", timeValue)
+    fname = get_file_name(args, os.path.basename(__file__) + "_Pressure", time_value)
     if args.directory:
         if not os.path.exists(args.directory):
             os.makedirs(args.directory)

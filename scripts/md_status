@@ -6,9 +6,9 @@ from rich_argparse import RawDescriptionRichHelpFormatter
 from idstools.machinedescription import MachineDescription
 
 # Management of input arguments
-parser = argparse.ArgumentParser(
+parser = argparse.argument_parser(
     description="""---- Show status and potential parent and children for a given simulation stored in ITER machine description database folder\n\nImportant: The legacy md_status tool is deprecated and will be removed in a future versions. It will remain available until simdb is fully adopted.more about simdb : https://simdb.iter.org/dashboard/""",
-    formatter_class=RawDescriptionRichHelpFormatter
+    formatter_class=raw_description_rich_help_formatter
 )
 parser.add_argument(
     "-f",
@@ -32,41 +32,41 @@ run = args["run"]
 
 # FOLDER
 if args["folder"] != None:
-    machineDescriptionFolder = args["folder"]
+    machine_description_folder = args["folder"]
 else:
-    machineDescriptionFolder = "/work/imas/shared/imasdb/ITER_MD/3"
+    machine_description_folder = "/work/imas/shared/imasdb/ITER_MD/3"
 
-mdObject = MachineDescription(machineDescriptionFolder, connectionArgs=None)
+md_object = machine_description(machine_description_folder, connection_args=None)
 
-if not mdObject.checkIfExist(shot, run):
+if not md_object.check_if_exist(shot, run):
     print(f"Data entry {shot}/{run} does not exist")
     exit()
 
 
-family = mdObject.getFamily(shot, run)
+family = md_object.get_family(shot, run)
 
 print("-----------------------------------------------------------------")
 print(f"  {'DATASET':<10}\t{'STATUS':<10}\tREASON WHY IT REPLACES PREVIOUS")
 print("-----------------------------------------------------------------")
 for iparent in range(len(family["parents"]["pulse"])):
-    shotInfo = family["parents"]["pulse"][iparent]
-    runInfo = family["parents"]["run"][iparent]
+    shot_info = family["parents"]["pulse"][iparent]
+    run_info = family["parents"]["run"][iparent]
     status = family["parents"]["status"][iparent]
     reason_for_replacement = family["parents"]["reason_for_replacement"][iparent]
-    shotLen = len(family["parents"]["pulse"][iparent])
-    runLen = len(family["parents"]["run"][iparent])
-    print(f"  {shotInfo:<6} {runInfo:<4}\t{status:<10}\t{reason_for_replacement}")
+    shot_len = len(family["parents"]["pulse"][iparent])
+    run_len = len(family["parents"]["run"][iparent])
+    print(f"  {shot_info:<6} {run_info:<4}\t{status:<10}\t{reason_for_replacement}")
 
-mdstatus = mdObject.getStatus(shot, run)
-mdreason_for_replacement = mdObject.getReasonForReplacement(shot, run)
+mdstatus = md_object.get_status(shot, run)
+mdreason_for_replacement = md_object.get_reason_for_replacement(shot, run)
 print(f"* {shot:<6} {run:<4}\t{mdstatus:<10}\t{mdreason_for_replacement}")
 
 for ichild in range(len(family["children"]["pulse"])):
-    shotInfo = family["children"]["pulse"][ichild]
-    runInfo = family["children"]["run"][ichild]
+    shot_info = family["children"]["pulse"][ichild]
+    run_info = family["children"]["run"][ichild]
     status = family["children"]["status"][ichild]
     reason_for_replacement = family["children"]["reason_for_replacement"][ichild]
-    shotLen = len(family["children"]["pulse"][ichild])
-    runLen = len(family["children"]["run"][ichild])
-    print(f"  {shotInfo:<6} {runInfo:<4}\t{status:<10}\t{reason_for_replacement}")
+    shot_len = len(family["children"]["pulse"][ichild])
+    run_len = len(family["children"]["run"][ichild])
+    print(f"  {shot_info:<6} {run_info:<4}\t{status:<10}\t{reason_for_replacement}")
 print("-----------------------------------------------------------------")

@@ -9,29 +9,29 @@ from idstools.view.common import BasePlot
 logger = logging.getLogger(f"module.{__name__}")
 
 
-class DistributionSourcesView(BasePlot):
+class distribution_sources_view(base_plot):
     def __init__(self, ids):
-        self.distributionSourcesCompute = DistributionSourcesCompute(ids)
+        self.distribution_sources_compute = distribution_sources_compute(ids)
         self.ids = ids
 
-    def viewNeutrons(self, ax: plt.axes):
-        rhoTorNorm = self.distributionSourcesCompute.getRhoTorNorm()
-        nrho = len(rhoTorNorm)
-        if rhoTorNorm is not None and nrho == 0:
+    def view_neutrons(self, ax: plt.axes):
+        rho_tor_norm = self.distribution_sources_compute.get_rho_tor_norm()
+        nrho = len(rho_tor_norm)
+        if rho_tor_norm is not None and nrho == 0:
             logger.critical("distribution_sources.source[0].profiles_1d[0].grid.rho_tor_norm) is empty")
             return
 
-        sources = self.distributionSourcesCompute.getSourceInfo()
+        sources = self.distribution_sources_compute.get_source_info()
         if len(sources) > 32:
             sources = dict(itertools.islice(sources.items(), 32))
         for key, source in sources.items():
-            ax.plot(rhoTorNorm, source["particles"], label=source["label"])
+            ax.plot(rho_tor_norm, source["particles"], label=source["label"])
             logger.info(
                 f' {source["label"]}; P = ' + "%.2f" % (source["powerInKW"]) + " kW",
             )
 
         # Set Plot properties
-        fontArgs = {
+        font_args = {
             "fontfamily": "serif",
             "color": "darkred",
             "fontweight": "normal",
@@ -41,9 +41,9 @@ class DistributionSourcesView(BasePlot):
             which="both",
             labelsize=12,
         )
-        ax.set_xlim(rhoTorNorm[0], rhoTorNorm[nrho - 1])
-        ax.set_xlabel(r"$\rho/\rho_0$", fontArgs, labelpad=1)
-        ax.set_ylabel(r"Neutron rate ($s^{-1}.m{^{-3}}$)", fontArgs, labelpad=0)
+        ax.set_xlim(rho_tor_norm[0], rho_tor_norm[nrho - 1])
+        ax.set_xlabel(r"$\rho/\rho_0$", font_args, labelpad=1)
+        ax.set_ylabel(r"Neutron rate ($s^{-1}.m{^{-3}}$)", font_args, labelpad=0)
 
         # set legend
         # legx_pos = 1.35
@@ -56,10 +56,10 @@ class DistributionSourcesView(BasePlot):
         for label in legend.get_lines():
             label.set_linewidth(1.5)
 
-    def viewTime(self, ax: plt.axes, time: float):
-        axTime = ax.twiny()
+    def view_time(self, ax: plt.axes, time: float):
+        ax_time = ax.twiny()
         ymin, ymax = ax.get_ylim()
-        axTime.plot(
+        ax_time.plot(
             [time, time],
             [ymin, ymax],
             color="gray",
@@ -67,7 +67,7 @@ class DistributionSourcesView(BasePlot):
             linewidth=1,
             label=r"$t_{slice}$",
         )
-        axTime.set_ylim(ymin, ymax)
+        ax_time.set_ylim(ymin, ymax)
 
-    def viewPulseInfo(self, ax: plt.axes, title: str, hostdir: str, shot: int, run: int, t: float):
+    def view_pulse_info(self, ax: plt.axes, title: str, hostdir: str, shot: int, run: int, t: float):
         self.database_info(ax, title, hostdir, shot, run, t)

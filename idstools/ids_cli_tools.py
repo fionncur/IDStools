@@ -37,7 +37,7 @@ def read_shot():
     if len(args) == 0:
         raise SystemExit("No shot parameters given")
 
-    pars.update(parseShotDescription(args[0]))
+    pars.update(parse_shot_description(args[0]))
 
     return pars, args[1:]
 
@@ -87,10 +87,10 @@ def read_shot_ids_list():
     return pars
 
 
-def parseShotDescription(shotDesc):
+def parse_shot_description(shot_desc):
     pars = {}
     try:
-        parts = shotDesc.split(",")
+        parts = shot_desc.split(",")
         if len(parts) >= 2:
             pars["shot"] = int(parts[0])
             pars["run"] = int(parts[1])
@@ -98,13 +98,13 @@ def parseShotDescription(shotDesc):
             pars["time"] = float(parts[2])
     except Exception as e:
         logger.debug(f"{e}")
-        raise SystemExit("Invalid shot description: " + shotDesc)
+        raise SystemExit("Invalid shot description: " + shot_desc)
 
     return pars
 
 
 def setup_parser():
-    p = optparse.OptionParser()
+    p = optparse.option_parser()
     p.add_option("-u", "--user", dest="user", default=None)
     p.add_option(
         "-t",
@@ -126,10 +126,10 @@ def parse_cli(p):
 
     if (
         (opts.user is not None) | (opts.tokamak is not None) | (opts.database is not None) | (opts.version is not None)
-    ) & opts.useHDF5:
+    ) & opts.use_h_d_f5:
         raise SystemExit("HDF5 access method not allowed when specifying user, tokamak or data version.")
 
-    pars = setDefaultParameters()
+    pars = set_default_parameters()
     if opts.user is not None:
         pars["user"] = opts.user
     if opts.tokamak is not None:
@@ -138,17 +138,17 @@ def parse_cli(p):
         pars["databasename"] = opts.database
     if opts.version is not None:
         pars["dataversion"] = opts.version
-    pars["hdf5"] = opts.useHDF5
+    pars["hdf5"] = opts.use_h_d_f5
     pars["debug"] = opts.debug
 
     return pars, opts, args
 
 
-def setDefaultParameters():
+def set_default_parameters():
     default = {}
     default["user"] = os.getenv("USER")
     default["tokamakname"] = "iter"
-    data_version = DBMaster.getDDVersion()
+    data_version = d_b_master.get_d_d_version()
     default["dataversion"] = data_version.split(".")[0]
     default["hdf5"] = False
     default["debug"] = False

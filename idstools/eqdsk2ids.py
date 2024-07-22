@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 # ----------------------------------------------------------------------
 
 
-class GEQDSK:
+class g_e_q_d_s_k:
     """
     GEQDSK module for IMAS
 
@@ -63,7 +63,7 @@ class GEQDSK:
 
         # 3. Confer COCOS
         if cocos_in:
-            self.cocos = COCOS(
+            self.cocos = c_o_c_o_s(
                 index={
                     "COCOS": cocos_in,
                     "ipsign": np.sign(self.data["CURRENT"]),
@@ -80,8 +80,8 @@ class GEQDSK:
 
         # 4. Compute transformation coeff.
         self.coef = self.cocos.values_coefficients(
-            self.cocos.COCOS,
-            IDS_COCOS,
+            self.cocos.c_o_c_o_s,
+            i_d_s__c_o_c_o_s,
             self.data["CURRENT"],
             self.data["BCENTR"],
             ipsign_out,
@@ -118,9 +118,9 @@ class GEQDSK:
         except OSError:
             raise IOError(f"cannot open/read file: {fpath}")
 
-        fmt00 = FortranRecordReader("6a8,3i4")
-        fmt20 = FortranRecordReader("5e16.9")
-        fmt22 = FortranRecordReader("2i5")
+        fmt00 = fortran_record_reader("6a8,3i4")
+        fmt20 = fortran_record_reader("5e16.9")
+        fmt22 = fortran_record_reader("2i5")
 
         data = {}
 
@@ -259,14 +259,14 @@ class GEQDSK:
         sigma_b0 = np.sign(g["BCENTR"])
 
         # PSIRZ divided by 2*pi [1], Table 1(a) [2]
-        exp_Bp = 0
+        exp__bp = 0
 
         # Eq.(22) [2]
         sign_psi_edge_axis = np.sign(g["SIBRY"] - g["SIMAG"])
-        sigma_Bp = int(sign_psi_edge_axis * sigma_ip)
+        sigma__bp = int(sign_psi_edge_axis * sigma_ip)
 
         # Right-handed cylindrical coordinate system [1], Table 1(a) [2]
-        sigma_RphiZ = int(+1)
+        sigma__rphi_z = int(+1)
 
         # Eq.(22), Table 1(b) [2]
         x = np.sign(median(g["QPSI"]))
@@ -292,9 +292,9 @@ class GEQDSK:
         sign_pprime_pos = int(sign_pprime * sigma_ip)
 
         values = {
-            "exp_Bp": exp_Bp,
-            "sigma_Bp": sigma_Bp,
-            "sigma_RphiZ": sigma_RphiZ,
+            "exp_Bp": exp__bp,
+            "sigma_Bp": sigma__bp,
+            "sigma_RphiZ": sigma__rphi_z,
             "sigma_rhothetaphi": sigma_rhothetaphi,
             "sign_q_pos": sign_q_pos,
             "sign_pprime_pos": sign_pprime_pos,
@@ -302,13 +302,13 @@ class GEQDSK:
             "b0sign": sigma_b0,
         }
 
-        return COCOS(values=values)
+        return c_o_c_o_s(values=values)
 
 
 # ----------------------------------------------------------------------
 
 
-def map_GEQDSK_to_IDS(geqdsk, eq):
+def map__g_e_q_d_s_k_to__i_d_s(geqdsk, eq):
     """
     Convert GEQDSK file into IDS/equilibrium
 
@@ -350,7 +350,7 @@ def map_GEQDSK_to_IDS(geqdsk, eq):
     coef = geqdsk.coef
 
     # IDS_COCOS
-    cocos = COCOS(index={"COCOS": IDS_COCOS, "ipsign": +1, "b0sign": +1})
+    cocos = c_o_c_o_s(index={"COCOS": i_d_s__c_o_c_o_s, "ipsign": +1, "b0sign": +1})
 
     # IDS info.
     common_properties(eq)
@@ -424,7 +424,7 @@ def map_GEQDSK_to_IDS(geqdsk, eq):
             eq.time_slice[0].profiles_2d[0].r[i, j] = eq.time_slice[0].profiles_2d[0].grid.dim1[i]
             eq.time_slice[0].profiles_2d[0].z[i, j] = eq.time_slice[0].profiles_2d[0].grid.dim2[j]
     # Eq. (19)
-    fact = cocos.sigma_RphiZ * cocos.sigma_Bp / (2.0 * np.pi) ** cocos.exp_Bp
+    fact = cocos.sigma__rphi_z * cocos.sigma__bp / (2.0 * np.pi) ** cocos.exp__bp
     dim1 = eq.time_slice[0].profiles_2d[0].grid.dim1
     dim2 = eq.time_slice[0].profiles_2d[0].grid.dim2
     for i in range(nw):
@@ -465,20 +465,20 @@ def geqdsk2ids(fpath, ipsign=0, b0sign=0, cocos_in=None):
 
     # Read GEQDSK file
     logger.info("loading GEQDSK file ...")
-    geqdsk = GEQDSK(fpath, ipsign, b0sign, cocos_in)
+    geqdsk = g_e_q_d_s_k(fpath, ipsign, b0sign, cocos_in)
 
     # Map GEQDSK to IDS/equilibrium
     logger.info("mapping GEQDSK to IDS/equilibrium ...")
     eq = imas.equilibrium()
-    map_GEQDSK_to_IDS(geqdsk, eq)
+    map__g_e_q_d_s_k_to__i_d_s(geqdsk, eq)
 
     # COCOS Check
-    cocos = compute_COCOS(eq)
+    cocos = compute__c_o_c_o_s(eq)
     logger.info("IDS COCOS: \n%s", pformat(cocos, indent=2))
 
     # Check if COCOS is equal to IDS_COCOS
-    if cocos["COCOS"] != IDS_COCOS:
-        logger.warning("COCOS Target= {}, Output= {}, Input= {}".format(IDS_COCOS, cocos["COCOS"], geqdsk.cocos.COCOS))
+    if cocos["COCOS"] != i_d_s__c_o_c_o_s:
+        logger.warning("COCOS Target= {}, Output= {}, Input= {}".format(i_d_s__c_o_c_o_s, cocos["COCOS"], geqdsk.cocos.c_o_c_o_s))
         raise SystemExit("Input COCOS is inconsistent between GEQDSK file and COCOS with the option '--cocos_in'.")
     return eq
 

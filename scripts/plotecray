@@ -29,7 +29,7 @@ from idstools.view.wall import WallView
 from idstools.view.waves import WavesView
 
 
-class MdAction(argparse.Action):
+class md_action(argparse.action):
     def __call__(self, parser, namespace, values, option_string=None):
         if len(values) == 0:
             setattr(namespace, self.dest, True)
@@ -37,16 +37,16 @@ class MdAction(argparse.Action):
             setattr(namespace, self.dest, values)
 
 
-parser = argparse.ArgumentParser(
+parser = argparse.argument_parser(
     description="---- Display EC wave ray-tracing results [Previously known as ecray]",
-    parents=[dbentryParser],
-    formatter_class=RichHelpFormatter,
+    parents=[dbentry_parser],
+    formatter_class=rich_help_formatter,
 )
 parser.add_argument(
     "-md",
     "--md",
     nargs="*",
-    action=MdAction,
+    action=md_action,
     default=[],
     help="""Provide machine descriptions that you need to plot\n
 with ids names for example wall pf_active \n
@@ -71,7 +71,7 @@ parser.add_argument(
 )
 args = parser.parse_args()
 
-logger = setupLogger("module", stdout_level=logging.INFO)
+logger = setup_logger("module", stdout_level=logging.i_n_f_o)
 
 # Font/Colour definition
 fontsize = 9
@@ -81,7 +81,7 @@ shotstyle = ["-", "--", "-.", ":", ".", ","]
 colorcounter = 0
 lpad = -1
 
-canvas = Canvas(2, 3)
+canvas = canvas(2, 3)
 ax_polview = canvas.add_axes(title="", xlabel="", row=0, col=0, rowspan=2)
 ax_topview = canvas.add_axes(title="", xlabel="", row=0, col=1, rowspan=2)
 ax_powview = canvas.add_axes(title="", xlabel="", row=0, col=2)
@@ -96,130 +96,130 @@ style = shotstyle[colorcounter % len(shotcolors)]
 colorcounter += 1
 
 
-conn = DBMaster.getConnection(args)
+conn = d_b_master.get_connection(args)
 if conn is None:
     logger.critical("----> Aborted.")
     exit(1)
-idsWaves = conn.get("waves")
+ids_waves = conn.get("waves")
 # Search for adequate time slice for display
-timeArray = idsWaves.time
-ntime = len(idsWaves.time)
-timeIndex, timeValue = getNearestTime(timeArray, args.time)
+time_array = ids_waves.time
+ntime = len(ids_waves.time)
+time_index, time_value = get_nearest_time(time_array, args.time)
 # Reading in waves ids and equilibrium ids
-idsWaves = conn.get_slice("waves", timeValue, 1)
-idsCoreProfiles = conn.get_slice("core_profiles", timeValue, 1)
-idsEquilibrium = conn.get_slice("equilibrium", timeValue, 1)
+ids_waves = conn.get_slice("waves", time_value, 1)
+ids_core_profiles = conn.get_slice("core_profiles", time_value, 1)
+ids_equilibrium = conn.get_slice("equilibrium", time_value, 1)
 
-if len(idsWaves.code.name) > 0:
-    logger.info(f"Code name = {idsWaves.code.name.upper()}")
-    labelCode = idsWaves.code.name.upper()
+if len(ids_waves.code.name) > 0:
+    logger.info(f"Code name = {ids_waves.code.name.upper()}")
+    label_code = ids_waves.code.name.upper()
 else:
-    labelCode = getTitle(args)
-ecstraView = EcStrayView(
-    equilibriumIds=idsEquilibrium,
-    coreProfilesIds=idsCoreProfiles,
-    wavesIds=idsWaves,
+    label_code = get_title(args)
+ecstra_view = ec_stray_view(
+    equilibrium_ids=ids_equilibrium,
+    core_profiles_ids=ids_core_profiles,
+    waves_ids=ids_waves,
 )
-equiView = EquilibriumView(ids=idsEquilibrium)
-waveView = WavesView(idsWaves)
-waveCompute = WavesCompute(idsWaves)
+equi_view = equilibrium_view(ids=ids_equilibrium)
+wave_view = waves_view(ids_waves)
+wave_compute = waves_compute(ids_waves)
 
-beamTracingDict = waveCompute.getBeamTracing(timeIndex)
+beam_tracing_dict = wave_compute.get_beam_tracing(time_index)
 logger.info(
-    f"There are {beamTracingDict['activeBeamsCount']} active beam(s) and each beam has {beamTracingDict['maxTotalBeams']} ray(s)"
+    f"There are {beam_tracing_dict['activeBeamsCount']} active beam(s) and each beam has {beam_tracing_dict['maxTotalBeams']} ray(s)"
 )
 
-ecstraView.plotPoloidalView(ax_polview)
+ecstra_view.plot_poloidal_view(ax_polview)
 
-for mdidsInfo in args.md:
+for mdids_info in args.md:
     inputargs = copy.deepcopy(args)
-    splittedmsIdsInfo = mdidsInfo.split("#")
-    _idsName = []
-    _mdUri = None
-    if len(splittedmsIdsInfo) == 2:
-        _mdUri, idsName = splittedmsIdsInfo
-        _idsName.append(idsName)
-        mdargs = argparse.Namespace()
-        mdargs.uri = _mdUri
+    splittedms_ids_info = mdids_info.split("#")
+    _ids_name = []
+    _md_uri = None
+    if len(splittedms_ids_info) == 2:
+        _md_uri, ids_name = splittedms_ids_info
+        _ids_name.append(ids_name)
+        mdargs = argparse.namespace()
+        mdargs.uri = _md_uri
         inputargs = mdargs
-    if len(splittedmsIdsInfo) == 1:
-        if "imas:" in splittedmsIdsInfo[0]:
-            _mdUri = splittedmsIdsInfo[0]
-            mdargs = argparse.Namespace()
-            mdargs.uri = _mdUri
+    if len(splittedms_ids_info) == 1:
+        if "imas:" in splittedms_ids_info[0]:
+            _md_uri = splittedms_ids_info[0]
+            mdargs = argparse.namespace()
+            mdargs.uri = _md_uri
             inputargs = mdargs
         else:
-            _idsName = splittedmsIdsInfo
-    if len(_idsName) == 0:
-        idsConnection = DBMaster.getConnection(inputargs)
-        availableIdsAndTimes = getAvailableIdsAndTimes(idsConnection)
-        for idsName, _ in availableIdsAndTimes:
-            _idsName.append(idsName)
-        idsConnection.close()
-    if "wall" in _idsName:
-        connection = DBMaster.getConnection(inputargs)
+            _ids_name = splittedms_ids_info
+    if len(_ids_name) == 0:
+        ids_connection = d_b_master.get_connection(inputargs)
+        available_ids_and_times = get_available_ids_and_times(ids_connection)
+        for ids_name, _ in available_ids_and_times:
+            _ids_name.append(ids_name)
+        ids_connection.close()
+    if "wall" in _ids_name:
+        connection = d_b_master.get_connection(inputargs)
         if connection is not None:
-            _idsData = connection.get("wall")
+            _ids_data = connection.get("wall")
             from imas import imasdef
 
-            if _idsData.ids_properties.homogeneous_time != imasdef.EMPTY_INT:
-                wallview = WallView(_idsData)
+            if _ids_data.ids_properties.homogeneous_time != imasdef.e_m_p_t_y__i_n_t:
+                wallview = wall_view(_ids_data)
                 wallview.view_wall(
                     ax_polview,
-                    showLabels=False,
+                    show_labels=False,
                     wallcolor="slategray",
-                    showLegend=False,
+                    show_legend=False,
                 )
             else:
-                logger.warning(f"{_idsName} ids is empty in the dbentry")
+                logger.warning(f"{_ids_name} ids is empty in the dbentry")
             connection.close()
         else:
-            logger.warning(f"{_idsName} ids is not present")
-    if "pf_active" in _idsName:
-        connection = DBMaster.getConnection(inputargs)
+            logger.warning(f"{_ids_name} ids is not present")
+    if "pf_active" in _ids_name:
+        connection = d_b_master.get_connection(inputargs)
         if connection is not None:
-            _idsData = connection.get("pf_active")
+            _ids_data = connection.get("pf_active")
             from imas import imasdef
 
-            if _idsData.ids_properties.homogeneous_time != imasdef.EMPTY_INT:
-                ViewPfCoils = PFActiveView(_idsData)
-                ViewPfCoils.viewActivePfCoils(ax_polview, showLabels=False)
+            if _ids_data.ids_properties.homogeneous_time != imasdef.e_m_p_t_y__i_n_t:
+                view_pf_coils = p_f_active_view(_ids_data)
+                view_pf_coils.view_active_pf_coils(ax_polview, show_labels=False)
             else:
-                logger.warning(f"{_idsName} ids is empty in the dbentry")
+                logger.warning(f"{_ids_name} ids is empty in the dbentry")
             connection.close()
 
         else:
             logger.warning("f{_idsName} ids is not present")
 
 
-waveView.plotPolViewTraces(
+wave_view.plot_pol_view_traces(
     ax_polview,
-    timeIndex=0,
+    time_index=0,
     color=color,
     style=style,
     fontsize=fontsize,
     labelpad=lpad,
 )
 
-equiView.plotTopplotequilibrium(ax=ax_topview, timeIndex=0)
-waveView.plotTopViewTraces(
-    ax_topview, timeIndex=0, color=color, style=style, label=labelCode
+equi_view.plot_topplotequilibrium(ax=ax_topview, time_index=0)
+wave_view.plot_top_view_traces(
+    ax_topview, time_index=0, color=color, style=style, label=label_code
 )
 
-waveView.plotElectronPower(ax_powview, timeIndex=0, color=color, style=style)
-waveView.plotPowerFlowNormal(ax_powparview, timeIndex=0, color=color, style=style)
+wave_view.plot_electron_power(ax_powview, time_index=0, color=color, style=style)
+wave_view.plot_power_flow_normal(ax_powparview, time_index=0, color=color, style=style)
 
 
-canvas.setText(text=f"{getDatabasePath(args, timeValue=timeValue)}")
+canvas.set_text(text=f"{get_database_path(args, time_value=time_value)}")
 
 canvas.fig.subplots_adjust(
     top=0.95, bottom=0.097, left=0, right=0.948, hspace=0.2, wspace=0.108
 )
 canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
-canvas.fig.suptitle(getTitle(args, "EC rays", timeValue), size=12)
+canvas.fig.suptitle(get_title(args, "EC rays", time_value), size=12)
 
 if args.save:
-    fname = getFileName(args, os.path.basename(__file__) + "_EC_rays", timeValue)
+    fname = get_file_name(args, os.path.basename(__file__) + "_EC_rays", time_value)
     if args.directory:
         if not os.path.exists(args.directory):
             os.makedirs(args.directory)

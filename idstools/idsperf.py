@@ -5,7 +5,7 @@ import imas
 import numpy as np
 
 
-def get_ids(db, idsname, occ=0, times=None, interp=imas.imasdef.PREVIOUS_INTERP, verbose=False):
+def get_ids(db, idsname, occ=0, times=None, interp=imas.imasdef.p_r_e_v_i_o_u_s__i_n_t_e_r_p, verbose=False):
     """
     The function `get_ids` reads an IDS from a given DBEntry, either the entire IDS or slices at
     selected times, and returns the IDS object or a list of IDS slices.
@@ -39,10 +39,10 @@ def get_ids(db, idsname, occ=0, times=None, interp=imas.imasdef.PREVIOUS_INTERP,
         for t in times:
             if verbose:
                 print(f"getting a slice of {idsname} at time {t}")
-            dataSlice = db.get_slice(idsname, t, interp, occurrence=occ)
-            idsobj.append(dataSlice)
+            data_slice = db.get_slice(idsname, t, interp, occurrence=occ)
+            idsobj.append(data_slice)
             if verbose:
-                print(f"got {dataSlice.time}")
+                print(f"got {data_slice.time}")
 
     return idsobj
 
@@ -82,13 +82,13 @@ def get_timings(db, idsname, occ=0, dbout=None, times=None, repeat=5, verbose=Fa
 
     # Default timing
     # TODO: more fine grained control of imported symbols to avoid issues?
-    t = timeit.Timer(cmd, globals={**locals(), **globals()})
+    t = timeit.timer(cmd, globals={**locals(), **globals()})
     # 'from __main__ import get_ids,db,dbout,verbose,times,idsobj')
     timings = t.repeat(repeat=repeat, number=1)
 
     # Profiling
     if profile:
-        cProfile.runctx(cmd, globals(), locals())
+        c_profile.runctx(cmd, globals(), locals())
 
     return timings
 
@@ -107,23 +107,23 @@ def byte_size(obj):
     S: int
         estimated data size in bytes
     """
-    S = 0
+    s = 0
 
     if isinstance(obj, str):
-        S += len(obj)
+        s += len(obj)
     elif isinstance(obj, np.ndarray):
-        S += obj.nbytes
+        s += obj.nbytes
     elif isinstance(obj, int):
-        S += 4
+        s += 4
     elif isinstance(obj, float):
-        S += 8
+        s += 8
     elif isinstance(obj, list):
         for o in obj:
-            S += byte_size(o)
+            s += byte_size(o)
     elif isinstance(obj, dict):
         for o in obj.values():
-            S += byte_size(o)
+            s += byte_size(o)
     else:
         for o in obj.__dict__.values():
-            S += byte_size(o)
-    return S
+            s += byte_size(o)
+    return s

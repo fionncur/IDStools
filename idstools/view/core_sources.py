@@ -10,30 +10,30 @@ from idstools.compute.core_sources import CoreSourcesCompute
 logger = logging.getLogger(f"module.{__name__}")
 
 
-class CoreSourcesView:
+class core_sources_view:
     def __init__(self, ids):
-        self.coreSourcesCompute = CoreSourcesCompute(ids)
+        self.core_sources_compute = core_sources_compute(ids)
         self.ids = ids
 
-    def viewSources(self):
+    def view_sources(self):
         """
         The `viewSources` function prints information about sources, including their name, electron
         flux, energy flux, and ion flux.
         """
-        sourcesDict = self.coreSourcesCompute.getFluxInfoFromSources()
-        ionTable = Table(show_header=False)
-        for _, sourceDict in sourcesDict.items():
+        sources_dict = self.core_sources_compute.get_flux_info_from_sources()
+        ion_table = table(show_header=False)
+        for _, source_dict in sources_dict.items():
             # electrons
-            if sourceDict["particles_flux"] is None:
+            if source_dict["particles_flux"] is None:
                 eparticles_flux = "particles(--)"
             else:
-                eparticles_flux = f"particles ({sourceDict['particles_flux'] : >.6e})"
-            if sourceDict["energy_flux"] is None:
+                eparticles_flux = f"particles ({source_dict['particles_flux'] : >.6e})"
+            if source_dict["energy_flux"] is None:
                 eenergy_flux = "energy(--)"
             else:
-                eenergy_flux = f"energy ({sourceDict['energy_flux']: >.6e})"
-            ionTable.add_row(
-                f'{sourceDict["name"]}',
+                eenergy_flux = f"energy ({source_dict['energy_flux']: >.6e})"
+            ion_table.add_row(
+                f'{source_dict["name"]}',
                 eparticles_flux,
                 eenergy_flux,
                 "",
@@ -41,38 +41,38 @@ class CoreSourcesView:
                 style="bold magenta",
             )
             # ions
-            ionTable.add_section()
-            ionTable.add_row(
-                Align.right("a"),
-                Align.right("z_n"),
-                Align.right("z_ion"),
-                Align.right("particles"),
-                Align.right("energy"),
+            ion_table.add_section()
+            ion_table.add_row(
+                align.right("a"),
+                align.right("z_n"),
+                align.right("z_ion"),
+                align.right("particles"),
+                align.right("energy"),
                 style="bold red",
             )
 
-            for _, ionDict in sourceDict["ions"].items():
-                if ionDict["particles_flux"] is None or np.isnan(ionDict["particles_flux"]):
+            for _, ion_dict in source_dict["ions"].items():
+                if ion_dict["particles_flux"] is None or np.isnan(ion_dict["particles_flux"]):
                     particles_flux = "--"
                 else:
-                    particles_flux = f"{ionDict['particles_flux'] : >.6e}"
-                if ionDict["energy_flux"] is None or np.isnan(ionDict["energy_flux"]):
+                    particles_flux = f"{ion_dict['particles_flux'] : >.6e}"
+                if ion_dict["energy_flux"] is None or np.isnan(ion_dict["energy_flux"]):
                     energy_flux = "--"
                 else:
-                    energy_flux = f"{ionDict['energy_flux'] : >.6e}"
-                ionTable.add_row(
-                    Align.right(str(ionDict["a"])),
-                    Align.right(str(ionDict["z_n"])),
-                    Align.right(str(ionDict["z_ion"])),
-                    Align.right(particles_flux),
-                    Align.right(energy_flux),
+                    energy_flux = f"{ion_dict['energy_flux'] : >.6e}"
+                ion_table.add_row(
+                    align.right(str(ion_dict["a"])),
+                    align.right(str(ion_dict["z_n"])),
+                    align.right(str(ion_dict["z_ion"])),
+                    align.right(particles_flux),
+                    align.right(energy_flux),
                     style="bold green",
                 )
-            ionTable.add_section()
-        console = Console()
-        console.print(ionTable)
+            ion_table.add_section()
+        console = console()
+        console.print(ion_table)
 
-    def viewPowerProfiles(self, ax, *args, **kwargs):
+    def view_power_profiles(self, ax, *args, **kwargs):
         """
         The function `viewPowerProfiles` plots power profiles for different sources
 
@@ -80,32 +80,32 @@ class CoreSourcesView:
             ax: The parameter `ax` is an instance of the `Axes` class from the `matplotlib.pyplot` module.
             It represents the axes on which the power profiles will be plotted.
         """
-        if self.coreSourcesCompute.isActiveSourceAvailable():
-            rho_tor_norm = self.coreSourcesCompute.getRhoTorNorm()
-            singleAndTotalElectronsProfiles = self.coreSourcesCompute.getSingleAndTotalElectronsProfiles()
-            singleAndTotalIonProfiles = self.coreSourcesCompute.getSingleAndTotalIonProfiles()
-            sourceNames = self.coreSourcesCompute.getSourceNames()
+        if self.core_sources_compute.is_active_source_available():
+            rho_tor_norm = self.core_sources_compute.get_rho_tor_norm()
+            single_and_total_electrons_profiles = self.core_sources_compute.get_single_and_total_electrons_profiles()
+            single_and_total_ion_profiles = self.core_sources_compute.get_single_and_total_ion_profiles()
+            source_names = self.core_sources_compute.get_source_names()
             ax.set_title("Power Profiles [MW/M3]")
             ax.plot(
                 rho_tor_norm,
-                singleAndTotalElectronsProfiles["totalElectronPowerProfile"] * 1.0e-6,
+                single_and_total_electrons_profiles["totalElectronPowerProfile"] * 1.0e-6,
                 label=r"Total to electrons",
             )
             ax.plot(
                 rho_tor_norm,
-                singleAndTotalIonProfiles["totalIonPowerProfile"] * 1.0e-6,
+                single_and_total_ion_profiles["totalIonPowerProfile"] * 1.0e-6,
                 "--",
                 label=r"Total to ions",
             )
-            for isource, name in sourceNames.items():
+            for isource, name in source_names.items():
                 ax.plot(
                     rho_tor_norm,
-                    singleAndTotalElectronsProfiles["singleElectronPowerProfile"][isource] * 1.0e-6,
+                    single_and_total_electrons_profiles["singleElectronPowerProfile"][isource] * 1.0e-6,
                     label=name + " [" + str(isource) + "]" + " to electrons",
                 )
                 ax.plot(
                     rho_tor_norm,
-                    singleAndTotalIonProfiles["singleIonPowerProfile"][isource] * 1.0e-6,
+                    single_and_total_ion_profiles["singleIonPowerProfile"][isource] * 1.0e-6,
                     "--",
                     label=name + " [" + str(isource) + "]" + " to ions",
                 )
@@ -124,7 +124,7 @@ class CoreSourcesView:
             logger.warning("viewPowerProfiles:No active sources available")
         return -1
 
-    def viewParticlesProfiles(self, ax, *args, **kwargs):
+    def view_particles_profiles(self, ax, *args, **kwargs):
         """
         The function `viewParticlesProfiles` plots particle density profiles for electrons and ions at different
         sources as a function of normalized toroidal flux coordinate.
@@ -133,32 +133,32 @@ class CoreSourcesView:
             ax: The parameter `ax` is an instance of the `Axes` class from the `matplotlib.pyplot` module. It
             represents the axes on which the particles profiles will be plotted.
         """
-        if self.coreSourcesCompute.isActiveSourceAvailable():
-            rho_tor_norm = self.coreSourcesCompute.getRhoTorNorm()
-            singleAndTotalElectronsProfiles = self.coreSourcesCompute.getSingleAndTotalElectronsProfiles()
-            singleAndTotalIonProfiles = self.coreSourcesCompute.getSingleAndTotalIonProfiles()
-            sourceNames = self.coreSourcesCompute.getSourceNames()
+        if self.core_sources_compute.is_active_source_available():
+            rho_tor_norm = self.core_sources_compute.get_rho_tor_norm()
+            single_and_total_electrons_profiles = self.core_sources_compute.get_single_and_total_electrons_profiles()
+            single_and_total_ion_profiles = self.core_sources_compute.get_single_and_total_ion_profiles()
+            source_names = self.core_sources_compute.get_source_names()
             ax.set_title("PARTICLES PROFILES [/M3/S]")
             ax.plot(
                 rho_tor_norm,
-                singleAndTotalElectronsProfiles["totalElectronParticlesProfile"] * 1.0e-6,
+                single_and_total_electrons_profiles["totalElectronParticlesProfile"] * 1.0e-6,
                 label=r"Total to electrons",
             )
             ax.plot(
                 rho_tor_norm,
-                singleAndTotalIonProfiles["totalIonParticlesProfile"] * 1.0e-6,
+                single_and_total_ion_profiles["totalIonParticlesProfile"] * 1.0e-6,
                 "--",
                 label=r"Total to ions",
             )
-            for isource, name in sourceNames.items():
+            for isource, name in source_names.items():
                 ax.plot(
                     rho_tor_norm,
-                    singleAndTotalElectronsProfiles["singleElectronParticlesProfile"][isource] * 1.0e-6,
+                    single_and_total_electrons_profiles["singleElectronParticlesProfile"][isource] * 1.0e-6,
                     label=name + " [" + str(isource) + "]" + " electrons",
                 )
                 ax.plot(
                     rho_tor_norm,
-                    singleAndTotalIonProfiles["singleIonParticlesProfile"][isource] * 1.0e-6,
+                    single_and_total_ion_profiles["singleIonParticlesProfile"][isource] * 1.0e-6,
                     "--",
                     label=name + " [" + str(isource) + "]" + " ions",
                 )
@@ -177,7 +177,7 @@ class CoreSourcesView:
             logger.warning("viewParticlesProfiles:No active sources available")
         return -1
 
-    def viewCurrentProfiles(self, ax, *args, **kwargs):
+    def view_current_profiles(self, ax, *args, **kwargs):
         """
         The function `viewCurrentProfiles` plots current profiles.
 
@@ -185,21 +185,21 @@ class CoreSourcesView:
             ax: The parameter `ax` is an instance of the `Axes` class from the `matplotlib.pyplot` module. It
             represents the axes on which the current profiles will be plotted.
         """
-        if self.coreSourcesCompute.isActiveSourceAvailable():
-            rho_tor_norm = self.coreSourcesCompute.getRhoTorNorm()
-            singleAndTotalElectronsAndIonsProfiles = self.coreSourcesCompute.getSingleAndTotalElectronsAndIonsProfiles()
-            sourceNames = self.coreSourcesCompute.getSourceNames()
+        if self.core_sources_compute.is_active_source_available():
+            rho_tor_norm = self.core_sources_compute.get_rho_tor_norm()
+            single_and_total_electrons_and_ions_profiles = self.core_sources_compute.get_single_and_total_electrons_and_ions_profiles()
+            source_names = self.core_sources_compute.get_source_names()
             ax.set_title("CURRENT PROFILES [KA/M2]")
             ax.plot(
                 rho_tor_norm,
-                singleAndTotalElectronsAndIonsProfiles["totalCurrentProfile"] * 1.0e-3,
+                single_and_total_electrons_and_ions_profiles["totalCurrentProfile"] * 1.0e-3,
                 label=r"Total current",
             )
-            for isource, name in sourceNames.items():
-                if len(singleAndTotalElectronsAndIonsProfiles["singleCurrentProfile"][isource]) > 0:
+            for isource, name in source_names.items():
+                if len(single_and_total_electrons_and_ions_profiles["singleCurrentProfile"][isource]) > 0:
                     ax.plot(
                         rho_tor_norm,
-                        singleAndTotalElectronsAndIonsProfiles["singleCurrentProfile"][isource] * 1.0e-3,
+                        single_and_total_electrons_and_ions_profiles["singleCurrentProfile"][isource] * 1.0e-3,
                         label=name + str(isource),
                     )
             ax.set_ylabel("Current density $\\mathrm{[kA/m^{2}]}$")
@@ -217,7 +217,7 @@ class CoreSourcesView:
             logger.warning("viewCurrentProfiles:No active sources available")
         return -1
 
-    def viewPowerAndParticleWaveforms(self, ax, *args, **kwargs):
+    def view_power_and_particle_waveforms(self, ax, *args, **kwargs):
         """
         The function `viewPowerAndParticleWaveforms` plots power waveforms for different sources and particles
         over time.
@@ -226,47 +226,47 @@ class CoreSourcesView:
             ax: The parameter `ax` is an instance of the `Axes` class from the `matplotlib.pyplot` module. It
             represents the axes on which the waveforms will be plotted.
         """
-        if self.coreSourcesCompute.isActiveSourceAvailable():
+        if self.core_sources_compute.is_active_source_available():
             ntime = len(self.ids.time)
             if ntime == 1:
                 logger.warning("Only one time slice --> Waveforms not displayed")
             else:
-                timeArray = self.ids.time
-                singleAndTotalElectronsIonsWaveforms = self.coreSourcesCompute.getSingleAndTotalElectronsIonsWaveforms()
-                singleAndTotalElectronsWaveforms = self.coreSourcesCompute.getSingleAndTotalElectronsWaveforms()
-                singleAndTotalIonsWaveforms = self.coreSourcesCompute.getSingleAndTotalIonsWaveforms()
-                sourceNames = self.coreSourcesCompute.getSourceNames()
+                time_array = self.ids.time
+                single_and_total_electrons_ions_waveforms = self.core_sources_compute.get_single_and_total_electrons_ions_waveforms()
+                single_and_total_electrons_waveforms = self.core_sources_compute.get_single_and_total_electrons_waveforms()
+                single_and_total_ions_waveforms = self.core_sources_compute.get_single_and_total_ions_waveforms()
+                source_names = self.core_sources_compute.get_source_names()
                 ax.set_title("POWER AND PARTICLE WAVEFORMS")
                 ax.plot(
-                    timeArray,
-                    singleAndTotalElectronsIonsWaveforms["total_power_waveform"] * 1.0e-6,
+                    time_array,
+                    single_and_total_electrons_ions_waveforms["total_power_waveform"] * 1.0e-6,
                     label=r"Total electrons+ions",
                 )
                 ax.plot(
-                    timeArray,
-                    singleAndTotalElectronsWaveforms["total_electron_power_waveform"] * 1.0e-6,
+                    time_array,
+                    single_and_total_electrons_waveforms["total_electron_power_waveform"] * 1.0e-6,
                     label=r"Total electrons",
                 )
                 ax.plot(
-                    timeArray,
-                    singleAndTotalIonsWaveforms["total_ion_power_waveform"] * 1.0e-6,
+                    time_array,
+                    single_and_total_ions_waveforms["total_ion_power_waveform"] * 1.0e-6,
                     label=r"Total ions",
                 )
 
-                for isource, name in sourceNames.items():
+                for isource, name in source_names.items():
                     ax.plot(
-                        timeArray,
-                        singleAndTotalElectronsIonsWaveforms["single_power_waveform"][isource] * 1.0e-6,
+                        time_array,
+                        single_and_total_electrons_ions_waveforms["single_power_waveform"][isource] * 1.0e-6,
                         label=name + " [" + str(isource) + "]" + " electrons+ions",
                     )
                     ax.plot(
-                        timeArray,
-                        singleAndTotalElectronsWaveforms["single_electron_power_waveform"][isource] * 1.0e-6,
+                        time_array,
+                        single_and_total_electrons_waveforms["single_electron_power_waveform"][isource] * 1.0e-6,
                         label=name + " [" + str(isource) + "]" + " electrons",
                     )
                     ax.plot(
-                        timeArray,
-                        singleAndTotalIonsWaveforms["single_ion_power_waveform"][isource] * 1.0e-6,
+                        time_array,
+                        single_and_total_ions_waveforms["single_ion_power_waveform"][isource] * 1.0e-6,
                         label=name + " [" + str(isource) + "]" + " ions",
                     )
                 ax.set_ylabel("Power waveforms $\\mathrm{[MW]}$")
@@ -284,7 +284,7 @@ class CoreSourcesView:
             logger.warning("viewPowerAndParticleWaveforms:No active sources available")
         return -1
 
-    def viewParticlesWaveform(self, ax, *args, **kwargs):
+    def view_particles_waveform(self, ax, *args, **kwargs):
         """
         The function `viewParticlesWaveform` plots the waveforms of particles (electrons and ions) over time.
 
@@ -292,50 +292,50 @@ class CoreSourcesView:
             ax: The parameter "ax" is an instance of the matplotlib Axes class. It represents the axes on which
             the waveform plot will be drawn.
         """
-        if self.coreSourcesCompute.isActiveSourceAvailable():
+        if self.core_sources_compute.is_active_source_available():
             ntime = len(self.ids.time)
             if ntime == 1:
                 logger.warning("Only one time slice --> Waveforms not displayed")
             else:
-                timeArray = self.ids.time
-                singleAndTotalElectronsIonsWaveforms = self.coreSourcesCompute.getSingleAndTotalElectronsIonsWaveforms()
+                time_array = self.ids.time
+                single_and_total_electrons_ions_waveforms = self.core_sources_compute.get_single_and_total_electrons_ions_waveforms()
 
-                singleAndTotalElectronsWaveforms = self.coreSourcesCompute.getSingleAndTotalElectronsWaveforms()
+                single_and_total_electrons_waveforms = self.core_sources_compute.get_single_and_total_electrons_waveforms()
 
-                singleAndTotalIonsWaveforms = self.coreSourcesCompute.getSingleAndTotalIonsWaveforms()
+                single_and_total_ions_waveforms = self.core_sources_compute.get_single_and_total_ions_waveforms()
 
-                sourceNames = self.coreSourcesCompute.getSourceNames()
+                source_names = self.core_sources_compute.get_source_names()
                 ax.set_title("PARTICLES WAVEFORM")
                 ax.plot(
-                    timeArray,
-                    singleAndTotalElectronsIonsWaveforms["total_particles_waveform"],
+                    time_array,
+                    single_and_total_electrons_ions_waveforms["total_particles_waveform"],
                     label=r"Total electrons+ions",
                 )
                 ax.plot(
-                    timeArray,
-                    singleAndTotalElectronsWaveforms["total_electron_particles_waveform"],
+                    time_array,
+                    single_and_total_electrons_waveforms["total_electron_particles_waveform"],
                     label=r"Total electrons",
                 )
                 ax.plot(
-                    timeArray,
-                    singleAndTotalIonsWaveforms["total_ion_particles_waveform"],
+                    time_array,
+                    single_and_total_ions_waveforms["total_ion_particles_waveform"],
                     label=r"Total ions",
                 )
 
-                for isource, name in sourceNames.items():
+                for isource, name in source_names.items():
                     ax.plot(
-                        timeArray,
-                        singleAndTotalElectronsIonsWaveforms["single_particles_waveform"][isource],
+                        time_array,
+                        single_and_total_electrons_ions_waveforms["single_particles_waveform"][isource],
                         label=name + " [" + str(isource) + "]" + " electrons+ions",
                     )
                     ax.plot(
-                        timeArray,
-                        singleAndTotalElectronsWaveforms["single_electron_particles_waveform"][isource],
+                        time_array,
+                        single_and_total_electrons_waveforms["single_electron_particles_waveform"][isource],
                         label=name + " [" + str(isource) + "]" + " electrons",
                     )
                     ax.plot(
-                        timeArray,
-                        singleAndTotalIonsWaveforms["single_ion_particles_waveform"][isource],
+                        time_array,
+                        single_and_total_ions_waveforms["single_ion_particles_waveform"][isource],
                         label=name + " [" + str(isource) + "]" + " ions",
                     )
                 ax.set_ylabel("Particles waveforms $\\mathrm{[s^{-1}]}$")
@@ -353,7 +353,7 @@ class CoreSourcesView:
             logger.warning("viewParticlesWaveform:No active sources available")
         return -1
 
-    def viewCurrentWaveform(self, ax, *args, **kwargs):
+    def view_current_waveform(self, ax, *args, **kwargs):
         """
         The function `viewCurrentWaveform` plots the current waveform for different sources and displays it.
 
@@ -361,25 +361,25 @@ class CoreSourcesView:
             ax: The parameter `ax` is an instance of the `Axes` class from the `matplotlib.pyplot` module. It
                 represents the axes on which the waveform plot will be drawn.
         """
-        if self.coreSourcesCompute.isActiveSourceAvailable():
+        if self.core_sources_compute.is_active_source_available():
             ntime = len(self.ids.time)
             if ntime == 1:
                 logger.warning("Only one time slice --> Waveforms not displayed")
             else:
-                timeArray = self.ids.time
-                singleAndTotalCurrentTorque = self.coreSourcesCompute.getSingleAndTotalCurrentTorque()
-                sourceNames = self.coreSourcesCompute.getSourceNames()
+                time_array = self.ids.time
+                single_and_total_current_torque = self.core_sources_compute.get_single_and_total_current_torque()
+                source_names = self.core_sources_compute.get_source_names()
                 ax.set_title("CURRENT WAVEFORM")
                 ax.plot(
-                    timeArray,
-                    singleAndTotalCurrentTorque["total_current_waveform"] * 1.0e-3,
+                    time_array,
+                    single_and_total_current_torque["total_current_waveform"] * 1.0e-3,
                     label=r"Total electrons+ions",
                 )
 
-                for isource, name in sourceNames.items():
+                for isource, name in source_names.items():
                     ax.plot(
-                        timeArray,
-                        singleAndTotalCurrentTorque["single_current_waveform"][isource] * 1.0e-3,
+                        time_array,
+                        single_and_total_current_torque["single_current_waveform"][isource] * 1.0e-3,
                         label=name + " [" + str(isource) + "]" + " electrons+ions",
                     )
 
@@ -398,7 +398,7 @@ class CoreSourcesView:
             logger.warning("viewCurrentWaveform:No active sources available")
         return -1
 
-    def viewTorqueWaveform(self, ax, *args, **kwargs):
+    def view_torque_waveform(self, ax, *args, **kwargs):
         """
         The function `viewTorqueWaveform` plots torque waveforms for different sources over time.
 
@@ -407,25 +407,25 @@ class CoreSourcesView:
             the torque waveform plot will be drawn.
         """
 
-        if self.coreSourcesCompute.isActiveSourceAvailable():
+        if self.core_sources_compute.is_active_source_available():
             ntime = len(self.ids.time)
             if ntime == 1:
                 logger.warning("Only one time slice --> Waveforms not displayed")
             else:
-                timeArray = self.ids.time
-                singleAndTotalCurrentTorque = self.coreSourcesCompute.getSingleAndTotalCurrentTorque()
-                sourceNames = self.coreSourcesCompute.getSourceNames()
+                time_array = self.ids.time
+                single_and_total_current_torque = self.core_sources_compute.get_single_and_total_current_torque()
+                source_names = self.core_sources_compute.get_source_names()
                 # TORQUE WAVEFORM
                 ax.set_title("TORQUE WAVEFORM")
                 ax.plot(
-                    timeArray,
-                    singleAndTotalCurrentTorque["total_torque_waveform"],
+                    time_array,
+                    single_and_total_current_torque["total_torque_waveform"],
                     label=r"Total electrons+ions",
                 )
-                for isource, name in sourceNames.items():
+                for isource, name in source_names.items():
                     ax.plot(
-                        timeArray,
-                        singleAndTotalCurrentTorque["single_torque_waveform"][isource],
+                        time_array,
+                        single_and_total_current_torque["single_torque_waveform"][isource],
                         label=name + " [" + str(isource) + "]" + " electrons+ions",
                     )
 

@@ -26,7 +26,7 @@ from idstools.utils.ddhelper import DDHelper
 from idstools.utils.idshelper import compareIds
 from idstools.utils.idslogger import setupLogger
 
-THRESHOLD_PERCENT = 2
+t_h_r_e_s_h_o_l_d__p_e_r_c_e_n_t = 2
 
 
 def get_filename(file_title, log_dir):
@@ -48,15 +48,15 @@ def get_filename(file_title, log_dir):
     return os.path.join(log_dir, file_name)
 
 
-def generate_html(file_path, compareData):
+def generate_html(file_path, compare_data):
     logger.info("Writing to html file :" + file_path)
 
-    ddhelper = DDHelper()
+    ddhelper = d_d_helper()
 
     file_object = open(file_path, "w")
-    (pulseA, pulseB, inputA, inputB), data = next(iter(compareData.items()))
+    (pulse_a, pulse_b, input_a, input_b), data = next(iter(compare_data.items()))
 
-    report_title = f"Differences : {pulseA} ~ {pulseB}"
+    report_title = f"Differences : {pulse_a} ~ {pulse_b}"
     report_header_string = (
         """<head>
                 <meta charset="utf-8">
@@ -72,8 +72,8 @@ def generate_html(file_path, compareData):
     <thead class="table-primary">
     <tr>
                         <th>Field Name</th>
-                        <th>{pulseA}</th>
-                        <th>{pulseB}</th>
+                        <th>{pulse_a}</th>
+                        <th>{pulse_b}</th>
                         <th>Comments</th>
                         <th>Details</th>
                         <tr>
@@ -128,10 +128,10 @@ def generate_html(file_path, compareData):
                         threshold_candidate = values[1]
                         compare_candidate = values[0][: len(values[1])]
                     threshold_min = (
-                        (threshold_candidate * THRESHOLD_PERCENT) / 100
+                        (threshold_candidate * t_h_r_e_s_h_o_l_d__p_e_r_c_e_n_t) / 100
                     ) - threshold_candidate
                     threshold_max = (
-                        (threshold_candidate * THRESHOLD_PERCENT) / 100
+                        (threshold_candidate * t_h_r_e_s_h_o_l_d__p_e_r_c_e_n_t) / 100
                     ) + threshold_candidate
 
                     within_threshold = all(compare_candidate > threshold_min) and all(
@@ -147,61 +147,61 @@ def generate_html(file_path, compareData):
                         if "itime" in coordinate_path:
                             coordinate_path = coordinate_path.replace("itime", "0")
 
-                        valuesA = np.copy(values[0])
-                        valuesB = np.copy(values[1])
+                        values_a = np.copy(values[0])
+                        values_b = np.copy(values[1])
 
                         # Calculate cross corelation
-                        correlate_result = np.correlate(valuesA, valuesB, "full")
-                        b_shift_positions = np.arange(-len(valuesA) + 1, len(valuesB))
+                        correlate_result = np.correlate(values_a, values_b, "full")
+                        b_shift_positions = np.arange(-len(values_a) + 1, len(values_b))
                         itemindex = np.where(
                             correlate_result == np.max(correlate_result)
                         )
                         cross_correlation = b_shift_positions[itemindex][0]
                         # TODO Check the logic of normalised difference calculation
-                        if len(valuesA) < len(valuesB):
-                            valuesB = valuesB[: len(valuesA)]
+                        if len(values_a) < len(values_b):
+                            values_b = values_b[: len(values_a)]
                         else:
-                            valuesA = valuesA[: len(valuesB)]
+                            values_a = values_a[: len(values_b)]
                         # valuesA[valuesA == 0] = 0.00000001
                         # valuesB[valuesB == 0] = 0.00000001
 
-                        abs_diff = abs(valuesA - valuesB)
-                        base = abs(valuesA)
-                        if np.average(abs(valuesA)) > np.average(abs(valuesB)):
-                            base = abs(valuesB)
+                        abs_diff = abs(values_a - values_b)
+                        base = abs(values_a)
+                        if np.average(abs(values_a)) > np.average(abs(values_b)):
+                            base = abs(values_b)
 
                         norm_diff = abs_diff / np.linalg.norm(base, ord=np.inf)
                         # norm_diff = abs_diff / base
 
                         norm_avg_diff = np.average(norm_diff)
 
-                        minA = np.amin(values[0])
-                        minB = np.amin(values[1])
-                        maxA = np.amax(values[0])
-                        maxB = np.amax(values[1])
-                        avgA = np.average(values[0])
-                        avgB = np.average(values[1])
-                        avg_diff = abs(avgA - avgB)
-                        rmsA = np.sqrt(np.mean(values[0] ** 2))
-                        rmsB = np.sqrt(np.mean(values[1] ** 2))
-                        rms_diff = abs(rmsA - rmsB)
+                        min_a = np.amin(values[0])
+                        min_b = np.amin(values[1])
+                        max_a = np.amax(values[0])
+                        max_b = np.amax(values[1])
+                        avg_a = np.average(values[0])
+                        avg_b = np.average(values[1])
+                        avg_diff = abs(avg_a - avg_b)
+                        rms_a = np.sqrt(np.mean(values[0] ** 2))
+                        rms_b = np.sqrt(np.mean(values[1] ** 2))
+                        rms_diff = abs(rms_a - rms_b)
 
-                        timeA = inputA.partial_get(idsname, coordinate_path)
-                        timeB = inputB.partial_get(idsname, coordinate_path)
-                        if timeA is not None and timeB is not None:
-                            min_time_A = np.amin(timeA)
-                            min_time_B = np.amin(timeB)
+                        time_a = input_a.partial_get(idsname, coordinate_path)
+                        time_b = input_b.partial_get(idsname, coordinate_path)
+                        if time_a is not None and time_b is not None:
+                            min_time__a = np.amin(time_a)
+                            min_time__b = np.amin(time_b)
 
-                            max_time_A = np.amax(timeA)
-                            max_time_B = np.amax(timeB)
-                            ax_timeA = np.linspace(
-                                min_time_A if min_time_A < min_time_B else min_time_B,
-                                max_time_A if max_time_A > max_time_B else max_time_B,
+                            max_time__a = np.amax(time_a)
+                            max_time__b = np.amax(time_b)
+                            ax_time_a = np.linspace(
+                                min_time__a if min_time__a < min_time__b else min_time__b,
+                                max_time__a if max_time__a > max_time__b else max_time__b,
                                 len(values[0]),
                             )
-                            ax_timeB = np.linspace(
-                                min_time_A if min_time_A < min_time_B else min_time_B,
-                                max_time_A if max_time_A > max_time_B else max_time_B,
+                            ax_time_b = np.linspace(
+                                min_time__a if min_time__a < min_time__b else min_time__b,
+                                max_time__a if max_time__a > max_time__b else max_time__b,
                                 len(values[1]),
                             )
                             fig = plt.figure()
@@ -211,7 +211,7 @@ def generate_html(file_path, compareData):
                             ax.set_ylabel("values")
                             ax2 = ax.twinx()
                             ax2.plot(
-                                ax_timeA,
+                                ax_time_a,
                                 abs_diff,
                                 "-g",
                                 label="difference",
@@ -220,45 +220,45 @@ def generate_html(file_path, compareData):
                             ax2.set_yscale("log")
                             if len(values[0]) < 10:
                                 ax.plot(
-                                    ax_timeA,
+                                    ax_time_a,
                                     values[0],
                                     marker="o",
                                     color="r",
-                                    label=f"{pulseA}",
+                                    label=f"{pulse_a}",
                                     linewidth="0.5",
                                     ms=2,
                                 )
                             else:
                                 ax.plot(
-                                    ax_timeA,
+                                    ax_time_a,
                                     values[0],
                                     color="r",
-                                    label=f"{pulseA}",
+                                    label=f"{pulse_a}",
                                     linewidth="0.5",
                                     ms=2,
                                 )
                             if len(values[1]) < 10:
                                 ax.plot(
-                                    ax_timeB,
+                                    ax_time_b,
                                     values[1],
                                     marker="D",
                                     color="b",
-                                    label=f"{pulseB}",
+                                    label=f"{pulse_b}",
                                     linewidth="0.5",
                                     ms=2,
                                 )
                             else:
                                 ax.plot(
-                                    ax_timeB,
+                                    ax_time_b,
                                     values[1],
                                     color="b",
-                                    label=f"{pulseB}",
+                                    label=f"{pulse_b}",
                                     linewidth="0.5",
                                     ms=2,
                                 )
                             ax.legend(loc="upper right")
                             ax.grid()
-                            tmpfile = BytesIO()
+                            tmpfile = bytes_i_o()
                             fig.savefig(tmpfile, format="png")
                             encoded = base64.b64encode(tmpfile.getvalue()).decode(
                                 "utf-8"
@@ -269,25 +269,25 @@ def generate_html(file_path, compareData):
                                                         <thead class="table-primary">
                                                             <tr>
                                                             <th>Attribute Name</th>
-                                                            <th>{pulseA}</th>
-                                                            <th>{pulseB}</th>
+                                                            <th>{pulse_a}</th>
+                                                            <th>{pulse_b}</th>
                                                             </tr>
                                                         </thead>
                                                         <tbody>
                                                         <tr>
                                                             <td>minimum</td>
-                                                            <td>{"{:.4e}".format(minA)}</td>
-                                                            <td>{"{:.4e}".format(minB)}</td>
+                                                            <td>{"{:.4e}".format(min_a)}</td>
+                                                            <td>{"{:.4e}".format(min_b)}</td>
                                                         </tr>
                                                         <tr>
                                                             <td>maximum</td>
-                                                            <td>{"{:.4e}".format(maxA)}</td>
-                                                            <td>{"{:.4e}".format(maxB)}</td>
+                                                            <td>{"{:.4e}".format(max_a)}</td>
+                                                            <td>{"{:.4e}".format(max_b)}</td>
                                                         </tr>
                                                         <tr>
                                                             <td>average</td>
-                                                            <td>{"{:.4e}".format(avgA)}</td>
-                                                            <td>{"{:.4e}".format(avgB)}</td>
+                                                            <td>{"{:.4e}".format(avg_a)}</td>
+                                                            <td>{"{:.4e}".format(avg_b)}</td>
                                                         </tr>
                                                         </tbody>
                                                     </table>
@@ -322,8 +322,8 @@ def generate_html(file_path, compareData):
                     </tr>"""
             else:
                 if type(values[0]) is int or type(values[1]) is int:
-                    threshold_min = ((values[0] * THRESHOLD_PERCENT) / 100) - values[0]
-                    threshold_max = ((values[0] * THRESHOLD_PERCENT) / 100) + values[0]
+                    threshold_min = ((values[0] * t_h_r_e_s_h_o_l_d__p_e_r_c_e_n_t) / 100) - values[0]
+                    threshold_max = ((values[0] * t_h_r_e_s_h_o_l_d__p_e_r_c_e_n_t) / 100) + values[0]
                     if values[1] > threshold_min and values[1] < threshold_max:
                         report_diff_line = f"""<tr>
                             <td>{key}</td>
@@ -333,8 +333,8 @@ def generate_html(file_path, compareData):
                             <td></td>
                         </tr>"""
                 elif type(values[0]) is float or type(values[1]) is float:
-                    threshold_min = ((values[0] * THRESHOLD_PERCENT) / 100) - values[0]
-                    threshold_max = ((values[0] * THRESHOLD_PERCENT) / 100) + values[0]
+                    threshold_min = ((values[0] * t_h_r_e_s_h_o_l_d__p_e_r_c_e_n_t) / 100) - values[0]
+                    threshold_max = ((values[0] * t_h_r_e_s_h_o_l_d__p_e_r_c_e_n_t) / 100) + values[0]
                     if values[1] > threshold_min and values[1] < threshold_max:
                         report_diff_line = f"""<tr>
                             <td>{key}</td>
@@ -346,39 +346,39 @@ def generate_html(file_path, compareData):
                 elif type(values[0]) is str or type(values[1]) is str:
                     if len(values[0]) > 100:
                         tmpdir = "/dev/shm" if os.path.exists("/dev/shm") else "."
-                        idsA = tempfile.mktemp(prefix="idsA_", dir=tmpdir)
-                        idsB = tempfile.mktemp(prefix="idsB_", dir=tmpdir)
+                        ids_a = tempfile.mktemp(prefix="idsA_", dir=tmpdir)
+                        ids_b = tempfile.mktemp(prefix="idsB_", dir=tmpdir)
                         try:
-                            with open(idsA, "wb") as f:
+                            with open(ids_a, "wb") as f:
                                 f.write(bytes(values[0], "UTF-8"))
                         except Exception as e:
-                            if os.path.exists(idsA):
-                                os.unlink(idsA)
+                            if os.path.exists(ids_a):
+                                os.unlink(ids_a)
                             raise
 
                         try:
-                            with open(idsB, "wb") as f:
+                            with open(ids_b, "wb") as f:
                                 f.write(bytes(values[1], "UTF-8"))
                         except Exception as e:
-                            if os.path.exists(idsB):
-                                os.unlink(idsB)
+                            if os.path.exists(ids_b):
+                                os.unlink(ids_b)
                             raise
 
-                        with open(idsA, "r") as file_idsA:
-                            lines_idsA = file_idsA.readlines()
-                        with open(idsB, "r") as file_idsB:
-                            lines_idsB = file_idsB.readlines()
+                        with open(ids_a, "r") as file_ids_a:
+                            lines_ids_a = file_ids_a.readlines()
+                        with open(ids_b, "r") as file_ids_b:
+                            lines_ids_b = file_ids_b.readlines()
 
                         diff = difflib.unified_diff(
-                            lines_idsA,
-                            lines_idsB,
-                            fromfile=idsA,
-                            tofile=idsB,
+                            lines_ids_a,
+                            lines_ids_b,
+                            fromfile=ids_a,
+                            tofile=ids_b,
                             lineterm="",
                         )
 
-                        os.unlink(idsA)
-                        os.unlink(idsB)
+                        os.unlink(ids_a)
+                        os.unlink(ids_b)
                         diff_lines = []
                         for line in diff:
                             if "\n" not in line:
@@ -415,12 +415,12 @@ def generate_html(file_path, compareData):
 
 if __name__ == "__main__":
     # Management of input arguments
-    parser = argparse.ArgumentParser(
+    parser = argparse.argument_parser(
         description="""--- Compare a IDS from multiple date entries and returns True or False with option of generating html page with comparisen \n"
         + "- Example: \n"
         + "  idsdiff summary --uri \"imas:mdsplus?user=public;shot=122525;run=1;database=ITER;version=3\" \"imas:mdsplus?user=public;shot=122525;run=2;database=ITER;version=3\" \n"
         + "  \n""",
-        formatter_class=RichHelpFormatter,
+        formatter_class=rich_help_formatter,
     )
     parser.add_argument(
         "-u",
@@ -457,9 +457,9 @@ if __name__ == "__main__":
 
     if args.uri is not None:
         for uriinfo in args.uri:
-            _uriArgs = argparse.Namespace()
-            _uriArgs.uri = uriinfo
-            _connection = DBMaster.getConnection(_uriArgs)
+            _uri_args = argparse.namespace()
+            _uri_args.uri = uriinfo
+            _connection = d_b_master.get_connection(_uri_args)
             if _connection is None:
                 print(f"Error opening uri! Please check existence : {uriinfo}")
                 continue
@@ -469,64 +469,64 @@ if __name__ == "__main__":
         print("No valid connections found! Please validate pulse details")
 
     if args.ids == []:
-        args.ids = [ids.value for ids in list(imas.IDSName)]
+        args.ids = [ids.value for ids in list(imas.i_d_s_name)]
 
     file_path = get_filename("compare_report", args.directory)
     log_file = file_path + ".log"
     html_file = file_path + ".html"
-    logger = setupLogger(
+    logger = setup_logger(
         "module",
         log_file=log_file,
         fmt="%(message)s",
-        log_file_level=logging.INFO,
-        stdout_level=logging.INFO,
+        log_file_level=logging.i_n_f_o,
+        stdout_level=logging.i_n_f_o,
     )
     st = time.time()
-    totalData = {}
+    total_data = {}
     for i in track(
         range(len(connections)), description="[green]Comparing Data Entries..."
     ):
         for j in range(i + 1, len(connections)):
             if connections[i][0] != connections[j][0]:
-                compareData = {}
+                compare_data = {}
                 for idsname in args.ids:
-                    idsA = connections[i][1].get(idsname)
-                    idsB = connections[j][1].get(idsname)
-                    compare_result, output = compareIds(
-                        idsA,
-                        idsB,
+                    ids_a = connections[i][1].get(idsname)
+                    ids_b = connections[j][1].get(idsname)
+                    compare_result, output = compare_ids(
+                        ids_a,
+                        ids_b,
                         field=idsname,
                         ignore_version=args.skip_provenance,
                         verb=False,
-                        nameX=connections[i][0],
-                        nameY=connections[j][0],
+                        name_x=connections[i][0],
+                        name_y=connections[j][0],
                         output={},
                     )
-                    compareData[idsname] = (compare_result, output)
-                totalData[
+                    compare_data[idsname] = (compare_result, output)
+                total_data[
                     (
                         connections[i][0],
                         connections[j][0],
                         connections[i][1],
                         connections[j][1],
                     )
-                ] = compareData
+                ] = compare_data
 
     et = time.time()
     elapsed_time = et - st
 
-    if bool(totalData):
+    if bool(total_data):
         different = {}
-        for cmpName, cmpResult in totalData.items():
-            for idsName, resultData in cmpResult.items():
-                for k, v in resultData[1].items():
+        for cmp_name, cmp_result in total_data.items():
+            for ids_name, result_data in cmp_result.items():
+                for k, v in result_data[1].items():
                     different[(k, v[3])] = (v[0], v[1])
         print("")
-        strConnection = "\n"
-        strConnection += "\n".join([x[0] for x in connections])
-        console = Console()
-        table = Table(
-            title=Text(f"Comparisen between {strConnection}", style="bold blue")
+        str_connection = "\n"
+        str_connection += "\n".join([x[0] for x in connections])
+        console = console()
+        table = table(
+            title=text(f"Comparisen between {str_connection}", style="bold blue")
         )
         table.add_column("ids field name", style="magenta")
         table.add_column("Comment", style="green")
@@ -543,7 +543,7 @@ if __name__ == "__main__":
                 )
             else:
                 st = time.time()
-                generate_html(html_file, totalData)
+                generate_html(html_file, total_data)
 
                 et = time.time()
                 elapsed_time = et - st

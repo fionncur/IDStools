@@ -14,10 +14,10 @@ from idstools.database import DBMaster
 from idstools.utils.clihelper import dbentryParser
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
+    parser = argparse.argument_parser(
         description="This script gives simple timing and performance information for different types of operations on IDS data with the IMAS Python Access Layer (get/get_slice/put depending on selected options)",
-        parents=[dbentryParser],
-        formatter_class=RichHelpFormatter,
+        parents=[dbentry_parser],
+        formatter_class=rich_help_formatter,
     )
     timegroup = parser.add_mutually_exclusive_group()
     timegroup.add_argument(
@@ -76,22 +76,22 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # For memory backend need to read the full IDS and load it into memory
-    if args.memoryBackend:
+    if args.memory_backend:
         print("First import data into memory...", file=sys.stderr)
         # sys.exit(1)
-        dbref = DBMaster.getConnection(args)
+        dbref = d_b_master.get_connection(args)
         if dbref is None:
             print("----> Aborted.")
             exit(1)
 
         args.backend = "MEMORY"
         if "uri" in args.__dict__ and args.uri is not None:
-            startIndex = args.uri.index(":") + 1
-            endIndex = args.uri.index("?")
+            start_index = args.uri.index(":") + 1
+            end_index = args.uri.index("?")
 
             # Replace the substring between ':' and '?' with 'memory'
-            args.uri = args.uri[:startIndex] + "memory" + args.uri[endIndex:]
-        dbm = DBMaster.createConnection(args)
+            args.uri = args.uri[:start_index] + "memory" + args.uri[end_index:]
+        dbm = d_b_master.create_connection(args)
         if dbm is None:
             print("----> Aborted.")
             exit(1)
@@ -105,40 +105,40 @@ if __name__ == "__main__":
             dbm.put(dbref.get(idsname, occ))
         args.mode = "r"
 
-    db = DBMaster.getConnection(args)
+    db = d_b_master.get_connection(args)
     if db is None:
         print("----> Aborted.")
         exit(1)
 
     if args.ids == []:
-        allidss = [ids.value for ids in list(imas.IDSName)]
+        allidss = [ids.value for ids in list(imas.i_d_s_name)]
         # TODO: treat occurrences
         args.ids = [
             ids
             for ids in allidss
             if db.partial_get(ids, "ids_properties/homogeneous_time")
-            != imas.imasdef.EMPTY_INT
+            != imas.imasdef.e_m_p_t_y__i_n_t
         ]
     idsobj = None
     dbout = None
 
     # Set command
-    dboutArgs = argparse.Namespace()
-    if args.uriOut or args.outputRun:
-        if args.uriOut:
-            dboutArgs.uri = args.uriOut
+    dbout_args = argparse.namespace()
+    if args.uri_out or args.output_run:
+        if args.uri_out:
+            dbout_args.uri = args.uri_out
             if args.verbose:
                 print("Using given uriOut for checking put performance")
-        elif args.outputRun:
+        elif args.output_run:
             import re
 
-            dboutArgs.uri = args.uri
-            dboutArgs.uri = re.sub(
-                r"user=[^;]+", f"user={os.environ['USER']}", dboutArgs.uri
+            dbout_args.uri = args.uri
+            dbout_args.uri = re.sub(
+                r"user=[^;]+", f"user={os.environ['USER']}", dbout_args.uri
             )
-            dboutArgs.uri = re.sub(r"run=[^;]+", f"run={args.outputRun}", dboutArgs.uri)
+            dbout_args.uri = re.sub(r"run=[^;]+", f"run={args.output_run}", dbout_args.uri)
 
-        dbout = DBMaster.createConnection(dboutArgs)
+        dbout = d_b_master.create_connection(dbout_args)
         if dbout is None:
             print("----> Aborted.")
             exit(1)
@@ -152,11 +152,11 @@ if __name__ == "__main__":
         if len(nameocc) == 2:
             occ = int(nameocc[1])
 
-        if args.allSlices:
+        if args.all_slices:
             # TODO: might not be relevant if homogeneous_time != 1
             times = (db.partial_get(idsname, "time", occurrence=occ)).tolist()
         else:
-            times = args.sliceTime
+            times = args.slice_time
 
         timings = idsperf.get_timings(
             db,
@@ -168,7 +168,7 @@ if __name__ == "__main__":
             profile=args.profile,
         )
 
-        if args.showStats and args.repeat > 1:
+        if args.show_stats and args.repeat > 1:
             print(f"All timings  = {timings}")
             print(f"Mean         = {stat.mean(timings)}")
             print(f"Standard dev = {stat.stdev(timings)}")

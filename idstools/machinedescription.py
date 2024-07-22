@@ -10,100 +10,100 @@ from idstools.database import DBMaster
 logger = logging.getLogger(f"module.{__name__}")
 
 
-class MachineDescription:
-    mdSummaryPath = r"/work/imas/shared/imasdb/ITER_MD/3/md_summary.yaml"
+class machine_description:
+    md_summary_path = r"/work/imas/shared/imasdb/ITER_MD/3/md_summary.yaml"
 
-    def __init__(self, mdSummaryPath: str = "", connectionArgs=None) -> None:
-        self.mdArgs = connectionArgs
-        if self.mdArgs:
-            if "database" in self.mdArgs.__dict__ and self.mdArgs.database == "ITER":
-                self.mdArgs.database = "ITER_MD"
+    def __init__(self, md_summary_path: str = "", connection_args=None) -> None:
+        self.md_args = connection_args
+        if self.md_args:
+            if "database" in self.md_args.__dict__ and self.md_args.database == "ITER":
+                self.md_args.database = "ITER_MD"
 
-        self.mdSummaryYaml = {}
-        if not mdSummaryPath:
-            _mdSummaryPath = MachineDescription.mdSummaryPath
+        self.md_summary_yaml = {}
+        if not md_summary_path:
+            _md_summary_path = machine_description.md_summary_path
 
         else:
-            _mdSummaryPath = mdSummaryPath
+            _md_summary_path = md_summary_path
 
-            if os.path.isdir(_mdSummaryPath):
-                _mdSummaryPath = os.path.join(_mdSummaryPath, "md_summary.yaml")
-        with open(_mdSummaryPath, "r") as stream:
+            if os.path.isdir(_md_summary_path):
+                _md_summary_path = os.path.join(_md_summary_path, "md_summary.yaml")
+        with open(_md_summary_path, "r") as stream:
             try:
-                self.mdSummaryYaml = safe_load(stream)
-            except YAMLError as exc:
+                self.md_summary_yaml = safe_load(stream)
+            except y_a_m_l_error as exc:
                 print(exc)
 
-    def getLatestIdsData(self, idsName: str):
-        mdIdsDict = self.getMDSummary(idsName)
-        idsData = None
+    def get_latest_ids_data(self, ids_name: str):
+        md_ids_dict = self.get_m_d_summary(ids_name)
+        ids_data = None
         config = None
         # Get wall of the tokamak
         import argparse
 
-        mdArgs = argparse.Namespace()
-        mdArgs.backend = "MDSPLUS"
-        mdArgs.pulse = 0
-        mdArgs.run = 0
-        mdArgs.user = "public"
-        mdArgs.database = "ITER_MD"
-        mdArgs.version = 3
-        mdArgs.uri = None
-        for pulse, _config in mdIdsDict.items():
-            if idsName == _config["config"]["ids"]:
-                mdArgs.pulse, mdArgs.run = pulse.split("/")
-                mdArgs.pulse, mdArgs.run = int(mdArgs.pulse), int(mdArgs.run)
-                mdArgs.uri = (
-                    f"imas:{mdArgs.backend.lower()}?user={mdArgs.user};shot={mdArgs.pulse};"
-                    f"run={mdArgs.run};database={mdArgs.database};version={mdArgs.version}"
+        md_args = argparse.namespace()
+        md_args.backend = "MDSPLUS"
+        md_args.pulse = 0
+        md_args.run = 0
+        md_args.user = "public"
+        md_args.database = "ITER_MD"
+        md_args.version = 3
+        md_args.uri = None
+        for pulse, _config in md_ids_dict.items():
+            if ids_name == _config["config"]["ids"]:
+                md_args.pulse, md_args.run = pulse.split("/")
+                md_args.pulse, md_args.run = int(md_args.pulse), int(md_args.run)
+                md_args.uri = (
+                    f"imas:{md_args.backend.lower()}?user={md_args.user};shot={md_args.pulse};"
+                    f"run={md_args.run};database={md_args.database};version={md_args.version}"
                 )
-                mdConnection = DBMaster.getConnection(mdArgs)
+                md_connection = d_b_master.get_connection(md_args)
 
                 # print(mdConnection)
-                if mdConnection is not None:
-                    idsData = mdConnection.get(idsName)
-                    mdConnection.close()
-                    if idsData is None:
+                if md_connection is not None:
+                    ids_data = md_connection.get(ids_name)
+                    md_connection.close()
+                    if ids_data is None:
                         continue
                     else:
                         config = _config["config"]
                         break
         return {
-            "idsData": idsData,
+            "idsData": ids_data,
             "yamlConfig": config,
-            "connectionArgs": copy.deepcopy(mdArgs),
+            "connectionArgs": copy.deepcopy(md_args),
         }
 
-    def getMDDataByIdsList(self, mdIdsList=[]):
+    def get_m_d_data_by_ids_list(self, md_ids_list=[]):
         """
         The `getMachineDatabaseData` method is responsible for retrieving machine database data for the specified
         pulse list. It iterates over each pulse in the `mdSummaryYaml` dictionary and checks if the pulse is present
         in the `pulseList`. If the pulse is not in the `pulseList`, it skips to the next pulse.
         """
-        idsData = {}
-        for idsName in mdIdsList:
-            idsData[idsName] = self.getMDDataByIds(idsName)
-        return idsData
+        ids_data = {}
+        for ids_name in md_ids_list:
+            ids_data[ids_name] = self.get_m_d_data_by_ids(ids_name)
+        return ids_data
 
-    def getMDDataByIds(self, idsName: str):
-        outputDict = self.getLatestIdsData(idsName)
+    def get_m_d_data_by_ids(self, ids_name: str):
+        output_dict = self.get_latest_ids_data(ids_name)
         data = {}
         (
             data["idsData"],
             data["yamlConfig"],
             data["connectionArgs"],
         ) = (
-            outputDict["idsData"],
-            outputDict["yamlConfig"],
-            outputDict["connectionArgs"],
+            output_dict["idsData"],
+            output_dict["yamlConfig"],
+            output_dict["connectionArgs"],
         )
         return data
 
-    def getMDSummary(
+    def get_m_d_summary(
         self,
-        idsNames: typing.Union[typing.List, str] = "",
-        addObsoelete=False,
-        checkValidity=False,
+        ids_names: typing.union[typing.list, str] = "",
+        add_obsoelete=False,
+        check_validity=False,
     ):
         """
         The `readMDSummary` method is responsible for reading the machine description summary and retrieving
@@ -111,40 +111,40 @@ class MachineDescription:
         """
 
         # if provided just single string then convert to list with single string
-        if isinstance(idsNames, str):
-            idsNames = [idsNames]
+        if isinstance(ids_names, str):
+            ids_names = [ids_names]
         # lower case provided ids names
-        idsNames = list(map(lambda x: x.lower(), idsNames))
-        pulsesData: typing.Dict[str, typing.Dict] = {}
-        for pulse, config in self.mdSummaryYaml.items():
-            if idsNames:
-                if config["ids"] not in idsNames:
+        ids_names = list(map(lambda x: x.lower(), ids_names))
+        pulses_data: typing.dict[str, typing.dict] = {}
+        for pulse, config in self.md_summary_yaml.items():
+            if ids_names:
+                if config["ids"] not in ids_names:
                     continue
 
-            if addObsoelete is False:
+            if add_obsoelete is False:
                 if config["status"] == "obsolete":
                     continue
 
-            pulsesData[pulse] = {}
-            pulsesData[pulse]["data"] = None
-            if checkValidity:
-                self.mdArgs.pulse, self.mdArgs.run = pulse.split("/")
-                self.mdArgs.pulse, self.mdArgs.run = int(self.mdArgs.pulse), int(self.mdArgs.run)
-                self.mdArgs.uri = (
-                    f"imas:mdsplus?user={self.mdArgs.user};pulse={self.mdArgs.pulse};"
-                    f"run={self.mdArgs.run};database={self.mdArgs.database};version={self.mdArgs.version}"
+            pulses_data[pulse] = {}
+            pulses_data[pulse]["data"] = None
+            if check_validity:
+                self.md_args.pulse, self.md_args.run = pulse.split("/")
+                self.md_args.pulse, self.md_args.run = int(self.md_args.pulse), int(self.md_args.run)
+                self.md_args.uri = (
+                    f"imas:mdsplus?user={self.md_args.user};pulse={self.md_args.pulse};"
+                    f"run={self.md_args.run};database={self.md_args.database};version={self.md_args.version}"
                 )
-                mdConnection = DBMaster.getConnection(self.mdArgs)
-                if mdConnection is not None:
-                    idsData = mdConnection.get(config["ids"])
-                    if idsData is not None:
-                        pulsesData[pulse]["data"]
-                    mdConnection.close()
+                md_connection = d_b_master.get_connection(self.md_args)
+                if md_connection is not None:
+                    ids_data = md_connection.get(config["ids"])
+                    if ids_data is not None:
+                        pulses_data[pulse]["data"]
+                    md_connection.close()
 
-            pulsesData[pulse]["config"] = config
-        return pulsesData
+            pulses_data[pulse]["config"] = config
+        return pulses_data
 
-    def getPandasDataFrame(self):
+    def get_pandas_data_frame(self):
         """
         The function `getPandasDataFrame` converts a dictionary into a pandas DataFrame.
 
@@ -153,11 +153,11 @@ class MachineDescription:
         """
         import pandas as pd
 
-        dataList = [{"id": key, **value} for key, value in self.mdSummaryYaml.items()]
-        df = pd.DataFrame(dataList)
+        data_list = [{"id": key, **value} for key, value in self.md_summary_yaml.items()]
+        df = pd.data_frame(data_list)
         return df
 
-    def getStatus(self, pulse: int, run: int):
+    def get_status(self, pulse: int, run: int):
         """
         The function `getStatus` takes in two parameters, `pulse` and `run`, and returns the value of the
         key "status" from the `yaml` object dictionary using the `pulse` and `run` as keys.
@@ -171,12 +171,12 @@ class MachineDescription:
             otherwise it returns `None`.
         """
         pulserun = str(pulse) + r"/" + str(run)
-        if self.mdSummaryYaml:
-            return self.mdSummaryYaml[pulserun]["status"]
+        if self.md_summary_yaml:
+            return self.md_summary_yaml[pulserun]["status"]
         else:
             return None
 
-    def getReasonForReplacement(self, pulse: int, run: int):
+    def get_reason_for_replacement(self, pulse: int, run: int):
         """
         The function `getReasonForReplacement` takes in two parameters, `pulse` and `run`, and returns
         the value of the key "reason_for_replacement" from the `yaml` object dictionary using the `pulse`
@@ -191,12 +191,12 @@ class MachineDescription:
             object is not `None`, otherwise it returns `None`.
         """
         pulserun = str(pulse) + r"/" + str(run)
-        if self.mdSummaryYaml:
-            return self.mdSummaryYaml[pulserun]["reason_for_replacement"]
+        if self.md_summary_yaml:
+            return self.md_summary_yaml[pulserun]["reason_for_replacement"]
         else:
             return None
 
-    def getReplacedBy(self, pulse: int, run: int):
+    def get_replaced_by(self, pulse: int, run: int):
         """
         The function `getReplacedBy` takes in two parameters, `pulse` and `run`, and returns the value of
         the key "replaced_by" from the `yaml` object dictionary using the `pulse` and `run` as keys.
@@ -210,12 +210,12 @@ class MachineDescription:
             otherwise it returns `None`.
         """
         pulserun = str(pulse) + r"/" + str(run)
-        if self.mdSummaryYaml:
-            return self.mdSummaryYaml[pulserun]["replaced_by"]
+        if self.md_summary_yaml:
+            return self.md_summary_yaml[pulserun]["replaced_by"]
         else:
             return None
 
-    def getReplaces(self, pulse: int, run: int):
+    def get_replaces(self, pulse: int, run: int):
         """
         The function `getReplaces` takes in two parameters, `pulse` and `run`, and returns the value of the key
         "replaces" from the `yaml` object dictionary using the `pulse` and `run` as keys.
@@ -229,12 +229,12 @@ class MachineDescription:
             it returns `None`.
         """
         pulserun = str(pulse) + r"/" + str(run)
-        if self.mdSummaryYaml:
-            return self.mdSummaryYaml[pulserun]["replaces"]
+        if self.md_summary_yaml:
+            return self.md_summary_yaml[pulserun]["replaces"]
         else:
             return None
 
-    def getChildren(self, pulse: int, run: int, dictToFill={}):
+    def get_children(self, pulse: int, run: int, dict_to_fill={}):
         """
         The function `getChildren` recursively retrieves information about replaced pulses and runs from a
         dictionary and stores it in a new dictionary.
@@ -251,28 +251,28 @@ class MachineDescription:
             The dictionary has keys "pulse", "run", "status", and "reason_for_replacement", and the corresponding
             values are lists that store the information for each child.
         """
-        replaced_by = self.getReplacedBy(pulse, run)
+        replaced_by = self.get_replaced_by(pulse, run)
         if replaced_by is not None:
             string_list = re.findall(r"\d+", replaced_by)
             pulsec = string_list[0]
             runc = string_list[1]
             pulserunc = pulsec + "/" + runc
-            if "pulse" not in dictToFill.keys():
-                dictToFill["pulse"] = []
-            if "run" not in dictToFill.keys():
-                dictToFill["run"] = []
-            if "status" not in dictToFill.keys():
-                dictToFill["status"] = []
-            if "reason_for_replacement" not in dictToFill.keys():
-                dictToFill["reason_for_replacement"] = []
-            dictToFill["pulse"].append(pulsec)
-            dictToFill["run"].append(runc)
-            dictToFill["status"].append(self.mdSummaryYaml[pulserunc]["status"])
-            dictToFill["reason_for_replacement"].append(self.mdSummaryYaml[pulserunc]["reason_for_replacement"])
-            dictToFill = self.getChildren(int(pulsec), int(runc), dictToFill)
-        return dictToFill
+            if "pulse" not in dict_to_fill.keys():
+                dict_to_fill["pulse"] = []
+            if "run" not in dict_to_fill.keys():
+                dict_to_fill["run"] = []
+            if "status" not in dict_to_fill.keys():
+                dict_to_fill["status"] = []
+            if "reason_for_replacement" not in dict_to_fill.keys():
+                dict_to_fill["reason_for_replacement"] = []
+            dict_to_fill["pulse"].append(pulsec)
+            dict_to_fill["run"].append(runc)
+            dict_to_fill["status"].append(self.md_summary_yaml[pulserunc]["status"])
+            dict_to_fill["reason_for_replacement"].append(self.md_summary_yaml[pulserunc]["reason_for_replacement"])
+            dict_to_fill = self.get_children(int(pulsec), int(runc), dict_to_fill)
+        return dict_to_fill
 
-    def getParents(self, pulse: int, run: int, dictToFill={}):
+    def get_parents(self, pulse: int, run: int, dict_to_fill={}):
         """
         The `getParents` function recursively retrieves the parent information for a given pulse and run, populating
         a dictionary with the parent pulse, parent run, status, and reason for replacement.
@@ -287,29 +287,29 @@ class MachineDescription:
         Returns:
             a dictionary `dictToFill` that contains information about the parents of a given pulse and run.
         """
-        replaces = self.getReplaces(pulse, run)
+        replaces = self.get_replaces(pulse, run)
         if replaces is not None:
             string_list = re.findall(r"\d+", replaces)
             pulsep = string_list[0]
             runp = string_list[1]
             pulserunp = pulsep + "/" + runp
-            if "pulse" not in dictToFill.keys():
-                dictToFill["pulse"] = []
-            if "run" not in dictToFill.keys():
-                dictToFill["run"] = []
-            if "status" not in dictToFill.keys():
-                dictToFill["status"] = []
-            if "reason_for_replacement" not in dictToFill.keys():
-                dictToFill["reason_for_replacement"] = []
+            if "pulse" not in dict_to_fill.keys():
+                dict_to_fill["pulse"] = []
+            if "run" not in dict_to_fill.keys():
+                dict_to_fill["run"] = []
+            if "status" not in dict_to_fill.keys():
+                dict_to_fill["status"] = []
+            if "reason_for_replacement" not in dict_to_fill.keys():
+                dict_to_fill["reason_for_replacement"] = []
 
-            dictToFill["pulse"].insert(0, pulsep)  # Order to be reversed for parents
-            dictToFill["run"].insert(0, runp)
-            dictToFill["status"].insert(0, self.mdSummaryYaml[pulserunp]["status"])
-            dictToFill["reason_for_replacement"].insert(0, self.mdSummaryYaml[pulserunp]["reason_for_replacement"])
-            dictToFill = self.getParents(int(pulsep), int(runp), dictToFill)
-        return dictToFill
+            dict_to_fill["pulse"].insert(0, pulsep)  # Order to be reversed for parents
+            dict_to_fill["run"].insert(0, runp)
+            dict_to_fill["status"].insert(0, self.md_summary_yaml[pulserunp]["status"])
+            dict_to_fill["reason_for_replacement"].insert(0, self.md_summary_yaml[pulserunp]["reason_for_replacement"])
+            dict_to_fill = self.get_parents(int(pulsep), int(runp), dict_to_fill)
+        return dict_to_fill
 
-    def getFamily(self, pulse: int, run: int):
+    def get_family(self, pulse: int, run: int):
         """
         The function "getFamily" returns a dictionary containing the parents and children of a given pulse and run.
 
@@ -322,12 +322,12 @@ class MachineDescription:
             with these keys are the results of calling the `getParents` and `getChildren` methods with the given
             `pulse` and `run` parameters.
         """
-        familyDict = {}
-        familyDict["parents"] = self.getParents(pulse, run)
-        familyDict["children"] = self.getChildren(pulse, run)
-        return familyDict
+        family_dict = {}
+        family_dict["parents"] = self.get_parents(pulse, run)
+        family_dict["children"] = self.get_children(pulse, run)
+        return family_dict
 
-    def checkIfExist(self, pulse: int, run: int):
+    def check_if_exist(self, pulse: int, run: int):
         """
         The function checks if a given pulse and run combination exists in a yaml dictionary.
 
@@ -340,6 +340,6 @@ class MachineDescription:
             `True`. Otherwise, it will return `False`.
         """
         pulserun = str(pulse) + r"/" + str(run)
-        if pulserun not in self.mdSummaryYaml.keys():
+        if pulserun not in self.md_summary_yaml.keys():
             return False
         return True

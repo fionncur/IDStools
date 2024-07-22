@@ -49,12 +49,12 @@ try:
     from rich.panel import Panel
     from rich.pretty import Pretty, pprint
 
-    richAvailable = True
+    rich_available = True
 except ImportError:
-    richAvailable = False
+    rich_available = False
 
 
-class Canvas:
+class canvas:
     # https://matplotlib.org/stable/tutorials/intermediate/arranging_axes.html
 
     def __init__(self, nrows=1, ncols=1, *args, **kwargs) -> None:
@@ -110,7 +110,7 @@ class Canvas:
         except Exception as e:
             logger.debug(f"{e}")
 
-    def setText(self, x=0.001, y=0.985, text="", ha="left", fontsize=7):
+    def set_text(self, x=0.001, y=0.985, text="", ha="left", fontsize=7):
         plt.figtext(
             x,
             y,
@@ -119,7 +119,7 @@ class Canvas:
             fontsize=fontsize,
         )
 
-    def setSupTitle(self, text="", *args, **kwargs):
+    def set_sup_title(self, text="", *args, **kwargs):
         plt.suptitle(text, *args, **kwargs)
 
     def show(self, *args, **kwargs):
@@ -133,7 +133,7 @@ class Canvas:
     def get_current_fig_manager(self):
         return plt.get_current_fig_manager()
 
-    def setStyle(self, style="default"):
+    def set_style(self, style="default"):
         """
         The function `setStyle` in allows you to set different color schemes for plots using Matplotlib based
         on the specified style parameter. Available styles are vibrant, retro, muted, high-vis, contrast, bright
@@ -146,7 +146,7 @@ class Canvas:
             # Standard SciencePlots color cycle
 
             # Set color cycle: blue, green, yellow, red, violet, gray
-            matplotlib.rcParams["axes.prop_cycle"] = matplotlib.cycler(
+            matplotlib.rc_params["axes.prop_cycle"] = matplotlib.cycler(
                 "color",
                 ["0C5DA5", "00B945", "FF9500", "FF2C00", "845B97", "474747", "9e9e9e"],
             )
@@ -156,7 +156,7 @@ class Canvas:
             # from Paul Tot's website: https://personal.sron.nl/~pault/
 
             # Set color cycle
-            matplotlib.rcParams["axes.prop_cycle"] = matplotlib.cycler(
+            matplotlib.rc_params["axes.prop_cycle"] = matplotlib.cycler(
                 "color",
                 ["EE7733", "0077BB", "33BBEE", "EE3377", "CC3311", "009988", "BBBBBB"],
             )
@@ -164,7 +164,7 @@ class Canvas:
             # Retro color style
 
             # Set color cycle
-            matplotlib.rcParams["axes.prop_cycle"] = matplotlib.cycler(
+            matplotlib.rc_params["axes.prop_cycle"] = matplotlib.cycler(
                 "color", ["4165c0", "e770a2", "5ac3be", "696969", "f79a1e", "ba7dcd"]
             )
         if style == "muted":
@@ -173,7 +173,7 @@ class Canvas:
             # from Paul Tot's website: https://personal.sron.nl/~pault/
 
             # Set color cycle
-            matplotlib.rcParams["axes.prop_cycle"] = matplotlib.cycler(
+            matplotlib.rc_params["axes.prop_cycle"] = matplotlib.cycler(
                 "color",
                 [
                     "CC6677",
@@ -194,7 +194,7 @@ class Canvas:
             # from Paul Tot's website: https://personal.sron.nl/~pault/
 
             # Set color cycle
-            matplotlib.rcParams["axes.prop_cycle"] = matplotlib.cycler(
+            matplotlib.rc_params["axes.prop_cycle"] = matplotlib.cycler(
                 "color",
                 [
                     "77AADD",
@@ -213,7 +213,7 @@ class Canvas:
             # Matplotlib style for high visability plots (i.e., bright colors!!!)
 
             # Set color cycle
-            matplotlib.rcParams["axes.prop_cycle"] = matplotlib.cycler(
+            matplotlib.rc_params["axes.prop_cycle"] = matplotlib.cycler(
                 "color", ["0d49fb", "e6091c", "26eb47", "8936df", "fec32d", "25d7fd"]
             ) + matplotlib.cycler("ls", ["-", "--", "-.", ":", "-", "--"])
 
@@ -223,7 +223,7 @@ class Canvas:
             # from Paul Tot's website: https://personal.sron.nl/~pault/
 
             # Set color cycle
-            matplotlib.rcParams["axes.prop_cycle"] = matplotlib.cycler("color", ["004488", "DDAA33", "BB5566"])
+            matplotlib.rc_params["axes.prop_cycle"] = matplotlib.cycler("color", ["004488", "DDAA33", "BB5566"])
 
         if style == "bright":
             # Bright color scheme
@@ -231,13 +231,13 @@ class Canvas:
             # from Paul Tot's website: https://personal.sron.nl/~pault/
 
             # Set color cycle
-            matplotlib.rcParams["axes.prop_cycle"] = matplotlib.cycler(
+            matplotlib.rc_params["axes.prop_cycle"] = matplotlib.cycler(
                 "color",
                 ["4477AA", "EE6677", "228833", "CCBB44", "66CCEE", "AA3377", "BBBBBB"],
             )
 
 
-class BasePlot:
+class base_plot:
     def database_info(self, ax, title, hostdir, shot, run, t):
         plottitle = title
         plottitle += " (t={:.3f})".format(t)
@@ -262,14 +262,14 @@ class BasePlot:
         # self.ax.add_artist(anchored_text)
 
 
-class Terminal:
+class terminal:
     tabsize = 10
-    TAB = " " * 16
-    LINE = "-" * 8
+    t_a_b = " " * 16
+    l_i_n_e = "-" * 8
 
     def __init__(self) -> None:
-        if richAvailable:
-            self.console = Console()
+        if rich_available:
+            self.console = console()
 
     def print(self, text, style=None, panel=False, pretty=False):
         if type(text) is dict:
@@ -277,11 +277,11 @@ class Terminal:
             return
         if style is None:
             style = "green"
-        if richAvailable:
+        if rich_available:
             if pretty:
-                text = Pretty(text)
+                text = pretty(text)
             if panel:
-                text = Panel(text)
+                text = panel(text)
             self.console.print(text, style=style, highlight=False)
             return
         print(text)

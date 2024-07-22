@@ -1,7 +1,7 @@
 """
 This module provides compute functions and classes for pf_active ids data
 
-`refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`_.
+`refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/i_m_design/Data%20Model/sphinx/latest.html>`_.
 
 """
 
@@ -10,7 +10,7 @@ import logging
 logger = logging.getLogger("module")
 
 
-class PfActiveCompute:
+class pf_active_compute:
     """This class provides compute functions for pf_active ids"""
 
     def __init__(self, ids: object):
@@ -21,7 +21,7 @@ class PfActiveCompute:
         """
         self.ids = ids
 
-    def getActivePfCoils(self) -> dict:
+    def get_active_pf_coils(self) -> dict:
         """
         This function returns a dictionary of active PF coils and their corresponding elements dimensions and
         center coordinates.
@@ -49,38 +49,38 @@ class PfActiveCompute:
         """
 
         coils = {}
-        for coilIndex, coil in enumerate(self.ids.coil):
-            coilInfo = {}
+        for coil_index, coil in enumerate(self.ids.coil):
+            coil_info = {}
 
-            coilInfo["identifier"] = coil.identifier
-            coilInfo["name"] = coil.name
-            coilInfo["resistance"] = coil.resistance
+            coil_info["identifier"] = coil.identifier
+            coil_info["name"] = coil.name
+            coil_info["resistance"] = coil.resistance
 
             # Get elements
-            dictElements = {}
-            for elementIndex, element in enumerate(coil.element):
-                horizontalWidth = element.geometry.rectangle.width
-                verticalHeight = element.geometry.rectangle.height
-                if horizontalWidth > 0.0 and verticalHeight > 0.0:
+            dict_elements = {}
+            for element_index, element in enumerate(coil.element):
+                horizontal_width = element.geometry.rectangle.width
+                vertical_height = element.geometry.rectangle.height
+                if horizontal_width > 0.0 and vertical_height > 0.0:
                     cec = (
-                        element.geometry.rectangle.r - horizontalWidth / 2.0,
-                        element.geometry.rectangle.z - verticalHeight / 2.0,
+                        element.geometry.rectangle.r - horizontal_width / 2.0,
+                        element.geometry.rectangle.z - vertical_height / 2.0,
                     )
-                    dictElements[elementIndex] = {
+                    dict_elements[element_index] = {
                         "name": element.name,
                         "identifier": element.identifier,
                         "area": element.area,
-                        "horizontalWidth": horizontalWidth,
-                        "horizontalHeight": verticalHeight,
+                        "horizontalWidth": horizontal_width,
+                        "horizontalHeight": vertical_height,
                         "cec": cec,
                         "r": element.geometry.rectangle.r,
                         "z": element.geometry.rectangle.z,
                     }
 
-            coilInfo["elements"] = dictElements
-            if not dictElements:
-                logger.warning(f"Coil index {coilIndex} : pf_active.coil.element.geometry.rectangle is empty")
-            coils[coilIndex] = coilInfo
+            coil_info["elements"] = dict_elements
+            if not dict_elements:
+                logger.warning(f"Coil index {coil_index} : pf_active.coil.element.geometry.rectangle is empty")
+            coils[coil_index] = coil_info
         if not coils:
             logger.warning("pf_active.coil is empty")
         return coils

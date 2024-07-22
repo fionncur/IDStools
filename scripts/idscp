@@ -13,12 +13,12 @@ import imas
 from idstools.utils.clihelper import imasParser
 from idstools.utils.idslogger import setupLogger
 
-logger = setupLogger("module")
+logger = setup_logger("module")
 
 # Management of input arguments
-parser = argparse.ArgumentParser(
+parser = argparse.argument_parser(
     description="Copy IDSs from a data-entry into another one",
-    formatter_class=RichHelpFormatter,
+    formatter_class=rich_help_formatter,
 )
 parser.add_argument(
     "-s",
@@ -80,20 +80,20 @@ if args.src is not None and args.dest is not None:
         exit()
 
 if args.ids == []:
-    args.ids = [ids.value for ids in list(imas.IDSName)]
+    args.ids = [ids.value for ids in list(imas.i_d_s_name)]
 
 
-inputargs = argparse.Namespace()
+inputargs = argparse.namespace()
 inputargs.uri = args.src
 
-src_connection = DBMaster.getConnection(inputargs)
+src_connection = d_b_master.get_connection(inputargs)
 if src_connection is None:
     logger.error("Error opening source pulse! Please check existence.")
     sys.exit()
-outputargs = argparse.Namespace()
+outputargs = argparse.namespace()
 outputargs.uri = args.dest
 
-dest_connection = DBMaster.getDBEntryObject(outputargs)
+dest_connection = d_b_master.get_d_b_entry_object(outputargs)
 
 if not args.force:
     # OPEN DEST
@@ -114,7 +114,7 @@ else:
         exit(status)
 
 
-if args.allOccurrences:
+if args.all_occurrences:
     if "/" in args.ids:
         logger.error(
             "Please do not specify source occurrences together with -a/--allOccurrences option"
@@ -123,7 +123,7 @@ if args.allOccurrences:
     else:
         allids = []
         for idsname in args.ids:
-            mocc = getattr(imas, idsname)().getMaxOccurrences()
+            mocc = getattr(imas, idsname)().get_max_occurrences()
             allids.append(idsname)
             allids.extend(f"{idsname}/{o}" for o in range(1, mocc + 1))
         args.ids = allids
@@ -141,7 +141,7 @@ for idsname in args.ids:
             dest_connection.partial_get(
                 idsid[0], "ids_properties/homogeneous_time", occurrence=inocc
             )
-            == imas.imasdef.EMPTY_INT
+            == imas.imasdef.e_m_p_t_y__i_n_t
         ):
             user_choice = ""
             while user_choice not in ["y", "n"]:
@@ -152,12 +152,12 @@ for idsname in args.ids:
                 print(f"skip {idsid[0]}")
                 continue
     idsobj = src_connection.get(idsid[0], occurrence=inocc)
-    if args.setDatasetVersion and idsid[0] == "dataset_description":
-        idsobj.dd_version = DBMaster.getDDVersion()
+    if args.set_dataset_version and idsid[0] == "dataset_description":
+        idsobj.dd_version = d_b_master.get_d_d_version()
     try:
-        if idsobj.ids_properties.homogeneous_time != imas.imasdef.EMPTY_INT:
+        if idsobj.ids_properties.homogeneous_time != imas.imasdef.e_m_p_t_y__i_n_t:
             print(f"Copying {idsname}")
-            outocc = inocc if args.outputOccurrence is None else args.outputOccurrence
+            outocc = inocc if args.output_occurrence is None else args.output_occurrence
             dest_connection.put(idsobj, occurrence=outocc)
     except Exception as exc:
         print(exc, file=sys.stderr)

@@ -21,10 +21,10 @@ from idstools.utils.idslogger import setupLogger
 from idstools.view.common import Canvas
 from idstools.view.core_profiles import CoreProfilesView
 
-parser = argparse.ArgumentParser(
+parser = argparse.argument_parser(
     description="---- Display the efield, toroidal, polidal velocities from the core_profiles IDSs [previously known as rotationplot]",
-    parents=[dbentryParser],
-    formatter_class=RichHelpFormatter,
+    parents=[dbentry_parser],
+    formatter_class=rich_help_formatter,
 )
 
 parser.add_argument(
@@ -41,17 +41,17 @@ parser.add_argument(
     default=None,
 )
 args = parser.parse_args()
-logger = setupLogger("module", stdout_level=logging.INFO)
+logger = setup_logger("module", stdout_level=logging.i_n_f_o)
 
-connection = DBMaster.getConnection(args)
+connection = d_b_master.get_connection(args)
 if connection is None:
     logger.critical("----> Aborted.")
     exit(1)
 
 try:
-    idsCoreProfiles = imas.core_profiles()
-    idsCoreProfiles.time = connection.partial_get("core_profiles", "time")
-    if idsCoreProfiles.time is None:
+    ids_core_profiles = imas.core_profiles()
+    ids_core_profiles.time = connection.partial_get("core_profiles", "time")
+    if ids_core_profiles.time is None:
         logger.critical("No core_profiles IDS in the data-entry --> Abort.")
         exit()
 except Exception as e:
@@ -60,17 +60,17 @@ except Exception as e:
     exit()
 
 # Search for adequate time slice for display
-timeArray = idsCoreProfiles.time
-timeIndex, timeValue = getNearestTime(timeArray, args.time)
-ntime = len(idsCoreProfiles.time)
+time_array = ids_core_profiles.time
+time_index, time_value = get_nearest_time(time_array, args.time)
+ntime = len(ids_core_profiles.time)
 
 # Read 1D-profiles for this time slice
-idsCoreProfiles.profiles_1d.resize(1)
-idsCoreProfiles.profiles_1d[0] = connection.partial_get(
-    "core_profiles", f"profiles_1d({timeIndex})"
+ids_core_profiles.profiles_1d.resize(1)
+ids_core_profiles.profiles_1d[0] = connection.partial_get(
+    "core_profiles", f"profiles_1d({time_index})"
 )
 
-canvas = Canvas(2, 2)
+canvas = canvas(2, 2)
 
 ax1 = canvas.add_axes(title="", xlabel="", row=0, col=0)
 ax2 = canvas.add_axes(title="", xlabel="", row=0, col=1)
@@ -78,27 +78,27 @@ ax3 = canvas.add_axes(title="", xlabel="", row=1, col=0)
 ax4 = canvas.add_axes(title="", xlabel="", row=1, col=1)
 
 
-coreprofilesView = CoreProfilesView(idsCoreProfiles)
+coreprofiles_view = core_profiles_view(ids_core_profiles)
 
-coreprofilesView.plotEfieldProfile(ax1)
-coreprofilesView.plotToroidalVelocityProfile(ax2)
-coreprofilesView.plotPoloidalVelocityProfile(ax3)
-coreprofilesView.plotDiamagneticVelocityProfile(ax4)
+coreprofiles_view.plot_efield_profile(ax1)
+coreprofiles_view.plot_toroidal_velocity_profile(ax2)
+coreprofiles_view.plot_poloidal_velocity_profile(ax3)
+coreprofiles_view.plot_diamagnetic_velocity_profile(ax4)
 
 ax1.sharex(ax3)
 ax2.sharex(ax4)
 
-canvas.setText(text=f"{getDatabasePath(args, timeValue=timeValue)}")
+canvas.set_text(text=f"{get_database_path(args, time_value=time_value)}")
 
 canvas.fig.subplots_adjust(
     top=0.916, bottom=0.09, left=0.044, right=0.953, hspace=0.174, wspace=0.117
 )
 canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
-canvas.fig.suptitle(getTitle(args, "Kinetic profiles", timeValue), size=12)
+canvas.fig.suptitle(get_title(args, "Kinetic profiles", time_value), size=12)
 
 if args.save:
-    fname = getFileName(
-        args, os.path.basename(__file__) + "_Kinetic_profiles", timeValue
+    fname = get_file_name(
+        args, os.path.basename(__file__) + "_Kinetic_profiles", time_value
     )
     if args.directory:
         if not os.path.exists(args.directory):

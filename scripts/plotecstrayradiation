@@ -27,11 +27,11 @@ from idstools.view.equilibrium import EquilibriumView
 from idstools.view.tbd import TbdView
 from idstools.view.waves import WavesView
 
-logger = setupLogger("module", stdout_level=logging.INFO)
+logger = setup_logger("module", stdout_level=logging.i_n_f_o)
 
-parser = argparse.ArgumentParser(
+parser = argparse.argument_parser(
     description="---- Shows electron cyclotron stray radiation information by showing different plots",
-    formatter_class=RichHelpFormatter,
+    formatter_class=rich_help_formatter,
 )
 parser.add_argument(
     "-u",
@@ -59,9 +59,9 @@ parser.add_argument(
 )
 args = parser.parse_args()
 
-timeIndexEquilibrium = 0
-timeIndexCoreProfiles = 0
-timeIndexWaves = 0
+time_index_equilibrium = 0
+time_index_core_profiles = 0
+time_index_waves = 0
 
 current_file_path = os.path.dirname(os.path.abspath(__file__))
 
@@ -84,54 +84,54 @@ wall2d = read_wall(wallfile)
 # # Read launching parameters from EC waveform file
 launching_parameters = read_launching_parameters(filelaunchers)
 # # Read beam extra variables from Torbeam output ascii files
-beam_output, timeArrayWaves = read_torbeam_output(launching_parameters, path_result)
+beam_output, time_array_waves = read_torbeam_output(launching_parameters, path_result)
 # # Check if rays go into the divertor
 check_rays_into_divertor(wall2d, beam_output)
 # # Calculates where the beams cross the wall
 beam_wall = beam_wall_crossing(wall2d, launching_parameters, beam_output)
 
 if args.uri is None:
-    inIDSList, outIDSDict, inputargs = readScenario(
-        scenarioFilePath=scenario_file,
-        inIDSList=["equilibrium", "core_profiles"],
-        outIDSList=["waves"],
+    in_i_d_s_list, out_i_d_s_dict, inputargs = read_scenario(
+        scenario_file_path=scenario_file,
+        in_i_d_s_list=["equilibrium", "core_profiles"],
+        out_i_d_s_list=["waves"],
     )
     args.uri = f"imas:mdsplus?user={inputargs.user};pulse={inputargs.pulse};run={inputargs.run};database={inputargs.database};version={inputargs.version}"
 else:
-    data = readScenarioWithArgs(
+    data = read_scenario_with_args(
         imasargs=args,
-        inIDSList=["equilibrium", "core_profiles"],
-        outIDSList=["waves"],
+        in_i_d_s_list=["equilibrium", "core_profiles"],
+        out_i_d_s_list=["waves"],
     )
     if data is not None:
-        inIDSList, outIDSDict = data
+        in_i_d_s_list, out_i_d_s_dict = data
 
-equilibriumIds = inIDSList["equilibrium"]
-coreProfilesIds = inIDSList["core_profiles"]
-wavesIds = outIDSDict["waves"]
+equilibrium_ids = in_i_d_s_list["equilibrium"]
+core_profiles_ids = in_i_d_s_list["core_profiles"]
+waves_ids = out_i_d_s_dict["waves"]
 
 
-timeArrayEquilibrium = equilibriumIds.time  # Plot Ip
-timeArrayCoreProfiles = coreProfilesIds.time
-timeArrayWaves = wavesIds.time
+time_array_equilibrium = equilibrium_ids.time  # Plot Ip
+time_array_core_profiles = core_profiles_ids.time
+time_array_waves = waves_ids.time
 
-timeSlice = args.time
+time_slice = args.time
 
 # # Indices for time arrays in equilibrium, core_profiles, waves IDSs
-timeIndexEquilibrium, timeValueEquilibrium = getNearestTime(
-    timeArrayEquilibrium, timeSlice
+time_index_equilibrium, time_value_equilibrium = get_nearest_time(
+    time_array_equilibrium, time_slice
 )
-timeIndexCoreProfiles, timeValueCoreProfiles = getNearestTime(
-    timeArrayCoreProfiles, timeSlice
+time_index_core_profiles, time_value_core_profiles = get_nearest_time(
+    time_array_core_profiles, time_slice
 )
-timeIndexWaves, timeValueWaves = getNearestTime(timeArrayWaves, timeSlice)
+time_index_waves, time_value_waves = get_nearest_time(time_array_waves, time_slice)
 # Subplot waveforms versus time
-equilibriumView = EquilibriumView(equilibriumIds)
-coreProfilesView = CoreProfilesView(coreProfilesIds)
-wavesView = WavesView(wavesIds)
-ecstrayView = EcStrayView(equilibriumIds, coreProfilesIds, wavesIds)
+equilibrium_view = equilibrium_view(equilibrium_ids)
+core_profiles_view = core_profiles_view(core_profiles_ids)
+waves_view = waves_view(waves_ids)
+ecstray_view = ec_stray_view(equilibrium_ids, core_profiles_ids, waves_ids)
 
-canvas = Canvas(3, 3)
+canvas = canvas(3, 3)
 ax_top_view = canvas.add_axes(
     title="Top View (X,Y)", xlabel="X [m]", ylabel="Y [m]", row=0, col=0, rowspan=2
 )
@@ -159,34 +159,34 @@ ax_beam_index = canvas.add_axes(
     title="Beam index", xlabel="Beam index", row=2, col=1, colspan=2
 )
 
-equilibriumView.plotIP(ax_waveform)  # Plot Ip
-coreProfilesView.plotElectronDensityNe0(ax_waveform)
-wavesView.plotBeamIndex(ax_beam_index)
-equilibriumView.plotPoloidalEquilibrium(ax_pol_view, timeIndexEquilibrium)
-beamIndex = 0
-wavesView.plotPoloidalTracesUpdate(ax_pol_view, timeIndexWaves, beamIndex, verbose=True)
-ecstrayView.plotResonanceLayer(
-    ax_pol_view, timeIndexWaves, timeIndexEquilibrium, verbose=True
+equilibrium_view.plot_i_p(ax_waveform)  # Plot Ip
+core_profiles_view.plot_electron_density_ne0(ax_waveform)
+waves_view.plot_beam_index(ax_beam_index)
+equilibrium_view.plot_poloidal_equilibrium(ax_pol_view, time_index_equilibrium)
+beam_index = 0
+waves_view.plot_poloidal_traces_update(ax_pol_view, time_index_waves, beam_index, verbose=True)
+ecstray_view.plot_resonance_layer(
+    ax_pol_view, time_index_waves, time_index_equilibrium, verbose=True
 )
-ecstrayView.plotCutOffLayer(
-    ax_pol_view, timeIndexWaves, timeIndexCoreProfiles, timeIndexEquilibrium
+ecstray_view.plot_cut_off_layer(
+    ax_pol_view, time_index_waves, time_index_core_profiles, time_index_equilibrium
 )
-ax_topview_plot_eq = equilibriumView.plotTopplotequilibrium(
-    ax_top_view, timeIndexEquilibrium
+ax_topview_plot_eq = equilibrium_view.plot_topplotequilibrium(
+    ax_top_view, time_index_equilibrium
 )
-ax_topview_plot_traces = wavesView.plotTopviewTracesUpdate(
-    ax_top_view, timeIndexWaves, beamIndex
+ax_topview_plot_traces = waves_view.plot_topview_traces_update(
+    ax_top_view, time_index_waves, beam_index
 )
-ax_density_plot_dens, nmax = coreProfilesView.plotDensityProfile(
-    ax_density, timeIndexCoreProfiles, logscale=args.logscale
-)
-
-tbdView = TbdView()
-ax_polygon_plot_pol = tbdView.plot_polygon(
-    ax_polygon, wall2d, beam_wall, beamIndex, timeIndexWaves, timeIndexWaves
+ax_density_plot_dens, nmax = core_profiles_view.plot_density_profile(
+    ax_density, time_index_core_profiles, logscale=args.logscale
 )
 
-canvas.setText(text=f"{getDatabasePath(args, timeValue=timeValueEquilibrium)}")
+tbd_view = tbd_view()
+ax_polygon_plot_pol = tbd_view.plot_polygon(
+    ax_polygon, wall2d, beam_wall, beam_index, time_index_waves, time_index_waves
+)
+
+canvas.set_text(text=f"{get_database_path(args, time_value=time_value_equilibrium)}")
 canvas.fig.subplots_adjust(
     top=0.88,
     bottom=0.11,
@@ -195,11 +195,11 @@ canvas.fig.subplots_adjust(
     hspace=0.458,
     wspace=0.234,
 )
-canvas.fig.suptitle(getTitle(args, "EC Stray Radiation", timeValueEquilibrium), size=12)
+canvas.fig.suptitle(get_title(args, "EC Stray Radiation", time_value_equilibrium), size=12)
 canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
 if args.save:
-    fname = getFileName(
-        args, f"{os.path.basename(__file__)}_Equilibrium", timeValueEquilibrium
+    fname = get_file_name(
+        args, f"{os.path.basename(__file__)}_Equilibrium", time_value_equilibrium
     )
     if args.directory:
         if not os.path.exists(args.directory):

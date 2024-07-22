@@ -5,20 +5,20 @@ import logging
 logger = logging.getLogger("module")
 
 
-class EdgeProfilesView:
-    def __init__(self, edgeProfileIds=None):
-        self.edgeProfilesCompute = EdgeProfilesCompute(edgeProfileIds)
+class edge_profiles_view:
+    def __init__(self, edge_profile_ids=None):
+        self.edge_profiles_compute = edge_profiles_compute(edge_profile_ids)
 
     @staticmethod
     def view_plasma_composition_with_species_concentration(ids_object, slice_index=0, print_data=False):
         """
         Nice display of plasma composition with species concentrations
         """
-        composition_data = EdgeProfilesCompute.getPlasmaCompositionWithSpeciesConcentration(ids_object, slice_index)
+        composition_data = edge_profiles_compute.get_plasma_composition_with_species_concentration(ids_object, slice_index)
         if composition_data != 0 and composition_data != -1:
-            edgeProfilesView = EdgeProfilesView()
-            edgeProfilesView._print_plasma_composition(composition_data)
-            edgeProfilesView._print_specis_concentration(composition_data)
+            edge_profiles_view = edge_profiles_view()
+            edge_profiles_view._print_plasma_composition(composition_data)
+            edge_profiles_view._print_specis_concentration(composition_data)
 
             if print_data is True:
                 import json
@@ -103,7 +103,7 @@ class EdgeProfilesView:
                 )
                 istate += 1
 
-    def viewElectronsDensity(self, ax, timeSlice=0, showSeparatrix=False):
+    def view_electrons_density(self, ax, time_slice=0, show_separatrix=False):
         """
         The function `viewElectronsDensity` plots the electron density on a rectangular grid and adds a
         separatrix line.
@@ -117,16 +117,16 @@ class EdgeProfilesView:
         Returns:
             the pcolormesh object 'c'.
         """
-        x, y = self.edgeProfilesCompute.getRectangularGrid(500)
+        x, y = self.edge_profiles_compute.get_rectangular_grid(500)
 
-        ne_edge = self.edgeProfilesCompute.getElectronDensity(timeSlice, x, y)
+        ne_edge = self.edge_profiles_compute.get_electron_density(time_slice, x, y)
         if ne_edge is not None:
             ax.grid(False)
             c = ax.pcolormesh(x, y, ne_edge, vmin=0, vmax=5e19, shading="auto")
-            core_boundry = self.edgeProfilesCompute.getCoreBoundry(timeSlice)
+            core_boundry = self.edge_profiles_compute.get_core_boundry(time_slice)
             ax.fill(core_boundry[:, 0], core_boundry[:, 1], facecolor="w", edgecolor="r", linewidth=0)
-            if showSeparatrix:
-                separatrix = self.edgeProfilesCompute.getSeparatrix(timeSlice)
+            if show_separatrix:
+                separatrix = self.edge_profiles_compute.get_separatrix(time_slice)
                 if separatrix is not None:
                     ax.scatter(separatrix[:, 0], separatrix[:, 1], color="#FF1493", marker="x")
             ax.set_aspect("equal", adjustable="box")
@@ -147,7 +147,7 @@ class EdgeProfilesView:
             )
             return None
 
-    def viewIonDensity(self, ax, timeSlice=0, showSeparatrix=False):
+    def view_ion_density(self, ax, time_slice=0, show_separatrix=False):
         """
         The function `viewIonDensity` plots the ion density on a rectangular grid and adds a separatrix line.
 
@@ -160,16 +160,16 @@ class EdgeProfilesView:
         Returns:
             the pcolormesh object 'c'.
         """
-        x, y = self.edgeProfilesCompute.getRectangularGrid(500)
+        x, y = self.edge_profiles_compute.get_rectangular_grid(500)
 
-        ni_edge = self.edgeProfilesCompute.getIonDensity(timeSlice, x, y)
+        ni_edge = self.edge_profiles_compute.get_ion_density(time_slice, x, y)
         if ni_edge is not None:
             ax.grid(False)
             c = ax.pcolormesh(x, y, ni_edge, vmin=0, vmax=5e19, shading="auto")
-            core_boundry = self.edgeProfilesCompute.getCoreBoundry(timeSlice)
+            core_boundry = self.edge_profiles_compute.get_core_boundry(time_slice)
             ax.fill(core_boundry[:, 0], core_boundry[:, 1], facecolor="w", edgecolor="r", linewidth=0)
-            if showSeparatrix:
-                separatrix = self.edgeProfilesCompute.getSeparatrix(timeSlice)
+            if show_separatrix:
+                separatrix = self.edge_profiles_compute.get_separatrix(time_slice)
                 if separatrix is not None:
                     ax.scatter(separatrix[:, 0], separatrix[:, 1], color="#FF1493", marker="x")
 
@@ -191,7 +191,7 @@ class EdgeProfilesView:
             )
             return None
 
-    def viewNeutralDensity(self, ax, timeSlice=0, showSeparatrix=False):
+    def view_neutral_density(self, ax, time_slice=0, show_separatrix=False):
         """
         The function `viewNeutralDensity` plots the neutral density on a rectangular grid and adds a
         separatrix line.
@@ -205,17 +205,17 @@ class EdgeProfilesView:
         Returns:
             the pcolormesh object 'c'.
         """
-        x, y = self.edgeProfilesCompute.getRectangularGrid(500)
+        x, y = self.edge_profiles_compute.get_rectangular_grid(500)
 
-        n_neutral_edge = self.edgeProfilesCompute.getNeutralDensity(timeSlice, x, y)
+        n_neutral_edge = self.edge_profiles_compute.get_neutral_density(time_slice, x, y)
 
         if n_neutral_edge is not None:
             ax.grid(False)
             c = ax.pcolormesh(x, y, n_neutral_edge, vmin=0, vmax=5e19, shading="auto")
-            core_boundry = self.edgeProfilesCompute.getCoreBoundry(timeSlice)
+            core_boundry = self.edge_profiles_compute.get_core_boundry(time_slice)
             ax.fill(core_boundry[:, 0], core_boundry[:, 1], facecolor="w", edgecolor="r", linewidth=0)
-            if showSeparatrix:
-                separatrix = self.edgeProfilesCompute.getSeparatrix(timeSlice)
+            if show_separatrix:
+                separatrix = self.edge_profiles_compute.get_separatrix(time_slice)
                 if separatrix is not None:
                     ax.scatter(separatrix[:, 0], separatrix[:, 1], color="#FF1493", marker="x")
             ax.set_aspect("equal", adjustable="box")
@@ -236,17 +236,17 @@ class EdgeProfilesView:
             )
             return None
 
-    def viewEquatorialPlaneAndDiverterDensity(self, ax, timeSlice=0, logscale=False):
-        x, y = self.edgeProfilesCompute.getRectangularGrid(500)
-        ne_edge = self.edgeProfilesCompute.getElectronDensity(timeSlice, x, y)
+    def view_equatorial_plane_and_diverter_density(self, ax, time_slice=0, logscale=False):
+        x, y = self.edge_profiles_compute.get_rectangular_grid(500)
+        ne_edge = self.edge_profiles_compute.get_electron_density(time_slice, x, y)
         if ne_edge is not None:
             # choose Z position for a radial profile:
-            Z0 = 0.0
-            ind = np.argmin(abs(y[:, 0] - Z0))
+            z0 = 0.0
+            ind = np.argmin(abs(y[:, 0] - z0))
             ax.plot(x[ind, :], ne_edge[ind, :], label="Equatorial plane")
 
-            Z0 = -4.0
-            ind = np.argmin(abs(y[:, 0] - Z0))
+            z0 = -4.0
+            ind = np.argmin(abs(y[:, 0] - z0))
             ax.plot(x[ind, :], ne_edge[ind, :], label="Divertor")
             if logscale:
                 ax.set_yscale("log")
@@ -267,7 +267,7 @@ class EdgeProfilesView:
             )
             return None
 
-    def showInfoOnPlot(self, ax, info: str = ""):
+    def show_info_on_plot(self, ax, info: str = ""):
         xmin, xmax = ax.get_xlim()
         ymin, ymax = ax.get_ylim()
 

@@ -22,10 +22,10 @@ from idstools.utils.clihelper import imasParser, getBackendID
 # -------------------------------------------------------------------------------
 
 # Management of input arguments
-parser = argparse.ArgumentParser(
+parser = argparse.argument_parser(
     description="""---- Auto-generated yaml scenario and watcher files (!!! STILL TO BE COMPLETED BY HAND !!!)\n\nImportant: The legacy create_db_entry_disruption tool is deprecated and will be removed in a future versions. It will remain available until simdb is fully adopted.more about simdb : https://simdb.iter.org/dashboard/""",
-    parents=[imasParser],
-    formatter_class=RawDescriptionRichHelpFormatter,
+    parents=[imas_parser],
+    formatter_class=raw_description_rich_help_formatter,
 )
 parser.add_argument("-s", "--shot", dest="shot", help="Shot number", type=int)
 parser.add_argument("-r", "--run", help="Run number", type=int)
@@ -44,7 +44,7 @@ parser.add_argument(
 args = parser.parse_args()
 
 # Open the database and read the necessary IDSs
-input = imas.DBEntry(getBackendID(args.backend),
+input = imas.d_b_entry(get_backend_i_d(args.backend),
                 args.database,
                 args.shot,
                 args.run,
@@ -64,7 +64,7 @@ else:
 # Read necessary IDSs from database
 try:
     core_profiles = input.get("core_profiles")
-    if core_profiles.ids_properties.homogeneous_time != imas.imasdef.EMPTY_INT:
+    if core_profiles.ids_properties.homogeneous_time != imas.imasdef.e_m_p_t_y__i_n_t:
         core_present = 1
     else:
         core_present = 0
@@ -93,7 +93,7 @@ if core_present == 1:
 
 try:
     equilibrium = input.get("equilibrium")
-    if equilibrium.ids_properties.homogeneous_time != imas.imasdef.EMPTY_INT:
+    if equilibrium.ids_properties.homogeneous_time != imas.imasdef.e_m_p_t_y__i_n_t:
         eq_present = 1
     else:
         eq_present = 0
@@ -134,17 +134,17 @@ else:
 
 # Check the plasma direction (needs better criteria)
 if "up" in split_name:
-    VD_direction = "up"
+    v_d_direction = "up"
 elif "dw" in split_name:
-    VD_direction = "down"
+    v_d_direction = "down"
 else:
-    VD_direction = "tbd"
+    v_d_direction = "tbd"
 
 # Check the maximum RE current
 try:
-    REmax = 1.0e-6 * max(summary.runaways.current.value, key=abs)
+    r_emax = 1.0e-6 * max(summary.runaways.current.value, key=abs)
 except Exception as e:
-    REmax = 0.0
+    r_emax = 0.0
 
 # Btor
 if eq_present == 1:
@@ -251,9 +251,9 @@ f.write("""# --------------------------------------------------\n""")
 f.write("""scenario_key_parameters:\n""")
 # f.write("""    confinement_regime: %s\n""" % confinement_regime)
 f.write("""    disruption_type: %s\n""" % dis_type)
-f.write("""    VD_direction: %s\n""" % VD_direction)
+f.write("""    VD_direction: %s\n""" % v_d_direction)
 f.write("""    magnetic_field: %.2f\n""" % magnetic_field)
-f.write("""    I_RE_max: %.2f \n""" % REmax)
+f.write("""    I_RE_max: %.2f \n""" % r_emax)
 
 
 if plasma_current == 0:

@@ -7,37 +7,37 @@ from idstools.compute.distributions import DistributionsCompute
 logger = logging.getLogger(f"module.{__name__}")
 
 
-class DistributionsView:
+class distributions_view:
     def __init__(self, ids):
-        self.distributionsCompute = DistributionsCompute(ids)
+        self.distributions_compute = distributions_compute(ids)
         self.ids = ids
 
     # PROFILE OF ABSORBED POWER DENSITY ON ELECTRONS+IONS FOR ALL INJECTORS AND EACH OF THEM INDIVIDUALLY [MW/M3]
-    def plotAbsorbedPowerDensityIndividual(
+    def plot_absorbed_power_density_individual(
         self,
         ax,
-        timeIndex,
+        time_index,
     ):
-        radialGridInfo = self.distributionsCompute.getRadialGridInfo(timeIndex)
-        profiles = self.distributionsCompute.getProfiles(timeIndex)
+        radial_grid_info = self.distributions_compute.get_radial_grid_info(time_index)
+        profiles = self.distributions_compute.get_profiles(time_index)
 
-        if len(self.distributionsCompute.activeDistributions) != 0:
+        if len(self.distributions_compute.active_distributions) != 0:
             ax.plot(
-                self.distributionsCompute.rho_tor_norm,
+                self.distributions_compute.rho_tor_norm,
                 profiles["all_injectors_total_power_density_profile"] * 1.0e-6,
                 label=r"All injectors",
                 color="black",
             )
-            for idistrib in range(self.distributionsCompute.ndistributions):
-                if radialGridInfo[idistrib]["is_active"]:
+            for idistrib in range(self.distributions_compute.ndistributions):
+                if radial_grid_info[idistrib]["is_active"]:
                     lbl = ""
-                    if idistrib == 0 or self.distributionsCompute.ndistributions - 1 == idistrib:
+                    if idistrib == 0 or self.distributions_compute.ndistributions - 1 == idistrib:
                         lbl = profiles["single_nf_source_name"][idistrib]
                     # ax.plot(self.distributionsCompute.rho_tor_norm,
                     # profiles['single_total_power_density_profile'][idistrib]*1.e-6,
                     # label=profiles['single_nf_source_name'][idistrib])
                     ax.plot(
-                        self.distributionsCompute.rho_tor_norm,
+                        self.distributions_compute.rho_tor_norm,
                         profiles["single_total_power_density_profile"][idistrib] * 1.0e-6,
                         label=lbl,
                     )
@@ -46,29 +46,29 @@ class DistributionsView:
         ax.set_xlabel("Normalized toroidal flux coordinate")
 
         legend = ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
-        DistributionsView.customizeLegend(legend)
+        distributions_view.customize_legend(legend)
 
     # PROFILE OF ABSORBED POWER DENSITY ON ELECTRONS+IONS FOR ALL INJECTORS AND EACH OF THEM INDIVIDUALLY [MW/M3]
-    def plotAbsorbedPowerDensity(
+    def plot_absorbed_power_density(
         self,
         ax,
-        timeIndex,
+        time_index,
     ):
-        profiles = self.distributionsCompute.getProfiles(timeIndex)
+        profiles = self.distributions_compute.get_profiles(time_index)
 
-        if len(self.distributionsCompute.activeDistributions) != 0:
+        if len(self.distributions_compute.active_distributions) != 0:
             ax.plot(
-                self.distributionsCompute.rho_tor_norm,
+                self.distributions_compute.rho_tor_norm,
                 profiles["all_injectors_total_power_density_profile"] * 1.0e-6,
                 label=r"Electrons+Ions",
             )
             ax.plot(
-                self.distributionsCompute.rho_tor_norm,
+                self.distributions_compute.rho_tor_norm,
                 profiles["all_injectors_electron_power_density_profile"] * 1.0e-6,
                 label=r"Electrons",
             )
             ax.plot(
-                self.distributionsCompute.rho_tor_norm,
+                self.distributions_compute.rho_tor_norm,
                 profiles["all_injectors_ion_power_density_profile"] * 1.0e-6,
                 label=r"Ions",
             )
@@ -77,31 +77,31 @@ class DistributionsView:
         ax.set_xlabel("Normalized toroidal flux coordinate")
 
         legend = ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
-        DistributionsView.customizeLegend(legend)
+        distributions_view.customize_legend(legend)
 
     # CD PROFILE [MA/M2]
-    def plotCDProfile(
+    def plot_c_d_profile(
         self,
         ax,
-        timeIndex,
+        time_index,
     ):
-        radialGridInfo = self.distributionsCompute.getRadialGridInfo(timeIndex)
-        profiles = self.distributionsCompute.getProfiles(timeIndex)
+        radial_grid_info = self.distributions_compute.get_radial_grid_info(time_index)
+        profiles = self.distributions_compute.get_profiles(time_index)
 
-        if self.distributionsCompute.cur_calc == 1:
-            if len(self.distributionsCompute.activeDistributions) != 0:
+        if self.distributions_compute.cur_calc == 1:
+            if len(self.distributions_compute.active_distributions) != 0:
                 ax.plot(
-                    self.distributionsCompute.rho_tor_norm,
+                    self.distributions_compute.rho_tor_norm,
                     profiles["all_injectors_current_density_profile"] * 1.0e-6,
                     label="All Injectors",
                 )
-                for idistrib in range(self.distributionsCompute.ndistributions):
-                    if radialGridInfo[idistrib]["is_active"]:
+                for idistrib in range(self.distributions_compute.ndistributions):
+                    if radial_grid_info[idistrib]["is_active"]:
                         lbl = ""
-                        if idistrib == 0 or self.distributionsCompute.ndistributions - 1 == idistrib:
+                        if idistrib == 0 or self.distributions_compute.ndistributions - 1 == idistrib:
                             lbl = profiles["single_nf_source_name"][idistrib]
                         ax.plot(
-                            self.distributionsCompute.rho_tor_norm,
+                            self.distributions_compute.rho_tor_norm,
                             profiles["single_total_power_density_profile"][idistrib] * 1.0e-6,
                             label=lbl,
                         )
@@ -110,43 +110,43 @@ class DistributionsView:
         ax.set_title("NBI/FUS power profile")
 
         legend = ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
-        DistributionsView.customizeLegend(legend)
+        distributions_view.customize_legend(legend)
 
     # NBI/FUS POWER AND CD WAVEFORMS
-    def plotNBIFusPowerAndCDWaveforms(
+    def plot_n_b_i_fus_power_and_c_d_waveforms(
         self,
         ax,
-        timeIndex,
+        time_index,
     ):
-        timeArray = self.ids.time
-        radialGridInfo = self.distributionsCompute.getRadialGridInfo(timeIndex)
-        profiles = self.distributionsCompute.getProfiles(timeIndex)
+        time_array = self.ids.time
+        radial_grid_info = self.distributions_compute.get_radial_grid_info(time_index)
+        profiles = self.distributions_compute.get_profiles(time_index)
 
-        if len(self.distributionsCompute.activeDistributions) != 0:
+        if len(self.distributions_compute.active_distributions) != 0:
             ax.plot(
-                timeArray,
+                time_array,
                 np.array(profiles["all_injectors_total_power_waveform"]) * 1.0e-6,
                 label=r"Total",
             )
             ax.plot(
-                timeArray,
+                time_array,
                 np.array(profiles["all_injectors_electron_power_waveform"]) * 1.0e-6,
                 label=r"To electrons",
             )
             ax.plot(
-                timeArray,
+                time_array,
                 np.array(profiles["all_injectors_ion_power_waveform"]) * 1.0e-6,
                 label=r"To ions",
             )
-        for idistrib in range(self.distributionsCompute.ndistributions):
-            if radialGridInfo[idistrib]["is_active"]:
+        for idistrib in range(self.distributions_compute.ndistributions):
+            if radial_grid_info[idistrib]["is_active"]:
                 lbl = ""
-                if idistrib == 0 or self.distributionsCompute.ndistributions - 1 == idistrib:
+                if idistrib == 0 or self.distributions_compute.ndistributions - 1 == idistrib:
                     lbl = profiles["single_nf_source_name"][idistrib]
                 # ax.plot(timeArray, np.array(profiles['single_total_power_waveform'][idistrib])*1.e-6,
                 # label=profiles['single_nf_source_name'][idistrib])
                 ax.plot(
-                    timeArray,
+                    time_array,
                     np.array(profiles["single_total_power_waveform"][idistrib]) * 1.0e-6,
                     label=lbl,
                 )
@@ -156,35 +156,35 @@ class DistributionsView:
         if profiles is not None:
             ax.set_ylim(0, max(profiles["all_injectors_total_power_waveform"]) * 1.2e-6)
         legend = ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
-        DistributionsView.customizeLegend(legend)
+        distributions_view.customize_legend(legend)
 
     # CD WAVEFORM
-    def plotCDWaveform(
+    def plot_c_d_waveform(
         self,
         ax,
-        timeIndex,
+        time_index,
     ):
-        timeArray = self.ids.time
-        radialGridInfo = self.distributionsCompute.getRadialGridInfo(timeIndex)
+        time_array = self.ids.time
+        radial_grid_info = self.distributions_compute.get_radial_grid_info(time_index)
 
-        profiles = self.distributionsCompute.getProfiles(timeIndex)
+        profiles = self.distributions_compute.get_profiles(time_index)
 
-        if self.distributionsCompute.cur_calc == 1:
-            if len(self.distributionsCompute.activeDistributions) != 0:
+        if self.distributions_compute.cur_calc == 1:
+            if len(self.distributions_compute.active_distributions) != 0:
                 ax.plot(
-                    timeArray,
+                    time_array,
                     np.array(profiles["all_injectors_current_waveform"]) * 1.0e-6,
                     label=r"Total",
                 )
-            for idistrib in range(self.distributionsCompute.ndistributions):
-                if radialGridInfo[idistrib]["is_active"]:
+            for idistrib in range(self.distributions_compute.ndistributions):
+                if radial_grid_info[idistrib]["is_active"]:
                     lbl = ""
-                    if idistrib == 0 or self.distributionsCompute.ndistributions - 1 == idistrib:
+                    if idistrib == 0 or self.distributions_compute.ndistributions - 1 == idistrib:
                         lbl = profiles["single_nf_source_name"][idistrib]
                     # ax.plot(timeArray, np.array(profiles['single_current_waveform'][idistrib])*1.e-6,label=
                     # profiles['single_nf_source_name'][idistrib])
                     ax.plot(
-                        timeArray,
+                        time_array,
                         np.array(profiles["single_current_waveform"][idistrib]) * 1.0e-6,
                         label=lbl,
                     )
@@ -193,12 +193,12 @@ class DistributionsView:
             ax.set_title("NBI/FUS Current Density waveform")
             # ax.set_ylim(0,max(profiles['all_injectors_current_waveform'])*1.2e-3)
             legend = ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
-            DistributionsView.customizeLegend(legend)
+            distributions_view.customize_legend(legend)
         else:
             ax.remove()
 
     @staticmethod
-    def customizeLegend(legend):
+    def customize_legend(legend):
         frame = legend.get_frame()
         frame.set_facecolor("0.95")
         for label in legend.get_texts():

@@ -1,7 +1,7 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-"""Show size and time of IDSs.
+"""Show size and time of i_d_ss.
 Author : David.Coster@ipp.mpg.de
 
 The module retrieves the size of IDS objects from a database entry and shows IDS size in bytes and the time taken to read each object. 
@@ -42,7 +42,7 @@ Attributes:
     run (int): run number
 
 Todo:
-    * TODOs
+    * t_o_d_os
 
 """
 
@@ -57,12 +57,12 @@ from idstools.database import DBMaster
 from idstools.utils.clihelper import dbentryParser
 from idstools.utils.idshelper import getIDSSize
 
-parser = argparse.ArgumentParser(
+parser = argparse.argument_parser(
     description="Show size and time of IDSs [previously knwon as analyze_db_sizes]",
     epilog="""
 """,
-    formatter_class=RichHelpFormatter,
-    parents=[dbentryParser],
+    formatter_class=rich_help_formatter,
+    parents=[dbentry_parser],
 )
 
 parser.add_argument(
@@ -73,21 +73,21 @@ parser.add_argument(
 )
 args = parser.parse_args()
 
-connection = DBMaster.getConnection(args)
+connection = d_b_master.get_connection(args)
 if connection is None:
     print("----> Aborted.")
     exit(1)
 
 if args.ids == []:
-    args.ids = [ids.value for ids in list(imas.IDSName)]
+    args.ids = [ids.value for ids in list(imas.i_d_s_name)]
 
-idsSizeDict = getIDSSize(connection, args.ids)
-totalBytes = np.array([v["bytes"] for v in idsSizeDict.values()]).sum()
-totalTime = np.array([v["time"] for v in idsSizeDict.values()]).sum()
+ids_size_dict = get_i_d_s_size(connection, args.ids)
+total_bytes = np.array([v["bytes"] for v in ids_size_dict.values()]).sum()
+total_time = np.array([v["time"] for v in ids_size_dict.values()]).sum()
 
-print(f"Total reading time = {totalTime:0.2f} s")
+print(f"Total reading time = {total_time:0.2f} s")
 
-print(f"Total data size = {totalBytes/1024**2:5.1f} MB")
+print(f"Total data size = {total_bytes/1024**2:5.1f} MB")
 if args.uri is not None:
     print(f"Fractions of the total size for {args.uri}")
 else:
@@ -95,6 +95,6 @@ else:
         f"Fractions of the total size for {args.user}/{args.database}/{args.version}/{args.pulse}/{args.run}"
     )
 print("% bytes    IDS")
-for idsSize in idsSizeDict:
-    bytesData = idsSizeDict[idsSize]["bytes"] / totalBytes * 100
-    print(f"{bytesData:5.2f} %    {idsSize}")
+for ids_size in ids_size_dict:
+    bytes_data = ids_size_dict[ids_size]["bytes"] / total_bytes * 100
+    print(f"{bytes_data:5.2f} %    {ids_size}")

@@ -7,22 +7,22 @@ import os
 logger = logging.getLogger("module")
 
 
-class DDHelper(object):
+class d_d_helper(object):
     # root = None
     # version = None
     # cocos = None
 
     def __new__(cls):
         if not hasattr(cls, "instance"):
-            cls.instance = super(DDHelper, cls).__new__(cls)
+            cls.instance = super(d_d_helper, cls).__new__(cls)
         return cls.instance
 
     def __init__(self):
         """Simple class which allows to query meta-data from the definition of IDSs as expressed in IDSDef.xml."""
-        self.ids_def = DDHelper.getIDSDefPath()
+        self.ids_def = d_d_helper.get_i_d_s_def_path()
         self.root = None
         if path.isfile(self.ids_def):
-            self.root = ET.parse(self.ids_def).getroot()
+            self.root = e_t.parse(self.ids_def).getroot()
             self.version = self.root.findtext("./version", default="N/A")
             self.cocos = self.root.findtext("./cocos", default="N/A")
         else:
@@ -30,7 +30,7 @@ class DDHelper(object):
             raise FileNotFoundError(f"file not found:{self.ids_def}")
 
     @classmethod
-    def getIDSDefPath(cls):
+    def get_i_d_s_def_path(cls):
         # Find and parse XML definitions
         idsdef_path = ""
         if not idsdef_path:
@@ -83,13 +83,13 @@ class DDHelper(object):
                 if "coordinate1" in field.attrib.keys():
                     return field.attrib["coordinate1"]
 
-    def getField(self, struct, field):
+    def get_field(self, struct, field):
         """Recursive function which returns the node corresponding to a given field which is a descendant of struct."""
         elt = struct.find('./field[@name="' + field[0] + '"]')
         if elt is None:
             raise Exception("Element '" + field[0] + "' not found")
         if len(field) > 1:
-            f = self.getField(elt, field[1:])
+            f = self.get_field(elt, field[1:])
         else:
             # specific generic node for which the useful doc is from the parent
             if field[0] != "value":
@@ -108,7 +108,7 @@ class DDHelper(object):
             fields = path.split("/")
 
             try:
-                f = self.getField(ids, fields)
+                f = self.get_field(ids, fields)
             except Exception as e:
                 logger.debug(f"{e}")
                 raise ValueError(f"Error while accessing {path}: {str(e)}")

@@ -1,7 +1,7 @@
 """
 This module provides view functions and classes for spectrometer_visible ids data
 
-`refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`_.
+`refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/i_m_design/Data%20Model/sphinx/latest.html>`_.
 
 """
 
@@ -13,23 +13,23 @@ from idstools.compute.spectrometer_visible import SpectrometerVisibleCompute
 
 logger = logging.getLogger("module")
 
-LABEL_RADIANCE = "Spectral Radiance (ph s^-1 m^-2 sr^-1 nm^-1)"
-LABEL_INTENSITY = "Intensity (counts)"
+l_a_b_e_l__r_a_d_i_a_n_c_e = "Spectral Radiance (ph s^-1 m^-2 sr^-1 nm^-1)"
+l_a_b_e_l__i_n_t_e_n_s_i_t_y = "Intensity (counts)"
 
 
-class SpectrometerVisibleView:
+class spectrometer_visible_view:
     """This class provides view functions for spectrometer_visible ids"""
 
-    def __init__(self, idsObj: object):
+    def __init__(self, ids_obj: object):
         """Initialization SpectrometerVisibleView object.
 
         Args:
             idsObj : spectrometer_visible ids object
         """
-        self.idsObj = idsObj
-        self.computeObj = SpectrometerVisibleCompute(idsObj)
+        self.ids_obj = ids_obj
+        self.compute_obj = spectrometer_visible_compute(ids_obj)
 
-    def viewRadiance(self, ax: plt.axes, spectroIndex, logscale=False):
+    def view_radiance(self, ax: plt.axes, spectro_index, logscale=False):
         """
         The function `viewRadiance` plots radiance data from multiple spectrometers on separate axes.
 
@@ -44,8 +44,8 @@ class SpectrometerVisibleView:
             the value of the variable "filename".
         """
         filename = ""
-        spectros = self.computeObj.getChannels()
-        channels = spectros[int(spectroIndex)]
+        spectros = self.compute_obj.get_channels()
+        channels = spectros[int(spectro_index)]
 
         for _, channelinfo in channels.items():
             ax.plot(
@@ -64,11 +64,11 @@ class SpectrometerVisibleView:
         if logscale is False:
             ax.set_ylim(bottom=0.0)
 
-        ax.set_title(f"{channelinfo['diagnostic']}, Spectrum {spectroIndex}")
+        ax.set_title(f"{channelinfo['diagnostic']}, Spectrum {spectro_index}")
         if logscale:
             ax.set_yscale("log")
         ax.set_xlabel("Wavelength (nm)")
-        ax.set_ylabel(LABEL_RADIANCE)
+        ax.set_ylabel(l_a_b_e_l__r_a_d_i_a_n_c_e)
         ax.grid(True)
 
         ax.legend(
@@ -81,7 +81,7 @@ class SpectrometerVisibleView:
 
         return filename
 
-    def viewIntensity(self, ax: plt.axes, spectroIndex, logscale=False):
+    def view_intensity(self, ax: plt.axes, spectro_index, logscale=False):
         """
         The `viewIntensity` function plots intensity of spectrom from multiple spectrometers.
 
@@ -96,8 +96,8 @@ class SpectrometerVisibleView:
             a string variable named "filename".
         """
         filename = ""
-        spectros = self.computeObj.getChannels()
-        channels = spectros[int(spectroIndex)]
+        spectros = self.compute_obj.get_channels()
+        channels = spectros[int(spectro_index)]
         for _, channelinfo in channels.items():
             ax.plot(
                 channelinfo["wavelengths"],
@@ -117,10 +117,10 @@ class SpectrometerVisibleView:
 
         if logscale:
             ax.set_yscale("log")
-        ax.set_title(f"{channelinfo['diagnostic']}, Spectrum {spectroIndex}")
+        ax.set_title(f"{channelinfo['diagnostic']}, Spectrum {spectro_index}")
 
         ax.set_xlabel("Wavelength (nm)")
-        ax.set_ylabel(LABEL_RADIANCE)
+        ax.set_ylabel(l_a_b_e_l__r_a_d_i_a_n_c_e)
 
         ax.legend(
             bbox_to_anchor=(1.0, 0.5),

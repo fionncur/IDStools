@@ -18,10 +18,10 @@ from idstools.view.common import Canvas
 from idstools.view.domain.kineticprofiles import KineticProfilesView
 
 # Management of input arguments
-parser = argparse.ArgumentParser(
+parser = argparse.argument_parser(
     description="---- Display the plasma kinetic profiles from the core_profiles IDSs [previously known as kinplot]",
-    parents=[dbentryParser],
-    formatter_class=RichHelpFormatter,
+    parents=[dbentry_parser],
+    formatter_class=rich_help_formatter,
 )
 
 parser.add_argument(
@@ -48,20 +48,20 @@ parser.add_argument(
 )
 args = parser.parse_args()
 if args.verbose:
-    logger = setupLogger("module", stdout_level=logging.DEBUG)
+    logger = setup_logger("module", stdout_level=logging.d_e_b_u_g)
 else:
-    logger = setupLogger("module", stdout_level=logging.INFO)
+    logger = setup_logger("module", stdout_level=logging.i_n_f_o)
 
-connection = DBMaster.getConnection(args)
+connection = d_b_master.get_connection(args)
 if connection is None:
     logger.critical("----> Aborted.")
     exit(1)
 
-kpView = KineticProfilesView(connection, args.edge, args.time)
+kp_view = kinetic_profiles_view(connection, args.edge, args.time)
 
-hostdir = getDatabasePath(args)
+hostdir = get_database_path(args)
 
-canvas = Canvas(3, 4)
+canvas = canvas(3, 4)
 ax1 = canvas.add_axes(title="", xlabel="", row=0, col=0, colspan=2)
 ax2 = canvas.add_axes(title="", xlabel="", row=1, col=0, colspan=2)
 ax3 = canvas.add_axes(title="", xlabel="", row=2, col=0, colspan=2)
@@ -71,20 +71,20 @@ ax6 = canvas.add_axes(title="", xlabel="", row=2, col=2)
 ax7 = canvas.add_axes(title="", xlabel="", row=0, col=3)
 ax8 = canvas.add_axes(title="", xlabel="", row=1, col=3)
 
-if kpView.kProfiles.isCoreProfilesPresent:
-    kpView.viewCentralTemperatureWaveforms(ax1)  # Central temperature waveforms
-    kpView.viewCentralDensityWaveforms(
+if kp_view.k_profiles.is_core_profiles_present:
+    kp_view.view_central_temperature_waveforms(ax1)  # Central temperature waveforms
+    kp_view.view_central_density_waveforms(
         ax2, logscale=args.logscale
     )  # Central density waveforms
-    kpView.viewCentralZeffWaveform(ax3)  # Central Zeff waveform
-    kpView.viewTemperatureProfiles(ax4)  # Temperature profiles
-    kpView.viewZeffProfile(ax5)  # Zeff profiles
-    kpView.viewVpolProfile(ax6, logscale=args.logscale)  # Vpol profiles
-    kpView.viewDensityProfiles(ax7, logscale=args.logscale)  # Density profiles
-    kpView.viewVtorProfile(ax8, logscale=args.logscale)  # Vtol profiles
+    kp_view.view_central_zeff_waveform(ax3)  # Central Zeff waveform
+    kp_view.view_temperature_profiles(ax4)  # Temperature profiles
+    kp_view.view_zeff_profile(ax5)  # Zeff profiles
+    kp_view.view_vpol_profile(ax6, logscale=args.logscale)  # Vpol profiles
+    kp_view.view_density_profiles(ax7, logscale=args.logscale)  # Density profiles
+    kp_view.view_vtor_profile(ax8, logscale=args.logscale)  # Vtol profiles
 
-    canvas.setText(
-        text=f"{getDatabasePath(args, timeValue=kpView.kProfiles.commonTime)}"
+    canvas.set_text(
+        text=f"{get_database_path(args, time_value=kp_view.k_profiles.common_time)}"
     )
 
     canvas.fig.subplots_adjust(
@@ -93,12 +93,12 @@ if kpView.kProfiles.isCoreProfilesPresent:
     canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
 
     canvas.fig.suptitle(
-        getTitle(args, "Plasma kinetic profiles ", kpView.kProfiles.commonTime), size=12
+        get_title(args, "Plasma kinetic profiles ", kp_view.k_profiles.common_time), size=12
     )
 
     if args.save:
-        fname = getFileName(
-            args, os.path.basename(__file__) + "_Kinetic", kpView.kProfiles.commonTime
+        fname = get_file_name(
+            args, os.path.basename(__file__) + "_Kinetic", kp_view.k_profiles.common_time
         )
         if args.directory:
             if not os.path.exists(args.directory):

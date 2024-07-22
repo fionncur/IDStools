@@ -24,20 +24,20 @@ def main():
     """
     Command Interface of IDS Data Validation Tool w.r.t. DD (IDSDef.xml)
     """
-    db = DBMaster.getConnection(args)
+    db = d_b_master.get_connection(args)
     if db is None:
         print("----> Aborted.")
         exit(1)
 
     # Initialization for yaml Dumper
-    yaml.Dumper.ignore_aliases = lambda *args: True
+    yaml.dumper.ignore_aliases = lambda *args: True
 
     # COCOS Initialization
-    index = {"COCOS": idschk.IDS_COCOS, "ipsign": args.ipsign, "b0sign": args.b0sign}
-    cocos = idschk.COCOS(index=index).get()
+    index = {"COCOS": idschk.i_d_s__c_o_c_o_s, "ipsign": args.ipsign, "b0sign": args.b0sign}
+    cocos = idschk.c_o_c_o_s(index=index).get()
 
     # Load IMAS-DD File
-    root = idschk.load_XML(idschk.FILE_IDSDef)
+    root = idschk.load__x_m_l(idschk.f_i_l_e__i_d_s_def)
 
     # Validate COCOS in IDS/equilibrium
     if args.cocos:
@@ -73,7 +73,7 @@ def main():
     # IDS Validation
     if args.schema_file:
         # Initialize Scenario Validator
-        sv = ScenarioValidator(schema_path=[path.abspath(args.schema_file)])
+        sv = scenario_validator(schema_path=[path.abspath(args.schema_file)])
 
         # Validation for Class imas.DBEntry
         sv.validate_db(db)
@@ -166,11 +166,11 @@ Examples:
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
+    parser = argparse.argument_parser(
         prog="idschk",
-        formatter_class=RichHelpFormatter,
-        parents=[dbentryParser],
-        description=Markdown(description, style="argparse.text")
+        formatter_class=rich_help_formatter,
+        parents=[dbentry_parser],
+        description=markdown(description, style="argparse.text")
     )
     parser.add_argument(
         "-l",

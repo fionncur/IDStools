@@ -1,7 +1,7 @@
 """
 This module provides view functions and classes for equilibrium ids data
 
-`refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`_.
+`refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/i_m_design/Data%20Model/sphinx/latest.html>`_.
 
 """
 
@@ -10,7 +10,7 @@ from idstools.view.common import BasePlot
 from idstools.compute.equilibrium import EquilibriumCompute
 
 
-class EquilibriumView(BasePlot):
+class equilibrium_view(base_plot):
     def __init__(self, ids: object):
         """
         This is a constructor function that initializes an object with an input object and creates
@@ -22,14 +22,14 @@ class EquilibriumView(BasePlot):
         stored as an instance variable `self.idsObj`.
         """
         self.ids = ids
-        self.computeObj = EquilibriumCompute(ids)
+        self.compute_obj = equilibrium_compute(ids)
 
-    def viewMagneticPoloidalFlux(
+    def view_magnetic_poloidal_flux(
         self,
-        ax: plt.Axes,
-        timeSlice: int = 0,
-        profiles2DIndex: int = 0,
-        plotRho: bool = False,
+        ax: plt.axes,
+        time_slice: int = 0,
+        profiles2_d_index: int = 0,
+        plot_rho: bool = False,
     ):
         """
         This function plots the magnetic poloidal flux contours on a 2D Cartesian grid.
@@ -68,23 +68,23 @@ class EquilibriumView(BasePlot):
 
             :meth:`plotIP`
         """
-        cartestionGrid = self.computeObj.get2DCartesianGrid(timeSlice, profiles2DIndex)
-        if cartestionGrid is not None:
+        cartestion_grid = self.compute_obj.get2_d_cartesian_grid(time_slice, profiles2_d_index)
+        if cartestion_grid is not None:
             levels = 30
-            if plotRho:
-                rho2d = self.computeObj.getRho2D()
+            if plot_rho:
+                rho2d = self.compute_obj.get_rho2_d()
                 if rho2d is not None:
                     ax.contour(
-                        cartestionGrid["r2d"],
-                        cartestionGrid["z2d"],
+                        cartestion_grid["r2d"],
+                        cartestion_grid["z2d"],
                         rho2d,
                         levels,
                         colors="r",
                     )
             ax.contour(
-                cartestionGrid["r2d"],
-                cartestionGrid["z2d"],
-                cartestionGrid["psi2d"],
+                cartestion_grid["r2d"],
+                cartestion_grid["z2d"],
+                cartestion_grid["psi2d"],
                 levels,
             )
             ax.set_aspect("equal", adjustable="box")
@@ -94,22 +94,22 @@ class EquilibriumView(BasePlot):
             # ax.set_ylim(cartestionGrid["z2d"].min() * 0.7, cartestionGrid["z2d"].max() * 0.7)
             ax.tick_params(axis="both", which="major")
 
-    def viewPulseInfo(self, ax: plt.axes, title: str, hostdir: str, shot: int, run: int, t: float):
+    def view_pulse_info(self, ax: plt.axes, title: str, hostdir: str, shot: int, run: int, t: float):
         self.database_info(ax, title, hostdir, shot, run, t)
 
-    def plotIP(self, ax):
+    def plot_i_p(self, ax):
         """
         This function plots the plasma current over time on a given axis.
 
         Args:
             ax: The parameter "ax" is a matplotlib axis object.
         """
-        plasmaCurrent = self.computeObj.getIP()
+        plasma_current = self.compute_obj.get_i_p()
         time_array = self.ids.time
-        if len(plasmaCurrent) <= 3:
-            ax.plot(time_array, plasmaCurrent, color="b", marker="o", label="$I_p$ [MA]")
+        if len(plasma_current) <= 3:
+            ax.plot(time_array, plasma_current, color="b", marker="o", label="$I_p$ [MA]")
         else:
-            ax.plot(time_array, plasmaCurrent, color="b", label="$I_p$ [MA]")
+            ax.plot(time_array, plasma_current, color="b", label="$I_p$ [MA]")
         if len(time_array) != 1:
             ax.set_xlim(min(time_array), max(time_array))
         # ax_waveform.set_ylim(0,max(plasmaCurrent)*1.2)
@@ -122,7 +122,7 @@ class EquilibriumView(BasePlot):
         )
         ax.set_ylim(0, 20)
 
-    def plotPoloidalEquilibrium(self, ax, timeSlice: int):
+    def plot_poloidal_equilibrium(self, ax, time_slice: int):
         """
         This function plots a poloidal equilibrium contour plot using flux surface quantities extracted from the
         equilibrium.
@@ -135,7 +135,7 @@ class EquilibriumView(BasePlot):
             the contour plot object `cntr`.
         """
         # Extract flux surface quantities from equilibrium
-        data = self.computeObj.getFluxSurfaces(timeSlice)
+        data = self.compute_obj.get_flux_surfaces(time_slice)
         r2d = data["r2d"]
         z2d = data["z2d"]
         # rho2d = data["rho2d"]
@@ -151,7 +151,7 @@ class EquilibriumView(BasePlot):
 
         return cntr
 
-    def plotTopplotequilibrium(self, ax, timeIndex, label="Plasma Boundaries"):
+    def plot_topplotequilibrium(self, ax, time_index, label="Plasma Boundaries"):
         """
         This function plots the top view equilibrium of a plasma and updates the plot if specified.
 
@@ -163,7 +163,7 @@ class EquilibriumView(BasePlot):
             list containing two plot objects: ax_topview_plot_eq1 and ax_topview_plot_eq2.
         """
         # TODO: Refactor update mechanism of the plot
-        data = self.computeObj.getTopView(timeIndex)
+        data = self.compute_obj.get_top_view(time_index)
         bndcolor = "chocolate"
         colorcounter = 0
 
@@ -181,7 +181,7 @@ class EquilibriumView(BasePlot):
         ax.set_aspect("equal", adjustable="box")
 
     def plotequilibrium(self, ax):
-        quantities = self.computeObj.get2DCartesianGrid()
+        quantities = self.compute_obj.get2_d_cartesian_grid()
         if quantities is not None:
             r2d, z2d, psi2d = (
                 quantities["r2d"],
@@ -208,7 +208,7 @@ class EquilibriumView(BasePlot):
             ax.text(0.2, 0.5, "2D equilibrium", fontsize=10)
             ax.text(0.2, 0.45, "not available", fontsize=10)
 
-    def showInfoOnPlot(self, ax, info: str = "", location="right"):
+    def show_info_on_plot(self, ax, info: str = "", location="right"):
         xmin, xmax = ax.get_xlim()
         ymin, ymax = ax.get_ylim()
 

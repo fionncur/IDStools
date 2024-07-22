@@ -16,11 +16,11 @@ except ImportError:
 
 
 # For better formatting of input argument listing in the help of the function
-class SmartFormatter(argparse.HelpFormatter):
+class smart_formatter(argparse.help_formatter):
     def _split_lines(self, text, width):
         if text.startswith("R|"):
             return text[2:].splitlines()
-        return argparse.HelpFormatter._split_lines(self, text, width)
+        return argparse.help_formatter._split_lines(self, text, width)
 
 
 # ----------------------------------------------------------------------------
@@ -53,7 +53,7 @@ def rec(
             try:
                 j = j + 1
                 file = open(files[i], "r")
-                data[j] = yamlload(file, Loader=yamlLoader)
+                data[j] = yamlload(file, loader=yaml_loader)
                 data[j]["location"] = files[i]
                 file.close()
             except Exception as e:
@@ -82,13 +82,13 @@ def rec(
     disp_run = "Run"
     disp_type = "Type"
     disp_dis_type = "Type"
-    disp_VD_dir = "VD"
-    disp_HF = "HF"
+    disp__v_d_dir = "VD"
+    disp__h_f = "HF"
     disp_workflow = "Workflow"
     disp_database = "Database"
     disp_confinement = "Confinement"
     disp_ip = "Ip[MA]"
-    disp_IREmax = "I_RE_max[MA]"
+    disp__i_r_emax = "I_RE_max[MA]"
     disp_b0 = "B0[T]"
     disp_ne0 = "ne0[m-3]"
     disp_idslist = "List of IDSs"
@@ -106,10 +106,10 @@ def rec(
     tab_database = 0
     tab_confinement = 0
     tab_dis_type = 0
-    tab_VD_dir = 0
-    tab_HF = 0
+    tab__v_d_dir = 0
+    tab__h_f = 0
     tab_ip = 0
-    tab_IREmax = 0
+    tab__i_r_emax = 0
     tab_b0 = 0
     tab_ne0 = 0
     tab_idslist = 0
@@ -168,19 +168,19 @@ def rec(
             ),
             len(disp_dis_type),
         )
-        tab_VD_dir = max(
+        tab__v_d_dir = max(
             max(
                 len(str(sdata[i].get("scenario_key_parameters").get("VD_direction"))),
-                tab_VD_dir,
+                tab__v_d_dir,
             ),
-            len(disp_VD_dir),
+            len(disp__v_d_dir),
         )
-        tab_HF = max(
+        tab__h_f = max(
             max(
                 len(str(sdata[i].get("scenario_key_parameters").get("halo_fraction"))),
-                tab_HF,
+                tab__h_f,
             ),
-            len(disp_HF),
+            len(disp__h_f),
         )
         tab_ip = max(
             max(
@@ -189,12 +189,12 @@ def rec(
             ),
             len(disp_ip),
         )
-        tab_IREmax = max(
+        tab__i_r_emax = max(
             max(
                 len(str(sdata[i].get("scenario_key_parameters").get("I_RE_max"))),
-                tab_IREmax,
+                tab__i_r_emax,
             ),
-            len(disp_IREmax),
+            len(disp__i_r_emax),
         )
         tab_b0 = max(
             max(
@@ -262,14 +262,14 @@ def rec(
                 sdata[i].get("scenario_key_parameters").get("confinement_regime")
             )
             ip = sdata[i].get("scenario_key_parameters").get("plasma_current")
-            IREmax = sdata[i].get("scenario_key_parameters").get("I_RE_max")
+            i_r_emax = sdata[i].get("scenario_key_parameters").get("I_RE_max")
             b0 = sdata[i].get("scenario_key_parameters").get("magnetic_field")
             ne0 = (
                 sdata[i].get("scenario_key_parameters").get("central_electron_density")
             )
             dis_type = sdata[i].get("scenario_key_parameters").get("disruption_type")
-            VD_dir = sdata[i].get("scenario_key_parameters").get("VD_direction")
-            HF = sdata[i].get("scenario_key_parameters").get("halo_fraction")
+            v_d_dir = sdata[i].get("scenario_key_parameters").get("VD_direction")
+            h_f = sdata[i].get("scenario_key_parameters").get("halo_fraction")
             idslist = sdata[i].get("idslist")
             tsteps = sdata[i].get("tsteps")
 
@@ -371,9 +371,9 @@ def rec(
 if __name__ == "__main__":
 
     # Input arguments
-    parser = argparse.ArgumentParser(
+    parser = argparse.argument_parser(
         description="---- Script to list available disruptions in a specific folder ----",
-        formatter_class=SmartFormatter,
+        formatter_class=smart_formatter,
     )
     parser.add_argument(
         "-f",
@@ -427,9 +427,9 @@ if __name__ == "__main__":
     if args["folder"] != None:
         folder = args["folder"]
     else:
-        LL_version = DBMaster.getCoreVersion()
-        LL_version = int(LL_version.split(".")[0])
-        if LL_version < 4:
+        l_l_version = d_b_master.get_core_version()
+        l_l_version = int(l_l_version.split(".")[0])
+        if l_l_version < 4:
             folder = "/work/imas/shared/iterdb/3/0"
         else:
             folder = "/work/imas/shared/imasdb/ITER_DISRUPTIONS/3/0"

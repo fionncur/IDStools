@@ -17,7 +17,7 @@ from idstools.view.common import Terminal
 
 logger = logging.getLogger("module")
 
-yamlMapping = {
+yaml_mapping = {
     "reference_name": "ref_name",
     "responsible_name": "ro_name",
     "characteristics.shot": "pulse",
@@ -56,19 +56,19 @@ yamlMapping = {
 
 
 # Class is a base class for scenario descriptions.
-class ScenarioDescriptionBase:
-    def __init__(self, folderPath=os.getcwd()) -> None:
+class scenario_description_base:
+    def __init__(self, folder_path=os.getcwd()) -> None:
         """
         The function initializes a folder path variable based on the provided input or a default value.
 
         Args:
             folderPath (str): The `folderPath` parameter is a string that represents the path to a folder.
         """
-        if os.path.exists(folderPath):
-            self.folderPath = folderPath
+        if os.path.exists(folder_path):
+            self.folder_path = folder_path
 
     @staticmethod
-    def getYamlData(yamlFilePath):
+    def get_yaml_data(yaml_file_path):
         """
         The function `getYamlData` reads a YAML file and returns its contents as a Python object.
 
@@ -79,16 +79,16 @@ class ScenarioDescriptionBase:
         Returns:
             the data loaded from the YAML file.
         """
-        with open(yamlFilePath, "r") as fileHandle:
+        with open(yaml_file_path, "r") as file_handle:
             try:
-                yamlData = yamlload(fileHandle, Loader=yamlLoader)
+                yaml_data = yamlload(file_handle, loader=yaml_loader)
             except Exception as e:
                 logger.debug(f"{e}")
-                yamlData = None
-        return yamlData
+                yaml_data = None
+        return yaml_data
 
     @staticmethod
-    def getDataFrameFromYaml(yamlFilePath, addObsolete=False):
+    def get_data_frame_from_yaml(yaml_file_path, add_obsolete=False):
         """
         The function `getDataFrameFromYaml` takes a YAML file path, reads the data from the file, checks if
         the status is active (unless `addObsolete` is set to True), converts the data into a flat table, and
@@ -102,17 +102,17 @@ class ScenarioDescriptionBase:
         Returns:
             a pandas DataFrame object.
         """
-        yamlData = ScenarioDescriptionBase.getYamlData(yamlFilePath)
-        if addObsolete is False:
-            if yamlData["status"] != "active":
+        yaml_data = scenario_description_base.get_yaml_data(yaml_file_path)
+        if add_obsolete is False:
+            if yaml_data["status"] != "active":
                 return None
-        if yamlData is None:
+        if yaml_data is None:
             return None
-        flatTable = json_normalize(yamlData)
-        dataFrame = pd.DataFrame(flatTable)
-        return dataFrame
+        flat_table = json_normalize(yaml_data)
+        data_frame = pd.data_frame(flat_table)
+        return data_frame
 
-    def getDataframesFromFiles(self, extension=".yaml", addObsolete=False):
+    def get_dataframes_from_files(self, extension=".yaml", add_obsolete=False):
         """
         The function `getDataframesFromFiles` retrieves data from YAML files, creates dataframes, adds additional
         information, and returns a concatenated dataframe.
@@ -125,23 +125,23 @@ class ScenarioDescriptionBase:
         Returns:
             a pandas DataFrame object.
         """
-        files = glob.glob(f"{self.folderPath}/**/*{extension}", recursive=True)
+        files = glob.glob(f"{self.folder_path}/**/*{extension}", recursive=True)
         if extension == ".yaml":
-            dataFrames = []
-            for yamlFile in files:
-                df = ScenarioDescriptionBase.getDataFrameFromYaml(yamlFile, addObsolete=addObsolete)
+            data_frames = []
+            for yaml_file in files:
+                df = scenario_description_base.get_data_frame_from_yaml(yaml_file, add_obsolete=add_obsolete)
                 if df is not None:
-                    df["location"] = yamlFile
-                    localTime = time.ctime(os.path.getmtime(yamlFile))
-                    df["lastmodified"] = pd.to_datetime(localTime)
-                    self._extractInformation(df)
-                    dataFrames.append(df)
+                    df["location"] = yaml_file
+                    local_time = time.ctime(os.path.getmtime(yaml_file))
+                    df["lastmodified"] = pd.to_datetime(local_time)
+                    self._extract_information(df)
+                    data_frames.append(df)
 
-        df = pd.concat(dataFrames, ignore_index=True)
-        df = df.rename(columns=yamlMapping)
+        df = pd.concat(data_frames, ignore_index=True)
+        df = df.rename(columns=yaml_mapping)
         return df
 
-    def _extractInformation(self, df):
+    def _extract_information(self, df):
         """
         The function `_extractInformation` extracts information from a DataFrame and adds new columns based
         on the extracted data.
@@ -164,16 +164,16 @@ class ScenarioDescriptionBase:
             species = species.split()
             n_over_ne = n_over_ne.split()
 
-            speciesDict = {k: v for k, v in zip(species, n_over_ne)}
-            sorted_dict = dict(sorted(speciesDict.items(), key=lambda item: float(item[1]), reverse=True))
+            species_dict = {k: v for k, v in zip(species, n_over_ne)}
+            sorted_dict = dict(sorted(species_dict.items(), key=lambda item: float(item[1]), reverse=True))
             df["composition"] = ",".join([f"{key}({value})" for key, value in sorted_dict.items()])
         else:
             df["composition"] = "None"
 
 
 # The class ScenarioDescription is a subclass of ScenarioDescriptionBase.
-class ScenarioDescription(ScenarioDescriptionBase):
-    def __init__(self, pulse: int, run: int, folderPath: str = "") -> None:
+class scenario_description(scenario_description_base):
+    def __init__(self, pulse: int, run: int, folder_path: str = "") -> None:
         """
         The above function initializes an object with a pulse, run, and folder path, and attempts to load
         YAML data from a file based on the pulse and run numbers.
@@ -185,17 +185,17 @@ class ScenarioDescription(ScenarioDescriptionBase):
             folderPath (str): The `folderPath` parameter is a string that represents the path to a folder
             where the YAML file is located.
         """
-        super().__init__(folderPath)
-        yamlFileName = self.folderPath + f'/ids_{pulse}{str(run).rjust(4,"0")}.yaml'
-        self.yamlData = None
+        super().__init__(folder_path)
+        yaml_file_name = self.folder_path + f'/ids_{pulse}{str(run).rjust(4,"0")}.yaml'
+        self.yaml_data = None
         try:
-            with open(yamlFileName, "r") as f:
-                self.yamlData = yamlload(f, Loader=yamlLoader)
+            with open(yaml_file_name, "r") as f:
+                self.yaml_data = yamlload(f, loader=yaml_loader)
         except Exception as e:
             logger.debug(f"{e}")
             logger.critical(f"Warning: {e}")
 
-    def getChildren(self, yamlData, dictToFill={}):
+    def get_children(self, yaml_data, dict_to_fill={}):
         """
         The function `getChildren` recursively retrieves data from a YAML file and populates a dictionary
         with specific keys and values.
@@ -210,32 +210,32 @@ class ScenarioDescription(ScenarioDescriptionBase):
             the dictionary with scenario children.
         """
         replaced_by = None
-        if "database_relations" in yamlData.keys():
-            if "replaced_by" in yamlData["database_relations"].keys():
-                replaced_by = yamlData["database_relations"]["replaced_by"]
-        if "pulse" not in dictToFill.keys():
-            dictToFill["pulse"] = []
-        if "run" not in dictToFill.keys():
-            dictToFill["run"] = []
-        if "status" not in dictToFill.keys():
-            dictToFill["status"] = []
-        if "comment" not in dictToFill.keys():
-            dictToFill["comment"] = []
+        if "database_relations" in yaml_data.keys():
+            if "replaced_by" in yaml_data["database_relations"].keys():
+                replaced_by = yaml_data["database_relations"]["replaced_by"]
+        if "pulse" not in dict_to_fill.keys():
+            dict_to_fill["pulse"] = []
+        if "run" not in dict_to_fill.keys():
+            dict_to_fill["run"] = []
+        if "status" not in dict_to_fill.keys():
+            dict_to_fill["status"] = []
+        if "comment" not in dict_to_fill.keys():
+            dict_to_fill["comment"] = []
         if replaced_by is not None:
             string_list = re.findall(r"\d+", replaced_by)
             pulsec = string_list[0]
             runc = string_list[1]
-            scenarioDescription = ScenarioDescription(pulsec, runc, self.folderPath)
+            scenario_description = scenario_description(pulsec, runc, self.folder_path)
 
-            if scenarioDescription.yamlData is not None:
-                dictToFill["pulse"].append(pulsec)
-                dictToFill["run"].append(runc)
-                dictToFill["status"].append(scenarioDescription.yamlData["status"])
-                dictToFill["comment"].append(scenarioDescription.yamlData["database_relations"]["replaces"])
-                dictToFill = self.getChildren(scenarioDescription.yamlData, dictToFill)
-        return dictToFill
+            if scenario_description.yaml_data is not None:
+                dict_to_fill["pulse"].append(pulsec)
+                dict_to_fill["run"].append(runc)
+                dict_to_fill["status"].append(scenario_description.yaml_data["status"])
+                dict_to_fill["comment"].append(scenario_description.yaml_data["database_relations"]["replaces"])
+                dict_to_fill = self.get_children(scenario_description.yaml_data, dict_to_fill)
+        return dict_to_fill
 
-    def getParents(self, yamlData, dictToFill={}):
+    def get_parents(self, yaml_data, dict_to_fill={}):
         """
         The function `getParents` retrieves parent data from a YAML file and populates a dictionary with the
         parent information.
@@ -249,32 +249,32 @@ class ScenarioDescription(ScenarioDescriptionBase):
             the dictionary with scenario parents
         """
         replaces = None
-        if "database_relations" in yamlData.keys():
-            if "replaces" in yamlData["database_relations"].keys():
-                replaces = yamlData["database_relations"]["replaces"]
-        if "pulse" not in dictToFill.keys():
-            dictToFill["pulse"] = []
-        if "run" not in dictToFill.keys():
-            dictToFill["run"] = []
-        if "status" not in dictToFill.keys():
-            dictToFill["status"] = []
-        if "comment" not in dictToFill.keys():
-            dictToFill["comment"] = []
+        if "database_relations" in yaml_data.keys():
+            if "replaces" in yaml_data["database_relations"].keys():
+                replaces = yaml_data["database_relations"]["replaces"]
+        if "pulse" not in dict_to_fill.keys():
+            dict_to_fill["pulse"] = []
+        if "run" not in dict_to_fill.keys():
+            dict_to_fill["run"] = []
+        if "status" not in dict_to_fill.keys():
+            dict_to_fill["status"] = []
+        if "comment" not in dict_to_fill.keys():
+            dict_to_fill["comment"] = []
         if replaces is not None:
             string_list = re.findall(r"\d+", replaces)
             pulsep = string_list[0]
             runp = string_list[1]
-            scenarioDescription = ScenarioDescription(pulsep, runp, self.folderPath)
+            scenario_description = scenario_description(pulsep, runp, self.folder_path)
 
-            if scenarioDescription.yamlData is not None:
-                dictToFill["pulse"].insert(0, pulsep)  # Order to be reversed for parents
-                dictToFill["run"].insert(0, runp)
-                dictToFill["status"].insert(0, scenarioDescription.yamlData["status"])
-                dictToFill["comment"].insert(0, scenarioDescription.yamlData["database_relations"]["replaces"])
-                dictToFill = self.getParents(scenarioDescription.yamlData, dictToFill)
-        return dictToFill
+            if scenario_description.yaml_data is not None:
+                dict_to_fill["pulse"].insert(0, pulsep)  # Order to be reversed for parents
+                dict_to_fill["run"].insert(0, runp)
+                dict_to_fill["status"].insert(0, scenario_description.yaml_data["status"])
+                dict_to_fill["comment"].insert(0, scenario_description.yaml_data["database_relations"]["replaces"])
+                dict_to_fill = self.get_parents(scenario_description.yaml_data, dict_to_fill)
+        return dict_to_fill
 
-    def getFamily(self):
+    def get_family(self):
         """
         The function "getFamily" returns a dictionary containing the parents and children of a scenario based
         on the provided YAML data.
@@ -284,20 +284,20 @@ class ScenarioDescription(ScenarioDescriptionBase):
             associated with these keys are the results of calling the `getParents` and `getChildren` methods,
             passing in `yaml data` as argument.
         """
-        familyDict = {}
-        familyDict["parents"] = self.getParents(self.yamlData, {})
-        familyDict["children"] = self.getChildren(self.yamlData, {})
-        return familyDict
+        family_dict = {}
+        family_dict["parents"] = self.get_parents(self.yaml_data, {})
+        family_dict["children"] = self.get_children(self.yaml_data, {})
+        return family_dict
 
-    def printYaml(self):
+    def print_yaml(self):
         """
         The function `printYaml` prints the `yamlData` attribute of the object on terminal.
         """
-        terminal = Terminal()
-        terminal.print(self.yamlData)
+        terminal = terminal()
+        terminal.print(self.yaml_data)
 
 
 if __name__ == "__main__":
-    defaultFolderPath = r"/work/imas/shared/imasdb/ITER/3/0"
-    scenarioDescriptionObj = ScenarioDescriptionBase(folderPath=defaultFolderPath)
-    df = scenarioDescriptionObj.getDataframesFromFiles(extension=".yaml", addObsolete=False)
+    default_folder_path = r"/work/imas/shared/imasdb/ITER/3/0"
+    scenario_description_obj = scenario_description_base(folder_path=default_folder_path)
+    df = scenario_description_obj.get_dataframes_from_files(extension=".yaml", add_obsolete=False)

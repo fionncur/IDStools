@@ -15,10 +15,10 @@ from packaging import version
 from rich.progress import track
 
 logger = logging.getLogger("module")
-ARRAY_EQUAL_KWARGS = "equal_nan=True" if version.parse(np.__version__) > version.parse("1.19") else ""
+a_r_r_a_y__e_q_u_a_l__k_w_a_r_g_s = "equal_nan=True" if version.parse(np.__version__) > version.parse("1.19") else ""
 
 
-def isIdsField(idstype: type) -> bool:
+def is_ids_field(idstype: type) -> bool:
     """
     This function checks if a given type is a possible field of an IDS.
 
@@ -30,14 +30,14 @@ def isIdsField(idstype: type) -> bool:
         field of an IDS or not.
     """
     return (
-        idstype != types.MethodType
-        and idstype != types.FunctionType
+        idstype != types.method_type
+        and idstype != types.function_type
         and "Logger" not in str(idstype)
         and "HLIUtils" not in str(idstype)
     )
 
 
-def getIdsAttributes(idsobj: object) -> list:
+def get_ids_attributes(idsobj: object) -> list:
     """
     This function returns a list of attribute names for a given IDS object.
 
@@ -49,12 +49,12 @@ def getIdsAttributes(idsobj: object) -> list:
         private and are ids fields.
     """
     if "imas" in str(type(idsobj)):
-        return [a[0] for a in inspect.getmembers(idsobj) if not a[0].startswith("_") and isIdsField(type(a[1]))]
+        return [a[0] for a in inspect.getmembers(idsobj) if not a[0].startswith("_") and is_ids_field(type(a[1]))]
     else:
         return []
 
 
-def getIDSSize(dbEntryObject: imas.DBEntry, idsNames=None) -> dict:
+def get_i_d_s_size(db_entry_object: imas.d_b_entry, ids_names=None) -> dict:
     """
     The function `getIDSSize` retrieves the size of IDS objects from a database entry and returns a dictionary
     containing the size in bytes and the time taken to read each object.
@@ -68,35 +68,35 @@ def getIDSSize(dbEntryObject: imas.DBEntry, idsNames=None) -> dict:
         a dictionary containing information about the size and time taken to read IDS objects from a database
         entry. The dictionary has the following structure:
     """
-    if idsNames is None:
-        idsNames = [i.value for i in imas.IDSName]
-    if type(idsNames) is str:
-        idsNames = idsNames.split(",")
-    idsSizeDict = {}
-    for idsName in track(idsNames, description="[green]Processing..."):
-        occurrencesCount = eval(f"imas.{idsName}.getMaxOccurrences()")
-        for o in range(occurrencesCount + 1):
-            homogeneousTime = dbEntryObject.partial_get(idsName, "ids_properties/homogeneous_time", occurrence=o)
-            if homogeneousTime >= 0:
-                field = f"{idsName}/{o}"
-                idsSizeDict[field] = {}
-                startTime = time.time()
-                idsObject = dbEntryObject.get(idsName, occurrence=o)
-                idsSizeDict[field]["time"] = time.time() - startTime
-                idsSizeDict[field]["bytes"] = getObjectSize(idsObject)
+    if ids_names is None:
+        ids_names = [i.value for i in imas.i_d_s_name]
+    if type(ids_names) is str:
+        ids_names = ids_names.split(",")
+    ids_size_dict = {}
+    for ids_name in track(ids_names, description="[green]Processing..."):
+        occurrences_count = eval(f"imas.{ids_name}.getMaxOccurrences()")
+        for o in range(occurrences_count + 1):
+            homogeneous_time = db_entry_object.partial_get(ids_name, "ids_properties/homogeneous_time", occurrence=o)
+            if homogeneous_time >= 0:
+                field = f"{ids_name}/{o}"
+                ids_size_dict[field] = {}
+                start_time = time.time()
+                ids_object = db_entry_object.get(ids_name, occurrence=o)
+                ids_size_dict[field]["time"] = time.time() - start_time
+                ids_size_dict[field]["bytes"] = get_object_size(ids_object)
                 print(
                     "Reading %0.3f MB of data for %s took %0.2f seconds"
                     % (
-                        idsSizeDict[field]["bytes"] / 1024**2,
+                        ids_size_dict[field]["bytes"] / 1024**2,
                         field,
-                        idsSizeDict[field]["time"],
+                        ids_size_dict[field]["time"],
                     )
                 )
-                del idsObject
-    return idsSizeDict
+                del ids_object
+    return ids_size_dict
 
 
-def getAllIDSSize(dbEntryObject: imas.DBEntry):
+def get_all_i_d_s_size(db_entry_object: imas.d_b_entry):
     """
     The function `getAllIDSSize` calculates the total size in bytes of all IDS in a given `dbEntryObject`.
 
@@ -106,12 +106,12 @@ def getAllIDSSize(dbEntryObject: imas.DBEntry):
     Returns:
         the total size in bytes of all the IDS in the given `dbEntryObject`.
     """
-    idsSizeDict = getIDSSize(dbEntryObject)
-    totalBytes = np.array([ids["bytes"] for ids in idsSizeDict.values()]).sum()
-    return totalBytes
+    ids_size_dict = get_i_d_s_size(db_entry_object)
+    total_bytes = np.array([ids["bytes"] for ids in ids_size_dict.values()]).sum()
+    return total_bytes
 
 
-def getAllIDSGetTime(dbEntryObject: imas.DBEntry):
+def get_all_i_d_s_get_time(db_entry_object: imas.d_b_entry):
     """
     The function `getAllIDSGetTime` calculates the total time for all IDS in a given `dbEntryObject`.
 
@@ -121,34 +121,34 @@ def getAllIDSGetTime(dbEntryObject: imas.DBEntry):
     Returns:
         the total time to get all the IDSes in the given `dbEntryObject`.
     """
-    idsSizeDict = getIDSSize(dbEntryObject)
-    return np.array([ids["time"] for ids in idsSizeDict.values()]).sum()
+    ids_size_dict = get_i_d_s_size(db_entry_object)
+    return np.array([ids["time"] for ids in ids_size_dict.values()]).sum()
 
 
-def getObjectSize(obj: object) -> int:
-    objectSize = 0
+def get_object_size(obj: object) -> int:
+    object_size = 0
 
     if isinstance(obj, str):
-        objectSize += len(obj)
+        object_size += len(obj)
     elif isinstance(obj, np.ndarray):
-        objectSize += obj.nbytes
+        object_size += obj.nbytes
     elif isinstance(obj, int):
-        objectSize += 4
+        object_size += 4
     elif isinstance(obj, float):
-        objectSize += 8
+        object_size += 8
     elif isinstance(obj, list):
-        for objItem in obj:
-            objectSize += getObjectSize(objItem)
+        for obj_item in obj:
+            object_size += get_object_size(obj_item)
     elif isinstance(obj, dict):
-        for objValue in obj.values():
-            objectSize += getObjectSize(objValue)
+        for obj_value in obj.values():
+            object_size += get_object_size(obj_value)
     else:
-        for objValue in obj.__dict__.values():
-            objectSize += getObjectSize(objValue)
-    return objectSize
+        for obj_value in obj.__dict__.values():
+            object_size += get_object_size(obj_value)
+    return object_size
 
 
-def getIdsTypes():
+def get_ids_types():
     """
     This function returns list of strings corresponding to all ids types for each IDSName object in the imas module.
 
@@ -156,10 +156,10 @@ def getIdsTypes():
         The function `getIdsTypes()` is returning a list of values of all the `value` attributes of the `IDSName`
         objects in the `imas` module.
     """
-    return [ids.value for ids in list(imas.IDSName)]
+    return [ids.value for ids in list(imas.i_d_s_name)]
 
 
-def getAvailableIdsAndOccurrences(dbEntryObject: imas.DBEntry, timeMode=None, getComment=False):
+def get_available_ids_and_occurrences(db_entry_object: imas.d_b_entry, time_mode=None, get_comment=False):
     """
     This function returns a list of pairs of available IDS types and their occurrences in a given DBEntry object.
 
@@ -179,30 +179,30 @@ def getAvailableIdsAndOccurrences(dbEntryObject: imas.DBEntry, timeMode=None, ge
         4: "mapping",
     }
     availableidslist = []
-    for idstype in getIdsTypes():
-        for occ in range(getattr(imas, idstype)().getMaxOccurrences()):
+    for idstype in get_ids_types():
+        for occ in range(getattr(imas, idstype)().get_max_occurrences()):
             homogeneous_time = ""
             comment = ""
             occ_type = ""
-            homogeneous_time = dbEntryObject.partial_get(idstype, "ids_properties/homogeneous_time", occurrence=occ)
-            comment = dbEntryObject.partial_get(idstype, "ids_properties/comment", occurrence=occ)
+            homogeneous_time = db_entry_object.partial_get(idstype, "ids_properties/homogeneous_time", occurrence=occ)
+            comment = db_entry_object.partial_get(idstype, "ids_properties/comment", occurrence=occ)
             try:
                 occ_type_text = ""
-                occ_type = dbEntryObject.partial_get(idstype, "ids_properties/occurrence_type", occurrence=occ)
-                if occ_type.index != imas.imasdef.EMPTY_INT:
+                occ_type = db_entry_object.partial_get(idstype, "ids_properties/occurrence_type", occurrence=occ)
+                if occ_type.index != imas.imasdef.e_m_p_t_y__i_n_t:
                     occ_type_text = occ_type_dict[occ_type.index]
                     comment += f" [occurrence type = {occ_type_text}]"
             except Exception as e:
                 logger.debug(f"{e}")
-            if homogeneous_time != imas.imasdef.EMPTY_INT and (timeMode is None or timeMode == homogeneous_time):
-                if getComment is True:
+            if homogeneous_time != imas.imasdef.e_m_p_t_y__i_n_t and (time_mode is None or time_mode == homogeneous_time):
+                if get_comment is True:
                     availableidslist.append((idstype, occ, comment))
                 else:
                     availableidslist.append((idstype, occ))
     return availableidslist
 
 
-def getAvailableIdsAndTimes(dbEntryObject: imas.DBEntry) -> list:
+def get_available_ids_and_times(db_entry_object: imas.d_b_entry) -> list:
     """
     The function `getAvailableIdsAndTimes` retrieves available IDS names and corresponding time
     arrays from a given `dbEntryObject`.
@@ -215,33 +215,33 @@ def getAvailableIdsAndTimes(dbEntryObject: imas.DBEntry) -> list:
     """
 
     result = []
-    for _idsName in getIdsTypes():
-        maxOccurrences = eval(f"imas.{_idsName}.getMaxOccurrences()")
-        for occurrence in range(maxOccurrences + 1):
-            timeArray = None
-            idsName = _idsName if occurrence == 0 else f"{_idsName}/{occurrence}"
+    for _ids_name in get_ids_types():
+        max_occurrences = eval(f"imas.{_ids_name}.getMaxOccurrences()")
+        for occurrence in range(max_occurrences + 1):
+            time_array = None
+            ids_name = _ids_name if occurrence == 0 else f"{_ids_name}/{occurrence}"
             try:
-                homogeneous_time = dbEntryObject.partial_get(
-                    _idsName, "ids_properties/homogeneous_time", occurrence=occurrence
+                homogeneous_time = db_entry_object.partial_get(
+                    _ids_name, "ids_properties/homogeneous_time", occurrence=occurrence
                 )
-                if homogeneous_time == imas.imasdef.IDS_TIME_MODE_UNKNOWN:
-                    timeArray = []
-                if homogeneous_time == imas.imasdef.IDS_TIME_MODE_HETEROGENEOUS:
-                    timeArray = [np.NaN]
-                if homogeneous_time == imas.imasdef.IDS_TIME_MODE_HOMOGENEOUS:
-                    timeArray = dbEntryObject.partial_get(_idsName, "time")
-                if homogeneous_time == imas.imasdef.IDS_TIME_MODE_INDEPENDENT:
-                    timeArray = [np.NINF]
+                if homogeneous_time == imas.imasdef.i_d_s__t_i_m_e__m_o_d_e__u_n_k_n_o_w_n:
+                    time_array = []
+                if homogeneous_time == imas.imasdef.i_d_s__t_i_m_e__m_o_d_e__h_e_t_e_r_o_g_e_n_e_o_u_s:
+                    time_array = [np.na_n]
+                if homogeneous_time == imas.imasdef.i_d_s__t_i_m_e__m_o_d_e__h_o_m_o_g_e_n_e_o_u_s:
+                    time_array = db_entry_object.partial_get(_ids_name, "time")
+                if homogeneous_time == imas.imasdef.i_d_s__t_i_m_e__m_o_d_e__i_n_d_e_p_e_n_d_e_n_t:
+                    time_array = [np.n_i_n_f]
             except Exception as e:
                 logger.debug(f"{e}")
-                timeArray = []
-                logger.info(f"ERROR! IDS {idsName} : Reading time array fails due to following problem : {e}")
-            if timeArray is not None and len(timeArray):
-                result.append((idsName, timeArray))
+                time_array = []
+                logger.info(f"ERROR! IDS {ids_name} : Reading time array fails due to following problem : {e}")
+            if time_array is not None and len(time_array):
+                result.append((ids_name, time_array))
     return result
 
 
-def resampleIndices(dbin: str, dbout: str, idsname: str, start: int = 0, stop: int = None, step: int = 1):
+def resample_indices(dbin: str, dbout: str, idsname: str, start: int = 0, stop: int = None, step: int = 1):
     """
     The function resampleIndices takes in a database input, database output, and an idsname, and resamples the
     data based on the specified start, stop, and step values.
@@ -260,12 +260,12 @@ def resampleIndices(dbin: str, dbout: str, idsname: str, start: int = 0, stop: i
         is set to 3, every third index will be selected, and so. Defaults to 1
     """
     times = dbin.partial_get(idsname, "time")
-    for timeVal in times[range(start, len(times) if stop is None else stop, step)]:
-        dataSlice = dbin.get_slice(idsname, timeVal, imas.imasdef.PREVIOUS_INTERP)
-        dbout.put_slice(dataSlice)
+    for time_val in times[range(start, len(times) if stop is None else stop, step)]:
+        data_slice = dbin.get_slice(idsname, time_val, imas.imasdef.p_r_e_v_i_o_u_s__i_n_t_e_r_p)
+        dbout.put_slice(data_slice)
 
 
-def resampleTimes(
+def resample_times(
     dbin: str,
     dbout: str,
     idsname: str,
@@ -301,19 +301,19 @@ def resampleTimes(
         rstop = times[-1] if stop is None else stop
         rtimes = np.arange(rstart, rstop, step)
 
-    for timeVal in rtimes:
-        dataSlice = dbin.get_slice(idsname, timeVal, imas.imasdef.PREVIOUS_INTERP)
-        dbout.put_slice(dataSlice)
+    for time_val in rtimes:
+        data_slice = dbin.get_slice(idsname, time_val, imas.imasdef.p_r_e_v_i_o_u_s__i_n_t_e_r_p)
+        dbout.put_slice(data_slice)
 
 
-def compareIds(
-    X,
-    Y,
+def compare_ids(
+    x,
+    y,
     field=None,
     ignore_version=True,
     verb=True,
-    nameX="first",
-    nameY="second",
+    name_x="first",
+    name_y="second",
     output={},
 ):
     """
@@ -336,32 +336,32 @@ def compareIds(
     """
 
     identical = True
-    if hasattr(X, "__name__") and hasattr(Y, "__name__"):
-        if X.__name__ == Y.__name__:
+    if hasattr(x, "__name__") and hasattr(y, "__name__"):
+        if x.__name__ == y.__name__:
             if field is None:
-                field = X.__name__
-                logger.debug("Has __name__ in IDSes :" + X.__name__)
+                field = x.__name__
+                logger.debug("Has __name__ in IDSes :" + x.__name__)
         else:
             if verb:
-                logger.error(f"Different IDSs: {X.__name__} and {Y.__name__}")
+                logger.error(f"Different IDSs: {x.__name__} and {y.__name__}")
             return False
-    elif hasattr(X, "_base_path") and hasattr(Y, "_base_path"):
-        if X._base_path == Y._base_path:
+    elif hasattr(x, "_base_path") and hasattr(y, "_base_path"):
+        if x._base_path == y._base_path:
             if field is None:
-                field = X._base_path
-                logger.debug("Has _base_path in IDSes :" + X._base_path)
+                field = x._base_path
+                logger.debug("Has _base_path in IDSes :" + x._base_path)
         else:
             if verb:
-                logger.error(f"Different structure: {X._base_path} and {Y._base_path}")
+                logger.error(f"Different structure: {x._base_path} and {y._base_path}")
             return False
     else:
         # un-expected different objects
-        logger.error(f"Unexpected objects: {type(X)} and {type(Y)}")
+        logger.error(f"Unexpected objects: {type(x)} and {type(y)}")
         return False
 
-    Xd = X.__dict__
-    Yd = Y.__dict__
-    for key in set(Xd.keys()).union(set(Yd.keys())):
+    xd = x.__dict__
+    yd = y.__dict__
+    for key in set(xd.keys()).union(set(yd.keys())):
         if key.startswith("_"):
             continue
 
@@ -371,12 +371,12 @@ def compareIds(
         if ignore_version and "version_put" == key:
             continue
 
-        if key not in Xd:
+        if key not in xd:
             if field + "." + key not in output.keys():
                 output[field + "." + key] = (
                     field + "." + key,
                     field + "." + key,
-                    f"not present in {nameX} ids",
+                    f"not present in {name_x} ids",
                 )
             else:
                 logger.error("Duplicate key found")
@@ -385,12 +385,12 @@ def compareIds(
             identical = False
             continue
 
-        if key not in Yd:
+        if key not in yd:
             if field + "." + key not in output.keys():
                 output[field + "." + key] = (
                     field + "." + key,
                     field + "." + key,
-                    f"not present in {nameY} ids",
+                    f"not present in {name_y} ids",
                 )
             else:
                 logger.error("Duplicate key found")
@@ -399,44 +399,44 @@ def compareIds(
             identical = False
             continue
 
-        Xo = X.__dict__[key]
-        Yo = Y.__dict__[key]
-        if not isinstance(Xo, type(Yo)):
+        xo = x.__dict__[key]
+        yo = y.__dict__[key]
+        if not isinstance(xo, type(yo)):
             if field + "." + key not in output.keys():
                 output[field + "." + key] = (
-                    Xo,
-                    Yo,
+                    xo,
+                    yo,
                     None,
-                    f"different type {nameX} type(Xo), {nameY} type(Yo) ",
+                    f"different type {name_x} type(Xo), {name_y} type(Yo) ",
                 )
             else:
                 logger.error("Duplicate key found")
             if verb:
                 logger.warning(f"Different type for {field}.{key}")
 
-        if hasattr(Xo, "__module__") and "imas" in Xo.__module__:
+        if hasattr(xo, "__module__") and "imas" in xo.__module__:
             # TO DO: To be removed, when private _base_path will be replaced by __name__
-            if hasattr(Xo, "__name__"):
-                attrname = Xo.__name__
+            if hasattr(xo, "__name__"):
+                attrname = xo.__name__
             else:
-                attrname = Xo._base_path
-            identical_result, output = compareIds(
-                Xo,
-                Yo,
+                attrname = xo._base_path
+            identical_result, output = compare_ids(
+                xo,
+                yo,
                 field=f"{field}.{attrname}",
                 ignore_version=ignore_version,
                 verb=verb,
-                nameX=nameX,
-                nameY=nameY,
+                name_x=name_x,
+                name_y=name_y,
                 output=output,
             )
             identical &= identical_result
             continue
 
         # treatment of struct_array and list of strings
-        if type(Xo).__name__ == "list":
+        if type(xo).__name__ == "list":
             data_type = list
-            if len(Xo) != len(Yo):
+            if len(xo) != len(yo):
                 # avoids printing "array" as this is internal attribute for AoS
                 if key == "array":
                     f = field
@@ -444,23 +444,23 @@ def compareIds(
                     f = f"{field}.{key}"
 
                 if f not in output.keys():
-                    output[f] = (Xo, Yo, data_type, "different length")
+                    output[f] = (xo, yo, data_type, "different length")
                 else:
                     logger.error("Duplicate key found")
                 if verb:
                     logger.info(f"{f} is of different length")
                 identical = False
             else:
-                for i in range(len(Xo)):
-                    if "structArrayElement" in type(Xo[i]).__name__:
-                        identical_result, output = compareIds(
-                            Xo[i],
-                            Yo[i],
+                for i in range(len(xo)):
+                    if "structArrayElement" in type(xo[i]).__name__:
+                        identical_result, output = compare_ids(
+                            xo[i],
+                            yo[i],
                             field=f"{field}[{i}]",
                             ignore_version=ignore_version,
                             verb=verb,
-                            nameX=nameX,
-                            nameY=nameY,
+                            name_x=name_x,
+                            name_y=name_y,
                             output=output,
                         )
                         identical &= identical_result
@@ -469,38 +469,38 @@ def compareIds(
                         continue
         else:
             # Check equalities of arrays first as numpy array
-            if isinstance(Xo, np.ndarray) and isinstance(Yo, np.ndarray):
-                result = np.array_equal(Xo, Yo, ARRAY_EQUAL_KWARGS)
+            if isinstance(xo, np.ndarray) and isinstance(yo, np.ndarray):
+                result = np.array_equal(xo, yo, a_r_r_a_y__e_q_u_a_l__k_w_a_r_g_s)
                 # output[field + "." + key]= (Xo, Yo, "equal")
             # and second as list
             else:
-                result = Xo == Yo
+                result = xo == yo
                 # output[field + "." + key]= (Xo, Yo, "equal")
 
             if not result:
                 data_type = None
                 missing = [False]
-                if isinstance(Xo, np.ndarray):
+                if isinstance(xo, np.ndarray):
                     data_type = np.ndarray
-                    if Xo.size == 0:
-                        missing = [True, nameX]
-                    elif Yo.size == 0:
-                        missing = [True, nameY]
+                    if xo.size == 0:
+                        missing = [True, name_x]
+                    elif yo.size == 0:
+                        missing = [True, name_y]
                 else:
                     missmap = {int: -999999999, float: -9e40}
                     for t in missmap:
-                        if isinstance(Xo, t):
+                        if isinstance(xo, t):
                             data_type = t
-                            if Xo == missmap[t]:
-                                missing = [True, nameX]
-                            elif Yo == missmap[t]:
-                                missing = [True, nameY]
+                            if xo == missmap[t]:
+                                missing = [True, name_x]
+                            elif yo == missmap[t]:
+                                missing = [True, name_y]
 
                 if missing[0]:
                     if field + "." + key not in output.keys():
                         output[field + "." + key] = (
-                            Xo,
-                            Yo,
+                            xo,
+                            yo,
                             data_type,
                             f"missing in the IDS of {missing[1]}",
                         )
@@ -512,8 +512,8 @@ def compareIds(
                 else:
                     if field + "." + key not in output.keys():
                         output[field + "." + key] = (
-                            Xo,
-                            Yo,
+                            xo,
+                            yo,
                             data_type,
                             "different values",
                         )
@@ -526,7 +526,7 @@ def compareIds(
     return identical, output
 
 
-def getQuantitiesFromPulses(idspath: str, pulses: tuple, listCount: int = 0, verbose: bool = False) -> pd.DataFrame:
+def get_quantities_from_pulses(idspath: str, pulses: tuple, list_count: int = 0, verbose: bool = False) -> pd.data_frame:
     """
     The `getQuantitiesFromPulses` function retrieves values from a specified IDS path for a given set of pulses and
     returns a DataFrame containing the pulse, run, and corresponding values.
@@ -549,19 +549,19 @@ def getQuantitiesFromPulses(idspath: str, pulses: tuple, listCount: int = 0, ver
     """
     idsname = idspath.split("/")[0]
     valpath = idspath[1 + len(idsname) :]
-    if listCount != 0:
-        pulses = pulses[:listCount]
+    if list_count != 0:
+        pulses = pulses[:list_count]
     values = []
-    for pulseTuple in track(pulses, description="[green]Processing..."):
-        pulse = pulseTuple[0]
-        run = pulseTuple[1]
-        backend = pulseTuple[2]
-        database = pulseTuple[3]
-        user = pulseTuple[4]
-        version = pulseTuple[5]
+    for pulse_tuple in track(pulses, description="[green]Processing..."):
+        pulse = pulse_tuple[0]
+        run = pulse_tuple[1]
+        backend = pulse_tuple[2]
+        database = pulse_tuple[3]
+        user = pulse_tuple[4]
+        version = pulse_tuple[5]
         if verbose:
             print(f"fetching data from {pulse}, {run}")
-        connection = imas.DBEntry(backend, database, pulse, run, user, version)
+        connection = imas.d_b_entry(backend, database, pulse, run, user, version)
         connection.open()
         try:
             values.append(connection.partial_get(idsname, valpath))
@@ -570,7 +570,7 @@ def getQuantitiesFromPulses(idspath: str, pulses: tuple, listCount: int = 0, ver
             values.append(None)
         connection.close()
 
-    df = pd.DataFrame(
+    df = pd.data_frame(
         pulses,
         columns=[
             "PULSE",
@@ -584,5 +584,5 @@ def getQuantitiesFromPulses(idspath: str, pulses: tuple, listCount: int = 0, ver
         ],
     )
     df["VALUE"] = values
-    dfExtract = df[["PULSE", "RUN", "VALUE"]]
-    return dfExtract
+    df_extract = df[["PULSE", "RUN", "VALUE"]]
+    return df_extract

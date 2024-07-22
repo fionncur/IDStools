@@ -1,7 +1,7 @@
 """
 This module provides compute functions and classes for core_transport ids data
 
-`refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`_.
+`refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/i_m_design/Data%20Model/sphinx/latest.html>`_.
 
 """
 
@@ -11,11 +11,11 @@ import numpy as np
 logger = logging.getLogger("module")
 
 
-class CoreTransportCompute:
+class core_transport_compute:
     def __init__(self, ids):
         self.ids = ids
 
-    def getFluxes(self):
+    def get_fluxes(self):
         """
         The function `getFluxes` returns a dictionary containing information about fluxes in a model,
         including particle and energy fluxes for electrons and ions.
@@ -44,53 +44,53 @@ class CoreTransportCompute:
                 }
 
         """
-        fluxesDict = {}
+        fluxes_dict = {}
 
-        for modelIndex, model in enumerate(self.ids.model):
-            fluxDict = {
+        for model_index, model in enumerate(self.ids.model):
+            flux_dict = {
                 "name": ("Not defined" if model.identifier.name == "" else model.identifier.name),
                 "flux_multiplier": model.flux_multiplier,
             }
             if len(model.profiles_1d[0].electrons.particles.flux) != 0:
-                gridFluxSurface = (
+                grid_flux_surface = (
                     np.asarray([np.nan] * len(model.profiles_1d[0].electrons.particles.flux))
                     if len(model.profiles_1d[0].grid_flux.surface) == 0
                     else model.profiles_1d[0].grid_flux.surface
                 )
 
-                fluxDict["particles_flux"] = (model.profiles_1d[0].electrons.particles.flux * gridFluxSurface)[-1]
+                flux_dict["particles_flux"] = (model.profiles_1d[0].electrons.particles.flux * grid_flux_surface)[-1]
             else:
-                fluxDict["particles_flux"] = None
+                flux_dict["particles_flux"] = None
             if len(model.profiles_1d[0].electrons.energy.flux) != 0:
-                gridFluxSurface = (
+                grid_flux_surface = (
                     np.asarray([np.nan] * len(model.profiles_1d[0].electrons.energy.flux))
                     if len(model.profiles_1d[0].grid_flux.surface) == 0
                     else model.profiles_1d[0].grid_flux.surface
                 )
 
-                fluxDict["energy_flux"] = (model.profiles_1d[0].electrons.energy.flux * gridFluxSurface)[-1]
+                flux_dict["energy_flux"] = (model.profiles_1d[0].electrons.energy.flux * grid_flux_surface)[-1]
             else:
-                fluxDict["energy_flux"] = None
-            ionsDict = {}
-            gridFluxSurface = (
+                flux_dict["energy_flux"] = None
+            ions_dict = {}
+            grid_flux_surface = (
                 np.nan if len(model.profiles_1d[0].grid_flux.surface) == 0 else model.profiles_1d[0].grid_flux.surface
             )
-            for ionIndex, ion in enumerate(model.profiles_1d[0].ion):
+            for ion_index, ion in enumerate(model.profiles_1d[0].ion):
 
-                ionDict = {
+                ion_dict = {
                     "a": ion.element[0].a,
                     "z_n": ion.element[0].z_n,
                     "z_ion": ion.z_ion,
                 }
                 if len(ion.particles.flux) != 0:
-                    ionDict["particles_flux"] = (ion.particles.flux * gridFluxSurface)[-1]
+                    ion_dict["particles_flux"] = (ion.particles.flux * grid_flux_surface)[-1]
                 else:
-                    ionDict["particles_flux"] = None
+                    ion_dict["particles_flux"] = None
                 if len(ion.energy.flux) != 0:
-                    ionDict["energy_flux"] = (ion.energy.flux * gridFluxSurface)[-1]
+                    ion_dict["energy_flux"] = (ion.energy.flux * grid_flux_surface)[-1]
                 else:
-                    ionDict["energy_flux"] = None
-                ionsDict[ionIndex] = ionDict
-            fluxDict["ions"] = ionsDict
-            fluxesDict[modelIndex] = fluxDict
-        return fluxesDict
+                    ion_dict["energy_flux"] = None
+                ions_dict[ion_index] = ion_dict
+            flux_dict["ions"] = ions_dict
+            fluxes_dict[model_index] = flux_dict
+        return fluxes_dict

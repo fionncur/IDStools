@@ -29,22 +29,22 @@ from idstools.utils.idslogger import setupLogger
 from idstools.view.core_profiles import CoreProfilesView
 from idstools.view.edge_profiles import EdgeProfilesView
 
-parser = argparse.ArgumentParser(
+parser = argparse.argument_parser(
     description="---- Display the plasma composition from the core_profiles IDS [previously known as ids_compo]",
-    parents=[dbentryParser],
-    formatter_class=RichHelpFormatter,
+    parents=[dbentry_parser],
+    formatter_class=rich_help_formatter,
 )
 parser.add_argument("-i", "--info", action="store_true", help="Show information")
 parser.add_argument("--debug", action="store_true", help="Show debugging")
 
 args = parser.parse_args()
 
-level = logging.ERROR
+level = logging.e_r_r_o_r
 if args.info:
-    level = logging.INFO
+    level = logging.i_n_f_o
 if args.debug:
-    level = logging.DEBUG
-logger = setupLogger("module", stdout_level=level)
+    level = logging.d_e_b_u_g
+logger = setup_logger("module", stdout_level=level)
 
 logger.info("----------------------------------------------------------------")
 logger.info(
@@ -58,7 +58,7 @@ logger.info(
     nspec_over_nmaj : Species density list / Species density[Index of Maximum Density Species]"""
 )
 logger.info("----------------------------------------------------------------")
-connection = DBMaster.getConnection(args)
+connection = d_b_master.get_connection(args)
 if connection is None:
     logger.critical("----> Aborted.")
     exit(1)
@@ -97,7 +97,7 @@ if core_profiles_ids.time is not None:
     core_profiles_ids.profiles_1d.resize(1)
     core_profiles_ids.profiles_1d[0] = profiles_1d_slice
 
-    returnstatus = CoreProfilesView.view_plasma_composition_with_species_concentration(
+    returnstatus = core_profiles_view.view_plasma_composition_with_species_concentration(
         core_profiles_ids, 0
     )
     if returnstatus == 0:
@@ -115,7 +115,7 @@ if core_profiles_ids.time is not None:
             "equilibrium", f"time_slice({slice_index})/profiles_1d/volume"
         )
         returnstatus = (
-            CoreProfilesView.view_plasma_composition_with_species_concentration(
+            core_profiles_view.view_plasma_composition_with_species_concentration(
                 core_profiles_ids, 0, volume=volume
             )
         )
@@ -145,7 +145,7 @@ if edge_profiles_ids.time is not None:
     print("----------------")
     print("edge_profiles")
     print("----------------")
-    returnstatus = EdgeProfilesView.view_plasma_composition_with_species_concentration(
+    returnstatus = edge_profiles_view.view_plasma_composition_with_species_concentration(
         edge_profiles_ids, 0
     )
     if returnstatus == 0:
@@ -204,7 +204,7 @@ if edge_profiles_ids.time is not None:
                 )
 
                 returnstatus = (
-                    EdgeProfilesView.view_plasma_composition_with_species_concentration(
+                    edge_profiles_view.view_plasma_composition_with_species_concentration(
                         edge_profiles_ids, 0
                     )
                 )

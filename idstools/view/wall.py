@@ -3,12 +3,12 @@ from matplotlib.path import Path
 from idstools.compute.wall import WallCompute
 
 
-class WallView:
+class wall_view:
     def __init__(self, wall_ids):
         self.wall_ids = wall_ids
-        self.computeObject = WallCompute(wall_ids)
+        self.compute_object = wall_compute(wall_ids)
 
-    def addWallMarkings(self, ax, r, z, showLabels=False, **kwargs):
+    def add_wall_markings(self, ax, r, z, show_labels=False, **kwargs):
         """
         The function adds a path(Wall marking) to a given matplotlib axis object using the provided radial and
         vertical coordinates.
@@ -21,15 +21,15 @@ class WallView:
             containing the z-coordinates of the points.
         """
         n = len(r)
-        codes = [Path.MOVETO] + [Path.LINETO] * (n - 1)
+        codes = [path.m_o_v_e_t_o] + [path.l_i_n_e_t_o] * (n - 1)
         vertices = []
         for i in range(n):
             p = (r[i], z[i])
             vertices.append(p)
         # kwargs.setdefault("color", "darkgray")
-        path = Path(vertices, codes)
-        patch = patches.PathPatch(path, **kwargs)
-        if showLabels:
+        path = path(vertices, codes)
+        patch = patches.path_patch(path, **kwargs)
+        if show_labels:
             ax.text(
                 r[n - 1],
                 z[n - 1],
@@ -39,7 +39,7 @@ class WallView:
             )
         ax.add_patch(patch)
 
-    def view_wall(self, ax, showLabels=False, wallcolor=None, showLegend=False, **kwargs):
+    def view_wall(self, ax, show_labels=False, wallcolor=None, show_legend=False, **kwargs):
         """
         The function `view_wall` prints the values of `r` and `z` for each element in the `wall_data` dictionary
         and calls the `addWallMarkings` function to add a patch to the given `ax` object.
@@ -75,63 +75,63 @@ class WallView:
             "#ff7f50",  # Coral
             "darkgreen",  # dc143c",  # Crimson
         ]
-        vIndex = 0
+        v_index = 0
 
-        if vesselUnits := self.computeObject.getVesselUnits():
+        if vessel_units := self.compute_object.get_vessel_units():
 
-            for _, description2d in vesselUnits.items():
-                for vIndex, vesselUnit in description2d["vesselunits"].items():
-                    showLabelFlag = True
+            for _, description2d in vessel_units.items():
+                for v_index, vessel_unit in description2d["vesselunits"].items():
+                    show_label_flag = True
                     vname = ""
-                    if vesselUnit["identifier"]:
-                        vname = vesselUnit["identifier"]
-                    elif vesselUnit["name"]:
-                        vname = vesselUnit["name"]
+                    if vessel_unit["identifier"]:
+                        vname = vessel_unit["identifier"]
+                    elif vessel_unit["name"]:
+                        vname = vessel_unit["name"]
                     if wallcolor:
                         kwargs.update({"color": wallcolor})
                     else:
-                        kwargs.update({"color": colors[vIndex % 20]})
-                    if vesselUnit["rectangle_coordinates"]:
-                        for rw, zw in vesselUnit["rectangle_coordinates"]:
+                        kwargs.update({"color": colors[v_index % 20]})
+                    if vessel_unit["rectangle_coordinates"]:
+                        for rw, zw in vessel_unit["rectangle_coordinates"]:
 
-                            if showLabelFlag:
-                                self.addWallMarkings(
+                            if show_label_flag:
+                                self.add_wall_markings(
                                     ax,
                                     rw,
                                     zw,
-                                    showLabels=showLabels,
+                                    show_labels=show_labels,
                                     label=vname,
                                     fill=False,
                                     **kwargs,
                                 )
                             else:
-                                self.addWallMarkings(
+                                self.add_wall_markings(
                                     ax,
                                     rw,
                                     zw,
                                     fill=False,
                                     **kwargs,
                                 )
-                            showLabelFlag = False
+                            show_label_flag = False
 
-        if limiterUnits := self.computeObject.getLimiterUnits():
-            for _, description2d in limiterUnits.items():
+        if limiter_units := self.compute_object.get_limiter_units():
+            for _, description2d in limiter_units.items():
 
-                for lIndex, limiterUnit in description2d["limiterunits"].items():
+                for l_index, limiter_unit in description2d["limiterunits"].items():
                     if wallcolor:
                         kwargs.update({"color": wallcolor})
                     else:
-                        kwargs.update({"color": colors[(lIndex + vIndex) % 20]})
-                    self.addWallMarkings(
+                        kwargs.update({"color": colors[(l_index + v_index) % 20]})
+                    self.add_wall_markings(
                         ax,
-                        limiterUnit["r"],
-                        limiterUnit["z"],
-                        showLabels=showLabels,
+                        limiter_unit["r"],
+                        limiter_unit["z"],
+                        show_labels=show_labels,
                         fill=False,
-                        label=limiterUnit["name"],
+                        label=limiter_unit["name"],
                         **kwargs,
                     )
-        if showLegend:
+        if show_legend:
             ax.legend(
                 bbox_to_anchor=(1.0, 0.5),
                 loc="center left",

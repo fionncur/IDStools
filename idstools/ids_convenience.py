@@ -4,7 +4,7 @@ import imas
 
 # ------------------------------------------------------------------------------------
 def ids_read(idsname, shot, run, user_or_path, database, occ=0):
-    input = imas.DBEntry(imas.imasdef.MDSPLUS_BACKEND, database, shot, run, user_or_path)
+    input = imas.d_b_entry(imas.imasdef.m_d_s_p_l_u_s__b_a_c_k_e_n_d, database, shot, run, user_or_path)
     input.open()
     ids = input.get(idsname)
     input.close()
@@ -13,7 +13,7 @@ def ids_read(idsname, shot, run, user_or_path, database, occ=0):
 
 # ------------------------------------------------------------------------------------
 def ids_read_slice(idsname, time_slice, shot, run, user_or_path, database, occ=0, interp_method=1):
-    input = imas.DBEntry(imas.imasdef.MDSPLUS_BACKEND, database, shot, run, user_or_path)
+    input = imas.d_b_entry(imas.imasdef.m_d_s_p_l_u_s__b_a_c_k_e_n_d, database, shot, run, user_or_path)
     input.open()
     ids = input.get_slice(idsname, time_slice, interp_method, occ)
     input.close()
@@ -22,7 +22,7 @@ def ids_read_slice(idsname, time_slice, shot, run, user_or_path, database, occ=0
 
 # ------------------------------------------------------------------------------------
 def ids_write(ids, shot, run, user_or_path, database, occ=0):
-    output = imas.DBEntry(imas.imasdef.MDSPLUS_BACKEND, database, shot, run, user_or_path)
+    output = imas.d_b_entry(imas.imasdef.m_d_s_p_l_u_s__b_a_c_k_e_n_d, database, shot, run, user_or_path)
     retstatus, idx = output.open()
     if retstatus == 0:
         print(
@@ -42,7 +42,7 @@ def ids_write(ids, shot, run, user_or_path, database, occ=0):
 
 # ------------------------------------------------------------------------------------
 def ids_write_slice(ids, shot, run, user_or_path, database, occ=0):
-    output = imas.DBEntry(imas.imasdef.MDSPLUS_BACKEND, database, shot, run, user_or_path)
+    output = imas.d_b_entry(imas.imasdef.m_d_s_p_l_u_s__b_a_c_k_e_n_d, database, shot, run, user_or_path)
     retstatus, idx = output.open()
     if retstatus == 0:
         print(

@@ -23,12 +23,12 @@ from idstools.utils.idslogger import setupLogger
 from idstools.view.common import Canvas
 from idstools.view.edge_profiles import EdgeProfilesView
 
-logger = setupLogger("module", stdout_level=logging.INFO)
+logger = setup_logger("module", stdout_level=logging.i_n_f_o)
 
-parser = argparse.ArgumentParser(
+parser = argparse.argument_parser(
     description="---- Edge Profile plot",
-    parents=[dbentryParser],
-    formatter_class=RichHelpFormatter,
+    parents=[dbentry_parser],
+    formatter_class=rich_help_formatter,
 )
 
 parser.add_argument("-t", "--time", type=float, help="Time", default=-99)
@@ -59,69 +59,69 @@ parser.add_argument(
 )
 args = parser.parse_args()
 
-logger = setupLogger("module")
+logger = setup_logger("module")
 
 args = parser.parse_args()
-connection = DBMaster.getConnection(args)
+connection = d_b_master.get_connection(args)
 if connection is None:
     logger.critical("----> Aborted.")
     exit(1)
 
 if args.wall:
 
-    wallIds = connection.get("wall")
+    wall_ids = connection.get("wall")
 
-    if wallIds.ids_properties.homogeneous_time == imasdef.EMPTY_INT:
+    if wall_ids.ids_properties.homogeneous_time == imasdef.e_m_p_t_y__i_n_t:
 
-        machineDescription = MachineDescription(connectionArgs=copy.deepcopy(args))
-        wallMDDict = machineDescription.getLatestIdsData("wall")
-        wallIds = wallMDDict["idsData"]
-    if wallIds.ids_properties.homogeneous_time == imasdef.EMPTY_INT:
+        machine_description = machine_description(connection_args=copy.deepcopy(args))
+        wall_m_d_dict = machine_description.get_latest_ids_data("wall")
+        wall_ids = wall_m_d_dict["idsData"]
+    if wall_ids.ids_properties.homogeneous_time == imasdef.e_m_p_t_y__i_n_t:
         logger.error("wall ids is not present")
     else:
         r = None
         z = None
         h = None
-        wallCompute = WallCompute(wallIds)
-        if vesselUnits := wallCompute.getVesselUnits(nameFilter="VV IS"):
-            for _, description2d in vesselUnits.items():
-                for vIndex, vesselUnit in description2d["vesselunits"].items():
-                    r = vesselUnit["r"]
-                    z = vesselUnit["z"]
-                    h = vesselUnit["h"]
+        wall_compute = wall_compute(wall_ids)
+        if vessel_units := wall_compute.get_vessel_units(name_filter="VV IS"):
+            for _, description2d in vessel_units.items():
+                for v_index, vessel_unit in description2d["vesselunits"].items():
+                    r = vessel_unit["r"]
+                    z = vessel_unit["z"]
+                    h = vessel_unit["h"]
                     break
 
-timeArray = None
+time_array = None
 try:
-    timeArray = connection.partial_get("edge_profiles", "time")
+    time_array = connection.partial_get("edge_profiles", "time")
 except Exception as e:
     logger.error("edge_profiles ids is not present")
     exit(1)
-if timeArray is None:
+if time_array is None:
     logger.error("edge_profiles ids : time is not present")
     exit(1)
 
-timeIndex, timeValue = getNearestTime(timeArray, args.time)
+time_index, time_value = get_nearest_time(time_array, args.time)
 
-edgeProfileIds = connection.get_slice(
-    "edge_profiles", timeValue, imasdef.CLOSEST_INTERP
+edge_profile_ids = connection.get_slice(
+    "edge_profiles", time_value, imasdef.c_l_o_s_e_s_t__i_n_t_e_r_p
 )
 
-if len(edgeProfileIds.grid_ggd) == 0:
+if len(edge_profile_ids.grid_ggd) == 0:
     logger.error(
-        f"No values in grid_ggd  at time {timeValue}, Can not plot! Choose different time with option --time, timerange [{timeArray.min()}-{timeArray.max()}]"
+        f"No values in grid_ggd  at time {time_value}, Can not plot! Choose different time with option --time, timerange [{time_array.min()}-{time_array.max()}]"
     )
     exit(1)
 
-if len(edgeProfileIds.grid_ggd[0].space) == 0:
+if len(edge_profile_ids.grid_ggd[0].space) == 0:
     logger.error(
-        f"No values in grid_ggd[0].space at time {timeValue}, Can not plot! Choose different time with option --time, timerange [{timeArray.min()}-{timeArray.max()}]"
+        f"No values in grid_ggd[0].space at time {time_value}, Can not plot! Choose different time with option --time, timerange [{time_array.min()}-{time_array.max()}]"
     )
     exit(1)
 
 
-edgeProfilesView = EdgeProfilesView(edgeProfileIds)
-canvas = Canvas(2, 4)
+edge_profiles_view = edge_profiles_view(edge_profile_ids)
+canvas = canvas(2, 4)
 
 
 ax4 = canvas.add_axes(title="", xlabel="", row=0, col=0)
@@ -129,8 +129,8 @@ ax1 = canvas.add_axes(title="", xlabel="", row=0, col=1, rowspan=2)
 ax2 = canvas.add_axes(title="", xlabel="", row=0, col=2, rowspan=2)
 ax3 = canvas.add_axes(title="", xlabel="", row=0, col=3, rowspan=2)
 
-c1 = edgeProfilesView.viewElectronsDensity(
-    ax1, timeSlice=0, showSeparatrix=False
+c1 = edge_profiles_view.view_electrons_density(
+    ax1, time_slice=0, show_separatrix=False
 )
 if c1 is not None:
     canvas.fig.colorbar(c1, ax=ax1)
@@ -138,35 +138,35 @@ if c1 is not None:
         if r is not None and z is not None:
             ax1.plot(r, z, "silver")
 
-c2 = edgeProfilesView.viewIonDensity(ax2, timeSlice=0, showSeparatrix=False)
+c2 = edge_profiles_view.view_ion_density(ax2, time_slice=0, show_separatrix=False)
 if c2 is not None:
     canvas.fig.colorbar(c2, ax=ax2)
     if args.wall:
         if r is not None and z is not None:
             ax2.plot(r, z, "silver")
 
-c3 = edgeProfilesView.viewNeutralDensity(ax3, timeSlice=0, showSeparatrix=False)
+c3 = edge_profiles_view.view_neutral_density(ax3, time_slice=0, show_separatrix=False)
 if c3 is not None:
     canvas.fig.colorbar(c3, ax=ax3)
     if args.wall:
         if r is not None and z is not None:
             ax3.plot(r, z, "silver")
 
-edgeProfilesView.viewEquatorialPlaneAndDiverterDensity(
-    ax4, timeSlice=0, logscale=args.logscale
+edge_profiles_view.view_equatorial_plane_and_diverter_density(
+    ax4, time_slice=0, logscale=args.logscale
 )
 
-canvas.setText(text=f"{getDatabasePath(args, timeValue=timeValue)}")
+canvas.set_text(text=f"{get_database_path(args, time_value=time_value)}")
 
 canvas.fig.subplots_adjust(
     top=0.93, bottom=0.067, left=0.026, right=0.953, hspace=0.287, wspace=0.12
 )
 
-canvas.fig.suptitle(getTitle(args, "Edge Profiles", timeValue), size=12)
+canvas.fig.suptitle(get_title(args, "Edge Profiles", time_value), size=12)
 canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
 
 if args.save:
-    fname = getFileName(args, os.path.basename(__file__) + "_edge_profiles", timeValue)
+    fname = get_file_name(args, os.path.basename(__file__) + "_edge_profiles", time_value)
     if args.directory:
         if not os.path.exists(args.directory):
             os.makedirs(args.directory)

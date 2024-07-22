@@ -13,7 +13,7 @@ from xml.etree import ElementTree as ET
 from idstools.idschk import init_schema_coordinate
 
 
-FILE_IDSDef = DDHelper.getIDSDefPath() 
+f_i_l_e__i_d_s_def = d_d_helper.get_i_d_s_def_path() 
 # ----------------------------------------------------------------------
 
 
@@ -54,13 +54,13 @@ def main():
     """
 
     # Load IMAS-DD file
-    if path.isfile(FILE_IDSDef):
-        root = ET.parse(FILE_IDSDef).getroot()
+    if path.isfile(f_i_l_e__i_d_s_def):
+        root = e_t.parse(f_i_l_e__i_d_s_def).getroot()
     else:
-        exit(f"file not found:{FILE_IDSDef}")
+        exit(f"file not found:{f_i_l_e__i_d_s_def}")
 
     # Initialization for yaml.Dumper
-    yaml.Dumper.ignore_aliases = lambda *args: True
+    yaml.dumper.ignore_aliases = lambda *args: True
 
     # Default rules for dynamic array
     rule = {"empty": False, "ids_dim": False}
@@ -87,7 +87,7 @@ def main():
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="create validation schema wrt DD",formatter_class=RichHelpFormatter)
+    parser = argparse.argument_parser(description="create validation schema wrt DD",formatter_class=rich_help_formatter)
     parser.add_argument(
         "-i",
         "--idslist",

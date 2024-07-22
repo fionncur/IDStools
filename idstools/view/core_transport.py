@@ -11,223 +11,223 @@ from idstools.compute.equilibrium import EquilibriumCompute
 
 logger = logging.getLogger(f"module.{__name__}")
 
-QE = codata.physical_constants["elementary charge"][0]
+q_e = codata.physical_constants["elementary charge"][0]
 
 
-class CoreTransportView:
+class core_transport_view:
     def __init__(self, ids):
-        self.coreTransportCompute = CoreTransportCompute(ids)
+        self.core_transport_compute = core_transport_compute(ids)
         self.ids = ids
 
-    def viewFluxes(self):
+    def view_fluxes(self):
         """
         The `viewFluxes` function prints out flux information for electrons and ions.
         """
-        fluxesDict = self.coreTransportCompute.getFluxes()
-        ionTable = Table(show_header=False)
-        for _, fluxDict in fluxesDict.items():
-            if fluxDict["particles_flux"] is None:
+        fluxes_dict = self.core_transport_compute.get_fluxes()
+        ion_table = table(show_header=False)
+        for _, flux_dict in fluxes_dict.items():
+            if flux_dict["particles_flux"] is None:
                 eparticles_flux = "particles(--)"
             else:
-                eparticles_flux = f"particles ({fluxDict['particles_flux'] : >.6e})"
-            if fluxDict["energy_flux"] is None:
+                eparticles_flux = f"particles ({flux_dict['particles_flux'] : >.6e})"
+            if flux_dict["energy_flux"] is None:
                 eenergy_flux = "energy(--)"
             else:
-                eenergy_flux = f"energy ({fluxDict['energy_flux']: >.6e})"
-            ionTable.add_row(
-                f'{fluxDict["name"]} ({fluxDict["flux_multiplier"]})',
+                eenergy_flux = f"energy ({flux_dict['energy_flux']: >.6e})"
+            ion_table.add_row(
+                f'{flux_dict["name"]} ({flux_dict["flux_multiplier"]})',
                 eparticles_flux,
                 eenergy_flux,
                 "",
                 "",
                 style="bold magenta",
             )
-            ionTable.add_section()
-            ionTable.add_row(
-                Align.right("a"),
-                Align.right("z_n"),
-                Align.right("z_ion"),
-                Align.right("particles"),
-                Align.right("energy"),
+            ion_table.add_section()
+            ion_table.add_row(
+                align.right("a"),
+                align.right("z_n"),
+                align.right("z_ion"),
+                align.right("particles"),
+                align.right("energy"),
                 style="bold red",
             )
 
-            for _, ionDict in fluxDict["ions"].items():
-                if ionDict["particles_flux"] is None or np.isnan(ionDict["particles_flux"]):
+            for _, ion_dict in flux_dict["ions"].items():
+                if ion_dict["particles_flux"] is None or np.isnan(ion_dict["particles_flux"]):
                     particles_flux = "--"
                 else:
-                    particles_flux = f"{ionDict['particles_flux'] : >.6e}"
-                if ionDict["energy_flux"] is None or np.isnan(ionDict["energy_flux"]):
+                    particles_flux = f"{ion_dict['particles_flux'] : >.6e}"
+                if ion_dict["energy_flux"] is None or np.isnan(ion_dict["energy_flux"]):
                     energy_flux = "--"
                 else:
-                    energy_flux = f"{ionDict['energy_flux'] : >.6e}"
-                ionTable.add_row(
-                    Align.right(str(ionDict["a"])),
-                    Align.right(str(ionDict["z_n"])),
-                    Align.right(str(ionDict["z_ion"])),
-                    Align.right(particles_flux),
-                    Align.right(energy_flux),
+                    energy_flux = f"{ion_dict['energy_flux'] : >.6e}"
+                ion_table.add_row(
+                    align.right(str(ion_dict["a"])),
+                    align.right(str(ion_dict["z_n"])),
+                    align.right(str(ion_dict["z_ion"])),
+                    align.right(particles_flux),
+                    align.right(energy_flux),
                     style="bold green",
                 )
-            ionTable.add_section()
-        console = Console()
-        console.print(ionTable)
+            ion_table.add_section()
+        console = console()
+        console.print(ion_table)
 
-    def viewIonsParticleFluxes(
+    def view_ions_particle_fluxes(
         self,
         axes,
-        idsCoreTransport,
-        idsCoreProfiles,
-        idsEquilibrium,
-        timeIndex,
-        modelIndex,
+        ids_core_transport,
+        ids_core_profiles,
+        ids_equilibrium,
+        time_index,
+        model_index,
         logscale=False,
     ):
-        Tm = idsCoreTransport.model[modelIndex]
-        V = Tm.profiles_1d[timeIndex].grid_d.volume
-        r = Tm.profiles_1d[timeIndex].grid_d.rho_tor_norm
-        S = Tm.profiles_1d[timeIndex].grid_d.area
-        Vp_per_S = np.gradient(V, r) / S
+        tm = ids_core_transport.model[model_index]
+        v = tm.profiles_1d[time_index].grid_d.volume
+        r = tm.profiles_1d[time_index].grid_d.rho_tor_norm
+        s = tm.profiles_1d[time_index].grid_d.area
+        vp_per__s = np.gradient(v, r) / s
 
-        eCompute = EquilibriumCompute(idsEquilibrium)
-        gm3 = eCompute.getgm3(r, timeSlice=timeIndex)
-        gm7 = eCompute.getgm7(r, timeSlice=timeIndex)
+        e_compute = equilibrium_compute(ids_equilibrium)
+        gm3 = e_compute.getgm3(r, time_slice=time_index)
+        gm7 = e_compute.getgm7(r, time_slice=time_index)
 
         counter = 0
-        for T_i, C_i in zip(
-            Tm.profiles_1d[-1].ion,
-            idsCoreProfiles.profiles_1d[timeIndex].ion,
+        for t_i, c_i in zip(
+            tm.profiles_1d[-1].ion,
+            ids_core_profiles.profiles_1d[time_index].ion,
         ):
-            self._validateIonsData(T_i, C_i, r, modelIndex)
+            self._validate_ions_data(t_i, c_i, r, model_index)
 
-            Gamma_i = Vp_per_S * (
-                -T_i.particles.d * np.gradient(C_i.density, r) * gm3 + C_i.density * T_i.particles.v * gm7
+            gamma_i = vp_per__s * (
+                -t_i.particles.d * np.gradient(c_i.density, r) * gm3 + c_i.density * t_i.particles.v * gm7
             )
             ax = axes[counter]
             counter = counter + 1
-            ax.plot(r, Gamma_i, label="Direct evaluation")
-            ax.plot(r, T_i.particles.flux, label="Transport code")
+            ax.plot(r, gamma_i, label="Direct evaluation")
+            ax.plot(r, t_i.particles.flux, label="Transport code")
             if logscale:
                 ax.set_yscale("log")
-            ax.set_title(f"Particle fluxes for {T_i.element[0].z_n}/{T_i.element[0].a}")
+            ax.set_title(f"Particle fluxes for {t_i.element[0].z_n}/{t_i.element[0].a}")
             ax.set_xlabel("rho_tor_norm")
             ax.set_ylabel("Particle flux density")
             ax.legend()
 
-    def viewIonsEnergyFluxes(
+    def view_ions_energy_fluxes(
         self,
         axes,
-        idsCoreTransport,
-        idsCoreProfiles,
-        idsEquilibrium,
-        timeIndex,
-        modelIndex,
+        ids_core_transport,
+        ids_core_profiles,
+        ids_equilibrium,
+        time_index,
+        model_index,
         logscale=False,
     ):
-        Tm = idsCoreTransport.model[modelIndex]
-        V = Tm.profiles_1d[timeIndex].grid_d.volume
-        r = Tm.profiles_1d[timeIndex].grid_d.rho_tor_norm
-        S = Tm.profiles_1d[timeIndex].grid_d.area
-        Vp_per_S = np.gradient(V, r) / S
+        tm = ids_core_transport.model[model_index]
+        v = tm.profiles_1d[time_index].grid_d.volume
+        r = tm.profiles_1d[time_index].grid_d.rho_tor_norm
+        s = tm.profiles_1d[time_index].grid_d.area
+        vp_per__s = np.gradient(v, r) / s
 
-        eCompute = EquilibriumCompute(idsEquilibrium)
-        gm3 = eCompute.getgm3(r, timeSlice=timeIndex)
-        gm7 = eCompute.getgm7(r, timeSlice=timeIndex)
+        e_compute = equilibrium_compute(ids_equilibrium)
+        gm3 = e_compute.getgm3(r, time_slice=time_index)
+        gm7 = e_compute.getgm7(r, time_slice=time_index)
 
         counter = 0
-        for T_i, C_i in zip(
-            Tm.profiles_1d[-1].ion,
-            idsCoreProfiles.profiles_1d[timeIndex].ion,
+        for t_i, c_i in zip(
+            tm.profiles_1d[-1].ion,
+            ids_core_profiles.profiles_1d[time_index].ion,
         ):
-            self._validateIonsData(T_i, C_i, r, modelIndex)
-            Gamma_i = Vp_per_S * (
-                -T_i.particles.d * np.gradient(C_i.density, r) * gm3 + C_i.density * T_i.particles.v * gm7
+            self._validate_ions_data(t_i, c_i, r, model_index)
+            gamma_i = vp_per__s * (
+                -t_i.particles.d * np.gradient(c_i.density, r) * gm3 + c_i.density * t_i.particles.v * gm7
             )
 
             ax = axes[counter]
             counter = counter + 1
-            Q_i_conductive = (
-                Vp_per_S
-                * (-T_i.energy.d * np.gradient(C_i.temperature, r) * gm3 + C_i.temperature * T_i.energy.v * gm7)
-                * C_i.density
-                * QE
+            q_i_conductive = (
+                vp_per__s
+                * (-t_i.energy.d * np.gradient(c_i.temperature, r) * gm3 + c_i.temperature * t_i.energy.v * gm7)
+                * c_i.density
+                * q_e
             )
-            Q_i_convective = Gamma_i * C_i.temperature * QE
-            ax.plot(r, Q_i_conductive, label="Direct evaluation (conductive)")
-            (base_line,) = ax.plot(r, Q_i_convective * 1.5, label="Direct evaluation (convective)")
+            q_i_convective = gamma_i * c_i.temperature * q_e
+            ax.plot(r, q_i_conductive, label="Direct evaluation (conductive)")
+            (base_line,) = ax.plot(r, q_i_convective * 1.5, label="Direct evaluation (convective)")
             ax.fill_between(
                 r,
-                Q_i_convective * 0.0,
-                Q_i_convective * 2.5,
+                q_i_convective * 0.0,
+                q_i_convective * 2.5,
                 facecolor=base_line.get_color(),
                 alpha=0.2,
             )
-            (base_line,) = ax.plot(r, Q_i_conductive + Q_i_convective * 1.5, label="Direct evaluation")
+            (base_line,) = ax.plot(r, q_i_conductive + q_i_convective * 1.5, label="Direct evaluation")
             ax.fill_between(
                 r,
-                Q_i_conductive + Q_i_convective * 0.0,
-                Q_i_conductive + Q_i_convective * 2.5,
+                q_i_conductive + q_i_convective * 0.0,
+                q_i_conductive + q_i_convective * 2.5,
                 facecolor=base_line.get_color(),
                 alpha=0.2,
             )
-            ax.plot(r, T_i.energy.flux, label="Transport code")
+            ax.plot(r, t_i.energy.flux, label="Transport code")
             if logscale:
                 ax.set_yscale("log")
-            ax.set_title(f"Energy fluxes for {T_i.element[0].z_n}/{T_i.element[0].a}")
+            ax.set_title(f"Energy fluxes for {t_i.element[0].z_n}/{t_i.element[0].a}")
             ax.set_xlabel("rho_tor_norm")
             ax.set_ylabel("Energy flux density")
             ax.legend()
 
-    def viewEnergyFluxesForElectrons(
+    def view_energy_fluxes_for_electrons(
         self,
         ax,
-        idsCoreTransport,
-        idsCoreProfiles,
-        idsEquilibrium,
-        timeIndex,
-        modelIndex,
+        ids_core_transport,
+        ids_core_profiles,
+        ids_equilibrium,
+        time_index,
+        model_index,
         logscale=False,
     ):
-        Tm = idsCoreTransport.model[modelIndex]
-        V = Tm.profiles_1d[timeIndex].grid_d.volume
-        r = Tm.profiles_1d[timeIndex].grid_d.rho_tor_norm
-        S = Tm.profiles_1d[timeIndex].grid_d.area
-        Vp_per_S = np.gradient(V, r) / S
+        tm = ids_core_transport.model[model_index]
+        v = tm.profiles_1d[time_index].grid_d.volume
+        r = tm.profiles_1d[time_index].grid_d.rho_tor_norm
+        s = tm.profiles_1d[time_index].grid_d.area
+        vp_per__s = np.gradient(v, r) / s
 
-        T_e = Tm.profiles_1d[timeIndex].electrons
-        C_e = idsCoreProfiles.profiles_1d[timeIndex].electrons
-        self._validateElectrons(T_e, C_e, r, modelIndex)
-        eCompute = EquilibriumCompute(idsEquilibrium)
-        gm3 = eCompute.getgm3(r, timeSlice=timeIndex)
-        gm7 = eCompute.getgm7(r, timeSlice=timeIndex)
+        t_e = tm.profiles_1d[time_index].electrons
+        c_e = ids_core_profiles.profiles_1d[time_index].electrons
+        self._validate_electrons(t_e, c_e, r, model_index)
+        e_compute = equilibrium_compute(ids_equilibrium)
+        gm3 = e_compute.getgm3(r, time_slice=time_index)
+        gm7 = e_compute.getgm7(r, time_slice=time_index)
 
-        Q_e_conductive = (
-            Vp_per_S
-            * (-T_e.energy.d * np.gradient(C_e.temperature, r) * gm3 + C_e.temperature * T_e.energy.v * gm7)
-            * C_e.density
-            * QE
+        q_e_conductive = (
+            vp_per__s
+            * (-t_e.energy.d * np.gradient(c_e.temperature, r) * gm3 + c_e.temperature * t_e.energy.v * gm7)
+            * c_e.density
+            * q_e
         )
-        Gamma_e = np.array([t.particles.flux * t.z_ion for t in Tm.profiles_1d[-1].ion]).sum(axis=0)
-        Q_e_convective = Gamma_e * C_e.temperature * QE
+        gamma_e = np.array([t.particles.flux * t.z_ion for t in tm.profiles_1d[-1].ion]).sum(axis=0)
+        q_e_convective = gamma_e * c_e.temperature * q_e
 
-        ax.plot(r, Q_e_conductive, label="Direct evaluation (conductive)")
-        (base_line,) = ax.plot(r, Q_e_convective * 1.5, label="Direct evaluation (convective)")
+        ax.plot(r, q_e_conductive, label="Direct evaluation (conductive)")
+        (base_line,) = ax.plot(r, q_e_convective * 1.5, label="Direct evaluation (convective)")
         ax.fill_between(
             r,
-            Q_e_convective * 0.0,
-            Q_e_convective * 2.5,
+            q_e_convective * 0.0,
+            q_e_convective * 2.5,
             facecolor=base_line.get_color(),
             alpha=0.2,
         )
-        (base_line,) = ax.plot(r, Q_e_conductive + Q_e_convective * 1.5, label="Direct evaluation")
+        (base_line,) = ax.plot(r, q_e_conductive + q_e_convective * 1.5, label="Direct evaluation")
         ax.fill_between(
             r,
-            Q_e_conductive + Q_e_convective * 0.0,
-            Q_e_conductive + Q_e_convective * 2.5,
+            q_e_conductive + q_e_convective * 0.0,
+            q_e_conductive + q_e_convective * 2.5,
             facecolor=base_line.get_color(),
             alpha=0.2,
         )
-        ax.plot(r, T_e.energy.flux, label="Transport code")
+        ax.plot(r, t_e.energy.flux, label="Transport code")
         if logscale:
             ax.set_yscale("log")
         ax.set_title("Energy fluxes for electrons")
@@ -235,25 +235,25 @@ class CoreTransportView:
         ax.set_ylabel("Energy flux density")
         ax.legend()
 
-    def viewParticleFluxesForElectrons(
+    def view_particle_fluxes_for_electrons(
         self,
         ax,
-        idsCoreTransport,
-        idsCoreProfiles,
-        timeIndex,
-        modelIndex,
+        ids_core_transport,
+        ids_core_profiles,
+        time_index,
+        model_index,
         logscale=False,
     ):
-        Tm = idsCoreTransport.model[modelIndex]
-        r = Tm.profiles_1d[timeIndex].grid_d.rho_tor_norm
+        tm = ids_core_transport.model[model_index]
+        r = tm.profiles_1d[time_index].grid_d.rho_tor_norm
 
-        T_e = Tm.profiles_1d[timeIndex].electrons
-        C_e = idsCoreProfiles.profiles_1d[timeIndex].electrons
-        self._validateElectrons(T_e, C_e, r, modelIndex)
-        Gamma_e = np.array([t.particles.flux * t.z_ion for t in Tm.profiles_1d[-1].ion]).sum(axis=0)
+        t_e = tm.profiles_1d[time_index].electrons
+        c_e = ids_core_profiles.profiles_1d[time_index].electrons
+        self._validate_electrons(t_e, c_e, r, model_index)
+        gamma_e = np.array([t.particles.flux * t.z_ion for t in tm.profiles_1d[-1].ion]).sum(axis=0)
 
-        ax.plot(r, Gamma_e, label="Ambipolar Transport code fluxes")
-        ax.plot(r, T_e.particles.flux, label="Transport code")
+        ax.plot(r, gamma_e, label="Ambipolar Transport code fluxes")
+        ax.plot(r, t_e.particles.flux, label="Transport code")
         if logscale:
             ax.set_yscale("log")
         ax.set_title("Particle fluxes for electrons")
@@ -261,66 +261,66 @@ class CoreTransportView:
         ax.set_ylabel("Particle flux density")
         ax.legend()
 
-    def _validateElectrons(self, T_e, C_e, r, modelIndex):
-        if len(r) != len(C_e.density):
+    def _validate_electrons(self, t_e, c_e, r, model_index):
+        if len(r) != len(c_e.density):
             logger.critical("core_profiles.profiles_1d[-1].electrons.density could not be read")
-            C_e.density = C_e.density[: len(r)]
-        if len(r) != len(C_e.temperature):
+            c_e.density = c_e.density[: len(r)]
+        if len(r) != len(c_e.temperature):
             logger.critical("core_profiles.profiles_1d[-1].electrons.temperature could not be read")
-            C_e.temperature = C_e.temperature[: len(r)]
-        if len(T_e.particles.flux) < 1:
+            c_e.temperature = c_e.temperature[: len(r)]
+        if len(t_e.particles.flux) < 1:
             logger.critical(
-                f"core_transport.model[{modelIndex}].profiles_1d[-1].electrons.particles.flux could not be read"
+                f"core_transport.model[{model_index}].profiles_1d[-1].electrons.particles.flux could not be read"
             )
-            T_e.particles.flux = np.asarray([np.nan] * r)
-        if len(T_e.energy.d) < 1:
-            logger.critical(f"core_transport.model[{modelIndex}].profiles_1d[-1].electrons.energy.d could not be read")
-            T_e.energy.d = np.asarray([np.nan] * r)
-        if len(T_e.energy.v) < 1:
-            logger.critical(f"core_transport.model[{modelIndex}].profiles_1d[-1].electrons.energy.v could not be read")
-            T_e.energy.v = np.asarray([np.nan] * r)
-        if len(T_e.energy.flux) < 1:
+            t_e.particles.flux = np.asarray([np.nan] * r)
+        if len(t_e.energy.d) < 1:
+            logger.critical(f"core_transport.model[{model_index}].profiles_1d[-1].electrons.energy.d could not be read")
+            t_e.energy.d = np.asarray([np.nan] * r)
+        if len(t_e.energy.v) < 1:
+            logger.critical(f"core_transport.model[{model_index}].profiles_1d[-1].electrons.energy.v could not be read")
+            t_e.energy.v = np.asarray([np.nan] * r)
+        if len(t_e.energy.flux) < 1:
             logger.critical(
-                f"core_transport.model[{modelIndex}].profiles_1d[-1].electrons.energy.flux could not be read"
+                f"core_transport.model[{model_index}].profiles_1d[-1].electrons.energy.flux could not be read"
             )
-            T_e.energy.flux = np.asarray([np.nan] * r)
+            t_e.energy.flux = np.asarray([np.nan] * r)
 
-    def _validateIonsData(self, T_i, C_i, r, modelIndex):
-        if len(C_i.density) < 1:
+    def _validate_ions_data(self, t_i, c_i, r, model_index):
+        if len(c_i.density) < 1:
             logger.critical("core_profiles.profiles_1d[-1].ion.density could not be read")
-            C_i.density = np.asarray([np.nan] * r)
+            c_i.density = np.asarray([np.nan] * r)
 
-        if len(r) != len(C_i.density):
+        if len(r) != len(c_i.density):
             logger.critical(
                 "core_profiles.profiles_1d[-1].ion.density length is not the same as rho_tor_norm length,"
                 "correcting the length"
             )
-            C_i.density = C_i.density[: len(r)]
-        if len(C_i.temperature) < 1:
+            c_i.density = c_i.density[: len(r)]
+        if len(c_i.temperature) < 1:
             logger.critical("core_profiles.profiles_1d[-1].ion.temperature could not be read")
-            C_i.temperature = np.asarray([np.nan] * r)
-        if len(r) != len(C_i.temperature):
+            c_i.temperature = np.asarray([np.nan] * r)
+        if len(r) != len(c_i.temperature):
             logger.critical(
                 "core_profiles.profiles_1d[-1].ion.temperature length is not the same as rho_tor_norm length,"
                 "correcting the length"
             )
-            C_i.temperature = C_i.temperature[: len(r)]
+            c_i.temperature = c_i.temperature[: len(r)]
 
-        if len(T_i.particles.d) < 1:
-            logger.critical(f"core_transport.model[{modelIndex}].ion.particles.d could not be read")
-            T_i.particles.d = np.asarray([np.nan] * r)
-        if len(T_i.particles.v) < 1:
-            logger.critical(f"core_transport.model[{modelIndex}].ion.particles.v could not be read")
-            T_i.particles.v = np.asarray([np.nan] * r)
-        if len(T_i.particles.flux) < 1:
-            logger.critical(f"core_transport.model[{modelIndex}].ion.particles.flux could not be read")
-            T_i.particles.flux = np.asarray([np.nan] * r)
-        if len(T_i.energy.d) < 1:
-            logger.critical(f"core_transport.model[{modelIndex}].ion.energy.d could not be read")
-            T_i.energy.d = np.asarray([np.nan] * r)
-        if len(T_i.energy.v) < 1:
-            logger.critical(f"core_transport.model[{modelIndex}].ion.energy.v could not be read")
-            T_i.energy.v = np.asarray([np.nan] * r)
-        if len(T_i.energy.flux) < 1:
-            logger.critical(f"core_transport.model[{modelIndex}].ion.energy.flux could not be read")
-            T_i.energy.flux = np.asarray([np.nan] * r)
+        if len(t_i.particles.d) < 1:
+            logger.critical(f"core_transport.model[{model_index}].ion.particles.d could not be read")
+            t_i.particles.d = np.asarray([np.nan] * r)
+        if len(t_i.particles.v) < 1:
+            logger.critical(f"core_transport.model[{model_index}].ion.particles.v could not be read")
+            t_i.particles.v = np.asarray([np.nan] * r)
+        if len(t_i.particles.flux) < 1:
+            logger.critical(f"core_transport.model[{model_index}].ion.particles.flux could not be read")
+            t_i.particles.flux = np.asarray([np.nan] * r)
+        if len(t_i.energy.d) < 1:
+            logger.critical(f"core_transport.model[{model_index}].ion.energy.d could not be read")
+            t_i.energy.d = np.asarray([np.nan] * r)
+        if len(t_i.energy.v) < 1:
+            logger.critical(f"core_transport.model[{model_index}].ion.energy.v could not be read")
+            t_i.energy.v = np.asarray([np.nan] * r)
+        if len(t_i.energy.flux) < 1:
+            logger.critical(f"core_transport.model[{model_index}].ion.energy.flux could not be read")
+            t_i.energy.flux = np.asarray([np.nan] * r)

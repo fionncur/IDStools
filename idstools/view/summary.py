@@ -1,7 +1,7 @@
 """
 This module provides view functions and classes for equilibrium ids data
 
-`refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`_.
+`refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/i_m_design/Data%20Model/sphinx/latest.html>`_.
 
 """
 
@@ -12,7 +12,7 @@ from idstools.compute.summary import SummaryCompute
 logger = logging.getLogger("module")
 
 
-class SummaryView(BasePlot):
+class summary_view(base_plot):
     def __init__(self, ids: object):
         """
         This is a constructor function that initializes an object with an input object and creates
@@ -24,9 +24,9 @@ class SummaryView(BasePlot):
         stored as an instance variable `self.idsObj`.
         """
         self.ids = ids
-        self.computeObj = SummaryCompute(ids)
+        self.compute_obj = summary_compute(ids)
 
-    def viewHCDWaveforms(self, ax):
+    def view_h_c_d_waveforms(self, ax):
         """
         The function `viewHCDWaveforms` plots various power waveforms on a given axis.
 
@@ -34,7 +34,7 @@ class SummaryView(BasePlot):
             ax: The `ax` parameter is an instance of the `Axes` class from the `matplotlib.pyplot` module. It
             represents the axes on which the waveforms will be plotted.
         """
-        waveform = self.computeObj.getSummary()
+        waveform = self.compute_obj.get_summary()
         plotstyle = "-" if len(waveform["time"]) > 1 else "o"
         if max(waveform["p_hcd"]) > 0:
             ax.plot(
@@ -112,7 +112,7 @@ class SummaryView(BasePlot):
         ax.set_ylabel(r"$P\/[\mathrm{MW}]$", fontdict={"color": "darkred"})
         ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
 
-    def viewIpB0Waveforms(self, ax):
+    def view_ip_b0_waveforms(self, ax):
         """
         The function `viewIpB0Waveforms` plots the absolute values of the Ip and B0 waveforms on a given axis.
 
@@ -120,7 +120,7 @@ class SummaryView(BasePlot):
             ax: The parameter "ax" is an instance of the matplotlib Axes class. It represents the subplot where
             the Ip and B0 waveforms will be plotted.
         """
-        waveform = self.computeObj.getSummary()
+        waveform = self.compute_obj.get_summary()
         plotstyle = "-" if len(waveform["time"]) > 1 else "o"
         # Ip, B0 waveforms
         ax.plot(waveform["time"], abs(waveform["ip"]) * 1.0e-6, plotstyle, label=r"$|I_p|$")
@@ -131,7 +131,7 @@ class SummaryView(BasePlot):
         ax.set_ylabel(r"$I_p\/[\mathrm{MA}], B_0\/[\mathrm{T}]$", fontdict={"color": "darkred"})
         ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
 
-    def viewEnergyContentWaveforms(self, ax):
+    def view_energy_content_waveforms(self, ax):
         """
         The function `viewEnergyContentWaveforms` plots energy content waveforms on a given axis.
 
@@ -139,7 +139,7 @@ class SummaryView(BasePlot):
             ax: The parameter "ax" is an instance of the matplotlib Axes class. It represents the axes on which the
             waveforms will be plotted.
         """
-        waveform = self.computeObj.getSummary()
+        waveform = self.compute_obj.get_summary()
         plotstyle = "-" if len(waveform["time"]) > 1 else "o"
         ax.plot(
             waveform["time"],
@@ -170,7 +170,7 @@ class SummaryView(BasePlot):
         ax.set_ylabel(r"$W\/[\mathrm{MJ}]$", fontdict={"color": "darkred"})
         ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
 
-    def viewVloopWaveforms(self, ax):
+    def view_vloop_waveforms(self, ax):
         """
         The function `viewVloopWaveforms` plots three waveforms (`V_LOOP`, `H_98`, and `TAU_ENERGY`)  against time
         on the given `ax` object.
@@ -179,7 +179,7 @@ class SummaryView(BasePlot):
             ax: The parameter "ax" is an instance of the matplotlib Axes class. It represents the axes on which
             the waveforms will be plotted.
         """
-        waveform = self.computeObj.getSummary()
+        waveform = self.compute_obj.get_summary()
         plotstyle = "-" if len(waveform["time"]) > 1 else "o"
         ax.plot(waveform["time"], waveform["v_loop"], plotstyle, label=r"$V_{LOOP}$")
         ax.plot(waveform["time"], waveform["h_98"], plotstyle, label=r"$H_{98}$")
@@ -188,7 +188,7 @@ class SummaryView(BasePlot):
         ax.set_ylabel(r"$V\/[\mathrm{V}],\/H,\/\tau\/[\mathrm{s}]$", fontdict={"color": "darkred"})
         ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
 
-    def showInfoOnPlot(self, ax, info: str = "", location="right"):
+    def show_info_on_plot(self, ax, info: str = "", location="right"):
         xmin, xmax = ax.get_xlim()
         ymin, ymax = ax.get_ylim()
         if location == "top":
@@ -211,7 +211,7 @@ class SummaryView(BasePlot):
                 fontsize=6,
             )
 
-    def viewTimeLine(self, ax, time):
+    def view_time_line(self, ax, time):
         """
         The function `viewTimeLine` plots a vertical dashed line on a given matplotlib axis at a specified time.
 
@@ -233,7 +233,7 @@ class SummaryView(BasePlot):
         ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
         ax.set_ylim(ymin, ymax)
 
-    def viewHmode(self, ax):
+    def view_hmode(self, ax):
         """
         The function `viewHmode` checks if HMode is present and fills the area between `th_min` and `th_max` on the
         y-axis with a light yellow color if it is, otherwise it logs a warning message.
@@ -244,13 +244,13 @@ class SummaryView(BasePlot):
         """
         ymin, ymax = ax.get_ylim()
 
-        hModeDict = self.computeObj.getHModeInfo()
-        HModePresent, th_min, th_max = (
-            hModeDict["HModePresent"],
-            hModeDict["th_min"],
-            hModeDict["th_max"],
+        h_mode_dict = self.compute_obj.get_h_mode_info()
+        h_mode_present, th_min, th_max = (
+            h_mode_dict["HModePresent"],
+            h_mode_dict["th_min"],
+            h_mode_dict["th_max"],
         )
-        if HModePresent:
+        if h_mode_present:
             ax.fill(
                 [th_min, th_max, th_max, th_min],
                 [ymin, ymin, ymax, ymax],

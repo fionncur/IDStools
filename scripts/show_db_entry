@@ -9,11 +9,11 @@ from rich_argparse import RawDescriptionRichHelpFormatter
 
 from idstools.utils.idslogger import setupLogger
 
-logger = setupLogger("module", stdout_level=logging.INFO)
+logger = setup_logger("module", stdout_level=logging.i_n_f_o)
 
 # Management of input arguments
-parser = argparse.ArgumentParser(
-    description="""---- Show full description file for a given simulation stored in ITER DB folder\n\nImportant: The legacy show_db_entry tool is deprecated and will be removed in a future versions. It will remain available until simdb is fully adopted.more about simdb : https://simdb.iter.org/dashboard/""",formatter_class=RawDescriptionRichHelpFormatter,
+parser = argparse.argument_parser(
+    description="""---- Show full description file for a given simulation stored in ITER DB folder\n\nImportant: The legacy show_db_entry tool is deprecated and will be removed in a future versions. It will remain available until simdb is fully adopted.more about simdb : https://simdb.iter.org/dashboard/""",formatter_class=raw_description_rich_help_formatter,
 )
 parser.add_argument(
     "-f", "--folder", help="folder where to search for scenarios", required=False
@@ -35,12 +35,12 @@ for i in range(add0_length):
 filename = "ids_" + str(shot) + add0 + str(run) + ".yaml"
 
 
-def printYamlContents(filename):
+def print_yaml_contents(filename):
     try:
         with open(filename, "r") as file:
             file_contents = file.read()
-            console = Console()
-            syntax = Syntax(file_contents, "yaml")
+            console = console()
+            syntax = syntax(file_contents, "yaml")
             console.print(syntax)
     except FileNotFoundError:
         logger.error(f"File '{filename}' not found")
@@ -49,7 +49,7 @@ def printYamlContents(filename):
 # Folder
 if args["folder"] != None:
     folder = args["folder"]
-    printYamlContents(folder + "/" + filename)
+    print_yaml_contents(folder + "/" + filename)
 else:
     folder = "/work/imas/shared/imasdb/ITER"
-    printYamlContents(folder + "/3/0/" + filename)
+    print_yaml_contents(folder + "/3/0/" + filename)

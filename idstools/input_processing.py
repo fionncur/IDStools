@@ -27,7 +27,7 @@ def read_launching_parameters(filelaunchers):
 
     ec_launchers = add_dynamic(filelaunchers)
     lec_launchers = len(ec_launchers.beam)
-    bP_in = np.zeros((lec_launchers), dtype=np.double)
+    b_p_in = np.zeros((lec_launchers), dtype=np.double)
     br_t = np.zeros((lec_launchers, 3), dtype=np.double)
     be_k = np.zeros((lec_launchers, 3), dtype=np.double)
     bwyb = np.zeros((lec_launchers), dtype=np.double)
@@ -38,7 +38,7 @@ def read_launching_parameters(filelaunchers):
     brszb = np.zeros((lec_launchers), dtype=np.double)
     bgamma = np.zeros((lec_launchers), dtype=np.double)
     for i in range(lec_launchers):
-        bP_in[i] = ec_launchers.beam[i].power_launched.data[0]
+        b_p_in[i] = ec_launchers.beam[i].power_launched.data[0]
         br_t[i, :] = cyl2xyz(
             np.array(
                 [
@@ -93,7 +93,7 @@ def read_launching_parameters(filelaunchers):
     launching_parameters["brsyb"] = brsyb
     launching_parameters["bwzb"] = bwzb
     launching_parameters["brszb"] = brszb
-    launching_parameters["bP_in"] = bP_in
+    launching_parameters["bP_in"] = b_p_in
     launching_parameters["bgamma"] = bgamma
 
     return launching_parameters
@@ -141,8 +141,8 @@ def read_torbeam_output(launching_parameters, path_result):
     times = np.zeros(ntimes, dtype=float)
     r_t = np.zeros((ntimes, nlaunchers, 3), dtype=np.double)
     e_k = np.zeros((ntimes, nlaunchers, 3), dtype=np.double)
-    P_in = np.zeros((ntimes, nlaunchers), dtype=np.double)
-    P_abs = np.zeros((ntimes, nlaunchers), dtype=np.double)
+    p_in = np.zeros((ntimes, nlaunchers), dtype=np.double)
+    p_abs = np.zeros((ntimes, nlaunchers), dtype=np.double)
     wyb = np.zeros((ntimes, nlaunchers), dtype=np.double)
     wzb = np.zeros((ntimes, nlaunchers), dtype=np.double)
     w1 = np.zeros((ntimes, nlaunchers), dtype=np.double)
@@ -157,8 +157,8 @@ def read_torbeam_output(launching_parameters, path_result):
         data = np.genfromtxt(time_slices[j], dtype=np.double)[:, 1:]
         for i in range(nlaunchers):
             (
-                P_in[j, i],
-                P_abs[j, i],
+                p_in[j, i],
+                p_abs[j, i],
                 xe,
                 ye,
                 ze,
@@ -188,8 +188,8 @@ def read_torbeam_output(launching_parameters, path_result):
     beam_output["rsyb"] = rsyb
     beam_output["wzb"] = wzb
     beam_output["rszb"] = rszb
-    beam_output["P_in"] = P_in
-    beam_output["P_abs"] = P_abs
+    beam_output["P_in"] = p_in
+    beam_output["P_abs"] = p_abs
     beam_output["gamma"] = gamma
 
     return beam_output, times
@@ -218,7 +218,7 @@ def beam_wall_crossing(wall2d, launching_parameters, beam_output):
     brsyb = launching_parameters["brsyb"]
     bwzb = launching_parameters["bwzb"]
     brszb = launching_parameters["brszb"]
-    bP_in = launching_parameters["bP_in"]
+    b_p_in = launching_parameters["bP_in"]
     bgamma = launching_parameters["bgamma"]
 
     r_t = beam_output["r_t"]
@@ -227,8 +227,8 @@ def beam_wall_crossing(wall2d, launching_parameters, beam_output):
     rsyb = beam_output["rsyb"]
     wzb = beam_output["wzb"]
     rszb = beam_output["rszb"]
-    P_in = beam_output["P_in"]
-    P_abs = beam_output["P_abs"]
+    p_in = beam_output["P_in"]
+    p_abs = beam_output["P_abs"]
     gamma = beam_output["gamma"]
 
     beam_wall = {}
@@ -272,7 +272,7 @@ def beam_wall_crossing(wall2d, launching_parameters, beam_output):
     xpout = xpdata[:, :, 0]
     w1l = calcw(wyb, rsyb, xpout["lambda_ray"])
     w2l = calcw(wzb, rszb, xpout["lambda_ray"])
-    I0 = (P_in - P_abs) * 2.0 / np.pi * xpout["k_dot_n"] / (w1l * w2l)
+    i0 = (p_in - p_abs) * 2.0 / np.pi * xpout["k_dot_n"] / (w1l * w2l)
     g1l, g2l, rl, sl = ell_on_wall(xpout, w1l, w2l, gamma, e_k, wall2d)
 
     # now we look at the vacuum beam leaving the launcher
@@ -281,7 +281,7 @@ def beam_wall_crossing(wall2d, launching_parameters, beam_output):
     xpentry = bxpdata[:, 0]
     w1e = calcw(bwyb, brsyb, xpentry["lambda_ray"])
     w2e = calcw(bwzb, brszb, xpentry["lambda_ray"])
-    I0e = bP_in * 2.0 / np.pi * xpentry["k_dot_n"] / (w1e * w2e)
+    i0e = b_p_in * 2.0 / np.pi * xpentry["k_dot_n"] / (w1e * w2e)
     g1e, g2e, re, se = ell_on_wall(xpentry, w1e, w2e, bgamma, be_k, wall2d)
     xpvacout = bxpdata[:, 1]
     w1v = calcw(bwyb, brsyb, xpvacout["lambda_ray"])
@@ -297,8 +297,8 @@ def beam_wall_crossing(wall2d, launching_parameters, beam_output):
     beam_wall["g2l"] = g2l
     beam_wall["rl"] = rl
     beam_wall["sl"] = sl
-    beam_wall["I0"] = I0
-    beam_wall["I0e"] = I0e
+    beam_wall["I0"] = i0
+    beam_wall["I0e"] = i0e
 
     return beam_wall
 
@@ -398,27 +398,27 @@ def line_polygon_intersection(  # input
         rg = line_p[i_line_p, :]  # old : x0
         # loop polygon edges
         s_arr = np.ones((2 * n_edges, 11), dtype=np.double) * -1
-        rgR2 = rg[0] ** 2 + rg[1] ** 2  # useful for cc, old x01_x02
-        egR2 = eg[0] ** 2 + eg[1] ** 2
+        rg_r2 = rg[0] ** 2 + rg[1] ** 2  # useful for cc, old x01_x02
+        eg_r2 = eg[0] ** 2 + eg[1] ** 2
         egz2 = eg[2] ** 2
         rgegxy = rg[0] * eg[0] + rg[1] * eg[1]
         for i_s in range(n_edges):
             dzrg1 = rg[2] - cp_edges[i_s, 1]
             dz21 = cp_edges[i_s + 1, 1] - cp_edges[i_s, 1]
             dz212 = dz21**2
-            dR21 = cp_edges[i_s + 1, 0] - cp_edges[i_s, 0]
-            dR212 = dR21**2
-            dRz21 = dR21 * dz21
+            d_r21 = cp_edges[i_s + 1, 0] - cp_edges[i_s, 0]
+            d_r212 = d_r21**2
+            d_rz21 = d_r21 * dz21
             # coefficients of quadratic equation
-            aa = dz212 * egR2 - dR212 * egz2
-            bb = 2 * (dz212 * rgegxy - dR212 * eg[2] * dzrg1 - eg[2] * cp_edges[i_s, 0] * dRz21)
-            cc = dz212 * (rgR2 - cp_edges[i_s, 0] ** 2) - dR212 * (dzrg1**2) - 2 * cp_edges[i_s, 0] * dRz21 * dzrg1
+            aa = dz212 * eg_r2 - d_r212 * egz2
+            bb = 2 * (dz212 * rgegxy - d_r212 * eg[2] * dzrg1 - eg[2] * cp_edges[i_s, 0] * d_rz21)
+            cc = dz212 * (rg_r2 - cp_edges[i_s, 0] ** 2) - d_r212 * (dzrg1**2) - 2 * cp_edges[i_s, 0] * d_rz21 * dzrg1
             if aa**2 < 1.0e-12:  # assume aa is zero
                 if dz212 * egz2 < 1.0e-10:
                     # error: segment is horizontal plate and line is horizontal
                     s_arr[2 * i_s, 1] = -2
                     s_arr[2 * i_s + 1, 1] = -2
-                if dR212 * egR2 < 1.0e-10:
+                if d_r212 * eg_r2 < 1.0e-10:
                     # error: segment is vertical cylinder and line is vertical
                     s_arr[2 * i_s, 1] = -3
                     s_arr[2 * i_s + 1, 1] = -3
@@ -432,8 +432,8 @@ def line_polygon_intersection(  # input
                     if s_arr[2 * i_s, 1] >= 0.0:
                         rvec = s_arr[2 * i_s, 1] * eg + rg
                         # must lie on cone: radial component rR
-                        rR = np.sqrt(rvec[0] ** 2 + rvec[1] ** 2)
-                        drR1 = rR - cp_edges[i_s, 0]
+                        r_r = np.sqrt(rvec[0] ** 2 + rvec[1] ** 2)
+                        dr_r1 = r_r - cp_edges[i_s, 0]
                         drz1 = rvec[2] - cp_edges[i_s, 1]
                         # note that mathematically we are dealing with a double cone
                         # with a singularity somewhere on the z-axis
@@ -445,19 +445,19 @@ def line_polygon_intersection(  # input
                         # i.e. |dR21*drz1-dz21*drR1|/(dR212+dz212) < 1E-6
                         # we calculate lambda_pol by the normalized dot product
                         # (r2-r1)dot(r-r1)/(r2-r1)^2
-                        if np.abs(dR21 * drz1 - dz21 * drR1) / (dR212 + dz212) < 1.0e-6:
-                            s_arr[2 * i_s, 0] = (drR1 * dR21 + drz1 * dz21) / (dR212 + dz212)
+                        if np.abs(d_r21 * drz1 - dz21 * dr_r1) / (d_r212 + dz212) < 1.0e-6:
+                            s_arr[2 * i_s, 0] = (dr_r1 * d_r21 + drz1 * dz21) / (d_r212 + dz212)
                         # this is lambda_pol, must be between 0 and 1
                         # if segment is relevant
                         if s_arr[2 * i_s, 0] >= 0.0 and s_arr[2 * i_s, 0] < 1.0:
                             # later it is helpful if 0 < lambda_pol < |r2-r1|
-                            s_arr[2 * i_s, 0] = s_arr[2 * i_s, 0] * np.sqrt(dR212 + dz212)
-                            rPhi = np.arctan2(rvec[1], rvec[0], dtype=np.double)
-                            if rPhi < 0:
-                                rPhi = rPhi + 2 * np.pi  # 0 <= rPhi < 2pi
+                            s_arr[2 * i_s, 0] = s_arr[2 * i_s, 0] * np.sqrt(d_r212 + dz212)
+                            r_phi = np.arctan2(rvec[1], rvec[0], dtype=np.double)
+                            if r_phi < 0:
+                                r_phi = r_phi + 2 * np.pi  # 0 <= rPhi < 2pi
                             # normal on cone segment at rvex
                             n_c = np.array(
-                                [dz21 * np.cos(rPhi), dz21 * np.sin(rPhi), -dR21],
+                                [dz21 * np.cos(r_phi), dz21 * np.sin(r_phi), -d_r21],
                                 dtype=np.double,
                             )
                             n_c = n_c / np.sqrt(np.sum(n_c**2))  # normalize n_c
@@ -466,8 +466,8 @@ def line_polygon_intersection(  # input
                                 n_c = -n_c
                                 s_arr[2 * i_s, 2] = -s_arr[2 * i_s, 2]
                             s_arr[2 * i_s, 3:6] = rvec
-                            s_arr[2 * i_s, 6] = rR
-                            s_arr[2 * i_s, 7] = rPhi
+                            s_arr[2 * i_s, 6] = r_r
+                            s_arr[2 * i_s, 7] = r_phi
                             s_arr[2 * i_s, 8:11] = n_c
                     s_arr[2 * i_s + 1, 1] = -4
             else:
@@ -480,8 +480,8 @@ def line_polygon_intersection(  # input
                     if s_arr[2 * i_s, 1] >= 0.0:
                         rvec = s_arr[2 * i_s, 1] * eg + rg
                         # print(rvec)
-                        rR = np.sqrt(rvec[0] ** 2 + rvec[1] ** 2)
-                        drR1 = rR - cp_edges[i_s, 0]
+                        r_r = np.sqrt(rvec[0] ** 2 + rvec[1] ** 2)
+                        dr_r1 = r_r - cp_edges[i_s, 0]
                         drz1 = rvec[2] - cp_edges[i_s, 1]
                         # note that mathematically we are dealing with a double cone
                         # with a singularity somewhere on the z-axis
@@ -493,18 +493,18 @@ def line_polygon_intersection(  # input
                         # |dR21*drz1-dz21*drR1|/(dR212+dz212) < 1E-6
                         # we calculate lambda_pol by the normalized dot product
                         # (r2-r1)dot(r-r1)/(r2-r1)^2
-                        if np.abs(dR21 * drz1 - dz21 * drR1) / (dR212 + dz212) < 1.0e-6:
-                            s_arr[2 * i_s, 0] = (drR1 * dR21 + drz1 * dz21) / (dR212 + dz212)
+                        if np.abs(d_r21 * drz1 - dz21 * dr_r1) / (d_r212 + dz212) < 1.0e-6:
+                            s_arr[2 * i_s, 0] = (dr_r1 * d_r21 + drz1 * dz21) / (d_r212 + dz212)
                         # this is lambda_pol, must be between 0 and 1 if relevant
                         if s_arr[2 * i_s, 0] >= 0.0 and s_arr[2 * i_s, 0] < 1.0:
                             # later it is helpful if 0 < lambda_pol < |r2-r1|
-                            s_arr[2 * i_s, 0] = s_arr[2 * i_s, 0] * np.sqrt(dR212 + dz212)
-                            rPhi = np.arctan2(rvec[1], rvec[0], dtype=np.double)
-                            if rPhi < 0:
-                                rPhi = rPhi + 2 * np.pi
+                            s_arr[2 * i_s, 0] = s_arr[2 * i_s, 0] * np.sqrt(d_r212 + dz212)
+                            r_phi = np.arctan2(rvec[1], rvec[0], dtype=np.double)
+                            if r_phi < 0:
+                                r_phi = r_phi + 2 * np.pi
                             # normal on cone segment at rvex
                             n_c = np.array(
-                                [dz21 * np.cos(rPhi), dz21 * np.sin(rPhi), -dR21],
+                                [dz21 * np.cos(r_phi), dz21 * np.sin(r_phi), -d_r21],
                                 dtype=np.double,
                             )
                             n_c = n_c / np.sqrt(np.sum(n_c**2))  # normalize n_c
@@ -513,13 +513,13 @@ def line_polygon_intersection(  # input
                                 n_c = -n_c
                                 s_arr[2 * i_s, 2] = -s_arr[2 * i_s, 2]
                             s_arr[2 * i_s, 3:6] = rvec
-                            s_arr[2 * i_s, 6] = rR
-                            s_arr[2 * i_s, 7] = rPhi
+                            s_arr[2 * i_s, 6] = r_r
+                            s_arr[2 * i_s, 7] = r_phi
                             s_arr[2 * i_s, 8:11] = n_c
                     if s_arr[2 * i_s + 1, 1] >= 0.0:
                         rvec = s_arr[2 * i_s + 1, 1] * eg + rg
-                        rR = np.sqrt(rvec[0] ** 2 + rvec[1] ** 2)
-                        drR1 = rR - cp_edges[i_s, 0]
+                        r_r = np.sqrt(rvec[0] ** 2 + rvec[1] ** 2)
+                        dr_r1 = r_r - cp_edges[i_s, 0]
                         drz1 = rvec[2] - cp_edges[i_s, 1]
                         # note that mathematically we are dealing with a double cone
                         # with a singularity somewhere on the z-axis
@@ -531,17 +531,17 @@ def line_polygon_intersection(  # input
                         # i.e. |dR21*drz1-dz21*drR1|/(dR212+dz212) < 1E-6
                         # we calculate lambda_pol by the normalized dot product
                         # (r2-r1)dot(r-r1)/(r2-r1)^2
-                        if np.abs(dR21 * drz1 - dz21 * drR1) / (dR212 + dz212) < 1.0e-6:
-                            s_arr[2 * i_s + 1, 0] = (drR1 * dR21 + drz1 * dz21) / (dR212 + dz212)
+                        if np.abs(d_r21 * drz1 - dz21 * dr_r1) / (d_r212 + dz212) < 1.0e-6:
+                            s_arr[2 * i_s + 1, 0] = (dr_r1 * d_r21 + drz1 * dz21) / (d_r212 + dz212)
                         if s_arr[2 * i_s + 1, 0] >= 0.0 and s_arr[2 * i_s + 1, 0] < 1.0:
                             # later it is helpful if 0 < lambda_pol < |r2-r1|
-                            s_arr[2 * i_s + 1, 0] = s_arr[2 * i_s + 1, 0] * np.sqrt(dR212 + dz212)
-                            rPhi = np.arctan2(rvec[1], rvec[0], dtype=np.double)
-                            if rPhi < 0:
-                                rPhi = rPhi + 2 * np.pi
+                            s_arr[2 * i_s + 1, 0] = s_arr[2 * i_s + 1, 0] * np.sqrt(d_r212 + dz212)
+                            r_phi = np.arctan2(rvec[1], rvec[0], dtype=np.double)
+                            if r_phi < 0:
+                                r_phi = r_phi + 2 * np.pi
                             # normal on cone segment at rvec
                             n_c = np.array(
-                                [dz21 * np.cos(rPhi), dz21 * np.sin(rPhi), -dR21],
+                                [dz21 * np.cos(r_phi), dz21 * np.sin(r_phi), -d_r21],
                                 dtype=np.double,
                             )
                             n_c = n_c / np.sqrt(np.sum(n_c**2))  # normalize n_c
@@ -550,8 +550,8 @@ def line_polygon_intersection(  # input
                                 n_c = -n_c
                                 s_arr[2 * i_s + 1, 2] = -s_arr[2 * i_s + 1, 2]
                             s_arr[2 * i_s + 1, 3:6] = rvec
-                            s_arr[2 * i_s + 1, 6] = rR
-                            s_arr[2 * i_s + 1, 7] = rPhi
+                            s_arr[2 * i_s + 1, 6] = r_r
+                            s_arr[2 * i_s + 1, 7] = r_phi
                             s_arr[2 * i_s + 1, 8:11] = n_c
         # endfor ; end loop polygon edges
         # find 'useful' lambda_pol values, in that case n_c was calculated and
@@ -607,7 +607,7 @@ def line_polygon_intersection(  # input
 
 
 # calculate beam width for given w,Rcur and length along ray (lambda_ray)
-def calcw(wt, Rt, lambda_ray, freq=np.double(170.0e9)):
+def calcw(wt, rt, lambda_ray, freq=np.double(170.0e9)):
     # wt, Rt width and curvature radius at start point in m
     # Rt < 0 : beam will pass focus, >0 : purely diverging
     # the focus is at lambda_ray = -Rt
@@ -616,7 +616,7 @@ def calcw(wt, Rt, lambda_ray, freq=np.double(170.0e9)):
     c = np.double(2.998e8)  # speed of light in vacuum in m/s
     # assume vacuum conditionas at edge of plasma
     sr = np.pi * wt**2 / (c / freq)
-    w = wt * np.sqrt((1.0 + lambda_ray / Rt) ** 2 + (lambda_ray / sr) ** 2)
+    w = wt * np.sqrt((1.0 + lambda_ray / rt) ** 2 + (lambda_ray / sr) ** 2)
     return w
 
 
@@ -725,9 +725,9 @@ def ell_on_wall(xpout, w1, w2, gamma, e_k, wall2d):
         # now rl: first determine sector
         sl[i] = xpout["r_cyl"][i, 1] // (np.pi / 9.0)
         # dPhi with respect to midlle of sector
-        dPhi = xpout["r_cyl"][i, 1] - (sl[i] + 0.5) * (np.pi / 9.0)
+        d_phi = xpout["r_cyl"][i, 1] - (sl[i] + 0.5) * (np.pi / 9.0)
         # x - length scale relative to middle of sector
-        rl[i, 0] = dPhi * xpout["r_cyl"][i, 0]
+        rl[i, 0] = d_phi * xpout["r_cyl"][i, 0]
         # y-length: length along polygone
         rl[i, 1] = lwall[xpout["icorner"][i]] + xpout["lambda_pol"][i]
     # Reshape input and output vectors to initial shape

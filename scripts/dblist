@@ -13,24 +13,24 @@ from idstools.database import DBMaster
 from idstools.utils.idshelper import getAvailableIdsAndTimes
 from idstools.utils.idslogger import setupLogger
 
-logger = setupLogger("module")
+logger = setup_logger("module")
 
-TAB = " " * 3
-SHOT_STR_LEN = 6
-RUN_STR_LEN = 5
-DATABASE_STR_LEN = 12
-VERSION_STR_LEN = 6
-IDSNAME_STR_LEN = 26
-SLICENUM_STR_LEN = 4
-RUNNUM_STR_LEN = 4
-TIME_STR_LEN = 4
+t_a_b = " " * 3
+s_h_o_t__s_t_r__l_e_n = 6
+r_u_n__s_t_r__l_e_n = 5
+d_a_t_a_b_a_s_e__s_t_r__l_e_n = 12
+v_e_r_s_i_o_n__s_t_r__l_e_n = 6
+i_d_s_n_a_m_e__s_t_r__l_e_n = 26
+s_l_i_c_e_n_u_m__s_t_r__l_e_n = 4
+r_u_n_n_u_m__s_t_r__l_e_n = 4
+t_i_m_e__s_t_r__l_e_n = 4
 
 
 def extended(str, wlen):
     return f"{str:>{wlen}s}"
 
 
-def printVector(vec, wlen):
+def print_vector(vec, wlen):
     return " ".join([f"{str(x):>{wlen}s}" for x in vec])
 
 
@@ -51,41 +51,41 @@ def print_list(dbs, pulsenum=None, compact=False, timestamp=False):
                         print(f"Database: {dbname}")
                         printed_database = True
                     if not printed_dataversion:
-                        print(f"{TAB}Data version: {dv}")
+                        print(f"{t_a_b}Data version: {dv}")
                         printed_dataversion = True
                     if not printed_backend:
-                        print(TAB * 2 + "Backend: " + backend)
+                        print(t_a_b * 2 + "Backend: " + backend)
                         printed_backend = True
                     if compact:
                         print(
-                            TAB * 3
+                            t_a_b * 3
                             + "Pulse "
-                            + extended(str(pulse), SHOT_STR_LEN)
+                            + extended(str(pulse), s_h_o_t__s_t_r__l_e_n)
                             + ": "
-                            + extended(str(len(sorted(runs))), RUNNUM_STR_LEN)
+                            + extended(str(len(sorted(runs))), r_u_n_n_u_m__s_t_r__l_e_n)
                             + " runs"
                         )
 
                     elif timestamp:
-                        print(TAB * 3 + "Pulse " + extended(str(pulse), SHOT_STR_LEN))
+                        print(t_a_b * 3 + "Pulse " + extended(str(pulse), s_h_o_t__s_t_r__l_e_n))
                         runs.sort(reverse=True, key=lambda x: x[1])
                         for r in runs:
                             print(
-                                TAB * 3
-                                + " " * (5 + SHOT_STR_LEN)
+                                t_a_b * 3
+                                + " " * (5 + s_h_o_t__s_t_r__l_e_n)
                                 + " Runs: "
-                                + extended(str(r[1]), RUN_STR_LEN)
+                                + extended(str(r[1]), r_u_n__s_t_r__l_e_n)
                                 + " ("
                                 + str(r[7])
                                 + ")"
                             )
                     else:
                         print(
-                            TAB * 3
+                            t_a_b * 3
                             + "Pulse "
-                            + extended(str(pulse), SHOT_STR_LEN)
+                            + extended(str(pulse), s_h_o_t__s_t_r__l_e_n)
                             + " Runs: "
-                            + printVector(sorted([r[1] for r in runs]), RUN_STR_LEN)
+                            + print_vector(sorted([r[1] for r in runs]), r_u_n__s_t_r__l_e_n)
                         )
 
 
@@ -93,14 +93,14 @@ def print_urilist(dbs, pulsenum=None, compact=False, timestamp=False):
     urichoice = ["Sr. No.", "uri"]
     if timestamp:
         urichoice.append("timestamp")
-    table = Table()
-    for columnName in urichoice:
-        if columnName == "timestamp":
-            table.add_column(columnName, justify="left", style="red")
-        elif columnName == "uri":
-            table.add_column(columnName, justify="left", style="yellow")
+    table = table()
+    for column_name in urichoice:
+        if column_name == "timestamp":
+            table.add_column(column_name, justify="left", style="red")
+        elif column_name == "uri":
+            table.add_column(column_name, justify="left", style="yellow")
         else:
-            table.add_column(columnName, justify="left", style="green")
+            table.add_column(column_name, justify="left", style="green")
     counter = 0
     for dbname, dvs in dbs:
         for dv, dbbackends in dvs:
@@ -121,12 +121,12 @@ def print_urilist(dbs, pulsenum=None, compact=False, timestamp=False):
                         if timestamp:
                             x.append(str(r[7]))
                         table.add_row(*x)
-    console = Console()
+    console = console()
     console.print(table)
 
 
-def printTimes(
-    dbs, args, print_times=False, pulseNumber=None, runNumber=None, showuri=False
+def print_times(
+    dbs, args, print_times=False, pulse_number=None, run_number=None, showuri=False
 ):
 
     for dbname, dvs in dbs:
@@ -137,34 +137,34 @@ def printTimes(
                 printed_backend = False
                 for pulse, runs in sorted(dbs.items()):
                     # If a pulsenum and/or runnum is given, only display these
-                    if pulseNumber is not None:
-                        if pulse != pulseNumber:
+                    if pulse_number is not None:
+                        if pulse != pulse_number:
                             continue
 
                     printed_pulse = False
                     justruns = [r[1] for r in runs]
                     justruns.sort()
                     for run in justruns:
-                        if runNumber is not None:
-                            if run != runNumber:
+                        if run_number is not None:
+                            if run != run_number:
                                 continue
 
                         if not printed_database:
                             print(f"Database: {dbname}")
                             printed_database = True
                         if not printed_dataversion:
-                            print(f"{TAB}Data version: {dv}")
+                            print(f"{t_a_b}Data version: {dv}")
                             printed_dataversion = True
                         if not printed_backend:
-                            print(TAB * 2 + "Backend: " + backend)
+                            print(t_a_b * 2 + "Backend: " + backend)
                             printed_backend = True
                         if not printed_pulse:
                             print(
-                                TAB * 3 + "Pulse " + extended(str(pulse), SHOT_STR_LEN)
+                                t_a_b * 3 + "Pulse " + extended(str(pulse), s_h_o_t__s_t_r__l_e_n)
                             )
                             printed_pulse = True
 
-                        connargs = argparse.Namespace()
+                        connargs = argparse.namespace()
                         connargs.backend = backend.upper()
                         connargs.pulse = pulse
                         connargs.run = run
@@ -173,51 +173,51 @@ def printTimes(
                         connargs.version = dv
                         connargs.uri = f"imas:{backend.lower()}?user={args.user};pulse={pulse};run={run};database={dbname};version={dv}"
 
-                        connection = DBMaster.getConnection(connargs)
+                        connection = d_b_master.get_connection(connargs)
                         if showuri:
-                            print(TAB * 4 + '"' + connargs.uri + '"')
+                            print(t_a_b * 4 + '"' + connargs.uri + '"')
                         else:
-                            print(TAB * 4 + " Run: " + extended(str(run), RUN_STR_LEN))
-                        availableIdsAndTimes = getAvailableIdsAndTimes(connection)
-                        for idsname, times in availableIdsAndTimes:
+                            print(t_a_b * 4 + " Run: " + extended(str(run), r_u_n__s_t_r__l_e_n))
+                        available_ids_and_times = get_available_ids_and_times(connection)
+                        for idsname, times in available_ids_and_times:
                             if len(times) == 1 and np.isnan(times[0]):
                                 print(
-                                    TAB * 5
-                                    + extended(idsname, IDSNAME_STR_LEN)
+                                    t_a_b * 5
+                                    + extended(idsname, i_d_s_n_a_m_e__s_t_r__l_e_n)
                                     + ": "
-                                    + extended("?", SLICENUM_STR_LEN)
+                                    + extended("?", s_l_i_c_e_n_u_m__s_t_r__l_e_n)
                                     + " slices ( "
                                     + "heterogeneous IDS )"
                                 )
-                            elif len(times) == 1 and times[0] == np.NINF:
+                            elif len(times) == 1 and times[0] == np.n_i_n_f:
                                 print(
-                                    TAB * 5
-                                    + extended(idsname, IDSNAME_STR_LEN)
+                                    t_a_b * 5
+                                    + extended(idsname, i_d_s_n_a_m_e__s_t_r__l_e_n)
                                     + ": "
-                                    + extended("?", SLICENUM_STR_LEN)
+                                    + extended("?", s_l_i_c_e_n_u_m__s_t_r__l_e_n)
                                     + " slices ( "
                                     + "time independent IDS )"
                                 )
                             elif print_times:
                                 print(
-                                    TAB * 5
-                                    + extended(idsname, IDSNAME_STR_LEN)
+                                    t_a_b * 5
+                                    + extended(idsname, i_d_s_n_a_m_e__s_t_r__l_e_n)
                                     + ": "
-                                    + extended(str(len(times)), SLICENUM_STR_LEN)
+                                    + extended(str(len(times)), s_l_i_c_e_n_u_m__s_t_r__l_e_n)
                                     + " slices ("
-                                    + printVector(times, TIME_STR_LEN)
+                                    + print_vector(times, t_i_m_e__s_t_r__l_e_n)
                                     + ")"
                                 )
                             else:
                                 print(
-                                    TAB * 5
-                                    + extended(idsname, IDSNAME_STR_LEN)
+                                    t_a_b * 5
+                                    + extended(idsname, i_d_s_n_a_m_e__s_t_r__l_e_n)
                                     + ": "
-                                    + extended(str(len(times)), SLICENUM_STR_LEN)
+                                    + extended(str(len(times)), s_l_i_c_e_n_u_m__s_t_r__l_e_n)
                                     + " slices ("
-                                    + extended(str(times[0]), TIME_STR_LEN)
+                                    + extended(str(times[0]), t_i_m_e__s_t_r__l_e_n)
                                     + " - "
-                                    + extended(str(times[-1]), TIME_STR_LEN)
+                                    + extended(str(times[-1]), t_i_m_e__s_t_r__l_e_n)
                                     + ")"
                                 )
                         print("\n")
@@ -240,16 +240,16 @@ If the optional arguments pulse number and run number are given, only databases 
 
 [Previously known as imasdbs]"""
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
+    parser = argparse.argument_parser(
         prog="dblist",
-        formatter_class=RichHelpFormatter,
-        description=Markdown(description, style="argparse.text"),
+        formatter_class=rich_help_formatter,
+        description=markdown(description, style="argparse.text"),
     )
     subparsers = parser.add_subparsers(help="sub-commands help")
 
-    subparserList = subparsers.add_parser("list", help="list databases")
-    subparserList.set_defaults(cmd="list")
-    subparserList.add_argument(
+    subparser_list = subparsers.add_parser("list", help="list databases")
+    subparser_list.set_defaults(cmd="list")
+    subparser_list.add_argument(
         "-c",
         "--compact",
         action="store_true",
@@ -257,7 +257,7 @@ if __name__ == "__main__":
         default=False,
         help="Compact/reduced output",
     )
-    subparserList.add_argument(
+    subparser_list.add_argument(
         "-M",
         "--lastModifiedDate",
         action="store_true",
@@ -265,25 +265,25 @@ if __name__ == "__main__":
         default=False,
         help="Show (and sort per) date of last modification of the runs",
     )
-    subparserList.add_argument("pulse", nargs="?", help="Pulse number", type=int)
+    subparser_list.add_argument("pulse", nargs="?", help="Pulse number", type=int)
 
-    subparserSlices = subparsers.add_parser("slices", help="list slices")
-    subparserSlices.set_defaults(cmd="slices")
-    subparserSlices.add_argument("pulse", nargs="?", help="Pulse number", type=int)
-    subparserSlices.add_argument("run", nargs="?", help="Run number", type=int)
+    subparser_slices = subparsers.add_parser("slices", help="list slices")
+    subparser_slices.set_defaults(cmd="slices")
+    subparser_slices.add_argument("pulse", nargs="?", help="Pulse number", type=int)
+    subparser_slices.add_argument("run", nargs="?", help="Run number", type=int)
 
-    subparserTimes = subparsers.add_parser("times", help="list times")
-    subparserTimes.set_defaults(cmd="times")
-    subparserTimes.add_argument("pulse", nargs="?", help="Pulse number", type=int)
-    subparserTimes.add_argument("run", nargs="?", help="Run number", type=int)
+    subparser_times = subparsers.add_parser("times", help="list times")
+    subparser_times.set_defaults(cmd="times")
+    subparser_times.add_argument("pulse", nargs="?", help="Pulse number", type=int)
+    subparser_times.add_argument("run", nargs="?", help="Run number", type=int)
 
-    subparserDatabases = subparsers.add_parser("databases", help="print databases")
-    subparserDatabases.set_defaults(cmd="databases")
+    subparser_databases = subparsers.add_parser("databases", help="print databases")
+    subparser_databases.set_defaults(cmd="databases")
 
-    subparserDataVersions = subparsers.add_parser(
+    subparser_data_versions = subparsers.add_parser(
         "dataversions", help="print data versions"
     )
-    subparserDataVersions.set_defaults(cmd="dataversions")
+    subparser_data_versions.set_defaults(cmd="dataversions")
 
     parser.add_argument(
         "-u",
@@ -325,14 +325,14 @@ if __name__ == "__main__":
     # Default command if not provided
     if "cmd" not in args.__dict__:
         backends = args.backend.split(",") if args.backend else None
-        dbs = DBMaster.getDatabaseFiles(
+        dbs = d_b_master.get_database_files(
             args.user, args.database, args.version, backends
         )
         print_list(dbs)
         exit(0)
 
     backends = args.backend.split(",") if args.backend else None
-    dbs = DBMaster.getDatabaseFiles(args.user, args.database, args.version, backends)
+    dbs = d_b_master.get_database_files(args.user, args.database, args.version, backends)
     if args.cmd == "list":
 
         if args.showuri:
@@ -341,40 +341,40 @@ if __name__ == "__main__":
             print_list(dbs, args.pulse, args.compact, args.timestamp)
 
     if args.cmd == "slices":
-        printTimes(
+        print_times(
             dbs,
             args,
             print_times=False,
-            pulseNumber=args.pulse,
-            runNumber=args.run,
+            pulse_number=args.pulse,
+            run_number=args.run,
             showuri=args.showuri,
         )
 
     if args.cmd == "times":
-        printTimes(
+        print_times(
             dbs,
             args,
             print_times=True,
-            pulseNumber=args.pulse,
-            runNumber=args.run,
+            pulse_number=args.pulse,
+            run_number=args.run,
             showuri=args.showuri,
         )
 
     if args.cmd == "databases":
-        databasesWithVersions = DBMaster.getDatabasesWithVersions(args.user)
+        databases_with_versions = d_b_master.get_databases_with_versions(args.user)
         if args.version is not None:
-            databasesWithVersions = filter(
-                lambda x: (args.version in x[1]), databasesWithVersions
+            databases_with_versions = filter(
+                lambda x: (args.version in x[1]), databases_with_versions
             )
-        for databaseName, versions in databasesWithVersions:
+        for database_name, versions in databases_with_versions:
             print(
-                extended(databaseName, DATABASE_STR_LEN)
+                extended(database_name, d_a_t_a_b_a_s_e__s_t_r__l_e_n)
                 + " "
-                + printVector(versions, VERSION_STR_LEN)
+                + print_vector(versions, v_e_r_s_i_o_n__s_t_r__l_e_n)
             )
 
     if args.cmd == "dataversions":
-        for version, databaseNames in DBMaster.getVersionsWithDatabases(args.user):
+        for version, database_names in d_b_master.get_versions_with_databases(args.user):
             print(
-                f"{extended(version, VERSION_STR_LEN)} {printVector(databaseNames, DATABASE_STR_LEN)}"
+                f"{extended(version, v_e_r_s_i_o_n__s_t_r__l_e_n)} {print_vector(database_names, d_a_t_a_b_a_s_e__s_t_r__l_e_n)}"
             )

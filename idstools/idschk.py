@@ -20,17 +20,17 @@ logger = logging.getLogger(__name__)
 
 # Global Constants
 
-FILE_IDSDef = DDHelper.getIDSDefPath()
-TARGET_TAG = "IDS"
+f_i_l_e__i_d_s_def = d_d_helper.get_i_d_s_def_path()
+t_a_r_g_e_t__t_a_g = "IDS"
 ids_header = "ids."
 idx_header = "idx."
-IDS_COCOS = 11
+i_d_s__c_o_c_o_s = 11
 args_verbose = False
 args_check_all = True
 
 
 # Initialization for yaml Dumper
-yaml.Dumper.ignore_aliases = lambda *args: True
+yaml.dumper.ignore_aliases = lambda *args: True
 
 # Validation Schema for COCOS using IDS/equilibrium
 required_fields_eq = {
@@ -142,7 +142,7 @@ def find_time(timevec, time):
 # ----------------------------------------------------------------------
 
 
-class COCOS:
+class c_o_c_o_s:
     """
     COCOS module in Python
 
@@ -188,45 +188,45 @@ class COCOS:
         # in case of init. by index
         elif index is not None:
 
-            COCOS = index["COCOS"]
+            c_o_c_o_s = index["COCOS"]
             ipsign = index["ipsign"]
             b0sign = index["b0sign"]
             #
             # Parameters from Table I
             #
-            if COCOS in [1, 11]:
+            if c_o_c_o_s in [1, 11]:
                 # ITER, Boozer are cocos=11
                 val = (+1, +1, +1, +1, -1)
-            elif COCOS in [2, 12]:
+            elif c_o_c_o_s in [2, 12]:
                 # CHEASE, ONETWO, Hinton-Hazeltine, LION is cocos=2
                 val = (+1, -1, +1, +1, -1)
-            elif COCOS in [3, 13]:
+            elif c_o_c_o_s in [3, 13]:
                 # Freidberg, CAXE, KINX are cocos=3
                 # EU-ITM up to end of 2011 is COCOS=13
                 val = (-1, +1, -1, -1, +1)
-            elif COCOS in [4, 14]:
+            elif c_o_c_o_s in [4, 14]:
                 #
                 val = (-1, -1, -1, -1, +1)
-            elif COCOS in [5, 15]:
+            elif c_o_c_o_s in [5, 15]:
                 #
                 val = (+1, +1, -1, -1, -1)
-            elif COCOS in [6, 16]:
+            elif c_o_c_o_s in [6, 16]:
                 #
                 val = (+1, -1, -1, -1, -1)
-            elif COCOS in [7, 17]:
+            elif c_o_c_o_s in [7, 17]:
                 # TCV psitbx is cocos=7
                 val = (-1, +1, +1, +1, +1)
-            elif COCOS in [8, 18]:
+            elif c_o_c_o_s in [8, 18]:
                 #
                 val = (-1, -1, +1, +1, +1)
             else:
                 # Should not be here since all cases defined
-                raise ValueError(f"error: COCOS = {COCOS} does not exist")
+                raise ValueError(f"error: COCOS = {c_o_c_o_s} does not exist")
                 return
 
             (
-                sigma_Bp,
-                sigma_RphiZ,
+                sigma__bp,
+                sigma__rphi_z,
                 sigma_rhothetaphi,
                 sign_q_pos,
                 sign_pprime_pos,
@@ -235,19 +235,19 @@ class COCOS:
             # cocos=i or 10+i have similar coordinate conventions except psi/2pi for
             # cocos=i and psi for cocos=10+i
 
-            if COCOS >= 11:
-                exp_Bp = 1
+            if c_o_c_o_s >= 11:
+                exp__bp = 1
             else:
-                exp_Bp = 0
+                exp__bp = 0
 
-            theta_sign_clockwise = sigma_RphiZ * sigma_rhothetaphi
+            theta_sign_clockwise = sigma__rphi_z * sigma_rhothetaphi
 
-            self.COCOS = COCOS
-            self.sigma_Ip = ipsign
-            self.sigma_B0 = b0sign
-            self.exp_Bp = exp_Bp
-            self.sigma_Bp = sigma_Bp
-            self.sigma_RphiZ = sigma_RphiZ
+            self.c_o_c_o_s = c_o_c_o_s
+            self.sigma__ip = ipsign
+            self.sigma__b0 = b0sign
+            self.exp__bp = exp__bp
+            self.sigma__bp = sigma__bp
+            self.sigma__rphi_z = sigma__rphi_z
             self.sigma_rhothetaphi = sigma_rhothetaphi
             self.sign_q_pos = sign_q_pos
             self.sign_pprime_pos = sign_pprime_pos
@@ -256,18 +256,18 @@ class COCOS:
         # in case of init. by values
         else:
 
-            sigma_Ip = values["ipsign"]
-            sigma_B0 = values["b0sign"]
-            exp_Bp = values["exp_Bp"]
-            sigma_Bp = values["sigma_Bp"]
-            sigma_RphiZ = values["sigma_RphiZ"]
+            sigma__ip = values["ipsign"]
+            sigma__b0 = values["b0sign"]
+            exp__bp = values["exp_Bp"]
+            sigma__bp = values["sigma_Bp"]
+            sigma__rphi_z = values["sigma_RphiZ"]
             sigma_rhothetaphi = values["sigma_rhothetaphi"]
             sign_q_pos = values["sign_q_pos"]
             sign_pprime_pos = values["sign_pprime_pos"]
 
             val = (
-                sigma_Bp,
-                sigma_RphiZ,
+                sigma__bp,
+                sigma__rphi_z,
                 sigma_rhothetaphi,
                 sign_q_pos,
                 sign_pprime_pos,
@@ -278,42 +278,42 @@ class COCOS:
             #
             if val == (+1, +1, +1, +1, -1):
                 # ITER, Boozer are cocos=11
-                COCOS = [1, 11]
+                c_o_c_o_s = [1, 11]
             elif val == (+1, -1, +1, +1, -1):
                 # CHEASE, ONETWO, Hinton-Hazeltine, LION is cocos=2
-                COCOS = [2, 12]
+                c_o_c_o_s = [2, 12]
             elif val == (-1, +1, -1, -1, +1):
                 # Freidberg, CAXE, KINX are cocos=3
                 # EU-ITM up to end of 2011 is COCOS=13
-                COCOS = [3, 13]
+                c_o_c_o_s = [3, 13]
             elif val == (-1, -1, -1, -1, +1):
                 #
-                COCOS = [4, 14]
+                c_o_c_o_s = [4, 14]
             elif val == (+1, +1, -1, -1, -1):
                 #
-                COCOS = [5, 15]
+                c_o_c_o_s = [5, 15]
             elif val == (+1, -1, -1, -1, -1):
                 #
-                COCOS = [6, 16]
+                c_o_c_o_s = [6, 16]
             elif val == (-1, +1, +1, +1, +1):
                 #
-                COCOS = [7, 17]
+                c_o_c_o_s = [7, 17]
             elif val == (-1, -1, +1, +1, +1):
                 #
-                COCOS = [8, 18]
+                c_o_c_o_s = [8, 18]
             else:
                 # Should not be here since all cases defined
                 raise ValueError(f"error: COCOS Values not match {val}")
                 return
 
-            theta_sign_clockwise = sigma_RphiZ * sigma_rhothetaphi
+            theta_sign_clockwise = sigma__rphi_z * sigma_rhothetaphi
 
-            self.COCOS = COCOS[exp_Bp]
-            self.sigma_Ip = sigma_Ip
-            self.sigma_B0 = sigma_B0
-            self.exp_Bp = exp_Bp
-            self.sigma_Bp = sigma_Bp
-            self.sigma_RphiZ = sigma_RphiZ
+            self.c_o_c_o_s = c_o_c_o_s[exp__bp]
+            self.sigma__ip = sigma__ip
+            self.sigma__b0 = sigma__b0
+            self.exp__bp = exp__bp
+            self.sigma__bp = sigma__bp
+            self.sigma__rphi_z = sigma__rphi_z
             self.sigma_rhothetaphi = sigma_rhothetaphi
             self.sign_q_pos = sign_q_pos
             self.sign_pprime_pos = sign_pprime_pos
@@ -330,12 +330,12 @@ class COCOS:
         """
 
         return {
-            "COCOS": self.COCOS,
-            "sigma_Ip": self.sigma_Ip,
-            "sigma_B0": self.sigma_B0,
-            "exp_Bp": self.exp_Bp,
-            "sigma_Bp": self.sigma_Bp,
-            "sigma_RphiZ": self.sigma_RphiZ,
+            "COCOS": self.c_o_c_o_s,
+            "sigma_Ip": self.sigma__ip,
+            "sigma_B0": self.sigma__b0,
+            "exp_Bp": self.exp__bp,
+            "sigma_Bp": self.sigma__bp,
+            "sigma_RphiZ": self.sigma__rphi_z,
             "sigma_rhothetaphi": self.sigma_rhothetaphi,
             "sign_q_pos": self.sign_q_pos,
             "sign_pprime_pos": self.sign_pprime_pos,
@@ -343,7 +343,7 @@ class COCOS:
         }
 
     @classmethod
-    def values_coefficients(self, COCOS_in, COCOS_out, Ip_in, B0_in, Ipsign_out, B0sign_out):
+    def values_coefficients(self, c_o_c_o_s_in, c_o_c_o_s_out, ip_in, b0_in, ipsign_out, b0sign_out):
         """
         Provide transformation values for a set of quantities for a given pair
         of input/output COCOS numbers
@@ -370,74 +370,74 @@ class COCOS:
         """
 
         # Default outputs
-        sigma_Ip_eff = 1.0
-        sigma_B0_eff = 1.0
-        sigma_Bp_eff = 1.0
+        sigma__ip_eff = 1.0
+        sigma__b0_eff = 1.0
+        sigma__bp_eff = 1.0
         sigma_rhothetaphi_eff = 1.0
-        sigma_RphiZ_eff = 1.0
-        exp_Bp_eff = 1.0
+        sigma__rphi_z_eff = 1.0
+        exp__bp_eff = 1.0
         fact_psi = 1.0
         fact_q = 1.0
         fact_dpsi = 1.0
         fact_dtheta = 1.0
 
         # Check inputs
-        sigma_Ip_in = np.sign(Ip_in)
-        sigma_B0_in = np.sign(B0_in)
+        sigma__ip_in = np.sign(ip_in)
+        sigma__b0_in = np.sign(b0_in)
 
         # Get COCOS related parameters
-        CVI = COCOS(index={"COCOS": COCOS_in, "ipsign": sigma_Ip_in, "b0sign": sigma_B0_in}).get()
-        CVO = COCOS(index={"COCOS": COCOS_out, "ipsign": Ipsign_out, "b0sign": B0sign_out}).get()
+        c_v_i = c_o_c_o_s(index={"COCOS": c_o_c_o_s_in, "ipsign": sigma__ip_in, "b0sign": sigma__b0_in}).get()
+        c_v_o = c_o_c_o_s(index={"COCOS": c_o_c_o_s_out, "ipsign": ipsign_out, "b0sign": b0sign_out}).get()
 
         # Define effective variables: sigma_Ip_eff, si1gma_B0_eff, sigma_Bp_eff,
         # exp_Bp_eff as in Appendix C
-        sigma_RphiZ_eff = float(CVO["sigma_RphiZ"] * CVI["sigma_RphiZ"])
+        sigma__rphi_z_eff = float(c_v_o["sigma_RphiZ"] * c_v_i["sigma_RphiZ"])
 
         # sign(Ip) in output
-        if Ipsign_out == 0:
-            sigma_Ip_eff = sigma_RphiZ_eff  # sign folllowing transformation
+        if ipsign_out == 0:
+            sigma__ip_eff = sigma__rphi_z_eff  # sign folllowing transformation
         else:
-            sigma_Ip_eff = sigma_Ip_in * float(Ipsign_out)
+            sigma__ip_eff = sigma__ip_in * float(ipsign_out)
         # sigma_Ip_out = sigma_Ip_in * sigma_Ip_eff
 
         # sign(B0) in output
-        if B0sign_out == 0:
-            sigma_B0_eff = sigma_RphiZ_eff  # sign folllowing transformation
+        if b0sign_out == 0:
+            sigma__b0_eff = sigma__rphi_z_eff  # sign folllowing transformation
         else:
-            sigma_B0_eff = sigma_B0_in * float(B0sign_out)
+            sigma__b0_eff = sigma__b0_in * float(b0sign_out)
         # sigma_B0_out = sigma_B0_in * sigma_B0_eff
 
-        sigma_Bp_eff = float(CVO["sigma_Bp"] * CVI["sigma_Bp"])
-        exp_Bp_eff = float(CVO["exp_Bp"] - CVI["exp_Bp"])
-        sigma_rhothetaphi_eff = float(CVO["sigma_rhothetaphi"] * CVI["sigma_rhothetaphi"])
+        sigma__bp_eff = float(c_v_o["sigma_Bp"] * c_v_i["sigma_Bp"])
+        exp__bp_eff = float(c_v_o["exp_Bp"] - c_v_i["exp_Bp"])
+        sigma_rhothetaphi_eff = float(c_v_o["sigma_rhothetaphi"] * c_v_i["sigma_rhothetaphi"])
         #
         # Note that sign(sigma_RphiZ*sigma_rhothetaphi) gives theta in clockwise or counter-clockwise respectively
         # Thus sigma_RphiZ_eff*sigma_rhothetaphi_eff negative if the direction of
         # theta has changed from cocos_in to _out
         #
-        fact_psi = sigma_Ip_eff * sigma_Bp_eff * (2.0 * np.pi) ** exp_Bp_eff
-        fact_dpsi = sigma_Ip_eff * sigma_Bp_eff / (2.0 * np.pi) ** exp_Bp_eff
-        fact_q = sigma_Ip_eff * sigma_B0_eff * sigma_rhothetaphi_eff
-        fact_dtheta = sigma_RphiZ_eff * sigma_rhothetaphi_eff
+        fact_psi = sigma__ip_eff * sigma__bp_eff * (2.0 * np.pi) ** exp__bp_eff
+        fact_dpsi = sigma__ip_eff * sigma__bp_eff / (2.0 * np.pi) ** exp__bp_eff
+        fact_q = sigma__ip_eff * sigma__b0_eff * sigma_rhothetaphi_eff
+        fact_dtheta = sigma__rphi_z_eff * sigma_rhothetaphi_eff
 
-        self.sigma_Ip_eff = sigma_Ip_eff
-        self.sigma_B0_eff = sigma_B0_eff
-        self.sigma_Bp_eff = sigma_Bp_eff
+        self.sigma__ip_eff = sigma__ip_eff
+        self.sigma__b0_eff = sigma__b0_eff
+        self.sigma__bp_eff = sigma__bp_eff
         self.sigma_rhothetaphi_eff = sigma_rhothetaphi_eff
-        self.sigma_RphiZ_eff = sigma_RphiZ_eff
-        self.exp_Bp_eff = exp_Bp_eff
+        self.sigma__rphi_z_eff = sigma__rphi_z_eff
+        self.exp__bp_eff = exp__bp_eff
         self.fact_psi = fact_psi
         self.fact_q = fact_q
         self.fact_dpsi = fact_dpsi
         self.fact_dtheta = fact_dtheta
 
         return {
-            "sigma_Ip_eff": self.sigma_Ip_eff,
-            "sigma_B0_eff": self.sigma_B0_eff,
-            "sigma_Bp_eff": self.sigma_Bp_eff,
+            "sigma_Ip_eff": self.sigma__ip_eff,
+            "sigma_B0_eff": self.sigma__b0_eff,
+            "sigma_Bp_eff": self.sigma__bp_eff,
             "sigma_rhothetaphi_eff": self.sigma_rhothetaphi_eff,
-            "sigma_RphiZ_eff": self.sigma_RphiZ_eff,
-            "exp_Bp_eff": self.exp_Bp_eff,
+            "sigma_RphiZ_eff": self.sigma__rphi_z_eff,
+            "exp_Bp_eff": self.exp__bp_eff,
             "fact_psi": self.fact_psi,
             "fact_q": self.fact_q,
             "fact_dpsi": self.fact_dpsi,
@@ -495,7 +495,7 @@ def path2py(p, rm_last_bracket=False, header=False, idx=None):
 # ----------------------------------------------------------------------
 
 
-class IdxDict(dict):
+class idx_dict(dict):
     """
     Class for DD Sub-Indices (e.g. itime, i1, ..., etc.)
 
@@ -523,7 +523,7 @@ class IdxDict(dict):
 # ----------------------------------------------------------------------
 
 
-class IDSValidator(cerberus.Validator):
+class i_d_s_validator(cerberus.validator):
     """
     Cerberus-Validator extended with custom rules for IDS
 
@@ -553,7 +553,7 @@ class IDSValidator(cerberus.Validator):
         # self.idx = kwargs.get("idx")
 
         # pass all data to the base classes
-        super(IDSValidator, self).__init__(*args, **kwargs)
+        super(i_d_s_validator, self).__init__(*args, **kwargs)
 
     def set_ids(self, ids):
         """ """
@@ -707,7 +707,7 @@ class IDSValidator(cerberus.Validator):
         except ValueError:
             pass
 
-    def _validate_ids_dPdpsi_like(self, constraint, field, value):
+    def _validate_ids_d_pdpsi_like(self, constraint, field, value):
         """{'nullable': False }"""
         try:
             v = np.atleast_1d(value).flatten()
@@ -752,7 +752,7 @@ class IDSValidator(cerberus.Validator):
         """{'nullable': False }"""
         try:
             if self.ids.__name__ == "equilibrium":
-                val = compute_COCOS(self.ids, self.idx.itime, self.idx.i1)
+                val = compute__c_o_c_o_s(self.ids, self.idx.itime, self.idx.i1)
                 if val["COCOS"] != constraint:
                     msg = f"COCOS computed {val['COCOS']}, expected as {constraint}"
                     self._error(field, msg)
@@ -821,7 +821,7 @@ def validator(field, path_doc, ids, schema, cocos, buf, idx):
                 pass
 
     # Initialization
-    v_ids = IDSValidator({path_doc: schemaw[path_doc]})
+    v_ids = i_d_s_validator({path_doc: schemaw[path_doc]})
     v_ids.set_dim(field, ids, data)
     v_ids.set_cocos(cocos)
     v_ids.set_ids(ids)
@@ -911,7 +911,7 @@ def path_iterator(field, nodes, ids, schema, cocos, buf, idx=None, level=0):
 # ----------------------------------------------------------------------
 
 
-def validate_COCOS(ids, schema, itime, i1, cocos=None):
+def validate__c_o_c_o_s(ids, schema, itime, i1, cocos=None):
     """Compute COCOS values using stored data in IDS/equilibrium
 
     Parameters
@@ -934,7 +934,7 @@ def validate_COCOS(ids, schema, itime, i1, cocos=None):
 
     # Inter-COCOS Validation
     for key, value in schema.items():
-        v_ids = IDSValidator({key: value})
+        v_ids = i_d_s_validator({key: value})
         if cocos is not None:
             v_ids.cocos = cocos
 
@@ -956,7 +956,7 @@ def validate_COCOS(ids, schema, itime, i1, cocos=None):
 # ----------------------------------------------------------------------
 
 
-def compute_COCOS(ids, itime=None, i1=0, cocos_check=None):
+def compute__c_o_c_o_s(ids, itime=None, i1=0, cocos_check=None):
     """Compute COCOS values using experimental data in IDS/equilibrium
 
     Parameters
@@ -980,9 +980,9 @@ def compute_COCOS(ids, itime=None, i1=0, cocos_check=None):
         itime = int(np.floor(float(len(ids.time_slice)) / 2.0))
 
     # Check IDS/eq
-    validate_COCOS(ids, required_fields_eq, itime, i1)
+    validate__c_o_c_o_s(ids, required_fields_eq, itime, i1)
     if cocos_check:
-        validate_COCOS(ids, required_fields_cocos, itime, i1, cocos=cocos_check)
+        validate__c_o_c_o_s(ids, required_fields_cocos, itime, i1, cocos=cocos_check)
 
     # Sign(Ip) and Sign(B0) from input
     ipsign = np.sign(ids.time_slice[itime].global_quantities.ip)
@@ -990,7 +990,7 @@ def compute_COCOS(ids, itime=None, i1=0, cocos_check=None):
 
     # 1 Eq.(22)
     dpsi = ids.time_slice[itime].profiles_1d.psi[-1] - ids.time_slice[itime].profiles_1d.psi[0]
-    sigma_Bp = np.sign(dpsi) * ipsign
+    sigma__bp = np.sign(dpsi) * ipsign
 
     # 2 Eq.(22)
     q = ids.time_slice[itime].profiles_1d.q
@@ -1032,27 +1032,27 @@ def compute_COCOS(ids, itime=None, i1=0, cocos_check=None):
     # discard grids in private flux region)
     w = np.where(np.isclose(cols, iz, rtol=0.1))
 
-    twopi_expBp_sigma_RphiZ = np.zeros(bz.shape)
-    twopi_expBp_sigma_RphiZ = -sigma_Bp * dpsi2drdr[rows[w], cols[w]] / bz[rows[w], cols[w]]
-    sigma_RphiZ = np.sign(np.sum(np.sign(twopi_expBp_sigma_RphiZ)))
+    twopi_exp_bp_sigma__rphi_z = np.zeros(bz.shape)
+    twopi_exp_bp_sigma__rphi_z = -sigma__bp * dpsi2drdr[rows[w], cols[w]] / bz[rows[w], cols[w]]
+    sigma__rphi_z = np.sign(np.sum(np.sign(twopi_exp_bp_sigma__rphi_z)))
 
     # 6 exp_Bp from Eq.(19)
-    x = np.average(twopi_expBp_sigma_RphiZ * sigma_RphiZ)
-    exp_Bp = np.where(np.isclose(x, 2.0 * np.pi, rtol=0.5), 1, 0)
+    x = np.average(twopi_exp_bp_sigma__rphi_z * sigma__rphi_z)
+    exp__bp = np.where(np.isclose(x, 2.0 * np.pi, rtol=0.5), 1, 0)
 
     #
     values = {
         "ipsign": int(ipsign),
         "b0sign": int(b0sign),
-        "exp_Bp": int(exp_Bp),
-        "sigma_Bp": int(sigma_Bp),
-        "sigma_RphiZ": int(sigma_RphiZ),
+        "exp_Bp": int(exp__bp),
+        "sigma_Bp": int(sigma__bp),
+        "sigma_RphiZ": int(sigma__rphi_z),
         "sigma_rhothetaphi": int(sigma_rhothetaphi),
         "sign_q_pos": int(sign_q_pos),
         "sign_pprime_pos": int(sign_pprime_pos),
     }
 
-    cocos = COCOS(values=values).get()
+    cocos = c_o_c_o_s(values=values).get()
 
     return cocos
 
@@ -1086,7 +1086,7 @@ def dict_to_yaml(din):
 # ----------------------------------------------------------------------
 
 
-def load_XML(fpath):
+def load__x_m_l(fpath):
     """Read XML file and Retrun as ElementTree
 
     Parameters
@@ -1101,7 +1101,7 @@ def load_XML(fpath):
 
     # Load IMAS-DD File
     if path.isfile(fpath):
-        root = ET.parse(fpath).getroot()
+        root = e_t.parse(fpath).getroot()
     else:
         exit(f"file not found:{fpath}")
 
@@ -1111,7 +1111,7 @@ def load_XML(fpath):
 # ----------------------------------------------------------------------
 
 
-def load_YAML(fpath):
+def load__y_a_m_l(fpath):
     """Read YAML file and Retrun as dictionary
 
     Parameters
@@ -1142,7 +1142,7 @@ def load_YAML(fpath):
 # ----------------------------------------------------------------------
 
 
-def load_DD(idsname):
+def load__d_d(idsname):
     """Return Data Dictionary (DD)
 
     Parameters
@@ -1156,7 +1156,7 @@ def load_DD(idsname):
         DD correspoinding to idsname
     """
 
-    root = load_XML(FILE_IDSDef)
+    root = load__x_m_l(f_i_l_e__i_d_s_def)
     dd = [dd for dd in root if dd.get("name") == idsname][0]
 
     return dd
@@ -1165,7 +1165,7 @@ def load_DD(idsname):
 # ----------------------------------------------------------------------
 
 
-def eval_IDSs(s):
+def eval__i_d_ss(s):
     """Return True if IDSs validate
 
     Parameters
@@ -1228,7 +1228,7 @@ def ids_iterator(ids, schema, dd, cocos, occ=0):
     """
 
     idsname = ids.__name__
-    maxoc = ids.getMaxOccurrences()
+    maxoc = ids.get_max_occurrences()
     buf = {}
     dictw = {}
 
@@ -1268,7 +1268,7 @@ def ids_iterator(ids, schema, dd, cocos, occ=0):
                         schema[idsname],
                         cocos,
                         report_buf,
-                        idx=IdxDict(path),
+                        idx=idx_dict(path),
                     )
 
             if args_verbose:
@@ -1305,10 +1305,10 @@ def init_schema_coordinate(idsname, dd=None, rule={"ids_dim": False}):
 
     d = {}
 
-    if ET.iselement(dd):
+    if e_t.iselement(dd):
         ddo = dd
     elif dd is None:
-        ddo = load_DD(idsname)
+        ddo = load__d_d(idsname)
     else:
         exit("type error:{}".format(dd))
 
@@ -1366,21 +1366,21 @@ def ids_validator(ids, schema, dd=None, occ=0, ipsign=-1, b0sign=-1, verbose=Fal
     if isinstance(schema, dict):
         pass
     elif isinstance(schema, str):
-        schema = load_YAML(schema)
+        schema = load__y_a_m_l(schema)
     else:
         exit(f"type error:{schema}")
 
     # DD Initialization for Target IDS
-    if ET.iselement(dd):
+    if e_t.iselement(dd):
         pass
     elif dd is None:
-        dd = load_DD(ids.__name__)
+        dd = load__d_d(ids.__name__)
     else:
         exit(f"type error:{dd}")
 
     # COCOS Initialization
-    index = {"COCOS": IDS_COCOS, "ipsign": ipsign, "b0sign": b0sign}
-    cocos = COCOS(index=index).get()
+    index = {"COCOS": i_d_s__c_o_c_o_s, "ipsign": ipsign, "b0sign": b0sign}
+    cocos = c_o_c_o_s(index=index).get()
 
     # Check all fields if check_all = True
     global args_verbose, args_check_all
@@ -1392,7 +1392,7 @@ def ids_validator(ids, schema, dd=None, occ=0, ipsign=-1, b0sign=-1, verbose=Fal
     if ids.__name__ in schema:
         out = ids_iterator(ids, schema, dd, cocos, occ=occ)
 
-    return eval_IDSs(dict_to_yaml(out)), out
+    return eval__i_d_ss(dict_to_yaml(out)), out
 
 
 # ----------------------------------------------------------------------
@@ -1454,12 +1454,12 @@ def ids_cocos_check(ids, itime=None, i1=0, verbose=False):
 
     if ids.__name__ == "equilibrium":
         try:
-            cocos = compute_COCOS(ids, itime, i1)
+            cocos = compute__c_o_c_o_s(ids, itime, i1)
         except Exception as e:
             logger.debug(f"{e}")
             exit(f"Cannot compute COCOS: {e}")
         # set remark
-        if cocos[key] == IDS_COCOS:
+        if cocos[key] == i_d_s__c_o_c_o_s:
             remark = True
         # set error
         if verbose:
@@ -1498,7 +1498,7 @@ def ids_compute_cocos(ids, itime=None, i1=0):
 
     if ids.__name__ == "equilibrium":
         try:
-            cocos = compute_COCOS(ids, itime, i1)
+            cocos = compute__c_o_c_o_s(ids, itime, i1)
         except Exception as e:
             logger.debug(f"{e}")
             logger.error(traceback.format_exc())

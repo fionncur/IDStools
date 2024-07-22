@@ -4,16 +4,16 @@ import re
 logger = logging.getLogger("module")
 
 
-LABEL_RADIANCE = "Spectral Radiance (ph s^-1 m^-2 sr^-1 nm^-1)"
-LABEL_INTENSITY = "Intensity (counts)"
-CHANNEL_NAME_PATTERN = r"^(\d{2}\.\w{2}) CH#(\d{2}) Spectrum (\d{1})$"
+l_a_b_e_l__r_a_d_i_a_n_c_e = "Spectral Radiance (ph s^-1 m^-2 sr^-1 nm^-1)"
+l_a_b_e_l__i_n_t_e_n_s_i_t_y = "Intensity (counts)"
+c_h_a_n_n_e_l__n_a_m_e__p_a_t_t_e_r_n = r"^(\d{2}\.\w{2}) CH#(\d{2}) Spectrum (\d{1})$"
 
 
-class SpectrometerVisibleCompute:
+class spectrometer_visible_compute:
     def __init__(self, ids_object):
         self.ids_object = ids_object
 
-    def getValidSpectrometers(self):
+    def get_valid_spectrometers(self):
         """
         The function `getValidSpectrometers` returns a list of valid spectrometers by extracting
         the names from the `channel` objects.
@@ -29,7 +29,7 @@ class SpectrometerVisibleCompute:
                 spectrometers.append(1)
         return list(set(spectrometers))
 
-    def getChannels(self, channelNamePattern=CHANNEL_NAME_PATTERN):
+    def get_channels(self, channel_name_pattern=c_h_a_n_n_e_l__n_a_m_e__p_a_t_t_e_r_n):
         """
         The `getChannels` function retrieves information about channels based on a given channel name pattern.
 
@@ -43,11 +43,11 @@ class SpectrometerVisibleCompute:
         """
         channels = {}
         for channel in self.ids_object.channel:
-            channelInfo = {}
-            match = re.compile(CHANNEL_NAME_PATTERN).fullmatch(channel.name)
+            channel_info = {}
+            match = re.compile(c_h_a_n_n_e_l__n_a_m_e__p_a_t_t_e_r_n).fullmatch(channel.name)
 
             if match is None:
-                logger.warning(f"Channel's name {channel.name} does not math pattern {CHANNEL_NAME_PATTERN.pattern}")
+                logger.warning(f"Channel's name {channel.name} does not math pattern {c_h_a_n_n_e_l__n_a_m_e__p_a_t_t_e_r_n.pattern}")
                 continue
 
             diagnostic = match[1]
@@ -84,22 +84,22 @@ class SpectrometerVisibleCompute:
 
             radius = channel.line_of_sight.second_point.r
 
-            channelInfo["channel_name"] = channel.name
-            channelInfo["diagnostic"] = diagnostic
-            channelInfo["identifier"] = identifier
-            channelInfo["spectrum_n"] = spectrum_n
+            channel_info["channel_name"] = channel.name
+            channel_info["diagnostic"] = diagnostic
+            channel_info["identifier"] = identifier
+            channel_info["spectrum_n"] = spectrum_n
 
-            channelInfo["wavelengths"] = wavelengths
-            channelInfo["delta"] = delta
-            channelInfo["min_wavelength"] = min_wavelength
-            channelInfo["max_wavelength"] = max_wavelength
-            channelInfo["radiance_spectral"] = radiance_spectral
+            channel_info["wavelengths"] = wavelengths
+            channel_info["delta"] = delta
+            channel_info["min_wavelength"] = min_wavelength
+            channel_info["max_wavelength"] = max_wavelength
+            channel_info["radiance_spectral"] = radiance_spectral
 
-            channelInfo["intensity_spectrum"] = intensity_spectrum
-            channelInfo["exposure_time"] = exposure_time
-            channelInfo["radius"] = radius
+            channel_info["intensity_spectrum"] = intensity_spectrum
+            channel_info["exposure_time"] = exposure_time
+            channel_info["radius"] = radius
             if spectrum_n not in channels.keys():
                 channels[spectrum_n] = {}
-            channels[spectrum_n][identifier] = channelInfo
+            channels[spectrum_n][identifier] = channel_info
 
         return channels

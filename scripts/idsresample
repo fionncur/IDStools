@@ -13,9 +13,9 @@ from idstools.utils.clihelper import getCoreVersion
 from idstools.utils.idshelper import resampleIndices, resampleTimes
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
+    parser = argparse.argument_parser(
         description="Resample IDSs from a data-entry and save them into another data-entry [previously known as ids_resampling]",
-        formatter_class=RichHelpFormatter,
+        formatter_class=rich_help_formatter,
     )
     parser.add_argument(
         "-s",
@@ -56,73 +56,73 @@ if __name__ == "__main__":
             exit()
 
     if args.ids == []:
-        args.ids = [ids.value for ids in list(imas.IDSName)]
+        args.ids = [ids.value for ids in list(imas.i_d_s_name)]
 
-    inputargs = argparse.Namespace()
+    inputargs = argparse.namespace()
     inputargs.uri = args.src
-    src = DBMaster.getConnection(inputargs)
+    src = d_b_master.get_connection(inputargs)
     if src is None:
         print("Error opening source pulse! Please check existence.")
         sys.exit()
 
-    if getCoreVersion() > 4:
-        tmp = imas.DBEntry("imas:memory?path=tmp/1/1", "w")
+    if get_core_version() > 4:
+        tmp = imas.d_b_entry("imas:memory?path=tmp/1/1", "w")
     else:
-        tmp = imas.DBEntry(imas.imasdef.MEMORY_BACKEND, "tmp", 1, 1)
+        tmp = imas.d_b_entry(imas.imasdef.m_e_m_o_r_y__b_a_c_k_e_n_d, "tmp", 1, 1)
     status, _ = tmp.create()
     if status != 0:
         print("Error creating temporary data-entry in memory!", file=sys.stderr)
         sys.exit(status)
 
-    outputargs = argparse.Namespace()
+    outputargs = argparse.namespace()
     outputargs.mode = "w"
     outputargs.uri = args.dest
-    dest = DBMaster.createConnection(outputargs)
+    dest = d_b_master.create_connection(outputargs)
     if dest is None:
         print("Error creating pulse! Please check existence.")
         sys.exit()
 
-    for idsName in args.ids:
-        homogeneousTime = src.partial_get(idsName, "ids_properties/homogeneous_time")
-        if homogeneousTime == 1:
+    for ids_name in args.ids:
+        homogeneous_time = src.partial_get(ids_name, "ids_properties/homogeneous_time")
+        if homogeneous_time == 1:
             if args.time_range is None:
                 if args.index_range is None:
                     args.index_range = ",,"
-                timeRange = args.index_range.split(",")
-                start = int(timeRange[0]) if timeRange[0] != "" else 0
-                stop = int(timeRange[1]) if timeRange[1] != "" else None
-                step = int(timeRange[2]) if timeRange[2] != "" else 1
-                print(f"resampling indices :{idsName}")
-                resampleIndices(src, tmp, idsName, start=start, stop=stop, step=step)
+                time_range = args.index_range.split(",")
+                start = int(time_range[0]) if time_range[0] != "" else 0
+                stop = int(time_range[1]) if time_range[1] != "" else None
+                step = int(time_range[2]) if time_range[2] != "" else 1
+                print(f"resampling indices :{ids_name}")
+                resample_indices(src, tmp, ids_name, start=start, stop=stop, step=step)
             else:
-                timeRange = args.time_range.split(",")
-                start = int(timeRange[0]) if timeRange[0] != "" else 0
-                stop = int(timeRange[1]) if timeRange[1] != "" else None
-                step = int(timeRange[2]) if timeRange[2] != "" else 1
-                print(f"resampling times :{idsName}")
-                resampleTimes(src, tmp, idsName, start=start, stop=stop, step=step)
-        elif homogeneousTime == 0:
+                time_range = args.time_range.split(",")
+                start = int(time_range[0]) if time_range[0] != "" else 0
+                stop = int(time_range[1]) if time_range[1] != "" else None
+                step = int(time_range[2]) if time_range[2] != "" else 1
+                print(f"resampling times :{ids_name}")
+                resample_times(src, tmp, ids_name, start=start, stop=stop, step=step)
+        elif homogeneous_time == 0:
             if args.time_range != None:
-                timeRange = args.time_range.split(",")
-                if timeRange[0] != "" and timeRange[1] != "" and timeRange[2] != "":
-                    print(f"resampling times :{idsName}")
-                    resampleTimes(
+                time_range = args.time_range.split(",")
+                if time_range[0] != "" and time_range[1] != "" and time_range[2] != "":
+                    print(f"resampling times :{ids_name}")
+                    resample_times(
                         src,
                         tmp,
-                        idsName,
-                        start=timeRange[0],
-                        stop=timeRange[1],
-                        step=timeRange[2],
+                        ids_name,
+                        start=time_range[0],
+                        stop=time_range[1],
+                        step=time_range[2],
                     )
                 else:
                     print(
-                        f"Skipping IDS {idsName} because its homogeneous_time={homogeneousTime}",
+                        f"Skipping IDS {ids_name} because its homogeneous_time={homogeneous_time}",
                         file=sys.stderr,
                     )
                     continue
             else:
                 print(
-                    f"Skipping IDS {idsName} because its homogeneous_time={homogeneousTime}",
+                    f"Skipping IDS {ids_name} because its homogeneous_time={homogeneous_time}",
                     file=sys.stderr,
                 )
                 continue
@@ -130,4 +130,4 @@ if __name__ == "__main__":
             # print(f'Skipping IDS {idsname} because its homogeneous_time={homogeneous}',file=sys.stderr)
             continue
 
-        dest.put(tmp.get(idsName))
+        dest.put(tmp.get(ids_name))

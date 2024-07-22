@@ -17,7 +17,7 @@ from rich.progress import track
 from idstools.utils.clihelper import getBackendID
 
 
-def ids_setter(IDS, path, val):
+def ids_setter(i_d_s, path, val):
     """Set a value in a field of the given IDS.
     
     Parameters
@@ -30,13 +30,13 @@ def ids_setter(IDS, path, val):
     val 
            Value to be stored in the IDS/path node
     """
-    dodi = IDS
+    dodi = i_d_s
     for node in path[0:-1]:
         nodestruct = node.split('(')
         try:
             dodi = getattr(dodi, nodestruct[0])
         except AttributeError:
-            raise AttributeError(f"Node {node} could not be found in {path} for IDS {IDS._base_path}. Please check spelling.")
+            raise AttributeError(f"Node {node} could not be found in {path} for IDS {i_d_s._base_path}. Please check spelling.")
         if len(nodestruct) == 2:
             # AOS case
             nodeindex = int(nodestruct[1][:1])
@@ -56,7 +56,7 @@ def ids_setter(IDS, path, val):
         else:
             raise AttributeError(f"The type {leaftype} of {idspath} is currently not supported")
     except AttributeError:
-        raise AttributeError(f"The leaf '{node}' could not be found in {path} for IDS {IDS._base_path}. Please check spelling.")
+        raise AttributeError(f"The leaf '{node}' could not be found in {path} for IDS {i_d_s._base_path}. Please check spelling.")
 
 
 def evaluate(expr):
@@ -80,7 +80,7 @@ def evaluate(expr):
         print(f"Syntax error {se} for expression '{expr}'")
     return result
 
-parser = argparse.ArgumentParser(description="This script applies mapping of a non-IDS database content (e.g. ITPA DBs) into IDS rules. replaced by ids_rosetta_code.py", formatter_class=RichHelpFormatter)
+parser = argparse.argument_parser(description="This script applies mapping of a non-IDS database content (e.g. ITPA DBs) into IDS rules. replaced by ids_rosetta_code.py", formatter_class=rich_help_formatter)
 parser.add_argument("-i", "--inputCSV", type=str, default="HDB5.2.3.csv",
                     help="Path to csv file containing the external database content \t(default=%(default)s, the H-mode DB will be downloaded from https://osf.io/zhwa3/ automatically if not present)")
 parser.add_argument("-m", "--mapping", type=str, default=os.path.dirname(os.path.dirname(os.path.realpath(__file__)))+"/resources/mappings/h-mode-db-mapping.csv",
@@ -108,21 +108,21 @@ parser.add_argument("--debug", action='store_true',
 args = parser.parse_args()
 
 try:
-    f = open(args.inputCSV,'r')
+    f = open(args.input_c_s_v,'r')
     f.close()
 except FileNotFoundError:
-    print(f"Downloading {args.inputCSV} from https://osf.io/ (CC BY 4.0 @ Geert Verdoolaege and Stanley Kaye)")
+    print(f"Downloading {args.input_c_s_v} from https://osf.io/ (CC BY 4.0 @ Geert Verdoolaege and Stanley Kaye)")
     url = "https://osf.io/zhwa3/download"
     dl = requests.get(url,allow_redirects=True) # ,verify="/work/imas/etc/iter.pem"
-    open(args.inputCSV,'wb').write(dl.content)
+    open(args.input_c_s_v,'wb').write(dl.content)
 
-mf = pd.read_csv(args.mapping, keep_default_na=False, usecols=[args.varCol, args.pathCol, args.traCol])
+mf = pd.read_csv(args.mapping, keep_default_na=False, usecols=[args.var_col, args.path_col, args.tra_col])
 mf.dropna(how="all")
 
 if args.dbtype == 'H-MODE' or args.dbtype == 'HMODE':
-    db = pd.read_csv(args.inputCSV, skiprows=1, keep_default_na=False, na_values=['', '-9999999', '???????'])
+    db = pd.read_csv(args.input_c_s_v, skiprows=1, keep_default_na=False, na_values=['', '-9999999', '???????'])
 elif args.dbtype == 'L-MODE' or args.dbtype == 'LMODE':
-    db = pd.read_csv(args.inputCSV, delimiter=';', keep_default_na=False, na_values=['', '-9999999', '????????'])
+    db = pd.read_csv(args.input_c_s_v, delimiter=';', keep_default_na=False, na_values=['', '-9999999', '????????'])
 
 db.dropna(how="all")
 db = db.replace(to_replace=np.nan, value=None)
@@ -131,18 +131,18 @@ rows = [args.row] if args.row != None else db.index
 
 # print(f"Starts mapping of the DB {args.inputCSV}, please be patient...")
 for row in track(rows, description="[green]Processing..."):
-    DBVAR = db.iloc[row]
-    de = imas.DBEntry(getBackendID(args.backend), args.database, 1, row)
+    d_b_v_a_r = db.iloc[row]
+    de = imas.d_b_entry(get_backend_i_d(args.backend), args.database, 1, row)
     de.create()
 
     iod = {}
     
     
-    for ids in list(imas.IDSName):
+    for ids in list(imas.i_d_s_name):
         iod[ids.value] = getattr(imas, ids.value)()
-    for var in mf.loc[:, args.varCol]:
-        idspath = mf[mf[args.varCol] == var].iloc[0].at[args.pathCol] 
-        transformation = mf[mf[args.varCol] == var].iloc[0].at[args.traCol]
+    for var in mf.loc[:, args.var_col]:
+        idspath = mf[mf[args.var_col] == var].iloc[0].at[args.path_col] 
+        transformation = mf[mf[args.var_col] == var].iloc[0].at[args.tra_col]
         if idspath == '':
             if args.debug:
                 print(f"No mapping specified for variable {var}")
@@ -150,7 +150,7 @@ for row in track(rows, description="[green]Processing..."):
             idsname = idspath.split('/')[0]
             path = idspath.split('/')[1:]
             try:
-                IDS = iod[idsname]
+                i_d_s = iod[idsname]
             except KeyError:
                 print(f"{idsname} is not a valid IDS name. Please check spelling and IDS list.")
                 sys.exit()
@@ -164,8 +164,8 @@ for row in track(rows, description="[green]Processing..."):
                         print(f"Nothing to store for {var} in DB entry {row}")
                 else:
                     try:
-                        ids_setter(IDS, path, val)
-                        IDS.ids_properties.homogeneous_time = 1
+                        ids_setter(i_d_s, path, val)
+                        i_d_s.ids_properties.homogeneous_time = 1
                     except AttributeError as ae:
                         print(ae)
                         sys.exit()

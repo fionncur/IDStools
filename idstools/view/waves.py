@@ -7,24 +7,24 @@ import logging
 logger = logging.getLogger(f"module.{__name__}")
 
 
-class WavesView:
+class waves_view:
     def __init__(self, ids):
-        self.wavesCompute = WavesCompute(ids)
+        self.waves_compute = waves_compute(ids)
         self.ids = ids
 
-    def plotPolViewTraces(self, ax, timeIndex, color="b", style="-", label="", fontsize=9, labelpad=-1):
-        beamTracingDict = self.wavesCompute.getBeamTracing(timeIndex)
-        beamDataLengthForEachWave = beamTracingDict["beamDataLengthForEachWave"]
+    def plot_pol_view_traces(self, ax, time_index, color="b", style="-", label="", fontsize=9, labelpad=-1):
+        beam_tracing_dict = self.waves_compute.get_beam_tracing(time_index)
+        beam_data_length_for_each_wave = beam_tracing_dict["beamDataLengthForEachWave"]
 
-        lengthData = beamTracingDict["length"]
-        r_rayData = beamTracingDict["r_ray"]
-        z_rayData = beamTracingDict["z_ray"]
-        displayLabelOnce = True
-        for i in range(len(lengthData)):
-            for j in range(len(lengthData[i])):
-                length = beamDataLengthForEachWave[i][j]
-                r_ray = r_rayData[i][j]
-                z_ray = z_rayData[i][j]
+        length_data = beam_tracing_dict["length"]
+        r_ray_data = beam_tracing_dict["r_ray"]
+        z_ray_data = beam_tracing_dict["z_ray"]
+        display_label_once = True
+        for i in range(len(length_data)):
+            for j in range(len(length_data[i])):
+                length = beam_data_length_for_each_wave[i][j]
+                r_ray = r_ray_data[i][j]
+                z_ray = z_ray_data[i][j]
                 ax.plot(
                     r_ray[:length],
                     z_ray[:length],
@@ -32,26 +32,26 @@ class WavesView:
                     linestyle=style,
                     label=label,
                 )
-                if displayLabelOnce is True:
-                    displayLabelOnce = False
+                if display_label_once is True:
+                    display_label_once = False
                     label = ""
 
-    def plotTopViewTraces(self, ax, timeIndex, color="b", style="-", label="", fontsize=9, labelpad=-1):
+    def plot_top_view_traces(self, ax, time_index, color="b", style="-", label="", fontsize=9, labelpad=-1):
         ax.set_title("Top View (X,Y)", fontsize=fontsize)
         ax.set_xlabel("X [m]")
         ax.set_ylabel("Y [m]")
 
-        beamTracingDict = self.wavesCompute.getBeamTracing(timeIndex)
-        beamDataLengthForEachWave = beamTracingDict["beamDataLengthForEachWave"]
-        lengthData = beamTracingDict["length"]
-        x_rayData = beamTracingDict["x_ray"]
-        y_rayData = beamTracingDict["y_ray"]
-        displayLabelOnce = True
-        for i in range(len(lengthData)):
-            for j in range(len(lengthData[i])):
-                length = beamDataLengthForEachWave[i][j]
-                x_ray = x_rayData[i][j]
-                y_ray = y_rayData[i][j]
+        beam_tracing_dict = self.waves_compute.get_beam_tracing(time_index)
+        beam_data_length_for_each_wave = beam_tracing_dict["beamDataLengthForEachWave"]
+        length_data = beam_tracing_dict["length"]
+        x_ray_data = beam_tracing_dict["x_ray"]
+        y_ray_data = beam_tracing_dict["y_ray"]
+        display_label_once = True
+        for i in range(len(length_data)):
+            for j in range(len(length_data[i])):
+                length = beam_data_length_for_each_wave[i][j]
+                x_ray = x_ray_data[i][j]
+                y_ray = y_ray_data[i][j]
 
                 ax.plot(
                     x_ray[:length],
@@ -60,27 +60,27 @@ class WavesView:
                     linestyle=style,
                     label=label,
                 )
-                if displayLabelOnce is True:
-                    displayLabelOnce = False
+                if display_label_once is True:
+                    display_label_once = False
                     label = ""
 
-    def plotElectronPower(self, ax, timeIndex, color="b", style="-", label="", fontsize=9, labelpad=-1):
+    def plot_electron_power(self, ax, time_index, color="b", style="-", label="", fontsize=9, labelpad=-1):
         ax.set_title("Power along the beams", fontsize=fontsize)
         ax.set_xlabel("Path length [m]")
         ax.set_ylabel("P$_{electrons}$ [MW]")
 
-        beamTracingDict = self.wavesCompute.getBeamTracing(timeIndex)
-        beamElectronsLengthForEachWave = beamTracingDict["beamElectronsLengthForEachWave"]
+        beam_tracing_dict = self.waves_compute.get_beam_tracing(time_index)
+        beam_electrons_length_for_each_wave = beam_tracing_dict["beamElectronsLengthForEachWave"]
 
-        lengthData = beamTracingDict["length"]
-        electronspowerData = beamTracingDict["electronspower"]
-        displayLabelOnce = True
+        length_data = beam_tracing_dict["length"]
+        electronspower_data = beam_tracing_dict["electronspower"]
+        display_label_once = True
         label = "Electrons Power [W]"
-        for i in range(len(lengthData)):
-            for j in range(len(lengthData[i])):
-                dlength = beamElectronsLengthForEachWave[i][j]
-                length = lengthData[i][j]
-                electronspower = electronspowerData[i][j]
+        for i in range(len(length_data)):
+            for j in range(len(length_data[i])):
+                dlength = beam_electrons_length_for_each_wave[i][j]
+                length = length_data[i][j]
+                electronspower = electronspower_data[i][j]
 
                 ax.plot(
                     length[:dlength],
@@ -89,30 +89,30 @@ class WavesView:
                     linestyle=style,
                     label=label,
                 )
-                if displayLabelOnce is True:
-                    displayLabelOnce = False
+                if display_label_once is True:
+                    display_label_once = False
                     label = ""
         ax.legend()
 
-    def plotPowerFlowNormal(self, ax, timeIndex, color="b", style="-", label="", fontsize=9, labelpad=-1):
+    def plot_power_flow_normal(self, ax, time_index, color="b", style="-", label="", fontsize=9, labelpad=-1):
         ax.set_title("Power flow to the magnetic field", fontsize=fontsize)
         ax.set_xlabel("Path length [m]")
 
-        beamTracingDict = self.wavesCompute.getBeamTracing(timeIndex)
-        beamElectronsLengthForEachWave = beamTracingDict["beamElectronsLengthForEachWave"]
+        beam_tracing_dict = self.waves_compute.get_beam_tracing(time_index)
+        beam_electrons_length_for_each_wave = beam_tracing_dict["beamElectronsLengthForEachWave"]
 
-        lengthData = beamTracingDict["length"]
-        powerparallelData = beamTracingDict["powerparallel"]
-        powerperpendicularData = beamTracingDict["powerperpendicular"]
+        length_data = beam_tracing_dict["length"]
+        powerparallel_data = beam_tracing_dict["powerparallel"]
+        powerperpendicular_data = beam_tracing_dict["powerperpendicular"]
         perplabel = "P$_\\perp$/P$_{max}$ [-]"
         parlabel = "P$_\\parallel$/P$_{max}$ [-]"
-        displayLabelOnce = True
-        for i in range(len(lengthData)):
-            for j in range(len(lengthData[i])):
-                dlength = beamElectronsLengthForEachWave[i][j]
-                length = lengthData[i][j]
-                powerparallel = powerparallelData[i][j]
-                powerperpendicular = powerperpendicularData[i][j]
+        display_label_once = True
+        for i in range(len(length_data)):
+            for j in range(len(length_data[i])):
+                dlength = beam_electrons_length_for_each_wave[i][j]
+                length = length_data[i][j]
+                powerparallel = powerparallel_data[i][j]
+                powerperpendicular = powerperpendicular_data[i][j]
 
                 ax.plot(
                     length[:dlength],
@@ -128,35 +128,35 @@ class WavesView:
                     linestyle=style,
                     label=perplabel,
                 )
-                if displayLabelOnce is True:
-                    displayLabelOnce = False
+                if display_label_once is True:
+                    display_label_once = False
                     perplabel = ""
                     parlabel = ""
         ax.legend()
 
-    def plotECRHProfiles(
+    def plot_e_c_r_h_profiles(
         self,
         ax,
-        timeIndex,
+        time_index,
         verbose=False,
     ):
         # ECRH PROFILE [MA/M2]
-        ecLauncherInfo = self.wavesCompute.GetECLaunchersInfo(timeIndex)
-        radialGrid = self.wavesCompute.getRadialGridInfo(timeIndex)
-        activeLaunchers = {key: value for key, value in radialGrid.items() if value["isActive"] is True}
-        _, firstRadialGridInfo = next(iter(activeLaunchers.items()))
+        ec_launcher_info = self.waves_compute.get_e_c_launchers_info(time_index)
+        radial_grid = self.waves_compute.get_radial_grid_info(time_index)
+        active_launchers = {key: value for key, value in radial_grid.items() if value["isActive"] is True}
+        _, first_radial_grid_info = next(iter(active_launchers.items()))
 
-        codeName = self.ids.code.name.upper()
+        code_name = self.ids.code.name.upper()
         ax.set_title("ECRH Profiles")
-        lenActiveLaunchers = len(activeLaunchers)
-        if lenActiveLaunchers != 0:
-            totalx1 = firstRadialGridInfo["rho_tor_norm"]
-            totaly1 = ecLauncherInfo["total_power_density_profile"] * 1.0e-6
-            totallabel1 = f"Total-{codeName}"
+        len_active_launchers = len(active_launchers)
+        if len_active_launchers != 0:
+            totalx1 = first_radial_grid_info["rho_tor_norm"]
+            totaly1 = ec_launcher_info["total_power_density_profile"] * 1.0e-6
+            totallabel1 = f"Total-{code_name}"
 
             ax.plot(totalx1, totaly1, label=totallabel1)
             if verbose:
-                maxima = findMaxima(totaly1)
+                maxima = find_maxima(totaly1)
                 logger.info(f"There are {len(maxima)-1} maxima")
                 fwhm = []
                 for i in range(len(maxima)):
@@ -193,44 +193,44 @@ class WavesView:
                         )
                         logger.info(f"({totalx1[maxima[i]]}, {totaly1[maxima[i]]} --- fwhm: {fwhm[i]})")
 
-            for iWave, _ in activeLaunchers.items():
+            for i_wave, _ in active_launchers.items():
                 ax.plot(
-                    firstRadialGridInfo["rho_tor_norm"],
-                    ecLauncherInfo["single_power_density_profile"][iWave] * 1.0e-6,
+                    first_radial_grid_info["rho_tor_norm"],
+                    ec_launcher_info["single_power_density_profile"][i_wave] * 1.0e-6,
                     linestyle="--",
-                    label=ecLauncherInfo["single_ec_launcher_name"][iWave],
+                    label=ec_launcher_info["single_ec_launcher_name"][i_wave],
                 )
             ax.set_ylabel("Absorbed power $\\mathrm{[MW/m^{3}]}$")
-            if firstRadialGridInfo["psiBased"] is False:
+            if first_radial_grid_info["psiBased"] is False:
                 ax.set_xlabel("Normalized toroidal flux coordinate")
             else:
                 ax.set_xlabel("-(Poloidal flux coordinate) [Wb]")
             ax.legend()
 
-    def plotECCDProfiles(
+    def plot_e_c_c_d_profiles(
         self,
         ax,
-        timeIndex,
+        time_index,
         verbose=False,
     ):
         # ECCD PROFILE [MA/M2]
-        ecLauncherInfo = self.wavesCompute.GetECLaunchersInfo(timeIndex)
+        ec_launcher_info = self.waves_compute.get_e_c_launchers_info(time_index)
 
-        radialGrid = self.wavesCompute.getRadialGridInfo(timeIndex)
-        activeLaunchers = {key: value for key, value in radialGrid.items() if value["isActive"] is True}
-        _, firstRadialGridInfo = next(iter(activeLaunchers.items()))
+        radial_grid = self.waves_compute.get_radial_grid_info(time_index)
+        active_launchers = {key: value for key, value in radial_grid.items() if value["isActive"] is True}
+        _, first_radial_grid_info = next(iter(active_launchers.items()))
 
-        codeName = self.ids.code.name.upper()
+        code_name = self.ids.code.name.upper()
         ax.set_title("ECCD Profiles")
 
-        lenActiveLaunchers = len(activeLaunchers)
-        if lenActiveLaunchers != 0:
-            totalx2 = firstRadialGridInfo["rho_tor_norm"]
-            totaly2 = ecLauncherInfo["total_current_density_profile"] * 1.0e-6
-            totallabel = f"Total-{codeName}"
+        len_active_launchers = len(active_launchers)
+        if len_active_launchers != 0:
+            totalx2 = first_radial_grid_info["rho_tor_norm"]
+            totaly2 = ec_launcher_info["total_current_density_profile"] * 1.0e-6
+            totallabel = f"Total-{code_name}"
             ax.plot(totalx2, totaly2, label=totallabel)
             if verbose:
-                minima = findMinima(totaly2)
+                minima = find_minima(totaly2)
                 logger.info(f"There are {len(minima)} minima")
                 fwhm = []
                 for i in range(len(minima)):
@@ -252,33 +252,33 @@ class WavesView:
                         )
                     logger.info(f"({totalx2[minima[i]]}, {totaly2[minima[i]]} --- fwhm: {fwhm[i]})")
             # logger.debug(fwhm)
-        for iWave, _ in activeLaunchers.items():
+        for i_wave, _ in active_launchers.items():
             ax.plot(
-                firstRadialGridInfo["rho_tor_norm"],
-                ecLauncherInfo["single_current_density_profile"][iWave] * 1.0e-6,
+                first_radial_grid_info["rho_tor_norm"],
+                ec_launcher_info["single_current_density_profile"][i_wave] * 1.0e-6,
                 linestyle="--",
-                label=ecLauncherInfo["single_ec_launcher_name"][iWave],
+                label=ec_launcher_info["single_ec_launcher_name"][i_wave],
             )
         ax.set_ylabel("$\\mathrm{ECCD} [MA/m^{2}]}$")
-        if firstRadialGridInfo["psiBased"] is False:
+        if first_radial_grid_info["psiBased"] is False:
             ax.set_xlabel("Normalized toroidal flux coordinate")
         else:
             ax.set_xlabel("-(Poloidal flux coordinate) [Wb]")
         ax.legend()
 
-    def plotECRHWaveform(
+    def plot_e_c_r_h_waveform(
         self,
         ax,
-        timeIndex,
+        time_index,
     ):
-        timeArray = self.ids.time
+        time_array = self.ids.time
         ntime = len(self.ids.time)
-        ecLauncherInfo = self.wavesCompute.GetECLaunchersInfo(timeIndex)
+        ec_launcher_info = self.waves_compute.get_e_c_launchers_info(time_index)
 
-        radialGrid = self.wavesCompute.getRadialGridInfo(timeIndex)
-        activeLaunchers = {key: value for key, value in radialGrid.items() if value["isActive"] is True}
+        radial_grid = self.waves_compute.get_radial_grid_info(time_index)
+        active_launchers = {key: value for key, value in radial_grid.items() if value["isActive"] is True}
 
-        codeName = self.ids.code.name.upper()
+        code_name = self.ids.code.name.upper()
 
         ax.set_title("ECRH Waveforms")
 
@@ -290,35 +290,35 @@ class WavesView:
             ax.set_ylabel("Power to the electrons $\\mathrm{[MW]}$")
             ax.set_xlabel("Time (s)")
             # EC POWER WAVEFORM
-            if len(activeLaunchers) > 0:
+            if len(active_launchers) > 0:
                 ax.plot(
-                    timeArray,
-                    np.array(ecLauncherInfo["total_power_waveform"]) * 1.0e-6,
-                    label=f"Total-{codeName}",
+                    time_array,
+                    np.array(ec_launcher_info["total_power_waveform"]) * 1.0e-6,
+                    label=f"Total-{code_name}",
                 )
-            for iWave, _ in activeLaunchers.items():
+            for i_wave, _ in active_launchers.items():
                 ax.plot(
-                    timeArray,
-                    np.array(ecLauncherInfo["single_power_waveform"][iWave]) * 1.0e-6,
+                    time_array,
+                    np.array(ec_launcher_info["single_power_waveform"][i_wave]) * 1.0e-6,
                     linestyle="--",
-                    label=ecLauncherInfo["single_ec_launcher_name"][iWave],
+                    label=ec_launcher_info["single_ec_launcher_name"][i_wave],
                 )
             ax.legend()
             return 0
 
-    def plotECCDWaveform(
+    def plot_e_c_c_d_waveform(
         self,
         ax,
-        timeIndex,
+        time_index,
     ):
-        timeArray = self.ids.time
+        time_array = self.ids.time
         ntime = len(self.ids.time)
-        ecLauncherInfo = self.wavesCompute.GetECLaunchersInfo(timeIndex)
+        ec_launcher_info = self.waves_compute.get_e_c_launchers_info(time_index)
 
-        radialGrid = self.wavesCompute.getRadialGridInfo(timeIndex)
-        activeLaunchers = {key: value for key, value in radialGrid.items() if value["isActive"] is True}
+        radial_grid = self.waves_compute.get_radial_grid_info(time_index)
+        active_launchers = {key: value for key, value in radial_grid.items() if value["isActive"] is True}
 
-        codeName = self.ids.code.name.upper()
+        code_name = self.ids.code.name.upper()
 
         ax.set_title("ECCD Waveforms")
 
@@ -330,40 +330,40 @@ class WavesView:
             ax.set_ylabel("ECCD $\\mathrm{[kA]}$")
             ax.set_xlabel("Time (s)")
             # EC POWER WAVEFORM
-            if len(activeLaunchers) > 0:
+            if len(active_launchers) > 0:
                 ax.plot(
-                    timeArray,
-                    np.array(ecLauncherInfo["total_current_waveform"]) * 1.0e-3,
-                    label=f"Total-{codeName}",
+                    time_array,
+                    np.array(ec_launcher_info["total_current_waveform"]) * 1.0e-3,
+                    label=f"Total-{code_name}",
                 )
-            for iWave, _ in activeLaunchers.items():
+            for i_wave, _ in active_launchers.items():
                 ax.plot(
-                    timeArray,
-                    np.array(ecLauncherInfo["single_current_waveform"][iWave]) * 1.0e-6,
+                    time_array,
+                    np.array(ec_launcher_info["single_current_waveform"][i_wave]) * 1.0e-6,
                     linestyle="--",
-                    label=ecLauncherInfo["single_ec_launcher_name"][iWave],
+                    label=ec_launcher_info["single_ec_launcher_name"][i_wave],
                 )
             ax.legend()
             return 0
 
-    def displayECLaunchersInfo(self, timeIndex):
-        ecLauncherInfo = self.wavesCompute.GetECLaunchersInfo(timeIndex)
+    def display_e_c_launchers_info(self, time_index):
+        ec_launcher_info = self.waves_compute.get_e_c_launchers_info(time_index)
 
-        launchers = self.wavesCompute.getRadialGridInfo(timeIndex)
+        launchers = self.waves_compute.get_radial_grid_info(time_index)
 
-        for iWave, waveData in launchers.items():
-            if waveData["isActive"] is True:
+        for i_wave, wave_data in launchers.items():
+            if wave_data["isActive"] is True:
                 logger.info(
-                    f"{ecLauncherInfo['single_ec_launcher_name'][iWave]} is active with a power of"
-                    f"{ecLauncherInfo['single_injected_power'][iWave]*1.e-6:.2f} MW --> Absorbed power ="
-                    f"{ecLauncherInfo['single_absorbed_power'][iWave]*1.e-6:.2f} MW"
+                    f"{ec_launcher_info['single_ec_launcher_name'][i_wave]} is active with a power of"
+                    f"{ec_launcher_info['single_injected_power'][i_wave]*1.e-6:.2f} MW --> Absorbed power ="
+                    f"{ec_launcher_info['single_absorbed_power'][i_wave]*1.e-6:.2f} MW"
                 )
-                logger.info(f"--> ECCD =  {ecLauncherInfo['single_eccd'][iWave]*1.e-3:.2f} kA")
+                logger.info(f"--> ECCD =  {ec_launcher_info['single_eccd'][i_wave]*1.e-3:.2f} kA")
             else:
-                logger.info(f"{ecLauncherInfo['single_ec_launcher_name'][iWave]} is off")
+                logger.info(f"{ec_launcher_info['single_ec_launcher_name'][i_wave]} is off")
 
     @staticmethod
-    def customizeLegend(legend):
+    def customize_legend(legend):
         frame = legend.get_frame()
         frame.set_facecolor("0.95")
         for label in legend.get_texts():
@@ -373,122 +373,122 @@ class WavesView:
         return
 
     # CD WAVEFORM
-    def viewCDWaveform(self, ax, timeIndex, usepsi=False):
-        timeArray = self.ids.time
-        ecLauncherInfo = self.wavesCompute.GetECLaunchersInfo(timeIndex, usepsi)
+    def view_c_d_waveform(self, ax, time_index, usepsi=False):
+        time_array = self.ids.time
+        ec_launcher_info = self.waves_compute.get_e_c_launchers_info(time_index, usepsi)
 
-        radialGrid = self.wavesCompute.getRadialGridInfo(timeIndex, usepsi)
+        radial_grid = self.waves_compute.get_radial_grid_info(time_index, usepsi)
 
-        activeLaunchers = {key: value for key, value in radialGrid.items() if value["isActive"] is True}
-        lenActiveLaunchers = len(activeLaunchers)
+        active_launchers = {key: value for key, value in radial_grid.items() if value["isActive"] is True}
+        len_active_launchers = len(active_launchers)
         ax.set_title("Current density waveform")
-        if lenActiveLaunchers != 0:
+        if len_active_launchers != 0:
             ax.plot(
-                timeArray,
-                np.array(ecLauncherInfo["total_current_waveform"]) * 1.0e-3,
+                time_array,
+                np.array(ec_launcher_info["total_current_waveform"]) * 1.0e-3,
                 label=r"Total",
             )
-        for iwave, _ in activeLaunchers.items():
+        for iwave, _ in active_launchers.items():
             ax.plot(
-                timeArray,
-                np.array(ecLauncherInfo["single_current_waveform"][iwave]) * 1.0e-3,
-                label=ecLauncherInfo["single_ec_launcher_name"][iwave],
+                time_array,
+                np.array(ec_launcher_info["single_current_waveform"][iwave]) * 1.0e-3,
+                label=ec_launcher_info["single_ec_launcher_name"][iwave],
             )
         ax.set_ylabel("Current Density $\\mathrm{[kA]}$")
         ax.set_xlabel("Time (s)")
         legend = ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
-        WavesView.customizeLegend(legend)
+        waves_view.customize_legend(legend)
 
     # EC POWER WAVEFORM
-    def viewECPowerWaveform(self, ax, timeIndex, usepsi=False):
-        timeArray = self.ids.time
-        ecLauncherInfo = self.wavesCompute.GetECLaunchersInfo(timeIndex, usepsi)
+    def view_e_c_power_waveform(self, ax, time_index, usepsi=False):
+        time_array = self.ids.time
+        ec_launcher_info = self.waves_compute.get_e_c_launchers_info(time_index, usepsi)
 
-        radialGrid = self.wavesCompute.getRadialGridInfo(timeIndex, usepsi)
+        radial_grid = self.waves_compute.get_radial_grid_info(time_index, usepsi)
 
-        activeLaunchers = {key: value for key, value in radialGrid.items() if value["isActive"] is True}
-        lenActiveLaunchers = len(activeLaunchers)
+        active_launchers = {key: value for key, value in radial_grid.items() if value["isActive"] is True}
+        len_active_launchers = len(active_launchers)
         ax.set_title("EC Power Waveform")
-        if lenActiveLaunchers != 0:
+        if len_active_launchers != 0:
             ax.plot(
-                timeArray,
-                np.array(ecLauncherInfo["total_power_waveform"]) * 1.0e-6,
+                time_array,
+                np.array(ec_launcher_info["total_power_waveform"]) * 1.0e-6,
                 label=r"Total",
             )
-        for iwave, _ in activeLaunchers.items():
+        for iwave, _ in active_launchers.items():
             ax.plot(
-                timeArray,
-                np.array(ecLauncherInfo["single_power_waveform"][iwave]) * 1.0e-6,
-                label=ecLauncherInfo["single_ec_launcher_name"][iwave],
+                time_array,
+                np.array(ec_launcher_info["single_power_waveform"][iwave]) * 1.0e-6,
+                label=ec_launcher_info["single_ec_launcher_name"][iwave],
             )
         ax.set_ylabel("Power to the electrons $\\mathrm{[MW]}$")
         ax.set_xlabel("Time (s)")
         legend = ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
-        WavesView.customizeLegend(legend)
+        waves_view.customize_legend(legend)
 
     # CD PROFILE [MA/M2]
-    def viewCDProfile(self, ax, timeIndex, usepsi=False):
-        ecLauncherInfo = self.wavesCompute.GetECLaunchersInfo(timeIndex, usepsi)
+    def view_c_d_profile(self, ax, time_index, usepsi=False):
+        ec_launcher_info = self.waves_compute.get_e_c_launchers_info(time_index, usepsi)
 
-        radialGrid = self.wavesCompute.getRadialGridInfo(timeIndex, usepsi)
+        radial_grid = self.waves_compute.get_radial_grid_info(time_index, usepsi)
 
-        activeLaunchers = {key: value for key, value in radialGrid.items() if value["isActive"] is True}
-        _, firstRadialGridInfo = next(iter(activeLaunchers.items()))
-        lenActiveLaunchers = len(activeLaunchers)
+        active_launchers = {key: value for key, value in radial_grid.items() if value["isActive"] is True}
+        _, first_radial_grid_info = next(iter(active_launchers.items()))
+        len_active_launchers = len(active_launchers)
         ax.set_title("Current density profile")
-        if lenActiveLaunchers != 0:
+        if len_active_launchers != 0:
             ax.plot(
-                firstRadialGridInfo["rho_tor_norm"],
-                ecLauncherInfo["total_current_density_profile"] * 1.0e-6,
+                first_radial_grid_info["rho_tor_norm"],
+                ec_launcher_info["total_current_density_profile"] * 1.0e-6,
                 label=r"Total",
             )
-        for iwave, _ in activeLaunchers.items():
-            if iwave in ecLauncherInfo["single_current_density_profile"]:
+        for iwave, _ in active_launchers.items():
+            if iwave in ec_launcher_info["single_current_density_profile"]:
                 ax.plot(
-                    firstRadialGridInfo["rho_tor_norm"],
-                    ecLauncherInfo["single_current_density_profile"][iwave] * 1.0e-6,
-                    label=ecLauncherInfo["single_ec_launcher_name"][iwave],
+                    first_radial_grid_info["rho_tor_norm"],
+                    ec_launcher_info["single_current_density_profile"][iwave] * 1.0e-6,
+                    label=ec_launcher_info["single_ec_launcher_name"][iwave],
                 )
         ax.set_ylabel("$\\mathrm{CD} [MA/m^{2}]}$")
-        if firstRadialGridInfo["psiBased"] is False and usepsi is False:
+        if first_radial_grid_info["psiBased"] is False and usepsi is False:
             ax.set_xlabel("Normalized toroidal flux coordinate")
         else:
             ax.set_xlabel("-(Poloidal flux coordinate) [Wb]")
         legend = ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
-        WavesView.customizeLegend(legend)
+        waves_view.customize_legend(legend)
 
     # PROFILE OF ABSORBED POWER DENSITY [MW/M3]
-    def viewAbsorbedPowerDensityProfile(self, ax, timeIndex, usepsi=False):
-        ecLauncherInfo = self.wavesCompute.GetECLaunchersInfo(timeIndex, usepsi, True)
+    def view_absorbed_power_density_profile(self, ax, time_index, usepsi=False):
+        ec_launcher_info = self.waves_compute.get_e_c_launchers_info(time_index, usepsi, True)
 
-        radialGrid = self.wavesCompute.getRadialGridInfo(timeIndex, usepsi)
+        radial_grid = self.waves_compute.get_radial_grid_info(time_index, usepsi)
 
-        activeLaunchers = {key: value for key, value in radialGrid.items() if value["isActive"] is True}
-        _, firstRadialGridInfo = next(iter(activeLaunchers.items()))
-        lenActiveLaunchers = len(activeLaunchers)
+        active_launchers = {key: value for key, value in radial_grid.items() if value["isActive"] is True}
+        _, first_radial_grid_info = next(iter(active_launchers.items()))
+        len_active_launchers = len(active_launchers)
         ax.set_title("Absorbed power density profile")
-        if lenActiveLaunchers != 0:
+        if len_active_launchers != 0:
             ax.plot(
-                firstRadialGridInfo["rho_tor_norm"],
-                ecLauncherInfo["total_power_density_profile"] * 1.0e-6,
+                first_radial_grid_info["rho_tor_norm"],
+                ec_launcher_info["total_power_density_profile"] * 1.0e-6,
                 label=r"Total",
             )
-        for iwave, _ in activeLaunchers.items():
-            if iwave in ecLauncherInfo["single_power_density_profile"]:
+        for iwave, _ in active_launchers.items():
+            if iwave in ec_launcher_info["single_power_density_profile"]:
                 ax.plot(
-                    firstRadialGridInfo["rho_tor_norm"],
-                    ecLauncherInfo["single_power_density_profile"][iwave] * 1.0e-6,
-                    label=ecLauncherInfo["single_ec_launcher_name"][iwave],
+                    first_radial_grid_info["rho_tor_norm"],
+                    ec_launcher_info["single_power_density_profile"][iwave] * 1.0e-6,
+                    label=ec_launcher_info["single_ec_launcher_name"][iwave],
                 )
         ax.set_ylabel("Absorbed power $\\mathrm{[MW/m^{3}]}$")
-        if firstRadialGridInfo["psiBased"] is False and usepsi is False:
+        if first_radial_grid_info["psiBased"] is False and usepsi is False:
             ax.set_xlabel("Normalized toroidal flux coordinate")
         else:
             ax.set_xlabel("-(Poloidal flux coordinate) [Wb]")
         legend = ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
-        WavesView.customizeLegend(legend)
+        waves_view.customize_legend(legend)
 
-    def plotBeamIndex(self, ax):
+    def plot_beam_index(self, ax):
         """
         This function plots a bar graph of beam indices with a fixed height of 20.
 
@@ -496,14 +496,14 @@ class WavesView:
             ax: ax is a matplotlib axis object
         """
         # TODO add callback function which can be called whenever there is update requested on timeline
-        beam_array = self.wavesCompute.getBeamArray()
+        beam_array = self.waves_compute.get_beam_array()
         ax.bar(beam_array, 20, color="g", width=0.5)
         ax.set_xlim(beam_array[0] - 1, beam_array[-1] + 1)
         ax.set_ylim(top=20)
 
-    def plotPoloidalTracesUpdate(self, ax, beamTracingTimeIndex, beamIndex, verbose=False, update=True):
+    def plot_poloidal_traces_update(self, ax, beam_tracing_time_index, beam_index, verbose=False, update=True):
         # Read beam tracing from waves IDS
-        beam_tracing = self.wavesCompute.getBeamTracing(beamTracingTimeIndex)
+        beam_tracing = self.waves_compute.get_beam_tracing(beam_tracing_time_index)
 
         nbeam = beam_tracing["nbeam"]
         nbeam_active = beam_tracing["activeBeamsCount"]
@@ -557,9 +557,9 @@ class WavesView:
                         )
         return ax_polview_plot_traces
 
-    def plotTopviewTracesUpdate(self, ax, beamTracingTimeIndex, beamIndex, verbose=False, update=True):
+    def plot_topview_traces_update(self, ax, beam_tracing_time_index, beam_index, verbose=False, update=True):
         # Read beam tracing from waves IDS
-        beam_tracing = self.wavesCompute.getBeamTracing(beamTracingTimeIndex)
+        beam_tracing = self.waves_compute.get_beam_tracing(beam_tracing_time_index)
         nbeam = beam_tracing["nbeam"]
         is_active = beam_tracing["beamActivaStatusList"]
         len_ray = beam_tracing["len_ray"]
@@ -583,24 +583,24 @@ class WavesView:
                 )
 
         ax_topview_plot_traces = {}
-        for beamIndex in range(nbeam):
+        for beam_index in range(nbeam):
             # ax_topview_plot_traces[ibeam] = {}
-            if is_active[beamIndex] == 1:
+            if is_active[beam_index] == 1:
                 color = "b"
                 style = "-"
 
                 for iray in range(nray):
                     if update == 1:
                         (ax_topview_plot_traces[iray],) = ax.plot(
-                            x_ray[beamIndex, iray, : len_ray[beamIndex, iray]],
-                            y_ray[beamIndex, iray, : len_ray[beamIndex, iray]],
+                            x_ray[beam_index, iray, : len_ray[beam_index, iray]],
+                            y_ray[beam_index, iray, : len_ray[beam_index, iray]],
                             color=color,
                             linestyle=style,
                         )
                     else:
                         ax[iray].set_data(
-                            x_ray[beamIndex, iray, : len_ray[beamIndex, iray]],
-                            y_ray[beamIndex, iray, : len_ray[beamIndex, iray]],
+                            x_ray[beam_index, iray, : len_ray[beam_index, iray]],
+                            y_ray[beam_index, iray, : len_ray[beam_index, iray]],
                         )
         if update == 1:
             return ax_topview_plot_traces

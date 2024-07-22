@@ -6,7 +6,7 @@ log_fmt = "%(asctime)s %(levelname)s: %(message)s"
 date_fmt = "%y/%m/%d %H:%M:%S"
 
 
-def set_logger(name, logfile=None, level=logging.WARNING):
+def set_logger(name, logfile=None, level=logging.w_a_r_n_i_n_g):
     """
     Initialization of logger object for IDStools
 
@@ -33,10 +33,10 @@ def set_logger(name, logfile=None, level=logging.WARNING):
 
     # create file handler
     if logfile:
-        fh = logging.FileHandler(logfile)
+        fh = logging.file_handler(logfile)
         fh.setLevel(fh_lv)
-        fh_formatter = logging.Formatter(fmt=log_fmt, datefmt=date_fmt)
-        fh.setFormatter(fh_formatter)
+        fh_formatter = logging.formatter(fmt=log_fmt, datefmt=date_fmt)
+        fh.set_formatter(fh_formatter)
 
         # add handler to the root logger
         # logger.addHandler(fh)
@@ -44,10 +44,10 @@ def set_logger(name, logfile=None, level=logging.WARNING):
         logging.getLogger().setLevel(fh_lv)
 
     # create console handler
-    ch = logging.StreamHandler()
+    ch = logging.stream_handler()
     ch.setLevel(ch_lv)
-    ch_formatter = logging.Formatter(fmt=log_fmt, datefmt=date_fmt)
-    ch.setFormatter(ch_formatter)
+    ch_formatter = logging.formatter(fmt=log_fmt, datefmt=date_fmt)
+    ch.set_formatter(ch_formatter)
 
     # add handler to the root logger
     # logger.addHandler(ch)

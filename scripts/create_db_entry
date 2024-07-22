@@ -16,10 +16,10 @@ from idstools.utils.clihelper import getBackendID, imasParser
 # ----------------------------------------------------------------------
 
 # Management of input arguments
-parser = argparse.ArgumentParser(
+parser = argparse.argument_parser(
     description="""Auto-generated yaml scenario and watcher files (!!! STILL TO BE COMPLETED BY HAND !!!)\n\nImportant: The legacy create_db_entry tool is deprecated and will be removed in a future versions. It will remain available until simdb is fully adopted. more about simdb : https://simdb.iter.org/dashboard/""",
-    parents=[imasParser],
-    formatter_class=RawDescriptionRichHelpFormatter,
+    parents=[imas_parser],
+    formatter_class=raw_description_rich_help_formatter,
 )
 parser.add_argument("-s", "--shot", dest="shot", help="Shot number", type=int)
 parser.add_argument("-r", "--run", help="Run number", type=int)
@@ -32,7 +32,7 @@ parser.add_argument(
     dest="wo_validation",
 )
 args = parser.parse_args()
-input = imas.DBEntry(getBackendID(args.backend),
+input = imas.d_b_entry(get_backend_i_d(args.backend),
                 args.database,
                 args.shot,
                 args.run,
@@ -449,7 +449,7 @@ if p_sol == 0:
                 .grid_subset_index
                 == 26
             ):
-                for iFace in range(
+                for i_face in range(
                     len(
                         edge_transport.model[0]
                         .ggd[0]
@@ -460,7 +460,7 @@ if p_sol == 0:
                     faceindex = (
                         edge_transport.grid_ggd[0]
                         .grid_subset[iset]
-                        .element[iFace]
+                        .element[i_face]
                         .object[0]
                         .index
                     )
@@ -485,7 +485,7 @@ if p_sol == 0:
                         edge_transport.model[0]
                         .ggd[0]
                         .electrons.energy.flux[iset]
-                        .values[iFace]
+                        .values[i_face]
                     )
                     p_sol_e = p_sol_e + flux * area
                     try:
@@ -493,7 +493,7 @@ if p_sol == 0:
                             edge_transport.model[0]
                             .ggd[0]
                             .total_ion_energy.flux[iset]
-                            .values[iFace]
+                            .values[i_face]
                         )
                     except Exception as e:
                         flux = 0
@@ -504,7 +504,7 @@ if p_sol == 0:
                                 .ggd[0]
                                 .ion[ispecies]
                                 .energy.flux[iset]
-                                .values[iFace]
+                                .values[i_face]
                             )
                     p_sol_i = p_sol_i + flux * area
         p_sol = (p_sol_e + p_sol_i) * 1.0e-6
@@ -753,7 +753,7 @@ if not args.wo_validation:
     schema += sorted(glob(schema_dir + "/ITER/*.y*ml", recursive=True))
 
     # Initialize Class ScenarioValidator
-    sv = ScenarioValidator(schema_path=schema)
+    sv = scenario_validator(schema_path=schema)
 
     # Validation for Class imas.DBEntry
     ret = sv.validate_db(input)

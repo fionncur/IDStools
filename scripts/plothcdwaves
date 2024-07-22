@@ -19,34 +19,34 @@ from idstools.utils.idslogger import setupLogger
 from idstools.view.common import Canvas
 from idstools.view.waves import WavesView
 
-logger = setupLogger("module", stdout_level=logging.INFO)
+logger = setup_logger("module", stdout_level=logging.i_n_f_o)
 
 
-def showPlots(args):
+def show_plots(args):
     args = parser.parse_args()
-    conn = DBMaster.getConnection(args)
+    conn = d_b_master.get_connection(args)
     if conn is None:
         logger.critical("----> Aborted.")
         exit(1)
 
-    idsWaves = conn.get("waves")
+    ids_waves = conn.get("waves")
     conn.close()
 
-    wavesCompute = WavesCompute(idsWaves)
+    waves_compute = waves_compute(ids_waves)
 
-    timeArray = idsWaves.time
-    ntime = len(timeArray)
-    timeIndex, timeValue = getNearestTime(idsWaves.time, args.time)
+    time_array = ids_waves.time
+    ntime = len(time_array)
+    time_index, time_value = get_nearest_time(ids_waves.time, args.time)
 
-    radialGrid = wavesCompute.getRadialGridInfo(timeIndex, args.force_psi)
-    if radialGrid is None:
+    radial_grid = waves_compute.get_radial_grid_info(time_index, args.force_psi)
+    if radial_grid is None:
         logger.critical("Radial grid information is empty ----> Abort.")
         exit(1)
-    activeLaunchers = {
-        key: value for key, value in radialGrid.items() if value["isActive"] is True
+    active_launchers = {
+        key: value for key, value in radial_grid.items() if value["isActive"] is True
     }
-    lenActiveLaunchers = len(activeLaunchers)
-    if lenActiveLaunchers == 0:
+    len_active_launchers = len(active_launchers)
+    if len_active_launchers == 0:
         logger.critical("The waves IDS appears empty ----> Abort.")
         exit(1)
 
@@ -54,7 +54,7 @@ def showPlots(args):
     if ntime == 1:
         logger.error("Only one time slice --> ECCD and ECRH waveforms not displayed")
         rows = 1
-    canvas = Canvas(rows, 2)
+    canvas = canvas(rows, 2)
     # canvas.setStyle(style="retro")
     ax1 = canvas.add_axes(title="", xlabel="", row=0, col=0)
     ax2 = canvas.add_axes(title="", xlabel="", row=0, col=1)
@@ -62,28 +62,28 @@ def showPlots(args):
         ax3 = canvas.add_axes(title="", xlabel="", row=1, col=0)
         ax4 = canvas.add_axes(title="", xlabel="", row=1, col=1)
 
-    wavesView = WavesView(idsWaves)
-    wavesView.viewAbsorbedPowerDensityProfile(ax1, timeIndex, args.force_psi)
+    waves_view = waves_view(ids_waves)
+    waves_view.view_absorbed_power_density_profile(ax1, time_index, args.force_psi)
     if args.hide_legend:
         ax1.get_legend().remove()
     else:
         ax1.get_legend().remove()
-    wavesView.viewCDProfile(ax2, timeIndex, args.force_psi)
+    waves_view.view_c_d_profile(ax2, time_index, args.force_psi)
     if args.hide_legend:
         ax2.get_legend().remove()
     if ntime != 1:
-        wavesView.viewECPowerWaveform(ax3, timeIndex, args.force_psi)
+        waves_view.view_e_c_power_waveform(ax3, time_index, args.force_psi)
         if args.hide_legend:
             ax3.get_legend().remove()
         else:
             ax3.get_legend().remove()
-        wavesView.viewCDWaveform(ax4, timeIndex, args.force_psi)
+        waves_view.view_c_d_waveform(ax4, time_index, args.force_psi)
         if args.hide_legend:
             ax4.get_legend().remove()
         else:
             ax4.get_legend().remove()
 
-    canvas.setText(text=f"{getDatabasePath(args, timeValue=timeValue)}")
+    canvas.set_text(text=f"{get_database_path(args, time_value=time_value)}")
 
     canvas.fig.subplots_adjust(
         top=0.92,
@@ -94,10 +94,10 @@ def showPlots(args):
         wspace=0.13,
     )
     canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
-    canvas.fig.suptitle(getTitle(args, "HCD Waves Plot", timeValue), size=12)
+    canvas.fig.suptitle(get_title(args, "HCD Waves Plot", time_value), size=12)
 
     if args.save:
-        fname = getFileName(args,  os.path.basename(__file__)+"_ECRH_profile_time", timeValue)
+        fname = get_file_name(args,  os.path.basename(__file__)+"_ECRH_profile_time", time_value)
         if args.directory:
             if not os.path.exists(args.directory):
                 os.makedirs(args.directory)
@@ -107,8 +107,8 @@ def showPlots(args):
         canvas.show()
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        description="---- Display EC results", parents=[dbentryParser],formatter_class=RichHelpFormatter,
+    parser = argparse.argument_parser(
+        description="---- Display EC results", parents=[dbentry_parser],formatter_class=rich_help_formatter,
     )
     parser.add_argument(
         "-t", "--time", help="Time", required=False, type=float, default=-99.0
@@ -133,7 +133,7 @@ if __name__ == "__main__":
         default=None, 
     )
     args = parser.parse_args()
-    showPlots(args)
+    show_plots(args)
 
 
 # def showPlots(args):

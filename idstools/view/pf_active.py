@@ -1,7 +1,7 @@
 """
 This module provides view functions and classes for pf_active ids data
 
-`refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`_.
+`refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/i_m_design/Data%20Model/sphinx/latest.html>`_.
 
 """
 
@@ -14,19 +14,19 @@ from idstools.compute.pf_active import PfActiveCompute
 logger = logging.getLogger("module")
 
 
-class PFActiveView:
+class p_f_active_view:
     """This class provides view functions for pf_active ids"""
 
-    def __init__(self, idsObj: object):
+    def __init__(self, ids_obj: object):
         """Initialization PFActiveView object.
 
         Args:
             idsObj : pf_active ids object
         """
-        self.idsObj = idsObj
-        self.computeObj = PfActiveCompute(idsObj)
+        self.ids_obj = ids_obj
+        self.compute_obj = pf_active_compute(ids_obj)
 
-    def viewActivePfCoils(self, ax: plt.axes, showLabels=False):
+    def view_active_pf_coils(self, ax: plt.axes, show_labels=False):
         """
         This function plots and annotates the active PF coils on a existing plot.
 
@@ -58,28 +58,28 @@ class PFActiveView:
                 :alt: image not found
                 :align: center
         """
-        if coilsDict := self.computeObj.getActivePfCoils():
-            for _, coilInfo in coilsDict.items():
-                coilElements = coilInfo["elements"]
-                for _, elementInfo in coilElements.items():
+        if coils_dict := self.compute_obj.get_active_pf_coils():
+            for _, coil_info in coils_dict.items():
+                coil_elements = coil_info["elements"]
+                for _, element_info in coil_elements.items():
                     cew, ceh, cec = (
-                        elementInfo["horizontalWidth"],
-                        elementInfo["horizontalHeight"],
-                        elementInfo["cec"],
+                        element_info["horizontalWidth"],
+                        element_info["horizontalHeight"],
+                        element_info["cec"],
                     )
-                    rectangle = Rectangle(cec, cew, ceh, edgecolor="#fd7e14", facecolor="#fd7e14")
+                    rectangle = rectangle(cec, cew, ceh, edgecolor="#fd7e14", facecolor="#fd7e14")
 
                     ax.add_patch(rectangle)
                     rx, ry = rectangle.get_xy()
                     cx = rx + rectangle.get_width() / 2.0
                     cy = ry + rectangle.get_height() / 2.0
 
-                    if showLabels:
+                    if show_labels:
                         name = ""
-                        if coilInfo["identifier"]:
-                            name = coilInfo["identifier"]
-                        elif coilInfo["name"]:
-                            name = f"{coilInfo['name']}"
+                        if coil_info["identifier"]:
+                            name = coil_info["identifier"]
+                        elif coil_info["name"]:
+                            name = f"{coil_info['name']}"
 
                         ax.text(
                             cx,

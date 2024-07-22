@@ -28,7 +28,7 @@ from idstools.view.pf_active import PFActiveView
 from idstools.view.wall import WallView
 
 
-class MdAction(argparse.Action):
+class md_action(argparse.action):
     def __call__(self, parser, namespace, values, option_string=None):
         if len(values) == 0:
             setattr(namespace, self.dest, True)
@@ -36,10 +36,10 @@ class MdAction(argparse.Action):
             setattr(namespace, self.dest, values)
 
 
-parser = argparse.ArgumentParser(
+parser = argparse.argument_parser(
     description="---- Display the plasma equilibrium from the equilibrium IDS. It also shows pf coils and wall position overlay if exists [Previously known as equiplot]",
-    parents=[dbentryParser],
-    formatter_class=RichHelpFormatter,
+    parents=[dbentry_parser],
+    formatter_class=rich_help_formatter,
 )
 
 parser.add_argument(
@@ -54,7 +54,7 @@ parser.add_argument(
     "-md",
     "--md",
     nargs="*",
-    action=MdAction,
+    action=md_action,
     default=[],
     help="""Provide machine descriptions that you need to plot\n
 with ids names for example wall pf_active \n
@@ -80,22 +80,22 @@ parser.add_argument(
 )
 args = parser.parse_args()
 
-splittedIdsInfo = args.uri.split("#")
-uri = splittedIdsInfo[0]
+splitted_ids_info = args.uri.split("#")
+uri = splitted_ids_info[0]
 occurrence = 0
-if len(splittedIdsInfo) == 2:
-    idsFragment = splittedIdsInfo[1]
+if len(splitted_ids_info) == 2:
+    ids_fragment = splitted_ids_info[1]
 
-    splittedIdsFragment = idsFragment.split(":")
-    if len(splittedIdsFragment) == 2:
-        idsPathFragment = splittedIdsFragment[1]
+    splitted_ids_fragment = ids_fragment.split(":")
+    if len(splitted_ids_fragment) == 2:
+        ids_path_fragment = splitted_ids_fragment[1]
 
-        splittedIdsPathFragment = idsPathFragment.split("/", 1)
-        occurrence = int(splittedIdsPathFragment[0])
+        splitted_ids_path_fragment = ids_path_fragment.split("/", 1)
+        occurrence = int(splitted_ids_path_fragment[0])
 
-logger = setupLogger("module", stdout_level=logging.INFO)
+logger = setup_logger("module", stdout_level=logging.i_n_f_o)
 
-connection = DBMaster.getConnection(args)
+connection = d_b_master.get_connection(args)
 if connection is None:
     logger.critical("----> Aborted.")
     exit(1)
@@ -103,88 +103,88 @@ if connection is None:
 # if md not provided then get it from list of idses
 if isinstance(args.md, bool) and args.md is True:
     args.md = []
-    _idsConnection = DBMaster.getConnection(args)
-    availableIdsAndTimes = getAvailableIdsAndTimes(_idsConnection)
-    for idsName, _ in availableIdsAndTimes:
-        args.md.append(idsName)
-    _idsConnection.close()
+    _ids_connection = d_b_master.get_connection(args)
+    available_ids_and_times = get_available_ids_and_times(_ids_connection)
+    for ids_name, _ in available_ids_and_times:
+        args.md.append(ids_name)
+    _ids_connection.close()
 
-idsObjEquilibrium = imas.equilibrium()
-idsObjEquilibrium.time = connection.partial_get("equilibrium", "time", occurrence)
-if idsObjEquilibrium.time is not None:
-    timeIndex, timeValue = getNearestTime(idsObjEquilibrium.time, args.time)
-    idsObjEquilibrium.time_slice.resize(1)
-    idsObjEquilibrium.time_slice[0] = connection.partial_get(
-        "equilibrium", f"time_slice({str(timeIndex)})", occurrence
+ids_obj_equilibrium = imas.equilibrium()
+ids_obj_equilibrium.time = connection.partial_get("equilibrium", "time", occurrence)
+if ids_obj_equilibrium.time is not None:
+    time_index, time_value = get_nearest_time(ids_obj_equilibrium.time, args.time)
+    ids_obj_equilibrium.time_slice.resize(1)
+    ids_obj_equilibrium.time_slice[0] = connection.partial_get(
+        "equilibrium", f"time_slice({str(time_index)})", occurrence
     )
-    plotequilibrium = EquilibriumView(idsObjEquilibrium)
+    plotequilibrium = equilibrium_view(ids_obj_equilibrium)
 
-    title = f"2D Equilibrium at time {timeValue:.1f}"
-    databaseText = ""
-    canvas = Canvas(1, 1)
+    title = f"2D Equilibrium at time {time_value:.1f}"
+    database_text = ""
+    canvas = canvas(1, 1)
     ax = canvas.add_axes(title="", xlabel="", row=0, col=0)
 
-    for mdidsInfo in args.md:
+    for mdids_info in args.md:
         inputargs = copy.deepcopy(args)
-        splittedmsIdsInfo = mdidsInfo.split("#")
-        _idsName = []
-        _mdUri = None
-        if len(splittedmsIdsInfo) == 2:
-            _mdUri, idsName = splittedmsIdsInfo
-            _idsName.append(idsName)
-            mdargs = argparse.Namespace()
-            mdargs.uri = _mdUri
+        splittedms_ids_info = mdids_info.split("#")
+        _ids_name = []
+        _md_uri = None
+        if len(splittedms_ids_info) == 2:
+            _md_uri, ids_name = splittedms_ids_info
+            _ids_name.append(ids_name)
+            mdargs = argparse.namespace()
+            mdargs.uri = _md_uri
             inputargs = mdargs
-        if len(splittedmsIdsInfo) == 1:
-            if "imas:" in splittedmsIdsInfo[0]:
-                _mdUri = splittedmsIdsInfo[0]
-                mdargs = argparse.Namespace()
-                mdargs.uri = _mdUri
+        if len(splittedms_ids_info) == 1:
+            if "imas:" in splittedms_ids_info[0]:
+                _md_uri = splittedms_ids_info[0]
+                mdargs = argparse.namespace()
+                mdargs.uri = _md_uri
                 inputargs = mdargs
             else:
-                _idsName = splittedmsIdsInfo
-        if len(_idsName) == 0:
-            idsConnection = DBMaster.getConnection(inputargs)
-            availableIdsAndTimes = getAvailableIdsAndTimes(idsConnection)
-            for idsName, _ in availableIdsAndTimes:
-                _idsName.append(idsName)
-            idsConnection.close()
-        if "wall" in _idsName:
-            connection = DBMaster.getConnection(inputargs)
+                _ids_name = splittedms_ids_info
+        if len(_ids_name) == 0:
+            ids_connection = d_b_master.get_connection(inputargs)
+            available_ids_and_times = get_available_ids_and_times(ids_connection)
+            for ids_name, _ in available_ids_and_times:
+                _ids_name.append(ids_name)
+            ids_connection.close()
+        if "wall" in _ids_name:
+            connection = d_b_master.get_connection(inputargs)
             if connection is not None:
-                _idsData = connection.get("wall")
+                _ids_data = connection.get("wall")
                 from imas import imasdef
 
-                if _idsData.ids_properties.homogeneous_time != imasdef.EMPTY_INT:
-                    wallview = WallView(_idsData)
-                    if foundData := wallview.view_wall(
+                if _ids_data.ids_properties.homogeneous_time != imasdef.e_m_p_t_y__i_n_t:
+                    wallview = wall_view(_ids_data)
+                    if found_data := wallview.view_wall(
                         ax, args.show_labels, wallcolor="slategray"
                     ):
                         title += " wall"
-                        databaseText += f"{_idsName}={getDatabasePath(inputargs)}\n"
+                        database_text += f"{_ids_name}={get_database_path(inputargs)}\n"
                 else:
-                    logger.warning(f"{_idsName} ids is empty in the dbentry")
+                    logger.warning(f"{_ids_name} ids is empty in the dbentry")
                 connection.close()
             else:
-                logger.warning(f"{_idsName} ids is not present")
-        if "pf_active" in _idsName:
-            connection = DBMaster.getConnection(inputargs)
+                logger.warning(f"{_ids_name} ids is not present")
+        if "pf_active" in _ids_name:
+            connection = d_b_master.get_connection(inputargs)
             if connection is not None:
-                _idsData = connection.get("pf_active")
+                _ids_data = connection.get("pf_active")
                 from imas import imasdef
 
-                if _idsData.ids_properties.homogeneous_time != imasdef.EMPTY_INT:
-                    ViewPfCoils = PFActiveView(_idsData)
-                    ViewPfCoils.viewActivePfCoils(ax, args.show_labels)
+                if _ids_data.ids_properties.homogeneous_time != imasdef.e_m_p_t_y__i_n_t:
+                    view_pf_coils = p_f_active_view(_ids_data)
+                    view_pf_coils.view_active_pf_coils(ax, args.show_labels)
                     title += " Active PF Coils"
-                    databaseText += f"{_idsName}={getDatabasePath(inputargs)}\n"
+                    database_text += f"{_ids_name}={get_database_path(inputargs)}\n"
                 else:
-                    logger.warning(f"{_idsName} ids is empty in the dbentry")
+                    logger.warning(f"{_ids_name} ids is empty in the dbentry")
                 connection.close()
             else:
                 logger.warning("f{_idsName} ids is not present")
 
-    plotequilibrium.viewMagneticPoloidalFlux(ax, plotRho=args.rho)
+    plotequilibrium.view_magnetic_poloidal_flux(ax, plot_rho=args.rho)
     ax.set_title(title)
 
     xmin, xmax = ax.get_xlim()
@@ -192,18 +192,18 @@ if idsObjEquilibrium.time is not None:
     ax.text(
         xmax + 0.01 * abs(xmax),
         ymin + 0.5 * abs(ymax - ymin),
-        f"{getDatabasePath(args, timeValue=timeValue)}\n{databaseText}",
+        f"{get_database_path(args, time_value=time_value)}\n{database_text}",
         horizontalalignment="left",
         verticalalignment="center",
         rotation="vertical",
         fontsize=7,
     )
 
-    canvas.fig.suptitle(getTitle(args, "Equilibrium", timeValue), size=12)
+    canvas.fig.suptitle(get_title(args, "Equilibrium", time_value), size=12)
     canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
     if args.save:
-        fname = getFileName(
-            args, f"{os.path.basename(__file__)}_Equilibrium", timeValue
+        fname = get_file_name(
+            args, f"{os.path.basename(__file__)}_Equilibrium", time_value
         )
         if args.directory:
             if not os.path.exists(args.directory):

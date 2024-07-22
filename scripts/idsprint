@@ -16,16 +16,16 @@ from idstools.database import DBMaster
 from idstools.utils.clihelper import dbentryParser
 from idstools.utils.idslogger import setupLogger
 
-logger = setupLogger("module")
+logger = setup_logger("module")
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
+    parser = argparse.argument_parser(
         description="""Prints content of an IDS onto the terminal\n 
         provide with fragment
         e.g. -u imas:hdf5?path=/home/ITER/fleuryl/public/imasdb/west/3/54914/4#wall or #wall:0/description_2d | less
         [previously known as idsdump and idsdumppath]""",
-        formatter_class=RichHelpFormatter,
-        parents=[dbentryParser],
+        formatter_class=rich_help_formatter,
+        parents=[dbentry_parser],
     )
     parser.add_argument(
         "-e",
@@ -47,33 +47,33 @@ if __name__ == "__main__":
         help="Print only names which has data",
     )
     args = parser.parse_args()
-    splittedIdsInfo = args.uri.split("#")
+    splitted_ids_info = args.uri.split("#")
 
-    uri = splittedIdsInfo[0]
-    idsName = ""
-    idsPath = None
+    uri = splitted_ids_info[0]
+    ids_name = ""
+    ids_path = None
     occurrence = 0
-    if len(splittedIdsInfo) == 2:
-        idsFragment = splittedIdsInfo[1]
-        if ":" in idsFragment:
-            splittedIdsFragment = idsFragment.split(":")
-            idsName = splittedIdsFragment[0]
-            if len(splittedIdsFragment) == 2:
-                idsPathFragment = splittedIdsFragment[1]
-                splittedIdsPathFragment = idsPathFragment.split("/", 1)
-                occurrence = int(splittedIdsPathFragment[0])
-                if len(splittedIdsPathFragment) == 2:
-                    idsPath = splittedIdsPathFragment[1]
+    if len(splitted_ids_info) == 2:
+        ids_fragment = splitted_ids_info[1]
+        if ":" in ids_fragment:
+            splitted_ids_fragment = ids_fragment.split(":")
+            ids_name = splitted_ids_fragment[0]
+            if len(splitted_ids_fragment) == 2:
+                ids_path_fragment = splitted_ids_fragment[1]
+                splitted_ids_path_fragment = ids_path_fragment.split("/", 1)
+                occurrence = int(splitted_ids_path_fragment[0])
+                if len(splitted_ids_path_fragment) == 2:
+                    ids_path = splitted_ids_path_fragment[1]
         else:
-            splittedIdsFragment = idsFragment.split("/", 1)
-            idsName = splittedIdsFragment[0]
-            if len(splittedIdsFragment) == 2:
-                idsPath = splittedIdsFragment[1]
-    if idsName == "":
+            splitted_ids_fragment = ids_fragment.split("/", 1)
+            ids_name = splitted_ids_fragment[0]
+            if len(splitted_ids_fragment) == 2:
+                ids_path = splitted_ids_fragment[1]
+    if ids_name == "":
         logger.error("Please provide ids name at the end of uri with hash")
         exit(1)
     args.uri = uri
-    connection = DBMaster.getConnection(args)
+    connection = d_b_master.get_connection(args)
     if connection is None:
         logger.error("Please provide valid URI")
         exit(1)
@@ -82,11 +82,11 @@ if __name__ == "__main__":
     else:
         numpy.set_printoptions(threshold=10)
 
-    if idsPath is None:
-        ids = connection.get(idsName, occurrence)
+    if ids_path is None:
+        ids = connection.get(ids_name, occurrence)
         if args.compact:
             try:
-                output = StringIO()
+                output = string_i_o()
                 sys.stdout = open(os.devnull, "w")
 
                 ids.dump(print_empty=args.show_empty, file=output)
@@ -123,13 +123,13 @@ if __name__ == "__main__":
 
     else:
         try:
-            result = connection.partial_get(idsName, idsPath, occurrence)
+            result = connection.partial_get(ids_name, ids_path, occurrence)
         except Exception as exc:
             logger.error(exc)
             exit(1)
 
-        resultType = type(result)
-        print(f"Type: {resultType}")
+        result_type = type(result)
+        print(f"Type: {result_type}")
         if result.__class__ == numpy.ndarray:
             print(f"Shape: {result.shape}")
             print(f"Data type: {result.dtype.name}")
@@ -144,8 +144,8 @@ if __name__ == "__main__":
             and result[0].__class__.__module__ != "numpy"
         ):
             for i in range(len(result)):
-                idsDump = result[i]
-                print(idsDump)
+                ids_dump = result[i]
+                print(ids_dump)
                 print("-------------------------")
         else:
             print(result)

@@ -1,7 +1,7 @@
 """
 This module provides compute functions and classes for edge_profiles ids data
 
-`refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`_.
+`refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/i_m_design/Data%20Model/sphinx/latest.html>`_.
 
 """
 
@@ -17,12 +17,12 @@ import idstools.init_mendeleiev as mend
 logger = logging.getLogger("module")
 
 
-class EdgeProfilesCompute:
+class edge_profiles_compute:
     def __init__(self, ids):
         self.ids = ids
 
     @staticmethod
-    def getPlasmaCompositionWithSpeciesConcentration(ids, timeSlice=0) -> dict | int:
+    def get_plasma_composition_with_species_concentration(ids, time_slice=0) -> dict | int:
         """
         Function retrives composition and species concentration in below format
             - Spcies_label
@@ -89,28 +89,28 @@ class EdgeProfilesCompute:
                             'z': 2},
         """
         try:
-            ids.ggd[timeSlice]
+            ids.ggd[time_slice]
 
         except Exception as e:
             logger.debug(f"{e}")
             logger.critical(f"edge_profiles IDS:slice not found {e}")
             return 0
 
-        edgeProfilesCompute = EdgeProfilesCompute(ids)
+        edge_profiles_compute = edge_profiles_compute(ids)
 
-        if edgeProfilesCompute.getVolume(timeSlice) is None:
+        if edge_profiles_compute.get_volume(time_slice) is None:
             return -1
 
         data = {}
-        nspec_over_ntot = edgeProfilesCompute.getNspecOverNtot()
-        nspec_over_ne = edgeProfilesCompute.getNspecOverNe()
-        nspec_over_nmaj = edgeProfilesCompute.getNspecOverNmaj()
-        species = edgeProfilesCompute.getSpecies()
-        labels = edgeProfilesCompute.getLabels()
-        edgeProfilesCompute.combineSpeciesWhenAppearTwice(species, nspec_over_ntot, nspec_over_ne, nspec_over_nmaj)
-        a = edgeProfilesCompute.get_a()
-        z = edgeProfilesCompute.get_z()
-        states_data = edgeProfilesCompute.getStatesData()
+        nspec_over_ntot = edge_profiles_compute.get_nspec_over_ntot()
+        nspec_over_ne = edge_profiles_compute.get_nspec_over_ne()
+        nspec_over_nmaj = edge_profiles_compute.get_nspec_over_nmaj()
+        species = edge_profiles_compute.get_species()
+        labels = edge_profiles_compute.get_labels()
+        edge_profiles_compute.combine_species_when_appear_twice(species, nspec_over_ntot, nspec_over_ne, nspec_over_nmaj)
+        a = edge_profiles_compute.get_a()
+        z = edge_profiles_compute.get_z()
+        states_data = edge_profiles_compute.get_states_data()
         for species_index in range(len(species)):
             species_data = {
                 "nspec_over_ntot": nspec_over_ntot[species_index],
@@ -126,7 +126,7 @@ class EdgeProfilesCompute:
 
         return data
 
-    def getLabels(self, timeSlice: int = 0):
+    def get_labels(self, time_slice: int = 0):
         """
         This function returns a list of labels for all species in a given time slice.
 
@@ -150,13 +150,13 @@ class EdgeProfilesCompute:
                 ['D', 'He', 'Ne', 'Be', ' D2+']
         """
 
-        nspecies = len(self.ids.ggd[timeSlice].ion)
-        labels = [self.ids.ggd[timeSlice].ion[ispecies].label for ispecies in range(nspecies)]
+        nspecies = len(self.ids.ggd[time_slice].ion)
+        labels = [self.ids.ggd[time_slice].ion[ispecies].label for ispecies in range(nspecies)]
         logger.debug(f"Species identification :{labels}")
         return labels
 
     @functools.lru_cache(maxsize=128)
-    def get_a(self, timeSlice: int = 0, elementIndex: int = 0) -> list:
+    def get_a(self, time_slice: int = 0, element_index: int = 0) -> list:
         """
         This function returns a list of atomic masses for a given slice and element index.
 
@@ -181,16 +181,16 @@ class EdgeProfilesCompute:
 
                 [2.0, 4.0, 20.0, 9.0, 2.0]
         """
-        nspecies = len(self.ids.ggd[timeSlice].ion)
+        nspecies = len(self.ids.ggd[time_slice].ion)
         a = [0] * nspecies
         for ispecies in range(nspecies):
-            a[ispecies] = self.ids.ggd[timeSlice].ion[ispecies].element[elementIndex].a
+            a[ispecies] = self.ids.ggd[time_slice].ion[ispecies].element[element_index].a
 
         logger.debug(f"Mass of atom : {str(a)}")
         return a
 
     @functools.lru_cache(maxsize=128)
-    def get_z(self, timeSlice: int = 0, elementIndex: int = 0) -> list:
+    def get_z(self, time_slice: int = 0, element_index: int = 0) -> list:
         """
         This function returns a list of nuclear charges for each species in a given slice and element
         index.
@@ -216,14 +216,14 @@ class EdgeProfilesCompute:
                 [1, 2, 10, 4, 1]
         """
         # TODO why always element_index = 0 we are picking up
-        nspecies = len(self.ids.ggd[timeSlice].ion)
+        nspecies = len(self.ids.ggd[time_slice].ion)
         z = [0] * nspecies
         for ispecies in range(nspecies):
-            z[ispecies] = int(self.ids.ggd[timeSlice].ion[ispecies].element[elementIndex].z_n)
+            z[ispecies] = int(self.ids.ggd[time_slice].ion[ispecies].element[element_index].z_n)
         logger.debug(f"Nuclear charge each species : {z}")
         return z
 
-    def getStates(self, timeSlice: int = 0):
+    def get_states(self, time_slice: int = 0):
         """
         This function returns quantities related to the different states of the species (ionisation, energy,
         excitation, ...) for each species
@@ -248,10 +248,10 @@ class EdgeProfilesCompute:
 
                 # class 'imas_3_38_1_ual_4_11_4.edge_profiles.ggd_ion_state__structArray'
         """
-        nspecies = len(self.ids.ggd[timeSlice].ion)
-        return [self.ids.ggd[timeSlice].ion[iSpecies].state for iSpecies in range(nspecies)]
+        nspecies = len(self.ids.ggd[time_slice].ion)
+        return [self.ids.ggd[time_slice].ion[i_species].state for i_species in range(nspecies)]
 
-    def getStatesData(self, timeSlice: int = 0) -> dict:
+    def get_states_data(self, time_slice: int = 0) -> dict:
         """
         This function returns a dictionary containing data on the states and densities of different species
         in a plasma simulation.
@@ -294,20 +294,20 @@ class EdgeProfilesCompute:
 
         states_data = {}
 
-        volume = self.getVolume(timeSlice)
-        nspecies = len(self.ids.ggd[timeSlice].ion)
-        species_density, _, _ = self.getSpeciesDensity()
+        volume = self.get_volume(time_slice)
+        nspecies = len(self.ids.ggd[time_slice].ion)
+        species_density, _, _ = self.get_species_density()
         for species_index in range(nspecies):
             species_data = {}
-            nstates = len(self.ids.ggd[timeSlice].ion[species_index].state)
+            nstates = len(self.ids.ggd[time_slice].ion[species_index].state)
             states_density = [0] * nstates
             for state_index in range(nstates):
-                state_data = {"label": self.ids.ggd[timeSlice].ion[species_index].state[state_index].label}
-                for xd in self.ids.ggd[timeSlice].ion[species_index].state[state_index].z_average:
+                state_data = {"label": self.ids.ggd[time_slice].ion[species_index].state[state_index].label}
+                for xd in self.ids.ggd[time_slice].ion[species_index].state[state_index].z_average:
                     if xd.grid_subset_index == 5:
                         state_data["z_average"] = xd.values[0]
 
-                for xd in self.ids.ggd[timeSlice].ion[species_index].state[state_index].density:
+                for xd in self.ids.ggd[time_slice].ion[species_index].state[state_index].density:
                     if xd.grid_subset_index == 5:
                         states_density[state_index] = sum(np.array(volume) * np.array(xd.values))
                         break
@@ -317,7 +317,7 @@ class EdgeProfilesCompute:
             states_data[str(species_index)] = species_data
         return states_data
 
-    def get_ne(self, timeSlice: int = 0) -> float:
+    def get_ne(self, time_slice: int = 0) -> float:
         """
         This function calculates the total number of electrons (ne) based on the volume and electron density
         of a given slice.
@@ -341,13 +341,13 @@ class EdgeProfilesCompute:
 
                 1.7465285792413856e+22
         """
-        volume = self.getVolume(timeSlice)
-        electron_density = self.getDensity(timeSlice)
+        volume = self.get_volume(time_slice)
+        electron_density = self.get_density(time_slice)
         logger.info(f"Total no. electrons (ne): {str(sum(volume * electron_density))}")
         return sum(volume * electron_density)
 
     @functools.lru_cache(maxsize=128)
-    def getVolume(self, timeSlice=0) -> list | None:
+    def get_volume(self, time_slice=0) -> list | None:
         """
         This function calculates the volume of a grid subset using either pre-calculated volume data or by
         manually calculating it from the nodes.
@@ -381,14 +381,14 @@ class EdgeProfilesCompute:
                 0.0002505748085483,
                 0.00021528820409221]
         """
-        IDENTIFIER_CELLS_INDEX = 5  # cells identifier
-        cellsGridSubset = None
-        for grid_subset in self.ids.grid_ggd[timeSlice].grid_subset:
-            if grid_subset.identifier.index == IDENTIFIER_CELLS_INDEX:
-                cellsGridSubset = grid_subset
+        i_d_e_n_t_i_f_i_e_r__c_e_l_l_s__i_n_d_e_x = 5  # cells identifier
+        cells_grid_subset = None
+        for grid_subset in self.ids.grid_ggd[time_slice].grid_subset:
+            if grid_subset.identifier.index == i_d_e_n_t_i_f_i_e_r__c_e_l_l_s__i_n_d_e_x:
+                cells_grid_subset = grid_subset
         elements = []
-        if cellsGridSubset:
-            elements = cellsGridSubset.element
+        if cells_grid_subset:
+            elements = cells_grid_subset.element
 
         num_vertices = len(elements)
         if num_vertices == 0:
@@ -406,7 +406,7 @@ class EdgeProfilesCompute:
 
                 # Get geometry_content.index to check what is stored in the geometry array
                 geometry_content_index = (
-                    self.ids.grid_ggd[timeSlice]
+                    self.ids.grid_ggd[time_slice]
                     .space[space_index]
                     .objects_per_dimension[dimension_index]
                     .geometry_content.index
@@ -415,7 +415,7 @@ class EdgeProfilesCompute:
                 if geometry_content_index in [31, 32]:
                     # Get the object which is mapped from grid_subset to space
                     obj_dim = (
-                        self.ids.grid_ggd[timeSlice]
+                        self.ids.grid_ggd[time_slice]
                         .space[space_index]
                         .objects_per_dimension[dimension_index]
                         .object[object_index]
@@ -438,7 +438,7 @@ class EdgeProfilesCompute:
 
                     # Get all nodes of the cell object
                     nodes = (
-                        self.ids.grid_ggd[timeSlice]
+                        self.ids.grid_ggd[time_slice]
                         .space[space_index]
                         .objects_per_dimension[dimension_index]
                         .object[object_index]
@@ -447,48 +447,48 @@ class EdgeProfilesCompute:
                     # Decrement by 1 to compensate zero based indexing
                     nodes = nodes - 1
                     # Get R and Z values from nodes deom object_per_dimesnion 0
-                    R1, Z1 = (
-                        self.ids.grid_ggd[timeSlice]
+                    r1, z1 = (
+                        self.ids.grid_ggd[time_slice]
                         .space[space_index]
                         .objects_per_dimension[0]
                         .object[nodes[0]]
                         .geometry
                     )
-                    R2, Z2 = (
-                        self.ids.grid_ggd[timeSlice]
+                    r2, z2 = (
+                        self.ids.grid_ggd[time_slice]
                         .space[space_index]
                         .objects_per_dimension[0]
                         .object[nodes[1]]
                         .geometry
                     )
 
-                    R3, Z3 = (
-                        self.ids.grid_ggd[timeSlice]
+                    r3, z3 = (
+                        self.ids.grid_ggd[time_slice]
                         .space[space_index]
                         .objects_per_dimension[0]
                         .object[nodes[2]]
                         .geometry
                     )
-                    R4, Z4 = (
-                        self.ids.grid_ggd[timeSlice]
+                    r4, z4 = (
+                        self.ids.grid_ggd[time_slice]
                         .space[space_index]
                         .objects_per_dimension[0]
                         .object[nodes[3]]
                         .geometry
                     )
-                    area = 0.5 * ((R1 * Z2 + R2 * Z3 + R3 * Z4 + R4 * Z1) - (R2 * Z1 + R3 * Z2 + R4 * Z3 + R1 * Z4))
-                    baryR = (
+                    area = 0.5 * ((r1 * z2 + r2 * z3 + r3 * z4 + r4 * z1) - (r2 * z1 + r3 * z2 + r4 * z3 + r1 * z4))
+                    bary_r = (
                         1.0
                         / (6.0 * area)
                         * (
-                            (R1 + R2) * (R1 * Z2 - R2 * Z1)
-                            + (R2 + R3) * (R2 * Z3 - R3 * Z2)
-                            + (R3 + R4) * (R3 * Z4 - R4 * Z3)
-                            + (R4 + R1) * (R4 * Z1 - R1 * Z4)
+                            (r1 + r2) * (r1 * z2 - r2 * z1)
+                            + (r2 + r3) * (r2 * z3 - r3 * z2)
+                            + (r3 + r4) * (r3 * z4 - r4 * z3)
+                            + (r4 + r1) * (r4 * z1 - r1 * z4)
                         )
                     )
 
-                    volumes[ielement] = 2.0 * np.pi * baryR * area
+                    volumes[ielement] = 2.0 * np.pi * bary_r * area
 
         if not np.any(volumes):
             logger.critical("edge_profiles IDS: volumes are empty")
@@ -496,7 +496,7 @@ class EdgeProfilesCompute:
         logger.info(f"Total volume:{np.sum(volumes)}")
         return volumes
 
-    def getDensity(self, timeSlice=0):
+    def get_density(self, time_slice=0):
         """
         This function retrieves the electron density array for a given slice index and returns it.
 
@@ -521,16 +521,16 @@ class EdgeProfilesCompute:
                 1.04025196e+20, 1.56969187e+20, 2.32851365e+20, 3.45402170e+20,
                 4.94164863e+20, 7.07373803e+20])
         """
-        densityIon = next(
-            (xd.values for xd in self.ids.ggd[timeSlice].electrons.density if xd.grid_subset_index == 5),
+        density_ion = next(
+            (xd.values for xd in self.ids.ggd[time_slice].electrons.density if xd.grid_subset_index == 5),
             None,
         )
-        logger.debug(f"Electrons density array:{densityIon}")
-        logger.info(f"Total Electrons density:{sum(densityIon)}")
-        return densityIon
+        logger.debug(f"Electrons density array:{density_ion}")
+        logger.info(f"Total Electrons density:{sum(density_ion)}")
+        return density_ion
 
     @functools.lru_cache(maxsize=128)
-    def getSpeciesDensity(self, timeSlice: int = 0) -> tuple:
+    def get_species_density(self, time_slice: int = 0) -> tuple:
         """
         This function calculates the density of different species in a given slice and returns a tuple containing
         the species density list, the total density, and the index of the species with the maximum density.
@@ -560,26 +560,26 @@ class EdgeProfilesCompute:
                 1.6789674570848447e+22,
                 0)
         """
-        nspecies = len(self.ids.ggd[timeSlice].ion)
-        volume = self.getVolume(timeSlice)
+        nspecies = len(self.ids.ggd[time_slice].ion)
+        volume = self.get_volume(time_slice)
         ntot = 0
         species_density_list = [0] * nspecies
         max_density = -999.0
         max_density_index = 0
         for ispecies in range(nspecies):
-            for xd in self.ids.ggd[timeSlice].ion[ispecies].density:
+            for xd in self.ids.ggd[time_slice].ion[ispecies].density:
                 if xd.grid_subset_index == 5:
                     species_density_list[ispecies] = sum(np.array(volume) * np.array(xd.values))
                     break
 
-            if len(self.ids.ggd[timeSlice].ion[ispecies].density) == 0:
+            if len(self.ids.ggd[time_slice].ion[ispecies].density) == 0:
                 logger.warn(
                     "edge_profiles IDS: species density not found for "
-                    + self.ids.ggd[timeSlice].ion[ispecies].label
+                    + self.ids.ggd[time_slice].ion[ispecies].label
                     + ", Getting density from state."
                 )
                 density = None
-                for counter, state in enumerate(self.ids.ggd[timeSlice].ion[ispecies].state):
+                for counter, state in enumerate(self.ids.ggd[time_slice].ion[ispecies].state):
                     for xd in state.density:
                         if xd.grid_subset_index == 5:
                             if counter == 0:
@@ -598,7 +598,7 @@ class EdgeProfilesCompute:
         logger.debug(f"Index of Maximum Density Species : {max_density_index}")
         return species_density_list, ntot, max_density_index
 
-    def getNspecOverNtot(self, timeSlice=0):
+    def get_nspec_over_ntot(self, time_slice=0):
         """
         This function calculates the ratio of the number of species to the total number of particles in a plasma.
 
@@ -622,10 +622,10 @@ class EdgeProfilesCompute:
                 array([9.87334881e-01, 8.14648566e-03, 3.70894720e-03, 8.04708810e-04, 4.97696116e-06])
 
         """
-        species_density_list, ntot, _ = self.getSpeciesDensity(timeSlice)
+        species_density_list, ntot, _ = self.get_species_density(time_slice)
         return species_density_list / ntot
 
-    def getNspecOverNe(self, timeSlice=0):
+    def get_nspec_over_ne(self, time_slice=0):
         """
         This function calculates the ratio of species density to electron density.
 
@@ -647,11 +647,11 @@ class EdgeProfilesCompute:
 
                 array([9.49141717e-01, 7.83135442e-03, 3.56547366e-03, 7.73580187e-04, 4.78443692e-06])
         """
-        species_density_list, _, _ = self.getSpeciesDensity(timeSlice)
+        species_density_list, _, _ = self.get_species_density(time_slice)
         ne = self.get_ne()
         return species_density_list / ne
 
-    def getNspecOverNmaj(self, timeSlice=0) -> list:
+    def get_nspec_over_nmaj(self, time_slice=0) -> list:
         """
         This function returns a list of the ratio of each species density to the maximum species density.
 
@@ -679,10 +679,10 @@ class EdgeProfilesCompute:
             species_density_list,
             _,
             max_density_index,
-        ) = self.getSpeciesDensity(timeSlice)
+        ) = self.get_species_density(time_slice)
         return species_density_list / species_density_list[max_density_index]
 
-    def getSpecies(self, timeSlice=0) -> list:
+    def get_species(self, time_slice=0) -> list:
         """
         This function creates a Mendeleiev table and returns a list of species based on the values of a,
         z, and the table.
@@ -706,13 +706,13 @@ class EdgeProfilesCompute:
                 ['D', 'He4', 'Ne', 'Be', 'D']
         """
         table_mendeleiev = mend.create_table_mendeleiev()
-        nspecies = len(self.ids.ggd[timeSlice].ion)
+        nspecies = len(self.ids.ggd[time_slice].ion)
 
         a = list(map(int, self.get_a()))
         z = list(map(int, self.get_z()))
         return [table_mendeleiev[z[ispecies]][a[ispecies]].element for ispecies in range(nspecies)]
 
-    def combineSpeciesWhenAppearTwice(self, species, nspecOverNtot, nspecOverNe, nspecOverNmaj, timeSlice=0):
+    def combine_species_when_appear_twice(self, species, nspec_over_ntot, nspec_over_ne, nspec_over_nmaj, time_slice=0):
         """
         This is helper function which checks if there are duplicate entries of species and combine the species.
         This is in place change of arrays
@@ -724,100 +724,100 @@ class EdgeProfilesCompute:
             nspecOverNmaj (list): result from getNspecOverNmaj()
             timeSlice (int, optional): time slice on which function should operate on. Defaults to 0.
         """
-        nspecies = len(self.ids.ggd[timeSlice].ion)
+        nspecies = len(self.ids.ggd[time_slice].ion)
         for ispecies, jspecies in itertools.product(range(nspecies), range(nspecies)):
             if (species[jspecies] == species[ispecies]) & (jspecies != ispecies):
-                nspecOverNtot[ispecies] = nspecOverNtot[ispecies] + nspecOverNtot[jspecies]
-                nspecOverNtot[jspecies] = 0
-                nspecOverNe[ispecies] = nspecOverNe[ispecies] + nspecOverNe[jspecies]
-                nspecOverNe[jspecies] = 0
-                nspecOverNmaj[ispecies] = nspecOverNmaj[ispecies] + nspecOverNmaj[jspecies]
-                nspecOverNmaj[jspecies] = 0
+                nspec_over_ntot[ispecies] = nspec_over_ntot[ispecies] + nspec_over_ntot[jspecies]
+                nspec_over_ntot[jspecies] = 0
+                nspec_over_ne[ispecies] = nspec_over_ne[ispecies] + nspec_over_ne[jspecies]
+                nspec_over_ne[jspecies] = 0
+                nspec_over_nmaj[ispecies] = nspec_over_nmaj[ispecies] + nspec_over_nmaj[jspecies]
+                nspec_over_nmaj[jspecies] = 0
 
-    def getCoreBoundry(self, timeSlice=0):
-        CORE_BOUNDRY_SUBSET_INDEX = 15  # core_boundry
-        CORE_SUBSET_INDEX = 22  # Core
-        core_boundryGridSubset = None
-        coreGridSubset = None
-        for grid_subset in self.ids.grid_ggd[timeSlice].grid_subset:
-            if grid_subset.identifier.index == CORE_BOUNDRY_SUBSET_INDEX:
-                core_boundryGridSubset = grid_subset
+    def get_core_boundry(self, time_slice=0):
+        c_o_r_e__b_o_u_n_d_r_y__s_u_b_s_e_t__i_n_d_e_x = 15  # core_boundry
+        c_o_r_e__s_u_b_s_e_t__i_n_d_e_x = 22  # Core
+        core_boundry_grid_subset = None
+        core_grid_subset = None
+        for grid_subset in self.ids.grid_ggd[time_slice].grid_subset:
+            if grid_subset.identifier.index == c_o_r_e__b_o_u_n_d_r_y__s_u_b_s_e_t__i_n_d_e_x:
+                core_boundry_grid_subset = grid_subset
                 print(
                     f"Found Grid subset for core_boundry subset name:{grid_subset.identifier.name}, Index: \
                     {grid_subset.identifier.index}"
                 )
-            if grid_subset.identifier.index == CORE_SUBSET_INDEX:
-                coreGridSubset = grid_subset
+            if grid_subset.identifier.index == c_o_r_e__s_u_b_s_e_t__i_n_d_e_x:
+                core_grid_subset = grid_subset
                 print(
                     f"Found Grid subset for core name:{grid_subset.identifier.name}, Index: \
                     {grid_subset.identifier.index}"
                 )
-        if core_boundryGridSubset or coreGridSubset:
-            if core_boundryGridSubset is not None and len(core_boundryGridSubset.element) != 0:
-                gridSubset = core_boundryGridSubset
+        if core_boundry_grid_subset or core_grid_subset:
+            if core_boundry_grid_subset is not None and len(core_boundry_grid_subset.element) != 0:
+                grid_subset = core_boundry_grid_subset
 
-            elif coreGridSubset is not None and len(coreGridSubset.element) != 0:
-                gridSubset = coreGridSubset
+            elif core_grid_subset is not None and len(core_grid_subset.element) != 0:
+                grid_subset = core_grid_subset
 
-        num_sep = len(gridSubset.element)
+        num_sep = len(grid_subset.element)
         sep_coords = np.zeros((num_sep, 2))
 
-        for ielement, element in enumerate(gridSubset.element):
+        for ielement, element in enumerate(grid_subset.element):
             for obj in element.object:
                 index = obj.index - 1  # 1 based indexing
                 space = obj.space - 1
                 dim = 0  # choosing nodes 1=nodes, 2=edges, 3=faces, 4=cells/volumes
                 sep_coords[ielement, :] = (
-                    self.ids.grid_ggd[timeSlice].space[space].objects_per_dimension[dim].object[index].geometry[:2]
+                    self.ids.grid_ggd[time_slice].space[space].objects_per_dimension[dim].object[index].geometry[:2]
                 )
         # hull = ConvexHull(sep_coords[0 : num_sep - 1, :])  # find a closed core_boundry contour
         # core_boundry = np.array([sep_coords[hull.vertices, 0], sep_coords[hull.vertices, 1]]).T
         return sep_coords
 
-    def getSeparatrix(self, timeSlice=0):
-        SUBSET_INDEX = 16  # separatrix
-        separatixGridSubset = None
-        for grid_subset in self.ids.grid_ggd[timeSlice].grid_subset:
+    def get_separatrix(self, time_slice=0):
+        s_u_b_s_e_t__i_n_d_e_x = 16  # separatrix
+        separatix_grid_subset = None
+        for grid_subset in self.ids.grid_ggd[time_slice].grid_subset:
 
-            if grid_subset.identifier.index == SUBSET_INDEX:
-                separatixGridSubset = grid_subset
+            if grid_subset.identifier.index == s_u_b_s_e_t__i_n_d_e_x:
+                separatix_grid_subset = grid_subset
                 logger.info(
                     f"Found Grid subset for separatrix name:{grid_subset.identifier.name}, Index: \
                     {grid_subset.identifier.index}"
                 )
-        if separatixGridSubset is None:
+        if separatix_grid_subset is None:
             logger.warning("edge_profiles IDS:Separatrix not found")
             return None
-        num_sep = len(separatixGridSubset.element)
+        num_sep = len(separatix_grid_subset.element)
         # if num_sep == 0:
         #     logger.warning("edge_profiles IDS:No element found in separatrix grid subset")
         #     return None
         sep_coords = np.zeros((num_sep, 2))
 
-        for ielement, element in enumerate(separatixGridSubset.element):
+        for ielement, element in enumerate(separatix_grid_subset.element):
             for obj in element.object:
                 index = obj.index - 1  # 1 based indexing
                 space = obj.space - 1
                 dim = 0  # choosing nodes 1=nodes, 2=edges, 3=faces, 4=cells/volumes
                 sep_coords[ielement, :] = (
-                    self.ids.grid_ggd[timeSlice].space[space].objects_per_dimension[dim].object[index].geometry[:2]
+                    self.ids.grid_ggd[time_slice].space[space].objects_per_dimension[dim].object[index].geometry[:2]
                 )
         # hull = ConvexHull(sep_coords[0 : num_sep - 1, :])  # find a closed separatrix contour
         # separatrix = np.array([sep_coords[hull.vertices, 0], sep_coords[hull.vertices, 1]]).T
         return sep_coords
 
-    def getRZ(self, timeSlice=0):
+    def get_r_z(self, time_slice=0):
         """
         The function `getRZ` returns the `r_edge` and `z_edge` coordinates of vertices in a grid.
 
         Returns:
             two arrays: r_edge and z_edge.
         """
-        num_vertices = len(self.ids.grid_ggd[timeSlice].space[0].objects_per_dimension[0].object)  # nodes dimension
+        num_vertices = len(self.ids.grid_ggd[time_slice].space[0].objects_per_dimension[0].object)  # nodes dimension
         vertex_coords = np.zeros((num_vertices, 2))
         for vertex_id in range(num_vertices):
             vertex_coords[vertex_id, :] = (
-                self.ids.grid_ggd[timeSlice].space[0].objects_per_dimension[0].object[vertex_id].geometry[:2]
+                self.ids.grid_ggd[time_slice].space[0].objects_per_dimension[0].object[vertex_id].geometry[:2]
             )
         # Note : For  geometry_content=11 node coordinates (first 2 elements), then connection
         # length, and distance in the poloidal plane to the nearest solid surface outside
@@ -827,7 +827,7 @@ class EdgeProfilesCompute:
         return r_edge, z_edge
 
     # interpolate on rectangular x,y grid, for example a regular grid of 400 points
-    def getRectangularGrid(self, NumPoints=400):
+    def get_rectangular_grid(self, num_points=400):
         """
         The function `getRectangularGrid` returns two arrays `x` and `y` that represent a meshgrid of points
         within a specified range.
@@ -839,10 +839,10 @@ class EdgeProfilesCompute:
         Returns:
             two arrays, x and y.
         """
-        x, y = np.meshgrid(np.linspace(4, 8.5, NumPoints), np.linspace(-4.5, 4.5, NumPoints))
+        x, y = np.meshgrid(np.linspace(4, 8.5, num_points), np.linspace(-4.5, 4.5, num_points))
         return x, y
 
-    def getElectronDensity(self, timeSlice, x, y):
+    def get_electron_density(self, time_slice, x, y):
         """
         The function `getElectronDensity` calculates the electron density at a given position (x, y) by interpolating
         values from a grid.
@@ -855,12 +855,12 @@ class EdgeProfilesCompute:
         Returns:
             the electron density at the given coordinates (x, y).
         """
-        r_edge, z_edge = self.getRZ(timeSlice)
+        r_edge, z_edge = self.get_r_z(time_slice)
         temp = None
 
-        for electronsDensity in self.ids.ggd[timeSlice].electrons.density:
-            if electronsDensity.grid_subset_index == 1:  # nodes
-                temp = electronsDensity.values
+        for electrons_density in self.ids.ggd[time_slice].electrons.density:
+            if electrons_density.grid_subset_index == 1:  # nodes
+                temp = electrons_density.values
         if temp is None:
             # TODO if nodes grid_subset is not available is it possible to get coordinated from other subsets?
             logger.warning("edge_profiles : electrons density values not found for nodes grid_subset")
@@ -868,7 +868,7 @@ class EdgeProfilesCompute:
         ne_edge = interpolate.griddata((r_edge, z_edge), temp, (x, y))
         return ne_edge
 
-    def getIonDensity(self, timeSlice, x, y):
+    def get_ion_density(self, time_slice, x, y):
         """
         The function `getIonDensity` calculates the ion density at a given position (x, y) by interpolating values
         from a grid.
@@ -882,11 +882,11 @@ class EdgeProfilesCompute:
         Returns:
             the ion density at the given coordinates (x, y).
         """
-        r_edge, z_edge = self.getRZ(timeSlice)
+        r_edge, z_edge = self.get_r_z(time_slice)
         temp = None
-        for ionDensity in self.ids.ggd[timeSlice].ion[0].density:
-            if ionDensity.grid_subset_index == 1:  # nodes
-                temp = ionDensity.values
+        for ion_density in self.ids.ggd[time_slice].ion[0].density:
+            if ion_density.grid_subset_index == 1:  # nodes
+                temp = ion_density.values
 
         if temp is None:
             logger.warning("edge_profiles : ion density values not found for nodes grid_subset")
@@ -894,7 +894,7 @@ class EdgeProfilesCompute:
         ni_edge = interpolate.griddata((r_edge, z_edge), temp, (x, y))
         return ni_edge
 
-    def getNeutralDensity(self, timeSlice, x, y):
+    def get_neutral_density(self, time_slice, x, y):
         """
         The function `getNeutralDensity` calculates the neutral density at a given position (x, y) by
         interpolating values from a grid.
@@ -908,12 +908,12 @@ class EdgeProfilesCompute:
         Returns:
             the neutral density at the given coordinates (x, y).
         """
-        r_edge, z_edge = self.getRZ(timeSlice)
+        r_edge, z_edge = self.get_r_z(time_slice)
 
         temp = None
-        for neutralDensity in self.ids.ggd[timeSlice].neutral[0].density:
-            if neutralDensity.grid_subset_index == 1:  # nodes
-                temp = neutralDensity.values
+        for neutral_density in self.ids.ggd[time_slice].neutral[0].density:
+            if neutral_density.grid_subset_index == 1:  # nodes
+                temp = neutral_density.values
 
         if temp is None:
             logger.warning("edge_profiles : neutral.density values not found for nodes grid_subset")
@@ -922,7 +922,7 @@ class EdgeProfilesCompute:
         n_neutral_edge = interpolate.griddata((r_edge, z_edge), temp, (x, y))
         return n_neutral_edge
 
-    def getOuterMidplaneArrayIndex(self):
+    def get_outer_midplane_array_index(self):
         """
         This function searches for a specific grid subset with an index of 11 and returns its position
         within the list of subsets.
@@ -933,24 +933,24 @@ class EdgeProfilesCompute:
         it returns the index of that subset. If the subset is not found, it logs a warning message and
         returns `None`.
         """
-        subsetIndex = None
+        subset_index = None
         nsubsets = len(self.ids.grid_ggd[0].grid_subset)
         for iset in range(nsubsets):
             if self.ids.grid_ggd[0].grid_subset[iset].identifier.index == 11:
-                subsetIndex = iset
-        if subsetIndex is None:
+                subset_index = iset
+        if subset_index is None:
             logger.warning("Did not find outer_midplane GGD grid subset.")
         else:
-            logger.debug(f"Outer midplane GGD grid subset is number {subsetIndex+1} of {nsubsets}")
-        return subsetIndex
+            logger.debug(f"Outer midplane GGD grid subset is number {subset_index+1} of {nsubsets}")
+        return subset_index
 
-    def getnrho(self, sliceIndex=0):
+    def getnrho(self, slice_index=0):
         nrho = None
         try:
-            if len(self.ids.profiles_1d[sliceIndex].grid.rho_tor_norm) > 0:
-                nrho = len(self.ids.profiles_1d[sliceIndex].grid.rho_tor_norm)
-            elif len(self.ids.profiles_1d[sliceIndex].grid.rho_tor) > 0:
-                nrho = len(self.ids.profiles_1d[sliceIndex].grid.rho_tor)
+            if len(self.ids.profiles_1d[slice_index].grid.rho_tor_norm) > 0:
+                nrho = len(self.ids.profiles_1d[slice_index].grid.rho_tor_norm)
+            elif len(self.ids.profiles_1d[slice_index].grid.rho_tor) > 0:
+                nrho = len(self.ids.profiles_1d[slice_index].grid.rho_tor)
         except Exception as e:
             logger.debug(f"{e}")
             logger.warning(f"edge_profiles.profiles_1d[:].grid.rho_tor_norm and rho_tor could not be read. {e}")

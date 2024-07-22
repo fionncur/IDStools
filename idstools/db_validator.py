@@ -41,9 +41,9 @@ def load_scenario(user, database, version, backend):
 
     scenarios = []
     if backend == "MDSPLUS":
-        scenarios = DBMaster.mdsListPulseRun(DBMaster.getDBPath(user, database, version), with_status="active")
+        scenarios = d_b_master.mds_list_pulse_run(d_b_master.get_d_b_path(user, database, version), with_status="active")
     elif backend == "HDF5":
-        scenarios = DBMaster.hdf5ListPulseRun(DBMaster.getDBPath(user, database, version))
+        scenarios = d_b_master.hdf5_list_pulse_run(d_b_master.get_d_b_path(user, database, version))
 
     return scenarios
 
@@ -81,7 +81,7 @@ def merge_dict(d1, d2):
 # ----------------------------------------------------------------------
 
 
-class ScenarioValidator:
+class scenario_validator:
     """
     Scenario Validator for IMASDB
 
@@ -97,11 +97,11 @@ class ScenarioValidator:
         Path to DD
     """
 
-    DD = {}
-    SCHEMA = {}
-    SCHEMA_PATH = []
+    d_d = {}
+    s_c_h_e_m_a = {}
+    s_c_h_e_m_a__p_a_t_h = []
 
-    def __init__(self, dd_path=idschk.FILE_IDSDef, schema_path=[]):
+    def __init__(self, dd_path=idschk.f_i_l_e__i_d_s_def, schema_path=[]):
         """
         Parameters
         ----------
@@ -114,13 +114,13 @@ class ScenarioValidator:
         -------
         """
 
-        ScenarioValidator.DD or self.load_DD(dd_path)
+        scenario_validator.d_d or self.load__d_d(dd_path)
 
-        if schema_path != ScenarioValidator.SCHEMA_PATH:
+        if schema_path != scenario_validator.s_c_h_e_m_a__p_a_t_h:
             self.load_schema(schema_path)
-            ScenarioValidator.SCHEMA_PATH = schema_path
+            scenario_validator.s_c_h_e_m_a__p_a_t_h = schema_path
 
-    def load_DD(self, fpath):
+    def load__d_d(self, fpath):
         """
         Read the xml file of DD and store in self.DD
 
@@ -134,13 +134,13 @@ class ScenarioValidator:
         """
 
         try:
-            self.DD = idschk.load_XML(fpath)
+            self.d_d = idschk.load__x_m_l(fpath)
         except Exception as e:
             logger.debug(f"{e}")
             raise OSError(f"can not load DD: {fpath}")
 
         logger.debug(f" DD= {fpath}")
-        logger.debug(f" self.DD= {self.DD}")
+        logger.debug(f" self.DD= {self.d_d}")
 
     def load_schema(self, yaml):
         """
@@ -157,15 +157,15 @@ class ScenarioValidator:
 
         try:
             for f in yaml:
-                self.SCHEMA[f] = idschk.load_YAML(f)
+                self.s_c_h_e_m_a[f] = idschk.load__y_a_m_l(f)
         except Exception as e:
             logger.debug(f"{e}")
             raise OSError(f"failed to load Schema: {yaml}")
 
-        self.SCHEMA = self.arrange_schema(self.SCHEMA)
+        self.s_c_h_e_m_a = self.arrange_schema(self.s_c_h_e_m_a)
 
         logger.debug(f" schema file= {f}")
-        logger.debug(f" schema = {self.SCHEMA}")
+        logger.debug(f" schema = {self.s_c_h_e_m_a}")
 
     def arrange_schema(self, *args):
         """
@@ -217,24 +217,24 @@ class ScenarioValidator:
         -------
         """
 
-        dd0 = [dd for dd in self.DD if dd.get("name") == idsname][0]
+        dd0 = [dd for dd in self.d_d if dd.get("name") == idsname][0]
         ret = {}
-        for fpath, schemas in self.SCHEMA.items():
+        for fpath, schemas in self.s_c_h_e_m_a.items():
             for key, schema in schemas.items():
                 if key == idsname:
                     ids = None
-                    dbEntryDetails = ""
+                    db_entry_details = ""
                     if "uri" in db.__dict__:
-                        dbEntryDetails = db.__dict__["uri"]
+                        db_entry_details = db.__dict__["uri"]
                     else:
                         if "pulse" in db.__dict__:
-                            dbEntryDetails = f"{db.__dict__['pulse']}/{db.__dict__['run']}"
+                            db_entry_details = f"{db.__dict__['pulse']}/{db.__dict__['run']}"
                         if "shot" in db.__dict__:
-                            dbEntryDetails = f"{db.__dict__['shot']}/{db.__dict__['run']}"
+                            db_entry_details = f"{db.__dict__['shot']}/{db.__dict__['run']}"
 
                     logger.info(
                         "- {}/{}/{} < {}".format(
-                            dbEntryDetails,
+                            db_entry_details,
                             idsname,
                             occ,
                             path.relpath(fpath),
@@ -358,7 +358,7 @@ def db_validator(
         raise OSError(f"not found schema: {schema_path}")
 
     # Initialize Scenario Validator
-    sv = ScenarioValidator(schema_path=schema)
+    sv = scenario_validator(schema_path=schema)
 
     pulses = []
     if len(pulse) >= 1:
@@ -374,7 +374,7 @@ def db_validator(
     # Scenario Validation for Pulses
     npulse = len(pulses)
     for i, (shot, run) in enumerate(pulses):
-        db = imas.DBEntry(getBackendID(backend), database, shot, run, user)
+        db = imas.d_b_entry(get_backend_i_d(backend), database, shot, run, user)
         status, _ = db.open()
         if status != 0:
             raise OSError(

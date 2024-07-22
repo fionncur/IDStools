@@ -19,11 +19,11 @@ except ImportError:
 logger = logging.getLogger(f"module.{__name__}")
 
 
-class DBMaster:
-    ALL_BACKENDS = "mdsplus", "hdf5"
+class d_b_master:
+    a_l_l__b_a_c_k_e_n_d_s = "mdsplus", "hdf5"
 
     @staticmethod
-    def getUserDir(user: str = None):
+    def get_user_dir(user: str = None):
         """
         The function `getUserDir` returns the database directory path for a given user or the current user's directory
         path if no user is specified.
@@ -42,13 +42,13 @@ class DBMaster:
             user = os.getlogin()
         if user != "public":
             return f'{os.path.expanduser(f"~{user}")}/public/imasdb/'
-        imasHomeDir = os.environ["IMAS_HOME"]
-        if imasHomeDir is None:
+        imas_home_dir = os.environ["IMAS_HOME"]
+        if imas_home_dir is None:
             raise FileNotFoundError("File path in the environment variable IMAS_HOME is not defined.")
-        return f"{imasHomeDir}/shared/imasdb/"
+        return f"{imas_home_dir}/shared/imasdb/"
 
     @staticmethod
-    def getDatabaseDir(database: str, user: str = None):
+    def get_database_dir(database: str, user: str = None):
         """
         The function `getDatabaseDir` returns the directory path for a given database, and raises an error
         if the path does not exist.
@@ -63,12 +63,12 @@ class DBMaster:
             the directory path of the specified database if it exists. If the database does not exist, it
             raises a FileNotFoundError. If the database parameter is None, it returns None.
         """
-        userDir = DBMaster.getUserDir(user)
+        user_dir = d_b_master.get_user_dir(user)
 
         if database is not None:
-            userDatabaseDir = userDir + database
-            if os.path.exists(userDatabaseDir):
-                return userDatabaseDir
+            user_database_dir = user_dir + database
+            if os.path.exists(user_database_dir):
+                return user_database_dir
             else:
                 raise FileNotFoundError(
                     "The path provided does not exist or has no such database file or directory. \
@@ -77,7 +77,7 @@ class DBMaster:
         return None
 
     @staticmethod
-    def getVersionDir(version: str, database: str, user: str = None):
+    def get_version_dir(version: str, database: str, user: str = None):
         """
         The function `getVersionDir` returns the directory path for a specific version of a database,
         given the version, database name, and optional user.
@@ -92,11 +92,11 @@ class DBMaster:
             it returns the path. If the version directory does not exist, it raises a FileNotFoundError.
             If the version parameter is None, it returns None.
         """
-        databaseDir = DBMaster.getDatabaseDir(database, user)
+        database_dir = d_b_master.get_database_dir(database, user)
         if version is not None:
-            versionDir = f"{databaseDir}/{version}"
-            if os.path.exists(versionDir):
-                return versionDir
+            version_dir = f"{database_dir}/{version}"
+            if os.path.exists(version_dir):
+                return version_dir
             else:
                 raise FileNotFoundError(
                     "The path provided does not exist or has no such database file or directory.Please check spelling"
@@ -104,7 +104,7 @@ class DBMaster:
         return None
 
     @staticmethod
-    def getDatabases(user: str = None) -> list:
+    def get_databases(user: str = None) -> list:
         """
         The function `getDatabases` returns a sorted list of databases in a user's directory.
 
@@ -115,12 +115,12 @@ class DBMaster:
         Returns:
             a list of databases.
         """
-        userDir = DBMaster.getUserDir(user)
-        databases = [_database for _database in os.listdir(userDir) if os.path.isdir(os.path.join(userDir, _database))]
+        user_dir = d_b_master.get_user_dir(user)
+        databases = [_database for _database in os.listdir(user_dir) if os.path.isdir(os.path.join(user_dir, _database))]
         return sorted(databases)
 
     @staticmethod
-    def getVersions(database: str, user: str = None) -> list:
+    def get_versions(database: str, user: str = None) -> list:
         """
         The function `getVersions` returns a sorted list of versions in a given database directory.
 
@@ -131,14 +131,14 @@ class DBMaster:
         Returns:
             a sorted list of versions.
         """
-        databaseDir = DBMaster.getDatabaseDir(database, user)
+        database_dir = d_b_master.get_database_dir(database, user)
         versions = [
-            _version for _version in os.listdir(databaseDir) if os.path.isdir(os.path.join(databaseDir, _version))
+            _version for _version in os.listdir(database_dir) if os.path.isdir(os.path.join(database_dir, _version))
         ]
         return sorted(versions)
 
     @staticmethod
-    def getDatabasesWithVersions(user: str = None) -> list:
+    def get_databases_with_versions(user: str = None) -> list:
         """
         The function `getDatabasesWithVersions` returns a list of tuples, where each tuple contains
         the  name of a database and a list of its versions, for a given user.
@@ -152,17 +152,17 @@ class DBMaster:
             a list of tuples. Each tuple contains the name of a database and a list of versions associated
             with that database. The list is sorted by the database names.
         """
-        userDir = DBMaster.getUserDir(user)
-        databasesDict = {}
-        for _database in os.listdir(userDir):
-            if not os.path.isdir(os.path.join(userDir, _database)):
+        user_dir = d_b_master.get_user_dir(user)
+        databases_dict = {}
+        for _database in os.listdir(user_dir):
+            if not os.path.isdir(os.path.join(user_dir, _database)):
                 continue
-            _databaseVersions = DBMaster.getVersions(_database, user)
-            databasesDict[_database] = _databaseVersions
-        return [(database, databasesDict[database]) for database in sorted(databasesDict.keys())]
+            _database_versions = d_b_master.get_versions(_database, user)
+            databases_dict[_database] = _database_versions
+        return [(database, databases_dict[database]) for database in sorted(databases_dict.keys())]
 
     @staticmethod
-    def getVersionsWithDatabases(user: str = None) -> list:
+    def get_versions_with_databases(user: str = None) -> list:
         """
         The function `getVersionsWithDatabases` returns a list of tuples, where each tuple contains a version
         number and a list of databases associated with that version.
@@ -173,18 +173,18 @@ class DBMaster:
             a list of tuples. Each tuple contains a version number and a list of databases that have that version.
             The list is sorted in ascending order based on the version numbers.
         """
-        databaseWithVersionsDict = DBMaster.getDatabasesWithVersions(user=user)
+        database_with_versions_dict = d_b_master.get_databases_with_versions(user=user)
 
-        databaseDict = {}
-        for database, versions in databaseWithVersionsDict:
+        database_dict = {}
+        for database, versions in database_with_versions_dict:
             for _version in versions:
-                if _version not in databaseDict:
-                    databaseDict[_version] = []
-                databaseDict[_version].append(database)
-        return [(version, databaseDict[version]) for version in sorted(databaseDict.keys())]
+                if _version not in database_dict:
+                    database_dict[_version] = []
+                database_dict[_version].append(database)
+        return [(version, database_dict[version]) for version in sorted(database_dict.keys())]
 
     @staticmethod
-    def getHdf5Pulses(user: str = None, database: str = None, version: str = None, asDictionary=False) -> list:
+    def get_hdf5_pulses(user: str = None, database: str = None, version: str = None, as_dictionary=False) -> list:
         """
         The function `getHdf5Pulses` retrieves a list of pulses from HDF5 master files. It needs to specify
         full path till version.
@@ -193,32 +193,32 @@ class DBMaster:
             a list of tuples. Each tuple contains the following elements, The tuple includes the pulse number,
             run number, HDF5_BACKEND backend, database, user, version, and data file path.
         """
-        versionDir = DBMaster.getVersionDir(version, database, user)
-        pulses = {} if asDictionary else []
-        hdf5MasterFilePaths = glob(f"{versionDir}/**/*master.h5", recursive=True)
-        for hdf5MasterFilePath in hdf5MasterFilePaths:
+        version_dir = d_b_master.get_version_dir(version, database, user)
+        pulses = {} if as_dictionary else []
+        hdf5_master_file_paths = glob(f"{version_dir}/**/*master.h5", recursive=True)
+        for hdf5_master_file_path in hdf5_master_file_paths:
             try:
-                pulse = int(str(hdf5MasterFilePath).split("/")[-3])
-                run = int(str(hdf5MasterFilePath).split("/")[-2])
+                pulse = int(str(hdf5_master_file_path).split("/")[-3])
+                run = int(str(hdf5_master_file_path).split("/")[-2])
             except Exception as e:
-                print(f"Malformed database path {hdf5MasterFilePath}")
+                print(f"Malformed database path {hdf5_master_file_path}")
                 logger.debug(f"{e}")
                 continue
-            fileTime = datetime.fromtimestamp(os.path.getmtime(hdf5MasterFilePath)).replace(microsecond=0)
+            file_time = datetime.fromtimestamp(os.path.getmtime(hdf5_master_file_path)).replace(microsecond=0)
 
-            if asDictionary:
+            if as_dictionary:
                 if pulse not in pulses:
                     pulses[pulse] = []
                 pulses[pulse].append(
                     (
                         pulse,
                         run,
-                        imas.imasdef.MDSPLUS_BACKEND,
+                        imas.imasdef.m_d_s_p_l_u_s__b_a_c_k_e_n_d,
                         database,
                         user,
                         version,
-                        hdf5MasterFilePath,
-                        fileTime,
+                        hdf5_master_file_path,
+                        file_time,
                     )
                 )
             else:
@@ -226,23 +226,23 @@ class DBMaster:
                     (
                         pulse,
                         run,
-                        imas.imasdef.HDF5_BACKEND,
+                        imas.imasdef.h_d_f5__b_a_c_k_e_n_d,
                         database,
                         user,
                         version,
-                        hdf5MasterFilePath,
-                        fileTime,
+                        hdf5_master_file_path,
+                        file_time,
                     )
                 )
         return pulses
 
     @staticmethod
-    def getMdsPlusPulses(
+    def get_mds_plus_pulses(
         user: str = None,
         database: str = None,
         version: str = None,
         status: str = None,
-        asDictionary=False,
+        as_dictionary=False,
     ) -> list:
         """
         The function `getMdsPlusPulses` retrieves a list of MDSPlus pulses based on the provided user, database,
@@ -266,24 +266,24 @@ class DBMaster:
         Returns:
             a list of pulses.
         """
-        mdsplusDir = DBMaster.getVersionDir(version, database, user)
-        pulses = {} if asDictionary else []
+        mdsplus_dir = d_b_master.get_version_dir(version, database, user)
+        pulses = {} if as_dictionary else []
 
-        for root, dirnames, filenames in os.walk(mdsplusDir):
+        for root, dirnames, filenames in os.walk(mdsplus_dir):
             for datafile in fnmatch.filter(filenames, "*.datafile"):
-                dataFilePath = f"{root}/{datafile}"
-                if (status is None) or (status == DBMaster.getPulseStatus(Path(dataFilePath).with_suffix(".yaml"))):
-                    runList = (root[len(mdsplusDir) + 1 :]).split("/")
+                data_file_path = f"{root}/{datafile}"
+                if (status is None) or (status == d_b_master.get_pulse_status(path(data_file_path).with_suffix(".yaml"))):
+                    run_list = (root[len(mdsplus_dir) + 1 :]).split("/")
                     try:
-                        if len(runList) == 1:  # AL4 layout
-                            numStartPos = datafile.find("_") + 1
-                            numEndPos = datafile.rfind(".")
-                            num = int(datafile[numStartPos:numEndPos])
+                        if len(run_list) == 1:  # AL4 layout
+                            num_start_pos = datafile.find("_") + 1
+                            num_end_pos = datafile.rfind(".")
+                            num = int(datafile[num_start_pos:num_end_pos])
                             pulse = num // 10000
-                            run = int(runList[0]) * 10000 + (num % 10000)
+                            run = int(run_list[0]) * 10000 + (num % 10000)
                         else:  # AL5 layout
                             assert datafile == "ids_001.datafile"
-                            if os.path.islink(dataFilePath):
+                            if os.path.islink(data_file_path):
                                 continue
                             run = root.split("/")[-1]
                             run = int(run)
@@ -293,23 +293,23 @@ class DBMaster:
                         print(f"Malformed database path {root}")
                         logger.debug(f"{e}")
                         continue
-                    fileTime = datetime.fromtimestamp(os.path.getmtime(dataFilePath)).replace(microsecond=0)
+                    file_time = datetime.fromtimestamp(os.path.getmtime(data_file_path)).replace(microsecond=0)
 
-                    if asDictionary:
+                    if as_dictionary:
                         if pulse not in pulses:
                             pulses[pulse] = []
-                        isRunAvailable = any(x[1] == run for x in pulses[pulse])
-                        if not isRunAvailable:
+                        is_run_available = any(x[1] == run for x in pulses[pulse])
+                        if not is_run_available:
                             pulses[pulse].append(
                                 (
                                     pulse,
                                     run,
-                                    imas.imasdef.MDSPLUS_BACKEND,
+                                    imas.imasdef.m_d_s_p_l_u_s__b_a_c_k_e_n_d,
                                     database,
                                     user,
                                     version,
-                                    dataFilePath,
-                                    fileTime,
+                                    data_file_path,
+                                    file_time,
                                 )
                             )
                     else:
@@ -317,18 +317,18 @@ class DBMaster:
                             (
                                 pulse,
                                 run,
-                                imas.imasdef.MDSPLUS_BACKEND,
+                                imas.imasdef.m_d_s_p_l_u_s__b_a_c_k_e_n_d,
                                 database,
                                 user,
                                 version,
-                                dataFilePath,
-                                fileTime,
+                                data_file_path,
+                                file_time,
                             )
                         )
         return pulses
 
     @staticmethod
-    def getPulseStatus(yamlFilePath: str) -> str:
+    def get_pulse_status(yaml_file_path: str) -> str:
         """
         The function `getPulseStatus` reads a YAML file from a given path and returns the value of the
         "status" key in the file's metadata.
@@ -339,17 +339,17 @@ class DBMaster:
         Returns:
             the value of the "status" key from the metadata dictionary.
         """
-        _yamlFilePath = Path(yamlFilePath)
+        _yaml_file_path = path(yaml_file_path)
         try:
-            with open(_yamlFilePath, "r") as fileHandle:
-                metadata = safe_load(fileHandle)
+            with open(_yaml_file_path, "r") as file_handle:
+                metadata = safe_load(file_handle)
         except FileNotFoundError as exc:
             print(exc)
             return "unknown"
         return metadata["status"]
 
     @staticmethod
-    def getDatabaseFiles(user=None, database=None, version=None, backends=None):
+    def get_database_files(user=None, database=None, version=None, backends=None):
         """
         The function `getDatabaseFiles` retrieves a list of database files based on the specified user,
         database, version, and backends.
@@ -372,31 +372,31 @@ class DBMaster:
         result = []
 
         if not backends:
-            backends = DBMaster.ALL_BACKENDS
+            backends = d_b_master.a_l_l__b_a_c_k_e_n_d_s
 
-        databases = [database] if database else DBMaster.getDatabases(user)
+        databases = [database] if database else d_b_master.get_databases(user)
         for database in databases:
-            databaseFiles = []
-            versions = [version] if version else DBMaster.getVersions(database, user)
+            database_files = []
+            versions = [version] if version else d_b_master.get_versions(database, user)
             for _version in versions:
                 pulses = []
                 for backend in backends:
                     if backend == "hdf5":
-                        dbs = DBMaster.getHdf5Pulses(user, database, _version, asDictionary=True)
+                        dbs = d_b_master.get_hdf5_pulses(user, database, _version, as_dictionary=True)
                     elif backend == "mdsplus":
-                        dbs = DBMaster.getMdsPlusPulses(user, database, _version, asDictionary=True)
+                        dbs = d_b_master.get_mds_plus_pulses(user, database, _version, as_dictionary=True)
                     else:
                         raise NotImplementedError(f"Unsupported backend: {backend}")
                     if dbs:
                         pulses.append((backend, dbs))
                 if pulses:
-                    databaseFiles.append((_version, pulses))
-            if databaseFiles:
-                result.append((database, databaseFiles))
+                    database_files.append((_version, pulses))
+            if database_files:
+                result.append((database, database_files))
         return result
 
     @staticmethod
-    def getHDF5PhysicalFile(user, database, version, pulse, run):
+    def get_h_d_f5_physical_file(user, database, version, pulse, run):
         """
         The function `getHDF5PhysicalFile` returns the path to an HDF5 file based on the user, database, version,
         pulse, and run.
@@ -412,11 +412,11 @@ class DBMaster:
         Returns:
             the path to an HDF5 physical file.
         """
-        hdf5dir = os.path.join(DBMaster.getUserDir(user), database, version, "hdf5")
+        hdf5dir = os.path.join(d_b_master.get_user_dir(user), database, version, "hdf5")
         return os.path.join(hdf5dir, f"ids_{str(pulse)}_{str(run)}.hd5")
 
     @staticmethod
-    def getMDSPlusPhysicalFiles(user, database, version, pulse, run):
+    def get_m_d_s_plus_physical_files(user, database, version, pulse, run):
         """
         The function `getMDSPlusPhysicalFiles` returns the MDS+ database filenames for a given IMAS
         database.
@@ -433,27 +433,27 @@ class DBMaster:
             filename with the extension ".characteristics", the second string is the filename with the extension
             ".datafile", and the third string is the filename with the extension ".tree".
         """
-        mdsplusdir = os.path.join(DBMaster.getUserDir(user), database, version)
+        mdsplusdir = os.path.join(d_b_master.get_user_dir(user), database, version)
         # filename is ids_<shot><run> where run is last four digits of run number,
         # right-aligned (filled with zeros).
         # Examples: 1
         run_string = str(run % 10000)
         if pulse == 0:
-            mdsplusFileName = os.path.join(mdsplusdir, str(int(run / 10000)), f"ids_{run_string.zfill(3)}")
+            mdsplus_file_name = os.path.join(mdsplusdir, str(int(run / 10000)), f"ids_{run_string.zfill(3)}")
         else:
-            mdsplusFileName = os.path.join(
+            mdsplus_file_name = os.path.join(
                 mdsplusdir,
                 str(int(run / 10000)),
                 f"ids_{str(pulse)}{run_string.zfill(4)}",
             )
         return (
-            f"{mdsplusFileName}.characteristics",
-            f"{mdsplusFileName}.datafile",
-            f"{mdsplusFileName}.tree",
+            f"{mdsplus_file_name}.characteristics",
+            f"{mdsplus_file_name}.datafile",
+            f"{mdsplus_file_name}.tree",
         )
 
     @staticmethod
-    def getPhysicalFiles(user, database, version, pulse, run, backend):
+    def get_physical_files(user, database, version, pulse, run, backend):
         """
         The function `getPhysicalFiles` returns the physical files storing a database based on the
         specified backend.
@@ -476,45 +476,45 @@ class DBMaster:
         """
         """Return files storing this database."""
         if backend == "mdsplus":
-            return DBMaster.getMDSPlusPhysicalFiles(user, database, version, pulse, run)
+            return d_b_master.get_m_d_s_plus_physical_files(user, database, version, pulse, run)
         elif backend == "hdf5":
-            return DBMaster.getHDF5PhysicalFile(user, database, version, pulse, run)
+            return d_b_master.get_h_d_f5_physical_file(user, database, version, pulse, run)
         else:
             raise NotImplementedError(f"Unsupported backend: {backend}")
 
     @classmethod
-    def getCoreVersion(cls):
-        _lowlevelVersion = ""
+    def get_core_version(cls):
+        _lowlevel_version = ""
         if "_al_lowlevel" in imas.__dict__:
-            _lowlevelVersion = imas.get_al_version()
+            _lowlevel_version = imas.get_al_version()
         elif "_ual_lowlevel" in imas.__dict__:
-            rawCoreVersion = imas._ual_lowlevel.__name__  # '__name__': 'imas_3_41_0_ual_4_11_10._ual_lowlevel
-            rawCoreVersion, _ = rawCoreVersion.split(".")
-            match = re.search(r"\d+_\d+_\d+$", rawCoreVersion)
+            raw_core_version = imas._ual_lowlevel.__name__  # '__name__': 'imas_3_41_0_ual_4_11_10._ual_lowlevel
+            raw_core_version, _ = raw_core_version.split(".")
+            match = re.search(r"\d+_\d+_\d+$", raw_core_version)
             if match:
-                _lowlevelVersion = match.group()
-                _lowlevelVersion = _lowlevelVersion.replace("_", ".")
-        lowlevelVersion = _lowlevelVersion
-        return lowlevelVersion
+                _lowlevel_version = match.group()
+                _lowlevel_version = _lowlevel_version.replace("_", ".")
+        lowlevel_version = _lowlevel_version
+        return lowlevel_version
 
     @classmethod
-    def getDDVersion(cls):
-        _lowlevelVersion = ""
+    def get_d_d_version(cls):
+        _lowlevel_version = ""
         if "_al_lowlevel" in imas.__dict__:
-            _lowlevelVersion = imas.al_dd_version
+            _lowlevel_version = imas.al_dd_version
         elif "_ual_lowlevel" in imas.__dict__:
-            rawDDVersion = imas._ual_lowlevel.__name__  # '__name__': 'imas_3_41_0_ual_4_11_10._ual_lowlevel
-            rawDDVersion, _ = rawDDVersion.split(".")
-            match = re.search(r"\d+_\d+_\d+", rawDDVersion)
+            raw_d_d_version = imas._ual_lowlevel.__name__  # '__name__': 'imas_3_41_0_ual_4_11_10._ual_lowlevel
+            raw_d_d_version, _ = raw_d_d_version.split(".")
+            match = re.search(r"\d+_\d+_\d+", raw_d_d_version)
             if match:
-                _lowlevelVersion = match.group()
-                _lowlevelVersion = _lowlevelVersion.replace("_", ".")
-        lowlevelVersion = _lowlevelVersion
-        return lowlevelVersion
+                _lowlevel_version = match.group()
+                _lowlevel_version = _lowlevel_version.replace("_", ".")
+        lowlevel_version = _lowlevel_version
+        return lowlevel_version
 
     @classmethod
-    def getConnection(cls, imasargs):
-        connection = DBMaster.getDBEntryObject(imasargs)
+    def get_connection(cls, imasargs):
+        connection = d_b_master.get_d_b_entry_object(imasargs)
         if connection is not None:
             status, _ = connection.open()
             if status != 0:
@@ -523,11 +523,11 @@ class DBMaster:
         return connection
 
     @classmethod
-    def createConnection(cls, imasargs):
+    def create_connection(cls, imasargs):
         if "mode" not in imasargs.__dict__:
             imasargs.mode = "w"
 
-        connection = DBMaster.getDBEntryObject(imasargs)
+        connection = d_b_master.get_d_b_entry_object(imasargs)
         if connection is not None:
             status, _ = connection.create()
             if status != 0:
@@ -536,13 +536,13 @@ class DBMaster:
         return connection
 
     @classmethod
-    def getDBEntryObject(cls, imasargs):
+    def get_d_b_entry_object(cls, imasargs):
         connection = None
         if imasargs.uri != "" and imasargs.uri is not None:
             if "mode" in imasargs.__dict__:
-                connection = imas.DBEntry(imasargs.uri, imasargs.mode)
+                connection = imas.d_b_entry(imasargs.uri, imasargs.mode)
             else:
-                connection = imas.DBEntry(imasargs.uri, "r")
+                connection = imas.d_b_entry(imasargs.uri, "r")
         return connection
 
     @staticmethod
@@ -554,7 +554,7 @@ class DBMaster:
         path: str or Path
         """
 
-        p = Path(path)
+        p = path(path)
         try:
             with open(p, "r") as f:
                 metadata = safe_load(f)
@@ -564,7 +564,7 @@ class DBMaster:
         return metadata["status"]
 
     @staticmethod
-    def pulseList2Dict(pulselist):
+    def pulse_list2_dict(pulselist):
         """Utility function that returns a dict from a list of pairs (pulse,run)
 
         Parameters
@@ -582,7 +582,7 @@ class DBMaster:
         return pulsedict
 
     @staticmethod
-    def mdsListPulseRun(locpath, with_status=None, as_dict=False):
+    def mds_list_pulse_run(locpath, with_status=None, as_dict=False):
         """Function that lists Pulse and Run numbers from a given database, in MDSPLUS
 
         Parameters
@@ -597,7 +597,7 @@ class DBMaster:
         list of tuple (pulse,run)
         """
 
-        locpath = Path(locpath).expanduser()
+        locpath = path(locpath).expanduser()
         if not locpath.exists():
             raise FileNotFoundError(
                 "The path provided does not exist or has no such database file or directory. Please check spelling."
@@ -607,7 +607,7 @@ class DBMaster:
         # linked subfolders (https://bugs.python.org/issue33428)
         folder = glob(str(locpath) + "/**/*.datafile", recursive=True)
         for entry in folder:
-            if (with_status is None) or (with_status == DBMaster.get_status(Path(entry).with_suffix(".yaml"))):
+            if (with_status is None) or (with_status == d_b_master.get_status(path(entry).with_suffix(".yaml"))):
                 file = entry.split("/")[-1].split("_")[1].split(".")[0]
                 if len(file) <= 4:
                     pulse = 0
@@ -618,7 +618,7 @@ class DBMaster:
         return pulses
 
     @staticmethod
-    def hdf5ListPulseRun(locpath):
+    def hdf5_list_pulse_run(locpath):
         """Function that lists Pulse and Run numbers from a given database, in HDF5
 
         Parameter
@@ -631,7 +631,7 @@ class DBMaster:
         list of tuple (pulse,run)
         """
 
-        locpath = Path(locpath).expanduser()
+        locpath = path(locpath).expanduser()
         if not locpath.exists():
             raise FileNotFoundError(
                 "The path provided does not exist or has no such database file or directory. Please check spelling."
@@ -646,7 +646,7 @@ class DBMaster:
         return pulses
 
     @staticmethod
-    def getDBPath(user, database, version):
+    def get_d_b_path(user, database, version):
         """Function that returns a pathlib Path to desired database, depending on the user, database and
         version names.
 
@@ -668,18 +668,18 @@ class DBMaster:
         """
 
         if user == "public":
-            locpath = Path(os.environ["IMAS_HOME"] + "/shared/imasdb/" + database + "/" + version)
+            locpath = path(os.environ["IMAS_HOME"] + "/shared/imasdb/" + database + "/" + version)
         else:
-            locpath = Path(os.path.expanduser("~" + user) + "/public/imasdb/" + database + "/" + version)
+            locpath = path(os.path.expanduser("~" + user) + "/public/imasdb/" + database + "/" + version)
         return locpath
 
 
-def readScenario(
-    scenarioFilePath: str,
-    inIDSList: list = None,
-    outIDSList: list = None,
-    testMode: bool = False,
-    **testArgs,
+def read_scenario(
+    scenario_file_path: str,
+    in_i_d_s_list: list = None,
+    out_i_d_s_list: list = None,
+    test_mode: bool = False,
+    **test_args,
 ):
     """
     This function reads a scenario file and takes in optional input and output IDs lists, as well as a  test
@@ -695,39 +695,39 @@ def readScenario(
         If testMode is True, the function will execute in a way that is suitable for testing purposes.
         Defaults to False
     """
-    testArgsList = list(testArgs.values())
+    test_args_list = list(test_args.values())
 
-    inIDSDict = {}
-    outIDSDict = {}
-    if inIDSList is None:
-        inIDSList = []
+    in_i_d_s_dict = {}
+    out_i_d_s_dict = {}
+    if in_i_d_s_list is None:
+        in_i_d_s_list = []
 
-    if outIDSList is None:
-        outIDSList = []
-    with open(scenarioFilePath, "r") as scenario_file:
-        config = yamlload(scenario_file, Loader=yamlLoader)
+    if out_i_d_s_list is None:
+        out_i_d_s_list = []
+    with open(scenario_file_path, "r") as scenario_file:
+        config = yamlload(scenario_file, loader=yaml_loader)
 
     # Read the equilibrium and core_profiles IDSs from the input datafile
-    connectionIn = imas.DBEntry(
-        imas.imasdef.MDSPLUS_BACKEND,
+    connection_in = imas.d_b_entry(
+        imas.imasdef.m_d_s_p_l_u_s__b_a_c_k_e_n_d,
         config["input_database"],
         config["shot"],
         config["run_in"],
         config["input_user_or_path"],
     )
-    connectionIn.open()
-    for idsName in inIDSList:
-        if testMode:
-            ids = connectionIn.get_slice(idsName, testArgsList)
+    connection_in.open()
+    for ids_name in in_i_d_s_list:
+        if test_mode:
+            ids = connection_in.get_slice(ids_name, test_args_list)
         else:
-            ids = connectionIn.get(idsName)
-        inIDSDict[idsName] = ids
+            ids = connection_in.get(ids_name)
+        in_i_d_s_dict[ids_name] = ids
 
-    connectionIn.close()
+    connection_in.close()
 
     # Read the out IDS from the output datafile
-    connectionOut = imas.DBEntry(
-        imas.imasdef.MDSPLUS_BACKEND,
+    connection_out = imas.d_b_entry(
+        imas.imasdef.m_d_s_p_l_u_s__b_a_c_k_e_n_d,
         config["output_database"],
         config["shot"],
         config["run_out"],
@@ -737,18 +737,18 @@ def readScenario(
     # print(config["shot"])
     # print(config["run_out"])
     # print(config["output_user_or_path"])
-    connectionOut.open()
-    for idsName in outIDSList:
-        if testMode:
-            ids = connectionOut.get_slice(idsName, testArgsList)
+    connection_out.open()
+    for ids_name in out_i_d_s_list:
+        if test_mode:
+            ids = connection_out.get_slice(ids_name, test_args_list)
         else:
-            ids = connectionOut.get(idsName)
-        outIDSDict[idsName] = ids
-    connectionOut.close()
+            ids = connection_out.get(ids_name)
+        out_i_d_s_dict[ids_name] = ids
+    connection_out.close()
     import argparse
 
-    inputargs = argparse.Namespace()
-    inputargs.backend = imas.imasdef.MDSPLUS_BACKEND
+    inputargs = argparse.namespace()
+    inputargs.backend = imas.imasdef.m_d_s_p_l_u_s__b_a_c_k_e_n_d
     inputargs.pulse = config["shot"]
     inputargs.run = config["run_in"]
     inputargs.user = config["input_user_or_path"]
@@ -756,15 +756,15 @@ def readScenario(
     inputargs.version = 3
     inputargs.uri = None
 
-    return inIDSDict, outIDSDict, inputargs
+    return in_i_d_s_dict, out_i_d_s_dict, inputargs
 
 
-def readScenarioWithArgs(
+def read_scenario_with_args(
     imasargs,
-    inIDSList: list = None,
-    outIDSList: list = None,
-    testMode: bool = False,
-    **testArgs,
+    in_i_d_s_list: list = None,
+    out_i_d_s_list: list = None,
+    test_mode: bool = False,
+    **test_args,
 ):
     """
     This function reads a scenario file and takes in optional input and output IDs lists, as well as a
@@ -780,32 +780,32 @@ def readScenarioWithArgs(
         If testMode is True, the function will execute in a way that is suitable for testing purposes.
         Defaults to False
     """
-    testArgsList = list(testArgs.values())
+    test_args_list = list(test_args.values())
 
-    inIDSDict = {}
-    outIDSDict = {}
-    if inIDSList is None:
-        inIDSList = []
+    in_i_d_s_dict = {}
+    out_i_d_s_dict = {}
+    if in_i_d_s_list is None:
+        in_i_d_s_list = []
 
-    if outIDSList is None:
-        outIDSList = []
-    connection = DBMaster.getConnection(imasargs)
+    if out_i_d_s_list is None:
+        out_i_d_s_list = []
+    connection = d_b_master.get_connection(imasargs)
 
     if connection is None:
         return None
-    for idsName in inIDSList:
-        if testMode:
-            ids = connection.get_slice(idsName, testArgsList)
+    for ids_name in in_i_d_s_list:
+        if test_mode:
+            ids = connection.get_slice(ids_name, test_args_list)
         else:
-            ids = connection.get(idsName)
-        inIDSDict[idsName] = ids
+            ids = connection.get(ids_name)
+        in_i_d_s_dict[ids_name] = ids
 
-    for idsName in outIDSList:
-        if testMode:
-            ids = connection.get_slice(idsName, testArgsList)
+    for ids_name in out_i_d_s_list:
+        if test_mode:
+            ids = connection.get_slice(ids_name, test_args_list)
         else:
-            ids = connection.get(idsName)
-        outIDSDict[idsName] = ids
+            ids = connection.get(ids_name)
+        out_i_d_s_dict[ids_name] = ids
     connection.close()
 
-    return inIDSDict, outIDSDict
+    return in_i_d_s_dict, out_i_d_s_dict

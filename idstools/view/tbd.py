@@ -9,7 +9,7 @@ from matplotlib.colors import LogNorm
 
 
 # TODO Wait till we have new ids and then refactor
-class TbdView:
+class tbd_view:
     def __init__(self):
         pass
 
@@ -22,8 +22,8 @@ class TbdView:
         g2l = beam_wall["g2l"]
         rl = beam_wall["rl"]
         sl = beam_wall["sl"]
-        I0 = beam_wall["I0"]
-        I0e = beam_wall["I0e"]
+        i0 = beam_wall["I0"]
+        i0e = beam_wall["I0e"]
 
         # now do the plotting
         # y-axis polygone segments
@@ -47,22 +47,22 @@ class TbdView:
         irmax = np.argmax(edges[imin : imax + 1, 0]) + imin
         # FIXME edge is not defined here, might raise runtime error
         if irmax == imin:
-            Rmax = edges[imin, 0] + (lmin - lwall[imin]) / (lwall[imin + 1] - lwall[imin]) * (
+            rmax = edges[imin, 0] + (lmin - lwall[imin]) / (lwall[imin + 1] - lwall[imin]) * (
                 edges[imin + 1, 0] - edges[imin, 0]
             )
         elif irmax == imax:
-            Rmax = edges[imax - 1, 0] + (lmax - lwall[imax - 1]) / (lwall[imax] - lwall[imax - 1]) * (
+            rmax = edges[imax - 1, 0] + (lmax - lwall[imax - 1]) / (lwall[imax] - lwall[imax - 1]) * (
                 edges[imax, 0] - edges[imax - 1, 0]
             )
         else:
-            Rmax = edges[irmax, 0]
+            rmax = edges[irmax, 0]
         # if at the edge, interpolate
         y_range = np.array([lmin, lmax])
         # x-axis Torus sectors
         smin = 0.0
         smax = 18.0
         pi9 = np.double(np.pi / 9.0)
-        x_range = np.array([(smin) * pi9 * Rmax, smax * pi9 * Rmax], dtype=np.double)
+        x_range = np.array([(smin) * pi9 * rmax, smax * pi9 * rmax], dtype=np.double)
         # Note that even in the OO-style, we use `.pyplot.figure` to create the Figure.
         # fig, ax = plt.subplots(figsize=(10, 5.4), constrained_layout=True)
         if init == 1:
@@ -72,8 +72,8 @@ class TbdView:
         ydata = np.linspace(y_range[0], y_range[1], num=100)
         rdata = l2r(ydata, edges, lwall)
         for i in range(18):
-            x1data = pi9 * (np.double(i) + 0.5) * Rmax - rdata * pi9 * 0.5
-            x2data = pi9 * (np.double(i) + 0.5) * Rmax + rdata * pi9 * 0.5
+            x1data = pi9 * (np.double(i) + 0.5) * rmax - rdata * pi9 * 0.5
+            x2data = pi9 * (np.double(i) + 0.5) * rmax + rdata * pi9 * 0.5
             if init == 1:
                 ax.plot(x1data, ydata, label="S" + str(i) + "_1", color="0")
                 ax.plot(x2data, ydata, label="S" + str(i) + "_2", color="0")
@@ -89,17 +89,17 @@ class TbdView:
         nvalues = 100
         values = np.logspace(np.log10(pfmin), np.log10(pfmax), num=nvalues)
         # normieren und colormap erzeugen
-        normal = LogNorm(pfmin, pfmax)
+        normal = log_norm(pfmin, pfmax)
         chosen_cmap = plt.cm.inferno
         cmap = chosen_cmap(normal(values))
 
         # plot an entry pattern using g1e, g2e, re, se
         for i in range(len(tdata)):
             xydata[i, :] = re[ib, :] + np.cos(tdata[i]) * g1e[ib, :] + np.sin(tdata[i]) * g2e[ib, :]
-        xydata[:, 0] = xydata[:, 0] + pi9 * (np.double(se[ib]) + 0.5) * Rmax
+        xydata[:, 0] = xydata[:, 0] + pi9 * (np.double(se[ib]) + 0.5) * rmax
         if init == 1:
             ax.plot(xydata[:, 0], xydata[:, 1], label="L" + str(ib), color="0")
-            icolor = np.int_(normal(I0e[ib]) * nvalues) - 1
+            icolor = np.int_(normal(i0e[ib]) * nvalues) - 1
             if icolor < 0:
                 icolor = 0
             if icolor >= nvalues:
@@ -112,11 +112,11 @@ class TbdView:
         j = ite  # One time slice
         for i in range(len(tdata)):
             xydata[i, :] = rl[j, ib, :] + np.cos(tdata[i]) * g1l[j, ib, :] + np.sin(tdata[i]) * g2l[j, ib, :]
-        xydata[:, 0] = xydata[:, 0] + pi9 * (np.double(sl[j, ib]) + 0.5) * Rmax
+        xydata[:, 0] = xydata[:, 0] + pi9 * (np.double(sl[j, ib]) + 0.5) * rmax
 
         if init == 1:
             (ax_polygon_plot_pol,) = ax.plot(xydata[:, 0], xydata[:, 1], color="0")
-            icolor = np.int_(normal(I0[j, ib]) * nvalues) - 1
+            icolor = np.int_(normal(i0[j, ib]) * nvalues) - 1
             if icolor < 0:
                 icolor = 0
             if icolor >= nvalues:
@@ -133,7 +133,7 @@ class TbdView:
             ax.invert_yaxis()
             # colorbar erzeugen
             cax, _ = cbar.make_axes(ax)
-            cbar.ColorbarBase(cax, cmap=chosen_cmap, norm=normal)
+            cbar.colorbar_base(cax, cmap=chosen_cmap, norm=normal)
 
             return ax_polygon_plot_pol
         else:

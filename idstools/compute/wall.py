@@ -18,73 +18,73 @@ def timeit_decorator(func):
     return wrapper
 
 
-class WallCompute:
+class wall_compute:
     def __init__(self, ids_object):
         self.ids_object = ids_object
 
-    def getVesselUnits(self, nameFilter=None):
-        description2dInfos = {}
-        for description2dIndex, description2d in enumerate(self.ids_object.description_2d):
-            description2dInfo = {}
-            description2dInfo["name"] = description2d.type.name
-            description2dInfo["description"] = description2d.type.description
-            unitInfos = {}
-            for vUnitIndex, vUnit in enumerate(description2d.vessel.unit):
-                unitInfo = {}
-                unitInfo["name"] = vUnit.name
-                unitInfo["identifier"] = vUnit.identifier
+    def get_vessel_units(self, name_filter=None):
+        description2d_infos = {}
+        for description2d_index, description2d in enumerate(self.ids_object.description_2d):
+            description2d_info = {}
+            description2d_info["name"] = description2d.type.name
+            description2d_info["description"] = description2d.type.description
+            unit_infos = {}
+            for v_unit_index, v_unit in enumerate(description2d.vessel.unit):
+                unit_info = {}
+                unit_info["name"] = v_unit.name
+                unit_info["identifier"] = v_unit.identifier
 
-                unitInfo["r"] = vUnit.annular.centreline.r
-                unitInfo["z"] = vUnit.annular.centreline.z
-                unitInfo["h"] = vUnit.annular.thickness
-                unitInfo["closed"] = vUnit.annular.centreline.closed
-                unitInfo["resistivity"] = vUnit.annular.resistivity
+                unit_info["r"] = v_unit.annular.centreline.r
+                unit_info["z"] = v_unit.annular.centreline.z
+                unit_info["h"] = v_unit.annular.thickness
+                unit_info["closed"] = v_unit.annular.centreline.closed
+                unit_info["resistivity"] = v_unit.annular.resistivity
 
-                unitInfo["rectangle_coordinates"] = self.getRectangleCoordinates(
-                    vUnit.annular.centreline.r,
-                    vUnit.annular.centreline.z,
-                    vUnit.annular.thickness,
-                    vUnit.annular.centreline.closed,
+                unit_info["rectangle_coordinates"] = self.get_rectangle_coordinates(
+                    v_unit.annular.centreline.r,
+                    v_unit.annular.centreline.z,
+                    v_unit.annular.thickness,
+                    v_unit.annular.centreline.closed,
                 )
-                if nameFilter is not None:
-                    if nameFilter.lower() in vUnit.name.lower() or nameFilter.lower() in vUnit.identifier.lower():
-                        unitInfos[vUnitIndex] = unitInfo
+                if name_filter is not None:
+                    if name_filter.lower() in v_unit.name.lower() or name_filter.lower() in v_unit.identifier.lower():
+                        unit_infos[v_unit_index] = unit_info
                 else:
-                    unitInfos[vUnitIndex] = unitInfo
-            description2dInfo["vesselunits"] = unitInfos
-            description2dInfos[description2dIndex] = description2dInfo
+                    unit_infos[v_unit_index] = unit_info
+            description2d_info["vesselunits"] = unit_infos
+            description2d_infos[description2d_index] = description2d_info
 
-        return description2dInfos
+        return description2d_infos
 
-    def getLimiterUnits(self):
-        description2dInfos = {}
-        for description2dIndex, description2d in enumerate(self.ids_object.description_2d):
-            description2dInfo = {}
-            description2dInfo["name"] = description2d.type.name
-            description2dInfo["description"] = description2d.type.description
-            unitInfos = {}
-            for lUnitIndex, lUnit in enumerate(description2d.limiter.unit):
-                unitInfo = {}
-                unitInfo["name"] = lUnit.name
-                unitInfo["r"] = lUnit.outline.r
-                unitInfo["z"] = lUnit.outline.z
-                unitInfo["closed"] = lUnit.closed
-                unitInfo["resistivity"] = lUnit.resistivity
-                if lUnit.closed == 1:
-                    unitInfo["r"] = np.append(unitInfo["r"], unitInfo["r"][0])
-                    unitInfo["z"] = np.append(unitInfo["z"], unitInfo["z"][0])
-                unitInfos[lUnitIndex] = unitInfo
+    def get_limiter_units(self):
+        description2d_infos = {}
+        for description2d_index, description2d in enumerate(self.ids_object.description_2d):
+            description2d_info = {}
+            description2d_info["name"] = description2d.type.name
+            description2d_info["description"] = description2d.type.description
+            unit_infos = {}
+            for l_unit_index, l_unit in enumerate(description2d.limiter.unit):
+                unit_info = {}
+                unit_info["name"] = l_unit.name
+                unit_info["r"] = l_unit.outline.r
+                unit_info["z"] = l_unit.outline.z
+                unit_info["closed"] = l_unit.closed
+                unit_info["resistivity"] = l_unit.resistivity
+                if l_unit.closed == 1:
+                    unit_info["r"] = np.append(unit_info["r"], unit_info["r"][0])
+                    unit_info["z"] = np.append(unit_info["z"], unit_info["z"][0])
+                unit_infos[l_unit_index] = unit_info
 
-            description2dInfo["limiterunits"] = unitInfos
-            description2dInfos[description2dIndex] = description2dInfo
+            description2d_info["limiterunits"] = unit_infos
+            description2d_infos[description2d_index] = description2d_info
 
-        return description2dInfos
+        return description2d_infos
 
     @staticmethod
-    def getRectangleCoordinates(r, z, h, closed=False):
+    def get_rectangle_coordinates(r, z, h, closed=False):
         if len(r) == 0 or len(z) == 0 or len(h) == 0:
             return None
-        rectangleCoordinates = []
+        rectangle_coordinates = []
 
         if closed == 1:
             r = np.append(r, r[0])
@@ -98,8 +98,8 @@ class WallCompute:
             cs = x1 / d
             sn = y1 / d
 
-            R1 = np.array([[cs, sn], [-sn, cs]])
-            a1 = np.dot(R1, (x1, y1))
+            r1 = np.array([[cs, sn], [-sn, cs]])
+            a1 = np.dot(r1, (x1, y1))
 
             half_h = h[i] * 0.5
             p = [
@@ -110,15 +110,15 @@ class WallCompute:
             ]
             rw = []
             zw = []
-            R2 = np.array([[cs, -sn], [sn, cs]])
+            r2 = np.array([[cs, -sn], [sn, cs]])
 
             for item in p:
-                w = np.dot(R2, item) + np.array([r[i], z[i]])
+                w = np.dot(r2, item) + np.array([r[i], z[i]])
                 rw.append(w[0])
                 zw.append(w[1])
 
             rw.append(rw[0])
             zw.append(zw[0])
 
-            rectangleCoordinates.append((rw, zw))
-        return rectangleCoordinates
+            rectangle_coordinates.append((rw, zw))
+        return rectangle_coordinates

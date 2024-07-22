@@ -96,11 +96,11 @@ if __name__ == "__main__":
 
     # Parse for command line options
     prog = os.path.basename(__file__)
-    parser = argparse.ArgumentParser(
+    parser = argparse.argument_parser(
         prog=prog,
-        formatter_class=RichHelpFormatter,
-        parents=[imasParser],
-        description=Markdown(description, style="argparse.text"),
+        formatter_class=rich_help_formatter,
+        parents=[imas_parser],
+        description=markdown(description, style="argparse.text"),
     )
     parser.add_argument(
         "--shot", "-s", dest="shot", help="Shot number", required=False, type=int

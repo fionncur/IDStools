@@ -13,15 +13,15 @@ lpad = -1
 logger = logging.getLogger("module")
 
 
-class EcStrayView:
-    def __init__(self, equilibriumIds: object, coreProfilesIds: object, wavesIds: object):
-        self.ecstray_object = EcStrayCompute(equilibriumIds, coreProfilesIds, wavesIds)
-        self.equilibriumCompute = EquilibriumCompute(equilibriumIds)
-        self.equilibriumIds = equilibriumIds
-        self.coreProfilesIds = coreProfilesIds
-        self.wavesIds = wavesIds
+class ec_stray_view:
+    def __init__(self, equilibrium_ids: object, core_profiles_ids: object, waves_ids: object):
+        self.ecstray_object = ec_stray_compute(equilibrium_ids, core_profiles_ids, waves_ids)
+        self.equilibrium_compute = equilibrium_compute(equilibrium_ids)
+        self.equilibrium_ids = equilibrium_ids
+        self.core_profiles_ids = core_profiles_ids
+        self.waves_ids = waves_ids
 
-    def plotResonanceLayer(self, ax, time_index_wv, time_index_eq, init=1, verbose=False):
+    def plot_resonance_layer(self, ax, time_index_wv, time_index_eq, init=1, verbose=False):
         """
         Plot the resonance layer on the given `ax` object.
 
@@ -66,8 +66,8 @@ class EcStrayView:
             :func:`idstools.domain.ecstray.EcStrayCompute.getResonanceLayer`
 
         """
-        resultDict = self.ecstray_object.getResonanceLayer(time_index_wv, time_index_eq)
-        res_layer = resultDict["resonanceLayer"]
+        result_dict = self.ecstray_object.get_resonance_layer(time_index_wv, time_index_eq)
+        res_layer = result_dict["resonanceLayer"]
 
         for i_harm in range(len(res_layer)):
             if len(res_layer[i_harm]["r"]) > 1:
@@ -84,18 +84,18 @@ class EcStrayView:
                 else:
                     ax.set_data(res_layer[i_harm]["r"], res_layer[i_harm]["z"])
 
-    def plotPoloidalView(self, ax, timeSlice=0):
+    def plot_poloidal_view(self, ax, time_slice=0):
         n_harm = [1, 2, 3, 4]
 
-        resonanceData = self.ecstray_object.getResonanceLayer(nHarm=n_harm)
-        profile2dIndex = resonanceData["profile2dIndex"]
-        resonanceLayer = resonanceData["resonanceLayer"]
+        resonance_data = self.ecstray_object.get_resonance_layer(n_harm=n_harm)
+        profile2d_index = resonance_data["profile2dIndex"]
+        resonance_layer = resonance_data["resonanceLayer"]
 
-        gridData = self.equilibriumCompute.get2DCartesianGrid(timeSlice=timeSlice, profiles2DIndex=profile2dIndex)
-        r2d = gridData["r2d"]
-        z2d = gridData["z2d"]
-        psi2d = gridData["psi2d"]
-        rho2d = self.equilibriumCompute.getRho2D(timeSlice=timeSlice, profiles2DIndex=profile2dIndex)
+        grid_data = self.equilibrium_compute.get2_d_cartesian_grid(time_slice=time_slice, profiles2_d_index=profile2d_index)
+        r2d = grid_data["r2d"]
+        z2d = grid_data["z2d"]
+        psi2d = grid_data["psi2d"]
+        rho2d = self.equilibrium_compute.get_rho2_d(time_slice=time_slice, profiles2_d_index=profile2d_index)
 
         # Poloidal view plot
         ax.contour(r2d, z2d, psi2d, 50, cmap="summer")
@@ -109,21 +109,21 @@ class EcStrayView:
         ax.set_ylim(z2d.min() * 0.7, z2d.max() * 0.7)
         ax.set_aspect("equal", adjustable="box")
         for i_harm in range(len(n_harm)):
-            if len(resonanceLayer[i_harm]["r"]) > 1:
+            if len(resonance_layer[i_harm]["r"]) > 1:
                 logger.info(f"Resonance at n = {i_harm}")
                 ax.plot(
-                    resonanceLayer[i_harm]["r"],
-                    resonanceLayer[i_harm]["z"],
+                    resonance_layer[i_harm]["r"],
+                    resonance_layer[i_harm]["z"],
                     color="r",
                     linewidth=2,
                 )
 
-    def plotCutOffLayer(
+    def plot_cut_off_layer(
         self,
         ax,
-        timeIndexWaves=0,
-        timeIndexCoreProfiles=0,
-        timeIndexEquilibrium=0,
+        time_index_waves=0,
+        time_index_core_profiles=0,
+        time_index_equilibrium=0,
         init=1,
         verbose=False,
     ):
@@ -173,7 +173,7 @@ class EcStrayView:
             :func:`idstools.domain.ecstray.EcStrayCompute.getCutoffLayer`
         """
         # Calculate density cutoff layer position
-        cutoff_layer = self.ecstray_object.getCutoffLayer(timeIndexWaves, timeIndexCoreProfiles, timeIndexEquilibrium)
+        cutoff_layer = self.ecstray_object.get_cutoff_layer(time_index_waves, time_index_core_profiles, time_index_equilibrium)
 
         # TODO Work on this function to keep call back function and events and not to pass init=1
         if init == 1:

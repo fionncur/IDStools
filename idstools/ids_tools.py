@@ -1,5 +1,5 @@
 """
-Service classes for handling IDSs
+Service classes for handling i_d_ss
 
 @author: Hajo Klingshirn, MPI-IPP
 """
@@ -12,12 +12,12 @@ import os
 import sys
 
 # List of all IDS names to be read if 'all' is supplied as a IDS name
-ALL_IDSS = "edge"
+a_l_l__i_d_s_s = "edge"
 
 logger = logging.getLogger("module")
 
 
-class ImasDb:
+class imas_db:
     """Helper class wrapping an IMAS database entry."""
 
     def __init__(
@@ -27,8 +27,8 @@ class ImasDb:
         user=None,
         tokamak=None,
         version=None,
-        doOpen=True,
-        useHDF5=False,
+        do_open=True,
+        use_h_d_f5=False,
     ):
         """Creates an object wrapping a database entry with the given parameters.
         Shot and run number have to be given.
@@ -55,10 +55,10 @@ class ImasDb:
         if not self._tokamak:
             self._tokamak = os.getenv("MDSPLUS_TREE_BASE_0").split("/")[-3]
         if not self._version:
-            self._version = DBMaster.getDDVersion().split(".")[0]
+            self._version = d_b_master.get_d_d_version().split(".")[0]
 
-        self._useHDF5 = useHDF5
-        self._dbUALDAO = None  # this is the UAL data access object (DAO)
+        self._use_h_d_f5 = use_h_d_f5
+        self._db_u_a_l_d_a_o = None  # this is the UAL data access object (DAO)
 
     @property
     def shot(self):
@@ -83,19 +83,19 @@ class ImasDb:
 
     @property
     def db(self):
-        if not self._dbUALDAO:
+        if not self._db_u_a_l_d_a_o:
             self._open()
-        return self._dbUALDAO
+        return self._db_u_a_l_d_a_o
 
     def close(self):
         """Close the UAL database access object for this database."""
-        if self._dbUALDAO:
-            self._dbUALDAO.close()
-            self._dbUALDAO = None
+        if self._db_u_a_l_d_a_o:
+            self._db_u_a_l_d_a_o.close()
+            self._db_u_a_l_d_a_o = None
 
     def reopen(self):
         """Reopen the database."""
-        if self._dbUALDAO:
+        if self._db_u_a_l_d_a_o:
             self.close()
         self._open()
 
@@ -103,34 +103,34 @@ class ImasDb:
         """Open database."""
         logging.debug("Opening database " + str(self))
 
-        self._dbUALDAO = imas.ids(self._shot, self._run)
-        if self._useHDF5:
-            self._dbUALDAO.open_hdf5()
+        self._db_u_a_l_d_a_o = imas.ids(self._shot, self._run)
+        if self._use_h_d_f5:
+            self._db_u_a_l_d_a_o.open_hdf5()
         else:
-            self._dbUALDAO.open_env(self._user, self._tokamak, self._version)
+            self._db_u_a_l_d_a_o.open_env(self._user, self._tokamak, self._version)
 
-        return self._dbUALDAO
+        return self._db_u_a_l_d_a_o
 
     def _create(self):
         """Create database."""
 
         logging.debug("Creating dtabase " + str(self))
-        dbUALDAO = imas.ids(self._shot, self._run)
+        db_u_a_l_d_a_o = imas.ids(self._shot, self._run)
 
-        if self._useHDF5:
-            dbUALDAO.create_hdf5()
+        if self._use_h_d_f5:
+            db_u_a_l_d_a_o.create_hdf5()
         else:
-            dbUALDAO.create_env(self._user, self._tokamak, self._version)
+            db_u_a_l_d_a_o.create_env(self._user, self._tokamak, self._version)
 
-        self._dbUALDAO = dbUALDAO
-        return self._dbUALDAO
+        self._db_u_a_l_d_a_o = db_u_a_l_d_a_o
+        return self._db_u_a_l_d_a_o
 
-    def times(self, idsName):
+    def times(self, ids_name):
         """Return list of time points for the timeslices for which the IDS with given name is present.
 
         If no time slices present for the IDS, returns an empty list."""
         # print('X', idsName, 'X')
-        (status, times) = self.db.getTimes(idsName)
+        (status, times) = self.db.get_times(ids_name)
         return times
 
     # TODO to be removed.. migrated to idshelper.getAvailableIdsAndTimes
@@ -152,16 +152,16 @@ class ImasDb:
         timedep_idss = inspect.getmembers(self.db, timedep_ids_test)
 
         result = []
-        for idsnameArray, obj in timedep_idss:
+        for idsname_array, obj in timedep_idss:
             try:
-                maxOccurrences = obj.getMaxOccurrences()
+                max_occurrences = obj.get_max_occurrences()
             except AttributeError:
-                maxOccurrences = 1
-            for occurrence in range(maxOccurrences + 1):
+                max_occurrences = 1
+            for occurrence in range(max_occurrences + 1):
                 if occurrence == 0:
-                    idsname = idsnameArray
+                    idsname = idsname_array
                 else:
-                    idsname = idsnameArray + "/" + str(occurrence)
+                    idsname = idsname_array + "/" + str(occurrence)
                 try:
                     times = self.times(idsname)
                 except Exception as e:
@@ -176,68 +176,68 @@ class ImasDb:
 
         return result
 
-    def get_ids(self, idsName, time=None, doOpen=True):
+    def get_ids(self, ids_name, time=None, do_open=True):
         """Get IDS with given name. For time-dependent IDSs, the time has to be given.
 
         If the optional argument time is set to False, reading of the IDS data is delayed
         to the first access."""
-        return Ids(
+        return ids(
             self._shot,
             self._run,
-            idsName,
+            ids_name,
             time=time,
             user=self._user,
             tokamak=self._tokamak,
             version=self._version,
-            doOpen=doOpen,
-            useHDF5=self._useHDF5,
-            parentImasDb=self,
+            do_open=do_open,
+            use_h_d_f5=self._use_h_d_f5,
+            parent_imas_db=self,
         )
 
-    def get_ids_array(self, idsName, doOpen=False):
+    def get_ids_array(self, ids_name, do_open=False):
         """ """
-        idsArrayName = idsName + "Array"
-        if idsArrayName not in self.db.__dict__:
+        ids_array_name = ids_name + "Array"
+        if ids_array_name not in self.db.__dict__:
             # TODO: maybe throw exception
             return []
 
-        idsArray = eval("self._dbUALDAO." + idsArrayName)
-        idsArray.get()
+        ids_array = eval("self._dbUALDAO." + ids_array_name)
+        ids_array.get()
         idss = [
-            Ids(
+            ids(
                 self._shot,
                 self._run,
-                idsName,
-                time=idsUALDAO.time,
+                ids_name,
+                time=ids_u_a_l_d_a_o.time,
                 user=self._user,
                 tokamak=self._tokamak,
                 version=self._version,
-                doOpen=doOpen,
-                useHDF5=self._useHDF5,
-                parentImasDb=self,
-                idsUALDAO=idsUALDAO,
+                do_open=do_open,
+                use_h_d_f5=self._use_h_d_f5,
+                parent_imas_db=self,
+                ids_u_a_l_d_a_o=ids_u_a_l_d_a_o,
             )
-            for idsUALDAO in idsArray.array
+            for ids_u_a_l_d_a_o in ids_array.array
         ]
         return idss
 
 
-class Ids:
+class ids:
     """Helper class wrapping a UAL IDS data structure to add high-level functionality."""
 
     def __init__(
         self,
         shot,
         run,
-        idsName,
+        ids_name,
         time=None,
         user=None,
         tokamak=None,
         version=None,
-        doOpen=True,
-        useHDF5=False,
-        parentImasDb=None,
-        idsUALDAO=None,
+        do_open=True,
+        use_h_d_f5=False,
+        parent_imas_db=None,
+        ids_u_a_l_d_a_o=None,
     ):
         """Creates an object wrapping an IDS with the given parameters. Shot number, run number and
         ids name (e.g. 'equilibrium') have to be given. For time-dependent IDSs, time has to be given.
@@ -251,39 +251,39 @@ class Ids:
         The useHDF5 property controls whether UAL access is done through HDF5. If set to True, the
         parameters user, tokamak and version have no effect."""
 
-        if parentImasDb:
-            self._parentImasDb = parentImasDb
+        if parent_imas_db:
+            self._parent_imas_db = parent_imas_db
         else:
             # logging.debug("Creating exclusive ImasDb object for ids")
-            self._parentImasDb = ImasDb(shot, run, user, tokamak, version, doOpen, useHDF5)
+            self._parent_imas_db = imas_db(shot, run, user, tokamak, version, do_open, use_h_d_f5)
 
-        self._idsUALDAO = idsUALDAO
+        self._ids_u_a_l_d_a_o = ids_u_a_l_d_a_o
 
-        self._idsName = idsName
+        self._ids_name = ids_name
         self._time = time
 
-        if doOpen:
+        if do_open:
             self.ids
 
     @property
     def shot(self):
         """The shot number of the IDS."""
-        return self._parentImasDb.shot
+        return self._parent_imas_db.shot
 
     @property
     def run(self):
         """The run number of the IDS."""
-        return self._parentImasDb.run
+        return self._parent_imas_db.run
 
     @property
     def version(self):
         """The IMAS data version."""
-        return self._parentImasDb.version
+        return self._parent_imas_db.version
 
     @property
     def name(self):
         """The name of the IDS (e.g. 'equilibrium')."""
-        return self._idsName
+        return self._ids_name
 
     @property
     def time(self):
@@ -303,14 +303,14 @@ class Ids:
     @property
     def ids(self):
         """The IDS data object associated with this IDS object as provided by the UAL Python interface."""
-        if self._idsUALDAO is None:
+        if self._ids_u_a_l_d_a_o is None:
             self._retrieve_from_ual()
-        return self._idsUALDAO
+        return self._ids_u_a_l_d_a_o
 
     def close(self):
         """Close the UAL database access object for this IDS."""
-        self._parentImasDb.close()
-        self._idsUALDAO = None
+        self._parent_imas_db.close()
+        self._ids_u_a_l_d_a_o = None
 
     def reload(self):
         """Reload the IDS data from the UAL."""
@@ -322,32 +322,32 @@ class Ids:
 
         Subsequent calls will return the instance created on the first call."""
 
-        if self._idsUALDAO:
-            return self._idsUALDAO
+        if self._ids_u_a_l_d_a_o:
+            return self._ids_u_a_l_d_a_o
 
         logging.debug("Retrieving IDS " + str(self))
 
         eval("db = + self._parentImasDb.db")
-        self._idsUALDAO = eval("db." + self._idsName)
+        self._ids_u_a_l_d_a_o = eval("db." + self._ids_name)
 
-        if hasattr(self._idsUALDAO, "get"):
+        if hasattr(self._ids_u_a_l_d_a_o, "get"):
             # Time-independent IDS
-            self._idsUALDAO.get()
-        elif hasattr(self._idsUALDAO, "getSlice"):
-            times = self._parentImasDb.times(self.name)
+            self._ids_u_a_l_d_a_o.get()
+        elif hasattr(self._ids_u_a_l_d_a_o, "getSlice"):
+            times = self._parent_imas_db.times(self.name)
             if len(times) == 0:
                 raise ValueError("No slices stored for IDS " + self.name)
             # Time-dependent IDS
             if self._time is None:
                 raise ValueError("Need valid time for getting a time-dependent IDS")
-            self._idsUALDAO.getSlice(self._time, imas.imasdef.CLOSEST_INTERP)
+            self._ids_u_a_l_d_a_o.get_slice(self._time, imas.imasdef.c_l_o_s_e_s_t__i_n_t_e_r_p)
         else:
             raise TypeError("Found unexpected type of IDS, check IDS name")
 
-        return self._idsUALDAO
+        return self._ids_u_a_l_d_a_o
 
 
-class IdsDescriptor:
+class ids_descriptor:
     """Helper class describing one or more IDSs and presenting them as a sequence.
 
     It holds combinations of  shot/run number(s), IDS name(s), time stamp(s), user/tokamak/version.
@@ -359,13 +359,13 @@ class IdsDescriptor:
         self,
         shot,
         run,
-        idsNames="all",
+        ids_names="all",
         time=0.0,
         user=None,
         tokamak=None,
         version=None,
-        doOpen=True,
-        useHDF5=False,
+        do_open=True,
+        use_h_d_f5=False,
     ):
         """Create a IDS Descriptor.
 
@@ -386,7 +386,7 @@ class IdsDescriptor:
         # Make sure every parameter is a sequence
         self._shot = make_sequence(shot)
         self._run = make_sequence(run)
-        self._idsNames = make_sequence(idsNames)
+        self._ids_names = make_sequence(ids_names)
         self._time = make_sequence(time)
 
         # Environment parameters
@@ -395,24 +395,24 @@ class IdsDescriptor:
         self._version = make_sequence(version)
 
         # Access parameters
-        self._doOpen = doOpen
-        self._useHDF5 = useHDF5
+        self._do_open = do_open
+        self._use_h_d_f5 = use_h_d_f5
 
         # Expand "all" IDS name into list of IDSs using the general grid description
-        if self._idsNames[0] == "all":
-            self._idsNames = ALL_IDSS
+        if self._ids_names[0] == "all":
+            self._ids_names = a_l_l__i_d_s_s
 
         # Figure out the counts for the individual parameters
-        self._nPar = [
+        self._n_par = [
             1,
         ] * 7
-        self._nPar[0] = len(self._shot)
-        self._nPar[1] = len(self._run)
-        self._nPar[2] = len(self._idsNames)
-        self._nPar[3] = len(self._time)
-        self._nPar[4] = len(self._user)
-        self._nPar[5] = len(self._tokamak)
-        self._nPar[6] = len(self._version)
+        self._n_par[0] = len(self._shot)
+        self._n_par[1] = len(self._run)
+        self._n_par[2] = len(self._ids_names)
+        self._n_par[3] = len(self._time)
+        self._n_par[4] = len(self._user)
+        self._n_par[5] = len(self._tokamak)
+        self._n_par[6] = len(self._version)
 
     def __str__(self):
         """Return a string representation in the form shot/run/time/ids name/user/tokamak/version,
@@ -424,7 +424,7 @@ class IdsDescriptor:
             + "/"
             + str(self._time)
             + "/"
-            + str(self._idsNames)
+            + str(self._ids_names)
             + "/"
             + str(self._user)
             + "/"
@@ -436,7 +436,7 @@ class IdsDescriptor:
     def __len__(self):
         """Return number of IDSs described by this descriptor."""
         product = 1
-        for i in self._nPar:
+        for i in self._n_par:
             product = product * i
         return product
 
@@ -446,39 +446,39 @@ class IdsDescriptor:
             raise IndexError()
 
         # set up object counts for every components of the local index
-        iCount = [
+        i_count = [
             1,
-        ] * len(self._nPar)
-        for i in range(len(self._nPar) - 1):
-            iCount[-i - 2] = iCount[-i - 1] * self._nPar[-i - 1]
+        ] * len(self._n_par)
+        for i in range(len(self._n_par) - 1):
+            i_count[-i - 2] = i_count[-i - 1] * self._n_par[-i - 1]
 
         # From global index ind, compute local index tuple lInd (which is 0-based)
-        lInd = [
+        l_ind = [
             0,
-        ] * len(self._nPar)
-        tInd = ind
-        for i in range(len(self._nPar)):
-            lInd[i] = tInd / iCount[i]
-            tInd -= lInd[i] * iCount[i]
+        ] * len(self._n_par)
+        t_ind = ind
+        for i in range(len(self._n_par)):
+            l_ind[i] = t_ind / i_count[i]
+            t_ind -= l_ind[i] * i_count[i]
 
         # create IDS object
-        return Ids(
-            self._shot[lInd[0]],
-            self._run[lInd[1]],
-            self._idsNames[lInd[2]],
-            self._time[lInd[3]],
-            self._user[lInd[4]],
-            self._tokamak[lInd[5]],
-            self._version[lInd[6]],
-            self._doOpen,
-            self._useHDF5,
+        return ids(
+            self._shot[l_ind[0]],
+            self._run[l_ind[1]],
+            self._ids_names[l_ind[2]],
+            self._time[l_ind[3]],
+            self._user[l_ind[4]],
+            self._tokamak[l_ind[5]],
+            self._version[l_ind[6]],
+            self._do_open,
+            self._use_h_d_f5,
         )
 
 
-def get_all_idss(idsDescs):
+def get_all_idss(ids_descs):
     """Get a list of all IDSs described by a list of IDS descriptors."""
     all = []
-    for desc in idsDescs:
+    for desc in ids_descs:
         idss = list(desc)
         all.extend(idss)
     return all

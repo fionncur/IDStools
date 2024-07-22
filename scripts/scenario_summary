@@ -9,7 +9,7 @@ from rich.console import Console
 from rich.table import Table
 from idstools.scenariodescription import ScenarioDescriptionBase
 
-displayMapping = {
+display_mapping = {
     "ref_name": "Reference",
     "ro_name": "RO(s)",
     "pulse": "Pulse",
@@ -43,19 +43,19 @@ displayMapping = {
 
 
 # For better formatting of input argument listing in the help of the function
-class SmartFormatter(argparse.HelpFormatter):
+class smart_formatter(argparse.help_formatter):
     def _split_lines(self, text, width):
         if text.startswith("R|"):
             return text[2:].splitlines()
-        return argparse.HelpFormatter._split_lines(self, text, width)
+        return argparse.help_formatter._split_lines(self, text, width)
 
 
 # ----------------------------------------------------------------------------
 
 # Input arguments
-parser = argparse.ArgumentParser(
+parser = argparse.argument_parser(
     description="""---- Script to list available scenarios in a specific folder ----\n\nImportant: The legacy scenario_summary tool is deprecated and will be removed in a future versions. It will remain available until simdb is fully adopted.more about simdb : https://simdb.iter.org/dashboard/""",
-    formatter_class=SmartFormatter,
+    formatter_class=smart_formatter,
 )
 parser.add_argument(
     "-f",
@@ -133,22 +133,22 @@ args = vars(parser.parse_args())
 if args["folder"] != None:
     folder = args["folder"]
 else:
-    defaultFolderPath = os.environ["IMAS_HOME"] + "/shared/imasdb/ITER/3/0"
-    lowlevelVersion = getCoreVersion()
+    default_folder_path = os.environ["IMAS_HOME"] + "/shared/imasdb/ITER/3/0"
+    lowlevel_version = get_core_version()
 
-    if lowlevelVersion < 4:
-        defaultFolderPath = os.environ["IMAS_HOME"] + "/shared/iterdb/3/0"
+    if lowlevel_version < 4:
+        default_folder_path = os.environ["IMAS_HOME"] + "/shared/iterdb/3/0"
 
 # MATCHCASE
 matchcase = args["matchcase"]
 
 # FILTER
 if args["selection"] != None:
-    selectionOperation = "OR"
+    selection_operation = "OR"
     selection = args["selection"]
     if "," in selection[0]:
         selection = selection[0].split(",")
-        selectionOperation = "AND"
+        selection_operation = "AND"
 
     if not matchcase:
         selection = [str(x).lower() for x in selection]
@@ -158,7 +158,7 @@ else:
 # SORT
 if args["sort"] != None:
     sort = args["sort"].split(",")
-    sort = [x for x in sort if x in displayMapping.keys()]
+    sort = [x for x in sort if x in display_mapping.keys()]
 else:
     sort = ["pulse", "run"]
 
@@ -210,9 +210,9 @@ if args["choice"] == None:
         """      scenario_summary -c pulse,run,database,ref_name,ip,b0,fuelling,confinement,workflow,date"""
     )
 
-scenarioDescriptionObj = ScenarioDescriptionBase(folderPath=defaultFolderPath)
-df = scenarioDescriptionObj.getDataframesFromFiles(
-    extension=".yaml", addObsolete=obsolete
+scenario_description_obj = scenario_description_base(folder_path=default_folder_path)
+df = scenario_description_obj.get_dataframes_from_files(
+    extension=".yaml", add_obsolete=obsolete
 )
 
 # check of need to add obsolete
@@ -228,31 +228,31 @@ df = df[choice]
 # Search based on selection
 if selection:
 
-    def stringExists(row):
-        if selectionOperation == "AND":
+    def string_exists(row):
+        if selection_operation == "AND":
             found_substrings = set()
             for text in row:
                 text = str(text)
                 if not matchcase:
                     text = text.lower()
-                for searchString in selection:
-                    if searchString in text:
-                        found_substrings.add(searchString)
+                for search_string in selection:
+                    if search_string in text:
+                        found_substrings.add(search_string)
             if len(selection) == len(found_substrings):
                 return True
-        if selectionOperation == "OR":
+        if selection_operation == "OR":
             for text in row:
                 text = str(text)
                 if not matchcase:
                     text = str(text).lower()
-                for searchString in selection:
-                    if searchString in text:
+                for search_string in selection:
+                    if search_string in text:
                         return True
         return False
 
     df = df[
         df.apply(
-            lambda row: stringExists(row),
+            lambda row: string_exists(row),
             axis=1,
         )
     ]
@@ -263,22 +263,22 @@ if sort:
 
 
 # rename headers for display
-selected_df = df.rename(columns=displayMapping)
+selected_df = df.rename(columns=display_mapping)
 
 if not selected_df.empty:
     # print(selected_df.to_string(index=False, justify="center"), )
-    table = Table()
-    for columnName in choice:
-        table.add_column(columnName, justify="left", style="green")
+    table = table()
+    for column_name in choice:
+        table.add_column(column_name, justify="left", style="green")
 
     for _, row in df.iterrows():
         x = []
-        for columnName in choice:
-            x.append(str(row[columnName]))
+        for column_name in choice:
+            x.append(str(row[column_name]))
         table.add_row(*x)  # Even row style
 
-    console = Console()
+    console = console()
     console.print(table)
 else:
     print(" No records found matching mentioned criteria")
-print(f" NOTE: Read Scenario database from {defaultFolderPath}")
+print(f" NOTE: Read Scenario database from {default_folder_path}")

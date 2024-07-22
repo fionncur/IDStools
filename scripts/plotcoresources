@@ -20,12 +20,12 @@ from idstools.utils.idslogger import setupLogger
 from idstools.view.common import Canvas
 from idstools.view.core_sources import CoreSourcesView
 
-logger = setupLogger("module", stdout_level=logging.INFO)
+logger = setup_logger("module", stdout_level=logging.i_n_f_o)
 
-parser = argparse.ArgumentParser(
+parser = argparse.argument_parser(
     description="---- Display core_sources results [Previously known as csplot]",
-    parents=[dbentryParser],
-    formatter_class=RichHelpFormatter,
+    parents=[dbentry_parser],
+    formatter_class=rich_help_formatter,
 )
 
 parser.add_argument(
@@ -43,7 +43,7 @@ parser.add_argument(
 )
 
 args = parser.parse_args()
-connection = DBMaster.getConnection(args)
+connection = d_b_master.get_connection(args)
 if connection is None:
     logger.critical("----> Aborted.")
     exit(1)
@@ -54,12 +54,12 @@ if core_sources.time is None:
     logger.critical("No core_sources IDS in the data-entry --> Abort.")
     exit()
 
-timeArray = core_sources.time
-timeIndex, timeValue = getNearestTime(timeArray, args.time)
-ntime = len(timeArray)
+time_array = core_sources.time
+time_index, time_value = get_nearest_time(time_array, args.time)
+ntime = len(time_array)
 
 # Read quantities for this time slice
-cs_slice = connection.get_slice("core_sources", timeValue, 1)
+cs_slice = connection.get_slice("core_sources", time_value, 1)
 nsources = len(cs_slice.source)
 
 if nsources > 1:
@@ -90,41 +90,41 @@ for isource in range(nsources):
 
 nsources = len(core_sources.source)
 
-coreSourceView = CoreSourcesView(core_sources)
+core_source_view = core_sources_view(core_sources)
 
-canvas = Canvas(2, 4)
-ret = axPowerProfiles = canvas.add_axes(title=r"Power Profiles [MW/M3]", row=0, col=0)
-coreSourceView.viewPowerProfiles(axPowerProfiles)
+canvas = canvas(2, 4)
+ret = ax_power_profiles = canvas.add_axes(title=r"Power Profiles [MW/M3]", row=0, col=0)
+core_source_view.view_power_profiles(ax_power_profiles)
 
-axParticlesProfiles = canvas.add_axes(title=r"PARTICLES PROFILES [/M3/S]", row=0, col=1)
-ret = coreSourceView.viewParticlesProfiles(axParticlesProfiles)
+ax_particles_profiles = canvas.add_axes(title=r"PARTICLES PROFILES [/M3/S]", row=0, col=1)
+ret = core_source_view.view_particles_profiles(ax_particles_profiles)
 
-axCurrentProfiles = canvas.add_axes(title=r"CURRENT PROFILES [KA/M2]", row=0, col=2)
-ret = coreSourceView.viewCurrentProfiles(axCurrentProfiles)
+ax_current_profiles = canvas.add_axes(title=r"CURRENT PROFILES [KA/M2]", row=0, col=2)
+ret = core_source_view.view_current_profiles(ax_current_profiles)
 
-axPowerAndParticleWaveforms = canvas.add_axes(
+ax_power_and_particle_waveforms = canvas.add_axes(
     title="POWER AND PARTICLE WAVEFORMS", row=1, col=0
 )
-ret = coreSourceView.viewPowerAndParticleWaveforms(axPowerAndParticleWaveforms)
+ret = core_source_view.view_power_and_particle_waveforms(ax_power_and_particle_waveforms)
 
-axParticlesWaveform = canvas.add_axes(title="PARTICLES WAVEFORM", row=1, col=1)
-ret = coreSourceView.viewParticlesWaveform(axParticlesWaveform)
+ax_particles_waveform = canvas.add_axes(title="PARTICLES WAVEFORM", row=1, col=1)
+ret = core_source_view.view_particles_waveform(ax_particles_waveform)
 
-axCurrentWaveform = canvas.add_axes(title=r"CURRENT WAVEFORM", row=1, col=2)
-ret = coreSourceView.viewCurrentWaveform(axCurrentWaveform)
+ax_current_waveform = canvas.add_axes(title=r"CURRENT WAVEFORM", row=1, col=2)
+ret = core_source_view.view_current_waveform(ax_current_waveform)
 
-axTorqueWaveform = canvas.add_axes(row=1, col=3)
-ret = coreSourceView.viewTorqueWaveform(axTorqueWaveform)
+ax_torque_waveform = canvas.add_axes(row=1, col=3)
+ret = core_source_view.view_torque_waveform(ax_torque_waveform)
 
-canvas.setText(text=f"{getDatabasePath(args, timeValue=timeValue)}")
+canvas.set_text(text=f"{get_database_path(args, time_value=time_value)}")
 
 canvas.fig.subplots_adjust(
     top=0.916, bottom=0.09, left=0.044, right=0.953, hspace=0.287, wspace=0.2
 )
 canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
-canvas.fig.suptitle(getTitle(args, "Core sources", timeValue), size=12)
+canvas.fig.suptitle(get_title(args, "Core sources", time_value), size=12)
 if args.save:
-    fname = getFileName(args, os.path.basename(__file__) + "_core_sources", timeValue)
+    fname = get_file_name(args, os.path.basename(__file__) + "_core_sources", time_value)
     if args.directory:
         if not os.path.exists(args.directory):
             os.makedirs(args.directory)

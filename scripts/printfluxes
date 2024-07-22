@@ -16,20 +16,20 @@ from idstools.utils.clihelper import dbentryParser, getDatabasePath
 from idstools.utils.idslogger import setupLogger
 from idstools.view.core_transport import CoreTransportView
 
-logger = setupLogger("module", stdout_level=logging.INFO)
+logger = setup_logger("module", stdout_level=logging.i_n_f_o)
 
-slicingMethods = {
-    "CLOSEST": imasdef.CLOSEST_INTERP,
-    "PREVIOUS": imasdef.PREVIOUS_INTERP,
-    "LINEAR": imasdef.LINEAR_INTERP,
+slicing_methods = {
+    "CLOSEST": imasdef.c_l_o_s_e_s_t__i_n_t_e_r_p,
+    "PREVIOUS": imasdef.p_r_e_v_i_o_u_s__i_n_t_e_r_p,
+    "LINEAR": imasdef.l_i_n_e_a_r__i_n_t_e_r_p,
 }
 # Management of input arguments
-parser = argparse.ArgumentParser(
+parser = argparse.argument_parser(
     description="View information about fluxes [Previously known as print_fluxes]",
     epilog="""
 """,
-    formatter_class=RichHelpFormatter,
-    parents=[dbentryParser],
+    formatter_class=rich_help_formatter,
+    parents=[dbentry_parser],
 )
 
 parser.add_argument(
@@ -45,22 +45,22 @@ parser.add_argument("-o", "--occurrence", type=int, default=0, help="occurrence"
 parser.add_argument("-t", "--time", type=float, help="Time", default=-99)
 args = parser.parse_args()
 
-connection = DBMaster.getConnection(args)
+connection = d_b_master.get_connection(args)
 if connection is None:
     logger.critical("----> Aborted.")
     exit(1)
 
-idsSliceCoreTransport = connection.get_slice(
+ids_slice_core_transport = connection.get_slice(
     "core_transport",
     args.time,
-    slicingMethods[args.slicingmethod],
+    slicing_methods[args.slicingmethod],
     occurrence=args.occurrence,
 )
-if len(idsSliceCoreTransport.time) == 0:
+if len(ids_slice_core_transport.time) == 0:
     logger.critical("Time vector is empty! aborting")
     sys.exit(1)
 
-print(f"Showing details for {getDatabasePath(args, idsSliceCoreTransport.time[0])}")
+print(f"Showing details for {get_database_path(args, ids_slice_core_transport.time[0])}")
 
-coreTransportView = CoreTransportView(idsSliceCoreTransport)
-coreTransportView.viewFluxes()
+core_transport_view = core_transport_view(ids_slice_core_transport)
+core_transport_view.view_fluxes()

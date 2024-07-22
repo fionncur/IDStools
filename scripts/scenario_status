@@ -8,10 +8,10 @@ from rich.table import Table
 from rich_argparse import RawDescriptionRichHelpFormatter
 from idstools.scenariodescription import ScenarioDescription
 from idstools.utils.idslogger import setupLogger
-console = Console()
+console = console()
 # Management of input arguments
-parser = argparse.ArgumentParser(
-    description="""---- Show status and potential parent and children for a given simulation stored in ITER database folder\n\nImportant: The legacy scenario_status tool is deprecated and will be removed in a future versions. It will remain available until simdb is fully adopted.more about simdb : https://simdb.iter.org/dashboard/""",formatter_class=RawDescriptionRichHelpFormatter,
+parser = argparse.argument_parser(
+    description="""---- Show status and potential parent and children for a given simulation stored in ITER database folder\n\nImportant: The legacy scenario_status tool is deprecated and will be removed in a future versions. It will remain available until simdb is fully adopted.more about simdb : https://simdb.iter.org/dashboard/""",formatter_class=raw_description_rich_help_formatter,
 )
 parser.add_argument(
     "-f", "--folder", help="folder where to search for scenarios", required=False
@@ -34,7 +34,7 @@ parser.add_argument(
 )
 args = vars(parser.parse_args())
 
-logger = setupLogger("module")
+logger = setup_logger("module")
 
 shot = args["shot"]
 run = args["run"]
@@ -45,18 +45,18 @@ if args["folder"] is not None:
     folder = args["folder"]
 else:
     folder = os.environ["IMAS_HOME"] + "/shared/imasdb/ITER/3/0"
-    lowlevelVersion = DBMaster.getCoreVersion()
-    lowlevelVersion = int(lowlevelVersion.split(".")[0])
-    if lowlevelVersion < 4:
+    lowlevel_version = d_b_master.get_core_version()
+    lowlevel_version = int(lowlevel_version.split(".")[0])
+    if lowlevel_version < 4:
         folder = os.environ["IMAS_HOME"] + "/shared/iterdb/3/0"
-sdObject = ScenarioDescription(shot, run, folder)
+sd_object = scenario_description(shot, run, folder)
 if args["print"] is True:
-    sdObject.printYaml()
+    sd_object.print_yaml()
     exit(0)
 
-family = sdObject.getFamily()
+family = sd_object.get_family()
 
-table = Table(
+table = table(
     title="Scenario Status"
 )
 table.add_column("SCENARIO", style="magenta")
@@ -67,10 +67,10 @@ for iparent in range(len(family["parents"]["pulse"])):
     table.add_row(
         f" {family['parents']['pulse'][iparent]:>7}{family['parents']['run'][iparent]:>5}", f"{family['parents']['status'][iparent]:<10}", f"{family['parents']['comment'][iparent]}"
     )
-if "database_relations" in sdObject.yamlData.keys():
-    if "replaced_by" in sdObject.yamlData["database_relations"].keys():
+if "database_relations" in sd_object.yaml_data.keys():
+    if "replaced_by" in sd_object.yaml_data["database_relations"].keys():
         table.add_row(
-            f"*{shot:>7}{run:>5}",f"{sdObject.yamlData['status']:<10}",f"{sdObject.yamlData['database_relations']['replaces']}"
+            f"*{shot:>7}{run:>5}",f"{sd_object.yaml_data['status']:<10}",f"{sd_object.yaml_data['database_relations']['replaces']}"
         )
 else:
     logger.warn("database relations not found")

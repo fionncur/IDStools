@@ -6,24 +6,24 @@ import imas
 from imas import imasdef
 
 
-def getCoreVersion():
-    _lowlevelVersion = ""
+def get_core_version():
+    _lowlevel_version = ""
     if "_al_lowlevel" in imas.__dict__:
-        _lowlevelVersion = imas.get_al_version()
+        _lowlevel_version = imas.get_al_version()
     if "_ual_lowlevel" in imas.__dict__:
-        rawCoreVersion = imas._ual_lowlevel.__name__  # '__name__': 'imas_3_41_0_ual_4_11_10._ual_lowlevel
-        rawCoreVersion, _ = rawCoreVersion.split(".")
-        match = re.search(r"\d+_\d+_\d+$", rawCoreVersion)
+        raw_core_version = imas._ual_lowlevel.__name__  # '__name__': 'imas_3_41_0_ual_4_11_10._ual_lowlevel
+        raw_core_version, _ = raw_core_version.split(".")
+        match = re.search(r"\d+_\d+_\d+$", raw_core_version)
         if match:
-            _lowlevelVersion = match.group()
-            _lowlevelVersion = _lowlevelVersion.replace("_", ".")
-    lowlevelVersion = int(_lowlevelVersion.split(".")[0])
-    return lowlevelVersion
+            _lowlevel_version = match.group()
+            _lowlevel_version = _lowlevel_version.replace("_", ".")
+    lowlevel_version = int(_lowlevel_version.split(".")[0])
+    return lowlevel_version
 
 
 # default parent parser for all idstools scripts
-uriParser = argparse.ArgumentParser(add_help=False)
-uriParser.add_argument(
+uri_parser = argparse.argument_parser(add_help=False)
+uri_parser.add_argument(
     "-u",
     "--uri",
     type=str,
@@ -31,8 +31,8 @@ uriParser.add_argument(
     help="uri",
 )
 
-imasParser = argparse.ArgumentParser(add_help=False)
-imasParser.add_argument(
+imas_parser = argparse.argument_parser(add_help=False)
+imas_parser.add_argument(
     "-u",
     "--user_or_path",
     dest="user",
@@ -40,7 +40,7 @@ imasParser.add_argument(
     default="public",  # os.environ["USER"],
     help="user \t\t(default=%(default)s)",
 )
-db_group = imasParser.add_mutually_exclusive_group()
+db_group = imas_parser.add_mutually_exclusive_group()
 db_group.add_argument(
     "-d",
     "--database",
@@ -48,14 +48,14 @@ db_group.add_argument(
     default="ITER",
     help="database name \t(default=%(default)s)",
 )
-imasParser.add_argument(
+imas_parser.add_argument(
     "-b",
     "--backend",
     type=str,
     default="MDSPLUS",
     help="backend format \t(default=%(default)s)",
 )
-imasParser.add_argument(
+imas_parser.add_argument(
     "-v",
     "--version",
     type=str,
@@ -63,18 +63,18 @@ imasParser.add_argument(
     help="data version \t(default=%(default)s)",
 )
 
-dbentryParser = argparse.ArgumentParser(add_help=False, parents=[uriParser])
+dbentry_parser = argparse.argument_parser(add_help=False, parents=[uri_parser])
 
 
-def getBackendID(name):
+def get_backend_i_d(name):
     return getattr(imasdef, f"{name}_BACKEND")
 
 
-def getSliceMode(name):
+def get_slice_mode(name):
     return getattr(imasdef, f"{name}_INTERP")
 
 
-def getDetailsfromURI(uri):
+def get_detailsfrom_u_r_i(uri):
     import re
 
     param = {}
@@ -131,42 +131,42 @@ def getDetailsfromURI(uri):
     return param
 
 
-def getTitle(imasargs, title="", timeValue=None):
+def get_title(imasargs, title="", time_value=None):
     _title = ""
     if title:
         _title += f"{title} "
     if "uri" in imasargs.__dict__ and imasargs.uri:
-        param = getDetailsfromURI(imasargs.uri)
+        param = get_detailsfrom_u_r_i(imasargs.uri)
         if param["pathPresent"]:
             _title += f"PATH={param['path']}"
         else:
             _title += f"(PULSE={param['pulse']},{param['run']})"
     else:
         _title += f"(PULSE={imasargs.pulse},{imasargs.run})"
-    if timeValue:
-        _title += f" TIME:{timeValue:.1f}"
+    if time_value:
+        _title += f" TIME:{time_value:.1f}"
     return _title
 
 
-def getFileName(imasargs, title="", timeValue=None):
-    _fileName = ""
+def get_file_name(imasargs, title="", time_value=None):
+    _file_name = ""
     if title:
-        _fileName += f"{title}_"
+        _file_name += f"{title}_"
     if "uri" in imasargs.__dict__ and imasargs.uri:
-        param = getDetailsfromURI(imasargs.uri)
+        param = get_detailsfrom_u_r_i(imasargs.uri)
         if param["pathPresent"]:
-            _fileName += f"PATH_{param['path'].replace('/', '_')}_"
+            _file_name += f"PATH_{param['path'].replace('/', '_')}_"
         else:
-            _fileName += f"PULSE_{param['pulse']}_RUN_{param['run']}_"
+            _file_name += f"PULSE_{param['pulse']}_RUN_{param['run']}_"
     else:
-        _fileName += f"PULSE_{imasargs.pulse}_RUN_{imasargs.run}_"
-    if timeValue:
-        _fileName += f"TIME_{timeValue:.1f}"
-    _fileName += ".png"
-    return _fileName
+        _file_name += f"PULSE_{imasargs.pulse}_RUN_{imasargs.run}_"
+    if time_value:
+        _file_name += f"TIME_{time_value:.1f}"
+    _file_name += ".png"
+    return _file_name
 
 
-def getDatabasePath(imasargs, timeValue=None) -> str:
+def get_database_path(imasargs, time_value=None) -> str:
     """
     The function `getDatabasePath` returns the absolute path of a database based on the provided arguments.
 
@@ -176,33 +176,33 @@ def getDatabasePath(imasargs, timeValue=None) -> str:
     Returns:
         the absolute path of the database.
     """
-    pulseInfo = ""
-    databaseAbsolutePath = ""
+    pulse_info = ""
+    database_absolute_path = ""
     if "uri" in imasargs.__dict__ and imasargs.uri:
-        databaseAbsolutePath = imasargs.uri
+        database_absolute_path = imasargs.uri
 
     else:
         if imasargs.user == "public":
             publichome = os.getenv("IMAS_HOME", default="")
             if publichome is None:
                 return None
-            databaseAbsolutePath = (
+            database_absolute_path = (
                 f"{publichome}/shared/imasdb/{imasargs.database}/{imasargs.version}/{imasargs.run//10000}"
             )
         else:
-            databaseAbsolutePath = (
+            database_absolute_path = (
                 f'{os.path.expanduser(f"~{imasargs.user}")}/public/imasdb/'
                 f"{str(imasargs.database)}/{imasargs.version}/{imasargs.run//10000}"
             )
-        pulseInfo = f"pulse {imasargs.pulse},{imasargs.run}"
-        databaseAbsolutePath = databaseAbsolutePath[:-2]
-    timeString = ""
-    if timeValue:
-        timeString = f"time:{timeValue:.2f})"
-    hostdir = f"{socket.gethostname()}:{databaseAbsolutePath} "
-    if pulseInfo:
-        hostdir += f"({pulseInfo})"
-    if timeString:
-        hostdir += f"#{timeString}"
+        pulse_info = f"pulse {imasargs.pulse},{imasargs.run}"
+        database_absolute_path = database_absolute_path[:-2]
+    time_string = ""
+    if time_value:
+        time_string = f"time:{time_value:.2f})"
+    hostdir = f"{socket.gethostname()}:{database_absolute_path} "
+    if pulse_info:
+        hostdir += f"({pulse_info})"
+    if time_string:
+        hostdir += f"#{time_string}"
     #
     return hostdir

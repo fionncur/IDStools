@@ -12,13 +12,13 @@ from rich_argparse import RichHelpFormatter
 from idstools.compute.equilibrium import EquilibriumCompute
 from idstools.utils.idslogger import setupLogger
 
-logger = setupLogger("module", stdout_level=logging.INFO)
+logger = setup_logger("module", stdout_level=logging.i_n_f_o)
 #
 
 # Management of input arguments
-parser = argparse.ArgumentParser(
+parser = argparse.argument_parser(
     description="Rigidly shifts vertically an equilibrium, storing the output into another entry of the same DB. replaced by ids_shift_eq",
-    formatter_class=RichHelpFormatter,
+    formatter_class=rich_help_formatter,
 )
 parser.add_argument(
     "-s",
@@ -42,41 +42,41 @@ parser.add_argument(
 
 args = parser.parse_args()
 
-shiftParam = args.shift
+shift_param = args.shift
 
 # OPEN INPUT
-inputargs = argparse.Namespace()
+inputargs = argparse.namespace()
 inputargs.uri = args.src
-connection = DBMaster.getConnection(inputargs)
+connection = d_b_master.get_connection(inputargs)
 if connection is None:
     sys.exit()
 
-idsEquilibrium = connection.get("equilibrium")
+ids_equilibrium = connection.get("equilibrium")
 
-outputargs = argparse.Namespace()
+outputargs = argparse.namespace()
 outputargs.mode = "w"
 outputargs.uri = args.dest
 
-outputConnection = DBMaster.getConnection(outputargs)
-if outputConnection is None:
-    outputConnection = DBMaster.createConnection(outputargs)
-    if outputConnection is None:
+output_connection = d_b_master.get_connection(outputargs)
+if output_connection is None:
+    output_connection = d_b_master.create_connection(outputargs)
+    if output_connection is None:
         sys.exit()
 
 
-logger.info(f"Shifting equilibrium by {shiftParam} m")
+logger.info(f"Shifting equilibrium by {shift_param} m")
 logger.info(
     "Values for wall gaps, locations of strike-points and closest wall points are no longer guaranteed!"
 )
-equilibriumCompute = EquilibriumCompute(idsEquilibrium)
-equout = equilibriumCompute.z_shift(shiftParam)
+equilibrium_compute = equilibrium_compute(ids_equilibrium)
+equout = equilibrium_compute.z_shift(shift_param)
 
 # PUT IDS INTO OUTPUT
-outputConnection.put(equout)
+output_connection.put(equout)
 
 # CLOSE FILES
 connection.close()
-outputConnection.close()
+output_connection.close()
 logger.info("Equilibrium IDS is upward shifted successfully.")
 
 if args.dest is not None:

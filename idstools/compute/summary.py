@@ -1,7 +1,7 @@
 """
 This module provides compute functions and classes for summary ids data
 
-`more about summary ids <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/CI/latest.html>`_.
+`more about summary ids <https://sharepoint.iter.org/departments/POP/CM/i_m_design/Data%20Model/CI/latest.html>`_.
 
 """
 
@@ -12,7 +12,7 @@ from imas import imasdef
 logger = logging.getLogger("module")
 
 
-class SummaryCompute:
+class summary_compute:
     """This class provides compute functions for summary ids"""
 
     def __init__(self, ids):
@@ -23,7 +23,7 @@ class SummaryCompute:
         """
         self.ids = ids
 
-    def getSummary(
+    def get_summary(
         self,
     ):
         stime = len(self.ids.time)
@@ -205,11 +205,11 @@ class SummaryCompute:
         waveform["p_ohmic"] = p_ohmic
         waveform["p_steady"] = p_steady
         for k in waveform.keys():
-            waveform[k][waveform[k] == imasdef.EMPTY_DOUBLE] = np.nan
+            waveform[k][waveform[k] == imasdef.e_m_p_t_y__d_o_u_b_l_e] = np.nan
 
         return waveform
 
-    def getHModeInfo(self):
+    def get_h_mode_info(self):
         """
         The function `getHModeInfo` checks if the `h_mode` values are present in the `global_quantities`
         and returns information about the presence of HMode, as well as the minimum and maximum time
@@ -235,11 +235,11 @@ class SummaryCompute:
 
             h_mode_indices = indices(h_mode[2:], lambda h_mode_flag: h_mode_flag > 0)
             if len(h_mode_indices) > 0:
-                HModePresent = True
+                h_mode_present = True
                 th_min = self.ids.time[h_mode_indices[0]]
                 th_max = self.ids.time[h_mode_indices[-1]]
             else:
-                HModePresent = False
+                h_mode_present = False
         else:
-            HModePresent = False
-        return {"HModePresent": HModePresent, "th_min": th_min, "th_max": th_max}
+            h_mode_present = False
+        return {"HModePresent": h_mode_present, "th_min": th_min, "th_max": th_max}

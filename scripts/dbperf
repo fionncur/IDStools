@@ -21,10 +21,10 @@ from idstools.idsperf import byte_size, get_timings
 from idstools.utils.clihelper import getBackendID, imasParser
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
+    parser = argparse.argument_parser(
         description="Times IDS getting of given Pulse and Run, contrasts with IDS size and slices. replaced by db_backend_benchmark.py",
-        parents=[imasParser],
-        formatter_class=RichHelpFormatter,
+        parents=[imas_parser],
+        formatter_class=rich_help_formatter,
     )
     parser.add_argument(
         "-md",
@@ -137,13 +137,13 @@ if __name__ == "__main__":
 
     if not args.file:
         if args.database:
-            mdslocpath = DBMaster.getDBPath(args.user, args.database, args.version)
+            mdslocpath = d_b_master.get_d_b_path(args.user, args.database, args.version)
             hdflocpath = mdslocpath
         elif args.mdsdatabase and args.hdf5database:
-            mdslocpath = DBMaster.getDBPath(
+            mdslocpath = d_b_master.get_d_b_path(
                 args.mdsuser, args.mdsdatabase, args.version
             )
-            hdflocpath = DBMaster.getDBPath(
+            hdflocpath = d_b_master.get_d_b_path(
                 args.hdf5user, args.hdf5database, args.version
             )
         else:
@@ -160,8 +160,8 @@ if __name__ == "__main__":
             pulses = [(args.pulse, args.run)]
 
         elif not args.pulse:
-            hpulses = DBMaster.hdf5ListPulseRun(hdflocpath)
-            mpulses = DBMaster.mdsListPulseRun(mdslocpath)
+            hpulses = d_b_master.hdf5_list_pulse_run(hdflocpath)
+            mpulses = d_b_master.mds_list_pulse_run(mdslocpath)
             if set(hpulses) != set(mpulses):
                 mdsrem = set(mpulses) - set(hpulses)
                 hdfrem = set(hpulses) - set(mpulses)
@@ -199,10 +199,10 @@ if __name__ == "__main__":
             pulse = entry[0]
             run = entry[1]
 
-            mdsde = imas.DBEntry(12, args.database, pulse, run, args.user)
+            mdsde = imas.d_b_entry(12, args.database, pulse, run, args.user)
             mdsde.open()
 
-            hdfde = imas.DBEntry(13, args.database, pulse, run, args.user)
+            hdfde = imas.d_b_entry(13, args.database, pulse, run, args.user)
             hdfde.open()
 
             idslist = available_in_dbentry(hdfde)
@@ -263,7 +263,7 @@ if __name__ == "__main__":
                 print("HDF5 database closed")
                 print(log[-1])
 
-        totaldf = pd.DataFrame(
+        totaldf = pd.data_frame(
             log,
             columns=[
                 "(PULSE, RUN)",
@@ -281,18 +281,18 @@ if __name__ == "__main__":
 
         if args.sizevtime:
             totaldf["MDSPLUS_PERFORMANCE (MB/s)"] = totaldf.apply(
-                lambda row: (row.SIZE / row.MDSPLUS_TIME), axis=1
+                lambda row: (row.s_i_z_e / row.m_d_s_p_l_u_s__t_i_m_e), axis=1
             )
             totaldf["HDF5_PERFORMANCE (MB/s)"] = totaldf.apply(
-                lambda row: (row.SIZE / row.HDF5_TIME), axis=1
+                lambda row: (row.s_i_z_e / row.h_d_f5__t_i_m_e), axis=1
             )
 
         if args.slicevtime:
             totaldf["MDSPLUS_PERFORMANCE (Slices/s)"] = totaldf.apply(
-                lambda row: (row.SLICES / row.MDSPLUS_TIME), axis=1
+                lambda row: (row.s_l_i_c_e_s / row.m_d_s_p_l_u_s__t_i_m_e), axis=1
             )
             totaldf["HDF5_PERFORMANCE (Slices/s)"] = totaldf.apply(
-                lambda row: (row.SLICES / row.HDF5_TIME), axis=1
+                lambda row: (row.s_l_i_c_e_s / row.h_d_f5__t_i_m_e), axis=1
             )
 
         date = datetime.now().strftime("%Y_%m_%d-%I:%M:%S_%p")
@@ -307,7 +307,7 @@ if __name__ == "__main__":
             totaldf = totaldf[(totaldf["IDS"].isin(args.ids))]
 
         if args.excludeids:
-            totaldf.drop(totaldf[totaldf.IDS.isin(args.excludeids)].index, inplace=True)
+            totaldf.drop(totaldf[totaldf.i_d_s.isin(args.excludeids)].index, inplace=True)
 
     if args.verbose:
         print(totaldf)
