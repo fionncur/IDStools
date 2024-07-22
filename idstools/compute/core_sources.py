@@ -9,7 +9,6 @@ import logging
 import numpy as np
 import functools
 from typing import Dict
-from typing import Optional
 
 logger = logging.getLogger("module")
 
