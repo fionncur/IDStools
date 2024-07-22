@@ -20,11 +20,7 @@ Power, particle and current profiles.
 
         $ plotcoresources --uri "imas:mdsplus?user=public;pulse=130012;run=105;database=TEST;version=3"
 
-    .. thumbnail:: _static/images/plotcoresources1.png
-        :alt: image not found
-        :align: center
-
-    .. thumbnail:: _static/images/plotcoresources2.png
+    .. thumbnail:: _static/images/plotcoresources.png
         :alt: image not found
         :align: center
 
