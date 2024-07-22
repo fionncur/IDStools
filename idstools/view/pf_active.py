@@ -48,8 +48,8 @@ class p_f_active_view:
                 canvas = Canvas(1, 1) # create canvas
                 ax = canvas.add_axes(title="", xlabel="", row=0, col=0)
 
-                viewObj = PfActiveView(idsObj)
-                viewObj.viewActivePfCoils(ax) # plot contour on the canvas axes
+                viewObj = PFActiveView(idsObj)
+                viewObj.viewActivePfCoils(ax, showLabels=True) # plot contour on the canvas axes
 
                 ax.plot()
                 canvas.show()
@@ -67,7 +67,7 @@ class p_f_active_view:
                         element_info["horizontalHeight"],
                         element_info["cec"],
                     )
-                    rectangle = rectangle(cec, cew, ceh, edgecolor="#fd7e14", facecolor="#fd7e14")
+                    rectangle = Rectangle(cec, cew, ceh, edgecolor="#fd7e14", facecolor="#fd7e14", alpha=0.5)
 
                     ax.add_patch(rectangle)
                     rx, ry = rectangle.get_xy()
@@ -86,6 +86,5 @@ class p_f_active_view:
                             cy,
                             name,
                             fontsize="x-small",
-                            rotation=90,
                         )
             ax.set_aspect("equal", adjustable="box")

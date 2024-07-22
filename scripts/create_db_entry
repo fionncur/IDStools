@@ -32,13 +32,15 @@ parser.add_argument(
     dest="wo_validation",
 )
 args = parser.parse_args()
-input = imas.d_b_entry(get_backend_i_d(args.backend),
-                args.database,
-                args.shot,
-                args.run,
-                args.user,
-                args.version,
-            )
+input = imas.d_b_entry(
+    get_backend_i_d(args.backend),
+    args.database,
+    args.shot,
+    args.run,
+    args.user,
+    args.version,
+)
+
 
 if input is not None:
     status, _ = input.open()
@@ -96,9 +98,7 @@ if core_present == 1:
         print("----> Aborted.", file=sys.stderr)
         exit()
     core_profiles.profiles_1d.resize(1)
-    core_profiles.profiles_1d[0] = input.partial_get(
-        "core_profiles", "profiles_1d(" + str(the_slice) + ")"
-    )
+    core_profiles.profiles_1d[0] = input.partial_get("core_profiles", "profiles_1d(" + str(the_slice) + ")")
 
 if edge_present == 1:
     try:
@@ -124,13 +124,9 @@ try:
     else:
         eq_present = 0
     if eq_present == 1:
-        equilibrium.vacuum_toroidal_field = input.partial_get(
-            "equilibrium", "vacuum_toroidal_field"
-        )
+        equilibrium.vacuum_toroidal_field = input.partial_get("equilibrium", "vacuum_toroidal_field")
         equilibrium.time_slice.resize(1)
-        equilibrium.time_slice[0] = input.partial_get(
-            "equilibrium", "time_slice(" + str(the_slice) + ")"
-        )
+        equilibrium.time_slice[0] = input.partial_get("equilibrium", "time_slice(" + str(the_slice) + ")")
 except Exception as e:
     print("The equilibrium IDS is absent from the input data-entry", file=sys.stdout)
     eq_present = 0
@@ -156,9 +152,7 @@ except Exception as e:
 
 try:
     edge_transport = imas.edge_transport()
-    edge_transport.ids_properties = input.partial_get(
-        "edge_transport", "ids_properties"
-    )
+    edge_transport.ids_properties = input.partial_get("edge_transport", "ids_properties")
     if edge_transport.ids_properties.homogeneous_time != -999999999:
         flux_present = 1
     else:
@@ -166,13 +160,9 @@ try:
     if flux_present == 1:
         edge_transport.model.resize(1)
         edge_transport.model[0].ggd.resize(1)
-        edge_transport.model[0].ggd[0] = input.partial_get(
-            "edge_transport", "model(0)/ggd(" + str(the_slice) + ")"
-        )
+        edge_transport.model[0].ggd[0] = input.partial_get("edge_transport", "model(0)/ggd(" + str(the_slice) + ")")
         edge_transport.grid_ggd.resize(1)
-        edge_transport.grid_ggd[0] = input.partial_get(
-            "edge_transport", "grid_ggd(" + str(the_slice) + ")"
-        )
+        edge_transport.grid_ggd[0] = input.partial_get("edge_transport", "grid_ggd(" + str(the_slice) + ")")
 except Exception as e:
     print("The edge_transport IDS is absent from the input data-entry", file=sys.stdout)
     if p_sol == 0:
@@ -213,9 +203,7 @@ else:
         else:
             magnetic_field = max(summary.global_quantities.b0.value)
     except Exception as e:
-        print(
-            "summary.global_quantities.b0.value[:] could not be read", file=sys.stderr
-        )
+        print("summary.global_quantities.b0.value[:] could not be read", file=sys.stderr)
         print("----> Aborted.", file=sys.stderr)
         exit()
 
@@ -236,10 +224,7 @@ else:
     try:
         plasma_current = 0
         for islice in range(len(summary.time)):
-            if (
-                abs(summary.global_quantities.ip.value[islice]) * 1.0e-6
-                > plasma_current
-            ):
+            if abs(summary.global_quantities.ip.value[islice]) * 1.0e-6 > plasma_current:
                 plasma_current = summary.global_quantities.ip.value[islice] * 1.0e-6
     except Exception as e:
         print("summary.global_quantities.ip could not be read", file=sys.stderr)
@@ -264,9 +249,7 @@ else:
         edge_profiles.ggd.resize(1)
         # pdb.set_trace()
         # edge_profiles.ggd[0].ion = input.edge_profiles.partialGet('ggd('+str(the_slice)+')/ion')
-        edge_profiles.ggd[0] = input.partial_get(
-            "edge_profiles", "ggd(" + str(the_slice) + ")"
-        )
+        edge_profiles.ggd[0] = input.partial_get("edge_profiles", "ggd(" + str(the_slice) + ")")
         nspecies = len(edge_profiles.ggd[0].ion)
         a = [0] * nspecies
         for ispecies in range(nspecies):
@@ -349,9 +332,7 @@ if edge_present == 1:
     try:
         sepmid_zeff = summary.local.separatrix.zeff.value[the_slice]
     except Exception as e:
-        print(
-            "summary.local.separatrix.zeff.value[:] could not be read", file=sys.stderr
-        )
+        print("summary.local.separatrix.zeff.value[:] could not be read", file=sys.stderr)
         if core_present == 1:
             print("Only the core Zeff value will be provided", file=sys.stderr)
         else:
@@ -382,35 +363,19 @@ else:
     if n_ec > 0:
         for isource in range(n_ec):
             if len(summary.heating_current_drive.ec[isource].power.value) > 0:
-                p_ec = (
-                    p_ec
-                    + max(summary.heating_current_drive.ec[isource].power.value)
-                    * 1.0e-6
-                )
+                p_ec = p_ec + max(summary.heating_current_drive.ec[isource].power.value) * 1.0e-6
     if n_ic > 0:
         for isource in range(n_ic):
             if len(summary.heating_current_drive.ic[isource].power.value) > 0:
-                p_ic = (
-                    p_ic
-                    + max(summary.heating_current_drive.ic[isource].power.value)
-                    * 1.0e-6
-                )
+                p_ic = p_ic + max(summary.heating_current_drive.ic[isource].power.value) * 1.0e-6
     if n_nbi > 0:
         for isource in range(n_nbi):
             if len(summary.heating_current_drive.nbi[isource].power.value) > 0:
-                p_nbi = (
-                    p_nbi
-                    + max(summary.heating_current_drive.nbi[isource].power.value)
-                    * 1.0e-6
-                )
+                p_nbi = p_nbi + max(summary.heating_current_drive.nbi[isource].power.value) * 1.0e-6
     if n_lh > 0:
         for isource in range(n_lh):
             if len(summary.heating_current_drive.lh[isource].power.value) > 0:
-                p_lh = (
-                    p_lh
-                    + max(summary.heating_current_drive.lh[isource].power.value)
-                    * 1.0e-6
-                )
+                p_lh = p_lh + max(summary.heating_current_drive.lh[isource].power.value) * 1.0e-6
     p_hcd = p_ec + p_ic + p_nbi + p_lh
 
     # Detect L-H and H-L transitions
@@ -422,10 +387,7 @@ else:
                 foo = foo + "H"
             else:
                 foo = foo + "L"
-        confinement_regime = "".join(
-            [foo[i] + "-" for i in range(len(foo) - 1) if foo[i + 1] != foo[i]]
-            + [foo[-1]]
-        )
+        confinement_regime = "".join([foo[i] + "-" for i in range(len(foo) - 1) if foo[i + 1] != foo[i]] + [foo[-1]])
         if len(confinement_regime) > 5:
             confinement_regime = confinement_regime[0:5]
         if len(confinement_regime) == 1:
@@ -442,28 +404,9 @@ if p_sol == 0:
         p_sol_i = 0
         nsubsets = len(edge_transport.model[0].ggd[0].electrons.energy.flux)
         for iset in range(nsubsets):
-            if (
-                edge_transport.model[0]
-                .ggd[0]
-                .electrons.energy.flux[iset]
-                .grid_subset_index
-                == 26
-            ):
-                for i_face in range(
-                    len(
-                        edge_transport.model[0]
-                        .ggd[0]
-                        .electrons.energy.flux[iset]
-                        .values
-                    )
-                ):
-                    faceindex = (
-                        edge_transport.grid_ggd[0]
-                        .grid_subset[iset]
-                        .element[i_face]
-                        .object[0]
-                        .index
-                    )
+            if edge_transport.model[0].ggd[0].electrons.energy.flux[iset].grid_subset_index == 26:
+                for i_face in range(len(edge_transport.model[0].ggd[0].electrons.energy.flux[iset].values)):
+                    faceindex = edge_transport.grid_ggd[0].grid_subset[iset].element[i_face].object[0].index
                     # Allow for backward-compatibility when measure contained the area instead of the edge length
                     try:
                         area = (
@@ -475,37 +418,16 @@ if p_sol == 0:
                         )
                     except Exception as e:
                         area = (
-                            edge_transport.grid_ggd[0]
-                            .space[0]
-                            .objects_per_dimension[1]
-                            .object[faceindex - 1]
-                            .measure
+                            edge_transport.grid_ggd[0].space[0].objects_per_dimension[1].object[faceindex - 1].measure
                         )
-                    flux = (
-                        edge_transport.model[0]
-                        .ggd[0]
-                        .electrons.energy.flux[iset]
-                        .values[i_face]
-                    )
+                    flux = edge_transport.model[0].ggd[0].electrons.energy.flux[iset].values[i_face]
                     p_sol_e = p_sol_e + flux * area
                     try:
-                        flux = (
-                            edge_transport.model[0]
-                            .ggd[0]
-                            .total_ion_energy.flux[iset]
-                            .values[i_face]
-                        )
+                        flux = edge_transport.model[0].ggd[0].total_ion_energy.flux[iset].values[i_face]
                     except Exception as e:
                         flux = 0
                         for ispecies in range(nspecies):
-                            flux = (
-                                flux
-                                + edge_transport.model[0]
-                                .ggd[0]
-                                .ion[ispecies]
-                                .energy.flux[iset]
-                                .values[i_face]
-                            )
+                            flux = flux + edge_transport.model[0].ggd[0].ion[ispecies].energy.flux[iset].values[i_face]
                     p_sol_i = p_sol_i + flux * area
         p_sol = (p_sol_e + p_sol_i) * 1.0e-6
 
@@ -523,95 +445,65 @@ if nspecies > 0:
     max_density = -999.0
     for ispecies in range(nspecies):
         if core_present == 1:
-            species_density[ispecies] = sum(
-                volume * core_profiles.profiles_1d[0].ion[ispecies].density
-            )
+            species_density[ispecies] = sum(volume * core_profiles.profiles_1d[0].ion[ispecies].density)
         elif edge_present == 1:
             if z[ispecies] == 1:
                 if a[ispecies] == 1:
                     if species_done[0] == 0:
-                        species_density[ispecies] = (
-                            summary.local.separatrix.n_i.hydrogen.value[the_slice]
-                        )
+                        species_density[ispecies] = summary.local.separatrix.n_i.hydrogen.value[the_slice]
                         species_done[0] = 1
                 elif a[ispecies] == 2:
                     if species_done[1] == 0:
-                        species_density[ispecies] = (
-                            summary.local.separatrix.n_i.deuterium.value[the_slice]
-                        )
+                        species_density[ispecies] = summary.local.separatrix.n_i.deuterium.value[the_slice]
                         species_done[1] = 1
                 elif a[ispecies] == 3:
                     if species_done[2] == 0:
-                        species_density[ispecies] = (
-                            summary.local.separatrix.n_i.tritium.value[the_slice]
-                        )
+                        species_density[ispecies] = summary.local.separatrix.n_i.tritium.value[the_slice]
                         species_done[2] = 1
             elif z[ispecies] == 2:
                 if a[ispecies] == 3:
                     if species_done[3] == 0:
-                        species_density[ispecies] = (
-                            summary.local.separatrix.n_i.helium_3.value[the_slice]
-                        )
+                        species_density[ispecies] = summary.local.separatrix.n_i.helium_3.value[the_slice]
                         species_done[3] = 1
                 elif a[ispecies] == 4:
                     if species_done[4] == 0:
-                        species_density[ispecies] = (
-                            summary.local.separatrix.n_i.helium_4.value[the_slice]
-                        )
+                        species_density[ispecies] = summary.local.separatrix.n_i.helium_4.value[the_slice]
                         species_done[4] = 1
             elif z[ispecies] == 3:
                 if species_done[5] == 0:
-                    species_density[ispecies] = (
-                        summary.local.separatrix.n_i.lithium.value[the_slice]
-                    )
+                    species_density[ispecies] = summary.local.separatrix.n_i.lithium.value[the_slice]
                     species_done[5] = 1
             elif z[ispecies] == 4:
                 if species_done[6] == 0:
-                    species_density[ispecies] = (
-                        summary.local.separatrix.n_i.beryllium.value[the_slice]
-                    )
+                    species_density[ispecies] = summary.local.separatrix.n_i.beryllium.value[the_slice]
                     species_done[6] = 1
             elif z[ispecies] == 6:
                 if species_done[7] == 0:
-                    species_density[ispecies] = (
-                        summary.local.separatrix.n_i.carbon.value[the_slice]
-                    )
+                    species_density[ispecies] = summary.local.separatrix.n_i.carbon.value[the_slice]
                     species_done[7] = 1
             elif z[ispecies] == 7:
                 if species_done[8] == 0:
-                    species_density[ispecies] = (
-                        summary.local.separatrix.n_i.nitrogen.value[the_slice]
-                    )
+                    species_density[ispecies] = summary.local.separatrix.n_i.nitrogen.value[the_slice]
                     species_done[8] = 1
             elif z[ispecies] == 8:
                 if species_done[9] == 0:
-                    species_density[ispecies] = (
-                        summary.local.separatrix.n_i.oxygen.value[the_slice]
-                    )
+                    species_density[ispecies] = summary.local.separatrix.n_i.oxygen.value[the_slice]
                     species_done[9] = 1
             elif z[ispecies] == 10:
                 if species_done[10] == 0:
-                    species_density[ispecies] = summary.local.separatrix.n_i.neon.value[
-                        the_slice
-                    ]
+                    species_density[ispecies] = summary.local.separatrix.n_i.neon.value[the_slice]
                     species_done[10] = 1
             elif z[ispecies] == 18:
                 if species_done[11] == 0:
-                    species_density[ispecies] = (
-                        summary.local.separatrix.n_i.argon.value[the_slice]
-                    )
+                    species_density[ispecies] = summary.local.separatrix.n_i.argon.value[the_slice]
                     species_done[11] = 1
             elif z[ispecies] == 54:
                 if species_done[12] == 0:
-                    species_density[ispecies] = (
-                        summary.local.separatrix.n_i.xenon.value[the_slice]
-                    )
+                    species_density[ispecies] = summary.local.separatrix.n_i.xenon.value[the_slice]
                     species_done[12] = 1
             elif z[ispecies] == 74:
                 if species_done[13] == 0:
-                    species_density[ispecies] = (
-                        summary.local.separatrix.n_i.tungsten.value[the_slice]
-                    )
+                    species_density[ispecies] = summary.local.separatrix.n_i.tungsten.value[the_slice]
                     species_done[13] = 1
         ntot = ntot + species_density[ispecies]
         if species_density[ispecies] > max_density:
@@ -635,17 +527,11 @@ if nspecies > 0:
     for ispecies in range(nspecies):
         for jspecies in range(nspecies):
             if (species[jspecies] == species[ispecies]) & (jspecies != ispecies):
-                nspec_over_ntot[ispecies] = (
-                    nspec_over_ntot[ispecies] + nspec_over_ntot[jspecies]
-                )
+                nspec_over_ntot[ispecies] = nspec_over_ntot[ispecies] + nspec_over_ntot[jspecies]
                 nspec_over_ntot[jspecies] = 0
-                nspec_over_ne[ispecies] = (
-                    nspec_over_ne[ispecies] + nspec_over_ne[jspecies]
-                )
+                nspec_over_ne[ispecies] = nspec_over_ne[ispecies] + nspec_over_ne[jspecies]
                 nspec_over_ne[jspecies] = 0
-                nspec_over_nmaj[ispecies] = (
-                    nspec_over_nmaj[ispecies] + nspec_over_nmaj[jspecies]
-                )
+                nspec_over_nmaj[ispecies] = nspec_over_nmaj[ispecies] + nspec_over_nmaj[jspecies]
                 nspec_over_nmaj[jspecies] = 0
 
     # Nice display of plasma composition with species concentrations
@@ -664,21 +550,9 @@ if nspecies > 0:
                 main_species = main_species + "-" + species[ispecies]
         if nspec_over_ne[ispecies] > 0.0:
             tabsize = 10
-            disp_species = (
-                disp_species
-                + species[ispecies]
-                + " " * (tabsize - len(species[ispecies]))
-            )
-            disp_a = (
-                disp_a
-                + format("%.1f" % a[ispecies])
-                + " " * (tabsize - len(format("%.1f" % a[ispecies])))
-            )
-            disp_z = (
-                disp_z
-                + format("%.1f" % z[ispecies])
-                + " " * (tabsize - len(format("%.1f" % z[ispecies])))
-            )
+            disp_species = disp_species + species[ispecies] + " " * (tabsize - len(species[ispecies]))
+            disp_a = disp_a + format("%.1f" % a[ispecies]) + " " * (tabsize - len(format("%.1f" % a[ispecies])))
+            disp_z = disp_z + format("%.1f" % z[ispecies]) + " " * (tabsize - len(format("%.1f" % z[ispecies])))
             if nspec_over_ntot[ispecies] < 1.0e-2:
                 disp_nspec_over_ntot = (
                     disp_nspec_over_ntot
@@ -759,9 +633,7 @@ if not args.wo_validation:
     ret = sv.validate_db(input)
 
     if not all(ret.values()):
-        logging.error(
-            "IDS validation failed. Use '--disable-validation' for generating yaml and watcher files anyway"
-        )
+        logging.error("IDS validation failed. Use '--disable-validation' for generating yaml and watcher files anyway")
         sys.exit(1)
 
 # ----------------------------------------------------------------------
@@ -910,26 +782,18 @@ f.write("   DD version: " + dd_version + "\n")
 # f.write("""    - Pedestal:          pedestal assumptions....\n""")
 # f.write("""    - L-H transition:    scaling laws that have been used\n""")
 f.write("""\n""")
-f.write(
-    """# ------------------------------------------------------------------------------\n"""
-)
-f.write(
-    """# List of filled IDSs with time quantities in seconds (start, end, step)\n"""
-)
+f.write("""# ------------------------------------------------------------------------------\n""")
+f.write("""# List of filled IDSs with time quantities in seconds (start, end, step)\n""")
 f.write("""# It should be the output of the "idslist" script, adapted from\n""")
-f.write(
-    """# listidss, see IMAS-1010 (note: the data-entry has to be copied to a personal\n"""
-)
+f.write("""# listidss, see IMAS-1010 (note: the data-entry has to be copied to a personal\n""")
 f.write("""# database for the script to work, see the example below):\n""")
 f.write("""#  idslist --uri "imas:mdsplus?user=public;shot=122525;run=1;database=ITER;version=3" -y\n""")
-f.write(
-    """# ------------------------------------------------------------------------------\n"""
-)
+f.write("""# ------------------------------------------------------------------------------\n""")
 f.write("""idslist:\n""")
 f.close()
 
 # Complete the yaml file with the output of idslist
-inputuri = f"imas:{args.backend.lower()}?user={args.user};shot={args.shot};run={args.run};database={args.database};version={args.version}"
+inputuri = f'"imas:{args.backend.lower()}?user={args.user};shot={args.shot};run={args.run};database={args.database};version={args.version}"'
 system("idslist --uri " + inputuri + " -y >> " + filename)
 
 print("----> " + filename + " created.", file=sys.stdout)
@@ -938,13 +802,9 @@ print("----> " + filename + " created.", file=sys.stdout)
 filename = "ids_" + str(args.shot) + add0 + str(args.run) + ".watcher"
 f = open(filename, "w")
 if 1 == 1:  # Done for alignment
-    f.write(
-        """----------------------------------------------------------------------------------\n"""
-    )
+    f.write("""----------------------------------------------------------------------------------\n""")
     f.write(""" Firstname		Name			E-mail\n""")
-    f.write(
-        """----------------------------------------------------------------------------------\n"""
-    )
+    f.write("""----------------------------------------------------------------------------------\n""")
 if core_present == 1:
     f.write(""" Mireille			Schneider		mireille.schneider@iter.org\n""")
 if edge_present == 1:

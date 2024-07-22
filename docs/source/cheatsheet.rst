@@ -164,7 +164,7 @@ This cheat sheet provides quick reference of commonly used commands in IDStools.
 |                            |    $ plotscenario --uri "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3" --time 60                    |
 |                            |    $ plotscenario --uri "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3" --noProfiles                 |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
-| *printcoresources*          | Shows source information from available                                                                                     |
+| *printcoresources*         | Shows source information from available                                                                                      |
 |                            |  sources (replaces print_sources).                                                                                           |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
 |                            |                                                                                                                              |
@@ -367,6 +367,9 @@ Database Tools
 **************************
  Scenario Database Tools
 **************************
+
+.. warning::
+   Scenario Database tools are keeping their legacy arguments as they will be soon deprecated and replaced by SimDB.
 
 +--------------------------------+--------------------------------------------------------------------------------+
 | Command                        | Description and Example Usage                                                  |

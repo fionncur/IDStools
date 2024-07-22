@@ -116,7 +116,9 @@ class d_b_master:
             a list of databases.
         """
         user_dir = d_b_master.get_user_dir(user)
-        databases = [_database for _database in os.listdir(user_dir) if os.path.isdir(os.path.join(user_dir, _database))]
+        databases = [
+            _database for _database in os.listdir(user_dir) if os.path.isdir(os.path.join(user_dir, _database))
+        ]
         return sorted(databases)
 
     @staticmethod
@@ -272,7 +274,9 @@ class d_b_master:
         for root, dirnames, filenames in os.walk(mdsplus_dir):
             for datafile in fnmatch.filter(filenames, "*.datafile"):
                 data_file_path = f"{root}/{datafile}"
-                if (status is None) or (status == d_b_master.get_pulse_status(path(data_file_path).with_suffix(".yaml"))):
+                if (status is None) or (
+                    status == d_b_master.get_pulse_status(path(data_file_path).with_suffix(".yaml"))
+                ):
                     run_list = (root[len(mdsplus_dir) + 1 :]).split("/")
                     try:
                         if len(run_list) == 1:  # AL4 layout
@@ -486,7 +490,10 @@ class d_b_master:
     def get_core_version(cls):
         _lowlevel_version = ""
         if "_al_lowlevel" in imas.__dict__:
-            _lowlevel_version = imas.get_al_version()
+            try:
+                _lowlevelVersion = imas.get_al_version()
+            except Exception:
+                _lowlevelVersion = imas.al_defs.AL_VERSION.decode("utf-8")
         elif "_ual_lowlevel" in imas.__dict__:
             raw_core_version = imas._ual_lowlevel.__name__  # '__name__': 'imas_3_41_0_ual_4_11_10._ual_lowlevel
             raw_core_version, _ = raw_core_version.split(".")
@@ -501,7 +508,10 @@ class d_b_master:
     def get_d_d_version(cls):
         _lowlevel_version = ""
         if "_al_lowlevel" in imas.__dict__:
-            _lowlevel_version = imas.al_dd_version
+            try:
+                _lowlevelVersion = imas.al_dd_version
+            except Exception:
+                _lowlevelVersion = imas.al_defs.DD_VERSION.decode("utf-8")
         elif "_ual_lowlevel" in imas.__dict__:
             raw_d_d_version = imas._ual_lowlevel.__name__  # '__name__': 'imas_3_41_0_ual_4_11_10._ual_lowlevel
             raw_d_d_version, _ = raw_d_d_version.split(".")
