@@ -164,7 +164,7 @@ This cheat sheet provides quick reference of commonly used commands in IDStools.
 |                            |    $ plotscenario --uri "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3" --time 60                    |
 |                            |    $ plotscenario --uri "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3" --noProfiles                 |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
-| *printcoresources*          | Shows source information from available                                                                                     |
+| *printcoresources*         | Shows source information from available                                                                                      |
 |                            |  sources (replaces print_sources).                                                                                           |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
 |                            |                                                                                                                              |

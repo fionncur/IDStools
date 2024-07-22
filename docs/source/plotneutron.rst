@@ -10,13 +10,13 @@ retrieves from distribution_sources IDS
  Syntax plotneutron
 ********************
 
-   .. command-output:: plotneutron -h
+    .. command-output:: plotneutron -h
 
 *********
  Example
 *********
 
-   .. code-block:: bash
+    .. code-block:: bash
 
         $ plotneutron --uri "imas:mdsplus?user=public;pulse=121014;run=11;database=ITER;version=3" -t 450
 
@@ -29,7 +29,7 @@ retrieves from distribution_sources IDS
         :alt: image not found
         :align: center
 
-   .. code-block:: bash
+    .. code-block:: bash
 
 
         Time  = 482.00 s

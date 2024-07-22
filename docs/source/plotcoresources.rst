@@ -10,13 +10,13 @@ Power, particle and current profiles.
  Syntax plotcoresources
 ************************
 
-   .. command-output:: plotcoresources -h
+    .. command-output:: plotcoresources -h
 
 *************************
  Example plotcoresources
 *************************
 
-   .. code-block:: bash
+    .. code-block:: bash
 
         $ plotcoresources --uri "imas:mdsplus?user=public;pulse=130012;run=105;database=TEST;version=3"
 
@@ -29,7 +29,7 @@ Power, particle and current profiles.
         :align: center
 
 
-   .. code-block:: bash
+    .. code-block:: bash
 
         Time  = 190.82 s in range [31.20,328.18] s
         Index = 8
