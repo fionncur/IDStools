@@ -63,7 +63,7 @@ class g_e_q_d_s_k:
 
         # 3. Confer COCOS
         if cocos_in:
-            self.cocos = c_o_c_o_s(
+            self.cocos = COCOS(
                 index={
                     "COCOS": cocos_in,
                     "ipsign": np.sign(self.data["CURRENT"]),
@@ -80,8 +80,8 @@ class g_e_q_d_s_k:
 
         # 4. Compute transformation coeff.
         self.coef = self.cocos.values_coefficients(
-            self.cocos.c_o_c_o_s,
-            i_d_s__c_o_c_o_s,
+            self.cocos.COCOS,
+            IDS_COCOS,
             self.data["CURRENT"],
             self.data["BCENTR"],
             ipsign_out,
@@ -302,7 +302,7 @@ class g_e_q_d_s_k:
             "b0sign": sigma_b0,
         }
 
-        return c_o_c_o_s(values=values)
+        return COCOS(values=values)
 
 
 # ----------------------------------------------------------------------
@@ -350,7 +350,7 @@ def map__g_e_q_d_s_k_to__i_d_s(geqdsk, eq):
     coef = geqdsk.coef
 
     # IDS_COCOS
-    cocos = c_o_c_o_s(index={"COCOS": i_d_s__c_o_c_o_s, "ipsign": +1, "b0sign": +1})
+    cocos = COCOS(index={"COCOS": IDS_COCOS, "ipsign": +1, "b0sign": +1})
 
     # IDS info.
     common_properties(eq)
@@ -473,12 +473,12 @@ def geqdsk2ids(fpath, ipsign=0, b0sign=0, cocos_in=None):
     map__g_e_q_d_s_k_to__i_d_s(geqdsk, eq)
 
     # COCOS Check
-    cocos = compute__c_o_c_o_s(eq)
+    cocos = compute__COCOS(eq)
     logger.info("IDS COCOS: \n%s", pformat(cocos, indent=2))
 
     # Check if COCOS is equal to IDS_COCOS
-    if cocos["COCOS"] != i_d_s__c_o_c_o_s:
-        logger.warning("COCOS Target= {}, Output= {}, Input= {}".format(i_d_s__c_o_c_o_s, cocos["COCOS"], geqdsk.cocos.c_o_c_o_s))
+    if cocos["COCOS"] != IDS_COCOS:
+        logger.warning("COCOS Target= {}, Output= {}, Input= {}".format(IDS_COCOS, cocos["COCOS"], geqdsk.cocos.COCOS))
         raise SystemExit("Input COCOS is inconsistent between GEQDSK file and COCOS with the option '--cocos_in'.")
     return eq
 

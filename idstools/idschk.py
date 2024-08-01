@@ -20,17 +20,17 @@ logger = logging.getLogger(__name__)
 
 # Global Constants
 
-f_i_l_e__i_d_s_def = d_d_helper.get_i_d_s_def_path()
-t_a_r_g_e_t__t_a_g = "IDS"
+FILE_IDSDef = DDHelper.get_ids_def_path()
+TARGET_TAG = "IDS"
 ids_header = "ids."
 idx_header = "idx."
-i_d_s__c_o_c_o_s = 11
+IDS_COCOS = 11
 args_verbose = False
 args_check_all = True
 
 
 # Initialization for yaml Dumper
-yaml.dumper.ignore_aliases = lambda *args: True
+yaml.Dumper.ignore_aliases = lambda *args: True
 
 # Validation Schema for COCOS using IDS/equilibrium
 required_fields_eq = {
@@ -142,7 +142,7 @@ def find_time(timevec, time):
 # ----------------------------------------------------------------------
 
 
-class c_o_c_o_s:
+class COCOS:
     """
     COCOS module in Python
 
@@ -188,40 +188,40 @@ class c_o_c_o_s:
         # in case of init. by index
         elif index is not None:
 
-            c_o_c_o_s = index["COCOS"]
+            COCOS = index["COCOS"]
             ipsign = index["ipsign"]
             b0sign = index["b0sign"]
             #
             # Parameters from Table I
             #
-            if c_o_c_o_s in [1, 11]:
+            if COCOS in [1, 11]:
                 # ITER, Boozer are cocos=11
                 val = (+1, +1, +1, +1, -1)
-            elif c_o_c_o_s in [2, 12]:
+            elif COCOS in [2, 12]:
                 # CHEASE, ONETWO, Hinton-Hazeltine, LION is cocos=2
                 val = (+1, -1, +1, +1, -1)
-            elif c_o_c_o_s in [3, 13]:
+            elif COCOS in [3, 13]:
                 # Freidberg, CAXE, KINX are cocos=3
                 # EU-ITM up to end of 2011 is COCOS=13
                 val = (-1, +1, -1, -1, +1)
-            elif c_o_c_o_s in [4, 14]:
+            elif COCOS in [4, 14]:
                 #
                 val = (-1, -1, -1, -1, +1)
-            elif c_o_c_o_s in [5, 15]:
+            elif COCOS in [5, 15]:
                 #
                 val = (+1, +1, -1, -1, -1)
-            elif c_o_c_o_s in [6, 16]:
+            elif COCOS in [6, 16]:
                 #
                 val = (+1, -1, -1, -1, -1)
-            elif c_o_c_o_s in [7, 17]:
+            elif COCOS in [7, 17]:
                 # TCV psitbx is cocos=7
                 val = (-1, +1, +1, +1, +1)
-            elif c_o_c_o_s in [8, 18]:
+            elif COCOS in [8, 18]:
                 #
                 val = (-1, -1, +1, +1, +1)
             else:
                 # Should not be here since all cases defined
-                raise ValueError(f"error: COCOS = {c_o_c_o_s} does not exist")
+                raise ValueError(f"error: COCOS = {COCOS} does not exist")
                 return
 
             (
@@ -235,14 +235,14 @@ class c_o_c_o_s:
             # cocos=i or 10+i have similar coordinate conventions except psi/2pi for
             # cocos=i and psi for cocos=10+i
 
-            if c_o_c_o_s >= 11:
+            if COCOS >= 11:
                 exp__bp = 1
             else:
                 exp__bp = 0
 
             theta_sign_clockwise = sigma__rphi_z * sigma_rhothetaphi
 
-            self.c_o_c_o_s = c_o_c_o_s
+            self.COCOS = COCOS
             self.sigma__ip = ipsign
             self.sigma__b0 = b0sign
             self.exp__bp = exp__bp
@@ -278,29 +278,29 @@ class c_o_c_o_s:
             #
             if val == (+1, +1, +1, +1, -1):
                 # ITER, Boozer are cocos=11
-                c_o_c_o_s = [1, 11]
+                COCOS = [1, 11]
             elif val == (+1, -1, +1, +1, -1):
                 # CHEASE, ONETWO, Hinton-Hazeltine, LION is cocos=2
-                c_o_c_o_s = [2, 12]
+                COCOS = [2, 12]
             elif val == (-1, +1, -1, -1, +1):
                 # Freidberg, CAXE, KINX are cocos=3
                 # EU-ITM up to end of 2011 is COCOS=13
-                c_o_c_o_s = [3, 13]
+                COCOS = [3, 13]
             elif val == (-1, -1, -1, -1, +1):
                 #
-                c_o_c_o_s = [4, 14]
+                COCOS = [4, 14]
             elif val == (+1, +1, -1, -1, -1):
                 #
-                c_o_c_o_s = [5, 15]
+                COCOS = [5, 15]
             elif val == (+1, -1, -1, -1, -1):
                 #
-                c_o_c_o_s = [6, 16]
+                COCOS = [6, 16]
             elif val == (-1, +1, +1, +1, +1):
                 #
-                c_o_c_o_s = [7, 17]
+                COCOS = [7, 17]
             elif val == (-1, -1, +1, +1, +1):
                 #
-                c_o_c_o_s = [8, 18]
+                COCOS = [8, 18]
             else:
                 # Should not be here since all cases defined
                 raise ValueError(f"error: COCOS Values not match {val}")
@@ -308,7 +308,7 @@ class c_o_c_o_s:
 
             theta_sign_clockwise = sigma__rphi_z * sigma_rhothetaphi
 
-            self.c_o_c_o_s = c_o_c_o_s[exp__bp]
+            self.COCOS = COCOS[exp__bp]
             self.sigma__ip = sigma__ip
             self.sigma__b0 = sigma__b0
             self.exp__bp = exp__bp
@@ -330,7 +330,7 @@ class c_o_c_o_s:
         """
 
         return {
-            "COCOS": self.c_o_c_o_s,
+            "COCOS": self.COCOS,
             "sigma_Ip": self.sigma__ip,
             "sigma_B0": self.sigma__b0,
             "exp_Bp": self.exp__bp,
@@ -343,7 +343,7 @@ class c_o_c_o_s:
         }
 
     @classmethod
-    def values_coefficients(self, c_o_c_o_s_in, c_o_c_o_s_out, ip_in, b0_in, ipsign_out, b0sign_out):
+    def values_coefficients(self, COCOS_in, COCOS_out, ip_in, b0_in, ipsign_out, b0sign_out):
         """
         Provide transformation values for a set of quantities for a given pair
         of input/output COCOS numbers
@@ -386,8 +386,8 @@ class c_o_c_o_s:
         sigma__b0_in = np.sign(b0_in)
 
         # Get COCOS related parameters
-        c_v_i = c_o_c_o_s(index={"COCOS": c_o_c_o_s_in, "ipsign": sigma__ip_in, "b0sign": sigma__b0_in}).get()
-        c_v_o = c_o_c_o_s(index={"COCOS": c_o_c_o_s_out, "ipsign": ipsign_out, "b0sign": b0sign_out}).get()
+        c_v_i = COCOS(index={"COCOS": COCOS_in, "ipsign": sigma__ip_in, "b0sign": sigma__b0_in}).get()
+        c_v_o = COCOS(index={"COCOS": COCOS_out, "ipsign": ipsign_out, "b0sign": b0sign_out}).get()
 
         # Define effective variables: sigma_Ip_eff, si1gma_B0_eff, sigma_Bp_eff,
         # exp_Bp_eff as in Appendix C
@@ -523,7 +523,7 @@ class idx_dict(dict):
 # ----------------------------------------------------------------------
 
 
-class i_d_s_validator(cerberus.validator):
+class IDSValidator(cerberus.Validator):
     """
     Cerberus-Validator extended with custom rules for IDS
 
@@ -553,7 +553,7 @@ class i_d_s_validator(cerberus.validator):
         # self.idx = kwargs.get("idx")
 
         # pass all data to the base classes
-        super(i_d_s_validator, self).__init__(*args, **kwargs)
+        super(IDSValidator, self).__init__(*args, **kwargs)
 
     def set_ids(self, ids):
         """ """
@@ -752,7 +752,7 @@ class i_d_s_validator(cerberus.validator):
         """{'nullable': False }"""
         try:
             if self.ids.__name__ == "equilibrium":
-                val = compute__c_o_c_o_s(self.ids, self.idx.itime, self.idx.i1)
+                val = compute__COCOS(self.ids, self.idx.itime, self.idx.i1)
                 if val["COCOS"] != constraint:
                     msg = f"COCOS computed {val['COCOS']}, expected as {constraint}"
                     self._error(field, msg)
@@ -821,7 +821,7 @@ def validator(field, path_doc, ids, schema, cocos, buf, idx):
                 pass
 
     # Initialization
-    v_ids = i_d_s_validator({path_doc: schemaw[path_doc]})
+    v_ids = IDSValidator({path_doc: schemaw[path_doc]})
     v_ids.set_dim(field, ids, data)
     v_ids.set_cocos(cocos)
     v_ids.set_ids(ids)
@@ -911,7 +911,7 @@ def path_iterator(field, nodes, ids, schema, cocos, buf, idx=None, level=0):
 # ----------------------------------------------------------------------
 
 
-def validate__c_o_c_o_s(ids, schema, itime, i1, cocos=None):
+def validate__COCOS(ids, schema, itime, i1, cocos=None):
     """Compute COCOS values using stored data in IDS/equilibrium
 
     Parameters
@@ -934,7 +934,7 @@ def validate__c_o_c_o_s(ids, schema, itime, i1, cocos=None):
 
     # Inter-COCOS Validation
     for key, value in schema.items():
-        v_ids = i_d_s_validator({key: value})
+        v_ids = IDSValidator({key: value})
         if cocos is not None:
             v_ids.cocos = cocos
 
@@ -956,7 +956,7 @@ def validate__c_o_c_o_s(ids, schema, itime, i1, cocos=None):
 # ----------------------------------------------------------------------
 
 
-def compute__c_o_c_o_s(ids, itime=None, i1=0, cocos_check=None):
+def compute__COCOS(ids, itime=None, i1=0, cocos_check=None):
     """Compute COCOS values using experimental data in IDS/equilibrium
 
     Parameters
@@ -980,9 +980,9 @@ def compute__c_o_c_o_s(ids, itime=None, i1=0, cocos_check=None):
         itime = int(np.floor(float(len(ids.time_slice)) / 2.0))
 
     # Check IDS/eq
-    validate__c_o_c_o_s(ids, required_fields_eq, itime, i1)
+    validate__COCOS(ids, required_fields_eq, itime, i1)
     if cocos_check:
-        validate__c_o_c_o_s(ids, required_fields_cocos, itime, i1, cocos=cocos_check)
+        validate__COCOS(ids, required_fields_cocos, itime, i1, cocos=cocos_check)
 
     # Sign(Ip) and Sign(B0) from input
     ipsign = np.sign(ids.time_slice[itime].global_quantities.ip)
@@ -1052,7 +1052,7 @@ def compute__c_o_c_o_s(ids, itime=None, i1=0, cocos_check=None):
         "sign_pprime_pos": int(sign_pprime_pos),
     }
 
-    cocos = c_o_c_o_s(values=values).get()
+    cocos = COCOS(values=values).get()
 
     return cocos
 
@@ -1156,7 +1156,7 @@ def load__d_d(idsname):
         DD correspoinding to idsname
     """
 
-    root = load__x_m_l(f_i_l_e__i_d_s_def)
+    root = load__x_m_l(FILE_IDSDef)
     dd = [dd for dd in root if dd.get("name") == idsname][0]
 
     return dd
@@ -1379,8 +1379,8 @@ def ids_validator(ids, schema, dd=None, occ=0, ipsign=-1, b0sign=-1, verbose=Fal
         exit(f"type error:{dd}")
 
     # COCOS Initialization
-    index = {"COCOS": i_d_s__c_o_c_o_s, "ipsign": ipsign, "b0sign": b0sign}
-    cocos = c_o_c_o_s(index=index).get()
+    index = {"COCOS": IDS_COCOS, "ipsign": ipsign, "b0sign": b0sign}
+    cocos = COCOS(index=index).get()
 
     # Check all fields if check_all = True
     global args_verbose, args_check_all
@@ -1454,12 +1454,12 @@ def ids_cocos_check(ids, itime=None, i1=0, verbose=False):
 
     if ids.__name__ == "equilibrium":
         try:
-            cocos = compute__c_o_c_o_s(ids, itime, i1)
+            cocos = compute__COCOS(ids, itime, i1)
         except Exception as e:
             logger.debug(f"{e}")
             exit(f"Cannot compute COCOS: {e}")
         # set remark
-        if cocos[key] == i_d_s__c_o_c_o_s:
+        if cocos[key] == IDS_COCOS:
             remark = True
         # set error
         if verbose:
@@ -1498,7 +1498,7 @@ def ids_compute_cocos(ids, itime=None, i1=0):
 
     if ids.__name__ == "equilibrium":
         try:
-            cocos = compute__c_o_c_o_s(ids, itime, i1)
+            cocos = compute__COCOS(ids, itime, i1)
         except Exception as e:
             logger.debug(f"{e}")
             logger.error(traceback.format_exc())

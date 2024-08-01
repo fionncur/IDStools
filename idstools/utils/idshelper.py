@@ -54,7 +54,7 @@ def get_ids_attributes(idsobj: object) -> list:
         return []
 
 
-def get_i_d_s_size(db_entry_object: imas.d_b_entry, ids_names=None) -> dict:
+def get_ids_size(db_entry_object: imas.d_b_entry, ids_names=None) -> dict:
     """
     The function `getIDSSize` retrieves the size of IDS objects from a database entry and returns a dictionary
     containing the size in bytes and the time taken to read each object.
@@ -106,7 +106,7 @@ def get_all_i_d_s_size(db_entry_object: imas.d_b_entry):
     Returns:
         the total size in bytes of all the IDS in the given `dbEntryObject`.
     """
-    ids_size_dict = get_i_d_s_size(db_entry_object)
+    ids_size_dict = get_ids_size(db_entry_object)
     total_bytes = np.array([ids["bytes"] for ids in ids_size_dict.values()]).sum()
     return total_bytes
 
@@ -121,7 +121,7 @@ def get_all_i_d_s_get_time(db_entry_object: imas.d_b_entry):
     Returns:
         the total time to get all the IDSes in the given `dbEntryObject`.
     """
-    ids_size_dict = get_i_d_s_size(db_entry_object)
+    ids_size_dict = get_ids_size(db_entry_object)
     return np.array([ids["time"] for ids in ids_size_dict.values()]).sum()
 
 
@@ -194,7 +194,9 @@ def get_available_ids_and_occurrences(db_entry_object: imas.d_b_entry, time_mode
                     comment += f" [occurrence type = {occ_type_text}]"
             except Exception as e:
                 logger.debug(f"{e}")
-            if homogeneous_time != imas.imasdef.e_m_p_t_y__i_n_t and (time_mode is None or time_mode == homogeneous_time):
+            if homogeneous_time != imas.imasdef.e_m_p_t_y__i_n_t and (
+                time_mode is None or time_mode == homogeneous_time
+            ):
                 if get_comment is True:
                     availableidslist.append((idstype, occ, comment))
                 else:
@@ -227,7 +229,7 @@ def get_available_ids_and_times(db_entry_object: imas.d_b_entry) -> list:
                 if homogeneous_time == imas.imasdef.i_d_s__t_i_m_e__m_o_d_e__u_n_k_n_o_w_n:
                     time_array = []
                 if homogeneous_time == imas.imasdef.i_d_s__t_i_m_e__m_o_d_e__h_e_t_e_r_o_g_e_n_e_o_u_s:
-                    time_array = [np.na_n]
+                    time_array = [np.NaN]
                 if homogeneous_time == imas.imasdef.i_d_s__t_i_m_e__m_o_d_e__h_o_m_o_g_e_n_e_o_u_s:
                     time_array = db_entry_object.partial_get(_ids_name, "time")
                 if homogeneous_time == imas.imasdef.i_d_s__t_i_m_e__m_o_d_e__i_n_d_e_p_e_n_d_e_n_t:
@@ -526,7 +528,9 @@ def compare_ids(
     return identical, output
 
 
-def get_quantities_from_pulses(idspath: str, pulses: tuple, list_count: int = 0, verbose: bool = False) -> pd.data_frame:
+def get_quantities_from_pulses(
+    idspath: str, pulses: tuple, list_count: int = 0, verbose: bool = False
+) -> pd.data_frame:
     """
     The `getQuantitiesFromPulses` function retrieves values from a specified IDS path for a given set of pulses and
     returns a DataFrame containing the pulse, run, and corresponding values.

@@ -101,7 +101,7 @@ class scenario_validator:
     s_c_h_e_m_a = {}
     s_c_h_e_m_a__p_a_t_h = []
 
-    def __init__(self, dd_path=idschk.f_i_l_e__i_d_s_def, schema_path=[]):
+    def __init__(self, dd_path=idschk.FILE_IDSDef, schema_path=[]):
         """
         Parameters
         ----------

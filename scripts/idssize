@@ -81,7 +81,7 @@ if connection is None:
 if args.ids == []:
     args.ids = [ids.value for ids in list(imas.i_d_s_name)]
 
-ids_size_dict = get_i_d_s_size(connection, args.ids)
+ids_size_dict = get_ids_size(connection, args.ids)
 total_bytes = np.array([v["bytes"] for v in ids_size_dict.values()]).sum()
 total_time = np.array([v["time"] for v in ids_size_dict.values()]).sum()
 

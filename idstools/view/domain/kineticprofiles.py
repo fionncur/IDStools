@@ -68,7 +68,10 @@ class kinetic_profiles_view:
                 color="b",
                 label=r"$T_i(0)$",
             )
-        if self.k_profiles.common_time_array[self.k_profiles.common_time_length - 1] > self.k_profiles.common_time_array[0]:
+        if (
+            self.k_profiles.common_time_array[self.k_profiles.common_time_length - 1]
+            > self.k_profiles.common_time_array[0]
+        ):
             ax.set_xlim(
                 self.k_profiles.common_time_array[0],
                 self.k_profiles.common_time_array[self.k_profiles.common_time_length - 1],
@@ -106,7 +109,7 @@ class kinetic_profiles_view:
             )
         for ispecies in range(self.k_profiles.nspecies_core):
             if (self.k_profiles.is_composition_available == 1) & (
-                self.k_profiles.nspec_over_ne[ispecies] > kinetic_profiles_compute.i_m_p_u_r_i_t_y__l_i_m_i_t
+                self.k_profiles.nspec_over_ne[ispecies] > kinetic_profiles_compute.IMPURITY_LIMIT
             ):
                 ax.plot(
                     self.k_profiles.waveform["time"],
@@ -119,7 +122,10 @@ class kinetic_profiles_view:
         ax.set_xlabel("$Time\\/[\\mathrm{s}]$")
         ax.set_ylabel("$n\\/[\\mathrm{m^{-3}}]$")
 
-        if self.k_profiles.common_time_array[self.k_profiles.common_time_length - 1] > self.k_profiles.common_time_array[0]:
+        if (
+            self.k_profiles.common_time_array[self.k_profiles.common_time_length - 1]
+            > self.k_profiles.common_time_array[0]
+        ):
             ax.set_xlim(
                 self.k_profiles.common_time_array[0],
                 self.k_profiles.common_time_array[self.k_profiles.common_time_length - 1],
@@ -147,7 +153,10 @@ class kinetic_profiles_view:
         self.view_time_line(ax, self.k_profiles.common_time)
         ax.set_xlabel(r"$Time\/[\mathrm{s}]$")
         ax.set_ylabel("$Z_{eff}$")
-        if self.k_profiles.common_time_array[self.k_profiles.common_time_length - 1] > self.k_profiles.common_time_array[0]:
+        if (
+            self.k_profiles.common_time_array[self.k_profiles.common_time_length - 1]
+            > self.k_profiles.common_time_array[0]
+        ):
             ax.set_xlim(
                 self.k_profiles.common_time_array[0],
                 self.k_profiles.common_time_array[self.k_profiles.common_time_length - 1],
@@ -239,7 +248,7 @@ class kinetic_profiles_view:
             )
         for ispecies in range(self.k_profiles.nspecies_core):
             if self.k_profiles.is_composition_available and self.k_profiles.is_core_profiles_present:
-                if self.k_profiles.nspec_over_ne[ispecies] > kinetic_profiles_compute.i_m_p_u_r_i_t_y__l_i_m_i_t:
+                if self.k_profiles.nspec_over_ne[ispecies] > kinetic_profiles_compute.IMPURITY_LIMIT:
                     ax.plot(
                         self.k_profiles.profiles["rhonorm"],
                         self.k_profiles.profiles["n_species"][self.k_profiles.species[ispecies]]["density"],
@@ -247,7 +256,7 @@ class kinetic_profiles_view:
                     )
             if self.k_profiles.is_edge_profiles_present and self.k_profiles.species_map[ispecies] != -99:
                 if (
-                    self.k_profiles.nspec_over_ne[ispecies] > kinetic_profiles_compute.i_m_p_u_r_i_t_y__l_i_m_i_t
+                    self.k_profiles.nspec_over_ne[ispecies] > kinetic_profiles_compute.IMPURITY_LIMIT
                     or self.k_profiles.is_core_profiles_present == 0
                 ):
                     ax.plot(
@@ -316,7 +325,7 @@ class kinetic_profiles_view:
             and (max(self.k_profiles.nspec_over_ne) > 0 or not self.k_profiles.is_core_profiles_present)
         ):
             for ispecies in range(self.k_profiles.nspecies_core):
-                if self.k_profiles.nspec_over_ne[ispecies] > kinetic_profiles_compute.i_m_p_u_r_i_t_y__l_i_m_i_t:
+                if self.k_profiles.nspec_over_ne[ispecies] > kinetic_profiles_compute.IMPURITY_LIMIT:
                     if "vtor" in self.k_profiles.profiles["n_species"][self.k_profiles.species[ispecies]].keys():
                         if self.k_profiles.vtor_flag != 0:
                             ax.plot(
@@ -368,7 +377,7 @@ class kinetic_profiles_view:
             and (max(self.k_profiles.nspec_over_ne) > 0 or not self.k_profiles.is_core_profiles_present)
         ):
             for ispecies in range(self.k_profiles.nspecies_core):
-                if self.k_profiles.nspec_over_ne[ispecies] > kinetic_profiles_compute.i_m_p_u_r_i_t_y__l_i_m_i_t:
+                if self.k_profiles.nspec_over_ne[ispecies] > kinetic_profiles_compute.IMPURITY_LIMIT:
                     if "vpol" in self.k_profiles.profiles["n_species"][self.k_profiles.species[ispecies]].keys():
                         if self.k_profiles.vpol_flag != 0:
                             ax.plot(

@@ -13,51 +13,55 @@ from xml.etree import ElementTree as ET
 from idstools.idschk import init_schema_coordinate
 
 
-f_i_l_e__i_d_s_def = d_d_helper.get_i_d_s_def_path() 
+FILE_IDSDef = DDHelper.get_ids_def_path()
 # ----------------------------------------------------------------------
 
 
 def comment_for_schema():
-    """Add comments in stdout
-    """
+    """Add comments in stdout"""
 
-    print(f'# Schema File for IDS Validation Tool ({path.basename(__file__)})')
+    print(f"# Schema File for IDS Validation Tool ({path.basename(__file__)})")
     print('# 1) in YAML format, comments starting with "#" and blank lines are allowed.')
-    print('# 2) 1st level lists IDS name, 2nd one is for path_doc and 3rd is for validation rule')
-    print('#')
-    print('# IDS validation schema is listed as below, also default schemas in Cerberus can be used. The schema is presumed')
-    print('# in the form of "A:B", where A is name of rule, B is in type of boolean or float. Regarding the rules having B')
+    print("# 2) 1st level lists IDS name, 2nd one is for path_doc and 3rd is for validation rule")
+    print("#")
+    print(
+        "# IDS validation schema is listed as below, also default schemas in Cerberus can be used. The schema is presumed"
+    )
+    print(
+        '# in the form of "A:B", where A is name of rule, B is in type of boolean or float. Regarding the rules having B'
+    )
     print('# as "false", an error will be reported in case the validation fails, otherwise ignored with "true".')
-    print('#        A:               B')
-    print('#        ids_nan:         true/false')
-    print('#        ids_inf:         true/false')
-    print('#        ids_le:          float')
-    print('#        ids_ge:          float')
-    print('#        ids_lt:          float')
-    print('#        ids_gt:          float')
-    print('#        ids_psi_like:    true/false')
-    print('#        ids_b0_like:     true/false')
-    print('#        ids_dodpsi_like: true/false')
-    print('#        ids_q_like:      true/false')
-    print('#        ids_ip_like:     true/false')
-    print('#        ids_dPdpsi_like: true/false')
-    print('#        ids_dim:         true/false')
-    print('#        ids_bool:        true/false')
-    print('#        ids_eq:          float/int')
-    print('#        ids_cocos:       int')
-    print('#')
-    print('# *) The validation rules "ids_nan" and "ids_inf" are default so that the validation scripts as "idschk" and')
+    print("#        A:               B")
+    print("#        ids_nan:         true/false")
+    print("#        ids_inf:         true/false")
+    print("#        ids_le:          float")
+    print("#        ids_ge:          float")
+    print("#        ids_lt:          float")
+    print("#        ids_gt:          float")
+    print("#        ids_psi_like:    true/false")
+    print("#        ids_b0_like:     true/false")
+    print("#        ids_dodpsi_like: true/false")
+    print("#        ids_q_like:      true/false")
+    print("#        ids_ip_like:     true/false")
+    print("#        ids_dPdpsi_like: true/false")
+    print("#        ids_dim:         true/false")
+    print("#        ids_bool:        true/false")
+    print("#        ids_eq:          float/int")
+    print("#        ids_cocos:       int")
+    print("#")
+    print(
+        '# *) The validation rules "ids_nan" and "ids_inf" are default so that the validation scripts as "idschk" and'
+    )
 
 
 def main():
-    """create validation schema wrt DD
-    """
+    """create validation schema wrt DD"""
 
     # Load IMAS-DD file
-    if path.isfile(f_i_l_e__i_d_s_def):
-        root = e_t.parse(f_i_l_e__i_d_s_def).getroot()
+    if path.isfile(FILE_IDSDef):
+        root = e_t.parse(FILE_IDSDef).getroot()
     else:
-        exit(f"file not found:{f_i_l_e__i_d_s_def}")
+        exit(f"file not found:{FILE_IDSDef }")
 
     # Initialization for yaml.Dumper
     yaml.dumper.ignore_aliases = lambda *args: True
@@ -87,7 +91,9 @@ def main():
 
 
 if __name__ == "__main__":
-    parser = argparse.argument_parser(description="create validation schema wrt DD",formatter_class=rich_help_formatter)
+    parser = argparse.argument_parser(
+        description="create validation schema wrt DD", formatter_class=rich_help_formatter
+    )
     parser.add_argument(
         "-i",
         "--idslist",

@@ -7,19 +7,19 @@ import os
 logger = logging.getLogger("module")
 
 
-class d_d_helper(object):
+class DDHelper(object):
     # root = None
     # version = None
     # cocos = None
 
     def __new__(cls):
         if not hasattr(cls, "instance"):
-            cls.instance = super(d_d_helper, cls).__new__(cls)
+            cls.instance = super(DDHelper, cls).__new__(cls)
         return cls.instance
 
     def __init__(self):
         """Simple class which allows to query meta-data from the definition of IDSs as expressed in IDSDef.xml."""
-        self.ids_def = d_d_helper.get_i_d_s_def_path()
+        self.ids_def = DDHelper.get_ids_def_path()
         self.root = None
         if path.isfile(self.ids_def):
             self.root = e_t.parse(self.ids_def).getroot()
@@ -30,7 +30,7 @@ class d_d_helper(object):
             raise FileNotFoundError(f"file not found:{self.ids_def}")
 
     @classmethod
-    def get_i_d_s_def_path(cls):
+    def get_ids_def_path(cls):
         # Find and parse XML definitions
         idsdef_path = ""
         if not idsdef_path:

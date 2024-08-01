@@ -9,7 +9,7 @@ from idstools.compute.common import get_closest_of_given_value_from_array
 logger = logging.getLogger("module")
 
 
-class ec_stray_compute:
+class EcStrayCompute:
     def __init__(self, equilibrium_ids: object, core_profiles_ids: object, waves_ids: object):
         self.equilibrium_ids = equilibrium_ids
         self.core_profiles_ids = core_profiles_ids
@@ -133,7 +133,7 @@ class ec_stray_compute:
 
         """
         # wavecompute = WavesCompute(self.wavesIds)
-        omega_ec = self.waves_compute.get_omega_e_c(time_index_waves)
+        omega_ec = self.waves_compute.get_omega_ec(time_index_waves)
 
         # Find (R,Z) rectangular grid of B-field
         # eqcomputeobj = EquilibriumCompute(self.equilibriumIds)

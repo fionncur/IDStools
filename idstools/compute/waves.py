@@ -103,7 +103,7 @@ class WavesCompute:
         n_beam = len(self.ids.coherent_wave)
         return np.linspace(0, n_beam - 1, n_beam)
 
-    def get_omega_e_c(self, coherent_wave_index: int = 0, time_index: int = 0) -> float:
+    def get_omega_ec(self, coherent_wave_index: int = 0, time_index: int = 0) -> float:
         """
         This function returns the angular frequency of a coherent wave at a specific time index.
 

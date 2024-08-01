@@ -33,11 +33,11 @@ def main():
     yaml.dumper.ignore_aliases = lambda *args: True
 
     # COCOS Initialization
-    index = {"COCOS": idschk.i_d_s__c_o_c_o_s, "ipsign": args.ipsign, "b0sign": args.b0sign}
-    cocos = idschk.c_o_c_o_s(index=index).get()
+    index = {"COCOS": idschk.IDS_COCOS, "ipsign": args.ipsign, "b0sign": args.b0sign}
+    cocos = idschk.COCOS(index=index).get()
 
     # Load IMAS-DD File
-    root = idschk.load__x_m_l(idschk.f_i_l_e__i_d_s_def)
+    root = idschk.load__x_m_l(idschk.FILE_IDSDef)
 
     # Validate COCOS in IDS/equilibrium
     if args.cocos:
