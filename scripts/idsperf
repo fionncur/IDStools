@@ -14,7 +14,7 @@ from idstools.database import DBMaster
 from idstools.utils.clihelper import dbentryParser
 
 if __name__ == "__main__":
-    parser = argparse.argument_parser(
+    parser = argparse.ArgumentParser(
         description="This script gives simple timing and performance information for different types of operations on IDS data with the IMAS Python Access Layer (get/get_slice/put depending on selected options)",
         parents=[dbentry_parser],
         formatter_class=rich_help_formatter,
@@ -107,12 +107,10 @@ if __name__ == "__main__":
         exit(1)
 
     if args.ids == []:
-        allidss = [ids.value for ids in list(imas.i_d_s_name)]
+        allidss = [ids.value for ids in list(imas.IDSName)]
         # TODO: treat occurrences
         args.ids = [
-            ids
-            for ids in allidss
-            if db.partial_get(ids, "ids_properties/homogeneous_time") != imas.imasdef.e_m_p_t_y__i_n_t
+            ids for ids in allidss if db.partial_get(ids, "ids_properties/homogeneous_time") != imas.imasdef.EMPTY_INT
         ]
     idsobj = None
     dbout = None

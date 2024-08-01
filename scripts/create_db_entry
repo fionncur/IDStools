@@ -16,7 +16,7 @@ from idstools.utils.clihelper import getBackendID, imasParser
 # ----------------------------------------------------------------------
 
 # Management of input arguments
-parser = argparse.argument_parser(
+parser = argparse.ArgumentParser(
     description="""Auto-generated yaml scenario and watcher files (!!! STILL TO BE COMPLETED BY HAND !!!)\n\nImportant: The legacy create_db_entry tool is deprecated and will be removed in a future versions. It will remain available until simdb is fully adopted. more about simdb : https://simdb.iter.org/dashboard/""",
     parents=[imas_parser],
     formatter_class=raw_description_rich_help_formatter,
@@ -32,7 +32,7 @@ parser.add_argument(
     dest="wo_validation",
 )
 args = parser.parse_args()
-input = imas.d_b_entry(
+input = imas.DBEntry(
     get_backend_i_d(args.backend),
     args.database,
     args.shot,

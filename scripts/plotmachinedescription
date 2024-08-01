@@ -89,7 +89,7 @@ def plot_machine_description(ids_data, show_labels=False):
 
 
 if __name__ == "__main__":
-    parser = argparse.argument_parser(
+    parser = argparse.ArgumentParser(
         description="---- View and plot machine description with one or more URIs as data entries",
         formatter_class=rich_help_formatter,
     )

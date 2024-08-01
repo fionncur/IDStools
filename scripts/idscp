@@ -16,7 +16,7 @@ from idstools.utils.idslogger import setupLogger
 logger = setup_logger("module")
 
 # Management of input arguments
-parser = argparse.argument_parser(
+parser = argparse.ArgumentParser(
     description="Copy IDSs from a data-entry into another one",
     formatter_class=rich_help_formatter,
 )
@@ -80,7 +80,7 @@ if args.src is not None and args.dest is not None:
         exit()
 
 if args.ids == []:
-    args.ids = [ids.value for ids in list(imas.i_d_s_name)]
+    args.ids = [ids.value for ids in list(imas.IDSName)]
 
 
 inputargs = argparse.namespace()
@@ -135,7 +135,7 @@ for idsname in args.ids:
     if args.interactive:
         if (
             dest_connection.partial_get(idsid[0], "ids_properties/homogeneous_time", occurrence=inocc)
-            == imas.imasdef.e_m_p_t_y__i_n_t
+            == imas.imasdef.EMPTY_INT
         ):
             user_choice = ""
             while user_choice not in ["y", "n"]:
@@ -147,7 +147,7 @@ for idsname in args.ids:
     if args.set_dataset_version and idsid[0] == "dataset_description":
         idsobj.dd_version = DBMaster.get_dd_version()
     try:
-        if idsobj.ids_properties.homogeneous_time != imas.imasdef.e_m_p_t_y__i_n_t:
+        if idsobj.ids_properties.homogeneous_time != imas.imasdef.EMPTY_INT:
             print(f"Copying {idsname}")
             outocc = inocc if args.output_occurrence is None else args.output_occurrence
             dest_connection.put(idsobj, occurrence=outocc)

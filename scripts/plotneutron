@@ -23,7 +23,7 @@ from idstools.view.common import Canvas
 from idstools.view.distribution_sources import DistributionSourcesView
 
 # Management of input arguments
-parser = argparse.argument_parser(
+parser = argparse.ArgumentParser(
     description="---- Display the neutron profiles from the distribution_sources IDSs [previously known as neutronplot]",
     parents=[dbentry_parser],
     formatter_class=rich_help_formatter,

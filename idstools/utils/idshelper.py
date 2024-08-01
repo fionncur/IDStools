@@ -15,7 +15,7 @@ from packaging import version
 from rich.progress import track
 
 logger = logging.getLogger("module")
-a_r_r_a_y__e_q_u_a_l__k_w_a_r_g_s = "equal_nan=True" if version.parse(np.__version__) > version.parse("1.19") else ""
+ARRAY_EQUAL_KWARGS = "equal_nan=True" if version.parse(np.__version__) > version.parse("1.19") else ""
 
 
 def is_ids_field(idstype: type) -> bool:
@@ -30,8 +30,8 @@ def is_ids_field(idstype: type) -> bool:
         field of an IDS or not.
     """
     return (
-        idstype != types.method_type
-        and idstype != types.function_type
+        idstype != types.MethodType
+        and idstype != types.FunctionType
         and "Logger" not in str(idstype)
         and "HLIUtils" not in str(idstype)
     )
@@ -54,7 +54,7 @@ def get_ids_attributes(idsobj: object) -> list:
         return []
 
 
-def get_ids_size(db_entry_object: imas.d_b_entry, ids_names=None) -> dict:
+def get_ids_size(db_entry_object: imas.DBEntry, ids_names=None) -> dict:
     """
     The function `getIDSSize` retrieves the size of IDS objects from a database entry and returns a dictionary
     containing the size in bytes and the time taken to read each object.
@@ -69,7 +69,7 @@ def get_ids_size(db_entry_object: imas.d_b_entry, ids_names=None) -> dict:
         entry. The dictionary has the following structure:
     """
     if ids_names is None:
-        ids_names = [i.value for i in imas.i_d_s_name]
+        ids_names = [i.value for i in imas.IDSName]
     if type(ids_names) is str:
         ids_names = ids_names.split(",")
     ids_size_dict = {}
@@ -96,7 +96,7 @@ def get_ids_size(db_entry_object: imas.d_b_entry, ids_names=None) -> dict:
     return ids_size_dict
 
 
-def get_all_i_d_s_size(db_entry_object: imas.d_b_entry):
+def get_all_ids_size(db_entry_object: imas.DBEntry):
     """
     The function `getAllIDSSize` calculates the total size in bytes of all IDS in a given `dbEntryObject`.
 
@@ -111,7 +111,7 @@ def get_all_i_d_s_size(db_entry_object: imas.d_b_entry):
     return total_bytes
 
 
-def get_all_i_d_s_get_time(db_entry_object: imas.d_b_entry):
+def get_all_ids_get_time(db_entry_object: imas.DBEntry):
     """
     The function `getAllIDSGetTime` calculates the total time for all IDS in a given `dbEntryObject`.
 
@@ -156,10 +156,10 @@ def get_ids_types():
         The function `getIdsTypes()` is returning a list of values of all the `value` attributes of the `IDSName`
         objects in the `imas` module.
     """
-    return [ids.value for ids in list(imas.i_d_s_name)]
+    return [ids.value for ids in list(imas.IDSName)]
 
 
-def get_available_ids_and_occurrences(db_entry_object: imas.d_b_entry, time_mode=None, get_comment=False):
+def get_available_ids_and_occurrences(db_entry_object: imas.DBEntry, time_mode=None, get_comment=False):
     """
     This function returns a list of pairs of available IDS types and their occurrences in a given DBEntry object.
 
@@ -189,14 +189,12 @@ def get_available_ids_and_occurrences(db_entry_object: imas.d_b_entry, time_mode
             try:
                 occ_type_text = ""
                 occ_type = db_entry_object.partial_get(idstype, "ids_properties/occurrence_type", occurrence=occ)
-                if occ_type.index != imas.imasdef.e_m_p_t_y__i_n_t:
+                if occ_type.index != imas.imasdef.EMPTY_INT:
                     occ_type_text = occ_type_dict[occ_type.index]
                     comment += f" [occurrence type = {occ_type_text}]"
             except Exception as e:
                 logger.debug(f"{e}")
-            if homogeneous_time != imas.imasdef.e_m_p_t_y__i_n_t and (
-                time_mode is None or time_mode == homogeneous_time
-            ):
+            if homogeneous_time != imas.imasdef.EMPTY_INT and (time_mode is None or time_mode == homogeneous_time):
                 if get_comment is True:
                     availableidslist.append((idstype, occ, comment))
                 else:
@@ -204,7 +202,7 @@ def get_available_ids_and_occurrences(db_entry_object: imas.d_b_entry, time_mode
     return availableidslist
 
 
-def get_available_ids_and_times(db_entry_object: imas.d_b_entry) -> list:
+def get_available_ids_and_times(db_entry_object: imas.DBEntry) -> list:
     """
     The function `getAvailableIdsAndTimes` retrieves available IDS names and corresponding time
     arrays from a given `dbEntryObject`.
@@ -226,14 +224,14 @@ def get_available_ids_and_times(db_entry_object: imas.d_b_entry) -> list:
                 homogeneous_time = db_entry_object.partial_get(
                     _ids_name, "ids_properties/homogeneous_time", occurrence=occurrence
                 )
-                if homogeneous_time == imas.imasdef.i_d_s__t_i_m_e__m_o_d_e__u_n_k_n_o_w_n:
+                if homogeneous_time == imas.imasdef.IDS_TIME_MODE_UNKNOWN:
                     time_array = []
-                if homogeneous_time == imas.imasdef.i_d_s__t_i_m_e__m_o_d_e__h_e_t_e_r_o_g_e_n_e_o_u_s:
+                if homogeneous_time == imas.imasdef.IDS_TIME_MODE_HETEROGENEOUS:
                     time_array = [np.NaN]
-                if homogeneous_time == imas.imasdef.i_d_s__t_i_m_e__m_o_d_e__h_o_m_o_g_e_n_e_o_u_s:
+                if homogeneous_time == imas.imasdef.IDS_TIME_MODE_HOMOGENEOUS:
                     time_array = db_entry_object.partial_get(_ids_name, "time")
-                if homogeneous_time == imas.imasdef.i_d_s__t_i_m_e__m_o_d_e__i_n_d_e_p_e_n_d_e_n_t:
-                    time_array = [np.n_i_n_f]
+                if homogeneous_time == imas.imasdef.IDS_TIME_MODE_INDEPENDENT:
+                    time_array = [np.NINF]
             except Exception as e:
                 logger.debug(f"{e}")
                 time_array = []
@@ -263,7 +261,7 @@ def resample_indices(dbin: str, dbout: str, idsname: str, start: int = 0, stop: 
     """
     times = dbin.partial_get(idsname, "time")
     for time_val in times[range(start, len(times) if stop is None else stop, step)]:
-        data_slice = dbin.get_slice(idsname, time_val, imas.imasdef.p_r_e_v_i_o_u_s__i_n_t_e_r_p)
+        data_slice = dbin.get_slice(idsname, time_val, imas.imasdef.PREVIOUS_INTERP)
         dbout.put_slice(data_slice)
 
 
@@ -304,7 +302,7 @@ def resample_times(
         rtimes = np.arange(rstart, rstop, step)
 
     for time_val in rtimes:
-        data_slice = dbin.get_slice(idsname, time_val, imas.imasdef.p_r_e_v_i_o_u_s__i_n_t_e_r_p)
+        data_slice = dbin.get_slice(idsname, time_val, imas.imasdef.PREVIOUS_INTERP)
         dbout.put_slice(data_slice)
 
 
@@ -472,7 +470,7 @@ def compare_ids(
         else:
             # Check equalities of arrays first as numpy array
             if isinstance(xo, np.ndarray) and isinstance(yo, np.ndarray):
-                result = np.array_equal(xo, yo, a_r_r_a_y__e_q_u_a_l__k_w_a_r_g_s)
+                result = np.array_equal(xo, yo, ARRAY_EQUAL_KWARGS)
                 # output[field + "." + key]= (Xo, Yo, "equal")
             # and second as list
             else:
@@ -528,9 +526,7 @@ def compare_ids(
     return identical, output
 
 
-def get_quantities_from_pulses(
-    idspath: str, pulses: tuple, list_count: int = 0, verbose: bool = False
-) -> pd.data_frame:
+def get_quantities_from_pulses(idspath: str, pulses: tuple, list_count: int = 0, verbose: bool = False) -> pd.DataFrame:
     """
     The `getQuantitiesFromPulses` function retrieves values from a specified IDS path for a given set of pulses and
     returns a DataFrame containing the pulse, run, and corresponding values.
@@ -565,7 +561,7 @@ def get_quantities_from_pulses(
         version = pulse_tuple[5]
         if verbose:
             print(f"fetching data from {pulse}, {run}")
-        connection = imas.d_b_entry(backend, database, pulse, run, user, version)
+        connection = imas.DBEntry(backend, database, pulse, run, user, version)
         connection.open()
         try:
             values.append(connection.partial_get(idsname, valpath))
@@ -574,7 +570,7 @@ def get_quantities_from_pulses(
             values.append(None)
         connection.close()
 
-    df = pd.data_frame(
+    df = pd.DataFrame(
         pulses,
         columns=[
             "PULSE",

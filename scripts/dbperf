@@ -21,7 +21,7 @@ from idstools.idsperf import byte_size, get_timings
 from idstools.utils.clihelper import getBackendID, imasParser
 
 if __name__ == "__main__":
-    parser = argparse.argument_parser(
+    parser = argparse.ArgumentParser(
         description="Times IDS getting of given Pulse and Run, contrasts with IDS size and slices. replaced by db_backend_benchmark.py",
         parents=[imas_parser],
         formatter_class=rich_help_formatter,
@@ -187,10 +187,10 @@ if __name__ == "__main__":
             pulse = entry[0]
             run = entry[1]
 
-            mdsde = imas.d_b_entry(12, args.database, pulse, run, args.user)
+            mdsde = imas.DBEntry(12, args.database, pulse, run, args.user)
             mdsde.open()
 
-            hdfde = imas.d_b_entry(13, args.database, pulse, run, args.user)
+            hdfde = imas.DBEntry(13, args.database, pulse, run, args.user)
             hdfde.open()
 
             idslist = available_in_dbentry(hdfde)
@@ -242,7 +242,7 @@ if __name__ == "__main__":
                 print("HDF5 database closed")
                 print(log[-1])
 
-        totaldf = pd.data_frame(
+        totaldf = pd.DataFrame(
             log,
             columns=[
                 "(PULSE, RUN)",

@@ -16,7 +16,7 @@ logger = setup_logger("module", stdout_level=logging.i_n_f_o)
 #
 
 # Management of input arguments
-parser = argparse.argument_parser(
+parser = argparse.ArgumentParser(
     description="Rigidly shifts vertically an equilibrium, storing the output into another entry of the same DB. replaced by ids_shift_eq",
     formatter_class=rich_help_formatter,
 )

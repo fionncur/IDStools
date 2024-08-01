@@ -167,7 +167,7 @@ Examples:
 
 
 if __name__ == "__main__":
-    parser = argparse.argument_parser(
+    parser = argparse.ArgumentParser(
         prog="idschk",
         formatter_class=rich_help_formatter,
         parents=[dbentry_parser],

@@ -109,7 +109,7 @@ class scenario_description_base:
         if yaml_data is None:
             return None
         flat_table = json_normalize(yaml_data)
-        data_frame = pd.data_frame(flat_table)
+        data_frame = pd.DataFrame(flat_table)
         return data_frame
 
     def get_dataframes_from_files(self, extension=".yaml", add_obsolete=False):

@@ -25,7 +25,7 @@ from idstools.view.edge_profiles import EdgeProfilesView
 
 logger = setup_logger("module", stdout_level=logging.i_n_f_o)
 
-parser = argparse.argument_parser(
+parser = argparse.ArgumentParser(
     description="---- Edge Profile plot",
     parents=[dbentry_parser],
     formatter_class=rich_help_formatter,
@@ -71,12 +71,12 @@ if args.wall:
 
     wall_ids = connection.get("wall")
 
-    if wall_ids.ids_properties.homogeneous_time == imasdef.e_m_p_t_y__i_n_t:
+    if wall_ids.ids_properties.homogeneous_time == imasdef.EMPTY_INT:
 
         machine_description = machine_description(connection_args=copy.deepcopy(args))
         wall_m_d_dict = machine_description.get_latest_ids_data("wall")
         wall_ids = wall_m_d_dict["idsData"]
-    if wall_ids.ids_properties.homogeneous_time == imasdef.e_m_p_t_y__i_n_t:
+    if wall_ids.ids_properties.homogeneous_time == imasdef.EMPTY_INT:
         logger.error("wall ids is not present")
     else:
         r = None

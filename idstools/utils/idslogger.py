@@ -13,8 +13,8 @@ except ImportError:
 def setup_logger(
     name,
     log_file=None,
-    log_file_level=logging.d_e_b_u_g,
-    stdout_level=logging.w_a_r_n,
+    log_file_level=logging.DEBUG,
+    stdout_level=logging.WARN,
     fmt=None,
 ):
     # Format for file log

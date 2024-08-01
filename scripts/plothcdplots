@@ -193,7 +193,7 @@ def show_distribution_plots(args, hold=False):
 
 
 if __name__ == "__main__":
-    parser = argparse.argument_parser(
+    parser = argparse.ArgumentParser(
         description="--- Display H&CD results from multiple data sets \n"
         + "- Each H&CD source is optional \n"
         + "- Time is also optional \n"

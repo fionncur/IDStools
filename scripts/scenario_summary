@@ -53,7 +53,7 @@ class smart_formatter(argparse.help_formatter):
 # ----------------------------------------------------------------------------
 
 # Input arguments
-parser = argparse.argument_parser(
+parser = argparse.ArgumentParser(
     description="""---- Script to list available scenarios in a specific folder ----\n\nImportant: The legacy scenario_summary tool is deprecated and will be removed in a future versions. It will remain available until simdb is fully adopted.more about simdb : https://simdb.iter.org/dashboard/""",
     formatter_class=smart_formatter,
 )
@@ -170,9 +170,7 @@ else:
 if args["choice"] != None:
     try:
         input_choice = args["choice"]
-        choice = eval(
-            str("""['""" + re.sub(""",""", r"""','""", input_choice) + """']""")
-        )
+        choice = eval(str("""['""" + re.sub(""",""", r"""','""", input_choice) + """']"""))
     except Exception as e:
         print(
             "------------------------------------------------------------------",
@@ -206,14 +204,10 @@ else:
 # Print the arguments of the default call to the function
 if args["choice"] == None:
     print("""----> Default call equivalent to: """)
-    print(
-        """      scenario_summary -c pulse,run,database,ref_name,ip,b0,fuelling,confinement,workflow,date"""
-    )
+    print("""      scenario_summary -c pulse,run,database,ref_name,ip,b0,fuelling,confinement,workflow,date""")
 
 scenario_description_obj = scenario_description_base(folder_path=default_folder_path)
-df = scenario_description_obj.get_dataframes_from_files(
-    extension=".yaml", add_obsolete=obsolete
-)
+df = scenario_description_obj.get_dataframes_from_files(extension=".yaml", add_obsolete=obsolete)
 
 # check of need to add obsolete
 if not args["obsolete"]:

@@ -5,7 +5,7 @@ import imas
 import numpy as np
 
 
-def get_ids(db, idsname, occ=0, times=None, interp=imas.imasdef.p_r_e_v_i_o_u_s__i_n_t_e_r_p, verbose=False):
+def get_ids(db, idsname, occ=0, times=None, interp=imas.imasdef.PREVIOUS_INTERP, verbose=False):
     """
     The function `get_ids` reads an IDS from a given DBEntry, either the entire IDS or slices at
     selected times, and returns the IDS object or a list of IDS slices.

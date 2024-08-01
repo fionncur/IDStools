@@ -19,7 +19,7 @@ from idstools.utils.idslogger import setupLogger
 logger = setup_logger("module")
 
 if __name__ == "__main__":
-    parser = argparse.argument_parser(
+    parser = argparse.ArgumentParser(
         description="""Prints content of an IDS onto the terminal\n 
         provide with fragment
         e.g. -u imas:hdf5?path=/home/ITER/fleuryl/public/imasdb/west/3/54914/4#wall or #wall:0/description_2d | less

@@ -27,7 +27,7 @@ from idstools.utils.idslogger import setupLogger
 logger = setup_logger("module", stdout_level=logging.i_n_f_o)
 console = console()
 
-parser = argparse.argument_parser(
+parser = argparse.ArgumentParser(
     description="Copy all data-entries from one database into another one",
     parents=[imas_parser],
     formatter_class=rich_help_formatter,
@@ -93,7 +93,7 @@ for pulse in track(files, description="[green]Processing..."):
 
         idsinf = []
         run = pulse[1]
-        src = imas.d_b_entry(backend, args.database, pulse[0], run, args.user)
+        src = imas.DBEntry(backend, args.database, pulse[0], run, args.user)
         status, idx = src.open()
 
         if status != 0:
@@ -101,7 +101,7 @@ for pulse in track(files, description="[green]Processing..."):
             log.append("Error opening pulse!")
             continue
 
-        dest = imas.d_b_entry(get_backend_i_d(args.backend_output), args.database_out, pulse[0], run)
+        dest = imas.DBEntry(get_backend_i_d(args.backend_output), args.database_out, pulse[0], run)
         status, idx = dest.create()
         if status != 0:
             console.print(
@@ -155,7 +155,7 @@ for pulse in track(files, description="[green]Processing..."):
 
 
 if args.validate:
-    df = pd.data_frame(files, columns=["PULSE", "RUN"])
+    df = pd.DataFrame(files, columns=["PULSE", "RUN"])
     df["IDS STATUS | Validation"] = log
     date = datetime.now().strftime("%Y_%m_%d-%I:%M:%S_%p")
     df.to_csv(

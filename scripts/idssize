@@ -57,7 +57,7 @@ from idstools.database import DBMaster
 from idstools.utils.clihelper import dbentryParser
 from idstools.utils.idshelper import getIDSSize
 
-parser = argparse.argument_parser(
+parser = argparse.ArgumentParser(
     description="Show size and time of IDSs [previously knwon as analyze_db_sizes]",
     epilog="""
 """,
@@ -79,7 +79,7 @@ if connection is None:
     exit(1)
 
 if args.ids == []:
-    args.ids = [ids.value for ids in list(imas.i_d_s_name)]
+    args.ids = [ids.value for ids in list(imas.IDSName)]
 
 ids_size_dict = get_ids_size(connection, args.ids)
 total_bytes = np.array([v["bytes"] for v in ids_size_dict.values()]).sum()

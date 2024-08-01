@@ -21,9 +21,8 @@ from idstools.db_validator import db_validator
 
 def main():
     """
-    Validation of IDSs 
+    Validation of IDSs
     """
-    
 
     # Set validator for given (shot, run), otherwise whole shots found
     if args.shot:
@@ -38,7 +37,12 @@ def main():
 
     # Validation in IMASDB
     res = db_validator(
-        args.user, args.database, args.version, args.backend, args.path, shot,
+        args.user,
+        args.database,
+        args.version,
+        args.backend,
+        args.path,
+        shot,
     )
 
     et = time.time()
@@ -49,7 +53,7 @@ def main():
 
 # ----------------------------------------------------------------------
 
-description=f"""
+description = f"""
 Validation Tool for ITER Scenario DB
 -------------------------------------
 
@@ -96,18 +100,14 @@ if __name__ == "__main__":
 
     # Parse for command line options
     prog = os.path.basename(__file__)
-    parser = argparse.argument_parser(
+    parser = argparse.ArgumentParser(
         prog=prog,
         formatter_class=rich_help_formatter,
         parents=[imas_parser],
         description=markdown(description, style="argparse.text"),
     )
-    parser.add_argument(
-        "--shot", "-s", dest="shot", help="Shot number", required=False, type=int
-    )
-    parser.add_argument(
-        "--run", "-r", dest="run", help="Run number", required=False, type=int, default=-1
-    )
+    parser.add_argument("--shot", "-s", dest="shot", help="Shot number", required=False, type=int)
+    parser.add_argument("--run", "-r", dest="run", help="Run number", required=False, type=int, default=-1)
     parser.add_argument(
         "--log",
         dest="log",

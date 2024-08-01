@@ -22,7 +22,7 @@ from idstools.utils.clihelper import imasParser, getBackendID
 # -------------------------------------------------------------------------------
 
 # Management of input arguments
-parser = argparse.argument_parser(
+parser = argparse.ArgumentParser(
     description="""---- Auto-generated yaml scenario and watcher files (!!! STILL TO BE COMPLETED BY HAND !!!)\n\nImportant: The legacy create_db_entry_disruption tool is deprecated and will be removed in a future versions. It will remain available until simdb is fully adopted.more about simdb : https://simdb.iter.org/dashboard/""",
     parents=[imas_parser],
     formatter_class=raw_description_rich_help_formatter,
@@ -42,7 +42,7 @@ parser.add_argument(
 args = parser.parse_args()
 
 # Open the database and read the necessary IDSs
-input = imas.d_b_entry(
+input = imas.DBEntry(
     get_backend_i_d(args.backend),
     args.database,
     args.shot,
@@ -63,7 +63,7 @@ else:
 # Read necessary IDSs from database
 try:
     core_profiles = input.get("core_profiles")
-    if core_profiles.ids_properties.homogeneous_time != imas.imasdef.e_m_p_t_y__i_n_t:
+    if core_profiles.ids_properties.homogeneous_time != imas.imasdef.EMPTY_INT:
         core_present = 1
     else:
         core_present = 0
@@ -92,7 +92,7 @@ if core_present == 1:
 
 try:
     equilibrium = input.get("equilibrium")
-    if equilibrium.ids_properties.homogeneous_time != imas.imasdef.e_m_p_t_y__i_n_t:
+    if equilibrium.ids_properties.homogeneous_time != imas.imasdef.EMPTY_INT:
         eq_present = 1
     else:
         eq_present = 0

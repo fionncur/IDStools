@@ -29,7 +29,7 @@ from idstools.utils.idslogger import setupLogger
 from idstools.view.core_profiles import CoreProfilesView
 from idstools.view.edge_profiles import EdgeProfilesView
 
-parser = argparse.argument_parser(
+parser = argparse.ArgumentParser(
     description="---- Display the plasma composition from the core_profiles IDS [previously known as ids_compo]",
     parents=[dbentry_parser],
     formatter_class=rich_help_formatter,
@@ -43,7 +43,7 @@ level = logging.e_r_r_o_r
 if args.info:
     level = logging.i_n_f_o
 if args.debug:
-    level = logging.d_e_b_u_g
+    level = logging.DEBUG
 logger = setup_logger("module", stdout_level=level)
 
 logger.info("----------------------------------------------------------------")

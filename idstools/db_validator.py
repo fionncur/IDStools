@@ -374,7 +374,7 @@ def db_validator(
     # Scenario Validation for Pulses
     npulse = len(pulses)
     for i, (shot, run) in enumerate(pulses):
-        db = imas.d_b_entry(get_backend_i_d(backend), database, shot, run, user)
+        db = imas.DBEntry(get_backend_i_d(backend), database, shot, run, user)
         status, _ = db.open()
         if status != 0:
             raise OSError(

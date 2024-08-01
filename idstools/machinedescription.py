@@ -154,7 +154,7 @@ class machine_description:
         import pandas as pd
 
         data_list = [{"id": key, **value} for key, value in self.md_summary_yaml.items()]
-        df = pd.data_frame(data_list)
+        df = pd.DataFrame(data_list)
         return df
 
     def get_status(self, pulse: int, run: int):

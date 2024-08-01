@@ -37,7 +37,7 @@ class md_action(argparse.action):
             setattr(namespace, self.dest, values)
 
 
-parser = argparse.argument_parser(
+parser = argparse.ArgumentParser(
     description="---- Display EC wave ray-tracing results [Previously known as ecray]",
     parents=[dbentry_parser],
     formatter_class=rich_help_formatter,
@@ -160,7 +160,7 @@ for mdids_info in args.md:
             _ids_data = connection.get("wall")
             from imas import imasdef
 
-            if _ids_data.ids_properties.homogeneous_time != imasdef.e_m_p_t_y__i_n_t:
+            if _ids_data.ids_properties.homogeneous_time != imasdef.EMPTY_INT:
                 wallview = wall_view(_ids_data)
                 wallview.view_wall(
                     ax_polview,
@@ -179,7 +179,7 @@ for mdids_info in args.md:
             _ids_data = connection.get("pf_active")
             from imas import imasdef
 
-            if _ids_data.ids_properties.homogeneous_time != imasdef.e_m_p_t_y__i_n_t:
+            if _ids_data.ids_properties.homogeneous_time != imasdef.EMPTY_INT:
                 view_pf_coils = p_f_active_view(_ids_data)
                 view_pf_coils.view_active_pf_coils(ax_polview, show_labels=False)
             else:

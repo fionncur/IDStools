@@ -22,7 +22,7 @@ def get_core_version():
 
 
 # default parent parser for all idstools scripts
-uri_parser = argparse.argument_parser(add_help=False)
+uri_parser = argparse.ArgumentParser(add_help=False)
 uri_parser.add_argument(
     "-u",
     "--uri",
@@ -31,7 +31,7 @@ uri_parser.add_argument(
     help="uri",
 )
 
-imas_parser = argparse.argument_parser(add_help=False)
+imas_parser = argparse.ArgumentParser(add_help=False)
 imas_parser.add_argument(
     "-u",
     "--user_or_path",
@@ -63,7 +63,7 @@ imas_parser.add_argument(
     help="data version \t(default=%(default)s)",
 )
 
-dbentry_parser = argparse.argument_parser(add_help=False, parents=[uri_parser])
+dbentry_parser = argparse.ArgumentParser(add_help=False, parents=[uri_parser])
 
 
 def get_backend_i_d(name):
@@ -74,7 +74,7 @@ def get_slice_mode(name):
     return getattr(imasdef, f"{name}_INTERP")
 
 
-def get_detailsfrom_u_r_i(uri):
+def get_details_from_uri(uri):
     import re
 
     param = {}
@@ -136,7 +136,7 @@ def get_title(imasargs, title="", time_value=None):
     if title:
         _title += f"{title} "
     if "uri" in imasargs.__dict__ and imasargs.uri:
-        param = get_detailsfrom_u_r_i(imasargs.uri)
+        param = get_details_from_uri(imasargs.uri)
         if param["pathPresent"]:
             _title += f"PATH={param['path']}"
         else:
@@ -153,7 +153,7 @@ def get_file_name(imasargs, title="", time_value=None):
     if title:
         _file_name += f"{title}_"
     if "uri" in imasargs.__dict__ and imasargs.uri:
-        param = get_detailsfrom_u_r_i(imasargs.uri)
+        param = get_details_from_uri(imasargs.uri)
         if param["pathPresent"]:
             _file_name += f"PATH_{param['path'].replace('/', '_')}_"
         else:

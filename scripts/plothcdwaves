@@ -106,7 +106,7 @@ def show_plots(args):
 
 
 if __name__ == "__main__":
-    parser = argparse.argument_parser(
+    parser = argparse.ArgumentParser(
         description="---- Display EC results",
         parents=[dbentry_parser],
         formatter_class=rich_help_formatter,

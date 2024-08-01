@@ -20,11 +20,11 @@ logger = setup_logger("module", stdout_level=logging.i_n_f_o)
 
 slicing_methods = {
     "CLOSEST": imasdef.c_l_o_s_e_s_t__i_n_t_e_r_p,
-    "PREVIOUS": imasdef.p_r_e_v_i_o_u_s__i_n_t_e_r_p,
+    "PREVIOUS": imasdef.PREVIOUS_INTERP,
     "LINEAR": imasdef.l_i_n_e_a_r__i_n_t_e_r_p,
 }
 # Management of input arguments
-parser = argparse.argument_parser(
+parser = argparse.ArgumentParser(
     description="View information about fluxes [Previously known as print_fluxes]",
     epilog="""
 """,

@@ -21,7 +21,7 @@ from idstools.utils.idslogger import setupLogger
 from idstools.view.common import Canvas
 from idstools.view.core_profiles import CoreProfilesView
 
-parser = argparse.argument_parser(
+parser = argparse.ArgumentParser(
     description="---- Display the efield, toroidal, polidal velocities from the core_profiles IDSs [previously known as rotationplot]",
     parents=[dbentry_parser],
     formatter_class=rich_help_formatter,

@@ -92,7 +92,7 @@ description = r"""
 if __name__ == "__main__":
     # Parse for command line options
     prog = os.path.basename(__file__)
-    parser = argparse.argument_parser(
+    parser = argparse.ArgumentParser(
         prog=prog,
         formatter_class=rich_help_formatter,
         description=markdown(description, style="argparse.text"),

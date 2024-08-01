@@ -407,7 +407,7 @@ def generate_html(file_path, compare_data):
 
 if __name__ == "__main__":
     # Management of input arguments
-    parser = argparse.argument_parser(
+    parser = argparse.ArgumentParser(
         description="""--- Compare a IDS from multiple date entries and returns True or False with option of generating html page with comparisen \n"
         + "- Example: \n"
         + "  idsdiff summary --uri \"imas:mdsplus?user=public;shot=122525;run=1;database=ITER;version=3\" \"imas:mdsplus?user=public;shot=122525;run=2;database=ITER;version=3\" \n"
@@ -461,7 +461,7 @@ if __name__ == "__main__":
         print("No valid connections found! Please validate pulse details")
 
     if args.ids == []:
-        args.ids = [ids.value for ids in list(imas.i_d_s_name)]
+        args.ids = [ids.value for ids in list(imas.IDSName)]
 
     file_path = get_filename("compare_report", args.directory)
     log_file = file_path + ".log"

@@ -59,7 +59,7 @@ def main():
 
     # Load IMAS-DD file
     if path.isfile(FILE_IDSDef):
-        root = e_t.parse(FILE_IDSDef).getroot()
+        root = ET.parse(FILE_IDSDef).getroot()
     else:
         exit(f"file not found:{FILE_IDSDef }")
 
@@ -91,9 +91,7 @@ def main():
 
 
 if __name__ == "__main__":
-    parser = argparse.argument_parser(
-        description="create validation schema wrt DD", formatter_class=rich_help_formatter
-    )
+    parser = argparse.ArgumentParser(description="create validation schema wrt DD", formatter_class=rich_help_formatter)
     parser.add_argument(
         "-i",
         "--idslist",

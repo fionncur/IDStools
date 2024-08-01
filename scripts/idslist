@@ -27,7 +27,7 @@ yaml option is provided which is used by other scripts to provide list of idses 
 
 [``ids_content(yaml)``, ``listidss`` (with time slices), ``idsoccurrences(occ)`` merged into one script]
 """
-parser = argparse.argument_parser(
+parser = argparse.ArgumentParser(
     prog="idslist",
     formatter_class=rich_help_formatter,
     description=markdown(description, style="argparse.text"),
@@ -125,7 +125,7 @@ else:
                 continue
         if len(time_array) == 1 and np.isnan(time_array[0]):
             print(f"{ids_name:15}:  {question_string:5} slices: heterogeneous IDS ")
-        elif len(time_array) == 1 and time_array[0] == np.n_i_n_f:
+        elif len(time_array) == 1 and time_array[0] == np.NINF:
             print(f"{ids_name:15}:  {question_string:5} slices: time independent IDS ")
         else:
             if args.fullarray is True:

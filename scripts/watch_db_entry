@@ -6,17 +6,14 @@ import argparse, sys
 from rich_argparse import RichHelpFormatter
 
 # Management of input arguments
-parser = argparse.argument_parser(
-    description="---- Subscribe/unsubscribe as a watcher to a simulation file stored in IMAS DB", formatter_class=rich_help_formatter,
+parser = argparse.ArgumentParser(
+    description="---- Subscribe/unsubscribe as a watcher to a simulation file stored in IMAS DB",
+    formatter_class=rich_help_formatter,
 )
 parser.add_argument("-p", "--pulse", help="pulse number", required=True, type=int)
 parser.add_argument("-r", "--run", help="run number", required=True, type=int)
-parser.add_argument(
-    "-d", "--delete", help="email to remove from watcher list", required=False, type=str
-)
-parser.add_argument(
-    "-f", "--firstname", help="user firstname", required=False, type=str
-)
+parser.add_argument("-d", "--delete", help="email to remove from watcher list", required=False, type=str)
+parser.add_argument("-f", "--firstname", help="user firstname", required=False, type=str)
 parser.add_argument("-n", "--name", help="user name", required=False, type=str)
 parser.add_argument("-e", "--email", help="user e-mail", required=False, type=str)
 args = vars(parser.parse_args())
@@ -62,17 +59,7 @@ if delflag == 0:
     f.write((""" %s \t %s \t %s \n""").expandtabs(17) % (firstname, name, email))
     f.close()
 
-    print(
-        "----> Watcher "
-        + firstname
-        + " "
-        + name
-        + " added for pulse "
-        + str(pulse)
-        + " run "
-        + str(run)
-        + "."
-    )
+    print("----> Watcher " + firstname + " " + name + " added for pulse " + str(pulse) + " run " + str(run) + ".")
 
 else:
     # Read the file
@@ -86,11 +73,5 @@ else:
             f.write(line)
     f.close()
     print(
-        "----> Watcher with email address "
-        + del_email
-        + "removed for pulse "
-        + str(pulse)
-        + " run "
-        + str(run)
-        + "."
+        "----> Watcher with email address " + del_email + "removed for pulse " + str(pulse) + " run " + str(run) + "."
     )

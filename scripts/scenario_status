@@ -11,7 +11,7 @@ from idstools.utils.idslogger import setupLogger
 
 console = console()
 # Management of input arguments
-parser = argparse.argument_parser(
+parser = argparse.ArgumentParser(
     description="""---- Show status and potential parent and children for a given simulation stored in ITER database folder\n\nImportant: The legacy scenario_status tool is deprecated and will be removed in a future versions. It will remain available until simdb is fully adopted.more about simdb : https://simdb.iter.org/dashboard/""",
     formatter_class=raw_description_rich_help_formatter,
 )

@@ -327,7 +327,7 @@ def rec(
 if __name__ == "__main__":
 
     # Input arguments
-    parser = argparse.argument_parser(
+    parser = argparse.ArgumentParser(
         description="---- Script to list available disruptions in a specific folder ----",
         formatter_class=smart_formatter,
     )

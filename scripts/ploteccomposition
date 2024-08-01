@@ -20,7 +20,7 @@ from idstools.view.waves import WavesView
 
 # MANAGEMENT OF INPUT ARGUMENTS
 # ------------------------------
-parser = argparse.argument_parser(
+parser = argparse.ArgumentParser(
     description="---- Display EC results [previously known as eccomp]",
     parents=[dbentry_parser],
     formatter_class=rich_help_formatter,

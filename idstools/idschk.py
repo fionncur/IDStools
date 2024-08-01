@@ -1101,7 +1101,7 @@ def load__x_m_l(fpath):
 
     # Load IMAS-DD File
     if path.isfile(fpath):
-        root = e_t.parse(fpath).getroot()
+        root = ET.parse(fpath).getroot()
     else:
         exit(f"file not found:{fpath}")
 
@@ -1305,7 +1305,7 @@ def init_schema_coordinate(idsname, dd=None, rule={"ids_dim": False}):
 
     d = {}
 
-    if e_t.iselement(dd):
+    if ET.iselement(dd):
         ddo = dd
     elif dd is None:
         ddo = load__d_d(idsname)
@@ -1371,7 +1371,7 @@ def ids_validator(ids, schema, dd=None, occ=0, ipsign=-1, b0sign=-1, verbose=Fal
         exit(f"type error:{schema}")
 
     # DD Initialization for Target IDS
-    if e_t.iselement(dd):
+    if ET.iselement(dd):
         pass
     elif dd is None:
         dd = load__d_d(ids.__name__)

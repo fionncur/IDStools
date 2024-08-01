@@ -22,7 +22,7 @@ class DDHelper(object):
         self.ids_def = DDHelper.get_ids_def_path()
         self.root = None
         if path.isfile(self.ids_def):
-            self.root = e_t.parse(self.ids_def).getroot()
+            self.root = ET.parse(self.ids_def).getroot()
             self.version = self.root.findtext("./version", default="N/A")
             self.cocos = self.root.findtext("./cocos", default="N/A")
         else:

@@ -548,9 +548,9 @@ class DBMaster:
         connection = None
         if imasargs.uri != "" and imasargs.uri is not None:
             if "mode" in imasargs.__dict__:
-                connection = imas.d_b_entry(imasargs.uri, imasargs.mode)
+                connection = imas.DBEntry(imasargs.uri, imasargs.mode)
             else:
-                connection = imas.d_b_entry(imasargs.uri, "r")
+                connection = imas.DBEntry(imasargs.uri, "r")
         return connection
 
     @staticmethod
@@ -716,7 +716,7 @@ def read_scenario(
         config = yamlload(scenario_file, loader=yaml_loader)
 
     # Read the equilibrium and core_profiles IDSs from the input datafile
-    connection_in = imas.d_b_entry(
+    connection_in = imas.DBEntry(
         imas.imasdef.m_d_s_p_l_u_s__b_a_c_k_e_n_d,
         config["input_database"],
         config["shot"],
@@ -734,7 +734,7 @@ def read_scenario(
     connection_in.close()
 
     # Read the out IDS from the output datafile
-    connection_out = imas.d_b_entry(
+    connection_out = imas.DBEntry(
         imas.imasdef.m_d_s_p_l_u_s__b_a_c_k_e_n_d,
         config["output_database"],
         config["shot"],

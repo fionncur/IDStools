@@ -13,7 +13,7 @@ from idstools.utils.clihelper import getCoreVersion
 from idstools.utils.idshelper import resampleIndices, resampleTimes
 
 if __name__ == "__main__":
-    parser = argparse.argument_parser(
+    parser = argparse.ArgumentParser(
         description="Resample IDSs from a data-entry and save them into another data-entry [previously known as ids_resampling]",
         formatter_class=rich_help_formatter,
     )
@@ -56,7 +56,7 @@ if __name__ == "__main__":
             exit()
 
     if args.ids == []:
-        args.ids = [ids.value for ids in list(imas.i_d_s_name)]
+        args.ids = [ids.value for ids in list(imas.IDSName)]
 
     inputargs = argparse.namespace()
     inputargs.uri = args.src
@@ -66,9 +66,9 @@ if __name__ == "__main__":
         sys.exit()
 
     if get_core_version() > 4:
-        tmp = imas.d_b_entry("imas:memory?path=tmp/1/1", "w")
+        tmp = imas.DBEntry("imas:memory?path=tmp/1/1", "w")
     else:
-        tmp = imas.d_b_entry(imas.imasdef.m_e_m_o_r_y__b_a_c_k_e_n_d, "tmp", 1, 1)
+        tmp = imas.DBEntry(imas.imasdef.m_e_m_o_r_y__b_a_c_k_e_n_d, "tmp", 1, 1)
     status, _ = tmp.create()
     if status != 0:
         print("Error creating temporary data-entry in memory!", file=sys.stderr)
