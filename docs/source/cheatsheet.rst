@@ -252,11 +252,11 @@ This cheat sheet provides quick reference of commonly used commands in IDStools.
 |                               |    $ idsperf --uri "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3" equilibrium  -a                          |
 |                               |    $ idsperf --uri "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3" equilibrium  -t 50 -m                    |
 |                               |    $ idsperf --uri "imas:mdsplus?user=public;pulse=122525;run=1;database=ITER;version=3" summary                                    |
-|                               |    $ idsperf --uri "imas:mdsplus?user=public;pulse=122525;run=1;database=ITER;version=3" summary --verbose --outputRun 5            |
-|                               |    --showStats --repeat 2                                                                                                           |
-|                               |    $ idsperf --uri "imas:mdsplus?user=public;pulse=122525;run=1;database=ITER;version=3" summary --verbose --outputRun 5            |
-|                               |    --showStats --repeat 2                                                                                                           |
-|                               |    --uriOut "imas:mdsplus?user=$USERNAME;pulse=131024;run=25;database=ITER;version=3" --memoryBackend                               |
+|                               |    $ idsperf --uri "imas:mdsplus?user=public;pulse=122525;run=1;database=ITER;version=3" summary --verbose --output-run 5            |
+|                               |    --show-stats --repeat 2                                                                                                           |
+|                               |    $ idsperf --uri "imas:mdsplus?user=public;pulse=122525;run=1;database=ITER;version=3" summary --verbose --output-run 5            |
+|                               |    --show-stats --repeat 2                                                                                                           |
+|                               |    --uri-out "imas:mdsplus?user=$USERNAME;pulse=131024;run=25;database=ITER;version=3" --memory-backend                               |
 +-------------------------------+-------------------------------------------------------------------------------------------------------------------------------------+
 | *idsprint*                    | Dumps or prints all data on the console.                                                                                            |
 |                               | Check if specific fields or attributes have been filled out or empty                                                                |

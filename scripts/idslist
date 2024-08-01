@@ -12,7 +12,7 @@ from rich_argparse import RichHelpFormatter
 from idstools.database import DBMaster
 from idstools.utils.clihelper import dbentry_parser
 from idstools.utils.idshelper import (
-    getAvailableIdsAndOccurrences,
+    get_available_ids_and_occurrences,
     get_available_ids_and_times,
 )
 from idstools.utils.idslogger import setup_logger

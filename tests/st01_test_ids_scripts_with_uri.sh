@@ -39,8 +39,8 @@ SCRIPTS=(
     "idslist --uri \"imas:mdsplus?user=public;pulse=122525;run=1;database=ITER;version=3\" -y"
     "idslist --uri \"imas:mdsplus?user=public;pulse=122525;run=1;database=ITER;version=3\" -c"
     "idsperf --uri \"imas:mdsplus?user=public;pulse=122525;run=1;database=ITER;version=3\" summary"
-    "idsperf --uri \"imas:mdsplus?user=public;pulse=122525;run=1;database=ITER;version=3\" summary --verbose --outputRun 5 --showStats --repeat 2"
-    "idsperf --uri \"imas:mdsplus?user=public;pulse=122525;run=1;database=ITER;version=3\" summary --verbose --outputRun 5 --showStats --repeat 2 --uriOut \"imas:mdsplus?user=$USERNAME;pulse=131024;run=25;database=ITER;version=3?path=$DATABASE_DIR\" --memoryBackend"
+    "idsperf --uri \"imas:mdsplus?user=public;pulse=122525;run=1;database=ITER;version=3\" summary --verbose --output-run 5 --show-stats --repeat 2"
+    "idsperf --uri \"imas:mdsplus?user=public;pulse=122525;run=1;database=ITER;version=3\" summary --verbose --output-run 5 --show-stats --repeat 2 --uri-out \"imas:mdsplus?user=$USERNAME;pulse=131024;run=25;database=ITER;version=3?path=$DATABASE_DIR\" --memory-backend"
     "idsprint --uri \"imas:mdsplus?user=public;pulse=122525;run=1;database=ITER;version=3#equilibrium\""
     "idssize --uri \"imas:mdsplus?user=public;pulse=122525;run=1;database=ITER;version=3\" equilibrium"
     "idssize --uri \"imas:mdsplus?user=public;pulse=131024;run=10;database=ITER;version=3\"")

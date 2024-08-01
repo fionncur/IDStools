@@ -22,7 +22,7 @@ if __name__ == "__main__":
     timegroup = parser.add_mutually_exclusive_group()
     timegroup.add_argument(
         "-t",
-        "--sliceTime",
+        "--slice-time",
         type=float,
         nargs="+",
         help="Use get_slice with selected time(s)",
@@ -35,7 +35,7 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "-m",
-        "--memory_backend",
+        "--memory-backend",
         action="store_true",
         help="Use MEMORY_BACKEND for this test (involve reading from file and loading in memory first)",
     )
@@ -50,13 +50,13 @@ if __name__ == "__main__":
         action="store_true",
         help="Verbose mode, prints additional information",
     )
-    parser.add_argument("--showStats", action="store_true", help="Print addition stats for timings")
+    parser.add_argument("--show-stats", action="store_true", help="Print addition stats for timings")
     parser.add_argument(
         "--profile",
         action="store_true",
         help="Also do full profile of the selected operation, via cProfile",
     )
-    parser.add_argument("-o", "--outputRun", type=int, help="Output run number for checking perf of put")
+    parser.add_argument("-o", "--output-run", type=int, help="Output run number for checking perf of put")
     parser.add_argument(
         "ids",
         nargs="*",
@@ -64,8 +64,8 @@ if __name__ == "__main__":
         help='IDS name(s) (leave empty to select all IDSs with default occurrence, or append "/n" to copy a specific occurrence "n")',
     )
     parser.add_argument(
-        "-uri_out",
-        "--uri_out",
+        "-uri-out",
+        "--uri-out",
         type=str,
         help="uri out \t\t(default=%(default)s)",
     )

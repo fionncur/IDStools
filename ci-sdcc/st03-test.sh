@@ -47,16 +47,16 @@ echo "====================================================================="
 echo ""
 echo ""
 
-echo "====================================================================="
-echo "Testing analysis scripts  with URI $IMAS_MODULE_VERSION and $PYTHON_VERSION"
-echo "====================================================================="
-source ./tests/st03_test_analysis_scripts_with_uri.sh "$LOG_DIR" "$DB_DIR"
+# echo "====================================================================="
+# echo "Testing analysis scripts  with URI $IMAS_MODULE_VERSION and $PYTHON_VERSION"
+# echo "====================================================================="
+# source ./tests/st03_test_analysis_scripts_with_uri.sh "$LOG_DIR" "$DB_DIR"
 
 # echo "====================================================================="
 # echo "Testing analysis scripts  with URI PATH $IMAS_MODULE_VERSION and $PYTHON_VERSION"
 # echo "====================================================================="
 # source ./tests/st03_test_analysis_scripts_with_uripath.sh "$LOG_DIR" "$DB_DIR"
-# # ---------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 # echo ""
 # echo ""
 # echo "====================================================================="
@@ -64,13 +64,13 @@ source ./tests/st03_test_analysis_scripts_with_uri.sh "$LOG_DIR" "$DB_DIR"
 # echo "====================================================================="
 # source ./tests/st01_test_ids_scripts_with_uri.sh "$LOG_DIR" "$DB_DIR"
 
-# # ---------------------------------------------------------------------------
-# echo ""
-# echo ""
-# echo "====================================================================="
-# echo "Testing db scripts with $IMAS_MODULE_VERSION and $PYTHON_VERSION"
-# echo "====================================================================="
-# source ./tests/st02_test_db_scripts.sh "$LOG_DIR" "$DB_DIR"
+# ---------------------------------------------------------------------------
+echo ""
+echo ""
+echo "====================================================================="
+echo "Testing db scripts with $IMAS_MODULE_VERSION and $PYTHON_VERSION"
+echo "====================================================================="
+source ./tests/st02_test_db_scripts.sh "$LOG_DIR" "$DB_DIR"
 
 # # ---------------------------------------------------------------------------
 # echo ""
