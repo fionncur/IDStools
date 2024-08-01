@@ -9,18 +9,18 @@ import logging
 from rich_argparse import RichHelpFormatter
 from imas import imasdef
 
-from idstools.compute.common import getNearestTime
+from idstools.compute.common import get_nearest_time
 from idstools.compute.wall import WallCompute
 from idstools.database import DBMaster
 from idstools.machinedescription import MachineDescription
 from idstools.utils.clihelper import (
-    dbentryParser,
-    getDatabasePath,
-    getFileName,
-    getTitle,
+    dbentry_parser,
+    get_database_path,
+    get_file_name,
+    get_title,
 )
-from idstools.utils.idslogger import setupLogger
-from idstools.view.common import Canvas
+from idstools.utils.idslogger import setup_logger
+from idstools.view.common import PlotCanvas
 from idstools.view.edge_profiles import EdgeProfilesView
 
 logger = setup_logger("module", stdout_level=logging.i_n_f_o)
@@ -28,7 +28,7 @@ logger = setup_logger("module", stdout_level=logging.i_n_f_o)
 parser = argparse.ArgumentParser(
     description="---- Edge Profile plot",
     parents=[dbentry_parser],
-    formatter_class=rich_help_formatter,
+    formatter_class=RichHelpFormatter,
 )
 
 parser.add_argument("-t", "--time", type=float, help="Time", default=-99)
@@ -119,7 +119,7 @@ if len(edge_profile_ids.grid_ggd[0].space) == 0:
 
 
 edge_profiles_view = edge_profiles_view(edge_profile_ids)
-canvas = canvas(2, 4)
+canvas = PlotCanvas(2, 4)
 
 
 ax4 = canvas.add_axes(title="", xlabel="", row=0, col=0)

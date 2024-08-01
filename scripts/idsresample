@@ -15,7 +15,7 @@ from idstools.utils.idshelper import resampleIndices, resampleTimes
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Resample IDSs from a data-entry and save them into another data-entry [previously known as ids_resampling]",
-        formatter_class=rich_help_formatter,
+        formatter_class=RichHelpFormatter,
     )
     parser.add_argument(
         "-s",

@@ -24,7 +24,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Times IDS getting of given Pulse and Run, contrasts with IDS size and slices. replaced by db_backend_benchmark.py",
         parents=[imas_parser],
-        formatter_class=rich_help_formatter,
+        formatter_class=RichHelpFormatter,
     )
     parser.add_argument(
         "-md",

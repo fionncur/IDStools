@@ -8,7 +8,7 @@ from rich_argparse import RichHelpFormatter
 # Management of input arguments
 parser = argparse.ArgumentParser(
     description="---- Subscribe/unsubscribe as a watcher to a simulation file stored in IMAS DB",
-    formatter_class=rich_help_formatter,
+    formatter_class=RichHelpFormatter,
 )
 parser.add_argument("-p", "--pulse", help="pulse number", required=True, type=int)
 parser.add_argument("-r", "--run", help="run number", required=True, type=int)

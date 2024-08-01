@@ -54,14 +54,14 @@ import numpy as np
 from rich_argparse import RichHelpFormatter
 
 from idstools.database import DBMaster
-from idstools.utils.clihelper import dbentryParser
+from idstools.utils.clihelper import dbentry_parser
 from idstools.utils.idshelper import getIDSSize
 
 parser = argparse.ArgumentParser(
     description="Show size and time of IDSs [previously knwon as analyze_db_sizes]",
     epilog="""
 """,
-    formatter_class=rich_help_formatter,
+    formatter_class=RichHelpFormatter,
     parents=[dbentry_parser],
 )
 

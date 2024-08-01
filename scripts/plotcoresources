@@ -8,16 +8,16 @@ from rich_argparse import RichHelpFormatter
 
 import imas
 
-from idstools.compute.common import getNearestTime
+from idstools.compute.common import get_nearest_time
 from idstools.database import DBMaster
 from idstools.utils.clihelper import (
-    dbentryParser,
-    getDatabasePath,
-    getFileName,
-    getTitle,
+    dbentry_parser,
+    get_database_path,
+    get_file_name,
+    get_title,
 )
-from idstools.utils.idslogger import setupLogger
-from idstools.view.common import Canvas
+from idstools.utils.idslogger import setup_logger
+from idstools.view.common import PlotCanvas
 from idstools.view.core_sources import CoreSourcesView
 
 logger = setup_logger("module", stdout_level=logging.i_n_f_o)
@@ -25,7 +25,7 @@ logger = setup_logger("module", stdout_level=logging.i_n_f_o)
 parser = argparse.ArgumentParser(
     description="---- Display core_sources results [Previously known as csplot]",
     parents=[dbentry_parser],
-    formatter_class=rich_help_formatter,
+    formatter_class=RichHelpFormatter,
 )
 
 parser.add_argument("-t", "--time", help="time", required=False, type=float, default=-99.0)
@@ -86,7 +86,7 @@ nsources = len(core_sources.source)
 
 core_source_view = core_sources_view(core_sources)
 
-canvas = canvas(2, 4)
+canvas = PlotCanvas(2, 4)
 ret = ax_power_profiles = canvas.add_axes(title=r"Power Profiles [MW/M3]", row=0, col=0)
 core_source_view.view_power_profiles(ax_power_profiles)
 

@@ -10,23 +10,23 @@ from rich_argparse import RichHelpFormatter
 
 import imas
 
-from idstools.compute.common import getNearestTime
+from idstools.compute.common import get_nearest_time
 from idstools.database import DBMaster
 from idstools.utils.clihelper import (
-    dbentryParser,
-    getDatabasePath,
-    getFileName,
-    getTitle,
+    dbentry_parser,
+    get_database_path,
+    get_file_name,
+    get_title,
 )
-from idstools.utils.idslogger import setupLogger
-from idstools.view.common import Canvas
+from idstools.utils.idslogger import setup_logger
+from idstools.view.common import PlotCanvas
 from idstools.view.distribution_sources import DistributionSourcesView
 
 # Management of input arguments
 parser = argparse.ArgumentParser(
     description="---- Display the neutron profiles from the distribution_sources IDSs [previously known as neutronplot]",
     parents=[dbentry_parser],
-    formatter_class=rich_help_formatter,
+    formatter_class=RichHelpFormatter,
 )
 
 parser.add_argument("-t", "--time", help="Time", required=False, type=float, default=-99.0)
@@ -130,9 +130,9 @@ if sum(active) == 0:
     logger.critical("No active neutron sources --> Leave.")
     exit()
 
-canvas = canvas(1, 1)
+canvas = PlotCanvas(1, 1)
 ax = canvas.add_axes(title="", xlabel="", row=0, col=0)
-distribution_sources_view = distribution_sources_view(ids_distribution_sources)
+distribution_sources_view = DistributionSourcesView(ids_distribution_sources)
 distribution_sources_view.view_neutrons(ax)
 distribution_sources_view.view_time(ax, time_value)
 

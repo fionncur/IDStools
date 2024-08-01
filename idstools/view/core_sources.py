@@ -12,7 +12,7 @@ logger = logging.getLogger(f"module.{__name__}")
 
 class core_sources_view:
     def __init__(self, ids):
-        self.core_sources_compute = core_sources_compute(ids)
+        self.core_sources_compute = CoreSourcesCompute(ids)
         self.ids = ids
 
     def view_sources(self):
@@ -21,7 +21,7 @@ class core_sources_view:
         flux, energy flux, and ion flux.
         """
         sources_dict = self.core_sources_compute.get_flux_info_from_sources()
-        ion_table = table(show_header=False)
+        ion_table = Table(show_header=False)
         for _, source_dict in sources_dict.items():
             # electrons
             if source_dict["particles_flux"] is None:
@@ -88,24 +88,24 @@ class core_sources_view:
             ax.set_title("Power Profiles [MW/M3]")
             ax.plot(
                 rho_tor_norm,
-                single_and_total_electrons_profiles["totalElectronPowerProfile"] * 1.0e-6,
+                single_and_total_electrons_profiles["total_electron_power_profile"] * 1.0e-6,
                 label=r"Total to electrons",
             )
             ax.plot(
                 rho_tor_norm,
-                single_and_total_ion_profiles["totalIonPowerProfile"] * 1.0e-6,
+                single_and_total_ion_profiles["total_ion_power_profile"] * 1.0e-6,
                 "--",
                 label=r"Total to ions",
             )
             for isource, name in source_names.items():
                 ax.plot(
                     rho_tor_norm,
-                    single_and_total_electrons_profiles["singleElectronPowerProfile"][isource] * 1.0e-6,
+                    single_and_total_electrons_profiles["single_electron_power_profile"][isource] * 1.0e-6,
                     label=name + " [" + str(isource) + "]" + " to electrons",
                 )
                 ax.plot(
                     rho_tor_norm,
-                    single_and_total_ion_profiles["singleIonPowerProfile"][isource] * 1.0e-6,
+                    single_and_total_ion_profiles["single_ion_power_profile"][isource] * 1.0e-6,
                     "--",
                     label=name + " [" + str(isource) + "]" + " to ions",
                 )
@@ -141,24 +141,24 @@ class core_sources_view:
             ax.set_title("PARTICLES PROFILES [/M3/S]")
             ax.plot(
                 rho_tor_norm,
-                single_and_total_electrons_profiles["totalElectronParticlesProfile"] * 1.0e-6,
+                single_and_total_electrons_profiles["total_electron_particles_profile"] * 1.0e-6,
                 label=r"Total to electrons",
             )
             ax.plot(
                 rho_tor_norm,
-                single_and_total_ion_profiles["totalIonParticlesProfile"] * 1.0e-6,
+                single_and_total_ion_profiles["total_ion_particles_profile"] * 1.0e-6,
                 "--",
                 label=r"Total to ions",
             )
             for isource, name in source_names.items():
                 ax.plot(
                     rho_tor_norm,
-                    single_and_total_electrons_profiles["singleElectronParticlesProfile"][isource] * 1.0e-6,
+                    single_and_total_electrons_profiles["single_electron_particles_profile"][isource] * 1.0e-6,
                     label=name + " [" + str(isource) + "]" + " electrons",
                 )
                 ax.plot(
                     rho_tor_norm,
-                    single_and_total_ion_profiles["singleIonParticlesProfile"][isource] * 1.0e-6,
+                    single_and_total_ion_profiles["single_ion_particles_profile"][isource] * 1.0e-6,
                     "--",
                     label=name + " [" + str(isource) + "]" + " ions",
                 )
@@ -194,14 +194,14 @@ class core_sources_view:
             ax.set_title("CURRENT PROFILES [KA/M2]")
             ax.plot(
                 rho_tor_norm,
-                single_and_total_electrons_and_ions_profiles["totalCurrentProfile"] * 1.0e-3,
+                single_and_total_electrons_and_ions_profiles["total_current_profile"] * 1.0e-3,
                 label=r"Total current",
             )
             for isource, name in source_names.items():
-                if len(single_and_total_electrons_and_ions_profiles["singleCurrentProfile"][isource]) > 0:
+                if len(single_and_total_electrons_and_ions_profiles["single_current_profile"][isource]) > 0:
                     ax.plot(
                         rho_tor_norm,
-                        single_and_total_electrons_and_ions_profiles["singleCurrentProfile"][isource] * 1.0e-3,
+                        single_and_total_electrons_and_ions_profiles["single_current_profile"][isource] * 1.0e-3,
                         label=name + str(isource),
                     )
             ax.set_ylabel("Current density $\\mathrm{[kA/m^{2}]}$")

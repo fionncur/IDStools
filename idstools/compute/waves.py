@@ -311,11 +311,11 @@ class WavesCompute:
                             length[beam_index, iray, :npath] = ray.length
 
         beam_tracing = {"nbeam": total_waves}
-        beam_tracing["maxTotalBeams"] = max_total_beams
-        beam_tracing["activeBeamsCount"] = active_beams_count
-        beam_tracing["beamActivaStatusList"] = beam_activa_status_list
-        beam_tracing["beamDataLengthForEachWave"] = beam_data_length_for_each_wave
-        beam_tracing["beamElectronsLengthForEachWave"] = beam_electrons_length_for_each_wave
+        beam_tracing["max_total_beams"] = max_total_beams
+        beam_tracing["active_beams_count"] = active_beams_count
+        beam_tracing["beam_active_status_list"] = beam_activa_status_list
+        beam_tracing["beam_data_length_for_each_wave"] = beam_data_length_for_each_wave
+        beam_tracing["beam_electrons_length_for_each_wave"] = beam_electrons_length_for_each_wave
         beam_tracing["x_ray"] = x_ray
         beam_tracing["len_ray"] = len_ray
         beam_tracing["y_ray"] = y_ray
@@ -332,7 +332,7 @@ class WavesCompute:
     def get_e_c_launchers_info(self, time_index: int = 0, usepsi=False, verbose=False):
         ec_launcher_info = {}
         data = self.get_radial_grid_info(time_index, usepsi)
-        active_launchers = {key: value for key, value in data.items() if value["isActive"] is True}
+        active_launchers = {key: value for key, value in data.items() if value["is_active"] is True}
         _, first_item_value = next(iter(active_launchers.items()))
         nrho = first_item_value["nrho"]
 
@@ -480,7 +480,7 @@ class WavesCompute:
         active_found = False
         for iwave in range(len(self.ids.coherent_wave)):
             wave_data = {}
-            wave_data["isActive"] = False
+            wave_data["is_active"] = False
             wave_data["isPsiAvailable"] = False
             wave_data["npsi"] = None
             wave_data["nrho"] = None
@@ -490,7 +490,7 @@ class WavesCompute:
 
             if np.size(self.ids.coherent_wave[iwave].global_quantities) > 0:
                 if self.is_active_during_pulse(iwave) is True:
-                    wave_data["isActive"] = True
+                    wave_data["is_active"] = True
                     active_found = True
                     try:
                         if len(self.ids.coherent_wave[iwave].profiles_1d[time_index].grid.rho_tor_norm) > 0:

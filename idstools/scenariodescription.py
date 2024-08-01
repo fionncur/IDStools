@@ -291,9 +291,9 @@ class scenario_description(scenario_description_base):
 
     def print_yaml(self):
         """
-        The function `printYaml` prints the `yamlData` attribute of the object on terminal.
+        The function `printYaml` prints the `yamlData` attribute of the object on Terminal.
         """
-        terminal = terminal()
+        terminal = Terminal()
         terminal.print(self.yaml_data)
 
 

@@ -11,16 +11,16 @@ from rich_argparse import RichHelpFormatter
 
 import imas
 
-from idstools.compute.common import getNearestTime
+from idstools.compute.common import get_nearest_time
 from idstools.database import DBMaster
 from idstools.utils.clihelper import (
-    dbentryParser,
-    getDatabasePath,
-    getFileName,
-    getTitle,
+    dbentry_parser,
+    get_database_path,
+    get_file_name,
+    get_title,
 )
-from idstools.utils.idslogger import setupLogger
-from idstools.view.common import Canvas
+from idstools.utils.idslogger import setup_logger
+from idstools.view.common import PlotCanvas
 from idstools.view.core_profiles import CoreProfilesView
 
 logger = setup_logger("module", stdout_level=logging.i_n_f_o)
@@ -30,7 +30,7 @@ parser = argparse.ArgumentParser(
     description="Display the plasma pressure properties from the core_profiles IDS [previsouly known as pressureplot]",
     epilog="""
 """,
-    formatter_class=rich_help_formatter,
+    formatter_class=RichHelpFormatter,
     parents=[dbentry_parser],
 )
 
@@ -70,14 +70,14 @@ time_index, time_value = get_nearest_time(time_array, args.time)
 ids_core_profiles.profiles_1d.resize(1)  # Read 1D-profiles for this time slice
 ids_core_profiles.profiles_1d[0] = connection.partial_get("core_profiles", f"profiles_1d({time_index})")
 title = "Profiles displayed for t = " + "%.1f" % time_value + " s"
-canvas = canvas(3, 1)
+canvas = PlotCanvas(3, 1)
 canvas.fig.suptitle(title, size=12)
 
 ax1 = canvas.add_axes(title="", xlabel="", row=0, col=0, colspan=1)
 ax2 = canvas.add_axes(title="", xlabel="", row=1, col=0, colspan=1)
 ax3 = canvas.add_axes(title="", xlabel="", row=2, col=0, colspan=1)
 
-coreprofiles_view = core_profiles_view(ids_core_profiles)
+coreprofiles_view = CoreProfilesView(ids_core_profiles)
 
 coreprofiles_view.plot_total_pressure_properties(ax1)
 coreprofiles_view.plot_ion_pressure_properties(ax2)

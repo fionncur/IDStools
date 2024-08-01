@@ -7,7 +7,7 @@ from rich.console import Console
 from rich.syntax import Syntax
 from rich_argparse import RawDescriptionRichHelpFormatter
 
-from idstools.utils.idslogger import setupLogger
+from idstools.utils.idslogger import setup_logger
 
 logger = setup_logger("module", stdout_level=logging.i_n_f_o)
 

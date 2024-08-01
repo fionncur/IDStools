@@ -9,9 +9,9 @@ from idstools.view.common import BasePlot
 logger = logging.getLogger(f"module.{__name__}")
 
 
-class distribution_sources_view(base_plot):
+class DistributionSourcesView(BasePlot):
     def __init__(self, ids):
-        self.distribution_sources_compute = distribution_sources_compute(ids)
+        self.distribution_sources_compute = DistributionSourcesCompute(ids)
         self.ids = ids
 
     def view_neutrons(self, ax: plt.axes):

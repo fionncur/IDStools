@@ -7,7 +7,7 @@ from idstools.compute.distributions import DistributionsCompute
 logger = logging.getLogger(f"module.{__name__}")
 
 
-class distributions_view:
+class DistributionsView:
     def __init__(self, ids):
         self.distributions_compute = DistributionsCompute(ids)
         self.ids = ids
@@ -46,7 +46,7 @@ class distributions_view:
         ax.set_xlabel("Normalized toroidal flux coordinate")
 
         legend = ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
-        distributions_view.customize_legend(legend)
+        DistributionsView.customize_legend(legend)
 
     # PROFILE OF ABSORBED POWER DENSITY ON ELECTRONS+IONS FOR ALL INJECTORS AND EACH OF THEM INDIVIDUALLY [MW/M3]
     def plot_absorbed_power_density(
@@ -77,10 +77,10 @@ class distributions_view:
         ax.set_xlabel("Normalized toroidal flux coordinate")
 
         legend = ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
-        distributions_view.customize_legend(legend)
+        DistributionsView.customize_legend(legend)
 
     # CD PROFILE [MA/M2]
-    def plot_c_d_profile(
+    def plot_cd_profile(
         self,
         ax,
         time_index,
@@ -110,10 +110,10 @@ class distributions_view:
         ax.set_title("NBI/FUS power profile")
 
         legend = ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
-        distributions_view.customize_legend(legend)
+        DistributionsView.customize_legend(legend)
 
     # NBI/FUS POWER AND CD WAVEFORMS
-    def plot_n_b_i_fus_power_and_c_d_waveforms(
+    def plot_nbi_fus_power_and_cd_waveforms(
         self,
         ax,
         time_index,
@@ -156,10 +156,10 @@ class distributions_view:
         if profiles is not None:
             ax.set_ylim(0, max(profiles["all_injectors_total_power_waveform"]) * 1.2e-6)
         legend = ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
-        distributions_view.customize_legend(legend)
+        DistributionsView.customize_legend(legend)
 
     # CD WAVEFORM
-    def plot_c_d_waveform(
+    def plot_cd_waveform(
         self,
         ax,
         time_index,
@@ -193,7 +193,7 @@ class distributions_view:
             ax.set_title("NBI/FUS Current Density waveform")
             # ax.set_ylim(0,max(profiles['all_injectors_current_waveform'])*1.2e-3)
             legend = ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
-            distributions_view.customize_legend(legend)
+            DistributionsView.customize_legend(legend)
         else:
             ax.remove()
 

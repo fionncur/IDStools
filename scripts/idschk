@@ -9,7 +9,7 @@ from rich.markdown import Markdown
 from rich_argparse import RichHelpFormatter
 import yaml
 from idstools.database import DBMaster
-from idstools.utils.clihelper import dbentryParser
+from idstools.utils.clihelper import dbentry_parser
 
 import imas
 from idstools.idslist import available_in_dbentry
@@ -169,7 +169,7 @@ Examples:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         prog="idschk",
-        formatter_class=rich_help_formatter,
+        formatter_class=RichHelpFormatter,
         parents=[dbentry_parser],
         description=markdown(description, style="argparse.text"),
     )

@@ -17,7 +17,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Check if specified ids is exists in the scenario database and returns shot and pulse",
         parents=[imas_parser],
-        formatter_class=rich_help_formatter,
+        formatter_class=RichHelpFormatter,
     )
     parser.add_argument(
         "ids",

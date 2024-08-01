@@ -1,4 +1,4 @@
-from idstools.compute.common import findMaxima, findMinima, findfwhm
+from idstools.compute.common import find_maxima, find_minima, findfwhm
 from idstools.compute.waves import WavesCompute
 
 import numpy as np
@@ -7,14 +7,14 @@ import logging
 logger = logging.getLogger(f"module.{__name__}")
 
 
-class waves_view:
+class WavesView:
     def __init__(self, ids):
         self.waves_compute = WavesCompute(ids)
         self.ids = ids
 
     def plot_pol_view_traces(self, ax, time_index, color="b", style="-", label="", fontsize=9, labelpad=-1):
         beam_tracing_dict = self.waves_compute.get_beam_tracing(time_index)
-        beam_data_length_for_each_wave = beam_tracing_dict["beamDataLengthForEachWave"]
+        beam_data_length_for_each_wave = beam_tracing_dict["beam_data_length_for_each_wave"]
 
         length_data = beam_tracing_dict["length"]
         r_ray_data = beam_tracing_dict["r_ray"]
@@ -42,7 +42,7 @@ class waves_view:
         ax.set_ylabel("Y [m]")
 
         beam_tracing_dict = self.waves_compute.get_beam_tracing(time_index)
-        beam_data_length_for_each_wave = beam_tracing_dict["beamDataLengthForEachWave"]
+        beam_data_length_for_each_wave = beam_tracing_dict["beam_data_length_for_each_wave"]
         length_data = beam_tracing_dict["length"]
         x_ray_data = beam_tracing_dict["x_ray"]
         y_ray_data = beam_tracing_dict["y_ray"]
@@ -70,7 +70,7 @@ class waves_view:
         ax.set_ylabel("P$_{electrons}$ [MW]")
 
         beam_tracing_dict = self.waves_compute.get_beam_tracing(time_index)
-        beam_electrons_length_for_each_wave = beam_tracing_dict["beamElectronsLengthForEachWave"]
+        beam_electrons_length_for_each_wave = beam_tracing_dict["beam_electrons_length_for_each_wave"]
 
         length_data = beam_tracing_dict["length"]
         electronspower_data = beam_tracing_dict["electronspower"]
@@ -99,7 +99,7 @@ class waves_view:
         ax.set_xlabel("Path length [m]")
 
         beam_tracing_dict = self.waves_compute.get_beam_tracing(time_index)
-        beam_electrons_length_for_each_wave = beam_tracing_dict["beamElectronsLengthForEachWave"]
+        beam_electrons_length_for_each_wave = beam_tracing_dict["beam_electrons_length_for_each_wave"]
 
         length_data = beam_tracing_dict["length"]
         powerparallel_data = beam_tracing_dict["powerparallel"]
@@ -134,7 +134,7 @@ class waves_view:
                     parlabel = ""
         ax.legend()
 
-    def plot_e_c_r_h_profiles(
+    def plot_ecrh_profiles(
         self,
         ax,
         time_index,
@@ -143,7 +143,7 @@ class waves_view:
         # ECRH PROFILE [MA/M2]
         ec_launcher_info = self.waves_compute.get_e_c_launchers_info(time_index)
         radial_grid = self.waves_compute.get_radial_grid_info(time_index)
-        active_launchers = {key: value for key, value in radial_grid.items() if value["isActive"] is True}
+        active_launchers = {key: value for key, value in radial_grid.items() if value["is_active"] is True}
         _, first_radial_grid_info = next(iter(active_launchers.items()))
 
         code_name = self.ids.code.name.upper()
@@ -207,7 +207,7 @@ class waves_view:
                 ax.set_xlabel("-(Poloidal flux coordinate) [Wb]")
             ax.legend()
 
-    def plot_e_c_c_d_profiles(
+    def plot_eccd_profiles(
         self,
         ax,
         time_index,
@@ -217,7 +217,7 @@ class waves_view:
         ec_launcher_info = self.waves_compute.get_e_c_launchers_info(time_index)
 
         radial_grid = self.waves_compute.get_radial_grid_info(time_index)
-        active_launchers = {key: value for key, value in radial_grid.items() if value["isActive"] is True}
+        active_launchers = {key: value for key, value in radial_grid.items() if value["is_active"] is True}
         _, first_radial_grid_info = next(iter(active_launchers.items()))
 
         code_name = self.ids.code.name.upper()
@@ -266,7 +266,7 @@ class waves_view:
             ax.set_xlabel("-(Poloidal flux coordinate) [Wb]")
         ax.legend()
 
-    def plot_e_c_r_h_waveform(
+    def plot_ecrh_waveform(
         self,
         ax,
         time_index,
@@ -276,7 +276,7 @@ class waves_view:
         ec_launcher_info = self.waves_compute.get_e_c_launchers_info(time_index)
 
         radial_grid = self.waves_compute.get_radial_grid_info(time_index)
-        active_launchers = {key: value for key, value in radial_grid.items() if value["isActive"] is True}
+        active_launchers = {key: value for key, value in radial_grid.items() if value["is_active"] is True}
 
         code_name = self.ids.code.name.upper()
 
@@ -316,7 +316,7 @@ class waves_view:
         ec_launcher_info = self.waves_compute.get_e_c_launchers_info(time_index)
 
         radial_grid = self.waves_compute.get_radial_grid_info(time_index)
-        active_launchers = {key: value for key, value in radial_grid.items() if value["isActive"] is True}
+        active_launchers = {key: value for key, value in radial_grid.items() if value["is_active"] is True}
 
         code_name = self.ids.code.name.upper()
 
@@ -352,7 +352,7 @@ class waves_view:
         launchers = self.waves_compute.get_radial_grid_info(time_index)
 
         for i_wave, wave_data in launchers.items():
-            if wave_data["isActive"] is True:
+            if wave_data["is_active"] is True:
                 logger.info(
                     f"{ec_launcher_info['single_ec_launcher_name'][i_wave]} is active with a power of"
                     f"{ec_launcher_info['single_injected_power'][i_wave]*1.e-6:.2f} MW --> Absorbed power ="
@@ -379,7 +379,7 @@ class waves_view:
 
         radial_grid = self.waves_compute.get_radial_grid_info(time_index, usepsi)
 
-        active_launchers = {key: value for key, value in radial_grid.items() if value["isActive"] is True}
+        active_launchers = {key: value for key, value in radial_grid.items() if value["is_active"] is True}
         len_active_launchers = len(active_launchers)
         ax.set_title("Current density waveform")
         if len_active_launchers != 0:
@@ -397,7 +397,7 @@ class waves_view:
         ax.set_ylabel("Current Density $\\mathrm{[kA]}$")
         ax.set_xlabel("Time (s)")
         legend = ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
-        waves_view.customize_legend(legend)
+        WavesView.customize_legend(legend)
 
     # EC POWER WAVEFORM
     def view_e_c_power_waveform(self, ax, time_index, usepsi=False):
@@ -406,7 +406,7 @@ class waves_view:
 
         radial_grid = self.waves_compute.get_radial_grid_info(time_index, usepsi)
 
-        active_launchers = {key: value for key, value in radial_grid.items() if value["isActive"] is True}
+        active_launchers = {key: value for key, value in radial_grid.items() if value["is_active"] is True}
         len_active_launchers = len(active_launchers)
         ax.set_title("EC Power Waveform")
         if len_active_launchers != 0:
@@ -424,7 +424,7 @@ class waves_view:
         ax.set_ylabel("Power to the electrons $\\mathrm{[MW]}$")
         ax.set_xlabel("Time (s)")
         legend = ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
-        waves_view.customize_legend(legend)
+        WavesView.customize_legend(legend)
 
     # CD PROFILE [MA/M2]
     def view_c_d_profile(self, ax, time_index, usepsi=False):
@@ -432,7 +432,7 @@ class waves_view:
 
         radial_grid = self.waves_compute.get_radial_grid_info(time_index, usepsi)
 
-        active_launchers = {key: value for key, value in radial_grid.items() if value["isActive"] is True}
+        active_launchers = {key: value for key, value in radial_grid.items() if value["is_active"] is True}
         _, first_radial_grid_info = next(iter(active_launchers.items()))
         len_active_launchers = len(active_launchers)
         ax.set_title("Current density profile")
@@ -455,7 +455,7 @@ class waves_view:
         else:
             ax.set_xlabel("-(Poloidal flux coordinate) [Wb]")
         legend = ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
-        waves_view.customize_legend(legend)
+        WavesView.customize_legend(legend)
 
     # PROFILE OF ABSORBED POWER DENSITY [MW/M3]
     def view_absorbed_power_density_profile(self, ax, time_index, usepsi=False):
@@ -463,7 +463,7 @@ class waves_view:
 
         radial_grid = self.waves_compute.get_radial_grid_info(time_index, usepsi)
 
-        active_launchers = {key: value for key, value in radial_grid.items() if value["isActive"] is True}
+        active_launchers = {key: value for key, value in radial_grid.items() if value["is_active"] is True}
         _, first_radial_grid_info = next(iter(active_launchers.items()))
         len_active_launchers = len(active_launchers)
         ax.set_title("Absorbed power density profile")
@@ -486,7 +486,7 @@ class waves_view:
         else:
             ax.set_xlabel("-(Poloidal flux coordinate) [Wb]")
         legend = ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
-        waves_view.customize_legend(legend)
+        WavesView.customize_legend(legend)
 
     def plot_beam_index(self, ax):
         """
@@ -506,9 +506,9 @@ class waves_view:
         beam_tracing = self.waves_compute.get_beam_tracing(beam_tracing_time_index)
 
         nbeam = beam_tracing["nbeam"]
-        nbeam_active = beam_tracing["activeBeamsCount"]
-        nray = beam_tracing["maxTotalBeams"]
-        is_active = beam_tracing["beamActivaStatusList"]
+        nbeam_active = beam_tracing["active_beams_count"]
+        nray = beam_tracing["max_total_beams"]
+        is_active = beam_tracing["beam_active_status_list"]
         len_ray = beam_tracing["len_ray"]
         z_ray = beam_tracing["z_ray"]
         r_ray = beam_tracing["r_ray"]
@@ -561,12 +561,12 @@ class waves_view:
         # Read beam tracing from waves IDS
         beam_tracing = self.waves_compute.get_beam_tracing(beam_tracing_time_index)
         nbeam = beam_tracing["nbeam"]
-        is_active = beam_tracing["beamActivaStatusList"]
+        is_active = beam_tracing["beam_active_status_list"]
         len_ray = beam_tracing["len_ray"]
         x_ray = beam_tracing["x_ray"]
         y_ray = beam_tracing["y_ray"]
 
-        nray = beam_tracing["maxTotalBeams"]
+        nray = beam_tracing["max_total_beams"]
         if verbose:
             nbeam_active = beam_tracing["nbeam_active"]
             if nbeam_active > 1:

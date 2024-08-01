@@ -14,7 +14,7 @@ from idstools.compute.pf_active import PfActiveCompute
 logger = logging.getLogger("module")
 
 
-class p_f_active_view:
+class PFActiveView:
     """This class provides view functions for pf_active ids"""
 
     def __init__(self, ids_obj: object):
@@ -39,7 +39,7 @@ class p_f_active_view:
 
                 import imas
                 from idstools.view.pf_active import PFActiveView
-                from idstools.view.common import Canvas
+                from idstools.view.common import PlotCanvas
 
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=135005;run=4;database=ITER;version=3", "r")
                 connection.open()

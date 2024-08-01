@@ -146,7 +146,7 @@ class PlotCanvas:
             # Standard SciencePlots color cycle
 
             # Set color cycle: blue, green, yellow, red, violet, gray
-            matplotlib.rc_params["axes.prop_cycle"] = matplotlib.cycler(
+            matplotlib.rcParams["axes.prop_cycle"] = matplotlib.cycler(
                 "color",
                 ["0C5DA5", "00B945", "FF9500", "FF2C00", "845B97", "474747", "9e9e9e"],
             )
@@ -156,7 +156,7 @@ class PlotCanvas:
             # from Paul Tot's website: https://personal.sron.nl/~pault/
 
             # Set color cycle
-            matplotlib.rc_params["axes.prop_cycle"] = matplotlib.cycler(
+            matplotlib.rcParams["axes.prop_cycle"] = matplotlib.cycler(
                 "color",
                 ["EE7733", "0077BB", "33BBEE", "EE3377", "CC3311", "009988", "BBBBBB"],
             )
@@ -164,7 +164,7 @@ class PlotCanvas:
             # Retro color style
 
             # Set color cycle
-            matplotlib.rc_params["axes.prop_cycle"] = matplotlib.cycler(
+            matplotlib.rcParams["axes.prop_cycle"] = matplotlib.cycler(
                 "color", ["4165c0", "e770a2", "5ac3be", "696969", "f79a1e", "ba7dcd"]
             )
         if style == "muted":
@@ -173,7 +173,7 @@ class PlotCanvas:
             # from Paul Tot's website: https://personal.sron.nl/~pault/
 
             # Set color cycle
-            matplotlib.rc_params["axes.prop_cycle"] = matplotlib.cycler(
+            matplotlib.rcParams["axes.prop_cycle"] = matplotlib.cycler(
                 "color",
                 [
                     "CC6677",
@@ -194,7 +194,7 @@ class PlotCanvas:
             # from Paul Tot's website: https://personal.sron.nl/~pault/
 
             # Set color cycle
-            matplotlib.rc_params["axes.prop_cycle"] = matplotlib.cycler(
+            matplotlib.rcParams["axes.prop_cycle"] = matplotlib.cycler(
                 "color",
                 [
                     "77AADD",
@@ -213,7 +213,7 @@ class PlotCanvas:
             # Matplotlib style for high visability plots (i.e., bright colors!!!)
 
             # Set color cycle
-            matplotlib.rc_params["axes.prop_cycle"] = matplotlib.cycler(
+            matplotlib.rcParams["axes.prop_cycle"] = matplotlib.cycler(
                 "color", ["0d49fb", "e6091c", "26eb47", "8936df", "fec32d", "25d7fd"]
             ) + matplotlib.cycler("ls", ["-", "--", "-.", ":", "-", "--"])
 
@@ -223,7 +223,7 @@ class PlotCanvas:
             # from Paul Tot's website: https://personal.sron.nl/~pault/
 
             # Set color cycle
-            matplotlib.rc_params["axes.prop_cycle"] = matplotlib.cycler("color", ["004488", "DDAA33", "BB5566"])
+            matplotlib.rcParams["axes.prop_cycle"] = matplotlib.cycler("color", ["004488", "DDAA33", "BB5566"])
 
         if style == "bright":
             # Bright color scheme
@@ -231,13 +231,13 @@ class PlotCanvas:
             # from Paul Tot's website: https://personal.sron.nl/~pault/
 
             # Set color cycle
-            matplotlib.rc_params["axes.prop_cycle"] = matplotlib.cycler(
+            matplotlib.rcParams["axes.prop_cycle"] = matplotlib.cycler(
                 "color",
                 ["4477AA", "EE6677", "228833", "CCBB44", "66CCEE", "AA3377", "BBBBBB"],
             )
 
 
-class base_plot:
+class BasePlot:
     def database_info(self, ax, title, hostdir, shot, run, t):
         plottitle = title
         plottitle += " (t={:.3f})".format(t)
@@ -262,10 +262,10 @@ class base_plot:
         # self.ax.add_artist(anchored_text)
 
 
-class terminal:
+class Terminal:
     tabsize = 10
-    t_a_b = " " * 16
-    l_i_n_e = "-" * 8
+    TAB = " " * 16
+    LINE = "-" * 8
 
     def __init__(self) -> None:
         if rich_available:

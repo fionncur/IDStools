@@ -9,10 +9,10 @@ from idstools.database import DBMaster
 from idstools.idslist import available_in_dbentry
 from idstools.machinedescription import MachineDescription
 from idstools.utils.clihelper import (
-    getDatabasePath,
+    get_database_path,
 )
-from idstools.utils.idslogger import setupLogger
-from idstools.view.common import Canvas
+from idstools.utils.idslogger import setup_logger
+from idstools.view.common import PlotCanvas
 from idstools.view.pf_active import PFActiveView
 from idstools.view.wall import WallView
 
@@ -29,7 +29,7 @@ def plot_machine_description(ids_data, show_labels=False):
     """
 
     # Initialization
-    canvas = canvas(1, 1)
+    canvas = PlotCanvas(1, 1)
     ax = canvas.add_axes(title="", xlabel="R (m)", ylabel="Z (m)", row=0, col=0)
 
     ax.set_aspect("equal", adjustable="box")
@@ -43,12 +43,12 @@ def plot_machine_description(ids_data, show_labels=False):
         #     continue
         ids_u_r_i, ids_name = ids_name.split("#")
         if ids_name == "pf_active":
-            pfcoilsview = p_f_active_view(ids_data_and_config["idsData"])
+            pfcoilsview = PFActiveView(ids_data_and_config["idsData"])
             pfcoilsview.view_active_pf_coils(ax, show_labels=show_labels)
             database_path += "pf_active = " + get_database_path(ids_data_and_config["connectionArgs"]) + "\n"
 
         elif ids_name == "wall":
-            wallview = wall_view(ids_data_and_config["idsData"])
+            wallview = WallView(ids_data_and_config["idsData"])
             wallview.view_wall(ax, show_labels=show_labels)
             database_path += "wall = " + get_database_path(ids_data_and_config["connectionArgs"]) + "\n"
         else:
@@ -91,7 +91,7 @@ def plot_machine_description(ids_data, show_labels=False):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="---- View and plot machine description with one or more URIs as data entries",
-        formatter_class=rich_help_formatter,
+        formatter_class=RichHelpFormatter,
     )
     parser.add_argument(
         "-u",

@@ -24,7 +24,7 @@ from rich_argparse import RichHelpFormatter
 from idstools.database import DBMaster
 from idstools.utils.ddhelper import DDHelper
 from idstools.utils.idshelper import compareIds
-from idstools.utils.idslogger import setupLogger
+from idstools.utils.idslogger import setup_logger
 
 t_h_r_e_s_h_o_l_d__p_e_r_c_e_n_t = 2
 
@@ -412,7 +412,7 @@ if __name__ == "__main__":
         + "- Example: \n"
         + "  idsdiff summary --uri \"imas:mdsplus?user=public;shot=122525;run=1;database=ITER;version=3\" \"imas:mdsplus?user=public;shot=122525;run=2;database=ITER;version=3\" \n"
         + "  \n""",
-        formatter_class=rich_help_formatter,
+        formatter_class=RichHelpFormatter,
     )
     parser.add_argument(
         "-u",
@@ -515,7 +515,7 @@ if __name__ == "__main__":
         str_connection = "\n"
         str_connection += "\n".join([x[0] for x in connections])
         console = Console()
-        table = table(title=text(f"Comparisen between {str_connection}", style="bold blue"))
+        table = Table(title=text(f"Comparisen between {str_connection}", style="bold blue"))
         table.add_column("ids field name", style="magenta")
         table.add_column("Comment", style="green")
 

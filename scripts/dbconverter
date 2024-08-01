@@ -22,7 +22,7 @@ from idstools.database import DBMaster
 from idstools.idslist import available_in_dbentry
 from idstools.utils.clihelper import getBackendID, imasParser
 from idstools.utils.idshelper import compareIds
-from idstools.utils.idslogger import setupLogger
+from idstools.utils.idslogger import setup_logger
 
 logger = setup_logger("module", stdout_level=logging.i_n_f_o)
 console = Console()
@@ -30,7 +30,7 @@ console = Console()
 parser = argparse.ArgumentParser(
     description="Copy all data-entries from one database into another one",
     parents=[imas_parser],
-    formatter_class=rich_help_formatter,
+    formatter_class=RichHelpFormatter,
 )
 parser.add_argument(
     "-do",

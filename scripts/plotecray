@@ -10,18 +10,18 @@ import os
 
 from rich_argparse import RichHelpFormatter
 
-from idstools.compute.common import getNearestTime
+from idstools.compute.common import get_nearest_time
 from idstools.compute.waves import WavesCompute
 from idstools.database import DBMaster
 from idstools.utils.clihelper import (
-    dbentryParser,
-    getDatabasePath,
-    getFileName,
-    getTitle,
+    dbentry_parser,
+    get_database_path,
+    get_file_name,
+    get_title,
 )
-from idstools.utils.idshelper import getAvailableIdsAndTimes
-from idstools.utils.idslogger import setupLogger
-from idstools.view.common import Canvas
+from idstools.utils.idshelper import get_available_ids_and_times
+from idstools.utils.idslogger import setup_logger
+from idstools.view.common import PlotCanvas
 from idstools.view.domain.ecstray import EcStrayView
 from idstools.view.equilibrium import EquilibriumView
 from idstools.view.pf_active import PFActiveView
@@ -40,7 +40,7 @@ class md_action(argparse.action):
 parser = argparse.ArgumentParser(
     description="---- Display EC wave ray-tracing results [Previously known as ecray]",
     parents=[dbentry_parser],
-    formatter_class=rich_help_formatter,
+    formatter_class=RichHelpFormatter,
 )
 parser.add_argument(
     "-md",
@@ -79,7 +79,7 @@ shotstyle = ["-", "--", "-.", ":", ".", ","]
 colorcounter = 0
 lpad = -1
 
-canvas = canvas(2, 3)
+canvas = PlotCanvas(2, 3)
 ax_polview = canvas.add_axes(title="", xlabel="", row=0, col=0, rowspan=2)
 ax_topview = canvas.add_axes(title="", xlabel="", row=0, col=1, rowspan=2)
 ax_powview = canvas.add_axes(title="", xlabel="", row=0, col=2)
@@ -113,18 +113,18 @@ if len(ids_waves.code.name) > 0:
     label_code = ids_waves.code.name.upper()
 else:
     label_code = get_title(args)
-ecstra_view = ec_stray_view(
+ecstra_view = EcStrayView(
     equilibrium_ids=ids_equilibrium,
     core_profiles_ids=ids_core_profiles,
     waves_ids=ids_waves,
 )
-equi_view = equilibrium_view(ids=ids_equilibrium)
+equi_view = EquilibriumView(ids=ids_equilibrium)
 wave_view = WavesView(ids_waves)
 wave_compute = WavesCompute(ids_waves)
 
 beam_tracing_dict = wave_compute.get_beam_tracing(time_index)
 logger.info(
-    f"There are {beam_tracing_dict['activeBeamsCount']} active beam(s) and each beam has {beam_tracing_dict['maxTotalBeams']} ray(s)"
+    f"There are {beam_tracing_dict['active_beams_count']} active beam(s) and each beam has {beam_tracing_dict['max_total_beams']} ray(s)"
 )
 
 ecstra_view.plot_poloidal_view(ax_polview)
@@ -161,7 +161,7 @@ for mdids_info in args.md:
             from imas import imasdef
 
             if _ids_data.ids_properties.homogeneous_time != imasdef.EMPTY_INT:
-                wallview = wall_view(_ids_data)
+                wallview = WallView(_ids_data)
                 wallview.view_wall(
                     ax_polview,
                     show_labels=False,
@@ -180,7 +180,7 @@ for mdids_info in args.md:
             from imas import imasdef
 
             if _ids_data.ids_properties.homogeneous_time != imasdef.EMPTY_INT:
-                view_pf_coils = p_f_active_view(_ids_data)
+                view_pf_coils = PFActiveView(_ids_data)
                 view_pf_coils.view_active_pf_coils(ax_polview, show_labels=False)
             else:
                 logger.warning(f"{_ids_name} ids is empty in the dbentry")

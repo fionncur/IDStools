@@ -102,7 +102,7 @@ if __name__ == "__main__":
     prog = os.path.basename(__file__)
     parser = argparse.ArgumentParser(
         prog=prog,
-        formatter_class=rich_help_formatter,
+        formatter_class=RichHelpFormatter,
         parents=[imas_parser],
         description=markdown(description, style="argparse.text"),
     )

@@ -10,7 +10,7 @@ from idstools.view.common import BasePlot
 from idstools.compute.equilibrium import EquilibriumCompute
 
 
-class equilibrium_view(base_plot):
+class EquilibriumView(BasePlot):
     def __init__(self, ids: object):
         """
         This is a constructor function that initializes an object with an input object and creates
@@ -22,7 +22,7 @@ class equilibrium_view(base_plot):
         stored as an instance variable `self.idsObj`.
         """
         self.ids = ids
-        self.compute_obj = equilibrium_compute(ids)
+        self.compute_obj = EquilibriumCompute(ids)
 
     def view_magnetic_poloidal_flux(
         self,
@@ -42,7 +42,7 @@ class equilibrium_view(base_plot):
 
                 import imas
                 from idstools.view.equilibrium import EquilibriumView
-                from idstools.view.common import Canvas
+                from idstools.view.common import PlotCanvas
 
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3","r")
                 connection.open()
@@ -97,7 +97,7 @@ class equilibrium_view(base_plot):
     def view_pulse_info(self, ax: plt.axes, title: str, hostdir: str, shot: int, run: int, t: float):
         self.database_info(ax, title, hostdir, shot, run, t)
 
-    def plot_i_p(self, ax):
+    def plot_ip(self, ax):
         """
         This function plots the plasma current over time on a given axis.
 

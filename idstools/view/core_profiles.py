@@ -7,10 +7,10 @@ from idstools.compute.core_profiles import CoreProfilesCompute
 logger = logging.getLogger("module")
 
 
-class core_profiles_view:
+class CoreProfilesView:
     def __init__(self, ids):
         self.ids = ids
-        self.core_profiles_compute = core_profiles_compute(ids)
+        self.core_profiles_compute = CoreProfilesCompute(ids)
 
     @staticmethod
     def view_plasma_composition_with_species_concentration(ids_object, slice_index=0, print_data=False, volume=None):
@@ -20,11 +20,11 @@ class core_profiles_view:
         print("---------------")
         print("core_profiles")
         print("---------------")
-        composition_data = core_profiles_compute.get_plasma_composition_with_species_concentration(
+        composition_data = CoreProfilesCompute.get_plasma_composition_with_species_concentration(
             ids_object, slice_index, volume=volume
         )
         if composition_data != 0 and composition_data != -1:
-            core_profiles_view = core_profiles_view(ids_object)
+            core_profiles_view = CoreProfilesView(ids_object)
             core_profiles_view._print_plasma_composition(composition_data)
             core_profiles_view._print_specis_concentration(composition_data)
 
@@ -180,7 +180,7 @@ class core_profiles_view:
             if update:
                 xlabel = r"Normalised $\rho_{tor}$ [-]"
             if psi_cordinate:
-                psi = self.core_profiles_compute.get_p_s_i(time_index)
+                psi = self.core_profiles_compute.get_psi(time_index)
                 if psi is not None:
                     radial_coordinate = psi
                     if update:
@@ -212,7 +212,7 @@ class core_profiles_view:
             return ax_density_plot_dens, nmax
 
     def plot_ion_pressure_properties(self, ax):
-        f_a_c_t_o_r = 1.0e-6
+        FACTOR = 1.0e-6
         rho_tor_norm = self.core_profiles_compute.get_rho_tor_norm()  # Rho profile (mandatory)
         nrho = len(rho_tor_norm)
         if nrho == 0:
@@ -234,14 +234,14 @@ class core_profiles_view:
             "fontsize": 12,
         }
 
-        ax.plot(rho_tor_norm, pressure_ion_thermal * f_a_c_t_o_r, label="Thermal ion")
-        ax.plot(rho_tor_norm, pressure_ion_fast_parallel * f_a_c_t_o_r, label="Fast parallel ion")
+        ax.plot(rho_tor_norm, pressure_ion_thermal * FACTOR, label="Thermal ion")
+        ax.plot(rho_tor_norm, pressure_ion_fast_parallel * FACTOR, label="Fast parallel ion")
         ax.plot(
             rho_tor_norm,
-            pressure_ion_fast_perpendicular * f_a_c_t_o_r,
+            pressure_ion_fast_perpendicular * FACTOR,
             label="Fast perpendicular ion",
         )
-        ax.set_ylim(0, maxima_ion * f_a_c_t_o_r)
+        ax.set_ylim(0, maxima_ion * FACTOR)
         ax.tick_params(
             which="both",
             labelsize=12,
@@ -284,7 +284,7 @@ class core_profiles_view:
             )
 
     def plot_electron_pressure_properties(self, ax, **kwargs):
-        f_a_c_t_o_r = 1.0e-6
+        FACTOR = 1.0e-6
         rho_tor_norm = self.core_profiles_compute.get_rho_tor_norm()  # Rho profile (mandatory)
         nrho = len(rho_tor_norm)
         if nrho == 0:
@@ -294,30 +294,32 @@ class core_profiles_view:
             logger.critical("----> Aborted.")
 
         dict_electrons_pressure_properties = self.core_profiles_compute.get_electrons_pressure_properties()
-        maxima_electrons = dict_electrons_pressure_properties["maximaElectrons"]
-        pressure_electron_total = dict_electrons_pressure_properties["pressureElectronTotal"]
-        pressure_electron_thermal = dict_electrons_pressure_properties["pressureElectronThermal"]
-        pressure_electron_fast_parallel = dict_electrons_pressure_properties["pressureElectronFastParallel"]
-        pressure_electron_fast_perpendicular = dict_electrons_pressure_properties["pressureElectronFastPerpendicular"]
+        maxima_electrons = dict_electrons_pressure_properties["maxima_electrons"]
+        pressure_electron_total = dict_electrons_pressure_properties["pressure_electron_total"]
+        pressure_electron_thermal = dict_electrons_pressure_properties["pressure_electron_thermal"]
+        pressure_electron_fast_parallel = dict_electrons_pressure_properties["pressure_electron_fast_parallel"]
+        pressure_electron_fast_perpendicular = dict_electrons_pressure_properties[
+            "pressure_electron_fast_perpendicular"
+        ]
         font_args = {
             "fontfamily": "serif",
             "color": "darkred",
             "fontweight": "normal",
             "fontsize": 12,
         }
-        ax.plot(rho_tor_norm, pressure_electron_total * f_a_c_t_o_r, label="Total electron")
-        ax.plot(rho_tor_norm, pressure_electron_thermal * f_a_c_t_o_r, label="Thermal electron")
+        ax.plot(rho_tor_norm, pressure_electron_total * FACTOR, label="Total electron")
+        ax.plot(rho_tor_norm, pressure_electron_thermal * FACTOR, label="Thermal electron")
         ax.plot(
             rho_tor_norm,
-            pressure_electron_fast_parallel * f_a_c_t_o_r,
+            pressure_electron_fast_parallel * FACTOR,
             label="Fast parallel electron",
         )
         ax.plot(
             rho_tor_norm,
-            pressure_electron_fast_perpendicular * f_a_c_t_o_r,
+            pressure_electron_fast_perpendicular * FACTOR,
             label="Fast perpendicular electron",
         )
-        ax.set_ylim(0, maxima_electrons * f_a_c_t_o_r)
+        ax.set_ylim(0, maxima_electrons * FACTOR)
 
         ax.tick_params(
             which="both",
@@ -338,7 +340,7 @@ class core_profiles_view:
         ax.set_title("Electrons Pressure Properties", loc="left")
 
     def plot_total_pressure_properties(self, ax, **kwargs):
-        f_a_c_t_o_r = 1.0e-6
+        FACTOR = 1.0e-6
         rho_tor_norm = self.core_profiles_compute.get_rho_tor_norm()  # Rho profile (mandatory)
         nrho = len(rho_tor_norm)
         if nrho == 0:
@@ -348,21 +350,21 @@ class core_profiles_view:
             return
 
         dict_pressure = self.core_profiles_compute.get_pressure()
-        maxima_total = dict_pressure["maximaTotal"]
-        pressure_total = dict_pressure["pressureTotal"]
-        pressure_thermal = dict_pressure["pressureThermal"]
-        pressure_parallel = dict_pressure["pressureParallel"]
-        pressure_perpendicular = dict_pressure["pressurePerpendicular"]
+        maxima_total = dict_pressure["maxima_total"]
+        pressure_total = dict_pressure["pressure_total"]
+        pressure_thermal = dict_pressure["pressure_thermal"]
+        pressure_parallel = dict_pressure["pressure_parallel"]
+        pressure_perpendicular = dict_pressure["pressure_perpendicular"]
 
         if maxima_total == 0:
             logger.critical("No pressure profile found")
             return
-        ax.plot(rho_tor_norm, pressure_total * f_a_c_t_o_r, label="Total")
-        ax.plot(rho_tor_norm, pressure_thermal * f_a_c_t_o_r, label="Thermal")
-        ax.plot(rho_tor_norm, pressure_parallel * f_a_c_t_o_r, label="Parallel")
-        ax.plot(rho_tor_norm, pressure_perpendicular * f_a_c_t_o_r, label="Perpendicular")
+        ax.plot(rho_tor_norm, pressure_total * FACTOR, label="Total")
+        ax.plot(rho_tor_norm, pressure_thermal * FACTOR, label="Thermal")
+        ax.plot(rho_tor_norm, pressure_parallel * FACTOR, label="Parallel")
+        ax.plot(rho_tor_norm, pressure_perpendicular * FACTOR, label="Perpendicular")
         # ax.set_xlim(rhoTorNorm[0], rhoTorNorm[nrho - 1])
-        ax.set_ylim(0, maxima_total * f_a_c_t_o_r)
+        ax.set_ylim(0, maxima_total * FACTOR)
 
         # Set Plot properties
         font_args = {
@@ -434,7 +436,7 @@ class core_profiles_view:
         ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
 
     def plot_efield_profile(self, ax, **kwargs):
-        f_a_c_t_o_r = 1.0e-3
+        FACTOR = 1.0e-3
         rho_tor_norm = self.core_profiles_compute.get_rho_tor_norm()  # Rho profile (mandatory)
         nrho = len(rho_tor_norm)
         if nrho == 0:
@@ -445,7 +447,7 @@ class core_profiles_view:
         if len(self.ids.profiles_1d[0].e_field.radial) < 1:
             logger.critical("core_profiles.profiles_1d[0].e_field.radial could not be read")
             self.ids.profiles_1d[0].e_field.radial = np.asarray([np.nan] * nrho)
-        ax.plot(rho_tor_norm, self.ids.profiles_1d[0].e_field.radial * f_a_c_t_o_r, label="E-field")
+        ax.plot(rho_tor_norm, self.ids.profiles_1d[0].e_field.radial * FACTOR, label="E-field")
         ax.set_xlim(rho_tor_norm[0], rho_tor_norm[nrho - 1])
 
         # Set Plot properties
@@ -474,7 +476,7 @@ class core_profiles_view:
         ax.set_title("Electric field profile", loc="left")
 
     def plot_toroidal_velocity_profile(self, ax, **kwargs):
-        f_a_c_t_o_r = 1.0e-3
+        FACTOR = 1.0e-3
         rho_tor_norm = self.core_profiles_compute.get_rho_tor_norm()  # Rho profile (mandatory)
         nrho = len(rho_tor_norm)
         if nrho == 0:
@@ -491,7 +493,7 @@ class core_profiles_view:
                 self.ids.profiles_1d[0].ion[ion_index].velocity.toroidal = np.asarray([np.nan] * nrho)
             ax.plot(
                 rho_tor_norm,
-                self.ids.profiles_1d[0].ion[ion_index].velocity.toroidal * f_a_c_t_o_r,
+                self.ids.profiles_1d[0].ion[ion_index].velocity.toroidal * FACTOR,
                 label=species[ion_index],
             )
 
@@ -526,7 +528,7 @@ class core_profiles_view:
         ax.set_title("Toroidal velocity profile", loc="left")
 
     def plot_poloidal_velocity_profile(self, ax, **kwargs):
-        f_a_c_t_o_r = 1.0e-3
+        FACTOR = 1.0e-3
         rho_tor_norm = self.core_profiles_compute.get_rho_tor_norm()  # Rho profile (mandatory)
         nrho = len(rho_tor_norm)
         if nrho == 0:
@@ -543,7 +545,7 @@ class core_profiles_view:
                 self.ids.profiles_1d[0].ion[ion_index].velocity.poloidal = np.asarray([np.nan] * nrho)
             ax.plot(
                 rho_tor_norm,
-                self.ids.profiles_1d[0].ion[ion_index].velocity.poloidal * f_a_c_t_o_r,
+                self.ids.profiles_1d[0].ion[ion_index].velocity.poloidal * FACTOR,
                 label=species[ion_index],
             )
 
@@ -576,7 +578,7 @@ class core_profiles_view:
         ax.set_title("Poloidal velocity profile", loc="left")
 
     def plot_diamagnetic_velocity_profile(self, ax, **kwargs):
-        f_a_c_t_o_r = 1.0e-3
+        FACTOR = 1.0e-3
         rho_tor_norm = self.core_profiles_compute.get_rho_tor_norm()  # Rho profile (mandatory)
         nrho = len(rho_tor_norm)
         if nrho == 0:
@@ -593,7 +595,7 @@ class core_profiles_view:
                 self.ids.profiles_1d[0].ion[ion_index].velocity.diamagnetic = np.asarray([np.nan] * nrho)
             ax.plot(
                 rho_tor_norm,
-                self.ids.profiles_1d[0].ion[ion_index].velocity.diamagnetic * f_a_c_t_o_r,
+                self.ids.profiles_1d[0].ion[ion_index].velocity.diamagnetic * FACTOR,
                 label=species[ion_index],
             )
 

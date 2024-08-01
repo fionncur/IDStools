@@ -204,7 +204,7 @@ def get_available_ids_and_occurrences(db_entry_object: imas.DBEntry, time_mode=N
 
 def get_available_ids_and_times(db_entry_object: imas.DBEntry) -> list:
     """
-    The function `getAvailableIdsAndTimes` retrieves available IDS names and corresponding time
+    The function `get_available_ids_and_times` retrieves available IDS names and corresponding time
     arrays from a given `dbEntryObject`.
 
     Args:

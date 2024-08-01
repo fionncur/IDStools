@@ -13,7 +13,7 @@ lpad = -1
 logger = logging.getLogger("module")
 
 
-class ec_stray_view:
+class EcStrayView:
     def __init__(self, equilibrium_ids: object, core_profiles_ids: object, waves_ids: object):
         self.ecstray_object = EcStrayCompute(equilibrium_ids, core_profiles_ids, waves_ids)
         self.equilibrium_compute = EquilibriumCompute(equilibrium_ids)
@@ -41,7 +41,7 @@ class ec_stray_view:
 
                 from idstools.view.domain.ecstray import EcStrayView
                 import imas
-                from idstools.view.common import Canvas
+                from idstools.view.common import PlotCanvas
 
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=134173;run=2326;database=TEST;version=3", "r")
                 connection.open()
@@ -149,7 +149,7 @@ class ec_stray_view:
 
                 from idstools.view.domain.ecstray import EcStrayView
                 import imas
-                from idstools.view.common import Canvas
+                from idstools.view.common import PlotCanvas
 
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=134173;run=2326;database=TEST;version=3", "r")
                 connection.open()

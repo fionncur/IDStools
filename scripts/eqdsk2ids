@@ -13,7 +13,7 @@ from idstools.database import DBMaster
 from idstools.eqdsk2ids import geqdsk2ids
 from idstools.set_logger import set_logger
 from idstools.utils.clihelper import (
-    getDatabasePath,
+    get_database_path,
 )
 
 # ----------------------------------------------------------------------
@@ -94,7 +94,7 @@ if __name__ == "__main__":
     prog = os.path.basename(__file__)
     parser = argparse.ArgumentParser(
         prog=prog,
-        formatter_class=rich_help_formatter,
+        formatter_class=RichHelpFormatter,
         description=markdown(description, style="argparse.text"),
     )
     parser.add_argument(

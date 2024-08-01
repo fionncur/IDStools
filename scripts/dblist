@@ -10,8 +10,8 @@ from rich.table import Table
 from rich_argparse import RichHelpFormatter
 
 from idstools.database import DBMaster
-from idstools.utils.idshelper import getAvailableIdsAndTimes
-from idstools.utils.idslogger import setupLogger
+from idstools.utils.idshelper import get_available_ids_and_times
+from idstools.utils.idslogger import setup_logger
 
 logger = setup_logger("module")
 
@@ -93,7 +93,7 @@ def print_urilist(dbs, pulsenum=None, compact=False, timestamp=False):
     urichoice = ["Sr. No.", "uri"]
     if timestamp:
         urichoice.append("timestamp")
-    table = table()
+    table = Table()
     for column_name in urichoice:
         if column_name == "timestamp":
             table.add_column(column_name, justify="left", style="red")
@@ -238,7 +238,7 @@ If the optional arguments pulse number and run number are given, only databases 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         prog="dblist",
-        formatter_class=rich_help_formatter,
+        formatter_class=RichHelpFormatter,
         description=markdown(description, style="argparse.text"),
     )
     subparsers = parser.add_subparsers(help="sub-commands help")

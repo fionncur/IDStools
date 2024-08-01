@@ -6,12 +6,12 @@ import sys
 
 from rich_argparse import RichHelpFormatter
 
-from idstools.compute.common import getNearestTime
+from idstools.compute.common import get_nearest_time
 from idstools.compute.waves import WavesCompute
 from idstools.database import DBMaster
-from idstools.utils.clihelper import getDatabasePath, getFileName, getTitle
-from idstools.utils.idslogger import setupLogger
-from idstools.view.common import Canvas
+from idstools.utils.clihelper import get_database_path, get_file_name, get_title
+from idstools.utils.idslogger import setup_logger
+from idstools.view.common import PlotCanvas
 from idstools.view.distributions import DistributionsView
 from idstools.view.waves import WavesView
 
@@ -59,7 +59,7 @@ def show_waves_plots(args, hold=False):
         if radial_grid is None:
             logger.critical("Radial grid information is empty ----> Abort.")
             continue
-        active_launchers = {key: value for key, value in radial_grid.items() if value["isActive"] is True}
+        active_launchers = {key: value for key, value in radial_grid.items() if value["is_active"] is True}
         len_active_launchers = len(active_launchers)
         if len_active_launchers == 0:
             logger.critical("The waves IDS appears empty ----> Abort.")
@@ -153,7 +153,7 @@ def show_distribution_plots(args, hold=False):
         ntime = len(time_array)
         time_index, time_value = get_nearest_time(ids_distributions.time, args["time"])
 
-        canvas = canvas(3, 2)
+        canvas = PlotCanvas(3, 2)
         # canvas.setStyle(style="retro")
         canvas.set_sup_title(
             f"HCD Distributions Plot [pulse {args['pulse']} / Run {args['run']}] Time : {time_value:.1f}"
@@ -163,15 +163,15 @@ def show_distribution_plots(args, hold=False):
         ax1 = canvas.add_axes(title="", xlabel="", row=0, col=0)
         ax2 = canvas.add_axes(title="", xlabel="", row=1, col=0)
         ax3 = canvas.add_axes(title="", xlabel="", row=2, col=0)
-        distributions_view = distributions_view(ids_distributions)
+        distributions_view = DistributionsView(ids_distributions)
         distributions_view.plot_absorbed_power_density_individual(ax1, time_index)
         distributions_view.plot_absorbed_power_density(ax2, time_index)
-        distributions_view.plot_c_d_profile(ax3, time_index)
+        distributions_view.plot_cd_profile(ax3, time_index)
         if ntime != 1:
             ax4 = canvas.add_axes(title="", xlabel="", row=0, col=1)
             ax5 = canvas.add_axes(title="", xlabel="", row=1, col=1)
-            distributions_view.plot_n_b_i_fus_power_and_c_d_waveforms(ax4, time_index)
-            distributions_view.plot_c_d_waveform(ax5, time_index)
+            distributions_view.plot_nbi_fus_power_and_cd_waveforms(ax4, time_index)
+            distributions_view.plot_cd_waveform(ax5, time_index)
 
         canvas.set_text(text=f"{get_database_path(connargs, time_value=time_value)}")
 
@@ -199,7 +199,7 @@ if __name__ == "__main__":
         + "- Time is also optional \n"
         + "- Example: \n"
         + "  hcdplot -ech 134713/200/schneim/MDSPLUS/TORBEAM/3 -nbi 130012/122/schneim/nf_fopla_synergy \n",
-        formatter_class=rich_help_formatter,
+        formatter_class=RichHelpFormatter,
     )
     parser.add_argument(
         "-ech",

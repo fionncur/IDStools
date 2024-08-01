@@ -19,7 +19,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Extracts given quantities from all data entries of a given database [Previously known as idstools/db_extractor.py]",
         parents=[imas_parser],
-        formatter_class=rich_help_formatter,
+        formatter_class=RichHelpFormatter,
     )
     parser.add_argument(
         "idspath",

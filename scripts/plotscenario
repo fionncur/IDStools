@@ -8,16 +8,16 @@ import os
 from rich_argparse import RichHelpFormatter
 import imas
 
-from idstools.compute.common import getNearestTime
+from idstools.compute.common import get_nearest_time
 from idstools.database import DBMaster
 from idstools.utils.clihelper import (
-    dbentryParser,
-    getDatabasePath,
-    getFileName,
-    getTitle,
+    dbentry_parser,
+    get_database_path,
+    get_file_name,
+    get_title,
 )
-from idstools.utils.idslogger import setupLogger
-from idstools.view.common import Canvas
+from idstools.utils.idslogger import setup_logger
+from idstools.view.common import PlotCanvas
 from idstools.view.core_profiles import CoreProfilesView
 from idstools.view.equilibrium import EquilibriumView
 from idstools.view.summary import SummaryView
@@ -28,7 +28,7 @@ from idstools.view.summary import SummaryView
 parser = argparse.ArgumentParser(
     description="---- Display the plasma kinetic profiles and equilibrium from the core_profiles and equilibrium IDSs [previously known as scenplot]",
     parents=[dbentry_parser],
-    formatter_class=rich_help_formatter,
+    formatter_class=RichHelpFormatter,
 )
 
 group = parser.add_mutually_exclusive_group()
@@ -116,9 +116,9 @@ if summary_time < 1:
 
 
 if not args.no_profiles:
-    canvas = canvas(4, 2)
+    canvas = PlotCanvas(4, 2)
 else:
-    canvas = canvas(4, 1)
+    canvas = PlotCanvas(4, 1)
 ax1 = canvas.add_axes(title="", xlabel="", row=0, col=0)
 ax2 = canvas.add_axes(title="", xlabel="", row=1, col=0, sharex=ax1)
 ax3 = canvas.add_axes(title="", xlabel="", row=2, col=0, sharex=ax1)
@@ -129,8 +129,8 @@ if not args.no_profiles:
     ax7 = canvas.add_axes(title="", xlabel="", row=3, col=1)
 
 # H&CD waveforms
-obje_summary_view = summary_view(ids_summary)
-obje_summary_view.view_h_c_d_waveforms(ax1)
+obje_summary_view = SummaryView(ids_summary)
+obje_summary_view.view_hcd_waveforms(ax1)
 
 obje_summary_view.view_hmode(ax1)
 ax1.tick_params(axis="x", which="both", bottom=False, top=False, right=False, labelbottom=False)
@@ -163,12 +163,12 @@ if not args.no_profiles:
 
 
 if not args.no_profiles:
-    core_core_profiles_view = core_profiles_view(ids_core_profiles)
+    core_core_profiles_view = CoreProfilesView(ids_core_profiles)
     core_core_profiles_view.view_q_profile_and_magnetic_shear_profile(ax6)
 
     core_core_profiles_view.view_current_desnity_profiles(ax7)
 
-    plotequilibrium = equilibrium_view(ids_equilibrium)
+    plotequilibrium = EquilibriumView(ids_equilibrium)
     plotequilibrium.plotequilibrium(ax5)
 
 title = get_title(args, "Scenario")

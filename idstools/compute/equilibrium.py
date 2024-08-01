@@ -16,7 +16,7 @@ from imas import imasdef
 logger = logging.getLogger("module")
 
 
-class equilibrium_compute:
+class EquilibriumCompute:
     """This class provides compute functions for equilibrium ids"""
 
     def __init__(self, ids: object):

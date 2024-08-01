@@ -12,8 +12,8 @@ from idstools.database import DBMaster
 
 from imas import imasdef
 
-from idstools.utils.clihelper import dbentryParser, getDatabasePath
-from idstools.utils.idslogger import setupLogger
+from idstools.utils.clihelper import dbentry_parser, get_database_path
+from idstools.utils.idslogger import setup_logger
 from idstools.view.core_transport import CoreTransportView
 
 logger = setup_logger("module", stdout_level=logging.i_n_f_o)
@@ -28,7 +28,7 @@ parser = argparse.ArgumentParser(
     description="View information about fluxes [Previously known as print_fluxes]",
     epilog="""
 """,
-    formatter_class=rich_help_formatter,
+    formatter_class=RichHelpFormatter,
     parents=[dbentry_parser],
 )
 

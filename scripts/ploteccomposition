@@ -6,16 +6,16 @@ import sys
 import os
 from rich_argparse import RichHelpFormatter
 
-from idstools.compute.common import getNearestTime
+from idstools.compute.common import get_nearest_time
 from idstools.database import DBMaster
 from idstools.utils.clihelper import (
-    dbentryParser,
-    getDatabasePath,
-    getFileName,
-    getTitle,
+    dbentry_parser,
+    get_database_path,
+    get_file_name,
+    get_title,
 )
-from idstools.utils.idslogger import setupLogger
-from idstools.view.common import Canvas
+from idstools.utils.idslogger import setup_logger
+from idstools.view.common import PlotCanvas
 from idstools.view.waves import WavesView
 
 # MANAGEMENT OF INPUT ARGUMENTS
@@ -23,7 +23,7 @@ from idstools.view.waves import WavesView
 parser = argparse.ArgumentParser(
     description="---- Display EC results [previously known as eccomp]",
     parents=[dbentry_parser],
-    formatter_class=rich_help_formatter,
+    formatter_class=RichHelpFormatter,
 )
 parser.add_argument(
     "-t",
@@ -82,7 +82,7 @@ rows = 2
 if ntime == 1:
     logger.error("Only one time slice --> ECCD and ECRH waveforms not displayed")
     rows = 1
-canvas = canvas(rows, 2)
+canvas = PlotCanvas(rows, 2)
 ax1 = canvas.add_axes(title="", xlabel="", row=0, col=0)
 ax2 = canvas.add_axes(title="", xlabel="", row=0, col=1)
 if ntime != 1:
@@ -92,10 +92,10 @@ if ntime != 1:
 waves_view = WavesView(ids_waves)
 
 waves_view.display_e_c_launchers_info(time_index=time_index)
-waves_view.plot_e_c_r_h_profiles(ax1, time_index=time_index, verbose=args.verbose)
-waves_view.plot_e_c_c_d_profiles(ax2, time_index=time_index, verbose=args.verbose)
+waves_view.plot_ecrh_profiles(ax1, time_index=time_index, verbose=args.verbose)
+waves_view.plot_eccd_profiles(ax2, time_index=time_index, verbose=args.verbose)
 if ntime != 1:
-    waves_view.plot_e_c_r_h_waveform(ax3, time_index=time_index)
+    waves_view.plot_ecrh_waveform(ax3, time_index=time_index)
     waves_view.plot_e_c_c_d_waveform(ax4, time_index=time_index)
 
 canvas.set_text(text=f"{get_database_path(args, time_value=time_value)}")

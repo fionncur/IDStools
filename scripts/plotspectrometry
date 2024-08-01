@@ -8,17 +8,17 @@ import logging
 import sys
 import os
 from rich_argparse import RichHelpFormatter
-from idstools.compute.common import getNearestTime
+from idstools.compute.common import get_nearest_time
 from idstools.compute.spectrometer_visible import SpectrometerVisibleCompute
 from idstools.database import DBMaster
 from idstools.utils.clihelper import (
-    dbentryParser,
-    getDatabasePath,
-    getFileName,
-    getTitle,
+    dbentry_parser,
+    get_database_path,
+    get_file_name,
+    get_title,
 )
-from idstools.utils.idslogger import setupLogger
-from idstools.view.common import Canvas
+from idstools.utils.idslogger import setup_logger
+from idstools.view.common import PlotCanvas
 from idstools.view.spectrometer_visible import SpectrometerVisibleView
 
 logger = setup_logger("module", stdout_level=logging.i_n_f_o)
@@ -26,7 +26,7 @@ logger = setup_logger("module", stdout_level=logging.i_n_f_o)
 parser = argparse.ArgumentParser(
     description="---- Display spectrum from spectrometer_visible [previsouly known as svplot]",
     parents=[dbentry_parser],
-    formatter_class=rich_help_formatter,
+    formatter_class=RichHelpFormatter,
 )
 
 parser.add_argument("-t", "--time", help="Time", required=False, type=float, default=-99.0)
@@ -62,13 +62,13 @@ sv_compute = spectrometer_visible_compute(ids_spectrometer_visible)
 spectrometers_list = sv_compute.get_valid_spectrometers()
 total_spectrometers = len(spectrometers_list)
 
-sv_view = spectrometer_visible_view(ids_spectrometer_visible)
+sv_view = SpectrometerVisibleView(ids_spectrometer_visible)
 columns = 3
 if total_spectrometers / 3 == total_spectrometers // 3:
     rows = int(total_spectrometers / 3)
 else:
     rows = int(total_spectrometers / 3) + 1
-canvas_radiance = canvas(rows, columns)
+canvas_radiance = PlotCanvas(rows, columns)
 row_counter = 0
 column_counter = 0
 
@@ -96,7 +96,7 @@ if args.save:
     canvas_radiance.save(fname)
 else:
     canvas_radiance.show(block=False)
-canvas_intensity = canvas(rows, columns)
+canvas_intensity = PlotCanvas(rows, columns)
 
 row_counter = 0
 column_counter = 0

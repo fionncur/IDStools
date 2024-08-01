@@ -11,14 +11,14 @@ from idstools.database import DBMaster
 import imas
 
 from idstools.utils.clihelper import imasParser
-from idstools.utils.idslogger import setupLogger
+from idstools.utils.idslogger import setup_logger
 
 logger = setup_logger("module")
 
 # Management of input arguments
 parser = argparse.ArgumentParser(
     description="Copy IDSs from a data-entry into another one",
-    formatter_class=rich_help_formatter,
+    formatter_class=RichHelpFormatter,
 )
 parser.add_argument(
     "-s",

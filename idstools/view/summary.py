@@ -12,7 +12,7 @@ from idstools.compute.summary import SummaryCompute
 logger = logging.getLogger("module")
 
 
-class summary_view(BasePlot):
+class SummaryView(BasePlot):
     def __init__(self, ids: object):
         """
         This is a constructor function that initializes an object with an input object and creates
@@ -26,7 +26,7 @@ class summary_view(BasePlot):
         self.ids = ids
         self.compute_obj = SummaryCompute(ids)
 
-    def view_h_c_d_waveforms(self, ax):
+    def view_hcd_waveforms(self, ax):
         """
         The function `viewHCDWaveforms` plots various power waveforms on a given axis.
 

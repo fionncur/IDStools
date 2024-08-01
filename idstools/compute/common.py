@@ -18,7 +18,7 @@ def find_nearest(a, a0):
 
 def get_nearest_time(time_array: np.ndarray, requested_time: float) -> Tuple[int, float]:
     """
-    The function `getNearestTime` takes an array of time values and a requested time, and returns the index
+    The function `get_nearest_time` takes an array of time values and a requested time, and returns the index
     and value of the nearest time in the array to the requested time.
 
     Args:
@@ -27,7 +27,7 @@ def get_nearest_time(time_array: np.ndarray, requested_time: float) -> Tuple[int
         nearest value to in the `timeArray`.
 
     Returns:
-        The function `getNearestTime` returns a tuple containing the time index and time value.
+        The function `get_nearest_time` returns a tuple containing the time index and time value.
     """
     ntime = len(time_array)
     if ntime >= 1:

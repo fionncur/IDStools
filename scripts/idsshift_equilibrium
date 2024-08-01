@@ -10,7 +10,7 @@ from idstools.database import DBMaster
 from rich_argparse import RichHelpFormatter
 
 from idstools.compute.equilibrium import EquilibriumCompute
-from idstools.utils.idslogger import setupLogger
+from idstools.utils.idslogger import setup_logger
 
 logger = setup_logger("module", stdout_level=logging.i_n_f_o)
 #
@@ -18,7 +18,7 @@ logger = setup_logger("module", stdout_level=logging.i_n_f_o)
 # Management of input arguments
 parser = argparse.ArgumentParser(
     description="Rigidly shifts vertically an equilibrium, storing the output into another entry of the same DB. replaced by ids_shift_eq",
-    formatter_class=rich_help_formatter,
+    formatter_class=RichHelpFormatter,
 )
 parser.add_argument(
     "-s",
@@ -64,7 +64,7 @@ if output_connection is None:
 
 logger.info(f"Shifting equilibrium by {shift_param} m")
 logger.info("Values for wall gaps, locations of strike-points and closest wall points are no longer guaranteed!")
-equilibrium_compute = equilibrium_compute(ids_equilibrium)
+equilibrium_compute = EquilibriumCompute(ids_equilibrium)
 equout = equilibrium_compute.z_shift(shift_param)
 
 # PUT IDS INTO OUTPUT

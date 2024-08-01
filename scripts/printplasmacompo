@@ -24,15 +24,15 @@ import imas
 import numpy as np
 
 from idstools.database import DBMaster
-from idstools.utils.clihelper import dbentryParser
-from idstools.utils.idslogger import setupLogger
+from idstools.utils.clihelper import dbentry_parser
+from idstools.utils.idslogger import setup_logger
 from idstools.view.core_profiles import CoreProfilesView
 from idstools.view.edge_profiles import EdgeProfilesView
 
 parser = argparse.ArgumentParser(
     description="---- Display the plasma composition from the core_profiles IDS [previously known as ids_compo]",
     parents=[dbentry_parser],
-    formatter_class=rich_help_formatter,
+    formatter_class=RichHelpFormatter,
 )
 parser.add_argument("-i", "--info", action="store_true", help="Show information")
 parser.add_argument("--debug", action="store_true", help="Show debugging")
@@ -93,7 +93,7 @@ if core_profiles_ids.time is not None:
     core_profiles_ids.profiles_1d.resize(1)
     core_profiles_ids.profiles_1d[0] = profiles_1d_slice
 
-    returnstatus = core_profiles_view.view_plasma_composition_with_species_concentration(core_profiles_ids, 0)
+    returnstatus = CoreProfilesView.view_plasma_composition_with_species_concentration(core_profiles_ids, 0)
     if returnstatus == 0:
         core_profile_exists = False
         logger.critical("core_profiles IDS: IDS exists but time slice doesn't exists. --> Abort.")
@@ -104,7 +104,7 @@ if core_profiles_ids.time is not None:
         equilibrium = imas.equilibrium()
         equilibrium.time_slice.resize(1)
         volume = connection.partial_get("equilibrium", f"time_slice({slice_index})/profiles_1d/volume")
-        returnstatus = core_profiles_view.view_plasma_composition_with_species_concentration(
+        returnstatus = CoreProfilesView.view_plasma_composition_with_species_concentration(
             core_profiles_ids, 0, volume=volume
         )
         core_profile_exists = True

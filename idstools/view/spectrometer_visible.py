@@ -13,11 +13,11 @@ from idstools.compute.spectrometer_visible import SpectrometerVisibleCompute
 
 logger = logging.getLogger("module")
 
-l_a_b_e_l__r_a_d_i_a_n_c_e = "Spectral Radiance (ph s^-1 m^-2 sr^-1 nm^-1)"
-l_a_b_e_l__i_n_t_e_n_s_i_t_y = "Intensity (counts)"
+LABEL_RADIANCE = "Spectral Radiance (ph s^-1 m^-2 sr^-1 nm^-1)"
+LABEL_INTENSITY = "Intensity (counts)"
 
 
-class spectrometer_visible_view:
+class SpectrometerVisibleView:
     """This class provides view functions for spectrometer_visible ids"""
 
     def __init__(self, ids_obj: object):
@@ -27,7 +27,7 @@ class spectrometer_visible_view:
             idsObj : spectrometer_visible ids object
         """
         self.ids_obj = ids_obj
-        self.compute_obj = spectrometer_visible_compute(ids_obj)
+        self.compute_obj = SpectrometerVisibleCompute(ids_obj)
 
     def view_radiance(self, ax: plt.axes, spectro_index, logscale=False):
         """
@@ -68,7 +68,7 @@ class spectrometer_visible_view:
         if logscale:
             ax.set_yscale("log")
         ax.set_xlabel("Wavelength (nm)")
-        ax.set_ylabel(l_a_b_e_l__r_a_d_i_a_n_c_e)
+        ax.set_ylabel(LABEL_RADIANCE)
         ax.grid(True)
 
         ax.legend(
@@ -120,7 +120,7 @@ class spectrometer_visible_view:
         ax.set_title(f"{channelinfo['diagnostic']}, Spectrum {spectro_index}")
 
         ax.set_xlabel("Wavelength (nm)")
-        ax.set_ylabel(l_a_b_e_l__r_a_d_i_a_n_c_e)
+        ax.set_ylabel(LABEL_RADIANCE)
 
         ax.legend(
             bbox_to_anchor=(1.0, 0.5),

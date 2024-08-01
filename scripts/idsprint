@@ -13,8 +13,8 @@ except ImportError:
     from io import StringIO
 
 from idstools.database import DBMaster
-from idstools.utils.clihelper import dbentryParser
-from idstools.utils.idslogger import setupLogger
+from idstools.utils.clihelper import dbentry_parser
+from idstools.utils.idslogger import setup_logger
 
 logger = setup_logger("module")
 
@@ -24,7 +24,7 @@ if __name__ == "__main__":
         provide with fragment
         e.g. -u imas:hdf5?path=/home/ITER/fleuryl/public/imasdb/west/3/54914/4#wall or #wall:0/description_2d | less
         [previously known as idsdump and idsdumppath]""",
-        formatter_class=rich_help_formatter,
+        formatter_class=RichHelpFormatter,
         parents=[dbentry_parser],
     )
     parser.add_argument(

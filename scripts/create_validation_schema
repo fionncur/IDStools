@@ -91,7 +91,7 @@ def main():
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="create validation schema wrt DD", formatter_class=rich_help_formatter)
+    parser = argparse.ArgumentParser(description="create validation schema wrt DD", formatter_class=RichHelpFormatter)
     parser.add_argument(
         "-i",
         "--idslist",

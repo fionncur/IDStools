@@ -9,22 +9,22 @@ from rich_argparse import RichHelpFormatter
 
 import imas
 import sys
-from idstools.compute.common import getNearestTime
+from idstools.compute.common import get_nearest_time
 from idstools.database import DBMaster
 from idstools.utils.clihelper import (
-    dbentryParser,
-    getDatabasePath,
-    getFileName,
-    getTitle,
+    dbentry_parser,
+    get_database_path,
+    get_file_name,
+    get_title,
 )
-from idstools.utils.idslogger import setupLogger
-from idstools.view.common import Canvas
+from idstools.utils.idslogger import setup_logger
+from idstools.view.common import PlotCanvas
 from idstools.view.core_profiles import CoreProfilesView
 
 parser = argparse.ArgumentParser(
     description="---- Display the efield, toroidal, polidal velocities from the core_profiles IDSs [previously known as rotationplot]",
     parents=[dbentry_parser],
-    formatter_class=rich_help_formatter,
+    formatter_class=RichHelpFormatter,
 )
 
 parser.add_argument("-t", "--time", help="Time", required=False, type=float, default=99.0)
@@ -66,7 +66,7 @@ ntime = len(ids_core_profiles.time)
 ids_core_profiles.profiles_1d.resize(1)
 ids_core_profiles.profiles_1d[0] = connection.partial_get("core_profiles", f"profiles_1d({time_index})")
 
-canvas = canvas(2, 2)
+canvas = PlotCanvas(2, 2)
 
 ax1 = canvas.add_axes(title="", xlabel="", row=0, col=0)
 ax2 = canvas.add_axes(title="", xlabel="", row=0, col=1)
@@ -74,7 +74,7 @@ ax3 = canvas.add_axes(title="", xlabel="", row=1, col=0)
 ax4 = canvas.add_axes(title="", xlabel="", row=1, col=1)
 
 
-coreprofiles_view = core_profiles_view(ids_core_profiles)
+coreprofiles_view = CoreProfilesView(ids_core_profiles)
 
 coreprofiles_view.plot_efield_profile(ax1)
 coreprofiles_view.plot_toroidal_velocity_profile(ax2)

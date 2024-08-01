@@ -18,13 +18,13 @@ from imas import imasdef
 
 from idstools.database import DBMaster
 from idstools.utils.clihelper import (
-    dbentryParser,
-    getDatabasePath,
-    getFileName,
-    getTitle,
+    dbentry_parser,
+    get_database_path,
+    get_file_name,
+    get_title,
 )
-from idstools.utils.idslogger import setupLogger
-from idstools.view.common import Canvas
+from idstools.utils.idslogger import setup_logger
+from idstools.view.common import PlotCanvas
 from idstools.view.core_transport import CoreTransportView
 
 logger = setup_logger("module", stdout_level=logging.i_n_f_o)
@@ -37,7 +37,7 @@ slicing_methods = {
 # Management of input arguments
 parser = argparse.ArgumentParser(
     description="Check match between transport fluxes and a simple calculation [previously known as check_transport]",
-    formatter_class=rich_help_formatter,
+    formatter_class=RichHelpFormatter,
     parents=[dbentry_parser],
 )
 
@@ -116,7 +116,7 @@ except Exception as e:
 
 # define columns and rows for subplots based on ions
 columns = len(ids_slice_core_transport.model[model_index].profiles_1d[-1].ion)
-canvas = canvas(3, columns)
+canvas = PlotCanvas(3, columns)
 electrons_particle_fluxes_axes = canvas.add_axes(
     title="", xlabel="", row=0, col=0, colspan=1
 )

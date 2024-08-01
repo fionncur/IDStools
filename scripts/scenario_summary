@@ -261,7 +261,7 @@ selected_df = df.rename(columns=display_mapping)
 
 if not selected_df.empty:
     # print(selected_df.to_string(index=False, justify="center"), )
-    table = table()
+    table = Table()
     for column_name in choice:
         table.add_column(column_name, justify="left", style="green")
 

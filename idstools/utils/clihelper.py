@@ -168,7 +168,7 @@ def get_file_name(imasargs, title="", time_value=None):
 
 def get_database_path(imasargs, time_value=None) -> str:
     """
-    The function `getDatabasePath` returns the absolute path of a database based on the provided arguments.
+    The function `get_database_path` returns the absolute path of a database based on the provided arguments.
 
     Args:
         imasargs: The `imasargs` parameter is an object or dictionary that contains the following attributes:

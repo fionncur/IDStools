@@ -28,7 +28,7 @@ class WallView:
             vertices.append(p)
         # kwargs.setdefault("color", "darkgray")
         path = Path(vertices, codes)
-        patch = patches.path_patch(path, **kwargs)
+        patch = patches.PathPatch(path, **kwargs)
         if show_labels:
             ax.text(
                 r[n - 1],

@@ -10,12 +10,12 @@ from rich.markdown import Markdown
 from rich_argparse import RichHelpFormatter
 
 from idstools.database import DBMaster
-from idstools.utils.clihelper import dbentryParser
+from idstools.utils.clihelper import dbentry_parser
 from idstools.utils.idshelper import (
     getAvailableIdsAndOccurrences,
-    getAvailableIdsAndTimes,
+    get_available_ids_and_times,
 )
-from idstools.utils.idslogger import setupLogger
+from idstools.utils.idslogger import setup_logger
 
 logger = setup_logger("module")
 np.set_printoptions(threshold=1, precision=2, suppress=True)
@@ -29,7 +29,7 @@ yaml option is provided which is used by other scripts to provide list of idses 
 """
 parser = argparse.ArgumentParser(
     prog="idslist",
-    formatter_class=rich_help_formatter,
+    formatter_class=RichHelpFormatter,
     description=markdown(description, style="argparse.text"),
     parents=[dbentry_parser],
 )

@@ -11,7 +11,7 @@ from idstools.compute.equilibrium import EquilibriumCompute
 
 logger = logging.getLogger(f"module.{__name__}")
 
-q_e = codata.physical_constants["elementary charge"][0]
+QE = codata.physical_constants["elementary charge"][0]
 
 
 class CoreTransportView:
@@ -89,7 +89,7 @@ class CoreTransportView:
         s = tm.profiles_1d[time_index].grid_d.area
         vp_per__s = np.gradient(v, r) / s
 
-        e_compute = equilibrium_compute(ids_equilibrium)
+        e_compute = EquilibriumCompute(ids_equilibrium)
         gm3 = e_compute.getgm3(r, time_slice=time_index)
         gm7 = e_compute.getgm7(r, time_slice=time_index)
 
@@ -130,7 +130,7 @@ class CoreTransportView:
         s = tm.profiles_1d[time_index].grid_d.area
         vp_per__s = np.gradient(v, r) / s
 
-        e_compute = equilibrium_compute(ids_equilibrium)
+        e_compute = EquilibriumCompute(ids_equilibrium)
         gm3 = e_compute.getgm3(r, time_slice=time_index)
         gm7 = e_compute.getgm7(r, time_slice=time_index)
 
@@ -150,9 +150,9 @@ class CoreTransportView:
                 vp_per__s
                 * (-t_i.energy.d * np.gradient(c_i.temperature, r) * gm3 + c_i.temperature * t_i.energy.v * gm7)
                 * c_i.density
-                * q_e
+                * QE
             )
-            q_i_convective = gamma_i * c_i.temperature * q_e
+            q_i_convective = gamma_i * c_i.temperature * QE
             ax.plot(r, q_i_conductive, label="Direct evaluation (conductive)")
             (base_line,) = ax.plot(r, q_i_convective * 1.5, label="Direct evaluation (convective)")
             ax.fill_between(
@@ -197,7 +197,7 @@ class CoreTransportView:
         t_e = tm.profiles_1d[time_index].electrons
         c_e = ids_core_profiles.profiles_1d[time_index].electrons
         self._validate_electrons(t_e, c_e, r, model_index)
-        e_compute = equilibrium_compute(ids_equilibrium)
+        e_compute = EquilibriumCompute(ids_equilibrium)
         gm3 = e_compute.getgm3(r, time_slice=time_index)
         gm7 = e_compute.getgm7(r, time_slice=time_index)
 
@@ -205,10 +205,10 @@ class CoreTransportView:
             vp_per__s
             * (-t_e.energy.d * np.gradient(c_e.temperature, r) * gm3 + c_e.temperature * t_e.energy.v * gm7)
             * c_e.density
-            * q_e
+            * QE
         )
         gamma_e = np.array([t.particles.flux * t.z_ion for t in tm.profiles_1d[-1].ion]).sum(axis=0)
-        q_e_convective = gamma_e * c_e.temperature * q_e
+        q_e_convective = gamma_e * c_e.temperature * QE
 
         ax.plot(r, q_e_conductive, label="Direct evaluation (conductive)")
         (base_line,) = ax.plot(r, q_e_convective * 1.5, label="Direct evaluation (convective)")

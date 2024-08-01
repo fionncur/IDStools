@@ -87,7 +87,7 @@ def evaluate(expr):
 
 parser = argparse.ArgumentParser(
     description="This script applies mapping of a non-IDS database content (e.g. ITPA DBs) into IDS rules. replaced by ids_rosetta_code.py",
-    formatter_class=rich_help_formatter,
+    formatter_class=RichHelpFormatter,
 )
 parser.add_argument(
     "-i",
