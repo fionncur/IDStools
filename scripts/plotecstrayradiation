@@ -39,9 +39,7 @@ parser.add_argument(
     type=str,
     help="uri",
 )
-parser.add_argument(
-    "-t", "--time", help="Time (default=middle)", type=float, default=-99.0
-)
+parser.add_argument("-t", "--time", help="Time (default=middle)", type=float, default=-99.0)
 parser.add_argument(
     "--logscale",
     help="Shows y axis with logarithmic scale wherever appropriate",
@@ -118,26 +116,18 @@ time_array_waves = waves_ids.time
 time_slice = args.time
 
 # # Indices for time arrays in equilibrium, core_profiles, waves IDSs
-time_index_equilibrium, time_value_equilibrium = get_nearest_time(
-    time_array_equilibrium, time_slice
-)
-time_index_core_profiles, time_value_core_profiles = get_nearest_time(
-    time_array_core_profiles, time_slice
-)
+time_index_equilibrium, time_value_equilibrium = get_nearest_time(time_array_equilibrium, time_slice)
+time_index_core_profiles, time_value_core_profiles = get_nearest_time(time_array_core_profiles, time_slice)
 time_index_waves, time_value_waves = get_nearest_time(time_array_waves, time_slice)
 # Subplot waveforms versus time
 equilibrium_view = equilibrium_view(equilibrium_ids)
 core_profiles_view = core_profiles_view(core_profiles_ids)
-waves_view = waves_view(waves_ids)
+waves_view = WavesView(waves_ids)
 ecstray_view = ec_stray_view(equilibrium_ids, core_profiles_ids, waves_ids)
 
 canvas = canvas(3, 3)
-ax_top_view = canvas.add_axes(
-    title="Top View (X,Y)", xlabel="X [m]", ylabel="Y [m]", row=0, col=0, rowspan=2
-)
-ax_pol_view = canvas.add_axes(
-    title="Poloidal view (R,Z)", xlabel="R [m]", ylabel="Z [m]", row=0, col=1, rowspan=2
-)
+ax_top_view = canvas.add_axes(title="Top View (X,Y)", xlabel="X [m]", ylabel="Y [m]", row=0, col=0, rowspan=2)
+ax_pol_view = canvas.add_axes(title="Poloidal view (R,Z)", xlabel="R [m]", ylabel="Z [m]", row=0, col=1, rowspan=2)
 
 ax_polygon = canvas.add_axes(
     title="Beam footprints on the wall",
@@ -146,18 +136,14 @@ ax_polygon = canvas.add_axes(
     row=2,
     col=0,
 )
-ax_waveform = canvas.add_axes(
-    title="Current and Electrons density waveforms", xlabel="Time [s]", row=0, col=2
-)
+ax_waveform = canvas.add_axes(title="Current and Electrons density waveforms", xlabel="Time [s]", row=0, col=2)
 ax_density = canvas.add_axes(
     xlabel=r"Normalised $\rho_{tor}$ [-]",
     ylabel="Density [m-3]",
     row=1,
     col=2,
 )
-ax_beam_index = canvas.add_axes(
-    title="Beam index", xlabel="Beam index", row=2, col=1, colspan=2
-)
+ax_beam_index = canvas.add_axes(title="Beam index", xlabel="Beam index", row=2, col=1, colspan=2)
 
 equilibrium_view.plot_i_p(ax_waveform)  # Plot Ip
 core_profiles_view.plot_electron_density_ne0(ax_waveform)
@@ -165,18 +151,10 @@ waves_view.plot_beam_index(ax_beam_index)
 equilibrium_view.plot_poloidal_equilibrium(ax_pol_view, time_index_equilibrium)
 beam_index = 0
 waves_view.plot_poloidal_traces_update(ax_pol_view, time_index_waves, beam_index, verbose=True)
-ecstray_view.plot_resonance_layer(
-    ax_pol_view, time_index_waves, time_index_equilibrium, verbose=True
-)
-ecstray_view.plot_cut_off_layer(
-    ax_pol_view, time_index_waves, time_index_core_profiles, time_index_equilibrium
-)
-ax_topview_plot_eq = equilibrium_view.plot_topplotequilibrium(
-    ax_top_view, time_index_equilibrium
-)
-ax_topview_plot_traces = waves_view.plot_topview_traces_update(
-    ax_top_view, time_index_waves, beam_index
-)
+ecstray_view.plot_resonance_layer(ax_pol_view, time_index_waves, time_index_equilibrium, verbose=True)
+ecstray_view.plot_cut_off_layer(ax_pol_view, time_index_waves, time_index_core_profiles, time_index_equilibrium)
+ax_topview_plot_eq = equilibrium_view.plot_topplotequilibrium(ax_top_view, time_index_equilibrium)
+ax_topview_plot_traces = waves_view.plot_topview_traces_update(ax_top_view, time_index_waves, beam_index)
 ax_density_plot_dens, nmax = core_profiles_view.plot_density_profile(
     ax_density, time_index_core_profiles, logscale=args.logscale
 )
@@ -198,9 +176,7 @@ canvas.fig.subplots_adjust(
 canvas.fig.suptitle(get_title(args, "EC Stray Radiation", time_value_equilibrium), size=12)
 canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
 if args.save:
-    fname = get_file_name(
-        args, f"{os.path.basename(__file__)}_Equilibrium", time_value_equilibrium
-    )
+    fname = get_file_name(args, f"{os.path.basename(__file__)}_Equilibrium", time_value_equilibrium)
     if args.directory:
         if not os.path.exists(args.directory):
             os.makedirs(args.directory)

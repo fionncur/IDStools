@@ -1,7 +1,7 @@
 """
 This module provides view functions and classes for equilibrium ids data
 
-`refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/i_m_design/Data%20Model/sphinx/latest.html>`_.
+`refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`_.
 
 """
 
@@ -12,7 +12,7 @@ from idstools.compute.summary import SummaryCompute
 logger = logging.getLogger("module")
 
 
-class summary_view(base_plot):
+class summary_view(BasePlot):
     def __init__(self, ids: object):
         """
         This is a constructor function that initializes an object with an input object and creates
@@ -24,7 +24,7 @@ class summary_view(base_plot):
         stored as an instance variable `self.idsObj`.
         """
         self.ids = ids
-        self.compute_obj = summary_compute(ids)
+        self.compute_obj = SummaryCompute(ids)
 
     def view_h_c_d_waveforms(self, ax):
         """

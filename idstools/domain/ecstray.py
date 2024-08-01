@@ -4,7 +4,7 @@ from scipy import constants, interpolate
 import logging
 from idstools.compute.equilibrium import EquilibriumCompute
 from idstools.compute.waves import WavesCompute
-from idstools.compute.common import getClosestOfGivenValueFromArray
+from idstools.compute.common import get_closest_of_given_value_from_array
 
 logger = logging.getLogger("module")
 
@@ -15,9 +15,9 @@ class ec_stray_compute:
         self.core_profiles_ids = core_profiles_ids
         self.waves_ids = waves_ids
 
-        self.equilibrium_compute = equilibrium_compute(equilibrium_ids)
+        self.equilibrium_compute = EquilibriumCompute(equilibrium_ids)
         # self.coreProfilesCompute = coreProfilesIds
-        self.waves_compute = waves_compute(waves_ids)
+        self.waves_compute = WavesCompute(waves_ids)
 
     def get_resonance_layer(self, time_index_waves: int = 0, time_index_equilibrium: int = 0, n_harm=None):
         """This function calculates and returns a dictionary (Resonance Layer) containing r and z values

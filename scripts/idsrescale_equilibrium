@@ -51,7 +51,7 @@ if rescale == 0:
 # OPEN INPUT
 inputargs = argparse.namespace()
 inputargs.uri = args.src
-connection = d_b_master.get_connection(inputargs)
+connection = DBMaster.get_connection(inputargs)
 if connection is None:
     print("Error opening source pulse! Please check existence.")
     sys.exit()
@@ -62,9 +62,9 @@ outputargs = argparse.namespace()
 outputargs.mode = "w"
 outputargs.uri = args.dest
 
-output_connection = d_b_master.get_connection(outputargs)
+output_connection = DBMaster.get_connection(outputargs)
 if output_connection is None:
-    output_connection = d_b_master.create_connection(outputargs)
+    output_connection = DBMaster.create_connection(outputargs)
     if output_connection is None:
         sys.exit()
 

@@ -8,6 +8,7 @@ from idstools.database import DBMaster
 
 from idstools.utils.clihelper import getCoreVersion
 from yaml import load as yamlload
+
 try:
     from yaml import CLoader as yamlLoader
 except ImportError:
@@ -65,8 +66,7 @@ def rec(
     # Sort data as a function of shot and then run numbers
     sorted_indices = sorted(
         data,
-        key=lambda x: data[x]["characteristics"]["shot"]
-        + 0.001 * data[x]["characteristics"]["run"],
+        key=lambda x: data[x]["characteristics"]["shot"] + 0.001 * data[x]["characteristics"]["run"],
     )
     sdata = {}
     for i in range(len(data)):
@@ -137,9 +137,7 @@ def rec(
             len(disp_type),
         )
         tab_workflow = max(
-            max(
-                len(str(sdata[i].get("characteristics").get("workflow"))), tab_workflow
-            ),
+            max(len(str(sdata[i].get("characteristics").get("workflow"))), tab_workflow),
             len(disp_workflow),
         )
         tab_database = max(
@@ -148,22 +146,14 @@ def rec(
         )
         tab_confinement = max(
             max(
-                len(
-                    str(
-                        sdata[i]
-                        .get("scenario_key_parameters")
-                        .get("confinement_regime")
-                    )
-                ),
+                len(str(sdata[i].get("scenario_key_parameters").get("confinement_regime"))),
                 tab_confinement,
             ),
             len(disp_confinement),
         )
         tab_dis_type = max(
             max(
-                len(
-                    str(sdata[i].get("scenario_key_parameters").get("disruption_type"))
-                ),
+                len(str(sdata[i].get("scenario_key_parameters").get("disruption_type"))),
                 tab_dis_type,
             ),
             len(disp_dis_type),
@@ -205,23 +195,13 @@ def rec(
         )
         tab_ne0 = max(
             max(
-                len(
-                    str(
-                        sdata[i]
-                        .get("scenario_key_parameters")
-                        .get("central_electron_density")
-                    )
-                ),
+                len(str(sdata[i].get("scenario_key_parameters").get("central_electron_density"))),
                 tab_ne0,
             ),
             len(disp_ne0),
         )
-        tab_idslist = max(
-            max(len(str(sdata[i].get("ids_list"))), tab_idslist), len(disp_idslist)
-        )
-        tab_tsteps = max(
-            max(len(str(sdata[i].get("tsteps"))), tab_tsteps), len(disp_tsteps)
-        )
+        tab_idslist = max(max(len(str(sdata[i].get("ids_list"))), tab_idslist), len(disp_idslist))
+        tab_tsteps = max(max(len(str(sdata[i].get("tsteps"))), tab_tsteps), len(disp_tsteps))
 
     # --------------
     # Table heading
@@ -229,17 +209,11 @@ def rec(
     table = {}
     table[1] = eval("disp_" + str(choice[0]))
     for i in range(1, len(choice)):
-        space_length = (
-            eval("tab_" + str(choice[i - 1]))
-            - len(eval("disp_" + str(choice[i - 1])))
-            + 2
-        )
+        space_length = eval("tab_" + str(choice[i - 1])) - len(eval("disp_" + str(choice[i - 1]))) + 2
         try:
             table[1] = table[1] + " " * space_length + eval("disp_" + str(choice[i]))
         except Exception as e:
-            print(
-                "The argument " + str(choice[i]) + " is not correct.", file=sys.stderr
-            )
+            print("The argument " + str(choice[i]) + " is not correct.", file=sys.stderr)
             print("----> Aborted.", file=sys.stderr)
             exit()
     dimline = len(table[1])
@@ -258,15 +232,11 @@ def rec(
             type = sdata[i].get("characteristics").get("type")
             workflow = sdata[i].get("characteristics").get("workflow")
             database = sdata[i].get("characteristics").get("machine")
-            confinement = (
-                sdata[i].get("scenario_key_parameters").get("confinement_regime")
-            )
+            confinement = sdata[i].get("scenario_key_parameters").get("confinement_regime")
             ip = sdata[i].get("scenario_key_parameters").get("plasma_current")
             i_r_emax = sdata[i].get("scenario_key_parameters").get("I_RE_max")
             b0 = sdata[i].get("scenario_key_parameters").get("magnetic_field")
-            ne0 = (
-                sdata[i].get("scenario_key_parameters").get("central_electron_density")
-            )
+            ne0 = sdata[i].get("scenario_key_parameters").get("central_electron_density")
             dis_type = sdata[i].get("scenario_key_parameters").get("disruption_type")
             v_d_dir = sdata[i].get("scenario_key_parameters").get("VD_direction")
             h_f = sdata[i].get("scenario_key_parameters").get("halo_fraction")
@@ -290,11 +260,7 @@ def rec(
                 if choice[ic - 1] == "composition":
                     space_length = space_length_compo
                 else:
-                    space_length = (
-                        eval("tab_" + str(choice[ic - 1]))
-                        - len(str(eval(choice[ic - 1])))
-                        + 2
-                    )
+                    space_length = eval("tab_" + str(choice[ic - 1])) - len(str(eval(choice[ic - 1]))) + 2
 
                 if choice[ic] == "ip":
                     if float(eval(choice[ic])) < 10:
@@ -344,19 +310,9 @@ def rec(
         criterion = "zip("
         for ifilter in range(len(filter)):
             if ifilter == 0:
-                criterion = (
-                    criterion
-                    + """re.findall('"""
-                    + str(filter[ifilter])
-                    + """',table[iline])"""
-                )
+                criterion = criterion + """re.findall('""" + str(filter[ifilter]) + """',table[iline])"""
             else:
-                criterion = (
-                    criterion
-                    + """,re.findall('"""
-                    + str(filter[ifilter])
-                    + """',table[iline])"""
-                )
+                criterion = criterion + """,re.findall('""" + str(filter[ifilter]) + """',table[iline])"""
         criterion = criterion + """)"""
         for iline in range(len(table)):
             if iline in [0, 1, 2, j + 1] or len(list(eval(criterion))) > 0:
@@ -384,8 +340,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "-s",
         "--selection",
-        help="R|list of fields to filter: e.g. MD,up,2.65\n"
-        "----> Select only disruptions filling these criteria",
+        help="R|list of fields to filter: e.g. MD,up,2.65\n" "----> Select only disruptions filling these criteria",
         required=False,
     )
     parser.add_argument(
@@ -427,7 +382,7 @@ if __name__ == "__main__":
     if args["folder"] != None:
         folder = args["folder"]
     else:
-        l_l_version = d_b_master.get_core_version()
+        l_l_version = DBMaster.get_core_version()
         l_l_version = int(l_l_version.split(".")[0])
         if l_l_version < 4:
             folder = "/work/imas/shared/iterdb/3/0"
@@ -444,17 +399,13 @@ if __name__ == "__main__":
     if args["choice"] != None:
         try:
             input_choice = args["choice"]
-            choice = eval(
-                str("""['""" + re.sub(""",""", r"""','""", input_choice) + """']""")
-            )
+            choice = eval(str("""['""" + re.sub(""",""", r"""','""", input_choice) + """']"""))
         except Exception as e:
             print(
                 "------------------------------------------------------------------",
                 file=sys.stderr,
             )
-            print(
-                "Wrong way to write your list of variables to display", file=sys.stderr
-            )
+            print("Wrong way to write your list of variables to display", file=sys.stderr)
             print("You wrote " + str(args["choice"]), file=sys.stderr)
             print(
                 "Try e.g. this way: " + """ disruption_summary -c shot,run,ip     """,
@@ -487,9 +438,7 @@ if __name__ == "__main__":
     # Print the arguments of the default call to the function
     if args["choice"] == None:
         print("""----> Default call equivalent to: """)
-        print(
-            """      disruption_summary -c shot,run,ip,b0,ne0,dis_type,VD_dir,IREmax,HF,workflow,ref_name"""
-        )
+        print("""      disruption_summary -c shot,run,ip,b0,ne0,dis_type,VD_dir,IREmax,HF,workflow,ref_name""")
 
     # Call the function
     table = rec(
@@ -504,6 +453,4 @@ if __name__ == "__main__":
     # Display the clean formatted table
     for i in range(len(table)):
         print(table[i])
-    print(
-        " NOTE: Read entry from Disruption database using user = 'public', database = 'ITER_DISRUPTIONS'"
-    )
+    print(" NOTE: Read entry from Disruption database using user = 'public', database = 'ITER_DISRUPTIONS'")

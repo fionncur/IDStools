@@ -47,7 +47,7 @@ parser.add_argument(
 )
 args = parser.parse_args()
 
-connection = d_b_master.get_connection(args)
+connection = DBMaster.get_connection(args)
 if connection is None:
     logger.critical("----> Aborted.")
     exit(1)
@@ -68,9 +68,7 @@ time_array = ids_core_profiles.time
 time_index, time_value = get_nearest_time(time_array, args.time)
 
 ids_core_profiles.profiles_1d.resize(1)  # Read 1D-profiles for this time slice
-ids_core_profiles.profiles_1d[0] = connection.partial_get(
-    "core_profiles", f"profiles_1d({time_index})"
-)
+ids_core_profiles.profiles_1d[0] = connection.partial_get("core_profiles", f"profiles_1d({time_index})")
 title = "Profiles displayed for t = " + "%.1f" % time_value + " s"
 canvas = canvas(3, 1)
 canvas.fig.suptitle(title, size=12)
@@ -87,9 +85,7 @@ coreprofiles_view.plot_electron_pressure_properties(ax3)
 
 canvas.set_text(text=f"{get_database_path(args, time_value=time_value)}")
 
-canvas.fig.subplots_adjust(
-    top=0.916, bottom=0.09, left=0.044, right=0.953, hspace=0.287, wspace=0.2
-)
+canvas.fig.subplots_adjust(top=0.916, bottom=0.09, left=0.044, right=0.953, hspace=0.287, wspace=0.2)
 canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
 canvas.fig.suptitle(get_title(args, "Pressure", time_value), size=12)
 

@@ -1,7 +1,7 @@
 """
 This module provides compute functions and classes for waves ids data
 
-`refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/i_m_design/Data%20Model/sphinx/latest.html>`_.
+`refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`_.
 
 """
 
@@ -13,7 +13,7 @@ import imas
 logger = logging.getLogger("module")
 
 
-class waves_compute:
+class WavesCompute:
     """This class provides compute functions for waves ids"""
 
     def __init__(self, ids):
@@ -188,7 +188,10 @@ class waves_compute:
             beam_dict["active"] = False
             for ray_index in range(beam_dict["total_beams"]):
                 if (
-                    self.ids.coherent_wave[beam_index].beam_tracing[beam_tracing_time_index].beam[ray_index].power_initial
+                    self.ids.coherent_wave[beam_index]
+                    .beam_tracing[beam_tracing_time_index]
+                    .beam[ray_index]
+                    .power_initial
                     > 0
                 ):
                     beam_dict["active"] = True
@@ -235,14 +238,21 @@ class waves_compute:
         beam_data_length = max(
             max(
                 [
-                    len(self.ids.coherent_wave[beam_index].beam_tracing[beam_tracing_time_index].beam[ray_index].position.r)
+                    len(
+                        self.ids.coherent_wave[beam_index]
+                        .beam_tracing[beam_tracing_time_index]
+                        .beam[ray_index]
+                        .position.r
+                    )
                     for ray_index in range(max_total_beams)
                 ]
                 for beam_index in range(total_waves)
             )
         )
         beam_data_length_for_each_wave = np.array([[0 for _ in range(max_total_beams)] for _ in range(total_waves)])
-        beam_electrons_length_for_each_wave = np.array([[0 for _ in range(max_total_beams)] for _ in range(total_waves)])
+        beam_electrons_length_for_each_wave = np.array(
+            [[0 for _ in range(max_total_beams)] for _ in range(total_waves)]
+        )
         len_ray = np.array([[0.0 for iray in range(max_total_beams)] for ibeam in range(total_waves)]).astype(int)
         x_ray = np.array(
             [[[0.0 for _ in range(beam_data_length)] for _ in range(max_total_beams)] for _ in range(total_waves)]
@@ -391,9 +401,11 @@ class waves_compute:
                     single_injected_power[iwave] = 0.0
                     if len(self.ids.coherent_wave[iwave].beam_tracing) > 0:
                         for ibeam in range(len(self.ids.coherent_wave[iwave].beam_tracing[time_index].beam)):
-                            if imas.imasdef.is_field_valid(
+                            if imas.imasdef.isFieldValid(
                                 self.ids.coherent_wave[iwave].beam_tracing[time_index].beam[ibeam].power_initial
-                            ) and (self.ids.coherent_wave[iwave].beam_tracing[time_index].beam[ibeam].power_initial > 0):
+                            ) and (
+                                self.ids.coherent_wave[iwave].beam_tracing[time_index].beam[ibeam].power_initial > 0
+                            ):
                                 total_injected_power = (
                                     total_injected_power
                                     + self.ids.coherent_wave[iwave].beam_tracing[time_index].beam[ibeam].power_initial

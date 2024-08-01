@@ -9,7 +9,7 @@ logger = logging.getLogger(f"module.{__name__}")
 
 class waves_view:
     def __init__(self, ids):
-        self.waves_compute = waves_compute(ids)
+        self.waves_compute = WavesCompute(ids)
         self.ids = ids
 
     def plot_pol_view_traces(self, ax, time_index, color="b", style="-", label="", fontsize=9, labelpad=-1):

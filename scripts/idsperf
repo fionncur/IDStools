@@ -50,17 +50,13 @@ if __name__ == "__main__":
         action="store_true",
         help="Verbose mode, prints additional information",
     )
-    parser.add_argument(
-        "--showStats", action="store_true", help="Print addition stats for timings"
-    )
+    parser.add_argument("--showStats", action="store_true", help="Print addition stats for timings")
     parser.add_argument(
         "--profile",
         action="store_true",
         help="Also do full profile of the selected operation, via cProfile",
     )
-    parser.add_argument(
-        "-o", "--outputRun", type=int, help="Output run number for checking perf of put"
-    )
+    parser.add_argument("-o", "--outputRun", type=int, help="Output run number for checking perf of put")
     parser.add_argument(
         "ids",
         nargs="*",
@@ -79,7 +75,7 @@ if __name__ == "__main__":
     if args.memory_backend:
         print("First import data into memory...", file=sys.stderr)
         # sys.exit(1)
-        dbref = d_b_master.get_connection(args)
+        dbref = DBMaster.get_connection(args)
         if dbref is None:
             print("----> Aborted.")
             exit(1)
@@ -91,7 +87,7 @@ if __name__ == "__main__":
 
             # Replace the substring between ':' and '?' with 'memory'
             args.uri = args.uri[:start_index] + "memory" + args.uri[end_index:]
-        dbm = d_b_master.create_connection(args)
+        dbm = DBMaster.create_connection(args)
         if dbm is None:
             print("----> Aborted.")
             exit(1)
@@ -105,7 +101,7 @@ if __name__ == "__main__":
             dbm.put(dbref.get(idsname, occ))
         args.mode = "r"
 
-    db = d_b_master.get_connection(args)
+    db = DBMaster.get_connection(args)
     if db is None:
         print("----> Aborted.")
         exit(1)
@@ -116,8 +112,7 @@ if __name__ == "__main__":
         args.ids = [
             ids
             for ids in allidss
-            if db.partial_get(ids, "ids_properties/homogeneous_time")
-            != imas.imasdef.e_m_p_t_y__i_n_t
+            if db.partial_get(ids, "ids_properties/homogeneous_time") != imas.imasdef.e_m_p_t_y__i_n_t
         ]
     idsobj = None
     dbout = None
@@ -133,12 +128,10 @@ if __name__ == "__main__":
             import re
 
             dbout_args.uri = args.uri
-            dbout_args.uri = re.sub(
-                r"user=[^;]+", f"user={os.environ['USER']}", dbout_args.uri
-            )
+            dbout_args.uri = re.sub(r"user=[^;]+", f"user={os.environ['USER']}", dbout_args.uri)
             dbout_args.uri = re.sub(r"run=[^;]+", f"run={args.output_run}", dbout_args.uri)
 
-        dbout = d_b_master.create_connection(dbout_args)
+        dbout = DBMaster.create_connection(dbout_args)
         if dbout is None:
             print("----> Aborted.")
             exit(1)

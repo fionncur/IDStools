@@ -1,7 +1,7 @@
 """
 This module provides compute functions and classes for edge_profiles ids data
 
-`refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/i_m_design/Data%20Model/sphinx/latest.html>`_.
+`refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`_.
 
 """
 
@@ -17,7 +17,7 @@ import idstools.init_mendeleiev as mend
 logger = logging.getLogger("module")
 
 
-class edge_profiles_compute:
+class EdgeProfilesCompute:
     def __init__(self, ids):
         self.ids = ids
 
@@ -96,7 +96,7 @@ class edge_profiles_compute:
             logger.critical(f"edge_profiles IDS:slice not found {e}")
             return 0
 
-        edge_profiles_compute = edge_profiles_compute(ids)
+        edge_profiles_compute = EdgeProfilesCompute(ids)
 
         if edge_profiles_compute.get_volume(time_slice) is None:
             return -1
@@ -107,7 +107,9 @@ class edge_profiles_compute:
         nspec_over_nmaj = edge_profiles_compute.get_nspec_over_nmaj()
         species = edge_profiles_compute.get_species()
         labels = edge_profiles_compute.get_labels()
-        edge_profiles_compute.combine_species_when_appear_twice(species, nspec_over_ntot, nspec_over_ne, nspec_over_nmaj)
+        edge_profiles_compute.combine_species_when_appear_twice(
+            species, nspec_over_ntot, nspec_over_ne, nspec_over_nmaj
+        )
         a = edge_profiles_compute.get_a()
         z = edge_profiles_compute.get_z()
         states_data = edge_profiles_compute.get_states_data()
@@ -381,10 +383,10 @@ class edge_profiles_compute:
                 0.0002505748085483,
                 0.00021528820409221]
         """
-        i_d_e_n_t_i_f_i_e_r__c_e_l_l_s__i_n_d_e_x = 5  # cells identifier
+        IDENTIFIER_CELLS_INDEX = 5  # cells identifier
         cells_grid_subset = None
         for grid_subset in self.ids.grid_ggd[time_slice].grid_subset:
-            if grid_subset.identifier.index == i_d_e_n_t_i_f_i_e_r__c_e_l_l_s__i_n_d_e_x:
+            if grid_subset.identifier.index == IDENTIFIER_CELLS_INDEX:
                 cells_grid_subset = grid_subset
         elements = []
         if cells_grid_subset:
@@ -735,8 +737,8 @@ class edge_profiles_compute:
                 nspec_over_nmaj[jspecies] = 0
 
     def get_core_boundry(self, time_slice=0):
-        c_o_r_e__b_o_u_n_d_r_y__s_u_b_s_e_t__i_n_d_e_x = 15  # core_boundry
-        c_o_r_e__s_u_b_s_e_t__i_n_d_e_x = 22  # Core
+        CORE_BOUNDRY_SUBSET_INDEX = 15  # core_boundry
+        CORE_SUBSET_INDEX = 22  # Core
         core_boundry_grid_subset = None
         core_grid_subset = None
         for grid_subset in self.ids.grid_ggd[time_slice].grid_subset:
@@ -746,7 +748,7 @@ class edge_profiles_compute:
                     f"Found Grid subset for core_boundry subset name:{grid_subset.identifier.name}, Index: \
                     {grid_subset.identifier.index}"
                 )
-            if grid_subset.identifier.index == c_o_r_e__s_u_b_s_e_t__i_n_d_e_x:
+            if grid_subset.identifier.index == CORE_SUBSET_INDEX:
                 core_grid_subset = grid_subset
                 print(
                     f"Found Grid subset for core name:{grid_subset.identifier.name}, Index: \
@@ -775,7 +777,7 @@ class edge_profiles_compute:
         return sep_coords
 
     def get_separatrix(self, time_slice=0):
-        s_u_b_s_e_t__i_n_d_e_x = 16  # separatrix
+        SUBSET_INDEX = 16  # separatrix
         separatix_grid_subset = None
         for grid_subset in self.ids.grid_ggd[time_slice].grid_subset:
 

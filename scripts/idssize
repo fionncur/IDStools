@@ -73,7 +73,7 @@ parser.add_argument(
 )
 args = parser.parse_args()
 
-connection = d_b_master.get_connection(args)
+connection = DBMaster.get_connection(args)
 if connection is None:
     print("----> Aborted.")
     exit(1)
@@ -91,9 +91,7 @@ print(f"Total data size = {total_bytes/1024**2:5.1f} MB")
 if args.uri is not None:
     print(f"Fractions of the total size for {args.uri}")
 else:
-    print(
-        f"Fractions of the total size for {args.user}/{args.database}/{args.version}/{args.pulse}/{args.run}"
-    )
+    print(f"Fractions of the total size for {args.user}/{args.database}/{args.version}/{args.pulse}/{args.run}")
 print("% bytes    IDS")
 for ids_size in ids_size_dict:
     bytes_data = ids_size_dict[ids_size]["bytes"] / total_bytes * 100

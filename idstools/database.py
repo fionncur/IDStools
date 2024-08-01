@@ -19,7 +19,7 @@ except ImportError:
 logger = logging.getLogger(f"module.{__name__}")
 
 
-class d_b_master:
+class DBMaster:
     a_l_l__b_a_c_k_e_n_d_s = "mdsplus", "hdf5"
 
     @staticmethod
@@ -63,7 +63,7 @@ class d_b_master:
             the directory path of the specified database if it exists. If the database does not exist, it
             raises a FileNotFoundError. If the database parameter is None, it returns None.
         """
-        user_dir = d_b_master.get_user_dir(user)
+        user_dir = DBMaster.get_user_dir(user)
 
         if database is not None:
             user_database_dir = user_dir + database
@@ -92,7 +92,7 @@ class d_b_master:
             it returns the path. If the version directory does not exist, it raises a FileNotFoundError.
             If the version parameter is None, it returns None.
         """
-        database_dir = d_b_master.get_database_dir(database, user)
+        database_dir = DBMaster.get_database_dir(database, user)
         if version is not None:
             version_dir = f"{database_dir}/{version}"
             if os.path.exists(version_dir):
@@ -115,7 +115,7 @@ class d_b_master:
         Returns:
             a list of databases.
         """
-        user_dir = d_b_master.get_user_dir(user)
+        user_dir = DBMaster.get_user_dir(user)
         databases = [
             _database for _database in os.listdir(user_dir) if os.path.isdir(os.path.join(user_dir, _database))
         ]
@@ -133,7 +133,7 @@ class d_b_master:
         Returns:
             a sorted list of versions.
         """
-        database_dir = d_b_master.get_database_dir(database, user)
+        database_dir = DBMaster.get_database_dir(database, user)
         versions = [
             _version for _version in os.listdir(database_dir) if os.path.isdir(os.path.join(database_dir, _version))
         ]
@@ -154,12 +154,12 @@ class d_b_master:
             a list of tuples. Each tuple contains the name of a database and a list of versions associated
             with that database. The list is sorted by the database names.
         """
-        user_dir = d_b_master.get_user_dir(user)
+        user_dir = DBMaster.get_user_dir(user)
         databases_dict = {}
         for _database in os.listdir(user_dir):
             if not os.path.isdir(os.path.join(user_dir, _database)):
                 continue
-            _database_versions = d_b_master.get_versions(_database, user)
+            _database_versions = DBMaster.get_versions(_database, user)
             databases_dict[_database] = _database_versions
         return [(database, databases_dict[database]) for database in sorted(databases_dict.keys())]
 
@@ -175,7 +175,7 @@ class d_b_master:
             a list of tuples. Each tuple contains a version number and a list of databases that have that version.
             The list is sorted in ascending order based on the version numbers.
         """
-        database_with_versions_dict = d_b_master.get_databases_with_versions(user=user)
+        database_with_versions_dict = DBMaster.get_databases_with_versions(user=user)
 
         database_dict = {}
         for database, versions in database_with_versions_dict:
@@ -195,7 +195,7 @@ class d_b_master:
             a list of tuples. Each tuple contains the following elements, The tuple includes the pulse number,
             run number, HDF5_BACKEND backend, database, user, version, and data file path.
         """
-        version_dir = d_b_master.get_version_dir(version, database, user)
+        version_dir = DBMaster.get_version_dir(version, database, user)
         pulses = {} if as_dictionary else []
         hdf5_master_file_paths = glob(f"{version_dir}/**/*master.h5", recursive=True)
         for hdf5_master_file_path in hdf5_master_file_paths:
@@ -268,15 +268,13 @@ class d_b_master:
         Returns:
             a list of pulses.
         """
-        mdsplus_dir = d_b_master.get_version_dir(version, database, user)
+        mdsplus_dir = DBMaster.get_version_dir(version, database, user)
         pulses = {} if as_dictionary else []
 
         for root, dirnames, filenames in os.walk(mdsplus_dir):
             for datafile in fnmatch.filter(filenames, "*.datafile"):
                 data_file_path = f"{root}/{datafile}"
-                if (status is None) or (
-                    status == d_b_master.get_pulse_status(path(data_file_path).with_suffix(".yaml"))
-                ):
+                if (status is None) or (status == DBMaster.get_pulse_status(path(data_file_path).with_suffix(".yaml"))):
                     run_list = (root[len(mdsplus_dir) + 1 :]).split("/")
                     try:
                         if len(run_list) == 1:  # AL4 layout
@@ -376,19 +374,19 @@ class d_b_master:
         result = []
 
         if not backends:
-            backends = d_b_master.a_l_l__b_a_c_k_e_n_d_s
+            backends = DBMaster.a_l_l__b_a_c_k_e_n_d_s
 
-        databases = [database] if database else d_b_master.get_databases(user)
+        databases = [database] if database else DBMaster.get_databases(user)
         for database in databases:
             database_files = []
-            versions = [version] if version else d_b_master.get_versions(database, user)
+            versions = [version] if version else DBMaster.get_versions(database, user)
             for _version in versions:
                 pulses = []
                 for backend in backends:
                     if backend == "hdf5":
-                        dbs = d_b_master.get_hdf5_pulses(user, database, _version, as_dictionary=True)
+                        dbs = DBMaster.get_hdf5_pulses(user, database, _version, as_dictionary=True)
                     elif backend == "mdsplus":
-                        dbs = d_b_master.get_mds_plus_pulses(user, database, _version, as_dictionary=True)
+                        dbs = DBMaster.get_mds_plus_pulses(user, database, _version, as_dictionary=True)
                     else:
                         raise NotImplementedError(f"Unsupported backend: {backend}")
                     if dbs:
@@ -416,7 +414,7 @@ class d_b_master:
         Returns:
             the path to an HDF5 physical file.
         """
-        hdf5dir = os.path.join(d_b_master.get_user_dir(user), database, version, "hdf5")
+        hdf5dir = os.path.join(DBMaster.get_user_dir(user), database, version, "hdf5")
         return os.path.join(hdf5dir, f"ids_{str(pulse)}_{str(run)}.hd5")
 
     @staticmethod
@@ -437,7 +435,7 @@ class d_b_master:
             filename with the extension ".characteristics", the second string is the filename with the extension
             ".datafile", and the third string is the filename with the extension ".tree".
         """
-        mdsplusdir = os.path.join(d_b_master.get_user_dir(user), database, version)
+        mdsplusdir = os.path.join(DBMaster.get_user_dir(user), database, version)
         # filename is ids_<shot><run> where run is last four digits of run number,
         # right-aligned (filled with zeros).
         # Examples: 1
@@ -480,9 +478,9 @@ class d_b_master:
         """
         """Return files storing this database."""
         if backend == "mdsplus":
-            return d_b_master.get_m_d_s_plus_physical_files(user, database, version, pulse, run)
+            return DBMaster.get_m_d_s_plus_physical_files(user, database, version, pulse, run)
         elif backend == "hdf5":
-            return d_b_master.get_h_d_f5_physical_file(user, database, version, pulse, run)
+            return DBMaster.get_h_d_f5_physical_file(user, database, version, pulse, run)
         else:
             raise NotImplementedError(f"Unsupported backend: {backend}")
 
@@ -505,7 +503,7 @@ class d_b_master:
         return lowlevel_version
 
     @classmethod
-    def get_d_d_version(cls):
+    def get_dd_version(cls):
         _lowlevel_version = ""
         if "_al_lowlevel" in imas.__dict__:
             try:
@@ -524,7 +522,7 @@ class d_b_master:
 
     @classmethod
     def get_connection(cls, imasargs):
-        connection = d_b_master.get_d_b_entry_object(imasargs)
+        connection = DBMaster.get_d_b_entry_object(imasargs)
         if connection is not None:
             status, _ = connection.open()
             if status != 0:
@@ -537,7 +535,7 @@ class d_b_master:
         if "mode" not in imasargs.__dict__:
             imasargs.mode = "w"
 
-        connection = d_b_master.get_d_b_entry_object(imasargs)
+        connection = DBMaster.get_d_b_entry_object(imasargs)
         if connection is not None:
             status, _ = connection.create()
             if status != 0:
@@ -617,7 +615,7 @@ class d_b_master:
         # linked subfolders (https://bugs.python.org/issue33428)
         folder = glob(str(locpath) + "/**/*.datafile", recursive=True)
         for entry in folder:
-            if (with_status is None) or (with_status == d_b_master.get_status(path(entry).with_suffix(".yaml"))):
+            if (with_status is None) or (with_status == DBMaster.get_status(path(entry).with_suffix(".yaml"))):
                 file = entry.split("/")[-1].split("_")[1].split(".")[0]
                 if len(file) <= 4:
                     pulse = 0
@@ -799,7 +797,7 @@ def read_scenario_with_args(
 
     if out_i_d_s_list is None:
         out_i_d_s_list = []
-    connection = d_b_master.get_connection(imasargs)
+    connection = DBMaster.get_connection(imasargs)
 
     if connection is None:
         return None

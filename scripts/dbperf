@@ -56,9 +56,7 @@ if __name__ == "__main__":
         type=str,
         help="Path to already generated .csv file with backend performances",
     )
-    parser.add_argument(
-        "-p", "--pulse", type=int, help="Pulse number harboring desired IDSs"
-    )
+    parser.add_argument("-p", "--pulse", type=int, help="Pulse number harboring desired IDSs")
     parser.add_argument("--run", type=int, help="Run number harboring desired IDSs")
     parser.add_argument("--ids", nargs="*", type=str, help="IDS to test and/or plot")
     parser.add_argument(
@@ -75,9 +73,7 @@ if __name__ == "__main__":
         type=str,
         help="Tuple of Pulse and Runs to exclude",
     )
-    parser.add_argument(
-        "-exci", "--excludeids", nargs="*", type=str, help="IDS(s) to exclude"
-    )
+    parser.add_argument("-exci", "--excludeids", nargs="*", type=str, help="IDS(s) to exclude")
     parser.add_argument(
         "-rot",
         "--rotation",
@@ -98,12 +94,8 @@ if __name__ == "__main__":
         action="store_true",
         help="Evaluate performance based on time taken to read IDS size in MB",
     )
-    parser.add_argument(
-        "-xlog", "--xlogscale", action="store_true", help="Scale x-axis with logscale"
-    )
-    parser.add_argument(
-        "-ylog", "--ylogscale", action="store_true", help="Scale y-axis with logscale"
-    )
+    parser.add_argument("-xlog", "--xlogscale", action="store_true", help="Scale x-axis with logscale")
+    parser.add_argument("-ylog", "--ylogscale", action="store_true", help="Scale y-axis with logscale")
     parser.add_argument(
         "-sli",
         "--slicevtime",
@@ -137,15 +129,11 @@ if __name__ == "__main__":
 
     if not args.file:
         if args.database:
-            mdslocpath = d_b_master.get_d_b_path(args.user, args.database, args.version)
+            mdslocpath = DBMaster.get_d_b_path(args.user, args.database, args.version)
             hdflocpath = mdslocpath
         elif args.mdsdatabase and args.hdf5database:
-            mdslocpath = d_b_master.get_d_b_path(
-                args.mdsuser, args.mdsdatabase, args.version
-            )
-            hdflocpath = d_b_master.get_d_b_path(
-                args.hdf5user, args.hdf5database, args.version
-            )
+            mdslocpath = DBMaster.get_d_b_path(args.mdsuser, args.mdsdatabase, args.version)
+            hdflocpath = DBMaster.get_d_b_path(args.hdf5user, args.hdf5database, args.version)
         else:
             raise Exception(
                 "Please clarify where the data is stored. Please provide either one database containing data in both MDSPLUS and HDF5, or two separate databases containing data in MDSPLUS or HDF5"
@@ -160,8 +148,8 @@ if __name__ == "__main__":
             pulses = [(args.pulse, args.run)]
 
         elif not args.pulse:
-            hpulses = d_b_master.hdf5_list_pulse_run(hdflocpath)
-            mpulses = d_b_master.mds_list_pulse_run(mdslocpath)
+            hpulses = DBMaster.hdf5_list_pulse_run(hdflocpath)
+            mpulses = DBMaster.mds_list_pulse_run(mdslocpath)
             if set(hpulses) != set(mpulses):
                 mdsrem = set(mpulses) - set(hpulses)
                 hdfrem = set(hpulses) - set(mpulses)
@@ -224,19 +212,10 @@ if __name__ == "__main__":
                 size = byte_size(hdfde.get(idsname)) / 1024**2
                 if args.slicevtime:
                     try:
-                        slices.append(
-                            get_timings(hdfde, idsname, times=[10], repeat=args.repeat)
-                        )
+                        slices.append(get_timings(hdfde, idsname, times=[10], repeat=args.repeat))
                     except Exception as e:
                         slices.append(None)
-                        print(
-                            idsname
-                            + "in ("
-                            + pulse
-                            + ", "
-                            + run
-                            + ") failed to return slice get_timings"
-                        )
+                        print(idsname + "in (" + pulse + ", " + run + ") failed to return slice get_timings")
                 mdstimes = get_timings(mdsde, idsname, repeat=args.repeat)
                 mdstdev = np.std(mdstimes)
                 hdftimes = get_timings(hdfde, idsname, repeat=args.repeat)
@@ -283,9 +262,7 @@ if __name__ == "__main__":
             totaldf["MDSPLUS_PERFORMANCE (MB/s)"] = totaldf.apply(
                 lambda row: (row.s_i_z_e / row.m_d_s_p_l_u_s__t_i_m_e), axis=1
             )
-            totaldf["HDF5_PERFORMANCE (MB/s)"] = totaldf.apply(
-                lambda row: (row.s_i_z_e / row.h_d_f5__t_i_m_e), axis=1
-            )
+            totaldf["HDF5_PERFORMANCE (MB/s)"] = totaldf.apply(lambda row: (row.s_i_z_e / row.h_d_f5__t_i_m_e), axis=1)
 
         if args.slicevtime:
             totaldf["MDSPLUS_PERFORMANCE (Slices/s)"] = totaldf.apply(
@@ -296,9 +273,7 @@ if __name__ == "__main__":
             )
 
         date = datetime.now().strftime("%Y_%m_%d-%I:%M:%S_%p")
-        totaldf.to_csv(
-            "totaldf-" + date + ".csv", na_rep="None", index=False, header=True
-        )
+        totaldf.to_csv("totaldf-" + date + ".csv", na_rep="None", index=False, header=True)
 
     if args.file:
         totaldf = pd.read_csv(args.file)
@@ -382,9 +357,7 @@ if __name__ == "__main__":
             plt.xticks(np.arange(len(avgdf)), avgdf.index, rotation=args.rotation)
 
         if not args.sizevtime and args.slicevtime and args.time:
-            raise Exception(
-                "Please specify performance-measuring command line arguments (size, slices, time, etc.)"
-            )
+            raise Exception("Please specify performance-measuring command line arguments (size, slices, time, etc.)")
 
         if not args.file:
             avgdf.to_csv(

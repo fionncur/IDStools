@@ -1,7 +1,7 @@
 """
 This module provides view functions and classes for equilibrium ids data
 
-`refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/i_m_design/Data%20Model/sphinx/latest.html>`_.
+`refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`_.
 
 """
 
@@ -28,7 +28,7 @@ class equilibrium_view(base_plot):
         self,
         ax: plt.axes,
         time_slice: int = 0,
-        profiles2_d_index: int = 0,
+        profiles2d_index: int = 0,
         plot_rho: bool = False,
     ):
         """
@@ -48,7 +48,7 @@ class equilibrium_view(base_plot):
                 connection.open()
                 idsObj = connection.get('equilibrium')
 
-                canvas = Canvas(1, 1) # create canvas
+                canvas = PlotCanvas(1, 1) # create canvas
                 ax = canvas.add_axes(title="", xlabel="", row=0, col=0)
 
                 viewObj = EquilibriumView(idsObj)
@@ -68,11 +68,11 @@ class equilibrium_view(base_plot):
 
             :meth:`plotIP`
         """
-        cartestion_grid = self.compute_obj.get2_d_cartesian_grid(time_slice, profiles2_d_index)
+        cartestion_grid = self.compute_obj.get2d_cartesian_grid(time_slice, profiles2d_index)
         if cartestion_grid is not None:
             levels = 30
             if plot_rho:
-                rho2d = self.compute_obj.get_rho2_d()
+                rho2d = self.compute_obj.get_rho2d()
                 if rho2d is not None:
                     ax.contour(
                         cartestion_grid["r2d"],
@@ -104,7 +104,7 @@ class equilibrium_view(base_plot):
         Args:
             ax: The parameter "ax" is a matplotlib axis object.
         """
-        plasma_current = self.compute_obj.get_i_p()
+        plasma_current = self.compute_obj.get_ip()
         time_array = self.ids.time
         if len(plasma_current) <= 3:
             ax.plot(time_array, plasma_current, color="b", marker="o", label="$I_p$ [MA]")
@@ -181,7 +181,7 @@ class equilibrium_view(base_plot):
         ax.set_aspect("equal", adjustable="box")
 
     def plotequilibrium(self, ax):
-        quantities = self.compute_obj.get2_d_cartesian_grid()
+        quantities = self.compute_obj.get2d_cartesian_grid()
         if quantities is not None:
             r2d, z2d, psi2d = (
                 quantities["r2d"],

@@ -1,7 +1,7 @@
 """
 This module provides compute functions and classes for pf_active ids data
 
-`refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/i_m_design/Data%20Model/sphinx/latest.html>`_.
+`refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`_.
 
 """
 
@@ -10,7 +10,7 @@ import logging
 logger = logging.getLogger("module")
 
 
-class pf_active_compute:
+class PfActiveCompute:
     """This class provides compute functions for pf_active ids"""
 
     def __init__(self, ids: object):
@@ -70,8 +70,8 @@ class pf_active_compute:
                         "name": element.name,
                         "identifier": element.identifier,
                         "area": element.area,
-                        "horizontalWidth": horizontal_width,
-                        "horizontalHeight": vertical_height,
+                        "horizontal_width": horizontal_width,
+                        "horizontal_height": vertical_height,
                         "cec": cec,
                         "r": element.geometry.rectangle.r,
                         "z": element.geometry.rectangle.z,

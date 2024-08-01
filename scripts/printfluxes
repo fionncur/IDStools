@@ -45,7 +45,7 @@ parser.add_argument("-o", "--occurrence", type=int, default=0, help="occurrence"
 parser.add_argument("-t", "--time", type=float, help="Time", default=-99)
 args = parser.parse_args()
 
-connection = d_b_master.get_connection(args)
+connection = DBMaster.get_connection(args)
 if connection is None:
     logger.critical("----> Aborted.")
     exit(1)

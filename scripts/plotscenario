@@ -32,9 +32,7 @@ parser = argparse.argument_parser(
 )
 
 group = parser.add_mutually_exclusive_group()
-group.add_argument(
-    "-t", "--time", help="Time for profiles", required=False, type=float, default=-99.0
-)
+group.add_argument("-t", "--time", help="Time for profiles", required=False, type=float, default=-99.0)
 group.add_argument(
     "-n",
     "--noProfiles",
@@ -61,7 +59,7 @@ args = parser.parse_args()
 logger = setup_logger("module", stdout_level=logging.i_n_f_o)
 
 # Open the database and read the necessary IDSs
-connection = d_b_master.get_connection(args)
+connection = DBMaster.get_connection(args)
 if connection is None:
     logger.critical("----> Aborted.")
     exit(1)
@@ -70,9 +68,7 @@ if not args.no_profiles:
     try:
         ids_core_profiles = imas.core_profiles()  # To initialise the empty IDS structure
         ids_core_profiles.time = connection.partial_get("core_profiles", "time")
-        ids_core_profiles.global_quantities = connection.partial_get(
-            "core_profiles", "global_quantities"
-        )
+        ids_core_profiles.global_quantities = connection.partial_get("core_profiles", "global_quantities")
         if ids_core_profiles.time is None:
             logger.critical("No core_profiles IDS in the data-entry --> Abort.")
             exit()
@@ -95,9 +91,7 @@ if not args.no_profiles:
 
     # Read 1D-profiles for this time slice
     ids_core_profiles.profiles_1d.resize(1)
-    ids_core_profiles.profiles_1d[0] = connection.partial_get(
-        "core_profiles", "profiles_1d(" + str(time_index) + ")"
-    )
+    ids_core_profiles.profiles_1d[0] = connection.partial_get("core_profiles", "profiles_1d(" + str(time_index) + ")")
 
     ids_equilibrium.time_slice.resize(1)
     ids_equilibrium.time_slice[0].profiles_2d.resize(1)
@@ -139,9 +133,7 @@ obje_summary_view = summary_view(ids_summary)
 obje_summary_view.view_h_c_d_waveforms(ax1)
 
 obje_summary_view.view_hmode(ax1)
-ax1.tick_params(
-    axis="x", which="both", bottom=False, top=False, right=False, labelbottom=False
-)
+ax1.tick_params(axis="x", which="both", bottom=False, top=False, right=False, labelbottom=False)
 
 if not args.no_profiles:
     ax1.set_title("Profiles displayed for t = " + "%.1f" % time_value + " s")
@@ -150,9 +142,7 @@ if not args.no_profiles:
 obje_summary_view.view_ip_b0_waveforms(ax2)
 
 obje_summary_view.view_hmode(ax2)
-ax2.tick_params(
-    axis="x", which="both", bottom=False, top=False, right=False, labelbottom=False
-)
+ax2.tick_params(axis="x", which="both", bottom=False, top=False, right=False, labelbottom=False)
 if not args.no_profiles:
     obje_summary_view.view_time_line(ax2, time_value)
 
@@ -160,9 +150,7 @@ if not args.no_profiles:
 obje_summary_view.view_energy_content_waveforms(ax3)
 
 obje_summary_view.view_hmode(ax3)
-ax3.tick_params(
-    axis="x", which="both", bottom=False, top=False, right=False, labelbottom=False
-)
+ax3.tick_params(axis="x", which="both", bottom=False, top=False, right=False, labelbottom=False)
 if not args.no_profiles:
     obje_summary_view.view_time_line(ax3, time_value)
 
@@ -191,17 +179,12 @@ else:
 if args.info:
     try:
         dataset_description = connection.get("dataset_description")
-        if (
-            dataset_description.ids_properties.homogeneous_time
-            == imas.imasdef.e_m_p_t_y__i_n_t
-        ):
+        if dataset_description.ids_properties.homogeneous_time == imas.imasdef.e_m_p_t_y__i_n_t:
             got_dataset_description = False
         else:
             got_dataset_description = True
     except Exception as e:
-        logger.warning(
-            "Warning: The dataset_description IDS is absent from the input data-entry"
-        )
+        logger.warning("Warning: The dataset_description IDS is absent from the input data-entry")
         got_dataset_description = False
     # F4F specific?
     if got_dataset_description:
@@ -229,9 +212,7 @@ else:
     canvas.set_text(text=f"{get_database_path(args)}")
 canvas.set_sup_title(title)
 canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
-canvas.fig.subplots_adjust(
-    top=0.914, bottom=0.099, left=0.042, right=0.9, hspace=0.113, wspace=0.26
-)
+canvas.fig.subplots_adjust(top=0.914, bottom=0.099, left=0.042, right=0.9, hspace=0.113, wspace=0.26)
 
 
 if args.save:

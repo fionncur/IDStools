@@ -15,8 +15,8 @@ logger = logging.getLogger("module")
 
 class ec_stray_view:
     def __init__(self, equilibrium_ids: object, core_profiles_ids: object, waves_ids: object):
-        self.ecstray_object = ec_stray_compute(equilibrium_ids, core_profiles_ids, waves_ids)
-        self.equilibrium_compute = equilibrium_compute(equilibrium_ids)
+        self.ecstray_object = EcStrayCompute(equilibrium_ids, core_profiles_ids, waves_ids)
+        self.equilibrium_compute = EquilibriumCompute(equilibrium_ids)
         self.equilibrium_ids = equilibrium_ids
         self.core_profiles_ids = core_profiles_ids
         self.waves_ids = waves_ids
@@ -49,7 +49,7 @@ class ec_stray_view:
                 wavesIds = connection.get('waves')
                 coreProfilesIds = connection.get('core_profiles')
 
-                canvas = Canvas(1, 1) # create canvas
+                canvas = PlotCanvas(1, 1) # create canvas
                 ax = canvas.add_axes(title="Resonance Layer", xlabel="R [m]", ylabel="Z [m]", row=0, col=0, rowspan=1)
                 ax.set_title("uri=imas:mdsplus?user=public;pulse=134173;run=2326;database=TEST;version=3")
                 ecstrayView = EcStrayView(equilibriumIds, coreProfilesIds, wavesIds)
@@ -91,11 +91,13 @@ class ec_stray_view:
         profile2d_index = resonance_data["profile2dIndex"]
         resonance_layer = resonance_data["resonanceLayer"]
 
-        grid_data = self.equilibrium_compute.get2_d_cartesian_grid(time_slice=time_slice, profiles2_d_index=profile2d_index)
+        grid_data = self.equilibrium_compute.get2d_cartesian_grid(
+            time_slice=time_slice, profiles2d_index=profile2d_index
+        )
         r2d = grid_data["r2d"]
         z2d = grid_data["z2d"]
         psi2d = grid_data["psi2d"]
-        rho2d = self.equilibrium_compute.get_rho2_d(time_slice=time_slice, profiles2_d_index=profile2d_index)
+        rho2d = self.equilibrium_compute.get_rho2d(time_slice=time_slice, profiles2d_index=profile2d_index)
 
         # Poloidal view plot
         ax.contour(r2d, z2d, psi2d, 50, cmap="summer")
@@ -155,7 +157,7 @@ class ec_stray_view:
                 wavesIds = connection.get('waves')
                 coreProfilesIds = connection.get('core_profiles')
 
-                canvas = Canvas(1, 1) # create canvas
+                canvas = PlotCanvas(1, 1) # create canvas
                 ax = canvas.add_axes(title="Resonance Layer", xlabel="R [m]", ylabel="Z [m]", row=0, col=0, rowspan=1)
                 ax.set_title("uri=imas:mdsplus?user=public;pulse=134173;run=2326;database=TEST;version=3")
                 ecstrayView = EcStrayView(equilibriumIds, coreProfilesIds, wavesIds)
@@ -173,7 +175,9 @@ class ec_stray_view:
             :func:`idstools.domain.ecstray.EcStrayCompute.getCutoffLayer`
         """
         # Calculate density cutoff layer position
-        cutoff_layer = self.ecstray_object.get_cutoff_layer(time_index_waves, time_index_core_profiles, time_index_equilibrium)
+        cutoff_layer = self.ecstray_object.get_cutoff_layer(
+            time_index_waves, time_index_core_profiles, time_index_equilibrium
+        )
 
         # TODO Work on this function to keep call back function and events and not to pass init=1
         if init == 1:

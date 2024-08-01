@@ -21,7 +21,9 @@ from idstools.view.waves import WavesView
 # MANAGEMENT OF INPUT ARGUMENTS
 # ------------------------------
 parser = argparse.argument_parser(
-    description="---- Display EC results [previously known as eccomp]", parents=[dbentry_parser],formatter_class=rich_help_formatter,
+    description="---- Display EC results [previously known as eccomp]",
+    parents=[dbentry_parser],
+    formatter_class=rich_help_formatter,
 )
 parser.add_argument(
     "-t",
@@ -50,7 +52,7 @@ parser.add_argument(
 parser.add_argument(
     "--directory",
     help="Directory to save the figure",
-    default=None, 
+    default=None,
 )
 args = parser.parse_args()
 
@@ -62,7 +64,7 @@ verbose = args.verbose
 force_psi = int(args.force_psi)
 
 
-conn = d_b_master.get_connection(args)
+conn = DBMaster.get_connection(args)
 if conn is None:
     logger.critical("----> Aborted.")
     exit(1)
@@ -87,7 +89,7 @@ if ntime != 1:
     ax3 = canvas.add_axes(title="", xlabel="", row=1, col=0)
     ax4 = canvas.add_axes(title="", xlabel="", row=1, col=1)
 
-waves_view = waves_view(ids_waves)
+waves_view = WavesView(ids_waves)
 
 waves_view.display_e_c_launchers_info(time_index=time_index)
 waves_view.plot_e_c_r_h_profiles(ax1, time_index=time_index, verbose=args.verbose)
@@ -98,17 +100,15 @@ if ntime != 1:
 
 canvas.set_text(text=f"{get_database_path(args, time_value=time_value)}")
 canvas.fig.suptitle(get_title(args, "EC Composition", time_value), size=12)
-canvas.fig.subplots_adjust(
-    top=0.941, bottom=0.122, left=0.052, right=0.925, hspace=0.2, wspace=0.2
-)
+canvas.fig.subplots_adjust(top=0.941, bottom=0.122, left=0.052, right=0.925, hspace=0.2, wspace=0.2)
 canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
 
 if args.save:
-    fname = get_file_name(args, os.path.basename(__file__)+"_EC_Composition", time_value)
+    fname = get_file_name(args, os.path.basename(__file__) + "_EC_Composition", time_value)
     if args.directory:
         if not os.path.exists(args.directory):
             os.makedirs(args.directory)
-        fname=os.path.join(args.directory,fname)
+        fname = os.path.join(args.directory, fname)
     canvas.save(fname)
 else:
     canvas.show()

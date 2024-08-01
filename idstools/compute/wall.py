@@ -18,7 +18,7 @@ def timeit_decorator(func):
     return wrapper
 
 
-class wall_compute:
+class WallCompute:
     def __init__(self, ids_object):
         self.ids_object = ids_object
 

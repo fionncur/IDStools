@@ -62,7 +62,7 @@ args = parser.parse_args()
 logger = setup_logger("module")
 
 args = parser.parse_args()
-connection = d_b_master.get_connection(args)
+connection = DBMaster.get_connection(args)
 if connection is None:
     logger.critical("----> Aborted.")
     exit(1)
@@ -103,9 +103,7 @@ if time_array is None:
 
 time_index, time_value = get_nearest_time(time_array, args.time)
 
-edge_profile_ids = connection.get_slice(
-    "edge_profiles", time_value, imasdef.c_l_o_s_e_s_t__i_n_t_e_r_p
-)
+edge_profile_ids = connection.get_slice("edge_profiles", time_value, imasdef.c_l_o_s_e_s_t__i_n_t_e_r_p)
 
 if len(edge_profile_ids.grid_ggd) == 0:
     logger.error(
@@ -129,9 +127,7 @@ ax1 = canvas.add_axes(title="", xlabel="", row=0, col=1, rowspan=2)
 ax2 = canvas.add_axes(title="", xlabel="", row=0, col=2, rowspan=2)
 ax3 = canvas.add_axes(title="", xlabel="", row=0, col=3, rowspan=2)
 
-c1 = edge_profiles_view.view_electrons_density(
-    ax1, time_slice=0, show_separatrix=False
-)
+c1 = edge_profiles_view.view_electrons_density(ax1, time_slice=0, show_separatrix=False)
 if c1 is not None:
     canvas.fig.colorbar(c1, ax=ax1)
     if args.wall:
@@ -152,15 +148,11 @@ if c3 is not None:
         if r is not None and z is not None:
             ax3.plot(r, z, "silver")
 
-edge_profiles_view.view_equatorial_plane_and_diverter_density(
-    ax4, time_slice=0, logscale=args.logscale
-)
+edge_profiles_view.view_equatorial_plane_and_diverter_density(ax4, time_slice=0, logscale=args.logscale)
 
 canvas.set_text(text=f"{get_database_path(args, time_value=time_value)}")
 
-canvas.fig.subplots_adjust(
-    top=0.93, bottom=0.067, left=0.026, right=0.953, hspace=0.287, wspace=0.12
-)
+canvas.fig.subplots_adjust(top=0.93, bottom=0.067, left=0.026, right=0.953, hspace=0.287, wspace=0.12)
 
 canvas.fig.suptitle(get_title(args, "Edge Profiles", time_value), size=12)
 canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))

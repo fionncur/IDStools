@@ -23,7 +23,7 @@ logger = setup_logger("module", stdout_level=logging.i_n_f_o)
 
 
 def show_plots(args):
-    conn = d_b_master.get_connection(args)
+    conn = DBMaster.get_connection(args)
     if conn is None:
         logger.critical("----> Aborted.")
         exit(1)
@@ -69,11 +69,11 @@ def show_plots(args):
     canvas.fig.suptitle(get_title(args, "Distributions profile", time_value), size=12)
 
     if args.save:
-        fname = get_file_name(args, os.path.basename(__file__)+"_Distributions_profile", time_value)
+        fname = get_file_name(args, os.path.basename(__file__) + "_Distributions_profile", time_value)
         if args.directory:
             if not os.path.exists(args.directory):
                 os.makedirs(args.directory)
-            fname=os.path.join(args.directory,fname)
+            fname = os.path.join(args.directory, fname)
         canvas.save(fname)
     else:
         canvas.show()
@@ -81,11 +81,11 @@ def show_plots(args):
 
 if __name__ == "__main__":
     parser = argparse.argument_parser(
-        description="---- Display EC results", parents=[dbentry_parser],formatter_class=rich_help_formatter,
+        description="---- Display EC results",
+        parents=[dbentry_parser],
+        formatter_class=rich_help_formatter,
     )
-    parser.add_argument(
-        "-t", "--time", help="Time", required=False, type=float, default=-99.0
-    )
+    parser.add_argument("-t", "--time", help="Time", required=False, type=float, default=-99.0)
 
     parser.add_argument(
         "--save",
@@ -93,10 +93,10 @@ if __name__ == "__main__":
         action="store_true",
     )
     parser.add_argument(
-    "--directory",
-    help="Directory to save the figure",
-    default=None, 
-)
+        "--directory",
+        help="Directory to save the figure",
+        default=None,
+    )
     args = parser.parse_args()
 
     show_plots(args)

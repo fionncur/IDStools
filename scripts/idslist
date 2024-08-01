@@ -55,23 +55,19 @@ parser.add_argument(
 
 args = parser.parse_args()
 
-connection = d_b_master.get_connection(args)
+connection = DBMaster.get_connection(args)
 if connection is None:
     print("----> Aborted.")
     exit(1)
 
 if args.yaml is True:
     if args.fullarray:
-        print(
-            "(-f fullarray) option is provided, can not show full array for yaml output"
-        )
+        print("(-f fullarray) option is provided, can not show full array for yaml output")
     for idsname, oc in get_available_ids_and_occurrences(connection):
         if args.ids:
             if idsname != args.ids:
                 continue
-        homogeneous_time = connection.partial_get(
-            idsname, "ids_properties/homogeneous_time", occurrence=oc
-        )
+        homogeneous_time = connection.partial_get(idsname, "ids_properties/homogeneous_time", occurrence=oc)
         times = connection.partial_get(idsname, "time", occurrence=oc)
 
         # Format idsname
@@ -90,9 +86,7 @@ if args.yaml is True:
                     end_time = times[len(times) - 1]
                     print(f"  {idsnameoc}:")
                     print(f"     time_step_number: {len(times)}")
-                    print(
-                        f"     start_end_step:   [{str(start_time)} {str(end_time)} {str(time_step)}]"
-                    )
+                    print(f"     start_end_step:   [{str(start_time)} {str(end_time)} {str(time_step)}]")
                 elif len(times) == 1:
                     print(f"  {idsnameoc}:")
                     print(f"     time_step_number: {len(times)}")
@@ -108,13 +102,9 @@ if args.yaml is True:
 
 elif args.comment is True:
     if args.fullarray:
-        print(
-            "(-f fullarray) option is provided, can not show full array for comment output"
-        )
+        print("(-f fullarray) option is provided, can not show full array for comment output")
 
-    for idsname, oc, comment in get_available_ids_and_occurrences(
-        connection, get_comment=True
-    ):
+    for idsname, oc, comment in get_available_ids_and_occurrences(connection, get_comment=True):
         # If user wants to check specific ids type
         if args.ids:
             if idsname != args.ids:

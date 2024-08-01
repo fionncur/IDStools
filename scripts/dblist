@@ -125,9 +125,7 @@ def print_urilist(dbs, pulsenum=None, compact=False, timestamp=False):
     console.print(table)
 
 
-def print_times(
-    dbs, args, print_times=False, pulse_number=None, run_number=None, showuri=False
-):
+def print_times(dbs, args, print_times=False, pulse_number=None, run_number=None, showuri=False):
 
     for dbname, dvs in dbs:
         printed_database = False
@@ -159,9 +157,7 @@ def print_times(
                             print(t_a_b * 2 + "Backend: " + backend)
                             printed_backend = True
                         if not printed_pulse:
-                            print(
-                                t_a_b * 3 + "Pulse " + extended(str(pulse), s_h_o_t__s_t_r__l_e_n)
-                            )
+                            print(t_a_b * 3 + "Pulse " + extended(str(pulse), s_h_o_t__s_t_r__l_e_n))
                             printed_pulse = True
 
                         connargs = argparse.namespace()
@@ -173,7 +169,7 @@ def print_times(
                         connargs.version = dv
                         connargs.uri = f"imas:{backend.lower()}?user={args.user};pulse={pulse};run={run};database={dbname};version={dv}"
 
-                        connection = d_b_master.get_connection(connargs)
+                        connection = DBMaster.get_connection(connargs)
                         if showuri:
                             print(t_a_b * 4 + '"' + connargs.uri + '"')
                         else:
@@ -280,9 +276,7 @@ if __name__ == "__main__":
     subparser_databases = subparsers.add_parser("databases", help="print databases")
     subparser_databases.set_defaults(cmd="databases")
 
-    subparser_data_versions = subparsers.add_parser(
-        "dataversions", help="print data versions"
-    )
+    subparser_data_versions = subparsers.add_parser("dataversions", help="print data versions")
     subparser_data_versions.set_defaults(cmd="dataversions")
 
     parser.add_argument(
@@ -325,14 +319,12 @@ if __name__ == "__main__":
     # Default command if not provided
     if "cmd" not in args.__dict__:
         backends = args.backend.split(",") if args.backend else None
-        dbs = d_b_master.get_database_files(
-            args.user, args.database, args.version, backends
-        )
+        dbs = DBMaster.get_database_files(args.user, args.database, args.version, backends)
         print_list(dbs)
         exit(0)
 
     backends = args.backend.split(",") if args.backend else None
-    dbs = d_b_master.get_database_files(args.user, args.database, args.version, backends)
+    dbs = DBMaster.get_database_files(args.user, args.database, args.version, backends)
     if args.cmd == "list":
 
         if args.showuri:
@@ -361,11 +353,9 @@ if __name__ == "__main__":
         )
 
     if args.cmd == "databases":
-        databases_with_versions = d_b_master.get_databases_with_versions(args.user)
+        databases_with_versions = DBMaster.get_databases_with_versions(args.user)
         if args.version is not None:
-            databases_with_versions = filter(
-                lambda x: (args.version in x[1]), databases_with_versions
-            )
+            databases_with_versions = filter(lambda x: (args.version in x[1]), databases_with_versions)
         for database_name, versions in databases_with_versions:
             print(
                 extended(database_name, d_a_t_a_b_a_s_e__s_t_r__l_e_n)
@@ -374,7 +364,7 @@ if __name__ == "__main__":
             )
 
     if args.cmd == "dataversions":
-        for version, database_names in d_b_master.get_versions_with_databases(args.user):
+        for version, database_names in DBMaster.get_versions_with_databases(args.user):
             print(
                 f"{extended(version, v_e_r_s_i_o_n__s_t_r__l_e_n)} {print_vector(database_names, d_a_t_a_b_a_s_e__s_t_r__l_e_n)}"
             )

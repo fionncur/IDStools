@@ -60,7 +60,7 @@ if __name__ == "__main__":
 
     inputargs = argparse.namespace()
     inputargs.uri = args.src
-    src = d_b_master.get_connection(inputargs)
+    src = DBMaster.get_connection(inputargs)
     if src is None:
         print("Error opening source pulse! Please check existence.")
         sys.exit()
@@ -77,7 +77,7 @@ if __name__ == "__main__":
     outputargs = argparse.namespace()
     outputargs.mode = "w"
     outputargs.uri = args.dest
-    dest = d_b_master.create_connection(outputargs)
+    dest = DBMaster.create_connection(outputargs)
     if dest is None:
         print("Error creating pulse! Please check existence.")
         sys.exit()

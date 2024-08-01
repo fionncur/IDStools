@@ -9,7 +9,7 @@ import logging
 logger = logging.getLogger("module")
 
 
-class distributions_compute:
+class DistributionsCompute:
     def __init__(self, ids):
         self.ids = ids
 

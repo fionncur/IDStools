@@ -28,9 +28,7 @@ parser = argparse.argument_parser(
     formatter_class=rich_help_formatter,
 )
 
-parser.add_argument(
-    "-t", "--time", help="time", required=False, type=float, default=-99.0
-)
+parser.add_argument("-t", "--time", help="time", required=False, type=float, default=-99.0)
 parser.add_argument(
     "--save",
     help="Save figure at default location",
@@ -43,7 +41,7 @@ parser.add_argument(
 )
 
 args = parser.parse_args()
-connection = d_b_master.get_connection(args)
+connection = DBMaster.get_connection(args)
 if connection is None:
     logger.critical("----> Aborted.")
     exit(1)
@@ -72,9 +70,7 @@ for isource in range(nsources):
     # core_sources.source[isource].global_quantities.resize(1)
     if len(cs_slice.source[isource].profiles_1d) > 0:
         core_sources.source[isource].profiles_1d.resize(1)
-        core_sources.source[isource].profiles_1d[0] = cs_slice.source[
-            isource
-        ].profiles_1d[0]
+        core_sources.source[isource].profiles_1d[0] = cs_slice.source[isource].profiles_1d[0]
         try:
             core_sources.source[isource].global_quantities = connection.partial_get(
                 "core_sources", f"source({isource})/global_quantities"
@@ -84,9 +80,7 @@ for isource in range(nsources):
                 f"source({str(isource)}) does not have global_quantities",
             )
             core_sources.source[isource].global_quantities.resize(0)
-        core_sources.source[isource].identifier.name = cs_slice.source[
-            isource
-        ].identifier.name
+        core_sources.source[isource].identifier.name = cs_slice.source[isource].identifier.name
 
 nsources = len(core_sources.source)
 
@@ -102,9 +96,7 @@ ret = core_source_view.view_particles_profiles(ax_particles_profiles)
 ax_current_profiles = canvas.add_axes(title=r"CURRENT PROFILES [KA/M2]", row=0, col=2)
 ret = core_source_view.view_current_profiles(ax_current_profiles)
 
-ax_power_and_particle_waveforms = canvas.add_axes(
-    title="POWER AND PARTICLE WAVEFORMS", row=1, col=0
-)
+ax_power_and_particle_waveforms = canvas.add_axes(title="POWER AND PARTICLE WAVEFORMS", row=1, col=0)
 ret = core_source_view.view_power_and_particle_waveforms(ax_power_and_particle_waveforms)
 
 ax_particles_waveform = canvas.add_axes(title="PARTICLES WAVEFORM", row=1, col=1)
@@ -118,9 +110,7 @@ ret = core_source_view.view_torque_waveform(ax_torque_waveform)
 
 canvas.set_text(text=f"{get_database_path(args, time_value=time_value)}")
 
-canvas.fig.subplots_adjust(
-    top=0.916, bottom=0.09, left=0.044, right=0.953, hspace=0.287, wspace=0.2
-)
+canvas.fig.subplots_adjust(top=0.916, bottom=0.09, left=0.044, right=0.953, hspace=0.287, wspace=0.2)
 canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
 canvas.fig.suptitle(get_title(args, "Core sources", time_value), size=12)
 if args.save:

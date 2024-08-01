@@ -148,7 +148,7 @@ def set_default_parameters():
     default = {}
     default["user"] = os.getenv("USER")
     default["tokamakname"] = "iter"
-    data_version = d_b_master.get_d_d_version()
+    data_version = DBMaster.get_dd_version()
     default["dataversion"] = data_version.split(".")[0]
     default["hdf5"] = False
     default["debug"] = False

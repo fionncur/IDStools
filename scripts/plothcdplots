@@ -9,8 +9,7 @@ from rich_argparse import RichHelpFormatter
 from idstools.compute.common import getNearestTime
 from idstools.compute.waves import WavesCompute
 from idstools.database import DBMaster
-from idstools.utils.clihelper import (getDatabasePath,
-                                      getFileName, getTitle)
+from idstools.utils.clihelper import getDatabasePath, getFileName, getTitle
 from idstools.utils.idslogger import setupLogger
 from idstools.view.common import Canvas
 from idstools.view.distributions import DistributionsView
@@ -31,10 +30,8 @@ def show_waves_plots(args, hold=False):
         runmax = int(run)
 
     for irun in range(runmin, runmax + 1):
-        logger.info(
-            f"Open pulse: {pulse}/{irun} in DB {args['user']}/{args['database']}/{args['version']}"
-        )
-        
+        logger.info(f"Open pulse: {pulse}/{irun} in DB {args['user']}/{args['database']}/{args['version']}")
+
         connargs = argparse.namespace()
         connargs.backend = args["backend"]
         connargs.pulse = int(pulse)
@@ -44,7 +41,7 @@ def show_waves_plots(args, hold=False):
         connargs.version = args["version"]
         connargs.uri = f"imas:{args['backend'].lower()}?user={connargs.user };shot={connargs.pulse};run={connargs.run};database={connargs.database};version={connargs.version}"
 
-        conn = d_b_master.get_connection(connargs)
+        conn = DBMaster.get_connection(connargs)
         if conn is None:
             logger.critical("----> Aborted.")
             exit(1)
@@ -52,7 +49,7 @@ def show_waves_plots(args, hold=False):
         ids_waves = conn.get("waves")
         conn.close()
 
-        waves_compute = waves_compute(ids_waves)
+        waves_compute = WavesCompute(ids_waves)
 
         time_array = ids_waves.time
         ntime = len(time_array)
@@ -62,9 +59,7 @@ def show_waves_plots(args, hold=False):
         if radial_grid is None:
             logger.critical("Radial grid information is empty ----> Abort.")
             continue
-        active_launchers = {
-            key: value for key, value in radial_grid.items() if value["isActive"] is True
-        }
+        active_launchers = {key: value for key, value in radial_grid.items() if value["isActive"] is True}
         len_active_launchers = len(active_launchers)
         if len_active_launchers == 0:
             logger.critical("The waves IDS appears empty ----> Abort.")
@@ -72,15 +67,11 @@ def show_waves_plots(args, hold=False):
 
         rows = 2
         if ntime == 1:
-            logger.error(
-                "Only one time slice --> ECCD and ECRH waveforms not displayed"
-            )
+            logger.error("Only one time slice --> ECCD and ECRH waveforms not displayed")
             rows = 1
-        canvas = canvas(rows, 2)
+        canvas = PlotCanvas(rows, 2)
         # canvas.setStyle(style="retro")
-        canvas.set_sup_title(
-            f"HCD Waves Plot [pulse {args['pulse']} / Run {args['run']}] Time : {time_value:.1f}"
-        )
+        canvas.set_sup_title(f"HCD Waves Plot [pulse {args['pulse']} / Run {args['run']}] Time : {time_value:.1f}")
 
         ax1 = canvas.add_axes(title="", xlabel="", row=0, col=0)
         ax2 = canvas.add_axes(title="", xlabel="", row=0, col=1)
@@ -88,7 +79,7 @@ def show_waves_plots(args, hold=False):
             ax3 = canvas.add_axes(title="", xlabel="", row=1, col=0)
             ax4 = canvas.add_axes(title="", xlabel="", row=1, col=1)
 
-        waves_view = waves_view(ids_waves)
+        waves_view = WavesView(ids_waves)
         waves_view.view_absorbed_power_density_profile(ax1, time_index, args["force_psi"])
         if args["hide_legend"]:
             ax1.get_legend().remove()
@@ -140,9 +131,7 @@ def show_distribution_plots(args, hold=False):
         runmax = int(run)
 
     for irun in range(runmin, runmax + 1):
-        logger.info(
-            f"Open pulse: {pulse}/{irun} in DB {args['user']}/{args['database']}/{args['version']}"
-        )
+        logger.info(f"Open pulse: {pulse}/{irun} in DB {args['user']}/{args['database']}/{args['version']}")
         connargs = argparse.namespace()
         connargs.backend = args["backend"]
         connargs.pulse = int(pulse)
@@ -152,7 +141,7 @@ def show_distribution_plots(args, hold=False):
         connargs.version = args["version"]
         connargs.uri = f"imas:{args['backend'].lower()}?user={connargs.user };shot={connargs.pulse};run={connargs.run};database={connargs.database};version={connargs.version}"
 
-        conn = d_b_master.get_connection(connargs)
+        conn = DBMaster.get_connection(connargs)
         if conn is None:
             logger.critical("----> Aborted.")
             exit(1)
@@ -195,11 +184,9 @@ def show_distribution_plots(args, hold=False):
             wspace=0.328,
         )
         canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
-        canvas.fig.suptitle(
-            get_title(connargs, "HCD Distributions Plot", time_value), size=12
-        )
+        canvas.fig.suptitle(get_title(connargs, "HCD Distributions Plot", time_value), size=12)
         if args["save"]:
-            fname = get_file_name(connargs, os.path.basename(__file__) +"_Distributions_profile_time", time_value)
+            fname = get_file_name(connargs, os.path.basename(__file__) + "_Distributions_profile_time", time_value)
             canvas.save(fname)
         else:
             canvas.show(block=hold)
@@ -246,7 +233,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--directory",
         help="Directory to save the figure",
-        default=None, 
+        default=None,
     )
     args = vars(parser.parse_args())
 
@@ -313,19 +300,11 @@ if __name__ == "__main__":
                     hcd_sources[source]["time"],
                 ) = hcd_sources[source]["input"].split("/")
             else:
-                logger.critical(
-                    "------------------------------------------------------------"
-                )
-                logger.critical(
-                    "Bad input format: " + hcd_sources[source]["input"] + " not valid"
-                )
-                logger.critical(
-                    "Arguments should be formatted like pulse/run/user/database"
-                )
+                logger.critical("------------------------------------------------------------")
+                logger.critical("Bad input format: " + hcd_sources[source]["input"] + " not valid")
+                logger.critical("Arguments should be formatted like pulse/run/user/database")
                 logger.critical("--> Exit.")
-                logger.critical(
-                    "-------------------------------------------------------------"
-                )
+                logger.critical("-------------------------------------------------------------")
                 exit()
             hcd_sources[source]["pulse"] = int(hcd_sources[source]["pulse"])
             del hcd_sources[source]["input"]

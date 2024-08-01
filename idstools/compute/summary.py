@@ -1,7 +1,7 @@
 """
 This module provides compute functions and classes for summary ids data
 
-`more about summary ids <https://sharepoint.iter.org/departments/POP/CM/i_m_design/Data%20Model/CI/latest.html>`_.
+`more about summary ids <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/CI/latest.html>`_.
 
 """
 
@@ -12,7 +12,7 @@ from imas import imasdef
 logger = logging.getLogger("module")
 
 
-class summary_compute:
+class SummaryCompute:
     """This class provides compute functions for summary ids"""
 
     def __init__(self, ids):
@@ -205,7 +205,7 @@ class summary_compute:
         waveform["p_ohmic"] = p_ohmic
         waveform["p_steady"] = p_steady
         for k in waveform.keys():
-            waveform[k][waveform[k] == imasdef.e_m_p_t_y__d_o_u_b_l_e] = np.nan
+            waveform[k][waveform[k] == imasdef.EMPTY_DOUBLE] = np.nan
 
         return waveform
 
@@ -242,4 +242,4 @@ class summary_compute:
                 h_mode_present = False
         else:
             h_mode_present = False
-        return {"HModePresent": h_mode_present, "th_min": th_min, "th_max": th_max}
+        return {"h_mode_present": h_mode_present, "th_min": th_min, "th_max": th_max}

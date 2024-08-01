@@ -73,7 +73,7 @@ if __name__ == "__main__":
         logger.error("Please provide ids name at the end of uri with hash")
         exit(1)
     args.uri = uri
-    connection = d_b_master.get_connection(args)
+    connection = DBMaster.get_connection(args)
     if connection is None:
         logger.error("Please provide valid URI")
         exit(1)
@@ -139,10 +139,7 @@ if __name__ == "__main__":
             exit(0)
 
         print("----------------------------------------------")
-        if (
-            result.__class__ == numpy.ndarray
-            and result[0].__class__.__module__ != "numpy"
-        ):
+        if result.__class__ == numpy.ndarray and result[0].__class__.__module__ != "numpy":
             for i in range(len(result)):
                 ids_dump = result[i]
                 print(ids_dump)

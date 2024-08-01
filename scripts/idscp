@@ -86,14 +86,14 @@ if args.ids == []:
 inputargs = argparse.namespace()
 inputargs.uri = args.src
 
-src_connection = d_b_master.get_connection(inputargs)
+src_connection = DBMaster.get_connection(inputargs)
 if src_connection is None:
     logger.error("Error opening source pulse! Please check existence.")
     sys.exit()
 outputargs = argparse.namespace()
 outputargs.uri = args.dest
 
-dest_connection = d_b_master.get_d_b_entry_object(outputargs)
+dest_connection = DBMaster.get_d_b_entry_object(outputargs)
 
 if not args.force:
     # OPEN DEST
@@ -108,17 +108,13 @@ else:
     # CREATE DEST
     status, _ = dest_connection.create()
     if status != 0:
-        logger.error(
-            "Error creating destination pulse! Please check parameters and permissions."
-        )
+        logger.error("Error creating destination pulse! Please check parameters and permissions.")
         exit(status)
 
 
 if args.all_occurrences:
     if "/" in args.ids:
-        logger.error(
-            "Please do not specify source occurrences together with -a/--allOccurrences option"
-        )
+        logger.error("Please do not specify source occurrences together with -a/--allOccurrences option")
         exit(status)
     else:
         allids = []
@@ -138,22 +134,18 @@ for idsname in args.ids:
 
     if args.interactive:
         if (
-            dest_connection.partial_get(
-                idsid[0], "ids_properties/homogeneous_time", occurrence=inocc
-            )
+            dest_connection.partial_get(idsid[0], "ids_properties/homogeneous_time", occurrence=inocc)
             == imas.imasdef.e_m_p_t_y__i_n_t
         ):
             user_choice = ""
             while user_choice not in ["y", "n"]:
-                user_choice = input(
-                    f"{idsid[0]} already exists, do you want to overwrite it (y/n)? :"
-                )
+                user_choice = input(f"{idsid[0]} already exists, do you want to overwrite it (y/n)? :")
             if user_choice == "n":
                 print(f"skip {idsid[0]}")
                 continue
     idsobj = src_connection.get(idsid[0], occurrence=inocc)
     if args.set_dataset_version and idsid[0] == "dataset_description":
-        idsobj.dd_version = d_b_master.get_d_d_version()
+        idsobj.dd_version = DBMaster.get_dd_version()
     try:
         if idsobj.ids_properties.homogeneous_time != imas.imasdef.e_m_p_t_y__i_n_t:
             print(f"Copying {idsname}")

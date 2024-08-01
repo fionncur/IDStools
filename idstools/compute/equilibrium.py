@@ -1,7 +1,7 @@
 """
 This module provides compute functions and classes for equilibrium ids data
 
-`refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/i_m_design/Data%20Model/sphinx/latest.html>`_.
+`refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`_.
 
 """
 
@@ -27,7 +27,7 @@ class equilibrium_compute:
         """
         self.ids = ids
 
-    def get2_d_cartesian_grid(self, time_slice: int = 0, profiles2_d_index: int = 0) -> union[dict, None]:
+    def get2d_cartesian_grid(self, time_slice: int = 0, profiles2d_index: int = 0) -> Union[dict, None]:
         """
         This function returns a dictionary containing 2D Cartesian grid coordinates and psi values from
         an equilibrium IDS object.
@@ -58,26 +58,26 @@ class equilibrium_compute:
                 'r2d': array([[]]),
                 'z2d': array([[]])}
         """
-        profiles2_d = None
+        profiles2d = None
         try:
-            profiles2_d = self.ids.time_slice[time_slice].profiles_2d[
-                profiles2_d_index
+            profiles2d = self.ids.time_slice[time_slice].profiles_2d[
+                profiles2d_index
             ]  # using https://docs.python.org/2/glossary.html#term-eafp style
         except IndexError:
-            logger.error(f"equilibrium.time_slice[{time_slice}].profiles_2d[{profiles2_d_index}] is not available")
+            logger.error(f"equilibrium.time_slice[{time_slice}].profiles_2d[{profiles2d_index}] is not available")
             return None
 
-        profiles2_d = self.ids.time_slice[time_slice].profiles_2d[profiles2_d_index]
-        r2d = profiles2_d.r
-        z2d = profiles2_d.z
-        psi2d = profiles2_d.psi
+        profiles2d = self.ids.time_slice[time_slice].profiles_2d[profiles2d_index]
+        r2d = profiles2d.r
+        z2d = profiles2d.z
+        psi2d = profiles2d.psi
 
-        if profiles2_d.grid_type.index == 1 and np.size(r2d) == 0:
+        if profiles2d.grid_type.index == 1 and np.size(r2d) == 0:
             logger.warning(
-                f"profiles_2d[{profiles2_d_index}].r is not available and grid type is 1.. Calculating from grid"
+                f"profiles_2d[{profiles2d_index}].r is not available and grid type is 1.. Calculating from grid"
             )
-            r1d = profiles2_d.grid.dim1
-            z1d = profiles2_d.grid.dim2
+            r1d = profiles2d.grid.dim1
+            z1d = profiles2d.grid.dim2
             nr = len(r1d)
             nz = len(z1d)
             r2d = np.empty(shape=(nr, nz))
@@ -95,13 +95,13 @@ class equilibrium_compute:
         if np.size(r2d) != np.size(z2d) or np.size(r2d) != np.size(psi2d):
             logger.error(
                 f"r, z and psi have not the same dimension in \
-                equilibrium.time_slice[{time_slice}].profiles_2d[{profiles2_d_index}]"
+                equilibrium.time_slice[{time_slice}].profiles_2d[{profiles2d_index}]"
             )
             return None
 
         return {"r2d": r2d, "z2d": z2d, "psi2d": psi2d}
 
-    def get_rho2_d(self, time_slice: int = 0, profiles2_d_index: int = 0) -> union[np.ndarray, None]:
+    def get_rho2d(self, time_slice: int = 0, profiles2d_index: int = 0) -> Union[np.ndarray, None]:
         """
         This function calculates rho(R,Z) using toroidal flux  and returns a dictionary containing the result.
 
@@ -132,16 +132,16 @@ class equilibrium_compute:
         """
         phi = None
         try:  # using https://docs.python.org/2/glossary.html#term-eafp style
-            phi = self.ids.time_slice[time_slice].profiles_2d[profiles2_d_index].phi
+            phi = self.ids.time_slice[time_slice].profiles_2d[profiles2d_index].phi
             if len(phi) == 0:
-                logger.error(f"equilibrium.time_slice[{time_slice}].profiles_2d[{profiles2_d_index}].phi not available")
+                logger.error(f"equilibrium.time_slice[{time_slice}].profiles_2d[{profiles2d_index}].phi not available")
                 return None
         except IndexError:
-            logger.error(f"equilibrium.time_slice[{time_slice}].profiles_2d[{profiles2_d_index}].phi not available")
+            logger.error(f"equilibrium.time_slice[{time_slice}].profiles_2d[{profiles2d_index}].phi not available")
             return None
         if np.isnan(phi).all() is True:
             logger.error(
-                f"all values are nan for equilibrium.time_slice[{time_slice}].profiles_2d[{profiles2_d_index}].phi "
+                f"all values are nan for equilibrium.time_slice[{time_slice}].profiles_2d[{profiles2d_index}].phi "
             )
             return None
         return np.sqrt(phi / np.amax(phi))
@@ -182,7 +182,7 @@ class equilibrium_compute:
             ``b_field_tor`` (Toroidal component of the magnetic field)
 
         """
-        list_of_profiles = self.get2_d_profiles_indices(time_slice)
+        list_of_profiles = self.get2d_profiles_indices(time_slice)
         b_total = None
         profile2d_index = -99
 
@@ -201,7 +201,7 @@ class equilibrium_compute:
             print("------------------------------------------------")
         return profile2d_index, b_total
 
-    def get2_d_profiles_indices(self, time_slice: int, grid_type: int = 1) -> list:
+    def get2d_profiles_indices(self, time_slice: int, grid_type: int = 1) -> list:
         """Return the indices of ``profiles_2d`` of the specified grid type
 
         Args:
@@ -254,22 +254,22 @@ class equilibrium_compute:
             a 2D Cartesian grid, a 2D profile index, and a 2D array of rho values. If no profiles are found,
             the function returns None.
         """
-        g_r_i_d__t_y_p_e__r_e_c_t_a_n_g_u_l_a_r = 1
-        list_of_profiles = self.get2_d_profiles_indices(time_slice, g_r_i_d__t_y_p_e__r_e_c_t_a_n_g_u_l_a_r)
+        GRID_TYPE_RECTANGULAR = 1
+        list_of_profiles = self.get2d_profiles_indices(time_slice, GRID_TYPE_RECTANGULAR)
         if list_of_profiles is None:
             return None
 
         logger.debug(f"list Of rectangualar profiles found : {list_of_profiles}")
         profile2d_index = list_of_profiles[0]
 
-        result_dict = self.get2_d_cartesian_grid(time_slice, profile2d_index)
-        rho2d = self.get_rho2_d(time_slice, profile2d_index)
+        result_dict = self.get2d_cartesian_grid(time_slice, profile2d_index)
+        rho2d = self.get_rho2d(time_slice, profile2d_index)
         if rho2d is None:
             rho2d = []
         result_dict["rho2d"] = rho2d
         return result_dict
 
-    def get_i_p(self) -> list:
+    def get_ip(self) -> list:
         """
         This function returns a list of Plasma current (toroidal component) values for each time slice.
 
@@ -375,7 +375,7 @@ class equilibrium_compute:
 
         equout = deepcopy(self.ids)
 
-        imas_version = d_b_master.get_d_d_version()
+        imas_version = DBMaster.get_dd_version()
 
         equout.ids_properties.version_put.data_dictionary = imas_version
 
@@ -383,26 +383,26 @@ class equilibrium_compute:
             equout.vacuum_toroidal_field.b0[itime] = self.ids.vacuum_toroidal_field.b0[itime] * rescale_factor
 
         for itime in range(len(self.ids.time_slice)):
-            if imasdef.is_field_valid(self.ids.time_slice[itime].boundary.psi):
+            if imasdef.isFieldValid(self.ids.time_slice[itime].boundary.psi):
                 equout.time_slice[itime].boundary.psi = self.ids.time_slice[itime].boundary.psi * rescale_factor
 
-            if imasdef.is_field_valid(self.ids.time_slice[itime].boundary_separatrix.psi):
+            if imasdef.isFieldValid(self.ids.time_slice[itime].boundary_separatrix.psi):
                 equout.time_slice[itime].boundary_separatrix.psi = (
                     self.ids.time_slice[itime].boundary_separatrix.psi * rescale_factor
                 )
 
             if version.strict_version(dd_version) > version.strict_version("3.31.0"):
-                if imasdef.is_field_valid(self.ids.time_slice[itime].boundary_secondary_separatrix.psi):
+                if imasdef.isFieldValid(self.ids.time_slice[itime].boundary_secondary_separatrix.psi):
                     equout.time_slice[itime].boundary_secondary_separatrix.psi = (
                         self.ids.time_slice[itime].boundary_secondary_separatrix.psi * rescale_factor
                     )
 
-            if imasdef.is_field_valid(self.ids.time_slice[itime].constraints.b_field_tor_vacuum_r.measured):
+            if imasdef.isFieldValid(self.ids.time_slice[itime].constraints.b_field_tor_vacuum_r.measured):
                 equout.time_slice[itime].constraints.b_field_tor_vacuum_r.measured = (
                     self.ids.time_slice[itime].constraints.b_field_tor_vacuum_r.measured * rescale_factor
                 )
 
-            if imasdef.is_field_valid(self.ids.time_slice[itime].constraints.b_field_tor_vacuum_r.reconstructed):
+            if imasdef.isFieldValid(self.ids.time_slice[itime].constraints.b_field_tor_vacuum_r.reconstructed):
                 equout.time_slice[itime].constraints.b_field_tor_vacuum_r.reconstructed = (
                     self.ids.time_slice[itime].constraints.b_field_tor_vacuum_r.reconstructed * rescale_factor
                 )
@@ -415,12 +415,12 @@ class equilibrium_compute:
                     self.ids.time_slice[itime].constraints.bpol_probe[i1].reconstructed * rescale_factor
                 )
 
-            if imasdef.is_field_valid(self.ids.time_slice[itime].constraints.diamagnetic_flux.measured):
+            if imasdef.isFieldValid(self.ids.time_slice[itime].constraints.diamagnetic_flux.measured):
                 equout.time_slice[itime].constraints.diamagnetic_flux.measured = (
                     self.ids.time_slice[itime].constraints.diamagnetic_flux.measured * rescale_factor
                 )
 
-            if imasdef.is_field_valid(self.ids.time_slice[itime].constraints.diamagnetic_flux.reconstructed):
+            if imasdef.isFieldValid(self.ids.time_slice[itime].constraints.diamagnetic_flux.reconstructed):
                 equout.time_slice[itime].constraints.diamagnetic_flux.reconstructed = (
                     self.ids.time_slice[itime].constraints.diamagnetic_flux.reconstructed * rescale_factor
                 )
@@ -441,49 +441,49 @@ class equilibrium_compute:
                     self.ids.time_slice[itime].constraints.flux_loop[i1].reconstructed * rescale_factor
                 )
 
-            if imasdef.is_field_valid(self.ids.time_slice[itime].constraints.ip.measured):
+            if imasdef.isFieldValid(self.ids.time_slice[itime].constraints.ip.measured):
                 equout.time_slice[itime].constraints.ip.imeasured = (
                     self.ids.time_slice[itime].constraints.ip.measured * rescale_factor
                 )
 
-            if imasdef.is_field_valid(self.ids.time_slice[itime].constraints.ip.reconstructed):
+            if imasdef.isFieldValid(self.ids.time_slice[itime].constraints.ip.reconstructed):
                 equout.time_slice[itime].constraints.ip.reconstructed = (
                     self.ids.time_slice[itime].constraints.ip.reconstructed * rescale_factor
                 )
 
-            if imasdef.is_field_valid(self.ids.time_slice[itime].global_quantities.ip):
+            if imasdef.isFieldValid(self.ids.time_slice[itime].global_quantities.ip):
                 equout.time_slice[itime].global_quantities.ip = (
                     self.ids.time_slice[itime].global_quantities.ip * rescale_factor
                 )
 
-            if imasdef.is_field_valid(self.ids.time_slice[itime].global_quantities.psi_axis):
+            if imasdef.isFieldValid(self.ids.time_slice[itime].global_quantities.psi_axis):
                 equout.time_slice[itime].global_quantities.psi_axis = (
                     self.ids.time_slice[itime].global_quantities.psi_axis * rescale_factor
                 )
 
-            if imasdef.is_field_valid(self.ids.time_slice[itime].global_quantities.psi_boundary):
+            if imasdef.isFieldValid(self.ids.time_slice[itime].global_quantities.psi_boundary):
                 equout.time_slice[itime].global_quantities.psi_boundary = (
                     self.ids.time_slice[itime].global_quantities.psi_boundary * rescale_factor
                 )
 
-            if imasdef.is_field_valid(self.ids.time_slice[itime].global_quantities.magnetic_axis.b_field_tor):
+            if imasdef.isFieldValid(self.ids.time_slice[itime].global_quantities.magnetic_axis.b_field_tor):
                 equout.time_slice[itime].global_quantities.magnetic_axis.b_field_tor = (
                     self.ids.time_slice[itime].global_quantities.magnetic_axis.b_field_tor * rescale_factor
                 )
 
             if version.strict_version(dd_version) > version.strict_version("3.14.0"):
-                if imasdef.is_field_valid(self.ids.time_slice[itime].global_quantities.energy_mhd):
+                if imasdef.isFieldValid(self.ids.time_slice[itime].global_quantities.energy_mhd):
                     equout.time_slice[itime].global_quantities.energy_mhd = (
                         self.ids.time_slice[itime].global_quantities.energy_mhd * rescale_factor**2
                     )
             else:
-                if imasdef.is_field_valid(self.ids.time_slice[itime].global_quantities.w_mhd):
+                if imasdef.isFieldValid(self.ids.time_slice[itime].global_quantities.w_mhd):
                     equout.time_slice[itime].global_quantities.energy_mhd = (
                         self.ids.time_slice[itime].global_quantities.w_mhd * rescale_factor**2
                     )
 
             if version.strict_version(dd_version) > version.strict_version("3.31.0"):
-                if imasdef.is_field_valid(self.ids.time_slice[itime].global_quantities.psi_external_average):
+                if imasdef.isFieldValid(self.ids.time_slice[itime].global_quantities.psi_external_average):
                     equout.time_slice[itime].global_quantities.psi_external_average = (
                         self.ids.time_slice[itime].global_quantities.psi_external_average * rescale_factor
                     )

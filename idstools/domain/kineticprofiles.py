@@ -84,9 +84,9 @@ class kinetic_profiles_compute:
         self.initialised = self.check_i_d_ses()
         self.fill_i_d_ses(time_slice)
 
-        self.edge_profiles_compute = edge_profiles_compute(self.edge_profiles)
-        self.core_profiles_compute = core_profiles_compute(self.core_profiles)
-        self.equlibrium_compute = equilibrium_compute(self.equilibrium)
+        self.edge_profiles_compute = EdgeProfilesCompute(self.edge_profiles)
+        self.core_profiles_compute = CoreProfilesCompute(self.core_profiles)
+        self.equlibrium_compute = EquilibriumCompute(self.equilibrium)
 
         self.gset = self.getgset()
         (
@@ -200,7 +200,9 @@ class kinetic_profiles_compute:
         if self.is_edge_profiles_present:
             # ntimeEdgeProfiles = len(self.edge_profiles.time)
             time_array_edge_profiles = self.edge_profiles.time
-            time_index_edge_profiles, time_value_edge_profiles = get_nearest_time(time_array_edge_profiles, self.common_time)
+            time_index_edge_profiles, time_value_edge_profiles = get_nearest_time(
+                time_array_edge_profiles, self.common_time
+            )
 
             # Read edge_profile data for this time slice
             try:
@@ -218,7 +220,10 @@ class kinetic_profiles_compute:
                         "equilibrium", f"time_slice({time_index_equilibrium})"
                     )
                     # tqme = timeValueEquilibrium
-                    if len(self.equilibrium.time_slice[0].profiles_1d.r_outboard) > 0 or not self.is_core_profiles_present:
+                    if (
+                        len(self.equilibrium.time_slice[0].profiles_1d.r_outboard) > 0
+                        or not self.is_core_profiles_present
+                    ):
                         self.edge_profiles.grid_ggd.resize(1)
                         try:
                             self.edge_profiles.grid_ggd[0] = self.connection.partial_get(
@@ -639,7 +644,9 @@ class kinetic_profiles_compute:
             else:
                 if len(self.edge_profiles.ggd[0].electrons.temperature[self.gset].values) < 1:
                     logger.warning("edge_profiles.ggd[:].electrons.temperature could not be read.")
-                    self.edge_profiles.ggd[0].electrons.temperature[self.gset].values = np.asarray([np.na_n] * self.erho)
+                    self.edge_profiles.ggd[0].electrons.temperature[self.gset].values = np.asarray(
+                        [np.na_n] * self.erho
+                    )
                 for i in range(self.erho):
                     electron_temperature[self.nrho + i] = (
                         self.edge_profiles.ggd[0].electrons.temperature[self.gset].values[i] * 1.0e-3
@@ -835,7 +842,9 @@ class kinetic_profiles_compute:
                         f"Size mismatch: rho_tor_norm = {self.nrho}, ion[{ispecies}].velocity.toroidal = "
                         f"{len(self.core_profiles.profiles_1d[0].ion[ispecies].velocity.toroidal)}"
                     )
-                    self.core_profiles.profiles_1d[0].ion[ispecies].velocity.toroidal = np.asarray([np.na_n] * self.nrho)
+                    self.core_profiles.profiles_1d[0].ion[ispecies].velocity.toroidal = np.asarray(
+                        [np.na_n] * self.nrho
+                    )
                 else:
                     vtor_flag = 1
                     for i in range(self.nrho):
@@ -1030,7 +1039,9 @@ class kinetic_profiles_compute:
                         f"Size mismatch: rho_tor_norm = {self.nrho}, ion[{ispecies}].velocity.poloidal ="
                         f"{len(self.core_profiles.profiles_1d[0].ion[ispecies].velocity.poloidal)}"
                     )
-                    self.core_profiles.profiles_1d[0].ion[ispecies].velocity.poloidal = np.asarray([np.na_n] * self.nrho)
+                    self.core_profiles.profiles_1d[0].ion[ispecies].velocity.poloidal = np.asarray(
+                        [np.na_n] * self.nrho
+                    )
                 else:
                     vpol_flag = 1
                     for i in range(self.nrho):
@@ -1391,7 +1402,8 @@ class kinetic_profiles_compute:
         min_vpol = 9e99
         for ispecies in range(self.nspecies_core):
             if self.is_composition_available and (
-                self.nspec_over_ne[ispecies] > kinetic_profiles_compute.i_m_p_u_r_i_t_y__l_i_m_i_t or not self.is_core_profiles_present
+                self.nspec_over_ne[ispecies] > kinetic_profiles_compute.i_m_p_u_r_i_t_y__l_i_m_i_t
+                or not self.is_core_profiles_present
             ):
                 if self.vtor_flag != 0:
                     if "vtor" in self.profiles["n_species"][self.species[ispecies]].keys():

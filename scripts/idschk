@@ -24,7 +24,7 @@ def main():
     """
     Command Interface of IDS Data Validation Tool w.r.t. DD (IDSDef.xml)
     """
-    db = d_b_master.get_connection(args)
+    db = DBMaster.get_connection(args)
     if db is None:
         print("----> Aborted.")
         exit(1)
@@ -78,7 +78,8 @@ def main():
         # Validation for Class imas.DBEntry
         sv.validate_db(db)
 
-description="""
+
+description = """
 Load IMAS and install Cerberus (if not done before)
 ----------------------------------------------------
 
@@ -170,7 +171,7 @@ if __name__ == "__main__":
         prog="idschk",
         formatter_class=rich_help_formatter,
         parents=[dbentry_parser],
-        description=markdown(description, style="argparse.text")
+        description=markdown(description, style="argparse.text"),
     )
     parser.add_argument(
         "-l",

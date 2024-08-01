@@ -43,11 +43,11 @@ class core_sources_view:
             # ions
             ion_table.add_section()
             ion_table.add_row(
-                align.right("a"),
-                align.right("z_n"),
-                align.right("z_ion"),
-                align.right("particles"),
-                align.right("energy"),
+                Align.right("a"),
+                Align.right("z_n"),
+                Align.right("z_ion"),
+                Align.right("particles"),
+                Align.right("energy"),
                 style="bold red",
             )
 
@@ -61,11 +61,11 @@ class core_sources_view:
                 else:
                     energy_flux = f"{ion_dict['energy_flux'] : >.6e}"
                 ion_table.add_row(
-                    align.right(str(ion_dict["a"])),
-                    align.right(str(ion_dict["z_n"])),
-                    align.right(str(ion_dict["z_ion"])),
-                    align.right(particles_flux),
-                    align.right(energy_flux),
+                    Align.right(str(ion_dict["a"])),
+                    Align.right(str(ion_dict["z_n"])),
+                    Align.right(str(ion_dict["z_ion"])),
+                    Align.right(particles_flux),
+                    Align.right(energy_flux),
                     style="bold green",
                 )
             ion_table.add_section()
@@ -187,7 +187,9 @@ class core_sources_view:
         """
         if self.core_sources_compute.is_active_source_available():
             rho_tor_norm = self.core_sources_compute.get_rho_tor_norm()
-            single_and_total_electrons_and_ions_profiles = self.core_sources_compute.get_single_and_total_electrons_and_ions_profiles()
+            single_and_total_electrons_and_ions_profiles = (
+                self.core_sources_compute.get_single_and_total_electrons_and_ions_profiles()
+            )
             source_names = self.core_sources_compute.get_source_names()
             ax.set_title("CURRENT PROFILES [KA/M2]")
             ax.plot(
@@ -232,8 +234,12 @@ class core_sources_view:
                 logger.warning("Only one time slice --> Waveforms not displayed")
             else:
                 time_array = self.ids.time
-                single_and_total_electrons_ions_waveforms = self.core_sources_compute.get_single_and_total_electrons_ions_waveforms()
-                single_and_total_electrons_waveforms = self.core_sources_compute.get_single_and_total_electrons_waveforms()
+                single_and_total_electrons_ions_waveforms = (
+                    self.core_sources_compute.get_single_and_total_electrons_ions_waveforms()
+                )
+                single_and_total_electrons_waveforms = (
+                    self.core_sources_compute.get_single_and_total_electrons_waveforms()
+                )
                 single_and_total_ions_waveforms = self.core_sources_compute.get_single_and_total_ions_waveforms()
                 source_names = self.core_sources_compute.get_source_names()
                 ax.set_title("POWER AND PARTICLE WAVEFORMS")
@@ -298,9 +304,13 @@ class core_sources_view:
                 logger.warning("Only one time slice --> Waveforms not displayed")
             else:
                 time_array = self.ids.time
-                single_and_total_electrons_ions_waveforms = self.core_sources_compute.get_single_and_total_electrons_ions_waveforms()
+                single_and_total_electrons_ions_waveforms = (
+                    self.core_sources_compute.get_single_and_total_electrons_ions_waveforms()
+                )
 
-                single_and_total_electrons_waveforms = self.core_sources_compute.get_single_and_total_electrons_waveforms()
+                single_and_total_electrons_waveforms = (
+                    self.core_sources_compute.get_single_and_total_electrons_waveforms()
+                )
 
                 single_and_total_ions_waveforms = self.core_sources_compute.get_single_and_total_ions_waveforms()
 

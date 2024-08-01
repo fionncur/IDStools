@@ -14,9 +14,9 @@ logger = logging.getLogger(f"module.{__name__}")
 q_e = codata.physical_constants["elementary charge"][0]
 
 
-class core_transport_view:
+class CoreTransportView:
     def __init__(self, ids):
-        self.core_transport_compute = core_transport_compute(ids)
+        self.core_transport_compute = CoreTransportCompute(ids)
         self.ids = ids
 
     def view_fluxes(self):
@@ -24,7 +24,7 @@ class core_transport_view:
         The `viewFluxes` function prints out flux information for electrons and ions.
         """
         fluxes_dict = self.core_transport_compute.get_fluxes()
-        ion_table = table(show_header=False)
+        ion_table = Table(show_header=False)
         for _, flux_dict in fluxes_dict.items():
             if flux_dict["particles_flux"] is None:
                 eparticles_flux = "particles(--)"
@@ -44,11 +44,11 @@ class core_transport_view:
             )
             ion_table.add_section()
             ion_table.add_row(
-                align.right("a"),
-                align.right("z_n"),
-                align.right("z_ion"),
-                align.right("particles"),
-                align.right("energy"),
+                Align.right("a"),
+                Align.right("z_n"),
+                Align.right("z_ion"),
+                Align.right("particles"),
+                Align.right("energy"),
                 style="bold red",
             )
 
@@ -62,11 +62,11 @@ class core_transport_view:
                 else:
                     energy_flux = f"{ion_dict['energy_flux'] : >.6e}"
                 ion_table.add_row(
-                    align.right(str(ion_dict["a"])),
-                    align.right(str(ion_dict["z_n"])),
-                    align.right(str(ion_dict["z_ion"])),
-                    align.right(particles_flux),
-                    align.right(energy_flux),
+                    Align.right(str(ion_dict["a"])),
+                    Align.right(str(ion_dict["z_n"])),
+                    Align.right(str(ion_dict["z_ion"])),
+                    Align.right(particles_flux),
+                    Align.right(energy_flux),
                     style="bold green",
                 )
             ion_table.add_section()

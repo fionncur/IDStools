@@ -37,7 +37,7 @@ def main():
     #     args.dest = re.sub(r"user=public", f"user={getpass.getuser()}", args.src)
     outputargs.uri = args.dest
 
-    db = d_b_master.create_connection(outputargs)
+    db = DBMaster.create_connection(outputargs)
     if db is None:
         logger.critical("----> Aborted.")
         exit(1)

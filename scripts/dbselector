@@ -38,17 +38,15 @@ if __name__ == "__main__":
         help="Number of entries user needs to display",
     )
     args = parser.parse_args()
-    idsesto_search=args.ids.split(",")
+    idsesto_search = args.ids.split(",")
     backend = get_backend_i_d(args.backend)
-    dbmaster = d_b_master()
+    dbmaster = DBMaster()
     if args.verbose:
         print(f"Database located in {dbmaster.get_database_dir(args.database,args.user)}")
 
     pulses = None
     if backend == imas.imasdef.m_d_s_p_l_u_s__b_a_c_k_e_n_d:
-        pulses = dbmaster.get_mds_plus_pulses(
-            args.user, args.database, args.version, status=args.status
-        )
+        pulses = dbmaster.get_mds_plus_pulses(args.user, args.database, args.version, status=args.status)
     elif backend == imas.imasdef.h_d_f5__b_a_c_k_e_n_d:
         pulses = dbmaster.get_hdf5_pulses(args.user, args.database, args.version)
     else:
@@ -69,15 +67,15 @@ if __name__ == "__main__":
             connargs.database = args.database
             connargs.version = args.version
             connargs.uri = f"imas:{args.backend.lower()}?user={args.user};shot={pulse[0]};run={pulse[1]};database={args.database};version={args.version}"
-            connection = d_b_master.get_connection(connargs)
+            connection = DBMaster.get_connection(connargs)
             if connection is None:
                 continue
 
             ids_list = get_available_ids_and_occurrences(connection)
-            found_counter=0
+            found_counter = 0
             for ids_to_search in idsesto_search:
                 if any(ids_to_search in ids for ids in ids_list):
-                    found_counter=found_counter+1
-                    
+                    found_counter = found_counter + 1
+
             if found_counter == len(idsesto_search):
                 print((pulse[0], pulse[1]))

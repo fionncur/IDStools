@@ -58,7 +58,7 @@ logger.info(
     nspec_over_nmaj : Species density list / Species density[Index of Maximum Density Species]"""
 )
 logger.info("----------------------------------------------------------------")
-connection = d_b_master.get_connection(args)
+connection = DBMaster.get_connection(args)
 if connection is None:
     logger.critical("----> Aborted.")
     exit(1)
@@ -84,47 +84,33 @@ if edge_profiles_ids.time is None:
     edge_profile_exists = False
 slice_index = 0
 if core_profiles_ids.time is not None:
-    ne0_list = connection.partial_get(
-        "core_profiles", "profiles_1d(:)/electrons/density(0)"
-    )
+    ne0_list = connection.partial_get("core_profiles", "profiles_1d(:)/electrons/density(0)")
     slice_index = np.argmax(ne0_list)
-    profiles_1d_slice = connection.partial_get(
-        "core_profiles", f"profiles_1d({slice_index})"
-    )
+    profiles_1d_slice = connection.partial_get("core_profiles", f"profiles_1d({slice_index})")
     logger.info(
         f"core_profiles IDS:Using time slice where maximum electrons density is present, Time slice:{slice_index}"
     )
     core_profiles_ids.profiles_1d.resize(1)
     core_profiles_ids.profiles_1d[0] = profiles_1d_slice
 
-    returnstatus = core_profiles_view.view_plasma_composition_with_species_concentration(
-        core_profiles_ids, 0
-    )
+    returnstatus = core_profiles_view.view_plasma_composition_with_species_concentration(core_profiles_ids, 0)
     if returnstatus == 0:
         core_profile_exists = False
-        logger.critical(
-            "core_profiles IDS: IDS exists but time slice doesn't exists. --> Abort."
-        )
+        logger.critical("core_profiles IDS: IDS exists but time slice doesn't exists. --> Abort.")
     elif returnstatus == -1:
         core_profile_exists = False
         logger.critical("core_profiles IDS:IDS exists but volume is not set")
         logger.warning("core_profiles IDS :Retrieving volume from equilibrium IDS")
         equilibrium = imas.equilibrium()
         equilibrium.time_slice.resize(1)
-        volume = connection.partial_get(
-            "equilibrium", f"time_slice({slice_index})/profiles_1d/volume"
-        )
-        returnstatus = (
-            core_profiles_view.view_plasma_composition_with_species_concentration(
-                core_profiles_ids, 0, volume=volume
-            )
+        volume = connection.partial_get("equilibrium", f"time_slice({slice_index})/profiles_1d/volume")
+        returnstatus = core_profiles_view.view_plasma_composition_with_species_concentration(
+            core_profiles_ids, 0, volume=volume
         )
         core_profile_exists = True
 
 else:
-    logger.critical(
-        "core_profiles IDS:No core_profiles IDS in the data-entry --> Abort."
-    )
+    logger.critical("core_profiles IDS:No core_profiles IDS in the data-entry --> Abort.")
 
 
 # # TODO There is no relation of Slice index calculated above so getting data of 0th slice. and Why only 0th slice
@@ -134,25 +120,17 @@ if edge_profiles_ids.time is not None:
         f"edge_profiles IDS:Using time slice where maximum electrons density is present in core, Time slice:{slice_index}"
     )
     edge_profiles_ids.ggd.resize(1)
-    edge_profiles_ids.ggd[0] = connection.partial_get(
-        "edge_profiles", f"ggd({slice_index})"
-    )
+    edge_profiles_ids.ggd[0] = connection.partial_get("edge_profiles", f"ggd({slice_index})")
 
     edge_profiles_ids.grid_ggd.resize(1)
-    edge_profiles_ids.grid_ggd[0] = connection.partial_get(
-        "edge_profiles", f"grid_ggd({slice_index})"
-    )
+    edge_profiles_ids.grid_ggd[0] = connection.partial_get("edge_profiles", f"grid_ggd({slice_index})")
     print("----------------")
     print("edge_profiles")
     print("----------------")
-    returnstatus = edge_profiles_view.view_plasma_composition_with_species_concentration(
-        edge_profiles_ids, 0
-    )
+    returnstatus = edge_profiles_view.view_plasma_composition_with_species_concentration(edge_profiles_ids, 0)
     if returnstatus == 0:
         edge_profile_exists = False
-        logger.critical(
-            "edge_profiles IDS:IDS exists but time slice doesn't exists. --> Abort."
-        )
+        logger.critical("edge_profiles IDS:IDS exists but time slice doesn't exists. --> Abort.")
     elif returnstatus == -1:
         logger.warning(
             "edge_profiles IDS:IDS exists but volume is not set. --> Trying nearby time slice. This may take a while.."
@@ -168,24 +146,14 @@ if edge_profiles_ids.time is not None:
         for time_slice in index_list:
             index = 4
             elements = edge_profiles.grid_ggd[time_slice].grid_subset[index].element
-            grid_subset_name = (
-                edge_profiles.grid_ggd[time_slice].grid_subset[index].identifier.name
-            )
+            grid_subset_name = edge_profiles.grid_ggd[time_slice].grid_subset[index].identifier.name
             # check if grid_subset[4] identifier name is cells, if not, find out 'cells' index
             index_counter = 0
             if grid_subset_name.lower() != "cells":
                 for subset in edge_profiles.grid_ggd[time_slice].grid_subset:
                     if subset.identifier.name.lower() == "cells":
-                        elements = (
-                            edge_profiles.grid_ggd[time_slice]
-                            .grid_subset[index_counter]
-                            .element
-                        )
-                        grid_subset_name = (
-                            edge_profiles.grid_ggd[time_slice]
-                            .grid_subset[index_counter]
-                            .identifier.name
-                        )
+                        elements = edge_profiles.grid_ggd[time_slice].grid_subset[index_counter].element
+                        grid_subset_name = edge_profiles.grid_ggd[time_slice].grid_subset[index_counter].identifier.name
                         index = index_counter
                         break
                     index_counter = index_counter + 1
@@ -194,39 +162,25 @@ if edge_profiles_ids.time is not None:
                     f"edge_profiles IDS:Using nearby time slice in edge where maximum electrons density is present in core, Time slice:{time_slice}"
                 )
                 edge_profiles_ids.ggd.resize(1)
-                edge_profiles_ids.ggd[0] = connection.partial_get(
-                    "edge_profiles", f"ggd({time_slice})"
-                )
+                edge_profiles_ids.ggd[0] = connection.partial_get("edge_profiles", f"ggd({time_slice})")
 
                 edge_profiles_ids.grid_ggd.resize(1)
-                edge_profiles_ids.grid_ggd[0] = connection.partial_get(
-                    "edge_profiles", f"grid_ggd({time_slice})"
-                )
+                edge_profiles_ids.grid_ggd[0] = connection.partial_get("edge_profiles", f"grid_ggd({time_slice})")
 
-                returnstatus = (
-                    edge_profiles_view.view_plasma_composition_with_species_concentration(
-                        edge_profiles_ids, 0
-                    )
+                returnstatus = edge_profiles_view.view_plasma_composition_with_species_concentration(
+                    edge_profiles_ids, 0
                 )
                 if returnstatus == 0:
                     edge_profile_exists = False
-                    logger.critical(
-                        "edge_profiles IDS:IDS exists but time slice doesn't exists. --> Abort."
-                    )
+                    logger.critical("edge_profiles IDS:IDS exists but time slice doesn't exists. --> Abort.")
                 elif returnstatus == -1:
                     edge_profile_exists = False
-                    logger.warning(
-                        "edge_profiles IDS:IDS exists but volume is not set."
-                    )
+                    logger.warning("edge_profiles IDS:IDS exists but volume is not set.")
                 break
 else:
-    logger.critical(
-        "edge_profiles IDS:No edge_profiles IDS in the data-entry. --> Abort."
-    )
+    logger.critical("edge_profiles IDS:No edge_profiles IDS in the data-entry. --> Abort.")
 
-profile_availability_string = "" + (
-    "core -\t" if not core_profile_exists else "core +\t"
-)
+profile_availability_string = "" + ("core -\t" if not core_profile_exists else "core +\t")
 if edge_profile_exists is False:
     profile_availability_string += "edge -\t"
 else:

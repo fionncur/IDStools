@@ -27,9 +27,7 @@ parser = argparse.argument_parser(
     formatter_class=rich_help_formatter,
 )
 
-parser.add_argument(
-    "-t", "--time", help="Time", required=False, type=float, default=99.0
-)
+parser.add_argument("-t", "--time", help="Time", required=False, type=float, default=99.0)
 parser.add_argument(
     "--save",
     help="Save figure at default location",
@@ -43,7 +41,7 @@ parser.add_argument(
 args = parser.parse_args()
 logger = setup_logger("module", stdout_level=logging.i_n_f_o)
 
-connection = d_b_master.get_connection(args)
+connection = DBMaster.get_connection(args)
 if connection is None:
     logger.critical("----> Aborted.")
     exit(1)
@@ -66,9 +64,7 @@ ntime = len(ids_core_profiles.time)
 
 # Read 1D-profiles for this time slice
 ids_core_profiles.profiles_1d.resize(1)
-ids_core_profiles.profiles_1d[0] = connection.partial_get(
-    "core_profiles", f"profiles_1d({time_index})"
-)
+ids_core_profiles.profiles_1d[0] = connection.partial_get("core_profiles", f"profiles_1d({time_index})")
 
 canvas = canvas(2, 2)
 
@@ -90,16 +86,12 @@ ax2.sharex(ax4)
 
 canvas.set_text(text=f"{get_database_path(args, time_value=time_value)}")
 
-canvas.fig.subplots_adjust(
-    top=0.916, bottom=0.09, left=0.044, right=0.953, hspace=0.174, wspace=0.117
-)
+canvas.fig.subplots_adjust(top=0.916, bottom=0.09, left=0.044, right=0.953, hspace=0.174, wspace=0.117)
 canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
 canvas.fig.suptitle(get_title(args, "Kinetic profiles", time_value), size=12)
 
 if args.save:
-    fname = get_file_name(
-        args, os.path.basename(__file__) + "_Kinetic_profiles", time_value
-    )
+    fname = get_file_name(args, os.path.basename(__file__) + "_Kinetic_profiles", time_value)
     if args.directory:
         if not os.path.exists(args.directory):
             os.makedirs(args.directory)

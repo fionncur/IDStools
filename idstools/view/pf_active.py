@@ -1,7 +1,7 @@
 """
 This module provides view functions and classes for pf_active ids data
 
-`refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/i_m_design/Data%20Model/sphinx/latest.html>`_.
+`refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`_.
 
 """
 
@@ -24,7 +24,7 @@ class p_f_active_view:
             idsObj : pf_active ids object
         """
         self.ids_obj = ids_obj
-        self.compute_obj = pf_active_compute(ids_obj)
+        self.compute_obj = PfActiveCompute(ids_obj)
 
     def view_active_pf_coils(self, ax: plt.axes, show_labels=False):
         """
@@ -45,7 +45,7 @@ class p_f_active_view:
                 connection.open()
                 idsObj = connection.get('pf_active')
                 connection.close()
-                canvas = Canvas(1, 1) # create canvas
+                canvas = PlotCanvas(1, 1) # create canvas
                 ax = canvas.add_axes(title="", xlabel="", row=0, col=0)
 
                 viewObj = PFActiveView(idsObj)

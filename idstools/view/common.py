@@ -54,7 +54,7 @@ except ImportError:
     rich_available = False
 
 
-class canvas:
+class PlotCanvas:
     # https://matplotlib.org/stable/tutorials/intermediate/arranging_axes.html
 
     def __init__(self, nrows=1, ncols=1, *args, **kwargs) -> None:
@@ -269,7 +269,7 @@ class terminal:
 
     def __init__(self) -> None:
         if rich_available:
-            self.console = console()
+            self.console = Console()
 
     def print(self, text, style=None, panel=False, pretty=False):
         if type(text) is dict:
@@ -279,9 +279,9 @@ class terminal:
             style = "green"
         if rich_available:
             if pretty:
-                text = pretty(text)
+                text = Pretty(text)
             if panel:
-                text = panel(text)
+                text = Panel(text)
             self.console.print(text, style=style, highlight=False)
             return
         print(text)

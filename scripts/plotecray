@@ -55,9 +55,7 @@ or with uris for example\n
 "imas:mdsplus?user=public;shot=116000;run=4;database=ITER_MD;version=3"\n
 """,
 )
-parser.add_argument(
-    "-t", "--time", help="Time", required=False, type=float, default=-99.0
-)
+parser.add_argument("-t", "--time", help="Time", required=False, type=float, default=-99.0)
 
 parser.add_argument(
     "--save",
@@ -96,7 +94,7 @@ style = shotstyle[colorcounter % len(shotcolors)]
 colorcounter += 1
 
 
-conn = d_b_master.get_connection(args)
+conn = DBMaster.get_connection(args)
 if conn is None:
     logger.critical("----> Aborted.")
     exit(1)
@@ -121,8 +119,8 @@ ecstra_view = ec_stray_view(
     waves_ids=ids_waves,
 )
 equi_view = equilibrium_view(ids=ids_equilibrium)
-wave_view = waves_view(ids_waves)
-wave_compute = waves_compute(ids_waves)
+wave_view = WavesView(ids_waves)
+wave_compute = WavesCompute(ids_waves)
 
 beam_tracing_dict = wave_compute.get_beam_tracing(time_index)
 logger.info(
@@ -151,13 +149,13 @@ for mdids_info in args.md:
         else:
             _ids_name = splittedms_ids_info
     if len(_ids_name) == 0:
-        ids_connection = d_b_master.get_connection(inputargs)
+        ids_connection = DBMaster.get_connection(inputargs)
         available_ids_and_times = get_available_ids_and_times(ids_connection)
         for ids_name, _ in available_ids_and_times:
             _ids_name.append(ids_name)
         ids_connection.close()
     if "wall" in _ids_name:
-        connection = d_b_master.get_connection(inputargs)
+        connection = DBMaster.get_connection(inputargs)
         if connection is not None:
             _ids_data = connection.get("wall")
             from imas import imasdef
@@ -176,7 +174,7 @@ for mdids_info in args.md:
         else:
             logger.warning(f"{_ids_name} ids is not present")
     if "pf_active" in _ids_name:
-        connection = d_b_master.get_connection(inputargs)
+        connection = DBMaster.get_connection(inputargs)
         if connection is not None:
             _ids_data = connection.get("pf_active")
             from imas import imasdef
@@ -202,9 +200,7 @@ wave_view.plot_pol_view_traces(
 )
 
 equi_view.plot_topplotequilibrium(ax=ax_topview, time_index=0)
-wave_view.plot_top_view_traces(
-    ax_topview, time_index=0, color=color, style=style, label=label_code
-)
+wave_view.plot_top_view_traces(ax_topview, time_index=0, color=color, style=style, label=label_code)
 
 wave_view.plot_electron_power(ax_powview, time_index=0, color=color, style=style)
 wave_view.plot_power_flow_normal(ax_powparview, time_index=0, color=color, style=style)
@@ -212,9 +208,7 @@ wave_view.plot_power_flow_normal(ax_powparview, time_index=0, color=color, style
 
 canvas.set_text(text=f"{get_database_path(args, time_value=time_value)}")
 
-canvas.fig.subplots_adjust(
-    top=0.95, bottom=0.097, left=0, right=0.948, hspace=0.2, wspace=0.108
-)
+canvas.fig.subplots_adjust(top=0.95, bottom=0.097, left=0, right=0.948, hspace=0.2, wspace=0.108)
 canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
 canvas.fig.suptitle(get_title(args, "EC rays", time_value), size=12)
 

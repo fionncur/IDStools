@@ -42,9 +42,7 @@ parser = argparse.argument_parser(
     formatter_class=rich_help_formatter,
 )
 
-parser.add_argument(
-    "-t", "--time", help="Time (default=middle)", type=float, default=-99.0
-)
+parser.add_argument("-t", "--time", help="Time (default=middle)", type=float, default=-99.0)
 parser.add_argument(
     "--rho",
     help="Show rho overlay on the plot",
@@ -95,7 +93,7 @@ if len(splitted_ids_info) == 2:
 
 logger = setup_logger("module", stdout_level=logging.i_n_f_o)
 
-connection = d_b_master.get_connection(args)
+connection = DBMaster.get_connection(args)
 if connection is None:
     logger.critical("----> Aborted.")
     exit(1)
@@ -103,7 +101,7 @@ if connection is None:
 # if md not provided then get it from list of idses
 if isinstance(args.md, bool) and args.md is True:
     args.md = []
-    _ids_connection = d_b_master.get_connection(args)
+    _ids_connection = DBMaster.get_connection(args)
     available_ids_and_times = get_available_ids_and_times(_ids_connection)
     for ids_name, _ in available_ids_and_times:
         args.md.append(ids_name)
@@ -144,22 +142,20 @@ if ids_obj_equilibrium.time is not None:
             else:
                 _ids_name = splittedms_ids_info
         if len(_ids_name) == 0:
-            ids_connection = d_b_master.get_connection(inputargs)
+            ids_connection = DBMaster.get_connection(inputargs)
             available_ids_and_times = get_available_ids_and_times(ids_connection)
             for ids_name, _ in available_ids_and_times:
                 _ids_name.append(ids_name)
             ids_connection.close()
         if "wall" in _ids_name:
-            connection = d_b_master.get_connection(inputargs)
+            connection = DBMaster.get_connection(inputargs)
             if connection is not None:
                 _ids_data = connection.get("wall")
                 from imas import imasdef
 
                 if _ids_data.ids_properties.homogeneous_time != imasdef.e_m_p_t_y__i_n_t:
                     wallview = wall_view(_ids_data)
-                    if found_data := wallview.view_wall(
-                        ax, args.show_labels, wallcolor="slategray"
-                    ):
+                    if found_data := wallview.view_wall(ax, args.show_labels, wallcolor="slategray"):
                         title += " wall"
                         database_text += f"{_ids_name}={get_database_path(inputargs)}\n"
                 else:
@@ -168,7 +164,7 @@ if ids_obj_equilibrium.time is not None:
             else:
                 logger.warning(f"{_ids_name} ids is not present")
         if "pf_active" in _ids_name:
-            connection = d_b_master.get_connection(inputargs)
+            connection = DBMaster.get_connection(inputargs)
             if connection is not None:
                 _ids_data = connection.get("pf_active")
                 from imas import imasdef
@@ -202,9 +198,7 @@ if ids_obj_equilibrium.time is not None:
     canvas.fig.suptitle(get_title(args, "Equilibrium", time_value), size=12)
     canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
     if args.save:
-        fname = get_file_name(
-            args, f"{os.path.basename(__file__)}_Equilibrium", time_value
-        )
+        fname = get_file_name(args, f"{os.path.basename(__file__)}_Equilibrium", time_value)
         if args.directory:
             if not os.path.exists(args.directory):
                 os.makedirs(args.directory)

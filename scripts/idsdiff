@@ -134,9 +134,7 @@ def generate_html(file_path, compare_data):
                         (threshold_candidate * t_h_r_e_s_h_o_l_d__p_e_r_c_e_n_t) / 100
                     ) + threshold_candidate
 
-                    within_threshold = all(compare_candidate > threshold_min) and all(
-                        compare_candidate < threshold_max
-                    )
+                    within_threshold = all(compare_candidate > threshold_min) and all(compare_candidate < threshold_max)
                     if within_threshold is False:
                         field_path = re.sub("\[(.*?)\]", "", key)
                         field_path = field_path[field_path.index(".") + 1 :]
@@ -153,9 +151,7 @@ def generate_html(file_path, compare_data):
                         # Calculate cross corelation
                         correlate_result = np.correlate(values_a, values_b, "full")
                         b_shift_positions = np.arange(-len(values_a) + 1, len(values_b))
-                        itemindex = np.where(
-                            correlate_result == np.max(correlate_result)
-                        )
+                        itemindex = np.where(correlate_result == np.max(correlate_result))
                         cross_correlation = b_shift_positions[itemindex][0]
                         # TODO Check the logic of normalised difference calculation
                         if len(values_a) < len(values_b):
@@ -260,9 +256,7 @@ def generate_html(file_path, compare_data):
                             ax.grid()
                             tmpfile = bytes_i_o()
                             fig.savefig(tmpfile, format="png")
-                            encoded = base64.b64encode(tmpfile.getvalue()).decode(
-                                "utf-8"
-                            )
+                            encoded = base64.b64encode(tmpfile.getvalue()).decode("utf-8")
                             plt.close()
 
                             report_details = f"""<table class="table table-bordered table-striped table-hover table-sm align-top">
@@ -384,9 +378,7 @@ def generate_html(file_path, compare_data):
                             if "\n" not in line:
                                 line = line + "\n"
                             diff_lines.append(line)
-                        diff_lines_text = "".join(
-                            line for line in diff_lines if not line.isspace()
-                        )
+                        diff_lines_text = "".join(line for line in diff_lines if not line.isspace())
                         report_diff_line = f"""<tr>
                                 <td>{key}</td>
                                 <td colspan="2"><textarea class="form-control">{diff_lines_text}</textarea></td>
@@ -459,7 +451,7 @@ if __name__ == "__main__":
         for uriinfo in args.uri:
             _uri_args = argparse.namespace()
             _uri_args.uri = uriinfo
-            _connection = d_b_master.get_connection(_uri_args)
+            _connection = DBMaster.get_connection(_uri_args)
             if _connection is None:
                 print(f"Error opening uri! Please check existence : {uriinfo}")
                 continue
@@ -483,9 +475,7 @@ if __name__ == "__main__":
     )
     st = time.time()
     total_data = {}
-    for i in track(
-        range(len(connections)), description="[green]Comparing Data Entries..."
-    ):
+    for i in track(range(len(connections)), description="[green]Comparing Data Entries..."):
         for j in range(i + 1, len(connections)):
             if connections[i][0] != connections[j][0]:
                 compare_data = {}
@@ -525,9 +515,7 @@ if __name__ == "__main__":
         str_connection = "\n"
         str_connection += "\n".join([x[0] for x in connections])
         console = console()
-        table = table(
-            title=text(f"Comparisen between {str_connection}", style="bold blue")
-        )
+        table = table(title=text(f"Comparisen between {str_connection}", style="bold blue"))
         table.add_column("ids field name", style="magenta")
         table.add_column("Comment", style="green")
 
@@ -538,9 +526,7 @@ if __name__ == "__main__":
 
         if args.generate_html is True:
             if len(connections) > 2:
-                logger.info(
-                    "HTML file generation is available for two data entries currently"
-                )
+                logger.info("HTML file generation is available for two data entries currently")
             else:
                 st = time.time()
                 generate_html(html_file, total_data)

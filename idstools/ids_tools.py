@@ -55,7 +55,7 @@ class imas_db:
         if not self._tokamak:
             self._tokamak = os.getenv("MDSPLUS_TREE_BASE_0").split("/")[-3]
         if not self._version:
-            self._version = d_b_master.get_d_d_version().split(".")[0]
+            self._version = DBMaster.get_dd_version().split(".")[0]
 
         self._use_h_d_f5 = use_h_d_f5
         self._db_u_a_l_d_a_o = None  # this is the UAL data access object (DAO)

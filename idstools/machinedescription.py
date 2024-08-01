@@ -57,7 +57,7 @@ class machine_description:
                     f"imas:{md_args.backend.lower()}?user={md_args.user};shot={md_args.pulse};"
                     f"run={md_args.run};database={md_args.database};version={md_args.version}"
                 )
-                md_connection = d_b_master.get_connection(md_args)
+                md_connection = DBMaster.get_connection(md_args)
 
                 # print(mdConnection)
                 if md_connection is not None:
@@ -101,7 +101,7 @@ class machine_description:
 
     def get_m_d_summary(
         self,
-        ids_names: typing.union[typing.list, str] = "",
+        ids_names: typing.Union[typing.list, str] = "",
         add_obsoelete=False,
         check_validity=False,
     ):
@@ -134,7 +134,7 @@ class machine_description:
                     f"imas:mdsplus?user={self.md_args.user};pulse={self.md_args.pulse};"
                     f"run={self.md_args.run};database={self.md_args.database};version={self.md_args.version}"
                 )
-                md_connection = d_b_master.get_connection(self.md_args)
+                md_connection = DBMaster.get_connection(self.md_args)
                 if md_connection is not None:
                     ids_data = md_connection.get(config["ids"])
                     if ids_data is not None:

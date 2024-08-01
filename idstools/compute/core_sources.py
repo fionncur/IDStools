@@ -13,7 +13,7 @@ from typing import Dict
 logger = logging.getLogger("module")
 
 
-class CoreSourceCompute:
+class CoreSourcesCompute:
     def __init__(self, ids):
         self.ids = ids
 
@@ -198,7 +198,9 @@ class CoreSourceCompute:
         for source_index, source in sources.items():  # range(nsources):
             if source["valid"] and source["active"]:
                 if len(self.ids.source[source_index].profiles_1d[0].j_parallel) > 0:
-                    total_current_profile = total_current_profile + self.ids.source[source_index].profiles_1d[0].j_parallel
+                    total_current_profile = (
+                        total_current_profile + self.ids.source[source_index].profiles_1d[0].j_parallel
+                    )
                     single_current_profile[source_index] = self.ids.source[source_index].profiles_1d[0].j_parallel
                 else:
                     single_current_profile[source_index] = np.zeros(nrho)
@@ -243,16 +245,18 @@ class CoreSourceCompute:
                     total_electron_particles_profile + self.ids.source[source_index].profiles_1d[0].electrons.particles
                 )
 
-                single_electron_power_profile[source_index] = self.ids.source[source_index].profiles_1d[0].electrons.energy
+                single_electron_power_profile[source_index] = (
+                    self.ids.source[source_index].profiles_1d[0].electrons.energy
+                )
                 single_electron_particles_profile[source_index] = (
                     self.ids.source[source_index].profiles_1d[0].electrons.particles
                 )
 
         return {
-            "totalElectronPowerProfile": total_electron_power_profile,
-            "totalElectronParticlesProfile": total_electron_particles_profile,
-            "singleElectronPowerProfile": single_electron_power_profile,
-            "singleElectronParticlesProfile": single_electron_particles_profile,
+            "total_electron_power_profile": total_electron_power_profile,
+            "total_electron_particles_profile": total_electron_particles_profile,
+            "single_electron_power_profile": single_electron_power_profile,
+            "single_electron_particles_profile": single_electron_particles_profile,
         }
 
     def get_single_and_total_ion_profiles(self) -> Dict[str, np.ndarray]:
@@ -287,7 +291,9 @@ class CoreSourceCompute:
                         ion.particles = [0] * nrho
 
                     single_ion_power_profile[source_index] = single_ion_power_profile[source_index] + ion.energy
-                    single_ion_particles_profile[source_index] = single_ion_particles_profile[source_index] + ion.particles
+                    single_ion_particles_profile[source_index] = (
+                        single_ion_particles_profile[source_index] + ion.particles
+                    )
 
                     total_ion_power_profile = total_ion_power_profile + ion.energy
                     total_ion_particles_profile = total_ion_particles_profile + ion.particles
@@ -313,7 +319,9 @@ class CoreSourceCompute:
         single_particles_waveform = {}
         dict_single_and_total_electrons_waveforms = self.get_single_and_total_electrons_waveforms()
         total_electron_power_waveform = dict_single_and_total_electrons_waveforms["total_electron_power_waveform"]
-        total_electron_particles_waveform = dict_single_and_total_electrons_waveforms["total_electron_particles_waveform"]
+        total_electron_particles_waveform = dict_single_and_total_electrons_waveforms[
+            "total_electron_particles_waveform"
+        ]
         sources = self.get_valid_and_active_sources()
         for source_index, source in sources.items():
             if source["valid"] and source["active"]:
@@ -343,7 +351,9 @@ class CoreSourceCompute:
                     total_particles_waveform[time_index] = (
                         total_electron_particles_waveform[time_index] + _quantities.electrons.particles
                     ) + _quantities.total_ion_particles
-                    single_power_waveform[source_index].append(_quantities.electrons.power + _quantities.total_ion_power)
+                    single_power_waveform[source_index].append(
+                        _quantities.electrons.power + _quantities.total_ion_power
+                    )
                     single_particles_waveform[source_index].append(
                         _quantities.electrons.particles + _quantities.total_ion_particles
                     )
@@ -498,7 +508,9 @@ class CoreSourceCompute:
                     if _quantities.torque_tor < 0:
                         _quantities.torque_tor = 0.0
 
-                    total_current_waveform[time_index] = total_current_waveform[time_index] + _quantities.current_parallel
+                    total_current_waveform[time_index] = (
+                        total_current_waveform[time_index] + _quantities.current_parallel
+                    )
                     total_torque_waveform[time_index] = total_torque_waveform[time_index] + _quantities.torque_tor
                     single_current_waveform[source_index].append(_quantities.current_parallel)
                     single_torque_waveform[source_index].append(_quantities.torque_tor)

@@ -1,7 +1,7 @@
 """
 This module provides compute functions and classes for core_transport ids data
 
-`refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/i_m_design/Data%20Model/sphinx/latest.html>`_.
+`refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`_.
 
 """
 
@@ -11,13 +11,13 @@ import numpy as np
 logger = logging.getLogger("module")
 
 
-class core_transport_compute:
+class CoreTransportCompute:
     def __init__(self, ids):
         self.ids = ids
 
     def get_fluxes(self):
         """
-        The function `getFluxes` returns a dictionary containing information about fluxes in a model,
+        The function `get_fluxes` returns a dictionary containing information about fluxes in a model,
         including particle and energy fluxes for electrons and ions.
 
         Returns:

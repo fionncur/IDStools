@@ -41,9 +41,9 @@ def load_scenario(user, database, version, backend):
 
     scenarios = []
     if backend == "MDSPLUS":
-        scenarios = d_b_master.mds_list_pulse_run(d_b_master.get_d_b_path(user, database, version), with_status="active")
+        scenarios = DBMaster.mds_list_pulse_run(DBMaster.get_d_b_path(user, database, version), with_status="active")
     elif backend == "HDF5":
-        scenarios = d_b_master.hdf5_list_pulse_run(d_b_master.get_d_b_path(user, database, version))
+        scenarios = DBMaster.hdf5_list_pulse_run(DBMaster.get_d_b_path(user, database, version))
 
     return scenarios
 

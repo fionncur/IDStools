@@ -4,9 +4,9 @@ import re
 logger = logging.getLogger("module")
 
 
-l_a_b_e_l__r_a_d_i_a_n_c_e = "Spectral Radiance (ph s^-1 m^-2 sr^-1 nm^-1)"
-l_a_b_e_l__i_n_t_e_n_s_i_t_y = "Intensity (counts)"
-c_h_a_n_n_e_l__n_a_m_e__p_a_t_t_e_r_n = r"^(\d{2}\.\w{2}) CH#(\d{2}) Spectrum (\d{1})$"
+LABEL_RADIANCE = "Spectral Radiance (ph s^-1 m^-2 sr^-1 nm^-1)"
+LABEL_INTENSITY = "Intensity (counts)"
+CHANNEL_NAME_PATTERN = r"^(\d{2}\.\w{2}) CH#(\d{2}) Spectrum (\d{1})$"
 
 
 class spectrometer_visible_compute:
@@ -29,7 +29,7 @@ class spectrometer_visible_compute:
                 spectrometers.append(1)
         return list(set(spectrometers))
 
-    def get_channels(self, channel_name_pattern=c_h_a_n_n_e_l__n_a_m_e__p_a_t_t_e_r_n):
+    def get_channels(self, channel_name_pattern=CHANNEL_NAME_PATTERN):
         """
         The `getChannels` function retrieves information about channels based on a given channel name pattern.
 
@@ -44,10 +44,12 @@ class spectrometer_visible_compute:
         channels = {}
         for channel in self.ids_object.channel:
             channel_info = {}
-            match = re.compile(c_h_a_n_n_e_l__n_a_m_e__p_a_t_t_e_r_n).fullmatch(channel.name)
+            match = re.compile(CHANNEL_NAME_PATTERN).fullmatch(channel.name)
 
             if match is None:
-                logger.warning(f"Channel's name {channel.name} does not math pattern {c_h_a_n_n_e_l__n_a_m_e__p_a_t_t_e_r_n.pattern}")
+                logger.warning(
+                    f"Channel's name {channel.name} does not math pattern {c_h_a_n_n_e_l__n_a_m_e__p_a_t_t_e_r_n.pattern}"
+                )
                 continue
 
             diagnostic = match[1]

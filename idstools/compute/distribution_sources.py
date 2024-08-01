@@ -16,7 +16,7 @@ class distribution_sources_compute:
     def __init__(self, ids):
         self.ids = ids
 
-    def get_rho_tor_norm(self, time_slice: int = 0) -> union[None, np.ndarray]:
+    def get_rho_tor_norm(self, time_slice: int = 0) -> Union[None, np.ndarray]:
         """
         The function `getRhoTorNorm` returns the normalized toroidal rho values from a given time slice
         of a source.
@@ -42,7 +42,7 @@ class distribution_sources_compute:
             logger.critical("distribution_sources.source[0].profiles_1d[0].grid.rho_tor(_norm) could not be read")
         return rho_tor_norm
 
-    def get_volume(self, time_slice: int = 0) -> union[None, np.ndarray]:
+    def get_volume(self, time_slice: int = 0) -> Union[None, np.ndarray]:
         """
         The function `getVolume` retrieves the volume from a specific time slice of a source's profiles.
 

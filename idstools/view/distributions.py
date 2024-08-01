@@ -9,7 +9,7 @@ logger = logging.getLogger(f"module.{__name__}")
 
 class distributions_view:
     def __init__(self, ids):
-        self.distributions_compute = distributions_compute(ids)
+        self.distributions_compute = DistributionsCompute(ids)
         self.ids = ids
 
     # PROFILE OF ABSORBED POWER DENSITY ON ELECTRONS+IONS FOR ALL INJECTORS AND EACH OF THEM INDIVIDUALLY [MW/M3]

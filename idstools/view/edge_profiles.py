@@ -5,18 +5,20 @@ import logging
 logger = logging.getLogger("module")
 
 
-class edge_profiles_view:
+class EdgeProfilesView:
     def __init__(self, edge_profile_ids=None):
-        self.edge_profiles_compute = edge_profiles_compute(edge_profile_ids)
+        self.edge_profiles_compute = EdgeProfilesCompute(edge_profile_ids)
 
     @staticmethod
     def view_plasma_composition_with_species_concentration(ids_object, slice_index=0, print_data=False):
         """
         Nice display of plasma composition with species concentrations
         """
-        composition_data = edge_profiles_compute.get_plasma_composition_with_species_concentration(ids_object, slice_index)
+        composition_data = EdgeProfilesCompute.get_plasma_composition_with_species_concentration(
+            ids_object, slice_index
+        )
         if composition_data != 0 and composition_data != -1:
-            edge_profiles_view = edge_profiles_view()
+            edge_profiles_view = EdgeProfilesView()
             edge_profiles_view._print_plasma_composition(composition_data)
             edge_profiles_view._print_specis_concentration(composition_data)
 

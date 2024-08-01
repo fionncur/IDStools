@@ -24,7 +24,7 @@ logger = setup_logger("module", stdout_level=logging.i_n_f_o)
 
 def show_plots(args):
     args = parser.parse_args()
-    conn = d_b_master.get_connection(args)
+    conn = DBMaster.get_connection(args)
     if conn is None:
         logger.critical("----> Aborted.")
         exit(1)
@@ -32,7 +32,7 @@ def show_plots(args):
     ids_waves = conn.get("waves")
     conn.close()
 
-    waves_compute = waves_compute(ids_waves)
+    waves_compute = WavesCompute(ids_waves)
 
     time_array = ids_waves.time
     ntime = len(time_array)
@@ -42,9 +42,7 @@ def show_plots(args):
     if radial_grid is None:
         logger.critical("Radial grid information is empty ----> Abort.")
         exit(1)
-    active_launchers = {
-        key: value for key, value in radial_grid.items() if value["isActive"] is True
-    }
+    active_launchers = {key: value for key, value in radial_grid.items() if value["isActive"] is True}
     len_active_launchers = len(active_launchers)
     if len_active_launchers == 0:
         logger.critical("The waves IDS appears empty ----> Abort.")
@@ -62,7 +60,7 @@ def show_plots(args):
         ax3 = canvas.add_axes(title="", xlabel="", row=1, col=0)
         ax4 = canvas.add_axes(title="", xlabel="", row=1, col=1)
 
-    waves_view = waves_view(ids_waves)
+    waves_view = WavesView(ids_waves)
     waves_view.view_absorbed_power_density_profile(ax1, time_index, args.force_psi)
     if args.hide_legend:
         ax1.get_legend().remove()
@@ -97,31 +95,30 @@ def show_plots(args):
     canvas.fig.suptitle(get_title(args, "HCD Waves Plot", time_value), size=12)
 
     if args.save:
-        fname = get_file_name(args,  os.path.basename(__file__)+"_ECRH_profile_time", time_value)
+        fname = get_file_name(args, os.path.basename(__file__) + "_ECRH_profile_time", time_value)
         if args.directory:
             if not os.path.exists(args.directory):
                 os.makedirs(args.directory)
-            fname=os.path.join(args.directory,fname)
+            fname = os.path.join(args.directory, fname)
         canvas.save(fname)
     else:
         canvas.show()
 
+
 if __name__ == "__main__":
     parser = argparse.argument_parser(
-        description="---- Display EC results", parents=[dbentry_parser],formatter_class=rich_help_formatter,
+        description="---- Display EC results",
+        parents=[dbentry_parser],
+        formatter_class=rich_help_formatter,
     )
-    parser.add_argument(
-        "-t", "--time", help="Time", required=False, type=float, default=-99.0
-    )
+    parser.add_argument("-t", "--time", help="Time", required=False, type=float, default=-99.0)
     parser.add_argument(
         "-f",
         "--force_psi",
         help="force displaying the profiles versus poloidal flux",
         action="store_true",
     )
-    parser.add_argument(
-        "-l", "--hide_legend", help="remove the legend from graphs", action="store_true"
-    )
+    parser.add_argument("-l", "--hide_legend", help="remove the legend from graphs", action="store_true")
     parser.add_argument(
         "--save",
         help="Save figure at default location",
@@ -130,7 +127,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--directory",
         help="Directory to save the figure",
-        default=None, 
+        default=None,
     )
     args = parser.parse_args()
     show_plots(args)

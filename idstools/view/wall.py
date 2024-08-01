@@ -3,10 +3,10 @@ from matplotlib.path import Path
 from idstools.compute.wall import WallCompute
 
 
-class wall_view:
+class WallView:
     def __init__(self, wall_ids):
         self.wall_ids = wall_ids
-        self.compute_object = wall_compute(wall_ids)
+        self.compute_object = WallCompute(wall_ids)
 
     def add_wall_markings(self, ax, r, z, show_labels=False, **kwargs):
         """
@@ -21,13 +21,13 @@ class wall_view:
             containing the z-coordinates of the points.
         """
         n = len(r)
-        codes = [path.m_o_v_e_t_o] + [path.l_i_n_e_t_o] * (n - 1)
+        codes = [Path.MOVETO] + [Path.LINETO] * (n - 1)
         vertices = []
         for i in range(n):
             p = (r[i], z[i])
             vertices.append(p)
         # kwargs.setdefault("color", "darkgray")
-        path = path(vertices, codes)
+        path = Path(vertices, codes)
         patch = patches.path_patch(path, **kwargs)
         if show_labels:
             ax.text(
