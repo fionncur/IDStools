@@ -123,7 +123,7 @@ else:
 # add shot/run number because pandas is stores id as unique key
 choice.append("id")
 
-md_object = machine_description(machine_description_folder, connection_args=None)
+md_object = MachineDescription(machine_description_folder, connection_args=None)
 yaml_data = md_object.md_summary_yaml
 
 df = md_object.get_pandas_data_frame()

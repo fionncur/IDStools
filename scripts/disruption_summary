@@ -54,7 +54,7 @@ def rec(
             try:
                 j = j + 1
                 file = open(files[i], "r")
-                data[j] = yamlload(file, loader=yaml_loader)
+                data[j] = yamlload(file, loader=yamlLoader)
                 data[j]["location"] = files[i]
                 file.close()
             except Exception as e:

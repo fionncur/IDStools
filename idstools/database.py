@@ -20,7 +20,7 @@ logger = logging.getLogger(f"module.{__name__}")
 
 
 class DBMaster:
-    a_l_l__b_a_c_k_e_n_d_s = "mdsplus", "hdf5"
+    ALL_BACKENDS = "mdsplus", "hdf5"
 
     @staticmethod
     def get_user_dir(user: str = None):
@@ -215,7 +215,7 @@ class DBMaster:
                     (
                         pulse,
                         run,
-                        imas.imasdef.m_d_s_p_l_u_s__b_a_c_k_e_n_d,
+                        imas.imasdef.MDSPLUS_BACKEND,
                         database,
                         user,
                         version,
@@ -228,7 +228,7 @@ class DBMaster:
                     (
                         pulse,
                         run,
-                        imas.imasdef.h_d_f5__b_a_c_k_e_n_d,
+                        imas.imasdef.HDF5_BACKEND,
                         database,
                         user,
                         version,
@@ -274,7 +274,7 @@ class DBMaster:
         for root, dirnames, filenames in os.walk(mdsplus_dir):
             for datafile in fnmatch.filter(filenames, "*.datafile"):
                 data_file_path = f"{root}/{datafile}"
-                if (status is None) or (status == DBMaster.get_pulse_status(path(data_file_path).with_suffix(".yaml"))):
+                if (status is None) or (status == DBMaster.get_pulse_status(Path(data_file_path).with_suffix(".yaml"))):
                     run_list = (root[len(mdsplus_dir) + 1 :]).split("/")
                     try:
                         if len(run_list) == 1:  # AL4 layout
@@ -306,7 +306,7 @@ class DBMaster:
                                 (
                                     pulse,
                                     run,
-                                    imas.imasdef.m_d_s_p_l_u_s__b_a_c_k_e_n_d,
+                                    imas.imasdef.MDSPLUS_BACKEND,
                                     database,
                                     user,
                                     version,
@@ -319,7 +319,7 @@ class DBMaster:
                             (
                                 pulse,
                                 run,
-                                imas.imasdef.m_d_s_p_l_u_s__b_a_c_k_e_n_d,
+                                imas.imasdef.MDSPLUS_BACKEND,
                                 database,
                                 user,
                                 version,
@@ -341,7 +341,7 @@ class DBMaster:
         Returns:
             the value of the "status" key from the metadata dictionary.
         """
-        _yaml_file_path = path(yaml_file_path)
+        _yaml_file_path = Path(yaml_file_path)
         try:
             with open(_yaml_file_path, "r") as file_handle:
                 metadata = safe_load(file_handle)
@@ -374,7 +374,7 @@ class DBMaster:
         result = []
 
         if not backends:
-            backends = DBMaster.a_l_l__b_a_c_k_e_n_d_s
+            backends = DBMaster.ALL_BACKENDS
 
         databases = [database] if database else DBMaster.get_databases(user)
         for database in databases:
@@ -398,7 +398,7 @@ class DBMaster:
         return result
 
     @staticmethod
-    def get_h_d_f5_physical_file(user, database, version, pulse, run):
+    def get_hdf5_physical_file(user, database, version, pulse, run):
         """
         The function `getHDF5PhysicalFile` returns the path to an HDF5 file based on the user, database, version,
         pulse, and run.
@@ -418,7 +418,7 @@ class DBMaster:
         return os.path.join(hdf5dir, f"ids_{str(pulse)}_{str(run)}.hd5")
 
     @staticmethod
-    def get_m_d_s_plus_physical_files(user, database, version, pulse, run):
+    def get_mdsplus_physical_files(user, database, version, pulse, run):
         """
         The function `getMDSPlusPhysicalFiles` returns the MDS+ database filenames for a given IMAS
         database.
@@ -478,9 +478,9 @@ class DBMaster:
         """
         """Return files storing this database."""
         if backend == "mdsplus":
-            return DBMaster.get_m_d_s_plus_physical_files(user, database, version, pulse, run)
+            return DBMaster.get_mdsplus_physical_files(user, database, version, pulse, run)
         elif backend == "hdf5":
-            return DBMaster.get_h_d_f5_physical_file(user, database, version, pulse, run)
+            return DBMaster.get_hdf5_physical_file(user, database, version, pulse, run)
         else:
             raise NotImplementedError(f"Unsupported backend: {backend}")
 
@@ -522,7 +522,7 @@ class DBMaster:
 
     @classmethod
     def get_connection(cls, imasargs):
-        connection = DBMaster.get_d_b_entry_object(imasargs)
+        connection = DBMaster.get_db_entry_object(imasargs)
         if connection is not None:
             status, _ = connection.open()
             if status != 0:
@@ -535,7 +535,7 @@ class DBMaster:
         if "mode" not in imasargs.__dict__:
             imasargs.mode = "w"
 
-        connection = DBMaster.get_d_b_entry_object(imasargs)
+        connection = DBMaster.get_db_entry_object(imasargs)
         if connection is not None:
             status, _ = connection.create()
             if status != 0:
@@ -544,7 +544,7 @@ class DBMaster:
         return connection
 
     @classmethod
-    def get_d_b_entry_object(cls, imasargs):
+    def get_db_entry_object(cls, imasargs):
         connection = None
         if imasargs.uri != "" and imasargs.uri is not None:
             if "mode" in imasargs.__dict__:
@@ -562,7 +562,7 @@ class DBMaster:
         path: str or Path
         """
 
-        p = path(path)
+        p = Path(path)
         try:
             with open(p, "r") as f:
                 metadata = safe_load(f)
@@ -605,7 +605,7 @@ class DBMaster:
         list of tuple (pulse,run)
         """
 
-        locpath = path(locpath).expanduser()
+        locpath = Path(locpath).expanduser()
         if not locpath.exists():
             raise FileNotFoundError(
                 "The path provided does not exist or has no such database file or directory. Please check spelling."
@@ -615,7 +615,7 @@ class DBMaster:
         # linked subfolders (https://bugs.python.org/issue33428)
         folder = glob(str(locpath) + "/**/*.datafile", recursive=True)
         for entry in folder:
-            if (with_status is None) or (with_status == DBMaster.get_status(path(entry).with_suffix(".yaml"))):
+            if (with_status is None) or (with_status == DBMaster.get_status(Path(entry).with_suffix(".yaml"))):
                 file = entry.split("/")[-1].split("_")[1].split(".")[0]
                 if len(file) <= 4:
                     pulse = 0
@@ -639,7 +639,7 @@ class DBMaster:
         list of tuple (pulse,run)
         """
 
-        locpath = path(locpath).expanduser()
+        locpath = Path(locpath).expanduser()
         if not locpath.exists():
             raise FileNotFoundError(
                 "The path provided does not exist or has no such database file or directory. Please check spelling."
@@ -654,7 +654,7 @@ class DBMaster:
         return pulses
 
     @staticmethod
-    def get_d_b_path(user, database, version):
+    def get_db_Path(user, database, version):
         """Function that returns a pathlib Path to desired database, depending on the user, database and
         version names.
 
@@ -676,16 +676,16 @@ class DBMaster:
         """
 
         if user == "public":
-            locpath = path(os.environ["IMAS_HOME"] + "/shared/imasdb/" + database + "/" + version)
+            locpath = Path(os.environ["IMAS_HOME"] + "/shared/imasdb/" + database + "/" + version)
         else:
-            locpath = path(os.path.expanduser("~" + user) + "/public/imasdb/" + database + "/" + version)
+            locpath = Path(os.path.expanduser("~" + user) + "/public/imasdb/" + database + "/" + version)
         return locpath
 
 
 def read_scenario(
     scenario_file_path: str,
-    in_i_d_s_list: list = None,
-    out_i_d_s_list: list = None,
+    in_ids_list: list = None,
+    out_ids_list: list = None,
     test_mode: bool = False,
     **test_args,
 ):
@@ -705,37 +705,37 @@ def read_scenario(
     """
     test_args_list = list(test_args.values())
 
-    in_i_d_s_dict = {}
-    out_i_d_s_dict = {}
-    if in_i_d_s_list is None:
-        in_i_d_s_list = []
+    in_ids_dict = {}
+    out_ids_dict = {}
+    if in_ids_list is None:
+        in_ids_list = []
 
-    if out_i_d_s_list is None:
-        out_i_d_s_list = []
+    if out_ids_list is None:
+        out_ids_list = []
     with open(scenario_file_path, "r") as scenario_file:
-        config = yamlload(scenario_file, loader=yaml_loader)
+        config = yamlload(scenario_file, loader=yamlLoader)
 
     # Read the equilibrium and core_profiles IDSs from the input datafile
     connection_in = imas.DBEntry(
-        imas.imasdef.m_d_s_p_l_u_s__b_a_c_k_e_n_d,
+        imas.imasdef.MDSPLUS_BACKEND,
         config["input_database"],
         config["shot"],
         config["run_in"],
         config["input_user_or_path"],
     )
     connection_in.open()
-    for ids_name in in_i_d_s_list:
+    for ids_name in in_ids_list:
         if test_mode:
             ids = connection_in.get_slice(ids_name, test_args_list)
         else:
             ids = connection_in.get(ids_name)
-        in_i_d_s_dict[ids_name] = ids
+        in_ids_dict[ids_name] = ids
 
     connection_in.close()
 
     # Read the out IDS from the output datafile
     connection_out = imas.DBEntry(
-        imas.imasdef.m_d_s_p_l_u_s__b_a_c_k_e_n_d,
+        imas.imasdef.MDSPLUS_BACKEND,
         config["output_database"],
         config["shot"],
         config["run_out"],
@@ -746,17 +746,17 @@ def read_scenario(
     # print(config["run_out"])
     # print(config["output_user_or_path"])
     connection_out.open()
-    for ids_name in out_i_d_s_list:
+    for ids_name in out_ids_list:
         if test_mode:
             ids = connection_out.get_slice(ids_name, test_args_list)
         else:
             ids = connection_out.get(ids_name)
-        out_i_d_s_dict[ids_name] = ids
+        out_ids_dict[ids_name] = ids
     connection_out.close()
     import argparse
 
     inputargs = argparse.namespace()
-    inputargs.backend = imas.imasdef.m_d_s_p_l_u_s__b_a_c_k_e_n_d
+    inputargs.backend = imas.imasdef.MDSPLUS_BACKEND
     inputargs.pulse = config["shot"]
     inputargs.run = config["run_in"]
     inputargs.user = config["input_user_or_path"]
@@ -764,13 +764,13 @@ def read_scenario(
     inputargs.version = 3
     inputargs.uri = None
 
-    return in_i_d_s_dict, out_i_d_s_dict, inputargs
+    return in_ids_dict, out_ids_dict, inputargs
 
 
 def read_scenario_with_args(
     imasargs,
-    in_i_d_s_list: list = None,
-    out_i_d_s_list: list = None,
+    in_ids_list: list = None,
+    out_ids_list: list = None,
     test_mode: bool = False,
     **test_args,
 ):
@@ -790,30 +790,30 @@ def read_scenario_with_args(
     """
     test_args_list = list(test_args.values())
 
-    in_i_d_s_dict = {}
-    out_i_d_s_dict = {}
-    if in_i_d_s_list is None:
-        in_i_d_s_list = []
+    in_ids_dict = {}
+    out_ids_dict = {}
+    if in_ids_list is None:
+        in_ids_list = []
 
-    if out_i_d_s_list is None:
-        out_i_d_s_list = []
+    if out_ids_list is None:
+        out_ids_list = []
     connection = DBMaster.get_connection(imasargs)
 
     if connection is None:
         return None
-    for ids_name in in_i_d_s_list:
+    for ids_name in in_ids_list:
         if test_mode:
             ids = connection.get_slice(ids_name, test_args_list)
         else:
             ids = connection.get(ids_name)
-        in_i_d_s_dict[ids_name] = ids
+        in_ids_dict[ids_name] = ids
 
-    for ids_name in out_i_d_s_list:
+    for ids_name in out_ids_list:
         if test_mode:
             ids = connection.get_slice(ids_name, test_args_list)
         else:
             ids = connection.get(ids_name)
-        out_i_d_s_dict[ids_name] = ids
+        out_ids_dict[ids_name] = ids
     connection.close()
 
-    return in_i_d_s_dict, out_i_d_s_dict
+    return in_ids_dict, out_ids_dict

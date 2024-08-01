@@ -82,13 +82,13 @@ def get_timings(db, idsname, occ=0, dbout=None, times=None, repeat=5, verbose=Fa
 
     # Default timing
     # TODO: more fine grained control of imported symbols to avoid issues?
-    t = timeit.timer(cmd, globals={**locals(), **globals()})
+    t = timeit.Timer(cmd, globals={**locals(), **globals()})
     # 'from __main__ import get_ids,db,dbout,verbose,times,idsobj')
     timings = t.repeat(repeat=repeat, number=1)
 
     # Profiling
     if profile:
-        c_profile.runctx(cmd, globals(), locals())
+        cProfile.runctx(cmd, globals(), locals())
 
     return timings
 

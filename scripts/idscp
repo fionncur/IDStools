@@ -10,7 +10,7 @@ from idstools.database import DBMaster
 
 import imas
 
-from idstools.utils.clihelper import imasParser
+from idstools.utils.clihelper import imas_parser
 from idstools.utils.idslogger import setup_logger
 
 logger = setup_logger("module")
@@ -93,7 +93,7 @@ if src_connection is None:
 outputargs = argparse.namespace()
 outputargs.uri = args.dest
 
-dest_connection = DBMaster.get_d_b_entry_object(outputargs)
+dest_connection = DBMaster.get_db_entry_object(outputargs)
 
 if not args.force:
     # OPEN DEST
@@ -119,7 +119,7 @@ if args.all_occurrences:
     else:
         allids = []
         for idsname in args.ids:
-            mocc = getattr(imas, idsname)().get_max_occurrences()
+            mocc = getattr(imas, idsname)().getMaxOccurrences()
             allids.append(idsname)
             allids.extend(f"{idsname}/{o}" for o in range(1, mocc + 1))
         args.ids = allids

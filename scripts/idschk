@@ -37,7 +37,7 @@ def main():
     cocos = idschk.COCOS(index=index).get()
 
     # Load IMAS-DD File
-    root = idschk.load__x_m_l(idschk.FILE_IDSDef)
+    root = idschk.load_xml(idschk.FILE_IDSDef)
 
     # Validate COCOS in IDS/equilibrium
     if args.cocos:
@@ -73,7 +73,7 @@ def main():
     # IDS Validation
     if args.schema_file:
         # Initialize Scenario Validator
-        sv = scenario_validator(schema_path=[path.abspath(args.schema_file)])
+        sv = ScenarioValidator(schema_path=[path.abspath(args.schema_file)])
 
         # Validation for Class imas.DBEntry
         sv.validate_db(db)

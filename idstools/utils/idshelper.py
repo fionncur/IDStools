@@ -180,7 +180,7 @@ def get_available_ids_and_occurrences(db_entry_object: imas.DBEntry, time_mode=N
     }
     availableidslist = []
     for idstype in get_ids_types():
-        for occ in range(getattr(imas, idstype)().get_max_occurrences()):
+        for occ in range(getattr(imas, idstype)().getMaxOccurrences()):
             homogeneous_time = ""
             comment = ""
             occ_type = ""

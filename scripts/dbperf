@@ -18,7 +18,7 @@ from rich_argparse import RichHelpFormatter
 from idstools.database import DBMaster
 from idstools.idslist import available_in_dbentry
 from idstools.idsperf import byte_size, get_timings
-from idstools.utils.clihelper import getBackendID, imasParser
+from idstools.utils.clihelper import get_backend_id, imas_parser
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
@@ -129,11 +129,11 @@ if __name__ == "__main__":
 
     if not args.file:
         if args.database:
-            mdslocpath = DBMaster.get_d_b_path(args.user, args.database, args.version)
+            mdslocpath = DBMaster.get_db_Path(args.user, args.database, args.version)
             hdflocpath = mdslocpath
         elif args.mdsdatabase and args.hdf5database:
-            mdslocpath = DBMaster.get_d_b_path(args.mdsuser, args.mdsdatabase, args.version)
-            hdflocpath = DBMaster.get_d_b_path(args.hdf5user, args.hdf5database, args.version)
+            mdslocpath = DBMaster.get_db_Path(args.mdsuser, args.mdsdatabase, args.version)
+            hdflocpath = DBMaster.get_db_Path(args.hdf5user, args.hdf5database, args.version)
         else:
             raise Exception(
                 "Please clarify where the data is stored. Please provide either one database containing data in both MDSPLUS and HDF5, or two separate databases containing data in MDSPLUS or HDF5"

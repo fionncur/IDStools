@@ -4,7 +4,7 @@ from glob import glob
 from idstools import idschk
 from idstools.database import DBMaster
 from idstools.idslist import available_in_dbentry
-from idstools.utils.clihelper import getBackendID
+from idstools.utils.clihelper import get_backend_id
 from os import path
 import imas
 import logging
@@ -41,9 +41,9 @@ def load_scenario(user, database, version, backend):
 
     scenarios = []
     if backend == "MDSPLUS":
-        scenarios = DBMaster.mds_list_pulse_run(DBMaster.get_d_b_path(user, database, version), with_status="active")
+        scenarios = DBMaster.mds_list_pulse_run(DBMaster.get_db_Path(user, database, version), with_status="active")
     elif backend == "HDF5":
-        scenarios = DBMaster.hdf5_list_pulse_run(DBMaster.get_d_b_path(user, database, version))
+        scenarios = DBMaster.hdf5_list_pulse_run(DBMaster.get_db_Path(user, database, version))
 
     return scenarios
 
@@ -81,7 +81,7 @@ def merge_dict(d1, d2):
 # ----------------------------------------------------------------------
 
 
-class scenario_validator:
+class ScenarioValidator:
     """
     Scenario Validator for IMASDB
 
@@ -97,9 +97,9 @@ class scenario_validator:
         Path to DD
     """
 
-    d_d = {}
-    s_c_h_e_m_a = {}
-    s_c_h_e_m_a__p_a_t_h = []
+    dd = {}
+    schema = {}
+    schema_path = []
 
     def __init__(self, dd_path=idschk.FILE_IDSDef, schema_path=[]):
         """
@@ -114,13 +114,13 @@ class scenario_validator:
         -------
         """
 
-        scenario_validator.d_d or self.load__d_d(dd_path)
+        ScenarioValidator.dd or self.load__dd(dd_path)
 
-        if schema_path != scenario_validator.s_c_h_e_m_a__p_a_t_h:
+        if schema_path != ScenarioValidator.schema_path:
             self.load_schema(schema_path)
-            scenario_validator.s_c_h_e_m_a__p_a_t_h = schema_path
+            ScenarioValidator.schema_path = schema_path
 
-    def load__d_d(self, fpath):
+    def load__dd(self, fpath):
         """
         Read the xml file of DD and store in self.DD
 
@@ -134,13 +134,13 @@ class scenario_validator:
         """
 
         try:
-            self.d_d = idschk.load__x_m_l(fpath)
+            self.dd = idschk.load_xml(fpath)
         except Exception as e:
             logger.debug(f"{e}")
             raise OSError(f"can not load DD: {fpath}")
 
         logger.debug(f" DD= {fpath}")
-        logger.debug(f" self.DD= {self.d_d}")
+        logger.debug(f" self.DD= {self.dd}")
 
     def load_schema(self, yaml):
         """
@@ -157,15 +157,15 @@ class scenario_validator:
 
         try:
             for f in yaml:
-                self.s_c_h_e_m_a[f] = idschk.load__y_a_m_l(f)
+                self.schema[f] = idschk.load_yaml(f)
         except Exception as e:
             logger.debug(f"{e}")
             raise OSError(f"failed to load Schema: {yaml}")
 
-        self.s_c_h_e_m_a = self.arrange_schema(self.s_c_h_e_m_a)
+        self.schema = self.arrange_schema(self.schema)
 
         logger.debug(f" schema file= {f}")
-        logger.debug(f" schema = {self.s_c_h_e_m_a}")
+        logger.debug(f" schema = {self.schema}")
 
     def arrange_schema(self, *args):
         """
@@ -217,9 +217,9 @@ class scenario_validator:
         -------
         """
 
-        dd0 = [dd for dd in self.d_d if dd.get("name") == idsname][0]
+        dd0 = [dd for dd in self.dd if dd.get("name") == idsname][0]
         ret = {}
-        for fpath, schemas in self.s_c_h_e_m_a.items():
+        for fpath, schemas in self.schema.items():
             for key, schema in schemas.items():
                 if key == idsname:
                     ids = None
@@ -358,7 +358,7 @@ def db_validator(
         raise OSError(f"not found schema: {schema_path}")
 
     # Initialize Scenario Validator
-    sv = scenario_validator(schema_path=schema)
+    sv = ScenarioValidator(schema_path=schema)
 
     pulses = []
     if len(pulse) >= 1:
@@ -374,7 +374,7 @@ def db_validator(
     # Scenario Validation for Pulses
     npulse = len(pulses)
     for i, (shot, run) in enumerate(pulses):
-        db = imas.DBEntry(get_backend_i_d(backend), database, shot, run, user)
+        db = imas.DBEntry(get_backend_id(backend), database, shot, run, user)
         status, _ = db.open()
         if status != 0:
             raise OSError(

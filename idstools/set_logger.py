@@ -6,7 +6,7 @@ log_fmt = "%(asctime)s %(levelname)s: %(message)s"
 date_fmt = "%y/%m/%d %H:%M:%S"
 
 
-def set_logger(name, logfile=None, level=logging.WARN_i_n_g):
+def set_logger(name, logfile=None, level=logging.WARNING):
     """
     Initialization of logger object for IDStools
 
@@ -33,7 +33,7 @@ def set_logger(name, logfile=None, level=logging.WARN_i_n_g):
 
     # create file handler
     if logfile:
-        fh = logging.file_handler(logfile)
+        fh = logging.FileHandler(logfile)
         fh.setLevel(fh_lv)
         fh_formatter = logging.Formatter(fmt=log_fmt, datefmt=date_fmt)
         fh.setFormatter(fh_formatter)

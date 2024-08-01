@@ -73,7 +73,7 @@ if args.wall:
 
     if wall_ids.ids_properties.homogeneous_time == imasdef.EMPTY_INT:
 
-        machine_description = machine_description(connection_args=copy.deepcopy(args))
+        machine_description = MachineDescription(connection_args=copy.deepcopy(args))
         wall_m_d_dict = machine_description.get_latest_ids_data("wall")
         wall_ids = wall_m_d_dict["idsData"]
     if wall_ids.ids_properties.homogeneous_time == imasdef.EMPTY_INT:

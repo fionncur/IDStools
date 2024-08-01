@@ -14,7 +14,7 @@ import requests
 from imas import imasdef
 from rich.progress import track
 
-from idstools.utils.clihelper import getBackendID
+from idstools.utils.clihelper import get_backend_id
 
 
 def ids_setter(i_d_s, path, val):
@@ -170,7 +170,7 @@ rows = [args.row] if args.row != None else db.index
 # print(f"Starts mapping of the DB {args.inputCSV}, please be patient...")
 for row in track(rows, description="[green]Processing..."):
     d_b_v_a_r = db.iloc[row]
-    de = imas.DBEntry(get_backend_i_d(args.backend), args.database, 1, row)
+    de = imas.DBEntry(get_backend_id(args.backend), args.database, 1, row)
     de.create()
 
     iod = {}

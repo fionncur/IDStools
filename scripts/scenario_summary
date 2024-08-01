@@ -206,7 +206,7 @@ if args["choice"] == None:
     print("""----> Default call equivalent to: """)
     print("""      scenario_summary -c pulse,run,database,ref_name,ip,b0,fuelling,confinement,workflow,date""")
 
-scenario_description_obj = scenario_description_base(folder_path=default_folder_path)
+scenario_description_obj = ScenarioDescriptionBase(folder_path=default_folder_path)
 df = scenario_description_obj.get_dataframes_from_files(extension=".yaml", add_obsolete=obsolete)
 
 # check of need to add obsolete

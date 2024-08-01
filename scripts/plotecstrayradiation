@@ -89,24 +89,24 @@ check_rays_into_divertor(wall2d, beam_output)
 beam_wall = beam_wall_crossing(wall2d, launching_parameters, beam_output)
 
 if args.uri is None:
-    in_i_d_s_list, out_i_d_s_dict, inputargs = read_scenario(
+    in_ids_list, out_ids_dict, inputargs = read_scenario(
         scenario_file_path=scenario_file,
-        in_i_d_s_list=["equilibrium", "core_profiles"],
-        out_i_d_s_list=["waves"],
+        in_ids_list=["equilibrium", "core_profiles"],
+        out_ids_list=["waves"],
     )
     args.uri = f"imas:mdsplus?user={inputargs.user};pulse={inputargs.pulse};run={inputargs.run};database={inputargs.database};version={inputargs.version}"
 else:
     data = read_scenario_with_args(
         imasargs=args,
-        in_i_d_s_list=["equilibrium", "core_profiles"],
-        out_i_d_s_list=["waves"],
+        in_ids_list=["equilibrium", "core_profiles"],
+        out_ids_list=["waves"],
     )
     if data is not None:
-        in_i_d_s_list, out_i_d_s_dict = data
+        in_ids_list, out_ids_dict = data
 
-equilibrium_ids = in_i_d_s_list["equilibrium"]
-core_profiles_ids = in_i_d_s_list["core_profiles"]
-waves_ids = out_i_d_s_dict["waves"]
+equilibrium_ids = in_ids_list["equilibrium"]
+core_profiles_ids = in_ids_list["core_profiles"]
+waves_ids = out_ids_dict["waves"]
 
 
 time_array_equilibrium = equilibrium_ids.time  # Plot Ip

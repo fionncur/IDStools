@@ -104,7 +104,7 @@ def parse_shot_description(shot_desc):
 
 
 def setup_parser():
-    p = optparse.option_parser()
+    p = optparse.OptionParser()
     p.add_option("-u", "--user", dest="user", default=None)
     p.add_option(
         "-t",
@@ -126,7 +126,7 @@ def parse_cli(p):
 
     if (
         (opts.user is not None) | (opts.tokamak is not None) | (opts.database is not None) | (opts.version is not None)
-    ) & opts.use_h_d_f5:
+    ) & opts.use_hdf5:
         raise SystemExit("HDF5 access method not allowed when specifying user, tokamak or data version.")
 
     pars = set_default_parameters()
@@ -138,7 +138,7 @@ def parse_cli(p):
         pars["databasename"] = opts.database
     if opts.version is not None:
         pars["dataversion"] = opts.version
-    pars["hdf5"] = opts.use_h_d_f5
+    pars["hdf5"] = opts.use_hdf5
     pars["debug"] = opts.debug
 
     return pars, opts, args

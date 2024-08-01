@@ -120,7 +120,7 @@ if __name__ == "__main__":
         default=None,
     )
     args = parser.parse_args()
-    machine_description = machine_description()
+    machine_description = MachineDescription()
     ids_data = {}
     for mdids_info in args.uri:
         mdargs = argparse.namespace()

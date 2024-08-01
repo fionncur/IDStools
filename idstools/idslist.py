@@ -14,8 +14,8 @@ def is_field(idstype):
     idstype: type of an attribute from an IDS or a substructure of an IDS
     """
     return (
-        idstype != types.method_type
-        and idstype != types.function_type
+        idstype != types.MethodType
+        and idstype != types.FunctionType
         and "Logger" not in str(idstype)
         and "HLIUtils" not in str(idstype)
     )
@@ -53,7 +53,7 @@ def available_in_dbentry(db, time_mode=None):
     """
     presentidslist = []
     for idstype in all_ids_types():
-        for occ in range(getattr(imas, idstype)().get_max_occurrences()):
+        for occ in range(getattr(imas, idstype)().getMaxOccurrences()):
             homogeneous_time = db.partial_get(idstype, "ids_properties/homogeneous_time", occurrence=occ)
             if homogeneous_time != imas.imasdef.EMPTY_INT and (time_mode is None or time_mode == homogeneous_time):
                 presentidslist.append((idstype, occ))

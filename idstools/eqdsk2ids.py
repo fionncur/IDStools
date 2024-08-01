@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 # ----------------------------------------------------------------------
 
 
-class g_e_q_d_s_k:
+class GEQDSK:
     """
     GEQDSK module for IMAS
 
@@ -118,9 +118,9 @@ class g_e_q_d_s_k:
         except OSError:
             raise IOError(f"cannot open/read file: {fpath}")
 
-        fmt00 = fortran_record_reader("6a8,3i4")
-        fmt20 = fortran_record_reader("5e16.9")
-        fmt22 = fortran_record_reader("2i5")
+        fmt00 = FortranRecordReader("6a8,3i4")
+        fmt20 = FortranRecordReader("5e16.9")
+        fmt22 = FortranRecordReader("2i5")
 
         data = {}
 
@@ -259,14 +259,14 @@ class g_e_q_d_s_k:
         sigma_b0 = np.sign(g["BCENTR"])
 
         # PSIRZ divided by 2*pi [1], Table 1(a) [2]
-        exp__bp = 0
+        exp_bp = 0
 
         # Eq.(22) [2]
         sign_psi_edge_axis = np.sign(g["SIBRY"] - g["SIMAG"])
-        sigma__bp = int(sign_psi_edge_axis * sigma_ip)
+        sigma_bp = int(sign_psi_edge_axis * sigma_ip)
 
         # Right-handed cylindrical coordinate system [1], Table 1(a) [2]
-        sigma__rphi_z = int(+1)
+        sigma_rphi_z = int(+1)
 
         # Eq.(22), Table 1(b) [2]
         x = np.sign(median(g["QPSI"]))
@@ -292,9 +292,9 @@ class g_e_q_d_s_k:
         sign_pprime_pos = int(sign_pprime * sigma_ip)
 
         values = {
-            "exp_Bp": exp__bp,
-            "sigma_Bp": sigma__bp,
-            "sigma_RphiZ": sigma__rphi_z,
+            "exp_Bp": exp_bp,
+            "sigma_Bp": sigma_bp,
+            "sigma_RphiZ": sigma_rphi_z,
             "sigma_rhothetaphi": sigma_rhothetaphi,
             "sign_q_pos": sign_q_pos,
             "sign_pprime_pos": sign_pprime_pos,
@@ -308,7 +308,7 @@ class g_e_q_d_s_k:
 # ----------------------------------------------------------------------
 
 
-def map__g_e_q_d_s_k_to__i_d_s(geqdsk, eq):
+def map__GEQDSK_to_ids(geqdsk, eq):
     """
     Convert GEQDSK file into IDS/equilibrium
 
@@ -424,7 +424,7 @@ def map__g_e_q_d_s_k_to__i_d_s(geqdsk, eq):
             eq.time_slice[0].profiles_2d[0].r[i, j] = eq.time_slice[0].profiles_2d[0].grid.dim1[i]
             eq.time_slice[0].profiles_2d[0].z[i, j] = eq.time_slice[0].profiles_2d[0].grid.dim2[j]
     # Eq. (19)
-    fact = cocos.sigma__rphi_z * cocos.sigma__bp / (2.0 * np.pi) ** cocos.exp__bp
+    fact = cocos.sigma_rphi_z * cocos.sigma_bp / (2.0 * np.pi) ** cocos.exp_bp
     dim1 = eq.time_slice[0].profiles_2d[0].grid.dim1
     dim2 = eq.time_slice[0].profiles_2d[0].grid.dim2
     for i in range(nw):
@@ -465,15 +465,15 @@ def geqdsk2ids(fpath, ipsign=0, b0sign=0, cocos_in=None):
 
     # Read GEQDSK file
     logger.info("loading GEQDSK file ...")
-    geqdsk = g_e_q_d_s_k(fpath, ipsign, b0sign, cocos_in)
+    geqdsk = GEQDSK(fpath, ipsign, b0sign, cocos_in)
 
     # Map GEQDSK to IDS/equilibrium
     logger.info("mapping GEQDSK to IDS/equilibrium ...")
     eq = imas.equilibrium()
-    map__g_e_q_d_s_k_to__i_d_s(geqdsk, eq)
+    map__GEQDSK_to_ids(geqdsk, eq)
 
     # COCOS Check
-    cocos = compute__COCOS(eq)
+    cocos = compute_COCOS(eq)
     logger.info("IDS COCOS: \n%s", pformat(cocos, indent=2))
 
     # Check if COCOS is equal to IDS_COCOS

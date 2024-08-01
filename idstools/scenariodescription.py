@@ -56,7 +56,7 @@ yaml_mapping = {
 
 
 # Class is a base class for scenario descriptions.
-class scenario_description_base:
+class ScenarioDescriptionBase:
     def __init__(self, folder_path=os.getcwd()) -> None:
         """
         The function initializes a folder path variable based on the provided input or a default value.
@@ -81,7 +81,7 @@ class scenario_description_base:
         """
         with open(yaml_file_path, "r") as file_handle:
             try:
-                yaml_data = yamlload(file_handle, loader=yaml_loader)
+                yaml_data = yamlload(file_handle, loader=yamlLoader)
             except Exception as e:
                 logger.debug(f"{e}")
                 yaml_data = None
@@ -102,7 +102,7 @@ class scenario_description_base:
         Returns:
             a pandas DataFrame object.
         """
-        yaml_data = scenario_description_base.get_yaml_data(yaml_file_path)
+        yaml_data = ScenarioDescriptionBase.get_yaml_data(yaml_file_path)
         if add_obsolete is False:
             if yaml_data["status"] != "active":
                 return None
@@ -129,7 +129,7 @@ class scenario_description_base:
         if extension == ".yaml":
             data_frames = []
             for yaml_file in files:
-                df = scenario_description_base.get_data_frame_from_yaml(yaml_file, add_obsolete=add_obsolete)
+                df = ScenarioDescriptionBase.get_data_frame_from_yaml(yaml_file, add_obsolete=add_obsolete)
                 if df is not None:
                     df["location"] = yaml_file
                     local_time = time.ctime(os.path.getmtime(yaml_file))
@@ -172,7 +172,7 @@ class scenario_description_base:
 
 
 # The class ScenarioDescription is a subclass of ScenarioDescriptionBase.
-class scenario_description(scenario_description_base):
+class scenario_description(ScenarioDescriptionBase):
     def __init__(self, pulse: int, run: int, folder_path: str = "") -> None:
         """
         The above function initializes an object with a pulse, run, and folder path, and attempts to load
@@ -190,7 +190,7 @@ class scenario_description(scenario_description_base):
         self.yaml_data = None
         try:
             with open(yaml_file_name, "r") as f:
-                self.yaml_data = yamlload(f, loader=yaml_loader)
+                self.yaml_data = yamlload(f, loader=yamlLoader)
         except Exception as e:
             logger.debug(f"{e}")
             logger.critical(f"Warning: {e}")
@@ -299,5 +299,5 @@ class scenario_description(scenario_description_base):
 
 if __name__ == "__main__":
     default_folder_path = r"/work/imas/shared/imasdb/ITER/3/0"
-    scenario_description_obj = scenario_description_base(folder_path=default_folder_path)
+    scenario_description_obj = ScenarioDescriptionBase(folder_path=default_folder_path)
     df = scenario_description_obj.get_dataframes_from_files(extension=".yaml", add_obsolete=False)

@@ -36,7 +36,7 @@ if args["folder"] != None:
 else:
     machine_description_folder = "/work/imas/shared/imasdb/ITER_MD/3"
 
-md_object = machine_description(machine_description_folder, connection_args=None)
+md_object = MachineDescription(machine_description_folder, connection_args=None)
 
 if not md_object.check_if_exist(shot, run):
     print(f"Data entry {shot}/{run} does not exist")

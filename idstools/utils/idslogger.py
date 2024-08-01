@@ -38,7 +38,7 @@ def setup_logger(
 
     # Create file handler for logging to a file (log all five levels)
     if log_file:
-        file_handler = logging.file_handler(log_file)
+        file_handler = logging.FileHandler(log_file)
         file_handler.setLevel(log_file_level)
         file_handler.setFormatter(formatter)
         logger.addHandler(file_handler)

@@ -20,7 +20,7 @@ from rich_argparse import RichHelpFormatter
 from idstools.idschk import ids_validator
 from idstools.database import DBMaster
 from idstools.idslist import available_in_dbentry
-from idstools.utils.clihelper import getBackendID, imasParser
+from idstools.utils.clihelper import get_backend_id, imas_parser
 from idstools.utils.idshelper import compareIds
 from idstools.utils.idslogger import setup_logger
 
@@ -57,13 +57,13 @@ parser.add_argument(
     help="Performs diff and validation of the migrated data",
 )
 args = parser.parse_args()
-locpath = DBMaster.get_d_b_path(args.user, args.database, args.version)
+locpath = DBMaster.get_db_Path(args.user, args.database, args.version)
 
-backend = get_backend_i_d(args.backend)
+backend = get_backend_id(args.backend)
 
 log = []
 
-if backend == imas.imasdef.m_d_s_p_l_u_s__b_a_c_k_e_n_d:
+if backend == imas.imasdef.MDSPLUS_BACKEND:
     files = DBMaster.mds_list_pulse_run(locpath, with_status="active" if args.skip_obsolete else None)
 elif backend == imas.imasdef.h_d_f5__b_a_c_k_e_n_d:
     files = DBMaster.hdf5_list_pulse_run(locpath)
@@ -101,7 +101,7 @@ for pulse in track(files, description="[green]Processing..."):
             log.append("Error opening pulse!")
             continue
 
-        dest = imas.DBEntry(get_backend_i_d(args.backend_output), args.database_out, pulse[0], run)
+        dest = imas.DBEntry(get_backend_id(args.backend_output), args.database_out, pulse[0], run)
         status, idx = dest.create()
         if status != 0:
             console.print(

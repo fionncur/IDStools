@@ -66,7 +66,7 @@ imas_parser.add_argument(
 dbentry_parser = argparse.ArgumentParser(add_help=False, parents=[uri_parser])
 
 
-def get_backend_i_d(name):
+def get_backend_id(name):
     return getattr(imasdef, f"{name}_BACKEND")
 
 

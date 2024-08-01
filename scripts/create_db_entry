@@ -11,7 +11,7 @@ import numpy as np
 import sys
 from os import system, path
 from sys import exit
-from idstools.utils.clihelper import getBackendID, imasParser
+from idstools.utils.clihelper import get_backend_id, imas_parser
 
 # ----------------------------------------------------------------------
 
@@ -33,7 +33,7 @@ parser.add_argument(
 )
 args = parser.parse_args()
 input = imas.DBEntry(
-    get_backend_i_d(args.backend),
+    get_backend_id(args.backend),
     args.database,
     args.shot,
     args.run,
@@ -627,7 +627,7 @@ if not args.wo_validation:
     schema += sorted(glob(schema_dir + "/ITER/*.y*ml", recursive=True))
 
     # Initialize Class ScenarioValidator
-    sv = scenario_validator(schema_path=schema)
+    sv = ScenarioValidator(schema_path=schema)
 
     # Validation for Class imas.DBEntry
     ret = sv.validate_db(input)

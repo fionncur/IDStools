@@ -10,7 +10,7 @@ from idstools.database import DBMaster
 logger = logging.getLogger(f"module.{__name__}")
 
 
-class machine_description:
+class MachineDescription:
     md_summary_path = r"/work/imas/shared/imasdb/ITER_MD/3/md_summary.yaml"
 
     def __init__(self, md_summary_path: str = "", connection_args=None) -> None:
@@ -21,7 +21,7 @@ class machine_description:
 
         self.md_summary_yaml = {}
         if not md_summary_path:
-            _md_summary_path = machine_description.md_summary_path
+            _md_summary_path = MachineDescription.md_summary_path
 
         else:
             _md_summary_path = md_summary_path
@@ -31,11 +31,11 @@ class machine_description:
         with open(_md_summary_path, "r") as stream:
             try:
                 self.md_summary_yaml = safe_load(stream)
-            except y_a_m_l_error as exc:
+            except YAMLError as exc:
                 print(exc)
 
     def get_latest_ids_data(self, ids_name: str):
-        md_ids_dict = self.get_m_d_summary(ids_name)
+        md_ids_dict = self.get_md_summary(ids_name)
         ids_data = None
         config = None
         # Get wall of the tokamak
@@ -74,7 +74,7 @@ class machine_description:
             "connectionArgs": copy.deepcopy(md_args),
         }
 
-    def get_m_d_data_by_ids_list(self, md_ids_list=[]):
+    def get_md_data_by_ids_list(self, md_ids_list=[]):
         """
         The `getMachineDatabaseData` method is responsible for retrieving machine database data for the specified
         pulse list. It iterates over each pulse in the `mdSummaryYaml` dictionary and checks if the pulse is present
@@ -99,7 +99,7 @@ class machine_description:
         )
         return data
 
-    def get_m_d_summary(
+    def get_md_summary(
         self,
         ids_names: typing.Union[typing.list, str] = "",
         add_obsoelete=False,
