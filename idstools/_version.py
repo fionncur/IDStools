@@ -89,7 +89,7 @@ def run_command(commands, args, cwd=None, verbose=False, hide_stderr=False, env=
     popen_kwargs = {}
     if sys.platform == "win32":
         # This hides the console window if pythonw.exe is used
-        startupinfo = subprocess.s_t_a_r_t_u_p_i_n_f_o()
+        startupinfo = subprocess.s_t_a_r_t_u_p_INFO()
         startupinfo.dw_flags |= subprocess.s_t_a_r_t_f__u_s_e_s_h_o_w_w_i_n_d_o_w
         popen_kwargs["startupinfo"] = startupinfo
 

@@ -29,13 +29,13 @@ if __name__ == "__main__":
     )
     timegroup.add_argument(
         "-a",
-        "--allSlices",
+        "--all_slices",
         action="store_true",
         help="Use get_slice with all available times",
     )
     parser.add_argument(
         "-m",
-        "--memoryBackend",
+        "--memory_backend",
         action="store_true",
         help="Use MEMORY_BACKEND for this test (involve reading from file and loading in memory first)",
     )
@@ -64,8 +64,8 @@ if __name__ == "__main__":
         help='IDS name(s) (leave empty to select all IDSs with default occurrence, or append "/n" to copy a specific occurrence "n")',
     )
     parser.add_argument(
-        "-uriOut",
-        "--uriOut",
+        "-uri_out",
+        "--uri_out",
         type=str,
         help="uri out \t\t(default=%(default)s)",
     )
@@ -116,12 +116,12 @@ if __name__ == "__main__":
     dbout = None
 
     # Set command
-    dbout_args = argparse.namespace()
+    dbout_args = argparse.Namespace()
     if args.uri_out or args.output_run:
         if args.uri_out:
             dbout_args.uri = args.uri_out
             if args.verbose:
-                print("Using given uriOut for checking put performance")
+                print("Using given uri_out for checking put performance")
         elif args.output_run:
             import re
 

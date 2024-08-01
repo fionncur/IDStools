@@ -24,7 +24,7 @@ from idstools.utils.clihelper import get_backend_id, imas_parser
 from idstools.utils.idshelper import compareIds
 from idstools.utils.idslogger import setup_logger
 
-logger = setup_logger("module", stdout_level=logging.i_n_f_o)
+logger = setup_logger("module", stdout_level=logging.INFO)
 console = Console()
 
 parser = argparse.ArgumentParser(
@@ -65,7 +65,7 @@ log = []
 
 if backend == imas.imasdef.MDSPLUS_BACKEND:
     files = DBMaster.mds_list_pulse_run(locpath, with_status="active" if args.skip_obsolete else None)
-elif backend == imas.imasdef.h_d_f5__b_a_c_k_e_n_d:
+elif backend == imas.imasdef.HDF5_BACKEND:
     files = DBMaster.hdf5_list_pulse_run(locpath)
 
 schema = []

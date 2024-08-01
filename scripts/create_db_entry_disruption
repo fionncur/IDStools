@@ -25,7 +25,7 @@ from idstools.utils.clihelper import imas_parser, get_backend_id
 parser = argparse.ArgumentParser(
     description="""---- Auto-generated yaml scenario and watcher files (!!! STILL TO BE COMPLETED BY HAND !!!)\n\nImportant: The legacy create_db_entry_disruption tool is deprecated and will be removed in a future versions. It will remain available until simdb is fully adopted.more about simdb : https://simdb.iter.org/dashboard/""",
     parents=[imas_parser],
-    formatter_class=raw_description_rich_help_formatter,
+    formatter_class=RawDescriptionRichHelpFormatter,
 )
 parser.add_argument("-s", "--shot", dest="shot", help="Shot number", type=int)
 parser.add_argument("-r", "--run", help="Run number", type=int)

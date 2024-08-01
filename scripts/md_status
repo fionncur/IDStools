@@ -8,7 +8,7 @@ from idstools.machinedescription import MachineDescription
 # Management of input arguments
 parser = argparse.ArgumentParser(
     description="""---- Show status and potential parent and children for a given simulation stored in ITER machine description database folder\n\nImportant: The legacy md_status tool is deprecated and will be removed in a future versions. It will remain available until simdb is fully adopted.more about simdb : https://simdb.iter.org/dashboard/""",
-    formatter_class=raw_description_rich_help_formatter
+    formatter_class=RawDescriptionRichHelpFormatter
 )
 parser.add_argument(
     "-f",
@@ -31,7 +31,7 @@ run = args["run"]
 
 
 # FOLDER
-if args["folder"] != None:
+if args["folder"] is not None:
     machine_description_folder = args["folder"]
 else:
     machine_description_folder = "/work/imas/shared/imasdb/ITER_MD/3"

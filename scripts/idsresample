@@ -9,8 +9,8 @@ import imas
 from rich_argparse import RichHelpFormatter
 
 from idstools.database import DBMaster
-from idstools.utils.clihelper import getCoreVersion
-from idstools.utils.idshelper import resampleIndices, resampleTimes
+from idstools.utils.clihelper import get_core_version
+from idstools.utils.idshelper import resample_indices, resample_times
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
@@ -58,7 +58,7 @@ if __name__ == "__main__":
     if args.ids == []:
         args.ids = [ids.value for ids in list(imas.IDSName)]
 
-    inputargs = argparse.namespace()
+    inputargs = argparse.Namespace()
     inputargs.uri = args.src
     src = DBMaster.get_connection(inputargs)
     if src is None:
@@ -68,13 +68,13 @@ if __name__ == "__main__":
     if get_core_version() > 4:
         tmp = imas.DBEntry("imas:memory?path=tmp/1/1", "w")
     else:
-        tmp = imas.DBEntry(imas.imasdef.m_e_m_o_r_y__b_a_c_k_e_n_d, "tmp", 1, 1)
+        tmp = imas.DBEntry(imas.imasdef.MEMORY_BACKEND, "tmp", 1, 1)
     status, _ = tmp.create()
     if status != 0:
         print("Error creating temporary data-entry in memory!", file=sys.stderr)
         sys.exit(status)
 
-    outputargs = argparse.namespace()
+    outputargs = argparse.Namespace()
     outputargs.mode = "w"
     outputargs.uri = args.dest
     dest = DBMaster.create_connection(outputargs)

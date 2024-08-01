@@ -21,7 +21,7 @@ from idstools.utils.idslogger import setup_logger
 from idstools.view.common import PlotCanvas
 from idstools.view.spectrometer_visible import SpectrometerVisibleView
 
-logger = setup_logger("module", stdout_level=logging.i_n_f_o)
+logger = setup_logger("module", stdout_level=logging.INFO)
 
 parser = argparse.ArgumentParser(
     description="---- Display spectrum from spectrometer_visible [previsouly known as svplot]",
@@ -58,7 +58,7 @@ connection.close()
 time_array = ids_spectrometer_visible.time
 time_index, time_value = get_nearest_time(time_array, args.time)
 
-sv_compute = spectrometer_visible_compute(ids_spectrometer_visible)
+sv_compute = SpectrometerVisibleCompute(ids_spectrometer_visible)
 spectrometers_list = sv_compute.get_valid_spectrometers()
 total_spectrometers = len(spectrometers_list)
 

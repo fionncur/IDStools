@@ -713,7 +713,7 @@ def read_scenario(
     if out_ids_list is None:
         out_ids_list = []
     with open(scenario_file_path, "r") as scenario_file:
-        config = yamlload(scenario_file, loader=yamlLoader)
+        config = yamlload(scenario_file, Loader=yamlLoader)
 
     # Read the equilibrium and core_profiles IDSs from the input datafile
     connection_in = imas.DBEntry(
@@ -755,7 +755,7 @@ def read_scenario(
     connection_out.close()
     import argparse
 
-    inputargs = argparse.namespace()
+    inputargs = argparse.Namespace()
     inputargs.backend = imas.imasdef.MDSPLUS_BACKEND
     inputargs.pulse = config["shot"]
     inputargs.run = config["run_in"]

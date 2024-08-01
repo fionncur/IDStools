@@ -6,7 +6,7 @@ from operator import itemgetter
 from stat import *
 from idstools.database import DBMaster
 
-from idstools.utils.clihelper import getCoreVersion
+from idstools.utils.clihelper import get_core_version
 from yaml import load as yamlload
 
 try:
@@ -17,11 +17,11 @@ except ImportError:
 
 
 # For better formatting of input argument listing in the help of the function
-class smart_formatter(argparse.help_formatter):
+class SmartFormatter(argparse.HelpFormatter):
     def _split_lines(self, text, width):
         if text.startswith("R|"):
             return text[2:].splitlines()
-        return argparse.help_formatter._split_lines(self, text, width)
+        return argparse.HelpFormatter._split_lines(self, text, width)
 
 
 # ----------------------------------------------------------------------------
@@ -54,7 +54,7 @@ def rec(
             try:
                 j = j + 1
                 file = open(files[i], "r")
-                data[j] = yamlload(file, loader=yamlLoader)
+                data[j] = yamlload(file, Loader=yamlLoader)
                 data[j]["location"] = files[i]
                 file.close()
             except Exception as e:
@@ -329,7 +329,7 @@ if __name__ == "__main__":
     # Input arguments
     parser = argparse.ArgumentParser(
         description="---- Script to list available disruptions in a specific folder ----",
-        formatter_class=smart_formatter,
+        formatter_class=SmartFormatter,
     )
     parser.add_argument(
         "-f",
@@ -382,9 +382,9 @@ if __name__ == "__main__":
     if args["folder"] != None:
         folder = args["folder"]
     else:
-        l_l_version = DBMaster.get_core_version()
-        l_l_version = int(l_l_version.split(".")[0])
-        if l_l_version < 4:
+        ll_version = DBMaster.get_core_version()
+        ll_version = int(ll_version.split(".")[0])
+        if ll_version < 4:
             folder = "/work/imas/shared/iterdb/3/0"
         else:
             folder = "/work/imas/shared/imasdb/ITER_DISRUPTIONS/3/0"

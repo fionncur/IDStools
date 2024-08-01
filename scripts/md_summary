@@ -8,17 +8,17 @@ from idstools.machinedescription import MachineDescription
 
 
 # FOR BETTER FORMATTING OF INPUT ARGUMENT LISTING IN THE HELP OF THE FUNCTION
-class smart_formatter(argparse.help_formatter):
+class SmartFormatter(argparse.HelpFormatter):
     def _split_lines(self, text, width):
         if text.startswith("R|"):
             return text[2:].splitlines()
-        return argparse.help_formatter._split_lines(self, text, width)
+        return argparse.HelpFormatter._split_lines(self, text, width)
 
 
 # INPUT ARGUMENTS
 parser = argparse.ArgumentParser(
     description="""---- Script to list available MD data in a specific folder ----\n\nImportant: The legacy md_summary tool is deprecated and will be removed in a future versions. It will remain available until simdb is fully adopted.more about simdb : https://simdb.iter.org/dashboard/""",
-    formatter_class=smart_formatter,
+    formatter_class=SmartFormatter,
 )
 parser.add_argument(
     "-f", "--folder", help="folder where to search for MD data", required=False

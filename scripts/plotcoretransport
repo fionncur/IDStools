@@ -27,12 +27,12 @@ from idstools.utils.idslogger import setup_logger
 from idstools.view.common import PlotCanvas
 from idstools.view.core_transport import CoreTransportView
 
-logger = setup_logger("module", stdout_level=logging.i_n_f_o)
+logger = setup_logger("module", stdout_level=logging.INFO)
 
 slicing_methods = {
-    "CLOSEST": imasdef.c_l_o_s_e_s_t__i_n_t_e_r_p,
+    "CLOSEST": imasdef.CLOSEST_INTERP,
     "PREVIOUS": imasdef.PREVIOUS_INTERP,
-    "LINEAR": imasdef.l_i_n_e_a_r__i_n_t_e_r_p,
+    "LINEAR": imasdef.LINEAR_INTERP,
 }
 # Management of input arguments
 parser = argparse.ArgumentParser(
@@ -133,7 +133,7 @@ ions_energy_fluxes_axes = [
     for x in range(columns)
 ]
 
-ct_view = core_transport_view(ids_slice_core_transport)
+ct_view = CoreTransportView(ids_slice_core_transport)
 
 ct_view.view_ions_particle_fluxes(
     ions_particle_fluxes_axes,

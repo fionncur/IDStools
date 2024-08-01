@@ -19,7 +19,7 @@ from idstools.utils.idslogger import setup_logger
 from idstools.view.common import PlotCanvas
 from idstools.view.waves import WavesView
 
-logger = setup_logger("module", stdout_level=logging.i_n_f_o)
+logger = setup_logger("module", stdout_level=logging.INFO)
 
 
 def show_plots(args):

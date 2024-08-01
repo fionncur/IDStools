@@ -259,18 +259,14 @@ if __name__ == "__main__":
             totaldf["SLICES"] = slices
 
         if args.sizevtime:
-            totaldf["MDSPLUS_PERFORMANCE (MB/s)"] = totaldf.apply(
-                lambda row: (row.s_i_z_e / row.m_d_s_p_l_u_s__t_i_m_e), axis=1
-            )
-            totaldf["HDF5_PERFORMANCE (MB/s)"] = totaldf.apply(lambda row: (row.s_i_z_e / row.h_d_f5__t_i_m_e), axis=1)
+            totaldf["MDSPLUS_PERFORMANCE (MB/s)"] = totaldf.apply(lambda row: (row.SIZE / row.MDSPLUS_TIME), axis=1)
+            totaldf["HDF5_PERFORMANCE (MB/s)"] = totaldf.apply(lambda row: (row.SIZE / row.HDF5_TIME), axis=1)
 
         if args.slicevtime:
             totaldf["MDSPLUS_PERFORMANCE (Slices/s)"] = totaldf.apply(
-                lambda row: (row.s_l_i_c_e_s / row.m_d_s_p_l_u_s__t_i_m_e), axis=1
+                lambda row: (row.SLICES / row.MDSPLUS_TIME), axis=1
             )
-            totaldf["HDF5_PERFORMANCE (Slices/s)"] = totaldf.apply(
-                lambda row: (row.s_l_i_c_e_s / row.h_d_f5__t_i_m_e), axis=1
-            )
+            totaldf["HDF5_PERFORMANCE (Slices/s)"] = totaldf.apply(lambda row: (row.SLICES / row.HDF5_TIME), axis=1)
 
         date = datetime.now().strftime("%Y_%m_%d-%I:%M:%S_%p")
         totaldf.to_csv("totaldf-" + date + ".csv", na_rep="None", index=False, header=True)
@@ -282,7 +278,7 @@ if __name__ == "__main__":
             totaldf = totaldf[(totaldf["IDS"].isin(args.ids))]
 
         if args.excludeids:
-            totaldf.drop(totaldf[totaldf.i_d_s.isin(args.excludeids)].index, inplace=True)
+            totaldf.drop(totaldf[totaldf.IDS.isin(args.excludeids)].index, inplace=True)
 
     if args.verbose:
         print(totaldf)

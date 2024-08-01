@@ -30,7 +30,7 @@ yaml option is provided which is used by other scripts to provide list of idses 
 parser = argparse.ArgumentParser(
     prog="idslist",
     formatter_class=RichHelpFormatter,
-    description=markdown(description, style="argparse.text"),
+    description=Markdown(description, style="argparse.text"),
     parents=[dbentry_parser],
 )
 parser.add_argument(

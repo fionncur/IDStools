@@ -12,7 +12,7 @@ from rich_argparse import RichHelpFormatter
 from idstools.compute.equilibrium import EquilibriumCompute
 from idstools.utils.idslogger import setup_logger
 
-logger = setup_logger("module", stdout_level=logging.i_n_f_o)
+logger = setup_logger("module", stdout_level=logging.INFO)
 #
 
 # Management of input arguments
@@ -43,7 +43,7 @@ args = parser.parse_args()
 shift_param = args.shift
 
 # OPEN INPUT
-inputargs = argparse.namespace()
+inputargs = argparse.Namespace()
 inputargs.uri = args.src
 connection = DBMaster.get_connection(inputargs)
 if connection is None:
@@ -51,7 +51,7 @@ if connection is None:
 
 ids_equilibrium = connection.get("equilibrium")
 
-outputargs = argparse.namespace()
+outputargs = argparse.Namespace()
 outputargs.mode = "w"
 outputargs.uri = args.dest
 

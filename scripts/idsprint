@@ -86,7 +86,7 @@ if __name__ == "__main__":
         ids = connection.get(ids_name, occurrence)
         if args.compact:
             try:
-                output = string_i_o()
+                output = StringIO()
                 sys.stdout = open(os.devnull, "w")
 
                 ids.dump(print_empty=args.show_empty, file=output)

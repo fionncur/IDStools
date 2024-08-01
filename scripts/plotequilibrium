@@ -28,7 +28,7 @@ from idstools.view.pf_active import PFActiveView
 from idstools.view.wall import WallView
 
 
-class md_action(argparse.action):
+class MdAction(argparse.Action):
     def __call__(self, parser, namespace, values, option_string=None):
         if len(values) == 0:
             setattr(namespace, self.dest, True)
@@ -52,7 +52,7 @@ parser.add_argument(
     "-md",
     "--md",
     nargs="*",
-    action=md_action,
+    action=MdAction,
     default=[],
     help="""Provide machine descriptions that you need to plot\n
 with ids names for example wall pf_active \n
@@ -91,7 +91,7 @@ if len(splitted_ids_info) == 2:
         splitted_ids_path_fragment = ids_path_fragment.split("/", 1)
         occurrence = int(splitted_ids_path_fragment[0])
 
-logger = setup_logger("module", stdout_level=logging.i_n_f_o)
+logger = setup_logger("module", stdout_level=logging.INFO)
 
 connection = DBMaster.get_connection(args)
 if connection is None:
@@ -130,13 +130,13 @@ if ids_obj_equilibrium.time is not None:
         if len(splittedms_ids_info) == 2:
             _md_uri, ids_name = splittedms_ids_info
             _ids_name.append(ids_name)
-            mdargs = argparse.namespace()
+            mdargs = argparse.Namespace()
             mdargs.uri = _md_uri
             inputargs = mdargs
         if len(splittedms_ids_info) == 1:
             if "imas:" in splittedms_ids_info[0]:
                 _md_uri = splittedms_ids_info[0]
-                mdargs = argparse.namespace()
+                mdargs = argparse.Namespace()
                 mdargs.uri = _md_uri
                 inputargs = mdargs
             else:

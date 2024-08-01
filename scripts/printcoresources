@@ -16,12 +16,12 @@ from idstools.utils.clihelper import dbentry_parser, get_database_path
 from idstools.utils.idslogger import setup_logger
 from idstools.view.core_sources import CoreSourcesView
 
-logger = setup_logger("module", stdout_level=logging.i_n_f_o)
+logger = setup_logger("module", stdout_level=logging.INFO)
 
 slicing_methods = {
-    "CLOSEST": imasdef.c_l_o_s_e_s_t__i_n_t_e_r_p,
+    "CLOSEST": imasdef.CLOSEST_INTERP,
     "PREVIOUS": imasdef.PREVIOUS_INTERP,
-    "LINEAR": imasdef.l_i_n_e_a_r__i_n_t_e_r_p,
+    "LINEAR": imasdef.LINEAR_INTERP,
 }
 # Management of input arguments
 parser = argparse.ArgumentParser(
@@ -64,5 +64,5 @@ if len(ids_slice_core_sources.time) == 0:
 print(f"Showing details for {get_database_path(args, ids_slice_core_sources.time[0])}")
 
 
-core_sources_view = core_sources_view(ids_slice_core_sources)
+core_sources_view = CoreSourcesView(ids_slice_core_sources)
 core_sources_view.view_sources()

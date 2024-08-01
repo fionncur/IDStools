@@ -23,7 +23,7 @@ from idstools.utils.idslogger import setup_logger
 from idstools.view.common import PlotCanvas
 from idstools.view.edge_profiles import EdgeProfilesView
 
-logger = setup_logger("module", stdout_level=logging.i_n_f_o)
+logger = setup_logger("module", stdout_level=logging.INFO)
 
 parser = argparse.ArgumentParser(
     description="---- Edge Profile plot",
@@ -74,15 +74,15 @@ if args.wall:
     if wall_ids.ids_properties.homogeneous_time == imasdef.EMPTY_INT:
 
         machine_description = MachineDescription(connection_args=copy.deepcopy(args))
-        wall_m_d_dict = machine_description.get_latest_ids_data("wall")
-        wall_ids = wall_m_d_dict["idsData"]
+        wall_md_dict = machine_description.get_latest_ids_data("wall")
+        wall_ids = wall_md_dict["idsData"]
     if wall_ids.ids_properties.homogeneous_time == imasdef.EMPTY_INT:
         logger.error("wall ids is not present")
     else:
         r = None
         z = None
         h = None
-        wall_compute = wall_compute(wall_ids)
+        wall_compute = WallCompute(wall_ids)
         if vessel_units := wall_compute.get_vessel_units(name_filter="VV IS"):
             for _, description2d in vessel_units.items():
                 for v_index, vessel_unit in description2d["vesselunits"].items():
@@ -103,7 +103,7 @@ if time_array is None:
 
 time_index, time_value = get_nearest_time(time_array, args.time)
 
-edge_profile_ids = connection.get_slice("edge_profiles", time_value, imasdef.c_l_o_s_e_s_t__i_n_t_e_r_p)
+edge_profile_ids = connection.get_slice("edge_profiles", time_value, imasdef.CLOSEST_INTERP)
 
 if len(edge_profile_ids.grid_ggd) == 0:
     logger.error(
@@ -118,7 +118,7 @@ if len(edge_profile_ids.grid_ggd[0].space) == 0:
     exit(1)
 
 
-edge_profiles_view = edge_profiles_view(edge_profile_ids)
+edge_profiles_view = EdgeProfilesView(edge_profile_ids)
 canvas = PlotCanvas(2, 4)
 
 

@@ -30,7 +30,7 @@ def main():
     # Create the output datafile
     logger.info("creating output datafile ...")
 
-    outputargs = argparse.namespace()
+    outputargs = argparse.Namespace()
     outputargs.user = os.environ["USER"]
     outputargs.mode = "w"
     # if args.dest is None:
@@ -95,7 +95,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         prog=prog,
         formatter_class=RichHelpFormatter,
-        description=markdown(description, style="argparse.text"),
+        description=Markdown(description, style="argparse.text"),
     )
     parser.add_argument(
         "-s",

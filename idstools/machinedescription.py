@@ -41,7 +41,7 @@ class MachineDescription:
         # Get wall of the tokamak
         import argparse
 
-        md_args = argparse.namespace()
+        md_args = argparse.Namespace()
         md_args.backend = "MDSPLUS"
         md_args.pulse = 0
         md_args.run = 0

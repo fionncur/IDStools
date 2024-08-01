@@ -46,7 +46,7 @@ args = parser.parse_args()
 if args.verbose:
     logger = setup_logger("module", stdout_level=logging.DEBUG)
 else:
-    logger = setup_logger("module", stdout_level=logging.i_n_f_o)
+    logger = setup_logger("module", stdout_level=logging.INFO)
 
 connection = DBMaster.get_connection(args)
 if connection is None:

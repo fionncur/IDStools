@@ -27,7 +27,7 @@ from idstools.view.equilibrium import EquilibriumView
 from idstools.view.polygon import PolygonView
 from idstools.view.waves import WavesView
 
-logger = setup_logger("module", stdout_level=logging.i_n_f_o)
+logger = setup_logger("module", stdout_level=logging.INFO)
 
 parser = argparse.ArgumentParser(
     description="---- Shows electron cyclotron stray radiation information by showing different plots",

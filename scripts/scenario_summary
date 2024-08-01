@@ -4,7 +4,7 @@ import argparse
 import os
 import re
 import sys
-from idstools.utils.clihelper import getCoreVersion
+from idstools.utils.clihelper import get_core_version
 from rich.console import Console
 from rich.table import Table
 from idstools.scenariodescription import ScenarioDescriptionBase
@@ -43,11 +43,11 @@ display_mapping = {
 
 
 # For better formatting of input argument listing in the help of the function
-class smart_formatter(argparse.help_formatter):
+class SmartFormatter(argparse.HelpFormatter):
     def _split_lines(self, text, width):
         if text.startswith("R|"):
             return text[2:].splitlines()
-        return argparse.help_formatter._split_lines(self, text, width)
+        return argparse.HelpFormatter._split_lines(self, text, width)
 
 
 # ----------------------------------------------------------------------------
@@ -55,7 +55,7 @@ class smart_formatter(argparse.help_formatter):
 # Input arguments
 parser = argparse.ArgumentParser(
     description="""---- Script to list available scenarios in a specific folder ----\n\nImportant: The legacy scenario_summary tool is deprecated and will be removed in a future versions. It will remain available until simdb is fully adopted.more about simdb : https://simdb.iter.org/dashboard/""",
-    formatter_class=smart_formatter,
+    formatter_class=SmartFormatter,
 )
 parser.add_argument(
     "-f",

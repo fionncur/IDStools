@@ -19,8 +19,8 @@ from idstools.view.wall import WallView
 # ----------------------------------------------------------------------
 
 
-logger = setup_logger("module", stdout_level=logging.i_n_f_o)
-i_d_s_e_s = "wall,pf_active"
+logger = setup_logger("module", stdout_level=logging.INFO)
+idses = "wall,pf_active"
 
 
 def plot_machine_description(ids_data, show_labels=False):
@@ -41,7 +41,7 @@ def plot_machine_description(ids_data, show_labels=False):
         #     logger.error(f"Could not retrieve machine description for {idsName}")
         #     databasePath += f"{idsName} = not found"
         #     continue
-        ids_u_r_i, ids_name = ids_name.split("#")
+        ids_uri, ids_name = ids_name.split("#")
         if ids_name == "pf_active":
             pfcoilsview = PFActiveView(ids_data_and_config["idsData"])
             pfcoilsview.view_active_pf_coils(ax, show_labels=show_labels)
@@ -123,7 +123,7 @@ if __name__ == "__main__":
     machine_description = MachineDescription()
     ids_data = {}
     for mdids_info in args.uri:
-        mdargs = argparse.namespace()
+        mdargs = argparse.Namespace()
         splittedms_ids_info = mdids_info.split("#")
         _ids_names = ""
         _md_uri = None
@@ -136,9 +136,9 @@ if __name__ == "__main__":
         if connection:
             all_i_d_ses_list = [item for item, _ in available_in_dbentry(connection)]
             if _ids_names == "":
-                _ids_names = i_d_s_e_s
+                _ids_names = idses
             for _ids_name in _ids_names.split(","):
-                if _ids_name not in i_d_s_e_s:
+                if _ids_name not in idses:
                     continue
                 ids_found = False
                 if connection is not None:

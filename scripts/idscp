@@ -83,14 +83,14 @@ if args.ids == []:
     args.ids = [ids.value for ids in list(imas.IDSName)]
 
 
-inputargs = argparse.namespace()
+inputargs = argparse.Namespace()
 inputargs.uri = args.src
 
 src_connection = DBMaster.get_connection(inputargs)
 if src_connection is None:
     logger.error("Error opening source pulse! Please check existence.")
     sys.exit()
-outputargs = argparse.namespace()
+outputargs = argparse.Namespace()
 outputargs.uri = args.dest
 
 dest_connection = DBMaster.get_db_entry_object(outputargs)

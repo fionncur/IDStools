@@ -30,7 +30,7 @@ def main():
         exit(1)
 
     # Initialization for yaml Dumper
-    yaml.dumper.ignore_aliases = lambda *args: True
+    yaml.Dumper.ignore_aliases = lambda *args: True
 
     # COCOS Initialization
     index = {"COCOS": idschk.IDS_COCOS, "ipsign": args.ipsign, "b0sign": args.b0sign}
@@ -171,7 +171,7 @@ if __name__ == "__main__":
         prog="idschk",
         formatter_class=RichHelpFormatter,
         parents=[dbentry_parser],
-        description=markdown(description, style="argparse.text"),
+        description=Markdown(description, style="argparse.text"),
     )
     parser.add_argument(
         "-l",

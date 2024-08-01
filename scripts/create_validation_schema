@@ -64,7 +64,7 @@ def main():
         exit(f"file not found:{FILE_IDSDef }")
 
     # Initialization for yaml.Dumper
-    yaml.dumper.ignore_aliases = lambda *args: True
+    yaml.Dumper.ignore_aliases = lambda *args: True
 
     # Default rules for dynamic array
     rule = {"empty": False, "ids_dim": False}

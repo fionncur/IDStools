@@ -15,7 +15,7 @@ from idstools.view.common import PlotCanvas
 from idstools.view.distributions import DistributionsView
 from idstools.view.waves import WavesView
 
-logger = setup_logger("module", stdout_level=logging.i_n_f_o)
+logger = setup_logger("module", stdout_level=logging.INFO)
 
 
 def show_waves_plots(args, hold=False):
@@ -32,7 +32,7 @@ def show_waves_plots(args, hold=False):
     for irun in range(runmin, runmax + 1):
         logger.info(f"Open pulse: {pulse}/{irun} in DB {args['user']}/{args['database']}/{args['version']}")
 
-        connargs = argparse.namespace()
+        connargs = argparse.Namespace()
         connargs.backend = args["backend"]
         connargs.pulse = int(pulse)
         connargs.run = int(irun)
@@ -132,7 +132,7 @@ def show_distribution_plots(args, hold=False):
 
     for irun in range(runmin, runmax + 1):
         logger.info(f"Open pulse: {pulse}/{irun} in DB {args['user']}/{args['database']}/{args['version']}")
-        connargs = argparse.namespace()
+        connargs = argparse.Namespace()
         connargs.backend = args["backend"]
         connargs.pulse = int(pulse)
         connargs.run = int(irun)

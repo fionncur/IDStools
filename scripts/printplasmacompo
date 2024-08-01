@@ -39,9 +39,9 @@ parser.add_argument("--debug", action="store_true", help="Show debugging")
 
 args = parser.parse_args()
 
-level = logging.e_r_r_o_r
+level = logging.ERROR
 if args.info:
-    level = logging.i_n_f_o
+    level = logging.INFO
 if args.debug:
     level = logging.DEBUG
 logger = setup_logger("module", stdout_level=level)
@@ -127,7 +127,7 @@ if edge_profiles_ids.time is not None:
     print("----------------")
     print("edge_profiles")
     print("----------------")
-    returnstatus = edge_profiles_view.view_plasma_composition_with_species_concentration(edge_profiles_ids, 0)
+    returnstatus = EdgeProfilesView.view_plasma_composition_with_species_concentration(edge_profiles_ids, 0)
     if returnstatus == 0:
         edge_profile_exists = False
         logger.critical("edge_profiles IDS:IDS exists but time slice doesn't exists. --> Abort.")
@@ -167,9 +167,7 @@ if edge_profiles_ids.time is not None:
                 edge_profiles_ids.grid_ggd.resize(1)
                 edge_profiles_ids.grid_ggd[0] = connection.partial_get("edge_profiles", f"grid_ggd({time_slice})")
 
-                returnstatus = edge_profiles_view.view_plasma_composition_with_species_concentration(
-                    edge_profiles_ids, 0
-                )
+                returnstatus = EdgeProfilesView.view_plasma_composition_with_species_concentration(edge_profiles_ids, 0)
                 if returnstatus == 0:
                     edge_profile_exists = False
                     logger.critical("edge_profiles IDS:IDS exists but time slice doesn't exists. --> Abort.")

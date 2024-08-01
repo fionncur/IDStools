@@ -56,7 +56,7 @@ parser.add_argument(
     default=None,
 )
 args = parser.parse_args()
-logger = setup_logger("module", stdout_level=logging.i_n_f_o)
+logger = setup_logger("module", stdout_level=logging.INFO)
 
 # Open the database and read the necessary IDSs
 connection = DBMaster.get_connection(args)

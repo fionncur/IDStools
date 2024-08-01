@@ -9,12 +9,12 @@ from rich_argparse import RawDescriptionRichHelpFormatter
 
 from idstools.utils.idslogger import setup_logger
 
-logger = setup_logger("module", stdout_level=logging.i_n_f_o)
+logger = setup_logger("module", stdout_level=logging.INFO)
 
 # Management of input arguments
 parser = argparse.ArgumentParser(
     description="""---- Show full description file for a given simulation stored in ITER DB folder\n\nImportant: The legacy show_db_entry tool is deprecated and will be removed in a future versions. It will remain available until simdb is fully adopted.more about simdb : https://simdb.iter.org/dashboard/""",
-    formatter_class=raw_description_rich_help_formatter,
+    formatter_class=RawDescriptionRichHelpFormatter,
 )
 parser.add_argument("-f", "--folder", help="folder where to search for scenarios", required=False)
 parser.add_argument("-s", "--shot", help="shot number", required=True, type=int)
@@ -39,14 +39,14 @@ def print_yaml_contents(filename):
         with open(filename, "r") as file:
             file_contents = file.read()
             console = Console()
-            syntax = syntax(file_contents, "yaml")
+            syntax = Syntax(file_contents, "yaml")
             console.print(syntax)
     except FileNotFoundError:
         logger.error(f"File '{filename}' not found")
 
 
 # Folder
-if args["folder"] != None:
+if args["folder"] is not None:
     folder = args["folder"]
     print_yaml_contents(folder + "/" + filename)
 else:

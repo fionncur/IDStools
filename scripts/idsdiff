@@ -23,10 +23,10 @@ from rich_argparse import RichHelpFormatter
 
 from idstools.database import DBMaster
 from idstools.utils.ddhelper import DDHelper
-from idstools.utils.idshelper import compareIds
+from idstools.utils.idshelper import compare_ids
 from idstools.utils.idslogger import setup_logger
 
-t_h_r_e_s_h_o_l_d__p_e_r_c_e_n_t = 2
+THRESHOLD_PERCENT = 2
 
 
 def get_filename(file_title, log_dir):
@@ -127,12 +127,8 @@ def generate_html(file_path, compare_data):
                     else:
                         threshold_candidate = values[1]
                         compare_candidate = values[0][: len(values[1])]
-                    threshold_min = (
-                        (threshold_candidate * t_h_r_e_s_h_o_l_d__p_e_r_c_e_n_t) / 100
-                    ) - threshold_candidate
-                    threshold_max = (
-                        (threshold_candidate * t_h_r_e_s_h_o_l_d__p_e_r_c_e_n_t) / 100
-                    ) + threshold_candidate
+                    threshold_min = ((threshold_candidate * THRESHOLD_PERCENT) / 100) - threshold_candidate
+                    threshold_max = ((threshold_candidate * THRESHOLD_PERCENT) / 100) + threshold_candidate
 
                     within_threshold = all(compare_candidate > threshold_min) and all(compare_candidate < threshold_max)
                     if within_threshold is False:
@@ -254,7 +250,7 @@ def generate_html(file_path, compare_data):
                                 )
                             ax.legend(loc="upper right")
                             ax.grid()
-                            tmpfile = bytes_i_o()
+                            tmpfile = BytesIO()
                             fig.savefig(tmpfile, format="png")
                             encoded = base64.b64encode(tmpfile.getvalue()).decode("utf-8")
                             plt.close()
@@ -316,8 +312,8 @@ def generate_html(file_path, compare_data):
                     </tr>"""
             else:
                 if type(values[0]) is int or type(values[1]) is int:
-                    threshold_min = ((values[0] * t_h_r_e_s_h_o_l_d__p_e_r_c_e_n_t) / 100) - values[0]
-                    threshold_max = ((values[0] * t_h_r_e_s_h_o_l_d__p_e_r_c_e_n_t) / 100) + values[0]
+                    threshold_min = ((values[0] * THRESHOLD_PERCENT) / 100) - values[0]
+                    threshold_max = ((values[0] * THRESHOLD_PERCENT) / 100) + values[0]
                     if values[1] > threshold_min and values[1] < threshold_max:
                         report_diff_line = f"""<tr>
                             <td>{key}</td>
@@ -327,8 +323,8 @@ def generate_html(file_path, compare_data):
                             <td></td>
                         </tr>"""
                 elif type(values[0]) is float or type(values[1]) is float:
-                    threshold_min = ((values[0] * t_h_r_e_s_h_o_l_d__p_e_r_c_e_n_t) / 100) - values[0]
-                    threshold_max = ((values[0] * t_h_r_e_s_h_o_l_d__p_e_r_c_e_n_t) / 100) + values[0]
+                    threshold_min = ((values[0] * THRESHOLD_PERCENT) / 100) - values[0]
+                    threshold_max = ((values[0] * THRESHOLD_PERCENT) / 100) + values[0]
                     if values[1] > threshold_min and values[1] < threshold_max:
                         report_diff_line = f"""<tr>
                             <td>{key}</td>
@@ -449,7 +445,7 @@ if __name__ == "__main__":
 
     if args.uri is not None:
         for uriinfo in args.uri:
-            _uri_args = argparse.namespace()
+            _uri_args = argparse.Namespace()
             _uri_args.uri = uriinfo
             _connection = DBMaster.get_connection(_uri_args)
             if _connection is None:
@@ -470,8 +466,8 @@ if __name__ == "__main__":
         "module",
         log_file=log_file,
         fmt="%(message)s",
-        log_file_level=logging.i_n_f_o,
-        stdout_level=logging.i_n_f_o,
+        log_file_level=logging.INFO,
+        stdout_level=logging.INFO,
     )
     st = time.time()
     total_data = {}
@@ -515,7 +511,7 @@ if __name__ == "__main__":
         str_connection = "\n"
         str_connection += "\n".join([x[0] for x in connections])
         console = Console()
-        table = Table(title=text(f"Comparisen between {str_connection}", style="bold blue"))
+        table = Table(title=Text(f"Comparisen between {str_connection}", style="bold blue"))
         table.add_column("ids field name", style="magenta")
         table.add_column("Comment", style="green")
 
