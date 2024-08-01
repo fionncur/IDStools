@@ -271,7 +271,7 @@ if not selected_df.empty:
             x.append(str(row[column_name]))
         table.add_row(*x)  # Even row style
 
-    console = console()
+    console = Console()
     console.print(table)
 else:
     print(" No records found matching mentioned criteria")

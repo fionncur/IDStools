@@ -69,7 +69,7 @@ class core_sources_view:
                     style="bold green",
                 )
             ion_table.add_section()
-        console = console()
+        console = Console()
         console.print(ion_table)
 
     def view_power_profiles(self, ax, *args, **kwargs):

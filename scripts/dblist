@@ -121,7 +121,7 @@ def print_urilist(dbs, pulsenum=None, compact=False, timestamp=False):
                         if timestamp:
                             x.append(str(r[7]))
                         table.add_row(*x)
-    console = console()
+    console = Console()
     console.print(table)
 
 

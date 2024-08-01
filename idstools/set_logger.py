@@ -35,8 +35,8 @@ def set_logger(name, logfile=None, level=logging.WARN_i_n_g):
     if logfile:
         fh = logging.file_handler(logfile)
         fh.setLevel(fh_lv)
-        fh_formatter = logging.formatter(fmt=log_fmt, datefmt=date_fmt)
-        fh.set_formatter(fh_formatter)
+        fh_formatter = logging.Formatter(fmt=log_fmt, datefmt=date_fmt)
+        fh.setFormatter(fh_formatter)
 
         # add handler to the root logger
         # logger.addHandler(fh)
@@ -44,10 +44,10 @@ def set_logger(name, logfile=None, level=logging.WARN_i_n_g):
         logging.getLogger().setLevel(fh_lv)
 
     # create console handler
-    ch = logging.stream_handler()
+    ch = logging.StreamHandler()
     ch.setLevel(ch_lv)
-    ch_formatter = logging.formatter(fmt=log_fmt, datefmt=date_fmt)
-    ch.set_formatter(ch_formatter)
+    ch_formatter = logging.Formatter(fmt=log_fmt, datefmt=date_fmt)
+    ch.setFormatter(ch_formatter)
 
     # add handler to the root logger
     # logger.addHandler(ch)

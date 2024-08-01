@@ -38,7 +38,7 @@ def print_yaml_contents(filename):
     try:
         with open(filename, "r") as file:
             file_contents = file.read()
-            console = console()
+            console = Console()
             syntax = syntax(file_contents, "yaml")
             console.print(syntax)
     except FileNotFoundError:

@@ -70,7 +70,7 @@ class CoreTransportView:
                     style="bold green",
                 )
             ion_table.add_section()
-        console = console()
+        console = Console()
         console.print(ion_table)
 
     def view_ions_particle_fluxes(

@@ -514,7 +514,7 @@ if __name__ == "__main__":
         print("")
         str_connection = "\n"
         str_connection += "\n".join([x[0] for x in connections])
-        console = console()
+        console = Console()
         table = table(title=text(f"Comparisen between {str_connection}", style="bold blue"))
         table.add_column("ids field name", style="magenta")
         table.add_column("Comment", style="green")
