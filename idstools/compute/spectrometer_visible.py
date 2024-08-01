@@ -9,7 +9,7 @@ LABEL_INTENSITY = "Intensity (counts)"
 CHANNEL_NAME_PATTERN = r"^(\d{2}\.\w{2}) CH#(\d{2}) Spectrum (\d{1})$"
 
 
-class spectrometer_visible_compute:
+class SpectrometerVisibleCompute:
     def __init__(self, ids_object):
         self.ids_object = ids_object
 

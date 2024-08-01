@@ -246,7 +246,7 @@ class SummaryView(BasePlot):
 
         h_mode_dict = self.compute_obj.get_h_mode_info()
         h_mode_present, th_min, th_max = (
-            h_mode_dict["HModePresent"],
+            h_mode_dict["h_mode_present"],
             h_mode_dict["th_min"],
             h_mode_dict["th_max"],
         )

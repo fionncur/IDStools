@@ -12,7 +12,7 @@ import numpy as np
 logger = logging.getLogger("module")
 
 
-class distribution_sources_compute:
+class DistributionSourcesCompute:
     def __init__(self, ids):
         self.ids = ids
 

@@ -44,7 +44,7 @@ SCRIPTS=(
     "plotpressure --uri \"imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3\" --save --directory $LOG_DIR"
     "plotrotation --uri \"imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3\" --save --directory $LOG_DIR"
     "plotscenario --uri \"imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3\" --time 60 --save --directory $LOG_DIR"
-    "plotscenario --uri \"imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3\" --noProfiles --save --directory $LOG_DIR"
+    "plotscenario --uri \"imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3\" --no-profiles --save --directory $LOG_DIR"
     "printcoresources --uri \"imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3\""
     "plotspectrometry --uri \"imas:mdsplus?user=public;pulse=134000;run=37;database=TEST;version=3\" --save --directory $LOG_DIR")
 

@@ -742,7 +742,7 @@ class EdgeProfilesCompute:
         core_boundry_grid_subset = None
         core_grid_subset = None
         for grid_subset in self.ids.grid_ggd[time_slice].grid_subset:
-            if grid_subset.identifier.index == c_o_r_e__b_o_u_n_d_r_y__s_u_b_s_e_t__i_n_d_e_x:
+            if grid_subset.identifier.index == CORE_BOUNDRY_SUBSET_INDEX:
                 core_boundry_grid_subset = grid_subset
                 print(
                     f"Found Grid subset for core_boundry subset name:{grid_subset.identifier.name}, Index: \

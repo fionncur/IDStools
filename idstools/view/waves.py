@@ -259,7 +259,7 @@ class WavesView:
                 linestyle="--",
                 label=ec_launcher_info["single_ec_launcher_name"][i_wave],
             )
-        ax.set_ylabel("$\\mathrm{ECCD} [MA/m^{2}]}$")
+        ax.set_ylabel(r"$\mathrm{ECCD} \; [\mathrm{MA}/\mathrm{m}^{2}]$")
         if first_radial_grid_info["psiBased"] is False:
             ax.set_xlabel("Normalized toroidal flux coordinate")
         else:

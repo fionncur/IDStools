@@ -222,10 +222,10 @@ class CoreProfilesView:
             logger.critical("----> Aborted.")
             return
         dict_ion_pressure_properties = self.core_profiles_compute.get_ion_pressure_properties()
-        maxima_ion = dict_ion_pressure_properties["maximaIon"]
-        pressure_ion_thermal = dict_ion_pressure_properties["pressureIonThermal"]
-        pressure_ion_fast_parallel = dict_ion_pressure_properties["pressureIonFastParallel"]
-        pressure_ion_fast_perpendicular = dict_ion_pressure_properties["pressureIonFastPerpendicular"]
+        maxima_ion = dict_ion_pressure_properties["maxima_ion"]
+        pressure_ion_thermal = dict_ion_pressure_properties["pressure_ion_thermal"]
+        pressure_ion_fast_parallel = dict_ion_pressure_properties["pressure_ion_fast_parallel"]
+        pressure_ion_fast_perpendicular = dict_ion_pressure_properties["pressure_ion_fast_perpendicular"]
 
         font_args = {
             "fontfamily": "serif",

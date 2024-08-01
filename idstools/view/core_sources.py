@@ -10,7 +10,7 @@ from idstools.compute.core_sources import CoreSourcesCompute
 logger = logging.getLogger(f"module.{__name__}")
 
 
-class core_sources_view:
+class CoreSourcesView:
     def __init__(self, ids):
         self.core_sources_compute = CoreSourcesCompute(ids)
         self.ids = ids

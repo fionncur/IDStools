@@ -101,7 +101,7 @@ class MachineDescription:
 
     def get_md_summary(
         self,
-        ids_names: typing.Union[typing.list, str] = "",
+        ids_names: typing.Union[typing.List, str] = "",
         add_obsoelete=False,
         check_validity=False,
     ):

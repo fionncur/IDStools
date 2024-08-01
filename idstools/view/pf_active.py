@@ -63,8 +63,8 @@ class PFActiveView:
                 coil_elements = coil_info["elements"]
                 for _, element_info in coil_elements.items():
                     cew, ceh, cec = (
-                        element_info["horizontalWidth"],
-                        element_info["horizontalHeight"],
+                        element_info["horizontal_width"],
+                        element_info["horizontal_height"],
                         element_info["cec"],
                     )
                     rectangle = Rectangle(cec, cew, ceh, edgecolor="#fd7e14", facecolor="#fd7e14", alpha=0.5)

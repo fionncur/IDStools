@@ -42,7 +42,7 @@ def get_keywords():
     return keywords
 
 
-class versioneer_config:
+class VersioneerConfig:
     """Container for Versioneer configuration parameters."""
 
 
@@ -50,8 +50,8 @@ def get_config():
     """Create, populate and return the VersioneerConfig() object."""
     # these strings are filled in when 'setup.py versioneer' creates
     # _version.py
-    cfg = versioneer_config()
-    cfg.v_c_s = "git"
+    cfg = VersioneerConfig()
+    cfg.VCS = "git"
     cfg.style = "pep440"
     cfg.tag_prefix = ""
     cfg.parentdir_prefix = ""
@@ -60,12 +60,12 @@ def get_config():
     return cfg
 
 
-class not_this_method(Exception):
+class NotThisMethod(Exception):
     """Exception raised if a method is not valid for the current scenario."""
 
 
-l_o_n_g__v_e_r_s_i_o_n__p_y: dict[str, str] = {}
-h_a_n_d_l_e_r_s: dict[str, dict[str, callable]] = {}
+LONG_VERSION_PY: Dict[str, str] = {}
+HANDLERS: Dict[str, Dict[str, Callable]] = {}
 
 
 def register_vcs_handler(vcs, method):  # decorator
@@ -73,9 +73,9 @@ def register_vcs_handler(vcs, method):  # decorator
 
     def decorate(f):
         """Store f in HANDLERS[vcs][method]."""
-        if vcs not in h_a_n_d_l_e_r_s:
-            h_a_n_d_l_e_r_s[vcs] = {}
-        h_a_n_d_l_e_r_s[vcs][method] = f
+        if vcs not in HANDLERS:
+            HANDLERS[vcs] = {}
+        HANDLERS[vcs][method] = f
         return f
 
     return decorate
@@ -89,26 +89,26 @@ def run_command(commands, args, cwd=None, verbose=False, hide_stderr=False, env=
     popen_kwargs = {}
     if sys.platform == "win32":
         # This hides the console window if pythonw.exe is used
-        startupinfo = subprocess.s_t_a_r_t_u_p_INFO()
-        startupinfo.dw_flags |= subprocess.s_t_a_r_t_f__u_s_e_s_h_o_w_w_i_n_d_o_w
+        startupinfo = subprocess.STARTUPINFO()
+        startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
         popen_kwargs["startupinfo"] = startupinfo
 
     for command in commands:
         try:
             dispcmd = str([command] + args)
             # remember shell=False, so use git.cmd on windows, not just git
-            process = subprocess.popen(
+            process = subprocess.Popen(
                 [command] + args,
                 cwd=cwd,
                 env=env,
-                stdout=subprocess.p_i_p_e,
-                stderr=(subprocess.p_i_p_e if hide_stderr else None),
+                stdout=subprocess.PIPE,
+                stderr=(subprocess.PIPE if hide_stderr else None),
                 **popen_kwargs,
             )
             break
         except OSError:
             e = sys.exc_info()[1]
-            if e.errno == errno.e_n_o_e_n_t:
+            if e.errno == errno.ENOENT:
                 continue
             if verbose:
                 print("unable to run %s" % dispcmd)
@@ -151,7 +151,7 @@ def versions_from_parentdir(parentdir_prefix, root, verbose):
 
     if verbose:
         print("Tried directories %s but none started with prefix %s" % (str(rootdirs), parentdir_prefix))
-    raise not_this_method("rootdir doesn't start with parentdir_prefix")
+    raise NotThisMethod("rootdir doesn't start with parentdir_prefix")
 
 
 @register_vcs_handler("git", "get_keywords")
@@ -186,7 +186,7 @@ def git_get_keywords(versionfile_abs):
 def git_versions_from_keywords(keywords, tag_prefix, verbose):
     """Get version information from git keywords."""
     if "refnames" not in keywords:
-        raise not_this_method("Short version file found")
+        raise NotThisMethod("Short version file found")
     date = keywords.get("date")
     if date is not None:
         # Use only the last line.  Previous lines may contain GPG signature
@@ -204,12 +204,12 @@ def git_versions_from_keywords(keywords, tag_prefix, verbose):
     if refnames.startswith("$Format"):
         if verbose:
             print("keywords are unexpanded, not using")
-        raise not_this_method("unexpanded keywords, not a git-archive tarball")
+        raise NotThisMethod("unexpanded keywords, not a git-archive tarball")
     refs = {r.strip() for r in refnames.strip("()").split(",")}
     # starting in git-1.8.3, tags are listed as "tag: foo-1.0" instead of
     # just "foo-1.0". If we see a "tag: " prefix, prefer those.
-    t_a_g = "tag: "
-    tags = {r[len(t_a_g) :] for r in refs if r.startswith(t_a_g)}
+    TAG = "tag: "
+    tags = {r[len(TAG) :] for r in refs if r.startswith(TAG)}
     if not tags:
         # Either we're using git < 1.8.3, or there really are no tags. We use
         # a heuristic: assume all version tags have a digit. The old git %d
@@ -261,9 +261,9 @@ def git_pieces_from_vcs(tag_prefix, root, verbose, runner=run_command):
     expanded, and _version.py hasn't already been rewritten with a short
     version string, meaning we're inside a checked out source tree.
     """
-    g_i_t_s = ["git"]
+    GITS = ["git"]
     if sys.platform == "win32":
-        g_i_t_s = ["git.cmd", "git.exe"]
+        GITS = ["git.cmd", "git.exe"]
 
     # GIT_DIR can interfere with correct operation of Versioneer.
     # It may be intended to be passed to the Versioneer-versioned project,
@@ -272,16 +272,16 @@ def git_pieces_from_vcs(tag_prefix, root, verbose, runner=run_command):
     env.pop("GIT_DIR", None)
     runner = functools.partial(runner, env=env)
 
-    _, rc = runner(g_i_t_s, ["rev-parse", "--git-dir"], cwd=root, hide_stderr=not verbose)
+    _, rc = runner(GITS, ["rev-parse", "--git-dir"], cwd=root, hide_stderr=not verbose)
     if rc != 0:
         if verbose:
             print("Directory %s not under git control" % root)
-        raise not_this_method("'git rev-parse --git-dir' returned error")
+        raise NotThisMethod("'git rev-parse --git-dir' returned error")
 
     # if there is a tag matching tag_prefix, this yields TAG-NUM-gHEX[-dirty]
     # if there isn't one, this yields HEX[-dirty] (no NUM)
     describe_out, rc = runner(
-        g_i_t_s,
+        GITS,
         [
             "describe",
             "--tags",
@@ -295,11 +295,11 @@ def git_pieces_from_vcs(tag_prefix, root, verbose, runner=run_command):
     )
     # --long was added in git-1.5.5
     if describe_out is None:
-        raise not_this_method("'git describe' failed")
+        raise NotThisMethod("'git describe' failed")
     describe_out = describe_out.strip()
-    full_out, rc = runner(g_i_t_s, ["rev-parse", "HEAD"], cwd=root)
+    full_out, rc = runner(GITS, ["rev-parse", "HEAD"], cwd=root)
     if full_out is None:
-        raise not_this_method("'git rev-parse' failed")
+        raise NotThisMethod("'git rev-parse' failed")
     full_out = full_out.strip()
 
     pieces = {}
@@ -307,20 +307,20 @@ def git_pieces_from_vcs(tag_prefix, root, verbose, runner=run_command):
     pieces["short"] = full_out[:7]  # maybe improved later
     pieces["error"] = None
 
-    branch_name, rc = runner(g_i_t_s, ["rev-parse", "--abbrev-ref", "HEAD"], cwd=root)
+    branch_name, rc = runner(GITS, ["rev-parse", "--abbrev-ref", "HEAD"], cwd=root)
     # --abbrev-ref was added in git-1.6.3
     if rc != 0 or branch_name is None:
-        raise not_this_method("'git rev-parse --abbrev-ref' returned error")
+        raise NotThisMethod("'git rev-parse --abbrev-ref' returned error")
     branch_name = branch_name.strip()
 
     if branch_name == "HEAD":
         # If we aren't exactly on a branch, pick a branch which represents
         # the current commit. If all else fails, we are on a branchless
         # commit.
-        branches, rc = runner(g_i_t_s, ["branch", "--contains"], cwd=root)
+        branches, rc = runner(GITS, ["branch", "--contains"], cwd=root)
         # --contains was added in git-1.5.4
         if rc != 0 or branches is None:
-            raise not_this_method("'git branch --contains' returned error")
+            raise NotThisMethod("'git branch --contains' returned error")
         branches = branches.split("\n")
 
         # Remove the first line if we're running detached
@@ -381,11 +381,11 @@ def git_pieces_from_vcs(tag_prefix, root, verbose, runner=run_command):
     else:
         # HEX: no tags
         pieces["closest-tag"] = None
-        out, rc = runner(g_i_t_s, ["rev-list", "HEAD", "--left-right"], cwd=root)
+        out, rc = runner(GITS, ["rev-list", "HEAD", "--left-right"], cwd=root)
         pieces["distance"] = len(out.split())  # total number of commits
 
     # commit date: see ISO-8601 comment in git_versions_from_keywords()
-    date = runner(g_i_t_s, ["show", "-s", "--format=%ci", "HEAD"], cwd=root)[0].strip()
+    date = runner(GITS, ["show", "-s", "--format=%ci", "HEAD"], cwd=root)[0].strip()
     # Use only the last line.  Previous lines may contain GPG signature
     # information.
     date = date.splitlines()[-1]
@@ -660,7 +660,7 @@ def get_versions():
 
     try:
         return git_versions_from_keywords(get_keywords(), cfg.tag_prefix, verbose)
-    except not_this_method:
+    except NotThisMethod:
         pass
 
     try:
@@ -682,13 +682,13 @@ def get_versions():
     try:
         pieces = git_pieces_from_vcs(cfg.tag_prefix, root, verbose)
         return render(pieces, cfg.style)
-    except not_this_method:
+    except NotThisMethod:
         pass
 
     try:
         if cfg.parentdir_prefix:
             return versions_from_parentdir(cfg.parentdir_prefix, root, verbose)
-    except not_this_method:
+    except NotThisMethod:
         pass
 
     return {

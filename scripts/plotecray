@@ -29,7 +29,7 @@ from idstools.view.wall import WallView
 from idstools.view.waves import WavesView
 
 
-class md_action(argparse.action):
+class MdAction(argparse.Action):
     def __call__(self, parser, namespace, values, option_string=None):
         if len(values) == 0:
             setattr(namespace, self.dest, True)
@@ -46,7 +46,7 @@ parser.add_argument(
     "-md",
     "--md",
     nargs="*",
-    action=md_action,
+    action=MdAction,
     default=[],
     help="""Provide machine descriptions that you need to plot\n
 with ids names for example wall pf_active \n

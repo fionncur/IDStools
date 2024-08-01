@@ -105,7 +105,6 @@ echo "----------------------------------------------------"
 # Load modules
 
 echo "Loading Modules"
-. /usr/share/Modules/init/sh
 module purge
 module load EasyBuild
 echo "Done loading modules..."

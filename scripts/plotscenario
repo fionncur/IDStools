@@ -35,7 +35,7 @@ group = parser.add_mutually_exclusive_group()
 group.add_argument("-t", "--time", help="Time for profiles", required=False, type=float, default=-99.0)
 group.add_argument(
     "-n",
-    "--noProfiles",
+    "--no-profiles",
     action="store_true",
     help="Do not plot profiles or equilibrium",
 )

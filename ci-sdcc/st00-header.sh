@@ -3,7 +3,6 @@ source ./ci-sdcc/utils.sh
 ##########################################################################################
 #                     Set environment based on toolchain                                 #
 ##########################################################################################
-. /usr/share/Modules/init/sh
 module use /work/imas/etc/modules/all
 
 module purge
@@ -42,7 +41,7 @@ IMAS_MODULE_VERSION=$(getIMASModuleName "$TOOLCHAIN_VERSION" "$ACCESS_LAYER_VERS
 module load "$IMAS_MODULE_VERSION"
 
 GCCcore_VERSION=$(getGCCcoreVersion)
-module unload -f "$IMAS_MODULE_VERSION"
+module unload "$IMAS_MODULE_VERSION"
 dependencies="./ci-sdcc/dependencies.txt"
 
 # Check if the file exists

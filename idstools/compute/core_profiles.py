@@ -685,9 +685,9 @@ class CoreProfilesCompute:
         """
         The function calculates and returns the total thermal pressure,
         fast parallel pressure, and fast perpendicular pressure of ions in a given set of profiles.
-        
+
         Returns:
-          The function returns a dictionary 
+          The function returns a dictionary
         """
         nrho = len(self.get_rho_tor_norm())
         pressure_ion_thermal = 0.0
@@ -717,7 +717,9 @@ class CoreProfilesCompute:
             np.asarray([np.nan] * nrho) if len(pressure_ion_fast_parallel) == 0 else pressure_ion_fast_parallel
         )
         pressure_ion_fast_perpendicular = (
-            np.asarray([np.nan] * nrho) if len(pressure_ion_fast_perpendicular) == 0 else pressure_ion_fast_perpendicular
+            np.asarray([np.nan] * nrho)
+            if len(pressure_ion_fast_perpendicular) == 0
+            else pressure_ion_fast_perpendicular
         )
 
         maxima_ion = max(
@@ -737,7 +739,7 @@ class CoreProfilesCompute:
         """
         The  function calculates and returns various pressure properties
         of electrons, including maximum pressure and individual pressure components.
-        
+
         Returns:
             The `get_electrons_pressure_properties` function returns a dictionary with the following
             key-value pairs:
@@ -767,7 +769,9 @@ class CoreProfilesCompute:
             np.asarray([np.nan] * nrho) if len(pressure_electron_thermal) == 0 else pressure_electron_thermal
         )
         pressure_electron_fast_parallel = (
-            np.asarray([np.nan] * nrho) if len(pressure_electron_fast_parallel) == 0 else pressure_electron_fast_parallel
+            np.asarray([np.nan] * nrho)
+            if len(pressure_electron_fast_parallel) == 0
+            else pressure_electron_fast_parallel
         )
         pressure_electron_fast_perpendicular = (
             np.asarray([np.nan] * nrho)
@@ -794,7 +798,7 @@ class CoreProfilesCompute:
         """
         The function `getPressure` returns a dictionary containing the thermal pressure, parallel pressure,
         and perpendicular pressure.
-        
+
         Returns:
             The `get_pressure` function returns a dictionary with the following key-value pairs:
             - "maxima_total": maximum value calculated based on pressure values
@@ -821,7 +825,7 @@ class CoreProfilesCompute:
         )
 
         dict_electrons_pressure_properties = self.get_electrons_pressure_properties()
-        pressure_electron_total = dict_electrons_pressure_properties["pressureElectronTotal"]
+        pressure_electron_total = dict_electrons_pressure_properties["pressure_electron_total"]
 
         pressure_ion_total = self.get_pressure_ion_total()
         pressure_total = pressure_electron_total
