@@ -1,6 +1,7 @@
 """
 Test common compute functions
 """
+
 import os
 import sys
 
@@ -8,8 +9,8 @@ import numpy as np
 import pytest
 
 from idstools.compute.common import (
-    getClosestOfGivenValueFromArray,
-    getMiddleElementFromArray,
+    get_closest_of_given_value_from_array,
+    get_middle_element_from_array,
 )
 
 array = [
@@ -29,33 +30,33 @@ single_array = np.asarray([0.21069679])
 empty_array = np.asarray([])
 
 
-def test_getClosestOfGivenValueFromArray():
+def test_get_closest_of_given_value_from_array():
     """
     test nearest function
     """
-    index, value = getClosestOfGivenValueFromArray(full_array, value=0.5)
+    index, value = get_closest_of_given_value_from_array(full_array, value=0.5)
     assert value == 0.56874386, "nearest function is not producing correct result"
 
-    index, value = getClosestOfGivenValueFromArray(single_array, value=0.5)
+    index, value = get_closest_of_given_value_from_array(single_array, value=0.5)
     assert value == 0.21069679, "nearest function is not producing correct result"
 
-    value = getClosestOfGivenValueFromArray(empty_array, value=0.5)
+    value = get_closest_of_given_value_from_array(empty_array, value=0.5)
     assert value == None, "nearest function is not producing correct result"
 
-    index, value = getClosestOfGivenValueFromArray(full_array, value=-20)
+    index, value = get_closest_of_given_value_from_array(full_array, value=-20)
     assert value == 0.00213826, "nearest function is not producing correct result"
 
 
-def test_getMiddleElementFromArray():
+def test_get_middle_element_from_array():
     """
     test middle function
     """
 
-    index, value = getMiddleElementFromArray(full_array)
+    index, value = get_middle_element_from_array(full_array)
     assert value == 0.00213826, "middle function is not producing correct result"
 
-    index, value = getMiddleElementFromArray(single_array)
+    index, value = get_middle_element_from_array(single_array)
     assert value == 0.21069679, "middle function is not producing correct result"
 
-    value = getMiddleElementFromArray(empty_array)
+    value = get_middle_element_from_array(empty_array)
     assert value == None, "middle function is not producing correct result"

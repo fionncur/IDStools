@@ -1341,7 +1341,7 @@ class KineticProfilesCompute:
             profiles["ni"] = [0] * self.nrho
             for ispecies in range(self.nspecies_core):
                 if self.is_composition_available is True:
-                    if self.nspec_over_ne[ispecies] > kinetic_profiles_compute.IMPURITY_LIMIT:
+                    if self.nspec_over_ne[ispecies] > KineticProfilesCompute.IMPURITY_LIMIT:
                         profiles["n_species"][self.species[ispecies]]["density"] = [0] * self.nrho
                         if self.vpol_flag != 0:
                             profiles["n_species"][self.species[ispecies]]["vpol"] = [0] * self.nrho
@@ -1396,7 +1396,7 @@ class KineticProfilesCompute:
         min_vpol = 9e99
         for ispecies in range(self.nspecies_core):
             if self.is_composition_available and (
-                self.nspec_over_ne[ispecies] > kinetic_profiles_compute.IMPURITY_LIMIT
+                self.nspec_over_ne[ispecies] > KineticProfilesCompute.IMPURITY_LIMIT
                 or not self.is_core_profiles_present
             ):
                 if self.vtor_flag != 0:
@@ -1509,7 +1509,7 @@ class KineticProfilesCompute:
             waveform["ni"] = self.create_wave_form(self.common_time_length)
             for ispecies in range(self.nspecies_core):
                 if self.is_composition_available and (
-                    self.nspec_over_ne[ispecies] > kinetic_profiles_compute.IMPURITY_LIMIT
+                    self.nspec_over_ne[ispecies] > KineticProfilesCompute.IMPURITY_LIMIT
                 ):
                     waveform["n_species"][self.species[ispecies]] = {
                         "density": self.create_wave_form(0),
