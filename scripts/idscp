@@ -42,7 +42,7 @@ parser.add_argument(
     help="Force the creation of destination data-entry (existing data will be lost)",
 )
 parser.add_argument(
-    "--setDatasetVersion",
+    "--set-dataset-version",
     action="store_true",
     help="Store current DD version into dataset_description IDS if it exists",
 )
@@ -55,13 +55,13 @@ parser.add_argument(
 occgroup = parser.add_mutually_exclusive_group()
 occgroup.add_argument(
     "-a",
-    "--allOccurrences",
+    "--all-occurrences",
     action="store_true",
     help="Copy all occurrences available in the source into the destination",
 )
 occgroup.add_argument(
     "-o",
-    "--outputOccurrence",
+    "--output-occurrence",
     type=int,
     default=None,
     help="Copy the selected source into the specified occurrence at the destination",

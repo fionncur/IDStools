@@ -9,7 +9,7 @@ from rich.console import Console
 from rich.table import Table
 from idstools.scenariodescription import ScenarioDescriptionBase
 
-display_mapping = {
+displayMapping = {
     "ref_name": "Reference",
     "ro_name": "RO(s)",
     "pulse": "Pulse",
@@ -133,22 +133,22 @@ args = vars(parser.parse_args())
 if args["folder"] != None:
     folder = args["folder"]
 else:
-    default_folder_path = os.environ["IMAS_HOME"] + "/shared/imasdb/ITER/3/0"
-    lowlevel_version = get_core_version()
+    defaultFolderPath = os.environ["IMAS_HOME"] + "/shared/imasdb/ITER/3/0"
+    lowlevelVersion = get_core_version()
 
-    if lowlevel_version < 4:
-        default_folder_path = os.environ["IMAS_HOME"] + "/shared/iterdb/3/0"
+    if lowlevelVersion < 4:
+        defaultFolderPath = os.environ["IMAS_HOME"] + "/shared/iterdb/3/0"
 
 # MATCHCASE
 matchcase = args["matchcase"]
 
 # FILTER
 if args["selection"] != None:
-    selection_operation = "OR"
+    selectionOperation = "OR"
     selection = args["selection"]
     if "," in selection[0]:
         selection = selection[0].split(",")
-        selection_operation = "AND"
+        selectionOperation = "AND"
 
     if not matchcase:
         selection = [str(x).lower() for x in selection]
@@ -158,7 +158,7 @@ else:
 # SORT
 if args["sort"] != None:
     sort = args["sort"].split(",")
-    sort = [x for x in sort if x in display_mapping.keys()]
+    sort = [x for x in sort if x in displayMapping.keys()]
 else:
     sort = ["pulse", "run"]
 
@@ -206,8 +206,8 @@ if args["choice"] == None:
     print("""----> Default call equivalent to: """)
     print("""      scenario_summary -c pulse,run,database,ref_name,ip,b0,fuelling,confinement,workflow,date""")
 
-scenario_description_obj = ScenarioDescriptionBase(folder_path=default_folder_path)
-df = scenario_description_obj.get_dataframes_from_files(extension=".yaml", add_obsolete=obsolete)
+scenarioDescriptionObj = ScenarioDescriptionBase(folder_path=defaultFolderPath)
+df = scenarioDescriptionObj.get_dataframes_from_files(extension=".yaml", add_obsolete=obsolete)
 
 # check of need to add obsolete
 if not args["obsolete"]:
@@ -222,31 +222,31 @@ df = df[choice]
 # Search based on selection
 if selection:
 
-    def string_exists(row):
-        if selection_operation == "AND":
+    def stringExists(row):
+        if selectionOperation == "AND":
             found_substrings = set()
             for text in row:
                 text = str(text)
                 if not matchcase:
                     text = text.lower()
-                for search_string in selection:
-                    if search_string in text:
-                        found_substrings.add(search_string)
+                for searchString in selection:
+                    if searchString in text:
+                        found_substrings.add(searchString)
             if len(selection) == len(found_substrings):
                 return True
-        if selection_operation == "OR":
+        if selectionOperation == "OR":
             for text in row:
                 text = str(text)
                 if not matchcase:
                     text = str(text).lower()
-                for search_string in selection:
-                    if search_string in text:
+                for searchString in selection:
+                    if searchString in text:
                         return True
         return False
 
     df = df[
         df.apply(
-            lambda row: string_exists(row),
+            lambda row: stringExists(row),
             axis=1,
         )
     ]
@@ -257,22 +257,22 @@ if sort:
 
 
 # rename headers for display
-selected_df = df.rename(columns=display_mapping)
+selected_df = df.rename(columns=displayMapping)
 
 if not selected_df.empty:
     # print(selected_df.to_string(index=False, justify="center"), )
     table = Table()
-    for column_name in choice:
-        table.add_column(column_name, justify="left", style="green")
+    for columnName in choice:
+        table.add_column(columnName, justify="left", style="green")
 
     for _, row in df.iterrows():
         x = []
-        for column_name in choice:
-            x.append(str(row[column_name]))
+        for columnName in choice:
+            x.append(str(row[columnName]))
         table.add_row(*x)  # Even row style
 
     console = Console()
     console.print(table)
 else:
     print(" No records found matching mentioned criteria")
-print(f" NOTE: Read Scenario database from {default_folder_path}")
+print(f" NOTE: Read Scenario database from {defaultFolderPath}")

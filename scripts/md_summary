@@ -70,7 +70,7 @@ parser.add_argument(
 args = vars(parser.parse_args())
 
 # FOLDER
-if args["folder"] != None:
+if args["folder"] is not None:
     machine_description_folder = args["folder"]
 else:
     machine_description_folder = "/work/imas/shared/imasdb/ITER_MD/3"
@@ -79,7 +79,7 @@ else:
 matchcase = args["matchcase"]
 
 # FILTER
-if args["selection"] != None:
+if args["selection"] is not None:
     selection_operation = "OR"
     selection = args["selection"]
     if "," in selection[0]:
@@ -93,7 +93,7 @@ else:
 
 
 # CHOICE OF VARIABLES TO DISPLAY
-if args["choice"] != None:
+if args["choice"] is not None:
     try:
         input_choice = args["choice"]
         choice = eval(

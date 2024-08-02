@@ -165,7 +165,7 @@ elif args.dbtype == "L-MODE" or args.dbtype == "LMODE":
 db.dropna(how="all")
 db = db.replace(to_replace=np.nan, value=None)
 
-rows = [args.row] if args.row != None else db.index
+rows = [args.row] if args.row is not None else db.index
 
 # print(f"Starts mapping of the DB {args.inputCSV}, please be patient...")
 for row in track(rows, description="[green]Processing..."):
@@ -195,8 +195,8 @@ for row in track(rows, description="[green]Processing..."):
                 val = evaluate(transformation)
             else:
                 val = db.at[row, var]
-            if val != None:
-                if type(val) != str and math.isnan(val):
+            if val is not None:
+                if type(val) is not str and math.isnan(val):
                     if args.verbose:
                         print(f"Nothing to store for {var} in DB entry {row}")
                 else:

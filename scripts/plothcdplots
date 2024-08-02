@@ -277,7 +277,7 @@ if __name__ == "__main__":
     }
 
     for source in hcd_sources.keys():
-        if args[source] != None:
+        if args[source] is not None:
             hcd_sources[source]["input"] = args[source]
             if len(hcd_sources[source]["input"].split("/")) == 6:
                 (
@@ -311,7 +311,7 @@ if __name__ == "__main__":
 
     nsource = 0
     for source, value in hcd_sources.items():
-        if value != None:
+        if value is not None:
             nsource = nsource + 1
 
     if nsource == 0:

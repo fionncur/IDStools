@@ -364,7 +364,7 @@ class EquilibriumCompute:
         Returns:
             equilibrium IDS: rescaled equilibrium
         """
-        import distutils.version as version
+        from packaging.version import Version
         from copy import deepcopy
 
         try:
@@ -391,7 +391,7 @@ class EquilibriumCompute:
                     self.ids.time_slice[itime].boundary_separatrix.psi * rescale_factor
                 )
 
-            if version.strict_version(dd_version) > version.strict_version("3.31.0"):
+            if Version(dd_version) > Version("3.31.0"):
                 if imasdef.isFieldValid(self.ids.time_slice[itime].boundary_secondary_separatrix.psi):
                     equout.time_slice[itime].boundary_secondary_separatrix.psi = (
                         self.ids.time_slice[itime].boundary_secondary_separatrix.psi * rescale_factor
@@ -471,7 +471,7 @@ class EquilibriumCompute:
                     self.ids.time_slice[itime].global_quantities.magnetic_axis.b_field_tor * rescale_factor
                 )
 
-            if version.strict_version(dd_version) > version.strict_version("3.14.0"):
+            if Version(dd_version) > Version("3.14.0"):
                 if imasdef.isFieldValid(self.ids.time_slice[itime].global_quantities.energy_mhd):
                     equout.time_slice[itime].global_quantities.energy_mhd = (
                         self.ids.time_slice[itime].global_quantities.energy_mhd * rescale_factor**2
@@ -482,7 +482,7 @@ class EquilibriumCompute:
                         self.ids.time_slice[itime].global_quantities.w_mhd * rescale_factor**2
                     )
 
-            if version.strict_version(dd_version) > version.strict_version("3.31.0"):
+            if Version(dd_version) > Version("3.31.0"):
                 if imasdef.isFieldValid(self.ids.time_slice[itime].global_quantities.psi_external_average):
                     equout.time_slice[itime].global_quantities.psi_external_average = (
                         self.ids.time_slice[itime].global_quantities.psi_external_average * rescale_factor
@@ -558,7 +558,7 @@ class EquilibriumCompute:
                     self.ids.time_slice[itime].profiles_1d.gm6[i1d] / rescale_factor**2
                 )
 
-            if version.strict_version(dd_version) > version.strict_version("3.5.0"):
+            if Version(dd_version) > Version("3.5.0"):
                 for i1d in range(len(self.ids.time_slice[itime].profiles_1d.b_field_average)):
                     equout.time_slice[itime].profiles_1d.b_field_average[i1d] = (
                         self.ids.time_slice[itime].profiles_1d.b_field_average[i1d] * rescale_factor
@@ -569,7 +569,7 @@ class EquilibriumCompute:
                         abs(self.ids.time_slice[itime].profiles_1d.b_average[i1d]) * rescale_factor
                     )
 
-            if version.strict_version(dd_version) > version.strict_version("3.5.0"):
+            if Version(dd_version) > Version("3.5.0"):
                 for i1d in range(len(self.ids.time_slice[itime].profiles_1d.b_field_min)):
                     equout.time_slice[itime].profiles_1d.b_field_min[i1d] = (
                         self.ids.time_slice[itime].profiles_1d.b_field_min[i1d] * rescale_factor
@@ -580,7 +580,7 @@ class EquilibriumCompute:
                         abs(self.ids.time_slice[itime].profiles_1d.b_min[i1d]) * rescale_factor
                     )
 
-            if version.strict_version(dd_version) > version.strict_version("3.5.0"):
+            if Version(dd_version) > Version("3.5.0"):
                 for i1d in range(len(self.ids.time_slice[itime].profiles_1d.b_field_max)):
                     equout.time_slice[itime].profiles_1d.b_field_max[i1d] = (
                         self.ids.time_slice[itime].profiles_1d.b_field_max[i1d] * rescale_factor
@@ -616,7 +616,7 @@ class EquilibriumCompute:
                             self.ids.time_slice[itime].profiles_2d[i2d].j_parallel[ir][iz] * rescale_factor
                         )
 
-                if version.strict_version(dd_version) > version.strict_version("3.5.0"):
+                if Version(dd_version) > Version("3.5.0"):
                     for ir in range(len(self.ids.time_slice[itime].profiles_2d[i2d].b_field_r)):
                         for iz in range(len(self.ids.time_slice[itime].profiles_2d[i2d].b_field_r[ir])):
                             equout.time_slice[itime].profiles_2d[i2d].b_field_r[ir][iz] = (
@@ -629,7 +629,7 @@ class EquilibriumCompute:
                                 self.ids.time_slice[itime].profiles_2d[i2d].b_r[ir][iz] * rescale_factor
                             )
 
-                if version.strict_version(dd_version) > version.strict_version("3.5.0"):
+                if Version(dd_version) > Version("3.5.0"):
                     for ir in range(len(self.ids.time_slice[itime].profiles_2d[i2d].b_field_z)):
                         for iz in range(len(self.ids.time_slice[itime].profiles_2d[i2d].b_field_z[ir])):
                             equout.time_slice[itime].profiles_2d[i2d].b_field_z[ir][iz] = (
@@ -642,7 +642,7 @@ class EquilibriumCompute:
                                 self.ids.time_slice[itime].profiles_2d[i2d].b_z[ir][iz] * rescale_factor
                             )
 
-                if version.strict_version(dd_version) > version.strict_version("3.5.0"):
+                if Version(dd_version) > Version("3.5.0"):
                     for ir in range(len(self.ids.time_slice[itime].profiles_2d[i2d].b_field_tor)):
                         for iz in range(len(self.ids.time_slice[itime].profiles_2d[i2d].b_field_tor[ir])):
                             equout.time_slice[itime].profiles_2d[i2d].b_field_tor[ir][iz] = (

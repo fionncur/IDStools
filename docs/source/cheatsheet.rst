@@ -111,7 +111,7 @@ This cheat sheet provides quick reference of commonly used commands in IDStools.
 |                            | .. code-block:: bash                                                                                                         |
 |                            |                                                                                                                              |
 |                            |    $ plotkineticprofiles --uri "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3"                       |
-|                            |    $ plotkineticprofiles --uri "imas:mdsplus?path=/work/imas/shared/imasdb/ITER/3/134174/117" access layer 5 and above       |
+|                            |    $ plotkineticprofiles --uri "imas:mdsplus?path=/work/imas/shared/imasdb/ITER/3/134174/117" # access layer 5 and above     |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
 | *plotmachinedescription*   | Plots machine description data stored in databases.                                                                          |
 |                            | (replaces mdplot)                                                                                                            |
@@ -162,7 +162,7 @@ This cheat sheet provides quick reference of commonly used commands in IDStools.
 |                            | .. code-block:: bash                                                                                                         |
 |                            |                                                                                                                              |
 |                            |    $ plotscenario --uri "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3" --time 60                    |
-|                            |    $ plotscenario --uri "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3" --no-profiles                 |
+|                            |    $ plotscenario --uri "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3" --no-profiles                |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
 | *printcoresources*         | Shows source information from available                                                                                      |
 |                            |  sources (replaces print_sources).                                                                                           |
@@ -248,15 +248,15 @@ This cheat sheet provides quick reference of commonly used commands in IDStools.
 |                               |                                                                                                                                     |
 |                               |    $ idsperf --uri "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3"                                          |
 |                               |    $ idsperf --uri "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3" equilibrium                              |
-|                               |    $ idsperf --uri "imas:mdsplus?user=public;pulse=134174;run=117;daabase=ITER;version=3" equilibrium --showStats --repeat 2        |
+|                               |    $ idsperf --uri "imas:mdsplus?user=public;pulse=134174;run=117;daabase=ITER;version=3" equilibrium --show-stats --repeat 2       |
 |                               |    $ idsperf --uri "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3" equilibrium  -a                          |
 |                               |    $ idsperf --uri "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3" equilibrium  -t 50 -m                    |
 |                               |    $ idsperf --uri "imas:mdsplus?user=public;pulse=122525;run=1;database=ITER;version=3" summary                                    |
-|                               |    $ idsperf --uri "imas:mdsplus?user=public;pulse=122525;run=1;database=ITER;version=3" summary --verbose --output-run 5            |
-|                               |    --show-stats --repeat 2                                                                                                           |
-|                               |    $ idsperf --uri "imas:mdsplus?user=public;pulse=122525;run=1;database=ITER;version=3" summary --verbose --output-run 5            |
-|                               |    --show-stats --repeat 2                                                                                                           |
-|                               |    --uri-out "imas:mdsplus?user=$USERNAME;pulse=131024;run=25;database=ITER;version=3" --memory-backend                               |
+|                               |    $ idsperf --uri "imas:mdsplus?user=public;pulse=122525;run=1;database=ITER;version=3" summary --verbose --output-run 5           |
+|                               |    --show-stats --repeat 2                                                                                                          |
+|                               |    $ idsperf --uri "imas:mdsplus?user=public;pulse=122525;run=1;database=ITER;version=3" summary --verbose --output-run 5           |
+|                               |    --show-stats --repeat 2                                                                                                          |
+|                               |    --uri-out "imas:mdsplus?user=$USERNAME;pulse=131024;run=25;database=ITER;version=3" --memory-backend                             |
 +-------------------------------+-------------------------------------------------------------------------------------------------------------------------------------+
 | *idsprint*                    | Dumps or prints all data on the console.                                                                                            |
 |                               | Check if specific fields or attributes have been filled out or empty                                                                |

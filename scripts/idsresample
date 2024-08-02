@@ -102,7 +102,7 @@ if __name__ == "__main__":
                 print(f"resampling times :{ids_name}")
                 resample_times(src, tmp, ids_name, start=start, stop=stop, step=step)
         elif homogeneous_time == 0:
-            if args.time_range != None:
+            if args.time_range is not None:
                 time_range = args.time_range.split(",")
                 if time_range[0] != "" and time_range[1] != "" and time_range[2] != "":
                     print(f"resampling times :{ids_name}")

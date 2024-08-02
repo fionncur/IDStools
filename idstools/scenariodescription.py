@@ -172,7 +172,7 @@ class ScenarioDescriptionBase:
 
 
 # The class ScenarioDescription is a subclass of ScenarioDescriptionBase.
-class scenario_description(ScenarioDescriptionBase):
+class ScenarioDescription(ScenarioDescriptionBase):
     def __init__(self, pulse: int, run: int, folder_path: str = "") -> None:
         """
         The above function initializes an object with a pulse, run, and folder path, and attempts to load
@@ -225,7 +225,7 @@ class scenario_description(ScenarioDescriptionBase):
             string_list = re.findall(r"\d+", replaced_by)
             pulsec = string_list[0]
             runc = string_list[1]
-            scenario_description = scenario_description(pulsec, runc, self.folder_path)
+            scenario_description = ScenarioDescription(pulsec, runc, self.folder_path)
 
             if scenario_description.yaml_data is not None:
                 dict_to_fill["pulse"].append(pulsec)
@@ -264,7 +264,7 @@ class scenario_description(ScenarioDescriptionBase):
             string_list = re.findall(r"\d+", replaces)
             pulsep = string_list[0]
             runp = string_list[1]
-            scenario_description = scenario_description(pulsep, runp, self.folder_path)
+            scenario_description = ScenarioDescription(pulsep, runp, self.folder_path)
 
             if scenario_description.yaml_data is not None:
                 dict_to_fill["pulse"].insert(0, pulsep)  # Order to be reversed for parents

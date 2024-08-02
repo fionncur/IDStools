@@ -133,17 +133,17 @@ else:
 
 # Check the plasma direction (needs better criteria)
 if "up" in split_name:
-    v_d_direction = "up"
+    VD_direction = "up"
 elif "dw" in split_name:
-    v_d_direction = "down"
+    VD_direction = "down"
 else:
-    v_d_direction = "tbd"
+    VD_direction = "tbd"
 
 # Check the maximum RE current
 try:
-    r_emax = 1.0e-6 * max(summary.runaways.current.value, key=abs)
+    REmax = 1.0e-6 * max(summary.runaways.current.value, key=abs)
 except Exception as e:
-    r_emax = 0.0
+    REmax = 0.0
 
 # Btor
 if eq_present == 1:
@@ -248,9 +248,9 @@ f.write("""# --------------------------------------------------\n""")
 f.write("""scenario_key_parameters:\n""")
 # f.write("""    confinement_regime: %s\n""" % confinement_regime)
 f.write("""    disruption_type: %s\n""" % dis_type)
-f.write("""    VD_direction: %s\n""" % v_d_direction)
+f.write("""    VD_direction: %s\n""" % VD_direction)
 f.write("""    magnetic_field: %.2f\n""" % magnetic_field)
-f.write("""    I_RE_max: %.2f \n""" % r_emax)
+f.write("""    I_RE_max: %.2f \n""" % REmax)
 
 
 if plasma_current == 0:

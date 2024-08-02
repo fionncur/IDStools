@@ -405,8 +405,8 @@ if p_sol == 0:
         nsubsets = len(edge_transport.model[0].ggd[0].electrons.energy.flux)
         for iset in range(nsubsets):
             if edge_transport.model[0].ggd[0].electrons.energy.flux[iset].grid_subset_index == 26:
-                for i_face in range(len(edge_transport.model[0].ggd[0].electrons.energy.flux[iset].values)):
-                    faceindex = edge_transport.grid_ggd[0].grid_subset[iset].element[i_face].object[0].index
+                for iFace in range(len(edge_transport.model[0].ggd[0].electrons.energy.flux[iset].values)):
+                    faceindex = edge_transport.grid_ggd[0].grid_subset[iset].element[iFace].object[0].index
                     # Allow for backward-compatibility when measure contained the area instead of the edge length
                     try:
                         area = (
@@ -420,14 +420,14 @@ if p_sol == 0:
                         area = (
                             edge_transport.grid_ggd[0].space[0].objects_per_dimension[1].object[faceindex - 1].measure
                         )
-                    flux = edge_transport.model[0].ggd[0].electrons.energy.flux[iset].values[i_face]
+                    flux = edge_transport.model[0].ggd[0].electrons.energy.flux[iset].values[iFace]
                     p_sol_e = p_sol_e + flux * area
                     try:
-                        flux = edge_transport.model[0].ggd[0].total_ion_energy.flux[iset].values[i_face]
+                        flux = edge_transport.model[0].ggd[0].total_ion_energy.flux[iset].values[iFace]
                     except Exception as e:
                         flux = 0
                         for ispecies in range(nspecies):
-                            flux = flux + edge_transport.model[0].ggd[0].ion[ispecies].energy.flux[iset].values[i_face]
+                            flux = flux + edge_transport.model[0].ggd[0].ion[ispecies].energy.flux[iset].values[iFace]
                     p_sol_i = p_sol_i + flux * area
         p_sol = (p_sol_e + p_sol_i) * 1.0e-6
 
