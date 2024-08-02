@@ -45,7 +45,7 @@ class EcStrayCompute:
 
                 ecstrayCompute = EcStrayCompute(equilibriumIds, coreProfilesIds, wavesIds)
 
-                resonance_layer = ecstrayCompute.getResonanceLayer()
+                resonance_layer = ecstrayCompute.get_resonance_layer()
 
                 {0: {'r': [5.4375, 5.4375, 5.4375, 5.4375, 5.4375, 5.4375, 5.4375, 5.4375, 5.4375, 5.4375, 5.4375,
                 5.4375, 5.4375, 5.4375, 5.4375, 5.4375, 5.4375, 5.4375, 5.4375, 5.4375, 5.4375],
@@ -121,7 +121,7 @@ class EcStrayCompute:
 
                 ecStrayCompute = EcStrayCompute(equilibriumIds, coreProfilesIds, wavesIds)
 
-                cut_off_layer = ecStrayCompute.getCutoffLayer()
+                cut_off_layer = ecStrayCompute.get_cutoff_layer()
 
                 {'r': [5.625, 5.4375, 5.53125, 5.53125, 5.53125, 5.53125, 5.53125, 5.53125, 5.53125,
                 5.53125, 5.53125, 5.53125, 5.53125, 5.53125,

@@ -135,6 +135,18 @@ class KineticProfilesCompute:
         self.waveform = self.get_waveform()  # Create the dictionary defining the list of waveforms (central values)
 
     def get_ids(self, ids_name=""):
+        """
+        This function retrieves a specific IDS object based on the provided name and checks if it is
+        present in the data-entry.
+
+        Args:
+            ids_name: The `ids_name` parameter is used to specify the name of the IDS (Intelligent Data
+        Structure) that you want to retrieve. It is a string parameter that should correspond to the
+        specific IDS structure you are interested in accessing.
+
+        Returns:
+            The function `get_ids` returns a tuple containing two values - `ids_object` and `ids_present`.
+        """
         ids_present = False
         ids_object = None
         if ids_name:
@@ -154,6 +166,16 @@ class KineticProfilesCompute:
         return ids_object, ids_present
 
     def check_idsses(self):
+        """
+        The function `check_idsses` checks for the presence of core profiles, edge profiles, and
+        equilibrium data and logs appropriate messages based on the presence of the data.
+
+        Returns:
+            The function `check_idsses` is returning a boolean value. It returns `True` if either
+        `is_core_profiles_present` or `is_edge_profiles_present` is True, indicating that data
+        is present to plot. If both `is_core_profiles_present` and `is_edge_profiles_present`
+        are False, it logs a critical message and returns `None`.
+        """
         self.core_profiles, self.is_core_profiles_present = self.get_ids("core_profiles")
         if self.edge_required:
             self.edge_profiles, self.is_edge_profiles_present = self.get_ids("edge_profiles")
@@ -170,6 +192,15 @@ class KineticProfilesCompute:
         return True
 
     def fill_idses(self, time_slice=-99.0):
+        """
+        This function fills in various profiles and data for a given time slice in a plasma physics
+        simulation.
+
+        Args:
+            time_slice: The `fill_idses` method you provided seems to be handling the filling of various
+        profiles and data based on a given time slice. The `time_slice` parameter is used to specify a
+        particular time at which the data should be retrieved and processed.
+        """
         # Search for adequate time slice for display
         if self.is_core_profiles_present:
             self.common_time_length = len(self.core_profiles.time)
@@ -277,6 +308,13 @@ class KineticProfilesCompute:
                             logger.info("Attempting to use R coordinate instead.")
 
     def getgset(self):
+        """
+        This function retrieves the outer midplane array index for edge profiles, with some additional
+        checks and warnings.
+
+        Returns:
+            The function `getgset` is returning the variable `gset`.
+        """
         if self.r_out_graph:
             gset = self.edge_profiles_compute.get_outer_midplane_array_index()
             if gset is None:
@@ -293,6 +331,15 @@ class KineticProfilesCompute:
         return None
 
     def get_rho_or_r_outboard_profile(self):
+        """
+        This function retrieves the rho_tor_norm profile for the outboard region based on core and edge
+        profiles data.
+
+        Returns:
+            The function `get_rho_or_r_outboard_profile` returns a dictionary with keys `"xbeg"`,
+        `"xend"`, and `"rho_tor_norm"`. The values associated with these keys are the variables `xbeg`,
+        `xend`, and `rho_tor_norm` respectively.
+        """
         xbeg = 99.0
         xend = 0
         rho_tor_norm = [0] * (self.nrho + self.erho)
@@ -372,6 +419,14 @@ class KineticProfilesCompute:
         return {"xbeg": xbeg, "xend": xend, "rho_tor_norm": rho_tor_norm}
 
     def get_species(self):
+        """
+        The function `get_species` determines the number of species present in core and edge profiles
+        data, handling exceptions and logging warnings if necessary.
+
+        Returns:
+            The `get_species` method returns a tuple containing the number of species in the core profiles
+        (`nspecies_core`) and the number of species in the edge profiles (`nspecies_edge`).
+        """
         nspecies_core = 0
         if self.is_core_profiles_present:
             try:
@@ -395,6 +450,16 @@ class KineticProfilesCompute:
         return nspecies_core, nspecies_edge
 
     def get_species_a_number(self):
+        """
+        This function retrieves the 'a' attribute values for different species from core or edge
+        profiles data and handles exceptions accordingly.
+
+        Returns:
+            The function `get_species_a_number` returns a list `a` containing integer values extracted
+        from the attribute `a` of different elements in the core or edge profiles based on certain
+        conditions. The values are read from either
+        `core_profiles` or `edge_profiles'
+        """
         a = [0] * self.nspecies_core
         if self.is_core_profiles_present:
             try:
@@ -424,6 +489,16 @@ class KineticProfilesCompute:
         return a
 
     def get_species_z_number(self):
+        """
+        This function retrieves the Z number (atomic number) for each species in the core or edge
+        profiles data.
+
+        Returns:
+            The `get_species_z_number` method returns a list `z` containing the atomic numbers of
+        different species. The method first initializes the list `z` with zeros, then based on the
+        availability of core profiles or edge profiles, it reads the atomic numbers of species from the
+        corresponding profiles and populates the `z` list.
+        """
         z = [0] * self.nspecies_core
         if self.is_core_profiles_present:
             try:
@@ -453,6 +528,16 @@ class KineticProfilesCompute:
         return z
 
     def get_species_atoms_n(self):
+        """
+        This function retrieves the number of atoms for each species from core or edge profiles, with a
+        fallback value of 1 if the data cannot be read.
+
+        Returns:
+            The `get_species_atoms_n` method returns a list `n` containing the number of atoms for each
+        species in the core or edge profiles. The method first initializes the list with 1 for each
+        species, then attempts to read the number of atoms for each species from the core or edge
+        profiles data.
+        """
         n = [1] * self.nspecies_core
         if self.is_core_profiles_present:
             try:
@@ -482,6 +567,13 @@ class KineticProfilesCompute:
         return n
 
     def get_species_map(self):
+        """
+        The function `get_species_map` creates a mapping of species between core and edge profiles based
+        on certain conditions.
+
+        Returns:
+            The `species_map` is being returned.
+        """
         if self.is_edge_profiles_present:
             species_map = [-99] * self.nspecies_core
             for ispecies in range(self.nspecies_core):
@@ -511,6 +603,13 @@ class KineticProfilesCompute:
         return None
 
     def get_rho_tor_norm(self):
+        """
+        This function calculates and returns the values of nrho, mrho, and erho based on certain
+        conditions and data availability.
+
+        Returns:
+            The function `get_rho_tor_norm` returns three values: `nrho`, `mrho`, and `erho`.
+        """
         nrho = 0
         mrho = 0
         if not self.r_out_graph and self.is_core_profiles_present:
@@ -540,6 +639,16 @@ class KineticProfilesCompute:
         return nrho, mrho, erho
 
     def get_volume_profile(self):
+        """
+        The function `get_volume_profile` retrieves volume data from core and edge profiles, handling
+        different scenarios based on the availability of data.
+
+        Returns:
+            The `get_volume_profile` method returns a list `volume` containing volume values for the core
+        and edge profiles. The volume values are obtained from different sources based on the conditions
+        and availability of data. The method populates the `volume` list with volume values for the core
+        profiles, edge profiles, or equilibrium data, depending on the conditions and data availability.
+        """
         volume = [0] * (self.nrho + self.erho)
         if self.is_core_profiles_present:
             if len(self.core_profiles.profiles_1d[0].grid.volume) == self.nrho:
@@ -568,6 +677,17 @@ class KineticProfilesCompute:
         return volume
 
     def get_zeff_profile(self):
+        """
+        The function `get_zeff_profile` retrieves Zeff profiles from core and edge plasma profiles,
+        handling potential data mismatches.
+
+        Returns:
+            The function `get_zeff_profile` returns a list `zeff` containing Z-effective values for both
+        core and edge profiles. The list is constructed by first initializing it with zeros, then
+        populating it with Z-effective values from core and edge profiles if they are present. The
+        Z-effective values are read from the respective profile objects and stored in the `zeff` list
+        based on the indices
+        """
         zeff = [0] * (self.nrho + self.erho)
         if self.is_core_profiles_present:
             if len(self.core_profiles.profiles_1d[0].zeff) != self.nrho:
@@ -594,6 +714,15 @@ class KineticProfilesCompute:
         return zeff
 
     def getne_profile(self):
+        """
+        This function retrieves electron density profiles from core and edge plasma profiles data.
+
+        Returns:
+            The function `getne_profile` returns a list of electron density values. The electron density
+        values are collected from different sources based on the conditions specified in the function.
+        The returned list contains electron density values for both core and edge profiles, with NaN
+        values filled in case of missing data.
+        """
         electron_density = [0] * (self.nrho + self.erho)
         if self.is_core_profiles_present:
             if len(self.core_profiles.profiles_1d[0].electrons.density) != self.nrho:
@@ -621,6 +750,16 @@ class KineticProfilesCompute:
         return electron_density
 
     def gette_profile(self):
+        """
+        This function retrieves electron temperature profiles from core and edge plasma profiles,
+        converting the values to Kelvin.
+
+        Returns:
+            The function `gette_profile` returns a list `electron_temperature` containing electron
+        temperatures. The electron temperatures are extracted from core and edge profiles data,
+        converted to keV, and stored in the list based on the specified
+        conditions. The list is then returned as the output of the function.
+        """
         electron_temperature = [0] * (self.nrho + self.erho)
         if self.is_core_profiles_present:
             if len(self.core_profiles.profiles_1d[0].electrons.temperature) != self.nrho:
@@ -652,6 +791,14 @@ class KineticProfilesCompute:
         return electron_temperature
 
     def getti_flag(self):
+        """
+        The function `getti_flag` checks and sets flags based on the availability and consistency of
+        temperature data in core and edge profiles.
+
+        Returns:
+            The `getti_flag` method returns the values of `ti_flag` and `ti_e_flag` after performing
+        certain checks and operations within the method.
+        """
         ti_flag = 0
         if self.is_core_profiles_present:
             if len(self.core_profiles.profiles_1d[0].t_i_average) != self.nrho:
@@ -720,6 +867,14 @@ class KineticProfilesCompute:
         return ti_flag, ti_e_flag
 
     def get_ion_temperature(self):
+        """
+        This function retrieves ion temperatures from core and edge profiles and returns them in a list.
+
+        Returns:
+            The function `get_ion_temperature` returns a list of ion temperatures. The list is populated
+        based on certain conditions and calculations involving the input parameters and attributes of
+        the object.
+        """
         ion_temperature = [0] * (self.nrho + self.erho)
         if self.ti_flag == 1:
             for i in range(self.nrho):
@@ -751,6 +906,14 @@ class KineticProfilesCompute:
         return ion_temperature
 
     def get_ion_density(self):
+        """
+        This function retrieves ion density data from core and edge profiles, handling different cases
+        and logging warnings for any issues encountered.
+
+        Returns:
+            The `get_ion_density` method returns a dictionary `ion_density` containing ion density values
+        for each species at different radial positions.
+        """
         ion_density = {}
         for ispecies in range(self.nspecies_core):
             ion_density[ispecies] = [0] * (self.nrho + self.erho)
@@ -828,6 +991,16 @@ class KineticProfilesCompute:
         return ion_density
 
     def get_v_tor_profile(self):
+        """
+        This function retrieves toroidal velocity profiles for ions from core and edge plasma profiles.
+
+        Returns:
+            The function `get_v_tor_profile` returns a dictionary with three keys:
+            1. "vtor_flag": Indicates the status of the toroidal velocity for the core profiles. It can have
+            values 0, 1, or 2.
+            2. "vtor_e_flag": Indicates the status of the toroidal velocity for the edge profiles. It can
+            have values 0, 1
+        """
         vtor_flag = 0
         vtor_e_flag = 0
         ion_vtor = {}
@@ -1023,6 +1196,18 @@ class KineticProfilesCompute:
         }
 
     def get_vpol_profile(self):
+        """
+        The `get_vpol_profile` function retrieves poloidal velocity profiles for ions from core and edge
+        plasma profiles.
+
+        Returns:
+            The `get_vpol_profile` method returns a dictionary with three keys:
+            1. "vpol_flag": an integer indicating the status of the poloidal velocity calculation for the
+            ions in the core and edge profiles.
+            2. "vpol_e_flag": an integer indicating the status of the poloidal velocity calculation for the
+            edge profiles.
+            3. "ion_vpol": a dictionary containing the calculated pol
+        """
         vpol_flag = 0
         vpol_e_flag = 0
         ion_vpol = {}
@@ -1170,6 +1355,15 @@ class KineticProfilesCompute:
         }
 
     def get_species_list(self):
+        """
+        This function retrieves a list of species based on certain conditions and data sources.
+
+        Returns:
+            A list of species based on the conditions specified in the code snippet. If the number of core
+        species is greater than 0, the function will return a list of species either from the Mendeleiev
+        table or from core profiles or edge profiles based on certain conditions. If the number of core
+        species is not greater than 0, the function will return None.
+        """
         import idstools.init_mendeleiev as mend
 
         # Mendeleiev table
@@ -1192,6 +1386,16 @@ class KineticProfilesCompute:
         return None
 
     def get_n_spec_nver_ne(self):
+        """
+        This function calculates and displays plasma composition with species concentrations based on
+        core profiles and mapping to edge species.
+
+        Returns:
+            The function `get_n_spec_nver_ne` returns the list `nspec_over_ne`, which contains the
+        calculated values for the ratio of species density to electron density for each species in the
+        core profiles. If the conditions specified in the function are not met, the function returns a
+        list of zeros with the same length as the number of species in the core profiles.
+        """
         if (self.nspecies_core > 0) and self.is_composition_available:
             if self.is_edge_profiles_present and self.is_core_profiles_present:
                 logger.debug("Species_mapping :")
@@ -1302,6 +1506,16 @@ class KineticProfilesCompute:
         return nspec_over_ne
 
     def get_profiles(self):
+        """
+        The function `get_profiles` retrieves and organizes various plasma profiles and species
+        densities based on certain criteria.
+
+        Returns:
+            The function `get_profiles` returns a dictionary `profiles` containing various profiles
+        related to core and edge plasma parameters. The dictionary includes keys such as "rhonorm",
+        "te", "ti", "ne", "zeff" for core profiles, and "rhonorm_e", "te_e", "ti_e", "ne_e", "zeff_e"
+        for edge profiles.
+        """
         # Criteria for significant impurity (in X[imp]/ne concentration)
 
         profiles = {}
@@ -1382,6 +1596,16 @@ class KineticProfilesCompute:
         return profiles
 
     def get_min_max_velocity_profiles(self):
+        """
+        This function calculates the minimum and maximum velocity profiles for different species in a
+        plasma system.
+
+        Returns:
+            The `get_min_max_velocity_profiles` method returns a dictionary containing the maximum and
+        minimum velocity profiles for `vtor` and `vpol`. The keys in the dictionary are "max_vtor",
+        "min_vtor", "max_vpol", and "min_vpol", each corresponding to the maximum and minimum values for
+        the `vtor` and `vpol` profiles, respectively.
+        """
         # vtor_flag = vtor_profile["vtor_flag"]
         # vtor_e_flag = vtor_profile["vtor_e_flag"]
         # ion_vtor = vtor_profile["ion_vtor"]
@@ -1471,9 +1695,32 @@ class KineticProfilesCompute:
         }
 
     def create_wave_form(self, ndim):
+        """
+        The function `create_wave_form` returns a dictionary with three keys, each containing a list of
+        zeros with a length specified by the `ndim` parameter.
+
+        Args:
+            ndim: The `ndim` parameter in the `create_wave_form` function represents the number of
+        dimensions for which you want to create the wave form. This parameter is used to determine the
+        length of the lists in the dictionary that is returned by the function.
+
+        Returns:
+            A dictionary is being returned with three keys: "central", "edge", and "rho95", each
+        containing a list of zeros with a length specified by the input parameter ndim.
+        """
         return {"central": [0] * ndim, "edge": [0] * ndim, "rho95": [0] * ndim}
 
     def get_waveform(self):
+        """
+        The function `get_waveform` retrieves various plasma waveforms from a data source and organizes
+        them into a dictionary structure.
+
+        Returns:
+            The function `get_waveform` returns a dictionary containing various waveforms related to
+        plasma parameters such as electron temperature, ion temperature, electron density, impurity
+        density, impurity velocity components (poloidal and toroidal), and effective charge. The
+        dictionary also includes information about the time array and the total ion density.
+        """
         vtor_flag = self.vtor_flag
 
         vpol_flag = self.vpol_flag

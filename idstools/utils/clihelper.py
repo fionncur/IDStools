@@ -7,6 +7,13 @@ from imas import imasdef
 
 
 def get_core_version():
+    """
+    This function retrieves the core version number from the IMAS low-level modules in Python.
+
+    Returns:
+        The function `get_core_version` returns the low-level version of the core module being used in the
+    code. The version is extracted from the module names and formatted as an integer.
+    """
     _lowlevel_version = ""
     if "_al_lowlevel" in imas.__dict__:
         _lowlevel_version = imas.get_al_version()
@@ -67,14 +74,52 @@ dbentry_parser = argparse.ArgumentParser(add_help=False, parents=[uri_parser])
 
 
 def get_backend_id(name):
+    """
+    The function `get_backend_id` returns the value of the attribute from the module
+    `imasdef`.
+
+    Args:
+        name: The `name` parameter is a string representing the name of a backend system in the code.
+
+    Returns:
+        The code snippet is defining a function called `get_backend_id` that takes a parameter `name`.
+    Inside the function, it uses the `getattr` function to dynamically access an attribute from the
+    module `imasdef` based on the value of `name` with the suffix "_BACKEND". The value of this
+    attribute is then returned by the function.
+    """
     return getattr(imasdef, f"{name}_BACKEND")
 
 
 def get_slice_mode(name):
+    """
+    The function `get_slice_mode` returns the interpolation mode for a given name from the `imasdef`
+    module.
+
+    Args:
+        name: Thank you for providing the code snippet. Could you please provide the value of the `name`
+    parameter so that I can assist you further with the `get_slice_mode` function?
+
+    Returns:
+        The `get_slice_mode` function is returning the value of the attribute with the name
+    `{name}_INTERP` from the `imasdef` module.
+    """
     return getattr(imasdef, f"{name}_INTERP")
 
 
 def get_details_from_uri(uri):
+    """
+    The function `get_details_from_uri` extracts specific details from a URI string using regular
+    expressions and returns them in a dictionary format.
+
+    Args:
+        uri: The function `get_details_from_uri` takes a URI as input and extracts various parameters from
+    it. The parameters it extracts are:
+
+    Returns:
+        The function `get_details_from_uri` returns a dictionary containing details extracted from the
+    provided URI string. The dictionary includes information such as user, database, version, backend,
+    shot, pulse, run, path, and flags indicating the presence of certain parameters.
+    """
     import re
 
     param = {}

@@ -26,6 +26,16 @@ class SummaryCompute:
     def get_summary(
         self,
     ):
+        """
+        The function `get_summary` processes and retrieves various waveforms and power values, handling
+        missing data and logging critical errors when necessary.
+
+        Returns:
+            The `get_summary` method returns a dictionary named `waveform` containing various waveforms
+        and their values. The waveforms included in the dictionary are "time", "ip",
+        "current_non_inductive", "current_bootstrap", "v_loop", "beta_tor_norm", "beta_pol",
+        "energy_diamagnetic", "energy_mhd", "current_ohm", "energy_total
+        """
         stime = len(self.ids.time)
         # Ip waveform
         if len(self.ids.global_quantities.ip.value) < 1:

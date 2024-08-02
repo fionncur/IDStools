@@ -329,7 +329,26 @@ class WavesCompute:
 
         return beam_tracing
 
-    def get_e_c_launchers_info(self, time_index: int = 0, usepsi=False, verbose=False):
+    def get_ec_launchers_info(self, time_index: int = 0, usepsi=False, verbose=False):
+        """
+        The function `get_ec_launchers_info` retrieves information about electron cyclotron launchers,
+        including power, current, and profiles, at a specified time index.
+
+        Args:
+            time_index (int): The `time_index` parameter
+            usepsi: The `usepsi` parameter in the `get_ec_launchers_info` method is a boolean flag that
+        indicates whether to use psi (magnetic flux) information when retrieving radial grid data. When
+        `usepsi` is set to `True`, the method will include psi information in the radial grid. Defaults
+        to False
+            verbose: The `verbose` parameter
+
+        Returns:
+            The function `get_ec_launchers_info` returns a dictionary `ec_launcher_info` containing
+        information about the EC (Electron Cyclotron) launchers. The dictionary includes various keys
+        with corresponding values such as the names of single EC launchers, injected power, absorbed
+        power, ECCD (Electron Cyclotron Current Drive), total injected power, total absorbed power,
+        total ECCD, power density
+        """
         ec_launcher_info = {}
         data = self.get_radial_grid_info(time_index, usepsi)
         active_launchers = {key: value for key, value in data.items() if value["is_active"] is True}
@@ -465,7 +484,7 @@ class WavesCompute:
 
     def get_radial_grid_info(self, time_index: int = 0, usepsi=False):
         """
-        The function `getRadialGridInfo` retrieves radial grid information for coherent waves, with an option
+        The function `get_radial_grid_info` retrieves radial grid information for coherent waves, with an option
         to use psi as a radial coordinate.
 
         Args:
@@ -473,7 +492,7 @@ class WavesCompute:
             usepsi: The `usepsi` parameter tells whether to use the psi radial coordinate for the grid information.
 
         Returns:
-            The function `getRadialGridInfo` returns a dictionary `data` containing information about the
+            The function `get_radial_grid_info` returns a dictionary `data` containing information about the
             radial grid for each coherent wave in the object. If no active waves are found, it returns `None`.
         """
         data = {}
@@ -548,6 +567,20 @@ class WavesCompute:
         return data
 
     def is_active_during_pulse(self, wave_index):
+        """
+        The function `is_active_during_pulse` checks if a specific wave is active during a pulse based
+        on its power values at different time points.
+
+        Args:
+            wave_index: The `wave_index` parameter in the `is_active_during_pulse` method represents the
+        index of the coherent wave that you want to check for activity. This index is used to access a
+        specific coherent wave within the `coherent_wave` list.
+
+        Returns:
+            The function is checking if there is any time point during the pulse where the power of the
+        coherent wave at the specified wave_index is greater than 0. If such a time point is found, the
+        function returns True. If no such time point is found, the function returns False.
+        """
         for itime in range(len(self.ids.time)):
             if self.ids.coherent_wave[wave_index].global_quantities[itime].power > 0:
                 return True

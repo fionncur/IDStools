@@ -101,7 +101,7 @@ class CoreSourcesCompute:
     @functools.lru_cache(maxsize=128)
     def get_rho_tor_norm(self) -> np.ndarray | None:
         """
-        The function returns the value of `grid.rho_tor_norm` if it is not empty,
+        The function `get_rho_tor_norm` returns the value of `grid.rho_tor_norm` if it is not empty,
         otherwise it returns None.
 
         Returns:
@@ -133,7 +133,7 @@ class CoreSourcesCompute:
     @functools.lru_cache(maxsize=128)
     def get_valid_and_active_sources(self) -> Dict[int, Dict[str, bool]]:
         """
-        The function returns a dictionary of valid and active sources, where each source
+        The function `get_valid_and_active_sources` returns a dictionary of valid and active sources, where each source
         is represented by a dictionary with the keys "valid" and "active".
 
         Returns:
@@ -167,6 +167,13 @@ class CoreSourcesCompute:
         return any(source["active"] for _, source in sources.items())
 
     def get_source_names(self) -> Dict:
+        """
+        This function retrieves the names of valid and active sources and returns them in uppercase.
+
+        Returns:
+          A dictionary containing the index of valid and active sources as keys and the uppercase name
+        of the source as values.
+        """
         sources = self.get_valid_and_active_sources()
         single_source_name = {}
         for source_index, source in sources.items():
@@ -191,7 +198,10 @@ class CoreSourcesCompute:
         # total_particles_profile            = [0]*nrho  # profile
         # single_power_profile               = dict()    # profile
         # single_particles_profile           = dict()    # profile
-        nrho = len(self.get_rho_tor_norm())
+        rho_tor_norm = self.get_rho_tor_norm()
+        nrho = 0
+        if rho_tor_norm is not None:
+            nrho = len(rho_tor_norm)
         total_current_profile = np.zeros(nrho)
         single_current_profile = {}
         sources = self.get_valid_and_active_sources()
@@ -212,19 +222,22 @@ class CoreSourcesCompute:
     @functools.lru_cache(maxsize=128)
     def get_single_and_total_electrons_profiles(self) -> Dict[str, np.ndarray]:
         """
-        The function calculates and returns profiles of total  electron power,
-        total electron particles, single electron power, and single electron particles.
+        The function calculates and returns profiles of total and single electron power and particles
+        based on valid and active sources.
 
         Returns:
-            a dictionary with the following keys and values: totalElectronPowerProfile, totalElectronParticlesProfile,
-            singleElectronPowerProfile, singleElectronParticlesProfile,
+            a dictionary with the following keys and corresponding values:
+            - "total_electron_power_profile": Profile of total electron power
+            - "total_electron_particles_profile": Profile of total electron particles
+            - "single_electron_power_profile": Dictionary containing profiles of single electron power for
+            each data source
+            - "single_electron_particles_profile": Dictionary containing profiles of single electron
+            particles for each data source
         """
-        # SINGLE AND TOTAL PROFILES (ELECTRONS)
-        # totalElectronPowerProfile       = [0]*nrho  # profile
-        # total_electron_particles_profile   = [0]*nrho  # profile
-        # single_electron_power_profile      = dict()    # profile
-        # single_electron_particles_profile  = dict()    # profile
-        nrho = len(self.get_rho_tor_norm())
+        rho_tor_norm = self.get_rho_tor_norm()
+        nrho = 0
+        if rho_tor_norm is not None:
+            nrho = len(rho_tor_norm)
         total_electron_power_profile = np.zeros(nrho)
         total_electron_particles_profile = np.zeros(nrho)
         single_electron_power_profile = {}
@@ -273,7 +286,10 @@ class CoreSourcesCompute:
         # total_ion_particles_profile = [0] * nrho  # profile
         # single_ion_power_profile = dict()  # profile
         # single_ion_particles_profile = dict()  # profile
-        nrho = len(self.get_rho_tor_norm())
+        rho_tor_norm = self.get_rho_tor_norm()
+        nrho = 0
+        if rho_tor_norm is not None:
+            nrho = len(rho_tor_norm)
         total_ion_power_profile = np.zeros(nrho)
         total_ion_particles_profile = np.zeros(nrho)
         single_ion_power_profile = {}
@@ -307,6 +323,19 @@ class CoreSourcesCompute:
     def get_single_and_total_electrons_ions_waveforms(
         self,
     ):
+        """
+        This function calculates single and total waveforms for electrons and ions based on power and
+        particle quantities.
+
+        Returns:
+            The function `get_single_and_total_electrons_ions_waveforms` returns a dictionary containing
+            four key-value pairs:
+            1. "total_power_waveform": an array representing the total power waveform
+            2. "total_particles_waveform": an array representing the total particles waveform
+            3. "single_power_waveform": a dictionary where each key is a source index and the corresponding
+            value is an array
+            4. "single_particles_waveform": particles waveform
+        """
         # SINGLE AND TOTAL WAVEFORMS (ELECTRONS+IONS)
         # total_power_waveform = [0] * ntime  # waveform
         # total_particles_waveform = [0] * ntime  # waveform
@@ -473,7 +502,7 @@ class CoreSourcesCompute:
 
     def get_single_and_total_current_torque(self):
         """
-        The function calculates the total and individual current and torque
+        The function `get_single_and_total_current_torque` calculates the total and individual current and torque
         waveforms for a given set of sources.
 
         Returns:

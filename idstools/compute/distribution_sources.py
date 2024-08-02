@@ -18,11 +18,11 @@ class DistributionSourcesCompute:
 
     def get_rho_tor_norm(self, time_slice: int = 0) -> Union[None, np.ndarray]:
         """
-        The function `getRhoTorNorm` returns the normalized toroidal rho values from a given time slice
+        The function `get_rho_tor_norm` returns the normalized toroidal rho values from a given time slice
         of a source.
 
         Args:
-            timeSlice (int): The parameter "timeSlice" is an integer that represents the time slice for
+            time_slice (int): The parameter "time_slice" is an integer that represents the time slice for
             which you want to retrieve the value of "rho_tor_norm".
 
         Returns:
@@ -44,15 +44,15 @@ class DistributionSourcesCompute:
 
     def get_volume(self, time_slice: int = 0) -> Union[None, np.ndarray]:
         """
-        The function `getVolume` retrieves the volume from a specific time slice of a source's profiles.
+        The function `get_volume` retrieves the volume from a specific time slice of a source's profiles.
 
         Args:
-            timeSlice (int): The parameter "timeSlice" is an optional integer that specifies the index of the time
+            time_slice (int): The parameter "time_slice" is an optional integer that specifies the index of the time
             slice for which you want to retrieve the volume.
 
         Returns:
             the volume of a grid at a given time slice. The volume is obtained from the
-            `distribution_sources.source[timeSlice].profiles_1d[0].grid.volume` attribute.If the volume cannot be read
+            `distribution_sources.source[time_slice].profiles_1d[0].grid.volume` attribute.If the volume cannot be read
             , the function returns `None`.
         """
         volume = None
@@ -67,11 +67,11 @@ class DistributionSourcesCompute:
 
     def get_source_info(self):
         """
-        The function `getSourceInfo` retrieves information about sources, including labels, particle data, and power,
+        The function `get_source_info` retrieves information about sources, including labels, particle data, and power,
         and returns it in a dictionary format.
 
         Returns:
-            a dictionary called `sourcesDict`.
+            a dictionary called `sources_dict`.
         """
         nrho = len(self.get_rho_tor_norm())
         sources_dict = {}

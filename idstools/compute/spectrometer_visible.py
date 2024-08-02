@@ -15,7 +15,7 @@ class SpectrometerVisibleCompute:
 
     def get_valid_spectrometers(self):
         """
-        The function `getValidSpectrometers` returns a list of valid spectrometers by extracting
+        The function `get_valid_spectrometers` returns a list of valid spectrometers by extracting
         the names from the `channel` objects.
 
         Returns:
@@ -31,7 +31,7 @@ class SpectrometerVisibleCompute:
 
     def get_channels(self, channel_name_pattern=CHANNEL_NAME_PATTERN):
         """
-        The `getChannels` function retrieves information about channels based on a given channel name pattern.
+        The `get_channels` function retrieves information about channels based on a given channel name pattern.
 
         Args:
             channelNamePattern: The `channelNamePattern` parameter is a regular expression pattern used to

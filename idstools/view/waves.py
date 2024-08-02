@@ -141,7 +141,7 @@ class WavesView:
         verbose=False,
     ):
         # ECRH PROFILE [MA/M2]
-        ec_launcher_info = self.waves_compute.get_e_c_launchers_info(time_index)
+        ec_launcher_info = self.waves_compute.get_ec_launchers_info(time_index)
         radial_grid = self.waves_compute.get_radial_grid_info(time_index)
         active_launchers = {key: value for key, value in radial_grid.items() if value["is_active"] is True}
         _, first_radial_grid_info = next(iter(active_launchers.items()))
@@ -214,7 +214,7 @@ class WavesView:
         verbose=False,
     ):
         # ECCD PROFILE [MA/M2]
-        ec_launcher_info = self.waves_compute.get_e_c_launchers_info(time_index)
+        ec_launcher_info = self.waves_compute.get_ec_launchers_info(time_index)
 
         radial_grid = self.waves_compute.get_radial_grid_info(time_index)
         active_launchers = {key: value for key, value in radial_grid.items() if value["is_active"] is True}
@@ -273,7 +273,7 @@ class WavesView:
     ):
         time_array = self.ids.time
         ntime = len(self.ids.time)
-        ec_launcher_info = self.waves_compute.get_e_c_launchers_info(time_index)
+        ec_launcher_info = self.waves_compute.get_ec_launchers_info(time_index)
 
         radial_grid = self.waves_compute.get_radial_grid_info(time_index)
         active_launchers = {key: value for key, value in radial_grid.items() if value["is_active"] is True}
@@ -313,7 +313,7 @@ class WavesView:
     ):
         time_array = self.ids.time
         ntime = len(self.ids.time)
-        ec_launcher_info = self.waves_compute.get_e_c_launchers_info(time_index)
+        ec_launcher_info = self.waves_compute.get_ec_launchers_info(time_index)
 
         radial_grid = self.waves_compute.get_radial_grid_info(time_index)
         active_launchers = {key: value for key, value in radial_grid.items() if value["is_active"] is True}
@@ -347,7 +347,7 @@ class WavesView:
             return 0
 
     def display_e_c_launchers_info(self, time_index):
-        ec_launcher_info = self.waves_compute.get_e_c_launchers_info(time_index)
+        ec_launcher_info = self.waves_compute.get_ec_launchers_info(time_index)
 
         launchers = self.waves_compute.get_radial_grid_info(time_index)
 
@@ -375,7 +375,7 @@ class WavesView:
     # CD WAVEFORM
     def view_c_d_waveform(self, ax, time_index, usepsi=False):
         time_array = self.ids.time
-        ec_launcher_info = self.waves_compute.get_e_c_launchers_info(time_index, usepsi)
+        ec_launcher_info = self.waves_compute.get_ec_launchers_info(time_index, usepsi)
 
         radial_grid = self.waves_compute.get_radial_grid_info(time_index, usepsi)
 
@@ -402,7 +402,7 @@ class WavesView:
     # EC POWER WAVEFORM
     def view_e_c_power_waveform(self, ax, time_index, usepsi=False):
         time_array = self.ids.time
-        ec_launcher_info = self.waves_compute.get_e_c_launchers_info(time_index, usepsi)
+        ec_launcher_info = self.waves_compute.get_ec_launchers_info(time_index, usepsi)
 
         radial_grid = self.waves_compute.get_radial_grid_info(time_index, usepsi)
 
@@ -428,7 +428,7 @@ class WavesView:
 
     # CD PROFILE [MA/M2]
     def view_c_d_profile(self, ax, time_index, usepsi=False):
-        ec_launcher_info = self.waves_compute.get_e_c_launchers_info(time_index, usepsi)
+        ec_launcher_info = self.waves_compute.get_ec_launchers_info(time_index, usepsi)
 
         radial_grid = self.waves_compute.get_radial_grid_info(time_index, usepsi)
 
@@ -459,7 +459,7 @@ class WavesView:
 
     # PROFILE OF ABSORBED POWER DENSITY [MW/M3]
     def view_absorbed_power_density_profile(self, ax, time_index, usepsi=False):
-        ec_launcher_info = self.waves_compute.get_e_c_launchers_info(time_index, usepsi, True)
+        ec_launcher_info = self.waves_compute.get_ec_launchers_info(time_index, usepsi, True)
 
         radial_grid = self.waves_compute.get_radial_grid_info(time_index, usepsi)
 

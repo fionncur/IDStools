@@ -44,7 +44,7 @@ class PfActiveCompute:
                 idsObj = connection.get('pf_active')
 
                 computeObj = PfActiveCompute(idsObj)
-                result=computeObj.getActivePfCoils()
+                result=computeObj.get_active_pf_coils()
                 pprint.pprint(result)
         """
 

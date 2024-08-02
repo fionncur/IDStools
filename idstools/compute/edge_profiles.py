@@ -39,7 +39,7 @@ class EdgeProfilesCompute:
 
         Args:
             ids ([ids_object]): [filled ids object]
-            timeSlice (int, optional): [slice on which functions should operate on]. Defaults to 0.
+            time_slice (int, optional): [slice on which functions should operate on]. Defaults to 0.
 
         Returns:
             [dict]: [species wise data in dictionary format]
@@ -133,7 +133,7 @@ class EdgeProfilesCompute:
         This function returns a list of labels for all species in a given time slice.
 
         Args:
-            timeSlice: an optional integer parameter that specifies the time slice on which the function
+            time_slice: an optional integer parameter that specifies the time slice on which the function
             should operate. The default value is 0
 
         Returns:
@@ -147,7 +147,7 @@ class EdgeProfilesCompute:
                 connection.open()
                 idsObj = connection.get('edge_profiles')
                 computeObj = EdgeProfilesCompute(idsObj)
-                result = computeObj.getLabels(timeSlice=0)
+                result = computeObj.getLabels(time_slice=0)
 
                 ['D', 'He', 'Ne', 'Be', ' D2+']
         """
@@ -163,7 +163,7 @@ class EdgeProfilesCompute:
         This function returns a list of atomic masses for a given slice and element index.
 
         Args:
-            timeSlice (int, optional): The index of the slice in the `ggd` list that contains the ion information.
+            time_slice (int, optional): The index of the slice in the `ggd` list that contains the ion information.
             Defaults to 0
             elementIndex (int, optional): Element index, It is used to access the 'a' attribute of the element object.
             Defaults to 0
@@ -179,7 +179,7 @@ class EdgeProfilesCompute:
                 connection.open()
                 idsObj = connection.get('edge_profiles')
                 computeObj = EdgeProfilesCompute(idsObj)
-                result = computeObj.get_a(timeSlice=0)
+                result = computeObj.get_a(time_slice=0)
 
                 [2.0, 4.0, 20.0, 9.0, 2.0]
         """
@@ -198,12 +198,12 @@ class EdgeProfilesCompute:
         index.
 
         Args:
-            timeSlice (int, optional): time slice on which functions should operate on. Defaults to 0.
+            time_slice (int, optional): time slice on which functions should operate on. Defaults to 0.
             elementIndex (int, optional): element of the atom or molecule on which functions should operate on.
             Defaults to 0.
 
         Returns:
-            a list of nuclear charges for each species in the given timeSlice and elementIndex.
+            a list of nuclear charges for each species in the given time_slice and elementIndex.
 
         Example:
             .. code-block:: python
@@ -213,7 +213,7 @@ class EdgeProfilesCompute:
                 connection.open()
                 idsObj = connection.get('edge_profiles')
                 computeObj = EdgeProfilesCompute(idsObj)
-                result = computeObj.get_z(timeSlice=0)
+                result = computeObj.get_z(time_slice=0)
 
                 [1, 2, 10, 4, 1]
         """
@@ -231,7 +231,7 @@ class EdgeProfilesCompute:
         excitation, ...) for each species
 
         Args:
-            timeSlice (int, optional): time slice on which function should operate on. Defaults to 0.
+            time_slice (int, optional): time slice on which function should operate on. Defaults to 0.
 
         Returns:
             a list of states (ionisation, energy, excitation, etc.) in  the input data of each species .
@@ -244,7 +244,7 @@ class EdgeProfilesCompute:
                 connection.open()
                 idsObj = connection.get('edge_profiles')
                 computeObj = EdgeProfilesCompute(idsObj)
-                result = computeObj.getStates(timeSlice=0)
+                result = computeObj.getStates(time_slice=0)
 
                 print(result[0]) # state object from species
 
@@ -259,7 +259,7 @@ class EdgeProfilesCompute:
         in a plasma simulation.
 
         Args:
-            timeSlice (int, optional): time slice on which function should operate on. Defaults to 0.
+            time_slice (int, optional): time slice on which function should operate on. Defaults to 0.
 
         Returns:
             a dictionary containing information about the states of different species in a plasma, including
@@ -274,7 +274,7 @@ class EdgeProfilesCompute:
                 connection.open()
                 idsObj = connection.get('edge_profiles')
                 computeObj = EdgeProfilesCompute(idsObj)
-                result = computeObj.getStatesData(timeSlice=0)
+                result = computeObj.getStatesData(time_slice=0)
 
                 {'0':
                 {'0':
@@ -325,7 +325,7 @@ class EdgeProfilesCompute:
         of a given slice.
 
         Args:
-            timeSlice (int, optional): time slice on which function should operate on. Defaults to 0.
+            time_slice (int, optional): time slice on which function should operate on. Defaults to 0.
 
         Returns:
             the total number of electrons (ne) in the given slice of the object, calculated by multiplying the
@@ -339,7 +339,7 @@ class EdgeProfilesCompute:
                 connection.open()
                 idsObj = connection.get('edge_profiles')
                 computeObj = EdgeProfilesCompute(idsObj)
-                result = computeObj.get_ne(timeSlice=0)
+                result = computeObj.get_ne(time_slice=0)
 
                 1.7465285792413856e+22
         """
@@ -355,7 +355,7 @@ class EdgeProfilesCompute:
         manually calculating it from the nodes.
 
         Args:
-            timeSlice (int, optional): time slice on which function should operate on. Defaults to 0.
+            time_slice (int, optional): time slice on which function should operate on. Defaults to 0.
 
         Returns:
             a list of volumes for each element in the grid subset. If the volumes are not available in the cells,
@@ -370,7 +370,7 @@ class EdgeProfilesCompute:
                 connection.open()
                 idsObj = connection.get('edge_profiles')
                 computeObj = EdgeProfilesCompute(idsObj)
-                result = computeObj.getVolume(timeSlice=0)
+                result = computeObj.getVolume(time_slice=0)
 
                 [0.00037247887179986,
                 0.00036873285033229,
@@ -503,7 +503,7 @@ class EdgeProfilesCompute:
         This function retrieves the electron density array for a given slice index and returns it.
 
         Args:
-            timeSlice (int, optional): time slice on which function should operate on. Defaults to 0.
+            time_slice (int, optional): time slice on which function should operate on. Defaults to 0.
 
         Returns:
             the electron density array for a specific slice index, and also logging the array and the total
@@ -517,7 +517,7 @@ class EdgeProfilesCompute:
                 connection.open()
                 idsObj = connection.get('edge_profiles')
                 computeObj = EdgeProfilesCompute(idsObj)
-                result = computeObj.getDensity(timeSlice=0)
+                result = computeObj.getDensity(time_slice=0)
 
                 array([1.83014037e+19, 2.86305333e+19, 4.50302324e+19, 6.99266610e+19,
                 1.04025196e+20, 1.56969187e+20, 2.32851365e+20, 3.45402170e+20,
@@ -538,7 +538,7 @@ class EdgeProfilesCompute:
         the species density list, the total density, and the index of the species with the maximum density.
 
         Args:
-            timeSlice (int, optional): time slice on which function should operate on. Defaults to 0.
+            time_slice (int, optional): time slice on which function should operate on. Defaults to 0.
 
         Returns:
             a tuple containing three values: a list of species density, the total density of all species, and the
@@ -552,7 +552,7 @@ class EdgeProfilesCompute:
                 connection.open()
                 idsObj = connection.get('edge_profiles')
                 computeObj = EdgeProfilesCompute(idsObj)
-                result = computeObj.getSpeciesDensity(timeSlice=0)
+                result = computeObj.getSpeciesDensity(time_slice=0)
 
                 ([1.6577031350573213e+22,
                 1.3677684317145648e+20,
@@ -605,7 +605,7 @@ class EdgeProfilesCompute:
         This function calculates the ratio of the number of species to the total number of particles in a plasma.
 
         Args:
-            timeSlice (int, optional): time slice on which function should operate on. Defaults to 0.
+            time_slice (int, optional): time slice on which function should operate on. Defaults to 0.
 
         Returns:
             The function `getNspecOverNtot` is returning the ratio of the list of species densities to the
@@ -619,7 +619,7 @@ class EdgeProfilesCompute:
                 connection.open()
                 idsObj = connection.get('edge_profiles')
                 computeObj = EdgeProfilesCompute(idsObj)
-                result = computeObj.getNspecOverNtot(timeSlice=0)
+                result = computeObj.getNspecOverNtot(time_slice=0)
 
                 array([9.87334881e-01, 8.14648566e-03, 3.70894720e-03, 8.04708810e-04, 4.97696116e-06])
 
@@ -632,7 +632,7 @@ class EdgeProfilesCompute:
         This function calculates the ratio of species density to electron density.
 
         Args:
-            timeSlice (int, optional): time slice on which function should operate on. Defaults to 0.
+            time_slice (int, optional): time slice on which function should operate on. Defaults to 0.
 
         Returns:
             the ratio of the species density list to the electron density (ne).
@@ -645,7 +645,7 @@ class EdgeProfilesCompute:
                 connection.open()
                 idsObj = connection.get('edge_profiles')
                 computeObj = EdgeProfilesCompute(idsObj)
-                result = computeObj.getNspecOverNe(timeSlice=0)
+                result = computeObj.getNspecOverNe(time_slice=0)
 
                 array([9.49141717e-01, 7.83135442e-03, 3.56547366e-03, 7.73580187e-04, 4.78443692e-06])
         """
@@ -658,7 +658,7 @@ class EdgeProfilesCompute:
         This function returns a list of the ratio of each species density to the maximum species density.
 
         Args:
-            timeSlice (int, optional): time slice on which function should operate on. Defaults to 0.
+            time_slice (int, optional): time slice on which function should operate on. Defaults to 0.
 
         Returns:
             a list of values obtained by dividing each element of the list `species_density_list` by the maximum
@@ -690,7 +690,7 @@ class EdgeProfilesCompute:
         z, and the table.
 
         Args:
-            timeSlice (int, optional): time slice on which function should operate on. Defaults to 0.
+            time_slice (int, optional): time slice on which function should operate on. Defaults to 0.
 
         Returns:
             a list of species based on the values of a, z, and the Mendeleev table.
@@ -720,11 +720,11 @@ class EdgeProfilesCompute:
         This is in place change of arrays
 
         Args:
-            species (list): result from getSpecies()
-            nspecOverNtot (list): result from getNspecOverNtot()
-            nspecOverNe (list): result from getNspecOverNe()
-            nspecOverNmaj (list): result from getNspecOverNmaj()
-            timeSlice (int, optional): time slice on which function should operate on. Defaults to 0.
+            species (list): result from get_species()
+            nspecOverNtot (list): result from get_nspec_over_ntot()
+            nspecOverNe (list): result from get_nspec_over_ne()
+            nspecOverNmaj (list): result from get_nspec_over_nmaj()
+            time_slice (int, optional): time slice on which function should operate on. Defaults to 0.
         """
         nspecies = len(self.ids.ggd[time_slice].ion)
         for ispecies, jspecies in itertools.product(range(nspecies), range(nspecies)):
@@ -737,6 +737,17 @@ class EdgeProfilesCompute:
                 nspec_over_nmaj[jspecies] = 0
 
     def get_core_boundry(self, time_slice=0):
+        """
+        This function `get_core_boundry` retrieves coordinates for core boundary elements from grid subsets based on
+        specified indices.
+
+        Args:
+            time_slice: The `time_slice` parameter
+
+        Returns:
+            the coordinates of the elements in the grid subset that corresponds to either the core_boundry
+        or core subset, depending on which one is found and has non-zero elements.
+        """
         CORE_BOUNDRY_SUBSET_INDEX = 15  # core_boundry
         CORE_SUBSET_INDEX = 22  # Core
         core_boundry_grid_subset = None
@@ -777,11 +788,23 @@ class EdgeProfilesCompute:
         return sep_coords
 
     def get_separatrix(self, time_slice=0):
+        """
+        This function `get_separatrix` retrieves coordinates for the separatrix from a grid subset based on a given time
+        slice.
+
+        Args:
+            time_slice: The `time_slice` parameter
+
+        Returns:
+            The function `get_separatrix` is returning the coordinates of the separatrix elements found in
+        the grid subset for the given time slice. The coordinates are stored in a NumPy array
+        `sep_coords`, where each row represents the coordinates of a separatrix element.
+        """
         SUBSET_INDEX = 16  # separatrix
         separatix_grid_subset = None
         for grid_subset in self.ids.grid_ggd[time_slice].grid_subset:
 
-            if grid_subset.identifier.index == s_u_b_s_e_t__i_n_d_e_x:
+            if grid_subset.identifier.index == SUBSET_INDEX:
                 separatix_grid_subset = grid_subset
                 logger.info(
                     f"Found Grid subset for separatrix name:{grid_subset.identifier.name}, Index: \
@@ -808,9 +831,9 @@ class EdgeProfilesCompute:
         # separatrix = np.array([sep_coords[hull.vertices, 0], sep_coords[hull.vertices, 1]]).T
         return sep_coords
 
-    def get_r_z(self, time_slice=0):
+    def get_rz(self, time_slice=0):
         """
-        The function `getRZ` returns the `r_edge` and `z_edge` coordinates of vertices in a grid.
+        The function `get_rz` returns the `r_edge` and `z_edge` coordinates of vertices in a grid.
 
         Returns:
             two arrays: r_edge and z_edge.
@@ -831,7 +854,7 @@ class EdgeProfilesCompute:
     # interpolate on rectangular x,y grid, for example a regular grid of 400 points
     def get_rectangular_grid(self, num_points=400):
         """
-        The function `getRectangularGrid` returns two arrays `x` and `y` that represent a meshgrid of points
+        The function `get_rectangular_grid` returns two arrays `x` and `y` that represent a meshgrid of points
         within a specified range.
 
         Args:
@@ -846,7 +869,7 @@ class EdgeProfilesCompute:
 
     def get_electron_density(self, time_slice, x, y):
         """
-        The function `getElectronDensity` calculates the electron density at a given position (x, y) by interpolating
+        The function `get_electron_density` calculates the electron density at a given position (x, y) by interpolating
         values from a grid.
 
         Args:
@@ -857,7 +880,7 @@ class EdgeProfilesCompute:
         Returns:
             the electron density at the given coordinates (x, y).
         """
-        r_edge, z_edge = self.get_r_z(time_slice)
+        r_edge, z_edge = self.get_rz(time_slice)
         temp = None
 
         for electrons_density in self.ids.ggd[time_slice].electrons.density:
@@ -872,7 +895,7 @@ class EdgeProfilesCompute:
 
     def get_ion_density(self, time_slice, x, y):
         """
-        The function `getIonDensity` calculates the ion density at a given position (x, y) by interpolating values
+        The function `get_ion_density` calculates the ion density at a given position (x, y) by interpolating values
         from a grid.
 
         Args:
@@ -884,7 +907,7 @@ class EdgeProfilesCompute:
         Returns:
             the ion density at the given coordinates (x, y).
         """
-        r_edge, z_edge = self.get_r_z(time_slice)
+        r_edge, z_edge = self.get_rz(time_slice)
         temp = None
         for ion_density in self.ids.ggd[time_slice].ion[0].density:
             if ion_density.grid_subset_index == 1:  # nodes
@@ -898,7 +921,7 @@ class EdgeProfilesCompute:
 
     def get_neutral_density(self, time_slice, x, y):
         """
-        The function `getNeutralDensity` calculates the neutral density at a given position (x, y) by
+        The function `get_neutral_density` calculates the neutral density at a given position (x, y) by
         interpolating values from a grid.
 
         Args:
@@ -910,7 +933,7 @@ class EdgeProfilesCompute:
         Returns:
             the neutral density at the given coordinates (x, y).
         """
-        r_edge, z_edge = self.get_r_z(time_slice)
+        r_edge, z_edge = self.get_rz(time_slice)
 
         temp = None
         for neutral_density in self.ids.ggd[time_slice].neutral[0].density:
@@ -926,7 +949,7 @@ class EdgeProfilesCompute:
 
     def get_outer_midplane_array_index(self):
         """
-        This function searches for a specific grid subset with an index of 11 and returns its position
+        This function `get_outer_midplane_array_index` searches for a specific grid subset with an index of 11 and returns its position
         within the list of subsets.
 
         Returns:
@@ -947,6 +970,20 @@ class EdgeProfilesCompute:
         return subset_index
 
     def getnrho(self, slice_index=0):
+        """
+        This function `getnrho` returns the number of elements in the `rho_tor_norm` or `rho_tor` grid
+        based on the provided slice index.
+
+        Args:
+            slice_index: The `slice_index` parameter in the `getnrho` method is used to specify which
+        slice of the `profiles_1d` data to access.
+
+        Returns:
+            The `getnrho` method is returning the number of elements in the `rho_tor_norm` or `rho_tor`
+        attribute of the grid object within the `profiles_1d` attribute of the `ids` object at the
+        specified `slice_index`. If either of these attributes has elements, the length of that
+        attribute is returned as the number of elements (`nrho`).
+        """
         nrho = None
         try:
             if len(self.ids.profiles_1d[slice_index].grid.rho_tor_norm) > 0:

@@ -71,7 +71,7 @@ class CoreProfilesCompute:
     @functools.lru_cache(maxsize=128)
     def get_electron_density_ne0(self):
         """
-        This function returns a list of electron densities at the first position for each time step in a given object.
+        This function `get_electron_density_ne0` returns a list of electron densities at the first position for each time step in a given object.
 
         Returns:
             The function `get_ne0` returns a list of electron densities at the first spatial point (index 0) for all
@@ -86,7 +86,7 @@ class CoreProfilesCompute:
                 idsObj = connection.get('core_profiles')
                 connection.close()
                 computeObj = CoreProfilesCompute(idsObj)
-                result = computeObj.getElectronDensityNe0(timeSlice=0)
+                result = computeObj.get_electron_density_ne0(time_slice=0)
 
                 [5.106128949975287]
         """
@@ -100,7 +100,7 @@ class CoreProfilesCompute:
         This function returns a list of atomic masses for a given slice and element index.
 
         Args:
-            timeSlice (int, optional): The index of the slice in the `ggd` list that contains the ion
+            time_slice (int, optional): The index of the slice in the `ggd` list that contains the ion
             information.Defaults to 0
             element_index (int, optional): Element index, It is used to access the 'a' attribute of
             the element object. Defaults to 0
@@ -118,7 +118,7 @@ class CoreProfilesCompute:
                 idsObj = connection.get('core_profiles')
                 connection.close()
                 computeObj = CoreProfilesCompute(idsObj)
-                result = computeObj.get_a(timeSlice=0)
+                result = computeObj.get_a(time_slice=0)
 
                 [2.0, 3.0, 4.0, 9.0, 183.84, 40.0, 20.0]
         """
@@ -132,16 +132,16 @@ class CoreProfilesCompute:
     @functools.lru_cache(maxsize=128)
     def get_z(self, time_slice: int = 0, element_index: int = 0) -> list:
         """
-        This function returns a list of nuclear charges for each species in a given slice and element
+        This function `get_z` returns a list of nuclear charges for each species in a given slice and element
         index.
 
         Args:
-            timeSlice (int, optional): time slice on which functions should operate on. Defaults to 0.
+            time_slice (int, optional): time slice on which functions should operate on. Defaults to 0.
             elementIndex (int, optional): element of the atom or molecule on which functions should operate on.
             Defaults to 0.
 
         Returns:
-            a list of nuclear charges for each species in the given timeSlice and elementIndex.
+            a list of nuclear charges for each species in the given time_slice and elementIndex.
 
         Example:
             .. code-block:: python
@@ -152,7 +152,7 @@ class CoreProfilesCompute:
                 idsObj = connection.get('core_profiles')
                 connection.close()
                 computeObj = CoreProfilesCompute(idsObj)
-                result = computeObj.get_z(timeSlice=0)
+                result = computeObj.get_z(time_slice=0)
 
                 [1, 1, 2, 4, 74, 18, 10]
         """
@@ -166,11 +166,11 @@ class CoreProfilesCompute:
 
     def get_states(self, time_slice: int = 0) -> list:
         """
-        This function returns quantities related to the different states of the species (ionisation, energy,
+        This function `get_states` returns quantities related to the different states of the species (ionisation, energy,
         excitation, ...) for each species
 
         Args:
-            timeSlice (int, optional): time slice on which function should operate on. Defaults to 0.
+            time_slice (int, optional): time slice on which function should operate on. Defaults to 0.
 
         Returns:
             a list of states (ionisation, energy, excitation, etc.) in  the input data of each species .
@@ -185,22 +185,21 @@ class CoreProfilesCompute:
                 idsObj = connection.get('core_profiles')
                 connection.close()
                 computeObj = CoreProfilesCompute(idsObj)
-                result = computeObj.getStates(timeSlice=0)
+                result = computeObj.get_states(time_slice=0)
 
                 print(result[0]) # state object from species
 
-                # class 'imas_3_38_1_ual_4_11_4.core_profiles.profiles_1d_ion_state__structArray'
         """
         nspecies = len(self.ids.profiles_1d[time_slice].ion)
         return [self.ids.profiles_1d[time_slice].ion[species_index].state for species_index in range(nspecies)]
 
     def get_state_density(self, time_slice: int = 0, species_index: int = 0, state_index: int = 0) -> np.ndarray | None:
         """
-        This function returns the density of a specified state of a specified species at a specified time slice,
+        This function `get_state_density` returns the density of a specified state of a specified species at a specified time slice,
         or the thermal density if the former is not available.
 
         Args:
-            timeSlice (int): an integer representing the index of the time slice for which the density is being
+            time_slice (int): an integer representing the index of the time slice for which the density is being
             requested.
             Defaults to 0
             speciesIndex (int): The index of the ion species for which the density is being retrieved. Defaults to 0
@@ -219,7 +218,7 @@ class CoreProfilesCompute:
                 idsObj = connection.get('core_profiles')
                 connection.close()
                 computeObj = CoreProfilesCompute(idsObj)
-                result = computeObj.getStateDensity(timeSlice=0, speciesIndex=0, stateIndex=0)
+                result = computeObj.get_state_density(time_slice=0, speciesIndex=0, stateIndex=0)
 
                 array([4.16759116e+19, 4.17266130e+19, 4.17275806e+19, 4.17086410e+19,
                 4.16751781e+19, 4.16983762e+19, 4.17344996e+19, 4.17944658e+19,
@@ -236,11 +235,11 @@ class CoreProfilesCompute:
 
     def get_states_data(self, time_slice: int = 0) -> dict:
         """
-        This function returns a dictionary containing data on the states and densities of different
+        This function `get_states_data` returns a dictionary containing data on the states and densities of different
         species in a plasma simulation.
 
         Args:
-            timeSlice (int, optional): time slice on which function should operate on. Defaults to 0.
+            time_slice (int, optional): time slice on which function should operate on. Defaults to 0.
 
         Returns:
             a dictionary containing information about the states of different species in a plasma, including
@@ -256,7 +255,7 @@ class CoreProfilesCompute:
                 idsObj = connection.get('core_profiles')
                 connection.close()
                 computeObj = CoreProfilesCompute(idsObj)
-                result = computeObj.getStatesData(timeSlice=0)
+                result = computeObj.get_states_data(time_slice=0)
 
 
                 {'0': {'0': {'density_available': True,
@@ -339,17 +338,17 @@ class CoreProfilesCompute:
                     state_data["n_ni"] = 0.0
                 species_data[str(state_index)] = state_data
 
-            # label = self.ids_object.profiles_1d[timeSlice].ion[species_index].label
+            # label = self.ids_object.profiles_1d[time_slice].ion[species_index].label
             states_data[str(species_index)] = species_data
         return states_data
 
     def get_ne(self, time_slice: int = 0) -> float:
         """
-        This function calculates the total number of electrons (ne) based on the volume and electron density
+        This function `get_ne` calculates the total number of electrons (ne) based on the volume and electron density
         of a given slice.
 
         Args:
-            timeSlice (int, optional): time slice on which function should operate on. Defaults to 0.
+            time_slice (int, optional): time slice on which function should operate on. Defaults to 0.
 
         Returns:
             the total number of electrons (ne) in the given slice of the object, calculated by multiplying the
@@ -364,7 +363,7 @@ class CoreProfilesCompute:
                 idsObj = connection.get('core_profiles')
                 connection.close()
                 computeObj = CoreProfilesCompute(idsObj)
-                result = computeObj.get_ne(timeSlice=0)
+                result = computeObj.get_ne(time_slice=0)
 
                 8.778296205101714e+23
         """
@@ -377,10 +376,10 @@ class CoreProfilesCompute:
     @functools.lru_cache(maxsize=128)
     def get_volume(self, time_slice: int = 0) -> np.ndarray:
         """
-        This function returns the volume of a grid at a given time slice.
+        This function `get_volume` returns the volume of a grid at a given time slice.
 
         Args:
-            timeSlice (int, optional): time slice on which function should operate on. Defaults to 0.
+            time_slice (int, optional): time slice on which function should operate on. Defaults to 0.
 
         Returns:
             the volume of the grid for a given time slice. If the volume is empty, it returns None
@@ -394,7 +393,7 @@ class CoreProfilesCompute:
                 idsObj = connection.get('core_profiles')
                 connection.close()
                 computeObj = CoreProfilesCompute(idsObj)
-                result = computeObj.getVolume(timeSlice=0)
+                result = computeObj.get_volume(time_slice=0)
 
                 array([4.39932160e-02, 2.19952424e-01, 5.71837023e-01, 1.09958863e+00,
                 1.80311391e+00, 2.68234060e+00, 3.73724537e+00, 4.96778828e+00,
@@ -413,7 +412,7 @@ class CoreProfilesCompute:
         containing the species density list, the total density, and the index of the species with the maximum density.
 
         Args:
-            timeSlice (int, optional): time slice on which function should operate on. Defaults to 0.
+            time_slice (int, optional): time slice on which function should operate on. Defaults to 0.
 
         Returns:
             a tuple containing three values: a list of species density, the total density of all species, and the
@@ -428,7 +427,7 @@ class CoreProfilesCompute:
                 idsObj = connection.get('core_profiles')
                 connection.close()
                 computeObj = CoreProfilesCompute(idsObj)
-                result = computeObj.getSpeciesDensity(timeSlice=0)
+                result = computeObj.get_species_density(time_slice=0)
 
                 ([6.50016400579169e+23, 8.289108520803897e+22, 6.202712465391594e+21],7.391101982525995e+23, 0)
         """
@@ -454,10 +453,10 @@ class CoreProfilesCompute:
         This function calculates the ratio of the number of species to the total number of particles in a plasma.
 
         Args:
-            timeSlice (int, optional): time slice on which function should operate on. Defaults to 0.
+            time_slice (int, optional): time slice on which function should operate on. Defaults to 0.
 
         Returns:
-            The function `getNspecOverNtot` is returning the ratio of the list of species densities to the
+            The function `get_nspec_over_ntot` is returning the ratio of the list of species densities to the
             total density (`ntot`).
 
         Example:
@@ -469,7 +468,7 @@ class CoreProfilesCompute:
                 connection.open()
                 idsObj = connection.get('core_profiles')
                 computeObj = CoreProfilesCompute(idsObj)
-                result = computeObj.getNspecOverNtot(timeSlice=0)
+                result = computeObj.get_nspec_over_ntot(time_slice=0)
 
                 array([0.87945803, 0.11214983, 0.00839213])
         """
@@ -481,7 +480,7 @@ class CoreProfilesCompute:
         This function calculates the ratio of species density to electron density.
 
         Args:
-            timeSlice (int, optional): time slice on which function should operate on. Defaults to 0.
+            time_slice (int, optional): time slice on which function should operate on. Defaults to 0.
 
         Returns:
             the ratio of the species density list to the electron density (ne).
@@ -494,7 +493,7 @@ class CoreProfilesCompute:
                 connection.open()
                 idsObj = connection.get('core_profiles')
                 computeObj = CoreProfilesCompute(idsObj)
-                result = computeObj.getNspecOverNe(timeSlice=0)
+                result = computeObj.get_nspec_over_ne(time_slice=0)
 
                 array([0.74048128, 0.0944273 , 0.00706596])
         """
@@ -507,7 +506,7 @@ class CoreProfilesCompute:
         This function returns a list of the ratio of each species density to the maximum species density.
 
         Args:
-            timeSlice (int, optional): time slice on which function should operate on. Defaults to 0.
+            time_slice (int, optional): time slice on which function should operate on. Defaults to 0.
 
         Returns:
             a list of values obtained by dividing each element of the list `species_density_list` by the maximum
@@ -522,7 +521,7 @@ class CoreProfilesCompute:
                 connection.open()
                 idsObj = connection.get('core_profiles')
                 computeObj = CoreProfilesCompute(idsObj)
-                result = computeObj.getNspecOverNmaj(timeSlice=0)
+                result = computeObj.get_nspec_over_nmaj(time_slice=0)
 
                 array([1.        , 0.12752153, 0.00954239])
         """
@@ -535,11 +534,11 @@ class CoreProfilesCompute:
 
     def get_species(self, time_slice: int = 0) -> list:
         """
-        This function creates a Mendeleiev table and returns a list of species based on the values of a, z,
-        and the table.
+        This function `get_species` creates a Mendeleiev table and returns a list of species based on the
+        values of a, z,   and the table.
 
         Args:
-            timeSlice (int, optional): time slice on which function should operate on. Defaults to 0.
+            time_slice (int, optional): time slice on which function should operate on. Defaults to 0.
 
         Returns:
             a list of species based on the values of a, z, and the Mendeleev table.
@@ -552,7 +551,7 @@ class CoreProfilesCompute:
                 connection.open()
                 idsObj = connection.get('core_profiles')
                 computeObj = CoreProfilesCompute(idsObj)
-                result = computeObj.getSpecies(timeSlice=0)
+                result = computeObj.get_species(time_slice=0)
 
                 ['H', 'He4', 'Ne']
         """
@@ -565,10 +564,10 @@ class CoreProfilesCompute:
 
     def get_labels(self, time_slice: int = 0) -> list:
         """
-        This function returns a list of labels for all species in a given time slice.
+        This function `get_labels` returns a list of labels for all species in a given time slice.
 
         Args:
-            timeSlice: an optional integer parameter that specifies the time slice on which the function should
+            time_slice: an optional integer parameter that specifies the time slice on which the function should
             operate. The default value is 0
 
         Returns:
@@ -582,7 +581,7 @@ class CoreProfilesCompute:
                 connection.open()
                 idsObj = connection.get('core_profiles')
                 computeObj = CoreProfilesCompute(idsObj)
-                result = computeObj.getLabels(timeSlice=0)
+                result = computeObj.get_labels(time_slice=0)
 
                 ['H', 'He', 'Ne']
         """
@@ -597,11 +596,11 @@ class CoreProfilesCompute:
         This is in place change of arrays
 
         Args:
-            species (list): result from getSpecies()
-            nspecOverNtot (list): result from getNspecOverNtot()
-            nspecOverNe (list): result from getNspecOverNe()
-            nspecOverNmaj (list): result from getNspecOverNmaj()
-            timeSlice (int, optional): time slice on which function should operate on. Defaults to 0.
+            species (list): result from get_species()
+            nspec_over_ntot (list): result from get_nspec_over_ntot()
+            nspec_over_ne (list): result from get_nspec_over_ne()
+            nspec_over_nmaj (list): result from get_nspec_over_nmaj()
+            time_slice (int, optional): time_slice on which function should operate on. Defaults to 0.
         """
         nspecies = len(self.ids.profiles_1d[time_slice].ion)
         for ispecies, jspecies in itertools.product(range(nspecies), range(nspecies)):
@@ -615,10 +614,11 @@ class CoreProfilesCompute:
 
     def get_rho_tor_norm(self, time_slice: int = 0) -> np.ndarray | None:
         """
-        This function returns a list of normalized toroidal rho values from a given time slice of a profiles_1d object.
+        This function `get_rho_tor_norm` returns a list of normalized toroidal rho values from a given
+        time slice of a profiles_1d object.
 
         Args:
-            timeSlice (int): time index. Defaults to 0
+            time_slice (int): time index. Defaults to 0
 
         Returns:
             a list of normalized toroidal flux coordinates (rho_tor_norm) for a given time slice of the IDS object.
@@ -633,7 +633,7 @@ class CoreProfilesCompute:
                 connection.open()
                 idsObj = connection.get('core_profiles')
                 computeObj = CoreProfilesCompute(idsObj)
-                result = computeObj.get_rho_tor_norm(timeSlice=0)
+                result = computeObj.get_rho_tor_norm(time_slice=0)
 
                 [0.005025125628140704,
                 0.015075376884422112,
@@ -652,10 +652,10 @@ class CoreProfilesCompute:
 
     def get_psi(self, time_slice: int = 0) -> list | None:
         """
-        This function returns the poloidal magnetic flux (psi) at a given time slice.
+        This function `get_psi` returns the poloidal magnetic flux (psi) at a given time slice.
 
         Args:
-            timeSlice (int): time index
+            time_slice (int): time index
 
         Returns:
             the poloidal magnetic flux (psi) as a list of floats for a given time slice. If the length of the
@@ -670,7 +670,7 @@ class CoreProfilesCompute:
                 connection.open()
                 idsObj = connection.get('core_profiles')
                 computeObj = CoreProfilesCompute(idsObj)
-                result = computeObj.get_psi(timeSlice=0)
+                result = computeObj.get_psi(time_slice=0)
 
                 array([-4.95660880e+01, -4.95537345e+01, -4.95275298e+01, -4.94833135e+01,
                 -4.94209348e+01, -4.93461904e+01, -4.92595767e+01, -4.91573223e+01,
@@ -683,11 +683,12 @@ class CoreProfilesCompute:
 
     def get_ion_pressure_properties(self):
         """
-        The function calculates and returns the total thermal pressure,
+        The `get_ion_pressure_properties` function calculates and returns the total thermal pressure,
         fast parallel pressure, and fast perpendicular pressure of ions in a given set of profiles.
 
         Returns:
-          The function returns a dictionary
+            The function `get_ion_pressure_properties` is returning a dictionary containing the following
+        keys and values: maxima_ion, pressure_ion_thermal, pressure_ion_fast_parallel, pressure_ion_fast_perpendicular
         """
         nrho = len(self.get_rho_tor_norm())
         pressure_ion_thermal = 0.0
@@ -737,7 +738,7 @@ class CoreProfilesCompute:
 
     def get_electrons_pressure_properties(self):
         """
-        The  function calculates and returns various pressure properties
+        The  function `get_electrons_pressure_properties` calculates and returns various pressure properties
         of electrons, including maximum pressure and individual pressure components.
 
         Returns:
@@ -796,7 +797,7 @@ class CoreProfilesCompute:
 
     def get_pressure(self):
         """
-        The function `getPressure` returns a dictionary containing the thermal pressure, parallel pressure,
+        The function `get_pressure` returns a dictionary containing the thermal pressure, parallel pressure,
         and perpendicular pressure.
 
         Returns:
@@ -852,11 +853,12 @@ class CoreProfilesCompute:
 
     def get_pressure_ion_total(self) -> Union[float, None]:
         """
-        The function `getPressureIonTotal` returns the total ion pressure from a given set of profiles,
-        or None if the pressure values cannot be read.
+        The function `get_pressure_ion_total` returns the total ion pressure from a given set of
+        profiles or None if the pressure values cannot be read.
 
         Returns:
-            the value of the variable `pressureIonTotal`, which is either a float value or `None`.
+            The function `get_pressure_ion_total` returns the total ion pressure from a given set of
+        profiles, or `None` if the pressure values cannot be read.
         """
         pressure_ion_total = None
         if len(self.ids.profiles_1d[0].pressure_ion_total) > 1:
@@ -876,6 +878,18 @@ class CoreProfilesCompute:
         return pressure_ion_total
 
     def get_profiles(self, slice_index=0):
+        """
+        The function `get_profiles` retrieves and organizes various profiles from a data source for
+        further analysis.
+
+        Args:
+            slice_index: The `slice_index` parameter in the `get_profiles` method is used to specify which
+        slice of profiles to retrieve.
+
+        Returns:
+            A dictionary named `profiles` is being returned, which contains the following keys and
+            corresponding values
+        """
         rho_tor_norm = self.get_rho_tor_norm(time_slice=0)
         if rho_tor_norm is None:
             logger.critical("core_profiles.profiles_1d[:].grid.rho_tor_norm and rho_tor are empty")
@@ -938,6 +952,20 @@ class CoreProfilesCompute:
         return profiles
 
     def getnrho(self, slice_index=0):
+        """
+        This function `getnrho` returns the number of elements in the `rho_tor_norm` or `rho_tor` grid
+        based on the provided slice index.
+
+        Args:
+            slice_index: The `slice_index` parameter in the `getnrho` method is used to specify which
+        slice of data to retrieve the number of rho values from.
+
+        Returns:
+            The `getnrho` method is returning the number of elements in the `rho_tor_norm` or `rho_tor`
+        attribute of the `grid` object within the `profiles_1d` object at the specified `slice_index`.
+        If either of these attributes has elements, the length of that attribute is returned as the
+        number of `nrho`.
+        """
         nrho = None
         try:
             if len(self.ids.profiles_1d[slice_index].grid.rho_tor_norm) > 0:

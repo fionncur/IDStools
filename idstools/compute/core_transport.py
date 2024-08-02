@@ -21,7 +21,7 @@ class CoreTransportCompute:
         including particle and energy fluxes for electrons and ions.
 
         Returns:
-            a dictionary called `fluxesDict`. Following is the structure
+            a dictionary called `fluxes_dict`. Following is the structure
 
             .. code-block:: python
 

@@ -23,6 +23,22 @@ class WallCompute:
         self.ids_object = ids_object
 
     def get_vessel_units(self, name_filter=None):
+        """
+        The function `get_vessel_units` retrieves information about vessel units based on a name filter.
+
+        Args:
+            name_filter: The `get_vessel_units` method is used to retrieve information about vessel units
+        based on a name filter. The method iterates through the description_2d objects and extracts
+        details about each vessel unit, including its name, description, and various properties such as
+        coordinates, thickness, resistivity, etc
+
+        Returns:
+            The function `get_vessel_units` returns a dictionary containing information about vessel
+        units. The dictionary is structured with nested dictionaries for each description 2D object,
+        which in turn contain information about the vessel units within that description 2D object. The
+        information includes the name, description, and various properties of each vessel unit such as
+        name, identifier, dimensions, resistivity, and rectangle coordinates. The
+        """
         description2d_infos = {}
         for description2d_index, description2d in enumerate(self.ids_object.description_2d):
             description2d_info = {}
@@ -57,6 +73,16 @@ class WallCompute:
         return description2d_infos
 
     def get_limiter_units(self):
+        """
+        This `get_limiter_units` function retrieves information about limiter units from a given object.
+
+        Returns:
+            The `get_limiter_units` method returns a dictionary containing information about limiter
+        units. The dictionary has keys corresponding to the index of the description 2D objects and
+        values containing information about each description 2D object. Each description 2D object
+        contains the name and description of the type, as well as information about the limiter units
+        associated with it.
+        """
         description2d_infos = {}
         for description2d_index, description2d in enumerate(self.ids_object.description_2d):
             description2d_info = {}
@@ -82,6 +108,28 @@ class WallCompute:
 
     @staticmethod
     def get_rectangle_coordinates(r, z, h, closed=False):
+        """
+        The function `get_rectangle_coordinates` calculates the coordinates of rectangles based on input
+        parameters.
+
+        Args:
+            r: The parameter `r` in the `get_rectangle_coordinates` function represents the x-coordinates
+        of the corners of the rectangles.
+            z: The `z` parameter in the `get_rectangle_coordinates` function represents the vertical
+        coordinates of the corners of rectangles. It is used to define the vertical positions of the
+        rectangle vertices in the 3D space.
+            h: The `h` parameter in the `get_rectangle_coordinates` function represents the height of the
+        rectangle at each point. It is a list containing the height values for each rectangle.
+            closed: The `closed` parameter in the `get_rectangle_coordinates` function is a boolean
+        parameter that determines whether the rectangle should be closed or not. If `closed` is set to
+        `True`, the function will close the rectangle by connecting the last point to the first point.
+        If `closed` is set. Defaults to False
+
+        Returns:
+            The function `get_rectangle_coordinates` returns a list of tuples, where each tuple contains
+        two lists. The two lists in each tuple represent the x and y coordinates of the vertices of a
+        rectangle in 2D space.
+        """
         if len(r) == 0 or len(z) == 0 or len(h) == 0:
             return None
         rectangle_coordinates = []

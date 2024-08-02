@@ -24,6 +24,20 @@ class DistributionsCompute:
         self.is_radial_grid_info_processed = False
 
     def get_radial_grid_info(self, time_index=0):
+        """
+        The function `get_radial_grid_info` retrieves radial grid information for distributions in a
+        plasma simulation.
+
+        Args:
+            time_index: The `time_index` parameter
+
+        Returns:
+            The function `get_radial_grid_info` returns the `radial_grid_info` dictionary containing
+        information about radial grid data for each distribution. If the `radial_grid_info` dictionary
+        is empty, it returns `None`. The function also sets several attributes of the class instance
+        based on the computed radial grid information before returning the `radial_grid_info`
+        dictionary.
+        """
         radial_grid_info = {}
         for idistrib in range(self.ndistributions):
             distributions_data = {}
@@ -79,6 +93,20 @@ class DistributionsCompute:
         return radial_grid_info
 
     def get_profiles(self, time_index=0):
+        """
+        The function `get_profiles` retrieves and organizes various profiles and waveforms related to
+        injectors and distributions for a given time index.
+
+        Args:
+            time_index: The `time_index` parameter
+
+        Returns:
+            The `get_profiles` method returns a dictionary containing various profiles related to
+        injectors, waveforms, and power density. The dictionary includes information such as injector
+        names, current waveforms, power waveforms, current density profiles, and power density profiles
+        for both individual injectors and all injectors combined. The method also logs information about
+        total power, power to electrons, power to ions, and total current
+        """
         if self.nrho is None:
             return None
         time_array = self.ids.time
@@ -244,6 +272,21 @@ class DistributionsCompute:
         return profiles
 
     def get_power_absorbedto_individual_ions(self, time_index, verbose=False):
+        """
+        This function calculates the power absorbed by individual ions in a plasma simulation.
+
+        Args:
+            time_index: The `time_index` parameter in the `get_power_absorbedto_individual_ions` method is
+        used to specify the index of the time step for which you want to calculate the power absorbed to
+        individual ions.
+            verbose: The `verbose` parameter
+
+        Returns:
+            The function `get_power_absorbedto_individual_ions` returns a dictionary `power_absorbed`
+        containing information about the power absorbed to individual ions. The dictionary includes keys
+        such as "all_injectors_total_power_waveform_per_ion", "element", and "compo_detail" with
+        corresponding values calculated based on the input parameters and data within the function.
+        """
         if self.is_radial_grid_info_processed is False:
             self.get_radial_grid_info(time_index)
         import idstools.init_mendeleiev as mend
