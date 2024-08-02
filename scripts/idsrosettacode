@@ -9,7 +9,6 @@ import imas
 import numpy as np
 import pandas as pd
 import requests
-from imas import imasdef
 from rich.progress import track
 from rich_argparse import RichHelpFormatter
 

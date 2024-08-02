@@ -106,9 +106,7 @@ if len(ids_slice_equilibrium.time) == 0:
 time_value = ids_slice_core_transport.time[0]
 
 try:
-    model_index = [t.identifier.name for t in ids_slice_core_transport.model].index(
-        "transport_solver"
-    )
+    model_index = [t.identifier.name for t in ids_slice_core_transport.model].index("transport_solver")
     logger.info(f'Found model "transport_solver" as model {model_index}')
 except Exception as e:
     logger.critical('"transport_solver" not found in the transport models')
@@ -117,21 +115,11 @@ except Exception as e:
 # define columns and rows for subplots based on ions
 columns = len(ids_slice_core_transport.model[model_index].profiles_1d[-1].ion)
 canvas = PlotCanvas(3, columns)
-electrons_particle_fluxes_axes = canvas.add_axes(
-    title="", xlabel="", row=0, col=0, colspan=1
-)
-electrons_energy_fluxes_axes = canvas.add_axes(
-    title="", xlabel="", row=0, col=1, colspan=1
-)
+electrons_particle_fluxes_axes = canvas.add_axes(title="", xlabel="", row=0, col=0, colspan=1)
+electrons_energy_fluxes_axes = canvas.add_axes(title="", xlabel="", row=0, col=1, colspan=1)
 
-ions_particle_fluxes_axes = [
-    canvas.add_axes(title="", xlabel="", row=1, col=x, colspan=1)
-    for x in range(columns)
-]
-ions_energy_fluxes_axes = [
-    canvas.add_axes(title="", xlabel="", row=2, col=x, colspan=1)
-    for x in range(columns)
-]
+ions_particle_fluxes_axes = [canvas.add_axes(title="", xlabel="", row=1, col=x, colspan=1) for x in range(columns)]
+ions_energy_fluxes_axes = [canvas.add_axes(title="", xlabel="", row=2, col=x, colspan=1) for x in range(columns)]
 
 ct_view = CoreTransportView(ids_slice_core_transport)
 
@@ -172,9 +160,7 @@ ct_view.view_energy_fluxes_for_electrons(
 )
 canvas.set_text(text=f"{get_database_path(args, time_value=time_value)}")
 canvas.fig.suptitle(get_title(args, "Core transport", time_value), size=12)
-canvas.fig.subplots_adjust(
-    top=0.9, bottom=0.094, left=0.035, right=0.948, hspace=0.417, wspace=0.117
-)
+canvas.fig.subplots_adjust(top=0.9, bottom=0.094, left=0.035, right=0.948, hspace=0.417, wspace=0.117)
 canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
 
 if args.save:

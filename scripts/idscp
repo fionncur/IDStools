@@ -1,15 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import argparse
-import logging
-import os
 import sys
 
 import imas
 from rich_argparse import RichHelpFormatter
 
 from idstools.database import DBMaster
-from idstools.utils.clihelper import imas_parser
 from idstools.utils.idslogger import setup_logger
 
 logger = setup_logger("module")
@@ -69,7 +66,8 @@ parser.add_argument(
     "ids",
     nargs="*",
     type=str,
-    help='IDSs to copy (leave empty to select all IDSs with default occurrence, or append "/n" to copy a specific occurrence "n")',
+    help="IDSs to copy (leave empty to select all IDSs with default occurrence,"
+    'or append "/n" to copy a specific occurrence "n")',
 )
 args = parser.parse_args()
 
@@ -154,10 +152,12 @@ for idsname in args.ids:
         print(exc, file=sys.stderr)
         if not args.force:
             logger.warning(
-                "This error could be due to difference of data dictionary version between the current one and the existing destination pulse"
+                "This error could be due to difference of data dictionary version between the"
+                " current one and the existing destination pulse"
             )
             logger.warning(
-                "You can use option -f/--force to recreate the destination pulse with the current DD version (WARNING: all other IDSs will be lost at dest)"
+                "You can use option -f/--force to recreate the destination pulse with the current"
+                " DD version (WARNING: all other IDSs will be lost at dest)"
             )
 
 src_connection.close()

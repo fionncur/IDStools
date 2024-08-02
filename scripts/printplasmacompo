@@ -65,13 +65,13 @@ if connection is None:
 core_profiles_ids = imas.core_profiles()
 try:
     core_profiles_ids.time = connection.partial_get("core_profiles", "time")
-except Exception as _:
+except Exception as _:  # noqa: F841
     core_profiles_ids.time = None
 
 edge_profiles_ids = imas.edge_profiles()
 try:
     edge_profiles_ids.time = connection.partial_get("edge_profiles", "time")
-except Exception as _:
+except Exception as _:  # noqa: F841
     edge_profiles_ids.time = None
 
 core_profile_exists = True

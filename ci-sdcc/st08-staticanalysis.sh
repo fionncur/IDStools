@@ -20,9 +20,14 @@ pip install --upgrade 'black >=24,<25' flake8 pylint
 echo "---------------------------------------------------------------------"
 echo "executing black"
 black --check -l 120 idstools >black.log
+black --check -l 120 scripts/* >black_scripts.log
 echo "---------------------------------------------------------------------"
 echo "executing flake8"
 flake8 --max-line-length=120 --ignore=E203,W503 idstools >flake8.log
+# flake8 --max-line-length=120 --ignore=E203,W503 scripts/ids* >flake8_idsscripts.log
+# flake8 --max-line-length=120 --ignore=E203,W503 scripts/plot* >flake8_plotscripts.log
+# flake8 --max-line-length=120 --ignore=E203,W503 scripts/print* >flake8_printscripts.log
+# flake8 --max-line-length=120 --ignore=E203,W503 scripts/db* >flake8_dbscripts.log
 echo "---------------------------------------------------------------------"
 # echo "executing pylint"
 # pylint --max-line-length=120 -E ./idstools >pylint.log

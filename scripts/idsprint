@@ -20,7 +20,7 @@ logger = setup_logger("module")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="""Prints content of an IDS onto the terminal\n 
+        description="""Prints content of an IDS onto the terminal\n
         provide with fragment
         e.g. -u imas:hdf5?path=/home/ITER/fleuryl/public/imasdb/west/3/54914/4#wall or #wall:0/description_2d | less
         [previously known as idsdump and idsdumppath]""",
@@ -118,7 +118,7 @@ if __name__ == "__main__":
         else:
             try:
                 ids.dump(print_empty=args.show_empty)
-            except Exception as e:
+            except Exception as _:  # noqa: F841
                 print(ids)
 
     else:

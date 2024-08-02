@@ -20,9 +20,7 @@ parser = argparse.ArgumentParser(
     description="""---- Script to list available MD data in a specific folder ----\n\nImportant: The legacy md_summary tool is deprecated and will be removed in a future versions. It will remain available until simdb is fully adopted.more about simdb : https://simdb.iter.org/dashboard/""",
     formatter_class=SmartFormatter,
 )
-parser.add_argument(
-    "-f", "--folder", help="folder where to search for MD data", required=False
-)
+parser.add_argument("-f", "--folder", help="folder where to search for MD data", required=False)
 parser.add_argument(
     "-s",
     "--selection",
@@ -96,9 +94,7 @@ else:
 if args["choice"] is not None:
     try:
         input_choice = args["choice"]
-        choice = eval(
-            str("""['""" + re.sub(""",""", r"""','""", input_choice) + """']""")
-        )
+        choice = eval(str("""['""" + re.sub(""",""", r"""','""", input_choice) + """']"""))
     except Exception as e:
         print(
             "------------------------------------------------------------------",
@@ -189,9 +185,7 @@ selected_df = selected_df.rename(columns=header_mappings)
 # align text left aligned
 for index, _ in enumerate(choice):
     max_length = selected_df.iloc[:, index].map(len).max()
-    selected_df.iloc[:, index] = selected_df.iloc[:, index].apply(
-        lambda x: f"{x:<{max_length}}"
-    )
+    selected_df.iloc[:, index] = selected_df.iloc[:, index].apply(lambda x: f"{x:<{max_length}}")
 
 if not selected_df.empty:
     # display results
@@ -199,6 +193,4 @@ if not selected_df.empty:
 else:
     print(" No records found matching mentioned criteria")
 
-print(
-    "\n NOTE: Read entry from MD database using user = 'public', database = 'ITER_MD'"
-)
+print("\n NOTE: Read entry from MD database using user = 'public', database = 'ITER_MD'")
