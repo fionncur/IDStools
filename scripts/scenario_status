@@ -2,10 +2,12 @@
 # -*- coding: utf-8 -*-
 import argparse
 import os
-from idstools.database import DBMaster
+
 from rich.console import Console
 from rich.table import Table
 from rich_argparse import RawDescriptionRichHelpFormatter
+
+from idstools.database import DBMaster
 from idstools.scenariodescription import ScenarioDescription
 from idstools.utils.idslogger import setup_logger
 

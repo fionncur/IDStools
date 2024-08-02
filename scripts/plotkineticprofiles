@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 import argparse
 import logging
-import sys
 import os
+
 from rich_argparse import RichHelpFormatter
 
 from idstools.database import DBMaster
@@ -25,7 +25,7 @@ parser = argparse.ArgumentParser(
 )
 
 parser.add_argument("-t", "--time", help="Time", required=False, type=float, default=-99.0)
-parser.add_argument("-e", "--edge", help="Add edge profiles if available", action="store_true")
+parser.add_argument("-e", "--edge", help="Add redge profiles if available", action="store_true")
 parser.add_argument("--verbose", help="Verbose output", action="store_true")
 parser.add_argument(
     "--logscale",

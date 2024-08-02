@@ -4,24 +4,20 @@
 import argparse
 import logging
 import os
-import traceback
 from datetime import datetime
 from glob import glob
-from os import path
-from pathlib import Path
 
 import imas
 import pandas as pd
-from imas import imasdef
 from rich.console import Console
 from rich.progress import track
 from rich_argparse import RichHelpFormatter
 
-from idstools.idschk import ids_validator
 from idstools.database import DBMaster
+from idstools.idschk import ids_validator
 from idstools.idslist import available_in_dbentry
 from idstools.utils.clihelper import get_backend_id, imas_parser
-from idstools.utils.idshelper import compareIds
+from idstools.utils.idshelper import compare_ids
 from idstools.utils.idslogger import setup_logger
 
 logger = setup_logger("module", stdout_level=logging.INFO)
@@ -69,13 +65,13 @@ elif backend == imas.imasdef.HDF5_BACKEND:
     files = DBMaster.hdf5_list_pulse_run(locpath)
 
 schema = []
-current_fpath = path.dirname(path.realpath(__file__))
-schema_dir = path.join(current_fpath, "../../../../bin/validation_schemas")
-if not path.isdir(schema_dir):
-    current_fpath = path.dirname(path.dirname(path.realpath(__file__)))
-    schema_dir = path.join(current_fpath, "idstools/validation_schemas")
+current_fpath = os.path.dirname(os.path.realpath(__file__))
+schema_dir = os.path.join(current_fpath, "../../../../bin/validation_schemas")
+if not os.path.isdir(schema_dir):
+    current_fpath = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+    schema_dir = os.path.join(current_fpath, "idstools/validation_schemas")
 
-if path.isdir(schema_dir):
+if os.path.isdir(schema_dir):
     schema += sorted(glob(schema_dir + "/generic/*.y*ml", recursive=True))
 
 schema_dict = {}
@@ -105,7 +101,8 @@ for pulse in track(files, description="[green]Processing..."):
         status, idx = dest.create()
         if status != 0:
             console.print(
-                f"Error creating pulse! status={status} backend={args.backend_output} database={args.database_out} shot={pulse[0]} run={run}"
+                f"Error creating pulse! status={status} backend={args.backend_output} "
+                "database={args.database_out} shot={pulse[0]} run={run}"
             )
             log.append("Error creating pulse!")
             continue
@@ -144,12 +141,14 @@ for pulse in track(files, description="[green]Processing..."):
         log.append(idsinf)
         console.print("")
         console.print(
-            f"successfully converted, backend={args.backend_output} database={args.database_out} shot={pulse[0]} run={run}"
+            f"successfully converted, backend={args.backend_output} database={args.database_out} "
+            f"pulse={pulse[0]} run={run}"
         )
     except Exception as ex:
         log.append(idsinf)
         console.print(
-            f"Could not convert : backend={args.backend_output} database={args.database_out} shot={pulse[0]} run={run} {traceback.format_exc()}"
+            f"Could not convert : backend={args.backend_output} database={args.database_out} "
+            f"pulse={pulse[0]} run={run} {ex}"
         )
         continue
 

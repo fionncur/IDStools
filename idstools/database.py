@@ -1,11 +1,11 @@
 import fnmatch
 import logging
 import os
-
+import re
 from datetime import datetime
 from glob import glob
 from pathlib import Path
-import re
+
 import imas
 from yaml import load as yamlload
 from yaml import safe_load

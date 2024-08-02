@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import argparse
-import getpass
 import os
-import re
 import traceback
 
 from rich.markdown import Markdown
@@ -58,7 +56,7 @@ description = r"""
 0) Load IMAS and install fortranformat and Cerberus (if not done before)
 
     > module load IMAS
-    
+
     > pip install fortranformat cerberus
 
 1) Compute COCOS and create IDS data file in local database
@@ -81,11 +79,11 @@ description = r"""
 0) Initialization
 
     > from idstools.eqdsk2ids import eqdsk2ids
- 
+
 1) Convert Gfile
 
     > eq = eqdsk2ids(gfile='path/to/gfile')
- 
+
 2) Convert Gfile with COCOS input (=1) coerced
 
     > eq = eqdsk2ids(gfile='path/to/gfile', cocos_in=1)"""
@@ -142,5 +140,5 @@ if __name__ == "__main__":
 
     try:
         main()
-    except Exception as e:
+    except Exception as _:
         logger.error(traceback.format_exc())

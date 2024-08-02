@@ -1,9 +1,10 @@
 # TODO There are nonmigrated scripts that use the following functions, so
 # keep this file. These functions are already migrated to
 # utils/idshelper.py.
-import imas
 import inspect
 import types
+
+import imas
 
 
 def is_field(idstype):

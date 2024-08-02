@@ -3,11 +3,11 @@ import argparse
 import logging
 import os
 import sys
-from idstools.database import DBMaster
 
 from rich_argparse import RichHelpFormatter
 
 from idstools.compute.equilibrium import EquilibriumCompute
+from idstools.database import DBMaster
 from idstools.utils.idslogger import setup_logger
 
 logger = setup_logger("module", stdout_level=logging.INFO)

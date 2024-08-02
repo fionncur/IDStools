@@ -3,8 +3,9 @@ This is a common module which has mathematical or physics functions
 
 """
 
-from typing import Tuple, Union
 import logging
+from typing import Tuple, Union
+
 import numpy as np
 
 logger = logging.getLogger("module")

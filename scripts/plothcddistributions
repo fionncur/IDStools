@@ -2,18 +2,17 @@
 # -*- coding: utf-8 -*-
 import argparse
 import logging
-import sys
 import os
-from rich_argparse import RichHelpFormatter
 
+from rich_argparse import RichHelpFormatter
 
 from idstools.compute.common import get_nearest_time
 from idstools.database import DBMaster
 from idstools.utils.clihelper import (
+    dbentry_parser,
     get_database_path,
     get_file_name,
     get_title,
-    dbentry_parser,
 )
 from idstools.utils.idslogger import setup_logger
 from idstools.view.common import PlotCanvas
@@ -34,8 +33,6 @@ def show_plots(args):
     time_array = ids_distributions.time
     ntime = len(time_array)
     time_index, time_value = get_nearest_time(ids_distributions.time, args.time)
-    time = time_value
-    ndistributions = len(ids_distributions.distribution)
 
     canvas = PlotCanvas(3, 2)
     # canvas.setStyle(style="retro")plo

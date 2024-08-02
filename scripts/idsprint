@@ -4,8 +4,8 @@ import argparse
 import os
 import sys
 
-from rich_argparse import RichHelpFormatter
 import numpy
+from rich_argparse import RichHelpFormatter
 
 try:
     import StringIO

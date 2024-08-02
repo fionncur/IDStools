@@ -4,10 +4,12 @@ import argparse
 import os
 import re
 import sys
-from idstools.utils.clihelper import get_core_version
+
 from rich.console import Console
 from rich.table import Table
+
 from idstools.scenariodescription import ScenarioDescriptionBase
+from idstools.utils.clihelper import get_core_version
 
 displayMapping = {
     "ref_name": "Reference",

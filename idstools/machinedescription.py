@@ -4,7 +4,8 @@ import os
 import re
 import typing
 
-from yaml import safe_load, YAMLError
+from yaml import YAMLError, safe_load
+
 from idstools.database import DBMaster
 
 logger = logging.getLogger(f"module.{__name__}")

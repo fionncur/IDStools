@@ -6,8 +6,9 @@ This module provides view functions and classes for equilibrium ids data
 """
 
 import logging
-from idstools.view.common import BasePlot
+
 from idstools.compute.summary import SummaryCompute
+from idstools.view.common import BasePlot
 
 logger = logging.getLogger("module")
 

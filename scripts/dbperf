@@ -6,7 +6,6 @@
 import argparse
 import os
 from datetime import datetime
-from pathlib import Path
 
 import imas
 import matplotlib.pyplot as plt
@@ -18,11 +17,12 @@ from rich_argparse import RichHelpFormatter
 from idstools.database import DBMaster
 from idstools.idslist import available_in_dbentry
 from idstools.idsperf import byte_size, get_timings
-from idstools.utils.clihelper import get_backend_id, imas_parser
+from idstools.utils.clihelper import imas_parser
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="Times IDS getting of given Pulse and Run, contrasts with IDS size and slices. replaced by db_backend_benchmark.py",
+        description="Times IDS getting of given Pulse and Run, "
+        "contrasts with IDS size and slices. replaced by db_backend_benchmark.py",
         parents=[imas_parser],
         formatter_class=RichHelpFormatter,
     )
@@ -86,7 +86,8 @@ if __name__ == "__main__":
         "--fontweight",
         type=str,
         default="bold",
-        help="Fontweight for plot axes (options include: 'ultralight', 'light', 'normal', 'bold', 'heavy') (default='bold')",
+        help="Fontweight for plot axes (options include: 'ultralight', 'light', "
+        "'normal', 'bold', 'heavy') (default='bold')",
     )
     parser.add_argument(
         "-siz",
@@ -136,7 +137,9 @@ if __name__ == "__main__":
             hdflocpath = DBMaster.get_db_Path(args.hdf5user, args.hdf5database, args.version)
         else:
             raise Exception(
-                "Please clarify where the data is stored. Please provide either one database containing data in both MDSPLUS and HDF5, or two separate databases containing data in MDSPLUS or HDF5"
+                "Please clarify where the data is stored. Please provide either one database "
+                "containing data in both MDSPLUS and HDF5, or two separate databases"
+                "containing data in MDSPLUS or HDF5"
             )
 
         log = []
@@ -155,12 +158,12 @@ if __name__ == "__main__":
                 hdfrem = set(hpulses) - set(mpulses)
                 pulses = list(set(mpulses) & set(hpulses))
                 print(
-                    "WARNING: The provided database(s) do(es) not have the same Pulses/Runs in both backends. The intersection of the two will be used."
+                    "WARNING: The provided database(s) do(es) not have the same Pulses/Runs "
+                    "in both backends. The intersection of the two will be used."
                 )
                 if args.verbose:
                     print(
                         """The differences are:
-                
                     MDSPLUS has: """
                     )
                     print(list(mdsrem))
@@ -215,7 +218,7 @@ if __name__ == "__main__":
                         slices.append(get_timings(hdfde, idsname, times=[10], repeat=args.repeat))
                     except Exception as e:
                         slices.append(None)
-                        print(idsname + "in (" + pulse + ", " + run + ") failed to return slice get_timings")
+                        print(f"{idsname} in ({pulse} , {run}) failed to return slice get_timings - detailed:{e}")
                 mdstimes = get_timings(mdsde, idsname, repeat=args.repeat)
                 mdstdev = np.std(mdstimes)
                 hdftimes = get_timings(hdfde, idsname, repeat=args.repeat)

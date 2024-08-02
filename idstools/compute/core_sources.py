@@ -5,10 +5,11 @@ This module provides compute functions and classes for core_sources ids data
 
 """
 
-import logging
-import numpy as np
 import functools
+import logging
 from typing import Dict
+
+import numpy as np
 
 logger = logging.getLogger("module")
 

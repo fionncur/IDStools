@@ -1,11 +1,12 @@
-from idstools.input_processing import l2r
-import numpy as np
-import matplotlib.pyplot as plt
 import matplotlib.colorbar as cbar
+import matplotlib.pyplot as plt
+import numpy as np
 
 # import matplotlib
 # matplotlib.use('TKagg')
 from matplotlib.colors import LogNorm
+
+from idstools.input_processing import l2r
 
 
 # TODO Wait till we have new ids and then refactor

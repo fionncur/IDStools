@@ -1,15 +1,15 @@
 #!/usr/bin/env python
-import os
 import datetime
-import numpy as np
-from statistics import median
 import logging
+import os
 from pprint import pformat
-from fortranformat import FortranRecordReader
+from statistics import median
 
 import imas
-from idstools.idschk import IDS_COCOS, COCOS, compute_COCOS
+import numpy as np
+from fortranformat import FortranRecordReader
 
+from idstools.idschk import COCOS, IDS_COCOS, compute_COCOS
 
 logger = logging.getLogger(__name__)
 

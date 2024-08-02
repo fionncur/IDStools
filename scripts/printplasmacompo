@@ -16,12 +16,10 @@
 
 import argparse
 import logging
-import sys
-
-from rich_argparse import RichHelpFormatter
 
 import imas
 import numpy as np
+from rich_argparse import RichHelpFormatter
 
 from idstools.database import DBMaster
 from idstools.utils.clihelper import dbentry_parser
@@ -67,13 +65,13 @@ if connection is None:
 core_profiles_ids = imas.core_profiles()
 try:
     core_profiles_ids.time = connection.partial_get("core_profiles", "time")
-except Exception as e:
+except Exception as _:
     core_profiles_ids.time = None
 
 edge_profiles_ids = imas.edge_profiles()
 try:
     edge_profiles_ids.time = connection.partial_get("edge_profiles", "time")
-except Exception as e:
+except Exception as _:
     edge_profiles_ids.time = None
 
 core_profile_exists = True
@@ -117,7 +115,8 @@ else:
 
 if edge_profiles_ids.time is not None:
     logger.info(
-        f"edge_profiles IDS:Using time slice where maximum electrons density is present in core, Time slice:{slice_index}"
+        f"edge_profiles IDS:Using time slice where maximum "
+        f"electrons density is present in core, Time slice:{slice_index}"
     )
     edge_profiles_ids.ggd.resize(1)
     edge_profiles_ids.ggd[0] = connection.partial_get("edge_profiles", f"ggd({slice_index})")
@@ -159,7 +158,8 @@ if edge_profiles_ids.time is not None:
                     index_counter = index_counter + 1
             if len(elements) != 0:
                 logger.info(
-                    f"edge_profiles IDS:Using nearby time slice in edge where maximum electrons density is present in core, Time slice:{time_slice}"
+                    f"edge_profiles IDS:Using nearby time slice in edge where maximum "
+                    f"electrons density is present in core, Time slice:{time_slice}"
                 )
                 edge_profiles_ids.ggd.resize(1)
                 edge_profiles_ids.ggd[0] = connection.partial_get("edge_profiles", f"ggd({time_slice})")

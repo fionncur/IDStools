@@ -1,16 +1,18 @@
 #!/usr/bin/env python
 
-from idstools.utils.ddhelper import DDHelper
+import copy
+import logging
+import re
+import traceback
 from os import path
 from sys import exit
 from xml.etree import ElementTree as ET
+
 import cerberus
-import copy
-import logging
 import numpy as np
-import re
-import traceback
 import yaml
+
+from idstools.utils.ddhelper import DDHelper
 
 logger = logging.getLogger(__name__)
 

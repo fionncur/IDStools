@@ -1,13 +1,15 @@
 #!/usr/bin/env python
 
+import logging
 from glob import glob
+from os import path
+
+import imas
+
 from idstools import idschk
 from idstools.database import DBMaster
 from idstools.idslist import available_in_dbentry
 from idstools.utils.clihelper import get_backend_id
-from os import path
-import imas
-import logging
 
 logger = logging.getLogger(__name__)
 

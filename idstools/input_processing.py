@@ -21,7 +21,8 @@ def read_launching_parameters(filelaunchers):
     # and have no time base (in ec_waveforms.yaml the only time point is 0.0 sec).
 
     from waveform_cooker import add_dynamic
-    from idstools.compute.common import xyz2cyl, cyl2xyz
+
+    from idstools.compute.common import cyl2xyz, xyz2cyl
 
     launching_parameters = {}
 
@@ -100,8 +101,8 @@ def read_launching_parameters(filelaunchers):
 
 
 def read_torbeam_output(launching_parameters, path_result):
-    import os
     import glob
+    import os
 
     # Sort the list of files according to the time slices
     # TODO This logic can break easily if file names are not according to logic

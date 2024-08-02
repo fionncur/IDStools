@@ -5,14 +5,13 @@ import math
 import os
 import sys
 
-from rich_argparse import RichHelpFormatter
-
 import imas
 import numpy as np
 import pandas as pd
 import requests
 from imas import imasdef
 from rich.progress import track
+from rich_argparse import RichHelpFormatter
 
 from idstools.utils.clihelper import get_backend_id
 

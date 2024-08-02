@@ -6,12 +6,12 @@ This module provides compute functions and classes for equilibrium ids data
 """
 
 import logging
-
 from typing import Union
-from idstools.database import DBMaster
 
 import numpy as np
 from imas import imasdef
+
+from idstools.database import DBMaster
 
 logger = logging.getLogger("module")
 
@@ -410,8 +410,9 @@ class EquilibriumCompute:
         structure. The method also updates the comment in the `ids_properties` of the equilibrium to
         indicate that the magnetic field has been rescaled by a certain factor.
         """
-        from packaging.version import Version
         from copy import deepcopy
+
+        from packaging.version import Version
 
         try:
             dd_version = self.ids.ids_properties.version_put.data_dictionary

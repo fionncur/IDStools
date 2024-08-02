@@ -1,6 +1,8 @@
-from idstools.compute.edge_profiles import EdgeProfilesCompute
-import numpy as np
 import logging
+
+import numpy as np
+
+from idstools.compute.edge_profiles import EdgeProfilesCompute
 
 logger = logging.getLogger("module")
 

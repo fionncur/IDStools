@@ -2,16 +2,19 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 
-import argparse, imas, pdb
-
-from rich_argparse import RawDescriptionRichHelpFormatter
-from idstools.database import DBMaster
-import idstools.init_mendeleiev as mend
-import numpy as np
+import argparse
+import pdb
 import sys
-from os import system, getenv
+from os import getenv, system
 from sys import exit
-from idstools.utils.clihelper import imas_parser, get_backend_id
+
+import imas
+import numpy as np
+from rich_argparse import RawDescriptionRichHelpFormatter
+
+import idstools.init_mendeleiev as mend
+from idstools.database import DBMaster
+from idstools.utils.clihelper import get_backend_id, imas_parser
 
 # --------------------------------------------------------------------------------
 # --- Creates an entry for the Disruption database (adapted from create_db_entry

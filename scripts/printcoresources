@@ -7,9 +7,8 @@ import argparse
 import logging
 import sys
 
-from rich_argparse import RichHelpFormatter
-
 from imas import imasdef
+from rich_argparse import RichHelpFormatter
 
 from idstools.database import DBMaster
 from idstools.utils.clihelper import dbentry_parser, get_database_path

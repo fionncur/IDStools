@@ -7,9 +7,8 @@ import argparse
 import sys
 from pathlib import Path
 
-from rich_argparse import RichHelpFormatter
-
 from imas import imasdef
+from rich_argparse import RichHelpFormatter
 
 from idstools.database import DBMaster
 from idstools.utils.clihelper import get_backend_id, imas_parser
@@ -17,7 +16,8 @@ from idstools.utils.idshelper import get_quantities_from_pulses
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="Extracts given quantities from all data entries of a given database [Previously known as idstools/db_extractor.py]",
+        description="Extracts given quantities from all data entries of "
+        "a given database [Previously known as idstools/db_extractor.py]",
         parents=[imas_parser],
         formatter_class=RichHelpFormatter,
     )
@@ -63,7 +63,8 @@ if __name__ == "__main__":
         if args.saveas:
             if not Path(args.saveas).parent.exists():
                 raise FileNotFoundError(
-                    "The path provided does not exist or has no such database file or directory. Please check spelling."
+                    "The path provided does not exist or has no such database file or directory. "
+                    "Please check spelling."
                 )
             df.to_csv(args.saveas, na_rep="None", index=True, header=True)
         else:

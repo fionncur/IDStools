@@ -51,7 +51,6 @@ yaml_mapping = {
     "plasma_composition.n_over_ntot": "pc_n_over_ntot",
     "plasma_composition.n_over_n_maj": "pc_n_over_n_maj",
     "lastmodified": "date",
-    "location": "location",
 }
 
 

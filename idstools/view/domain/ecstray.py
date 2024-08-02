@@ -1,6 +1,7 @@
+import logging
+
 from idstools.compute.equilibrium import EquilibriumCompute
 from idstools.domain.ecstray import EcStrayCompute
-import logging
 
 # Font/Colour definition
 fontsize = 9

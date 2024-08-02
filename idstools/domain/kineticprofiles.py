@@ -1,6 +1,8 @@
 import logging
-import numpy as np
+
 import imas  # noqa: F401
+import numpy as np
+
 from idstools.compute.common import get_nearest_time
 from idstools.compute.core_profiles import CoreProfilesCompute
 from idstools.compute.edge_profiles import EdgeProfilesCompute

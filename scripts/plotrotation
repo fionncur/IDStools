@@ -5,10 +5,11 @@
 import argparse
 import logging
 import os
-from rich_argparse import RichHelpFormatter
+import sys
 
 import imas
-import sys
+from rich_argparse import RichHelpFormatter
+
 from idstools.compute.common import get_nearest_time
 from idstools.database import DBMaster
 from idstools.utils.clihelper import (

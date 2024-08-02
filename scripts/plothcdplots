@@ -2,7 +2,6 @@
 import argparse
 import logging
 import os
-import sys
 
 from rich_argparse import RichHelpFormatter
 
@@ -39,7 +38,8 @@ def show_waves_plots(args, hold=False):
         connargs.user = args["user"]
         connargs.database = args["database"]
         connargs.version = args["version"]
-        connargs.uri = f"imas:{args['backend'].lower()}?user={connargs.user };shot={connargs.pulse};run={connargs.run};database={connargs.database};version={connargs.version}"
+        connargs.uri = f"imas:{args['backend'].lower()}?user={connargs.user };"
+        f"pulse={connargs.pulse};run={connargs.run};database={connargs.database};version={connargs.version}"
 
         conn = DBMaster.get_connection(connargs)
         if conn is None:
@@ -139,7 +139,8 @@ def show_distribution_plots(args, hold=False):
         connargs.user = args["user"]
         connargs.database = args["database"]
         connargs.version = args["version"]
-        connargs.uri = f"imas:{args['backend'].lower()}?user={connargs.user };shot={connargs.pulse};run={connargs.run};database={connargs.database};version={connargs.version}"
+        connargs.uri = f"imas:{args['backend'].lower()}?user={connargs.user };"
+        f"pulse={connargs.pulse};run={connargs.run};database={connargs.database};version={connargs.version}"
 
         conn = DBMaster.get_connection(connargs)
         if conn is None:

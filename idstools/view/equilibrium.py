@@ -6,8 +6,9 @@ This module provides view functions and classes for equilibrium ids data
 """
 
 import matplotlib.pyplot as plt
-from idstools.view.common import BasePlot
+
 from idstools.compute.equilibrium import EquilibriumCompute
+from idstools.view.common import BasePlot
 
 
 class EquilibriumView(BasePlot):

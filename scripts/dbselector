@@ -1,13 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import argparse
-import os
 import sys
-import copy
 
-from rich_argparse import RichHelpFormatter
 import imas
 from rich.progress import track
+from rich_argparse import RichHelpFormatter
 
 from idstools.database import DBMaster
 from idstools.utils.clihelper import get_backend_id, imas_parser
@@ -66,7 +64,8 @@ if __name__ == "__main__":
             connargs.user = args.user
             connargs.database = args.database
             connargs.version = args.version
-            connargs.uri = f"imas:{args.backend.lower()}?user={args.user};shot={pulse[0]};run={pulse[1]};database={args.database};version={args.version}"
+            connargs.uri = f"imas:{args.backend.lower()}?user={args.user};shot={pulse[0]};"
+            f"run={pulse[1]};database={args.database};version={args.version}"
             connection = DBMaster.get_connection(connargs)
             if connection is None:
                 continue

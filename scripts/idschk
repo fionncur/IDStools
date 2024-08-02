@@ -1,21 +1,20 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-from os import getenv, path
-from sys import exit
-from sys import stdout
 import argparse
 import textwrap
-from rich.markdown import Markdown
-from rich_argparse import RichHelpFormatter
-import yaml
-from idstools.database import DBMaster
-from idstools.utils.clihelper import dbentry_parser
+from os import getenv, path
+from sys import exit, stdout
 
 import imas
-from idstools.idslist import available_in_dbentry
-from idstools import idschk
-from idstools.db_validator import ScenarioValidator
+import yaml
+from rich.markdown import Markdown
+from rich_argparse import RichHelpFormatter
 
+from idstools import idschk
+from idstools.database import DBMaster
+from idstools.db_validator import ScenarioValidator
+from idstools.idslist import available_in_dbentry
+from idstools.utils.clihelper import dbentry_parser
 
 # ----------------------------------------------------------------------
 

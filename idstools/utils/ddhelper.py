@@ -1,8 +1,9 @@
-from os import path
-from xml.etree import ElementTree as ET
-import imas
 import logging
 import os
+from os import path
+from xml.etree import ElementTree as ET
+
+import imas
 
 logger = logging.getLogger("module")
 

@@ -5,11 +5,9 @@ import argparse
 import logging
 import os
 
-from idstools.compute.common import get_nearest_time
-
-
 from rich_argparse import RichHelpFormatter
 
+from idstools.compute.common import get_nearest_time
 from idstools.database import read_scenario, read_scenario_with_args
 from idstools.input_processing import (
     beam_wall_crossing,

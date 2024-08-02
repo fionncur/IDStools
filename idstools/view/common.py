@@ -1,6 +1,7 @@
 import logging
 import os
 import sys
+
 import matplotlib
 
 if "DISPLAY" not in os.environ:

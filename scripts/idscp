@@ -5,11 +5,10 @@ import logging
 import os
 import sys
 
-from rich_argparse import RichHelpFormatter
-from idstools.database import DBMaster
-
 import imas
+from rich_argparse import RichHelpFormatter
 
+from idstools.database import DBMaster
 from idstools.utils.clihelper import imas_parser
 from idstools.utils.idslogger import setup_logger
 

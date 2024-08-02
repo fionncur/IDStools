@@ -4,10 +4,11 @@
 # Edgeplot is added in develop2.0 developed by Anna https://confluence.iter.org/display/IMP/How+to+plot+data+from+edge_profiles
 import argparse
 import copy
-import os
 import logging
-from rich_argparse import RichHelpFormatter
+import os
+
 from imas import imasdef
+from rich_argparse import RichHelpFormatter
 
 from idstools.compute.common import get_nearest_time
 from idstools.compute.wall import WallCompute

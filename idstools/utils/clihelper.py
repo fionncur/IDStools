@@ -1,7 +1,8 @@
 import argparse
 import os
-import socket
 import re
+import socket
+
 import imas
 from imas import imasdef
 

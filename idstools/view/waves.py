@@ -1,8 +1,9 @@
-from idstools.compute.common import find_maxima, find_minima, findfwhm
-from idstools.compute.waves import WavesCompute
+import logging
 
 import numpy as np
-import logging
+
+from idstools.compute.common import find_maxima, find_minima, findfwhm
+from idstools.compute.waves import WavesCompute
 
 logger = logging.getLogger(f"module.{__name__}")
 

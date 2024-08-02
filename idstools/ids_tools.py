@@ -4,12 +4,14 @@ Service classes for handling i_d_ss
 @author: Hajo Klingshirn, MPI-IPP
 """
 
-from idstools.database import DBMaster
-from idstools.helper import make_sequence
-import imas
 import logging
 import os
 import sys
+
+import imas
+
+from idstools.database import DBMaster
+from idstools.helper import make_sequence
 
 # List of all IDS names to be read if 'all' is supplied as a IDS name
 ALL_IDSS = "edge"

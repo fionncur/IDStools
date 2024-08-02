@@ -6,8 +6,9 @@ This module provides view functions and classes for pf_active ids data
 """
 
 import logging
-from matplotlib.patches import Rectangle
+
 import matplotlib.pyplot as plt
+from matplotlib.patches import Rectangle
 
 from idstools.compute.pf_active import PfActiveCompute
 

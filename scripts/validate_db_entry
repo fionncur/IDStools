@@ -1,20 +1,20 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-import os
 import argparse
-import textwrap
-import traceback
+import os
 import re
+import textwrap
 import time
+import traceback
+
+import imas
 from rich.markdown import Markdown
 from rich_argparse import RichHelpFormatter
 
-import imas
-from idstools.utils.clihelper import get_backend_id, imas_parser
-from idstools.set_logger import set_logger
 from idstools import idschk
 from idstools.db_validator import db_validator
-
+from idstools.set_logger import set_logger
+from idstools.utils.clihelper import get_backend_id, imas_parser
 
 # ----------------------------------------------------------------------
 

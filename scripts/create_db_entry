@@ -3,14 +3,16 @@
 
 from __future__ import print_function
 
-import argparse, imas
-
-from rich_argparse import RawDescriptionRichHelpFormatter
-import idstools.init_mendeleiev as mend
-import numpy as np
+import argparse
 import sys
-from os import system, path
+from os import path, system
 from sys import exit
+
+import imas
+import numpy as np
+from rich_argparse import RawDescriptionRichHelpFormatter
+
+import idstools.init_mendeleiev as mend
 from idstools.utils.clihelper import get_backend_id, imas_parser
 
 # ----------------------------------------------------------------------
@@ -609,6 +611,7 @@ type = "tbd"
 # Check IDSs
 
 import logging
+
 from idstools.set_logger import set_logger
 
 # Initialize logger
@@ -617,8 +620,9 @@ logger = set_logger(__name__)
 
 # Validate Input Database
 if not args.wo_validation:
-    from idstools.db_validator import ScenarioValidator
     from glob import glob
+
+    from idstools.db_validator import ScenarioValidator
 
     current_fpath = path.dirname(path.realpath(__file__))
     schema_dir = path.join(current_fpath, "validation_schemas")

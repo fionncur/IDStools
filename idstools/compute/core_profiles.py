@@ -6,13 +6,14 @@ This module provides compute functions and classes for core_profiles ids data
 """
 
 import contextlib
-from typing import Union
-import numpy as np
-import idstools.init_mendeleiev as mend
-import logging
 import functools
-
 import itertools
+import logging
+from typing import Union
+
+import numpy as np
+
+import idstools.init_mendeleiev as mend
 
 logger = logging.getLogger("module")
 

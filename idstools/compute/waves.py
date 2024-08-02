@@ -6,9 +6,10 @@ This module provides compute functions and classes for waves ids data
 """
 
 import functools
-import numpy as np
 import logging
+
 import imas
+import numpy as np
 
 logger = logging.getLogger("module")
 

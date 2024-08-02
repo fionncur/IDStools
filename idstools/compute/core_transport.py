@@ -6,6 +6,7 @@ This module provides compute functions and classes for core_transport ids data
 """
 
 import logging
+
 import numpy as np
 
 logger = logging.getLogger("module")

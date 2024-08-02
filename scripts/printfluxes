@@ -7,11 +7,10 @@ import argparse
 import logging
 import sys
 
-from rich_argparse import RichHelpFormatter
-from idstools.database import DBMaster
-
 from imas import imasdef
+from rich_argparse import RichHelpFormatter
 
+from idstools.database import DBMaster
 from idstools.utils.clihelper import dbentry_parser, get_database_path
 from idstools.utils.idslogger import setup_logger
 from idstools.view.core_transport import CoreTransportView

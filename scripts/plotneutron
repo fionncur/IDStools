@@ -4,11 +4,10 @@
 # migrated from neutronplot
 import argparse
 import logging
-import sys
 import os
-from rich_argparse import RichHelpFormatter
 
 import imas
+from rich_argparse import RichHelpFormatter
 
 from idstools.compute.common import get_nearest_time
 from idstools.database import DBMaster
@@ -67,7 +66,7 @@ try:
         )
         exit()
 
-except Exception as e:
+except Exception as _:
     logger.critical(
         "The distribution_sources IDS is absent from the input data-entry",
     )
@@ -102,7 +101,7 @@ for isource in range(nsources):
         ids_distribution_sources.source[isource].profiles_1d[0] = ids_slice_distribution_sources.source[
             isource
         ].profiles_1d[0]
-    except Exception as e:
+    except Exception as _:
         logger.warning(
             f"Source {str(isource)} has no profiles_1d -> considered as inactive",
         )
@@ -111,7 +110,7 @@ for isource in range(nsources):
         ids_distribution_sources.source[isource].global_quantities[0] = ids_slice_distribution_sources.source[
             isource
         ].global_quantities[0]
-    except Exception as e:
+    except Exception as _:
         if active[isource] == 1:
             logger.warning(
                 f"Source {str(isource)} has no global_quantities -> considered as inactive",
@@ -119,7 +118,7 @@ for isource in range(nsources):
             active[isource] = 0
     try:
         ids_distribution_sources.source[isource].process[0] = ids_slice_distribution_sources.source[isource].process[0]
-    except Exception as e:
+    except Exception as _:
         if active[isource] == 1:
             logger.warning(
                 f"Source {str(isource)} has no process -> considered as inactive",

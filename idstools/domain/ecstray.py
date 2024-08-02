@@ -1,10 +1,12 @@
 import itertools
+import logging
+
 import numpy as np
 from scipy import constants, interpolate
-import logging
+
+from idstools.compute.common import get_closest_of_given_value_from_array
 from idstools.compute.equilibrium import EquilibriumCompute
 from idstools.compute.waves import WavesCompute
-from idstools.compute.common import get_closest_of_given_value_from_array
 
 logger = logging.getLogger("module")
 

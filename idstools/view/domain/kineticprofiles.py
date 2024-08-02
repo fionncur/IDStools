@@ -1,6 +1,5 @@
 import logging
 
-
 from idstools.domain.kineticprofiles import KineticProfilesCompute
 
 logger = logging.getLogger("module")

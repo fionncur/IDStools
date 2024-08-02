@@ -3,6 +3,7 @@
 import argparse
 
 from rich_argparse import RawDescriptionRichHelpFormatter
+
 from idstools.machinedescription import MachineDescription
 
 # Management of input arguments
