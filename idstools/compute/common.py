@@ -77,13 +77,15 @@ def get_closest_of_given_value_from_array(array: np.ndarray, value: float) -> Un
 
 def get_middle_element_from_array(array: np.ndarray) -> Union[None, tuple]:
     """
-    The "get_middle_element_from_array" function returns the index and value of the middle element in a given numpy array.
+    The "get_middle_element_from_array" function returns the index and value of the middle element in a
+    given numpy array.
 
     Args:
         array (np.ndarray): A NumPy array for which we want to find the middle element.
 
     Returns:
-        The function `get_middle_element_from_array` takes a numpy array as input and returns a tuple containing the index and value
+        The function `get_middle_element_from_array` takes a numpy array as input and returns a tuple
+        containing the index and value
         of the middle element of the array. If the input array is None or empty, the function returns None.
     """
     if array is None:

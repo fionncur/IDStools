@@ -71,7 +71,8 @@ class CoreProfilesCompute:
     @functools.lru_cache(maxsize=128)
     def get_electron_density_ne0(self):
         """
-        This function `get_electron_density_ne0` returns a list of electron densities at the first position for each time step in a given object.
+        This function `get_electron_density_ne0` returns a list of electron densities at the
+        first position for each time step in a given object.
 
         Returns:
             The function `get_ne0` returns a list of electron densities at the first spatial point (index 0) for all
@@ -166,8 +167,8 @@ class CoreProfilesCompute:
 
     def get_states(self, time_slice: int = 0) -> list:
         """
-        This function `get_states` returns quantities related to the different states of the species (ionisation, energy,
-        excitation, ...) for each species
+        This function `get_states` returns quantities related to the different states of the species
+        (ionisation, energy, excitation, ...) for each species
 
         Args:
             time_slice (int, optional): time slice on which function should operate on. Defaults to 0.
@@ -195,8 +196,8 @@ class CoreProfilesCompute:
 
     def get_state_density(self, time_slice: int = 0, species_index: int = 0, state_index: int = 0) -> np.ndarray | None:
         """
-        This function `get_state_density` returns the density of a specified state of a specified species at a specified time slice,
-        or the thermal density if the former is not available.
+        This function `get_state_density` returns the density of a specified state of a
+        specified species at a specified time slice, or the thermal density if the former is not available.
 
         Args:
             time_slice (int): an integer representing the index of the time slice for which the density is being

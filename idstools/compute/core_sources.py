@@ -188,9 +188,10 @@ class CoreSourcesCompute:
         current profiles for each valid and active source.
         SINGLE AND TOTAL PROFILES (ELECTRONS+IONS)
         Returns:
-            a dictionary with two keys: "total_current_profile" and "single_current_profile". The value associated with
-            the "total_current_profile" key is a numpy array representing the total current profile. The value associated
-            with the "single_current_profile" key is a dictionary where the keys are the indices of the sources and the
+            a dictionary with two keys: "total_current_profile" and "single_current_profile". The value associated
+            with the "total_current_profile" key is a numpy array representing the total current profile.
+            The value associated with the "single_current_profile" key is a dictionary where the keys
+            are the indices of the sources and the
             values are numpy arrays representing the current profiles for each individual source.
         """
         # SINGLE AND TOTAL PROFILES (ELECTRONS+IONS)

@@ -949,8 +949,8 @@ class EdgeProfilesCompute:
 
     def get_outer_midplane_array_index(self):
         """
-        This function `get_outer_midplane_array_index` searches for a specific grid subset with an index of 11 and returns its position
-        within the list of subsets.
+        This function `get_outer_midplane_array_index` searches for a specific grid subset with an
+        index of 11 and returns its position within the list of subsets.
 
         Returns:
             The function `getOuterMidplaneArrayIndex` returns the index of the grid subset that has an identifier

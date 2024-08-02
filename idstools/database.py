@@ -507,9 +507,9 @@ class DBMaster:
         _lowlevel_version = ""
         if "_al_lowlevel" in imas.__dict__:
             try:
-                _lowlevelVersion = imas.al_dd_version
+                _lowlevel_version = imas.al_dd_version
             except Exception:
-                _lowlevelVersion = imas.al_defs.DD_VERSION.decode("utf-8")
+                _lowlevel_version = imas.al_defs.DD_VERSION.decode("utf-8")
         elif "_ual_lowlevel" in imas.__dict__:
             raw_d_d_version = imas._ual_lowlevel.__name__  # '__name__': 'imas_3_41_0_ual_4_11_10._ual_lowlevel
             raw_d_d_version, _ = raw_d_d_version.split(".")
