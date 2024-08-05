@@ -13,17 +13,13 @@ execute_scripts() {
         LOG_FILE="$LOG_DIR/${executable}.log"
 
         echo "$script" >>"$LOG_DIR/${executable}.log"
-        start_time_sec=$(date +%s)
-        start_time_nsec=$(date +%N)
+        start_time=$(date +%s.%N)
         # Execute the script and redirect both stdout and stderr to the log file
         eval "$script">>"$LOG_FILE" 2>&1
         output=$?
         # Calculate execution time
-        end_time_sec=$(date +%s)
-        end_time_nsec=$(date +%N)
-        start_time=$((start_time_sec * 1000000000 + start_time_nsec))
-        end_time=$((end_time_sec * 1000000000 + end_time_nsec))
-        SCRIPT_TIME["$script"]=$((end_time - start_time))
+        end_time=$(date +%s.%N)
+        SCRIPT_TIME["$script"]=$(awk -v start="$start_time" -v end="$end_time" 'BEGIN { printf "%.9f", end - start }')
 
         # Check if the script exited with an error
         if [ "$output" -ne 0 ]; then

@@ -168,9 +168,10 @@ def print_times(dbs, args, print_times=False, pulse_number=None, run_number=None
                         connargs.user = args.user
                         connargs.database = dbname
                         connargs.version = dv
-                        connargs.uri = f"imas:{backend.lower()}?user={args.user};pulse={pulse};"
-                        f"run={run};database={dbname};version={dv}"
-
+                        connargs.uri = (
+                            f"imas:{backend.lower()}?user={args.user};pulse={pulse};"
+                            f"run={run};database={dbname};version={dv}"
+                        )
                         connection = DBMaster.get_connection(connargs)
                         if showuri:
                             print(TAB * 4 + '"' + connargs.uri + '"')

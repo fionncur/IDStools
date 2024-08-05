@@ -260,7 +260,8 @@ class WavesView:
                 linestyle="--",
                 label=ec_launcher_info["single_ec_launcher_name"][i_wave],
             )
-        ax.set_ylabel(r"$\mathrm{ECCD} \; [\mathrm{MA}/\mathrm{m}^{2}]$")
+        ax.set_ylabel(r"$\mathrm{ECCD} \ [\text{MA}/\text{m}^{2}]$")
+        # ax.set_ylabel(r"$\mathrm{ECCD} \; [\mathrm{MA}/\mathrm{m}^{2}]$")
         if first_radial_grid_info["psiBased"] is False:
             ax.set_xlabel("Normalized toroidal flux coordinate")
         else:
@@ -450,7 +451,8 @@ class WavesView:
                     ec_launcher_info["single_current_density_profile"][iwave] * 1.0e-6,
                     label=ec_launcher_info["single_ec_launcher_name"][iwave],
                 )
-        ax.set_ylabel("$\\mathrm{CD} [MA/m^{2}]}$")
+        ax.set_ylabel(r"$\mathrm{CD} \ [\text{MA}/\text{m}^{2}]$")
+        # ax.set_ylabel("$\\mathrm{CD} [MA/m^{2}]}$")
         if first_radial_grid_info["psiBased"] is False and usepsi is False:
             ax.set_xlabel("Normalized toroidal flux coordinate")
         else:

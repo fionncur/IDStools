@@ -92,7 +92,10 @@ if args.uri is None:
         in_ids_list=["equilibrium", "core_profiles"],
         out_ids_list=["waves"],
     )
-    args.uri = f"imas:mdsplus?user={inputargs.user};pulse={inputargs.pulse};run={inputargs.run};database={inputargs.database};version={inputargs.version}"
+    args.uri = (
+        f"imas:mdsplus?user={inputargs.user};pulse={inputargs.pulse};"
+        f"run={inputargs.run};database={inputargs.database};version={inputargs.version}"
+    )
 else:
     data = read_scenario_with_args(
         imasargs=args,
