@@ -9,7 +9,7 @@ if [[ "$(uname -n)" == *"bamboo"* ]]; then
 fi
 
 ENVIRONEMNT_NAME=env"$TOOLCHAIN_VERSION"_"$ACCESS_LAYER_VERSION"
-module unload -f IDStools
+module unload IDStools
 
 python -m venv "$ENVIRONEMNT_NAME"
 

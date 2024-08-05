@@ -9,7 +9,7 @@ if [[ "$(uname -n)" == *"bamboo"* ]]; then
     set -e -u -o pipefail
 fi
 
-module unload -f IDStools
+module unload IDStools
 ENVIRONEMNT_NAME=env"$TOOLCHAIN_VERSION"_"$ACCESS_LAYER_VERSION"
 
 # Create python virtual environment and install dependencies
