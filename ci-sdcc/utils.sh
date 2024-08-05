@@ -13,23 +13,18 @@ getIMASModuleName() {
     else
         ACCESS_LAYER_VERSION="$2"
     fi
-    if [ -z "$DD_VERSION" ]; then
+    if [ -z "$DD_VERSION" ]; then 
         DD_VERSION="3"
     else
         DD_VERSION="$3"
     fi
+
     #Semantic versioning
-    IMASVERSIONSLIST=$(module av -t IMAS/ 2>&1 | grep -E "$DD_VERSION\.[0-9]+\.[0-9]+-$ACCESS_LAYER_VERSION\.[0-9]+\.[0-9]+-$TOOLCHAIN_VERSION")
-    if [ -f /etc/os-release ]; then
-        . /etc/os-release
-        if [[ "$ID" == "rhel" ]]; then
-            IMASVERSIONSLIST=$(module -r -t avail '^IMAS/' 2>&1 | grep -E "$DD_VERSION\.[0-9]+\.[0-9]+-$ACCESS_LAYER_VERSION\.[0-9]+\.[0-9]+-$TOOLCHAIN_VERSION")
-        fi
-    fi
+    IMASVERSIONSLIST=$(module -r -t avail IMAS/ 2>&1 | grep -E "^IMAS/$DD_VERSION\.[0-9]+\.[0-9]+-$ACCESS_LAYER_VERSION\.[0-9]+\.[0-9]+-$TOOLCHAIN_VERSION")
+
     # CalVar versioning
-    if [[ $ACCESS_LAYER_VERSION == "5" ]]; then
-        IMASCALVERVERSIONSLIST=$(module av -t IMAS/ 2>&1 | grep -E "$DD_VERSION\.[0-9]+\.[0-9]+-[0-9]+\.[0-9]+-$TOOLCHAIN_VERSION")
-    fi
+    IMASCALVERVERSIONSLIST=$(module -r -t avail IMAS/ 2>&1 | grep -E "^IMAS/$DD_VERSION\.[0-9]+\.[0-9]+-[0-9]+\.[0-9]+-$TOOLCHAIN_VERSION")
+    
     if [[ $TOOLCHAIN_VERSION == *"intel"* ]]; then
         IMAS_MODULE_VERSION=$(echo "$IMASVERSIONSLIST"$'\n'"$IMASCALVERVERSIONSLIST" | grep "intel" | sort -rV | head -n 1)
     fi
@@ -38,7 +33,6 @@ getIMASModuleName() {
     fi
     # IMAS_MODULE_VERSION="$IMAS_MODULE_VERSION" | sed 's/(.*//'
     IMAS_MODULE_VERSION="${IMAS_MODULE_VERSION%%(*}"
-    IMAS_MODULE_VERSION="${IMAS_MODULE_VERSION//(default)/}"
     IMAS_MODULE_VERSION="${IMAS_MODULE_VERSION// (D)/}"
     IMAS_MODULE_VERSION="${IMAS_MODULE_VERSION// /}"
     echo "${IMAS_MODULE_VERSION}"
@@ -52,16 +46,10 @@ getModuleName() {
     local GCCcore_VERSION=$3
     IFS='-' read -r TNAME TVERSION <<<"$TOOLCHAIN_VERSION"
 
-    module_versions=$(module av -t "$MODULE_NAME"/ 2>&1 | grep -E "$MODULE_NAME/[0-9]+\.[0-9]+\.[0-9]+")
-    if [ -f /etc/os-release ]; then
-        . /etc/os-release
-        if [[ "$ID" == "rhel" ]]; then
-            if [[ $MODULE_NAME == *-* ]]; then
-                module_versions=$(module -t avail "$MODULE_NAME"/ 2>&1 | grep -E "$MODULE_NAME/[0-9]+\.[0-9]+\.[0-9]+")
-            else
-                module_versions=$(module -r -t avail ^"$MODULE_NAME"/ 2>&1 | grep -E "$MODULE_NAME/[0-9]+\.[0-9]+\.[0-9]+")
-            fi
-        fi
+    if [[ $MODULE_NAME == *-* ]]; then
+        module_versions=$(module -t avail "$MODULE_NAME"/ 2>&1 | grep -E "$MODULE_NAME/[0-9]+\.[0-9]+\.[0-9]+")
+    else
+        module_versions=$(module -r -t avail ^"$MODULE_NAME"/ 2>&1 | grep -E "$MODULE_NAME/[0-9]+\.[0-9]+\.[0-9]+")
     fi
 
     # Check GCCcore version
@@ -128,7 +116,7 @@ getModuleNameAndVersion() {
     if [[ $input == *"intel-compilers"* ]]; then
         echo "('$input', EXTERNAL_MODULE),"
     elif [[ $input == *"GCCcore"* ]]; then
-        # gcccorename=$(echo "$input" | grep -oP '(?<=-)(GCCcore)(?=-)')
+        # gcccorename=$(echo "$input" | grep -oP '(?<=-)(GCCcore(?=-)')
         gcccoreversion=$(echo "$input" | grep -oP '(?<=GCCcore-)[0-9]+\.[0-9]+\.[0-9]+$')
         echo "('$mname', '$version',  '', ('GCCcore', '$gcccoreversion')),"
     elif [[ $input == *"intel"* ]] || [[ $input == *"foss"* ]] || [[ $input == *"gfbf"* ]] || [[ $input == *"GCC"* ]] || [[ $input == *"iimpi"* ]] || [[ $input == *"gompi"* ]] || [[ $input == *"iimkl"* ]]; then
@@ -182,7 +170,7 @@ deleteGitHeaderFile() {
 # getIMASModuleName $toolchain 5 3
 # module load "$(getIMASModuleName $toolchain 5)"
 # getModuleName FRUIT $toolchain
-# getModuleName netCDF-Fortran $toolchain
+# getModuleName netCDF-Fortran $toolchainll
 # getModuleName netCDF-Fortran foss-2020b
 # getModuleName netCDF-Fortran intel-2023b
 # getModuleName netCDF-Fortran foss-2023b
