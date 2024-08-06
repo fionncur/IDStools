@@ -120,7 +120,7 @@ EB_HTTP_OPTS=$(writeGitHeaderFile "$bamboo_HTTP_AUTH_BEARER_PASSWORD")
 EB_OPTS=(
     --force
     --force-download
-    --modules-tool=EnvironmentModules
+    --modules-tool=Lmod
     --module-syntax=Tcl
     --allow-modules-tool-mismatch
     --allow-use-as-root-and-accept-consequences
@@ -140,7 +140,6 @@ if [ -d "$EASYBUILD_DIR"/software/"$MODULE_NAME" ]; then
 fi
 
 module use -p /work/imas/opt/bamboo_deploy/easybuild/modules/all
-set -x
 # inject checksum
 eb ./ci-sdcc/ebfiles/"$MODULE_FULL_VERSION" --inject-checksums ${EB_OPTS[@]}
 
@@ -149,14 +148,13 @@ eb ./ci-sdcc/ebfiles/"$MODULE_FULL_VERSION" --inject-checksums ${EB_OPTS[@]}
 
 # # execute eb command
 eb ./ci-sdcc/ebfiles/"$MODULE_FULL_VERSION" ${EB_OPTS[@]}
-set +x
+
 
 if [ $? -eq 0 ]; then
     echo "$MODULE_FULL_VERSION is installed"
 else
     echo "$MODULE_FULL_VERSION is not installed"
 fi
-
 # Replace mnt with /work/imas/opt/ to work internal path on sdcc"
 if [[ "$(uname -n)" != "sdcc"* ]]; then
     find "$EASYBUILD_DIR"/modules/all/"$MODULE_NAME" -type f -not -path '*/\.*' -exec sed -i -- 's/mnt/work\/imas\/opt/g' {} +
@@ -169,7 +167,7 @@ if [[ "$(uname -n)" != "sdcc"* ]]; then
 else
     module use -p "$EASYBUILD_DIR"/modules/all
 fi
-module avail -i "$MODULE_NAME"/
+module -r -t avail "$MODULE_NAME"/
 
 deleteGitHeaderFile
 echo "Done"

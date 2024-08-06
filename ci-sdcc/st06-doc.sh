@@ -1,7 +1,8 @@
 #!/bin/bash
 # Bamboo CI script to build actor and run standalone program
 # Execute script from root directory
-
+source /etc/profile.d/modules.sh
+module use /work/imas/etc/modules/all
 source ./ci-sdcc/st00-header.sh $1 $2
 
 # Note Disable set -e option when using on local as it will exit the shell on error
