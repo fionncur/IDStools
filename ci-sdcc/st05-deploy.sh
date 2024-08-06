@@ -1,9 +1,9 @@
 #!/bin/bash
 # Bamboo deploy script using Easybuild
 # Execute script from root directory
-source /etc/profile.d/modules.sh
+
 source ./ci-sdcc/utils.sh
-module use /work/imas/etc/modules/all
+
 # expand aliases
 shopt -s expand_aliases
 
@@ -105,6 +105,8 @@ echo "----------------------------------------------------"
 # Load modules
 
 echo "Loading Modules"
+source /etc/profile.d/modules.sh
+module use /work/imas/etc/modules/all
 module purge
 module load EasyBuild
 echo "Done loading modules..."
