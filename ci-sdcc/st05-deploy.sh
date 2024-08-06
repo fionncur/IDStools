@@ -1,9 +1,9 @@
 #!/bin/bash
 # Bamboo deploy script using Easybuild
 # Execute script from root directory
-
+source /etc/profile.d/modules.sh
 source ./ci-sdcc/utils.sh
-
+module use /work/imas/etc/modules/all
 # expand aliases
 shopt -s expand_aliases
 
