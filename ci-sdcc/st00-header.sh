@@ -7,29 +7,47 @@ source ./ci-sdcc/utils.sh
 
 module use /work/imas/etc/modules/all
 
-module purge
-
 # expand aliases
 shopt -s expand_aliases
 
 #print hostname
 hostname -f
 
-# Get toolchain version
-if [ -z "$1" ]; then
+IMAS_EXISTS=$(module -r -t list 2>&1 | grep -E "IMAS/"  | head -n 1)
+if [ -n "$IMAS_EXISTS" ]; then
+    echo "> Found already loaded IMAS Module : $IMAS_EXISTS"
+    ACCESS_LAYER_VERSION=$(echo "$AL_VERSION" | cut -d '.' -f 1)
+    TOOLCHAIN_VERSION=$(echo "$IMAS_EXISTS" | awk -F '-' '{print $(NF-1)"-"$NF}')
+else
+    echo "> IMAS Module is not loaded"
+fi
+
+if [ -n "$1" ] || [ -n "$2" ]; then
+    echo "> Compiling with $1 and Access Layer $2 with latest version of installed modules.Previously loaded modules will be purged.."
+    module purge
+    # If toolchain version is passed then purge all modules
+    if [ -n "$1" ]; then
+        TOOLCHAIN_VERSION="$1"
+    fi
+
+    # Get AL version
+    if [ -n "$2" ]; then
+        ACCESS_LAYER_VERSION="$2"
+    else
+        ACCESS_LAYER_VERSION="5"
+    fi
+fi
+
+if [ -z "$TOOLCHAIN_VERSION" ]; then
+    echo "> No toolchain found, Setting it to default : intel-2023b"
     TOOLCHAIN_VERSION="intel-2023b"
-else
-    TOOLCHAIN_VERSION="$1"
 fi
 
-# Get AL version
-if [ -z "$2" ]; then
+if [ -z "$ACCESS_LAYER_VERSION" ]; then
     ACCESS_LAYER_VERSION="5"
-else
-    ACCESS_LAYER_VERSION="$2"
 fi
 
-echo "Building for $TOOLCHAIN_VERSION and Access Layer $ACCESS_LAYER_VERSION"
+echo "> Building for $TOOLCHAIN_VERSION and Access Layer $ACCESS_LAYER_VERSION"
 
 if [[ $TOOLCHAIN_VERSION == *"intel"* ]]; then
     FCOMPILER="ifort"
@@ -40,10 +58,14 @@ fi
 
 IMAS_MODULE_VERSION=$(getIMASModuleName "$TOOLCHAIN_VERSION" "$ACCESS_LAYER_VERSION")
 # load IMAS module first
-module load "$IMAS_MODULE_VERSION"
+
+if [ -z "$IMAS_EXISTS" ]; then
+    echo "> IMAS is not loaded.. Loading Module $IMAS_MODULE_VERSION"
+    module load "$IMAS_MODULE_VERSION"
+fi
 
 GCCcore_VERSION=$(getGCCcoreVersion)
-module unload "$IMAS_MODULE_VERSION"
+
 dependencies="./ci-sdcc/dependencies.txt"
 
 # Check if the file exists
@@ -55,39 +77,61 @@ fi
 declare -a RUNMODULES=()
 declare -a EBBRUNMODULES=()
 
-# actors have version suffix so better to provide them as EXTERNAL_MODULE
-
+echo "-------------------------------------------------------"
+echo "> dependency modules"
 counter=0
-# Read the file line by line
 while IFS= read -r line || [[ -n $line ]]; do
+    line="${line// /}"
     # for empty string continue
-    if [[ -z "${line// /}" ]]; then
+    if [[ -z "$line" ]]; then
+        counter=$(("$counter" + 1))
+        continue
+    fi
+    # fix module version
+    if [[ $line == *"/"* ]]; then
+        echo "using fix module $line"
+        RUNMODULES["$counter"]="$line"
+        EBBRUNMODULES["$counter"]="('$line', EXTERNAL_MODULE),"
         counter=$(("$counter" + 1))
         continue
     fi
     # latest module version as it is not given
-    if [[ $line == "IMAS" ]]; then
-        echo "Using latest version of IMAS $IMAS_MODULE_VERSION"
+    if [[ $line == *"IMAS"* ]]; then
+        echo "    IMAS $IMAS_MODULE_VERSION"
         RUNMODULES["$counter"]="$IMAS_MODULE_VERSION"
         EBBRUNMODULES["$counter"]="('$IMAS_MODULE_VERSION', EXTERNAL_MODULE),"
     else
         module_version=$(getModuleName "$line" "$TOOLCHAIN_VERSION" "$GCCcore_VERSION")
-        echo "Using latest version of $line $module_version"
+        echo "    $line $module_version"
         RUNMODULES["$counter"]="$module_version"
         EBBRUNMODULES["$counter"]=$(getModuleNameAndVersion "$module_version")
 
     fi
     counter=$(("$counter" + 1))
 done <"$dependencies"
+echo "-------------------------------------------------------"
 
-echo "TOOLCHAIN_VERSION : $TOOLCHAIN_VERSION"
-echo "GCCcore_VERSION : $GCCcore_VERSION"
-echo "IMAS VERSION : $IMAS_MODULE_VERSION"
-echo "RUNMODULES : " "${RUNMODULES[@]}"
-echo "EBRUNMODULES : " "${EBBRUNMODULES[@]}"
-echo "Compiler : $FCOMPILER"
+echo "> Details of environment"
+echo "    TOOLCHAIN_VERSION : $TOOLCHAIN_VERSION"
+echo "    GCCcore_VERSION : $GCCcore_VERSION"
+echo "    IMAS VERSION : $IMAS_MODULE_VERSION"
+echo "    RUNMODULES : " "${RUNMODULES[@]}"
+echo "    EBRUNMODULES : " "${EBBRUNMODULES[@]}"
+echo "    Compiler : $FCOMPILER"
+echo "-------------------------------------------------------"
 
-echo "Loading modules..."
-module purge
-module load "${RUNMODULES[@]}"
-echo "Done loading modules..."
+
+echo "> Loading run time modules"
+# Load build modules if they exist
+for imodule in "${RUNMODULES[@]}"; do
+    IFS='/' read -r iname iversion <<< "$imodule"
+    MODULE_EXISTS=$(module -r -t list 2>&1 | grep -E "$iname/")
+    if [ -z "$MODULE_EXISTS" ]; then
+        echo "    $iname not available, Loading $imodule"
+        module load "$imodule"
+    else
+        echo "    $MODULE_EXISTS already loaded"
+    fi
+done
+echo "> Done"
+echo "-------------------------------------------------------"

@@ -100,7 +100,7 @@ getModuleName() {
 getGCCcoreVersion() {
     # Get GCCcore version loaded
     # ensure that IMAS module should be loaded before calling this function
-    GCCcore_VERSION=$(module -t list 2>&1 | grep GCCcore | head -n 1 | awk -F'/' '{print $2}')
+    GCCcore_VERSION=$(module -r -t list 2>&1 | grep GCCcore | head -n 1 | awk -F'/' '{print $2}')
     echo "$GCCcore_VERSION"
 }
 
@@ -116,7 +116,6 @@ getModuleNameAndVersion() {
     if [[ $input == *"intel-compilers"* ]]; then
         echo "('$input', EXTERNAL_MODULE),"
     elif [[ $input == *"GCCcore"* ]]; then
-        # gcccorename=$(echo "$input" | grep -oP '(?<=-)(GCCcore(?=-)')
         gcccoreversion=$(echo "$input" | grep -oP '(?<=GCCcore-)[0-9]+\.[0-9]+\.[0-9]+$')
         echo "('$mname', '$version',  '', ('GCCcore', '$gcccoreversion')),"
     elif [[ $input == *"intel"* ]] || [[ $input == *"foss"* ]] || [[ $input == *"gfbf"* ]] || [[ $input == *"GCC"* ]] || [[ $input == *"iimpi"* ]] || [[ $input == *"gompi"* ]] || [[ $input == *"iimkl"* ]]; then
