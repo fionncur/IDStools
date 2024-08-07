@@ -86,8 +86,10 @@ tar -cvzf eb.tar.gz ./ci-sdcc/ebfiles/"$MODULE_FULL_VERSION" >/dev/null 2>&1
 ################################################################################################
 
 # Set up environment for compilation
-if [[ "$(uname -n)" == *"bamboo"* ]]; then
-    DEPLOY_DIRECTORY="/mnt/bamboo_deploy"
+if [ -z "$DEPLOY_DIRECTORY" ]; then
+    if [[ "$(uname -n)" != "sdcc"* ]]; then
+
+        DEPLOY_DIRECTORY="/mnt/bamboo_deploy"
 else
     if [ -z "$DEPLOY_DIRECTORY" ]; then
         DEPLOY_DIRECTORY=$(pwd)
@@ -96,6 +98,7 @@ else
     if [ -z "$bamboo_HTTP_AUTH_BEARER_PASSWORD" ]; then
         bamboo_HTTP_AUTH_BEARER_PASSWORD=
     fi
+fi
 fi
 
 # contents of eb file
@@ -106,7 +109,6 @@ echo "----------------------------------------------------"
 
 echo "Loading Modules"
 source /etc/profile.d/modules.sh
-module use /work/imas/etc/modules/all
 module purge
 module load EasyBuild
 echo "Done loading modules..."
@@ -122,7 +124,7 @@ EB_HTTP_OPTS=$(writeGitHeaderFile "$bamboo_HTTP_AUTH_BEARER_PASSWORD")
 EB_OPTS=(
     --force
     --force-download
-    --modules-tool=Lmod
+    "--modules-tool=Lmod"
     --module-syntax=Tcl
     --allow-modules-tool-mismatch
     --allow-use-as-root-and-accept-consequences
@@ -130,7 +132,7 @@ EB_OPTS=(
     "--optarch=Intel:axAVX,CORE-AVX2;GCC:march=sandybridge"
     "$EB_HTTP_OPTS"
 )
-# enable if need to debug
+# enable if need to debug --logtostdout --debug --trace
 EB_OPTS=(${EB_OPTS[@]})
 
 #Check contents of the paths
@@ -141,14 +143,19 @@ if [ -d "$EASYBUILD_DIR"/software/"$MODULE_NAME" ]; then
     ls "$EASYBUILD_DIR"/software/"$MODULE_NAME"
 fi
 
-module use -p /work/imas/opt/bamboo_deploy/easybuild/modules/all
-# inject checksum
+echo "=============================================================================="
+echo "> Injecting checksum"
+
 eb ./ci-sdcc/ebfiles/"$MODULE_FULL_VERSION" --inject-checksums ${EB_OPTS[@]}
 
-# check style
+echo "=============================================================================="
+#echo "> Checking style"
+#$EB_INSTALLPYTHON -m venv stylevenv && source ./stylevenv/bin/activate && pip install -- pycodestyle && eb ./ci-sdcc/ebfiles/"$MODULE_FULL_VERSION" ${EB_OPTS[@]} --check-style && deactivate
+#rm -rf stylevenv
 # eb ./ci-sdcc/ebfiles/"$MODULE_FULL_VERSION" --check-style ${EB_OPTS[@]}
 
-# # execute eb command
+echo "=============================================================================="
+echo "> execute eb"
 eb ./ci-sdcc/ebfiles/"$MODULE_FULL_VERSION" ${EB_OPTS[@]}
 
 
