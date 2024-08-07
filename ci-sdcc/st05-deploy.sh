@@ -88,17 +88,14 @@ tar -cvzf eb.tar.gz ./ci-sdcc/ebfiles/"$MODULE_FULL_VERSION" >/dev/null 2>&1
 # Set up environment for compilation
 if [ -z "$DEPLOY_DIRECTORY" ]; then
     if [[ "$(uname -n)" != "sdcc"* ]]; then
-
         DEPLOY_DIRECTORY="/mnt/bamboo_deploy"
-else
-    if [ -z "$DEPLOY_DIRECTORY" ]; then
+    else
         DEPLOY_DIRECTORY=$(pwd)
+        # Provide Git Token when running on local
+        if [ -z "$bamboo_HTTP_AUTH_BEARER_PASSWORD" ]; then
+            bamboo_HTTP_AUTH_BEARER_PASSWORD=
+        fi
     fi
-    # Provide Git Token when running on local
-    if [ -z "$bamboo_HTTP_AUTH_BEARER_PASSWORD" ]; then
-        bamboo_HTTP_AUTH_BEARER_PASSWORD=
-    fi
-fi
 fi
 
 # contents of eb file
