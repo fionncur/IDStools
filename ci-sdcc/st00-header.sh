@@ -13,7 +13,7 @@ shopt -s expand_aliases
 #print hostname
 hostname -f
 
-IMAS_EXISTS=$(module -r -t list 2>&1 | grep -E "IMAS/"  | head -n 1)
+IMAS_EXISTS=$(module -r -t list 2>&1 | grep -E "IMAS/IMAS-AL-Python/"  | head -n 1)
 if [ -n "$IMAS_EXISTS" ]; then
     echo "> Found already loaded IMAS Module : $IMAS_EXISTS"
     ACCESS_LAYER_VERSION=$(echo "$AL_VERSION" | cut -d '.' -f 1)
@@ -65,6 +65,8 @@ if [ -z "$IMAS_EXISTS" ]; then
 fi
 
 GCCcore_VERSION=$(getGCCcoreVersion)
+module unload IMAS
+module unload IDStools
 
 dependencies="./ci-sdcc/dependencies.txt"
 
@@ -96,17 +98,17 @@ while IFS= read -r line || [[ -n $line ]]; do
         continue
     fi
     # latest module version as it is not given
-    if [[ $line == *"IMAS"* ]]; then
-        echo "    IMAS $IMAS_MODULE_VERSION"
-        RUNMODULES["$counter"]="$IMAS_MODULE_VERSION"
-        EBBRUNMODULES["$counter"]="('$IMAS_MODULE_VERSION', EXTERNAL_MODULE),"
-    else
-        module_version=$(getModuleName "$line" "$TOOLCHAIN_VERSION" "$GCCcore_VERSION")
-        echo "    $line $module_version"
-        RUNMODULES["$counter"]="$module_version"
-        EBBRUNMODULES["$counter"]=$(getModuleNameAndVersion "$module_version")
+    # if [[ $line == *"IMAS"* ]]; then
+    #     echo "    IMAS $IMAS_MODULE_VERSION"
+    #     RUNMODULES["$counter"]="$IMAS_MODULE_VERSION"
+    #     EBBRUNMODULES["$counter"]="('$IMAS_MODULE_VERSION', EXTERNAL_MODULE),"
+    # else
+    module_version=$(getModuleName "$line" "$TOOLCHAIN_VERSION" "$GCCcore_VERSION")
+    echo "    $line $module_version"
+    RUNMODULES["$counter"]="$module_version"
+    EBBRUNMODULES["$counter"]=$(getModuleNameAndVersion "$module_version")
 
-    fi
+    # fi
     counter=$(("$counter" + 1))
 done <"$dependencies"
 echo "-------------------------------------------------------"
