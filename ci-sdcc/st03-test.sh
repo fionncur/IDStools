@@ -46,12 +46,12 @@ echo "====================================================================="
 #---------------------------------------------------------------------------
 echo ""
 echo ""
-
+set -x
 echo "====================================================================="
 echo "Testing analysis scripts  with URI $IMAS_MODULE_VERSION and $PYTHON_VERSION"
 echo "====================================================================="
 source ./tests/st03_test_analysis_scripts_with_uri.sh "$LOG_DIR" "$DB_DIR"
-
+set +x
 echo "====================================================================="
 echo "Testing analysis scripts  with URI PATH $IMAS_MODULE_VERSION and $PYTHON_VERSION"
 echo "====================================================================="
