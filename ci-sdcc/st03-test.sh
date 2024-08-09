@@ -40,6 +40,14 @@ print("SciPy version:", scipy.__version__)
 print("Matplotlib version:", matplotlib.__version__)
 END
 )
+echo "==========================PATH==========================================="
+echo "$PATH"
+echo "=========================module -r -t list============================================"
+module -r -t list
+
+echo "============================plotcoresources========================================="
+plotcoresources --uri \"imas:mdsplus?user=public;pulse=130012;run=105;database=TEST;version=3\" --save
+
 echo "====================================================================="
 python3 -c "$version_script"
 echo "====================================================================="
