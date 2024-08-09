@@ -46,7 +46,7 @@ echo "=========================module -r -t list================================
 module -r -t list
 
 echo "============================plotcoresources========================================="
-plotcoresources --uri \"imas:mdsplus?user=public;pulse=130012;run=105;database=TEST;version=3\" --save
+plotcoresources --uri "imas:mdsplus?user=public;pulse=130012;run=105;database=TEST;version=3" --save
 
 echo "====================================================================="
 python3 -c "$version_script"
