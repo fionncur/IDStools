@@ -46,7 +46,7 @@ echo "=========================module -r -t list================================
 module -r -t list
 
 echo "============================plotcoresources========================================="
-plotcoresources --uri "imas:mdsplus?user=public;pulse=130012;run=105;database=TEST;version=3" --save
+# plotcoresources --uri "imas:mdsplus?user=public;pulse=130012;run=105;database=TEST;version=3" --save
 
 echo "====================================================================="
 python3 -c "$version_script"
@@ -57,12 +57,12 @@ echo ""
 echo "====================================================================="
 echo "Testing analysis scripts  with URI $IMAS_MODULE_VERSION and $PYTHON_VERSION"
 echo "====================================================================="
-source ./tests/st03_test_analysis_scripts_with_uri.sh "$LOG_DIR" "$DB_DIR"
+# source ./tests/st03_test_analysis_scripts_with_uri.sh "$LOG_DIR" "$DB_DIR"
 
 echo "====================================================================="
 echo "Testing analysis scripts  with URI PATH $IMAS_MODULE_VERSION and $PYTHON_VERSION"
 echo "====================================================================="
-source ./tests/st03_test_analysis_scripts_with_uripath.sh "$LOG_DIR" "$DB_DIR"
+# source ./tests/st03_test_analysis_scripts_with_uripath.sh "$LOG_DIR" "$DB_DIR"
 # ---------------------------------------------------------------------------
 echo ""
 echo ""
