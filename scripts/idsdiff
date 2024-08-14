@@ -411,20 +411,21 @@ if __name__ == "__main__":
         '  "imas:mdsplus?user=public;shot=122525;run=2;database=ITER;version=3" \n'
         "  \n",
         formatter_class=RichHelpFormatter,
+        usage="%(prog)s [-h] ids... -u [URI ...] [--skip-provenance] [--generate-html] [--directory DIRECTORY]"
+    )
+    parser.add_argument(
+        "ids",
+        nargs="*",
+        type=str,
+        help="Name (or space separated list of names) of IDS to compare (leave empty to compare all IDSs)",
     )
     parser.add_argument(
         "-u",
         "--uri",
         nargs="*",
         type=str,
+        required=True, 
         help="uri separated by spaces \t\t(default=%(default)s)",
-    )
-
-    parser.add_argument(
-        "ids",
-        nargs="*",
-        type=str,
-        help="Name (or space separated list of names) of IDS to compare (leave empty to compare all IDSs)",
     )
     parser.add_argument(
         "--skip-provenance",
