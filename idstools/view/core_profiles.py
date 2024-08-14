@@ -161,14 +161,15 @@ class CoreProfilesView:
 
         Args:
             ax: ax is a matplotlib axis object where the density profile plot will be drawn.
-            timeIndex: The time index refers to the specific time step or snapshot of data that is being plotted.
+            time_index: The time index refers to the specific time step or snapshot of data that is being plotted.
                 It is used to retrieve the electron density and other relevant data at that particular time.
-            psiCordinate: A boolean parameter that determines whether the density profile should be plotted as a
+            psi_cordinate: A boolean parameter that determines whether the density profile should be plotted as a
                 function of the poloidal flux coordinate (-psi) or the normalised toroidal flux coordinate (rho_tor).
-                If psiCordinate is True, the density profile will be plotted as a function of -psi. Defaults to False
+                If psi_cordinate is True, the density profile will be plotted as a function of -psi. Defaults to False
             update: The `update` parameter is a boolean flag that determines whether the plot should be updated or
                 created from scratch. If `update` is `True`, the function will create a new plot with the given data.
                 If `update` is `False`, the function will update an existing plot with the new. Defaults to True
+            logscale: log scale
 
         Returns:
             a tuple containing the matplotlib plot object for the electron density profile (ax_density_plot_dens)

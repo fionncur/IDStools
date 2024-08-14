@@ -460,7 +460,7 @@ class KineticProfilesCompute:
             The function `get_species_a_number` returns a list `a` containing integer values extracted
             from the attribute `a` of different elements in the core or edge profiles based on certain
             conditions. The values are read from either
-            `core_profiles` or `edge_profiles'
+            `core_profiles` or `edge_profiles`
         """
         a = [0] * self.nspecies_core
         if self.is_core_profiles_present:

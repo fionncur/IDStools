@@ -401,8 +401,8 @@ class EquilibriumCompute:
 
         Args:
             rescale_factor: The `rescale` method you provided rescales various magnetic field components
-            in an equilibrium object by a specified rescale factor. The rescale factor is a float value that
-            you pass to the method to determine the extent of rescaling for the magnetic field components.
+                in an equilibrium object by a specified rescale factor. The rescale factor is a float value that
+                you pass to the method to determine the extent of rescaling for the magnetic field components.
 
         Returns:
             The `rescale` method returns the rescaled equilibrium `equout` after applying the rescaling
@@ -779,8 +779,8 @@ class EquilibriumCompute:
 
         Args:
             shift: The `shift` parameter in the `z_shift` method represents the vertical shift in meters
-            that will be applied to the equilibrium data. This shift will be added to the z-coordinates of
-            various points and boundaries within the equilibrium data structure.
+                that will be applied to the equilibrium data. This shift will be added to the z-coordinates of
+                various points and boundaries within the equilibrium data structure.
 
         Returns:
             The `z_shift` method returns a vertically shifted equilibrium object (`equilibrium IDS`) after

@@ -134,7 +134,7 @@ class EdgeProfilesCompute:
 
         Args:
             time_slice: an optional integer parameter that specifies the time slice on which the function
-            should operate. The default value is 0
+                should operate. The default value is 0
 
         Returns:
             a list of labels for all species in a given time slice.
@@ -797,8 +797,8 @@ class EdgeProfilesCompute:
 
         Returns:
             The function `get_separatrix` is returning the coordinates of the separatrix elements found in
-        the grid subset for the given time slice. The coordinates are stored in a NumPy array
-        `sep_coords`, where each row represents the coordinates of a separatrix element.
+            the grid subset for the given time slice. The coordinates are stored in a NumPy array
+            `sep_coords`, where each row represents the coordinates of a separatrix element.
         """
         SUBSET_INDEX = 16  # separatrix
         separatix_grid_subset = None

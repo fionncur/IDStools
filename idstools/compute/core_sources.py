@@ -188,7 +188,7 @@ class CoreSourcesCompute:
         The function returns the total current profile and the individual
         current profiles for each valid and active source.
         SINGLE AND TOTAL PROFILES (ELECTRONS+IONS)
-        
+
         Returns:
             a dictionary with two keys: "total_current_profile" and "single_current_profile". The value associated
             with the "total_current_profile" key is a numpy array representing the total current profile.
@@ -236,6 +236,7 @@ class CoreSourcesCompute:
             each data source
             - "single_electron_particles_profile": Dictionary containing profiles of single electron
             particles for each data source
+
         """
         rho_tor_norm = self.get_rho_tor_norm()
         nrho = 0

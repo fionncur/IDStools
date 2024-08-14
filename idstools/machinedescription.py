@@ -273,7 +273,8 @@ class MachineDescription:
             run (int): The `run` parameter is an integer that represents the run number.
             dict_to_fill: The `dictToFill` parameter is a dictionary that is used to store the information about the
                 parents of a given pulse and run. It is initially an empty dictionary and is passed as an argument to
-                the `get_parents` function. The function fills this dictionary with the parent information and returns it.
+                the `get_parents` function. The function fills this dictionary with the parent information
+                and returns it.
 
         Returns:
             a dictionary `dict_to_fill` that contains information about the parents of a given pulse and run.

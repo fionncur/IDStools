@@ -25,7 +25,7 @@ def get_nearest_time(time_array: np.ndarray, requested_time: float) -> Tuple[int
     Args:
         time_array (np.ndarray): The `time_array` parameter is a numpy array containing a list of time values.
         requested_time (float): The `requestedTime` parameter is the time value that you want to find the
-        nearest value to in the `time_array`.
+            nearest value to in the `time_array`.
 
     Returns:
         The function `get_nearest_time` returns a tuple containing the time index and time value.

@@ -167,9 +167,8 @@ def get_available_ids_and_occurrences(db_entry_object: imas.DBEntry, time_mode=N
         db_entry_object (imas.DBEntry): An object of the class imas.DBEntry, which represents an open DBEntry in
             which available IDSs will be looked for.
         time_mode: The time mode of interest for the IDSs in the given DBEntry. It can be one of the following
-        values:(imas.imasdef.IDS_TIME_MODE_HETEROGENEOUS, IDS_TIME_MODE_HOMOGENEOUS or IDS_TIME_MODE_INDEPENDENT)
         get_comment: Output ids_properties.comment field for each found occurrence
-        
+
     Returns:
         a list of pairs (idstype:str,occurrence:int) with data in the given DBEntry.
     """
@@ -322,8 +321,8 @@ def compare_ids(
     dictionary of differences.
 
     Args:
-        X: The first input ids object to compare.
-        Y: The second input ids object to compare.
+        x: The first input ids object to compare.
+        y: The second input ids object to compare.
         field: The name of the field being compared in the IDSes.
         ignore_version: A boolean parameter that determines whether to ignore the "version_put" attribute when
             comparing the two objects. If set to True, the function will ignore this attribute. Defaults to True

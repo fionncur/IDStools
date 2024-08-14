@@ -75,7 +75,6 @@ class EcStrayCompute:
                     resonance_layer[index_harm]["r"].append(r[ir])
                     resonance_layer[index_harm]["z"].append(z[iz])
 
-
     def get_cutoff_layer(
         self,
         time_index_waves: int = 0,
@@ -88,7 +87,7 @@ class EcStrayCompute:
         Args:
             time_index_waves (int, optional): time index for waves. Defaults to 0.
             time_index_core_profiles (int, optional): time index for core_profiles. Defaults to 0.
-            timeIndexEquilibrium (int, optional): time index for equilibrium. Defaults to 0.
+            time_index_equilibrium (int, optional): time index for equilibrium. Defaults to 0.
 
         Returns:
             dict: cut off layer in dictionary format

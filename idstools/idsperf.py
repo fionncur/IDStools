@@ -56,7 +56,8 @@ def get_timings(db, idsname, occ=0, dbout=None, times=None, repeat=5, verbose=Fa
             will be read from.
         idsname: The `idsname` parameter is a string that represents the name of the IDS to be read from the database.
         occ: The `occ` parameter is the occurrence number of the IDS to be read. It specifies which occurrence of
-            the IDS to read from the database. By default, it is set to 0, which means the first occurrence. Defaults to 0
+            the IDS to read from the database. By default, it is set to 0, which means the first occurrence.
+            Defaults to 0
         dbout: The `dbout` parameter is an optional argument that specifies the output database where the
             IDS will be written to. If `dbout` is provided, the IDS will be written to the specified database.
         times: The `times` parameter is a list of times at which to read a single slice of the IDS. If `times`

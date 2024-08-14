@@ -141,7 +141,7 @@ class PlotCanvas:
 
         Args:
             style: The `setStyle` function allows you to set different color schemes for your plots based on the
-            `style` parameter you provide. Defaults to default
+                `style` parameter you provide. Defaults to default
         """
         if style == "default":
             # Standard SciencePlots color cycle

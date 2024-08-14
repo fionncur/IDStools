@@ -73,7 +73,7 @@ class ScenarioDescriptionBase:
 
         Args:
             yaml_file_path: The `yaml_file_path` parameter is a string that represents the file path of the YAML
-            file that you want to load and retrieve data from.
+                file that you want to load and retrieve data from.
 
         Returns:
             the data loaded from the YAML file.

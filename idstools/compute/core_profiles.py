@@ -750,6 +750,7 @@ class CoreProfilesCompute:
             - "pressure_electron_thermal": Thermal pressure of electrons
             - "pressure_electron_fast_parallel": Pressure of fast parallel electrons
             - "pressure_electron_fast_perpendicular
+
         """
         nrho = len(self.get_rho_tor_norm())
         pressure_electron_total = self.ids.profiles_1d[0].electrons.pressure

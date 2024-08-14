@@ -198,14 +198,11 @@ class DBMaster:
                 It is used to specify the directory where the MDSplus pulses are stored.
             version (str): The `version` parameter is used to specify the version of the MDSplus database.
                 It is a string that represents the version number.
-            status (str): The "status" parameter is used to filter the pulses based on their status. If a
-                status is provided, only pulses with that status will be included in the result. If no status
-                is provided, all pulses will be included.
-            asDictionary (bool): The `asDictionary` parameter is a boolean flag that determines the format
-                of the returned pulses. If `asDictionary` is set to `True`, the pulses will be returned as a
+            as_dictionary (bool): The `as_dictionary` parameter is a boolean flag that determines the format
+                of the returned pulses. If `as_dictionary` is set to `True`, the pulses will be returned as a
                 dictionary where the keys are the pulse numbers and the values are lists of runs associated
                 with each pulse.Defaults to False
-                
+
         Returns:
             a list of tuples. Each tuple contains the following elements, The tuple includes the pulse number,
             run number, HDF5_BACKEND backend, database, user, version, and data file path.
@@ -275,8 +272,8 @@ class DBMaster:
             status (str): The "status" parameter is used to filter the pulses based on their status. If a
                 status is provided, only pulses with that status will be included in the result. If no status
                 is provided, all pulses will be included.
-            asDictionary (bool): The `asDictionary` parameter is a boolean flag that determines the format
-                of the returned pulses. If `asDictionary` is set to `True`, the pulses will be returned as a
+            as_dictionary (bool): The `as_dictionary` parameter is a boolean flag that determines the format
+                of the returned pulses. If `as_dictionary` is set to `True`, the pulses will be returned as a
                 dictionary where the keys are the pulse numbers and the values are lists of runs associated
                 with each pulse.Defaults to False
 
@@ -709,13 +706,13 @@ def read_scenario(
     mode flag and additional test arguments.
 
     Args:
-        scenarioFilePath (str): The file path of the scenario file that contains the test cases.
-        inIDSList (list): A list of input IDS names that should be read from the scenario file.
-        outIDSList (list): A list of output IDS names  It is used to specify the list of output IDs that
+        scenario_file_path (str): The file path of the scenario file that contains the test cases.
+        in_ids_list (list): A list of input IDS names that should be read from the scenario file.
+        out_ids_list (list): A list of output IDS names  It is used to specify the list of output IDs that
             the function should read from the scenario file. If this parameter is not provided, the function
             will read all output IDs from the scenario file.
-        testMode (bool): A boolean flag indicating whether the function is being called in test mode or not.
-            If testMode is True, the function will execute in a way that is suitable for testing purposes.
+        test_mode (bool): A boolean flag indicating whether the function is being called in test mode or not.
+            If test_mode is True, the function will execute in a way that is suitable for testing purposes.
             Defaults to False
     """
     test_args_list = list(test_args.values())
@@ -794,13 +791,13 @@ def read_scenario_with_args(
     test mode flag and additional test arguments.
 
     Args:
-        scenarioFilePath (str): The file path of the scenario file that contains the test cases.
-        inIDSList (list): A list of input IDS names that should be read from the scenario file.
-        outIDSList (list): A list of output IDS names  It is used to specify the list of output IDs that the
+        imasargs (str): The file path of the scenario file that contains the test cases.
+        in_ids_list (list): A list of input IDS names that should be read from the scenario file.
+        out_ids_list (list): A list of output IDS names  It is used to specify the list of output IDs that the
             function should read from the scenario file. If this parameter is not provided, the function will read
             all output IDs from the scenario file.
-        testMode (bool): A boolean flag indicating whether the function is being called in test mode or not.
-            If testMode is True, the function will execute in a way that is suitable for testing purposes.
+        test_mode (bool): A boolean flag indicating whether the function is being called in test mode or not.
+            If test_mode is True, the function will execute in a way that is suitable for testing purposes.
             Defaults to False
     """
     test_args_list = list(test_args.values())
