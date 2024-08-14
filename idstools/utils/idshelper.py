@@ -502,12 +502,12 @@ def compare_ids(
                             xo,
                             yo,
                             data_type,
-                            f"missing in the IDS of {missing[1]}",
+                            f"missing in {missing[1]}",
                         )
                     else:
                         logger.error("Duplicate key found")
                     if verb:
-                        logger.info(f"{field}.{key} is missing in the {missing[1]} IDS")
+                        logger.info(f"{field}.{key} is missing in {missing[1]}")
                     identical = False
                 else:
                     if field + "." + key not in output.keys():
