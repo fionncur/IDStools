@@ -36,13 +36,13 @@ class WavesCompute:
         time index, and list of harmonic frequencies.
 
         Args:
-            coherentWaveIndex (int): The index of the coherent wave for which we want to calculate the
-            B resonance. Defaults to 0
-            timeIndex (int): The index of the time step for which the bResonance is being calculated.
-            Defaults to 0
-            harmonicFrequencies (list): A list of integers representing the harmonic frequencies for
-            which the B-resonance values are to be calculated. If this parameter is not provided, the
-            function uses the default values of [1, 2, 3, 4].
+            coherent_wave_index (int): The index of the coherent wave for which we want to calculate the
+                B resonance. Defaults to 0
+            time_index (int): The index of the time step for which the bResonance is being calculated.
+                Defaults to 0
+            harmonic_frequencies (list): A list of integers representing the harmonic frequencies for
+                which the B-resonance values are to be calculated. If this parameter is not provided, the
+                function uses the default values of [1, 2, 3, 4].
 
         Returns:
             A list of values for the magnetic field resonance frequencies for the given coherent wave
@@ -109,10 +109,10 @@ class WavesCompute:
         This function returns the angular frequency of a coherent wave at a specific time index.
 
         Args:
-            coherentWaveIndex (int): The index of the coherent wave for which the angular frequency needs to
-            be calculated. Defaults to 0
-            timeIndex (int): The time index parameter is used to specify the time step for which the frequency
-            of the coherent wave is to be retrieved. Defaults to 0
+            coherent_wave_index (int): The index of the coherent wave for which the angular frequency needs to
+                be calculated. Defaults to 0
+            time_index (int): The time index parameter is used to specify the time step for which the frequency
+                of the coherent wave is to be retrieved. Defaults to 0
 
         Returns:
             The value of the angular frequency (in radians per second) of a coherent wave at a specific time
@@ -145,11 +145,11 @@ class WavesCompute:
         This function returns a dictionary of active beams with their respective properties.
 
         Args:
-            beamTracingTimeIndex (int): The parameter `beamTracingTimeIndex` is an integer that represents
-            the index of the beam tracing time. Defaults to 0
+            beam_tracing_time_index (int): The parameter `beam_tracing_time_index` is an integer that represents
+                the index of the beam tracing time. Defaults to 0
 
         Returns:
-            Dictionary called `activeBeams` which contains information about each beam in `waves.coherent_wave`.
+            Dictionary called `beams` which contains information about each beam in `waves.coherent_wave`.
             The dictionary has keys for each beam index and the values are  dictionaries containing the total number
             of beams and boolean indicating whether the beam is active or not. The function determines if a beam
             is active by checking if any of its rays have initial power greater than 0.
@@ -165,7 +165,7 @@ class WavesCompute:
                 connection.open()
                 idsObj = connection.get('waves')
                 waveobj = WavesCompute(waves_ids)
-                print(waveobj.getActiveBeams())
+                print(waveobj.get_beams())
 
                 {0: {'active': True, 'total_beams': 5},
                 1: {'active': True, 'total_beams': 5},
@@ -205,8 +205,8 @@ class WavesCompute:
         This function returns a dictionary containing information about the beam tracing of a coherent wave.
 
         Args:
-            beamTracingTimeIndex (int): The index of the time step for which to retrieve the beam tracing data.
-            Defaults to 0
+            beam_tracing_time_index (int): The index of the time step for which to retrieve the beam tracing data.
+                Defaults to 0
 
         Returns:
             a dictionary named "beam_tracing" which contains various arrays and values related to the beam tracing
@@ -338,17 +338,17 @@ class WavesCompute:
         Args:
             time_index (int): The `time_index` parameter
             usepsi: The `usepsi` parameter in the `get_ec_launchers_info` method is a boolean flag that
-        indicates whether to use psi (magnetic flux) information when retrieving radial grid data. When
-        `usepsi` is set to `True`, the method will include psi information in the radial grid. Defaults
-        to False
+                indicates whether to use psi (magnetic flux) information when retrieving radial grid data. When
+                `usepsi` is set to `True`, the method will include psi information in the radial grid. Defaults
+                to False
             verbose: The `verbose` parameter
 
         Returns:
             The function `get_ec_launchers_info` returns a dictionary `ec_launcher_info` containing
-        information about the EC (Electron Cyclotron) launchers. The dictionary includes various keys
-        with corresponding values such as the names of single EC launchers, injected power, absorbed
-        power, ECCD (Electron Cyclotron Current Drive), total injected power, total absorbed power,
-        total ECCD, power density
+            information about the EC (Electron Cyclotron) launchers. The dictionary includes various keys
+            with corresponding values such as the names of single EC launchers, injected power, absorbed
+            power, ECCD (Electron Cyclotron Current Drive), total injected power, total absorbed power,
+            total ECCD, power density
         """
         ec_launcher_info = {}
         data = self.get_radial_grid_info(time_index, usepsi)
@@ -489,7 +489,7 @@ class WavesCompute:
         to use psi as a radial coordinate.
 
         Args:
-            timeIndex (int): The `timeIndex` parameter
+            time_index (int): The `time_index` parameter
             usepsi: The `usepsi` parameter tells whether to use the psi radial coordinate for the grid information.
 
         Returns:
@@ -574,13 +574,13 @@ class WavesCompute:
 
         Args:
             wave_index: The `wave_index` parameter in the `is_active_during_pulse` method represents the
-        index of the coherent wave that you want to check for activity. This index is used to access a
-        specific coherent wave within the `coherent_wave` list.
+                index of the coherent wave that you want to check for activity. This index is used to access a
+                specific coherent wave within the `coherent_wave` list.
 
         Returns:
             The function is checking if there is any time point during the pulse where the power of the
-        coherent wave at the specified wave_index is greater than 0. If such a time point is found, the
-        function returns True. If no such time point is found, the function returns False.
+            coherent wave at the specified wave_index is greater than 0. If such a time point is found, the
+            function returns True. If no such time point is found, the function returns False.
         """
         for itime in range(len(self.ids.time)):
             if self.ids.coherent_wave[wave_index].global_quantities[itime].power > 0:

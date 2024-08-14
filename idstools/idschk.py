@@ -356,13 +356,13 @@ class COCOS:
             COCOS input
         COCOS_out: int
             COCOS output
-        Ip_in: float
+        ip_in: float
             Plasma curent (toroidal component) [A]
-        B0_in: float
+        b0_in: float
             Vacuum toroidal field [T]
-        Ipsign_out: int
+        ipsign_out: int
             desired sign of Ip in output
-        B0sign_out: int
+        b0sign_out: int
             desired sign of B0 in output
 
         Returns

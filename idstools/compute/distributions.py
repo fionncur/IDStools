@@ -32,10 +32,10 @@ class DistributionsCompute:
 
         Returns:
             The function `get_radial_grid_info` returns the `radial_grid_info` dictionary containing
-        information about radial grid data for each distribution. If the `radial_grid_info` dictionary
-        is empty, it returns `None`. The function also sets several attributes of the class instance
-        based on the computed radial grid information before returning the `radial_grid_info`
-        dictionary.
+            information about radial grid data for each distribution. If the `radial_grid_info` dictionary
+            is empty, it returns `None`. The function also sets several attributes of the class instance
+            based on the computed radial grid information before returning the `radial_grid_info`
+            dictionary.
         """
         radial_grid_info = {}
         for idistrib in range(self.ndistributions):
@@ -101,10 +101,10 @@ class DistributionsCompute:
 
         Returns:
             The `get_profiles` method returns a dictionary containing various profiles related to
-        injectors, waveforms, and power density. The dictionary includes information such as injector
-        names, current waveforms, power waveforms, current density profiles, and power density profiles
-        for both individual injectors and all injectors combined. The method also logs information about
-        total power, power to electrons, power to ions, and total current
+            injectors, waveforms, and power density. The dictionary includes information such as injector
+            names, current waveforms, power waveforms, current density profiles, and power density profiles
+            for both individual injectors and all injectors combined. The method also logs information about
+            total power, power to electrons, power to ions, and total current
         """
         if self.nrho is None:
             return None
@@ -276,15 +276,15 @@ class DistributionsCompute:
 
         Args:
             time_index: The `time_index` parameter in the `get_power_absorbedto_individual_ions` method is
-        used to specify the index of the time step for which you want to calculate the power absorbed to
-        individual ions.
+                used to specify the index of the time step for which you want to calculate the power absorbed to
+                individual ions.
             verbose: The `verbose` parameter
 
         Returns:
             The function `get_power_absorbedto_individual_ions` returns a dictionary `power_absorbed`
-        containing information about the power absorbed to individual ions. The dictionary includes keys
-        such as "all_injectors_total_power_waveform_per_ion", "element", and "compo_detail" with
-        corresponding values calculated based on the input parameters and data within the function.
+            containing information about the power absorbed to individual ions. The dictionary includes keys
+            such as "all_injectors_total_power_waveform_per_ion", "element", and "compo_detail" with
+            corresponding values calculated based on the input parameters and data within the function.
         """
         if self.is_radial_grid_info_processed is False:
             self.get_radial_grid_info(time_index)

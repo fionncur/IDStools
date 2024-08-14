@@ -38,7 +38,7 @@ class EdgeProfilesCompute:
                     - z_average
 
         Args:
-            ids ([ids_object]): [filled ids object]
+            ids ([ids_object]): filled ids object
             time_slice (int, optional): [slice on which functions should operate on]. Defaults to 0.
 
         Returns:
@@ -164,9 +164,9 @@ class EdgeProfilesCompute:
 
         Args:
             time_slice (int, optional): The index of the slice in the `ggd` list that contains the ion information.
-            Defaults to 0
-            elementIndex (int, optional): Element index, It is used to access the 'a' attribute of the element object.
-            Defaults to 0
+                Defaults to 0
+            element_index (int, optional): Element index, It is used to access the 'a' attribute of the element object.
+                Defaults to 0
 
         Returns:
             a list of atomic masses for each species in the given slice index and element index.
@@ -199,11 +199,11 @@ class EdgeProfilesCompute:
 
         Args:
             time_slice (int, optional): time slice on which functions should operate on. Defaults to 0.
-            elementIndex (int, optional): element of the atom or molecule on which functions should operate on.
-            Defaults to 0.
+            element_index (int, optional): element of the atom or molecule on which functions should operate on.
+                Defaults to 0.
 
         Returns:
-            a list of nuclear charges for each species in the given time_slice and elementIndex.
+            a list of nuclear charges for each species in the given time_slice and element_index.
 
         Example:
             .. code-block:: python
@@ -608,7 +608,7 @@ class EdgeProfilesCompute:
             time_slice (int, optional): time slice on which function should operate on. Defaults to 0.
 
         Returns:
-            The function `getNspecOverNtot` is returning the ratio of the list of species densities to the
+            The function `get_nspec_over_ntot` is returning the ratio of the list of species densities to the
             total density (`ntot`).
 
         Example:
@@ -619,7 +619,7 @@ class EdgeProfilesCompute:
                 connection.open()
                 idsObj = connection.get('edge_profiles')
                 computeObj = EdgeProfilesCompute(idsObj)
-                result = computeObj.getNspecOverNtot(time_slice=0)
+                result = computeObj.get_nspec_over_ntot(time_slice=0)
 
                 array([9.87334881e-01, 8.14648566e-03, 3.70894720e-03, 8.04708810e-04, 4.97696116e-06])
 
@@ -645,7 +645,7 @@ class EdgeProfilesCompute:
                 connection.open()
                 idsObj = connection.get('edge_profiles')
                 computeObj = EdgeProfilesCompute(idsObj)
-                result = computeObj.getNspecOverNe(time_slice=0)
+                result = computeObj.get_nspec_over_ne(time_slice=0)
 
                 array([9.49141717e-01, 7.83135442e-03, 3.56547366e-03, 7.73580187e-04, 4.78443692e-06])
         """
@@ -673,7 +673,7 @@ class EdgeProfilesCompute:
                 connection.open()
                 idsObj = connection.get('edge_profiles')
                 computeObj = EdgeProfilesCompute(idsObj)
-                result = computeObj.getNspecOverNmaj()
+                result = computeObj.get_nspec_over_nmaj()
 
                 array([1.00000000e+00, 8.25098537e-03, 3.75652402e-03, 8.15031278e-04,5.04080353e-06])
         """
@@ -721,9 +721,9 @@ class EdgeProfilesCompute:
 
         Args:
             species (list): result from get_species()
-            nspecOverNtot (list): result from get_nspec_over_ntot()
-            nspecOverNe (list): result from get_nspec_over_ne()
-            nspecOverNmaj (list): result from get_nspec_over_nmaj()
+            nspec_over_ntot (list): result from get_nspec_over_ntot()
+            nspec_over_ne (list): result from get_nspec_over_ne()
+            nspec_over_nmaj (list): result from get_nspec_over_nmaj()
             time_slice (int, optional): time slice on which function should operate on. Defaults to 0.
         """
         nspecies = len(self.ids.ggd[time_slice].ion)
@@ -858,8 +858,8 @@ class EdgeProfilesCompute:
         within a specified range.
 
         Args:
-            NumPoints: The `NumPoints` parameter is an optional integer argument that specifies the number of points
-            to generate in the x and y directions. By default, it is set to 400.
+            num_points: The `num_points` parameter is an optional integer argument that specifies the number of points
+                to generate in the x and y directions. By default, it is set to 400.
 
         Returns:
             two arrays, x and y.
@@ -873,9 +873,10 @@ class EdgeProfilesCompute:
         values from a grid.
 
         Args:
+            time_slice: time index
             x: The x-coordinate of the point where you want to calculate the electron density.
             y: The parameter "y" represents the y-coordinate of the point at which you want to calculate the electron
-            density.
+                density.
 
         Returns:
             the electron density at the given coordinates (x, y).
@@ -899,10 +900,11 @@ class EdgeProfilesCompute:
         from a grid.
 
         Args:
+            time_slice: time index
             x: The parameter "x" represents the x-coordinate of the point at which you want to calculate the
-            ion density.
+                ion density.
             y: The parameter "y" represents the y-coordinate of the point at which you want to calculate the
-            ion density.
+                ion density.
 
         Returns:
             the ion density at the given coordinates (x, y).
@@ -925,10 +927,11 @@ class EdgeProfilesCompute:
         interpolating values from a grid.
 
         Args:
+            time_slice: time index
             x: The x parameter represents the x-coordinate of the point at which you want to calculate
-            the neutral density.
+                the neutral density.
             y: The parameter "y" represents the y-coordinate of the point at which you want to calculate
-        the neutral density.
+                the neutral density.
 
         Returns:
             the neutral density at the given coordinates (x, y).
@@ -955,8 +958,8 @@ class EdgeProfilesCompute:
         Returns:
             The function `getOuterMidplaneArrayIndex` returns the index of the grid subset that has an identifier
             index of 11, representing the outer midplane GGD grid subset. If the subset is found,
-        it returns the index of that subset. If the subset is not found, it logs a warning message and
-        returns `None`.
+            it returns the index of that subset. If the subset is not found, it logs a warning message and
+            returns `None`.
         """
         subset_index = None
         nsubsets = len(self.ids.grid_ggd[0].grid_subset)
@@ -976,13 +979,13 @@ class EdgeProfilesCompute:
 
         Args:
             slice_index: The `slice_index` parameter in the `getnrho` method is used to specify which
-        slice of the `profiles_1d` data to access.
+                slice of the `profiles_1d` data to access.
 
         Returns:
             The `getnrho` method is returning the number of elements in the `rho_tor_norm` or `rho_tor`
-        attribute of the grid object within the `profiles_1d` attribute of the `ids` object at the
-        specified `slice_index`. If either of these attributes has elements, the length of that
-        attribute is returned as the number of elements (`nrho`).
+            attribute of the grid object within the `profiles_1d` attribute of the `ids` object at the
+            specified `slice_index`. If either of these attributes has elements, the length of that
+            attribute is returned as the number of elements (`nrho`).
         """
         nrho = None
         try:

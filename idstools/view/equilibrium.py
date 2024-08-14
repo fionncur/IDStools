@@ -18,9 +18,9 @@ class EquilibriumView(BasePlot):
         another object using the input object.
 
         Args:
-            idsObj (object): The parameter `idsObj` is an object that is being passed to the constructor
-        of the class. It is not clear from the code snippet what type of object it is, but it is being
-        stored as an instance variable `self.idsObj`.
+            ids (object): The parameter `ids` is an object that is being passed to the constructor
+                of the class. It is not clear from the code snippet what type of object it is, but it is being
+                stored as an instance variable `self.ids`.
         """
         self.ids = ids
         self.compute_obj = EquilibriumCompute(ids)
@@ -158,7 +158,7 @@ class EquilibriumView(BasePlot):
 
         Args:
             ax: `ax` is a matplotlib axis object.
-            timeIndex: The time index is an integer
+            time_index: The time index is an integer
 
         Returns:
             list containing two plot objects: ax_topview_plot_eq1 and ax_topview_plot_eq2.

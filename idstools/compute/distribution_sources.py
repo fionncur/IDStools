@@ -23,7 +23,7 @@ class DistributionSourcesCompute:
 
         Args:
             time_slice (int): The parameter "time_slice" is an integer that represents the time slice for
-            which you want to retrieve the value of "rho_tor_norm".
+                which you want to retrieve the value of "rho_tor_norm".
 
         Returns:
             the variable `rho_tor_norm`.
@@ -48,7 +48,7 @@ class DistributionSourcesCompute:
 
         Args:
             time_slice (int): The parameter "time_slice" is an optional integer that specifies the index of the time
-            slice for which you want to retrieve the volume.
+                slice for which you want to retrieve the volume.
 
         Returns:
             the volume of a grid at a given time slice. The volume is obtained from the

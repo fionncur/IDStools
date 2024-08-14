@@ -106,8 +106,8 @@ def xyz2cyl(rvec):
 
     Args:
         rvec: rvec is a numpy array containing the coordinates of points in 3D space in the Cartesian
-        coordinate system (x, y, z). The function xyz2cyl converts these coordinates to cylindrical
-        coordinates (r, phi, z) and returns them as a numpy array with the same shape as the `rvec`
+            coordinate system (x, y, z). The function xyz2cyl converts these coordinates to cylindrical
+            coordinates (r, phi, z) and returns them as a numpy array with the same shape as the `rvec`
 
     Returns:
         The function `xyz2cyl` returns a numpy array `rcyl` which contains the cylindrical coordinates
@@ -135,8 +135,8 @@ def cyl2xyz(rcyl):
 
     Args:
         rcyl: rcyl is a numpy array containing cylindrical coordinates (r, theta, z) of points in 3D space.
-        The function cyl2xyz converts these cylindrical coordinates to Cartesian coordinates (x, y, z) and
-        returns a numpy array of the same shape as rcyl.
+            The function cyl2xyz converts these cylindrical coordinates to Cartesian coordinates (x, y, z) and
+            returns a numpy array of the same shape as rcyl.
 
     Returns:
         The function `cyl2xyz` returns a numpy array with the same shape as the input `rcyl` array, but with
@@ -476,8 +476,8 @@ def calcw(wt, rt, lambda_ray, freq=np.double(170.0e9)):
 
     Args:
         wt: width at the start point of the ray in meters
-        Rt: Curvature radius at start point in meters. If Rt is negative, the beam will pass through the focus,
-        and if it is positive, the beam will purely diverge. The focus is located at lambda_ray =-Rt.
+        rt: Curvature radius at start point in meters. If rt is negative, the beam will pass through the focus,
+            and if it is positive, the beam will purely diverge. The focus is located at lambda_ray =-rt
         lambda_ray: length along the ray in meters
         freq: wave frequency in Hz (not rad/s)
 
@@ -488,9 +488,9 @@ def calcw(wt, rt, lambda_ray, freq=np.double(170.0e9)):
     Note:
         calculates beam width for given w,Rcur and length along ray (lambda_ray)
 
-        - wt, Rt width and curvature radius at start point in m
-        - Rt < 0 : beam will pass focus, >0 : purely diverging
-        - the focus is at lambda_ray = -Rt
+        - wt, rt width and curvature radius at start point in m
+        - rt < 0 : beam will pass focus, >0 : purely diverging
+        - the focus is at lambda_ray = -rt
         - lambda_ray length along ray in m
         - freq: wave frequency im Hz (not rad/s)
     """
@@ -521,15 +521,11 @@ def ell_on_wall(xpout, w1, w2, gamma, e_k, wall2d):
     Note:
         calculates ellipses on wall segment
         input
-
         - xpout   array of data type xp_dt  (as defined in routine line_polygon_intersection)
         - w1,w2   widths of beam at cross section (calculated with calcw)
         - gamma   rotation of the ellipse
         - e_k     unit vector direction of ray
-        - wall2d  R,z values of Polygone
-
-        output
-
+        - wall2d  R,z values of Polygone  output
         - rl      center of the Ellipse (R*Phi [m], l(ength along polygone) [m]
         - g1l,g2l generating vectors of the ellips (not orthogonal)
         - Ellipse rl + g1l*cos(t) + g2l*sin(t)

@@ -109,14 +109,14 @@ class EdgeProfilesView:
 
     def view_electrons_density(self, ax, time_slice=0, show_separatrix=False):
         """
-        The function `viewElectronsDensity` plots the electron density on a rectangular grid and adds a
+        The function `view_electrons_density` plots the electron density on a rectangular grid and adds a
         separatrix line.
 
         Args:
             ax: The parameter "ax" is an instance of the matplotlib Axes class. It represents the axes on
-            which the electron density plot will be drawn.
-            timeSlice: The `timeSlice` parameter represents the time slice at which the neutral density will be
-            plotted. It is an optional parameter with a default value of 0. Defaults to 0
+                which the electron density plot will be drawn.
+            time_slice: The `time_slice` parameter represents the time slice at which the neutral density will be
+                plotted. It is an optional parameter with a default value of 0. Defaults to 0
 
         Returns:
             the pcolormesh object 'c'.
@@ -153,13 +153,13 @@ class EdgeProfilesView:
 
     def view_ion_density(self, ax, time_slice=0, show_separatrix=False):
         """
-        The function `viewIonDensity` plots the ion density on a rectangular grid and adds a separatrix line.
+        The function `view_ion_density` plots the ion density on a rectangular grid and adds a separatrix line.
 
         Args:
             ax: The parameter "ax" is an instance of the matplotlib Axes class. It represents the axes on
-            which the ion density plot will be drawn.
-            timeSlice: The `timeSlice` parameter represents the time slice at which the neutral density will
-            be plotted. It is an optional parameter with a default value of 0. Defaults to 0
+                which the ion density plot will be drawn.
+            time_slice: The `time_slice` parameter represents the time slice at which the neutral density will
+                be plotted. It is an optional parameter with a default value of 0. Defaults to 0
 
         Returns:
             the pcolormesh object 'c'.
@@ -197,14 +197,14 @@ class EdgeProfilesView:
 
     def view_neutral_density(self, ax, time_slice=0, show_separatrix=False):
         """
-        The function `viewNeutralDensity` plots the neutral density on a rectangular grid and adds a
+        The function `view_neutral_density` plots the neutral density on a rectangular grid and adds a
         separatrix line.
 
         Args:
             ax: The parameter "ax" is an instance of the matplotlib Axes class. It represents the axes
-            on  which the plot will be drawn.
-            timeSlice: The `timeSlice` parameter represents the time slice at which the neutral density
-            will be plotted. It is an optional parameter with a default value of 0. Defaults to 0
+                on  which the plot will be drawn.
+            time_slice: The `time_slice` parameter represents the time slice at which the neutral density
+                will be plotted. It is an optional parameter with a default value of 0. Defaults to 0
 
         Returns:
             the pcolormesh object 'c'.

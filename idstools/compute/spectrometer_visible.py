@@ -34,9 +34,9 @@ class SpectrometerVisibleCompute:
         The `get_channels` function retrieves information about channels based on a given channel name pattern.
 
         Args:
-            channelNamePattern: The `channelNamePattern` parameter is a regular expression pattern used to
-            match the names of channels. It is used to filter out channels whose names do not match th
-            specified pattern.
+            channel_name_pattern: The `channel_name_pattern` parameter is a regular expression pattern used to
+                match the names of channels. It is used to filter out channels whose names do not match th
+                specified pattern.
 
         Returns:
             a dictionary called "channels".
@@ -44,10 +44,10 @@ class SpectrometerVisibleCompute:
         channels = {}
         for channel in self.ids_object.channel:
             channel_info = {}
-            match = re.compile(CHANNEL_NAME_PATTERN).fullmatch(channel.name)
+            match = re.compile(channel_name_pattern).fullmatch(channel.name)
 
             if match is None:
-                logger.warning(f"Channel's name {channel.name} does not math pattern {CHANNEL_NAME_PATTERN.pattern}")
+                logger.warning(f"Channel's name {channel.name} does not math pattern {channel_name_pattern.pattern}")
                 continue
 
             diagnostic = match[1]

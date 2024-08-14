@@ -31,14 +31,14 @@ class SpectrometerVisibleView:
 
     def view_radiance(self, ax: plt.axes, spectro_index, logscale=False):
         """
-        The function `viewRadiance` plots radiance data from multiple spectrometers on separate axes.
+        The function `view_radiance` plots radiance data from multiple spectrometers on separate axes.
 
         Args:
             ax (List[plt.axes]): The parameter `ax` is a list of `plt.axes` objects. These objects represent the
-            axes on which the radiance data will be plotted. The function `viewRadiance` takes these axes as input
-            and plots the radiance data on each of them.
-            spectroIndex: The `spectroIndex` parameter represents the index of the spectrometer for which the
-            intensity spectra will be plotted. It is used to select the appropriate channels from the spectrometers.
+                axes on which the radiance data will be plotted. The function `viewRadiance` takes these axes as input
+                and plots the radiance data on each of them.
+            spectro_index: The `spectro_index` parameter represents the index of the spectrometer for which the
+                intensity spectra will be plotted. It is used to select the appropriate channels from the spectrometers.
 
         Returns:
             the value of the variable "filename".
@@ -83,14 +83,14 @@ class SpectrometerVisibleView:
 
     def view_intensity(self, ax: plt.axes, spectro_index, logscale=False):
         """
-        The `viewIntensity` function plots intensity of spectrom from multiple spectrometers.
+        The `view_intensity` function plots intensity of spectrom from multiple spectrometers.
 
         Args:
             ax (List[plt.axes]): The parameter `ax` is a list of `plt.axes` objects. These objects represent the
-            axes on which the intensity spectra will be plotted. The function `viewIntensity` takes these axes
-            as input and plots the intensity spectra on them.
-            spectroIndex: The `spectroIndex` parameter represents the index of the spectrometer for which the
-            intensity spectra will be plotted. It is used to select the appropriate channels from the spectrometers.
+                axes on which the intensity spectra will be plotted. The function `view_intensity` takes these axes
+                as input and plots the intensity spectra on them.
+            spectro_index: The `spectroIndex` parameter represents the index of the spectrometer for which the
+                intensity spectra will be plotted. It is used to select the appropriate channels from the spectrometers.
 
         Returns:
             a string variable named "filename".

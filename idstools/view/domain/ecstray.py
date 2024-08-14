@@ -31,7 +31,7 @@ class EcStrayView:
             time_index_wv (int): The time index for accessing wave-related data.
             time_index_eq (int): The time index for accessing equilibrium-related data.
             init (int): Indicates if the function is called for the initial setup. Set to 1 for initial setup.
-            Default is 1.
+                Default is 1.
             verbose (bool): Controls whether verbose output should be displayed. Default is False.
 
         Returns:
@@ -54,7 +54,7 @@ class EcStrayView:
                 ax = canvas.add_axes(title="Resonance Layer", xlabel="R [m]", ylabel="Z [m]", row=0, col=0, rowspan=1)
                 ax.set_title("uri=imas:mdsplus?user=public;pulse=134173;run=2326;database=TEST;version=3")
                 ecstrayView = EcStrayView(equilibriumIds, coreProfilesIds, wavesIds)
-                ecstrayView.plotResonanceLayer(ax, time_index_wv=0, time_index_eq=0, verbose=True)
+                ecstrayView.plot_resonance_layer(ax, time_index_wv=0, time_index_eq=0, verbose=True)
 
                 ax.plot()
                 canvas.show()
@@ -135,11 +135,11 @@ class EcStrayView:
 
         Args:
             ax (matplotlib.axes.Axes): The matplotlib Axes object on which the cutoff layer will be plotted.
-            timeIndexWaves (int): The time index for accessing wave-related data. Default is 0.
-            timeIndexCoreProfiles (int): The time index for accessing core profile-related data. Default is 0.
-            timeIndexEquilibrium (int): The time index for accessing equilibrium-related data. Default is 0.
+            time_index_waves (int): The time index for accessing wave-related data. Default is 0.
+            time_index_core_profiles (int): The time index for accessing core profile-related data. Default is 0.
+            time_index_equilibrium (int): The time index for accessing equilibrium-related data. Default is 0.
             init (int): Indicates if the function is called for the initial setup. Set to 1 for initial setup.
-            Default is 1.
+                Default is 1.
             verbose (bool): Controls whether verbose output should be displayed. Default is False.
 
         Returns:
@@ -162,7 +162,7 @@ class EcStrayView:
                 ax = canvas.add_axes(title="Resonance Layer", xlabel="R [m]", ylabel="Z [m]", row=0, col=0, rowspan=1)
                 ax.set_title("uri=imas:mdsplus?user=public;pulse=134173;run=2326;database=TEST;version=3")
                 ecstrayView = EcStrayView(equilibriumIds, coreProfilesIds, wavesIds)
-                ecstrayView.plotCutOffLayer(ax, timeIndexWaves=0, timeIndexCoreProfiles=0,
+                ecstrayView.plot_cut_off_layer(ax, timeIndexWaves=0, timeIndexCoreProfiles=0,
                 timeIndexEquilibrium=0,verbose=True)
 
                 ax.plot()

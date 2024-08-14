@@ -93,7 +93,7 @@ class CoreProfilesView:
 
         Args:
             composition_data: The parameter composition_data is a dictionary containing information about
-        the composition of a plasma, including the species present and their states.
+                the composition of a plasma, including the species present and their states.
         """
         for species_key, species_data in composition_data.items():
             states = species_data["states"]
@@ -162,14 +162,13 @@ class CoreProfilesView:
         Args:
             ax: ax is a matplotlib axis object where the density profile plot will be drawn.
             timeIndex: The time index refers to the specific time step or snapshot of data that is being plotted.
-            It is used to retrieve the electron density and other relevant data at that particular
-        time.
+                It is used to retrieve the electron density and other relevant data at that particular time.
             psiCordinate: A boolean parameter that determines whether the density profile should be plotted as a
-            function of the poloidal flux coordinate (-psi) or the normalised toroidal flux coordinate (rho_tor).
-            If psiCordinate is True, the density profile will be plotted as a function of -psi. Defaults to False
+                function of the poloidal flux coordinate (-psi) or the normalised toroidal flux coordinate (rho_tor).
+                If psiCordinate is True, the density profile will be plotted as a function of -psi. Defaults to False
             update: The `update` parameter is a boolean flag that determines whether the plot should be updated or
-            created from scratch. If `update` is `True`, the function will create a new plot with the given data.
-            If `update` is `False`, the function will update an existing plot with the new. Defaults to True
+                created from scratch. If `update` is `True`, the function will create a new plot with the given data.
+                If `update` is `False`, the function will update an existing plot with the new. Defaults to True
 
         Returns:
             a tuple containing the matplotlib plot object for the electron density profile (ax_density_plot_dens)
@@ -395,12 +394,12 @@ class CoreProfilesView:
 
     def view_q_profile_and_magnetic_shear_profile(self, ax, **kwargs):
         """
-        The function `viewQProfileAndMagneticShearProfile` plots the q-profile and magnetic shear profile
+        The function `view_q_profile_and_magnetic_shear_profile` plots the q-profile and magnetic shear profile
         using the given axis.
 
         Args:
             ax: The parameter "ax" is an instance of the matplotlib Axes class. It represents the axes
-            on which the plot will be drawn.
+                on which the plot will be drawn.
         """
         profiles = self.core_profiles_compute.get_profiles()
 
@@ -420,11 +419,11 @@ class CoreProfilesView:
 
     def view_current_desnity_profiles(self, ax, **kwargs):
         """
-        The function `viewCurrentDesnityProfiles` plots various current density profiles on a given axis.
+        The function `view_current_desnity_profiles` plots various current density profiles on a given axis.
 
         Args:
             ax: The parameter "ax" is an instance of the matplotlib Axes class. It represents the axes
-            on which the plot will be drawn.
+                on which the plot will be drawn.
         """
         profiles = self.core_profiles_compute.get_profiles()
         ax.plot(profiles["rhonorm"], profiles["j_total"] * 1.0e-3, label=r"$j_{TOT}$")

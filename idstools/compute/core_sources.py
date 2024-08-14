@@ -172,7 +172,7 @@ class CoreSourcesCompute:
         This function retrieves the names of valid and active sources and returns them in uppercase.
 
         Returns:
-          A dictionary containing the index of valid and active sources as keys and the uppercase name
+            A dictionary containing the index of valid and active sources as keys and the uppercase name
         of the source as values.
         """
         sources = self.get_valid_and_active_sources()
@@ -188,6 +188,7 @@ class CoreSourcesCompute:
         The function returns the total current profile and the individual
         current profiles for each valid and active source.
         SINGLE AND TOTAL PROFILES (ELECTRONS+IONS)
+        
         Returns:
             a dictionary with two keys: "total_current_profile" and "single_current_profile". The value associated
             with the "total_current_profile" key is a numpy array representing the total current profile.

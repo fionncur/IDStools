@@ -76,17 +76,12 @@ class MachineDescription:
         }
 
     def get_md_data_by_ids_list(self, md_ids_list=[]):
-        """
-        The `getMachineDatabaseData` method is responsible for retrieving machine database data for the specified
-        pulse list. It iterates over each pulse in the `mdSummaryYaml` dictionary and checks if the pulse is present
-        in the `pulseList`. If the pulse is not in the `pulseList`, it skips to the next pulse.
-        """
         ids_data = {}
         for ids_name in md_ids_list:
-            ids_data[ids_name] = self.get_m_d_data_by_ids(ids_name)
+            ids_data[ids_name] = self.get_md_data_by_ids(ids_name)
         return ids_data
 
-    def get_m_d_data_by_ids(self, ids_name: str):
+    def get_md_data_by_ids(self, ids_name: str):
         output_dict = self.get_latest_ids_data(ids_name)
         data = {}
         (
@@ -106,11 +101,6 @@ class MachineDescription:
         add_obsoelete=False,
         check_validity=False,
     ):
-        """
-        The `readMDSummary` method is responsible for reading the machine description summary and retrieving
-        data for the specified IDS names.
-        """
-
         # if provided just single string then convert to list with single string
         if isinstance(ids_names, str):
             ids_names = [ids_names]
@@ -147,7 +137,7 @@ class MachineDescription:
 
     def get_pandas_data_frame(self):
         """
-        The function `getPandasDataFrame` converts a dictionary into a pandas DataFrame.
+        The function `get_pandas_data_frame` converts a dictionary into a pandas DataFrame.
 
         Returns:
           a pandas DataFrame object.
@@ -160,7 +150,7 @@ class MachineDescription:
 
     def get_status(self, pulse: int, run: int):
         """
-        The function `getStatus` takes in two parameters, `pulse` and `run`, and returns the value of the
+        The function `get_status` takes in two parameters, `pulse` and `run`, and returns the value of the
         key "status" from the `yaml` object dictionary using the `pulse` and `run` as keys.
 
         Args:
@@ -168,7 +158,7 @@ class MachineDescription:
             run (int): The "run" parameter represents the number of runs in a particular pulse.
 
         Returns:
-            The method `getStatus` returns the value of `"status"` if `yaml` object is not `None`,
+            The method `get_status` returns the value of `"status"` if `yaml` object is not `None`,
             otherwise it returns `None`.
         """
         pulserun = str(pulse) + r"/" + str(run)
@@ -179,7 +169,7 @@ class MachineDescription:
 
     def get_reason_for_replacement(self, pulse: int, run: int):
         """
-        The function `getReasonForReplacement` takes in two parameters, `pulse` and `run`, and returns
+        The function `get_reason_for_replacement` takes in two parameters, `pulse` and `run`, and returns
         the value of the key "reason_for_replacement" from the `yaml` object dictionary using the `pulse`
         and `run` as keys.
 
@@ -188,7 +178,7 @@ class MachineDescription:
             run (int): The "run" parameter represents the number of runs in a particular pulse.
 
         Returns:
-            The method `getReasonForReplacement` returns the value of `"reason_for_replacement"` if `yaml`
+            The method `get_reason_for_replacement` returns the value of `"reason_for_replacement"` if `yaml`
             object is not `None`, otherwise it returns `None`.
         """
         pulserun = str(pulse) + r"/" + str(run)
@@ -199,7 +189,7 @@ class MachineDescription:
 
     def get_replaced_by(self, pulse: int, run: int):
         """
-        The function `getReplacedBy` takes in two parameters, `pulse` and `run`, and returns the value of
+        The function `get_replaced_by` takes in two parameters, `pulse` and `run`, and returns the value of
         the key "replaced_by" from the `yaml` object dictionary using the `pulse` and `run` as keys.
 
         Args:
@@ -207,7 +197,7 @@ class MachineDescription:
             run (int): The "run" parameter represents the number of runs in a particular pulse.
 
         Returns:
-            The method `getReplacedBy` returns the value of `"replaced_by"` if `yaml` object is not `None`,
+            The method `get_replaced_by` returns the value of `"replaced_by"` if `yaml` object is not `None`,
             otherwise it returns `None`.
         """
         pulserun = str(pulse) + r"/" + str(run)
@@ -218,7 +208,7 @@ class MachineDescription:
 
     def get_replaces(self, pulse: int, run: int):
         """
-        The function `getReplaces` takes in two parameters, `pulse` and `run`, and returns the value of the key
+        The function `get_replaces` takes in two parameters, `pulse` and `run`, and returns the value of the key
         "replaces" from the `yaml` object dictionary using the `pulse` and `run` as keys.
 
         Args:
@@ -226,7 +216,7 @@ class MachineDescription:
             run (int): The "run" parameter represents the number of runs in a particular pulse.
 
         Returns:
-            The method `getReplaces` returns the value of `"replaces"` if `yaml` object is not `None`, otherwise
+            The method `get_replaces` returns the value of `"replaces"` if `yaml` object is not `None`, otherwise
             it returns `None`.
         """
         pulserun = str(pulse) + r"/" + str(run)
@@ -237,18 +227,18 @@ class MachineDescription:
 
     def get_children(self, pulse: int, run: int, dict_to_fill={}):
         """
-        The function `getChildren` recursively retrieves information about replaced pulses and runs from a
+        The function `get_children` recursively retrieves information about replaced pulses and runs from a
         dictionary and stores it in a new dictionary.
 
         Args:
             pulse (int): The "pulse" parameter is an integer that represents a pulse number.
-            run (int): The `run` parameter in the `getChildren` method represents the run number.
-            dictToFill: The `dictToFill` parameter is a dictionary that is used to store the information about
-            the children of a given pulse and run. It is initially an empty dictionary and is passed as an
-            argument to the function to accumulate the information about the children.
+            run (int): The `run` parameter in the `get_children` method represents the run number.
+            dict_to_fill: The `dict_to_fill` parameter is a dictionary that is used to store the information about
+                the children of a given pulse and run. It is initially an empty dictionary and is passed as an
+                argument to the function to accumulate the information about the children.
 
         Returns:
-            a dictionary `dictToFill` that contains information about the children of a given pulse and run.
+            a dictionary `dict_to_fill` that contains information about the children of a given pulse and run.
             The dictionary has keys "pulse", "run", "status", and "reason_for_replacement", and the corresponding
             values are lists that store the information for each child.
         """
@@ -275,18 +265,18 @@ class MachineDescription:
 
     def get_parents(self, pulse: int, run: int, dict_to_fill={}):
         """
-        The `getParents` function recursively retrieves the parent information for a given pulse and run, populating
+        The `get_parents` function recursively retrieves the parent information for a given pulse and run, populating
         a dictionary with the parent pulse, parent run, status, and reason for replacement.
 
         Args:
             pulse (int): The `pulse` parameter is an integer that represents a pulse number.
             run (int): The `run` parameter is an integer that represents the run number.
-            dictToFill: The `dictToFill` parameter is a dictionary that is used to store the information about the
-            parents of a given pulse and run. It is initially an empty dictionary and is passed as an argument to
-            the `getParents` function. The function fills this dictionary with the parent information and returns it.
+            dict_to_fill: The `dictToFill` parameter is a dictionary that is used to store the information about the
+                parents of a given pulse and run. It is initially an empty dictionary and is passed as an argument to
+                the `get_parents` function. The function fills this dictionary with the parent information and returns it.
 
         Returns:
-            a dictionary `dictToFill` that contains information about the parents of a given pulse and run.
+            a dictionary `dict_to_fill` that contains information about the parents of a given pulse and run.
         """
         replaces = self.get_replaces(pulse, run)
         if replaces is not None:
@@ -312,15 +302,15 @@ class MachineDescription:
 
     def get_family(self, pulse: int, run: int):
         """
-        The function "getFamily" returns a dictionary containing the parents and children of a given pulse and run.
+        The function "get_family" returns a dictionary containing the parents and children of a given pulse and run.
 
         Args:
             pulse (int): The "pulse" parameter represents the pulse number
             run (int): The "run" parameter is an integer that represents the run number.
 
         Returns:
-            a dictionary called `familyDict` which contains two keys: "parents" and "children". The values associated
-            with these keys are the results of calling the `getParents` and `getChildren` methods with the given
+            a dictionary called `famly_dict` which contains two keys: "parents" and "children". The values associated
+            with these keys are the results of calling the `get_parents` and `get_children` methods with the given
             `pulse` and `run` parameters.
         """
         family_dict = {}

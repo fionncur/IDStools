@@ -103,9 +103,9 @@ class CoreProfilesCompute:
 
         Args:
             time_slice (int, optional): The index of the slice in the `ggd` list that contains the ion
-            information.Defaults to 0
+                information.Defaults to 0
             element_index (int, optional): Element index, It is used to access the 'a' attribute of
-            the element object. Defaults to 0
+                the element object. Defaults to 0
 
         Returns:
             a list of atomic masses for each species in the given slice index and element index.
@@ -139,8 +139,8 @@ class CoreProfilesCompute:
 
         Args:
             time_slice (int, optional): time slice on which functions should operate on. Defaults to 0.
-            elementIndex (int, optional): element of the atom or molecule on which functions should operate on.
-            Defaults to 0.
+            element_index (int, optional): element of the atom or molecule on which functions should operate on.
+                Defaults to 0.
 
         Returns:
             a list of nuclear charges for each species in the given time_slice and elementIndex.
@@ -202,10 +202,9 @@ class CoreProfilesCompute:
 
         Args:
             time_slice (int): an integer representing the index of the time slice for which the density is being
-            requested.
-            Defaults to 0
-            speciesIndex (int): The index of the ion species for which the density is being retrieved. Defaults to 0
-            stateIndex (int): The index of the state for which the density is being retrieved. Defaults to 0
+                requested. Defaults to 0
+            species_index (int): The index of the ion species for which the density is being retrieved. Defaults to 0
+            state_index (int): The index of the state for which the density is being retrieved. Defaults to 0
 
         Returns:
             a numpy array containing the density of a specified state of a specified species at a specified time slice.
@@ -570,7 +569,7 @@ class CoreProfilesCompute:
 
         Args:
             time_slice: an optional integer parameter that specifies the time slice on which the function should
-            operate. The default value is 0
+                operate. The default value is 0
 
         Returns:
             a list of labels for all species in a given time slice.
@@ -886,7 +885,7 @@ class CoreProfilesCompute:
 
         Args:
             slice_index: The `slice_index` parameter in the `get_profiles` method is used to specify which
-        slice of profiles to retrieve.
+                slice of profiles to retrieve.
 
         Returns:
             A dictionary named `profiles` is being returned, which contains the following keys and
@@ -960,13 +959,13 @@ class CoreProfilesCompute:
 
         Args:
             slice_index: The `slice_index` parameter in the `getnrho` method is used to specify which
-        slice of data to retrieve the number of rho values from.
+                slice of data to retrieve the number of rho values from.
 
         Returns:
             The `getnrho` method is returning the number of elements in the `rho_tor_norm` or `rho_tor`
-        attribute of the `grid` object within the `profiles_1d` object at the specified `slice_index`.
-        If either of these attributes has elements, the length of that attribute is returned as the
-        number of `nrho`.
+            attribute of the `grid` object within the `profiles_1d` object at the specified `slice_index`.
+            If either of these attributes has elements, the length of that attribute is returned as the
+            number of `nrho`.
         """
         nrho = None
         try:

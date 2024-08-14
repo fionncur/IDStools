@@ -20,20 +20,20 @@ class SummaryView(BasePlot):
         another object using the input object.
 
         Args:
-            idsObj (object): The parameter `idsObj` is an object that is being passed to the constructor
-        of the class. It is not clear from the code snippet what type of object it is, but it is being
-        stored as an instance variable `self.idsObj`.
+            ids (object): The parameter `idsObj` is an object that is being passed to the constructor
+                of the class. It is not clear from the code snippet what type of object it is, but it is being
+                stored as an instance variable `self.idsObj`.
         """
         self.ids = ids
         self.compute_obj = SummaryCompute(ids)
 
     def view_hcd_waveforms(self, ax):
         """
-        The function `viewHCDWaveforms` plots various power waveforms on a given axis.
+        The function `view_hcd_waveforms` plots various power waveforms on a given axis.
 
         Args:
             ax: The `ax` parameter is an instance of the `Axes` class from the `matplotlib.pyplot` module. It
-            represents the axes on which the waveforms will be plotted.
+                represents the axes on which the waveforms will be plotted.
         """
         waveform = self.compute_obj.get_summary()
         plotstyle = "-" if len(waveform["time"]) > 1 else "o"
@@ -115,11 +115,11 @@ class SummaryView(BasePlot):
 
     def view_ip_b0_waveforms(self, ax):
         """
-        The function `viewIpB0Waveforms` plots the absolute values of the Ip and B0 waveforms on a given axis.
+        The function `view_ip_b0_waveforms` plots the absolute values of the Ip and B0 waveforms on a given axis.
 
         Args:
             ax: The parameter "ax" is an instance of the matplotlib Axes class. It represents the subplot where
-            the Ip and B0 waveforms will be plotted.
+                the Ip and B0 waveforms will be plotted.
         """
         waveform = self.compute_obj.get_summary()
         plotstyle = "-" if len(waveform["time"]) > 1 else "o"
@@ -134,11 +134,11 @@ class SummaryView(BasePlot):
 
     def view_energy_content_waveforms(self, ax):
         """
-        The function `viewEnergyContentWaveforms` plots energy content waveforms on a given axis.
+        The function `view_energy_content_waveforms` plots energy content waveforms on a given axis.
 
         Args:
             ax: The parameter "ax" is an instance of the matplotlib Axes class. It represents the axes on which the
-            waveforms will be plotted.
+                waveforms will be plotted.
         """
         waveform = self.compute_obj.get_summary()
         plotstyle = "-" if len(waveform["time"]) > 1 else "o"
@@ -173,12 +173,12 @@ class SummaryView(BasePlot):
 
     def view_vloop_waveforms(self, ax):
         """
-        The function `viewVloopWaveforms` plots three waveforms (`V_LOOP`, `H_98`, and `TAU_ENERGY`)  against time
+        The function `view_vloop_waveforms` plots three waveforms (`V_LOOP`, `H_98`, and `TAU_ENERGY`)  against time
         on the given `ax` object.
 
         Args:
             ax: The parameter "ax" is an instance of the matplotlib Axes class. It represents the axes on which
-            the waveforms will be plotted.
+                the waveforms will be plotted.
         """
         waveform = self.compute_obj.get_summary()
         plotstyle = "-" if len(waveform["time"]) > 1 else "o"
@@ -214,13 +214,13 @@ class SummaryView(BasePlot):
 
     def view_time_line(self, ax, time):
         """
-        The function `viewTimeLine` plots a vertical dashed line on a given matplotlib axis at a specified time.
+        The function `view_time_line` plots a vertical dashed line on a given matplotlib axis at a specified time.
 
         Args:
             ax: The parameter "ax" is a reference to the second y-axis of a matplotlib figure. It is used to plot
-            the timeline on the same figure as the other data.
+                the timeline on the same figure as the other data.
             time: The "time" parameter is the value at which you want to plot a vertical line on the timeline. It
-            represents the specific point in time that you want to highlight on the timeline.
+                represents the specific point in time that you want to highlight on the timeline.
         """
         ymin, ymax = ax.get_ylim()
         ax.plot(
@@ -236,12 +236,12 @@ class SummaryView(BasePlot):
 
     def view_hmode(self, ax):
         """
-        The function `viewHmode` checks if HMode is present and fills the area between `th_min` and `th_max` on the
+        The function `view_hmode` checks if HMode is present and fills the area between `th_min` and `th_max` on the
         y-axis with a light yellow color if it is, otherwise it logs a warning message.
 
         Args:
             ax: The parameter `ax` is an instance of the `Axes` class from the `matplotlib` library. It represents
-            the axes on which the plot is being drawn.
+                the axes on which the plot is being drawn.
         """
         ymin, ymax = ax.get_ylim()
 

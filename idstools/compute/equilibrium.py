@@ -35,10 +35,10 @@ class EquilibriumCompute:
 
         Args:
             time_slice (int): The time slice index of the equilibrium data to be used for generating the
-            2D Cartesian grid. Defaults to 0
+                2D Cartesian grid. Defaults to 0
             profiles2d_index (int): `profiles2d_index` is an integer parameter that represents the index of the
-            ``profile_2d`` to be used in the calculation. It is used to access the specific 2D profile from the
-            list of profiles in the `time_slice` object. Defaults to 0
+                ``profile_2d`` to be used in the calculation. It is used to access the specific 2D profile from the
+                list of profiles in the `time_slice` object. Defaults to 0
 
         Returns:
             A dictionary containing the 2D Cartesian grid coordinates (r2d and z2d) and the corresponding psi
@@ -107,11 +107,11 @@ class EquilibriumCompute:
 
         Args:
             time_slice (int): The time slice is an integer value that represents the index of the time slice in
-            the equilibrium ids. It is used to select a specific time slice for the calculation of rho(R,Z).
-            Defaults to 0
-            profiles2d_index (int): `profiles2DIndex` is an integer parameter that represents the index of  the
-            ``profiles_2d`` to be used for the calculation of rho(R,Z). It is used to access the `profiles_2d`
-            list in the `time_slice` object. Defaults to 0
+                the equilibrium ids. It is used to select a specific time slice for the calculation of rho(R,Z).
+                Defaults to 0
+            profiles2d_index (int): `profiles2d_index` is an integer parameter that represents the index of  the
+                ``profiles_2d`` to be used for the calculation of rho(R,Z). It is used to access the `profiles_2d`
+                list in the `time_slice` object. Defaults to 0
 
         Returns:
             a value containing the square root of the toroidal flux values divided by the maximum toroidal
@@ -152,7 +152,7 @@ class EquilibriumCompute:
 
         Args:
             time_slice (int): time_slice is an integer parameter representing the index of the time slice for which
-            the magnetic field is being calculated from profiles 2D.
+                the magnetic field is being calculated from profiles 2D.
 
         Returns:
             Index in `profiles_2d`
@@ -205,7 +205,7 @@ class EquilibriumCompute:
 
         Args:
             time_slice (int): time slice index
-            gridType (int, optional): grid type. Defaults to 1.
+            grid_type (int, optional): grid type. Defaults to 1.
 
         Returns:
             list: list of indices of the 2D profiles at a given time slice. If no such 2D profiles are found,
@@ -246,7 +246,7 @@ class EquilibriumCompute:
 
         Args:
             time_slice (int): The time slice parameter represents the time step at which the flux surfaces are to
-            be calculated.
+                be calculated.
 
         Returns:
             a dictionary containing information about flux surfaces at a specific time slice. The dictionary includes
@@ -274,7 +274,7 @@ class EquilibriumCompute:
 
         Returns:
             a list of plasma currents for each time slice in `self.ids.time_slice`. The plasma current is
-        calculated by multiplying the global quantity `ip` by -1.0e-6.
+            calculated by multiplying the global quantity `ip` by -1.0e-6.
 
         Examples:
             .. code-block:: python
@@ -328,11 +328,11 @@ class EquilibriumCompute:
         This function calculates the number of elements in a list that are less than zero.
 
         Args:
-          time_slice (int): The `time_slice` parameter
+            time_slice (int): The `time_slice` parameter
 
         Returns:
-          The function `getmrho` is returning the number of elements in the `rho_tor_norm` list that are
-        less than 0.
+            The function `getmrho` is returning the number of elements in the `rho_tor_norm` list that are
+            less than 0.
         """
         mrho = 0
         for i in range(len(self.ids.time_slice[0].profiles_1d.rho_tor_norm)):
@@ -348,15 +348,15 @@ class EquilibriumCompute:
 
         Args:
             r: The `r` parameter in the `getgm3` function represents the radial coordinate at which you
-        want to calculate the value of `gm3`. This function interpolates the value of `gm3` at the
-        specified radial coordinate `r` based on the provided data.
-          time_slice (int): The `time_slice` parameter
+                want to calculate the value of `gm3`. This function interpolates the value of `gm3` at the
+                specified radial coordinate `r` based on the provided data.
+            time_slice (int): The `time_slice` parameter
 
         Returns:
             The function `getgm3` returns the value of `gm3`, which is calculated based on the input
-        parameters `r` and `time_slice`. The calculation involves interpolation of
-        `time_slice[time_slice].profiles_1d.gm3` based on `r` and normalization by
-        `rho_tor_sep` squared.
+            parameters `r` and `time_slice`. The calculation involves interpolation of
+            `time_slice[time_slice].profiles_1d.gm3` based on `r` and normalization by
+            `rho_tor_sep` squared.
         """
         rho_tor_sep = self.ids.time_slice[time_slice].profiles_1d.rho_tor[time_slice]
         gm3 = (
@@ -376,12 +376,12 @@ class EquilibriumCompute:
 
         Args:
             r: The `r` parameter in the `getgm7` method is used as the input radial coordinate for which
-        you want to calculate the value of `gm7`.
-          time_slice (int): The `time_slice` parameter
+                you want to calculate the value of `gm7`.
+            time_slice (int): The `time_slice` parameter
 
         Returns:
-          The function `getgm7` returns the value of `gm7`, which is calculated based on the input
-        parameters `r` and `time_slice`.
+            The function `getgm7` returns the value of `gm7`, which is calculated based on the input
+            parameters `r` and `time_slice`.
         """
         rho_tor_sep = self.ids.time_slice[time_slice].profiles_1d.rho_tor[time_slice]
         gm7 = (
@@ -401,14 +401,14 @@ class EquilibriumCompute:
 
         Args:
             rescale_factor: The `rescale` method you provided rescales various magnetic field components
-        in an equilibrium object by a specified rescale factor. The rescale factor is a float value that
-        you pass to the method to determine the extent of rescaling for the magnetic field components.
+            in an equilibrium object by a specified rescale factor. The rescale factor is a float value that
+            you pass to the method to determine the extent of rescaling for the magnetic field components.
 
         Returns:
             The `rescale` method returns the rescaled equilibrium `equout` after applying the rescaling
-        factor to various magnetic field components and properties within the equilibrium data
-        structure. The method also updates the comment in the `ids_properties` of the equilibrium to
-        indicate that the magnetic field has been rescaled by a certain factor.
+            factor to various magnetic field components and properties within the equilibrium data
+            structure. The method also updates the comment in the `ids_properties` of the equilibrium to
+            indicate that the magnetic field has been rescaled by a certain factor.
         """
         from copy import deepcopy
 
@@ -779,15 +779,15 @@ class EquilibriumCompute:
 
         Args:
             shift: The `shift` parameter in the `z_shift` method represents the vertical shift in meters
-        that will be applied to the equilibrium data. This shift will be added to the z-coordinates of
-        various points and boundaries within the equilibrium data structure.
+            that will be applied to the equilibrium data. This shift will be added to the z-coordinates of
+            various points and boundaries within the equilibrium data structure.
 
         Returns:
             The `z_shift` method returns a vertically shifted equilibrium object (`equilibrium IDS`) after
-        applying the specified vertical shift in meters to various components of the equilibrium data
-        structure. The method modifies the z-coordinates of different components within the equilibrium
-        object based on the provided shift value. Additionally, it updates the comment of the
-        equilibrium object to indicate that it has been shifted vertically by a certain amount.
+            applying the specified vertical shift in meters to various components of the equilibrium data
+            structure. The method modifies the z-coordinates of different components within the equilibrium
+            object based on the provided shift value. Additionally, it updates the comment of the
+            equilibrium object to indicate that it has been shifted vertically by a certain amount.
         """
         from copy import deepcopy
 

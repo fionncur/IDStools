@@ -33,9 +33,9 @@ class SummaryCompute:
 
         Returns:
             The `get_summary` method returns a dictionary named `waveform` containing various waveforms
-        and their values. The waveforms included in the dictionary are "time", "ip",
-        "current_non_inductive", "current_bootstrap", "v_loop", "beta_tor_norm", "beta_pol",
-        "energy_diamagnetic", "energy_mhd", "current_ohm", "energy_total
+            and their values. The waveforms included in the dictionary are "time", "ip",
+            "current_non_inductive", "current_bootstrap", "v_loop", "beta_tor_norm", "beta_pol",
+            "energy_diamagnetic", "energy_mhd", "current_ohm", "energy_total
         """
         stime = len(self.ids.time)
         # Ip waveform

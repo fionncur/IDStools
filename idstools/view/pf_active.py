@@ -18,14 +18,14 @@ logger = logging.getLogger("module")
 class PFActiveView:
     """This class provides view functions for pf_active ids"""
 
-    def __init__(self, ids_obj: object):
+    def __init__(self, ids: object):
         """Initialization PFActiveView object.
 
         Args:
-            idsObj : pf_active ids object
+            ids : pf_active ids object
         """
-        self.ids_obj = ids_obj
-        self.compute_obj = PfActiveCompute(ids_obj)
+        self.ids = ids
+        self.compute_obj = PfActiveCompute(ids)
 
     def view_active_pf_coils(self, ax: plt.axes, show_labels=False):
         """
@@ -33,7 +33,7 @@ class PFActiveView:
 
         Args:
             ax (plt.axes): `ax` is a parameter of type `plt.axes`, It is used to add patches (such as rectangles)
-            and annotations to the plot.
+                and annotations to the plot.
 
         Example:
             .. code-block:: python

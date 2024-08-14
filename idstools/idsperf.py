@@ -12,17 +12,17 @@ def get_ids(db, idsname, occ=0, times=None, interp=imas.imasdef.PREVIOUS_INTERP,
 
     Args:
         db: The `db` parameter is an `imas.DBEntry` object, which represents an open data-entry for which the
-        IDS will be read from. This object provides access to the data stored in the IMAS  database.
+            IDS will be read from. This object provides access to the data stored in the IMAS  database.
         idsname: The `idsname` parameter is a string that represents the name of the IDS that you want to read
-        from the database.
+            from the database.
         occ: The `occ` parameter is the occurrence number of the IDS to be read. It is an optional parameter
-        and its default value is 0.
+            and its default value is 0.
         times: A list of times at which to read a single slice of the IDS. If this parameter is not provided
-        or set to None, the function will read the entire IDS.
+            or set to None, the function will read the entire IDS.
         interp: The `interp` parameter is an optional parameter that specifies the slicing interpolation mode.
-        It determines how the data is interpolated when reading a single slice at a specific time. The default
-        value is `imas.imasdef.PREVIOUS_INTERP`, which means that the data is interpolated using the previous
-        time slice
+            It determines how the data is interpolated when reading a single slice at a specific time. The default
+            value is `imas.imasdef.PREVIOUS_INTERP`, which means that the data is interpolated using the previous
+            time slice
         verbose: Verbose information
 
     Returns:
@@ -53,19 +53,19 @@ def get_timings(db, idsname, occ=0, dbout=None, times=None, repeat=5, verbose=Fa
 
     Args:
         db: The `db` parameter is an `imas.DBEntry` object, which represents an open data-entry for which the IDS
-        will be read from.
+            will be read from.
         idsname: The `idsname` parameter is a string that represents the name of the IDS to be read from the database.
         occ: The `occ` parameter is the occurrence number of the IDS to be read. It specifies which occurrence of
-        the IDS to read from the database. By default, it is set to 0, which means the first occurrence. Defaults to 0
+            the IDS to read from the database. By default, it is set to 0, which means the first occurrence. Defaults to 0
         dbout: The `dbout` parameter is an optional argument that specifies the output database where the
-        IDS will be written to. If `dbout` is provided, the IDS will be written to the specified database.
+            IDS will be written to. If `dbout` is provided, the IDS will be written to the specified database.
         times: The `times` parameter is a list of times at which to read a single slice of the IDS. If `times`
-        is set to `None`, the entire IDS will be read.
+            is set to `None`, the entire IDS will be read.
         repeat: The `repeat` parameter specifies the number of timings being measured. It allows for collecting
-        statistics by repeating the timing measurement multiple times. Defaults to 5
+            statistics by repeating the timing measurement multiple times. Defaults to 5
         verbose: Verbose information
         profile: A boolean parameter that determines whether or not to print additional information by running
-        the command under cProfile.
+            the command under cProfile.
 
     Returns:
         The function `get_timings` returns a list of timing measurements. The length of the list is equal to the

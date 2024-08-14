@@ -45,7 +45,7 @@ def get_ids_attributes(idsobj: object) -> list:
         idsobj (object): The IDS or substructure object for which the function will return a list of attribute names.
 
     Returns:
-        The function `getIdsAttributes` returns a list of attribute names for the given IDS object which are not
+        The function `get_ids_attributes` returns a list of attribute names for the given IDS object which are not
         private and are ids fields.
     """
     if "imas" in str(type(idsobj)):
@@ -56,13 +56,13 @@ def get_ids_attributes(idsobj: object) -> list:
 
 def get_ids_size(db_entry_object: imas.DBEntry, ids_names=None) -> dict:
     """
-    The function `getIDSSize` retrieves the size of IDS objects from a database entry and returns a dictionary
+    The function `get_ids_size` retrieves the size of IDS objects from a database entry and returns a dictionary
     containing the size in bytes and the time taken to read each object.
 
     Args:
-        dbEntryObject (imas.DBEntry): The `dbEntryObject` parameter is an object of type `imas.DBEntry`. It
-        is used to access the data in the IMAS database.
-        idsNames: idsNames is a list of IDS names. If it is not provided, it defaults to None.
+        db_entry_object (imas.DBEntry): The `db_entry_object` parameter is an object of type `imas.DBEntry`. It
+            is used to access the data in the IMAS database.
+        ids_names: idsNames is a list of IDS names. If it is not provided, it defaults to None.
 
     Returns:
         a dictionary containing information about the size and time taken to read IDS objects from a database
@@ -98,13 +98,13 @@ def get_ids_size(db_entry_object: imas.DBEntry, ids_names=None) -> dict:
 
 def get_all_ids_size(db_entry_object: imas.DBEntry):
     """
-    The function `getAllIDSSize` calculates the total size in bytes of all IDS in a given `dbEntryObject`.
+    The function `get_all_ids_size` calculates the total size in bytes of all IDS in a given `db_entry_object`.
 
     Args:
-        dbEntryObject (imas.DBEntry): The parameter `dbEntryObject` is of type `imas.DBEntry`.
+        db_entry_object (imas.DBEntry): The parameter `db_entry_object` is of type `imas.DBEntry`.
 
     Returns:
-        the total size in bytes of all the IDS in the given `dbEntryObject`.
+        the total size in bytes of all the IDS in the given `db_entry_object`.
     """
     ids_size_dict = get_ids_size(db_entry_object)
     total_bytes = np.array([ids["bytes"] for ids in ids_size_dict.values()]).sum()
@@ -113,13 +113,13 @@ def get_all_ids_size(db_entry_object: imas.DBEntry):
 
 def get_all_ids_get_time(db_entry_object: imas.DBEntry):
     """
-    The function `getAllIDSGetTime` calculates the total time for all IDS in a given `dbEntryObject`.
+    The function `get_all_ids_get_time` calculates the total time for all IDS in a given `db_entry_object`.
 
     Args:
-        dbEntryObject (imas.DBEntry): The parameter `dbEntryObject` is of type `imas.DBEntry`.
+        db_entry_object (imas.DBEntry): The parameter `db_entry_object` is of type `imas.DBEntry`.
 
     Returns:
-        the total time to get all the IDSes in the given `dbEntryObject`.
+        the total time to get all the IDSes in the given `db_entry_object`.
     """
     ids_size_dict = get_ids_size(db_entry_object)
     return np.array([ids["time"] for ids in ids_size_dict.values()]).sum()
@@ -153,7 +153,7 @@ def get_ids_types():
     This function returns list of strings corresponding to all ids types for each IDSName object in the imas module.
 
     Returns:
-        The function `getIdsTypes()` is returning a list of values of all the `value` attributes of the `IDSName`
+        The function `get_ids_types()` is returning a list of values of all the `value` attributes of the `IDSName`
         objects in the `imas` module.
     """
     return [ids.value for ids in list(imas.IDSName)]
@@ -164,11 +164,12 @@ def get_available_ids_and_occurrences(db_entry_object: imas.DBEntry, time_mode=N
     This function returns a list of pairs of available IDS types and their occurrences in a given DBEntry object.
 
     Args:
-        dbEntryObject (imas.DBEntry): An object of the class imas.DBEntry, which represents an open DBEntry in
-        which available IDSs will be looked for.
-        timeMode: The time mode of interest for the IDSs in the given DBEntry. It can be one of the following
+        db_entry_object (imas.DBEntry): An object of the class imas.DBEntry, which represents an open DBEntry in
+            which available IDSs will be looked for.
+        time_mode: The time mode of interest for the IDSs in the given DBEntry. It can be one of the following
         values:(imas.imasdef.IDS_TIME_MODE_HETEROGENEOUS, IDS_TIME_MODE_HOMOGENEOUS or IDS_TIME_MODE_INDEPENDENT)
-        getComment: Output ids_properties.comment field for each found occurrence
+        get_comment: Output ids_properties.comment field for each found occurrence
+        
     Returns:
         a list of pairs (idstype:str,occurrence:int) with data in the given DBEntry.
     """
@@ -205,10 +206,10 @@ def get_available_ids_and_occurrences(db_entry_object: imas.DBEntry, time_mode=N
 def get_available_ids_and_times(db_entry_object: imas.DBEntry) -> list:
     """
     The function `get_available_ids_and_times` retrieves available IDS names and corresponding time
-    arrays from a given `dbEntryObject`.
+    arrays from a given `db_entry_object`.
 
     Args:
-        dbEntryObject (imas.DBEntry): The `dbEntryObject` parameter is an object of type `imas.DBEntry`.
+        db_entry_object (imas.DBEntry): The `db_entry_object` parameter is an object of type `imas.DBEntry`.
 
     Returns:
         a list of tuples. Each tuple contains an IDS name and a corresponding time array.
@@ -243,21 +244,21 @@ def get_available_ids_and_times(db_entry_object: imas.DBEntry) -> list:
 
 def resample_indices(dbin: str, dbout: str, idsname: str, start: int = 0, stop: int = None, step: int = 1):
     """
-    The function resampleIndices takes in a database input, database output, and an idsname, and resamples the
+    The function resample_indices takes in a database input, database output, and an idsname, and resamples the
     data based on the specified start, stop, and step values.
 
     Args:
         dbin (str): The parameter "dbin" is a string that represents the input database name. It is the
-        database from which the data will be read.
+            database from which the data will be read.
         dbout (str): The parameter `dbout` is a string that represents the name of the output database.
-        It is the database where the resampled data will be stored.
+            It is the database where the resampled data will be stored.
         idsname (str): The parameter "idsname" is a string that represents the ids that you want to resample.
         start (int): The start parameter is the index of the first time value to be resampled.
         stop (int): The `stop` parameter is used to specify the index at which the resampling should stop.
-        If `stop` is not provided, the resampling will continue until the end of the `times` array.
+            If `stop` is not provided, the resampling will continue until the end of the `times` array.
         step (int): The `step` parameter determines the interval between the indices that are selected from
-        the `times` array. For example, if `step` is set to 2, every second index will be selected. If `step`
-        is set to 3, every third index will be selected, and so. Defaults to 1
+            the `times` array. For example, if `step` is set to 2, every second index will be selected. If `step`
+            is set to 3, every third index will be selected, and so. Defaults to 1
     """
     times = dbin.partial_get(idsname, "time")
     for time_val in times[range(start, len(times) if stop is None else stop, step)]:
@@ -280,16 +281,16 @@ def resample_times(
 
     Args:
         dbin (str): The parameter "dbin" is a string that represents the input database name. It is the
-        database from which the data will be read.
+            database from which the data will be read.
         dbout (str): The parameter `dbout` is a string that represents the name of the output database.
-        It is the database where the resampled data will be stored.
+            It is the database where the resampled data will be stored.
         idsname (str): The parameter "idsname" is a string that represents the ids that you want to resample.
         start (int): The start parameter is the index of the first time value to be resampled.
         stop (int): The `stop` parameter is used to specify the index at which the resampling should stop.
-        If `stop` is not provided, the resampling will continue until the end of the `times` array.
+            If `stop` is not provided, the resampling will continue until the end of the `times` array.
         step (int): The `step` parameter determines the interval between the indices that are selected from
-        the `times` array. For example, if `step` is set to 2, every second index will be selected. If `step`
-        is set to 3, every third index will be selected, and so. Defaults to 1
+            the `times` array. For example, if `step` is set to 2, every second index will be selected. If `step`
+            is set to 3, every third index will be selected, and so. Defaults to 1
     """
     times = dbin.partial_get(idsname, "time")
     if step is None:  # work on indices
@@ -325,10 +326,10 @@ def compare_ids(
         Y: The second input ids object to compare.
         field: The name of the field being compared in the IDSes.
         ignore_version: A boolean parameter that determines whether to ignore the "version_put" attribute when
-        comparing the two objects. If set to True, the function will ignore this attribute. Defaults to True
+            comparing the two objects. If set to True, the function will ignore this attribute. Defaults to True
         verb: a boolean indicating whether to print log messages during the comparison process. Defaults to True
         output: A dictionary that stores the output of the function, which includes information about any differences
-        found between the two input objects.
+            found between the two input objects.
 
     Returns:
         tuple containing a boolean value indicating whether the two input objects are identical, and a dictionary
@@ -528,23 +529,23 @@ def compare_ids(
 
 def get_quantities_from_pulses(idspath: str, pulses: tuple, list_count: int = 0, verbose: bool = False) -> pd.DataFrame:
     """
-    The `getQuantitiesFromPulses` function retrieves values from a specified IDS path for a given set of pulses and
+    The `get_quantities_from_pulses` function retrieves values from a specified IDS path for a given set of pulses and
     returns a DataFrame containing the pulse, run, and corresponding values.
 
     Args:
         idspath (str): The `idspath` parameter is a string that represents the path to the IDS node from which the
-        quantities will be extracted. It is used to specify the location of the data in the IDS
+            quantities will be extracted. It is used to specify the location of the data in the IDS
         pulses (tuple): The `pulses` parameter is a tuple containing information about each pulse. Each element in
-        the tuple is itself a tuple with the following elements: pulse, run, backend, database, user, version, and
-        file path.
-        listCount (int): The `listCount` parameter is an optional parameter that specifies the number of pulses to
-        retrieve values for. If `listCount` is set to 0 (default), values will be retrieved for all pulses in the
-        `pulses` tuple. If `listCount` is set to a positive integer, values will be retrieved for first `listCount`
-        pulses in the `pulses` tuple. Defaults to 0
+            the tuple is itself a tuple with the following elements: pulse, run, backend, database, user, version, and
+            file path.
+        list_count (int): The `list_count` parameter is an optional parameter that specifies the number of pulses to
+            retrieve values for. If `list_count` is set to 0 (default), values will be retrieved for all pulses in the
+            `pulses` tuple. If `list_count` is set to a positive integer, values will be retrieved for first `listCount`
+            pulses in the `pulses` tuple. Defaults to 0
         verbose (bool): print debug information
 
     Returns:
-        The function `getQuantitiesFromPulses` returns a pandas DataFrame containing the columns "PULSE", "RUN",
+        The function `get_quantities_from_pulses` returns a pandas DataFrame containing the columns "PULSE", "RUN",
         and "VALUE".
     """
     idsname = idspath.split("/")[0]

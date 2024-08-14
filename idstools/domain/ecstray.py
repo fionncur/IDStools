@@ -23,13 +23,13 @@ class EcStrayCompute:
 
     def get_resonance_layer(self, time_index_waves: int = 0, time_index_equilibrium: int = 0, n_harm=None):
         """This function calculates and returns a dictionary (Resonance Layer) containing r and z values
-        corresponding to the resonance points based on the provided nHarm values, BResonance, and bTotal arrays.
+        corresponding to the resonance points based on the provided nHarm values, b_resonance, and b_total arrays.
 
         Args:
-            timeIndexWaves (int): time index for waves, default is 0
-            timeIndexEquilibrium (int): time index of equilibrium, default is 0
-            nHarm (list, optional):  integer values that represent the order or index of harmonics
-            in a series. Defaults to [1, 2, 3, 4].
+            time_index_waves (int): time index for waves, default is 0
+            time_index_equilibrium (int): time index of equilibrium, default is 0
+            n_harm (list, optional):  integer values that represent the order or index of harmonics
+                in a series. Defaults to [1, 2, 3, 4].
 
         Returns:
             dict: returns dictionary of  resonance layer for specific harmonics
@@ -75,7 +75,6 @@ class EcStrayCompute:
                     resonance_layer[index_harm]["r"].append(r[ir])
                     resonance_layer[index_harm]["z"].append(z[iz])
 
-        return {"profile2dIndex": profile2d_index, "resonanceLayer": resonance_layer}
 
     def get_cutoff_layer(
         self,
@@ -87,8 +86,8 @@ class EcStrayCompute:
         are prevented from propagating or transmitting due to the plasma's properties.
 
         Args:
-            timeIndexWaves (int, optional): time index for waves. Defaults to 0.
-            timeIndexCoreProfiles (int, optional): time index for core_profiles. Defaults to 0.
+            time_index_waves (int, optional): time index for waves. Defaults to 0.
+            time_index_core_profiles (int, optional): time index for core_profiles. Defaults to 0.
             timeIndexEquilibrium (int, optional): time index for equilibrium. Defaults to 0.
 
         Returns:

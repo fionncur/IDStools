@@ -143,8 +143,8 @@ class KineticProfilesCompute:
 
         Args:
             ids_name: The `ids_name` parameter is used to specify the name of the IDS (Intelligent Data
-        Structure) that you want to retrieve. It is a string parameter that should correspond to the
-        specific IDS structure you are interested in accessing.
+                Structure) that you want to retrieve. It is a string parameter that should correspond to the
+                specific IDS structure you are interested in accessing.
 
         Returns:
             The function `get_ids` returns a tuple containing two values - `ids_object` and `ids_present`.
@@ -174,9 +174,9 @@ class KineticProfilesCompute:
 
         Returns:
             The function `check_idsses` is returning a boolean value. It returns `True` if either
-        `is_core_profiles_present` or `is_edge_profiles_present` is True, indicating that data
-        is present to plot. If both `is_core_profiles_present` and `is_edge_profiles_present`
-        are False, it logs a critical message and returns `None`.
+            `is_core_profiles_present` or `is_edge_profiles_present` is True, indicating that data
+            is present to plot. If both `is_core_profiles_present` and `is_edge_profiles_present`
+            are False, it logs a critical message and returns `None`.
         """
         self.core_profiles, self.is_core_profiles_present = self.get_ids("core_profiles")
         if self.edge_required:
@@ -200,8 +200,8 @@ class KineticProfilesCompute:
 
         Args:
             time_slice: The `fill_idses` method you provided seems to be handling the filling of various
-        profiles and data based on a given time slice. The `time_slice` parameter is used to specify a
-        particular time at which the data should be retrieved and processed.
+                profiles and data based on a given time slice. The `time_slice` parameter is used to specify a
+                part``icular time at which the data should be retrieved and processed.
         """
         # Search for adequate time slice for display
         if self.is_core_profiles_present:
@@ -339,8 +339,8 @@ class KineticProfilesCompute:
 
         Returns:
             The function `get_rho_or_r_outboard_profile` returns a dictionary with keys `"xbeg"`,
-        `"xend"`, and `"rho_tor_norm"`. The values associated with these keys are the variables `xbeg`,
-        `xend`, and `rho_tor_norm` respectively.
+            `"xend"`, and `"rho_tor_norm"`. The values associated with these keys are the variables `xbeg`,
+            `xend`, and `rho_tor_norm` respectively.
         """
         xbeg = 99.0
         xend = 0
@@ -427,7 +427,7 @@ class KineticProfilesCompute:
 
         Returns:
             The `get_species` method returns a tuple containing the number of species in the core profiles
-        (`nspecies_core`) and the number of species in the edge profiles (`nspecies_edge`).
+            (`nspecies_core`) and the number of species in the edge profiles (`nspecies_edge`).
         """
         nspecies_core = 0
         if self.is_core_profiles_present:
@@ -458,9 +458,9 @@ class KineticProfilesCompute:
 
         Returns:
             The function `get_species_a_number` returns a list `a` containing integer values extracted
-        from the attribute `a` of different elements in the core or edge profiles based on certain
-        conditions. The values are read from either
-        `core_profiles` or `edge_profiles'
+            from the attribute `a` of different elements in the core or edge profiles based on certain
+            conditions. The values are read from either
+            `core_profiles` or `edge_profiles'
         """
         a = [0] * self.nspecies_core
         if self.is_core_profiles_present:
@@ -497,9 +497,9 @@ class KineticProfilesCompute:
 
         Returns:
             The `get_species_z_number` method returns a list `z` containing the atomic numbers of
-        different species. The method first initializes the list `z` with zeros, then based on the
-        availability of core profiles or edge profiles, it reads the atomic numbers of species from the
-        corresponding profiles and populates the `z` list.
+            different species. The method first initializes the list `z` with zeros, then based on the
+            availability of core profiles or edge profiles, it reads the atomic numbers of species from the
+            corresponding profiles and populates the `z` list.
         """
         z = [0] * self.nspecies_core
         if self.is_core_profiles_present:
@@ -536,9 +536,9 @@ class KineticProfilesCompute:
 
         Returns:
             The `get_species_atoms_n` method returns a list `n` containing the number of atoms for each
-        species in the core or edge profiles. The method first initializes the list with 1 for each
-        species, then attempts to read the number of atoms for each species from the core or edge
-        profiles data.
+            species in the core or edge profiles. The method first initializes the list with 1 for each
+            species, then attempts to read the number of atoms for each species from the core or edge
+            profiles data.
         """
         n = [1] * self.nspecies_core
         if self.is_core_profiles_present:
@@ -647,9 +647,9 @@ class KineticProfilesCompute:
 
         Returns:
             The `get_volume_profile` method returns a list `volume` containing volume values for the core
-        and edge profiles. The volume values are obtained from different sources based on the conditions
-        and availability of data. The method populates the `volume` list with volume values for the core
-        profiles, edge profiles, or equilibrium data, depending on the conditions and data availability.
+            and edge profiles. The volume values are obtained from different sources based on the conditions
+            and availability of data. The method populates the `volume` list with volume values for the core
+            profiles, edge profiles, or equilibrium data, depending on the conditions and data availability.
         """
         volume = [0] * (self.nrho + self.erho)
         if self.is_core_profiles_present:
@@ -685,10 +685,10 @@ class KineticProfilesCompute:
 
         Returns:
             The function `get_zeff_profile` returns a list `zeff` containing Z-effective values for both
-        core and edge profiles. The list is constructed by first initializing it with zeros, then
-        populating it with Z-effective values from core and edge profiles if they are present. The
-        Z-effective values are read from the respective profile objects and stored in the `zeff` list
-        based on the indices
+            core and edge profiles. The list is constructed by first initializing it with zeros, then
+            populating it with Z-effective values from core and edge profiles if they are present. The
+            Z-effective values are read from the respective profile objects and stored in the `zeff` list
+            based on the indices
         """
         zeff = [0] * (self.nrho + self.erho)
         if self.is_core_profiles_present:
@@ -721,9 +721,9 @@ class KineticProfilesCompute:
 
         Returns:
             The function `getne_profile` returns a list of electron density values. The electron density
-        values are collected from different sources based on the conditions specified in the function.
-        The returned list contains electron density values for both core and edge profiles, with NaN
-        values filled in case of missing data.
+            values are collected from different sources based on the conditions specified in the function.
+            The returned list contains electron density values for both core and edge profiles, with NaN
+            values filled in case of missing data.
         """
         electron_density = [0] * (self.nrho + self.erho)
         if self.is_core_profiles_present:
@@ -758,9 +758,9 @@ class KineticProfilesCompute:
 
         Returns:
             The function `gette_profile` returns a list `electron_temperature` containing electron
-        temperatures. The electron temperatures are extracted from core and edge profiles data,
-        converted to keV, and stored in the list based on the specified
-        conditions. The list is then returned as the output of the function.
+            temperatures. The electron temperatures are extracted from core and edge profiles data,
+            converted to keV, and stored in the list based on the specified
+            conditions. The list is then returned as the output of the function.
         """
         electron_temperature = [0] * (self.nrho + self.erho)
         if self.is_core_profiles_present:
@@ -799,7 +799,7 @@ class KineticProfilesCompute:
 
         Returns:
             The `getti_flag` method returns the values of `ti_flag` and `ti_e_flag` after performing
-        certain checks and operations within the method.
+            certain checks and operations within the method.
         """
         ti_flag = 0
         if self.is_core_profiles_present:
@@ -874,8 +874,8 @@ class KineticProfilesCompute:
 
         Returns:
             The function `get_ion_temperature` returns a list of ion temperatures. The list is populated
-        based on certain conditions and calculations involving the input parameters and attributes of
-        the object.
+            based on certain conditions and calculations involving the input parameters and attributes of
+            the object.
         """
         ion_temperature = [0] * (self.nrho + self.erho)
         if self.ti_flag == 1:
@@ -914,7 +914,7 @@ class KineticProfilesCompute:
 
         Returns:
             The `get_ion_density` method returns a dictionary `ion_density` containing ion density values
-        for each species at different radial positions.
+            for each species at different radial positions.
         """
         ion_density = {}
         for ispecies in range(self.nspecies_core):
@@ -1362,9 +1362,9 @@ class KineticProfilesCompute:
 
         Returns:
             A list of species based on the conditions specified in the code snippet. If the number of core
-        species is greater than 0, the function will return a list of species either from the Mendeleiev
-        table or from core profiles or edge profiles based on certain conditions. If the number of core
-        species is not greater than 0, the function will return None.
+            species is greater than 0, the function will return a list of species either from the Mendeleiev
+            table or from core profiles or edge profiles based on certain conditions. If the number of core
+            species is not greater than 0, the function will return None.
         """
         import idstools.init_mendeleiev as mend
 
@@ -1394,9 +1394,9 @@ class KineticProfilesCompute:
 
         Returns:
             The function `get_n_spec_nver_ne` returns the list `nspec_over_ne`, which contains the
-        calculated values for the ratio of species density to electron density for each species in the
-        core profiles. If the conditions specified in the function are not met, the function returns a
-        list of zeros with the same length as the number of species in the core profiles.
+            calculated values for the ratio of species density to electron density for each species in the
+            core profiles. If the conditions specified in the function are not met, the function returns a
+            list of zeros with the same length as the number of species in the core profiles.
         """
         if (self.nspecies_core > 0) and self.is_composition_available:
             if self.is_edge_profiles_present and self.is_core_profiles_present:
@@ -1514,9 +1514,9 @@ class KineticProfilesCompute:
 
         Returns:
             The function `get_profiles` returns a dictionary `profiles` containing various profiles
-        related to core and edge plasma parameters. The dictionary includes keys such as "rhonorm",
-        "te", "ti", "ne", "zeff" for core profiles, and "rhonorm_e", "te_e", "ti_e", "ne_e", "zeff_e"
-        for edge profiles.
+            related to core and edge plasma parameters. The dictionary includes keys such as "rhonorm",
+            "te", "ti", "ne", "zeff" for core profiles, and "rhonorm_e", "te_e", "ti_e", "ne_e", "zeff_e"
+            for edge profiles.
         """
         # Criteria for significant impurity (in X[imp]/ne concentration)
 
@@ -1604,9 +1604,9 @@ class KineticProfilesCompute:
 
         Returns:
             The `get_min_max_velocity_profiles` method returns a dictionary containing the maximum and
-        minimum velocity profiles for `vtor` and `vpol`. The keys in the dictionary are "max_vtor",
-        "min_vtor", "max_vpol", and "min_vpol", each corresponding to the maximum and minimum values for
-        the `vtor` and `vpol` profiles, respectively.
+            minimum velocity profiles for `vtor` and `vpol`. The keys in the dictionary are "max_vtor",
+            "min_vtor", "max_vpol", and "min_vpol", each corresponding to the maximum and minimum values for
+            the `vtor` and `vpol` profiles, respectively.
         """
         # vtor_flag = vtor_profile["vtor_flag"]
         # vtor_e_flag = vtor_profile["vtor_e_flag"]
@@ -1703,12 +1703,12 @@ class KineticProfilesCompute:
 
         Args:
             ndim: The `ndim` parameter in the `create_wave_form` function represents the number of
-        dimensions for which you want to create the wave form. This parameter is used to determine the
-        length of the lists in the dictionary that is returned by the function.
+                dimensions for which you want to create the wave form. This parameter is used to determine the
+                length of the lists in the dictionary that is returned by the function.
 
         Returns:
             A dictionary is being returned with three keys: "central", "edge", and "rho95", each
-        containing a list of zeros with a length specified by the input parameter ndim.
+            containing a list of zeros with a length specified by the input parameter ndim.
         """
         return {"central": [0] * ndim, "edge": [0] * ndim, "rho95": [0] * ndim}
 
@@ -1719,9 +1719,9 @@ class KineticProfilesCompute:
 
         Returns:
             The function `get_waveform` returns a dictionary containing various waveforms related to
-        plasma parameters such as electron temperature, ion temperature, electron density, impurity
-        density, impurity velocity components (poloidal and toroidal), and effective charge. The
-        dictionary also includes information about the time array and the total ion density.
+            plasma parameters such as electron temperature, ion temperature, electron density, impurity
+            density, impurity velocity components (poloidal and toroidal), and effective charge. The
+            dictionary also includes information about the time array and the total ion density.
         """
         vtor_flag = self.vtor_flag
 
