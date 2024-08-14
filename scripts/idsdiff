@@ -411,7 +411,7 @@ if __name__ == "__main__":
         '  "imas:mdsplus?user=public;shot=122525;run=2;database=ITER;version=3" \n'
         "  \n",
         formatter_class=RichHelpFormatter,
-        usage="%(prog)s [-h] ids... -u [URI ...] [--skip-provenance] [--generate-html] [--directory DIRECTORY]"
+        usage="%(prog)s [-h] ids... -u [URI ...] [--skip-provenance] [--generate-html] [--directory DIRECTORY]",
     )
     parser.add_argument(
         "ids",
@@ -424,7 +424,7 @@ if __name__ == "__main__":
         "--uri",
         nargs="*",
         type=str,
-        required=True, 
+        required=True,
         help="uri separated by spaces \t\t(default=%(default)s)",
     )
     parser.add_argument(
