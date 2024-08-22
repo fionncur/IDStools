@@ -74,7 +74,7 @@ class EcStrayCompute:
                 if np.abs(b_total[ir, iz] - b_resonance[index_harm]) < b_err:
                     resonance_layer[index_harm]["r"].append(r[ir])
                     resonance_layer[index_harm]["z"].append(z[iz])
-                    
+
         return {"profile2d_index": profile2d_index, "resonance_layer": resonance_layer}
 
     def get_cutoff_layer(
