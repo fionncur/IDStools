@@ -47,7 +47,7 @@ git checkout -b feature/your-feature
  - `docstring` with example will be useful for others to understand what code is doing
 
 #### Variable Naming
-Define clear and meaningful variable names `bTotal`, `profile2dIndex`
+Define clear and meaningful variable names `b_total`, `profile_2d_index`
 *   Use PascalCase for class names
 *   Use camelCase for variables, function names
 

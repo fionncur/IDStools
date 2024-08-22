@@ -64,11 +64,11 @@ class EcStrayView:
                 :align: center
 
         See also:
-            :func:`idstools.domain.ecstray.EcStrayCompute.getResonanceLayer`
+            :func:`idstools.domain.ecstray.EcStrayCompute.get_resonance_layer`
 
         """
         result_dict = self.ecstray_object.get_resonance_layer(time_index_wv, time_index_eq)
-        res_layer = result_dict["resonanceLayer"]
+        res_layer = result_dict["resonance_layer"]
 
         for i_harm in range(len(res_layer)):
             if len(res_layer[i_harm]["r"]) > 1:
@@ -89,8 +89,8 @@ class EcStrayView:
         n_harm = [1, 2, 3, 4]
 
         resonance_data = self.ecstray_object.get_resonance_layer(n_harm=n_harm)
-        profile2d_index = resonance_data["profile2dIndex"]
-        resonance_layer = resonance_data["resonanceLayer"]
+        profile2d_index = resonance_data["profile2d_index"]
+        resonance_layer = resonance_data["resonance_layer"]
 
         grid_data = self.equilibrium_compute.get2d_cartesian_grid(
             time_slice=time_slice, profiles2d_index=profile2d_index
