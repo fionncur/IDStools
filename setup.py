@@ -138,7 +138,7 @@ setup(
         "scripts/plotequilibrium",
         "scripts/printfluxes",
         "scripts/plothcddistributions",
-        "scripts/plothcdplots",
+        "scripts/plothcd",
         "scripts/plotkineticprofiles",
         "scripts/plothcdwaves",
         "scripts/plotmachinedescription",

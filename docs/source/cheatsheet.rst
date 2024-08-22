@@ -85,13 +85,13 @@ This cheat sheet provides quick reference of commonly used commands in IDStools.
 |                            |                                                                                                                              |
 |                            |    $ plothcddistributions --uri "imas:mdsplus?user=public;pulse=130012;run=115;database=TEST;version=3"                      |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
-| *plothcdplots*             | shows plots from distributions and waves for                                                                                 |
+| *plothcd*                  | shows plots from distributions and waves for                                                                                 |
 |                            | different data entries for analysis   (replaces hcd_plot).                                                                   |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
 |                            |                                                                                                                              |
 |                            | .. code-block:: bash                                                                                                         |
 |                            |                                                                                                                              |
-|                            |    $ plothcdplots  -ech 134173/101/public/MDSPLUS/TEST/3                                                                     |
+|                            |    $ plothcd       -ech 134173/101/public/MDSPLUS/TEST/3                                                                     |
 |                            |    -nbi 130012/115/public/MDSPLUS/TEST/3                                                                                     |
 |                            |    -fus 130012/115/public/MDSPLUS/TEST/3                                                                                     |
 |                            |    -icrh 130012/15/public/MDSPLUS/TEST/3                                                                                     |

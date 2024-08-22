@@ -35,7 +35,7 @@ SCRIPTS=(
     "plotedgeprofiles --uri \"imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3\" --wall --time 60 --save --directory $LOG_DIR"
     "plotequilibrium --uri \"imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3\" -md pf_active wall --save --directory $LOG_DIR"
     "printfluxes --uri \"imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3\" -m CLOSEST"
-    "plothcdplots -ech 134173/101/public/MDSPLUS/TEST/3 -nbi 130012/115/public/MDSPLUS/TEST/3 -fus 130012/115/public/MDSPLUS/TEST/3 -icrh 130012/115/public/MDSPLUS/TEST/3 --save --directory $LOG_DIR"
+    "plothcd -ech 134173/101/public/MDSPLUS/TEST/3 -nbi 130012/115/public/MDSPLUS/TEST/3 -fus 130012/115/public/MDSPLUS/TEST/3 -icrh 130012/115/public/MDSPLUS/TEST/3 --save --directory $LOG_DIR"
     "plothcddistributions --uri \"imas:mdsplus?user=public;pulse=130012;run=115;database=TEST;version=3\" --save --directory $LOG_DIR"
     "plothcdwaves --uri \"imas:mdsplus?user=public;pulse=134173;run=101;database=TEST;version=3\" --save --directory $LOG_DIR"
     "plotkineticprofiles --uri \"imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3\" --save --directory $LOG_DIR"

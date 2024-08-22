@@ -17,7 +17,7 @@ composition, allowing you to depict various trends and plasma physics.
    plotequilibrium
    printfluxes
    plotkineticprofiles
-   plothcdplots
+   plothcd
    plothcdwaves
    plothcddistributions
    plotmachinedescription
