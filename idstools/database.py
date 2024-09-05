@@ -5,8 +5,7 @@ import re
 from datetime import datetime
 from glob import glob
 from pathlib import Path
-
-import imas
+import imaspy
 from yaml import load as yamlload
 from yaml import safe_load
 
@@ -535,11 +534,11 @@ class DBMaster:
     @classmethod
     def get_connection(cls, imasargs):
         connection = DBMaster.get_db_entry_object(imasargs)
-        if connection is not None:
-            status, _ = connection.open()
-            if status != 0:
-                logger.error(f"Can not find data entry {imasargs}")
-                return None
+        # if connection is not None:
+        #     status, _ = connection.open()
+        #     if status != 0:
+        #         logger.error(f"Can not find data entry {imasargs}")
+        #         return None
         return connection
 
     @classmethod
@@ -560,9 +559,9 @@ class DBMaster:
         connection = None
         if imasargs.uri != "" and imasargs.uri is not None:
             if "mode" in imasargs.__dict__:
-                connection = imas.DBEntry(imasargs.uri, imasargs.mode)
+                connection = imaspy.DBEntry(imasargs.uri, imasargs.mode)
             else:
-                connection = imas.DBEntry(imasargs.uri, "r")
+                connection = imaspy.DBEntry(imasargs.uri, "r")
         return connection
 
     @staticmethod

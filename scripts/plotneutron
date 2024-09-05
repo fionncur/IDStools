@@ -6,7 +6,6 @@ import argparse
 import logging
 import os
 
-import imas
 from rich_argparse import RichHelpFormatter
 
 from idstools.compute.common import get_nearest_time
@@ -56,24 +55,7 @@ if hostdir is None:
     )
     exit(1)
 
-try:
-    # connection.distribution_sources.get()
-    ids_distribution_sources = imas.distribution_sources()
-    ids_distribution_sources.time = connection.partial_get("distribution_sources", "time")
-    if ids_distribution_sources.time is None:
-        logger.critical(
-            "No distribution_sources IDS in the data-entry --> Abort.",
-        )
-        exit()
-
-except Exception as _:
-    logger.critical(
-        "The distribution_sources IDS is absent from the input data-entry",
-    )
-    logger.critical(
-        "----> Aborted.",
-    )
-    exit()
+ids_distribution_sources = connection.get("distribution_sources")
 
 time_array = ids_distribution_sources.time
 time_index, time_value = get_nearest_time(time_array, args.time)

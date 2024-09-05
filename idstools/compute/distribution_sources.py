@@ -77,8 +77,8 @@ class DistributionSourcesCompute:
         sources_dict = {}
         counter = 0
         for source in self.ids.source:
-            mlabel1 = unicodedata.normalize("NFKD", source.process[0].type.description).encode("ascii", "ignore")
-            mlabel2 = unicodedata.normalize("NFKD", source.process[0].reactant_energy.description).encode(
+            mlabel1 = unicodedata.normalize("NFKD", source.process[0].type.description.value).encode("ascii", "ignore")
+            mlabel2 = unicodedata.normalize("NFKD", source.process[0].reactant_energy.description.value).encode(
                 "ascii", "ignore"
             )
             particles = source.profiles_1d[0].particles
