@@ -892,7 +892,7 @@ class CoreProfilesCompute:
             A dictionary named `profiles` is being returned, which contains the following keys and
             corresponding values
         """
-        rho_tor_norm = self.get_rho_tor_norm(time_slice=time_slice)
+        rho_tor_norm = self.get_rho_tor_norm(time_slice)
         if rho_tor_norm is None:
             logger.critical("core_profiles.profiles_1d[:].grid.rho_tor_norm and rho_tor are empty")
             logger.critical("----> Aborted.")
