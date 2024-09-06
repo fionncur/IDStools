@@ -154,14 +154,14 @@ class CoreProfilesView:
         )
         ax.set_ylim(0, 20)
 
-    def plot_density_profile(self, ax, time_index, psi_cordinate=False, update=True, logscale=False):
+    def plot_density_profile(self, ax, time_slice, psi_cordinate=False, update=True, logscale=False):
         """
         This function plots the electron density profile as a function of either the normalized toroidal flux
         coordinate or the poloidal magnetic flux coordinate.
 
         Args:
             ax: ax is a matplotlib axis object where the density profile plot will be drawn.
-            time_index: The time index refers to the specific time step or snapshot of data that is being plotted.
+            time_slice: The time index refers to the specific time step or snapshot of data that is being plotted.
                 It is used to retrieve the electron density and other relevant data at that particular time.
             psi_cordinate: A boolean parameter that determines whether the density profile should be plotted as a
                 function of the poloidal flux coordinate (-psi) or the normalised toroidal flux coordinate (rho_tor).
@@ -175,21 +175,21 @@ class CoreProfilesView:
             a tuple containing the matplotlib plot object for the electron density profile (ax_density_plot_dens)
             and the maximum electron density value (nmax).
         """
-        rho_tor_norm = self.core_profiles_compute.get_rho_tor_norm(time_index)
+        rho_tor_norm = self.core_profiles_compute.get_rho_tor_norm(time_slice)
         if rho_tor_norm is not None:
             radial_coordinate = rho_tor_norm
             xlabel = ""
             if update:
                 xlabel = r"Normalised $\rho_{tor}$ [-]"
             if psi_cordinate:
-                psi = self.core_profiles_compute.get_psi(time_index)
+                psi = self.core_profiles_compute.get_psi(time_slice)
                 if psi is not None:
                     radial_coordinate = psi
                     if update:
                         xlabel = r"$-\psi$ [Wb]"
 
             ax.set_xlabel(xlabel)
-            electron_density = self.ids.profiles_1d[time_index].electrons.density
+            electron_density = self.ids.profiles_1d[time_slice].electrons.density
             nmax = max(electron_density) * 1.2
             ax_density_plot_dens = None
             if update:
@@ -213,9 +213,9 @@ class CoreProfilesView:
                 ax.set_yscale("log")
             return ax_density_plot_dens, nmax
 
-    def plot_ion_pressure_properties(self, ax):
+    def plot_ion_pressure_properties(self, ax, time_slice):
         FACTOR = 1.0e-6
-        rho_tor_norm = self.core_profiles_compute.get_rho_tor_norm()  # Rho profile (mandatory)
+        rho_tor_norm = self.core_profiles_compute.get_rho_tor_norm(time_slice)  # Rho profile (mandatory)
         nrho = len(rho_tor_norm)
         if nrho == 0:
             logger.critical(
@@ -223,7 +223,7 @@ class CoreProfilesView:
             )
             logger.critical("----> Aborted.")
             return
-        dict_ion_pressure_properties = self.core_profiles_compute.get_ion_pressure_properties()
+        dict_ion_pressure_properties = self.core_profiles_compute.get_ion_pressure_properties(time_slice)
         maxima_ion = dict_ion_pressure_properties["maxima_ion"]
         pressure_ion_thermal = dict_ion_pressure_properties["pressure_ion_thermal"]
         pressure_ion_fast_parallel = dict_ion_pressure_properties["pressure_ion_fast_parallel"]
@@ -285,9 +285,9 @@ class CoreProfilesView:
                 fontsize=5,
             )
 
-    def plot_electron_pressure_properties(self, ax, **kwargs):
+    def plot_electron_pressure_properties(self, ax, time_slice,**kwargs):
         FACTOR = 1.0e-6
-        rho_tor_norm = self.core_profiles_compute.get_rho_tor_norm()  # Rho profile (mandatory)
+        rho_tor_norm = self.core_profiles_compute.get_rho_tor_norm(time_slice)  # Rho profile (mandatory)
         nrho = len(rho_tor_norm)
         if nrho == 0:
             logger.critical(
@@ -295,7 +295,7 @@ class CoreProfilesView:
             )
             logger.critical("----> Aborted.")
 
-        dict_electrons_pressure_properties = self.core_profiles_compute.get_electrons_pressure_properties()
+        dict_electrons_pressure_properties = self.core_profiles_compute.get_electrons_pressure_properties(time_slice)
         maxima_electrons = dict_electrons_pressure_properties["maxima_electrons"]
         pressure_electron_total = dict_electrons_pressure_properties["pressure_electron_total"]
         pressure_electron_thermal = dict_electrons_pressure_properties["pressure_electron_thermal"]
@@ -341,9 +341,9 @@ class CoreProfilesView:
             label.set_linewidth(1.5)
         ax.set_title("Electrons Pressure Properties", loc="left")
 
-    def plot_total_pressure_properties(self, ax, **kwargs):
+    def plot_total_pressure_properties(self, ax, time_slice, **kwargs):
         FACTOR = 1.0e-6
-        rho_tor_norm = self.core_profiles_compute.get_rho_tor_norm()  # Rho profile (mandatory)
+        rho_tor_norm = self.core_profiles_compute.get_rho_tor_norm(time_slice=time_slice)  # Rho profile (mandatory)
         nrho = len(rho_tor_norm)
         if nrho == 0:
             logger.critical(

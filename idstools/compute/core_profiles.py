@@ -682,7 +682,7 @@ class CoreProfilesCompute:
             psi = -self.ids.profiles_1d[time_slice].grid.psi
         return psi
 
-    def get_ion_pressure_properties(self):
+    def get_ion_pressure_properties(self, time_slice=0):
         """
         The `get_ion_pressure_properties` function calculates and returns the total thermal pressure,
         fast parallel pressure, and fast perpendicular pressure of ions in a given set of profiles.
@@ -691,11 +691,11 @@ class CoreProfilesCompute:
             The function `get_ion_pressure_properties` is returning a dictionary containing the following
         keys and values: maxima_ion, pressure_ion_thermal, pressure_ion_fast_parallel, pressure_ion_fast_perpendicular
         """
-        nrho = len(self.get_rho_tor_norm())
+        nrho = len(self.get_rho_tor_norm(time_slice))
         pressure_ion_thermal = 0.0
         pressure_ion_fast_parallel = 0.0
         pressure_ion_fast_perpendicular = 0.0
-        for ion in self.ids.profiles_1d[0].ion:
+        for ion in self.ids.profiles_1d[time_slice].ion:
             if len(ion.pressure_thermal) == 0:
                 logger.warn("Empty profiles_1d[0].ion.pressure_thermal")
             if len(ion.pressure_fast_parallel) == 0:
@@ -737,7 +737,7 @@ class CoreProfilesCompute:
             "pressure_ion_fast_perpendicular": pressure_ion_fast_perpendicular,
         }
 
-    def get_electrons_pressure_properties(self):
+    def get_electrons_pressure_properties(self, time_slice=0):
         """
         The  function `get_electrons_pressure_properties` calculates and returns various pressure properties
         of electrons, including maximum pressure and individual pressure components.
@@ -752,11 +752,11 @@ class CoreProfilesCompute:
             - "pressure_electron_fast_perpendicular
 
         """
-        nrho = len(self.get_rho_tor_norm())
-        pressure_electron_total = self.ids.profiles_1d[0].electrons.pressure
-        pressure_electron_thermal = self.ids.profiles_1d[0].electrons.pressure_thermal
-        pressure_electron_fast_parallel = self.ids.profiles_1d[0].electrons.pressure_fast_parallel
-        pressure_electron_fast_perpendicular = self.ids.profiles_1d[0].electrons.pressure_fast_perpendicular
+        nrho = len(self.get_rho_tor_norm(time_slice))
+        pressure_electron_total = self.ids.profiles_1d[time_slice].electrons.pressure
+        pressure_electron_thermal = self.ids.profiles_1d[time_slice].electrons.pressure_thermal
+        pressure_electron_fast_parallel = self.ids.profiles_1d[time_slice].electrons.pressure_fast_parallel
+        pressure_electron_fast_perpendicular = self.ids.profiles_1d[time_slice].electrons.pressure_fast_perpendicular
         if len(pressure_electron_total) == 0:
             logger.warn("Empty profiles_1d[0].electrons.pressure")
         if len(pressure_electron_thermal) == 0:
@@ -797,7 +797,7 @@ class CoreProfilesCompute:
             "pressure_electron_fast_perpendicular": pressure_electron_fast_perpendicular,
         }
 
-    def get_pressure(self):
+    def get_pressure(self, time_slice=0):
         """
         The function `get_pressure` returns a dictionary containing the thermal pressure, parallel pressure,
         and perpendicular pressure.
@@ -811,10 +811,10 @@ class CoreProfilesCompute:
             - "pressure_parallel": parallel pressure values
             - "pressure_perpendicular": perpendicular pressure values
         """
-        nrho = len(self.get_rho_tor_norm())
-        pressure_thermal = self.ids.profiles_1d[0].pressure_thermal
-        pressure_parallel = self.ids.profiles_1d[0].pressure_parallel
-        pressure_perpendicular = self.ids.profiles_1d[0].pressure_perpendicular
+        nrho = len(self.get_rho_tor_norm(time_slice))
+        pressure_thermal = self.ids.profiles_1d[time_slice].pressure_thermal
+        pressure_parallel = self.ids.profiles_1d[time_slice].pressure_parallel
+        pressure_perpendicular = self.ids.profiles_1d[time_slice].pressure_perpendicular
         if len(pressure_thermal) == 0:
             logger.warn("Empty profiles_1d[0].pressure_thermal")
         if len(pressure_parallel) == 0:
@@ -827,10 +827,10 @@ class CoreProfilesCompute:
             np.asarray([np.nan] * nrho) if len(pressure_perpendicular) == 0 else pressure_perpendicular
         )
 
-        dict_electrons_pressure_properties = self.get_electrons_pressure_properties()
+        dict_electrons_pressure_properties = self.get_electrons_pressure_properties(time_slice)
         pressure_electron_total = dict_electrons_pressure_properties["pressure_electron_total"]
 
-        pressure_ion_total = self.get_pressure_ion_total()
+        pressure_ion_total = self.get_pressure_ion_total(time_slice)
         pressure_total = pressure_electron_total
         if pressure_ion_total is not None:
             pressure_total += pressure_ion_total
@@ -853,7 +853,7 @@ class CoreProfilesCompute:
             "pressure_perpendicular": pressure_perpendicular,
         }
 
-    def get_pressure_ion_total(self) -> Union[float, None]:
+    def get_pressure_ion_total(self, time_slice) -> Union[float, None]:
         """
         The function `get_pressure_ion_total` returns the total ion pressure from a given set of
         profiles or None if the pressure values cannot be read.
@@ -863,15 +863,15 @@ class CoreProfilesCompute:
         profiles, or `None` if the pressure values cannot be read.
         """
         pressure_ion_total = None
-        if len(self.ids.profiles_1d[0].pressure_ion_total) > 1:
-            pressure_ion_total = self.ids.profiles_1d[0].pressure_ion_total
+        if len(self.ids.profiles_1d[time_slice].pressure_ion_total) > 1:
+            pressure_ion_total = self.ids.profiles_1d[time_slice].pressure_ion_total
         else:
             logger.critical(
                 "core_profiles.profiles_1d[0].pressure_ion_total could not be read",
             )
-            if len(self.ids.profiles_1d[0].ion[0].pressure) > 1:
+            if len(self.ids.profiles_1d[time_slice].ion[0].pressure) > 1:
                 pressure_ion_total = 0.0
-                for ion in self.ids.profiles_1d[0].ion:
+                for ion in self.ids.profiles_1d[time_slice].ion:
                     pressure_ion_total = pressure_ion_total + ion.pressure
             else:
                 logger.critical(
@@ -879,20 +879,20 @@ class CoreProfilesCompute:
                 )
         return pressure_ion_total
 
-    def get_profiles(self, slice_index=0):
+    def get_profiles(self, time_slice=0):
         """
         The function `get_profiles` retrieves and organizes various profiles from a data source for
         further analysis.
 
         Args:
-            slice_index: The `slice_index` parameter in the `get_profiles` method is used to specify which
+            time_slice: The `time_slice` parameter in the `get_profiles` method is used to specify which
                 slice of profiles to retrieve.
 
         Returns:
             A dictionary named `profiles` is being returned, which contains the following keys and
             corresponding values
         """
-        rho_tor_norm = self.get_rho_tor_norm(time_slice=0)
+        rho_tor_norm = self.get_rho_tor_norm(time_slice=time_slice)
         if rho_tor_norm is None:
             logger.critical("core_profiles.profiles_1d[:].grid.rho_tor_norm and rho_tor are empty")
             logger.critical("----> Aborted.")
@@ -901,36 +901,36 @@ class CoreProfilesCompute:
         nrho = len(rho_tor_norm)
 
         # J_bootstrap profile
-        if len(self.ids.profiles_1d[slice_index].j_bootstrap) < 1:
-            logger.critical("core_profiles.profiles_1d[" + str(slice_index) + "].j_bootstrap could not be read")
-            self.ids.profiles_1d[slice_index].j_bootstrap = np.asarray([np.nan] * nrho)
+        if len(self.ids.profiles_1d[time_slice].j_bootstrap) < 1:
+            logger.critical("core_profiles.profiles_1d[" + str(time_slice) + "].j_bootstrap could not be read")
+            self.ids.profiles_1d[time_slice].j_bootstrap = np.asarray([np.nan] * nrho)
 
         # J_non_inductive profile
-        if len(self.ids.profiles_1d[slice_index].j_non_inductive) < 1:
-            logger.critical("core_profiles.profiles_1d[" + str(slice_index) + "].j_non_inductive could not be read")
-            self.ids.profiles_1d[slice_index].j_non_inductive = np.asarray([np.nan] * nrho)
+        if len(self.ids.profiles_1d[time_slice].j_non_inductive) < 1:
+            logger.critical("core_profiles.profiles_1d[" + str(time_slice) + "].j_non_inductive could not be read")
+            self.ids.profiles_1d[time_slice].j_non_inductive = np.asarray([np.nan] * nrho)
 
         # J_ohmic profile
-        if len(self.ids.profiles_1d[0].j_ohmic) < 1:
-            logger.critical("core_profiles.profiles_1d[" + str(slice_index) + "].j_ohmic could not be read")
+        if len(self.ids.profiles_1d[time_slice].j_ohmic) < 1:
+            logger.critical("core_profiles.profiles_1d[" + str(time_slice) + "].j_ohmic could not be read")
             self.ids.profiles_1d[0].j_ohmic = np.asarray([np.nan] * nrho)
 
         # J_total profile
-        if len(self.ids.profiles_1d[0].j_total) < 1:
-            logger.critical("core_profiles.profiles_1d[" + str(slice_index) + "].j_total could not be read")
+        if len(self.ids.profiles_1d[time_slice].j_total) < 1:
+            logger.critical("core_profiles.profiles_1d[" + str(time_slice) + "].j_total could not be read")
             self.ids.profiles_1d[0].j_total = np.asarray([np.nan] * nrho)
 
         # q-profile
-        if len(self.ids.profiles_1d[0].q) < 1:
-            logger.critical("core_profiles.profiles_1d[" + str(slice_index) + "].q could not be read")
+        if len(self.ids.profiles_1d[time_slice].q) < 1:
+            logger.critical("core_profiles.profiles_1d[" + str(time_slice) + "].q could not be read")
             self.ids.profiles_1d[0].q = np.asarray([np.nan] * nrho)
 
         # Magnetic shear profile
-        if len(self.ids.profiles_1d[0].magnetic_shear) < 1:
-            logger.critical("core_profiles.profiles_1d[" + str(slice_index) + "].magnetic_shear could not be read")
+        if len(self.ids.profiles_1d[time_slice].magnetic_shear) < 1:
+            logger.critical("core_profiles.profiles_1d[" + str(time_slice) + "].magnetic_shear could not be read")
             self.ids.profiles_1d[0].magnetic_shear = np.asarray([np.nan] * nrho)
 
-        if len(self.ids.profiles_1d[0].q) != nrho:
+        if len(self.ids.profiles_1d[time_slice].q) != nrho:
             logger.critical("--------------------------------------------------------------")
             logger.critical("Dimensions of input core profiles are not consistent:")
             logger.critical("  core_profiles.profiles_1d[0].grid.rho_tor(_norm)")
@@ -945,35 +945,35 @@ class CoreProfilesCompute:
         # Create the dictionary defining the list of profiles that can be displayed
         profiles = {}
         profiles["rhonorm"] = rho_tor_norm
-        profiles["j_bootstrap"] = self.ids.profiles_1d[0].j_bootstrap
-        profiles["j_non_inductive"] = self.ids.profiles_1d[0].j_non_inductive
-        profiles["j_ohmic"] = self.ids.profiles_1d[0].j_ohmic
-        profiles["j_total"] = self.ids.profiles_1d[0].j_total
-        profiles["q"] = self.ids.profiles_1d[0].q
-        profiles["magnetic_shear"] = self.ids.profiles_1d[0].magnetic_shear
+        profiles["j_bootstrap"] = self.ids.profiles_1d[time_slice].j_bootstrap
+        profiles["j_non_inductive"] = self.ids.profiles_1d[time_slice].j_non_inductive
+        profiles["j_ohmic"] = self.ids.profiles_1d[time_slice].j_ohmic
+        profiles["j_total"] = self.ids.profiles_1d[time_slice].j_total
+        profiles["q"] = self.ids.profiles_1d[time_slice].q
+        profiles["magnetic_shear"] = self.ids.profiles_1d[time_slice].magnetic_shear
         return profiles
 
-    def getnrho(self, slice_index=0):
+    def getnrho(self, time_slice=0):
         """
         This function `getnrho` returns the number of elements in the `rho_tor_norm` or `rho_tor` grid
         based on the provided slice index.
 
         Args:
-            slice_index: The `slice_index` parameter in the `getnrho` method is used to specify which
+            time_slice: The `time_slice` parameter in the `getnrho` method is used to specify which
                 slice of data to retrieve the number of rho values from.
 
         Returns:
             The `getnrho` method is returning the number of elements in the `rho_tor_norm` or `rho_tor`
-            attribute of the `grid` object within the `profiles_1d` object at the specified `slice_index`.
+            attribute of the `grid` object within the `profiles_1d` object at the specified `time_slice`.
             If either of these attributes has elements, the length of that attribute is returned as the
             number of `nrho`.
         """
         nrho = None
         try:
-            if len(self.ids.profiles_1d[slice_index].grid.rho_tor_norm) > 0:
-                nrho = len(self.ids.profiles_1d[slice_index].grid.rho_tor_norm)
-            elif len(self.ids.profiles_1d[slice_index].grid.rho_tor) > 0:
-                nrho = len(self.ids.profiles_1d[slice_index].grid.rho_tor)
+            if len(self.ids.profiles_1d[time_slice].grid.rho_tor_norm) > 0:
+                nrho = len(self.ids.profiles_1d[time_slice].grid.rho_tor_norm)
+            elif len(self.ids.profiles_1d[time_slice].grid.rho_tor) > 0:
+                nrho = len(self.ids.profiles_1d[time_slice].grid.rho_tor)
         except Exception as e:
             logger.debug(f"{e}")
             logger.warning(f"core_profiles.profiles_1d[:].grid.rho_tor_norm and rho_tor could not be read. {e}")
