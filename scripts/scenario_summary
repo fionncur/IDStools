@@ -134,6 +134,7 @@ args = vars(parser.parse_args())
 # Folder
 if args["folder"] != None:
     folder = args["folder"]
+    defaultFolderPath = folder
 else:
     defaultFolderPath = os.environ["IMAS_HOME"] + "/shared/imasdb/ITER/3/0"
     lowlevelVersion = get_core_version()
