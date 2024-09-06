@@ -23,8 +23,12 @@ getIMASModuleName() {
     IMASVERSIONSLIST=$(module -r -t avail IMAS/ 2>&1 | grep -E "^IMAS/$DD_VERSION\.[0-9]+\.[0-9]+-$ACCESS_LAYER_VERSION\.[0-9]+\.[0-9]+-$TOOLCHAIN_VERSION")
 
     # CalVar versioning
-    IMASCALVERVERSIONSLIST=$(module -r -t avail IMAS/ 2>&1 | grep -E "^IMAS/$DD_VERSION\.[0-9]+\.[0-9]+-[0-9]+\.[0-9]+-$TOOLCHAIN_VERSION")
-    
+    if [[ "$ACCESS_LAYER_VERSION" -ge 5 ]]; then
+        IMASCALVERVERSIONSLIST=$(module -r -t avail IMAS/ 2>&1 | grep -E "^IMAS/$DD_VERSION\.[0-9]+\.[0-9]+-[0-9]{4}\.[0-9]+(\.[0-9]+)?-$TOOLCHAIN_VERSION")
+    else
+        IMASCALVERVERSIONSLIST=""
+    fi
+
     if [[ $TOOLCHAIN_VERSION == *"intel"* ]]; then
         IMAS_MODULE_VERSION=$(echo "$IMASVERSIONSLIST"$'\n'"$IMASCALVERVERSIONSLIST" | grep "intel" | sort -rV | head -n 1)
     fi
