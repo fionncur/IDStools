@@ -65,7 +65,7 @@ class DistributionSourcesCompute:
             )
         return volume
 
-    def get_source_info(self):
+    def get_source_info(self, time_slice=0):
         """
         The function `get_source_info` retrieves information about sources, including labels, particle data, and power,
         and returns it in a dictionary format.
@@ -73,7 +73,7 @@ class DistributionSourcesCompute:
         Returns:
             a dictionary called `sources_dict`.
         """
-        nrho = len(self.get_rho_tor_norm())
+        nrho = len(self.get_rho_tor_norm(time_slice=time_slice))
         sources_dict = {}
         counter = 0
         for source in self.ids.source:
@@ -81,8 +81,8 @@ class DistributionSourcesCompute:
             mlabel2 = unicodedata.normalize("NFKD", source.process[0].reactant_energy.description.value).encode(
                 "ascii", "ignore"
             )
-            particles = source.profiles_1d[0].particles
-            if len(source.profiles_1d[0].particles) < 1:
+            particles = source.profiles_1d[time_slice].particles
+            if len(source.profiles_1d[time_slice].particles) < 1:
                 logger.warning("distribution_sources.source[isource].profiles_1d[0].particles could not be read")
                 particles = np.asarray([np.nan] * nrho)
 

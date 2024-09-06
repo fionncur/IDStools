@@ -14,14 +14,14 @@ class DistributionSourcesView(BasePlot):
         self.distribution_sources_compute = DistributionSourcesCompute(ids)
         self.ids = ids
 
-    def view_neutrons(self, ax: plt.axes):
-        rho_tor_norm = self.distribution_sources_compute.get_rho_tor_norm()
+    def view_neutrons(self, ax: plt.axes, time_slice=0):
+        rho_tor_norm = self.distribution_sources_compute.get_rho_tor_norm(time_slice)
         nrho = len(rho_tor_norm)
         if rho_tor_norm is not None and nrho == 0:
             logger.critical("distribution_sources.source[0].profiles_1d[0].grid.rho_tor_norm) is empty")
             return
 
-        sources = self.distribution_sources_compute.get_source_info()
+        sources = self.distribution_sources_compute.get_source_info(time_slice)
         if len(sources) > 32:
             sources = dict(itertools.islice(sources.items(), 32))
         for key, source in sources.items():

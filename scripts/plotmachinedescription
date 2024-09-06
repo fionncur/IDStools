@@ -111,7 +111,7 @@ if __name__ == "__main__":
         help="Show labels",
         action="store_true",
     )
-    parser.add_argument(
+    parser.add_argument(\
         "--save",
         help="Save figure at default location",
         action="store_true",

@@ -55,14 +55,12 @@ if hostdir is None:
     )
     exit(1)
 
-ids_distribution_sources = connection.get("distribution_sources")
+ids_distribution_sources = connection.get("distribution_sources",lazy=True)
 
 time_array = ids_distribution_sources.time
 time_index, time_value = get_nearest_time(time_array, args.time)
 
-ids_slice_distribution_sources = connection.get_slice("distribution_sources", time_value, 1)
-
-nsources = len(ids_slice_distribution_sources.source)
+nsources = len(ids_distribution_sources.source)
 if nsources > 1:
     logger.info(
         f"Distribution_sources contains {nsources} sources",
@@ -72,26 +70,22 @@ else:
         f"Distribution_sources contains {nsources} source",
     )
 
-
 active = [1] * nsources  # A priori all sources are active
-ids_distribution_sources.source.resize(nsources)
 for isource in range(nsources):
-    ids_distribution_sources.source[isource].profiles_1d.resize(1)
-    ids_distribution_sources.source[isource].global_quantities.resize(1)
-    ids_distribution_sources.source[isource].process.resize(1)
     try:
-        ids_distribution_sources.source[isource].profiles_1d[0] = ids_slice_distribution_sources.source[
+        availability_test = ids_distribution_sources.source[
             isource
-        ].profiles_1d[0]
+        ].profiles_1d[time_index]
+        
     except Exception as _:
         logger.warning(
             f"Source {str(isource)} has no profiles_1d -> considered as inactive",
         )
         active[isource] = 0
     try:
-        ids_distribution_sources.source[isource].global_quantities[0] = ids_slice_distribution_sources.source[
+        availability_test= ids_distribution_sources.source[
             isource
-        ].global_quantities[0]
+        ].global_quantities[time_index]
     except Exception as _:
         if active[isource] == 1:
             logger.warning(
@@ -99,7 +93,7 @@ for isource in range(nsources):
             )
             active[isource] = 0
     try:
-        ids_distribution_sources.source[isource].process[0] = ids_slice_distribution_sources.source[isource].process[0]
+        availability_test = ids_distribution_sources.source[isource].process[time_index]
     except Exception as _:
         if active[isource] == 1:
             logger.warning(
@@ -114,7 +108,7 @@ if sum(active) == 0:
 canvas = PlotCanvas(1, 1)
 ax = canvas.add_axes(title="", xlabel="", row=0, col=0)
 distribution_sources_view = DistributionSourcesView(ids_distribution_sources)
-distribution_sources_view.view_neutrons(ax)
+distribution_sources_view.view_neutrons(ax,time_slice=time_index)
 distribution_sources_view.view_time(ax, time_value)
 
 canvas.set_text(text=f"{get_database_path(args, time_value=time_value)}")
