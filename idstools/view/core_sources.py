@@ -15,12 +15,12 @@ class CoreSourcesView:
         self.core_sources_compute = CoreSourcesCompute(ids)
         self.ids = ids
 
-    def view_sources(self):
+    def view_sources(self, time_slice):
         """
         The `view_sources` function prints information about sources, including their name, electron
         flux, energy flux, and ion flux.
         """
-        sources_dict = self.core_sources_compute.get_flux_info_from_sources()
+        sources_dict = self.core_sources_compute.get_flux_info_from_sources(time_slice)
         ion_table = Table(show_header=False)
         for _, source_dict in sources_dict.items():
             # electrons
@@ -72,7 +72,7 @@ class CoreSourcesView:
         console = Console()
         console.print(ion_table)
 
-    def view_power_profiles(self, ax, *args, **kwargs):
+    def view_power_profiles(self, ax, time_slice, *args, **kwargs):
         """
         The function `view_power_profiles` plots power profiles for different sources
 
@@ -80,11 +80,11 @@ class CoreSourcesView:
             ax: The parameter `ax` is an instance of the `Axes` class from the `matplotlib.pyplot` module.
                 It represents the axes on which the power profiles will be plotted.
         """
-        if self.core_sources_compute.is_active_source_available():
-            rho_tor_norm = self.core_sources_compute.get_rho_tor_norm()
-            single_and_total_electrons_profiles = self.core_sources_compute.get_single_and_total_electrons_profiles()
-            single_and_total_ion_profiles = self.core_sources_compute.get_single_and_total_ion_profiles()
-            source_names = self.core_sources_compute.get_source_names()
+        if self.core_sources_compute.is_active_source_available(time_slice):
+            rho_tor_norm = self.core_sources_compute.get_rho_tor_norm(time_slice)
+            single_and_total_electrons_profiles = self.core_sources_compute.get_single_and_total_electrons_profiles(time_slice)
+            single_and_total_ion_profiles = self.core_sources_compute.get_single_and_total_ion_profiles(time_slice)
+            source_names = self.core_sources_compute.get_source_names(time_slice)
             ax.set_title("Power Profiles [MW/M3]")
             ax.plot(
                 rho_tor_norm,
@@ -124,7 +124,7 @@ class CoreSourcesView:
             logger.warning("viewPowerProfiles:No active sources available")
         return -1
 
-    def view_particles_profiles(self, ax, *args, **kwargs):
+    def view_particles_profiles(self, ax, time_slice, *args, **kwargs):
         """
         The function `view_particles_profiles` plots particle density profiles for electrons and ions at different
         sources as a function of normalized toroidal flux coordinate.
@@ -133,11 +133,11 @@ class CoreSourcesView:
             ax: The parameter `ax` is an instance of the `Axes` class from the `matplotlib.pyplot` module. It
                 represents the axes on which the particles profiles will be plotted.
         """
-        if self.core_sources_compute.is_active_source_available():
-            rho_tor_norm = self.core_sources_compute.get_rho_tor_norm()
-            single_and_total_electrons_profiles = self.core_sources_compute.get_single_and_total_electrons_profiles()
-            single_and_total_ion_profiles = self.core_sources_compute.get_single_and_total_ion_profiles()
-            source_names = self.core_sources_compute.get_source_names()
+        if self.core_sources_compute.is_active_source_available(time_slice):
+            rho_tor_norm = self.core_sources_compute.get_rho_tor_norm(time_slice)
+            single_and_total_electrons_profiles = self.core_sources_compute.get_single_and_total_electrons_profiles(time_slice)
+            single_and_total_ion_profiles = self.core_sources_compute.get_single_and_total_ion_profiles(time_slice)
+            source_names = self.core_sources_compute.get_source_names(time_slice)
             ax.set_title("PARTICLES PROFILES [/M3/S]")
             ax.plot(
                 rho_tor_norm,
@@ -177,7 +177,7 @@ class CoreSourcesView:
             logger.warning("viewParticlesProfiles:No active sources available")
         return -1
 
-    def view_current_profiles(self, ax, *args, **kwargs):
+    def view_current_profiles(self, ax, time_slice,*args, **kwargs):
         """
         The function `view_current_profiles` plots current profiles.
 
@@ -185,12 +185,12 @@ class CoreSourcesView:
             ax: The parameter `ax` is an instance of the `Axes` class from the `matplotlib.pyplot` module. It
                 represents the axes on which the current profiles will be plotted.
         """
-        if self.core_sources_compute.is_active_source_available():
-            rho_tor_norm = self.core_sources_compute.get_rho_tor_norm()
+        if self.core_sources_compute.is_active_source_available(time_slice):
+            rho_tor_norm = self.core_sources_compute.get_rho_tor_norm(time_slice)
             single_and_total_electrons_and_ions_profiles = (
-                self.core_sources_compute.get_single_and_total_electrons_and_ions_profiles()
+                self.core_sources_compute.get_single_and_total_electrons_and_ions_profiles(time_slice)
             )
-            source_names = self.core_sources_compute.get_source_names()
+            source_names = self.core_sources_compute.get_source_names(time_slice)
             ax.set_title("CURRENT PROFILES [KA/M2]")
             ax.plot(
                 rho_tor_norm,
@@ -219,7 +219,7 @@ class CoreSourcesView:
             logger.warning("viewCurrentProfiles:No active sources available")
         return -1
 
-    def view_power_and_particle_waveforms(self, ax, *args, **kwargs):
+    def view_power_and_particle_waveforms(self, ax, time_slice, *args, **kwargs):
         """
         The function `view_power_and_particle_waveforms` plots power waveforms for different sources and particles
         over time.
@@ -228,20 +228,20 @@ class CoreSourcesView:
             ax: The parameter `ax` is an instance of the `Axes` class from the `matplotlib.pyplot` module. It
                 represents the axes on which the waveforms will be plotted.
         """
-        if self.core_sources_compute.is_active_source_available():
+        if self.core_sources_compute.is_active_source_available(time_slice):
             ntime = len(self.ids.time)
             if ntime == 1:
                 logger.warning("Only one time slice --> Waveforms not displayed")
             else:
                 time_array = self.ids.time
                 single_and_total_electrons_ions_waveforms = (
-                    self.core_sources_compute.get_single_and_total_electrons_ions_waveforms()
+                    self.core_sources_compute.get_single_and_total_electrons_ions_waveforms(time_slice)
                 )
                 single_and_total_electrons_waveforms = (
-                    self.core_sources_compute.get_single_and_total_electrons_waveforms()
+                    self.core_sources_compute.get_single_and_total_electrons_waveforms(time_slice)
                 )
-                single_and_total_ions_waveforms = self.core_sources_compute.get_single_and_total_ions_waveforms()
-                source_names = self.core_sources_compute.get_source_names()
+                single_and_total_ions_waveforms = self.core_sources_compute.get_single_and_total_ions_waveforms(time_slice)
+                source_names = self.core_sources_compute.get_source_names(time_slice)
                 ax.set_title("POWER AND PARTICLE WAVEFORMS")
                 ax.plot(
                     time_array,
@@ -290,7 +290,7 @@ class CoreSourcesView:
             logger.warning("viewPowerAndParticleWaveforms:No active sources available")
         return -1
 
-    def view_particles_waveform(self, ax, *args, **kwargs):
+    def view_particles_waveform(self, ax, time_slice, *args, **kwargs):
         """
         The function `view_particles_waveform` plots the waveforms of particles (electrons and ions) over time.
 
@@ -298,23 +298,23 @@ class CoreSourcesView:
             ax: The parameter "ax" is an instance of the matplotlib Axes class. It represents the axes on which
                 the waveform plot will be drawn.
         """
-        if self.core_sources_compute.is_active_source_available():
+        if self.core_sources_compute.is_active_source_available(time_slice):
             ntime = len(self.ids.time)
             if ntime == 1:
                 logger.warning("Only one time slice --> Waveforms not displayed")
             else:
                 time_array = self.ids.time
                 single_and_total_electrons_ions_waveforms = (
-                    self.core_sources_compute.get_single_and_total_electrons_ions_waveforms()
+                    self.core_sources_compute.get_single_and_total_electrons_ions_waveforms(time_slice)
                 )
 
                 single_and_total_electrons_waveforms = (
-                    self.core_sources_compute.get_single_and_total_electrons_waveforms()
+                    self.core_sources_compute.get_single_and_total_electrons_waveforms(time_slice)
                 )
 
-                single_and_total_ions_waveforms = self.core_sources_compute.get_single_and_total_ions_waveforms()
+                single_and_total_ions_waveforms = self.core_sources_compute.get_single_and_total_ions_waveforms(time_slice)
 
-                source_names = self.core_sources_compute.get_source_names()
+                source_names = self.core_sources_compute.get_source_names(time_slice)
                 ax.set_title("PARTICLES WAVEFORM")
                 ax.plot(
                     time_array,
@@ -363,7 +363,7 @@ class CoreSourcesView:
             logger.warning("viewParticlesWaveform:No active sources available")
         return -1
 
-    def view_current_waveform(self, ax, *args, **kwargs):
+    def view_current_waveform(self, ax, time_slice,*args, **kwargs):
         """
         The function `view_current_waveform` plots the current waveform for different sources and displays it.
 
@@ -371,14 +371,14 @@ class CoreSourcesView:
             ax: The parameter `ax` is an instance of the `Axes` class from the `matplotlib.pyplot` module. It
                 represents the axes on which the waveform plot will be drawn.
         """
-        if self.core_sources_compute.is_active_source_available():
+        if self.core_sources_compute.is_active_source_available(time_slice):
             ntime = len(self.ids.time)
             if ntime == 1:
                 logger.warning("Only one time slice --> Waveforms not displayed")
             else:
                 time_array = self.ids.time
-                single_and_total_current_torque = self.core_sources_compute.get_single_and_total_current_torque()
-                source_names = self.core_sources_compute.get_source_names()
+                single_and_total_current_torque = self.core_sources_compute.get_single_and_total_current_torque(time_slice)
+                source_names = self.core_sources_compute.get_source_names(time_slice)
                 ax.set_title("CURRENT WAVEFORM")
                 ax.plot(
                     time_array,
@@ -408,7 +408,7 @@ class CoreSourcesView:
             logger.warning("viewCurrentWaveform:No active sources available")
         return -1
 
-    def view_torque_waveform(self, ax, *args, **kwargs):
+    def view_torque_waveform(self, ax,time_slice, *args, **kwargs):
         """
         The function `view_torque_waveform` plots torque waveforms for different sources over time.
 
@@ -417,14 +417,14 @@ class CoreSourcesView:
                 the torque waveform plot will be drawn.
         """
 
-        if self.core_sources_compute.is_active_source_available():
+        if self.core_sources_compute.is_active_source_available(time_slice):
             ntime = len(self.ids.time)
             if ntime == 1:
                 logger.warning("Only one time slice --> Waveforms not displayed")
             else:
                 time_array = self.ids.time
-                single_and_total_current_torque = self.core_sources_compute.get_single_and_total_current_torque()
-                source_names = self.core_sources_compute.get_source_names()
+                single_and_total_current_torque = self.core_sources_compute.get_single_and_total_current_torque(time_slice)
+                source_names = self.core_sources_compute.get_source_names(time_slice)
                 # TORQUE WAVEFORM
                 ax.set_title("TORQUE WAVEFORM")
                 ax.plot(
