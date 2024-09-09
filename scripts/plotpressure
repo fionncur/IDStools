@@ -7,7 +7,6 @@ import argparse
 import logging
 import os
 
-import imas
 from rich_argparse import RichHelpFormatter
 
 from idstools.compute.common import get_nearest_time

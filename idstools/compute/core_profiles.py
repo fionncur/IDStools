@@ -24,7 +24,7 @@ class CoreProfilesCompute:
         self.volume = volume
 
     @staticmethod
-    def get_plasma_composition_with_species_concentration(ids, time_slice=0, volume=None) -> dict | int:
+    def get_plasma_composition_with_species_concentration(ids, time_slice, volume=None) -> dict | int:
         """
         Function retrives composition and species concentration in below format
         """
@@ -97,7 +97,7 @@ class CoreProfilesCompute:
         return [self.ids.profiles_1d[itime].electrons.density[0] * 1.0e-19 for itime in range(ntime)]
 
     @functools.lru_cache(maxsize=128)
-    def get_a(self, time_slice=0, element_index=0) -> list:
+    def get_a(self, time_slice, element_index=0) -> list:
         """
         This function returns a list of atomic masses for a given slice and element index.
 
@@ -219,7 +219,7 @@ class CoreProfilesCompute:
                 idsObj = connection.get('core_profiles')
                 connection.close()
                 computeObj = CoreProfilesCompute(idsObj)
-                result = computeObj.get_state_density(time_slice=0, speciesIndex=0, stateIndex=0)
+                result = computeObj.get_state_density(time_slice, speciesIndex=0, stateIndex=0)
 
                 array([4.16759116e+19, 4.17266130e+19, 4.17275806e+19, 4.17086410e+19,
                 4.16751781e+19, 4.16983762e+19, 4.17344996e+19, 4.17944658e+19,
@@ -559,8 +559,8 @@ class CoreProfilesCompute:
         table_mendeleiev = mend.create_table_mendeleiev()
         nspecies = len(self.ids.profiles_1d[time_slice].ion)
 
-        a = list(map(int, self.get_a()))
-        z = list(map(int, self.get_z()))
+        a = list(map(int, self.get_a(time_slice)))
+        z = list(map(int, self.get_z(time_slice)))
         return [table_mendeleiev[z[ispecies]][a[ispecies]].element for ispecies in range(nspecies)]
 
     def get_labels(self, time_slice: int = 0) -> list:
@@ -591,7 +591,7 @@ class CoreProfilesCompute:
         logger.debug(f"Species identification :{labels}")
         return labels
 
-    def combine_species_when_appear_twice(self, species, nspec_over_ntot, nspec_over_ne, nspec_over_nmaj, time_slice=0):
+    def combine_species_when_appear_twice(self, species, nspec_over_ntot, nspec_over_ne, nspec_over_nmaj, time_slice):
         """
         This is helper function which checks if there are duplicate entries of species and combine the species.
         This is in place change of arrays
@@ -682,7 +682,7 @@ class CoreProfilesCompute:
             psi = -self.ids.profiles_1d[time_slice].grid.psi
         return psi
 
-    def get_ion_pressure_properties(self, time_slice=0):
+    def get_ion_pressure_properties(self, time_slice):
         """
         The `get_ion_pressure_properties` function calculates and returns the total thermal pressure,
         fast parallel pressure, and fast perpendicular pressure of ions in a given set of profiles.
@@ -697,11 +697,11 @@ class CoreProfilesCompute:
         pressure_ion_fast_perpendicular = 0.0
         for ion in self.ids.profiles_1d[time_slice].ion:
             if len(ion.pressure_thermal) == 0:
-                logger.warn("Empty profiles_1d[0].ion.pressure_thermal")
+                logger.warn(f"Empty profiles_1d[{time_slice}].ion.pressure_thermal")
             if len(ion.pressure_fast_parallel) == 0:
-                logger.warn("Empty profiles_1d[0].ion.pressure_fast_parallel")
+                logger.warn(f"Empty profiles_1d[{time_slice}].ion.pressure_fast_parallel")
             if len(ion.pressure_fast_perpendicular) == 0:
-                logger.warn("Empty profiles_1d[0].ion.pressure_fast_perpendicular")
+                logger.warn(f"Empty profiles_1d[{time_slice}].ion.pressure_fast_perpendicular")
             pressure_ion_thermal = pressure_ion_thermal + ion.pressure_thermal
             pressure_ion_fast_parallel = (
                 pressure_ion_fast_parallel + np.asarray([np.nan] * nrho)
@@ -737,7 +737,7 @@ class CoreProfilesCompute:
             "pressure_ion_fast_perpendicular": pressure_ion_fast_perpendicular,
         }
 
-    def get_electrons_pressure_properties(self, time_slice=0):
+    def get_electrons_pressure_properties(self, time_slice):
         """
         The  function `get_electrons_pressure_properties` calculates and returns various pressure properties
         of electrons, including maximum pressure and individual pressure components.
@@ -758,13 +758,13 @@ class CoreProfilesCompute:
         pressure_electron_fast_parallel = self.ids.profiles_1d[time_slice].electrons.pressure_fast_parallel
         pressure_electron_fast_perpendicular = self.ids.profiles_1d[time_slice].electrons.pressure_fast_perpendicular
         if len(pressure_electron_total) == 0:
-            logger.warn("Empty profiles_1d[0].electrons.pressure")
+            logger.warn(f"Empty profiles_1d[{time_slice}].electrons.pressure")
         if len(pressure_electron_thermal) == 0:
-            logger.warn("Empty profiles_1d[0].electrons.pressure_thermal")
+            logger.warn(f"Empty profiles_1d[{time_slice}].electrons.pressure_thermal")
         if len(pressure_electron_fast_parallel) == 0:
-            logger.warn("Empty profiles_1d[0].electrons.pressure_fast_parallel")
+            logger.warn(f"Empty profiles_1d[{time_slice}].electrons.pressure_fast_parallel")
         if len(pressure_electron_fast_perpendicular) == 0:
-            logger.warn("Empty profiles_1d[0].electrons.pressure_fast_perpendicular")
+            logger.warn(f"Empty profiles_1d[{time_slice}].electrons.pressure_fast_perpendicular")
         pressure_electron_total = (
             np.asarray([np.nan] * nrho) if len(pressure_electron_total) == 0 else pressure_electron_total
         )
@@ -797,7 +797,7 @@ class CoreProfilesCompute:
             "pressure_electron_fast_perpendicular": pressure_electron_fast_perpendicular,
         }
 
-    def get_pressure(self, time_slice=0):
+    def get_pressure(self, time_slice):
         """
         The function `get_pressure` returns a dictionary containing the thermal pressure, parallel pressure,
         and perpendicular pressure.
@@ -816,11 +816,11 @@ class CoreProfilesCompute:
         pressure_parallel = self.ids.profiles_1d[time_slice].pressure_parallel
         pressure_perpendicular = self.ids.profiles_1d[time_slice].pressure_perpendicular
         if len(pressure_thermal) == 0:
-            logger.warn("Empty profiles_1d[0].pressure_thermal")
+            logger.warn(f"Empty profiles_1d[{time_slice}].pressure_thermal")
         if len(pressure_parallel) == 0:
-            logger.warn("Empty profiles_1d[0].pressure_fast_parallel")
+            logger.warn(f"Empty profiles_1d[{time_slice}].pressure_fast_parallel")
         if len(pressure_perpendicular) == 0:
-            logger.warn("Empty profiles_1d[0].pressure_fast_perpendicular")
+            logger.warn(f"Empty profiles_1d[{time_slice}].pressure_fast_perpendicular")
         pressure_thermal = np.asarray([np.nan] * nrho) if len(pressure_thermal) == 0 else pressure_thermal
         pressure_parallel = np.asarray([np.nan] * nrho) if len(pressure_parallel) == 0 else pressure_parallel
         pressure_perpendicular = (
@@ -867,7 +867,7 @@ class CoreProfilesCompute:
             pressure_ion_total = self.ids.profiles_1d[time_slice].pressure_ion_total
         else:
             logger.critical(
-                "core_profiles.profiles_1d[0].pressure_ion_total could not be read",
+                f"core_profiles.profiles_1d[{time_slice}].pressure_ion_total could not be read",
             )
             if len(self.ids.profiles_1d[time_slice].ion[0].pressure) > 1:
                 pressure_ion_total = 0.0
@@ -875,11 +875,11 @@ class CoreProfilesCompute:
                     pressure_ion_total = pressure_ion_total + ion.pressure
             else:
                 logger.critical(
-                    "core_profiles.profiles_1d[0].ion[0].pressure could not be read",
+                    f"core_profiles.profiles_1d[{time_slice}].ion[0].pressure could not be read",
                 )
         return pressure_ion_total
 
-    def get_profiles(self, time_slice=0):
+    def get_profiles(self, time_slice):
         """
         The function `get_profiles` retrieves and organizes various profiles from a data source for
         further analysis.
@@ -913,31 +913,31 @@ class CoreProfilesCompute:
         # J_ohmic profile
         if len(self.ids.profiles_1d[time_slice].j_ohmic) < 1:
             logger.critical("core_profiles.profiles_1d[" + str(time_slice) + "].j_ohmic could not be read")
-            self.ids.profiles_1d[0].j_ohmic = np.asarray([np.nan] * nrho)
+            self.ids.profiles_1d[time_slice].j_ohmic = np.asarray([np.nan] * nrho)
 
         # J_total profile
         if len(self.ids.profiles_1d[time_slice].j_total) < 1:
             logger.critical("core_profiles.profiles_1d[" + str(time_slice) + "].j_total could not be read")
-            self.ids.profiles_1d[0].j_total = np.asarray([np.nan] * nrho)
+            self.ids.profiles_1d[time_slice].j_total = np.asarray([np.nan] * nrho)
 
         # q-profile
         if len(self.ids.profiles_1d[time_slice].q) < 1:
             logger.critical("core_profiles.profiles_1d[" + str(time_slice) + "].q could not be read")
-            self.ids.profiles_1d[0].q = np.asarray([np.nan] * nrho)
+            self.ids.profiles_1d[time_slice].q = np.asarray([np.nan] * nrho)
 
         # Magnetic shear profile
         if len(self.ids.profiles_1d[time_slice].magnetic_shear) < 1:
             logger.critical("core_profiles.profiles_1d[" + str(time_slice) + "].magnetic_shear could not be read")
-            self.ids.profiles_1d[0].magnetic_shear = np.asarray([np.nan] * nrho)
+            self.ids.profiles_1d[time_slice].magnetic_shear = np.asarray([np.nan] * nrho)
 
         if len(self.ids.profiles_1d[time_slice].q) != nrho:
             logger.critical("--------------------------------------------------------------")
             logger.critical("Dimensions of input core profiles are not consistent:")
-            logger.critical("  core_profiles.profiles_1d[0].grid.rho_tor(_norm)")
-            logger.critical("  and core_profiles.profiles_1d[0].q")
+            logger.critical(f"  core_profiles.profiles_1d[{time_slice}].grid.rho_tor_norm)")
+            logger.critical(f"  and core_profiles.profiles_1d[{time_slice}].q")
             logger.critical("  have different dimensions:")
-            logger.critical(f"- len(core_profiles.profiles_1d[0].grid.rho_tor(_norm))= {nrho}")
-            logger.critical(f"- len(core_profiles.profiles_1d[0].q = {len(self.ids.profiles_1d[0].q)}")
+            logger.critical(f"- len(core_profiles.profiles_1d[{time_slice}].grid.rho_tor_norm))= {nrho}")
+            logger.critical(f"- len(core_profiles.profiles_1d[{time_slice}].q = {len(self.ids.profiles_1d[time_slice].q)}")
             logger.critical("----> Aborted.")
             logger.critical("--------------------------------------------------------------")
             return None
@@ -953,7 +953,7 @@ class CoreProfilesCompute:
         profiles["magnetic_shear"] = self.ids.profiles_1d[time_slice].magnetic_shear
         return profiles
 
-    def getnrho(self, time_slice=0):
+    def getnrho(self, time_slice):
         """
         This function `getnrho` returns the number of elements in the `rho_tor_norm` or `rho_tor` grid
         based on the provided slice index.

@@ -181,8 +181,8 @@ class EquilibriumView(BasePlot):
         ax.set_xlim((-data["r0"] - data["amin"]) * 1.1, (data["r0"] + data["amin"]) * 1.1)
         ax.set_aspect("equal", adjustable="box")
 
-    def plotequilibrium(self, ax):
-        quantities = self.compute_obj.get2d_cartesian_grid()
+    def plotequilibrium(self, ax, time_slice):
+        quantities = self.compute_obj.get2d_cartesian_grid(time_slice)
         if quantities is not None:
             r2d, z2d, psi2d = (
                 quantities["r2d"],

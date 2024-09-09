@@ -14,7 +14,7 @@ class DistributionSourcesView(BasePlot):
         self.distribution_sources_compute = DistributionSourcesCompute(ids)
         self.ids = ids
 
-    def view_neutrons(self, ax: plt.axes, time_slice=0):
+    def view_neutrons(self, ax: plt.axes, time_slice):
         rho_tor_norm = self.distribution_sources_compute.get_rho_tor_norm(time_slice)
         nrho = len(rho_tor_norm)
         if rho_tor_norm is not None and nrho == 0:

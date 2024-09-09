@@ -27,7 +27,7 @@ class EquilibriumCompute:
         """
         self.ids = ids
 
-    def get2d_cartesian_grid(self, time_slice: int = 0, profiles2d_index: int = 0) -> Union[dict, None]:
+    def get2d_cartesian_grid(self, time_slice: int, profiles2d_index: int = 0) -> Union[dict, None]:
         """
         This function returns a dictionary containing 2D Cartesian grid coordinates and psi values from
         an equilibrium IDS object.
@@ -101,7 +101,7 @@ class EquilibriumCompute:
 
         return {"r2d": r2d, "z2d": z2d, "psi2d": psi2d}
 
-    def get_rho2d(self, time_slice: int = 0, profiles2d_index: int = 0) -> Union[np.ndarray, None]:
+    def get_rho2d(self, time_slice: int, profiles2d_index: int = 0) -> Union[np.ndarray, None]:
         """
         This function calculates rho(R,Z) using toroidal flux  and returns a dictionary containing the result.
 
@@ -293,7 +293,7 @@ class EquilibriumCompute:
             for time_index in range(len(self.ids.time_slice))
         ]
 
-    def get_top_view(self, time_slice: int = 0) -> dict:
+    def get_top_view(self, time_slice: int) -> dict:
         """
         The function returns data for plotting the top view of a 2D shape.
 
@@ -323,7 +323,7 @@ class EquilibriumCompute:
         top_view_dict["yplap"] = (r0 + amin) * np.sin(phit)
         return top_view_dict
 
-    def getmrho(self, time_slice: int = 0):
+    def getmrho(self, time_slice: int):
         """
         This function calculates the number of elements in a list that are less than zero.
 
@@ -335,13 +335,13 @@ class EquilibriumCompute:
             less than 0.
         """
         mrho = 0
-        for i in range(len(self.ids.time_slice[0].profiles_1d.rho_tor_norm)):
-            if self.ids.time_slice[0].profiles_1d.rho_tor_norm[i] < 0:
+        for i in range(len(self.ids.time_slice[time_slice].profiles_1d.rho_tor_norm)):
+            if self.ids.time_slice[time_slice].profiles_1d.rho_tor_norm[i] < 0:
                 mrho = mrho + 1
 
         return mrho
 
-    def getgm3(self, r, time_slice: int = 0):
+    def getgm3(self, r, time_slice: int):
         """
         The function `getgm3` calculates and returns a value based on interpolation and division
         operations.
@@ -369,7 +369,7 @@ class EquilibriumCompute:
         )
         return gm3
 
-    def getgm7(self, r, time_slice: int = 0):
+    def getgm7(self, r, time_slice: int):
         """
         The function `getgm7` calculates and returns the normalized value of gm7 at a given radial
         position `r` for a specific time slice.

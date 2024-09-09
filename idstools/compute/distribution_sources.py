@@ -16,7 +16,7 @@ class DistributionSourcesCompute:
     def __init__(self, ids):
         self.ids = ids
 
-    def get_rho_tor_norm(self, time_slice: int = 0) -> Union[None, np.ndarray]:
+    def get_rho_tor_norm(self, time_slice: int, source_index=0) -> Union[None, np.ndarray]:
         """
         The function `get_rho_tor_norm` returns the normalized toroidal rho values from a given time slice
         of a source.
@@ -30,19 +30,19 @@ class DistributionSourcesCompute:
         """
         rho_tor_norm = None
         try:
-            rho_tor_norm = self.ids.source[0].profiles_1d[time_slice].grid.rho_tor_norm
-            if len(rho_tor_norm) == 0 and len(self.ids.source[0].profiles_1d[time_slice].grid.rho_tor) > 0:
-                nrho = len(self.ids.source[0].profiles_1d[time_slice].grid.rho_tor)
+            rho_tor_norm = self.ids.source[source_index].profiles_1d[time_slice].grid.rho_tor_norm
+            if len(rho_tor_norm) == 0 and len(self.ids.source[source_index].profiles_1d[time_slice].grid.rho_tor) > 0:
+                nrho = len(self.ids.source[source_index].profiles_1d[time_slice].grid.rho_tor)
                 rho_tor_norm = (
-                    self.ids.source[0].profiles_1d[time_slice].grid.rho_tor
-                    / self.ids.source[0].profiles_1d[time_slice].grid.rho_tor[nrho - 1]
+                    self.ids.source[source_index].profiles_1d[time_slice].grid.rho_tor
+                    / self.ids.source[source_index].profiles_1d[time_slice].grid.rho_tor[nrho - 1]
                 )
         except Exception as e:
             logger.debug(f"{e}")
-            logger.critical("distribution_sources.source[0].profiles_1d[0].grid.rho_tor(_norm) could not be read")
+            logger.critical(f"distribution_sources.source[{source_index}].profiles_1d[{time_slice}].grid.rho_tor_norm) could not be read")
         return rho_tor_norm
 
-    def get_volume(self, time_slice: int = 0) -> Union[None, np.ndarray]:
+    def get_volume(self, time_slice: int, source_index=0) -> Union[None, np.ndarray]:
         """
         The function `get_volume` retrieves the volume from a specific time slice of a source's profiles.
 
@@ -57,15 +57,15 @@ class DistributionSourcesCompute:
         """
         volume = None
         try:
-            volume = self.ids.source[0].profiles_1d[time_slice].grid.volume
+            volume = self.ids.source[source_index].profiles_1d[time_slice].grid.volume
         except Exception as e:
             logger.debug(f"{e}")
             logger.critical(
-                f"distribution_sources.source[0].profiles_1d[{time_slice}].grid.volume" "could not be read {e}"
+                f"distribution_sources.source[{source_index}].profiles_1d[{time_slice}].grid.volume" "could not be read {e}"
             )
         return volume
 
-    def get_source_info(self, time_slice=0):
+    def get_source_info(self, time_slice, process_index=0):
         """
         The function `get_source_info` retrieves information about sources, including labels, particle data, and power,
         and returns it in a dictionary format.
@@ -73,23 +73,23 @@ class DistributionSourcesCompute:
         Returns:
             a dictionary called `sources_dict`.
         """
-        nrho = len(self.get_rho_tor_norm(time_slice=time_slice))
+        nrho = len(self.get_rho_tor_norm(time_slice))
         sources_dict = {}
         counter = 0
-        for source in self.ids.source:
-            mlabel1 = unicodedata.normalize("NFKD", source.process[0].type.description.value).encode("ascii", "ignore")
-            mlabel2 = unicodedata.normalize("NFKD", source.process[0].reactant_energy.description.value).encode(
+        for isource,source in enumerate(self.ids.source):
+            mlabel1 = unicodedata.normalize("NFKD", source.process[process_index].type.description.value).encode("ascii", "ignore")
+            mlabel2 = unicodedata.normalize("NFKD", source.process[process_index].reactant_energy.description.value).encode(
                 "ascii", "ignore"
             )
             particles = source.profiles_1d[time_slice].particles
             if len(source.profiles_1d[time_slice].particles) < 1:
-                logger.warning("distribution_sources.source[isource].profiles_1d[0].particles could not be read")
+                logger.warning(f"distribution_sources.source[{isource}].profiles_1d[{time_slice}].particles could not be read")
                 particles = np.asarray([np.nan] * nrho)
 
             source_info = {
                 "label": (mlabel1 + b"; " + mlabel2).decode(),
                 "particles": particles,
-                "powerInKW": source.global_quantities[0].power * 1.0e-3,
+                "powerInKW": source.global_quantities[time_slice].power * 1.0e-3,
             }
             sources_dict[counter] = source_info
             counter = counter + 1
