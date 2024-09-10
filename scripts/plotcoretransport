@@ -103,7 +103,7 @@ if len(ids_slice_equilibrium.time) == 0:
     logger.critical("IDS:equilibrium Time vector is empty! aborting")
     sys.exit(1)
 
-time_value = ids_slice_core_transport.time[0]
+time_value = ids_slice_core_transport.time[-1]
 
 try:
     model_index = [t.identifier.name for t in ids_slice_core_transport.model].index("transport_solver")

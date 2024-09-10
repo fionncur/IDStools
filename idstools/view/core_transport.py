@@ -19,11 +19,11 @@ class CoreTransportView:
         self.core_transport_compute = CoreTransportCompute(ids)
         self.ids = ids
 
-    def view_fluxes(self):
+    def view_fluxes(self, time_slice):
         """
         The `viewFluxes` function prints out flux information for electrons and ions.
         """
-        fluxes_dict = self.core_transport_compute.get_fluxes()
+        fluxes_dict = self.core_transport_compute.get_fluxes(time_slice)
         ion_table = Table(show_header=False)
         for _, flux_dict in fluxes_dict.items():
             if flux_dict["particles_flux"] is None:
@@ -79,24 +79,24 @@ class CoreTransportView:
         ids_core_transport,
         ids_core_profiles,
         ids_equilibrium,
-        time_index,
+        time_slice,
         model_index,
         logscale=False,
     ):
         tm = ids_core_transport.model[model_index]
-        v = tm.profiles_1d[time_index].grid_d.volume
-        r = tm.profiles_1d[time_index].grid_d.rho_tor_norm
-        s = tm.profiles_1d[time_index].grid_d.area
+        v = tm.profiles_1d[time_slice].grid_d.volume
+        r = tm.profiles_1d[time_slice].grid_d.rho_tor_norm
+        s = tm.profiles_1d[time_slice].grid_d.area
         vp_per__s = np.gradient(v, r) / s
 
         e_compute = EquilibriumCompute(ids_equilibrium)
-        gm3 = e_compute.getgm3(r, time_slice=time_index)
-        gm7 = e_compute.getgm7(r, time_slice=time_index)
+        gm3 = e_compute.getgm3(r, time_slice=time_slice)
+        gm7 = e_compute.getgm7(r, time_slice=time_slice)
 
         counter = 0
         for t_i, c_i in zip(
             tm.profiles_1d[-1].ion,
-            ids_core_profiles.profiles_1d[time_index].ion,
+            ids_core_profiles.profiles_1d[time_slice].ion,
         ):
             self._validate_ions_data(t_i, c_i, r, model_index)
 
@@ -120,24 +120,24 @@ class CoreTransportView:
         ids_core_transport,
         ids_core_profiles,
         ids_equilibrium,
-        time_index,
+        time_slice,
         model_index,
         logscale=False,
     ):
         tm = ids_core_transport.model[model_index]
-        v = tm.profiles_1d[time_index].grid_d.volume
-        r = tm.profiles_1d[time_index].grid_d.rho_tor_norm
-        s = tm.profiles_1d[time_index].grid_d.area
+        v = tm.profiles_1d[time_slice].grid_d.volume
+        r = tm.profiles_1d[time_slice].grid_d.rho_tor_norm
+        s = tm.profiles_1d[time_slice].grid_d.area
         vp_per__s = np.gradient(v, r) / s
 
         e_compute = EquilibriumCompute(ids_equilibrium)
-        gm3 = e_compute.getgm3(r, time_slice=time_index)
-        gm7 = e_compute.getgm7(r, time_slice=time_index)
+        gm3 = e_compute.getgm3(r, time_slice=time_slice)
+        gm7 = e_compute.getgm7(r, time_slice=time_slice)
 
         counter = 0
         for t_i, c_i in zip(
             tm.profiles_1d[-1].ion,
-            ids_core_profiles.profiles_1d[time_index].ion,
+            ids_core_profiles.profiles_1d[time_slice].ion,
         ):
             self._validate_ions_data(t_i, c_i, r, model_index)
             gamma_i = vp_per__s * (
@@ -184,22 +184,22 @@ class CoreTransportView:
         ids_core_transport,
         ids_core_profiles,
         ids_equilibrium,
-        time_index,
+        time_slice,
         model_index,
         logscale=False,
     ):
         tm = ids_core_transport.model[model_index]
-        v = tm.profiles_1d[time_index].grid_d.volume
-        r = tm.profiles_1d[time_index].grid_d.rho_tor_norm
-        s = tm.profiles_1d[time_index].grid_d.area
+        v = tm.profiles_1d[time_slice].grid_d.volume
+        r = tm.profiles_1d[time_slice].grid_d.rho_tor_norm
+        s = tm.profiles_1d[time_slice].grid_d.area
         vp_per__s = np.gradient(v, r) / s
 
-        t_e = tm.profiles_1d[time_index].electrons
-        c_e = ids_core_profiles.profiles_1d[time_index].electrons
+        t_e = tm.profiles_1d[time_slice].electrons
+        c_e = ids_core_profiles.profiles_1d[time_slice].electrons
         self._validate_electrons(t_e, c_e, r, model_index)
         e_compute = EquilibriumCompute(ids_equilibrium)
-        gm3 = e_compute.getgm3(r, time_slice=time_index)
-        gm7 = e_compute.getgm7(r, time_slice=time_index)
+        gm3 = e_compute.getgm3(r, time_slice=time_slice)
+        gm7 = e_compute.getgm7(r, time_slice=time_slice)
 
         q_e_conductive = (
             vp_per__s
@@ -240,15 +240,15 @@ class CoreTransportView:
         ax,
         ids_core_transport,
         ids_core_profiles,
-        time_index,
+        time_slice,
         model_index,
         logscale=False,
     ):
         tm = ids_core_transport.model[model_index]
-        r = tm.profiles_1d[time_index].grid_d.rho_tor_norm
+        r = tm.profiles_1d[time_slice].grid_d.rho_tor_norm
 
-        t_e = tm.profiles_1d[time_index].electrons
-        c_e = ids_core_profiles.profiles_1d[time_index].electrons
+        t_e = tm.profiles_1d[time_slice].electrons
+        c_e = ids_core_profiles.profiles_1d[time_slice].electrons
         self._validate_electrons(t_e, c_e, r, model_index)
         gamma_e = np.array([t.particles.flux * t.z_ion for t in tm.profiles_1d[-1].ion]).sum(axis=0)
 

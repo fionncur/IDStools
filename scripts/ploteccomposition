@@ -70,14 +70,14 @@ if conn is None:
     logger.critical("----> Aborted.")
     exit(1)
 
-ids_waves = conn.get("waves")
-conn.close()
+ids_waves = conn.get("waves", lazy=True)
 
 # TIME VECTOR AND TIME INDEX
 # ---------------------------
 time_array = ids_waves.time
+print(time_array)
 ntime = len(time_array)
-time_index, time_value = get_nearest_time(time_array, args.time)
+time_slice, time_value = get_nearest_time(time_array, args.time)
 time = time_value
 rows = 2
 if ntime == 1:
@@ -92,12 +92,12 @@ if ntime != 1:
 
 waves_view = WavesView(ids_waves)
 
-waves_view.display_e_c_launchers_info(time_index=time_index)
-waves_view.plot_ecrh_profiles(ax1, time_index=time_index, verbose=args.verbose)
-waves_view.plot_eccd_profiles(ax2, time_index=time_index, verbose=args.verbose)
+waves_view.display_e_c_launchers_info(time_slice=time_slice)
+waves_view.plot_ecrh_profiles(ax1, time_slice=time_slice, verbose=args.verbose)
+waves_view.plot_eccd_profiles(ax2, time_slice=time_slice, verbose=args.verbose)
 if ntime != 1:
-    waves_view.plot_ecrh_waveform(ax3, time_index=time_index)
-    waves_view.plot_e_c_c_d_waveform(ax4, time_index=time_index)
+    waves_view.plot_ecrh_waveform(ax3, time_slice=time_slice)
+    waves_view.plot_e_c_c_d_waveform(ax4, time_slice=time_slice)
 
 canvas.set_text(text=f"{get_database_path(args, time_value=time_value)}")
 canvas.fig.suptitle(get_title(args, "EC Composition", time_value), size=12)
@@ -113,7 +113,7 @@ if args.save:
     canvas.save(fname)
 else:
     canvas.show()
-
+conn.close()
 # def StrToList(string):
 #     if string[0] == "[":
 #         slist = string.split(",")
