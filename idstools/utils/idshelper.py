@@ -7,8 +7,8 @@ import inspect
 import logging
 import time
 import types
-
-import imas
+import sys
+import imaspy
 import numpy as np
 import pandas as pd
 from packaging import version
@@ -54,13 +54,13 @@ def get_ids_attributes(idsobj: object) -> list:
         return []
 
 
-def get_ids_size(db_entry_object: imas.DBEntry, ids_names=None) -> dict:
+def get_ids_size(db_entry_object, ids_names=None) -> dict:
     """
     The function `get_ids_size` retrieves the size of IDS objects from a database entry and returns a dictionary
     containing the size in bytes and the time taken to read each object.
 
     Args:
-        db_entry_object (imas.DBEntry): The `db_entry_object` parameter is an object of type `imas.DBEntry`. It
+        db_entry_object (): The `db_entry_object` parameter is an object of type ``. It
             is used to access the data in the IMAS database.
         ids_names: idsNames is a list of IDS names. If it is not provided, it defaults to None.
 
@@ -68,20 +68,28 @@ def get_ids_size(db_entry_object: imas.DBEntry, ids_names=None) -> dict:
         a dictionary containing information about the size and time taken to read IDS objects from a database
         entry. The dictionary has the following structure:
     """
+    
     if ids_names is None:
-        ids_names = [i.value for i in imas.IDSName]
+        factory = imaspy.IDSFactory()
+        ids_names = factory.ids_names()
     if type(ids_names) is str:
         ids_names = ids_names.split(",")
     ids_size_dict = {}
     for ids_name in track(ids_names, description="[green]Processing..."):
-        occurrences_count = eval(f"imas.{ids_name}.getMaxOccurrences()")
+        occurrence_list = db_entry_object.list_all_occurrences(ids_name)
+        if len(occurrence_list) ==0:
+            continue
+        occurrences_count=max(occurrence_list)
+        
         for o in range(occurrences_count + 1):
-            homogeneous_time = db_entry_object.partial_get(ids_name, "ids_properties/homogeneous_time", occurrence=o)
+            ids_object = db_entry_object.get(
+                    ids_name,  occurrence=o
+                )
+            homogeneous_time=ids_object.ids_properties.homogeneous_time
             if homogeneous_time >= 0:
                 field = f"{ids_name}/{o}"
                 ids_size_dict[field] = {}
                 start_time = time.time()
-                ids_object = db_entry_object.get(ids_name, occurrence=o)
                 ids_size_dict[field]["time"] = time.time() - start_time
                 ids_size_dict[field]["bytes"] = get_object_size(ids_object)
                 print(
@@ -96,12 +104,12 @@ def get_ids_size(db_entry_object: imas.DBEntry, ids_names=None) -> dict:
     return ids_size_dict
 
 
-def get_all_ids_size(db_entry_object: imas.DBEntry):
+def get_all_ids_size(db_entry_object):
     """
     The function `get_all_ids_size` calculates the total size in bytes of all IDS in a given `db_entry_object`.
 
     Args:
-        db_entry_object (imas.DBEntry): The parameter `db_entry_object` is of type `imas.DBEntry`.
+        db_entry_object : The parameter `db_entry_object` is of type .
 
     Returns:
         the total size in bytes of all the IDS in the given `db_entry_object`.
@@ -111,12 +119,12 @@ def get_all_ids_size(db_entry_object: imas.DBEntry):
     return total_bytes
 
 
-def get_all_ids_get_time(db_entry_object: imas.DBEntry):
+def get_all_ids_get_time(db_entry_object):
     """
     The function `get_all_ids_get_time` calculates the total time for all IDS in a given `db_entry_object`.
 
     Args:
-        db_entry_object (imas.DBEntry): The parameter `db_entry_object` is of type `imas.DBEntry`.
+        db_entry_object : The parameter `db_entry_object` is of type .
 
     Returns:
         the total time to get all the IDSes in the given `db_entry_object`.
@@ -127,24 +135,29 @@ def get_all_ids_get_time(db_entry_object: imas.DBEntry):
 
 def get_object_size(obj: object) -> int:
     object_size = 0
-
-    if isinstance(obj, str):
-        object_size += len(obj)
-    elif isinstance(obj, np.ndarray):
-        object_size += obj.nbytes
-    elif isinstance(obj, int):
-        object_size += 4
-    elif isinstance(obj, float):
-        object_size += 8
-    elif isinstance(obj, list):
+    
+    if isinstance(obj, imaspy.ids_primitive.IDSInt0D)  or isinstance(obj, imaspy.ids_primitive.IDSString0D) or isinstance(obj, imaspy.ids_primitive.IDSComplex0D) or isinstance(obj, imaspy.ids_primitive.IDSFloat0D) or isinstance(obj, imaspy.ids_primitive.IDSNumericArray) or isinstance(obj, imaspy.ids_primitive.IDSPrimitive) or isinstance(obj, imaspy.ids_primitive.IDSString0D) or isinstance(obj, imaspy.ids_primitive.IDSString1D):
+        if isinstance(obj.value, str):
+            object_size += len(obj.value)
+        elif isinstance(obj.value, np.ndarray):
+            object_size += obj.value.nbytes
+        elif isinstance(obj.value, int):
+            object_size += 4
+        elif isinstance(obj.value, float):
+            object_size += 8
+        elif isinstance(obj.value, list):
+            for obj_item in obj:
+                object_size += get_object_size(obj_item)
+        else:
+            print(f"Not implemented {type(obj.value)}  ->  {obj}" )
+    elif isinstance(obj, imaspy.ids_struct_array.IDSStructArray):
         for obj_item in obj:
             object_size += get_object_size(obj_item)
-    elif isinstance(obj, dict):
-        for obj_value in obj.values():
+    elif isinstance(obj, imaspy.ids_structure.IDSStructure):
+        for obj_value in obj:
             object_size += get_object_size(obj_value)
     else:
-        for obj_value in obj.__dict__.values():
-            object_size += get_object_size(obj_value)
+        print(f"Not implemented {type(obj)}  ->  {obj}" )
     return object_size
 
 
@@ -156,15 +169,16 @@ def get_ids_types():
         The function `get_ids_types()` is returning a list of values of all the `value` attributes of the `IDSName`
         objects in the `imas` module.
     """
-    return [ids.value for ids in list(imas.IDSName)]
+    factory = imaspy.IDSFactory()
+    return factory.ids_names()
 
 
-def get_available_ids_and_occurrences(db_entry_object: imas.DBEntry, time_mode=None, get_comment=False):
+def get_available_ids_and_occurrences(db_entry_object, time_mode=None, get_comment=False):
     """
     This function returns a list of pairs of available IDS types and their occurrences in a given DBEntry object.
 
     Args:
-        db_entry_object (imas.DBEntry): An object of the class imas.DBEntry, which represents an open DBEntry in
+        db_entry_object (): An object of the class , which represents an open DBEntry in
             which available IDSs will be looked for.
         time_mode: The time mode of interest for the IDSs in the given DBEntry. It can be one of the following
         get_comment: Output ids_properties.comment field for each found occurrence
@@ -180,21 +194,28 @@ def get_available_ids_and_occurrences(db_entry_object: imas.DBEntry, time_mode=N
     }
     availableidslist = []
     for idstype in get_ids_types():
-        for occ in range(getattr(imas, idstype)().getMaxOccurrences()):
+        occurrence_list = db_entry_object.list_all_occurrences(idstype)
+        if len(occurrence_list) ==0:
+            continue
+        max_occurrences=max(occurrence_list)
+        for occ in range(max_occurrences + 1):
             homogeneous_time = ""
             comment = ""
             occ_type = ""
-            homogeneous_time = db_entry_object.partial_get(idstype, "ids_properties/homogeneous_time", occurrence=occ)
-            comment = db_entry_object.partial_get(idstype, "ids_properties/comment", occurrence=occ)
+            ids_object = db_entry_object.get(
+                    idstype,  occurrence=occ, lazy=True
+                )
+            homogeneous_time=ids_object.ids_properties.homogeneous_time
+            comment = ids_object.ids_properties.homogeneous_time.comment
             try:
                 occ_type_text = ""
-                occ_type = db_entry_object.partial_get(idstype, "ids_properties/occurrence_type", occurrence=occ)
-                if occ_type.index != imas.imasdef.EMPTY_INT:
+                occ_type = ids_object.ids_properties.occurrence_type
+                if occ_type.index != imaspy.ids_defs.EMPTY_INT:
                     occ_type_text = occ_type_dict[occ_type.index]
                     comment += f" [occurrence type = {occ_type_text}]"
             except Exception as e:
                 logger.debug(f"{e}")
-            if homogeneous_time != imas.imasdef.EMPTY_INT and (time_mode is None or time_mode == homogeneous_time):
+            if homogeneous_time != imaspy.ids_defs.EMPTY_INT and (time_mode is None or time_mode == homogeneous_time):
                 if get_comment is True:
                     availableidslist.append((idstype, occ, comment))
                 else:
@@ -202,13 +223,13 @@ def get_available_ids_and_occurrences(db_entry_object: imas.DBEntry, time_mode=N
     return availableidslist
 
 
-def get_available_ids_and_times(db_entry_object: imas.DBEntry) -> list:
+def get_available_ids_and_times(db_entry_object) -> list:
     """
     The function `get_available_ids_and_times` retrieves available IDS names and corresponding time
     arrays from a given `db_entry_object`.
 
     Args:
-        db_entry_object (imas.DBEntry): The `db_entry_object` parameter is an object of type `imas.DBEntry`.
+        db_entry_object: The `db_entry_object` parameter.
 
     Returns:
         a list of tuples. Each tuple contains an IDS name and a corresponding time array.
@@ -216,28 +237,32 @@ def get_available_ids_and_times(db_entry_object: imas.DBEntry) -> list:
 
     result = []
     for _ids_name in get_ids_types():
-        max_occurrences = eval(f"imas.{_ids_name}.getMaxOccurrences()")
+        occurrence_list = db_entry_object.list_all_occurrences(_ids_name)
+        if len(occurrence_list) ==0:
+            continue
+        max_occurrences=max(occurrence_list)
+
         for occurrence in range(max_occurrences + 1):
             time_array = None
-            ids_name = _ids_name if occurrence == 0 else f"{_ids_name}/{occurrence}"
             try:
-                homogeneous_time = db_entry_object.partial_get(
-                    _ids_name, "ids_properties/homogeneous_time", occurrence=occurrence
+                ids_object = db_entry_object.get(
+                    _ids_name,  occurrence=occurrence, lazy=True
                 )
-                if homogeneous_time == imas.imasdef.IDS_TIME_MODE_UNKNOWN:
+                homogeneous_time=ids_object.ids_properties.homogeneous_time
+                if homogeneous_time == imaspy.ids_defs.IDS_TIME_MODE_UNKNOWN:
                     time_array = []
-                if homogeneous_time == imas.imasdef.IDS_TIME_MODE_HETEROGENEOUS:
+                if homogeneous_time == imaspy.ids_defs.IDS_TIME_MODE_HETEROGENEOUS:
                     time_array = [np.NaN]
-                if homogeneous_time == imas.imasdef.IDS_TIME_MODE_HOMOGENEOUS:
+                if homogeneous_time == imaspy.ids_defs.IDS_TIME_MODE_HOMOGENEOUS:
                     time_array = db_entry_object.partial_get(_ids_name, "time")
-                if homogeneous_time == imas.imasdef.IDS_TIME_MODE_INDEPENDENT:
+                if homogeneous_time == imaspy.ids_defs.IDS_TIME_MODE_INDEPENDENT:
                     time_array = [np.NINF]
             except Exception as e:
                 logger.debug(f"{e}")
                 time_array = []
-                logger.info(f"ERROR! IDS {ids_name} : Reading time array fails due to following problem : {e}")
+                logger.info(f"ERROR! IDS {_ids_name} : Reading time array fails due to following problem : {e}")
             if time_array is not None and len(time_array):
-                result.append((ids_name, time_array))
+                result.append((_ids_name, time_array))
     return result
 
 
@@ -261,7 +286,7 @@ def resample_indices(dbin: str, dbout: str, idsname: str, start: int = 0, stop: 
     """
     times = dbin.partial_get(idsname, "time")
     for time_val in times[range(start, len(times) if stop is None else stop, step)]:
-        data_slice = dbin.get_slice(idsname, time_val, imas.imasdef.PREVIOUS_INTERP)
+        data_slice = dbin.get_slice(idsname, time_val, imaspy.ids_defs.PREVIOUS_INTERP)
         dbout.put_slice(data_slice)
 
 
@@ -302,7 +327,7 @@ def resample_times(
         rtimes = np.arange(rstart, rstop, step)
 
     for time_val in rtimes:
-        data_slice = dbin.get_slice(idsname, time_val, imas.imasdef.PREVIOUS_INTERP)
+        data_slice = dbin.get_slice(idsname, time_val, imaspy.ids_defs.PREVIOUS_INTERP)
         dbout.put_slice(data_slice)
 
 
@@ -561,7 +586,7 @@ def get_quantities_from_pulses(idspath: str, pulses: tuple, list_count: int = 0,
         version = pulse_tuple[5]
         if verbose:
             print(f"fetching data from {pulse}, {run}")
-        connection = imas.DBEntry(backend, database, pulse, run, user, version)
+        connection = (backend, database, pulse, run, user, version)
         connection.open()
         try:
             values.append(connection.partial_get(idsname, valpath))
@@ -586,3 +611,18 @@ def get_quantities_from_pulses(idspath: str, pulses: tuple, list_count: int = 0,
     df["VALUE"] = values
     df_extract = df[["PULSE", "RUN", "VALUE"]]
     return df_extract
+
+
+# if __name__ == "__main__":
+#     import imaspy
+#     entry = imaspy.DBEntry("imas:mdsplus?user=public;shot=131024;run=41;database=ITER;version=3", "r")  
+
+#     # Open the database entry, providing legacy Data Entry parameters
+#     imas_entry = imaspy.DBEntry(imaspy.ids_defs.MDSPLUS_BACKEND, "ITER", 131024, 41, "public")
+#     imas_entry.open()
+#     core_profiles = imas_entry.get("core_profiles", lazy=False)
+
+#     print(core_profiles.ids_properties)
+
+#     # print(get_ids_attributes(core_profiles))
+#     print(get_ids_size(entry, ["summary"]))

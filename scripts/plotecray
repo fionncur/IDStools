@@ -9,7 +9,7 @@ import logging
 import os
 
 from rich_argparse import RichHelpFormatter
-
+from  imaspy.ids_defs import EMPTY_INT
 from idstools.compute.common import get_nearest_time
 from idstools.compute.waves import WavesCompute
 from idstools.database import DBMaster
@@ -98,15 +98,14 @@ conn = DBMaster.get_connection(args)
 if conn is None:
     logger.critical("----> Aborted.")
     exit(1)
-ids_waves = conn.get("waves")
+ids_waves = conn.get("waves", lazy=True)
+ids_core_profiles = conn.get("core_profiles", lazy=True)
+ids_equilibrium = conn.get("equilibrium", lazy=True)
+
 # Search for adequate time slice for display
 time_array = ids_waves.time
 ntime = len(ids_waves.time)
-time_index, time_value = get_nearest_time(time_array, args.time)
-# Reading in waves ids and equilibrium ids
-ids_waves = conn.get_slice("waves", time_value, 1)
-ids_core_profiles = conn.get_slice("core_profiles", time_value, 1)
-ids_equilibrium = conn.get_slice("equilibrium", time_value, 1)
+time_slice, time_value = get_nearest_time(time_array, args.time)
 
 if len(ids_waves.code.name) > 0:
     logger.info(f"Code name = {ids_waves.code.name.upper()}")
@@ -118,17 +117,19 @@ ecstra_view = EcStrayView(
     core_profiles_ids=ids_core_profiles,
     waves_ids=ids_waves,
 )
-equi_view = EquilibriumView(ids=ids_equilibrium)
+equi_view = EquilibriumView(ids_equilibrium)
 wave_view = WavesView(ids_waves)
 wave_compute = WavesCompute(ids_waves)
 
-beam_tracing_dict = wave_compute.get_beam_tracing(time_index)
+beam_tracing_dict = wave_compute.get_beam_tracing(time_slice)
 logger.info(
     f"There are {beam_tracing_dict['active_beams_count']} active beam(s) and each beam has {beam_tracing_dict['max_total_beams']} ray(s)"
 )
 
-ecstra_view.plot_poloidal_view(ax_polview)
-
+ecstra_view.plot_poloidal_view(ax_polview, coherent_wave_index=0, time_slice=time_slice)
+if args.md is True:
+    args.md = ["wall", "pf_active"]
+    
 for mdids_info in args.md:
     inputargs = copy.deepcopy(args)
     splittedms_ids_info = mdids_info.split("#")
@@ -157,18 +158,19 @@ for mdids_info in args.md:
     if "wall" in _ids_name:
         connection = DBMaster.get_connection(inputargs)
         if connection is not None:
-            _ids_data = connection.get("wall")
-            from imas import imasdef
-
-            if _ids_data.ids_properties.homogeneous_time != imasdef.EMPTY_INT:
-                wallview = WallView(_ids_data)
-                wallview.view_wall(
-                    ax_polview,
-                    show_labels=False,
-                    wallcolor="slategray",
-                    show_legend=False,
-                )
-            else:
+            try:
+                _ids_data = connection.get("wall", lazy=True)
+                if _ids_data.ids_properties.homogeneous_time != EMPTY_INT:
+                    wallview = WallView(_ids_data)
+                    wallview.view_wall(
+                        ax_polview,
+                        show_labels=False,
+                        wallcolor="slategray",
+                        show_legend=False,
+                    )
+                else:
+                    logger.warning(f"{_ids_name} ids is empty in the dbentry")
+            except Exception as _:
                 logger.warning(f"{_ids_name} ids is empty in the dbentry")
             connection.close()
         else:
@@ -176,13 +178,15 @@ for mdids_info in args.md:
     if "pf_active" in _ids_name:
         connection = DBMaster.get_connection(inputargs)
         if connection is not None:
-            _ids_data = connection.get("pf_active")
-            from imas import imasdef
+            try:
+                _ids_data = connection.get("pf_active", lazy=True)
 
-            if _ids_data.ids_properties.homogeneous_time != imasdef.EMPTY_INT:
-                view_pf_coils = PFActiveView(_ids_data)
-                view_pf_coils.view_active_pf_coils(ax_polview, show_labels=False)
-            else:
+                if _ids_data.ids_properties.homogeneous_time != EMPTY_INT:
+                    view_pf_coils = PFActiveView(_ids_data)
+                    view_pf_coils.view_active_pf_coils(ax_polview, show_labels=False)
+                else:
+                    logger.warning(f"{_ids_name} ids is empty in the dbentry")
+            except Exception as _:
                 logger.warning(f"{_ids_name} ids is empty in the dbentry")
             connection.close()
 
@@ -192,18 +196,18 @@ for mdids_info in args.md:
 
 wave_view.plot_pol_view_traces(
     ax_polview,
-    time_index=0,
+    time_slice,
     color=color,
     style=style,
     fontsize=fontsize,
     labelpad=lpad,
 )
 
-equi_view.plot_topplotequilibrium(ax=ax_topview, time_index=0)
-wave_view.plot_top_view_traces(ax_topview, time_index=0, color=color, style=style, label=label_code)
+equi_view.plot_topplotequilibrium(ax_topview, time_slice)
+wave_view.plot_top_view_traces(ax_topview, time_slice, color=color, style=style, label=label_code)
 
-wave_view.plot_electron_power(ax_powview, time_index=0, color=color, style=style)
-wave_view.plot_power_flow_normal(ax_powparview, time_index=0, color=color, style=style)
+wave_view.plot_electron_power(ax_powview, time_slice, color=color, style=style)
+wave_view.plot_power_flow_normal(ax_powparview, time_slice, color=color, style=style)
 
 
 canvas.set_text(text=f"{get_database_path(args, time_value=time_value)}")

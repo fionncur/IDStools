@@ -152,19 +152,19 @@ class EquilibriumView(BasePlot):
 
         return cntr
 
-    def plot_topplotequilibrium(self, ax, time_index, label="Plasma Boundaries"):
+    def plot_topplotequilibrium(self, ax, time_slice, label="Plasma Boundaries"):
         """
         This function plots the top view equilibrium of a plasma and updates the plot if specified.
 
         Args:
             ax: `ax` is a matplotlib axis object.
-            time_index: The time index is an integer
+            time_slice: The time index is an integer
 
         Returns:
             list containing two plot objects: ax_topview_plot_eq1 and ax_topview_plot_eq2.
         """
         # TODO: Refactor update mechanism of the plot
-        data = self.compute_obj.get_top_view(time_index)
+        data = self.compute_obj.get_top_view(time_slice)
         bndcolor = "chocolate"
         colorcounter = 0
 

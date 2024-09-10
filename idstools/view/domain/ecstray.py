@@ -22,14 +22,13 @@ class EcStrayView:
         self.core_profiles_ids = core_profiles_ids
         self.waves_ids = waves_ids
 
-    def plot_resonance_layer(self, ax, time_index_wv, time_index_eq, init=1, verbose=False):
+    def plot_resonance_layer(self, ax, coherent_wave_index, time_slice, init=1, verbose=False):
         """
         Plot the resonance layer on the given `ax` object.
 
         Args:
             ax (matplotlib.axes.Axes): The matplotlib Axes object on which the resonance layer will be plotted.
-            time_index_wv (int): The time index for accessing wave-related data.
-            time_index_eq (int): The time index for accessing equilibrium-related data.
+            time_slice (int): The time slice for accessing wave-related data.
             init (int): Indicates if the function is called for the initial setup. Set to 1 for initial setup.
                 Default is 1.
             verbose (bool): Controls whether verbose output should be displayed. Default is False.
@@ -54,7 +53,7 @@ class EcStrayView:
                 ax = canvas.add_axes(title="Resonance Layer", xlabel="R [m]", ylabel="Z [m]", row=0, col=0, rowspan=1)
                 ax.set_title("uri=imas:mdsplus?user=public;pulse=134173;run=2326;database=TEST;version=3")
                 ecstrayView = EcStrayView(equilibriumIds, coreProfilesIds, wavesIds)
-                ecstrayView.plot_resonance_layer(ax, time_index_wv=0, time_index_eq=0, verbose=True)
+                ecstrayView.plot_resonance_layer(ax, time_slice_wv=0, time_slice_eq=0, verbose=True)
 
                 ax.plot()
                 canvas.show()
@@ -67,7 +66,7 @@ class EcStrayView:
             :func:`idstools.domain.ecstray.EcStrayCompute.get_resonance_layer`
 
         """
-        result_dict = self.ecstray_object.get_resonance_layer(time_index_wv, time_index_eq)
+        result_dict = self.ecstray_object.get_resonance_layer(coherent_wave_index, time_slice)
         res_layer = result_dict["resonance_layer"]
 
         for i_harm in range(len(res_layer)):
@@ -85,24 +84,24 @@ class EcStrayView:
                 else:
                     ax.set_data(res_layer[i_harm]["r"], res_layer[i_harm]["z"])
 
-    def plot_poloidal_view(self, ax, time_slice=0):
+    def plot_poloidal_view(self, ax, coherent_wave_index, time_slice):
         n_harm = [1, 2, 3, 4]
 
-        resonance_data = self.ecstray_object.get_resonance_layer(n_harm=n_harm)
+        resonance_data = self.ecstray_object.get_resonance_layer(coherent_wave_index, time_slice, n_harm=n_harm)
         profile2d_index = resonance_data["profile2d_index"]
         resonance_layer = resonance_data["resonance_layer"]
 
         grid_data = self.equilibrium_compute.get2d_cartesian_grid(
-            time_slice=time_slice, profiles2d_index=profile2d_index
+            time_slice, profile2d_index
         )
         r2d = grid_data["r2d"]
         z2d = grid_data["z2d"]
         psi2d = grid_data["psi2d"]
-        rho2d = self.equilibrium_compute.get_rho2d(time_slice=time_slice, profiles2d_index=profile2d_index)
+        rho2d = self.equilibrium_compute.get_rho2d(time_slice, profile2d_index)
 
         # Poloidal view plot
         ax.contour(r2d, z2d, psi2d, 50, cmap="summer")
-        if len(rho2d) > 0:
+        if rho2d is not None and len(rho2d) > 0:
             ax.contour(r2d, z2d, rho2d, 50, cmap="YlOrBr")
         # ax_polview.set_xlim(r2d.min(),r2d.max())
         ax.set_title("Poloidal view (R,Z)", fontsize=fontsize)
@@ -124,9 +123,7 @@ class EcStrayView:
     def plot_cut_off_layer(
         self,
         ax,
-        time_index_waves=0,
-        time_index_core_profiles=0,
-        time_index_equilibrium=0,
+        time_slice,
         init=1,
         verbose=False,
     ):
@@ -135,9 +132,7 @@ class EcStrayView:
 
         Args:
             ax (matplotlib.axes.Axes): The matplotlib Axes object on which the cutoff layer will be plotted.
-            time_index_waves (int): The time index for accessing wave-related data. Default is 0.
-            time_index_core_profiles (int): The time index for accessing core profile-related data. Default is 0.
-            time_index_equilibrium (int): The time index for accessing equilibrium-related data. Default is 0.
+            time_slice (int): The time index for accessing wave-related data. Default is 0.
             init (int): Indicates if the function is called for the initial setup. Set to 1 for initial setup.
                 Default is 1.
             verbose (bool): Controls whether verbose output should be displayed. Default is False.
@@ -162,8 +157,7 @@ class EcStrayView:
                 ax = canvas.add_axes(title="Resonance Layer", xlabel="R [m]", ylabel="Z [m]", row=0, col=0, rowspan=1)
                 ax.set_title("uri=imas:mdsplus?user=public;pulse=134173;run=2326;database=TEST;version=3")
                 ecstrayView = EcStrayView(equilibriumIds, coreProfilesIds, wavesIds)
-                ecstrayView.plot_cut_off_layer(ax, timeIndexWaves=0, timeIndexCoreProfiles=0,
-                timeIndexEquilibrium=0,verbose=True)
+                ecstrayView.plot_cut_off_layer(ax, time_slice=0,verbose=True)
 
                 ax.plot()
                 canvas.show()
@@ -177,7 +171,7 @@ class EcStrayView:
         """
         # Calculate density cutoff layer position
         cutoff_layer = self.ecstray_object.get_cutoff_layer(
-            time_index_waves, time_index_core_profiles, time_index_equilibrium
+            time_slice
         )
 
         # TODO Work on this function to keep call back function and events and not to pass init=1

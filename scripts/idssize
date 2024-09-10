@@ -48,8 +48,7 @@ Todo:
 
 
 import argparse
-
-import imas
+import imaspy
 import numpy as np
 from rich_argparse import RichHelpFormatter
 
@@ -79,9 +78,11 @@ if connection is None:
     exit(1)
 
 if args.ids == []:
-    args.ids = [ids.value for ids in list(imas.IDSName)]
+    factory = imaspy.IDSFactory()
+    args.ids = factory.ids_names()
 
 ids_size_dict = get_ids_size(connection, args.ids)
+
 total_bytes = np.array([v["bytes"] for v in ids_size_dict.values()]).sum()
 total_time = np.array([v["time"] for v in ids_size_dict.values()]).sum()
 
