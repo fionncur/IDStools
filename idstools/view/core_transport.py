@@ -90,8 +90,8 @@ class CoreTransportView:
         vp_per__s = np.gradient(v, r) / s
 
         e_compute = EquilibriumCompute(ids_equilibrium)
-        gm3 = e_compute.getgm3(r, time_slice=time_slice)
-        gm7 = e_compute.getgm7(r, time_slice=time_slice)
+        gm3 = e_compute.getgm3(r, time_slice)
+        gm7 = e_compute.getgm7(r, time_slice)
 
         counter = 0
         for t_i, c_i in zip(
@@ -131,8 +131,8 @@ class CoreTransportView:
         vp_per__s = np.gradient(v, r) / s
 
         e_compute = EquilibriumCompute(ids_equilibrium)
-        gm3 = e_compute.getgm3(r, time_slice=time_slice)
-        gm7 = e_compute.getgm7(r, time_slice=time_slice)
+        gm3 = e_compute.getgm3(r, time_slice)
+        gm7 = e_compute.getgm7(r, time_slice)
 
         counter = 0
         for t_i, c_i in zip(

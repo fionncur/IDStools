@@ -7,7 +7,7 @@ import argparse
 import logging
 import sys
 
-from imas import imasdef
+from imaspy import ids_defs
 from rich_argparse import RichHelpFormatter
 
 from idstools.database import DBMaster
@@ -18,9 +18,9 @@ from idstools.view.core_transport import CoreTransportView
 logger = setup_logger("module", stdout_level=logging.INFO)
 
 slicing_methods = {
-    "CLOSEST": imasdef.CLOSEST_INTERP,
-    "PREVIOUS": imasdef.PREVIOUS_INTERP,
-    "LINEAR": imasdef.LINEAR_INTERP,
+    "CLOSEST": ids_defs.CLOSEST_INTERP,
+    "PREVIOUS": ids_defs.PREVIOUS_INTERP,
+    "LINEAR": ids_defs.LINEAR_INTERP,
 }
 # Management of input arguments
 parser = argparse.ArgumentParser(
@@ -62,4 +62,4 @@ if len(ids_slice_core_transport.time) == 0:
 print(f"Showing details for {get_database_path(args, ids_slice_core_transport.time[0])}")
 
 core_transport_view = CoreTransportView(ids_slice_core_transport)
-core_transport_view.view_fluxes()
+core_transport_view.view_fluxes(time_slice=0)
