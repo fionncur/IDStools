@@ -53,8 +53,9 @@ connection = DBMaster.get_connection(args)
 if connection is None:
     exit(1)
 
-ids_spectrometer_visible = connection.get("spectrometer_visible")
-connection.close()
+
+ids_spectrometer_visible = connection.get("spectrometer_visible",lazy=True)
+
 
 time_array = ids_spectrometer_visible.time
 time_index, time_value = get_nearest_time(time_array, args.time)
@@ -125,3 +126,5 @@ if args.save:
     canvas_intensity.save(fname)
 else:
     canvas_intensity.show(block=True)
+connection.close()
+
