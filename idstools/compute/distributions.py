@@ -139,7 +139,7 @@ class DistributionsCompute:
         # LOOP OVER ALL SOURCE
         for idistrib in range(self.ndistributions):
             # INJECTOR NAME
-            if len(self.ids.distribution[idistrib].process) > process_index:
+            if len(self.ids.distribution[idistrib].process) <= process_index:
                 if len(self.ids.distribution[idistrib].process[process_index].type.description) > 0:
                     profiles["single_nf_source_name"][idistrib] = self.ids.distribution[idistrib].process[
                         process_index
