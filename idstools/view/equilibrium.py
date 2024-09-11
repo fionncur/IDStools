@@ -28,7 +28,7 @@ class EquilibriumView(BasePlot):
     def view_magnetic_poloidal_flux(
         self,
         ax: plt.axes,
-        time_slice: int = 0,
+        time_slice: int,
         profiles2d_index: int = 0,
         plot_rho: bool = False,
     ):

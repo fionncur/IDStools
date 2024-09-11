@@ -9,7 +9,8 @@ import copy
 import logging
 import os
 
-import imas
+from imaspy import ids_defs
+
 from rich_argparse import RichHelpFormatter
 
 from idstools.compute.common import get_nearest_time
@@ -41,13 +42,13 @@ parser = argparse.ArgumentParser(
     parents=[dbentry_parser],
     formatter_class=RichHelpFormatter,
 )
-
 parser.add_argument("-t", "--time", help="Time (default=middle)", type=float, default=-99.0)
 parser.add_argument(
     "--rho",
     help="Show rho overlay on the plot",
     action="store_true",
 )
+
 parser.add_argument(
     "-md",
     "--md",
@@ -107,14 +108,11 @@ if isinstance(args.md, bool) and args.md is True:
         args.md.append(ids_name)
     _ids_connection.close()
 
-ids_obj_equilibrium = imas.equilibrium()
-ids_obj_equilibrium.time = connection.partial_get("equilibrium", "time", occurrence)
+
+ids_obj_equilibrium = connection.get("equilibrium",occurrence=occurrence, lazy=True)
+
 if ids_obj_equilibrium.time is not None:
-    time_index, time_value = get_nearest_time(ids_obj_equilibrium.time, args.time)
-    ids_obj_equilibrium.time_slice.resize(1)
-    ids_obj_equilibrium.time_slice[0] = connection.partial_get(
-        "equilibrium", f"time_slice({str(time_index)})", occurrence
-    )
+    time_slice, time_value = get_nearest_time(ids_obj_equilibrium.time, args.time)
     plotequilibrium = EquilibriumView(ids_obj_equilibrium)
 
     title = f"2D Equilibrium at time {time_value:.1f}"
@@ -151,9 +149,8 @@ if ids_obj_equilibrium.time is not None:
             connection = DBMaster.get_connection(inputargs)
             if connection is not None:
                 _ids_data = connection.get("wall")
-                from imas import imasdef
 
-                if _ids_data.ids_properties.homogeneous_time != imasdef.EMPTY_INT:
+                if _ids_data.ids_properties.homogeneous_time != ids_defs.EMPTY_INT:
                     wallview = WallView(_ids_data)
                     if found_data := wallview.view_wall(ax, args.show_labels, wallcolor="slategray"):
                         title += " wall"
@@ -167,9 +164,8 @@ if ids_obj_equilibrium.time is not None:
             connection = DBMaster.get_connection(inputargs)
             if connection is not None:
                 _ids_data = connection.get("pf_active")
-                from imas import imasdef
 
-                if _ids_data.ids_properties.homogeneous_time != imasdef.EMPTY_INT:
+                if _ids_data.ids_properties.homogeneous_time != ids_defs.EMPTY_INT:
                     view_pf_coils = PFActiveView(_ids_data)
                     view_pf_coils.view_active_pf_coils(ax, args.show_labels)
                     title += " Active PF Coils"
@@ -180,7 +176,7 @@ if ids_obj_equilibrium.time is not None:
             else:
                 logger.warning("f{_idsName} ids is not present")
 
-    plotequilibrium.view_magnetic_poloidal_flux(ax, plot_rho=args.rho)
+    plotequilibrium.view_magnetic_poloidal_flux(ax, time_slice,  plot_rho=args.rho)
     ax.set_title(title)
 
     xmin, xmax = ax.get_xlim()
