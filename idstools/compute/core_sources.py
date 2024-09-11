@@ -100,7 +100,7 @@ class CoreSourcesCompute:
         return sources_dict
 
     @functools.lru_cache(maxsize=128)
-    def get_rho_tor_norm(self, time_slice) -> np.ndarray | None:
+    def get_rho_tor_norm(self, time_slice) -> Union[np.ndarray , None]:
         """
         The function `get_rho_tor_norm` returns the value of `grid.rho_tor_norm` if it is not empty,
         otherwise it returns None.

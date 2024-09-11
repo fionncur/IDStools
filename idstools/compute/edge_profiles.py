@@ -8,7 +8,7 @@ This module provides compute functions and classes for edge_profiles ids data
 import functools
 import itertools
 import logging
-
+from typing import Union
 import numpy as np
 from scipy import interpolate
 
@@ -22,7 +22,7 @@ class EdgeProfilesCompute:
         self.ids = ids
 
     @staticmethod
-    def get_plasma_composition_with_species_concentration(ids, time_slice=0) -> dict | int:
+    def get_plasma_composition_with_species_concentration(ids, time_slice=0) -> Union[dict , int]:
         """
         Function retrives composition and species concentration in below format
             - Spcies_label
@@ -349,7 +349,7 @@ class EdgeProfilesCompute:
         return sum(volume * electron_density)
 
     @functools.lru_cache(maxsize=128)
-    def get_volume(self, time_slice=0) -> list | None:
+    def get_volume(self, time_slice=0) -> Union[list , None]:
         """
         This function calculates the volume of a grid subset using either pre-calculated volume data or by
         manually calculating it from the nodes.

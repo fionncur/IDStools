@@ -24,7 +24,7 @@ class CoreProfilesCompute:
         self.volume = volume
 
     @staticmethod
-    def get_plasma_composition_with_species_concentration(ids, time_slice, volume=None) -> dict | int:
+    def get_plasma_composition_with_species_concentration(ids, time_slice, volume=None) -> Union[dict, int]:
         """
         Function retrives composition and species concentration in below format
         """
@@ -195,7 +195,7 @@ class CoreProfilesCompute:
         nspecies = len(self.ids.profiles_1d[time_slice].ion)
         return [self.ids.profiles_1d[time_slice].ion[species_index].state for species_index in range(nspecies)]
 
-    def get_state_density(self, time_slice: int = 0, species_index: int = 0, state_index: int = 0) -> np.ndarray | None:
+    def get_state_density(self, time_slice: int = 0, species_index: int = 0, state_index: int = 0) -> Union[np.ndarray , None]:
         """
         This function `get_state_density` returns the density of a specified state of a
         specified species at a specified time slice, or the thermal density if the former is not available.
@@ -613,7 +613,7 @@ class CoreProfilesCompute:
                 nspec_over_nmaj[ispecies] = nspec_over_nmaj[ispecies] + nspec_over_nmaj[jspecies]
                 nspec_over_nmaj[jspecies] = 0
 
-    def get_rho_tor_norm(self, time_slice: int = 0) -> np.ndarray | None:
+    def get_rho_tor_norm(self, time_slice: int = 0) -> Union[np.ndarray , None]:
         """
         This function `get_rho_tor_norm` returns a list of normalized toroidal rho values from a given
         time slice of a profiles_1d object.
@@ -651,7 +651,7 @@ class CoreProfilesCompute:
             logger.error(f"core_profiles.profiles_1d[{time_slice}].grid.rho_tor_norm or rho_tor is not available")
         return None
 
-    def get_psi(self, time_slice: int = 0) -> list | None:
+    def get_psi(self, time_slice: int = 0) -> Union[list , None]:
         """
         This function `get_psi` returns the poloidal magnetic flux (psi) at a given time slice.
 
