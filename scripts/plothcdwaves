@@ -29,16 +29,15 @@ def show_plots(args):
         logger.critical("----> Aborted.")
         exit(1)
 
-    ids_waves = conn.get("waves")
-    conn.close()
+    ids_waves = conn.get("waves", lazy=True)
 
     waves_compute = WavesCompute(ids_waves)
 
     time_array = ids_waves.time
     ntime = len(time_array)
-    time_index, time_value = get_nearest_time(ids_waves.time, args.time)
+    time_slice, time_value = get_nearest_time(ids_waves.time, args.time)
 
-    radial_grid = waves_compute.get_radial_grid_info(time_index, args.force_psi)
+    radial_grid = waves_compute.get_radial_grid_info(time_slice, args.force_psi)
     if radial_grid is None:
         logger.critical("Radial grid information is empty ----> Abort.")
         exit(1)
@@ -61,21 +60,21 @@ def show_plots(args):
         ax4 = canvas.add_axes(title="", xlabel="", row=1, col=1)
 
     waves_view = WavesView(ids_waves)
-    waves_view.view_absorbed_power_density_profile(ax1, time_index, args.force_psi)
+    waves_view.view_absorbed_power_density_profile(ax1, time_slice, args.force_psi)
     if args.hide_legend:
         ax1.get_legend().remove()
     else:
         ax1.get_legend().remove()
-    waves_view.view_c_d_profile(ax2, time_index, args.force_psi)
+    waves_view.view_c_d_profile(ax2, time_slice, args.force_psi)
     if args.hide_legend:
         ax2.get_legend().remove()
     if ntime != 1:
-        waves_view.view_e_c_power_waveform(ax3, time_index, args.force_psi)
+        waves_view.view_e_c_power_waveform(ax3, time_slice, args.force_psi)
         if args.hide_legend:
             ax3.get_legend().remove()
         else:
             ax3.get_legend().remove()
-        waves_view.view_c_d_waveform(ax4, time_index, args.force_psi)
+        waves_view.view_c_d_waveform(ax4, time_slice, args.force_psi)
         if args.hide_legend:
             ax4.get_legend().remove()
         else:
@@ -103,6 +102,7 @@ def show_plots(args):
         canvas.save(fname)
     else:
         canvas.show()
+    conn.close()
 
 
 if __name__ == "__main__":
