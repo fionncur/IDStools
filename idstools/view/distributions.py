@@ -16,10 +16,10 @@ class DistributionsView:
     def plot_absorbed_power_density_individual(
         self,
         ax,
-        time_index,
+        time_slice,
     ):
-        radial_grid_info = self.distributions_compute.get_radial_grid_info(time_index)
-        profiles = self.distributions_compute.get_profiles(time_index)
+        radial_grid_info = self.distributions_compute.get_radial_grid_info(time_slice)
+        profiles = self.distributions_compute.get_profiles(time_slice)
 
         if len(self.distributions_compute.active_distributions) != 0:
             ax.plot(
@@ -52,9 +52,9 @@ class DistributionsView:
     def plot_absorbed_power_density(
         self,
         ax,
-        time_index,
+        time_slice,
     ):
-        profiles = self.distributions_compute.get_profiles(time_index)
+        profiles = self.distributions_compute.get_profiles(time_slice)
 
         if len(self.distributions_compute.active_distributions) != 0:
             ax.plot(
@@ -83,10 +83,10 @@ class DistributionsView:
     def plot_cd_profile(
         self,
         ax,
-        time_index,
+        time_slice,
     ):
-        radial_grid_info = self.distributions_compute.get_radial_grid_info(time_index)
-        profiles = self.distributions_compute.get_profiles(time_index)
+        radial_grid_info = self.distributions_compute.get_radial_grid_info(time_slice)
+        profiles = self.distributions_compute.get_profiles(time_slice)
 
         if self.distributions_compute.cur_calc == 1:
             if len(self.distributions_compute.active_distributions) != 0:
@@ -116,11 +116,11 @@ class DistributionsView:
     def plot_nbi_fus_power_and_cd_waveforms(
         self,
         ax,
-        time_index,
+        time_slice,
     ):
         time_array = self.ids.time
-        radial_grid_info = self.distributions_compute.get_radial_grid_info(time_index)
-        profiles = self.distributions_compute.get_profiles(time_index)
+        radial_grid_info = self.distributions_compute.get_radial_grid_info(time_slice)
+        profiles = self.distributions_compute.get_profiles(time_slice)
 
         if len(self.distributions_compute.active_distributions) != 0:
             ax.plot(
@@ -162,12 +162,12 @@ class DistributionsView:
     def plot_cd_waveform(
         self,
         ax,
-        time_index,
+        time_slice,
     ):
         time_array = self.ids.time
-        radial_grid_info = self.distributions_compute.get_radial_grid_info(time_index)
+        radial_grid_info = self.distributions_compute.get_radial_grid_info(time_slice)
 
-        profiles = self.distributions_compute.get_profiles(time_index)
+        profiles = self.distributions_compute.get_profiles(time_slice)
 
         if self.distributions_compute.cur_calc == 1:
             if len(self.distributions_compute.active_distributions) != 0:

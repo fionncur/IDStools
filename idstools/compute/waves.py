@@ -8,7 +8,6 @@ This module provides compute functions and classes for waves ids data
 import functools
 import logging
 
-import imas
 import numpy as np
 
 logger = logging.getLogger("module")
@@ -421,9 +420,7 @@ class WavesCompute:
                     single_injected_power[iwave] = 0.0
                     if len(self.ids.coherent_wave[iwave].beam_tracing) > 0:
                         for ibeam in range(len(self.ids.coherent_wave[iwave].beam_tracing[time_slice].beam)):
-                            if imas.imasdef.isFieldValid(
-                                self.ids.coherent_wave[iwave].beam_tracing[time_slice].beam[ibeam].power_initial
-                            ) and (
+                            if self.ids.coherent_wave[iwave].beam_tracing[time_slice].beam[ibeam].power_initial.has_value and (
                                 self.ids.coherent_wave[iwave].beam_tracing[time_slice].beam[ibeam].power_initial > 0
                             ):
                                 total_injected_power = (

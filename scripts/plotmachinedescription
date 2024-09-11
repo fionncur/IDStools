@@ -111,7 +111,7 @@ if __name__ == "__main__":
         help="Show labels",
         action="store_true",
     )
-    parser.add_argument(\
+    parser.add_argument(
         "--save",
         help="Save figure at default location",
         action="store_true",
@@ -136,7 +136,7 @@ if __name__ == "__main__":
         mdargs.uri = _md_uri
         connection = DBMaster.get_connection(mdargs)
         if connection:
-            all_i_d_ses_list = [item for item, _ in available_in_dbentry(connection)]
+            all_idses_list = [item for item, _ in available_in_dbentry(connection)]
             if _ids_names == "":
                 _ids_names = idses
             for _ids_name in _ids_names.split(","):
@@ -144,7 +144,7 @@ if __name__ == "__main__":
                     continue
                 ids_found = False
                 if connection is not None:
-                    if _ids_name in all_i_d_ses_list:
+                    if _ids_name in all_idses_list:
                         _ids_data = connection.get(_ids_name)
 
                         data = {}
