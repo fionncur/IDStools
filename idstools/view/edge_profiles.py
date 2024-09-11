@@ -107,7 +107,7 @@ class EdgeProfilesView:
                 )
                 istate += 1
 
-    def view_electrons_density(self, ax, time_slice=0, show_separatrix=False):
+    def view_electrons_density(self, ax, time_slice, show_separatrix=False):
         """
         The function `view_electrons_density` plots the electron density on a rectangular grid and adds a
         separatrix line.
@@ -151,7 +151,7 @@ class EdgeProfilesView:
             )
             return None
 
-    def view_ion_density(self, ax, time_slice=0, show_separatrix=False):
+    def view_ion_density(self, ax, time_slice, show_separatrix=False):
         """
         The function `view_ion_density` plots the ion density on a rectangular grid and adds a separatrix line.
 
@@ -195,7 +195,7 @@ class EdgeProfilesView:
             )
             return None
 
-    def view_neutral_density(self, ax, time_slice=0, show_separatrix=False):
+    def view_neutral_density(self, ax, time_slice, show_separatrix=False):
         """
         The function `view_neutral_density` plots the neutral density on a rectangular grid and adds a
         separatrix line.
@@ -240,7 +240,7 @@ class EdgeProfilesView:
             )
             return None
 
-    def view_equatorial_plane_and_diverter_density(self, ax, time_slice=0, logscale=False):
+    def view_equatorial_plane_and_diverter_density(self, ax, time_slice, logscale=False):
         x, y = self.edge_profiles_compute.get_rectangular_grid(500)
         ne_edge = self.edge_profiles_compute.get_electron_density(time_slice, x, y)
         if ne_edge is not None:
