@@ -9,9 +9,9 @@ class KineticProfilesView:
     single_style = "o"
     multi_style = "-"
 
-    def __init__(self, connection, edge_required=False, time_slice=-99.0):
+    def __init__(self, connection, time_slice, edge_required):
         self.k_profiles = KineticProfilesCompute()
-        self.k_profiles.analyze(connection, edge_required, time_slice)
+        self.k_profiles.analyze(connection, time_slice, edge_required)
         if self.k_profiles.is_core_profiles_present:
             self.plotstyle = (
                 KineticProfilesView.multi_style
@@ -68,21 +68,21 @@ class KineticProfilesView:
                 label=r"$T_i(0)$",
             )
         if (
-            self.k_profiles.common_time_array[self.k_profiles.common_time_length - 1]
-            > self.k_profiles.common_time_array[0]
+            self.k_profiles.time_array_core_profiles[self.k_profiles.time_array_length_core_profiles - 1]
+            > self.k_profiles.time_array_core_profiles[0]
         ):
             ax.set_xlim(
-                self.k_profiles.common_time_array[0],
-                self.k_profiles.common_time_array[self.k_profiles.common_time_length - 1],
+                self.k_profiles.time_array_core_profiles[0],
+                self.k_profiles.time_array_core_profiles[self.k_profiles.time_array_length_core_profiles - 1],
             )
 
-        KineticProfilesView.view_time_line(ax, self.k_profiles.common_time)
+        KineticProfilesView.view_time_line(ax, self.k_profiles.time_value_core_profiles)
         ax.set_xlabel("$Time\\/[\\mathrm{s}]$")
         ax.set_ylabel("$T\\/[\\mathrm{keV}]$")
         # ax.ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
         legend = ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
         KineticProfilesView.customize_legend(legend)
-        ax.set_title("Profiles displayed for t = " + "%.1f" % self.k_profiles.common_time + " s")
+        ax.set_title("Profiles displayed for t = " + "%.1f" % self.k_profiles.time_value_core_profiles + " s")
 
     def view_central_density_waveforms(self, ax, logscale=False):
         """
@@ -117,17 +117,17 @@ class KineticProfilesView:
                     label=r"$n_{" + self.k_profiles.species[ispecies] + "}(0)$",
                 )
 
-        KineticProfilesView.view_time_line(ax, self.k_profiles.common_time)
+        KineticProfilesView.view_time_line(ax, self.k_profiles.time_value_core_profiles)
         ax.set_xlabel("$Time\\/[\\mathrm{s}]$")
         ax.set_ylabel("$n\\/[\\mathrm{m^{-3}}]$")
 
         if (
-            self.k_profiles.common_time_array[self.k_profiles.common_time_length - 1]
-            > self.k_profiles.common_time_array[0]
+            self.k_profiles.time_array_core_profiles[self.k_profiles.time_array_length_core_profiles - 1]
+            > self.k_profiles.time_array_core_profiles[0]
         ):
             ax.set_xlim(
-                self.k_profiles.common_time_array[0],
-                self.k_profiles.common_time_array[self.k_profiles.common_time_length - 1],
+                self.k_profiles.time_array_core_profiles[0],
+                self.k_profiles.time_array_core_profiles[self.k_profiles.time_array_length_core_profiles - 1],
             )
         # ax.ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
         legend = ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
@@ -149,16 +149,16 @@ class KineticProfilesView:
             color="b",
             label=r"$Z_{eff}(0)$",
         )
-        self.view_time_line(ax, self.k_profiles.common_time)
+        self.view_time_line(ax, self.k_profiles.time_value_core_profiles)
         ax.set_xlabel(r"$Time\/[\mathrm{s}]$")
         ax.set_ylabel("$Z_{eff}$")
         if (
-            self.k_profiles.common_time_array[self.k_profiles.common_time_length - 1]
-            > self.k_profiles.common_time_array[0]
+            self.k_profiles.time_array_core_profiles[self.k_profiles.time_array_length_core_profiles - 1]
+            > self.k_profiles.time_array_core_profiles[0]
         ):
             ax.set_xlim(
-                self.k_profiles.common_time_array[0],
-                self.k_profiles.common_time_array[self.k_profiles.common_time_length - 1],
+                self.k_profiles.time_array_core_profiles[0],
+                self.k_profiles.time_array_core_profiles[self.k_profiles.time_array_length_core_profiles - 1],
             )
         # ax.ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
         legend = ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
@@ -207,7 +207,7 @@ class KineticProfilesView:
             ax.set_ylabel("$T\\/[\\mathrm{keV}]$")
         ax.set_xlim(self.k_profiles.xbeg, self.k_profiles.xend)
         # ax.ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
-        ax.set_title("t = " + "%.1f" % self.k_profiles.common_time + " s")
+        ax.set_title("t = " + "%.1f" % self.k_profiles.time_value_core_profiles + " s")
         legend = ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
         KineticProfilesView.customize_legend(legend)
 
@@ -273,7 +273,7 @@ class KineticProfilesView:
             ax.set_yscale("log")
         ax.set_xlim(self.k_profiles.xbeg, self.k_profiles.xend)
         # ax.ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
-        ax.set_title("t = " + "%.1f" % self.k_profiles.common_time + " s")
+        ax.set_title("t = " + "%.1f" % self.k_profiles.time_value_core_profiles + " s")
         legend = ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
         KineticProfilesView.customize_legend(legend)
 
@@ -306,7 +306,7 @@ class KineticProfilesView:
             ax.set_ylabel("$Z_{eff}$")
         ax.set_xlim(self.k_profiles.xbeg, self.k_profiles.xend)
         # ax.ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
-        ax.set_title("t = " + "%.1f" % self.k_profiles.common_time + " s")
+        ax.set_title("t = " + "%.1f" % self.k_profiles.time_value_core_profiles + " s")
         legend = ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
         KineticProfilesView.customize_legend(legend)
 
@@ -354,7 +354,7 @@ class KineticProfilesView:
                     ax.set_ylim(self.k_profiles.min_vtor, self.k_profiles.max_vtor * 1.1)
 
             ax.ticklabel_format(axis="y", style="sci", scilimits=(0, 0))
-            ax.set_title("t = " + "%.1f" % self.k_profiles.common_time + " s")
+            ax.set_title("t = " + "%.1f" % self.k_profiles.time_value_core_profiles + " s")
             legend = ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
             KineticProfilesView.customize_legend(legend)
             if logscale:
@@ -406,7 +406,7 @@ class KineticProfilesView:
                     ax.set_ylim(self.k_profiles.min_vpol, self.k_profiles.max_vpol * 1.1)
 
             ax.ticklabel_format(axis="y", style="sci", scilimits=(0, 0))
-            ax.set_title("t = " + "%.1f" % self.k_profiles.common_time + " s")
+            ax.set_title("t = " + "%.1f" % self.k_profiles.time_value_core_profiles + " s")
             legend = ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
             KineticProfilesView.customize_legend(legend)
             if logscale:
