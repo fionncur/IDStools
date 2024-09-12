@@ -38,6 +38,9 @@ class KineticProfilesCompute:
         self.time_index_equilibrium = None
         self.time_value_equilibrium = None  
         
+        self.common_time_length = None
+        self.common_time_array = None
+        
         self.r_out_graph = False
         self.initialised = None
 
@@ -162,7 +165,7 @@ class KineticProfilesCompute:
         ids_object = None
         
         if ids_name:
-            ids_object
+            logger.info(f"--> retrieving ids {ids_name}")
             try:
                 ids_object = self.connection.get(ids_name, lazy=True)
                 if ids_object.time is not None:
@@ -219,7 +222,13 @@ class KineticProfilesCompute:
             self.time_array_length_core_profiles = len(self.core_profiles.time)
             self.time_array_core_profiles = self.core_profiles.time
             self.time_index_core_profiles, self.time_value_core_profiles = get_nearest_time(self.time_array_core_profiles, time_slice)
+            self.common_time_length = len(self.core_profiles.time)
+            self.common_time_array = self.core_profiles.time
+        else:
+            self.common_time_length = len(self.edge_profiles.time)
+            self.common_time_array = self.edge_profiles.time
 
+        self.common_time_index, self.common_time_value = get_nearest_time(self.common_time_array, time_slice)
         # Read equilibrium data for this time slice if present
         if self.is_equilibrium_present:
             self.time_array_length_equilibrium = len(self.equilibrium.time)
@@ -233,7 +242,6 @@ class KineticProfilesCompute:
             self.time_index_edge_profiles, self.time_value_edge_profiles = get_nearest_time(
                 self.time_array_edge_profiles, time_slice
             )
-
             # Read edge_profile data for this time slice
             try:
                 test = self.edge_profiles.profiles_1d[self.time_index_edge_profiles]
@@ -1700,7 +1708,7 @@ class KineticProfilesCompute:
         # Create the dictionary defining the list of waveforms (central values) that can be displayed
         if self.is_core_profiles_present:
             waveform = {}
-            waveform["time"] = self.time_array_core_profiles
+            waveform["time"] = self.common_time_array
             for ikey in ["te", "ti", "ne", "zeff"]:
                 waveform[ikey] = self.create_wave_form(0)
             electrons_temperature = np.array([])
@@ -1819,15 +1827,15 @@ class KineticProfilesCompute:
                         logger.debug(f"{e}")
                         waveform["n_species"][self.species[ispecies]]["density"]["central"] = [
                             np.NaN
-                        ] * len(self.time_array_core_profiles)
+                        ] * self.common_time_length
                         waveform["n_species"][self.species[ispecies]]["vpol"]["central"] = [
                             np.NaN
-                        ] * len(self.time_array_core_profiles)
+                        ] * self.common_time_length
                         waveform["n_species"][self.species[ispecies]]["vtor"]["central"] = [
                             np.NaN
-                        ] * len(self.time_array_core_profiles)
+                        ] * self.common_time_length
 
-                    for itime in range(len(self.time_array_core_profiles)):
+                    for itime in range(self.common_time_length):
                         waveform["ni"]["central"][itime] = (
                             waveform["ni"]["central"][itime]
                             + waveform["n_species"][self.species[ispecies]]["density"]["central"][itime]
