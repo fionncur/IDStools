@@ -17,8 +17,8 @@
 import argparse
 import logging
 
-import imas
 import numpy as np
+from idstools.compute.common import get_nearest_time
 from rich_argparse import RichHelpFormatter
 
 from idstools.database import DBMaster
@@ -32,6 +32,7 @@ parser = argparse.ArgumentParser(
     parents=[dbentry_parser],
     formatter_class=RichHelpFormatter,
 )
+parser.add_argument("-t", "--time", help="Time", required=False, type=float, default=-99.0)
 parser.add_argument("-i", "--info", action="store_true", help="Show information")
 parser.add_argument("--debug", action="store_true", help="Show debugging")
 
@@ -42,56 +43,86 @@ if args.info:
     level = logging.INFO
 if args.debug:
     level = logging.DEBUG
+
 logger = setup_logger("module", stdout_level=level)
 
-logger.info("----------------------------------------------------------------")
-logger.info(
-    """
-    a       = Mass of atom [Atomic Mass Unit]
-    z       = Nuclear charge [Elementary Charge Unit]
-    ne      = sum(volume * electron_density)
-    volume  = sum(volume of each cell)
-    nspec_over_ntot : Species density list / Sum of Species Density (ntot)
-    nspec_over_ne   : Species density list / Total no. electrons (ne)
-    nspec_over_nmaj : Species density list / Species density[Index of Maximum Density Species]"""
-)
-logger.info("----------------------------------------------------------------")
+if args.info:
+    logger.info("----------------------------------------------------------------")
+    logger.info(
+        """
+        a       = Mass of atom [Atomic Mass Unit]
+        z       = Nuclear charge [Elementary Charge Unit]
+        ne      = sum(volume * electron_density)
+        volume  = sum(volume of each cell)
+        nspec_over_ntot : Species density list / Sum of Species Density (ntot)
+        nspec_over_ne   : Species density list / Total no. electrons (ne)
+        nspec_over_nmaj : Species density list / Species density[Index of Maximum Density Species]"""
+    )
+    logger.info("----------------------------------------------------------------")
 connection = DBMaster.get_connection(args)
 if connection is None:
     logger.critical("----> Aborted.")
     exit(1)
 
 # Prepare IDS with highest density data from core profiles
-core_profiles_ids = imas.core_profiles()
 try:
-    core_profiles_ids.time = connection.partial_get("core_profiles", "time")
+    logger.info("\ngetting core_profiles slice")
+    core_profiles_ids = connection.get("core_profiles",lazy=True)
+    
+    if args.time== -99:
+        ne0_list = np.array([])
+        for i,_ in enumerate(core_profiles_ids.time):
+            ne0_list =np.append(ne0_list, core_profiles_ids.profiles_1d[i].electrons.density[0])
+        time_slice_core_profiles = np.argmax(ne0_list)
+        time_value_core_profiles = core_profiles_ids.time[time_slice_core_profiles]
+        logger.info(
+        f"core_profiles IDS:Using time slice where maximum electrons density is present, Time slice:{time_slice_core_profiles}"
+        )
+    else:
+        time_array_core_profiles = core_profiles_ids.time
+        time_slice_core_profiles, time_value_core_profiles = get_nearest_time(time_array_core_profiles, args.time)
+    logger.info(f"coreprofiles Time {time_value_core_profiles}  Index {time_slice_core_profiles}")
+        
 except Exception as _:  # noqa: F841
-    core_profiles_ids.time = None
+    core_profiles_ids = None
+    
+try:
+    logger.info("\ngetting edge_profiles slice")
+    edge_profiles_ids = connection.get("edge_profiles",lazy=True)
+    if time_slice_core_profiles is None:
+        if args.time== -99:
+            ne0_list = np.array([])
+            for i,_ in enumerate(edge_profiles_ids.time):
+                ne0_list =np.append(ne0_list, edge_profiles_ids.profiles_1d[i].electrons.density[0])
+            time_slice_edge_profiles = np.argmax(ne0_list)
+            time_value_edge_profiles = edge_profiles_ids.time[time_slice_edge_profiles]
+            logger.info(
+            f"edge_profiles IDS:Using time slice where maximum electrons density is present, Time slice:{time_slice_edge_profiles}"
+            )
+        else:
+            time_array_edge_profiles = edge_profiles_ids.time
+            time_slice_edge_profiles, time_value_edge_profiles = get_nearest_time(time_array_edge_profiles, args.time)
+    else:
+        time_array_edge_profiles = edge_profiles_ids.time
+        time_slice_edge_profiles, time_value_edge_profiles = get_nearest_time(time_array_edge_profiles, time_value_core_profiles)
+    logger.info(f"edge_profiles Time {time_value_edge_profiles}  Index {time_slice_edge_profiles}")
 
-edge_profiles_ids = imas.edge_profiles()
-try:
-    edge_profiles_ids.time = connection.partial_get("edge_profiles", "time")
 except Exception as _:  # noqa: F841
-    edge_profiles_ids.time = None
+    edge_profiles_ids = None
+
+
 
 core_profile_exists = True
 edge_profile_exists = True
-if core_profiles_ids.time is None:
+if core_profiles_ids is None:
     core_profile_exists = False
-if edge_profiles_ids.time is None:
+if edge_profiles_ids is None:
     edge_profile_exists = False
-slice_index = 0
-if core_profiles_ids.time is not None:
-    ne0_list = connection.partial_get("core_profiles", "profiles_1d(:)/electrons/density(0)")
-    slice_index = np.argmax(ne0_list)
-    profiles_1d_slice = connection.partial_get("core_profiles", f"profiles_1d({slice_index})")
-    logger.info(
-        f"core_profiles IDS:Using time slice where maximum electrons density is present, Time slice:{slice_index}"
-    )
-    core_profiles_ids.profiles_1d.resize(1)
-    core_profiles_ids.profiles_1d[0] = profiles_1d_slice
 
-    returnstatus = CoreProfilesView.view_plasma_composition_with_species_concentration(core_profiles_ids, 0)
+
+if core_profiles_ids is not None:
+    
+    returnstatus = CoreProfilesView.view_plasma_composition_with_species_concentration(core_profiles_ids, time_slice_core_profiles)
     if returnstatus == 0:
         core_profile_exists = False
         logger.critical("core_profiles IDS: IDS exists but time slice doesn't exists. --> Abort.")
@@ -99,34 +130,27 @@ if core_profiles_ids.time is not None:
         core_profile_exists = False
         logger.critical("core_profiles IDS:IDS exists but volume is not set")
         logger.warning("core_profiles IDS :Retrieving volume from equilibrium IDS")
-        equilibrium = imas.equilibrium()
-        equilibrium.time_slice.resize(1)
-        volume = connection.partial_get("equilibrium", f"time_slice({slice_index})/profiles_1d/volume")
+        equilibrium_ids = connection.get("equilibrium",lazy=True)
+        volume = equilibrium_ids.time_slice({time_slice_core_profiles}).profiles_1d.volume
         returnstatus = CoreProfilesView.view_plasma_composition_with_species_concentration(
-            core_profiles_ids, 0, volume=volume
+            core_profiles_ids, time_slice_core_profiles, volume=volume
         )
         core_profile_exists = True
-
 else:
     logger.critical("core_profiles IDS:No core_profiles IDS in the data-entry --> Abort.")
 
 
-# # TODO There is no relation of Slice index calculated above so getting data of 0th slice. and Why only 0th slice
 
-if edge_profiles_ids.time is not None:
+if edge_profiles_ids is not None:
     logger.info(
         f"edge_profiles IDS:Using time slice where maximum "
-        f"electrons density is present in core, Time slice:{slice_index}"
+        f"electrons density is present in core, Time slice:{time_slice_edge_profiles}"
     )
-    edge_profiles_ids.ggd.resize(1)
-    edge_profiles_ids.ggd[0] = connection.partial_get("edge_profiles", f"ggd({slice_index})")
 
-    edge_profiles_ids.grid_ggd.resize(1)
-    edge_profiles_ids.grid_ggd[0] = connection.partial_get("edge_profiles", f"grid_ggd({slice_index})")
     print("----------------")
     print("edge_profiles")
     print("----------------")
-    returnstatus = EdgeProfilesView.view_plasma_composition_with_species_concentration(edge_profiles_ids, 0)
+    returnstatus = EdgeProfilesView.view_plasma_composition_with_species_concentration(edge_profiles_ids, time_slice_edge_profiles)
     if returnstatus == 0:
         edge_profile_exists = False
         logger.critical("edge_profiles IDS:IDS exists but time slice doesn't exists. --> Abort.")
@@ -138,36 +162,30 @@ if edge_profiles_ids.time is not None:
         time_slices_count = len(edge_profiles.grid_ggd)
         index_list = []
         for counter in range(1, 10):
-            if slice_index - counter >= 0 and slice_index - counter < time_slices_count:
-                index_list.append(slice_index - counter)
-            if slice_index + counter >= 0 and slice_index + counter < time_slices_count:
-                index_list.append(slice_index + counter)
-        for time_slice in index_list:
+            if time_slice_edge_profiles - counter >= 0 and time_slice_edge_profiles - counter < time_slices_count:
+                index_list.append(time_slice_edge_profiles - counter)
+            if time_slice_edge_profiles + counter >= 0 and time_slice_edge_profiles + counter < time_slices_count:
+                index_list.append(time_slice_edge_profiles + counter)
+        for itime_slice in index_list:
             index = 4
-            elements = edge_profiles.grid_ggd[time_slice].grid_subset[index].element
-            grid_subset_name = edge_profiles.grid_ggd[time_slice].grid_subset[index].identifier.name
+            elements = edge_profiles.grid_ggd[itime_slice].grid_subset[index].element
+            grid_subset_name = edge_profiles.grid_ggd[itime_slice].grid_subset[index].identifier.name
             # check if grid_subset[4] identifier name is cells, if not, find out 'cells' index
             index_counter = 0
             if grid_subset_name.lower() != "cells":
-                for subset in edge_profiles.grid_ggd[time_slice].grid_subset:
+                for subset in edge_profiles.grid_ggd[itime_slice].grid_subset:
                     if subset.identifier.name.lower() == "cells":
-                        elements = edge_profiles.grid_ggd[time_slice].grid_subset[index_counter].element
-                        grid_subset_name = edge_profiles.grid_ggd[time_slice].grid_subset[index_counter].identifier.name
+                        elements = edge_profiles.grid_ggd[itime_slice].grid_subset[index_counter].element
+                        grid_subset_name = edge_profiles.grid_ggd[itime_slice].grid_subset[index_counter].identifier.name
                         index = index_counter
                         break
                     index_counter = index_counter + 1
             if len(elements) != 0:
                 logger.info(
                     f"edge_profiles IDS:Using nearby time slice in edge where maximum "
-                    f"electrons density is present in core, Time slice:{time_slice}"
+                    f"electrons density is present in core, Time slice:{itime_slice}"
                 )
-                edge_profiles_ids.ggd.resize(1)
-                edge_profiles_ids.ggd[0] = connection.partial_get("edge_profiles", f"ggd({time_slice})")
-
-                edge_profiles_ids.grid_ggd.resize(1)
-                edge_profiles_ids.grid_ggd[0] = connection.partial_get("edge_profiles", f"grid_ggd({time_slice})")
-
-                returnstatus = EdgeProfilesView.view_plasma_composition_with_species_concentration(edge_profiles_ids, 0)
+                returnstatus = EdgeProfilesView.view_plasma_composition_with_species_concentration(edge_profiles_ids, itime_slice)
                 if returnstatus == 0:
                     edge_profile_exists = False
                     logger.critical("edge_profiles IDS:IDS exists but time slice doesn't exists. --> Abort.")

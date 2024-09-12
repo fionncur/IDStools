@@ -29,7 +29,7 @@ class CoreProfilesCompute:
         Function retrives composition and species concentration in below format
         """
         try:
-            ids.profiles_1d[time_slice]
+            test=ids.profiles_1d[time_slice]
 
         except Exception as e:
             logger.debug(f"{e}")
@@ -45,15 +45,15 @@ class CoreProfilesCompute:
                 core_profile_compute.volume = volume
         data = {}
 
-        nspec_over_ntot = core_profile_compute.get_nspec_over_ntot()
-        nspec_over_ne = core_profile_compute.get_nspec_over_ne()
-        nspec_over_nmaj = core_profile_compute.get_nspec_over_nmaj()
-        species = core_profile_compute.get_species()
-        labels = core_profile_compute.get_labels()
-        core_profile_compute.combine_species_when_appear_twice(species, nspec_over_ntot, nspec_over_ne, nspec_over_nmaj)
-        a = core_profile_compute.get_a()
-        z = core_profile_compute.get_z()
-        states_data = core_profile_compute.get_states_data()
+        nspec_over_ntot = core_profile_compute.get_nspec_over_ntot(time_slice)
+        nspec_over_ne = core_profile_compute.get_nspec_over_ne(time_slice)
+        nspec_over_nmaj = core_profile_compute.get_nspec_over_nmaj(time_slice)
+        species = core_profile_compute.get_species(time_slice)
+        labels = core_profile_compute.get_labels(time_slice)
+        core_profile_compute.combine_species_when_appear_twice(species, nspec_over_ntot, nspec_over_ne, nspec_over_nmaj, time_slice)
+        a = core_profile_compute.get_a(time_slice)
+        z = core_profile_compute.get_z(time_slice)
+        states_data = core_profile_compute.get_states_data(time_slice)
         for species_index in range(len(species)):
             species_data = {
                 "nspec_over_ntot": nspec_over_ntot[species_index],
@@ -132,7 +132,7 @@ class CoreProfilesCompute:
         return a
 
     @functools.lru_cache(maxsize=128)
-    def get_z(self, time_slice: int = 0, element_index: int = 0) -> list:
+    def get_z(self, time_slice: int, element_index: int = 0) -> list:
         """
         This function `get_z` returns a list of nuclear charges for each species in a given slice and element
         index.
@@ -166,7 +166,7 @@ class CoreProfilesCompute:
         logger.debug(f"Nuclear charge each species : {z}")
         return z
 
-    def get_states(self, time_slice: int = 0) -> list:
+    def get_states(self, time_slice: int) -> list:
         """
         This function `get_states` returns quantities related to the different states of the species
         (ionisation, energy, excitation, ...) for each species
@@ -195,7 +195,7 @@ class CoreProfilesCompute:
         nspecies = len(self.ids.profiles_1d[time_slice].ion)
         return [self.ids.profiles_1d[time_slice].ion[species_index].state for species_index in range(nspecies)]
 
-    def get_state_density(self, time_slice: int = 0, species_index: int = 0, state_index: int = 0) -> Union[np.ndarray , None]:
+    def get_state_density(self, time_slice: int, species_index: int = 0, state_index: int = 0) -> Union[np.ndarray , None]:
         """
         This function `get_state_density` returns the density of a specified state of a
         specified species at a specified time slice, or the thermal density if the former is not available.
@@ -234,7 +234,7 @@ class CoreProfilesCompute:
                 return density
         return None
 
-    def get_states_data(self, time_slice: int = 0) -> dict:
+    def get_states_data(self, time_slice: int) -> dict:
         """
         This function `get_states_data` returns a dictionary containing data on the states and densities of different
         species in a plasma simulation.
@@ -273,7 +273,7 @@ class CoreProfilesCompute:
 
         volume = self.get_volume(time_slice)
         nspecies = len(self.ids.profiles_1d[time_slice].ion)
-        species_density, _, _ = self.get_species_density()
+        species_density, _, _ = self.get_species_density(time_slice)
         states_data = {}
         for species_index in range(nspecies):
             logger.debug(f"Species index :{species_index}")
@@ -343,7 +343,7 @@ class CoreProfilesCompute:
             states_data[str(species_index)] = species_data
         return states_data
 
-    def get_ne(self, time_slice: int = 0) -> float:
+    def get_ne(self, time_slice: int) -> float:
         """
         This function `get_ne` calculates the total number of electrons (ne) based on the volume and electron density
         of a given slice.
@@ -375,7 +375,7 @@ class CoreProfilesCompute:
         return sum(volume * electron_density)
 
     @functools.lru_cache(maxsize=128)
-    def get_volume(self, time_slice: int = 0) -> np.ndarray:
+    def get_volume(self, time_slice: int) -> np.ndarray:
         """
         This function `get_volume` returns the volume of a grid at a given time slice.
 
@@ -407,7 +407,7 @@ class CoreProfilesCompute:
         return volume
 
     @functools.lru_cache(maxsize=128)
-    def get_species_density(self, time_slice: int = 0) -> tuple:
+    def get_species_density(self, time_slice: int) -> tuple:
         """
         This function calculates the density of different species in a given slice and returns a tuple
         containing the species density list, the total density, and the index of the species with the maximum density.
@@ -449,7 +449,7 @@ class CoreProfilesCompute:
         logger.debug(f"Species density:{str(species_density_list)}")
         return species_density_list, sum_density, max_density_index
 
-    def get_nspec_over_ntot(self, time_slice: int = 0):
+    def get_nspec_over_ntot(self, time_slice: int):
         """
         This function calculates the ratio of the number of species to the total number of particles in a plasma.
 
@@ -476,7 +476,7 @@ class CoreProfilesCompute:
         species_density_list, sum_density, _ = self.get_species_density(time_slice)
         return species_density_list / sum_density
 
-    def get_nspec_over_ne(self, time_slice: int = 0):
+    def get_nspec_over_ne(self, time_slice: int):
         """
         This function calculates the ratio of species density to electron density.
 
@@ -499,10 +499,10 @@ class CoreProfilesCompute:
                 array([0.74048128, 0.0944273 , 0.00706596])
         """
         species_density_list, _, _ = self.get_species_density(time_slice)
-        ne = self.get_ne()
+        ne = self.get_ne(time_slice)
         return species_density_list / ne
 
-    def get_nspec_over_nmaj(self, time_slice: int = 0) -> list:
+    def get_nspec_over_nmaj(self, time_slice: int) -> list:
         """
         This function returns a list of the ratio of each species density to the maximum species density.
 
@@ -533,7 +533,7 @@ class CoreProfilesCompute:
         ) = self.get_species_density(time_slice)
         return species_density_list / species_density_list[max_density_index]
 
-    def get_species(self, time_slice: int = 0) -> list:
+    def get_species(self, time_slice: int) -> list:
         """
         This function `get_species` creates a Mendeleiev table and returns a list of species based on the
         values of a, z,   and the table.
@@ -563,7 +563,7 @@ class CoreProfilesCompute:
         z = list(map(int, self.get_z(time_slice)))
         return [table_mendeleiev[z[ispecies]][a[ispecies]].element for ispecies in range(nspecies)]
 
-    def get_labels(self, time_slice: int = 0) -> list:
+    def get_labels(self, time_slice: int) -> list:
         """
         This function `get_labels` returns a list of labels for all species in a given time slice.
 
@@ -613,7 +613,7 @@ class CoreProfilesCompute:
                 nspec_over_nmaj[ispecies] = nspec_over_nmaj[ispecies] + nspec_over_nmaj[jspecies]
                 nspec_over_nmaj[jspecies] = 0
 
-    def get_rho_tor_norm(self, time_slice: int = 0) -> Union[np.ndarray , None]:
+    def get_rho_tor_norm(self, time_slice: int) -> Union[np.ndarray , None]:
         """
         This function `get_rho_tor_norm` returns a list of normalized toroidal rho values from a given
         time slice of a profiles_1d object.
@@ -651,7 +651,7 @@ class CoreProfilesCompute:
             logger.error(f"core_profiles.profiles_1d[{time_slice}].grid.rho_tor_norm or rho_tor is not available")
         return None
 
-    def get_psi(self, time_slice: int = 0) -> Union[list , None]:
+    def get_psi(self, time_slice: int) -> Union[list , None]:
         """
         This function `get_psi` returns the poloidal magnetic flux (psi) at a given time slice.
 

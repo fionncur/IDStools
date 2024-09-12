@@ -44,8 +44,8 @@ def show_waves_plots(args, hold=False):
         )
         conn = DBMaster.get_connection(connargs)
         if conn is None:
-            logger.critical("----> Aborted.")
-            exit(1)
+            logger.critical(f"data entry not found : {connargs}")
+            continue
 
         ids_waves = conn.get("waves", lazy=True)
         
@@ -147,8 +147,8 @@ def show_distribution_plots(args, hold=False):
         )
         conn = DBMaster.get_connection(connargs)
         if conn is None:
-            logger.critical("----> Aborted.")
-            exit(1)
+            logger.critical(f"data entry not found : {connargs}")
+            continue
 
         ids_distributions = conn.get("distributions", lazy=True)
         
@@ -324,24 +324,25 @@ if __name__ == "__main__":
         logger.warning("--> Exit.")
 
     # ECH
+    hold=False
     if hcd_sources["ech"]["run"]:
         ec_args = hcd_sources["ech"]
         ec_args["force_psi"] = None
         ec_args["hide_legend"] = False
         ec_args["save"] = args["save"]
-        show_waves_plots(ec_args)
+        show_waves_plots(ec_args, hold=True)
 
     # NUCLEAR REACTIONS
     if hcd_sources["fus"]["run"]:
         fus_args = hcd_sources["fus"]
         fus_args["save"] = args["save"]
-        show_distribution_plots(fus_args)
+        show_distribution_plots(fus_args, hold=True)
 
     # NBI
     if hcd_sources["nbi"]["run"]:
         nbi_args = hcd_sources["nbi"]
         nbi_args["save"] = args["save"]
-        show_distribution_plots(nbi_args)
+        show_distribution_plots(nbi_args, hold=True)
 
     # ICRH
     if hcd_sources["icrh"]["run"]:

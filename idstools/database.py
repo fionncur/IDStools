@@ -561,7 +561,10 @@ class DBMaster:
             if "mode" in imasargs.__dict__:
                 connection = imaspy.DBEntry(imasargs.uri, imasargs.mode)
             else:
-                connection = imaspy.DBEntry(imasargs.uri, "r")
+                try:
+                    connection = imaspy.DBEntry(imasargs.uri, "r")
+                except Exception as e:
+                    print(e)
         return connection
 
     @staticmethod

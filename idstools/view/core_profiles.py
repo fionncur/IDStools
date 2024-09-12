@@ -15,7 +15,7 @@ class CoreProfilesView:
         self.core_profiles_compute = CoreProfilesCompute(ids)
 
     @staticmethod
-    def view_plasma_composition_with_species_concentration(ids_object, slice_index=0, print_data=False, volume=None):
+    def view_plasma_composition_with_species_concentration(ids_object, time_slice, print_data=False, volume=None):
         """
         Nice display of plasma composition with species concentrations
         """
@@ -23,7 +23,7 @@ class CoreProfilesView:
         print("core_profiles")
         print("---------------")
         composition_data = CoreProfilesCompute.get_plasma_composition_with_species_concentration(
-            ids_object, slice_index, volume=volume
+            ids_object, time_slice, volume=volume
         )
         if composition_data != 0 and composition_data != -1:
             core_profiles_view = CoreProfilesView(ids_object)
@@ -56,7 +56,7 @@ class CoreProfilesView:
                 species_name = f"{species_data['species']}({species_data['label']})"
                 species_name = species_name[:11]
                 disp_species = f"{disp_species} {species_name : >12}"
-                a = f"{species_data['a'] :.1f}"
+                a = f"{species_data['a'].value :.1f}"
                 disp_a = f"{disp_a} {a : >12}"
                 z = f"{species_data['z'] :.1f}"
                 disp_z = f"{disp_z} {z : >12}"
@@ -115,7 +115,7 @@ class CoreProfilesView:
                         if state_data["label"].strip() != "":
                             label_space = 7
                         print(
-                            f"\t {'state' +str(istate + 1) : <8}{state_data['label']: <{label_space}}z : "
+                            f"\t {'state' +str(istate + 1) : <8}{state_data['label'].value: <{label_space}}z : "
                             f"{state_data['z_average']: <10} n/ni, % :{n_ni : >12}"
                         )
                     istate = istate + 1
