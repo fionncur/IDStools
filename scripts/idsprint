@@ -1,28 +1,113 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import argparse
-import os
-import sys
-
+import imaspy
 import numpy
-from rich_argparse import RichHelpFormatter
-
-try:
-    import StringIO
-except ImportError:
-    from io import StringIO
-
+import rich
+import sys
 from idstools.database import DBMaster
 from idstools.utils.clihelper import dbentry_parser
 from idstools.utils.idslogger import setup_logger
+from imaspy.ids_primitive import IDSPrimitive
+from imaspy.ids_struct_array import IDSStructArray
+from imaspy.ids_structure import IDSStructure
+from rich.columns import Columns
+from rich.pretty import Pretty
+from rich.tree import Tree
+from rich_argparse import RichHelpFormatter
 
 logger = setup_logger("module")
+
+
+def print_tree(structure, hide_empty_nodes,compact,  full_array):
+    if full_array:
+        with numpy.printoptions(threshold=sys.maxsize, linewidth=1024, precision=4):
+            rich.print(_make_tree(structure, hide_empty_nodes, compact))
+    else:
+        with numpy.printoptions(threshold=5, linewidth=1024, precision=4):
+            rich.print(_make_tree(structure, hide_empty_nodes, compact))
+            
+def _make_tree(structure, hide_empty_nodes, compact, *,  tree=None):
+    """Build the ``rich.tree.Tree`` for display in :py:meth:`print_tree`.
+
+    Args:
+        structure: IDS structure to add to the tree
+        hide_empty_nodes: Show or hide nodes without value.
+
+    Keyword Args:
+        tree: If provided, child items will be added to this Tree object. Otherwise a
+            new Tree is constructed.
+    """
+    
+    if tree is None:
+        if isinstance(structure, numpy.ndarray):
+            tree = Tree(f"[magenta]{type(structure)}")
+            if structure.size==0:
+                value = "[bright_black]"
+                txt = f"[grey62]numpy.ndarray|{structure.shape}|{structure.dtype}[/]"
+            else:
+                value=Pretty(structure)
+                txt = f"[bright_yellow]numpy.ndarray|{structure.shape}|{structure.dtype}[/]:"
+
+            group = Columns([txt, value])
+            if compact:
+                txt = f"[bright_yellow]numpy.ndarray|{structure.shape}|{structure.dtype}[/]"
+                group = Columns([txt])
+            tree.add(group)
+            return tree
+        else:
+            tree = Tree(f"[magenta]{structure.metadata.name}")
+
+    iterator = structure
+    if hide_empty_nodes and isinstance(structure, IDSStructure):
+        iterator = structure.iter_nonempty_(accept_lazy=True)
+
+    for counter,child in enumerate(iterator):
+        if isinstance(child, (numpy.ndarray)):
+            if child.size==0:
+                value = "[bright_black]"
+                txt = f"[grey62]numpy.ndarray|{child.shape}|{child.dtype}|{counter}][/]"
+            else:
+                value=Pretty(child)
+                txt = f"[bright_yellow]numpy.ndarray|{child.shape}|{child.dtype}|{counter}][/]:"
+
+            group = Columns([txt, value])
+            if compact:
+                txt = f"[bright_yellow]numpy.ndarray|{child.shape}|{child.dtype}|{counter}][/]"
+                group = Columns([txt])
+            tree.add(group)
+        elif isinstance(child, IDSPrimitive):
+            if not child.has_value:
+                value = "[bright_black]"
+                txt = f"[grey62]{child.metadata.name}[/]"
+            else:
+                value=Pretty(child.value)
+                txt = f"[bright_yellow]{child.metadata.name}[/]:"
+
+            group = Columns([txt, value])
+            if compact:
+                txt = f"[bright_yellow]{child.metadata.name}[/]"
+                group = Columns([txt])
+            tree.add(group)
+        else:
+            
+            if isinstance(child, IDSStructure):
+                txt = f"[magenta]{child._path}[/]"
+                ntree = tree.add(txt)
+            elif isinstance(child, IDSStructArray):
+                ntree = tree
+                if not child.has_value:
+                    tree.add(f"[magenta]{child._path}[][/]")
+            _make_tree(child, hide_empty_nodes, compact, tree=ntree)
+
+    return tree
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="""Prints content of an IDS onto the terminal\n
         provide with fragment
-        e.g. -u imas:hdf5?path=/home/ITER/fleuryl/public/imasdb/west/3/54914/4#wall or #wall:0/description_2d | less
+        e.g. -u idsprint --uri "imas:mdsplus?user=public;pulse=122525;run=1;database=ITER;version=3#equilibrium"
+        or #equilibrium/time_slice[0]/profiles_2d[0].r[1]
         [previously known as idsdump and idsdumppath]""",
         formatter_class=RichHelpFormatter,
         parents=[dbentry_parser],
@@ -38,13 +123,19 @@ if __name__ == "__main__":
         "-f",
         "--full",
         action="store_true",
-        help="Print all array elements (can be very slow for large data)",
+        help="Print all array elements (can be slow for large data)",
     )
     parser.add_argument(
         "-c",
         "--compact",
         action="store_true",
         help="Print only names which has data",
+    )
+    parser.add_argument(
+        "-i",
+        "--inspect",
+        action="store_true",
+        help="Print child nodes information and metadata",
     )
     args = parser.parse_args()
     splitted_ids_info = args.uri.split("#")
@@ -77,73 +168,18 @@ if __name__ == "__main__":
     if connection is None:
         logger.error("Please provide valid URI")
         exit(1)
-    if args.full:
-        numpy.set_printoptions(threshold=sys.maxsize)
-    else:
-        numpy.set_printoptions(threshold=10)
+    ids = connection.get(ids_name, occurrence)    
 
     if ids_path is None:
-        ids = connection.get(ids_name, occurrence)
-        if args.compact:
-            try:
-                output = StringIO()
-                sys.stdout = open(os.devnull, "w")
-
-                ids.dump(print_empty=args.show_empty, file=output)
-
-                sys.stdout = sys.__stdout__
-                output.seek(0)
-
-                for line in output.readlines():
-                    if "[" in line and "]" not in line:
-                        continue
-                    if "]" in line and "[" not in line:
-                        continue
-                    if "]" in line and "[" in line and "." in line:
-                        continue
-                    if "class" in line:
-                        continue
-                    if "value" in line:
-                        continue
-                    if ":" in line:
-                        line = line.split(":")[0] + "\n"
-                    line = line.replace("Attribute", "")
-                    line = line.replace("class", "")
-                    line = line.replace("=", "")
-                    line = line.replace("\t", "  ")
-                    print(line, end="")
-                output.close()
-            except Exception as e:
-                print(e)
+        if args.inspect:
+            imaspy.util.inspect(ids, hide_empty_nodes=not args.show_empty)
         else:
-            try:
-                ids.dump(print_empty=args.show_empty)
-            except Exception as _:  # noqa: F841
-                print(ids)
-
+            print_tree(ids, hide_empty_nodes=not args.show_empty,compact=args.compact, full_array=args.full)
     else:
-        try:
-            result = connection.partial_get(ids_name, ids_path, occurrence)
-        except Exception as exc:
-            logger.error(exc)
-            exit(1)
-
-        result_type = type(result)
-        print(f"Type: {result_type}")
-        if result.__class__ == numpy.ndarray:
-            print(f"Shape: {result.shape}")
-            print(f"Data type: {result.dtype.name}")
-
-        print("----------------------------------------------")
-        if result.__class__ == numpy.ndarray and len(result) < 1:
-            exit(0)
-
-        print("----------------------------------------------")
-        if result.__class__ == numpy.ndarray and result[0].__class__.__module__ != "numpy":
-            for i in range(len(result)):
-                ids_dump = result[i]
-                print(ids_dump)
-                print("-------------------------")
+        ids_path=ids_path.replace("(", "[").replace(")", "]").replace("/", ".")
+        node = eval("ids." + ids_path)
+        if args.inspect:
+            imaspy.util.inspect(node, hide_empty_nodes=not args.show_empty)    
         else:
-            print(result)
+            print_tree(node, hide_empty_nodes=not args.show_empty,compact=args.compact, full_array=args.full)
     connection.close()
