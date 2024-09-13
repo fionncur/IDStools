@@ -6,7 +6,6 @@ import os
 import statistics as stat
 import sys
 
-import imas
 from rich_argparse import RichHelpFormatter
 
 from idstools import idsperf

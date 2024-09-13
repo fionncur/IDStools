@@ -195,10 +195,7 @@ def get_available_ids_and_occurrences(db_entry_object, time_mode=None, get_comme
     availableidslist = []
     for idstype in get_ids_types():
         occurrence_list = db_entry_object.list_all_occurrences(idstype)
-        if len(occurrence_list) ==0:
-            continue
-        max_occurrences=max(occurrence_list)
-        for occ in range(max_occurrences + 1):
+        for occ in occurrence_list:
             homogeneous_time = ""
             comment = ""
             occ_type = ""
@@ -206,7 +203,7 @@ def get_available_ids_and_occurrences(db_entry_object, time_mode=None, get_comme
                     idstype,  occurrence=occ, lazy=True
                 )
             homogeneous_time=ids_object.ids_properties.homogeneous_time
-            comment = ids_object.ids_properties.homogeneous_time.comment
+            comment = ids_object.ids_properties.comment
             try:
                 occ_type_text = ""
                 occ_type = ids_object.ids_properties.occurrence_type
@@ -236,31 +233,32 @@ def get_available_ids_and_times(db_entry_object) -> list:
     """
 
     result = []
+    
     for _ids_name in get_ids_types():
         occurrence_list = db_entry_object.list_all_occurrences(_ids_name)
+       
         if len(occurrence_list) ==0:
             continue
-        max_occurrences=max(occurrence_list)
 
-        for occurrence in range(max_occurrences + 1):
+        for occurrence in occurrence_list:
             time_array = None
-            try:
-                ids_object = db_entry_object.get(
-                    _ids_name,  occurrence=occurrence, lazy=True
-                )
-                homogeneous_time=ids_object.ids_properties.homogeneous_time
-                if homogeneous_time == imaspy.ids_defs.IDS_TIME_MODE_UNKNOWN:
-                    time_array = []
-                if homogeneous_time == imaspy.ids_defs.IDS_TIME_MODE_HETEROGENEOUS:
-                    time_array = [np.NaN]
-                if homogeneous_time == imaspy.ids_defs.IDS_TIME_MODE_HOMOGENEOUS:
-                    time_array = db_entry_object.partial_get(_ids_name, "time")
-                if homogeneous_time == imaspy.ids_defs.IDS_TIME_MODE_INDEPENDENT:
-                    time_array = [np.NINF]
-            except Exception as e:
-                logger.debug(f"{e}")
+            # try:  
+            ids_object = db_entry_object.get(
+                _ids_name,  occurrence=occurrence, lazy=True
+            )
+            homogeneous_time=ids_object.ids_properties.homogeneous_time
+            if homogeneous_time == imaspy.ids_defs.IDS_TIME_MODE_UNKNOWN:
                 time_array = []
-                logger.info(f"ERROR! IDS {_ids_name} : Reading time array fails due to following problem : {e}")
+            if homogeneous_time == imaspy.ids_defs.IDS_TIME_MODE_HETEROGENEOUS:
+                time_array = [np.NaN]
+            if homogeneous_time == imaspy.ids_defs.IDS_TIME_MODE_HOMOGENEOUS:
+                time_array = ids_object.time.value
+            if homogeneous_time == imaspy.ids_defs.IDS_TIME_MODE_INDEPENDENT:
+                time_array = [np.NINF]
+            # except Exception as e:
+            #     logger.debug(f"{e}")
+            #     time_array = []
+            #     logger.info(f"ERROR! IDS {_ids_name} : Reading time array fails due to following problem : {e}")
             if time_array is not None and len(time_array):
                 result.append((_ids_name, time_array))
     return result
