@@ -282,10 +282,16 @@ def resample_indices(dbin: str, dbout: str, idsname: str, start: int = 0, stop: 
             the `times` array. For example, if `step` is set to 2, every second index will be selected. If `step`
             is set to 3, every third index will be selected, and so. Defaults to 1
     """
-    times = dbin.partial_get(idsname, "time")
-    for time_val in times[range(start, len(times) if stop is None else stop, step)]:
-        data_slice = dbin.get_slice(idsname, time_val, imaspy.ids_defs.PREVIOUS_INTERP)
-        dbout.put_slice(data_slice)
+    idsobj=None
+    try:
+        idsobj=dbin.get(idsname, lazy=True)
+    except:
+        pass
+    if idsobj:
+        times = idsobj.time
+        for time_val in times[range(start, len(times) if stop is None else stop, step)]:
+            data_slice = dbin.get_slice(idsname, time_val, imaspy.ids_defs.PREVIOUS_INTERP)
+            dbout.put_slice(data_slice)
 
 
 def resample_times(
@@ -314,19 +320,25 @@ def resample_times(
             the `times` array. For example, if `step` is set to 2, every second index will be selected. If `step`
             is set to 3, every third index will be selected, and so. Defaults to 1
     """
-    times = dbin.partial_get(idsname, "time")
-    if step is None:  # work on indices
-        rstart = 0 if start is None else np.argmax(times >= start)
-        rstop = len(times) if stop is None else (np.argmax(times > stop) - 1)
-        rtimes = [times[range(rstart, rstop, 1)]]
-    else:
-        rstart = times[0] if start is None else start
-        rstop = times[-1] if stop is None else stop
-        rtimes = np.arange(rstart, rstop, step)
+    idsobj=None
+    try:
+        idsobj=dbin.get(idsname, lazy=True)
+    except:
+        pass
+    if idsobj:
+        times = idsobj.time
+        if step is None:  # work on indices
+            rstart = 0 if start is None else np.argmax(times >= start)
+            rstop = len(times) if stop is None else (np.argmax(times > stop) - 1)
+            rtimes = [times[range(rstart, rstop, 1)]]
+        else:
+            rstart = times[0] if start is None else start
+            rstop = times[-1] if stop is None else stop
+            rtimes = np.arange(rstart, rstop, step)
 
-    for time_val in rtimes:
-        data_slice = dbin.get_slice(idsname, time_val, imaspy.ids_defs.PREVIOUS_INTERP)
-        dbout.put_slice(data_slice)
+        for time_val in rtimes:
+            data_slice = dbin.get_slice(idsname, time_val, imaspy.ids_defs.PREVIOUS_INTERP)
+            dbout.put_slice(data_slice)
 
 
 def compare_ids(
