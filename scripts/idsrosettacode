@@ -4,8 +4,8 @@ import argparse
 import math
 import os
 import sys
-
-import imas
+from idstools.utils.idshelper import get_ids_types
+import imaspy
 import numpy as np
 import pandas as pd
 import requests
@@ -44,7 +44,9 @@ def ids_setter(ids, path, val):
             dodi = dodi[nodeindex]
     leaf = path[-1]
     try:
-        leaftype = type(getattr(dodi, leaf))
+        ids_field=getattr(dodi, leaf)
+        leaftype = type(ids_field.value)
+        
         if leaftype == str:
             setattr(dodi, str(leaf), str(val))
         elif leaftype == float:
@@ -52,13 +54,18 @@ def ids_setter(ids, path, val):
         elif leaftype == int:
             setattr(dodi, str(leaf), int(val))
         elif leaftype == np.ndarray:
-            setattr(dodi, str(leaf), (np.array([val], dtype=(getattr(dodi, leaf)).dtype)))
+            if len(ids_field.shape) == 1:
+                arr=[val]
+            elif len(ids_field.shape) == 2:
+                arr=[[val]]
+            setattr(dodi, str(leaf), np.array(arr, dtype=ids_field.dtype))
         else:
             raise AttributeError(f"The type {leaftype} of {idspath} is currently not supported")
     except AttributeError:
         raise AttributeError(
             f"The leaf '{node}' could not be found in {path} for IDS {ids._base_path}. Please check spelling."
         )
+    
 
 
 def evaluate(expr):
@@ -167,14 +174,14 @@ rows = [args.row] if args.row is not None else db.index
 
 # print(f"Starts mapping of the DB {args.inputCSV}, please be patient...")
 for row in track(rows, description="[green]Processing..."):
-    d_b_v_a_r = db.iloc[row]
-    de = imas.DBEntry(get_backend_id(args.backend), args.database, 1, row)
+    DBVAR = db.iloc[row]
+    de = imaspy.DBEntry(get_backend_id(args.backend), args.database, 1, row)
     de.create()
 
     iod = {}
-
-    for ids in list(imas.IDSName):
-        iod[ids.value] = getattr(imas, ids.value)()
+    factory = imaspy.IDSFactory()
+    for ids in get_ids_types():
+        iod[ids] = factory.new(ids)
     for var in mf.loc[:, args.varcol]:
         idspath = mf[mf[args.varcol] == var].iloc[0].at[args.pathcol]
         transformation = mf[mf[args.varcol] == var].iloc[0].at[args.tracol]
