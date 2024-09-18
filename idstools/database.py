@@ -515,47 +515,20 @@ class DBMaster:
 
     @classmethod
     def get_dd_version(cls):
-        _lowlevel_version = ""
-        if "_al_lowlevel" in imas.__dict__:
-            try:
-                _lowlevel_version = imas.al_dd_version
-            except Exception:
-                _lowlevel_version = imas.al_defs.DD_VERSION.decode("utf-8")
-        elif "_ual_lowlevel" in imas.__dict__:
-            raw_d_d_version = imas._ual_lowlevel.__name__  # '__name__': 'imas_3_41_0_ual_4_11_10._ual_lowlevel
-            raw_d_d_version, _ = raw_d_d_version.split(".")
-            match = re.search(r"\d+_\d+_\d+", raw_d_d_version)
-            if match:
-                _lowlevel_version = match.group()
-                _lowlevel_version = _lowlevel_version.replace("_", ".")
-        lowlevel_version = _lowlevel_version
-        return lowlevel_version
-
-    @classmethod
-    def get_connection(cls, imasargs):
-        connection = DBMaster.get_db_entry_object(imasargs)
-        # if connection is not None:
-        #     status, _ = connection.open()
-        #     if status != 0:
-        #         logger.error(f"Can not find data entry {imasargs}")
-        #         return None
-        return connection
+        factory = imaspy.IDSFactory()
+        return factory.dd_version
 
     @classmethod
     def create_connection(cls, imasargs):
         if "mode" not in imasargs.__dict__:
             imasargs.mode = "w"
-
-        connection = DBMaster.get_db_entry_object(imasargs)
-        if connection is not None:
-            status, _ = connection.create()
-            if status != 0:
-                logger.error(f"Can not create database entry {imasargs}")
-                return None
+        connection = None
+        if imasargs.uri != "" and imasargs.uri is not None:
+            connection = imaspy.DBEntry(imasargs.uri, imasargs.mode)
         return connection
 
     @classmethod
-    def get_db_entry_object(cls, imasargs):
+    def get_connection(cls, imasargs):
         connection = None
         if imasargs.uri != "" and imasargs.uri is not None:
             if "mode" in imasargs.__dict__:

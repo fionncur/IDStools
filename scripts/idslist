@@ -6,19 +6,19 @@ import argparse
 import sys
 
 import numpy as np
+from rich.console import Console
 from rich.markdown import Markdown
+from rich.pretty import Pretty
+from rich.table import Table
 from rich_argparse import RichHelpFormatter
+
 from idstools.database import DBMaster
 from idstools.utils.clihelper import dbentry_parser
-from idstools.utils.idslogger import setup_logger
-from rich.console import Console
-from rich.table import Table
-from rich.pretty import Pretty
-
 from idstools.utils.idshelper import (
     get_available_ids_and_occurrences,
     get_available_ids_and_times,
 )
+from idstools.utils.idslogger import setup_logger
 
 logger = setup_logger("module")
 np.set_printoptions(threshold=1, precision=2, suppress=True)

@@ -10,7 +10,6 @@ import logging
 import os
 
 from imaspy import ids_defs
-
 from rich_argparse import RichHelpFormatter
 
 from idstools.compute.common import get_nearest_time

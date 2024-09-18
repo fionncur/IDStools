@@ -8,8 +8,9 @@ import copy
 import logging
 import os
 
+from imaspy.ids_defs import EMPTY_INT
 from rich_argparse import RichHelpFormatter
-from  imaspy.ids_defs import EMPTY_INT
+
 from idstools.compute.common import get_nearest_time
 from idstools.compute.waves import WavesCompute
 from idstools.database import DBMaster

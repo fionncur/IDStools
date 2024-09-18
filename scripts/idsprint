@@ -1,13 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import argparse
+import sys
+
 import imaspy
 import numpy
 import rich
-import sys
-from idstools.database import DBMaster
-from idstools.utils.clihelper import dbentry_parser
-from idstools.utils.idslogger import setup_logger
 from imaspy.ids_primitive import IDSPrimitive
 from imaspy.ids_struct_array import IDSStructArray
 from imaspy.ids_structure import IDSStructure
@@ -15,6 +13,10 @@ from rich.columns import Columns
 from rich.pretty import Pretty
 from rich.tree import Tree
 from rich_argparse import RichHelpFormatter
+
+from idstools.database import DBMaster
+from idstools.utils.clihelper import dbentry_parser
+from idstools.utils.idslogger import setup_logger
 
 logger = setup_logger("module")
 
@@ -55,9 +57,24 @@ def _make_tree(structure, hide_empty_nodes, compact, *,  tree=None):
                 group = Columns([txt])
             tree.add(group)
             return tree
+        elif isinstance(structure, imaspy.ids_primitive.IDSNumericArray):
+            tree = Tree(f"[magenta]{type(structure)}")
+            if structure.size==0:
+                value = "[bright_black]"
+                txt = f"[grey62]numpy.ndarray|{structure.shape}|{structure.dtype}[/]"
+            else:
+                value=Pretty(structure)
+                txt = f"[bright_yellow]numpy.ndarray|{structure.shape}|{structure.dtype}[/]:"
+
+            group = Columns([txt, value])
+            if compact:
+                txt = f"[bright_yellow]numpy.ndarray|{structure.shape}|{structure.dtype}[/]"
+                group = Columns([txt])
+            tree.add(group)
+            return tree
         else:
             tree = Tree(f"[magenta]{structure.metadata.name}")
-
+            
     iterator = structure
     if hide_empty_nodes and isinstance(structure, IDSStructure):
         iterator = structure.iter_nonempty_(accept_lazy=True)
@@ -90,15 +107,16 @@ def _make_tree(structure, hide_empty_nodes, compact, *,  tree=None):
                 group = Columns([txt])
             tree.add(group)
         else:
-            
+            # print(type(child))
             if isinstance(child, IDSStructure):
                 txt = f"[magenta]{child._path}[/]"
                 ntree = tree.add(txt)
+                _make_tree(child, hide_empty_nodes, compact, tree=ntree)
             elif isinstance(child, IDSStructArray):
                 ntree = tree
                 if not child.has_value:
                     tree.add(f"[magenta]{child._path}[][/]")
-            _make_tree(child, hide_empty_nodes, compact, tree=ntree)
+                _make_tree(child, hide_empty_nodes, compact, tree=ntree)
 
     return tree
 

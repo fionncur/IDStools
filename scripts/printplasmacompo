@@ -18,9 +18,9 @@ import argparse
 import logging
 
 import numpy as np
-from idstools.compute.common import get_nearest_time
 from rich_argparse import RichHelpFormatter
 
+from idstools.compute.common import get_nearest_time
 from idstools.database import DBMaster
 from idstools.utils.clihelper import dbentry_parser
 from idstools.utils.idslogger import setup_logger
