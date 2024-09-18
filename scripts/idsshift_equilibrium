@@ -5,7 +5,7 @@ import argparse
 import logging
 import os
 import sys
-
+import imaspy
 from rich_argparse import RichHelpFormatter
 
 from idstools.compute.equilibrium import EquilibriumCompute
@@ -55,13 +55,16 @@ outputargs = argparse.Namespace()
 outputargs.mode = "w"
 outputargs.uri = args.dest
 
-output_connection = DBMaster.get_connection(outputargs)
+if "mode" not in outputargs.__dict__:
+    outputargs.mode = "a"
+output_connection = None
+if outputargs.uri != "" and outputargs.uri is not None:
+    output_connection = imaspy.DBEntry(outputargs.uri, outputargs.mode)
+        
 if output_connection is None:
-    output_connection = DBMaster.create_connection(outputargs)
-    if output_connection is None:
-        sys.exit()
-
-
+    logger.error("Error opening destination pulse! Please check parameters and permissions.")
+    exit(1)
+        
 logger.info(f"Shifting equilibrium by {shift_param} m")
 logger.info("Values for wall gaps, locations of strike-points and closest wall points are no longer guaranteed!")
 equilibrium_compute = EquilibriumCompute(ids_equilibrium)

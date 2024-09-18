@@ -5,7 +5,7 @@ import os
 import sys
 
 from rich_argparse import RichHelpFormatter
-
+import imaspy
 from idstools.compute.equilibrium import EquilibriumCompute
 from idstools.database import DBMaster
 from idstools.utils.idslogger import setup_logger
@@ -62,11 +62,15 @@ outputargs = argparse.Namespace()
 outputargs.mode = "w"
 outputargs.uri = args.dest
 
-output_connection = DBMaster.get_connection(outputargs)
+if "mode" not in outputargs.__dict__:
+    outputargs.mode = "a"
+output_connection = None
+if outputargs.uri != "" and outputargs.uri is not None:
+    output_connection = imaspy.DBEntry(outputargs.uri, outputargs.mode)
+        
 if output_connection is None:
-    output_connection = DBMaster.create_connection(outputargs)
-    if output_connection is None:
-        sys.exit()
+    logger.error("Error opening destination pulse! Please check parameters and permissions.")
+    exit(1)
 
 
 logger.info(f"Rescaling equilibrium magnetic field by {rescale}")

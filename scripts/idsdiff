@@ -12,7 +12,6 @@ import tempfile
 import time
 from io import BytesIO
 
-import imas
 import matplotlib.pyplot as plt
 import numpy as np
 from rich.console import Console
@@ -23,7 +22,7 @@ from rich_argparse import RichHelpFormatter
 
 from idstools.database import DBMaster
 from idstools.utils.ddhelper import DDHelper
-from idstools.utils.idshelper import compare_ids
+from idstools.utils.idshelper import compare_ids, get_ids_types
 from idstools.utils.idslogger import setup_logger
 
 THRESHOLD_PERCENT = 2
@@ -460,7 +459,7 @@ if __name__ == "__main__":
         print("No valid connections found! Please validate pulse details")
 
     if args.ids == []:
-        args.ids = [ids.value for ids in list(imas.IDSName)]
+        args.ids = get_ids_types()
 
     file_path = get_filename("compare_report", args.directory)
     log_file = file_path + ".log"
@@ -479,8 +478,18 @@ if __name__ == "__main__":
             if connections[i][0] != connections[j][0]:
                 compare_data = {}
                 for idsname in args.ids:
-                    ids_a = connections[i][1].get(idsname)
-                    ids_b = connections[j][1].get(idsname)
+                    ids_a=None
+                    try:
+                        ids_a = connections[i][1].get(idsname)
+                    except:
+                        pass
+                    ids_b=None
+                    try:
+                        ids_b = connections[j][1].get(idsname)
+                    except:
+                        pass
+                    if ids_a is None or ids_b is None:
+                        continue
                     compare_result, output = compare_ids(
                         ids_a,
                         ids_b,

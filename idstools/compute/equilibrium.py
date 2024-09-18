@@ -415,7 +415,7 @@ class EquilibriumCompute:
         from packaging.version import Version
 
         try:
-            dd_version = self.ids.ids_properties.version_put.data_dictionary
+            dd_version = self.ids.ids_properties.version_put.data_dictionary.value
         except Exception as e:
             logger.debug(f"{e}")
             dd_version = "0.0.0"
