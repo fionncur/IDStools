@@ -4,7 +4,7 @@ import argparse
 import math
 import os
 import sys
-from idstools.utils.idshelper import get_ids_types
+
 import imaspy
 import numpy as np
 import pandas as pd
@@ -13,6 +13,7 @@ from rich.progress import track
 from rich_argparse import RichHelpFormatter
 
 from idstools.utils.clihelper import get_backend_id
+from idstools.utils.idshelper import get_ids_types
 
 
 def ids_setter(ids, path, val):

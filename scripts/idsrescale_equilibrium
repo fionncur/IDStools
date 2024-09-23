@@ -4,8 +4,9 @@ import logging
 import os
 import sys
 
-from rich_argparse import RichHelpFormatter
 import imaspy
+from rich_argparse import RichHelpFormatter
+
 from idstools.compute.equilibrium import EquilibriumCompute
 from idstools.database import DBMaster
 from idstools.utils.idslogger import setup_logger
