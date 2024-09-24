@@ -58,7 +58,6 @@ class CoreTransportCompute:
                     if len(model.profiles_1d[time_slice].grid_flux.surface) == 0
                     else model.profiles_1d[time_slice].grid_flux.surface
                 )
-
                 flux_dict["particles_flux"] = (model.profiles_1d[time_slice].electrons.particles.flux * grid_flux_surface)[-1]
             else:
                 flux_dict["particles_flux"] = None
@@ -77,11 +76,19 @@ class CoreTransportCompute:
                 np.nan if len(model.profiles_1d[time_slice].grid_flux.surface) == 0 else model.profiles_1d[time_slice].grid_flux.surface
             )
             for ion_index, ion in enumerate(model.profiles_1d[time_slice].ion):
-
+                ion_name="--"
+                if "label" in dir(ion):
+                    if ion.label.has_value:
+                        ion_name=ion.label.value
+                elif "name" in dir(ion):
+                    if ion.name.has_value:
+                        ion_name=ion.name.value
+                # print(ion.name)
                 ion_dict = {
-                    "a": ion.element[0].a,
-                    "z_n": ion.element[0].z_n,
-                    "z_ion": ion.z_ion,
+                    "name": ion_name,
+                    "a": ion.element[0].a if ion.element[0].a else "--",
+                    "z_n": ion.element[0].z_n if ion.element[0].z_n else "--",
+                    "z_ion": ion.z_ion if ion.z_ion.has_value else "--",
                 }
                 if len(ion.particles.flux) != 0:
                     ion_dict["particles_flux"] = (ion.particles.flux * grid_flux_surface)[-1]

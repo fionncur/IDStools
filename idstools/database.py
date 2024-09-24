@@ -5,7 +5,7 @@ import re
 from datetime import datetime
 from glob import glob
 from pathlib import Path
-import imaspy
+import imaspy as imas
 from yaml import load as yamlload
 from yaml import safe_load
 
@@ -515,7 +515,7 @@ class DBMaster:
 
     @classmethod
     def get_dd_version(cls):
-        factory = imaspy.IDSFactory()
+        factory = imas.IDSFactory()
         return factory.dd_version
 
     @classmethod
@@ -524,7 +524,7 @@ class DBMaster:
             imasargs.mode = "w"
         connection = None
         if imasargs.uri != "" and imasargs.uri is not None:
-            connection = imaspy.DBEntry(imasargs.uri, imasargs.mode)
+            connection = imas.DBEntry(imasargs.uri, imasargs.mode)
         return connection
 
     @classmethod
@@ -532,10 +532,10 @@ class DBMaster:
         connection = None
         if imasargs.uri != "" and imasargs.uri is not None:
             if "mode" in imasargs.__dict__:
-                connection = imaspy.DBEntry(imasargs.uri, imasargs.mode)
+                connection = imas.DBEntry(imasargs.uri, imasargs.mode)
             else:
                 try:
-                    connection = imaspy.DBEntry(imasargs.uri, "r")
+                    connection = imas.DBEntry(imasargs.uri, "r")
                 except Exception as e:
                     print(e)
         return connection

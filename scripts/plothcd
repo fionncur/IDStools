@@ -13,10 +13,89 @@ from idstools.utils.idslogger import setup_logger
 from idstools.view.common import PlotCanvas
 from idstools.view.distributions import DistributionsView
 from idstools.view.waves import WavesView
+from collections import OrderedDict
 
 logger = setup_logger("module", stdout_level=logging.INFO)
 
+def _show_waves_plots(connargs, args, hold=False):
+    conn = DBMaster.get_connection(connargs)
+    if conn is None:
+        logger.critical(f"data entry not found : {connargs}")
+        return
 
+    ids_waves = conn.get("waves", lazy=True)
+    
+
+    waves_compute = WavesCompute(ids_waves)
+
+    time_array = ids_waves.time
+    ntime = len(time_array)
+    time_slice, time_value = get_nearest_time(ids_waves.time, args["time"])
+
+    radial_grid = waves_compute.get_radial_grid_info(time_slice, args["force_psi"])
+    if radial_grid is None:
+        logger.critical("Radial grid information is empty ----> Abort.")
+        return
+    active_launchers = {key: value for key, value in radial_grid.items() if value["is_active"] is True}
+    len_active_launchers = len(active_launchers)
+    if len_active_launchers == 0:
+        logger.critical("The waves IDS appears empty ----> Abort.")
+        return
+
+    rows = 2
+    if ntime == 1:
+        logger.error("Only one time slice --> ECCD and ECRH waveforms not displayed")
+        rows = 1
+    canvas = PlotCanvas(rows, 2)
+    # canvas.setStyle(style="retro")
+    canvas.set_sup_title(f"HCD Waves Plot {connargs.uri} Time : {time_value:.1f}")
+
+    ax1 = canvas.add_axes(title="", xlabel="", row=0, col=0)
+    ax2 = canvas.add_axes(title="", xlabel="", row=0, col=1)
+    if ntime != 1:
+        ax3 = canvas.add_axes(title="", xlabel="", row=1, col=0)
+        ax4 = canvas.add_axes(title="", xlabel="", row=1, col=1)
+
+    waves_view = WavesView(ids_waves)
+    waves_view.view_absorbed_power_density_profile(ax1, time_slice, args["force_psi"])
+    if args["hide_legend"]:
+        ax1.get_legend().remove()
+    else:
+        ax1.get_legend().remove()
+    waves_view.view_c_d_profile(ax2, time_slice, args["force_psi"])
+    if args["hide_legend"]:
+        ax2.get_legend().remove()
+    if ntime != 1:
+        waves_view.view_e_c_power_waveform(ax3, time_slice, args["force_psi"])
+        if args["hide_legend"]:
+            ax3.get_legend().remove()
+        else:
+            ax3.get_legend().remove()
+        waves_view.view_c_d_waveform(ax4, time_slice, args["force_psi"])
+        if args["hide_legend"]:
+            ax4.get_legend().remove()
+        else:
+            ax4.get_legend().remove()
+
+    canvas.set_text(text=f"{get_database_path(connargs, time_value=time_value)}")
+
+    canvas.fig.subplots_adjust(
+        top=0.92,
+        bottom=0.122,
+        left=0.05,
+        right=0.896,
+        hspace=0.2,
+        wspace=0.13,
+    )
+    canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
+    canvas.fig.suptitle(get_title(connargs, "HCD Waves Plot", time_value), size=12)
+    if args["save"]:
+        fname = get_file_name(connargs, "hcd_waves_plot", time_value)
+        canvas.save(fname)
+    else:
+        canvas.show(block=hold)
+    conn.close()
+        
 def show_waves_plots(args, hold=False):
     pulse = args["pulse"]
     run = args["run"]
@@ -42,85 +121,61 @@ def show_waves_plots(args, hold=False):
             f"imas:{args['backend'].lower()}?user={connargs.user};pulse={connargs.pulse};"
             f"run={connargs.run};database={connargs.database};version={connargs.version}"
         )
-        conn = DBMaster.get_connection(connargs)
-        if conn is None:
-            logger.critical(f"data entry not found : {connargs}")
-            continue
-
-        ids_waves = conn.get("waves", lazy=True)
+        _show_waves_plots(connargs, args, hold)
         
 
-        waves_compute = WavesCompute(ids_waves)
+def _show_distribution_plots(connargs, args, hold=False):
+    conn = DBMaster.get_connection(connargs)
+    if conn is None:
+        logger.critical(f"data entry not found : {connargs}")
+        return
 
-        time_array = ids_waves.time
-        ntime = len(time_array)
-        time_slice, time_value = get_nearest_time(ids_waves.time, args["time"])
+    ids_distributions = conn.get("distributions", lazy=True)
+    
 
-        radial_grid = waves_compute.get_radial_grid_info(time_slice, args["force_psi"])
-        if radial_grid is None:
-            logger.critical("Radial grid information is empty ----> Abort.")
-            continue
-        active_launchers = {key: value for key, value in radial_grid.items() if value["is_active"] is True}
-        len_active_launchers = len(active_launchers)
-        if len_active_launchers == 0:
-            logger.critical("The waves IDS appears empty ----> Abort.")
-            continue
+    time_array = ids_distributions.time
+    ntime = len(time_array)
+    time_slice, time_value = get_nearest_time(ids_distributions.time, args["time"])
 
-        rows = 2
-        if ntime == 1:
-            logger.error("Only one time slice --> ECCD and ECRH waveforms not displayed")
-            rows = 1
-        canvas = PlotCanvas(rows, 2)
-        # canvas.setStyle(style="retro")
-        canvas.set_sup_title(f"HCD Waves Plot [pulse {args['pulse']} / Run {args['run']}] Time : {time_value:.1f}")
+    canvas = PlotCanvas(3, 2)
+    # canvas.setStyle(style="retro")
+    canvas.set_sup_title(
+        f"HCD Distributions Plot {connargs.uri} Time : {time_value:.1f}"
+    )
+    if ntime == 1:
+        logger.info("Only one time slice --> Power and CD waveforms not displayed")
+    ax1 = canvas.add_axes(title="", xlabel="", row=0, col=0)
+    ax2 = canvas.add_axes(title="", xlabel="", row=1, col=0)
+    ax3 = canvas.add_axes(title="", xlabel="", row=2, col=0)
+    distributions_view = DistributionsView(ids_distributions)
+    distributions_view.plot_absorbed_power_density_individual(ax1, time_slice)
+    distributions_view.plot_absorbed_power_density(ax2, time_slice)
+    distributions_view.plot_cd_profile(ax3, time_slice)
+    if ntime != 1:
+        ax4 = canvas.add_axes(title="", xlabel="", row=0, col=1)
+        ax5 = canvas.add_axes(title="", xlabel="", row=1, col=1)
+        distributions_view.plot_nbi_fus_power_and_cd_waveforms(ax4, time_slice)
+        distributions_view.plot_cd_waveform(ax5, time_slice)
 
-        ax1 = canvas.add_axes(title="", xlabel="", row=0, col=0)
-        ax2 = canvas.add_axes(title="", xlabel="", row=0, col=1)
-        if ntime != 1:
-            ax3 = canvas.add_axes(title="", xlabel="", row=1, col=0)
-            ax4 = canvas.add_axes(title="", xlabel="", row=1, col=1)
+    canvas.set_text(text=f"{get_database_path(connargs, time_value=time_value)}")
 
-        waves_view = WavesView(ids_waves)
-        waves_view.view_absorbed_power_density_profile(ax1, time_slice, args["force_psi"])
-        if args["hide_legend"]:
-            ax1.get_legend().remove()
-        else:
-            ax1.get_legend().remove()
-        waves_view.view_c_d_profile(ax2, time_slice, args["force_psi"])
-        if args["hide_legend"]:
-            ax2.get_legend().remove()
-        if ntime != 1:
-            waves_view.view_e_c_power_waveform(ax3, time_slice, args["force_psi"])
-            if args["hide_legend"]:
-                ax3.get_legend().remove()
-            else:
-                ax3.get_legend().remove()
-            waves_view.view_c_d_waveform(ax4, time_slice, args["force_psi"])
-            if args["hide_legend"]:
-                ax4.get_legend().remove()
-            else:
-                ax4.get_legend().remove()
-
-        canvas.set_text(text=f"{get_database_path(connargs, time_value=time_value)}")
-
-        canvas.fig.subplots_adjust(
-            top=0.92,
-            bottom=0.122,
-            left=0.05,
-            right=0.896,
-            hspace=0.2,
-            wspace=0.13,
-        )
-        canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
-        canvas.fig.suptitle(get_title(connargs, "HCD Waves Plot", time_value), size=12)
-        if args["save"]:
-            fname = get_file_name(connargs, "hcd_waves_plot", time_value)
-            canvas.save(fname)
-        else:
-            canvas.show(block=hold)
-        conn.close()
-
-
+    canvas.fig.subplots_adjust(
+        top=0.92,
+        bottom=0.122,
+        left=0.044,
+        right=0.886,
+        hspace=0.438,
+        wspace=0.328,
+    )
+    canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
+    canvas.fig.suptitle(get_title(connargs, "HCD Distributions Plot", time_value), size=12)
+    if args["save"]:
+        fname = get_file_name(connargs, os.path.basename(__file__) + "_Distributions_profile_time", time_value)
+        canvas.save(fname)
+    else:
+        canvas.show(block=hold)
+    conn.close()
+        
 def show_distribution_plots(args, hold=False):
     pulse = args["pulse"]
     run = args["run"]
@@ -145,58 +200,8 @@ def show_distribution_plots(args, hold=False):
             f"imas:{args['backend'].lower()}?user={connargs.user};pulse={connargs.pulse};"
             f"run={connargs.run};database={connargs.database};version={connargs.version}"
         )
-        conn = DBMaster.get_connection(connargs)
-        if conn is None:
-            logger.critical(f"data entry not found : {connargs}")
-            continue
-
-        ids_distributions = conn.get("distributions", lazy=True)
+        _show_distribution_plots(connargs, args, hold)
         
-
-        time_array = ids_distributions.time
-        ntime = len(time_array)
-        time_slice, time_value = get_nearest_time(ids_distributions.time, args["time"])
-
-        canvas = PlotCanvas(3, 2)
-        # canvas.setStyle(style="retro")
-        canvas.set_sup_title(
-            f"HCD Distributions Plot [pulse {args['pulse']} / Run {args['run']}] Time : {time_value:.1f}"
-        )
-        if ntime == 1:
-            logger.info("Only one time slice --> Power and CD waveforms not displayed")
-        ax1 = canvas.add_axes(title="", xlabel="", row=0, col=0)
-        ax2 = canvas.add_axes(title="", xlabel="", row=1, col=0)
-        ax3 = canvas.add_axes(title="", xlabel="", row=2, col=0)
-        distributions_view = DistributionsView(ids_distributions)
-        distributions_view.plot_absorbed_power_density_individual(ax1, time_slice)
-        distributions_view.plot_absorbed_power_density(ax2, time_slice)
-        distributions_view.plot_cd_profile(ax3, time_slice)
-        if ntime != 1:
-            ax4 = canvas.add_axes(title="", xlabel="", row=0, col=1)
-            ax5 = canvas.add_axes(title="", xlabel="", row=1, col=1)
-            distributions_view.plot_nbi_fus_power_and_cd_waveforms(ax4, time_slice)
-            distributions_view.plot_cd_waveform(ax5, time_slice)
-
-        canvas.set_text(text=f"{get_database_path(connargs, time_value=time_value)}")
-
-        canvas.fig.subplots_adjust(
-            top=0.92,
-            bottom=0.122,
-            left=0.044,
-            right=0.886,
-            hspace=0.438,
-            wspace=0.328,
-        )
-        canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
-        canvas.fig.suptitle(get_title(connargs, "HCD Distributions Plot", time_value), size=12)
-        if args["save"]:
-            fname = get_file_name(connargs, os.path.basename(__file__) + "_Distributions_profile_time", time_value)
-            canvas.save(fname)
-        else:
-            canvas.show(block=hold)
-        conn.close()
-
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="--- Display H&CD results from multiple data sets \n"
@@ -240,7 +245,79 @@ if __name__ == "__main__":
         help="Directory to save the figure",
         default=None,
     )
+    parser.add_argument("-t", "--time", help="Time", required=False, type=float, default=-99.0)
     args = vars(parser.parse_args())
+    
+    holder= OrderedDict()
+    if args["ech"] != "":
+        if "imas:" in args["ech"]:
+            holder["ech_uri_hold"] =True
+        else:
+            holder["ech_uri_hold"] =False
+    if args["icrh"] != "":
+        if "imas:" in args["icrh"]:
+            holder["icrh_uri_hold"]=True
+        else:
+            holder["icrh_uri_hold"]=False
+    if args["nbi"] != "":
+        if "imas:" in args["nbi"]:
+            holder["nbi_uri_hold"]=True
+        else:
+            holder["nbi_uri_hold"]=False
+    if args["fus"] != "":
+        if "imas:" in args["fus"]:
+            holder["fus_uri_hold"]=True
+        else:
+            holder["fus_uri_hold"]=False
+    if args["ech"] != "":
+        if "imas:" not in args["ech"]:
+            holder["ech_hold"]=True
+        else:
+            holder["ech_hold"]=False
+    if args["icrh"] != "":
+        if "imas:" not in args["icrh"]:
+            holder["icrh_hold"]=True
+        else:
+            holder["icrh_hold"]=False
+    if args["nbi"] != "":
+        if "imas:" not in args["nbi"]:
+            holder["nbi_hold"]=True
+        else:
+            holder["nbi_hold"]=False
+    if args["fus"] != "":
+        if "imas:" not in args["fus"]:
+            holder["fus_hold"]=True
+        else:
+            holder["fus_hold"]=False
+
+    last_item = next(reversed(holder))    
+
+    for key,_ in holder.items():
+        if key is not last_item:
+            holder[key]=False
+            
+    if "imas:" in args["ech"]:
+        connargs_ech = argparse.Namespace()
+        connargs_ech.uri=args["ech"]
+        args["force_psi"] = None
+        args["hide_legend"] = False
+        args["save"] = args["save"]
+        _show_waves_plots(connargs_ech, args, holder["ech_uri_hold"])
+    if "imas:" in args["icrh"]:
+        connargs_icrh = argparse.Namespace()
+        connargs_icrh.uri=args["icrh"]
+        args["save"] = args["save"]
+        _show_distribution_plots(connargs_icrh, args, holder["icrh_uri_hold"])
+    if "imas:" in args["nbi"]:
+        connargs_nbi = argparse.Namespace()
+        connargs_nbi.uri=args["nbi"]
+        args["save"] = args["save"]
+        _show_distribution_plots(connargs_nbi, args, holder["nbi_uri_hold"])
+    if "imas:" in args["fus"]:
+        connargs_fus = argparse.Namespace()
+        connargs_fus.uri=args["fus"]
+        args["save"] = args["save"]
+        _show_distribution_plots(connargs_fus, args, holder["fus_uri_hold"])
 
     hcd_sources = {
         "ech": {
@@ -280,39 +357,39 @@ if __name__ == "__main__":
             "version": "3",
         },
     }
-
     for source in hcd_sources.keys():
         if args[source] is not None:
-            hcd_sources[source]["input"] = args[source]
-            if len(hcd_sources[source]["input"].split("/")) == 6:
-                (
-                    hcd_sources[source]["pulse"],
-                    hcd_sources[source]["run"],
-                    hcd_sources[source]["user"],
-                    hcd_sources[source]["backend"],
-                    hcd_sources[source]["database"],
-                    hcd_sources[source]["version"],
-                ) = hcd_sources[source]["input"].split("/")
-                hcd_sources[source]["time"] = -99.0
-            elif len(hcd_sources[source]["input"].split("/")) == 7:
-                (
-                    hcd_sources[source]["pulse"],
-                    hcd_sources[source]["run"],
-                    hcd_sources[source]["user"],
-                    hcd_sources[source]["backend"],
-                    hcd_sources[source]["database"],
-                    hcd_sources[source]["version"],
-                    hcd_sources[source]["time"],
-                ) = hcd_sources[source]["input"].split("/")
-            else:
-                logger.critical("------------------------------------------------------------")
-                logger.critical("Bad input format: " + hcd_sources[source]["input"] + " not valid")
-                logger.critical("Arguments should be formatted like pulse/run/user/database")
-                logger.critical("--> Exit.")
-                logger.critical("-------------------------------------------------------------")
-                exit()
-            hcd_sources[source]["pulse"] = int(hcd_sources[source]["pulse"])
-            del hcd_sources[source]["input"]
+            if "imas:" not in args[source]:
+                hcd_sources[source]["input"] = args[source]
+                if len(hcd_sources[source]["input"].split("/")) == 6:
+                    (
+                        hcd_sources[source]["pulse"],
+                        hcd_sources[source]["run"],
+                        hcd_sources[source]["user"],
+                        hcd_sources[source]["backend"],
+                        hcd_sources[source]["database"],
+                        hcd_sources[source]["version"],
+                    ) = hcd_sources[source]["input"].split("/")
+                    hcd_sources[source]["time"] = -99.0
+                elif len(hcd_sources[source]["input"].split("/")) == 7:
+                    (
+                        hcd_sources[source]["pulse"],
+                        hcd_sources[source]["run"],
+                        hcd_sources[source]["user"],
+                        hcd_sources[source]["backend"],
+                        hcd_sources[source]["database"],
+                        hcd_sources[source]["version"],
+                        hcd_sources[source]["time"],
+                    ) = hcd_sources[source]["input"].split("/")
+                else:
+                    logger.critical("------------------------------------------------------------")
+                    logger.critical("Bad input format: " + hcd_sources[source]["input"] + " not valid")
+                    logger.critical("Arguments should be formatted like pulse/run/user/database")
+                    logger.critical("--> Exit.")
+                    logger.critical("-------------------------------------------------------------")
+                    exit()
+                hcd_sources[source]["pulse"] = int(hcd_sources[source]["pulse"])
+                del hcd_sources[source]["input"]
 
     nsource = 0
     for source, value in hcd_sources.items():
@@ -330,22 +407,22 @@ if __name__ == "__main__":
         ec_args["force_psi"] = None
         ec_args["hide_legend"] = False
         ec_args["save"] = args["save"]
-        show_waves_plots(ec_args, hold=True)
+        show_waves_plots(ec_args, hold=holder["ech_hold"])
 
     # NUCLEAR REACTIONS
     if hcd_sources["fus"]["run"]:
         fus_args = hcd_sources["fus"]
         fus_args["save"] = args["save"]
-        show_distribution_plots(fus_args, hold=True)
+        show_distribution_plots(fus_args, hold=holder["icrh_hold"])
 
     # NBI
     if hcd_sources["nbi"]["run"]:
         nbi_args = hcd_sources["nbi"]
         nbi_args["save"] = args["save"]
-        show_distribution_plots(nbi_args, hold=True)
+        show_distribution_plots(nbi_args, hold=holder["nbi_hold"])
 
     # ICRH
     if hcd_sources["icrh"]["run"]:
         icrh_args = hcd_sources["icrh"]
         icrh_args["save"] = args["save"]
-        show_distribution_plots(icrh_args, hold=True)
+        show_distribution_plots(icrh_args, hold=holder["fus_hold"])
