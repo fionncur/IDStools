@@ -208,30 +208,31 @@ if __name__ == "__main__":
         + "- Each H&CD source is optional \n"
         + "- Time is also optional \n"
         + "- Example: \n"
-        + "  hcdplot -ech 134713/200/schneim/MDSPLUS/TORBEAM/3 -nbi 130012/122/schneim/nf_fopla_synergy \n",
+        + "  plothcd -ech 134713/200/schneim/MDSPLUS/TORBEAM/3 -nbi 130012/122/schneim/nf_fopla_synergy \n"
+        + "  plothcd -ech imas:mdsplus?user=public;pulse=134173;run=101;database=TEST;version=3 \n",
         formatter_class=RichHelpFormatter,
     )
     parser.add_argument(
         "-ech",
-        help="pulse/run/user/backend/database/[time] for ECH results (waves)",
+        help="uri or pulse/run/user/backend/database/[time] for ECH results (waves)",
         required=False,
         type=str,
     )
     parser.add_argument(
         "-icrh",
-        help="pulse/run/user/backend/database/version/[time] for ICRH results (distributions)",
+        help="uri or pulse/run/user/backend/database/version/[time] for ICRH results (distributions)",
         required=False,
         type=str,
     )
     parser.add_argument(
         "-nbi",
-        help="pulse/run/user/backend/database/version/[time] for NBI results (distributions)",
+        help="uri or pulse/run/user/backend/database/version/[time] for NBI results (distributions)",
         required=False,
         type=str,
     )
     parser.add_argument(
         "-fus",
-        help="pulse/run/user/backend/database/version/[time] for fusion products (distributionss)",
+        help="uri or pulse/run/user/backend/database/version/[time] for fusion products (distributionss)",
         required=False,
         type=str,
     )
