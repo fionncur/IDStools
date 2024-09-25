@@ -242,23 +242,23 @@ def get_available_ids_and_times(db_entry_object) -> list:
 
         for occurrence in occurrence_list:
             time_array = None
-            # try:  
-            ids_object = db_entry_object.get(
-                _ids_name,  occurrence=occurrence, lazy=True
-            )
-            homogeneous_time=ids_object.ids_properties.homogeneous_time
-            if homogeneous_time == imaspy.ids_defs.IDS_TIME_MODE_UNKNOWN:
+            try:  
+                ids_object = db_entry_object.get(
+                    _ids_name,  occurrence=occurrence, lazy=True
+                )
+                homogeneous_time=ids_object.ids_properties.homogeneous_time
+                if homogeneous_time == imaspy.ids_defs.IDS_TIME_MODE_UNKNOWN:
+                    time_array = []
+                if homogeneous_time == imaspy.ids_defs.IDS_TIME_MODE_HETEROGENEOUS:
+                    time_array = [np.NaN]
+                if homogeneous_time == imaspy.ids_defs.IDS_TIME_MODE_HOMOGENEOUS:
+                    time_array = ids_object.time.value
+                if homogeneous_time == imaspy.ids_defs.IDS_TIME_MODE_INDEPENDENT:
+                    time_array = [np.NINF]
+            except Exception as e:
+                logger.debug(f"{e}")
                 time_array = []
-            if homogeneous_time == imaspy.ids_defs.IDS_TIME_MODE_HETEROGENEOUS:
-                time_array = [np.NaN]
-            if homogeneous_time == imaspy.ids_defs.IDS_TIME_MODE_HOMOGENEOUS:
-                time_array = ids_object.time.value
-            if homogeneous_time == imaspy.ids_defs.IDS_TIME_MODE_INDEPENDENT:
-                time_array = [np.NINF]
-            # except Exception as e:
-            #     logger.debug(f"{e}")
-            #     time_array = []
-            #     logger.info(f"ERROR! IDS {_ids_name} : Reading time array fails due to following problem : {e}")
+                logger.info(f"ERROR! IDS {_ids_name} : Reading time array fails due to following problem : {e}")
             if time_array is not None and len(time_array):
                 result.append((_ids_name, time_array))
     return result

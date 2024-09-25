@@ -226,7 +226,7 @@ class DBMaster:
                     (
                         pulse,
                         run,
-                        imas.imasdef.MDSPLUS_BACKEND,
+                        imas.ids_defs.MDSPLUS_BACKEND,
                         database,
                         user,
                         version,
@@ -239,7 +239,7 @@ class DBMaster:
                     (
                         pulse,
                         run,
-                        imas.imasdef.HDF5_BACKEND,
+                        imas.ids_defs.HDF5_BACKEND,
                         database,
                         user,
                         version,
@@ -317,7 +317,7 @@ class DBMaster:
                                 (
                                     pulse,
                                     run,
-                                    imas.imasdef.MDSPLUS_BACKEND,
+                                    imas.ids_defs.MDSPLUS_BACKEND,
                                     database,
                                     user,
                                     version,
@@ -330,7 +330,7 @@ class DBMaster:
                             (
                                 pulse,
                                 run,
-                                imas.imasdef.MDSPLUS_BACKEND,
+                                imas.ids_defs.MDSPLUS_BACKEND,
                                 database,
                                 user,
                                 version,
@@ -704,7 +704,7 @@ def read_scenario(
 
     # Read the equilibrium and core_profiles IDSs from the input datafile
     connection_in = imas.DBEntry(
-        imas.imasdef.MDSPLUS_BACKEND,
+        imas.ids_defs.MDSPLUS_BACKEND,
         config["input_database"],
         config["shot"],
         config["run_in"],
@@ -722,7 +722,7 @@ def read_scenario(
 
     # Read the out IDS from the output datafile
     connection_out = imas.DBEntry(
-        imas.imasdef.MDSPLUS_BACKEND,
+        imas.ids_defs.MDSPLUS_BACKEND,
         config["output_database"],
         config["shot"],
         config["run_out"],
@@ -743,7 +743,7 @@ def read_scenario(
     import argparse
 
     inputargs = argparse.Namespace()
-    inputargs.backend = imas.imasdef.MDSPLUS_BACKEND
+    inputargs.backend = imas.ids_defs.MDSPLUS_BACKEND
     inputargs.pulse = config["shot"]
     inputargs.run = config["run_in"]
     inputargs.user = config["input_user_or_path"]
