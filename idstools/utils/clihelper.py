@@ -3,8 +3,7 @@ import os
 import re
 import socket
 
-import imas
-from imas import imasdef
+import imaspy as imas
 
 
 def get_core_version():
@@ -88,7 +87,7 @@ def get_backend_id(name):
     module `imasdef` based on the value of `name` with the suffix "_BACKEND". The value of this
     attribute is then returned by the function.
     """
-    return getattr(imasdef, f"{name}_BACKEND")
+    return getattr(imas.ids_defs, f"{name}_BACKEND")
 
 
 def get_slice_mode(name):
@@ -104,7 +103,7 @@ def get_slice_mode(name):
         The `get_slice_mode` function is returning the value of the attribute with the name
     `{name}_INTERP` from the `imasdef` module.
     """
-    return getattr(imasdef, f"{name}_INTERP")
+    return getattr(imas.ids_defs, f"{name}_INTERP")
 
 
 def get_details_from_uri(uri):

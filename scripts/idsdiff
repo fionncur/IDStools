@@ -12,8 +12,6 @@ from io import BytesIO
 
 import matplotlib.pyplot as plt
 import numpy as np
-import rich
-from imaspy.ids_base import IDSBase
 from imaspy.ids_primitive import (
     IDSFloat0D,
     IDSInt0D,
@@ -21,15 +19,12 @@ from imaspy.ids_primitive import (
     IDSString0D,
 )
 from imaspy.ids_struct_array import IDSStructArray
-from imaspy.ids_structure import IDSStructure
 from rich.progress import track
-from rich.table import Table
-from rich.text import Text
 from rich_argparse import RichHelpFormatter
 
 from idstools.database import DBMaster
 from idstools.utils.ddhelper import DDHelper
-from idstools.utils.idshelper import get_ids_types
+from idstools.utils.idshelper import get_ids_types, idsdiff, idsdiff_full
 from idstools.utils.idslogger import setup_logger
 
 THRESHOLD_PERCENT = 2
@@ -381,126 +376,7 @@ def generate_html(file_path, compare_data):
     )
     file_object.close()
 
-def idsdiff_full(struct1: IDSStructure, struct2: IDSStructure, name1="", name2="") :
-    diff_result=[]
-    compare_result=False
-    diff_table = Table(f"{name1}({struct1.metadata.name})", f"{name2}({struct2.metadata.name})")
 
-    for description, child1, child2 in imaspy.util.idsdiffgen(struct1, struct2):
-        if not isinstance(child1, IDSBase) and not isinstance(child2, IDSBase):
-            txt1 = f"{description}: {child1}"
-            txt2 = f"{description}: {child2}"
-        else:
-            txt1 = "-" if child1 is None else repr(child1)
-            txt2 = "-" if child2 is None else repr(child2)
-
-        seqmat = difflib.SequenceMatcher()
-        seqmat.set_seqs(txt1, txt2)
-
-        out1 = Text()
-        out2 = Text()
-        prevmatch = difflib.Match(0, 0, 0)
-        for match in seqmat.get_matching_blocks():
-            if match.a > prevmatch.a + prevmatch.size:
-                out1.append(txt1[prevmatch.a + prevmatch.size : match.a], "bold red")
-            if match.b > prevmatch.b + prevmatch.size:
-                out2.append(txt2[prevmatch.b + prevmatch.size : match.b], "bold green")
-            out1.append(txt1[match.a : match.a + match.size])
-            out2.append(txt2[match.b : match.b + match.size])
-            prevmatch = match
-        out1.append(txt1[match.a + match.size :], style="bold red")
-        out2.append(txt2[match.b + match.size :], style="bold green")
-        diff_result.append((description, child1, child2))
-        diff_table.add_row(out1, out2)
-        diff_table.add_section()
-
-    if diff_table.row_count:
-        compare_result=False
-        rich.print(diff_table)
-    else:
-        rich.print("Structures", struct1, "and", struct2, "are identical")
-        compare_result=True
-    return compare_result, diff_result
-        
- 
-def idsdiff(struct1: IDSStructure, struct2: IDSStructure, name1="", name2="", verbose=True):
-    diff_result=[]
-    compare_result=False
-    print(f"{name1}({struct1.metadata.name}) - {name2}({struct2.metadata.name})")
-    diff_table = Table(title=Text(f"{name1}({struct1.metadata.name})", f"{name2}({struct2.metadata.name})"))
-    diff_table.add_column("IDS Path")
-    diff_table.add_column("Description")
-    if verbose:
-        diff_table.add_column("Value Left")
-        diff_table.add_column("Value Right")
-    
-    for description, child1, child2 in imaspy.util.idsdiffgen(struct1, struct2):
-        diff_result.append((description, child1, child2))
-        information=Text("different values", style="cyan")
-        if child1 is None:
-            information = Text("missing in first", style="red")
-        if child2 is None:
-            information = Text("missing in second", style="yellow")
-        if isinstance(child1,IDSStructArray):
-            data_type1 = "STRUCT_ARRAY"
-            information=Text("different length", style="magenta")
-        else:
-            data_type1 = "-" if child1 is None else child1.data_type
-        if isinstance(child2,IDSStructArray):
-            data_type2 = "STRUCT_ARRAY"
-            information=Text("different length", style="magenta")
-        else:
-            data_type2 = "-" if child2 is None else child2.data_type
-        
-        path = child1._path if child2 is None else child2._path
-        
-        value1 = "-" if child1 is None else child1.value
-        value2 = "-" if child2 is None else child2.value
-        
-        if type(value1) is np.ndarray:
-            value1 = str(value1[0]) + ",..."
-        elif type(value1) is list:
-            value1 = str(len(value1)) + " items"
-        if type(value2) is np.ndarray:
-            value2 = str(value2[0]) + ",..."
-        elif type(value2) is list:
-            value2 = str(len(value2)) + " items" 
-        if verbose:
-            if not isinstance(child1, IDSBase) and not isinstance(child2, IDSBase):
-                txt1 = f"{description}: {child1}"
-                txt2 = f"{description}: {child2}"
-            else:
-                txt1="" if data_type1 =="-" else f"({data_type1}) {value1}"
-                txt2="" if data_type2 =="-" else f"({data_type2}) {value2}"
-            seqmat = difflib.SequenceMatcher()
-            seqmat.set_seqs(txt1, txt2)
-            out1 = Text()
-            out2 = Text()
-            prevmatch = difflib.Match(0, 0, 0)
-            for match in seqmat.get_matching_blocks():
-                if match.a > prevmatch.a + prevmatch.size:
-                    out1.append(txt1[prevmatch.a + prevmatch.size : match.a], "bold red")
-                if match.b > prevmatch.b + prevmatch.size:
-                    out2.append(txt2[prevmatch.b + prevmatch.size : match.b], "bold green")
-                out1.append(txt1[match.a : match.a + match.size])
-                out2.append(txt2[match.b : match.b + match.size])
-                prevmatch = match
-            out1.append(txt1[match.a + match.size :], style="bold red")
-            out2.append(txt2[match.b + match.size :], style="bold green")
-        
-        if verbose:
-            diff_table.add_row(path, information, out1, out2)
-        else:
-            diff_table.add_row(path, information)
-        # diff_table.add_section()
-
-    if diff_table.row_count:
-        compare_result=False
-        rich.print(diff_table)
-    else:
-        rich.print("Structures", struct1, "and", struct2, "are identical")
-        compare_result=True
-    return compare_result, diff_result
 
 if __name__ == "__main__":
     # Management of input arguments
@@ -591,11 +467,11 @@ if __name__ == "__main__":
                     if ids_a is None or ids_b is None:
                         continue
                     if args.fullarray:
-                        compare_result, output=idsdiff_full(ids_a,ids_b, connections[i][0], connections[j][0] )
+                        compare_result, diff_result, _=idsdiff_full(ids_a,ids_b, connections[i][0], connections[j][0] ,print_result=True)
                     else:
-                        compare_result, output=idsdiff(ids_a,ids_b, connections[i][0], connections[j][0] )
+                        compare_result, diff_result, _=idsdiff(ids_a,ids_b, connections[i][0], connections[j][0] , print_result=True, verbose=True)
                     
-                    compare_data[idsname] = (compare_result, output)
+                    compare_data[idsname] = (compare_result, diff_result)
                     total_data[
                         (
                             connections[i][0],

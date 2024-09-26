@@ -548,7 +548,7 @@ class DBMaster:
         ---------
         path: str or Path
         """
-
+        
         p = Path(path)
         try:
             with open(p, "r") as f:
@@ -591,7 +591,7 @@ class DBMaster:
         -------
         list of tuple (pulse,run)
         """
-
+        
         locpath = Path(locpath).expanduser()
         if not locpath.exists():
             raise FileNotFoundError(
@@ -605,13 +605,18 @@ class DBMaster:
             if (with_status is None) or (with_status == DBMaster.get_status(Path(entry).with_suffix(".yaml"))):
                 file = entry.split("/")[-1].split("_")[1].split(".")[0]
                 if len(file) <= 4:
-                    pulse = 0
+                    pulse=int(entry.split("/")[-3])
+                    run=int(entry.split("/")[-2])
                 else:
                     pulse = int(file[0:-4])
-                run = int(file[-4:]) + 10000 * int(entry.split("/")[-2])
+                    run = int(file[-4:])
+                    
+                # run = int(file[-4:]) + 10000 * int(entry.split("/")[-2])
                 pulses.append((pulse, run))
-        return pulses
-
+        
+        pulses_set=set(pulses) 
+        return list(pulses_set)
+    
     @staticmethod
     def hdf5_list_pulse_run(locpath):
         """Function that lists Pulse and Run numbers from a given database, in HDF5

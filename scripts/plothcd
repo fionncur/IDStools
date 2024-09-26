@@ -2,6 +2,7 @@
 import argparse
 import logging
 import os
+from collections import OrderedDict
 
 from rich_argparse import RichHelpFormatter
 
@@ -13,7 +14,6 @@ from idstools.utils.idslogger import setup_logger
 from idstools.view.common import PlotCanvas
 from idstools.view.distributions import DistributionsView
 from idstools.view.waves import WavesView
-from collections import OrderedDict
 
 logger = setup_logger("module", stdout_level=logging.INFO)
 

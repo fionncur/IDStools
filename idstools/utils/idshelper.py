@@ -8,11 +8,18 @@ import logging
 import time
 import types
 import sys
-import imaspy
+import imaspy as imas
 import numpy as np
 import pandas as pd
 from packaging import version
 from rich.progress import track
+import difflib
+import rich
+from imaspy.ids_struct_array import IDSStructArray
+from imaspy.ids_base import IDSBase
+from imaspy.ids_structure import IDSStructure
+from rich.table import Table
+from rich.text import Text
 
 logger = logging.getLogger("module")
 ARRAY_EQUAL_KWARGS = "equal_nan=True" if version.parse(np.__version__) > version.parse("1.19") else ""
@@ -70,7 +77,7 @@ def get_ids_size(db_entry_object, ids_names=None) -> dict:
     """
     
     if ids_names is None:
-        factory = imaspy.IDSFactory()
+        factory = imas.IDSFactory()
         ids_names = factory.ids_names()
     if type(ids_names) is str:
         ids_names = ids_names.split(",")
@@ -136,7 +143,7 @@ def get_all_ids_get_time(db_entry_object):
 def get_object_size(obj: object) -> int:
     object_size = 0
     
-    if isinstance(obj, imaspy.ids_primitive.IDSInt0D)  or isinstance(obj, imaspy.ids_primitive.IDSString0D) or isinstance(obj, imaspy.ids_primitive.IDSComplex0D) or isinstance(obj, imaspy.ids_primitive.IDSFloat0D) or isinstance(obj, imaspy.ids_primitive.IDSNumericArray) or isinstance(obj, imaspy.ids_primitive.IDSPrimitive) or isinstance(obj, imaspy.ids_primitive.IDSString0D) or isinstance(obj, imaspy.ids_primitive.IDSString1D):
+    if isinstance(obj, imas.ids_primitive.IDSInt0D)  or isinstance(obj, imas.ids_primitive.IDSString0D) or isinstance(obj, imas.ids_primitive.IDSComplex0D) or isinstance(obj, imas.ids_primitive.IDSFloat0D) or isinstance(obj, imas.ids_primitive.IDSNumericArray) or isinstance(obj, imas.ids_primitive.IDSPrimitive) or isinstance(obj, imas.ids_primitive.IDSString0D) or isinstance(obj, imas.ids_primitive.IDSString1D):
         if isinstance(obj.value, str):
             object_size += len(obj.value)
         elif isinstance(obj.value, np.ndarray):
@@ -150,10 +157,10 @@ def get_object_size(obj: object) -> int:
                 object_size += get_object_size(obj_item)
         else:
             print(f"Not implemented {type(obj.value)}  ->  {obj}" )
-    elif isinstance(obj, imaspy.ids_struct_array.IDSStructArray):
+    elif isinstance(obj, imas.ids_struct_array.IDSStructArray):
         for obj_item in obj:
             object_size += get_object_size(obj_item)
-    elif isinstance(obj, imaspy.ids_structure.IDSStructure):
+    elif isinstance(obj, imas.ids_structure.IDSStructure):
         for obj_value in obj:
             object_size += get_object_size(obj_value)
     else:
@@ -169,7 +176,7 @@ def get_ids_types():
         The function `get_ids_types()` is returning a list of values of all the `value` attributes of the `IDSName`
         objects in the `imas` module.
     """
-    factory = imaspy.IDSFactory()
+    factory = imas.IDSFactory()
     return factory.ids_names()
 
 
@@ -207,12 +214,12 @@ def get_available_ids_and_occurrences(db_entry_object, time_mode=None, get_comme
             try:
                 occ_type_text = ""
                 occ_type = ids_object.ids_properties.occurrence_type
-                if occ_type.index != imaspy.ids_defs.EMPTY_INT:
+                if occ_type.index != imas.ids_defs.EMPTY_INT:
                     occ_type_text = occ_type_dict[occ_type.index]
                     comment += f" [occurrence type = {occ_type_text}]"
             except Exception as e:
                 logger.debug(f"{e}")
-            if homogeneous_time != imaspy.ids_defs.EMPTY_INT and (time_mode is None or time_mode == homogeneous_time):
+            if homogeneous_time != imas.ids_defs.EMPTY_INT and (time_mode is None or time_mode == homogeneous_time):
                 if get_comment is True:
                     availableidslist.append((idstype, occ, comment))
                 else:
@@ -247,13 +254,13 @@ def get_available_ids_and_times(db_entry_object) -> list:
                     _ids_name,  occurrence=occurrence, lazy=True
                 )
                 homogeneous_time=ids_object.ids_properties.homogeneous_time
-                if homogeneous_time == imaspy.ids_defs.IDS_TIME_MODE_UNKNOWN:
+                if homogeneous_time == imas.ids_defs.IDS_TIME_MODE_UNKNOWN:
                     time_array = []
-                if homogeneous_time == imaspy.ids_defs.IDS_TIME_MODE_HETEROGENEOUS:
+                if homogeneous_time == imas.ids_defs.IDS_TIME_MODE_HETEROGENEOUS:
                     time_array = [np.NaN]
-                if homogeneous_time == imaspy.ids_defs.IDS_TIME_MODE_HOMOGENEOUS:
+                if homogeneous_time == imas.ids_defs.IDS_TIME_MODE_HOMOGENEOUS:
                     time_array = ids_object.time.value
-                if homogeneous_time == imaspy.ids_defs.IDS_TIME_MODE_INDEPENDENT:
+                if homogeneous_time == imas.ids_defs.IDS_TIME_MODE_INDEPENDENT:
                     time_array = [np.NINF]
             except Exception as e:
                 logger.debug(f"{e}")
@@ -290,7 +297,7 @@ def resample_indices(dbin: str, dbout: str, idsname: str, start: int = 0, stop: 
     if idsobj:
         times = idsobj.time
         for time_val in times[range(start, len(times) if stop is None else stop, step)]:
-            data_slice = dbin.get_slice(idsname, time_val, imaspy.ids_defs.PREVIOUS_INTERP)
+            data_slice = dbin.get_slice(idsname, time_val, imas.ids_defs.PREVIOUS_INTERP)
             dbout.put_slice(data_slice)
 
 
@@ -337,7 +344,7 @@ def resample_times(
             rtimes = np.arange(rstart, rstop, step)
 
         for time_val in rtimes:
-            data_slice = dbin.get_slice(idsname, time_val, imaspy.ids_defs.PREVIOUS_INTERP)
+            data_slice = dbin.get_slice(idsname, time_val, imas.ids_defs.PREVIOUS_INTERP)
             dbout.put_slice(data_slice)
 
 
@@ -622,7 +629,133 @@ def get_quantities_from_pulses(idspath: str, pulses: tuple, list_count: int = 0,
     df_extract = df[["PULSE", "RUN", "VALUE"]]
     return df_extract
 
+def idsdiff_full(struct1: IDSStructure, struct2: IDSStructure, name1="", name2="", print_result=False) :
+    diff_result=[]
+    compare_result=False
+    diff_table = Table(f"{name1}({struct1.metadata.name})", f"{name2}({struct2.metadata.name})")
 
+    for description, child1, child2 in imas.util.idsdiffgen(struct1, struct2):
+        if not isinstance(child1, IDSBase) and not isinstance(child2, IDSBase):
+            txt1 = f"{description}: {child1}"
+            txt2 = f"{description}: {child2}"
+        else:
+            txt1 = "-" if child1 is None else repr(child1)
+            txt2 = "-" if child2 is None else repr(child2)
+
+        seqmat = difflib.SequenceMatcher()
+        seqmat.set_seqs(txt1, txt2)
+
+        out1 = Text()
+        out2 = Text()
+        prevmatch = difflib.Match(0, 0, 0)
+        for match in seqmat.get_matching_blocks():
+            if match.a > prevmatch.a + prevmatch.size:
+                out1.append(txt1[prevmatch.a + prevmatch.size : match.a], "bold red")
+            if match.b > prevmatch.b + prevmatch.size:
+                out2.append(txt2[prevmatch.b + prevmatch.size : match.b], "bold green")
+            out1.append(txt1[match.a : match.a + match.size])
+            out2.append(txt2[match.b : match.b + match.size])
+            prevmatch = match
+        out1.append(txt1[match.a + match.size :], style="bold red")
+        out2.append(txt2[match.b + match.size :], style="bold green")
+        diff_result.append((description, child1, child2))
+        diff_table.add_row(out1, out2)
+        diff_table.add_section()
+    text_output=None
+    if diff_table.row_count:
+        compare_result=False
+        text_output = diff_table
+        
+    else:
+        text_output="Structures", struct1, "and", struct2, "are identical"
+        compare_result=True
+    if print_result:
+        rich.print(text_output)
+    return compare_result, diff_result, text_output
+        
+ 
+def idsdiff(struct1: IDSStructure, struct2: IDSStructure, name1="", name2="", print_result=False,verbose=True):
+    diff_result=[]
+    compare_result=False
+
+    diff_table = Table(title=Text(f"{name1}({struct1.metadata.name})", f"{name2}({struct2.metadata.name})"))
+    diff_table.add_column("IDS Path")
+    diff_table.add_column("Description")
+    if verbose:
+        diff_table.add_column("Value Left")
+        diff_table.add_column("Value Right")
+    
+    for description, child1, child2 in imas.util.idsdiffgen(struct1, struct2):
+        diff_result.append((description, child1, child2))
+        information=Text("different values", style="cyan")
+        if child1 is None:
+            information = Text("missing in first", style="red")
+        if child2 is None:
+            information = Text("missing in second", style="yellow")
+        if isinstance(child1,IDSStructArray):
+            data_type1 = "STRUCT_ARRAY"
+            information=Text("different length", style="magenta")
+        else:
+            data_type1 = "-" if child1 is None else child1.data_type
+        if isinstance(child2,IDSStructArray):
+            data_type2 = "STRUCT_ARRAY"
+            information=Text("different length", style="magenta")
+        else:
+            data_type2 = "-" if child2 is None else child2.data_type
+        
+        path = child1._path if child2 is None else child2._path
+        
+        value1 = "-" if child1 is None else child1.value
+        value2 = "-" if child2 is None else child2.value
+        
+        if type(value1) is np.ndarray:
+            value1 = str(value1[0]) + ",..."
+        elif type(value1) is list:
+            value1 = str(len(value1)) + " items"
+        if type(value2) is np.ndarray:
+            value2 = str(value2[0]) + ",..."
+        elif type(value2) is list:
+            value2 = str(len(value2)) + " items" 
+        if verbose:
+            if not isinstance(child1, IDSBase) and not isinstance(child2, IDSBase):
+                txt1 = f"{description}: {child1}"
+                txt2 = f"{description}: {child2}"
+            else:
+                txt1="" if data_type1 =="-" else f"({data_type1}) {value1}"
+                txt2="" if data_type2 =="-" else f"({data_type2}) {value2}"
+            seqmat = difflib.SequenceMatcher()
+            seqmat.set_seqs(txt1, txt2)
+            out1 = Text()
+            out2 = Text()
+            prevmatch = difflib.Match(0, 0, 0)
+            for match in seqmat.get_matching_blocks():
+                if match.a > prevmatch.a + prevmatch.size:
+                    out1.append(txt1[prevmatch.a + prevmatch.size : match.a], "bold red")
+                if match.b > prevmatch.b + prevmatch.size:
+                    out2.append(txt2[prevmatch.b + prevmatch.size : match.b], "bold green")
+                out1.append(txt1[match.a : match.a + match.size])
+                out2.append(txt2[match.b : match.b + match.size])
+                prevmatch = match
+            out1.append(txt1[match.a + match.size :], style="bold red")
+            out2.append(txt2[match.b + match.size :], style="bold green")
+        
+        if verbose:
+            diff_table.add_row(path, information, out1, out2)
+        else:
+            diff_table.add_row(path, information)
+        # diff_table.add_section()
+    text_output = None
+    
+    if diff_table.row_count:
+        compare_result=False
+        text_output = diff_table
+        
+    else:
+        text_output=f"Structures {struct1} and {struct2} are identical"
+        compare_result=True
+    if print_result:
+        rich.print(text_output)
+    return compare_result, diff_result, text_output
 # if __name__ == "__main__":
 #     import imaspy
 #     entry = imaspy.DBEntry("imas:mdsplus?user=public;shot=131024;run=41;database=ITER;version=3", "r")  
