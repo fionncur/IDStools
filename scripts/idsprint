@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import argparse
+import os
 import sys
 
 import imaspy
 import numpy
 import rich
-from imaspy.ids_primitive import IDSPrimitive
+from imaspy.ids_primitive import IDSNumericArray, IDSPrimitive
 from imaspy.ids_struct_array import IDSStructArray
 from imaspy.ids_structure import IDSStructure
 from rich.columns import Columns
@@ -15,12 +16,59 @@ from rich.tree import Tree
 from rich_argparse import RichHelpFormatter
 
 from idstools.database import DBMaster
-from idstools.utils.clihelper import dbentry_parser
+from idstools.utils.clihelper import (
+        dbentry_parser,
+        get_database_path,
+        get_file_name,
+        get_title,
+)
 from idstools.utils.idslogger import setup_logger
+from idstools.view.common import PlotCanvas
 
 logger = setup_logger("module")
 
+def view_plot(ax, node, ids_path, coordinate=0):
+        if not isinstance(node,IDSNumericArray):
+            logger.error("Not numeric array, Please adjust path")
+            return
+        if not node.has_value:
+            logger.error("Values are not present")
+            return
 
+        units=node.metadata.units
+
+        coordinate=node.coordinates[coordinate]
+        coordinate_units="-"
+        if isinstance(coordinate, IDSPrimitive):
+            coordinate_units=coordinate.metadata.units
+        ax.plot(coordinate, node.value, label=ids_path)
+
+        # Set Plot properties
+        font_args = {
+            "fontfamily": "serif",
+            "color": "darkred",
+            "fontweight": "normal",
+            "fontsize": 12,
+        }
+        ax.tick_params(
+            which="both",
+            labelsize=12,
+        )
+        # ax.set_xlim(rho_tor_norm[0], rho_tor_norm[nrho - 1])
+        ax.set_xlabel(coordinate_units, font_args, labelpad=1)
+        ax.set_ylabel(units, font_args, labelpad=0)
+
+        # set legend
+        # legx_pos = 1.35
+        # legy_pos = 1.05
+        legend = ax.legend(loc="upper right")
+        frame = legend.get_frame()
+        frame.set_facecolor("0.95")
+        for label in legend.get_texts():
+            label.set_fontsize(7)
+        for label in legend.get_lines():
+            label.set_linewidth(1.5)
+            
 def print_tree(structure, hide_empty_nodes,compact,  full_array):
     if full_array:
         with numpy.printoptions(threshold=sys.maxsize, linewidth=1024, precision=4):
@@ -155,6 +203,22 @@ if __name__ == "__main__":
         action="store_true",
         help="Print child nodes information and metadata",
     )
+    parser.add_argument(
+        "-p",
+        "--plot",
+        action="store_true",
+        help="plot data",
+    )
+    parser.add_argument(
+        "--save",
+        help="Save figure at default location",
+        action="store_true",
+    )
+    parser.add_argument(
+        "--directory",
+        help="Directory to save the figure",
+        default=None,
+    )
     args = parser.parse_args()
     splitted_ids_info = args.uri.split("#")
 
@@ -186,8 +250,8 @@ if __name__ == "__main__":
     if connection is None:
         logger.error("Please provide valid URI")
         exit(1)
-    ids = connection.get(ids_name, occurrence)    
-
+        
+    ids = connection.get(ids_name, occurrence)
     if ids_path is None:
         if args.inspect:
             imaspy.util.inspect(ids, hide_empty_nodes=not args.show_empty)
@@ -198,6 +262,26 @@ if __name__ == "__main__":
         node = eval("ids." + ids_path)
         if args.inspect:
             imaspy.util.inspect(node, hide_empty_nodes=not args.show_empty)    
+        if args.plot:
+            canvas = PlotCanvas(1, 1)
+            ax = canvas.add_axes(title="", xlabel="", row=0, col=0)
+            view_plot(ax, node, f"{ids_name}/{ids_path}")
+            canvas.set_text(text=f"{get_database_path(args, time_value=None)}")
+
+            canvas.fig.subplots_adjust(top=0.916, bottom=0.09, left=0.044, right=0.953, hspace=0.287, wspace=0.2)
+            canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
+            canvas.fig.suptitle(get_title(args, f"{ids_name}/{ids_path}", None), size=12)
+
+            if args.save:
+                fname = get_file_name(args, os.path.basename(__file__) , None)
+                print(fname)
+                if args.directory:
+                    if not os.path.exists(args.directory):
+                        os.makedirs(args.directory)
+                    fname = os.path.join(args.directory, fname)
+                canvas.save(fname)
+            else:
+                canvas.show()
         else:
             print_tree(node, hide_empty_nodes=not args.show_empty,compact=args.compact, full_array=args.full)
     connection.close()
