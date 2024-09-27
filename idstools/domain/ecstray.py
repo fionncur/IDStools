@@ -36,7 +36,7 @@ class EcStrayCompute:
         Examples:
             .. code-block:: python
 
-                import imas
+                import imaspy
                 # add necessary imports
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=134173;run=106;database=ITER;version=3", "r")
                 connection.open()
@@ -108,7 +108,7 @@ class EcStrayCompute:
         Examples:
             .. code-block:: python
 
-                import imas
+                import imaspy
 
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=134173;run=106;database=ITER;version=3","r")
                 connection.open()

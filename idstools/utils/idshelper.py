@@ -20,11 +20,72 @@ from imaspy.ids_base import IDSBase
 from imaspy.ids_structure import IDSStructure
 from rich.table import Table
 from rich.text import Text
-
+import re
 logger = logging.getLogger("module")
 ARRAY_EQUAL_KWARGS = "equal_nan=True" if version.parse(np.__version__) > version.parse("1.19") else ""
 
+def parse_uri(uri:str):
+    result={}
+    splitted_ids_info = uri.split("#")
 
+    uri_part = splitted_ids_info[0]
+    ids_name = ""
+    ids_path = None
+    occurrence = 0
+    if len(splitted_ids_info) == 2:
+        ids_fragment = splitted_ids_info[1]
+        splitted_ids_fragment = ids_fragment.split("/", 1)
+        if ":" in splitted_ids_fragment[0]:
+            splitted_ids_fragment = ids_fragment.split(":")
+            ids_name = splitted_ids_fragment[0]
+            if len(splitted_ids_fragment) == 2:
+                ids_path_fragment = splitted_ids_fragment[1]
+                splitted_ids_path_fragment = ids_path_fragment.split("/", 1)
+                occurrence = int(splitted_ids_path_fragment[0])
+                if len(splitted_ids_path_fragment) == 2:
+                    ids_path = splitted_ids_path_fragment[1]
+        else:
+            ids_name = splitted_ids_fragment[0]
+            if len(splitted_ids_fragment) == 2:
+                ids_path = splitted_ids_fragment[1]
+    result["uri_part"]=uri_part
+    result["occurrence"]=occurrence
+    result["ids_name"]=ids_name
+    result["ids_path"]=ids_path
+    return result
+
+def parse_slice_from_string(input_string):
+    match = re.search(r'\(([-\d]*):([-\d]*)\)', input_string)
+    start=end =None
+    if match:
+        start_str, end_str = match.groups()
+        start = int(start_str) if start_str else None
+        end = int(end_str) if end_str else None
+        return slice(start, end)
+    else:
+        return slice(start, end)
+    
+def partial_get(ids, ids_path):
+    time_array = ids.time
+    if len(time_array)==0:
+        logger.error("Time array not present")
+        exit(1)
+    slice_object=parse_slice_from_string(ids_path)
+    
+    ids_path_for_eval = re.sub(r'\(([-\d]*:[-\d]*:?[-\d]*)\)', '(t)', ids_path)
+    ids_path_for_eval=ids_path_for_eval.replace("(", "[").replace(")", "]").replace("/", ".")
+    data = np.array([]).reshape(0,)
+    for t in range(len(time_array)):
+        _inner_data = eval("ids." + ids_path_for_eval)
+        if len(_inner_data.shape) == 0:
+            data = np.append(data, _inner_data)
+        elif len(_inner_data.shape) == 1:
+            if data.size == 0:
+                data = _inner_data
+            else:
+                data = np.vstack((data, _inner_data))
+    return np.array(data)[slice_object], time_array[slice_object]
+                        
 def is_ids_field(idstype: type) -> bool:
     """
     This function checks if a given type is a possible field of an IDS.

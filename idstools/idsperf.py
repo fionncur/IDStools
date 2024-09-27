@@ -1,11 +1,11 @@
 import cProfile
 import timeit
 
-import imas
+import imaspy as imas
 import numpy as np
+import sys
 
-
-def get_ids(db, idsname, occ=0, times=None, interp=imas.imasdef.PREVIOUS_INTERP, verbose=False):
+def get_ids(db, idsname, occ=0, times=None, interp=imas.ids_defs.PREVIOUS_INTERP, verbose=False):
     """
     The function `get_ids` reads an IDS from a given DBEntry, either the entire IDS or slices at
     selected times, and returns the IDS object or a list of IDS slices.
@@ -21,7 +21,7 @@ def get_ids(db, idsname, occ=0, times=None, interp=imas.imasdef.PREVIOUS_INTERP,
             or set to None, the function will read the entire IDS.
         interp: The `interp` parameter is an optional parameter that specifies the slicing interpolation mode.
             It determines how the data is interpolated when reading a single slice at a specific time. The default
-            value is `imas.imasdef.PREVIOUS_INTERP`, which means that the data is interpolated using the previous
+            value is `imas.ids_defs.PREVIOUS_INTERP`, which means that the data is interpolated using the previous
             time slice
         verbose: Verbose information
 
@@ -109,22 +109,15 @@ def byte_size(obj):
         estimated data size in bytes
     """
     s = 0
-
-    if isinstance(obj, str):
-        s += len(obj)
-    elif isinstance(obj, np.ndarray):
-        s += obj.nbytes
-    elif isinstance(obj, int):
-        s += 4
-    elif isinstance(obj, float):
-        s += 8
-    elif isinstance(obj, list):
-        for o in obj:
-            s += byte_size(o)
-    elif isinstance(obj, dict):
-        for o in obj.values():
-            s += byte_size(o)
-    else:
-        for o in obj.__dict__.values():
-            s += byte_size(o)
+    for node in imas.util.tree_iter(obj):
+        if isinstance(node, imas.ids_primitive.IDSString0D):
+            s += len(node.value)
+        elif isinstance(node, imas.ids_primitive.IDSNumericArray):
+            s += node.value.nbytes
+        elif isinstance(node, imas.ids_primitive.IDSInt0D):
+            s += 4
+        elif isinstance(node, imas.ids_primitive.IDSFloat0D):
+            s += 8
+        else:
+            print(type(node), type(node.value), {sys.getsizeof(node.value)})
     return s

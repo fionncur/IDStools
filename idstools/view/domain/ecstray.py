@@ -40,7 +40,7 @@ class EcStrayView:
             .. code-block:: python
 
                 from idstools.view.domain.ecstray import EcStrayView
-                import imas
+                import imaspy as imas
                 from idstools.view.common import PlotCanvas
 
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=134173;run=2326;database=TEST;version=3", "r")
@@ -144,7 +144,7 @@ class EcStrayView:
             .. code-block:: python
 
                 from idstools.view.domain.ecstray import EcStrayView
-                import imas
+                import imaspy as imas
                 from idstools.view.common import PlotCanvas
 
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=134173;run=2326;database=TEST;version=3", "r")

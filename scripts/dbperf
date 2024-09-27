@@ -7,7 +7,7 @@ import argparse
 import os
 from datetime import datetime
 
-import imas
+import imaspy as imas
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -21,7 +21,7 @@ from idstools.utils.clihelper import imas_parser
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="Times IDS getting of given Pulse and Run, "
+        description="Benchmark backend performance by getting times of IDSes of given Pulse and Run, "
         "contrasts with IDS size and slices. replaced by db_backend_benchmark.py",
         parents=[imas_parser],
         formatter_class=RichHelpFormatter,
@@ -127,7 +127,7 @@ if __name__ == "__main__":
     )
 
     args = parser.parse_args()
-
+    print(args.database)
     if not args.file:
         if args.database:
             mdslocpath = DBMaster.get_db_Path(args.user, args.database, args.version)
@@ -141,7 +141,7 @@ if __name__ == "__main__":
                 "containing data in both MDSPLUS and HDF5, or two separate databases"
                 "containing data in MDSPLUS or HDF5"
             )
-
+        print(mdslocpath)
         log = []
 
         if args.slicevtime:
@@ -190,10 +190,10 @@ if __name__ == "__main__":
             pulse = entry[0]
             run = entry[1]
 
-            mdsde = imas.DBEntry(12, args.database, pulse, run, args.user)
+            mdsde = imas.DBEntry(imas.ids_defs.MDSPLUS_BACKEND, args.database, pulse, run, args.user)
             mdsde.open()
 
-            hdfde = imas.DBEntry(13, args.database, pulse, run, args.user)
+            hdfde = imas.DBEntry(imas.ids_defs.HDF5_BACKEND, args.database, pulse, run, args.user)
             hdfde.open()
 
             idslist = available_in_dbentry(hdfde)
@@ -211,31 +211,31 @@ if __name__ == "__main__":
                 print(idslist)
 
             for ids in idslist:
-                idsname = ids[0]
-                size = byte_size(hdfde.get(idsname)) / 1024**2
-                if args.slicevtime:
-                    try:
-                        slices.append(get_timings(hdfde, idsname, times=[10], repeat=args.repeat))
-                    except Exception as e:
-                        slices.append(None)
-                        print(f"{idsname} in ({pulse} , {run}) failed to return slice get_timings - detailed:{e}")
-                mdstimes = get_timings(mdsde, idsname, repeat=args.repeat)
-                mdstdev = np.std(mdstimes)
-                hdftimes = get_timings(hdfde, idsname, repeat=args.repeat)
-                hdfstdev = np.std(hdftimes)
-                mdsmeantime = sum(mdstimes) / len(mdstimes)
-                hdfmeantime = sum(hdftimes) / len(hdftimes)
-                log.append(
-                    (
-                        (pulse, run),
-                        idsname,
-                        size,
-                        mdsmeantime,
-                        mdstdev,
-                        hdfmeantime,
-                        hdfstdev,
+                for ids2process in ids:
+                    size = byte_size(hdfde.get(ids2process)) / 1024**2
+                    if args.slicevtime:
+                        try:
+                            slices.append(get_timings(hdfde, ids2process, times=[10], repeat=args.repeat))
+                        except Exception as e:
+                            slices.append(None)
+                            print(f"{ids2process} in ({pulse} , {run}) failed to return slice get_timings - detailed:{e}")
+                    mdstimes = get_timings(mdsde, ids2process, repeat=args.repeat)
+                    mdstdev = np.std(mdstimes)
+                    hdftimes = get_timings(hdfde, ids2process, repeat=args.repeat)
+                    hdfstdev = np.std(hdftimes)
+                    mdsmeantime = sum(mdstimes) / len(mdstimes)
+                    hdfmeantime = sum(hdftimes) / len(hdftimes)
+                    log.append(
+                        (
+                            (pulse, run),
+                            ids2process,
+                            size,
+                            mdsmeantime,
+                            mdstdev,
+                            hdfmeantime,
+                            hdfstdev,
+                        )
                     )
-                )
 
             mdsde.close()
             hdfde.close()

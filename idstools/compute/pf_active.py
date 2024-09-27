@@ -36,7 +36,7 @@ class PfActiveCompute:
             .. code-block:: python
 
                 import pprint
-                import imas
+                import imaspy
                 from idstools.compute.pf_active import PfActiveCompute
                 from idstools.view.common import PlotCanvas
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=135005;run=4;database=ITER;version=3", "r")

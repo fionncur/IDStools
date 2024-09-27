@@ -41,7 +41,7 @@ class EquilibriumView(BasePlot):
         Example:
             .. code-block:: python
 
-                import imas
+                import imaspy as imas
                 from idstools.view.equilibrium import EquilibriumView
                 from idstools.view.common import PlotCanvas
 

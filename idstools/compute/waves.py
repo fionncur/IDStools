@@ -57,7 +57,7 @@ class WavesCompute:
         Example:
             .. code-block:: python
 
-                import imas
+                import imaspy
                 from idstools.compute.waves import WavesCompute
 
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3","r")
@@ -89,7 +89,7 @@ class WavesCompute:
         Example:
             .. code-block:: python
 
-                import imas
+                import imaspy
                 from idstools.compute.waves import WavesCompute
 
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3","r")
@@ -125,7 +125,7 @@ class WavesCompute:
             .. code-block:: python
 
 
-                import imas
+                import imaspy
                 from idstools.compute.waves import WavesCompute
 
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3","r")
@@ -157,7 +157,7 @@ class WavesCompute:
             .. code-block:: python
 
 
-                import imas
+                import imaspy
                 from idstools.compute.waves import WavesCompute
 
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3","r")
@@ -214,7 +214,7 @@ class WavesCompute:
         Example:
             .. code-block:: python
 
-                import imas
+                import imaspy
                 from idstools.compute.waves import WavesCompute
 
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3","r")

@@ -23,7 +23,6 @@ from rich.progress import track
 from rich_argparse import RichHelpFormatter
 
 from idstools.database import DBMaster
-from idstools.utils.ddhelper import DDHelper
 from idstools.utils.idshelper import get_ids_types, idsdiff, idsdiff_full
 from idstools.utils.idslogger import setup_logger
 
@@ -71,8 +70,6 @@ def highlight_differences(text1, text2):
 
 def generate_html(file_path, compare_data):
     logger.info("Writing to html file :" + file_path)
-
-    ddhelper = DDHelper()
 
     file_object = open(file_path, "w")
     (pulse_a, pulse_b, input_a, input_b), data = next(iter(compare_data.items()))

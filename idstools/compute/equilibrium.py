@@ -9,7 +9,7 @@ import logging
 from typing import Union
 
 import numpy as np
-from imas import imasdef
+from imaspy import ids_defs
 
 from idstools.database import DBMaster
 
@@ -47,7 +47,7 @@ class EquilibriumCompute:
         Example:
             .. code-block:: python
 
-                import imas
+                import imaspy
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=134173;run=106;database=ITER;version=3","r")
                 connection.open()
                 idsObj = connection.get('equilibrium')
@@ -121,7 +121,7 @@ class EquilibriumCompute:
         Examples:
             .. code-block:: python
 
-                import imas
+                import imaspy
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=134173;run=106;database=ITER;version=3", "r")
                 connection.open()
                 idsObj = connection.get('equilibrium')
@@ -163,7 +163,7 @@ class EquilibriumCompute:
         Examples:
             .. code-block:: python
 
-                import imas
+                import imaspy
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=134173;run=106;database=ITER;version=3", "r")
                 connection.open()
                 idsObj = connection.get('equilibrium')
@@ -225,7 +225,7 @@ class EquilibriumCompute:
         Examples:
             .. code-block:: python
 
-                import imas
+                import imaspy
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=134173;run=106;database=ITER;version=3","r")
                 connection.open()
                 idsObj = connection.get('equilibrium')
@@ -279,7 +279,7 @@ class EquilibriumCompute:
         Examples:
             .. code-block:: python
 
-                import imas
+                import imaspy
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=134173;run=106;database=ITER;version=3","r")
                 connection.open()
                 idsObj = connection.get('equilibrium')
@@ -430,26 +430,26 @@ class EquilibriumCompute:
             equout.vacuum_toroidal_field.b0[itime] = self.ids.vacuum_toroidal_field.b0[itime] * rescale_factor
 
         for itime in range(len(self.ids.time_slice)):
-            if imasdef.isFieldValid(self.ids.time_slice[itime].boundary.psi):
+            if self.ids.time_slice[itime].boundary.psi.has_value():
                 equout.time_slice[itime].boundary.psi = self.ids.time_slice[itime].boundary.psi * rescale_factor
 
-            if imasdef.isFieldValid(self.ids.time_slice[itime].boundary_separatrix.psi):
+            if self.ids.time_slice[itime].boundary_separatrix.psi.has_value():
                 equout.time_slice[itime].boundary_separatrix.psi = (
                     self.ids.time_slice[itime].boundary_separatrix.psi * rescale_factor
                 )
 
             if Version(dd_version) > Version("3.31.0"):
-                if imasdef.isFieldValid(self.ids.time_slice[itime].boundary_secondary_separatrix.psi):
+                if self.ids.time_slice[itime].boundary_secondary_separatrix.psi.has_value():
                     equout.time_slice[itime].boundary_secondary_separatrix.psi = (
                         self.ids.time_slice[itime].boundary_secondary_separatrix.psi * rescale_factor
                     )
 
-            if imasdef.isFieldValid(self.ids.time_slice[itime].constraints.b_field_tor_vacuum_r.measured):
+            if self.ids.time_slice[itime].constraints.b_field_tor_vacuum_r.measured.has_value():
                 equout.time_slice[itime].constraints.b_field_tor_vacuum_r.measured = (
                     self.ids.time_slice[itime].constraints.b_field_tor_vacuum_r.measured * rescale_factor
                 )
 
-            if imasdef.isFieldValid(self.ids.time_slice[itime].constraints.b_field_tor_vacuum_r.reconstructed):
+            if self.ids.time_slice[itime].constraints.b_field_tor_vacuum_r.reconstructed.has_value():
                 equout.time_slice[itime].constraints.b_field_tor_vacuum_r.reconstructed = (
                     self.ids.time_slice[itime].constraints.b_field_tor_vacuum_r.reconstructed * rescale_factor
                 )
@@ -462,12 +462,12 @@ class EquilibriumCompute:
                     self.ids.time_slice[itime].constraints.bpol_probe[i1].reconstructed * rescale_factor
                 )
 
-            if imasdef.isFieldValid(self.ids.time_slice[itime].constraints.diamagnetic_flux.measured):
+            if self.ids.time_slice[itime].constraints.diamagnetic_flux.measured.has_value():
                 equout.time_slice[itime].constraints.diamagnetic_flux.measured = (
                     self.ids.time_slice[itime].constraints.diamagnetic_flux.measured * rescale_factor
                 )
 
-            if imasdef.isFieldValid(self.ids.time_slice[itime].constraints.diamagnetic_flux.reconstructed):
+            if self.ids.time_slice[itime].constraints.diamagnetic_flux.reconstructed.has_value():
                 equout.time_slice[itime].constraints.diamagnetic_flux.reconstructed = (
                     self.ids.time_slice[itime].constraints.diamagnetic_flux.reconstructed * rescale_factor
                 )
@@ -488,49 +488,49 @@ class EquilibriumCompute:
                     self.ids.time_slice[itime].constraints.flux_loop[i1].reconstructed * rescale_factor
                 )
 
-            if imasdef.isFieldValid(self.ids.time_slice[itime].constraints.ip.measured):
+            if self.ids.time_slice[itime].constraints.ip.measured.has_value():
                 equout.time_slice[itime].constraints.ip.imeasured = (
                     self.ids.time_slice[itime].constraints.ip.measured * rescale_factor
                 )
 
-            if imasdef.isFieldValid(self.ids.time_slice[itime].constraints.ip.reconstructed):
+            if self.ids.time_slice[itime].constraints.ip.reconstructed.has_value():
                 equout.time_slice[itime].constraints.ip.reconstructed = (
                     self.ids.time_slice[itime].constraints.ip.reconstructed * rescale_factor
                 )
 
-            if imasdef.isFieldValid(self.ids.time_slice[itime].global_quantities.ip):
+            if self.ids.time_slice[itime].global_quantities.ip.has_value():
                 equout.time_slice[itime].global_quantities.ip = (
                     self.ids.time_slice[itime].global_quantities.ip * rescale_factor
                 )
 
-            if imasdef.isFieldValid(self.ids.time_slice[itime].global_quantities.psi_axis):
+            if self.ids.time_slice[itime].global_quantities.psi_axis.has_value():
                 equout.time_slice[itime].global_quantities.psi_axis = (
                     self.ids.time_slice[itime].global_quantities.psi_axis * rescale_factor
                 )
 
-            if imasdef.isFieldValid(self.ids.time_slice[itime].global_quantities.psi_boundary):
+            if self.ids.time_slice[itime].global_quantities.psi_boundary.has_value():
                 equout.time_slice[itime].global_quantities.psi_boundary = (
                     self.ids.time_slice[itime].global_quantities.psi_boundary * rescale_factor
                 )
 
-            if imasdef.isFieldValid(self.ids.time_slice[itime].global_quantities.magnetic_axis.b_field_tor):
+            if self.ids.time_slice[itime].global_quantities.magnetic_axis.b_field_tor.has_value():
                 equout.time_slice[itime].global_quantities.magnetic_axis.b_field_tor = (
                     self.ids.time_slice[itime].global_quantities.magnetic_axis.b_field_tor * rescale_factor
                 )
 
             if Version(dd_version) > Version("3.14.0"):
-                if imasdef.isFieldValid(self.ids.time_slice[itime].global_quantities.energy_mhd):
+                if self.ids.time_slice[itime].global_quantities.energy_mhd.has_value():
                     equout.time_slice[itime].global_quantities.energy_mhd = (
                         self.ids.time_slice[itime].global_quantities.energy_mhd * rescale_factor**2
                     )
             else:
-                if imasdef.isFieldValid(self.ids.time_slice[itime].global_quantities.w_mhd):
+                if self.ids.time_slice[itime].global_quantities.w_mhd.has_value():
                     equout.time_slice[itime].global_quantities.energy_mhd = (
                         self.ids.time_slice[itime].global_quantities.w_mhd * rescale_factor**2
                     )
 
             if Version(dd_version) > Version("3.31.0"):
-                if imasdef.isFieldValid(self.ids.time_slice[itime].global_quantities.psi_external_average):
+                if self.ids.time_slice[itime].global_quantities.psi_external_average.has_value():
                     equout.time_slice[itime].global_quantities.psi_external_average = (
                         self.ids.time_slice[itime].global_quantities.psi_external_average * rescale_factor
                     )
