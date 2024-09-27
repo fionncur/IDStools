@@ -15,6 +15,7 @@ from packaging import version
 from rich.progress import track
 import difflib
 import rich
+from imaspy.ids_toplevel import IDSToplevel
 from imaspy.ids_struct_array import IDSStructArray
 from imaspy.ids_base import IDSBase
 from imaspy.ids_structure import IDSStructure
@@ -72,7 +73,7 @@ def partial_get(ids, ids_path):
         exit(1)
     slice_object=parse_slice_from_string(ids_path)
     
-    ids_path_for_eval = re.sub(r'\(([-\d]*:[-\d]*:?[-\d]*)\)', '(t)', ids_path)
+    ids_path_for_eval = re.sub(r'[\[\(]([-\d]*):?([-\d]*)[\]\)]', '(t)', ids_path)
     ids_path_for_eval=ids_path_for_eval.replace("(", "[").replace(")", "]").replace("/", ".")
     data = np.array([]).reshape(0,)
     for t in range(len(time_array)):
@@ -84,7 +85,11 @@ def partial_get(ids, ids_path):
                 data = _inner_data
             else:
                 data = np.vstack((data, _inner_data))
-    return np.array(data)[slice_object], time_array[slice_object]
+    data = np.array(data)[slice_object] 
+    time_array = time_array[slice_object]
+    if len(data) != len(time_array):
+        time_array= np.arange(len(data))
+    return data, time_array
                         
 def is_ids_field(idstype: type) -> bool:
     """
@@ -738,8 +743,12 @@ def idsdiff_full(struct1: IDSStructure, struct2: IDSStructure, name1="", name2="
 def idsdiff(struct1: IDSStructure, struct2: IDSStructure, name1="", name2="", print_result=False,verbose=True):
     diff_result=[]
     compare_result=False
-
-    diff_table = Table(title=Text(f"{name1}({struct1.metadata.name})", f"{name2}({struct2.metadata.name})"))
+    diff_name="Left -Right"
+    if isinstance(struct1,IDSToplevel) and isinstance(struct1,IDSToplevel) :
+        diff_name=f"{name1}({struct1.metadata.name})", f"{name2}({struct2.metadata.name})"
+    elif isinstance(struct1,IDSStructure) and isinstance(struct1,IDSStructure):
+        diff_name=f"{name1}({struct1._path})", f"{name2}({struct2._path})"
+    diff_table = Table(title=Text(diff_name))
     diff_table.add_column("IDS Path")
     diff_table.add_column("Description")
     if verbose:

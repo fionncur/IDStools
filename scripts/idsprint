@@ -34,7 +34,7 @@ from idstools.view.common import PlotCanvas
 logger = setup_logger("module", stdout_level=logging.INFO)
 
 def view_plot(ax, field, coordinate, field_name="", coordinate_name="", field_unit="", coordinate_unit=""):
-    if not isinstance(node,(IDSNumericArray,np.ndarray)):
+    if not isinstance(field,(IDSNumericArray,np.ndarray)):
         logger.error("Not a numeric array, Please select ids path")
         return
     data=field
@@ -260,7 +260,7 @@ if __name__ == "__main__":
             else:
                 value = f"{len(time_array)}"
                 type=time_array
-            table.add_row(ids_name,value, Pretty(type) )
+            table.add_row(ids_name,value, str(type[0]) + ",...," + str(type[-1])  )
         console.print(table)
         connection.close()
         exit(1)
@@ -273,13 +273,12 @@ if __name__ == "__main__":
         else:
             print_tree(ids, hide_empty_nodes=not args.show_empty,compact=args.compact, full_array=args.full)
     else:
-        
+        ids_path=ids_path.replace("(", "[").replace(")", "]").replace("/", ".")
         if ":" in ids_path:
             node, coordinate = partial_get(ids, ids_path)
             coordinate_name=f"{ids_name}/time"
             coordinate_unit="t"
         else:
-            ids_path=ids_path.replace("(", "[").replace(")", "]").replace("/", ".")
             node = eval("ids." + ids_path)
             coordinate= 0
             coordinate_name=""
