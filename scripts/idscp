@@ -3,7 +3,7 @@
 import argparse
 import sys
 
-import imaspy
+import imaspy as imas
 from rich_argparse import RichHelpFormatter
 
 from idstools.database import DBMaster
@@ -96,7 +96,7 @@ if args.force:
         outputargs.mode = "w"
     dest_connection = None
     if outputargs.uri != "" and outputargs.uri is not None:
-        dest_connection = imaspy.DBEntry(outputargs.uri, outputargs.mode)
+        dest_connection = imas.DBEntry(outputargs.uri, outputargs.mode)
     if dest_connection is None:
         logger.error("Error creating destination pulse! Please check parameters and permissions.")
         exit(1)
@@ -105,7 +105,7 @@ else:
         outputargs.mode = "a"
     dest_connection = None
     if outputargs.uri != "" and outputargs.uri is not None:
-        dest_connection = imaspy.DBEntry(outputargs.uri, outputargs.mode)
+        dest_connection = imas.DBEntry(outputargs.uri, outputargs.mode)
             
     if dest_connection is None:
         logger.error("Error opening destination pulse! Please check parameters and permissions.")

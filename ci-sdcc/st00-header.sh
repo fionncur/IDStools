@@ -72,7 +72,7 @@ dependencies="./ci-sdcc/dependencies.txt"
 # Check if the file exists
 if [ ! -f "$dependencies" ]; then
     echo "File $dependencies not found."
-    exit 1
+    return 1
 fi
 
 declare -a RUNMODULES=()

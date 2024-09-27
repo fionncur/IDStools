@@ -6,7 +6,7 @@ import logging
 import os
 import sys
 
-import imaspy
+import imaspy as imas
 from rich_argparse import RichHelpFormatter
 
 from idstools.compute.equilibrium import EquilibriumCompute
@@ -60,7 +60,7 @@ if "mode" not in outputargs.__dict__:
     outputargs.mode = "a"
 output_connection = None
 if outputargs.uri != "" and outputargs.uri is not None:
-    output_connection = imaspy.DBEntry(outputargs.uri, outputargs.mode)
+    output_connection = imas.DBEntry(outputargs.uri, outputargs.mode)
         
 if output_connection is None:
     logger.error("Error opening destination pulse! Please check parameters and permissions.")

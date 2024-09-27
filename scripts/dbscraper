@@ -6,9 +6,11 @@
 import argparse
 import sys
 from pathlib import Path
-
+import numpy as np
 from imas import imasdef
 from rich_argparse import RichHelpFormatter
+from rich.console import Console
+from rich.table import Table
 
 from idstools.database import DBMaster
 from idstools.utils.clihelper import get_backend_id, imas_parser
@@ -59,7 +61,7 @@ if __name__ == "__main__":
         print(pulses)
 
     if pulses is not None:
-        df = get_quantities_from_pulses(args.idspath, tuple(pulses), args.list_count, True)
+        df = get_quantities_from_pulses(args.idspath, tuple(pulses), args.list_count, False)
         if args.saveas:
             if not Path(args.saveas).parent.exists():
                 raise FileNotFoundError(
@@ -68,4 +70,17 @@ if __name__ == "__main__":
                 )
             df.to_csv(args.saveas, na_rep="None", index=True, header=True)
         else:
-            print(df.to_markdown())
+            np.set_printoptions(threshold=4)
+            column_styles = {
+                "URI": "green",
+                "VALUE": "yellow"
+            }
+            console = Console()
+            table = Table(show_header=True, header_style="bold magenta")
+            for col in df.columns:
+                table.add_column(col, style=column_styles[col])
+            for index, row in df.iterrows():
+                table.add_row(str(row['URI']), str(row['VALUE']))
+                table.add_section()
+            
+            console.print(table)

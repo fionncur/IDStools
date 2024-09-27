@@ -5,7 +5,7 @@ import math
 import os
 import sys
 
-import imaspy
+import imaspy as imas
 import numpy as np
 import pandas as pd
 import requests
@@ -176,7 +176,7 @@ rows = [args.row] if args.row is not None else db.index
 # print(f"Starts mapping of the DB {args.inputCSV}, please be patient...")
 for row in track(rows, description="[green]Processing..."):
     DBVAR = db.iloc[row]
-    de = imaspy.DBEntry(get_backend_id(args.backend), args.database, 1, row)
+    de = imas.DBEntry(get_backend_id(args.backend), args.database, 1, row)
     de.create()
 
     iod = {}

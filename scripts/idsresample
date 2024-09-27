@@ -4,7 +4,7 @@
 import argparse
 import sys
 
-import imaspy
+import imaspy as imas
 from rich_argparse import RichHelpFormatter
 
 from idstools.database import DBMaster
@@ -63,7 +63,7 @@ if __name__ == "__main__":
         print("Error opening source pulse! Please check existence.")
         sys.exit()
 
-    tmp = imaspy.DBEntry("imas:memory?path=tmp/1/1", "w")
+    tmp = imas.DBEntry("imas:memory?path=tmp/1/1", "w")
 
     if tmp is None:
         print("Error creating temporary data-entry in memory!", file=sys.stderr)

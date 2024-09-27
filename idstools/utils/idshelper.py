@@ -657,9 +657,10 @@ def get_quantities_from_pulses(idspath: str, pulses: tuple, list_count: int = 0,
     """
     idsname = idspath.split("/")[0]
     valpath = idspath[1 + len(idsname) :]
-    if list_count != 0:
-        pulses = pulses[:list_count]
+    list_counter=0
+
     values = []
+    pulse_for_df=[]
     for pulse_tuple in track(pulses, description="[green]Processing..."):
         pulse = pulse_tuple[0]
         run = pulse_tuple[1]
@@ -667,32 +668,46 @@ def get_quantities_from_pulses(idspath: str, pulses: tuple, list_count: int = 0,
         database = pulse_tuple[3]
         user = pulse_tuple[4]
         version = pulse_tuple[5]
+        file_path = pulse_tuple[6]
+        file_time = pulse_tuple[7]
+        backend_string=""
+        if backend==imas.ids_defs.MDSPLUS_BACKEND:
+            backend_string="mdsplus"
+        if backend==imas.ids_defs.HDF5_BACKEND:
+            backend_string="hdf5"
+
+        uri = f'"imas:{backend_string}?user={user};shot={pulse};run={run};database={database};version={version}"'
         if verbose:
             print(f"fetching data from {pulse}, {run}")
-        connection = (backend, database, pulse, run, user, version)
+        connection = imas.DBEntry(backend, database, pulse, run, user, version)
         connection.open()
+        valpath=valpath.replace("(", "[").replace(")", "]").replace("/", ".")
         try:
-            values.append(connection.partial_get(idsname, valpath))
+            ids = connection.get(idsname, lazy=True)
+            node =eval("ids." + valpath)
+            if node.has_value:
+                values.append(node)
+                list_counter=list_counter+1
+                pulse_for_df.append((uri,file_path, file_time))
         except Exception as e:
             logger.debug(f"{e}")
-            values.append(None)
+        
         connection.close()
-
+        if list_count!=0:
+            if list_counter == list_count:
+                break
     df = pd.DataFrame(
-        pulses,
+        pulse_for_df,
         columns=[
-            "PULSE",
-            "RUN",
-            "BACKEND",
-            "DATABASE",
-            "USER",
-            "VERSION",
+            "URI",
             "FILEPATH",
             "FILETIME",
         ],
     )
+    
     df["VALUE"] = values
-    df_extract = df[["PULSE", "RUN", "VALUE"]]
+    df_filtered = df[df["VALUE"].notna()]  
+    df_extract = df_filtered[["URI", "VALUE"]]
     return df_extract
 
 def idsdiff_full(struct1: IDSStructure, struct2: IDSStructure, name1="", name2="", print_result=False) :
