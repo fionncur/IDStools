@@ -50,7 +50,7 @@ if connection is None:
     logger.critical("----> Aborted.")
     exit(1)
 
-ids_core_profiles = connection.get("core_profiles",lazy=True)
+ids_core_profiles = connection.get("core_profiles", lazy=True)
 time_array = ids_core_profiles.time
 time_slice, time_value = get_nearest_time(time_array, args.time)
 title = "Profiles displayed for t = " + "%.1f" % time_value + " s"

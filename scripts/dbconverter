@@ -76,10 +76,10 @@ schema_dict = {}
 for file_path in schema:
     filename = os.path.splitext(os.path.basename(file_path))[0]
     schema_dict[filename] = file_path
-log_messages=[]
-files=files[0:2]
+log_messages = []
+files = files[0:2]
 for pulse in track(files, description="[green]Processing..."):
-    error=False
+    error = False
     console.print(f"Processing {pulse}")
 
     idsinf = []
@@ -87,7 +87,7 @@ for pulse in track(files, description="[green]Processing..."):
     try:
         src = imas.DBEntry(imas.ids_defs.MDSPLUS_BACKEND, args.database, pulse[0], run, args.user)
         src.open()
-    except  Exception as e:
+    except Exception as e:
         console.print(f"Error opening pulse!error={e} Please check existence.")
         continue
 
@@ -99,10 +99,10 @@ for pulse in track(files, description="[green]Processing..."):
             f"Error creating pulse! error={e} backend={args.backend_output} "
             "database={args.database_out} shot={pulse[0]} run={run}"
         )
-        error=True
+        error = True
         continue
     avids = available_in_dbentry(src)
-    complete_description=""
+    complete_description = ""
     for ids in avids:
         idsname = ids[0]
         inocc = ids[1]
@@ -111,47 +111,47 @@ for pulse in track(files, description="[green]Processing..."):
             dest.put(idsobj, occurrence=inocc)
         except Exception as e:
             console.print(f"Error while storing ids !error={e}")
-            error=True
+            error = True
             continue
         if args.validate:
             idsobj2 = dest.get(idsname, occurrence=inocc)
-            compare_output, _,compare_output_description  = idsdiff(idsobj,idsobj2, "", "" , print=False)
+            compare_output, _, compare_output_description = idsdiff(idsobj, idsobj2, "", "", print=False)
             if not compare_output:
-                complete_description=complete_description+";"+compare_output_description
+                complete_description = complete_description + ";" + compare_output_description
             else:
-                complete_description=complete_description+f";{idsname} is identical"
+                complete_description = complete_description + f";{idsname} is identical"
     log_messages.append(complete_description)
-            # IDS validator is not yet updated to imaspy
-            # if idsname in schema_dict.keys():
-            #     idsinf.append(
-            #         (
-            #             idsname,
-            #             same,
-            #             ids_validator(idsobj, schema_dict[idsname])[0],
-            #         )
-            #     )
-            # else:
-            #     idsinf.append(
-            #         (
-            #             idsname,
-            #             same,
-            #             "No Schema",
-            #         )
-            #     )
-            #     console.print(f"could not find schema for {idsname}")
+    # IDS validator is not yet updated to imaspy
+    # if idsname in schema_dict.keys():
+    #     idsinf.append(
+    #         (
+    #             idsname,
+    #             same,
+    #             ids_validator(idsobj, schema_dict[idsname])[0],
+    #         )
+    #     )
+    # else:
+    #     idsinf.append(
+    #         (
+    #             idsname,
+    #             same,
+    #             "No Schema",
+    #         )
+    #     )
+    #     console.print(f"could not find schema for {idsname}")
 
     src.close()
     dest.close()
     if error:
         console.print(
             f"Could not convert : backend={args.backend_output} database={args.database_out} "
-            f"pulse={pulse[0]} run={run}")
+            f"pulse={pulse[0]} run={run}"
+        )
     else:
         console.print(
             f"successfully converted, backend={args.backend_output} database={args.database_out} "
             f"pulse={pulse[0]} run={run}"
         )
-
 
 
 if args.validate:

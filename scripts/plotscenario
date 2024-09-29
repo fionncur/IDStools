@@ -62,7 +62,6 @@ args = parser.parse_args()
 logger = setup_logger("module", stdout_level=logging.INFO)
 
 
-
 # Open the database and read the necessary IDSs
 connection = DBMaster.get_connection(args)
 if connection is None:
@@ -70,22 +69,21 @@ if connection is None:
     exit(1)
 
 if not args.no_profiles:
-    ids_core_profiles = connection.get("core_profiles",lazy=True)
+    ids_core_profiles = connection.get("core_profiles", lazy=True)
     if ids_core_profiles.time is None:
         logger.critical("No core_profiles IDS in the data-entry --> Abort.")
         exit()
-    ids_equilibrium = connection.get("equilibrium",lazy=True)
+    ids_equilibrium = connection.get("equilibrium", lazy=True)
     if ids_equilibrium.time is None:
         logger.critical("No equilibrium IDS in the data-entry --> Abort.")
         exit()
-
 
     # Search for adequate time slice for display
     time_array = ids_core_profiles.time
     ntime = len(ids_core_profiles.time)
     time_slice, time_value = get_nearest_time(time_array, args.time)
 try:
-    ids_summary = connection.get("summary",lazy=True)
+    ids_summary = connection.get("summary", lazy=True)
 except Exception as e:
     logger.critical("The summary IDS is absent from the input data-entry")
     logger.critical("----> Aborted.")

@@ -28,7 +28,6 @@ def show_plots(args):
         exit(1)
 
     ids_distributions = conn.get("distributions", lazy=True)
-    
 
     time_array = ids_distributions.time
     ntime = len(time_array)

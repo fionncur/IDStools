@@ -55,7 +55,7 @@ if hostdir is None:
     )
     exit(1)
 
-ids_distribution_sources = connection.get("distribution_sources",lazy=True)
+ids_distribution_sources = connection.get("distribution_sources", lazy=True)
 
 time_array = ids_distribution_sources.time
 time_slice, time_value = get_nearest_time(time_array, args.time)
@@ -73,19 +73,15 @@ else:
 active = [1] * nsources  # A priori all sources are active
 for isource in range(nsources):
     try:
-        availability_test = ids_distribution_sources.source[
-            isource
-        ].profiles_1d[time_slice]
-        
+        availability_test = ids_distribution_sources.source[isource].profiles_1d[time_slice]
+
     except Exception as _:
         logger.warning(
             f"Source {str(isource)} has no profiles_1d -> considered as inactive",
         )
         active[isource] = 0
     try:
-        availability_test= ids_distribution_sources.source[
-            isource
-        ].global_quantities[time_slice]
+        availability_test = ids_distribution_sources.source[isource].global_quantities[time_slice]
     except Exception as _:
         if active[isource] == 1:
             logger.warning(
@@ -108,7 +104,7 @@ if sum(active) == 0:
 canvas = PlotCanvas(1, 1)
 ax = canvas.add_axes(title="", xlabel="", row=0, col=0)
 distribution_sources_view = DistributionSourcesView(ids_distribution_sources)
-distribution_sources_view.view_neutrons(ax,time_slice)
+distribution_sources_view.view_neutrons(ax, time_slice)
 distribution_sources_view.view_time(ax, time_value)
 
 canvas.set_text(text=f"{get_database_path(args, time_value=time_value)}")

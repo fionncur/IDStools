@@ -45,7 +45,7 @@ if connection is None:
     logger.critical("----> Aborted.")
     exit(1)
 
-core_sources = connection.get("core_sources",lazy=True)
+core_sources = connection.get("core_sources", lazy=True)
 if core_sources.time is None:
     logger.critical("No core_sources IDS in the data-entry --> Abort.")
     exit()

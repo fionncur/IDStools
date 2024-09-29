@@ -32,23 +32,24 @@ from idstools.utils.idslogger import setup_logger
 THRESHOLD_PERCENT = 2
 import imaspy
 
+
 def view_plot(ax, field, coordinate, field_name="", coordinate_name="", field_unit="", coordinate_unit=""):
-    if not isinstance(field,(IDSNumericArray,np.ndarray)):
+    if not isinstance(field, (IDSNumericArray, np.ndarray)):
         logger.error("Not a numeric array, Please select ids path")
         return
-    data=field
-    if isinstance(field,IDSNumericArray):
+    data = field
+    if isinstance(field, IDSNumericArray):
         if not field.has_value:
             logger.error("Values are not present")
             return
-        data-field.value
-        field_unit=field.metadata.units
-        field_name=f"{field_name} (coordinate:{coordinate_name})"
-        coordinate=field.coordinates[coordinate]
+        data - field.value
+        field_unit = field.metadata.units
+        field_name = f"{field_name} (coordinate:{coordinate_name})"
+        coordinate = field.coordinates[coordinate]
         if isinstance(coordinate, IDSPrimitive):
             coordinate_unit = f"{coordinate.metadata.name} ({coordinate.metadata.units})"
             coordinate_name = coordinate.metadata.path
-        
+
     ax.plot(coordinate, data, label=field_name)
 
     # Set Plot properties
@@ -77,6 +78,7 @@ def view_plot(ax, field, coordinate, field_name="", coordinate_name="", field_un
     for label in legend.get_lines():
         label.set_linewidth(1.5)
 
+
 def get_filename(file_title, log_dir):
     # Determine log path and file name; create log path if it does not exist
 
@@ -95,25 +97,27 @@ def get_filename(file_title, log_dir):
             print(f"Defaulting to {log_dir}.", file=sys.stderr)
     return os.path.join(log_dir, file_name)
 
+
 def highlight_differences(text1, text2):
     seq_matcher = difflib.SequenceMatcher(None, text1, text2)
-    
-    result1 = []  
-    result2 = [] 
-    
+
+    result1 = []
+    result2 = []
+
     for tag, i1, i2, j1, j2 in seq_matcher.get_opcodes():
-        if tag == 'replace':
+        if tag == "replace":
             result1.append(f'<span style="color:red;">{text1[i1:i2]}</span>')
             result2.append(f'<span style="color:green;">{text2[j1:j2]}</span>')
-        elif tag == 'delete':
+        elif tag == "delete":
             result1.append(f'<span style="color:red;">{text1[i1:i2]}</span>')
-        elif tag == 'insert':
+        elif tag == "insert":
             result2.append(f'<span style="color:green;">{text2[j1:j2]}</span>')
         else:
             result1.append(text1[i1:i2])
             result2.append(text2[j1:j2])
-    
-    return ''.join(result1), ''.join(result2)
+
+    return "".join(result1), "".join(result2)
+
 
 def generate_html(file_path, compare_data):
     logger.info("Writing to html file :" + file_path)
@@ -167,7 +171,7 @@ def generate_html(file_path, compare_data):
         report_details = ""
 
         add_header = True
-       
+
         for description, first, second in output:
             description = second._path if first is None else first._path
             report_diff_line = ""
@@ -180,8 +184,8 @@ def generate_html(file_path, compare_data):
             badge_color = "bg-primary"
             status_message = "different values"
 
-            if isinstance(first,IDSNumericArray) and isinstance(second,IDSNumericArray):
-                
+            if isinstance(first, IDSNumericArray) and isinstance(second, IDSNumericArray):
+
                 if len(first.value) <= len(second.value):
                     threshold_candidate = first
                     compare_candidate = second[: len(first)]
@@ -226,8 +230,8 @@ def generate_html(file_path, compare_data):
                     avg_a = np.average(first)
                     avg_b = np.average(second)
                     avg_diff = abs(avg_a - avg_b)
-                    rms_a = np.sqrt(np.mean(first ** 2))
-                    rms_b = np.sqrt(np.mean(second ** 2))
+                    rms_a = np.sqrt(np.mean(first**2))
+                    rms_b = np.sqrt(np.mean(second**2))
                     rms_diff = abs(rms_a - rms_b)
 
                     time_a = first.coordinates[0]
@@ -356,7 +360,7 @@ def generate_html(file_path, compare_data):
                             </tr>"""
                         plot_counter = plot_counter + 1
 
-            elif isinstance(first,IDSStructArray) or isinstance(second,IDSStructArray):
+            elif isinstance(first, IDSStructArray) or isinstance(second, IDSStructArray):
                 status_message = "different length"
                 badge_color = "bg-warning"
                 str1 = f"List length : {0 if first is None else len(first)}"
@@ -369,7 +373,7 @@ def generate_html(file_path, compare_data):
                         <td>{second_output}</td>
                     </tr>"""
 
-            elif isinstance(first,IDSInt0D) and isinstance(second,IDSInt0D): 
+            elif isinstance(first, IDSInt0D) and isinstance(second, IDSInt0D):
                 threshold_min = ((first * THRESHOLD_PERCENT) / 100) - first
                 threshold_max = ((first * THRESHOLD_PERCENT) / 100) + first
                 if second > threshold_min and second < threshold_max:
@@ -380,7 +384,7 @@ def generate_html(file_path, compare_data):
                         <td>{first_output}</td>
                         <td>{second_output}</td>
                     </tr>"""
-            elif isinstance(first,IDSFloat0D) and isinstance(second,IDSFloat0D):
+            elif isinstance(first, IDSFloat0D) and isinstance(second, IDSFloat0D):
                 threshold_min = ((first * THRESHOLD_PERCENT) / 100) - first
                 threshold_max = ((first * THRESHOLD_PERCENT) / 100) + first
                 if second > threshold_min and second < threshold_max:
@@ -391,7 +395,7 @@ def generate_html(file_path, compare_data):
                         <td>{first_output}</td>
                         <td>{second_output}</td>
                     </tr>"""
-            elif  isinstance(first,IDSString0D) and isinstance(second,IDSString0D):
+            elif isinstance(first, IDSString0D) and isinstance(second, IDSString0D):
                 first_output, second_output = highlight_differences(first.value, second.value)
                 report_diff_line = f"""<tr>
                             <td><span class="badge {badge_color}">{status_message}</span></td>
@@ -400,8 +404,8 @@ def generate_html(file_path, compare_data):
                             <td>{second_output}</td>
                         </tr>"""
             else:
-                first_value="" if first is None else first
-                second_value="" if second is None else second
+                first_value = "" if first is None else first
+                second_value = "" if second is None else second
                 first_output, second_output = highlight_differences(str(first_value), str(second_value))
                 report_diff_line = f"""<tr>
                         <td><span class="badge {badge_color}">{status_message}</span></td>
@@ -419,7 +423,6 @@ def generate_html(file_path, compare_data):
             """
     )
     file_object.close()
-
 
 
 if __name__ == "__main__":
@@ -483,22 +486,22 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     connections = []
-    path_exists_counter=0
-    fragment_ids_list=[]
+    path_exists_counter = 0
+    fragment_ids_list = []
     if args.uri is not None:
         for uriinfo in args.uri:
             _uri_args = argparse.Namespace()
             _uri_args.original_uri = uriinfo
-            uri_dict=parse_uri(uriinfo)
-            _uri_args.uri=uri_dict["uri_part"]
-            _uri_args.occurrence=uri_dict["occurrence"]
-            _uri_args.ids_name=uri_dict["ids_name"]
-            _uri_args.ids_path=uri_dict["ids_path"]
+            uri_dict = parse_uri(uriinfo)
+            _uri_args.uri = uri_dict["uri_part"]
+            _uri_args.occurrence = uri_dict["occurrence"]
+            _uri_args.ids_name = uri_dict["ids_name"]
+            _uri_args.ids_path = uri_dict["ids_path"]
             if _uri_args.ids_name != "":
                 if _uri_args.ids_name not in fragment_ids_list:
                     fragment_ids_list.append(_uri_args.ids_name)
             if _uri_args.ids_path is not None:
-                path_exists_counter=path_exists_counter+1
+                path_exists_counter = path_exists_counter + 1
             _connection = DBMaster.get_connection(_uri_args)
             if _connection is None:
                 print(f"Error opening uri! Please check existence : {uriinfo}")
@@ -507,34 +510,34 @@ if __name__ == "__main__":
 
     if not connections:
         print("No valid connections found! Please validate pulse details")
-    fragment_ids_list=list(set(fragment_ids_list))
+    fragment_ids_list = list(set(fragment_ids_list))
     if args.ids is None:
         if len(connections) == path_exists_counter:
             for i in track(range(len(connections)), description="[green]Comparing Data Entries..."):
                 for j in range(i + 1, len(connections)):
                     if i != j:
                         compare_data = {}
-                        _uri_args_a=connections[i][0]
-                        _uri_args_b=connections[j][0]
-                        ids_a=node_a=coordinate_a=None
-                        coordinate_a_name=coordinate_a_unit=""
+                        _uri_args_a = connections[i][0]
+                        _uri_args_b = connections[j][0]
+                        ids_a = node_a = coordinate_a = None
+                        coordinate_a_name = coordinate_a_unit = ""
                         ids_a = connections[i][1].get(_uri_args_a.ids_name)
                         if ":" in _uri_args_a.ids_path:
                             node_a, coordinate_a = partial_get(ids_a, _uri_args_a.ids_path)
-                            coordinate_a_name=f"{_uri_args_a.ids_name}/time"
-                            coordinate_a_unit="t"
+                            coordinate_a_name = f"{_uri_args_a.ids_name}/time"
+                            coordinate_a_unit = "t"
                         else:
-                            ids_path=_uri_args_a.ids_path.replace("(", "[").replace(")", "]").replace("/", ".")
+                            ids_path = _uri_args_a.ids_path.replace("(", "[").replace(")", "]").replace("/", ".")
                             node_a = eval("ids_a." + ids_path)
-                        ids_b=node_b=coordinate_b=None
-                        coordinate_b_name=coordinate_b_unit=""
+                        ids_b = node_b = coordinate_b = None
+                        coordinate_b_name = coordinate_b_unit = ""
                         ids_b = connections[j][1].get(_uri_args_b.ids_name)
                         if ":" in _uri_args_b.ids_path:
                             node_b, coordinate_b = partial_get(ids_a, _uri_args_b.ids_path)
-                            coordinate_b_name=f"{_uri_args_b.ids_name}/time"
-                            coordinate_b_unit="t"
+                            coordinate_b_name = f"{_uri_args_b.ids_name}/time"
+                            coordinate_b_unit = "t"
                         else:
-                            ids_path=_uri_args_b.ids_path.replace("(", "[").replace(")", "]").replace("/", ".")
+                            ids_path = _uri_args_b.ids_path.replace("(", "[").replace(")", "]").replace("/", ".")
                             node_b = eval("ids_b." + ids_path)
                         if ids_a is None or ids_b is None:
                             pass
@@ -543,17 +546,35 @@ if __name__ == "__main__":
                             if args.plot:
                                 canvas = PlotCanvas(1, 1)
                                 ax = canvas.add_axes(title="", xlabel="", row=0, col=0)
-                                view_plot(ax, node_a, coordinate_a, field_name=f"{_uri_args_a.ids_name}/{_uri_args_a.original_uri}", coordinate_name=coordinate_a_name, field_unit="", coordinate_unit=coordinate_a_unit)
-                                view_plot(ax, node_b, coordinate_b, field_name=f"{_uri_args_b.ids_name}/{_uri_args_b.original_uri}", coordinate_name=coordinate_b_name, field_unit="", coordinate_unit=coordinate_b_unit)
+                                view_plot(
+                                    ax,
+                                    node_a,
+                                    coordinate_a,
+                                    field_name=f"{_uri_args_a.ids_name}/{_uri_args_a.original_uri}",
+                                    coordinate_name=coordinate_a_name,
+                                    field_unit="",
+                                    coordinate_unit=coordinate_a_unit,
+                                )
+                                view_plot(
+                                    ax,
+                                    node_b,
+                                    coordinate_b,
+                                    field_name=f"{_uri_args_b.ids_name}/{_uri_args_b.original_uri}",
+                                    coordinate_name=coordinate_b_name,
+                                    field_unit="",
+                                    coordinate_unit=coordinate_b_unit,
+                                )
 
                                 canvas.set_text(text=f"{get_database_path(args, time_value=None)}")
 
-                                canvas.fig.subplots_adjust(top=0.916, bottom=0.09, left=0.044, right=0.953, hspace=0.287, wspace=0.2)
+                                canvas.fig.subplots_adjust(
+                                    top=0.916, bottom=0.09, left=0.044, right=0.953, hspace=0.287, wspace=0.2
+                                )
                                 canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
                                 # canvas.fig.suptitle(get_title(args, f"{_uri_args_a.ids_name}/{_uri_args_a.original_uri}", None), size=12)
 
                                 if args.save:
-                                    fname = get_file_name(args, os.path.basename(__file__) , None)
+                                    fname = get_file_name(args, os.path.basename(__file__), None)
                                     if args.directory:
                                         if not os.path.exists(args.directory):
                                             os.makedirs(args.directory)
@@ -561,27 +582,27 @@ if __name__ == "__main__":
                                     canvas.save(fname)
                                 else:
                                     canvas.show()
-                        
+
         else:
-            if len(fragment_ids_list)==0:
+            if len(fragment_ids_list) == 0:
                 args.ids = get_ids_types()
             else:
-                args.ids =fragment_ids_list
-    idsavailability1= []
-    idsavailability2= []
+                args.ids = fragment_ids_list
+    idsavailability1 = []
+    idsavailability2 = []
     total_data = {}
     for i in track(range(len(connections)), description="[green]Comparing Data Entries..."):
         for j in range(i + 1, len(connections)):
             if connections[i][0] != connections[j][0]:
                 compare_data = {}
                 for idsname in args.ids:
-                    ids_a=None
+                    ids_a = None
                     try:
                         ids_a = connections[i][1].get(idsname)
                     except:
                         idsavailability1.append(idsname)
                         pass
-                    ids_b=None
+                    ids_b = None
                     try:
                         ids_b = connections[j][1].get(idsname)
                     except:
@@ -590,12 +611,16 @@ if __name__ == "__main__":
                     if ids_a is None or ids_b is None:
                         continue
                     if args.fullarray:
-                        compare_result, diff_result, _=idsdiff_full(ids_a,ids_b, connections[i][0], connections[j][0] ,print_result=True)
+                        compare_result, diff_result, _ = idsdiff_full(
+                            ids_a, ids_b, connections[i][0], connections[j][0], print_result=True
+                        )
                     else:
-                        compare_result, diff_result, _=idsdiff(ids_a,ids_b, connections[i][0], connections[j][0] , print_result=True, verbose=True)
-                    
+                        compare_result, diff_result, _ = idsdiff(
+                            ids_a, ids_b, connections[i][0], connections[j][0], print_result=True, verbose=True
+                        )
+
                     compare_data[idsname] = (compare_result, diff_result)
-                    
+
                     total_data[
                         (
                             connections[i][0].original_uri,
@@ -608,8 +633,7 @@ if __name__ == "__main__":
     set2 = set(idsavailability2)
     only_in_list1 = set1 - set2
     only_in_list2 = set2 - set1
-    uncommon_with_origin = [(item, 'list1') for item in only_in_list1] + \
-                        [(item, 'list2') for item in only_in_list2]
+    uncommon_with_origin = [(item, "list1") for item in only_in_list1] + [(item, "list2") for item in only_in_list2]
     for item, origin in uncommon_with_origin:
         print(f"'{item}' is only in {origin}")
     file_path = get_filename("compare_report", args.directory)

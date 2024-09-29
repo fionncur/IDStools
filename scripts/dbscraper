@@ -71,16 +71,13 @@ if __name__ == "__main__":
             df.to_csv(args.saveas, na_rep="None", index=True, header=True)
         else:
             np.set_printoptions(threshold=4)
-            column_styles = {
-                "URI": "green",
-                "VALUE": "yellow"
-            }
+            column_styles = {"URI": "green", "VALUE": "yellow"}
             console = Console()
             table = Table(show_header=True, header_style="bold magenta")
             for col in df.columns:
                 table.add_column(col, style=column_styles[col])
             for index, row in df.iterrows():
-                table.add_row(str(row['URI']), str(row['VALUE']))
+                table.add_row(str(row["URI"]), str(row["VALUE"]))
                 table.add_section()
-            
+
             console.print(table)

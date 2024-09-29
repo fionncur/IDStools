@@ -108,7 +108,7 @@ if isinstance(args.md, bool) and args.md is True:
     _ids_connection.close()
 
 
-ids_obj_equilibrium = connection.get("equilibrium",occurrence=occurrence, lazy=True)
+ids_obj_equilibrium = connection.get("equilibrium", occurrence=occurrence, lazy=True)
 
 if ids_obj_equilibrium.time is not None:
     time_slice, time_value = get_nearest_time(ids_obj_equilibrium.time, args.time)
@@ -165,7 +165,7 @@ if ids_obj_equilibrium.time is not None:
         if "pf_active" in _ids_name:
             connection = DBMaster.get_connection(inputargs)
             if connection is not None:
-                _ids_data =None
+                _ids_data = None
                 try:
                     _ids_data = connection.get("pf_active")
                     if _ids_data.ids_properties.homogeneous_time == ids_defs.EMPTY_INT:
@@ -181,7 +181,7 @@ if ids_obj_equilibrium.time is not None:
             else:
                 logger.warning(f"given data entry is not present for {_ids_name}")
 
-    plotequilibrium.view_magnetic_poloidal_flux(ax, time_slice,  plot_rho=args.rho)
+    plotequilibrium.view_magnetic_poloidal_flux(ax, time_slice, plot_rho=args.rho)
     ax.set_title(title)
 
     xmin, xmax = ax.get_xlim()

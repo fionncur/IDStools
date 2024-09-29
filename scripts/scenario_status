@@ -12,7 +12,6 @@ from idstools.scenariodescription import ScenarioDescription
 from idstools.utils.idslogger import setup_logger
 
 
-
 def get_core_version():
     _lowlevel_version = ""
     if "_al_lowlevel" in imas.__dict__:
@@ -30,7 +29,7 @@ def get_core_version():
     lowlevel_version = _lowlevel_version
     return lowlevel_version
 
-    
+
 console = Console()
 # Management of input arguments
 parser = argparse.ArgumentParser(

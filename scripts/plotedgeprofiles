@@ -74,23 +74,27 @@ if connection is None:
     logger.critical("----> Aborted.")
     exit(1)
 
-wall_ids=None
+wall_ids = None
 if args.wall:
-    
+
     print(args.walluri)
     if args.walluri:
         mdargs = argparse.Namespace()
-        mdargs.uri=args.walluri
+        mdargs.uri = args.walluri
         mdconnection = DBMaster.get_connection(args)
         try:
             wall_ids = mdconnection.get("wall", lazy=True)
         except Exception as e:
-            logger.error("wall ids is not present in the data entry. please provide with --walluri option where wall ids is exists")
+            logger.error(
+                "wall ids is not present in the data entry. please provide with --walluri option where wall ids is exists"
+            )
     else:
         try:
             wall_ids = connection.get("wall", lazy=True)
         except Exception as e:
-            logger.error("wall ids is not present in the data entry. please provide with --walluri option where wall ids is exists")
+            logger.error(
+                "wall ids is not present in the data entry. please provide with --walluri option where wall ids is exists"
+            )
 
     if wall_ids and not wall_ids.ids_properties.homogeneous_time == ids_defs.EMPTY_INT:
         r = None
@@ -105,7 +109,7 @@ if args.wall:
                     h = vessel_unit["h"]
                     break
 
-edge_profile_ids=connection.get("edge_profiles", lazy=True)
+edge_profile_ids = connection.get("edge_profiles", lazy=True)
 time_array = edge_profile_ids.time
 if time_array is None:
     logger.error("edge_profiles ids : time is not present")

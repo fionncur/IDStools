@@ -218,7 +218,9 @@ if __name__ == "__main__":
                             slices.append(get_timings(hdfde, ids2process, times=[10], repeat=args.repeat))
                         except Exception as e:
                             slices.append(None)
-                            print(f"{ids2process} in ({pulse} , {run}) failed to return slice get_timings - detailed:{e}")
+                            print(
+                                f"{ids2process} in ({pulse} , {run}) failed to return slice get_timings - detailed:{e}"
+                            )
                     mdstimes = get_timings(mdsde, ids2process, repeat=args.repeat)
                     mdstdev = np.std(mdstimes)
                     hdftimes = get_timings(hdfde, ids2process, repeat=args.repeat)

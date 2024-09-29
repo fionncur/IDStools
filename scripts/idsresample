@@ -78,9 +78,9 @@ if __name__ == "__main__":
         sys.exit()
 
     for ids_name in args.ids:
-        idsobj=None
+        idsobj = None
         try:
-            idsobj=src.get(ids_name)
+            idsobj = src.get(ids_name)
         except:
             pass
         if idsobj:

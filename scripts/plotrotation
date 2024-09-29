@@ -46,7 +46,7 @@ if connection is None:
     logger.critical("----> Aborted.")
     exit(1)
 
-ids_core_profiles = connection.get("core_profiles",lazy=True)
+ids_core_profiles = connection.get("core_profiles", lazy=True)
 
 # Search for adequate time slice for display
 time_array = ids_core_profiles.time

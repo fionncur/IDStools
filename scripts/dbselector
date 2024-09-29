@@ -54,7 +54,7 @@ if __name__ == "__main__":
     list_count = args.list_count
 
     if pulses is not None:
-        pulse_counter=0
+        pulse_counter = 0
         for pulse in track(pulses, description="[green]Analyzing DB..."):
             connargs = argparse.Namespace()
             connargs.backend = args.backend
@@ -79,8 +79,7 @@ if __name__ == "__main__":
 
             if found_counter == len(idsesto_search):
                 print((pulse[0], pulse[1]))
-                pulse_counter = pulse_counter+1
+                pulse_counter = pulse_counter + 1
             if list_count != 0:
                 if pulse_counter == list_count:
                     break
-                

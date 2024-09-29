@@ -45,9 +45,9 @@ def ids_setter(ids, path, val):
             dodi = dodi[nodeindex]
     leaf = path[-1]
     try:
-        ids_field=getattr(dodi, leaf)
+        ids_field = getattr(dodi, leaf)
         leaftype = type(ids_field.value)
-        
+
         if leaftype == str:
             setattr(dodi, str(leaf), str(val))
         elif leaftype == float:
@@ -56,9 +56,9 @@ def ids_setter(ids, path, val):
             setattr(dodi, str(leaf), int(val))
         elif leaftype == np.ndarray:
             if len(ids_field.shape) == 1:
-                arr=[val]
+                arr = [val]
             elif len(ids_field.shape) == 2:
-                arr=[[val]]
+                arr = [[val]]
             setattr(dodi, str(leaf), np.array(arr, dtype=ids_field.dtype))
         else:
             raise AttributeError(f"The type {leaftype} of {idspath} is currently not supported")
@@ -66,7 +66,6 @@ def ids_setter(ids, path, val):
         raise AttributeError(
             f"The leaf '{node}' could not be found in {path} for IDS {ids._base_path}. Please check spelling."
         )
-    
 
 
 def evaluate(expr):

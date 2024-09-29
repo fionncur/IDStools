@@ -17,6 +17,7 @@ from idstools.view.waves import WavesView
 
 logger = setup_logger("module", stdout_level=logging.INFO)
 
+
 def _show_waves_plots(connargs, args, hold=False):
     conn = DBMaster.get_connection(connargs)
     if conn is None:
@@ -24,7 +25,6 @@ def _show_waves_plots(connargs, args, hold=False):
         return
 
     ids_waves = conn.get("waves", lazy=True)
-    
 
     waves_compute = WavesCompute(ids_waves)
 
@@ -95,7 +95,8 @@ def _show_waves_plots(connargs, args, hold=False):
     else:
         canvas.show(block=hold)
     conn.close()
-        
+
+
 def show_waves_plots(args, hold=False):
     pulse = args["pulse"]
     run = args["run"]
@@ -122,7 +123,7 @@ def show_waves_plots(args, hold=False):
             f"run={connargs.run};database={connargs.database};version={connargs.version}"
         )
         _show_waves_plots(connargs, args, hold)
-        
+
 
 def _show_distribution_plots(connargs, args, hold=False):
     conn = DBMaster.get_connection(connargs)
@@ -131,7 +132,6 @@ def _show_distribution_plots(connargs, args, hold=False):
         return
 
     ids_distributions = conn.get("distributions", lazy=True)
-    
 
     time_array = ids_distributions.time
     ntime = len(time_array)
@@ -139,9 +139,7 @@ def _show_distribution_plots(connargs, args, hold=False):
 
     canvas = PlotCanvas(3, 2)
     # canvas.setStyle(style="retro")
-    canvas.set_sup_title(
-        f"HCD Distributions Plot {connargs.uri} Time : {time_value:.1f}"
-    )
+    canvas.set_sup_title(f"HCD Distributions Plot {connargs.uri} Time : {time_value:.1f}")
     if ntime == 1:
         logger.info("Only one time slice --> Power and CD waveforms not displayed")
     ax1 = canvas.add_axes(title="", xlabel="", row=0, col=0)
@@ -175,7 +173,8 @@ def _show_distribution_plots(connargs, args, hold=False):
     else:
         canvas.show(block=hold)
     conn.close()
-        
+
+
 def show_distribution_plots(args, hold=False):
     pulse = args["pulse"]
     run = args["run"]
@@ -201,7 +200,8 @@ def show_distribution_plots(args, hold=False):
             f"run={connargs.run};database={connargs.database};version={connargs.version}"
         )
         _show_distribution_plots(connargs, args, hold)
-        
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="--- Display H&CD results from multiple data sets \n"
@@ -248,75 +248,75 @@ if __name__ == "__main__":
     )
     parser.add_argument("-t", "--time", help="Time", required=False, type=float, default=-99.0)
     args = vars(parser.parse_args())
-    
-    holder= OrderedDict()
+
+    holder = OrderedDict()
     if args["ech"] != "":
         if "imas:" in args["ech"]:
-            holder["ech_uri_hold"] =True
+            holder["ech_uri_hold"] = True
         else:
-            holder["ech_uri_hold"] =False
+            holder["ech_uri_hold"] = False
     if args["icrh"] != "":
         if "imas:" in args["icrh"]:
-            holder["icrh_uri_hold"]=True
+            holder["icrh_uri_hold"] = True
         else:
-            holder["icrh_uri_hold"]=False
+            holder["icrh_uri_hold"] = False
     if args["nbi"] != "":
         if "imas:" in args["nbi"]:
-            holder["nbi_uri_hold"]=True
+            holder["nbi_uri_hold"] = True
         else:
-            holder["nbi_uri_hold"]=False
+            holder["nbi_uri_hold"] = False
     if args["fus"] != "":
         if "imas:" in args["fus"]:
-            holder["fus_uri_hold"]=True
+            holder["fus_uri_hold"] = True
         else:
-            holder["fus_uri_hold"]=False
+            holder["fus_uri_hold"] = False
     if args["ech"] != "":
         if "imas:" not in args["ech"]:
-            holder["ech_hold"]=True
+            holder["ech_hold"] = True
         else:
-            holder["ech_hold"]=False
+            holder["ech_hold"] = False
     if args["icrh"] != "":
         if "imas:" not in args["icrh"]:
-            holder["icrh_hold"]=True
+            holder["icrh_hold"] = True
         else:
-            holder["icrh_hold"]=False
+            holder["icrh_hold"] = False
     if args["nbi"] != "":
         if "imas:" not in args["nbi"]:
-            holder["nbi_hold"]=True
+            holder["nbi_hold"] = True
         else:
-            holder["nbi_hold"]=False
+            holder["nbi_hold"] = False
     if args["fus"] != "":
         if "imas:" not in args["fus"]:
-            holder["fus_hold"]=True
+            holder["fus_hold"] = True
         else:
-            holder["fus_hold"]=False
+            holder["fus_hold"] = False
 
-    last_item = next(reversed(holder))    
+    last_item = next(reversed(holder))
 
-    for key,_ in holder.items():
+    for key, _ in holder.items():
         if key is not last_item:
-            holder[key]=False
-            
+            holder[key] = False
+
     if "imas:" in args["ech"]:
         connargs_ech = argparse.Namespace()
-        connargs_ech.uri=args["ech"]
+        connargs_ech.uri = args["ech"]
         args["force_psi"] = None
         args["hide_legend"] = False
         args["save"] = args["save"]
         _show_waves_plots(connargs_ech, args, holder["ech_uri_hold"])
     if "imas:" in args["icrh"]:
         connargs_icrh = argparse.Namespace()
-        connargs_icrh.uri=args["icrh"]
+        connargs_icrh.uri = args["icrh"]
         args["save"] = args["save"]
         _show_distribution_plots(connargs_icrh, args, holder["icrh_uri_hold"])
     if "imas:" in args["nbi"]:
         connargs_nbi = argparse.Namespace()
-        connargs_nbi.uri=args["nbi"]
+        connargs_nbi.uri = args["nbi"]
         args["save"] = args["save"]
         _show_distribution_plots(connargs_nbi, args, holder["nbi_uri_hold"])
     if "imas:" in args["fus"]:
         connargs_fus = argparse.Namespace()
-        connargs_fus.uri=args["fus"]
+        connargs_fus.uri = args["fus"]
         args["save"] = args["save"]
         _show_distribution_plots(connargs_fus, args, holder["fus_uri_hold"])
 
@@ -402,7 +402,7 @@ if __name__ == "__main__":
         logger.warning("--> Exit.")
 
     # ECH
-    hold=False
+    hold = False
     if hcd_sources["ech"]["run"]:
         ec_args = hcd_sources["ech"]
         ec_args["force_psi"] = None

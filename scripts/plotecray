@@ -130,7 +130,7 @@ logger.info(
 ecstra_view.plot_poloidal_view(ax_polview, coherent_wave_index=0, time_slice=time_slice)
 if args.md is True:
     args.md = ["wall", "pf_active"]
-    
+
 for mdids_info in args.md:
     inputargs = copy.deepcopy(args)
     splittedms_ids_info = mdids_info.split("#")

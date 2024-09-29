@@ -54,7 +54,7 @@ if connection is None:
     exit(1)
 
 
-ids_spectrometer_visible = connection.get("spectrometer_visible",lazy=True)
+ids_spectrometer_visible = connection.get("spectrometer_visible", lazy=True)
 
 
 time_array = ids_spectrometer_visible.time
@@ -127,4 +127,3 @@ if args.save:
 else:
     canvas_intensity.show(block=True)
 connection.close()
-

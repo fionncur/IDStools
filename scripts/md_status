@@ -35,9 +35,9 @@ run = args["run"]
 if args["folder"] is not None:
     machine_description_folder = args["folder"]
 else:
-    publichome = os.getenv("IMAS_HOME", default="") 
-            
-    machine_description_folder = os.path.join(publichome , r"shared/imasdb/ITER_MD/3/md_summary.yaml")
+    publichome = os.getenv("IMAS_HOME", default="")
+
+    machine_description_folder = os.path.join(publichome, r"shared/imasdb/ITER_MD/3/md_summary.yaml")
 
 md_object = MachineDescription(machine_description_folder)
 

@@ -61,11 +61,11 @@ if "mode" not in outputargs.__dict__:
 output_connection = None
 if outputargs.uri != "" and outputargs.uri is not None:
     output_connection = imas.DBEntry(outputargs.uri, outputargs.mode)
-        
+
 if output_connection is None:
     logger.error("Error opening destination pulse! Please check parameters and permissions.")
     exit(1)
-        
+
 logger.info(f"Shifting equilibrium by {shift_param} m")
 logger.info("Values for wall gaps, locations of strike-points and closest wall points are no longer guaranteed!")
 equilibrium_compute = EquilibriumCompute(ids_equilibrium)

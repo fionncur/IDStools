@@ -106,11 +106,11 @@ else:
     dest_connection = None
     if outputargs.uri != "" and outputargs.uri is not None:
         dest_connection = imas.DBEntry(outputargs.uri, outputargs.mode)
-            
+
     if dest_connection is None:
         logger.error("Error opening destination pulse! Please check parameters and permissions.")
         exit(1)
-        
+
 if args.all_occurrences:
     if "/" in args.ids:
         logger.error("Please do not specify source occurrences together with -a/--allOccurrences option")
@@ -133,7 +133,7 @@ for idsname in args.ids:
     if args.interactive:
         dest_ids_object = None
         try:
-            dest_ids_object=dest_connection.get(idsid[0],occurrence=inocc)
+            dest_ids_object = dest_connection.get(idsid[0], occurrence=inocc)
         except Exception as e:
             pass
         if dest_ids_object:

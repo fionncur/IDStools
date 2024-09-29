@@ -13,11 +13,13 @@ from yaml import load as yamlload
 
 from idstools.database import DBMaster
 import imas
+
 try:
     from yaml import CLoader as yamlLoader
 except ImportError:
     from yaml import Loader as yamlLoader
 # ----------------------------------------------------------------------------
+
 
 def get_core_version():
     """
@@ -39,6 +41,7 @@ def get_core_version():
             _lowlevel_version = _lowlevel_version.replace("_", ".")
     lowlevel_version = int(_lowlevel_version.split(".")[0])
     return lowlevel_version
+
 
 # For better formatting of input argument listing in the help of the function
 class SmartFormatter(argparse.HelpFormatter):
