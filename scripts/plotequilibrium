@@ -147,33 +147,39 @@ if ids_obj_equilibrium.time is not None:
         if "wall" in _ids_name:
             connection = DBMaster.get_connection(inputargs)
             if connection is not None:
-                _ids_data = connection.get("wall")
+                try:
+                    _ids_data = connection.get("wall")
+                    if _ids_data.ids_properties.homogeneous_time == ids_defs.EMPTY_INT:
+                        logger.warning(f"{_ids_name} ids is empty in the dbentry")
+                except Exception as e:
+                    logger.warning(f"{_ids_name} ids is not present error {e}")
+                if _ids_data:
 
-                if _ids_data.ids_properties.homogeneous_time != ids_defs.EMPTY_INT:
                     wallview = WallView(_ids_data)
                     if found_data := wallview.view_wall(ax, args.show_labels, wallcolor="slategray"):
                         title += " wall"
                         database_text += f"{_ids_name}={get_database_path(inputargs)}\n"
-                else:
-                    logger.warning(f"{_ids_name} ids is empty in the dbentry")
                 connection.close()
             else:
-                logger.warning(f"{_ids_name} ids is not present")
+                logger.warning(f"given data entry is not present for {_ids_name}")
         if "pf_active" in _ids_name:
             connection = DBMaster.get_connection(inputargs)
             if connection is not None:
-                _ids_data = connection.get("pf_active")
-
-                if _ids_data.ids_properties.homogeneous_time != ids_defs.EMPTY_INT:
+                _ids_data =None
+                try:
+                    _ids_data = connection.get("pf_active")
+                    if _ids_data.ids_properties.homogeneous_time == ids_defs.EMPTY_INT:
+                        logger.warning(f"{_ids_name} ids is empty in the dbentry")
+                except Exception as e:
+                    logger.warning(f"{_ids_name} ids is not present error {e}")
+                if _ids_data:
                     view_pf_coils = PFActiveView(_ids_data)
                     view_pf_coils.view_active_pf_coils(ax, args.show_labels)
                     title += " Active PF Coils"
                     database_text += f"{_ids_name}={get_database_path(inputargs)}\n"
-                else:
-                    logger.warning(f"{_ids_name} ids is empty in the dbentry")
                 connection.close()
             else:
-                logger.warning("f{_idsName} ids is not present")
+                logger.warning(f"given data entry is not present for {_ids_name}")
 
     plotequilibrium.view_magnetic_poloidal_flux(ax, time_slice,  plot_rho=args.rho)
     ax.set_title(title)

@@ -12,14 +12,33 @@ from stat import *
 from yaml import load as yamlload
 
 from idstools.database import DBMaster
-from idstools.utils.clihelper import get_core_version
-
+import imas
 try:
     from yaml import CLoader as yamlLoader
 except ImportError:
     from yaml import Loader as yamlLoader
 # ----------------------------------------------------------------------------
 
+def get_core_version():
+    """
+    This function retrieves the core version number from the IMAS low-level modules in Python.
+
+    Returns:
+        The function `get_core_version` returns the low-level version of the core module being used in the
+    code. The version is extracted from the module names and formatted as an integer.
+    """
+    _lowlevel_version = ""
+    if "_al_lowlevel" in imas.__dict__:
+        _lowlevel_version = imas.get_al_version()
+    if "_ual_lowlevel" in imas.__dict__:
+        raw_core_version = imas._ual_lowlevel.__name__  # '__name__': 'imas_3_41_0_ual_4_11_10._ual_lowlevel
+        raw_core_version, _ = raw_core_version.split(".")
+        match = re.search(r"\d+_\d+_\d+$", raw_core_version)
+        if match:
+            _lowlevel_version = match.group()
+            _lowlevel_version = _lowlevel_version.replace("_", ".")
+    lowlevel_version = int(_lowlevel_version.split(".")[0])
+    return lowlevel_version
 
 # For better formatting of input argument listing in the help of the function
 class SmartFormatter(argparse.HelpFormatter):
@@ -387,8 +406,7 @@ if __name__ == "__main__":
     if args["folder"] != None:
         folder = args["folder"]
     else:
-        LL_version = DBMaster.get_core_version()
-        LL_version = int(LL_version.split(".")[0])
+        LL_version = get_core_version()
         if LL_version < 4:
             folder = "/work/imas/shared/iterdb/3/0"
         else:

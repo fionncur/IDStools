@@ -12,43 +12,36 @@ logger = logging.getLogger(f"module.{__name__}")
 
 
 class MachineDescription:
-    md_summary_path = r"/work/imas/shared/imasdb/ITER_MD/3/md_summary.yaml"
 
-    def __init__(self, md_summary_path: str = "", connection_args=None) -> None:
-        self.md_args = connection_args
-        if self.md_args:
-            if "database" in self.md_args.__dict__ and self.md_args.database == "ITER":
-                self.md_args.database = "ITER_MD"
-
+    def __init__(self, summary_yaml_file: str = "") -> None:
         self.md_summary_yaml = {}
-        if not md_summary_path:
-            _md_summary_path = MachineDescription.md_summary_path
+        if not summary_yaml_file:
+            publichome = os.getenv("IMAS_HOME", default="") 
+            
+            _md_summary_path = os.path.join(publichome , r"shared/imasdb/ITER_MD/3/md_summary.yaml")
 
         else:
-            _md_summary_path = md_summary_path
+            _md_summary_path = summary_yaml_file
 
-            if os.path.isdir(_md_summary_path):
-                _md_summary_path = os.path.join(_md_summary_path, "md_summary.yaml")
         with open(_md_summary_path, "r") as stream:
             try:
                 self.md_summary_yaml = safe_load(stream)
             except YAMLError as exc:
                 print(exc)
 
-    def get_latest_ids_data(self, ids_name: str):
+    def get_latest_ids_data(self, ids_name: str, backend = "MDSPLUS", user = "public", database = "ITER_MD", version = 3):
         md_ids_dict = self.get_md_summary(ids_name)
         ids_data = None
         config = None
-        # Get wall of the tokamak
         import argparse
 
         md_args = argparse.Namespace()
-        md_args.backend = "MDSPLUS"
+        md_args.backend = backend
         md_args.pulse = 0
         md_args.run = 0
-        md_args.user = "public"
-        md_args.database = "ITER_MD"
-        md_args.version = 3
+        md_args.user = user
+        md_args.database = database
+        md_args.version = version
         md_args.uri = None
         for pulse, _config in md_ids_dict.items():
             if ids_name == _config["config"]["ids"]:

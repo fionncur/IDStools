@@ -13,7 +13,6 @@ from rich_argparse import RichHelpFormatter
 from idstools.compute.common import get_nearest_time
 from idstools.compute.wall import WallCompute
 from idstools.database import DBMaster
-from idstools.machinedescription import MachineDescription
 from idstools.utils.clihelper import (
     dbentry_parser,
     get_database_path,
@@ -44,6 +43,12 @@ parser.add_argument(
     action="store_true",
 )
 parser.add_argument(
+    "-w",
+    "--walluri",
+    type=str,
+    help="Show wall from this uri",
+)
+parser.add_argument(
     "--logscale",
     help="Shows y axis with logarithmic scale wherever appropriate",
     action="store_true",
@@ -58,11 +63,7 @@ parser.add_argument(
     help="Directory to save the figure",
     default=None,
 )
-parser.add_argument(
-    "--mdsummary",
-    help="Machine description summary file path",
-    default=None,
-)
+
 args = parser.parse_args()
 
 logger = setup_logger("module")
@@ -73,18 +74,25 @@ if connection is None:
     logger.critical("----> Aborted.")
     exit(1)
 
+wall_ids=None
 if args.wall:
-
-    wall_ids = connection.get("wall", lazy=True)
-
-    if wall_ids.ids_properties.homogeneous_time == ids_defs.EMPTY_INT:
-
-        machine_description = MachineDescription(md_summary_path=args.mdsummary,connection_args=copy.deepcopy(args))
-        wall_md_dict = machine_description.get_latest_ids_data("wall")
-        wall_ids = wall_md_dict["idsData"]
-    if wall_ids.ids_properties.homogeneous_time == ids_defs.EMPTY_INT:
-        logger.error("wall ids is not present")
+    
+    print(args.walluri)
+    if args.walluri:
+        mdargs = argparse.Namespace()
+        mdargs.uri=args.walluri
+        mdconnection = DBMaster.get_connection(args)
+        try:
+            wall_ids = mdconnection.get("wall", lazy=True)
+        except Exception as e:
+            logger.error("wall ids is not present in the data entry. please provide with --walluri option where wall ids is exists")
     else:
+        try:
+            wall_ids = connection.get("wall", lazy=True)
+        except Exception as e:
+            logger.error("wall ids is not present in the data entry. please provide with --walluri option where wall ids is exists")
+
+    if wall_ids and not wall_ids.ids_properties.homogeneous_time == ids_defs.EMPTY_INT:
         r = None
         z = None
         h = None
@@ -130,21 +138,21 @@ ax3 = canvas.add_axes(title="", xlabel="", row=0, col=3, rowspan=2)
 c1 = edge_profiles_view.view_electrons_density(ax1, time_slice, show_separatrix=False)
 if c1 is not None:
     canvas.fig.colorbar(c1, ax=ax1)
-    if args.wall:
+    if wall_ids:
         if r is not None and z is not None:
             ax1.plot(r, z, "silver")
 
 c2 = edge_profiles_view.view_ion_density(ax2, time_slice, show_separatrix=False)
 if c2 is not None:
     canvas.fig.colorbar(c2, ax=ax2)
-    if args.wall:
+    if wall_ids:
         if r is not None and z is not None:
             ax2.plot(r, z, "silver")
 
 c3 = edge_profiles_view.view_neutral_density(ax3, time_slice, show_separatrix=False)
 if c3 is not None:
     canvas.fig.colorbar(c3, ax=ax3)
-    if args.wall:
+    if wall_ids:
         if r is not None and z is not None:
             ax3.plot(r, z, "silver")
 

@@ -531,7 +531,7 @@ class CoreProfilesView:
 
     def plot_poloidal_velocity_profile(self, ax, time_slice, **kwargs):
         FACTOR = 1.0e-3
-        rho_tor_norm = self.core_profiles_compute.get_rho_tor_norm()  # Rho profile (mandatory)
+        rho_tor_norm = self.core_profiles_compute.get_rho_tor_norm(time_slice)  # Rho profile (mandatory)
         nrho = len(rho_tor_norm)
         if nrho == 0:
             logger.critical(

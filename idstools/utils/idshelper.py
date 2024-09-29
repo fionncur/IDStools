@@ -760,9 +760,9 @@ def idsdiff(struct1: IDSStructure, struct2: IDSStructure, name1="", name2="", pr
     compare_result=False
     diff_name="Left -Right"
     if isinstance(struct1,IDSToplevel) and isinstance(struct1,IDSToplevel) :
-        diff_name=f"{name1}({struct1.metadata.name})", f"{name2}({struct2.metadata.name})"
+        diff_name=f"{name1}({struct1.metadata.name}) - {name2}({struct2.metadata.name})"
     elif isinstance(struct1,IDSStructure) and isinstance(struct1,IDSStructure):
-        diff_name=f"{name1}({struct1._path})", f"{name2}({struct2._path})"
+        diff_name=f"{name1}({struct1._path}) - {name2}({struct2._path})"
     diff_table = Table(title=Text(diff_name))
     diff_table.add_column("IDS Path")
     diff_table.add_column("Description")

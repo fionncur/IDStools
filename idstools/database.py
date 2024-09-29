@@ -496,24 +496,6 @@ class DBMaster:
             raise NotImplementedError(f"Unsupported backend: {backend}")
 
     @classmethod
-    def get_core_version(cls):
-        _lowlevel_version = ""
-        if "_al_lowlevel" in imas.__dict__:
-            try:
-                _lowlevel_version = imas.get_al_version()
-            except Exception:
-                _lowlevel_version = imas.al_defs.AL_VERSION.decode("utf-8")
-        elif "_ual_lowlevel" in imas.__dict__:
-            raw_core_version = imas._ual_lowlevel.__name__  # '__name__': 'imas_3_41_0_ual_4_11_10._ual_lowlevel
-            raw_core_version, _ = raw_core_version.split(".")
-            match = re.search(r"\d+_\d+_\d+$", raw_core_version)
-            if match:
-                _lowlevel_version = match.group()
-                _lowlevel_version = _lowlevel_version.replace("_", ".")
-        lowlevel_version = _lowlevel_version
-        return lowlevel_version
-
-    @classmethod
     def get_dd_version(cls):
         factory = imas.IDSFactory()
         return factory.dd_version

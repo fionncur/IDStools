@@ -7,7 +7,7 @@ This module provides compute functions and classes for core_sources ids data
 
 import functools
 import logging
-from typing import Dict
+from typing import Dict, Union
 
 import numpy as np
 

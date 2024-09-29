@@ -507,8 +507,6 @@ if __name__ == "__main__":
 
     if not connections:
         print("No valid connections found! Please validate pulse details")
-    print("args.ids ", args.ids)    
-    print("fragment_ids_list",fragment_ids_list)
     fragment_ids_list=list(set(fragment_ids_list))
     if args.ids is None:
         if len(connections) == path_exists_counter:
@@ -597,10 +595,11 @@ if __name__ == "__main__":
                         compare_result, diff_result, _=idsdiff(ids_a,ids_b, connections[i][0], connections[j][0] , print_result=True, verbose=True)
                     
                     compare_data[idsname] = (compare_result, diff_result)
+                    
                     total_data[
                         (
-                            connections[i][0],
-                            connections[j][0],
+                            connections[i][0].original_uri,
+                            connections[j][0].original_uri,
                             connections[i][1],
                             connections[j][1],
                         )

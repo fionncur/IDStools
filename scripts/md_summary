@@ -20,7 +20,7 @@ parser = argparse.ArgumentParser(
     description="""---- Script to list available MD data in a specific folder ----\n\nImportant: The legacy md_summary tool is deprecated and will be removed in a future versions. It will remain available until simdb is fully adopted.more about simdb : https://simdb.iter.org/dashboard/""",
     formatter_class=SmartFormatter,
 )
-parser.add_argument("-f", "--folder", help="folder where to search for MD data", required=False)
+parser.add_argument("-f", "--folder", help="folder where to search for MD data (yaml file)", required=False)
 parser.add_argument(
     "-s",
     "--selection",
@@ -71,7 +71,7 @@ args = vars(parser.parse_args())
 if args["folder"] is not None:
     machine_description_folder = args["folder"]
 else:
-    machine_description_folder = "/work/imas/shared/imasdb/ITER_MD/3"
+    machine_description_folder = "/work/imas/shared/imasdb/ITER_MD/3/md_summary.yaml"
 
 # MATCHCASE
 matchcase = args["matchcase"]
@@ -119,7 +119,7 @@ else:
 # add shot/run number because pandas is stores id as unique key
 choice.append("id")
 
-md_object = MachineDescription(machine_description_folder, connection_args=None)
+md_object = MachineDescription(machine_description_folder)
 yaml_data = md_object.md_summary_yaml
 
 df = md_object.get_pandas_data_frame()
