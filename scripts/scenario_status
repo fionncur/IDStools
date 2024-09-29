@@ -2,8 +2,9 @@
 # -*- coding: utf-8 -*-
 import argparse
 import os
-import imas
 import re
+
+import imas
 from rich.console import Console
 from rich.table import Table
 from rich_argparse import RawDescriptionRichHelpFormatter

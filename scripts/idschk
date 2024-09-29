@@ -4,6 +4,7 @@ import argparse
 from os import path
 from sys import exit
 
+import imas
 import yaml
 from rich.markdown import Markdown
 from rich_argparse import RichHelpFormatter
@@ -11,7 +12,6 @@ from rich_argparse import RichHelpFormatter
 from idstools import idschk
 from idstools.db_validator import ScenarioValidator
 from idstools.utils.clihelper import dbentry_parser
-import imas
 
 # ----------------------------------------------------------------------
 

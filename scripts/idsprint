@@ -25,7 +25,7 @@ from idstools.utils.clihelper import (
     get_file_name,
     get_title,
 )
-from idstools.utils.idshelper import get_available_ids_and_times, partial_get, parse_uri
+from idstools.utils.idshelper import get_available_ids_and_times, parse_uri, partial_get
 from idstools.utils.idslogger import setup_logger
 from idstools.view.common import PlotCanvas
 

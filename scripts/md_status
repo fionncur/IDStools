@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 import argparse
 import os
+
 from rich_argparse import RawDescriptionRichHelpFormatter
 
 from idstools.machinedescription import MachineDescription

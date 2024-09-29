@@ -12,22 +12,28 @@ from io import BytesIO
 
 import matplotlib.pyplot as plt
 import numpy as np
-from idstools.utils.clihelper import get_database_path, get_file_name, get_title
-from idstools.view.common import PlotCanvas
 from imaspy.ids_primitive import (
     IDSFloat0D,
     IDSInt0D,
     IDSNumericArray,
+    IDSPrimitive,
     IDSString0D,
 )
-from imaspy.ids_primitive import IDSNumericArray, IDSPrimitive
 from imaspy.ids_struct_array import IDSStructArray
 from rich.progress import track
 from rich_argparse import RichHelpFormatter
 
 from idstools.database import DBMaster
-from idstools.utils.idshelper import get_ids_types, idsdiff, idsdiff_full, partial_get, parse_uri
+from idstools.utils.clihelper import get_database_path, get_file_name, get_title
+from idstools.utils.idshelper import (
+    get_ids_types,
+    idsdiff,
+    idsdiff_full,
+    parse_uri,
+    partial_get,
+)
 from idstools.utils.idslogger import setup_logger
+from idstools.view.common import PlotCanvas
 
 THRESHOLD_PERCENT = 2
 import imaspy

@@ -1,9 +1,9 @@
 import cProfile
+import sys
 import timeit
 
 import imaspy as imas
 import numpy as np
-import sys
 
 
 def get_ids(db, idsname, occ=0, times=None, interp=imas.ids_defs.PREVIOUS_INTERP, verbose=False):

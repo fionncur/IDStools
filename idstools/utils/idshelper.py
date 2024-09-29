@@ -3,25 +3,26 @@ This module
 
 """
 
+import difflib
 import inspect
 import logging
+import re
+import sys
 import time
 import types
-import sys
+
 import imaspy as imas
 import numpy as np
 import pandas as pd
+import rich
+from imaspy.ids_base import IDSBase
+from imaspy.ids_struct_array import IDSStructArray
+from imaspy.ids_structure import IDSStructure
+from imaspy.ids_toplevel import IDSToplevel
 from packaging import version
 from rich.progress import track
-import difflib
-import rich
-from imaspy.ids_toplevel import IDSToplevel
-from imaspy.ids_struct_array import IDSStructArray
-from imaspy.ids_base import IDSBase
-from imaspy.ids_structure import IDSStructure
 from rich.table import Table
 from rich.text import Text
-import re
 
 logger = logging.getLogger("module")
 ARRAY_EQUAL_KWARGS = "equal_nan=True" if version.parse(np.__version__) > version.parse("1.19") else ""

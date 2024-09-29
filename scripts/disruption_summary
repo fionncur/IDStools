@@ -9,10 +9,10 @@ import sys
 from operator import itemgetter
 from stat import *
 
+import imas
 from yaml import load as yamlload
 
 from idstools.database import DBMaster
-import imas
 
 try:
     from yaml import CLoader as yamlLoader
