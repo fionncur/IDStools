@@ -222,10 +222,10 @@ This cheat sheet provides quick reference of commonly used commands in IDStools.
 |                               |                                                                                                                                     |
 |                               | .. code-block:: bash                                                                                                                |
 |                               |                                                                                                                                     |
-|                               |    $ idsdiff summary --uri "imas:mdsplus?user=public;pulse=122525;run=1;database=ITER;version=3"                                    |
+|                               |    $ idsdiff --ids summary --uri "imas:mdsplus?user=public;pulse=122525;run=1;database=ITER;version=3"                              |
 |                               |    "imas:mdsplus?user=public;pulse=122525;run=2;database=ITER;version=3"                                                            |
 |                               |                                                                                                                                     |
-|                               |    $ idsdiff summary --uri "imas:mdsplus?user=public;pulse=130011;run=6;database=ITER;version=3"                                    |
+|                               |    $ idsdiff --ids summary --uri "imas:mdsplus?user=public;pulse=130011;run=6;database=ITER;version=3"                              |
 |                               |    "imas:mdsplus?user=public;pulse=130012;run=4;database=ITER;version=3"                                                            |
 +-------------------------------+-------------------------------------------------------------------------------------------------------------------------------------+
 | *idslist*                     | Shows list of all idses along with count of time slices.                                                                            |
