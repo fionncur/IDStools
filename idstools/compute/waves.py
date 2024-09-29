@@ -27,7 +27,7 @@ class WavesCompute:
     def get_b_resonance(
         self,
         coherent_wave_index: int,
-        time_slice:int,
+        time_slice: int,
         harmonic_frequencies: list = None,
     ):
         """
@@ -36,9 +36,9 @@ class WavesCompute:
 
         Args:
             coherent_wave_index (int): The index of the coherent wave for which we want to calculate the
-                B resonance. 
+                B resonance.
             time_slice (int): The index of the time step for which the bResonance is being calculated.
-                
+
             harmonic_frequencies (list): A list of integers representing the harmonic frequencies for
                 which the B-resonance values are to be calculated. If this parameter is not provided, the
                 function uses the default values of [1, 2, 3, 4].
@@ -103,7 +103,7 @@ class WavesCompute:
         n_beam = len(self.ids.coherent_wave)
         return np.linspace(0, n_beam - 1, n_beam)
 
-    def get_omega_ec(self, coherent_wave_index: int, time_slice:int) -> float:
+    def get_omega_ec(self, coherent_wave_index: int, time_slice: int) -> float:
         """
         This function returns the angular frequency of a coherent wave at a specific time index.
 
@@ -139,7 +139,7 @@ class WavesCompute:
         return 2 * np.pi * self.ids.coherent_wave[coherent_wave_index].global_quantities[time_slice].frequency
 
     @functools.lru_cache(maxsize=128)
-    def get_beams(self, time_slice:int):
+    def get_beams(self, time_slice: int):
         """
         This function returns a dictionary of active beams with their respective properties.
 
@@ -187,19 +187,13 @@ class WavesCompute:
             # Check if any beam has power
             beam_dict["active"] = False
             for ray_index in range(beam_dict["total_beams"]):
-                if (
-                    self.ids.coherent_wave[beam_index]
-                    .beam_tracing[time_slice]
-                    .beam[ray_index]
-                    .power_initial
-                    > 0
-                ):
+                if self.ids.coherent_wave[beam_index].beam_tracing[time_slice].beam[ray_index].power_initial > 0:
                     beam_dict["active"] = True
             beams[beam_index] = beam_dict
 
         return beams
 
-    def get_beam_tracing(self, time_slice:int):
+    def get_beam_tracing(self, time_slice: int):
         """
         This function returns a dictionary containing information about the beam tracing of a coherent wave.
 
@@ -238,12 +232,7 @@ class WavesCompute:
         beam_data_length = max(
             max(
                 [
-                    len(
-                        self.ids.coherent_wave[beam_index]
-                        .beam_tracing[time_slice]
-                        .beam[ray_index]
-                        .position.r
-                    )
+                    len(self.ids.coherent_wave[beam_index].beam_tracing[time_slice].beam[ray_index].position.r)
                     for ray_index in range(max_total_beams)
                 ]
                 for beam_index in range(total_waves)
@@ -295,10 +284,7 @@ class WavesCompute:
                         y_ray[beam_index, iray, :] = r_ray[beam_index, iray, :] * np.sin(phi_ray[beam_index, iray, :])
                         len_ray[beam_index, iray] = len(wr)
                         npath = len(
-                            self.ids.coherent_wave[beam_index]
-                            .beam_tracing[time_slice]
-                            .beam[iray]
-                            .electrons.power
+                            self.ids.coherent_wave[beam_index].beam_tracing[time_slice].beam[iray].electrons.power
                         )
                         beam_electrons_length_for_each_wave[beam_index, iray] = npath
                         if len(ray.electrons.power) > 0:
@@ -329,7 +315,7 @@ class WavesCompute:
 
         return beam_tracing
 
-    def get_ec_launchers_info(self, time_slice:int, usepsi=False, verbose=False):
+    def get_ec_launchers_info(self, time_slice: int, usepsi=False, verbose=False):
         """
         The function `get_ec_launchers_info` retrieves information about electron cyclotron launchers,
         including power, current, and profiles, at a specified time index.
@@ -420,7 +406,9 @@ class WavesCompute:
                     single_injected_power[iwave] = 0.0
                     if len(self.ids.coherent_wave[iwave].beam_tracing) > 0:
                         for ibeam in range(len(self.ids.coherent_wave[iwave].beam_tracing[time_slice].beam)):
-                            if self.ids.coherent_wave[iwave].beam_tracing[time_slice].beam[ibeam].power_initial.has_value and (
+                            if self.ids.coherent_wave[iwave].beam_tracing[time_slice].beam[
+                                ibeam
+                            ].power_initial.has_value and (
                                 self.ids.coherent_wave[iwave].beam_tracing[time_slice].beam[ibeam].power_initial > 0
                             ):
                                 total_injected_power = (
@@ -480,7 +468,7 @@ class WavesCompute:
         ec_launcher_info["single_current_waveform"] = single_current_waveform
         return ec_launcher_info
 
-    def get_radial_grid_info(self, time_slice:int, usepsi=False):
+    def get_radial_grid_info(self, time_slice: int, usepsi=False):
         """
         The function `get_radial_grid_info` retrieves radial grid information for coherent waves, with an option
         to use psi as a radial coordinate.

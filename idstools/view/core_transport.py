@@ -27,16 +27,16 @@ class CoreTransportView:
         fluxes_dict = self.core_transport_compute.get_fluxes(time_slice)
         ion_table = Table(show_header=False)
         for _, flux_dict in fluxes_dict.items():
-            if flux_dict["particles_flux"] is None or np.isnan(flux_dict["particles_flux"]) :
+            if flux_dict["particles_flux"] is None or np.isnan(flux_dict["particles_flux"]):
                 eparticles_flux = "--"
             else:
                 eparticles_flux = f"{flux_dict['particles_flux'] : >.6e}"
             if flux_dict["energy_flux"] is None or np.isnan(flux_dict["energy_flux"]):
                 eenergy_flux = "--"
-            
+
             else:
                 eenergy_flux = f"{flux_dict['energy_flux']: >.6e}"
-            
+
             ion_table.add_row(
                 f'{flux_dict["name"]} ({flux_dict["flux_multiplier"] if flux_dict["flux_multiplier"].has_value else "--"})',
                 "",
@@ -70,7 +70,7 @@ class CoreTransportView:
                     Align.right(str(ion_dict["a"])),
                     Align.right(str(ion_dict["z_n"])),
                     Align.right(str(ion_dict["z_ion"])),
-                    Align.right(particles_flux), 
+                    Align.right(particles_flux),
                     Align.right(energy_flux),
                     style="bold green",
                 )

@@ -39,6 +39,7 @@ def available_in_dbentry(db, time_mode=None):
                 presentidslist.append((idstype, occ))
     return presentidslist
 
+
 def load_scenario(user, database, version, backend):
     """
     Return a list of pulses as tuple (shot,run) by using idstools.db_helper

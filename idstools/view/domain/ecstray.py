@@ -91,9 +91,7 @@ class EcStrayView:
         profile2d_index = resonance_data["profile2d_index"]
         resonance_layer = resonance_data["resonance_layer"]
 
-        grid_data = self.equilibrium_compute.get2d_cartesian_grid(
-            time_slice, profile2d_index
-        )
+        grid_data = self.equilibrium_compute.get2d_cartesian_grid(time_slice, profile2d_index)
         r2d = grid_data["r2d"]
         z2d = grid_data["z2d"]
         psi2d = grid_data["psi2d"]
@@ -170,9 +168,7 @@ class EcStrayView:
             :func:`idstools.domain.ecstray.EcStrayCompute.getCutoffLayer`
         """
         # Calculate density cutoff layer position
-        cutoff_layer = self.ecstray_object.get_cutoff_layer(
-            time_slice
-        )
+        cutoff_layer = self.ecstray_object.get_cutoff_layer(time_slice)
 
         # TODO Work on this function to keep call back function and events and not to pass init=1
         if init == 1:

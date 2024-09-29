@@ -283,7 +283,7 @@ class CoreProfilesView:
                 fontsize=5,
             )
 
-    def plot_electron_pressure_properties(self, ax, time_slice,**kwargs):
+    def plot_electron_pressure_properties(self, ax, time_slice, **kwargs):
         FACTOR = 1.0e-6
         rho_tor_norm = self.core_profiles_compute.get_rho_tor_norm(time_slice)  # Rho profile (mandatory)
         nrho = len(rho_tor_norm)
@@ -391,7 +391,7 @@ class CoreProfilesView:
             label.set_linewidth(1.5)
         ax.set_title("Total Pressure Properties", loc="left")
 
-    def view_q_profile_and_magnetic_shear_profile(self, ax,time_slice, **kwargs):
+    def view_q_profile_and_magnetic_shear_profile(self, ax, time_slice, **kwargs):
         """
         The function `view_q_profile_and_magnetic_shear_profile` plots the q-profile and magnetic shear profile
         using the given axis.
@@ -444,7 +444,7 @@ class CoreProfilesView:
                 f"core_profiles.profiles_1d[{time_slice}].grid.rho_tor/core_profiles.profiles_1d[{time_slice}].grid.rho_tor_norm) is empty",
             )
             return
-        radial=self.ids.profiles_1d[time_slice].e_field.radial.value
+        radial = self.ids.profiles_1d[time_slice].e_field.radial.value
         if len(radial) < 1:
             logger.critical(f"core_profiles.profiles_1d[{time_slice}].e_field.radial could not be read")
             radial = np.asarray([np.nan] * nrho)
@@ -476,7 +476,7 @@ class CoreProfilesView:
             label.set_linewidth(1.5)
         ax.set_title("Electric field profile", loc="left")
 
-    def plot_toroidal_velocity_profile(self, ax,time_slice, **kwargs):
+    def plot_toroidal_velocity_profile(self, ax, time_slice, **kwargs):
         FACTOR = 1.0e-3
         rho_tor_norm = self.core_profiles_compute.get_rho_tor_norm(time_slice)  # Rho profile (mandatory)
         nrho = len(rho_tor_norm)
@@ -489,10 +489,12 @@ class CoreProfilesView:
         nions = len(self.ids.profiles_1d[time_slice].ion)
         species = self.core_profiles_compute.get_species(time_slice)
         for ion_index in range(nions):
-            toroidal=self.ids.profiles_1d[time_slice].ion[ion_index].velocity.toroidal.value
+            toroidal = self.ids.profiles_1d[time_slice].ion[ion_index].velocity.toroidal.value
             if len(toroidal) < 1:
-                logger.critical(f"core_profiles.profiles_1d[{time_slice}].ion[{ion_index}].velocity.toroidal could not be read")
-                toroidal= np.asarray([np.nan] * nrho)
+                logger.critical(
+                    f"core_profiles.profiles_1d[{time_slice}].ion[{ion_index}].velocity.toroidal could not be read"
+                )
+                toroidal = np.asarray([np.nan] * nrho)
             ax.plot(
                 rho_tor_norm,
                 toroidal * FACTOR,
@@ -542,9 +544,11 @@ class CoreProfilesView:
         nions = len(self.ids.profiles_1d[time_slice].ion)
         species = self.core_profiles_compute.get_species(time_slice)
         for ion_index in range(nions):
-            poloidal=self.ids.profiles_1d[time_slice].ion[ion_index].velocity.poloidal.value
+            poloidal = self.ids.profiles_1d[time_slice].ion[ion_index].velocity.poloidal.value
             if len(poloidal) < 1:
-                logger.critical(f"core_profiles.profiles_1d[{time_slice}].ion[{ion_index}].velocity.poloidal could not be read")
+                logger.critical(
+                    f"core_profiles.profiles_1d[{time_slice}].ion[{ion_index}].velocity.poloidal could not be read"
+                )
                 poloidal = np.asarray([np.nan] * nrho)
             ax.plot(
                 rho_tor_norm,
@@ -593,10 +597,12 @@ class CoreProfilesView:
         nions = len(self.ids.profiles_1d[time_slice].ion)
         species = self.core_profiles_compute.get_species(time_slice)
         for ion_index in range(nions):
-            diamagnetic=self.ids.profiles_1d[time_slice].ion[ion_index].velocity.diamagnetic.value
+            diamagnetic = self.ids.profiles_1d[time_slice].ion[ion_index].velocity.diamagnetic.value
 
             if len(diamagnetic) < 1:
-                logger.critical(f"core_profiles.profiles_1d[{time_slice}].ion[{ion_index}].velocity.diamagnetic could not be read")
+                logger.critical(
+                    f"core_profiles.profiles_1d[{time_slice}].ion[{ion_index}].velocity.diamagnetic could not be read"
+                )
                 diamagnetic = np.asarray([np.nan] * nrho)
             ax.plot(
                 rho_tor_norm,

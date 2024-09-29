@@ -11,7 +11,8 @@ import numpy as np
 from imas import imasdef
 
 logger = logging.getLogger("module")
-EMPTY_DOUBLE=-9e40
+EMPTY_DOUBLE = -9e40
+
 
 class SummaryCompute:
     """This class provides compute functions for summary ids"""
@@ -39,43 +40,43 @@ class SummaryCompute:
         """
         stime = len(self.ids.time)
         # Ip waveform
-        ip=self.ids.global_quantities.ip.value
+        ip = self.ids.global_quantities.ip.value
         if len(ip) < 1:
             logger.critical("summary.global_quantities.ip.value could not be read")
             ip = np.asarray([np.nan] * stime)
 
         # Current_non_inductive waveform
-        current_non_inductive=self.ids.global_quantities.current_non_inductive.value
+        current_non_inductive = self.ids.global_quantities.current_non_inductive.value
         if len(current_non_inductive) < 1:
             logger.critical("summary.global_quantities.current_non_inductive.value could not be read")
             current_non_inductive = np.asarray([np.nan] * stime)
 
         # Current_bootstrap waveform
-        current_bootstrap=self.ids.global_quantities.current_bootstrap.value
+        current_bootstrap = self.ids.global_quantities.current_bootstrap.value
         if len(current_bootstrap) < 1:
             logger.critical("summary.global_quantities.current_bootstrap.value could not be read")
             current_bootstrap = np.asarray([np.nan] * stime)
 
         # V_loop waveform
-        v_loop=self.ids.global_quantities.v_loop.value
+        v_loop = self.ids.global_quantities.v_loop.value
         if len(v_loop) < 1:
             logger.critical("summary.global_quantities.v_loop.value could not be read")
             v_loop = np.asarray([np.nan] * stime)
 
         # Beta_tor_norm waveform
-        beta_tor_norm=self.ids.global_quantities.beta_tor_norm.value
+        beta_tor_norm = self.ids.global_quantities.beta_tor_norm.value
         if len(beta_tor_norm) < 1:
             logger.critical("summary.global_quantities.beta_tor_norm.value could not be read")
             beta_tor_norm = np.asarray([np.nan] * stime)
 
         # Beta_pol waveform
-        beta_pol=self.ids.global_quantities.beta_pol.value
+        beta_pol = self.ids.global_quantities.beta_pol.value
         if len(beta_pol) < 1:
             logger.critical("summary.global_quantities.beta_pol.value could not be read")
             beta_pol = np.asarray([np.nan] * stime)
 
         # Energy_diamagnetic waveform
-        energy_diamagnetic=self.ids.global_quantities.energy_diamagnetic.value
+        energy_diamagnetic = self.ids.global_quantities.energy_diamagnetic.value
         if len(energy_diamagnetic) < 1:
             logger.critical("summary.global_quantities.energy_diamagnetic.value could not be read")
             energy_diamagnetic = np.asarray([np.nan] * stime)
@@ -87,31 +88,31 @@ class SummaryCompute:
         # could not be read and assigns an array of NaN values with the same length as the time vector
         # to the `energy_mhd` variable. This ensures that the `energy_mhd` waveform data is handled
         # properly even in the case of missing or unreadable data.
-        energy_mhd=self.ids.global_quantities.energy_mhd.value
+        energy_mhd = self.ids.global_quantities.energy_mhd.value
         if len(energy_mhd) < 1:
             logger.critical("summary.global_quantities.energy_mhd.value could not be read")
             energy_mhd = np.asarray([np.nan] * stime)
 
         # Current_ohm waveform
-        current_ohm=self.ids.global_quantities.current_ohm.value
+        current_ohm = self.ids.global_quantities.current_ohm.value
         if len(current_ohm) < 1:
             logger.critical("summary.global_quantities.current_ohm.value could not be read")
             current_ohm = np.asarray([np.nan] * stime)
 
         # Energy_total waveform
-        energy_total=self.ids.global_quantities.energy_total.value
+        energy_total = self.ids.global_quantities.energy_total.value
         if len(energy_total) < 1:
             logger.critical("summary.global_quantities.energy_total.value could not be read")
             energy_total = np.asarray([np.nan] * stime)
 
         # Energy_thermal waveform
-        energy_thermal=self.ids.global_quantities.energy_thermal.value
+        energy_thermal = self.ids.global_quantities.energy_thermal.value
         if len(energy_thermal) < 1:
             logger.critical("summary.global_quantities.energy_thermal.value could not be read")
             energy_thermal = np.asarray([np.nan] * stime)
 
         # B0 waveform
-        b0=self.ids.global_quantities.b0.value
+        b0 = self.ids.global_quantities.b0.value
         if len(b0) < 1:
             logger.critical("summary.global_quantities.b0.value could not be read")
             b0 = np.asarray([np.nan] * stime)
@@ -129,7 +130,7 @@ class SummaryCompute:
             tau_energy = np.asarray([np.nan] * stime)
 
         # H-mode flag
-        h_mode=self.ids.global_quantities.h_mode.value
+        h_mode = self.ids.global_quantities.h_mode.value
         if len(h_mode) < 1:
             logger.critical("summary.global_quantities.h_mode.value could not be read")
             h_mode = np.asarray([np.nan] * stime)
@@ -254,7 +255,7 @@ class SummaryCompute:
             of time when HMode is present, and the maximum value of time when HMode is present, respectively.
         """
         stime = len(self.ids.time)
-        h_mode_value=self.ids.global_quantities.h_mode.value
+        h_mode_value = self.ids.global_quantities.h_mode.value
         if len(h_mode_value) < 1:
             logger.critical("summary.global_quantities.h_mode.value could not be read")
             h_mode_value = np.asarray([np.nan] * stime)

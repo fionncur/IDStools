@@ -58,7 +58,9 @@ class CoreTransportCompute:
                     if len(model.profiles_1d[time_slice].grid_flux.surface) == 0
                     else model.profiles_1d[time_slice].grid_flux.surface
                 )
-                flux_dict["particles_flux"] = (model.profiles_1d[time_slice].electrons.particles.flux * grid_flux_surface)[-1]
+                flux_dict["particles_flux"] = (
+                    model.profiles_1d[time_slice].electrons.particles.flux * grid_flux_surface
+                )[-1]
             else:
                 flux_dict["particles_flux"] = None
             if len(model.profiles_1d[time_slice].electrons.energy.flux) != 0:
@@ -73,16 +75,18 @@ class CoreTransportCompute:
                 flux_dict["energy_flux"] = None
             ions_dict = {}
             grid_flux_surface = (
-                np.nan if len(model.profiles_1d[time_slice].grid_flux.surface) == 0 else model.profiles_1d[time_slice].grid_flux.surface
+                np.nan
+                if len(model.profiles_1d[time_slice].grid_flux.surface) == 0
+                else model.profiles_1d[time_slice].grid_flux.surface
             )
             for ion_index, ion in enumerate(model.profiles_1d[time_slice].ion):
-                ion_name="--"
+                ion_name = "--"
                 if "label" in dir(ion):
                     if ion.label.has_value:
-                        ion_name=ion.label.value
+                        ion_name = ion.label.value
                 elif "name" in dir(ion):
                     if ion.name.has_value:
-                        ion_name=ion.name.value
+                        ion_name = ion.name.value
                 # print(ion.name)
                 ion_dict = {
                     "name": ion_name,

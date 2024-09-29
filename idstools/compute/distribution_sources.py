@@ -39,7 +39,9 @@ class DistributionSourcesCompute:
                 )
         except Exception as e:
             logger.debug(f"{e}")
-            logger.critical(f"distribution_sources.source[{source_index}].profiles_1d[{time_slice}].grid.rho_tor_norm) could not be read")
+            logger.critical(
+                f"distribution_sources.source[{source_index}].profiles_1d[{time_slice}].grid.rho_tor_norm) could not be read"
+            )
         return rho_tor_norm
 
     def get_volume(self, time_slice: int, source_index=0) -> Union[None, np.ndarray]:
@@ -61,7 +63,8 @@ class DistributionSourcesCompute:
         except Exception as e:
             logger.debug(f"{e}")
             logger.critical(
-                f"distribution_sources.source[{source_index}].profiles_1d[{time_slice}].grid.volume" "could not be read {e}"
+                f"distribution_sources.source[{source_index}].profiles_1d[{time_slice}].grid.volume"
+                "could not be read {e}"
             )
         return volume
 
@@ -76,14 +79,18 @@ class DistributionSourcesCompute:
         nrho = len(self.get_rho_tor_norm(time_slice))
         sources_dict = {}
         counter = 0
-        for isource,source in enumerate(self.ids.source):
-            mlabel1 = unicodedata.normalize("NFKD", source.process[process_index].type.description.value).encode("ascii", "ignore")
-            mlabel2 = unicodedata.normalize("NFKD", source.process[process_index].reactant_energy.description.value).encode(
+        for isource, source in enumerate(self.ids.source):
+            mlabel1 = unicodedata.normalize("NFKD", source.process[process_index].type.description.value).encode(
                 "ascii", "ignore"
             )
+            mlabel2 = unicodedata.normalize(
+                "NFKD", source.process[process_index].reactant_energy.description.value
+            ).encode("ascii", "ignore")
             particles = source.profiles_1d[time_slice].particles
             if len(source.profiles_1d[time_slice].particles) < 1:
-                logger.warning(f"distribution_sources.source[{isource}].profiles_1d[{time_slice}].particles could not be read")
+                logger.warning(
+                    f"distribution_sources.source[{isource}].profiles_1d[{time_slice}].particles could not be read"
+                )
                 particles = np.asarray([np.nan] * nrho)
 
             source_info = {

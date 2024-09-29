@@ -57,7 +57,9 @@ def available_in_dbentry(db, time_mode=None):
     for idstype in all_ids_types():
         for occ in db.list_all_occurrences(idstype):
             idsObj = db.get(idstype, occurrence=occ, lazy=True)
-            homogeneous_time=idsObj.ids_properties.homogeneous_time.value
-            if homogeneous_time != imaspy.ids_primitive.IDSInt0D and (time_mode is None or time_mode == homogeneous_time):
+            homogeneous_time = idsObj.ids_properties.homogeneous_time.value
+            if homogeneous_time != imaspy.ids_primitive.IDSInt0D and (
+                time_mode is None or time_mode == homogeneous_time
+            ):
                 presentidslist.append((idstype, occ))
     return presentidslist

@@ -22,7 +22,7 @@ class EdgeProfilesCompute:
         self.ids = ids
 
     @staticmethod
-    def get_plasma_composition_with_species_concentration(ids, time_slice) -> Union[dict , int]:
+    def get_plasma_composition_with_species_concentration(ids, time_slice) -> Union[dict, int]:
         """
         Function retrives composition and species concentration in below format
             - Spcies_label
@@ -349,7 +349,7 @@ class EdgeProfilesCompute:
         return sum(volume * electron_density)
 
     @functools.lru_cache(maxsize=128)
-    def get_volume(self, time_slice) -> Union[list , None]:
+    def get_volume(self, time_slice) -> Union[list, None]:
         """
         This function calculates the volume of a grid subset using either pre-calculated volume data or by
         manually calculating it from the nodes.
@@ -995,5 +995,7 @@ class EdgeProfilesCompute:
                 nrho = len(self.ids.profiles_1d[time_slice].grid.rho_tor)
         except Exception as e:
             logger.debug(f"{e}")
-            logger.warning(f"edge_profiles.profiles_1d[{time_slice}].grid.rho_tor_norm and rho_tor could not be read. {e}")
+            logger.warning(
+                f"edge_profiles.profiles_1d[{time_slice}].grid.rho_tor_norm and rho_tor could not be read. {e}"
+            )
         return nrho

@@ -47,7 +47,9 @@ class SpectrometerVisibleCompute:
             match = re.compile(channel_name_pattern).fullmatch(channel.name.value)
 
             if match is None:
-                logger.warning(f"Channel's name {channel.name.value} does not math pattern {channel_name_pattern.pattern}")
+                logger.warning(
+                    f"Channel's name {channel.name.value} does not math pattern {channel_name_pattern.pattern}"
+                )
                 continue
 
             diagnostic = match[1]

@@ -16,9 +16,9 @@ class MachineDescription:
     def __init__(self, summary_yaml_file: str = "") -> None:
         self.md_summary_yaml = {}
         if not summary_yaml_file:
-            publichome = os.getenv("IMAS_HOME", default="") 
-            
-            _md_summary_path = os.path.join(publichome , r"shared/imasdb/ITER_MD/3/md_summary.yaml")
+            publichome = os.getenv("IMAS_HOME", default="")
+
+            _md_summary_path = os.path.join(publichome, r"shared/imasdb/ITER_MD/3/md_summary.yaml")
 
         else:
             _md_summary_path = summary_yaml_file
@@ -29,7 +29,7 @@ class MachineDescription:
             except YAMLError as exc:
                 print(exc)
 
-    def get_latest_ids_data(self, ids_name: str, backend = "MDSPLUS", user = "public", database = "ITER_MD", version = 3):
+    def get_latest_ids_data(self, ids_name: str, backend="MDSPLUS", user="public", database="ITER_MD", version=3):
         md_ids_dict = self.get_md_summary(ids_name)
         ids_data = None
         config = None

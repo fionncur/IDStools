@@ -21,7 +21,7 @@ class EcStrayCompute:
         # self.coreProfilesCompute = coreProfilesIds
         self.waves_compute = WavesCompute(waves_ids)
 
-    def get_resonance_layer(self,coherent_wave_index, time_slice, n_harm=None):
+    def get_resonance_layer(self, coherent_wave_index, time_slice, n_harm=None):
         """This function calculates and returns a dictionary (Resonance Layer) containing r and z values
         corresponding to the resonance points based on the provided nHarm values, b_resonance, and b_total arrays.
 
@@ -56,7 +56,7 @@ class EcStrayCompute:
         """
         if n_harm is None:
             n_harm = [1, 2, 3, 4]
-        b_resonance = self.waves_compute.get_b_resonance(coherent_wave_index,time_slice, harmonic_frequencies=n_harm)
+        b_resonance = self.waves_compute.get_b_resonance(coherent_wave_index, time_slice, harmonic_frequencies=n_harm)
         profile2d_index, b_total = self.equilibrium_compute.get_b_total(time_slice)
         if profile2d_index != -99:
             r = self.equilibrium_compute.ids.time_slice[time_slice].profiles_2d[profile2d_index].grid.dim1
@@ -76,10 +76,7 @@ class EcStrayCompute:
 
         return {"profile2d_index": profile2d_index, "resonance_layer": resonance_layer}
 
-    def get_cutoff_layer(
-        self,
-        time_slice
-    ):
+    def get_cutoff_layer(self, time_slice):
         """The cutoff layer is a region in a plasma where certain frequencies or modes of wave propagation
         are prevented from propagating or transmitting due to the plasma's properties.
 

@@ -100,7 +100,7 @@ class CoreSourcesCompute:
         return sources_dict
 
     @functools.lru_cache(maxsize=128)
-    def get_rho_tor_norm(self, time_slice) -> Union[np.ndarray , None]:
+    def get_rho_tor_norm(self, time_slice) -> Union[np.ndarray, None]:
         """
         The function `get_rho_tor_norm` returns the value of `grid.rho_tor_norm` if it is not empty,
         otherwise it returns None.
@@ -127,7 +127,9 @@ class CoreSourcesCompute:
             logger.debug(f"{e}")
             return None
         if rho_tor_norm is not None and len(rho_tor_norm) == 0:
-            logger.critical(f"core_sources.source[isource].profiles_1d[{time_slice}].grid.rho_tor_norm and rho_tor are empty")
+            logger.critical(
+                f"core_sources.source[isource].profiles_1d[{time_slice}].grid.rho_tor_norm and rho_tor are empty"
+            )
             return None
         return rho_tor_norm
 
@@ -167,7 +169,7 @@ class CoreSourcesCompute:
         sources = self.get_valid_and_active_sources(time_slice)
         return any(source["active"] for _, source in sources.items())
 
-    def get_source_names(self,time_slice) -> Dict:
+    def get_source_names(self, time_slice) -> Dict:
         """
         This function retrieves the names of valid and active sources and returns them in uppercase.
 
@@ -214,7 +216,9 @@ class CoreSourcesCompute:
                     total_current_profile = (
                         total_current_profile + self.ids.source[source_index].profiles_1d[time_slice].j_parallel
                     )
-                    single_current_profile[source_index] = self.ids.source[source_index].profiles_1d[time_slice].j_parallel
+                    single_current_profile[source_index] = (
+                        self.ids.source[source_index].profiles_1d[time_slice].j_parallel
+                    )
                 else:
                     single_current_profile[source_index] = np.zeros(nrho)
         return {
@@ -253,23 +257,15 @@ class CoreSourcesCompute:
                 electrons_energy = self.ids.source[source_index].profiles_1d[time_slice].electrons.energy
                 if len(electrons_energy) < 1:
                     electrons_energy = np.zeros(nrho)
-                electrons_particles=self.ids.source[source_index].profiles_1d[time_slice].electrons.particles
+                electrons_particles = self.ids.source[source_index].profiles_1d[time_slice].electrons.particles
                 if len(electrons_particles) < 1:
                     electrons_particles = np.zeros(nrho)
 
-                total_electron_power_profile = (
-                    total_electron_power_profile + electrons_energy
-                )
-                total_electron_particles_profile = (
-                    total_electron_particles_profile + electrons_particles
-                )
+                total_electron_power_profile = total_electron_power_profile + electrons_energy
+                total_electron_particles_profile = total_electron_particles_profile + electrons_particles
 
-                single_electron_power_profile[source_index] = (
-                    electrons_energy
-                )
-                single_electron_particles_profile[source_index] = (
-                    electrons_particles
-                )
+                single_electron_power_profile[source_index] = electrons_energy
+                single_electron_particles_profile[source_index] = electrons_particles
 
         return {
             "total_electron_power_profile": total_electron_power_profile,
@@ -310,7 +306,7 @@ class CoreSourcesCompute:
                     ion_energy = ion.energy
                     if len(ion_energy) < 1:
                         ion_energy = [0] * nrho
-                    ion_particles  = ion.particles 
+                    ion_particles = ion.particles
                     if len(ion_particles) < 1:
                         ion_particles = [0] * nrho
 
@@ -328,9 +324,7 @@ class CoreSourcesCompute:
             "single_ion_particles_profile": single_ion_particles_profile,
         }
 
-    def get_single_and_total_electrons_ions_waveforms(
-        self,time_slice
-    ):
+    def get_single_and_total_electrons_ions_waveforms(self, time_slice):
         """
         This function calculates single and total waveforms for electrons and ions based on power and
         particle quantities.
@@ -366,8 +360,12 @@ class CoreSourcesCompute:
                 single_particles_waveform[source_index] = []
                 for time_index in range(time_length):
                     electrons_power = self.ids.source[source_index].global_quantities[time_index].electrons.power
-                    electrons_particles = self.ids.source[source_index].global_quantities[time_index].electrons.particles
-                    total_ion_particles = self.ids.source[source_index].global_quantities[time_index].total_ion_particles
+                    electrons_particles = (
+                        self.ids.source[source_index].global_quantities[time_index].electrons.particles
+                    )
+                    total_ion_particles = (
+                        self.ids.source[source_index].global_quantities[time_index].total_ion_particles
+                    )
                     total_ion_power = self.ids.source[source_index].global_quantities[time_index].total_ion_power
 
                     if electrons_power < 0:
@@ -380,19 +378,13 @@ class CoreSourcesCompute:
                         total_ion_power = 0.0
 
                     total_power_waveform[time_index] = (
-                        total_electron_power_waveform[time_index]
-                        + electrons_power
-                        + total_ion_power
+                        total_electron_power_waveform[time_index] + electrons_power + total_ion_power
                     )
                     total_particles_waveform[time_index] = (
                         total_electron_particles_waveform[time_index] + electrons_particles
                     ) + total_ion_particles
-                    single_power_waveform[source_index].append(
-                        electrons_power + total_ion_power
-                    )
-                    single_particles_waveform[source_index].append(
-                        electrons_particles + total_ion_particles
-                    )
+                    single_power_waveform[source_index].append(electrons_power + total_ion_power)
+                    single_particles_waveform[source_index].append(electrons_particles + total_ion_particles)
                 single_power_waveform[source_index] = np.array(single_power_waveform[source_index])
                 single_particles_waveform[source_index] = np.array(single_particles_waveform[source_index])
         return {
@@ -430,10 +422,12 @@ class CoreSourcesCompute:
                 single_electron_power_waveform[source_index] = []
                 single_electron_particles_waveform[source_index] = []
                 for time_index in range(time_length):
-                    electrons_power  = self.ids.source[source_index].global_quantities[time_index].electrons.power 
+                    electrons_power = self.ids.source[source_index].global_quantities[time_index].electrons.power
                     if electrons_power < 0:
                         electrons_power = 0.0
-                    electrons_particles  = self.ids.source[source_index].global_quantities[time_index].electrons.particles 
+                    electrons_particles = (
+                        self.ids.source[source_index].global_quantities[time_index].electrons.particles
+                    )
                     if electrons_particles < 0:
                         electrons_particles = 0.0
 
@@ -488,14 +482,14 @@ class CoreSourcesCompute:
                     total_ion_power = self.ids.source[source_index].global_quantities[time_index].total_ion_power
                     if total_ion_power < 0:
                         total_ion_power = 0.0
-                    total_ion_particles = self.ids.source[source_index].global_quantities[time_index].total_ion_particles
+                    total_ion_particles = (
+                        self.ids.source[source_index].global_quantities[time_index].total_ion_particles
+                    )
                     if total_ion_particles < 0:
                         total_ion_particles = 0.0
                     single_ion_power_waveform[source_index].append(total_ion_power)
                     single_ion_particles_waveform[source_index].append(total_ion_particles)
-                    total_ion_power_waveform[time_index] = (
-                        total_ion_power_waveform[time_index] + total_ion_power
-                    )
+                    total_ion_power_waveform[time_index] = total_ion_power_waveform[time_index] + total_ion_power
                     total_ion_particles_waveform[time_index] = (
                         total_ion_particles_waveform[time_index] + total_ion_particles
                     )
@@ -547,9 +541,7 @@ class CoreSourcesCompute:
                     if torque_tor < 0:
                         torque_tor = 0.0
 
-                    total_current_waveform[time_index] = (
-                        total_current_waveform[time_index] + current_parallel
-                    )
+                    total_current_waveform[time_index] = total_current_waveform[time_index] + current_parallel
                     total_torque_waveform[time_index] = total_torque_waveform[time_index] + torque_tor
                     single_current_waveform[source_index].append(current_parallel)
                     single_torque_waveform[source_index].append(torque_tor)

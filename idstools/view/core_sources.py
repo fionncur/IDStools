@@ -82,7 +82,9 @@ class CoreSourcesView:
         """
         if self.core_sources_compute.is_active_source_available(time_slice):
             rho_tor_norm = self.core_sources_compute.get_rho_tor_norm(time_slice)
-            single_and_total_electrons_profiles = self.core_sources_compute.get_single_and_total_electrons_profiles(time_slice)
+            single_and_total_electrons_profiles = self.core_sources_compute.get_single_and_total_electrons_profiles(
+                time_slice
+            )
             single_and_total_ion_profiles = self.core_sources_compute.get_single_and_total_ion_profiles(time_slice)
             source_names = self.core_sources_compute.get_source_names(time_slice)
             ax.set_title("Power Profiles [MW/M3]")
@@ -135,7 +137,9 @@ class CoreSourcesView:
         """
         if self.core_sources_compute.is_active_source_available(time_slice):
             rho_tor_norm = self.core_sources_compute.get_rho_tor_norm(time_slice)
-            single_and_total_electrons_profiles = self.core_sources_compute.get_single_and_total_electrons_profiles(time_slice)
+            single_and_total_electrons_profiles = self.core_sources_compute.get_single_and_total_electrons_profiles(
+                time_slice
+            )
             single_and_total_ion_profiles = self.core_sources_compute.get_single_and_total_ion_profiles(time_slice)
             source_names = self.core_sources_compute.get_source_names(time_slice)
             ax.set_title("PARTICLES PROFILES [/M3/S]")
@@ -177,7 +181,7 @@ class CoreSourcesView:
             logger.warning("viewParticlesProfiles:No active sources available")
         return -1
 
-    def view_current_profiles(self, ax, time_slice,*args, **kwargs):
+    def view_current_profiles(self, ax, time_slice, *args, **kwargs):
         """
         The function `view_current_profiles` plots current profiles.
 
@@ -240,7 +244,9 @@ class CoreSourcesView:
                 single_and_total_electrons_waveforms = (
                     self.core_sources_compute.get_single_and_total_electrons_waveforms(time_slice)
                 )
-                single_and_total_ions_waveforms = self.core_sources_compute.get_single_and_total_ions_waveforms(time_slice)
+                single_and_total_ions_waveforms = self.core_sources_compute.get_single_and_total_ions_waveforms(
+                    time_slice
+                )
                 source_names = self.core_sources_compute.get_source_names(time_slice)
                 ax.set_title("POWER AND PARTICLE WAVEFORMS")
                 ax.plot(
@@ -312,7 +318,9 @@ class CoreSourcesView:
                     self.core_sources_compute.get_single_and_total_electrons_waveforms(time_slice)
                 )
 
-                single_and_total_ions_waveforms = self.core_sources_compute.get_single_and_total_ions_waveforms(time_slice)
+                single_and_total_ions_waveforms = self.core_sources_compute.get_single_and_total_ions_waveforms(
+                    time_slice
+                )
 
                 source_names = self.core_sources_compute.get_source_names(time_slice)
                 ax.set_title("PARTICLES WAVEFORM")
@@ -363,7 +371,7 @@ class CoreSourcesView:
             logger.warning("viewParticlesWaveform:No active sources available")
         return -1
 
-    def view_current_waveform(self, ax, time_slice,*args, **kwargs):
+    def view_current_waveform(self, ax, time_slice, *args, **kwargs):
         """
         The function `view_current_waveform` plots the current waveform for different sources and displays it.
 
@@ -377,7 +385,9 @@ class CoreSourcesView:
                 logger.warning("Only one time slice --> Waveforms not displayed")
             else:
                 time_array = self.ids.time
-                single_and_total_current_torque = self.core_sources_compute.get_single_and_total_current_torque(time_slice)
+                single_and_total_current_torque = self.core_sources_compute.get_single_and_total_current_torque(
+                    time_slice
+                )
                 source_names = self.core_sources_compute.get_source_names(time_slice)
                 ax.set_title("CURRENT WAVEFORM")
                 ax.plot(
@@ -408,7 +418,7 @@ class CoreSourcesView:
             logger.warning("viewCurrentWaveform:No active sources available")
         return -1
 
-    def view_torque_waveform(self, ax,time_slice, *args, **kwargs):
+    def view_torque_waveform(self, ax, time_slice, *args, **kwargs):
         """
         The function `view_torque_waveform` plots torque waveforms for different sources over time.
 
@@ -423,7 +433,9 @@ class CoreSourcesView:
                 logger.warning("Only one time slice --> Waveforms not displayed")
             else:
                 time_array = self.ids.time
-                single_and_total_current_torque = self.core_sources_compute.get_single_and_total_current_torque(time_slice)
+                single_and_total_current_torque = self.core_sources_compute.get_single_and_total_current_torque(
+                    time_slice
+                )
                 source_names = self.core_sources_compute.get_source_names(time_slice)
                 # TORQUE WAVEFORM
                 ax.set_title("TORQUE WAVEFORM")

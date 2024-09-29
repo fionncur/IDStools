@@ -18,7 +18,9 @@ class DistributionSourcesView(BasePlot):
         rho_tor_norm = self.distribution_sources_compute.get_rho_tor_norm(time_slice, source_index)
         nrho = len(rho_tor_norm)
         if rho_tor_norm is not None and nrho == 0:
-            logger.critical(f"distribution_sources.source[{source_index}].profiles_1d[{time_slice}].grid.rho_tor_norm) is empty")
+            logger.critical(
+                f"distribution_sources.source[{source_index}].profiles_1d[{time_slice}].grid.rho_tor_norm) is empty"
+            )
             return
 
         sources = self.distribution_sources_compute.get_source_info(time_slice)

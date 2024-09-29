@@ -29,7 +29,7 @@ class CoreProfilesCompute:
         Function retrives composition and species concentration in below format
         """
         try:
-            test=ids.profiles_1d[time_slice]
+            test = ids.profiles_1d[time_slice]
 
         except Exception as e:
             logger.debug(f"{e}")
@@ -50,7 +50,9 @@ class CoreProfilesCompute:
         nspec_over_nmaj = core_profile_compute.get_nspec_over_nmaj(time_slice)
         species = core_profile_compute.get_species(time_slice)
         labels = core_profile_compute.get_labels(time_slice)
-        core_profile_compute.combine_species_when_appear_twice(species, nspec_over_ntot, nspec_over_ne, nspec_over_nmaj, time_slice)
+        core_profile_compute.combine_species_when_appear_twice(
+            species, nspec_over_ntot, nspec_over_ne, nspec_over_nmaj, time_slice
+        )
         a = core_profile_compute.get_a(time_slice)
         z = core_profile_compute.get_z(time_slice)
         states_data = core_profile_compute.get_states_data(time_slice)
@@ -195,7 +197,9 @@ class CoreProfilesCompute:
         nspecies = len(self.ids.profiles_1d[time_slice].ion)
         return [self.ids.profiles_1d[time_slice].ion[species_index].state for species_index in range(nspecies)]
 
-    def get_state_density(self, time_slice: int, species_index: int = 0, state_index: int = 0) -> Union[np.ndarray , None]:
+    def get_state_density(
+        self, time_slice: int, species_index: int = 0, state_index: int = 0
+    ) -> Union[np.ndarray, None]:
         """
         This function `get_state_density` returns the density of a specified state of a
         specified species at a specified time slice, or the thermal density if the former is not available.
@@ -613,7 +617,7 @@ class CoreProfilesCompute:
                 nspec_over_nmaj[ispecies] = nspec_over_nmaj[ispecies] + nspec_over_nmaj[jspecies]
                 nspec_over_nmaj[jspecies] = 0
 
-    def get_rho_tor_norm(self, time_slice: int) -> Union[np.ndarray , None]:
+    def get_rho_tor_norm(self, time_slice: int) -> Union[np.ndarray, None]:
         """
         This function `get_rho_tor_norm` returns a list of normalized toroidal rho values from a given
         time slice of a profiles_1d object.
@@ -651,7 +655,7 @@ class CoreProfilesCompute:
             logger.error(f"core_profiles.profiles_1d[{time_slice}].grid.rho_tor_norm or rho_tor is not available")
         return None
 
-    def get_psi(self, time_slice: int) -> Union[list , None]:
+    def get_psi(self, time_slice: int) -> Union[list, None]:
         """
         This function `get_psi` returns the poloidal magnetic flux (psi) at a given time slice.
 
@@ -937,7 +941,9 @@ class CoreProfilesCompute:
             logger.critical(f"  and core_profiles.profiles_1d[{time_slice}].q")
             logger.critical("  have different dimensions:")
             logger.critical(f"- len(core_profiles.profiles_1d[{time_slice}].grid.rho_tor_norm))= {nrho}")
-            logger.critical(f"- len(core_profiles.profiles_1d[{time_slice}].q = {len(self.ids.profiles_1d[time_slice].q)}")
+            logger.critical(
+                f"- len(core_profiles.profiles_1d[{time_slice}].q = {len(self.ids.profiles_1d[time_slice].q)}"
+            )
             logger.critical("----> Aborted.")
             logger.critical("--------------------------------------------------------------")
             return None
