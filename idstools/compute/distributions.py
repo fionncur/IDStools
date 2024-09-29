@@ -76,7 +76,8 @@ class DistributionsCompute:
                     return None
                 if distributions_data["nrho"] == 0:
                     logger.warning(
-                        f"distributions.distribution[{idistrib}].profiles_1d[{time_slice}].grid.rho_tor_norm and rho_tor are empty"
+                        f"distributions.distribution[{idistrib}].profiles_1d[{time_slice}].grid.rho_tor_norm"
+                        "and rho_tor are empty"
                     )
                     return None
 

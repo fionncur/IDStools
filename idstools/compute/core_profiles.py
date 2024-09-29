@@ -29,7 +29,7 @@ class CoreProfilesCompute:
         Function retrives composition and species concentration in below format
         """
         try:
-            test = ids.profiles_1d[time_slice]
+            _ = ids.profiles_1d[time_slice]
 
         except Exception as e:
             logger.debug(f"{e}")

@@ -7,7 +7,6 @@ import difflib
 import inspect
 import logging
 import re
-import sys
 import time
 import types
 
@@ -369,7 +368,7 @@ def resample_indices(dbin: str, dbout: str, idsname: str, start: int = 0, stop: 
     idsobj = None
     try:
         idsobj = dbin.get(idsname, lazy=True)
-    except:
+    except Exception as _:  # noqa: F841
         pass
     if idsobj:
         times = idsobj.time
@@ -407,7 +406,7 @@ def resample_times(
     idsobj = None
     try:
         idsobj = dbin.get(idsname, lazy=True)
-    except:
+    except Exception as _:  # noqa: F841
         pass
     if idsobj:
         times = idsobj.time
@@ -694,7 +693,7 @@ def get_quantities_from_pulses(idspath: str, pulses: tuple, list_count: int = 0,
         connection.open()
         valpath = valpath.replace("(", "[").replace(")", "]").replace("/", ".")
         try:
-            ids = connection.get(idsname, lazy=True)
+            ids = connection.get(idsname, lazy=True)  # noqa: F841
             node = eval("ids." + valpath)
             if node.has_value:
                 values.append(node)

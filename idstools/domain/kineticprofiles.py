@@ -248,7 +248,7 @@ class KineticProfilesCompute:
             )
             # Read edge_profile data for this time slice
             try:
-                test = self.edge_profiles.profiles_1d[self.time_index_edge_profiles]
+                _ = self.edge_profiles.profiles_1d[self.time_index_edge_profiles]
                 # teme = timeValueEdgeProfiles
             except Exception as e:
                 logger.debug(f"{e}")
@@ -260,13 +260,13 @@ class KineticProfilesCompute:
                         or not self.is_core_profiles_present
                     ):
                         try:
-                            test = self.edge_profiles.grid_ggd[self.time_index_edge_profiles]
+                            _ = self.edge_profiles.grid_ggd[self.time_index_edge_profiles]
                         except Exception as e:
                             logger.debug(f"{e}")
                             self.is_edge_profiles_present = False
                             logger.warning("No grid_ggd information found in edge_profiles IDS.")
                         try:
-                            test = self.edge_profiles.ggd[self.time_index_edge_profiles]
+                            _ = self.edge_profiles.ggd[self.time_index_edge_profiles]
                         except Exception as e:
                             logger.debug(f"{e}")
                             self.is_edge_profiles_present = False
@@ -282,13 +282,13 @@ class KineticProfilesCompute:
                         self.is_edge_profiles_present = False
                     else:
                         try:
-                            test = self.edge_profiles.grid_ggd[self.time_index_edge_profiles]
+                            _ = self.edge_profiles.grid_ggd[self.time_index_edge_profiles]
                         except Exception as e:
                             logger.debug(f"{e}")
                             self.is_edge_profiles_present = False
                             logger.warning("No grid_ggd information found in edge_profiles IDS.")
                         try:
-                            test = self.edge_profiles.ggd[self.time_index_edge_profiles]
+                            _ = self.edge_profiles.ggd[self.time_index_edge_profiles]
                         except Exception as e:
                             logger.debug(f"{e}")
                             self.is_edge_profiles_present = False
@@ -765,7 +765,8 @@ class KineticProfilesCompute:
             if len(self.core_profiles.profiles_1d[self.time_index_core_profiles].zeff) != self.nrho:
                 logger.warning("core_profiles.profiles_1d[:].zeff could not be read.")
                 logger.warning(
-                    f"Size mismatch: rho_tor_norm = {self.nrho}, zeff = {len(self.core_profiles.profiles_1d[self.time_index_core_profiles].zeff)}"
+                    f"Size mismatch: rho_tor_norm = {self.nrho}, "
+                    f"zeff = {len(self.core_profiles.profiles_1d[self.time_index_core_profiles].zeff)}"
                 )
                 self.core_profiles.profiles_1d[self.time_index_core_profiles].zeff = np.asarray([np.NaN] * self.nrho)
             for i in range(self.nrho):
@@ -934,14 +935,11 @@ class KineticProfilesCompute:
         if ti_flag == 0:
             for ispecies in range(self.nspecies_core):
                 if self.is_core_profiles_present:
-                    if (
-                        len(self.core_profiles.profiles_1d[self.time_index_core_profiles].ion[ispecies].temperature)
-                        != self.nrho
-                    ):
+                    temp = self.core_profiles.profiles_1d[self.time_index_core_profiles].ion[ispecies].temperature
+                    if len(temp) != self.nrho:
                         logger.warning(f"core_profiles.profiles_1d[:].ion[{ispecies}].temperature could not be read.")
                         logger.warning(
-                            f"Size mismatch: rho_tor_norm = {self.nrho}, ion[{ispecies}].temperature = "
-                            f"{len(self.core_profiles.profiles_1d[self.time_index_core_profiles].ion[ispecies].temperature)}"
+                            f"Size mismatch: rho_tor_norm = {self.nrho}, ion[{ispecies}].temperature = " f"{len(temp)}"
                         )
                         self.core_profiles.profiles_1d[self.time_index_core_profiles].ion[ispecies].temperature = (
                             np.asarray([np.NaN] * self.nrho)
@@ -1190,14 +1188,12 @@ class KineticProfilesCompute:
         for ispecies in range(self.nspecies_core):
             ion_vtor[ispecies] = [0] * (self.nrho + self.erho)
             if self.is_core_profiles_present:
-                if (
-                    len(self.core_profiles.profiles_1d[self.time_index_core_profiles].ion[ispecies].velocity.toroidal)
-                    != self.nrho
-                ):
+                vtoroid = self.core_profiles.profiles_1d[self.time_index_core_profiles].ion[ispecies].velocity.toroidal
+                if len(vtoroid) != self.nrho:
                     logger.warning(f"core_profiles.profiles_1d[:].ion[{ispecies}].velocity.toroidal could not be read.")
                     logger.warning(
                         f"Size mismatch: rho_tor_norm = {self.nrho}, ion[{ispecies}].velocity.toroidal = "
-                        f"{len(self.core_profiles.profiles_1d[self.time_index_core_profiles].ion[ispecies].velocity.toroidal)}"
+                        f"{len(vtoroid)}"
                     )
                     self.core_profiles.profiles_1d[self.time_index_core_profiles].ion[ispecies].velocity.toroidal = (
                         np.asarray([np.NaN] * self.nrho)
@@ -1210,14 +1206,11 @@ class KineticProfilesCompute:
                             .ion[ispecies]
                             .velocity.toroidal[i]
                         )
-                if (
-                    len(self.core_profiles.profiles_1d[self.time_index_core_profiles].ion[ispecies].velocity_tor)
-                    != self.nrho
-                ):
+                vtor = self.core_profiles.profiles_1d[self.time_index_core_profiles].ion[ispecies].velocity_tor
+                if len(vtor) != self.nrho:
                     logger.warning(f"core_profiles.profiles_1d[:].ion[{ispecies}].velocity_tor could not be read.")
                     logger.warning(
-                        f"Size mismatch: rho_tor_norm = {self.nrho}, ion[{ispecies}].velocity_tor = "
-                        f"{len(self.core_profiles.profiles_1d[self.time_index_core_profiles].ion[ispecies].velocity_tor)}"
+                        f"Size mismatch: rho_tor_norm = {self.nrho}, ion[{ispecies}].velocity_tor = " f"{len(vtor)}"
                     )
                     self.core_profiles.profiles_1d[self.time_index_core_profiles].ion[ispecies].velocity_tor = (
                         np.asarray([np.NaN] * self.nrho)
@@ -1453,14 +1446,14 @@ class KineticProfilesCompute:
         for ispecies in range(self.nspecies_core):
             ion_vpol[ispecies] = [0] * (self.nrho + self.erho)
             if self.is_core_profiles_present:
-                if (
-                    len(self.core_profiles.profiles_1d[self.time_index_core_profiles].ion[ispecies].velocity.poloidal)
-                    != self.nrho
-                ):
+                vpoloidal = (
+                    self.core_profiles.profiles_1d[self.time_index_core_profiles].ion[ispecies].velocity.poloidal
+                )
+                if len(vpoloidal) != self.nrho:
                     logger.warning(f"core_profiles.profiles_1d[:].ion[{ispecies}].velocity.poloidal could not be read.")
                     logger.warning(
                         f"Size mismatch: rho_tor_norm = {self.nrho}, ion[{ispecies}].velocity.poloidal ="
-                        f"{len(self.core_profiles.profiles_1d[self.time_index_core_profiles].ion[ispecies].velocity.poloidal)}"
+                        f"{len(vpoloidal)}"
                     )
                     self.core_profiles.profiles_1d[self.time_index_core_profiles].ion[ispecies].velocity.poloidal = (
                         np.asarray([np.NaN] * self.nrho)
@@ -1473,14 +1466,11 @@ class KineticProfilesCompute:
                             .ion[ispecies]
                             .velocity.poloidal[i]
                         )
-                if (
-                    len(self.core_profiles.profiles_1d[self.time_index_core_profiles].ion[ispecies].velocity_pol)
-                    != self.nrho
-                ):
+                vpol = self.core_profiles.profiles_1d[self.time_index_core_profiles].ion[ispecies].velocity_pol
+                if len(vpol) != self.nrho:
                     logger.warning(f"core_profiles.profiles_1d[:].ion[{ispecies}].velocity_pol could not be read.")
                     logger.warning(
-                        f"Size mismatch: rho_tor_norm = {self.nrho}, ion[{ispecies}].velocity_pol = "
-                        f"{len(self.core_profiles.profiles_1d[self.time_index_core_profiles].ion[ispecies].velocity_pol)}"
+                        f"Size mismatch: rho_tor_norm = {self.nrho}, ion[{ispecies}].velocity_pol = " f"{len(vpol)}"
                     )
                     self.core_profiles.profiles_1d[self.time_index_core_profiles].ion[ispecies].velocity_pol = (
                         np.asarray([np.NaN] * self.nrho)

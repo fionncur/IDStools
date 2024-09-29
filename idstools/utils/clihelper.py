@@ -1,8 +1,7 @@
 import argparse
 import os
-import re
 import socket
-
+import re
 import imaspy as imas
 
 # default parent parser for all idstools scripts
@@ -97,8 +96,6 @@ def get_details_from_uri(uri):
     provided URI string. The dictionary includes information such as user, database, version, backend,
     shot, pulse, run, path, and flags indicating the presence of certain parameters.
     """
-    import re
-
     param = {}
     user_pattern = r"user=([^;]+)"
     database_pattern = r"database=([^;]+)"

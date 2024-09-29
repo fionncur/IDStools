@@ -36,9 +36,10 @@ class CoreTransportView:
 
             else:
                 eenergy_flux = f"{flux_dict['energy_flux']: >.6e}"
-
+            name = flux_dict["flux_multiplier"] if flux_dict["flux_multiplier"].has_value else "--"
+            name = flux_dict["name"] + " (" + name + ")"
             ion_table.add_row(
-                f'{flux_dict["name"]} ({flux_dict["flux_multiplier"] if flux_dict["flux_multiplier"].has_value else "--"})',
+                name,
                 "",
                 "",
                 "",

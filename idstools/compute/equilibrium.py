@@ -9,7 +9,6 @@ import logging
 from typing import Union
 
 import numpy as np
-from imaspy import ids_defs
 
 from idstools.database import DBMaster
 

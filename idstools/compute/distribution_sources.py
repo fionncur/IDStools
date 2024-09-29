@@ -40,7 +40,8 @@ class DistributionSourcesCompute:
         except Exception as e:
             logger.debug(f"{e}")
             logger.critical(
-                f"distribution_sources.source[{source_index}].profiles_1d[{time_slice}].grid.rho_tor_norm) could not be read"
+                f"distribution_sources.source[{source_index}].profiles_1d[{time_slice}].grid.rho_tor_norm)"
+                "could not be read"
             )
         return rho_tor_norm
 

@@ -8,7 +8,6 @@ This module provides compute functions and classes for summary ids data
 import logging
 
 import numpy as np
-from imas import imasdef
 
 logger = logging.getLogger("module")
 EMPTY_DOUBLE = -9e40

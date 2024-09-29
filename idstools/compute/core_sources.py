@@ -122,7 +122,8 @@ class CoreSourcesCompute:
                 )
         except Exception as e:
             logger.critical(
-                f"core_sources.source[isource].profiles_1d[{time_slice}].grid.rho_tor_norm and rho_tor could not be read"
+                f"core_sources.source[isource].profiles_1d[{time_slice}].grid.rho_tor_norm and"
+                "rho_tor could not be read"
             )
             logger.debug(f"{e}")
             return None

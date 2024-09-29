@@ -217,7 +217,8 @@ class CoreProfilesView:
         nrho = len(rho_tor_norm)
         if nrho == 0:
             logger.critical(
-                f"core_profiles.profiles_1d[{time_slice}].grid.rho_tor/core_profiles.profiles_1d[{time_slice}].grid.rho_tor_norm) is empty",
+                f"core_profiles.profiles_1d[{time_slice}].grid.rho_tor/"
+                f"core_profiles.profiles_1d[{time_slice}].grid.rho_tor_norm) is empty",
             )
             logger.critical("----> Aborted.")
             return
@@ -289,7 +290,8 @@ class CoreProfilesView:
         nrho = len(rho_tor_norm)
         if nrho == 0:
             logger.critical(
-                f"core_profiles.profiles_1d[{time_slice}].grid.rho_tor/core_profiles.profiles_1d[{time_slice}].grid.rho_tor_norm) is empty",
+                f"core_profiles.profiles_1d[{time_slice}].grid.rho_tor/"
+                f"core_profiles.profiles_1d[{time_slice}].grid.rho_tor_norm) is empty",
             )
             logger.critical("----> Aborted.")
 
@@ -345,7 +347,8 @@ class CoreProfilesView:
         nrho = len(rho_tor_norm)
         if nrho == 0:
             logger.critical(
-                f"core_profiles.profiles_1d[{time_slice}].grid.rho_tor/core_profiles.profiles_1d[{time_slice}].grid.rho_tor_norm) is empty",
+                f"core_profiles.profiles_1d[{time_slice}].grid.rho_tor/"
+                f"core_profiles.profiles_1d[{time_slice}].grid.rho_tor_norm) is empty",
             )
             return
 
@@ -441,7 +444,8 @@ class CoreProfilesView:
         nrho = len(rho_tor_norm)
         if nrho == 0:
             logger.critical(
-                f"core_profiles.profiles_1d[{time_slice}].grid.rho_tor/core_profiles.profiles_1d[{time_slice}].grid.rho_tor_norm) is empty",
+                f"core_profiles.profiles_1d[{time_slice}].grid.rho_tor/"
+                f"core_profiles.profiles_1d[{time_slice}].grid.rho_tor_norm) is empty",
             )
             return
         radial = self.ids.profiles_1d[time_slice].e_field.radial.value
@@ -482,7 +486,8 @@ class CoreProfilesView:
         nrho = len(rho_tor_norm)
         if nrho == 0:
             logger.critical(
-                f"core_profiles.profiles_1d[{time_slice}].grid.rho_tor/core_profiles.profiles_1d[{time_slice}].grid.rho_tor_norm) is empty",
+                f"core_profiles.profiles_1d[{time_slice}].grid.rho_tor/"
+                f"core_profiles.profiles_1d[{time_slice}].grid.rho_tor_norm) is empty",
             )
             return
 
@@ -537,7 +542,8 @@ class CoreProfilesView:
         nrho = len(rho_tor_norm)
         if nrho == 0:
             logger.critical(
-                f"core_profiles.profiles_1d[{time_slice}].grid.rho_tor/core_profiles.profiles_1d[{time_slice}].grid.rho_tor_norm) is empty",
+                f"core_profiles.profiles_1d[{time_slice}].grid.rho_tor/"
+                f"core_profiles.profiles_1d[{time_slice}].grid.rho_tor_norm) is empty",
             )
             return
 
@@ -590,7 +596,8 @@ class CoreProfilesView:
         nrho = len(rho_tor_norm)
         if nrho == 0:
             logger.critical(
-                "core_profiles.profiles_1d[{time_slice}].grid.rho_tor/core_profiles.profiles_1d[{time_slice}].grid.rho_tor_norm) is empty",
+                f"core_profiles.profiles_1d[{time_slice}].grid.rho_tor/"
+                f"core_profiles.profiles_1d[{time_slice}].grid.rho_tor_norm) is empty"
             )
             return
 
