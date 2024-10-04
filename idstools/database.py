@@ -6,14 +6,7 @@ from glob import glob
 from pathlib import Path
 
 import imaspy as imas
-from yaml import load as yamlload
-from yaml import safe_load
-
-try:
-    from yaml import CLoader as yamlLoader
-except ImportError:
-    from yaml import Loader as yamlLoader
-
+import yaml
 
 logger = logging.getLogger(f"module.{__name__}")
 
@@ -185,7 +178,7 @@ class DBMaster:
         return [(version, database_dict[version]) for version in sorted(database_dict.keys())]
 
     @staticmethod
-    def get_hdf5_pulses(user: str = None, database: str = None, version: str = None, as_dictionary=False) -> list:
+    def get_hdf5_pulses(user: str = None, database: str = None, version: str = None,status=None, as_dictionary=False) -> list:
         """
         The function `get_hdf5_pulses` retrieves a list of pulses from HDF5 master files. It needs to specify
         full path till version.
@@ -207,18 +200,34 @@ class DBMaster:
             run number, HDF5_BACKEND backend, database, user, version, and data file path.
         """
         version_dir = DBMaster.get_version_dir(version, database, user)
+        scenario_yaml_dir=os.path.join(version_dir, "0")
         pulses = {} if as_dictionary else []
         hdf5_master_file_paths = glob(f"{version_dir}/**/*master.h5", recursive=True)
         for hdf5_master_file_path in hdf5_master_file_paths:
-            try:
-                pulse = int(str(hdf5_master_file_path).split("/")[-3])
-                run = int(str(hdf5_master_file_path).split("/")[-2])
-            except Exception as e:
-                print(f"Malformed database path {hdf5_master_file_path}")
-                logger.debug(f"{e}")
+            run = hdf5_master_file_path.split("/")[-2]
+            if not run.isdigit():
+                print(f"warning:run number is not an integer {run} {hdf5_master_file_path}")
                 continue
+            run = int(run)
+            pulse = hdf5_master_file_path.split("/")[-3]
+            if not pulse.isdigit():
+                print(f"warning:pulse number is not an integer {pulse}/{run} {hdf5_master_file_path}")
+                continue
+            pulse = int(pulse)
+            
             file_time = datetime.fromtimestamp(os.path.getmtime(hdf5_master_file_path)).replace(microsecond=0)
-
+            if status is not None:
+                yaml_file = f"ids_{pulse}{str(run).zfill(4)}.yaml"
+                yaml_file_path = os.path.join(scenario_yaml_dir, yaml_file)
+                status_from_yaml=""
+                if os.path.exists(yaml_file_path):
+                    status_from_yaml = DBMaster.get_pulse_status(yaml_file_path)
+                    if status_from_yaml == "":
+                        print(f"warning:could not find status info in scenario summary file {pulse}/{run} {yaml_file_path}")
+                else:
+                    print(f"warning:scenario summary file does not exists for {pulse}/{run} {yaml_file_path}")
+                if status != status_from_yaml:
+                    continue
             if as_dictionary:
                 if pulse not in pulses:
                     pulses[pulse] = []
@@ -226,7 +235,7 @@ class DBMaster:
                     (
                         pulse,
                         run,
-                        imas.ids_defs.MDSPLUS_BACKEND,
+                        imas.ids_defs.HDF5_BACKEND,
                         database,
                         user,
                         version,
@@ -280,68 +289,88 @@ class DBMaster:
             a list of pulses.
         """
         mdsplus_dir = DBMaster.get_version_dir(version, database, user)
+        scenario_yaml_dir=os.path.join(mdsplus_dir, "0")
         pulses = {} if as_dictionary else []
+        
+        datafile_paths = glob(f"{mdsplus_dir}/**/*.datafile", recursive=True)
+        
+        for data_file_path in datafile_paths:
+            root = os.path.dirname(data_file_path)
+            datafile = os.path.basename(data_file_path)
+            run_list = (root[len(mdsplus_dir) + 1 :]).split("/")
+            if len(run_list) == 1:  # AL4 layout
+                num_start_pos = datafile.find("_") + 1
+                num_end_pos = datafile.rfind(".")
+                num = int(datafile[num_start_pos:num_end_pos])
+                pulse = num // 10000
+                run = int(run_list[0]) * 10000 + (num % 10000)
+                
+            else:  # AL5 layout
+                if datafile != "ids_001.datafile":
+                    print(f"warning:ids_001.datafile does not exists {run} {data_file_path}")
+                    continue
+                if os.path.islink(data_file_path):
+                    continue
+                run = root.split("/")[-1]
+                if not run.isdigit():
+                    print(f"warning:run number is not an integer {run} {data_file_path}")
+                    continue
+                run = int(run)
+                pulse = root.split("/")[-2]
+                if not pulse.isdigit():
+                    print(f"warning:pulse number is not an integer {pulse}/{run} {data_file_path}")
+                    continue
+                pulse = int(pulse)
+            
+            if status is not None:
+                yaml_file = f"ids_{pulse}{str(run).zfill(4)}.yaml"
+                yaml_file_path = os.path.join(scenario_yaml_dir, yaml_file)
+                status_from_yaml=""
+                if os.path.exists(yaml_file_path):
+                    status_from_yaml = DBMaster.get_pulse_status(yaml_file_path)
+                    if status_from_yaml == "":
+                        print(f"warning:could not find status info in scenario summary file {pulse}/{run} {yaml_file_path}")
+                else:
+                    print(f"warning:scenario summary file does not exists for {pulse}/{run} {yaml_file_path}")
+                if status != status_from_yaml:
+                    continue
+                    
+            file_time = datetime.fromtimestamp(os.path.getmtime(data_file_path)).replace(microsecond=0)
 
-        for root, dirnames, filenames in os.walk(mdsplus_dir):
-            for datafile in fnmatch.filter(filenames, "*.datafile"):
-                data_file_path = f"{root}/{datafile}"
-                if (status is None) or (status == DBMaster.get_pulse_status(Path(data_file_path).with_suffix(".yaml"))):
-                    run_list = (root[len(mdsplus_dir) + 1 :]).split("/")
-                    try:
-                        if len(run_list) == 1:  # AL4 layout
-                            num_start_pos = datafile.find("_") + 1
-                            num_end_pos = datafile.rfind(".")
-                            num = int(datafile[num_start_pos:num_end_pos])
-                            pulse = num // 10000
-                            run = int(run_list[0]) * 10000 + (num % 10000)
-                        else:  # AL5 layout
-                            assert datafile == "ids_001.datafile"
-                            if os.path.islink(data_file_path):
-                                continue
-                            run = root.split("/")[-1]
-                            run = int(run)
-                            pulse = root.split("/")[-2]
-                            pulse = int(pulse)
-                    except Exception as e:
-                        print(f"Malformed database path {root}")
-                        logger.debug(f"{e}")
-                        continue
-                    file_time = datetime.fromtimestamp(os.path.getmtime(data_file_path)).replace(microsecond=0)
-
-                    if as_dictionary:
-                        if pulse not in pulses:
-                            pulses[pulse] = []
-                        is_run_available = any(x[1] == run for x in pulses[pulse])
-                        if not is_run_available:
-                            pulses[pulse].append(
-                                (
-                                    pulse,
-                                    run,
-                                    imas.ids_defs.MDSPLUS_BACKEND,
-                                    database,
-                                    user,
-                                    version,
-                                    data_file_path,
-                                    file_time,
-                                )
-                            )
-                    else:
-                        pulses.append(
-                            (
-                                pulse,
-                                run,
-                                imas.ids_defs.MDSPLUS_BACKEND,
-                                database,
-                                user,
-                                version,
-                                data_file_path,
-                                file_time,
-                            )
+            if as_dictionary:
+                if pulse not in pulses:
+                    pulses[pulse] = []
+                is_run_available = any(x[1] == run for x in pulses[pulse])
+                if not is_run_available:
+                    pulses[pulse].append(
+                        (
+                            pulse,
+                            run,
+                            imas.ids_defs.MDSPLUS_BACKEND,
+                            database,
+                            user,
+                            version,
+                            data_file_path,
+                            file_time,
                         )
+                    )
+            else:
+                pulses.append(
+                    (
+                        pulse,
+                        run,
+                        imas.ids_defs.MDSPLUS_BACKEND,
+                        database,
+                        user,
+                        version,
+                        data_file_path,
+                        file_time,
+                    )
+                )
         return pulses
 
     @staticmethod
-    def get_pulse_status(yaml_file_path: str) -> str:
+    def get_pulse_status(yaml_file_path) -> str:
         """
         The function `get_pulse_status` reads a YAML file from a given path and returns the value of the
         "status" key in the file's metadata.
@@ -353,13 +382,20 @@ class DBMaster:
             the value of the "status" key from the metadata dictionary.
         """
         _yaml_file_path = Path(yaml_file_path)
-        try:
-            with open(_yaml_file_path, "r") as file_handle:
-                metadata = safe_load(file_handle)
-        except FileNotFoundError as exc:
-            print(exc)
-            return "unknown"
-        return metadata["status"]
+        
+        status=""
+        with open(_yaml_file_path, "r") as file_handle:
+            lines = file_handle.readlines() 
+            for i, line in enumerate(lines):
+                if line.strip().startswith("status:"): 
+                    start_index = max(0, i - 1)  
+                    end_index = min(len(lines), i + 2)  
+                    context = lines[start_index:end_index]
+                    combined_context = ''.join(context)
+                    metadata = yaml.load(combined_context, Loader=yaml.Loader)
+                    if isinstance(metadata, dict):
+                        status=metadata["status"]
+        return status
 
     @staticmethod
     def get_database_files(user=None, database=None, version=None, backends=None):
@@ -523,24 +559,6 @@ class DBMaster:
         return connection
 
     @staticmethod
-    def get_status(path):
-        """Function that returns the status in the given yaml file
-
-        Parameter
-        ---------
-        path: str or Path
-        """
-
-        p = Path(path)
-        try:
-            with open(p, "r") as f:
-                metadata = safe_load(f)
-        except FileNotFoundError as exc:
-            print(exc)
-            return "unknown"
-        return metadata["status"]
-
-    @staticmethod
     def pulse_list2_dict(pulselist):
         """Utility function that returns a dict from a list of pairs (pulse,run)
 
@@ -584,7 +602,7 @@ class DBMaster:
         # linked subfolders (https://bugs.python.org/issue33428)
         folder = glob(str(locpath) + "/**/*.datafile", recursive=True)
         for entry in folder:
-            if (with_status is None) or (with_status == DBMaster.get_status(Path(entry).with_suffix(".yaml"))):
+            if (with_status is None) or (with_status == DBMaster.get_pulse_status(Path(entry).with_suffix(".yaml"))):
                 file = entry.split("/")[-1].split("_")[1].split(".")[0]
                 if len(file) <= 4:
                     pulse = int(entry.split("/")[-3])
@@ -687,7 +705,7 @@ def read_scenario(
     if out_ids_list is None:
         out_ids_list = []
     with open(scenario_file_path, "r") as scenario_file:
-        config = yamlload(scenario_file, Loader=yamlLoader)
+        config = yaml.safe_load(scenario_file, Loader=yamlLoader)
 
     # Read the equilibrium and core_profiles IDSs from the input datafile
     connection_in = imas.DBEntry(

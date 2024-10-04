@@ -1,4 +1,4 @@
-IMAS-AL-Python
+IMAS-AL-Core
 Tkinter
 matplotlib
 IMASPy

@@ -8,7 +8,7 @@ pyparsing
 python-dateutil
 pyyaml
 rich
-rich-argparse
+rich_argparse
 six
 tabulate
 build
