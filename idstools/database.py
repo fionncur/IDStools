@@ -1,4 +1,3 @@
-import fnmatch
 import logging
 import os
 from datetime import datetime
@@ -226,7 +225,7 @@ class DBMaster:
                     status_from_yaml = DBMaster.get_pulse_status(yaml_file_path)
                     if status_from_yaml == "":
                         print(
-                            f"warning:could not find status info in scenario summary file {pulse}/{run} {yaml_file_path}"
+                            f"warning:could not find status info in scenario file {pulse}/{run} {yaml_file_path}"
                         )
                 else:
                     print(f"warning:scenario summary file does not exists for {pulse}/{run} {yaml_file_path}")
@@ -334,7 +333,7 @@ class DBMaster:
                     status_from_yaml = DBMaster.get_pulse_status(yaml_file_path)
                     if status_from_yaml == "":
                         print(
-                            f"warning:could not find status info in scenario summary file {pulse}/{run} {yaml_file_path}"
+                            f"warning:could not find status info in scenario file {pulse}/{run} {yaml_file_path}"
                         )
                 else:
                     print(f"warning:scenario summary file does not exists for {pulse}/{run} {yaml_file_path}")
@@ -711,7 +710,7 @@ def read_scenario(
     if out_ids_list is None:
         out_ids_list = []
     with open(scenario_file_path, "r") as scenario_file:
-        config = yaml.safe_load(scenario_file, Loader=yamlLoader)
+        config = yaml.load(scenario_file, Loader=yaml.Loader)
 
     # Read the equilibrium and core_profiles IDSs from the input datafile
     connection_in = imas.DBEntry(
