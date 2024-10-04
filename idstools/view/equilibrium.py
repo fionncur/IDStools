@@ -5,10 +5,14 @@ This module provides view functions and classes for equilibrium ids data
 
 """
 
+import logging
+
 import matplotlib.pyplot as plt
 
 from idstools.compute.equilibrium import EquilibriumCompute
 from idstools.view.common import BasePlot
+
+logger = logging.getLogger("module")
 
 
 class EquilibriumView(BasePlot):
@@ -208,6 +212,68 @@ class EquilibriumView(BasePlot):
         else:
             ax.text(0.2, 0.5, "2D equilibrium", fontsize=10)
             ax.text(0.2, 0.45, "not available", fontsize=10)
+
+    def plot_profiles_1d_quantities(self, ax, time_slice, attributes=None):
+        quantities = self.compute_obj.get_profiles_1d_quantities(time_slice)
+        if not quantities:
+            return
+        for name, field in quantities.items():
+            if field.has_value:
+                coordinate = field.coordinates[0]
+                ax.plot(coordinate, field, label=f"{field.metadata.name} ({field.metadata.units})")
+                ax.set_xlabel(f"{coordinate.metadata.name} ({coordinate.metadata.units})")
+                ax.set_ylabel("profiles_1d quantities")
+            else:
+                logger.warning(f"attribute {name} is empty")
+
+        ax.set_title("profiles_1d")
+        ax.legend(
+            bbox_to_anchor=(1.0, 0.5),
+            loc="center left",
+            borderaxespad=0.0,
+            frameon=False,
+            fontsize="medium",
+        )
+
+    def plot_global_quantities(self, ax, time_slice, attributes=None):
+        quantities = self.compute_obj.get_global_quantities(time_slice)
+        if not quantities:
+            return
+        for name, field in quantities.items():
+            ax.plot(field["coordinate"], field["node"], label=f"{name} ({field['unit']})")
+            ax.set_xlabel(f"{field['coordinate_name']} ({field['coordinate_unit']})")
+            ax.set_ylabel("global_quantities")
+
+        ax.set_title("global_quantities")
+        ax.legend(
+            bbox_to_anchor=(1.0, 0.5),
+            loc="center left",
+            borderaxespad=0.0,
+            frameon=False,
+            fontsize="medium",
+        )
+
+    def view_time_line(self, ax, time):
+        """
+        The function `view_time_line` plots a vertical dashed line on a given matplotlib axis at a specified time.
+
+        Args:
+            ax: The parameter "ax" is a reference to the second y-axis of a matplotlib figure. It is used to plot
+                the timeline on the same figure as the other data.
+            time: The "time" parameter is the value at which you want to plot a vertical line on the timeline. It
+                represents the specific point in time that you want to highlight on the timeline.
+        """
+        ymin, ymax = ax.get_ylim()
+        ax.plot(
+            [time, time],
+            [ymin, ymax],
+            color="gray",
+            linestyle="--",
+            linewidth=1,
+            label=r"$t_{slice}$",
+        )
+        ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
+        ax.set_ylim(ymin, ymax)
 
     def show_info_on_plot(self, ax, info: str = "", location="right"):
         xmin, xmax = ax.get_xlim()

@@ -1,7 +1,8 @@
 import argparse
 import os
-import socket
 import re
+import socket
+
 import imaspy as imas
 
 # default parent parser for all idstools scripts

@@ -180,7 +180,7 @@ class EquilibriumCompute:
             ``b_field_tor`` (Toroidal component of the magnetic field)
 
         """
-        list_of_profiles = self.get2d_profiles_indices(time_slice)
+        list_of_profiles = self.get2d_profiles_indices[time_slice]
         b_total = None
         profile2d_index = -99
 
@@ -921,16 +921,81 @@ class EquilibriumCompute:
         )
         return equout
 
-    # def getEquilibriumQuantities(self):
-    #     """
-    #     The function "getEquilibriumQuantities" returns a dictionary containing the 2D profiles of r, z,  and psi.
+    def get_profiles_1d_quantities(self, time_slice, attributes=None):
+        """
+        The function `get_profiles_1d_quantities` retrieves specified attributes from a 1D profile at a
+        given time slice.
 
-    #     Returns:
-    #         a dictionary with keys "r2d", "z2d", and "psi2d", and their corresponding values are the  variables
-    # r2d, z2d, and psi2d, respectively.
-    #     """
-    #     r2d   = self.ids.time_slice[0].profiles_2d[0].r
-    #     z2d   = self.ids.time_slice[0].profiles_2d[0].z
-    #     psi2d = self.ids.time_slice[0].profiles_2d[0].psi
+        Args:
+            time_slice: Time slice is a parameter
+            attributes: The `attributes` parameter in the `get_profiles_1d_quantities` function is a list
+        of strings that represent the quantities or attributes you want to retrieve from the profiles_1d
+        object for a specific time slice. defaults it retrives pressure, q, beta_pol
 
-    #     return({"r2d":r2d, "z2d", z2d, "psi2d", psi2d})
+        Returns:
+            A dictionary containing the values of the specified attributes ("pressure", "q", "beta_pol")
+        for the given time slice from the profiles_1d data.
+        """
+        quantities = {}
+        if attributes is None:
+            attributes = ["pressure", "q", "beta_pol"]
+        for attribute in attributes:
+            quantities[attribute] = eval(f"self.ids.time_slice[{time_slice}].profiles_1d.{attribute}")
+        return quantities
+
+    def get_global_quantities(self, time_slice=None, attributes=None):
+        """
+        This Python function retrieves global quantities from a time slice object based on specified
+        attributes.
+
+        Args:
+            time_slice: The `time_slice` parameter in the `get_global_quantities` function is used to
+        specify a particular time slice for which you want to retrieve global quantities. If
+        `time_slice` is not provided (i.e., it is `None`), the function will retrieve global quantities
+        for all time slices
+            attributes: The `attributes` parameter in the `get_global_quantities` function is used to
+        specify a list of quantities that you want to retrieve from the global quantities of a time
+        slice. The default list of attributes includes "q_min", "q_95", "li_3", "beta_tor
+
+        Returns:
+            The `get_global_quantities` function returns a dictionary `quantities` containing global
+        quantities based on the provided `time_slice` and `attributes`. If `time_slice` is not
+        specified, it calculates the global quantities for all time slices and stores them in arrays
+        within the dictionary. If `time_slice` is specified, it retrieves the global quantities for that
+        specific time slice and returns them in the dictionary format
+        """
+        quantities = {}
+        if attributes is None:
+            attributes = ["q_min.value", "q_95", "li_3", "beta_tor", "energy_mhd"]
+        if not isinstance(attributes, list):
+            logger.warning("attributes argument is not provided as list of quantities, returning None")
+            return None
+
+        if time_slice is not None:
+            for attribute in attributes:
+                quantities[attribute] = {}
+                quantities[attribute]["node"] = []
+                quantities[attribute]["coordinate"] = self.ids.time
+            for attribute in attributes:
+                info_flag = True
+                for ti in range(len(self.ids.time_slice)):
+                    node = eval(f"self.ids.time_slice[ti].global_quantities.{attribute}")
+                    if info_flag:
+                        quantities[attribute]["unit"] = node.metadata.units
+                        quantities[attribute]["coordinate_unit"] = "t"
+
+                        quantities[attribute]["name"] = node.metadata.name
+                        quantities[attribute]["coordinate_name"] = "time"
+                        info_flag = False
+                    quantities[attribute]["node"].append(node)
+            for attribute in attributes:
+                quantities[attribute]["node"] = np.array(quantities[attribute]["node"])
+        else:
+            for attribute in attributes:
+                quantities[attribute] = eval(f"self.ids.time_slice[time_slice].global_quantities.{attribute}")
+        return quantities
+        # q_min = self.ids.time_slice[ti].global_quantities.q_min
+        # q_95 = self.ids.time_slice[ti].global_quantities.q_95
+        # li_3 = self.ids.time_slice[ti].global_quantities.li_3
+        # beta_tor = self.ids.time_slice[ti].global_quantities.beta_tor
+        # energy_mhd= self.ids.time_slice[ti].global_quantities.energy_mhd

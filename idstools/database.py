@@ -178,7 +178,9 @@ class DBMaster:
         return [(version, database_dict[version]) for version in sorted(database_dict.keys())]
 
     @staticmethod
-    def get_hdf5_pulses(user: str = None, database: str = None, version: str = None,status=None, as_dictionary=False) -> list:
+    def get_hdf5_pulses(
+        user: str = None, database: str = None, version: str = None, status=None, as_dictionary=False
+    ) -> list:
         """
         The function `get_hdf5_pulses` retrieves a list of pulses from HDF5 master files. It needs to specify
         full path till version.
@@ -200,7 +202,7 @@ class DBMaster:
             run number, HDF5_BACKEND backend, database, user, version, and data file path.
         """
         version_dir = DBMaster.get_version_dir(version, database, user)
-        scenario_yaml_dir=os.path.join(version_dir, "0")
+        scenario_yaml_dir = os.path.join(version_dir, "0")
         pulses = {} if as_dictionary else []
         hdf5_master_file_paths = glob(f"{version_dir}/**/*master.h5", recursive=True)
         for hdf5_master_file_path in hdf5_master_file_paths:
@@ -214,16 +216,18 @@ class DBMaster:
                 print(f"warning:pulse number is not an integer {pulse}/{run} {hdf5_master_file_path}")
                 continue
             pulse = int(pulse)
-            
+
             file_time = datetime.fromtimestamp(os.path.getmtime(hdf5_master_file_path)).replace(microsecond=0)
             if status is not None:
                 yaml_file = f"ids_{pulse}{str(run).zfill(4)}.yaml"
                 yaml_file_path = os.path.join(scenario_yaml_dir, yaml_file)
-                status_from_yaml=""
+                status_from_yaml = ""
                 if os.path.exists(yaml_file_path):
                     status_from_yaml = DBMaster.get_pulse_status(yaml_file_path)
                     if status_from_yaml == "":
-                        print(f"warning:could not find status info in scenario summary file {pulse}/{run} {yaml_file_path}")
+                        print(
+                            f"warning:could not find status info in scenario summary file {pulse}/{run} {yaml_file_path}"
+                        )
                 else:
                     print(f"warning:scenario summary file does not exists for {pulse}/{run} {yaml_file_path}")
                 if status != status_from_yaml:
@@ -289,11 +293,11 @@ class DBMaster:
             a list of pulses.
         """
         mdsplus_dir = DBMaster.get_version_dir(version, database, user)
-        scenario_yaml_dir=os.path.join(mdsplus_dir, "0")
+        scenario_yaml_dir = os.path.join(mdsplus_dir, "0")
         pulses = {} if as_dictionary else []
-        
+
         datafile_paths = glob(f"{mdsplus_dir}/**/*.datafile", recursive=True)
-        
+
         for data_file_path in datafile_paths:
             root = os.path.dirname(data_file_path)
             datafile = os.path.basename(data_file_path)
@@ -304,7 +308,7 @@ class DBMaster:
                 num = int(datafile[num_start_pos:num_end_pos])
                 pulse = num // 10000
                 run = int(run_list[0]) * 10000 + (num % 10000)
-                
+
             else:  # AL5 layout
                 if datafile != "ids_001.datafile":
                     print(f"warning:ids_001.datafile does not exists {run} {data_file_path}")
@@ -321,20 +325,22 @@ class DBMaster:
                     print(f"warning:pulse number is not an integer {pulse}/{run} {data_file_path}")
                     continue
                 pulse = int(pulse)
-            
+
             if status is not None:
                 yaml_file = f"ids_{pulse}{str(run).zfill(4)}.yaml"
                 yaml_file_path = os.path.join(scenario_yaml_dir, yaml_file)
-                status_from_yaml=""
+                status_from_yaml = ""
                 if os.path.exists(yaml_file_path):
                     status_from_yaml = DBMaster.get_pulse_status(yaml_file_path)
                     if status_from_yaml == "":
-                        print(f"warning:could not find status info in scenario summary file {pulse}/{run} {yaml_file_path}")
+                        print(
+                            f"warning:could not find status info in scenario summary file {pulse}/{run} {yaml_file_path}"
+                        )
                 else:
                     print(f"warning:scenario summary file does not exists for {pulse}/{run} {yaml_file_path}")
                 if status != status_from_yaml:
                     continue
-                    
+
             file_time = datetime.fromtimestamp(os.path.getmtime(data_file_path)).replace(microsecond=0)
 
             if as_dictionary:
@@ -382,19 +388,19 @@ class DBMaster:
             the value of the "status" key from the metadata dictionary.
         """
         _yaml_file_path = Path(yaml_file_path)
-        
-        status=""
+
+        status = ""
         with open(_yaml_file_path, "r") as file_handle:
-            lines = file_handle.readlines() 
+            lines = file_handle.readlines()
             for i, line in enumerate(lines):
-                if line.strip().startswith("status:"): 
-                    start_index = max(0, i - 1)  
-                    end_index = min(len(lines), i + 2)  
+                if line.strip().startswith("status:"):
+                    start_index = max(0, i - 1)
+                    end_index = min(len(lines), i + 2)
                     context = lines[start_index:end_index]
-                    combined_context = ''.join(context)
+                    combined_context = "".join(context)
                     metadata = yaml.load(combined_context, Loader=yaml.Loader)
                     if isinstance(metadata, dict):
-                        status=metadata["status"]
+                        status = metadata["status"]
         return status
 
     @staticmethod
