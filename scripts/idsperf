@@ -6,6 +6,7 @@ import os
 import statistics as stat
 import sys
 
+import imaspy
 from rich_argparse import RichHelpFormatter
 
 from idstools import idsperf
@@ -109,7 +110,9 @@ if __name__ == "__main__":
         allidss = [ids.value for ids in list(imas.IDSName)]
         # TODO: treat occurrences
         args.ids = [
-            ids for ids in allidss if db.partial_get(ids, "ids_properties/homogeneous_time") != imas.imasdef.EMPTY_INT
+            ids
+            for ids in allidss
+            if db.partial_get(ids, "ids_properties/homogeneous_time") != imaspy.ids_defs.EMPTY_INT
         ]
     idsobj = None
     dbout = None

@@ -5,12 +5,17 @@ import re
 import time
 
 import pandas as pd
-from yaml import load as yamlload
+import yaml
 
 try:
-    from yaml import CLoader as yamlLoader
+    from yaml import CLoader as Loader
+
+    print("using faster yaml CLoader")
 except ImportError:
-    from yaml import Loader as yamlLoader
+    from yaml import Loader
+
+    print("using slower yaml Loader")
+
 from pandas import json_normalize
 
 from idstools.view.common import Terminal
@@ -80,7 +85,7 @@ class ScenarioDescriptionBase:
         """
         with open(yaml_file_path, "r") as file_handle:
             try:
-                yaml_data = yamlload(file_handle, Loader=yamlLoader)
+                yaml_data = yaml.load(file_handle, Loader=Loader)
             except Exception as e:
                 logger.debug(f"{e}")
                 yaml_data = None
@@ -189,7 +194,7 @@ class ScenarioDescription(ScenarioDescriptionBase):
         self.yaml_data = None
         try:
             with open(yaml_file_name, "r") as f:
-                self.yaml_data = yamlload(f, Loader=yamlLoader)
+                self.yaml_data = yaml.load(f, Loader=Loader)
         except Exception as e:
             logger.debug(f"{e}")
             logger.critical(f"Warning: {e}")

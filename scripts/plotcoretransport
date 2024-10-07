@@ -13,7 +13,7 @@ import logging
 import os
 import sys
 
-from imas import imasdef
+from imaspy import ids_defs
 from rich_argparse import RichHelpFormatter
 
 from idstools.database import DBMaster
@@ -30,9 +30,9 @@ from idstools.view.core_transport import CoreTransportView
 logger = setup_logger("module", stdout_level=logging.INFO)
 
 slicing_methods = {
-    "CLOSEST": imasdef.CLOSEST_INTERP,
-    "PREVIOUS": imasdef.PREVIOUS_INTERP,
-    "LINEAR": imasdef.LINEAR_INTERP,
+    "CLOSEST": ids_defs.CLOSEST_INTERP,
+    "PREVIOUS": ids_defs.PREVIOUS_INTERP,
+    "LINEAR": ids_defs.LINEAR_INTERP,
 }
 # Management of input arguments
 parser = argparse.ArgumentParser(

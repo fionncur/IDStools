@@ -227,7 +227,9 @@ class EquilibriumView(BasePlot):
 
                 if isinstance(copied_field.value, np.floating) or isinstance(copied_field.value, np.ndarray):
                     copied_field[copied_field == imas.ids_defs.EMPTY_FLOAT] = np.nan
-
+                if np.all(np.isnan(copied_field.value)):
+                    axes_list[counter].remove()
+                    continue
                 coordinate = copied_field.coordinates[0]
                 axes_list[counter].plot(
                     coordinate, copied_field, label=f"{field.metadata.name} ({field.metadata.units})"
@@ -237,8 +239,7 @@ class EquilibriumView(BasePlot):
                 axes_list[counter].legend(loc="upper right")
             else:
                 logger.warning(f"attribute {name} is empty")
-                axes_list[counter].text(0.2, 0.5, name, fontsize=10)
-                axes_list[counter].text(0.2, 0.45, "is not available", fontsize=10)
+                axes_list[counter].remove()
             counter = counter + 1
 
     def plot_global_quantities(self, axes_list, time_slice, attributes=None):
@@ -249,11 +250,14 @@ class EquilibriumView(BasePlot):
         for name, field in quantities.items():
             if isinstance(field["node"], np.floating) or isinstance(field["node"], np.ndarray):
                 field["node"][field["node"] == imas.ids_defs.EMPTY_FLOAT] = np.nan
-            axes_list[counter].plot(field["coordinate"], field["node"], label=f"{name} ({field['unit']})")
-            axes_list[counter].set_xlabel(f"{field['coordinate_name']} ({field['coordinate_unit']})")
-            axes_list[counter].set_ylabel(name)
-            self.view_time_line(axes_list[counter], time_slice)
-            axes_list[counter].legend(loc="upper right")
+            if np.all(np.isnan(field["node"])):
+                axes_list[counter].remove()
+            else:
+                axes_list[counter].plot(field["coordinate"], field["node"], label=f"{name} ({field['unit']})")
+                axes_list[counter].set_xlabel(f"{field['coordinate_name']} ({field['coordinate_unit']})")
+                axes_list[counter].set_ylabel(name)
+                self.view_time_line(axes_list[counter], time_slice)
+                axes_list[counter].legend(loc="upper right")
             counter = counter + 1
 
     def view_time_line(self, ax, time):

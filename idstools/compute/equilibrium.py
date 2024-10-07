@@ -180,7 +180,7 @@ class EquilibriumCompute:
             ``b_field_tor`` (Toroidal component of the magnetic field)
 
         """
-        list_of_profiles = self.get2d_profiles_indices[time_slice]
+        list_of_profiles = self.get2d_profiles_indices(time_slice)
         b_total = None
         profile2d_index = -99
 

@@ -48,12 +48,15 @@ SCRIPTS=(
     "plotscenario --uri \"imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3\" --time 60 --save --directory $LOG_DIR"
     "plotscenario --uri \"imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3\" --no-profiles --save --directory $LOG_DIR"
     "printcoresources --uri \"imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3\""
-    "plotspectrometry --uri \"imas:mdsplus?user=public;pulse=134000;run=37;database=TEST;version=3\" --save --directory $LOG_DIR")
+    "plotspectrometry --uri \"imas:mdsplus?user=public;pulse=134000;run=37;database=TEST;version=3\" --save --directory $LOG_DIR"
+    "plotkineticprofiles --uri \"imas:mdsplus?path=/work/imas/shared/imasdb/ITER/3/134174/117\" --save --directory $LOG_DIR"
+    "plotpressure --uri \"imas:mdsplus?path=/work/imas/shared/imasdb/ITER/3/134174/117\" --save --directory $LOG_DIR"
+    "plotspectrometry --uri \"imas:mdsplus?path=/work/imas/shared/imasdb/TEST/3/134000/37\" --save --directory $LOG_DIR")
 
 execute_scripts "${SCRIPTS[@]}"
 STATUS=$?
 if [[ "$(uname -n)" == *"bamboo"* ]]; then
     if [ "$STATUS" -ne 0 ]; then
-        exit "$STATUS"
+        return "$STATUS"
     fi
 fi
