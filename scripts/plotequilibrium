@@ -116,10 +116,23 @@ if ids_obj_equilibrium.time is not None:
 
     title = f"2D Equilibrium at time {time_value:.1f}"
     database_text = ""
-    canvas = PlotCanvas(2, 3)
-    ax1 = canvas.add_axes(title="", xlabel="", row=0, col=2, rowspan=2)
-    ax2 = canvas.add_axes(title="", xlabel="", row=0, col=0, colspan=2)
-    ax3 = canvas.add_axes(title="", xlabel="", row=1, col=0, colspan=2)
+    canvas = PlotCanvas(2, 6)
+    ax1 = canvas.add_axes(title="", xlabel="", row=0, col=0, rowspan=2)
+    axes_list1 = []
+    ax2 = canvas.add_axes(title="", xlabel="", row=0, col=1)
+    ax3 = canvas.add_axes(title="", xlabel="", row=0, col=2)
+    ax4 = canvas.add_axes(title="", xlabel="", row=1, col=1)
+    # ax5=canvas.add_axes(title="", xlabel="", row=1, col=2)
+    axes_list1 = [ax2, ax3, ax4]
+
+    axes_list2 = []
+    ax6 = canvas.add_axes(title="", xlabel="", row=0, col=3)
+    ax7 = canvas.add_axes(title="", xlabel="", row=0, col=4)
+    ax8 = canvas.add_axes(title="", xlabel="", row=0, col=5)
+    ax9 = canvas.add_axes(title="", xlabel="", row=1, col=3)
+    ax10 = canvas.add_axes(title="", xlabel="", row=1, col=4)
+    # ax11=canvas.add_axes(title="", xlabel="", row=1, col=5)
+    axes_list2 = [ax6, ax7, ax8, ax9, ax10]
 
     for mdids_info in args.md:
         inputargs = copy.deepcopy(args)
@@ -197,11 +210,11 @@ if ids_obj_equilibrium.time is not None:
         rotation="vertical",
         fontsize=7,
     )
-    view_object.plot_profiles_1d_quantities(ax2, time_slice)
-    view_object.plot_global_quantities(ax3, time_slice)
-    view_object.view_time_line(ax3, time_slice)
+    view_object.plot_profiles_1d_quantities(axes_list1, time_slice)
+    view_object.plot_global_quantities(axes_list2, time_slice)
+
     canvas.fig.suptitle(get_title(args, "Equilibrium", time_value), size=12)
-    canvas.fig.subplots_adjust(top=0.924, bottom=0.062, left=0.038, right=1, hspace=0.24, wspace=0.19)
+    canvas.fig.subplots_adjust(top=0.933, bottom=0.05, left=0.03, right=0.988, hspace=0.221, wspace=0.364)
     canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
     if args.save:
         fname = get_file_name(args, f"{os.path.basename(__file__)}_Equilibrium", time_value)

@@ -5,9 +5,12 @@ This module provides view functions and classes for equilibrium ids data
 
 """
 
+import copy
 import logging
 
+import imaspy as imas
 import matplotlib.pyplot as plt
+import numpy as np
 
 from idstools.compute.equilibrium import EquilibriumCompute
 from idstools.view.common import BasePlot
@@ -213,45 +216,45 @@ class EquilibriumView(BasePlot):
             ax.text(0.2, 0.5, "2D equilibrium", fontsize=10)
             ax.text(0.2, 0.45, "not available", fontsize=10)
 
-    def plot_profiles_1d_quantities(self, ax, time_slice, attributes=None):
-        quantities = self.compute_obj.get_profiles_1d_quantities(time_slice)
+    def plot_profiles_1d_quantities(self, axes_list, time_slice, attributes=None):
+        quantities = self.compute_obj.get_profiles_1d_quantities(time_slice, attributes)
         if not quantities:
             return
+        counter = 0
         for name, field in quantities.items():
             if field.has_value:
-                coordinate = field.coordinates[0]
-                ax.plot(coordinate, field, label=f"{field.metadata.name} ({field.metadata.units})")
-                ax.set_xlabel(f"{coordinate.metadata.name} ({coordinate.metadata.units})")
-                ax.set_ylabel("profiles_1d quantities")
+                copied_field = copy.deepcopy(field)
+
+                if isinstance(copied_field.value, np.floating) or isinstance(copied_field.value, np.ndarray):
+                    copied_field[copied_field == imas.ids_defs.EMPTY_FLOAT] = np.nan
+
+                coordinate = copied_field.coordinates[0]
+                axes_list[counter].plot(
+                    coordinate, copied_field, label=f"{field.metadata.name} ({field.metadata.units})"
+                )
+                axes_list[counter].set_xlabel(f"{coordinate.metadata.name} ({coordinate.metadata.units})")
+                axes_list[counter].set_ylabel(name)
+                axes_list[counter].legend(loc="upper right")
             else:
                 logger.warning(f"attribute {name} is empty")
+                axes_list[counter].text(0.2, 0.5, name, fontsize=10)
+                axes_list[counter].text(0.2, 0.45, "is not available", fontsize=10)
+            counter = counter + 1
 
-        ax.set_title("profiles_1d")
-        ax.legend(
-            bbox_to_anchor=(1.0, 0.5),
-            loc="center left",
-            borderaxespad=0.0,
-            frameon=False,
-            fontsize="medium",
-        )
-
-    def plot_global_quantities(self, ax, time_slice, attributes=None):
-        quantities = self.compute_obj.get_global_quantities(time_slice)
+    def plot_global_quantities(self, axes_list, time_slice, attributes=None):
+        quantities = self.compute_obj.get_global_quantities(time_slice, attributes)
         if not quantities:
             return
+        counter = 0
         for name, field in quantities.items():
-            ax.plot(field["coordinate"], field["node"], label=f"{name} ({field['unit']})")
-            ax.set_xlabel(f"{field['coordinate_name']} ({field['coordinate_unit']})")
-            ax.set_ylabel("global_quantities")
-
-        ax.set_title("global_quantities")
-        ax.legend(
-            bbox_to_anchor=(1.0, 0.5),
-            loc="center left",
-            borderaxespad=0.0,
-            frameon=False,
-            fontsize="medium",
-        )
+            if isinstance(field["node"], np.floating) or isinstance(field["node"], np.ndarray):
+                field["node"][field["node"] == imas.ids_defs.EMPTY_FLOAT] = np.nan
+            axes_list[counter].plot(field["coordinate"], field["node"], label=f"{name} ({field['unit']})")
+            axes_list[counter].set_xlabel(f"{field['coordinate_name']} ({field['coordinate_unit']})")
+            axes_list[counter].set_ylabel(name)
+            self.view_time_line(axes_list[counter], time_slice)
+            axes_list[counter].legend(loc="upper right")
+            counter = counter + 1
 
     def view_time_line(self, ax, time):
         """
@@ -272,7 +275,7 @@ class EquilibriumView(BasePlot):
             linewidth=1,
             label=r"$t_{slice}$",
         )
-        ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
+        # ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
         ax.set_ylim(ymin, ymax)
 
     def show_info_on_plot(self, ax, info: str = "", location="right"):

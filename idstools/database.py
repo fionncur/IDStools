@@ -224,9 +224,7 @@ class DBMaster:
                 if os.path.exists(yaml_file_path):
                     status_from_yaml = DBMaster.get_pulse_status(yaml_file_path)
                     if status_from_yaml == "":
-                        print(
-                            f"warning:could not find status info in scenario file {pulse}/{run} {yaml_file_path}"
-                        )
+                        print(f"warning:could not find status info in scenario file {pulse}/{run} {yaml_file_path}")
                 else:
                     print(f"warning:scenario summary file does not exists for {pulse}/{run} {yaml_file_path}")
                 if status != status_from_yaml:
@@ -332,9 +330,7 @@ class DBMaster:
                 if os.path.exists(yaml_file_path):
                     status_from_yaml = DBMaster.get_pulse_status(yaml_file_path)
                     if status_from_yaml == "":
-                        print(
-                            f"warning:could not find status info in scenario file {pulse}/{run} {yaml_file_path}"
-                        )
+                        print(f"warning:could not find status info in scenario file {pulse}/{run} {yaml_file_path}")
                 else:
                     print(f"warning:scenario summary file does not exists for {pulse}/{run} {yaml_file_path}")
                 if status != status_from_yaml:
