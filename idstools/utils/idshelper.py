@@ -57,33 +57,46 @@ def parse_uri(uri: str):
     result["ids_path"] = ids_path
     return result
 
-
 def parse_slice_from_string(input_string):
-    match = re.search(r"\(([-\d]*):([-\d]*)\)", input_string)
-    start = end = None
+    match = re.search(r"[\[\(]([-\d]*):([-\d]*):?([-\d]*)[\]\)]", input_string)
+    
+    start = end = step = None
     if match:
-        start_str, end_str = match.groups()
+        start_str, end_str, step_str = match.groups()
+        
         start = int(start_str) if start_str else None
         end = int(end_str) if end_str else None
-        return slice(start, end)
-    else:
-        return slice(start, end)
+        step = int(step_str) if step_str else None
+    
+    return slice(start, end, step)
 
+def get_length_of_partial_field(ids, ids_path):
+    partial_field = re.sub(r"[\[\(](t|[\d]*)[\]\)]", "", ids_path)
+    partial_field = partial_field.split('.')[0]
+    try:
+        _inner_data = eval("ids." + partial_field)
+        return _inner_data.coordinates[0]
+    except Exception as e:
+        logger.error(f"{partial_field} path/value does not exist, hint: please check length of arrays with -i option, detailed error : {e}")
+        return None
 
 def partial_get(ids, ids_path):
-    time_array = ids.time
-    if len(time_array) == 0:
-        logger.error("Time array not present")
-        exit(1)
     slice_object = parse_slice_from_string(ids_path)
-
-    ids_path_for_eval = re.sub(r"[\[\(]([-\d]*):?([-\d]*)[\]\)]", "(t)", ids_path)
+    ids_path_for_eval = re.sub(r"[\[\(][^:\[\]\(\)]*:[^:\[\]\(\)]*[\]\)]", "(t)", ids_path)
     ids_path_for_eval = ids_path_for_eval.replace("(", "[").replace(")", "]").replace("/", ".")
+    coordinate = get_length_of_partial_field(ids, ids_path_for_eval)
     data = np.array([]).reshape(
         0,
     )
-    for t in range(len(time_array)):
-        _inner_data = eval("ids." + ids_path_for_eval)
+    start = slice_object.start if slice_object.start is not None else 0
+    stop = slice_object.stop  if slice_object.start is not None else len(coordinate)
+    step = slice_object.step if slice_object.step is not None else 1
+    for t in range(start, stop, step):
+        try:
+            _inner_data = eval("ids." + ids_path_for_eval)
+        except Exception as e:
+            logger.error(f"{ids_path} path/value does not exist, hint: please check length of arrays with -i option, detailed error : {e}")
+            return data, coordinate
         if len(_inner_data.shape) == 0:
             data = np.append(data, _inner_data)
         elif len(_inner_data.shape) == 1:
@@ -91,11 +104,11 @@ def partial_get(ids, ids_path):
                 data = _inner_data
             else:
                 data = np.vstack((data, _inner_data))
-    data = np.array(data)[slice_object]
-    time_array = time_array[slice_object]
-    if len(data) != len(time_array):
-        time_array = np.arange(len(data))
-    return data, time_array
+    data = np.array(data)
+    coordinate = coordinate[slice_object]
+    if len(data) != len(coordinate):
+        coordinate = np.arange(len(data))
+    return data, coordinate
 
 
 def is_ids_field(idstype: type) -> bool:

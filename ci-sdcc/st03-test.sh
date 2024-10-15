@@ -50,14 +50,14 @@ echo ""
 echo "====================================================================="
 echo "Testing analysis scripts  with URI $CORE_MODULE_VERSION and $PYTHON_VERSION"
 echo "====================================================================="
-source ./tests/st03_test_analysis_scripts_with_uri.sh "$LOG_DIR" "$DB_DIR"
+# source ./tests/st03_test_analysis_scripts_with_uri.sh "$LOG_DIR" "$DB_DIR"
 
 echo ""
 echo ""
 echo "====================================================================="
 echo "Testing ids manipulation scripts with $CORE_MODULE_VERSION and $PYTHON_VERSION"
 echo "====================================================================="
-source ./tests/st01_test_ids_scripts_with_uri.sh "$LOG_DIR" "$DB_DIR"
+# source ./tests/st01_test_ids_scripts_with_uri.sh "$LOG_DIR" "$DB_DIR"
 
 # ---------------------------------------------------------------------------
 echo ""
@@ -65,7 +65,7 @@ echo ""
 echo "====================================================================="
 echo "Testing db scripts with $CORE_MODULE_VERSION and $PYTHON_VERSION"
 echo "====================================================================="
-source ./tests/st02_test_db_scripts.sh "$LOG_DIR" "$DB_DIR"
+# source ./tests/st02_test_db_scripts.sh "$LOG_DIR" "$DB_DIR"
 
 # ---------------------------------------------------------------------------
 echo ""

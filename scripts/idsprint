@@ -43,13 +43,16 @@ def view_plot(ax, field, coordinate, field_name="", coordinate_name="", field_un
             return
         data - field.value
         field_unit = field.metadata.units
-        field_name = f"{field_name} (coordinate:{coordinate_name})"
+        
         coordinate = field.coordinates[coordinate]
         if isinstance(coordinate, IDSPrimitive):
             coordinate_unit = f"{coordinate.metadata.name} ({coordinate.metadata.units})"
             coordinate_name = coordinate.metadata.path
-
-    ax.plot(coordinate, data, label=field_name)
+        field_name = f"{field_name} (coordinate:{coordinate_name})"
+    if len(data) < 5:
+        ax.plot(coordinate, data, label=field_name, marker='o', color='red')
+    else:
+        ax.plot(coordinate, data, label=field_name)
 
     # Set Plot properties
     font_args = {
@@ -218,7 +221,7 @@ if __name__ == "__main__":
         "-p",
         "--plot",
         action="store_true",
-        help="plot data",
+        help="plot 1d arrays from leaf nodes",
     )
     parser.add_argument(
         "--save",
@@ -280,7 +283,12 @@ if __name__ == "__main__":
             coordinate_name = f"{ids_name}/time"
             coordinate_unit = "t"
         else:
-            node = eval("ids." + ids_path)
+            try:
+                node = eval("ids." + ids_path)
+            except Exception as e:
+                logger.error(f"{ids_path} path does not exist, hint: check length of arrays, detailed error {e}")   
+                node = np.array([]).reshape(0,
+    )
             coordinate = 0
             coordinate_name = ""
             coordinate_unit = ""
@@ -288,6 +296,12 @@ if __name__ == "__main__":
         if args.inspect:
             imaspy.util.inspect(node, hide_empty_nodes=not args.show_empty)
         elif args.plot:
+            # if not isinstance(node,np.ndarray) :
+            #     logger.error("Can not plot data, please select leaf nodes with 1D arrays")
+            #     exit(0)
+            if len(node)==0:
+                logger.error("Can not plot data, no values present in the array. inspect data with -i option")
+                exit(0)
             canvas = PlotCanvas(1, 1)
             ax = canvas.add_axes(title="", xlabel="", row=0, col=0)
             view_plot(

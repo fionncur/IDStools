@@ -32,8 +32,7 @@ SCRIPTS=(
     "disruption_summary"
     "show_db_entry -s 134174 -r 117"
     "create_db_entry -s 130012 -r 105 -d TEST --disable-validation"
-    "create_db_entry_disruption -s 100028 -r 1 -d ITER_DISRUPTIONS"
-    "create_validation_schema -i core_profiles")
+    "create_db_entry_disruption -s 100028 -r 1 -d ITER_DISRUPTIONS")
 
 execute_scripts "${SCRIPTS[@]}"
 STATUS=$?

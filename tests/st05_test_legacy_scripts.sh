@@ -27,6 +27,7 @@ SCRIPTS=(
     "eqdsk2ids -c 11 --src \"imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3\" -g resources/geqdsk/example.gfile --dest \"imas:hdf5?user=$USERNAME;pulse=134174;run=117;database=ITER;version=3?path=$DATABASE_DIR\" --log INFO"
     "eqdsk2ids -c 11 --src \"imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3\" -g resources/geqdsk/example.gfile --dest \"imas:hdf5?user=$USERNAME;pulse=134174;run=117;database=ITER;version=3?path=$DATABASE_DIR\" --log INFO"
     "idschk --uri \"imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3\" -f resources/validation_schemas/generic/core_profiles.yml"
+    "create_validation_schema -i core_profiles"
     "validate_db_entry -s 134174 -r 117 --path resources/validation_schemas")
 
 execute_scripts "${SCRIPTS[@]}"
