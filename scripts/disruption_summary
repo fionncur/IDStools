@@ -9,38 +9,13 @@ import sys
 from operator import itemgetter
 from stat import *
 
-import imas
-from yaml import load as yamlload
-
-from idstools.database import DBMaster
+import yaml
 
 try:
     from yaml import CLoader as yamlLoader
 except ImportError:
     from yaml import Loader as yamlLoader
 # ----------------------------------------------------------------------------
-
-
-def get_core_version():
-    """
-    This function retrieves the core version number from the IMAS low-level modules in Python.
-
-    Returns:
-        The function `get_core_version` returns the low-level version of the core module being used in the
-    code. The version is extracted from the module names and formatted as an integer.
-    """
-    _lowlevel_version = ""
-    if "_al_lowlevel" in imas.__dict__:
-        _lowlevel_version = imas.get_al_version()
-    if "_ual_lowlevel" in imas.__dict__:
-        raw_core_version = imas._ual_lowlevel.__name__  # '__name__': 'imas_3_41_0_ual_4_11_10._ual_lowlevel
-        raw_core_version, _ = raw_core_version.split(".")
-        match = re.search(r"\d+_\d+_\d+$", raw_core_version)
-        if match:
-            _lowlevel_version = match.group()
-            _lowlevel_version = _lowlevel_version.replace("_", ".")
-    lowlevel_version = int(_lowlevel_version.split(".")[0])
-    return lowlevel_version
 
 
 # For better formatting of input argument listing in the help of the function
@@ -69,23 +44,21 @@ def rec(
     # Read all YAML files
     # --------------------
     table = {}
-    files = glob.glob(path + "/*")
+    files = glob.glob(path + "/**/*.yaml", recursive=True)
     # Fill data dictionary with yaml input files describing simulations
     j = -1
-    for i in range(len(files)):
-        # Recursivity on sub-folders (temporarily removed, to speed up the code)
-        # if os.path.isdir(files[i]):
-        #  rec(data=data,path=files[i],extension=extension,choice=choice)
-        # elif files[i]....
-        if files[i].endswith(extension):  # Work on all YAML files
+
+    for scenario_file_path in files:
+        if "*.yaml" not in scenario_file_path:
             try:
                 j = j + 1
-                file = open(files[i], "r")
-                data[j] = yamlload(file, Loader=yamlLoader)
-                data[j]["location"] = files[i]
-                file.close()
+                # file = open(scenario_file_path, "r")
+                with open(scenario_file_path, "r") as scenario_file:
+                    data[j] = yaml.load(scenario_file, Loader=yaml.Loader)
+
+                    data[j]["location"] = scenario_file_path
             except Exception as e:
-                print("Error reading yaml " + files[i], file=sys.stderr)
+                print("Error reading yaml " + scenario_file_path, file=sys.stderr)
 
     # ---------------------------------------------------------------
     # Sort all YAML files by shot and run numbers in sdata structure
@@ -409,7 +382,9 @@ if __name__ == "__main__":
     if args["folder"] != None:
         folder = args["folder"]
     else:
-        LL_version = get_core_version()
+        LL_version = os.environ["AL_VERSION"]
+        LL_version = int(LL_version.split(".")[0])
+
         if LL_version < 4:
             folder = "/work/imas/shared/iterdb/3/0"
         else:
