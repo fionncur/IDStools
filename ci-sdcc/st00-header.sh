@@ -47,6 +47,12 @@ if [ -z "$ACCESS_LAYER_VERSION" ]; then
     ACCESS_LAYER_VERSION="5"
 fi
 
+if [ -z "$DD_VERSION" ]; then 
+    DD_VERSION="3"
+else
+    DD_VERSION="$3"
+fi
+
 echo "> Building for $TOOLCHAIN_VERSION and Access Layer $ACCESS_LAYER_VERSION"
 
 if [[ $TOOLCHAIN_VERSION == *"intel"* ]]; then
@@ -56,7 +62,9 @@ if [[ $TOOLCHAIN_VERSION == *"foss"* ]]; then
     FCOMPILER="gfortran"
 fi
 
-CORE_MODULE_VERSION=$(getIMASCoreModuleName "$TOOLCHAIN_VERSION" "$ACCESS_LAYER_VERSION")
+"$DD_VERSION"
+
+CORE_MODULE_VERSION=$(getIMASCoreModuleName "$TOOLCHAIN_VERSION" "$ACCESS_LAYER_VERSION" "$DD_VERSION")
 # load IMAS module first
 
 if [ -z "$IMAS_EXISTS" ]; then
