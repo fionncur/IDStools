@@ -57,45 +57,63 @@ def parse_uri(uri: str):
     result["ids_path"] = ids_path
     return result
 
+
 def parse_slice_from_string(input_string):
     match = re.search(r"[\[\(]([-\d]*):([-\d]*):?([-\d]*)[\]\)]", input_string)
-    
+
     start = end = step = None
     if match:
         start_str, end_str, step_str = match.groups()
-        
+
         start = int(start_str) if start_str else None
         end = int(end_str) if end_str else None
         step = int(step_str) if step_str else None
-    
+
     return slice(start, end, step)
+
 
 def get_length_of_partial_field(ids, ids_path):
     partial_field = re.sub(r"[\[\(](t|[\d]*)[\]\)]", "", ids_path)
-    partial_field = partial_field.split('.')[0]
+    partial_field = partial_field.split(".")[0]
     try:
         _inner_data = eval("ids." + partial_field)
         return _inner_data.coordinates[0]
     except Exception as e:
-        logger.error(f"{partial_field} path/value does not exist, hint: please check length of arrays with -i option, detailed error : {e}")
+        logger.error(
+            f"{partial_field} path/value does not exist, hint: please check"
+            f"length of arrays with -i option, detailed error : {e}"
+        )
         return None
 
-def partial_get(ids, ids_path):
+
+def partial_get(ids, ids_path, coordinate_index=0):
     slice_object = parse_slice_from_string(ids_path)
     ids_path_for_eval = re.sub(r"[\[\(][^:\[\]\(\)]*:[^:\[\]\(\)]*[\]\)]", "(t)", ids_path)
     ids_path_for_eval = ids_path_for_eval.replace("(", "[").replace(")", "]").replace("/", ".")
-    coordinate = get_length_of_partial_field(ids, ids_path_for_eval)
+    coordinate_partial = get_length_of_partial_field(ids, ids_path_for_eval)
     data = np.array([]).reshape(
         0,
     )
     start = slice_object.start if slice_object.start is not None else 0
-    stop = slice_object.stop  if slice_object.start is not None else len(coordinate)
+    stop = slice_object.stop if slice_object.start is not None else len(coordinate_partial)
     step = slice_object.step if slice_object.step is not None else 1
+    data_flag = True
+    data_unit = ""
+    coordinate = None
     for t in range(start, stop, step):
         try:
             _inner_data = eval("ids." + ids_path_for_eval)
+            if data_flag:
+                data_flag = False
+                data_unit = _inner_data.metadata.units
+                if coordinate_index >= len(_inner_data.coordinates):
+                    coordinate_index = 0
+                coordinate = _inner_data.coordinates[coordinate_index]
         except Exception as e:
-            logger.error(f"{ids_path} path/value does not exist, hint: please check length of arrays with -i option, detailed error : {e}")
+            logger.error(
+                f"{ids_path} path/value does not exist, hint: please check length"
+                f"of arrays with -i option, detailed error : {e}"
+            )
             return data, coordinate
         if len(_inner_data.shape) == 0:
             data = np.append(data, _inner_data)
@@ -105,10 +123,7 @@ def partial_get(ids, ids_path):
             else:
                 data = np.vstack((data, _inner_data))
     data = np.array(data)
-    coordinate = coordinate[slice_object]
-    if len(data) != len(coordinate):
-        coordinate = np.arange(len(data))
-    return data, coordinate
+    return data, coordinate, data_unit
 
 
 def is_ids_field(idstype: type) -> bool:
@@ -865,18 +880,3 @@ def idsdiff(struct1: IDSStructure, struct2: IDSStructure, name1="", name2="", pr
     if print_result:
         rich.print(text_output)
     return compare_result, diff_result, text_output
-
-
-# if __name__ == "__main__":
-#     import imaspy
-#     entry = imaspy.DBEntry("imas:mdsplus?user=public;shot=131024;run=41;database=ITER;version=3", "r")
-
-#     # Open the database entry, providing legacy Data Entry parameters
-#     imas_entry = imaspy.DBEntry(imaspy.ids_defs.MDSPLUS_BACKEND, "ITER", 131024, 41, "public")
-#     imas_entry.open()
-#     core_profiles = imas_entry.get("core_profiles", lazy=False)
-
-#     print(core_profiles.ids_properties)
-
-#     # print(get_ids_attributes(core_profiles))
-#     print(get_ids_size(entry, ["summary"]))
