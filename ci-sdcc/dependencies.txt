@@ -2,3 +2,4 @@ IMAS-AL-Core
 Tkinter
 matplotlib
 IMASPy
+PyYAML

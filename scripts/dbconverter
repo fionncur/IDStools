@@ -2,6 +2,7 @@
 # Converts an IMAS database (all its data-entries) to the specified folder and backend
 
 import argparse
+from io import StringIO
 import logging
 import os
 from datetime import datetime
@@ -77,10 +78,10 @@ for file_path in schema:
     filename = os.path.splitext(os.path.basename(file_path))[0]
     schema_dict[filename] = file_path
 log_messages = []
-files = files[0:2]
-for pulse in track(files, description="[green]Processing..."):
+
+for pulse in files:
     error = False
-    console.print(f"Processing {pulse}")
+    console.print(f"\nProcessing {pulse}")
 
     idsinf = []
     run = pulse[1]
@@ -89,6 +90,7 @@ for pulse in track(files, description="[green]Processing..."):
         src.open()
     except Exception as e:
         console.print(f"Error opening pulse!error={e} Please check existence.")
+        log_messages.append("Error opening pulse")
         continue
 
     dest = imas.DBEntry(get_backend_id(args.backend_output), args.database_out, pulse[0], run)
@@ -100,9 +102,11 @@ for pulse in track(files, description="[green]Processing..."):
             "database={args.database_out} shot={pulse[0]} run={run}"
         )
         error = True
+        log_messages.append("Error creating pulse")
         continue
     avids = available_in_dbentry(src)
     complete_description = ""
+    identical=True
     for ids in avids:
         idsname = ids[0]
         inocc = ids[1]
@@ -115,13 +119,17 @@ for pulse in track(files, description="[green]Processing..."):
             continue
         if args.validate:
             idsobj2 = dest.get(idsname, occurrence=inocc)
-            compare_output, _, compare_output_description = idsdiff(idsobj, idsobj2, "", "", print=False)
+            compare_output, _, compare_output_description = idsdiff(idsobj, idsobj2, "", "", print_result=False)
             if not compare_output:
-                complete_description = complete_description + ";" + compare_output_description
-            else:
-                complete_description = complete_description + f";{idsname} is identical"
-    log_messages.append(complete_description)
-    # IDS validator is not yet updated to imaspy
+                identical=False
+                print(compare_output_description)
+    if args.validate:
+        if not identical:
+            log_messages.append(complete_description)
+        else:
+            log_messages.append("identical")
+
+    # #TODO IDS validator is not yet updated to imaspy
     # if idsname in schema_dict.keys():
     #     idsinf.append(
     #         (
@@ -165,3 +173,4 @@ if args.validate:
         header=True,
     )
     print(args.database_out + " migration_log--" + date + ".csv")
+    print(df)
