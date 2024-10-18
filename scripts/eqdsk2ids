@@ -3,8 +3,8 @@
 import argparse
 import os
 import traceback
-import imaspy
 
+import imaspy
 from rich.markdown import Markdown
 from rich_argparse import RichHelpFormatter
 

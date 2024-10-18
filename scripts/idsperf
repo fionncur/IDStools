@@ -63,7 +63,7 @@ if __name__ == "__main__":
         nargs="*",
         type=str,
         help=(
-            'IDS name(s) (leave empty to select all IDSs with default occurrence, or'
+            "IDS name(s) (leave empty to select all IDSs with default occurrence, or"
             'append "/n" to copy a specific occurrence "n")'
         ),
     )
@@ -115,9 +115,7 @@ if __name__ == "__main__":
         allidss = factory.ids_names()
         # TODO: treat occurrences
         args.ids = [
-            ids
-            for ids in allidss
-            if db.partial_get(ids, "ids_properties/homogeneous_time") != imas.ids_defs.EMPTY_INT
+            ids for ids in allidss if db.partial_get(ids, "ids_properties/homogeneous_time") != imas.ids_defs.EMPTY_INT
         ]
     idsobj = None
     dbout = None

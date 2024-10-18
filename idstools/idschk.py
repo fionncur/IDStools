@@ -9,11 +9,11 @@ from sys import exit
 from xml.etree import ElementTree as ET
 
 import cerberus
+import imaspy as imas
 import numpy as np
 import yaml
 
 from idstools.utils.ddhelper import DDHelper
-import imaspy as imas
 
 logger = logging.getLogger(__name__)
 
