@@ -28,7 +28,6 @@ fi
 
 SCRIPTS=(
     "eqdsk2ids -c 11 -g resources/geqdsk/example.gfile --dest \"imas:hdf5?user=$USERNAME;pulse=134174;run=117;database=ITER;version=3?path=$DATABASE_DIR\" --log INFO"
-    "eqdsk2ids -c 11 -g resources/geqdsk/example.gfile --dest \"imas:hdf5?user=$USERNAME;pulse=134174;run=117;database=ITER;version=3?path=$DATABASE_DIR\" --log INFO"
     "idscp --src \"imas:mdsplus?user=public;pulse=131024;run=10;database=ITER;version=3\" --dest \"imas:hdf5?user=$USERNAME;pulse=145000;run=5;database=ITER;version=3?path=$DATABASE_DIR\""
     "idsdiff --ids summary --uri \"imas:mdsplus?user=public;pulse=122525;run=1;database=ITER;version=3\" \"imas:mdsplus?user=public;pulse=122525;run=2;database=ITER;version=3\""
     "idsdiff --ids summary --uri \"imas:mdsplus?user=public;pulse=130011;run=6;database=ITER;version=3\" \"imas:mdsplus?user=public;pulse=130012;run=4;database=ITER;version=3\""

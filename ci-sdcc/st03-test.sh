@@ -41,6 +41,12 @@ print("Matplotlib version:", matplotlib.__version__)
 END
 )
 
+function on_error {
+    echo "Error occurred at line $LINENO, with status $?."
+}
+trap 'on_error' ERR
+
+set -x
 echo "====================================================================="
 python3 -c "$version_script"
 echo "====================================================================="
@@ -96,7 +102,7 @@ pip install pytest
 python -m pytest --junit-xml="$LOG_DIR"/test_report.xml tests
 echo "---------------------------------------------------------------------"
 deactivate
-
+set +x
 ARTIFACT=./$ENVIRONEMNT_NAME"_testlogs.tar.gz"
 
 # Check if the *.tar.gz exists before attempting to remove it
