@@ -2,7 +2,6 @@
 # Converts an IMAS database (all its data-entries) to the specified folder and backend
 
 import argparse
-from io import StringIO
 import logging
 import os
 from datetime import datetime
@@ -11,7 +10,6 @@ from glob import glob
 import imaspy as imas
 import pandas as pd
 from rich.console import Console
-from rich.progress import track
 from rich_argparse import RichHelpFormatter
 
 from idstools.database import DBMaster
@@ -106,7 +104,7 @@ for pulse in files:
         continue
     avids = available_in_dbentry(src)
     complete_description = ""
-    identical=True
+    identical = True
     for ids in avids:
         idsname = ids[0]
         inocc = ids[1]
@@ -121,7 +119,7 @@ for pulse in files:
             idsobj2 = dest.get(idsname, occurrence=inocc)
             compare_output, _, compare_output_description = idsdiff(idsobj, idsobj2, "", "", print_result=False)
             if not compare_output:
-                identical=False
+                identical = False
                 print(compare_output_description)
     if args.validate:
         if not identical:
@@ -167,10 +165,10 @@ if args.validate:
     df["Validation"] = log_messages
     date = datetime.now().strftime("%Y_%m_%d-%I:%M:%S_%p")
     df.to_csv(
-        args.database_out + " migration_log--" + date + ".csv",
+        args.database_out + "_migration_log--" + date + ".csv",
         na_rep="None",
         index=False,
         header=True,
     )
-    print(args.database_out + " migration_log--" + date + ".csv")
+    print(args.database_out + "_migration_log--" + date + ".csv")
     print(df)

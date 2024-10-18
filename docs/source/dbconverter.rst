@@ -2,7 +2,7 @@
  dbconverter
 #############
 
-Copy all data-entries from one database into another one
+Copy all data-entries from one database to another one. 
 
 ********************
  Syntax dbconverter
@@ -46,16 +46,6 @@ Copy all data-entries from one database into another one
 
       $ dbconverter --user $USERNAME --database ITER -do MYDB -bo MDSPLUS --validate
       Processing (100027, 1)
-      Processing... ━━━━╸━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  12% -:--:--[04/08/24 16:19:45]                                                                                 dbconverter:130
-      WARNING:module:could not find schema for core_transport
-      Processing... ━━━━╸━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  12% -:--:--[04/08/24 16:19:46]                                                                                     dbconverter:130
-      WARNING:module:could not find schema for disruption
-      Processing... ━━━━╸━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  12% -:--:--[04/08/24 16:19:49]                                                                                       dbconverter:130
-      WARNING:module:could not find schema for pf_active
-      Processing... ━━━━╸━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  12% -:--:--[04/08/24 16:19:50]                                                                                      dbconverter:130
-      WARNING:module:could not find schema for pf_passive
-      Processing... ━━━━╸━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  12% -:--:--[04/08/24 16:19:51]                                                                                            dbconverter:130
-      WARNING:module:could not find schema for wall
       Processing... ━━━━╸━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  12% -:--:--
       successfully converted, backend=MDSPLUS database=MYDB shot=100027 run=1
       ----------------------------------------
@@ -63,7 +53,3 @@ Copy all data-entries from one database into another one
       Processing... ━━━━━━━╺━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  18% 0:02:17
       successfully converted, backend=MDSPLUS database=MYDB shot=114101 run=157
       ----------------------------------------
-
-      MYDB migration_log--2024_04_08-05:01:40_PM.csv
-      134120,1,"[('core_profiles', True, False), ('core_sources', True, 'No Schema'), ('distribution_sources', True, 'No Schema'), ('distributions', True, 'No Schema'), ('waves', True, 'No Schema')]"
-      123001,1,"[('equilibrium', True, True)]"

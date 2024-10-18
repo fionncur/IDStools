@@ -24,7 +24,8 @@ logger = setup_logger("module")
 np.set_printoptions(threshold=1, precision=2, suppress=True)
 
 description = """
-By default this script lists available IDSes in the pulse. It prints all IDSes along with its time length. The fullarray option allows you to print the complete time array.
+By default this script lists available IDSes in the pulse. It prints all IDSes along with its time length. 
+The fullarray option allows you to print the complete time array.
 with comment option you can view ids with their occurrences, its comment and occurrence type if present
 yaml option is provided which is used by other scripts to provide list of idses with their time ranges in yaml format
 
