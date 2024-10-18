@@ -196,7 +196,7 @@ This cheat sheet provides quick reference of commonly used commands in IDStools.
 |                               |                                                                                                                                     |
 |                               | .. code-block:: bash                                                                                                                |
 |                               |                                                                                                                                     |
-|                               |    $ eqdsk2ids -c 11 --src "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3"                                  |
+|                               |    $ eqdsk2ids -c 11                                                                                                                |
 |                               |    -g resources/geqdsk/example.gfile --dest "imas:mdsplus?user=$USERNAME;pulse=134174;run=117;database=ITER;version=3"              | 
 |                               |    --log INFO                                                                                                                       |
 +-------------------------------+-------------------------------------------------------------------------------------------------------------------------------------+
