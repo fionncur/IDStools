@@ -5,7 +5,7 @@ import os
 from pprint import pformat
 from statistics import median
 
-import imas
+import imaspy as imas
 import numpy as np
 from fortranformat import FortranRecordReader
 
@@ -337,9 +337,6 @@ def map__GEQDSK_to_ids(geqdsk, eq):
         ids.ids_properties.creation_date = datetime.datetime.now().strftime("%d/%m/%Y %H:%M")
         ids.ids_properties.provider = os.getenv("USER")
 
-        ids.ids_properties.provenance.node.resize(1)
-        ids.ids_properties.provenance.node[0].sources.append(geqdsk.fpath)
-
         ids.code.name = "IDStools/eqdsk2ids"
         ids.code.repository = "https://git.iter.org/projects/IMAS/repos/idstools/browse"
         ids.code.output_flag.resize(1)
@@ -469,7 +466,7 @@ def geqdsk2ids(fpath, ipsign=0, b0sign=0, cocos_in=None):
 
     # Map GEQDSK to IDS/equilibrium
     logger.info("mapping GEQDSK to IDS/equilibrium ...")
-    eq = imas.equilibrium()
+    eq = imas.IDSFactory().equilibrium()
     map__GEQDSK_to_ids(geqdsk, eq)
 
     # COCOS Check

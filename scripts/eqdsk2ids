@@ -3,6 +3,7 @@
 import argparse
 import os
 import traceback
+import imaspy
 
 from rich.markdown import Markdown
 from rich_argparse import RichHelpFormatter
@@ -61,15 +62,11 @@ description = r"""
 
 1) Compute COCOS and create IDS data file in local database
 
-    > eqdsk2ids -g path_to_gfile -p 12345 -r 1 -u userid -d ITER
+    > eqdsk2ids -g path_to_gfile -d "imas:hdf5?path=/path/to/data" -c 11
 
 2) Increase verbosity to see information as COCOS index and transformation coeff.
 
-    > eqdsk2ids -g path_to_gfile -p 12345 -r 1 -u userid -d ITER --log INFO
-
-3) Coerce input COCOS index
-
-    > eqdsk2ids -g path_to_gfile -p 12345 -r 1 -u userid -d ITER --cocos_in 7
+    > eqdsk2ids -g path_to_gfile -d "imas:hdf5?path=/path/to/data" -c 11 --log INFO
 
 (II) Functional Interface in Python (idstools/eqdsk2ids.py)
 ------------------------------------------------------------
@@ -94,13 +91,6 @@ if __name__ == "__main__":
         prog=prog,
         formatter_class=RichHelpFormatter,
         description=Markdown(description, style="argparse.text"),
-    )
-    parser.add_argument(
-        "-s",
-        "--src",
-        type=str,
-        required=True,
-        help="source uri",
     )
     parser.add_argument(
         "-d",

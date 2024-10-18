@@ -13,6 +13,7 @@ import numpy as np
 import yaml
 
 from idstools.utils.ddhelper import DDHelper
+import imaspy as imas
 
 logger = logging.getLogger(__name__)
 
@@ -39,7 +40,7 @@ required_fields_eq = {
     "ids.ids_properties.homogeneous_time": {"min": 0, "max": 2},
     "ids.time_slice": {"minlength": 1},
     "ids.time_slice[itime].global_quantities.ip": {
-        "empty": False,
+        "ids_gt": imas.ids_defs.EMPTY_FLOAT,
     },
     "ids.vacuum_toroidal_field.b0": {
         "empty": False,
