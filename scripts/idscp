@@ -137,7 +137,7 @@ for idsname in args.ids:
         except Exception as e:
             pass
         if dest_ids_object:
-            if dest_ids_object.ids_properties.homogeneous_time != imaspy.ids_defs.EMPTY_INT:
+            if dest_ids_object.ids_properties.homogeneous_time != imas.ids_defs.EMPTY_INT:
                 user_choice = ""
                 while user_choice not in ["y", "n"]:
                     user_choice = input(f"{idsid[0]} already exists, do you want to overwrite it (y/n)? :")
@@ -153,7 +153,7 @@ for idsname in args.ids:
         if args.set_dataset_version and idsid[0] == "dataset_description":
             idsobj.dd_version = DBMaster.get_dd_version()
         try:
-            if idsobj.ids_properties.homogeneous_time != imaspy.ids_defs.EMPTY_INT:
+            if idsobj.ids_properties.homogeneous_time != imas.ids_defs.EMPTY_INT:
                 print(f"Copying {idsname}")
                 outocc = inocc if args.output_occurrence is None else args.output_occurrence
                 dest_connection.put(idsobj, occurrence=outocc)

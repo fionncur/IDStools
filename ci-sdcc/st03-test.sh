@@ -1,7 +1,7 @@
 #!/bin/bash
 # Bamboo CI script to test IDS tools on different toolchains
 # Execute script from root directory
-source ./ci-sdcc/st00-header.sh $1 $2
+source ./ci-sdcc/st00-header.sh $1 $2 $3
 
 # Note Disable set -e option when using on local as it will exit the shell on error
 if [[ "$(uname -n)" == *"bamboo"* ]]; then
@@ -76,7 +76,7 @@ echo "====================================================================="
 source ./tests/st04_test_scenario_scripts.sh "$LOG_DIR" "$DB_DIR"
 
 # Load Python Module
-IMAS_MODULE_VERSION=$(getIMASPythonModuleName "$TOOLCHAIN_VERSION" "$ACCESS_LAYER_VERSION")
+IMAS_MODULE_VERSION=$(getIMASPythonModuleName "$TOOLCHAIN_VERSION" "$ACCESS_LAYER_VERSION" "$DD_VERSION")
 module load $IMAS_MODULE_VERSION
 # ---------------------------------------------------------------------------
 echo "Loading IMAS Module $IMAS_MODULE_VERSION"

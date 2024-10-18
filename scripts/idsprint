@@ -37,19 +37,34 @@ def view_plot(ax, field, coordinate, field_name="", coordinate_name="", field_un
         logger.error("Not a numeric array, Please select ids path")
         return
     data = field
+    if isinstance(coordinate, IDSNumericArray):
+        if isinstance(coordinate, IDSPrimitive):
+            coordinate_unit = f"{coordinate.metadata.name} ({coordinate.metadata.units})"
+            coordinate_name = coordinate.metadata.path
+
     if isinstance(field, IDSNumericArray):
         if not field.has_value:
             logger.error("Values are not present")
             return
         data - field.value
         field_unit = field.metadata.units
-        field_name = f"{field_name} (coordinate:{coordinate_name})"
+
         coordinate = field.coordinates[coordinate]
         if isinstance(coordinate, IDSPrimitive):
             coordinate_unit = f"{coordinate.metadata.name} ({coordinate.metadata.units})"
             coordinate_name = coordinate.metadata.path
+        field_name = f"{field_name} (coordinate:{coordinate_name})"
 
-    ax.plot(coordinate, data, label=field_name)
+    if len(data) < 5 and len(data.shape) == 1:
+        ax.plot(coordinate, data, label=field_name, marker="o", color="red")
+    elif len(data.shape) == 2:
+        for j in range(data.shape[1]):
+            if j == 0:
+                ax.plot(coordinate, data[:, j], label=f"{field_name}")
+            else:
+                ax.plot(coordinate, data[:, j])
+    else:
+        ax.plot(coordinate, data, label=field_name)
 
     # Set Plot properties
     font_args = {
@@ -165,7 +180,6 @@ def _make_tree(structure, hide_empty_nodes, compact, *, tree=None):
                 group = Columns([txt])
             tree.add(group)
         else:
-            # print(type(child))
             if isinstance(child, IDSStructure):
                 txt = f"[magenta]{child._path}[/]"
                 ntree = tree.add(txt)
@@ -218,7 +232,7 @@ if __name__ == "__main__":
         "-p",
         "--plot",
         action="store_true",
-        help="plot data",
+        help="plot 1d arrays from leaf nodes",
     )
     parser.add_argument(
         "--save",
@@ -274,20 +288,32 @@ if __name__ == "__main__":
         else:
             print_tree(ids, hide_empty_nodes=not args.show_empty, compact=args.compact, full_array=args.full)
     else:
+        node_unit = ""
+        coordinate_name = ""
+        coordinate_unit = ""
         ids_path = ids_path.replace("(", "[").replace(")", "]").replace("/", ".")
         if ":" in ids_path:
-            node, coordinate = partial_get(ids, ids_path)
-            coordinate_name = f"{ids_name}/time"
-            coordinate_unit = "t"
+            node, coordinate, node_unit = partial_get(ids, ids_path)
+            node = np.transpose(node)
         else:
-            node = eval("ids." + ids_path)
+            try:
+                node = eval("ids." + ids_path)
+            except Exception as e:
+                logger.error(f"{ids_path} path does not exist, hint: check length of arrays, detailed error {e}")
+                node = np.array([]).reshape(
+                    0,
+                )
             coordinate = 0
-            coordinate_name = ""
-            coordinate_unit = ""
 
         if args.inspect:
             imaspy.util.inspect(node, hide_empty_nodes=not args.show_empty)
         elif args.plot:
+            # if not isinstance(node,np.ndarray) :
+            #     logger.error("Can not plot data, please select leaf nodes with 1D arrays")
+            #     exit(0)
+            if len(node) == 0:
+                logger.error("Can not plot data, no values present in the array. inspect data with -i option")
+                exit(0)
             canvas = PlotCanvas(1, 1)
             ax = canvas.add_axes(title="", xlabel="", row=0, col=0)
             view_plot(
@@ -296,7 +322,7 @@ if __name__ == "__main__":
                 coordinate,
                 field_name=f"{ids_name}/{original_ids_path}",
                 coordinate_name=coordinate_name,
-                field_unit="",
+                field_unit=node_unit,
                 coordinate_unit=coordinate_unit,
             )
 

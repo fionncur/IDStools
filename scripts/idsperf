@@ -6,7 +6,7 @@ import os
 import statistics as stat
 import sys
 
-import imaspy
+import imaspy as imas
 from rich_argparse import RichHelpFormatter
 
 from idstools import idsperf
@@ -15,7 +15,8 @@ from idstools.utils.clihelper import dbentry_parser
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="This script gives simple timing and performance information for different types of operations on IDS data with the IMAS Python Access Layer (get/get_slice/put depending on selected options)",
+        description="""This script gives simple timing and performance information for different types of 
+        operations on IDS data with the IMAS Python Access Layer (get/get_slice/put depending on selected options)""",
         parents=[dbentry_parser],
         formatter_class=RichHelpFormatter,
     )
@@ -61,7 +62,10 @@ if __name__ == "__main__":
         "ids",
         nargs="*",
         type=str,
-        help='IDS name(s) (leave empty to select all IDSs with default occurrence, or append "/n" to copy a specific occurrence "n")',
+        help=(
+            'IDS name(s) (leave empty to select all IDSs with default occurrence, or'
+            'append "/n" to copy a specific occurrence "n")'
+        ),
     )
     parser.add_argument(
         "-uri-out",
@@ -107,12 +111,13 @@ if __name__ == "__main__":
         exit(1)
 
     if args.ids == []:
-        allidss = [ids.value for ids in list(imas.IDSName)]
+        factory = imas.IDSFactory()
+        allidss = factory.ids_names()
         # TODO: treat occurrences
         args.ids = [
             ids
             for ids in allidss
-            if db.partial_get(ids, "ids_properties/homogeneous_time") != imaspy.ids_defs.EMPTY_INT
+            if db.partial_get(ids, "ids_properties/homogeneous_time") != imas.ids_defs.EMPTY_INT
         ]
     idsobj = None
     dbout = None
