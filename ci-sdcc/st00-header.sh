@@ -62,7 +62,6 @@ if [[ $TOOLCHAIN_VERSION == *"foss"* ]]; then
     FCOMPILER="gfortran"
 fi
 
-"$DD_VERSION"
 
 CORE_MODULE_VERSION=$(getIMASCoreModuleName "$TOOLCHAIN_VERSION" "$ACCESS_LAYER_VERSION" "$DD_VERSION")
 # load IMAS module first
