@@ -32,7 +32,7 @@ exts_list = [
         'source_urls': ['https://pypi.python.org/packages/source/%(nameletterlower)s/%(namelower)s'],
         'checksums': ['81011e10266ef71b6ec6d50e60171258a5b134d69f8fb387d16e4936d0d47642'],
     }),
-    ('fortranformat', version, {
+    ('fortranformat', '2.0.0', {
         'checksums': ['52473831d6f6bad7c2de0f26ad51856ea5d0ef097bcba5af3b855b871b815b0d'],
     }),
     ('packaging', '24.1', {
