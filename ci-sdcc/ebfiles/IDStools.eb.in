@@ -23,6 +23,10 @@ Git Repo: https://git.iter.org/projects/IMAS/repos/idstools
 
 toolchain = {"name": "__TOOLCHAIN_NAME__", "version": "__TOOLCHAIN_VERSION__"}
 
+builddependencies = [
+    ('hatchling', '1.18.0'),
+]
+
 checksums = [""]
 
 dependencies = [__EBRUN_MODULES__]
