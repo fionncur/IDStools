@@ -9,21 +9,20 @@ from sys import exit
 from xml.etree import ElementTree as ET
 
 import cerberus
+from pathlib import Path
 import imaspy as imas
 import numpy as np
 import yaml
-
-from idstools.utils.ddhelper import DDHelper
+import os
 
 logger = logging.getLogger(__name__)
 
 
 # ----------------------------------------------------------------------
 
-
 # Global Constants
-
-FILE_IDSDef = DDHelper.get_ids_def_path()
+imas_prefix = Path(os.environ["IMAS_PREFIX"]).resolve()
+FILE_IDSDef = str(imas_prefix / "include" / "IDSDef.xml")
 TARGET_TAG = "IDS"
 ids_header = "ids."
 idx_header = "idx."
