@@ -46,7 +46,6 @@ function on_error {
 }
 trap 'on_error' ERR
 
-set -x
 echo "====================================================================="
 python3 -c "$version_script"
 echo "====================================================================="
@@ -56,7 +55,7 @@ echo ""
 echo "====================================================================="
 echo "Testing analysis scripts  with URI $CORE_MODULE_VERSION and $PYTHON_VERSION"
 echo "====================================================================="
-# source ./tests/st03_test_analysis_scripts_with_uri.sh "$LOG_DIR" "$DB_DIR"
+source ./tests/st03_test_analysis_scripts_with_uri.sh "$LOG_DIR" "$DB_DIR"
 
 echo ""
 echo ""
