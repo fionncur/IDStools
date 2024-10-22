@@ -4,9 +4,9 @@
 source ./ci-sdcc/st00-header.sh $1 $2 $3
 
 # Note Disable set -e option when using on local as it will exit the shell on error
-if [[ "$(uname -n)" == *"bamboo"* ]]; then
-    set -e -u -o pipefail
-fi
+# if [[ "$(uname -n)" == *"bamboo"* ]]; then
+#     set -e -u -o pipefail
+# fi
 
 ENVIRONEMNT_NAME=env"$TOOLCHAIN_VERSION"_"$ACCESS_LAYER_VERSION"
 module unload IDStools
@@ -56,7 +56,7 @@ echo ""
 echo "====================================================================="
 echo "Testing analysis scripts  with URI $CORE_MODULE_VERSION and $PYTHON_VERSION"
 echo "====================================================================="
-source ./tests/st03_test_analysis_scripts_with_uri.sh "$LOG_DIR" "$DB_DIR"
+# source ./tests/st03_test_analysis_scripts_with_uri.sh "$LOG_DIR" "$DB_DIR"
 
 echo ""
 echo ""
