@@ -1,6 +1,11 @@
+import logging
+import traceback
+
 import numpy as np
 
 IDS_COCOS = 11
+
+logger = logging.getLogger(f"module.{__name__}")
 
 
 class COCOS:
@@ -324,9 +329,11 @@ def compute_COCOS(ids, itime=None, i1=0, cocos_check=None):
     cocos: COCOS
     """
     # idschk.py to be replaced with ids-validator
-    from idstools.idschk import validate_COCOS
-    from idstools.idschk import required_fields_eq, required_fields_cocos
-
+    from idstools.idschk import (
+        required_fields_cocos,
+        required_fields_eq,
+        validate_COCOS,
+    )
 
     # COCOS Values in the middle of time sequence
     if itime is None:

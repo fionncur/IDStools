@@ -2,20 +2,19 @@
 
 import copy
 import logging
+import os
 import re
-import traceback
 from os import path
+from pathlib import Path
 from sys import exit
 from xml.etree import ElementTree as ET
 
 import cerberus
-from pathlib import Path
 import imaspy as imas
 import numpy as np
 import yaml
-import os
 
-from idstools.cocos import COCOS, compute_COCOS, ids_compute_cocos, IDS_COCOS
+from idstools.cocos import COCOS, IDS_COCOS, compute_COCOS
 
 logger = logging.getLogger(__name__)
 
