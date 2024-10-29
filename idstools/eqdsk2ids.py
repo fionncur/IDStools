@@ -9,7 +9,7 @@ import imaspy as imas
 import numpy as np
 from fortranformat import FortranRecordReader
 
-from idstools.idschk import COCOS, IDS_COCOS, compute_COCOS
+from idstools.cocos import COCOS, compute_COCOS, IDS_COCOS
 
 logger = logging.getLogger(__name__)
 

@@ -10,6 +10,7 @@ from rich.markdown import Markdown
 from rich_argparse import RichHelpFormatter
 
 from idstools import idschk
+from idstools.cocos import IDS_COCOS
 from idstools.db_validator import ScenarioValidator
 from idstools.utils.clihelper import dbentry_parser
 
@@ -136,6 +137,7 @@ Examples:
 
     >>> import imas
     >>> from idstools.idschk import *
+    >>> from idstools.cocos import *
     >>> input = imas.DBEntry(imas.imasdef.MDSPLUS_BACKEND,"ITER",131024,40,"public")
     >>> input.open()
     >>> equilibrium=input.get("equilibrium")
