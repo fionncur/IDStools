@@ -38,7 +38,7 @@ def main():
     yaml.Dumper.ignore_aliases = lambda *args: True
 
     # COCOS Initialization
-    index = {"COCOS": idschk.IDS_COCOS, "ipsign": args.ipsign, "b0sign": args.b0sign}
+    index = {"COCOS": IDS_COCOS, "ipsign": args.ipsign, "b0sign": args.b0sign}
     # cocos=idschk.COCOS(index=index).get()
 
     # Load IMAS-DD File
