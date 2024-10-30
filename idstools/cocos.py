@@ -310,7 +310,7 @@ class COCOS:
         }
 
 
-def compute_COCOS(ids, itime=None, i1=0, cocos_check=None):
+def compute_COCOS(ids, itime=None, i1=0):
     """Compute COCOS values using experimental data in IDS/equilibrium
 
     Parameters
@@ -321,28 +321,15 @@ def compute_COCOS(ids, itime=None, i1=0, cocos_check=None):
         Index of struct_array time_slice in IDS/equilibrium
     i1: int=0
         Index of struct_array profiles_2d in IDS/equilibrium
-    cocos_check: COCOS=None
-        Validate IDS wrt COCOS if given
 
     Returns
     -------
     cocos: COCOS
     """
-    # idschk.py to be replaced with ids-validator
-    from idstools.idschk import (
-        required_fields_cocos,
-        required_fields_eq,
-        validate_COCOS,
-    )
 
     # COCOS Values in the middle of time sequence
     if itime is None:
         itime = int(np.floor(float(len(ids.time_slice)) / 2.0))
-
-    # Check IDS/eq
-    validate_COCOS(ids, required_fields_eq, itime, i1)
-    if cocos_check:
-        validate_COCOS(ids, required_fields_cocos, itime, i1, cocos=cocos_check)
 
     # Sign(Ip) and Sign(B0) from input
     ipsign = np.sign(ids.time_slice[itime].global_quantities.ip)
