@@ -5,8 +5,8 @@ import numpy as np
 import imaspy as imas
 
 
-# set cocos in the DD version from the environment 
-IDS_COCOS = int(imas.dd_zip.dd_etree().find('cocos').text)
+# set cocos in the DD version from the environment
+IDS_COCOS = int(imas.dd_zip.dd_etree().find("cocos").text)
 
 
 logger = logging.getLogger(f"module.{__name__}")
@@ -47,7 +47,9 @@ class COCOS:
         """
 
         if (index is None) and (values is None):
-            raise ValueError("Initialize COCOS with either index or values: both not given")
+            raise ValueError(
+                "Initialize COCOS with either index or values: both not given"
+            )
             return
 
         elif (index is not None) and (values is not None):
@@ -212,7 +214,9 @@ class COCOS:
         }
 
     @classmethod
-    def values_coefficients(self, COCOS_in, COCOS_out, ip_in, b0_in, ipsign_out, b0sign_out):
+    def values_coefficients(
+        self, COCOS_in, COCOS_out, ip_in, b0_in, ipsign_out, b0sign_out
+    ):
         """
         Provide transformation values for a set of quantities for a given pair
         of input/output COCOS numbers
@@ -255,8 +259,12 @@ class COCOS:
         sigma_b0_in = np.sign(b0_in)
 
         # Get COCOS related parameters
-        c_v_i = COCOS(index={"COCOS": COCOS_in, "ipsign": sigma_ip_in, "b0sign": sigma_b0_in}).get()
-        c_v_o = COCOS(index={"COCOS": COCOS_out, "ipsign": ipsign_out, "b0sign": b0sign_out}).get()
+        c_v_i = COCOS(
+            index={"COCOS": COCOS_in, "ipsign": sigma_ip_in, "b0sign": sigma_b0_in}
+        ).get()
+        c_v_o = COCOS(
+            index={"COCOS": COCOS_out, "ipsign": ipsign_out, "b0sign": b0sign_out}
+        ).get()
 
         # Define effective variables: sigma_Ip_eff, si1gma_B0_eff, sigma_Bp_eff,
         # exp_Bp_eff as in Appendix C
@@ -278,7 +286,9 @@ class COCOS:
 
         sigma_bp_eff = float(c_v_o["sigma_Bp"] * c_v_i["sigma_Bp"])
         exp_bp_eff = float(c_v_o["exp_Bp"] - c_v_i["exp_Bp"])
-        sigma_rhothetaphi_eff = float(c_v_o["sigma_rhothetaphi"] * c_v_i["sigma_rhothetaphi"])
+        sigma_rhothetaphi_eff = float(
+            c_v_o["sigma_rhothetaphi"] * c_v_i["sigma_rhothetaphi"]
+        )
         #
         # Note that sign(sigma_RphiZ*sigma_rhothetaphi) gives theta in clockwise or counter-clockwise respectively
         # Thus sigma_RphiZ_eff*sigma_rhothetaphi_eff negative if the direction of
@@ -340,7 +350,10 @@ def compute_COCOS(ids, itime=None, i1=0):
     b0sign = np.sign(ids.vacuum_toroidal_field.b0[itime])
 
     # 1 Eq.(22)
-    dpsi = ids.time_slice[itime].profiles_1d.psi[-1] - ids.time_slice[itime].profiles_1d.psi[0]
+    dpsi = (
+        ids.time_slice[itime].profiles_1d.psi[-1]
+        - ids.time_slice[itime].profiles_1d.psi[0]
+    )
     sigma_bp = np.sign(dpsi) * ipsign
 
     # 2 Eq.(22)
@@ -384,7 +397,9 @@ def compute_COCOS(ids, itime=None, i1=0):
     w = np.where(np.isclose(cols, iz, rtol=0.1))
 
     twopi_exp_bp_sigma_rphi_z = np.zeros(bz.shape)
-    twopi_exp_bp_sigma_rphi_z = -sigma_bp * dpsi2drdr[rows[w], cols[w]] / bz[rows[w], cols[w]]
+    twopi_exp_bp_sigma_rphi_z = (
+        -sigma_bp * dpsi2drdr[rows[w], cols[w]] / bz[rows[w], cols[w]]
+    )
     sigma_rphi_z = np.sign(np.sum(np.sign(twopi_exp_bp_sigma_rphi_z)))
 
     # 6 exp_Bp from Eq.(19)
