@@ -2,8 +2,12 @@ import logging
 import traceback
 
 import numpy as np
+import imaspy as imas
 
-IDS_COCOS = 11
+
+# set cocos in the DD version from the environment 
+IDS_COCOS = int(imas.dd_zip.dd_etree().find('cocos').text)
+
 
 logger = logging.getLogger(f"module.{__name__}")
 
