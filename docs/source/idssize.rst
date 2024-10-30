@@ -21,27 +21,27 @@ Example idssize
     .. code-block:: bash
 
         $ idssize --uri "imas:mdsplus?user=public;pulse=122525;run=1;database=ITER;version=3"
-        Examining data for public, ITER, 3, 122525, 1
-        Reading 0.001 MB of data for dataset_description/0 took 0.00 seconds
-        Reading 0.003 MB of data for divertors/0 took 0.02 seconds
-        Reading 35.431 MB of data for edge_profiles/0 took 5.58 seconds
-        Reading 27.630 MB of data for edge_sources/0 took 5.62 seconds
-        Reading 14.335 MB of data for edge_transport/0 took 4.48 seconds
-        Reading 3.057 MB of data for equilibrium/0 took 0.02 seconds
-        Reading 5.578 MB of data for radiation/0 took 3.94 seconds
-        Reading 0.016 MB of data for summary/0 took 0.12 seconds
-        Reading 0.011 MB of data for wall/0 took 0.01 seconds
-        Total reading time = 19.79 s
-        Total data size =  86.1 MB
-        Fractions of the total size for public/ITER/3/122525/1
+        Reading 0.000 MB of data for dataset_description/0 took 0.00 seconds
+        Reading 0.001 MB of data for divertors/0 took 0.00 seconds
+        Reading 34.526 MB of data for edge_profiles/0 took 0.00 seconds
+        Reading 26.076 MB of data for edge_sources/0 took 0.00 seconds
+        Reading 12.907 MB of data for edge_transport/0 took 0.00 seconds
+        Reading 3.057 MB of data for equilibrium/0 took 0.00 seconds
+        Reading 4.164 MB of data for radiation/0 took 0.00 seconds
+        Reading 0.006 MB of data for summary/0 took 0.00 seconds
+        Reading 0.009 MB of data for wall/0 took 0.00 seconds
+        Total reading time = 0.0000 s
+        Total data size =  80.7 MB
+        Fractions of the total size for imas:mdsplus?user=public;pulse=122525;run=1;database=ITER;version=3
         % bytes    IDS
-         0.00 %    dataset_description/0
-         0.00 %    divertors/0
-        41.17 %    edge_profiles/0
-        32.11 %    edge_sources/0
-        16.66 %    edge_transport/0
-         3.55 %    equilibrium/0
-         6.48 %    radiation/0
-         0.02 %    summary/0
-         0.01 %    wall/0
+        0.00 %    dataset_description/0
+        0.00 %    divertors/0
+        42.76 %    edge_profiles/0
+        32.29 %    edge_sources/0
+        15.98 %    edge_transport/0
+        3.79 %    equilibrium/0
+        5.16 %    radiation/0
+        0.01 %    summary/0
+        0.01 %    wall/0
+
 

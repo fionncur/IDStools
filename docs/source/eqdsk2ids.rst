@@ -2,7 +2,8 @@
  eqdsk2ids
 ###########
 
-*eqdsk2ids* EQDSK Convertor
+*eqdsk2ids* EQDSK Convertor allows users to specify a destination URI, a GEQDSK file path, 
+logging levels, and Tokamak coordinate conventions for converting GEQDSK file to equilibrium IDS
 
 ******************
  Syntax eqdsk2ids
@@ -15,7 +16,7 @@ Example eqdsk2ids
 
    .. code-block:: bash
 
-         $ eqdsk2ids -c 11 -g resources/geqdsk/example.gfile --dest \"imas:hdf5?user=$USER;pulse=134174;run=117;database=ITER;version=3?path=$DATABASE_DIR\" --log INFO"
+         $ eqdsk2ids -c 11 -g resources/geqdsk/example.gfile --dest \"imas:hdf5?user=$USER;pulse=134174;run=117;database=ITER;version=3\" --log INFO"
 
          24/10/18 16:35:52 INFO: loading GEQDSK file ...
          24/10/18 16:35:52 INFO: GEQDSK COCOS: 

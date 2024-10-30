@@ -179,7 +179,7 @@ for row in track(rows, description="[green]Processing..."):
     de.create()
 
     iod = {}
-    factory = imaspy.IDSFactory()
+    factory = imas.IDSFactory()
     for ids in get_ids_types():
         iod[ids] = factory.new(ids)
     for var in mf.loc[:, args.varcol]:

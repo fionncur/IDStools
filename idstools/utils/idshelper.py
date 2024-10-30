@@ -18,6 +18,9 @@ from imaspy.ids_base import IDSBase
 from imaspy.ids_struct_array import IDSStructArray
 from imaspy.ids_structure import IDSStructure
 from imaspy.ids_toplevel import IDSToplevel
+from imaspy.ids_primitive import (
+    IDSPrimitive,
+)
 from packaging import version
 from rich.progress import track
 from rich.table import Table
@@ -77,11 +80,16 @@ def get_length_of_partial_field(ids, ids_path):
     partial_field = partial_field.split(".")[0]
     try:
         _inner_data = eval("ids." + partial_field)
-        return _inner_data.coordinates[0]
+        coordinate_partial=_inner_data
+        coordinate_unit=""
+        if isinstance(_inner_data, IDSPrimitive):
+            coordinate_partial = _inner_data.coordinates[0]
+            coordinate_unit = _inner_data.coordinates[0].metadata.units
+        return coordinate_partial, coordinate_unit
     except Exception as e:
         logger.error(
-            f"{partial_field} path/value does not exist, hint: please check"
-            f"length of arrays with -i option, detailed error : {e}"
+            f"{partial_field} path/value does not exist, hint: please check "
+            f"length of an array, detailed error : {e}"
         )
         return None
 
@@ -90,7 +98,7 @@ def partial_get(ids, ids_path, coordinate_index=0):
     slice_object = parse_slice_from_string(ids_path)
     ids_path_for_eval = re.sub(r"[\[\(][^:\[\]\(\)]*:[^:\[\]\(\)]*[\]\)]", "(t)", ids_path)
     ids_path_for_eval = ids_path_for_eval.replace("(", "[").replace(")", "]").replace("/", ".")
-    coordinate_partial = get_length_of_partial_field(ids, ids_path_for_eval)
+    coordinate_partial, coordinate_unit = get_length_of_partial_field(ids, ids_path_for_eval)
     data = np.array([]).reshape(
         0,
     )
@@ -99,22 +107,25 @@ def partial_get(ids, ids_path, coordinate_index=0):
     step = slice_object.step if slice_object.step is not None else 1
     data_flag = True
     data_unit = ""
-    coordinate = None
+    coordinate = coordinate_partial
     for t in range(start, stop, step):
         try:
             _inner_data = eval("ids." + ids_path_for_eval)
             if data_flag:
                 data_flag = False
-                data_unit = _inner_data.metadata.units
-                if coordinate_index >= len(_inner_data.coordinates):
-                    coordinate_index = 0
-                coordinate = _inner_data.coordinates[coordinate_index]
+                if isinstance(_inner_data, IDSPrimitive):
+                    data_unit = _inner_data.metadata.units
+                    if coordinate_index >= len(_inner_data.coordinates):
+                        coordinate_index = 0
+                    coordinate = _inner_data.coordinates[coordinate_index]
+                    if isinstance(coordinate, IDSPrimitive):
+                        coordinate_unit=coordinate.metadata.units
         except Exception as e:
             logger.error(
                 f"{ids_path} path/value does not exist, hint: please check length"
-                f"of arrays with -i option, detailed error : {e}"
+                f"of arrays, detailed error : {e}"
             )
-            return data, coordinate
+            return data, coordinate, data_unit, coordinate_unit
         if len(_inner_data.shape) == 0:
             data = np.append(data, _inner_data)
         elif len(_inner_data.shape) == 1:
@@ -123,7 +134,7 @@ def partial_get(ids, ids_path, coordinate_index=0):
             else:
                 data = np.vstack((data, _inner_data))
     data = np.array(data)
-    return data, coordinate, data_unit
+    return data, coordinate, data_unit, coordinate_unit
 
 
 def is_ids_field(idstype: type) -> bool:
@@ -180,8 +191,6 @@ def get_ids_size(db_entry_object, ids_names=None) -> dict:
     if ids_names is None:
         factory = imas.IDSFactory()
         ids_names = factory.ids_names()
-    if type(ids_names) is str:
-        ids_names = ids_names.split(",")
     ids_size_dict = {}
     for ids_name in track(ids_names, description="[green]Processing..."):
         occurrence_list = db_entry_object.list_all_occurrences(ids_name)
@@ -752,8 +761,22 @@ def get_quantities_from_pulses(idspath: str, pulses: tuple, list_count: int = 0,
 def idsdiff_full(struct1: IDSStructure, struct2: IDSStructure, name1="", name2="", print_result=False):
     diff_result = []
     compare_result = False
-    diff_table = Table(f"{name1}({struct1.metadata.name})", f"{name2}({struct2.metadata.name})")
-
+    table_title = Text()
+    if isinstance(struct1, IDSToplevel) and isinstance(struct1, IDSToplevel):
+        table_title.append("First: ", style="bold blue")
+        table_title.append(f"{name1} ({struct1.metadata.name}) -\n", style="blue")
+        table_title.append("Second: ", style="bold magenta")
+        table_title.append(f"{name2} ({struct2.metadata.name})", style="magenta")
+    elif isinstance(struct1, IDSStructure) and isinstance(struct1, IDSStructure):
+        table_title.append("First: ", style="bold blue")
+        table_title.append(f"{name1} ({struct1._path}) -\n", style="blue")
+        table_title.append("Second: ", style="bold magenta")
+        table_title.append(f"{name2} ({struct2._path})", style="magenta")
+    else:
+        table_title.append("first - second")
+    diff_table = Table(title=table_title)
+    diff_table.add_column("first", style="blue")
+    diff_table.add_column("second", style="magenta")
     for description, child1, child2 in imas.util.idsdiffgen(struct1, struct2):
         if not isinstance(child1, IDSBase) and not isinstance(child2, IDSBase):
             txt1 = f"{description}: {child1}"
@@ -797,17 +820,26 @@ def idsdiff_full(struct1: IDSStructure, struct2: IDSStructure, name1="", name2="
 def idsdiff(struct1: IDSStructure, struct2: IDSStructure, name1="", name2="", print_result=False, verbose=True):
     diff_result = []
     compare_result = False
-    diff_name = "Left -Right"
+    table_title = Text()
+
     if isinstance(struct1, IDSToplevel) and isinstance(struct1, IDSToplevel):
-        diff_name = f"{name1}({struct1.metadata.name}) - {name2}({struct2.metadata.name})"
+        table_title.append("First: ", style="bold blue")
+        table_title.append(f"{name1} ({struct1.metadata.name}) -\n", style="blue")
+        table_title.append("Second: ", style="bold magenta")
+        table_title.append(f"{name2} ({struct2.metadata.name})", style="magenta")
     elif isinstance(struct1, IDSStructure) and isinstance(struct1, IDSStructure):
-        diff_name = f"{name1}({struct1._path}) - {name2}({struct2._path})"
-    diff_table = Table(title=Text(diff_name))
+        table_title.append("First: ", style="bold blue")
+        table_title.append(f"{name1} ({struct1._path}) -\n", style="blue")
+        table_title.append("Second: ", style="bold magenta")
+        table_title.append(f"{name2} ({struct2._path})", style="magenta")
+    else:
+        table_title.append("first - second")
+    diff_table = Table(title=table_title)
     diff_table.add_column("IDS Path")
     diff_table.add_column("Description")
     if verbose:
-        diff_table.add_column("Value Left")
-        diff_table.add_column("Value Right")
+        diff_table.add_column("Value first", style="blue")
+        diff_table.add_column("Value second", style="magenta")
 
     for description, child1, child2 in imas.util.idsdiffgen(struct1, struct2):
         diff_result.append((description, child1, child2))
@@ -868,6 +900,7 @@ def idsdiff(struct1: IDSStructure, struct2: IDSStructure, name1="", name2="", pr
         else:
             diff_table.add_row(path, information)
         # diff_table.add_section()
+    
     text_output = None
 
     if diff_table.row_count:

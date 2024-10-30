@@ -54,9 +54,9 @@ def view_plot(ax, field, coordinate, field_name="", coordinate_name="", field_un
             coordinate_unit = f"{coordinate.metadata.name} ({coordinate.metadata.units})"
             coordinate_name = coordinate.metadata.path
         field_name = f"{field_name} (coordinate:{coordinate_name})"
-
     if len(data) < 5 and len(data.shape) == 1:
         ax.plot(coordinate, data, label=field_name, marker="o", color="red")
+    
     elif len(data.shape) == 2:
         for j in range(data.shape[1]):
             if j == 0:
@@ -293,7 +293,7 @@ if __name__ == "__main__":
         coordinate_unit = ""
         ids_path = ids_path.replace("(", "[").replace(")", "]").replace("/", ".")
         if ":" in ids_path:
-            node, coordinate, node_unit = partial_get(ids, ids_path)
+            node, coordinate, node_unit, coordinate_unit = partial_get(ids, ids_path)
             node = np.transpose(node)
         else:
             try:
@@ -308,9 +308,6 @@ if __name__ == "__main__":
         if args.inspect:
             imaspy.util.inspect(node, hide_empty_nodes=not args.show_empty)
         elif args.plot:
-            # if not isinstance(node,np.ndarray) :
-            #     logger.error("Can not plot data, please select leaf nodes with 1D arrays")
-            #     exit(0)
             if len(node) == 0:
                 logger.error("Can not plot data, no values present in the array. inspect data with -i option")
                 exit(0)

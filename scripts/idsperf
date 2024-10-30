@@ -6,6 +6,7 @@ import os
 import statistics as stat
 import sys
 
+from idstools.utils.idshelper import get_available_ids_and_times
 import imaspy as imas
 from rich_argparse import RichHelpFormatter
 
@@ -111,12 +112,14 @@ if __name__ == "__main__":
         exit(1)
 
     if args.ids == []:
-        factory = imas.IDSFactory()
-        allidss = factory.ids_names()
-        # TODO: treat occurrences
-        args.ids = [
-            ids for ids in allidss if db.partial_get(ids, "ids_properties/homogeneous_time") != imas.ids_defs.EMPTY_INT
-        ]
+        args.ids = [ids for ids, _ in get_available_ids_and_times(db)]
+        # factory = imas.IDSFactory()
+        # allidss = factory.ids_names()
+        # # TODO: treat occurrences
+
+        # args.ids = [
+        #     ids for ids in allidss if db.partial_get(ids, "ids_properties/homogeneous_time") != imas.ids_defs.EMPTY_INT
+        # ]
     idsobj = None
     dbout = None
 
@@ -150,7 +153,8 @@ if __name__ == "__main__":
 
         if args.all_slices:
             # TODO: might not be relevant if homogeneous_time != 1
-            times = (db.partial_get(idsname, "time", occurrence=occ)).tolist()
+            ids=db.get(idsname, occurrence=occ)
+            times = (ids.time).tolist()
         else:
             times = args.slice_time
 
