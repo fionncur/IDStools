@@ -12,7 +12,8 @@ from idstools.utils.idshelper import get_ids_types, resample_indices, resample_t
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="Resample IDSs from a data-entry and save them into another data-entry [previously known as ids_resampling]",
+        description="Resample IDSs from a data-entry and save them into another data-entry "
+        "[previously known as ids_resampling]",
         formatter_class=RichHelpFormatter,
     )
     parser.add_argument(
@@ -33,12 +34,15 @@ if __name__ == "__main__":
     group.add_argument(
         "--index-range",
         type=str,
-        help='Specified range of slices index as "start,stop,step". If omitted, start=0, stop=len(timebase),step=1, e.g. "0,,10" to keep 1 every 10 slices. Works only for IDS with homogeneous timebase. (Default)',
+        help="Specified range of slices index as 'start,stop,step'. If omitted, start=0, stop=len(timebase),step=1,"
+        " e.g. '0,,10' to keep 1 every 10 slices. Works only for IDS with homogeneous timebase. (Default)",
     )
     group.add_argument(
         "--time-range",
         type=str,
-        help='Specified range of times as "start,stop,step". If omitted, start=time[0], stop=time[-1]), while omitting step will keep of slices between start and stop, e.g. "10.,50.," to keep all times between 10. and 50. secondes). Works only for IDS with homogeneous timebase unless all three values are specified.',
+        help="Specified range of times as 'start,stop,step'. If omitted, start=time[0], stop=time[-1]), while "
+        "omitting step will keep of slices between start and stop, e.g. '10.,50.,' to keep all times between 10. "
+        "and 50. secondes). Works only for IDS with homogeneous timebase unless all three values are specified.",
     )
     parser.add_argument(
         "ids",
@@ -81,7 +85,7 @@ if __name__ == "__main__":
         idsobj = None
         try:
             idsobj = src.get(ids_name)
-        except:
+        except Exception as _:  # noqa: F841
             pass
         if idsobj:
             homogeneous_time = idsobj.ids_properties.homogeneous_time

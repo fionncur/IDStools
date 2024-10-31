@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 import argparse
 import os
-import re
 
 from rich.console import Console
 from rich.table import Table
@@ -14,7 +13,10 @@ from idstools.utils.idslogger import setup_logger
 console = Console()
 # Management of input arguments
 parser = argparse.ArgumentParser(
-    description="""---- Show status and potential parent and children for a given simulation stored in ITER database folder\n\nImportant: The legacy scenario_status tool is deprecated and will be removed in a future versions. It will remain available until simdb is fully adopted.more about simdb : https://simdb.iter.org/dashboard/""",
+    description="""---- Show status and potential parent and children for a given simulation stored in
+    ITER database folder\n\nImportant: The legacy scenario_status tool is deprecated and will be
+    removed in a future versions. It will remain available until simdb is fully adopted.
+    more about simdb : https://simdb.iter.org/dashboard/""",
     formatter_class=RawDescriptionRichHelpFormatter,
 )
 parser.add_argument("-f", "--folder", help="folder where to search for scenarios", required=False)

@@ -13,7 +13,9 @@ logger = setup_logger("module", stdout_level=logging.INFO)
 
 # Management of input arguments
 parser = argparse.ArgumentParser(
-    description="""---- Show full description file for a given simulation stored in ITER DB folder\n\nImportant: The legacy show_db_entry tool is deprecated and will be removed in a future versions. It will remain available until simdb is fully adopted.more about simdb : https://simdb.iter.org/dashboard/""",
+    description="""---- Show full description file for a given simulation stored in ITER DB folder\n\n
+    Important: The legacy show_db_entry tool is deprecated and will be removed in a future versions.
+    It will remain available until simdb is fully adopted.more about simdb : https://simdb.iter.org/dashboard/""",
     formatter_class=RawDescriptionRichHelpFormatter,
 )
 parser.add_argument("-f", "--folder", help="folder where to search for scenarios", required=False)

@@ -53,9 +53,12 @@ connection = DBMaster.get_connection(args)
 if connection is None:
     exit(1)
 
-
-ids_spectrometer_visible = connection.get("spectrometer_visible", lazy=True)
-
+ids_spectrometer_visible = None
+try:
+    ids_spectrometer_visible = connection.get("spectrometer_visible", lazy=True)
+except Exception as _:  # noqa: F841
+    logger.error("spectrometer_visible ids is not present")
+    exit(1)
 
 time_array = ids_spectrometer_visible.time
 time_index, time_value = get_nearest_time(time_array, args.time)

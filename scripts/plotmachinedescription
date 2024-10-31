@@ -27,7 +27,8 @@ idses = "wall,pf_active"
 
 def plot_machine_description(ids_data, show_labels=False):
     """
-    The `plotMachineDescription` method is responsible for plotting the machine description based on the provided pulse list.
+    The `plotMachineDescription` method is responsible for plotting the machine description
+    based on the provided pulse list.
     """
 
     # Initialization

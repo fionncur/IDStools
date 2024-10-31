@@ -6,18 +6,17 @@ import os
 import statistics as stat
 import sys
 
-from idstools.utils.idshelper import get_available_ids_and_times
-import imaspy as imas
 from rich_argparse import RichHelpFormatter
 
 from idstools import idsperf
 from idstools.database import DBMaster
 from idstools.utils.clihelper import dbentry_parser
+from idstools.utils.idshelper import get_available_ids_and_times
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="""This script gives simple timing and performance information for different types of 
-        operations on IDS data with the IMAS Python Access Layer (get/get_slice/put depending on selected options)""",
+        description="This script gives simple timing and performance information for different types of"
+        "operations on IDS data with the IMAS Python Access Layer (get/get_slice/put depending on selected options)",
         parents=[dbentry_parser],
         formatter_class=RichHelpFormatter,
     )
@@ -113,13 +112,7 @@ if __name__ == "__main__":
 
     if args.ids == []:
         args.ids = [ids for ids, _ in get_available_ids_and_times(db)]
-        # factory = imas.IDSFactory()
-        # allidss = factory.ids_names()
-        # # TODO: treat occurrences
 
-        # args.ids = [
-        #     ids for ids in allidss if db.partial_get(ids, "ids_properties/homogeneous_time") != imas.ids_defs.EMPTY_INT
-        # ]
     idsobj = None
     dbout = None
 
@@ -153,7 +146,7 @@ if __name__ == "__main__":
 
         if args.all_slices:
             # TODO: might not be relevant if homogeneous_time != 1
-            ids=db.get(idsname, occurrence=occ)
+            ids = db.get(idsname, occurrence=occ)
             times = (ids.time).tolist()
         else:
             times = args.slice_time

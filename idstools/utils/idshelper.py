@@ -15,12 +15,12 @@ import numpy as np
 import pandas as pd
 import rich
 from imaspy.ids_base import IDSBase
-from imaspy.ids_struct_array import IDSStructArray
-from imaspy.ids_structure import IDSStructure
-from imaspy.ids_toplevel import IDSToplevel
 from imaspy.ids_primitive import (
     IDSPrimitive,
 )
+from imaspy.ids_struct_array import IDSStructArray
+from imaspy.ids_structure import IDSStructure
+from imaspy.ids_toplevel import IDSToplevel
 from packaging import version
 from rich.progress import track
 from rich.table import Table
@@ -80,8 +80,8 @@ def get_length_of_partial_field(ids, ids_path):
     partial_field = partial_field.split(".")[0]
     try:
         _inner_data = eval("ids." + partial_field)
-        coordinate_partial=_inner_data
-        coordinate_unit=""
+        coordinate_partial = _inner_data
+        coordinate_unit = ""
         if isinstance(_inner_data, IDSPrimitive):
             coordinate_partial = _inner_data.coordinates[0]
             coordinate_unit = _inner_data.coordinates[0].metadata.units
@@ -119,11 +119,10 @@ def partial_get(ids, ids_path, coordinate_index=0):
                         coordinate_index = 0
                     coordinate = _inner_data.coordinates[coordinate_index]
                     if isinstance(coordinate, IDSPrimitive):
-                        coordinate_unit=coordinate.metadata.units
+                        coordinate_unit = coordinate.metadata.units
         except Exception as e:
             logger.error(
-                f"{ids_path} path/value does not exist, hint: please check length"
-                f"of arrays, detailed error : {e}"
+                f"{ids_path} path/value does not exist, hint: please check length" f"of arrays, detailed error : {e}"
             )
             return data, coordinate, data_unit, coordinate_unit
         if len(_inner_data.shape) == 0:
@@ -900,7 +899,7 @@ def idsdiff(struct1: IDSStructure, struct2: IDSStructure, name1="", name2="", pr
         else:
             diff_table.add_row(path, information)
         # diff_table.add_section()
-    
+
     text_output = None
 
     if diff_table.row_count:

@@ -20,7 +20,6 @@ from imaspy.ids_primitive import (
     IDSString0D,
 )
 from imaspy.ids_struct_array import IDSStructArray
-from rich.progress import track
 from rich_argparse import RichHelpFormatter
 
 from idstools.database import DBMaster
@@ -36,7 +35,6 @@ from idstools.utils.idslogger import setup_logger
 from idstools.view.common import PlotCanvas
 
 THRESHOLD_PERCENT = 2
-import imaspy
 
 
 def view_plot(ax, field, coordinate, field_name="", coordinate_name="", field_unit="", coordinate_unit=""):
@@ -327,46 +325,52 @@ def generate_html(file_path, compare_data):
                             )
                         ax_lines, ax_labels = ax.get_legend_handles_labels()
                         ax2_lines, ax2_labels = ax2.get_legend_handles_labels()
-                        ax.legend(ax_lines + ax2_lines, ax_labels + ax2_labels, loc="center left", fontsize=10, bbox_to_anchor=(1.15, 0.5))
+                        ax.legend(
+                            ax_lines + ax2_lines,
+                            ax_labels + ax2_labels,
+                            loc="center left",
+                            fontsize=10,
+                            bbox_to_anchor=(1.15, 0.5),
+                        )
                         ax.grid()
                         tmpfile = BytesIO()
-                        fig.savefig(tmpfile, format="svg" , bbox_inches='tight')
+                        fig.savefig(tmpfile, format="svg", bbox_inches="tight")
                         encoded = base64.b64encode(tmpfile.getvalue()).decode("utf-8")
                         plt.close()
 
                         report_details = f"""<table class="table table-bordered table-striped table-hover table-sm align-top">
-                                                    <thead class="table-primary">
-                                                        <tr>
-                                                        <th>Attribute Name</th>
-                                                        <th>{pulse_a}</th>
-                                                        <th>{pulse_b}</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                    <tr>
-                                                        <td>minimum</td>
-                                                        <td>{"{:.4e}".format(min_a)}</td>
-                                                        <td>{"{:.4e}".format(min_b)}</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td>maximum</td>
-                                                        <td>{"{:.4e}".format(max_a)}</td>
-                                                        <td>{"{:.4e}".format(max_b)}</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td>average</td>
-                                                        <td>{"{:.4e}".format(avg_a)}</td>
-                                                        <td>{"{:.4e}".format(avg_b)}</td>
-                                                    </tr>
-                                                    </tbody>
-                                                </table>
-                                                <ul class="list-group">
-                                                <li class="list-group-item d-flex justify-content-between align-items-center"> normalized average difference : <span>{"{:.4e}".format(norm_avg_diff)} </span></li>
-                                                <li class="list-group-item d-flex justify-content-between align-items-center"> cross correlation : <span>{cross_correlation}</span></li>
-                                                <li class="list-group-item d-flex justify-content-between align-items-center"> average difference : <span>{"{:.4e}".format(avg_diff)} </span></li>
-                                                <li class="list-group-item d-flex justify-content-between align-items-center"> rms difference : <span>{"{:.4e}".format(rms_diff)} </span></li>
-                                                </ul>
-                                                <img src="data:image/svg+xml;base64,{encoded}" alt="Could not generate plot" style="width:800px; height:auto;"  class="img-fluid rounded"/>"""
+<thead class="table-primary">
+    <tr>
+    <th>Attribute Name</th>
+    <th>{pulse_a}</th>
+    <th>{pulse_b}</th>
+    </tr>
+</thead>
+<tbody>
+<tr>
+    <td>minimum</td>
+    <td>{"{:.4e}".format(min_a)}</td>
+    <td>{"{:.4e}".format(min_b)}</td>
+</tr>
+<tr>
+    <td>maximum</td>
+    <td>{"{:.4e}".format(max_a)}</td>
+    <td>{"{:.4e}".format(max_b)}</td>
+</tr>
+<tr>
+    <td>average</td>
+    <td>{"{:.4e}".format(avg_a)}</td>
+    <td>{"{:.4e}".format(avg_b)}</td>
+</tr>
+</tbody>
+</table>
+<ul class="list-group">
+<li class="list-group-item d-flex justify-content-between align-items-center"> normalized average difference : <span>{"{:.4e}".format(norm_avg_diff)} </span></li>
+<li class="list-group-item d-flex justify-content-between align-items-center"> cross correlation : <span>{cross_correlation}</span></li>
+<li class="list-group-item d-flex justify-content-between align-items-center"> average difference : <span>{"{:.4e}".format(avg_diff)} </span></li>
+<li class="list-group-item d-flex justify-content-between align-items-center"> rms difference : <span>{"{:.4e}".format(rms_diff)} </span></li>
+</ul>
+<img src="data:image/svg+xml;base64,{encoded}" alt="Could not generate plot" style="width:800px; height:auto;"  class="img-fluid rounded"/>"""
                         report_diff_line = f"""<tr>
                                 <td><span class="badge {badge_color}">{status_message}</span></td>
                                 <td>{description}</td>
@@ -374,13 +378,13 @@ def generate_html(file_path, compare_data):
                                 <td>Array length : {len(second)}</td>
                             </tr>"""
                         report_diff_line += f"""<tr>
-                                <td scope="row" colspan="4"><button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="collapse" 
-                                data-bs-target="#plot{plot_counter}">See details</button>
-                                <div class="collapse" id="plot{plot_counter}">
-                                <div class="card card-body">{report_details}
-                                </div>
-                                </div></td>
-                            </tr>"""
+<td scope="row" colspan="4"><button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="collapse" 
+data-bs-target="#plot{plot_counter}">See details</button>
+<div class="collapse" id="plot{plot_counter}">
+<div class="card card-body">{report_details}
+</div>
+</div></td>
+</tr>"""
                         plot_counter = plot_counter + 1
 
             elif isinstance(first, IDSStructArray) or isinstance(second, IDSStructArray):
@@ -544,7 +548,7 @@ if __name__ == "__main__":
                         _uri_args_a = connections[i][0]
                         _uri_args_b = connections[j][0]
 
-                        node_unit_a=""
+                        node_unit_a = ""
                         ids_a = node_a = coordinate_a = None
                         coordinate_a_name = coordinate_unit_a = ""
                         ids_a = connections[i][1].get(_uri_args_a.ids_name)
@@ -556,13 +560,16 @@ if __name__ == "__main__":
                             try:
                                 node_a = eval("ids_a." + ids_path_a)
                             except Exception as e:
-                                print(f"{ids_path_a} first  path does not exist, hint: check length of arrays, detailed error {e}")
+                                print(
+                                    f"{ids_path_a} first  path does not exist, hint: "
+                                    f"check length of arrays, detailed error {e}"
+                                )
                                 node_a = np.array([]).reshape(
                                     0,
                                 )
                             coordinate_a = 0
 
-                        node_unit_b=""  
+                        node_unit_b = ""
                         ids_b = node_b = coordinate_b = None
                         coordinate_b_name = coordinate_unit_b = ""
                         ids_b = connections[j][1].get(_uri_args_b.ids_name)
@@ -574,7 +581,10 @@ if __name__ == "__main__":
                             try:
                                 node_b = eval("ids_b." + ids_path_b)
                             except Exception as e:
-                                print(f"{ids_path_b} second path does not exist, hint: check length of arrays, detailed error {e}")
+                                print(
+                                    f"{ids_path_b} second path does not exist, hint:"
+                                    f"check length of arrays, detailed error {e}"
+                                )
                                 node_b = np.array([]).reshape(
                                     0,
                                 )
@@ -582,7 +592,8 @@ if __name__ == "__main__":
                         if ids_a is None or ids_b is None:
                             pass
                         else:
-                            # idsdiff(node_a,node_b, connections[i][0], connections[j][0] , print_result=True, verbose=True)
+                            # idsdiff(node_a,node_b, connections[i][0], connections[j][0] ,
+                            # print_result=True, verbose=True)
                             if args.plot:
                                 canvas = PlotCanvas(1, 1)
                                 ax = canvas.add_axes(title="", xlabel="", row=0, col=0)
@@ -611,7 +622,9 @@ if __name__ == "__main__":
                                     top=0.916, bottom=0.09, left=0.044, right=0.953, hspace=0.287, wspace=0.2
                                 )
                                 canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
-                                # canvas.fig.suptitle(get_title(args, f"{_uri_args_a.ids_name}/{_uri_args_a.original_uri}", None), size=12)
+                                canvas.fig.suptitle(
+                                    get_title(args, f"{_uri_args_a.ids_name}/{_uri_args_a.original_uri}", None), size=12
+                                )
 
                                 if args.save:
                                     fname = get_file_name(args, os.path.basename(__file__), None)
@@ -632,7 +645,7 @@ if __name__ == "__main__":
     idsavailability1 = []
     idsavailability2 = []
     total_data = {}
-    
+
     for i in range(len(connections)):
         for j in range(i + 1, len(connections)):
             if connections[i][0] != connections[j][0]:
@@ -641,24 +654,33 @@ if __name__ == "__main__":
                     ids_a = None
                     try:
                         ids_a = connections[i][1].get(idsname)
-                    except:
+                    except Exception as _:  # noqa: F841
                         idsavailability1.append(idsname)
                         pass
                     ids_b = None
                     try:
                         ids_b = connections[j][1].get(idsname)
-                    except:
+                    except Exception as _:  # noqa: F841
                         idsavailability2.append(idsname)
                         pass
                     if ids_a is None or ids_b is None:
                         continue
                     if args.fullarray:
                         compare_result, diff_result, _ = idsdiff_full(
-                            ids_a, ids_b, connections[i][0].original_uri, connections[j][0].original_uri, print_result=True
+                            ids_a,
+                            ids_b,
+                            connections[i][0].original_uri,
+                            connections[j][0].original_uri,
+                            print_result=True,
                         )
                     else:
                         compare_result, diff_result, _ = idsdiff(
-                            ids_a, ids_b, connections[i][0].original_uri, connections[j][0].original_uri, print_result=True, verbose=True
+                            ids_a,
+                            ids_b,
+                            connections[i][0].original_uri,
+                            connections[j][0].original_uri,
+                            print_result=True,
+                            verbose=True,
                         )
 
                     compare_data[idsname] = (compare_result, diff_result)
@@ -677,8 +699,9 @@ if __name__ == "__main__":
     only_in_list2 = set2 - set1
     ids_differences = [(item, "first") for item in only_in_list1] + [(item, "second") for item in only_in_list2]
     if len(ids_differences) != 0:
-        from rich.table import Table
         from rich.console import Console
+        from rich.table import Table
+
         console = Console()
         ids_differences_table = Table(title="IDS availability")
 

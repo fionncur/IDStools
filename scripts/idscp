@@ -134,7 +134,7 @@ for idsname in args.ids:
         dest_ids_object = None
         try:
             dest_ids_object = dest_connection.get(idsid[0], occurrence=inocc)
-        except Exception as e:
+        except Exception as _:  # noqa: F841
             pass
         if dest_ids_object:
             if dest_ids_object.ids_properties.homogeneous_time != imas.ids_defs.EMPTY_INT:
@@ -147,7 +147,7 @@ for idsname in args.ids:
     idsobj = None
     try:
         idsobj = src_connection.get(idsid[0], occurrence=inocc)
-    except Exception as e:
+    except Exception as _:  # noqa: F841
         pass
     if idsobj:
         if args.set_dataset_version and idsid[0] == "dataset_description":

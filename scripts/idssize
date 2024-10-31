@@ -4,8 +4,10 @@
 """Show size and time of IDSs.
 Author : David.Coster@ipp.mpg.de
 
-The module retrieves the size of IDS objects from a database entry and shows IDS size in bytes and the time taken to read each object. 
-It also shows total size of all IDS objects in the data entry. It shows total time taken to read all objects from the data entry
+The module retrieves the size of IDS objects from a database entry and shows
+IDS size in bytes and the time taken to read each object.
+It also shows total size of all IDS objects in the data entry. It shows total
+time taken to read all objects from the data entry
 
 Todo:
     * TODOs

@@ -3,7 +3,6 @@
 import argparse
 import logging
 import os
-import sys
 
 from rich_argparse import RichHelpFormatter
 
@@ -70,7 +69,12 @@ if conn is None:
     logger.critical("----> Aborted.")
     exit(1)
 
-ids_waves = conn.get("waves", lazy=True)
+ids_waves = None
+try:
+    ids_waves = conn.get("waves", lazy=True)
+except Exception as _:  # noqa: F841
+    logger.error("waves ids is not present")
+    exit(1)
 
 # TIME VECTOR AND TIME INDEX
 # ---------------------------

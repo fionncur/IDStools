@@ -99,9 +99,27 @@ conn = DBMaster.get_connection(args)
 if conn is None:
     logger.critical("----> Aborted.")
     exit(1)
-ids_waves = conn.get("waves", lazy=True)
-ids_core_profiles = conn.get("core_profiles", lazy=True)
-ids_equilibrium = conn.get("equilibrium", lazy=True)
+
+ids_waves = None
+try:
+    ids_waves = conn.get("waves", lazy=True)
+except Exception as _:  # noqa: F841
+    logger.error("waves ids is not present")
+    exit(1)
+
+ids_core_profiles = None
+try:
+    ids_core_profiles = conn.get("core_profiles", lazy=True)
+except Exception as _:  # noqa: F841
+    logger.error("core_profiles ids is not present")
+    exit(1)
+
+ids_equilibrium = None
+try:
+    ids_equilibrium = conn.get("equilibrium", lazy=True)
+except Exception as _:  # noqa: F841
+    logger.error("equilibrium ids is not present")
+    exit(1)
 
 # Search for adequate time slice for display
 time_array = ids_waves.time
@@ -124,7 +142,8 @@ wave_compute = WavesCompute(ids_waves)
 
 beam_tracing_dict = wave_compute.get_beam_tracing(time_slice)
 logger.info(
-    f"There are {beam_tracing_dict['active_beams_count']} active beam(s) and each beam has {beam_tracing_dict['max_total_beams']} ray(s)"
+    f"There are {beam_tracing_dict['active_beams_count']} active beam(s)"
+    f"and each beam has {beam_tracing_dict['max_total_beams']} ray(s)"
 )
 
 ecstra_view.plot_poloidal_view(ax_polview, coherent_wave_index=0, time_slice=time_slice)
@@ -171,7 +190,7 @@ for mdids_info in args.md:
                     )
                 else:
                     logger.warning(f"{_ids_name} ids is empty in the dbentry")
-            except Exception as _:
+            except Exception as _:  # noqa: F841
                 logger.warning(f"{_ids_name} ids is empty in the dbentry")
             connection.close()
         else:
@@ -187,7 +206,7 @@ for mdids_info in args.md:
                     view_pf_coils.view_active_pf_coils(ax_polview, show_labels=False)
                 else:
                     logger.warning(f"{_ids_name} ids is empty in the dbentry")
-            except Exception as _:
+            except Exception as _:  # noqa: F841
                 logger.warning(f"{_ids_name} ids is empty in the dbentry")
             connection.close()
 

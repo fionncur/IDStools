@@ -91,7 +91,8 @@ def evaluate(expr):
 
 
 parser = argparse.ArgumentParser(
-    description="This script applies mapping of a non-IDS database content (e.g. ITPA DBs) into IDS rules. replaced by ids_rosetta_code.py",
+    description="This script applies mapping of a non-IDS database content (e.g. ITPA DBs)"
+    "into IDS rules. replaced by ids_rosetta_code.py",
     formatter_class=RichHelpFormatter,
 )
 parser.add_argument(
@@ -99,7 +100,8 @@ parser.add_argument(
     "--inputcsv",
     type=str,
     default="HDB5.2.3.csv",
-    help="Path to csv file containing the external database content \t(default=%(default)s, the H-mode DB will be downloaded from https://osf.io/zhwa3/ automatically if not present)",
+    help="Path to csv file containing the external database content \t(default=%(default)s, "
+    "the H-mode DB will be downloaded from https://osf.io/zhwa3/ automatically if not present)",
 )
 parser.add_argument(
     "-m",
@@ -118,13 +120,15 @@ parser.add_argument(
     "--pathcol",
     type=str,
     default="IDS_PATH",
-    help="Name of the column of the mapping file listing the paths to store all DB variables into IDS fields \t(default=%(default)s)",
+    help="Name of the column of the mapping file listing the paths to store all"
+    "DB variables into IDS fields \t(default=%(default)s)",
 )
 parser.add_argument(
     "--tracol",
     type=str,
     default="TRANSFORMATION",
-    help="Name of the column of the mapping file listing the transformations to be done on DB variables (default = summary)\t(default=%(default)s)",
+    help="Name of the column of the mapping file listing the transformations"
+    "to be done on DB variables (default = summary)\t(default=%(default)s)",
 )
 parser.add_argument(
     "--timeloc",

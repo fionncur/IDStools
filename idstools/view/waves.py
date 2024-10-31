@@ -560,7 +560,7 @@ class WavesView:
                         )
         return ax_polview_plot_traces
 
-    def plot_topview_traces_update(self, ax, time_slice, beam_index, verbose=False, update=True):
+    def plot_topview_traces_update(self, ax, time_slice, verbose=False, update=True):
         # Read beam tracing from waves IDS
         beam_tracing = self.waves_compute.get_beam_tracing(time_slice)
         nbeam = beam_tracing["nbeam"]

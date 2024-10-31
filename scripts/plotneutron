@@ -22,7 +22,8 @@ from idstools.view.distribution_sources import DistributionSourcesView
 
 # Management of input arguments
 parser = argparse.ArgumentParser(
-    description="---- Display the neutron profiles from the distribution_sources IDSs [previously known as neutronplot]",
+    description="""---- Display the neutron profiles from the distribution_sources IDSs
+    [previously known as neutronplot]""",
     parents=[dbentry_parser],
     formatter_class=RichHelpFormatter,
 )
@@ -55,7 +56,13 @@ if hostdir is None:
     )
     exit(1)
 
-ids_distribution_sources = connection.get("distribution_sources", lazy=True)
+ids_distribution_sources = None
+try:
+    ids_distribution_sources = connection.get("distribution_sources", lazy=True)
+except Exception as _:  # noqa: F841
+    logger.error("distribution_sources ids is not present")
+    exit(1)
+
 
 time_array = ids_distribution_sources.time
 time_slice, time_value = get_nearest_time(time_array, args.time)
@@ -75,14 +82,14 @@ for isource in range(nsources):
     try:
         availability_test = ids_distribution_sources.source[isource].profiles_1d[time_slice]
 
-    except Exception as _:
+    except Exception as _:  # noqa: F841
         logger.warning(
             f"Source {str(isource)} has no profiles_1d -> considered as inactive",
         )
         active[isource] = 0
     try:
         availability_test = ids_distribution_sources.source[isource].global_quantities[time_slice]
-    except Exception as _:
+    except Exception as _:  # noqa: F841
         if active[isource] == 1:
             logger.warning(
                 f"Source {str(isource)} has no global_quantities -> considered as inactive",
@@ -90,7 +97,7 @@ for isource in range(nsources):
             active[isource] = 0
     try:
         availability_test = ids_distribution_sources.source[isource].process[time_slice]
-    except Exception as _:
+    except Exception as _:  # noqa: F841
         if active[isource] == 1:
             logger.warning(
                 f"Source {str(isource)} has no process -> considered as inactive",

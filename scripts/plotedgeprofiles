@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Edgeplot is added in develop2.0 developed by Anna https://confluence.iter.org/display/IMP/How+to+plot+data+from+edge_profiles
+# Edgeplot is added in develop2.0 developed by Anna
+# https://confluence.iter.org/display/IMP/How+to+plot+data+from+edge_profiles
 import argparse
-import copy
 import logging
 import os
 
@@ -76,24 +76,24 @@ if connection is None:
 
 wall_ids = None
 if args.wall:
-
-    print(args.walluri)
     if args.walluri:
         mdargs = argparse.Namespace()
         mdargs.uri = args.walluri
         mdconnection = DBMaster.get_connection(args)
         try:
             wall_ids = mdconnection.get("wall", lazy=True)
-        except Exception as e:
+        except Exception as _:  # noqa: F841
             logger.error(
-                "wall ids is not present in the data entry. please provide with --walluri option where wall ids is exists"
+                "wall ids is not present in the data entry. please provide"
+                "with --walluri option where wall ids is exists"
             )
     else:
         try:
             wall_ids = connection.get("wall", lazy=True)
-        except Exception as e:
+        except Exception as _:  # noqa: F841
             logger.error(
-                "wall ids is not present in the data entry. please provide with --walluri option where wall ids is exists"
+                "wall ids is not present in the data entry. please provide with"
+                "--walluri option where wall ids is exists"
             )
 
     if wall_ids and not wall_ids.ids_properties.homogeneous_time == ids_defs.EMPTY_INT:
@@ -109,7 +109,13 @@ if args.wall:
                     h = vessel_unit["h"]
                     break
 
-edge_profile_ids = connection.get("edge_profiles", lazy=True)
+edge_profile_ids = None
+try:
+    edge_profile_ids = connection.get("edge_profiles", lazy=True)
+except Exception as _:  # noqa: F841
+    logger.error("edge_profiles ids is not present")
+    exit(1)
+
 time_array = edge_profile_ids.time
 if time_array is None:
     logger.error("edge_profiles ids : time is not present")
@@ -119,13 +125,15 @@ time_slice, time_value = get_nearest_time(time_array, args.time)
 
 if len(edge_profile_ids.grid_ggd) == 0:
     logger.error(
-        f"No values in grid_ggd  at time {time_value}, Can not plot! Choose different time with option --time, timerange [{time_array.min()}-{time_array.max()}]"
+        f"No values in grid_ggd  at time {time_value}, Can not plot! Choose different time with option --time,"
+        f"timerange [{time_array.min()}-{time_array.max()}]"
     )
     exit(1)
 
 if len(edge_profile_ids.grid_ggd[time_slice].space) == 0:
     logger.error(
-        f"No values in grid_ggd[{time_slice}].space at time {time_value}, Can not plot! Choose different time with option --time, timerange [{time_array.min()}-{time_array.max()}]"
+        f"No values in grid_ggd[{time_slice}].space at time {time_value}, Can not plot!"
+        f"Choose different time with option --time, timerange [{time_array.min()}-{time_array.max()}]"
     )
     exit(1)
 

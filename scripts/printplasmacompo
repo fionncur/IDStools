@@ -76,7 +76,8 @@ try:
         time_slice_core_profiles = np.argmax(ne0_list)
         time_value_core_profiles = core_profiles_ids.time[time_slice_core_profiles]
         logger.info(
-            f"core_profiles IDS:Using time slice where maximum electrons density is present, Time slice:{time_slice_core_profiles}"
+            f"core_profiles IDS:Using time slice where maximum electrons density is present,"
+            f"Time slice:{time_slice_core_profiles}"
         )
     else:
         time_array_core_profiles = core_profiles_ids.time
@@ -97,7 +98,8 @@ try:
             time_slice_edge_profiles = np.argmax(ne0_list)
             time_value_edge_profiles = edge_profiles_ids.time[time_slice_edge_profiles]
             logger.info(
-                f"edge_profiles IDS:Using time slice where maximum electrons density is present, Time slice:{time_slice_edge_profiles}"
+                f"edge_profiles IDS:Using time slice where maximum electrons density is present,"
+                f"Time slice:{time_slice_edge_profiles}"
             )
         else:
             time_array_edge_profiles = edge_profiles_ids.time
@@ -133,8 +135,13 @@ if core_profiles_ids is not None:
         core_profile_exists = False
         logger.critical("core_profiles IDS:IDS exists but volume is not set")
         logger.warning("core_profiles IDS :Retrieving volume from equilibrium IDS")
-        equilibrium_ids = connection.get("equilibrium", lazy=True)
-        volume = equilibrium_ids.time_slice({time_slice_core_profiles}).profiles_1d.volume
+        equilibrium_ids = None
+        try:
+            equilibrium_ids = connection.get("equilibrium", lazy=True)
+            volume = equilibrium_ids.time_slice({time_slice_core_profiles}).profiles_1d.volume
+        except Exception as _:  # noqa: F841
+            logger.warning("equilibrium IDS :equilibrium IDS/volume is not present")
+
         returnstatus = CoreProfilesView.view_plasma_composition_with_species_concentration(
             core_profiles_ids, time_slice_core_profiles, volume=volume
         )

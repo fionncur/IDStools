@@ -121,6 +121,7 @@ class EcStrayView:
     def plot_cut_off_layer(
         self,
         ax,
+        coherent_wave_index,
         time_slice,
         init=1,
         verbose=False,
@@ -168,7 +169,7 @@ class EcStrayView:
             :func:`idstools.domain.ecstray.EcStrayCompute.getCutoffLayer`
         """
         # Calculate density cutoff layer position
-        cutoff_layer = self.ecstray_object.get_cutoff_layer(time_slice)
+        cutoff_layer = self.ecstray_object.get_cutoff_layer(coherent_wave_index, time_slice)
 
         # TODO Work on this function to keep call back function and events and not to pass init=1
         if init == 1:

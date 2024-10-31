@@ -76,7 +76,7 @@ class EcStrayCompute:
 
         return {"profile2d_index": profile2d_index, "resonance_layer": resonance_layer}
 
-    def get_cutoff_layer(self, time_slice):
+    def get_cutoff_layer(self, coherent_wave_index, time_slice):
         """The cutoff layer is a region in a plasma where certain frequencies or modes of wave propagation
         are prevented from propagating or transmitting due to the plasma's properties.
 
@@ -127,7 +127,7 @@ class EcStrayCompute:
 
         """
         # wavecompute = WavesCompute(self.wavesIds)
-        omega_ec = self.waves_compute.get_omega_ec(time_slice)
+        omega_ec = self.waves_compute.get_omega_ec(coherent_wave_index, time_slice)
 
         # Find (R,Z) rectangular grid of B-field
         # eqcomputeobj = EquilibriumCompute(self.equilibriumIds)

@@ -22,8 +22,6 @@ from idstools.view.core_profiles import CoreProfilesView
 from idstools.view.equilibrium import EquilibriumView
 from idstools.view.summary import SummaryView
 
-EMPTY_INT = -999999999
-
 # ----------------------------------------------------------------------
 
 # Management of input arguments
@@ -69,11 +67,23 @@ if connection is None:
     exit(1)
 
 if not args.no_profiles:
-    ids_core_profiles = connection.get("core_profiles", lazy=True)
+    ids_core_profiles = None
+    try:
+        ids_core_profiles = connection.get("core_profiles", lazy=True)
+    except Exception as _:  # noqa: F841
+        logger.error("core_profiles ids is not present")
+        exit(1)
     if ids_core_profiles.time is None:
         logger.critical("No core_profiles IDS in the data-entry --> Abort.")
         exit()
-    ids_equilibrium = connection.get("equilibrium", lazy=True)
+
+    ids_equilibrium = None
+    try:
+        ids_equilibrium = connection.get("equilibrium", lazy=True)
+    except Exception as _:  # noqa: F841
+        logger.error("equilibrium ids is not present")
+        exit(1)
+
     if ids_equilibrium.time is None:
         logger.critical("No equilibrium IDS in the data-entry --> Abort.")
         exit()
@@ -84,7 +94,7 @@ if not args.no_profiles:
     time_slice, time_value = get_nearest_time(time_array, args.time)
 try:
     ids_summary = connection.get("summary", lazy=True)
-except Exception as e:
+except Exception as _:  # noqa: F841
     logger.critical("The summary IDS is absent from the input data-entry")
     logger.critical("----> Aborted.")
     exit(1)
@@ -166,7 +176,7 @@ if args.info:
             got_dataset_description = False
         else:
             got_dataset_description = True
-    except Exception as _:
+    except Exception as _:  # noqa: F841
         logger.warning("Warning: The dataset_description IDS is absent from the input data-entry")
         got_dataset_description = False
     # F4F specific?
@@ -181,7 +191,7 @@ if args.info:
         if ids_summary.tag.name != "":
             try:
                 additional_data = json.loads(ids_summary.tag.name)
-            except Exception as _:
+            except Exception as _:  # noqa: F841
                 additional_data = ""
         if "date" in additional_data:
             txtdate = additional_data["date"]
@@ -193,7 +203,12 @@ if args.info:
             f"access_layer={ids_summary.ids_properties.version_put.access_layer}"
 
         else:
-            title += f"\nprovider={ids_summary.ids_properties.provider}, creation_date={ids_summary.ids_properties.creation_date}\ndata_dictionary={ids_summary.ids_properties.version_put.data_dictionary}, access_layer={ids_summary.ids_properties.version_put.access_layer}"
+            title += (
+                f"\nprovider={ids_summary.ids_properties.provider}, "
+                f"creation_date={ids_summary.ids_properties.creation_date}\n"
+                f"data_dictionary={ids_summary.ids_properties.version_put.data_dictionary}, "
+                f"access_layer={ids_summary.ids_properties.version_put.access_layer}"
+            )
 
 if not args.no_profiles:
     canvas.set_text(text=f"{get_database_path(args, time_value=time_value)}")

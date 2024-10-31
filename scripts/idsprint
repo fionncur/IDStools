@@ -56,7 +56,7 @@ def view_plot(ax, field, coordinate, field_name="", coordinate_name="", field_un
         field_name = f"{field_name} (coordinate:{coordinate_name})"
     if len(data) < 5 and len(data.shape) == 1:
         ax.plot(coordinate, data, label=field_name, marker="o", color="red")
-    
+
     elif len(data.shape) == 2:
         for j in range(data.shape[1]):
             if j == 0:

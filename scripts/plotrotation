@@ -5,7 +5,6 @@
 import argparse
 import logging
 import os
-import sys
 
 from rich_argparse import RichHelpFormatter
 
@@ -22,7 +21,8 @@ from idstools.view.common import PlotCanvas
 from idstools.view.core_profiles import CoreProfilesView
 
 parser = argparse.ArgumentParser(
-    description="---- Display the efield, toroidal, polidal velocities from the core_profiles IDSs [previously known as rotationplot]",
+    description="""---- Display the efield, toroidal, polidal velocities from the core_profiles IDSs
+    [previously known as rotationplot]""",
     parents=[dbentry_parser],
     formatter_class=RichHelpFormatter,
 )
@@ -46,7 +46,12 @@ if connection is None:
     logger.critical("----> Aborted.")
     exit(1)
 
-ids_core_profiles = connection.get("core_profiles", lazy=True)
+ids_core_profiles = None
+try:
+    ids_core_profiles = connection.get("core_profiles", lazy=True)
+except Exception as _:  # noqa: F841
+    logger.error("core_profiles ids is not present")
+    exit(1)
 
 # Search for adequate time slice for display
 time_array = ids_core_profiles.time

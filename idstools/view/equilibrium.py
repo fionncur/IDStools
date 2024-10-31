@@ -80,7 +80,7 @@ class EquilibriumView(BasePlot):
         if cartestion_grid is not None:
             levels = 30
             if plot_rho:
-                rho2d = self.compute_obj.get_rho2d()
+                rho2d = self.compute_obj.get_rho2d(time_slice)
                 if rho2d is not None:
                     ax.contour(
                         cartestion_grid["r2d"],

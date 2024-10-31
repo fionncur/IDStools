@@ -41,7 +41,7 @@ This cheat sheet provides quick reference of commonly used commands in IDStools.
 |                            |                                                                                                                              |
 |                            | .. code-block:: bash                                                                                                         |
 |                            |                                                                                                                              |
-|                            |    $ plotecray --uri "imas:mdsplus?user=public;pulse=134173;run=2326;database=TEST;version=3"                                |
+|                            |    $ plotecray --uri "imas:mdsplus?user=public;pulse=134173;run=2326;database=TEST;version=3"  -md wall                      |
 |                            |    $ plotecray --uri "imas:mdsplus?user=public;pulse=134173;run=2326;database=TEST;version=3"                                |
 |                            |    -md "imas:hdf5?user=public;pulse=116000;run=4;database=ITER_MD;version=3#wall"                                            |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
@@ -95,6 +95,8 @@ This cheat sheet provides quick reference of commonly used commands in IDStools.
 |                            |    -nbi 130012/115/public/MDSPLUS/TEST/3                                                                                     |
 |                            |    -fus 130012/115/public/MDSPLUS/TEST/3                                                                                     |
 |                            |    -icrh 130012/15/public/MDSPLUS/TEST/3                                                                                     |
+|                            |                                                                                                                              |
+|                            |    $ plothcd -ech "imas:mdsplus?user=public;pulse=134173;run=101;database=TEST;version=3"                                    |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
 | *plothcdwaves*             | shows waveforms  (replaces hcd_waves_plot).                                                                                  |
 |                            |                                                                                                                              |
@@ -197,7 +199,7 @@ This cheat sheet provides quick reference of commonly used commands in IDStools.
 |                               | .. code-block:: bash                                                                                                                |
 |                               |                                                                                                                                     |
 |                               |    $ eqdsk2ids -c 11                                                                                                                |
-|                               |    -g resources/geqdsk/example.gfile --dest "imas:mdsplus?user=$USERNAME;pulse=134174;run=117;database=ITER;version=3"              | 
+|                               |    -g resources/geqdsk/example.gfile --dest "imas:mdsplus?user=$USER;pulse=134174;run=117;database=ITER;version=3"                  | 
 |                               |    --log INFO                                                                                                                       |
 +-------------------------------+-------------------------------------------------------------------------------------------------------------------------------------+
 | *idschk*                      | Validate ids fields against rules defined in yaml file                                                                              |
@@ -214,7 +216,7 @@ This cheat sheet provides quick reference of commonly used commands in IDStools.
 |                               | .. code-block:: bash                                                                                                                |
 |                               |                                                                                                                                     |
 |                               |    $ idscp --src "imas:mdsplus?user=public;pulse=131024;run=10;database=ITER;version=3"                                             |
-|                               |    --dest "imas:mdsplus?user=$USERNAME;pulse=145000;run=5;database=ITER;version=3"                                                  |
+|                               |    --dest "imas:mdsplus?user=$USER;pulse=145000;run=5;database=ITER;version=3"                                                      |
 +-------------------------------+-------------------------------------------------------------------------------------------------------------------------------------+
 | *idsdiff*                     | Shows ids level differences between two runs. It stores result in                                                                   |
 |                               | html document. For signals differences it is also shown as graph.                                                                   |  
@@ -227,6 +229,30 @@ This cheat sheet provides quick reference of commonly used commands in IDStools.
 |                               |                                                                                                                                     |
 |                               |    $ idsdiff --ids summary --uri "imas:mdsplus?user=public;pulse=130011;run=6;database=ITER;version=3"                              |
 |                               |    "imas:mdsplus?user=public;pulse=130012;run=4;database=ITER;version=3"                                                            |
+|                               |     $ idsdiff --uri "imas:mdsplus?user=public;pulse=122481;run=1;database=ITER;version=3                                            |
+|                               |     #edge_profiles/ggd[:]/electrons/density[1].values"                                                                              |
+|                               |    "imas:mdsplus?user=public;pulse=122481;run=2;database=ITER;version=3#edge_profiles/ggd[:]/electrons/density[1].values"           |
+|                               |     --plot                                                                                                                          |
+|                               |                                                                                                                                     |
+|                               |    $ idsdiff --uri "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3                                           |
+|                               |     #core_profiles/profiles_1d(:)/electrons/temperature[10]"                                                                        |
+|                               |    "imas:mdsplus?user=public;pulse=134174;run=107;database=ITER;version=3#core_profiles/profiles_1d(:)/electrons/temperature[0]"    |
+|                               |     --plot                                                                                                                          |
+|                               |                                                                                                                                     |
+|                               |    $ idsdiff --uri "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3                                           |
+|                               |    #core_profiles/profiles_1d(40:60)/electrons/temperature"                                                                         |
+|                               |    "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3#core_profiles/profiles_1d(40:60)/electrons/temperature"   |
+|                               |    --plot                                                                                                                           |
+|                               |                                                                                                                                     |
+|                               |    $ idsdiff --uri "imas:mdsplus?user=public;pulse=131024;run=50;database=ITER;version=3"                                           |
+|                               |    "imas:mdsplus?user=sawantp1;pulse=131024;run=50;database=ITER;version=3"                                                         |
+|                               |                                                                                                                                     |
+|                               |    $ idsdiff --uri "imas:mdsplus?user=public;pulse=130011;run=6;database=ITER;version=3#summary"                                    |
+|                               |    "imas:mdsplus?user=public;pulse=130012;run=4;database=ITER;version=3#summary"                                                    |
+|                               |                                                                                                                                     |
+|                               |    $ idsdiff --ids summary --uri "imas:mdsplus?user=public;pulse=122525;run=1;database=ITER;version=3"                              |
+|                               |    "imas:mdsplus?user=public;pulse=122525;run=2;database=ITER;version=3"                                                            |
+|                               |                                                                                                                                     |
 +-------------------------------+-------------------------------------------------------------------------------------------------------------------------------------+
 | *idslist*                     | Shows list of all idses along with count of time slices.                                                                            |
 |                               | (replaces ids_content(yaml), listidss (with time slices),                                                                           |    
@@ -237,7 +263,8 @@ This cheat sheet provides quick reference of commonly used commands in IDStools.
 |                               |                                                                                                                                     |
 |                               |    $ idslist --uri "imas:mdsplus?user=public;pulse=122525;run=1;database=ITER;version=3"                                            |
 |                               |    $ idslist --uri "imas:mdsplus?user=public;pulse=122525;run=1;database=ITER;version=3" -y                                         |
-|                               |    $ idslist --uri "imas:mdsplus?user=public;pulse=122525;run=1;database=ITER;version=3" -o                                         |                                                                                                                                                                                                                                                                              
+|                               |    $ idslist --uri "imas:mdsplus?user=public;pulse=122525;run=1;database=ITER;version=3" -c                                         |                                                                                                                                                                                                                                                                              
+|                               |    $ idslist --uri "imas:mdsplus?user=public;pulse=122525;run=1;database=ITER;version=3" -f                                         |                                                                                                                                                                                                                                                                              
 +-------------------------------+-------------------------------------------------------------------------------------------------------------------------------------+
 | *idsperf*                     | Shows performance of access layer operations on dataset. timing and                                                                 |
 |                               | performance information for different types of operations on IDS                                                                    |
@@ -267,6 +294,16 @@ This cheat sheet provides quick reference of commonly used commands in IDStools.
 |                               | .. code-block:: bash                                                                                                                |
 |                               |                                                                                                                                     |
 |                               |    $ idsprint --uri "imas:mdsplus?user=public;pulse=122525;run=1;database=ITER;version=3#equilibrium"                               |
+|                               |    $ idsprint --uri "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3#core_profiles/profiles_1d" -i            |
+|                               |    $ idsprint --uri "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3#core_profiles/profiles_1d[0]"            |
+|                               |    $ idsprint --uri "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3#core_profiles/profiles_1d[0]" -c         |
+|                               |    $ idsprint --uri "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3#core_profiles/profiles_1d[0]" -f         |
+|                               |    $ idsprint --uri "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3#core_profiles/profiles_1d[0]/e_field" -e |
+|                               |    $ idsprint --uri "imas:hdf5?path=/work/imas/shared/imasdb/ITER/3/105027/2#magnetics/flux_loop[:]/flux/data" -p                   |
+|                               |    $ idsprint --uri "imas:mdsplus?user=public;pulse=122481;run=1;database=ITER;version=3#edge_profiles/ggd[:]/electrons/density[1]  |
+|                               |    .values" -p                                                                                                                      |
+|                               |    $ idsprint --uri "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3                                          |
+|                               |    #core_profiles/profiles_1d(:)/electrons/temperature" -p                                                                          |
 +-------------------------------+-------------------------------------------------------------------------------------------------------------------------------------+
 | *idsresample*                 | Resample IDSs from a data-entry and save them into another                                                                          |
 |                               | data-entry based on PREVIOUS_INTERP method.                                                                                         |
@@ -275,7 +312,7 @@ This cheat sheet provides quick reference of commonly used commands in IDStools.
 |                               | .. code-block:: bash                                                                                                                |
 |                               |                                                                                                                                     |                                                                                                                                                                                                                                                                                                                                                
 |                               |    $ idsresample --src "imas:mdsplus?user=public;pulse=131024;run=10;database=ITER;version=3"                                       |
-|                               |    --dest "imas:mdsplus?user=$USERNAME;pulse=131024;run=5;database=ITER;version=3"                                                  |                                                                                                                                                                            
+|                               |    --dest "imas:mdsplus?user=$USERNAME;pulse=131024;run=5;database=ITER;version=3"  --index-range 0,,10                             |                                                                                                                                                                            
 +-------------------------------+-------------------------------------------------------------------------------------------------------------------------------------+
 | *idsrescale_equilibrium*      | Rescaling an equilibrium magnetic field, storing the output into                                                                    |
 |                               | another entry of the same DB. replaced by ids_rescale_eq                                                                            |

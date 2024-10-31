@@ -15,7 +15,8 @@ logger = setup_logger("module", stdout_level=logging.INFO)
 
 # Management of input arguments
 parser = argparse.ArgumentParser(
-    description="Rescaling an equilibrium magnetic field, storing the output into another entry of the same DB. replaced by ids_rescale_eq",
+    description="Rescaling an equilibrium magnetic field, storing the output into another entry of the same "
+    "DB. replaced by ids_rescale_eq",
     formatter_class=RichHelpFormatter,
 )
 parser.add_argument(
@@ -90,5 +91,6 @@ if args.dest is not None:
     logger.info(f"Output database details {args.dest}")
 else:
     logger.info(
-        f"Output database details database={args.dest_database}, pulse={args.dest_pulse}, run={args.dest_run}, user={os.environ['USER']}"
+        f"Output database details database={args.dest_database}, pulse={args.dest_pulse}, "
+        f"run={args.dest_run}, user={os.environ['USER']}"
     )
