@@ -16,7 +16,7 @@ Copy all data-entries from one database to another one.
 
    .. code:: bash
 
-      $ dbconverter --user $USERNAME --database ITER -do MYDB -bo HDF5
+      $ dbconverter --user $USER --database ITER -do MYDB -bo HDF5
       ----------------------------------------
       Processing (114101, 157)
       Processing... ━━━━━━━╺━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  18% 0:00:51
@@ -44,7 +44,7 @@ Copy all data-entries from one database to another one.
 
    .. code:: bash
 
-      $ dbconverter --user $USERNAME --database ITER -do MYDB -bo MDSPLUS --validate
+      $ dbconverter --user $USER --database ITER -do MYDB -bo MDSPLUS --validate
       Processing (100027, 1)
       Processing... ━━━━╸━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  12% -:--:--
       successfully converted, backend=MDSPLUS database=MYDB shot=100027 run=1

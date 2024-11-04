@@ -25,12 +25,8 @@ retrieves from distribution_sources IDS
         :alt: image not found
         :align: center
 
-    .. thumbnail:: _static/images/plotneutron2.png
-        :alt: image not found
-        :align: center
 
     .. code-block:: bash
-
 
         Time  = 482.00 s
         Distribution_sources contains 9 sources
