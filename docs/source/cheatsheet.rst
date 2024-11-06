@@ -349,7 +349,7 @@ This cheat sheet provides quick reference of commonly used commands in IDStools.
 |                               |    # Show empty fields of ids alone with filled ids fields                                                                          |
 |                               |    $ idsprint --uri "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3#core_profiles/profiles_1d[0]/e_field" -e |
 |                               |                                                                                                                                     | 
-|                               |    # plot 1d array
+|                               |    # plot 1d array                                                                                                                  |
 |                               |    $ idsprint --uri "imas:hdf5?path=/work/imas/shared/imasdb/ITER/3/105027/2#magnetics/flux_loop[:]/flux/data" -p                   |
 |                               |                                                                                                                                     | 
 |                               |    $ idsprint --uri "imas:mdsplus?user=public;pulse=122481;run=1;database=ITER;version=3#edge_profiles/ggd[:]/electrons/density[1]  |

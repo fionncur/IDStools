@@ -64,12 +64,19 @@ occgroup.add_argument(
     help="Copy the selected source into the specified occurrence at the destination",
 )
 parser.add_argument(
+    "--convert-ids",
+    action="store_true",
+    help=("Convert ids to the default version of the data dictionary if set to True"
+    "otherwise uses original ids stored in disk")
+)
+parser.add_argument(
     "ids",
     nargs="*",
     type=str,
     help="IDSs to copy (leave empty to select all IDSs with default occurrence,"
     'or append "/n" to copy a specific occurrence "n")',
 )
+
 args = parser.parse_args()
 
 if args.src is not None and args.dest is not None:
@@ -90,13 +97,24 @@ if src_connection is None:
 outputargs = argparse.Namespace()
 outputargs.uri = args.dest
 
+# hack to get underlying data dictionary version used by idses
+src_dd_version=src_connection.dd_version
+if not args.convert_ids:
+    for idsname in args.ids:
+        try:
+            _dummy = src_connection.get(idsname, lazy=True)
+            src_dd_version = _dummy.ids_properties.version_put.data_dictionary.value
+            break
+        except Exception as _:  # noqa: F841
+            pass
+        
 if args.force:
     # CREATE DEST
     if "mode" not in outputargs.__dict__:
         outputargs.mode = "w"
     dest_connection = None
     if outputargs.uri != "" and outputargs.uri is not None:
-        dest_connection = imas.DBEntry(outputargs.uri, outputargs.mode)
+        dest_connection = imas.DBEntry(outputargs.uri, outputargs.mode, dd_version=src_dd_version)
     if dest_connection is None:
         logger.error("Error creating destination pulse! Please check parameters and permissions.")
         exit(1)
@@ -105,7 +123,7 @@ else:
         outputargs.mode = "a"
     dest_connection = None
     if outputargs.uri != "" and outputargs.uri is not None:
-        dest_connection = imas.DBEntry(outputargs.uri, outputargs.mode)
+        dest_connection = imas.DBEntry(outputargs.uri, outputargs.mode, dd_version=src_dd_version)
 
     if dest_connection is None:
         logger.error("Error opening destination pulse! Please check parameters and permissions.")
@@ -133,7 +151,10 @@ for idsname in args.ids:
     if args.interactive:
         dest_ids_object = None
         try:
-            dest_ids_object = dest_connection.get(idsid[0], occurrence=inocc)
+            if args.convert_ids:
+                dest_ids_object = dest_connection.get(idsid[0], occurrence=inocc)
+            else:
+                dest_ids_object = dest_connection.get(idsid[0], occurrence=inocc, autoconvert=False, ignore_unknown_dd_version=True)
         except Exception as _:  # noqa: F841
             pass
         if dest_ids_object:
@@ -146,12 +167,16 @@ for idsname in args.ids:
                     continue
     idsobj = None
     try:
-        idsobj = src_connection.get(idsid[0], occurrence=inocc)
+        if args.convert_ids:
+            idsobj = src_connection.get(idsid[0], occurrence=inocc)
+        else:
+            idsobj = src_connection.get(idsid[0], occurrence=inocc, autoconvert=False, ignore_unknown_dd_version=True)
+
     except Exception as _:  # noqa: F841
         pass
     if idsobj:
         if args.set_dataset_version and idsid[0] == "dataset_description":
-            idsobj.dd_version = DBMaster.get_dd_version()
+            idsobj.dd_version = src_dd_version
         try:
             if idsobj.ids_properties.homogeneous_time != imas.ids_defs.EMPTY_INT:
                 print(f"Copying {idsname}")
