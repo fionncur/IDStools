@@ -237,8 +237,10 @@ if __name__ == "__main__":
     parser.add_argument(
         "--convert-ids",
         action="store_true",
-        help=("Convert ids to the default version of the data dictionary if set to True"
-        "otherwise uses original ids stored in disk")
+        help=(
+            "Convert IDS to the default version of the data dictionary if enabled"
+            "otherwise, use the original IDS stored on disk."
+        ),
     )
     parser.add_argument(
         "--save",
@@ -291,7 +293,7 @@ if __name__ == "__main__":
         ids = connection.get(ids_name, occurrence)
     else:
         ids = connection.get(ids_name, occurrence, autoconvert=False, ignore_unknown_dd_version=True)
-    
+
     if ids_path is None:
         if args.inspect:
             imaspy.util.inspect(ids, hide_empty_nodes=not args.show_empty)

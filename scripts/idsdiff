@@ -502,6 +502,14 @@ if __name__ == "__main__":
         help="Show full time array values",
     )
     parser.add_argument(
+        "--convert-ids",
+        action="store_true",
+        help=(
+            "Convert IDS to the default version of the data dictionary if enabled"
+            "otherwise, use the original IDS stored on disk."
+        ),
+    )
+    parser.add_argument(
         "--save",
         help="Save figure at default location",
         action="store_true",
@@ -551,7 +559,13 @@ if __name__ == "__main__":
                         node_unit_a = ""
                         ids_a = node_a = coordinate_a = None
                         coordinate_a_name = coordinate_unit_a = ""
-                        ids_a = connections[i][1].get(_uri_args_a.ids_name)
+                        if args.convert_ids:
+                            ids_a = connections[i][1].get(_uri_args_a.ids_name)
+                        else:
+                            ids_a = connections[i][1].get(
+                                _uri_args_a.ids_name, autoconvert=False, ignore_unknown_dd_version=True
+                            )
+
                         ids_path_a = _uri_args_a.ids_path.replace("(", "[").replace(")", "]").replace("/", ".")
                         if ":" in _uri_args_a.ids_path:
                             node_a, coordinate_a, node_unit_a, coordinate_unit_a = partial_get(ids_a, ids_path_a)
@@ -572,7 +586,13 @@ if __name__ == "__main__":
                         node_unit_b = ""
                         ids_b = node_b = coordinate_b = None
                         coordinate_b_name = coordinate_unit_b = ""
-                        ids_b = connections[j][1].get(_uri_args_b.ids_name)
+                        if args.convert_ids:
+                            ids_b = connections[j][1].get(_uri_args_b.ids_name)
+                        else:
+                            ids_b = connections[j][1].get(
+                                _uri_args_b.ids_name, autoconvert=False, ignore_unknown_dd_version=True
+                            )
+
                         ids_path_b = _uri_args_b.ids_path.replace("(", "[").replace(")", "]").replace("/", ".")
                         if ":" in _uri_args_b.ids_path:
                             node_b, coordinate_b, node_unit_b, coordinate_unit_b = partial_get(ids_b, ids_path_b)
@@ -653,13 +673,20 @@ if __name__ == "__main__":
                 for idsname in args.ids:
                     ids_a = None
                     try:
-                        ids_a = connections[i][1].get(idsname)
+                        if args.convert_ids:
+                            ids_a = connections[i][1].get(idsname)
+                        else:
+                            ids_a = connections[i][1].get(idsname, autoconvert=False, ignore_unknown_dd_version=True)
                     except Exception as _:  # noqa: F841
                         idsavailability1.append(idsname)
                         pass
                     ids_b = None
                     try:
-                        ids_b = connections[j][1].get(idsname)
+                        if args.convert_ids:
+                            ids_b = connections[j][1].get(idsname)
+                        else:
+                            ids_b = connections[j][1].get(idsname, autoconvert=False, ignore_unknown_dd_version=True)
+
                     except Exception as _:  # noqa: F841
                         idsavailability2.append(idsname)
                         pass
