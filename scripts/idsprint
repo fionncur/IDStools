@@ -49,11 +49,39 @@ def view_plot(ax, field, coordinate, field_name="", coordinate_name="", field_un
         data - field.value
         field_unit = field.metadata.units
 
-        coordinate = field.coordinates[coordinate]
-        if isinstance(coordinate, IDSPrimitive):
-            coordinate_unit = f"{coordinate.metadata.name} ({coordinate.metadata.units})"
-            coordinate_name = coordinate.metadata.path
-        field_name = f"{field_name} (coordinate:{coordinate_name})"
+        if coordinate and coordinate.sdigit():
+            _coordinate = field.coordinates[coordinate]
+            if isinstance(_coordinate, IDSPrimitive):
+                if _coordinate.has_value is True:
+                    coordinate = _coordinate
+        elif coordinate and isinstance(coordinate, str):
+            _coordinate = eval("ids." + coordinate)
+            if isinstance(_coordinate, IDSPrimitive):
+                if _coordinate.has_value is True:
+                    coordinate = _coordinate
+        else:
+            for _coordinate in field.coordinates:
+                if isinstance(_coordinate, IDSPrimitive):
+                    if _coordinate.has_value is True:
+                        coordinate_unit = f"{_coordinate.metadata.name} ({_coordinate.metadata.units})"
+                        coordinate_name = _coordinate.metadata.path
+                        coordinate = _coordinate
+                        break
+                    else:
+                        continue
+
+    if (
+        coordinate is None
+        or isinstance(coordinate, int)
+        or (isinstance(coordinate, IDSNumericArray) and coordinate.has_value is False)
+    ):
+        logger.error("Coordinates are empty, creating default array, you can also provide custom coordinates")
+        coordinate = np.arange(len(data))
+        coordinate_name = "NA"
+        coordinate_unit = "-"
+
+    field_name = f"{field_name} (coordinate:{coordinate_name})"
+
     if len(data) < 5 and len(data.shape) == 1:
         ax.plot(coordinate, data, label=field_name, marker="o", color="red")
 
@@ -235,7 +263,12 @@ if __name__ == "__main__":
         help="plot 1d arrays from leaf nodes",
     )
     parser.add_argument(
-        "--convert-ids",
+        "--coordinate",
+        help="Provide custom coordinate if required, provide index from coordinates array or ids field",
+        default=None,
+    )
+    parser.add_argument(
+        "--dd-convert",
         action="store_true",
         help=(
             "Convert IDS to the default version of the data dictionary if enabled"
@@ -289,7 +322,7 @@ if __name__ == "__main__":
         connection.close()
         exit(1)
 
-    if args.convert_ids:
+    if args.dd_convert:
         ids = connection.get(ids_name, occurrence)
     else:
         ids = connection.get(ids_name, occurrence, autoconvert=False, ignore_unknown_dd_version=True)
@@ -300,13 +333,27 @@ if __name__ == "__main__":
         else:
             print_tree(ids, hide_empty_nodes=not args.show_empty, compact=args.compact, full_array=args.full)
     else:
+        coordinate = None
         node_unit = ""
         coordinate_name = ""
         coordinate_unit = ""
+        if args.coordinate:
+            coordinate = args.coordinate  # provide custom coordiante like "profiles_1d[0]/grid/psi"
+            if coordinate.isdigit():
+                coordinate = int(coordinate)
+            else:
+                try:
+                    coordinate = coordinate.replace("(", "[").replace(")", "]").replace("/", ".")
+                    coordinate = eval("ids." + coordinate)
+                except Exception as e:
+                    logger.error(f"{coordinate} path does not exist, hint: check length of arrays, detailed error {e}")
+
         ids_path = ids_path.replace("(", "[").replace(")", "]").replace("/", ".")
         if ":" in ids_path:
-            node, coordinate, node_unit, coordinate_unit = partial_get(ids, ids_path)
+            node, _coordinate, node_unit, coordinate_unit = partial_get(ids, ids_path)
             node = np.transpose(node)
+            if not args.coordinate and _coordinate is not None:
+                coordinate = _coordinate
         else:
             try:
                 node = eval("ids." + ids_path)
@@ -315,7 +362,6 @@ if __name__ == "__main__":
                 node = np.array([]).reshape(
                     0,
                 )
-            coordinate = 0
 
         if args.inspect:
             imaspy.util.inspect(node, hide_empty_nodes=not args.show_empty)

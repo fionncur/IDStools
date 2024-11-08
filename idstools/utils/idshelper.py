@@ -80,9 +80,9 @@ def get_length_of_partial_field(ids, ids_path):
     partial_field = partial_field.split(".")[0]
     try:
         _inner_data = eval("ids." + partial_field)
-        coordinate_partial = _inner_data
+        coordinate_partial = None
         coordinate_unit = ""
-        if isinstance(_inner_data, IDSPrimitive):
+        if isinstance(_inner_data, IDSPrimitive) or isinstance(_inner_data, IDSStructArray):
             coordinate_partial = _inner_data.coordinates[0]
             coordinate_unit = _inner_data.coordinates[0].metadata.units
         return coordinate_partial, coordinate_unit
@@ -94,7 +94,7 @@ def get_length_of_partial_field(ids, ids_path):
         return None
 
 
-def partial_get(ids, ids_path, coordinate_index=0):
+def partial_get(ids, ids_path, custom_coordinate=None):
     slice_object = parse_slice_from_string(ids_path)
     ids_path_for_eval = re.sub(r"[\[\(][^:\[\]\(\)]*:[^:\[\]\(\)]*[\]\)]", "(t)", ids_path)
     ids_path_for_eval = ids_path_for_eval.replace("(", "[").replace(")", "]").replace("/", ".")
@@ -107,7 +107,9 @@ def partial_get(ids, ids_path, coordinate_index=0):
     step = slice_object.step if slice_object.step is not None else 1
     data_flag = True
     data_unit = ""
+
     coordinate = coordinate_partial
+
     for t in range(start, stop, step):
         try:
             _inner_data = eval("ids." + ids_path_for_eval)
@@ -115,11 +117,26 @@ def partial_get(ids, ids_path, coordinate_index=0):
                 data_flag = False
                 if isinstance(_inner_data, IDSPrimitive):
                     data_unit = _inner_data.metadata.units
-                    if coordinate_index >= len(_inner_data.coordinates):
-                        coordinate_index = 0
-                    coordinate = _inner_data.coordinates[coordinate_index]
-                    if isinstance(coordinate, IDSPrimitive):
-                        coordinate_unit = coordinate.metadata.units
+                    if custom_coordinate and custom_coordinate.sdigit():
+                        _coordinate = _inner_data.coordinates[custom_coordinate]
+                        if isinstance(_coordinate, IDSPrimitive):
+                            if _coordinate.has_value is True:
+                                coordinate = _coordinate
+                    elif custom_coordinate and isinstance(custom_coordinate, str):
+                        _coordinate = eval("ids." + custom_coordinate)
+                        if isinstance(_coordinate, IDSPrimitive):
+                            if _coordinate.has_value is True:
+                                coordinate = _coordinate
+                    else:
+
+                        for _coordinate in _inner_data.coordinates:
+                            if isinstance(_coordinate, IDSPrimitive):
+                                if _coordinate.has_value is True:
+                                    coordinate_unit = _coordinate.metadata.units
+                                    coordinate = _coordinate
+                                    break
+                                else:
+                                    continue
         except Exception as e:
             logger.error(
                 f"{ids_path} path/value does not exist, hint: please check length" f"of arrays, detailed error : {e}"
@@ -133,6 +150,8 @@ def partial_get(ids, ids_path, coordinate_index=0):
             else:
                 data = np.vstack((data, _inner_data))
     data = np.array(data)
+    # if len(data) != len(coordinate):
+    #     coordinate=None
     return data, coordinate, data_unit, coordinate_unit
 
 
