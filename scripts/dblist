@@ -330,11 +330,11 @@ if __name__ == "__main__":
         dbs = DBMaster.get_database_files(args.user, args.database, args.version, backends)
         print_list(dbs)
         exit(0)
-
+    
     backends = args.backend.split(",") if args.backend else None
-    dbs = DBMaster.get_database_files(args.user, args.database, args.version, backends)
+    if args.cmd in ["list", "slices", "times"]:
+        dbs = DBMaster.get_database_files(args.user, args.database, args.version, backends)
     if args.cmd == "list":
-
         if args.showuri:
             print_urilist(dbs, args.pulse, args.compact, args.timestamp)
         else:

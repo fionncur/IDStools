@@ -88,10 +88,6 @@ class DBMaster:
             version_dir = f"{database_dir}/{version}"
             if os.path.exists(version_dir):
                 return version_dir
-            else:
-                raise FileNotFoundError(
-                    "The path provided does not exist or has no such database file or directory.Please check spelling"
-                )
         return None
 
     @staticmethod
@@ -200,9 +196,12 @@ class DBMaster:
             a list of tuples. Each tuple contains the following elements, The tuple includes the pulse number,
             run number, HDF5_BACKEND backend, database, user, version, and data file path.
         """
-        version_dir = DBMaster.get_version_dir(version, database, user)
-        scenario_yaml_dir = os.path.join(version_dir, "0")
         pulses = {} if as_dictionary else []
+        version_dir = DBMaster.get_version_dir(version, database, user)
+        if version_dir is None:
+            return pulses
+        scenario_yaml_dir = os.path.join(version_dir, "0")
+        
         hdf5_master_file_paths = glob(f"{version_dir}/**/*master.h5", recursive=True)
         for hdf5_master_file_path in hdf5_master_file_paths:
             run = hdf5_master_file_path.split("/")[-2]
@@ -289,9 +288,11 @@ class DBMaster:
         Returns:
             a list of pulses.
         """
-        mdsplus_dir = DBMaster.get_version_dir(version, database, user)
-        scenario_yaml_dir = os.path.join(mdsplus_dir, "0")
         pulses = {} if as_dictionary else []
+        mdsplus_dir = DBMaster.get_version_dir(version, database, user)
+        if mdsplus_dir is None:
+            return pulses
+        scenario_yaml_dir = os.path.join(mdsplus_dir, "0")
 
         datafile_paths = glob(f"{mdsplus_dir}/**/*.datafile", recursive=True)
 
