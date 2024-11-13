@@ -330,7 +330,7 @@ if __name__ == "__main__":
         dbs = DBMaster.get_database_files(args.user, args.database, args.version, backends)
         print_list(dbs)
         exit(0)
-    
+
     backends = args.backend.split(",") if args.backend else None
     if args.cmd in ["list", "slices", "times"]:
         dbs = DBMaster.get_database_files(args.user, args.database, args.version, backends)

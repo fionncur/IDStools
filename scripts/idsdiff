@@ -209,141 +209,149 @@ def generate_html(file_path, compare_data):
             status_message = "different values"
 
             if isinstance(first, IDSNumericArray) and isinstance(second, IDSNumericArray):
-
-                if len(first.value) <= len(second.value):
-                    threshold_candidate = first
-                    compare_candidate = second[: len(first)]
-                else:
-                    threshold_candidate = second
-                    compare_candidate = first[: len(second)]
-                threshold_min = ((threshold_candidate * THRESHOLD_PERCENT) / 100) - threshold_candidate
-                threshold_max = ((threshold_candidate * THRESHOLD_PERCENT) / 100) + threshold_candidate
-
-                within_threshold = all(compare_candidate > threshold_min) and all(compare_candidate < threshold_max)
-                if within_threshold is False:
-                    values_a = np.copy(first.value)
-                    values_b = np.copy(second.value)
-
-                    # Calculate cross corelation
-                    correlate_result = np.correlate(values_a, values_b, "full")
-                    b_shift_positions = np.arange(-len(values_a) + 1, len(values_b))
-                    itemindex = np.where(correlate_result == np.max(correlate_result))
-                    cross_correlation = b_shift_positions[itemindex][0]
-                    # TODO Check the logic of normalised difference calculation
-                    if len(values_a) < len(values_b):
-                        values_b = values_b[: len(values_a)]
+                if len(first.shape) == 1 and len(second.shape) == 1:
+                    if len(first.value) != len(second.value):
+                        common = np.linspace(0, 1, max(len(first), len(second)))
+                        first.value = np.interp(common, np.linspace(0, 1, len(first)), first)
+                        second.value = np.interp(common, np.linspace(0, 1, len(second)), second)
+                    if len(first.value) <= len(second.value):
+                        threshold_candidate = first
+                        compare_candidate = second[: len(first)]
                     else:
-                        values_a = values_a[: len(values_b)]
-                    # valuesA[valuesA == 0] = 0.00000001
-                    # valuesB[valuesB == 0] = 0.00000001
+                        threshold_candidate = second
+                        compare_candidate = first[: len(second)]
+                    threshold_min = ((threshold_candidate * THRESHOLD_PERCENT) / 100) - threshold_candidate
+                    threshold_max = ((threshold_candidate * THRESHOLD_PERCENT) / 100) + threshold_candidate
+                    within_threshold = all(compare_candidate > threshold_min) and all(compare_candidate < threshold_max)
+                    if within_threshold is False:
+                        values_a = np.copy(first.value)
+                        values_b = np.copy(second.value)
 
-                    abs_diff = abs(values_a - values_b)
-                    base = abs(values_a)
-                    if np.average(abs(values_a)) > np.average(abs(values_b)):
-                        base = abs(values_b)
-
-                    norm_diff = abs_diff / np.linalg.norm(base, ord=np.inf)
-                    # norm_diff = abs_diff / base
-
-                    norm_avg_diff = np.average(norm_diff)
-
-                    min_a = np.amin(first)
-                    min_b = np.amin(second)
-                    max_a = np.amax(first)
-                    max_b = np.amax(second)
-                    avg_a = np.average(first)
-                    avg_b = np.average(second)
-                    avg_diff = abs(avg_a - avg_b)
-                    rms_a = np.sqrt(np.mean(first**2))
-                    rms_b = np.sqrt(np.mean(second**2))
-                    rms_diff = abs(rms_a - rms_b)
-
-                    time_a = first.coordinates[0]
-                    time_b = second.coordinates[0]
-                    if time_a is not None and time_b is not None:
-                        min_time__a = np.amin(time_a)
-                        min_time__b = np.amin(time_b)
-
-                        max_time__a = np.amax(time_a)
-                        max_time__b = np.amax(time_b)
-                        ax_time_a = np.linspace(
-                            min_time__a if min_time__a < min_time__b else min_time__b,
-                            max_time__a if max_time__a > max_time__b else max_time__b,
-                            len(first),
-                        )
-                        ax_time_b = np.linspace(
-                            min_time__a if min_time__a < min_time__b else min_time__b,
-                            max_time__a if max_time__a > max_time__b else max_time__b,
-                            len(second),
-                        )
-                        fig = plt.figure(figsize=(6, 4), dpi=100)
-                        ax = fig.add_subplot(111)
-                        ax.set_title(description, fontsize=10)
-                        # ax.set_xlabel(coordinate_path)
-                        ax.set_ylabel("values", fontsize=10)
-                        ax2 = ax.twinx()
-                        ax2.plot(
-                            ax_time_a,
-                            abs_diff,
-                            "-g",
-                            label="difference",
-                            linewidth="0.5",
-                        )
-                        ax2.set_yscale("log")
-                        if len(first) < 10:
-                            ax.plot(
-                                ax_time_a,
-                                first,
-                                marker="o",
-                                color="r",
-                                label="first",
-                                linewidth="0.5",
-                                ms=2,
-                            )
+                        # Calculate cross corelation
+                        correlate_result = np.correlate(values_a, values_b, "full")
+                        b_shift_positions = np.arange(-len(values_a) + 1, len(values_b))
+                        itemindex = np.where(correlate_result == np.max(correlate_result))
+                        cross_correlation = b_shift_positions[itemindex][0]
+                        # TODO Check the logic of normalised difference calculation
+                        if len(values_a) < len(values_b):
+                            values_b = values_b[: len(values_a)]
                         else:
-                            ax.plot(
-                                ax_time_a,
-                                first,
-                                color="r",
-                                label="first",
-                                linewidth="0.5",
-                                ms=2,
-                            )
-                        if len(second) < 10:
-                            ax.plot(
-                                ax_time_b,
-                                second,
-                                marker="D",
-                                color="b",
-                                label="second",
-                                linewidth="0.5",
-                                ms=2,
-                            )
-                        else:
-                            ax.plot(
-                                ax_time_b,
-                                second,
-                                color="b",
-                                label="second",
-                                linewidth="0.5",
-                                ms=2,
-                            )
-                        ax_lines, ax_labels = ax.get_legend_handles_labels()
-                        ax2_lines, ax2_labels = ax2.get_legend_handles_labels()
-                        ax.legend(
-                            ax_lines + ax2_lines,
-                            ax_labels + ax2_labels,
-                            loc="center left",
-                            fontsize=10,
-                            bbox_to_anchor=(1.15, 0.5),
-                        )
-                        ax.grid()
-                        tmpfile = BytesIO()
-                        fig.savefig(tmpfile, format="svg", bbox_inches="tight")
-                        encoded = base64.b64encode(tmpfile.getvalue()).decode("utf-8")
-                        plt.close()
+                            values_a = values_a[: len(values_b)]
+                        # valuesA[valuesA == 0] = 0.00000001
+                        # valuesB[valuesB == 0] = 0.00000001
 
-                        report_details = f"""<table class="table table-bordered table-striped table-hover table-sm align-top">
+                        abs_diff = abs(values_a - values_b)
+                        base = abs(values_a)
+                        if np.average(abs(values_a)) > np.average(abs(values_b)):
+                            base = abs(values_b)
+
+                        norm_diff = abs_diff / np.linalg.norm(base, ord=np.inf)
+                        # norm_diff = abs_diff / base
+
+                        norm_avg_diff = np.average(norm_diff)
+
+                        min_a = np.amin(first)
+                        min_b = np.amin(second)
+                        max_a = np.amax(first)
+                        max_b = np.amax(second)
+                        avg_a = np.average(first)
+                        avg_b = np.average(second)
+                        avg_diff = abs(avg_a - avg_b)
+                        rms_a = np.sqrt(np.mean(first**2))
+                        rms_b = np.sqrt(np.mean(second**2))
+                        rms_diff = abs(rms_a - rms_b)
+
+                        time_a = first.coordinates[0]
+                        time_b = second.coordinates[0]
+
+                        if time_a is not None and time_b is not None:
+                            min_time__a = min_time__b = max_time__a = max_time__b = 0
+                            if time_a.size != 0:
+                                min_time__a = np.amin(time_a)
+                            if time_b.size != 0:
+                                min_time__b = np.amin(time_b)
+                            if time_a.size != 0:
+                                max_time__a = np.amax(time_a)
+                            if time_b.size != 0:
+                                max_time__b = np.amax(time_b)
+                            ax_time_a = np.linspace(
+                                min_time__a if min_time__a < min_time__b else min_time__b,
+                                max_time__a if max_time__a > max_time__b else max_time__b,
+                                len(first),
+                            )
+                            ax_time_b = np.linspace(
+                                min_time__a if min_time__a < min_time__b else min_time__b,
+                                max_time__a if max_time__a > max_time__b else max_time__b,
+                                len(second),
+                            )
+                            fig = plt.figure(figsize=(6, 4), dpi=100)
+                            ax = fig.add_subplot(111)
+                            ax.set_title(description, fontsize=10)
+                            # ax.set_xlabel(coordinate_path)
+                            ax.set_ylabel("values", fontsize=10)
+                            ax2 = ax.twinx()
+                            ax2.plot(
+                                ax_time_a,
+                                abs_diff,
+                                "-g",
+                                label="difference",
+                                linewidth="0.5",
+                            )
+                            ax2.set_yscale("log")
+                            if len(first) < 10:
+                                ax.plot(
+                                    ax_time_a,
+                                    first,
+                                    marker="o",
+                                    color="r",
+                                    label="first",
+                                    linewidth="0.5",
+                                    ms=2,
+                                )
+                            else:
+                                ax.plot(
+                                    ax_time_a,
+                                    first,
+                                    color="r",
+                                    label="first",
+                                    linewidth="0.5",
+                                    ms=2,
+                                )
+                            if len(second) < 10:
+                                ax.plot(
+                                    ax_time_b,
+                                    second,
+                                    marker="D",
+                                    color="b",
+                                    label="second",
+                                    linewidth="0.5",
+                                    ms=2,
+                                )
+                            else:
+                                ax.plot(
+                                    ax_time_b,
+                                    second,
+                                    color="b",
+                                    label="second",
+                                    linewidth="0.5",
+                                    ms=2,
+                                )
+                            ax_lines, ax_labels = ax.get_legend_handles_labels()
+                            ax2_lines, ax2_labels = ax2.get_legend_handles_labels()
+                            ax.legend(
+                                ax_lines + ax2_lines,
+                                ax_labels + ax2_labels,
+                                loc="center left",
+                                fontsize=10,
+                                bbox_to_anchor=(1.15, 0.5),
+                            )
+                            ax.grid()
+                            tmpfile = BytesIO()
+                            fig.savefig(tmpfile, format="svg", bbox_inches="tight")
+                            encoded = base64.b64encode(tmpfile.getvalue()).decode("utf-8")
+                            plt.close()
+
+                            report_details = f"""<table class="table table-bordered table-striped table-hover table-sm align-top">
 <thead class="table-primary">
     <tr>
     <th>Attribute Name</th>

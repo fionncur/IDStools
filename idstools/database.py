@@ -201,7 +201,7 @@ class DBMaster:
         if version_dir is None:
             return pulses
         scenario_yaml_dir = os.path.join(version_dir, "0")
-        
+
         hdf5_master_file_paths = glob(f"{version_dir}/**/*master.h5", recursive=True)
         for hdf5_master_file_path in hdf5_master_file_paths:
             run = hdf5_master_file_path.split("/")[-2]
