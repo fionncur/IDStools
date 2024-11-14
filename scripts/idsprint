@@ -173,8 +173,10 @@ def _make_tree(structure, hide_empty_nodes, compact, *, tree=None):
                 group = Columns([txt])
             tree.add(group)
             return tree
-        else:
+        elif isinstance(structure, imaspy.ids_primitive.IDSPrimitive):
             tree = Tree(f"[magenta]{structure.metadata.name}")
+        else:
+            return structure
 
     iterator = structure
     if hide_empty_nodes and isinstance(structure, IDSStructure):
