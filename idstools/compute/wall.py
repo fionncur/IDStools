@@ -107,11 +107,14 @@ class WallCompute:
         return description2d_infos
 
     def get_inner_wall(self):
-        rw = self.ids_object.description_2d[0].limiter.unit[0].outline.r
-        zw = self.ids_object.description_2d[0].limiter.unit[0].outline.z
-        # append first value to end of array
-        rw = np.concatenate((rw, [rw[0]]))
-        zw = np.concatenate((zw, [zw[0]]))
+        try:
+            rw = self.ids_object.description_2d[0].limiter.unit[0].outline.r
+            zw = self.ids_object.description_2d[0].limiter.unit[0].outline.z
+            # append first value to end of array
+            rw = np.concatenate((rw, [rw[0]]))
+            zw = np.concatenate((zw, [zw[0]]))
+        except Exception as _:  # noqa: F841
+            return None
         return rw, zw
 
     @staticmethod

@@ -141,3 +141,10 @@ class WallView:
                 fontsize="x-small",
             )
         return True
+
+    def view_inner_wall_line(self, ax):
+        result = self.compute_object.get_inner_wall()
+        if result is None:
+            return None
+        rw, zw = result
+        ax.plot(rw, zw, linewidth=2, color="red")

@@ -999,3 +999,387 @@ class EquilibriumCompute:
         # li_3 = self.ids.time_slice[ti].global_quantities.li_3
         # beta_tor = self.ids.time_slice[ti].global_quantities.beta_tor
         # energy_mhd= self.ids.time_slice[ti].global_quantities.energy_mhd
+
+    def get_equilibria(self):
+        """
+        The function `get_equilibria` retrieves equilibrium data from a given object and organizes it
+        into a dictionary for further analysis.
+
+        Returns:
+            The `get_equilibria` method returns a dictionary named `data` containing various equilibrium
+        data such as time, magnetic field parameters, profiles in 1D and 2D, boundary information,
+        constraints information, and other relevant details.
+        """
+        homogeneous_time = self.ids.ids_properties.homogeneous_time
+        name = self.ids.code.name
+        if homogeneous_time == 1:
+            time = self.ids.time
+        nt = time.size
+        ip = np.zeros(nt)
+        q0 = np.zeros(nt)
+        beta = np.zeros(nt)
+        rmag = np.zeros(nt)
+        zmag = np.zeros(nt)
+        psi_axis = np.zeros(nt)
+        psi_boundary = np.zeros(nt)
+        num_iterations = np.zeros(nt)
+        iteration_error = np.zeros(nt)
+        n = 0
+        n2 = 0
+        n3 = 0
+        n4 = 0
+        n5 = 0
+        n6 = 0
+        n7 = 0
+        n8 = 0
+        output_flag = self.ids.code.output_flag
+        if len(output_flag) == 0:
+            output_flag = np.zeros(len(self.ids.time_slice), dtype=int)
+        if self.ids.time_slice:
+            for time_slice in self.ids.time_slice:
+                if time_slice:
+                    if hasattr(time_slice, "profiles_1d") and time_slice.profiles_1d:
+                        n = time_slice.profiles_1d.psi.size
+                    if hasattr(time_slice, "profiles_2d") and time_slice.profiles_2d:
+                        n2 = time_slice.profiles_2d[0].psi.shape
+                    if (
+                        hasattr(time_slice, "boundary")
+                        and time_slice.boundary
+                        and hasattr(time_slice.boundary, "outline")
+                        and time_slice.boundary.outline
+                    ):
+                        n3 = time_slice.boundary.outline.r.size
+                    constraints = time_slice.constraints
+                    if hasattr(constraints, "ip") and constraints.ip:
+                        n4 = 1
+                    if hasattr(constraints, "pf_current") and constraints.pf_current:
+                        n5 = len(constraints.pf_current)
+                    if hasattr(constraints, "pf_passive_current") and constraints.pf_passive_current:
+                        n6 = len(constraints.pf_passive_current)
+                    if hasattr(constraints, "bpol_probe") and constraints.bpol_probe:
+                        n7 = len(constraints.bpol_probe)
+                    if hasattr(constraints, "flux_loop") and constraints.flux_loop:
+                        n8 = len(constraints.flux_loop)
+
+                    if n == 0 or not n2 or n3 == 0:
+                        continue  # Moves to the next iteration
+                    else:
+                        break  # Exits the loop
+
+        if n > 0:
+            psi1D = np.zeros((nt, n))
+            qpsi1D = np.zeros((nt, n))
+            press1D = np.zeros((nt, n))
+            j_tor1D = np.zeros((nt, n))
+            rin1D = np.zeros((nt, n))
+            rout1D = np.zeros((nt, n))
+            i = -1
+            for time_slice in self.ids.time_slice:
+                i = i + 1
+                ip[i] = time_slice.global_quantities.ip
+                q0[i] = time_slice.global_quantities.q_axis
+                beta[i] = time_slice.global_quantities.beta_tor
+                rmag[i] = time_slice.global_quantities.magnetic_axis.r
+                zmag[i] = time_slice.global_quantities.magnetic_axis.z
+                psi_axis[i] = time_slice.global_quantities.psi_axis
+                psi_boundary[i] = time_slice.global_quantities.psi_boundary
+                num_iterations[i] = time_slice.convergence.iterations_n
+                iteration_error[i] = time_slice.convergence.grad_shafranov_deviation_value
+                if time_slice.profiles_1d.psi.size > 0:
+                    psi1D[i, :] = time_slice.profiles_1d.psi
+                if time_slice.profiles_1d.q.size > 0:
+                    qpsi1D[i, :] = time_slice.profiles_1d.q
+                if time_slice.profiles_1d.pressure.size > 0:
+                    press1D[i, :] = time_slice.profiles_1d.pressure
+                if time_slice.profiles_1d.j_tor.size > 0:
+                    j_tor1D[i, :] = time_slice.profiles_1d.j_tor
+                if time_slice.profiles_1d.r_inboard.size > 0:
+                    rin1D[i, :] = time_slice.profiles_1d.r_inboard
+                if time_slice.profiles_1d.r_outboard.size > 0:
+                    rout1D[i, :] = time_slice.profiles_1d.r_outboard
+
+        if isinstance(n2, tuple):
+            psi2D = np.zeros((nt, n2[0], n2[1]))
+            jtor2D = np.zeros((nt, n2[0], n2[1]))
+            r2D = np.zeros((nt, n2[0], n2[1]))
+            z2D = np.zeros((nt, n2[0], n2[1]))
+            r2D = np.zeros((nt, n2[0], n2[1]))
+            z2D = np.zeros((nt, n2[0], n2[1]))
+            rb = np.zeros((nt, n3))
+            zb = np.zeros((nt, n3))
+            i = -1
+            for time_slice in self.ids.time_slice:
+                i = i + 1
+                if len(time_slice.profiles_2d) > 0:
+                    if time_slice.profiles_2d[0].r.size > 0:
+                        r2D[i, :, :] = time_slice.profiles_2d[0].r
+                    if time_slice.profiles_2d[0].z.size > 0:
+                        z2D[i, :, :] = time_slice.profiles_2d[0].z
+                    if time_slice.profiles_2d[0].psi.size > 0:
+                        psi2D[i, :, :] = time_slice.profiles_2d[0].psi
+                    if time_slice.profiles_2d[0].j_tor.size > 0:
+                        jtor2D[i, :, :] = time_slice.profiles_2d[0].j_tor
+                    if time_slice.boundary.outline.r.size > 0:
+                        rb[i, :] = time_slice.boundary.outline.r
+                    if time_slice.boundary.outline.z.size > 0:
+                        zb[i, :] = time_slice.boundary.outline.z
+                    if time_slice.profiles_2d[0].grid.dim1.size > 0:
+                        r = time_slice.profiles_2d[0].grid.dim1
+                    if time_slice.profiles_2d[0].grid.dim2.size > 0:
+                        z = time_slice.profiles_2d[0].grid.dim2
+
+        if n3 > 0:
+            rb = np.zeros((nt, n3))
+            zb = np.zeros((nt, n3))
+            i = -1
+            for time_slice in self.ids.time_slice:
+                i = i + 1
+                if time_slice.boundary.outline.r.size > 0:
+                    rb[i, :] = time_slice.boundary.outline.r
+                if time_slice.boundary.outline.z.size > 0:
+                    zb[i, :] = time_slice.boundary.outline.z
+        if n4 > 0:
+            constr_ip_meas = np.zeros((nt, 1))
+            constr_ip_recon = np.zeros((nt, 1))
+            constr_ip_source = np.zeros((nt, 1), dtype=object)
+            i = -1
+            for time_slice in self.ids.time_slice:
+                i = i + 1
+                constr_ip_meas[i, 0] = time_slice.constraints.ip.measured
+                constr_ip_recon[i, 0] = time_slice.constraints.ip.reconstructed
+                constr_ip_source[i, 0] = time_slice.constraints.ip.source
+        else:
+            constr_ip_meas = None
+            constr_ip_recon = None
+            constr_ip_source = None
+        if n5 > 0:
+            constr_pf_meas = np.zeros((nt, n5))
+            constr_pf_recon = np.zeros((nt, n5))
+            constr_pf_source = np.empty((nt, n5), dtype=object)
+            i = -1
+            for time_slice in self.ids.time_slice:
+                i = i + 1
+                for j in range(len(time_slice.constraints.pf_current)):
+                    constr_pf_meas[i, j] = time_slice.constraints.pf_current[j].measured
+                    constr_pf_recon[i, j] = time_slice.constraints.pf_current[j].reconstructed
+                    constr_pf_source[i, j] = str(time_slice.constraints.pf_current[j].source)
+        else:
+            constr_pf_meas = None
+            constr_pf_recon = None
+            constr_pf_source = None
+        if n6 > 0:
+            constr_pas_meas = np.zeros((nt, n6))
+            constr_pas_recon = np.zeros((nt, n6))
+            constr_pas_source = np.zeros((nt, n6), dtype=object)
+            i = -1
+            for time_slice in self.ids.time_slice:
+                i = i + 1
+                for j in range(len(time_slice.constraints.pf_passive_current)):
+                    constr_pas_meas[i, j] = time_slice.constraints.pf_passive_current[j].measured
+                    constr_pas_recon[i, j] = time_slice.constraints.pf_passive_current[j].reconstructed
+                    constr_pas_source[i, j] = time_slice.constraints.pf_passive_current[j].source
+        else:
+            constr_pas_meas = None
+            constr_pas_recon = None
+            constr_pas_source = None
+        if n7 > 0:
+            constr_bpol_meas = np.zeros((nt, n7))
+            constr_bpol_recon = np.zeros((nt, n7))
+            constr_bpol_source = np.zeros((nt, n7), dtype=object)
+            i = -1
+            for time_slice in self.ids.time_slice:
+                i = i + 1
+                for j in range(len(time_slice.constraints.bpol_probe)):
+                    constr_bpol_meas[i, j] = time_slice.constraints.bpol_probe[j].measured
+                    constr_bpol_recon[i, j] = time_slice.constraints.bpol_probe[j].reconstructed
+                    constr_bpol_source[i, j] = time_slice.constraints.bpol_probe[j].source
+        #              constr_bpol_source[i,j]=time_slice0.constraints.bpol_probe[j].source
+        else:
+            constr_bpol_meas = None
+            constr_bpol_recon = None
+            constr_bpol_source = None
+        if n8 > 0:
+            constr_fluxloop_meas = np.zeros((nt, n8))
+            constr_fluxloop_recon = np.zeros((nt, n8))
+            constr_fluxloop_source = np.zeros((nt, n8), dtype=object)
+            i = -1
+            for time_slice in self.ids.time_slice:
+                i = i + 1
+                for j in range(len(time_slice.constraints.flux_loop)):
+                    constr_fluxloop_meas[i, j] = time_slice.constraints.flux_loop[j].measured
+                    constr_fluxloop_recon[i, j] = time_slice.constraints.flux_loop[j].reconstructed
+                    constr_fluxloop_source[i, j] = time_slice.constraints.flux_loop[j].source
+        else:
+            constr_fluxloop_meas = None
+            constr_fluxloop_recon = None
+            constr_fluxloop_source = None
+
+        constraints = {
+            "ip_meas": constr_ip_meas,
+            "ip_recon": constr_ip_recon,
+            "ip_source": constr_ip_source,
+            "pf_meas": constr_pf_meas,
+            "pf_recon": constr_pf_recon,
+            "pf_source": constr_pf_source,
+            "pas_meas": constr_pas_meas,
+            "pas_recon": constr_pas_recon,
+            "pas_source": constr_pas_source,
+            "bpol_meas": constr_bpol_meas,
+            "bpol_recon": constr_bpol_recon,
+            "bpol_source": constr_bpol_source,
+            "fluxloop_meas": constr_fluxloop_meas,
+            "fluxloop_recon": constr_fluxloop_recon,
+            "fluxloop_source": constr_fluxloop_source,
+        }
+        data = {
+            "time": time,
+            "ip": ip,
+            "q0": q0,
+            "beta": beta,
+            "rmag": rmag,
+            "zmag": zmag,
+            "psi1D": psi1D,
+            "qpsi1D": qpsi1D,
+            "press1D": press1D,
+            "psi2D": psi2D,
+            "jtor2D": jtor2D,
+            "r2D": r2D,
+            "z2D": z2D,
+            "rb": rb,
+            "zb": zb,
+            "r": r,
+            "z": z,
+            "j_tor1D": j_tor1D,
+            "rin1D": rin1D,
+            "rout1D": rout1D,
+            "output_flag": output_flag,
+            "psi_axis": psi_axis,
+            "psi_boundary": psi_boundary,
+            "name": name,
+            "num_iterations": num_iterations,
+            "iteration_error": iteration_error,
+            "constraints": constraints,
+        }
+
+        return data
+
+    def get_contour(self, psi_axis, psi_boundary, time, time_index1, psi_axis2=None, psi_boundary2=None, time2=None):
+        n = 10
+        dp = (psi_boundary[time_index1] - psi_axis[time_index1]) / n
+        if dp == 0.0:
+            c = np.array(psi_axis[time_index1])
+        else:
+            c = np.arange(psi_axis[time_index1], psi_axis[time_index1] + 2 * n * dp, dp)
+            is_decreasing = np.all(np.diff(c) < 0)
+            if is_decreasing:
+                c = c[::-1]
+        if psi_axis2 is not None:
+            time_index2 = np.argmin(abs(time2 - time[time_index1]))
+            dp = (psi_boundary2[time_index2] - psi_axis2[time_index2]) / n
+            if dp == 0.0:
+                ce = np.array(psi_axis2[time_index1])
+            else:
+                ce = np.arange(psi_axis2[time_index2], psi_axis2[time_index2] + 2 * n * dp, dp)
+                is_decreasing = np.all(np.diff(ce) < 0)
+                if is_decreasing:
+                    ce = ce[::-1]
+        else:
+            ce = None
+
+        return c, ce
+
+    def get_constraints_info(self, label, constraints, constraintsE, time, time_index1, timeE):
+        labels = ["$I_p$", "pf-currents", "passive-currents", "$B_{pol}$ probes", "flux loops"]
+        constraint_available = [True] * len(labels)
+        if (constraints["ip_recon"]) is None:
+            constraint_available[0] = False
+        if (constraints["pf_recon"]) is None:
+            constraint_available[1] = False
+        if (constraints["pas_recon"]) is None:
+            constraint_available[2] = False
+        if (constraints["bpol_recon"]) is None:
+            constraint_available[3] = False
+        if (constraints["fluxloop_recon"]) is None:
+            constraint_available[4] = False
+        for index, item in enumerate(labels):
+            if label == item:
+                break
+        if not constraint_available[index]:
+            return
+        constraintSelected = label
+        y1 = None
+        y2 = None
+        y3 = None
+        y4 = None
+        text = ""
+        if constraintSelected == "$I_p$":
+            scaleFactor = 1e6
+            text = "[MA]"
+            try:
+                y1 = (constraints["ip_meas"])[time_index1, :]
+                y2 = (constraints["ip_recon"])[time_index1, :]
+            except Exception as _:  # noqa: F841
+                pass
+            try:
+                time_index2 = np.argmin(abs(timeE - time[time_index1]))
+                y3 = (constraintsE["ip_meas"])[time_index2, :]
+                y4 = (constraintsE["ip_recon"])[time_index2, :]
+            except Exception as _:  # noqa: F841
+                pass
+        elif constraintSelected == "pf-currents":
+            text = "[kA]"
+            scaleFactor = 1e3
+            try:
+                y1 = (constraints["pf_meas"])[time_index1, :]
+                y2 = (constraints["pf_recon"])[time_index1, :]
+            except Exception as _:  # noqa: F841
+                pass
+            try:
+                time_index2 = np.argmin(abs(timeE - time[time_index1]))
+                y3 = (constraintsE["pf_meas"])[time_index2, :]
+                y4 = (constraintsE["pf_recon"])[time_index2, :]
+            except Exception as _:  # noqa: F841
+                pass
+        elif constraintSelected == "passive-currents":
+            text = "[kA]"
+            scaleFactor = 1e3
+            try:
+                y1 = (constraints["pas_meas"])[time_index1, :]
+                y2 = (constraints["pas_recon"])[time_index1, :]
+            except Exception as _:  # noqa: F841
+                pass
+            try:
+                time_index2 = np.argmin(abs(timeE - time[time_index1]))
+                y3 = (constraintsE["pas_meas"])[time_index2, :]
+                y4 = (constraintsE["pas_recon"])[time_index2, :]
+            except Exception as _:  # noqa: F841
+                pass
+        elif constraintSelected == "$B_{pol}$ probes":
+            text = "[mT]"
+            scaleFactor = 1e-3
+            try:
+                y1 = (constraints["bpol_meas"])[time_index1, :]
+                y2 = (constraints["bpol_recon"])[time_index1, :]
+            except Exception as _:  # noqa: F841
+                pass
+            try:
+                time_index2 = np.argmin(abs(timeE - time[time_index1]))
+                y3 = (constraintsE["bpol_meas"])[time_index2, :]
+                y4 = (constraintsE["bpol_recon"])[time_index2, :]
+            except Exception as _:  # noqa: F841
+                pass
+        elif constraintSelected == "flux loops":
+            text = "[Wb]"
+            scaleFactor = 1e0
+            try:
+                y1 = (constraints["fluxloop_meas"])[time_index1, :]
+                y2 = (constraints["fluxloop_recon"])[time_index1, :]
+            except Exception as _:  # noqa: F841
+                pass
+            try:
+                time_index2 = np.argmin(abs(timeE - time[time_index1]))
+                y3 = (constraintsE["fluxloop_meas"])[time_index2, :]
+                y4 = (constraintsE["fluxloop_recon"])[time_index2, :]
+            except Exception as _:  # noqa: F841
+                pass
+        return y1, y2, y3, y4, constraintSelected, text, scaleFactor
