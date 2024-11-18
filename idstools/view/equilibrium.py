@@ -8,7 +8,7 @@ This module provides view functions and classes for equilibrium ids data
 import copy
 import logging
 
-import imas
+import imaspy as imas
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -532,35 +532,35 @@ class EquilibriumView(BasePlot):
             x_wrk = np.array([])
             y_wrk = np.array([])
             dataAvail = [False, False, False, False]
-            dataAvail[0] = np.all(y1) is not None and np.any(y1 != imas.imasdef.EMPTY_FLOAT)
-            dataAvail[1] = np.all(y2) is not None and np.any(y2 != imas.imasdef.EMPTY_FLOAT)
-            dataAvail[2] = y3 is not None and np.any(y3 != imas.imasdef.EMPTY_FLOAT)
-            dataAvail[3] = y4 is not None and np.any(y4 != imas.imasdef.EMPTY_FLOAT)
+            dataAvail[0] = np.all(y1) is not None and np.any(y1 != imas.ids_defs.EMPTY_FLOAT)
+            dataAvail[1] = np.all(y2) is not None and np.any(y2 != imas.ids_defs.EMPTY_FLOAT)
+            dataAvail[2] = y3 is not None and np.any(y3 != imas.ids_defs.EMPTY_FLOAT)
+            dataAvail[3] = y4 is not None and np.any(y4 != imas.ids_defs.EMPTY_FLOAT)
             if dataAvail[0]:
                 x1 = range(len(y1))
                 x_wrk = np.concatenate((x_wrk, x1))
-                filtered = y1[y1 != imas.imasdef.EMPTY_FLOAT]
+                filtered = y1[y1 != imas.ids_defs.EMPTY_FLOAT]
                 y1 /= scaleFactor
                 if len(filtered) > 0:
                     y_wrk = np.concatenate((y_wrk, filtered / scaleFactor))
             if dataAvail[1]:
                 x2 = range(len(y2))
                 x_wrk = np.concatenate((x_wrk, x2))
-                filtered = y2[y2 != imas.imasdef.EMPTY_FLOAT]
+                filtered = y2[y2 != imas.ids_defs.EMPTY_FLOAT]
                 y2 /= scaleFactor
                 if len(filtered) > 0:
                     y_wrk = np.concatenate((y_wrk, filtered / scaleFactor))
             if dataAvail[2]:
                 x3 = range(len(y3))
                 x_wrk = np.concatenate((x_wrk, x3))
-                filtered = y3[y3 != imas.imasdef.EMPTY_FLOAT]
+                filtered = y3[y3 != imas.ids_defs.EMPTY_FLOAT]
                 y3 /= scaleFactor
                 if len(filtered) > 0:
                     y_wrk = np.concatenate((y_wrk, filtered / scaleFactor))
             if dataAvail[3]:
                 x4 = range(len(y4))
                 x_wrk = np.concatenate((x_wrk, x4))
-                filtered = y4[y4 != imas.imasdef.EMPTY_FLOAT]
+                filtered = y4[y4 != imas.ids_defs.EMPTY_FLOAT]
                 y4 /= scaleFactor
                 if len(filtered) > 0:
                     y_wrk = np.concatenate((y_wrk, filtered / scaleFactor))

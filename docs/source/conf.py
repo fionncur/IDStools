@@ -49,20 +49,21 @@ print(f"version : {version}, release : {release}")
 
 language = "en"
 
+# {"version": "5.0/index.html#", "title": "5.0", "aliases": ["5.0"]}
 switcher_version = ""
 if "dev" in version:
     switcher_version = "devdocs"
     version_string = {
-        "name": "devdocs",
-        "version": release,
-        "url": "https://sharepoint.iter.org/departments/POP/CM/IMDesign/Code%20Documentation/idstools-doc/devdocs/",
+        "title": "devdocs",
+        "version": "devdocs/index.html#",
+        "aliases": ["devdocs"],
     }
 else:
     switcher_version = f"{version}"
     version_string = {
-        "name": version,
-        "version": release,
-        "url": f"https://sharepoint.iter.org/departments/POP/CM/IMDesign/Code%20Documentation/idstools-doc/{version}/",
+        "title": release,
+        "version": f"{release}/index.html#",
+        "aliases": [release],
     }
 
 
@@ -208,13 +209,6 @@ html_theme_options = {
         },
     ],
     "version_dropdown": True,
-    "version_json": [
-        {
-            "version": "https://sharepoint.iter.org/departments/POP/CM/IMDesign/Code%20Documentation/idstools-doc/devdocs/index.html",
-            "title": "devdocs",
-            "aliases": [],
-        },
-    ],
 }
 # templates_path = ["_templates"]
 object_description_options = []
