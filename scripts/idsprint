@@ -81,7 +81,6 @@ def view_plot(ax, field, coordinate, field_name="", coordinate_name="", field_un
         coordinate_unit = "-"
 
     field_name = f"{field_name} (coordinate:{coordinate_name})"
-
     if len(data) < 5 and len(data.shape) == 1:
         ax.plot(coordinate, data, label=field_name, marker="o", color="red")
 
@@ -324,17 +323,21 @@ if __name__ == "__main__":
         connection.close()
         exit(1)
 
-    if args.dd_update:
-        ids = connection.get(ids_name, occurrence)
-    else:
-        ids = connection.get(ids_name, occurrence, autoconvert=False, ignore_unknown_dd_version=True)
-
     if ids_path is None:
+        if args.dd_update:
+            ids = connection.get(ids_name, occurrence)
+        else:
+            ids = connection.get(ids_name, occurrence, autoconvert=False, ignore_unknown_dd_version=True)
+
         if args.inspect:
             imaspy.util.inspect(ids, hide_empty_nodes=not args.show_empty)
         else:
             print_tree(ids, hide_empty_nodes=not args.show_empty, compact=args.compact, full_array=args.full)
     else:
+        if args.dd_update:
+            ids = connection.get(ids_name, occurrence, lazy=True)
+        else:
+            ids = connection.get(ids_name, occurrence, autoconvert=False, ignore_unknown_dd_version=True, lazy=True)
         coordinate = None
         node_unit = ""
         coordinate_name = ""
@@ -353,12 +356,21 @@ if __name__ == "__main__":
         ids_path = ids_path.replace("(", "[").replace(")", "]").replace("/", ".")
         if ":" in ids_path:
             node, _coordinate, node_unit, coordinate_unit = partial_get(ids, ids_path)
-            node = np.transpose(node)
+
+            if _coordinate.shape[0] != node.shape[0]:
+                node = np.transpose(node)
             if not args.coordinate and _coordinate is not None:
                 coordinate = _coordinate
         else:
             try:
                 node = eval("ids." + ids_path)
+                # reevaluate if struct or struct_array
+                if isinstance(node, (imaspy.ids_structure.IDSStructure, imaspy.ids_struct_array.IDSStructArray)):
+                    if args.dd_update:
+                        ids = connection.get(ids_name, occurrence)
+                    else:
+                        ids = connection.get(ids_name, occurrence, autoconvert=False, ignore_unknown_dd_version=True)
+                    node = eval("ids." + ids_path)
             except Exception as e:
                 logger.error(f"{ids_path} path does not exist, hint: check length of arrays, detailed error {e}")
                 node = np.array([]).reshape(
@@ -368,9 +380,17 @@ if __name__ == "__main__":
         if args.inspect:
             imaspy.util.inspect(node, hide_empty_nodes=not args.show_empty)
         elif args.plot:
+            if isinstance(node, (imaspy.ids_structure.IDSStructure, imaspy.ids_struct_array.IDSStructArray)):
+                logger.error("Can not plot data, fragment is structure. inspect data with -i option")
+                exit(0)
             if len(node) == 0:
                 logger.error("Can not plot data, no values present in the array. inspect data with -i option")
                 exit(0)
+
+            if isinstance(node[0], (imaspy.ids_structure.IDSStructure, imaspy.ids_struct_array.IDSStructArray)):
+                logger.error("Can not plot data, fragment values are structures. inspect data with -i option")
+                exit(0)
+
             canvas = PlotCanvas(1, 1)
             ax = canvas.add_axes(title="", xlabel="", row=0, col=0)
             view_plot(
@@ -398,6 +418,7 @@ if __name__ == "__main__":
                 canvas.save(fname)
             else:
                 canvas.show()
+
         else:
             print_tree(node, hide_empty_nodes=not args.show_empty, compact=args.compact, full_array=args.full)
     connection.close()

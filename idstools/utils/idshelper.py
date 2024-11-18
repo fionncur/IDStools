@@ -84,7 +84,8 @@ def get_length_of_partial_field(ids, ids_path):
         coordinate_unit = ""
         if isinstance(_inner_data, IDSPrimitive) or isinstance(_inner_data, IDSStructArray):
             coordinate_partial = _inner_data.coordinates[0]
-            coordinate_unit = _inner_data.coordinates[0].metadata.units
+            if isinstance(coordinate_partial, IDSPrimitive):
+                coordinate_unit = coordinate_partial.metadata.units
         return coordinate_partial, coordinate_unit
     except Exception as e:
         logger.error(
@@ -102,6 +103,7 @@ def partial_get(ids, ids_path, custom_coordinate=None):
     data = np.array([]).reshape(
         0,
     )
+    struct_data = []
     start = slice_object.start if slice_object.start is not None else 0
     stop = slice_object.stop if slice_object.start is not None else len(coordinate_partial)
     step = slice_object.step if slice_object.step is not None else 1
@@ -139,17 +141,23 @@ def partial_get(ids, ids_path, custom_coordinate=None):
                                     continue
         except Exception as e:
             logger.error(
-                f"{ids_path} path/value does not exist, hint: please check length" f"of arrays, detailed error : {e}"
+                f"{ids_path} path/value does not exist, hint: please check length of arrays, detailed error : {e}"
             )
             return data, coordinate, data_unit, coordinate_unit
-        if len(_inner_data.shape) == 0:
-            data = np.append(data, _inner_data)
-        elif len(_inner_data.shape) == 1:
-            if data.size == 0:
-                data = _inner_data
-            else:
-                data = np.vstack((data, _inner_data))
-    data = np.array(data)
+        if isinstance(_inner_data, (imas.ids_structure.IDSStructure, imas.ids_struct_array.IDSStructArray)):
+            struct_data.append(_inner_data)
+        else:
+            if len(_inner_data.shape) == 0:
+                data = np.append(data, _inner_data)
+            elif len(_inner_data.shape) == 1:
+                if data.size == 0:
+                    data = _inner_data
+                else:
+                    data = np.vstack((data, _inner_data))
+    if len(struct_data) == 0:
+        data = np.array(data)
+    else:
+        data = np.array(struct_data)
     # if len(data) != len(coordinate):
     #     coordinate=None
     return data, coordinate, data_unit, coordinate_unit
