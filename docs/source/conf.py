@@ -209,6 +209,7 @@ html_theme_options = {
         },
     ],
     "version_dropdown": True,
+    "version_json": "../versions.js",
 }
 # templates_path = ["_templates"]
 object_description_options = []
