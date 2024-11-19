@@ -63,7 +63,7 @@ else:
     version_string = {
         "title": release,
         "version": f"{release}/index.html#",
-        "aliases": [release],
+        "aliases": [release, "latest"],
     }
 
 
@@ -162,7 +162,7 @@ html_logo = "_static/idstools-48.png"
 #     "navbar_end": ["theme-switcher", "version-switcher", "navbar-icon-links"],
 # }
 html_theme_options = {
-    "site_url": "https://sharepoint.iter.org/departments/POP/CM/IMDesign/Code%20Documentation/idstools-doc/devdocs/index.html",
+    "site_url": "https://sharepoint.iter.org/departments/POP/CM/IMDesign/Code%20Documentation/idstools-doc/latest.html",
     "repo_url": "https://git.iter.org/projects/IMAS/repos/idstools",
     "repo_name": "IDStools",
     "icon": {
