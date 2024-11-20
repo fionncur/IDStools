@@ -41,11 +41,13 @@ parser.add_argument(
 
 args = parser.parse_args()
 connection = DBMaster.get_connection(args)
+print(connection._dbe_impl)
 if connection is None:
     logger.critical("----> Aborted.")
     exit(1)
 
 core_sources = None
+
 try:
     core_sources = connection.get("core_sources", lazy=True)
 except Exception as _:  # noqa: F841

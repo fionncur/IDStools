@@ -37,6 +37,7 @@ def view_plot(ax, field, coordinate, field_name="", coordinate_name="", field_un
         logger.error("Not a numeric array, Please select ids path")
         return
     data = field
+    yfield_name = field_name
     if isinstance(coordinate, IDSNumericArray):
         if isinstance(coordinate, IDSPrimitive):
             coordinate_unit = f"{coordinate.metadata.name} ({coordinate.metadata.units})"
@@ -48,7 +49,7 @@ def view_plot(ax, field, coordinate, field_name="", coordinate_name="", field_un
             return
         data - field.value
         field_unit = field.metadata.units
-
+        yfield_name = field.metadata.name
         if coordinate and coordinate.sdigit():
             _coordinate = field.coordinates[coordinate]
             if isinstance(_coordinate, IDSPrimitive):
@@ -63,8 +64,8 @@ def view_plot(ax, field, coordinate, field_name="", coordinate_name="", field_un
             for _coordinate in field.coordinates:
                 if isinstance(_coordinate, IDSPrimitive):
                     if _coordinate.has_value is True:
-                        coordinate_unit = f"{_coordinate.metadata.name} ({_coordinate.metadata.units})"
-                        coordinate_name = _coordinate.metadata.path
+                        coordinate_unit = f"{_coordinate.metadata.units}"
+                        coordinate_name = _coordinate.metadata.name
                         coordinate = _coordinate
                         break
                     else:
@@ -77,10 +78,9 @@ def view_plot(ax, field, coordinate, field_name="", coordinate_name="", field_un
     ):
         logger.error("Coordinates are empty, creating default array, you can also provide custom coordinates")
         coordinate = np.arange(len(data))
-        coordinate_name = "NA"
+        coordinate_name = "Index"
         coordinate_unit = "-"
 
-    field_name = f"{field_name} (coordinate:{coordinate_name})"
     if len(data) < 5 and len(data.shape) == 1:
         ax.plot(coordinate, data, label=field_name, marker="o", color="red")
 
@@ -105,8 +105,8 @@ def view_plot(ax, field, coordinate, field_name="", coordinate_name="", field_un
         labelsize=12,
     )
     # ax.set_xlim(rho_tor_norm[0], rho_tor_norm[nrho - 1])
-    ax.set_xlabel(coordinate_unit, font_args, labelpad=1)
-    ax.set_ylabel(field_unit, font_args, labelpad=0)
+    ax.set_xlabel(f"{coordinate_name} [{coordinate_unit}]", font_args, labelpad=1)
+    ax.set_ylabel(f"{yfield_name} [{field_unit}]", font_args, labelpad=0)
 
     # set legend
     # legx_pos = 1.35

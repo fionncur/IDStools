@@ -375,17 +375,16 @@ class WavesCompute:
                         single_power_waveform[iwave].append(
                             self.ids.coherent_wave[iwave].global_quantities[itime].electrons.power_thermal
                         )
-                        single_current_waveform[iwave].append(
-                            self.ids.coherent_wave[iwave].global_quantities[itime].current_tor
-                        )
+                        current_tor = getattr(
+                            self.ids.coherent_wave[iwave].global_quantities[itime], "current_tor", None
+                        ) or getattr(self.ids.coherent_wave[iwave].global_quantities[itime], "current_phi", None)
+
+                        single_current_waveform[iwave].append(current_tor)
                         total_power_waveform[itime] = (
                             total_power_waveform[itime]
                             + self.ids.coherent_wave[iwave].global_quantities[itime].electrons.power_thermal
                         )
-                        total_current_waveform[itime] = (
-                            total_current_waveform[itime]
-                            + self.ids.coherent_wave[iwave].global_quantities[itime].current_tor
-                        )
+                        total_current_waveform[itime] = total_current_waveform[itime] + current_tor
                     if len(self.ids.coherent_wave[iwave].profiles_1d[time_slice].power_density) > 0:
                         total_power_density_profile = (
                             total_power_density_profile
@@ -424,12 +423,19 @@ class WavesCompute:
                                     total_absorbed_power
                                     + self.ids.coherent_wave[iwave].global_quantities[time_slice].power
                                 )
-                                total_eccd = (
-                                    total_eccd + self.ids.coherent_wave[iwave].global_quantities[time_slice].current_tor
+                                current_tor = getattr(
+                                    self.ids.coherent_wave[iwave].global_quantities[time_slice], "current_tor", None
+                                ) or getattr(
+                                    self.ids.coherent_wave[iwave].global_quantities[time_slice], "current_phi", None
                                 )
 
+                                total_eccd = total_eccd + current_tor
+
                     single_absorbed_power[iwave] = self.ids.coherent_wave[iwave].global_quantities[time_slice].power
-                    single_eccd[iwave] = self.ids.coherent_wave[iwave].global_quantities[time_slice].current_tor
+                    current_tor = getattr(
+                        self.ids.coherent_wave[iwave].global_quantities[time_slice], "current_tor", None
+                    ) or getattr(self.ids.coherent_wave[iwave].global_quantities[time_slice], "current_phi", None)
+                    single_eccd[iwave] = current_tor
                     if verbose:
                         logger.info(
                             " "

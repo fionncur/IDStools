@@ -538,7 +538,10 @@ class CoreSourcesCompute:
                     current_parallel = self.ids.source[source_index].global_quantities[time_index].current_parallel
                     if current_parallel < -1.0e40:
                         current_parallel = 0.0
-                    torque_tor = self.ids.source[source_index].global_quantities[time_index].torque_tor
+                    torque_tor = getattr(
+                        self.ids.source[source_index].global_quantities[time_index], "torque_tor", None
+                    ) or getattr(self.ids.source[source_index].global_quantities[time_index], "torque_phi", None)
+
                     if torque_tor < 0:
                         torque_tor = 0.0
 
