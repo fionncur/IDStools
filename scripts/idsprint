@@ -222,6 +222,48 @@ def _make_tree(structure, hide_empty_nodes, compact, *, tree=None):
     return tree
 
 
+def _make_dict_tree(structure, hide_empty_nodes, compact, *, tree=None):
+    """Build the ``rich.tree.Tree`` for display in :py:meth:`print_tree`.
+
+    Args:
+        structure: IDS structure to add to the tree
+        hide_empty_nodes: Show or hide nodes without value.
+
+    Keyword Args:
+        tree: If provided, child items will be added to this Tree object. Otherwise a
+            new Tree is constructed.
+    """
+
+    if tree is None:
+        tree = {}
+
+    iterator = structure
+    if hide_empty_nodes and isinstance(structure, IDSStructure):
+        iterator = structure.iter_nonempty_(accept_lazy=True)
+
+    for counter, child in enumerate(iterator):
+        if isinstance(child, (np.ndarray)):
+            tree = child.tolist()
+        elif isinstance(child, IDSPrimitive):
+            data=child.value
+            if isinstance(data , np.ndarray):
+                data=data.tolist()
+            tree[child.metadata.name] = data
+        else:
+            if isinstance(child, IDSStructure):
+                ntree = {}
+                tree[child.metadata.name] = ntree
+                _make_dict_tree(child, hide_empty_nodes, compact, tree=ntree)
+            elif isinstance(child, IDSStructArray):
+                nlist = []
+                tree[child.metadata.name] = nlist
+                for counter, ids_structure in enumerate(child):
+                    ntree = {}
+                    nlist.append(ntree)
+                    nlist.append(_make_dict_tree(ids_structure, hide_empty_nodes, compact, tree=ntree))
+    return tree
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="""Prints content of an IDS onto the terminal\n
@@ -257,6 +299,18 @@ if __name__ == "__main__":
         action="store_true",
         help="Print child nodes information and metadata",
     )
+    parser.add_argument("-t", "--time", help="Time", required=False, type=float, default=None)
+    parser.add_argument(
+        "--export",
+        action="store_true",
+        help=("export ids data to use in other format"),
+    )
+    parser.add_argument(
+        "--export-type",
+        type=str,
+        default="mat",
+        help=("type of export mat, json"),
+    )
     parser.add_argument(
         "-p",
         "--plot",
@@ -269,14 +323,6 @@ if __name__ == "__main__":
         default=None,
     )
     parser.add_argument(
-        "--dd-update",
-        action="store_true",
-        help=(
-            "Convert IDS to the default version of the data dictionary if enabled"
-            "otherwise, use the original IDS stored on disk."
-        ),
-    )
-    parser.add_argument(
         "--save",
         help="Save figure at default location",
         action="store_true",
@@ -287,6 +333,9 @@ if __name__ == "__main__":
         default=None,
     )
     args = parser.parse_args()
+    time_slice = 0.0
+    if args.time:
+        time_slice = float(args.time)
     uri_dict = parse_uri(args.uri)
     uri_part = uri_dict["uri_part"]
     occurrence = uri_dict["occurrence"]
@@ -325,19 +374,96 @@ if __name__ == "__main__":
 
     if ids_path is None:
         if args.dd_update:
-            ids = connection.get(ids_name, occurrence)
+            if args.time:
+                ids = connection.get_slice(
+                    ids_name,
+                    occurrence=0,
+                    time_requested=time_slice,
+                    interpolation_method=imaspy.ids_defs.CLOSEST_INTERP,
+                )
+            else:
+                ids = connection.get(ids_name, occurrence=0)
         else:
-            ids = connection.get(ids_name, occurrence, autoconvert=False, ignore_unknown_dd_version=True)
+            if args.time:
+                ids = connection.get_slice(
+                    ids_name,
+                    occurrence=0,
+                    time_requested=time_slice,
+                    interpolation_method=imaspy.ids_defs.CLOSEST_INTERP,
+                )
+            else:
+                ids = connection.get(ids_name, occurrence=0, autoconvert=False, ignore_unknown_dd_version=True)
 
         if args.inspect:
             imaspy.util.inspect(ids, hide_empty_nodes=not args.show_empty)
+        elif args.export:
+            fields = _make_dict_tree(ids, hide_empty_nodes=not args.show_empty, compact=args.compact)
+            root_dict = {}
+            root_dict[ids_name] = fields
+            if args.export_type == "mat":
+                fname = f"{ids_name}.mat"
+                if args.directory:
+                    if not os.path.exists(args.directory):
+                        os.makedirs(args.directory)
+                    fname = os.path.join(args.directory, fname)
+                from scipy.io import savemat
+
+                savemat(fname, root_dict, long_field_names=True)
+                logger.info(f"MAT file '{fname}' created successfully!")
+            elif args.export_type == "json":
+                fname = f"{ids_name}.json"
+                if args.directory:
+                    if not os.path.exists(args.directory):
+                        os.makedirs(args.directory)
+                    fname = os.path.join(args.directory, fname)
+                import json
+
+                with open(fname, "w") as f:
+                    json.dump(root_dict, f, indent=4)
+                logger.info(f"JSON file '{fname}' created successfully!")
+            elif args.export_type == "yaml":
+                fname = f"{ids_name}.yaml"
+                if args.directory:
+                    if not os.path.exists(args.directory):
+                        os.makedirs(args.directory)
+                    fname = os.path.join(args.directory, fname)
+                import yaml
+
+                with open(fname, "w") as f:
+                    yaml.dump(root_dict, f)
+                logger.info(f"YAML file '{fname}' created successfully!")
+            else:
+                logger.error(f"Please provide valid export type")
         else:
             print_tree(ids, hide_empty_nodes=not args.show_empty, compact=args.compact, full_array=args.full)
     else:
         if args.dd_update:
-            ids = connection.get(ids_name, occurrence, lazy=True)
+            if args.time:
+                ids = connection.get_slice(
+                    ids_name,
+                    occurrence=0,
+                    lazy=True,
+                    time_requested=time_slice,
+                    interpolation_method=imaspy.ids_defs.CLOSEST_INTERP,
+                )
+            else:
+                ids = connection.get(ids_name, occurrence=0, lazy=True)
+
         else:
-            ids = connection.get(ids_name, occurrence, autoconvert=False, ignore_unknown_dd_version=True, lazy=True)
+            if args.time:
+                ids = connection.get_slice(
+                    ids_name,
+                    occurrence=0,
+                    autoconvert=False,
+                    ignore_unknown_dd_version=True,
+                    lazy=True,
+                    time_requested=time_slice,
+                    interpolation_method=imaspy.ids_defs.CLOSEST_INTERP,
+                )
+            else:
+                ids = connection.get(
+                    ids_name, occurrence=0, autoconvert=False, ignore_unknown_dd_version=True, lazy=True
+                )
         coordinate = None
         node_unit = ""
         coordinate_name = ""
@@ -379,6 +505,44 @@ if __name__ == "__main__":
 
         if args.inspect:
             imaspy.util.inspect(node, hide_empty_nodes=not args.show_empty)
+        elif args.export:
+            fields = _make_dict_tree(ids, hide_empty_nodes=not args.show_empty, compact=args.compact)
+            root_dict = {}
+            root_dict[ids_name] = fields
+            if args.export_type == "mat":
+                fname = f"{ids_name}.mat"
+                if args.directory:
+                    if not os.path.exists(args.directory):
+                        os.makedirs(args.directory)
+                    fname = os.path.join(args.directory, fname)
+                from scipy.io import savemat
+
+                savemat(fname, root_dict, long_field_names=True)
+                logger.info(f"MAT file '{fname}' created successfully!")
+            elif args.export_type == "json":
+                fname = f"{ids_name}.json"
+                if args.directory:
+                    if not os.path.exists(args.directory):
+                        os.makedirs(args.directory)
+                    fname = os.path.join(args.directory, fname)
+                import json
+
+                with open(fname, "w") as f:
+                    json.dump(root_dict, f, indent=4)
+                logger.info(f"JSON file '{fname}' created successfully!")
+            elif args.export_type == "yaml":
+                fname = f"{ids_name}.yaml"
+                if args.directory:
+                    if not os.path.exists(args.directory):
+                        os.makedirs(args.directory)
+                    fname = os.path.join(args.directory, fname)
+                import yaml
+
+                with open(fname, "w") as f:
+                    yaml.dump(root_dict, f)
+                logger.info(f"YAML file '{fname}' created successfully!")
+            else:
+                logger.error(f"Please provide valid export type")
         elif args.plot:
             if isinstance(node, (imaspy.ids_structure.IDSStructure, imaspy.ids_struct_array.IDSStructArray)):
                 logger.error("Can not plot data, fragment is structure. inspect data with -i option")

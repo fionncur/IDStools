@@ -187,10 +187,14 @@ class EquilibriumCompute:
         if list_of_profiles is not None:
             # TODO Check if we should always pick up first profile
             profile2d_index = list_of_profiles[0]
+            b_field_tor = getattr(
+                self.ids.time_slice[time_slice].profiles_2d[profile2d_index], "b_field_tor", None
+            ) or getattr(self.ids.time_slice[time_slice].profiles_2d[profile2d_index], "b_field_phi", None)
+
             b_total = np.sqrt(
                 self.ids.time_slice[time_slice].profiles_2d[profile2d_index].b_field_r ** 2
                 + self.ids.time_slice[time_slice].profiles_2d[profile2d_index].b_field_z ** 2
-                + self.ids.time_slice[time_slice].profiles_2d[profile2d_index].b_field_tor ** 2
+                + b_field_tor**2
             )
         else:
             print("------------------------------------------------")
@@ -512,10 +516,15 @@ class EquilibriumCompute:
                     self.ids.time_slice[itime].global_quantities.psi_boundary * rescale_factor
                 )
 
-            if self.ids.time_slice[itime].global_quantities.magnetic_axis.b_field_tor.has_value:
-                equout.time_slice[itime].global_quantities.magnetic_axis.b_field_tor = (
-                    self.ids.time_slice[itime].global_quantities.magnetic_axis.b_field_tor * rescale_factor
-                )
+            b_field_tor = getattr(
+                self.ids.time_slice[itime].global_quantities.magnetic_axis, "b_field_tor", None
+            ) or getattr(self.ids.time_slice[itime].global_quantities.magnetic_axis, "b_field_phi", None)
+
+            if b_field_tor.has_value:
+                if hasattr(equout.time_slice[itime].global_quantities.magnetic_axis, "b_field_tor"):
+                    equout.time_slice[itime].global_quantities.magnetic_axis.b_field_tor = b_field_tor * rescale_factor
+                elif hasattr(equout.time_slice[itime].global_quantities.magnetic_axis, "b_field_phi"):
+                    equout.time_slice[itime].global_quantities.magnetic_axis.b_field_phi = b_field_tor * rescale_factor
 
             if Version(dd_version) > Version("3.14.0"):
                 if self.ids.time_slice[itime].global_quantities.energy_mhd.has_value:
@@ -689,11 +698,20 @@ class EquilibriumCompute:
                             )
 
                 if Version(dd_version) > Version("3.5.0"):
-                    for ir in range(len(self.ids.time_slice[itime].profiles_2d[i2d].b_field_tor)):
-                        for iz in range(len(self.ids.time_slice[itime].profiles_2d[i2d].b_field_tor[ir])):
-                            equout.time_slice[itime].profiles_2d[i2d].b_field_tor[ir][iz] = (
-                                self.ids.time_slice[itime].profiles_2d[i2d].b_field_tor[ir][iz] * rescale_factor
-                            )
+                    b_field_tor = getattr(self.ids.time_slice[itime].profiles_2d[i2d], "b_field_tor", None) or getattr(
+                        self.ids.time_slice[itime].profiles_2d[i2d], "b_field_phi", None
+                    )
+
+                    for ir in range(len(b_field_tor)):
+                        for iz in range(len(b_field_tor[ir])):
+                            if hasattr(equout.time_slice[itime].profiles_2d[i2d], "b_field_tor"):
+                                equout.time_slice[itime].profiles_2d[i2d].b_field_tor[ir][iz] = (
+                                    b_field_tor[ir][iz] * rescale_factor
+                                )
+                            if hasattr(equout.time_slice[itime].profiles_2d[i2d], "b_field_phi"):
+                                equout.time_slice[itime].profiles_2d[i2d].b_field_phi[ir][iz] = (
+                                    b_field_tor[ir][iz] * rescale_factor
+                                )
                 else:
                     for ir in range(len(self.ids.time_slice[itime].profiles_2d[i2d].b_tor)):
                         for iz in range(len(self.ids.time_slice[itime].profiles_2d[i2d].b_tor[ir])):
@@ -757,14 +775,27 @@ class EquilibriumCompute:
                                 self.ids.time_slice[itime].ggd[iggd].b_field_z[i2].coefficients[i][j] * rescale_factor
                             )
 
-                    for i in range(len(self.ids.time_slice[itime].ggd[iggd].b_field_tor[i2].values)):
-                        equout.time_slice[itime].ggd[iggd].b_field_tor[i2].values[i] = (
-                            self.ids.time_slice[itime].ggd[iggd].b_field_tor[i2].values[i] * rescale_factor
-                        )
-                        for j in range(len(self.ids.time_slice[itime].ggd[iggd].b_field_tor[i2].values[i])):
-                            equout.time_slice[itime].ggd[iggd].b_field_tor[i2].coefficients[i][j] = (
-                                self.ids.time_slice[itime].ggd[iggd].b_field_tor[i2].coefficients[i][j] * rescale_factor
+                    b_field_tor = getattr(self.ids.time_slice[itime].ggd[iggd], "b_field_tor", None) or getattr(
+                        self.ids.time_slice[itime].ggd[iggd], "b_field_phi", None
+                    )
+
+                    for i in range(len(b_field_tor[i2].values)):
+                        if hasattr(equout.time_slice[itime].ggd[iggd], "b_field_tor"):
+                            equout.time_slice[itime].ggd[iggd].b_field_tor[i2].values[i] = (
+                                b_field_tor[i2].values[i] * rescale_factor
                             )
+                            for j in range(len(b_field_tor[i2].values[i])):
+                                equout.time_slice[itime].ggd[iggd].b_field_tor[i2].coefficients[i][j] = (
+                                    b_field_tor[i2].coefficients[i][j] * rescale_factor
+                                )
+                        elif hasattr(equout.time_slice[itime].ggd[iggd], "b_field_phi"):
+                            equout.time_slice[itime].ggd[iggd].b_field_phi[i2].values[i] = (
+                                b_field_tor[i2].values[i] * rescale_factor
+                            )
+                            for j in range(len(b_field_tor[i2].values[i])):
+                                equout.time_slice[itime].ggd[iggd].b_field_phi[i2].coefficients[i][j] = (
+                                    b_field_tor[i2].coefficients[i][j] * rescale_factor
+                                )
 
         equout.ids_properties.comment = (
             self.ids.ids_properties.comment + " (field rescaled by " + str(rescale_factor) + ")"

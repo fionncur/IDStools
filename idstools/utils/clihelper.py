@@ -48,6 +48,14 @@ imas_parser.add_argument(
 )
 
 dbentry_parser = argparse.ArgumentParser(add_help=False, parents=[uri_parser])
+dbentry_parser.add_argument(
+    "--dd-update",
+    action="store_true",
+    help=(
+        "Convert IDS to the default version of the data dictionary if enabled"
+        "otherwise, use the original IDS stored on disk."
+    ),
+)
 
 
 def get_backend_id(name):

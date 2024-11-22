@@ -104,7 +104,6 @@ if __name__ == "__main__":
                 occ = int(nameocc[1])
             dbm.put(dbref.get(idsname, occ))
         args.mode = "r"
-
     db = DBMaster.get_connection(args)
     if db is None:
         print("----> Aborted.")

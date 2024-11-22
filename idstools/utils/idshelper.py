@@ -323,7 +323,7 @@ def get_ids_types():
     return factory.ids_names()
 
 
-def get_available_ids_and_occurrences(db_entry_object, time_mode=None, get_comment=False):
+def get_available_ids_and_occurrences(db_entry_object, time_mode=None, get_comment=False, dd_update=False):
     """
     This function returns a list of pairs of available IDS types and their occurrences in a given DBEntry object.
 
@@ -349,7 +349,7 @@ def get_available_ids_and_occurrences(db_entry_object, time_mode=None, get_comme
             homogeneous_time = ""
             comment = ""
             occ_type = ""
-            ids_object = db_entry_object.get(idstype, occurrence=occ, lazy=True)
+            ids_object = db_entry_object.get(idstype, occurrence=occ, lazy=True, autoconvert=dd_update)
             homogeneous_time = ids_object.ids_properties.homogeneous_time
             comment = ids_object.ids_properties.comment
             try:
@@ -368,7 +368,7 @@ def get_available_ids_and_occurrences(db_entry_object, time_mode=None, get_comme
     return availableidslist
 
 
-def get_available_ids_and_times(db_entry_object) -> list:
+def get_available_ids_and_times(db_entry_object, dd_update=False) -> list:
     """
     The function `get_available_ids_and_times` retrieves available IDS names and corresponding time
     arrays from a given `db_entry_object`.
@@ -391,26 +391,28 @@ def get_available_ids_and_times(db_entry_object) -> list:
         for occurrence in occurrence_list:
             time_array = None
             try:
-                ids_object = db_entry_object.get(_ids_name, occurrence=occurrence, lazy=True)
+                ids_object = db_entry_object.get(_ids_name, occurrence=occurrence, lazy=True, autoconvert=dd_update)
                 homogeneous_time = ids_object.ids_properties.homogeneous_time
                 if homogeneous_time == imas.ids_defs.IDS_TIME_MODE_UNKNOWN:
                     time_array = []
                 if homogeneous_time == imas.ids_defs.IDS_TIME_MODE_HETEROGENEOUS:
                     time_array = [np.NaN]
                 if homogeneous_time == imas.ids_defs.IDS_TIME_MODE_HOMOGENEOUS:
-                    time_array = ids_object.time.value
+                    if getattr(ids_object, "time", None):
+                        time_array = ids_object.time.value
                 if homogeneous_time == imas.ids_defs.IDS_TIME_MODE_INDEPENDENT:
                     time_array = [np.NINF]
             except Exception as e:
                 logger.debug(f"{e}")
                 time_array = []
                 logger.info(f"ERROR! IDS {_ids_name} : Reading time array fails due to following problem : {e}")
-            if time_array is not None and len(time_array):
-                result.append((_ids_name, time_array))
+            result.append((_ids_name, time_array))
     return result
 
 
-def resample_indices(dbin: str, dbout: str, idsname: str, start: int = 0, stop: int = None, step: int = 1):
+def resample_indices(
+    dbin: str, dbout: str, idsname: str, start: int = 0, stop: int = None, step: int = 1, dd_update=False
+):
     """
     The function resample_indices takes in a database input, database output, and an idsname, and resamples the
     data based on the specified start, stop, and step values.
@@ -430,13 +432,13 @@ def resample_indices(dbin: str, dbout: str, idsname: str, start: int = 0, stop: 
     """
     idsobj = None
     try:
-        idsobj = dbin.get(idsname, lazy=True)
+        idsobj = dbin.get(idsname, lazy=True, autoconvert=dd_update)
     except Exception as _:  # noqa: F841
         pass
     if idsobj:
         times = idsobj.time
         for time_val in times[range(start, len(times) if stop is None else stop, step)]:
-            data_slice = dbin.get_slice(idsname, time_val, imas.ids_defs.PREVIOUS_INTERP)
+            data_slice = dbin.get_slice(idsname, time_val, imas.ids_defs.PREVIOUS_INTERP, autoconvert=dd_update)
             dbout.put_slice(data_slice)
 
 
@@ -447,6 +449,7 @@ def resample_times(
     start: int = None,
     stop: int = None,
     step: int = None,
+    dd_update=False,
 ):
     """
     The function resampleTimes takes in a database input, database output, idsname, start, stop, and
@@ -483,7 +486,7 @@ def resample_times(
             rtimes = np.arange(rstart, rstop, step)
 
         for time_val in rtimes:
-            data_slice = dbin.get_slice(idsname, time_val, imas.ids_defs.PREVIOUS_INTERP)
+            data_slice = dbin.get_slice(idsname, time_val, imas.ids_defs.PREVIOUS_INTERP, autoconvert=dd_update)
             dbout.put_slice(data_slice)
 
 

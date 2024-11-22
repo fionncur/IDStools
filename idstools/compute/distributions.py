@@ -205,8 +205,8 @@ class DistributionsCompute:
                 profiles["single_total_power_density_profile"][idistrib] = [0] * self.nrho
                 if self.cur_calc == 1:
                     current_tor = getattr(
-                        self.ids.distribution[idistrib].global_quantities[time_slice], "current_tor", None
-                    ) or getattr(self.ids.distribution[idistrib].global_quantities[time_slice], "current_phi", None)
+                        self.ids.distribution[idistrib].profiles_1d[time_slice], "current_tor", None
+                    ) or getattr(self.ids.distribution[idistrib].profiles_1d[time_slice], "current_phi", None)
                     profiles["single_current_density_profile"][idistrib] = current_tor
                 profiles["single_electron_power_density_profile"][idistrib] = (
                     self.ids.distribution[idistrib].profiles_1d[time_slice].collisions.electrons.power_thermal

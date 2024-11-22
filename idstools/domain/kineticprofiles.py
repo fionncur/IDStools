@@ -167,7 +167,7 @@ class KineticProfilesCompute:
         if ids_name:
             logger.info(f"--> retrieving ids {ids_name}")
             try:
-                ids_object = self.connection.get(ids_name, lazy=True)
+                ids_object = self.connection.get(ids_name, lazy=True, autoconvert=False)
                 if ids_object.time is not None:
                     if len(ids_object.time) > 0:
                         ids_present = True
@@ -1206,24 +1206,25 @@ class KineticProfilesCompute:
                             .ion[ispecies]
                             .velocity.toroidal[i]
                         )
-                vtor = self.core_profiles.profiles_1d[self.time_index_core_profiles].ion[ispecies].velocity_tor
-                if len(vtor) != self.nrho:
-                    logger.warning(f"core_profiles.profiles_1d[:].ion[{ispecies}].velocity_tor could not be read.")
-                    logger.warning(
-                        f"Size mismatch: rho_tor_norm = {self.nrho}, ion[{ispecies}].velocity_tor = " f"{len(vtor)}"
-                    )
-                    self.core_profiles.profiles_1d[self.time_index_core_profiles].ion[ispecies].velocity_tor = (
-                        np.asarray([np.NaN] * self.nrho)
-                    )
-                else:
-                    if vtor_flag == 0:
-                        vtor_flag = 2
-                        for i in range(self.nrho):
-                            ion_vtor[ispecies][i] = abs(
-                                self.core_profiles.profiles_1d[self.time_index_core_profiles]
-                                .ion[ispecies]
-                                .velocity_tor[i]
-                            )
+                if hasattr(self.core_profiles.profiles_1d[self.time_index_core_profiles].ion[ispecies], "velocity_tor"):
+                    vtor = self.core_profiles.profiles_1d[self.time_index_core_profiles].ion[ispecies].velocity_tor
+                    if len(vtor) != self.nrho:
+                        logger.warning(f"core_profiles.profiles_1d[:].ion[{ispecies}].velocity_tor could not be read.")
+                        logger.warning(
+                            f"Size mismatch: rho_tor_norm = {self.nrho}, ion[{ispecies}].velocity_tor = " f"{len(vtor)}"
+                        )
+                        self.core_profiles.profiles_1d[self.time_index_core_profiles].ion[ispecies].velocity_tor = (
+                            np.asarray([np.NaN] * self.nrho)
+                        )
+                    else:
+                        if vtor_flag == 0:
+                            vtor_flag = 2
+                            for i in range(self.nrho):
+                                ion_vtor[ispecies][i] = abs(
+                                    self.core_profiles.profiles_1d[self.time_index_core_profiles]
+                                    .ion[ispecies]
+                                    .velocity_tor[i]
+                                )
             if self.is_edge_profiles_present:
                 jspecies = self.species_map[ispecies]
                 if jspecies != -99:
@@ -1466,24 +1467,25 @@ class KineticProfilesCompute:
                             .ion[ispecies]
                             .velocity.poloidal[i]
                         )
-                vpol = self.core_profiles.profiles_1d[self.time_index_core_profiles].ion[ispecies].velocity_pol
-                if len(vpol) != self.nrho:
-                    logger.warning(f"core_profiles.profiles_1d[:].ion[{ispecies}].velocity_pol could not be read.")
-                    logger.warning(
-                        f"Size mismatch: rho_tor_norm = {self.nrho}, ion[{ispecies}].velocity_pol = " f"{len(vpol)}"
-                    )
-                    self.core_profiles.profiles_1d[self.time_index_core_profiles].ion[ispecies].velocity_pol = (
-                        np.asarray([np.NaN] * self.nrho)
-                    )
-                else:
-                    if vpol_flag == 0:
-                        vpol_flag = 2
-                        for i in range(self.nrho):
-                            ion_vpol[ispecies][i] = abs(
-                                self.core_profiles.profiles_1d[self.time_index_core_profiles]
-                                .ion[ispecies]
-                                .velocity_pol[i]
-                            )
+                if hasattr(self.core_profiles.profiles_1d[self.time_index_core_profiles].ion[ispecies], "velocity_pol"):
+                    vpol = self.core_profiles.profiles_1d[self.time_index_core_profiles].ion[ispecies].velocity_pol
+                    if len(vpol) != self.nrho:
+                        logger.warning(f"core_profiles.profiles_1d[:].ion[{ispecies}].velocity_pol could not be read.")
+                        logger.warning(
+                            f"Size mismatch: rho_tor_norm = {self.nrho}, ion[{ispecies}].velocity_pol = " f"{len(vpol)}"
+                        )
+                        self.core_profiles.profiles_1d[self.time_index_core_profiles].ion[ispecies].velocity_pol = (
+                            np.asarray([np.NaN] * self.nrho)
+                        )
+                    else:
+                        if vpol_flag == 0:
+                            vpol_flag = 2
+                            for i in range(self.nrho):
+                                ion_vpol[ispecies][i] = abs(
+                                    self.core_profiles.profiles_1d[self.time_index_core_profiles]
+                                    .ion[ispecies]
+                                    .velocity_pol[i]
+                                )
             if self.is_edge_profiles_present:
                 jspecies = self.species_map[ispecies]
                 if jspecies != -99:
