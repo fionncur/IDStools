@@ -373,26 +373,16 @@ if __name__ == "__main__":
         exit(1)
 
     if ids_path is None:
-        if args.dd_update:
-            if args.time:
-                ids = connection.get_slice(
-                    ids_name,
-                    occurrence=0,
-                    time_requested=time_slice,
-                    interpolation_method=imaspy.ids_defs.CLOSEST_INTERP,
-                )
-            else:
-                ids = connection.get(ids_name, occurrence=0)
+        if args.time:
+            ids = connection.get_slice(
+                ids_name,
+                occurrence=0,
+                time_requested=time_slice,
+                autoconvert=args.dd_update,
+                interpolation_method=imaspy.ids_defs.CLOSEST_INTERP,
+            )
         else:
-            if args.time:
-                ids = connection.get_slice(
-                    ids_name,
-                    occurrence=0,
-                    time_requested=time_slice,
-                    interpolation_method=imaspy.ids_defs.CLOSEST_INTERP,
-                )
-            else:
-                ids = connection.get(ids_name, occurrence=0, autoconvert=False, ignore_unknown_dd_version=True)
+            ids = connection.get(ids_name, occurrence=0, autoconvert=args.dd_update, ignore_unknown_dd_version=True)
 
         if args.inspect:
             imaspy.util.inspect(ids, hide_empty_nodes=not args.show_empty)
@@ -437,33 +427,20 @@ if __name__ == "__main__":
         else:
             print_tree(ids, hide_empty_nodes=not args.show_empty, compact=args.compact, full_array=args.full)
     else:
-        if args.dd_update:
-            if args.time:
-                ids = connection.get_slice(
-                    ids_name,
-                    occurrence=0,
-                    lazy=True,
-                    time_requested=time_slice,
-                    interpolation_method=imaspy.ids_defs.CLOSEST_INTERP,
-                )
-            else:
-                ids = connection.get(ids_name, occurrence=0, lazy=True)
-
+        if args.time:
+            ids = connection.get_slice(
+                ids_name,
+                occurrence=0,
+                autoconvert=args.dd_update,
+                ignore_unknown_dd_version=True,
+                lazy=True,
+                time_requested=time_slice,
+                interpolation_method=imaspy.ids_defs.CLOSEST_INTERP,
+            )
         else:
-            if args.time:
-                ids = connection.get_slice(
-                    ids_name,
-                    occurrence=0,
-                    autoconvert=False,
-                    ignore_unknown_dd_version=True,
-                    lazy=True,
-                    time_requested=time_slice,
-                    interpolation_method=imaspy.ids_defs.CLOSEST_INTERP,
-                )
-            else:
-                ids = connection.get(
-                    ids_name, occurrence=0, autoconvert=False, ignore_unknown_dd_version=True, lazy=True
-                )
+            ids = connection.get(
+                ids_name, occurrence=0, autoconvert=args.dd_update, ignore_unknown_dd_version=True, lazy=True
+            )
         coordinate = None
         node_unit = ""
         coordinate_name = ""
@@ -492,10 +469,7 @@ if __name__ == "__main__":
                 node = eval("ids." + ids_path)
                 # reevaluate if struct or struct_array
                 if isinstance(node, (imaspy.ids_structure.IDSStructure, imaspy.ids_struct_array.IDSStructArray)):
-                    if args.dd_update:
-                        ids = connection.get(ids_name, occurrence)
-                    else:
-                        ids = connection.get(ids_name, occurrence, autoconvert=False, ignore_unknown_dd_version=True)
+                    ids = connection.get(ids_name, occurrence, autoconvert=args.dd_update)
                     node = eval("ids." + ids_path)
             except Exception as e:
                 logger.error(f"{ids_path} path does not exist, hint: check length of arrays, detailed error {e}")
