@@ -245,9 +245,9 @@ def _make_dict_tree(structure, hide_empty_nodes, compact, *, tree=None):
         if isinstance(child, (np.ndarray)):
             tree = child.tolist()
         elif isinstance(child, IDSPrimitive):
-            data=child.value
-            if isinstance(data , np.ndarray):
-                data=data.tolist()
+            data = child.value
+            if isinstance(data, np.ndarray):
+                data = data.tolist()
             tree[child.metadata.name] = data
         else:
             if isinstance(child, IDSStructure):
