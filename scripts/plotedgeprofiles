@@ -81,7 +81,7 @@ if args.wall:
         mdargs.uri = args.walluri
         mdconnection = DBMaster.get_connection(args)
         try:
-            wall_ids = mdconnection.get("wall", lazy=True)
+            wall_ids = mdconnection.get("wall", lazy=True, autoconvert=args.dd_update)
         except Exception as _:  # noqa: F841
             logger.error(
                 "wall ids is not present in the data entry. please provide"
@@ -89,7 +89,7 @@ if args.wall:
             )
     else:
         try:
-            wall_ids = connection.get("wall", lazy=True)
+            wall_ids = connection.get("wall", lazy=True, autoconvert=args.dd_update)
         except Exception as _:  # noqa: F841
             logger.error(
                 "wall ids is not present in the data entry. please provide with"
@@ -111,7 +111,7 @@ if args.wall:
 
 edge_profile_ids = None
 try:
-    edge_profile_ids = connection.get("edge_profiles", lazy=True)
+    edge_profile_ids = connection.get("edge_profiles", lazy=True, autoconvert=args.dd_update)
 except Exception as _:  # noqa: F841
     logger.error("edge_profiles ids is not present")
     exit(1)

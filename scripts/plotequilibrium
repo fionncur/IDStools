@@ -114,7 +114,7 @@ if isinstance(args.md, bool) and args.md is True:
     _ids_connection.close()
 
 
-ids_obj_equilibrium = connection.get("equilibrium", occurrence=occurrence, lazy=True)
+ids_obj_equilibrium = connection.get("equilibrium", occurrence=occurrence, lazy=True, autoconvert=args.dd_update)
 
 if ids_obj_equilibrium.time is not None:
     time_slice, time_value = get_nearest_time(ids_obj_equilibrium.time, args.time)
@@ -173,7 +173,7 @@ if ids_obj_equilibrium.time is not None:
             connection = DBMaster.get_connection(inputargs)
             if connection is not None:
                 try:
-                    _ids_data = connection.get("wall")
+                    _ids_data = connection.get("wall", autoconvert=args.dd_update)
                     if _ids_data.ids_properties.homogeneous_time == ids_defs.EMPTY_INT:
                         logger.warning(f"{_ids_name} ids is empty in the dbentry")
                 except Exception as e:
@@ -192,7 +192,7 @@ if ids_obj_equilibrium.time is not None:
             if connection is not None:
                 _ids_data = None
                 try:
-                    _ids_data = connection.get("pf_active")
+                    _ids_data = connection.get("pf_active", autoconvert=args.dd_update)
                     if _ids_data.ids_properties.homogeneous_time == ids_defs.EMPTY_INT:
                         logger.warning(f"{_ids_name} ids is empty in the dbentry")
                 except Exception as e:

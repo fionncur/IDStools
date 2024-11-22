@@ -33,6 +33,8 @@ SCRIPTS=(
     "plotecray --uri \"imas:mdsplus?user=public;pulse=134173;run=2326;database=TEST;version=3\" --save --directory $LOG_DIR"
     "plotecray --uri \"imas:mdsplus?user=public;pulse=134173;run=2326;database=TEST;version=3\" -md wall --save --directory $LOG_DIR"
     "plotedgeprofiles --uri \"imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3\" --wall --time 60 --save --directory $LOG_DIR"
+    "plotequilibrium --uri \"imas:hdf5?user=appell;shot=105027;run=200;database=ITER;version=3\" --time 60.2542657903933 --save --directory $LOG_DIR"
+    "plotequilibrium --uri \"imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3"\ --rho -md \"imas:mdsplus?user=public;pulse=111001;run=103;database=ITER_MD;version=3#pf_active\" \"imas:mdsplus?user=public;pulse=116000;run=4;database=ITER_MD;version=3#wall\" --save --directory $LOG_DIR"
     "plotequilibrium --uri \"imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3\" -md pf_active wall --save --directory $LOG_DIR"
     "printfluxes --uri \"imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3\" -m CLOSEST"
     "plothcd -ech 134173/101/public/MDSPLUS/TEST/3 -nbi 130012/115/public/MDSPLUS/TEST/3 -fus 130012/115/public/MDSPLUS/TEST/3 -icrh 130012/115/public/MDSPLUS/TEST/3 --save --directory $LOG_DIR"

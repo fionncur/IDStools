@@ -102,21 +102,21 @@ if conn is None:
 
 ids_waves = None
 try:
-    ids_waves = conn.get("waves", lazy=True)
+    ids_waves = conn.get("waves", lazy=True, autoconvert=args.dd_update)
 except Exception as _:  # noqa: F841
     logger.error("waves ids is not present")
     exit(1)
 
 ids_core_profiles = None
 try:
-    ids_core_profiles = conn.get("core_profiles", lazy=True)
+    ids_core_profiles = conn.get("core_profiles", lazy=True, autoconvert=args.dd_update)
 except Exception as _:  # noqa: F841
     logger.error("core_profiles ids is not present")
     exit(1)
 
 ids_equilibrium = None
 try:
-    ids_equilibrium = conn.get("equilibrium", lazy=True)
+    ids_equilibrium = conn.get("equilibrium", lazy=True, autoconvert=args.dd_update)
 except Exception as _:  # noqa: F841
     logger.error("equilibrium ids is not present")
     exit(1)
@@ -179,7 +179,7 @@ for mdids_info in args.md:
         connection = DBMaster.get_connection(inputargs)
         if connection is not None:
             try:
-                _ids_data = connection.get("wall", lazy=True)
+                _ids_data = connection.get("wall", lazy=True, autoconvert=args.dd_update)
                 if _ids_data.ids_properties.homogeneous_time != EMPTY_INT:
                     wallview = WallView(_ids_data)
                     wallview.view_wall(
@@ -199,7 +199,7 @@ for mdids_info in args.md:
         connection = DBMaster.get_connection(inputargs)
         if connection is not None:
             try:
-                _ids_data = connection.get("pf_active", lazy=True)
+                _ids_data = connection.get("pf_active", lazy=True, autoconvert=args.dd_update)
 
                 if _ids_data.ids_properties.homogeneous_time != EMPTY_INT:
                     view_pf_coils = PFActiveView(_ids_data)

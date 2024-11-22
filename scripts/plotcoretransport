@@ -76,7 +76,8 @@ if connection is None:
 ids_slice_core_transport = connection.get_slice(
     "core_transport",
     args.time,
-    slicing_methods[args.slicingmethod],
+    autoconvert=args.dd_update,
+    interpolation_method=slicing_methods[args.slicingmethod],
     occurrence=args.occurrence,
 )
 if len(ids_slice_core_transport.time) == 0:
@@ -86,7 +87,8 @@ if len(ids_slice_core_transport.time) == 0:
 ids_slice_core_profiles = connection.get_slice(
     "core_profiles",
     args.time,
-    slicing_methods[args.slicingmethod],
+    autoconvert=args.dd_update,
+    interpolation_method=slicing_methods[args.slicingmethod],
     occurrence=args.occurrence,
 )
 if len(ids_slice_core_profiles.time) == 0:
@@ -96,7 +98,8 @@ if len(ids_slice_core_profiles.time) == 0:
 ids_slice_equilibrium = connection.get_slice(
     "equilibrium",
     args.time,
-    slicing_methods[args.slicingmethod],
+    autoconvert=args.dd_update,
+    interpolation_method=slicing_methods[args.slicingmethod],
     occurrence=args.occurrence,
 )
 if len(ids_slice_equilibrium.time) == 0:

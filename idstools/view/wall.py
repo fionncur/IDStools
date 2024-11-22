@@ -27,6 +27,12 @@ class WallView:
         for i in range(n):
             p = (r[i], z[i])
             vertices.append(p)
+        
+        # check if vertices are empty
+        if not vertices:
+            print("Vertices are empty")
+            return None
+
         # kwargs.setdefault("color", "darkgray")
         path = Path(vertices, codes)
         patch = patches.PathPatch(path, **kwargs)
@@ -77,24 +83,22 @@ class WallView:
             "darkgreen",  # dc143c",  # Crimson
         ]
         v_index = 0
-
+        
         if vessel_units := self.compute_object.get_vessel_units():
-
             for _, description2d in vessel_units.items():
                 for v_index, vessel_unit in description2d["vesselunits"].items():
                     show_label_flag = True
                     vname = ""
-                    if vessel_unit["identifier"]:
-                        vname = vessel_unit["identifier"]
-                    elif vessel_unit["name"]:
+                    if vessel_unit["name"]:
                         vname = vessel_unit["name"]
+                    elif vessel_unit["identifier"]:
+                        vname = vessel_unit["identifier"]
                     if wallcolor:
                         kwargs.update({"color": wallcolor})
                     else:
                         kwargs.update({"color": colors[v_index % 20]})
                     if vessel_unit["rectangle_coordinates"]:
                         for rw, zw in vessel_unit["rectangle_coordinates"]:
-
                             if show_label_flag:
                                 self.add_wall_markings(
                                     ax,
