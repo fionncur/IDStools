@@ -199,7 +199,7 @@ def get_ids_attributes(idsobj: object) -> list:
         return []
 
 
-def get_ids_size(db_entry_object, ids_names=None) -> dict:
+def get_ids_size(db_entry_object, ids_names=None, dd_update=False) -> dict:
     """
     The function `get_ids_size` retrieves the size of IDS objects from a database entry and returns a dictionary
     containing the size in bytes and the time taken to read each object.
@@ -225,7 +225,7 @@ def get_ids_size(db_entry_object, ids_names=None) -> dict:
         occurrences_count = max(occurrence_list)
 
         for o in range(occurrences_count + 1):
-            ids_object = db_entry_object.get(ids_name, occurrence=o)
+            ids_object = db_entry_object.get(ids_name, occurrence=o, autoconvert=dd_update)
             homogeneous_time = ids_object.ids_properties.homogeneous_time
             if homogeneous_time >= 0:
                 field = f"{ids_name}/{o}"
@@ -710,7 +710,9 @@ def compare_ids(
     return identical, output
 
 
-def get_quantities_from_pulses(idspath: str, pulses: tuple, list_count: int = 0, verbose: bool = False) -> pd.DataFrame:
+def get_quantities_from_pulses(
+    idspath: str, pulses: tuple, list_count: int = 0, verbose: bool = False, dd_update: bool = False
+) -> pd.DataFrame:
     """
     The `get_quantities_from_pulses` function retrieves values from a specified IDS path for a given set of pulses and
     returns a DataFrame containing the pulse, run, and corresponding values.
@@ -759,7 +761,7 @@ def get_quantities_from_pulses(idspath: str, pulses: tuple, list_count: int = 0,
         connection.open()
         valpath = valpath.replace("(", "[").replace(")", "]").replace("/", ".")
         try:
-            ids = connection.get(idsname, lazy=True)  # noqa: F841
+            ids = connection.get(idsname, autoconvert=dd_update)  # noqa: F841
             node = eval("ids." + valpath)
             if node.has_value:
                 values.append(node)

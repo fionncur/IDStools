@@ -44,6 +44,14 @@ if __name__ == "__main__":
         type=int,
         help="number of entries user needs to display",
     )
+    parser.add_argument(
+        "--dd-update",
+        action="store_true",
+        help=(
+            "Convert IDS to the default version of the data dictionary if enabled"
+            "otherwise, use the original IDS stored on disk."
+        ),
+    )
     parser.add_argument("--verbose", action="store_true", help="Verbose mode")
     args = parser.parse_args()
 
@@ -64,7 +72,7 @@ if __name__ == "__main__":
         pprint.pprint(pulses)
 
     if pulses is not None:
-        df = get_quantities_from_pulses(args.idspath, tuple(pulses), args.list_count, False)
+        df = get_quantities_from_pulses(args.idspath, tuple(pulses), args.list_count, False, dd_update=args.dd_update)
         if args.saveas:
             if not Path(args.saveas).parent.exists():
                 raise FileNotFoundError(

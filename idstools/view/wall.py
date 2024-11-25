@@ -27,7 +27,7 @@ class WallView:
         for i in range(n):
             p = (r[i], z[i])
             vertices.append(p)
-        
+
         # check if vertices are empty
         if not vertices:
             print("Vertices are empty")
@@ -83,7 +83,7 @@ class WallView:
             "darkgreen",  # dc143c",  # Crimson
         ]
         v_index = 0
-        
+
         if vessel_units := self.compute_object.get_vessel_units():
             for _, description2d in vessel_units.items():
                 for v_index, vessel_unit in description2d["vesselunits"].items():

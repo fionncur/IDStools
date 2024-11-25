@@ -112,7 +112,7 @@ class WallCompute:
                 else:
                     unit_info["closed"] = False
                 unit_info["resistivity"] = l_unit.resistivity
-                if unit_info["closed"] == True:
+                if unit_info["closed"] is True:
                     unit_info["r"] = np.append(unit_info["r"], unit_info["r"][0])
                     unit_info["z"] = np.append(unit_info["z"], unit_info["z"][0])
                 unit_infos[l_unit_index] = unit_info
