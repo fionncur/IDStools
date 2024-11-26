@@ -18,7 +18,8 @@ from idstools.view.waves import WavesView
 logger = setup_logger("module", stdout_level=logging.INFO)
 
 
-def _show_waves_plots(connargs, args, hold=False):
+def _show_waves_plots(connargs, args, hold=False, dd_update=False):
+    print(args)
     conn = DBMaster.get_connection(connargs)
     if conn is None:
         logger.critical(f"data entry not found : {connargs}")
@@ -26,7 +27,7 @@ def _show_waves_plots(connargs, args, hold=False):
 
     ids_waves = None
     try:
-        ids_waves = conn.get("waves", lazy=True)
+        ids_waves = conn.get("waves", lazy=True, autoconvert=dd_update)
     except Exception as _:  # noqa: F841
         logger.error("waves ids is not present")
 
@@ -102,7 +103,7 @@ def _show_waves_plots(connargs, args, hold=False):
     conn.close()
 
 
-def show_waves_plots(args, hold=False):
+def show_waves_plots(args, hold=False, dd_update=False):
     pulse = args["pulse"]
     run = args["run"]
 
@@ -127,10 +128,10 @@ def show_waves_plots(args, hold=False):
             f"imas:{args['backend'].lower()}?user={connargs.user};pulse={connargs.pulse};"
             f"run={connargs.run};database={connargs.database};version={connargs.version}"
         )
-        _show_waves_plots(connargs, args, hold)
+        _show_waves_plots(connargs, args, hold, dd_update)
 
 
-def _show_distribution_plots(connargs, args, hold=False):
+def _show_distribution_plots(connargs, args, hold=False, dd_update=False):
     conn = DBMaster.get_connection(connargs)
     if conn is None:
         logger.critical(f"data entry not found : {connargs}")
@@ -138,7 +139,7 @@ def _show_distribution_plots(connargs, args, hold=False):
 
     ids_distributions = None
     try:
-        ids_distributions = conn.get("distributions", lazy=True)
+        ids_distributions = conn.get("distributions", lazy=True, autoconvert=dd_update)
     except Exception as _:  # noqa: F841
         logger.error("distributions ids is not present")
 
@@ -185,7 +186,7 @@ def _show_distribution_plots(connargs, args, hold=False):
     conn.close()
 
 
-def show_distribution_plots(args, hold=False):
+def show_distribution_plots(args, hold=False, dd_update=False):
     pulse = args["pulse"]
     run = args["run"]
 
@@ -209,7 +210,7 @@ def show_distribution_plots(args, hold=False):
             f"imas:{args['backend'].lower()}?user={connargs.user};pulse={connargs.pulse};"
             f"run={connargs.run};database={connargs.database};version={connargs.version}"
         )
-        _show_distribution_plots(connargs, args, hold)
+        _show_distribution_plots(connargs, args, hold, dd_update)
 
 
 if __name__ == "__main__":
@@ -245,6 +246,14 @@ if __name__ == "__main__":
         help="uri or pulse/run/user/backend/database/version/[time] for fusion products (distributionss)",
         required=False,
         type=str,
+    )
+    parser.add_argument(
+        "--dd-update",
+        action="store_true",
+        help=(
+            "Convert IDS to the default version of the data dictionary if enabled"
+            "otherwise, use the original IDS stored on disk."
+        ),
     )
     parser.add_argument(
         "--save",
@@ -313,22 +322,22 @@ if __name__ == "__main__":
         args["force_psi"] = None
         args["hide_legend"] = False
         args["save"] = args["save"]
-        _show_waves_plots(connargs_ech, args, holder["ech_uri_hold"])
+        _show_waves_plots(connargs_ech, args, holder["ech_uri_hold"], args.dd_update)
     if "imas:" in args["icrh"]:
         connargs_icrh = argparse.Namespace()
         connargs_icrh.uri = args["icrh"]
         args["save"] = args["save"]
-        _show_distribution_plots(connargs_icrh, args, holder["icrh_uri_hold"])
+        _show_distribution_plots(connargs_icrh, args, holder["icrh_uri_hold"], args.dd_update)
     if "imas:" in args["nbi"]:
         connargs_nbi = argparse.Namespace()
         connargs_nbi.uri = args["nbi"]
         args["save"] = args["save"]
-        _show_distribution_plots(connargs_nbi, args, holder["nbi_uri_hold"])
+        _show_distribution_plots(connargs_nbi, args, holder["nbi_uri_hold"], args.dd_update)
     if "imas:" in args["fus"]:
         connargs_fus = argparse.Namespace()
         connargs_fus.uri = args["fus"]
         args["save"] = args["save"]
-        _show_distribution_plots(connargs_fus, args, holder["fus_uri_hold"])
+        _show_distribution_plots(connargs_fus, args, holder["fus_uri_hold"], args.dd_update)
 
     hcd_sources = {
         "ech": {
