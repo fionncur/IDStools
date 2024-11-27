@@ -53,7 +53,7 @@ if connection is None:
     logger.critical("----> Aborted.")
     exit(1)
 
-kp_view = KineticProfilesView(connection, args.time, args.edge)
+kp_view = KineticProfilesView(connection, args.time, args.edge, args.dd_update)
 
 hostdir = get_database_path(args)
 

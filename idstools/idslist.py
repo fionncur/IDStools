@@ -41,7 +41,7 @@ def all_ids_types():
     return factory.ids_names()
 
 
-def available_in_dbentry(db, time_mode=None):
+def available_in_dbentry(db, time_mode=None, dd_update=False):
     """Returns a list of pairs (idstype:str,occurrence:int) with data in the given DBEntry.
 
     Parameters
@@ -56,10 +56,13 @@ def available_in_dbentry(db, time_mode=None):
     presentidslist = []
     for idstype in all_ids_types():
         for occ in db.list_all_occurrences(idstype):
-            idsObj = db.get(idstype, occurrence=occ, lazy=True)
+            idsObj = db.get(idstype, occurrence=occ, lazy=True, autoconvert=dd_update)
+
             homogeneous_time = idsObj.ids_properties.homogeneous_time.value
-            if homogeneous_time != imaspy.ids_primitive.IDSInt0D and (
+
+            if idsObj.ids_properties.homogeneous_time.has_value and (
                 time_mode is None or time_mode == homogeneous_time
             ):
                 presentidslist.append((idstype, occ))
+                print((idstype, occ))
     return presentidslist

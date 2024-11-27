@@ -9,9 +9,9 @@ class KineticProfilesView:
     single_style = "o"
     multi_style = "-"
 
-    def __init__(self, connection, time_slice, edge_required):
+    def __init__(self, connection, time_slice, edge_required, dd_update):
         self.k_profiles = KineticProfilesCompute()
-        self.k_profiles.analyze(connection, time_slice, edge_required)
+        self.k_profiles.analyze(connection, time_slice, edge_required, dd_update)
         if self.k_profiles.is_core_profiles_present:
             self.plotstyle = (
                 KineticProfilesView.multi_style
@@ -106,16 +106,17 @@ class KineticProfilesView:
                 color="b",
                 label=r"$n_i(0)$",
             )
-        for ispecies in range(self.k_profiles.nspecies_core):
-            if (self.k_profiles.is_composition_available == 1) & (
-                self.k_profiles.nspec_over_ne[ispecies] > KineticProfilesCompute.IMPURITY_LIMIT
-            ):
-                ax.plot(
-                    self.k_profiles.waveform["time"],
-                    self.k_profiles.waveform["n_species"][self.k_profiles.species[ispecies]]["density"]["central"],
-                    self.plotstyle,
-                    label=r"$n_{" + self.k_profiles.species[ispecies] + "}(0)$",
-                )
+        if self.k_profiles.species:
+            for ispecies in range(self.k_profiles.nspecies_core):
+                if (self.k_profiles.is_composition_available == 1) & (
+                    self.k_profiles.nspec_over_ne[ispecies] > KineticProfilesCompute.IMPURITY_LIMIT
+                ):
+                    ax.plot(
+                        self.k_profiles.waveform["time"],
+                        self.k_profiles.waveform["n_species"][self.k_profiles.species[ispecies]]["density"]["central"],
+                        self.plotstyle,
+                        label=r"$n_{" + self.k_profiles.species[ispecies] + "}(0)$",
+                    )
 
         KineticProfilesView.view_time_line(ax, self.k_profiles.common_time_value)
         ax.set_xlabel("$Time\\/[\\mathrm{s}]$")
@@ -225,13 +226,14 @@ class KineticProfilesView:
                 color="r",
                 label=r"$n_e$",
             )
-            if max(self.k_profiles.nspec_over_ne) > 0:
-                ax.plot(
-                    self.k_profiles.profiles["rhonorm"],
-                    self.k_profiles.profiles["ni"],
-                    color="b",
-                    label=r"$n_i$",
-                )
+            if "ni" in self.k_profiles.profiles.keys():
+                if max(self.k_profiles.nspec_over_ne) > 0:
+                    ax.plot(
+                        self.k_profiles.profiles["rhonorm"],
+                        self.k_profiles.profiles["ni"],
+                        color="b",
+                        label=r"$n_i$",
+                    )
         if self.k_profiles.is_edge_profiles_present:
             ax.plot(
                 self.k_profiles.profiles["rhonorm_e"],
@@ -245,24 +247,25 @@ class KineticProfilesView:
                 color="b",
                 label=r"$n_{i,edge}$",
             )
-        for ispecies in range(self.k_profiles.nspecies_core):
-            if self.k_profiles.is_composition_available and self.k_profiles.is_core_profiles_present:
-                if self.k_profiles.nspec_over_ne[ispecies] > KineticProfilesCompute.IMPURITY_LIMIT:
-                    ax.plot(
-                        self.k_profiles.profiles["rhonorm"],
-                        self.k_profiles.profiles["n_species"][self.k_profiles.species[ispecies]]["density"],
-                        label=r"$n_" + self.k_profiles.species[ispecies] + "$",
-                    )
-            if self.k_profiles.is_edge_profiles_present and self.k_profiles.species_map[ispecies] != -99:
-                if (
-                    self.k_profiles.nspec_over_ne[ispecies] > KineticProfilesCompute.IMPURITY_LIMIT
-                    or self.k_profiles.is_core_profiles_present == 0
-                ):
-                    ax.plot(
-                        self.k_profiles.profiles["rhonorm_e"],
-                        self.k_profiles.profiles["n_species"][self.k_profiles.species[ispecies]]["density_e"],
-                        label=r"$n_{" + self.k_profiles.species[ispecies] + ",edge}$",
-                    )
+        if self.k_profiles.species:
+            for ispecies in range(self.k_profiles.nspecies_core):
+                if self.k_profiles.is_composition_available and self.k_profiles.is_core_profiles_present:
+                    if self.k_profiles.nspec_over_ne[ispecies] > KineticProfilesCompute.IMPURITY_LIMIT:
+                        ax.plot(
+                            self.k_profiles.profiles["rhonorm"],
+                            self.k_profiles.profiles["n_species"][self.k_profiles.species[ispecies]]["density"],
+                            label=r"$n_" + self.k_profiles.species[ispecies] + "$",
+                        )
+                if self.k_profiles.is_edge_profiles_present and self.k_profiles.species_map[ispecies] != -99:
+                    if (
+                        self.k_profiles.nspec_over_ne[ispecies] > KineticProfilesCompute.IMPURITY_LIMIT
+                        or self.k_profiles.is_core_profiles_present == 0
+                    ):
+                        ax.plot(
+                            self.k_profiles.profiles["rhonorm_e"],
+                            self.k_profiles.profiles["n_species"][self.k_profiles.species[ispecies]]["density_e"],
+                            label=r"$n_{" + self.k_profiles.species[ispecies] + ",edge}$",
+                        )
         if not self.k_profiles.r_out_graph:
             ax.set_xlabel(r"$\rho/\rho_0$")
             ax.set_ylabel("$n\\/[\\mathrm{m^{-3}}]$")
@@ -318,47 +321,48 @@ class KineticProfilesView:
         Args:
             ax: a matplotlib axis object.
         """
-        if (
-            self.k_profiles.is_composition_available
-            and (self.k_profiles.vtor_flag != 0 or self.k_profiles.vtor_e_flag != 0)
-            and (max(self.k_profiles.nspec_over_ne) > 0 or not self.k_profiles.is_core_profiles_present)
-        ):
-            for ispecies in range(self.k_profiles.nspecies_core):
-                if self.k_profiles.nspec_over_ne[ispecies] > KineticProfilesCompute.IMPURITY_LIMIT:
-                    if "vtor" in self.k_profiles.profiles["n_species"][self.k_profiles.species[ispecies]].keys():
-                        if self.k_profiles.vtor_flag != 0:
-                            ax.plot(
-                                self.k_profiles.profiles["rhonorm"],
-                                self.k_profiles.profiles["n_species"][self.k_profiles.species[ispecies]]["vtor"],
-                                label=r"$vtor_" + self.k_profiles.species[ispecies] + "$",
-                            )
-                        if (
-                            self.k_profiles.is_edge_profiles_present
-                            and self.k_profiles.species_map[ispecies] != -99
-                            and self.k_profiles.vtor_e_flag != 0
-                        ):
-                            ax.plot(
-                                self.k_profiles.profiles["rhonorm_e"],
-                                self.k_profiles.profiles["n_species"][self.k_profiles.species[ispecies]]["vtor_e"],
-                                label=r"$vtor_{" + self.k_profiles.species[ispecies] + ",edge}$",
-                            )
-            if not self.k_profiles.r_out_graph:
-                ax.set_xlabel(r"$\rho/\rho_0$")
-                ax.set_ylabel(r"$|v_{tor}|\/[\mathrm{m.s^{-1}}]$")
-            else:
-                ax.set_xlabel(r"$R_{maj}\/[\mathrm{m}]$")
-                ax.set_ylabel(r"$|v_{tor}|\/[\mathrm{m.s^{-1}}]$")
-            ax.set_xlim(self.k_profiles.xbeg, self.k_profiles.xend)
-            if logscale is False:
-                if self.k_profiles.max_vtor > self.k_profiles.min_vtor:
-                    ax.set_ylim(self.k_profiles.min_vtor, self.k_profiles.max_vtor * 1.1)
+        if self.k_profiles.species:
+            if (
+                self.k_profiles.is_composition_available
+                and (self.k_profiles.vtor_flag != 0 or self.k_profiles.vtor_e_flag != 0)
+                and (max(self.k_profiles.nspec_over_ne) > 0 or not self.k_profiles.is_core_profiles_present)
+            ):
+                for ispecies in range(self.k_profiles.nspecies_core):
+                    if self.k_profiles.nspec_over_ne[ispecies] > KineticProfilesCompute.IMPURITY_LIMIT:
+                        if "vtor" in self.k_profiles.profiles["n_species"][self.k_profiles.species[ispecies]].keys():
+                            if self.k_profiles.vtor_flag != 0:
+                                ax.plot(
+                                    self.k_profiles.profiles["rhonorm"],
+                                    self.k_profiles.profiles["n_species"][self.k_profiles.species[ispecies]]["vtor"],
+                                    label=r"$vtor_" + self.k_profiles.species[ispecies] + "$",
+                                )
+                            if (
+                                self.k_profiles.is_edge_profiles_present
+                                and self.k_profiles.species_map[ispecies] != -99
+                                and self.k_profiles.vtor_e_flag != 0
+                            ):
+                                ax.plot(
+                                    self.k_profiles.profiles["rhonorm_e"],
+                                    self.k_profiles.profiles["n_species"][self.k_profiles.species[ispecies]]["vtor_e"],
+                                    label=r"$vtor_{" + self.k_profiles.species[ispecies] + ",edge}$",
+                                )
+                if not self.k_profiles.r_out_graph:
+                    ax.set_xlabel(r"$\rho/\rho_0$")
+                    ax.set_ylabel(r"$|v_{tor}|\/[\mathrm{m.s^{-1}}]$")
+                else:
+                    ax.set_xlabel(r"$R_{maj}\/[\mathrm{m}]$")
+                    ax.set_ylabel(r"$|v_{tor}|\/[\mathrm{m.s^{-1}}]$")
+                ax.set_xlim(self.k_profiles.xbeg, self.k_profiles.xend)
+                if logscale is False:
+                    if self.k_profiles.max_vtor > self.k_profiles.min_vtor:
+                        ax.set_ylim(self.k_profiles.min_vtor, self.k_profiles.max_vtor * 1.1)
 
-            ax.ticklabel_format(axis="y", style="sci", scilimits=(0, 0))
-            ax.set_title("t = " + "%.1f" % self.k_profiles.common_time_value + " s")
-            legend = ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
-            KineticProfilesView.customize_legend(legend)
-            if logscale:
-                ax.set_yscale("log")
+                ax.ticklabel_format(axis="y", style="sci", scilimits=(0, 0))
+                ax.set_title("t = " + "%.1f" % self.k_profiles.common_time_value + " s")
+                legend = ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
+                KineticProfilesView.customize_legend(legend)
+                if logscale:
+                    ax.set_yscale("log")
         else:
             ax.remove()
 
@@ -370,46 +374,47 @@ class KineticProfilesView:
         Args:
             ax: a matplotlib Axes object.
         """
-        if (
-            self.k_profiles.is_composition_available
-            and (self.k_profiles.vpol_flag != 0 or self.k_profiles.vpol_e_flag != 0)
-            and (max(self.k_profiles.nspec_over_ne) > 0 or not self.k_profiles.is_core_profiles_present)
-        ):
-            for ispecies in range(self.k_profiles.nspecies_core):
-                if self.k_profiles.nspec_over_ne[ispecies] > KineticProfilesCompute.IMPURITY_LIMIT:
-                    if "vpol" in self.k_profiles.profiles["n_species"][self.k_profiles.species[ispecies]].keys():
-                        if self.k_profiles.vpol_flag != 0:
-                            ax.plot(
-                                self.k_profiles.profiles["rhonorm"],
-                                self.k_profiles.profiles["n_species"][self.k_profiles.species[ispecies]]["vpol"],
-                                label=r"$vpol_" + self.k_profiles.species[ispecies] + "$",
-                            )
-                        if (
-                            self.k_profiles.is_edge_profiles_present
-                            and self.k_profiles.species_map[ispecies] != -99
-                            and self.k_profiles.vpol_e_flag != 0
-                        ):
-                            ax.plot(
-                                self.k_profiles.profiles["rhonorm_e"],
-                                self.k_profiles.profiles["n_species"][self.k_profiles.species[ispecies]]["vpol_e"],
-                                label=r"$vpol_{" + self.k_profiles.species[ispecies] + ",edge}$",
-                            )
-            if not self.k_profiles.r_out_graph:
-                ax.set_xlabel(r"$\rho/\rho_0$")
-                ax.set_ylabel(r"$|v_{pol}|\/[\mathrm{m.s^{-1}}]$")
-            else:
-                ax.set_xlabel(r"$R_{maj}\/[\mathrm{m}]$")
-                ax.set_ylabel(r"$|v_{pol}|\/[\mathrm{m.s^{-1}}]$")
-            ax.set_xlim(self.k_profiles.xbeg, self.k_profiles.xend)
-            if logscale is False:
-                if self.k_profiles.max_vpol > self.k_profiles.min_vpol:
-                    ax.set_ylim(self.k_profiles.min_vpol, self.k_profiles.max_vpol * 1.1)
+        if self.k_profiles.species:
+            if (
+                self.k_profiles.is_composition_available
+                and (self.k_profiles.vpol_flag != 0 or self.k_profiles.vpol_e_flag != 0)
+                and (max(self.k_profiles.nspec_over_ne) > 0 or not self.k_profiles.is_core_profiles_present)
+            ):
+                for ispecies in range(self.k_profiles.nspecies_core):
+                    if self.k_profiles.nspec_over_ne[ispecies] > KineticProfilesCompute.IMPURITY_LIMIT:
+                        if "vpol" in self.k_profiles.profiles["n_species"][self.k_profiles.species[ispecies]].keys():
+                            if self.k_profiles.vpol_flag != 0:
+                                ax.plot(
+                                    self.k_profiles.profiles["rhonorm"],
+                                    self.k_profiles.profiles["n_species"][self.k_profiles.species[ispecies]]["vpol"],
+                                    label=r"$vpol_" + self.k_profiles.species[ispecies] + "$",
+                                )
+                            if (
+                                self.k_profiles.is_edge_profiles_present
+                                and self.k_profiles.species_map[ispecies] != -99
+                                and self.k_profiles.vpol_e_flag != 0
+                            ):
+                                ax.plot(
+                                    self.k_profiles.profiles["rhonorm_e"],
+                                    self.k_profiles.profiles["n_species"][self.k_profiles.species[ispecies]]["vpol_e"],
+                                    label=r"$vpol_{" + self.k_profiles.species[ispecies] + ",edge}$",
+                                )
+                if not self.k_profiles.r_out_graph:
+                    ax.set_xlabel(r"$\rho/\rho_0$")
+                    ax.set_ylabel(r"$|v_{pol}|\/[\mathrm{m.s^{-1}}]$")
+                else:
+                    ax.set_xlabel(r"$R_{maj}\/[\mathrm{m}]$")
+                    ax.set_ylabel(r"$|v_{pol}|\/[\mathrm{m.s^{-1}}]$")
+                ax.set_xlim(self.k_profiles.xbeg, self.k_profiles.xend)
+                if logscale is False:
+                    if self.k_profiles.max_vpol > self.k_profiles.min_vpol:
+                        ax.set_ylim(self.k_profiles.min_vpol, self.k_profiles.max_vpol * 1.1)
 
-            ax.ticklabel_format(axis="y", style="sci", scilimits=(0, 0))
-            ax.set_title("t = " + "%.1f" % self.k_profiles.common_time_value + " s")
-            legend = ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
-            KineticProfilesView.customize_legend(legend)
-            if logscale:
-                ax.set_yscale("log")
+                ax.ticklabel_format(axis="y", style="sci", scilimits=(0, 0))
+                ax.set_title("t = " + "%.1f" % self.k_profiles.common_time_value + " s")
+                legend = ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
+                KineticProfilesView.customize_legend(legend)
+                if logscale:
+                    ax.set_yscale("log")
         else:
             ax.remove()

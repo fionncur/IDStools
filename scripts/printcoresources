@@ -54,6 +54,7 @@ ids_slice_core_sources = connection.get_slice(
     args.time,
     slicing_methods[args.slicingmethod],
     occurrence=args.occurrence,
+    autoconvert=args.dd_update,
 )
 if len(ids_slice_core_sources.time) == 0:
     logger.critical("Time vector is empty! aborting")

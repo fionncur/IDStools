@@ -19,7 +19,6 @@ logger = setup_logger("module", stdout_level=logging.INFO)
 
 
 def _show_waves_plots(connargs, args, hold=False, dd_update=False):
-    print(args)
     conn = DBMaster.get_connection(connargs)
     if conn is None:
         logger.critical(f"data entry not found : {connargs}")
@@ -269,46 +268,47 @@ if __name__ == "__main__":
     args = vars(parser.parse_args())
 
     holder = OrderedDict()
-    if args["ech"] != "":
+    if args["ech"] is not None:
         if "imas:" in args["ech"]:
             holder["ech_uri_hold"] = True
-        else:
-            holder["ech_uri_hold"] = False
-    if args["icrh"] != "":
+    else:
+        holder["ech_uri_hold"] = False
+
+    if args["icrh"] is not None:
         if "imas:" in args["icrh"]:
             holder["icrh_uri_hold"] = True
-        else:
-            holder["icrh_uri_hold"] = False
-    if args["nbi"] != "":
+    else:
+        holder["icrh_uri_hold"] = False
+    if args["nbi"] is not None:
         if "imas:" in args["nbi"]:
             holder["nbi_uri_hold"] = True
-        else:
-            holder["nbi_uri_hold"] = False
-    if args["fus"] != "":
+    else:
+        holder["nbi_uri_hold"] = False
+    if args["fus"] is not None:
         if "imas:" in args["fus"]:
             holder["fus_uri_hold"] = True
-        else:
-            holder["fus_uri_hold"] = False
-    if args["ech"] != "":
+    else:
+        holder["fus_uri_hold"] = False
+    if args["ech"] is not None:
         if "imas:" not in args["ech"]:
             holder["ech_hold"] = True
-        else:
-            holder["ech_hold"] = False
-    if args["icrh"] != "":
+    else:
+        holder["ech_hold"] = False
+    if args["icrh"] is not None:
         if "imas:" not in args["icrh"]:
             holder["icrh_hold"] = True
-        else:
-            holder["icrh_hold"] = False
-    if args["nbi"] != "":
+    else:
+        holder["icrh_hold"] = False
+    if args["nbi"] is not None:
         if "imas:" not in args["nbi"]:
             holder["nbi_hold"] = True
-        else:
-            holder["nbi_hold"] = False
-    if args["fus"] != "":
+    else:
+        holder["nbi_hold"] = False
+    if args["fus"] is not None:
         if "imas:" not in args["fus"]:
             holder["fus_hold"] = True
-        else:
-            holder["fus_hold"] = False
+    else:
+        holder["fus_hold"] = False
 
     last_item = next(reversed(holder))
 
@@ -316,24 +316,24 @@ if __name__ == "__main__":
         if key is not last_item:
             holder[key] = False
 
-    if "imas:" in args["ech"]:
+    if args["ech"] is not None and "imas:" in args["ech"]:
         connargs_ech = argparse.Namespace()
         connargs_ech.uri = args["ech"]
         args["force_psi"] = None
         args["hide_legend"] = False
         args["save"] = args["save"]
-        _show_waves_plots(connargs_ech, args, holder["ech_uri_hold"], args.dd_update)
-    if "imas:" in args["icrh"]:
+        _show_waves_plots(connargs_ech, args, holder["ech_uri_hold"], args["dd_update"])
+    if args["icrh"] is not None and "imas:" in args["icrh"]:
         connargs_icrh = argparse.Namespace()
         connargs_icrh.uri = args["icrh"]
         args["save"] = args["save"]
         _show_distribution_plots(connargs_icrh, args, holder["icrh_uri_hold"], args.dd_update)
-    if "imas:" in args["nbi"]:
+    if args["nbi"] is not None and "imas:" in args["nbi"]:
         connargs_nbi = argparse.Namespace()
         connargs_nbi.uri = args["nbi"]
         args["save"] = args["save"]
         _show_distribution_plots(connargs_nbi, args, holder["nbi_uri_hold"], args.dd_update)
-    if "imas:" in args["fus"]:
+    if args["fus"] is not None and "imas:" in args["fus"]:
         connargs_fus = argparse.Namespace()
         connargs_fus.uri = args["fus"]
         args["save"] = args["save"]
@@ -427,22 +427,22 @@ if __name__ == "__main__":
         ec_args["force_psi"] = None
         ec_args["hide_legend"] = False
         ec_args["save"] = args["save"]
-        show_waves_plots(ec_args, hold=holder["ech_hold"])
+        show_waves_plots(ec_args, hold=holder["ech_hold"], dd_update=args["dd_update"])
 
     # NUCLEAR REACTIONS
     if hcd_sources["fus"]["run"]:
         fus_args = hcd_sources["fus"]
         fus_args["save"] = args["save"]
-        show_distribution_plots(fus_args, hold=holder["icrh_hold"])
+        show_distribution_plots(fus_args, hold=holder["icrh_hold"], dd_update=args["dd_update"])
 
     # NBI
     if hcd_sources["nbi"]["run"]:
         nbi_args = hcd_sources["nbi"]
         nbi_args["save"] = args["save"]
-        show_distribution_plots(nbi_args, hold=holder["nbi_hold"])
+        show_distribution_plots(nbi_args, hold=holder["nbi_hold"], dd_update=args["dd_update"])
 
     # ICRH
     if hcd_sources["icrh"]["run"]:
         icrh_args = hcd_sources["icrh"]
         icrh_args["save"] = args["save"]
-        show_distribution_plots(icrh_args, hold=holder["fus_hold"])
+        show_distribution_plots(icrh_args, hold=holder["fus_hold"], dd_update=args["dd_update"])

@@ -64,7 +64,7 @@ occgroup.add_argument(
     help="Copy the selected source into the specified occurrence at the destination",
 )
 parser.add_argument(
-    "--convert-ids",
+    "--dd-update",
     action="store_true",
     help=(
         "Convert IDS to the default version of the data dictionary if enabled"
@@ -101,10 +101,10 @@ outputargs.uri = args.dest
 
 # hack to get underlying data dictionary version used by idses
 src_dd_version = src_connection.dd_version
-if not args.convert_ids:
+if not args.dd_update:
     for idsname in args.ids:
         try:
-            _dummy = src_connection.get(idsname, lazy=True)
+            _dummy = src_connection.get(idsname, lazy=True, autoconvert=False)
             src_dd_version = _dummy.ids_properties.version_put.data_dictionary.value
             break
         except Exception as _:  # noqa: F841
@@ -153,12 +153,9 @@ for idsname in args.ids:
     if args.interactive:
         dest_ids_object = None
         try:
-            if args.convert_ids:
-                dest_ids_object = dest_connection.get(idsid[0], occurrence=inocc)
-            else:
-                dest_ids_object = dest_connection.get(
-                    idsid[0], occurrence=inocc, autoconvert=False, ignore_unknown_dd_version=True
-                )
+            dest_ids_object = dest_connection.get(
+                idsid[0], occurrence=inocc, autoconvert=args.dd_update, ignore_unknown_dd_version=True
+            )
         except Exception as _:  # noqa: F841
             pass
         if dest_ids_object:
@@ -171,10 +168,9 @@ for idsname in args.ids:
                     continue
     idsobj = None
     try:
-        if args.convert_ids:
-            idsobj = src_connection.get(idsid[0], occurrence=inocc)
-        else:
-            idsobj = src_connection.get(idsid[0], occurrence=inocc, autoconvert=False, ignore_unknown_dd_version=True)
+        idsobj = src_connection.get(
+            idsid[0], occurrence=inocc, autoconvert=args.dd_update, ignore_unknown_dd_version=True
+        )
 
     except Exception as _:  # noqa: F841
         pass

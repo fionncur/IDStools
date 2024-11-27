@@ -493,18 +493,19 @@ class CoreProfilesView:
 
         nions = len(self.ids.profiles_1d[time_slice].ion)
         species = self.core_profiles_compute.get_species(time_slice)
-        for ion_index in range(nions):
-            toroidal = self.ids.profiles_1d[time_slice].ion[ion_index].velocity.toroidal.value
-            if len(toroidal) < 1:
-                logger.critical(
-                    f"core_profiles.profiles_1d[{time_slice}].ion[{ion_index}].velocity.toroidal could not be read"
+        if species:
+            for ion_index in range(nions):
+                toroidal = self.ids.profiles_1d[time_slice].ion[ion_index].velocity.toroidal.value
+                if len(toroidal) < 1:
+                    logger.critical(
+                        f"core_profiles.profiles_1d[{time_slice}].ion[{ion_index}].velocity.toroidal could not be read"
+                    )
+                    toroidal = np.asarray([np.nan] * nrho)
+                ax.plot(
+                    rho_tor_norm,
+                    toroidal * FACTOR,
+                    label=species[ion_index],
                 )
-                toroidal = np.asarray([np.nan] * nrho)
-            ax.plot(
-                rho_tor_norm,
-                toroidal * FACTOR,
-                label=species[ion_index],
-            )
 
         ax.set_xlim(rho_tor_norm[0], rho_tor_norm[nrho - 1])
 
@@ -549,18 +550,19 @@ class CoreProfilesView:
 
         nions = len(self.ids.profiles_1d[time_slice].ion)
         species = self.core_profiles_compute.get_species(time_slice)
-        for ion_index in range(nions):
-            poloidal = self.ids.profiles_1d[time_slice].ion[ion_index].velocity.poloidal.value
-            if len(poloidal) < 1:
-                logger.critical(
-                    f"core_profiles.profiles_1d[{time_slice}].ion[{ion_index}].velocity.poloidal could not be read"
+        if species:
+            for ion_index in range(nions):
+                poloidal = self.ids.profiles_1d[time_slice].ion[ion_index].velocity.poloidal.value
+                if len(poloidal) < 1:
+                    logger.critical(
+                        f"core_profiles.profiles_1d[{time_slice}].ion[{ion_index}].velocity.poloidal could not be read"
+                    )
+                    poloidal = np.asarray([np.nan] * nrho)
+                ax.plot(
+                    rho_tor_norm,
+                    poloidal * FACTOR,
+                    label=species[ion_index],
                 )
-                poloidal = np.asarray([np.nan] * nrho)
-            ax.plot(
-                rho_tor_norm,
-                poloidal * FACTOR,
-                label=species[ion_index],
-            )
 
         ax.set_xlim(rho_tor_norm[0], rho_tor_norm[nrho - 1])
 
@@ -603,19 +605,20 @@ class CoreProfilesView:
 
         nions = len(self.ids.profiles_1d[time_slice].ion)
         species = self.core_profiles_compute.get_species(time_slice)
-        for ion_index in range(nions):
-            diamagnetic = self.ids.profiles_1d[time_slice].ion[ion_index].velocity.diamagnetic.value
+        if species:
+            for ion_index in range(nions):
+                diamagnetic = self.ids.profiles_1d[time_slice].ion[ion_index].velocity.diamagnetic.value
 
-            if len(diamagnetic) < 1:
-                logger.critical(
-                    f"core_profiles.profiles_1d[{time_slice}].ion[{ion_index}].velocity.diamagnetic could not be read"
+                if len(diamagnetic) < 1:
+                    logger.critical(
+                        f"core_profiles.profiles_1d[{time_slice}].ion[{ion_index}].velocity.diamagnetic could not be read"
+                    )
+                    diamagnetic = np.asarray([np.nan] * nrho)
+                ax.plot(
+                    rho_tor_norm,
+                    diamagnetic * FACTOR,
+                    label=species[ion_index],
                 )
-                diamagnetic = np.asarray([np.nan] * nrho)
-            ax.plot(
-                rho_tor_norm,
-                diamagnetic * FACTOR,
-                label=species[ion_index],
-            )
 
         ax.set_xlim(rho_tor_norm[0], rho_tor_norm[nrho - 1])
         # ax4.yaxis.tick_right()

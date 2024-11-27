@@ -56,18 +56,19 @@ class CoreProfilesCompute:
         a = core_profile_compute.get_a(time_slice)
         z = core_profile_compute.get_z(time_slice)
         states_data = core_profile_compute.get_states_data(time_slice)
-        for species_index in range(len(species)):
-            species_data = {
-                "nspec_over_ntot": nspec_over_ntot[species_index],
-                "nspec_over_ne": nspec_over_ne[species_index],
-                "nspec_over_nmaj": nspec_over_nmaj[species_index],
-                "a": a[species_index],
-                "z": z[species_index],
-                "species": species[species_index],
-                "states": states_data[str(species_index)],
-                "label": labels[species_index],
-            }
-            data[str(species_index)] = species_data
+        if species:
+            for species_index in range(len(species)):
+                species_data = {
+                    "nspec_over_ntot": nspec_over_ntot[species_index],
+                    "nspec_over_ne": nspec_over_ne[species_index],
+                    "nspec_over_nmaj": nspec_over_nmaj[species_index],
+                    "a": a[species_index],
+                    "z": z[species_index],
+                    "species": species[species_index],
+                    "states": states_data[str(species_index)],
+                    "label": labels[species_index],
+                }
+                data[str(species_index)] = species_data
 
         return data
 
@@ -287,8 +288,17 @@ class CoreProfilesCompute:
             logger.debug(f"Species states count :{nstates}")
             states_density = [0] * nstates
             for state_index in range(nstates):
+                if hasattr(self.ids.profiles_1d[time_slice].ion[species_index], "label"):
+                    ion_name = self.ids.profiles_1d[time_slice].ion[species_index].label
+                elif hasattr(self.ids.profiles_1d[time_slice].ion[species_index], "name"):
+                    ion_name = self.ids.profiles_1d[time_slice].ion[species_index].name
+
+                if hasattr(self.ids.profiles_1d[time_slice].ion[species_index].state[state_index], "label"):
+                    state_name = self.ids.profiles_1d[time_slice].ion[species_index].state[state_index].label
+                elif hasattr(self.ids.profiles_1d[time_slice].ion[species_index].state[state_index], "name"):
+                    state_name = self.ids.profiles_1d[time_slice].ion[species_index].state[state_index].name
                 state_data = {
-                    "label": self.ids.profiles_1d[time_slice].ion[species_index].state[state_index].label,
+                    "label": state_name,
                     "z_average": np.mean(
                         self.ids.profiles_1d[time_slice].ion[species_index].state[state_index].z_average
                     ),
@@ -299,7 +309,7 @@ class CoreProfilesCompute:
                 if density is None:
                     logger.critical(
                         f"core_profile IDS: Density data for species"
-                        f"{self.ids.profiles_1d[time_slice].ion[species_index].label} and state"
+                        f"{ion_name} and state"
                         f"{str(state_index)} is empty"
                     )
                 elif len(density) != 0:
@@ -308,7 +318,7 @@ class CoreProfilesCompute:
                     if np.all(density == 1.0) or np.all(density == 0.0):
                         logger.critical(
                             f"core_profile IDS: Density data for species"
-                            f"{self.ids.profiles_1d[time_slice].ion[species_index].label}"
+                            f"{ion_name}"
                             f"and state {str(state_index)} all are ones or zeros"
                         )
                     else:
@@ -317,9 +327,7 @@ class CoreProfilesCompute:
                         state_data["density_available"] = True
                 else:
                     logger.critical(
-                        f"core_profile IDS: Density data for species"
-                        f"{self.ids.profiles_1d[time_slice].ion[species_index].label}"
-                        f" and state {state_index} is empty"
+                        f"core_profile IDS: Density data for species" f"{ion_name}" f" and state {state_index} is empty"
                     )
                 # TODO Couldn't retrive state desnity should we calculate n/ni?
                 # In that case density is always 0 and no meaning of n/ni
@@ -565,6 +573,11 @@ class CoreProfilesCompute:
 
         a = list(map(int, self.get_a(time_slice)))
         z = list(map(int, self.get_z(time_slice)))
+        if any(value == -999999999 for value in z):
+            logger.error(
+                f"core_profiles.profiles_1d[{time_slice}].ion[].element[].z_n" f" values are not available {z}"
+            )
+            return None
         return [table_mendeleiev[z[ispecies]][a[ispecies]].element for ispecies in range(nspecies)]
 
     def get_labels(self, time_slice: int) -> list:
@@ -591,7 +604,11 @@ class CoreProfilesCompute:
                 ['H', 'He', 'Ne']
         """
         nspecies = len(self.ids.profiles_1d[time_slice].ion)
-        labels = [self.ids.profiles_1d[time_slice].ion[ispecies].label for ispecies in range(nspecies)]
+        if hasattr(self.ids.profiles_1d[time_slice].ion[0], "label"):
+            labels = [self.ids.profiles_1d[time_slice].ion[ispecies].label for ispecies in range(nspecies)]
+        elif hasattr(self.ids.profiles_1d[time_slice].ion[0], "name"):
+            labels = [self.ids.profiles_1d[time_slice].ion[ispecies].name for ispecies in range(nspecies)]
+
         logger.debug(f"Species identification :{labels}")
         return labels
 
@@ -607,15 +624,16 @@ class CoreProfilesCompute:
             nspec_over_nmaj (list): result from get_nspec_over_nmaj()
             time_slice (int, optional): time_slice on which function should operate on. Defaults to 0.
         """
-        nspecies = len(self.ids.profiles_1d[time_slice].ion)
-        for ispecies, jspecies in itertools.product(range(nspecies), range(nspecies)):
-            if (species[jspecies] == species[ispecies]) & (jspecies != ispecies):
-                nspec_over_ntot[ispecies] = nspec_over_ntot[ispecies] + nspec_over_ntot[jspecies]
-                nspec_over_ntot[jspecies] = 0
-                nspec_over_ne[ispecies] = nspec_over_ne[ispecies] + nspec_over_ne[jspecies]
-                nspec_over_ne[jspecies] = 0
-                nspec_over_nmaj[ispecies] = nspec_over_nmaj[ispecies] + nspec_over_nmaj[jspecies]
-                nspec_over_nmaj[jspecies] = 0
+        if species is not None:
+            nspecies = len(self.ids.profiles_1d[time_slice].ion)
+            for ispecies, jspecies in itertools.product(range(nspecies), range(nspecies)):
+                if (species[jspecies] == species[ispecies]) & (jspecies != ispecies):
+                    nspec_over_ntot[ispecies] = nspec_over_ntot[ispecies] + nspec_over_ntot[jspecies]
+                    nspec_over_ntot[jspecies] = 0
+                    nspec_over_ne[ispecies] = nspec_over_ne[ispecies] + nspec_over_ne[jspecies]
+                    nspec_over_ne[jspecies] = 0
+                    nspec_over_nmaj[ispecies] = nspec_over_nmaj[ispecies] + nspec_over_nmaj[jspecies]
+                    nspec_over_nmaj[jspecies] = 0
 
     def get_rho_tor_norm(self, time_slice: int) -> Union[np.ndarray, None]:
         """
