@@ -154,8 +154,11 @@ for idsname in args.ids:
         dest_ids_object = None
         try:
             dest_ids_object = dest_connection.get(
-                idsid[0], occurrence=inocc, autoconvert=args.dd_update, ignore_unknown_dd_version=True
+                idsid[0], occurrence=inocc, autoconvert=False, ignore_unknown_dd_version=True
             )
+            if args.dd_update:
+                dest_ids_object = imas.convert_ids(dest_ids_object, dest_connection.factory.version)
+            
         except Exception as _:  # noqa: F841
             pass
         if dest_ids_object:
@@ -169,9 +172,10 @@ for idsname in args.ids:
     idsobj = None
     try:
         idsobj = src_connection.get(
-            idsid[0], occurrence=inocc, autoconvert=args.dd_update, ignore_unknown_dd_version=True
+            idsid[0], occurrence=inocc, autoconvert=False, ignore_unknown_dd_version=True
         )
-
+        if args.dd_update:
+            idsobj = imas.convert_ids(idsobj, src_connection.factory.version)
     except Exception as _:  # noqa: F841
         pass
     if idsobj:

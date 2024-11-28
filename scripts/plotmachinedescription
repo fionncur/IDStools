@@ -6,7 +6,7 @@ import logging
 import os
 
 from rich_argparse import RichHelpFormatter
-
+from imaspy import convert_ids
 from idstools.database import DBMaster
 from idstools.idslist import available_in_dbentry
 from idstools.machinedescription import MachineDescription
@@ -154,8 +154,11 @@ if __name__ == "__main__":
                 ids_found = False
                 if connection is not None:
                     if _ids_name in all_idses_list:
-                        _ids_data = connection.get(_ids_name, autoconvert=args.dd_update)
-
+                        if args.dd_update:
+                            _ids_data = convert_ids(connection.get(_ids_name, autoconvert=False), connection.factory.version)
+                        else:
+                            _ids_data = connection.get(_ids_name, autoconvert=False)
+                            
                         data = {}
                         if _ids_data is not None:
                             ids_found = True

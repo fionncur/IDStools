@@ -225,7 +225,10 @@ def get_ids_size(db_entry_object, ids_names=None, dd_update=False) -> dict:
         occurrences_count = max(occurrence_list)
 
         for o in range(occurrences_count + 1):
-            ids_object = db_entry_object.get(ids_name, occurrence=o, autoconvert=dd_update)
+            if dd_update:
+                ids_object = imas.convert_ids(db_entry_object.get(ids_name, occurrence=o, autoconvert=False), db_entry_object.factory.version)
+            else:
+                ids_object = db_entry_object.get(ids_name, occurrence=o, autoconvert=False)
             homogeneous_time = ids_object.ids_properties.homogeneous_time
             if homogeneous_time >= 0:
                 field = f"{ids_name}/{o}"
@@ -349,7 +352,11 @@ def get_available_ids_and_occurrences(db_entry_object, time_mode=None, get_comme
             homogeneous_time = ""
             comment = ""
             occ_type = ""
-            ids_object = db_entry_object.get(idstype, occurrence=occ, lazy=True, autoconvert=dd_update)
+            if dd_update:
+                ids_object = imas.convert_ids(db_entry_object.get(idstype, occurrence=occ, lazy=True, autoconvert=False), db_entry_object.factory.version)
+            else:
+                ids_object = db_entry_object.get(idstype, occurrence=occ, lazy=True, autoconvert=False)
+            
             homogeneous_time = ids_object.ids_properties.homogeneous_time
             comment = ids_object.ids_properties.comment
             try:
@@ -391,7 +398,11 @@ def get_available_ids_and_times(db_entry_object, dd_update=False) -> list:
         for occurrence in occurrence_list:
             time_array = None
             try:
-                ids_object = db_entry_object.get(_ids_name, occurrence=occurrence, lazy=True, autoconvert=dd_update)
+                if dd_update:
+                    ids_object = imas.convert_ids(db_entry_object.get(_ids_name, occurrence=occurrence, lazy=True, autoconvert=False), db_entry_object.factory.version)
+                else:
+                    ids_object = db_entry_object.get(_ids_name, occurrence=occurrence, lazy=True, autoconvert=False)
+            
                 homogeneous_time = ids_object.ids_properties.homogeneous_time
                 if homogeneous_time == imas.ids_defs.IDS_TIME_MODE_UNKNOWN:
                     time_array = []
@@ -432,13 +443,21 @@ def resample_indices(
     """
     idsobj = None
     try:
-        idsobj = dbin.get(idsname, lazy=True, autoconvert=dd_update)
+        if dd_update:
+            idsobj = imas.convert_ids(dbin.get(idsname, lazy=True, autoconvert=False), dbin.factory.version)
+        else:
+            idsobj = dbin.get(idsname,lazy=True, autoconvert=False)
+    
     except Exception as _:  # noqa: F841
         pass
     if idsobj:
         times = idsobj.time
         for time_val in times[range(start, len(times) if stop is None else stop, step)]:
-            data_slice = dbin.get_slice(idsname, time_val, imas.ids_defs.PREVIOUS_INTERP, autoconvert=dd_update)
+            if dd_update:
+                data_slice = imas.convert_ids(dbin.get_slice(idsname, time_val, imas.ids_defs.PREVIOUS_INTERP, autoconvert=False), dbin.factory.version)
+            else:
+                data_slice = dbin.get_slice(idsname,time_val, imas.ids_defs.PREVIOUS_INTERP, autoconvert=False)
+        
             dbout.put_slice(data_slice)
 
 
@@ -486,7 +505,10 @@ def resample_times(
             rtimes = np.arange(rstart, rstop, step)
 
         for time_val in rtimes:
-            data_slice = dbin.get_slice(idsname, time_val, imas.ids_defs.PREVIOUS_INTERP, autoconvert=dd_update)
+            if dd_update:
+                data_slice = imas.convert_ids(dbin.get_slice(idsname, time_val, imas.ids_defs.PREVIOUS_INTERP,autoconvert=False), dbin.factory.version)
+            else:
+                data_slice = dbin.get_slice(idsname, time_val, imas.ids_defs.PREVIOUS_INTERP,autoconvert=False)
             dbout.put_slice(data_slice)
 
 
@@ -761,7 +783,10 @@ def get_quantities_from_pulses(
         connection.open()
         valpath = valpath.replace("(", "[").replace(")", "]").replace("/", ".")
         try:
-            ids = connection.get(idsname, autoconvert=dd_update)  # noqa: F841
+            if dd_update:
+                ids = imas.convert_ids(connection.get(idsname, autoconvert=False), connection.factory.version)  # noqa: F841
+            else:
+                ids = connection.get(idsname, autoconvert=False)  # noqa: F841
             node = eval("ids." + valpath)
             if node.has_value:
                 values.append(node)

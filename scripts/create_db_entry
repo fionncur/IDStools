@@ -66,7 +66,7 @@ except Exception as e:
 
 try:
     edge_profiles = connection.get("edge_profiles", lazy=True)
-    if edge_profiles.ids_properties.homogeneous_time != -999999999:
+    if edge_profiles.ids_properties.homogeneous_time != imas.ids_defs.EMPTY_INT:
         edge_present = 1
     else:
         edge_present = 0
@@ -150,7 +150,7 @@ except Exception as e:
 
 try:
     edge_transport = connection.get("edge_transport", lazy=True)
-    if edge_transport.ids_properties.homogeneous_time != -999999999:
+    if edge_transport.ids_properties.homogeneous_time != imas.ids_defs.EMPTY_INT:
         flux_present = 1
     else:
         flux_present = 0

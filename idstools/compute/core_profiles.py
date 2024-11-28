@@ -12,7 +12,7 @@ import logging
 from typing import Union
 
 import numpy as np
-
+import imaspy as imas
 import idstools.init_mendeleiev as mend
 
 logger = logging.getLogger("module")
@@ -573,7 +573,7 @@ class CoreProfilesCompute:
 
         a = list(map(int, self.get_a(time_slice)))
         z = list(map(int, self.get_z(time_slice)))
-        if any(value == -999999999 for value in z):
+        if any(value == imas.ids_defs.EMPTY_INT for value in z):
             logger.error(
                 f"core_profiles.profiles_1d[{time_slice}].ion[].element[].z_n" f" values are not available {z}"
             )

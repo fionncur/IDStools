@@ -7,7 +7,7 @@ import logging
 import os
 
 from rich_argparse import RichHelpFormatter
-
+from imaspy.ids_factory import IDSFactory
 from idstools.compute.common import get_nearest_time
 from idstools.database import DBMaster
 from idstools.utils.clihelper import (

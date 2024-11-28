@@ -56,7 +56,10 @@ def available_in_dbentry(db, time_mode=None, dd_update=False):
     presentidslist = []
     for idstype in all_ids_types():
         for occ in db.list_all_occurrences(idstype):
-            idsObj = db.get(idstype, occurrence=occ, lazy=True, autoconvert=dd_update)
+            if dd_update:
+                idsObj = imaspy.convert_ids(db.get(idstype, occurrence=occ,lazy=True, autoconvert=False), db.factory.version)
+            else:
+                idsObj = db.get(idstype, occurrence=occ,lazy=True, autoconvert=False)
 
             homogeneous_time = idsObj.ids_properties.homogeneous_time.value
 

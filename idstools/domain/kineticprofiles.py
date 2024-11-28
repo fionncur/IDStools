@@ -1,12 +1,12 @@
 import logging
 
 import numpy as np
-
+from imaspy import convert_ids
 from idstools.compute.common import get_nearest_time
 from idstools.compute.core_profiles import CoreProfilesCompute
 from idstools.compute.edge_profiles import EdgeProfilesCompute
 from idstools.compute.equilibrium import EquilibriumCompute
-
+import imaspy as imas
 logger = logging.getLogger("module")
 
 
@@ -167,7 +167,11 @@ class KineticProfilesCompute:
         if ids_name:
             logger.info(f"--> retrieving ids {ids_name}")
             try:
-                ids_object = self.connection.get(ids_name, lazy=True, autoconvert=dd_update)
+                if dd_update:
+                    ids_object = convert_ids(self.connection.get(ids_name, lazy=True,autoconvert=False), self.connection.factory.version)
+                else:
+                    ids_object = self.connection.get(ids_name, lazy=True,autoconvert=False)
+
                 if ids_object.time is not None:
                     if len(ids_object.time) > 0:
                         ids_present = True
@@ -375,7 +379,7 @@ class KineticProfilesCompute:
             else:
                 if (
                     self.edge_profiles.grid_ggd[self.time_index_edge_profiles].grid_subset[self.gset].dimension
-                    == -999999999
+                    == imas.ids_defs.EMPTY_INT
                 ):
                     logger.debug("Dimensionality of Outer Midplane GGD subset is not defined !")
                     logger.debug("Assuming the grid subset is made of edges (dimensionality 2).")
@@ -407,7 +411,7 @@ class KineticProfilesCompute:
                 elif (
                     self.edge_profiles.grid_ggd[self.time_index_edge_profiles].grid_subset[self.gset].dimension == 2
                     or self.edge_profiles.grid_ggd[self.time_index_edge_profiles].grid_subset[self.gset].dimension
-                    == -999999999
+                    == imas.ids_defs.EMPTY_INT
                 ) and self.is_edge_profiles_present:
                     for i in range(self.erho):
                         ielem = (
@@ -1644,7 +1648,7 @@ class KineticProfilesCompute:
 
         # Mendeleiev table
         table_mendeleiev = mend.create_table_mendeleiev()
-        if any(value == -999999999 for value in self.z):
+        if any(value == imas.ids_defs.EMPTY_INT for value in self.z):
             logger.error(f"core_profiles.profiles_1d[].ion[].element[].z_n" f" values are not available {self.z}")
             return None
         if self.nspecies_core > 0:
