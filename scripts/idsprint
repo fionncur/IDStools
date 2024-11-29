@@ -429,18 +429,23 @@ if __name__ == "__main__":
         else:
             print_tree(ids, hide_empty_nodes=not args.show_empty, compact=args.compact, full_array=args.full)
     else:
+        lazy_value = True
+        if args.dd_update:
+            lazy_value = False
         if args.time:
             ids = connection.get_slice(
                 ids_name,
                 occurrence=0,
                 autoconvert=False,
                 ignore_unknown_dd_version=True,
-                lazy=True,
+                lazy=lazy_value,
                 time_requested=time_slice,
                 interpolation_method=imaspy.ids_defs.CLOSEST_INTERP,
             )
         else:
-            ids = connection.get(ids_name, occurrence=0, autoconvert=False, ignore_unknown_dd_version=True, lazy=True)
+            ids = connection.get(
+                ids_name, occurrence=0, autoconvert=False, ignore_unknown_dd_version=True, lazy=lazy_value
+            )
         if args.dd_update:
             ids = imaspy.convert_ids(ids, connection.factory.version)
         coordinate = None

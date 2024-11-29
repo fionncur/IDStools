@@ -114,10 +114,11 @@ if isinstance(args.md, bool) and args.md is True:
     _ids_connection.close()
 
 
-ids_obj_equilibrium = connection.get("equilibrium", occurrence=occurrence, lazy=True, autoconvert=False)
 if args.dd_update:
-
+    ids_obj_equilibrium = connection.get("equilibrium", occurrence=occurrence, autoconvert=False)
     ids_obj_equilibrium = convert_ids(ids_obj_equilibrium, connection.factory.version)
+else:
+    ids_obj_equilibrium = connection.get("equilibrium", occurrence=occurrence, lazy=True, autoconvert=False)
 
 if ids_obj_equilibrium.time is not None:
     time_slice, time_value = get_nearest_time(ids_obj_equilibrium.time, args.time)

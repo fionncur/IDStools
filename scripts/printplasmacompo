@@ -67,9 +67,12 @@ if connection is None:
 # Prepare IDS with highest density data from core profiles
 try:
     logger.info("\ngetting core_profiles slice")
-    core_profiles_ids = connection.get("core_profiles", lazy=True, autoconvert=False)
+
     if args.dd_update:
+        core_profiles_ids = connection.get("core_profiles", autoconvert=False)
         core_profiles_ids = convert_ids(core_profiles_ids, connection.factory.version)
+    else:
+        core_profiles_ids = connection.get("core_profiles", lazy=True, autoconvert=False)
 
     if args.time == -99:
         ne0_list = np.array([])
@@ -91,9 +94,12 @@ except Exception as _:  # noqa: F841
 
 try:
     logger.info("\ngetting edge_profiles slice")
-    edge_profiles_ids = connection.get("edge_profiles", lazy=True, autoconvert=False)
+
     if args.dd_update:
+        edge_profiles_ids = connection.get("edge_profiles", autoconvert=False)
         edge_profiles_ids = convert_ids(edge_profiles_ids, connection.factory.version)
+    else:
+        edge_profiles_ids = connection.get("edge_profiles", lazy=True, autoconvert=False)
     if time_slice_core_profiles is None:
         if args.time == -99:
             ne0_list = np.array([])
@@ -141,9 +147,12 @@ if core_profiles_ids is not None:
         logger.warning("core_profiles IDS :Retrieving volume from equilibrium IDS")
         equilibrium_ids = None
         try:
-            equilibrium_ids = connection.get("equilibrium", lazy=True, autoconvert=False)
+
             if args.dd_update:
+                equilibrium_ids = connection.get("equilibrium", autoconvert=False)
                 equilibrium_ids = convert_ids(equilibrium_ids, connection.factory.version)
+            else:
+                equilibrium_ids = connection.get("equilibrium", lazy=True, autoconvert=False)
             volume = equilibrium_ids.time_slice({time_slice_core_profiles}).profiles_1d.volume
         except Exception as _:  # noqa: F841
             logger.warning("equilibrium IDS :equilibrium IDS/volume is not present")

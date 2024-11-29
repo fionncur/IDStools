@@ -171,7 +171,7 @@ class KineticProfilesCompute:
             try:
                 if dd_update:
                     ids_object = convert_ids(
-                        self.connection.get(ids_name, lazy=True, autoconvert=False), self.connection.factory.version
+                        self.connection.get(ids_name, autoconvert=False), self.connection.factory.version
                     )
                 else:
                     ids_object = self.connection.get(ids_name, lazy=True, autoconvert=False)

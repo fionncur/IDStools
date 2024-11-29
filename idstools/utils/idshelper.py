@@ -354,9 +354,12 @@ def get_available_ids_and_occurrences(db_entry_object, time_mode=None, get_comme
             homogeneous_time = ""
             comment = ""
             occ_type = ""
-            ids_object = db_entry_object.get(idstype, occurrence=occ, lazy=True, autoconvert=False)
+
             if dd_update:
+                ids_object = db_entry_object.get(idstype, occurrence=occ, autoconvert=False)
                 ids_object = imas.convert_ids(ids_object, db_entry_object.factory.version)
+            else:
+                ids_object = db_entry_object.get(idstype, occurrence=occ, lazy=True, autoconvert=False)
 
             homogeneous_time = ids_object.ids_properties.homogeneous_time
             comment = ids_object.ids_properties.comment
@@ -399,9 +402,12 @@ def get_available_ids_and_times(db_entry_object, dd_update=False) -> list:
         for occurrence in occurrence_list:
             time_array = None
             try:
-                ids_object = db_entry_object.get(_ids_name, occurrence=occurrence, lazy=True, autoconvert=False)
+
                 if dd_update:
+                    ids_object = db_entry_object.get(_ids_name, occurrence=occurrence, autoconvert=False)
                     ids_object = imas.convert_ids(ids_object, db_entry_object.factory.version)
+                else:
+                    ids_object = db_entry_object.get(_ids_name, occurrence=occurrence, lazy=True, autoconvert=False)
 
                 homogeneous_time = ids_object.ids_properties.homogeneous_time
                 if homogeneous_time == imas.ids_defs.IDS_TIME_MODE_UNKNOWN:
@@ -444,7 +450,7 @@ def resample_indices(
     idsobj = None
     try:
         if dd_update:
-            idsobj = imas.convert_ids(dbin.get(idsname, lazy=True, autoconvert=False), dbin.factory.version)
+            idsobj = imas.convert_ids(dbin.get(idsname, autoconvert=False), dbin.factory.version)
         else:
             idsobj = dbin.get(idsname, lazy=True, autoconvert=False)
 

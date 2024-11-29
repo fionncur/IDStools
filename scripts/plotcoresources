@@ -49,12 +49,15 @@ if connection is None:
 core_sources = None
 
 try:
-    core_sources = connection.get("core_sources", lazy=True, autoconvert=False)
-    if args.dd_update:
-        core_sources = convert_ids(core_sources, connection.factory.version)
 
-except Exception as _:  # noqa: F841
-    logger.error("core_sources ids is not present")
+    if args.dd_update:
+        core_sources = connection.get("core_sources", autoconvert=False)
+        core_sources = convert_ids(core_sources, connection.factory.version)
+    else:
+        core_sources = connection.get("core_sources", lazy=True, autoconvert=False)
+
+except Exception as e:  # noqa: F841
+    logger.error(f"core_sources ids is not present {e}")
     exit(1)
 
 if core_sources.time is None:

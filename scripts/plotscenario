@@ -70,9 +70,12 @@ if connection is None:
 if not args.no_profiles:
     ids_core_profiles = None
     try:
-        ids_core_profiles = connection.get("core_profiles", lazy=True, autoconvert=False)
+
         if args.dd_update:
+            ids_core_profiles = connection.get("core_profiles", autoconvert=False)
             ids_core_profiles = convert_ids(ids_core_profiles, connection.factory.version)
+        else:
+            ids_core_profiles = connection.get("core_profiles", lazy=True, autoconvert=False)
     except Exception as _:  # noqa: F841
         logger.error("core_profiles ids is not present")
         exit(1)
@@ -82,9 +85,12 @@ if not args.no_profiles:
 
     ids_equilibrium = None
     try:
-        ids_equilibrium = connection.get("equilibrium", lazy=True, autoconvert=False)
+
         if args.dd_update:
+            ids_equilibrium = connection.get("equilibrium", autoconvert=False)
             ids_equilibrium = convert_ids(ids_equilibrium, connection.factory.version)
+        else:
+            ids_equilibrium = connection.get("equilibrium", lazy=True, autoconvert=False)
     except Exception as _:  # noqa: F841
         logger.error("equilibrium ids is not present")
         exit(1)
@@ -98,9 +104,12 @@ if not args.no_profiles:
     ntime = len(ids_core_profiles.time)
     time_slice, time_value = get_nearest_time(time_array, args.time)
 try:
-    ids_summary = connection.get("summary", lazy=True, autoconvert=False)
+
     if args.dd_update:
+        ids_summary = connection.get("summary", autoconvert=False)
         ids_summary = convert_ids(ids_summary, connection.factory.version)
+    else:
+        ids_summary = connection.get("summary", lazy=True, autoconvert=False)
 except Exception as _:  # noqa: F841
     logger.critical("The summary IDS is absent from the input data-entry")
     logger.critical("----> Aborted.")

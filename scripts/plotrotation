@@ -49,9 +49,12 @@ if connection is None:
 
 ids_core_profiles = None
 try:
-    ids_core_profiles = connection.get("core_profiles", lazy=True, autoconvert=False)
+
     if args.dd_update:
+        ids_core_profiles = connection.get("core_profiles", autoconvert=False)
         ids_core_profiles = convert_ids(ids_core_profiles, connection.factory.version)
+    else:
+        ids_core_profiles = connection.get("core_profiles", lazy=True, autoconvert=False)
 except Exception as _:  # noqa: F841
     logger.error("core_profiles ids is not present")
     exit(1)

@@ -72,9 +72,12 @@ if args.yaml is True:
         if args.ids:
             if idsname != args.ids:
                 continue
-        ids = connection.get(idsname, occurrence=oc, lazy=True, autoconvert=False, ignore_unknown_dd_version=True)
+
         if args.dd_update:
+            ids = connection.get(idsname, occurrence=oc, autoconvert=False, ignore_unknown_dd_version=True)
             ids = convert_ids(ids, connection.factory.version)
+        else:
+            ids = connection.get(idsname, occurrence=oc, lazy=True, autoconvert=False, ignore_unknown_dd_version=True)
         homogeneous_time = ids.ids_properties.homogeneous_time
         if getattr(ids, "time", None) is None:
             times = None
