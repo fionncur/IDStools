@@ -105,11 +105,12 @@ ids_waves = None
 try:
 
     if args.dd_update:
+        ids_waves = conn.get("waves", autoconvert=False)
         ids_waves = convert_ids(ids_waves, conn.factory.version)
     else:
-        ids_waves = conn.get("waves", autoconvert=False)
-except Exception as _:  # noqa: F841
-    logger.error("waves ids is not present")
+        ids_waves = conn.get("waves", lazy=True, autoconvert=False)
+except Exception as e:  # noqa: F841
+    logger.error(f"waves ids is not present {e}")
     exit(1)
 
 ids_core_profiles = None
@@ -120,8 +121,8 @@ try:
         ids_core_profiles = convert_ids(ids_core_profiles, conn.factory.version)
     else:
         ids_core_profiles = conn.get("core_profiles", lazy=True, autoconvert=False)
-except Exception as _:  # noqa: F841
-    logger.error("core_profiles ids is not present")
+except Exception as e:  # noqa: F841
+    logger.error(f"core_profiles ids is not present : {e}")
     exit(1)
 
 ids_equilibrium = None
@@ -131,8 +132,8 @@ try:
         ids_equilibrium = convert_ids(ids_equilibrium, conn.factory.version)
     else:
         ids_equilibrium = conn.get("equilibrium", lazy=True, autoconvert=False)
-except Exception as _:  # noqa: F841
-    logger.error("equilibrium ids is not present")
+except Exception as e:  # noqa: F841
+    logger.error(f"equilibrium ids is not present : {e}")
     exit(1)
 
 # Search for adequate time slice for display
@@ -209,8 +210,8 @@ for mdids_info in args.md:
                     )
                 else:
                     logger.warning(f"{_ids_name} ids is empty in the dbentry")
-            except Exception as _:  # noqa: F841
-                logger.warning(f"{_ids_name} ids is empty in the dbentry")
+            except Exception as e:  # noqa: F841
+                logger.warning(f"{_ids_name} ids is empty in the dbentry {e}")
             connection.close()
         else:
             logger.warning(f"{_ids_name} ids is not present")
@@ -229,8 +230,8 @@ for mdids_info in args.md:
                     view_pf_coils.view_active_pf_coils(ax_polview, show_labels=False)
                 else:
                     logger.warning(f"{_ids_name} ids is empty in the dbentry")
-            except Exception as _:  # noqa: F841
-                logger.warning(f"{_ids_name} ids is empty in the dbentry")
+            except Exception as e:  # noqa: F841
+                logger.warning(f"{_ids_name} ids is empty in the dbentry {e}")
             connection.close()
 
         else:

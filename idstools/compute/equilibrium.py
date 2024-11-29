@@ -397,7 +397,7 @@ class EquilibriumCompute:
         )
         return gm7
 
-    def rescale(self, rescale_factor):
+    def rescale(self, rescale_factor, dd_update=False):
         """
         The function rescales various magnetic field properties in an equilibrium by a specified
         factor.
@@ -424,28 +424,27 @@ class EquilibriumCompute:
             dd_version = "0.0.0"
 
         equout = deepcopy(self.ids)
+        if dd_update:
+            dd_version = DBMaster.get_dd_version()
 
-        imas_version = DBMaster.get_dd_version()
-
-        equout.ids_properties.version_put.data_dictionary = imas_version
+        equout.ids_properties.version_put.data_dictionary = dd_version
 
         for itime in range(len(self.ids.vacuum_toroidal_field.b0)):
             equout.vacuum_toroidal_field.b0[itime] = self.ids.vacuum_toroidal_field.b0[itime] * rescale_factor
 
         for itime in range(len(self.ids.time_slice)):
-            if self.ids.time_slice[itime].boundary.psi.has_value:
+            if hasattr(self.ids.time_slice[itime].boundary,"psi") and self.ids.time_slice[itime].boundary.psi.has_value:
                 equout.time_slice[itime].boundary.psi = self.ids.time_slice[itime].boundary.psi * rescale_factor
 
-            if self.ids.time_slice[itime].boundary_separatrix.psi.has_value:
+            if hasattr(self.ids.time_slice[itime].boundary_separatrix,"psi") and self.ids.time_slice[itime].boundary_separatrix.psi.has_value:
                 equout.time_slice[itime].boundary_separatrix.psi = (
                     self.ids.time_slice[itime].boundary_separatrix.psi * rescale_factor
                 )
 
-            if Version(dd_version) > Version("3.31.0"):
-                if self.ids.time_slice[itime].boundary_secondary_separatrix.psi.has_value:
-                    equout.time_slice[itime].boundary_secondary_separatrix.psi = (
-                        self.ids.time_slice[itime].boundary_secondary_separatrix.psi * rescale_factor
-                    )
+            if hasattr(self.ids.time_slice[itime].boundary_secondary_separatrix,"psi") and self.ids.time_slice[itime].boundary_secondary_separatrix.psi.has_value:
+                equout.time_slice[itime].boundary_secondary_separatrix.psi = (
+                    self.ids.time_slice[itime].boundary_secondary_separatrix.psi * rescale_factor
+                )
 
             if self.ids.time_slice[itime].constraints.b_field_tor_vacuum_r.measured.has_value:
                 equout.time_slice[itime].constraints.b_field_tor_vacuum_r.measured = (
@@ -701,17 +700,17 @@ class EquilibriumCompute:
                     b_field_tor = getattr(self.ids.time_slice[itime].profiles_2d[i2d], "b_field_tor", None) or getattr(
                         self.ids.time_slice[itime].profiles_2d[i2d], "b_field_phi", None
                     )
-
-                    for ir in range(len(b_field_tor)):
-                        for iz in range(len(b_field_tor[ir])):
-                            if hasattr(equout.time_slice[itime].profiles_2d[i2d], "b_field_tor"):
-                                equout.time_slice[itime].profiles_2d[i2d].b_field_tor[ir][iz] = (
-                                    b_field_tor[ir][iz] * rescale_factor
-                                )
-                            if hasattr(equout.time_slice[itime].profiles_2d[i2d], "b_field_phi"):
-                                equout.time_slice[itime].profiles_2d[i2d].b_field_phi[ir][iz] = (
-                                    b_field_tor[ir][iz] * rescale_factor
-                                )
+                    if b_field_tor:
+                        for ir in range(len(b_field_tor)):
+                            for iz in range(len(b_field_tor[ir])):
+                                if hasattr(equout.time_slice[itime].profiles_2d[i2d], "b_field_tor"):
+                                    equout.time_slice[itime].profiles_2d[i2d].b_field_tor[ir][iz] = (
+                                        b_field_tor[ir][iz] * rescale_factor
+                                    )
+                                if hasattr(equout.time_slice[itime].profiles_2d[i2d], "b_field_phi"):
+                                    equout.time_slice[itime].profiles_2d[i2d].b_field_phi[ir][iz] = (
+                                        b_field_tor[ir][iz] * rescale_factor
+                                    )
                 else:
                     for ir in range(len(self.ids.time_slice[itime].profiles_2d[i2d].b_tor)):
                         for iz in range(len(self.ids.time_slice[itime].profiles_2d[i2d].b_tor[ir])):
@@ -802,7 +801,7 @@ class EquilibriumCompute:
         )
         return equout
 
-    def z_shift(self, shift):
+    def z_shift(self, shift, dd_update=False):
         """
         The function `z_shift` rigidly shifts the vertical position of various components within an
         equilibrium by a specified amount.
@@ -820,8 +819,19 @@ class EquilibriumCompute:
             equilibrium object to indicate that it has been shifted vertically by a certain amount.
         """
         from copy import deepcopy
+        from packaging.version import Version
+
+        try:
+            dd_version = self.ids.ids_properties.version_put.data_dictionary.value
+        except Exception as e:
+            logger.debug(f"{e}")
+            dd_version = "0.0.0"
 
         equout = deepcopy(self.ids)
+        if dd_update:
+            dd_version = DBMaster.get_dd_version()
+
+        equout.ids_properties.version_put.data_dictionary = dd_version
         for itime in range(len(self.ids.time_slice)):
             for iz in range(len(self.ids.time_slice[itime].boundary.outline.z)):
                 equout.time_slice[itime].boundary.outline.z[iz] = (

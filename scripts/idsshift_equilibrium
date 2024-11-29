@@ -6,6 +6,7 @@ import logging
 import os
 import sys
 
+from idstools.utils.idshelper import get_ids_types
 import imaspy as imas
 from rich_argparse import RichHelpFormatter
 
@@ -36,11 +37,20 @@ parser.add_argument(
     required=True,
     help="destination uri",
 )
+parser.add_argument(
+    "--dd-update",
+    action="store_true",
+    help=(
+        "Convert IDS to the default version of the data dictionary if enabled"
+        "otherwise, use the original IDS stored on disk."
+    ),
+)
 
 
 parser.add_argument("--shift", help="Upward shift of equilibrium (m)", type=float, required=True)
 
 args = parser.parse_args()
+
 
 shift_param = args.shift
 
@@ -51,7 +61,19 @@ connection = DBMaster.get_connection(inputargs)
 if connection is None:
     sys.exit()
 
-ids_equilibrium = connection.get("equilibrium")
+# hack to get underlying data dictionary version used by idses
+ids = get_ids_types()
+src_dd_version = connection.dd_version
+if not args.dd_update:
+    for idsname in ids:
+        try:
+            _dummy = connection.get(idsname, lazy=True, autoconvert=False)
+            src_dd_version = _dummy.ids_properties.version_put.data_dictionary.value
+            break
+        except Exception as _:  # noqa: F841
+            pass
+ids_equilibrium = connection.get("equilibrium", autoconvert=False)
+
 
 outputargs = argparse.Namespace()
 outputargs.mode = "w"
@@ -61,7 +83,10 @@ if "mode" not in outputargs.__dict__:
     outputargs.mode = "a"
 output_connection = None
 if outputargs.uri != "" and outputargs.uri is not None:
-    output_connection = imas.DBEntry(outputargs.uri, outputargs.mode)
+    if args.dd_update:
+        output_connection = imas.DBEntry(outputargs.uri, outputargs.mode)
+    else:
+        output_connection = imas.DBEntry(outputargs.uri, outputargs.mode,dd_version=src_dd_version)
 
 if output_connection is None:
     logger.error("Error opening destination pulse! Please check parameters and permissions.")
@@ -70,8 +95,10 @@ if output_connection is None:
 logger.info(f"Shifting equilibrium by {shift_param} m")
 logger.info("Values for wall gaps, locations of strike-points and closest wall points are no longer guaranteed!")
 equilibrium_compute = EquilibriumCompute(ids_equilibrium)
-equout = equilibrium_compute.z_shift(shift_param)
 
+equout = equilibrium_compute.z_shift(shift_param, dd_update=args.dd_update)
+if args.dd_update:
+    dest_ids_object = imas.convert_ids(equout, output_connection.factory.version)
 # PUT IDS INTO OUTPUT
 output_connection.put(equout)
 

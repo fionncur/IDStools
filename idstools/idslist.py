@@ -67,5 +67,4 @@ def available_in_dbentry(db, time_mode=None, dd_update=False):
                 time_mode is None or time_mode == homogeneous_time
             ):
                 presentidslist.append((idstype, occ))
-                print((idstype, occ))
     return presentidslist
