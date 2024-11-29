@@ -6,12 +6,12 @@ import logging
 import os
 import sys
 
-from idstools.utils.idshelper import get_ids_types
 import imaspy as imas
 from rich_argparse import RichHelpFormatter
 
 from idstools.compute.equilibrium import EquilibriumCompute
 from idstools.database import DBMaster
+from idstools.utils.idshelper import get_ids_types
 from idstools.utils.idslogger import setup_logger
 
 logger = setup_logger("module", stdout_level=logging.INFO)
@@ -86,7 +86,7 @@ if outputargs.uri != "" and outputargs.uri is not None:
     if args.dd_update:
         output_connection = imas.DBEntry(outputargs.uri, outputargs.mode)
     else:
-        output_connection = imas.DBEntry(outputargs.uri, outputargs.mode,dd_version=src_dd_version)
+        output_connection = imas.DBEntry(outputargs.uri, outputargs.mode, dd_version=src_dd_version)
 
 if output_connection is None:
     logger.error("Error opening destination pulse! Please check parameters and permissions.")

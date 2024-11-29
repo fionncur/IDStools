@@ -433,15 +433,24 @@ class EquilibriumCompute:
             equout.vacuum_toroidal_field.b0[itime] = self.ids.vacuum_toroidal_field.b0[itime] * rescale_factor
 
         for itime in range(len(self.ids.time_slice)):
-            if hasattr(self.ids.time_slice[itime].boundary,"psi") and self.ids.time_slice[itime].boundary.psi.has_value:
+            if (
+                hasattr(self.ids.time_slice[itime].boundary, "psi")
+                and self.ids.time_slice[itime].boundary.psi.has_value
+            ):
                 equout.time_slice[itime].boundary.psi = self.ids.time_slice[itime].boundary.psi * rescale_factor
 
-            if hasattr(self.ids.time_slice[itime].boundary_separatrix,"psi") and self.ids.time_slice[itime].boundary_separatrix.psi.has_value:
+            if (
+                hasattr(self.ids.time_slice[itime].boundary_separatrix, "psi")
+                and self.ids.time_slice[itime].boundary_separatrix.psi.has_value
+            ):
                 equout.time_slice[itime].boundary_separatrix.psi = (
                     self.ids.time_slice[itime].boundary_separatrix.psi * rescale_factor
                 )
 
-            if hasattr(self.ids.time_slice[itime].boundary_secondary_separatrix,"psi") and self.ids.time_slice[itime].boundary_secondary_separatrix.psi.has_value:
+            if (
+                hasattr(self.ids.time_slice[itime].boundary_secondary_separatrix, "psi")
+                and self.ids.time_slice[itime].boundary_secondary_separatrix.psi.has_value
+            ):
                 equout.time_slice[itime].boundary_secondary_separatrix.psi = (
                     self.ids.time_slice[itime].boundary_secondary_separatrix.psi * rescale_factor
                 )
@@ -819,7 +828,6 @@ class EquilibriumCompute:
             equilibrium object to indicate that it has been shifted vertically by a certain amount.
         """
         from copy import deepcopy
-        from packaging.version import Version
 
         try:
             dd_version = self.ids.ids_properties.version_put.data_dictionary.value
