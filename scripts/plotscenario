@@ -5,6 +5,7 @@ import json
 import logging
 import os
 
+from imaspy import convert_ids
 from imaspy.ids_defs import EMPTY_INT
 from rich_argparse import RichHelpFormatter
 
@@ -69,7 +70,9 @@ if connection is None:
 if not args.no_profiles:
     ids_core_profiles = None
     try:
-        ids_core_profiles = connection.get("core_profiles", lazy=True, autoconvert=args.dd_update)
+        ids_core_profiles = connection.get("core_profiles", lazy=True, autoconvert=False)
+        if args.dd_update:
+            ids_core_profiles = convert_ids(ids_core_profiles, connection.factory.version)
     except Exception as _:  # noqa: F841
         logger.error("core_profiles ids is not present")
         exit(1)
@@ -79,7 +82,9 @@ if not args.no_profiles:
 
     ids_equilibrium = None
     try:
-        ids_equilibrium = connection.get("equilibrium", lazy=True, autoconvert=args.dd_update)
+        ids_equilibrium = connection.get("equilibrium", lazy=True, autoconvert=False)
+        if args.dd_update:
+            ids_equilibrium = convert_ids(ids_equilibrium, connection.factory.version)
     except Exception as _:  # noqa: F841
         logger.error("equilibrium ids is not present")
         exit(1)
@@ -93,7 +98,9 @@ if not args.no_profiles:
     ntime = len(ids_core_profiles.time)
     time_slice, time_value = get_nearest_time(time_array, args.time)
 try:
-    ids_summary = connection.get("summary", lazy=True, autoconvert=args.dd_update)
+    ids_summary = connection.get("summary", lazy=True, autoconvert=False)
+    if args.dd_update:
+        ids_summary = convert_ids(ids_summary, connection.factory.version)
 except Exception as _:  # noqa: F841
     logger.critical("The summary IDS is absent from the input data-entry")
     logger.critical("----> Aborted.")
@@ -171,7 +178,9 @@ else:
     title = get_title(args, "Scenario")
 if args.info:
     try:
-        dataset_description = connection.get("dataset_description", autoconvert=args.dd_update)
+        dataset_description = connection.get("dataset_description", autoconvert=False)
+        if args.dd_update:
+            dataset_description = convert_ids(dataset_description, connection.factory.version)
         if dataset_description.ids_properties.homogeneous_time == EMPTY_INT:
             got_dataset_description = False
         else:

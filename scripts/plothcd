@@ -4,8 +4,9 @@ import logging
 import os
 from collections import OrderedDict
 
-from rich_argparse import RichHelpFormatter
 from imaspy import convert_ids
+from rich_argparse import RichHelpFormatter
+
 from idstools.compute.common import get_nearest_time
 from idstools.compute.waves import WavesCompute
 from idstools.database import DBMaster
@@ -27,9 +28,9 @@ def _show_waves_plots(connargs, args, hold=False, dd_update=False):
     ids_waves = None
     try:
         if args.dd_update:
-            ids_waves = convert_ids(conn.get("waves", lazy=True,autoconvert=False), conn.factory.version)
+            ids_waves = convert_ids(conn.get("waves", lazy=True, autoconvert=False), conn.factory.version)
         else:
-            ids_waves = conn.get("waves", lazy=True,autoconvert=False)
+            ids_waves = conn.get("waves", lazy=True, autoconvert=False)
 
     except Exception as _:  # noqa: F841
         logger.error("waves ids is not present")
@@ -143,10 +144,12 @@ def _show_distribution_plots(connargs, args, hold=False, dd_update=False):
     ids_distributions = None
     try:
         if args.dd_update:
-            ids_distributions = convert_ids(conn.get("distributions", lazy=True,autoconvert=False), conn.factory.version)
+            ids_distributions = convert_ids(
+                conn.get("distributions", lazy=True, autoconvert=False), conn.factory.version
+            )
         else:
-            ids_distributions = conn.get("distributions", lazy=True,autoconvert=False)
-    
+            ids_distributions = conn.get("distributions", lazy=True, autoconvert=False)
+
     except Exception as _:  # noqa: F841
         logger.error("distributions ids is not present")
 

@@ -7,7 +7,7 @@ import argparse
 import logging
 import os
 
-from imaspy import ids_defs
+from imaspy import convert_ids, ids_defs
 from rich_argparse import RichHelpFormatter
 
 from idstools.compute.common import get_nearest_time
@@ -81,7 +81,9 @@ if args.wall:
         mdargs.uri = args.walluri
         mdconnection = DBMaster.get_connection(args)
         try:
-            wall_ids = mdconnection.get("wall", lazy=True, autoconvert=args.dd_update)
+            wall_ids = mdconnection.get("wall", lazy=True, autoconvert=False)
+            if args.dd_update:
+                wall_ids = convert_ids(wall_ids, mdconnection.factory.version)
         except Exception as _:  # noqa: F841
             logger.error(
                 "wall ids is not present in the data entry. please provide"
@@ -89,7 +91,9 @@ if args.wall:
             )
     else:
         try:
-            wall_ids = connection.get("wall", lazy=True, autoconvert=args.dd_update)
+            wall_ids = connection.get("wall", lazy=True, autoconvert=False)
+            if args.dd_update:
+                wall_ids = convert_ids(wall_ids, connection.factory.version)
         except Exception as _:  # noqa: F841
             logger.error(
                 "wall ids is not present in the data entry. please provide with"
@@ -111,7 +115,9 @@ if args.wall:
 
 edge_profile_ids = None
 try:
-    edge_profile_ids = connection.get("edge_profiles", lazy=True, autoconvert=args.dd_update)
+    edge_profile_ids = connection.get("edge_profiles", lazy=True, autoconvert=False)
+    if args.dd_update:
+        edge_profile_ids = convert_ids(edge_profile_ids, connection.factory.version)
 except Exception as _:  # noqa: F841
     logger.error("edge_profiles ids is not present")
     exit(1)

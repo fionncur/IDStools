@@ -1,12 +1,14 @@
 import logging
 
+import imaspy as imas
 import numpy as np
 from imaspy import convert_ids
+
 from idstools.compute.common import get_nearest_time
 from idstools.compute.core_profiles import CoreProfilesCompute
 from idstools.compute.edge_profiles import EdgeProfilesCompute
 from idstools.compute.equilibrium import EquilibriumCompute
-import imaspy as imas
+
 logger = logging.getLogger("module")
 
 
@@ -168,9 +170,11 @@ class KineticProfilesCompute:
             logger.info(f"--> retrieving ids {ids_name}")
             try:
                 if dd_update:
-                    ids_object = convert_ids(self.connection.get(ids_name, lazy=True,autoconvert=False), self.connection.factory.version)
+                    ids_object = convert_ids(
+                        self.connection.get(ids_name, lazy=True, autoconvert=False), self.connection.factory.version
+                    )
                 else:
-                    ids_object = self.connection.get(ids_name, lazy=True,autoconvert=False)
+                    ids_object = self.connection.get(ids_name, lazy=True, autoconvert=False)
 
                 if ids_object.time is not None:
                     if len(ids_object.time) > 0:

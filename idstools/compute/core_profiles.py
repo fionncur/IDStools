@@ -11,8 +11,9 @@ import itertools
 import logging
 from typing import Union
 
-import numpy as np
 import imaspy as imas
+import numpy as np
+
 import idstools.init_mendeleiev as mend
 
 logger = logging.getLogger("module")

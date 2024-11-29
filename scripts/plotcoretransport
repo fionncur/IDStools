@@ -13,7 +13,7 @@ import logging
 import os
 import sys
 
-from imaspy import ids_defs
+from imaspy import convert_ids, ids_defs
 from rich_argparse import RichHelpFormatter
 
 from idstools.database import DBMaster
@@ -76,10 +76,12 @@ if connection is None:
 ids_slice_core_transport = connection.get_slice(
     "core_transport",
     args.time,
-    autoconvert=args.dd_update,
+    autoconvert=False,
     interpolation_method=slicing_methods[args.slicingmethod],
     occurrence=args.occurrence,
 )
+if args.dd_update:
+    ids_slice_core_transport = convert_ids(ids_slice_core_transport, connection.factory.version)
 if len(ids_slice_core_transport.time) == 0:
     logger.critical("IDS:core_transport Time vector is empty! aborting")
     sys.exit(1)
@@ -87,10 +89,12 @@ if len(ids_slice_core_transport.time) == 0:
 ids_slice_core_profiles = connection.get_slice(
     "core_profiles",
     args.time,
-    autoconvert=args.dd_update,
+    autoconvert=False,
     interpolation_method=slicing_methods[args.slicingmethod],
     occurrence=args.occurrence,
 )
+if args.dd_update:
+    ids_slice_core_profiles = convert_ids(ids_slice_core_profiles, connection.factory.version)
 if len(ids_slice_core_profiles.time) == 0:
     logger.critical("IDS:core_profiles Time vector is empty! aborting")
     sys.exit(1)
@@ -98,10 +102,12 @@ if len(ids_slice_core_profiles.time) == 0:
 ids_slice_equilibrium = connection.get_slice(
     "equilibrium",
     args.time,
-    autoconvert=args.dd_update,
+    autoconvert=False,
     interpolation_method=slicing_methods[args.slicingmethod],
     occurrence=args.occurrence,
 )
+if args.dd_update:
+    ids_slice_equilibrium = convert_ids(ids_slice_equilibrium, connection.factory.version)
 if len(ids_slice_equilibrium.time) == 0:
     logger.critical("IDS:equilibrium Time vector is empty! aborting")
     sys.exit(1)

@@ -9,7 +9,7 @@ import copy
 import logging
 import os
 
-from imaspy import ids_defs
+from imaspy import convert_ids, ids_defs
 from rich_argparse import RichHelpFormatter
 
 from idstools.compute.common import get_nearest_time
@@ -114,7 +114,10 @@ if isinstance(args.md, bool) and args.md is True:
     _ids_connection.close()
 
 
-ids_obj_equilibrium = connection.get("equilibrium", occurrence=occurrence, lazy=True, autoconvert=args.dd_update)
+ids_obj_equilibrium = connection.get("equilibrium", occurrence=occurrence, lazy=True, autoconvert=False)
+if args.dd_update:
+
+    ids_obj_equilibrium = convert_ids(ids_obj_equilibrium, connection.factory.version)
 
 if ids_obj_equilibrium.time is not None:
     time_slice, time_value = get_nearest_time(ids_obj_equilibrium.time, args.time)
@@ -173,7 +176,9 @@ if ids_obj_equilibrium.time is not None:
             connection = DBMaster.get_connection(inputargs)
             if connection is not None:
                 try:
-                    _ids_data = connection.get("wall", autoconvert=args.dd_update)
+                    _ids_data = connection.get("wall", autoconvert=False)
+                    if args.dd_update:
+                        _ids_data = convert_ids(_ids_data, connection.factory.version)
                     if _ids_data.ids_properties.homogeneous_time == ids_defs.EMPTY_INT:
                         logger.warning(f"{_ids_name} ids is empty in the dbentry")
                 except Exception as e:
@@ -192,7 +197,7 @@ if ids_obj_equilibrium.time is not None:
             if connection is not None:
                 _ids_data = None
                 try:
-                    _ids_data = connection.get("pf_active", autoconvert=args.dd_update)
+                    _ids_data = connection.get("pf_active", autoconvert=False)
                     if _ids_data.ids_properties.homogeneous_time == ids_defs.EMPTY_INT:
                         logger.warning(f"{_ids_name} ids is empty in the dbentry")
                 except Exception as e:

@@ -378,12 +378,14 @@ if __name__ == "__main__":
                 ids_name,
                 occurrence=0,
                 time_requested=time_slice,
-                autoconvert=args.dd_update,
+                autoconvert=False,
                 interpolation_method=imaspy.ids_defs.CLOSEST_INTERP,
             )
-        else:
-            ids = connection.get(ids_name, occurrence=0, autoconvert=args.dd_update, ignore_unknown_dd_version=True)
 
+        else:
+            ids = connection.get(ids_name, occurrence=0, autoconvert=False, ignore_unknown_dd_version=True)
+        if args.dd_update:
+            ids = imaspy.convert_ids(ids, connection.factory.version)
         if args.inspect:
             imaspy.util.inspect(ids, hide_empty_nodes=not args.show_empty)
         elif args.export:
@@ -431,16 +433,16 @@ if __name__ == "__main__":
             ids = connection.get_slice(
                 ids_name,
                 occurrence=0,
-                autoconvert=args.dd_update,
+                autoconvert=False,
                 ignore_unknown_dd_version=True,
                 lazy=True,
                 time_requested=time_slice,
                 interpolation_method=imaspy.ids_defs.CLOSEST_INTERP,
             )
         else:
-            ids = connection.get(
-                ids_name, occurrence=0, autoconvert=args.dd_update, ignore_unknown_dd_version=True, lazy=True
-            )
+            ids = connection.get(ids_name, occurrence=0, autoconvert=False, ignore_unknown_dd_version=True, lazy=True)
+        if args.dd_update:
+            ids = imaspy.convert_ids(ids, connection.factory.version)
         coordinate = None
         node_unit = ""
         coordinate_name = ""
@@ -469,7 +471,7 @@ if __name__ == "__main__":
                 node = eval("ids." + ids_path)
                 # reevaluate if struct or struct_array
                 if isinstance(node, (imaspy.ids_structure.IDSStructure, imaspy.ids_struct_array.IDSStructArray)):
-                    ids = connection.get(ids_name, occurrence, autoconvert=args.dd_update)
+                    ids = connection.get(ids_name, occurrence, autoconvert=False)
                     node = eval("ids." + ids_path)
             except Exception as e:
                 logger.error(f"{ids_path} path does not exist, hint: check length of arrays, detailed error {e}")

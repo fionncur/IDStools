@@ -13,11 +13,11 @@
 #    n_over_ntot:  5.29e-06  0.460     0.493     7.01e-07  0.011     0.024     0.012
 #    n_over_ne:    4.45e-06  0.387     0.414     5.89e-07  9.58e-03  0.020     0.010
 #    n_over_n_maj: 1.07e-05  0.933     1.000     1.42e-06  0.023     0.048     0.024
-
 import argparse
 import logging
 
 import numpy as np
+from imaspy import convert_ids
 from rich_argparse import RichHelpFormatter
 
 from idstools.compute.common import get_nearest_time
@@ -67,7 +67,9 @@ if connection is None:
 # Prepare IDS with highest density data from core profiles
 try:
     logger.info("\ngetting core_profiles slice")
-    core_profiles_ids = connection.get("core_profiles", lazy=True, autoconvert=args.dd_update)
+    core_profiles_ids = connection.get("core_profiles", lazy=True, autoconvert=False)
+    if args.dd_update:
+        core_profiles_ids = convert_ids(core_profiles_ids, connection.factory.version)
 
     if args.time == -99:
         ne0_list = np.array([])
@@ -89,7 +91,9 @@ except Exception as _:  # noqa: F841
 
 try:
     logger.info("\ngetting edge_profiles slice")
-    edge_profiles_ids = connection.get("edge_profiles", lazy=True, autoconvert=args.dd_update)
+    edge_profiles_ids = connection.get("edge_profiles", lazy=True, autoconvert=False)
+    if args.dd_update:
+        edge_profiles_ids = convert_ids(edge_profiles_ids, connection.factory.version)
     if time_slice_core_profiles is None:
         if args.time == -99:
             ne0_list = np.array([])
@@ -137,7 +141,9 @@ if core_profiles_ids is not None:
         logger.warning("core_profiles IDS :Retrieving volume from equilibrium IDS")
         equilibrium_ids = None
         try:
-            equilibrium_ids = connection.get("equilibrium", lazy=True, autoconvert=args.dd_update)
+            equilibrium_ids = connection.get("equilibrium", lazy=True, autoconvert=False)
+            if args.dd_update:
+                equilibrium_ids = convert_ids(equilibrium_ids, connection.factory.version)
             volume = equilibrium_ids.time_slice({time_slice_core_profiles}).profiles_1d.volume
         except Exception as _:  # noqa: F841
             logger.warning("equilibrium IDS :equilibrium IDS/volume is not present")
@@ -169,7 +175,9 @@ if edge_profiles_ids is not None:
         logger.warning(
             "edge_profiles IDS:IDS exists but volume is not set. --> Trying nearby time slice. This may take a while.."
         )
-        edge_profiles = connection.get("edge_profiles", autoconvert=args.dd_update)
+        edge_profiles = connection.get("edge_profiles", autoconvert=False)
+        if args.dd_update:
+            edge_profiles = convert_ids(edge_profiles, connection.factory.version)
         time_slices_count = len(edge_profiles.grid_ggd)
         index_list = []
         for counter in range(1, 10):

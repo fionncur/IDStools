@@ -611,7 +611,8 @@ class CoreProfilesView:
 
                 if len(diamagnetic) < 1:
                     logger.critical(
-                        f"core_profiles.profiles_1d[{time_slice}].ion[{ion_index}].velocity.diamagnetic could not be read"
+                        f"core_profiles.profiles_1d[{time_slice}].ion[{ion_index}].velocity.diamagnetic"
+                        "could not be read"
                     )
                     diamagnetic = np.asarray([np.nan] * nrho)
                 ax.plot(
