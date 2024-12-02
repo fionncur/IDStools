@@ -130,7 +130,6 @@ def partial_get(ids, ids_path, custom_coordinate=None):
                             if _coordinate.has_value is True:
                                 coordinate = _coordinate
                     else:
-
                         for _coordinate in _inner_data.coordinates:
                             if isinstance(_coordinate, IDSPrimitive):
                                 if _coordinate.has_value is True:
@@ -139,6 +138,9 @@ def partial_get(ids, ids_path, custom_coordinate=None):
                                     break
                                 else:
                                     continue
+                            else:
+                                coordinate = _coordinate
+                                coordinate_unit = "Indices"
         except Exception as e:
             logger.error(
                 f"{ids_path} path/value does not exist, hint: please check length of arrays, detailed error : {e}"
@@ -922,17 +924,43 @@ def idsdiff(struct1: IDSStructure, struct2: IDSStructure, name1="", name2="", pr
             data_type1 = "STRUCT_ARRAY"
             information = Text("different length", style="magenta")
         else:
-            data_type1 = "-" if child1 is None else child1.data_type
+            if child1 is None:
+                data_type1 = "-"
+            else:
+                if hasattr(child1, "data_type"):
+                    data_type1 = child1.data_type
+                else:
+                    data_type1 = type(child1).__name__.upper()
+
         if isinstance(child2, IDSStructArray):
             data_type2 = "STRUCT_ARRAY"
             information = Text("different length", style="magenta")
         else:
-            data_type2 = "-" if child2 is None else child2.data_type
+            if child2 is None:
+                data_type2 = "-"
+            else:
+                if hasattr(child2, "data_type"):
+                    data_type2 = child2.data_type
+                else:
+                    data_type2 = type(child2).__name__.upper()
+            # data_type2 = "-" if child2 is None else child2.data_type
 
-        path = child1._path if child2 is None else child2._path
+        if child1 is not None and hasattr(child1, "_path"):
+            path = child1._path
+        elif child2 is not None and hasattr(child2, "_path"):
+            path = child2._path
+        else:
+            path = "NA"
 
-        value1 = "-" if child1 is None else child1.value
-        value2 = "-" if child2 is None else child2.value
+        if child1 is not None and hasattr(child1, "value"):
+            value1 = child1.value
+        else:
+            value1 = child1
+
+        if child2 is not None and hasattr(child2, "value"):
+            value2 = child2.value
+        else:
+            value2 = child2
 
         if type(value1) is np.ndarray:
             value1 = str(value1[0]) + ",..."

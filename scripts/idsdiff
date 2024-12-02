@@ -13,6 +13,7 @@ from io import BytesIO
 import matplotlib.pyplot as plt
 import numpy as np
 import rich
+from imaspy import ids_defs
 from imaspy.ids_base import IDSBase
 from imaspy.ids_primitive import (
     IDSFloat0D,
@@ -41,6 +42,12 @@ from idstools.view.common import PlotCanvas
 
 THRESHOLD_PERCENT = 2
 
+slicing_methods = {
+    "CLOSEST": ids_defs.CLOSEST_INTERP,
+    "PREVIOUS": ids_defs.PREVIOUS_INTERP,
+    "LINEAR": ids_defs.LINEAR_INTERP,
+}
+
 
 def view_plot(ax, field, coordinate, field_name="", coordinate_name="", field_unit="", coordinate_unit=""):
     if not isinstance(field, (IDSNumericArray, np.ndarray)):
@@ -51,14 +58,12 @@ def view_plot(ax, field, coordinate, field_name="", coordinate_name="", field_un
         if isinstance(coordinate, IDSPrimitive):
             coordinate_unit = f"{coordinate.metadata.name} ({coordinate.metadata.units})"
             coordinate_name = coordinate.metadata.path
-
     if isinstance(field, IDSNumericArray):
         if not field.has_value:
             logger.error("Values are not present")
             return
         data - field.value
         field_unit = field.metadata.units
-
         coordinate = field.coordinates[coordinate]
         if isinstance(coordinate, IDSPrimitive):
             coordinate_unit = f"{coordinate.metadata.name} ({coordinate.metadata.units})"
@@ -197,7 +202,12 @@ def generate_html(file_path, compare_data):
         add_header = True
 
         for description, first, second in output:
-            description = second._path if first is None else first._path
+
+            description = "NA"
+            if first is not None and hasattr(first, "_path"):
+                description = first._path
+            elif second is not None and hasattr(second, "_path"):
+                description = type(second).__name__.upper()
             report_diff_line = ""
             if add_header is True:
                 report_diff_line = f"""<tr class="table-secondary">
@@ -209,6 +219,7 @@ def generate_html(file_path, compare_data):
             status_message = "different values"
 
             if isinstance(first, IDSNumericArray) and isinstance(second, IDSNumericArray):
+
                 if len(first.shape) == 1 and len(second.shape) == 1:
                     if len(first.value) != len(second.value):
                         common = np.linspace(0, 1, max(len(first), len(second)))
@@ -483,6 +494,7 @@ if __name__ == "__main__":
         type=str,
         help="Name (or space separated list of names) of IDS to compare (leave empty to compare all IDSs)",
     )
+    parser.add_argument("-o", "--occurrence", required=False, type=int, default=0, help="occurrence")
     parser.add_argument(
         "-u",
         "--uri",
@@ -492,6 +504,16 @@ if __name__ == "__main__":
         help="uri separated by spaces \t\t(default=%(default)s)",
     )
     parser.add_argument(
+        "-m",
+        "--slicingmethod",
+        type=str,
+        default="CLOSEST",
+        choices=["CLOSEST", "PREVIOUS", "LINEAR"],
+        help="Slicing method \t(default=%(default)s)",
+    )
+
+    parser.add_argument("-t", "--time", help="Time", required=False, type=float, default=None)
+    parser.add_argument(
         "--skip-provenance",
         action="store_true",
         help="Discards provenance data differences (optional)",
@@ -500,7 +522,7 @@ if __name__ == "__main__":
         "-p",
         "--plot",
         action="store_true",
-        help="plot data",
+        help="if idspath is given in the URI fragment with this option you can plot the data",
     )
     parser.add_argument(
         "-html",
@@ -565,7 +587,16 @@ if __name__ == "__main__":
                     node_unit_a = ""
                     ids_a = node_a = coordinate_a = None
                     coordinate_a_name = coordinate_unit_a = ""
-                    ids_a = connections[i][1].get(_uri_args_a.ids_name)
+                    if args.time:
+                        ids_a = connections[i][1].get_slice(
+                            _uri_args_a.ids_name,
+                            args.time,
+                            slicing_methods[args.slicingmethod],
+                            occurrence=_uri_args.occurrence,
+                            autoconvert=False,
+                        )
+                    else:
+                        ids_a = connections[i][1].get(_uri_args_a.ids_name, autoconvert=False)
 
                     ids_path_a = _uri_args_a.ids_path.replace("(", "[").replace(")", "]").replace("/", ".")
                     if ":" in _uri_args_a.ids_path:
@@ -587,7 +618,16 @@ if __name__ == "__main__":
                     node_unit_b = ""
                     ids_b = node_b = coordinate_b = None
                     coordinate_b_name = coordinate_unit_b = ""
-                    ids_b = connections[j][1].get(_uri_args_b.ids_name)
+                    if args.time:
+                        ids_b = connections[j][1].get_slice(
+                            _uri_args_b.ids_name,
+                            args.time,
+                            slicing_methods[args.slicingmethod],
+                            occurrence=_uri_args_b.occurrence,
+                            autoconvert=False,
+                        )
+                    else:
+                        ids_b = connections[j][1].get(_uri_args_b.ids_name, autoconvert=False)
 
                     ids_path_b = _uri_args_b.ids_path.replace("(", "[").replace(")", "]").replace("/", ".")
                     if ":" in _uri_args_b.ids_path:
@@ -609,6 +649,7 @@ if __name__ == "__main__":
                         pass
                     else:
                         if isinstance(node_a, IDSStructure) and isinstance(node_b, IDSStructArray):
+
                             if args.fullarray:
                                 compare_result, diff_result, _ = idsdiff_full(
                                     node_a,
@@ -629,10 +670,10 @@ if __name__ == "__main__":
                         else:
                             if not isinstance(node_a, IDSBase) and not isinstance(node_b, IDSBase):
                                 txt1 = f"{node_a}"
-                                txt2 = f"{node_a}"
+                                txt2 = f"{node_b}"
                             else:
                                 txt1 = "-" if node_a is None else repr(node_a)
-                                txt2 = "-" if node_a is None else repr(node_a)
+                                txt2 = "-" if node_b is None else repr(node_b)
                             diff_table = Table(title="first-second")
                             diff_table.add_column("first", style="blue")
                             diff_table.add_column("second", style="magenta")
@@ -658,6 +699,7 @@ if __name__ == "__main__":
                         if args.plot:
                             canvas = PlotCanvas(1, 1)
                             ax = canvas.add_axes(title="", xlabel="", row=0, col=0)
+
                             view_plot(
                                 ax,
                                 node_a,
@@ -694,10 +736,12 @@ if __name__ == "__main__":
                             else:
                                 canvas.show()
                         exit(0)
-    if len(fragment_ids_list) == 0:
-        args.ids = get_ids_types()
-    else:
-        args.ids = fragment_ids_list
+
+    if args.ids is None:
+        if len(fragment_ids_list) == 0:
+            args.ids = get_ids_types()
+        else:
+            args.ids = fragment_ids_list
     idsavailability1 = []
     idsavailability2 = []
     total_data = {}
@@ -709,17 +753,36 @@ if __name__ == "__main__":
                 for idsname in args.ids:
                     ids_a = None
                     try:
-                        ids_a = connections[i][1].get(idsname)
-                    except Exception as _:  # noqa: F841
+                        if args.time:
+                            ids_a = connections[i][1].get_slice(
+                                idsname,
+                                args.time,
+                                slicing_methods[args.slicingmethod],
+                                occurrence=args.occurrence,
+                                autoconvert=False,
+                            )
+                        else:
+                            ids_a = connections[i][1].get(idsname, autoconvert=False)
+
+                    except Exception as e:  # noqa: F841
+                        print(f"exception occurred when retriving first {idsname} {e}")
                         idsavailability1.append(idsname)
-                        pass
                     ids_b = None
                     try:
-                        ids_b = connections[j][1].get(idsname)
+                        if args.time:
+                            ids_b = connections[j][1].get_slice(
+                                idsname,
+                                args.time,
+                                slicing_methods[args.slicingmethod],
+                                occurrence=args.occurrence,
+                                autoconvert=False,
+                            )
+                        else:
+                            ids_b = connections[j][1].get(idsname, autoconvert=False)
 
-                    except Exception as _:  # noqa: F841
+                    except Exception as e:  # noqa: F841
+                        print(f"exception occurred when retriving second {idsname} {e}")
                         idsavailability2.append(idsname)
-                        pass
                     if ids_a is None or ids_b is None:
                         continue
                     if args.fullarray:
