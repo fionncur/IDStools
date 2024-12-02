@@ -218,7 +218,7 @@ def get_ids_size(db_entry_object, ids_names=None, dd_update=False) -> dict:
         factory = imas.IDSFactory()
         ids_names = factory.ids_names()
     ids_size_dict = {}
-    for ids_name in track(ids_names, description="[green]Processing..."):
+    for ids_name in ids_names:
         occurrence_list = db_entry_object.list_all_occurrences(ids_name)
         if len(occurrence_list) == 0:
             continue
@@ -363,14 +363,14 @@ def get_available_ids_and_occurrences(db_entry_object, time_mode=None, get_comme
 
             homogeneous_time = ids_object.ids_properties.homogeneous_time
             comment = ids_object.ids_properties.comment
-            try:
-                occ_type_text = ""
+
+            occ_type_text = ""
+            if hasattr(ids_object.ids_properties, "occurrence_type"):
                 occ_type = ids_object.ids_properties.occurrence_type
+
                 if occ_type.index != imas.ids_defs.EMPTY_INT:
                     occ_type_text = occ_type_dict[occ_type.index]
                     comment += f" [occurrence type = {occ_type_text}]"
-            except Exception as e:
-                logger.debug(f"{e}")
             if homogeneous_time != imas.ids_defs.EMPTY_INT and (time_mode is None or time_mode == homogeneous_time):
                 if get_comment is True:
                     availableidslist.append((idstype, occ, comment))

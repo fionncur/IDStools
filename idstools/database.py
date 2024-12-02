@@ -539,12 +539,13 @@ class DBMaster:
         return factory.dd_version
 
     @classmethod
-    def create_connection(cls, imasargs):
+    def create_connection(cls, imasargs, target_dd_version=None):
         if "mode" not in imasargs.__dict__:
             imasargs.mode = "w"
         connection = None
         if imasargs.uri != "" and imasargs.uri is not None:
-            connection = imas.DBEntry(imasargs.uri, imasargs.mode)
+            print(target_dd_version)
+            connection = imas.DBEntry(imasargs.uri, imasargs.mode, dd_version=target_dd_version)
         return connection
 
     @classmethod

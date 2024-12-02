@@ -5,7 +5,7 @@ import timeit
 import imaspy as imas
 
 
-def get_ids(db, idsname, occ=0, times=None, interp=imas.ids_defs.PREVIOUS_INTERP, verbose=False):
+def get_ids(db, idsname, occ=0, times=None, interp=imas.ids_defs.PREVIOUS_INTERP, verbose=False, dd_update=False):
     """
     The function `get_ids` reads an IDS from a given DBEntry, either the entire IDS or slices at
     selected times, and returns the IDS object or a list of IDS slices.
@@ -31,7 +31,9 @@ def get_ids(db, idsname, occ=0, times=None, interp=imas.ids_defs.PREVIOUS_INTERP
     if times is None:
         if verbose:
             print(f"getting {idsname}")
-        idsobj = db.get(idsname, occurrence=occ)
+        idsobj = db.get(idsname, occurrence=occ, autoconvert=False)
+        if dd_update:
+            idsobj = imas.convert_ids(idsobj, db.factory.version)
         if verbose:
             print(f"got {len(idsobj.time)} slices")
     else:
@@ -39,7 +41,9 @@ def get_ids(db, idsname, occ=0, times=None, interp=imas.ids_defs.PREVIOUS_INTERP
         for t in times:
             if verbose:
                 print(f"getting a slice of {idsname} at time {t}")
-            data_slice = db.get_slice(idsname, t, interp, occurrence=occ)
+            data_slice = db.get_slice(idsname, t, interp, occurrence=occ, autoconvert=False)
+            if dd_update:
+                data_slice = imas.convert_ids(data_slice, db.factory.version)
             idsobj.append(data_slice)
             if verbose:
                 print(f"got {data_slice.time}")
@@ -47,7 +51,7 @@ def get_ids(db, idsname, occ=0, times=None, interp=imas.ids_defs.PREVIOUS_INTERP
     return idsobj
 
 
-def get_timings(db, idsname, occ=0, dbout=None, times=None, repeat=5, verbose=False, profile=False):
+def get_timings(db, idsname, occ=0, dbout=None, times=None, repeat=5, verbose=False, profile=False, dd_update=False):
     """
     The function `get_timings` performs timing measurements for various I/O operations on an IDS in an IMAS database.
 
@@ -76,7 +80,7 @@ def get_timings(db, idsname, occ=0, dbout=None, times=None, repeat=5, verbose=Fa
     if dbout is not None:
         if verbose:
             print("profiles put")
-        idsobj = get_ids(db, idsname, occ, times, verbose)
+        idsobj = get_ids(db, idsname, occ, times, verbose, dd_update=dd_update)
         cmd = "dbout.put(idsobj)"
     else:
         cmd = f"get_ids(db,'{idsname}',occ=occ,times=times,verbose=verbose)"

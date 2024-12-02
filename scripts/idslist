@@ -68,7 +68,8 @@ if connection is None:
 if args.yaml is True:
     if args.fullarray:
         print("(-f fullarray) option is provided, can not show full array for yaml output")
-    for idsname, oc in get_available_ids_and_occurrences(connection, args.dd_update):
+    for idsname, oc in get_available_ids_and_occurrences(connection, dd_update=args.dd_update):
+        print(idsname)
         if args.ids:
             if idsname != args.ids:
                 continue
