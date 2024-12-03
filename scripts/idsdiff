@@ -765,7 +765,6 @@ if __name__ == "__main__":
                             ids_a = connections[i][1].get(idsname, autoconvert=False)
 
                     except Exception as e:  # noqa: F841
-                        print(f"exception occurred when retriving first {idsname} {e}")
                         idsavailability1.append(idsname)
                     ids_b = None
                     try:
@@ -781,7 +780,6 @@ if __name__ == "__main__":
                             ids_b = connections[j][1].get(idsname, autoconvert=False)
 
                     except Exception as e:  # noqa: F841
-                        print(f"exception occurred when retriving second {idsname} {e}")
                         idsavailability2.append(idsname)
                     if ids_a is None or ids_b is None:
                         continue

@@ -163,6 +163,7 @@ setup(
         "scripts/show_db_entry",
         "scripts/validate_db_entry",
         "scripts/watch_db_entry",
+        "scripts/idstools",
     ],
     setup_requires=["pytest-runner"],
     tests_require=["pytest"],
