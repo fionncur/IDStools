@@ -9,6 +9,7 @@ import imaspy as imas
 import numpy as np
 from rich_argparse import RichHelpFormatter
 
+from imaspy import convert_ids
 from idstools.compute.common import get_nearest_time
 from idstools.database import DBMaster
 from idstools.utils.clihelper import (
@@ -36,7 +37,14 @@ parser.add_argument(
     required=True,
     help="uri separated by spaces if comparing\t\t(default=%(default)s)",
 )
-
+parser.add_argument(
+    "--dd-update",
+    action="store_true",
+    help=(
+        "Convert IDS to the default version of the data dictionary if enabled"
+        "otherwise, use the original IDS stored on disk."
+    ),
+)
 parser.add_argument("-t", "--time", help="Time (default=middle)", type=float, default=-99.0)
 
 parser.add_argument(
@@ -54,55 +62,73 @@ equilibrium1 = None
 equilibrium2 = None
 wall1 = None
 wall2 = None
+
 if args.uri is not None:
     if len(args.uri) >= 1:
         connection1 = imas.DBEntry(args.uri[0], "r")
-        equilibrium1 = connection1.get("equilibrium")
+        if args.dd_update:
+            equilibrium1 = connection1.get("equilibrium", autoconvert=False)
+            equilibrium1 = convert_ids(equilibrium1, connection1.factory.version)
+        else:
+            equilibrium1 = connection1.get("equilibrium", lazy=True, autoconvert=False)
+
         time_array1 = equilibrium1.time
         time_slice1, time_value1 = get_nearest_time(time_array1, args.time)
 
-        wall1 = connection1.get("wall")
+        if args.dd_update:
+            wall1 = connection1.get("wall", autoconvert=False)
+            wall1 = convert_ids(wall1, connection1.factory.version)
+        else:
+            wall1 = connection1.get("wall", lazy=True, autoconvert=False)
+
         if connection1 is None:
             logger.critical("----> Could not open first data entry. Aborted.")
             exit(1)
     if len(args.uri) == 2:
         connection2 = imas.DBEntry(args.uri[1], "r")
-        equilibrium2 = connection2.get("equilibrium")
+        if args.dd_update:
+            equilibrium2 = connection2.get("equilibrium", autoconvert=False)
+            equilibrium2 = convert_ids(equilibrium2, connection2.factory.version)
+        else:
+            equilibrium2 = connection2.get("equilibrium", autoconvert=False)
         time_array2 = equilibrium2.time
         time_slice2 = np.argmin(abs(time_array2 - time_array1[time_slice1]))
-        wall2 = connection2.get("wall")
+        if args.dd_update:
+            wall2 = connection2.get("wall", autoconvert=False)
+            wall2 = convert_ids(wall2, connection2.factory.version)
+        else:
+            wall2 = connection2.get("wall", autoconvert=False)
+
         if connection2 is None:
             logger.critical("----> Could not open second data entry.")
             exit(1)
-        equilibrium2 = connection1.get("equilibrium")
 
 canvas = PlotCanvas(1, 4)
 ax1 = canvas.add_axes(title="", xlabel="", row=0, col=0)
 ax2 = canvas.add_axes(title="", xlabel="", row=0, col=1)
 ax3 = canvas.add_axes(title="", xlabel="", row=0, col=2)
 ax4 = canvas.add_axes(title="", xlabel="", row=0, col=3)
-
 equiview = EquilibriumView(equilibrium1)
 if equilibrium2:
     equiview.view_profile_plot(ax1, time_slice1, equilibrium2_ids=equilibrium2, time_index2=time_slice2)
 else:
     equiview.view_profile_plot(ax1, time_slice1)
 
-if wall1:
-    wallview1 = WallView(wall1)
-    wallview1.view_inner_wall_line(ax2)
-if wall2:
-    wallview2 = WallView(wall2)
-    wallview2.view_inner_wall_line(ax2)
+# if wall1:
+#     wallview1 = WallView(wall1)
+#     wallview1.view_inner_wall_line(ax2)
+# if wall2:
+#     wallview2 = WallView(wall2)
+#     wallview2.view_inner_wall_line(ax2)
 
-if equilibrium2:
-    equiview.view_equlibrium_plot(ax2, time_index1=220, equilibrium2_ids=equilibrium2)
-    equiview.view_current_plot(ax3, time_index1=220, equilibrium2_ids=equilibrium2)
-    equiview.view_constraints(ax4, time_index1=time_slice1, equilibrium2_ids=equilibrium2)
-else:
-    equiview.view_equlibrium_plot(ax2, time_index1=time_slice1)
-    equiview.view_current_plot(ax3, time_index1=time_slice1)
-    equiview.view_constraints(ax4, time_index1=time_slice1)
+# if equilibrium2:
+#     equiview.view_equlibrium_plot(ax2, time_index1=220, equilibrium2_ids=equilibrium2)
+#     equiview.view_current_plot(ax3, time_index1=220, equilibrium2_ids=equilibrium2)
+#     equiview.view_constraints(ax4, time_index1=time_slice1, equilibrium2_ids=equilibrium2)
+# else:
+#     equiview.view_equlibrium_plot(ax2, time_index1=time_slice1)
+#     equiview.view_current_plot(ax3, time_index1=time_slice1)
+#     equiview.view_constraints(ax4, time_index1=time_slice1)
 
 canvas.fig.suptitle(",".join(args.uri) + f" time {time_value1}", size=8)
 canvas.fig.subplots_adjust(top=0.933, bottom=0.05, left=0.038, right=0.988, hspace=0.221, wspace=0.364)

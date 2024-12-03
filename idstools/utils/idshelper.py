@@ -460,6 +460,10 @@ def resample_indices(
         pass
     if idsobj:
         times = idsobj.time
+        if stop >= len(times):
+            stop = len(times) 
+        if start >= len(times):
+            start = 0
         for time_val in times[range(start, len(times) if stop is None else stop, step)]:
             if dd_update:
                 data_slice = imas.convert_ids(
@@ -473,12 +477,12 @@ def resample_indices(
 
 
 def resample_times(
-    dbin: str,
-    dbout: str,
+    dbin: object,
+    dbout: object,
     idsname: str,
-    start: int = None,
-    stop: int = None,
-    step: int = None,
+    start: float = None,
+    stop: float = None,
+    step: float = None,
     dd_update=False,
 ):
     """
@@ -501,7 +505,7 @@ def resample_times(
     """
     idsobj = None
     try:
-        idsobj = dbin.get(idsname, lazy=True)
+        idsobj = dbin.get(idsname)
     except Exception as _:  # noqa: F841
         pass
     if idsobj:
@@ -514,8 +518,8 @@ def resample_times(
             rstart = times[0] if start is None else start
             rstop = times[-1] if stop is None else stop
             rtimes = np.arange(rstart, rstop, step)
-
         for time_val in rtimes:
+
             if dd_update:
                 data_slice = imas.convert_ids(
                     dbin.get_slice(idsname, time_val, imas.ids_defs.PREVIOUS_INTERP, autoconvert=False),

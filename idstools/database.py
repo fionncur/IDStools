@@ -544,7 +544,6 @@ class DBMaster:
             imasargs.mode = "w"
         connection = None
         if imasargs.uri != "" and imasargs.uri is not None:
-            print(target_dd_version)
             connection = imas.DBEntry(imasargs.uri, imasargs.mode, dd_version=target_dd_version)
         return connection
 

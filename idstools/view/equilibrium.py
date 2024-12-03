@@ -350,7 +350,6 @@ class EquilibriumView(BasePlot):
         return new_y12, new_y11, y_min, y_max, scalStr
 
     def view_profile_plot(self, ax, time_index1, equilibrium2_ids=None, time_index2=None):
-
         data = self.compute_obj.get_equilibria()
         data2 = None
         if equilibrium2_ids is not None:
