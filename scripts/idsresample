@@ -90,7 +90,7 @@ if __name__ == "__main__":
             homogeneous_time = idsobj.ids_properties.homogeneous_time
 
             if homogeneous_time == 1:
-                if args.time_range is None: # index range
+                if args.time_range is None:  # index range
                     if args.index_range is None:
                         args.index_range = ",,"
                     time_range = args.index_range.split(",")

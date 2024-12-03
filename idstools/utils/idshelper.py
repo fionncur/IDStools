@@ -461,7 +461,7 @@ def resample_indices(
     if idsobj:
         times = idsobj.time
         if stop >= len(times):
-            stop = len(times) 
+            stop = len(times)
         if start >= len(times):
             start = 0
         for time_val in times[range(start, len(times) if stop is None else stop, step)]:

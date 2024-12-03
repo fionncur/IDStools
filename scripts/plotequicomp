@@ -7,9 +7,9 @@ import os
 
 import imaspy as imas
 import numpy as np
+from imaspy import convert_ids
 from rich_argparse import RichHelpFormatter
 
-from imaspy import convert_ids
 from idstools.compute.common import get_nearest_time
 from idstools.database import DBMaster
 from idstools.utils.clihelper import (
