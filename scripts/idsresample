@@ -30,6 +30,14 @@ if __name__ == "__main__":
         required=True,
         help="destination uri",
     )
+    parser.add_argument(
+        "--dd-update",
+        action="store_true",
+        help=(
+            "Convert IDS to the default version of the data dictionary if enabled"
+            "otherwise, use the original IDS stored on disk."
+        ),
+    )
     group = parser.add_mutually_exclusive_group()
     group.add_argument(
         "--index-range",
@@ -66,6 +74,16 @@ if __name__ == "__main__":
     if src is None:
         print("Error opening source pulse! Please check existence.")
         sys.exit()
+    # hack to get underlying data dictionary version used by idses
+    src_dd_version = src.dd_version
+    if not args.dd_update:
+        for idsname in get_ids_types():
+            try:
+                _dummy = src.get(idsname, lazy=True, autoconvert=False)
+                src_dd_version = _dummy.ids_properties.version_put.data_dictionary.value
+                break
+            except Exception as _:  # noqa: F841
+                pass
 
     tmp = imas.DBEntry("imas:memory?path=tmp/1/1", "w")
 
@@ -76,14 +94,14 @@ if __name__ == "__main__":
     outputargs = argparse.Namespace()
     outputargs.mode = "w"
     outputargs.uri = args.dest
-    dest = DBMaster.create_connection(outputargs)
+    dest = DBMaster.create_connection(outputargs, target_dd_version=src_dd_version)
     if dest is None:
         print("Error creating pulse! Please check existence.")
         sys.exit()
     for ids_name in args.ids:
         idsobj = None
         try:
-            idsobj = src.get(ids_name)
+            idsobj = src.get(ids_name, autoconvert=False)
         except Exception as _:  # noqa: F841
             pass
         if idsobj:
@@ -97,7 +115,7 @@ if __name__ == "__main__":
                     start = int(time_range[0]) if time_range[0] != "" else 0
                     stop = int(time_range[1]) if time_range[1] != "" else None
                     step = int(time_range[2]) if time_range[2] != "" else 1
-                    print(f"resampling indices :{ids_name} with {start}, {stop}, {step}")
+                    print(f"resampling indices :{ids_name}")
                     if start == stop:
                         print(f"Please provide range. start={start} and stop={stop} are the same", file=sys.stderr)
                         exit(0)
@@ -107,7 +125,7 @@ if __name__ == "__main__":
                     start = float(time_range[0]) if time_range[0] != "" else idsobj.time[0]
                     stop = float(time_range[1]) if time_range[1] != "" else idsobj.time[-1]
                     step = float(time_range[2]) if time_range[2] != "" else 1.0
-                    print(f"resampling times :{ids_name} with {start}, {stop}, {step}")
+                    print(f"resampling times :{ids_name}")
                     if start == stop:
                         print(f"Please provide range. start={start} and stop={stop} are the same", file=sys.stderr)
                         exit(0)
@@ -145,4 +163,4 @@ if __name__ == "__main__":
                 # print(f'Skipping IDS {idsname} because its homogeneous_time={homogeneous}',file=sys.stderr)
                 continue
 
-            dest.put(tmp.get(ids_name))
+            dest.put(tmp.get(ids_name, autoconvert=False))
