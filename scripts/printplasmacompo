@@ -144,8 +144,7 @@ if core_profiles_ids is not None:
     elif returnstatus == -1:
         core_profile_exists = False
         logger.warning(
-            f"core_profiles: IDS exists but volume is not set, "
-            f"try retrieving it from the equilibrium IDS"
+            f"core_profiles: IDS exists but volume is not set, " f"try retrieving it from the equilibrium IDS"
         )
         equilibrium_ids = None
         try:
@@ -184,8 +183,7 @@ if edge_profiles_ids is not None:
         logger.warning("edge_profiles: time slice doesn't exists.")
     elif returnstatus == -1:
         logger.warning(
-            f"edge_profiles: IDS exists but volume is not set. "
-            f"Trying nearby time slice. This may take a while."
+            f"edge_profiles: IDS exists but volume is not set. " f"Trying nearby time slice. This may take a while."
         )
         edge_profiles = connection.get("edge_profiles", autoconvert=False)
         if args.dd_update:
