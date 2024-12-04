@@ -22,14 +22,14 @@ parser.add_argument(
     "--src",
     type=str,
     required=True,
-    help="source uri \t\t(default=%(default)s)",
+    help="source uri",
 )
 parser.add_argument(
     "-d",
     "--dest",
     type=str,
     required=True,
-    help="destination uri \t\t(default=%(default)s)",
+    help="destination uri",
 )
 
 parser.add_argument(
@@ -67,8 +67,9 @@ parser.add_argument(
     "--dd-update",
     action="store_true",
     help=(
-        "Convert IDS to the default version of the data dictionary if enabled"
-        "otherwise, use the original IDS stored on disk."
+        f"Convert IDS to the default Data Dictionary version "
+        f"(={imas.IDSFactory().dd_version}, "
+        f"otherwise use the original version stored on disk)"
     ),
 )
 parser.add_argument(
