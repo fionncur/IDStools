@@ -140,11 +140,13 @@ if core_profiles_ids is not None:
     )
     if returnstatus == 0:
         core_profile_exists = False
-        logger.critical("core_profiles IDS: IDS exists but time slice doesn't exists. --> Abort.")
+        logger.warning("core_profiles: IDS exists but time slice doesn't exists.")
     elif returnstatus == -1:
         core_profile_exists = False
-        logger.critical("core_profiles IDS:IDS exists but volume is not set")
-        logger.warning("core_profiles IDS :Retrieving volume from equilibrium IDS")
+        logger.warning(
+            f"core_profiles: IDS exists but volume is not set, "
+            f"try retrieving it from the equilibrium IDS"
+        )
         equilibrium_ids = None
         try:
 
@@ -155,20 +157,20 @@ if core_profiles_ids is not None:
                 equilibrium_ids = connection.get("equilibrium", lazy=True, autoconvert=False)
             volume = equilibrium_ids.time_slice({time_slice_core_profiles}).profiles_1d.volume
         except Exception as _:  # noqa: F841
-            logger.warning("equilibrium IDS :equilibrium IDS/volume is not present")
+            logger.warning("equilibrium: IDS exists but volume is not present.")
 
         returnstatus = CoreProfilesView.view_plasma_composition_with_species_concentration(
             core_profiles_ids, time_slice_core_profiles, volume=volume
         )
         core_profile_exists = True
 else:
-    logger.critical("core_profiles IDS:No core_profiles IDS in the data-entry --> Abort.")
+    logger.warning("No core_profiles IDS in the data-entry.")
 
 
 if edge_profiles_ids is not None:
     logger.info(
-        f"edge_profiles IDS:Using time slice where maximum "
-        f"electrons density is present in core, Time slice:{time_slice_edge_profiles}"
+        f"edge_profiles: using time slice where maximum "
+        f"electrons density is present in core, time slice={time_slice_edge_profiles}"
     )
 
     print("----------------")
@@ -179,10 +181,11 @@ if edge_profiles_ids is not None:
     )
     if returnstatus == 0:
         edge_profile_exists = False
-        logger.critical("edge_profiles IDS:IDS exists but time slice doesn't exists. --> Abort.")
+        logger.warning("edge_profiles: time slice doesn't exists.")
     elif returnstatus == -1:
         logger.warning(
-            "edge_profiles IDS:IDS exists but volume is not set. --> Trying nearby time slice. This may take a while.."
+            f"edge_profiles: IDS exists but volume is not set. "
+            f"Trying nearby time slice. This may take a while."
         )
         edge_profiles = connection.get("edge_profiles", autoconvert=False)
         if args.dd_update:
@@ -212,7 +215,7 @@ if edge_profiles_ids is not None:
                     index_counter = index_counter + 1
             if len(elements) != 0:
                 logger.info(
-                    f"edge_profiles IDS:Using nearby time slice in edge where maximum "
+                    f"edge_profiles: using nearby time slice in edge where maximum "
                     f"electrons density is present in core, Time slice:{itime_slice}"
                 )
                 returnstatus = EdgeProfilesView.view_plasma_composition_with_species_concentration(
@@ -220,13 +223,13 @@ if edge_profiles_ids is not None:
                 )
                 if returnstatus == 0:
                     edge_profile_exists = False
-                    logger.critical("edge_profiles IDS:IDS exists but time slice doesn't exists. --> Abort.")
+                    logger.warning("edge_profiles: time slice doesn't exists.")
                 elif returnstatus == -1:
                     edge_profile_exists = False
-                    logger.warning("edge_profiles IDS:IDS exists but volume is not set.")
+                    logger.warning("edge_profiles: IDS exists but volume is not set.")
                 break
 else:
-    logger.critical("edge_profiles IDS:No edge_profiles IDS in the data-entry. --> Abort.")
+    logger.warning("No edge_profiles IDS in the data-entry.")
 
 profile_availability_string = "" + ("core -\t" if not core_profile_exists else "core +\t")
 if edge_profile_exists is False:
