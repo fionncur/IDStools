@@ -51,7 +51,7 @@ slicing_methods = {
 
 def view_plot(ax, field, coordinate, field_name="", coordinate_name="", field_unit="", coordinate_unit=""):
     if not isinstance(field, (IDSNumericArray, np.ndarray)):
-        logger.error("Not a numeric array, Please select ids path")
+        print("Not a numeric array, Please select ids path")
         return
     data = field
     if isinstance(coordinate, IDSNumericArray):
@@ -60,7 +60,7 @@ def view_plot(ax, field, coordinate, field_name="", coordinate_name="", field_un
             coordinate_name = coordinate.metadata.path
     if isinstance(field, IDSNumericArray):
         if not field.has_value:
-            logger.error("Values are not present")
+            print("Values are not present")
             return
         data - field.value
         field_unit = field.metadata.units
@@ -149,7 +149,7 @@ def highlight_differences(text1, text2):
 
 
 def generate_html(file_path, compare_data):
-    logger.info("Writing to html file :" + file_path)
+    print("Writing to html file, Please have patience :" + file_path)
 
     file_object = open(file_path, "w")
     (pulse_a, pulse_b, input_a, input_b), data = next(iter(compare_data.items()))
@@ -193,9 +193,11 @@ def generate_html(file_path, compare_data):
     )
     plot_counter = 0
     for idsname, values in data.items():
+
         compare_result, output = values
         if bool(compare_result):
             continue
+        print("Upating comparisen report for : ", idsname)
         report_field_difference = ""
         report_details = ""
 
@@ -218,7 +220,7 @@ def generate_html(file_path, compare_data):
             badge_color = "bg-primary"
             status_message = "different values"
 
-            if isinstance(first, IDSNumericArray) and isinstance(second, IDSNumericArray):
+            if args.plot and isinstance(first, IDSNumericArray) and isinstance(second, IDSNumericArray):
 
                 if len(first.shape) == 1 and len(second.shape) == 1:
                     if len(first.value) != len(second.value):
@@ -394,7 +396,7 @@ def generate_html(file_path, compare_data):
 <li class="list-group-item d-flex justify-content-between align-items-center"> average difference : <span>{"{:.4e}".format(avg_diff)} </span></li>
 <li class="list-group-item d-flex justify-content-between align-items-center"> rms difference : <span>{"{:.4e}".format(rms_diff)} </span></li>
 </ul>
-<img src="data:image/svg+xml;base64,{encoded}" alt="Could not generate plot" style="width:800px; height:auto;"  class="img-fluid rounded"/>"""
+<img src="data:image/svg+xml;base64,{encoded}" alt="Could not generate plot" style="width:1000px; height:auto;"  class="img-fluid rounded"/>"""
                         report_diff_line = f"""<tr>
                                 <td><span class="badge {badge_color}">{status_message}</span></td>
                                 <td>{description}</td>
@@ -488,13 +490,7 @@ if __name__ == "__main__":
         formatter_class=RichHelpFormatter,
         usage="%(prog)s -h",
     )
-    parser.add_argument(
-        "--ids",
-        nargs="*",
-        type=str,
-        help="Name (or space separated list of names) of IDS to compare (leave empty to compare all IDSs)",
-    )
-    parser.add_argument("-o", "--occurrence", required=False, type=int, default=0, help="occurrence")
+
     parser.add_argument(
         "-u",
         "--uri",
@@ -503,6 +499,7 @@ if __name__ == "__main__":
         required=True,
         help="uri separated by spaces \t\t(default=%(default)s)",
     )
+    parser.add_argument("-t", "--time", help="Time", required=False, type=float, default=None)
     parser.add_argument(
         "-m",
         "--slicingmethod",
@@ -511,8 +508,6 @@ if __name__ == "__main__":
         choices=["CLOSEST", "PREVIOUS", "LINEAR"],
         help="Slicing method \t(default=%(default)s)",
     )
-
-    parser.add_argument("-t", "--time", help="Time", required=False, type=float, default=None)
     parser.add_argument(
         "--skip-provenance",
         action="store_true",
@@ -522,13 +517,14 @@ if __name__ == "__main__":
         "-p",
         "--plot",
         action="store_true",
-        help="if idspath is given in the URI fragment with this option you can plot the data",
+        help="""if idspath is given in the URI fragment with this option you can plot 
+        the data also add plots in html page if used along with -html""",
     )
     parser.add_argument(
         "-html",
         "--html",
         action="store_true",
-        help="Generate static html page for showing difference including plots",
+        help="Generate html page for showing difference, it can also includes plots if -p option is enabled",
     )
     parser.add_argument(
         "-f",
@@ -561,8 +557,8 @@ if __name__ == "__main__":
             _uri_args.ids_name = uri_dict["ids_name"]
             _uri_args.ids_path = uri_dict["ids_path"]
             if _uri_args.ids_name != "":
-                if _uri_args.ids_name not in fragment_ids_list:
-                    fragment_ids_list.append(_uri_args.ids_name)
+                # if _uri_args.ids_name not in fragment_ids_list:
+                fragment_ids_list.append(_uri_args.ids_name)
             if _uri_args.ids_path is not None:
                 path_exists_counter = path_exists_counter + 1
             _connection = DBMaster.get_connection(_uri_args)
@@ -574,9 +570,17 @@ if __name__ == "__main__":
     if not connections:
         print("No valid connections found! Please validate pulse details")
 
+    if path_exists_counter != 0 and len(connections) != path_exists_counter:
+        print("Please provide ids path for all uris to compare")
+        exit(0)
+    if len(fragment_ids_list) != 0 and len(connections) != len(fragment_ids_list):
+        print("Please provide ids name for all uris to compare")
+        exit(0)
+
     fragment_ids_list = list(set(fragment_ids_list))
+    total_data = {}
     # work on idspath if exists
-    if args.ids is None and len(connections) == path_exists_counter:
+    if len(connections) == path_exists_counter:
         for i in range(len(connections)):
             for j in range(i + 1, len(connections)):
                 if i != j:
@@ -592,7 +596,7 @@ if __name__ == "__main__":
                             _uri_args_a.ids_name,
                             args.time,
                             slicing_methods[args.slicingmethod],
-                            occurrence=_uri_args.occurrence,
+                            occurrence=_uri_args_a.occurrence,
                             autoconvert=False,
                         )
                     else:
@@ -645,11 +649,12 @@ if __name__ == "__main__":
                                 0,
                             )
                         coordinate_b = 0
+
                     if ids_a is None or ids_b is None:
                         pass
                     else:
-                        if isinstance(node_a, IDSStructure) and isinstance(node_b, IDSStructArray):
-
+                        compare_data = {}
+                        if isinstance(node_a, IDSStructure) and isinstance(node_b, IDSStructure):
                             if args.fullarray:
                                 compare_result, diff_result, _ = idsdiff_full(
                                     node_a,
@@ -657,6 +662,7 @@ if __name__ == "__main__":
                                     connections[i][0].original_uri,
                                     connections[j][0].original_uri,
                                     print_result=True,
+                                    ignore_version=args.skip_provenance,
                                 )
                             else:
                                 compare_result, diff_result, _ = idsdiff(
@@ -666,7 +672,18 @@ if __name__ == "__main__":
                                     connections[j][0].original_uri,
                                     print_result=True,
                                     verbose=True,
+                                    ignore_version=args.skip_provenance,
                                 )
+
+                            compare_data["differences"] = (compare_result, diff_result)
+                            total_data[
+                                (
+                                    connections[i][0].original_uri,
+                                    connections[j][0].original_uri,
+                                    connections[i][1],
+                                    connections[j][1],
+                                )
+                            ] = compare_data
                         else:
                             if not isinstance(node_a, IDSBase) and not isinstance(node_b, IDSBase):
                                 txt1 = f"{node_a}"
@@ -695,8 +712,20 @@ if __name__ == "__main__":
                             out2.append(txt2[match.b + match.size :], style="bold green")
                             diff_table.add_row(out1, out2)
                             rich.print(diff_table)
+                            diff_result = []
+                            diff_result.append(("differences", node_a, node_b))
+                            compare_result = False
+                            compare_data["differences"] = (compare_result, diff_result)
+                            total_data[
+                                (
+                                    connections[i][0].original_uri,
+                                    connections[j][0].original_uri,
+                                    connections[i][1],
+                                    connections[j][1],
+                                )
+                            ] = compare_data
 
-                        if args.plot:
+                        if args.plot and not args.html:
                             canvas = PlotCanvas(1, 1)
                             ax = canvas.add_axes(title="", xlabel="", row=0, col=0)
 
@@ -725,7 +754,6 @@ if __name__ == "__main__":
                                 top=0.916, bottom=0.09, left=0.044, right=0.953, hspace=0.287, wspace=0.2
                             )
                             canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
-
                             if args.save:
                                 fname = get_file_name(args, os.path.basename(__file__), None)
                                 if args.directory:
@@ -734,23 +762,58 @@ if __name__ == "__main__":
                                     fname = os.path.join(args.directory, fname)
                                 canvas.save(fname)
                             else:
-                                canvas.show()
+                                if len([child for child in ax.get_children() if isinstance(child, plt.Line2D)]) == 0:
+                                    print("No plots to display.")
+                                else:
+                                    canvas.show()
+                        file_path = get_filename("compare_report", args.directory)
+                        log_file = file_path + ".log"
+                        html_file = file_path + ".html"
+                        logger = setup_logger(
+                            "module",
+                            log_file=log_file,
+                            fmt="%(message)s",
+                            log_file_level=logging.INFO,
+                            stdout_level=logging.INFO,
+                        )
+                        # print(total_data)
+                        if args.html:
+                            if len(connections) > 2:
+                                logger.info("HTML file generation is available for two data entries currently")
+                            else:
+                                st = time.time()
+                                generate_html(html_file, total_data)
+
+                                et = time.time()
+                                elapsed_time = et - st
+                                try:
+                                    import webbrowser
+
+                                    webbrowser.open(html_file)
+                                except Exception as _:  # noqa: F841
+                                    pass
                         exit(0)
 
-    if args.ids is None:
-        if len(fragment_ids_list) == 0:
-            args.ids = get_ids_types()
-        else:
-            args.ids = fragment_ids_list
+    if len(set(fragment_ids_list)) > 1:
+        print("Please provide same ids name for all uris to compare")
+        exit(0)
+    # work on ids
+    if len(fragment_ids_list) == 0:
+        ids_list = get_ids_types()
+        print(
+            "Comparisen process may take a while if you intend to compare all ID types and generate an HTML report, use fragment for comparing single IDS"
+        )
+    else:
+        ids_list = fragment_ids_list
     idsavailability1 = []
     idsavailability2 = []
-    total_data = {}
 
     for i in range(len(connections)):
         for j in range(i + 1, len(connections)):
             if connections[i][0] != connections[j][0]:
                 compare_data = {}
-                for idsname in args.ids:
+                for idsname in ids_list:
+
                     ids_a = None
                     try:
                         if args.time:
@@ -758,7 +821,6 @@ if __name__ == "__main__":
                                 idsname,
                                 args.time,
                                 slicing_methods[args.slicingmethod],
-                                occurrence=args.occurrence,
                                 autoconvert=False,
                             )
                         else:
@@ -773,7 +835,6 @@ if __name__ == "__main__":
                                 idsname,
                                 args.time,
                                 slicing_methods[args.slicingmethod],
-                                occurrence=args.occurrence,
                                 autoconvert=False,
                             )
                         else:
@@ -783,6 +844,7 @@ if __name__ == "__main__":
                         idsavailability2.append(idsname)
                     if ids_a is None or ids_b is None:
                         continue
+                    print("comparing ids recursively: ", idsname)
                     if args.fullarray:
                         compare_result, diff_result, _ = idsdiff_full(
                             ids_a,
@@ -790,6 +852,7 @@ if __name__ == "__main__":
                             connections[i][0].original_uri,
                             connections[j][0].original_uri,
                             print_result=True,
+                            ignore_version=args.skip_provenance,
                         )
                     else:
                         compare_result, diff_result, _ = idsdiff(
@@ -799,6 +862,7 @@ if __name__ == "__main__":
                             connections[j][0].original_uri,
                             print_result=True,
                             verbose=True,
+                            ignore_version=args.skip_provenance,
                         )
 
                     compare_data[idsname] = (compare_result, diff_result)

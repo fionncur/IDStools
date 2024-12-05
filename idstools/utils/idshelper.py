@@ -834,7 +834,9 @@ def get_quantities_from_pulses(
     return df_extract
 
 
-def idsdiff_full(struct1: IDSStructure, struct2: IDSStructure, name1="", name2="", print_result=False):
+def idsdiff_full(
+    struct1: IDSStructure, struct2: IDSStructure, name1="", name2="", print_result=False, ignore_version=False
+):
     diff_result = []
     compare_result = False
     table_title = Text()
@@ -854,6 +856,9 @@ def idsdiff_full(struct1: IDSStructure, struct2: IDSStructure, name1="", name2="
     diff_table.add_column("first", style="blue")
     diff_table.add_column("second", style="magenta")
     for description, child1, child2 in imas.util.idsdiffgen(struct1, struct2):
+        if "_path" in dir(child1):
+            if ignore_version is True and "version_put" in child1._path:
+                continue
         if not isinstance(child1, IDSBase) and not isinstance(child2, IDSBase):
             txt1 = f"{description}: {child1}"
             txt2 = f"{description}: {child2}"
@@ -893,17 +898,25 @@ def idsdiff_full(struct1: IDSStructure, struct2: IDSStructure, name1="", name2="
     return compare_result, diff_result, text_output
 
 
-def idsdiff(struct1: IDSStructure, struct2: IDSStructure, name1="", name2="", print_result=False, verbose=True):
+def idsdiff(
+    struct1: IDSStructure,
+    struct2: IDSStructure,
+    name1="",
+    name2="",
+    print_result=False,
+    verbose=True,
+    ignore_version=False,
+):
     diff_result = []
     compare_result = False
     table_title = Text()
 
-    if isinstance(struct1, IDSToplevel) and isinstance(struct1, IDSToplevel):
+    if isinstance(struct1, IDSToplevel) and isinstance(struct2, IDSToplevel):
         table_title.append("First: ", style="bold blue")
         table_title.append(f"{name1} ({struct1.metadata.name}) -\n", style="blue")
         table_title.append("Second: ", style="bold magenta")
         table_title.append(f"{name2} ({struct2.metadata.name})", style="magenta")
-    elif isinstance(struct1, IDSStructure) and isinstance(struct1, IDSStructure):
+    elif isinstance(struct1, IDSStructure) and isinstance(struct2, IDSStructure):
         table_title.append("First: ", style="bold blue")
         table_title.append(f"{name1} ({struct1._path}) -\n", style="blue")
         table_title.append("Second: ", style="bold magenta")
@@ -918,6 +931,9 @@ def idsdiff(struct1: IDSStructure, struct2: IDSStructure, name1="", name2="", pr
         diff_table.add_column("Value second", style="magenta")
 
     for description, child1, child2 in imas.util.idsdiffgen(struct1, struct2):
+        if "_path" in dir(child1):
+            if ignore_version is True and "version_put" in child1._path:
+                continue
         diff_result.append((description, child1, child2))
         information = Text("different values", style="cyan")
         if child1 is None:
@@ -954,7 +970,7 @@ def idsdiff(struct1: IDSStructure, struct2: IDSStructure, name1="", name2="", pr
         elif child2 is not None and hasattr(child2, "_path"):
             path = child2._path
         else:
-            path = "NA"
+            path = None
 
         if child1 is not None and hasattr(child1, "value"):
             value1 = child1.value
@@ -996,11 +1012,11 @@ def idsdiff(struct1: IDSStructure, struct2: IDSStructure, name1="", name2="", pr
                 prevmatch = match
             out1.append(txt1[match.a + match.size :], style="bold red")
             out2.append(txt2[match.b + match.size :], style="bold green")
-
-        if verbose:
-            diff_table.add_row(path, information, out1, out2)
-        else:
-            diff_table.add_row(path, information)
+        if path:
+            if verbose:
+                diff_table.add_row(path, information, out1, out2)
+            else:
+                diff_table.add_row(path, information)
         # diff_table.add_section()
 
     text_output = None
