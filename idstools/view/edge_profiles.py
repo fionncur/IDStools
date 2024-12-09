@@ -49,7 +49,7 @@ class EdgeProfilesView:
                 species_name = f"{species_data['species']}({species_data['label']})"
                 species_name = species_name[:11]
                 disp_species = f"{disp_species} {species_name : >12}"
-                a = f"{species_data['a'] :.1f}"
+                a = f"{species_data['a'].value :.1f}"
                 disp_a = f"{disp_a} {a : >12}"
                 z = f"{species_data['z'] :.1f}"
                 disp_z = f"{disp_z} {z : >12}"
@@ -102,8 +102,8 @@ class EdgeProfilesView:
                 if state_data["label"].strip() != "":
                     label_space = 7
                 print(
-                    f"\t {'state' +str(istate + 1) : <8}{state_data['label']: <{label_space}} z : "
-                    f"{state_data['z_average']: <10} n/ni, % :{n_ni : >12}"
+                    f"\t {'state' +str(istate + 1) : <8}{state_data['label'].value: <{label_space}} z : "
+                    f"{state_data['z_average']:.6f} n/ni, % :{n_ni : >12}"
                 )
                 istate += 1
 

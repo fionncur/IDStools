@@ -103,17 +103,17 @@ class EdgeProfilesCompute:
             return -1
 
         data = {}
-        nspec_over_ntot = edge_profiles_compute.get_nspec_over_ntot()
-        nspec_over_ne = edge_profiles_compute.get_nspec_over_ne()
-        nspec_over_nmaj = edge_profiles_compute.get_nspec_over_nmaj()
-        species = edge_profiles_compute.get_species()
-        labels = edge_profiles_compute.get_labels()
+        nspec_over_ntot = edge_profiles_compute.get_nspec_over_ntot(time_slice)
+        nspec_over_ne = edge_profiles_compute.get_nspec_over_ne(time_slice)
+        nspec_over_nmaj = edge_profiles_compute.get_nspec_over_nmaj(time_slice)
+        species = edge_profiles_compute.get_species(time_slice)
+        labels = edge_profiles_compute.get_labels(time_slice)
         edge_profiles_compute.combine_species_when_appear_twice(
             time_slice, species, nspec_over_ntot, nspec_over_ne, nspec_over_nmaj
         )
-        a = edge_profiles_compute.get_a()
-        z = edge_profiles_compute.get_z()
-        states_data = edge_profiles_compute.get_states_data()
+        a = edge_profiles_compute.get_a(time_slice)
+        z = edge_profiles_compute.get_z(time_slice)
+        states_data = edge_profiles_compute.get_states_data(time_slice)
         for species_index in range(len(species)):
             species_data = {
                 "nspec_over_ntot": nspec_over_ntot[species_index],
@@ -299,7 +299,7 @@ class EdgeProfilesCompute:
 
         volume = self.get_volume(time_slice)
         nspecies = len(self.ids.ggd[time_slice].ion)
-        species_density, _, _ = self.get_species_density()
+        species_density, _, _ = self.get_species_density(time_slice)
         for species_index in range(nspecies):
             species_data = {}
             nstates = len(self.ids.ggd[time_slice].ion[species_index].state)
@@ -651,7 +651,7 @@ class EdgeProfilesCompute:
                 array([9.49141717e-01, 7.83135442e-03, 3.56547366e-03, 7.73580187e-04, 4.78443692e-06])
         """
         species_density_list, _, _ = self.get_species_density(time_slice)
-        ne = self.get_ne()
+        ne = self.get_ne(time_slice)
         return species_density_list / ne
 
     def get_nspec_over_nmaj(self, time_slice) -> list:
@@ -711,8 +711,8 @@ class EdgeProfilesCompute:
         table_mendeleiev = mend.create_table_mendeleiev()
         nspecies = len(self.ids.ggd[time_slice].ion)
 
-        a = list(map(int, self.get_a()))
-        z = list(map(int, self.get_z()))
+        a = list(map(int, self.get_a(time_slice)))
+        z = list(map(int, self.get_z(time_slice)))
         return [table_mendeleiev[z[ispecies]][a[ispecies]].element for ispecies in range(nspecies)]
 
     def combine_species_when_appear_twice(self, time_slice, species, nspec_over_ntot, nspec_over_ne, nspec_over_nmaj):

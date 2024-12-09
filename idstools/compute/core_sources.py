@@ -150,7 +150,12 @@ class CoreSourcesCompute:
             source = {}
             if len(source_info.global_quantities) > 0:
                 source["valid"] = True
-                source["active"] = True if source_info.global_quantities[time_slice].power > 0 else False
+                source["active"] = (
+                    True
+                    if source_info.global_quantities[time_slice].power.has_value
+                    and abs(source_info.global_quantities[time_slice].power) > 0
+                    else False
+                )
             else:
                 source["valid"] = False
                 source["active"] = False
@@ -303,21 +308,27 @@ class CoreSourcesCompute:
             if source["valid"] and source["active"]:
                 single_ion_power_profile[source_index] = np.zeros(nrho)
                 single_ion_particles_profile[source_index] = np.zeros(nrho)
+                single_ions_filled = False
                 for ion in self.ids.source[source_index].profiles_1d[time_slice].ion:
-                    ion_energy = ion.energy
-                    if len(ion_energy) < 1:
-                        ion_energy = [0] * nrho
-                    ion_particles = ion.particles
-                    if len(ion_particles) < 1:
-                        ion_particles = [0] * nrho
+                    if len(ion.energy) > 1:
+                        single_ions_filled = True
+                        if len(ion.energy) < 1:
+                            ion.energy = [0] * nrho
+                        if len(ion.particles) < 1:
+                            ion.particles = [0] * nrho
 
-                    single_ion_power_profile[source_index] = single_ion_power_profile[source_index] + ion_energy
-                    single_ion_particles_profile[source_index] = (
-                        single_ion_particles_profile[source_index] + ion_particles
-                    )
+                        single_ion_power_profile[source_index] = single_ion_power_profile[source_index] + ion.energy
+                        single_ion_particles_profile[source_index] = (
+                            single_ion_particles_profile[source_index] + ion.particles
+                        )
 
-                    total_ion_power_profile = total_ion_power_profile + ion_energy
-                    total_ion_particles_profile = total_ion_particles_profile + ion_particles
+                        total_ion_power_profile = total_ion_power_profile + ion.energy
+                        total_ion_particles_profile = total_ion_particles_profile + ion.particles
+                if single_ions_filled is False:
+                    if self.ids.source[source_index].profiles_1d[0].total_ion_energy.has_value:
+                        total_ion_power_profile = (
+                            total_ion_power_profile + self.ids.source[source_index].profiles_1d[0].total_ion_energy
+                        )
         return {
             "total_ion_power_profile": total_ion_power_profile,
             "total_ion_particles_profile": total_ion_particles_profile,

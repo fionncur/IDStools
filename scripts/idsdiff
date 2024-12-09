@@ -197,7 +197,7 @@ def generate_html(file_path, compare_data):
         compare_result, output = values
         if bool(compare_result):
             continue
-        print("Upating comparisen report for : ", idsname)
+        print("Upating comparison report for : ", idsname)
         report_field_difference = ""
         report_details = ""
 
@@ -482,7 +482,7 @@ if __name__ == "__main__":
     # Management of input arguments
     parser = argparse.ArgumentParser(
         description="--- Compare a IDS from multiple date entries and returns True or "
-        "False with option of generating html page with comparisen \n"
+        "False with option of generating html page with comparison \n"
         "- Example: \n"
         '  idsdiff summary --uri "imas:mdsplus?user=public;shot=122525;run=1;database=ITER;version=3" '
         '  "imas:mdsplus?user=public;shot=122525;run=2;database=ITER;version=3" \n'
@@ -801,7 +801,7 @@ if __name__ == "__main__":
     if len(fragment_ids_list) == 0:
         ids_list = get_ids_types()
         print(
-            "Comparisen process may take a while if you intend to compare all ID types and generate an HTML report, use fragment for comparing single IDS"
+            "Comparison process may take a while if you intend to compare all ID types and generate an HTML report, use fragment for comparing single IDS"
         )
     else:
         ids_list = fragment_ids_list
