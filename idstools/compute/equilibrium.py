@@ -5,6 +5,7 @@ This module provides compute functions and classes for equilibrium ids data
 
 """
 
+import functools
 import logging
 from typing import Union
 
@@ -1049,6 +1050,7 @@ class EquilibriumCompute:
         # beta_tor = self.ids.time_slice[ti].global_quantities.beta_tor
         # energy_mhd= self.ids.time_slice[ti].global_quantities.energy_mhd
 
+    @functools.lru_cache(maxsize=128)
     def get_equilibria(self):
         """
         The function `get_equilibria` retrieves equilibrium data from a given object and organizes it
@@ -1059,6 +1061,7 @@ class EquilibriumCompute:
         data such as time, magnetic field parameters, profiles in 1D and 2D, boundary information,
         constraints information, and other relevant details.
         """
+
         homogeneous_time = self.ids.ids_properties.homogeneous_time
         name = self.ids.code.name
         if homogeneous_time == 1:
@@ -1180,20 +1183,19 @@ class EquilibriumCompute:
         if n3 > 0:
             rb = np.zeros((nt, n3))
             zb = np.zeros((nt, n3))
-            i = -1
-            for time_slice in self.ids.time_slice:
-                i = i + 1
+
+            for i, time_slice in enumerate(self.ids.time_slice):
                 if time_slice.boundary.outline.r.size > 0:
-                    rb[i, :] = time_slice.boundary.outline.r
+                    rb[i, : len(time_slice.boundary.outline.r)] = time_slice.boundary.outline.r
                 if time_slice.boundary.outline.z.size > 0:
-                    zb[i, :] = time_slice.boundary.outline.z
+                    zb[i, : len(time_slice.boundary.outline.z)] = time_slice.boundary.outline.z
+
         if n4 > 0:
             constr_ip_meas = np.zeros((nt, 1))
             constr_ip_recon = np.zeros((nt, 1))
             constr_ip_source = np.zeros((nt, 1), dtype=object)
-            i = -1
-            for time_slice in self.ids.time_slice:
-                i = i + 1
+
+            for i, time_slice in enumerate(self.ids.time_slice):
                 constr_ip_meas[i, 0] = time_slice.constraints.ip.measured
                 constr_ip_recon[i, 0] = time_slice.constraints.ip.reconstructed
                 constr_ip_source[i, 0] = time_slice.constraints.ip.source
@@ -1205,28 +1207,31 @@ class EquilibriumCompute:
             constr_pf_meas = np.zeros((nt, n5))
             constr_pf_recon = np.zeros((nt, n5))
             constr_pf_source = np.empty((nt, n5), dtype=object)
-            i = -1
-            for time_slice in self.ids.time_slice:
-                i = i + 1
-                for j in range(len(time_slice.constraints.pf_current)):
-                    constr_pf_meas[i, j] = time_slice.constraints.pf_current[j].measured
-                    constr_pf_recon[i, j] = time_slice.constraints.pf_current[j].reconstructed
-                    constr_pf_source[i, j] = str(time_slice.constraints.pf_current[j].source)
+
+            for i, time_slice in enumerate(self.ids.time_slice):
+                pf_currents = time_slice.constraints.pf_current
+                n_pf_currents = len(pf_currents)
+
+                constr_pf_meas[i, :n_pf_currents] = [current.measured for current in pf_currents]
+                constr_pf_recon[i, :n_pf_currents] = [current.reconstructed for current in pf_currents]
+                constr_pf_source[i, :n_pf_currents] = [str(current.source) for current in pf_currents]
         else:
             constr_pf_meas = None
             constr_pf_recon = None
             constr_pf_source = None
         if n6 > 0:
+
             constr_pas_meas = np.zeros((nt, n6))
             constr_pas_recon = np.zeros((nt, n6))
             constr_pas_source = np.zeros((nt, n6), dtype=object)
-            i = -1
-            for time_slice in self.ids.time_slice:
-                i = i + 1
-                for j in range(len(time_slice.constraints.pf_passive_current)):
-                    constr_pas_meas[i, j] = time_slice.constraints.pf_passive_current[j].measured
-                    constr_pas_recon[i, j] = time_slice.constraints.pf_passive_current[j].reconstructed
-                    constr_pas_source[i, j] = time_slice.constraints.pf_passive_current[j].source
+
+            for i, time_slice in enumerate(self.ids.time_slice):
+                pf_passive_currents = time_slice.constraints.pf_passive_current
+                n_pf_passive = len(pf_passive_currents)
+
+                constr_pas_meas[i, :n_pf_passive] = [current.measured for current in pf_passive_currents]
+                constr_pas_recon[i, :n_pf_passive] = [current.reconstructed for current in pf_passive_currents]
+                constr_pas_source[i, :n_pf_passive] = [current.source for current in pf_passive_currents]
         else:
             constr_pas_meas = None
             constr_pas_recon = None
@@ -1235,14 +1240,14 @@ class EquilibriumCompute:
             constr_bpol_meas = np.zeros((nt, n7))
             constr_bpol_recon = np.zeros((nt, n7))
             constr_bpol_source = np.zeros((nt, n7), dtype=object)
-            i = -1
-            for time_slice in self.ids.time_slice:
-                i = i + 1
-                for j in range(len(time_slice.constraints.bpol_probe)):
-                    constr_bpol_meas[i, j] = time_slice.constraints.bpol_probe[j].measured
-                    constr_bpol_recon[i, j] = time_slice.constraints.bpol_probe[j].reconstructed
-                    constr_bpol_source[i, j] = time_slice.constraints.bpol_probe[j].source
-        #              constr_bpol_source[i,j]=time_slice0.constraints.bpol_probe[j].source
+
+            for i, time_slice in enumerate(self.ids.time_slice):
+                bpol_probes = time_slice.constraints.bpol_probe
+                n_bpol_probes = len(bpol_probes)
+
+                constr_bpol_meas[i, :n_bpol_probes] = [probe.measured for probe in bpol_probes]
+                constr_bpol_recon[i, :n_bpol_probes] = [probe.reconstructed for probe in bpol_probes]
+                constr_bpol_source[i, :n_bpol_probes] = [probe.source for probe in bpol_probes]
         else:
             constr_bpol_meas = None
             constr_bpol_recon = None
@@ -1251,13 +1256,14 @@ class EquilibriumCompute:
             constr_fluxloop_meas = np.zeros((nt, n8))
             constr_fluxloop_recon = np.zeros((nt, n8))
             constr_fluxloop_source = np.zeros((nt, n8), dtype=object)
-            i = -1
-            for time_slice in self.ids.time_slice:
-                i = i + 1
-                for j in range(len(time_slice.constraints.flux_loop)):
-                    constr_fluxloop_meas[i, j] = time_slice.constraints.flux_loop[j].measured
-                    constr_fluxloop_recon[i, j] = time_slice.constraints.flux_loop[j].reconstructed
-                    constr_fluxloop_source[i, j] = time_slice.constraints.flux_loop[j].source
+
+            for i, time_slice in enumerate(self.ids.time_slice):
+                flux_loops = time_slice.constraints.flux_loop
+                n_flux_loops = len(flux_loops)
+
+                constr_fluxloop_meas[i, :n_flux_loops] = [loop.measured for loop in flux_loops]
+                constr_fluxloop_recon[i, :n_flux_loops] = [loop.reconstructed for loop in flux_loops]
+                constr_fluxloop_source[i, :n_flux_loops] = [loop.source for loop in flux_loops]
         else:
             constr_fluxloop_meas = None
             constr_fluxloop_recon = None
@@ -1309,9 +1315,9 @@ class EquilibriumCompute:
             "iteration_error": iteration_error,
             "constraints": constraints,
         }
-
         return data
 
+    @functools.lru_cache(maxsize=128)
     def get_contour(self, psi_axis, psi_boundary, time, time_index1, psi_axis2=None, psi_boundary2=None, time2=None):
         n = 10
         dp = (psi_boundary[time_index1] - psi_axis[time_index1]) / n

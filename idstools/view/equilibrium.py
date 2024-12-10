@@ -31,6 +31,7 @@ class EquilibriumView(BasePlot):
         """
         self.ids = ids
         self.compute_obj = EquilibriumCompute(ids)
+        self.equilibria = None
 
     def view_magnetic_poloidal_flux(
         self,
@@ -350,7 +351,11 @@ class EquilibriumView(BasePlot):
         return new_y12, new_y11, y_min, y_max, scalStr
 
     def view_profile_plot(self, ax, time_index1, equilibrium2_ids=None, time_index2=None):
-        data = self.compute_obj.get_equilibria()
+        if self.equilibria is None:
+            self.equilibria = self.compute_obj.get_equilibria()
+            data = self.equilibria
+        else:
+            data = self.equilibria
         data2 = None
         if equilibrium2_ids is not None:
             compute_obj2 = EquilibriumCompute(equilibrium2_ids)
@@ -392,7 +397,11 @@ class EquilibriumView(BasePlot):
         ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.13), fancybox=True, shadow=True, ncol=2)
 
     def view_equlibrium_plot(self, ax, time_index1, equilibrium2_ids=None):
-        data = self.compute_obj.get_equilibria()
+        if self.equilibria is None:
+            self.equilibria = self.compute_obj.get_equilibria()
+            data = self.equilibria
+        else:
+            data = self.equilibria
         data2 = None
         if equilibrium2_ids:
             self.compute_obj2 = EquilibriumCompute(equilibrium2_ids)
@@ -438,7 +447,11 @@ class EquilibriumView(BasePlot):
                 lineb2.set_ydata(zbE[time_index1])
 
     def view_current_plot(self, ax, time_index1, equilibrium2_ids=None):
-        data = self.compute_obj.get_equilibria()
+        if self.equilibria is None:
+            self.equilibria = self.compute_obj.get_equilibria()
+            data = self.equilibria
+        else:
+            data = self.equilibria
         data2 = None
         if equilibrium2_ids:
             self.compute_obj2 = EquilibriumCompute(equilibrium2_ids)
@@ -492,7 +505,11 @@ class EquilibriumView(BasePlot):
         ax.set_ylim(ylims)
 
     def view_constraints(self, ax, time_index1, equilibrium2_ids=None):
-        data = self.compute_obj.get_equilibria()
+        if self.equilibria is None:
+            self.equilibria = self.compute_obj.get_equilibria()
+            data = self.equilibria
+        else:
+            data = self.equilibria
         data2 = None
         if equilibrium2_ids:
             self.compute_obj2 = EquilibriumCompute(equilibrium2_ids)

@@ -134,7 +134,7 @@ canvas.fig.suptitle(",".join(args.uri) + f" time {time_value1}", size=8)
 canvas.fig.subplots_adjust(top=0.933, bottom=0.05, left=0.038, right=0.988, hspace=0.221, wspace=0.364)
 canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
 if args.save:
-    fname = get_file_name(args, f"{os.path.basename(__file__)}_Equilibrium", time_value)
+    fname = f"plotequicomp_time_{time_value1}.png"
     if args.directory:
         if not os.path.exists(args.directory):
             os.makedirs(args.directory)
