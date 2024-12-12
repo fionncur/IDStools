@@ -78,22 +78,22 @@ graph.
 
       $ idsdiff --uri "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3#core_profiles/profiles_1d(40:60)/electrons/temperature" "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3#core_profiles/profiles_1d(40:60)/electrons/temperature" --plot
 
-   .. thumbnail:: _static/images/idsdiff_1.png
+   .. image:: _static/images/idsdiff_1.png
       :alt: image not found
       :align: center
 
-   .. thumbnail:: _static/images/idsdiff_2.png
+   .. image:: _static/images/idsdiff_2.png
       :alt: image not found
       :align: center
 
-   .. thumbnail:: _static/images/idsdiff_3.png
+   .. image:: _static/images/idsdiff_3.png
       :alt: image not found
       :align: center
 
-   .. thumbnail:: _static/images/idsdiff_4.png
+   .. image:: _static/images/idsdiff_4.png
       :alt: image not found
       :align: center
 
-   .. thumbnail:: _static/images/idsdiff_5.png
+   .. image:: _static/images/idsdiff_5.png
       :alt: image not found
       :align: center

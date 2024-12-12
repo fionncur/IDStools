@@ -242,8 +242,7 @@ class CoreSourcesCompute:
             a dictionary with the following keys and corresponding values:
             - "total_electron_power_profile": Profile of total electron power
             - "total_electron_particles_profile": Profile of total electron particles
-            - "single_electron_power_profile": Dictionary containing profiles of single electron power for
-            each data source
+            - "single_electron_power_profile": Dictionary with profiles of single electron power for each source
             - "single_electron_particles_profile": Dictionary containing profiles of single electron
             particles for each data source
 

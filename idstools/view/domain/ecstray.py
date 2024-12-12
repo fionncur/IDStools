@@ -58,7 +58,7 @@ class EcStrayView:
                 ax.plot()
                 canvas.show()
 
-            .. thumbnail:: /_static/images/EcstrayView_plotResonanceLayer.png
+            .. image:: /_static/images/EcstrayView_plotResonanceLayer.png
                 :alt: image not found
                 :align: center
 
@@ -161,7 +161,7 @@ class EcStrayView:
                 ax.plot()
                 canvas.show()
 
-            .. thumbnail:: /_static/images/EcstrayView_plotCutOffLayer.png
+            .. image:: /_static/images/EcstrayView_plotCutOffLayer.png
                 :alt: image not found
                 :align: center
 

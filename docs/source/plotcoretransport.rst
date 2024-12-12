@@ -20,6 +20,6 @@ energy, momentum and poloidal flux.
 
         $ plotcoretransport --uri "imas:mdsplus?user=public;pulse=92436;run=850;database=TEST;version=3" 
 
-   .. thumbnail:: _static/images/plotcoretransport.png
+   .. image:: _static/images/plotcoretransport.png
       :alt: image not found
       :align: center

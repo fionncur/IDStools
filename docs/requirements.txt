@@ -7,5 +7,4 @@ sphinx-autoapi
 sphinx-autodoc-typehints
 sphinx-immaterial
 sphinx-toolbox
-sphinxcontrib-images
 sphinxcontrib-programoutput

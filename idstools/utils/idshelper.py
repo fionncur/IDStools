@@ -207,8 +207,7 @@ def get_ids_size(db_entry_object, ids_names=None, dd_update=False) -> dict:
     containing the size in bytes and the time taken to read each object.
 
     Args:
-        db_entry_object (): The `db_entry_object` parameter is an object of type ``. It
-            is used to access the data in the IMAS database.
+        db_entry_object: The `db_entry_object` parameter is used to access the data in the IMAS database.
         ids_names: idsNames is a list of IDS names. If it is not provided, it defaults to None.
 
     Returns:
@@ -335,7 +334,7 @@ def get_available_ids_and_occurrences(db_entry_object, time_mode=None, get_comme
     This function returns a list of pairs of available IDS types and their occurrences in a given DBEntry object.
 
     Args:
-        db_entry_object (): An object of the class , which represents an open DBEntry in
+        db_entry_object: An object of the class , which represents an open DBEntry in
             which available IDSs will be looked for.
         time_mode: The time mode of interest for the IDSs in the given DBEntry. It can be one of the following
         get_comment: Output ids_properties.comment field for each found occurrence
