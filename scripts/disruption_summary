@@ -34,7 +34,7 @@ class SmartFormatter(argparse.HelpFormatter):
 
 def rec(
     data={},
-    path=os.getcwd(),
+    paths=os.getcwd(),
     extension=".yaml",
     choice=["shot", "run", "ip", "b0"],
     selection=None,
@@ -47,7 +47,19 @@ def rec(
     # Read all YAML files
     # --------------------
     table = {}
-    files = glob.glob(path + "/*")
+    yaml_files = []
+  
+    for path in paths:
+      files = glob.glob(path + "/*")
+
+      # Walk through the directory and find .yaml files
+      for root, _, files in os.walk(path):
+          for file in files:
+              if file.endswith('.yaml'):
+                  yaml_files.append(os.path.join(root, file))
+              
+    files = yaml_files           
+
     # Fill data dictionary with yaml input files describing simulations
     j = -1
     for i in range(len(files)):
@@ -383,16 +395,13 @@ if __name__ == "__main__":
 
     obsolete_cases = args["obsolete"]
 
-    # Folder
+    # Folder paths
+    paths = []
     if args["folder"] != None:
-        folder = args["folder"]
+        paths.append( args["folder"] )
     else:
-        LL_version = DBMaster.get_core_version()
-        LL_version = int(LL_version.split(".")[0])
-        if LL_version < 4:
-            folder = "/work/imas/shared/iterdb/3/0"
-        else:
-            folder = "/work/imas/shared/imasdb/ITER_DISRUPTIONS/3/0"
+        paths.append( "/work/imas/shared/imasdb/ITER_DISRUPTIONS/3/0" )
+        paths.append( "/work/imas/shared/imasdb/ITER_DISRUPTIONS/4" )
 
     # Filter
     if args["selection"] != None:
@@ -448,7 +457,7 @@ if __name__ == "__main__":
     # Call the function
     table = rec(
         data=data,
-        path=folder,
+        paths=paths,
         extension=ext,
         choice=choice,
         selection=selection,
@@ -458,4 +467,5 @@ if __name__ == "__main__":
     # Display the clean formatted table
     for i in range(len(table)):
         print(table[i])
-    print(" NOTE: Read entry from Disruption database using user = 'public', database = 'ITER_DISRUPTIONS'")
+    print(" NOTE: Default read entry from Disruption database using user = 'public', database = 'ITER_DISRUPTIONS'" )
+
