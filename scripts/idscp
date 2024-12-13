@@ -3,10 +3,11 @@
 import argparse
 import sys
 
-import imas
+import imaspy as imas
 from rich_argparse import RichHelpFormatter
 
 from idstools.database import DBMaster
+from idstools.utils.idshelper import get_ids_types
 from idstools.utils.idslogger import setup_logger
 
 logger = setup_logger("module")
@@ -21,14 +22,14 @@ parser.add_argument(
     "--src",
     type=str,
     required=True,
-    help="source uri \t\t(default=%(default)s)",
+    help="source uri",
 )
 parser.add_argument(
     "-d",
     "--dest",
     type=str,
     required=True,
-    help="destination uri \t\t(default=%(default)s)",
+    help="destination uri",
 )
 
 parser.add_argument(
@@ -63,12 +64,22 @@ occgroup.add_argument(
     help="Copy the selected source into the specified occurrence at the destination",
 )
 parser.add_argument(
+    "--dd-update",
+    action="store_true",
+    help=(
+        f"Convert IDS to the default Data Dictionary version "
+        f"(={imas.IDSFactory().dd_version}, "
+        f"otherwise use the original version stored on disk)"
+    ),
+)
+parser.add_argument(
     "ids",
     nargs="*",
     type=str,
     help="IDSs to copy (leave empty to select all IDSs with default occurrence,"
     'or append "/n" to copy a specific occurrence "n")',
 )
+
 args = parser.parse_args()
 
 if args.src is not None and args.dest is not None:
@@ -77,8 +88,7 @@ if args.src is not None and args.dest is not None:
         exit()
 
 if args.ids == []:
-    args.ids = [ids.value for ids in list(imas.IDSName)]
-
+    args.ids = get_ids_types()
 
 inputargs = argparse.Namespace()
 inputargs.uri = args.src
@@ -90,37 +100,49 @@ if src_connection is None:
 outputargs = argparse.Namespace()
 outputargs.uri = args.dest
 
-dest_connection = DBMaster.get_db_entry_object(outputargs)
+# hack to get underlying data dictionary version used by idses
+src_dd_version = src_connection.dd_version
+if not args.dd_update:
+    for idsname in args.ids:
+        try:
+            _dummy = src_connection.get(idsname, lazy=True, autoconvert=False)
+            src_dd_version = _dummy.ids_properties.version_put.data_dictionary.value
+            break
+        except Exception as _:  # noqa: F841
+            pass
 
-if not args.force:
-    # OPEN DEST
-    status, _ = dest_connection.open()
-    if status != 0:
-        logger.warning("Destination pulse does not exist. Creating.")
-        status, _ = dest_connection.create()
-    if status != 0:
-        logger.error("Error opening destination pulse! Please check parameters.")
-        exit(status)
-else:
+if args.force:
     # CREATE DEST
-    status, _ = dest_connection.create()
-    if status != 0:
+    if "mode" not in outputargs.__dict__:
+        outputargs.mode = "w"
+    dest_connection = None
+    if outputargs.uri != "" and outputargs.uri is not None:
+        dest_connection = imas.DBEntry(outputargs.uri, outputargs.mode, dd_version=src_dd_version)
+    if dest_connection is None:
         logger.error("Error creating destination pulse! Please check parameters and permissions.")
-        exit(status)
+        exit(1)
+else:
+    if "mode" not in outputargs.__dict__:
+        outputargs.mode = "a"
+    dest_connection = None
+    if outputargs.uri != "" and outputargs.uri is not None:
+        dest_connection = imas.DBEntry(outputargs.uri, outputargs.mode, dd_version=src_dd_version)
 
+    if dest_connection is None:
+        logger.error("Error opening destination pulse! Please check parameters and permissions.")
+        exit(1)
 
 if args.all_occurrences:
     if "/" in args.ids:
         logger.error("Please do not specify source occurrences together with -a/--allOccurrences option")
-        exit(status)
+        exit(1)
     else:
         allids = []
         for idsname in args.ids:
-            mocc = getattr(imas, idsname)().getMaxOccurrences()
+            occurrence_list = src_connection.list_all_occurrences(idsname)
             allids.append(idsname)
-            allids.extend(f"{idsname}/{o}" for o in range(1, mocc + 1))
+            allids.extend(f"{idsname}/{o}" for o in occurrence_list if o != 0)
         args.ids = allids
-
 
 # COPY IDSs FROM SOURCE TO DEST
 for idsname in args.ids:
@@ -130,35 +152,50 @@ for idsname in args.ids:
         inocc = int(idsid[1])
 
     if args.interactive:
-        if (
-            dest_connection.partial_get(idsid[0], "ids_properties/homogeneous_time", occurrence=inocc)
-            == imas.imasdef.EMPTY_INT
-        ):
-            user_choice = ""
-            while user_choice not in ["y", "n"]:
-                user_choice = input(f"{idsid[0]} already exists, do you want to overwrite it (y/n)? :")
-            if user_choice == "n":
-                print(f"skip {idsid[0]}")
-                continue
-    idsobj = src_connection.get(idsid[0], occurrence=inocc)
-    if args.set_dataset_version and idsid[0] == "dataset_description":
-        idsobj.dd_version = DBMaster.get_dd_version()
+        dest_ids_object = None
+        try:
+            dest_ids_object = dest_connection.get(
+                idsid[0], occurrence=inocc, autoconvert=False, ignore_unknown_dd_version=True
+            )
+            if args.dd_update:
+                dest_ids_object = imas.convert_ids(dest_ids_object, dest_connection.factory.version)
+
+        except Exception as _:  # noqa: F841
+            pass
+        if dest_ids_object:
+            if dest_ids_object.ids_properties.homogeneous_time != imas.ids_defs.EMPTY_INT:
+                user_choice = ""
+                while user_choice not in ["y", "n"]:
+                    user_choice = input(f"{idsid[0]} already exists, do you want to overwrite it (y/n)? :")
+                if user_choice == "n":
+                    print(f"skip {idsid[0]}")
+                    continue
+    idsobj = None
     try:
-        if idsobj.ids_properties.homogeneous_time != imas.imasdef.EMPTY_INT:
-            print(f"Copying {idsname}")
-            outocc = inocc if args.output_occurrence is None else args.output_occurrence
-            dest_connection.put(idsobj, occurrence=outocc)
-    except Exception as exc:
-        print(exc, file=sys.stderr)
-        if not args.force:
-            logger.warning(
-                "This error could be due to difference of data dictionary version between the"
-                " current one and the existing destination pulse"
-            )
-            logger.warning(
-                "You can use option -f/--force to recreate the destination pulse with the current"
-                " DD version (WARNING: all other IDSs will be lost at dest)"
-            )
+        idsobj = src_connection.get(idsid[0], occurrence=inocc, autoconvert=False, ignore_unknown_dd_version=True)
+        if args.dd_update:
+            idsobj = imas.convert_ids(idsobj, src_connection.factory.version)
+    except Exception as _:  # noqa: F841
+        pass
+    if idsobj:
+        if args.set_dataset_version and idsid[0] == "dataset_description":
+            idsobj.dd_version = src_dd_version
+        try:
+            if idsobj.ids_properties.homogeneous_time != imas.ids_defs.EMPTY_INT:
+                print(f"Copying {idsname}")
+                outocc = inocc if args.output_occurrence is None else args.output_occurrence
+                dest_connection.put(idsobj, occurrence=outocc)
+        except Exception as exc:
+            print(exc, file=sys.stderr)
+            if not args.force:
+                logger.warning(
+                    "This error could be due to difference of data dictionary version between the"
+                    " current one and the existing destination pulse"
+                )
+                logger.warning(
+                    "You can use option -f/--force to recreate the destination pulse with the current"
+                    " DD version (WARNING: all other IDSs will be lost at dest)"
+                )
 
 src_connection.close()
 dest_connection.close()

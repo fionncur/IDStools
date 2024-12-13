@@ -36,7 +36,7 @@ class PfActiveCompute:
             .. code-block:: python
 
                 import pprint
-                import imas
+                import imaspy
                 from idstools.compute.pf_active import PfActiveCompute
                 from idstools.view.common import PlotCanvas
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=135005;run=4;database=ITER;version=3", "r")
@@ -51,8 +51,10 @@ class PfActiveCompute:
         coils = {}
         for coil_index, coil in enumerate(self.ids.coil):
             coil_info = {}
-
-            coil_info["identifier"] = coil.identifier
+            if hasattr(coil, "identifier"):
+                coil_info["identifier"] = coil.identifier
+            else:
+                coil_info["identifier"] = ""
             coil_info["name"] = coil.name
             coil_info["resistance"] = coil.resistance
 
@@ -66,9 +68,14 @@ class PfActiveCompute:
                         element.geometry.rectangle.r - horizontal_width / 2.0,
                         element.geometry.rectangle.z - vertical_height / 2.0,
                     )
+                    if hasattr(element, "identifier"):
+                        element_identifier = element.identifier
+                    else:
+                        element_identifier = ""
+
                     dict_elements[element_index] = {
                         "name": element.name,
-                        "identifier": element.identifier,
+                        "identifier": element_identifier,
                         "area": element.area,
                         "horizontal_width": horizontal_width,
                         "horizontal_height": vertical_height,

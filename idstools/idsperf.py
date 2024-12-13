@@ -1,11 +1,11 @@
 import cProfile
+import sys
 import timeit
 
-import imas
-import numpy as np
+import imaspy as imas
 
 
-def get_ids(db, idsname, occ=0, times=None, interp=imas.imasdef.PREVIOUS_INTERP, verbose=False):
+def get_ids(db, idsname, occ=0, times=None, interp=imas.ids_defs.PREVIOUS_INTERP, verbose=False, dd_update=False):
     """
     The function `get_ids` reads an IDS from a given DBEntry, either the entire IDS or slices at
     selected times, and returns the IDS object or a list of IDS slices.
@@ -21,7 +21,7 @@ def get_ids(db, idsname, occ=0, times=None, interp=imas.imasdef.PREVIOUS_INTERP,
             or set to None, the function will read the entire IDS.
         interp: The `interp` parameter is an optional parameter that specifies the slicing interpolation mode.
             It determines how the data is interpolated when reading a single slice at a specific time. The default
-            value is `imas.imasdef.PREVIOUS_INTERP`, which means that the data is interpolated using the previous
+            value is `imas.ids_defs.PREVIOUS_INTERP`, which means that the data is interpolated using the previous
             time slice
         verbose: Verbose information
 
@@ -31,7 +31,9 @@ def get_ids(db, idsname, occ=0, times=None, interp=imas.imasdef.PREVIOUS_INTERP,
     if times is None:
         if verbose:
             print(f"getting {idsname}")
-        idsobj = db.get(idsname, occurrence=occ)
+        idsobj = db.get(idsname, occurrence=occ, autoconvert=False)
+        if dd_update:
+            idsobj = imas.convert_ids(idsobj, db.factory.version)
         if verbose:
             print(f"got {len(idsobj.time)} slices")
     else:
@@ -39,7 +41,9 @@ def get_ids(db, idsname, occ=0, times=None, interp=imas.imasdef.PREVIOUS_INTERP,
         for t in times:
             if verbose:
                 print(f"getting a slice of {idsname} at time {t}")
-            data_slice = db.get_slice(idsname, t, interp, occurrence=occ)
+            data_slice = db.get_slice(idsname, t, interp, occurrence=occ, autoconvert=False)
+            if dd_update:
+                data_slice = imas.convert_ids(data_slice, db.factory.version)
             idsobj.append(data_slice)
             if verbose:
                 print(f"got {data_slice.time}")
@@ -47,7 +51,7 @@ def get_ids(db, idsname, occ=0, times=None, interp=imas.imasdef.PREVIOUS_INTERP,
     return idsobj
 
 
-def get_timings(db, idsname, occ=0, dbout=None, times=None, repeat=5, verbose=False, profile=False):
+def get_timings(db, idsname, occ=0, dbout=None, times=None, repeat=5, verbose=False, profile=False, dd_update=False):
     """
     The function `get_timings` performs timing measurements for various I/O operations on an IDS in an IMAS database.
 
@@ -76,7 +80,7 @@ def get_timings(db, idsname, occ=0, dbout=None, times=None, repeat=5, verbose=Fa
     if dbout is not None:
         if verbose:
             print("profiles put")
-        idsobj = get_ids(db, idsname, occ, times, verbose)
+        idsobj = get_ids(db, idsname, occ, times, verbose, dd_update=dd_update)
         cmd = "dbout.put(idsobj)"
     else:
         cmd = f"get_ids(db,'{idsname}',occ=occ,times=times,verbose=verbose)"
@@ -109,22 +113,15 @@ def byte_size(obj):
         estimated data size in bytes
     """
     s = 0
-
-    if isinstance(obj, str):
-        s += len(obj)
-    elif isinstance(obj, np.ndarray):
-        s += obj.nbytes
-    elif isinstance(obj, int):
-        s += 4
-    elif isinstance(obj, float):
-        s += 8
-    elif isinstance(obj, list):
-        for o in obj:
-            s += byte_size(o)
-    elif isinstance(obj, dict):
-        for o in obj.values():
-            s += byte_size(o)
-    else:
-        for o in obj.__dict__.values():
-            s += byte_size(o)
+    for node in imas.util.tree_iter(obj):
+        if isinstance(node, imas.ids_primitive.IDSString0D):
+            s += len(node.value)
+        elif isinstance(node, imas.ids_primitive.IDSNumericArray):
+            s += node.value.nbytes
+        elif isinstance(node, imas.ids_primitive.IDSInt0D):
+            s += 4
+        elif isinstance(node, imas.ids_primitive.IDSFloat0D):
+            s += 8
+        else:
+            print(type(node), type(node.value), {sys.getsizeof(node.value)})
     return s

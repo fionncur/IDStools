@@ -38,7 +38,7 @@ class PFActiveView:
         Example:
             .. code-block:: python
 
-                import imas
+                import imaspy as imas
                 from idstools.view.pf_active import PFActiveView
                 from idstools.view.common import PlotCanvas
 
@@ -55,7 +55,7 @@ class PFActiveView:
                 ax.plot()
                 canvas.show()
 
-            .. thumbnail:: /_static/images/PFActiveView_viewActivePfCoils.png
+            .. image:: /_static/images/PFActiveView_viewActivePfCoils.png
                 :alt: image not found
                 :align: center
         """

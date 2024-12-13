@@ -13,8 +13,8 @@ class WavesView:
         self.waves_compute = WavesCompute(ids)
         self.ids = ids
 
-    def plot_pol_view_traces(self, ax, time_index, color="b", style="-", label="", fontsize=9, labelpad=-1):
-        beam_tracing_dict = self.waves_compute.get_beam_tracing(time_index)
+    def plot_pol_view_traces(self, ax, time_slice, color="b", style="-", label="", fontsize=9, labelpad=-1):
+        beam_tracing_dict = self.waves_compute.get_beam_tracing(time_slice)
         beam_data_length_for_each_wave = beam_tracing_dict["beam_data_length_for_each_wave"]
 
         length_data = beam_tracing_dict["length"]
@@ -37,12 +37,12 @@ class WavesView:
                     display_label_once = False
                     label = ""
 
-    def plot_top_view_traces(self, ax, time_index, color="b", style="-", label="", fontsize=9, labelpad=-1):
+    def plot_top_view_traces(self, ax, time_slice, color="b", style="-", label="", fontsize=9, labelpad=-1):
         ax.set_title("Top View (X,Y)", fontsize=fontsize)
         ax.set_xlabel("X [m]")
         ax.set_ylabel("Y [m]")
 
-        beam_tracing_dict = self.waves_compute.get_beam_tracing(time_index)
+        beam_tracing_dict = self.waves_compute.get_beam_tracing(time_slice)
         beam_data_length_for_each_wave = beam_tracing_dict["beam_data_length_for_each_wave"]
         length_data = beam_tracing_dict["length"]
         x_ray_data = beam_tracing_dict["x_ray"]
@@ -65,12 +65,12 @@ class WavesView:
                     display_label_once = False
                     label = ""
 
-    def plot_electron_power(self, ax, time_index, color="b", style="-", label="", fontsize=9, labelpad=-1):
+    def plot_electron_power(self, ax, time_slice, color="b", style="-", label="", fontsize=9, labelpad=-1):
         ax.set_title("Power along the beams", fontsize=fontsize)
         ax.set_xlabel("Path length [m]")
         ax.set_ylabel("P$_{electrons}$ [MW]")
 
-        beam_tracing_dict = self.waves_compute.get_beam_tracing(time_index)
+        beam_tracing_dict = self.waves_compute.get_beam_tracing(time_slice)
         beam_electrons_length_for_each_wave = beam_tracing_dict["beam_electrons_length_for_each_wave"]
 
         length_data = beam_tracing_dict["length"]
@@ -95,11 +95,11 @@ class WavesView:
                     label = ""
         ax.legend()
 
-    def plot_power_flow_normal(self, ax, time_index, color="b", style="-", label="", fontsize=9, labelpad=-1):
+    def plot_power_flow_normal(self, ax, time_slice, color="b", style="-", label="", fontsize=9, labelpad=-1):
         ax.set_title("Power flow to the magnetic field", fontsize=fontsize)
         ax.set_xlabel("Path length [m]")
 
-        beam_tracing_dict = self.waves_compute.get_beam_tracing(time_index)
+        beam_tracing_dict = self.waves_compute.get_beam_tracing(time_slice)
         beam_electrons_length_for_each_wave = beam_tracing_dict["beam_electrons_length_for_each_wave"]
 
         length_data = beam_tracing_dict["length"]
@@ -138,12 +138,12 @@ class WavesView:
     def plot_ecrh_profiles(
         self,
         ax,
-        time_index,
+        time_slice,
         verbose=False,
     ):
         # ECRH PROFILE [MA/M2]
-        ec_launcher_info = self.waves_compute.get_ec_launchers_info(time_index)
-        radial_grid = self.waves_compute.get_radial_grid_info(time_index)
+        ec_launcher_info = self.waves_compute.get_ec_launchers_info(time_slice)
+        radial_grid = self.waves_compute.get_radial_grid_info(time_slice)
         active_launchers = {key: value for key, value in radial_grid.items() if value["is_active"] is True}
         _, first_radial_grid_info = next(iter(active_launchers.items()))
 
@@ -211,13 +211,13 @@ class WavesView:
     def plot_eccd_profiles(
         self,
         ax,
-        time_index,
+        time_slice,
         verbose=False,
     ):
         # ECCD PROFILE [MA/M2]
-        ec_launcher_info = self.waves_compute.get_ec_launchers_info(time_index)
+        ec_launcher_info = self.waves_compute.get_ec_launchers_info(time_slice)
 
-        radial_grid = self.waves_compute.get_radial_grid_info(time_index)
+        radial_grid = self.waves_compute.get_radial_grid_info(time_slice)
         active_launchers = {key: value for key, value in radial_grid.items() if value["is_active"] is True}
         _, first_radial_grid_info = next(iter(active_launchers.items()))
 
@@ -271,13 +271,13 @@ class WavesView:
     def plot_ecrh_waveform(
         self,
         ax,
-        time_index,
+        time_slice,
     ):
         time_array = self.ids.time
         ntime = len(self.ids.time)
-        ec_launcher_info = self.waves_compute.get_ec_launchers_info(time_index)
+        ec_launcher_info = self.waves_compute.get_ec_launchers_info(time_slice)
 
-        radial_grid = self.waves_compute.get_radial_grid_info(time_index)
+        radial_grid = self.waves_compute.get_radial_grid_info(time_slice)
         active_launchers = {key: value for key, value in radial_grid.items() if value["is_active"] is True}
 
         code_name = self.ids.code.name.upper()
@@ -311,13 +311,13 @@ class WavesView:
     def plot_e_c_c_d_waveform(
         self,
         ax,
-        time_index,
+        time_slice,
     ):
         time_array = self.ids.time
         ntime = len(self.ids.time)
-        ec_launcher_info = self.waves_compute.get_ec_launchers_info(time_index)
+        ec_launcher_info = self.waves_compute.get_ec_launchers_info(time_slice)
 
-        radial_grid = self.waves_compute.get_radial_grid_info(time_index)
+        radial_grid = self.waves_compute.get_radial_grid_info(time_slice)
         active_launchers = {key: value for key, value in radial_grid.items() if value["is_active"] is True}
 
         code_name = self.ids.code.name.upper()
@@ -348,10 +348,10 @@ class WavesView:
             ax.legend()
             return 0
 
-    def display_e_c_launchers_info(self, time_index):
-        ec_launcher_info = self.waves_compute.get_ec_launchers_info(time_index)
+    def display_e_c_launchers_info(self, time_slice):
+        ec_launcher_info = self.waves_compute.get_ec_launchers_info(time_slice)
 
-        launchers = self.waves_compute.get_radial_grid_info(time_index)
+        launchers = self.waves_compute.get_radial_grid_info(time_slice)
 
         for i_wave, wave_data in launchers.items():
             if wave_data["is_active"] is True:
@@ -375,11 +375,11 @@ class WavesView:
         return
 
     # CD WAVEFORM
-    def view_c_d_waveform(self, ax, time_index, usepsi=False):
+    def view_c_d_waveform(self, ax, time_slice, usepsi=False):
         time_array = self.ids.time
-        ec_launcher_info = self.waves_compute.get_ec_launchers_info(time_index, usepsi)
+        ec_launcher_info = self.waves_compute.get_ec_launchers_info(time_slice, usepsi)
 
-        radial_grid = self.waves_compute.get_radial_grid_info(time_index, usepsi)
+        radial_grid = self.waves_compute.get_radial_grid_info(time_slice, usepsi)
 
         active_launchers = {key: value for key, value in radial_grid.items() if value["is_active"] is True}
         len_active_launchers = len(active_launchers)
@@ -402,11 +402,11 @@ class WavesView:
         WavesView.customize_legend(legend)
 
     # EC POWER WAVEFORM
-    def view_e_c_power_waveform(self, ax, time_index, usepsi=False):
+    def view_e_c_power_waveform(self, ax, time_slice, usepsi=False):
         time_array = self.ids.time
-        ec_launcher_info = self.waves_compute.get_ec_launchers_info(time_index, usepsi)
+        ec_launcher_info = self.waves_compute.get_ec_launchers_info(time_slice, usepsi)
 
-        radial_grid = self.waves_compute.get_radial_grid_info(time_index, usepsi)
+        radial_grid = self.waves_compute.get_radial_grid_info(time_slice, usepsi)
 
         active_launchers = {key: value for key, value in radial_grid.items() if value["is_active"] is True}
         len_active_launchers = len(active_launchers)
@@ -429,10 +429,10 @@ class WavesView:
         WavesView.customize_legend(legend)
 
     # CD PROFILE [MA/M2]
-    def view_c_d_profile(self, ax, time_index, usepsi=False):
-        ec_launcher_info = self.waves_compute.get_ec_launchers_info(time_index, usepsi)
+    def view_c_d_profile(self, ax, time_slice, usepsi=False):
+        ec_launcher_info = self.waves_compute.get_ec_launchers_info(time_slice, usepsi)
 
-        radial_grid = self.waves_compute.get_radial_grid_info(time_index, usepsi)
+        radial_grid = self.waves_compute.get_radial_grid_info(time_slice, usepsi)
 
         active_launchers = {key: value for key, value in radial_grid.items() if value["is_active"] is True}
         _, first_radial_grid_info = next(iter(active_launchers.items()))
@@ -461,10 +461,10 @@ class WavesView:
         WavesView.customize_legend(legend)
 
     # PROFILE OF ABSORBED POWER DENSITY [MW/M3]
-    def view_absorbed_power_density_profile(self, ax, time_index, usepsi=False):
-        ec_launcher_info = self.waves_compute.get_ec_launchers_info(time_index, usepsi, True)
+    def view_absorbed_power_density_profile(self, ax, time_slice, usepsi=False):
+        ec_launcher_info = self.waves_compute.get_ec_launchers_info(time_slice, usepsi, True)
 
-        radial_grid = self.waves_compute.get_radial_grid_info(time_index, usepsi)
+        radial_grid = self.waves_compute.get_radial_grid_info(time_slice, usepsi)
 
         active_launchers = {key: value for key, value in radial_grid.items() if value["is_active"] is True}
         _, first_radial_grid_info = next(iter(active_launchers.items()))
@@ -504,9 +504,9 @@ class WavesView:
         ax.set_xlim(beam_array[0] - 1, beam_array[-1] + 1)
         ax.set_ylim(top=20)
 
-    def plot_poloidal_traces_update(self, ax, beam_tracing_time_index, beam_index, verbose=False, update=True):
+    def plot_poloidal_traces_update(self, ax, time_slice, verbose=False, update=True):
         # Read beam tracing from waves IDS
-        beam_tracing = self.waves_compute.get_beam_tracing(beam_tracing_time_index)
+        beam_tracing = self.waves_compute.get_beam_tracing(time_slice)
 
         nbeam = beam_tracing["nbeam"]
         nbeam_active = beam_tracing["active_beams_count"]
@@ -560,9 +560,9 @@ class WavesView:
                         )
         return ax_polview_plot_traces
 
-    def plot_topview_traces_update(self, ax, beam_tracing_time_index, beam_index, verbose=False, update=True):
+    def plot_topview_traces_update(self, ax, time_slice, verbose=False, update=True):
         # Read beam tracing from waves IDS
-        beam_tracing = self.waves_compute.get_beam_tracing(beam_tracing_time_index)
+        beam_tracing = self.waves_compute.get_beam_tracing(time_slice)
         nbeam = beam_tracing["nbeam"]
         is_active = beam_tracing["beam_active_status_list"]
         len_ray = beam_tracing["len_ray"]

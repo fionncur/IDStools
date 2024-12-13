@@ -4,12 +4,13 @@ import argparse
 from os import path
 from sys import exit
 
+import imas
 import yaml
 from rich.markdown import Markdown
 from rich_argparse import RichHelpFormatter
 
 from idstools import idschk
-from idstools.database import DBMaster
+from idstools.cocos import IDS_COCOS
 from idstools.db_validator import ScenarioValidator
 from idstools.utils.clihelper import dbentry_parser
 
@@ -20,7 +21,15 @@ def main():
     """
     Command Interface of IDS Data Validation Tool w.r.t. DD (IDSDef.xml)
     """
-    db = DBMaster.get_connection(args)
+    db = None
+    if args.uri != "" and args.uri is not None:
+        if "mode" in args.__dict__:
+            db = imas.DBEntry(args.uri, args.mode)
+        else:
+            try:
+                db = imas.DBEntry(args.uri, "r")
+            except Exception as e:
+                print(e)
     if db is None:
         print("----> Aborted.")
         exit(1)
@@ -29,7 +38,7 @@ def main():
     yaml.Dumper.ignore_aliases = lambda *args: True
 
     # COCOS Initialization
-    index = {"COCOS": idschk.IDS_COCOS, "ipsign": args.ipsign, "b0sign": args.b0sign}
+    index = {"COCOS": IDS_COCOS, "ipsign": args.ipsign, "b0sign": args.b0sign}
     # cocos=idschk.COCOS(index=index).get()
 
     # Load IMAS-DD File
@@ -128,6 +137,7 @@ Examples:
 
     >>> import imas
     >>> from idstools.idschk import *
+    >>> from idstools.cocos import *
     >>> input = imas.DBEntry(imas.imasdef.MDSPLUS_BACKEND,"ITER",131024,40,"public")
     >>> input.open()
     >>> equilibrium=input.get("equilibrium")

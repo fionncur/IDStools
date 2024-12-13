@@ -44,10 +44,12 @@ class SpectrometerVisibleCompute:
         channels = {}
         for channel in self.ids_object.channel:
             channel_info = {}
-            match = re.compile(channel_name_pattern).fullmatch(channel.name)
+            match = re.compile(channel_name_pattern).fullmatch(channel.name.value)
 
             if match is None:
-                logger.warning(f"Channel's name {channel.name} does not math pattern {channel_name_pattern.pattern}")
+                logger.warning(
+                    f"Channel's name {channel.name.value} does not math pattern {channel_name_pattern.pattern}"
+                )
                 continue
 
             diagnostic = match[1]
@@ -76,15 +78,15 @@ class SpectrometerVisibleCompute:
             else:
                 intensity_spectrum = gs.intensity_spectrum.data[:, 0]
 
-            if not gs.exposure_time:
+            if not gs.exposure_time.value:
                 logging.warning(f"{channel.name} grating_spectrometer.exposure_time is empty.")
                 exposure_time = None
             else:
-                exposure_time = gs.exposure_time
+                exposure_time = gs.exposure_time.value
 
-            radius = channel.line_of_sight.second_point.r
+            radius = channel.line_of_sight.second_point.r.value
 
-            channel_info["channel_name"] = channel.name
+            channel_info["channel_name"] = channel.name.value
             channel_info["diagnostic"] = diagnostic
             channel_info["identifier"] = identifier
             channel_info["spectrum_n"] = spectrum_n
@@ -98,6 +100,7 @@ class SpectrometerVisibleCompute:
             channel_info["intensity_spectrum"] = intensity_spectrum
             channel_info["exposure_time"] = exposure_time
             channel_info["radius"] = radius
+
             if spectrum_n not in channels.keys():
                 channels[spectrum_n] = {}
             channels[spectrum_n][identifier] = channel_info

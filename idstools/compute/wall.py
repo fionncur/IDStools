@@ -48,19 +48,28 @@ class WallCompute:
             for v_unit_index, v_unit in enumerate(description2d.vessel.unit):
                 unit_info = {}
                 unit_info["name"] = v_unit.name
-                unit_info["identifier"] = v_unit.identifier
-
+                if hasattr(v_unit, "identifier"):
+                    unit_info["identifier"] = v_unit.identifier
+                else:
+                    unit_info["identifier"] = ""
+                if hasattr(v_unit, "description"):
+                    unit_info["description"] = v_unit.description
+                else:
+                    unit_info["description"] = ""
                 unit_info["r"] = v_unit.annular.centreline.r
                 unit_info["z"] = v_unit.annular.centreline.z
                 unit_info["h"] = v_unit.annular.thickness
-                unit_info["closed"] = v_unit.annular.centreline.closed
+                if hasattr(v_unit.annular.centreline, "closed"):
+                    unit_info["closed"] = v_unit.annular.centreline.closed
+                else:
+                    unit_info["closed"] = False
                 unit_info["resistivity"] = v_unit.annular.resistivity
 
                 unit_info["rectangle_coordinates"] = self.get_rectangle_coordinates(
                     v_unit.annular.centreline.r,
                     v_unit.annular.centreline.z,
                     v_unit.annular.thickness,
-                    v_unit.annular.centreline.closed,
+                    unit_info["closed"],
                 )
                 if name_filter is not None:
                     if name_filter.lower() in v_unit.name.lower() or name_filter.lower() in v_unit.identifier.lower():
@@ -92,11 +101,18 @@ class WallCompute:
             for l_unit_index, l_unit in enumerate(description2d.limiter.unit):
                 unit_info = {}
                 unit_info["name"] = l_unit.name
+                if hasattr(l_unit, "description"):
+                    unit_info["description"] = l_unit.description
+                else:
+                    unit_info["description"] = ""
                 unit_info["r"] = l_unit.outline.r
                 unit_info["z"] = l_unit.outline.z
-                unit_info["closed"] = l_unit.closed
+                if hasattr(l_unit, "closed"):
+                    unit_info["closed"] = l_unit.closed
+                else:
+                    unit_info["closed"] = False
                 unit_info["resistivity"] = l_unit.resistivity
-                if l_unit.closed == 1:
+                if unit_info["closed"] is True:
                     unit_info["r"] = np.append(unit_info["r"], unit_info["r"][0])
                     unit_info["z"] = np.append(unit_info["z"], unit_info["z"][0])
                 unit_infos[l_unit_index] = unit_info
@@ -105,6 +121,17 @@ class WallCompute:
             description2d_infos[description2d_index] = description2d_info
 
         return description2d_infos
+
+    def get_inner_wall(self):
+        try:
+            rw = self.ids_object.description_2d[0].limiter.unit[0].outline.r
+            zw = self.ids_object.description_2d[0].limiter.unit[0].outline.z
+            # append first value to end of array
+            rw = np.concatenate((rw, [rw[0]]))
+            zw = np.concatenate((zw, [zw[0]]))
+        except Exception as _:  # noqa: F841
+            return None
+        return rw, zw
 
     @staticmethod
     def get_rectangle_coordinates(r, z, h, closed=False):

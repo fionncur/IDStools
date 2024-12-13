@@ -28,7 +28,7 @@ exists. Just provide idsname as input argument to the script.
 
 .. code-block:: bash
 
-   $ dbselector -u $USERNAME equilibrium,core_sources
+   $ dbselector -u $USER equilibrium,core_sources
    (100016, 1)
    (134000, 37)
    (134173, 106)

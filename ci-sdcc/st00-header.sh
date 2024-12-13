@@ -13,7 +13,7 @@ shopt -s expand_aliases
 #print hostname
 hostname -f
 
-IMAS_EXISTS=$(module -r -t list 2>&1 | grep -E "IMAS"  | head -n 1)
+IMAS_EXISTS=$(module -r -t list 2>&1 | grep -E "IMAS-AL-Core"  | head -n 1)
 if [ -n "$IMAS_EXISTS" ]; then
     echo "> Found already loaded IMAS Module : $IMAS_EXISTS"
     ACCESS_LAYER_VERSION=$(echo "$AL_VERSION" | cut -d '.' -f 1)
@@ -47,6 +47,12 @@ if [ -z "$ACCESS_LAYER_VERSION" ]; then
     ACCESS_LAYER_VERSION="5"
 fi
 
+if [ -z "$DD_VERSION" ]; then 
+    DD_VERSION="3"
+else
+    DD_VERSION="$3"
+fi
+
 echo "> Building for $TOOLCHAIN_VERSION and Access Layer $ACCESS_LAYER_VERSION"
 
 if [[ $TOOLCHAIN_VERSION == *"intel"* ]]; then
@@ -56,12 +62,13 @@ if [[ $TOOLCHAIN_VERSION == *"foss"* ]]; then
     FCOMPILER="gfortran"
 fi
 
-IMAS_MODULE_VERSION=$(getIMASModuleName "$TOOLCHAIN_VERSION" "$ACCESS_LAYER_VERSION")
+
+CORE_MODULE_VERSION=$(getIMASCoreModuleName "$TOOLCHAIN_VERSION" "$ACCESS_LAYER_VERSION" "$DD_VERSION")
 # load IMAS module first
 
 if [ -z "$IMAS_EXISTS" ]; then
-    echo "> IMAS is not loaded.. Loading Module $IMAS_MODULE_VERSION"
-    module load "$IMAS_MODULE_VERSION"
+    echo "> IMAS is not loaded.. Loading Module $CORE_MODULE_VERSION"
+    module load "$CORE_MODULE_VERSION"
 fi
 
 GCCcore_VERSION=$(getGCCcoreVersion)
@@ -72,7 +79,7 @@ dependencies="./ci-sdcc/dependencies.txt"
 # Check if the file exists
 if [ ! -f "$dependencies" ]; then
     echo "File $dependencies not found."
-    exit 1
+    return 1
 fi
 
 declare -a RUNMODULES=()
@@ -98,9 +105,9 @@ while IFS= read -r line || [[ -n $line ]]; do
     fi
     # latest module version as it is not given
     # if [[ $line == *"IMAS"* ]]; then
-    #     echo "    IMAS $IMAS_MODULE_VERSION"
-    #     RUNMODULES["$counter"]="$IMAS_MODULE_VERSION"
-    #     EBBRUNMODULES["$counter"]="('$IMAS_MODULE_VERSION', EXTERNAL_MODULE),"
+    #     echo "    IMAS $CORE_MODULE_VERSION"
+    #     RUNMODULES["$counter"]="$CORE_MODULE_VERSION"
+    #     EBBRUNMODULES["$counter"]="('$CORE_MODULE_VERSION', EXTERNAL_MODULE),"
     # else
     module_version=$(getModuleName "$line" "$TOOLCHAIN_VERSION" "$GCCcore_VERSION")
     echo "    $line $module_version"
@@ -115,7 +122,7 @@ echo "-------------------------------------------------------"
 echo "> Details of environment"
 echo "    TOOLCHAIN_VERSION : $TOOLCHAIN_VERSION"
 echo "    GCCcore_VERSION : $GCCcore_VERSION"
-echo "    IMAS VERSION : $IMAS_MODULE_VERSION"
+echo "    IMAS VERSION : $CORE_MODULE_VERSION"
 echo "    RUNMODULES : " "${RUNMODULES[@]}"
 echo "    EBRUNMODULES : " "${EBBRUNMODULES[@]}"
 echo "    Compiler : $FCOMPILER"

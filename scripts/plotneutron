@@ -6,7 +6,8 @@ import argparse
 import logging
 import os
 
-import imas
+from imaspy import convert_ids
+from imaspy.ids_factory import IDSFactory
 from rich_argparse import RichHelpFormatter
 
 from idstools.compute.common import get_nearest_time
@@ -23,7 +24,8 @@ from idstools.view.distribution_sources import DistributionSourcesView
 
 # Management of input arguments
 parser = argparse.ArgumentParser(
-    description="---- Display the neutron profiles from the distribution_sources IDSs [previously known as neutronplot]",
+    description="""---- Display the neutron profiles from the distribution_sources IDSs
+    [previously known as neutronplot]""",
     parents=[dbentry_parser],
     formatter_class=RichHelpFormatter,
 )
@@ -56,31 +58,23 @@ if hostdir is None:
     )
     exit(1)
 
+ids_distribution_sources = None
 try:
-    # connection.distribution_sources.get()
-    ids_distribution_sources = imas.distribution_sources()
-    ids_distribution_sources.time = connection.partial_get("distribution_sources", "time")
-    if ids_distribution_sources.time is None:
-        logger.critical(
-            "No distribution_sources IDS in the data-entry --> Abort.",
-        )
-        exit()
 
-except Exception as _:
-    logger.critical(
-        "The distribution_sources IDS is absent from the input data-entry",
-    )
-    logger.critical(
-        "----> Aborted.",
-    )
-    exit()
+    if args.dd_update:
+        ids_distribution_sources = connection.get("distribution_sources", autoconvert=False)
+        ids_distribution_sources = convert_ids(ids_distribution_sources, connection.factory.version)
+    else:
+        ids_distribution_sources = connection.get("distribution_sources", lazy=True, autoconvert=False)
+except Exception as _:  # noqa: F841
+    logger.error("distribution_sources ids is not present")
+    exit(1)
+
 
 time_array = ids_distribution_sources.time
-time_index, time_value = get_nearest_time(time_array, args.time)
+time_slice, time_value = get_nearest_time(time_array, args.time)
 
-ids_slice_distribution_sources = connection.get_slice("distribution_sources", time_value, 1)
-
-nsources = len(ids_slice_distribution_sources.source)
+nsources = len(ids_distribution_sources.source)
 if nsources > 1:
     logger.info(
         f"Distribution_sources contains {nsources} sources",
@@ -90,35 +84,27 @@ else:
         f"Distribution_sources contains {nsources} source",
     )
 
-
 active = [1] * nsources  # A priori all sources are active
-ids_distribution_sources.source.resize(nsources)
 for isource in range(nsources):
-    ids_distribution_sources.source[isource].profiles_1d.resize(1)
-    ids_distribution_sources.source[isource].global_quantities.resize(1)
-    ids_distribution_sources.source[isource].process.resize(1)
     try:
-        ids_distribution_sources.source[isource].profiles_1d[0] = ids_slice_distribution_sources.source[
-            isource
-        ].profiles_1d[0]
-    except Exception as _:
+        availability_test = ids_distribution_sources.source[isource].profiles_1d[time_slice]
+
+    except Exception as _:  # noqa: F841
         logger.warning(
             f"Source {str(isource)} has no profiles_1d -> considered as inactive",
         )
         active[isource] = 0
     try:
-        ids_distribution_sources.source[isource].global_quantities[0] = ids_slice_distribution_sources.source[
-            isource
-        ].global_quantities[0]
-    except Exception as _:
+        availability_test = ids_distribution_sources.source[isource].global_quantities[time_slice]
+    except Exception as _:  # noqa: F841
         if active[isource] == 1:
             logger.warning(
                 f"Source {str(isource)} has no global_quantities -> considered as inactive",
             )
             active[isource] = 0
     try:
-        ids_distribution_sources.source[isource].process[0] = ids_slice_distribution_sources.source[isource].process[0]
-    except Exception as _:
+        availability_test = ids_distribution_sources.source[isource].process[time_slice]
+    except Exception as _:  # noqa: F841
         if active[isource] == 1:
             logger.warning(
                 f"Source {str(isource)} has no process -> considered as inactive",
@@ -132,7 +118,7 @@ if sum(active) == 0:
 canvas = PlotCanvas(1, 1)
 ax = canvas.add_axes(title="", xlabel="", row=0, col=0)
 distribution_sources_view = DistributionSourcesView(ids_distribution_sources)
-distribution_sources_view.view_neutrons(ax)
+distribution_sources_view.view_neutrons(ax, time_slice)
 distribution_sources_view.view_time(ax, time_value)
 
 canvas.set_text(text=f"{get_database_path(args, time_value=time_value)}")

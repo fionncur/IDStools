@@ -5,7 +5,7 @@ import argparse
 import logging
 import os
 
-import imas
+from imaspy import convert_ids
 from rich_argparse import RichHelpFormatter
 
 from idstools.compute.common import get_nearest_time
@@ -46,67 +46,52 @@ if connection is None:
     logger.critical("----> Aborted.")
     exit(1)
 
-core_sources = imas.core_sources()
-core_sources.time = connection.partial_get("core_sources", "time")
+core_sources = None
+
+try:
+
+    if args.dd_update:
+        core_sources = connection.get("core_sources", autoconvert=False)
+        core_sources = convert_ids(core_sources, connection.factory.version)
+    else:
+        core_sources = connection.get("core_sources", lazy=True, autoconvert=False)
+
+except Exception as e:  # noqa: F841
+    logger.error(f"core_sources ids is not present {e}")
+    exit(1)
+
 if core_sources.time is None:
     logger.critical("No core_sources IDS in the data-entry --> Abort.")
     exit()
 
 time_array = core_sources.time
-time_index, time_value = get_nearest_time(time_array, args.time)
+time_slice, time_value = get_nearest_time(time_array, args.time)
 ntime = len(time_array)
-
-# Read quantities for this time slice
-cs_slice = connection.get_slice("core_sources", time_value, 1)
-nsources = len(cs_slice.source)
-
-if nsources > 1:
-    logger.info(f"Core_sources contains {nsources} sources")
-else:
-    logger.info(f"Core_sources contains {nsources} source")
-
-core_sources.source.resize(nsources)
-for isource in range(nsources):
-    # core_sources.source[isource].global_quantities.resize(1)
-    if len(cs_slice.source[isource].profiles_1d) > 0:
-        core_sources.source[isource].profiles_1d.resize(1)
-        core_sources.source[isource].profiles_1d[0] = cs_slice.source[isource].profiles_1d[0]
-        try:
-            core_sources.source[isource].global_quantities = connection.partial_get(
-                "core_sources", f"source({isource})/global_quantities"
-            )
-        except Exception as e:
-            logger.critical(
-                f"source({str(isource)}) does not have global_quantities",
-            )
-            core_sources.source[isource].global_quantities.resize(0)
-        core_sources.source[isource].identifier.name = cs_slice.source[isource].identifier.name
-
 nsources = len(core_sources.source)
 
 core_source_view = CoreSourcesView(core_sources)
 
 canvas = PlotCanvas(2, 4)
 ret = ax_power_profiles = canvas.add_axes(title=r"Power Profiles [MW/M3]", row=0, col=0)
-core_source_view.view_power_profiles(ax_power_profiles)
+core_source_view.view_power_profiles(ax_power_profiles, time_slice)
 
 ax_particles_profiles = canvas.add_axes(title=r"PARTICLES PROFILES [/M3/S]", row=0, col=1)
-ret = core_source_view.view_particles_profiles(ax_particles_profiles)
+ret = core_source_view.view_particles_profiles(ax_particles_profiles, time_slice)
 
 ax_current_profiles = canvas.add_axes(title=r"CURRENT PROFILES [KA/M2]", row=0, col=2)
-ret = core_source_view.view_current_profiles(ax_current_profiles)
+ret = core_source_view.view_current_profiles(ax_current_profiles, time_slice)
 
 ax_power_and_particle_waveforms = canvas.add_axes(title="POWER AND PARTICLE WAVEFORMS", row=1, col=0)
-ret = core_source_view.view_power_and_particle_waveforms(ax_power_and_particle_waveforms)
+ret = core_source_view.view_power_and_particle_waveforms(ax_power_and_particle_waveforms, time_slice)
 
 ax_particles_waveform = canvas.add_axes(title="PARTICLES WAVEFORM", row=1, col=1)
-ret = core_source_view.view_particles_waveform(ax_particles_waveform)
+ret = core_source_view.view_particles_waveform(ax_particles_waveform, time_slice)
 
 ax_current_waveform = canvas.add_axes(title=r"CURRENT WAVEFORM", row=1, col=2)
-ret = core_source_view.view_current_waveform(ax_current_waveform)
+ret = core_source_view.view_current_waveform(ax_current_waveform, time_slice)
 
 ax_torque_waveform = canvas.add_axes(row=1, col=3)
-ret = core_source_view.view_torque_waveform(ax_torque_waveform)
+ret = core_source_view.view_torque_waveform(ax_torque_waveform, time_slice)
 
 canvas.set_text(text=f"{get_database_path(args, time_value=time_value)}")
 

@@ -8,6 +8,7 @@ This module provides compute functions and classes for edge_profiles ids data
 import functools
 import itertools
 import logging
+from typing import Union
 
 import numpy as np
 from scipy import interpolate
@@ -22,7 +23,7 @@ class EdgeProfilesCompute:
         self.ids = ids
 
     @staticmethod
-    def get_plasma_composition_with_species_concentration(ids, time_slice=0) -> dict | int:
+    def get_plasma_composition_with_species_concentration(ids, time_slice) -> Union[dict, int]:
         """
         Function retrives composition and species concentration in below format
             - Spcies_label
@@ -47,7 +48,7 @@ class EdgeProfilesCompute:
         Example:
             .. code-block:: python
 
-                import imas
+                import imaspy
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=123276;run=1;database=ITER;version=3", "r")
                 connection.open()
                 idsObj = connection.get('edge_profiles')
@@ -102,17 +103,17 @@ class EdgeProfilesCompute:
             return -1
 
         data = {}
-        nspec_over_ntot = edge_profiles_compute.get_nspec_over_ntot()
-        nspec_over_ne = edge_profiles_compute.get_nspec_over_ne()
-        nspec_over_nmaj = edge_profiles_compute.get_nspec_over_nmaj()
-        species = edge_profiles_compute.get_species()
-        labels = edge_profiles_compute.get_labels()
+        nspec_over_ntot = edge_profiles_compute.get_nspec_over_ntot(time_slice)
+        nspec_over_ne = edge_profiles_compute.get_nspec_over_ne(time_slice)
+        nspec_over_nmaj = edge_profiles_compute.get_nspec_over_nmaj(time_slice)
+        species = edge_profiles_compute.get_species(time_slice)
+        labels = edge_profiles_compute.get_labels(time_slice)
         edge_profiles_compute.combine_species_when_appear_twice(
-            species, nspec_over_ntot, nspec_over_ne, nspec_over_nmaj
+            time_slice, species, nspec_over_ntot, nspec_over_ne, nspec_over_nmaj
         )
-        a = edge_profiles_compute.get_a()
-        z = edge_profiles_compute.get_z()
-        states_data = edge_profiles_compute.get_states_data()
+        a = edge_profiles_compute.get_a(time_slice)
+        z = edge_profiles_compute.get_z(time_slice)
+        states_data = edge_profiles_compute.get_states_data(time_slice)
         for species_index in range(len(species)):
             species_data = {
                 "nspec_over_ntot": nspec_over_ntot[species_index],
@@ -128,7 +129,7 @@ class EdgeProfilesCompute:
 
         return data
 
-    def get_labels(self, time_slice: int = 0):
+    def get_labels(self, time_slice: int):
         """
         This function returns a list of labels for all species in a given time slice.
 
@@ -142,7 +143,7 @@ class EdgeProfilesCompute:
         Example:
             .. code-block:: python
 
-                import imas
+                import imaspy
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=123276;run=1;database=ITER;version=3", "r")
                 connection.open()
                 idsObj = connection.get('edge_profiles')
@@ -158,7 +159,7 @@ class EdgeProfilesCompute:
         return labels
 
     @functools.lru_cache(maxsize=128)
-    def get_a(self, time_slice: int = 0, element_index: int = 0) -> list:
+    def get_a(self, time_slice: int, element_index: int = 0) -> list:
         """
         This function returns a list of atomic masses for a given slice and element index.
 
@@ -174,7 +175,7 @@ class EdgeProfilesCompute:
         Example:
             .. code-block:: python
 
-                import imas
+                import imaspy
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=123276;run=1;database=ITER;version=3", "r")
                 connection.open()
                 idsObj = connection.get('edge_profiles')
@@ -192,7 +193,7 @@ class EdgeProfilesCompute:
         return a
 
     @functools.lru_cache(maxsize=128)
-    def get_z(self, time_slice: int = 0, element_index: int = 0) -> list:
+    def get_z(self, time_slice: int, element_index: int = 0) -> list:
         """
         This function returns a list of nuclear charges for each species in a given slice and element
         index.
@@ -208,7 +209,7 @@ class EdgeProfilesCompute:
         Example:
             .. code-block:: python
 
-                import imas
+                import imaspy
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=123276;run=1;database=ITER;version=3", "r")
                 connection.open()
                 idsObj = connection.get('edge_profiles')
@@ -225,7 +226,7 @@ class EdgeProfilesCompute:
         logger.debug(f"Nuclear charge each species : {z}")
         return z
 
-    def get_states(self, time_slice: int = 0):
+    def get_states(self, time_slice: int):
         """
         This function returns quantities related to the different states of the species (ionisation, energy,
         excitation, ...) for each species
@@ -239,7 +240,7 @@ class EdgeProfilesCompute:
         Example:
             .. code-block:: python
 
-                import imas
+                import imaspy
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=123276;run=1;database=ITER;version=3", "r")
                 connection.open()
                 idsObj = connection.get('edge_profiles')
@@ -253,7 +254,7 @@ class EdgeProfilesCompute:
         nspecies = len(self.ids.ggd[time_slice].ion)
         return [self.ids.ggd[time_slice].ion[i_species].state for i_species in range(nspecies)]
 
-    def get_states_data(self, time_slice: int = 0) -> dict:
+    def get_states_data(self, time_slice: int) -> dict:
         """
         This function returns a dictionary containing data on the states and densities of different species
         in a plasma simulation.
@@ -269,7 +270,7 @@ class EdgeProfilesCompute:
         Example:
             .. code-block:: python
 
-                import imas
+                import imaspy
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=123276;run=1;database=ITER;version=3", "r")
                 connection.open()
                 idsObj = connection.get('edge_profiles')
@@ -298,7 +299,7 @@ class EdgeProfilesCompute:
 
         volume = self.get_volume(time_slice)
         nspecies = len(self.ids.ggd[time_slice].ion)
-        species_density, _, _ = self.get_species_density()
+        species_density, _, _ = self.get_species_density(time_slice)
         for species_index in range(nspecies):
             species_data = {}
             nstates = len(self.ids.ggd[time_slice].ion[species_index].state)
@@ -319,7 +320,7 @@ class EdgeProfilesCompute:
             states_data[str(species_index)] = species_data
         return states_data
 
-    def get_ne(self, time_slice: int = 0) -> float:
+    def get_ne(self, time_slice: int) -> float:
         """
         This function calculates the total number of electrons (ne) based on the volume and electron density
         of a given slice.
@@ -334,7 +335,7 @@ class EdgeProfilesCompute:
         Example:
             .. code-block:: python
 
-                import imas
+                import imaspy
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=123276;run=1;database=ITER;version=3", "r")
                 connection.open()
                 idsObj = connection.get('edge_profiles')
@@ -349,7 +350,7 @@ class EdgeProfilesCompute:
         return sum(volume * electron_density)
 
     @functools.lru_cache(maxsize=128)
-    def get_volume(self, time_slice=0) -> list | None:
+    def get_volume(self, time_slice) -> Union[list, None]:
         """
         This function calculates the volume of a grid subset using either pre-calculated volume data or by
         manually calculating it from the nodes.
@@ -365,7 +366,7 @@ class EdgeProfilesCompute:
         Example:
             .. code-block:: python
 
-                import imas
+                import imaspy
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=123276;run=1;database=ITER;version=3", "r")
                 connection.open()
                 idsObj = connection.get('edge_profiles')
@@ -498,7 +499,7 @@ class EdgeProfilesCompute:
         logger.info(f"Total volume:{np.sum(volumes)}")
         return volumes
 
-    def get_density(self, time_slice=0):
+    def get_density(self, time_slice):
         """
         This function retrieves the electron density array for a given slice index and returns it.
 
@@ -512,7 +513,7 @@ class EdgeProfilesCompute:
         Example:
             .. code-block:: python
 
-                import imas
+                import imaspy
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=123276;run=1;database=ITER;version=3", "r")
                 connection.open()
                 idsObj = connection.get('edge_profiles')
@@ -532,7 +533,7 @@ class EdgeProfilesCompute:
         return density_ion
 
     @functools.lru_cache(maxsize=128)
-    def get_species_density(self, time_slice: int = 0) -> tuple:
+    def get_species_density(self, time_slice: int) -> tuple:
         """
         This function calculates the density of different species in a given slice and returns a tuple containing
         the species density list, the total density, and the index of the species with the maximum density.
@@ -547,7 +548,7 @@ class EdgeProfilesCompute:
         Example:
             .. code-block:: python
 
-                import imas
+                import imaspy
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=123276;run=1;database=ITER;version=3", "r")
                 connection.open()
                 idsObj = connection.get('edge_profiles')
@@ -600,7 +601,7 @@ class EdgeProfilesCompute:
         logger.debug(f"Index of Maximum Density Species : {max_density_index}")
         return species_density_list, ntot, max_density_index
 
-    def get_nspec_over_ntot(self, time_slice=0):
+    def get_nspec_over_ntot(self, time_slice):
         """
         This function calculates the ratio of the number of species to the total number of particles in a plasma.
 
@@ -614,7 +615,7 @@ class EdgeProfilesCompute:
         Example:
             .. code-block:: python
 
-                import imas
+                import imaspy
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=123276;run=1;database=ITER;version=3", "r")
                 connection.open()
                 idsObj = connection.get('edge_profiles')
@@ -627,7 +628,7 @@ class EdgeProfilesCompute:
         species_density_list, ntot, _ = self.get_species_density(time_slice)
         return species_density_list / ntot
 
-    def get_nspec_over_ne(self, time_slice=0):
+    def get_nspec_over_ne(self, time_slice):
         """
         This function calculates the ratio of species density to electron density.
 
@@ -640,7 +641,7 @@ class EdgeProfilesCompute:
         Example:
             .. code-block:: python
 
-                import imas
+                import imaspy
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=123276;run=1;database=ITER;version=3", "r")
                 connection.open()
                 idsObj = connection.get('edge_profiles')
@@ -650,10 +651,10 @@ class EdgeProfilesCompute:
                 array([9.49141717e-01, 7.83135442e-03, 3.56547366e-03, 7.73580187e-04, 4.78443692e-06])
         """
         species_density_list, _, _ = self.get_species_density(time_slice)
-        ne = self.get_ne()
+        ne = self.get_ne(time_slice)
         return species_density_list / ne
 
-    def get_nspec_over_nmaj(self, time_slice=0) -> list:
+    def get_nspec_over_nmaj(self, time_slice) -> list:
         """
         This function returns a list of the ratio of each species density to the maximum species density.
 
@@ -668,7 +669,7 @@ class EdgeProfilesCompute:
         Example:
             .. code-block:: python
 
-                import imas
+                import imaspy
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=123276;run=1;database=ITER;version=3", "r")
                 connection.open()
                 idsObj = connection.get('edge_profiles')
@@ -684,7 +685,7 @@ class EdgeProfilesCompute:
         ) = self.get_species_density(time_slice)
         return species_density_list / species_density_list[max_density_index]
 
-    def get_species(self, time_slice=0) -> list:
+    def get_species(self, time_slice) -> list:
         """
         This function creates a Mendeleiev table and returns a list of species based on the values of a,
         z, and the table.
@@ -698,7 +699,7 @@ class EdgeProfilesCompute:
         Example:
             .. code-block:: python
 
-                import imas
+                import imaspy
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=123276;run=1;database=ITER;version=3", "r")
                 connection.open()
                 idsObj = connection.get('edge_profiles')
@@ -710,11 +711,11 @@ class EdgeProfilesCompute:
         table_mendeleiev = mend.create_table_mendeleiev()
         nspecies = len(self.ids.ggd[time_slice].ion)
 
-        a = list(map(int, self.get_a()))
-        z = list(map(int, self.get_z()))
+        a = list(map(int, self.get_a(time_slice)))
+        z = list(map(int, self.get_z(time_slice)))
         return [table_mendeleiev[z[ispecies]][a[ispecies]].element for ispecies in range(nspecies)]
 
-    def combine_species_when_appear_twice(self, species, nspec_over_ntot, nspec_over_ne, nspec_over_nmaj, time_slice=0):
+    def combine_species_when_appear_twice(self, time_slice, species, nspec_over_ntot, nspec_over_ne, nspec_over_nmaj):
         """
         This is helper function which checks if there are duplicate entries of species and combine the species.
         This is in place change of arrays
@@ -736,7 +737,7 @@ class EdgeProfilesCompute:
                 nspec_over_nmaj[ispecies] = nspec_over_nmaj[ispecies] + nspec_over_nmaj[jspecies]
                 nspec_over_nmaj[jspecies] = 0
 
-    def get_core_boundry(self, time_slice=0):
+    def get_core_boundry(self, time_slice):
         """
         This function `get_core_boundry` retrieves coordinates for core boundary elements from grid subsets based on
         specified indices.
@@ -787,7 +788,7 @@ class EdgeProfilesCompute:
         # core_boundry = np.array([sep_coords[hull.vertices, 0], sep_coords[hull.vertices, 1]]).T
         return sep_coords
 
-    def get_separatrix(self, time_slice=0):
+    def get_separatrix(self, time_slice):
         """
         This function `get_separatrix` retrieves coordinates for the separatrix from a grid subset based on a given time
         slice.
@@ -831,7 +832,7 @@ class EdgeProfilesCompute:
         # separatrix = np.array([sep_coords[hull.vertices, 0], sep_coords[hull.vertices, 1]]).T
         return sep_coords
 
-    def get_rz(self, time_slice=0):
+    def get_rz(self, time_slice):
         """
         The function `get_rz` returns the `r_edge` and `z_edge` coordinates of vertices in a grid.
 
@@ -950,7 +951,7 @@ class EdgeProfilesCompute:
         n_neutral_edge = interpolate.griddata((r_edge, z_edge), temp, (x, y))
         return n_neutral_edge
 
-    def get_outer_midplane_array_index(self):
+    def get_outer_midplane_array_index(self, time_slice):
         """
         This function `get_outer_midplane_array_index` searches for a specific grid subset with an
         index of 11 and returns its position within the list of subsets.
@@ -962,9 +963,9 @@ class EdgeProfilesCompute:
             returns `None`.
         """
         subset_index = None
-        nsubsets = len(self.ids.grid_ggd[0].grid_subset)
+        nsubsets = len(self.ids.grid_ggd[time_slice].grid_subset)
         for iset in range(nsubsets):
-            if self.ids.grid_ggd[0].grid_subset[iset].identifier.index == 11:
+            if self.ids.grid_ggd[time_slice].grid_subset[iset].identifier.index == 11:
                 subset_index = iset
         if subset_index is None:
             logger.warning("Did not find outer_midplane GGD grid subset.")
@@ -972,28 +973,30 @@ class EdgeProfilesCompute:
             logger.debug(f"Outer midplane GGD grid subset is number {subset_index+1} of {nsubsets}")
         return subset_index
 
-    def getnrho(self, slice_index=0):
+    def getnrho(self, time_slice):
         """
         This function `getnrho` returns the number of elements in the `rho_tor_norm` or `rho_tor` grid
         based on the provided slice index.
 
         Args:
-            slice_index: The `slice_index` parameter in the `getnrho` method is used to specify which
+            time_slice: The `time_slice` parameter in the `getnrho` method is used to specify which
                 slice of the `profiles_1d` data to access.
 
         Returns:
             The `getnrho` method is returning the number of elements in the `rho_tor_norm` or `rho_tor`
             attribute of the grid object within the `profiles_1d` attribute of the `ids` object at the
-            specified `slice_index`. If either of these attributes has elements, the length of that
+            specified `time_slice`. If either of these attributes has elements, the length of that
             attribute is returned as the number of elements (`nrho`).
         """
         nrho = None
         try:
-            if len(self.ids.profiles_1d[slice_index].grid.rho_tor_norm) > 0:
-                nrho = len(self.ids.profiles_1d[slice_index].grid.rho_tor_norm)
-            elif len(self.ids.profiles_1d[slice_index].grid.rho_tor) > 0:
-                nrho = len(self.ids.profiles_1d[slice_index].grid.rho_tor)
+            if len(self.ids.profiles_1d[time_slice].grid.rho_tor_norm) > 0:
+                nrho = len(self.ids.profiles_1d[time_slice].grid.rho_tor_norm)
+            elif len(self.ids.profiles_1d[time_slice].grid.rho_tor) > 0:
+                nrho = len(self.ids.profiles_1d[time_slice].grid.rho_tor)
         except Exception as e:
             logger.debug(f"{e}")
-            logger.warning(f"edge_profiles.profiles_1d[:].grid.rho_tor_norm and rho_tor could not be read. {e}")
+            logger.warning(
+                f"edge_profiles.profiles_1d[{time_slice}].grid.rho_tor_norm and rho_tor could not be read. {e}"
+            )
         return nrho

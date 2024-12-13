@@ -6,14 +6,12 @@ import sys
 from os import getenv, path
 from xml.etree import ElementTree as ET
 
-import imas
+import imaspy as imas
 import yaml
 from rich_argparse import RichHelpFormatter
 
 from idstools.idschk import init_schema_coordinate
-from idstools.utils.ddhelper import DDHelper
 
-FILE_IDSDef = DDHelper.get_ids_def_path()
 # ----------------------------------------------------------------------
 
 
@@ -56,12 +54,7 @@ def comment_for_schema():
 
 def main():
     """create validation schema wrt DD"""
-
-    # Load IMAS-DD file
-    if path.isfile(FILE_IDSDef):
-        root = ET.parse(FILE_IDSDef).getroot()
-    else:
-        exit(f"file not found:{FILE_IDSDef }")
+    root = imas.dd_zip.dd_etree().getroot()
 
     # Initialization for yaml.Dumper
     yaml.Dumper.ignore_aliases = lambda *args: True

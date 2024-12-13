@@ -3,8 +3,8 @@
 import argparse
 import logging
 import os
-import sys
 
+from imaspy import convert_ids
 from rich_argparse import RichHelpFormatter
 
 from idstools.compute.common import get_nearest_time
@@ -70,14 +70,24 @@ if conn is None:
     logger.critical("----> Aborted.")
     exit(1)
 
-ids_waves = conn.get("waves")
-conn.close()
+ids_waves = None
+try:
+
+    if args.dd_update:
+        ids_waves = conn.get("waves", autoconvert=False)
+        core_sources = convert_ids(ids_waves, conn.factory.version)
+    else:
+        ids_waves = conn.get("waves", lazy=True, autoconvert=False)
+except Exception as _:  # noqa: F841
+    logger.error("waves ids is not present")
+    exit(1)
 
 # TIME VECTOR AND TIME INDEX
 # ---------------------------
 time_array = ids_waves.time
+
 ntime = len(time_array)
-time_index, time_value = get_nearest_time(time_array, args.time)
+time_slice, time_value = get_nearest_time(time_array, args.time)
 time = time_value
 rows = 2
 if ntime == 1:
@@ -92,14 +102,14 @@ if ntime != 1:
 
 waves_view = WavesView(ids_waves)
 
-waves_view.display_e_c_launchers_info(time_index=time_index)
-waves_view.plot_ecrh_profiles(ax1, time_index=time_index, verbose=args.verbose)
-waves_view.plot_eccd_profiles(ax2, time_index=time_index, verbose=args.verbose)
+waves_view.display_e_c_launchers_info(time_slice)
+waves_view.plot_ecrh_profiles(ax1, time_slice, verbose=args.verbose)
+waves_view.plot_eccd_profiles(ax2, time_slice, verbose=args.verbose)
 if ntime != 1:
-    waves_view.plot_ecrh_waveform(ax3, time_index=time_index)
-    waves_view.plot_e_c_c_d_waveform(ax4, time_index=time_index)
+    waves_view.plot_ecrh_waveform(ax3, time_slice)
+    waves_view.plot_e_c_c_d_waveform(ax4, time_slice)
 
-canvas.set_text(text=f"{get_database_path(args, time_value=time_value)}")
+canvas.set_text(text=f"{get_database_path(args, time_value)}")
 canvas.fig.suptitle(get_title(args, "EC Composition", time_value), size=12)
 canvas.fig.subplots_adjust(top=0.941, bottom=0.122, left=0.052, right=0.925, hspace=0.2, wspace=0.2)
 canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
@@ -113,7 +123,7 @@ if args.save:
     canvas.save(fname)
 else:
     canvas.show()
-
+conn.close()
 # def StrToList(string):
 #     if string[0] == "[":
 #         slist = string.split(",")

@@ -3,31 +3,7 @@ import os
 import re
 import socket
 
-import imas
-from imas import imasdef
-
-
-def get_core_version():
-    """
-    This function retrieves the core version number from the IMAS low-level modules in Python.
-
-    Returns:
-        The function `get_core_version` returns the low-level version of the core module being used in the
-    code. The version is extracted from the module names and formatted as an integer.
-    """
-    _lowlevel_version = ""
-    if "_al_lowlevel" in imas.__dict__:
-        _lowlevel_version = imas.get_al_version()
-    if "_ual_lowlevel" in imas.__dict__:
-        raw_core_version = imas._ual_lowlevel.__name__  # '__name__': 'imas_3_41_0_ual_4_11_10._ual_lowlevel
-        raw_core_version, _ = raw_core_version.split(".")
-        match = re.search(r"\d+_\d+_\d+$", raw_core_version)
-        if match:
-            _lowlevel_version = match.group()
-            _lowlevel_version = _lowlevel_version.replace("_", ".")
-    lowlevel_version = int(_lowlevel_version.split(".")[0])
-    return lowlevel_version
-
+import imaspy as imas
 
 # default parent parser for all idstools scripts
 uri_parser = argparse.ArgumentParser(add_help=False)
@@ -72,6 +48,14 @@ imas_parser.add_argument(
 )
 
 dbentry_parser = argparse.ArgumentParser(add_help=False, parents=[uri_parser])
+dbentry_parser.add_argument(
+    "--dd-update",
+    action="store_true",
+    help=(
+        "Convert IDS to the default version of the data dictionary if enabled"
+        "otherwise, use the original IDS stored on disk."
+    ),
+)
 
 
 def get_backend_id(name):
@@ -88,7 +72,7 @@ def get_backend_id(name):
     module `imasdef` based on the value of `name` with the suffix "_BACKEND". The value of this
     attribute is then returned by the function.
     """
-    return getattr(imasdef, f"{name}_BACKEND")
+    return getattr(imas.ids_defs, f"{name}_BACKEND")
 
 
 def get_slice_mode(name):
@@ -104,7 +88,7 @@ def get_slice_mode(name):
         The `get_slice_mode` function is returning the value of the attribute with the name
     `{name}_INTERP` from the `imasdef` module.
     """
-    return getattr(imasdef, f"{name}_INTERP")
+    return getattr(imas.ids_defs, f"{name}_INTERP")
 
 
 def get_details_from_uri(uri):
@@ -121,8 +105,6 @@ def get_details_from_uri(uri):
     provided URI string. The dictionary includes information such as user, database, version, backend,
     shot, pulse, run, path, and flags indicating the presence of certain parameters.
     """
-    import re
-
     param = {}
     user_pattern = r"user=([^;]+)"
     database_pattern = r"database=([^;]+)"

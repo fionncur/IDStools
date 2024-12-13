@@ -18,9 +18,7 @@ RUNMODULES=${RUNMODULES[@]}
 EBRUNMODULES=${EBBRUNMODULES[@]}
 EOF
 
-set -x
 cat ./ci-sdcc/versioninfo.txt
-set +x
 
 # Create ci acrtifact
 tar -cvzf ci-sdcc.tar.gz ci-sdcc inputs >/dev/null 2>&1

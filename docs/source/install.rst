@@ -3,7 +3,7 @@
 ##############
 
 *IDStools* is a Python package, so the Python environment is
-mandatory. Its functioning depends on IMAS and the data dictionary. As a
+mandatory. Its functioning depends on IMASPy and the data dictionary. As a
 result, before running *IDStools* scripts, the IMAS environment must be
 loaded.
 

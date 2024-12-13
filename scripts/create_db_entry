@@ -8,12 +8,12 @@ import sys
 from os import path, system
 from sys import exit
 
-import imas
+import imaspy as imas
 import numpy as np
 from rich_argparse import RawDescriptionRichHelpFormatter
 
 import idstools.init_mendeleiev as mend
-from idstools.utils.clihelper import get_backend_id, imas_parser
+from idstools.utils.clihelper import imas_parser
 
 # ----------------------------------------------------------------------
 
@@ -34,31 +34,29 @@ parser.add_argument(
     dest="wo_validation",
 )
 args = parser.parse_args()
-input = imas.DBEntry(
-    get_backend_id(args.backend),
-    args.database,
-    args.shot,
-    args.run,
-    args.user,
-    args.version,
+
+uri = (
+    f"imas:{args.backend.lower()}?user={args.user};pulse={args.shot};"
+    f"run={args.run};database={args.database};version={args.version}"
 )
+the_slice = 0
+connection = None
+if uri != "" and uri is not None:
+    try:
+        connection = imas.DBEntry(uri, "r")
+    except Exception as e:
+        print(e)
 
-
-if input is not None:
-    status, _ = input.open()
-    if status != 0:
-        print(f"Can not find data entry {args}")
-        exit(1)
-else:
-    print("----> Aborted.")
+if connection is None:
+    print(f"Can not find data entry {args}")
     exit(1)
+
 # ----------------------------------------------------------------------
 
 # Read necessary IDSs from database
 try:
-    core_profiles = imas.core_profiles()
-    core_profiles.ids_properties = input.partial_get("core_profiles", "ids_properties")
-    if core_profiles.ids_properties.homogeneous_time != -999999999:
+    core_profiles = connection.get("core_profiles", lazy=True)
+    if core_profiles.ids_properties.homogeneous_time != imas.ids_defs.EMPTY_INT:
         core_present = 1
     else:
         core_present = 0
@@ -67,9 +65,8 @@ except Exception as e:
     core_present = 0
 
 try:
-    edge_profiles = imas.edge_profiles()
-    edge_profiles.ids_properties = input.partial_get("edge_profiles", "ids_properties")
-    if edge_profiles.ids_properties.homogeneous_time != -999999999:
+    edge_profiles = connection.get("edge_profiles", lazy=True)
+    if edge_profiles.ids_properties.homogeneous_time != imas.ids_defs.EMPTY_INT:
         edge_present = 1
     else:
         edge_present = 0
@@ -79,14 +76,18 @@ except Exception as e:
     edge_present = 0
 
 try:
-    summary = input.get("summary")
+    summary = connection.get("summary", lazy=True)
 except Exception as e:
     print("The summary IDS is absent from the input data-entry", file=sys.stdout)
     print("----> H&CD waveforms not filled (to be completed by hand)", file=sys.stdout)
 
 if core_present == 1:
     try:
-        ne0 = input.partial_get("core_profiles", "profiles_1d(:)/electrons/density(0)")
+        summary = connection.get("summary", lazy=True)
+        ne0_raw = []
+        for t in range(len(core_profiles.time)):
+            ne0_raw.append(core_profiles.profiles_1d[t].electrons.density[0])
+        ne0 = np.array(ne0_raw)
         central_electron_density = 0
         for islice in range(len(ne0)):
             if ne0[islice] > central_electron_density:
@@ -99,8 +100,6 @@ if core_present == 1:
         )
         print("----> Aborted.", file=sys.stderr)
         exit()
-    core_profiles.profiles_1d.resize(1)
-    core_profiles.profiles_1d[0] = input.partial_get("core_profiles", "profiles_1d(" + str(the_slice) + ")")
 
 if edge_present == 1:
     try:
@@ -119,30 +118,27 @@ if edge_present == 1:
             exit()
 
 try:
-    equilibrium = imas.equilibrium()
-    equilibrium.ids_properties = input.partial_get("equilibrium", "ids_properties")
-    if equilibrium.ids_properties.homogeneous_time != -999999999:
+    equilibrium = connection.get("equilibrium", lazy=True)
+    if equilibrium.ids_properties.homogeneous_time != imas.ids_defs.EMPTY_INT:
         eq_present = 1
     else:
         eq_present = 0
-    if eq_present == 1:
-        equilibrium.vacuum_toroidal_field = input.partial_get("equilibrium", "vacuum_toroidal_field")
-        equilibrium.time_slice.resize(1)
-        equilibrium.time_slice[0] = input.partial_get("equilibrium", "time_slice(" + str(the_slice) + ")")
 except Exception as e:
     print("The equilibrium IDS is absent from the input data-entry", file=sys.stdout)
     eq_present = 0
 
+comment = ""
+dd_version = ""
+workflow = "tbd"
+
 try:
-    dataset_description = input.get("dataset_description")
+    dataset_description = connection.get("dataset_description", lazy=True)
     comment = str.replace(dataset_description.ids_properties.comment, "\n", "\n   ")
     dd_version = dataset_description.dd_version
     workflow = dataset_description.simulation.workflow
 except Exception as e:
     print("----> dataset_description does not exist", file=sys.stderr)
-    comment = ""
-    dd_version = ""
-    workflow = "tbd"
+
 
 p_sol = 0
 try:
@@ -153,18 +149,12 @@ except Exception as e:
     print("P_sol will be deduced from edge_transport if available", file=sys.stdout)
 
 try:
-    edge_transport = imas.edge_transport()
-    edge_transport.ids_properties = input.partial_get("edge_transport", "ids_properties")
-    if edge_transport.ids_properties.homogeneous_time != -999999999:
+    edge_transport = connection.get("edge_transport", lazy=True)
+    if edge_transport.ids_properties.homogeneous_time != imas.ids_defs.EMPTY_INT:
         flux_present = 1
     else:
         flux_present = 0
-    if flux_present == 1:
-        edge_transport.model.resize(1)
-        edge_transport.model[0].ggd.resize(1)
-        edge_transport.model[0].ggd[0] = input.partial_get("edge_transport", "model(0)/ggd(" + str(the_slice) + ")")
-        edge_transport.grid_ggd.resize(1)
-        edge_transport.grid_ggd[0] = input.partial_get("edge_transport", "grid_ggd(" + str(the_slice) + ")")
+
 except Exception as e:
     print("The edge_transport IDS is absent from the input data-entry", file=sys.stdout)
     if p_sol == 0:
@@ -212,7 +202,11 @@ else:
 if eq_present == 1:
     try:
         plasma_current = 0
-        ip = input.partial_get("equilibrium", "time_slice(:)/global_quantities/ip")
+        ip_raw = []
+        for t in range(len(equilibrium.time)):
+            ip_raw.append(equilibrium.time_slice[t].global_quantities.ip)
+        ip = np.array(ip_raw)
+
         for islice in range(len(ip)):
             if abs(ip[islice]) > plasma_current:
                 plasma_current = ip[islice] * 1.0e-6
@@ -234,10 +228,10 @@ else:
 
 if core_present == 1:
     try:
-        nspecies = len(core_profiles.profiles_1d[0].ion)
+        nspecies = len(core_profiles.profiles_1d[the_slice].ion)
         a = [0] * nspecies
         for ispecies in range(nspecies):
-            a[ispecies] = int(core_profiles.profiles_1d[0].ion[ispecies].element[0].a)
+            a[ispecies] = int(core_profiles.profiles_1d[the_slice].ion[ispecies].element[0].a)
     except Exception as e:
         print(
             "core_profiles.profiles_1d[:].ion[0].element[0].a could not be read",
@@ -250,12 +244,12 @@ else:
         edge_profiles = imas.edge_profiles()
         edge_profiles.ggd.resize(1)
         # pdb.set_trace()
-        # edge_profiles.ggd[0].ion = input.edge_profiles.partialGet('ggd('+str(the_slice)+')/ion')
-        edge_profiles.ggd[0] = input.partial_get("edge_profiles", "ggd(" + str(the_slice) + ")")
-        nspecies = len(edge_profiles.ggd[0].ion)
+        # edge_profiles.ggd[the_slice].ion = input.edge_profiles.partialGet('ggd('+str(the_slice)+')/ion')
+
+        nspecies = len(edge_profiles.ggd[the_slice].ion)
         a = [0] * nspecies
         for ispecies in range(nspecies):
-            a[ispecies] = int(edge_profiles.ggd[0].ion[ispecies].element[0].a)
+            a[ispecies] = int(edge_profiles.ggd[the_slice].ion[ispecies].element[0].a)
     except Exception as e:
         print(
             "edge_profiles.ggd[:].ion[:].element[0].a could not be read",
@@ -266,10 +260,10 @@ else:
 
 if core_present == 1:
     try:
-        nspecies = len(core_profiles.profiles_1d[0].ion)
+        nspecies = len(core_profiles.profiles_1d[the_slice].ion)
         z = [0] * nspecies
         for ispecies in range(nspecies):
-            z[ispecies] = int(core_profiles.profiles_1d[0].ion[ispecies].element[0].z_n)
+            z[ispecies] = int(core_profiles.profiles_1d[the_slice].ion[ispecies].element[0].z_n)
     except Exception as e:
         print(
             "core_profiles.profiles_1d[:].ion[0].element[0].z_n could not be read",
@@ -279,10 +273,10 @@ if core_present == 1:
         z = [0]
 else:
     try:
-        nspecies = len(edge_profiles.ggd[0].ion)
+        nspecies = len(edge_profiles.ggd[the_slice].ion)
         z = [0] * nspecies
         for ispecies in range(nspecies):
-            z[ispecies] = int(edge_profiles.ggd[0].ion[ispecies].element[0].z_n)
+            z[ispecies] = int(edge_profiles.ggd[the_slice].ion[ispecies].element[0].z_n)
     except Exception as e:
         print(
             "edge_profiles.ggd[:].ion[:].element[0].z_n could not be read",
@@ -293,13 +287,13 @@ else:
 
 if core_present == 1:
     try:
-        volume = core_profiles.profiles_1d[0].grid.volume
+        volume = core_profiles.profiles_1d[the_slice].grid.volume
         if len(volume) == 0:
             try:
-                volume = equilibrium.time_slice[0].profiles_1d.volume
+                volume = equilibrium.time_slice[the_slice].profiles_1d.volume
             except Exception as e:
-                exit("equilibrium.time_slice[0].profiles_1d.volume could not be read")
-            if len(volume) == len(core_profiles.profiles_1d[0].electrons.density):
+                exit("equilibrium.time_slice[the_slice].profiles_1d.volume could not be read")
+            if len(volume) == len(core_profiles.profiles_1d[the_slice].electrons.density):
                 print(
                     "core_profiles.profiles_1d[:].grid.volume could not be read",
                     file=sys.stderr,
@@ -323,7 +317,7 @@ if core_present == 1:
         exit()
 
     try:
-        central_zeff = core_profiles.profiles_1d[0].zeff[0]
+        central_zeff = core_profiles.profiles_1d[the_slice].zeff[0]
     except Exception as e:
         print("core_profiles.profiles_1d[:].zeff[0] could not be read", file=sys.stderr)
         print("----> Aborted.", file=sys.stderr)
@@ -404,15 +398,15 @@ if p_sol == 0:
         p_sol = 0
         p_sol_e = 0
         p_sol_i = 0
-        nsubsets = len(edge_transport.model[0].ggd[0].electrons.energy.flux)
+        nsubsets = len(edge_transport.model[0].ggd[the_slice].electrons.energy.flux)
         for iset in range(nsubsets):
-            if edge_transport.model[0].ggd[0].electrons.energy.flux[iset].grid_subset_index == 26:
-                for iFace in range(len(edge_transport.model[0].ggd[0].electrons.energy.flux[iset].values)):
-                    faceindex = edge_transport.grid_ggd[0].grid_subset[iset].element[iFace].object[0].index
+            if edge_transport.model[0].ggd[the_slice].electrons.energy.flux[iset].grid_subset_index == 26:
+                for iFace in range(len(edge_transport.model[0].ggd[the_slice].electrons.energy.flux[iset].values)):
+                    faceindex = edge_transport.grid_ggd[the_slice].grid_subset[iset].element[iFace].object[0].index
                     # Allow for backward-compatibility when measure contained the area instead of the edge length
                     try:
                         area = (
-                            edge_transport.grid_ggd[0]
+                            edge_transport.grid_ggd[the_slice]
                             .space[0]
                             .objects_per_dimension[1]
                             .object[faceindex - 1]
@@ -420,16 +414,23 @@ if p_sol == 0:
                         )
                     except Exception as e:
                         area = (
-                            edge_transport.grid_ggd[0].space[0].objects_per_dimension[1].object[faceindex - 1].measure
+                            edge_transport.grid_ggd[the_slice]
+                            .space[0]
+                            .objects_per_dimension[1]
+                            .object[faceindex - 1]
+                            .measure
                         )
-                    flux = edge_transport.model[0].ggd[0].electrons.energy.flux[iset].values[iFace]
+                    flux = edge_transport.model[0].ggd[the_slice].electrons.energy.flux[iset].values[iFace]
                     p_sol_e = p_sol_e + flux * area
                     try:
-                        flux = edge_transport.model[0].ggd[0].total_ion_energy.flux[iset].values[iFace]
+                        flux = edge_transport.model[0].ggd[the_slice].total_ion_energy.flux[iset].values[iFace]
                     except Exception as e:
                         flux = 0
                         for ispecies in range(nspecies):
-                            flux = flux + edge_transport.model[0].ggd[0].ion[ispecies].energy.flux[iset].values[iFace]
+                            flux = (
+                                flux
+                                + edge_transport.model[0].ggd[the_slice].ion[ispecies].energy.flux[iset].values[iFace]
+                            )
                     p_sol_i = p_sol_i + flux * area
         p_sol = (p_sol_e + p_sol_i) * 1.0e-6
 
@@ -447,7 +448,7 @@ if nspecies > 0:
     max_density = -999.0
     for ispecies in range(nspecies):
         if core_present == 1:
-            species_density[ispecies] = sum(volume * core_profiles.profiles_1d[0].ion[ispecies].density)
+            species_density[ispecies] = sum(volume * core_profiles.profiles_1d[the_slice].ion[ispecies].density)
         elif edge_present == 1:
             if z[ispecies] == 1:
                 if a[ispecies] == 1:
@@ -513,7 +514,7 @@ if nspecies > 0:
             imax = ispecies
 
     if core_present == 1:
-        ne = sum(volume * core_profiles.profiles_1d[0].electrons.density)
+        ne = sum(volume * core_profiles.profiles_1d[the_slice].electrons.density)
     elif edge_present == 1:
         ne = summary.local.separatrix.n_e.value[the_slice]
 

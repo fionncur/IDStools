@@ -1,20 +1,11 @@
-import fnmatch
 import logging
 import os
-import re
 from datetime import datetime
 from glob import glob
 from pathlib import Path
 
-import imas
-from yaml import load as yamlload
-from yaml import safe_load
-
-try:
-    from yaml import CLoader as yamlLoader
-except ImportError:
-    from yaml import Loader as yamlLoader
-
+import imaspy as imas
+import yaml
 
 logger = logging.getLogger(f"module.{__name__}")
 
@@ -97,10 +88,6 @@ class DBMaster:
             version_dir = f"{database_dir}/{version}"
             if os.path.exists(version_dir):
                 return version_dir
-            else:
-                raise FileNotFoundError(
-                    "The path provided does not exist or has no such database file or directory.Please check spelling"
-                )
         return None
 
     @staticmethod
@@ -186,7 +173,9 @@ class DBMaster:
         return [(version, database_dict[version]) for version in sorted(database_dict.keys())]
 
     @staticmethod
-    def get_hdf5_pulses(user: str = None, database: str = None, version: str = None, as_dictionary=False) -> list:
+    def get_hdf5_pulses(
+        user: str = None, database: str = None, version: str = None, status=None, as_dictionary=False
+    ) -> list:
         """
         The function `get_hdf5_pulses` retrieves a list of pulses from HDF5 master files. It needs to specify
         full path till version.
@@ -207,19 +196,38 @@ class DBMaster:
             a list of tuples. Each tuple contains the following elements, The tuple includes the pulse number,
             run number, HDF5_BACKEND backend, database, user, version, and data file path.
         """
-        version_dir = DBMaster.get_version_dir(version, database, user)
         pulses = {} if as_dictionary else []
+        version_dir = DBMaster.get_version_dir(version, database, user)
+        if version_dir is None:
+            return pulses
+        scenario_yaml_dir = os.path.join(version_dir, "0")
+
         hdf5_master_file_paths = glob(f"{version_dir}/**/*master.h5", recursive=True)
         for hdf5_master_file_path in hdf5_master_file_paths:
-            try:
-                pulse = int(str(hdf5_master_file_path).split("/")[-3])
-                run = int(str(hdf5_master_file_path).split("/")[-2])
-            except Exception as e:
-                print(f"Malformed database path {hdf5_master_file_path}")
-                logger.debug(f"{e}")
+            run = hdf5_master_file_path.split("/")[-2]
+            if not run.isdigit():
+                print(f"warning:run number is not an integer {run} {hdf5_master_file_path}")
                 continue
-            file_time = datetime.fromtimestamp(os.path.getmtime(hdf5_master_file_path)).replace(microsecond=0)
+            run = int(run)
+            pulse = hdf5_master_file_path.split("/")[-3]
+            if not pulse.isdigit():
+                print(f"warning:pulse number is not an integer {pulse}/{run} {hdf5_master_file_path}")
+                continue
+            pulse = int(pulse)
 
+            file_time = datetime.fromtimestamp(os.path.getmtime(hdf5_master_file_path)).replace(microsecond=0)
+            if status is not None:
+                yaml_file = f"ids_{pulse}{str(run).zfill(4)}.yaml"
+                yaml_file_path = os.path.join(scenario_yaml_dir, yaml_file)
+                status_from_yaml = ""
+                if os.path.exists(yaml_file_path):
+                    status_from_yaml = DBMaster.get_pulse_status(yaml_file_path)
+                    if status_from_yaml == "":
+                        print(f"warning:could not find status info in scenario file {pulse}/{run} {yaml_file_path}")
+                else:
+                    print(f"warning:scenario summary file does not exists for {pulse}/{run} {yaml_file_path}")
+                if status != status_from_yaml:
+                    continue
             if as_dictionary:
                 if pulse not in pulses:
                     pulses[pulse] = []
@@ -227,7 +235,7 @@ class DBMaster:
                     (
                         pulse,
                         run,
-                        imas.imasdef.MDSPLUS_BACKEND,
+                        imas.ids_defs.HDF5_BACKEND,
                         database,
                         user,
                         version,
@@ -240,7 +248,7 @@ class DBMaster:
                     (
                         pulse,
                         run,
-                        imas.imasdef.HDF5_BACKEND,
+                        imas.ids_defs.HDF5_BACKEND,
                         database,
                         user,
                         version,
@@ -280,69 +288,91 @@ class DBMaster:
         Returns:
             a list of pulses.
         """
-        mdsplus_dir = DBMaster.get_version_dir(version, database, user)
         pulses = {} if as_dictionary else []
+        mdsplus_dir = DBMaster.get_version_dir(version, database, user)
+        if mdsplus_dir is None:
+            return pulses
+        scenario_yaml_dir = os.path.join(mdsplus_dir, "0")
 
-        for root, dirnames, filenames in os.walk(mdsplus_dir):
-            for datafile in fnmatch.filter(filenames, "*.datafile"):
-                data_file_path = f"{root}/{datafile}"
-                if (status is None) or (status == DBMaster.get_pulse_status(Path(data_file_path).with_suffix(".yaml"))):
-                    run_list = (root[len(mdsplus_dir) + 1 :]).split("/")
-                    try:
-                        if len(run_list) == 1:  # AL4 layout
-                            num_start_pos = datafile.find("_") + 1
-                            num_end_pos = datafile.rfind(".")
-                            num = int(datafile[num_start_pos:num_end_pos])
-                            pulse = num // 10000
-                            run = int(run_list[0]) * 10000 + (num % 10000)
-                        else:  # AL5 layout
-                            assert datafile == "ids_001.datafile"
-                            if os.path.islink(data_file_path):
-                                continue
-                            run = root.split("/")[-1]
-                            run = int(run)
-                            pulse = root.split("/")[-2]
-                            pulse = int(pulse)
-                    except Exception as e:
-                        print(f"Malformed database path {root}")
-                        logger.debug(f"{e}")
-                        continue
-                    file_time = datetime.fromtimestamp(os.path.getmtime(data_file_path)).replace(microsecond=0)
+        datafile_paths = glob(f"{mdsplus_dir}/**/*.datafile", recursive=True)
 
-                    if as_dictionary:
-                        if pulse not in pulses:
-                            pulses[pulse] = []
-                        is_run_available = any(x[1] == run for x in pulses[pulse])
-                        if not is_run_available:
-                            pulses[pulse].append(
-                                (
-                                    pulse,
-                                    run,
-                                    imas.imasdef.MDSPLUS_BACKEND,
-                                    database,
-                                    user,
-                                    version,
-                                    data_file_path,
-                                    file_time,
-                                )
-                            )
-                    else:
-                        pulses.append(
-                            (
-                                pulse,
-                                run,
-                                imas.imasdef.MDSPLUS_BACKEND,
-                                database,
-                                user,
-                                version,
-                                data_file_path,
-                                file_time,
-                            )
+        for data_file_path in datafile_paths:
+            root = os.path.dirname(data_file_path)
+            datafile = os.path.basename(data_file_path)
+            run_list = (root[len(mdsplus_dir) + 1 :]).split("/")
+            if len(run_list) == 1:  # AL4 layout
+                num_start_pos = datafile.find("_") + 1
+                num_end_pos = datafile.rfind(".")
+                num = int(datafile[num_start_pos:num_end_pos])
+                pulse = num // 10000
+                run = int(run_list[0]) * 10000 + (num % 10000)
+
+            else:  # AL5 layout
+                if datafile != "ids_001.datafile":
+                    print(f"warning:ids_001.datafile does not exists {run} {data_file_path}")
+                    continue
+                if os.path.islink(data_file_path):
+                    continue
+                run = root.split("/")[-1]
+                if not run.isdigit():
+                    print(f"warning:run number is not an integer {run} {data_file_path}")
+                    continue
+                run = int(run)
+                pulse = root.split("/")[-2]
+                if not pulse.isdigit():
+                    print(f"warning:pulse number is not an integer {pulse}/{run} {data_file_path}")
+                    continue
+                pulse = int(pulse)
+
+            if status is not None:
+                yaml_file = f"ids_{pulse}{str(run).zfill(4)}.yaml"
+                yaml_file_path = os.path.join(scenario_yaml_dir, yaml_file)
+                status_from_yaml = ""
+                if os.path.exists(yaml_file_path):
+                    status_from_yaml = DBMaster.get_pulse_status(yaml_file_path)
+                    if status_from_yaml == "":
+                        print(f"warning:could not find status info in scenario file {pulse}/{run} {yaml_file_path}")
+                else:
+                    print(f"warning:scenario summary file does not exists for {pulse}/{run} {yaml_file_path}")
+                if status != status_from_yaml:
+                    continue
+
+            file_time = datetime.fromtimestamp(os.path.getmtime(data_file_path)).replace(microsecond=0)
+
+            if as_dictionary:
+                if pulse not in pulses:
+                    pulses[pulse] = []
+                is_run_available = any(x[1] == run for x in pulses[pulse])
+                if not is_run_available:
+                    pulses[pulse].append(
+                        (
+                            pulse,
+                            run,
+                            imas.ids_defs.MDSPLUS_BACKEND,
+                            database,
+                            user,
+                            version,
+                            data_file_path,
+                            file_time,
                         )
+                    )
+            else:
+                pulses.append(
+                    (
+                        pulse,
+                        run,
+                        imas.ids_defs.MDSPLUS_BACKEND,
+                        database,
+                        user,
+                        version,
+                        data_file_path,
+                        file_time,
+                    )
+                )
         return pulses
 
     @staticmethod
-    def get_pulse_status(yaml_file_path: str) -> str:
+    def get_pulse_status(yaml_file_path) -> str:
         """
         The function `get_pulse_status` reads a YAML file from a given path and returns the value of the
         "status" key in the file's metadata.
@@ -354,13 +384,20 @@ class DBMaster:
             the value of the "status" key from the metadata dictionary.
         """
         _yaml_file_path = Path(yaml_file_path)
-        try:
-            with open(_yaml_file_path, "r") as file_handle:
-                metadata = safe_load(file_handle)
-        except FileNotFoundError as exc:
-            print(exc)
-            return "unknown"
-        return metadata["status"]
+
+        status = ""
+        with open(_yaml_file_path, "r") as file_handle:
+            lines = file_handle.readlines()
+            for i, line in enumerate(lines):
+                if line.strip().startswith("status:"):
+                    start_index = max(0, i - 1)
+                    end_index = min(len(lines), i + 2)
+                    context = lines[start_index:end_index]
+                    combined_context = "".join(context)
+                    metadata = yaml.load(combined_context, Loader=yaml.Loader)
+                    if isinstance(metadata, dict):
+                        status = metadata["status"]
+        return status
 
     @staticmethod
     def get_database_files(user=None, database=None, version=None, backends=None):
@@ -497,91 +534,31 @@ class DBMaster:
             raise NotImplementedError(f"Unsupported backend: {backend}")
 
     @classmethod
-    def get_core_version(cls):
-        _lowlevel_version = ""
-        if "_al_lowlevel" in imas.__dict__:
-            try:
-                _lowlevel_version = imas.get_al_version()
-            except Exception:
-                _lowlevel_version = imas.al_defs.AL_VERSION.decode("utf-8")
-        elif "_ual_lowlevel" in imas.__dict__:
-            raw_core_version = imas._ual_lowlevel.__name__  # '__name__': 'imas_3_41_0_ual_4_11_10._ual_lowlevel
-            raw_core_version, _ = raw_core_version.split(".")
-            match = re.search(r"\d+_\d+_\d+$", raw_core_version)
-            if match:
-                _lowlevel_version = match.group()
-                _lowlevel_version = _lowlevel_version.replace("_", ".")
-        lowlevel_version = _lowlevel_version
-        return lowlevel_version
+    def get_dd_version(cls):
+        factory = imas.IDSFactory()
+        return factory.dd_version
 
     @classmethod
-    def get_dd_version(cls):
-        _lowlevel_version = ""
-        if "_al_lowlevel" in imas.__dict__:
-            try:
-                _lowlevel_version = imas.al_dd_version
-            except Exception:
-                _lowlevel_version = imas.al_defs.DD_VERSION.decode("utf-8")
-        elif "_ual_lowlevel" in imas.__dict__:
-            raw_d_d_version = imas._ual_lowlevel.__name__  # '__name__': 'imas_3_41_0_ual_4_11_10._ual_lowlevel
-            raw_d_d_version, _ = raw_d_d_version.split(".")
-            match = re.search(r"\d+_\d+_\d+", raw_d_d_version)
-            if match:
-                _lowlevel_version = match.group()
-                _lowlevel_version = _lowlevel_version.replace("_", ".")
-        lowlevel_version = _lowlevel_version
-        return lowlevel_version
+    def create_connection(cls, imasargs, target_dd_version=None):
+        if "mode" not in imasargs.__dict__:
+            imasargs.mode = "w"
+        connection = None
+        if imasargs.uri != "" and imasargs.uri is not None:
+            connection = imas.DBEntry(imasargs.uri, imasargs.mode, dd_version=target_dd_version)
+        return connection
 
     @classmethod
     def get_connection(cls, imasargs):
-        connection = DBMaster.get_db_entry_object(imasargs)
-        if connection is not None:
-            status, _ = connection.open()
-            if status != 0:
-                logger.error(f"Can not find data entry {imasargs}")
-                return None
-        return connection
-
-    @classmethod
-    def create_connection(cls, imasargs):
-        if "mode" not in imasargs.__dict__:
-            imasargs.mode = "w"
-
-        connection = DBMaster.get_db_entry_object(imasargs)
-        if connection is not None:
-            status, _ = connection.create()
-            if status != 0:
-                logger.error(f"Can not create database entry {imasargs}")
-                return None
-        return connection
-
-    @classmethod
-    def get_db_entry_object(cls, imasargs):
         connection = None
         if imasargs.uri != "" and imasargs.uri is not None:
             if "mode" in imasargs.__dict__:
                 connection = imas.DBEntry(imasargs.uri, imasargs.mode)
             else:
-                connection = imas.DBEntry(imasargs.uri, "r")
+                try:
+                    connection = imas.DBEntry(imasargs.uri, "r")
+                except Exception as e:
+                    print(e)
         return connection
-
-    @staticmethod
-    def get_status(path):
-        """Function that returns the status in the given yaml file
-
-        Parameter
-        ---------
-        path: str or Path
-        """
-
-        p = Path(path)
-        try:
-            with open(p, "r") as f:
-                metadata = safe_load(f)
-        except FileNotFoundError as exc:
-            print(exc)
-            return "unknown"
-        return metadata["status"]
 
     @staticmethod
     def pulse_list2_dict(pulselist):
@@ -627,15 +604,20 @@ class DBMaster:
         # linked subfolders (https://bugs.python.org/issue33428)
         folder = glob(str(locpath) + "/**/*.datafile", recursive=True)
         for entry in folder:
-            if (with_status is None) or (with_status == DBMaster.get_status(Path(entry).with_suffix(".yaml"))):
+            if (with_status is None) or (with_status == DBMaster.get_pulse_status(Path(entry).with_suffix(".yaml"))):
                 file = entry.split("/")[-1].split("_")[1].split(".")[0]
                 if len(file) <= 4:
-                    pulse = 0
+                    pulse = int(entry.split("/")[-3])
+                    run = int(entry.split("/")[-2])
                 else:
                     pulse = int(file[0:-4])
-                run = int(file[-4:]) + 10000 * int(entry.split("/")[-2])
+                    run = int(file[-4:])
+
+                # run = int(file[-4:]) + 10000 * int(entry.split("/")[-2])
                 pulses.append((pulse, run))
-        return pulses
+
+        pulses_set = set(pulses)
+        return list(pulses_set)
 
     @staticmethod
     def hdf5_list_pulse_run(locpath):
@@ -725,11 +707,11 @@ def read_scenario(
     if out_ids_list is None:
         out_ids_list = []
     with open(scenario_file_path, "r") as scenario_file:
-        config = yamlload(scenario_file, Loader=yamlLoader)
+        config = yaml.load(scenario_file, Loader=yaml.Loader)
 
     # Read the equilibrium and core_profiles IDSs from the input datafile
     connection_in = imas.DBEntry(
-        imas.imasdef.MDSPLUS_BACKEND,
+        imas.ids_defs.MDSPLUS_BACKEND,
         config["input_database"],
         config["shot"],
         config["run_in"],
@@ -747,7 +729,7 @@ def read_scenario(
 
     # Read the out IDS from the output datafile
     connection_out = imas.DBEntry(
-        imas.imasdef.MDSPLUS_BACKEND,
+        imas.ids_defs.MDSPLUS_BACKEND,
         config["output_database"],
         config["shot"],
         config["run_out"],
@@ -768,7 +750,7 @@ def read_scenario(
     import argparse
 
     inputargs = argparse.Namespace()
-    inputargs.backend = imas.imasdef.MDSPLUS_BACKEND
+    inputargs.backend = imas.ids_defs.MDSPLUS_BACKEND
     inputargs.pulse = config["shot"]
     inputargs.run = config["run_in"]
     inputargs.user = config["input_user_or_path"]

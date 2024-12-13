@@ -5,9 +5,8 @@
 import argparse
 import logging
 import os
-import sys
 
-import imas
+from imaspy import convert_ids
 from rich_argparse import RichHelpFormatter
 
 from idstools.compute.common import get_nearest_time
@@ -23,7 +22,8 @@ from idstools.view.common import PlotCanvas
 from idstools.view.core_profiles import CoreProfilesView
 
 parser = argparse.ArgumentParser(
-    description="---- Display the efield, toroidal, polidal velocities from the core_profiles IDSs [previously known as rotationplot]",
+    description="""---- Display the efield, toroidal, polidal velocities from the core_profiles IDSs
+    [previously known as rotationplot]""",
     parents=[dbentry_parser],
     formatter_class=RichHelpFormatter,
 )
@@ -47,25 +47,23 @@ if connection is None:
     logger.critical("----> Aborted.")
     exit(1)
 
+ids_core_profiles = None
 try:
-    ids_core_profiles = imas.core_profiles()
-    ids_core_profiles.time = connection.partial_get("core_profiles", "time")
-    if ids_core_profiles.time is None:
-        logger.critical("No core_profiles IDS in the data-entry --> Abort.")
-        exit()
-except Exception as e:
-    logger.critical("The core_profiles IDS is absent from the input data-entry")
-    logger.critical("----> Aborted.")
-    exit()
+
+    if args.dd_update:
+        ids_core_profiles = connection.get("core_profiles", autoconvert=False)
+        ids_core_profiles = convert_ids(ids_core_profiles, connection.factory.version)
+    else:
+        ids_core_profiles = connection.get("core_profiles", lazy=True, autoconvert=False)
+except Exception as _:  # noqa: F841
+    logger.error("core_profiles ids is not present")
+    exit(1)
 
 # Search for adequate time slice for display
 time_array = ids_core_profiles.time
-time_index, time_value = get_nearest_time(time_array, args.time)
-ntime = len(ids_core_profiles.time)
+time_slice, time_value = get_nearest_time(time_array, args.time)
 
-# Read 1D-profiles for this time slice
-ids_core_profiles.profiles_1d.resize(1)
-ids_core_profiles.profiles_1d[0] = connection.partial_get("core_profiles", f"profiles_1d({time_index})")
+ntime = len(ids_core_profiles.time)
 
 canvas = PlotCanvas(2, 2)
 
@@ -77,10 +75,10 @@ ax4 = canvas.add_axes(title="", xlabel="", row=1, col=1)
 
 coreprofiles_view = CoreProfilesView(ids_core_profiles)
 
-coreprofiles_view.plot_efield_profile(ax1)
-coreprofiles_view.plot_toroidal_velocity_profile(ax2)
-coreprofiles_view.plot_poloidal_velocity_profile(ax3)
-coreprofiles_view.plot_diamagnetic_velocity_profile(ax4)
+coreprofiles_view.plot_efield_profile(ax1, time_slice)
+coreprofiles_view.plot_toroidal_velocity_profile(ax2, time_slice)
+coreprofiles_view.plot_poloidal_velocity_profile(ax3, time_slice)
+coreprofiles_view.plot_diamagnetic_velocity_profile(ax4, time_slice)
 
 ax1.sharex(ax3)
 ax2.sharex(ax4)

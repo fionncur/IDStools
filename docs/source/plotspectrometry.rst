@@ -21,6 +21,6 @@ It shows plots of radiance and intensity of the spectrom.
         $ plotspectrometry --uri "imas:mdsplus?user=public;pulse=134000;run=37;database=TEST;version=3"
 
 
-   .. thumbnail:: _static/images/plotspectrometry.png
+   .. image:: _static/images/plotspectrometry.png
       :alt: image not found
       :align: center

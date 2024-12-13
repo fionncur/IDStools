@@ -21,16 +21,12 @@ retrieves from distribution_sources IDS
         $ plotneutron --uri "imas:mdsplus?user=public;pulse=121014;run=11;database=ITER;version=3" -t 450
 
 
-    .. thumbnail:: _static/images/plotneutron.png
+    .. image:: _static/images/plotneutron.png
         :alt: image not found
         :align: center
 
-    .. thumbnail:: _static/images/plotneutron2.png
-        :alt: image not found
-        :align: center
 
     .. code-block:: bash
-
 
         Time  = 482.00 s
         Distribution_sources contains 9 sources

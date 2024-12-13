@@ -4,17 +4,20 @@ import logging
 import os
 import sys
 
+import imaspy as imas
 from rich_argparse import RichHelpFormatter
 
 from idstools.compute.equilibrium import EquilibriumCompute
 from idstools.database import DBMaster
+from idstools.utils.idshelper import get_ids_types
 from idstools.utils.idslogger import setup_logger
 
 logger = setup_logger("module", stdout_level=logging.INFO)
 
 # Management of input arguments
 parser = argparse.ArgumentParser(
-    description="Rescaling an equilibrium magnetic field, storing the output into another entry of the same DB. replaced by ids_rescale_eq",
+    description="Rescaling an equilibrium magnetic field, storing the output into another entry of the same "
+    "DB. replaced by ids_rescale_eq",
     formatter_class=RichHelpFormatter,
 )
 parser.add_argument(
@@ -38,7 +41,14 @@ parser.add_argument(
     type=float,
     required=True,
 )
-
+parser.add_argument(
+    "--dd-update",
+    action="store_true",
+    help=(
+        "Convert IDS to the default version of the data dictionary if enabled"
+        "otherwise, use the original IDS stored on disk."
+    ),
+)
 args = parser.parse_args()
 
 rescale = args.rescale
@@ -46,7 +56,6 @@ rescale = args.rescale
 if rescale == 0:
     logger.critical("Rescale factor cannot be zero!")
     sys.exit(1)
-
 
 # OPEN INPUT
 inputargs = argparse.Namespace()
@@ -56,23 +65,43 @@ if connection is None:
     print("Error opening source pulse! Please check existence.")
     sys.exit()
 
-ids_equilibrium = connection.get("equilibrium")
+# hack to get underlying data dictionary version used by idses
+ids = get_ids_types()
+src_dd_version = connection.dd_version
+if not args.dd_update:
+    for idsname in ids:
+        try:
+            _dummy = connection.get(idsname, lazy=True, autoconvert=False)
+            src_dd_version = _dummy.ids_properties.version_put.data_dictionary.value
+            break
+        except Exception as _:  # noqa: F841
+            pass
+
+ids_equilibrium = connection.get("equilibrium", autoconvert=False)
 
 outputargs = argparse.Namespace()
 outputargs.mode = "w"
 outputargs.uri = args.dest
 
-output_connection = DBMaster.get_connection(outputargs)
+if "mode" not in outputargs.__dict__:
+    outputargs.mode = "a"
+output_connection = None
+if outputargs.uri != "" and outputargs.uri is not None:
+    if args.dd_update:
+        output_connection = imas.DBEntry(outputargs.uri, outputargs.mode)
+    else:
+        output_connection = imas.DBEntry(outputargs.uri, outputargs.mode, dd_version=src_dd_version)
+
 if output_connection is None:
-    output_connection = DBMaster.create_connection(outputargs)
-    if output_connection is None:
-        sys.exit()
+    logger.error("Error opening destination pulse! Please check parameters and permissions.")
+    exit(1)
 
 
 logger.info(f"Rescaling equilibrium magnetic field by {rescale}")
 equilibrium_compute = EquilibriumCompute(ids_equilibrium)
-equout = equilibrium_compute.rescale(rescale)
-
+equout = equilibrium_compute.rescale(rescale, dd_update=args.dd_update)
+if args.dd_update:
+    dest_ids_object = imas.convert_ids(equout, output_connection.factory.version)
 # PUT IDS INTO OUTPUT
 output_connection.put(equout)
 
@@ -85,5 +114,6 @@ if args.dest is not None:
     logger.info(f"Output database details {args.dest}")
 else:
     logger.info(
-        f"Output database details database={args.dest_database}, pulse={args.dest_pulse}, run={args.dest_run}, user={os.environ['USER']}"
+        f"Output database details database={args.dest_database}, pulse={args.dest_pulse}, "
+        f"run={args.dest_run}, user={os.environ['USER']}"
     )

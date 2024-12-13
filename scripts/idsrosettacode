@@ -5,7 +5,7 @@ import math
 import os
 import sys
 
-import imas
+import imaspy as imas
 import numpy as np
 import pandas as pd
 import requests
@@ -13,6 +13,7 @@ from rich.progress import track
 from rich_argparse import RichHelpFormatter
 
 from idstools.utils.clihelper import get_backend_id
+from idstools.utils.idshelper import get_ids_types
 
 
 def ids_setter(ids, path, val):
@@ -31,11 +32,12 @@ def ids_setter(ids, path, val):
     dodi = ids
     for node in path[0:-1]:
         nodestruct = node.split("(")
+
         try:
             dodi = getattr(dodi, nodestruct[0])
         except AttributeError:
             raise AttributeError(
-                f"Node {node} could not be found in {path} for IDS {ids._base_path}. Please check spelling."
+                f"Node {node} could not be found in {path} for IDS {ids._path}. Please check spelling."
             )
         if len(nodestruct) == 2:
             # AOS case
@@ -43,8 +45,11 @@ def ids_setter(ids, path, val):
             dodi.resize(nodeindex + 1, keep=True)
             dodi = dodi[nodeindex]
     leaf = path[-1]
+
     try:
-        leaftype = type(getattr(dodi, leaf))
+        ids_field = getattr(dodi, leaf)
+        leaftype = type(ids_field.value)
+
         if leaftype == str:
             setattr(dodi, str(leaf), str(val))
         elif leaftype == float:
@@ -52,7 +57,11 @@ def ids_setter(ids, path, val):
         elif leaftype == int:
             setattr(dodi, str(leaf), int(val))
         elif leaftype == np.ndarray:
-            setattr(dodi, str(leaf), (np.array([val], dtype=(getattr(dodi, leaf)).dtype)))
+            if len(ids_field.shape) == 1:
+                arr = [val]
+            elif len(ids_field.shape) == 2:
+                arr = [[val]]
+            setattr(dodi, str(leaf), np.array(arr, dtype=ids_field.dtype))
         else:
             raise AttributeError(f"The type {leaftype} of {idspath} is currently not supported")
     except AttributeError:
@@ -83,8 +92,22 @@ def evaluate(expr):
     return result
 
 
+# apply DD4 conversion
+def get_dd4_conversion(idspath):
+    if idspath == "dataset_description/data_entry/machine":
+        return "dataset_description/machine"
+    if idspath == "dataset_description/data_entry/pulse":
+        return "dataset_description/pulse"
+    if idspath == "summary/global_quantities/li/value":
+        return "summary/global_quantities/li_3/value"
+    if idspath == "summary/global_quantities/li_mhd/value":
+        return "summary/global_quantities/li_3_mhd/value"
+    return idspath
+
+
 parser = argparse.ArgumentParser(
-    description="This script applies mapping of a non-IDS database content (e.g. ITPA DBs) into IDS rules. replaced by ids_rosetta_code.py",
+    description="This script applies mapping of a non-IDS database content (e.g. ITPA DBs)"
+    "into IDS rules. replaced by ids_rosetta_code.py",
     formatter_class=RichHelpFormatter,
 )
 parser.add_argument(
@@ -92,7 +115,8 @@ parser.add_argument(
     "--inputcsv",
     type=str,
     default="HDB5.2.3.csv",
-    help="Path to csv file containing the external database content \t(default=%(default)s, the H-mode DB will be downloaded from https://osf.io/zhwa3/ automatically if not present)",
+    help="Path to csv file containing the external database content \t(default=%(default)s, "
+    "the H-mode DB will be downloaded from https://osf.io/zhwa3/ automatically if not present)",
 )
 parser.add_argument(
     "-m",
@@ -111,13 +135,15 @@ parser.add_argument(
     "--pathcol",
     type=str,
     default="IDS_PATH",
-    help="Name of the column of the mapping file listing the paths to store all DB variables into IDS fields \t(default=%(default)s)",
+    help="Name of the column of the mapping file listing the paths to store all"
+    "DB variables into IDS fields \t(default=%(default)s)",
 )
 parser.add_argument(
     "--tracol",
     type=str,
     default="TRANSFORMATION",
-    help="Name of the column of the mapping file listing the transformations to be done on DB variables (default = summary)\t(default=%(default)s)",
+    help="Name of the column of the mapping file listing the transformations"
+    "to be done on DB variables (default = summary)\t(default=%(default)s)",
 )
 parser.add_argument(
     "--timeloc",
@@ -165,18 +191,20 @@ db = db.replace(to_replace=np.nan, value=None)
 
 rows = [args.row] if args.row is not None else db.index
 
-# print(f"Starts mapping of the DB {args.inputCSV}, please be patient...")
+print(f"Starts mapping of the DB {args.inputcsv}, please be patient...")
 for row in track(rows, description="[green]Processing..."):
-    d_b_v_a_r = db.iloc[row]
+    DBVAR = db.iloc[row]
     de = imas.DBEntry(get_backend_id(args.backend), args.database, 1, row)
     de.create()
 
     iod = {}
-
-    for ids in list(imas.IDSName):
-        iod[ids.value] = getattr(imas, ids.value)()
+    factory = imas.IDSFactory()
+    for ids in get_ids_types():
+        iod[ids] = factory.new(ids)
     for var in mf.loc[:, args.varcol]:
         idspath = mf[mf[args.varcol] == var].iloc[0].at[args.pathcol]
+        idspath = get_dd4_conversion(idspath)
+
         transformation = mf[mf[args.varcol] == var].iloc[0].at[args.tracol]
         if idspath == "":
             if args.debug:
@@ -200,14 +228,17 @@ for row in track(rows, description="[green]Processing..."):
                 else:
                     try:
                         ids_setter(ids, path, val)
-                        ids.ids_properties.homogeneous_time = 1
+                        if idsname in ["dataset_description"]:
+                            ids.ids_properties.homogeneous_time = 2
+                        else:
+                            ids.ids_properties.homogeneous_time = 1
                     except AttributeError as ae:
                         print(ae)
                         sys.exit()
 
     for sids in iod.keys():
         if iod[sids].ids_properties.homogeneous_time == 1:
-            if iod[sids].time.size == 0:
+            if hasattr(iod[sids], "time") and iod[sids].time.size == 0:
                 iod[sids].time = iod[args.timeloc].time
             try:
                 de.put(iod[sids])

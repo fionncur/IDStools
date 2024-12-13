@@ -9,10 +9,7 @@ import sys
 from operator import itemgetter
 from stat import *
 
-from yaml import load as yamlload
-
-from idstools.database import DBMaster
-from idstools.utils.clihelper import get_core_version
+import yaml
 
 try:
     from yaml import CLoader as yamlLoader
@@ -62,20 +59,18 @@ def rec(
 
     # Fill data dictionary with yaml input files describing simulations
     j = -1
-    for i in range(len(files)):
-        # Recursivity on sub-folders (temporarily removed, to speed up the code)
-        # if os.path.isdir(files[i]):
-        #  rec(data=data,path=files[i],extension=extension,choice=choice)
-        # elif files[i]....
-        if files[i].endswith(extension):  # Work on all YAML files
+
+    for scenario_file_path in files:
+        if "*.yaml" not in scenario_file_path:
             try:
                 j = j + 1
-                file = open(files[i], "r")
-                data[j] = yamlload(file, Loader=yamlLoader)
-                data[j]["location"] = files[i]
-                file.close()
+                # file = open(scenario_file_path, "r")
+                with open(scenario_file_path, "r") as scenario_file:
+                    data[j] = yaml.load(scenario_file, Loader=yaml.Loader)
+
+                    data[j]["location"] = scenario_file_path
             except Exception as e:
-                print("Error reading yaml " + files[i], file=sys.stderr)
+                print("Error reading yaml " + scenario_file_path, file=sys.stderr)
 
     # ---------------------------------------------------------------
     # Sort all YAML files by shot and run numbers in sdata structure

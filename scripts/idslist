@@ -6,7 +6,11 @@ import argparse
 import sys
 
 import numpy as np
+from imaspy import convert_ids
+from rich.console import Console
 from rich.markdown import Markdown
+from rich.pretty import Pretty
+from rich.table import Table
 from rich_argparse import RichHelpFormatter
 
 from idstools.database import DBMaster
@@ -21,7 +25,8 @@ logger = setup_logger("module")
 np.set_printoptions(threshold=1, precision=2, suppress=True)
 
 description = """
-By default this script lists available IDSes in the pulse. It prints all IDSes along with its time length. The fullarray option allows you to print the complete time array.
+By default this script lists available IDSes in the pulse. It prints all IDSes along with its time length.
+The fullarray option allows you to print the complete time array.
 with comment option you can view ids with their occurrences, its comment and occurrence type if present
 yaml option is provided which is used by other scripts to provide list of idses with their time ranges in yaml format
 
@@ -63,12 +68,22 @@ if connection is None:
 if args.yaml is True:
     if args.fullarray:
         print("(-f fullarray) option is provided, can not show full array for yaml output")
-    for idsname, oc in get_available_ids_and_occurrences(connection):
+    for idsname, oc in get_available_ids_and_occurrences(connection, dd_update=args.dd_update):
+        print(idsname)
         if args.ids:
             if idsname != args.ids:
                 continue
-        homogeneous_time = connection.partial_get(idsname, "ids_properties/homogeneous_time", occurrence=oc)
-        times = connection.partial_get(idsname, "time", occurrence=oc)
+
+        if args.dd_update:
+            ids = connection.get(idsname, occurrence=oc, autoconvert=False, ignore_unknown_dd_version=True)
+            ids = convert_ids(ids, connection.factory.version)
+        else:
+            ids = connection.get(idsname, occurrence=oc, lazy=True, autoconvert=False, ignore_unknown_dd_version=True)
+        homogeneous_time = ids.ids_properties.homogeneous_time
+        if getattr(ids, "time", None) is None:
+            times = None
+        else:
+            times = ids.time
 
         # Format idsname
         idsnameoc = f"{idsname}/{str(oc)}" if oc > 0 else idsname
@@ -101,35 +116,52 @@ if args.yaml is True:
 
 
 elif args.comment is True:
-    if args.fullarray:
-        print("(-f fullarray) option is provided, can not show full array for comment output")
-
-    for idsname, oc, comment in get_available_ids_and_occurrences(connection, get_comment=True):
+    console = Console()
+    table = Table(title="List of IDSes with Occurrences")
+    table.add_column("IDS", style="magenta")
+    table.add_column("COMMENT", style="green")
+    for idsname, oc, comment in get_available_ids_and_occurrences(
+        connection, get_comment=True, dd_update=args.dd_update
+    ):
         # If user wants to check specific ids type
         if args.ids:
             if idsname != args.ids:
                 continue
         # Format idsname
         idsnameoc = f"{idsname}/{str(oc)}"
-        print(f"  {idsnameoc}: {comment}")
+        table.add_row(idsnameoc, comment.value)
+    console.print(table)
     connection.close()
     exit(0)
 else:
+    available_ids_and_times = get_available_ids_and_times(connection, dd_update=args.dd_update)
     question_string = "?"
-
-    available_ids_and_times = get_available_ids_and_times(connection)
-    question_string = "?"
+    console = Console()
+    table = Table(title="List of IDSes")
+    table.add_column("IDS", style="magenta")
+    table.add_column("SLICES", style="green")
+    table.add_column("TIME", style="green")
     for ids_name, time_array in available_ids_and_times:
         if args.ids:
             if ids_name != args.ids:
                 continue
-        if len(time_array) == 1 and np.isnan(time_array[0]):
-            print(f"{ids_name:15}:  {question_string:5} slices: heterogeneous IDS ")
-        elif len(time_array) == 1 and time_array[0] == np.NINF:
-            print(f"{ids_name:15}:  {question_string:5} slices: time independent IDS ")
-        else:
-            if args.fullarray is True:
-                np.set_printoptions(threshold=sys.maxsize)
-            print(f"{ids_name:15}: {str(len(time_array)):5} slices: {time_array} ")
+        if time_array is not None and len(time_array) == 1 and np.isnan(time_array[0]):
+            value = f"{question_string}"
+            type = "heterogeneous IDS"
+        elif time_array is not None and len(time_array) == 1 and time_array[0] == np.NINF:
+            value = f"{question_string}"
+            type = "time independent IDS"
+        elif time_array is not None:
+            value = f"{len(time_array)}"
+            type = time_array
+        elif time_array is None:
+            value = f"{question_string}"
+            type = "unknown"
+        table.add_row(ids_name, value, Pretty(type))
+    if args.fullarray is True:
+        with np.printoptions(threshold=sys.maxsize, linewidth=1024, precision=4):
+            console.print(table)
+    else:
+        console.print(table)
     connection.close()
     exit(0)

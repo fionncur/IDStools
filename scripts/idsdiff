@@ -6,27 +6,106 @@ import datetime
 import difflib
 import logging
 import os
-import re
 import sys
-import tempfile
 import time
 from io import BytesIO
 
-import imas
 import matplotlib.pyplot as plt
 import numpy as np
-from rich.console import Console
-from rich.progress import track
+import rich
+from imaspy import ids_defs
+from imaspy.ids_base import IDSBase
+from imaspy.ids_primitive import (
+    IDSFloat0D,
+    IDSInt0D,
+    IDSNumericArray,
+    IDSPrimitive,
+    IDSString0D,
+)
+from imaspy.ids_struct_array import IDSStructArray
+from imaspy.ids_structure import IDSStructure
 from rich.table import Table
 from rich.text import Text
 from rich_argparse import RichHelpFormatter
 
 from idstools.database import DBMaster
-from idstools.utils.ddhelper import DDHelper
-from idstools.utils.idshelper import compare_ids
+from idstools.utils.clihelper import get_database_path, get_file_name
+from idstools.utils.idshelper import (
+    get_ids_types,
+    idsdiff,
+    idsdiff_full,
+    parse_uri,
+    partial_get,
+)
 from idstools.utils.idslogger import setup_logger
+from idstools.view.common import PlotCanvas
 
 THRESHOLD_PERCENT = 2
+
+slicing_methods = {
+    "CLOSEST": ids_defs.CLOSEST_INTERP,
+    "PREVIOUS": ids_defs.PREVIOUS_INTERP,
+    "LINEAR": ids_defs.LINEAR_INTERP,
+}
+
+
+def view_plot(ax, field, coordinate, field_name="", coordinate_name="", field_unit="", coordinate_unit=""):
+    if not isinstance(field, (IDSNumericArray, np.ndarray)):
+        print("Not a numeric array, Please select ids path")
+        return
+    data = field
+    if isinstance(coordinate, IDSNumericArray):
+        if isinstance(coordinate, IDSPrimitive):
+            coordinate_unit = f"{coordinate.metadata.name} ({coordinate.metadata.units})"
+            coordinate_name = coordinate.metadata.path
+    if isinstance(field, IDSNumericArray):
+        if not field.has_value:
+            print("Values are not present")
+            return
+        data - field.value
+        field_unit = field.metadata.units
+        coordinate = field.coordinates[coordinate]
+        if isinstance(coordinate, IDSPrimitive):
+            coordinate_unit = f"{coordinate.metadata.name} ({coordinate.metadata.units})"
+            coordinate_name = coordinate.metadata.path
+        field_name = f"{field_name} (coordinate:{coordinate_name})"
+
+    if len(data) < 5 and len(data.shape) == 1:
+        ax.plot(coordinate, data, label=field_name, marker="o", color="red")
+    elif len(data.shape) == 2:
+        for j in range(data.shape[1]):
+            if j == 0:
+                ax.plot(coordinate, data[:, j], label=f"{field_name}")
+            else:
+                ax.plot(coordinate, data[:, j])
+    else:
+        ax.plot(coordinate, data, label=field_name)
+
+    # Set Plot properties
+    font_args = {
+        "fontfamily": "serif",
+        "color": "darkred",
+        "fontweight": "normal",
+        "fontsize": 12,
+    }
+    ax.tick_params(
+        which="both",
+        labelsize=12,
+    )
+    # ax.set_xlim(rho_tor_norm[0], rho_tor_norm[nrho - 1])
+    ax.set_xlabel(coordinate_unit, font_args, labelpad=1)
+    ax.set_ylabel(field_unit, font_args, labelpad=0)
+
+    # set legend
+    # legx_pos = 1.35
+    # legy_pos = 1.05
+    legend = ax.legend(loc="upper right")
+    frame = legend.get_frame()
+    frame.set_facecolor("0.95")
+    for label in legend.get_texts():
+        label.set_fontsize(10)
+    for label in legend.get_lines():
+        label.set_linewidth(1.5)
 
 
 def get_filename(file_title, log_dir):
@@ -48,10 +127,29 @@ def get_filename(file_title, log_dir):
     return os.path.join(log_dir, file_name)
 
 
-def generate_html(file_path, compare_data):
-    logger.info("Writing to html file :" + file_path)
+def highlight_differences(text1, text2):
+    seq_matcher = difflib.SequenceMatcher(None, text1, text2)
 
-    ddhelper = DDHelper()
+    result1 = []
+    result2 = []
+
+    for tag, i1, i2, j1, j2 in seq_matcher.get_opcodes():
+        if tag == "replace":
+            result1.append(f'<span style="color:red;">{text1[i1:i2]}</span>')
+            result2.append(f'<span style="color:green;">{text2[j1:j2]}</span>')
+        elif tag == "delete":
+            result1.append(f'<span style="color:red;">{text1[i1:i2]}</span>')
+        elif tag == "insert":
+            result2.append(f'<span style="color:green;">{text2[j1:j2]}</span>')
+        else:
+            result1.append(text1[i1:i2])
+            result2.append(text2[j1:j2])
+
+    return "".join(result1), "".join(result2)
+
+
+def generate_html(file_path, compare_data):
+    print("Writing to html file, Please have patience :" + file_path)
 
     file_object = open(file_path, "w")
     (pulse_a, pulse_b, input_a, input_b), data = next(iter(compare_data.items()))
@@ -71,11 +169,10 @@ def generate_html(file_path, compare_data):
     report_table_header = f"""
     <thead class="table-primary">
     <tr>
-                        <th>Field Name</th>
-                        <th>{pulse_a}</th>
-                        <th>{pulse_b}</th>
-                        <th>Comments</th>
-                        <th>Details</th>
+                        <th class="col-1">Status</th>
+                        <th class="col-3">Field Name</th>
+                        <th class="col-2">{pulse_a}</th>
+                        <th class="col-2">{pulse_b}</th>
                         <tr>
                     </thead>"""
     file_object.write(
@@ -86,7 +183,7 @@ def generate_html(file_path, compare_data):
                 <div class="jumbotron jumbotron-fluid text-center">
                     <div class="container">
                         <p class="h4">{report_title}</p>
-                        <small class="text-muted">Result generated by idsdiff tool show difference between quantities and shows plots</small>
+                        <small class="text-muted">Result generated by idsdiff tool shows differences between quantities and also shows plots</small>
                     </div>
                 </div>
                     <div class="table-responsive" >
@@ -96,52 +193,52 @@ def generate_html(file_path, compare_data):
     )
     plot_counter = 0
     for idsname, values in data.items():
+
         compare_result, output = values
-        if bool(output) is False:
+        if bool(compare_result):
             continue
+        print("Upating comparison report for : ", idsname)
         report_field_difference = ""
         report_details = ""
 
         add_header = True
-        for key, values in output.items():
+
+        for description, first, second in output:
+
+            description = "NA"
+            if first is not None and hasattr(first, "_path"):
+                description = first._path
+            elif second is not None and hasattr(second, "_path"):
+                description = type(second).__name__.upper()
             report_diff_line = ""
             if add_header is True:
                 report_diff_line = f"""<tr class="table-secondary">
-                        <th scope="row" colspan="5">{idsname}</td>
+                        <th scope="row" colspan="4">{idsname}</td>
                     </tr>"""
                 report_field_difference += report_diff_line
                 add_header = False
-            badge_color = "bg-secondary"
-            if values[3] is not None:
-                if values[3] == "different values":
-                    badge_color = "bg-primary"
-                elif values[3] == "different length":
-                    badge_color = "bg-warning"
+            badge_color = "bg-primary"
+            status_message = "different values"
 
-            if values[2] is np.ndarray:
-                if values[0] is not None and values[1] is not None:
-                    if len(values[0]) <= len(values[1]):
-                        threshold_candidate = values[0]
-                        compare_candidate = values[1][: len(values[0])]
+            if args.plot and isinstance(first, IDSNumericArray) and isinstance(second, IDSNumericArray):
+
+                if len(first.shape) == 1 and len(second.shape) == 1:
+                    if len(first.value) != len(second.value):
+                        common = np.linspace(0, 1, max(len(first), len(second)))
+                        first.value = np.interp(common, np.linspace(0, 1, len(first)), first)
+                        second.value = np.interp(common, np.linspace(0, 1, len(second)), second)
+                    if len(first.value) <= len(second.value):
+                        threshold_candidate = first
+                        compare_candidate = second[: len(first)]
                     else:
-                        threshold_candidate = values[1]
-                        compare_candidate = values[0][: len(values[1])]
+                        threshold_candidate = second
+                        compare_candidate = first[: len(second)]
                     threshold_min = ((threshold_candidate * THRESHOLD_PERCENT) / 100) - threshold_candidate
                     threshold_max = ((threshold_candidate * THRESHOLD_PERCENT) / 100) + threshold_candidate
-
                     within_threshold = all(compare_candidate > threshold_min) and all(compare_candidate < threshold_max)
                     if within_threshold is False:
-                        field_path = re.sub(r"\[(.*?)\]", "", key)
-                        field_path = field_path[field_path.index(".") + 1 :]
-                        field_path = field_path.replace(".", "/")
-                        coordinate_path = ddhelper.get_coordinate(idsname, field_path)
-                        if coordinate_path[0] == r"/":
-                            coordinate_path = coordinate_path[1:]
-                        if "itime" in coordinate_path:
-                            coordinate_path = coordinate_path.replace("itime", "0")
-
-                        values_a = np.copy(values[0])
-                        values_b = np.copy(values[1])
+                        values_a = np.copy(first.value)
+                        values_b = np.copy(second.value)
 
                         # Calculate cross corelation
                         correlate_result = np.correlate(values_a, values_b, "full")
@@ -166,40 +263,45 @@ def generate_html(file_path, compare_data):
 
                         norm_avg_diff = np.average(norm_diff)
 
-                        min_a = np.amin(values[0])
-                        min_b = np.amin(values[1])
-                        max_a = np.amax(values[0])
-                        max_b = np.amax(values[1])
-                        avg_a = np.average(values[0])
-                        avg_b = np.average(values[1])
+                        min_a = np.amin(first)
+                        min_b = np.amin(second)
+                        max_a = np.amax(first)
+                        max_b = np.amax(second)
+                        avg_a = np.average(first)
+                        avg_b = np.average(second)
                         avg_diff = abs(avg_a - avg_b)
-                        rms_a = np.sqrt(np.mean(values[0] ** 2))
-                        rms_b = np.sqrt(np.mean(values[1] ** 2))
+                        rms_a = np.sqrt(np.mean(first**2))
+                        rms_b = np.sqrt(np.mean(second**2))
                         rms_diff = abs(rms_a - rms_b)
 
-                        time_a = input_a.partial_get(idsname, coordinate_path)
-                        time_b = input_b.partial_get(idsname, coordinate_path)
-                        if time_a is not None and time_b is not None:
-                            min_time__a = np.amin(time_a)
-                            min_time__b = np.amin(time_b)
+                        time_a = first.coordinates[0]
+                        time_b = second.coordinates[0]
 
-                            max_time__a = np.amax(time_a)
-                            max_time__b = np.amax(time_b)
+                        if time_a is not None and time_b is not None:
+                            min_time__a = min_time__b = max_time__a = max_time__b = 0
+                            if time_a.size != 0:
+                                min_time__a = np.amin(time_a)
+                            if time_b.size != 0:
+                                min_time__b = np.amin(time_b)
+                            if time_a.size != 0:
+                                max_time__a = np.amax(time_a)
+                            if time_b.size != 0:
+                                max_time__b = np.amax(time_b)
                             ax_time_a = np.linspace(
                                 min_time__a if min_time__a < min_time__b else min_time__b,
                                 max_time__a if max_time__a > max_time__b else max_time__b,
-                                len(values[0]),
+                                len(first),
                             )
                             ax_time_b = np.linspace(
                                 min_time__a if min_time__a < min_time__b else min_time__b,
                                 max_time__a if max_time__a > max_time__b else max_time__b,
-                                len(values[1]),
+                                len(second),
                             )
-                            fig = plt.figure()
+                            fig = plt.figure(figsize=(6, 4), dpi=100)
                             ax = fig.add_subplot(111)
-                            ax.set_title(key)
-                            ax.set_xlabel(coordinate_path)
-                            ax.set_ylabel("values")
+                            ax.set_title(description, fontsize=10)
+                            # ax.set_xlabel(coordinate_path)
+                            ax.set_ylabel("values", fontsize=10)
                             ax2 = ax.twinx()
                             ax2.plot(
                                 ax_time_a,
@@ -209,186 +311,161 @@ def generate_html(file_path, compare_data):
                                 linewidth="0.5",
                             )
                             ax2.set_yscale("log")
-                            if len(values[0]) < 10:
+                            if len(first) < 10:
                                 ax.plot(
                                     ax_time_a,
-                                    values[0],
+                                    first,
                                     marker="o",
                                     color="r",
-                                    label=f"{pulse_a}",
+                                    label="first",
                                     linewidth="0.5",
                                     ms=2,
                                 )
                             else:
                                 ax.plot(
                                     ax_time_a,
-                                    values[0],
+                                    first,
                                     color="r",
-                                    label=f"{pulse_a}",
+                                    label="first",
                                     linewidth="0.5",
                                     ms=2,
                                 )
-                            if len(values[1]) < 10:
+                            if len(second) < 10:
                                 ax.plot(
                                     ax_time_b,
-                                    values[1],
+                                    second,
                                     marker="D",
                                     color="b",
-                                    label=f"{pulse_b}",
+                                    label="second",
                                     linewidth="0.5",
                                     ms=2,
                                 )
                             else:
                                 ax.plot(
                                     ax_time_b,
-                                    values[1],
+                                    second,
                                     color="b",
-                                    label=f"{pulse_b}",
+                                    label="second",
                                     linewidth="0.5",
                                     ms=2,
                                 )
-                            ax.legend(loc="upper right")
+                            ax_lines, ax_labels = ax.get_legend_handles_labels()
+                            ax2_lines, ax2_labels = ax2.get_legend_handles_labels()
+                            ax.legend(
+                                ax_lines + ax2_lines,
+                                ax_labels + ax2_labels,
+                                loc="center left",
+                                fontsize=10,
+                                bbox_to_anchor=(1.15, 0.5),
+                            )
                             ax.grid()
                             tmpfile = BytesIO()
-                            fig.savefig(tmpfile, format="png")
+                            fig.savefig(tmpfile, format="svg", bbox_inches="tight")
                             encoded = base64.b64encode(tmpfile.getvalue()).decode("utf-8")
                             plt.close()
 
                             report_details = f"""<table class="table table-bordered table-striped table-hover table-sm align-top">
-                                                        <thead class="table-primary">
-                                                            <tr>
-                                                            <th>Attribute Name</th>
-                                                            <th>{pulse_a}</th>
-                                                            <th>{pulse_b}</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                        <tr>
-                                                            <td>minimum</td>
-                                                            <td>{"{:.4e}".format(min_a)}</td>
-                                                            <td>{"{:.4e}".format(min_b)}</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td>maximum</td>
-                                                            <td>{"{:.4e}".format(max_a)}</td>
-                                                            <td>{"{:.4e}".format(max_b)}</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td>average</td>
-                                                            <td>{"{:.4e}".format(avg_a)}</td>
-                                                            <td>{"{:.4e}".format(avg_b)}</td>
-                                                        </tr>
-                                                        </tbody>
-                                                    </table>
-                                                    <ul class="list-group">
-                                                    <li class="list-group-item d-flex justify-content-between align-items-center"> normalized average difference : <span>{"{:.4e}".format(norm_avg_diff)} </span></li>
-                                                    <li class="list-group-item d-flex justify-content-between align-items-center"> cross correlation : <span>{cross_correlation}</span></li>
-                                                    <li class="list-group-item d-flex justify-content-between align-items-center"> average difference : <span>{"{:.4e}".format(avg_diff)} </span></li>
-                                                    <li class="list-group-item d-flex justify-content-between align-items-center"> rms difference : <span>{"{:.4e}".format(rms_diff)} </span></li>
-                                                    </ul>
-                                                    <img src="data:image/png;base64, {encoded}" alt="Red dot"  class="img-fluid rounded"/>"""
-                            report_diff_line = f"""<tr>
-                                    <td>{key}</td>
-                                    <td>Array length : {len(values[0])}</td>
-                                    <td>Array length : {len(values[1])}</td>
-                                    <td><span class="badge {badge_color}">{values[3]}</span></td>
-                                    <td><button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="collapse" 
-                                    data-bs-target="#plot{plot_counter}">See details</button>
-                                    <div class="collapse" id="plot{plot_counter}">
-                                    <div class="card card-body">{report_details}
-                                    </div>
-                                    </div>
-                                    </td>
-                                </tr>"""
-                            plot_counter = plot_counter + 1
+<thead class="table-primary">
+    <tr>
+    <th>Attribute Name</th>
+    <th>{pulse_a}</th>
+    <th>{pulse_b}</th>
+    </tr>
+</thead>
+<tbody>
+<tr>
+    <td>minimum</td>
+    <td>{"{:.4e}".format(min_a)}</td>
+    <td>{"{:.4e}".format(min_b)}</td>
+</tr>
+<tr>
+    <td>maximum</td>
+    <td>{"{:.4e}".format(max_a)}</td>
+    <td>{"{:.4e}".format(max_b)}</td>
+</tr>
+<tr>
+    <td>average</td>
+    <td>{"{:.4e}".format(avg_a)}</td>
+    <td>{"{:.4e}".format(avg_b)}</td>
+</tr>
+</tbody>
+</table>
+<ul class="list-group">
+<li class="list-group-item d-flex justify-content-between align-items-center"> normalized average difference : <span>{"{:.4e}".format(norm_avg_diff)} </span></li>
+<li class="list-group-item d-flex justify-content-between align-items-center"> cross correlation : <span>{cross_correlation}</span></li>
+<li class="list-group-item d-flex justify-content-between align-items-center"> average difference : <span>{"{:.4e}".format(avg_diff)} </span></li>
+<li class="list-group-item d-flex justify-content-between align-items-center"> rms difference : <span>{"{:.4e}".format(rms_diff)} </span></li>
+</ul>
+<img src="data:image/svg+xml;base64,{encoded}" alt="Could not generate plot" style="width:1000px; height:auto;"  class="img-fluid rounded"/>"""
+                        report_diff_line = f"""<tr>
+                                <td><span class="badge {badge_color}">{status_message}</span></td>
+                                <td>{description}</td>
+                                <td>Array length : {len(first)}</td>
+                                <td>Array length : {len(second)}</td>
+                            </tr>"""
+                        report_diff_line += f"""<tr>
+<td scope="row" colspan="4"><button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="collapse" 
+data-bs-target="#plot{plot_counter}">See details</button>
+<div class="collapse" id="plot{plot_counter}">
+<div class="card card-body">{report_details}
+</div>
+</div></td>
+</tr>"""
+                        plot_counter = plot_counter + 1
 
-            elif values[2] == list:
+            elif isinstance(first, IDSStructArray) or isinstance(second, IDSStructArray):
+                status_message = "different length"
+                badge_color = "bg-warning"
+                str1 = f"List length : {0 if first is None else len(first)}"
+                str2 = f"List length : {0 if second is None else len(second)}"
+                first_output, second_output = highlight_differences(str1, str2)
                 report_diff_line = f"""<tr>
-                        <td>{key}</td>
-                        <td>List length : {len(values[0])}</td>
-                        <td>List length : {len(values[1])}</td>
-                        <td><span class="badge {badge_color}">{values[3]}</span></td>
-                        <td></td>
+                        <td><span class="badge {badge_color}">{status_message}</span></td>
+                        <td>{description}</td>
+                        <td>{first_output}</td>
+                        <td>{second_output}</td>
                     </tr>"""
+
+            elif isinstance(first, IDSInt0D) and isinstance(second, IDSInt0D):
+                threshold_min = ((first * THRESHOLD_PERCENT) / 100) - first
+                threshold_max = ((first * THRESHOLD_PERCENT) / 100) + first
+                if second > threshold_min and second < threshold_max:
+                    first_output, second_output = highlight_differences(f"{first.value}", f"{second.value}")
+                    report_diff_line = f"""<tr>
+                        <td><span class="badge {badge_color}">{status_message}</span></td>
+                        <td>{description}</td>
+                        <td>{first_output}</td>
+                        <td>{second_output}</td>
+                    </tr>"""
+            elif isinstance(first, IDSFloat0D) and isinstance(second, IDSFloat0D):
+                threshold_min = ((first * THRESHOLD_PERCENT) / 100) - first
+                threshold_max = ((first * THRESHOLD_PERCENT) / 100) + first
+                if second > threshold_min and second < threshold_max:
+                    first_output, second_output = highlight_differences(f"{first.value:.4e}", f"{second.value:.4e}")
+                    report_diff_line = f"""<tr>
+                        <td><span class="badge {badge_color}">{status_message}</span></td>
+                        <td>{description}</td>
+                        <td>{first_output}</td>
+                        <td>{second_output}</td>
+                    </tr>"""
+            elif isinstance(first, IDSString0D) and isinstance(second, IDSString0D):
+                first_output, second_output = highlight_differences(first.value, second.value)
+                report_diff_line = f"""<tr>
+                            <td><span class="badge {badge_color}">{status_message}</span></td>
+                            <td>{description}</td>
+                            <td>{first_output}</td>
+                            <td>{second_output}</td>
+                        </tr>"""
             else:
-                if type(values[0]) is int or type(values[1]) is int:
-                    threshold_min = ((values[0] * THRESHOLD_PERCENT) / 100) - values[0]
-                    threshold_max = ((values[0] * THRESHOLD_PERCENT) / 100) + values[0]
-                    if values[1] > threshold_min and values[1] < threshold_max:
-                        report_diff_line = f"""<tr>
-                            <td>{key}</td>
-                            <td>{values[0]}</td>
-                            <td>{values[1]}</td>
-                            <td><span class="badge {badge_color}">{values[3]}</span></td>
-                            <td></td>
-                        </tr>"""
-                elif type(values[0]) is float or type(values[1]) is float:
-                    threshold_min = ((values[0] * THRESHOLD_PERCENT) / 100) - values[0]
-                    threshold_max = ((values[0] * THRESHOLD_PERCENT) / 100) + values[0]
-                    if values[1] > threshold_min and values[1] < threshold_max:
-                        report_diff_line = f"""<tr>
-                            <td>{key}</td>
-                            <td>{"{:.4e}".format(values[0])}</td>
-                            <td>{"{:.4e}".format(values[1])}</td>
-                            <td><span class="badge {badge_color}">{values[3]}</span></td>
-                            <td></td>
-                        </tr>"""
-                elif type(values[0]) is str or type(values[1]) is str:
-                    if len(values[0]) > 100:
-                        tmpdir = "/dev/shm" if os.path.exists("/dev/shm") else "."
-                        ids_a = tempfile.mktemp(prefix="idsA_", dir=tmpdir)
-                        ids_b = tempfile.mktemp(prefix="idsB_", dir=tmpdir)
-                        try:
-                            with open(ids_a, "wb") as f:
-                                f.write(bytes(values[0], "UTF-8"))
-                        except Exception as _:  # noqa: F841
-                            if os.path.exists(ids_a):
-                                os.unlink(ids_a)
-                            raise
-
-                        try:
-                            with open(ids_b, "wb") as f:
-                                f.write(bytes(values[1], "UTF-8"))
-                        except Exception as _:  # noqa: F841
-                            if os.path.exists(ids_b):
-                                os.unlink(ids_b)
-                            raise
-
-                        with open(ids_a, "r") as file_ids_a:
-                            lines_ids_a = file_ids_a.readlines()
-                        with open(ids_b, "r") as file_ids_b:
-                            lines_ids_b = file_ids_b.readlines()
-
-                        diff = difflib.unified_diff(
-                            lines_ids_a,
-                            lines_ids_b,
-                            fromfile=ids_a,
-                            tofile=ids_b,
-                            lineterm="",
-                        )
-
-                        os.unlink(ids_a)
-                        os.unlink(ids_b)
-                        diff_lines = []
-                        for line in diff:
-                            if "\n" not in line:
-                                line = line + "\n"
-                            diff_lines.append(line)
-                        diff_lines_text = "".join(line for line in diff_lines if not line.isspace())
-                        report_diff_line = f"""<tr>
-                                <td>{key}</td>
-                                <td colspan="2"><textarea class="form-control">{diff_lines_text}</textarea></td>
-                                <td><span class="badge {badge_color}">{values[3]}</span></td>
-                                <td></td>
-                            </tr>"""
-                    else:
-                        report_diff_line = f"""<tr>
-                                <td>{key}</td>
-                                <td>{values[0]}</td>
-                                <td>{values[1]}</td>
-                                <td><span class="badge {badge_color}">{values[3]}</span></td>
-                                <td></td>
-                            </tr>"""
+                first_value = "" if first is None else first
+                second_value = "" if second is None else second
+                first_output, second_output = highlight_differences(str(first_value), str(second_value))
+                report_diff_line = f"""<tr>
+                        <td><span class="badge {badge_color}">{status_message}</span></td>
+                        <td>{description}</td>
+                        <td>{first_output}</td>
+                        <td>{second_output}</td>
+                    </tr>"""
             report_field_difference += report_diff_line
         file_object.write(f"""   {report_field_difference}""")
     file_object.write(
@@ -405,20 +482,15 @@ if __name__ == "__main__":
     # Management of input arguments
     parser = argparse.ArgumentParser(
         description="--- Compare a IDS from multiple date entries and returns True or "
-        "False with option of generating html page with comparisen \n"
+        "False with option of generating html page with comparison \n"
         "- Example: \n"
         '  idsdiff summary --uri "imas:mdsplus?user=public;shot=122525;run=1;database=ITER;version=3" '
         '  "imas:mdsplus?user=public;shot=122525;run=2;database=ITER;version=3" \n'
         "  \n",
         formatter_class=RichHelpFormatter,
-        usage="%(prog)s [-h] ids... -u [URI ...] [--skip-provenance] [--generate-html] [--directory DIRECTORY]",
+        usage="%(prog)s -h",
     )
-    parser.add_argument(
-        "ids",
-        nargs="*",
-        type=str,
-        help="Name (or space separated list of names) of IDS to compare (leave empty to compare all IDSs)",
-    )
+
     parser.add_argument(
         "-u",
         "--uri",
@@ -427,15 +499,43 @@ if __name__ == "__main__":
         required=True,
         help="uri separated by spaces \t\t(default=%(default)s)",
     )
+    parser.add_argument("-t", "--time", help="Time", required=False, type=float, default=None)
+    parser.add_argument(
+        "-m",
+        "--slicingmethod",
+        type=str,
+        default="CLOSEST",
+        choices=["CLOSEST", "PREVIOUS", "LINEAR"],
+        help="Slicing method \t(default=%(default)s)",
+    )
     parser.add_argument(
         "--skip-provenance",
         action="store_true",
         help="Discards provenance data differences (optional)",
     )
     parser.add_argument(
-        "--generate-html",
+        "-p",
+        "--plot",
         action="store_true",
-        help="Generate static html page for showing difference including plots",
+        help="""if idspath is given in the URI fragment with this option you can plot 
+        the data also add plots in html page if used along with -html""",
+    )
+    parser.add_argument(
+        "-html",
+        "--html",
+        action="store_true",
+        help="Generate html page for showing difference, it can also includes plots if -p option is enabled",
+    )
+    parser.add_argument(
+        "-f",
+        "--fullarray",
+        action="store_true",
+        help="Show full time array values",
+    )
+    parser.add_argument(
+        "--save",
+        help="Save figure at default location",
+        action="store_true",
     )
     parser.add_argument(
         "--directory",
@@ -445,23 +545,354 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     connections = []
-
+    path_exists_counter = 0
+    fragment_ids_list = []
     if args.uri is not None:
         for uriinfo in args.uri:
             _uri_args = argparse.Namespace()
-            _uri_args.uri = uriinfo
+            _uri_args.original_uri = uriinfo
+            uri_dict = parse_uri(uriinfo)
+            _uri_args.uri = uri_dict["uri_part"]
+            _uri_args.occurrence = uri_dict["occurrence"]
+            _uri_args.ids_name = uri_dict["ids_name"]
+            _uri_args.ids_path = uri_dict["ids_path"]
+            if _uri_args.ids_name != "":
+                # if _uri_args.ids_name not in fragment_ids_list:
+                fragment_ids_list.append(_uri_args.ids_name)
+            if _uri_args.ids_path is not None:
+                path_exists_counter = path_exists_counter + 1
             _connection = DBMaster.get_connection(_uri_args)
             if _connection is None:
                 print(f"Error opening uri! Please check existence : {uriinfo}")
                 continue
-            connections.append((uriinfo, _connection))
+            connections.append((_uri_args, _connection))
 
     if not connections:
         print("No valid connections found! Please validate pulse details")
 
-    if args.ids == []:
-        args.ids = [ids.value for ids in list(imas.IDSName)]
+    if path_exists_counter != 0 and len(connections) != path_exists_counter:
+        print("Please provide ids path for all uris to compare")
+        exit(0)
+    if len(fragment_ids_list) != 0 and len(connections) != len(fragment_ids_list):
+        print("Please provide ids name for all uris to compare")
+        exit(0)
 
+    fragment_ids_list = list(set(fragment_ids_list))
+    total_data = {}
+    # work on idspath if exists
+    if len(connections) == path_exists_counter:
+        for i in range(len(connections)):
+            for j in range(i + 1, len(connections)):
+                if i != j:
+                    compare_data = {}
+                    _uri_args_a = connections[i][0]
+                    _uri_args_b = connections[j][0]
+
+                    node_unit_a = ""
+                    ids_a = node_a = coordinate_a = None
+                    coordinate_a_name = coordinate_unit_a = ""
+                    if args.time:
+                        ids_a = connections[i][1].get_slice(
+                            _uri_args_a.ids_name,
+                            args.time,
+                            slicing_methods[args.slicingmethod],
+                            occurrence=_uri_args_a.occurrence,
+                            autoconvert=False,
+                        )
+                    else:
+                        ids_a = connections[i][1].get(_uri_args_a.ids_name, autoconvert=False)
+
+                    ids_path_a = _uri_args_a.ids_path.replace("(", "[").replace(")", "]").replace("/", ".")
+                    if ":" in _uri_args_a.ids_path:
+                        node_a, coordinate_a, node_unit_a, coordinate_unit_a = partial_get(ids_a, ids_path_a)
+                        node_a = np.transpose(node_a)
+                    else:
+                        try:
+                            node_a = eval("ids_a." + ids_path_a)
+                        except Exception as e:
+                            print(
+                                f"{ids_path_a} first  path does not exist, hint: "
+                                f"check length of arrays, detailed error {e}"
+                            )
+                            node_a = np.array([]).reshape(
+                                0,
+                            )
+                        coordinate_a = 0
+
+                    node_unit_b = ""
+                    ids_b = node_b = coordinate_b = None
+                    coordinate_b_name = coordinate_unit_b = ""
+                    if args.time:
+                        ids_b = connections[j][1].get_slice(
+                            _uri_args_b.ids_name,
+                            args.time,
+                            slicing_methods[args.slicingmethod],
+                            occurrence=_uri_args_b.occurrence,
+                            autoconvert=False,
+                        )
+                    else:
+                        ids_b = connections[j][1].get(_uri_args_b.ids_name, autoconvert=False)
+
+                    ids_path_b = _uri_args_b.ids_path.replace("(", "[").replace(")", "]").replace("/", ".")
+                    if ":" in _uri_args_b.ids_path:
+                        node_b, coordinate_b, node_unit_b, coordinate_unit_b = partial_get(ids_b, ids_path_b)
+                        node_b = np.transpose(node_b)
+                    else:
+                        try:
+                            node_b = eval("ids_b." + ids_path_b)
+                        except Exception as e:
+                            print(
+                                f"{ids_path_b} second path does not exist, hint:"
+                                f"check length of arrays, detailed error {e}"
+                            )
+                            node_b = np.array([]).reshape(
+                                0,
+                            )
+                        coordinate_b = 0
+
+                    if ids_a is None or ids_b is None:
+                        pass
+                    else:
+                        compare_data = {}
+                        if isinstance(node_a, IDSStructure) and isinstance(node_b, IDSStructure):
+                            if args.fullarray:
+                                compare_result, diff_result, _ = idsdiff_full(
+                                    node_a,
+                                    node_b,
+                                    connections[i][0].original_uri,
+                                    connections[j][0].original_uri,
+                                    print_result=True,
+                                    ignore_version=args.skip_provenance,
+                                )
+                            else:
+                                compare_result, diff_result, _ = idsdiff(
+                                    node_a,
+                                    node_b,
+                                    connections[i][0].original_uri,
+                                    connections[j][0].original_uri,
+                                    print_result=True,
+                                    verbose=True,
+                                    ignore_version=args.skip_provenance,
+                                )
+
+                            compare_data["differences"] = (compare_result, diff_result)
+                            total_data[
+                                (
+                                    connections[i][0].original_uri,
+                                    connections[j][0].original_uri,
+                                    connections[i][1],
+                                    connections[j][1],
+                                )
+                            ] = compare_data
+                        else:
+                            if not isinstance(node_a, IDSBase) and not isinstance(node_b, IDSBase):
+                                txt1 = f"{node_a}"
+                                txt2 = f"{node_b}"
+                            else:
+                                txt1 = "-" if node_a is None else repr(node_a)
+                                txt2 = "-" if node_b is None else repr(node_b)
+                            diff_table = Table(title="first-second")
+                            diff_table.add_column("first", style="blue")
+                            diff_table.add_column("second", style="magenta")
+                            seqmat = difflib.SequenceMatcher()
+                            seqmat.set_seqs(txt1, txt2)
+
+                            out1 = Text()
+                            out2 = Text()
+                            prevmatch = difflib.Match(0, 0, 0)
+                            for match in seqmat.get_matching_blocks():
+                                if match.a > prevmatch.a + prevmatch.size:
+                                    out1.append(txt1[prevmatch.a + prevmatch.size : match.a], "bold red")
+                                if match.b > prevmatch.b + prevmatch.size:
+                                    out2.append(txt2[prevmatch.b + prevmatch.size : match.b], "bold green")
+                                out1.append(txt1[match.a : match.a + match.size])
+                                out2.append(txt2[match.b : match.b + match.size])
+                                prevmatch = match
+                            out1.append(txt1[match.a + match.size :], style="bold red")
+                            out2.append(txt2[match.b + match.size :], style="bold green")
+                            diff_table.add_row(out1, out2)
+                            rich.print(diff_table)
+                            diff_result = []
+                            diff_result.append(("differences", node_a, node_b))
+                            compare_result = False
+                            compare_data["differences"] = (compare_result, diff_result)
+                            total_data[
+                                (
+                                    connections[i][0].original_uri,
+                                    connections[j][0].original_uri,
+                                    connections[i][1],
+                                    connections[j][1],
+                                )
+                            ] = compare_data
+
+                        if args.plot and not args.html:
+                            canvas = PlotCanvas(1, 1)
+                            ax = canvas.add_axes(title="", xlabel="", row=0, col=0)
+
+                            view_plot(
+                                ax,
+                                node_a,
+                                coordinate_a,
+                                field_name=f"{_uri_args_a.ids_name}/{_uri_args_a.original_uri}",
+                                coordinate_name=coordinate_a_name,
+                                field_unit=node_unit_a,
+                                coordinate_unit=coordinate_unit_a,
+                            )
+                            view_plot(
+                                ax,
+                                node_b,
+                                coordinate_b,
+                                field_name=f"{_uri_args_b.ids_name}/{_uri_args_b.original_uri}",
+                                coordinate_name=coordinate_b_name,
+                                field_unit=node_unit_b,
+                                coordinate_unit=coordinate_unit_b,
+                            )
+
+                            canvas.set_text(text=f"{get_database_path(args, time_value=None)}")
+
+                            canvas.fig.subplots_adjust(
+                                top=0.916, bottom=0.09, left=0.044, right=0.953, hspace=0.287, wspace=0.2
+                            )
+                            canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
+                            if args.save:
+                                fname = get_file_name(args, os.path.basename(__file__), None)
+                                if args.directory:
+                                    if not os.path.exists(args.directory):
+                                        os.makedirs(args.directory)
+                                    fname = os.path.join(args.directory, fname)
+                                canvas.save(fname)
+                            else:
+                                if len([child for child in ax.get_children() if isinstance(child, plt.Line2D)]) == 0:
+                                    print("No plots to display.")
+                                else:
+                                    canvas.show()
+                        file_path = get_filename("compare_report", args.directory)
+                        log_file = file_path + ".log"
+                        html_file = file_path + ".html"
+                        logger = setup_logger(
+                            "module",
+                            log_file=log_file,
+                            fmt="%(message)s",
+                            log_file_level=logging.INFO,
+                            stdout_level=logging.INFO,
+                        )
+                        # print(total_data)
+                        if args.html:
+                            if len(connections) > 2:
+                                logger.info("HTML file generation is available for two data entries currently")
+                            else:
+                                st = time.time()
+                                generate_html(html_file, total_data)
+
+                                et = time.time()
+                                elapsed_time = et - st
+                                try:
+                                    import webbrowser
+
+                                    webbrowser.open(html_file)
+                                except Exception as _:  # noqa: F841
+                                    pass
+                        exit(0)
+
+    if len(set(fragment_ids_list)) > 1:
+        print("Please provide same ids name for all uris to compare")
+        exit(0)
+    # work on ids
+    if len(fragment_ids_list) == 0:
+        ids_list = get_ids_types()
+        print(
+            "Comparison process may take a while if you intend to compare all ID types and generate an HTML report, use fragment for comparing single IDS"
+        )
+    else:
+        ids_list = fragment_ids_list
+    idsavailability1 = []
+    idsavailability2 = []
+
+    for i in range(len(connections)):
+        for j in range(i + 1, len(connections)):
+            if connections[i][0] != connections[j][0]:
+                compare_data = {}
+                for idsname in ids_list:
+
+                    ids_a = None
+                    try:
+                        if args.time:
+                            ids_a = connections[i][1].get_slice(
+                                idsname,
+                                args.time,
+                                slicing_methods[args.slicingmethod],
+                                autoconvert=False,
+                            )
+                        else:
+                            ids_a = connections[i][1].get(idsname, autoconvert=False)
+
+                    except Exception as e:  # noqa: F841
+                        idsavailability1.append(idsname)
+                    ids_b = None
+                    try:
+                        if args.time:
+                            ids_b = connections[j][1].get_slice(
+                                idsname,
+                                args.time,
+                                slicing_methods[args.slicingmethod],
+                                autoconvert=False,
+                            )
+                        else:
+                            ids_b = connections[j][1].get(idsname, autoconvert=False)
+
+                    except Exception as e:  # noqa: F841
+                        idsavailability2.append(idsname)
+                    if ids_a is None or ids_b is None:
+                        continue
+                    print("comparing ids recursively: ", idsname)
+                    if args.fullarray:
+                        compare_result, diff_result, _ = idsdiff_full(
+                            ids_a,
+                            ids_b,
+                            connections[i][0].original_uri,
+                            connections[j][0].original_uri,
+                            print_result=True,
+                            ignore_version=args.skip_provenance,
+                        )
+                    else:
+                        compare_result, diff_result, _ = idsdiff(
+                            ids_a,
+                            ids_b,
+                            connections[i][0].original_uri,
+                            connections[j][0].original_uri,
+                            print_result=True,
+                            verbose=True,
+                            ignore_version=args.skip_provenance,
+                        )
+
+                    compare_data[idsname] = (compare_result, diff_result)
+
+                    total_data[
+                        (
+                            connections[i][0].original_uri,
+                            connections[j][0].original_uri,
+                            connections[i][1],
+                            connections[j][1],
+                        )
+                    ] = compare_data
+    set1 = set(idsavailability1)
+    set2 = set(idsavailability2)
+    only_in_list1 = set1 - set2
+    only_in_list2 = set2 - set1
+    ids_differences = [(item, "first") for item in only_in_list1] + [(item, "second") for item in only_in_list2]
+    if len(ids_differences) != 0:
+        from rich.console import Console
+        from rich.table import Table
+
+        console = Console()
+        ids_differences_table = Table(title="IDS availability")
+
+        # Define table columns
+        ids_differences_table.add_column("IDS", style="bold cyan")
+        ids_differences_table.add_column("Availability", style="magenta")
+        for item, origin in ids_differences:
+            ids_differences_table.add_row(item, origin)
+        console.print(ids_differences_table)
     file_path = get_filename("compare_report", args.directory)
     log_file = file_path + ".log"
     html_file = file_path + ".html"
@@ -472,58 +903,9 @@ if __name__ == "__main__":
         log_file_level=logging.INFO,
         stdout_level=logging.INFO,
     )
-    st = time.time()
-    total_data = {}
-    for i in track(range(len(connections)), description="[green]Comparing Data Entries..."):
-        for j in range(i + 1, len(connections)):
-            if connections[i][0] != connections[j][0]:
-                compare_data = {}
-                for idsname in args.ids:
-                    ids_a = connections[i][1].get(idsname)
-                    ids_b = connections[j][1].get(idsname)
-                    compare_result, output = compare_ids(
-                        ids_a,
-                        ids_b,
-                        field=idsname,
-                        ignore_version=args.skip_provenance,
-                        verb=False,
-                        name_x=connections[i][0],
-                        name_y=connections[j][0],
-                        output={},
-                    )
-                    compare_data[idsname] = (compare_result, output)
-                total_data[
-                    (
-                        connections[i][0],
-                        connections[j][0],
-                        connections[i][1],
-                        connections[j][1],
-                    )
-                ] = compare_data
-
-    et = time.time()
-    elapsed_time = et - st
-
+    # print(total_data)
     if bool(total_data):
-        different = {}
-        for cmp_name, cmp_result in total_data.items():
-            for ids_name, result_data in cmp_result.items():
-                for k, v in result_data[1].items():
-                    different[(k, v[3])] = (v[0], v[1])
-        print("")
-        str_connection = "\n"
-        str_connection += "\n".join([x[0] for x in connections])
-        console = Console()
-        table = Table(title=Text(f"Comparisen between {str_connection}", style="bold blue"))
-        table.add_column("ids field name", style="magenta")
-        table.add_column("Comment", style="green")
-
-        for field, _ in different.items():
-            _field, _comment = field
-            table.add_row(f"{_field}", f"{_comment}")
-        console.print(table)
-
-        if args.generate_html is True:
+        if args.html is True:
             if len(connections) > 2:
                 logger.info("HTML file generation is available for two data entries currently")
             else:

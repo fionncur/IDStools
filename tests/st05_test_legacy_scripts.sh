@@ -3,7 +3,7 @@
 # Execute script from root directory
 source ./tests/st00_common.sh
 # expand aliases
-shopt -s expand_aliases
+shopt -p expand_aliases
 
 #print hostname
 hostname -f
@@ -23,16 +23,15 @@ else
     DATABASE_DIR="$2"
 fi
 
-# "viewall database --uri \"imas:mdsplus?user=schneim;pulse=92436;run=271;database=jet;version=3\""
 SCRIPTS=(
-    "plotkineticprofiles --uri \"imas:mdsplus?path=/work/imas/shared/imasdb/ITER/3/134174/117\" --save --directory $LOG_DIR"
-    "plotpressure --uri \"imas:mdsplus?path=/work/imas/shared/imasdb/ITER/3/134174/117\" --save --directory $LOG_DIR"
-    "plotspectrometry --uri \"imas:mdsplus?path=/work/imas/shared/imasdb/TEST/3/134000/37\" --save --directory $LOG_DIR")
+    "idschk --uri \"imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3\" -f resources/validation_schemas/generic/core_profiles.yml"
+    "create_validation_schema -i core_profiles"
+    "validate_db_entry -s 134174 -r 117 --path resources/validation_schemas")
 
 execute_scripts "${SCRIPTS[@]}"
 STATUS=$?
 if [[ "$(uname -n)" == *"bamboo"* ]]; then
     if [ "$STATUS" -ne 0 ]; then
-        exit "$STATUS"
+        return "$STATUS"
     fi
 fi

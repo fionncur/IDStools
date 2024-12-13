@@ -4,7 +4,7 @@
 import inspect
 import types
 
-import imas
+import imaspy
 
 
 def is_field(idstype):
@@ -37,15 +37,16 @@ def list_attributes(idsobj):
 
 def all_ids_types():
     """Returns a list of strings corresponding to all IDS types defined in the version of IMAS being used."""
-    return [ids.value for ids in list(imas.IDSName)]
+    factory = imaspy.IDSFactory()
+    return factory.ids_names()
 
 
-def available_in_dbentry(db, time_mode=None):
+def available_in_dbentry(db, time_mode=None, dd_update=False):
     """Returns a list of pairs (idstype:str,occurrence:int) with data in the given DBEntry.
 
     Parameters
     ----------
-    db: imas.DBEntry object
+    db: imaspy.DBEntry object
         an open DBEntry in which available IDSs will be looked for
     time_mode: int, optional
         time_mode of interest (imas.imasdef.IDS_TIME_MODE_HETEROGENEOUS, IDS_TIME_MODE_HOMOGENEOUS or
@@ -54,8 +55,16 @@ def available_in_dbentry(db, time_mode=None):
     """
     presentidslist = []
     for idstype in all_ids_types():
-        for occ in range(getattr(imas, idstype)().getMaxOccurrences()):
-            homogeneous_time = db.partial_get(idstype, "ids_properties/homogeneous_time", occurrence=occ)
-            if homogeneous_time != imas.imasdef.EMPTY_INT and (time_mode is None or time_mode == homogeneous_time):
+        for occ in db.list_all_occurrences(idstype):
+            if dd_update:
+                idsObj = imaspy.convert_ids(db.get(idstype, occurrence=occ, autoconvert=False), db.factory.version)
+            else:
+                idsObj = db.get(idstype, occurrence=occ, lazy=True, autoconvert=False)
+
+            homogeneous_time = idsObj.ids_properties.homogeneous_time.value
+
+            if idsObj.ids_properties.homogeneous_time.has_value and (
+                time_mode is None or time_mode == homogeneous_time
+            ):
                 presentidslist.append((idstype, occ))
     return presentidslist

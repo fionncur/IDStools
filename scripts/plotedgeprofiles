@@ -1,19 +1,18 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Edgeplot is added in develop2.0 developed by Anna https://confluence.iter.org/display/IMP/How+to+plot+data+from+edge_profiles
+# Edgeplot is added in develop2.0 developed by Anna
+# https://confluence.iter.org/display/IMP/How+to+plot+data+from+edge_profiles
 import argparse
-import copy
 import logging
 import os
 
-from imas import imasdef
+from imaspy import convert_ids, ids_defs
 from rich_argparse import RichHelpFormatter
 
 from idstools.compute.common import get_nearest_time
 from idstools.compute.wall import WallCompute
 from idstools.database import DBMaster
-from idstools.machinedescription import MachineDescription
 from idstools.utils.clihelper import (
     dbentry_parser,
     get_database_path,
@@ -44,6 +43,12 @@ parser.add_argument(
     action="store_true",
 )
 parser.add_argument(
+    "-w",
+    "--walluri",
+    type=str,
+    help="Show wall from this uri",
+)
+parser.add_argument(
     "--logscale",
     help="Shows y axis with logarithmic scale wherever appropriate",
     action="store_true",
@@ -58,6 +63,7 @@ parser.add_argument(
     help="Directory to save the figure",
     default=None,
 )
+
 args = parser.parse_args()
 
 logger = setup_logger("module")
@@ -68,18 +74,38 @@ if connection is None:
     logger.critical("----> Aborted.")
     exit(1)
 
+wall_ids = None
 if args.wall:
+    if args.walluri:
+        mdargs = argparse.Namespace()
+        mdargs.uri = args.walluri
+        mdconnection = DBMaster.get_connection(args)
+        try:
 
-    wall_ids = connection.get("wall")
-
-    if wall_ids.ids_properties.homogeneous_time == imasdef.EMPTY_INT:
-
-        machine_description = MachineDescription(connection_args=copy.deepcopy(args))
-        wall_md_dict = machine_description.get_latest_ids_data("wall")
-        wall_ids = wall_md_dict["idsData"]
-    if wall_ids.ids_properties.homogeneous_time == imasdef.EMPTY_INT:
-        logger.error("wall ids is not present")
+            if args.dd_update:
+                wall_ids = mdconnection.get("wall", autoconvert=False)
+                wall_ids = convert_ids(wall_ids, mdconnection.factory.version)
+            else:
+                wall_ids = mdconnection.get("wall", lazy=True, autoconvert=False)
+        except Exception as _:  # noqa: F841
+            logger.error(
+                "wall ids is not present in the data entry. please provide"
+                "with --walluri option where wall ids is exists"
+            )
     else:
+        try:
+            if args.dd_update:
+                wall_ids = connection.get("wall", autoconvert=False)
+                wall_ids = convert_ids(wall_ids, connection.factory.version)
+            else:
+                wall_ids = connection.get("wall", lazy=True, autoconvert=False)
+        except Exception as _:  # noqa: F841
+            logger.error(
+                "wall ids is not present in the data entry. please provide with"
+                "--walluri option where wall ids is exists"
+            )
+
+    if wall_ids and not wall_ids.ids_properties.homogeneous_time == ids_defs.EMPTY_INT:
         r = None
         z = None
         h = None
@@ -92,29 +118,36 @@ if args.wall:
                     h = vessel_unit["h"]
                     break
 
-time_array = None
+edge_profile_ids = None
 try:
-    time_array = connection.partial_get("edge_profiles", "time")
-except Exception as e:
+
+    if args.dd_update:
+        edge_profile_ids = connection.get("edge_profiles", autoconvert=False)
+        edge_profile_ids = convert_ids(edge_profile_ids, connection.factory.version)
+    else:
+        edge_profile_ids = connection.get("edge_profiles", lazy=True, autoconvert=False)
+except Exception as _:  # noqa: F841
     logger.error("edge_profiles ids is not present")
     exit(1)
+
+time_array = edge_profile_ids.time
 if time_array is None:
     logger.error("edge_profiles ids : time is not present")
     exit(1)
 
-time_index, time_value = get_nearest_time(time_array, args.time)
-
-edge_profile_ids = connection.get_slice("edge_profiles", time_value, imasdef.CLOSEST_INTERP)
+time_slice, time_value = get_nearest_time(time_array, args.time)
 
 if len(edge_profile_ids.grid_ggd) == 0:
     logger.error(
-        f"No values in grid_ggd  at time {time_value}, Can not plot! Choose different time with option --time, timerange [{time_array.min()}-{time_array.max()}]"
+        f"No values in grid_ggd  at time {time_value}, Can not plot! Choose different time with option --time,"
+        f"timerange [{time_array.min()}-{time_array.max()}]"
     )
     exit(1)
 
-if len(edge_profile_ids.grid_ggd[0].space) == 0:
+if len(edge_profile_ids.grid_ggd[time_slice].space) == 0:
     logger.error(
-        f"No values in grid_ggd[0].space at time {time_value}, Can not plot! Choose different time with option --time, timerange [{time_array.min()}-{time_array.max()}]"
+        f"No values in grid_ggd[{time_slice}].space at time {time_value}, Can not plot!"
+        f"Choose different time with option --time, timerange [{time_array.min()}-{time_array.max()}]"
     )
     exit(1)
 
@@ -128,28 +161,28 @@ ax1 = canvas.add_axes(title="", xlabel="", row=0, col=1, rowspan=2)
 ax2 = canvas.add_axes(title="", xlabel="", row=0, col=2, rowspan=2)
 ax3 = canvas.add_axes(title="", xlabel="", row=0, col=3, rowspan=2)
 
-c1 = edge_profiles_view.view_electrons_density(ax1, time_slice=0, show_separatrix=False)
+c1 = edge_profiles_view.view_electrons_density(ax1, time_slice, show_separatrix=False)
 if c1 is not None:
     canvas.fig.colorbar(c1, ax=ax1)
-    if args.wall:
+    if wall_ids:
         if r is not None and z is not None:
             ax1.plot(r, z, "silver")
 
-c2 = edge_profiles_view.view_ion_density(ax2, time_slice=0, show_separatrix=False)
+c2 = edge_profiles_view.view_ion_density(ax2, time_slice, show_separatrix=False)
 if c2 is not None:
     canvas.fig.colorbar(c2, ax=ax2)
-    if args.wall:
+    if wall_ids:
         if r is not None and z is not None:
             ax2.plot(r, z, "silver")
 
-c3 = edge_profiles_view.view_neutral_density(ax3, time_slice=0, show_separatrix=False)
+c3 = edge_profiles_view.view_neutral_density(ax3, time_slice, show_separatrix=False)
 if c3 is not None:
     canvas.fig.colorbar(c3, ax=ax3)
-    if args.wall:
+    if wall_ids:
         if r is not None and z is not None:
             ax3.plot(r, z, "silver")
 
-edge_profiles_view.view_equatorial_plane_and_diverter_density(ax4, time_slice=0, logscale=args.logscale)
+edge_profiles_view.view_equatorial_plane_and_diverter_density(ax4, time_slice, logscale=args.logscale)
 
 canvas.set_text(text=f"{get_database_path(args, time_value=time_value)}")
 

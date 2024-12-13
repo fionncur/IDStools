@@ -20,6 +20,6 @@ output of TORBEAM code.
 
         $ plotecray --uri "imas:mdsplus?user=public;pulse=134173;run=2326;database=TEST;version=3" -md wall
 
-   .. thumbnail:: _static/images/plotecray.png
+   .. image:: _static/images/plotecray.png
       :alt: image not found
       :align: center

@@ -21,13 +21,12 @@ class EcStrayCompute:
         # self.coreProfilesCompute = coreProfilesIds
         self.waves_compute = WavesCompute(waves_ids)
 
-    def get_resonance_layer(self, time_index_waves: int = 0, time_index_equilibrium: int = 0, n_harm=None):
+    def get_resonance_layer(self, coherent_wave_index, time_slice, n_harm=None):
         """This function calculates and returns a dictionary (Resonance Layer) containing r and z values
         corresponding to the resonance points based on the provided nHarm values, b_resonance, and b_total arrays.
 
         Args:
-            time_index_waves (int): time index for waves, default is 0
-            time_index_equilibrium (int): time index of equilibrium, default is 0
+            time_slice (int): time index, default is 0
             n_harm (list, optional):  integer values that represent the order or index of harmonics
                 in a series. Defaults to [1, 2, 3, 4].
 
@@ -37,7 +36,7 @@ class EcStrayCompute:
         Examples:
             .. code-block:: python
 
-                import imas
+                import imaspy
                 # add necessary imports
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=134173;run=106;database=ITER;version=3", "r")
                 connection.open()
@@ -57,11 +56,11 @@ class EcStrayCompute:
         """
         if n_harm is None:
             n_harm = [1, 2, 3, 4]
-        b_resonance = self.waves_compute.get_b_resonance(time_index=time_index_waves, harmonic_frequencies=n_harm)
-        profile2d_index, b_total = self.equilibrium_compute.get_b_total(time_index_equilibrium)
+        b_resonance = self.waves_compute.get_b_resonance(coherent_wave_index, time_slice, harmonic_frequencies=n_harm)
+        profile2d_index, b_total = self.equilibrium_compute.get_b_total(time_slice)
         if profile2d_index != -99:
-            r = self.equilibrium_compute.ids.time_slice[time_index_equilibrium].profiles_2d[profile2d_index].grid.dim1
-            z = self.equilibrium_compute.ids.time_slice[time_index_equilibrium].profiles_2d[profile2d_index].grid.dim2
+            r = self.equilibrium_compute.ids.time_slice[time_slice].profiles_2d[profile2d_index].grid.dim1
+            z = self.equilibrium_compute.ids.time_slice[time_slice].profiles_2d[profile2d_index].grid.dim2
 
         [nr, nz] = np.shape(b_total)
         b_err = 10 / nr
@@ -77,19 +76,12 @@ class EcStrayCompute:
 
         return {"profile2d_index": profile2d_index, "resonance_layer": resonance_layer}
 
-    def get_cutoff_layer(
-        self,
-        time_index_waves: int = 0,
-        time_index_core_profiles: int = 0,
-        time_index_equilibrium: int = 0,
-    ):
+    def get_cutoff_layer(self, coherent_wave_index, time_slice):
         """The cutoff layer is a region in a plasma where certain frequencies or modes of wave propagation
         are prevented from propagating or transmitting due to the plasma's properties.
 
         Args:
-            time_index_waves (int, optional): time index for waves. Defaults to 0.
-            time_index_core_profiles (int, optional): time index for core_profiles. Defaults to 0.
-            time_index_equilibrium (int, optional): time index for equilibrium. Defaults to 0.
+            time_slice (int, optional): time index. Defaults to 0.
 
         Returns:
             dict: cut off layer in dictionary format
@@ -113,7 +105,7 @@ class EcStrayCompute:
         Examples:
             .. code-block:: python
 
-                import imas
+                import imaspy
 
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=134173;run=106;database=ITER;version=3","r")
                 connection.open()
@@ -135,35 +127,35 @@ class EcStrayCompute:
 
         """
         # wavecompute = WavesCompute(self.wavesIds)
-        omega_ec = self.waves_compute.get_omega_ec(time_index_waves)
+        omega_ec = self.waves_compute.get_omega_ec(coherent_wave_index, time_slice)
 
         # Find (R,Z) rectangular grid of B-field
         # eqcomputeobj = EquilibriumCompute(self.equilibriumIds)
-        profile2d_index, b_total = self.equilibrium_compute.get_b_total(time_index_equilibrium)
+        profile2d_index, b_total = self.equilibrium_compute.get_b_total(time_slice)
 
         # B(R,Z) evaluation
-        r = self.equilibrium_ids.time_slice[time_index_equilibrium].profiles_2d[profile2d_index].grid.dim1
-        z = self.equilibrium_ids.time_slice[time_index_equilibrium].profiles_2d[profile2d_index].grid.dim2
+        r = self.equilibrium_ids.time_slice[time_slice].profiles_2d[profile2d_index].grid.dim1
+        z = self.equilibrium_ids.time_slice[time_slice].profiles_2d[profile2d_index].grid.dim2
 
         # Ne(psi) in core_profiles IDS
         # rho1d_cp = self.coreProfilesIds.profiles_1d[timeIndexCoreProfiles].grid.rho_tor_norm
         psi1d_cp = (
-            self.core_profiles_ids.profiles_1d[time_index_core_profiles].grid.psi
-            - self.core_profiles_ids.profiles_1d[time_index_core_profiles].grid.psi[-1]
+            self.core_profiles_ids.profiles_1d[time_slice].grid.psi
+            - self.core_profiles_ids.profiles_1d[time_slice].grid.psi[-1]
         ) / (
-            self.core_profiles_ids.profiles_1d[time_index_core_profiles].grid.psi[0]
-            - self.core_profiles_ids.profiles_1d[time_index_core_profiles].grid.psi[-1]
+            self.core_profiles_ids.profiles_1d[time_slice].grid.psi[0]
+            - self.core_profiles_ids.profiles_1d[time_slice].grid.psi[-1]
         )
-        ne_cp = self.core_profiles_ids.profiles_1d[time_index_core_profiles].electrons.density
+        ne_cp = self.core_profiles_ids.profiles_1d[time_slice].electrons.density
 
         # Ne(psi) interpolated over equilibrium IDS
         # rho1d_eq = self.equilibriumIds.time_slice[timeIndexEquilibrium].profiles_1d.rho_tor_norm
         psi1d_eq = (
-            self.equilibrium_ids.time_slice[time_index_equilibrium].profiles_1d.psi
-            - self.equilibrium_ids.time_slice[time_index_equilibrium].profiles_1d.psi[-1]
+            self.equilibrium_ids.time_slice[time_slice].profiles_1d.psi
+            - self.equilibrium_ids.time_slice[time_slice].profiles_1d.psi[-1]
         ) / (
-            self.equilibrium_ids.time_slice[time_index_equilibrium].profiles_1d.psi[0]
-            - self.equilibrium_ids.time_slice[time_index_equilibrium].profiles_1d.psi[-1]
+            self.equilibrium_ids.time_slice[time_slice].profiles_1d.psi[0]
+            - self.equilibrium_ids.time_slice[time_slice].profiles_1d.psi[-1]
         )
         ne_eq = np.zeros(len(psi1d_eq))
         ne_interp = interpolate.interp1d(psi1d_cp, ne_cp, kind="linear")
@@ -171,8 +163,8 @@ class EcStrayCompute:
             ne_eq[i] = float(ne_interp(psi1d_eq[i]))
 
         # Ne(R,Z) deduced for each point over B(R,Z) in equilibrium IDS
-        psi1d_eq = self.equilibrium_ids.time_slice[time_index_equilibrium].profiles_1d.psi
-        psi2d_eq = self.equilibrium_ids.time_slice[time_index_equilibrium].profiles_2d[profile2d_index].psi
+        psi1d_eq = self.equilibrium_ids.time_slice[time_slice].profiles_1d.psi
+        psi2d_eq = self.equilibrium_ids.time_slice[time_slice].profiles_2d[profile2d_index].psi
         ne_from_psi = interpolate.interp1d(psi1d_eq, ne_eq, kind="linear")
         ne2d_eq = np.zeros(np.shape(psi2d_eq))
         omega_r = np.zeros(np.shape(psi2d_eq))

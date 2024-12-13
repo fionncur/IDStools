@@ -8,7 +8,7 @@ import sys
 from os import getenv, system
 from sys import exit
 
-import imas
+import imaspy as imas
 import numpy as np
 from rich_argparse import RawDescriptionRichHelpFormatter
 
@@ -45,28 +45,26 @@ parser.add_argument(
 args = parser.parse_args()
 
 # Open the database and read the necessary IDSs
-input = imas.DBEntry(
-    get_backend_id(args.backend),
-    args.database,
-    args.shot,
-    args.run,
-    args.user,
-    args.version,
+uri = (
+    f"imas:{args.backend.lower()}?user={args.user};pulse={args.shot};"
+    f"run={args.run};database={args.database};version={args.version}"
 )
+the_slice = 0
+connection = None
+if uri != "" and uri is not None:
+    try:
+        connection = imas.DBEntry(uri, "r")
+    except Exception as e:
+        print(e)
 
-if input is not None:
-    status, _ = input.open()
-    if status != 0:
-        print(f"Can not find data entry {args}")
-        exit(1)
-else:
-    print("----> Aborted.")
+if connection is None:
+    print(f"Can not find data entry {args}")
     exit(1)
 
 # Read necessary IDSs from database
 try:
-    core_profiles = input.get("core_profiles")
-    if core_profiles.ids_properties.homogeneous_time != imas.imasdef.EMPTY_INT:
+    core_profiles = connection.get("core_profiles", lazy=True)
+    if core_profiles.ids_properties.homogeneous_time != imas.ids_defs.EMPTY_INT:
         core_present = 1
     else:
         core_present = 0
@@ -75,7 +73,7 @@ except Exception as e:
     core_present = 0
 
 try:
-    summary = input.get("summary")
+    summary = connection.get("summary", lazy=True)
 except Exception as e:
     print("The summary IDS is absent from the input data-entry", file=sys.stdout)
     print("----> H&CD waveforms not filled (to be completed by hand)", file=sys.stdout)
@@ -83,7 +81,11 @@ except Exception as e:
 
 if core_present == 1:
     try:
-        ne0 = input.partial_get("core_profiles", "profiles_1d(:)/electrons/density(0)")
+        ne0_raw = []
+        for t in range(len(core_profiles.time)):
+            ne0_raw.append(core_profiles.profiles_1d[t].electrons.density[0])
+        ne0 = np.array(ne0_raw)
+
         central_electron_density = ne0[0]
 
     except Exception as e:
@@ -94,8 +96,8 @@ if core_present == 1:
         ne0 = 0
 
 try:
-    equilibrium = input.get("equilibrium")
-    if equilibrium.ids_properties.homogeneous_time != imas.imasdef.EMPTY_INT:
+    equilibrium = connection.get("equilibrium", lazy=True)
+    if equilibrium.ids_properties.homogeneous_time != imas.ids_defs.EMPTY_INT:
         eq_present = 1
     else:
         eq_present = 0
@@ -105,7 +107,7 @@ except Exception as e:
     eq_present = 0
 
 try:
-    dataset_description = input.get("dataset_description")
+    dataset_description = connection.get("dataset_description", lazy=True)
     comment = str.replace(dataset_description.ids_properties.comment, "\n", "\n   ")
     dd_version = dataset_description.dd_version
 except Exception as e:
@@ -180,7 +182,7 @@ except Exception as e:
 # Ihalo
 try:
     halo_current = 0
-    disruption = input.get("disruption")
+    disruption = connection.get("disruption", lazy=True)
     halo_current = max(disruption.global_quantities.current_halo_pol, key=abs)
 except Exception as e:
     print(
@@ -255,12 +257,12 @@ f.write("""    VD_direction: %s\n""" % VD_direction)
 f.write("""    magnetic_field: %.2f\n""" % magnetic_field)
 f.write("""    I_RE_max: %.2f \n""" % REmax)
 
-
 if plasma_current == 0:
     f.write("""    plasma_current: tbd\n""")
     f.write("""    halo_fraction: tbd \n""")
 else:
     f.write("""    plasma_current: %.2f \n""" % plasma_current)
+
     halo_fraction = 1.0e-6 * abs(float(halo_current) / float(plasma_current))
     if halo_fraction > 0.5:
         print(disruption.global_quantities.current_halo_pol * 1.0e-6)

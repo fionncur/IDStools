@@ -9,7 +9,7 @@ import copy
 import logging
 import os
 
-import imas
+from imaspy import convert_ids, ids_defs
 from rich_argparse import RichHelpFormatter
 
 from idstools.compute.common import get_nearest_time
@@ -37,15 +37,21 @@ class MdAction(argparse.Action):
 
 
 parser = argparse.ArgumentParser(
-    description="---- Display the plasma equilibrium from the equilibrium IDS. It also shows pf coils and wall position overlay if exists [Previously known as equiplot]",
+    description="""---- Display the plasma equilibrium from the equilibrium IDS.
+    It also shows pf coils and wall position overlay if exists [Previously known as equiplot]""",
     parents=[dbentry_parser],
     formatter_class=RichHelpFormatter,
 )
-
 parser.add_argument("-t", "--time", help="Time (default=middle)", type=float, default=-99.0)
 parser.add_argument(
     "--rho",
     help="Show rho overlay on the plot",
+    action="store_true",
+)
+parser.add_argument(
+    "-p",
+    "--plots",
+    help="Plots available quantities along with equilibrium",
     action="store_true",
 )
 parser.add_argument(
@@ -107,20 +113,40 @@ if isinstance(args.md, bool) and args.md is True:
         args.md.append(ids_name)
     _ids_connection.close()
 
-ids_obj_equilibrium = imas.equilibrium()
-ids_obj_equilibrium.time = connection.partial_get("equilibrium", "time", occurrence)
+
+if args.dd_update:
+    ids_obj_equilibrium = connection.get("equilibrium", occurrence=occurrence, autoconvert=False)
+    ids_obj_equilibrium = convert_ids(ids_obj_equilibrium, connection.factory.version)
+else:
+    ids_obj_equilibrium = connection.get("equilibrium", occurrence=occurrence, lazy=True, autoconvert=False)
+
 if ids_obj_equilibrium.time is not None:
-    time_index, time_value = get_nearest_time(ids_obj_equilibrium.time, args.time)
-    ids_obj_equilibrium.time_slice.resize(1)
-    ids_obj_equilibrium.time_slice[0] = connection.partial_get(
-        "equilibrium", f"time_slice({str(time_index)})", occurrence
-    )
-    plotequilibrium = EquilibriumView(ids_obj_equilibrium)
+    time_slice, time_value = get_nearest_time(ids_obj_equilibrium.time, args.time)
+    view_object = EquilibriumView(ids_obj_equilibrium)
 
     title = f"2D Equilibrium at time {time_value:.1f}"
     database_text = ""
-    canvas = PlotCanvas(1, 1)
-    ax = canvas.add_axes(title="", xlabel="", row=0, col=0)
+    if args.plots:
+        canvas = PlotCanvas(2, 6)
+        axes_list1 = []
+        ax2 = canvas.add_axes(title="", xlabel="", row=0, col=1)
+        ax3 = canvas.add_axes(title="", xlabel="", row=0, col=2)
+        ax4 = canvas.add_axes(title="", xlabel="", row=1, col=1)
+        # ax5=canvas.add_axes(title="", xlabel="", row=1, col=2)
+        axes_list1 = [ax2, ax3, ax4]
+
+        axes_list2 = []
+        ax6 = canvas.add_axes(title="", xlabel="", row=0, col=3)
+        ax7 = canvas.add_axes(title="", xlabel="", row=0, col=4)
+        ax8 = canvas.add_axes(title="", xlabel="", row=0, col=5)
+        ax9 = canvas.add_axes(title="", xlabel="", row=1, col=3)
+        ax10 = canvas.add_axes(title="", xlabel="", row=1, col=4)
+        # ax11=canvas.add_axes(title="", xlabel="", row=1, col=5)
+        axes_list2 = [ax6, ax7, ax8, ax9, ax10]
+
+    else:
+        canvas = PlotCanvas(1, 1)
+        ax1 = canvas.add_axes(title="", xlabel="", row=0, col=0)
 
     for mdids_info in args.md:
         inputargs = copy.deepcopy(args)
@@ -150,42 +176,48 @@ if ids_obj_equilibrium.time is not None:
         if "wall" in _ids_name:
             connection = DBMaster.get_connection(inputargs)
             if connection is not None:
-                _ids_data = connection.get("wall")
-                from imas import imasdef
+                try:
+                    _ids_data = connection.get("wall", autoconvert=False)
+                    if args.dd_update:
+                        _ids_data = convert_ids(_ids_data, connection.factory.version)
+                    if _ids_data.ids_properties.homogeneous_time == ids_defs.EMPTY_INT:
+                        logger.warning(f"{_ids_name} ids is empty in the dbentry")
+                except Exception as e:
+                    logger.warning(f"{_ids_name} ids is not present error {e}")
+                if _ids_data:
 
-                if _ids_data.ids_properties.homogeneous_time != imasdef.EMPTY_INT:
                     wallview = WallView(_ids_data)
-                    if found_data := wallview.view_wall(ax, args.show_labels, wallcolor="slategray"):
+                    if found_data := wallview.view_wall(ax1, args.show_labels, wallcolor="slategray"):
                         title += " wall"
                         database_text += f"{_ids_name}={get_database_path(inputargs)}\n"
-                else:
-                    logger.warning(f"{_ids_name} ids is empty in the dbentry")
                 connection.close()
             else:
-                logger.warning(f"{_ids_name} ids is not present")
+                logger.warning(f"given data entry is not present for {_ids_name}")
         if "pf_active" in _ids_name:
             connection = DBMaster.get_connection(inputargs)
             if connection is not None:
-                _ids_data = connection.get("pf_active")
-                from imas import imasdef
-
-                if _ids_data.ids_properties.homogeneous_time != imasdef.EMPTY_INT:
+                _ids_data = None
+                try:
+                    _ids_data = connection.get("pf_active", autoconvert=False)
+                    if _ids_data.ids_properties.homogeneous_time == ids_defs.EMPTY_INT:
+                        logger.warning(f"{_ids_name} ids is empty in the dbentry")
+                except Exception as e:
+                    logger.warning(f"{_ids_name} ids is not present error {e}")
+                if _ids_data:
                     view_pf_coils = PFActiveView(_ids_data)
-                    view_pf_coils.view_active_pf_coils(ax, args.show_labels)
+                    view_pf_coils.view_active_pf_coils(ax1, args.show_labels)
                     title += " Active PF Coils"
                     database_text += f"{_ids_name}={get_database_path(inputargs)}\n"
-                else:
-                    logger.warning(f"{_ids_name} ids is empty in the dbentry")
                 connection.close()
             else:
-                logger.warning("f{_idsName} ids is not present")
+                logger.warning(f"given data entry is not present for {_ids_name}")
 
-    plotequilibrium.view_magnetic_poloidal_flux(ax, plot_rho=args.rho)
-    ax.set_title(title)
+    view_object.view_magnetic_poloidal_flux(ax1, time_slice, plot_rho=args.rho)
+    ax1.set_title(title)
 
-    xmin, xmax = ax.get_xlim()
-    ymin, ymax = ax.get_ylim()
-    ax.text(
+    xmin, xmax = ax1.get_xlim()
+    ymin, ymax = ax1.get_ylim()
+    ax1.text(
         xmax + 0.01 * abs(xmax),
         ymin + 0.5 * abs(ymax - ymin),
         f"{get_database_path(args, time_value=time_value)}\n{database_text}",
@@ -194,8 +226,12 @@ if ids_obj_equilibrium.time is not None:
         rotation="vertical",
         fontsize=7,
     )
+    if args.plots:
+        view_object.plot_profiles_1d_quantities(axes_list1, time_slice)
+        view_object.plot_global_quantities(axes_list2, time_slice)
 
     canvas.fig.suptitle(get_title(args, "Equilibrium", time_value), size=12)
+    canvas.fig.subplots_adjust(top=0.933, bottom=0.05, left=0.03, right=0.988, hspace=0.221, wspace=0.364)
     canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
     if args.save:
         fname = get_file_name(args, f"{os.path.basename(__file__)}_Equilibrium", time_value)

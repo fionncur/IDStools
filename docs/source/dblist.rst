@@ -42,14 +42,14 @@ user name.
 .. code-block:: bash
 
    # Show available dataversions with databases from specific user database
-   $ dblist -u $USERNAME dataversions
+   $ dblist -u $USER dataversions
    0 jet_reference
    3        DEBUG         GRAY          HCD         ITER      TORBEAM         
 
 .. code-block:: bash
 
    # Show available dataversions with databases from specific user database
-   $ dblist -u $USERNAME databases
+   $ dblist -u $USER databases
       DEBUG    3
       GRAY     3
       HCD      3
@@ -60,7 +60,7 @@ user name.
 .. code-block:: bash
 
    # Show available time slices with ids names from specific user database
-   $ dblist -u $USERNAME slices
+   $ dblist -u $USER slices
    Database: DEBUG
       Data version: 3
          Backend: mdsplus
@@ -77,7 +77,7 @@ user name.
 .. code-block:: bash
 
    # Show available time slices with ids names from specific user database with specific shot/run
-   $ dblist -u $USERNAME slices 130012 26
+   $ dblist -u $USER slices 130012 26
    Database: DEBUG
       Data version: 3
          Backend: mdsplus
@@ -92,7 +92,7 @@ user name.
 .. code-block:: bash
 
    # Show last modified databases with compact output from  specific user database
-   dblist -u $USERNAME  list -M -c 
+   dblist -u $USER  list -M -c 
    Database: DEBUG
       Data version: 3
          Backend: mdsplus

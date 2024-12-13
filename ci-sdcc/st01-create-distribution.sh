@@ -26,12 +26,10 @@ source "$VIRTUALENV_DIR"/bin/activate
 pip install build
 
 # Debuggging:
-set -x
 # create a source distribution
 python -m build --sdist
 # create wheel compiled version of the package
 python -m build --wheel
-set +x
 deactivate
 
 echo "Done"

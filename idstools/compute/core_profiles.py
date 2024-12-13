@@ -11,6 +11,7 @@ import itertools
 import logging
 from typing import Union
 
+import imaspy as imas
 import numpy as np
 
 import idstools.init_mendeleiev as mend
@@ -24,12 +25,12 @@ class CoreProfilesCompute:
         self.volume = volume
 
     @staticmethod
-    def get_plasma_composition_with_species_concentration(ids, time_slice=0, volume=None) -> dict | int:
+    def get_plasma_composition_with_species_concentration(ids, time_slice, volume=None) -> Union[dict, int]:
         """
         Function retrives composition and species concentration in below format
         """
         try:
-            ids.profiles_1d[time_slice]
+            _ = ids.profiles_1d[time_slice]
 
         except Exception as e:
             logger.debug(f"{e}")
@@ -45,27 +46,30 @@ class CoreProfilesCompute:
                 core_profile_compute.volume = volume
         data = {}
 
-        nspec_over_ntot = core_profile_compute.get_nspec_over_ntot()
-        nspec_over_ne = core_profile_compute.get_nspec_over_ne()
-        nspec_over_nmaj = core_profile_compute.get_nspec_over_nmaj()
-        species = core_profile_compute.get_species()
-        labels = core_profile_compute.get_labels()
-        core_profile_compute.combine_species_when_appear_twice(species, nspec_over_ntot, nspec_over_ne, nspec_over_nmaj)
-        a = core_profile_compute.get_a()
-        z = core_profile_compute.get_z()
-        states_data = core_profile_compute.get_states_data()
-        for species_index in range(len(species)):
-            species_data = {
-                "nspec_over_ntot": nspec_over_ntot[species_index],
-                "nspec_over_ne": nspec_over_ne[species_index],
-                "nspec_over_nmaj": nspec_over_nmaj[species_index],
-                "a": a[species_index],
-                "z": z[species_index],
-                "species": species[species_index],
-                "states": states_data[str(species_index)],
-                "label": labels[species_index],
-            }
-            data[str(species_index)] = species_data
+        nspec_over_ntot = core_profile_compute.get_nspec_over_ntot(time_slice)
+        nspec_over_ne = core_profile_compute.get_nspec_over_ne(time_slice)
+        nspec_over_nmaj = core_profile_compute.get_nspec_over_nmaj(time_slice)
+        species = core_profile_compute.get_species(time_slice)
+        labels = core_profile_compute.get_labels(time_slice)
+        core_profile_compute.combine_species_when_appear_twice(
+            species, nspec_over_ntot, nspec_over_ne, nspec_over_nmaj, time_slice
+        )
+        a = core_profile_compute.get_a(time_slice)
+        z = core_profile_compute.get_z(time_slice)
+        states_data = core_profile_compute.get_states_data(time_slice)
+        if species:
+            for species_index in range(len(species)):
+                species_data = {
+                    "nspec_over_ntot": nspec_over_ntot[species_index],
+                    "nspec_over_ne": nspec_over_ne[species_index],
+                    "nspec_over_nmaj": nspec_over_nmaj[species_index],
+                    "a": a[species_index],
+                    "z": z[species_index],
+                    "species": species[species_index],
+                    "states": states_data[str(species_index)],
+                    "label": labels[species_index],
+                }
+                data[str(species_index)] = species_data
 
         return data
 
@@ -82,7 +86,7 @@ class CoreProfilesCompute:
         Example:
             .. code-block:: python
 
-                import imas
+                import imaspy as imas
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=105033;run=1;database=ITER;version=3", "r")
                 connection.open()
                 idsObj = connection.get('core_profiles')
@@ -97,7 +101,7 @@ class CoreProfilesCompute:
         return [self.ids.profiles_1d[itime].electrons.density[0] * 1.0e-19 for itime in range(ntime)]
 
     @functools.lru_cache(maxsize=128)
-    def get_a(self, time_slice=0, element_index=0) -> list:
+    def get_a(self, time_slice, element_index=0) -> list:
         """
         This function returns a list of atomic masses for a given slice and element index.
 
@@ -113,7 +117,7 @@ class CoreProfilesCompute:
         Example:
             .. code-block:: python
 
-                import imas
+                import imaspy as imas
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=105033;run=1;database=ITER;version=3", "r")
                 connection.open()
 
@@ -132,7 +136,7 @@ class CoreProfilesCompute:
         return a
 
     @functools.lru_cache(maxsize=128)
-    def get_z(self, time_slice: int = 0, element_index: int = 0) -> list:
+    def get_z(self, time_slice: int, element_index: int = 0) -> list:
         """
         This function `get_z` returns a list of nuclear charges for each species in a given slice and element
         index.
@@ -148,7 +152,7 @@ class CoreProfilesCompute:
         Example:
             .. code-block:: python
 
-                import imas
+                import imaspy as imas
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=105033;run=1;database=ITER;version=3", "r")
                 connection.open()
                 idsObj = connection.get('core_profiles')
@@ -166,7 +170,7 @@ class CoreProfilesCompute:
         logger.debug(f"Nuclear charge each species : {z}")
         return z
 
-    def get_states(self, time_slice: int = 0) -> list:
+    def get_states(self, time_slice: int) -> list:
         """
         This function `get_states` returns quantities related to the different states of the species
         (ionisation, energy, excitation, ...) for each species
@@ -180,7 +184,7 @@ class CoreProfilesCompute:
         Example:
             .. code-block:: python
 
-                import imas
+                import imaspy as imas
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=105033;run=1;database=ITER;version=3", "r")
                 connection.open()
 
@@ -195,7 +199,9 @@ class CoreProfilesCompute:
         nspecies = len(self.ids.profiles_1d[time_slice].ion)
         return [self.ids.profiles_1d[time_slice].ion[species_index].state for species_index in range(nspecies)]
 
-    def get_state_density(self, time_slice: int = 0, species_index: int = 0, state_index: int = 0) -> np.ndarray | None:
+    def get_state_density(
+        self, time_slice: int, species_index: int = 0, state_index: int = 0
+    ) -> Union[np.ndarray, None]:
         """
         This function `get_state_density` returns the density of a specified state of a
         specified species at a specified time slice, or the thermal density if the former is not available.
@@ -213,13 +219,13 @@ class CoreProfilesCompute:
         Example:
             .. code-block:: python
 
-                import imas
+                import imaspy as imas
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=104010;run=2;database=ITER;version=3", "r")
                 connection.open()
                 idsObj = connection.get('core_profiles')
                 connection.close()
                 computeObj = CoreProfilesCompute(idsObj)
-                result = computeObj.get_state_density(time_slice=0, speciesIndex=0, stateIndex=0)
+                result = computeObj.get_state_density(time_slice, speciesIndex=0, stateIndex=0)
 
                 array([4.16759116e+19, 4.17266130e+19, 4.17275806e+19, 4.17086410e+19,
                 4.16751781e+19, 4.16983762e+19, 4.17344996e+19, 4.17944658e+19,
@@ -234,7 +240,7 @@ class CoreProfilesCompute:
                 return density
         return None
 
-    def get_states_data(self, time_slice: int = 0) -> dict:
+    def get_states_data(self, time_slice: int) -> dict:
         """
         This function `get_states_data` returns a dictionary containing data on the states and densities of different
         species in a plasma simulation.
@@ -250,7 +256,7 @@ class CoreProfilesCompute:
         Example:
             .. code-block:: python
 
-                import imas
+                import imaspy as imas
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=104010;run=2;database=ITER;version=3", "r")
                 connection.open()
                 idsObj = connection.get('core_profiles')
@@ -273,7 +279,7 @@ class CoreProfilesCompute:
 
         volume = self.get_volume(time_slice)
         nspecies = len(self.ids.profiles_1d[time_slice].ion)
-        species_density, _, _ = self.get_species_density()
+        species_density, _, _ = self.get_species_density(time_slice)
         states_data = {}
         for species_index in range(nspecies):
             logger.debug(f"Species index :{species_index}")
@@ -283,8 +289,17 @@ class CoreProfilesCompute:
             logger.debug(f"Species states count :{nstates}")
             states_density = [0] * nstates
             for state_index in range(nstates):
+                if hasattr(self.ids.profiles_1d[time_slice].ion[species_index], "label"):
+                    ion_name = self.ids.profiles_1d[time_slice].ion[species_index].label
+                elif hasattr(self.ids.profiles_1d[time_slice].ion[species_index], "name"):
+                    ion_name = self.ids.profiles_1d[time_slice].ion[species_index].name
+
+                if hasattr(self.ids.profiles_1d[time_slice].ion[species_index].state[state_index], "label"):
+                    state_name = self.ids.profiles_1d[time_slice].ion[species_index].state[state_index].label
+                elif hasattr(self.ids.profiles_1d[time_slice].ion[species_index].state[state_index], "name"):
+                    state_name = self.ids.profiles_1d[time_slice].ion[species_index].state[state_index].name
                 state_data = {
-                    "label": self.ids.profiles_1d[time_slice].ion[species_index].state[state_index].label,
+                    "label": state_name,
                     "z_average": np.mean(
                         self.ids.profiles_1d[time_slice].ion[species_index].state[state_index].z_average
                     ),
@@ -295,7 +310,7 @@ class CoreProfilesCompute:
                 if density is None:
                     logger.critical(
                         f"core_profile IDS: Density data for species"
-                        f"{self.ids.profiles_1d[time_slice].ion[species_index].label} and state"
+                        f"{ion_name} and state"
                         f"{str(state_index)} is empty"
                     )
                 elif len(density) != 0:
@@ -304,7 +319,7 @@ class CoreProfilesCompute:
                     if np.all(density == 1.0) or np.all(density == 0.0):
                         logger.critical(
                             f"core_profile IDS: Density data for species"
-                            f"{self.ids.profiles_1d[time_slice].ion[species_index].label}"
+                            f"{ion_name}"
                             f"and state {str(state_index)} all are ones or zeros"
                         )
                     else:
@@ -313,9 +328,7 @@ class CoreProfilesCompute:
                         state_data["density_available"] = True
                 else:
                     logger.critical(
-                        f"core_profile IDS: Density data for species"
-                        f"{self.ids.profiles_1d[time_slice].ion[species_index].label}"
-                        f" and state {state_index} is empty"
+                        f"core_profile IDS: Density data for species" f"{ion_name}" f" and state {state_index} is empty"
                     )
                 # TODO Couldn't retrive state desnity should we calculate n/ni?
                 # In that case density is always 0 and no meaning of n/ni
@@ -343,7 +356,7 @@ class CoreProfilesCompute:
             states_data[str(species_index)] = species_data
         return states_data
 
-    def get_ne(self, time_slice: int = 0) -> float:
+    def get_ne(self, time_slice: int) -> float:
         """
         This function `get_ne` calculates the total number of electrons (ne) based on the volume and electron density
         of a given slice.
@@ -358,7 +371,7 @@ class CoreProfilesCompute:
         Example:
             .. code-block:: python
 
-                import imas
+                import imaspy as imas
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=104010;run=2;database=ITER;version=3", "r")
                 connection.open()
                 idsObj = connection.get('core_profiles')
@@ -375,7 +388,7 @@ class CoreProfilesCompute:
         return sum(volume * electron_density)
 
     @functools.lru_cache(maxsize=128)
-    def get_volume(self, time_slice: int = 0) -> np.ndarray:
+    def get_volume(self, time_slice: int) -> np.ndarray:
         """
         This function `get_volume` returns the volume of a grid at a given time slice.
 
@@ -388,7 +401,7 @@ class CoreProfilesCompute:
         Example:
             .. code-block:: python
 
-                import imas
+                import imaspy as imas
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=104010;run=2;database=ITER;version=3", "r")
                 connection.open()
                 idsObj = connection.get('core_profiles')
@@ -407,7 +420,7 @@ class CoreProfilesCompute:
         return volume
 
     @functools.lru_cache(maxsize=128)
-    def get_species_density(self, time_slice: int = 0) -> tuple:
+    def get_species_density(self, time_slice: int) -> tuple:
         """
         This function calculates the density of different species in a given slice and returns a tuple
         containing the species density list, the total density, and the index of the species with the maximum density.
@@ -422,7 +435,7 @@ class CoreProfilesCompute:
         Example:
             .. code-block:: python
 
-                import imas
+                import imaspy as imas
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=104010;run=2;database=ITER;version=3", "r")
                 connection.open()
                 idsObj = connection.get('core_profiles')
@@ -449,7 +462,7 @@ class CoreProfilesCompute:
         logger.debug(f"Species density:{str(species_density_list)}")
         return species_density_list, sum_density, max_density_index
 
-    def get_nspec_over_ntot(self, time_slice: int = 0):
+    def get_nspec_over_ntot(self, time_slice: int):
         """
         This function calculates the ratio of the number of species to the total number of particles in a plasma.
 
@@ -463,7 +476,7 @@ class CoreProfilesCompute:
         Example:
             .. code-block:: python
 
-                import imas
+                import imaspy as imas
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=104010;run=2;database=ITER;version=3", "r")
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=104010;run=2;database=ITER;version=3", "r")
                 connection.open()
@@ -476,7 +489,7 @@ class CoreProfilesCompute:
         species_density_list, sum_density, _ = self.get_species_density(time_slice)
         return species_density_list / sum_density
 
-    def get_nspec_over_ne(self, time_slice: int = 0):
+    def get_nspec_over_ne(self, time_slice: int):
         """
         This function calculates the ratio of species density to electron density.
 
@@ -489,7 +502,7 @@ class CoreProfilesCompute:
         Example:
             .. code-block:: python
 
-                import imas
+                import imaspy as imas
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=104010;run=2;database=ITER;version=3", "r")
                 connection.open()
                 idsObj = connection.get('core_profiles')
@@ -499,10 +512,10 @@ class CoreProfilesCompute:
                 array([0.74048128, 0.0944273 , 0.00706596])
         """
         species_density_list, _, _ = self.get_species_density(time_slice)
-        ne = self.get_ne()
+        ne = self.get_ne(time_slice)
         return species_density_list / ne
 
-    def get_nspec_over_nmaj(self, time_slice: int = 0) -> list:
+    def get_nspec_over_nmaj(self, time_slice: int) -> list:
         """
         This function returns a list of the ratio of each species density to the maximum species density.
 
@@ -517,7 +530,7 @@ class CoreProfilesCompute:
         Example:
             .. code-block:: python
 
-                import imas
+                import imaspy as imas
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=104010;run=2;database=ITER;version=3", "r")
                 connection.open()
                 idsObj = connection.get('core_profiles')
@@ -533,7 +546,7 @@ class CoreProfilesCompute:
         ) = self.get_species_density(time_slice)
         return species_density_list / species_density_list[max_density_index]
 
-    def get_species(self, time_slice: int = 0) -> list:
+    def get_species(self, time_slice: int) -> list:
         """
         This function `get_species` creates a Mendeleiev table and returns a list of species based on the
         values of a, z,   and the table.
@@ -547,7 +560,7 @@ class CoreProfilesCompute:
         Example:
             .. code-block:: python
 
-                import imas
+                import imaspy as imas
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=104010;run=2;database=ITER;version=3", "r")
                 connection.open()
                 idsObj = connection.get('core_profiles')
@@ -559,11 +572,16 @@ class CoreProfilesCompute:
         table_mendeleiev = mend.create_table_mendeleiev()
         nspecies = len(self.ids.profiles_1d[time_slice].ion)
 
-        a = list(map(int, self.get_a()))
-        z = list(map(int, self.get_z()))
+        a = list(map(int, self.get_a(time_slice)))
+        z = list(map(int, self.get_z(time_slice)))
+        if any(value == imas.ids_defs.EMPTY_INT for value in z):
+            logger.error(
+                f"core_profiles.profiles_1d[{time_slice}].ion[].element[].z_n" f" values are not available {z}"
+            )
+            return None
         return [table_mendeleiev[z[ispecies]][a[ispecies]].element for ispecies in range(nspecies)]
 
-    def get_labels(self, time_slice: int = 0) -> list:
+    def get_labels(self, time_slice: int) -> list:
         """
         This function `get_labels` returns a list of labels for all species in a given time slice.
 
@@ -577,7 +595,7 @@ class CoreProfilesCompute:
         Example:
             .. code-block:: python
 
-                import imas
+                import imaspy as imas
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=104010;run=2;database=ITER;version=3", "r")
                 connection.open()
                 idsObj = connection.get('core_profiles')
@@ -587,11 +605,15 @@ class CoreProfilesCompute:
                 ['H', 'He', 'Ne']
         """
         nspecies = len(self.ids.profiles_1d[time_slice].ion)
-        labels = [self.ids.profiles_1d[time_slice].ion[ispecies].label for ispecies in range(nspecies)]
+        if hasattr(self.ids.profiles_1d[time_slice].ion[0], "label"):
+            labels = [self.ids.profiles_1d[time_slice].ion[ispecies].label for ispecies in range(nspecies)]
+        elif hasattr(self.ids.profiles_1d[time_slice].ion[0], "name"):
+            labels = [self.ids.profiles_1d[time_slice].ion[ispecies].name for ispecies in range(nspecies)]
+
         logger.debug(f"Species identification :{labels}")
         return labels
 
-    def combine_species_when_appear_twice(self, species, nspec_over_ntot, nspec_over_ne, nspec_over_nmaj, time_slice=0):
+    def combine_species_when_appear_twice(self, species, nspec_over_ntot, nspec_over_ne, nspec_over_nmaj, time_slice):
         """
         This is helper function which checks if there are duplicate entries of species and combine the species.
         This is in place change of arrays
@@ -603,17 +625,18 @@ class CoreProfilesCompute:
             nspec_over_nmaj (list): result from get_nspec_over_nmaj()
             time_slice (int, optional): time_slice on which function should operate on. Defaults to 0.
         """
-        nspecies = len(self.ids.profiles_1d[time_slice].ion)
-        for ispecies, jspecies in itertools.product(range(nspecies), range(nspecies)):
-            if (species[jspecies] == species[ispecies]) & (jspecies != ispecies):
-                nspec_over_ntot[ispecies] = nspec_over_ntot[ispecies] + nspec_over_ntot[jspecies]
-                nspec_over_ntot[jspecies] = 0
-                nspec_over_ne[ispecies] = nspec_over_ne[ispecies] + nspec_over_ne[jspecies]
-                nspec_over_ne[jspecies] = 0
-                nspec_over_nmaj[ispecies] = nspec_over_nmaj[ispecies] + nspec_over_nmaj[jspecies]
-                nspec_over_nmaj[jspecies] = 0
+        if species is not None:
+            nspecies = len(self.ids.profiles_1d[time_slice].ion)
+            for ispecies, jspecies in itertools.product(range(nspecies), range(nspecies)):
+                if (species[jspecies] == species[ispecies]) & (jspecies != ispecies):
+                    nspec_over_ntot[ispecies] = nspec_over_ntot[ispecies] + nspec_over_ntot[jspecies]
+                    nspec_over_ntot[jspecies] = 0
+                    nspec_over_ne[ispecies] = nspec_over_ne[ispecies] + nspec_over_ne[jspecies]
+                    nspec_over_ne[jspecies] = 0
+                    nspec_over_nmaj[ispecies] = nspec_over_nmaj[ispecies] + nspec_over_nmaj[jspecies]
+                    nspec_over_nmaj[jspecies] = 0
 
-    def get_rho_tor_norm(self, time_slice: int = 0) -> np.ndarray | None:
+    def get_rho_tor_norm(self, time_slice: int) -> Union[np.ndarray, None]:
         """
         This function `get_rho_tor_norm` returns a list of normalized toroidal rho values from a given
         time slice of a profiles_1d object.
@@ -629,7 +652,7 @@ class CoreProfilesCompute:
         Example:
             .. code-block:: python
 
-                import imas
+                import imaspy as imas
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=104010;run=2;database=ITER;version=3", "r")
                 connection.open()
                 idsObj = connection.get('core_profiles')
@@ -651,7 +674,7 @@ class CoreProfilesCompute:
             logger.error(f"core_profiles.profiles_1d[{time_slice}].grid.rho_tor_norm or rho_tor is not available")
         return None
 
-    def get_psi(self, time_slice: int = 0) -> list | None:
+    def get_psi(self, time_slice: int) -> Union[list, None]:
         """
         This function `get_psi` returns the poloidal magnetic flux (psi) at a given time slice.
 
@@ -666,7 +689,7 @@ class CoreProfilesCompute:
         Example:
             .. code-block:: python
 
-                import imas
+                import imaspy as imas
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=104010;run=2;database=ITER;version=3", "r")
                 connection.open()
                 idsObj = connection.get('core_profiles')
@@ -682,7 +705,7 @@ class CoreProfilesCompute:
             psi = -self.ids.profiles_1d[time_slice].grid.psi
         return psi
 
-    def get_ion_pressure_properties(self):
+    def get_ion_pressure_properties(self, time_slice):
         """
         The `get_ion_pressure_properties` function calculates and returns the total thermal pressure,
         fast parallel pressure, and fast perpendicular pressure of ions in a given set of profiles.
@@ -691,17 +714,17 @@ class CoreProfilesCompute:
             The function `get_ion_pressure_properties` is returning a dictionary containing the following
         keys and values: maxima_ion, pressure_ion_thermal, pressure_ion_fast_parallel, pressure_ion_fast_perpendicular
         """
-        nrho = len(self.get_rho_tor_norm())
+        nrho = len(self.get_rho_tor_norm(time_slice))
         pressure_ion_thermal = 0.0
         pressure_ion_fast_parallel = 0.0
         pressure_ion_fast_perpendicular = 0.0
-        for ion in self.ids.profiles_1d[0].ion:
+        for ion in self.ids.profiles_1d[time_slice].ion:
             if len(ion.pressure_thermal) == 0:
-                logger.warn("Empty profiles_1d[0].ion.pressure_thermal")
+                logger.warn(f"Empty profiles_1d[{time_slice}].ion.pressure_thermal")
             if len(ion.pressure_fast_parallel) == 0:
-                logger.warn("Empty profiles_1d[0].ion.pressure_fast_parallel")
+                logger.warn(f"Empty profiles_1d[{time_slice}].ion.pressure_fast_parallel")
             if len(ion.pressure_fast_perpendicular) == 0:
-                logger.warn("Empty profiles_1d[0].ion.pressure_fast_perpendicular")
+                logger.warn(f"Empty profiles_1d[{time_slice}].ion.pressure_fast_perpendicular")
             pressure_ion_thermal = pressure_ion_thermal + ion.pressure_thermal
             pressure_ion_fast_parallel = (
                 pressure_ion_fast_parallel + np.asarray([np.nan] * nrho)
@@ -737,7 +760,7 @@ class CoreProfilesCompute:
             "pressure_ion_fast_perpendicular": pressure_ion_fast_perpendicular,
         }
 
-    def get_electrons_pressure_properties(self):
+    def get_electrons_pressure_properties(self, time_slice):
         """
         The  function `get_electrons_pressure_properties` calculates and returns various pressure properties
         of electrons, including maximum pressure and individual pressure components.
@@ -745,26 +768,26 @@ class CoreProfilesCompute:
         Returns:
             The `get_electrons_pressure_properties` function returns a dictionary with the following
             key-value pairs:
-            - "maxima_electrons": Maximum pressure of electrons
-            - "pressure_electron_total": Total pressure of electrons
-            - "pressure_electron_thermal": Thermal pressure of electrons
-            - "pressure_electron_fast_parallel": Pressure of fast parallel electrons
-            - "pressure_electron_fast_perpendicular
+            "maxima_electrons": Maximum pressure of electrons
+            "pressure_electron_total": Total pressure of electrons
+            "pressure_electron_thermal": Thermal pressure of electrons
+            "pressure_electron_fast_parallel": Pressure of fast parallel electrons
+            "pressure_electron_fast_perpendicular
 
         """
-        nrho = len(self.get_rho_tor_norm())
-        pressure_electron_total = self.ids.profiles_1d[0].electrons.pressure
-        pressure_electron_thermal = self.ids.profiles_1d[0].electrons.pressure_thermal
-        pressure_electron_fast_parallel = self.ids.profiles_1d[0].electrons.pressure_fast_parallel
-        pressure_electron_fast_perpendicular = self.ids.profiles_1d[0].electrons.pressure_fast_perpendicular
+        nrho = len(self.get_rho_tor_norm(time_slice))
+        pressure_electron_total = self.ids.profiles_1d[time_slice].electrons.pressure
+        pressure_electron_thermal = self.ids.profiles_1d[time_slice].electrons.pressure_thermal
+        pressure_electron_fast_parallel = self.ids.profiles_1d[time_slice].electrons.pressure_fast_parallel
+        pressure_electron_fast_perpendicular = self.ids.profiles_1d[time_slice].electrons.pressure_fast_perpendicular
         if len(pressure_electron_total) == 0:
-            logger.warn("Empty profiles_1d[0].electrons.pressure")
+            logger.warn(f"Empty profiles_1d[{time_slice}].electrons.pressure")
         if len(pressure_electron_thermal) == 0:
-            logger.warn("Empty profiles_1d[0].electrons.pressure_thermal")
+            logger.warn(f"Empty profiles_1d[{time_slice}].electrons.pressure_thermal")
         if len(pressure_electron_fast_parallel) == 0:
-            logger.warn("Empty profiles_1d[0].electrons.pressure_fast_parallel")
+            logger.warn(f"Empty profiles_1d[{time_slice}].electrons.pressure_fast_parallel")
         if len(pressure_electron_fast_perpendicular) == 0:
-            logger.warn("Empty profiles_1d[0].electrons.pressure_fast_perpendicular")
+            logger.warn(f"Empty profiles_1d[{time_slice}].electrons.pressure_fast_perpendicular")
         pressure_electron_total = (
             np.asarray([np.nan] * nrho) if len(pressure_electron_total) == 0 else pressure_electron_total
         )
@@ -797,40 +820,39 @@ class CoreProfilesCompute:
             "pressure_electron_fast_perpendicular": pressure_electron_fast_perpendicular,
         }
 
-    def get_pressure(self):
+    def get_pressure(self, time_slice):
         """
         The function `get_pressure` returns a dictionary containing the thermal pressure, parallel pressure,
         and perpendicular pressure.
 
         Returns:
             The `get_pressure` function returns a dictionary with the following key-value pairs:
-            - "maxima_total": maximum value calculated based on pressure values
-            - "pressure_total": total pressure value calculated as the sum of electron pressure and ion
-            pressure
-            - "pressure_thermal": thermal pressure values
-            - "pressure_parallel": parallel pressure values
-            - "pressure_perpendicular": perpendicular pressure values
+            "maxima_total": maximum value calculated based on pressure values
+            "pressure_total": total pressure value calculated as the sum of electron pressure and ion pressure
+            "pressure_thermal": thermal pressure values
+            "pressure_parallel": parallel pressure values
+            "pressure_perpendicular": perpendicular pressure values
         """
-        nrho = len(self.get_rho_tor_norm())
-        pressure_thermal = self.ids.profiles_1d[0].pressure_thermal
-        pressure_parallel = self.ids.profiles_1d[0].pressure_parallel
-        pressure_perpendicular = self.ids.profiles_1d[0].pressure_perpendicular
+        nrho = len(self.get_rho_tor_norm(time_slice))
+        pressure_thermal = self.ids.profiles_1d[time_slice].pressure_thermal
+        pressure_parallel = self.ids.profiles_1d[time_slice].pressure_parallel
+        pressure_perpendicular = self.ids.profiles_1d[time_slice].pressure_perpendicular
         if len(pressure_thermal) == 0:
-            logger.warn("Empty profiles_1d[0].pressure_thermal")
+            logger.warn(f"Empty profiles_1d[{time_slice}].pressure_thermal")
         if len(pressure_parallel) == 0:
-            logger.warn("Empty profiles_1d[0].pressure_fast_parallel")
+            logger.warn(f"Empty profiles_1d[{time_slice}].pressure_fast_parallel")
         if len(pressure_perpendicular) == 0:
-            logger.warn("Empty profiles_1d[0].pressure_fast_perpendicular")
+            logger.warn(f"Empty profiles_1d[{time_slice}].pressure_fast_perpendicular")
         pressure_thermal = np.asarray([np.nan] * nrho) if len(pressure_thermal) == 0 else pressure_thermal
         pressure_parallel = np.asarray([np.nan] * nrho) if len(pressure_parallel) == 0 else pressure_parallel
         pressure_perpendicular = (
             np.asarray([np.nan] * nrho) if len(pressure_perpendicular) == 0 else pressure_perpendicular
         )
 
-        dict_electrons_pressure_properties = self.get_electrons_pressure_properties()
+        dict_electrons_pressure_properties = self.get_electrons_pressure_properties(time_slice)
         pressure_electron_total = dict_electrons_pressure_properties["pressure_electron_total"]
 
-        pressure_ion_total = self.get_pressure_ion_total()
+        pressure_ion_total = self.get_pressure_ion_total(time_slice)
         pressure_total = pressure_electron_total
         if pressure_ion_total is not None:
             pressure_total += pressure_ion_total
@@ -853,7 +875,7 @@ class CoreProfilesCompute:
             "pressure_perpendicular": pressure_perpendicular,
         }
 
-    def get_pressure_ion_total(self) -> Union[float, None]:
+    def get_pressure_ion_total(self, time_slice) -> Union[float, None]:
         """
         The function `get_pressure_ion_total` returns the total ion pressure from a given set of
         profiles or None if the pressure values cannot be read.
@@ -863,36 +885,36 @@ class CoreProfilesCompute:
         profiles, or `None` if the pressure values cannot be read.
         """
         pressure_ion_total = None
-        if len(self.ids.profiles_1d[0].pressure_ion_total) > 1:
-            pressure_ion_total = self.ids.profiles_1d[0].pressure_ion_total
+        if len(self.ids.profiles_1d[time_slice].pressure_ion_total) > 1:
+            pressure_ion_total = self.ids.profiles_1d[time_slice].pressure_ion_total
         else:
             logger.critical(
-                "core_profiles.profiles_1d[0].pressure_ion_total could not be read",
+                f"core_profiles.profiles_1d[{time_slice}].pressure_ion_total could not be read",
             )
-            if len(self.ids.profiles_1d[0].ion[0].pressure) > 1:
+            if len(self.ids.profiles_1d[time_slice].ion[0].pressure) > 1:
                 pressure_ion_total = 0.0
-                for ion in self.ids.profiles_1d[0].ion:
+                for ion in self.ids.profiles_1d[time_slice].ion:
                     pressure_ion_total = pressure_ion_total + ion.pressure
             else:
                 logger.critical(
-                    "core_profiles.profiles_1d[0].ion[0].pressure could not be read",
+                    f"core_profiles.profiles_1d[{time_slice}].ion[0].pressure could not be read",
                 )
         return pressure_ion_total
 
-    def get_profiles(self, slice_index=0):
+    def get_profiles(self, time_slice):
         """
         The function `get_profiles` retrieves and organizes various profiles from a data source for
         further analysis.
 
         Args:
-            slice_index: The `slice_index` parameter in the `get_profiles` method is used to specify which
+            time_slice: The `time_slice` parameter in the `get_profiles` method is used to specify which
                 slice of profiles to retrieve.
 
         Returns:
             A dictionary named `profiles` is being returned, which contains the following keys and
             corresponding values
         """
-        rho_tor_norm = self.get_rho_tor_norm(time_slice=0)
+        rho_tor_norm = self.get_rho_tor_norm(time_slice)
         if rho_tor_norm is None:
             logger.critical("core_profiles.profiles_1d[:].grid.rho_tor_norm and rho_tor are empty")
             logger.critical("----> Aborted.")
@@ -901,43 +923,45 @@ class CoreProfilesCompute:
         nrho = len(rho_tor_norm)
 
         # J_bootstrap profile
-        if len(self.ids.profiles_1d[slice_index].j_bootstrap) < 1:
-            logger.critical("core_profiles.profiles_1d[" + str(slice_index) + "].j_bootstrap could not be read")
-            self.ids.profiles_1d[slice_index].j_bootstrap = np.asarray([np.nan] * nrho)
+        if len(self.ids.profiles_1d[time_slice].j_bootstrap) < 1:
+            logger.critical("core_profiles.profiles_1d[" + str(time_slice) + "].j_bootstrap could not be read")
+            self.ids.profiles_1d[time_slice].j_bootstrap = np.asarray([np.nan] * nrho)
 
         # J_non_inductive profile
-        if len(self.ids.profiles_1d[slice_index].j_non_inductive) < 1:
-            logger.critical("core_profiles.profiles_1d[" + str(slice_index) + "].j_non_inductive could not be read")
-            self.ids.profiles_1d[slice_index].j_non_inductive = np.asarray([np.nan] * nrho)
+        if len(self.ids.profiles_1d[time_slice].j_non_inductive) < 1:
+            logger.critical("core_profiles.profiles_1d[" + str(time_slice) + "].j_non_inductive could not be read")
+            self.ids.profiles_1d[time_slice].j_non_inductive = np.asarray([np.nan] * nrho)
 
         # J_ohmic profile
-        if len(self.ids.profiles_1d[0].j_ohmic) < 1:
-            logger.critical("core_profiles.profiles_1d[" + str(slice_index) + "].j_ohmic could not be read")
-            self.ids.profiles_1d[0].j_ohmic = np.asarray([np.nan] * nrho)
+        if len(self.ids.profiles_1d[time_slice].j_ohmic) < 1:
+            logger.critical("core_profiles.profiles_1d[" + str(time_slice) + "].j_ohmic could not be read")
+            self.ids.profiles_1d[time_slice].j_ohmic = np.asarray([np.nan] * nrho)
 
         # J_total profile
-        if len(self.ids.profiles_1d[0].j_total) < 1:
-            logger.critical("core_profiles.profiles_1d[" + str(slice_index) + "].j_total could not be read")
-            self.ids.profiles_1d[0].j_total = np.asarray([np.nan] * nrho)
+        if len(self.ids.profiles_1d[time_slice].j_total) < 1:
+            logger.critical("core_profiles.profiles_1d[" + str(time_slice) + "].j_total could not be read")
+            self.ids.profiles_1d[time_slice].j_total = np.asarray([np.nan] * nrho)
 
         # q-profile
-        if len(self.ids.profiles_1d[0].q) < 1:
-            logger.critical("core_profiles.profiles_1d[" + str(slice_index) + "].q could not be read")
-            self.ids.profiles_1d[0].q = np.asarray([np.nan] * nrho)
+        if len(self.ids.profiles_1d[time_slice].q) < 1:
+            logger.critical("core_profiles.profiles_1d[" + str(time_slice) + "].q could not be read")
+            self.ids.profiles_1d[time_slice].q = np.asarray([np.nan] * nrho)
 
         # Magnetic shear profile
-        if len(self.ids.profiles_1d[0].magnetic_shear) < 1:
-            logger.critical("core_profiles.profiles_1d[" + str(slice_index) + "].magnetic_shear could not be read")
-            self.ids.profiles_1d[0].magnetic_shear = np.asarray([np.nan] * nrho)
+        if len(self.ids.profiles_1d[time_slice].magnetic_shear) < 1:
+            logger.critical("core_profiles.profiles_1d[" + str(time_slice) + "].magnetic_shear could not be read")
+            self.ids.profiles_1d[time_slice].magnetic_shear = np.asarray([np.nan] * nrho)
 
-        if len(self.ids.profiles_1d[0].q) != nrho:
+        if len(self.ids.profiles_1d[time_slice].q) != nrho:
             logger.critical("--------------------------------------------------------------")
             logger.critical("Dimensions of input core profiles are not consistent:")
-            logger.critical("  core_profiles.profiles_1d[0].grid.rho_tor(_norm)")
-            logger.critical("  and core_profiles.profiles_1d[0].q")
+            logger.critical(f"  core_profiles.profiles_1d[{time_slice}].grid.rho_tor_norm)")
+            logger.critical(f"  and core_profiles.profiles_1d[{time_slice}].q")
             logger.critical("  have different dimensions:")
-            logger.critical(f"- len(core_profiles.profiles_1d[0].grid.rho_tor(_norm))= {nrho}")
-            logger.critical(f"- len(core_profiles.profiles_1d[0].q = {len(self.ids.profiles_1d[0].q)}")
+            logger.critical(f"- len(core_profiles.profiles_1d[{time_slice}].grid.rho_tor_norm))= {nrho}")
+            logger.critical(
+                f"- len(core_profiles.profiles_1d[{time_slice}].q = {len(self.ids.profiles_1d[time_slice].q)}"
+            )
             logger.critical("----> Aborted.")
             logger.critical("--------------------------------------------------------------")
             return None
@@ -945,35 +969,35 @@ class CoreProfilesCompute:
         # Create the dictionary defining the list of profiles that can be displayed
         profiles = {}
         profiles["rhonorm"] = rho_tor_norm
-        profiles["j_bootstrap"] = self.ids.profiles_1d[0].j_bootstrap
-        profiles["j_non_inductive"] = self.ids.profiles_1d[0].j_non_inductive
-        profiles["j_ohmic"] = self.ids.profiles_1d[0].j_ohmic
-        profiles["j_total"] = self.ids.profiles_1d[0].j_total
-        profiles["q"] = self.ids.profiles_1d[0].q
-        profiles["magnetic_shear"] = self.ids.profiles_1d[0].magnetic_shear
+        profiles["j_bootstrap"] = self.ids.profiles_1d[time_slice].j_bootstrap
+        profiles["j_non_inductive"] = self.ids.profiles_1d[time_slice].j_non_inductive
+        profiles["j_ohmic"] = self.ids.profiles_1d[time_slice].j_ohmic
+        profiles["j_total"] = self.ids.profiles_1d[time_slice].j_total
+        profiles["q"] = self.ids.profiles_1d[time_slice].q
+        profiles["magnetic_shear"] = self.ids.profiles_1d[time_slice].magnetic_shear
         return profiles
 
-    def getnrho(self, slice_index=0):
+    def getnrho(self, time_slice):
         """
         This function `getnrho` returns the number of elements in the `rho_tor_norm` or `rho_tor` grid
         based on the provided slice index.
 
         Args:
-            slice_index: The `slice_index` parameter in the `getnrho` method is used to specify which
+            time_slice: The `time_slice` parameter in the `getnrho` method is used to specify which
                 slice of data to retrieve the number of rho values from.
 
         Returns:
             The `getnrho` method is returning the number of elements in the `rho_tor_norm` or `rho_tor`
-            attribute of the `grid` object within the `profiles_1d` object at the specified `slice_index`.
+            attribute of the `grid` object within the `profiles_1d` object at the specified `time_slice`.
             If either of these attributes has elements, the length of that attribute is returned as the
             number of `nrho`.
         """
         nrho = None
         try:
-            if len(self.ids.profiles_1d[slice_index].grid.rho_tor_norm) > 0:
-                nrho = len(self.ids.profiles_1d[slice_index].grid.rho_tor_norm)
-            elif len(self.ids.profiles_1d[slice_index].grid.rho_tor) > 0:
-                nrho = len(self.ids.profiles_1d[slice_index].grid.rho_tor)
+            if len(self.ids.profiles_1d[time_slice].grid.rho_tor_norm) > 0:
+                nrho = len(self.ids.profiles_1d[time_slice].grid.rho_tor_norm)
+            elif len(self.ids.profiles_1d[time_slice].grid.rho_tor) > 0:
+                nrho = len(self.ids.profiles_1d[time_slice].grid.rho_tor)
         except Exception as e:
             logger.debug(f"{e}")
             logger.warning(f"core_profiles.profiles_1d[:].grid.rho_tor_norm and rho_tor could not be read. {e}")

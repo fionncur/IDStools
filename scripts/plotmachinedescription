@@ -5,6 +5,7 @@ import argparse
 import logging
 import os
 
+from imaspy import convert_ids
 from rich_argparse import RichHelpFormatter
 
 from idstools.database import DBMaster
@@ -27,7 +28,8 @@ idses = "wall,pf_active"
 
 def plot_machine_description(ids_data, show_labels=False):
     """
-    The `plotMachineDescription` method is responsible for plotting the machine description based on the provided pulse list.
+    The `plotMachineDescription` method is responsible for plotting the machine description
+    based on the provided pulse list.
     """
 
     # Initialization
@@ -62,7 +64,6 @@ def plot_machine_description(ids_data, show_labels=False):
     # wallview.view_DIR(ax)
     # wallview.view_TS(ax)
     # wallview.view_Cryostat(ax)
-
     ax.plot()
 
     xmin, xmax = ax.get_xlim()
@@ -107,6 +108,14 @@ if __name__ == "__main__":
     """,
     )
     parser.add_argument(
+        "--dd-update",
+        action="store_true",
+        help=(
+            "Convert IDS to the default version of the data dictionary if enabled"
+            "otherwise, use the original IDS stored on disk."
+        ),
+    )
+    parser.add_argument(
         "--show-labels",
         help="Show labels",
         action="store_true",
@@ -124,6 +133,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     machine_description = MachineDescription()
     ids_data = {}
+
     for mdids_info in args.uri:
         mdargs = argparse.Namespace()
         splittedms_ids_info = mdids_info.split("#")
@@ -136,7 +146,7 @@ if __name__ == "__main__":
         mdargs.uri = _md_uri
         connection = DBMaster.get_connection(mdargs)
         if connection:
-            all_i_d_ses_list = [item for item, _ in available_in_dbentry(connection)]
+            all_idses_list = [item for item, _ in available_in_dbentry(connection, None, args.dd_update)]
             if _ids_names == "":
                 _ids_names = idses
             for _ids_name in _ids_names.split(","):
@@ -144,8 +154,13 @@ if __name__ == "__main__":
                     continue
                 ids_found = False
                 if connection is not None:
-                    if _ids_name in all_i_d_ses_list:
-                        _ids_data = connection.get(_ids_name)
+                    if _ids_name in all_idses_list:
+                        if args.dd_update:
+                            _ids_data = convert_ids(
+                                connection.get(_ids_name, autoconvert=False), connection.factory.version
+                            )
+                        else:
+                            _ids_data = connection.get(_ids_name, autoconvert=False)
 
                         data = {}
                         if _ids_data is not None:

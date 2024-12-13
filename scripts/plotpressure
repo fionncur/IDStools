@@ -7,7 +7,7 @@ import argparse
 import logging
 import os
 
-import imas
+from imaspy import convert_ids
 from rich_argparse import RichHelpFormatter
 
 from idstools.compute.common import get_nearest_time
@@ -51,23 +51,20 @@ if connection is None:
     logger.critical("----> Aborted.")
     exit(1)
 
-
+ids_core_profiles = None
 try:
-    ids_core_profiles = imas.core_profiles()
-    ids_core_profiles.time = connection.partial_get("core_profiles", "time")
-    if ids_core_profiles.time is None:
-        logger.critical("No core_profiles IDS in the data-entry --> Abort.")
-        exit()
-except Exception as _:
-    logger.critical("The core_profiles IDS is absent from the input data-entry")
-    logger.critical("----> Aborted.")
+
+    if args.dd_update:
+        ids_core_profiles = connection.get("core_profiles", autoconvert=False)
+        ids_core_profiles = convert_ids(ids_core_profiles, connection.factory.version)
+    else:
+        ids_core_profiles = connection.get("core_profiles", lazy=True, autoconvert=False)
+except Exception as _:  # noqa: F841
+    logger.error("core_profiles ids is not present")
     exit(1)
 
 time_array = ids_core_profiles.time
-time_index, time_value = get_nearest_time(time_array, args.time)
-
-ids_core_profiles.profiles_1d.resize(1)  # Read 1D-profiles for this time slice
-ids_core_profiles.profiles_1d[0] = connection.partial_get("core_profiles", f"profiles_1d({time_index})")
+time_slice, time_value = get_nearest_time(time_array, args.time)
 title = "Profiles displayed for t = " + "%.1f" % time_value + " s"
 canvas = PlotCanvas(3, 1)
 canvas.fig.suptitle(title, size=12)
@@ -78,9 +75,9 @@ ax3 = canvas.add_axes(title="", xlabel="", row=2, col=0, colspan=1)
 
 coreprofiles_view = CoreProfilesView(ids_core_profiles)
 
-coreprofiles_view.plot_total_pressure_properties(ax1)
-coreprofiles_view.plot_ion_pressure_properties(ax2)
-coreprofiles_view.plot_electron_pressure_properties(ax3)
+coreprofiles_view.plot_total_pressure_properties(ax1, time_slice)
+coreprofiles_view.plot_ion_pressure_properties(ax2, time_slice)
+coreprofiles_view.plot_electron_pressure_properties(ax3, time_slice)
 
 canvas.set_text(text=f"{get_database_path(args, time_value=time_value)}")
 

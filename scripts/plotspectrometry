@@ -2,11 +2,11 @@
 # -*- coding: utf-8 -*-
 
 # migrated from svplot
-
 import argparse
 import logging
 import os
 
+from imaspy import convert_ids
 from rich_argparse import RichHelpFormatter
 
 from idstools.compute.common import get_nearest_time
@@ -53,8 +53,17 @@ connection = DBMaster.get_connection(args)
 if connection is None:
     exit(1)
 
-ids_spectrometer_visible = connection.get("spectrometer_visible")
-connection.close()
+ids_spectrometer_visible = None
+try:
+
+    if args.dd_update:
+        ids_spectrometer_visible = connection.get("spectrometer_visible", autoconvert=False)
+        ids_spectrometer_visible = convert_ids(ids_spectrometer_visible, connection.factory.version)
+    else:
+        ids_spectrometer_visible = connection.get("spectrometer_visible", lazy=True, autoconvert=False)
+except Exception as _:  # noqa: F841
+    logger.error("spectrometer_visible ids is not present")
+    exit(1)
 
 time_array = ids_spectrometer_visible.time
 time_index, time_value = get_nearest_time(time_array, args.time)
@@ -125,3 +134,4 @@ if args.save:
     canvas_intensity.save(fname)
 else:
     canvas_intensity.show(block=True)
+connection.close()

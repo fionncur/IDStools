@@ -5,11 +5,11 @@ This module provides compute functions and classes for equilibrium ids data
 
 """
 
+import functools
 import logging
 from typing import Union
 
 import numpy as np
-from imas import imasdef
 
 from idstools.database import DBMaster
 
@@ -27,7 +27,7 @@ class EquilibriumCompute:
         """
         self.ids = ids
 
-    def get2d_cartesian_grid(self, time_slice: int = 0, profiles2d_index: int = 0) -> Union[dict, None]:
+    def get2d_cartesian_grid(self, time_slice: int, profiles2d_index: int = 0) -> Union[dict, None]:
         """
         This function returns a dictionary containing 2D Cartesian grid coordinates and psi values from
         an equilibrium IDS object.
@@ -47,7 +47,7 @@ class EquilibriumCompute:
         Example:
             .. code-block:: python
 
-                import imas
+                import imaspy
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=134173;run=106;database=ITER;version=3","r")
                 connection.open()
                 idsObj = connection.get('equilibrium')
@@ -101,7 +101,7 @@ class EquilibriumCompute:
 
         return {"r2d": r2d, "z2d": z2d, "psi2d": psi2d}
 
-    def get_rho2d(self, time_slice: int = 0, profiles2d_index: int = 0) -> Union[np.ndarray, None]:
+    def get_rho2d(self, time_slice: int, profiles2d_index: int = 0) -> Union[np.ndarray, None]:
         """
         This function calculates rho(R,Z) using toroidal flux  and returns a dictionary containing the result.
 
@@ -121,7 +121,7 @@ class EquilibriumCompute:
         Examples:
             .. code-block:: python
 
-                import imas
+                import imaspy
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=134173;run=106;database=ITER;version=3", "r")
                 connection.open()
                 idsObj = connection.get('equilibrium')
@@ -163,7 +163,7 @@ class EquilibriumCompute:
         Examples:
             .. code-block:: python
 
-                import imas
+                import imaspy
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=134173;run=106;database=ITER;version=3", "r")
                 connection.open()
                 idsObj = connection.get('equilibrium')
@@ -188,10 +188,14 @@ class EquilibriumCompute:
         if list_of_profiles is not None:
             # TODO Check if we should always pick up first profile
             profile2d_index = list_of_profiles[0]
+            b_field_tor = getattr(
+                self.ids.time_slice[time_slice].profiles_2d[profile2d_index], "b_field_tor", None
+            ) or getattr(self.ids.time_slice[time_slice].profiles_2d[profile2d_index], "b_field_phi", None)
+
             b_total = np.sqrt(
                 self.ids.time_slice[time_slice].profiles_2d[profile2d_index].b_field_r ** 2
                 + self.ids.time_slice[time_slice].profiles_2d[profile2d_index].b_field_z ** 2
-                + self.ids.time_slice[time_slice].profiles_2d[profile2d_index].b_field_tor ** 2
+                + b_field_tor**2
             )
         else:
             print("------------------------------------------------")
@@ -225,7 +229,7 @@ class EquilibriumCompute:
         Examples:
             .. code-block:: python
 
-                import imas
+                import imaspy
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=134173;run=106;database=ITER;version=3","r")
                 connection.open()
                 idsObj = connection.get('equilibrium')
@@ -279,7 +283,7 @@ class EquilibriumCompute:
         Examples:
             .. code-block:: python
 
-                import imas
+                import imaspy
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=134173;run=106;database=ITER;version=3","r")
                 connection.open()
                 idsObj = connection.get('equilibrium')
@@ -293,7 +297,7 @@ class EquilibriumCompute:
             for time_index in range(len(self.ids.time_slice))
         ]
 
-    def get_top_view(self, time_slice: int = 0) -> dict:
+    def get_top_view(self, time_slice: int) -> dict:
         """
         The function returns data for plotting the top view of a 2D shape.
 
@@ -323,7 +327,7 @@ class EquilibriumCompute:
         top_view_dict["yplap"] = (r0 + amin) * np.sin(phit)
         return top_view_dict
 
-    def getmrho(self, time_slice: int = 0):
+    def getmrho(self, time_slice: int):
         """
         This function calculates the number of elements in a list that are less than zero.
 
@@ -335,13 +339,13 @@ class EquilibriumCompute:
             less than 0.
         """
         mrho = 0
-        for i in range(len(self.ids.time_slice[0].profiles_1d.rho_tor_norm)):
-            if self.ids.time_slice[0].profiles_1d.rho_tor_norm[i] < 0:
+        for i in range(len(self.ids.time_slice[time_slice].profiles_1d.rho_tor_norm)):
+            if self.ids.time_slice[time_slice].profiles_1d.rho_tor_norm[i] < 0:
                 mrho = mrho + 1
 
         return mrho
 
-    def getgm3(self, r, time_slice: int = 0):
+    def getgm3(self, r, time_slice: int):
         """
         The function `getgm3` calculates and returns a value based on interpolation and division
         operations.
@@ -369,7 +373,7 @@ class EquilibriumCompute:
         )
         return gm3
 
-    def getgm7(self, r, time_slice: int = 0):
+    def getgm7(self, r, time_slice: int):
         """
         The function `getgm7` calculates and returns the normalized value of gm7 at a given radial
         position `r` for a specific time slice.
@@ -394,7 +398,7 @@ class EquilibriumCompute:
         )
         return gm7
 
-    def rescale(self, rescale_factor):
+    def rescale(self, rescale_factor, dd_update=False):
         """
         The function rescales various magnetic field properties in an equilibrium by a specified
         factor.
@@ -415,41 +419,49 @@ class EquilibriumCompute:
         from packaging.version import Version
 
         try:
-            dd_version = self.ids.ids_properties.version_put.data_dictionary
+            dd_version = self.ids.ids_properties.version_put.data_dictionary.value
         except Exception as e:
             logger.debug(f"{e}")
             dd_version = "0.0.0"
 
         equout = deepcopy(self.ids)
+        if dd_update:
+            dd_version = DBMaster.get_dd_version()
 
-        imas_version = DBMaster.get_dd_version()
-
-        equout.ids_properties.version_put.data_dictionary = imas_version
+        equout.ids_properties.version_put.data_dictionary = dd_version
 
         for itime in range(len(self.ids.vacuum_toroidal_field.b0)):
             equout.vacuum_toroidal_field.b0[itime] = self.ids.vacuum_toroidal_field.b0[itime] * rescale_factor
 
         for itime in range(len(self.ids.time_slice)):
-            if imasdef.isFieldValid(self.ids.time_slice[itime].boundary.psi):
+            if (
+                hasattr(self.ids.time_slice[itime].boundary, "psi")
+                and self.ids.time_slice[itime].boundary.psi.has_value
+            ):
                 equout.time_slice[itime].boundary.psi = self.ids.time_slice[itime].boundary.psi * rescale_factor
 
-            if imasdef.isFieldValid(self.ids.time_slice[itime].boundary_separatrix.psi):
+            if (
+                hasattr(self.ids.time_slice[itime].boundary_separatrix, "psi")
+                and self.ids.time_slice[itime].boundary_separatrix.psi.has_value
+            ):
                 equout.time_slice[itime].boundary_separatrix.psi = (
                     self.ids.time_slice[itime].boundary_separatrix.psi * rescale_factor
                 )
 
-            if Version(dd_version) > Version("3.31.0"):
-                if imasdef.isFieldValid(self.ids.time_slice[itime].boundary_secondary_separatrix.psi):
-                    equout.time_slice[itime].boundary_secondary_separatrix.psi = (
-                        self.ids.time_slice[itime].boundary_secondary_separatrix.psi * rescale_factor
-                    )
+            if (
+                hasattr(self.ids.time_slice[itime].boundary_secondary_separatrix, "psi")
+                and self.ids.time_slice[itime].boundary_secondary_separatrix.psi.has_value
+            ):
+                equout.time_slice[itime].boundary_secondary_separatrix.psi = (
+                    self.ids.time_slice[itime].boundary_secondary_separatrix.psi * rescale_factor
+                )
 
-            if imasdef.isFieldValid(self.ids.time_slice[itime].constraints.b_field_tor_vacuum_r.measured):
+            if self.ids.time_slice[itime].constraints.b_field_tor_vacuum_r.measured.has_value:
                 equout.time_slice[itime].constraints.b_field_tor_vacuum_r.measured = (
                     self.ids.time_slice[itime].constraints.b_field_tor_vacuum_r.measured * rescale_factor
                 )
 
-            if imasdef.isFieldValid(self.ids.time_slice[itime].constraints.b_field_tor_vacuum_r.reconstructed):
+            if self.ids.time_slice[itime].constraints.b_field_tor_vacuum_r.reconstructed.has_value:
                 equout.time_slice[itime].constraints.b_field_tor_vacuum_r.reconstructed = (
                     self.ids.time_slice[itime].constraints.b_field_tor_vacuum_r.reconstructed * rescale_factor
                 )
@@ -462,12 +474,12 @@ class EquilibriumCompute:
                     self.ids.time_slice[itime].constraints.bpol_probe[i1].reconstructed * rescale_factor
                 )
 
-            if imasdef.isFieldValid(self.ids.time_slice[itime].constraints.diamagnetic_flux.measured):
+            if self.ids.time_slice[itime].constraints.diamagnetic_flux.measured.has_value:
                 equout.time_slice[itime].constraints.diamagnetic_flux.measured = (
                     self.ids.time_slice[itime].constraints.diamagnetic_flux.measured * rescale_factor
                 )
 
-            if imasdef.isFieldValid(self.ids.time_slice[itime].constraints.diamagnetic_flux.reconstructed):
+            if self.ids.time_slice[itime].constraints.diamagnetic_flux.reconstructed.has_value:
                 equout.time_slice[itime].constraints.diamagnetic_flux.reconstructed = (
                     self.ids.time_slice[itime].constraints.diamagnetic_flux.reconstructed * rescale_factor
                 )
@@ -488,49 +500,54 @@ class EquilibriumCompute:
                     self.ids.time_slice[itime].constraints.flux_loop[i1].reconstructed * rescale_factor
                 )
 
-            if imasdef.isFieldValid(self.ids.time_slice[itime].constraints.ip.measured):
+            if self.ids.time_slice[itime].constraints.ip.measured.has_value:
                 equout.time_slice[itime].constraints.ip.imeasured = (
                     self.ids.time_slice[itime].constraints.ip.measured * rescale_factor
                 )
 
-            if imasdef.isFieldValid(self.ids.time_slice[itime].constraints.ip.reconstructed):
+            if self.ids.time_slice[itime].constraints.ip.reconstructed.has_value:
                 equout.time_slice[itime].constraints.ip.reconstructed = (
                     self.ids.time_slice[itime].constraints.ip.reconstructed * rescale_factor
                 )
 
-            if imasdef.isFieldValid(self.ids.time_slice[itime].global_quantities.ip):
+            if self.ids.time_slice[itime].global_quantities.ip.has_value:
                 equout.time_slice[itime].global_quantities.ip = (
                     self.ids.time_slice[itime].global_quantities.ip * rescale_factor
                 )
 
-            if imasdef.isFieldValid(self.ids.time_slice[itime].global_quantities.psi_axis):
+            if self.ids.time_slice[itime].global_quantities.psi_axis.has_value:
                 equout.time_slice[itime].global_quantities.psi_axis = (
                     self.ids.time_slice[itime].global_quantities.psi_axis * rescale_factor
                 )
 
-            if imasdef.isFieldValid(self.ids.time_slice[itime].global_quantities.psi_boundary):
+            if self.ids.time_slice[itime].global_quantities.psi_boundary.has_value:
                 equout.time_slice[itime].global_quantities.psi_boundary = (
                     self.ids.time_slice[itime].global_quantities.psi_boundary * rescale_factor
                 )
 
-            if imasdef.isFieldValid(self.ids.time_slice[itime].global_quantities.magnetic_axis.b_field_tor):
-                equout.time_slice[itime].global_quantities.magnetic_axis.b_field_tor = (
-                    self.ids.time_slice[itime].global_quantities.magnetic_axis.b_field_tor * rescale_factor
-                )
+            b_field_tor = getattr(
+                self.ids.time_slice[itime].global_quantities.magnetic_axis, "b_field_tor", None
+            ) or getattr(self.ids.time_slice[itime].global_quantities.magnetic_axis, "b_field_phi", None)
+
+            if b_field_tor.has_value:
+                if hasattr(equout.time_slice[itime].global_quantities.magnetic_axis, "b_field_tor"):
+                    equout.time_slice[itime].global_quantities.magnetic_axis.b_field_tor = b_field_tor * rescale_factor
+                elif hasattr(equout.time_slice[itime].global_quantities.magnetic_axis, "b_field_phi"):
+                    equout.time_slice[itime].global_quantities.magnetic_axis.b_field_phi = b_field_tor * rescale_factor
 
             if Version(dd_version) > Version("3.14.0"):
-                if imasdef.isFieldValid(self.ids.time_slice[itime].global_quantities.energy_mhd):
+                if self.ids.time_slice[itime].global_quantities.energy_mhd.has_value:
                     equout.time_slice[itime].global_quantities.energy_mhd = (
                         self.ids.time_slice[itime].global_quantities.energy_mhd * rescale_factor**2
                     )
             else:
-                if imasdef.isFieldValid(self.ids.time_slice[itime].global_quantities.w_mhd):
+                if self.ids.time_slice[itime].global_quantities.w_mhd.has_value:
                     equout.time_slice[itime].global_quantities.energy_mhd = (
                         self.ids.time_slice[itime].global_quantities.w_mhd * rescale_factor**2
                     )
 
             if Version(dd_version) > Version("3.31.0"):
-                if imasdef.isFieldValid(self.ids.time_slice[itime].global_quantities.psi_external_average):
+                if self.ids.time_slice[itime].global_quantities.psi_external_average.has_value:
                     equout.time_slice[itime].global_quantities.psi_external_average = (
                         self.ids.time_slice[itime].global_quantities.psi_external_average * rescale_factor
                     )
@@ -690,11 +707,20 @@ class EquilibriumCompute:
                             )
 
                 if Version(dd_version) > Version("3.5.0"):
-                    for ir in range(len(self.ids.time_slice[itime].profiles_2d[i2d].b_field_tor)):
-                        for iz in range(len(self.ids.time_slice[itime].profiles_2d[i2d].b_field_tor[ir])):
-                            equout.time_slice[itime].profiles_2d[i2d].b_field_tor[ir][iz] = (
-                                self.ids.time_slice[itime].profiles_2d[i2d].b_field_tor[ir][iz] * rescale_factor
-                            )
+                    b_field_tor = getattr(self.ids.time_slice[itime].profiles_2d[i2d], "b_field_tor", None) or getattr(
+                        self.ids.time_slice[itime].profiles_2d[i2d], "b_field_phi", None
+                    )
+                    if b_field_tor:
+                        for ir in range(len(b_field_tor)):
+                            for iz in range(len(b_field_tor[ir])):
+                                if hasattr(equout.time_slice[itime].profiles_2d[i2d], "b_field_tor"):
+                                    equout.time_slice[itime].profiles_2d[i2d].b_field_tor[ir][iz] = (
+                                        b_field_tor[ir][iz] * rescale_factor
+                                    )
+                                if hasattr(equout.time_slice[itime].profiles_2d[i2d], "b_field_phi"):
+                                    equout.time_slice[itime].profiles_2d[i2d].b_field_phi[ir][iz] = (
+                                        b_field_tor[ir][iz] * rescale_factor
+                                    )
                 else:
                     for ir in range(len(self.ids.time_slice[itime].profiles_2d[i2d].b_tor)):
                         for iz in range(len(self.ids.time_slice[itime].profiles_2d[i2d].b_tor[ir])):
@@ -758,21 +784,34 @@ class EquilibriumCompute:
                                 self.ids.time_slice[itime].ggd[iggd].b_field_z[i2].coefficients[i][j] * rescale_factor
                             )
 
-                    for i in range(len(self.ids.time_slice[itime].ggd[iggd].b_field_tor[i2].values)):
-                        equout.time_slice[itime].ggd[iggd].b_field_tor[i2].values[i] = (
-                            self.ids.time_slice[itime].ggd[iggd].b_field_tor[i2].values[i] * rescale_factor
-                        )
-                        for j in range(len(self.ids.time_slice[itime].ggd[iggd].b_field_tor[i2].values[i])):
-                            equout.time_slice[itime].ggd[iggd].b_field_tor[i2].coefficients[i][j] = (
-                                self.ids.time_slice[itime].ggd[iggd].b_field_tor[i2].coefficients[i][j] * rescale_factor
+                    b_field_tor = getattr(self.ids.time_slice[itime].ggd[iggd], "b_field_tor", None) or getattr(
+                        self.ids.time_slice[itime].ggd[iggd], "b_field_phi", None
+                    )
+
+                    for i in range(len(b_field_tor[i2].values)):
+                        if hasattr(equout.time_slice[itime].ggd[iggd], "b_field_tor"):
+                            equout.time_slice[itime].ggd[iggd].b_field_tor[i2].values[i] = (
+                                b_field_tor[i2].values[i] * rescale_factor
                             )
+                            for j in range(len(b_field_tor[i2].values[i])):
+                                equout.time_slice[itime].ggd[iggd].b_field_tor[i2].coefficients[i][j] = (
+                                    b_field_tor[i2].coefficients[i][j] * rescale_factor
+                                )
+                        elif hasattr(equout.time_slice[itime].ggd[iggd], "b_field_phi"):
+                            equout.time_slice[itime].ggd[iggd].b_field_phi[i2].values[i] = (
+                                b_field_tor[i2].values[i] * rescale_factor
+                            )
+                            for j in range(len(b_field_tor[i2].values[i])):
+                                equout.time_slice[itime].ggd[iggd].b_field_phi[i2].coefficients[i][j] = (
+                                    b_field_tor[i2].coefficients[i][j] * rescale_factor
+                                )
 
         equout.ids_properties.comment = (
             self.ids.ids_properties.comment + " (field rescaled by " + str(rescale_factor) + ")"
         )
         return equout
 
-    def z_shift(self, shift):
+    def z_shift(self, shift, dd_update=False):
         """
         The function `z_shift` rigidly shifts the vertical position of various components within an
         equilibrium by a specified amount.
@@ -791,7 +830,17 @@ class EquilibriumCompute:
         """
         from copy import deepcopy
 
+        try:
+            dd_version = self.ids.ids_properties.version_put.data_dictionary.value
+        except Exception as e:
+            logger.debug(f"{e}")
+            dd_version = "0.0.0"
+
         equout = deepcopy(self.ids)
+        if dd_update:
+            dd_version = DBMaster.get_dd_version()
+
+        equout.ids_properties.version_put.data_dictionary = dd_version
         for itime in range(len(self.ids.time_slice)):
             for iz in range(len(self.ids.time_slice[itime].boundary.outline.z)):
                 equout.time_slice[itime].boundary.outline.z[iz] = (
@@ -922,16 +971,469 @@ class EquilibriumCompute:
         )
         return equout
 
-    # def getEquilibriumQuantities(self):
-    #     """
-    #     The function "getEquilibriumQuantities" returns a dictionary containing the 2D profiles of r, z,  and psi.
+    def get_profiles_1d_quantities(self, time_slice, attributes=None):
+        """
+        The function `get_profiles_1d_quantities` retrieves specified attributes from a 1D profile at a
+        given time slice.
 
-    #     Returns:
-    #         a dictionary with keys "r2d", "z2d", and "psi2d", and their corresponding values are the  variables
-    # r2d, z2d, and psi2d, respectively.
-    #     """
-    #     r2d   = self.ids.time_slice[0].profiles_2d[0].r
-    #     z2d   = self.ids.time_slice[0].profiles_2d[0].z
-    #     psi2d = self.ids.time_slice[0].profiles_2d[0].psi
+        Args:
+            time_slice: Time slice is a parameter
+            attributes: The `attributes` parameter in the `get_profiles_1d_quantities` function is a list
+        of strings that represent the quantities or attributes you want to retrieve from the profiles_1d
+        object for a specific time slice. defaults it retrives pressure, q, beta_pol
 
-    #     return({"r2d":r2d, "z2d", z2d, "psi2d", psi2d})
+        Returns:
+            A dictionary containing the values of the specified attributes ("pressure", "q", "beta_pol")
+        for the given time slice from the profiles_1d data.
+        """
+        quantities = {}
+        if attributes is None:
+            attributes = ["pressure", "q", "beta_pol"]
+        for attribute in attributes:
+            quantities[attribute] = eval(f"self.ids.time_slice[{time_slice}].profiles_1d.{attribute}")
+        return quantities
+
+    def get_global_quantities(self, time_slice=None, attributes=None):
+        """
+        This Python function retrieves global quantities from a time slice object based on specified
+        attributes.
+
+        Args:
+            time_slice: The `time_slice` parameter in the `get_global_quantities` function is used to
+                specify a particular time slice for which you want to retrieve global quantities. If
+                `time_slice` is not provided (i.e., it is `None`), the function will retrieve global quantities
+                for all time slices
+            attributes: The `attributes` parameter in the `get_global_quantities` function is used to
+                specify a list of quantities that you want to retrieve from the global quantities of a time
+                slice. The default list of attributes includes "q_min", "q_95", "li_3", "beta_tor
+
+        Returns:
+            The `get_global_quantities` function returns a dictionary `quantities` containing global
+        quantities based on the provided `time_slice` and `attributes`. If `time_slice` is not
+        specified, it calculates the global quantities for all time slices and stores them in arrays
+        within the dictionary. If `time_slice` is specified, it retrieves the global quantities for that
+        specific time slice and returns them in the dictionary format
+        """
+        quantities = {}
+        if attributes is None:
+            attributes = ["q_min.value", "q_95", "li_3", "beta_tor", "energy_mhd"]
+        if not isinstance(attributes, list):
+            logger.warning("attributes argument is not provided as list of quantities, returning None")
+            return None
+
+        if time_slice is not None:
+            for attribute in attributes:
+                quantities[attribute] = {}
+                quantities[attribute]["node"] = []
+                quantities[attribute]["coordinate"] = self.ids.time
+            for attribute in attributes:
+                info_flag = True
+                for ti in range(len(self.ids.time_slice)):
+                    node = eval(f"self.ids.time_slice[ti].global_quantities.{attribute}")
+                    if info_flag:
+                        quantities[attribute]["unit"] = node.metadata.units
+                        quantities[attribute]["coordinate_unit"] = "t"
+
+                        quantities[attribute]["name"] = node.metadata.name
+                        quantities[attribute]["coordinate_name"] = "time"
+                        info_flag = False
+                    quantities[attribute]["node"].append(node)
+            for attribute in attributes:
+                quantities[attribute]["node"] = np.array(quantities[attribute]["node"])
+        else:
+            for attribute in attributes:
+                quantities[attribute] = eval(f"self.ids.time_slice[time_slice].global_quantities.{attribute}")
+        return quantities
+        # q_min = self.ids.time_slice[ti].global_quantities.q_min
+        # q_95 = self.ids.time_slice[ti].global_quantities.q_95
+        # li_3 = self.ids.time_slice[ti].global_quantities.li_3
+        # beta_tor = self.ids.time_slice[ti].global_quantities.beta_tor
+        # energy_mhd= self.ids.time_slice[ti].global_quantities.energy_mhd
+
+    @functools.lru_cache(maxsize=128)
+    def get_equilibria(self):
+        """
+        The function `get_equilibria` retrieves equilibrium data from a given object and organizes it
+        into a dictionary for further analysis.
+
+        Returns:
+            The `get_equilibria` method returns a dictionary named `data` containing various equilibrium
+        data such as time, magnetic field parameters, profiles in 1D and 2D, boundary information,
+        constraints information, and other relevant details.
+        """
+
+        homogeneous_time = self.ids.ids_properties.homogeneous_time
+        name = self.ids.code.name
+        if homogeneous_time == 1:
+            time = self.ids.time
+        nt = time.size
+        ip = np.zeros(nt)
+        q0 = np.zeros(nt)
+        beta = np.zeros(nt)
+        rmag = np.zeros(nt)
+        zmag = np.zeros(nt)
+        psi_axis = np.zeros(nt)
+        psi_boundary = np.zeros(nt)
+        num_iterations = np.zeros(nt)
+        iteration_error = np.zeros(nt)
+        n = 0
+        n2 = 0
+        n3 = 0
+        n4 = 0
+        n5 = 0
+        n6 = 0
+        n7 = 0
+        n8 = 0
+        output_flag = self.ids.code.output_flag
+        if len(output_flag) == 0:
+            output_flag = np.zeros(len(self.ids.time_slice), dtype=int)
+        if self.ids.time_slice:
+            for time_slice in self.ids.time_slice:
+                if time_slice:
+                    if hasattr(time_slice, "profiles_1d") and time_slice.profiles_1d:
+                        n = time_slice.profiles_1d.psi.size
+                    if hasattr(time_slice, "profiles_2d") and time_slice.profiles_2d:
+                        n2 = time_slice.profiles_2d[0].psi.shape
+                    if (
+                        hasattr(time_slice, "boundary")
+                        and time_slice.boundary
+                        and hasattr(time_slice.boundary, "outline")
+                        and time_slice.boundary.outline
+                    ):
+                        n3 = time_slice.boundary.outline.r.size
+                    constraints = time_slice.constraints
+                    if hasattr(constraints, "ip") and constraints.ip:
+                        n4 = 1
+                    if hasattr(constraints, "pf_current") and constraints.pf_current:
+                        n5 = len(constraints.pf_current)
+                    if hasattr(constraints, "pf_passive_current") and constraints.pf_passive_current:
+                        n6 = len(constraints.pf_passive_current)
+                    if hasattr(constraints, "bpol_probe") and constraints.bpol_probe:
+                        n7 = len(constraints.bpol_probe)
+                    if hasattr(constraints, "flux_loop") and constraints.flux_loop:
+                        n8 = len(constraints.flux_loop)
+
+                    if n == 0 or not n2 or n3 == 0:
+                        continue  # Moves to the next iteration
+                    else:
+                        break  # Exits the loop
+
+        if n > 0:
+            psi1D = np.zeros((nt, n))
+            qpsi1D = np.zeros((nt, n))
+            press1D = np.zeros((nt, n))
+            j_tor1D = np.zeros((nt, n))
+            rin1D = np.zeros((nt, n))
+            rout1D = np.zeros((nt, n))
+            i = -1
+            for time_slice in self.ids.time_slice:
+                i = i + 1
+                ip[i] = time_slice.global_quantities.ip
+                q0[i] = time_slice.global_quantities.q_axis
+                beta[i] = time_slice.global_quantities.beta_tor
+                rmag[i] = time_slice.global_quantities.magnetic_axis.r
+                zmag[i] = time_slice.global_quantities.magnetic_axis.z
+                psi_axis[i] = time_slice.global_quantities.psi_axis
+                psi_boundary[i] = time_slice.global_quantities.psi_boundary
+                num_iterations[i] = time_slice.convergence.iterations_n
+                iteration_error[i] = time_slice.convergence.grad_shafranov_deviation_value
+                if time_slice.profiles_1d.psi.size > 0:
+                    psi1D[i, :] = time_slice.profiles_1d.psi
+                if time_slice.profiles_1d.q.size > 0:
+                    qpsi1D[i, :] = time_slice.profiles_1d.q
+                if time_slice.profiles_1d.pressure.size > 0:
+                    press1D[i, :] = time_slice.profiles_1d.pressure
+                if time_slice.profiles_1d.j_tor.size > 0:
+                    j_tor1D[i, :] = time_slice.profiles_1d.j_tor
+                if time_slice.profiles_1d.r_inboard.size > 0:
+                    rin1D[i, :] = time_slice.profiles_1d.r_inboard
+                if time_slice.profiles_1d.r_outboard.size > 0:
+                    rout1D[i, :] = time_slice.profiles_1d.r_outboard
+
+        if isinstance(n2, tuple):
+            psi2D = np.zeros((nt, n2[0], n2[1]))
+            jtor2D = np.zeros((nt, n2[0], n2[1]))
+            r2D = np.zeros((nt, n2[0], n2[1]))
+            z2D = np.zeros((nt, n2[0], n2[1]))
+            r2D = np.zeros((nt, n2[0], n2[1]))
+            z2D = np.zeros((nt, n2[0], n2[1]))
+            rb = np.zeros((nt, n3))
+            zb = np.zeros((nt, n3))
+            i = -1
+            for time_slice in self.ids.time_slice:
+                i = i + 1
+                if len(time_slice.profiles_2d) > 0:
+                    if time_slice.profiles_2d[0].r.size > 0:
+                        r2D[i, :, :] = time_slice.profiles_2d[0].r
+                    if time_slice.profiles_2d[0].z.size > 0:
+                        z2D[i, :, :] = time_slice.profiles_2d[0].z
+                    if time_slice.profiles_2d[0].psi.size > 0:
+                        psi2D[i, :, :] = time_slice.profiles_2d[0].psi
+                    if time_slice.profiles_2d[0].j_tor.size > 0:
+                        jtor2D[i, :, :] = time_slice.profiles_2d[0].j_tor
+                    if time_slice.boundary.outline.r.size > 0:
+                        rb[i, :] = time_slice.boundary.outline.r
+                    if time_slice.boundary.outline.z.size > 0:
+                        zb[i, :] = time_slice.boundary.outline.z
+                    if time_slice.profiles_2d[0].grid.dim1.size > 0:
+                        r = time_slice.profiles_2d[0].grid.dim1
+                    if time_slice.profiles_2d[0].grid.dim2.size > 0:
+                        z = time_slice.profiles_2d[0].grid.dim2
+
+        if n3 > 0:
+            rb = np.zeros((nt, n3))
+            zb = np.zeros((nt, n3))
+
+            for i, time_slice in enumerate(self.ids.time_slice):
+                if time_slice.boundary.outline.r.size > 0:
+                    rb[i, : len(time_slice.boundary.outline.r)] = time_slice.boundary.outline.r
+                if time_slice.boundary.outline.z.size > 0:
+                    zb[i, : len(time_slice.boundary.outline.z)] = time_slice.boundary.outline.z
+
+        if n4 > 0:
+            constr_ip_meas = np.zeros((nt, 1))
+            constr_ip_recon = np.zeros((nt, 1))
+            constr_ip_source = np.zeros((nt, 1), dtype=object)
+
+            for i, time_slice in enumerate(self.ids.time_slice):
+                constr_ip_meas[i, 0] = time_slice.constraints.ip.measured
+                constr_ip_recon[i, 0] = time_slice.constraints.ip.reconstructed
+                constr_ip_source[i, 0] = time_slice.constraints.ip.source
+        else:
+            constr_ip_meas = None
+            constr_ip_recon = None
+            constr_ip_source = None
+        if n5 > 0:
+            constr_pf_meas = np.zeros((nt, n5))
+            constr_pf_recon = np.zeros((nt, n5))
+            constr_pf_source = np.empty((nt, n5), dtype=object)
+
+            for i, time_slice in enumerate(self.ids.time_slice):
+                pf_currents = time_slice.constraints.pf_current
+                n_pf_currents = len(pf_currents)
+
+                constr_pf_meas[i, :n_pf_currents] = [current.measured for current in pf_currents]
+                constr_pf_recon[i, :n_pf_currents] = [current.reconstructed for current in pf_currents]
+                constr_pf_source[i, :n_pf_currents] = [str(current.source) for current in pf_currents]
+        else:
+            constr_pf_meas = None
+            constr_pf_recon = None
+            constr_pf_source = None
+        if n6 > 0:
+
+            constr_pas_meas = np.zeros((nt, n6))
+            constr_pas_recon = np.zeros((nt, n6))
+            constr_pas_source = np.zeros((nt, n6), dtype=object)
+
+            for i, time_slice in enumerate(self.ids.time_slice):
+                pf_passive_currents = time_slice.constraints.pf_passive_current
+                n_pf_passive = len(pf_passive_currents)
+
+                constr_pas_meas[i, :n_pf_passive] = [current.measured for current in pf_passive_currents]
+                constr_pas_recon[i, :n_pf_passive] = [current.reconstructed for current in pf_passive_currents]
+                constr_pas_source[i, :n_pf_passive] = [current.source for current in pf_passive_currents]
+        else:
+            constr_pas_meas = None
+            constr_pas_recon = None
+            constr_pas_source = None
+        if n7 > 0:
+            constr_bpol_meas = np.zeros((nt, n7))
+            constr_bpol_recon = np.zeros((nt, n7))
+            constr_bpol_source = np.zeros((nt, n7), dtype=object)
+
+            for i, time_slice in enumerate(self.ids.time_slice):
+                bpol_probes = time_slice.constraints.bpol_probe
+                n_bpol_probes = len(bpol_probes)
+
+                constr_bpol_meas[i, :n_bpol_probes] = [probe.measured for probe in bpol_probes]
+                constr_bpol_recon[i, :n_bpol_probes] = [probe.reconstructed for probe in bpol_probes]
+                constr_bpol_source[i, :n_bpol_probes] = [probe.source for probe in bpol_probes]
+        else:
+            constr_bpol_meas = None
+            constr_bpol_recon = None
+            constr_bpol_source = None
+        if n8 > 0:
+            constr_fluxloop_meas = np.zeros((nt, n8))
+            constr_fluxloop_recon = np.zeros((nt, n8))
+            constr_fluxloop_source = np.zeros((nt, n8), dtype=object)
+
+            for i, time_slice in enumerate(self.ids.time_slice):
+                flux_loops = time_slice.constraints.flux_loop
+                n_flux_loops = len(flux_loops)
+
+                constr_fluxloop_meas[i, :n_flux_loops] = [loop.measured for loop in flux_loops]
+                constr_fluxloop_recon[i, :n_flux_loops] = [loop.reconstructed for loop in flux_loops]
+                constr_fluxloop_source[i, :n_flux_loops] = [loop.source for loop in flux_loops]
+        else:
+            constr_fluxloop_meas = None
+            constr_fluxloop_recon = None
+            constr_fluxloop_source = None
+
+        constraints = {
+            "ip_meas": constr_ip_meas,
+            "ip_recon": constr_ip_recon,
+            "ip_source": constr_ip_source,
+            "pf_meas": constr_pf_meas,
+            "pf_recon": constr_pf_recon,
+            "pf_source": constr_pf_source,
+            "pas_meas": constr_pas_meas,
+            "pas_recon": constr_pas_recon,
+            "pas_source": constr_pas_source,
+            "bpol_meas": constr_bpol_meas,
+            "bpol_recon": constr_bpol_recon,
+            "bpol_source": constr_bpol_source,
+            "fluxloop_meas": constr_fluxloop_meas,
+            "fluxloop_recon": constr_fluxloop_recon,
+            "fluxloop_source": constr_fluxloop_source,
+        }
+        data = {
+            "time": time,
+            "ip": ip,
+            "q0": q0,
+            "beta": beta,
+            "rmag": rmag,
+            "zmag": zmag,
+            "psi1D": psi1D,
+            "qpsi1D": qpsi1D,
+            "press1D": press1D,
+            "psi2D": psi2D,
+            "jtor2D": jtor2D,
+            "r2D": r2D,
+            "z2D": z2D,
+            "rb": rb,
+            "zb": zb,
+            "r": r,
+            "z": z,
+            "j_tor1D": j_tor1D,
+            "rin1D": rin1D,
+            "rout1D": rout1D,
+            "output_flag": output_flag,
+            "psi_axis": psi_axis,
+            "psi_boundary": psi_boundary,
+            "name": name,
+            "num_iterations": num_iterations,
+            "iteration_error": iteration_error,
+            "constraints": constraints,
+        }
+        return data
+
+    def get_contour(self, psi_axis, psi_boundary, time, time_index1, psi_axis2=None, psi_boundary2=None, time2=None):
+        n = 10
+        dp = (psi_boundary[time_index1] - psi_axis[time_index1]) / n
+        if dp == 0.0:
+            c = np.array(psi_axis[time_index1])
+        else:
+            c = np.arange(psi_axis[time_index1], psi_axis[time_index1] + 2 * n * dp, dp)
+            is_decreasing = np.all(np.diff(c) < 0)
+            if is_decreasing:
+                c = c[::-1]
+        if psi_axis2 is not None:
+            time_index2 = np.argmin(abs(time2 - time[time_index1]))
+            dp = (psi_boundary2[time_index2] - psi_axis2[time_index2]) / n
+            if dp == 0.0:
+                ce = np.array(psi_axis2[time_index1])
+            else:
+                ce = np.arange(psi_axis2[time_index2], psi_axis2[time_index2] + 2 * n * dp, dp)
+                is_decreasing = np.all(np.diff(ce) < 0)
+                if is_decreasing:
+                    ce = ce[::-1]
+        else:
+            ce = None
+
+        return c, ce
+
+    def get_constraints_info(self, label, constraints, constraintsE, time, time_index1, timeE):
+        labels = ["$I_p$", "pf-currents", "passive-currents", "$B_{pol}$ probes", "flux loops"]
+        constraint_available = [True] * len(labels)
+        if (constraints["ip_recon"]) is None:
+            constraint_available[0] = False
+        if (constraints["pf_recon"]) is None:
+            constraint_available[1] = False
+        if (constraints["pas_recon"]) is None:
+            constraint_available[2] = False
+        if (constraints["bpol_recon"]) is None:
+            constraint_available[3] = False
+        if (constraints["fluxloop_recon"]) is None:
+            constraint_available[4] = False
+        for index, item in enumerate(labels):
+            if label == item:
+                break
+        if not constraint_available[index]:
+            return
+        constraintSelected = label
+        y1 = None
+        y2 = None
+        y3 = None
+        y4 = None
+        text = ""
+        if constraintSelected == "$I_p$":
+            scaleFactor = 1e6
+            text = "[MA]"
+            try:
+                y1 = (constraints["ip_meas"])[time_index1, :]
+                y2 = (constraints["ip_recon"])[time_index1, :]
+            except Exception as _:  # noqa: F841
+                pass
+            try:
+                time_index2 = np.argmin(abs(timeE - time[time_index1]))
+                y3 = (constraintsE["ip_meas"])[time_index2, :]
+                y4 = (constraintsE["ip_recon"])[time_index2, :]
+            except Exception as _:  # noqa: F841
+                pass
+        elif constraintSelected == "pf-currents":
+            text = "[kA]"
+            scaleFactor = 1e3
+            try:
+                y1 = (constraints["pf_meas"])[time_index1, :]
+                y2 = (constraints["pf_recon"])[time_index1, :]
+            except Exception as _:  # noqa: F841
+                pass
+            try:
+                time_index2 = np.argmin(abs(timeE - time[time_index1]))
+                y3 = (constraintsE["pf_meas"])[time_index2, :]
+                y4 = (constraintsE["pf_recon"])[time_index2, :]
+            except Exception as _:  # noqa: F841
+                pass
+        elif constraintSelected == "passive-currents":
+            text = "[kA]"
+            scaleFactor = 1e3
+            try:
+                y1 = (constraints["pas_meas"])[time_index1, :]
+                y2 = (constraints["pas_recon"])[time_index1, :]
+            except Exception as _:  # noqa: F841
+                pass
+            try:
+                time_index2 = np.argmin(abs(timeE - time[time_index1]))
+                y3 = (constraintsE["pas_meas"])[time_index2, :]
+                y4 = (constraintsE["pas_recon"])[time_index2, :]
+            except Exception as _:  # noqa: F841
+                pass
+        elif constraintSelected == "$B_{pol}$ probes":
+            text = "[mT]"
+            scaleFactor = 1e-3
+            try:
+                y1 = (constraints["bpol_meas"])[time_index1, :]
+                y2 = (constraints["bpol_recon"])[time_index1, :]
+            except Exception as _:  # noqa: F841
+                pass
+            try:
+                time_index2 = np.argmin(abs(timeE - time[time_index1]))
+                y3 = (constraintsE["bpol_meas"])[time_index2, :]
+                y4 = (constraintsE["bpol_recon"])[time_index2, :]
+            except Exception as _:  # noqa: F841
+                pass
+        elif constraintSelected == "flux loops":
+            text = "[Wb]"
+            scaleFactor = 1e0
+            try:
+                y1 = (constraints["fluxloop_meas"])[time_index1, :]
+                y2 = (constraints["fluxloop_recon"])[time_index1, :]
+            except Exception as _:  # noqa: F841
+                pass
+            try:
+                time_index2 = np.argmin(abs(timeE - time[time_index1]))
+                y3 = (constraintsE["fluxloop_meas"])[time_index2, :]
+                y4 = (constraintsE["fluxloop_recon"])[time_index2, :]
+            except Exception as _:  # noqa: F841
+                pass
+        return y1, y2, y3, y4, constraintSelected, text, scaleFactor
