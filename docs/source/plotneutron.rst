@@ -21,7 +21,7 @@ retrieves from distribution_sources IDS
         $ plotneutron --uri "imas:mdsplus?user=public;pulse=121014;run=11;database=ITER;version=3" -t 450
 
 
-    .. thumbnail:: _static/images/plotneutron.png
+    .. image:: _static/images/plotneutron.png
         :alt: image not found
         :align: center
 

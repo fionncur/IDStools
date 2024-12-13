@@ -768,11 +768,11 @@ class CoreProfilesCompute:
         Returns:
             The `get_electrons_pressure_properties` function returns a dictionary with the following
             key-value pairs:
-            - "maxima_electrons": Maximum pressure of electrons
-            - "pressure_electron_total": Total pressure of electrons
-            - "pressure_electron_thermal": Thermal pressure of electrons
-            - "pressure_electron_fast_parallel": Pressure of fast parallel electrons
-            - "pressure_electron_fast_perpendicular
+            "maxima_electrons": Maximum pressure of electrons
+            "pressure_electron_total": Total pressure of electrons
+            "pressure_electron_thermal": Thermal pressure of electrons
+            "pressure_electron_fast_parallel": Pressure of fast parallel electrons
+            "pressure_electron_fast_perpendicular
 
         """
         nrho = len(self.get_rho_tor_norm(time_slice))
@@ -827,12 +827,11 @@ class CoreProfilesCompute:
 
         Returns:
             The `get_pressure` function returns a dictionary with the following key-value pairs:
-            - "maxima_total": maximum value calculated based on pressure values
-            - "pressure_total": total pressure value calculated as the sum of electron pressure and ion
-            pressure
-            - "pressure_thermal": thermal pressure values
-            - "pressure_parallel": parallel pressure values
-            - "pressure_perpendicular": perpendicular pressure values
+            "maxima_total": maximum value calculated based on pressure values
+            "pressure_total": total pressure value calculated as the sum of electron pressure and ion pressure
+            "pressure_thermal": thermal pressure values
+            "pressure_parallel": parallel pressure values
+            "pressure_perpendicular": perpendicular pressure values
         """
         nrho = len(self.get_rho_tor_norm(time_slice))
         pressure_thermal = self.ids.profiles_1d[time_slice].pressure_thermal

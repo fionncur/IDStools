@@ -15,6 +15,7 @@ composition, allowing you to depict various trends and plasma physics.
    plotecstrayradiation
    plotedgeprofiles
    plotequilibrium
+   plotequicomp
    printfluxes
    plotkineticprofiles
    plothcd

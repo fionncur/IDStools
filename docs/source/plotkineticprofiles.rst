@@ -34,6 +34,6 @@ core_profiles IDSs
         n_over_ne:    0.502   0.494   0.001
         n_over_n_maj: 1.000   0.984   0.002
 
-   .. thumbnail:: _static/images/plotkineticprofiles.png
+   .. image:: _static/images/plotkineticprofiles.png
       :alt: image not found
       :align: center
