@@ -48,17 +48,17 @@ def rec(
     # --------------------
     table = {}
     yaml_files = []
-  
-    for path in paths:
-      files = glob.glob(path + "/*")
 
-      # Walk through the directory and find .yaml files
-      for root, _, files in os.walk(path):
-          for file in files:
-              if file.endswith('.yaml'):
-                  yaml_files.append(os.path.join(root, file))
-              
-    files = yaml_files           
+    for path in paths:
+        files = glob.glob(path + "/*")
+
+        # Walk through the directory and find .yaml files
+        for root, _, files in os.walk(path):
+            for file in files:
+                if file.endswith(".yaml"):
+                    yaml_files.append(os.path.join(root, file))
+
+    files = yaml_files
 
     # Fill data dictionary with yaml input files describing simulations
     j = -1
@@ -398,10 +398,10 @@ if __name__ == "__main__":
     # Folder paths
     paths = []
     if args["folder"] != None:
-        paths.append( args["folder"] )
+        paths.append(args["folder"])
     else:
-        paths.append( "/work/imas/shared/imasdb/ITER_DISRUPTIONS/3/0" )
-        paths.append( "/work/imas/shared/imasdb/ITER_DISRUPTIONS/4" )
+        paths.append("/work/imas/shared/imasdb/ITER_DISRUPTIONS/3/0")
+        paths.append("/work/imas/shared/imasdb/ITER_DISRUPTIONS/4")
 
     # Filter
     if args["selection"] != None:
@@ -467,5 +467,4 @@ if __name__ == "__main__":
     # Display the clean formatted table
     for i in range(len(table)):
         print(table[i])
-    print(" NOTE: Default read entry from Disruption database using user = 'public', database = 'ITER_DISRUPTIONS'" )
-
+    print(" NOTE: Default read entry from Disruption database using user = 'public', database = 'ITER_DISRUPTIONS'")
