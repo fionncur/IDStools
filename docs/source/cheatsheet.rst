@@ -76,6 +76,15 @@ This cheat sheet provides quick reference of commonly used commands in IDStools.
 |                            |    "imas:hdf5?user=public;pulse=116000;run=4;database=ITER_MD;version=3#wall" --rho                                          |
 |                            |                                                                                                                              |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+
+| *plotequicomp*             | Shows plasma equilibrium and quantities related with it                                                                      |
++----------------------------+------------------------------------------------------------------------------------------------------------------------------+
+|                            |                                                                                                                              |
+|                            | .. code-block:: bash                                                                                                         |
+|                            |                                                                                                                              |
+|                            |    $ plotequicomp --uri "imas:hdf5?user=public;shot=105027;run=200;database=ITER;version=3"                                  |
+|                            |    "imas:hdf5?user=public;shot=105027;run=2;database=ITER;version=3"                                                         |
+|                            |                                                                                                                              |
++----------------------------+------------------------------------------------------------------------------------------------------------------------------+
 | *printfluxes*              | Shows flux information from available                                                                                        |
 |                            | transport models  (replaces print_fluxes).                                                                                   |
 +----------------------------+------------------------------------------------------------------------------------------------------------------------------+

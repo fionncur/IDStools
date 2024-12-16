@@ -185,14 +185,14 @@ It can also save generated figures to a specified directory or the default locat
 
       $ idsprint --uri "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3#core_profiles/profiles_1d(:)/electrons/temperature" -p
 
-   .. thumbnail:: _static/images/idsprint_1.png
+   .. image:: _static/images/idsprint_1.png
       :alt: image not found
       :align: center
 
-   .. thumbnail:: _static/images/idsprint_2.png
+   .. image:: _static/images/idsprint_2.png
       :alt: image not found
       :align: center
 
-   .. thumbnail:: _static/images/idsprint_3.png
+   .. image:: _static/images/idsprint_3.png
       :alt: image not found
       :align: center

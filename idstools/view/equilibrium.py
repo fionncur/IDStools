@@ -67,7 +67,7 @@ class EquilibriumView(BasePlot):
                 ax.plot()
                 canvas.show()
 
-            .. thumbnail:: /_static/images/EquilibriumView_viewMagneticPoloidalFlux.png
+            .. image:: /_static/images/EquilibriumView_viewMagneticPoloidalFlux.png
                 :alt: image not found
                 :align: center
 
@@ -138,7 +138,7 @@ class EquilibriumView(BasePlot):
 
         Args:
             ax: `ax` is a matplotlib axis object.
-            timeSlice (int): timeSlice is an integer index.
+            time_slice (int): time_slice is an integer index.
 
         Returns:
             the contour plot object `cntr`.

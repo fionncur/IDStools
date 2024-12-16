@@ -108,7 +108,6 @@ extensions = [
     "sphinx_immaterial",
     "sphinx_immaterial.apidoc.python.apigen",
     "sphinxcontrib.programoutput",
-    'sphinxcontrib.images',
 ]
 
 autoapi_dirs = ['../../idstools']

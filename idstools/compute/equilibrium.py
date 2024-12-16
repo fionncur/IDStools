@@ -1000,12 +1000,12 @@ class EquilibriumCompute:
 
         Args:
             time_slice: The `time_slice` parameter in the `get_global_quantities` function is used to
-        specify a particular time slice for which you want to retrieve global quantities. If
-        `time_slice` is not provided (i.e., it is `None`), the function will retrieve global quantities
-        for all time slices
+                specify a particular time slice for which you want to retrieve global quantities. If
+                `time_slice` is not provided (i.e., it is `None`), the function will retrieve global quantities
+                for all time slices
             attributes: The `attributes` parameter in the `get_global_quantities` function is used to
-        specify a list of quantities that you want to retrieve from the global quantities of a time
-        slice. The default list of attributes includes "q_min", "q_95", "li_3", "beta_tor
+                specify a list of quantities that you want to retrieve from the global quantities of a time
+                slice. The default list of attributes includes "q_min", "q_95", "li_3", "beta_tor
 
         Returns:
             The `get_global_quantities` function returns a dictionary `quantities` containing global
@@ -1317,7 +1317,6 @@ class EquilibriumCompute:
         }
         return data
 
-    @functools.lru_cache(maxsize=128)
     def get_contour(self, psi_axis, psi_boundary, time, time_index1, psi_axis2=None, psi_boundary2=None, time2=None):
         n = 10
         dp = (psi_boundary[time_index1] - psi_axis[time_index1]) / n

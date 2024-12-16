@@ -12,6 +12,7 @@ source ./ci-sdcc/st00-header.sh $1 $2 $3
 IMAS_MODULE_VERSION=$(getIMASPythonModuleName "$TOOLCHAIN_VERSION" "$ACCESS_LAYER_VERSION" "$DD_VERSION")
 module load $IMAS_MODULE_VERSION
 
+module unload Python-bundle-PyPI
 ENVIRONEMNT_NAME=env"$TOOLCHAIN_VERSION"_"$ACCESS_LAYER_VERSION"
 
 # Create python virtual environment and install dependencies

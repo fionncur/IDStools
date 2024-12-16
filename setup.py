@@ -136,6 +136,7 @@ setup(
         "scripts/plotecstrayradiation",
         "scripts/plotedgeprofiles",
         "scripts/plotequilibrium",
+        "scripts/plotequicomp",
         "scripts/printfluxes",
         "scripts/plothcddistributions",
         "scripts/plothcd",

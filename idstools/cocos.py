@@ -13,11 +13,14 @@ logger = logging.getLogger(f"module.{__name__}")
 
 class COCOS:
     """
-    COCOS module in Python
+    COCOS module in Python.
 
-        [1] O. Sauter and S.Yu. Medvedev, "Tokamak Coordinate Conventions : COCOS",
-            Comput. Physics Commun. 184 (2013) 293
-        [2] cocos_module.f90 (CHEASE)
+    This module provides functionality related to coordinate conventions in tokamak physics.
+
+    References:
+        1. O. Sauter and S. Yu. Medvedev, "Tokamak Coordinate Conventions: COCOS",
+          *Comput. Physics Commun.*, **184** (2013), 293.
+        2. `cocos_module.f90 (CHEASE)`.
 
     Attributes
     ----------

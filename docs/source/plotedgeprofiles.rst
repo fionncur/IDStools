@@ -22,6 +22,6 @@ rectangular grid. It shows Electrons, Ions and Neutral density plots.
         $ plotedgeprofiles --uri "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3" --wall --time 60
         $ plotedgeprofiles --uri "imas:mdsplus?user=public;pulse=123314;run=1;database=ITER;version=3"
 
-   .. thumbnail:: _static/images/plotedgeprofiles.png
+   .. image:: _static/images/plotedgeprofiles.png
       :alt: image not found
       :align: center

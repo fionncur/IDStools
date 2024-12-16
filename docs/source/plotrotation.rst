@@ -26,6 +26,6 @@ core_profiles IDSs.
         core_profiles.profiles_1d[0].ion[1].velocity.diamagnetic could not be read
         core_profiles.profiles_1d[0].ion[2].velocity.diamagnetic could not be read
 
-   .. thumbnail:: _static/images/plotrotation.png
+   .. image:: _static/images/plotrotation.png
       :alt: image not found
       :align: center

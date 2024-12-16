@@ -564,13 +564,13 @@ class WavesCompute:
         on its power values at different time points.
 
         Args:
-            wave_index: The `wave_index` parameter in the `is_active_during_pulse` method represents the
+            coherent_wave_index: The `coherent_wave_index` parameter in the `is_active_during_pulse` method represents
                 index of the coherent wave that you want to check for activity. This index is used to access a
                 specific coherent wave within the `coherent_wave` list.
 
         Returns:
             The function is checking if there is any time point during the pulse where the power of the
-            coherent wave at the specified wave_index is greater than 0. If such a time point is found, the
+            coherent wave at the specified coherent_wave_index is greater than 0. If such a time point is found,
             function returns True. If no such time point is found, the function returns False.
         """
         for itime in range(len(self.ids.time)):
