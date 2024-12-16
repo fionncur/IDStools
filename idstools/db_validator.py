@@ -14,6 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 # ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
 def all_ids_types():
     """Returns a list of strings corresponding to all IDS types defined in the version of IMAS being used."""
     return [ids.value for ids in list(imas.IDSName)]
@@ -366,10 +367,14 @@ def db_validator(
     if not schema_path:
         # Load default validation schema in case of "schema_path" not given
         current_fpath = path.dirname(path.realpath(__file__))
-        schema_dir = path.join(current_fpath, "../../../../bin/validation_schemas")
-        if path.isdir(schema_dir):
-            schema += sorted(glob(schema_dir + "/generic/*.y*ml", recursive=True))
-            schema += sorted(glob(schema_dir + "/ITER/*.y*ml", recursive=True))
+        schema_dir_installed = path.join(current_fpath, "../../../../bin/validation_schemas")
+        schema_dir_local = path.join(current_fpath, "../resources/validation_schemas")
+        if path.isdir(schema_dir_installed):
+            schema += sorted(glob(schema_dir_installed + "/generic/*.y*ml", recursive=True))
+            schema += sorted(glob(schema_dir_installed + "/ITER/*.y*ml", recursive=True))
+        elif path.isdir(schema_dir_local):
+            schema += sorted(glob(schema_dir_local + "/generic/*.y*ml", recursive=True))
+            schema += sorted(glob(schema_dir_local + "/ITER/*.y*ml", recursive=True))
     else:
         for p in schema_path:
             if path.isdir(p):
@@ -399,7 +404,7 @@ def db_validator(
     # Scenario Validation for Pulses
     npulse = len(pulses)
     for i, (shot, run) in enumerate(pulses):
-        db = imas.DBEntry(get_backend_id(backend), database, shot, run, user)
+        db = imas.DBEntry(get_backend_id(backend), database, shot, run, user, version)
         status, _ = db.open()
         if status != 0:
             raise OSError(
