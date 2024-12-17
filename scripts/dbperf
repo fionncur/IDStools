@@ -15,8 +15,10 @@ from rich.progress import track
 from rich_argparse import RichHelpFormatter
 
 from idstools.database import DBMaster
-from idstools.idslist import available_in_dbentry
 from idstools.idsperf import byte_size, get_timings
+from idstools.utils.idshelper import (
+    get_available_ids_and_occurrences,
+)
 from idstools.utils.clihelper import imas_parser
 
 if __name__ == "__main__":
@@ -196,7 +198,7 @@ if __name__ == "__main__":
             hdfde = imas.DBEntry(imas.ids_defs.HDF5_BACKEND, args.database, pulse, run, args.user)
             hdfde.open()
 
-            idslist = available_in_dbentry(hdfde)
+            idslist = get_available_ids_and_occurrences(hdfde)
             if args.ids:
                 idslist = [args.ids]
 

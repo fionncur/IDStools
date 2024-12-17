@@ -17,7 +17,7 @@ Todo:
 
 import argparse
 
-import imaspy
+import imaspy as imas
 import numpy as np
 from rich_argparse import RichHelpFormatter
 
@@ -47,7 +47,7 @@ if connection is None:
     exit(1)
 
 if args.ids == []:
-    factory = imaspy.IDSFactory()
+    factory = imas.IDSFactory()
     args.ids = factory.ids_names()
 
 ids_size_dict = get_ids_size(connection, args.ids, dd_update=args.dd_update)

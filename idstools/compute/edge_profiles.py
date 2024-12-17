@@ -48,9 +48,8 @@ class EdgeProfilesCompute:
         Example:
             .. code-block:: python
 
-                import imaspy
+                import imaspy as imas
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=123276;run=1;database=ITER;version=3", "r")
-                connection.open()
                 idsObj = connection.get('edge_profiles')
                 result = EdgeProfilesCompute.getPlasmaCompositionWithSpeciesConcentration(idsObj, 0)
 
@@ -143,9 +142,8 @@ class EdgeProfilesCompute:
         Example:
             .. code-block:: python
 
-                import imaspy
+                import imaspy as imas
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=123276;run=1;database=ITER;version=3", "r")
-                connection.open()
                 idsObj = connection.get('edge_profiles')
                 computeObj = EdgeProfilesCompute(idsObj)
                 result = computeObj.getLabels(time_slice=0)
@@ -175,9 +173,8 @@ class EdgeProfilesCompute:
         Example:
             .. code-block:: python
 
-                import imaspy
+                import imaspy as imas
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=123276;run=1;database=ITER;version=3", "r")
-                connection.open()
                 idsObj = connection.get('edge_profiles')
                 computeObj = EdgeProfilesCompute(idsObj)
                 result = computeObj.get_a(time_slice=0)
@@ -209,9 +206,8 @@ class EdgeProfilesCompute:
         Example:
             .. code-block:: python
 
-                import imaspy
+                import imaspy as imas
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=123276;run=1;database=ITER;version=3", "r")
-                connection.open()
                 idsObj = connection.get('edge_profiles')
                 computeObj = EdgeProfilesCompute(idsObj)
                 result = computeObj.get_z(time_slice=0)
@@ -240,9 +236,8 @@ class EdgeProfilesCompute:
         Example:
             .. code-block:: python
 
-                import imaspy
+                import imaspy as imas
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=123276;run=1;database=ITER;version=3", "r")
-                connection.open()
                 idsObj = connection.get('edge_profiles')
                 computeObj = EdgeProfilesCompute(idsObj)
                 result = computeObj.getStates(time_slice=0)
@@ -270,9 +265,8 @@ class EdgeProfilesCompute:
         Example:
             .. code-block:: python
 
-                import imaspy
+                import imaspy as imas
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=123276;run=1;database=ITER;version=3", "r")
-                connection.open()
                 idsObj = connection.get('edge_profiles')
                 computeObj = EdgeProfilesCompute(idsObj)
                 result = computeObj.getStatesData(time_slice=0)
@@ -335,9 +329,8 @@ class EdgeProfilesCompute:
         Example:
             .. code-block:: python
 
-                import imaspy
+                import imaspy as imas
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=123276;run=1;database=ITER;version=3", "r")
-                connection.open()
                 idsObj = connection.get('edge_profiles')
                 computeObj = EdgeProfilesCompute(idsObj)
                 result = computeObj.get_ne(time_slice=0)
@@ -366,9 +359,8 @@ class EdgeProfilesCompute:
         Example:
             .. code-block:: python
 
-                import imaspy
+                import imaspy as imas
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=123276;run=1;database=ITER;version=3", "r")
-                connection.open()
                 idsObj = connection.get('edge_profiles')
                 computeObj = EdgeProfilesCompute(idsObj)
                 result = computeObj.getVolume(time_slice=0)
@@ -513,9 +505,8 @@ class EdgeProfilesCompute:
         Example:
             .. code-block:: python
 
-                import imaspy
+                import imaspy as imas
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=123276;run=1;database=ITER;version=3", "r")
-                connection.open()
                 idsObj = connection.get('edge_profiles')
                 computeObj = EdgeProfilesCompute(idsObj)
                 result = computeObj.getDensity(time_slice=0)
@@ -548,9 +539,8 @@ class EdgeProfilesCompute:
         Example:
             .. code-block:: python
 
-                import imaspy
+                import imaspy as imas
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=123276;run=1;database=ITER;version=3", "r")
-                connection.open()
                 idsObj = connection.get('edge_profiles')
                 computeObj = EdgeProfilesCompute(idsObj)
                 result = computeObj.getSpeciesDensity(time_slice=0)
@@ -615,9 +605,8 @@ class EdgeProfilesCompute:
         Example:
             .. code-block:: python
 
-                import imaspy
+                import imaspy as imas
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=123276;run=1;database=ITER;version=3", "r")
-                connection.open()
                 idsObj = connection.get('edge_profiles')
                 computeObj = EdgeProfilesCompute(idsObj)
                 result = computeObj.get_nspec_over_ntot(time_slice=0)
@@ -641,9 +630,8 @@ class EdgeProfilesCompute:
         Example:
             .. code-block:: python
 
-                import imaspy
+                import imaspy as imas
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=123276;run=1;database=ITER;version=3", "r")
-                connection.open()
                 idsObj = connection.get('edge_profiles')
                 computeObj = EdgeProfilesCompute(idsObj)
                 result = computeObj.get_nspec_over_ne(time_slice=0)
@@ -669,9 +657,8 @@ class EdgeProfilesCompute:
         Example:
             .. code-block:: python
 
-                import imaspy
+                import imaspy as imas
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=123276;run=1;database=ITER;version=3", "r")
-                connection.open()
                 idsObj = connection.get('edge_profiles')
                 computeObj = EdgeProfilesCompute(idsObj)
                 result = computeObj.get_nspec_over_nmaj()
@@ -699,9 +686,8 @@ class EdgeProfilesCompute:
         Example:
             .. code-block:: python
 
-                import imaspy
+                import imaspy as imas
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=123276;run=1;database=ITER;version=3", "r")
-                connection.open()
                 idsObj = connection.get('edge_profiles')
                 computeObj = EdgeProfilesCompute(idsObj)
                 result = computeObj.getSpecies()

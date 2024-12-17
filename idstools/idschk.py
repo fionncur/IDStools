@@ -10,7 +10,7 @@ from sys import exit
 from xml.etree import ElementTree as ET
 
 import cerberus
-import imas
+import imaspy as imas
 import numpy as np
 import yaml
 
@@ -39,7 +39,7 @@ required_fields_eq = {
     "ids.ids_properties.homogeneous_time": {"min": 0, "max": 2},
     "ids.time_slice": {"minlength": 1},
     "ids.time_slice[itime].global_quantities.ip": {
-        "ids_gt": imas.imasdef.EMPTY_FLOAT,
+        "ids_gt": imas.ids_defs.EMPTY_FLOAT,
     },
     "ids.vacuum_toroidal_field.b0": {
         "empty": False,

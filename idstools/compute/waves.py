@@ -57,11 +57,10 @@ class WavesCompute:
         Example:
             .. code-block:: python
 
-                import imaspy
+                import imaspy as imas
                 from idstools.compute.waves import WavesCompute
 
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3","r")
-                connection.open()
                 idsObj = connection.get('waves')
                 waveobj = WavesCompute(waves_ids)
                 print(waveobj.getBResonance())
@@ -89,11 +88,10 @@ class WavesCompute:
         Example:
             .. code-block:: python
 
-                import imaspy
+                import imaspy as imas
                 from idstools.compute.waves import WavesCompute
 
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3","r")
-                connection.open()
                 idsObj = connection.get('waves')
                 waveobj = WavesCompute(waves_ids)
                 print(waveobj.getBeamArray())
@@ -125,11 +123,10 @@ class WavesCompute:
             .. code-block:: python
 
 
-                import imaspy
+                import imaspy as imas
                 from idstools.compute.waves import WavesCompute
 
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3","r")
-                connection.open()
                 idsObj = connection.get('waves')
                 waveobj = WavesCompute(waves_ids)
                 print(waveobj.getOmegaEC())
@@ -157,11 +154,10 @@ class WavesCompute:
             .. code-block:: python
 
 
-                import imaspy
+                import imaspy as imas
                 from idstools.compute.waves import WavesCompute
 
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3","r")
-                connection.open()
                 idsObj = connection.get('waves')
                 waveobj = WavesCompute(waves_ids)
                 print(waveobj.get_beams())
@@ -208,11 +204,10 @@ class WavesCompute:
         Example:
             .. code-block:: python
 
-                import imaspy
+                import imaspy as imas
                 from idstools.compute.waves import WavesCompute
 
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3","r")
-                connection.open()
                 idsObj = connection.get('waves')
                 waveobj = WavesCompute(waves_ids)
                 print(waveobj.getBeamTracing())
