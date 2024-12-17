@@ -619,7 +619,6 @@ from idstools.set_logger import set_logger
 logger = set_logger(__name__)
 
 
-
 # ----------------------------------------------------------------------
 
 # Set up the name of the yaml file
