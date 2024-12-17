@@ -9,7 +9,6 @@ copying, moving, or comparing differences etc.
    :maxdepth: 1
 
    eqdsk2ids
-   idschk
    idscp
    idsdiff
    idslist

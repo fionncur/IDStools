@@ -11,12 +11,10 @@ Use simdb tool to upload/find scenario database
 
    create_db_entry
    create_db_entry_disruption
-   create_validation_schema
    disruption_summary
    md_status
    md_summary
    scenario_status
    scenario_summary
    show_db_entry
-   validate_db_entry
    watch_db_entry
