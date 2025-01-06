@@ -10,11 +10,11 @@ from rich_argparse import RichHelpFormatter
 
 from idstools.database import DBMaster
 from idstools.machinedescription import MachineDescription
-from idstools.utils.idshelper import (
-    get_available_ids_and_occurrences,
-)
 from idstools.utils.clihelper import (
     get_database_path,
+)
+from idstools.utils.idshelper import (
+    get_available_ids_and_occurrences,
 )
 from idstools.utils.idslogger import setup_logger
 from idstools.view.common import PlotCanvas

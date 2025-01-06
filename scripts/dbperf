@@ -16,10 +16,10 @@ from rich_argparse import RichHelpFormatter
 
 from idstools.database import DBMaster
 from idstools.idsperf import byte_size, get_timings
+from idstools.utils.clihelper import imas_parser
 from idstools.utils.idshelper import (
     get_available_ids_and_occurrences,
 )
-from idstools.utils.clihelper import imas_parser
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
