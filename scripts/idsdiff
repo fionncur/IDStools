@@ -163,7 +163,7 @@ def generate_html(file_path, compare_data):
                 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
                 <title>"""
         + report_title
-        + """</title>
+        + """</title>   
             </head>"""
     )
     report_table_header = f"""
@@ -204,12 +204,6 @@ def generate_html(file_path, compare_data):
         add_header = True
 
         for description, first, second in output:
-
-            description = "NA"
-            if first is not None and hasattr(first, "_path"):
-                description = first._path
-            elif second is not None and hasattr(second, "_path"):
-                description = type(second).__name__.upper()
             report_diff_line = ""
             if add_header is True:
                 report_diff_line = f"""<tr class="table-secondary">
