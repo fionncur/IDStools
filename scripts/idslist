@@ -135,33 +135,35 @@ elif args.comment is True:
     exit(0)
 else:
     available_ids_and_times = get_available_ids_and_times(connection, dd_update=args.dd_update)
-    question_string = "?"
+    not_applicable = "N/A"
     console = Console()
-    table = Table(title="List of IDSes")
-    table.add_column("IDS", style="magenta")
-    table.add_column("SLICES", style="green")
-    table.add_column("TIME", style="green")
+    table = Table(
+        title="List of IDSes", border_style="black", title_style="bold black on white", header_style="bold black"
+    )
+    table.add_column("IDS", style="black")
+    table.add_column("SLICES", style="dark_blue")
+    table.add_column("TIME", style="dark_green")
     for ids_name, time_array in available_ids_and_times:
         if args.ids:
             if ids_name != args.ids:
                 continue
         if time_array is not None and len(time_array) == 1 and np.isnan(time_array[0]):
-            value = f"{question_string}"
+            value = f"{not_applicable}"
             type = "heterogeneous IDS"
         elif time_array is not None and len(time_array) == 1 and time_array[0] == np.NINF:
-            value = f"{question_string}"
+            value = f"{not_applicable}"
             type = "time independent IDS"
         elif time_array is not None:
             value = f"{len(time_array)}"
             type = time_array
         elif time_array is None:
-            value = f"{question_string}"
+            value = f"{not_applicable}"
             type = "unknown"
         table.add_row(ids_name, value, Pretty(type))
     if args.fullarray is True:
         with np.printoptions(threshold=sys.maxsize, linewidth=1024, precision=4):
-            console.print(table)
+            console.print(table, style="on white")
     else:
-        console.print(table)
+        console.print(table, style="on white")
     connection.close()
     exit(0)
