@@ -31,6 +31,7 @@ SCRIPTS=(
     "dblist -u public -d TEST list -M" 
     "dblist -f /work/imas/shared/imasdb/TEST/3/ slices"
     "dblist -f /work/imas/shared/imasdb/TEST/3/ list"
+    "dblist -f /work/imas/shared/imasdb/TEST/3/ --showuri list"
     "dblist databases" 
     "dblist dataversions" 
     "dbperf -d TEST" 
