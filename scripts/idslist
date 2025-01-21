@@ -137,9 +137,7 @@ else:
     available_ids_and_times = get_available_ids_and_times(connection, dd_update=args.dd_update)
     not_applicable = "N/A"
     console = Console()
-    table = Table(
-        title="List of IDSes"
-    )
+    table = Table(title="List of IDSes")
     table.add_column("IDS")
     table.add_column("SLICES")
     table.add_column("TIME")
