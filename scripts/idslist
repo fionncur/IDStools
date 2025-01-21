@@ -138,11 +138,11 @@ else:
     not_applicable = "N/A"
     console = Console()
     table = Table(
-        title="List of IDSes", border_style="black", title_style="bold black on white", header_style="bold black"
+        title="List of IDSes"
     )
-    table.add_column("IDS", style="black")
-    table.add_column("SLICES", style="dark_blue")
-    table.add_column("TIME", style="dark_green")
+    table.add_column("IDS")
+    table.add_column("SLICES")
+    table.add_column("TIME")
     for ids_name, time_array in available_ids_and_times:
         if args.ids:
             if ids_name != args.ids:
@@ -162,8 +162,8 @@ else:
         table.add_row(ids_name, value, Pretty(type))
     if args.fullarray is True:
         with np.printoptions(threshold=sys.maxsize, linewidth=1024, precision=4):
-            console.print(table, style="on white")
+            console.print(table)
     else:
-        console.print(table, style="on white")
+        console.print(table)
     connection.close()
     exit(0)
