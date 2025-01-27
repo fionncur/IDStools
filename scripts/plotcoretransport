@@ -122,14 +122,16 @@ except Exception as _:  # noqa: F841
     exit()
 
 # define columns and rows for subplots based on ions
-columns = len(ids_slice_core_transport.model[model_index].profiles_1d[-1].ion)
+columns = 2
+if len(ids_slice_core_transport.model[model_index].profiles_1d[-1].ion) > 1:
+    columns = len(ids_slice_core_transport.model[model_index].profiles_1d[-1].ion)
+
 canvas = PlotCanvas(3, columns)
 electrons_particle_fluxes_axes = canvas.add_axes(title="", xlabel="", row=0, col=0, colspan=1)
 electrons_energy_fluxes_axes = canvas.add_axes(title="", xlabel="", row=0, col=1, colspan=1)
 
 ions_particle_fluxes_axes = [canvas.add_axes(title="", xlabel="", row=1, col=x, colspan=1) for x in range(columns)]
 ions_energy_fluxes_axes = [canvas.add_axes(title="", xlabel="", row=2, col=x, colspan=1) for x in range(columns)]
-
 ct_view = CoreTransportView(ids_slice_core_transport)
 
 ct_view.view_ions_particle_fluxes(
