@@ -8,7 +8,7 @@ import sys
 from rich.console import Console
 from rich.table import Table
 
-from idstools.scenariodescription import ScenarioDescriptionBase
+from idstools.scenariodescription import ScenarioDescriptionSummary
 
 displayMapping = {
     "ref_name": "Reference",
@@ -63,7 +63,8 @@ parser = argparse.ArgumentParser(
 parser.add_argument(
     "-f",
     "--folder",
-    help="folder where to search for scenarios (recursive)",
+    nargs="*",
+    help="list of folders where to search for scenarios (recursive)",
     required=False,
 )
 parser.add_argument(
@@ -126,7 +127,8 @@ parser.add_argument(
     "        tsteps      = Number of time steps in the scenario\n"
     "        location    = Location of the full description file\n"
     "        composition = Plasma composition\n"
-    "        date        = Date of last modification of the dataset\n",
+    "        date        = Date of last modification of the dataset\n"
+    "        dd_version  = Data dictionary version\n",
     required=False,
 )
 
@@ -135,13 +137,15 @@ args = vars(parser.parse_args())
 # Folder
 if args["folder"] is not None:
     folder = args["folder"]
-    defaultFolderPath = folder
+    directory_list = folder
 else:
-    defaultFolderPath = os.environ["IMAS_HOME"] + "/shared/imasdb/ITER/3/0"
+    directory_list = [os.environ["IMAS_HOME"] + "/shared/imasdb/ITER/3/0"]
+    directory_list.append(os.environ["IMAS_HOME"] + "/shared/imasdb/ITER/4")
+
     lowlevelVersion = os.environ["AL_VERSION"]
     lowlevelVersion = int(lowlevelVersion.split(".")[0])
     if lowlevelVersion < 4:
-        defaultFolderPath = os.environ["IMAS_HOME"] + "/shared/iterdb/3/0"
+        directory_list = [os.environ["IMAS_HOME"] + "/shared/iterdb/3/0"]
 
 # MATCHCASE
 matchcase = args["matchcase"]
@@ -196,6 +200,7 @@ else:
         "pulse",
         "run",
         "database",
+        "dd_version",
         "ref_name",
         "ip",
         "b0",
@@ -210,7 +215,7 @@ if args["choice"] is None:
     print("""----> Default call equivalent to: """)
     print("""      scenario_summary -c pulse,run,database,ref_name,ip,b0,fuelling,confinement,workflow,date""")
 
-scenarioDescriptionObj = ScenarioDescriptionBase(folder_path=defaultFolderPath)
+scenarioDescriptionObj = ScenarioDescriptionSummary(directory_list=directory_list)
 df = scenarioDescriptionObj.get_dataframes_from_files(extension=".yaml", add_obsolete=obsolete)
 
 # check of need to add obsolete
@@ -279,4 +284,4 @@ if not selected_df.empty:
     console.print(table)
 else:
     print(" No records found matching mentioned criteria")
-print(f" NOTE: Read Scenario database from {defaultFolderPath}")
+print(f" NOTE: Read Scenario database from {directory_list}")

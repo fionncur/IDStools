@@ -1,4 +1,3 @@
-import glob
 import logging
 import os
 import re
@@ -9,12 +8,10 @@ import yaml
 
 try:
     from yaml import CLoader as Loader
-
-    print("using faster yaml CLoader")
 except ImportError:
     from yaml import Loader
 
-    print("using slower yaml Loader")
+from concurrent.futures import ThreadPoolExecutor
 
 from pandas import json_normalize
 
@@ -60,16 +57,15 @@ yaml_mapping = {
 
 
 # Class is a base class for scenario descriptions.
-class ScenarioDescriptionBase:
-    def __init__(self, folder_path=os.getcwd()) -> None:
+class ScenarioDescriptionSummary:
+    def __init__(self, directory_list=[]) -> None:
         """
         The function initializes a folder path variable based on the provided input or a default value.
 
         Args:
             folder_path (str): The `folder_path` parameter is a string that represents the path to a folder.
         """
-        if os.path.exists(folder_path):
-            self.folder_path = folder_path
+        self.directory_list = directory_list
 
     @staticmethod
     def get_yaml_data(yaml_file_path):
@@ -83,11 +79,11 @@ class ScenarioDescriptionBase:
         Returns:
             the data loaded from the YAML file.
         """
-        with open(yaml_file_path, "r") as file_handle:
+        with open(yaml_file_path, "r", encoding="utf-8") as file_handle:
             try:
                 yaml_data = yaml.load(file_handle, Loader=Loader)
             except Exception as e:
-                logger.debug(f"{e}")
+                logger.debug(f"Error loading YAML file {e}", exc_info=True)
                 yaml_data = None
         return yaml_data
 
@@ -106,7 +102,7 @@ class ScenarioDescriptionBase:
         Returns:
             a pandas DataFrame object.
         """
-        yaml_data = ScenarioDescriptionBase.get_yaml_data(yaml_file_path)
+        yaml_data = ScenarioDescriptionSummary.get_yaml_data(yaml_file_path)
         if add_obsolete is False:
             if yaml_data["status"] != "active":
                 return None
@@ -129,18 +125,39 @@ class ScenarioDescriptionBase:
         Returns:
             a pandas DataFrame object.
         """
-        files = glob.glob(f"{self.folder_path}/**/*{extension}", recursive=True)
+        files = []
+        for folder_path in self.directory_list:
+            for root, _, filenames in os.walk(folder_path):
+                for filename in filenames:
+                    if filename.endswith(extension):
+                        files.append(os.path.join(root, filename))
+
         if extension == ".yaml":
             data_frames = []
-            for yaml_file in files:
-                df = ScenarioDescriptionBase.get_data_frame_from_yaml(yaml_file, add_obsolete=add_obsolete)
+            append_df = data_frames.append
+
+            def process_yaml_file(yaml_file):
+                df = ScenarioDescriptionSummary.get_data_frame_from_yaml(yaml_file, add_obsolete=add_obsolete)
                 if df is not None:
+                    df["dd_version"] = ""
+                    if "ITER/3/0" in yaml_file or "iterdb/3/0" in yaml_file:
+                        df["dd_version"] = "3"
+                    elif "ITER/4/" in yaml_file or "iterdb/4/" in yaml_file:
+                        df["dd_version"] = "4"
+
                     df["location"] = yaml_file
                     local_time = time.ctime(os.path.getmtime(yaml_file))
                     df["lastmodified"] = pd.to_datetime(local_time)
                     self._extract_information(df)
-                    data_frames.append(df)
+                    return df
+                return None
 
+            with ThreadPoolExecutor() as executor:
+                results = executor.map(process_yaml_file, files)
+
+            for result in results:
+                if result is not None:
+                    append_df(result)
         df = pd.concat(data_frames, ignore_index=True)
         df = df.rename(columns=yaml_mapping)
         return df
@@ -175,9 +192,9 @@ class ScenarioDescriptionBase:
             df["composition"] = "None"
 
 
-# The class ScenarioDescription is a subclass of ScenarioDescriptionBase.
-class ScenarioDescription(ScenarioDescriptionBase):
-    def __init__(self, pulse: int, run: int, folder_path: str = "") -> None:
+# The class ScenarioDescription
+class ScenarioDescription:
+    def __init__(self, pulse: int, run: int, yaml_path: str) -> None:
         """
         The above function initializes an object with a pulse, run, and folder path, and attempts to load
         YAML data from a file based on the pulse and run numbers.
@@ -189,15 +206,14 @@ class ScenarioDescription(ScenarioDescriptionBase):
             folder_path (str): The `folder_path` parameter is a string that represents the path to a folder
                 where the YAML file is located.
         """
-        super().__init__(folder_path)
-        yaml_file_name = self.folder_path + f'/ids_{pulse}{str(run).rjust(4,"0")}.yaml'
+        self.yaml_path = yaml_path
         self.yaml_data = None
         try:
-            with open(yaml_file_name, "r") as f:
-                self.yaml_data = yaml.load(f, Loader=Loader)
+            with open(self.yaml_path, "r") as f:
+                self.yaml_data = yaml.safe_load(f)
         except Exception as e:
             logger.debug(f"{e}")
-            logger.critical(f"Warning: {e}")
+            logger.critical(f"{e}")
 
     def get_children(self, yaml_data, dict_to_fill={}):
         """
@@ -213,6 +229,8 @@ class ScenarioDescription(ScenarioDescriptionBase):
         Returns:
             the dictionary with scenario children.
         """
+        if yaml_data is None:
+            return dict_to_fill
         replaced_by = None
         if "database_relations" in yaml_data.keys():
             if "replaced_by" in yaml_data["database_relations"].keys():
@@ -229,7 +247,15 @@ class ScenarioDescription(ScenarioDescriptionBase):
             string_list = re.findall(r"\d+", replaced_by)
             pulsec = string_list[0]
             runc = string_list[1]
-            scenario_description = ScenarioDescription(pulsec, runc, self.folder_path)
+
+            parent_dir = os.path.dirname(self.yaml_path)
+            if os.path.basename(parent_dir) == "0":
+                yaml_file_name = parent_dir + f'/ids_{pulsec}{str(runc).rjust(4,"0")}.yaml'
+            else:
+                grandparent_dir = os.path.dirname(os.path.dirname(parent_dir))
+                yaml_file_name = grandparent_dir + f'/{pulsec}/{runc}/ids_{pulsec}{str(runc).rjust(4,"0")}.yaml'
+
+            scenario_description = ScenarioDescription(pulsec, runc, yaml_file_name)
 
             if scenario_description.yaml_data is not None:
                 dict_to_fill["pulse"].append(pulsec)
@@ -252,6 +278,8 @@ class ScenarioDescription(ScenarioDescriptionBase):
         Returns:
             the dictionary with scenario parents
         """
+        if yaml_data is None:
+            return dict_to_fill
         replaces = None
         if "database_relations" in yaml_data.keys():
             if "replaces" in yaml_data["database_relations"].keys():
@@ -268,7 +296,15 @@ class ScenarioDescription(ScenarioDescriptionBase):
             string_list = re.findall(r"\d+", replaces)
             pulsep = string_list[0]
             runp = string_list[1]
-            scenario_description = ScenarioDescription(pulsep, runp, self.folder_path)
+            parent_dir = os.path.dirname(self.yaml_path)
+
+            if os.path.basename(parent_dir) == "0":
+                yaml_file_name = parent_dir + f'/ids_{pulsep}{str(runp).rjust(4,"0")}.yaml'
+            else:
+                grandparent_dir = os.path.dirname(os.path.dirname(parent_dir))
+                yaml_file_name = grandparent_dir + f'/{pulsep}/{runp}/ids_{pulsep}{str(runp).rjust(4,"0")}.yaml'
+
+            scenario_description = ScenarioDescription(pulsep, runp, yaml_file_name)
 
             if scenario_description.yaml_data is not None:
                 dict_to_fill["pulse"].insert(0, pulsep)  # Order to be reversed for parents
@@ -303,5 +339,5 @@ class ScenarioDescription(ScenarioDescriptionBase):
 
 if __name__ == "__main__":
     default_folder_path = r"/work/imas/shared/imasdb/ITER/3/0"
-    scenario_description_obj = ScenarioDescriptionBase(folder_path=default_folder_path)
+    scenario_description_obj = ScenarioDescriptionSummary(folder_path=default_folder_path)
     df = scenario_description_obj.get_dataframes_from_files(extension=".yaml", add_obsolete=False)
