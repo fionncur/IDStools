@@ -4,6 +4,7 @@ import argparse
 import sys
 
 import imaspy as imas
+from packaging import version
 from rich_argparse import RichHelpFormatter
 
 from idstools.database import DBMaster
@@ -102,15 +103,31 @@ outputargs.uri = args.dest
 
 # hack to get underlying data dictionary version used by idses
 src_dd_version = src_connection.dd_version
-if not args.dd_update:
-    for idsname in args.ids:
-        try:
-            _dummy = src_connection.get(idsname, lazy=True, autoconvert=False)
-            src_dd_version = _dummy.ids_properties.version_put.data_dictionary.value
-            break
-        except Exception as _:  # noqa: F841
-            pass
 
+ids_dd_versions = []
+for idsname in args.ids:
+    try:
+        _dummy = src_connection.get(idsname, lazy=True, autoconvert=False)
+        ids_dd_versions.append(_dummy.ids_properties.version_put.data_dictionary.value)
+    except Exception as _:  # noqa: F841
+        pass
+
+max_dd_version = max(ids_dd_versions, key=version.parse)
+if not args.dd_update:
+
+    if len(set(ids_dd_versions)) > 1:
+        logger.warning(
+            f"The source pulse contains IDSs with different data dictionary versions."
+            f"{set(ids_dd_versions)}"
+            f" The data dictionary version {max_dd_version} will be used."
+        )
+    src_dd_version = max_dd_version
+else:
+    logger.warning(
+        f"Be careful, all IDSs will be converted from dd versions {set(ids_dd_versions)} to data dictionary version {src_dd_version}"
+        f" using explicit conversion. This is still an experimental feature and may miss some type conversions."
+        f" Please verify the conversion carefully using idsdiff."
+    )
 if args.force:
     # CREATE DEST
     if "mode" not in outputargs.__dict__:

@@ -38,7 +38,6 @@ from idstools.utils.idshelper import (
     partial_get,
 )
 from idstools.utils.idslogger import setup_logger
-from idstools.view.common import PlotCanvas
 
 THRESHOLD_PERCENT = 2
 
@@ -50,6 +49,8 @@ slicing_methods = {
 
 
 def view_plot(ax, field, coordinate, field_name="", coordinate_name="", field_unit="", coordinate_unit=""):
+    from idstools.view.common import PlotCanvas
+
     if not isinstance(field, (IDSNumericArray, np.ndarray)):
         print("Not a numeric array, Please select ids path")
         return
