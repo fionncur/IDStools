@@ -120,7 +120,7 @@ for idsname, data_dictionary_version in ids_dd_versions.items():
 max_dd_version = max(ids_dd_versions.values(), key=version.parse)
 if not args.dd_update:
 
-    if len(set(ids_dd_versions.values())) > 0:
+    if len(set(ids_dd_versions.values())) > 1:
         ids_grouped_by_dd_version_output = ", ".join(
             f"{k}: {', '.join(v)}" for k, v in ids_grouped_by_dd_version.items()
         )
@@ -139,7 +139,7 @@ else:
         f"This is still an experimental feature and may miss some type conversions."
         f"Please verify the conversion carefully using idsdiff."
     )
-exit(0)
+
 if args.force:
     # CREATE DEST
     if "mode" not in outputargs.__dict__:
