@@ -155,7 +155,6 @@ if __name__ == "__main__":
         connection = DBMaster.get_connection(mdargs)
         if connection:
             all_idses_list = [item for item, _ in get_available_ids_and_occurrences(connection, None)]
-            print(all_idses_list)
             if _ids_names == "":
                 _ids_names = idses
             for _ids_name in _ids_names.split(","):
