@@ -18,6 +18,7 @@ from idstools.utils.idshelper import (
 )
 from idstools.utils.idslogger import setup_logger
 from idstools.view.common import PlotCanvas
+from idstools.view.magnetics import MagneticsView
 from idstools.view.pf_active import PFActiveView
 from idstools.view.wall import WallView
 
@@ -25,7 +26,7 @@ from idstools.view.wall import WallView
 
 
 logger = setup_logger("module", stdout_level=logging.INFO)
-idses = "wall,pf_active"
+idses = "wall,pf_active,magnetics"
 
 
 def plot_machine_description(ids_data, show_labels=False):
@@ -57,6 +58,11 @@ def plot_machine_description(ids_data, show_labels=False):
             wallview = WallView(ids_data_and_config["idsData"])
             wallview.view_wall(ax, show_labels=show_labels)
             database_path += "wall = " + get_database_path(ids_data_and_config["connectionArgs"]) + "\n"
+        elif ids_name == "magnetics":
+            magnetics_view = MagneticsView(ids_data_and_config["idsData"])
+            magnetics_view.view_probe(ax, show_labels=show_labels)
+            magnetics_view.view_flux_loop(ax, show_labels=show_labels)
+            database_path += "magnetics = " + get_database_path(ids_data_and_config["connectionArgs"]) + "\n"
         else:
             database_path += (
                 f"{ids_name} = " + get_database_path(ids_data_and_config["connectionArgs"]) + "No visualization yet\n"
@@ -149,6 +155,7 @@ if __name__ == "__main__":
         connection = DBMaster.get_connection(mdargs)
         if connection:
             all_idses_list = [item for item, _ in get_available_ids_and_occurrences(connection, None)]
+            print(all_idses_list)
             if _ids_names == "":
                 _ids_names = idses
             for _ids_name in _ids_names.split(","):
