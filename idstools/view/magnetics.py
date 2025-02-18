@@ -41,7 +41,7 @@ class MagneticsView:
         probe_data = self.magnetics_compute.get_probes()
         radial_coordinate = probe_data["R"]
         vertical_coordinate = probe_data["Z"]
-        poloidal_angle_rad = probe_data["Poloidal_Angle"]
+        poloidal_angle_rad = - probe_data["Poloidal_Angle"]
 
         names = probe_data["Names"]
         # area = probe_data["Area"]
