@@ -329,7 +329,13 @@ def get_ids_types():
     return factory.ids_names()
 
 
-def get_available_ids_and_occurrences(db_entry_object, time_mode=None, get_comment=False, dd_update=False):
+def get_available_ids_and_occurrences(
+    db_entry_object,
+    time_mode=None,
+    get_comment=False,
+    dd_update=False,
+    get_version=False,
+):
     """
     This function returns a list of pairs of available IDS types and their occurrences in a given DBEntry object.
 
@@ -364,6 +370,7 @@ def get_available_ids_and_occurrences(db_entry_object, time_mode=None, get_comme
 
             homogeneous_time = ids_object.ids_properties.homogeneous_time
             comment = ids_object.ids_properties.comment
+            dd_version = ids_object.ids_properties.version_put.data_dictionary.value
 
             occ_type_text = ""
             if hasattr(ids_object.ids_properties, "occurrence_type"):
@@ -375,6 +382,10 @@ def get_available_ids_and_occurrences(db_entry_object, time_mode=None, get_comme
             if homogeneous_time != imas.ids_defs.EMPTY_INT and (time_mode is None or time_mode == homogeneous_time):
                 if get_comment is True:
                     availableidslist.append((idstype, occ, comment))
+                elif get_version is True:
+                    availableidslist.append((idstype, occ, dd_version))
+                elif get_comment is True and get_version is True:
+                    availableidslist.append(idstype, occ, comment, dd_version)
                 else:
                     availableidslist.append((idstype, occ))
     return availableidslist
