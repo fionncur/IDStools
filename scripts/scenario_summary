@@ -213,7 +213,9 @@ else:
 # Print the arguments of the default call to the function
 if args["choice"] is None:
     print("""----> Default call equivalent to: """)
-    print("""      scenario_summary -c pulse,run,database,dd_version,ref_name,ip,b0,fuelling,confinement,workflow,date""")
+    print(
+        """      scenario_summary -c pulse,run,database,dd_version,ref_name,ip,b0,fuelling,confinement,workflow,date"""
+    )
 
 scenarioDescriptionObj = ScenarioDescriptionSummary(directory_list=directory_list)
 df = scenarioDescriptionObj.get_dataframes_from_files(extension=".yaml", add_obsolete=obsolete)
