@@ -7,6 +7,7 @@ This module provides view functions and classes for pf_active ids data
 
 import logging
 
+import matplotlib.patches as patches
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -27,7 +28,7 @@ class MagneticsView:
         self.ids = ids
         self.magnetics_compute = MagneticsCompute(ids)
 
-    def view_probe(self, ax: plt.axes, show_labels=False):
+    def view_b_field_pol_probes(self, ax: plt.axes, show_labels=False):
         """
         Plots the positions and directions of poloidal magnetic field probes on a tokamak wall.
 
@@ -38,47 +39,61 @@ class MagneticsView:
         Returns:
         None
         """
-        probe_data = self.magnetics_compute.get_probes()
-        radial_coordinate = probe_data["R"]
-        vertical_coordinate = probe_data["Z"]
-        poloidal_angle_rad = - probe_data["Poloidal_Angle"]
+        probe_data = self.magnetics_compute.get_b_field_pol_probes()
+        poloidal_angle_rad = -probe_data["poloidal_angle"]
+        rect_size = 0.2
 
-        names = probe_data["Names"]
-        # area = probe_data["Area"]
-        # marker_size = (Area / max(Area)) * 100
+        for i, (radial_coordinate, vertical_coordinate, poloidal_angle_rad, length, name) in enumerate(
+            zip(probe_data["r"], probe_data["z"], poloidal_angle_rad, probe_data["lengths"], probe_data["identifiers"])
+        ):
+            if length > 0:
+                rect_size = length
+            arrow_length = rect_size
+            rect_x = radial_coordinate - rect_size / 2
+            rect_y = vertical_coordinate - rect_size / 2
+            rect = patches.Rectangle(
+                (rect_x, rect_y),
+                rect_size,  # Width
+                rect_size,  # Height
+                linewidth=0.8,
+                edgecolor="gray",
+                facecolor="#FAEBD7",
+                alpha=0.5,
+            )
+            ax.add_patch(rect)
 
-        ax.scatter(radial_coordinate, vertical_coordinate, c="none", edgecolors="b", label="Bpol Probes")
+            start_x = radial_coordinate
+            start_y = vertical_coordinate
+            end_x = start_x + arrow_length * np.cos(poloidal_angle_rad)
+            end_y = start_y + arrow_length * np.sin(poloidal_angle_rad)
 
-        arrow_length = 0.2
-        dx = arrow_length * np.cos(poloidal_angle_rad)
-        dy = arrow_length * np.sin(poloidal_angle_rad)
-        ax.quiver(
-            radial_coordinate,
-            vertical_coordinate,
-            dx,
-            dy,
-            angles="xy",
-            scale_units="xy",
-            scale=1.5,
-            color="blue",
-            width=0.003,
-        )
-
-        lables = []
-        if show_labels:
-            for i, name in enumerate(names):
-                if name not in lables:
-                    ax.text(
-                        radial_coordinate[i] + 0.01, vertical_coordinate[i], name, fontsize=8, ha="left", va="center"
-                    )
-                    lables.append(name)
-
-        ax.set_xlabel("R [m]")
-        ax.set_ylabel("Z [m]")
-        ax.set_title("Poloidal Magnetic Field Probes on Tokamak Wall")
-        ax.legend()
-        ax.set_aspect("equal")
-        ax.grid(True)
+            arrow = patches.FancyArrowPatch(
+                (start_x, start_y),
+                (end_x, end_y),
+                arrowstyle="->",
+                mutation_scale=10,
+                linewidth=0.8,
+                color="darkgray",
+                fill=False,
+            )
+            ax.add_patch(arrow)
+            if show_labels:
+                ax.annotate(
+                    f"{name}",
+                    xy=(radial_coordinate, vertical_coordinate),
+                    xytext=(
+                        radial_coordinate,
+                        vertical_coordinate,
+                    ),  # (radial_coordinate[i] + 0.2, vertical_coordinate[i] + 0.1 * (-1) ** i)
+                    fontsize=8,
+                    # arrowprops=dict(arrowstyle="->", color="gray", lw=1),
+                    textcoords="data",
+                    bbox=dict(boxstyle="round,pad=0.3", fc="none", ec="gray", lw=0.5),
+                    verticalalignment="bottom",  # Align text vertically
+                    horizontalalignment="left",  # Align text horizontally
+                )
+        title = ax.get_title()
+        ax.set_title(f"{title}\nb_field_pol_probes")
 
     def view_flux_loop(self, ax: plt.axes, show_labels=False):
         """
@@ -92,86 +107,26 @@ class MagneticsView:
         None
         """
         flux_loops = self.magnetics_compute.get_flux_loops()
-        radial_coordinate = flux_loops["R"]
-        vertical_coordinate = flux_loops["Z"]
 
-        names = flux_loops["Names"]
-        # area = flux_loops["Area"]
-        # marker_size = (area / max(area)) * 300  # Scale marker size
-        ax.scatter(radial_coordinate, vertical_coordinate, c="none", edgecolors="r", label="flux loops")
-        lables = []
-        if show_labels:
-            for i, name in enumerate(names):
-                if name not in lables:
-                    ax.text(
-                        radial_coordinate[i][0] + 0.05,
-                        vertical_coordinate[i][0],
-                        name,
-                        fontsize=8,
-                        ha="left",
-                        va="center",
-                    )
-                    lables.append(name)
+        for index, (r, z, name) in enumerate(zip(flux_loops["r"], flux_loops["z"], flux_loops["identifiers"])):
+            points = [(r[0], z[0]), (r[1], z[1]), (r[2], z[2]), (r[3], z[3]), (r[4], z[4])]
+            ax.scatter(r, z, c="none", edgecolors="darkgray", facecolor="none", marker="o", label="flux loops")
 
-        ax.set_xlabel("R [m]")
-        ax.set_ylabel("Z [m]")
-        ax.set_title("Flux Loops Around Tokamak Wall")
-        ax.legend()
-        ax.set_aspect("equal")
-        ax.grid(True)
+            rectangle = patches.Polygon(points, closed=True, edgecolor="lightcoral", facecolor="none")
+            ax.add_patch(rectangle)
 
-
-# plt.figure(figsize=(8, 8))
-
-# # Plot tokamak boundary
-# plt.plot(X_wall, Y_wall, 'k', linewidth=2, label="Tokamak Wall")
-
-# # Scatter plot of probes
-# sc = plt.scatter(R, Z, c=Poloidal_Angle, cmap="coolwarm", edgecolors='k', s=Marker_Size, label="Bpol Probes")
-
-# # Add probe names as annotations
-# for i, name in enumerate(Names):
-#     plt.text(R[i] + 0.05, Z[i], name.split()[-1], fontsize=9, ha='left', va='center')
-
-# # Colorbar for poloidal angles
-# cbar = plt.colorbar(sc)
-# cbar.set_label("Poloidal Angle [rad]")
-
-# plt.xlabel("R [m]")
-# plt.ylabel("Z [m]")
-# plt.title("Poloidal Magnetic Field Probes on Tokamak Wall")
-# plt.legend()
-# plt.axis("equal")
-# plt.grid(True)
-# plt.show()
-
-# if coils_dict := self.compute_obj.get_active_pf_coils():
-#             for _, coil_info in coils_dict.items():
-#                 coil_elements = coil_info["elements"]
-#                 for _, element_info in coil_elements.items():
-#                     cew, ceh, cec = (
-#                         element_info["horizontal_width"],
-#                         element_info["horizontal_height"],
-#                         element_info["cec"],
-#                     )
-#                     rectangle = Rectangle(cec, cew, ceh, edgecolor="#fd7e14", facecolor="#fd7e14", alpha=0.5)
-
-#                     ax.add_patch(rectangle)
-#                     rx, ry = rectangle.get_xy()
-#                     cx = rx + rectangle.get_width() / 2.0
-#                     cy = ry + rectangle.get_height() / 2.0
-
-#                     if show_labels:
-#                         name = ""
-#                         if coil_info["identifier"]:
-#                             name = coil_info["identifier"]
-#                         elif coil_info["name"]:
-#                             name = f"{coil_info['name']}"
-
-#                         ax.text(
-#                             cx,
-#                             cy,
-#                             name,
-#                             fontsize="x-small",
-#                         )
-#             ax.set_aspect("equal", adjustable="box")
+            if show_labels:
+                ax.annotate(
+                    f"{name}",
+                    xy=(r[0], z[0]),
+                    xytext=(r[0], z[0]),
+                    fontsize=8,
+                    # arrowprops=dict(arrowstyle="->", color="gray", lw=1),
+                    textcoords="data",
+                    bbox=dict(boxstyle="round,pad=0.3", fc="none", ec="gray", lw=0.5),
+                    verticalalignment="bottom",
+                    horizontalalignment="left",
+                )
+        ax.set_xlim(-5, 20)
+        title = ax.get_title()
+        ax.set_title(f"{title}  \nflux_loop")

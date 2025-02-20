@@ -48,7 +48,8 @@ def plot_machine_description(ids_data, show_labels=False):
         #     logger.error(f"Could not retrieve machine description for {idsName}")
         #     databasePath += f"{idsName} = not found"
         #     continue
-        ids_uri, ids_name = ids_name.split("#")
+        ids_name = ids_data_and_config["idsname"]
+        idsfield = ids_data_and_config["idsfield"]
         if ids_name == "pf_active":
             pfcoilsview = PFActiveView(ids_data_and_config["idsData"])
             pfcoilsview.view_active_pf_coils(ax, show_labels=show_labels)
@@ -60,8 +61,10 @@ def plot_machine_description(ids_data, show_labels=False):
             database_path += "wall = " + get_database_path(ids_data_and_config["connectionArgs"]) + "\n"
         elif ids_name == "magnetics":
             magnetics_view = MagneticsView(ids_data_and_config["idsData"])
-            magnetics_view.view_probe(ax, show_labels=show_labels)
-            magnetics_view.view_flux_loop(ax, show_labels=show_labels)
+            if idsfield == "b_field_pol_probe" or idsfield == "":
+                magnetics_view.view_b_field_pol_probes(ax, show_labels=show_labels)
+            if idsfield == "flux_loop" or idsfield == "":
+                magnetics_view.view_flux_loop(ax, show_labels=show_labels)
             database_path += "magnetics = " + get_database_path(ids_data_and_config["connectionArgs"]) + "\n"
         else:
             database_path += (
@@ -97,6 +100,22 @@ def plot_machine_description(ids_data, show_labels=False):
         canvas.save(fname)
     else:
         canvas.show()
+
+
+def parse_md_uri(uri):
+    splitted_md_uri = uri.split("#", 1)
+
+    if len(splitted_md_uri) == 2:
+        _md_uri, ids_info = splitted_md_uri
+    else:
+        _md_uri = splitted_md_uri[0]
+        ids_info = ""
+
+    splitted_ids_info = ids_info.split("/", 1)
+    _ids_name = splitted_ids_info[0] if ids_info else ""
+    _ids_field = splitted_ids_info[1] if len(splitted_ids_info) > 1 else ""
+
+    return _md_uri, _ids_name, _ids_field
 
 
 if __name__ == "__main__":
@@ -142,15 +161,11 @@ if __name__ == "__main__":
     machine_description = MachineDescription()
     ids_data = {}
 
-    for mdids_info in args.uri:
+    for mduri in args.uri:
         mdargs = argparse.Namespace()
-        splittedms_ids_info = mdids_info.split("#")
-        _ids_names = ""
-        _md_uri = None
-        if len(splittedms_ids_info) == 2:
-            _md_uri, _ids_names = splittedms_ids_info
-        if len(splittedms_ids_info) == 1:
-            _md_uri = splittedms_ids_info[0]
+
+        _md_uri, _ids_name, _ids_field = parse_md_uri(mduri)
+        _ids_names = _ids_name
         mdargs.uri = _md_uri
         connection = DBMaster.get_connection(mdargs)
         if connection:
@@ -169,7 +184,6 @@ if __name__ == "__main__":
                             )
                         else:
                             _ids_data = connection.get(_ids_name, autoconvert=False)
-
                         data = {}
                         if _ids_data is not None:
                             ids_found = True
@@ -177,11 +191,9 @@ if __name__ == "__main__":
                                 data["idsData"],
                                 data["yamlConfig"],
                                 data["connectionArgs"],
-                            ) = (
-                                _ids_data,
-                                None,
-                                mdargs,
-                            )
+                                data["idsname"],
+                                data["idsfield"],
+                            ) = (_ids_data, None, mdargs, _ids_name, _ids_field)
                             ids_data[f"{_md_uri}#{_ids_name}"] = data
                 if not ids_found:
                     logger.info(f"Could not find {_ids_name} in the given data entry")

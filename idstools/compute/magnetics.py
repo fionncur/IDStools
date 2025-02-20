@@ -23,7 +23,7 @@ class MagneticsCompute:
         """
         self.ids = ids
 
-    def get_probes_values(self):
+    def get_b_field_pol_probe_values(self):
         """
         Retrieve values of magnetic probes from the IDS object.
 
@@ -52,6 +52,7 @@ class MagneticsCompute:
         for probe_index, probe in enumerate(self.ids.b_field_pol_probe):
             probe_info = {}
             probe_info["name"] = probe.name
+            probe_info["identifier"] = probe.identifier
             probe_info["type"] = probe.type
             probe_info["r"] = probe.position.r
             probe_info["z"] = probe.position.z
@@ -95,6 +96,7 @@ class MagneticsCompute:
         for iflux_loop, flux_loop in enumerate(self.ids.flux_loop):
             flux_loop_info = {}
             flux_loop_info["name"] = flux_loop.name
+            flux_loop_info["identifier"] = flux_loop.identifier
             flux_loop_info["r"] = [x.r.value for x in flux_loop.position]
             flux_loop_info["z"] = [x.z.value for x in flux_loop.position]
             flux_loop_info["phi"] = [x.phi.value for x in flux_loop.position]
@@ -108,7 +110,7 @@ class MagneticsCompute:
             flux_loops.append(flux_loop_info)
         return flux_loops
 
-    def get_probes(self):
+    def get_b_field_pol_probes(self):
         """
         Retrieve probe information and organize it into a dictionary.
 
@@ -125,14 +127,16 @@ class MagneticsCompute:
         Returns:
             dict: A dictionary containing probe information.
         """
-        probes = self.get_probes_values()
+        probes = self.get_b_field_pol_probe_values()
         probe_dict = {
-            "R": np.array([p["r"] for p in probes]),
-            "Z": np.array([p["z"] for p in probes]),
-            "Poloidal_Angle": np.array([p["poloidal_angle"] for p in probes]),
+            "r": np.array([p["r"] for p in probes]),
+            "z": np.array([p["z"] for p in probes]),
+            "poloidal_angle": np.array([p["poloidal_angle"] for p in probes]),
             "toroidal_angle": np.array([p["toroidal_angle"] for p in probes]),
-            "Area": np.array([p["area"] for p in probes]),
-            "Names": [p["name"] for p in probes],
+            "area": np.array([p["area"] for p in probes]),
+            "names": [p["name"] for p in probes],
+            "identifiers": [p["identifier"] for p in probes],
+            "lengths": [p["length"] for p in probes],
         }
         return probe_dict
 
@@ -143,20 +147,21 @@ class MagneticsCompute:
         This method calls `get_fluxloop_values` to obtain a list of flux loop
         measurements, and then processes this list to create a dictionary
         containing the following keys:
-            - "R": A numpy array of the radial positions of the flux loops.
-            - "Z": A numpy array of the vertical positions of the flux loops.
-            - "Area": A numpy array of the areas of the flux loops.
-            - "Names": A list of the names of the flux loops.
+            - "r": A numpy array of the radial positions of the flux loops.
+            - "z": A numpy array of the vertical positions of the flux loops.
+            - "area": A numpy array of the areas of the flux loops.
+            - "names": A list of the names of the flux loops.
+            - "identfiers": A list of the identfiers of the flux loops.
 
         Returns:
             dict: A dictionary containing the processed flux loop data.
         """
         flux_loops = self.get_fluxloop_values()
         flux_loops_dict = {
-            "R": np.array([p["r"] for p in flux_loops]),
-            "Z": np.array([p["z"] for p in flux_loops]),
-            "Area": np.array([p["area"] for p in flux_loops]),
-            "Names": [p["name"] for p in flux_loops],
+            "r": np.array([p["r"] for p in flux_loops]),
+            "z": np.array([p["z"] for p in flux_loops]),
+            "area": np.array([p["area"] for p in flux_loops]),
+            "names": [p["name"] for p in flux_loops],
+            "identifiers": [p["identifier"] for p in flux_loops],
         }
-
         return flux_loops_dict

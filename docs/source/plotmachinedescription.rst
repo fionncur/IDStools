@@ -42,4 +42,4 @@ with options to show labels and save figures.
 
       $ plotmachinedescription --uri "imas:mdsplus?user=public;pulse=111001;run=103;database=ITER_MD;version=3#pf_active" --show-labels
       $ plotmachinedescription --uri "imas:mdsplus?user=public;pulse=111001;run=103;database=ITER_MD;version=3#pf_active" "imas:mdsplus?user=public;pulse=116000;run=4;database=ITER_MD;version=3#wall" --show-labels
-      $ plotmachinedescription --uri "imas:mdsplus?user=public;pulse=111001;run=103;database=ITER_MD;version=3#magnetics" --show-labels
+      $ plotmachinedescription --uri "imas:mdsplus?user=public;pulse=150100;run=5;database=ITER_MD;version=3#magnetics/flux_loop" --show-labels
