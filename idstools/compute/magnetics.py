@@ -16,7 +16,7 @@ class MagneticsCompute:
     """This class provides compute functions for magnetics ids"""
 
     def __init__(self, ids: object):
-        """Initialization PfActiveCompute object.
+        """Initialization MagneticsCompute object.
 
         Args:
             ids : magnetics ids object
