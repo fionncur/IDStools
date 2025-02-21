@@ -89,3 +89,5 @@ class PFActiveView:
                             fontsize="x-small",
                         )
             ax.set_aspect("equal", adjustable="box")
+            title = ax.get_title()
+            ax.set_title(f"{title}, pf_active")

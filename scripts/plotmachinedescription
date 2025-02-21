@@ -33,13 +33,12 @@ def plot_machine_description(ids_data, show_labels=False):
     """
     The `plotMachineDescription` method is responsible for plotting the machine description
     based on the provided pulse list.
+
     """
 
     # Initialization
     canvas = PlotCanvas(1, 1)
     ax = canvas.add_axes(title="", xlabel="R (m)", ylabel="Z (m)", row=0, col=0)
-
-    ax.set_aspect("equal", adjustable="box")
 
     database_path = ""
     # Plot Overlay
@@ -61,10 +60,16 @@ def plot_machine_description(ids_data, show_labels=False):
             database_path += "wall = " + get_database_path(ids_data_and_config["connectionArgs"]) + "\n"
         elif ids_name == "magnetics":
             magnetics_view = MagneticsView(ids_data_and_config["idsData"])
+            if idsfield == "b_field_phi_probe" or idsfield == "":
+                magnetics_view.view_b_field_probes(ax, probe_type="b_field_phi_probe", show_labels=show_labels)
             if idsfield == "b_field_pol_probe" or idsfield == "":
-                magnetics_view.view_b_field_pol_probes(ax, show_labels=show_labels)
+                magnetics_view.view_b_field_probes(ax, probe_type="b_field_pol_probe", show_labels=show_labels)
             if idsfield == "flux_loop" or idsfield == "":
                 magnetics_view.view_flux_loop(ax, show_labels=show_labels)
+            if idsfield == "rogowski_coil" or idsfield == "":
+                magnetics_view.view_rogowski_coil(ax, show_labels=show_labels)
+            if idsfield == "shunt" or idsfield == "":
+                magnetics_view.view_shunt(ax, show_labels=show_labels)
             database_path += "magnetics = " + get_database_path(ids_data_and_config["connectionArgs"]) + "\n"
         else:
             database_path += (
@@ -75,6 +80,7 @@ def plot_machine_description(ids_data, show_labels=False):
     # wallview.view_DIR(ax)
     # wallview.view_TS(ax)
     # wallview.view_Cryostat(ax)
+    ax.set_aspect("equal", adjustable="box")
     ax.plot()
 
     xmin, xmax = ax.get_xlim()
@@ -194,7 +200,7 @@ if __name__ == "__main__":
                                 data["idsname"],
                                 data["idsfield"],
                             ) = (_ids_data, None, mdargs, _ids_name, _ids_field)
-                            ids_data[f"{_md_uri}#{_ids_name}"] = data
+                            ids_data[f"{_md_uri}#{_ids_name}/{_ids_field}"] = data
                 if not ids_found:
                     logger.info(f"Could not find {_ids_name} in the given data entry")
             connection.close()
