@@ -20,13 +20,14 @@ from idstools.utils.idslogger import setup_logger
 from idstools.view.common import PlotCanvas
 from idstools.view.magnetics import MagneticsView
 from idstools.view.pf_active import PFActiveView
+from idstools.view.pf_passive import PFPassiveView
 from idstools.view.wall import WallView
 
 # ----------------------------------------------------------------------
 
 
 logger = setup_logger("module", stdout_level=logging.INFO)
-idses = "wall,pf_active,magnetics"
+idses = "wall,pf_active,magnetics,pf_passive"
 
 
 def plot_machine_description(ids_data, show_labels=False):
@@ -53,7 +54,10 @@ def plot_machine_description(ids_data, show_labels=False):
             pfcoilsview = PFActiveView(ids_data_and_config["idsData"])
             pfcoilsview.view_active_pf_coils(ax, show_labels=show_labels)
             database_path += "pf_active = " + get_database_path(ids_data_and_config["connectionArgs"]) + "\n"
-
+        elif ids_name == "pf_passive":
+            pfpassiveview = PFPassiveView(ids_data_and_config["idsData"])
+            pfpassiveview.view_pf_passive_loops(ax, show_labels=show_labels)
+            database_path += "pf_passive = " + get_database_path(ids_data_and_config["connectionArgs"]) + "\n"
         elif ids_name == "wall":
             wallview = WallView(ids_data_and_config["idsData"])
             wallview.view_wall(ax, show_labels=show_labels)

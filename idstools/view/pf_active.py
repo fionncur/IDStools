@@ -90,4 +90,7 @@ class PFActiveView:
                         )
             ax.set_aspect("equal", adjustable="box")
             title = ax.get_title()
-            ax.set_title(f"{title}, pf_active")
+            if title:
+                ax.set_title(f"{title}, pf_active")
+            else:
+                ax.set_title("pf_active")

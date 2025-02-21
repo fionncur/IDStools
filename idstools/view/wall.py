@@ -144,6 +144,12 @@ class WallView:
                 frameon=False,
                 fontsize="x-small",
             )
+        title = ax.get_title()
+        if title:
+            ax.set_title(f"{title}, wall")
+        else:
+            ax.set_title("wall")
+
         return True
 
     def view_inner_wall_line(self, ax):

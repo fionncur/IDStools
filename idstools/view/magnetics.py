@@ -157,7 +157,10 @@ class MagneticsView:
                     color=patch_color,
                 )
         title = ax.get_title()
-        ax.set_title(f"{title}, {probe_type}")
+        if title:
+            ax.set_title(f"{title}, {probe_type}")
+        else:
+            ax.set_title(f"{probe_type}")
 
     def view_flux_loop(self, ax: plt.axes, show_labels=False):
         """
@@ -188,7 +191,10 @@ class MagneticsView:
             if show_labels:
                 ax.annotate(f"{name}", xy=(r[0], z[0]), xytext=(r[0], z[0]), fontsize="x-small", color="dodgerblue")
         title = ax.get_title()
-        ax.set_title(f"{title}, flux_loop")
+        if title:
+            ax.set_title(f"{title}, flux_loop")
+        else:
+            ax.set_title("flux_loop")
 
     def view_rogowski_coil(self, ax: plt.axes, show_labels=False):
         rogowski_coil_data = self.magnetics_compute.get_rogowski_coils()
@@ -220,7 +226,10 @@ class MagneticsView:
             if show_labels:
                 ax.annotate(f"{name}", xy=(r[0], z[0]), xytext=(r[0], z[0]), fontsize="x-small", color="darkolivegreen")
         title = ax.get_title()
-        ax.set_title(f"{title}, rogowski_coil")
+        if title:
+            ax.set_title(f"{title}, rogowski_coil")
+        else:
+            ax.set_title("rogowski_coil")
 
     def view_shunt(self, ax: plt.axes, show_labels=False):
         shunt_data = self.magnetics_compute.get_shunts()
@@ -249,4 +258,7 @@ class MagneticsView:
             if show_labels:
                 ax.annotate(f"{name}", xy=(r1, z1), xytext=(r1, z1), fontsize="x-small", color="darkolivegreen")
         title = ax.get_title()
-        ax.set_title(f"{title}, shunt")
+        if title:
+            ax.set_title(f"{title}, shunt")
+        else:
+            ax.set_title("shunt")

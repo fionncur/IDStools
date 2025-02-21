@@ -48,6 +48,17 @@ class PfActiveCompute:
         """
 
         coils = {}
+        # rectangle is geometry_type 2
+        if (
+            len(self.ids.coil) > 0
+            and len(self.ids.coil[0].element) > 0
+            and self.ids.coil[0].element[0].geometry.geometry_type != 2
+        ):
+            logger.warning(
+                "pf_active.coil.element.geometry.geometry_type"
+                f"{self.ids.coil[0].element[0].geometry.geometry_type} is not implemented"
+            )
+            return None
         for coil_index, coil in enumerate(self.ids.coil):
             coil_info = {}
             if hasattr(coil, "identifier"):
@@ -59,6 +70,7 @@ class PfActiveCompute:
 
             # Get elements
             dict_elements = {}
+
             for element_index, element in enumerate(coil.element):
                 horizontal_width = element.geometry.rectangle.width
                 vertical_height = element.geometry.rectangle.height
