@@ -7,6 +7,7 @@ This module provides view functions and classes for pf_active ids data
 
 import logging
 
+import matplotlib.lines as mlines
 import matplotlib.patches as patches
 import matplotlib.pyplot as plt
 import numpy as np
@@ -36,26 +37,6 @@ def shunt_marker():
         ],
         closed=True,
     )
-
-
-def flux_loop_marker():
-    vertices = []
-    codes = []
-    num_loops = 2
-    num_points_per_loop = 20
-
-    for i in range(num_loops * num_points_per_loop + 1):
-        t = i / (num_loops * num_points_per_loop)
-        angle = t * 2 * np.pi
-        x = np.cos(angle)
-        y = np.sin(angle) * (1 + 0.5 * np.sin(num_loops * angle))
-        vertices.append((x, y))
-        if i == 0:
-            codes.append(Path.MOVETO)
-        else:
-            codes.append(Path.LINETO)
-
-    return Path(vertices, codes)
 
 
 def coil_marker():
@@ -162,7 +143,7 @@ class MagneticsView:
         else:
             ax.set_title(f"{probe_type}")
 
-    def view_flux_loop(self, ax: plt.axes, show_labels=False):
+    def view_flux_loop(self, ax: plt.axes, select=":", show_labels=False):
         """
         Plots the flux loops on the given matplotlib axes.
 
@@ -173,28 +154,36 @@ class MagneticsView:
         Returns:
         None
         """
-        flux_loops = self.magnetics_compute.get_flux_loops()
+        flux_loops = self.magnetics_compute.get_flux_loops(select=select)
         if flux_loops is None:
             logger.warning("Can not plot, no flux_loop data found.")
             return
-        fl_marker = flux_loop_marker()
         for index, (r, z, name) in enumerate(zip(flux_loops["r"], flux_loops["z"], flux_loops["names"])):
             points = []
             for _r, _z in zip(r, z):
                 points.append((_r, _z))
-            ax.scatter(
-                r, z, c="none", edgecolors="dodgerblue", facecolor="none", marker=fl_marker, label="flux loops", s=50
-            )
-            rectangle = patches.Polygon(points, closed=True, edgecolor="dodgerblue", facecolor="none", linewidth=0.5)
-            ax.add_patch(rectangle)
-
             if show_labels:
-                ax.annotate(f"{name}", xy=(r[0], z[0]), xytext=(r[0], z[0]), fontsize="x-small", color="dodgerblue")
+                ax.annotate(f"{name}", xy=(r[0], z[0]), xytext=(r[0], z[0]), fontsize="small", color="#FF6347")
+            ax.scatter(r, z, edgecolors="#FF6347", c="none", marker="o", lw=1, s=50)
+            # rectangle = patches.Polygon(points, closed=True, edgecolor="#FF6347", facecolor="none", linewidth=0.5)
+            # ax.add_patch(rectangle)
+
+        magnetics_legend = mlines.Line2D(
+            [],
+            [],
+            marker="o",
+            color="#FF6347",
+            markersize=8,
+            label="magnetics/flux_loop",
+            fillstyle="none",
+            linestyle="None",
+        )
         title = ax.get_title()
         if title:
             ax.set_title(f"{title}, flux_loop")
         else:
             ax.set_title("flux_loop")
+        return magnetics_legend
 
     def view_rogowski_coil(self, ax: plt.axes, show_labels=False):
         rogowski_coil_data = self.magnetics_compute.get_rogowski_coils()
@@ -257,6 +246,7 @@ class MagneticsView:
 
             if show_labels:
                 ax.annotate(f"{name}", xy=(r1, z1), xytext=(r1, z1), fontsize="x-small", color="darkolivegreen")
+
         title = ax.get_title()
         if title:
             ax.set_title(f"{title}, shunt")

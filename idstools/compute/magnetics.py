@@ -9,6 +9,8 @@ import logging
 
 import numpy as np
 
+from idstools.utils.utility_functions import parse_slice
+
 logger = logging.getLogger("module")
 
 
@@ -48,6 +50,7 @@ class MagneticsCompute:
         Logs:
             If a probe's information is empty, a warning is logged with the probe index.
         """
+
         probes = []
         if hasattr(self.ids, probe_type):
             for probe_index, probe in enumerate(self.ids[probe_type]):
@@ -72,7 +75,7 @@ class MagneticsCompute:
             return None
         return probes
 
-    def get_fluxloop_values(self):
+    def get_fluxloop_values(self, select=":"):
         """
         Retrieve flux loop values from the IDS (Integrated Data Structure).
 
@@ -97,8 +100,13 @@ class MagneticsCompute:
         Example:
             flux_loops = get_fluxloop_values()
         """
+        if select is not None:
+            start, stop, step = parse_slice(select)
+        flux_loop_arrays = [
+            self.ids.flux_loop[i] for i in range(start or 0, stop or len(self.ids.flux_loop), step or 1)
+        ]
         flux_loops = []
-        for iflux_loop, flux_loop in enumerate(self.ids.flux_loop):
+        for iflux_loop, flux_loop in enumerate(flux_loop_arrays):
             flux_loop_info = {}
             flux_loop_info["name"] = flux_loop.name
             if hasattr(flux_loop, "identifier") and flux_loop.identifier:
@@ -235,7 +243,7 @@ class MagneticsCompute:
         }
         return probe_dict
 
-    def get_flux_loops(self):
+    def get_flux_loops(self, select=":"):
         """
         Retrieves flux loop data and organizes it into a dictionary.
 
@@ -250,7 +258,7 @@ class MagneticsCompute:
         Returns:
             dict: A dictionary containing the processed flux loop data.
         """
-        flux_loops = self.get_fluxloop_values()
+        flux_loops = self.get_fluxloop_values(select=select)
         if flux_loops is None:
             return None
         flux_loops_dict = {

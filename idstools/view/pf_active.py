@@ -8,10 +8,10 @@ This module provides view functions and classes for pf_active ids data
 import logging
 
 import matplotlib.pyplot as plt
+import numpy as np
 from matplotlib.patches import Arc, FancyArrow, Patch, Polygon, Rectangle, Wedge
 
 from idstools.compute.pf_active import PfActiveCompute
-import numpy as np
 
 logger = logging.getLogger("module")
 
@@ -174,7 +174,7 @@ class PFActiveView:
                     ax.add_patch(line)
                     cx = (r1 + r2) / 2
                     cy = (z1 + z2) / 2
-                elif element_info["geometry_type"] == 1 or len(element_info["r"]) !=0:
+                elif element_info["geometry_type"] == 1 or len(element_info["r"]) != 0:
                     r = element_info["r"]
                     z = element_info["z"]
                     if len(r) == 1:

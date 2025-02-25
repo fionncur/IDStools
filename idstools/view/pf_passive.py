@@ -8,8 +8,9 @@ This module provides view functions and classes for pf_passive ids data
 import logging
 
 import matplotlib.pyplot as plt
-from matplotlib.patches import Arc, FancyArrow, Patch, Polygon, Rectangle, Wedge
 import numpy as np
+from matplotlib.patches import Arc, FancyArrow, Patch, Polygon, Rectangle, Wedge
+
 from idstools.compute.pf_passive import PfPassiveCompute
 
 logger = logging.getLogger("module")
@@ -61,7 +62,12 @@ class PFPassiveView:
                     lower_left_x = r - width / 2
                     lower_left_y = z - height / 2
                     rectangle = Rectangle(
-                        (lower_left_x, lower_left_y), width, height, edgecolor="steelblue", facecolor="steelblue", alpha=0.7
+                        (lower_left_x, lower_left_y),
+                        width,
+                        height,
+                        edgecolor="steelblue",
+                        facecolor="steelblue",
+                        alpha=0.7,
                     )
                     ax.add_patch(rectangle)
                     rx, ry = rectangle.get_xy()
@@ -97,7 +103,7 @@ class PFPassiveView:
                     cx = np.mean(parallelogram[:, 0])
                     cy = np.mean(parallelogram[:, 1])
                 elif element_info["geometry_type"] == 4:
-                    
+
                     r = element_info["r"]
                     z = element_info["z"]
                     curvature_radii = element_info["curvature_radii"]
@@ -153,7 +159,7 @@ class PFPassiveView:
                     ax.add_patch(line)
                     cx = (r1 + r2) / 2
                     cy = (z1 + z2) / 2
-                elif element_info["geometry_type"] == 1 or len(element_info["r"]) !=0:
+                elif element_info["geometry_type"] == 1 or len(element_info["r"]) != 0:
                     r = element_info["r"]
                     z = element_info["z"]
                     if len(r) == 1:
@@ -183,7 +189,7 @@ class PFPassiveView:
                         fontsize="x-small",
                     )
         pf_passive_legend = Patch(color="steelblue", label="pf_passive")
-        
+
         ax.set_aspect("equal", adjustable="box")
         title = ax.get_title()
         if title:
