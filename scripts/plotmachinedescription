@@ -43,6 +43,8 @@ def plot_machine_description(ids_data, show_labels=False):
 
     database_path = ""
     # Plot Overlay
+    mdlegends = []
+    mdlabels = []
     for ids_name, ids_data_and_config in ids_data.items():
         # if idsDataAndConfig["yamlConfig"] is None:
         #     logger.error(f"Could not retrieve machine description for {idsName}")
@@ -52,11 +54,15 @@ def plot_machine_description(ids_data, show_labels=False):
         idsfield = ids_data_and_config["idsfield"]
         if ids_name == "pf_active":
             pfcoilsview = PFActiveView(ids_data_and_config["idsData"])
-            pfcoilsview.view_active_pf_coils(ax, show_labels=show_labels)
+            _legend = pfcoilsview.view_active_pf_coils(ax, show_labels=show_labels)
+            mdlegends.append(_legend)
+            mdlabels.append("pf_active")
             database_path += "pf_active = " + get_database_path(ids_data_and_config["connectionArgs"]) + "\n"
         elif ids_name == "pf_passive":
             pfpassiveview = PFPassiveView(ids_data_and_config["idsData"])
-            pfpassiveview.view_pf_passive_loops(ax, show_labels=show_labels)
+            _legend = pfpassiveview.view_pf_passive_loops(ax, show_labels=show_labels)
+            mdlegends.append(_legend)
+            mdlabels.append("pf_passive")
             database_path += "pf_passive = " + get_database_path(ids_data_and_config["connectionArgs"]) + "\n"
         elif ids_name == "wall":
             wallview = WallView(ids_data_and_config["idsData"])
@@ -81,12 +87,17 @@ def plot_machine_description(ids_data, show_labels=False):
             )
             logger.info(f"Visualization is not implemented yet for machine description {ids_name}")
 
+    handles, labels = ax.get_legend_handles_labels()
+    print(handles, labels)
+    print(mdlegends)
+    handles.extend(mdlegends)
+    labels.extend(mdlabels)
+    ax.legend(handles=handles, labels=labels, loc="upper left", bbox_to_anchor=(1, 1))
     # wallview.view_DIR(ax)
     # wallview.view_TS(ax)
     # wallview.view_Cryostat(ax)
     ax.set_aspect("equal", adjustable="box")
     ax.plot()
-
     xmin, xmax = ax.get_xlim()
     ymin, ymax = ax.get_ylim()
     ax.text(

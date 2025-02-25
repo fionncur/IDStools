@@ -8,9 +8,10 @@ This module provides view functions and classes for pf_active ids data
 import logging
 
 import matplotlib.pyplot as plt
-from matplotlib.patches import Rectangle
+from matplotlib.patches import Arc, FancyArrow, Patch, Polygon, Rectangle, Wedge
 
 from idstools.compute.pf_active import PfActiveCompute
+import numpy as np
 
 logger = logging.getLogger("module")
 
@@ -59,38 +60,155 @@ class PFActiveView:
                 :alt: image not found
                 :align: center
         """
-        if coils_dict := self.compute_obj.get_active_pf_coils():
-            for _, coil_info in coils_dict.items():
-                coil_elements = coil_info["elements"]
-                for _, element_info in coil_elements.items():
-                    cew, ceh, cec = (
-                        element_info["horizontal_width"],
-                        element_info["horizontal_height"],
-                        element_info["cec"],
-                    )
-                    rectangle = Rectangle(cec, cew, ceh, edgecolor="#fd7e14", facecolor="#fd7e14", alpha=0.5)
+        coils_dict = self.compute_obj.get_active_pf_coils()
+        if coils_dict is None:
+            logger.warning("Can not plot, no pf passive loops data found.")
+            return
+        for _, coil_info in coils_dict.items():
 
+            coil_elements = coil_info["elements"]
+
+            name = coil_info["name"]
+
+            for _, element_info in coil_elements.items():
+                cx = cy = 0.0
+
+                if element_info["geometry_type"] == 2:
+                    width = element_info["width"]
+                    height = element_info["height"]
+
+                    r, z = (
+                        element_info["r"],
+                        element_info["z"],
+                    )
+                    lower_left_x = r - width / 2
+                    lower_left_y = z - height / 2
+                    rectangle = Rectangle(
+                        (lower_left_x, lower_left_y), width, height, edgecolor="#E5A67D", facecolor="#E5A67D", alpha=0.7
+                    )
                     ax.add_patch(rectangle)
                     rx, ry = rectangle.get_xy()
                     cx = rx + rectangle.get_width() / 2.0
                     cy = ry + rectangle.get_height() / 2.0
+                elif element_info["geometry_type"] == 3:
+                    r = element_info["r"]
+                    z = element_info["z"]
+                    length_alpha = element_info["length_alpha"]
+                    length_beta = element_info["length_beta"]
+                    alpha = element_info["alpha"]
+                    beta = element_info["beta"]
 
-                    if show_labels:
-                        name = ""
-                        if coil_info["identifier"]:
-                            name = coil_info["identifier"]
-                        elif coil_info["name"]:
-                            name = f"{coil_info['name']}"
+                    corner1 = np.array([r, z])
 
-                        ax.text(
-                            cx,
-                            cy,
-                            name,
-                            fontsize="x-small",
+                    corner2 = corner1 + np.array([length_alpha * np.cos(alpha), length_alpha * np.sin(alpha)])
+
+                    corner3 = corner2 + np.array(
+                        [length_beta * np.cos(0.5 * np.pi + beta), length_beta * np.sin(0.5 * np.pi + beta)]
+                    )
+                    corner4 = corner1 + np.array(
+                        [length_beta * np.cos(0.5 * np.pi + beta), length_beta * np.sin(0.5 * np.pi + beta)]
+                    )
+
+                    parallelogram = np.array([corner1, corner2, corner3, corner4, corner1])
+
+                    parallelogram_patch = Polygon(
+                        parallelogram, closed=True, edgecolor="#E5A67D", facecolor="#E5A67D", alpha=0.7
+                    )
+
+                    ax.add_patch(parallelogram_patch)
+                    cx = np.mean(parallelogram[:, 0])
+                    cy = np.mean(parallelogram[:, 1])
+                elif element_info["geometry_type"] == 4:
+                    r = element_info["r"]
+                    z = element_info["z"]
+                    curvature_radii = element_info["curvature_radii"]
+
+                    radius, start_angle, end_angle = curvature_radii
+
+                    arc = Arc(
+                        (r, z),
+                        2 * radius,
+                        2 * radius,
+                        angle=0,
+                        theta1=start_angle,
+                        theta2=end_angle,
+                        edgecolor="#E5A67D",
+                        facecolor="#E5A67D",
+                        alpha=0.7,
+                    )
+                    ax.add_patch(arc)
+                    mid_angle = (start_angle + end_angle) / 2
+                    cx = r + radius * np.cos(np.radians(mid_angle))
+                    cy = z + radius * np.sin(np.radians(mid_angle))
+                elif element_info["geometry_type"] == 5:
+
+                    r = element_info["r"]
+                    z = element_info["z"]
+                    radius_inner = element_info["radius_inner"]
+                    radius_outer = element_info["radius_outer"]
+
+                    outer_wedge = Wedge(
+                        (r, z), radius_outer, 0, 360, edgecolor="#E5A67D", facecolor="#E5A67D", alpha=0.7
+                    )
+                    inner_wedge = Wedge((r, z), radius_inner, 0, 360, edgecolor="#E5A67D", facecolor="w", alpha=1)
+
+                    ax.add_patch(outer_wedge)
+                    ax.add_patch(inner_wedge)
+                elif element_info["geometry_type"] == 6:
+                    thickness = element_info["thickness"]
+                    r1 = element_info["r1"]
+                    z1 = element_info["z1"]
+                    r2 = element_info["r2"]
+                    z2 = element_info["z2"]
+                    line = FancyArrow(
+                        r1,
+                        z1,
+                        r2 - r1,
+                        z2 - z1,
+                        width=thickness,
+                        head_length=0,
+                        head_width=0,
+                        color="#E5A67D",
+                        alpha=0.7,
+                    )
+                    ax.add_patch(line)
+                    cx = (r1 + r2) / 2
+                    cy = (z1 + z2) / 2
+                elif element_info["geometry_type"] == 1 or len(element_info["r"]) !=0:
+                    r = element_info["r"]
+                    z = element_info["z"]
+                    if len(r) == 1:
+                        ax.scatter(r, z, color="E5A67D")
+                    else:
+                        outline = Polygon(
+                            list(zip(r, z)),
+                            closed=True,
+                            edgecolor="E5A67D",
+                            facecolor="none",
+                            alpha=0.7,
                         )
-            ax.set_aspect("equal", adjustable="box")
-            title = ax.get_title()
-            if title:
-                ax.set_title(f"{title}, pf_active")
-            else:
-                ax.set_title("pf_active")
+                        ax.add_patch(outline)
+                    cx = np.mean(r)
+                    cy = np.mean(z)
+                if show_labels:
+                    name = ""
+                    if coil_info["identifier"]:
+                        name = coil_info["identifier"]
+                    elif coil_info["name"]:
+                        name = f"{coil_info['name']}"
+
+                    ax.text(
+                        cx,
+                        cy,
+                        name,
+                        fontsize="x-small",
+                    )
+        pf_active_legend = Patch(color="#E5A67D", label="pf_passive")
+
+        ax.set_aspect("equal", adjustable="box")
+        title = ax.get_title()
+        if title:
+            ax.set_title(f"{title}, pf_active")
+        else:
+            ax.set_title("pf_active")
+        return pf_active_legend
