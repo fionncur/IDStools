@@ -172,7 +172,7 @@ def get_title(imasargs, title="", time_value=None):
     else:
         _title += f"(PULSE={imasargs.pulse},{imasargs.run})"
     if time_value:
-        _title += f" TIME:{time_value:.1f}"
+        _title += f" TIME:{time_value:.3f}"
     return _title
 
 
@@ -189,7 +189,7 @@ def get_file_name(imasargs, title="", time_value=None):
     else:
         _file_name += f"PULSE_{imasargs.pulse}_RUN_{imasargs.run}_"
     if time_value:
-        _file_name += f"TIME_{time_value:.1f}"
+        _file_name += f"TIME_{time_value:.3f}"
     _file_name += ".png"
     return _file_name
 
@@ -226,7 +226,7 @@ def get_database_path(imasargs, time_value=None) -> str:
         database_absolute_path = database_absolute_path[:-2]
     time_string = ""
     if time_value:
-        time_string = f"time:{time_value:.2f})"
+        time_string = f"time:{time_value:.3f})"
     hostdir = f"{socket.gethostname()}:{database_absolute_path} "
     if pulse_info:
         hostdir += f"({pulse_info})"

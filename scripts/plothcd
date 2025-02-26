@@ -58,7 +58,7 @@ def _show_waves_plots(connargs, args, hold=False, dd_update=False):
             rows = 1
         canvas = PlotCanvas(rows, 2)
         # canvas.setStyle(style="retro")
-        canvas.set_sup_title(f"HCD Waves Plot {connargs.uri} Time : {time_value:.1f}")
+        canvas.set_sup_title(f"HCD Waves Plot {connargs.uri} Time : {time_value:.3f}")
 
         ax1 = canvas.add_axes(title="", xlabel="", row=0, col=0)
         ax2 = canvas.add_axes(title="", xlabel="", row=0, col=1)
@@ -158,7 +158,7 @@ def _show_distribution_plots(connargs, args, hold=False, dd_update=False):
 
         canvas = PlotCanvas(3, 2)
         # canvas.setStyle(style="retro")
-        canvas.set_sup_title(f"HCD Distributions Plot {connargs.uri} Time : {time_value:.1f}")
+        canvas.set_sup_title(f"HCD Distributions Plot {connargs.uri} Time : {time_value:.3f}")
         if ntime == 1:
             logger.info("Only one time slice --> Power and CD waveforms not displayed")
         ax1 = canvas.add_axes(title="", xlabel="", row=0, col=0)

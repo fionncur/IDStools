@@ -4,6 +4,7 @@
 import argparse
 import logging
 import os
+import re
 
 from imaspy import convert_ids
 from rich_argparse import RichHelpFormatter
@@ -42,7 +43,7 @@ def plot_machine_description(ids_data, show_labels=False):
     ax = canvas.add_axes(title="", xlabel="R (m)", ylabel="Z (m)", row=0, col=0)
 
     database_path = ""
-    # Plot Overlay
+
     mdlegends = []
     mdlabels = []
     for ids_name, ids_data_and_config in ids_data.items():
@@ -52,27 +53,39 @@ def plot_machine_description(ids_data, show_labels=False):
         #     continue
         ids_name = ids_data_and_config["idsname"]
         idsfield = ids_data_and_config["idsfield"]
+
+        matches = re.findall(r"\[([^\]]+)\]", idsfield)
         select = ":"
-        if "[" in idsfield:
-            select = idsfield.split("[")[-1].split("]")[0]
+        if len(matches) == 1:
+            select = matches[0]
         if ids_name == "pf_active":
             pfcoilsview = PFActiveView(ids_data_and_config["idsData"])
-            _legend = pfcoilsview.view_active_pf_coils(ax, show_labels=show_labels)
-            if _legend:
-                mdlegends.append(_legend)
-                mdlabels.append("pf_active")
-                database_path += "pf_active = " + get_database_path(ids_data_and_config["connectionArgs"]) + "\n"
+            if "coil" in idsfield or idsfield == "":
+                _legend = pfcoilsview.view_active_pf_coils(ax, select=select, show_labels=show_labels)
+                if _legend:
+                    mdlegends.append(_legend)
+                    mdlabels.append(f"pf_active/coil[{select}]")
+                    database_path += "pf_active = " + get_database_path(ids_data_and_config["connectionArgs"]) + "\n"
         elif ids_name == "pf_passive":
             pfpassiveview = PFPassiveView(ids_data_and_config["idsData"])
-            _legend = pfpassiveview.view_pf_passive_loops(ax, show_labels=show_labels)
-            if _legend:
-                mdlegends.append(_legend)
+            if "loop" in idsfield or idsfield == "":
+                _legend = pfpassiveview.view_pf_passive_loops(ax, select=select, show_labels=show_labels)
+                if _legend:
+                    mdlegends.append(_legend)
 
-                mdlabels.append("pf_passive")
-                database_path += "pf_passive = " + get_database_path(ids_data_and_config["connectionArgs"]) + "\n"
+                    mdlabels.append(f"pf_passive/loop[{select}]")
+                    database_path += "pf_passive = " + get_database_path(ids_data_and_config["connectionArgs"]) + "\n"
         elif ids_name == "wall":
             wallview = WallView(ids_data_and_config["idsData"])
-            wallview.view_wall(ax, show_labels=show_labels)
+            select2 = ":"
+            if len(matches) == 2:
+                select2 = matches[1]
+            if "vessel" in idsfield or idsfield == "":
+                wallview.view_wall_vessel(ax, select_description2d=select, select_unit=select2, show_labels=show_labels)
+            if "limiter" in idsfield or idsfield == "":
+                wallview.view_wall_limiter(
+                    ax, select_description2d=select, select_unit=select2, show_labels=show_labels
+                )
             database_path += "wall = " + get_database_path(ids_data_and_config["connectionArgs"]) + "\n"
         elif ids_name == "magnetics":
             magnetics_view = MagneticsView(ids_data_and_config["idsData"])
@@ -82,29 +95,29 @@ def plot_machine_description(ids_data, show_labels=False):
                 )
                 if _legend:
                     mdlegends.append(_legend)
-                    mdlabels.append("magnetics/b_field_phi_probe")
+                    mdlabels.append(f"magnetics/b_field_phi_probe[{select}]")
             if "b_field_pol_probe" in idsfield or idsfield == "":
                 _legend = magnetics_view.view_b_field_probes(
                     ax, probe_type="b_field_pol_probe", select=select, show_labels=show_labels
                 )
                 if _legend:
                     mdlegends.append(_legend)
-                    mdlabels.append("magnetics/b_field_pol_probe")
+                    mdlabels.append(f"magnetics/b_field_pol_probe[{select}]")
             if "flux_loop" in idsfield or idsfield == "":
                 _legend = magnetics_view.view_flux_loop(ax, select=select, show_labels=show_labels)
                 if _legend:
                     mdlegends.append(_legend)
-                    mdlabels.append("magnetics/flux_loop")
+                    mdlabels.append(f"magnetics/flux_loop[{select}]")
             if "rogowski_coil" in idsfield or idsfield == "":
                 _legend = magnetics_view.view_rogowski_coil(ax, select=select, show_labels=show_labels)
                 if _legend:
                     mdlegends.append(_legend)
-                    mdlabels.append("magnetics/rogowski_coil")
+                    mdlabels.append(f"magnetics/rogowski_coil[{select}]")
             if "shunt" in idsfield or idsfield == "":
                 _legend = magnetics_view.view_shunt(ax, show_labels=show_labels)
                 if _legend:
                     mdlegends.append(_legend)
-                    mdlabels.append("magnetics/shunt")
+                    mdlabels.append(f"magnetics/shunt[{select}]")
             database_path += "magnetics = " + get_database_path(ids_data_and_config["connectionArgs"]) + "\n"
         else:
             database_path += (
@@ -113,42 +126,35 @@ def plot_machine_description(ids_data, show_labels=False):
             logger.info(f"Visualization is not implemented yet for machine description {ids_name}")
 
     handles, labels = ax.get_legend_handles_labels()
-    # print(mdlegends)
-    # print(mdmarkers)
-    # handles.extend([mdlegends, mdmarkers])
-    # handles.extend(mdlegends)  # Add patch
-    handles.extend(mdlegends)  # Add marker
+    handles.extend(mdlegends)
     labels.extend(mdlabels)
-    if mdlegends:
+    if labels:
         ax.legend(handles=handles, labels=labels, loc="upper left", bbox_to_anchor=(1, 1))
-        # wallview.view_DIR(ax)
-        # wallview.view_TS(ax)
-        # wallview.view_Cryostat(ax)
-        ax.set_aspect("equal", adjustable="box")
-        ax.plot()
-        xmin, xmax = ax.get_xlim()
-        ymin, ymax = ax.get_ylim()
-        ax.text(
-            xmax + 0.01 * abs(xmax),
-            ymin + 0.5 * abs(ymax - ymin),
-            f"{database_path}",
-            horizontalalignment="left",
-            verticalalignment="center",
-            rotation="vertical",
-            fontsize=7,
-        )
-        canvas.fig.subplots_adjust(top=0.916, bottom=0.09, left=0.044, right=0.953, hspace=0.287, wspace=0.2)
-        canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
-        canvas.fig.suptitle("Machine Description", size=12)
-        if args.save:
-            fname = os.path.basename(__file__) + "_machine_description.png"
-            if args.directory:
-                if not os.path.exists(args.directory):
-                    os.makedirs(args.directory)
-                fname = os.path.join(args.directory, fname)
-            canvas.save(fname)
-        else:
-            canvas.show()
+    ax.set_aspect("equal", adjustable="box")
+    ax.plot()
+    xmin, xmax = ax.get_xlim()
+    ymin, ymax = ax.get_ylim()
+    ax.text(
+        xmax + 0.01 * abs(xmax),
+        ymin + 0.5 * abs(ymax - ymin),
+        f"{database_path}",
+        horizontalalignment="left",
+        verticalalignment="center",
+        rotation="vertical",
+        fontsize=7,
+    )
+    canvas.fig.subplots_adjust(top=0.916, bottom=0.09, left=0.044, right=0.953, hspace=0.287, wspace=0.2)
+    canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
+    canvas.fig.suptitle("Machine Description", size=12)
+    if args.save:
+        fname = os.path.basename(__file__) + "_machine_description.png"
+        if args.directory:
+            if not os.path.exists(args.directory):
+                os.makedirs(args.directory)
+            fname = os.path.join(args.directory, fname)
+        canvas.save(fname)
+    else:
+        canvas.show()
 
 
 def parse_md_uri(uri):
@@ -214,6 +220,7 @@ if __name__ == "__main__":
         mdargs = argparse.Namespace()
 
         _md_uri, _ids_name, _ids_field = parse_md_uri(mduri)
+        print(_md_uri, _ids_name, _ids_field)
         _ids_names = _ids_name
         mdargs.uri = _md_uri
         connection = DBMaster.get_connection(mdargs)

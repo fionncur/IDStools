@@ -7,6 +7,8 @@ This module provides compute functions and classes for pf_active ids data
 
 import logging
 
+from idstools.utils.utility_functions import get_slice_from_array
+
 logger = logging.getLogger("module")
 
 
@@ -21,7 +23,7 @@ class PfActiveCompute:
         """
         self.ids = ids
 
-    def get_active_pf_coils(self) -> dict:
+    def get_active_pf_coils(self, select=":") -> dict:
         """
         This function returns a dictionary of active PF coils and their corresponding elements dimensions and
         center coordinates.
@@ -46,9 +48,11 @@ class PfActiveCompute:
                 result=computeObj.get_active_pf_coils()
                 pprint.pprint(result)
         """
-
+        coil_arrays = list(self.ids.coil)
+        if select is not None:
+            coil_arrays = get_slice_from_array(coil_arrays, select)
         coils = {}
-        for coil_index, coil in enumerate(self.ids.coil):
+        for coil_index, coil in enumerate(coil_arrays):
 
             coil_info = {}
             if hasattr(coil, "identifier"):

@@ -7,6 +7,8 @@ This module provides compute functions and classes for pf_passive ids data
 
 import logging
 
+from idstools.utils.utility_functions import get_slice_from_array
+
 logger = logging.getLogger("module")
 
 
@@ -21,7 +23,7 @@ class PfPassiveCompute:
         """
         self.ids = ids
 
-    def get_pf_passive_loops(self) -> dict:
+    def get_pf_passive_loops(self, select=":") -> dict:
         """
         Retrieves passive loops information from the IDS (Integrated Data Structure).
 
@@ -43,10 +45,11 @@ class PfPassiveCompute:
             - Any loop has no elements.
             - The entire loop structure is empty.
         """
-
+        loop_arrays = list(self.ids.loop)
+        if select is not None:
+            loop_arrays = get_slice_from_array(loop_arrays, select)
         loops = {}
-
-        for loop_index, loop in enumerate(self.ids.loop):
+        for loop_index, loop in enumerate(loop_arrays):
             loop_info = {}
             if hasattr(loop, "identifier"):
                 loop_info["identifier"] = loop.identifier

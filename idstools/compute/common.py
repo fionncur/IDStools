@@ -40,13 +40,13 @@ def get_nearest_time(time_array: np.ndarray, requested_time: float) -> Tuple[int
             time_value = time_array[time_index]
         requested_time = time_value
         if ntime > 1:
-            logger.info(f"Time  = {time_value:.2f} s in range [{time_array[0]:.2f},{time_array[ntime - 1]}] s")
+            logger.info(f"Time  = {time_value:.3f} s in range [{time_array[0]:.2f},{time_array[ntime - 1]}] s")
             logger.info(f"Index = {time_index}")
             logger.info(
                 f"Averaged resolution = {(time_array[ntime - 1] - time_array[0]) / (ntime - 1) } s",
             )
         else:
-            logger.info(f"Time  = {time_value:.2f} s")
+            logger.info(f"Time  = {time_value:.3f} s")
     else:
         time_value = time_array[0] if len(time_array) > 0 else 0
         time_index = 0

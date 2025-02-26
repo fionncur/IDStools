@@ -3,6 +3,8 @@ import time
 
 import numpy as np
 
+from idstools.utils.utility_functions import get_slice_from_array
+
 logger = logging.getLogger(f"module.{__name__}")
 
 
@@ -22,7 +24,7 @@ class WallCompute:
     def __init__(self, ids_object):
         self.ids_object = ids_object
 
-    def get_vessel_units(self, name_filter=None):
+    def get_vessel_units(self, select_description2d=":", select_unit=":", name_filter=None):
         """
         The function `get_vessel_units` retrieves information about vessel units based on a name filter.
 
@@ -39,13 +41,20 @@ class WallCompute:
             information includes the name, description, and various properties of each vessel unit such as
             name, identifier, dimensions, resistivity, and rectangle coordinates. The
         """
+        description_2ds = list(self.ids_object.description_2d)
+        if select_description2d is not None:
+            description_2ds = get_slice_from_array(description_2ds, select_description2d)
         description2d_infos = {}
-        for description2d_index, description2d in enumerate(self.ids_object.description_2d):
+        for description2d_index, description2d in enumerate(description_2ds):
             description2d_info = {}
             description2d_info["name"] = description2d.type.name
             description2d_info["description"] = description2d.type.description
+
+            units = list(description2d.vessel.unit)
+            if select_unit is not None:
+                units = get_slice_from_array(units, select_unit)
             unit_infos = {}
-            for v_unit_index, v_unit in enumerate(description2d.vessel.unit):
+            for v_unit_index, v_unit in enumerate(units):
                 unit_info = {}
                 unit_info["name"] = v_unit.name
                 if hasattr(v_unit, "identifier"):
@@ -81,7 +90,7 @@ class WallCompute:
 
         return description2d_infos
 
-    def get_limiter_units(self):
+    def get_limiter_units(self, select_description2d=":", select_unit=":"):
         """
         This `get_limiter_units` function retrieves information about limiter units from a given object.
 
@@ -92,13 +101,20 @@ class WallCompute:
             contains the name and description of the type, as well as information about the limiter units
             associated with it.
         """
+        description_2ds = list(self.ids_object.description_2d)
+        if select_description2d is not None:
+            description_2ds = get_slice_from_array(description_2ds, select_description2d)
         description2d_infos = {}
-        for description2d_index, description2d in enumerate(self.ids_object.description_2d):
+        for description2d_index, description2d in enumerate(description_2ds):
             description2d_info = {}
             description2d_info["name"] = description2d.type.name
             description2d_info["description"] = description2d.type.description
+
+            units = list(description2d.limiter.unit)
+            if select_unit is not None:
+                units = get_slice_from_array(units, select_unit)
             unit_infos = {}
-            for l_unit_index, l_unit in enumerate(description2d.limiter.unit):
+            for l_unit_index, l_unit in enumerate(units):
                 unit_info = {}
                 unit_info["name"] = l_unit.name
                 if hasattr(l_unit, "description"):

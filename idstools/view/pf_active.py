@@ -28,7 +28,7 @@ class PFActiveView:
         self.ids = ids
         self.compute_obj = PfActiveCompute(ids)
 
-    def view_active_pf_coils(self, ax: plt.axes, show_labels=False):
+    def view_active_pf_coils(self, ax: plt.axes, select=":", show_labels=False):
         """
         This function plots and annotates the active PF coils on a existing plot.
 
@@ -60,7 +60,7 @@ class PFActiveView:
                 :alt: image not found
                 :align: center
         """
-        coils_dict = self.compute_obj.get_active_pf_coils()
+        coils_dict = self.compute_obj.get_active_pf_coils(select=select)
         if coils_dict is None:
             logger.warning("Can not plot, no pf passive loops data found.")
             return

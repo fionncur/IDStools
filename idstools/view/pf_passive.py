@@ -28,7 +28,7 @@ class PFPassiveView:
         self.ids = ids
         self.compute_obj = PfPassiveCompute(ids)
 
-    def view_pf_passive_loops(self, ax: plt.axes, show_labels=False):
+    def view_pf_passive_loops(self, ax: plt.axes, select=":", show_labels=False):
         """
         Visualizes passive PF (Poloidal Field) loops on the given matplotlib axis.
 
@@ -42,7 +42,7 @@ class PFPassiveView:
         loop's identifier or name at the center of the rectangle. The aspect ratio of the plot is set to be equal,
         and the plot title is appended with ", pf_passive".
         """
-        loops_dict = self.compute_obj.get_pf_passive_loops()
+        loops_dict = self.compute_obj.get_pf_passive_loops(select=select)
         if loops_dict is None:
             logger.warning("Can not plot, no pf passive loops data found.")
             return
