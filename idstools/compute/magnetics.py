@@ -9,7 +9,7 @@ import logging
 
 import numpy as np
 
-from idstools.utils.utility_functions import parse_slice
+from idstools.utils.utility_functions import get_slice_from_array
 
 logger = logging.getLogger("module")
 
@@ -25,7 +25,7 @@ class MagneticsCompute:
         """
         self.ids = ids
 
-    def get_b_field_probe_values(self, probe_type="b_field_pol_probe"):
+    def get_b_field_probe_values(self, probe_type="b_field_pol_probe", select=":"):
         """
         Retrieve values of magnetic probes from the IDS object.
 
@@ -53,7 +53,10 @@ class MagneticsCompute:
 
         probes = []
         if hasattr(self.ids, probe_type):
-            for probe_index, probe in enumerate(self.ids[probe_type]):
+            all_probes = list(self.ids[probe_type])
+            if select is not None:
+                all_probes = get_slice_from_array(all_probes, select)
+            for probe_index, probe in enumerate(all_probes):
                 probe_info = {}
                 probe_info["name"] = probe.name
                 if hasattr(probe, "identifier") and probe.identifier:
@@ -100,11 +103,10 @@ class MagneticsCompute:
         Example:
             flux_loops = get_fluxloop_values()
         """
+        flux_loop_arrays = list(self.ids.flux_loop)
         if select is not None:
-            start, stop, step = parse_slice(select)
-        flux_loop_arrays = [
-            self.ids.flux_loop[i] for i in range(start or 0, stop or len(self.ids.flux_loop), step or 1)
-        ]
+            flux_loop_arrays = get_slice_from_array(flux_loop_arrays, select)
+
         flux_loops = []
         for iflux_loop, flux_loop in enumerate(flux_loop_arrays):
             flux_loop_info = {}
@@ -127,7 +129,7 @@ class MagneticsCompute:
             return None
         return flux_loops
 
-    def get_rogowski_coil_values(self):
+    def get_rogowski_coil_values(self, select=":"):
         """
         Retrieves the values of Rogowski coils from the IDS.
 
@@ -150,9 +152,12 @@ class MagneticsCompute:
         Raises:
             AttributeError: If the IDS object does not have the expected attributes.
         """
+        rogowski_coil_arrays = list(self.ids.rogowski_coil)
+        if select is not None:
+            rogowski_coil_arrays = get_slice_from_array(rogowski_coil_arrays, select)
 
         rogowski_coils = []
-        for index, rogowski_coil in enumerate(self.ids.rogowski_coil):
+        for index, rogowski_coil in enumerate(rogowski_coil_arrays):
             rogowski_coil_info = {}
             rogowski_coil_info["name"] = rogowski_coil.name
             if hasattr(rogowski_coil, "identifier") and rogowski_coil.identifier:
@@ -172,7 +177,7 @@ class MagneticsCompute:
             return None
         return rogowski_coils
 
-    def get_shunt_values(self):
+    def get_shunt_values(self, select=":"):
         """
         Retrieves shunt information from the IDS object and returns it as a list of dictionaries.
 
@@ -191,8 +196,12 @@ class MagneticsCompute:
         Returns:
             list: A list of dictionaries containing shunt information.
         """
+        shunts_array = list(self.ids.shunt)
+        if select is not None:
+            shunts_array = get_slice_from_array(shunts_array, select)
+
         shunts = []
-        for index, _shunt in enumerate(self.ids.shunt):
+        for index, _shunt in enumerate(shunts_array):
             shunt_info = {}
             shunt_info["name"] = _shunt.name
             if hasattr(_shunt, "identifier") and _shunt.identifier:
@@ -212,7 +221,7 @@ class MagneticsCompute:
             return None
         return shunts
 
-    def get_b_field_probes(self, probe_type="b_field_pol_probe"):
+    def get_b_field_probes(self, probe_type="b_field_pol_probe", select=":"):
         """
         Retrieve probe information and organize it into a dictionary.
 
@@ -229,7 +238,7 @@ class MagneticsCompute:
         Returns:
             dict: A dictionary containing probe information.
         """
-        probes = self.get_b_field_probe_values(probe_type)
+        probes = self.get_b_field_probe_values(probe_type, select=select)
         if probes is None:
             return None
         probe_dict = {
@@ -269,7 +278,7 @@ class MagneticsCompute:
         }
         return flux_loops_dict
 
-    def get_rogowski_coils(self):
+    def get_rogowski_coils(self, select=":"):
         """
         Retrieve Rogowski coil data and organize it into a dictionary.
 
@@ -285,7 +294,7 @@ class MagneticsCompute:
                 - 'area' (numpy.ndarray): Areas of the Rogowski coils.
                 - 'names' (list): Names of the Rogowski coils.
         """
-        rogowski_coil_data = self.get_rogowski_coil_values()
+        rogowski_coil_data = self.get_rogowski_coil_values(select=select)
         if rogowski_coil_data is None:
             return None
         rogowski_coils_dict = {
@@ -297,7 +306,7 @@ class MagneticsCompute:
         }
         return rogowski_coils_dict
 
-    def get_shunts(self):
+    def get_shunts(self, select=":"):
         """
         Retrieves shunt data and organizes it into a dictionary.
 
@@ -313,7 +322,7 @@ class MagneticsCompute:
         Returns:
             dict: A dictionary containing shunt data arrays and names.
         """
-        shunt_data = self.get_shunt_values()
+        shunt_data = self.get_shunt_values(select=select)
         if shunt_data is None:
             return None
         shunt_dict = {

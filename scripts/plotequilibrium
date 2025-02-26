@@ -124,7 +124,7 @@ if ids_obj_equilibrium.time is not None:
     time_slice, time_value = get_nearest_time(ids_obj_equilibrium.time, args.time)
     view_object = EquilibriumView(ids_obj_equilibrium)
 
-    title = f"2D Equilibrium at time {time_value:.1f}"
+    title = f"2D Equilibrium at time {time_value:.3f}"
     database_text = ""
     if args.plots:
         canvas = PlotCanvas(2, 6)
