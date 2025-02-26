@@ -124,11 +124,11 @@ if not args.dd_update:
         ids_grouped_by_dd_version_output = ", ".join(
             f"{k}: {', '.join(v)}" for k, v in ids_grouped_by_dd_version.items()
         )
-        logger.warning(
+        logger.error(
             f"The source pulse contains IDSs with different data dictionary versions. \n\n"
             f"{ids_grouped_by_dd_version_output} \n\n"
-            f"The data dictionary version {max_dd_version} will be used."
         )
+        exit(1)
     src_dd_version = max_dd_version
 else:
     ids_grouped_by_dd_version_output = ", ".join(f"{k}: {', '.join(v)}" for k, v in ids_grouped_by_dd_version.items())
@@ -208,7 +208,8 @@ for idsname in args.ids:
         pass
     if idsobj:
         if args.set_dataset_version and idsid[0] == "dataset_description":
-            idsobj.dd_version = src_dd_version
+            if hasattr(idsobj, "dd_version"):
+                idsobj.dd_version = src_dd_version
         try:
             if idsobj.ids_properties.homogeneous_time != imas.ids_defs.EMPTY_INT:
                 print(f"Copying {idsname}")
