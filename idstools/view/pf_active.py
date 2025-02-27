@@ -197,12 +197,7 @@ class PFActiveView:
                     elif coil_info["name"]:
                         name = f"{coil_info['name']}"
 
-                    ax.text(
-                        cx,
-                        cy,
-                        name,
-                        fontsize="x-small",
-                    )
+                    ax.text(cx, cy, name, fontsize="small", color="#333333")
         pf_active_legend = Patch(color="#E5A67D", label="pf_passive")
 
         ax.set_aspect("equal", adjustable="box")

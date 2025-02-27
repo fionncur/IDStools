@@ -1,7 +1,16 @@
+import logging
+
+logger = logging.getLogger(f"module.{__name__}")
+
+
 def get_slice_from_array(arr, slice_str):
     if ":" not in slice_str:
         index = int(slice_str)
-        return [arr[index]]
+        try:
+            return [arr[index]]
+        except IndexError:
+            logger.error(f"Index {index} out of bounds for array of size {len(arr)}")
+            return None
 
     parts = slice_str.split(":")
 

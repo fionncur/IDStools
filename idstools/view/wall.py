@@ -41,8 +41,8 @@ class WallView:
                 r[n - 1],
                 z[n - 1],
                 kwargs.get("label"),
-                fontsize="x-small",
-                color=kwargs.get("color"),
+                fontsize="small",
+                color="#333333",
             )
         ax.add_patch(patch)
 
@@ -130,9 +130,9 @@ class WallView:
                             show_label_flag = False
         title = ax.get_title()
         if title:
-            ax.set_title(f"{title}, wall")
+            ax.set_title(f"{title}, wall-vessel")
         else:
-            ax.set_title("wall")
+            ax.set_title("wall-vessel")
 
         return None
 
@@ -190,9 +190,9 @@ class WallView:
                     )
         title = ax.get_title()
         if title:
-            ax.set_title(f"{title}, wall")
+            ax.set_title(f"{title}, wall-limiter")
         else:
-            ax.set_title("wall")
+            ax.set_title("wall-limiter")
 
         return None
 

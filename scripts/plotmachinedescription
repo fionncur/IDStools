@@ -56,7 +56,7 @@ def plot_machine_description(ids_data, show_labels=False):
 
         matches = re.findall(r"\[([^\]]+)\]", idsfield)
         select = ":"
-        if len(matches) == 1:
+        if len(matches) > 1:
             select = matches[0]
         if ids_name == "pf_active":
             pfcoilsview = PFActiveView(ids_data_and_config["idsData"])
@@ -77,7 +77,8 @@ def plot_machine_description(ids_data, show_labels=False):
                     database_path += "pf_passive = " + get_database_path(ids_data_and_config["connectionArgs"]) + "\n"
         elif ids_name == "wall":
             wallview = WallView(ids_data_and_config["idsData"])
-            select2 = ":"
+            select="0"
+            select2 = "0"
             if len(matches) == 2:
                 select2 = matches[1]
             if "vessel" in idsfield or idsfield == "":
@@ -114,7 +115,7 @@ def plot_machine_description(ids_data, show_labels=False):
                     mdlegends.append(_legend)
                     mdlabels.append(f"magnetics/rogowski_coil[{select}]")
             if "shunt" in idsfield or idsfield == "":
-                _legend = magnetics_view.view_shunt(ax, show_labels=show_labels)
+                _legend = magnetics_view.view_shunt(ax, select=select, show_labels=show_labels)
                 if _legend:
                     mdlegends.append(_legend)
                     mdlabels.append(f"magnetics/shunt[{select}]")
@@ -129,7 +130,7 @@ def plot_machine_description(ids_data, show_labels=False):
     handles.extend(mdlegends)
     labels.extend(mdlabels)
     if labels:
-        ax.legend(handles=handles, labels=labels, loc="upper left", bbox_to_anchor=(1, 1))
+        ax.legend(handles=handles, labels=labels, loc="upper left", bbox_to_anchor=(1.15, 1))
     ax.set_aspect("equal", adjustable="box")
     ax.plot()
     xmin, xmax = ax.get_xlim()
@@ -220,7 +221,6 @@ if __name__ == "__main__":
         mdargs = argparse.Namespace()
 
         _md_uri, _ids_name, _ids_field = parse_md_uri(mduri)
-        print(_md_uri, _ids_name, _ids_field)
         _ids_names = _ids_name
         mdargs.uri = _md_uri
         connection = DBMaster.get_connection(mdargs)

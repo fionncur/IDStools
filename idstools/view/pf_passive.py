@@ -182,12 +182,7 @@ class PFPassiveView:
                     elif loop_info["name"]:
                         name = f"{loop_info['name']}"
 
-                    ax.text(
-                        cx,
-                        cy,
-                        name,
-                        fontsize="x-small",
-                    )
+                    ax.text(cx, cy, name, fontsize="small", color="#333333")
         pf_passive_legend = Patch(color="steelblue", label="pf_passive")
 
         ax.set_aspect("equal", adjustable="box")
