@@ -22,13 +22,14 @@ from idstools.view.common import PlotCanvas
 from idstools.view.magnetics import MagneticsView
 from idstools.view.pf_active import PFActiveView
 from idstools.view.pf_passive import PFPassiveView
+from idstools.view.tf import TFView
 from idstools.view.wall import WallView
 
 # ----------------------------------------------------------------------
 
 
 logger = setup_logger("module", stdout_level=logging.INFO)
-idses = "wall,pf_active,magnetics,pf_passive"
+idses = "tf,wall,pf_passive,pf_active, magnetics"
 
 
 def plot_machine_description(ids_data, show_labels=False):
@@ -54,7 +55,7 @@ def plot_machine_description(ids_data, show_labels=False):
         ids_name = ids_data_and_config["idsname"]
         idsfield = ids_data_and_config["idsfield"]
 
-        matches = re.findall(r"\[([^\]]+)\]", idsfield)
+        matches = re.findall(r"[\[(]([^\])]+)[\])]", idsfield)
         select = ":"
         if len(matches) > 1:
             select = matches[0]
@@ -66,6 +67,19 @@ def plot_machine_description(ids_data, show_labels=False):
                     mdlegends.append(_legend)
                     mdlabels.append(f"pf_active/coil[{select}]")
                     database_path += "pf_active = " + get_database_path(ids_data_and_config["connectionArgs"]) + "\n"
+        elif ids_name == "tf":
+            select2 = ":"
+            if len(matches) == 2:
+                select2 = matches[1]
+            tfview = TFView(ids_data_and_config["idsData"])
+            if "coil" in idsfield or idsfield == "":
+                _legend = tfview.view_tf_coils(
+                    ax, select_coil=select, select_conductor=select2, show_labels=show_labels
+                )
+                if _legend:
+                    mdlegends.append(_legend)
+                    mdlabels.append(f"tf/coil[{select}]/conductor[{select2}]")
+                    database_path += "tf = " + get_database_path(ids_data_and_config["connectionArgs"]) + "\n"
         elif ids_name == "pf_passive":
             pfpassiveview = PFPassiveView(ids_data_and_config["idsData"])
             if "loop" in idsfield or idsfield == "":
@@ -77,11 +91,10 @@ def plot_machine_description(ids_data, show_labels=False):
                     database_path += "pf_passive = " + get_database_path(ids_data_and_config["connectionArgs"]) + "\n"
         elif ids_name == "wall":
             wallview = WallView(ids_data_and_config["idsData"])
-            select = "0"
-            select2 = "0"
+            select2 = ":"
             if len(matches) == 2:
                 select2 = matches[1]
-            if "vessel" in idsfield or idsfield == "":
+            if "vessel" in idsfield:
                 wallview.view_wall_vessel(ax, select_description2d=select, select_unit=select2, show_labels=show_labels)
             if "limiter" in idsfield or idsfield == "":
                 wallview.view_wall_limiter(
