@@ -154,6 +154,20 @@ class MagneticsView:
         return magnetics_legend
 
     def view_rogowski_coil(self, ax: plt.axes, select=":", color="#069AF3", show_labels=False):
+        """
+        Plots Rogowski coil data on the given matplotlib axes.
+
+        Parameters:
+        ax (matplotlib.axes.Axes): The axes on which to plot the Rogowski coil data.
+        select (str, optional): Selection criteria for the Rogowski coil data. Defaults to ":".
+        color (str, optional): Color for the Rogowski coil markers. Defaults to "#069AF3".
+        show_labels (bool, optional): Whether to show labels for the Rogowski coils. Defaults to False.
+
+        Returns:
+        matplotlib.lines.Line2D: A legend handle for the Rogowski coil plot.
+
+        Logs a warning if no Rogowski coil data is found.
+        """
         rogowski_coil_data = self.magnetics_compute.get_rogowski_coils(select=select)
         if rogowski_coil_data is None or len(rogowski_coil_data["r"]) == 0:
             logger.warning("Can not plot, no rogowski_coil data found.")

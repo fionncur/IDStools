@@ -29,7 +29,7 @@ from idstools.view.wall import WallView
 
 
 logger = setup_logger("module", stdout_level=logging.INFO)
-idses = "tf,wall,pf_passive,pf_active, magnetics"
+idses = "tf,wall,pf_passive,pf_active,magnetics"
 
 
 def plot_machine_description(ids_data, show_labels=False):

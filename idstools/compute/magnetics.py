@@ -27,30 +27,37 @@ class MagneticsCompute:
 
     def get_b_field_probe_values(self, probe_type="b_field_pol_probe", select=":"):
         """
-        Retrieve values of magnetic probes from the IDS object.
+        Retrieve B-field probe values from the IDS object.
 
-        This method iterates over the `b_field_pol_probe` attribute of the IDS object,
-        extracting relevant information for each probe and storing it in a dictionary.
-        The dictionaries are then collected into a list which is returned.
+        Parameters:
+        -----------
+        probe_type : str, optional
+            The type of probe to retrieve values for. Default is "b_field_pol_probe".
+        select : str, optional
+            A selection string to filter the probes. Default is ":".
 
         Returns:
-            list: A list of dictionaries, each containing information about a magnetic probe.
-                  Each dictionary contains the following keys:
-                  - "name": The name of the probe.
-                  - "type": The type of the probe.
-                  - "r": The radial position of the probe.
-                  - "z": The vertical position of the probe.
-                  - "phi": The toroidal angle of the probe.
-                  - "poloidal_angle": The poloidal angle of the probe.
-                  - "toroidal_angle": The toroidal angle of the probe.
-                  - "area": The area of the probe.
-                  - "length": The length of the probe.
-                  - "turns": The number of turns of the probe.
+        --------
+        list of dict or None
+            A list of dictionaries containing probe information, or None if no probes are found.
 
-        Logs:
-            If a probe's information is empty, a warning is logged with the probe index.
+        Each dictionary in the list contains the following keys:
+        - "name": str, the name or identifier of the probe.
+        - "type": str, the type of the probe.
+        - "r": float, the radial position of the probe.
+        - "z": float, the vertical position of the probe.
+        - "phi": float, the toroidal angle of the probe.
+        - "poloidal_angle": float, the poloidal angle of the probe.
+        - "toroidal_angle": float, the toroidal angle of the probe.
+        - "area": float, the area of the probe.
+        - "length": float, the length of the probe.
+        - "turns": int, the number of turns of the probe.
+
+        Notes:
+        ------
+        - If the specified probe type is not found in the IDS object, a warning is logged.
+        - If no probes are found after filtering, a warning is logged and None is returned.
         """
-
         probes = []
         if hasattr(self.ids, probe_type):
             all_probes = list(self.ids[probe_type])
@@ -82,26 +89,20 @@ class MagneticsCompute:
         """
         Retrieve flux loop values from the IDS (Integrated Data Structure).
 
-        This method iterates over the flux loops in the IDS and extracts relevant information
-        such as name, position (r, z, phi), flux data, voltage data, and area. The extracted
-        information is stored in a list of dictionaries, where each dictionary corresponds to
-        a flux loop.
+        Parameters:
+        select (str): A string to select a subset of the flux loop arrays. Default is ":" which selects all.
 
         Returns:
-            list: A list of dictionaries, each containing the following keys:
-                - "name" (str): The name of the flux loop.
-                - "r" (list): A list of radial positions.
-                - "z" (list): A list of vertical positions.
-                - "phi" (list): A list of toroidal angles.
-                - "flux" (dict): A dictionary with keys "data" (flux data) and "time" (time points).
-                - "voltage" (dict): A dictionary with keys "data" (voltage data) and "time" (time points).
-                - "area" (float): The area of the flux loop.
+        list: A list of dictionaries containing flux loop information. Each dictionary includes:
+            - "name" (str): The name or identifier of the flux loop.
+            - "r" (list): List of radial positions.
+            - "z" (list): List of vertical positions.
+            - "phi" (list): List of toroidal positions.
+            - "flux" (dict): Dictionary with "data" (flux data) and "time" (time data).
+            - "voltage" (dict): Dictionary with "data" (voltage data) and "time" (time data).
+            - "area" (float): The area of the flux loop.
 
-        Logs:
-            A warning is logged if a flux loop is found to be empty.
-
-        Example:
-            flux_loops = get_fluxloop_values()
+        If no flux loops are found or if the flux loop information is empty, a warning is logged and None is returned.
         """
         flux_loop_arrays = list(self.ids.flux_loop)
         if select is not None:
@@ -131,23 +132,23 @@ class MagneticsCompute:
 
     def get_rogowski_coil_values(self, select=":"):
         """
-        Retrieves the values of Rogowski coils from the IDS.
+        Retrieve values from Rogowski coils.
 
-        This method iterates through the Rogowski coils available in the IDS and extracts
-        relevant information such as name, position (r, z, phi), current data, and area.
-        The extracted information is stored in a list of dictionaries, each representing
-        a Rogowski coil.
+        This method extracts information from Rogowski coils stored in the IDS (Integrated Data Structure).
+        It allows for optional selection of specific coils using a slice notation.
+
+        Args:
+            select (str, optional): A slice notation string to select specific Rogowski coils. Defaults to ":".
 
         Returns:
-            list: A list of dictionaries, each containing the following keys:
+            list[dict] or None: A list of dictionaries containing Rogowski coil information. Each dictionary contains:
                 - "name" (str): The name or identifier of the Rogowski coil.
-                - "r" (list): A list of radial positions of the Rogowski coil.
-                - "z" (list): A list of vertical positions of the Rogowski coil.
-                - "phi" (list): A list of angular positions of the Rogowski coil.
-                - "current" (dict): A dictionary containing:
-                    - "data" (list): The current data of the Rogowski coil.
-                    - "time" (list): The time points corresponding to the current data.
+                - "r" (list[float]): Radial positions of the coil.
+                - "z" (list[float]): Axial positions of the coil.
+                - "phi" (list[float]): Toroidal positions of the coil.
+                - "current" (dict): A dictionary with "data" (list[float]) and "time" (list[float]) of the coil current.
                 - "area" (float): The area of the Rogowski coil.
+            Returns None if no Rogowski coils are found or if the selection is empty.
 
         Raises:
             AttributeError: If the IDS object does not have the expected attributes.
@@ -179,22 +180,22 @@ class MagneticsCompute:
 
     def get_shunt_values(self, select=":"):
         """
-        Retrieves shunt information from the IDS object and returns it as a list of dictionaries.
+        Retrieve shunt values from the IDS object and return them as a list of dictionaries.
 
-        Each dictionary contains the following keys:
-            - "name": The name or identifier of the shunt.
-            - "r1": List of radial positions (r) of the first point of the shunt.
-            - "z1": List of vertical positions (z) of the first point of the shunt.
-            - "r2": List of radial positions (r) of the second point of the shunt.
-            - "z2": List of vertical positions (z) of the second point of the shunt.
-            - "voltage": A dictionary with keys "data" and "time" representing the voltage
-            data and corresponding time points.
-            - "resistance": The resistance value of the shunt.
-
-        If a shunt dictionary is empty, a warning is logged with the index of the shunt.
+        Parameters:
+        select (str): A string representing the selection slice. Default is ":".
 
         Returns:
-            list: A list of dictionaries containing shunt information.
+        list: A list of dictionaries containing shunt information. Each dictionary contains:
+            - "name" (str): The name or identifier of the shunt.
+            - "r1" (list): A list of radial positions for the first point.
+            - "z1" (list): A list of vertical positions for the first point.
+            - "r2" (list): A list of radial positions for the second point.
+            - "z2" (list): A list of vertical positions for the second point.
+            - "voltage" (dict): A dictionary containing voltage data and time.
+            - "resistance" (float): The resistance of the shunt.
+
+        If no shunts are found or if the shunts list is empty, a warning is logged and None is returned.
         """
         shunts_array = list(self.ids.shunt)
         if select is not None:
@@ -254,18 +255,18 @@ class MagneticsCompute:
 
     def get_flux_loops(self, select=":"):
         """
-        Retrieves flux loop data and organizes it into a dictionary.
+        Retrieve flux loop data and organize it into a dictionary.
 
-        This method calls `get_fluxloop_values` to obtain a list of flux loop
-        measurements, and then processes this list to create a dictionary
-        containing the following keys:
-            - "r": A numpy array of the radial positions of the flux loops.
-            - "z": A numpy array of the vertical positions of the flux loops.
-            - "area": A numpy array of the areas of the flux loops.
-            - "names": A list of the names of the flux loops.
+        Parameters:
+        select (str): A selection string to filter the flux loop values. Default is ":".
 
         Returns:
-            dict: A dictionary containing the processed flux loop data.
+        dict: A dictionary containing the flux loop data with keys:
+            - "r": numpy array of radial positions.
+            - "z": numpy array of vertical positions.
+            - "area": numpy array of areas.
+            - "names": list of names.
+        None: If no flux loop data is found.
         """
         flux_loops = self.get_fluxloop_values(select=select)
         if flux_loops is None:
@@ -282,17 +283,17 @@ class MagneticsCompute:
         """
         Retrieve Rogowski coil data and organize it into a dictionary.
 
-        This method fetches the Rogowski coil values and structures them into a dictionary
-        with keys 'r', 'z', 'phi', 'area', and 'names'. Each key corresponds to a numpy array
-        or list containing the respective values for each Rogowski coil.
+        Parameters:
+        select (str): A selection string to filter the Rogowski coil data. Default is ":".
 
         Returns:
-            dict: A dictionary containing the Rogowski coil data with the following keys:
-                - 'r' (numpy.ndarray): Radial positions of the Rogowski coils.
-                - 'z' (numpy.ndarray): Axial positions of the Rogowski coils.
-                - 'phi' (numpy.ndarray): Azimuthal angles of the Rogowski coils.
-                - 'area' (numpy.ndarray): Areas of the Rogowski coils.
-                - 'names' (list): Names of the Rogowski coils.
+        dict or None: A dictionary containing Rogowski coil data with keys:
+            - "r": numpy array of radial positions
+            - "z": numpy array of vertical positions
+            - "phi": numpy array of angular positions
+            - "area": numpy array of coil areas
+            - "names": list of coil names
+            Returns None if no data is available.
         """
         rogowski_coil_data = self.get_rogowski_coil_values(select=select)
         if rogowski_coil_data is None:
@@ -308,10 +309,13 @@ class MagneticsCompute:
 
     def get_shunts(self, select=":"):
         """
-        Retrieves shunt data and organizes it into a dictionary.
+        Retrieve shunt data and organize it into a dictionary.
 
-        This method calls `get_shunt_values` to obtain shunt data, then processes
-        this data into a dictionary with the following keys:
+        Parameters:
+        select (str): A selection string to filter the shunt data. Default is ":".
+
+        Returns:
+        dict: A dictionary containing shunt data with the following keys:
             - "r1": numpy array of r1 values
             - "z1": numpy array of z1 values
             - "r2": numpy array of r2 values
@@ -319,8 +323,7 @@ class MagneticsCompute:
             - "resitance": numpy array of resistance values
             - "names": list of shunt names
 
-        Returns:
-            dict: A dictionary containing shunt data arrays and names.
+        If no shunt data is found, returns None.
         """
         shunt_data = self.get_shunt_values(select=select)
         if shunt_data is None:

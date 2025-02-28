@@ -26,20 +26,35 @@ class WallCompute:
 
     def get_vessel_units(self, select_description2d=":", select_unit=":", name_filter=None):
         """
-        The function `get_vessel_units` retrieves information about vessel units based on a name filter.
+        Retrieves information about vessel units based on the provided filters.
 
         Args:
-            name_filter: The `get_vessel_units` method is used to retrieve information about vessel units
-                based on a name filter. The method iterates through the description_2d objects and extracts
-                details about each vessel unit, including its name, description, and various properties such as
-                coordinates, thickness, resistivity, etc
+            select_description2d (str, optional): A slice notation string to filter the
+            description_2d array. Defaults to ":".
+            select_unit (str, optional): A slice notation string to filter the unit array within
+            each description_2d. Defaults to ":".
+            name_filter (str, optional): A string to filter units by name or identifier. Defaults to None.
 
         Returns:
-            The function `get_vessel_units` returns a dictionary containing information about vessel
-            units. The dictionary is structured with nested dictionaries for each description 2D object,
-            which in turn contain information about the vessel units within that description 2D object. The
-            information includes the name, description, and various properties of each vessel unit such as
-            name, identifier, dimensions, resistivity, and rectangle coordinates. The
+            dict: A dictionary containing information about the filtered vessel units. The keys are the indices of the
+                  description_2d elements, and the values are dictionaries with the following structure:
+                  {
+                      "name": str,
+                      "description": str,
+                      "vesselunits": {
+                          unit_index: {
+                              "name": str,
+                              "identifier": str,
+                              "description": str,
+                              "r": float,
+                              "z": float,
+                              "h": float,
+                              "closed": bool,
+                              "resistivity": float,
+                              "rectangle_coordinates": list
+                          }
+                      }
+                  }
         """
         description_2ds = list(self.ids_object.description_2d)
         if select_description2d is not None:
