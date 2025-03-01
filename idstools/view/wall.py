@@ -69,26 +69,26 @@ class WallView:
         """
         # These are the colors that will be used in the plot
         colors = [
-            "#1f77b4",  # Blue
-            "#ff7f0e",  # Orange
-            "#2ca02c",  # Green
-            "#d62728",  # Red
-            "#9467bd",  # Purple
-            "#8c564b",  # Brown
-            "#e377c2",  # Pink
-            "darkred",  # "#7f7f7f",  # Gray
-            "#bcbd22",  # Olive
-            "#17becf",  # Cyan
-            "#17a2b8",  # Teal
-            "darkblue",  # b8e55d",  # Lime
-            "#ff00ff",  # Magenta
-            "navy",  # "#ffdd44",  # Yellow
-            "#87ceeb",  # Sky Blue
-            "#b57edc",  # Lavender
-            "#40e0d0",  # Turquoise
-            "#ffd700",  # Gold
-            "#ff7f50",  # Coral
-            "darkgreen",  # dc143c",  # Crimson
+            "#001F3F",  # Deep Blue
+            "#003366",  # Serene Blue
+            "#0A192F",  # Twilight Blue
+            "#1B3A4B",  # Dusky Blue
+            "#004E89",  # Oceanic Blue
+            "#003F5C",  # Marine Blue
+            "#2C3E50",  # Starlit Blue
+            "#102A43",  # Nocturnal Blue
+            "#5B7C99",  # Frosty Blue
+            "#6B8EAF",  # Icy Blue
+            "#0F4C75",  # Sapphire Blue
+            "#1B4965",  # Dreamy Blue
+            "#3A506B",  # Calm Blue
+            "#2E4A62",  # Tranquil Blue
+            "#001B2E",  # Abyss Blue
+            "#011F4B",  # Deepwater Blue
+            "#34495E",  # Shadow Blue
+            "#2C3A47",  # Evening Blue
+            "#4B0082",  # Indigo
+            "#281E5D",  # Deep Indigo
         ]
         v_index = 0
         if vessel_units := self.compute_object.get_vessel_units(
@@ -105,7 +105,7 @@ class WallView:
                     if wallcolor:
                         kwargs.update({"color": wallcolor})
                     else:
-                        kwargs.update({"color": colors[v_index % 20]})
+                        kwargs.update({"color": colors[v_index % 4]})
                     if vessel_unit["rectangle_coordinates"]:
 
                         for rw, zw in vessel_unit["rectangle_coordinates"]:
@@ -147,26 +147,26 @@ class WallView:
         **kwargs,
     ):
         colors = [
-            "#1f77b4",  # Blue
-            "#ff7f0e",  # Orange
-            "#2ca02c",  # Green
-            "#d62728",  # Red
-            "#9467bd",  # Purple
-            "#8c564b",  # Brown
-            "#e377c2",  # Pink
-            "darkred",  # "#7f7f7f",  # Gray
-            "#bcbd22",  # Olive
-            "#17becf",  # Cyan
-            "#17a2b8",  # Teal
-            "darkblue",  # b8e55d",  # Lime
-            "#ff00ff",  # Magenta
-            "navy",  # "#ffdd44",  # Yellow
-            "#87ceeb",  # Sky Blue
-            "#b57edc",  # Lavender
-            "#40e0d0",  # Turquoise
-            "#ffd700",  # Gold
-            "#ff7f50",  # Coral
-            "darkgreen",  # dc143c",  # Crimson
+            "#001F3F",  # Deep Blue
+            "#003366",  # Serene Blue
+            "#0A192F",  # Twilight Blue
+            "#1B3A4B",  # Dusky Blue
+            "#004E89",  # Oceanic Blue
+            "#003F5C",  # Marine Blue
+            "#2C3E50",  # Starlit Blue
+            "#102A43",  # Nocturnal Blue
+            "#5B7C99",  # Frosty Blue
+            "#6B8EAF",  # Icy Blue
+            "#0F4C75",  # Sapphire Blue
+            "#1B4965",  # Dreamy Blue
+            "#3A506B",  # Calm Blue
+            "#2E4A62",  # Tranquil Blue
+            "#001B2E",  # Abyss Blue
+            "#011F4B",  # Deepwater Blue
+            "#34495E",  # Shadow Blue
+            "#2C3A47",  # Evening Blue
+            "#4B0082",  # Indigo
+            "#281E5D",  # Deep Indigo
         ]
         v_index = 0
         if limiter_units := self.compute_object.get_limiter_units(
@@ -178,7 +178,7 @@ class WallView:
                     if wallcolor:
                         kwargs.update({"color": wallcolor})
                     else:
-                        kwargs.update({"color": colors[(l_index + v_index) % 20]})
+                        kwargs.update({"color": colors[(l_index + v_index) % 4]})
                     self.add_wall_markings(
                         ax,
                         limiter_unit["r"],

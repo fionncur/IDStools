@@ -28,7 +28,16 @@ class PFActiveView:
         self.ids = ids
         self.compute_obj = PfActiveCompute(ids)
 
-    def view_active_pf_coils(self, ax: plt.axes, select=":", show_labels=False):
+    def view_active_pf_coils(
+        self,
+        ax: plt.axes,
+        select=":",
+        edgecolor="#ff0000",
+        facecolor="#ff7400",
+        alpha=0.7,
+        linewidth=1,
+        show_labels=False,
+    ):
         """
         This function plots and annotates the active PF coils on a existing plot.
 
@@ -84,7 +93,13 @@ class PFActiveView:
                     lower_left_x = r - width / 2
                     lower_left_y = z - height / 2
                     rectangle = Rectangle(
-                        (lower_left_x, lower_left_y), width, height, edgecolor="#E5A67D", facecolor="#E5A67D", alpha=0.7
+                        (lower_left_x, lower_left_y),
+                        width,
+                        height,
+                        edgecolor=edgecolor,
+                        facecolor=facecolor,
+                        alpha=alpha,
+                        linewidth=1,
                     )
                     ax.add_patch(rectangle)
                     rx, ry = rectangle.get_xy()
@@ -112,7 +127,12 @@ class PFActiveView:
                     parallelogram = np.array([corner1, corner2, corner3, corner4, corner1])
 
                     parallelogram_patch = Polygon(
-                        parallelogram, closed=True, edgecolor="#E5A67D", facecolor="#E5A67D", alpha=0.7
+                        parallelogram,
+                        closed=True,
+                        edgecolor=edgecolor,
+                        facecolor=facecolor,
+                        alpha=alpha,
+                        linewidth=linewidth,
                     )
 
                     ax.add_patch(parallelogram_patch)
@@ -132,9 +152,10 @@ class PFActiveView:
                         angle=0,
                         theta1=start_angle,
                         theta2=end_angle,
-                        edgecolor="#E5A67D",
-                        facecolor="#E5A67D",
-                        alpha=0.7,
+                        edgecolor=edgecolor,
+                        facecolor=facecolor,
+                        alpha=alpha,
+                        linewidth=linewidth,
                     )
                     ax.add_patch(arc)
                     mid_angle = (start_angle + end_angle) / 2
@@ -148,9 +169,16 @@ class PFActiveView:
                     radius_outer = element_info["radius_outer"]
 
                     outer_wedge = Wedge(
-                        (r, z), radius_outer, 0, 360, edgecolor="#E5A67D", facecolor="#E5A67D", alpha=0.7
+                        (r, z),
+                        radius_outer,
+                        0,
+                        360,
+                        edgecolor=edgecolor,
+                        facecolor=facecolor,
+                        alpha=alpha,
+                        linewidth=linewidth,
                     )
-                    inner_wedge = Wedge((r, z), radius_inner, 0, 360, edgecolor="#E5A67D", facecolor="w", alpha=1)
+                    inner_wedge = Wedge((r, z), radius_inner, 0, 360, edgecolor=edgecolor, facecolor="w", alpha=alpha)
 
                     ax.add_patch(outer_wedge)
                     ax.add_patch(inner_wedge)
@@ -169,7 +197,7 @@ class PFActiveView:
                         head_length=0,
                         head_width=0,
                         color="#E5A67D",
-                        alpha=0.7,
+                        alpha=alpha,
                     )
                     ax.add_patch(line)
                     cx = (r1 + r2) / 2
@@ -185,7 +213,7 @@ class PFActiveView:
                             closed=True,
                             edgecolor="E5A67D",
                             facecolor="none",
-                            alpha=0.7,
+                            alpha=alpha,
                         )
                         ax.add_patch(outline)
                     cx = np.mean(r)
@@ -198,7 +226,9 @@ class PFActiveView:
                         name = f"{coil_info['name']}"
 
                     ax.text(cx, cy, name, fontsize="small", color="#333333")
-        pf_active_legend = Patch(color="#E5A67D", label="pf_passive")
+        pf_active_legend = Patch(
+            edgecolor=edgecolor, facecolor=facecolor, alpha=alpha, linewidth=linewidth, label="pf_passive"
+        )
 
         ax.set_aspect("equal", adjustable="box")
         title = ax.get_title()

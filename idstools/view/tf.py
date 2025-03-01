@@ -27,7 +27,7 @@ class TFView:
         self.ids = ids
         self.compute_obj = TFCompute(ids)
 
-    def view_tf_coils(self, ax: plt.axes, select_coil=":", select_conductor="", color="#800000", show_labels=False):
+    def view_tf_coils(self, ax: plt.axes, select_coil=":", select_conductor="", color="#b07154", show_labels=False):
         """
         Plots the Toroidal Field (TF) coils on the given matplotlib axis.
 
@@ -65,8 +65,8 @@ class TFView:
             for _, conductor_info in conductors.items():
                 elements = conductor_info["elements"]
                 # cross_sections = conductor_info["cross_section"]
-                ax.scatter(elements["start_points"]["r"], elements["start_points"]["z"], color=color)
-                ax.scatter(elements["end_points"]["r"], elements["end_points"]["z"], color=color)
+                ax.scatter(elements["start_points"]["r"], elements["start_points"]["z"], color=color, s=10)
+                ax.scatter(elements["end_points"]["r"], elements["end_points"]["z"], color=color, s=10)
                 for ielement in range(len(elements.types)):
                     if elements["types"][ielement] == 1:  # line
 

@@ -28,7 +28,16 @@ class PFPassiveView:
         self.ids = ids
         self.compute_obj = PfPassiveCompute(ids)
 
-    def view_pf_passive_loops(self, ax: plt.axes, select=":", show_labels=False):
+    def view_pf_passive_loops(
+        self,
+        ax: plt.axes,
+        select=":",
+        edgecolor="#52bf90",
+        facecolor="#52bf90",
+        alpha=0.7,
+        linewidth=1,
+        show_labels=False,
+    ):
         """
         Visualizes passive PF (Poloidal Field) loops on the given matplotlib axis.
 
@@ -65,9 +74,9 @@ class PFPassiveView:
                         (lower_left_x, lower_left_y),
                         width,
                         height,
-                        edgecolor="steelblue",
-                        facecolor="steelblue",
-                        alpha=0.7,
+                        edgecolor=edgecolor,
+                        facecolor=facecolor,
+                        alpha=alpha,
                     )
                     ax.add_patch(rectangle)
                     rx, ry = rectangle.get_xy()
@@ -95,7 +104,7 @@ class PFPassiveView:
                     parallelogram = np.array([corner1, corner2, corner3, corner4, corner1])
 
                     parallelogram_patch = Polygon(
-                        parallelogram, closed=True, edgecolor="#E5A67D", facecolor="#E5A67D", alpha=0.7
+                        parallelogram, closed=True, edgecolor=edgecolor, facecolor=facecolor, alpha=alpha, linewidth=1
                     )
 
                     ax.add_patch(parallelogram_patch)
@@ -117,9 +126,10 @@ class PFPassiveView:
                         angle=0,
                         theta1=start_angle,
                         theta2=end_angle,
-                        edgecolor="steelblue",
-                        facecolor="steelblue",
-                        alpha=0.7,
+                        edgecolor=edgecolor,
+                        facecolor=facecolor,
+                        alpha=alpha,
+                        linewidth=1,
                     )
                     ax.add_patch(arc)
                     mid_angle = (start_angle + end_angle) / 2
@@ -133,9 +143,11 @@ class PFPassiveView:
                     radius_outer = element_info["radius_outer"]
 
                     outer_wedge = Wedge(
-                        (r, z), radius_outer, 0, 360, edgecolor="steelblue", facecolor="steelblue", alpha=0.7
+                        (r, z), radius_outer, 0, 360, edgecolor=edgecolor, facecolor=facecolor, alpha=alpha, linewidth=1
                     )
-                    inner_wedge = Wedge((r, z), radius_inner, 0, 360, edgecolor="steelblue", facecolor="w", alpha=1)
+                    inner_wedge = Wedge(
+                        (r, z), radius_inner, 0, 360, edgecolor=edgecolor, facecolor="w", alpha=1, linewidth=1
+                    )
 
                     ax.add_patch(outer_wedge)
                     ax.add_patch(inner_wedge)
@@ -153,8 +165,9 @@ class PFPassiveView:
                         width=thickness,
                         head_length=0,
                         head_width=0,
-                        color="steelblue",
-                        alpha=0.7,
+                        color=facecolor,
+                        alpha=alpha,
+                        linewidth=1,
                     )
                     ax.add_patch(line)
                     cx = (r1 + r2) / 2
@@ -168,9 +181,10 @@ class PFPassiveView:
                         outline = Polygon(
                             list(zip(r, z)),
                             closed=True,
-                            edgecolor="steelblue",
+                            edgecolor=edgecolor,
                             facecolor="none",
-                            alpha=0.7,
+                            alpha=alpha,
+                            linewidth=1,
                         )
                         ax.add_patch(outline)
                     cx = np.mean(r)
@@ -183,7 +197,9 @@ class PFPassiveView:
                         name = f"{loop_info['name']}"
 
                     ax.text(cx, cy, name, fontsize="small", color="#333333")
-        pf_passive_legend = Patch(color="steelblue", label="pf_passive")
+        pf_passive_legend = Patch(
+            edgecolor=edgecolor, facecolor=facecolor, alpha=alpha, linewidth=linewidth, label="pf_passive"
+        )
 
         ax.set_aspect("equal", adjustable="box")
         title = ax.get_title()

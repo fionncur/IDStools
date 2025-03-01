@@ -45,9 +45,9 @@ class MagneticsView:
             logger.warning(f"Can not plot, no {probe_type} data found.")
             return
         if probe_type == "b_field_pol_probe":
-            patch_color = "teal"
+            patch_color = "#ff3d41"
         elif probe_type == "b_field_phi_probe":
-            patch_color = "#FF796C"
+            patch_color = "#ff3d41"
         poloidal_angle_rad = -probe_data["poloidal_angle"]
         rect_size = 0
 
@@ -111,7 +111,7 @@ class MagneticsView:
             ax.set_title(f"magnetics/{probe_type}")
         return magnetics_legend
 
-    def view_flux_loop(self, ax: plt.axes, select=":", color="#800080", show_labels=False):
+    def view_flux_loop(self, ax: plt.axes, select=":", color="#ff3d41", show_labels=False):
         """
         Plots the flux loops on the given matplotlib axes.
 
@@ -153,7 +153,7 @@ class MagneticsView:
             ax.set_title("magnetics/flux_loop")
         return magnetics_legend
 
-    def view_rogowski_coil(self, ax: plt.axes, select=":", color="#069AF3", show_labels=False):
+    def view_rogowski_coil(self, ax: plt.axes, select=":", color="#ff3d41", show_labels=False):
         """
         Plots Rogowski coil data on the given matplotlib axes.
 
@@ -211,7 +211,7 @@ class MagneticsView:
             ax.set_title("magnetics/rogowski_legend")
         return rogowski_legend
 
-    def view_shunt(self, ax: plt.axes, select=":", show_labels=False):
+    def view_shunt(self, ax: plt.axes, select=":", color="#ff3d41", show_labels=False):
         shunt_data = self.magnetics_compute.get_shunts(select=select)
         if shunt_data is None or len(shunt_data["r1"]) == 0:
             logger.warning("Can not plot, no shunt data found.")
@@ -225,13 +225,13 @@ class MagneticsView:
                 [r1, r2],
                 [z1, z2],
                 c="none",
-                edgecolors="#FFA500",
+                edgecolors=color,
                 marker="^",
                 lw=1,
                 s=50,
             )
 
-            rectangle = patches.Polygon(points, closed=True, edgecolor="#FFA500", facecolor="none")
+            rectangle = patches.Polygon(points, closed=True, edgecolor=color, facecolor="none")
             ax.add_patch(rectangle)
 
             if show_labels:
@@ -241,7 +241,7 @@ class MagneticsView:
             [],
             [],
             marker="^",
-            color="#FFA500",
+            color=color,
             markersize=8,
             label="magnetics/shunt",
             fillstyle="none",

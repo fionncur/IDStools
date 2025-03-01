@@ -272,9 +272,9 @@ class MagneticsCompute:
         if flux_loops is None:
             return None
         flux_loops_dict = {
-            "r": np.array([p["r"] for p in flux_loops]),
-            "z": np.array([p["z"] for p in flux_loops]),
-            "area": np.array([p["area"] for p in flux_loops]),
+            "r": [p["r"] for p in flux_loops],
+            "z": [p["z"] for p in flux_loops],
+            "area": [p["area"] for p in flux_loops],
             "names": [p["name"] for p in flux_loops],
         }
         return flux_loops_dict
@@ -299,10 +299,10 @@ class MagneticsCompute:
         if rogowski_coil_data is None:
             return None
         rogowski_coils_dict = {
-            "r": np.array([p["r"] for p in rogowski_coil_data]),
-            "z": np.array([p["z"] for p in rogowski_coil_data]),
-            "phi": np.array([p["phi"] for p in rogowski_coil_data]),
-            "area": np.array([p["area"] for p in rogowski_coil_data]),
+            "r": [p["r"] for p in rogowski_coil_data],
+            "z": [p["z"] for p in rogowski_coil_data],
+            "phi": [p["phi"] for p in rogowski_coil_data],
+            "area": [p["area"] for p in rogowski_coil_data],
             "names": [p["name"] for p in rogowski_coil_data],
         }
         return rogowski_coils_dict
@@ -329,11 +329,11 @@ class MagneticsCompute:
         if shunt_data is None:
             return None
         shunt_dict = {
-            "r1": np.array([p["r1"] for p in shunt_data]),
-            "z1": np.array([p["z1"] for p in shunt_data]),
-            "r2": np.array([p["r2"] for p in shunt_data]),
-            "z2": np.array([p["z2"] for p in shunt_data]),
-            "resitance": np.array([p["resitance"] for p in shunt_data]),
+            "r1": [p["r1"] for p in shunt_data],
+            "z1": [p["z1"] for p in shunt_data],
+            "r2": [p["r2"] for p in shunt_data],
+            "z2": [p["z2"] for p in shunt_data],
+            "resitance": [p["resitance"] for p in shunt_data],
             "names": [p["name"] for p in shunt_data],
         }
         return shunt_dict
