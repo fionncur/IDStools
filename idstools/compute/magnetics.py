@@ -65,21 +65,27 @@ class MagneticsCompute:
                 all_probes = get_slice_from_array(all_probes, select)
             for probe_index, probe in enumerate(all_probes):
                 probe_info = {}
-                probe_info["name"] = probe.name
-                if hasattr(probe, "identifier") and probe.identifier:
-                    probe_info["name"] = probe.identifier
-                probe_info["type"] = probe.type
-                probe_info["r"] = probe.position.r
-                probe_info["z"] = probe.position.z
-                probe_info["phi"] = probe.position.phi
-                probe_info["poloidal_angle"] = probe.poloidal_angle
-                probe_info["toroidal_angle"] = probe.toroidal_angle
-                probe_info["area"] = probe.area
-                probe_info["length"] = probe.length
-                probe_info["turns"] = probe.turns
-                if not probe_info:
-                    logger.warning(f"Probe index {probe_index} : {probe_type} is empty")
-                probes.append(probe_info)
+                if probe.position.r.has_value and probe.position.z.has_value:
+                    probe_info["name"] = probe.name
+                    if hasattr(probe, "identifier") and probe.identifier:
+                        probe_info["name"] = probe.identifier
+                        print(probe.identifier)
+                    probe_info["type"] = probe.type
+                    probe_info["r"] = probe.position.r
+                    probe_info["z"] = probe.position.z
+                    probe_info["phi"] = probe.position.phi
+                    probe_info["poloidal_angle"] = probe.poloidal_angle
+                    probe_info["toroidal_angle"] = probe.toroidal_angle
+                    probe_info["area"] = probe.area
+                    probe_info["length"] = probe.length
+                    probe_info["turns"] = probe.turns
+                    if not probe_info:
+                        logger.warning(f"Probe index {probe_index} : {probe_type} is empty")
+                        continue
+                    probes.append(probe_info)
+                else:
+                    logger.warning(f"Probe index {probe_index} : {probe_type} position.r,z are empty")
+                    continue
         if len(probes) == 0:
             logger.warning(f"{probe_type} are empty")
             return None
@@ -107,23 +113,28 @@ class MagneticsCompute:
         flux_loop_arrays = list(self.ids.flux_loop)
         if select is not None:
             flux_loop_arrays = get_slice_from_array(flux_loop_arrays, select)
-
         flux_loops = []
         for iflux_loop, flux_loop in enumerate(flux_loop_arrays):
             flux_loop_info = {}
-            flux_loop_info["name"] = flux_loop.name
-            if hasattr(flux_loop, "identifier") and flux_loop.identifier:
-                flux_loop_info["name"] = flux_loop.identifier
-            flux_loop_info["r"] = [x.r.value for x in flux_loop.position]
-            flux_loop_info["z"] = [x.z.value for x in flux_loop.position]
-            flux_loop_info["phi"] = [x.phi.value for x in flux_loop.position]
+            if flux_loop.position[0].r.has_value and flux_loop.position[0].z.has_value:
 
-            flux_loop_info["flux"] = {"data": flux_loop.flux.data, "time": flux_loop.flux.time}
-            flux_loop_info["voltage"] = {"data": flux_loop.voltage.data, "time": flux_loop.voltage.time}
-            flux_loop_info["area"] = flux_loop.area
+                flux_loop_info["name"] = flux_loop.name
+                if hasattr(flux_loop, "identifier") and flux_loop.identifier:
+                    flux_loop_info["name"] = flux_loop.identifier
+                flux_loop_info["r"] = [x.r.value for x in flux_loop.position]
+                flux_loop_info["z"] = [x.z.value for x in flux_loop.position]
+                flux_loop_info["phi"] = [x.phi.value for x in flux_loop.position]
+
+                flux_loop_info["flux"] = {"data": flux_loop.flux.data, "time": flux_loop.flux.time}
+                flux_loop_info["voltage"] = {"data": flux_loop.voltage.data, "time": flux_loop.voltage.time}
+                flux_loop_info["area"] = flux_loop.area
+            else:
+                logger.warning(f"flux_loop index {iflux_loop} : flux_loop.position.r,z are empty")
+                continue
 
             if not flux_loop_info:
                 logger.warning(f"flux_loop index {iflux_loop} : flux_loop is empty")
+                continue
             flux_loops.append(flux_loop_info)
         if len(flux_loops) == 0:
             logger.warning("flux_loops are empty")
@@ -159,19 +170,24 @@ class MagneticsCompute:
 
         rogowski_coils = []
         for index, rogowski_coil in enumerate(rogowski_coil_arrays):
-            rogowski_coil_info = {}
-            rogowski_coil_info["name"] = rogowski_coil.name
-            if hasattr(rogowski_coil, "identifier") and rogowski_coil.identifier:
-                rogowski_coil_info["name"] = rogowski_coil.identifier
-            rogowski_coil_info["r"] = [x.r.value for x in rogowski_coil.position]
-            rogowski_coil_info["z"] = [x.z.value for x in rogowski_coil.position]
-            rogowski_coil_info["phi"] = [x.phi.value for x in rogowski_coil.position]
+            if rogowski_coil.position[0].r.has_value and rogowski_coil.position[0].z.has_value:
+                rogowski_coil_info = {}
+                rogowski_coil_info["name"] = rogowski_coil.name
+                if hasattr(rogowski_coil, "identifier") and rogowski_coil.identifier:
+                    rogowski_coil_info["name"] = rogowski_coil.identifier
+                rogowski_coil_info["r"] = [x.r.value for x in rogowski_coil.position]
+                rogowski_coil_info["z"] = [x.z.value for x in rogowski_coil.position]
+                rogowski_coil_info["phi"] = [x.phi.value for x in rogowski_coil.position]
 
-            rogowski_coil_info["current"] = {"data": rogowski_coil.current.data, "time": rogowski_coil.current.time}
-            rogowski_coil_info["area"] = rogowski_coil.area
+                rogowski_coil_info["current"] = {"data": rogowski_coil.current.data, "time": rogowski_coil.current.time}
+                rogowski_coil_info["area"] = rogowski_coil.area
 
-            if not rogowski_coil_info:
-                logger.warning(f"rogowski_coil index {index} : rogowski_coil is empty")
+                if not rogowski_coil_info:
+                    logger.warning(f"rogowski_coil index {index} : rogowski_coil is empty")
+                    continue
+            else:
+                logger.warning(f"rogowski_coil index {index} : rogowski_coil.position.r,z are empty")
+                continue
             rogowski_coils.append(rogowski_coil_info)
         if len(rogowski_coils) == 0:
             logger.warning("rogowski_coils are empty")
@@ -207,15 +223,25 @@ class MagneticsCompute:
             shunt_info["name"] = _shunt.name
             if hasattr(_shunt, "identifier") and _shunt.identifier:
                 shunt_info["name"] = _shunt.identifier
-            shunt_info["r1"] = [x.r.value for x in _shunt.position.first_point]
-            shunt_info["z1"] = [x.z.value for x in _shunt.position.first_point]
-            shunt_info["r2"] = [x.r.value for x in _shunt.position.second_point]
-            shunt_info["z2"] = [x.z.value for x in _shunt.position.second_point]
-            shunt_info["voltage"] = {"data": _shunt.voltage.data, "time": _shunt.voltage.time}
-            shunt_info["resistance"] = _shunt.resistance
+            if (
+                _shunt.position.first_point.r.has_value
+                and _shunt.position.first_point.z.has_value
+                and _shunt.position.second_point.r.has_value
+                and _shunt.position.second_point.z.has_value
+            ):
+                shunt_info["r1"] = [x.r.value for x in _shunt.position.first_point]
+                shunt_info["z1"] = [x.z.value for x in _shunt.position.first_point]
+                shunt_info["r2"] = [x.r.value for x in _shunt.position.second_point]
+                shunt_info["z2"] = [x.z.value for x in _shunt.position.second_point]
+                shunt_info["voltage"] = {"data": _shunt.voltage.data, "time": _shunt.voltage.time}
+                shunt_info["resistance"] = _shunt.resistance
+            else:
+                logger.warning(f"shunt index {index} : shunt is empty")
+                continue
 
             if not shunt_info:
                 logger.warning(f"shunt index {index} : shunt is empty")
+                continue
             shunts.append(shunt_info)
         if len(shunts) == 0:
             logger.warning("shunts are empty")
@@ -271,6 +297,7 @@ class MagneticsCompute:
         flux_loops = self.get_fluxloop_values(select=select)
         if flux_loops is None:
             return None
+
         flux_loops_dict = {
             "r": [p["r"] for p in flux_loops],
             "z": [p["z"] for p in flux_loops],

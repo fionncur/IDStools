@@ -16,6 +16,7 @@ from idstools.utils.clihelper import (
 )
 from idstools.utils.idshelper import (
     get_available_ids_and_occurrences,
+    parse_uri,
 )
 from idstools.utils.idslogger import setup_logger
 from idstools.view.common import PlotCanvas
@@ -47,14 +48,16 @@ def plot_machine_description(ids_data, show_labels=False):
 
     mdlegends = []
     mdlabels = []
-    for ids_name, ids_data_and_config in ids_data.items():
+    for idsinfo, ids_data_and_config in ids_data.items():
         # if idsDataAndConfig["yamlConfig"] is None:
         #     logger.error(f"Could not retrieve machine description for {idsName}")
         #     databasePath += f"{idsName} = not found"
         #     continue
+        logger.info(f"Processing for plotting {idsinfo}")
         ids_name = ids_data_and_config["idsname"]
-        idsfield = ids_data_and_config["idsfield"]
-
+        idsfield = ids_data_and_config["idsfield"] or ""
+        idsocc = ids_data_and_config["idsocc"]
+        print(ids_data_and_config)
         matches = re.findall(r"[\[(]([^\])]+)[\])]", idsfield)
         select = ":"
         if len(matches) > 1:
@@ -65,7 +68,7 @@ def plot_machine_description(ids_data, show_labels=False):
                 _legend = pfcoilsview.view_active_pf_coils(ax, select=select, show_labels=show_labels)
                 if _legend:
                     mdlegends.append(_legend)
-                    mdlabels.append(f"pf_active/coil[{select}]")
+                    mdlabels.append(f"pf_active:{idsocc}/coil[{select}]")
                     database_path += "pf_active = " + get_database_path(ids_data_and_config["connectionArgs"]) + "\n"
         elif ids_name == "tf":
             select2 = ":"
@@ -78,7 +81,7 @@ def plot_machine_description(ids_data, show_labels=False):
                 )
                 if _legend:
                     mdlegends.append(_legend)
-                    mdlabels.append(f"tf/coil[{select}]/conductor[{select2}]")
+                    mdlabels.append(f"tf:{idsocc}/coil[{select}]/conductor[{select2}]")
                     database_path += "tf = " + get_database_path(ids_data_and_config["connectionArgs"]) + "\n"
         elif ids_name == "pf_passive":
             pfpassiveview = PFPassiveView(ids_data_and_config["idsData"])
@@ -87,7 +90,7 @@ def plot_machine_description(ids_data, show_labels=False):
                 if _legend:
                     mdlegends.append(_legend)
 
-                    mdlabels.append(f"pf_passive/loop[{select}]")
+                    mdlabels.append(f"pf_passive:{idsocc}/loop[{select}]")
                     database_path += "pf_passive = " + get_database_path(ids_data_and_config["connectionArgs"]) + "\n"
         elif ids_name == "wall":
             wallview = WallView(ids_data_and_config["idsData"])
@@ -109,29 +112,29 @@ def plot_machine_description(ids_data, show_labels=False):
                 )
                 if _legend:
                     mdlegends.append(_legend)
-                    mdlabels.append(f"magnetics/b_field_phi_probe[{select}]")
+                    mdlabels.append(f"magnetics:{idsocc}/b_field_phi_probe[{select}]")
             if "b_field_pol_probe" in idsfield or idsfield == "":
                 _legend = magnetics_view.view_b_field_probes(
                     ax, probe_type="b_field_pol_probe", select=select, show_labels=show_labels
                 )
                 if _legend:
                     mdlegends.append(_legend)
-                    mdlabels.append(f"magnetics/b_field_pol_probe[{select}]")
+                    mdlabels.append(f"magnetics:{idsocc}/b_field_pol_probe[{select}]")
             if "flux_loop" in idsfield or idsfield == "":
                 _legend = magnetics_view.view_flux_loop(ax, select=select, show_labels=show_labels)
                 if _legend:
                     mdlegends.append(_legend)
-                    mdlabels.append(f"magnetics/flux_loop[{select}]")
+                    mdlabels.append(f"magnetics:{idsocc}/flux_loop[{select}]")
             if "rogowski_coil" in idsfield or idsfield == "":
                 _legend = magnetics_view.view_rogowski_coil(ax, select=select, show_labels=show_labels)
                 if _legend:
                     mdlegends.append(_legend)
-                    mdlabels.append(f"magnetics/rogowski_coil[{select}]")
+                    mdlabels.append(f"magnetics:{idsocc}/rogowski_coil[{select}]")
             if "shunt" in idsfield or idsfield == "":
                 _legend = magnetics_view.view_shunt(ax, select=select, show_labels=show_labels)
                 if _legend:
                     mdlegends.append(_legend)
-                    mdlabels.append(f"magnetics/shunt[{select}]")
+                    mdlabels.append(f"magnetics:{idsocc}/shunt[{select}]")
             database_path += "magnetics = " + get_database_path(ids_data_and_config["connectionArgs"]) + "\n"
         else:
             database_path += (
@@ -169,22 +172,6 @@ def plot_machine_description(ids_data, show_labels=False):
         canvas.save(fname)
     else:
         canvas.show()
-
-
-def parse_md_uri(uri):
-    splitted_md_uri = uri.split("#", 1)
-
-    if len(splitted_md_uri) == 2:
-        _md_uri, ids_info = splitted_md_uri
-    else:
-        _md_uri = splitted_md_uri[0]
-        ids_info = ""
-
-    splitted_ids_info = ids_info.split("/", 1)
-    _ids_name = splitted_ids_info[0] if ids_info else ""
-    _ids_field = splitted_ids_info[1] if len(splitted_ids_info) > 1 else ""
-
-    return _md_uri, _ids_name, _ids_field
 
 
 if __name__ == "__main__":
@@ -233,37 +220,47 @@ if __name__ == "__main__":
     for mduri in args.uri:
         mdargs = argparse.Namespace()
 
-        _md_uri, _ids_name, _ids_field = parse_md_uri(mduri)
+        result = parse_uri(mduri)
+        # specified things in uri
+        _md_uri = result["uri_part"]
+        _ids_occurrence = result["occurrence"]
+        _ids_name = result["ids_name"]
+        _ids_field = result["ids_path"]
         _ids_names = _ids_name
         mdargs.uri = _md_uri
         connection = DBMaster.get_connection(mdargs)
         if connection:
-            all_idses_list = [item for item, _ in get_available_ids_and_occurrences(connection, None)]
+            all_idses_list = get_available_ids_and_occurrences(connection, None)
             if _ids_names == "":
                 _ids_names = idses
+
             for _ids_name in _ids_names.split(","):
                 if _ids_name not in idses:
                     continue
                 ids_found = False
-                if connection is not None:
-                    if _ids_name in all_idses_list:
-                        if args.dd_update:
-                            _ids_data = convert_ids(
-                                connection.get(_ids_name, autoconvert=False), connection.factory.version
-                            )
-                        else:
-                            _ids_data = connection.get(_ids_name, autoconvert=False)
-                        data = {}
-                        if _ids_data is not None:
-                            ids_found = True
-                            (
-                                data["idsData"],
-                                data["yamlConfig"],
-                                data["connectionArgs"],
-                                data["idsname"],
-                                data["idsfield"],
-                            ) = (_ids_data, None, mdargs, _ids_name, _ids_field)
-                            ids_data[f"{_md_uri}#{_ids_name}/{_ids_field}"] = data
+                if _ids_occurrence is None:
+                    _ids_occurrences = [value for term, value in all_idses_list if _ids_name in term]
+                else:
+                    _ids_occurrences = [_ids_occurrence]
+                for occ in _ids_occurrences:
+                    if args.dd_update:
+                        _ids_data = convert_ids(
+                            connection.get(_ids_name, autoconvert=False, occurrence=occ), connection.factory.version
+                        )
+                    else:
+                        _ids_data = connection.get(_ids_name, autoconvert=False, occurrence=occ)
+                    data = {}
+                    if _ids_data is not None:
+                        ids_found = True
+                        (
+                            data["idsData"],
+                            data["yamlConfig"],
+                            data["connectionArgs"],
+                            data["idsname"],
+                            data["idsfield"],
+                            data["idsocc"],
+                        ) = (_ids_data, None, mdargs, _ids_name, _ids_field, occ)
+                        ids_data[f"{_md_uri}#{_ids_name}:{occ}/{_ids_field}"] = data
                 if not ids_found:
                     logger.info(f"Could not find {_ids_name} in the given data entry")
             connection.close()

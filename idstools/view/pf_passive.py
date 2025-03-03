@@ -87,18 +87,26 @@ class PFPassiveView:
                     z = element_info["z"]
                     length_alpha = element_info["length_alpha"]
                     length_beta = element_info["length_beta"]
-                    alpha = element_info["alpha"]
-                    beta = element_info["beta"]
+                    alpha_values = element_info["alpha"]
+                    beta_values = element_info["beta"]
 
                     corner1 = np.array([r, z])
 
-                    corner2 = corner1 + np.array([length_alpha * np.cos(alpha), length_alpha * np.sin(alpha)])
+                    corner2 = corner1 + np.array(
+                        [length_alpha * np.cos(alpha_values), length_alpha * np.sin(alpha_values)]
+                    )
 
                     corner3 = corner2 + np.array(
-                        [length_beta * np.cos(0.5 * np.pi + beta), length_beta * np.sin(0.5 * np.pi + beta)]
+                        [
+                            length_beta * np.cos(0.5 * np.pi + beta_values),
+                            length_beta * np.sin(0.5 * np.pi + beta_values),
+                        ]
                     )
                     corner4 = corner1 + np.array(
-                        [length_beta * np.cos(0.5 * np.pi + beta), length_beta * np.sin(0.5 * np.pi + beta)]
+                        [
+                            length_beta * np.cos(0.5 * np.pi + beta_values),
+                            length_beta * np.sin(0.5 * np.pi + beta_values),
+                        ]
                     )
 
                     parallelogram = np.array([corner1, corner2, corner3, corner4, corner1])
@@ -176,7 +184,7 @@ class PFPassiveView:
                     r = element_info["r"]
                     z = element_info["z"]
                     if len(r) == 1:
-                        ax.scatter(r, z, color="steelblue")
+                        ax.scatter(r, z, color=facecolor)
                     else:
                         outline = Polygon(
                             list(zip(r, z)),

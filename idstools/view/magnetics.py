@@ -50,24 +50,29 @@ class MagneticsView:
             patch_color = "#ff3d41"
         poloidal_angle_rad = -probe_data["poloidal_angle"]
         rect_size = 0
+        arrow_length = 0.001
 
         for i, (radial_coordinate, vertical_coordinate, poloidal_angle_rad, length, name) in enumerate(
             zip(probe_data["r"], probe_data["z"], poloidal_angle_rad, probe_data["lengths"], probe_data["names"])
         ):
             if length > 0:
                 rect_size = length
-
-            arrow_length = rect_size
-            rect_x = radial_coordinate - rect_size / 2
-            rect_y = vertical_coordinate - rect_size / 2
-            rect = patches.Rectangle(
-                (rect_x, rect_y),
-                rect_size,
-                rect_size,
-                edgecolor=patch_color,
-                facecolor="none",
-            )
-            ax.add_patch(rect)
+                arrow_length = rect_size
+            if rect_size == 0:
+                ax.scatter(
+                    radial_coordinate, vertical_coordinate, facecolors="none", edgecolors=patch_color, marker="s", s=20
+                )
+            else:
+                rect_x = radial_coordinate - rect_size / 2
+                rect_y = vertical_coordinate - rect_size / 2
+                rect = patches.Rectangle(
+                    (rect_x, rect_y),
+                    rect_size,
+                    rect_size,
+                    edgecolor=patch_color,
+                    facecolor="none",
+                )
+                ax.add_patch(rect)
 
             start_x = radial_coordinate
             start_y = vertical_coordinate

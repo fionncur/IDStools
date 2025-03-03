@@ -37,12 +37,12 @@ def parse_uri(uri: str):
     uri_part = splitted_ids_info[0]
     ids_name = ""
     ids_path = None
-    occurrence = 0
+    occurrence = None
     if len(splitted_ids_info) == 2:
         ids_fragment = splitted_ids_info[1]
         splitted_ids_fragment = ids_fragment.split("/", 1)
         if ":" in splitted_ids_fragment[0]:
-            splitted_ids_fragment = ids_fragment.split(":")
+            splitted_ids_fragment = ids_fragment.split(":", 1)
             ids_name = splitted_ids_fragment[0]
             if len(splitted_ids_fragment) == 2:
                 ids_path_fragment = splitted_ids_fragment[1]

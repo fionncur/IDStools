@@ -196,7 +196,7 @@ class PFActiveView:
                         width=thickness,
                         head_length=0,
                         head_width=0,
-                        color="#E5A67D",
+                        color=facecolor,
                         alpha=alpha,
                     )
                     ax.add_patch(line)
@@ -206,12 +206,12 @@ class PFActiveView:
                     r = element_info["r"]
                     z = element_info["z"]
                     if len(r) == 1:
-                        ax.scatter(r, z, color="E5A67D")
+                        ax.scatter(r, z, color=facecolor)
                     else:
                         outline = Polygon(
                             list(zip(r, z)),
                             closed=True,
-                            edgecolor="E5A67D",
+                            edgecolor=facecolor,
                             facecolor="none",
                             alpha=alpha,
                         )
