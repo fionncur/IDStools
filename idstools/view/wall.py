@@ -21,7 +21,7 @@ class WallView:
             z: The parameter "z" represents the z-coordinates of the points in the path. It is a list or  array
             containing the z-coordinates of the points.
         """
-        if not kwargs["label"]:
+        if "label" in kwargs and not kwargs["label"]:
             kwargs["label"] = "wall"
         n = len(r)
         codes = [Path.MOVETO] + [Path.LINETO] * (n - 1)

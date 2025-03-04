@@ -84,7 +84,7 @@ def plot_machine_description(ids_data):
 
         matches = re.findall(r"[\[(]([^\])]+)[\])]", idsfield)
         select = ":"
-        if len(matches) > 1:
+        if len(matches) > 0:
             select = matches[0]
         if ids_name == "pf_active":
             pfcoilsview = PFActiveView(ids_data_and_config["idsData"])
@@ -236,6 +236,7 @@ if __name__ == "__main__":
         mdargs = argparse.Namespace()
 
         result = parse_uri(mduri)
+
         # specified things in uri
         _md_uri = result["uri_part"]
         _ids_occurrence = result["occurrence"]

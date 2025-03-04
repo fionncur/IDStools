@@ -29,13 +29,14 @@ class MagneticsView:
         self.ids = ids
         self.magnetics_compute = MagneticsCompute(ids)
 
-    def view_b_field_probes(self, ax: plt.axes, probe_type="b_field_pol_probe", select=":", show_labels=False):
+    def view_b_field_probes(self, ax: plt.axes, probe_type="b_field_pol_probe", select=":"):
         """
         Plots the positions and directions of poloidal magnetic field probes on a tokamak wall.
 
         Parameters:
         ax (matplotlib.axes.Axes): The matplotlib axes object where the plot will be drawn.
-        show_labels (bool, optional): If True, labels for the probes will be displayed. Defaults to False.
+        probe_type (str, optional): The type of probe to plot. Defaults to "b_field_pol_probe".
+        select (str, optional): Selection criteria for the probe data. Defaults to ":".
 
         Returns:
         None

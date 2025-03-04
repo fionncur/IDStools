@@ -204,7 +204,6 @@ for mdids_info in args.md:
                     wallview = WallView(_ids_data)
                     wallview.view_wall(
                         ax_polview,
-                        show_labels=False,
                         wallcolor="slategray",
                         show_legend=False,
                     )
@@ -227,7 +226,7 @@ for mdids_info in args.md:
                     _ids_data = connection.get("pf_active", lazy=True, autoconvert=False)
                 if _ids_data.ids_properties.homogeneous_time != EMPTY_INT:
                     view_pf_coils = PFActiveView(_ids_data)
-                    view_pf_coils.view_active_pf_coils(ax_polview, show_labels=False)
+                    view_pf_coils.view_active_pf_coils(ax_polview)
                 else:
                     logger.warning(f"{_ids_name} ids is empty in the dbentry")
             except Exception as e:  # noqa: F841

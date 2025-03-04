@@ -36,7 +36,6 @@ class TFView:
         select_coil (str, optional): The coil selection criteria. Defaults to ":".
         select_conductor (str, optional): The conductor selection criteria. Defaults to "".
         color (str, optional): The color to use for plotting the coils. Defaults to "#800000".
-        show_labels (bool, optional): Whether to show labels for the coils. Defaults to False.
 
         Returns:
         Patch: A matplotlib Patch object for the TF legend.
@@ -45,7 +44,6 @@ class TFView:
         - The function retrieves TF coil data using the compute_obj's get_tf_coils method.
         - If no TF coil data is found, a warning is logged and the function returns without plotting.
         - The function plots the start and end points of the coil conductors and connects them with line segments.
-        - If show_labels is True, the coil identifiers or names are displayed as text labels.
         - The aspect ratio of the plot is set to be equal and the title is updated to include "tf".
         """
         coils_dict = self.compute_obj.get_tf_coils(select_coil=select_coil, select_conductor=select_conductor)

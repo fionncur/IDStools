@@ -194,7 +194,6 @@ if ids_obj_equilibrium.time is not None:
                         ax1,
                         select_description2d="0",
                         select_unit="0",
-                        show_labels=args.show_labels,
                         wallcolor="slategray",
                     ):
                         title += " wall-vessel"
@@ -202,7 +201,6 @@ if ids_obj_equilibrium.time is not None:
                         ax1,
                         select_description2d="0",
                         select_unit="0",
-                        show_labels=args.show_labels,
                         wallcolor="slategray",
                     ):
                         title += " wall-vessel"
@@ -222,7 +220,7 @@ if ids_obj_equilibrium.time is not None:
                     logger.warning(f"{_ids_name} ids is not present error {e}")
                 if _ids_data:
                     view_pf_coils = PFActiveView(_ids_data)
-                    view_pf_coils.view_active_pf_coils(ax1, select=":", show_labels=args.show_labels)
+                    view_pf_coils.view_active_pf_coils(ax1, select=":")
                     title += " PF-Active Coils"
                     database_text += f"{_ids_name}={get_database_path(inputargs)}\n"
                 connection.close()
@@ -240,7 +238,7 @@ if ids_obj_equilibrium.time is not None:
                     logger.warning(f"{_ids_name} ids is not present error {e}")
                 if _ids_data:
                     view_pf_coils = PFPassiveView(_ids_data)
-                    view_pf_coils.view_pf_passive_loops(ax1, select=":", show_labels=args.show_labels)
+                    view_pf_coils.view_pf_passive_loops(ax1, select=":")
                     title += " PF-Passive Loops"
                     database_text += f"{_ids_name}={get_database_path(inputargs)}\n"
                 connection.close()
@@ -258,13 +256,11 @@ if ids_obj_equilibrium.time is not None:
                     logger.warning(f"{_ids_name} ids is not present error {e}")
                 if _ids_data:
                     view_magnetics = MagneticsView(_ids_data)
-                    view_magnetics.view_b_field_probes(
-                        ax1, probe_type="b_field_phi_probe", select=":", show_labels=args.show_labels
-                    )
-                    view_magnetics.view_b_field_probes(ax1, select=":", show_labels=args.show_labels)
-                    view_magnetics.view_flux_loop(ax1, select=":", show_labels=args.show_labels)
-                    view_magnetics.view_rogowski_coil(ax1, select=":", show_labels=args.show_labels)
-                    view_magnetics.view_shunt(ax1, select=":", show_labels=args.show_labels)
+                    view_magnetics.view_b_field_probes(ax1, probe_type="b_field_phi_probe", select=":")
+                    view_magnetics.view_b_field_probes(ax1, select=":")
+                    view_magnetics.view_flux_loop(ax1, select=":")
+                    view_magnetics.view_rogowski_coil(ax1, select=":")
+                    view_magnetics.view_shunt(ax1, select=":")
                     title += " Magnetics"
                     database_text += f"{_ids_name}={get_database_path(inputargs)}\n"
                 connection.close()
