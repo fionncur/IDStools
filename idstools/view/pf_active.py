@@ -36,7 +36,6 @@ class PFActiveView:
         facecolor="#ff7400",
         alpha=0.7,
         linewidth=1,
-        show_labels=False,
     ):
         """
         This function plots and annotates the active PF coils on a existing plot.
@@ -73,14 +72,13 @@ class PFActiveView:
         if coils_dict is None:
             logger.warning("Can not plot, no pf passive loops data found.")
             return
-        for _, coil_info in coils_dict.items():
+        for cindex, coil_info in coils_dict.items():
 
             coil_elements = coil_info["elements"]
 
             name = coil_info["name"]
-
-            for _, element_info in coil_elements.items():
-                cx = cy = 0.0
+            cx = cy = 0.0
+            for eindex, element_info in coil_elements.items():
 
                 if element_info["geometry_type"] == 2:
                     width = element_info["width"]
@@ -218,14 +216,13 @@ class PFActiveView:
                         ax.add_patch(outline)
                     cx = np.mean(r)
                     cy = np.mean(z)
-                if show_labels:
-                    name = ""
-                    if coil_info["identifier"]:
-                        name = coil_info["identifier"]
-                    elif coil_info["name"]:
-                        name = f"{coil_info['name']}"
-
-                    ax.text(cx, cy, name, fontsize="small", color="#333333")
+            name = ""
+            if coil_info["identifier"]:
+                name = coil_info["identifier"]
+            elif coil_info["name"]:
+                name = f"{coil_info['name']}"
+            ha = "right" if cindex % 2 == 0 else "left"
+            ax.text(cx, cy, name, fontsize="small", ha=ha, color="#333333", visible=False)
         pf_active_legend = Patch(
             edgecolor=edgecolor, facecolor=facecolor, alpha=alpha, linewidth=linewidth, label="pf_passive"
         )

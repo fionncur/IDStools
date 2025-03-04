@@ -27,7 +27,7 @@ class TFView:
         self.ids = ids
         self.compute_obj = TFCompute(ids)
 
-    def view_tf_coils(self, ax: plt.axes, select_coil=":", select_conductor="", color="#b07154", show_labels=False):
+    def view_tf_coils(self, ax: plt.axes, select_coil=":", select_conductor="", color="#b07154"):
         """
         Plots the Toroidal Field (TF) coils on the given matplotlib axis.
 
@@ -82,14 +82,13 @@ class TFView:
                         )
                         ax.add_patch(segment)
 
-            if show_labels:
-                name = ""
-                if coil_info["identifier"]:
-                    name = coil_info["identifier"]
-                elif coil_info["name"]:
-                    name = f"{coil_info['name']}"
+            name = ""
+            if coil_info["identifier"]:
+                name = coil_info["identifier"]
+            elif coil_info["name"]:
+                name = f"{coil_info['name']}"
 
-                ax.text(cx, cy, name, fontsize="small", color="#333333")
+            ax.text(cx, cy, name, fontsize="small", color="#333333", visible=False)
         tf_legend = Patch(color=color, label="tf")
 
         ax.set_aspect("equal", adjustable="box")

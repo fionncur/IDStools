@@ -36,31 +36,28 @@ class PFPassiveView:
         facecolor="#52bf90",
         alpha=0.7,
         linewidth=1,
-        show_labels=False,
     ):
         """
         Visualizes passive PF (Poloidal Field) loops on the given matplotlib axis.
 
         Parameters:
         ax (plt.axes): The matplotlib axes on which to draw the PF loops.
-        show_labels (bool, optional): If True, labels the loops with their identifiers or names. Defaults to False.
 
         This method retrieves active PF loops from the compute object and draws them as rectangles on the provided
         matplotlib axis. Each rectangle represents a loop element, and the rectangles are colored with a blue edge
-        and cyan face with 50% transparency. If `show_labels` is True, the method labels each rectangle with the
-        loop's identifier or name at the center of the rectangle. The aspect ratio of the plot is set to be equal,
+        and cyan face with 50% transparency. The aspect ratio of the plot is set to be equal,
         and the plot title is appended with ", pf_passive".
         """
         loops_dict = self.compute_obj.get_pf_passive_loops(select=select)
         if loops_dict is None:
             logger.warning("Can not plot, no pf passive loops data found.")
             return
-        for _, loop_info in loops_dict.items():
+        for cindex, loop_info in loops_dict.items():
             loop_elements = loop_info["elements"]
             name = loop_info["name"]
+            cx = cy = 0.0
+            for eindex, element_info in loop_elements.items():
 
-            for _, element_info in loop_elements.items():
-                cx = cy = 0.0
                 if element_info["geometry_type"] == 2:
                     width = element_info["width"]
                     height = element_info["height"]
@@ -197,14 +194,13 @@ class PFPassiveView:
                         ax.add_patch(outline)
                     cx = np.mean(r)
                     cy = np.mean(z)
-                if show_labels:
-                    name = ""
-                    if loop_info["identifier"]:
-                        name = loop_info["identifier"]
-                    elif loop_info["name"]:
-                        name = f"{loop_info['name']}"
-
-                    ax.text(cx, cy, name, fontsize="small", color="#333333")
+            name = ""
+            if loop_info["identifier"]:
+                name = loop_info["identifier"]
+            elif loop_info["name"]:
+                name = f"{loop_info['name']}"
+            ha = "right" if cindex % 2 == 0 else "left"
+            ax.text(cx, cy, name, fontsize="small", ha=ha, color="#333333", visible=False)
         pf_passive_legend = Patch(
             edgecolor=edgecolor, facecolor=facecolor, alpha=alpha, linewidth=linewidth, label="pf_passive"
         )

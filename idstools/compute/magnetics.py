@@ -69,7 +69,6 @@ class MagneticsCompute:
                     probe_info["name"] = probe.name
                     if hasattr(probe, "identifier") and probe.identifier:
                         probe_info["name"] = probe.identifier
-                        print(probe.identifier)
                     probe_info["type"] = probe.type
                     probe_info["r"] = probe.position.r
                     probe_info["z"] = probe.position.z

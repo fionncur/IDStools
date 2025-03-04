@@ -9,7 +9,7 @@ class WallView:
         self.wall_ids = wall_ids
         self.compute_object = WallCompute(wall_ids)
 
-    def add_wall_markings(self, ax, r, z, show_labels=False, **kwargs):
+    def add_wall_markings(self, ax, r, z, **kwargs):
         """
         The function adds a path(Wall marking) to a given matplotlib axis object using the provided radial and
         vertical coordinates.
@@ -21,6 +21,8 @@ class WallView:
             z: The parameter "z" represents the z-coordinates of the points in the path. It is a list or  array
             containing the z-coordinates of the points.
         """
+        if not kwargs["label"]:
+            kwargs["label"] = "wall"
         n = len(r)
         codes = [Path.MOVETO] + [Path.LINETO] * (n - 1)
         vertices = []
@@ -36,14 +38,7 @@ class WallView:
         # kwargs.setdefault("color", "darkgray")
         path = Path(vertices, codes)
         patch = patches.PathPatch(path, **kwargs)
-        if show_labels:
-            ax.text(
-                r[n - 1],
-                z[n - 1],
-                kwargs.get("label"),
-                fontsize="small",
-                color="#333333",
-            )
+        ax.text(r[n - 1], z[n - 1], kwargs.get("label"), fontsize="small", color="#333333", visible=False)
         ax.add_patch(patch)
 
     def view_wall_vessel(
@@ -51,7 +46,6 @@ class WallView:
         ax,
         select_description2d=":",
         select_unit=":",
-        show_labels=False,
         wallcolor=None,
         **kwargs,
     ):
@@ -62,7 +56,6 @@ class WallView:
         Args:
             ax: `ax` is an instance of the `matplotlib.axes.Axes` class. It represents the axes on which
         the wall will be plotted.
-            showLabels:shows labels on the plot
             kwargs: This is useful to update properties of patch (Wall marking on the plot). You can find it here
             https://matplotlib.org/stable/api/_as_gen/matplotlib.patches.PathPatch.html.. most useful are linewidth,
             linestyle, visible, animated, edgecolor, fill or facecolor
@@ -114,7 +107,6 @@ class WallView:
                                     ax,
                                     rw,
                                     zw,
-                                    show_labels=show_labels,
                                     label=vname,
                                     fill=False,
                                     **kwargs,
@@ -141,7 +133,6 @@ class WallView:
         ax,
         select_description2d=":",
         select_unit=":",
-        show_labels=False,
         wallcolor=None,
         show_legend=False,
         **kwargs,
@@ -183,7 +174,6 @@ class WallView:
                         ax,
                         limiter_unit["r"],
                         limiter_unit["z"],
-                        show_labels=show_labels,
                         fill=False,
                         label=limiter_unit["name"],
                         **kwargs,
