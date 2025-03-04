@@ -108,18 +108,26 @@ class PFActiveView:
                     z = element_info["z"]
                     length_alpha = element_info["length_alpha"]
                     length_beta = element_info["length_beta"]
-                    alpha = element_info["alpha"]
-                    beta = element_info["beta"]
+                    geometry_alpha = element_info["alpha"]
+                    geometry_beta = element_info["beta"]
 
                     corner1 = np.array([r, z])
 
-                    corner2 = corner1 + np.array([length_alpha * np.cos(alpha), length_alpha * np.sin(alpha)])
+                    corner2 = corner1 + np.array(
+                        [length_alpha * np.cos(geometry_alpha), length_alpha * np.sin(geometry_alpha)]
+                    )
 
                     corner3 = corner2 + np.array(
-                        [length_beta * np.cos(0.5 * np.pi + beta), length_beta * np.sin(0.5 * np.pi + beta)]
+                        [
+                            length_beta * np.cos(0.5 * np.pi + geometry_beta),
+                            length_beta * np.sin(0.5 * np.pi + geometry_beta),
+                        ]
                     )
                     corner4 = corner1 + np.array(
-                        [length_beta * np.cos(0.5 * np.pi + beta), length_beta * np.sin(0.5 * np.pi + beta)]
+                        [
+                            length_beta * np.cos(0.5 * np.pi + geometry_beta),
+                            length_beta * np.sin(0.5 * np.pi + geometry_beta),
+                        ]
                     )
 
                     parallelogram = np.array([corner1, corner2, corner3, corner4, corner1])
