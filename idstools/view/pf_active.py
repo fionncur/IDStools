@@ -8,6 +8,7 @@ This module provides view functions and classes for pf_active ids data
 import logging
 
 import matplotlib.pyplot as plt
+import matplotlib.text as mtext
 import numpy as np
 from matplotlib.patches import Arc, FancyArrow, Patch, Polygon, Rectangle, Wedge
 
@@ -72,6 +73,8 @@ class PFActiveView:
         if coils_dict is None:
             logger.warning("Can not plot, no pf passive loops data found.")
             return
+        text_labels = []
+        shapes = []
         for cindex, coil_info in coils_dict.items():
 
             coil_elements = coil_info["elements"]
@@ -100,6 +103,7 @@ class PFActiveView:
                         linewidth=1,
                     )
                     ax.add_patch(rectangle)
+                    shapes.append(rectangle)
                     rx, ry = rectangle.get_xy()
                     cx = rx + rectangle.get_width() / 2.0
                     cy = ry + rectangle.get_height() / 2.0
@@ -142,6 +146,7 @@ class PFActiveView:
                     )
 
                     ax.add_patch(parallelogram_patch)
+                    shapes.append(parallelogram_patch)
                     cx = np.mean(parallelogram[:, 0])
                     cy = np.mean(parallelogram[:, 1])
                 elif element_info["geometry_type"] == 4:
@@ -164,6 +169,7 @@ class PFActiveView:
                         linewidth=linewidth,
                     )
                     ax.add_patch(arc)
+                    shapes.append(arc)
                     mid_angle = (start_angle + end_angle) / 2
                     cx = r + radius * np.cos(np.radians(mid_angle))
                     cy = z + radius * np.sin(np.radians(mid_angle))
@@ -188,6 +194,8 @@ class PFActiveView:
 
                     ax.add_patch(outer_wedge)
                     ax.add_patch(inner_wedge)
+                    shapes.append(outer_wedge)
+                    shapes.append(inner_wedge)
                 elif element_info["geometry_type"] == 6:
                     thickness = element_info["thickness"]
                     r1 = element_info["r1"]
@@ -206,13 +214,15 @@ class PFActiveView:
                         alpha=alpha,
                     )
                     ax.add_patch(line)
+                    shapes.append(line)
                     cx = (r1 + r2) / 2
                     cy = (z1 + z2) / 2
                 elif element_info["geometry_type"] == 1 or len(element_info["r"]) != 0:
                     r = element_info["r"]
                     z = element_info["z"]
                     if len(r) == 1:
-                        ax.scatter(r, z, color=facecolor)
+                        scatter = ax.scatter(r, z, color=facecolor)
+                        shapes.append(scatter)
                     else:
                         outline = Polygon(
                             list(zip(r, z)),
@@ -222,6 +232,7 @@ class PFActiveView:
                             alpha=alpha,
                         )
                         ax.add_patch(outline)
+                        shapes.append(outline)
                     cx = np.mean(r)
                     cy = np.mean(z)
             name = ""
@@ -230,12 +241,37 @@ class PFActiveView:
             elif coil_info["name"]:
                 name = f"{coil_info['name']}"
             ha = "right" if cindex % 2 == 0 else "left"
-            ax.text(cx, cy, name, fontsize="small", ha=ha, color="#333333", visible=False)
+            text = ax.text(cx, cy, name, fontsize="small", ha=ha, color="#333333", visible=False)
+            text_labels.append(text)
         pf_active_legend = Patch(
-            edgecolor=edgecolor, facecolor=facecolor, alpha=alpha, linewidth=linewidth, label="pf_passive"
+            edgecolor=edgecolor, facecolor=facecolor, alpha=alpha, linewidth=linewidth, label="pf_active"
         )
 
         ax.set_aspect("equal", adjustable="box")
+        pf_active_legend.is_label_visible = False
+        pf_active_legend.is_shape_visible = True
+
+        def on_legend_click(event):
+            legend = event.artist
+            if isinstance(legend, mtext.Text) and "pf_active" in legend.get_text():
+                visible = not pf_active_legend.is_label_visible
+                for text in text_labels:
+                    text.set_visible(visible)
+
+                pf_active_legend.is_label_visible = visible
+                font_weight = "bold" if visible else "normal"
+                legend.set_fontweight(font_weight)
+                ax.figure.canvas.draw_idle()
+            elif isinstance(legend, Patch) and legend.get_label() == "pf_active":
+                visible = not pf_active_legend.is_shape_visible
+                for scatter in shapes:
+                    scatter.set_visible(visible)
+                pf_active_legend.is_shape_visible = visible
+                alpha_value = 1.0 if visible else 0.7
+                legend.set_alpha(alpha_value)
+                ax.figure.canvas.draw_idle()
+
+        ax.figure.canvas.mpl_connect("pick_event", on_legend_click)
         title = ax.get_title()
         if title:
             ax.set_title(f"{title}, pf_active")

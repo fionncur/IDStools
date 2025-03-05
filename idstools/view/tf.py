@@ -8,6 +8,7 @@ This module provides view functions and classes for tf ids data
 import logging
 
 import matplotlib.pyplot as plt
+import matplotlib.text as mtext
 from matplotlib.patches import Patch, Polygon
 
 from idstools.compute.tf import TFCompute
@@ -51,6 +52,8 @@ class TFView:
         if coils_dict is None:
             logger.warning("Can not plot, no tf coils data found.")
             return
+        text_labels = []
+        shapes = []
         for _, coil_info in coils_dict.items():
             conductors = coil_info["conductors"]
             if hasattr(coil_info, "identifier"):
@@ -63,8 +66,10 @@ class TFView:
             for _, conductor_info in conductors.items():
                 elements = conductor_info["elements"]
                 # cross_sections = conductor_info["cross_section"]
-                ax.scatter(elements["start_points"]["r"], elements["start_points"]["z"], color=color, s=10)
-                ax.scatter(elements["end_points"]["r"], elements["end_points"]["z"], color=color, s=10)
+                scatter = ax.scatter(elements["start_points"]["r"], elements["start_points"]["z"], color=color, s=10)
+                shapes.append(scatter)
+                scatter = ax.scatter(elements["end_points"]["r"], elements["end_points"]["z"], color=color, s=10)
+                shapes.append(scatter)
                 for ielement in range(len(elements.types)):
                     if elements["types"][ielement] == 1:  # line
 
@@ -79,6 +84,7 @@ class TFView:
                             [[r1, z1], [r2, z2]], closed=False, edgecolor=color, facecolor="none", linewidth=1
                         )
                         ax.add_patch(segment)
+                        shapes.append(segment)
 
             name = ""
             if coil_info["identifier"]:
@@ -86,10 +92,35 @@ class TFView:
             elif coil_info["name"]:
                 name = f"{coil_info['name']}"
 
-            ax.text(cx, cy, name, fontsize="small", color="#333333", visible=False)
+            text = ax.text(cx, cy, name, fontsize="small", color="#333333", visible=False)
+            text_labels.append(text)
         tf_legend = Patch(color=color, label="tf")
 
         ax.set_aspect("equal", adjustable="box")
+        tf_legend.is_label_visible = False
+        tf_legend.is_shape_visible = True
+
+        def on_legend_click(event):
+            legend = event.artist
+            if isinstance(legend, mtext.Text) and "tf" in legend.get_text():
+                visible = not tf_legend.is_label_visible
+                for text in text_labels:
+                    text.set_visible(visible)
+
+                tf_legend.is_label_visible = visible
+                font_weight = "bold" if visible else "normal"
+                legend.set_fontweight(font_weight)
+                ax.figure.canvas.draw_idle()
+            elif isinstance(legend, Patch) and legend.get_label() == "tf":
+                visible = not tf_legend.is_shape_visible
+                for scatter in shapes:
+                    scatter.set_visible(visible)
+                tf_legend.is_shape_visible = visible
+                alpha_value = 1.0 if visible else 0.7
+                legend.set_alpha(alpha_value)
+                ax.figure.canvas.draw_idle()
+
+        ax.figure.canvas.mpl_connect("pick_event", on_legend_click)
         title = ax.get_title()
         if title:
             ax.set_title(f"{title}, tf")

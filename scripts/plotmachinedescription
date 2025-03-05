@@ -31,6 +31,14 @@ from idstools.view.wall import WallView
 
 logger = setup_logger("module", stdout_level=logging.INFO)
 idses = "tf,wall,pf_passive,pf_active,magnetics"
+# def on_legend_click(event):
+#     print("hi", event.artist)
+# for leg, plot in zip(legend.get_lines(), [magnetics_plot]):
+#     if event.artist == leg:  # Check if clicked legend item matches
+#         visible = not plot.get_visible()
+#         plot.set_visible(visible)
+#         leg.set_alpha(1.0 if visible else 0.2)  # Dim legend if hidden
+#         fig.canvas.draw()
 
 
 def update_labels(ax):
@@ -63,8 +71,8 @@ def plot_machine_description(ids_data):
     """
 
     # Initialization
-    canvas = PlotCanvas(1, 1)
-    ax = canvas.add_axes(title="", xlabel="R (m)", ylabel="Z (m)", row=0, col=0)
+    mdcanvas = PlotCanvas(1, 1)
+    ax = mdcanvas.add_axes(title="", xlabel="R (m)", ylabel="Z (m)", row=0, col=0)
 
     database_path = ""
 
@@ -162,7 +170,13 @@ def plot_machine_description(ids_data):
     handles.extend(mdlegends)
     labels.extend(mdlabels)
     if labels:
-        ax.legend(handles=handles, labels=labels, loc="upper left", bbox_to_anchor=(1.15, 1))
+        legend = ax.legend(handles=handles, labels=labels, loc="upper left", bbox_to_anchor=(1.15, 1), fancybox=True)
+        for legline in legend.get_lines():
+            legline.set_picker(8 * 0.5)
+        for text in legend.get_texts():
+            text.set_picker(True)
+        for patch in legend.get_patches():
+            patch.set_picker(True)
     ax.set_aspect("equal", adjustable="box")
     ax.callbacks.connect("xlim_changed", update_labels)
     ax.callbacks.connect("ylim_changed", update_labels)
@@ -180,18 +194,18 @@ def plot_machine_description(ids_data):
         fontsize=7,
     )
 
-    canvas.fig.subplots_adjust(top=0.916, bottom=0.09, left=0.044, right=0.953, hspace=0.287, wspace=0.2)
-    canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
-    canvas.fig.suptitle("Machine Description", size=12)
+    mdcanvas.fig.subplots_adjust(top=0.916, bottom=0.09, left=0.044, right=0.953, hspace=0.287, wspace=0.2)
+    mdcanvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
+    mdcanvas.fig.suptitle("Machine Description", size=12)
     if args.save:
         fname = os.path.basename(__file__) + "_machine_description.png"
         if args.directory:
             if not os.path.exists(args.directory):
                 os.makedirs(args.directory)
             fname = os.path.join(args.directory, fname)
-        canvas.save(fname)
+        mdcanvas.save(fname)
     else:
-        canvas.show()
+        mdcanvas.show()
 
 
 if __name__ == "__main__":
