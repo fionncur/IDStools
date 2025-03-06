@@ -26,35 +26,18 @@ class WallCompute:
 
     def get_vessel_units(self, select_description2d=":", select_unit=":", name_filter=None):
         """
-        Retrieves information about vessel units based on the provided filters.
+        Retrieve vessel units information from the IDS object.
 
         Args:
-            select_description2d (str, optional): A slice notation string to filter the
-            description_2d array. Defaults to ":".
-            select_unit (str, optional): A slice notation string to filter the unit array within
-            each description_2d. Defaults to ":".
+            select_description2d (str, optional): A slice notation string to filter the description_2d list.
+            Defaults to ":".
+            select_unit (str, optional): A slice notation string to filter the units list. Defaults to ":".
             name_filter (str, optional): A string to filter units by name or identifier. Defaults to None.
 
         Returns:
-            dict: A dictionary containing information about the filtered vessel units. The keys are the indices of the
-                  description_2d elements, and the values are dictionaries with the following structure:
-                  {
-                      "name": str,
-                      "description": str,
-                      "vesselunits": {
-                          unit_index: {
-                              "name": str,
-                              "identifier": str,
-                              "description": str,
-                              "r": float,
-                              "z": float,
-                              "h": float,
-                              "closed": bool,
-                              "resistivity": float,
-                              "rectangle_coordinates": list
-                          }
-                      }
-                  }
+            dict: A dictionary containing information about the vessel units.
+            The keys are the indices of the description_2d elements, and the values
+            are dictionaries containing the name, description, and vessel units information.
         """
         description_2ds = list(self.ids_object.description_2d)
         if select_description2d is not None:
@@ -121,14 +104,37 @@ class WallCompute:
 
     def get_limiter_units(self, select_description2d=":", select_unit=":"):
         """
-        This `get_limiter_units` function retrieves information about limiter units from a given object.
+        Retrieve information about limiter units from the IDS object.
+
+        Parameters:
+        -----------
+        select_description2d : str, optional
+            A slice notation string to select specific description_2d entries. Default is ":" (select all).
+        select_unit : str, optional
+            A slice notation string to select specific units within each description_2d. Default is ":" (select all).
 
         Returns:
-            The `get_limiter_units` method returns a dictionary containing information about limiter
-            units. The dictionary has keys corresponding to the index of the description 2D objects and
-            values containing information about each description 2D object. Each description 2D object
-            contains the name and description of the type, as well as information about the limiter units
-            associated with it.
+        --------
+        description2d_infos : dict
+            A dictionary where keys are indices of description_2d entries and values are dictionaries containing:
+                - "name" : str
+                    The name of the description_2d type.
+                - "description" : str
+                    The description of the description_2d type.
+                - "limiterunits" : dict
+                    A dictionary where keys are indices of units and values are dictionaries containing:
+                        - "name" : str
+                            The name of the unit.
+                        - "description" : str
+                            The description of the unit (empty string if not available).
+                        - "r" : numpy.ndarray
+                            The r-coordinates of the unit's outline.
+                        - "z" : numpy.ndarray
+                            The z-coordinates of the unit's outline.
+                        - "closed" : bool
+                            Indicates if the unit is closed (default is False if not available).
+                        - "resistivity" : float
+                            The resistivity of the unit.
         """
         description_2ds = list(self.ids_object.description_2d)
         if select_description2d is not None:
@@ -169,6 +175,21 @@ class WallCompute:
         return description2d_infos
 
     def get_inner_wall(self):
+        """
+        Retrieves the inner wall coordinates from the IDS object.
+
+        This method extracts the radial (r) and vertical (z) coordinates of the
+        inner wall outline from the first limiter unit in the IDS object's
+        2D description. It appends the first coordinate to the end of the array
+        to close the loop of the wall outline.
+
+        Returns:
+            tuple: A tuple containing two numpy arrays:
+                rw (numpy.ndarray): Radial coordinates of the inner wall.
+                zw (numpy.ndarray): Vertical coordinates of the inner wall.
+
+            If an error occurs during extraction, returns None.
+        """
         try:
             rw = self.ids_object.description_2d[0].limiter.unit[0].outline.r
             zw = self.ids_object.description_2d[0].limiter.unit[0].outline.z

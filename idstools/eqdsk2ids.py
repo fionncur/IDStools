@@ -24,17 +24,6 @@ class GEQDSK:
     [1] L.L. Lao, "G EQDSK FORMAT", https://w3.pppl.gov/ntcc/TORAY/G_EQDSK.pdf
     [2] O. Sauter and S.Yu. Medvedev, "Tokamak Coordinate Conventions : COCOS",
     Comput. Physics Commun. 184 (2013) 293
-
-    Attributes
-    ----------
-    fpath: str
-        Path to GEQDSK file
-    data: OrderedDict
-        Information in GEQDSK file
-    cocos: COCOS
-        Class COCOS computed from input
-    coef: dict
-        COCOS Transformation coefficients regarding IDS default (COCOS=11)
     """
 
     def __init__(self, fpath, ipsign_out, b0sign_out, cocos_in):

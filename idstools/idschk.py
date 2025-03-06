@@ -223,16 +223,6 @@ class IDSValidator(cerberus.Validator):
     """
     Cerberus-Validator extended with custom rules for IDS
 
-    Attributes
-    ----------
-    cocos: COCOS
-        COCOS for validation
-    shape: list
-        data shape
-    coord: list
-        name of coordinate
-    ndim: int
-        number of dimension
     """
 
     ids = None

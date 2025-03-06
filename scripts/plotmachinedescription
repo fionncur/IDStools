@@ -31,14 +31,6 @@ from idstools.view.wall import WallView
 
 logger = setup_logger("module", stdout_level=logging.INFO)
 idses = "tf,wall,pf_passive,pf_active,magnetics"
-# def on_legend_click(event):
-#     print("hi", event.artist)
-# for leg, plot in zip(legend.get_lines(), [magnetics_plot]):
-#     if event.artist == leg:  # Check if clicked legend item matches
-#         visible = not plot.get_visible()
-#         plot.set_visible(visible)
-#         leg.set_alpha(1.0 if visible else 0.2)  # Dim legend if hidden
-#         fig.canvas.draw()
 
 
 def update_labels(ax):
@@ -221,6 +213,7 @@ if __name__ == "__main__":
         help="""Provide machine descriptions that you need to plot\n
     with uris for example\n
     "imas:mdsplus?user=public;pulse=116000;run=4;database=ITER_MD;version=3#wall"\n
+    "imas:mdsplus?user=public;pulse=116000;run=4;database=ITER_MD#wall:0/description2d[0]/vessel/unit[:]"
     "imas:mdsplus?user=public;pulse=116000;run=4;database=ITER_MD;version=3"\n
     """,
     )

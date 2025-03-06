@@ -35,22 +35,7 @@ class TFCompute:
 
         Returns:
             dict: A dictionary containing information about the selected TF coils and their conductors.
-              The dictionary structure is as follows:
-              {
-                  coil_index: {
-                  "identifier": str,
-                  "name": str,
-                  "resistance": float,
-                  "turns": int,
-                  "conductors": {
-                      conductor_index: {
-                      "elements": list,
-                      "cross_section": float
-                      }
-                  }
-                  }
-              }
-              If no coils are found, a warning is logged and None is returned.
+                If no coils are found, a warning is logged and None is returned.
         """
         coil_arrays = list(self.ids.coil)
         if select_coil is not None:

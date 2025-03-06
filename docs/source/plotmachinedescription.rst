@@ -6,6 +6,7 @@
 and plot machine descriptions based on one or more URIs.
 It allows users to fetch machine configuration data and display it graphically,
 with options to show labels and save figures.
+You can control visibility of shapes and labels by clicking on legends.
 
 *******************************
  Syntax plotmachinedescription

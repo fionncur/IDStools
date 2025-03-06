@@ -22,7 +22,6 @@ from imaspy.ids_struct_array import IDSStructArray
 from imaspy.ids_structure import IDSStructure
 from imaspy.ids_toplevel import IDSToplevel
 from packaging import version
-from rich.progress import track
 from rich.table import Table
 from rich.text import Text
 
@@ -778,7 +777,7 @@ def get_quantities_from_pulses(
 
     values = []
     pulse_for_df = []
-    for pulse_tuple in track(pulses, description="[green]Processing..."):
+    for pulse_tuple in pulses:
         pulse = pulse_tuple[0]
         run = pulse_tuple[1]
         backend = pulse_tuple[2]
@@ -805,7 +804,7 @@ def get_quantities_from_pulses(
                     connection.get(idsname, autoconvert=False), connection.factory.version
                 )  # noqa: F841
             else:
-                ids = connection.get(idsname, autoconvert=False)  # noqa: F841
+                ids = connection.get(idsname, autoconvert=False, lazy=True)  # noqa: F841
             node = eval("ids." + valpath)
             if node.has_value:
                 values.append(node)
