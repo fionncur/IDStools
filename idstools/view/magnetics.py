@@ -49,7 +49,7 @@ class MagneticsView:
         if probe_type == "b_field_pol_probe":
             patch_color = "#ff3d41"
         elif probe_type == "b_field_phi_probe":
-            patch_color = "#ff3d41"
+            patch_color = "#f37199"
         poloidal_angle_rad = -probe_data["poloidal_angle"]
         rect_size = 0
         arrow_length = 0.001

@@ -205,7 +205,6 @@ for mdids_info in args.md:
                     wallview.view_wall(
                         ax_polview,
                         wallcolor="slategray",
-                        show_legend=False,
                     )
                 else:
                     logger.warning(f"{_ids_name} ids is empty in the dbentry")

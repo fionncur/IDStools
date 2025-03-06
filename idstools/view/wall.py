@@ -1,4 +1,6 @@
 import matplotlib.patches as patches
+import matplotlib.text as mtext
+from matplotlib.patches import Rectangle
 from matplotlib.path import Path
 
 from idstools.compute.wall import WallCompute
@@ -38,8 +40,9 @@ class WallView:
         # kwargs.setdefault("color", "darkgray")
         path = Path(vertices, codes)
         patch = patches.PathPatch(path, **kwargs)
-        ax.text(r[n - 1], z[n - 1], kwargs.get("label"), fontsize="small", color="#333333", visible=False)
+        text = ax.text(r[n - 1], z[n - 1], kwargs.get("label"), fontsize="small", color="#333333", visible=False)
         ax.add_patch(patch)
+        return patch, text
 
     def view_wall_vessel(
         self,
@@ -87,6 +90,8 @@ class WallView:
         if vessel_units := self.compute_object.get_vessel_units(
             select_description2d=select_description2d, select_unit=select_unit
         ):
+            text_labels = []
+            shapes = []
             for _, description2d in vessel_units.items():
                 for v_index, vessel_unit in description2d["vesselunits"].items():
                     show_label_flag = True
@@ -103,16 +108,16 @@ class WallView:
 
                         for rw, zw in vessel_unit["rectangle_coordinates"]:
                             if show_label_flag:
-                                self.add_wall_markings(
+                                shape, text = self.add_wall_markings(
                                     ax,
                                     rw,
                                     zw,
-                                    label=vname,
+                                    label=f"wall/{vname}",
                                     fill=False,
                                     **kwargs,
                                 )
                             else:
-                                self.add_wall_markings(
+                                shape, text = self.add_wall_markings(
                                     ax,
                                     rw,
                                     zw,
@@ -120,6 +125,35 @@ class WallView:
                                     **kwargs,
                                 )
                             show_label_flag = False
+                            text_labels.append(text)
+                            shapes.append(shape)
+
+            def on_legend_click(event):
+                legend_object = ax.get_legend()
+                if not hasattr(legend_object, "is_wall_label_visible"):
+                    legend_object.is_wall_label_visible = False
+                if not hasattr(legend_object, "is_wall_shape_visible"):
+                    legend_object.is_wall_shape_visible = True
+                legend = event.artist
+                if isinstance(legend, mtext.Text) and "wall" in legend.get_text():
+                    visible = not legend_object.is_wall_label_visible
+                    for text in text_labels:
+                        text.set_visible(visible)
+
+                    legend_object.is_wall_label_visible = visible
+                    font_weight = "bold" if visible else "normal"
+                    legend.set_fontweight(font_weight)
+                    ax.figure.canvas.draw_idle()
+                elif isinstance(legend, Rectangle) and "wall" in legend.get_label():
+                    visible = not legend_object.is_wall_shape_visible
+                    for scatter in shapes:
+                        scatter.set_visible(visible)
+                    legend_object.is_wall_shape_visible = visible
+                    alpha_value = 1.0 if visible else 0.7
+                    legend.set_alpha(alpha_value)
+                    ax.figure.canvas.draw_idle()
+
+            ax.figure.canvas.mpl_connect("pick_event", on_legend_click)
         title = ax.get_title()
         if title:
             ax.set_title(f"{title}, wall-vessel")
@@ -134,7 +168,6 @@ class WallView:
         select_description2d=":",
         select_unit=":",
         wallcolor=None,
-        show_legend=False,
         **kwargs,
     ):
         colors = [
@@ -163,6 +196,8 @@ class WallView:
         if limiter_units := self.compute_object.get_limiter_units(
             select_description2d=select_description2d, select_unit=select_unit
         ):
+            text_labels = []
+            shapes = []
             for _, description2d in limiter_units.items():
 
                 for l_index, limiter_unit in description2d["limiterunits"].items():
@@ -170,14 +205,43 @@ class WallView:
                         kwargs.update({"color": wallcolor})
                     else:
                         kwargs.update({"color": colors[(l_index + v_index) % 4]})
-                    self.add_wall_markings(
+                    shape, text = self.add_wall_markings(
                         ax,
                         limiter_unit["r"],
                         limiter_unit["z"],
                         fill=False,
-                        label=limiter_unit["name"],
+                        label=f"wall/{limiter_unit['name']}" if limiter_unit["name"] != "" else "wall",
                         **kwargs,
                     )
+                    text_labels.append(text)
+                    shapes.append(shape)
+
+            def on_legend_click(event):
+                legend_object = ax.get_legend()
+                if not hasattr(legend_object, "is_wall_label_visible"):
+                    legend_object.is_wall_label_visible = False
+                if not hasattr(legend_object, "is_wall_shape_visible"):
+                    legend_object.is_wall_shape_visible = True
+                legend = event.artist
+                if isinstance(legend, mtext.Text) and "wall" in legend.get_text():
+                    visible = not legend_object.is_wall_label_visible
+                    for text in text_labels:
+                        text.set_visible(visible)
+
+                    legend_object.is_wall_label_visible = visible
+                    font_weight = "bold" if visible else "normal"
+                    legend.set_fontweight(font_weight)
+                    ax.figure.canvas.draw_idle()
+                elif isinstance(legend, Rectangle) and "wall" in legend.get_label():
+                    visible = not legend_object.is_wall_shape_visible
+                    for scatter in shapes:
+                        scatter.set_visible(visible)
+                    legend_object.is_wall_shape_visible = visible
+                    alpha_value = 1.0 if visible else 0.7
+                    legend.set_alpha(alpha_value)
+                    ax.figure.canvas.draw_idle()
+
+            ax.figure.canvas.mpl_connect("pick_event", on_legend_click)
         title = ax.get_title()
         if title:
             ax.set_title(f"{title}, wall-limiter")

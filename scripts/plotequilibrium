@@ -27,6 +27,7 @@ from idstools.view.equilibrium import EquilibriumView
 from idstools.view.magnetics import MagneticsView
 from idstools.view.pf_active import PFActiveView
 from idstools.view.pf_passive import PFPassiveView
+from idstools.view.tf import TFView
 from idstools.view.wall import WallView
 
 
@@ -130,20 +131,24 @@ if ids_obj_equilibrium.time is not None:
     database_text = ""
     if args.plots:
         canvas = PlotCanvas(2, 6)
-        axes_list1 = []
-        ax2 = canvas.add_axes(title="", xlabel="", row=0, col=1)
-        ax3 = canvas.add_axes(title="", xlabel="", row=0, col=2)
-        ax4 = canvas.add_axes(title="", xlabel="", row=1, col=1)
-        # ax5=canvas.add_axes(title="", xlabel="", row=1, col=2)
+
+        # Middle axis spanning two rows
+        ax1 = canvas.add_axes(title="", xlabel="", row=0, col=2, rowspan=2)
+
+        # Left subplots
+        ax2 = canvas.add_axes(title="", xlabel="", row=0, col=0)
+        ax3 = canvas.add_axes(title="", xlabel="", row=0, col=1)
+        ax4 = canvas.add_axes(title="", xlabel="", row=1, col=0)
+        # ax5 = canvas.add_axes(title="", xlabel="", row=1, col=1)
         axes_list1 = [ax2, ax3, ax4]
 
-        axes_list2 = []
+        # Right subplots
         ax6 = canvas.add_axes(title="", xlabel="", row=0, col=3)
         ax7 = canvas.add_axes(title="", xlabel="", row=0, col=4)
         ax8 = canvas.add_axes(title="", xlabel="", row=0, col=5)
         ax9 = canvas.add_axes(title="", xlabel="", row=1, col=3)
         ax10 = canvas.add_axes(title="", xlabel="", row=1, col=4)
-        # ax11=canvas.add_axes(title="", xlabel="", row=1, col=5)
+        # ax11 = canvas.add_axes(title="", xlabel="", row=1, col=5)
         axes_list2 = [ax6, ax7, ax8, ax9, ax10]
 
     else:
@@ -266,6 +271,25 @@ if ids_obj_equilibrium.time is not None:
                 connection.close()
             else:
                 logger.warning(f"given data entry is not present for {_ids_name}")
+        if "tf" in _ids_name:
+            connection = DBMaster.get_connection(inputargs)
+            if connection is not None:
+                _ids_data = None
+                try:
+                    _ids_data = connection.get("tf", autoconvert=False)
+                    if _ids_data.ids_properties.homogeneous_time == ids_defs.EMPTY_INT:
+                        logger.warning(f"{_ids_name} ids is empty in the dbentry")
+                except Exception as e:
+                    logger.warning(f"{_ids_name} ids is not present error {e}")
+                if _ids_data:
+                    tfview = TFView(_ids_data)
+                    tfview.view_tf_coils(ax1)
+
+                    title += " tf"
+                    database_text += f"{_ids_name}={get_database_path(inputargs)}\n"
+                connection.close()
+            else:
+                logger.warning(f"given data entry is not present for {_ids_name}")
     view_object.view_magnetic_poloidal_flux(ax1, time_slice, plot_rho=args.rho)
     ax1.set_title(title)
 
@@ -285,7 +309,7 @@ if ids_obj_equilibrium.time is not None:
         view_object.plot_global_quantities(axes_list2, time_slice)
 
     canvas.fig.suptitle(get_title(args, "Equilibrium", time_value), size=12)
-    canvas.fig.subplots_adjust(top=0.933, bottom=0.05, left=0.03, right=0.988, hspace=0.221, wspace=0.364)
+    canvas.fig.subplots_adjust(top=0.933, bottom=0.05, left=0.043, right=0.988, hspace=0.221, wspace=0.364)
     canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
     if args.save:
         fname = get_file_name(args, f"{os.path.basename(__file__)}_Equilibrium", time_value)

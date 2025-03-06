@@ -28,7 +28,7 @@ class TFView:
         self.ids = ids
         self.compute_obj = TFCompute(ids)
 
-    def view_tf_coils(self, ax: plt.axes, select_coil=":", select_conductor="", color="#b07154"):
+    def view_tf_coils(self, ax: plt.axes, select_coil=":", select_conductor=":", color="#b07154"):
         """
         Plots the Toroidal Field (TF) coils on the given matplotlib axis.
 
