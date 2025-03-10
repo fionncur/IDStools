@@ -243,8 +243,6 @@ class EquilibriumView(BasePlot):
                 )
                 axes_list[counter].set_xlabel(f"{coordinate.metadata.name} ({coordinate.metadata.units})")
                 axes_list[counter].set_ylabel(name)
-                if name in ["pressure", "q", "beta_pol"]:
-                    axes_list[counter].invert_xaxis()
                 axes_list[counter].legend(loc="upper right")
             else:
                 logger.warning(f"attribute {name} is empty")
