@@ -231,13 +231,19 @@ class EquilibriumView(BasePlot):
                 if np.all(np.isnan(copied_field.value)):
                     axes_list[counter].remove()
                     continue
-                coordinate = copied_field.coordinates[0]
+                coordinate = coordinate_normalized = copied_field.coordinates[0]
+                if coordinate.metadata.name == "psi":
+                    psi = coordinate
+                    psi_min = np.min(psi)
+                    psi_max = np.max(psi)
+                    coordinate_normalized = (psi - psi_min) / (psi_max - psi_min)
+
                 axes_list[counter].plot(
-                    coordinate, copied_field, label=f"{field.metadata.name} ({field.metadata.units})"
+                    coordinate_normalized, copied_field, label=f"{field.metadata.name} ({field.metadata.units})"
                 )
                 axes_list[counter].set_xlabel(f"{coordinate.metadata.name} ({coordinate.metadata.units})")
                 axes_list[counter].set_ylabel(name)
-                if name == "pressure":
+                if name in ["pressure", "q", "beta_pol"]:
                     axes_list[counter].invert_xaxis()
                 axes_list[counter].legend(loc="upper right")
             else:
