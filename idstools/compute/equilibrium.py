@@ -1024,7 +1024,7 @@ class EquilibriumCompute:
             for attribute in attributes:
                 info_flag = True
                 for ti in range(len(self.ids.time_slice)):
-                    node = eval(f"self.ids.time_slice[ti].global_quantities.{attribute}")
+                    node = eval(f"self.ids.time_slice[{ti}].global_quantities.{attribute}")
                     if info_flag:
                         quantities[attribute]["unit"] = node.metadata.units
                         quantities[attribute]["coordinate_unit"] = "t"
@@ -1033,11 +1033,20 @@ class EquilibriumCompute:
                         quantities[attribute]["coordinate_name"] = "time"
                         info_flag = False
                     quantities[attribute]["node"].append(node)
+
+                counter = 0
+                quantities[attribute]["has_value"] = False
+                for node in quantities[attribute]["node"]:
+                    if node != -9e40:
+                        counter += 1
+
+                if len(quantities[attribute]["node"]) == counter:
+                    quantities[attribute]["has_value"] = True
             for attribute in attributes:
                 quantities[attribute]["node"] = np.array(quantities[attribute]["node"])
         else:
             for attribute in attributes:
-                quantities[attribute] = eval(f"self.ids.time_slice[time_slice].global_quantities.{attribute}")
+                quantities[attribute] = eval(f"self.ids.time_slice[{time_slice}].global_quantities.{attribute}")
         return quantities
         # q_min = self.ids.time_slice[ti].global_quantities.q_min
         # q_95 = self.ids.time_slice[ti].global_quantities.q_95

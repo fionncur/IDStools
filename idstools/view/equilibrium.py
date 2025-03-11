@@ -244,10 +244,7 @@ class EquilibriumView(BasePlot):
                 axes_list[counter].set_xlabel(f"{coordinate.metadata.name} ({coordinate.metadata.units})")
                 axes_list[counter].set_ylabel(name)
                 axes_list[counter].legend(loc="upper right")
-            else:
-                logger.warning(f"attribute {name} is empty")
-                axes_list[counter].remove()
-            counter = counter + 1
+                counter = counter + 1
 
     def plot_global_quantities(self, axes_list, time_slice, attributes=None):
         quantities = self.compute_obj.get_global_quantities(time_slice, attributes)
@@ -257,15 +254,13 @@ class EquilibriumView(BasePlot):
         for name, field in quantities.items():
             if isinstance(field["node"], np.floating) or isinstance(field["node"], np.ndarray):
                 field["node"][field["node"] == imas.ids_defs.EMPTY_FLOAT] = np.nan
-            if np.all(np.isnan(field["node"])):
-                axes_list[counter].remove()
-            else:
+            if field["has_value"]:
                 axes_list[counter].plot(field["coordinate"], field["node"], label=f"{name} ({field['unit']})")
                 axes_list[counter].set_xlabel(f"{field['coordinate_name']} ({field['coordinate_unit']})")
                 axes_list[counter].set_ylabel(name)
                 self.view_time_line(axes_list[counter], time_slice)
                 axes_list[counter].legend(loc="upper right")
-            counter = counter + 1
+                counter = counter + 1
 
     def view_time_line(self, ax, time):
         """
