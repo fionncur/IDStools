@@ -9,6 +9,7 @@ import functools
 import logging
 from typing import Union
 
+import imaspy as imas
 import numpy as np
 
 from idstools.database import DBMaster
@@ -985,7 +986,11 @@ class EquilibriumCompute:
         if attributes is None:
             attributes = ["pressure", "q", "beta_pol"]
         for attribute in attributes:
-            quantities[attribute] = eval(f"self.ids.time_slice[{time_slice}].profiles_1d.{attribute}")
+            ids_field = eval(f"self.ids.time_slice[{time_slice}].profiles_1d.{attribute}")
+            if ids_field.has_value:
+                quantities[attribute] = eval(f"self.ids.time_slice[{time_slice}].profiles_1d.{attribute}")
+            else:
+                logger.error(f"self.ids.time_slice[{time_slice}].profiles_1d.{attribute} not found")
         return quantities
 
     def get_global_quantities(self, time_slice=None, attributes=None):
@@ -1033,15 +1038,14 @@ class EquilibriumCompute:
                         quantities[attribute]["coordinate_name"] = "time"
                         info_flag = False
                     quantities[attribute]["node"].append(node)
-
                 counter = 0
-                quantities[attribute]["has_value"] = False
+                quantities[attribute]["has_value"] = True
                 for node in quantities[attribute]["node"]:
-                    if node != -9e40:
+                    if node == imas.ids_defs.EMPTY_INT or node == imas.ids_defs.EMPTY_FLOAT:
                         counter += 1
 
                 if len(quantities[attribute]["node"]) == counter:
-                    quantities[attribute]["has_value"] = True
+                    quantities[attribute]["has_value"] = False
             for attribute in attributes:
                 quantities[attribute]["node"] = np.array(quantities[attribute]["node"])
         else:

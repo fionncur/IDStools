@@ -255,7 +255,10 @@ class EquilibriumView(BasePlot):
             if isinstance(field["node"], np.floating) or isinstance(field["node"], np.ndarray):
                 field["node"][field["node"] == imas.ids_defs.EMPTY_FLOAT] = np.nan
             if field["has_value"]:
-                axes_list[counter].plot(field["coordinate"], field["node"], label=f"{name} ({field['unit']})")
+                if len(field["node"]) < 5:
+                    axes_list[counter].scatter(field["coordinate"], field["node"], label=f"{name} ({field['unit']})")
+                else:
+                    axes_list[counter].plot(field["coordinate"], field["node"], label=f"{name} ({field['unit']})")
                 axes_list[counter].set_xlabel(f"{field['coordinate_name']} ({field['coordinate_unit']})")
                 axes_list[counter].set_ylabel(name)
                 self.view_time_line(axes_list[counter], time_slice)
