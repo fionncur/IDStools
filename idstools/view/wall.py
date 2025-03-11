@@ -198,19 +198,29 @@ class WallView:
         ):
             text_labels = []
             shapes = []
-            for _, description2d in limiter_units.items():
-
+            show_label_flag = True
+            for idescription2d, description2d in limiter_units.items():
                 for l_index, limiter_unit in description2d["limiterunits"].items():
                     if wallcolor:
                         kwargs.update({"color": wallcolor})
                     else:
                         kwargs.update({"color": colors[(l_index + v_index) % 4]})
+                    if show_label_flag:
+                        shape, text = self.add_wall_markings(
+                            ax,
+                            limiter_unit["r"],
+                            limiter_unit["z"],
+                            fill=False,
+                            label=f"wall/{limiter_unit['name']}" if limiter_unit["name"] != "" else "wall/limiter",
+                            **kwargs,
+                        )
+
+                        show_label_flag = False
                     shape, text = self.add_wall_markings(
                         ax,
                         limiter_unit["r"],
                         limiter_unit["z"],
                         fill=False,
-                        label=f"wall/{limiter_unit['name']}" if limiter_unit["name"] != "" else "wall",
                         **kwargs,
                     )
                     text_labels.append(text)

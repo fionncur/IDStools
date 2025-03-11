@@ -55,6 +55,7 @@ class WallCompute:
             if units:
                 for v_unit_index, v_unit in enumerate(units):
                     unit_info = {}
+
                     unit_info["name"] = v_unit.name
                     if hasattr(v_unit, "identifier"):
                         unit_info["identifier"] = v_unit.identifier
@@ -79,6 +80,9 @@ class WallCompute:
                     unit_info["h"] = v_unit.annular.thickness
                     if hasattr(v_unit.annular.centreline, "closed"):
                         unit_info["closed"] = v_unit.annular.centreline.closed
+                        if v_unit.annular.centreline.closed:
+                            unit_info["r"] = np.append(unit_info["r"], unit_info["r"][0])
+                            unit_info["z"] = np.append(unit_info["z"], unit_info["z"][0])
                     else:
                         unit_info["closed"] = False
                     unit_info["resistivity"] = v_unit.annular.resistivity
@@ -161,6 +165,9 @@ class WallCompute:
                     unit_info["z"] = l_unit.outline.z
                     if hasattr(l_unit, "closed"):
                         unit_info["closed"] = l_unit.closed
+                        if l_unit.closed:
+                            unit_info["r"] = np.append(unit_info["r"], unit_info["r"][0])
+                            unit_info["z"] = np.append(unit_info["z"], unit_info["z"][0])
                     else:
                         unit_info["closed"] = False
                     unit_info["resistivity"] = l_unit.resistivity
