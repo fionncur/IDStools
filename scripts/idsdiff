@@ -547,7 +547,7 @@ if __name__ == "__main__":
             _uri_args.original_uri = uriinfo
             uri_dict = parse_uri(uriinfo)
             _uri_args.uri = uri_dict["uri_part"]
-            _uri_args.occurrence = uri_dict["occurrence"]
+            _uri_args.occurrence = uri_dict["occurrence"] or 0
             _uri_args.ids_name = uri_dict["ids_name"]
             _uri_args.ids_path = uri_dict["ids_path"]
             if _uri_args.ids_name != "":

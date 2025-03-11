@@ -338,7 +338,7 @@ if __name__ == "__main__":
         time_slice = float(args.time)
     uri_dict = parse_uri(args.uri)
     uri_part = uri_dict["uri_part"]
-    occurrence = uri_dict["occurrence"]
+    occurrence = uri_dict["occurrence"] or 0
     ids_name = uri_dict["ids_name"]
     ids_path = uri_dict["ids_path"]
     original_ids_path = ids_path
