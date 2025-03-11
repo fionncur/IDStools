@@ -234,8 +234,8 @@ class EquilibriumView(BasePlot):
                 coordinate = coordinate_normalized = copied_field.coordinates[0]
                 if coordinate.metadata.name == "psi":
                     psi = coordinate
-                    psi_min = np.min(psi)
-                    psi_max = np.max(psi)
+                    psi_min = psi[0]
+                    psi_max = psi[-1]
                     coordinate_normalized = (psi - psi_min) / (psi_max - psi_min)
 
                 axes_list[counter].plot(

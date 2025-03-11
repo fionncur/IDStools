@@ -4,200 +4,25 @@
 import argparse
 import logging
 import os
-import re
 
 from imaspy import convert_ids
 from rich_argparse import RichHelpFormatter
 
 from idstools.database import DBMaster
 from idstools.machinedescription import MachineDescription
-from idstools.utils.clihelper import (
-    get_database_path,
-)
 from idstools.utils.idshelper import (
     get_available_ids_and_occurrences,
     parse_uri,
 )
 from idstools.utils.idslogger import setup_logger
 from idstools.view.common import PlotCanvas
-from idstools.view.magnetics import MagneticsView
-from idstools.view.pf_active import PFActiveView
-from idstools.view.pf_passive import PFPassiveView
-from idstools.view.tf import TFView
-from idstools.view.wall import WallView
+from idstools.view.domain.mdplot import plot_machine_description
 
 # ----------------------------------------------------------------------
 
 
 logger = setup_logger("module", stdout_level=logging.INFO)
 idses = "tf,wall,pf_passive,pf_active,magnetics"
-
-
-def update_labels(ax):
-    """Show labels only when zoomed in for all subplots based on zoom width & height."""
-    # Iterate over all axes in the figure
-    xlim = ax.get_xlim()
-    ylim = ax.get_ylim()
-
-    visible_texts = [
-        text
-        for text in ax.texts
-        if xlim[0] <= text.get_position()[0] <= xlim[1] and ylim[0] <= text.get_position()[1] <= ylim[1]
-    ]
-    max_visible_texts = 100
-    show_labels = len(visible_texts) < max_visible_texts
-
-    for text in ax.texts:
-        text.set_visible(False)
-
-        if show_labels and text in visible_texts:
-            text.set_visible(True)
-    ax.figure.canvas.draw_idle()
-
-
-def plot_machine_description(ids_data):
-    """
-    The `plotMachineDescription` method is responsible for plotting the machine description
-    based on the provided pulse list.
-
-    """
-
-    # Initialization
-    mdcanvas = PlotCanvas(1, 1)
-    ax = mdcanvas.add_axes(title="", xlabel="R (m)", ylabel="Z (m)", row=0, col=0)
-
-    database_path = ""
-
-    mdlegends = []
-    mdlabels = []
-    for idsinfo, ids_data_and_config in ids_data.items():
-        # if idsDataAndConfig["yamlConfig"] is None:
-        #     logger.error(f"Could not retrieve machine description for {idsName}")
-        #     databasePath += f"{idsName} = not found"
-        #     continue
-        ids_name = ids_data_and_config["idsname"]
-
-        idsfield = ids_data_and_config["idsfield"] or ""
-        idsocc = ids_data_and_config["idsocc"]
-
-        logger.info(f"Started to process {ids_name} ids for plotting {idsinfo}")
-
-        matches = re.findall(r"[\[(]([^\])]+)[\])]", idsfield)
-        select = ":"
-        if len(matches) > 0:
-            select = matches[0]
-        if ids_name == "pf_active":
-            pfcoilsview = PFActiveView(ids_data_and_config["idsData"])
-            if "coil" in idsfield or idsfield == "":
-                _legend = pfcoilsview.view_active_pf_coils(ax, select=select)
-                if _legend:
-                    mdlegends.append(_legend)
-                    mdlabels.append(f"pf_active:{idsocc}/coil[{select}]")
-                    database_path += "pf_active = " + get_database_path(ids_data_and_config["connectionArgs"]) + "\n"
-        elif ids_name == "tf":
-            select2 = ":"
-            if len(matches) == 2:
-                select2 = matches[1]
-            tfview = TFView(ids_data_and_config["idsData"])
-            if "coil" in idsfield or idsfield == "":
-                _legend = tfview.view_tf_coils(ax, select_coil=select, select_conductor=select2)
-                if _legend:
-                    mdlegends.append(_legend)
-                    mdlabels.append(f"tf:{idsocc}/coil[{select}]/conductor[{select2}]")
-                    database_path += "tf = " + get_database_path(ids_data_and_config["connectionArgs"]) + "\n"
-        elif ids_name == "pf_passive":
-            pfpassiveview = PFPassiveView(ids_data_and_config["idsData"])
-            if "loop" in idsfield or idsfield == "":
-                _legend = pfpassiveview.view_pf_passive_loops(ax, select=select)
-                if _legend:
-                    mdlegends.append(_legend)
-
-                    mdlabels.append(f"pf_passive:{idsocc}/loop[{select}]")
-                    database_path += "pf_passive = " + get_database_path(ids_data_and_config["connectionArgs"]) + "\n"
-        elif ids_name == "wall":
-            wallview = WallView(ids_data_and_config["idsData"])
-            select2 = ":"
-            if len(matches) == 2:
-                select2 = matches[1]
-            if "vessel" in idsfield:
-                wallview.view_wall_vessel(ax, select_description2d=select, select_unit=select2)
-            if "limiter" in idsfield or idsfield == "":
-                wallview.view_wall_limiter(ax, select_description2d=select, select_unit=select2)
-            database_path += "wall = " + get_database_path(ids_data_and_config["connectionArgs"]) + "\n"
-        elif ids_name == "magnetics":
-            magnetics_view = MagneticsView(ids_data_and_config["idsData"])
-            if "b_field_phi_probe" in idsfield or idsfield == "":
-                _legend = magnetics_view.view_b_field_probes(ax, probe_type="b_field_phi_probe", select=select)
-                if _legend:
-                    mdlegends.append(_legend)
-                    mdlabels.append(f"magnetics:{idsocc}/b_field_phi_probe[{select}]")
-            if "b_field_pol_probe" in idsfield or idsfield == "":
-                _legend = magnetics_view.view_b_field_probes(ax, probe_type="b_field_pol_probe", select=select)
-                if _legend:
-                    mdlegends.append(_legend)
-                    mdlabels.append(f"magnetics:{idsocc}/b_field_pol_probe[{select}]")
-            if "flux_loop" in idsfield or idsfield == "":
-                _legend = magnetics_view.view_flux_loop(ax, select=select)
-                if _legend:
-                    mdlegends.append(_legend)
-                    mdlabels.append(f"magnetics:{idsocc}/flux_loop[{select}]")
-            if "rogowski_coil" in idsfield or idsfield == "":
-                _legend = magnetics_view.view_rogowski_coil(ax, select=select)
-                if _legend:
-                    mdlegends.append(_legend)
-                    mdlabels.append(f"magnetics:{idsocc}/rogowski_coil[{select}]")
-            if "shunt" in idsfield or idsfield == "":
-                _legend = magnetics_view.view_shunt(ax, select=select)
-                if _legend:
-                    mdlegends.append(_legend)
-                    mdlabels.append(f"magnetics:{idsocc}/shunt[{select}]")
-            database_path += "magnetics = " + get_database_path(ids_data_and_config["connectionArgs"]) + "\n"
-        else:
-            database_path += (
-                f"{ids_name} = " + get_database_path(ids_data_and_config["connectionArgs"]) + "No visualization yet\n"
-            )
-            logger.info(f"Visualization is not implemented yet for machine description {ids_name}")
-
-    handles, labels = ax.get_legend_handles_labels()
-    handles.extend(mdlegends)
-    labels.extend(mdlabels)
-    if labels:
-        legend = ax.legend(handles=handles, labels=labels, loc="upper left", bbox_to_anchor=(1.15, 1), fancybox=True)
-        for legline in legend.get_lines():
-            legline.set_picker(8 * 0.5)
-        for text in legend.get_texts():
-            text.set_picker(True)
-        for patch in legend.get_patches():
-            patch.set_picker(True)
-    ax.set_aspect("equal", adjustable="box")
-    ax.callbacks.connect("xlim_changed", update_labels)
-    ax.callbacks.connect("ylim_changed", update_labels)
-    ax.plot()
-
-    xmin, xmax = ax.get_xlim()
-    ymin, ymax = ax.get_ylim()
-    ax.text(
-        xmax + 0.01 * abs(xmax),
-        ymin + 0.5 * abs(ymax - ymin),
-        f"{database_path}",
-        horizontalalignment="left",
-        verticalalignment="center",
-        rotation="vertical",
-        fontsize=7,
-    )
-
-    mdcanvas.fig.subplots_adjust(top=0.916, bottom=0.09, left=0.044, right=0.953, hspace=0.287, wspace=0.2)
-    mdcanvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
-    mdcanvas.fig.suptitle("Machine Description", size=12)
-    if args.save:
-        fname = os.path.basename(__file__) + "_machine_description.png"
-        if args.directory:
-            if not os.path.exists(args.directory):
-                os.makedirs(args.directory)
-            fname = os.path.join(args.directory, fname)
-        mdcanvas.save(fname)
-    else:
-        mdcanvas.show()
 
 
 if __name__ == "__main__":
@@ -288,4 +113,19 @@ if __name__ == "__main__":
                     logger.info(f"Could not find {_ids_name} in the given data entry")
             connection.close()
 
-    plot_machine_description(ids_data)
+    # Initialization
+    mdcanvas = PlotCanvas(1, 1)
+    ax = mdcanvas.add_axes(title="", xlabel="R (m)", ylabel="Z (m)", row=0, col=0)
+    plot_machine_description(ax, ids_data)
+    mdcanvas.fig.subplots_adjust(top=0.916, bottom=0.09, left=0.044, right=0.953, hspace=0.287, wspace=0.2)
+    mdcanvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
+    mdcanvas.fig.suptitle("Machine Description", size=12)
+    if args.save:
+        fname = os.path.basename(__file__) + "_machine_description.png"
+        if args.directory:
+            if not os.path.exists(args.directory):
+                os.makedirs(args.directory)
+            fname = os.path.join(args.directory, fname)
+        mdcanvas.save(fname)
+    else:
+        mdcanvas.show()

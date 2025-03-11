@@ -301,6 +301,7 @@ if ids_obj_equilibrium.time is not None:
                 connection.close()
             else:
                 logger.warning(f"given data entry is not present for {_ids_name}")
+
     view_object.view_magnetic_poloidal_flux(ax1, time_slice, plot_rho=args.rho)
     ax1.set_title(title)
 
