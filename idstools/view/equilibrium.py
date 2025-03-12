@@ -235,7 +235,7 @@ class EquilibriumView(BasePlot):
                     if psi_norm_attr and psi_norm_attr.has_value:
                         coordinate_normalized = psi_norm_attr
                     else:
-                        logger.warning("psi_norm not found in the ids, normalizing psi with psi_min and psi_max")
+                        logger.warning("psi_norm not found in the ids, using normalized psi..")
                         psi = coordinate
                         psi_first = psi[0]
                         psi_last = psi[-1]
