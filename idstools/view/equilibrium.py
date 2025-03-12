@@ -225,23 +225,22 @@ class EquilibriumView(BasePlot):
         for name, field in quantities.items():
             if field.has_value:
                 copied_field = copy.deepcopy(field)
-
                 if isinstance(copied_field.value, np.floating) or isinstance(copied_field.value, np.ndarray):
                     copied_field[copied_field == imas.ids_defs.EMPTY_FLOAT] = np.nan
                 if np.all(np.isnan(copied_field.value)):
-                    axes_list[counter].remove()
                     continue
                 coordinate = coordinate_normalized = copied_field.coordinates[0]
                 if coordinate.metadata.name == "psi":
-                    if hasattr(self.ids.time_slice[time_slice].profiles_1d, "psi_norm"):
-                        coordinate_normalized = self.ids[f"time_slice[{time_slice}].profiles_1d.psi_norm"]
+                    psi_norm_attr = getattr(self.ids.time_slice[time_slice].profiles_1d, "psi_norm", None)
+                    if psi_norm_attr and psi_norm_attr.has_value:
+                        coordinate_normalized = psi_norm_attr
                     else:
                         logger.warning("psi_norm not found in the ids, normalizing psi with psi_min and psi_max")
-                        fact_psi = -1  # COCOS convention 11
-                        psi = coordinate * fact_psi
-                        psi_min = np.min(psi)
-                        psi_max = np.max(psi)
-                        coordinate_normalized = (psi - psi_min) / (psi_max - psi_min)
+                        psi = coordinate
+                        psi_first = psi[0]
+                        psi_last = psi[-1]
+
+                        coordinate_normalized = (psi - psi_first) / (psi_last - psi_first)
                 axes_list[counter].plot(
                     coordinate_normalized, copied_field, label=f"{field.metadata.name} ({field.metadata.units})"
                 )
