@@ -233,11 +233,15 @@ class EquilibriumView(BasePlot):
                     continue
                 coordinate = coordinate_normalized = copied_field.coordinates[0]
                 if coordinate.metadata.name == "psi":
-                    psi = coordinate
-                    psi_min = psi[0]
-                    psi_max = psi[-1]
-                    coordinate_normalized = (psi - psi_min) / (psi_max - psi_min)
-
+                    if hasattr(self.ids.time_slice[time_slice].profiles_1d, "psi_norm"):
+                        coordinate_normalized = self.ids[f"time_slice[{time_slice}].profiles_1d.psi_norm"]
+                    else:
+                        logger.warning("psi_norm not found in the ids, normalizing psi with psi_min and psi_max")
+                        fact_psi = -1  # COCOS convention 11
+                        psi = coordinate * fact_psi
+                        psi_min = np.min(psi)
+                        psi_max = np.max(psi)
+                        coordinate_normalized = (psi - psi_min) / (psi_max - psi_min)
                 axes_list[counter].plot(
                     coordinate_normalized, copied_field, label=f"{field.metadata.name} ({field.metadata.units})"
                 )

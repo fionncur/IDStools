@@ -117,7 +117,7 @@ class SummaryCompute:
             b0 = np.asarray([np.nan] * stime)
 
         # H_98 waveform
-        h_98 = self.ids.global_quantities.h_98.value
+        h_98 = np.copy(self.ids.global_quantities.h_98.value)
         if len(h_98) < 1:
             logger.critical("summary.global_quantities.h_98.value could not be read")
             h_98 = np.asarray([np.nan] * stime)
