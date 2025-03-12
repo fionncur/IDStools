@@ -241,7 +241,10 @@ class EquilibriumView(BasePlot):
                 axes_list[counter].plot(
                     coordinate_normalized, copied_field, label=f"{field.metadata.name} ({field.metadata.units})"
                 )
-                axes_list[counter].set_xlabel(f"{coordinate.metadata.name} ({coordinate.metadata.units})")
+                if coordinate.metadata.name == "psi":
+                    axes_list[counter].set_xlabel(f"{coordinate.metadata.name} (normalized)")
+                else:
+                    axes_list[counter].set_xlabel(f"{coordinate.metadata.name} ({coordinate.metadata.units})")
                 axes_list[counter].set_ylabel(name)
                 axes_list[counter].legend(loc="upper right")
                 counter = counter + 1
