@@ -1,14 +1,21 @@
+import argparse
 import copy
 import logging
 import os
 import re
 import typing
 
+from imaspy import convert_ids
 from yaml import YAMLError, safe_load
 
 from idstools.database import DBMaster
+from idstools.utils.idshelper import (
+    get_available_ids_and_occurrences,
+    parse_uri,
+)
 
 logger = logging.getLogger(f"module.{__name__}")
+MD_IDSES = "tf,wall,pf_passive,pf_active,magnetics"
 
 
 class MachineDescription:
@@ -328,3 +335,59 @@ class MachineDescription:
         if pulserun not in self.md_summary_yaml.keys():
             return False
         return True
+
+
+def get_md_data(uri_list, dd_update=False, idses=MD_IDSES):
+    ids_data = {}
+    for mduri in uri_list:
+        mdargs = argparse.Namespace()
+
+        result = parse_uri(mduri)
+
+        # specified things in uri
+        _md_uri = result["uri_part"]
+        _ids_occurrence = result["occurrence"]
+        _ids_name = result["ids_name"]
+        _ids_field = result["ids_path"]
+        _ids_names = _ids_name
+        mdargs.uri = _md_uri
+        connection = DBMaster.get_connection(mdargs)
+        if connection:
+            all_idses_list = get_available_ids_and_occurrences(connection, None)
+            if _ids_names == "":
+                _ids_names = idses
+
+            for _ids_name in _ids_names.split(","):
+                _ids_name = _ids_name.strip()
+                if _ids_name == "":
+                    continue
+                if _ids_name not in idses:
+                    continue
+                ids_found = False
+                if _ids_occurrence is None:
+                    _ids_occurrences = [value for term, value in all_idses_list if _ids_name in term]
+                else:
+                    _ids_occurrences = [_ids_occurrence]
+                for occ in _ids_occurrences:
+                    if dd_update:
+                        _ids_data = convert_ids(
+                            connection.get(_ids_name, autoconvert=False, occurrence=occ), connection.factory.version
+                        )
+                    else:
+                        _ids_data = connection.get(_ids_name, autoconvert=False, occurrence=occ)
+                    data = {}
+                    if _ids_data is not None:
+                        ids_found = True
+                        (
+                            data["idsData"],
+                            data["yamlConfig"],
+                            data["connectionArgs"],
+                            data["idsname"],
+                            data["idsfield"],
+                            data["idsocc"],
+                        ) = (_ids_data, None, mdargs, _ids_name, _ids_field, occ)
+                        ids_data[f"{_md_uri}#{_ids_name}:{occ}/{_ids_field}"] = data
+                if not ids_found:
+                    logger.info(f"Could not find {_ids_name} in the given data entry")
+            connection.close()
+    return ids_data

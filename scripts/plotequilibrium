@@ -15,6 +15,7 @@ from rich_argparse import RichHelpFormatter
 from idstools.compute.common import get_nearest_time
 from idstools.compute.equilibrium import EquilibriumCompute
 from idstools.database import DBMaster
+from idstools.machinedescription import get_md_data
 from idstools.utils.clihelper import (
     dbentry_parser,
     get_database_path,
@@ -24,6 +25,7 @@ from idstools.utils.clihelper import (
 from idstools.utils.idshelper import get_available_ids_and_times
 from idstools.utils.idslogger import setup_logger
 from idstools.view.common import PlotCanvas
+from idstools.view.domain.mdplot import plot_machine_description
 from idstools.view.equilibrium import EquilibriumView
 from idstools.view.magnetics import MagneticsView
 from idstools.view.pf_active import PFActiveView
@@ -110,13 +112,7 @@ if connection is None:
 
 # if md not provided then get it from list of idses
 if isinstance(args.md, bool) and args.md is True:
-    args.md = []
-    _ids_connection = DBMaster.get_connection(args)
-    available_ids_and_times = get_available_ids_and_times(_ids_connection)
-    for ids_name, _ in available_ids_and_times:
-        args.md.append(ids_name)
-    _ids_connection.close()
-
+    args.md = [args.uri]
 
 if args.dd_update:
     ids_obj_equilibrium = connection.get("equilibrium", occurrence=occurrence, autoconvert=False)
@@ -166,141 +162,21 @@ if ids_obj_equilibrium.time is not None:
         canvas = PlotCanvas(1, 1)
         ax1 = canvas.add_axes(title="", xlabel="", row=0, col=0)
 
-    for mdids_info in args.md:
-        inputargs = copy.deepcopy(args)
-        splittedms_ids_info = mdids_info.split("#")
-        _ids_name = []
-        _md_uri = None
-        if len(splittedms_ids_info) == 2:
-            _md_uri, ids_name = splittedms_ids_info
-            _ids_name.append(ids_name)
-            mdargs = argparse.Namespace()
-            mdargs.uri = _md_uri
-            inputargs = mdargs
-        if len(splittedms_ids_info) == 1:
-            if "imas:" in splittedms_ids_info[0]:
-                _md_uri = splittedms_ids_info[0]
-                mdargs = argparse.Namespace()
-                mdargs.uri = _md_uri
-                inputargs = mdargs
+    if args.md:
+        idses = ""
+        mduris = []
+        for mduri in args.md:
+            if "imas:" in mduri:
+                mduris.append(mduri)
             else:
-                _ids_name = splittedms_ids_info
-        if len(_ids_name) == 0:
-            ids_connection = DBMaster.get_connection(inputargs)
-            available_ids_and_times = get_available_ids_and_times(ids_connection)
-            for ids_name, _ in available_ids_and_times:
-                _ids_name.append(ids_name)
-            ids_connection.close()
-        if "wall" in _ids_name:
-            connection = DBMaster.get_connection(inputargs)
-            if connection is not None:
-                try:
-                    _ids_data = connection.get("wall", autoconvert=False)
-                    if args.dd_update:
-                        _ids_data = convert_ids(_ids_data, connection.factory.version)
-                    if _ids_data.ids_properties.homogeneous_time == ids_defs.EMPTY_INT:
-                        logger.warning(f"{_ids_name} ids is empty in the dbentry")
-                except Exception as e:
-                    logger.warning(f"{_ids_name} ids is not present error {e}")
-                if _ids_data:
-                    select = "0"
-                    select2 = "0"
-                    wallview = WallView(_ids_data)
-                    if found_data := wallview.view_wall_vessel(
-                        ax1,
-                        select_description2d="0",
-                        select_unit="0",
-                        wallcolor="slategray",
-                    ):
-                        title += " wall-vessel"
-                    if found_data := wallview.view_wall_limiter(
-                        ax1,
-                        select_description2d="0",
-                        select_unit="0",
-                        wallcolor="slategray",
-                    ):
-                        title += " wall-vessel"
-                    database_text += f"{_ids_name}={get_database_path(inputargs)}\n"
-                connection.close()
-            else:
-                logger.warning(f"given data entry is not present for {_ids_name}")
-        if "pf_active" in _ids_name:
-            connection = DBMaster.get_connection(inputargs)
-            if connection is not None:
-                _ids_data = None
-                try:
-                    _ids_data = connection.get("pf_active", autoconvert=False)
-                    if _ids_data.ids_properties.homogeneous_time == ids_defs.EMPTY_INT:
-                        logger.warning(f"{_ids_name} ids is empty in the dbentry")
-                except Exception as e:
-                    logger.warning(f"{_ids_name} ids is not present error {e}")
-                if _ids_data:
-                    view_pf_coils = PFActiveView(_ids_data)
-                    view_pf_coils.view_active_pf_coils(ax1, select=":")
-                    title += " PF-Active Coils"
-                    database_text += f"{_ids_name}={get_database_path(inputargs)}\n"
-                connection.close()
-            else:
-                logger.warning(f"given data entry is not present for {_ids_name}")
-        if "pf_passive" in _ids_name:
-            connection = DBMaster.get_connection(inputargs)
-            if connection is not None:
-                _ids_data = None
-                try:
-                    _ids_data = connection.get("pf_passive", autoconvert=False)
-                    if _ids_data.ids_properties.homogeneous_time == ids_defs.EMPTY_INT:
-                        logger.warning(f"{_ids_name} ids is empty in the dbentry")
-                except Exception as e:
-                    logger.warning(f"{_ids_name} ids is not present error {e}")
-                if _ids_data:
-                    view_pf_coils = PFPassiveView(_ids_data)
-                    view_pf_coils.view_pf_passive_loops(ax1, select=":")
-                    title += " PF-Passive Loops"
-                    database_text += f"{_ids_name}={get_database_path(inputargs)}\n"
-                connection.close()
-            else:
-                logger.warning(f"given data entry is not present for {_ids_name}")
-        if "magnetics" in _ids_name:
-            connection = DBMaster.get_connection(inputargs)
-            if connection is not None:
-                _ids_data = None
-                try:
-                    _ids_data = connection.get("magnetics", autoconvert=False)
-                    if _ids_data.ids_properties.homogeneous_time == ids_defs.EMPTY_INT:
-                        logger.warning(f"{_ids_name} ids is empty in the dbentry")
-                except Exception as e:
-                    logger.warning(f"{_ids_name} ids is not present error {e}")
-                if _ids_data:
-                    view_magnetics = MagneticsView(_ids_data)
-                    view_magnetics.view_b_field_probes(ax1, probe_type="b_field_phi_probe", select=":")
-                    view_magnetics.view_b_field_probes(ax1, select=":")
-                    view_magnetics.view_flux_loop(ax1, select=":")
-                    view_magnetics.view_rogowski_coil(ax1, select=":")
-                    view_magnetics.view_shunt(ax1, select=":")
-                    title += " Magnetics"
-                    database_text += f"{_ids_name}={get_database_path(inputargs)}\n"
-                connection.close()
-            else:
-                logger.warning(f"given data entry is not present for {_ids_name}")
-        if "tf" in _ids_name:
-            connection = DBMaster.get_connection(inputargs)
-            if connection is not None:
-                _ids_data = None
-                try:
-                    _ids_data = connection.get("tf", autoconvert=False)
-                    if _ids_data.ids_properties.homogeneous_time == ids_defs.EMPTY_INT:
-                        logger.warning(f"{_ids_name} ids is empty in the dbentry")
-                except Exception as e:
-                    logger.warning(f"{_ids_name} ids is not present error {e}")
-                if _ids_data:
-                    tfview = TFView(_ids_data)
-                    tfview.view_tf_coils(ax1)
+                idses += mduri + ","
 
-                    title += " tf"
-                    database_text += f"{_ids_name}={get_database_path(inputargs)}\n"
-                connection.close()
-            else:
-                logger.warning(f"given data entry is not present for {_ids_name}")
+        if idses:
+            mduris.append(args.uri)
+            ids_data = get_md_data(mduris, args.dd_update, idses=idses)
+        else:
+            ids_data = get_md_data(mduris, args.dd_update)
+        plot_machine_description(ax1, ids_data)
 
     view_object.view_magnetic_poloidal_flux(ax1, time_slice, plot_rho=args.rho)
     ax1.set_title(title)

@@ -1,19 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+
 import argparse
 import logging
 import os
 
-from imaspy import convert_ids
 from rich_argparse import RichHelpFormatter
 
-from idstools.database import DBMaster
-from idstools.machinedescription import MachineDescription
-from idstools.utils.idshelper import (
-    get_available_ids_and_occurrences,
-    parse_uri,
-)
+from idstools.machinedescription import MachineDescription, get_md_data
 from idstools.utils.idslogger import setup_logger
 from idstools.view.common import PlotCanvas
 from idstools.view.domain.mdplot import plot_machine_description
@@ -22,7 +17,6 @@ from idstools.view.domain.mdplot import plot_machine_description
 
 
 logger = setup_logger("module", stdout_level=logging.INFO)
-idses = "tf,wall,pf_passive,pf_active,magnetics"
 
 
 if __name__ == "__main__":
@@ -62,56 +56,8 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
     machine_description = MachineDescription()
-    ids_data = {}
 
-    for mduri in args.uri:
-        mdargs = argparse.Namespace()
-
-        result = parse_uri(mduri)
-
-        # specified things in uri
-        _md_uri = result["uri_part"]
-        _ids_occurrence = result["occurrence"]
-        _ids_name = result["ids_name"]
-        _ids_field = result["ids_path"]
-        _ids_names = _ids_name
-        mdargs.uri = _md_uri
-        connection = DBMaster.get_connection(mdargs)
-        if connection:
-            all_idses_list = get_available_ids_and_occurrences(connection, None)
-            if _ids_names == "":
-                _ids_names = idses
-
-            for _ids_name in _ids_names.split(","):
-                if _ids_name not in idses:
-                    continue
-                ids_found = False
-                if _ids_occurrence is None:
-                    _ids_occurrences = [value for term, value in all_idses_list if _ids_name in term]
-                else:
-                    _ids_occurrences = [_ids_occurrence]
-                for occ in _ids_occurrences:
-                    if args.dd_update:
-                        _ids_data = convert_ids(
-                            connection.get(_ids_name, autoconvert=False, occurrence=occ), connection.factory.version
-                        )
-                    else:
-                        _ids_data = connection.get(_ids_name, autoconvert=False, occurrence=occ)
-                    data = {}
-                    if _ids_data is not None:
-                        ids_found = True
-                        (
-                            data["idsData"],
-                            data["yamlConfig"],
-                            data["connectionArgs"],
-                            data["idsname"],
-                            data["idsfield"],
-                            data["idsocc"],
-                        ) = (_ids_data, None, mdargs, _ids_name, _ids_field, occ)
-                        ids_data[f"{_md_uri}#{_ids_name}:{occ}/{_ids_field}"] = data
-                if not ids_found:
-                    logger.info(f"Could not find {_ids_name} in the given data entry")
-            connection.close()
+    ids_data = get_md_data(args.uri, args.dd_update)
 
     # Initialization
     mdcanvas = PlotCanvas(1, 1)
