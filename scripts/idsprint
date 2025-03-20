@@ -266,11 +266,12 @@ def _make_dict_tree(structure, hide_empty_nodes, compact, *, tree=None):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="""Prints content of an IDS onto the terminal\n
-        provide with fragment
-        e.g. -u idsprint --uri "imas:mdsplus?user=public;pulse=122525;run=1;database=ITER;version=3#equilibrium"
-        or #equilibrium/time_slice[0]/profiles_2d[0].r[1]
-        [previously known as idsdump and idsdumppath]""",
+        description="""Prints content of an IDS onto the terminal. 
+        The selected IDS is given in the URI #fragment, e.g. 
+        e.g. idsprint -u 'imas:mdsplus?user=public;pulse=122525;run=1;database=ITER;version=3#equilibrium'
+        It can also print the content of a field or substructure, by modifying the fragment, e.g.
+        '#equilibrium/time_slice[0]/profiles_2d[0].r'.
+        [idsprint was previously known as idsdump and idsdumppath]""",
         formatter_class=RichHelpFormatter,
         parents=[dbentry_parser],
     )
