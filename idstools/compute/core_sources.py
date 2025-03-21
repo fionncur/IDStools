@@ -150,12 +150,14 @@ class CoreSourcesCompute:
             source = {}
             if len(source_info.global_quantities) > 0:
                 source["valid"] = True
-                source["active"] = (
-                    True
-                    if source_info.global_quantities[time_slice].power.has_value
-                    and abs(source_info.global_quantities[time_slice].power) > 0
-                    else False
-                )
+                source["active"] = True if source_info.global_quantities[time_slice].power.has_value else False
+                # https://jira.iter.org/browse/IMAS-5686
+                # (
+                #     True
+                #     if source_info.global_quantities[time_slice].power.has_value
+                #     and abs(source_info.global_quantities[time_slice].power) > 0
+                #     else False
+                # )
             else:
                 source["valid"] = False
                 source["active"] = False
