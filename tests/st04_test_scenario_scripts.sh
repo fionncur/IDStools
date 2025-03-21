@@ -35,9 +35,4 @@ SCRIPTS=(
     "create_db_entry_disruption -s 100028 -r 1 -d ITER_DISRUPTIONS")
 
 execute_scripts "${SCRIPTS[@]}"
-STATUS=$?
-if [[ "$(uname -n)" == *"bamboo"* ]]; then
-    if [ "$STATUS" -ne 0 ]; then
-        return "$STATUS"
-    fi
-fi
+return $?

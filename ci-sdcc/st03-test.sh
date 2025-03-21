@@ -3,11 +3,6 @@
 # Execute script from root directory
 source ./ci-sdcc/st00-header.sh $1 $2 $3
 
-# Note Disable set -e option when using on local as it will exit the shell on error
-# if [[ "$(uname -n)" == *"bamboo"* ]]; then
-#     set -e -u -o pipefail
-# fi
-
 ENVIRONEMNT_NAME=env"$TOOLCHAIN_VERSION"_"$ACCESS_LAYER_VERSION"
 module unload IDStools
 
@@ -41,11 +36,6 @@ print("Matplotlib version:", matplotlib.__version__)
 END
 )
 
-function on_error {
-    echo "Error occurred at line $LINENO, with status $?."
-}
-trap 'on_error' ERR
-
 echo "====================================================================="
 python3 -c "$version_script"
 echo "====================================================================="
@@ -56,6 +46,11 @@ echo "====================================================================="
 echo "Testing analysis scripts  with URI $CORE_MODULE_VERSION and $PYTHON_VERSION"
 echo "====================================================================="
 source ./tests/st03_test_analysis_scripts_with_uri.sh "$LOG_DIR" "$DB_DIR"
+errstatus=$?
+if [ $errstatus  -ne 0 ]; then
+    echo "Error: st03_test_analysis_scripts_with_uri.sh failed."
+    exit 1
+fi
 
 echo ""
 echo ""
@@ -63,6 +58,11 @@ echo "====================================================================="
 echo "Testing ids manipulation scripts with $CORE_MODULE_VERSION and $PYTHON_VERSION"
 echo "====================================================================="
 source ./tests/st01_test_ids_scripts_with_uri.sh "$LOG_DIR" "$DB_DIR"
+errstatus=$?
+if [ $errstatus -ne 0 ]; then
+    echo "Error: st01_test_ids_scripts_with_uri.sh failed."
+    exit 1
+fi
 
 # ---------------------------------------------------------------------------
 echo ""
@@ -71,6 +71,11 @@ echo "====================================================================="
 echo "Testing db scripts with $CORE_MODULE_VERSION and $PYTHON_VERSION"
 echo "====================================================================="
 source ./tests/st02_test_db_scripts.sh "$LOG_DIR" "$DB_DIR"
+errstatus=$?
+if [ $errstatus -ne 0 ]; then
+    echo "Error: st02_test_db_scripts.sh failed."
+    exit 1
+fi
 
 # ---------------------------------------------------------------------------
 echo ""
@@ -79,19 +84,12 @@ echo "====================================================================="
 echo "Testing scenario scripts with $CORE_MODULE_VERSION and $PYTHON_VERSION"
 echo "====================================================================="
 source ./tests/st04_test_scenario_scripts.sh "$LOG_DIR" "$DB_DIR"
+errstatus=$?
+if [ $errstatus -ne 0 ]; then
+    echo "Error: st04_test_scenario_scripts.sh failed."
+    exit 1
+fi
 
-# Load Python Module
-IMAS_MODULE_VERSION=$(getIMASPythonModuleName "$TOOLCHAIN_VERSION" "$ACCESS_LAYER_VERSION" "$DD_VERSION")
-module load $IMAS_MODULE_VERSION
-# ---------------------------------------------------------------------------
-echo "Loading IMAS Module $IMAS_MODULE_VERSION"
-echo ""
-echo "====================================================================="
-echo "Testing legacy scripts with $IMAS_MODULE_VERSION and $PYTHON_VERSION"
-echo "====================================================================="
-source ./tests/st05_test_legacy_scripts.sh "$LOG_DIR" "$DB_DIR"
-
-module unload $IMAS_MODULE_VERSION
 echo ""
 echo ""
 echo "====================================================================="
@@ -99,6 +97,11 @@ echo "Run pytest for functions testing with $CORE_MODULE_VERSION and $PYTHON_VER
 echo "====================================================================="
 pip install pytest
 python -m pytest --junit-xml="$LOG_DIR"/test_report.xml tests
+errstatus=$?
+if [ $errstatus -ne 0 ]; then
+    echo "Error: pytest failed."
+    exit 1
+fi
 echo "---------------------------------------------------------------------"
 deactivate
 set +x

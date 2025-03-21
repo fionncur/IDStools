@@ -45,9 +45,4 @@ SCRIPTS=(
     "idssize --uri \"imas:mdsplus?user=public;pulse=131024;run=10;database=ITER;version=3\"")
 
 execute_scripts "${SCRIPTS[@]}"
-STATUS=$?
-if [[ "$(uname -n)" == *"bamboo"* ]]; then
-    if [ "$STATUS" -ne 0 ]; then
-        return "$STATUS"
-    fi
-fi
+return $?

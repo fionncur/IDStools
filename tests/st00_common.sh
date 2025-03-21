@@ -6,7 +6,6 @@ execute_scripts() {
 
     local SCRIPTS=("$@")
 
-    # Loop through each script and execute
     for script in "${SCRIPTS[@]}"; do
         # Set the log file for each script
         executable=$(echo "$script" | awk '{print $1}')
@@ -27,6 +26,7 @@ execute_scripts() {
             SCRIPT_STATUS["$script"]="FAIL"
             cat "$LOG_FILE"
             echo ""
+            break
         else
             echo "[$script] executed successfully!"
             SCRIPT_STATUS["$script"]="PASS"
@@ -42,6 +42,7 @@ execute_scripts() {
         printf "%-10s %.2f %-50s\n" "${SCRIPT_STATUS[$script]}" "${SCRIPT_TIME[$script]}" "$script"
         if [ "${SCRIPT_STATUS[$script]}" == "FAIL" ]; then
             RETURN_STATUS=1
+            break
         fi
     done
     echo "---------------------------------------------------------------------"

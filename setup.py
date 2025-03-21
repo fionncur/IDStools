@@ -107,7 +107,6 @@ setup(
         "Development Status :: 2 - Beta",
         "Intended Audience :: Users/Developers",
         "Intended Audience :: Science/Research",
-        "License :: Other/Proprietary License",
         "Programming Language :: Python :: 3",
         "Topic :: Scientific/Engineering :: Physics",
     ],

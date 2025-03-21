@@ -605,6 +605,7 @@ class DBMaster:
         folder = glob(str(locpath) + "/**/*.datafile", recursive=True)
         for entry in folder:
             if (with_status is None) or (with_status == DBMaster.get_pulse_status(Path(entry).with_suffix(".yaml"))):
+
                 file = entry.split("/")[-1].split("_")[1].split(".")[0]
                 if len(file) <= 4:
                     pulse = int(entry.split("/")[-3])
@@ -612,7 +613,6 @@ class DBMaster:
                 else:
                     pulse = int(file[0:-4])
                     run = int(file[-4:])
-
                 # run = int(file[-4:]) + 10000 * int(entry.split("/")[-2])
                 pulses.append((pulse, run))
 
@@ -641,9 +641,14 @@ class DBMaster:
         pulses = []
         # folder = Path(locpath).glob('**/*master.h5')
         folder = glob(str(locpath) + "/**/*master.h5", recursive=True)
+
         for entry in folder:
-            pulse = int(str(entry).split("/")[-3])
-            run = int(str(entry).split("/")[-2])
+            _pulse = pulse = str(entry).split("/")[-3]
+            _run = run = str(entry).split("/")[-2]
+            if _pulse.isdigit():
+                pulse = int(str(entry).split("/")[-3])
+            if _run.isdigit():
+                run = int(str(entry).split("/")[-2])
             pulses.append((pulse, run))
         return pulses
 

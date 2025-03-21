@@ -129,7 +129,7 @@ if __name__ == "__main__":
     )
 
     args = parser.parse_args()
-    print(args.database)
+
     if not args.file:
         if args.database:
             mdslocpath = DBMaster.get_db_Path(args.user, args.database, args.version)
@@ -143,7 +143,6 @@ if __name__ == "__main__":
                 "containing data in both MDSPLUS and HDF5, or two separate databases"
                 "containing data in MDSPLUS or HDF5"
             )
-        print(mdslocpath)
         log = []
 
         if args.slicevtime:
@@ -155,6 +154,7 @@ if __name__ == "__main__":
         elif not args.pulse:
             hpulses = DBMaster.hdf5_list_pulse_run(hdflocpath)
             mpulses = DBMaster.mds_list_pulse_run(mdslocpath)
+
             if set(hpulses) != set(mpulses):
                 mdsrem = set(mpulses) - set(hpulses)
                 hdfrem = set(hpulses) - set(mpulses)
@@ -188,7 +188,7 @@ if __name__ == "__main__":
                 excludep = [int(x) for x in args.excludep]
                 pulses = list(set(pulses) - set(excludep))
 
-        for entry in track(pulses, description="[green]Processing..."):
+        for entry in pulses:
             pulse = entry[0]
             run = entry[1]
 
@@ -198,9 +198,11 @@ if __name__ == "__main__":
             hdfde = imas.DBEntry(imas.ids_defs.HDF5_BACKEND, args.database, pulse, run, args.user)
             hdfde.open()
 
-            idslist = get_available_ids_and_occurrences(hdfde)
+            idslist = []
             if args.ids:
                 idslist = [args.ids]
+            else:
+                idslist = get_available_ids_and_occurrences(hdfde)
 
             if args.excludeids:
                 idslist = [i for i in idslist if i[0] not in args.excludeids]
@@ -213,33 +215,34 @@ if __name__ == "__main__":
                 print(idslist)
 
             for ids in idslist:
-                for ids2process in ids:
-                    size = byte_size(hdfde.get(ids2process)) / 1024**2
-                    if args.slicevtime:
-                        try:
-                            slices.append(get_timings(hdfde, ids2process, times=[10], repeat=args.repeat))
-                        except Exception as e:
-                            slices.append(None)
-                            print(
-                                f"{ids2process} in ({pulse} , {run}) failed to return slice get_timings - detailed:{e}"
-                            )
-                    mdstimes = get_timings(mdsde, ids2process, repeat=args.repeat)
-                    mdstdev = np.std(mdstimes)
-                    hdftimes = get_timings(hdfde, ids2process, repeat=args.repeat)
-                    hdfstdev = np.std(hdftimes)
-                    mdsmeantime = sum(mdstimes) / len(mdstimes)
-                    hdfmeantime = sum(hdftimes) / len(hdftimes)
-                    log.append(
-                        (
-                            (pulse, run),
-                            ids2process,
-                            size,
-                            mdsmeantime,
-                            mdstdev,
-                            hdfmeantime,
-                            hdfstdev,
-                        )
+                print("Getting performance for ids:", ids)
+                ids2process = ids[0]
+                idsoccurrence = ids[1]
+                ids_obj = hdfde.get(ids2process)
+                size = byte_size(ids_obj) / 1024**2
+                if args.slicevtime:
+                    try:
+                        slices.append(get_timings(hdfde, ids2process, times=[10], repeat=args.repeat))
+                    except Exception as e:
+                        slices.append(None)
+                        print(f"{ids2process} in ({pulse} , {run}) failed to return slice get_timings - detailed:{e}")
+                mdstimes = get_timings(mdsde, ids2process, repeat=args.repeat)
+                mdstdev = np.std(mdstimes)
+                hdftimes = get_timings(hdfde, ids2process, repeat=args.repeat)
+                hdfstdev = np.std(hdftimes)
+                mdsmeantime = sum(mdstimes) / len(mdstimes)
+                hdfmeantime = sum(hdftimes) / len(hdftimes)
+                log.append(
+                    (
+                        (pulse, run),
+                        ids2process,
+                        size,
+                        mdsmeantime,
+                        mdstdev,
+                        hdfmeantime,
+                        hdfstdev,
                     )
+                )
 
             mdsde.close()
             hdfde.close()
@@ -256,9 +259,9 @@ if __name__ == "__main__":
                 "IDS",
                 "SIZE",
                 "MDSPLUS_TIME",
-                "MDSPLUS_TIME ST. DEV.",
+                "MDSPLUS_TIME-ST. DEV.",
                 "HDF5_TIME",
-                "HDF5_TIME ST. DEV.",
+                "HDF5_TIME-ST. DEV.",
             ],
         ).sort_values("SIZE")
 

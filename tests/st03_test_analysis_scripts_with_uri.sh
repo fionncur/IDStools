@@ -55,12 +55,7 @@ SCRIPTS=(
     "plotspectrometry --uri \"imas:mdsplus?path=/work/imas/shared/imasdb/TEST/3/134000/37\" --save --directory $LOG_DIR")
 
 execute_scripts "${SCRIPTS[@]}"
-STATUS=$?
-if [[ "$(uname -n)" == *"bamboo"* ]]; then
-    if [ "$STATUS" -ne 0 ]; then
-        exit "$STATUS"
-    fi
-fi
+return $?
 
 
 # "plotcoresources --uri \"imas:mdsplus?user=public;pulse=130012;run=105;database=TEST;version=3\" --dd-update --save --directory $LOG_DIR"
