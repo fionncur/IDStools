@@ -32,7 +32,7 @@ SCRIPTS=(
     "dblist -u public -d TEST list -M" 
     "dblist databases" 
     "dblist dataversions" 
-    "dbperf -d ITER --pulse 134174 --run 117 --verb -exci core_sources equilibrium edge_profiles edge_sources core_transport core_profiles edge_transport"
+    "dbperf -d ITER --version 3 --pulse 134174 --run 117 --verb -exci core_sources equilibrium edge_profiles edge_sources core_transport core_profiles edge_transport"
     "dbscraper \"core_profiles/profiles_1d(0)/electrons/temperature\" --verbose --list-count 2"  
     "dbselector -d TEST core_profiles --list-count 2" 
     "dbselector -d TEST summary --list-count 2")
