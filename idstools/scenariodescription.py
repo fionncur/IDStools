@@ -10,11 +10,9 @@ import yaml
 try:
     from yaml import CLoader as Loader
 
-    print("using faster yaml CLoader")
 except ImportError:
     from yaml import Loader
 
-    print("using slower yaml Loader")
 
 from pandas import json_normalize
 
@@ -88,6 +86,7 @@ class ScenarioDescriptionBase:
                 yaml_data = yaml.load(file_handle, Loader=Loader)
             except Exception as e:
                 logger.debug(f"{e}")
+                logger.warning(f"Could ot read yaml file: {yaml_file_path}")
                 yaml_data = None
         return yaml_data
 
@@ -107,11 +106,11 @@ class ScenarioDescriptionBase:
             a pandas DataFrame object.
         """
         yaml_data = ScenarioDescriptionBase.get_yaml_data(yaml_file_path)
+        if yaml_data is None:
+            return None
         if add_obsolete is False:
             if yaml_data["status"] != "active":
                 return None
-        if yaml_data is None:
-            return None
         flat_table = json_normalize(yaml_data)
         data_frame = pd.DataFrame(flat_table)
         return data_frame
