@@ -52,7 +52,7 @@ SCRIPTS=(
     "plotspectrometry --uri \"imas:mdsplus?user=public;pulse=134000;run=37;database=TEST;version=3\" --save --directory $LOG_DIR"
     "plotkineticprofiles --uri \"imas:hdf5?path=/work/imas/shared/imasdb/ITER/3/134174/117\" --save --directory $LOG_DIR"
     "plotpressure --uri \"imas:hdf5?path=/work/imas/shared/imasdb/ITER/3/134174/117\" --save --directory $LOG_DIR"
-    "plotspectrometry --uri \"imas:hdf5?path=/work/imas/shared/imasdb/TEST/3/134000/37\" --save --directory $LOG_DIR")
+    "plotspectrometry --uri \"imas:mdsplus?path=/work/imas/shared/imasdb/TEST/3/134000/37\" --save --directory $LOG_DIR")
 
 execute_scripts "${SCRIPTS[@]}"
 return $?
