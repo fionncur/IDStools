@@ -43,7 +43,7 @@ SCRIPTS=(
     "plotmachinedescription --uri \"imas:hdf5?user=public;pulse=116000;run=5;database=ITER_MD;version=3\" --save --directory $LOG_DIR"
     "plotmachinedescription --uri \"imas:hdf5?user=public;pulse=111001;run=103;database=ITER_MD;version=3#pf_active\" --save --directory $LOG_DIR"
     "plotneutron --uri \"imas:hdf5?user=public;pulse=121014;run=11;database=ITER;version=3\" -t 450 --save --directory $LOG_DIR"
-    "printplasmacompo --uri \"imas:hdf5?user=public;pulse=131047;run=4;database=ITER;version=3\""
+    "printplasmacompo --uri \"imas:hdf5?user=public;pulse=131047;run=27;database=ITER;version=3\""
     "plotpressure --uri \"imas:hdf5?user=public;pulse=134174;run=117;database=ITER;version=3\" --save --directory $LOG_DIR"
     "plotrotation --uri \"imas:hdf5?user=public;pulse=134174;run=117;database=ITER;version=3\" --save --directory $LOG_DIR"
     "plotscenario --uri \"imas:hdf5?user=public;pulse=134174;run=117;database=ITER;version=3\" --time 60 --save --directory $LOG_DIR"
