@@ -126,7 +126,7 @@ EB_OPTS=(
     --allow-modules-tool-mismatch
     --allow-use-as-root-and-accept-consequences
     "--prefix=$EASYBUILD_DIR"
-    "--optarch=Intel:axAVX,CORE-AVX2;GCC:march=sandybridge"
+    "--optarch=Intel:-axAVX,-CORE-AVX2;GCC:march=sandybridge"
     "$EB_HTTP_OPTS"
 )
 # enable if need to debug --logtostdout --debug --trace

@@ -8,6 +8,7 @@ import yaml
 
 try:
     from yaml import CLoader as Loader
+
 except ImportError:
     from yaml import Loader
 
@@ -109,7 +110,6 @@ class ScenarioDescriptionSummary:
         if add_obsolete is False:
             if yaml_data["status"] != "active":
                 return None
-
         flat_table = json_normalize(yaml_data)
         data_frame = pd.DataFrame(flat_table)
         return data_frame

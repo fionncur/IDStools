@@ -31,9 +31,9 @@ class SmartFormatter(argparse.HelpFormatter):
 
 def rec(
     data={},
-    path=os.getcwd(),
+    paths=os.getcwd(),
     extension=".yaml",
-    choice=["shot", "run", "ip", "b0"],
+    choice=["shot", "run", "dd_version", "ip", "b0"],
     selection=None,
     obsolete_cases=False,
 ):
@@ -44,7 +44,19 @@ def rec(
     # Read all YAML files
     # --------------------
     table = {}
-    files = glob.glob(path + "/**/*.yaml", recursive=True)
+    yaml_files = []
+
+    for path in paths:
+        files = glob.glob(path + "/*")
+
+        # Walk through the directory and find .yaml files
+        for root, _, files in os.walk(path):
+            for file in files:
+                if file.endswith(".yaml"):
+                    yaml_files.append(os.path.join(root, file))
+
+    files = yaml_files
+
     # Fill data dictionary with yaml input files describing simulations
     j = -1
 
@@ -57,6 +69,9 @@ def rec(
                     data[j] = yaml.load(scenario_file, Loader=yaml.Loader)
 
                     data[j]["location"] = scenario_file_path
+                    data[j]["dd_version"] = "3"
+                    if r"ITER_DISRUPTIONS/4" in scenario_file_path:
+                        data[j]["dd_version"] = "4"
             except Exception as e:
                 print("Error reading yaml " + scenario_file_path, file=sys.stderr)
 
@@ -93,6 +108,7 @@ def rec(
     disp_ne0 = "ne0[m-3]"
     disp_idslist = "List of IDSs"
     disp_tsteps = "#time steps"
+    disp_dd_version = "DD Version"
 
     # ---------------------------------------------------
     # Calculate the optimized tabulation for each column
@@ -114,6 +130,7 @@ def rec(
     tab_ne0 = 0
     tab_idslist = 0
     tab_tsteps = 0
+    tab_dd_version = 0
 
     for i in range(len(sdata)):
         tab_ref_name = max(
@@ -131,6 +148,10 @@ def rec(
         tab_run = max(
             max(len(str(sdata[i].get("characteristics").get("run"))), tab_run),
             len(disp_run),
+        )
+        tab_dd_version = max(
+            max(len(str(sdata[i].get("characteristics").get("dd_version"))), tab_dd_version),
+            len(disp_dd_version),
         )
         tab_type = max(
             max(len(str(sdata[i].get("characteristics").get("type"))), tab_type),
@@ -242,6 +263,7 @@ def rec(
             HF = sdata[i].get("scenario_key_parameters").get("halo_fraction")
             idslist = sdata[i].get("idslist")
             tsteps = sdata[i].get("tsteps")
+            dd_version = sdata[i].get("dd_version")
 
             # Number of time steps in the scenario
             tstep = -99
@@ -370,7 +392,8 @@ if __name__ == "__main__":
         "        b0          = central magnetic field \n"
         "        ne0         = central electron density\n"
         "        idslist     = List of IDSs available in the data-entry\n"
-        "        tsteps      = Number of time steps in the disruptions\n",
+        "        tsteps      = Number of time steps in the disruptions\n"
+        "        dd_version  = Data dictionary version\n",
         required=False,
     )
 
@@ -378,17 +401,13 @@ if __name__ == "__main__":
 
     obsolete_cases = args["obsolete"]
 
-    # Folder
+    # Folder paths
+    paths = []
     if args["folder"] != None:
-        folder = args["folder"]
+        paths.append(args["folder"])
     else:
-        LL_version = os.environ["AL_VERSION"]
-        LL_version = int(LL_version.split(".")[0])
-
-        if LL_version < 4:
-            folder = "/work/imas/shared/iterdb/3/0"
-        else:
-            folder = "/work/imas/shared/imasdb/ITER_DISRUPTIONS/3/0"
+        paths.append("/work/imas/shared/imasdb/ITER_DISRUPTIONS/3/0")
+        paths.append("/work/imas/shared/imasdb/ITER_DISRUPTIONS/4")
 
     # Filter
     if args["selection"] != None:
@@ -421,6 +440,7 @@ if __name__ == "__main__":
         choice = [
             "shot",
             "run",
+            "dd_version",
             "ip",
             "b0",
             "ne0",
@@ -439,12 +459,12 @@ if __name__ == "__main__":
     # Print the arguments of the default call to the function
     if args["choice"] == None:
         print("""----> Default call equivalent to: """)
-        print("""      disruption_summary -c shot,run,ip,b0,ne0,dis_type,VD_dir,IREmax,HF,workflow,ref_name""")
+        print("""      disruption_summary -c shot,run,dd_version,ip,b0,ne0,dis_type,VD_dir,IREmax,HF,workflow,ref_name""")
 
     # Call the function
     table = rec(
         data=data,
-        path=folder,
+        paths=paths,
         extension=ext,
         choice=choice,
         selection=selection,
@@ -454,4 +474,4 @@ if __name__ == "__main__":
     # Display the clean formatted table
     for i in range(len(table)):
         print(table[i])
-    print(" NOTE: Read entry from Disruption database using user = 'public', database = 'ITER_DISRUPTIONS'")
+    print(" NOTE: Default read entry from Disruption database using user = 'public', database = 'ITER_DISRUPTIONS'")
