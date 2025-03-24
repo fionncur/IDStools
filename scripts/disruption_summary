@@ -459,7 +459,9 @@ if __name__ == "__main__":
     # Print the arguments of the default call to the function
     if args["choice"] == None:
         print("""----> Default call equivalent to: """)
-        print("""      disruption_summary -c shot,run,dd_version,ip,b0,ne0,dis_type,VD_dir,IREmax,HF,workflow,ref_name""")
+        print(
+            """      disruption_summary -c shot,run,dd_version,ip,b0,ne0,dis_type,VD_dir,IREmax,HF,workflow,ref_name"""
+        )
 
     # Call the function
     table = rec(
