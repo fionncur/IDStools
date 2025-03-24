@@ -192,10 +192,10 @@ if __name__ == "__main__":
             pulse = entry[0]
             run = entry[1]
 
-            mdsde = imas.DBEntry(imas.ids_defs.MDSPLUS_BACKEND, args.database, pulse, run, args.user)
+            mdsde = imas.DBEntry(imas.ids_defs.MDSPLUS_BACKEND, args.database, pulse, run, args.user, data_version=args.version)
             mdsde.open()
 
-            hdfde = imas.DBEntry(imas.ids_defs.HDF5_BACKEND, args.database, pulse, run, args.user)
+            hdfde = imas.DBEntry(imas.ids_defs.HDF5_BACKEND, args.database, pulse, run, args.user, data_version=args.version)
             hdfde.open()
 
             idslist = []
