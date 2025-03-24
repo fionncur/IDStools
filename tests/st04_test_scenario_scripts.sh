@@ -24,14 +24,14 @@ else
 fi
 
 SCRIPTS=(
-    "md_status -s 116000 -r 3"
+    "md_status -s 116000 -r 5"
     "md_summary  -s 150502/102"
     "md_summary  -s nbi on-on"
     "scenario_status -s 134174 -r 117"
     "scenario_summary -s He4,2.65"
     "disruption_summary"
     "show_db_entry -s 134174 -r 117"
-    "create_db_entry -s 130012 -r 105 -d TEST --disable-validation"
+    "create_db_entry -s 130012 -r 5 -d ITER --disable-validation"
     "create_db_entry_disruption -s 100028 -r 1 -d ITER_DISRUPTIONS")
 
 execute_scripts "${SCRIPTS[@]}"
