@@ -263,6 +263,8 @@ if core_present == 1:
         nspecies = len(core_profiles.profiles_1d[the_slice].ion)
         z = [0] * nspecies
         for ispecies in range(nspecies):
+            if core_profiles.profiles_1d[the_slice].ion[ispecies].element[0].z_n < 0:
+                raise
             z[ispecies] = int(core_profiles.profiles_1d[the_slice].ion[ispecies].element[0].z_n)
     except Exception as e:
         print(
@@ -438,6 +440,9 @@ if nspecies > 0:
 
     # Plasma composition
     species = []
+    print(z)
+    print("---------------")
+    print(a)
     for ispecies in range(nspecies):
         species.append(table_mendeleiev[z[ispecies]][a[ispecies]].element)
 
