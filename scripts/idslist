@@ -50,6 +50,12 @@ parser.add_argument(
     action="store_true",
     help="List ids with their number of occurrences with comment and occurrence_type if available",
 )
+parser.add_argument(
+    "-v",
+    "--version",
+    action="store_true",
+    help="List ids with their number of occurrences with data dictionary version and occurrence_type if available",
+)
 parser.add_argument("-i", "--ids", required=False, type=str, help="IDS name to filter")
 parser.add_argument(
     "-f",
@@ -116,7 +122,7 @@ if args.yaml is True:
 
 elif args.comment is True:
     console = Console()
-    table = Table(title="List of IDSes with Occurrences")
+    table = Table(title="List of IDSes with occurrences and comments")
     table.add_column("IDS", style="magenta")
     table.add_column("COMMENT", style="green")
     for idsname, oc, comment in get_available_ids_and_occurrences(
@@ -129,6 +135,24 @@ elif args.comment is True:
         # Format idsname
         idsnameoc = f"{idsname}/{str(oc)}"
         table.add_row(idsnameoc, comment.value)
+    console.print(table)
+    connection.close()
+    exit(0)
+elif args.version is True:
+    console = Console()
+    table = Table(title="List of IDSes with Occurrences and DD Version")
+    table.add_column("IDS", style="magenta")
+    table.add_column("DD VERSION", style="green")
+    for idsname, oc, dd_version in get_available_ids_and_occurrences(
+        connection, get_version=True, dd_update=args.dd_update
+    ):
+        # If user wants to check specific ids type
+        if args.ids:
+            if idsname != args.ids:
+                continue
+        # Format idsname
+        idsnameoc = f"{idsname}/{str(oc)}"
+        table.add_row(idsnameoc, dd_version)
     console.print(table)
     connection.close()
     exit(0)

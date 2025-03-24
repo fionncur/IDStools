@@ -241,8 +241,8 @@ if core_present == 1:
         a = [0]
 else:
     try:
-        edge_profiles = imas.edge_profiles()
-        edge_profiles.ggd.resize(1)
+        # edge_profiles = imas.edge_profiles()
+        # edge_profiles.ggd.resize(1)
         # pdb.set_trace()
         # edge_profiles.ggd[the_slice].ion = input.edge_profiles.partialGet('ggd('+str(the_slice)+')/ion')
 

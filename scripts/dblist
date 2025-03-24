@@ -89,6 +89,29 @@ def print_list(dbs, pulsenum=None, compact=False, timestamp=False):
                         )
 
 
+def print_list_from_folder(dbs, pulsenum=None, compact=False, timestamp=False):
+    for backend, pulses in dbs:
+        printed_backend = False
+        for pulse, details in pulses.items():
+            if not printed_backend:
+                print(TAB * 2 + "Backend: " + backend)
+                printed_backend = True
+
+            file_path = pulse.rsplit("/", 1)[0]
+            uripath = f'"imas:{backend.lower()}?path={file_path}"'
+
+            if pulsenum is not None:
+                # if a pulsenum is given, only display databases with this pulse number
+                if details[0][0] != pulsenum:
+                    continue
+
+            if timestamp:
+                print(TAB * 3 + extended(str(uripath), SHOT_STR_LEN))
+                print(TAB * 3 + " " * (5 + SHOT_STR_LEN) + " (" + str(details[0][4]) + ")")
+            else:
+                print(TAB * 3 + extended(str(uripath), SHOT_STR_LEN))
+
+
 def print_urilist(dbs, pulsenum=None, compact=False, timestamp=False):
     urichoice = ["Sr. No.", "uri"]
     if timestamp:
@@ -122,6 +145,38 @@ def print_urilist(dbs, pulsenum=None, compact=False, timestamp=False):
                         if timestamp:
                             x.append(str(r[7]))
                         table.add_row(*x)
+    console = Console()
+    console.print(table)
+
+
+def print_urilist_from_folder(dbs, pulsenum=None, compact=False, timestamp=False):
+    urichoice = ["Sr. No.", "uri"]
+    if timestamp:
+        urichoice.append("timestamp")
+    table = Table()
+    for column_name in urichoice:
+        if column_name == "timestamp":
+            table.add_column(column_name, justify="left", style="red")
+        elif column_name == "uri":
+            table.add_column(column_name, justify="left", style="yellow")
+        else:
+            table.add_column(column_name, justify="left", style="green")
+    counter = 0
+    for backend, pulses in dbs:
+        for pulse, details in pulses.items():
+            file_path = pulse.rsplit("/", 1)[0]
+            uripath = f'"imas:{backend.lower()}?path={file_path}"'
+            if pulsenum is not None:
+                # if a pulsenum is given, only display databases with this pulse number
+                if details[0] != pulsenum:
+                    continue
+            x = []
+            x.append(str(counter))
+            counter = counter + 1
+            x.append(uripath)
+            if timestamp:
+                x.append(str(details[3]))
+            table.add_row(*x)
     console = Console()
     console.print(table)
 
@@ -224,6 +279,88 @@ def print_times(dbs, args, print_times=False, pulse_number=None, run_number=None
                         connection.close()
 
 
+def print_times_with_folder(dbs, print_times=False, pulse_number=None, run_number=None, showuri=False):
+    for backend, pulses in dbs:
+        printed_backend = False
+        for pulse, details in pulses.items():
+            file_path = pulse.rsplit("/", 1)[0]
+            uripath = f"imas:{backend.lower()}?path={file_path}"
+            if pulse_number is not None:
+                if details[0][0] != pulse_number:
+                    continue
+            if run_number is not None:
+                if details[0][1] != run_number:
+                    continue
+            if not printed_backend:
+                print(TAB * 2 + "Backend: " + backend)
+                printed_backend = True
+            print(TAB * 3 + "Pulse " + extended(str(pulse), SHOT_STR_LEN))
+
+            connargs = argparse.Namespace()
+            connargs.backend = backend.upper()
+            connargs.pulse = pulse
+            connargs.run = details[0][1]
+            connargs.user = args.user
+            connargs.database = args.database
+            connargs.version = args.version
+            connargs.uri = uripath
+            connection = DBMaster.get_connection(connargs)
+            if showuri:
+                print(TAB * 4 + '"' + connargs.uri + '"')
+            if connection is None:
+                continue
+            available_ids_and_times = get_available_ids_and_times(connection)
+            for idsname, times in available_ids_and_times:
+                if times is not None:
+                    if len(times) == 1 and np.isnan(times[0]):
+                        print(
+                            TAB * 15
+                            + extended(idsname, IDSNAME_STR_LEN)
+                            + ": "
+                            + extended("?", SLICENUM_STR_LEN)
+                            + " slices ( "
+                            + "heterogeneous IDS )"
+                        )
+                    elif len(times) == 1 and times[0] == np.NINF:
+                        print(
+                            TAB * 15
+                            + extended(idsname, IDSNAME_STR_LEN)
+                            + ": "
+                            + extended("?", SLICENUM_STR_LEN)
+                            + " slices ( "
+                            + "time independent IDS )"
+                        )
+                    elif print_times:
+
+                        print(
+                            TAB * 15
+                            + extended(idsname, IDSNAME_STR_LEN)
+                            + ": "
+                            + extended(str(len(times)), SLICENUM_STR_LEN)
+                            + " slices ("
+                            + print_vector(times, TIME_STR_LEN)
+                            + ")"
+                        )
+                    else:
+                        times_0 = extended(str(times[0]), TIME_STR_LEN) if len(times) > 0 else ""
+                        times_1 = extended(str(times[-1]), TIME_STR_LEN) if len(times) > 0 else ""
+                        extended(str(times[0]), TIME_STR_LEN) if len(times) > 0 else ""
+                        print(
+                            TAB * 15
+                            + extended(idsname, IDSNAME_STR_LEN)
+                            + ": "
+                            + extended(str(len(times)), SLICENUM_STR_LEN)
+                            + " slices ("
+                            + times_0
+                            + " - "
+                            + times_1
+                            + ")"
+                        )
+            print("\n")
+
+            connection.close()
+
+
 description = """
 This program lists existing IMAS databases.
 
@@ -287,6 +424,15 @@ if __name__ == "__main__":
     subparser_data_versions.set_defaults(cmd="dataversions")
 
     parser.add_argument(
+        "-f",
+        "--folder",
+        dest="folder",
+        default=None,
+        help="Show data entries from specified folder (This options is useful to search data entries"
+        " from folder recursively and it doesn't need structured layout to search"
+        " data entries)\t\t(default=%(default)s)",
+    )
+    parser.add_argument(
         "-u",
         "--user",
         dest="user",
@@ -327,38 +473,69 @@ if __name__ == "__main__":
     # Default command if not provided
     if "cmd" not in args.__dict__:
         backends = args.backend.split(",") if args.backend else None
-        dbs = DBMaster.get_database_files(args.user, args.database, args.version, backends)
-        print_list(dbs)
+        if args.folder is not None:
+            dbs = DBMaster.get_database_files_from_folder(args.folder, backends)
+            print_list_from_folder(dbs)
+        else:
+            dbs = DBMaster.get_database_files(args.user, args.database, args.version, backends)
+            print_list(dbs)
         exit(0)
 
     backends = args.backend.split(",") if args.backend else None
     if args.cmd in ["list", "slices", "times"]:
-        dbs = DBMaster.get_database_files(args.user, args.database, args.version, backends)
+        if args.folder is not None:
+            dbs = DBMaster.get_database_files_from_folder(args.folder, backends)
+        else:
+            dbs = DBMaster.get_database_files(args.user, args.database, args.version, backends)
     if args.cmd == "list":
         if args.showuri:
-            print_urilist(dbs, args.pulse, args.compact, args.timestamp)
+            if args.folder is not None:
+                print_urilist_from_folder(dbs, args.pulse, args.compact, args.timestamp)
+            else:
+                print_urilist(dbs, args.pulse, args.compact, args.timestamp)
         else:
-            print_list(dbs, args.pulse, args.compact, args.timestamp)
+            if args.folder is not None:
+                print_list_from_folder(dbs, args.pulse, args.compact, args.timestamp)
+            else:
+                print_list(dbs, args.pulse, args.compact, args.timestamp)
 
     if args.cmd == "slices":
-        print_times(
-            dbs,
-            args,
-            print_times=False,
-            pulse_number=args.pulse,
-            run_number=args.run,
-            showuri=args.showuri,
-        )
+        if args.folder is not None:
+            print_times_with_folder(
+                dbs,
+                print_times=False,
+                pulse_number=args.pulse,
+                run_number=args.run,
+                showuri=args.showuri,
+            )
+        else:
+            print_times(
+                dbs,
+                args,
+                print_times=False,
+                pulse_number=args.pulse,
+                run_number=args.run,
+                showuri=args.showuri,
+            )
 
     if args.cmd == "times":
-        print_times(
-            dbs,
-            args,
-            print_times=True,
-            pulse_number=args.pulse,
-            run_number=args.run,
-            showuri=args.showuri,
-        )
+        if args.folder is not None:
+            print_times_with_folder(
+                dbs,
+                print_times=True,
+                pulse_number=args.pulse,
+                run_number=args.run,
+                showuri=args.showuri,
+            )
+        else:
+            print_times(
+                dbs,
+                args,
+                print_times=True,
+                pulse_number=args.pulse,
+                run_number=args.run,
+                showuri=args.showuri,
+            )
 
     if args.cmd == "databases":
         databases_with_versions = DBMaster.get_databases_with_versions(args.user)

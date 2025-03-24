@@ -7,6 +7,7 @@ import difflib
 import inspect
 import logging
 import re
+import sys
 import time
 import types
 
@@ -200,7 +201,7 @@ def get_ids_attributes(idsobj: object) -> list:
         return []
 
 
-def get_ids_size(db_entry_object, ids_names=None, dd_update=False) -> dict:
+def get_ids_size(db_entry_object, ids_names=None, dd_update=False, ignore_empty=False) -> dict:
     """
     The function `get_ids_size` retrieves the size of IDS objects from a database entry and returns a dictionary
     containing the size in bytes and the time taken to read each object.
@@ -225,21 +226,23 @@ def get_ids_size(db_entry_object, ids_names=None, dd_update=False) -> dict:
         occurrences_count = max(occurrence_list)
 
         for o in range(occurrences_count + 1):
+
             if dd_update:
                 ids_object = imas.convert_ids(
                     db_entry_object.get(ids_name, occurrence=o, autoconvert=False), db_entry_object.factory.version
                 )
             else:
                 ids_object = db_entry_object.get(ids_name, occurrence=o, autoconvert=False)
+
             homogeneous_time = ids_object.ids_properties.homogeneous_time
             if homogeneous_time >= 0:
                 field = f"{ids_name}/{o}"
                 ids_size_dict[field] = {}
                 start_time = time.time()
+                ids_size_dict[field]["bytes"] = get_object_size(ids_object, ignore_empty)
                 ids_size_dict[field]["time"] = time.time() - start_time
-                ids_size_dict[field]["bytes"] = get_object_size(ids_object)
                 print(
-                    "Reading %0.3f MB of data for %s took %0.2f seconds"
+                    "Reading %0.3f MB of data for %s took %0.3f seconds"
                     % (
                         ids_size_dict[field]["bytes"] / 1024**2,
                         field,
@@ -279,7 +282,7 @@ def get_all_ids_get_time(db_entry_object):
     return np.array([ids["time"] for ids in ids_size_dict.values()]).sum()
 
 
-def get_object_size(obj: object) -> int:
+def get_object_size(obj: object, ignore_empty=False) -> int:
     object_size = 0
 
     if (
@@ -289,30 +292,35 @@ def get_object_size(obj: object) -> int:
         or isinstance(obj, imas.ids_primitive.IDSFloat0D)
         or isinstance(obj, imas.ids_primitive.IDSNumericArray)
         or isinstance(obj, imas.ids_primitive.IDSPrimitive)
-        or isinstance(obj, imas.ids_primitive.IDSString0D)
         or isinstance(obj, imas.ids_primitive.IDSString1D)
     ):
-        if isinstance(obj.value, str):
-            object_size += len(obj.value)
+        if ignore_empty and obj.has_value is False:
+            return object_size
+        elif isinstance(obj.value, str):
+            object_size += len(obj.value.encode("utf-8"))
         elif isinstance(obj.value, np.ndarray):
             object_size += obj.value.nbytes
         elif isinstance(obj.value, int):
             object_size += 4
         elif isinstance(obj.value, float):
             object_size += 8
+        elif isinstance(obj.value, complex):
+            object_size += 16
         elif isinstance(obj.value, list):
             for obj_item in obj:
-                object_size += get_object_size(obj_item)
+                object_size += get_object_size(obj_item, ignore_empty)
         else:
-            print(f"Not implemented {type(obj.value)}  ->  {obj}")
+            object_size += sys.getsizeof(obj)
+            print(f"Unkonwn {type(obj.value)}  getting size with getsizeof  ->  {obj}")
     elif isinstance(obj, imas.ids_struct_array.IDSStructArray):
         for obj_item in obj:
-            object_size += get_object_size(obj_item)
+            object_size += get_object_size(obj_item, ignore_empty)
     elif isinstance(obj, imas.ids_structure.IDSStructure):
         for obj_value in obj:
-            object_size += get_object_size(obj_value)
+            object_size += get_object_size(obj_value, ignore_empty)
     else:
-        print(f"Not implemented {type(obj)}  ->  {obj}")
+        object_size += sys.getsizeof(obj)
+        print(f"Unkonwn  {type(obj)}  getting size with getsizeof ->  {obj}")
     return object_size
 
 
