@@ -84,6 +84,7 @@ class ScenarioDescriptionSummary:
                 yaml_data = yaml.load(file_handle, Loader=Loader)
             except Exception as e:
                 logger.debug(f"Error loading YAML file {e}", exc_info=True)
+                logger.warning(f"Could ot read yaml file: {yaml_file_path}")
                 yaml_data = None
         return yaml_data
 
@@ -103,11 +104,12 @@ class ScenarioDescriptionSummary:
             a pandas DataFrame object.
         """
         yaml_data = ScenarioDescriptionSummary.get_yaml_data(yaml_file_path)
+        if yaml_data is None:
+            return None
         if add_obsolete is False:
             if yaml_data["status"] != "active":
                 return None
-        if yaml_data is None:
-            return None
+
         flat_table = json_normalize(yaml_data)
         data_frame = pd.DataFrame(flat_table)
         return data_frame
