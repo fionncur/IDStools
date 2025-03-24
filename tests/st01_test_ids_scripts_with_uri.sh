@@ -31,7 +31,7 @@ SCRIPTS=(
     "idscp --src \"imas:hdf5?user=public;pulse=131024;run=55;database=ITER;version=3\" --dest \"imas:hdf5?user=$USER;pulse=145000;run=5;database=ITER;version=3?path=$DATABASE_DIR\""
     "idsdiff --uri \"imas:hdf5?user=public;pulse=122525;run=2;database=ITER;version=3#summary\" \"imas:hdf5?user=public;pulse=122525;run=2;database=ITER;version=3#summary\""
     "idsdiff --uri \"imas:hdf5?user=public;pulse=130011;run=6;database=ITER;version=3#summary\" \"imas:hdf5?user=public;pulse=130012;run=4;database=ITER;version=3#summary\""
-    "idsresample --src \"imas:hdf5?user=public;pulse=131024;run=55;database=ITER;version=3\" --dest \"imas:hdf5?user=$USER;pulse=131024;run=5;database=ITER;version=3?path=$DATABASE_DIR\""
+    "idsresample --src \"imas:hdf5?user=public;pulse=131024;run=55;database=ITER;version=3\" --dest \"imas:hdf5?user=$USER;pulse=131024;run=5;database=ITER;version=3?path=$DATABASE_DIR\" equilibrium"
     "idsrescale_equilibrium --src \"imas:hdf5?user=public;pulse=122525;run=2;database=ITER;version=3\" --dest \"imas:hdf5?user=$USER;pulse=122222;run=22;database=ITER;version=3?path=$DATABASE_DIR\"  --rescale 2"
     "idsshift_equilibrium --src \"imas:hdf5?user=public;pulse=122525;run=2;database=ITER;version=3\" --dest \"imas:hdf5?user=$USER;pulse=123001;run=1;database=ITER;version=3?path=$DATABASE_DIR\"  --shift -0.01"
     "idslist --uri \"imas:hdf5?user=public;pulse=122525;run=2;database=ITER;version=3\""
