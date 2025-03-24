@@ -122,14 +122,16 @@ except Exception as _:  # noqa: F841
     exit()
 
 # define columns and rows for subplots based on ions
-columns = len(ids_slice_core_transport.model[model_index].profiles_1d[-1].ion)
+columns = 2
+if len(ids_slice_core_transport.model[model_index].profiles_1d[-1].ion) > 1:
+    columns = len(ids_slice_core_transport.model[model_index].profiles_1d[-1].ion)
+
 canvas = PlotCanvas(3, columns)
 electrons_particle_fluxes_axes = canvas.add_axes(title="", xlabel="", row=0, col=0, colspan=1)
 electrons_energy_fluxes_axes = canvas.add_axes(title="", xlabel="", row=0, col=1, colspan=1)
 
 ions_particle_fluxes_axes = [canvas.add_axes(title="", xlabel="", row=1, col=x, colspan=1) for x in range(columns)]
 ions_energy_fluxes_axes = [canvas.add_axes(title="", xlabel="", row=2, col=x, colspan=1) for x in range(columns)]
-
 ct_view = CoreTransportView(ids_slice_core_transport)
 
 ct_view.view_ions_particle_fluxes(
@@ -171,7 +173,7 @@ canvas.set_text(text=f"{get_database_path(args, time_value=time_value)}")
 canvas.fig.suptitle(get_title(args, "Core transport", time_value), size=12)
 canvas.fig.subplots_adjust(top=0.9, bottom=0.094, left=0.035, right=0.948, hspace=0.417, wspace=0.117)
 canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
-
+canvas.remove_empty_axes()
 if args.save:
     fname = get_file_name(args, os.path.basename(__file__) + "_core_transport", time_value)
     if args.directory:

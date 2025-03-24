@@ -13,9 +13,11 @@ from rich.console import Console
 from rich_argparse import RichHelpFormatter
 
 from idstools.database import DBMaster
-from idstools.idslist import available_in_dbentry
 from idstools.utils.clihelper import get_backend_id, imas_parser
-from idstools.utils.idshelper import idsdiff
+from idstools.utils.idshelper import (
+    get_available_ids_and_occurrences,
+    idsdiff,
+)
 from idstools.utils.idslogger import setup_logger
 
 logger = setup_logger("module", stdout_level=logging.INFO)
@@ -102,7 +104,7 @@ for pulse in files:
         error = True
         log_messages.append("Error creating pulse")
         continue
-    avids = available_in_dbentry(src)
+    avids = get_available_ids_and_occurrences(src)
     complete_description = ""
     identical = True
     for ids in avids:

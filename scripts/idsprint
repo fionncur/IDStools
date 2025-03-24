@@ -5,7 +5,7 @@ import logging
 import os
 import sys
 
-import imaspy
+import imaspy as imas
 import numpy as np
 import rich
 from imaspy.ids_primitive import IDSNumericArray, IDSPrimitive
@@ -157,7 +157,7 @@ def _make_tree(structure, hide_empty_nodes, compact, *, tree=None):
                 group = Columns([txt])
             tree.add(group)
             return tree
-        elif isinstance(structure, imaspy.ids_primitive.IDSNumericArray):
+        elif isinstance(structure, IDSNumericArray):
             tree = Tree(f"[magenta]{type(structure)}")
             if structure.size == 0:
                 value = "[bright_black]"
@@ -379,15 +379,15 @@ if __name__ == "__main__":
                 occurrence=0,
                 time_requested=time_slice,
                 autoconvert=False,
-                interpolation_method=imaspy.ids_defs.CLOSEST_INTERP,
+                interpolation_method=imas.ids_defs.CLOSEST_INTERP,
             )
 
         else:
             ids = connection.get(ids_name, occurrence=0, autoconvert=False, ignore_unknown_dd_version=True)
         if args.dd_update:
-            ids = imaspy.convert_ids(ids, connection.factory.version)
+            ids = imas.convert_ids(ids, connection.factory.version)
         if args.inspect:
-            imaspy.util.inspect(ids, hide_empty_nodes=not args.show_empty)
+            imas.util.inspect(ids, hide_empty_nodes=not args.show_empty)
         elif args.export:
             fields = _make_dict_tree(ids, hide_empty_nodes=not args.show_empty, compact=args.compact)
             root_dict = {}
@@ -440,14 +440,14 @@ if __name__ == "__main__":
                 ignore_unknown_dd_version=True,
                 lazy=lazy_value,
                 time_requested=time_slice,
-                interpolation_method=imaspy.ids_defs.CLOSEST_INTERP,
+                interpolation_method=imas.ids_defs.CLOSEST_INTERP,
             )
         else:
             ids = connection.get(
                 ids_name, occurrence=0, autoconvert=False, ignore_unknown_dd_version=True, lazy=lazy_value
             )
         if args.dd_update:
-            ids = imaspy.convert_ids(ids, connection.factory.version)
+            ids = imas.convert_ids(ids, connection.factory.version)
         coordinate = None
         node_unit = ""
         coordinate_name = ""
@@ -475,7 +475,7 @@ if __name__ == "__main__":
             try:
                 node = eval("ids." + ids_path)
                 # reevaluate if struct or struct_array
-                if isinstance(node, (imaspy.ids_structure.IDSStructure, imaspy.ids_struct_array.IDSStructArray)):
+                if isinstance(node, (IDSStructure, IDSStructArray)):
                     ids = connection.get(ids_name, occurrence, autoconvert=False)
                     node = eval("ids." + ids_path)
             except Exception as e:
@@ -485,7 +485,7 @@ if __name__ == "__main__":
                 )
 
         if args.inspect:
-            imaspy.util.inspect(node, hide_empty_nodes=not args.show_empty)
+            imas.util.inspect(node, hide_empty_nodes=not args.show_empty)
         elif args.export:
             fields = _make_dict_tree(ids, hide_empty_nodes=not args.show_empty, compact=args.compact)
             root_dict = {}
@@ -525,14 +525,14 @@ if __name__ == "__main__":
             else:
                 logger.error(f"Please provide valid export type")
         elif args.plot:
-            if isinstance(node, (imaspy.ids_structure.IDSStructure, imaspy.ids_struct_array.IDSStructArray)):
+            if isinstance(node, (IDSStructure, IDSStructArray)):
                 logger.error("Can not plot data, fragment is structure. inspect data with -i option")
                 exit(0)
             if len(node) == 0:
                 logger.error("Can not plot data, no values present in the array. inspect data with -i option")
                 exit(0)
 
-            if isinstance(node[0], (imaspy.ids_structure.IDSStructure, imaspy.ids_struct_array.IDSStructArray)):
+            if isinstance(node[0], (IDSStructure, IDSStructArray)):
                 logger.error("Can not plot data, fragment values are structures. inspect data with -i option")
                 exit(0)
 

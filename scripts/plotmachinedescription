@@ -9,10 +9,12 @@ from imaspy import convert_ids
 from rich_argparse import RichHelpFormatter
 
 from idstools.database import DBMaster
-from idstools.idslist import available_in_dbentry
 from idstools.machinedescription import MachineDescription
 from idstools.utils.clihelper import (
     get_database_path,
+)
+from idstools.utils.idshelper import (
+    get_available_ids_and_occurrences,
 )
 from idstools.utils.idslogger import setup_logger
 from idstools.view.common import PlotCanvas
@@ -146,7 +148,7 @@ if __name__ == "__main__":
         mdargs.uri = _md_uri
         connection = DBMaster.get_connection(mdargs)
         if connection:
-            all_idses_list = [item for item, _ in available_in_dbentry(connection, None, args.dd_update)]
+            all_idses_list = [item for item, _ in get_available_ids_and_occurrences(connection, None)]
             if _ids_names == "":
                 _ids_names = idses
             for _ids_name in _ids_names.split(","):

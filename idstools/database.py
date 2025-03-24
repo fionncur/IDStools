@@ -259,6 +259,48 @@ class DBMaster:
         return pulses
 
     @staticmethod
+    def get_hdf5_pulses_from_folder(folder: str = None, as_dictionary=False) -> list:
+
+        pulses = {} if as_dictionary else []
+        hdf5_master_file_paths = glob(f"{folder}/**/*master.h5", recursive=True)
+        for hdf5_master_file_path in hdf5_master_file_paths:
+            run = hdf5_master_file_path.split("/")[-2]
+            if run.isdigit():
+                run = int(run)
+            else:
+                run = 0
+            pulse = hdf5_master_file_path.split("/")[-3]
+            if pulse.isdigit():
+                pulse = int(pulse)
+            else:
+                pulse = 0
+
+            file_time = datetime.fromtimestamp(os.path.getmtime(hdf5_master_file_path)).replace(microsecond=0)
+            if as_dictionary:
+                if hdf5_master_file_path not in pulses:
+                    pulses[hdf5_master_file_path] = []
+                pulses[hdf5_master_file_path].append(
+                    (
+                        pulse,
+                        run,
+                        imas.ids_defs.HDF5_BACKEND,
+                        hdf5_master_file_path,
+                        file_time,
+                    )
+                )
+            else:
+                pulses.append(
+                    (
+                        pulse,
+                        run,
+                        imas.ids_defs.HDF5_BACKEND,
+                        hdf5_master_file_path,
+                        file_time,
+                    )
+                )
+        return pulses
+
+    @staticmethod
     def get_mds_plus_pulses(
         user: str = None,
         database: str = None,
@@ -309,7 +351,7 @@ class DBMaster:
 
             else:  # AL5 layout
                 if datafile != "ids_001.datafile":
-                    print(f"warning:ids_001.datafile does not exists {run} {data_file_path}")
+                    print(f"warning:ids_001.datafile does not exists {data_file_path}")
                     continue
                 if os.path.islink(data_file_path):
                     continue
@@ -365,6 +407,73 @@ class DBMaster:
                         database,
                         user,
                         version,
+                        data_file_path,
+                        file_time,
+                    )
+                )
+        return pulses
+
+    @staticmethod
+    def get_mds_plus_pulses_from_folder(
+        folder: str = None,
+        as_dictionary=False,
+    ) -> list:
+        pulses = {} if as_dictionary else []
+
+        datafile_paths = glob(f"{folder}/**/*.datafile", recursive=True)
+
+        for data_file_path in datafile_paths:
+            root = os.path.dirname(data_file_path)
+            datafile = os.path.basename(data_file_path)
+            run_list = (root[len(folder) + 1 :]).split("/")
+            if len(run_list) == 1 and run_list[0] != "":  # AL4 layout
+                num_start_pos = datafile.find("_") + 1
+                num_end_pos = datafile.rfind(".")
+                num = int(datafile[num_start_pos:num_end_pos])
+                pulse = num // 10000
+                run = 0
+                if run_list[0].isdigit():
+                    run = int(run_list[0]) * 10000 + (num % 10000)
+
+            else:  # AL5 layout
+                if datafile != "ids_001.datafile":
+                    continue
+                run = root.split("/")[-1]
+                if not run.isdigit():
+                    run = int(run)
+                else:
+                    run = 0
+                pulse = root.split("/")[-2]
+                if not pulse.isdigit():
+                    pulse = int(pulse)
+                else:
+                    pulse = 0
+            try:
+                file_time = datetime.fromtimestamp(os.path.getmtime(data_file_path)).replace(microsecond=0)
+            except FileNotFoundError:
+                print(f"warning:invalid file {data_file_path}")
+                continue
+
+            if as_dictionary:
+                if data_file_path not in pulses:
+                    pulses[data_file_path] = []
+                is_run_available = any(x[1] == run for x in pulses[data_file_path])
+                if not is_run_available:
+                    pulses[data_file_path].append(
+                        (
+                            pulse,
+                            run,
+                            imas.ids_defs.MDSPLUS_BACKEND,
+                            data_file_path,
+                            file_time,
+                        )
+                    )
+            else:
+                pulses.append(
+                    (
+                        pulse,
+                        run,
+                        imas.ids_defs.MDSPLUS_BACKEND,
                         data_file_path,
                         file_time,
                     )
@@ -445,6 +554,42 @@ class DBMaster:
             if database_files:
                 result.append((database, database_files))
         return result
+
+    @staticmethod
+    def get_database_files_from_folder(folder=None, backends=None):
+        """
+        The function `get_database_files` retrieves a list of database files based on the specified user,
+        database, version, and backends.
+
+        Args:
+            user: The ``user`` parameter is used to specify the user for whom the database files are being
+                retrieved. If no user is specified, it defaults to ``None``.
+            database: The ``database`` parameter is used to specify the name of the database.
+            version: The ``version`` parameter is used to specify a specific version of the database.
+            backends: The ``backends`` parameter is a list of strings that specifies the database backends to
+                retrieve files from. The possible values for ``backends`` are ``hdf5`` and ``mdsplus``. If ``backends``
+                is not provided, it defaults to ``DBMaster.ALL_BACKENDS``
+
+        Returns:
+            The function ``get_database_files`` returns a list of tuples. Each tuple contains the name of a database,
+            followed by a list of tuples. Each inner tuple contains a version number, followed by a list of tuples.
+            Each innermost tuple contains the name of a backend (either ``hdf5`` or ``mdsplus``), followed by a
+            dictionary of database files.
+        """
+        if not backends:
+            backends = DBMaster.ALL_BACKENDS
+
+        pulses = []
+        for backend in backends:
+            if backend == "hdf5":
+                dbs = DBMaster.get_hdf5_pulses_from_folder(folder, as_dictionary=True)
+            elif backend == "mdsplus":
+                dbs = DBMaster.get_mds_plus_pulses_from_folder(folder, as_dictionary=True)
+            else:
+                raise NotImplementedError(f"Unsupported backend: {backend}")
+            if dbs:
+                pulses.append((backend, dbs))
+        return pulses
 
     @staticmethod
     def get_hdf5_physical_file(user, database, version, pulse, run):

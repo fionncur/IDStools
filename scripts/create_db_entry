@@ -28,7 +28,7 @@ parser.add_argument("-r", "--run", help="Run number", type=int)
 
 parser.add_argument(
     "--disable-validation",
-    help="disable IDS validation",
+    help="disable IDS validation (deprecated)",
     required=False,
     action="store_true",
     dest="wo_validation",
@@ -241,8 +241,8 @@ if core_present == 1:
         a = [0]
 else:
     try:
-        edge_profiles = imas.edge_profiles()
-        edge_profiles.ggd.resize(1)
+        # edge_profiles = imas.edge_profiles()
+        # edge_profiles.ggd.resize(1)
         # pdb.set_trace()
         # edge_profiles.ggd[the_slice].ion = input.edge_profiles.partialGet('ggd('+str(the_slice)+')/ion')
 
@@ -618,28 +618,6 @@ from idstools.set_logger import set_logger
 # Initialize logger
 logger = set_logger(__name__)
 
-
-# Validate Input Database
-if not args.wo_validation:
-    from glob import glob
-
-    from idstools.db_validator import ScenarioValidator
-
-    current_fpath = path.dirname(path.realpath(__file__))
-    schema_dir = path.join(current_fpath, "validation_schemas")
-    schema = []
-    schema += sorted(glob(schema_dir + "/generic/*.y*ml", recursive=True))
-    schema += sorted(glob(schema_dir + "/ITER/*.y*ml", recursive=True))
-
-    # Initialize Class ScenarioValidator
-    sv = ScenarioValidator(schema_path=schema)
-
-    # Validation for Class imas.DBEntry
-    ret = sv.validate_db(input)
-
-    if not all(ret.values()):
-        logging.error("IDS validation failed. Use '--disable-validation' for generating yaml and watcher files anyway")
-        sys.exit(1)
 
 # ----------------------------------------------------------------------
 

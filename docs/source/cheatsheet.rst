@@ -236,15 +236,6 @@ This cheat sheet provides quick reference of commonly used commands in IDStools.
 |                               |    --log INFO                                                                                                                       |
 |                               |                                                                                                                                     | 
 +-------------------------------+-------------------------------------------------------------------------------------------------------------------------------------+
-| *idschk*                      | Validate ids fields against rules defined in yaml file                                                                              |
-+-------------------------------+-------------------------------------------------------------------------------------------------------------------------------------+
-|                               |                                                                                                                                     |
-|                               | .. code-block:: bash                                                                                                                |
-|                               |                                                                                                                                     |
-|                               |    $ idschk --uri "imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3"                                           |
-|                               |    -f resources/validation_schemas/generic/core_profiles.yml                                                                        |  
-|                               |                                                                                                                                     |                 
-+-------------------------------+-------------------------------------------------------------------------------------------------------------------------------------+
 | *idscp*                       | Copy ids from one pulse to another                                                                                                  |
 +-------------------------------+-------------------------------------------------------------------------------------------------------------------------------------+
 |                               |                                                                                                                                     |
@@ -501,13 +492,6 @@ Database Tools
 |                                |    $ create_db_entry_disruption -s 100028 -r 1 -d ITER_DISRUPTIONS             |
 |                                |                                                                                |
 +--------------------------------+--------------------------------------------------------------------------------+
-| *create_validation_schema*     | Create validation schema using data dictionary validation attributes           |
-|                                |                                                                                |
-|                                | .. code-block:: bash                                                           |
-|                                |                                                                                |
-|                                |    $ create_validation_schema -i core_profiles                                 |
-|                                |                                                                                |
-+--------------------------------+--------------------------------------------------------------------------------+
 | *disruption_summary*           | Script to list available disruptions in a specific folder                      |
 |                                |                                                                                |
 |                                | .. code-block:: bash                                                           |
@@ -564,13 +548,6 @@ Database Tools
 |                                | .. code-block:: bash                                                           |
 |                                |                                                                                |
 |                                |    $ show_db_entry -s 134174 -r 117                                            |
-|                                |                                                                                |
-+--------------------------------+--------------------------------------------------------------------------------+
-| *validate_db_entry*            | Validation Tool for ITER Scenario DB                                           |
-|                                |                                                                                |
-|                                | .. code-block:: bash                                                           |
-|                                |                                                                                |
-|                                |    $ validate_db_entry -s 134174 -r 117 --path resources/validation_schemas    |
 |                                |                                                                                |
 +--------------------------------+--------------------------------------------------------------------------------+
 | *watch_db_entry*               | Subscribe/unsubscribe as a watcher to a simulation file                        |

@@ -47,9 +47,8 @@ class EquilibriumCompute:
         Example:
             .. code-block:: python
 
-                import imaspy
+                import imaspy as imas
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=134173;run=106;database=ITER;version=3","r")
-                connection.open()
                 idsObj = connection.get('equilibrium')
                 computeObj = EquilibriumCompute(idsObj)
                 result = computeObj.get2d_cartesian_grid(time_slice=0)
@@ -121,9 +120,8 @@ class EquilibriumCompute:
         Examples:
             .. code-block:: python
 
-                import imaspy
+                import imaspy as imas
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=134173;run=106;database=ITER;version=3", "r")
-                connection.open()
                 idsObj = connection.get('equilibrium')
                 computeObj = EquilibriumCompute(idsObj)
                 result = computeObj.get_rho2d(time_slice=0)
@@ -163,9 +161,8 @@ class EquilibriumCompute:
         Examples:
             .. code-block:: python
 
-                import imaspy
+                import imaspy as imas
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=134173;run=106;database=ITER;version=3", "r")
-                connection.open()
                 idsObj = connection.get('equilibrium')
                 computeObj = EquilibriumCompute(idsObj)
                 indices = idsobj.get_b_total(time_slice=0)
@@ -229,9 +226,8 @@ class EquilibriumCompute:
         Examples:
             .. code-block:: python
 
-                import imaspy
+                import imaspy as imas
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=134173;run=106;database=ITER;version=3","r")
-                connection.open()
                 idsObj = connection.get('equilibrium')
                 computeObj = EquilibriumCompute(idsObj)
                 indices = idsobj.get2d_profiles_indices(time_slice=0, gridType=1)
@@ -283,9 +279,8 @@ class EquilibriumCompute:
         Examples:
             .. code-block:: python
 
-                import imaspy
+                import imaspy as imas
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=134173;run=106;database=ITER;version=3","r")
-                connection.open()
                 idsObj = connection.get('equilibrium')
                 computeObj = EquilibriumCompute(idsObj)
                 result = computeObj.getIP()

@@ -2,8 +2,10 @@
 # -*- coding: utf-8 -*-
 import argparse
 import sys
+from collections import defaultdict
 
 import imaspy as imas
+from packaging import version
 from rich_argparse import RichHelpFormatter
 
 from idstools.database import DBMaster
@@ -102,14 +104,41 @@ outputargs.uri = args.dest
 
 # hack to get underlying data dictionary version used by idses
 src_dd_version = src_connection.dd_version
+
+ids_dd_versions = {}
+for idsname in args.ids:
+    try:
+        _dummy = src_connection.get(idsname, lazy=True, autoconvert=False)
+        ids_dd_versions[idsname] = _dummy.ids_properties.version_put.data_dictionary.value
+    except Exception as _:  # noqa: F841
+        pass
+
+ids_grouped_by_dd_version = defaultdict(list)
+for idsname, data_dictionary_version in ids_dd_versions.items():
+    ids_grouped_by_dd_version[data_dictionary_version].append(idsname)
+
+max_dd_version = max(ids_dd_versions.values(), key=version.parse)
 if not args.dd_update:
-    for idsname in args.ids:
-        try:
-            _dummy = src_connection.get(idsname, lazy=True, autoconvert=False)
-            src_dd_version = _dummy.ids_properties.version_put.data_dictionary.value
-            break
-        except Exception as _:  # noqa: F841
-            pass
+
+    if len(set(ids_dd_versions.values())) > 1:
+        ids_grouped_by_dd_version_output = ", ".join(
+            f"{k}: {', '.join(v)}" for k, v in ids_grouped_by_dd_version.items()
+        )
+        logger.error(
+            f"The source pulse contains IDSs with different data dictionary versions. \n\n"
+            f"{ids_grouped_by_dd_version_output} \n\n"
+        )
+        exit(1)
+    src_dd_version = max_dd_version
+else:
+    ids_grouped_by_dd_version_output = ", ".join(f"{k}: {', '.join(v)}" for k, v in ids_grouped_by_dd_version.items())
+    logger.warning(
+        f"Be careful, all IDSs will be converted to data dictionary version {src_dd_version} using explicit "
+        "conversion.Below is the list of IDSs grouped by data dictionary version: \n\n"
+        f"{ids_grouped_by_dd_version_output} \n\n"
+        f"This is still an experimental feature and may miss some type conversions."
+        f"Please verify the conversion carefully using idsdiff."
+    )
 
 if args.force:
     # CREATE DEST
@@ -179,7 +208,8 @@ for idsname in args.ids:
         pass
     if idsobj:
         if args.set_dataset_version and idsid[0] == "dataset_description":
-            idsobj.dd_version = src_dd_version
+            if hasattr(idsobj, "dd_version"):
+                idsobj.dd_version = src_dd_version
         try:
             if idsobj.ids_properties.homogeneous_time != imas.ids_defs.EMPTY_INT:
                 print(f"Copying {idsname}")

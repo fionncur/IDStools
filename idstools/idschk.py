@@ -339,6 +339,8 @@ class IDSValidator(cerberus.Validator):
         """{'nullable': False }"""
         try:
             v = np.atleast_1d(value).flatten()
+            if isinstance(min_value, str):
+                min_value = eval(min_value)
             if np.any(v <= min_value):
                 self._error(field, f"Must be larger than {min_value}")
         except ValueError:

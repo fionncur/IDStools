@@ -134,6 +134,35 @@ class PlotCanvas:
     def get_current_fig_manager(self):
         return plt.get_current_fig_manager()
 
+    @staticmethod
+    def is_axes_empty(ax):
+        """
+        Check if a given Matplotlib Axes object is empty.
+
+        An Axes object is considered empty if it has no data, no lines, no patches, and no texts.
+
+        Parameters:
+        ax (matplotlib.axes.Axes): The Axes object to check.
+
+        Returns:
+        bool: True if the Axes object is empty, False otherwise.
+        """
+        return not ax.has_data() and len(ax.lines) == 0 and len(ax.patches) == 0 and len(ax.texts) == 0
+
+    def remove_empty_axes(self):
+        """
+        Remove empty axes from the figure.
+
+        This method iterates over all axes in the figure and removes those that are empty.
+        An axis is considered empty if the `PlotCanvas.is_axes_empty` method returns True.
+
+        Returns:
+            None
+        """
+        for ax in self.fig.axes[:]:  # Iterate over a copy of the axes list
+            if PlotCanvas.is_axes_empty(ax):
+                self.fig.delaxes(ax)
+
     def set_style(self, style="default"):
         """
         The function `setStyle` in allows you to set different color schemes for plots using Matplotlib based
