@@ -1,0 +1,171 @@
+[build-system]
+requires = ["setuptools", "wheel", "setuptools_scm>8"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "IDStools"
+authors = [
+    { name = "ITER Organization", email = "imas-support@iter.org" }
+]
+description = "Python based collection of data analysis and visualization tools written in IMAS framework"
+readme = {file = "README.md", content-type = "text/markdown"}
+requires-python = ">=3.6"
+license = "GPL-3.0-or-later"
+license-files = ["LICEN[CS]E*"]
+keywords = ["IMAS", "IDS"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Console",
+    "Environment :: Plugins",
+    "Environment :: X11 Applications",
+    "Framework :: Flake8",
+    "Framework :: IPython",
+    "Framework :: Matplotlib",
+    "Framework :: Pytest",
+    "Framework :: Sphinx",
+# Custom trove classifiers are not allowed, and newer versions of python setuptools will fail to build
+# when classifiers other than those listed on: https://pypi.org/classifiers/ are included
+#    "Framework :: IMAS",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: System Administrators",
+    "Natural Language :: English",
+    "Operating System :: POSIX",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Unix Shell",
+    "Topic :: Database",
+    "Topic :: Database :: Front-Ends",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Scientific/Engineering :: Physics",
+    "Topic :: Scientific/Engineering :: Visualization",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: System",
+    "Topic :: System :: Software Distribution",
+    "Topic :: Utilities",
+]
+dependencies = [
+    "cerberus",
+    "fortranformat",
+    "matplotlib",
+    "numpy<2",
+    "packaging",
+    "pandas",
+    "pyparsing",
+    "python-dateutil",
+    "pyyaml",
+    "rich",
+    "rich_argparse",
+    "six",
+    "tabulate"
+]
+dynamic = ["version"]
+
+[project.scripts]
+dbconverter = "scripts.dbconverter:main"
+dblist = "scripts.dblist:main"
+dbperf = "scripts.dbperf:main"
+dbscraper = "scripts.dbscraper:main"
+dbselector = "scripts.dbselector:main"
+eqdsk2ids = "scripts.eqdsk2ids:main"
+idscp = "scripts.idscp:main"
+idsdiff = "scripts.idsdiff:main"
+idslist = "scripts.idslist:main"
+idsperf = "scripts.idsperf:main"
+idsprint = "scripts.idsprint:main"
+idsresample = "scripts.idsresample:main"
+idsrescale_equilibrium = "scripts.idsrescale_equilibrium:main"
+idsrosettacode = "scripts.idsrosettacode:main"
+idssize = "scripts.idssize:main"
+idsshift_equilibrium = "scripts.idsshift_equilibrium:main"
+plotcoresources = "scripts.plotcoresources:main"
+plotecstrayradiation = "scripts.plotecstrayradiation:main"
+plotedgeprofiles = "scripts.plotedgeprofiles:main"
+plotequilibrium = "scripts.plotequilibrium:main"
+plotequicomp = "scripts.plotequicomp:main"
+printfluxes = "scripts.printfluxes:main"
+plothcddistributions = "scripts.plothcddistributions:main"
+plothcd = "scripts.plothcd:main"
+plotkineticprofiles = "scripts.plotkineticprofiles:main"
+plothcdwaves = "scripts.plothcdwaves:main"
+plotmachinedescription = "scripts.plotmachinedescription:main"
+plotneutron = "scripts.plotneutron:main"
+printplasmacompo = "scripts.printplasmacompo:main"
+plotpressure = "scripts.plotpressure:main"
+plotscenario = "scripts.plotscenario:main"
+plotrotation = "scripts.plotrotation:main"
+printcoresources = "scripts.printcoresources:main"
+plotecray = "scripts.plotecray:main"
+ploteccomposition = "scripts.ploteccomposition:main"
+plotspectrometry = "scripts.plotspectrometry:main"
+plotcoretransport = "scripts.plotcoretransport:main"
+create_db_entry = "scripts.create_db_entry:main"
+create_db_entry_disruption = "scripts.create_db_entry_disruption:main"
+disruption_summary = "scripts.disruption_summary:main"
+md_status = "scripts.md_status:main"
+md_summary = "scripts.md_summary:main"
+scenario_status = "scripts.scenario_status:main"
+scenario_summary = "scripts.scenario_summary:main"
+show_db_entry = "scripts.show_db_entry:main"
+watch_db_entry = "scripts.watch_db_entry:main"
+idstools = "scripts.idstools:main"
+
+[project.urls]
+homepage = "https://git.iter.org/projects/IMAS/repos/idstools/browse"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["idstools*"]
+exclude = ["*.pyc", "*.pyo"]
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "--strict-markers"
+testpaths = "idstools"
+
+[tool.setuptools_scm]
+write_to = "idstools/_version.py"
+local_scheme = "no-local-version"
+
+[tool.isort]
+profile = "black"
+
+[tool.flake8]
+max-line-length = 120
+ignore = ["E203", "W503"]
+
+[project.optional-dependencies]
+# these self-dependencies are available since pip 21.2
+all = [
+    "IDStools[test,docs]" 
+]
+docs = [
+"Sphinx",
+"numpy",
+"pyparsing",
+"python-dateutil",
+"rst2pdf",
+"sphinx-autoapi",
+"sphinx-autodoc-typehints",
+"sphinx-immaterial",
+"sphinx-toolbox",
+"sphinxcontrib-programoutput"
+]
+
+test = [
+    "pytest",
+    "IDStools",
+]
+
+
+[tool.black]
+line-length = 120
+exclude = '''
+/(
+    idstools/_version\.py
+)/
+'''
