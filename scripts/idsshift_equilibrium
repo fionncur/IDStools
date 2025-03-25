@@ -16,101 +16,101 @@ from idstools.utils.idslogger import setup_logger
 
 logger = setup_logger("module", stdout_level=logging.INFO)
 #
-
-# Management of input arguments
-parser = argparse.ArgumentParser(
-    description="""Rigidly shifts vertically an equilibrium, storing the output into another
-    entry of the same DB. replaced by ids_shift_eq""",
-    formatter_class=RichHelpFormatter,
-)
-parser.add_argument(
-    "-s",
-    "--src",
-    type=str,
-    required=True,
-    help="source uri",
-)
-parser.add_argument(
-    "-d",
-    "--dest",
-    type=str,
-    required=True,
-    help="destination uri",
-)
-parser.add_argument(
-    "--dd-update",
-    action="store_true",
-    help=(
-        "Convert IDS to the default version of the data dictionary if enabled"
-        "otherwise, use the original IDS stored on disk."
-    ),
-)
-
-
-parser.add_argument("--shift", help="Upward shift of equilibrium (m)", type=float, required=True)
-
-args = parser.parse_args()
-
-
-shift_param = args.shift
-
-# OPEN INPUT
-inputargs = argparse.Namespace()
-inputargs.uri = args.src
-connection = DBMaster.get_connection(inputargs)
-if connection is None:
-    sys.exit()
-
-# hack to get underlying data dictionary version used by idses
-ids = get_ids_types()
-src_dd_version = connection.dd_version
-if not args.dd_update:
-    for idsname in ids:
-        try:
-            _dummy = connection.get(idsname, lazy=True, autoconvert=False)
-            src_dd_version = _dummy.ids_properties.version_put.data_dictionary.value
-            break
-        except Exception as _:  # noqa: F841
-            pass
-ids_equilibrium = connection.get("equilibrium", autoconvert=False)
-
-
-outputargs = argparse.Namespace()
-outputargs.mode = "w"
-outputargs.uri = args.dest
-
-if "mode" not in outputargs.__dict__:
-    outputargs.mode = "a"
-output_connection = None
-if outputargs.uri != "" and outputargs.uri is not None:
-    if args.dd_update:
-        output_connection = imas.DBEntry(outputargs.uri, outputargs.mode)
-    else:
-        output_connection = imas.DBEntry(outputargs.uri, outputargs.mode, dd_version=src_dd_version)
-
-if output_connection is None:
-    logger.error("Error opening destination pulse! Please check parameters and permissions.")
-    exit(1)
-
-logger.info(f"Shifting equilibrium by {shift_param} m")
-logger.info("Values for wall gaps, locations of strike-points and closest wall points are no longer guaranteed!")
-equilibrium_compute = EquilibriumCompute(ids_equilibrium)
-
-equout = equilibrium_compute.z_shift(shift_param, dd_update=args.dd_update)
-if args.dd_update:
-    dest_ids_object = imas.convert_ids(equout, output_connection.factory.version)
-# PUT IDS INTO OUTPUT
-output_connection.put(equout)
-
-# CLOSE FILES
-connection.close()
-output_connection.close()
-logger.info("Equilibrium IDS is upward shifted successfully.")
-
-if args.dest is not None:
-    logger.info(f"Output database details {args.dest}")
-else:
-    logger.info(
-        f"Output database details database={args.dest_database}, pulse={args.dest_pulse},"
-        f"run={args.dest_run}, user={os.environ['USER']}"
+if __name__ == "__main__":
+    # Management of input arguments
+    parser = argparse.ArgumentParser(
+        description="""Rigidly shifts vertically an equilibrium, storing the output into another
+        entry of the same DB. replaced by ids_shift_eq""",
+        formatter_class=RichHelpFormatter,
     )
+    parser.add_argument(
+        "-s",
+        "--src",
+        type=str,
+        required=True,
+        help="source uri",
+    )
+    parser.add_argument(
+        "-d",
+        "--dest",
+        type=str,
+        required=True,
+        help="destination uri",
+    )
+    parser.add_argument(
+        "--dd-update",
+        action="store_true",
+        help=(
+            "Convert IDS to the default version of the data dictionary if enabled"
+            "otherwise, use the original IDS stored on disk."
+        ),
+    )
+
+
+    parser.add_argument("--shift", help="Upward shift of equilibrium (m)", type=float, required=True)
+
+    args = parser.parse_args()
+
+
+    shift_param = args.shift
+
+    # OPEN INPUT
+    inputargs = argparse.Namespace()
+    inputargs.uri = args.src
+    connection = DBMaster.get_connection(inputargs)
+    if connection is None:
+        sys.exit()
+
+    # hack to get underlying data dictionary version used by idses
+    ids = get_ids_types()
+    src_dd_version = connection.dd_version
+    if not args.dd_update:
+        for idsname in ids:
+            try:
+                _dummy = connection.get(idsname, lazy=True, autoconvert=False)
+                src_dd_version = _dummy.ids_properties.version_put.data_dictionary.value
+                break
+            except Exception as _:  # noqa: F841
+                pass
+    ids_equilibrium = connection.get("equilibrium", autoconvert=False)
+
+
+    outputargs = argparse.Namespace()
+    outputargs.mode = "w"
+    outputargs.uri = args.dest
+
+    if "mode" not in outputargs.__dict__:
+        outputargs.mode = "a"
+    output_connection = None
+    if outputargs.uri != "" and outputargs.uri is not None:
+        if args.dd_update:
+            output_connection = imas.DBEntry(outputargs.uri, outputargs.mode)
+        else:
+            output_connection = imas.DBEntry(outputargs.uri, outputargs.mode, dd_version=src_dd_version)
+
+    if output_connection is None:
+        logger.error("Error opening destination pulse! Please check parameters and permissions.")
+        exit(1)
+
+    logger.info(f"Shifting equilibrium by {shift_param} m")
+    logger.info("Values for wall gaps, locations of strike-points and closest wall points are no longer guaranteed!")
+    equilibrium_compute = EquilibriumCompute(ids_equilibrium)
+
+    equout = equilibrium_compute.z_shift(shift_param, dd_update=args.dd_update)
+    if args.dd_update:
+        dest_ids_object = imas.convert_ids(equout, output_connection.factory.version)
+    # PUT IDS INTO OUTPUT
+    output_connection.put(equout)
+
+    # CLOSE FILES
+    connection.close()
+    output_connection.close()
+    logger.info("Equilibrium IDS is upward shifted successfully.")
+
+    if args.dest is not None:
+        logger.info(f"Output database details {args.dest}")
+    else:
+        logger.info(
+            f"Output database details database={args.dest_database}, pulse={args.dest_pulse},"
+            f"run={args.dest_run}, user={os.environ['USER']}"
+        )

@@ -52,238 +52,238 @@ class SmartFormatter(argparse.HelpFormatter):
 
 
 # ----------------------------------------------------------------------------
-
-# Input arguments
-parser = argparse.ArgumentParser(
-    description="""---- Script to list available scenarios in a specific folder ----\n\n
-    Important: The legacy scenario_summary tool is deprecated and will be removed in a future versions.
-    It will remain available until simdb is fully adopted.more about simdb : https://simdb.iter.org/dashboard/""",
-    formatter_class=SmartFormatter,
-)
-parser.add_argument(
-    "-f",
-    "--folder",
-    nargs="*",
-    help="list of folders where to search for scenarios (recursive)",
-    required=False,
-)
-parser.add_argument(
-    "-s",
-    "--selection",
-    nargs="*",
-    type=str,
-    help="R|list of fields to filter: e.g. He4,2.65\n"
-    "fields listed together (-s A,B) means selecting for both A and B\n"
-    "fields listed separately (-s A B) means selecting for either A or B\n"
-    "----> Select only scenarios filling these criteria",
-    required=False,
-)
-parser.add_argument(
-    "--sort",
-    help="sort by specific column ",
-    required=False,
-)
-parser.add_argument(
-    "-m",
-    "--matchcase",
-    help="Match case with selection criteria, default is false",
-    action="store_true",
-)
-parser.add_argument(
-    "-o",
-    "--obsolete",
-    help="Shows obsolete files",
-    action="store_true",
-)
-
-parser.add_argument(
-    "-c",
-    "--choice",
-    help="R|list of variables to display, e.g.: pulse,run,ip,b0\n"
-    "... available among following variables:\n"
-    "        ref_name    = dataset reference name\n"
-    "        ro_name     = responsible officer name\n"
-    "        pulse       = pulse number\n"
-    "        run         = run number\n"
-    "        type        = data type (experimental,predictive,interpretative)\n"
-    "        workflow    = suite of codes used to compute these data\n"
-    "        database    = database name\n"
-    "        confinement = confinement regime (L or H)\n"
-    "        ip          = plasma current\n"
-    "        b0          = central magnetic field \n"
-    "        fuelling    = plasma fuelling species\n"
-    "        ne0         = central electron density\n"
-    "        nesep       = midplane separatrix electron density\n"
-    "        zeff        = central Zeff\n"
-    "        zeff_sep    = midplane separatrix Zeff\n"
-    "        npeak       = density peaking\n"
-    "        p_hcd       = total H&CD power\n"
-    "        p_ec        = EC power\n"
-    "        p_ic        = IC power\n"
-    "        p_nbi       = NBI power\n"
-    "        p_lh        = LH power\n"
-    "        p_sol       = SOL power\n"
-    "        idslist     = List of IDSs available in the data-entry\n"
-    "        tsteps      = Number of time steps in the scenario\n"
-    "        location    = Location of the full description file\n"
-    "        composition = Plasma composition\n"
-    "        date        = Date of last modification of the dataset\n"
-    "        dd_version  = Data dictionary version\n",
-    required=False,
-)
-
-args = vars(parser.parse_args())
-
-# Folder
-if args["folder"] is not None:
-    folder = args["folder"]
-    directory_list = folder
-else:
-    directory_list = [os.environ["IMAS_HOME"] + "/shared/imasdb/ITER/3"]
-    directory_list.append(os.environ["IMAS_HOME"] + "/shared/imasdb/ITER/4")
-
-    lowlevelVersion = os.environ["AL_VERSION"]
-    lowlevelVersion = int(lowlevelVersion.split(".")[0])
-    if lowlevelVersion < 4:
-        directory_list = [os.environ["IMAS_HOME"] + "/shared/iterdb/3/0"]
-
-# MATCHCASE
-matchcase = args["matchcase"]
-
-# FILTER
-if args["selection"] is not None:
-    selectionOperation = "OR"
-    selection = args["selection"]
-    if "," in selection[0]:
-        selection = selection[0].split(",")
-        selectionOperation = "AND"
-
-    if not matchcase:
-        selection = [str(x).lower() for x in selection]
-else:
-    selection = None
-
-# SORT
-if args["sort"] is not None:
-    sort = args["sort"].split(",")
-    sort = [x for x in sort if x in displayMapping.keys()]
-else:
-    sort = ["pulse", "run"]
-
-if args["obsolete"] is not None:
-    obsolete = args["obsolete"]
-else:
-    obsolete = False
-# Choice of variables to display
-if args["choice"] is not None:
-    try:
-        input_choice = args["choice"]
-        choice = eval(str("""['""" + re.sub(""",""", r"""','""", input_choice) + """']"""))
-    except Exception as _:  # noqa: F841
-        print(
-            "------------------------------------------------------------------",
-            file=sys.stderr,
-        )
-        print("Wrong way to write your list of variables to display", file=sys.stderr)
-        print("You wrote " + str(args["choice"]), file=sys.stderr)
-        print(
-            "Try e.g. this way: " + """ scenario_summary -c pulse,run,workflow """,
-            file=sys.stderr,
-        )
-        print(
-            "------------------------------------------------------------------",
-            file=sys.stderr,
-        )
-        sys.exit(1)
-else:
-    choice = [
-        "pulse",
-        "run",
-        "database",
-        "dd_version",
-        "ref_name",
-        "ip",
-        "b0",
-        "fuelling",
-        "confinement",
-        "workflow",
-        "date",
-    ]
-
-# Print the arguments of the default call to the function
-if args["choice"] is None:
-    print("""----> Default call equivalent to: """)
-    print(
-        """      scenario_summary -c pulse,run,database,dd_version,ref_name,ip,b0,fuelling,confinement,workflow,date"""
+if __name__ == "__main__":
+    # Input arguments
+    parser = argparse.ArgumentParser(
+        description="""---- Script to list available scenarios in a specific folder ----\n\n
+        Important: The legacy scenario_summary tool is deprecated and will be removed in a future versions.
+        It will remain available until simdb is fully adopted.more about simdb : https://simdb.iter.org/dashboard/""",
+        formatter_class=SmartFormatter,
+    )
+    parser.add_argument(
+        "-f",
+        "--folder",
+        nargs="*",
+        help="list of folders where to search for scenarios (recursive)",
+        required=False,
+    )
+    parser.add_argument(
+        "-s",
+        "--selection",
+        nargs="*",
+        type=str,
+        help="R|list of fields to filter: e.g. He4,2.65\n"
+        "fields listed together (-s A,B) means selecting for both A and B\n"
+        "fields listed separately (-s A B) means selecting for either A or B\n"
+        "----> Select only scenarios filling these criteria",
+        required=False,
+    )
+    parser.add_argument(
+        "--sort",
+        help="sort by specific column ",
+        required=False,
+    )
+    parser.add_argument(
+        "-m",
+        "--matchcase",
+        help="Match case with selection criteria, default is false",
+        action="store_true",
+    )
+    parser.add_argument(
+        "-o",
+        "--obsolete",
+        help="Shows obsolete files",
+        action="store_true",
     )
 
-scenarioDescriptionObj = ScenarioDescriptionSummary(directory_list=directory_list)
-df = scenarioDescriptionObj.get_dataframes_from_files(extension=".yaml", add_obsolete=obsolete)
+    parser.add_argument(
+        "-c",
+        "--choice",
+        help="R|list of variables to display, e.g.: pulse,run,ip,b0\n"
+        "... available among following variables:\n"
+        "        ref_name    = dataset reference name\n"
+        "        ro_name     = responsible officer name\n"
+        "        pulse       = pulse number\n"
+        "        run         = run number\n"
+        "        type        = data type (experimental,predictive,interpretative)\n"
+        "        workflow    = suite of codes used to compute these data\n"
+        "        database    = database name\n"
+        "        confinement = confinement regime (L or H)\n"
+        "        ip          = plasma current\n"
+        "        b0          = central magnetic field \n"
+        "        fuelling    = plasma fuelling species\n"
+        "        ne0         = central electron density\n"
+        "        nesep       = midplane separatrix electron density\n"
+        "        zeff        = central Zeff\n"
+        "        zeff_sep    = midplane separatrix Zeff\n"
+        "        npeak       = density peaking\n"
+        "        p_hcd       = total H&CD power\n"
+        "        p_ec        = EC power\n"
+        "        p_ic        = IC power\n"
+        "        p_nbi       = NBI power\n"
+        "        p_lh        = LH power\n"
+        "        p_sol       = SOL power\n"
+        "        idslist     = List of IDSs available in the data-entry\n"
+        "        tsteps      = Number of time steps in the scenario\n"
+        "        location    = Location of the full description file\n"
+        "        composition = Plasma composition\n"
+        "        date        = Date of last modification of the dataset\n"
+        "        dd_version  = Data dictionary version\n",
+        required=False,
+    )
 
-# check of need to add obsolete
-if not args["obsolete"]:
-    df = df[df["status"] == "active"]
+    args = vars(parser.parse_args())
 
-df["date"] = df["date"].dt.strftime("%Y-%m-%d %H:%M:%S")
+    # Folder
+    if args["folder"] is not None:
+        folder = args["folder"]
+        directory_list = folder
+    else:
+        directory_list = [os.environ["IMAS_HOME"] + "/shared/imasdb/ITER/3"]
+        directory_list.append(os.environ["IMAS_HOME"] + "/shared/imasdb/ITER/4")
 
-df["ref_name"] = df["ref_name"].str.slice(0, 50)
-# Columns filtering
-df = df[choice]
+        lowlevelVersion = os.environ["AL_VERSION"]
+        lowlevelVersion = int(lowlevelVersion.split(".")[0])
+        if lowlevelVersion < 4:
+            directory_list = [os.environ["IMAS_HOME"] + "/shared/iterdb/3/0"]
 
-# Search based on selection
-if selection:
+    # MATCHCASE
+    matchcase = args["matchcase"]
 
-    def stringExists(row):
-        if selectionOperation == "AND":
-            found_substrings = set()
-            for text in row:
-                text = str(text)
-                if not matchcase:
-                    text = text.lower()
-                for searchString in selection:
-                    if searchString in text:
-                        found_substrings.add(searchString)
-            if len(selection) == len(found_substrings):
-                return True
-        if selectionOperation == "OR":
-            for text in row:
-                text = str(text)
-                if not matchcase:
-                    text = str(text).lower()
-                for searchString in selection:
-                    if searchString in text:
-                        return True
-        return False
+    # FILTER
+    if args["selection"] is not None:
+        selectionOperation = "OR"
+        selection = args["selection"]
+        if "," in selection[0]:
+            selection = selection[0].split(",")
+            selectionOperation = "AND"
 
-    df = df[
-        df.apply(
-            lambda row: stringExists(row),
-            axis=1,
+        if not matchcase:
+            selection = [str(x).lower() for x in selection]
+    else:
+        selection = None
+
+    # SORT
+    if args["sort"] is not None:
+        sort = args["sort"].split(",")
+        sort = [x for x in sort if x in displayMapping.keys()]
+    else:
+        sort = ["pulse", "run"]
+
+    if args["obsolete"] is not None:
+        obsolete = args["obsolete"]
+    else:
+        obsolete = False
+    # Choice of variables to display
+    if args["choice"] is not None:
+        try:
+            input_choice = args["choice"]
+            choice = eval(str("""['""" + re.sub(""",""", r"""','""", input_choice) + """']"""))
+        except Exception as _:  # noqa: F841
+            print(
+                "------------------------------------------------------------------",
+                file=sys.stderr,
+            )
+            print("Wrong way to write your list of variables to display", file=sys.stderr)
+            print("You wrote " + str(args["choice"]), file=sys.stderr)
+            print(
+                "Try e.g. this way: " + """ scenario_summary -c pulse,run,workflow """,
+                file=sys.stderr,
+            )
+            print(
+                "------------------------------------------------------------------",
+                file=sys.stderr,
+            )
+            sys.exit(1)
+    else:
+        choice = [
+            "pulse",
+            "run",
+            "database",
+            "dd_version",
+            "ref_name",
+            "ip",
+            "b0",
+            "fuelling",
+            "confinement",
+            "workflow",
+            "date",
+        ]
+
+    # Print the arguments of the default call to the function
+    if args["choice"] is None:
+        print("""----> Default call equivalent to: """)
+        print(
+            """      scenario_summary -c pulse,run,database,dd_version,ref_name,ip,b0,fuelling,confinement,workflow,date"""
         )
-    ]
 
-# sort df
-if sort:
-    df = df.sort_values(by=sort)
+    scenarioDescriptionObj = ScenarioDescriptionSummary(directory_list=directory_list)
+    df = scenarioDescriptionObj.get_dataframes_from_files(extension=".yaml", add_obsolete=obsolete)
+
+    # check of need to add obsolete
+    if not args["obsolete"]:
+        df = df[df["status"] == "active"]
+
+    df["date"] = df["date"].dt.strftime("%Y-%m-%d %H:%M:%S")
+
+    df["ref_name"] = df["ref_name"].str.slice(0, 50)
+    # Columns filtering
+    df = df[choice]
+
+    # Search based on selection
+    if selection:
+
+        def stringExists(row):
+            if selectionOperation == "AND":
+                found_substrings = set()
+                for text in row:
+                    text = str(text)
+                    if not matchcase:
+                        text = text.lower()
+                    for searchString in selection:
+                        if searchString in text:
+                            found_substrings.add(searchString)
+                if len(selection) == len(found_substrings):
+                    return True
+            if selectionOperation == "OR":
+                for text in row:
+                    text = str(text)
+                    if not matchcase:
+                        text = str(text).lower()
+                    for searchString in selection:
+                        if searchString in text:
+                            return True
+            return False
+
+        df = df[
+            df.apply(
+                lambda row: stringExists(row),
+                axis=1,
+            )
+        ]
+
+    # sort df
+    if sort:
+        df = df.sort_values(by=sort)
 
 
-# rename headers for display
-selected_df = df.rename(columns=displayMapping)
+    # rename headers for display
+    selected_df = df.rename(columns=displayMapping)
 
-if not selected_df.empty:
-    # print(selected_df.to_string(index=False, justify="center"), )
-    table = Table()
-    for columnName in choice:
-        table.add_column(columnName, justify="left", style="green")
-
-    for _, row in df.iterrows():
-        x = []
+    if not selected_df.empty:
+        # print(selected_df.to_string(index=False, justify="center"), )
+        table = Table()
         for columnName in choice:
-            x.append(str(row[columnName]))
-        table.add_row(*x)  # Even row style
+            table.add_column(columnName, justify="left", style="green")
 
-    console = Console()
-    console.print(table)
-else:
-    print(" No records found matching mentioned criteria")
-print(f" NOTE: Read Scenario database from {directory_list}")
+        for _, row in df.iterrows():
+            x = []
+            for columnName in choice:
+                x.append(str(row[columnName]))
+            table.add_row(*x)  # Even row style
+
+        console = Console()
+        console.print(table)
+    else:
+        print(" No records found matching mentioned criteria")
+    print(f" NOTE: Read Scenario database from {directory_list}")

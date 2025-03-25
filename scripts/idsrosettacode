@@ -104,157 +104,157 @@ def get_dd4_conversion(idspath):
         return "summary/global_quantities/li_3_mhd/value"
     return idspath
 
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        description="This script applies mapping of a non-IDS database content (e.g. ITPA DBs)"
+        "into IDS rules. replaced by ids_rosetta_code.py",
+        formatter_class=RichHelpFormatter,
+    )
+    parser.add_argument(
+        "-i",
+        "--inputcsv",
+        type=str,
+        default="HDB5.2.3.csv",
+        help="Path to csv file containing the external database content \t(default=%(default)s, "
+        "the H-mode DB will be downloaded from https://osf.io/zhwa3/ automatically if not present)",
+    )
+    parser.add_argument(
+        "-m",
+        "--mapping",
+        type=str,
+        default=os.path.dirname(os.path.dirname(os.path.realpath(__file__))) + "/resources/mappings/h-mode-db-mapping.csv",
+        help="Path to csv-formatted mapping file \t(default=%(default)s)",
+    )
+    parser.add_argument(
+        "--varcol",
+        type=str,
+        default="DB_VARIABLE",
+        help="Name of the column of the mapping file listing all DB variables \t(default=%(default)s)",
+    )
+    parser.add_argument(
+        "--pathcol",
+        type=str,
+        default="IDS_PATH",
+        help="Name of the column of the mapping file listing the paths to store all"
+        "DB variables into IDS fields \t(default=%(default)s)",
+    )
+    parser.add_argument(
+        "--tracol",
+        type=str,
+        default="TRANSFORMATION",
+        help="Name of the column of the mapping file listing the transformations"
+        "to be done on DB variables (default = summary)\t(default=%(default)s)",
+    )
+    parser.add_argument(
+        "--timeloc",
+        type=str,
+        default="summary",
+        help="Name of the IDS from which the time will be extracted to populate time-empty IDSs \t(default=%(default)s",
+    )
+    parser.add_argument("-b", "--backend", type=str, default="ASCII", help="backend format \t(default=%(default)s)")
+    parser.add_argument(
+        "-d", "--database", type=str, default="test", help="target IMAS database name \t(default=%(default)s)"
+    )
+    parser.add_argument(
+        "--dbtype", type=str, default="H-MODE", help="Type of database (default = H-MODE) \t(default=%(default)s)"
+    )
+    parser.add_argument(
+        "-r",
+        "--row",
+        type=int,
+        default=None,
+        help="Stores data for the given row/entry of the input database \t(processes all rows otherwise)",
+    )
+    parser.add_argument("-v", "--verbose", action="store_true", help="Run in verbose mode")
+    parser.add_argument("--debug", action="store_true", help="Run in debug mode")
+    args = parser.parse_args()
 
-parser = argparse.ArgumentParser(
-    description="This script applies mapping of a non-IDS database content (e.g. ITPA DBs)"
-    "into IDS rules. replaced by ids_rosetta_code.py",
-    formatter_class=RichHelpFormatter,
-)
-parser.add_argument(
-    "-i",
-    "--inputcsv",
-    type=str,
-    default="HDB5.2.3.csv",
-    help="Path to csv file containing the external database content \t(default=%(default)s, "
-    "the H-mode DB will be downloaded from https://osf.io/zhwa3/ automatically if not present)",
-)
-parser.add_argument(
-    "-m",
-    "--mapping",
-    type=str,
-    default=os.path.dirname(os.path.dirname(os.path.realpath(__file__))) + "/resources/mappings/h-mode-db-mapping.csv",
-    help="Path to csv-formatted mapping file \t(default=%(default)s)",
-)
-parser.add_argument(
-    "--varcol",
-    type=str,
-    default="DB_VARIABLE",
-    help="Name of the column of the mapping file listing all DB variables \t(default=%(default)s)",
-)
-parser.add_argument(
-    "--pathcol",
-    type=str,
-    default="IDS_PATH",
-    help="Name of the column of the mapping file listing the paths to store all"
-    "DB variables into IDS fields \t(default=%(default)s)",
-)
-parser.add_argument(
-    "--tracol",
-    type=str,
-    default="TRANSFORMATION",
-    help="Name of the column of the mapping file listing the transformations"
-    "to be done on DB variables (default = summary)\t(default=%(default)s)",
-)
-parser.add_argument(
-    "--timeloc",
-    type=str,
-    default="summary",
-    help="Name of the IDS from which the time will be extracted to populate time-empty IDSs \t(default=%(default)s",
-)
-parser.add_argument("-b", "--backend", type=str, default="ASCII", help="backend format \t(default=%(default)s)")
-parser.add_argument(
-    "-d", "--database", type=str, default="test", help="target IMAS database name \t(default=%(default)s)"
-)
-parser.add_argument(
-    "--dbtype", type=str, default="H-MODE", help="Type of database (default = H-MODE) \t(default=%(default)s)"
-)
-parser.add_argument(
-    "-r",
-    "--row",
-    type=int,
-    default=None,
-    help="Stores data for the given row/entry of the input database \t(processes all rows otherwise)",
-)
-parser.add_argument("-v", "--verbose", action="store_true", help="Run in verbose mode")
-parser.add_argument("--debug", action="store_true", help="Run in debug mode")
-args = parser.parse_args()
+    try:
+        f = open(args.inputcsv, "r")
+        f.close()
+    except FileNotFoundError:
+        print(f"Downloading {args.inputcsv} from https://osf.io/ (CC BY 4.0 @ Geert Verdoolaege and Stanley Kaye)")
+        url = "https://osf.io/zhwa3/download"
+        dl = requests.get(url, allow_redirects=True)  # ,verify="/work/imas/etc/iter.pem"
+        open(args.inputcsv, "wb").write(dl.content)
 
-try:
-    f = open(args.inputcsv, "r")
-    f.close()
-except FileNotFoundError:
-    print(f"Downloading {args.inputcsv} from https://osf.io/ (CC BY 4.0 @ Geert Verdoolaege and Stanley Kaye)")
-    url = "https://osf.io/zhwa3/download"
-    dl = requests.get(url, allow_redirects=True)  # ,verify="/work/imas/etc/iter.pem"
-    open(args.inputcsv, "wb").write(dl.content)
+    mf = pd.read_csv(args.mapping, keep_default_na=False, usecols=[args.varcol, args.pathcol, args.tracol])
+    mf.dropna(how="all")
 
-mf = pd.read_csv(args.mapping, keep_default_na=False, usecols=[args.varcol, args.pathcol, args.tracol])
-mf.dropna(how="all")
+    if args.dbtype == "H-MODE" or args.dbtype == "HMODE":
+        db = pd.read_csv(args.inputcsv, skiprows=1, keep_default_na=False, na_values=["", "-9999999", "???????"])
+    elif args.dbtype == "L-MODE" or args.dbtype == "LMODE":
+        db = pd.read_csv(args.inputcsv, delimiter=";", keep_default_na=False, na_values=["", "-9999999", "????????"])
 
-if args.dbtype == "H-MODE" or args.dbtype == "HMODE":
-    db = pd.read_csv(args.inputcsv, skiprows=1, keep_default_na=False, na_values=["", "-9999999", "???????"])
-elif args.dbtype == "L-MODE" or args.dbtype == "LMODE":
-    db = pd.read_csv(args.inputcsv, delimiter=";", keep_default_na=False, na_values=["", "-9999999", "????????"])
+    db.dropna(how="all")
+    db = db.replace(to_replace=np.nan, value=None)
 
-db.dropna(how="all")
-db = db.replace(to_replace=np.nan, value=None)
+    rows = [args.row] if args.row is not None else db.index
 
-rows = [args.row] if args.row is not None else db.index
+    print(f"Starts mapping of the DB {args.inputcsv}, please be patient...")
+    for row in track(rows, description="[green]Processing..."):
+        DBVAR = db.iloc[row]
+        de = imas.DBEntry(get_backend_id(args.backend), args.database, 1, row)
+        de.create()
 
-print(f"Starts mapping of the DB {args.inputcsv}, please be patient...")
-for row in track(rows, description="[green]Processing..."):
-    DBVAR = db.iloc[row]
-    de = imas.DBEntry(get_backend_id(args.backend), args.database, 1, row)
-    de.create()
+        iod = {}
+        factory = imas.IDSFactory()
+        for ids in get_ids_types():
+            iod[ids] = factory.new(ids)
+        for var in mf.loc[:, args.varcol]:
+            idspath = mf[mf[args.varcol] == var].iloc[0].at[args.pathcol]
+            idspath = get_dd4_conversion(idspath)
 
-    iod = {}
-    factory = imas.IDSFactory()
-    for ids in get_ids_types():
-        iod[ids] = factory.new(ids)
-    for var in mf.loc[:, args.varcol]:
-        idspath = mf[mf[args.varcol] == var].iloc[0].at[args.pathcol]
-        idspath = get_dd4_conversion(idspath)
-
-        transformation = mf[mf[args.varcol] == var].iloc[0].at[args.tracol]
-        if idspath == "":
-            if args.debug:
-                print(f"No mapping specified for variable {var}")
-        else:
-            idsname = idspath.split("/")[0]
-            path = idspath.split("/")[1:]
-            try:
-                ids = iod[idsname]
-            except KeyError:
-                print(f"{idsname} is not a valid IDS name. Please check spelling and IDS list.")
-                sys.exit()
-            if transformation != "":
-                val = evaluate(transformation)
+            transformation = mf[mf[args.varcol] == var].iloc[0].at[args.tracol]
+            if idspath == "":
+                if args.debug:
+                    print(f"No mapping specified for variable {var}")
             else:
-                val = db.at[row, var]
-            if val is not None:
-                if type(val) is not str and math.isnan(val):
-                    if args.verbose:
-                        print(f"Nothing to store for {var} in DB entry {row}")
+                idsname = idspath.split("/")[0]
+                path = idspath.split("/")[1:]
+                try:
+                    ids = iod[idsname]
+                except KeyError:
+                    print(f"{idsname} is not a valid IDS name. Please check spelling and IDS list.")
+                    sys.exit()
+                if transformation != "":
+                    val = evaluate(transformation)
                 else:
-                    try:
-                        ids_setter(ids, path, val)
-                        if idsname in ["dataset_description"]:
-                            ids.ids_properties.homogeneous_time = 2
-                        else:
-                            ids.ids_properties.homogeneous_time = 1
-                    except AttributeError as ae:
-                        print(ae)
-                        sys.exit()
+                    val = db.at[row, var]
+                if val is not None:
+                    if type(val) is not str and math.isnan(val):
+                        if args.verbose:
+                            print(f"Nothing to store for {var} in DB entry {row}")
+                    else:
+                        try:
+                            ids_setter(ids, path, val)
+                            if idsname in ["dataset_description"]:
+                                ids.ids_properties.homogeneous_time = 2
+                            else:
+                                ids.ids_properties.homogeneous_time = 1
+                        except AttributeError as ae:
+                            print(ae)
+                            sys.exit()
 
-    for sids in iod.keys():
-        if iod[sids].ids_properties.homogeneous_time == 1:
-            if hasattr(iod[sids], "time") and iod[sids].time.size == 0:
-                iod[sids].time = iod[args.timeloc].time
-            try:
-                de.put(iod[sids])
-            except Exception as ex:
-                print(f"Error while attempting to write the IDS {sids} into the IMAS DB: {ex}")
-                sys.exit()
-            if args.verbose:
-                print(f"The IDS {sids} was stored successfully for DB entry {row}")
+        for sids in iod.keys():
+            if iod[sids].ids_properties.homogeneous_time == 1:
+                if hasattr(iod[sids], "time") and iod[sids].time.size == 0:
+                    iod[sids].time = iod[args.timeloc].time
+                try:
+                    de.put(iod[sids])
+                except Exception as ex:
+                    print(f"Error while attempting to write the IDS {sids} into the IMAS DB: {ex}")
+                    sys.exit()
+                if args.verbose:
+                    print(f"The IDS {sids} was stored successfully for DB entry {row}")
 
-if args.debug:
-    dd = iod["dataset_description"]
-    s = iod["summary"]
-    barometry = iod["barometry"]
-    print(dd.ids_properties.homogeneous_time)
-    print(s.boundary.type.value)
-    print(s.time)
-    print(s.global_quantities.ip.value)
-    print(s.global_quantities.volume.value)
-    print(s.elms.frequency.value)
+    if args.debug:
+        dd = iod["dataset_description"]
+        s = iod["summary"]
+        barometry = iod["barometry"]
+        print(dd.ids_properties.homogeneous_time)
+        print(s.boundary.type.value)
+        print(s.time)
+        print(s.global_quantities.ip.value)
+        print(s.global_quantities.volume.value)
+        print(s.elms.frequency.value)

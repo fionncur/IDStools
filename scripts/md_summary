@@ -14,185 +14,185 @@ class SmartFormatter(argparse.HelpFormatter):
             return text[2:].splitlines()
         return argparse.HelpFormatter._split_lines(self, text, width)
 
+if __name__ == "__main__":
+    # INPUT ARGUMENTS
+    parser = argparse.ArgumentParser(
+        description="""---- Script to list available MD data in a specific folder ----\n\n
+        Important: The legacy md_summary tool is deprecated and will be removed in a future versions.
+        It will remain available until simdb is fully adopted.more about simdb : https://simdb.iter.org/dashboard/""",
+        formatter_class=SmartFormatter,
+    )
+    parser.add_argument("-f", "--folder", help="folder where to search for MD data (yaml file)", required=False)
+    parser.add_argument(
+        "-s",
+        "--selection",
+        nargs="*",
+        type=str,
+        help="R|list of fields to filter: e.g. PBS-55,ece\n"
+        "fields listed together (-s A,B) means selecting for both A and B\n"
+        "fields listed separately (-s A B) means selecting for either A or B\n"
+        "----> Select only machine description data filling these criteria",
+        required=False,
+    )
+    parser.add_argument(
+        "-o",
+        "--obsolete",
+        help="Shows obsolete files",
+        action="store_true",
+    )
+    parser.add_argument(
+        "-m",
+        "--matchcase",
+        help="Match case with selection criteria, default is false",
+        action="store_true",
+    )
+    parser.add_argument(
+        "-c",
+        "--choice",
+        help="R|list of variables to display, e.g.: pbs,ids,description\n"
+        "... available among following variables:\n"
+        "        pbs                    = Plant Breakdown Structure number\n"
+        "        ids                    = Name of the IDS\n"
+        "        data_provider          = Name of the data provider\n"
+        "        data_provider_email    = E-mail of the data provider\n"
+        "        ro                     = Name of the diagnostic responsible officer\n"
+        "        ro_email               = E-mail of the diagnostic responsible officer\n"
+        "        description            = Description of the data\n"
+        "        backend                = Backend used to store de IDS\n"
+        "        provenance             = Data provenance\n"
+        "        status                 = Status of the machine description\n"
+        "        replaces               = Old shot/run this one replaces\n"
+        "        replaced_by            = Replaced by shot/run \n"
+        "        reason_for_replacement = Comment on why this shot/run replaces the previous one\n",
+        required=False,
+    )
 
-# INPUT ARGUMENTS
-parser = argparse.ArgumentParser(
-    description="""---- Script to list available MD data in a specific folder ----\n\n
-    Important: The legacy md_summary tool is deprecated and will be removed in a future versions.
-    It will remain available until simdb is fully adopted.more about simdb : https://simdb.iter.org/dashboard/""",
-    formatter_class=SmartFormatter,
-)
-parser.add_argument("-f", "--folder", help="folder where to search for MD data (yaml file)", required=False)
-parser.add_argument(
-    "-s",
-    "--selection",
-    nargs="*",
-    type=str,
-    help="R|list of fields to filter: e.g. PBS-55,ece\n"
-    "fields listed together (-s A,B) means selecting for both A and B\n"
-    "fields listed separately (-s A B) means selecting for either A or B\n"
-    "----> Select only machine description data filling these criteria",
-    required=False,
-)
-parser.add_argument(
-    "-o",
-    "--obsolete",
-    help="Shows obsolete files",
-    action="store_true",
-)
-parser.add_argument(
-    "-m",
-    "--matchcase",
-    help="Match case with selection criteria, default is false",
-    action="store_true",
-)
-parser.add_argument(
-    "-c",
-    "--choice",
-    help="R|list of variables to display, e.g.: pbs,ids,description\n"
-    "... available among following variables:\n"
-    "        pbs                    = Plant Breakdown Structure number\n"
-    "        ids                    = Name of the IDS\n"
-    "        data_provider          = Name of the data provider\n"
-    "        data_provider_email    = E-mail of the data provider\n"
-    "        ro                     = Name of the diagnostic responsible officer\n"
-    "        ro_email               = E-mail of the diagnostic responsible officer\n"
-    "        description            = Description of the data\n"
-    "        backend                = Backend used to store de IDS\n"
-    "        provenance             = Data provenance\n"
-    "        status                 = Status of the machine description\n"
-    "        replaces               = Old shot/run this one replaces\n"
-    "        replaced_by            = Replaced by shot/run \n"
-    "        reason_for_replacement = Comment on why this shot/run replaces the previous one\n",
-    required=False,
-)
+    args = vars(parser.parse_args())
 
-args = vars(parser.parse_args())
+    # FOLDER
+    if args["folder"] is not None:
+        machine_description_folder = args["folder"]
+    else:
+        machine_description_folder = "/work/imas/shared/imasdb/ITER_MD/3/md_summary.yaml"
 
-# FOLDER
-if args["folder"] is not None:
-    machine_description_folder = args["folder"]
-else:
-    machine_description_folder = "/work/imas/shared/imasdb/ITER_MD/3/md_summary.yaml"
+    # MATCHCASE
+    matchcase = args["matchcase"]
 
-# MATCHCASE
-matchcase = args["matchcase"]
+    # FILTER
+    if args["selection"] is not None:
+        selection_operation = "OR"
+        selection = args["selection"]
+        if "," in selection[0]:
+            selection = selection[0].split(",")
+            selection_operation = "AND"
 
-# FILTER
-if args["selection"] is not None:
-    selection_operation = "OR"
-    selection = args["selection"]
-    if "," in selection[0]:
-        selection = selection[0].split(",")
-        selection_operation = "AND"
-
-    if not matchcase:
-        selection = [str(x).lower() for x in selection]
-else:
-    selection = None
-
-
-# CHOICE OF VARIABLES TO DISPLAY
-if args["choice"] is not None:
-    try:
-        input_choice = args["choice"]
-        choice = eval(str("""['""" + re.sub(""",""", r"""','""", input_choice) + """']"""))
-    except Exception as _:  # noqa: F841
-        print(
-            "------------------------------------------------------------------",
-            file=sys.stderr,
-        )
-        print("Wrong way to write your list of variables to display", file=sys.stderr)
-        print("You wrote " + str(args["choice"]), file=sys.stderr)
-        print(
-            "Try e.g. this way: " + """ md_summary -c pbs,ids,description """,
-            file=sys.stderr,
-        )
-        print(
-            "------------------------------------------------------------------",
-            file=sys.stderr,
-        )
-        sys.exit(1)
-else:
-    choice = ["pbs", "ids", "description", "backend"]
-    print("""----> Default call equivalent to: """)
-    print("""      md_summary -c pbs,ids,description,backend""")
-    print(""" """)
-# add shot/run number because pandas is stores id as unique key
-choice.append("id")
-
-md_object = MachineDescription(machine_description_folder)
-yaml_data = md_object.md_summary_yaml
-
-df = md_object.get_pandas_data_frame()
+        if not matchcase:
+            selection = [str(x).lower() for x in selection]
+    else:
+        selection = None
 
 
-# Search based on selection
-if selection:
+    # CHOICE OF VARIABLES TO DISPLAY
+    if args["choice"] is not None:
+        try:
+            input_choice = args["choice"]
+            choice = eval(str("""['""" + re.sub(""",""", r"""','""", input_choice) + """']"""))
+        except Exception as _:  # noqa: F841
+            print(
+                "------------------------------------------------------------------",
+                file=sys.stderr,
+            )
+            print("Wrong way to write your list of variables to display", file=sys.stderr)
+            print("You wrote " + str(args["choice"]), file=sys.stderr)
+            print(
+                "Try e.g. this way: " + """ md_summary -c pbs,ids,description """,
+                file=sys.stderr,
+            )
+            print(
+                "------------------------------------------------------------------",
+                file=sys.stderr,
+            )
+            sys.exit(1)
+    else:
+        choice = ["pbs", "ids", "description", "backend"]
+        print("""----> Default call equivalent to: """)
+        print("""      md_summary -c pbs,ids,description,backend""")
+        print(""" """)
+    # add shot/run number because pandas is stores id as unique key
+    choice.append("id")
 
-    def string_exists(row):
-        if selection_operation == "AND":
-            found_substrings = set()
-            for text in row:
-                text = str(text)
-                if not matchcase:
-                    text = text.lower()
-                for search_string in selection:
-                    if search_string in text:
-                        found_substrings.add(search_string)
-            if len(selection) == len(found_substrings):
-                return True
-        if selection_operation == "OR":
-            for text in row:
-                text = str(text)
-                if not matchcase:
-                    text = str(text).lower()
-                for search_string in selection:
-                    if search_string in text:
-                        return True
-        return False
+    md_object = MachineDescription(machine_description_folder)
+    yaml_data = md_object.md_summary_yaml
 
-    df = df[
-        df.apply(
-            lambda row: string_exists(row),
-            axis=1,
-        )
-    ]
-# check of need to add obsolete
-if not args["obsolete"]:
-    df = df[df["status"] == "active"]
+    df = md_object.get_pandas_data_frame()
 
-# Columns filtering
-selected_df = df[choice]
 
-# rename headers
-header_mappings = {
-    "ids": "IDS",
-    "pbs": "PBS",
-    "data_provider": "DATA PROVIDER",
-    "data_provider_email": "DATA PROVIDER EMAIL",
-    "ro": "RO",
-    "ro_email": "RO EMAIL",
-    "description": "DESCRIPTION",
-    "provenance": "PROVENANCE",
-    "status": "STATUS",
-    "replaced_by": "REPLACED BY",
-    "replaces": "REPLACES",
-    "reason_for_replacement": "REASON FOR REPLACEMENT",
-    "backend": "BACKEND",
-    "id": "SHOT/RUN",
-}
-selected_df = selected_df.rename(columns=header_mappings)
+    # Search based on selection
+    if selection:
 
-# align text left aligned
-for index, _ in enumerate(choice):
-    max_length = selected_df.iloc[:, index].map(len).max()
-    selected_df.iloc[:, index] = selected_df.iloc[:, index].apply(lambda x: f"{x:<{max_length}}")
+        def string_exists(row):
+            if selection_operation == "AND":
+                found_substrings = set()
+                for text in row:
+                    text = str(text)
+                    if not matchcase:
+                        text = text.lower()
+                    for search_string in selection:
+                        if search_string in text:
+                            found_substrings.add(search_string)
+                if len(selection) == len(found_substrings):
+                    return True
+            if selection_operation == "OR":
+                for text in row:
+                    text = str(text)
+                    if not matchcase:
+                        text = str(text).lower()
+                    for search_string in selection:
+                        if search_string in text:
+                            return True
+            return False
 
-if not selected_df.empty:
-    # display results
-    print(selected_df.to_string(index=False, justify="center"))
-else:
-    print(" No records found matching mentioned criteria")
+        df = df[
+            df.apply(
+                lambda row: string_exists(row),
+                axis=1,
+            )
+        ]
+    # check of need to add obsolete
+    if not args["obsolete"]:
+        df = df[df["status"] == "active"]
 
-print("\n NOTE: Read entry from MD database using user = 'public', database = 'ITER_MD'")
+    # Columns filtering
+    selected_df = df[choice]
+
+    # rename headers
+    header_mappings = {
+        "ids": "IDS",
+        "pbs": "PBS",
+        "data_provider": "DATA PROVIDER",
+        "data_provider_email": "DATA PROVIDER EMAIL",
+        "ro": "RO",
+        "ro_email": "RO EMAIL",
+        "description": "DESCRIPTION",
+        "provenance": "PROVENANCE",
+        "status": "STATUS",
+        "replaced_by": "REPLACED BY",
+        "replaces": "REPLACES",
+        "reason_for_replacement": "REASON FOR REPLACEMENT",
+        "backend": "BACKEND",
+        "id": "SHOT/RUN",
+    }
+    selected_df = selected_df.rename(columns=header_mappings)
+
+    # align text left aligned
+    for index, _ in enumerate(choice):
+        max_length = selected_df.iloc[:, index].map(len).max()
+        selected_df.iloc[:, index] = selected_df.iloc[:, index].apply(lambda x: f"{x:<{max_length}}")
+
+    if not selected_df.empty:
+        # display results
+        print(selected_df.to_string(index=False, justify="center"))
+    else:
+        print(" No records found matching mentioned criteria")
+
+    print("\n NOTE: Read entry from MD database using user = 'public', database = 'ITER_MD'")

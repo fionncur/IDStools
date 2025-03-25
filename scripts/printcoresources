@@ -22,49 +22,50 @@ slicing_methods = {
     "PREVIOUS": ids_defs.PREVIOUS_INTERP,
     "LINEAR": ids_defs.LINEAR_INTERP,
 }
-# Management of input arguments
-parser = argparse.ArgumentParser(
-    description="View information about sources [previsouly known as print_sources]",
-    epilog="""
-""",
-    formatter_class=RichHelpFormatter,
-    parents=[dbentry_parser],
-)
+if __name__ == "__main__":
+    # Management of input arguments
+    parser = argparse.ArgumentParser(
+        description="View information about sources [previsouly known as print_sources]",
+        epilog="""
+    """,
+        formatter_class=RichHelpFormatter,
+        parents=[dbentry_parser],
+    )
 
-parser.add_argument(
-    "-m",
-    "--slicingmethod",
-    type=str,
-    default="CLOSEST",
-    choices=["CLOSEST", "PREVIOUS", "LINEAR"],
-    help="Slicing method \t(default=%(default)s)",
-)
+    parser.add_argument(
+        "-m",
+        "--slicingmethod",
+        type=str,
+        default="CLOSEST",
+        choices=["CLOSEST", "PREVIOUS", "LINEAR"],
+        help="Slicing method \t(default=%(default)s)",
+    )
 
-parser.add_argument("-o", "--occurrence", type=int, default=0, help="occurrence")
-parser.add_argument("-t", "--time", type=float, help="Time", default=-99)
-args = parser.parse_args()
+    parser.add_argument("-o", "--occurrence", type=int, default=0, help="occurrence")
+    parser.add_argument("-t", "--time", type=float, help="Time", default=-99)
+    args = parser.parse_args()
 
-connection = DBMaster.get_connection(args)
-if connection is None:
-    logger.critical("----> Aborted.")
-    exit(1)
+    connection = DBMaster.get_connection(args)
+    if connection is None:
+        logger.critical("----> Aborted.")
+        exit(1)
 
-ids_slice_core_sources = connection.get_slice(
-    "core_sources",
-    args.time,
-    slicing_methods[args.slicingmethod],
-    occurrence=args.occurrence,
-    autoconvert=False,
-)
-if args.dd_update:
-    ids_slice_core_sources = convert_ids(ids_slice_core_sources, connection.factory.version)
-if len(ids_slice_core_sources.time) == 0:
-    logger.critical("Time vector is empty! aborting")
-    sys.exit(1)
-
-
-print(f"Showing details for {get_database_path(args, ids_slice_core_sources.time[0])}")
+    ids_slice_core_sources = connection.get_slice(
+        "core_sources",
+        args.time,
+        slicing_methods[args.slicingmethod],
+        occurrence=args.occurrence,
+        autoconvert=False,
+    )
+    if args.dd_update:
+        ids_slice_core_sources = convert_ids(ids_slice_core_sources, connection.factory.version)
+    if len(ids_slice_core_sources.time) == 0:
+        logger.critical("Time vector is empty! aborting")
+        sys.exit(1)
 
 
-core_sources_view = CoreSourcesView(ids_slice_core_sources)
-core_sources_view.view_sources(time_slice=0)
+    print(f"Showing details for {get_database_path(args, ids_slice_core_sources.time[0])}")
+
+
+    core_sources_view = CoreSourcesView(ids_slice_core_sources)
+    core_sources_view.view_sources(time_slice=0)

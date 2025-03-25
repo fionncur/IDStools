@@ -10,47 +10,47 @@ from rich_argparse import RawDescriptionRichHelpFormatter
 from idstools.utils.idslogger import setup_logger
 
 logger = setup_logger("module", stdout_level=logging.INFO)
+if __name__ == "__main__":
+    # Management of input arguments
+    parser = argparse.ArgumentParser(
+        description="""---- Show full description file for a given simulation stored in ITER DB folder\n\n
+        Important: The legacy show_db_entry tool is deprecated and will be removed in a future versions.
+        It will remain available until simdb is fully adopted.more about simdb : https://simdb.iter.org/dashboard/""",
+        formatter_class=RawDescriptionRichHelpFormatter,
+    )
+    parser.add_argument("-f", "--folder", help="folder where to search for scenarios", required=False)
+    parser.add_argument("-s", "--shot", help="shot number", required=True, type=int)
+    parser.add_argument("-r", "--run", help="run number", required=True, type=int)
+    args = vars(parser.parse_args())
+    shot = args["shot"]
+    run = args["run"]
 
-# Management of input arguments
-parser = argparse.ArgumentParser(
-    description="""---- Show full description file for a given simulation stored in ITER DB folder\n\n
-    Important: The legacy show_db_entry tool is deprecated and will be removed in a future versions.
-    It will remain available until simdb is fully adopted.more about simdb : https://simdb.iter.org/dashboard/""",
-    formatter_class=RawDescriptionRichHelpFormatter,
-)
-parser.add_argument("-f", "--folder", help="folder where to search for scenarios", required=False)
-parser.add_argument("-s", "--shot", help="shot number", required=True, type=int)
-parser.add_argument("-r", "--run", help="run number", required=True, type=int)
-args = vars(parser.parse_args())
-shot = args["shot"]
-run = args["run"]
+    # ------------------------------------------------------------------------------------------------------------
 
-# ------------------------------------------------------------------------------------------------------------
+    # Set up the name of the yaml file
+    add0 = ""
+    add0_length = 4 - len(str(run))
+    for i in range(add0_length):
+        add0 = add0 + "0"
 
-# Set up the name of the yaml file
-add0 = ""
-add0_length = 4 - len(str(run))
-for i in range(add0_length):
-    add0 = add0 + "0"
-
-filename = "ids_" + str(shot) + add0 + str(run) + ".yaml"
-
-
-def print_yaml_contents(filename):
-    try:
-        with open(filename, "r") as file:
-            file_contents = file.read()
-            console = Console()
-            syntax = Syntax(file_contents, "yaml", theme="Default")
-            console.print(syntax)
-    except FileNotFoundError:
-        logger.error(f"File '{filename}' not found")
+    filename = "ids_" + str(shot) + add0 + str(run) + ".yaml"
 
 
-# Folder
-if args["folder"] is not None:
-    folder = args["folder"]
-    print_yaml_contents(folder + "/" + filename)
-else:
-    folder = "/work/imas/shared/imasdb/ITER"
-    print_yaml_contents(folder + "/3/0/" + filename)
+    def print_yaml_contents(filename):
+        try:
+            with open(filename, "r") as file:
+                file_contents = file.read()
+                console = Console()
+                syntax = Syntax(file_contents, "yaml", theme="Default")
+                console.print(syntax)
+        except FileNotFoundError:
+            logger.error(f"File '{filename}' not found")
+
+
+    # Folder
+    if args["folder"] is not None:
+        folder = args["folder"]
+        print_yaml_contents(folder + "/" + filename)
+    else:
+        folder = "/work/imas/shared/imasdb/ITER"
+        print_yaml_contents(folder + "/3/0/" + filename)

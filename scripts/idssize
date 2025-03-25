@@ -24,49 +24,49 @@ from rich_argparse import RichHelpFormatter
 from idstools.database import DBMaster
 from idstools.utils.clihelper import dbentry_parser
 from idstools.utils.idshelper import get_ids_size
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        description="Show size and time of IDSs [previously knwon as analyze_db_sizes]",
+        epilog="""
+    """,
+        formatter_class=RichHelpFormatter,
+        parents=[dbentry_parser],
+    )
 
-parser = argparse.ArgumentParser(
-    description="Show size and time of IDSs [previously knwon as analyze_db_sizes]",
-    epilog="""
-""",
-    formatter_class=RichHelpFormatter,
-    parents=[dbentry_parser],
-)
+    parser.add_argument(
+        "ids",
+        nargs="*",
+        type=str,
+        help="Name (or space separated list of names) of IDS to (leave empty to show size of all IDSs)",
+    )
+    parser.add_argument(
+        "-i",
+        "--ignore-empty",
+        action="store_true",
+        help="Ignore empty when calculating size",
+    )
+    args = parser.parse_args()
 
-parser.add_argument(
-    "ids",
-    nargs="*",
-    type=str,
-    help="Name (or space separated list of names) of IDS to (leave empty to show size of all IDSs)",
-)
-parser.add_argument(
-    "-i",
-    "--ignore-empty",
-    action="store_true",
-    help="Ignore empty when calculating size",
-)
-args = parser.parse_args()
+    connection = DBMaster.get_connection(args)
+    if connection is None:
+        print("----> Aborted.")
+        exit(1)
 
-connection = DBMaster.get_connection(args)
-if connection is None:
-    print("----> Aborted.")
-    exit(1)
+    if args.ids == []:
+        factory = imas.IDSFactory()
+        args.ids = factory.ids_names()
 
-if args.ids == []:
-    factory = imas.IDSFactory()
-    args.ids = factory.ids_names()
+    ids_size_dict = get_ids_size(connection, args.ids, dd_update=args.dd_update, ignore_empty=args.ignore_empty)
+    total_bytes = np.array([v["bytes"] for v in ids_size_dict.values()]).sum()
+    total_time = np.array([v["time"] for v in ids_size_dict.values()]).sum()
+    print(f"Total reading time = {total_time:0.4f} s")
 
-ids_size_dict = get_ids_size(connection, args.ids, dd_update=args.dd_update, ignore_empty=args.ignore_empty)
-total_bytes = np.array([v["bytes"] for v in ids_size_dict.values()]).sum()
-total_time = np.array([v["time"] for v in ids_size_dict.values()]).sum()
-print(f"Total reading time = {total_time:0.4f} s")
-
-print(f"Total data size = {total_bytes/1024**2:5.3f} MB")
-if args.uri is not None:
-    print(f"Fractions of the total size for {args.uri}")
-else:
-    print(f"Fractions of the total size for {args.user}/{args.database}/{args.version}/{args.pulse}/{args.run}")
-print("% bytes    IDS")
-for ids_size in ids_size_dict:
-    bytes_data = ids_size_dict[ids_size]["bytes"] / total_bytes * 100
-    print(f"{bytes_data:5.2f} %    {ids_size}")
+    print(f"Total data size = {total_bytes/1024**2:5.3f} MB")
+    if args.uri is not None:
+        print(f"Fractions of the total size for {args.uri}")
+    else:
+        print(f"Fractions of the total size for {args.user}/{args.database}/{args.version}/{args.pulse}/{args.run}")
+    print("% bytes    IDS")
+    for ids_size in ids_size_dict:
+        bytes_data = ids_size_dict[ids_size]["bytes"] / total_bytes * 100
+        print(f"{bytes_data:5.2f} %    {ids_size}")

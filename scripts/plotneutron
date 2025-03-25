@@ -21,118 +21,118 @@ from idstools.utils.clihelper import (
 from idstools.utils.idslogger import setup_logger
 from idstools.view.common import PlotCanvas
 from idstools.view.distribution_sources import DistributionSourcesView
-
-# Management of input arguments
-parser = argparse.ArgumentParser(
-    description="""---- Display the neutron profiles from the distribution_sources IDSs
-    [previously known as neutronplot]""",
-    parents=[dbentry_parser],
-    formatter_class=RichHelpFormatter,
-)
-
-parser.add_argument("-t", "--time", help="Time", required=False, type=float, default=-99.0)
-parser.add_argument(
-    "--save",
-    help="Save figure at default location",
-    action="store_true",
-)
-parser.add_argument(
-    "--directory",
-    help="Directory to save the figure",
-    default=None,
-)
-args = parser.parse_args()
-logger = setup_logger("module", stdout_level=logging.INFO)
-
-
-# Open the database and read the necessary IDSs
-connection = DBMaster.get_connection(args)
-if connection is None:
-    logger.critical("----> Aborted.")
-    exit(1)
-
-hostdir = get_database_path(args)
-if hostdir is None:
-    logger.critical(
-        "Environment variable IMAS_HOME is not defined. Quitting.",
-    )
-    exit(1)
-
-ids_distribution_sources = None
-try:
-
-    if args.dd_update:
-        ids_distribution_sources = connection.get("distribution_sources", autoconvert=False)
-        ids_distribution_sources = convert_ids(ids_distribution_sources, connection.factory.version)
-    else:
-        ids_distribution_sources = connection.get("distribution_sources", lazy=True, autoconvert=False)
-except Exception as _:  # noqa: F841
-    logger.error("distribution_sources ids is not present")
-    exit(1)
-
-
-time_array = ids_distribution_sources.time
-time_slice, time_value = get_nearest_time(time_array, args.time)
-
-nsources = len(ids_distribution_sources.source)
-if nsources > 1:
-    logger.info(
-        f"Distribution_sources contains {nsources} sources",
-    )
-else:
-    logger.info(
-        f"Distribution_sources contains {nsources} source",
+if __name__ == "__main__":
+    # Management of input arguments
+    parser = argparse.ArgumentParser(
+        description="""---- Display the neutron profiles from the distribution_sources IDSs
+        [previously known as neutronplot]""",
+        parents=[dbentry_parser],
+        formatter_class=RichHelpFormatter,
     )
 
-active = [1] * nsources  # A priori all sources are active
-for isource in range(nsources):
-    try:
-        availability_test = ids_distribution_sources.source[isource].profiles_1d[time_slice]
+    parser.add_argument("-t", "--time", help="Time", required=False, type=float, default=-99.0)
+    parser.add_argument(
+        "--save",
+        help="Save figure at default location",
+        action="store_true",
+    )
+    parser.add_argument(
+        "--directory",
+        help="Directory to save the figure",
+        default=None,
+    )
+    args = parser.parse_args()
+    logger = setup_logger("module", stdout_level=logging.INFO)
 
-    except Exception as _:  # noqa: F841
-        logger.warning(
-            f"Source {str(isource)} has no profiles_1d -> considered as inactive",
+
+    # Open the database and read the necessary IDSs
+    connection = DBMaster.get_connection(args)
+    if connection is None:
+        logger.critical("----> Aborted.")
+        exit(1)
+
+    hostdir = get_database_path(args)
+    if hostdir is None:
+        logger.critical(
+            "Environment variable IMAS_HOME is not defined. Quitting.",
         )
-        active[isource] = 0
+        exit(1)
+
+    ids_distribution_sources = None
     try:
-        availability_test = ids_distribution_sources.source[isource].global_quantities[time_slice]
+
+        if args.dd_update:
+            ids_distribution_sources = connection.get("distribution_sources", autoconvert=False)
+            ids_distribution_sources = convert_ids(ids_distribution_sources, connection.factory.version)
+        else:
+            ids_distribution_sources = connection.get("distribution_sources", lazy=True, autoconvert=False)
     except Exception as _:  # noqa: F841
-        if active[isource] == 1:
+        logger.error("distribution_sources ids is not present")
+        exit(1)
+
+
+    time_array = ids_distribution_sources.time
+    time_slice, time_value = get_nearest_time(time_array, args.time)
+
+    nsources = len(ids_distribution_sources.source)
+    if nsources > 1:
+        logger.info(
+            f"Distribution_sources contains {nsources} sources",
+        )
+    else:
+        logger.info(
+            f"Distribution_sources contains {nsources} source",
+        )
+
+    active = [1] * nsources  # A priori all sources are active
+    for isource in range(nsources):
+        try:
+            availability_test = ids_distribution_sources.source[isource].profiles_1d[time_slice]
+
+        except Exception as _:  # noqa: F841
             logger.warning(
-                f"Source {str(isource)} has no global_quantities -> considered as inactive",
+                f"Source {str(isource)} has no profiles_1d -> considered as inactive",
             )
             active[isource] = 0
-    try:
-        availability_test = ids_distribution_sources.source[isource].process[time_slice]
-    except Exception as _:  # noqa: F841
-        if active[isource] == 1:
-            logger.warning(
-                f"Source {str(isource)} has no process -> considered as inactive",
-            )
-            active[isource] = 0
+        try:
+            availability_test = ids_distribution_sources.source[isource].global_quantities[time_slice]
+        except Exception as _:  # noqa: F841
+            if active[isource] == 1:
+                logger.warning(
+                    f"Source {str(isource)} has no global_quantities -> considered as inactive",
+                )
+                active[isource] = 0
+        try:
+            availability_test = ids_distribution_sources.source[isource].process[time_slice]
+        except Exception as _:  # noqa: F841
+            if active[isource] == 1:
+                logger.warning(
+                    f"Source {str(isource)} has no process -> considered as inactive",
+                )
+                active[isource] = 0
 
-if sum(active) == 0:
-    logger.critical("No active neutron sources --> Leave.")
-    exit()
+    if sum(active) == 0:
+        logger.critical("No active neutron sources --> Leave.")
+        exit()
 
-canvas = PlotCanvas(1, 1)
-ax = canvas.add_axes(title="", xlabel="", row=0, col=0)
-distribution_sources_view = DistributionSourcesView(ids_distribution_sources)
-distribution_sources_view.view_neutrons(ax, time_slice)
-distribution_sources_view.view_time(ax, time_value)
+    canvas = PlotCanvas(1, 1)
+    ax = canvas.add_axes(title="", xlabel="", row=0, col=0)
+    distribution_sources_view = DistributionSourcesView(ids_distribution_sources)
+    distribution_sources_view.view_neutrons(ax, time_slice)
+    distribution_sources_view.view_time(ax, time_value)
 
-canvas.set_text(text=f"{get_database_path(args, time_value=time_value)}")
+    canvas.set_text(text=f"{get_database_path(args, time_value=time_value)}")
 
-canvas.fig.subplots_adjust(top=0.916, bottom=0.09, left=0.044, right=0.953, hspace=0.287, wspace=0.2)
-canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
-canvas.fig.suptitle(get_title(args, "Neutrons profiles", time_value), size=12)
+    canvas.fig.subplots_adjust(top=0.916, bottom=0.09, left=0.044, right=0.953, hspace=0.287, wspace=0.2)
+    canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
+    canvas.fig.suptitle(get_title(args, "Neutrons profiles", time_value), size=12)
 
-if args.save:
-    fname = get_file_name(args, os.path.basename(__file__) + "_Neutrons", time_value)
-    if args.directory:
-        if not os.path.exists(args.directory):
-            os.makedirs(args.directory)
-        fname = os.path.join(args.directory, fname)
-    canvas.save(fname)
-else:
-    canvas.show()
+    if args.save:
+        fname = get_file_name(args, os.path.basename(__file__) + "_Neutrons", time_value)
+        if args.directory:
+            if not os.path.exists(args.directory):
+                os.makedirs(args.directory)
+            fname = os.path.join(args.directory, fname)
+        canvas.save(fname)
+    else:
+        canvas.show()

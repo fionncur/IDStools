@@ -96,7 +96,7 @@ echo "====================================================================="
 echo "Run pytest for functions testing with $CORE_MODULE_VERSION and $PYTHON_VERSION"
 echo "====================================================================="
 pip install pytest
-python -m pytest --junit-xml="$LOG_DIR"/test_report.xml tests
+python -m pytest --junit-xml="$LOG_DIR"/test_report.xml idstools/test
 errstatus=$?
 if [ $errstatus -ne 0 ]; then
     echo "Error: pytest failed."

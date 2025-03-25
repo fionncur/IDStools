@@ -20,81 +20,81 @@ from idstools.utils.clihelper import (
 from idstools.utils.idslogger import setup_logger
 from idstools.view.common import PlotCanvas
 from idstools.view.core_profiles import CoreProfilesView
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        description="""---- Display the efield, toroidal, polidal velocities from the core_profiles IDSs
+        [previously known as rotationplot]""",
+        parents=[dbentry_parser],
+        formatter_class=RichHelpFormatter,
+    )
 
-parser = argparse.ArgumentParser(
-    description="""---- Display the efield, toroidal, polidal velocities from the core_profiles IDSs
-    [previously known as rotationplot]""",
-    parents=[dbentry_parser],
-    formatter_class=RichHelpFormatter,
-)
+    parser.add_argument("-t", "--time", help="Time", required=False, type=float, default=99.0)
+    parser.add_argument(
+        "--save",
+        help="Save figure at default location",
+        action="store_true",
+    )
+    parser.add_argument(
+        "--directory",
+        help="Directory to save the figure",
+        default=None,
+    )
+    args = parser.parse_args()
+    logger = setup_logger("module", stdout_level=logging.INFO)
 
-parser.add_argument("-t", "--time", help="Time", required=False, type=float, default=99.0)
-parser.add_argument(
-    "--save",
-    help="Save figure at default location",
-    action="store_true",
-)
-parser.add_argument(
-    "--directory",
-    help="Directory to save the figure",
-    default=None,
-)
-args = parser.parse_args()
-logger = setup_logger("module", stdout_level=logging.INFO)
+    connection = DBMaster.get_connection(args)
+    if connection is None:
+        logger.critical("----> Aborted.")
+        exit(1)
 
-connection = DBMaster.get_connection(args)
-if connection is None:
-    logger.critical("----> Aborted.")
-    exit(1)
+    ids_core_profiles = None
+    try:
 
-ids_core_profiles = None
-try:
+        if args.dd_update:
+            ids_core_profiles = connection.get("core_profiles", autoconvert=False)
+            ids_core_profiles = convert_ids(ids_core_profiles, connection.factory.version)
+        else:
+            ids_core_profiles = connection.get("core_profiles", lazy=True, autoconvert=False)
+    except Exception as _:  # noqa: F841
+        logger.error("core_profiles ids is not present")
+        exit(1)
 
-    if args.dd_update:
-        ids_core_profiles = connection.get("core_profiles", autoconvert=False)
-        ids_core_profiles = convert_ids(ids_core_profiles, connection.factory.version)
+    # Search for adequate time slice for display
+    time_array = ids_core_profiles.time
+    time_slice, time_value = get_nearest_time(time_array, args.time)
+
+    ntime = len(ids_core_profiles.time)
+
+    canvas = PlotCanvas(2, 2)
+
+    ax1 = canvas.add_axes(title="", xlabel="", row=0, col=0)
+    ax2 = canvas.add_axes(title="", xlabel="", row=0, col=1)
+    ax3 = canvas.add_axes(title="", xlabel="", row=1, col=0)
+    ax4 = canvas.add_axes(title="", xlabel="", row=1, col=1)
+
+
+    coreprofiles_view = CoreProfilesView(ids_core_profiles)
+
+    coreprofiles_view.plot_efield_profile(ax1, time_slice)
+    coreprofiles_view.plot_toroidal_velocity_profile(ax2, time_slice)
+    coreprofiles_view.plot_poloidal_velocity_profile(ax3, time_slice)
+    coreprofiles_view.plot_diamagnetic_velocity_profile(ax4, time_slice)
+
+    ax1.sharex(ax3)
+    ax2.sharex(ax4)
+
+    canvas.set_text(text=f"{get_database_path(args, time_value=time_value)}")
+
+    canvas.fig.subplots_adjust(top=0.916, bottom=0.09, left=0.044, right=0.953, hspace=0.174, wspace=0.117)
+    canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
+    canvas.fig.suptitle(get_title(args, "Kinetic profiles", time_value), size=12)
+
+    if args.save:
+        fname = get_file_name(args, os.path.basename(__file__) + "_Kinetic_profiles", time_value)
+        if args.directory:
+            if not os.path.exists(args.directory):
+                os.makedirs(args.directory)
+            fname = os.path.join(args.directory, fname)
+        canvas.save(fname)
     else:
-        ids_core_profiles = connection.get("core_profiles", lazy=True, autoconvert=False)
-except Exception as _:  # noqa: F841
-    logger.error("core_profiles ids is not present")
-    exit(1)
-
-# Search for adequate time slice for display
-time_array = ids_core_profiles.time
-time_slice, time_value = get_nearest_time(time_array, args.time)
-
-ntime = len(ids_core_profiles.time)
-
-canvas = PlotCanvas(2, 2)
-
-ax1 = canvas.add_axes(title="", xlabel="", row=0, col=0)
-ax2 = canvas.add_axes(title="", xlabel="", row=0, col=1)
-ax3 = canvas.add_axes(title="", xlabel="", row=1, col=0)
-ax4 = canvas.add_axes(title="", xlabel="", row=1, col=1)
-
-
-coreprofiles_view = CoreProfilesView(ids_core_profiles)
-
-coreprofiles_view.plot_efield_profile(ax1, time_slice)
-coreprofiles_view.plot_toroidal_velocity_profile(ax2, time_slice)
-coreprofiles_view.plot_poloidal_velocity_profile(ax3, time_slice)
-coreprofiles_view.plot_diamagnetic_velocity_profile(ax4, time_slice)
-
-ax1.sharex(ax3)
-ax2.sharex(ax4)
-
-canvas.set_text(text=f"{get_database_path(args, time_value=time_value)}")
-
-canvas.fig.subplots_adjust(top=0.916, bottom=0.09, left=0.044, right=0.953, hspace=0.174, wspace=0.117)
-canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
-canvas.fig.suptitle(get_title(args, "Kinetic profiles", time_value), size=12)
-
-if args.save:
-    fname = get_file_name(args, os.path.basename(__file__) + "_Kinetic_profiles", time_value)
-    if args.directory:
-        if not os.path.exists(args.directory):
-            os.makedirs(args.directory)
-        fname = os.path.join(args.directory, fname)
-    canvas.save(fname)
-else:
-    canvas.show()
+        canvas.show()

@@ -6,77 +6,77 @@ import os
 from rich_argparse import RawDescriptionRichHelpFormatter
 
 from idstools.machinedescription import MachineDescription
+if __name__ == "__main__":
+    # Management of input arguments
+    parser = argparse.ArgumentParser(
+        description="""---- Show status and potential parent and children for a given simulation stored in ITER
+        machine description database folder\n\nImportant: The legacy md_status tool is deprecated and will be
+        removed in a future versions. It will remain available until simdb is fully adopted.
+        more about simdb : https://simdb.iter.org/dashboard/""",
+        formatter_class=RawDescriptionRichHelpFormatter,
+    )
+    parser.add_argument(
+        "-f",
+        "--folder",
+        help="folder where to search for machine description data",
+        required=False,
+    )
+    parser.add_argument("-s", "--shot", help="shot number", required=True, type=int)
 
-# Management of input arguments
-parser = argparse.ArgumentParser(
-    description="""---- Show status and potential parent and children for a given simulation stored in ITER
-    machine description database folder\n\nImportant: The legacy md_status tool is deprecated and will be
-    removed in a future versions. It will remain available until simdb is fully adopted.
-    more about simdb : https://simdb.iter.org/dashboard/""",
-    formatter_class=RawDescriptionRichHelpFormatter,
-)
-parser.add_argument(
-    "-f",
-    "--folder",
-    help="folder where to search for machine description data",
-    required=False,
-)
-parser.add_argument("-s", "--shot", help="shot number", required=True, type=int)
-
-parser.add_argument(
-    "-r",
-    "--run",
-    help="run number",
-    required=True,
-    type=int,
-)
-args = vars(parser.parse_args())
-shot = args["shot"]
-run = args["run"]
-
-
-# FOLDER
-if args["folder"] is not None:
-    machine_description_folder = args["folder"]
-else:
-    publichome = os.getenv("IMAS_HOME", default="")
-
-    machine_description_folder = os.path.join(publichome, r"shared/imasdb/ITER_MD/3/md_summary.yaml")
-
-md_object = MachineDescription(machine_description_folder)
-
-if not md_object.check_if_exist(shot, run):
-    print(f"Data entry {shot}/{run} does not exist")
-    exit()
+    parser.add_argument(
+        "-r",
+        "--run",
+        help="run number",
+        required=True,
+        type=int,
+    )
+    args = vars(parser.parse_args())
+    shot = args["shot"]
+    run = args["run"]
 
 
-family = md_object.get_family(shot, run)
-if not family["parents"] and not family["children"]:
-    print("No information found")
-    exit(0)
-print("-----------------------------------------------------------------")
-print(f"  {'DATASET':<10}\t{'STATUS':<10}\tREASON WHY IT REPLACES PREVIOUS")
-print("-----------------------------------------------------------------")
-if family["parents"]:
-    for iparent in range(len(family["parents"]["pulse"])):
-        shot_info = family["parents"]["pulse"][iparent]
-        run_info = family["parents"]["run"][iparent]
-        status = family["parents"]["status"][iparent]
-        reason_for_replacement = family["parents"]["reason_for_replacement"][iparent]
-        shot_len = len(family["parents"]["pulse"][iparent])
-        run_len = len(family["parents"]["run"][iparent])
-        print(f"  {shot_info:<6} {run_info:<4}\t{status:<10}\t{reason_for_replacement}")
+    # FOLDER
+    if args["folder"] is not None:
+        machine_description_folder = args["folder"]
+    else:
+        publichome = os.getenv("IMAS_HOME", default="")
 
-mdstatus = md_object.get_status(shot, run)
-mdreason_for_replacement = md_object.get_reason_for_replacement(shot, run)
-print(f"* {shot:<6} {run:<4}\t{mdstatus:<10}\t{mdreason_for_replacement}")
-if family["children"]:
-    for ichild in range(len(family["children"]["pulse"])):
-        shot_info = family["children"]["pulse"][ichild]
-        run_info = family["children"]["run"][ichild]
-        status = family["children"]["status"][ichild]
-        reason_for_replacement = family["children"]["reason_for_replacement"][ichild]
-        shot_len = len(family["children"]["pulse"][ichild])
-        run_len = len(family["children"]["run"][ichild])
-        print(f"  {shot_info:<6} {run_info:<4}\t{status:<10}\t{reason_for_replacement}")
-print("-----------------------------------------------------------------")
+        machine_description_folder = os.path.join(publichome, r"shared/imasdb/ITER_MD/3/md_summary.yaml")
+
+    md_object = MachineDescription(machine_description_folder)
+
+    if not md_object.check_if_exist(shot, run):
+        print(f"Data entry {shot}/{run} does not exist")
+        exit()
+
+
+    family = md_object.get_family(shot, run)
+    if not family["parents"] and not family["children"]:
+        print("No information found")
+        exit(0)
+    print("-----------------------------------------------------------------")
+    print(f"  {'DATASET':<10}\t{'STATUS':<10}\tREASON WHY IT REPLACES PREVIOUS")
+    print("-----------------------------------------------------------------")
+    if family["parents"]:
+        for iparent in range(len(family["parents"]["pulse"])):
+            shot_info = family["parents"]["pulse"][iparent]
+            run_info = family["parents"]["run"][iparent]
+            status = family["parents"]["status"][iparent]
+            reason_for_replacement = family["parents"]["reason_for_replacement"][iparent]
+            shot_len = len(family["parents"]["pulse"][iparent])
+            run_len = len(family["parents"]["run"][iparent])
+            print(f"  {shot_info:<6} {run_info:<4}\t{status:<10}\t{reason_for_replacement}")
+
+    mdstatus = md_object.get_status(shot, run)
+    mdreason_for_replacement = md_object.get_reason_for_replacement(shot, run)
+    print(f"* {shot:<6} {run:<4}\t{mdstatus:<10}\t{mdreason_for_replacement}")
+    if family["children"]:
+        for ichild in range(len(family["children"]["pulse"])):
+            shot_info = family["children"]["pulse"][ichild]
+            run_info = family["children"]["run"][ichild]
+            status = family["children"]["status"][ichild]
+            reason_for_replacement = family["children"]["reason_for_replacement"][ichild]
+            shot_len = len(family["children"]["pulse"][ichild])
+            run_len = len(family["children"]["run"][ichild])
+            print(f"  {shot_info:<6} {run_info:<4}\t{status:<10}\t{reason_for_replacement}")
+    print("-----------------------------------------------------------------")

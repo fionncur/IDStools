@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools", "wheel", "setuptools_scm>8"]
+requires = ["setuptools", "packaging>=24.2", "wheel", "setuptools_scm>8"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -10,8 +10,6 @@ authors = [
 description = "Python based collection of data analysis and visualization tools written in IMAS framework"
 readme = {file = "README.md", content-type = "text/markdown"}
 requires-python = ">=3.6"
-license = "GPL-3.0-or-later"
-license-files = ["LICEN[CS]E*"]
 keywords = ["IMAS", "IDS"]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
@@ -65,61 +63,14 @@ dependencies = [
 ]
 dynamic = ["version"]
 
-[project.scripts]
-dbconverter = "scripts.dbconverter:main"
-dblist = "scripts.dblist:main"
-dbperf = "scripts.dbperf:main"
-dbscraper = "scripts.dbscraper:main"
-dbselector = "scripts.dbselector:main"
-eqdsk2ids = "scripts.eqdsk2ids:main"
-idscp = "scripts.idscp:main"
-idsdiff = "scripts.idsdiff:main"
-idslist = "scripts.idslist:main"
-idsperf = "scripts.idsperf:main"
-idsprint = "scripts.idsprint:main"
-idsresample = "scripts.idsresample:main"
-idsrescale_equilibrium = "scripts.idsrescale_equilibrium:main"
-idsrosettacode = "scripts.idsrosettacode:main"
-idssize = "scripts.idssize:main"
-idsshift_equilibrium = "scripts.idsshift_equilibrium:main"
-plotcoresources = "scripts.plotcoresources:main"
-plotecstrayradiation = "scripts.plotecstrayradiation:main"
-plotedgeprofiles = "scripts.plotedgeprofiles:main"
-plotequilibrium = "scripts.plotequilibrium:main"
-plotequicomp = "scripts.plotequicomp:main"
-printfluxes = "scripts.printfluxes:main"
-plothcddistributions = "scripts.plothcddistributions:main"
-plothcd = "scripts.plothcd:main"
-plotkineticprofiles = "scripts.plotkineticprofiles:main"
-plothcdwaves = "scripts.plothcdwaves:main"
-plotmachinedescription = "scripts.plotmachinedescription:main"
-plotneutron = "scripts.plotneutron:main"
-printplasmacompo = "scripts.printplasmacompo:main"
-plotpressure = "scripts.plotpressure:main"
-plotscenario = "scripts.plotscenario:main"
-plotrotation = "scripts.plotrotation:main"
-printcoresources = "scripts.printcoresources:main"
-plotecray = "scripts.plotecray:main"
-ploteccomposition = "scripts.ploteccomposition:main"
-plotspectrometry = "scripts.plotspectrometry:main"
-plotcoretransport = "scripts.plotcoretransport:main"
-create_db_entry = "scripts.create_db_entry:main"
-create_db_entry_disruption = "scripts.create_db_entry_disruption:main"
-disruption_summary = "scripts.disruption_summary:main"
-md_status = "scripts.md_status:main"
-md_summary = "scripts.md_summary:main"
-scenario_status = "scripts.scenario_status:main"
-scenario_summary = "scripts.scenario_summary:main"
-show_db_entry = "scripts.show_db_entry:main"
-watch_db_entry = "scripts.watch_db_entry:main"
-idstools = "scripts.idstools:main"
+
 
 [project.urls]
 homepage = "https://git.iter.org/projects/IMAS/repos/idstools/browse"
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["idstools*"]
+include = ["idstools*", "scripts*"]
 exclude = ["*.pyc", "*.pyo"]
 
 [tool.pytest.ini_options]
@@ -153,7 +104,9 @@ docs = [
 "sphinx-autodoc-typehints",
 "sphinx-immaterial",
 "sphinx-toolbox",
-"sphinxcontrib-programoutput"
+"sphinxcontrib-programoutput",
+"click",
+"setuptools-scm"
 ]
 
 test = [
@@ -169,3 +122,12 @@ exclude = '''
     idstools/_version\.py
 )/
 '''
+
+[tool.setuptools.data-files]
+"bin" = ["scripts/*"]
+"bin/validation_schemas/ITER" = ["resources/validation_schemas/ITER/*.*"]
+"bin/validation_schemas/generic" = ["resources/validation_schemas/generic/*.*"]
+"bin/geqdsk" = ["resources/geqdsk/*.*"]
+"bin/input" = ["resources/input/*.*"]
+"bin/mappings" = ["resources/mappings/*.*"]
+"bin/results" = ["resources/results/*.*"]

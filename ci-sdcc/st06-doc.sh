@@ -22,8 +22,7 @@ python -m venv "$ENVIRONEMNT_NAME"
 . $ENVIRONEMNT_NAME/bin/activate
 python --version
 pip install --upgrade pip
-pip install .
-pip install -r docs/requirements.txt
+pip install .[docs]
 pip list
 
 # Build documentation

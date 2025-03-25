@@ -9,96 +9,96 @@ from rich_argparse import RawDescriptionRichHelpFormatter
 
 from idstools.scenariodescription import ScenarioDescription
 from idstools.utils.idslogger import setup_logger
+if __name__ == "__main__":
+    console = Console()
+    # Management of input arguments
+    parser = argparse.ArgumentParser(
+        description="""---- Show status and potential parent and children for a given simulation stored in
+        ITER database folder\n\nImportant: The legacy scenario_status tool is deprecated and will be
+        removed in a future versions. It will remain available until simdb is fully adopted.
+        more about simdb : https://simdb.iter.org/dashboard/""",
+        formatter_class=RawDescriptionRichHelpFormatter,
+    )
+    parser.add_argument("-f", "--folder", help="folder where to search for scenarios", required=False)
+    parser.add_argument("-s", "--shot", help="Shot number", required=True, type=int)
+    # currently limiting run < 10000 because of the search path /3/0
+    parser.add_argument(
+        "-r",
+        "--run",
+        help="run number",
+        required=True,
+        type=int,
+        choices=range(0, 9999),
+        metavar="[0-9999]",
+    )
+    parser.add_argument(
+        "--print",
+        help="print yaml on console",
+        action="store_true",
+    )
+    args = vars(parser.parse_args())
 
-console = Console()
-# Management of input arguments
-parser = argparse.ArgumentParser(
-    description="""---- Show status and potential parent and children for a given simulation stored in
-    ITER database folder\n\nImportant: The legacy scenario_status tool is deprecated and will be
-    removed in a future versions. It will remain available until simdb is fully adopted.
-    more about simdb : https://simdb.iter.org/dashboard/""",
-    formatter_class=RawDescriptionRichHelpFormatter,
-)
-parser.add_argument("-f", "--folder", help="folder where to search for scenarios", required=False)
-parser.add_argument("-s", "--shot", help="Shot number", required=True, type=int)
-# currently limiting run < 10000 because of the search path /3/0
-parser.add_argument(
-    "-r",
-    "--run",
-    help="run number",
-    required=True,
-    type=int,
-    choices=range(0, 9999),
-    metavar="[0-9999]",
-)
-parser.add_argument(
-    "--print",
-    help="print yaml on console",
-    action="store_true",
-)
-args = vars(parser.parse_args())
+    logger = setup_logger("module")
 
-logger = setup_logger("module")
+    shot = args["shot"]
+    run = args["run"]
 
-shot = args["shot"]
-run = args["run"]
+    # FOLDER
+    if args["folder"] is not None:
+        directory_list = [args["folder"]]
+    else:
+        directory_list = [os.environ["IMAS_HOME"] + "/shared/imasdb/ITER/3/0"]
+        directory_list.append(os.environ["IMAS_HOME"] + "/shared/imasdb/ITER/4")
 
-# FOLDER
-if args["folder"] is not None:
-    directory_list = [args["folder"]]
-else:
-    directory_list = [os.environ["IMAS_HOME"] + "/shared/imasdb/ITER/3/0"]
-    directory_list.append(os.environ["IMAS_HOME"] + "/shared/imasdb/ITER/4")
+        lowlevelVersion = os.environ["AL_VERSION"]
+        lowlevelVersion = int(lowlevelVersion.split(".")[0])
+        if lowlevelVersion < 4:
+            directory_list = [os.environ["IMAS_HOME"] + "/shared/iterdb/3/0"]
+    yaml_file_name = ""
+    for folder_path in directory_list:
+        for root, _, filenames in os.walk(folder_path):
+            for filename in filenames:
+                if filename == f'ids_{shot}{str(run).rjust(4,"0")}.yaml':
+                    yaml_file_name = root + f'/ids_{shot}{str(run).rjust(4,"0")}.yaml'
+                    break
 
-    lowlevelVersion = os.environ["AL_VERSION"]
-    lowlevelVersion = int(lowlevelVersion.split(".")[0])
-    if lowlevelVersion < 4:
-        directory_list = [os.environ["IMAS_HOME"] + "/shared/iterdb/3/0"]
-yaml_file_name = ""
-for folder_path in directory_list:
-    for root, _, filenames in os.walk(folder_path):
-        for filename in filenames:
-            if filename == f'ids_{shot}{str(run).rjust(4,"0")}.yaml':
-                yaml_file_name = root + f'/ids_{shot}{str(run).rjust(4,"0")}.yaml'
-                break
+    sd_object = ScenarioDescription(shot, run, yaml_file_name)
+    if args["print"] is True:
+        sd_object.print_yaml()
+        exit(0)
 
-sd_object = ScenarioDescription(shot, run, yaml_file_name)
-if args["print"] is True:
-    sd_object.print_yaml()
-    exit(0)
+    family = sd_object.get_family()
+    if not family["parents"] and not family["children"]:
+        logger.info("No information found")
+        exit(0)
 
-family = sd_object.get_family()
-if not family["parents"] and not family["children"]:
-    logger.info("No information found")
-    exit(0)
+    table = Table(title="Scenario Status")
+    table.add_column("SCENARIO", style="magenta")
+    table.add_column("STATUS", style="green")
+    table.add_column("REASON WHY IT REPLACES PREVIOUS", style="green")
 
-table = Table(title="Scenario Status")
-table.add_column("SCENARIO", style="magenta")
-table.add_column("STATUS", style="green")
-table.add_column("REASON WHY IT REPLACES PREVIOUS", style="green")
+    if family["parents"]:
+        for iparent in range(len(family["parents"]["pulse"])):
+            table.add_row(
+                f" {family['parents']['pulse'][iparent]:>7}{family['parents']['run'][iparent]:>5}",
+                f"{family['parents']['status'][iparent]:<10}",
+                f"{family['parents']['comment'][iparent]}",
+            )
+    if "database_relations" in sd_object.yaml_data.keys():
+        if "replaced_by" in sd_object.yaml_data["database_relations"].keys():
+            table.add_row(
+                f"*{shot:>7}{run:>5}",
+                f"{sd_object.yaml_data['status']:<10}",
+                f"{sd_object.yaml_data['database_relations']['replaces']}",
+            )
+    else:
+        logger.warning("database relations not found")
+    if family["children"]:
+        for ichild in range(len(family["children"]["pulse"])):
+            table.add_row(
+                f" {family['children']['pulse'][ichild]:>7}{family['children']['run'][ichild]:>5}",
+                f"{family['children']['status'][ichild]:<10}",
+                f"{family['children']['comment'][ichild]}",
+            )
 
-if family["parents"]:
-    for iparent in range(len(family["parents"]["pulse"])):
-        table.add_row(
-            f" {family['parents']['pulse'][iparent]:>7}{family['parents']['run'][iparent]:>5}",
-            f"{family['parents']['status'][iparent]:<10}",
-            f"{family['parents']['comment'][iparent]}",
-        )
-if "database_relations" in sd_object.yaml_data.keys():
-    if "replaced_by" in sd_object.yaml_data["database_relations"].keys():
-        table.add_row(
-            f"*{shot:>7}{run:>5}",
-            f"{sd_object.yaml_data['status']:<10}",
-            f"{sd_object.yaml_data['database_relations']['replaces']}",
-        )
-else:
-    logger.warning("database relations not found")
-if family["children"]:
-    for ichild in range(len(family["children"]["pulse"])):
-        table.add_row(
-            f" {family['children']['pulse'][ichild]:>7}{family['children']['run'][ichild]:>5}",
-            f"{family['children']['status'][ichild]:<10}",
-            f"{family['children']['comment'][ichild]}",
-        )
-
-console.print(table)
+    console.print(table)
