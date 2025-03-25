@@ -109,7 +109,6 @@ if __name__ == "__main__":
     core_profiles_ids = in_ids_list["core_profiles"]
     waves_ids = out_ids_dict["waves"]
 
-
     time_array_equilibrium = equilibrium_ids.time  # Plot Ip
     time_array_core_profiles = core_profiles_ids.time
     time_array_waves = waves_ids.time

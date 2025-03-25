@@ -16,6 +16,7 @@ from idstools.utils.clihelper import (
 from idstools.utils.idslogger import setup_logger
 from idstools.view.common import PlotCanvas
 from idstools.view.domain.kineticprofiles import KineticProfilesView
+
 if __name__ == "__main__":
     # Management of input arguments
     parser = argparse.ArgumentParser(

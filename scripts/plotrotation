@@ -20,6 +20,7 @@ from idstools.utils.clihelper import (
 from idstools.utils.idslogger import setup_logger
 from idstools.view.common import PlotCanvas
 from idstools.view.core_profiles import CoreProfilesView
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="""---- Display the efield, toroidal, polidal velocities from the core_profiles IDSs
@@ -71,7 +72,6 @@ if __name__ == "__main__":
     ax2 = canvas.add_axes(title="", xlabel="", row=0, col=1)
     ax3 = canvas.add_axes(title="", xlabel="", row=1, col=0)
     ax4 = canvas.add_axes(title="", xlabel="", row=1, col=1)
-
 
     coreprofiles_view = CoreProfilesView(ids_core_profiles)
 

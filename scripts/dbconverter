@@ -162,7 +162,6 @@ if __name__ == "__main__":
                 f"pulse={pulse[0]} run={run}"
             )
 
-
     if args.validate:
         df = pd.DataFrame(files, columns=["PULSE", "RUN"])
         df["Validation"] = log_messages

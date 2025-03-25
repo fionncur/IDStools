@@ -266,7 +266,6 @@ if __name__ == "__main__":
     if sort:
         df = df.sort_values(by=sort)
 
-
     # rename headers for display
     selected_df = df.rename(columns=displayMapping)
 

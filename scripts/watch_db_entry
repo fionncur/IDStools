@@ -5,6 +5,7 @@ import argparse
 import sys
 
 from rich_argparse import RichHelpFormatter
+
 if __name__ == "__main__":
     # Management of input arguments
     parser = argparse.ArgumentParser(
@@ -74,5 +75,11 @@ if __name__ == "__main__":
                 f.write(line)
         f.close()
         print(
-            "----> Watcher with email address " + del_email + "removed for pulse " + str(pulse) + " run " + str(run) + "."
+            "----> Watcher with email address "
+            + del_email
+            + "removed for pulse "
+            + str(pulse)
+            + " run "
+            + str(run)
+            + "."
         )

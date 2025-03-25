@@ -24,6 +24,7 @@ from rich_argparse import RichHelpFormatter
 from idstools.database import DBMaster
 from idstools.utils.clihelper import dbentry_parser
 from idstools.utils.idshelper import get_ids_size
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Show size and time of IDSs [previously knwon as analyze_db_sizes]",

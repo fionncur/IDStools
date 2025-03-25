@@ -131,7 +131,9 @@ if __name__ == "__main__":
             exit(1)
         src_dd_version = max_dd_version
     else:
-        ids_grouped_by_dd_version_output = ", ".join(f"{k}: {', '.join(v)}" for k, v in ids_grouped_by_dd_version.items())
+        ids_grouped_by_dd_version_output = ", ".join(
+            f"{k}: {', '.join(v)}" for k, v in ids_grouped_by_dd_version.items()
+        )
         logger.warning(
             f"Be careful, all IDSs will be converted to data dictionary version {src_dd_version} using explicit "
             "conversion.Below is the list of IDSs grouped by data dictionary version: \n\n"

@@ -6,6 +6,7 @@ import os
 from rich_argparse import RawDescriptionRichHelpFormatter
 
 from idstools.machinedescription import MachineDescription
+
 if __name__ == "__main__":
     # Management of input arguments
     parser = argparse.ArgumentParser(
@@ -34,7 +35,6 @@ if __name__ == "__main__":
     shot = args["shot"]
     run = args["run"]
 
-
     # FOLDER
     if args["folder"] is not None:
         machine_description_folder = args["folder"]
@@ -48,7 +48,6 @@ if __name__ == "__main__":
     if not md_object.check_if_exist(shot, run):
         print(f"Data entry {shot}/{run} does not exist")
         exit()
-
 
     family = md_object.get_family(shot, run)
     if not family["parents"] and not family["children"]:

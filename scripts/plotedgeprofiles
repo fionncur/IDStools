@@ -151,10 +151,8 @@ if __name__ == "__main__":
         )
         exit(1)
 
-
     edge_profiles_view = EdgeProfilesView(edge_profile_ids)
     canvas = PlotCanvas(2, 4)
-
 
     ax4 = canvas.add_axes(title="", xlabel="", row=0, col=0)
     ax1 = canvas.add_axes(title="", xlabel="", row=0, col=1, rowspan=2)

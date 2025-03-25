@@ -38,6 +38,7 @@ class MdAction(argparse.Action):
         else:
             setattr(namespace, self.dest, values)
 
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="---- Display EC wave ray-tracing results [Previously known as ecray]",
@@ -87,14 +88,12 @@ if __name__ == "__main__":
     ax_powview = canvas.add_axes(title="", xlabel="", row=0, col=2)
     ax_powparview = canvas.add_axes(title="", xlabel="", row=1, col=2)
 
-
     # Looping over shots and runs
     global_label = ""
     # Color management
     color = shotcolors[colorcounter % len(shotcolors)]
     style = shotstyle[colorcounter % len(shotcolors)]
     colorcounter += 1
-
 
     conn = DBMaster.get_connection(args)
     if conn is None:
@@ -235,7 +234,6 @@ if __name__ == "__main__":
             else:
                 logger.warning("f{_idsName} ids is not present")
 
-
     wave_view.plot_pol_view_traces(
         ax_polview,
         time_slice,
@@ -250,7 +248,6 @@ if __name__ == "__main__":
 
     wave_view.plot_electron_power(ax_powview, time_slice, color=color, style=style)
     wave_view.plot_power_flow_normal(ax_powparview, time_slice, color=color, style=style)
-
 
     canvas.set_text(text=f"{get_database_path(args, time_value=time_value)}")
 

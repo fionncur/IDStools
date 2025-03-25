@@ -9,6 +9,7 @@ from rich_argparse import RawDescriptionRichHelpFormatter
 
 from idstools.scenariodescription import ScenarioDescription
 from idstools.utils.idslogger import setup_logger
+
 if __name__ == "__main__":
     console = Console()
     # Management of input arguments

@@ -14,6 +14,7 @@ class SmartFormatter(argparse.HelpFormatter):
             return text[2:].splitlines()
         return argparse.HelpFormatter._split_lines(self, text, width)
 
+
 if __name__ == "__main__":
     # INPUT ARGUMENTS
     parser = argparse.ArgumentParser(
@@ -91,7 +92,6 @@ if __name__ == "__main__":
     else:
         selection = None
 
-
     # CHOICE OF VARIABLES TO DISPLAY
     if args["choice"] is not None:
         try:
@@ -125,7 +125,6 @@ if __name__ == "__main__":
     yaml_data = md_object.md_summary_yaml
 
     df = md_object.get_pandas_data_frame()
-
 
     # Search based on selection
     if selection:

@@ -78,7 +78,6 @@ if __name__ == "__main__":
         print("The summary IDS is absent from the input data-entry", file=sys.stdout)
         print("----> H&CD waveforms not filled (to be completed by hand)", file=sys.stdout)
 
-
     if core_present == 1:
         try:
             ne0_raw = []
@@ -189,7 +188,6 @@ if __name__ == "__main__":
             "disruption.global_quantities.current_halo_pol could not be read",
             file=sys.stderr,
         )
-
 
     # Misc
     type = "tbd"

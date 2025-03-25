@@ -21,6 +21,7 @@ from idstools.utils.clihelper import (
 from idstools.utils.idslogger import setup_logger
 from idstools.view.common import PlotCanvas
 from idstools.view.distribution_sources import DistributionSourcesView
+
 if __name__ == "__main__":
     # Management of input arguments
     parser = argparse.ArgumentParser(
@@ -43,7 +44,6 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
     logger = setup_logger("module", stdout_level=logging.INFO)
-
 
     # Open the database and read the necessary IDSs
     connection = DBMaster.get_connection(args)
@@ -69,7 +69,6 @@ if __name__ == "__main__":
     except Exception as _:  # noqa: F841
         logger.error("distribution_sources ids is not present")
         exit(1)
-
 
     time_array = ids_distribution_sources.time
     time_slice, time_value = get_nearest_time(time_array, args.time)

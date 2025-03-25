@@ -18,6 +18,7 @@ from idstools.utils.clihelper import (
 from idstools.utils.idslogger import setup_logger
 from idstools.view.common import PlotCanvas
 from idstools.view.waves import WavesView
+
 if __name__ == "__main__":
     # MANAGEMENT OF INPUT ARGUMENTS
     # ------------------------------
@@ -59,11 +60,9 @@ if __name__ == "__main__":
 
     logger = setup_logger("module", stdout_level=logging.INFO)
 
-
     verbose = args.verbose
     # Flag to force psi radial coordinate to be used
     force_psi = int(args.force_psi)
-
 
     conn = DBMaster.get_connection(args)
     if conn is None:

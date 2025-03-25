@@ -60,7 +60,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
     logger = setup_logger("module", stdout_level=logging.INFO)
 
-
     # Open the database and read the necessary IDSs
     connection = DBMaster.get_connection(args)
     if connection is None:
@@ -115,14 +114,12 @@ if __name__ == "__main__":
         logger.critical("----> Aborted.")
         exit(1)
 
-
     summary_time = len(ids_summary.time)
 
     if summary_time < 1:
         logger.critical("The summary IDS is absent from the input data-entry")
         logger.critical("----> Aborted.")
         exit(1)
-
 
     if not args.no_profiles:
         canvas = PlotCanvas(4, 2)
@@ -155,7 +152,6 @@ if __name__ == "__main__":
     if not args.no_profiles:
         obje_summary_view.view_time_line(ax2, time_value)
 
-
     obje_summary_view.view_energy_content_waveforms(ax3)
 
     obje_summary_view.view_hmode(ax3)
@@ -169,7 +165,6 @@ if __name__ == "__main__":
 
     if not args.no_profiles:
         obje_summary_view.view_time_line(ax4, time_value)
-
 
     if not args.no_profiles:
         core_core_profiles_view = CoreProfilesView(ids_core_profiles)
@@ -235,7 +230,6 @@ if __name__ == "__main__":
     canvas.set_sup_title(title)
     canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
     canvas.fig.subplots_adjust(top=0.914, bottom=0.099, left=0.042, right=0.9, hspace=0.113, wspace=0.26)
-
 
     if args.save:
         if not args.no_profiles:

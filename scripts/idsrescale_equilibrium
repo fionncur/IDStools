@@ -96,7 +96,6 @@ if __name__ == "__main__":
         logger.error("Error opening destination pulse! Please check parameters and permissions.")
         exit(1)
 
-
     logger.info(f"Rescaling equilibrium magnetic field by {rescale}")
     equilibrium_compute = EquilibriumCompute(ids_equilibrium)
     equout = equilibrium_compute.rescale(rescale, dd_update=args.dd_update)

@@ -26,6 +26,7 @@ from idstools.utils.clihelper import dbentry_parser
 from idstools.utils.idslogger import setup_logger
 from idstools.view.core_profiles import CoreProfilesView
 from idstools.view.edge_profiles import EdgeProfilesView
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="---- Display the plasma composition from the core_profiles IDS [previously known as ids_compo]",
@@ -113,7 +114,9 @@ if __name__ == "__main__":
                 )
             else:
                 time_array_edge_profiles = edge_profiles_ids.time
-                time_slice_edge_profiles, time_value_edge_profiles = get_nearest_time(time_array_edge_profiles, args.time)
+                time_slice_edge_profiles, time_value_edge_profiles = get_nearest_time(
+                    time_array_edge_profiles, args.time
+                )
         else:
             time_array_edge_profiles = edge_profiles_ids.time
             time_slice_edge_profiles, time_value_edge_profiles = get_nearest_time(
@@ -124,14 +127,12 @@ if __name__ == "__main__":
     except Exception as _:  # noqa: F841
         edge_profiles_ids = None
 
-
     core_profile_exists = True
     edge_profile_exists = True
     if core_profiles_ids is None:
         core_profile_exists = False
     if edge_profiles_ids is None:
         edge_profile_exists = False
-
 
     if core_profiles_ids is not None:
 
@@ -164,7 +165,6 @@ if __name__ == "__main__":
             core_profile_exists = True
     else:
         logger.warning("No core_profiles IDS in the data-entry.")
-
 
     if edge_profiles_ids is not None:
         logger.info(

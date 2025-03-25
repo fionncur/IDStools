@@ -139,7 +139,6 @@ if __name__ == "__main__":
     except Exception as e:
         print("----> dataset_description does not exist", file=sys.stderr)
 
-
     p_sol = 0
     try:
         p_loss = summary.global_quantities.power_loss.value
@@ -385,7 +384,9 @@ if __name__ == "__main__":
                     foo = foo + "H"
                 else:
                     foo = foo + "L"
-            confinement_regime = "".join([foo[i] + "-" for i in range(len(foo) - 1) if foo[i + 1] != foo[i]] + [foo[-1]])
+            confinement_regime = "".join(
+                [foo[i] + "-" for i in range(len(foo) - 1) if foo[i + 1] != foo[i]] + [foo[-1]]
+            )
             if len(confinement_regime) > 5:
                 confinement_regime = confinement_regime[0:5]
             if len(confinement_regime) == 1:
@@ -431,7 +432,11 @@ if __name__ == "__main__":
                             for ispecies in range(nspecies):
                                 flux = (
                                     flux
-                                    + edge_transport.model[0].ggd[the_slice].ion[ispecies].energy.flux[iset].values[iFace]
+                                    + edge_transport.model[0]
+                                    .ggd[the_slice]
+                                    .ion[ispecies]
+                                    .energy.flux[iset]
+                                    .values[iFace]
                                 )
                         p_sol_i = p_sol_i + flux * area
             p_sol = (p_sol_e + p_sol_i) * 1.0e-6
@@ -612,7 +617,6 @@ if __name__ == "__main__":
     # Misc
     type = "tbd"
 
-
     # ----------------------------------------------------------------------
     # Check IDSs
 
@@ -622,7 +626,6 @@ if __name__ == "__main__":
 
     # Initialize logger
     logger = set_logger(__name__)
-
 
     # ----------------------------------------------------------------------
 

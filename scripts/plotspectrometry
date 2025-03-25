@@ -48,7 +48,6 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-
     connection = DBMaster.get_connection(args)
     if connection is None:
         exit(1)
@@ -121,7 +120,9 @@ if __name__ == "__main__":
             ax.get_legend().remove()
 
     canvas_intensity.set_text(text=f"{get_database_path(args, time_value=time_value)}")
-    canvas_intensity.fig.suptitle(get_title(args, "Spectrum (Intensity) from spectrometer_visible", time_value), size=12)
+    canvas_intensity.fig.suptitle(
+        get_title(args, "Spectrum (Intensity) from spectrometer_visible", time_value), size=12
+    )
     canvas_intensity.fig.subplots_adjust(top=0.88, bottom=0.113, left=0.033, right=0.891, hspace=0.497, wspace=0.18)
     canvas_intensity.get_current_fig_manager().set_window_title(os.path.basename(__file__) + "-intensity")
 

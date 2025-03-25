@@ -35,7 +35,6 @@ if __name__ == "__main__":
 
     filename = "ids_" + str(shot) + add0 + str(run) + ".yaml"
 
-
     def print_yaml_contents(filename):
         try:
             with open(filename, "r") as file:
@@ -45,7 +44,6 @@ if __name__ == "__main__":
                 console.print(syntax)
         except FileNotFoundError:
             logger.error(f"File '{filename}' not found")
-
 
     # Folder
     if args["folder"] is not None:

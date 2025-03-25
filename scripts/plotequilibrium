@@ -41,6 +41,7 @@ class MdAction(argparse.Action):
         else:
             setattr(namespace, self.dest, values)
 
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="""---- Display the plasma equilibrium from the equilibrium IDS.
