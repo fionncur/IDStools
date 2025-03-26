@@ -3,20 +3,25 @@
 # Execute script from root directory
 source ./ci-sdcc/st00-header.sh $1 $2
 
-# Note Disable set -e option when using on local as it will exit the shell on error
 if [[ "$(uname -n)" == *"bamboo"* ]]; then
     set -e -u -o pipefail
 fi
 
-ENVIRONEMNT_NAME=env"$TOOLCHAIN_VERSION"_"$ACCESS_LAYER_VERSION"
-module unload IDStools
 
-python -m venv "$ENVIRONEMNT_NAME"
+VIRTUALENV_DIR=virtualenvdir
+if [ -d "$VIRTUALENV_DIR" ]; then
+    rm -r "$VIRTUALENV_DIR"
+fi
 
-. "$ENVIRONEMNT_NAME"/bin/activate
+# create virtual env
+python3 -m venv "$VIRTUALENV_DIR"
+# activate virtual env
+source "$VIRTUALENV_DIR"/bin/activate
+pip install --upgrade pip
+pip install .
 pip install coverage
 # run tests
-coverage run --source=idstools -m pytest tests
+coverage run --source=idstools -m pytest idstools/test
 
 # report
 coverage report -i
