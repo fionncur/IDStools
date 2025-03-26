@@ -482,7 +482,7 @@ def resample_times(
     dbin: object,
     dbout: object,
     idsname: str,
-    occurrence =0,
+    occurrence=0,
     start: float = None,
     stop: float = None,
     step: float = None,
@@ -501,7 +501,7 @@ def resample_times(
         stop (float, optional): The stop time for resampling. Defaults to None.
         step (float, optional): The time step for resampling. Defaults to None.
         dd_update (bool, optional): Flag to indicate whether to update the data dictionary. Defaults to False.
-        interpolation_method (int, optional): The interpolation method to use for resampling. 
+        interpolation_method (int, optional): The interpolation method to use for resampling.
             Defaults to `imas.ids_defs.PREVIOUS_INTERP`.
 
     Returns:
@@ -512,11 +512,19 @@ def resample_times(
     """
     idsobj = None
     try:
-        idsobj = dbin.get_sample(idsname, tmin=start, tmax=stop, dtime=step, interpolation_method=interpolation_method, occurrence=occurrence, autoconvert=False)
-        dbout.put(idsobj,occurrence=occurrence)
+        idsobj = dbin.get_sample(
+            idsname,
+            tmin=start,
+            tmax=stop,
+            dtime=step,
+            interpolation_method=interpolation_method,
+            occurrence=occurrence,
+            autoconvert=False,
+        )
+        dbout.put(idsobj, occurrence=occurrence)
     except Exception as e:  # noqa: F841
         logger.error(f"Error occurred while resampling data for {idsname} in the input database. {e}")
-    
+
 
 def compare_ids(
     x,
