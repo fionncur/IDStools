@@ -10,6 +10,12 @@ from rich_argparse import RichHelpFormatter
 from idstools.database import DBMaster
 from idstools.utils.idshelper import get_ids_types, resample_indices, resample_times
 
+slicing_methods = {
+    "CLOSEST": imas.ids_defs.CLOSEST_INTERP,
+    "PREVIOUS": imas.ids_defs.PREVIOUS_INTERP,
+    "LINEAR": imas.ids_defs.LINEAR_INTERP,
+}
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Resample IDSs from a data-entry and save them into another data-entry "
@@ -51,6 +57,14 @@ if __name__ == "__main__":
         help="Specified range of times as 'start,stop,step'. If omitted, start=time[0], stop=time[-1]), while "
         "omitting step will keep of slices between start and stop, e.g. '10.,50.,' to keep all times between 10. "
         "and 50. secondes). Works only for IDS with homogeneous timebase unless all three values are specified.",
+    )
+    parser.add_argument(
+        "-m",
+        "--slicingmethod",
+        type=str,
+        default="CLOSEST",
+        choices=["CLOSEST", "PREVIOUS", "LINEAR"],
+        help="Slicing method \t(default=%(default)s)",
     )
     parser.add_argument(
         "ids",
@@ -115,7 +129,7 @@ if __name__ == "__main__":
                     start = int(time_range[0]) if time_range[0] != "" else 0
                     stop = int(time_range[1]) if time_range[1] != "" else None
                     step = int(time_range[2]) if time_range[2] != "" else 1
-                    print(f"resampling indices :{ids_name}")
+                    print(f"resampling indices :{ids_name} with {start}, {stop}, {step}")
                     if start == stop:
                         print(f"Please provide range. start={start} and stop={stop} are the same", file=sys.stderr)
                         exit(0)
@@ -125,12 +139,12 @@ if __name__ == "__main__":
                     start = float(time_range[0]) if time_range[0] != "" else idsobj.time[0]
                     stop = float(time_range[1]) if time_range[1] != "" else idsobj.time[-1]
                     step = float(time_range[2]) if time_range[2] != "" else 1.0
-                    print(f"resampling times :{ids_name}")
+                    print(f"resampling times :{ids_name} with {start}, {stop}, {step}")
                     if start == stop:
                         print(f"Please provide range. start={start} and stop={stop} are the same", file=sys.stderr)
                         exit(0)
                     try:
-                        resample_times(src, tmp, ids_name, start=start, stop=stop, step=step)
+                        resample_times(src, tmp, ids_name, occurrence=0, start=start, stop=stop, step=step, dd_update=args.dd_update, interpolation_method=slicing_methods[args.slicingmethod])
                     except Exception as e:  # noqa: F841
                         print(f"Error resampling times for {ids_name} : {e}")
                         continue
@@ -143,9 +157,11 @@ if __name__ == "__main__":
                             src,
                             tmp,
                             ids_name,
+                            occurrence=0, 
                             start=time_range[0],
                             stop=time_range[1],
                             step=time_range[2],
+                            dd_update=args.dd_update, interpolation_method=args.interpolation_method
                         )
                     else:
                         print(

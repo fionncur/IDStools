@@ -457,15 +457,11 @@ def resample_indices(
     """
     idsobj = None
     try:
-        if dd_update:
-            idsobj = imas.convert_ids(dbin.get(idsname, autoconvert=False), dbin.factory.version)
-        else:
-            idsobj = dbin.get(idsname, lazy=True, autoconvert=False)
-
-    except Exception as _:  # noqa: F841
-        pass
-    if idsobj:
+        idsobj = dbin.get(idsname, lazy=True, autoconvert=False)
         times = idsobj.time
+    except Exception as e:  # noqa: F841
+        logger.error(f"Error occurred while resampling data for {idsname} in the input database. {e}")
+    if idsobj:
         if stop is not None and stop >= len(times):
             stop = len(times)
         if start is not None and start >= len(times):
@@ -486,55 +482,41 @@ def resample_times(
     dbin: object,
     dbout: object,
     idsname: str,
+    occurrence =0,
     start: float = None,
     stop: float = None,
     step: float = None,
     dd_update=False,
+    interpolation_method=imas.ids_defs.PREVIOUS_INTERP,
 ):
     """
-    The function resampleTimes takes in a database input, database output, idsname, start, stop, and
-    step parameters, and resamples the times in the input database based on the specified parameters,
-    and puts the resampled data into the output database.
+    Resamples time-dependent data from an input database and stores it in an output database.
 
-    Args:
-        dbin (str): The parameter "dbin" is a string that represents the input database name. It is the
-            database from which the data will be read.
-        dbout (str): The parameter `dbout` is a string that represents the name of the output database.
-            It is the database where the resampled data will be stored.
-        idsname (str): The parameter "idsname" is a string that represents the ids that you want to resample.
-        start (int): The start parameter is the index of the first time value to be resampled.
-        stop (int): The `stop` parameter is used to specify the index at which the resampling should stop.
-            If `stop` is not provided, the resampling will continue until the end of the `times` array.
-        step (int): The `step` parameter determines the interval between the indices that are selected from
-            the `times` array. For example, if `step` is set to 2, every second index will be selected. If `step`
-            is set to 3, every third index will be selected, and so. Defaults to 1
+    Parameters:
+        dbin (object): The input database object from which data is retrieved.
+        dbout (object): The output database object where resampled data is stored.
+        idsname (str): The name of the IDS (Integrated Data Structure) to be resampled.
+        occurrence (int, optional): The occurrence index of the IDS. Defaults to 0.
+        start (float, optional): The start time for resampling. Defaults to None.
+        stop (float, optional): The stop time for resampling. Defaults to None.
+        step (float, optional): The time step for resampling. Defaults to None.
+        dd_update (bool, optional): Flag to indicate whether to update the data dictionary. Defaults to False.
+        interpolation_method (int, optional): The interpolation method to use for resampling. 
+            Defaults to `imas.ids_defs.PREVIOUS_INTERP`.
+
+    Returns:
+        None: The function does not return a value. The resampled data is stored in the output database.
+
+    Raises:
+        Exception: If an error occurs during data retrieval from the input database, it is caught and ignored.
     """
     idsobj = None
     try:
-        idsobj = dbin.get(idsname)
-    except Exception as _:  # noqa: F841
-        pass
-    if idsobj:
-        times = idsobj.time
-        if step is None:  # work on indices
-            rstart = 0 if start is None else np.argmax(times >= start)
-            rstop = len(times) if stop is None else (np.argmax(times > stop) - 1)
-            rtimes = [times[range(rstart, rstop, 1)]]
-        else:
-            rstart = times[0] if start is None else start
-            rstop = times[-1] if stop is None else stop
-            rtimes = np.arange(rstart, rstop, step)
-        for time_val in rtimes:
-
-            if dd_update:
-                data_slice = imas.convert_ids(
-                    dbin.get_slice(idsname, time_val, imas.ids_defs.PREVIOUS_INTERP, autoconvert=False),
-                    dbin.factory.version,
-                )
-            else:
-                data_slice = dbin.get_slice(idsname, time_val, imas.ids_defs.PREVIOUS_INTERP, autoconvert=False)
-            dbout.put_slice(data_slice)
-
+        idsobj = dbin.get_sample(idsname, tmin=start, tmax=stop, dtime=step, interpolation_method=interpolation_method, occurrence=occurrence, autoconvert=False)
+        dbout.put(idsobj,occurrence=occurrence)
+    except Exception as e:  # noqa: F841
+        logger.error(f"Error occurred while resampling data for {idsname} in the input database. {e}")
+    
 
 def compare_ids(
     x,
