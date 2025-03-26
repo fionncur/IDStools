@@ -26,5 +26,5 @@ coverage run --source=idstools -m pytest idstools/test
 # report
 coverage report -i
 deactivate
-rm -rf "$ENVIRONEMNT_NAME"
+rm -rf "$VIRTUALENV_DIR"
 echo "Done"
