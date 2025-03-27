@@ -36,7 +36,7 @@ def show_plots(args):
             ids_distributions = convert_ids(ids_distributions, conn.factory.version)
         else:
             ids_distributions = conn.get("distributions", lazy=True, autoconvert=False)
-    except Exception as e:  # noqa: F841
+    except Exception as e:
         logger.error(f"distributions ids is not present, detailed error: {e}")
 
     if ids_distributions:

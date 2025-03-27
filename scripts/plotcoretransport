@@ -118,7 +118,7 @@ if __name__ == "__main__":
     try:
         model_index = [t.identifier.name for t in ids_slice_core_transport.model].index("transport_solver")
         logger.info(f'Found model "transport_solver" as model {model_index}')
-    except Exception as e:  # noqa: F841
+    except Exception as e:
         logger.critical(f'"transport_solver" not found in the transport models {e}')
         exit()
 

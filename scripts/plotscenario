@@ -81,7 +81,7 @@ if __name__ == "__main__":
                         ids_core_profiles = connection.get(
                             "core_profiles", occurrence=occ, lazy=True, autoconvert=False
                         )
-                except Exception as e:  # noqa: F841
+                except Exception as e:
                     logger.error(f"core_profiles ids is not present {e}")
         if ids_core_profiles.time is None:
             ids_core_profiles = None
@@ -100,7 +100,7 @@ if __name__ == "__main__":
                         ids_equilibrium = convert_ids(ids_equilibrium, connection.factory.version)
                     else:
                         ids_equilibrium = connection.get("equilibrium", occurrence=occ, lazy=True, autoconvert=False)
-                except Exception as e:  # noqa: F841
+                except Exception as e:
                     logger.error(f"equilibrium ids is not present, detailed error: {e}")
 
         if ids_equilibrium.time is None:
@@ -122,7 +122,7 @@ if __name__ == "__main__":
                     ids_summary = convert_ids(ids_summary, connection.factory.version)
                 else:
                     ids_summary = connection.get("summary", occurrence=occ, lazy=True, autoconvert=False)
-            except Exception as e:  # noqa: F841
+            except Exception as e:
                 logger.critical(f"The summary IDS is absent from the input data-entry, detailed error: {e}")
 
     if ids_summary:
@@ -205,7 +205,7 @@ if __name__ == "__main__":
                 got_dataset_description = False
             else:
                 got_dataset_description = True
-        except Exception as e:  # noqa: F841
+        except Exception as e:
             logger.warning(
                 f"Warning: The dataset_description IDS is absent from the input data-entry, detailed error: {e}"
             )
@@ -222,7 +222,7 @@ if __name__ == "__main__":
             if ids_summary.tag.name != "":
                 try:
                     additional_data = json.loads(ids_summary.tag.name)
-                except Exception as e:  # noqa: F841
+                except Exception as e:
                     logger.warning(f"The tag name is not a valid JSON string, detailed error: {e}")
                     additional_data = ""
             if "date" in additional_data:

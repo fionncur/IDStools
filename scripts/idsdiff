@@ -117,7 +117,7 @@ def get_filename(file_title, log_dir):
     if not os.path.exists(log_dir):
         try:
             os.makedirs(log_dir)
-        except Exception as e:  # noqa: F841
+        except Exception as e:
             print(
                 f"Cannot create directory {log_dir}. detailed error : {e}.",
                 end="",
@@ -785,7 +785,7 @@ if __name__ == "__main__":
                                     import webbrowser
 
                                     webbrowser.open(html_file)
-                                except Exception as e:  # noqa: F841
+                                except Exception as e:
                                     logger.error(f"Exception occurred, detailed error {e}")
                         exit(0)
 
@@ -821,7 +821,7 @@ if __name__ == "__main__":
                         else:
                             ids_a = connections[i][1].get(idsname, autoconvert=False)
 
-                    except Exception as e:  # noqa: F841
+                    except Exception as e:
                         idsavailability1.append(idsname)
                     ids_b = None
                     try:
@@ -835,7 +835,7 @@ if __name__ == "__main__":
                         else:
                             ids_b = connections[j][1].get(idsname, autoconvert=False)
 
-                    except Exception as e:  # noqa: F841
+                    except Exception as e:
                         idsavailability2.append(idsname)
                     if ids_a is None or ids_b is None:
                         continue
@@ -913,6 +913,6 @@ if __name__ == "__main__":
                     import webbrowser
 
                     webbrowser.open(html_file)
-                except Exception as e:  # noqa: F841
+                except Exception as e:
                     logger.error(f"Exception occurred, detailed error {e}")
                     pass

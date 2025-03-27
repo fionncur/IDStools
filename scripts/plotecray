@@ -108,7 +108,7 @@ if __name__ == "__main__":
             ids_waves = convert_ids(ids_waves, conn.factory.version)
         else:
             ids_waves = conn.get("waves", lazy=True, autoconvert=False)
-    except Exception as e:  # noqa: F841
+    except Exception as e:
         logger.error(f"waves ids is not present {e}")
         exit(1)
 
@@ -120,7 +120,7 @@ if __name__ == "__main__":
             ids_core_profiles = convert_ids(ids_core_profiles, conn.factory.version)
         else:
             ids_core_profiles = conn.get("core_profiles", lazy=True, autoconvert=False)
-    except Exception as e:  # noqa: F841
+    except Exception as e:
         logger.error(f"core_profiles ids is not present : {e}")
         exit(1)
 
@@ -131,7 +131,7 @@ if __name__ == "__main__":
             ids_equilibrium = convert_ids(ids_equilibrium, conn.factory.version)
         else:
             ids_equilibrium = conn.get("equilibrium", lazy=True, autoconvert=False)
-    except Exception as e:  # noqa: F841
+    except Exception as e:
         logger.error(f"equilibrium ids is not present : {e}")
         exit(1)
 
@@ -207,7 +207,7 @@ if __name__ == "__main__":
                         )
                     else:
                         logger.warning(f"{_ids_name} ids is empty in the dbentry")
-                except Exception as e:  # noqa: F841
+                except Exception as e:
                     logger.warning(f"{_ids_name} ids is empty in the dbentry {e}")
                 connection.close()
             else:
@@ -227,7 +227,7 @@ if __name__ == "__main__":
                         view_pf_coils.view_active_pf_coils(ax_polview)
                     else:
                         logger.warning(f"{_ids_name} ids is empty in the dbentry")
-                except Exception as e:  # noqa: F841
+                except Exception as e:
                     logger.warning(f"{_ids_name} ids is empty in the dbentry {e}")
                 connection.close()
 

@@ -111,8 +111,8 @@ if __name__ == "__main__":
         try:
             _dummy = src_connection.get(idsname, lazy=True, autoconvert=False)
             ids_dd_versions[idsname] = _dummy.ids_properties.version_put.data_dictionary.value
-        except Exception as e:  # noqa: F841
-            logger.error(f"Exception occurred, detailed error {e}")
+        except Exception as e:
+            pass
 
     ids_grouped_by_dd_version = defaultdict(list)
     for idsname, data_dictionary_version in ids_dd_versions.items():
@@ -192,8 +192,8 @@ if __name__ == "__main__":
                 if args.dd_update:
                     dest_ids_object = imas.convert_ids(dest_ids_object, dest_connection.factory.version)
 
-            except Exception as e:  # noqa: F841
-                logger.error(f"Exception occurred detailed descriptiom : {e}")
+            except Exception as e:
+                logger.error(f"Exception occurred detailed description : {e}")
             if dest_ids_object:
                 if dest_ids_object.ids_properties.homogeneous_time != imas.ids_defs.EMPTY_INT:
                     user_choice = ""
@@ -207,7 +207,7 @@ if __name__ == "__main__":
             idsobj = src_connection.get(idsid[0], occurrence=inocc, autoconvert=False, ignore_unknown_dd_version=True)
             if args.dd_update:
                 idsobj = imas.convert_ids(idsobj, src_connection.factory.version)
-        except Exception as e:  # noqa: F841
+        except Exception as e:
             logger.error(f"Exception occurred, detailed error {e}")
         if idsobj:
             if args.set_dataset_version and idsid[0] == "dataset_description":

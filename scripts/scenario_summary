@@ -179,7 +179,7 @@ if __name__ == "__main__":
         try:
             input_choice = args["choice"]
             choice = eval(str("""['""" + re.sub(""",""", r"""','""", input_choice) + """']"""))
-        except Exception as e:  # noqa: F841
+        except Exception as e:
             print(
                 "------------------------------------------------------------------",
                 file=sys.stderr,

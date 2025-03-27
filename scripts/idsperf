@@ -88,7 +88,7 @@ if __name__ == "__main__":
             _dummy = src_connection.get(idsname, lazy=True, autoconvert=False)
             src_dd_version = _dummy.ids_properties.version_put.data_dictionary.value
             break
-        except Exception as e:  # noqa: F841
+        except Exception as e:
             logger.error(f"Exception occurred, detailed error {e}")
     src_connection.close()
 

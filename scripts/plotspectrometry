@@ -60,7 +60,7 @@ if __name__ == "__main__":
             ids_spectrometer_visible = convert_ids(ids_spectrometer_visible, connection.factory.version)
         else:
             ids_spectrometer_visible = connection.get("spectrometer_visible", lazy=True, autoconvert=False)
-    except Exception as e:  # noqa: F841
+    except Exception as e:
         logger.error(f"spectrometer_visible ids is not present, detailed error: {e}")
         exit(1)
 

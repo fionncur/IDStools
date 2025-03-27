@@ -105,8 +105,8 @@ if __name__ == "__main__":
                 _dummy = src.get(idsname, lazy=True, autoconvert=False)
                 src_dd_version = _dummy.ids_properties.version_put.data_dictionary.value
                 break
-            except Exception as e:  # noqa: F841
-                logger.error(f"Exception occurred detailed descriptiom : {e}")
+            except Exception as e:
+                logger.error(f"Exception occurred detailed description : {e}")
 
     tmp = imas.DBEntry("imas:memory?path=tmp/1/1", "w")
 
@@ -125,7 +125,7 @@ if __name__ == "__main__":
         idsobj = None
         try:
             idsobj = src.get(ids_name, autoconvert=False)
-        except Exception as e:  # noqa: F841
+        except Exception as e:
             logger.error(f"Exception occurred, detailed error {e}")
         if idsobj:
             homogeneous_time = idsobj.ids_properties.homogeneous_time
@@ -164,7 +164,7 @@ if __name__ == "__main__":
                             dd_update=args.dd_update,
                             interpolation_method=slicing_methods[args.slicingmethod],
                         )
-                    except Exception as e:  # noqa: F841
+                    except Exception as e:
                         print(f"Error resampling times for {ids_name} : {e}")
                         continue
             elif homogeneous_time == 0:

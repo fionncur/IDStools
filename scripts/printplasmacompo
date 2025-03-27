@@ -90,7 +90,7 @@ if __name__ == "__main__":
             time_slice_core_profiles, time_value_core_profiles = get_nearest_time(time_array_core_profiles, args.time)
         logger.info(f"coreprofiles Time {time_value_core_profiles}  Index {time_slice_core_profiles}")
 
-    except Exception as e:  # noqa: F841
+    except Exception as e:
         logger.error(f"Exception occurred, detailed error {e}")
         core_profiles_ids = None
 
@@ -125,7 +125,7 @@ if __name__ == "__main__":
             )
         logger.info(f"edge_profiles Time {time_value_edge_profiles}  Index {time_slice_edge_profiles}")
 
-    except Exception as e:  # noqa: F841
+    except Exception as e:
         logger.error(f"Exception occurred, detailed error {e}")
         edge_profiles_ids = None
 
@@ -158,7 +158,7 @@ if __name__ == "__main__":
                 else:
                     equilibrium_ids = connection.get("equilibrium", lazy=True, autoconvert=False)
                 volume = equilibrium_ids.time_slice({time_slice_core_profiles}).profiles_1d.volume
-            except Exception as e:  # noqa: F841
+            except Exception as e:
                 logger.warning(f"equilibrium: IDS exists but volume is not present. detailed error {e}")
 
             returnstatus = CoreProfilesView.view_plasma_composition_with_species_concentration(
