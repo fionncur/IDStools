@@ -142,11 +142,12 @@ if __name__ == "__main__":
             ax6 = canvas.add_axes(title="", xlabel="", row=2, col=2)
             ax7 = canvas.add_axes(title="", xlabel="", row=3, col=2)
     else:
-        canvas = PlotCanvas(4, 1)
+        logger.critical(f"summary IDS is absent from the input data-entry")
+        canvas = PlotCanvas(2, 2)
         if not args.no_profiles:
             ax5 = canvas.add_axes(title="", xlabel="", row=0, col=0, rowspan=2)
-            ax6 = canvas.add_axes(title="", xlabel="", row=2, col=0)
-            ax7 = canvas.add_axes(title="", xlabel="", row=3, col=0)
+            ax6 = canvas.add_axes(title="", xlabel="", row=0, col=1)
+            ax7 = canvas.add_axes(title="", xlabel="", row=1, col=1)
 
     if ids_summary:
         summary_time = len(ids_summary.time)
