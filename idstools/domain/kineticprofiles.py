@@ -8,6 +8,7 @@ from idstools.compute.common import get_nearest_time
 from idstools.compute.core_profiles import CoreProfilesCompute
 from idstools.compute.edge_profiles import EdgeProfilesCompute
 from idstools.compute.equilibrium import EquilibriumCompute
+from idstools.utils.idshelper import get_available_ids_and_occurrences
 
 logger = logging.getLogger("module")
 
@@ -17,6 +18,7 @@ class KineticProfilesCompute:
 
     def __init__(self):
         self.connection = None
+        self.available_ids = None
         self.edge_required = None
 
         self.core_profiles = None
@@ -97,6 +99,7 @@ class KineticProfilesCompute:
     def analyze(self, connection, time_value, edge_required, dd_update=False):
         self.connection = connection
         self.edge_required = edge_required
+        self.available_ids = get_available_ids_and_occurrences(connection)
         self.initialised = self.check_idsses(dd_update)
         self.fill_idses(time_value)
 
@@ -168,24 +171,30 @@ class KineticProfilesCompute:
 
         if ids_name:
             logger.info(f"--> retrieving ids {ids_name}")
-            try:
-                if dd_update:
-                    ids_object = convert_ids(
-                        self.connection.get(ids_name, autoconvert=False), self.connection.factory.version
-                    )
-                else:
-                    ids_object = self.connection.get(ids_name, lazy=True, autoconvert=False)
 
-                if ids_object.time is not None:
-                    if len(ids_object.time) > 0:
-                        ids_present = True
-                else:
-                    logger.critical(f"No {ids_name} IDS in the data-entry.")
-                    ids_present = False
-            except Exception as e:
-                logger.debug(f"{e}")
-                logger.critical(f"The {ids_name} IDS is absent from the input data-entry.")
-                ids_present = False
+            for idsname, occ in self.available_ids:
+                if idsname == ids_name:
+                    try:
+                        if dd_update:
+                            ids_object = convert_ids(
+                                self.connection.get(ids_name, occurrence=occ, autoconvert=False),
+                                self.connection.factory.version,
+                            )
+                        else:
+                            ids_object = self.connection.get(ids_name, occurrence=occ, lazy=True, autoconvert=False)
+
+                        if ids_object.time is not None:
+                            if len(ids_object.time) > 0:
+                                ids_present = True
+                        else:
+                            logger.critical(f"No {ids_name}/{occ} IDS in the data-entry.")
+                            ids_present = False
+                            continue
+                        break
+
+                    except Exception as e:
+                        logger.critical(f"The {ids_name} IDS is absent from the input data-entry. {e}")
+                        ids_present = False
         return ids_object, ids_present
 
     def check_idsses(self, dd_update=False):
@@ -213,6 +222,7 @@ class KineticProfilesCompute:
             logger.critical("No data found to plot. --> Abort.")
             logger.critical("----> Aborted.")
             return None
+
         return True
 
     def fill_idses(self, time_slice):

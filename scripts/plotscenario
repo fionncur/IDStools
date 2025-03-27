@@ -81,6 +81,7 @@ if __name__ == "__main__":
                         ids_core_profiles = connection.get(
                             "core_profiles", occurrence=occ, lazy=True, autoconvert=False
                         )
+                    break
                 except Exception as e:
                     logger.error(f"core_profiles ids is not present {e}")
         if ids_core_profiles.time is None:
@@ -100,6 +101,7 @@ if __name__ == "__main__":
                         ids_equilibrium = convert_ids(ids_equilibrium, connection.factory.version)
                     else:
                         ids_equilibrium = connection.get("equilibrium", occurrence=occ, lazy=True, autoconvert=False)
+                    break
                 except Exception as e:
                     logger.error(f"equilibrium ids is not present, detailed error: {e}")
 
@@ -122,6 +124,7 @@ if __name__ == "__main__":
                     ids_summary = convert_ids(ids_summary, connection.factory.version)
                 else:
                     ids_summary = connection.get("summary", occurrence=occ, lazy=True, autoconvert=False)
+                break
             except Exception as e:
                 logger.critical(f"The summary IDS is absent from the input data-entry, detailed error: {e}")
 
