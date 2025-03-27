@@ -135,8 +135,8 @@ if __name__ == "__main__":
             canvas = PlotCanvas(4, 1)
         ax1 = canvas.add_axes(title="", xlabel="", row=0, col=0, colspan=2)
         ax2 = canvas.add_axes(title="", xlabel="", row=1, col=0, sharex=ax1, colspan=2)
-        ax3 = canvas.add_axes(title="", xlabel="", row=2, col=0, sharex=ax1,colspan=2)
-        ax4 = canvas.add_axes(title="", xlabel="", row=3, col=0, sharex=ax1,colspan=2)
+        ax3 = canvas.add_axes(title="", xlabel="", row=2, col=0, sharex=ax1, colspan=2)
+        ax4 = canvas.add_axes(title="", xlabel="", row=3, col=0, sharex=ax1, colspan=2)
         if not args.no_profiles:
             ax5 = canvas.add_axes(title="", xlabel="", row=0, col=2, rowspan=2)
             ax6 = canvas.add_axes(title="", xlabel="", row=2, col=2)
