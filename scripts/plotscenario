@@ -130,17 +130,17 @@ if __name__ == "__main__":
 
     if ids_summary:
         if not args.no_profiles:
-            canvas = PlotCanvas(4, 2)
+            canvas = PlotCanvas(4, 3)
         else:
             canvas = PlotCanvas(4, 1)
-        ax1 = canvas.add_axes(title="", xlabel="", row=0, col=0)
-        ax2 = canvas.add_axes(title="", xlabel="", row=1, col=0, sharex=ax1)
-        ax3 = canvas.add_axes(title="", xlabel="", row=2, col=0, sharex=ax1)
-        ax4 = canvas.add_axes(title="", xlabel="", row=3, col=0, sharex=ax1)
+        ax1 = canvas.add_axes(title="", xlabel="", row=0, col=0, colspan=2)
+        ax2 = canvas.add_axes(title="", xlabel="", row=1, col=0, sharex=ax1, colspan=2)
+        ax3 = canvas.add_axes(title="", xlabel="", row=2, col=0, sharex=ax1,colspan=2)
+        ax4 = canvas.add_axes(title="", xlabel="", row=3, col=0, sharex=ax1,colspan=2)
         if not args.no_profiles:
-            ax5 = canvas.add_axes(title="", xlabel="", row=0, col=1, rowspan=2)
-            ax6 = canvas.add_axes(title="", xlabel="", row=2, col=1)
-            ax7 = canvas.add_axes(title="", xlabel="", row=3, col=1)
+            ax5 = canvas.add_axes(title="", xlabel="", row=0, col=2, rowspan=2)
+            ax6 = canvas.add_axes(title="", xlabel="", row=2, col=2)
+            ax7 = canvas.add_axes(title="", xlabel="", row=3, col=2)
     else:
         canvas = PlotCanvas(4, 1)
         if not args.no_profiles:
@@ -251,7 +251,7 @@ if __name__ == "__main__":
         canvas.set_text(text=f"{get_database_path(args)}")
     canvas.set_sup_title(title)
     canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
-    canvas.fig.subplots_adjust(top=0.914, bottom=0.099, left=0.042, right=0.9, hspace=0.113, wspace=0.26)
+    canvas.fig.subplots_adjust(top=0.914, bottom=0.099, left=0.042, right=0.9, hspace=0.113, wspace=0.43)
 
     if args.save:
         if not args.no_profiles:
