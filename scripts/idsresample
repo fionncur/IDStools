@@ -2,20 +2,26 @@
 # -*- coding: utf-8 -*-
 
 import argparse
+import logging
 import sys
 
 import imaspy as imas
 from rich_argparse import RichHelpFormatter
 
 from idstools.database import DBMaster
-from idstools.utils.idshelper import get_ids_types, resample_indices, resample_times
+from idstools.utils.idshelper import (
+    get_available_ids_and_occurrences,
+    resample_indices,
+    resample_times,
+)
+from idstools.utils.idslogger import setup_logger
 
 slicing_methods = {
     "CLOSEST": imas.ids_defs.CLOSEST_INTERP,
     "PREVIOUS": imas.ids_defs.PREVIOUS_INTERP,
     "LINEAR": imas.ids_defs.LINEAR_INTERP,
 }
-
+logger = setup_logger("module", stdout_level=logging.INFO)
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Resample IDSs from a data-entry and save them into another data-entry "
@@ -79,19 +85,22 @@ if __name__ == "__main__":
             print("Can not use the same uri as source and destination!")
             exit()
 
-    if args.ids == []:
-        args.ids = get_ids_types()
-
     inputargs = argparse.Namespace()
     inputargs.uri = args.src
     src = DBMaster.get_connection(inputargs)
+    availables_ids = get_available_ids_and_occurrences(src)
+    if args.ids == []:
+        args.ids = availables_ids
+    else:
+        args.ids = [(ids, 0) for ids in args.ids]
+
     if src is None:
         print("Error opening source pulse! Please check existence.")
         sys.exit()
     # hack to get underlying data dictionary version used by idses
     src_dd_version = src.dd_version
     if not args.dd_update:
-        for idsname in get_ids_types():
+        for idsname, occurrence in availables_ids:
             try:
                 _dummy = src.get(idsname, lazy=True, autoconvert=False)
                 src_dd_version = _dummy.ids_properties.version_put.data_dictionary.value
@@ -112,7 +121,7 @@ if __name__ == "__main__":
     if dest is None:
         print("Error creating pulse! Please check existence.")
         sys.exit()
-    for ids_name in args.ids:
+    for ids_name, occurrence in args.ids:
         idsobj = None
         try:
             idsobj = src.get(ids_name, autoconvert=False)

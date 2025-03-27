@@ -75,7 +75,7 @@ if __name__ == "__main__":
                 src_dd_version = _dummy.ids_properties.version_put.data_dictionary.value
                 break
             except Exception as e:  # noqa: F841
-                logger.error(f"Exception occurred detailed descriptiom : {e}")
+                pass
 
     ids_equilibrium = connection.get("equilibrium", autoconvert=False)
 

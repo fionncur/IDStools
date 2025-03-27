@@ -9,7 +9,7 @@ from packaging import version
 from rich_argparse import RichHelpFormatter
 
 from idstools.database import DBMaster
-from idstools.utils.idshelper import get_ids_types
+from idstools.utils.idshelper import get_available_ids_and_occurrences
 from idstools.utils.idslogger import setup_logger
 
 logger = setup_logger("module")
@@ -89,13 +89,14 @@ if __name__ == "__main__":
             logger.error("Can not use the same uri as source and destination!")
             exit()
 
-    if args.ids == []:
-        args.ids = get_ids_types()
-
     inputargs = argparse.Namespace()
     inputargs.uri = args.src
 
     src_connection = DBMaster.get_connection(inputargs)
+    availables_ids = get_available_ids_and_occurrences(src_connection)
+    if args.ids == []:
+        args.ids = [f"{ids}/{occ}" for ids, occ in availables_ids]
+
     if src_connection is None:
         logger.error("Error opening source pulse! Please check existence.")
         sys.exit()
@@ -106,7 +107,7 @@ if __name__ == "__main__":
     src_dd_version = src_connection.dd_version
 
     ids_dd_versions = {}
-    for idsname in args.ids:
+    for idsname, occurrence in availables_ids:
         try:
             _dummy = src_connection.get(idsname, lazy=True, autoconvert=False)
             ids_dd_versions[idsname] = _dummy.ids_properties.version_put.data_dictionary.value
