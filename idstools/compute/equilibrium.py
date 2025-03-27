@@ -1380,68 +1380,68 @@ class EquilibriumCompute:
             try:
                 y1 = (constraints["ip_meas"])[time_index1, :]
                 y2 = (constraints["ip_recon"])[time_index1, :]
-            except Exception as _:  # noqa: F841
-                pass
+            except Exception as e:  # noqa: F841
+                logger.error(f"Exception occurred detailed descriptiom : {e}")
             try:
                 time_index2 = np.argmin(abs(timeE - time[time_index1]))
                 y3 = (constraintsE["ip_meas"])[time_index2, :]
                 y4 = (constraintsE["ip_recon"])[time_index2, :]
-            except Exception as _:  # noqa: F841
-                pass
+            except Exception as e:  # noqa: F841
+                logger.error(f"Exception occurred detailed descriptiom : {e}")
         elif constraintSelected == "pf-currents":
             text = "[kA]"
             scaleFactor = 1e3
             try:
                 y1 = (constraints["pf_meas"])[time_index1, :]
                 y2 = (constraints["pf_recon"])[time_index1, :]
-            except Exception as _:  # noqa: F841
-                pass
+            except Exception as e:  # noqa: F841
+                logger.error(f"Exception occurred detailed descriptiom : {e}")
             try:
                 time_index2 = np.argmin(abs(timeE - time[time_index1]))
                 y3 = (constraintsE["pf_meas"])[time_index2, :]
                 y4 = (constraintsE["pf_recon"])[time_index2, :]
-            except Exception as _:  # noqa: F841
-                pass
+            except Exception as e:  # noqa: F841
+                logger.error(f"Exception occurred detailed descriptiom : {e}")
         elif constraintSelected == "passive-currents":
             text = "[kA]"
             scaleFactor = 1e3
             try:
                 y1 = (constraints["pas_meas"])[time_index1, :]
                 y2 = (constraints["pas_recon"])[time_index1, :]
-            except Exception as _:  # noqa: F841
-                pass
+            except Exception as e:  # noqa: F841
+                logger.error(f"Exception occurred detailed descriptiom : {e}")
             try:
                 time_index2 = np.argmin(abs(timeE - time[time_index1]))
                 y3 = (constraintsE["pas_meas"])[time_index2, :]
                 y4 = (constraintsE["pas_recon"])[time_index2, :]
-            except Exception as _:  # noqa: F841
-                pass
+            except Exception as e:  # noqa: F841
+                logger.error(f"Exception occurred detailed descriptiom : {e}")
         elif constraintSelected == "$B_{pol}$ probes":
             text = "[mT]"
             scaleFactor = 1e-3
             try:
                 y1 = (constraints["bpol_meas"])[time_index1, :]
                 y2 = (constraints["bpol_recon"])[time_index1, :]
-            except Exception as _:  # noqa: F841
-                pass
+            except Exception as e:  # noqa: F841
+                logger.error(f"Exception occurred detailed descriptiom : {e}")
             try:
                 time_index2 = np.argmin(abs(timeE - time[time_index1]))
                 y3 = (constraintsE["bpol_meas"])[time_index2, :]
                 y4 = (constraintsE["bpol_recon"])[time_index2, :]
-            except Exception as _:  # noqa: F841
-                pass
+            except Exception as e:  # noqa: F841
+                logger.error(f"Exception occurred detailed descriptiom : {e}")
         elif constraintSelected == "flux loops":
             text = "[Wb]"
             scaleFactor = 1e0
             try:
                 y1 = (constraints["fluxloop_meas"])[time_index1, :]
                 y2 = (constraints["fluxloop_recon"])[time_index1, :]
-            except Exception as _:  # noqa: F841
-                pass
+            except Exception as e:  # noqa: F841
+                logger.error(f"Exception occurred detailed descriptiom : {e}")
             try:
                 time_index2 = np.argmin(abs(timeE - time[time_index1]))
                 y3 = (constraintsE["fluxloop_meas"])[time_index2, :]
                 y4 = (constraintsE["fluxloop_recon"])[time_index2, :]
-            except Exception as _:  # noqa: F841
-                pass
+            except Exception as e:  # noqa: F841
+                logger.error(f"Exception occurred detailed descriptiom : {e}")
         return y1, y2, y3, y4, constraintSelected, text, scaleFactor

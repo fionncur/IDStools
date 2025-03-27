@@ -327,14 +327,14 @@ class EquilibriumView(BasePlot):
             new_y11 = jtor2D[time_index1, :, k]
             y_min = new_y11.min()
             y_max = new_y11.max()
-        except Exception as _:  # noqa: F841
-            pass
+        except Exception as e:  # noqa: F841
+            logger.error(f"Exception occurred, detailed error {e}")
         try:
             new_y12 = jtor2DE[time_index2, :, kE]
             y_min = min(y_min, new_y12.min())
             y_max = max(y_max, new_y12.max())
-        except Exception as _:  # noqa: F841
-            pass
+        except Exception as e:  # noqa: F841
+            logger.error(f"Exception occurred, detailed error {e}")
 
         delta = (y_max - y_min) * 0.03
         y_min -= delta

@@ -703,11 +703,11 @@ class CoreProfilesCompute:
         pressure_ion_fast_perpendicular = 0.0
         for ion in self.ids.profiles_1d[time_slice].ion:
             if len(ion.pressure_thermal) == 0:
-                logger.warn(f"Empty profiles_1d[{time_slice}].ion.pressure_thermal")
+                logger.warning(f"Empty profiles_1d[{time_slice}].ion.pressure_thermal")
             if len(ion.pressure_fast_parallel) == 0:
-                logger.warn(f"Empty profiles_1d[{time_slice}].ion.pressure_fast_parallel")
+                logger.warning(f"Empty profiles_1d[{time_slice}].ion.pressure_fast_parallel")
             if len(ion.pressure_fast_perpendicular) == 0:
-                logger.warn(f"Empty profiles_1d[{time_slice}].ion.pressure_fast_perpendicular")
+                logger.warning(f"Empty profiles_1d[{time_slice}].ion.pressure_fast_perpendicular")
             pressure_ion_thermal = pressure_ion_thermal + ion.pressure_thermal
             pressure_ion_fast_parallel = (
                 pressure_ion_fast_parallel + np.asarray([np.nan] * nrho)
@@ -764,13 +764,13 @@ class CoreProfilesCompute:
         pressure_electron_fast_parallel = self.ids.profiles_1d[time_slice].electrons.pressure_fast_parallel
         pressure_electron_fast_perpendicular = self.ids.profiles_1d[time_slice].electrons.pressure_fast_perpendicular
         if len(pressure_electron_total) == 0:
-            logger.warn(f"Empty profiles_1d[{time_slice}].electrons.pressure")
+            logger.warning(f"Empty profiles_1d[{time_slice}].electrons.pressure")
         if len(pressure_electron_thermal) == 0:
-            logger.warn(f"Empty profiles_1d[{time_slice}].electrons.pressure_thermal")
+            logger.warning(f"Empty profiles_1d[{time_slice}].electrons.pressure_thermal")
         if len(pressure_electron_fast_parallel) == 0:
-            logger.warn(f"Empty profiles_1d[{time_slice}].electrons.pressure_fast_parallel")
+            logger.warning(f"Empty profiles_1d[{time_slice}].electrons.pressure_fast_parallel")
         if len(pressure_electron_fast_perpendicular) == 0:
-            logger.warn(f"Empty profiles_1d[{time_slice}].electrons.pressure_fast_perpendicular")
+            logger.warning(f"Empty profiles_1d[{time_slice}].electrons.pressure_fast_perpendicular")
         pressure_electron_total = (
             np.asarray([np.nan] * nrho) if len(pressure_electron_total) == 0 else pressure_electron_total
         )
@@ -821,11 +821,11 @@ class CoreProfilesCompute:
         pressure_parallel = self.ids.profiles_1d[time_slice].pressure_parallel
         pressure_perpendicular = self.ids.profiles_1d[time_slice].pressure_perpendicular
         if len(pressure_thermal) == 0:
-            logger.warn(f"Empty profiles_1d[{time_slice}].pressure_thermal")
+            logger.warning(f"Empty profiles_1d[{time_slice}].pressure_thermal")
         if len(pressure_parallel) == 0:
-            logger.warn(f"Empty profiles_1d[{time_slice}].pressure_fast_parallel")
+            logger.warning(f"Empty profiles_1d[{time_slice}].pressure_fast_parallel")
         if len(pressure_perpendicular) == 0:
-            logger.warn(f"Empty profiles_1d[{time_slice}].pressure_fast_perpendicular")
+            logger.warning(f"Empty profiles_1d[{time_slice}].pressure_fast_perpendicular")
         pressure_thermal = np.asarray([np.nan] * nrho) if len(pressure_thermal) == 0 else pressure_thermal
         pressure_parallel = np.asarray([np.nan] * nrho) if len(pressure_parallel) == 0 else pressure_parallel
         pressure_perpendicular = (

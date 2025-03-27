@@ -117,9 +117,9 @@ def get_filename(file_title, log_dir):
     if not os.path.exists(log_dir):
         try:
             os.makedirs(log_dir)
-        except Exception as _:  # noqa: F841
+        except Exception as e:  # noqa: F841
             print(
-                f"Cannot create directory {log_dir}. ",
+                f"Cannot create directory {log_dir}. detailed error : {e}.",
                 end="",
                 file=sys.stderr,
             )
@@ -785,8 +785,8 @@ if __name__ == "__main__":
                                     import webbrowser
 
                                     webbrowser.open(html_file)
-                                except Exception as _:  # noqa: F841
-                                    pass
+                                except Exception as e:  # noqa: F841
+                                    logger.error(f"Exception occurred, detailed error {e}")
                         exit(0)
 
     if len(set(fragment_ids_list)) > 1:
@@ -913,5 +913,6 @@ if __name__ == "__main__":
                     import webbrowser
 
                     webbrowser.open(html_file)
-                except Exception as _:  # noqa: F841
+                except Exception as e:  # noqa: F841
+                    logger.error(f"Exception occurred, detailed error {e}")
                     pass

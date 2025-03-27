@@ -59,8 +59,8 @@ if __name__ == "__main__":
             ids_core_profiles = convert_ids(ids_core_profiles, connection.factory.version)
         else:
             ids_core_profiles = connection.get("core_profiles", lazy=True, autoconvert=False)
-    except Exception as _:  # noqa: F841
-        logger.error("core_profiles ids is not present")
+    except Exception as e:  # noqa: F841
+        logger.error(f"core_profiles ids is not present, detailed error: {e}")
         exit(1)
 
     time_array = ids_core_profiles.time

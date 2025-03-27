@@ -129,5 +129,5 @@ if __name__ == "__main__":
 
     try:
         main()
-    except Exception as _:  # noqa: F841
+    except Exception as e:  # noqa: F841
         logger.error(traceback.format_exc())

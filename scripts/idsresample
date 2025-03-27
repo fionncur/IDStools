@@ -10,6 +10,12 @@ from rich_argparse import RichHelpFormatter
 from idstools.database import DBMaster
 from idstools.utils.idshelper import get_ids_types, resample_indices, resample_times
 
+slicing_methods = {
+    "CLOSEST": imas.ids_defs.CLOSEST_INTERP,
+    "PREVIOUS": imas.ids_defs.PREVIOUS_INTERP,
+    "LINEAR": imas.ids_defs.LINEAR_INTERP,
+}
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Resample IDSs from a data-entry and save them into another data-entry "
@@ -53,6 +59,14 @@ if __name__ == "__main__":
         "and 50. secondes). Works only for IDS with homogeneous timebase unless all three values are specified.",
     )
     parser.add_argument(
+        "-m",
+        "--slicingmethod",
+        type=str,
+        default="CLOSEST",
+        choices=["CLOSEST", "PREVIOUS", "LINEAR"],
+        help="Slicing method \t(default=%(default)s)",
+    )
+    parser.add_argument(
         "ids",
         nargs="*",
         type=str,
@@ -82,8 +96,8 @@ if __name__ == "__main__":
                 _dummy = src.get(idsname, lazy=True, autoconvert=False)
                 src_dd_version = _dummy.ids_properties.version_put.data_dictionary.value
                 break
-            except Exception as _:  # noqa: F841
-                pass
+            except Exception as e:  # noqa: F841
+                logger.error(f"Exception occurred detailed descriptiom : {e}")
 
     tmp = imas.DBEntry("imas:memory?path=tmp/1/1", "w")
 
@@ -102,8 +116,8 @@ if __name__ == "__main__":
         idsobj = None
         try:
             idsobj = src.get(ids_name, autoconvert=False)
-        except Exception as _:  # noqa: F841
-            pass
+        except Exception as e:  # noqa: F841
+            logger.error(f"Exception occurred, detailed error {e}")
         if idsobj:
             homogeneous_time = idsobj.ids_properties.homogeneous_time
 
@@ -115,7 +129,7 @@ if __name__ == "__main__":
                     start = int(time_range[0]) if time_range[0] != "" else 0
                     stop = int(time_range[1]) if time_range[1] != "" else None
                     step = int(time_range[2]) if time_range[2] != "" else 1
-                    print(f"resampling indices :{ids_name}")
+                    print(f"resampling indices :{ids_name} with {start}, {stop}, {step}")
                     if start == stop:
                         print(f"Please provide range. start={start} and stop={stop} are the same", file=sys.stderr)
                         exit(0)
@@ -125,12 +139,22 @@ if __name__ == "__main__":
                     start = float(time_range[0]) if time_range[0] != "" else idsobj.time[0]
                     stop = float(time_range[1]) if time_range[1] != "" else idsobj.time[-1]
                     step = float(time_range[2]) if time_range[2] != "" else 1.0
-                    print(f"resampling times :{ids_name}")
+                    print(f"resampling times :{ids_name} with {start}, {stop}, {step}")
                     if start == stop:
                         print(f"Please provide range. start={start} and stop={stop} are the same", file=sys.stderr)
                         exit(0)
                     try:
-                        resample_times(src, tmp, ids_name, start=start, stop=stop, step=step)
+                        resample_times(
+                            src,
+                            tmp,
+                            ids_name,
+                            occurrence=0,
+                            start=start,
+                            stop=stop,
+                            step=step,
+                            dd_update=args.dd_update,
+                            interpolation_method=slicing_methods[args.slicingmethod],
+                        )
                     except Exception as e:  # noqa: F841
                         print(f"Error resampling times for {ids_name} : {e}")
                         continue
@@ -143,9 +167,12 @@ if __name__ == "__main__":
                             src,
                             tmp,
                             ids_name,
+                            occurrence=0,
                             start=time_range[0],
                             stop=time_range[1],
                             step=time_range[2],
+                            dd_update=args.dd_update,
+                            interpolation_method=args.interpolation_method,
                         )
                     else:
                         print(
