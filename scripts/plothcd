@@ -27,7 +27,7 @@ def _show_waves_plots(connargs, args, hold=False, dd_update=False):
 
     ids_waves = None
     try:
-        if args.dd_update:
+        if dd_update:
             ids_waves = convert_ids(conn.get("waves", autoconvert=False), conn.factory.version)
         else:
             ids_waves = conn.get("waves", lazy=True, autoconvert=False)
@@ -143,7 +143,7 @@ def _show_distribution_plots(connargs, args, hold=False, dd_update=False):
 
     ids_distributions = None
     try:
-        if args.dd_update:
+        if dd_update:
             ids_distributions = convert_ids(conn.get("distributions", autoconvert=False), conn.factory.version)
         else:
             ids_distributions = conn.get("distributions", lazy=True, autoconvert=False)
