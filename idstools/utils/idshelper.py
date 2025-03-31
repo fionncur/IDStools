@@ -436,7 +436,15 @@ def get_available_ids_and_times(db_entry_object, dd_update=False) -> list:
 
 
 def resample_indices(
-    dbin: str, dbout: str, idsname: str, start: int = 0, stop: int = None, step: int = 1, dd_update=False
+    dbin: str,
+    dbout: str,
+    idsname: str,
+    occurrence=0,
+    start: int = 0,
+    stop: int = None,
+    step: int = 1,
+    dd_update=False,
+    interpolation_method=imas.ids_defs.PREVIOUS_INTERP,
 ):
     """
     The function resample_indices takes in a database input, database output, and an idsname, and resamples the
@@ -466,16 +474,16 @@ def resample_indices(
             stop = len(times)
         if start is not None and start >= len(times):
             start = 0
-        for time_val in times[range(start, len(times) if stop is None else stop, step)]:
-            if dd_update:
-                data_slice = imas.convert_ids(
-                    dbin.get_slice(idsname, time_val, imas.ids_defs.PREVIOUS_INTERP, autoconvert=False),
-                    dbin.factory.version,
-                )
-            else:
-                data_slice = dbin.get_slice(idsname, time_val, imas.ids_defs.PREVIOUS_INTERP, autoconvert=False)
-
-            dbout.put_slice(data_slice)
+        idsobj = dbin.get_sample(
+            idsname,
+            tmin=times[start],
+            tmax=times[stop],
+            dtime=times[start:stop:step],
+            interpolation_method=interpolation_method,
+            occurrence=occurrence,
+            autoconvert=False,
+        )
+        dbout.put(idsobj, occurrence=occurrence)
 
 
 def resample_times(
@@ -511,19 +519,16 @@ def resample_times(
         Exception: If an error occurs during data retrieval from the input database, it is caught and ignored.
     """
     idsobj = None
-    try:
-        idsobj = dbin.get_sample(
-            idsname,
-            tmin=start,
-            tmax=stop,
-            dtime=step,
-            interpolation_method=interpolation_method,
-            occurrence=occurrence,
-            autoconvert=False,
-        )
-        dbout.put(idsobj, occurrence=occurrence)
-    except Exception as e:  # noqa: F841
-        logger.error(f"Error occurred while resampling data for {idsname} in the input database. {e}")
+    idsobj = dbin.get_sample(
+        idsname,
+        tmin=start,
+        tmax=stop,
+        dtime=step,
+        interpolation_method=interpolation_method,
+        occurrence=occurrence,
+        autoconvert=False,
+    )
+    dbout.put(idsobj, occurrence=occurrence)
 
 
 def compare_ids(
