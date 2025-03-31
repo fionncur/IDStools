@@ -566,7 +566,7 @@ class EdgeProfilesCompute:
                     break
 
             if len(self.ids.ggd[time_slice].ion[ispecies].density) == 0:
-                logger.warn(
+                logger.warning(
                     "edge_profiles IDS: species density not found for "
                     + self.ids.ggd[time_slice].ion[ispecies].label
                     + ", Getting density from state."

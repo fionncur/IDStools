@@ -17,6 +17,7 @@ from idstools.utils.clihelper import (
     get_file_name,
     get_title,
 )
+from idstools.utils.idshelper import get_available_ids_and_occurrences
 from idstools.utils.idslogger import setup_logger
 from idstools.view.common import PlotCanvas
 from idstools.view.core_profiles import CoreProfilesView
@@ -62,109 +63,128 @@ if __name__ == "__main__":
 
     # Open the database and read the necessary IDSs
     connection = DBMaster.get_connection(args)
+    availables_ids = get_available_ids_and_occurrences(connection)
+
     if connection is None:
         logger.critical("----> Aborted.")
         exit(1)
 
     if not args.no_profiles:
         ids_core_profiles = None
-        try:
-
-            if args.dd_update:
-                ids_core_profiles = connection.get("core_profiles", autoconvert=False)
-                ids_core_profiles = convert_ids(ids_core_profiles, connection.factory.version)
-            else:
-                ids_core_profiles = connection.get("core_profiles", lazy=True, autoconvert=False)
-        except Exception as _:  # noqa: F841
-            logger.error("core_profiles ids is not present")
-            exit(1)
+        for idsname, occ in availables_ids:
+            if idsname == "core_profiles":
+                try:
+                    if args.dd_update:
+                        ids_core_profiles = connection.get("core_profiles", occurrence=occ, autoconvert=False)
+                        ids_core_profiles = convert_ids(ids_core_profiles, connection.factory.version)
+                    else:
+                        ids_core_profiles = connection.get(
+                            "core_profiles", occurrence=occ, lazy=True, autoconvert=False
+                        )
+                    break
+                except Exception as e:
+                    logger.error(f"core_profiles ids is not present {e}")
         if ids_core_profiles.time is None:
-            logger.critical("No core_profiles IDS in the data-entry --> Abort.")
-            exit()
+            ids_core_profiles = None
+            logger.critical("core_profiles IDS time is empty")
+        else:
+            time_array = ids_core_profiles.time
+            ntime = len(ids_core_profiles.time)
+            time_slice, time_value = get_nearest_time(time_array, args.time)
 
         ids_equilibrium = None
-        try:
-
-            if args.dd_update:
-                ids_equilibrium = connection.get("equilibrium", autoconvert=False)
-                ids_equilibrium = convert_ids(ids_equilibrium, connection.factory.version)
-            else:
-                ids_equilibrium = connection.get("equilibrium", lazy=True, autoconvert=False)
-        except Exception as _:  # noqa: F841
-            logger.error("equilibrium ids is not present")
-            exit(1)
+        for idsname, occ in availables_ids:
+            if idsname == "equilibrium":
+                try:
+                    if args.dd_update:
+                        ids_equilibrium = connection.get("equilibrium", occurrence=occ, autoconvert=False)
+                        ids_equilibrium = convert_ids(ids_equilibrium, connection.factory.version)
+                    else:
+                        ids_equilibrium = connection.get("equilibrium", occurrence=occ, lazy=True, autoconvert=False)
+                    break
+                except Exception as e:
+                    logger.error(f"equilibrium ids is not present, detailed error: {e}")
 
         if ids_equilibrium.time is None:
-            logger.critical("No equilibrium IDS in the data-entry --> Abort.")
-            exit()
-
-        # Search for adequate time slice for display
-        time_array = ids_core_profiles.time
-        ntime = len(ids_core_profiles.time)
-        time_slice, time_value = get_nearest_time(time_array, args.time)
-    try:
-
-        if args.dd_update:
-            ids_summary = connection.get("summary", autoconvert=False)
-            ids_summary = convert_ids(ids_summary, connection.factory.version)
+            ids_equilibrium = None
+            logger.critical("equilibrium IDS time is empty")
         else:
-            ids_summary = connection.get("summary", lazy=True, autoconvert=False)
-    except Exception as _:  # noqa: F841
-        logger.critical("The summary IDS is absent from the input data-entry")
-        logger.critical("----> Aborted.")
-        exit(1)
+            if time_array is not None:
+                # Search for adequate time slice for display
+                time_array = ids_equilibrium.time
+                ntime = len(ids_equilibrium.time)
+                time_slice, time_value = get_nearest_time(time_array, args.time)
+    ids_summary = None
 
-    summary_time = len(ids_summary.time)
+    for idsname, occ in availables_ids:
+        if idsname == "summary":
+            try:
+                if args.dd_update:
+                    ids_summary = connection.get("summary", occurrence=occ, autoconvert=False)
+                    ids_summary = convert_ids(ids_summary, connection.factory.version)
+                else:
+                    ids_summary = connection.get("summary", occurrence=occ, lazy=True, autoconvert=False)
+                break
+            except Exception as e:
+                logger.critical(f"The summary IDS is absent from the input data-entry, detailed error: {e}")
 
-    if summary_time < 1:
-        logger.critical("The summary IDS is absent from the input data-entry")
-        logger.critical("----> Aborted.")
-        exit(1)
-
-    if not args.no_profiles:
-        canvas = PlotCanvas(4, 2)
+    if ids_summary:
+        if not args.no_profiles:
+            canvas = PlotCanvas(4, 3)
+        else:
+            canvas = PlotCanvas(4, 1)
+        ax1 = canvas.add_axes(title="", xlabel="", row=0, col=0, colspan=2)
+        ax2 = canvas.add_axes(title="", xlabel="", row=1, col=0, sharex=ax1, colspan=2)
+        ax3 = canvas.add_axes(title="", xlabel="", row=2, col=0, sharex=ax1, colspan=2)
+        ax4 = canvas.add_axes(title="", xlabel="", row=3, col=0, sharex=ax1, colspan=2)
+        if not args.no_profiles:
+            ax5 = canvas.add_axes(title="", xlabel="", row=0, col=2, rowspan=2)
+            ax6 = canvas.add_axes(title="", xlabel="", row=2, col=2)
+            ax7 = canvas.add_axes(title="", xlabel="", row=3, col=2)
     else:
-        canvas = PlotCanvas(4, 1)
-    ax1 = canvas.add_axes(title="", xlabel="", row=0, col=0)
-    ax2 = canvas.add_axes(title="", xlabel="", row=1, col=0, sharex=ax1)
-    ax3 = canvas.add_axes(title="", xlabel="", row=2, col=0, sharex=ax1)
-    ax4 = canvas.add_axes(title="", xlabel="", row=3, col=0, sharex=ax1)
-    if not args.no_profiles:
-        ax5 = canvas.add_axes(title="", xlabel="", row=0, col=1, rowspan=2)
-        ax6 = canvas.add_axes(title="", xlabel="", row=2, col=1)
-        ax7 = canvas.add_axes(title="", xlabel="", row=3, col=1)
+        logger.critical(f"summary IDS is absent from the input data-entry")
+        canvas = PlotCanvas(2, 2)
+        if not args.no_profiles:
+            ax5 = canvas.add_axes(title="", xlabel="", row=0, col=0, rowspan=2)
+            ax6 = canvas.add_axes(title="", xlabel="", row=0, col=1)
+            ax7 = canvas.add_axes(title="", xlabel="", row=1, col=1)
 
-    # H&CD waveforms
-    obje_summary_view = SummaryView(ids_summary)
-    obje_summary_view.view_hcd_waveforms(ax1)
+    if ids_summary:
+        summary_time = len(ids_summary.time)
 
-    obje_summary_view.view_hmode(ax1)
-    ax1.tick_params(axis="x", which="both", bottom=False, top=False, right=False, labelbottom=False)
+        if summary_time < 1:
+            logger.critical("The summary IDS is absent from the input data-entry")
+        # H&CD waveforms
+        obje_summary_view = SummaryView(ids_summary)
+        obje_summary_view.view_hcd_waveforms(ax1)
 
-    if not args.no_profiles:
-        ax1.set_title("Profiles displayed for t = " + "%.1f" % time_value + " s")
-        obje_summary_view.view_time_line(ax1, time_value)
+        obje_summary_view.view_hmode(ax1)
+        ax1.tick_params(axis="x", which="both", bottom=False, top=False, right=False, labelbottom=False)
 
-    obje_summary_view.view_ip_b0_waveforms(ax2)
+        if not args.no_profiles:
+            ax1.set_title("Profiles displayed for t = " + "%.1f" % time_value + " s")
+            obje_summary_view.view_time_line(ax1, time_value)
 
-    obje_summary_view.view_hmode(ax2)
-    ax2.tick_params(axis="x", which="both", bottom=False, top=False, right=False, labelbottom=False)
-    if not args.no_profiles:
-        obje_summary_view.view_time_line(ax2, time_value)
+        obje_summary_view.view_ip_b0_waveforms(ax2)
 
-    obje_summary_view.view_energy_content_waveforms(ax3)
+        obje_summary_view.view_hmode(ax2)
+        ax2.tick_params(axis="x", which="both", bottom=False, top=False, right=False, labelbottom=False)
+        if not args.no_profiles:
+            obje_summary_view.view_time_line(ax2, time_value)
 
-    obje_summary_view.view_hmode(ax3)
-    ax3.tick_params(axis="x", which="both", bottom=False, top=False, right=False, labelbottom=False)
-    if not args.no_profiles:
-        obje_summary_view.view_time_line(ax3, time_value)
+        obje_summary_view.view_energy_content_waveforms(ax3)
 
-    obje_summary_view.view_vloop_waveforms(ax4)
+        obje_summary_view.view_hmode(ax3)
+        ax3.tick_params(axis="x", which="both", bottom=False, top=False, right=False, labelbottom=False)
+        if not args.no_profiles:
+            obje_summary_view.view_time_line(ax3, time_value)
 
-    obje_summary_view.view_hmode(ax4)
+        obje_summary_view.view_vloop_waveforms(ax4)
 
-    if not args.no_profiles:
-        obje_summary_view.view_time_line(ax4, time_value)
+        obje_summary_view.view_hmode(ax4)
+
+        if not args.no_profiles:
+            obje_summary_view.view_time_line(ax4, time_value)
 
     if not args.no_profiles:
         core_core_profiles_view = CoreProfilesView(ids_core_profiles)
@@ -189,8 +209,10 @@ if __name__ == "__main__":
                 got_dataset_description = False
             else:
                 got_dataset_description = True
-        except Exception as _:  # noqa: F841
-            logger.warning("Warning: The dataset_description IDS is absent from the input data-entry")
+        except Exception as e:
+            logger.warning(
+                f"Warning: The dataset_description IDS is absent from the input data-entry, detailed error: {e}"
+            )
             got_dataset_description = False
         # F4F specific?
         if got_dataset_description:
@@ -204,7 +226,8 @@ if __name__ == "__main__":
             if ids_summary.tag.name != "":
                 try:
                     additional_data = json.loads(ids_summary.tag.name)
-                except Exception as _:  # noqa: F841
+                except Exception as e:
+                    logger.warning(f"The tag name is not a valid JSON string, detailed error: {e}")
                     additional_data = ""
             if "date" in additional_data:
                 txtdate = additional_data["date"]
@@ -229,7 +252,7 @@ if __name__ == "__main__":
         canvas.set_text(text=f"{get_database_path(args)}")
     canvas.set_sup_title(title)
     canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
-    canvas.fig.subplots_adjust(top=0.914, bottom=0.099, left=0.042, right=0.9, hspace=0.113, wspace=0.26)
+    canvas.fig.subplots_adjust(top=0.914, bottom=0.099, left=0.042, right=0.9, hspace=0.113, wspace=0.43)
 
     if args.save:
         if not args.no_profiles:

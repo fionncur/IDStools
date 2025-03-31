@@ -9,7 +9,7 @@ from packaging import version
 from rich_argparse import RichHelpFormatter
 
 from idstools.database import DBMaster
-from idstools.utils.idshelper import get_ids_types
+from idstools.utils.idshelper import get_available_ids_and_occurrences
 from idstools.utils.idslogger import setup_logger
 
 logger = setup_logger("module")
@@ -89,13 +89,14 @@ if __name__ == "__main__":
             logger.error("Can not use the same uri as source and destination!")
             exit()
 
-    if args.ids == []:
-        args.ids = get_ids_types()
-
     inputargs = argparse.Namespace()
     inputargs.uri = args.src
 
     src_connection = DBMaster.get_connection(inputargs)
+    availables_ids = get_available_ids_and_occurrences(src_connection)
+    if args.ids == []:
+        args.ids = [f"{ids}/{occ}" for ids, occ in availables_ids]
+
     if src_connection is None:
         logger.error("Error opening source pulse! Please check existence.")
         sys.exit()
@@ -106,11 +107,11 @@ if __name__ == "__main__":
     src_dd_version = src_connection.dd_version
 
     ids_dd_versions = {}
-    for idsname in args.ids:
+    for idsname, occurrence in availables_ids:
         try:
             _dummy = src_connection.get(idsname, lazy=True, autoconvert=False)
             ids_dd_versions[idsname] = _dummy.ids_properties.version_put.data_dictionary.value
-        except Exception as _:  # noqa: F841
+        except Exception as e:
             pass
 
     ids_grouped_by_dd_version = defaultdict(list)
@@ -191,8 +192,8 @@ if __name__ == "__main__":
                 if args.dd_update:
                     dest_ids_object = imas.convert_ids(dest_ids_object, dest_connection.factory.version)
 
-            except Exception as _:  # noqa: F841
-                pass
+            except Exception as e:
+                logger.error(f"Exception occurred detailed description : {e}")
             if dest_ids_object:
                 if dest_ids_object.ids_properties.homogeneous_time != imas.ids_defs.EMPTY_INT:
                     user_choice = ""
@@ -206,8 +207,8 @@ if __name__ == "__main__":
             idsobj = src_connection.get(idsid[0], occurrence=inocc, autoconvert=False, ignore_unknown_dd_version=True)
             if args.dd_update:
                 idsobj = imas.convert_ids(idsobj, src_connection.factory.version)
-        except Exception as _:  # noqa: F841
-            pass
+        except Exception as e:
+            logger.error(f"Exception occurred, detailed error {e}")
         if idsobj:
             if args.set_dataset_version and idsid[0] == "dataset_description":
                 if hasattr(idsobj, "dd_version"):

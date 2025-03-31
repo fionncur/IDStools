@@ -203,7 +203,8 @@ class WallCompute:
             # append first value to end of array
             rw = np.concatenate((rw, [rw[0]]))
             zw = np.concatenate((zw, [zw[0]]))
-        except Exception as _:  # noqa: F841
+        except Exception as e:
+            logger.error(f"Exception occurred, detailed error {e}")
             return None
         return rw, zw
 

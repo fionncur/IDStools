@@ -27,13 +27,13 @@ def _show_waves_plots(connargs, args, hold=False, dd_update=False):
 
     ids_waves = None
     try:
-        if args.dd_update:
+        if dd_update:
             ids_waves = convert_ids(conn.get("waves", autoconvert=False), conn.factory.version)
         else:
             ids_waves = conn.get("waves", lazy=True, autoconvert=False)
 
-    except Exception as _:  # noqa: F841
-        logger.error("waves ids is not present")
+    except Exception as e:
+        logger.error(f"waves ids is not present, detailed error {e}")
 
     if ids_waves:
         waves_compute = WavesCompute(ids_waves)
@@ -143,13 +143,13 @@ def _show_distribution_plots(connargs, args, hold=False, dd_update=False):
 
     ids_distributions = None
     try:
-        if args.dd_update:
+        if dd_update:
             ids_distributions = convert_ids(conn.get("distributions", autoconvert=False), conn.factory.version)
         else:
             ids_distributions = conn.get("distributions", lazy=True, autoconvert=False)
 
-    except Exception as _:  # noqa: F841
-        logger.error("distributions ids is not present")
+    except Exception as e:
+        logger.error(f"distributions ids is not present, detailed error {e}")
 
     if ids_distributions:
         time_array = ids_distributions.time

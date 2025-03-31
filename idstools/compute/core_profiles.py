@@ -703,11 +703,11 @@ class CoreProfilesCompute:
         pressure_ion_fast_perpendicular = 0.0
         for ion in self.ids.profiles_1d[time_slice].ion:
             if len(ion.pressure_thermal) == 0:
-                logger.warn(f"Empty profiles_1d[{time_slice}].ion.pressure_thermal")
+                logger.warning(f"Empty profiles_1d[{time_slice}].ion.pressure_thermal")
             if len(ion.pressure_fast_parallel) == 0:
-                logger.warn(f"Empty profiles_1d[{time_slice}].ion.pressure_fast_parallel")
+                logger.warning(f"Empty profiles_1d[{time_slice}].ion.pressure_fast_parallel")
             if len(ion.pressure_fast_perpendicular) == 0:
-                logger.warn(f"Empty profiles_1d[{time_slice}].ion.pressure_fast_perpendicular")
+                logger.warning(f"Empty profiles_1d[{time_slice}].ion.pressure_fast_perpendicular")
             pressure_ion_thermal = pressure_ion_thermal + ion.pressure_thermal
             pressure_ion_fast_parallel = (
                 pressure_ion_fast_parallel + np.asarray([np.nan] * nrho)
@@ -764,13 +764,13 @@ class CoreProfilesCompute:
         pressure_electron_fast_parallel = self.ids.profiles_1d[time_slice].electrons.pressure_fast_parallel
         pressure_electron_fast_perpendicular = self.ids.profiles_1d[time_slice].electrons.pressure_fast_perpendicular
         if len(pressure_electron_total) == 0:
-            logger.warn(f"Empty profiles_1d[{time_slice}].electrons.pressure")
+            logger.warning(f"Empty profiles_1d[{time_slice}].electrons.pressure")
         if len(pressure_electron_thermal) == 0:
-            logger.warn(f"Empty profiles_1d[{time_slice}].electrons.pressure_thermal")
+            logger.warning(f"Empty profiles_1d[{time_slice}].electrons.pressure_thermal")
         if len(pressure_electron_fast_parallel) == 0:
-            logger.warn(f"Empty profiles_1d[{time_slice}].electrons.pressure_fast_parallel")
+            logger.warning(f"Empty profiles_1d[{time_slice}].electrons.pressure_fast_parallel")
         if len(pressure_electron_fast_perpendicular) == 0:
-            logger.warn(f"Empty profiles_1d[{time_slice}].electrons.pressure_fast_perpendicular")
+            logger.warning(f"Empty profiles_1d[{time_slice}].electrons.pressure_fast_perpendicular")
         pressure_electron_total = (
             np.asarray([np.nan] * nrho) if len(pressure_electron_total) == 0 else pressure_electron_total
         )
@@ -821,11 +821,11 @@ class CoreProfilesCompute:
         pressure_parallel = self.ids.profiles_1d[time_slice].pressure_parallel
         pressure_perpendicular = self.ids.profiles_1d[time_slice].pressure_perpendicular
         if len(pressure_thermal) == 0:
-            logger.warn(f"Empty profiles_1d[{time_slice}].pressure_thermal")
+            logger.warning(f"Empty profiles_1d[{time_slice}].pressure_thermal")
         if len(pressure_parallel) == 0:
-            logger.warn(f"Empty profiles_1d[{time_slice}].pressure_fast_parallel")
+            logger.warning(f"Empty profiles_1d[{time_slice}].pressure_fast_parallel")
         if len(pressure_perpendicular) == 0:
-            logger.warn(f"Empty profiles_1d[{time_slice}].pressure_fast_perpendicular")
+            logger.warning(f"Empty profiles_1d[{time_slice}].pressure_fast_perpendicular")
         pressure_thermal = np.asarray([np.nan] * nrho) if len(pressure_thermal) == 0 else pressure_thermal
         pressure_parallel = np.asarray([np.nan] * nrho) if len(pressure_parallel) == 0 else pressure_parallel
         pressure_perpendicular = (
@@ -906,34 +906,40 @@ class CoreProfilesCompute:
         nrho = len(rho_tor_norm)
 
         # J_bootstrap profile
+        j_bootstrap = self.ids.profiles_1d[time_slice].j_bootstrap
         if len(self.ids.profiles_1d[time_slice].j_bootstrap) < 1:
             logger.critical("core_profiles.profiles_1d[" + str(time_slice) + "].j_bootstrap could not be read")
-            self.ids.profiles_1d[time_slice].j_bootstrap = np.asarray([np.nan] * nrho)
+            j_bootstrap = np.asarray([np.nan] * nrho)
 
         # J_non_inductive profile
+        j_non_inductive = self.ids.profiles_1d[time_slice].j_non_inductive
         if len(self.ids.profiles_1d[time_slice].j_non_inductive) < 1:
             logger.critical("core_profiles.profiles_1d[" + str(time_slice) + "].j_non_inductive could not be read")
-            self.ids.profiles_1d[time_slice].j_non_inductive = np.asarray([np.nan] * nrho)
+            j_non_inductive = np.asarray([np.nan] * nrho)
 
         # J_ohmic profile
+        j_ohmic = self.ids.profiles_1d[time_slice].j_ohmic
         if len(self.ids.profiles_1d[time_slice].j_ohmic) < 1:
             logger.critical("core_profiles.profiles_1d[" + str(time_slice) + "].j_ohmic could not be read")
-            self.ids.profiles_1d[time_slice].j_ohmic = np.asarray([np.nan] * nrho)
+            j_ohmic = np.asarray([np.nan] * nrho)
 
         # J_total profile
+        j_total = self.ids.profiles_1d[time_slice].j_total
         if len(self.ids.profiles_1d[time_slice].j_total) < 1:
             logger.critical("core_profiles.profiles_1d[" + str(time_slice) + "].j_total could not be read")
-            self.ids.profiles_1d[time_slice].j_total = np.asarray([np.nan] * nrho)
+            j_total = np.asarray([np.nan] * nrho)
 
         # q-profile
+        q = self.ids.profiles_1d[time_slice].q
         if len(self.ids.profiles_1d[time_slice].q) < 1:
             logger.critical("core_profiles.profiles_1d[" + str(time_slice) + "].q could not be read")
-            self.ids.profiles_1d[time_slice].q = np.asarray([np.nan] * nrho)
+            q = np.asarray([np.nan] * nrho)
 
         # Magnetic shear profile
+        magnetic_shear = self.ids.profiles_1d[time_slice].magnetic_shear
         if len(self.ids.profiles_1d[time_slice].magnetic_shear) < 1:
             logger.critical("core_profiles.profiles_1d[" + str(time_slice) + "].magnetic_shear could not be read")
-            self.ids.profiles_1d[time_slice].magnetic_shear = np.asarray([np.nan] * nrho)
+            magnetic_shear = np.asarray([np.nan] * nrho)
 
         if len(self.ids.profiles_1d[time_slice].q) != nrho:
             logger.critical("--------------------------------------------------------------")
@@ -952,12 +958,12 @@ class CoreProfilesCompute:
         # Create the dictionary defining the list of profiles that can be displayed
         profiles = {}
         profiles["rhonorm"] = rho_tor_norm
-        profiles["j_bootstrap"] = self.ids.profiles_1d[time_slice].j_bootstrap
-        profiles["j_non_inductive"] = self.ids.profiles_1d[time_slice].j_non_inductive
-        profiles["j_ohmic"] = self.ids.profiles_1d[time_slice].j_ohmic
-        profiles["j_total"] = self.ids.profiles_1d[time_slice].j_total
-        profiles["q"] = self.ids.profiles_1d[time_slice].q
-        profiles["magnetic_shear"] = self.ids.profiles_1d[time_slice].magnetic_shear
+        profiles["j_bootstrap"] = j_bootstrap
+        profiles["j_non_inductive"] = j_non_inductive
+        profiles["j_ohmic"] = j_ohmic
+        profiles["j_total"] = j_total
+        profiles["q"] = q
+        profiles["magnetic_shear"] = magnetic_shear
         return profiles
 
     def getnrho(self, time_slice):

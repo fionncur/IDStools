@@ -66,8 +66,8 @@ if __name__ == "__main__":
             ids_distribution_sources = convert_ids(ids_distribution_sources, connection.factory.version)
         else:
             ids_distribution_sources = connection.get("distribution_sources", lazy=True, autoconvert=False)
-    except Exception as _:  # noqa: F841
-        logger.error("distribution_sources ids is not present")
+    except Exception as e:
+        logger.error(f"distribution_sources ids is not present, detailed error: {e}")
         exit(1)
 
     time_array = ids_distribution_sources.time
@@ -88,25 +88,25 @@ if __name__ == "__main__":
         try:
             availability_test = ids_distribution_sources.source[isource].profiles_1d[time_slice]
 
-        except Exception as _:  # noqa: F841
+        except Exception as e:
             logger.warning(
-                f"Source {str(isource)} has no profiles_1d -> considered as inactive",
+                f"Source {str(isource)} has no profiles_1d -> considered as inactive, detailed error: {e}",
             )
             active[isource] = 0
         try:
             availability_test = ids_distribution_sources.source[isource].global_quantities[time_slice]
-        except Exception as _:  # noqa: F841
+        except Exception as e:
             if active[isource] == 1:
                 logger.warning(
-                    f"Source {str(isource)} has no global_quantities -> considered as inactive",
+                    f"Source {str(isource)} has no global_quantities -> considered as inactive, detailed error: {e}",
                 )
                 active[isource] = 0
         try:
             availability_test = ids_distribution_sources.source[isource].process[time_slice]
-        except Exception as _:  # noqa: F841
+        except Exception as e:
             if active[isource] == 1:
                 logger.warning(
-                    f"Source {str(isource)} has no process -> considered as inactive",
+                    f"Source {str(isource)} has no process -> considered as inactive, detailed error: {e}",
                 )
                 active[isource] = 0
 
