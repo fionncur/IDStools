@@ -443,7 +443,6 @@ def resample_indices(
     start: int = 0,
     stop: int = None,
     step: int = 1,
-    dd_update=False,
     interpolation_method=imas.ids_defs.PREVIOUS_INTERP,
 ):
     """
@@ -476,8 +475,8 @@ def resample_indices(
             start = 0
         idsobj = dbin.get_sample(
             idsname,
-            tmin=times[start],
-            tmax=times[stop],
+            tmin=start,
+            tmax=stop,
             dtime=times[start:stop:step],
             interpolation_method=interpolation_method,
             occurrence=occurrence,
@@ -494,7 +493,6 @@ def resample_times(
     start: float = None,
     stop: float = None,
     step: float = None,
-    dd_update=False,
     interpolation_method=imas.ids_defs.PREVIOUS_INTERP,
 ):
     """
