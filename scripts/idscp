@@ -3,7 +3,7 @@
 import argparse
 import sys
 from collections import defaultdict
-
+import traceback
 import imaspy as imas
 from packaging import version
 from rich_argparse import RichHelpFormatter
@@ -117,11 +117,10 @@ if __name__ == "__main__":
     ids_grouped_by_dd_version = defaultdict(list)
     for idsname, data_dictionary_version in ids_dd_versions.items():
         ids_grouped_by_dd_version[data_dictionary_version].append(idsname)
-
-    max_dd_version = max(ids_dd_versions.values(), key=version.parse)
     if not args.dd_update:
 
         if len(set(ids_dd_versions.values())) > 1:
+            src_dd_version = max(ids_dd_versions.values(), key=version.parse)
             ids_grouped_by_dd_version_output = ", ".join(
                 f"{k}: {', '.join(v)}" for k, v in ids_grouped_by_dd_version.items()
             )
@@ -130,7 +129,6 @@ if __name__ == "__main__":
                 f"{ids_grouped_by_dd_version_output} \n\n"
             )
             exit(1)
-        src_dd_version = max_dd_version
     else:
         ids_grouped_by_dd_version_output = ", ".join(
             f"{k}: {', '.join(v)}" for k, v in ids_grouped_by_dd_version.items()
@@ -219,7 +217,7 @@ if __name__ == "__main__":
                     outocc = inocc if args.output_occurrence is None else args.output_occurrence
                     dest_connection.put(idsobj, occurrence=outocc)
             except Exception as exc:
-                print(exc, file=sys.stderr)
+                traceback.print_exc()
                 if not args.force:
                     logger.warning(
                         "This error could be due to difference of data dictionary version between the"

@@ -162,7 +162,7 @@ if __name__ == "__main__":
                         args.index_range = ",,"
                     time_range = args.index_range.split(",")
                     start = int(time_range[0]) if time_range[0] != "" else 0
-                    stop = int(time_range[1]) if time_range[1] != "" else None
+                    stop = int(time_range[1]) if time_range[1] != "" else len(idsobj.time)
                     step = int(time_range[2]) if time_range[2] != "" else 1
                     print(f"resampling indices :{ids_name} with {start}, {stop}, {step}")
                     if start == stop:
