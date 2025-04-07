@@ -17,7 +17,7 @@ Todo:
 
 import argparse
 
-import imaspy as imas
+import imas
 import numpy as np
 from rich_argparse import RichHelpFormatter
 

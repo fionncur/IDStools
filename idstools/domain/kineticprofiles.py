@@ -1,8 +1,8 @@
 import logging
 
-import imaspy as imas
+import imas
 import numpy as np
-from imaspy import convert_ids
+from imas import convert_ids
 
 from idstools.compute.common import get_nearest_time
 from idstools.compute.core_profiles import CoreProfilesCompute

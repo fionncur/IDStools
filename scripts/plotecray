@@ -8,8 +8,8 @@ import copy
 import logging
 import os
 
-from imaspy import convert_ids
-from imaspy.ids_defs import EMPTY_INT
+from imas import convert_ids
+from imas.ids_defs import EMPTY_INT
 from rich_argparse import RichHelpFormatter
 
 from idstools.compute.common import get_nearest_time

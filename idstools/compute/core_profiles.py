@@ -11,7 +11,7 @@ import itertools
 import logging
 from typing import Union
 
-import imaspy as imas
+import imas
 import numpy as np
 
 import idstools.init_mendeleiev as mend
@@ -86,7 +86,7 @@ class CoreProfilesCompute:
         Example:
             .. code-block:: python
 
-                import imaspy as imas
+                import imas
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=105033;run=1;database=ITER;version=3", "r")
                 idsObj = connection.get('core_profiles')
                 connection.close()
@@ -116,7 +116,7 @@ class CoreProfilesCompute:
         Example:
             .. code-block:: python
 
-                import imaspy as imas
+                import imas
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=105033;run=1;database=ITER;version=3", "r")
 
                 idsObj = connection.get('core_profiles')
@@ -150,7 +150,7 @@ class CoreProfilesCompute:
         Example:
             .. code-block:: python
 
-                import imaspy as imas
+                import imas
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=105033;run=1;database=ITER;version=3", "r")
                 idsObj = connection.get('core_profiles')
                 connection.close()
@@ -181,7 +181,7 @@ class CoreProfilesCompute:
         Example:
             .. code-block:: python
 
-                import imaspy as imas
+                import imas
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=105033;run=1;database=ITER;version=3", "r")
 
                 idsObj = connection.get('core_profiles')
@@ -215,7 +215,7 @@ class CoreProfilesCompute:
         Example:
             .. code-block:: python
 
-                import imaspy as imas
+                import imas
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=104010;run=2;database=ITER;version=3", "r")
                 idsObj = connection.get('core_profiles')
                 connection.close()
@@ -251,7 +251,7 @@ class CoreProfilesCompute:
         Example:
             .. code-block:: python
 
-                import imaspy as imas
+                import imas
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=104010;run=2;database=ITER;version=3", "r")
                 idsObj = connection.get('core_profiles')
                 connection.close()
@@ -365,7 +365,7 @@ class CoreProfilesCompute:
         Example:
             .. code-block:: python
 
-                import imaspy as imas
+                import imas
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=104010;run=2;database=ITER;version=3", "r")
                 idsObj = connection.get('core_profiles')
                 connection.close()
@@ -394,7 +394,7 @@ class CoreProfilesCompute:
         Example:
             .. code-block:: python
 
-                import imaspy as imas
+                import imas
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=104010;run=2;database=ITER;version=3", "r")
                 idsObj = connection.get('core_profiles')
                 connection.close()
@@ -427,7 +427,7 @@ class CoreProfilesCompute:
         Example:
             .. code-block:: python
 
-                import imaspy as imas
+                import imas
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=104010;run=2;database=ITER;version=3", "r")
                 idsObj = connection.get('core_profiles')
                 connection.close()
@@ -467,7 +467,7 @@ class CoreProfilesCompute:
         Example:
             .. code-block:: python
 
-                import imaspy as imas
+                import imas
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=104010;run=2;database=ITER;version=3", "r")
                 idsObj = connection.get('core_profiles')
                 computeObj = CoreProfilesCompute(idsObj)
@@ -491,7 +491,7 @@ class CoreProfilesCompute:
         Example:
             .. code-block:: python
 
-                import imaspy as imas
+                import imas
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=104010;run=2;database=ITER;version=3", "r")
                 idsObj = connection.get('core_profiles')
                 computeObj = CoreProfilesCompute(idsObj)
@@ -518,7 +518,7 @@ class CoreProfilesCompute:
         Example:
             .. code-block:: python
 
-                import imaspy as imas
+                import imas
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=104010;run=2;database=ITER;version=3", "r")
                 idsObj = connection.get('core_profiles')
                 computeObj = CoreProfilesCompute(idsObj)
@@ -547,7 +547,7 @@ class CoreProfilesCompute:
         Example:
             .. code-block:: python
 
-                import imaspy as imas
+                import imas
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=104010;run=2;database=ITER;version=3", "r")
                 idsObj = connection.get('core_profiles')
                 computeObj = CoreProfilesCompute(idsObj)
@@ -581,7 +581,7 @@ class CoreProfilesCompute:
         Example:
             .. code-block:: python
 
-                import imaspy as imas
+                import imas
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=104010;run=2;database=ITER;version=3", "r")
                 idsObj = connection.get('core_profiles')
                 computeObj = CoreProfilesCompute(idsObj)
@@ -637,7 +637,7 @@ class CoreProfilesCompute:
         Example:
             .. code-block:: python
 
-                import imaspy as imas
+                import imas
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=104010;run=2;database=ITER;version=3", "r")
                 idsObj = connection.get('core_profiles')
                 computeObj = CoreProfilesCompute(idsObj)
@@ -673,7 +673,7 @@ class CoreProfilesCompute:
         Example:
             .. code-block:: python
 
-                import imaspy as imas
+                import imas
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=104010;run=2;database=ITER;version=3", "r")
                 idsObj = connection.get('core_profiles')
                 computeObj = CoreProfilesCompute(idsObj)

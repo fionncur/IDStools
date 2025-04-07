@@ -5,12 +5,12 @@ import logging
 import os
 import sys
 
-import imaspy as imas
+import imas
 import numpy as np
 import rich
-from imaspy.ids_primitive import IDSNumericArray, IDSPrimitive
-from imaspy.ids_struct_array import IDSStructArray
-from imaspy.ids_structure import IDSStructure
+from imas.ids_primitive import IDSNumericArray, IDSPrimitive
+from imas.ids_struct_array import IDSStructArray
+from imas.ids_structure import IDSStructure
 from rich.columns import Columns
 from rich.console import Console
 from rich.pretty import Pretty

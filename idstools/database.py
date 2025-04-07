@@ -4,7 +4,7 @@ from datetime import datetime
 from glob import glob
 from pathlib import Path
 
-import imaspy as imas
+import imas
 import yaml
 
 logger = logging.getLogger(f"module.{__name__}")

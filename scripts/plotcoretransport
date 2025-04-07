@@ -13,7 +13,7 @@ import logging
 import os
 import sys
 
-from imaspy import convert_ids, ids_defs
+from imas import convert_ids, ids_defs
 from rich_argparse import RichHelpFormatter
 
 from idstools.database import DBMaster

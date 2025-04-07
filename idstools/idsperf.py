@@ -2,7 +2,7 @@ import cProfile
 import sys
 import timeit
 
-import imaspy as imas
+import imas
 
 
 def get_ids(db, idsname, occ=0, times=None, interp=imas.ids_defs.PREVIOUS_INTERP, verbose=False, dd_update=False):

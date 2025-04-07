@@ -3,7 +3,7 @@ import os
 import re
 import socket
 
-import imaspy as imas
+import imas
 
 # default parent parser for all idstools scripts
 uri_parser = argparse.ArgumentParser(add_help=False)

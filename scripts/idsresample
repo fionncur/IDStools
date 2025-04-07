@@ -5,7 +5,7 @@ import argparse
 import logging
 import sys
 
-import imaspy as imas
+import imas
 from rich_argparse import RichHelpFormatter
 
 from idstools.database import DBMaster

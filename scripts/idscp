@@ -4,7 +4,7 @@ import argparse
 import sys
 from collections import defaultdict
 
-import imaspy as imas
+import imas
 from packaging import version
 from rich_argparse import RichHelpFormatter
 

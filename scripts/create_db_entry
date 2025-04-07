@@ -8,7 +8,7 @@ import sys
 from os import path, system
 from sys import exit
 
-import imaspy as imas
+import imas
 import numpy as np
 from rich_argparse import RawDescriptionRichHelpFormatter
 

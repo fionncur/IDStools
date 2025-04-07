@@ -5,7 +5,7 @@ import os
 from pprint import pformat
 from statistics import median
 
-import imaspy as imas
+import imas
 import numpy as np
 from fortranformat import FortranRecordReader
 

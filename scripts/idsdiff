@@ -13,17 +13,17 @@ from io import BytesIO
 import matplotlib.pyplot as plt
 import numpy as np
 import rich
-from imaspy import ids_defs
-from imaspy.ids_base import IDSBase
-from imaspy.ids_primitive import (
+from imas import ids_defs
+from imas.ids_base import IDSBase
+from imas.ids_primitive import (
     IDSFloat0D,
     IDSInt0D,
     IDSNumericArray,
     IDSPrimitive,
     IDSString0D,
 )
-from imaspy.ids_struct_array import IDSStructArray
-from imaspy.ids_structure import IDSStructure
+from imas.ids_struct_array import IDSStructArray
+from imas.ids_structure import IDSStructure
 from rich.table import Table
 from rich.text import Text
 from rich_argparse import RichHelpFormatter

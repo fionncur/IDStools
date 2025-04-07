@@ -9,7 +9,7 @@ import functools
 import logging
 from typing import Union
 
-import imaspy as imas
+import imas
 import numpy as np
 
 from idstools.database import DBMaster
@@ -48,7 +48,7 @@ class EquilibriumCompute:
         Example:
             .. code-block:: python
 
-                import imaspy as imas
+                import imas
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=134173;run=106;database=ITER;version=3","r")
                 idsObj = connection.get('equilibrium')
                 computeObj = EquilibriumCompute(idsObj)
@@ -121,7 +121,7 @@ class EquilibriumCompute:
         Examples:
             .. code-block:: python
 
-                import imaspy as imas
+                import imas
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=134173;run=106;database=ITER;version=3", "r")
                 idsObj = connection.get('equilibrium')
                 computeObj = EquilibriumCompute(idsObj)
@@ -162,7 +162,7 @@ class EquilibriumCompute:
         Examples:
             .. code-block:: python
 
-                import imaspy as imas
+                import imas
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=134173;run=106;database=ITER;version=3", "r")
                 idsObj = connection.get('equilibrium')
                 computeObj = EquilibriumCompute(idsObj)
@@ -227,7 +227,7 @@ class EquilibriumCompute:
         Examples:
             .. code-block:: python
 
-                import imaspy as imas
+                import imas
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=134173;run=106;database=ITER;version=3","r")
                 idsObj = connection.get('equilibrium')
                 computeObj = EquilibriumCompute(idsObj)
@@ -280,7 +280,7 @@ class EquilibriumCompute:
         Examples:
             .. code-block:: python
 
-                import imaspy as imas
+                import imas
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=134173;run=106;database=ITER;version=3","r")
                 idsObj = connection.get('equilibrium')
                 computeObj = EquilibriumCompute(idsObj)

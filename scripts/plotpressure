@@ -7,7 +7,7 @@ import argparse
 import logging
 import os
 
-from imaspy import convert_ids
+from imas import convert_ids
 from rich_argparse import RichHelpFormatter
 
 from idstools.compute.common import get_nearest_time

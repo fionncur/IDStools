@@ -5,7 +5,7 @@ import math
 import os
 import sys
 
-import imaspy as imas
+import imas
 import numpy as np
 import pandas as pd
 import requests

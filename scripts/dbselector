@@ -3,7 +3,7 @@
 import argparse
 import sys
 
-import imaspy as imas
+import imas
 from rich.progress import track
 from rich_argparse import RichHelpFormatter
 

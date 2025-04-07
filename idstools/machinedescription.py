@@ -5,7 +5,7 @@ import os
 import re
 import typing
 
-from imaspy import convert_ids
+from imas import convert_ids
 from yaml import YAMLError, safe_load
 
 from idstools.database import DBMaster

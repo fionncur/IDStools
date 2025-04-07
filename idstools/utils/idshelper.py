@@ -11,17 +11,17 @@ import sys
 import time
 import types
 
-import imaspy as imas
+import imas
 import numpy as np
 import pandas as pd
 import rich
-from imaspy.ids_base import IDSBase
-from imaspy.ids_primitive import (
+from imas.ids_base import IDSBase
+from imas.ids_primitive import (
     IDSPrimitive,
 )
-from imaspy.ids_struct_array import IDSStructArray
-from imaspy.ids_structure import IDSStructure
-from imaspy.ids_toplevel import IDSToplevel
+from imas.ids_struct_array import IDSStructArray
+from imas.ids_structure import IDSStructure
+from imas.ids_toplevel import IDSToplevel
 from packaging import version
 from rich.table import Table
 from rich.text import Text
