@@ -14,6 +14,7 @@ from rich_argparse import RawDescriptionRichHelpFormatter
 
 import idstools.init_mendeleiev as mend
 from idstools.utils.clihelper import imas_parser
+from idstools.utils.idshelper import get_available_ids_and_occurrences
 
 # ----------------------------------------------------------------------
 if __name__ == "__main__":
@@ -52,10 +53,18 @@ if __name__ == "__main__":
         exit(1)
 
     # ----------------------------------------------------------------------
+    availables_ids = get_available_ids_and_occurrences(connection)
+    ids_dd_versions = {}
+    for idsname, occurrence in availables_ids:
+        try:
+            _dummy = connection.get(idsname, lazy=True, autoconvert=False)
+            ids_dd_versions[idsname] = _dummy.ids_properties.version_put.data_dictionary.value
+        except Exception as e:
+            ids_dd_versions[idsname] = ""
 
     # Read necessary IDSs from database
     try:
-        core_profiles = connection.get("core_profiles", lazy=True)
+        core_profiles = connection.get("core_profiles", lazy=True, autoconvert=False)
         if core_profiles.ids_properties.homogeneous_time != imas.ids_defs.EMPTY_INT:
             core_present = 1
         else:
@@ -65,7 +74,7 @@ if __name__ == "__main__":
         core_present = 0
 
     try:
-        edge_profiles = connection.get("edge_profiles", lazy=True)
+        edge_profiles = connection.get("edge_profiles", lazy=True, autoconvert=False)
         if edge_profiles.ids_properties.homogeneous_time != imas.ids_defs.EMPTY_INT:
             edge_present = 1
         else:
@@ -76,14 +85,14 @@ if __name__ == "__main__":
         edge_present = 0
 
     try:
-        summary = connection.get("summary", lazy=True)
+        summary = connection.get("summary", lazy=True, autoconvert=False)
     except Exception as e:
         print("The summary IDS is absent from the input data-entry", file=sys.stdout)
         print("----> H&CD waveforms not filled (to be completed by hand)", file=sys.stdout)
 
     if core_present == 1:
         try:
-            summary = connection.get("summary", lazy=True)
+            summary = connection.get("summary", lazy=True, autoconvert=False)
             ne0_raw = []
             for t in range(len(core_profiles.time)):
                 ne0_raw.append(core_profiles.profiles_1d[t].electrons.density[0])
@@ -118,7 +127,7 @@ if __name__ == "__main__":
                 exit()
 
     try:
-        equilibrium = connection.get("equilibrium", lazy=True)
+        equilibrium = connection.get("equilibrium", lazy=True, autoconvert=False)
         if equilibrium.ids_properties.homogeneous_time != imas.ids_defs.EMPTY_INT:
             eq_present = 1
         else:
@@ -132,13 +141,16 @@ if __name__ == "__main__":
     workflow = "tbd"
 
     try:
-        dataset_description = connection.get("dataset_description", lazy=True)
+        dataset_description = connection.get("dataset_description", lazy=True, autoconvert=False)
         comment = str.replace(dataset_description.ids_properties.comment, "\n", "\n   ")
         dd_version = dataset_description.dd_version
         workflow = dataset_description.simulation.workflow
     except Exception as e:
         print("----> dataset_description does not exist", file=sys.stderr)
 
+    # Fallbacks for dd_version
+    if not dd_version:
+        dd_version = ids_dd_versions.get("summary") or next(iter(ids_dd_versions.values()), "")
     p_sol = 0
     try:
         p_loss = summary.global_quantities.power_loss.value
@@ -148,7 +160,7 @@ if __name__ == "__main__":
         print("P_sol will be deduced from edge_transport if available", file=sys.stdout)
 
     try:
-        edge_transport = connection.get("edge_transport", lazy=True)
+        edge_transport = connection.get("edge_transport", lazy=True, autoconvert=False)
         if edge_transport.ids_properties.homogeneous_time != imas.ids_defs.EMPTY_INT:
             flux_present = 1
         else:
@@ -445,9 +457,6 @@ if __name__ == "__main__":
 
         # Plasma composition
         species = []
-        print(z)
-        print("---------------")
-        print(a)
         for ispecies in range(nspecies):
             species.append(table_mendeleiev[z[ispecies]][a[ispecies]].element)
 
