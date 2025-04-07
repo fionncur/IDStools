@@ -58,9 +58,10 @@ if __name__ == "__main__":
     for idsname, occurrence in availables_ids:
         try:
             _dummy = connection.get(idsname, lazy=True, autoconvert=False)
-            ids_dd_versions[idsname] = _dummy.ids_properties.version_put.data_dictionary.value
+            if _dummy.ids_properties.version_put.data_dictionary.value != "":
+                ids_dd_versions[idsname] = _dummy.ids_properties.version_put.data_dictionary.value
         except Exception as e:
-            ids_dd_versions[idsname] = ""
+            pass
 
     # Read necessary IDSs from database
     try:
@@ -150,6 +151,7 @@ if __name__ == "__main__":
 
     # Fallbacks for dd_version
     if not dd_version:
+        print("----> retrieving data dictionary version from summary ids")
         dd_version = ids_dd_versions.get("summary") or next(iter(ids_dd_versions.values()), "")
     p_sol = 0
     try:
