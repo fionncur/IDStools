@@ -7,7 +7,10 @@ import os
 from datetime import datetime
 from glob import glob
 
-import imas
+try:
+    import imaspy as imas
+except ImportError:
+    import imas
 import pandas as pd
 from rich.console import Console
 from rich_argparse import RichHelpFormatter

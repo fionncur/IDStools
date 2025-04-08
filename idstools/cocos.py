@@ -1,7 +1,10 @@
 import logging
 import traceback
 
-import imas
+try:
+    import imaspy as imas
+except ImportError:
+    import imas
 import numpy as np
 
 # set cocos in the DD version from the environment

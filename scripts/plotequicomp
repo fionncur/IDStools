@@ -5,9 +5,16 @@ import argparse
 import logging
 import os
 
-import imas
+try:
+    import imaspy as imas
+except ImportError:
+    import imas
 import numpy as np
-from imas import convert_ids
+
+try:
+    import imaspy as imas
+except ImportError:
+    import imas
 from rich_argparse import RichHelpFormatter
 
 from idstools.compute.common import get_nearest_time
@@ -68,7 +75,7 @@ if __name__ == "__main__":
             connection1 = imas.DBEntry(args.uri[0], "r")
             if args.dd_update:
                 equilibrium1 = connection1.get("equilibrium", autoconvert=False)
-                equilibrium1 = convert_ids(equilibrium1, connection1.factory.version)
+                equilibrium1 = imas.convert_ids(equilibrium1, connection1.factory.version)
             else:
                 equilibrium1 = connection1.get("equilibrium", lazy=True, autoconvert=False)
 
@@ -77,7 +84,7 @@ if __name__ == "__main__":
 
             if args.dd_update:
                 wall1 = connection1.get("wall", autoconvert=False)
-                wall1 = convert_ids(wall1, connection1.factory.version)
+                wall1 = imas.convert_ids(wall1, connection1.factory.version)
             else:
                 wall1 = connection1.get("wall", lazy=True, autoconvert=False)
 
@@ -88,14 +95,14 @@ if __name__ == "__main__":
             connection2 = imas.DBEntry(args.uri[1], "r")
             if args.dd_update:
                 equilibrium2 = connection2.get("equilibrium", autoconvert=False)
-                equilibrium2 = convert_ids(equilibrium2, connection2.factory.version)
+                equilibrium2 = imas.convert_ids(equilibrium2, connection2.factory.version)
             else:
                 equilibrium2 = connection2.get("equilibrium", autoconvert=False)
             time_array2 = equilibrium2.time
             time_slice2 = np.argmin(abs(time_array2 - time_array1[time_slice1]))
             if args.dd_update:
                 wall2 = connection2.get("wall", autoconvert=False)
-                wall2 = convert_ids(wall2, connection2.factory.version)
+                wall2 = imas.convert_ids(wall2, connection2.factory.version)
             else:
                 wall2 = connection2.get("wall", autoconvert=False)
 

@@ -59,8 +59,8 @@ class EcStrayView:
                 canvas.show()
 
             .. image:: /_static/images/EcstrayView_plotResonanceLayer.png
-                :alt: image not found
-                :align: center
+                        :alt: image not found
+                        :align: center
 
         See also:
             :func:`idstools.domain.ecstray.EcStrayCompute.get_resonance_layer`

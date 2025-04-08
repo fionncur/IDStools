@@ -5,7 +5,10 @@ import os
 import re
 import typing
 
-from imas import convert_ids
+try:
+    import imaspy as imas
+except ImportError:
+    import imas
 from yaml import YAMLError, safe_load
 
 from idstools.database import DBMaster
@@ -370,7 +373,7 @@ def get_md_data(uri_list, dd_update=False, idses=MD_IDSES):
                     _ids_occurrences = [_ids_occurrence]
                 for occ in _ids_occurrences:
                     if dd_update:
-                        _ids_data = convert_ids(
+                        _ids_data = imas.convert_ids(
                             connection.get(_ids_name, autoconvert=False, occurrence=occ), connection.factory.version
                         )
                     else:

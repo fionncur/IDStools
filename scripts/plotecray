@@ -8,8 +8,10 @@ import copy
 import logging
 import os
 
-from imas import convert_ids
-from imas.ids_defs import EMPTY_INT
+try:
+    import imaspy as imas
+except ImportError:
+    import imas
 from rich_argparse import RichHelpFormatter
 
 from idstools.compute.common import get_nearest_time
@@ -105,7 +107,7 @@ if __name__ == "__main__":
 
         if args.dd_update:
             ids_waves = conn.get("waves", autoconvert=False)
-            ids_waves = convert_ids(ids_waves, conn.factory.version)
+            ids_waves = imas.convert_ids(ids_waves, conn.factory.version)
         else:
             ids_waves = conn.get("waves", lazy=True, autoconvert=False)
     except Exception as e:
@@ -117,7 +119,7 @@ if __name__ == "__main__":
 
         if args.dd_update:
             ids_core_profiles = conn.get("core_profiles", autoconvert=False)
-            ids_core_profiles = convert_ids(ids_core_profiles, conn.factory.version)
+            ids_core_profiles = imas.convert_ids(ids_core_profiles, conn.factory.version)
         else:
             ids_core_profiles = conn.get("core_profiles", lazy=True, autoconvert=False)
     except Exception as e:
@@ -128,7 +130,7 @@ if __name__ == "__main__":
     try:
         if args.dd_update:
             ids_equilibrium = conn.get("equilibrium", autoconvert=False)
-            ids_equilibrium = convert_ids(ids_equilibrium, conn.factory.version)
+            ids_equilibrium = imas.convert_ids(ids_equilibrium, conn.factory.version)
         else:
             ids_equilibrium = conn.get("equilibrium", lazy=True, autoconvert=False)
     except Exception as e:
@@ -196,10 +198,10 @@ if __name__ == "__main__":
 
                     if args.dd_update:
                         _ids_data = connection.get("wall", autoconvert=False)
-                        _ids_data = convert_ids(_ids_data, connection.factory.version)
+                        _ids_data = imas.convert_ids(_ids_data, connection.factory.version)
                     else:
                         _ids_data = connection.get("wall", lazy=True, autoconvert=False)
-                    if _ids_data.ids_properties.homogeneous_time != EMPTY_INT:
+                    if _ids_data.ids_properties.homogeneous_time != imas.ids_defs.EMPTY_INT:
                         wallview = WallView(_ids_data)
                         wallview.view_wall(
                             ax_polview,
@@ -219,10 +221,10 @@ if __name__ == "__main__":
 
                     if args.dd_update:
                         _ids_data = connection.get("pf_active", autoconvert=False)
-                        _ids_data = convert_ids(_ids_data, connection.factory.version)
+                        _ids_data = imas.convert_ids(_ids_data, connection.factory.version)
                     else:
                         _ids_data = connection.get("pf_active", lazy=True, autoconvert=False)
-                    if _ids_data.ids_properties.homogeneous_time != EMPTY_INT:
+                    if _ids_data.ids_properties.homogeneous_time != imas.ids_defs.EMPTY_INT:
                         view_pf_coils = PFActiveView(_ids_data)
                         view_pf_coils.view_active_pf_coils(ax_polview)
                     else:

@@ -9,7 +9,10 @@ import functools
 import logging
 from typing import Union
 
-import imas
+try:
+    import imaspy as imas
+except ImportError:
+    import imas
 import numpy as np
 
 from idstools.database import DBMaster
@@ -162,12 +165,12 @@ class EquilibriumCompute:
         Examples:
             .. code-block:: python
 
-                import imas
-                connection = imas.DBEntry("imas:mdsplus?user=public;pulse=134173;run=106;database=ITER;version=3", "r")
-                idsObj = connection.get('equilibrium')
-                computeObj = EquilibriumCompute(idsObj)
-                indices = idsobj.get_b_total(time_slice=0)
-                (0, array([[10.99503929
+            import imas
+            connection = imas.DBEntry("imas:mdsplus?user=public;pulse=134173;run=106;database=ITER;version=3", "r")
+            idsObj = connection.get('equilibrium')
+            computeObj = EquilibriumCompute(idsObj)
+            indices = idsobj.get_b_total(time_slice=0)
+            (0, array([[10.99503929
 
         Notes:
 

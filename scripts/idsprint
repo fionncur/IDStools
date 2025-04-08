@@ -5,12 +5,12 @@ import logging
 import os
 import sys
 
-import imas
+try:
+    import imaspy as imas
+except ImportError:
+    import imas
 import numpy as np
 import rich
-from imas.ids_primitive import IDSNumericArray, IDSPrimitive
-from imas.ids_struct_array import IDSStructArray
-from imas.ids_structure import IDSStructure
 from rich.columns import Columns
 from rich.console import Console
 from rich.pretty import Pretty
@@ -33,17 +33,17 @@ logger = setup_logger("module", stdout_level=logging.INFO)
 
 
 def view_plot(ax, field, coordinate, field_name="", coordinate_name="", field_unit="", coordinate_unit=""):
-    if not isinstance(field, (IDSNumericArray, np.ndarray)):
+    if not isinstance(field, (imas.ids_primitive.IDSNumericArray, np.ndarray)):
         logger.error("Not a numeric array, Please select ids path")
         return
     data = field
     yfield_name = field_name
-    if isinstance(coordinate, IDSNumericArray):
-        if isinstance(coordinate, IDSPrimitive):
+    if isinstance(coordinate, imas.ids_primitive.IDSNumericArray):
+        if isinstance(coordinate, imas.ids_primitive.IDSPrimitive):
             coordinate_unit = f"{coordinate.metadata.name} ({coordinate.metadata.units})"
             coordinate_name = coordinate.metadata.path
 
-    if isinstance(field, IDSNumericArray):
+    if isinstance(field, imas.ids_primitive.IDSNumericArray):
         if not field.has_value:
             logger.error("Values are not present")
             return
@@ -52,17 +52,17 @@ def view_plot(ax, field, coordinate, field_name="", coordinate_name="", field_un
         yfield_name = field.metadata.name
         if coordinate and coordinate.sdigit():
             _coordinate = field.coordinates[coordinate]
-            if isinstance(_coordinate, IDSPrimitive):
+            if isinstance(_coordinate, imas.ids_primitive.IDSPrimitive):
                 if _coordinate.has_value is True:
                     coordinate = _coordinate
         elif coordinate and isinstance(coordinate, str):
             _coordinate = eval("ids." + coordinate)
-            if isinstance(_coordinate, IDSPrimitive):
+            if isinstance(_coordinate, imas.ids_primitive.IDSPrimitive):
                 if _coordinate.has_value is True:
                     coordinate = _coordinate
         else:
             for _coordinate in field.coordinates:
-                if isinstance(_coordinate, IDSPrimitive):
+                if isinstance(_coordinate, imas.ids_primitive.IDSPrimitive):
                     if _coordinate.has_value is True:
                         coordinate_unit = f"{_coordinate.metadata.units}"
                         coordinate_name = _coordinate.metadata.name
@@ -74,7 +74,7 @@ def view_plot(ax, field, coordinate, field_name="", coordinate_name="", field_un
     if (
         coordinate is None
         or isinstance(coordinate, int)
-        or (isinstance(coordinate, IDSNumericArray) and coordinate.has_value is False)
+        or (isinstance(coordinate, imas.ids_primitive.IDSNumericArray) and coordinate.has_value is False)
     ):
         logger.error("Coordinates are empty, creating default array, you can also provide custom coordinates")
         coordinate = np.arange(len(data))
@@ -157,7 +157,7 @@ def _make_tree(structure, hide_empty_nodes, compact, *, tree=None):
                 group = Columns([txt])
             tree.add(group)
             return tree
-        elif isinstance(structure, IDSNumericArray):
+        elif isinstance(structure, imas.ids_primitive.IDSNumericArray):
             tree = Tree(f"[magenta]{type(structure)}")
             if structure.size == 0:
                 value = "[bright_black]"
@@ -178,7 +178,7 @@ def _make_tree(structure, hide_empty_nodes, compact, *, tree=None):
             tree = Tree(f"[magenta]{structure.metadata.name}")
 
     iterator = structure
-    if hide_empty_nodes and isinstance(structure, IDSStructure):
+    if hide_empty_nodes and isinstance(structure, imas.ids_structure.IDSStructure):
         iterator = structure.iter_nonempty_(accept_lazy=True)
 
     for counter, child in enumerate(iterator):
@@ -195,7 +195,7 @@ def _make_tree(structure, hide_empty_nodes, compact, *, tree=None):
                 txt = f"[bright_yellow]numpy.ndarray|{child.shape}|{child.dtype}|{counter}][/]"
                 group = Columns([txt])
             tree.add(group)
-        elif isinstance(child, IDSPrimitive):
+        elif isinstance(child, imas.ids_primitive.IDSPrimitive):
             if not child.has_value:
                 value = "[bright_black]"
                 txt = f"[grey62]{child.metadata.name}[/]"
@@ -209,11 +209,11 @@ def _make_tree(structure, hide_empty_nodes, compact, *, tree=None):
                 group = Columns([txt])
             tree.add(group)
         else:
-            if isinstance(child, IDSStructure):
+            if isinstance(child, imas.ids_structure.IDSStructure):
                 txt = f"[magenta]{child._path}[/]"
                 ntree = tree.add(txt)
                 _make_tree(child, hide_empty_nodes, compact, tree=ntree)
-            elif isinstance(child, IDSStructArray):
+            elif isinstance(child, imas.ids_struct_array.IDSStructArray):
                 ntree = tree
                 if not child.has_value:
                     tree.add(f"[magenta]{child._path}[][/]")
@@ -238,23 +238,23 @@ def _make_dict_tree(structure, hide_empty_nodes, compact, *, tree=None):
         tree = {}
 
     iterator = structure
-    if hide_empty_nodes and isinstance(structure, IDSStructure):
+    if hide_empty_nodes and isinstance(structure, imas.ids_structure.IDSStructure):
         iterator = structure.iter_nonempty_(accept_lazy=True)
 
     for counter, child in enumerate(iterator):
         if isinstance(child, (np.ndarray)):
             tree = child.tolist()
-        elif isinstance(child, IDSPrimitive):
+        elif isinstance(child, imas.ids_primitive.IDSPrimitive):
             data = child.value
             if isinstance(data, np.ndarray):
                 data = data.tolist()
             tree[child.metadata.name] = data
         else:
-            if isinstance(child, IDSStructure):
+            if isinstance(child, imas.ids_structure.IDSStructure):
                 ntree = {}
                 tree[child.metadata.name] = ntree
                 _make_dict_tree(child, hide_empty_nodes, compact, tree=ntree)
-            elif isinstance(child, IDSStructArray):
+            elif isinstance(child, imas.ids_struct_array.IDSStructArray):
                 nlist = []
                 tree[child.metadata.name] = nlist
                 for counter, ids_structure in enumerate(child):
@@ -476,7 +476,7 @@ if __name__ == "__main__":
             try:
                 node = eval("ids." + ids_path)
                 # reevaluate if struct or struct_array
-                if isinstance(node, (IDSStructure, IDSStructArray)):
+                if isinstance(node, (imas.ids_structure.IDSStructure, imas.ids_struct_array.IDSStructArray)):
                     ids = connection.get(ids_name, occurrence, autoconvert=False)
                     node = eval("ids." + ids_path)
             except Exception as e:
@@ -526,14 +526,14 @@ if __name__ == "__main__":
             else:
                 logger.error(f"Please provide valid export type")
         elif args.plot:
-            if isinstance(node, (IDSStructure, IDSStructArray)):
+            if isinstance(node, (imas.ids_structure.IDSStructure, imas.ids_struct_array.IDSStructArray)):
                 logger.error("Can not plot data, fragment is structure. inspect data with -i option")
                 exit(0)
             if len(node) == 0:
                 logger.error("Can not plot data, no values present in the array. inspect data with -i option")
                 exit(0)
 
-            if isinstance(node[0], (IDSStructure, IDSStructArray)):
+            if isinstance(node[0], (imas.ids_structure.IDSStructure, imas.ids_struct_array.IDSStructArray)):
                 logger.error("Can not plot data, fragment values are structures. inspect data with -i option")
                 exit(0)
 

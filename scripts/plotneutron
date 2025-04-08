@@ -6,8 +6,11 @@ import argparse
 import logging
 import os
 
-from imas import convert_ids
-from imas.ids_factory import IDSFactory
+try:
+    import imaspy as imas
+
+except ImportError:
+    import imas
 from rich_argparse import RichHelpFormatter
 
 from idstools.compute.common import get_nearest_time
@@ -63,7 +66,7 @@ if __name__ == "__main__":
 
         if args.dd_update:
             ids_distribution_sources = connection.get("distribution_sources", autoconvert=False)
-            ids_distribution_sources = convert_ids(ids_distribution_sources, connection.factory.version)
+            ids_distribution_sources = imas.convert_ids(ids_distribution_sources, connection.factory.version)
         else:
             ids_distribution_sources = connection.get("distribution_sources", lazy=True, autoconvert=False)
     except Exception as e:

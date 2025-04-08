@@ -3,7 +3,10 @@ import os
 import re
 import socket
 
-import imas
+try:
+    import imaspy as imas
+except ImportError:
+    import imas
 
 # default parent parser for all idstools scripts
 uri_parser = argparse.ArgumentParser(add_help=False)
@@ -61,7 +64,7 @@ dbentry_parser.add_argument(
 def get_backend_id(name):
     """
     The function `get_backend_id` returns the value of the attribute from the module
-    `imasdef`.
+    `ids_defs`.
 
     Args:
         name: The `name` parameter is a string representing the name of a backend system in the code.
@@ -69,7 +72,7 @@ def get_backend_id(name):
     Returns:
         The code snippet is defining a function called `get_backend_id` that takes a parameter `name`.
     Inside the function, it uses the `getattr` function to dynamically access an attribute from the
-    module `imasdef` based on the value of `name` with the suffix "_BACKEND". The value of this
+    module `ids_defs` based on the value of `name` with the suffix "_BACKEND". The value of this
     attribute is then returned by the function.
     """
     return getattr(imas.ids_defs, f"{name}_BACKEND")
@@ -77,7 +80,7 @@ def get_backend_id(name):
 
 def get_slice_mode(name):
     """
-    The function `get_slice_mode` returns the interpolation mode for a given name from the `imasdef`
+    The function `get_slice_mode` returns the interpolation mode for a given name from the `ids_defs`
     module.
 
     Args:
@@ -86,7 +89,7 @@ def get_slice_mode(name):
 
     Returns:
         The `get_slice_mode` function is returning the value of the attribute with the name
-    `{name}_INTERP` from the `imasdef` module.
+    `{name}_INTERP` from the `ids_defs` module.
     """
     return getattr(imas.ids_defs, f"{name}_INTERP")
 

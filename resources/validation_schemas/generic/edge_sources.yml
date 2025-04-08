@@ -55,11 +55,11 @@ edge_sources:
 
     # IMAS-3393
     grid_ggd(itime)/space(i1)/identifier/index:
-        ids_gt: imas.imasdef.EMPTY_INT
+        ids_gt: imas.ids_defs.EMPTY_INT
     grid_ggd(itime)/space(i1)/geometry_type/index:
-        ids_gt: imas.imasdef.EMPTY_INT
+        ids_gt: imas.ids_defs.EMPTY_INT
     grid_ggd(itime)/space(i1)/coordinates_types:
-        ids_gt: imas.imasdef.EMPTY_INT
+        ids_gt: imas.ids_defs.EMPTY_INT
         ids_bool: len(edge_sources.grid_ggd[_itime_].space)==len(edge_sources.grid_ggd[_itime_].space[_i1_].coordinate_type)
     grid_ggd(itime)/space(i1)/objects_per_dimension(i2)/geometry_content/index:
-        ids_gt: imas.imasdef.EMPTY_INT
+        ids_gt: imas.ids_defs.EMPTY_INT

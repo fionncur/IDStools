@@ -17,7 +17,11 @@ import argparse
 import logging
 
 import numpy as np
-from imas import convert_ids
+
+try:
+    import imaspy as imas
+except ImportError:
+    import imas
 from rich_argparse import RichHelpFormatter
 
 from idstools.compute.common import get_nearest_time
@@ -71,7 +75,7 @@ if __name__ == "__main__":
 
         if args.dd_update:
             core_profiles_ids = connection.get("core_profiles", autoconvert=False)
-            core_profiles_ids = convert_ids(core_profiles_ids, connection.factory.version)
+            core_profiles_ids = imas.convert_ids(core_profiles_ids, connection.factory.version)
         else:
             core_profiles_ids = connection.get("core_profiles", lazy=True, autoconvert=False)
 
@@ -99,7 +103,7 @@ if __name__ == "__main__":
 
         if args.dd_update:
             edge_profiles_ids = connection.get("edge_profiles", autoconvert=False)
-            edge_profiles_ids = convert_ids(edge_profiles_ids, connection.factory.version)
+            edge_profiles_ids = imas.convert_ids(edge_profiles_ids, connection.factory.version)
         else:
             edge_profiles_ids = connection.get("edge_profiles", lazy=True, autoconvert=False)
         if time_slice_core_profiles is None:
@@ -154,7 +158,7 @@ if __name__ == "__main__":
 
                 if args.dd_update:
                     equilibrium_ids = connection.get("equilibrium", autoconvert=False)
-                    equilibrium_ids = convert_ids(equilibrium_ids, connection.factory.version)
+                    equilibrium_ids = imas.convert_ids(equilibrium_ids, connection.factory.version)
                 else:
                     equilibrium_ids = connection.get("equilibrium", lazy=True, autoconvert=False)
                 volume = equilibrium_ids.time_slice({time_slice_core_profiles}).profiles_1d.volume
@@ -189,7 +193,7 @@ if __name__ == "__main__":
             )
             edge_profiles = connection.get("edge_profiles", autoconvert=False)
             if args.dd_update:
-                edge_profiles = convert_ids(edge_profiles, connection.factory.version)
+                edge_profiles = imas.convert_ids(edge_profiles, connection.factory.version)
             time_slices_count = len(edge_profiles.grid_ggd)
             index_list = []
             for counter in range(1, 10):

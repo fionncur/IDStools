@@ -8,7 +8,10 @@ This module provides view functions and classes for equilibrium ids data
 import copy
 import logging
 
-import imas
+try:
+    import imaspy as imas
+except ImportError:
+    import imas
 import matplotlib.pyplot as plt
 import numpy as np
 

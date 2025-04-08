@@ -122,7 +122,6 @@ class WavesCompute:
         Example:
             .. code-block:: python
 
-
                 import imas
                 from idstools.compute.waves import WavesCompute
 
@@ -152,7 +151,6 @@ class WavesCompute:
 
         Example:
             .. code-block:: python
-
 
                 import imas
                 from idstools.compute.waves import WavesCompute
@@ -211,7 +209,6 @@ class WavesCompute:
                 idsObj = connection.get('waves')
                 waveobj = WavesCompute(waves_ids)
                 print(waveobj.getBeamTracing())
-
         """
         # Count number of active beams and their number of rays
         beams_dict = self.get_beams(time_slice)

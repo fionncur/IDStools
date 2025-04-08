@@ -6,7 +6,10 @@ import argparse
 import logging
 import os
 
-from imas import convert_ids
+try:
+    import imaspy as imas
+except ImportError:
+    import imas
 from rich_argparse import RichHelpFormatter
 
 from idstools.compute.common import get_nearest_time
@@ -57,7 +60,7 @@ if __name__ == "__main__":
 
         if args.dd_update:
             ids_spectrometer_visible = connection.get("spectrometer_visible", autoconvert=False)
-            ids_spectrometer_visible = convert_ids(ids_spectrometer_visible, connection.factory.version)
+            ids_spectrometer_visible = imas.convert_ids(ids_spectrometer_visible, connection.factory.version)
         else:
             ids_spectrometer_visible = connection.get("spectrometer_visible", lazy=True, autoconvert=False)
     except Exception as e:

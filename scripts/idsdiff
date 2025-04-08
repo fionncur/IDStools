@@ -13,17 +13,11 @@ from io import BytesIO
 import matplotlib.pyplot as plt
 import numpy as np
 import rich
-from imas import ids_defs
-from imas.ids_base import IDSBase
-from imas.ids_primitive import (
-    IDSFloat0D,
-    IDSInt0D,
-    IDSNumericArray,
-    IDSPrimitive,
-    IDSString0D,
-)
-from imas.ids_struct_array import IDSStructArray
-from imas.ids_structure import IDSStructure
+
+try:
+    import imaspy as imas
+except ImportError:
+    import imas
 from rich.table import Table
 from rich.text import Text
 from rich_argparse import RichHelpFormatter
@@ -42,31 +36,31 @@ from idstools.utils.idslogger import setup_logger
 THRESHOLD_PERCENT = 2
 
 slicing_methods = {
-    "CLOSEST": ids_defs.CLOSEST_INTERP,
-    "PREVIOUS": ids_defs.PREVIOUS_INTERP,
-    "LINEAR": ids_defs.LINEAR_INTERP,
+    "CLOSEST": imas.ids_defs.CLOSEST_INTERP,
+    "PREVIOUS": imas.ids_defs.PREVIOUS_INTERP,
+    "LINEAR": imas.ids_defs.LINEAR_INTERP,
 }
 
 
 def view_plot(ax, field, coordinate, field_name="", coordinate_name="", field_unit="", coordinate_unit=""):
     from idstools.view.common import PlotCanvas
 
-    if not isinstance(field, (IDSNumericArray, np.ndarray)):
+    if not isinstance(field, (imas.ids_primitive.IDSNumericArray, np.ndarray)):
         print("Not a numeric array, Please select ids path")
         return
     data = field
-    if isinstance(coordinate, IDSNumericArray):
-        if isinstance(coordinate, IDSPrimitive):
+    if isinstance(coordinate, imas.ids_primitive.IDSNumericArray):
+        if isinstance(coordinate, imas.ids_primitive.IDSPrimitive):
             coordinate_unit = f"{coordinate.metadata.name} ({coordinate.metadata.units})"
             coordinate_name = coordinate.metadata.path
-    if isinstance(field, IDSNumericArray):
+    if isinstance(field, imas.ids_primitive.IDSNumericArray):
         if not field.has_value:
             print("Values are not present")
             return
         data - field.value
         field_unit = field.metadata.units
         coordinate = field.coordinates[coordinate]
-        if isinstance(coordinate, IDSPrimitive):
+        if isinstance(coordinate, imas.ids_primitive.IDSPrimitive):
             coordinate_unit = f"{coordinate.metadata.name} ({coordinate.metadata.units})"
             coordinate_name = coordinate.metadata.path
         field_name = f"{field_name} (coordinate:{coordinate_name})"
@@ -215,7 +209,11 @@ def generate_html(file_path, compare_data):
             badge_color = "bg-primary"
             status_message = "different values"
 
-            if args.plot and isinstance(first, IDSNumericArray) and isinstance(second, IDSNumericArray):
+            if (
+                args.plot
+                and isinstance(first, imas.ids_primitive.IDSNumericArray)
+                and isinstance(second, imas.ids_primitive.IDSNumericArray)
+            ):
 
                 if len(first.shape) == 1 and len(second.shape) == 1:
                     if len(first.value) != len(second.value):
@@ -408,7 +406,9 @@ data-bs-target="#plot{plot_counter}">See details</button>
 </tr>"""
                         plot_counter = plot_counter + 1
 
-            elif isinstance(first, IDSStructArray) or isinstance(second, IDSStructArray):
+            elif isinstance(first, imas.ids_struct_array.IDSStructArray) or isinstance(
+                second, imas.ids_struct_array.IDSStructArray
+            ):
                 status_message = "different length"
                 badge_color = "bg-warning"
                 str1 = f"List length : {0 if first is None else len(first)}"
@@ -649,7 +649,9 @@ if __name__ == "__main__":
                         pass
                     else:
                         compare_data = {}
-                        if isinstance(node_a, IDSStructure) and isinstance(node_b, IDSStructure):
+                        if isinstance(node_a, imas.ids_structure.IDSStructure) and isinstance(
+                            node_b, imas.ids_structure.IDSStructure
+                        ):
                             if args.fullarray:
                                 compare_result, diff_result, _ = idsdiff_full(
                                     node_a,
@@ -680,7 +682,9 @@ if __name__ == "__main__":
                                 )
                             ] = compare_data
                         else:
-                            if not isinstance(node_a, IDSBase) and not isinstance(node_b, IDSBase):
+                            if not isinstance(node_a, imas.ids_base.IDSBase) and not isinstance(
+                                node_b, imas.ids_base.IDSBase
+                            ):
                                 txt1 = f"{node_a}"
                                 txt2 = f"{node_b}"
                             else:

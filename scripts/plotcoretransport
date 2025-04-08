@@ -13,7 +13,10 @@ import logging
 import os
 import sys
 
-from imas import convert_ids, ids_defs
+try:
+    import imaspy as imas
+except ImportError:
+    import imas
 from rich_argparse import RichHelpFormatter
 
 from idstools.database import DBMaster
@@ -30,9 +33,9 @@ from idstools.view.core_transport import CoreTransportView
 logger = setup_logger("module", stdout_level=logging.INFO)
 
 slicing_methods = {
-    "CLOSEST": ids_defs.CLOSEST_INTERP,
-    "PREVIOUS": ids_defs.PREVIOUS_INTERP,
-    "LINEAR": ids_defs.LINEAR_INTERP,
+    "CLOSEST": imas.ids_defs.CLOSEST_INTERP,
+    "PREVIOUS": imas.ids_defs.PREVIOUS_INTERP,
+    "LINEAR": imas.ids_defs.LINEAR_INTERP,
 }
 if __name__ == "__main__":
     # Management of input arguments
@@ -82,7 +85,7 @@ if __name__ == "__main__":
         occurrence=args.occurrence,
     )
     if args.dd_update:
-        ids_slice_core_transport = convert_ids(ids_slice_core_transport, connection.factory.version)
+        ids_slice_core_transport = imas.convert_ids(ids_slice_core_transport, connection.factory.version)
     if len(ids_slice_core_transport.time) == 0:
         logger.critical("IDS:core_transport Time vector is empty! aborting")
         sys.exit(1)
@@ -95,7 +98,7 @@ if __name__ == "__main__":
         occurrence=args.occurrence,
     )
     if args.dd_update:
-        ids_slice_core_profiles = convert_ids(ids_slice_core_profiles, connection.factory.version)
+        ids_slice_core_profiles = imas.convert_ids(ids_slice_core_profiles, connection.factory.version)
     if len(ids_slice_core_profiles.time) == 0:
         logger.critical("IDS:core_profiles Time vector is empty! aborting")
         sys.exit(1)
@@ -108,7 +111,7 @@ if __name__ == "__main__":
         occurrence=args.occurrence,
     )
     if args.dd_update:
-        ids_slice_equilibrium = convert_ids(ids_slice_equilibrium, connection.factory.version)
+        ids_slice_equilibrium = imas.convert_ids(ids_slice_equilibrium, connection.factory.version)
     if len(ids_slice_equilibrium.time) == 0:
         logger.critical("IDS:equilibrium Time vector is empty! aborting")
         sys.exit(1)

@@ -5,7 +5,10 @@ import os
 from pprint import pformat
 from statistics import median
 
-import imas
+try:
+    import imaspy as imas
+except ImportError:
+    import imas
 import numpy as np
 from fortranformat import FortranRecordReader
 
@@ -455,7 +458,7 @@ def geqdsk2ids(fpath, ipsign=0, b0sign=0, cocos_in=None):
 
     # Map GEQDSK to IDS/equilibrium
     logger.info("mapping GEQDSK to IDS/equilibrium ...")
-    eq = imas.IDSFactory().equilibrium()
+    eq = imas.ids_factory.IDSFactory().equilibrium()
     map__GEQDSK_to_ids(geqdsk, eq)
 
     # COCOS Check

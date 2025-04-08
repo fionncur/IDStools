@@ -4,7 +4,10 @@ import argparse
 import logging
 import os
 
-from imas import convert_ids
+try:
+    import imaspy as imas
+except ImportError:
+    import imas
 from rich_argparse import RichHelpFormatter
 
 from idstools.compute.common import get_nearest_time
@@ -74,7 +77,7 @@ if __name__ == "__main__":
 
         if args.dd_update:
             ids_waves = conn.get("waves", autoconvert=False)
-            core_sources = convert_ids(ids_waves, conn.factory.version)
+            core_sources = imas.convert_ids(ids_waves, conn.factory.version)
         else:
             ids_waves = conn.get("waves", lazy=True, autoconvert=False)
     except Exception as e:
