@@ -146,8 +146,8 @@ if __name__ == "__main__":
 
     try:
         dataset_description = connection.get("dataset_description", lazy=True, autoconvert=False)
-        comment = str.replace(dataset_description.ids_properties.comment, "\n", "\n   ")
-        dd_version = dataset_description.dd_version
+        comment = str.replace(dataset_description.ids_properties.comment.value, "\n", "\n   ")
+        dd_version = dataset_description.ids_properties.version_put.data_dictionary
         workflow = dataset_description.simulation.workflow
     except Exception as e:
         print("----> dataset_description does not exist", file=sys.stderr)
