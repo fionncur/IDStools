@@ -10,7 +10,11 @@ from sys import exit
 from xml.etree import ElementTree as ET
 
 import cerberus
-import imaspy as imas
+
+try:
+    import imaspy as imas
+except ImportError:
+    import imas
 import numpy as np
 import yaml
 

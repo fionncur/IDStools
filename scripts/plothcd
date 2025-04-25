@@ -4,7 +4,10 @@ import logging
 import os
 from collections import OrderedDict
 
-from imaspy import convert_ids
+try:
+    import imaspy as imas
+except ImportError:
+    import imas
 from rich_argparse import RichHelpFormatter
 
 from idstools.compute.common import get_nearest_time
@@ -28,7 +31,7 @@ def _show_waves_plots(connargs, args, hold=False, dd_update=False):
     ids_waves = None
     try:
         if dd_update:
-            ids_waves = convert_ids(conn.get("waves", autoconvert=False), conn.factory.version)
+            ids_waves = imas.convert_ids(conn.get("waves", autoconvert=False), conn.factory.version)
         else:
             ids_waves = conn.get("waves", lazy=True, autoconvert=False)
 
@@ -144,7 +147,7 @@ def _show_distribution_plots(connargs, args, hold=False, dd_update=False):
     ids_distributions = None
     try:
         if dd_update:
-            ids_distributions = convert_ids(conn.get("distributions", autoconvert=False), conn.factory.version)
+            ids_distributions = imas.convert_ids(conn.get("distributions", autoconvert=False), conn.factory.version)
         else:
             ids_distributions = conn.get("distributions", lazy=True, autoconvert=False)
 

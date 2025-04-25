@@ -7,7 +7,10 @@ import argparse
 import logging
 import sys
 
-from imaspy import convert_ids, ids_defs
+try:
+    import imaspy as imas
+except ImportError:
+    import imas
 from rich_argparse import RichHelpFormatter
 
 from idstools.database import DBMaster
@@ -18,9 +21,9 @@ from idstools.view.core_sources import CoreSourcesView
 logger = setup_logger("module", stdout_level=logging.INFO)
 
 slicing_methods = {
-    "CLOSEST": ids_defs.CLOSEST_INTERP,
-    "PREVIOUS": ids_defs.PREVIOUS_INTERP,
-    "LINEAR": ids_defs.LINEAR_INTERP,
+    "CLOSEST": imas.ids_defs.CLOSEST_INTERP,
+    "PREVIOUS": imas.ids_defs.PREVIOUS_INTERP,
+    "LINEAR": imas.ids_defs.LINEAR_INTERP,
 }
 if __name__ == "__main__":
     # Management of input arguments
@@ -58,7 +61,7 @@ if __name__ == "__main__":
         autoconvert=False,
     )
     if args.dd_update:
-        ids_slice_core_sources = convert_ids(ids_slice_core_sources, connection.factory.version)
+        ids_slice_core_sources = imas.convert_ids(ids_slice_core_sources, connection.factory.version)
     if len(ids_slice_core_sources.time) == 0:
         logger.critical("Time vector is empty! aborting")
         sys.exit(1)

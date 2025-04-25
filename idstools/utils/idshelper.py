@@ -11,17 +11,14 @@ import sys
 import time
 import types
 
-import imaspy as imas
 import numpy as np
 import pandas as pd
 import rich
-from imaspy.ids_base import IDSBase
-from imaspy.ids_primitive import (
-    IDSPrimitive,
-)
-from imaspy.ids_struct_array import IDSStructArray
-from imaspy.ids_structure import IDSStructure
-from imaspy.ids_toplevel import IDSToplevel
+
+try:
+    import imaspy as imas
+except ImportError:
+    import imas
 from packaging import version
 from rich.table import Table
 from rich.text import Text
@@ -82,9 +79,11 @@ def get_length_of_partial_field(ids, ids_path):
         _inner_data = eval("ids." + partial_field)
         coordinate_partial = None
         coordinate_unit = ""
-        if isinstance(_inner_data, IDSPrimitive) or isinstance(_inner_data, IDSStructArray):
+        if isinstance(_inner_data, imas.ids_primitive.IDSPrimitive) or isinstance(
+            _inner_data, imas.ids_struct_array.IDSStructArray
+        ):
             coordinate_partial = _inner_data.coordinates[0]
-            if isinstance(coordinate_partial, IDSPrimitive):
+            if isinstance(coordinate_partial, imas.ids_primitive.IDSPrimitive):
                 coordinate_unit = coordinate_partial.metadata.units
         return coordinate_partial, coordinate_unit
     except Exception as e:
@@ -117,21 +116,21 @@ def partial_get(ids, ids_path, custom_coordinate=None):
             _inner_data = eval("ids." + ids_path_for_eval)
             if data_flag:
                 data_flag = False
-                if isinstance(_inner_data, IDSPrimitive):
+                if isinstance(_inner_data, imas.ids_primitive.IDSPrimitive):
                     data_unit = _inner_data.metadata.units
                     if custom_coordinate and custom_coordinate.sdigit():
                         _coordinate = _inner_data.coordinates[custom_coordinate]
-                        if isinstance(_coordinate, IDSPrimitive):
+                        if isinstance(_coordinate, imas.ids_primitive.IDSPrimitive):
                             if _coordinate.has_value is True:
                                 coordinate = _coordinate
                     elif custom_coordinate and isinstance(custom_coordinate, str):
                         _coordinate = eval("ids." + custom_coordinate)
-                        if isinstance(_coordinate, IDSPrimitive):
+                        if isinstance(_coordinate, imas.ids_primitive.IDSPrimitive):
                             if _coordinate.has_value is True:
                                 coordinate = _coordinate
                     else:
                         for _coordinate in _inner_data.coordinates:
-                            if isinstance(_coordinate, IDSPrimitive):
+                            if isinstance(_coordinate, imas.ids_primitive.IDSPrimitive):
                                 if _coordinate.has_value is True:
                                     coordinate_unit = _coordinate.metadata.units
                                     coordinate = _coordinate
@@ -216,7 +215,7 @@ def get_ids_size(db_entry_object, ids_names=None, dd_update=False, ignore_empty=
     """
 
     if ids_names is None:
-        factory = imas.IDSFactory()
+        factory = imas.ids_factory.IDSFactory()
         ids_names = factory.ids_names()
     ids_size_dict = {}
     for ids_name in ids_names:
@@ -332,7 +331,7 @@ def get_ids_types():
         The function `get_ids_types()` is returning a list of values of all the `value` attributes of the `IDSName`
         objects in the `imas` module.
     """
-    factory = imas.IDSFactory()
+    factory = imas.ids_factory.IDSFactory()
     return factory.ids_names()
 
 
@@ -834,17 +833,22 @@ def get_quantities_from_pulses(
 
 
 def idsdiff_full(
-    struct1: IDSStructure, struct2: IDSStructure, name1="", name2="", print_result=False, ignore_version=False
+    struct1: imas.ids_structure.IDSStructure,
+    struct2: imas.ids_structure.IDSStructure,
+    name1="",
+    name2="",
+    print_result=False,
+    ignore_version=False,
 ):
     diff_result = []
     compare_result = False
     table_title = Text()
-    if isinstance(struct1, IDSToplevel) and isinstance(struct1, IDSToplevel):
+    if isinstance(struct1, imas.ids_toplevel.IDSStructure) and isinstance(struct1, imas.ids_toplevel.IDSStructure):
         table_title.append("First: ", style="bold blue")
         table_title.append(f"{name1} ({struct1.metadata.name}) -\n", style="blue")
         table_title.append("Second: ", style="bold magenta")
         table_title.append(f"{name2} ({struct2.metadata.name})", style="magenta")
-    elif isinstance(struct1, IDSStructure) and isinstance(struct1, IDSStructure):
+    elif isinstance(struct1, imas.ids_structure.IDSStructure) and isinstance(struct1, imas.ids_structure.IDSStructure):
         table_title.append("First: ", style="bold blue")
         table_title.append(f"{name1} ({struct1._path}) -\n", style="blue")
         table_title.append("Second: ", style="bold magenta")
@@ -858,7 +862,7 @@ def idsdiff_full(
         if "_path" in dir(child1):
             if ignore_version is True and "version_put" in child1._path:
                 continue
-        if not isinstance(child1, IDSBase) and not isinstance(child2, IDSBase):
+        if not isinstance(child1, imas.ids_base.IDSBase) and not isinstance(child2, imas.ids_base.IDSBase):
             txt1 = f"{description}: {child1}"
             txt2 = f"{description}: {child2}"
         else:
@@ -898,8 +902,8 @@ def idsdiff_full(
 
 
 def idsdiff(
-    struct1: IDSStructure,
-    struct2: IDSStructure,
+    struct1: imas.ids_structure.IDSStructure,
+    struct2: imas.ids_structure.IDSStructure,
     name1="",
     name2="",
     print_result=False,
@@ -910,12 +914,12 @@ def idsdiff(
     compare_result = False
     table_title = Text()
 
-    if isinstance(struct1, IDSToplevel) and isinstance(struct2, IDSToplevel):
+    if isinstance(struct1, imas.ids_toplevel.IDSStructure) and isinstance(struct2, imas.ids_toplevel.IDSStructure):
         table_title.append("First: ", style="bold blue")
         table_title.append(f"{name1} ({struct1.metadata.name}) -\n", style="blue")
         table_title.append("Second: ", style="bold magenta")
         table_title.append(f"{name2} ({struct2.metadata.name})", style="magenta")
-    elif isinstance(struct1, IDSStructure) and isinstance(struct2, IDSStructure):
+    elif isinstance(struct1, imas.ids_structure.IDSStructure) and isinstance(struct2, imas.ids_structure.IDSStructure):
         table_title.append("First: ", style="bold blue")
         table_title.append(f"{name1} ({struct1._path}) -\n", style="blue")
         table_title.append("Second: ", style="bold magenta")
@@ -939,7 +943,7 @@ def idsdiff(
             information = Text("missing in first", style="red")
         if child2 is None:
             information = Text("missing in second", style="yellow")
-        if isinstance(child1, IDSStructArray):
+        if isinstance(child1, imas.ids_struct_array.IDSStructArray):
             data_type1 = "STRUCT_ARRAY"
             information = Text("different length", style="magenta")
         else:
@@ -951,7 +955,7 @@ def idsdiff(
                 else:
                     data_type1 = type(child1).__name__.upper()
 
-        if isinstance(child2, IDSStructArray):
+        if isinstance(child2, imas.ids_struct_array.IDSStructArray):
             data_type2 = "STRUCT_ARRAY"
             information = Text("different length", style="magenta")
         else:
@@ -990,7 +994,7 @@ def idsdiff(
         elif type(value2) is list:
             value2 = str(len(value2)) + " items"
         if verbose:
-            if not isinstance(child1, IDSBase) and not isinstance(child2, IDSBase):
+            if not isinstance(child1, imas.ids_base.IDSBase) and not isinstance(child2, imas.ids_base.IDSBase):
                 txt1 = f"{description}: {child1}"
                 txt2 = f"{description}: {child2}"
             else:

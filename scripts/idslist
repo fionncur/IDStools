@@ -6,7 +6,11 @@ import argparse
 import sys
 
 import numpy as np
-from imaspy import convert_ids
+
+try:
+    import imaspy as imas
+except ImportError:
+    import imas
 from rich.console import Console
 from rich.markdown import Markdown
 from rich.pretty import Pretty
@@ -82,7 +86,7 @@ if __name__ == "__main__":
 
             if args.dd_update:
                 ids = connection.get(idsname, occurrence=oc, autoconvert=False, ignore_unknown_dd_version=True)
-                ids = convert_ids(ids, connection.factory.version)
+                ids = imas.convert_ids(ids, connection.factory.version)
             else:
                 ids = connection.get(
                     idsname, occurrence=oc, lazy=True, autoconvert=False, ignore_unknown_dd_version=True

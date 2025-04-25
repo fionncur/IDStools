@@ -51,7 +51,7 @@ getIMASPythonModuleName() {
         DD_VERSION="$3"
     fi
     #Semantic versioning
-    IMASVERSIONSLIST=$(module -t avail IMAS-AL-Python/ 2>&1 | grep -E "^IMAS-AL-Python/$ACCESS_LAYER_VERSION\.[0-9]+\.[0-9]+-$TOOLCHAIN_VERSION-DD-$DD_VERSION\.[0-9]+\.[0-9]+")
+    IMASVERSIONSLIST=$(module -t avail IMAS-Python/ 2>&1 | grep -E "^IMAS-Python/$ACCESS_LAYER_VERSION\.[0-9]+\.[0-9]+-$TOOLCHAIN_VERSION-DD-$DD_VERSION\.[0-9]+\.[0-9]+")
     
     if [[ $TOOLCHAIN_VERSION == *"intel"* ]]; then
         IMAS_MODULE_VERSION=$(echo "$IMASVERSIONSLIST" | grep "intel" | sort -rV | head -n 1)

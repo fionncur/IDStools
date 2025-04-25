@@ -8,7 +8,10 @@ import sys
 from os import getenv, system
 from sys import exit
 
-import imaspy as imas
+try:
+    import imaspy as imas
+except ImportError:
+    import imas
 import numpy as np
 from rich_argparse import RawDescriptionRichHelpFormatter
 
@@ -107,8 +110,8 @@ if __name__ == "__main__":
 
     try:
         dataset_description = connection.get("dataset_description", lazy=True)
-        comment = str.replace(dataset_description.ids_properties.comment, "\n", "\n   ")
-        dd_version = dataset_description.dd_version
+        comment = str.replace(dataset_description.ids_properties.comment.value, "\n", "\n   ")
+        dd_version = dataset_description.ids_properties.version_put.data_dictionary
     except Exception as e:
         print("----> dataset_description does not exist", file=sys.stderr)
         comment = ""

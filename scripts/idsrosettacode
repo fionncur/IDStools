@@ -5,7 +5,10 @@ import math
 import os
 import sys
 
-import imaspy as imas
+try:
+    import imaspy as imas
+except ImportError:
+    import imas
 import numpy as np
 import pandas as pd
 import requests
@@ -200,7 +203,7 @@ if __name__ == "__main__":
         de.create()
 
         iod = {}
-        factory = imas.IDSFactory()
+        factory = imas.ids_factory.IDSFactory()
         for ids in get_ids_types():
             iod[ids] = factory.new(ids)
         for var in mf.loc[:, args.varcol]:

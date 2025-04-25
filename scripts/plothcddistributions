@@ -4,7 +4,10 @@ import argparse
 import logging
 import os
 
-from imaspy import convert_ids
+try:
+    import imaspy as imas
+except ImportError:
+    import imas
 from rich_argparse import RichHelpFormatter
 
 from idstools.compute.common import get_nearest_time
@@ -33,7 +36,7 @@ def show_plots(args):
 
         if args.dd_update:
             ids_distributions = conn.get("distributions", autoconvert=False)
-            ids_distributions = convert_ids(ids_distributions, conn.factory.version)
+            ids_distributions = imas.convert_ids(ids_distributions, conn.factory.version)
         else:
             ids_distributions = conn.get("distributions", lazy=True, autoconvert=False)
     except Exception as e:

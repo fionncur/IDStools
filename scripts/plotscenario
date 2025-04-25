@@ -5,8 +5,11 @@ import json
 import logging
 import os
 
-from imaspy import convert_ids
-from imaspy.ids_defs import EMPTY_INT
+try:
+    import imaspy as imas
+
+except ImportError:
+    import imas
 from rich_argparse import RichHelpFormatter
 
 from idstools.compute.common import get_nearest_time
@@ -76,7 +79,7 @@ if __name__ == "__main__":
                 try:
                     if args.dd_update:
                         ids_core_profiles = connection.get("core_profiles", occurrence=occ, autoconvert=False)
-                        ids_core_profiles = convert_ids(ids_core_profiles, connection.factory.version)
+                        ids_core_profiles = imas.convert_ids(ids_core_profiles, connection.factory.version)
                     else:
                         ids_core_profiles = connection.get(
                             "core_profiles", occurrence=occ, lazy=True, autoconvert=False
@@ -98,7 +101,7 @@ if __name__ == "__main__":
                 try:
                     if args.dd_update:
                         ids_equilibrium = connection.get("equilibrium", occurrence=occ, autoconvert=False)
-                        ids_equilibrium = convert_ids(ids_equilibrium, connection.factory.version)
+                        ids_equilibrium = imas.convert_ids(ids_equilibrium, connection.factory.version)
                     else:
                         ids_equilibrium = connection.get("equilibrium", occurrence=occ, lazy=True, autoconvert=False)
                     break
@@ -121,7 +124,7 @@ if __name__ == "__main__":
             try:
                 if args.dd_update:
                     ids_summary = connection.get("summary", occurrence=occ, autoconvert=False)
-                    ids_summary = convert_ids(ids_summary, connection.factory.version)
+                    ids_summary = imas.convert_ids(ids_summary, connection.factory.version)
                 else:
                     ids_summary = connection.get("summary", occurrence=occ, lazy=True, autoconvert=False)
                 break
@@ -204,8 +207,8 @@ if __name__ == "__main__":
         try:
             dataset_description = connection.get("dataset_description", autoconvert=False)
             if args.dd_update:
-                dataset_description = convert_ids(dataset_description, connection.factory.version)
-            if dataset_description.ids_properties.homogeneous_time == EMPTY_INT:
+                dataset_description = imas.convert_ids(dataset_description, connection.factory.version)
+            if dataset_description.ids_properties.homogeneous_time == imas.ids_defs.EMPTY_INT:
                 got_dataset_description = False
             else:
                 got_dataset_description = True

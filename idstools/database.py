@@ -4,7 +4,10 @@ from datetime import datetime
 from glob import glob
 from pathlib import Path
 
-import imaspy as imas
+try:
+    import imaspy as imas
+except ImportError:
+    import imas
 import yaml
 
 logger = logging.getLogger(f"module.{__name__}")
@@ -680,7 +683,7 @@ class DBMaster:
 
     @classmethod
     def get_dd_version(cls):
-        factory = imas.IDSFactory()
+        factory = imas.ids_factory.IDSFactory()
         return factory.dd_version
 
     @classmethod

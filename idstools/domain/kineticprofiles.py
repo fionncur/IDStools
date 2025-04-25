@@ -1,8 +1,11 @@
 import logging
 
-import imaspy as imas
 import numpy as np
-from imaspy import convert_ids
+
+try:
+    import imaspy as imas
+except ImportError:
+    import imas
 
 from idstools.compute.common import get_nearest_time
 from idstools.compute.core_profiles import CoreProfilesCompute
@@ -176,7 +179,7 @@ class KineticProfilesCompute:
                 if idsname == ids_name:
                     try:
                         if dd_update:
-                            ids_object = convert_ids(
+                            ids_object = imas.convert_ids(
                                 self.connection.get(ids_name, occurrence=occ, autoconvert=False),
                                 self.connection.factory.version,
                             )

@@ -5,7 +5,10 @@ import sys
 import traceback
 from collections import defaultdict
 
-import imaspy as imas
+try:
+    import imaspy as imas
+except ImportError:
+    import imas
 from packaging import version
 from rich_argparse import RichHelpFormatter
 
@@ -71,7 +74,7 @@ if __name__ == "__main__":
         action="store_true",
         help=(
             f"Convert IDS to the default Data Dictionary version "
-            f"(={imas.IDSFactory().dd_version}, "
+            f"(={imas.ids_factory.IDSFactory().dd_version}, "
             f"otherwise use the original version stored on disk)"
         ),
     )

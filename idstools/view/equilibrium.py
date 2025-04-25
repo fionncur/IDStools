@@ -8,7 +8,10 @@ This module provides view functions and classes for equilibrium ids data
 import copy
 import logging
 
-import imaspy as imas
+try:
+    import imaspy as imas
+except ImportError:
+    import imas
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -49,7 +52,7 @@ class EquilibriumView(BasePlot):
         Example:
             .. code-block:: python
 
-                import imaspy as imas
+                import imas
                 from idstools.view.equilibrium import EquilibriumView
                 from idstools.view.common import PlotCanvas
 

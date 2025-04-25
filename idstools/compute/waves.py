@@ -57,7 +57,7 @@ class WavesCompute:
         Example:
             .. code-block:: python
 
-                import imaspy as imas
+                import imas
                 from idstools.compute.waves import WavesCompute
 
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3","r")
@@ -88,7 +88,7 @@ class WavesCompute:
         Example:
             .. code-block:: python
 
-                import imaspy as imas
+                import imas
                 from idstools.compute.waves import WavesCompute
 
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3","r")
@@ -122,8 +122,7 @@ class WavesCompute:
         Example:
             .. code-block:: python
 
-
-                import imaspy as imas
+                import imas
                 from idstools.compute.waves import WavesCompute
 
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3","r")
@@ -153,8 +152,7 @@ class WavesCompute:
         Example:
             .. code-block:: python
 
-
-                import imaspy as imas
+                import imas
                 from idstools.compute.waves import WavesCompute
 
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3","r")
@@ -204,14 +202,13 @@ class WavesCompute:
         Example:
             .. code-block:: python
 
-                import imaspy as imas
+                import imas
                 from idstools.compute.waves import WavesCompute
 
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3","r")
                 idsObj = connection.get('waves')
                 waveobj = WavesCompute(waves_ids)
                 print(waveobj.getBeamTracing())
-
         """
         # Count number of active beams and their number of rays
         beams_dict = self.get_beams(time_slice)
