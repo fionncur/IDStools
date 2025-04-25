@@ -28,16 +28,15 @@ class MachineDescription:
         if not summary_yaml_file:
             publichome = os.getenv("IMAS_HOME", default="")
 
-            _md_summary_path = os.path.join(publichome, r"shared/imasdb/ITER_MD/3/md_summary.yaml")
+            _md_summary_path = os.path.join(publichome, r"shared/dimasdb/ITER_MD/3/md_summary.yaml")
 
         else:
             _md_summary_path = summary_yaml_file
-
-        with open(_md_summary_path, "r") as stream:
-            try:
+        try:
+            with open(_md_summary_path, "r") as stream:
                 self.md_summary_yaml = safe_load(stream)
-            except YAMLError as exc:
-                print(exc)
+        except YAMLError as exc:
+            print(exc)
 
     def get_latest_ids_data(self, ids_name: str, backend="MDSPLUS", user="public", database="ITER_MD", version=3):
         md_ids_dict = self.get_md_summary(ids_name)

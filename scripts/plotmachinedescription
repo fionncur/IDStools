@@ -55,7 +55,6 @@ if __name__ == "__main__":
         default=None,
     )
     args = parser.parse_args()
-    machine_description = MachineDescription()
 
     ids_data = get_md_data(args.uri, args.dd_update)
 
