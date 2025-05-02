@@ -3,8 +3,14 @@ try:
 except ImportError:
     import imas
 
-from ._version import version as __version__  # noqa: F401
-from ._version import version_tuple  # noqa: F401
+
+try:
+    from ._version import version as __version__  # noqa: F401
+    from ._version import version_tuple  # noqa: F401
+except ImportError:
+    __version__ = "unknown"
+    version_tuple = (0, 0, 0)
+
 
 if not hasattr(imas, "ids_defs"):
     print(

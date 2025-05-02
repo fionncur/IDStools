@@ -76,6 +76,12 @@ if __name__ == "__main__":
         help="Slicing method \t(default=%(default)s)",
     )
     parser.add_argument(
+        "-f",
+        "--force",
+        action="store_true",
+        help="Force the creation of destination data-entry (existing data will be lost)",
+    )
+    parser.add_argument(
         "ids",
         nargs="*",
         type=str,
@@ -118,12 +124,29 @@ if __name__ == "__main__":
         sys.exit(1)
 
     outputargs = argparse.Namespace()
-    outputargs.mode = "w"
+    outputargs.mode = "a"
     outputargs.uri = args.dest
-    dest = DBMaster.create_connection(outputargs, target_dd_version=src_dd_version)
+    dest = None
+    if args.force:
+        # CREATE DEST
+        outputargs.mode = "w"
+        if outputargs.uri != "" and outputargs.uri is not None:
+            dest = imas.DBEntry(outputargs.uri, outputargs.mode, dd_version=src_dd_version)
+        if dest is None:
+            logger.error("Error creating destination pulse! Please check parameters and permissions.")
+            exit(1)
+    else:
+        if outputargs.uri != "" and outputargs.uri is not None:
+            dest = imas.DBEntry(outputargs.uri, outputargs.mode, dd_version=src_dd_version)
+
+        if dest is None:
+            logger.error("Error creating destination pulse! Please check parameters and permissions.")
+            exit(1)
+
     if dest is None:
         print("Error creating pulse! Please check existence.")
         sys.exit()
+
     for ids_name, occurrence in args.ids:
         idsobj = None
         try:
@@ -139,7 +162,7 @@ if __name__ == "__main__":
                         args.index_range = ",,"
                     time_range = args.index_range.split(",")
                     start = int(time_range[0]) if time_range[0] != "" else 0
-                    stop = int(time_range[1]) if time_range[1] != "" else None
+                    stop = int(time_range[1]) if time_range[1] != "" else len(idsobj.time)
                     step = int(time_range[2]) if time_range[2] != "" else 1
                     print(f"resampling indices :{ids_name} with {start}, {stop}, {step}")
                     if start == stop:
@@ -167,7 +190,7 @@ if __name__ == "__main__":
                             dd_update=args.dd_update,
                             interpolation_method=slicing_methods[args.slicingmethod],
                         )
-                    except Exception as e:
+                    except Exception as e:  # noqa: F841
                         print(f"Error resampling times for {ids_name} : {e}")
                         continue
             elif homogeneous_time == 0:
@@ -175,17 +198,21 @@ if __name__ == "__main__":
                     time_range = args.time_range.split(",")
                     if time_range[0] != "" and time_range[1] != "" and time_range[2] != "":
                         print(f"resampling times :{ids_name}")
-                        resample_times(
-                            src,
-                            tmp,
-                            ids_name,
-                            occurrence=0,
-                            start=time_range[0],
-                            stop=time_range[1],
-                            step=time_range[2],
-                            dd_update=args.dd_update,
-                            interpolation_method=args.interpolation_method,
-                        )
+                        try:
+                            resample_times(
+                                src,
+                                tmp,
+                                ids_name,
+                                occurrence=0,
+                                start=time_range[0],
+                                stop=time_range[1],
+                                step=time_range[2],
+                                dd_update=args.dd_update,
+                                interpolation_method=args.interpolation_method,
+                            )
+                        except Exception as e:
+                            print(f"Error resampling times for {ids_name} : {e}")
+                            continue
                     else:
                         print(
                             f"Skipping IDS {ids_name} because its homogeneous_time={homogeneous_time}",
@@ -203,3 +230,7 @@ if __name__ == "__main__":
                 continue
 
             dest.put(tmp.get(ids_name, autoconvert=False))
+    if dest:
+        dest.close()
+    if src:
+        src.close()

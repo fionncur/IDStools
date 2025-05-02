@@ -325,6 +325,8 @@ if __name__ == "__main__":
                         file=sys.stderr,
                     )
                 else:
+                    print("density lenth is not same")
+                    print("----> Aborted.", file=sys.stderr)
                     exit()
         except Exception as e:
             print(

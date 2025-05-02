@@ -84,8 +84,7 @@ class ScenarioDescriptionSummary:
             try:
                 yaml_data = yaml.load(file_handle, Loader=Loader)
             except Exception as e:
-                logger.debug(f"Error loading YAML file {e}", exc_info=True)
-                logger.warning(f"Could ot read yaml file: {yaml_file_path}")
+                logger.warning(f"Could not read yaml file: {yaml_file_path} {e}")
                 yaml_data = None
         return yaml_data
 
