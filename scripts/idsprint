@@ -40,9 +40,8 @@ def view_plot(ax, field, coordinate, field_name="", coordinate_name="", field_un
     yfield_name = field_name
     if isinstance(coordinate, imas.ids_primitive.IDSNumericArray):
         if isinstance(coordinate, imas.ids_primitive.IDSPrimitive):
-            coordinate_unit = f"{coordinate.metadata.name} ({coordinate.metadata.units})"
+            coordinate_unit = f"{coordinate.metadata.units}"
             coordinate_name = coordinate.metadata.path
-
     if isinstance(field, imas.ids_primitive.IDSNumericArray):
         if not field.has_value:
             logger.error("Values are not present")
@@ -52,6 +51,7 @@ def view_plot(ax, field, coordinate, field_name="", coordinate_name="", field_un
         yfield_name = field.metadata.name
         if coordinate and coordinate.sdigit():
             _coordinate = field.coordinates[coordinate]
+            
             if isinstance(_coordinate, imas.ids_primitive.IDSPrimitive):
                 if _coordinate.has_value is True:
                     coordinate = _coordinate
@@ -63,6 +63,7 @@ def view_plot(ax, field, coordinate, field_name="", coordinate_name="", field_un
         else:
             for _coordinate in field.coordinates:
                 if isinstance(_coordinate, imas.ids_primitive.IDSPrimitive):
+                    
                     if _coordinate.has_value is True:
                         coordinate_unit = f"{_coordinate.metadata.units}"
                         coordinate_name = _coordinate.metadata.name

@@ -41,6 +41,8 @@ SCRIPTS=(
     "idsperf --uri \"imas:hdf5?user=public;pulse=122525;run=2;database=ITER;version=3\" summary --verbose --output-run 5 --show-stats --repeat 2"
     "idsperf --uri \"imas:hdf5?user=public;pulse=122525;run=2;database=ITER;version=3\" summary --verbose --output-run 5 --show-stats --repeat 2 --uri-out \"imas:hdf5?user=$USER;pulse=131024;run=25;database=ITER;version=3?path=$DATABASE_DIR\" --memory-backend"
     "idsprint --uri \"imas:hdf5?user=public;pulse=122525;run=2;database=ITER;version=3#equilibrium\""
+    "idsprint --uri \"imas:mdsplus?user=public;pulse=134174;run=117;database=ITER;version=3#core_profiles/profiles_1d(:)/electrons/temperature\""
+    "idsprint --uri \"imas:mdsplus?user=public;pulse=122481;run=1;database=ITER;version=3#edge_profiles/grid_ggd[0]/grid_subset[:]/identifier/name\""
     "idssize --uri \"imas:hdf5?user=public;pulse=122525;run=2;database=ITER;version=3\" equilibrium"
     "idssize --uri \"imas:hdf5?user=public;pulse=131024;run=55;database=ITER;version=3\"")
 

@@ -158,7 +158,11 @@ if __name__ == "__main__":
         outputargs.mode = "a"
         dest_connection = None
         if outputargs.uri != "" and outputargs.uri is not None:
-            dest_connection = imas.DBEntry(outputargs.uri, outputargs.mode, dd_version=src_dd_version)
+            try:
+                dest_connection = imas.DBEntry(outputargs.uri, outputargs.mode, dd_version=src_dd_version)
+            except Exception as e:
+                outputargs.mode = "w"
+                dest_connection = imas.DBEntry(outputargs.uri, outputargs.mode, dd_version=src_dd_version)
 
         if dest_connection is None:
             logger.error("Error opening destination pulse! Please check parameters and permissions.")

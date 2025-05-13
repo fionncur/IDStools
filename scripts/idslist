@@ -104,6 +104,8 @@ if __name__ == "__main__":
                 print(f"  {idsnameoc}:")
                 if times is not None:
                     print(f"     time_step_number: {len(times)}")
+                else:
+                    print(f"     time_step_number: 0")
                 print("     time:             [unhomogeneous]")
             elif homogeneous_time == 1:
                 if times is not None:
@@ -122,6 +124,8 @@ if __name__ == "__main__":
                 print(f"  {idsnameoc}:")
                 if times is not None:
                     print(f"     time_step_number: {len(times)}")
+                else:
+                    print(f"     time_step_number: 0")
                 print("     time:             [static]")
         connection.close()
         exit(0)
