@@ -6,11 +6,9 @@ module use /work/imas/etc/modules/all
 source ./ci-sdcc/st00-header.sh $1 $2 $3
 
 # Note Disable set -e option when using on local as it will exit the shell on error
-# if [[ "$(uname -n)" == *"bamboo"* ]]; then
-#     set -e -u -o pipefail
-# fi
-IMAS_MODULE_VERSION=$(getIMASPythonModuleName "$TOOLCHAIN_VERSION" "$ACCESS_LAYER_VERSION" "$DD_VERSION")
-module load $IMAS_MODULE_VERSION
+if [[ "$(uname -n)" == *"bamboo"* ]]; then
+    set -e -u -o pipefail
+fi
 
 module unload Python-bundle-PyPI
 ENVIRONEMNT_NAME=env"$TOOLCHAIN_VERSION"_"$ACCESS_LAYER_VERSION"

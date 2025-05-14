@@ -98,11 +98,7 @@ def get_length_of_partial_field(ids, ids_path):
 
 def partial_get(ids, ids_path, custom_coordinate=None):
     slice_object = parse_slice_from_string(ids_path)
-    ids_path_for_eval = re.sub(
-        r"[\[\(][^()\[\]]*:[^()\[\]]*[\]\)]",
-        "(t)",
-        ids_path
-    )
+    ids_path_for_eval = re.sub(r"[\[\(][^()\[\]]*:[^()\[\]]*[\]\)]", "(t)", ids_path)
     ids_path_for_eval = ids_path_for_eval.replace("(", "[").replace(")", "]").replace("/", ".")
     coordinate_partial, coordinate_unit = get_length_of_partial_field(ids, ids_path_for_eval)
     data = np.array([]).reshape(

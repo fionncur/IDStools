@@ -1,4 +1,4 @@
 Tkinter
 matplotlib
-IMAS-Python
+IMAS-AL-Core
 PyYAML
