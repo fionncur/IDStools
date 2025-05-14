@@ -54,6 +54,9 @@ exts_list = [
     ('fortranformat', '2.0.0', {
         'checksums': ['52473831d6f6bad7c2de0f26ad51856ea5d0ef097bcba5af3b855b871b815b0d'],
     }),
+    ('imas-python', '2.0.0', {
+        'checksums': ['12d9c5eac60d8b2fdf6d5c048057627165fc851fbdd96affc8f8ea28f0ae9614'],
+    }),
     ('pyproject_hooks', '1.2.0', {
         'checksums': ['1e859bd5c40fae9448642dd871adf459e5e2084186e8d2c2a79a824c970da1f8'],
     }),
