@@ -4,7 +4,6 @@
 source ./ci-sdcc/st00-header.sh $1 $2 $3
 
 ENVIRONEMNT_NAME=env"$TOOLCHAIN_VERSION"_"$ACCESS_LAYER_VERSION"
-module unload IDStools
 
 python -m venv "$ENVIRONEMNT_NAME"
 
