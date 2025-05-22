@@ -139,6 +139,7 @@ class ScenarioDescriptionSummary:
 
             def process_yaml_file(yaml_file):
                 df = ScenarioDescriptionSummary.get_data_frame_from_yaml(yaml_file, add_obsolete=add_obsolete)
+                yaml_file = os.path.abspath(yaml_file)
                 if df is not None:
                     df["dd_version"] = ""
                     if "ITER/3/0" in yaml_file or "iterdb/3/0" in yaml_file:
