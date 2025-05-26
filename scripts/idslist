@@ -59,7 +59,7 @@ if __name__ == "__main__":
         "-v",
         "--version",
         action="store_true",
-        help="List ids with their number of occurrences with data dictionary version and occurrence_type if available",
+        help="List ids with their number of occurrences with data dictionary version",
     )
     parser.add_argument("-i", "--ids", required=False, type=str, help="IDS name to filter")
     parser.add_argument(
@@ -143,7 +143,10 @@ if __name__ == "__main__":
                 if idsname != args.ids:
                     continue
             # Format idsname
-            idsnameoc = f"{idsname}/{str(oc)}"
+            if oc != 0:
+                idsnameoc = f"{idsname}/{str(oc)}"
+            else:
+                idsnameoc = idsname
             table.add_row(idsnameoc, comment.value)
         console.print(table)
         connection.close()
