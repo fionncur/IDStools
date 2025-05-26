@@ -161,7 +161,10 @@ if __name__ == "__main__":
                 if idsname != args.ids:
                     continue
             # Format idsname
-            idsnameoc = f"{idsname}/{str(oc)}"
+            if oc != 0:
+                idsnameoc = f"{idsname}/{str(oc)}"
+            else:
+                idsnameoc = idsname
             table.add_row(idsnameoc, dd_version)
         console.print(table)
         connection.close()

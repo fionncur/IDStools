@@ -189,7 +189,8 @@ if __name__ == "__main__":
             ids_connection = DBMaster.get_connection(inputargs)
             available_ids_and_times = get_available_ids_and_times(ids_connection)
             for ids_name, _ in available_ids_and_times:
-                _ids_name.append(ids_name)
+                name = ids_name.split("/")[0]
+                _ids_name.append(name)
             ids_connection.close()
         if "wall" in _ids_name:
             connection = DBMaster.get_connection(inputargs)

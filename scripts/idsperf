@@ -12,6 +12,9 @@ from idstools import idsperf
 from idstools.database import DBMaster
 from idstools.utils.clihelper import uri_parser
 from idstools.utils.idshelper import get_available_ids_and_times
+from idstools.utils.idslogger import setup_logger
+
+logger = setup_logger("module")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
@@ -84,8 +87,13 @@ if __name__ == "__main__":
         args.ids = [ids for ids, _ in get_available_ids_and_times(src_connection)]
     src_dd_version = src_connection.dd_version
     for idsname in args.ids:
+        nameocc = idsname.split("/")
+        idsname = nameocc[0]
+        occ = 0
+        if len(nameocc) == 2:
+            occ = int(nameocc[1])
         try:
-            _dummy = src_connection.get(idsname, lazy=True, autoconvert=False)
+            _dummy = src_connection.get(idsname, occurrence=occ, lazy=True, autoconvert=False)
             src_dd_version = _dummy.ids_properties.version_put.data_dictionary.value
             break
         except Exception as e:
@@ -180,4 +188,4 @@ if __name__ == "__main__":
             print(f"Mean         = {stat.mean(timings)}")
             print(f"Standard dev = {stat.stdev(timings)}")
             print(f"Variance     = {stat.variance(timings)}")
-        print(f"{idsname} best time = {min(timings)} s")
+        print(f"{idsname}/{occ} best time = {min(timings)} s")

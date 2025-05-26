@@ -25,16 +25,10 @@ from idstools.utils.clihelper import (
     get_file_name,
     get_title,
 )
-from idstools.utils.idshelper import get_available_ids_and_times
 from idstools.utils.idslogger import setup_logger
 from idstools.view.common import PlotCanvas
 from idstools.view.domain.mdplot import plot_machine_description
 from idstools.view.equilibrium import EquilibriumView
-from idstools.view.magnetics import MagneticsView
-from idstools.view.pf_active import PFActiveView
-from idstools.view.pf_passive import PFPassiveView
-from idstools.view.tf import TFView
-from idstools.view.wall import WallView
 
 
 class MdAction(argparse.Action):
