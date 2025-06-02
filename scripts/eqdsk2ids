@@ -3,7 +3,7 @@
 import argparse
 import os
 import traceback
-
+import imas
 from rich.markdown import Markdown
 from rich_argparse import RichHelpFormatter
 
@@ -25,23 +25,35 @@ def main():
     # Convert GEQDSK to IDS/equilibrium
     eq = geqdsk2ids(args.gpath, cocos_in=args.cocos_in)
 
-    # Create the output datafile
-    logger.info("creating output datafile ...")
-
     outputargs = argparse.Namespace()
-    outputargs.user = os.environ["USER"]
-    outputargs.mode = "w"
-    # if args.dest is None:
-    #     args.dest = re.sub(r"user=public", f"user={getpass.getuser()}", args.src)
     outputargs.uri = args.dest
+    dest_connection = None
+    if args.force:
+        # CREATE DEST
+        outputargs.mode = "w"
+        logger.info("creating output datafile ...")
+        if outputargs.uri != "" and outputargs.uri is not None:
+            dest_connection = imas.DBEntry(outputargs.uri, outputargs.mode)
+        if dest_connection is None:
+            logger.error("Error creating destination pulse! Please check parameters and permissions.")
+            exit(1)
+    else:
+        outputargs.mode = "a"
+        dest_connection = None
+        logger.info("appending to output datafile ...")
+        if outputargs.uri != "" and outputargs.uri is not None:
+            try:
+                dest_connection = imas.DBEntry(outputargs.uri, outputargs.mode)
+            except Exception as e:
+                outputargs.mode = "w"
+                dest_connection = imas.DBEntry(outputargs.uri, outputargs.mode)
 
-    db = DBMaster.create_connection(outputargs)
-    if db is None:
-        logger.critical("----> Aborted.")
-        exit(1)
+        if dest_connection is None:
+            logger.error("Error opening destination pulse! Please check parameters and permissions.")
+            exit(1)
 
-    db.put(eq)
-    db.close()
+    dest_connection.put(eq)
+    dest_connection.close()
     logger.info(f"IDS/equilibrium populated in  {get_database_path(outputargs)}.")
 
 
@@ -97,6 +109,12 @@ if __name__ == "__main__":
         type=str,
         required=True,
         help="destination uri",
+    )
+    parser.add_argument(
+        "-f",
+        "--force",
+        action="store_true",
+        help="Force the creation of destination data-entry (existing data will be lost)",
     )
     parser.add_argument(
         "-g",
