@@ -40,7 +40,7 @@ def main():
     else:
         outputargs.mode = "a"
         dest_connection = None
-        logger.info("appending to output datafile ...")
+        logger.info("opening the output datafile ...")
         if outputargs.uri != "" and outputargs.uri is not None:
             try:
                 dest_connection = imas.DBEntry(outputargs.uri, outputargs.mode)
