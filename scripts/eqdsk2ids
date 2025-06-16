@@ -3,6 +3,7 @@
 import argparse
 import os
 import traceback
+
 import imas
 from rich.markdown import Markdown
 from rich_argparse import RichHelpFormatter

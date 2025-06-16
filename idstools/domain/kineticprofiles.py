@@ -1505,18 +1505,31 @@ class KineticProfilesCompute:
                     species.append(table_mendeleiev[self.z[ispecies]][self.a[ispecies]].element)
                 else:
                     if self.is_core_profiles_present:
-                        species.append(
-                            self.core_profiles.profiles_1d[self.time_index_core_profiles].ion[ispecies].name[0]
-                        )
+                        _coreprofiles_profile_1d_ion = self.core_profiles.profiles_1d[
+                            self.time_index_core_profiles
+                        ].ion[ispecies]
+                        if "label" in dir(_coreprofiles_profile_1d_ion):
+                            species.append(_coreprofiles_profile_1d_ion.label.value)
+                        elif "name" in dir(_coreprofiles_profile_1d_ion):
+                            species.append(_coreprofiles_profile_1d_ion.name.value)
                     else:
                         if not self.r_out_graph:
-                            species.append(
-                                self.edge_profiles.profiles_1d[self.time_index_edge_profiles].ion[ispecies].name[0]
-                            )
+                            _edgeprofiles_profile_1d_ion = self.edge_profiles.profiles_1d[
+                                self.time_index_edge_profiles
+                            ].ion[ispecies]
+                            print(_edgeprofiles_profile_1d_ion)
+                            if "label" in dir(_edgeprofiles_profile_1d_ion):
+                                species.append(_edgeprofiles_profile_1d_ion.label.value)
+                            elif "name" in dir(_edgeprofiles_profile_1d_ion):
+                                species.append(_edgeprofiles_profile_1d_ion.name.value)
                         else:
-                            species.append(
-                                self.edge_profiles.ggd[self.time_index_edge_profiles].ion[ispecies].name[0]
-                            )
+                            _edgeprofiles_ggd_ion = self.edge_profiles.ggd[self.time_index_edge_profiles].ion[ispecies]
+                            print(_edgeprofiles_ggd_ion)
+                            if "label" in dir(_edgeprofiles_ggd_ion):
+                                species.append(_edgeprofiles_ggd_ion.label.value)
+                            elif "name" in dir(_edgeprofiles_ggd_ion):
+                                species.append(_edgeprofiles_ggd_ion.name.value)
+
             return species
         return None
 
