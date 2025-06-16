@@ -1517,14 +1517,12 @@ class KineticProfilesCompute:
                             _edgeprofiles_profile_1d_ion = self.edge_profiles.profiles_1d[
                                 self.time_index_edge_profiles
                             ].ion[ispecies]
-                            print(_edgeprofiles_profile_1d_ion)
                             if "label" in dir(_edgeprofiles_profile_1d_ion):
                                 species.append(_edgeprofiles_profile_1d_ion.label.value)
                             elif "name" in dir(_edgeprofiles_profile_1d_ion):
                                 species.append(_edgeprofiles_profile_1d_ion.name.value)
                         else:
                             _edgeprofiles_ggd_ion = self.edge_profiles.ggd[self.time_index_edge_profiles].ion[ispecies]
-                            print(_edgeprofiles_ggd_ion)
                             if "label" in dir(_edgeprofiles_ggd_ion):
                                 species.append(_edgeprofiles_ggd_ion.label.value)
                             elif "name" in dir(_edgeprofiles_ggd_ion):
