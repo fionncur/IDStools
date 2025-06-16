@@ -81,8 +81,8 @@ class CoreTransportCompute:
             )
             for ion_index, ion in enumerate(model.profiles_1d[time_slice].ion):
                 ion_name = "--"
-                if "label" in dir(ion):
-                    if ion.label.has_value:
+                if "name" in dir(ion):
+                    if ion.name.has_value:
                         ion_name = ion.name
                 elif "name" in dir(ion):
                     if ion.name.has_value:
