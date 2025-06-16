@@ -76,7 +76,7 @@ if __name__ == "__main__":
         kp_view.view_zeff_profile(ax5)  # Zeff profiles
         kp_view.view_vpol_profile(ax6, logscale=args.logscale)  # Vpol profiles
         kp_view.view_density_profiles(ax7, logscale=args.logscale)  # Density profiles
-        kp_view.view_vtor_profile(ax8, logscale=args.logscale)  # Vtol profiles
+        kp_view.view_vphi_profile(ax8, logscale=args.logscale)  # Vtol profiles
 
         canvas.set_text(text=f"{get_database_path(args, time_value=kp_view.k_profiles.time_value_core_profiles)}")
 
