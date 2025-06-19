@@ -339,17 +339,17 @@ if __name__ == "__main__":
         connargs_icrh = argparse.Namespace()
         connargs_icrh.uri = args["icrh"]
         args["save"] = args["save"]
-        _show_distribution_plots(connargs_icrh, args, holder["icrh_uri_hold"], args.dd_update)
+        _show_distribution_plots(connargs_icrh, args, holder["icrh_uri_hold"], args["dd_update"])
     if args["nbi"] is not None and "imas:" in args["nbi"]:
         connargs_nbi = argparse.Namespace()
         connargs_nbi.uri = args["nbi"]
         args["save"] = args["save"]
-        _show_distribution_plots(connargs_nbi, args, holder["nbi_uri_hold"], args.dd_update)
+        _show_distribution_plots(connargs_nbi, args, holder["nbi_uri_hold"], args["dd_update"])
     if args["fus"] is not None and "imas:" in args["fus"]:
         connargs_fus = argparse.Namespace()
         connargs_fus.uri = args["fus"]
         args["save"] = args["save"]
-        _show_distribution_plots(connargs_fus, args, holder["fus_uri_hold"], args.dd_update)
+        _show_distribution_plots(connargs_fus, args, holder["fus_uri_hold"], args["dd_update"])
 
     hcd_sources = {
         "ech": {
