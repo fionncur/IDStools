@@ -265,7 +265,9 @@ class PlotCanvas:
                 "color",
                 ["4477AA", "EE6677", "228833", "CCBB44", "66CCEE", "AA3377", "BBBBBB"],
             )
-
+    
+    def update_style(self, parameters={}):
+        matplotlib.rcParams.update(parameters)
 
 class BasePlot:
     def database_info(self, ax, title, hostdir, shot, run, t):

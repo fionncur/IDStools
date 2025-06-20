@@ -14,7 +14,7 @@ class DistributionSourcesView(BasePlot):
         self.distribution_sources_compute = DistributionSourcesCompute(ids)
         self.ids = ids
 
-    def view_neutrons(self, ax: plt.axes, time_slice, source_index=0):
+    def view_neutrons(self, ax: plt.axes, time_slice, source_index=0, **kwargs):
         rho_tor_norm = self.distribution_sources_compute.get_rho_tor_norm(time_slice, source_index)
         nrho = len(rho_tor_norm)
         if rho_tor_norm is not None and nrho == 0:
@@ -34,10 +34,10 @@ class DistributionSourcesView(BasePlot):
 
         # Set Plot properties
         font_args = {
-            "fontfamily": "serif",
-            "color": "darkred",
-            "fontweight": "normal",
-            "fontsize": 12,
+            "fontfamily": kwargs.get("fontfamily", "serif"),
+            "color": kwargs.get("color", "darkred"),
+            "fontweight": kwargs.get("fontweight", "normal"),
+            "fontsize": kwargs.get("fontsize", 12),
         }
         ax.tick_params(
             which="both",

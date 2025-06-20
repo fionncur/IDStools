@@ -17,6 +17,7 @@ from idstools.compute.common import get_nearest_time
 from idstools.database import DBMaster
 from idstools.utils.clihelper import (
     dbentry_parser,
+    rcparam_parser,
     get_database_path,
     get_file_name,
     get_title,
@@ -33,7 +34,7 @@ if __name__ == "__main__":
         epilog="""
     """,
         formatter_class=RichHelpFormatter,
-        parents=[dbentry_parser],
+        parents=[dbentry_parser, rcparam_parser],
     )
 
     parser.add_argument("-t", "--time", type=float, help="Time", default=-99)
@@ -70,6 +71,20 @@ if __name__ == "__main__":
     time_slice, time_value = get_nearest_time(time_array, args.time)
     title = "Profiles displayed for t = " + "%.1f" % time_value + " s"
     canvas = PlotCanvas(3, 1)
+
+    canvas.update_style({
+        'lines.linewidth': args.line_width,
+        'font.size': args.font_size,
+        'font.family': args.font_family,
+        'font.weight': args.font_weight,
+        'axes.titlesize': args.title_size,
+        'axes.labelsize': args.label_size,
+        'grid.linewidth': args.grid_linewidth,
+        'legend.loc': args.legend_loc,
+        'legend.fontsize': args.legend_fontsize,
+        'legend.handlelength': args.legend_handlelength,
+        'legend.handleheight': args.legend_handleheight,
+    })
     canvas.fig.suptitle(title, size=12)
 
     ax1 = canvas.add_axes(title="", xlabel="", row=0, col=0, colspan=1)
@@ -78,9 +93,9 @@ if __name__ == "__main__":
 
     coreprofiles_view = CoreProfilesView(ids_core_profiles)
 
-    coreprofiles_view.plot_total_pressure_properties(ax1, time_slice)
-    coreprofiles_view.plot_ion_pressure_properties(ax2, time_slice)
-    coreprofiles_view.plot_electron_pressure_properties(ax3, time_slice)
+    coreprofiles_view.plot_total_pressure_properties(ax1, time_slice, **vars(args))
+    coreprofiles_view.plot_ion_pressure_properties(ax2, time_slice, **vars(args))
+    coreprofiles_view.plot_electron_pressure_properties(ax3, time_slice, **vars(args))
 
     canvas.set_text(text=f"{get_database_path(args, time_value=time_value)}")
 

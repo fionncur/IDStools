@@ -211,7 +211,7 @@ class CoreProfilesView:
                 ax.set_yscale("log")
             return ax_density_plot_dens, nmax
 
-    def plot_ion_pressure_properties(self, ax, time_slice):
+    def plot_ion_pressure_properties(self, ax, time_slice, **kwargs):
         FACTOR = 1.0e-6
         rho_tor_norm = self.core_profiles_compute.get_rho_tor_norm(time_slice)  # Rho profile (mandatory)
         nrho = len(rho_tor_norm)
@@ -229,10 +229,10 @@ class CoreProfilesView:
         pressure_ion_fast_perpendicular = dict_ion_pressure_properties["pressure_ion_fast_perpendicular"]
 
         font_args = {
-            "fontfamily": "serif",
-            "color": "darkred",
-            "fontweight": "normal",
-            "fontsize": 12,
+            "fontfamily": kwargs.get("fontfamily", "serif"),
+            "color": kwargs.get("color", "darkred"),
+            "fontweight": kwargs.get("fontweight", "normal"),
+            "fontsize": kwargs.get("fontsize", 12),
         }
 
         ax.plot(rho_tor_norm, pressure_ion_thermal * FACTOR, label="Thermal ion")
@@ -252,13 +252,13 @@ class CoreProfilesView:
         # set legend
         # legx_pos = 1.35
         # legy_pos = 1.05
-        legend = ax.legend(loc="upper right")  # bbox_to_anchor=(legx_pos - 0.4, legy_pos - 0.05)
+        legend = ax.legend(loc=kwargs.get("legend_loc","upper right"))  # bbox_to_anchor=(legx_pos - 0.35, legy_pos - 0.05)
         frame = legend.get_frame()
         frame.set_facecolor("0.95")
         for label in legend.get_texts():
-            label.set_fontsize(7)
+            label.set_fontsize(kwargs.get("legend_fontsize", 12))
         for label in legend.get_lines():
-            label.set_linewidth(1.5)
+            label.set_linewidth(kwargs.get("legend_handleheight", 2))
         ax.set_title("Ion Pressure Properties", loc="left")
 
     def show_info_on_plot(self, ax, info: str = "", location="right"):
@@ -304,10 +304,10 @@ class CoreProfilesView:
             "pressure_electron_fast_perpendicular"
         ]
         font_args = {
-            "fontfamily": "serif",
-            "color": "darkred",
-            "fontweight": "normal",
-            "fontsize": 12,
+            "fontfamily": kwargs.get("fontfamily", "serif"),
+            "color": kwargs.get("color", "darkred"),
+            "fontweight": kwargs.get("fontweight", "normal"),
+            "fontsize": kwargs.get("fontsize", 12),
         }
         ax.plot(rho_tor_norm, pressure_electron_total * FACTOR, label="Total electron")
         ax.plot(rho_tor_norm, pressure_electron_thermal * FACTOR, label="Thermal electron")
@@ -332,13 +332,13 @@ class CoreProfilesView:
         # set legend
         # legx_pos = 1.35
         # legy_pos = 1.05
-        legend = ax.legend(loc="upper right")  # bbox_to_anchor=(legx_pos - 0.5, legy_pos - 0.05)
+        legend = ax.legend(loc=kwargs.get("legend_loc","upper right"))  # bbox_to_anchor=(legx_pos - 0.35, legy_pos - 0.05)
         frame = legend.get_frame()
         frame.set_facecolor("0.95")
         for label in legend.get_texts():
-            label.set_fontsize(7)
+            label.set_fontsize(kwargs.get("legend_fontsize", 12))
         for label in legend.get_lines():
-            label.set_linewidth(1.5)
+            label.set_linewidth(kwargs.get("legend_handleheight", 2))
         ax.set_title("Electrons Pressure Properties", loc="left")
 
     def plot_total_pressure_properties(self, ax, time_slice, **kwargs):
@@ -371,10 +371,10 @@ class CoreProfilesView:
 
         # Set Plot properties
         font_args = {
-            "fontfamily": "serif",
-            "color": "darkred",
-            "fontweight": "normal",
-            "fontsize": 12,
+            "fontfamily": kwargs.get("fontfamily", "serif"),
+            "color": kwargs.get("color", "darkred"),
+            "fontweight": kwargs.get("fontweight", "normal"),
+            "fontsize": kwargs.get("fontsize", 12),
         }
         ax.tick_params(
             which="both",
@@ -385,13 +385,13 @@ class CoreProfilesView:
         # set legend
         # legx_pos = 1.35
         # legy_pos = 1.05
-        legend = ax.legend(loc="upper right")  # bbox_to_anchor=(legx_pos - 0.35, legy_pos - 0.05)
+        legend = ax.legend(loc=kwargs.get("legend_loc","upper right"))  # bbox_to_anchor=(legx_pos - 0.35, legy_pos - 0.05)
         frame = legend.get_frame()
         frame.set_facecolor("0.95")
         for label in legend.get_texts():
-            label.set_fontsize(7)
+            label.set_fontsize(kwargs.get("legend_fontsize", 12))
         for label in legend.get_lines():
-            label.set_linewidth(1.5)
+            label.set_linewidth(kwargs.get("legend_handleheight", 2))
         ax.set_title("Total Pressure Properties", loc="left")
 
     def view_q_profile_and_magnetic_shear_profile(self, ax, time_slice, **kwargs):
@@ -457,10 +457,10 @@ class CoreProfilesView:
 
         # Set Plot properties
         font_args = {
-            "fontfamily": "serif",
-            "color": "darkred",
-            "fontweight": "normal",
-            "fontsize": 12,
+            "fontfamily": kwargs.get("fontfamily", "serif"),
+            "color": kwargs.get("color", "darkred"),
+            "fontweight": kwargs.get("fontweight", "normal"),
+            "fontsize": kwargs.get("fontsize", 12),
         }
         ax.tick_params(
             which="both",
@@ -511,10 +511,10 @@ class CoreProfilesView:
 
         # Set Plot properties
         font_args = {
-            "fontfamily": "serif",
-            "color": "darkred",
-            "fontweight": "normal",
-            "fontsize": 12,
+            "fontfamily": kwargs.get("fontfamily", "serif"),
+            "color": kwargs.get("color", "darkred"),
+            "fontweight": kwargs.get("fontweight", "normal"),
+            "fontsize": kwargs.get("fontsize", 12),
         }
         ax.tick_params(
             which="both",
@@ -568,10 +568,10 @@ class CoreProfilesView:
 
         # Set Plot properties
         font_args = {
-            "fontfamily": "serif",
-            "color": "darkred",
-            "fontweight": "normal",
-            "fontsize": 12,
+            "fontfamily": kwargs.get("fontfamily", "serif"),
+            "color": kwargs.get("color", "darkred"),
+            "fontweight": kwargs.get("fontweight", "normal"),
+            "fontsize": kwargs.get("fontsize", 12),
         }
         ax.tick_params(
             which="both",
@@ -626,10 +626,10 @@ class CoreProfilesView:
         # ax4.yaxis.set_label_position("right")
         # Set Plot properties
         font_args = {
-            "fontfamily": "serif",
-            "color": "darkred",
-            "fontweight": "normal",
-            "fontsize": 12,
+            "fontfamily": kwargs.get("fontfamily", "serif"),
+            "color": kwargs.get("color", "darkred"),
+            "fontweight": kwargs.get("fontweight", "normal"),
+            "fontsize": kwargs.get("fontsize", 12),
         }
         ax.tick_params(
             which="both",

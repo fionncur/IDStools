@@ -32,7 +32,7 @@ from idstools.view.common import PlotCanvas
 logger = setup_logger("module", stdout_level=logging.INFO)
 
 
-def view_plot(ax, field, coordinate, field_name="", coordinate_name="", field_unit="", coordinate_unit=""):
+def view_plot(ax, field, coordinate, field_name="", coordinate_name="", field_unit="", coordinate_unit="", **kwargs):
     if not isinstance(field, (imas.ids_primitive.IDSNumericArray, np.ndarray)):
         logger.error("Not a numeric array, Please select ids path")
         return
@@ -96,10 +96,10 @@ def view_plot(ax, field, coordinate, field_name="", coordinate_name="", field_un
 
     # Set Plot properties
     font_args = {
-        "fontfamily": "serif",
-        "color": "darkred",
-        "fontweight": "normal",
-        "fontsize": 12,
+        "fontfamily": kwargs.get("fontfamily", "serif"),
+        "color": kwargs.get("color", "darkred"),
+        "fontweight": kwargs.get("fontweight", "normal"),
+        "fontsize": kwargs.get("fontsize", 12),
     }
     ax.tick_params(
         which="both",

@@ -60,6 +60,38 @@ dbentry_parser.add_argument(
     ),
 )
 
+def parse_figsize(s):
+    try:
+        w, h = map(float, s.split(','))
+        return w, h
+    except:
+        raise argparse.ArgumentTypeError("Figsize must be WIDTH,HEIGHT (e.g., 6,4)")
+
+rcparam_parser = argparse.ArgumentParser(add_help=False, 
+    description="Plot with customizable rcParams flags"
+)
+
+# Lines
+rcparam_parser.add_argument("--line-width", type=float, default=2.0, help="Line width")
+
+# Font
+rcparam_parser.add_argument("--font-size", type=float, default=12.0, help="Base font size")
+rcparam_parser.add_argument("--font-family", type=str, default='serif', help="Font family (default: serif)")
+rcparam_parser.add_argument("--font-weight", type=str, default='normal', choices=["normal", "bold", "heavy"], help="Font weight")
+
+# Axes titles & labels
+rcparam_parser.add_argument("--title-size", type=float, default=12.0, help="Title font size")
+rcparam_parser.add_argument("--label-size", type=float, default=10.0, help="Axis label font size")
+
+# Grid
+rcparam_parser.add_argument("--grid", action="store_true", help="Enable grid")
+rcparam_parser.add_argument("--grid-linewidth", type=float, default=0.5, help="Grid line width")
+
+# Legend
+rcparam_parser.add_argument("--legend-loc", type=str, default="upper right", help="Legend location")
+rcparam_parser.add_argument("--legend-fontsize", type=float, default=10.0, help="Legend font size")
+rcparam_parser.add_argument("--legend-handlelength", type=float, default=2.0, help="Legend handle length")
+rcparam_parser.add_argument("--legend-handleheight", type=float, default=2.0, help="Legend handle height")
 
 def get_backend_id(name):
     """
