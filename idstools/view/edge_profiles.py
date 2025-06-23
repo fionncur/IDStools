@@ -147,7 +147,6 @@ class EdgeProfilesView:
                 "No data",
                 horizontalalignment="left",
                 verticalalignment="center",
-                fontsize=10,
             )
             return None
 
@@ -191,7 +190,6 @@ class EdgeProfilesView:
                 "No data",
                 horizontalalignment="left",
                 verticalalignment="center",
-                fontsize=10,
             )
             return None
 
@@ -236,7 +234,6 @@ class EdgeProfilesView:
                 "No data",
                 horizontalalignment="left",
                 verticalalignment="center",
-                fontsize=10,
             )
             return None
 
@@ -267,7 +264,6 @@ class EdgeProfilesView:
                 "No data",
                 horizontalalignment="left",
                 verticalalignment="center",
-                fontsize=10,
             )
             return None
 

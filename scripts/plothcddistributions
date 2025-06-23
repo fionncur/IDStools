@@ -76,7 +76,7 @@ def show_plots(args):
             wspace=0.328,
         )
         canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
-        canvas.fig.suptitle(get_title(args, "Distributions profile", time_value), size=12)
+        canvas.fig.suptitle(get_title(args, "Distributions profile", time_value))
 
         if args.save:
             fname = get_file_name(args, os.path.basename(__file__) + "_Distributions_profile", time_value)

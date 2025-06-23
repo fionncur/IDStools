@@ -324,7 +324,6 @@ def generate_html(file_path, compare_data):
                                 ax_lines + ax2_lines,
                                 ax_labels + ax2_labels,
                                 loc="center left",
-                                fontsize=10,
                                 bbox_to_anchor=(1.15, 0.5),
                             )
                             tmpfile = BytesIO()

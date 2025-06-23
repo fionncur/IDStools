@@ -277,12 +277,6 @@ class BasePlot:
             rotation="vertical",
             fontsize=7,
         )
-        # from matplotlib.offsetbox import AnchoredText
-
-        # anchored_text = AnchoredText(
-        #     "Shot " + str(shot) + " / " + "Run " + str(run), prop=dict(size=8), loc=4
-        # )
-        # self.ax.add_artist(anchored_text)
 
 
 class Terminal:

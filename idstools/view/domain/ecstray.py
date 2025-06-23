@@ -4,7 +4,6 @@ from idstools.compute.equilibrium import EquilibriumCompute
 from idstools.domain.ecstray import EcStrayCompute
 
 # Font/Colour definition
-fontsize = 9
 bndcolor = "chocolate"
 shotcolors = ["b", "r", "c", "y", "m", "b"]
 shotstyle = ["-", "--", "-.", ":", ".", ","]
@@ -101,9 +100,9 @@ class EcStrayView:
         if rho2d is not None and len(rho2d) > 0:
             ax.contour(r2d, z2d, rho2d, 50, cmap="YlOrBr")
         # ax_polview.set_xlim(r2d.min(),r2d.max())
-        ax.set_title("Poloidal view (R,Z)", fontsize=fontsize)
-        ax.set_xlabel("R [m]", fontsize=fontsize, labelpad=lpad)
-        ax.set_ylabel("Z [m]", fontsize=fontsize, labelpad=lpad)
+        ax.set_title("Poloidal view (R,Z)")
+        ax.set_xlabel("R [m]", labelpad=lpad)
+        ax.set_ylabel("Z [m]", labelpad=lpad)
         ax.set_xlim(3.4, r2d.max())
         ax.set_ylim(z2d.min() * 0.7, z2d.max() * 0.7)
         ax.set_aspect("equal", adjustable="box")

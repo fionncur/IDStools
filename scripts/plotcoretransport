@@ -25,6 +25,7 @@ from idstools.utils.clihelper import (
     get_database_path,
     get_file_name,
     get_title,
+    rcparam_parser,
 )
 from idstools.utils.idslogger import setup_logger
 from idstools.view.common import PlotCanvas
@@ -42,7 +43,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Check match between transport fluxes and a simple calculation [previously known as check_transport]",
         formatter_class=RichHelpFormatter,
-        parents=[dbentry_parser],
+        parents=[dbentry_parser, rcparam_parser],
     )
 
     parser.add_argument(
@@ -131,6 +132,7 @@ if __name__ == "__main__":
         columns = len(ids_slice_core_transport.model[model_index].profiles_1d[-1].ion)
 
     canvas = PlotCanvas(3, columns)
+    canvas.update_style(args.rc)
     electrons_particle_fluxes_axes = canvas.add_axes(title="", xlabel="", row=0, col=0, colspan=1)
     electrons_energy_fluxes_axes = canvas.add_axes(title="", xlabel="", row=0, col=1, colspan=1)
 
@@ -174,7 +176,7 @@ if __name__ == "__main__":
         logscale=args.logscale,
     )
     canvas.set_text(text=f"{get_database_path(args, time_value=time_value)}")
-    canvas.fig.suptitle(get_title(args, "Core transport", time_value), size=12)
+    canvas.fig.suptitle(get_title(args, "Core transport", time_value))
     canvas.fig.subplots_adjust(top=0.9, bottom=0.094, left=0.035, right=0.948, hspace=0.417, wspace=0.117)
     canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
     canvas.remove_empty_axes()

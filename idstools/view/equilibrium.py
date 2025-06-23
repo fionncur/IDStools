@@ -129,7 +129,6 @@ class EquilibriumView(BasePlot):
             loc="center left",
             borderaxespad=0.0,
             frameon=False,
-            fontsize="x-small",
         )
         ax.set_ylim(0, 20)
 
@@ -212,8 +211,8 @@ class EquilibriumView(BasePlot):
             ax.set_ylabel(r"$Z\/\mathrm{[m]}$")
             ax.set_title("2D equilibrium")
         else:
-            ax.text(0.2, 0.5, "2D equilibrium", fontsize=10)
-            ax.text(0.2, 0.45, "not available", fontsize=10)
+            ax.text(0.2, 0.5, "2D equilibrium")
+            ax.text(0.2, 0.45, "not available")
 
     def plot_profiles_1d_quantities(self, axes_list, time_slice, attributes=None):
         quantities = self.compute_obj.get_profiles_1d_quantities(time_slice, attributes)

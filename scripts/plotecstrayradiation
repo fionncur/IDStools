@@ -173,7 +173,7 @@ if __name__ == "__main__":
         hspace=0.458,
         wspace=0.234,
     )
-    canvas.fig.suptitle(get_title(args, "EC Stray Radiation", time_value_equilibrium), size=12)
+    canvas.fig.suptitle(get_title(args, "EC Stray Radiation", time_value_equilibrium))
     canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
     if args.save:
         fname = get_file_name(args, f"{os.path.basename(__file__)}_Equilibrium", time_value_equilibrium)

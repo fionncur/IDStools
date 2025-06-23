@@ -148,7 +148,6 @@ class CoreProfilesView:
             loc="center left",
             borderaxespad=0.0,
             frameon=False,
-            fontsize="x-small",
         )
         ax.set_ylim(0, 20)
 

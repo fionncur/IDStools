@@ -189,7 +189,7 @@ if __name__ == "__main__":
 
     canvas.fig.subplots_adjust(top=0.93, bottom=0.067, left=0.026, right=0.953, hspace=0.287, wspace=0.12)
 
-    canvas.fig.suptitle(get_title(args, "Edge Profiles", time_value), size=12)
+    canvas.fig.suptitle(get_title(args, "Edge Profiles", time_value))
     canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
 
     if args.save:

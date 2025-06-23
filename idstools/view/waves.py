@@ -13,7 +13,7 @@ class WavesView:
         self.waves_compute = WavesCompute(ids)
         self.ids = ids
 
-    def plot_pol_view_traces(self, ax, time_slice, color="b", style="-", label="", fontsize=9, labelpad=-1):
+    def plot_pol_view_traces(self, ax, time_slice, color="b", style="-", label=""):
         beam_tracing_dict = self.waves_compute.get_beam_tracing(time_slice)
         beam_data_length_for_each_wave = beam_tracing_dict["beam_data_length_for_each_wave"]
 
@@ -37,8 +37,8 @@ class WavesView:
                     display_label_once = False
                     label = ""
 
-    def plot_top_view_traces(self, ax, time_slice, color="b", style="-", label="", fontsize=9, labelpad=-1):
-        ax.set_title("Top View (X,Y)", fontsize=fontsize)
+    def plot_top_view_traces(self, ax, time_slice, color="b", style="-", label=""):
+        ax.set_title("Top View (X,Y)")
         ax.set_xlabel("X [m]")
         ax.set_ylabel("Y [m]")
 
@@ -65,8 +65,8 @@ class WavesView:
                     display_label_once = False
                     label = ""
 
-    def plot_electron_power(self, ax, time_slice, color="b", style="-", label="", fontsize=9, labelpad=-1):
-        ax.set_title("Power along the beams", fontsize=fontsize)
+    def plot_electron_power(self, ax, time_slice, color="b", style="-", label=""):
+        ax.set_title("Power along the beams")
         ax.set_xlabel("Path length [m]")
         ax.set_ylabel("P$_{electrons}$ [MW]")
 
@@ -95,8 +95,8 @@ class WavesView:
                     label = ""
         ax.legend()
 
-    def plot_power_flow_normal(self, ax, time_slice, color="b", style="-", label="", fontsize=9, labelpad=-1):
-        ax.set_title("Power flow to the magnetic field", fontsize=fontsize)
+    def plot_power_flow_normal(self, ax, time_slice, color="b", style="-", label=""):
+        ax.set_title("Power flow to the magnetic field")
         ax.set_xlabel("Path length [m]")
 
         beam_tracing_dict = self.waves_compute.get_beam_tracing(time_slice)

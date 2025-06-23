@@ -83,9 +83,7 @@ if __name__ == "__main__":
         canvas.fig.subplots_adjust(top=0.928, bottom=0.11, left=0.033, right=0.91, hspace=0.435, wspace=0.518)
         canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
 
-        canvas.fig.suptitle(
-            get_title(args, "Plasma kinetic profiles ", kp_view.k_profiles.time_value_core_profiles), size=12
-        )
+        canvas.fig.suptitle(get_title(args, "Plasma kinetic profiles ", kp_view.k_profiles.time_value_core_profiles))
 
         if args.save:
             fname = get_file_name(

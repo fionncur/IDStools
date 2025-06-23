@@ -73,7 +73,7 @@ if __name__ == "__main__":
     canvas = PlotCanvas(3, 1)
 
     canvas.update_style(args.rc)
-    canvas.fig.suptitle(title, size=12)
+    canvas.fig.suptitle(title)
 
     ax1 = canvas.add_axes(title="", xlabel="", row=0, col=0, colspan=1)
     ax2 = canvas.add_axes(title="", xlabel="", row=1, col=0, colspan=1)
@@ -89,7 +89,7 @@ if __name__ == "__main__":
 
     canvas.fig.subplots_adjust(top=0.916, bottom=0.09, left=0.044, right=0.953, hspace=0.287, wspace=0.2)
     canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
-    canvas.fig.suptitle(get_title(args, "Pressure", time_value), size=12)
+    canvas.fig.suptitle(get_title(args, "Pressure", time_value))
 
     if args.save:
         fname = get_file_name(args, os.path.basename(__file__) + "_Pressure", time_value)

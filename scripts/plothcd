@@ -101,7 +101,7 @@ def _show_waves_plots(connargs, args, hold=False, dd_update=False):
             wspace=0.13,
         )
         canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
-        canvas.fig.suptitle(get_title(connargs, "HCD Waves Plot", time_value), size=12)
+        canvas.fig.suptitle(get_title(connargs, "HCD Waves Plot", time_value))
         if args["save"]:
             fname = get_file_name(connargs, "hcd_waves_plot", time_value)
             canvas.save(fname)
@@ -188,7 +188,7 @@ def _show_distribution_plots(connargs, args, hold=False, dd_update=False):
             wspace=0.328,
         )
         canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
-        canvas.fig.suptitle(get_title(connargs, "HCD Distributions Plot", time_value), size=12)
+        canvas.fig.suptitle(get_title(connargs, "HCD Distributions Plot", time_value))
         if args["save"]:
             fname = get_file_name(connargs, os.path.basename(__file__) + "_Distributions_profile_time", time_value)
             canvas.save(fname)

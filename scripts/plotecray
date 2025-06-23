@@ -22,6 +22,7 @@ from idstools.utils.clihelper import (
     get_database_path,
     get_file_name,
     get_title,
+    rcparam_parser,
 )
 from idstools.utils.idshelper import get_available_ids_and_times
 from idstools.utils.idslogger import setup_logger
@@ -44,7 +45,7 @@ class MdAction(argparse.Action):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="---- Display EC wave ray-tracing results [Previously known as ecray]",
-        parents=[dbentry_parser],
+        parents=[dbentry_parser, rcparam_parser],
         formatter_class=RichHelpFormatter,
     )
     parser.add_argument(
@@ -77,7 +78,6 @@ if __name__ == "__main__":
     logger = setup_logger("module", stdout_level=logging.INFO)
 
     # Font/Colour definition
-    fontsize = 9
     bndcolor = "chocolate"
     shotcolors = ["b", "r", "c", "y", "m", "b"]
     shotstyle = ["-", "--", "-.", ":", ".", ","]
@@ -85,6 +85,7 @@ if __name__ == "__main__":
     lpad = -1
 
     canvas = PlotCanvas(2, 3)
+    canvas.update_style(args.rc)
     ax_polview = canvas.add_axes(title="", xlabel="", row=0, col=0, rowspan=2)
     ax_topview = canvas.add_axes(title="", xlabel="", row=0, col=1, rowspan=2)
     ax_powview = canvas.add_axes(title="", xlabel="", row=0, col=2)
@@ -242,8 +243,6 @@ if __name__ == "__main__":
         time_slice,
         color=color,
         style=style,
-        fontsize=fontsize,
-        labelpad=lpad,
     )
 
     equi_view.plot_topplotequilibrium(ax_topview, time_slice)
@@ -256,7 +255,7 @@ if __name__ == "__main__":
 
     canvas.fig.subplots_adjust(top=0.95, bottom=0.097, left=0, right=0.948, hspace=0.2, wspace=0.108)
     canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
-    canvas.fig.suptitle(get_title(args, "EC rays", time_value), size=12)
+    canvas.fig.suptitle(get_title(args, "EC rays", time_value))
 
     if args.save:
         fname = get_file_name(args, os.path.basename(__file__) + "_EC_rays", time_value)
