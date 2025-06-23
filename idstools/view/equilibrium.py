@@ -104,7 +104,6 @@ class EquilibriumView(BasePlot):
             ax.set_ylabel("$Z$ [m]")
             # ax.set_xlim(3.4, cartestionGrid["r2d"].max())
             # ax.set_ylim(cartestionGrid["z2d"].min() * 0.7, cartestionGrid["z2d"].max() * 0.7)
-            ax.tick_params(axis="both", which="major")
 
     def view_pulse_info(self, ax: plt.axes, title: str, hostdir: str, shot: int, run: int, t: float):
         self.database_info(ax, title, hostdir, shot, run, t)
@@ -210,11 +209,7 @@ class EquilibriumView(BasePlot):
             ax.set_ylabel("Z (m)")
 
             ax.set_xlabel("$R\\/\\mathrm{[m]}$")
-            # ax.tick_params(axis='both',which='major',labelsize=ticksize)
             ax.set_ylabel(r"$Z\/\mathrm{[m]}$")
-            # ax.tick_params(
-            #     axis="x", which="both", bottom=False, top=False, labelbottom=False
-            # )
             ax.set_title("2D equilibrium")
         else:
             ax.text(0.2, 0.5, "2D equilibrium", fontsize=10)

@@ -265,4 +265,4 @@ class WallView:
         if result is None:
             return None
         rw, zw = result
-        ax.plot(rw, zw, linewidth=2, color="red")
+        ax.plot(rw, zw, color="red")

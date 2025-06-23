@@ -51,7 +51,6 @@ class SpectrometerVisibleView:
             ax.plot(
                 channelinfo["wavelengths"],
                 channelinfo["radiance_spectral"],
-                linewidth=1.0,
                 label=f"CH#{channelinfo['identifier']:0>2g} R {channelinfo['radius']:0>0.2f} m",
             )
             filename = "_".join(
@@ -69,7 +68,6 @@ class SpectrometerVisibleView:
             ax.set_yscale("log")
         ax.set_xlabel("Wavelength (nm)")
         ax.set_ylabel(LABEL_RADIANCE)
-        ax.grid(True)
 
         ax.legend(
             bbox_to_anchor=(1.0, 0.5),
@@ -102,7 +100,6 @@ class SpectrometerVisibleView:
             ax.plot(
                 channelinfo["wavelengths"],
                 channelinfo["intensity_spectrum"] * channelinfo["exposure_time"],
-                linewidth=1.0,
                 label=f"CH#{channelinfo['identifier']:0>2g} R {channelinfo['radius']:0>0.2f} m",
             )
             filename = "_".join(

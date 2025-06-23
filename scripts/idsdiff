@@ -23,7 +23,7 @@ from rich.text import Text
 from rich_argparse import RichHelpFormatter
 
 from idstools.database import DBMaster
-from idstools.utils.clihelper import get_database_path, get_file_name
+from idstools.utils.clihelper import get_database_path, get_file_name, rcparam_parser
 from idstools.utils.idshelper import (
     get_ids_types,
     idsdiff,
@@ -76,31 +76,12 @@ def view_plot(ax, field, coordinate, field_name="", coordinate_name="", field_un
     else:
         ax.plot(coordinate, data, label=field_name)
 
-    # Set Plot properties
-    font_args = {
-        "fontfamily": kwargs.get("fontfamily", "serif"),
-        "color": kwargs.get("color", "darkred"),
-        "fontweight": kwargs.get("fontweight", "normal"),
-        "fontsize": kwargs.get("fontsize", 12),
-    }
-    ax.tick_params(
-        which="both",
-        labelsize=12,
-    )
     # ax.set_xlim(rho_tor_norm[0], rho_tor_norm[nrho - 1])
-    ax.set_xlabel(coordinate_unit, font_args, labelpad=1)
-    ax.set_ylabel(field_unit, font_args, labelpad=0)
+    ax.set_xlabel(coordinate_unit, labelpad=1)
+    ax.set_ylabel(field_unit, labelpad=0)
 
     # set legend
-    # legx_pos = 1.35
-    # legy_pos = 1.05
-    legend = ax.legend(loc="upper right")
-    frame = legend.get_frame()
-    frame.set_facecolor("0.95")
-    for label in legend.get_texts():
-        label.set_fontsize(10)
-    for label in legend.get_lines():
-        label.set_linewidth(1.5)
+    ax.legend()
 
 
 def get_filename(file_title, log_dir):
@@ -292,16 +273,15 @@ def generate_html(file_path, compare_data):
                             )
                             fig = plt.figure(figsize=(6, 4), dpi=100)
                             ax = fig.add_subplot(111)
-                            ax.set_title(description, fontsize=10)
+                            ax.set_title(description)
                             # ax.set_xlabel(coordinate_path)
-                            ax.set_ylabel("values", fontsize=10)
+                            ax.set_ylabel("values")
                             ax2 = ax.twinx()
                             ax2.plot(
                                 ax_time_a,
                                 abs_diff,
                                 "-g",
                                 label="difference",
-                                linewidth="0.5",
                             )
                             ax2.set_yscale("log")
                             if len(first) < 10:
@@ -311,7 +291,6 @@ def generate_html(file_path, compare_data):
                                     marker="o",
                                     color="r",
                                     label="first",
-                                    linewidth="0.5",
                                     ms=2,
                                 )
                             else:
@@ -320,7 +299,6 @@ def generate_html(file_path, compare_data):
                                     first,
                                     color="r",
                                     label="first",
-                                    linewidth="0.5",
                                     ms=2,
                                 )
                             if len(second) < 10:
@@ -330,7 +308,6 @@ def generate_html(file_path, compare_data):
                                     marker="D",
                                     color="b",
                                     label="second",
-                                    linewidth="0.5",
                                     ms=2,
                                 )
                             else:
@@ -339,7 +316,6 @@ def generate_html(file_path, compare_data):
                                     second,
                                     color="b",
                                     label="second",
-                                    linewidth="0.5",
                                     ms=2,
                                 )
                             ax_lines, ax_labels = ax.get_legend_handles_labels()
@@ -351,7 +327,6 @@ def generate_html(file_path, compare_data):
                                 fontsize=10,
                                 bbox_to_anchor=(1.15, 0.5),
                             )
-                            ax.grid()
                             tmpfile = BytesIO()
                             fig.savefig(tmpfile, format="svg", bbox_inches="tight")
                             encoded = base64.b64encode(tmpfile.getvalue()).decode("utf-8")
@@ -421,7 +396,7 @@ data-bs-target="#plot{plot_counter}">See details</button>
                         <td>{second_output}</td>
                     </tr>"""
 
-            elif isinstance(first, IDSInt0D) and isinstance(second, IDSInt0D):
+            elif isinstance(first, imas.ids_primitive.IDSInt0D) and isinstance(second, imas.ids_primitive.IDSInt0D):
                 threshold_min = ((first * THRESHOLD_PERCENT) / 100) - first
                 threshold_max = ((first * THRESHOLD_PERCENT) / 100) + first
                 if second > threshold_min and second < threshold_max:
@@ -432,7 +407,7 @@ data-bs-target="#plot{plot_counter}">See details</button>
                         <td>{first_output}</td>
                         <td>{second_output}</td>
                     </tr>"""
-            elif isinstance(first, IDSFloat0D) and isinstance(second, IDSFloat0D):
+            elif isinstance(first, imas.ids_primitive.IDSFloat0D) and isinstance(second, imas.ids_primitive.IDSFloat0D):
                 threshold_min = ((first * THRESHOLD_PERCENT) / 100) - first
                 threshold_max = ((first * THRESHOLD_PERCENT) / 100) + first
                 if second > threshold_min and second < threshold_max:
@@ -443,7 +418,9 @@ data-bs-target="#plot{plot_counter}">See details</button>
                         <td>{first_output}</td>
                         <td>{second_output}</td>
                     </tr>"""
-            elif isinstance(first, IDSString0D) and isinstance(second, IDSString0D):
+            elif isinstance(first, imas.ids_primitive.IDSString0D) and isinstance(
+                second, imas.ids_primitive.IDSString0D
+            ):
                 first_output, second_output = highlight_differences(first.value, second.value)
                 report_diff_line = f"""<tr>
                             <td><span class="badge {badge_color}">{status_message}</span></td>
@@ -484,6 +461,7 @@ if __name__ == "__main__":
         "  \n",
         formatter_class=RichHelpFormatter,
         usage="%(prog)s -h",
+        parents=[rcparam_parser],
     )
 
     parser.add_argument(
@@ -726,6 +704,7 @@ if __name__ == "__main__":
 
                         if args.plot and not args.html:
                             canvas = PlotCanvas(1, 1)
+                            canvas.update_style(args.rc)
                             ax = canvas.add_axes(title="", xlabel="", row=0, col=0)
 
                             view_plot(

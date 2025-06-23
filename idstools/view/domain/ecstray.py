@@ -78,7 +78,6 @@ class EcStrayView:
                         res_layer[i_harm]["r"],
                         res_layer[i_harm]["z"],
                         color="r",
-                        linewidth=2,
                     )
                     return ax_polview_plot_res
                 else:
@@ -115,7 +114,6 @@ class EcStrayView:
                     resonance_layer[i_harm]["r"],
                     resonance_layer[i_harm]["z"],
                     color="r",
-                    linewidth=2,
                 )
 
     def plot_cut_off_layer(
@@ -173,7 +171,7 @@ class EcStrayView:
 
         # TODO Work on this function to keep call back function and events and not to pass init=1
         if init == 1:
-            (ax_polview_plot_cut,) = ax.plot(cutoff_layer["r"], cutoff_layer["z"], color="g", linewidth=2)
+            (ax_polview_plot_cut,) = ax.plot(cutoff_layer["r"], cutoff_layer["z"], color="g")
             return ax_polview_plot_cut
         else:
             ax.set_data(cutoff_layer["r"], cutoff_layer["z"])

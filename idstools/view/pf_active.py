@@ -36,7 +36,6 @@ class PFActiveView:
         edgecolor="#ff0000",
         facecolor="#ff7400",
         alpha=0.7,
-        linewidth=1,
     ):
         """
         This function plots and annotates the active PF coils on a existing plot.
@@ -142,7 +141,7 @@ class PFActiveView:
                         edgecolor=edgecolor,
                         facecolor=facecolor,
                         alpha=alpha,
-                        linewidth=linewidth,
+                        linewidth=1,
                     )
 
                     ax.add_patch(parallelogram_patch)
@@ -166,7 +165,7 @@ class PFActiveView:
                         edgecolor=edgecolor,
                         facecolor=facecolor,
                         alpha=alpha,
-                        linewidth=linewidth,
+                        linewidth=1,
                     )
                     ax.add_patch(arc)
                     shapes.append(arc)
@@ -188,7 +187,7 @@ class PFActiveView:
                         edgecolor=edgecolor,
                         facecolor=facecolor,
                         alpha=alpha,
-                        linewidth=linewidth,
+                        linewidth=1,
                     )
                     inner_wedge = Wedge((r, z), radius_inner, 0, 360, edgecolor=edgecolor, facecolor="w", alpha=alpha)
 
@@ -243,9 +242,7 @@ class PFActiveView:
             ha = "right" if cindex % 2 == 0 else "left"
             text = ax.text(cx, cy, name, fontsize="small", ha=ha, color="#333333", visible=False)
             text_labels.append(text)
-        pf_active_legend = Patch(
-            edgecolor=edgecolor, facecolor=facecolor, alpha=alpha, linewidth=linewidth, label="pf_active"
-        )
+        pf_active_legend = Patch(edgecolor=edgecolor, facecolor=facecolor, alpha=alpha, linewidth=1, label="pf_active")
 
         ax.set_aspect("equal", adjustable="box")
         pf_active_legend.is_label_visible = False
