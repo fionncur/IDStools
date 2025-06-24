@@ -204,50 +204,30 @@ if __name__ == "__main__":
     else:
         title = get_title(args, "Scenario")
     if args.info:
-        try:
-            dataset_description = connection.get("dataset_description", autoconvert=False)
-            if args.dd_update:
-                dataset_description = imas.convert_ids(dataset_description, connection.factory.version)
-            if dataset_description.ids_properties.homogeneous_time == imas.ids_defs.EMPTY_INT:
-                got_dataset_description = False
-            else:
-                got_dataset_description = True
-        except Exception as e:
-            logger.warning(
-                f"Warning: The dataset_description IDS is absent from the input data-entry, detailed error: {e}"
-            )
-            got_dataset_description = False
-        # F4F specific?
-        if got_dataset_description:
+        additional_data = ""
+
+        if ids_summary.tag.name != "":
+            try:
+                additional_data = json.loads(ids_summary.tag.name)
+            except Exception as e:
+                logger.warning(f"The tag name is not a valid JSON string, detailed error: {e}")
+                additional_data = ""
+        if "date" in additional_data:
+            txtdate = additional_data["date"]
+            txttime = additional_data["time"]
+
             title += f"\nprovider={ids_summary.ids_properties.provider}, "
-            f"shot_date_time={dataset_description.pulse_time_begin}\n"
+            f"shot_date={txtdate}, shot_time={txttime}\n"
             f"data_dictionary={ids_summary.ids_properties.version_put.data_dictionary}, "
-            f"access_layer-{ids_summary.ids_properties.version_put.access_layer}"
+            f"access_layer={ids_summary.ids_properties.version_put.access_layer}"
+
         else:
-            additional_data = ""
-
-            if ids_summary.tag.name != "":
-                try:
-                    additional_data = json.loads(ids_summary.tag.name)
-                except Exception as e:
-                    logger.warning(f"The tag name is not a valid JSON string, detailed error: {e}")
-                    additional_data = ""
-            if "date" in additional_data:
-                txtdate = additional_data["date"]
-                txttime = additional_data["time"]
-
-                title += f"\nprovider={ids_summary.ids_properties.provider}, "
-                f"shot_date={txtdate}, shot_time={txttime}\n"
+            title += (
+                f"\nprovider={ids_summary.ids_properties.provider}, "
+                f"creation_date={ids_summary.ids_properties.creation_date}\n"
                 f"data_dictionary={ids_summary.ids_properties.version_put.data_dictionary}, "
                 f"access_layer={ids_summary.ids_properties.version_put.access_layer}"
-
-            else:
-                title += (
-                    f"\nprovider={ids_summary.ids_properties.provider}, "
-                    f"creation_date={ids_summary.ids_properties.creation_date}\n"
-                    f"data_dictionary={ids_summary.ids_properties.version_put.data_dictionary}, "
-                    f"access_layer={ids_summary.ids_properties.version_put.access_layer}"
-                )
+            )
 
     if not args.no_profiles:
         canvas.set_text(text=f"{get_database_path(args, time_value=time_value)}")

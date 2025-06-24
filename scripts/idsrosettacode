@@ -12,6 +12,7 @@ except ImportError:
 import numpy as np
 import pandas as pd
 import requests
+from packaging.version import Version
 from rich.progress import track
 from rich_argparse import RichHelpFormatter
 
@@ -97,10 +98,17 @@ def evaluate(expr):
 
 # apply DD4 conversion
 def get_dd4_conversion(idspath):
+    factory = imas.ids_factory.IDSFactory()
     if idspath == "dataset_description/data_entry/machine":
-        return "dataset_description/machine"
+        if Version(factory.version) <= Version("4.0.0"):
+            return "dataset_description/machine"
+        if Version(factory.version) > Version("4.0.0"):
+            return "summary/machine"
     if idspath == "dataset_description/data_entry/pulse":
-        return "dataset_description/pulse"
+        if Version(factory.version) <= Version("4.0.0"):
+            return "dataset_description/pulse"
+        if Version(factory.version) > Version("4.0.0"):
+            return "summary/pulse"
     if idspath == "summary/global_quantities/li/value":
         return "summary/global_quantities/li_3/value"
     if idspath == "summary/global_quantities/li_mhd/value":
@@ -233,10 +241,7 @@ if __name__ == "__main__":
                     else:
                         try:
                             ids_setter(ids, path, val)
-                            if idsname in ["dataset_description"]:
-                                ids.ids_properties.homogeneous_time = 2
-                            else:
-                                ids.ids_properties.homogeneous_time = 1
+                            ids.ids_properties.homogeneous_time = 1
                         except AttributeError as ae:
                             print(ae)
                             sys.exit()
@@ -254,10 +259,8 @@ if __name__ == "__main__":
                     print(f"The IDS {sids} was stored successfully for DB entry {row}")
 
     if args.debug:
-        dd = iod["dataset_description"]
         s = iod["summary"]
         barometry = iod["barometry"]
-        print(dd.ids_properties.homogeneous_time)
         print(s.boundary.type.value)
         print(s.time)
         print(s.global_quantities.ip.value)

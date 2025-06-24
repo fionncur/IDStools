@@ -45,11 +45,6 @@ if __name__ == "__main__":
         help="Force the creation of destination data-entry (existing data will be lost)",
     )
     parser.add_argument(
-        "--set-dataset-version",
-        action="store_true",
-        help="Store current DD version into dataset_description IDS if it exists",
-    )
-    parser.add_argument(
         "-i",
         "--interactive",
         action="store_true",
@@ -214,9 +209,6 @@ if __name__ == "__main__":
         except Exception as e:
             logger.error(f"Exception occurred, detailed error {e}")
         if idsobj:
-            if args.set_dataset_version and idsid[0] == "dataset_description":
-                if hasattr(idsobj, "dd_version"):
-                    idsobj.dd_version = src_dd_version
             try:
                 if idsobj.ids_properties.homogeneous_time != imas.ids_defs.EMPTY_INT:
                     print(f"Copying {idsname}")
