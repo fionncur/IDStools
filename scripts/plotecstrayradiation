@@ -16,7 +16,12 @@ from idstools.input_processing import (
     read_torbeam_output,
     read_wall,
 )
-from idstools.utils.clihelper import get_database_path, get_file_name, get_title
+from idstools.utils.clihelper import (
+    get_database_path,
+    get_file_name,
+    get_title,
+    rcparam_parser,
+)
 from idstools.utils.idslogger import setup_logger
 from idstools.view.common import PlotCanvas
 from idstools.view.core_profiles import CoreProfilesView
@@ -30,6 +35,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="---- Shows electron cyclotron stray radiation information by showing different plots",
         formatter_class=RichHelpFormatter,
+        parents=[rcparam_parser],
     )
     parser.add_argument(
         "-u",
@@ -126,6 +132,7 @@ if __name__ == "__main__":
     ecstray_view = EcStrayView(equilibrium_ids, core_profiles_ids, waves_ids)
 
     canvas = PlotCanvas(3, 3)
+    canvas.update_style(args.rc)
     ax_top_view = canvas.add_axes(title="Top View (X,Y)", xlabel="X [m]", ylabel="Y [m]", row=0, col=0, rowspan=2)
     ax_pol_view = canvas.add_axes(title="Poloidal view (R,Z)", xlabel="R [m]", ylabel="Z [m]", row=0, col=1, rowspan=2)
 

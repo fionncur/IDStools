@@ -41,7 +41,7 @@ ytick.labelsize : 10
 # Set line widths
 axes.linewidth : 0.8
 grid.linewidth : 0.5
-lines.linewidth : 2.
+lines.linewidth : 1.5
 
 # Remove legend frame
 legend.frameon : False

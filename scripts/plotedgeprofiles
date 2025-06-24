@@ -21,6 +21,7 @@ from idstools.utils.clihelper import (
     get_database_path,
     get_file_name,
     get_title,
+    rcparam_parser,
 )
 from idstools.utils.idslogger import setup_logger
 from idstools.view.common import PlotCanvas
@@ -30,7 +31,7 @@ logger = setup_logger("module", stdout_level=logging.INFO)
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="---- Edge Profile plot",
-        parents=[dbentry_parser],
+        parents=[dbentry_parser, rcparam_parser],
         formatter_class=RichHelpFormatter,
     )
 
@@ -156,7 +157,7 @@ if __name__ == "__main__":
 
     edge_profiles_view = EdgeProfilesView(edge_profile_ids)
     canvas = PlotCanvas(2, 4)
-
+    canvas.update_style(args.rc)
     ax4 = canvas.add_axes(title="", xlabel="", row=0, col=0)
     ax1 = canvas.add_axes(title="", xlabel="", row=0, col=1, rowspan=2)
     ax2 = canvas.add_axes(title="", xlabel="", row=0, col=2, rowspan=2)

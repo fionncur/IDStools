@@ -13,7 +13,12 @@ from rich_argparse import RichHelpFormatter
 from idstools.compute.common import get_nearest_time
 from idstools.compute.waves import WavesCompute
 from idstools.database import DBMaster
-from idstools.utils.clihelper import get_database_path, get_file_name, get_title
+from idstools.utils.clihelper import (
+    get_database_path,
+    get_file_name,
+    get_title,
+    rcparam_parser,
+)
 from idstools.utils.idslogger import setup_logger
 from idstools.view.common import PlotCanvas
 from idstools.view.distributions import DistributionsView
@@ -60,6 +65,7 @@ def _show_waves_plots(connargs, args, hold=False, dd_update=False):
             logger.error("Only one time slice --> ECCD and ECRH waveforms not displayed")
             rows = 1
         canvas = PlotCanvas(rows, 2)
+        canvas.update_style(args.rc)
         # canvas.setStyle(style="retro")
         canvas.set_sup_title(f"HCD Waves Plot {connargs.uri} Time : {time_value:.3f}")
 
@@ -160,6 +166,7 @@ def _show_distribution_plots(connargs, args, hold=False, dd_update=False):
         time_slice, time_value = get_nearest_time(ids_distributions.time, args["time"])
 
         canvas = PlotCanvas(3, 2)
+        canvas.update_style(args.rc)
         # canvas.setStyle(style="retro")
         canvas.set_sup_title(f"HCD Distributions Plot {connargs.uri} Time : {time_value:.3f}")
         if ntime == 1:
@@ -233,6 +240,7 @@ if __name__ == "__main__":
         + "  plothcd -ech 134713/200/schneim/MDSPLUS/TORBEAM/3 -nbi 130012/122/schneim/nf_fopla_synergy \n"
         + "  plothcd -ech imas:mdsplus?user=public;pulse=134173;run=101;database=TEST;version=3 \n",
         formatter_class=RichHelpFormatter,
+        parents=[rcparam_parser],
     )
     parser.add_argument(
         "-ech",

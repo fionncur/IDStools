@@ -24,6 +24,7 @@ from idstools.utils.clihelper import (
     get_database_path,
     get_file_name,
     get_title,
+    rcparam_parser,
 )
 from idstools.utils.idslogger import setup_logger
 from idstools.view.common import PlotCanvas
@@ -43,7 +44,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="""---- Display the plasma equilibrium from the equilibrium IDS.
         It also shows pf coils and wall position overlay if exists [Previously known as equiplot]""",
-        parents=[dbentry_parser],
+        parents=[dbentry_parser, rcparam_parser],
         formatter_class=RichHelpFormatter,
     )
     parser.add_argument("-t", "--time", help="Time (default=middle)", type=float, default=-99.0)
@@ -143,7 +144,6 @@ if __name__ == "__main__":
 
             col_size = col_size + 1
             canvas = PlotCanvas(2, col_size)
-
             ax1 = canvas.add_axes(title="", xlabel="", row=0, col=0, rowspan=2)
             axes_list1 = []
             axes_list2 = []
@@ -160,6 +160,7 @@ if __name__ == "__main__":
             canvas = PlotCanvas(1, 1)
             ax1 = canvas.add_axes(title="", xlabel="", row=0, col=0)
 
+        canvas.update_style(args.rc)
         if args.md:
             idses = ""
             mduris = []

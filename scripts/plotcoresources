@@ -18,6 +18,7 @@ from idstools.utils.clihelper import (
     get_database_path,
     get_file_name,
     get_title,
+    rcparam_parser,
 )
 from idstools.utils.idslogger import setup_logger
 from idstools.view.common import PlotCanvas
@@ -27,7 +28,7 @@ logger = setup_logger("module", stdout_level=logging.INFO)
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="---- Display core_sources results [Previously known as csplot]",
-        parents=[dbentry_parser],
+        parents=[dbentry_parser, rcparam_parser],
         formatter_class=RichHelpFormatter,
     )
 
@@ -75,6 +76,7 @@ if __name__ == "__main__":
     core_source_view = CoreSourcesView(core_sources)
 
     canvas = PlotCanvas(2, 4)
+    canvas.update_style(args.rc)
     ret = ax_power_profiles = canvas.add_axes(title=r"Power Profiles [MW/M3]", row=0, col=0)
     core_source_view.view_power_profiles(ax_power_profiles, time_slice)
 

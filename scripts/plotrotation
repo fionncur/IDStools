@@ -19,6 +19,7 @@ from idstools.utils.clihelper import (
     get_database_path,
     get_file_name,
     get_title,
+    rcparam_parser,
 )
 from idstools.utils.idslogger import setup_logger
 from idstools.view.common import PlotCanvas
@@ -28,7 +29,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="""---- Display the efield, toroidal, polidal velocities from the core_profiles IDSs
         [previously known as rotationplot]""",
-        parents=[dbentry_parser],
+        parents=[dbentry_parser, rcparam_parser],
         formatter_class=RichHelpFormatter,
     )
 
@@ -70,7 +71,7 @@ if __name__ == "__main__":
     ntime = len(ids_core_profiles.time)
 
     canvas = PlotCanvas(2, 2)
-
+    canvas.update_style(args.rc)
     ax1 = canvas.add_axes(title="", xlabel="", row=0, col=0)
     ax2 = canvas.add_axes(title="", xlabel="", row=0, col=1)
     ax3 = canvas.add_axes(title="", xlabel="", row=1, col=0)

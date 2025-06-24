@@ -12,6 +12,7 @@ from idstools.utils.clihelper import (
     get_database_path,
     get_file_name,
     get_title,
+    rcparam_parser,
 )
 from idstools.utils.idslogger import setup_logger
 from idstools.view.common import PlotCanvas
@@ -21,7 +22,7 @@ if __name__ == "__main__":
     # Management of input arguments
     parser = argparse.ArgumentParser(
         description="---- Display the plasma kinetic profiles from the core_profiles IDSs [previously known as kinplot]",
-        parents=[dbentry_parser],
+        parents=[dbentry_parser, rcparam_parser],
         formatter_class=RichHelpFormatter,
     )
 
@@ -59,6 +60,7 @@ if __name__ == "__main__":
     hostdir = get_database_path(args)
 
     canvas = PlotCanvas(3, 4)
+    canvas.update_style(args.rc)
     ax1 = canvas.add_axes(title="", xlabel="", row=0, col=0, colspan=2)
     ax2 = canvas.add_axes(title="", xlabel="", row=1, col=0, colspan=2)
     ax3 = canvas.add_axes(title="", xlabel="", row=2, col=0, colspan=2)
