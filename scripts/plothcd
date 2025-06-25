@@ -27,7 +27,7 @@ from idstools.view.waves import WavesView
 logger = setup_logger("module", stdout_level=logging.INFO)
 
 
-def _show_waves_plots(connargs, args, hold=False, dd_update=False):
+def _show_waves_plots(connargs, args, hold=False, dd_update=False, rc=""):
     conn = DBMaster.get_connection(connargs)
     if conn is None:
         logger.critical(f"data entry not found : {connargs}")
@@ -65,7 +65,7 @@ def _show_waves_plots(connargs, args, hold=False, dd_update=False):
             logger.error("Only one time slice --> ECCD and ECRH waveforms not displayed")
             rows = 1
         canvas = PlotCanvas(rows, 2)
-        canvas.update_style(args.rc)
+        canvas.update_style(rc)
         # canvas.setStyle(style="retro")
         canvas.set_sup_title(f"HCD Waves Plot {connargs.uri} Time : {time_value:.3f}")
 
@@ -116,7 +116,7 @@ def _show_waves_plots(connargs, args, hold=False, dd_update=False):
     conn.close()
 
 
-def show_waves_plots(args, hold=False, dd_update=False):
+def show_waves_plots(args, hold=False, dd_update=False,rc=""):
     pulse = args["pulse"]
     run = args["run"]
 
@@ -141,10 +141,10 @@ def show_waves_plots(args, hold=False, dd_update=False):
             f"imas:{args['backend'].lower()}?user={connargs.user};pulse={connargs.pulse};"
             f"run={connargs.run};database={connargs.database};version={connargs.version}"
         )
-        _show_waves_plots(connargs, args, hold, dd_update)
+        _show_waves_plots(connargs, args, hold, dd_update, rc)
 
 
-def _show_distribution_plots(connargs, args, hold=False, dd_update=False):
+def _show_distribution_plots(connargs, args, hold=False, dd_update=False, rc=""):
     conn = DBMaster.get_connection(connargs)
     if conn is None:
         logger.critical(f"data entry not found : {connargs}")
@@ -166,7 +166,7 @@ def _show_distribution_plots(connargs, args, hold=False, dd_update=False):
         time_slice, time_value = get_nearest_time(ids_distributions.time, args["time"])
 
         canvas = PlotCanvas(3, 2)
-        canvas.update_style(args.rc)
+        canvas.update_style(rc)
         # canvas.setStyle(style="retro")
         canvas.set_sup_title(f"HCD Distributions Plot {connargs.uri} Time : {time_value:.3f}")
         if ntime == 1:
@@ -204,7 +204,7 @@ def _show_distribution_plots(connargs, args, hold=False, dd_update=False):
     conn.close()
 
 
-def show_distribution_plots(args, hold=False, dd_update=False):
+def show_distribution_plots(args, hold=False, dd_update=False,rc=""):
     pulse = args["pulse"]
     run = args["run"]
 
@@ -228,7 +228,7 @@ def show_distribution_plots(args, hold=False, dd_update=False):
             f"imas:{args['backend'].lower()}?user={connargs.user};pulse={connargs.pulse};"
             f"run={connargs.run};database={connargs.database};version={connargs.version}"
         )
-        _show_distribution_plots(connargs, args, hold, dd_update)
+        _show_distribution_plots(connargs, args, hold, dd_update,rc)
 
 
 if __name__ == "__main__":
@@ -447,22 +447,22 @@ if __name__ == "__main__":
         ec_args["force_psi"] = None
         ec_args["hide_legend"] = False
         ec_args["save"] = args["save"]
-        show_waves_plots(ec_args, hold=holder["ech_hold"], dd_update=args["dd_update"])
+        show_waves_plots(ec_args, hold=holder["ech_hold"], dd_update=args["dd_update"], rc=args["rc"])
 
     # NUCLEAR REACTIONS
     if hcd_sources["fus"]["run"]:
         fus_args = hcd_sources["fus"]
         fus_args["save"] = args["save"]
-        show_distribution_plots(fus_args, hold=holder["icrh_hold"], dd_update=args["dd_update"])
+        show_distribution_plots(fus_args, hold=holder["icrh_hold"], dd_update=args["dd_update"], rc=args["rc"])
 
     # NBI
     if hcd_sources["nbi"]["run"]:
         nbi_args = hcd_sources["nbi"]
         nbi_args["save"] = args["save"]
-        show_distribution_plots(nbi_args, hold=holder["nbi_hold"], dd_update=args["dd_update"])
+        show_distribution_plots(nbi_args, hold=holder["nbi_hold"], dd_update=args["dd_update"], rc=args["rc"])
 
     # ICRH
     if hcd_sources["icrh"]["run"]:
         icrh_args = hcd_sources["icrh"]
         icrh_args["save"] = args["save"]
-        show_distribution_plots(icrh_args, hold=holder["fus_hold"], dd_update=args["dd_update"])
+        show_distribution_plots(icrh_args, hold=holder["fus_hold"], dd_update=args["dd_update"], rc=args["rc"])
