@@ -14,6 +14,7 @@ import types
 import numpy as np
 import pandas as pd
 import rich
+from simpleeval import simple_eval
 
 try:
     import imaspy as imas
@@ -766,7 +767,7 @@ def compare_ids(
 
 
 def get_quantities_from_pulses(
-    idspath: str, pulses: tuple, list_count: int = 0, verbose: bool = False, dd_update: bool = False
+    idspath: str, pulses: tuple, list_count: int = 0, verbose: bool = False, query=None, dd_update: bool = False
 ) -> pd.DataFrame:
     """
     The `get_quantities_from_pulses` function retrieves values from a specified IDS path for a given set of pulses and
@@ -788,6 +789,34 @@ def get_quantities_from_pulses(
         The function `get_quantities_from_pulses` returns a pandas DataFrame containing the columns "PULSE", "RUN",
         and "VALUE".
     """
+
+    numpy_functions = {
+        "mean": np.mean,
+        "median": np.median,
+        "std": np.std,
+        "var": np.var,
+        "min": np.min,
+        "max": np.max,
+        "sum": np.sum,
+        "prod": np.prod,
+        "ptp": np.ptp,
+        "any": np.any,
+        "all": np.all,
+        "abs": np.abs,
+        "sqrt": np.sqrt,
+        "log": np.log,
+        "log10": np.log10,
+        "log2": np.log2,
+        "exp": np.exp,
+        "negative": np.negative,
+        "floor": np.floor,
+        "ceil": np.ceil,
+        "rint": np.rint,
+        "size": np.size,
+        "ndim": np.ndim,
+        "shape": np.shape,
+    }
+
     idsname = idspath.split("/")[0]
     valpath = idspath[1 + len(idsname) :]
     list_counter = 0
@@ -822,13 +851,36 @@ def get_quantities_from_pulses(
                 )  # noqa: F841
             else:
                 ids = connection.get(idsname, autoconvert=False, lazy=True)  # noqa: F841
-            node = eval("ids." + valpath)
-            if node.has_value:
-                values.append(node)
-                list_counter = list_counter + 1
-                pulse_for_df.append((uri, file_path, file_time))
+            if ":" in valpath:
+                node, _, _, _ = partial_get(ids, valpath)
+            else:
+                node = eval("ids." + valpath)
+                if not node.has_value:
+                    node = None
+            if node is not None:
+                if query is not None:
+                    _value = f"'{node}'" if isinstance(node, str) else node
+
+                    if isinstance(_value, np.ndarray):
+                        _value = _value.tolist() if _value.size > 1 else _value.item()
+
+                    if query:
+                        try:
+                            result = simple_eval(query, names={"x": _value}, functions=numpy_functions)
+                            if result:
+                                values.append(node)
+                                list_counter += 1
+                                pulse_for_df.append((uri, file_path, file_time))
+                        except Exception as e:
+                            logger.warning(f"[WARNING] Failed to evaluate query '{query}': {e}")
+                            continue
+                else:
+                    values.append(node)
+                    list_counter = list_counter + 1
+                    pulse_for_df.append((uri, file_path, file_time))
         except Exception as e:
-            logger.debug(f"{e}")
+            if verbose:
+                logger.error(f"Exception occurred: {e}", exc_info=True)
 
         connection.close()
         if list_count != 0:
@@ -843,9 +895,9 @@ def get_quantities_from_pulses(
         ],
     )
 
-    df["VALUE"] = values
-    df_filtered = df[df["VALUE"].notna()]
-    df_extract = df_filtered[["URI", "VALUE"]]
+    df[idspath] = values
+    df_filtered = df[df[idspath].notna()]
+    df_extract = df_filtered[["URI", idspath]]
     return df_extract
 
 

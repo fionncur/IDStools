@@ -13,6 +13,8 @@ try:
     import imaspy as imas
 except ImportError:
     import imas
+import operator
+
 from rich.console import Console
 from rich.table import Table
 from rich_argparse import RichHelpFormatter
@@ -24,14 +26,23 @@ from idstools.utils.idshelper import get_quantities_from_pulses
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Extracts given quantities from all data entries of "
-        "a given database [Previously known as idstools/db_extractor.py]",
+        "a given database [Previously known as idstools/db_extractor.py]"
+        "e.g. dbscraper 'core_profiles/profiles_1d(0)/electrons/temperature' "
+        "--list-count 5 --query 'x[0] > 20000'",
         parents=[imas_parser],
         formatter_class=RichHelpFormatter,
     )
     parser.add_argument(
         "idspath",
-        type=str,  # nargs="*", #multiple paths not yet implemented
-        help="IDS path (starting with IDS name) to the desired data to be collected, e.g equilibrium/time",
+        type=str,
+        help="IDS paths (starting with IDS name) to the desired data to be collected, e.g. equilibrium/time core_profiles/profiles_1d(0)/electrons/temperature",
+    )
+    parser.add_argument(
+        "--query",
+        type=str,
+        required=False,
+        help="Query expression to evaluate on IDS field"
+        "Examples: 'x > 0.5', 'mean(x) > 10000', 'x[0] == 1.0', 'any(x > 5000)'",
     )
     parser.add_argument(
         "--saveas",
@@ -58,7 +69,6 @@ if __name__ == "__main__":
     )
     parser.add_argument("--verbose", action="store_true", help="Verbose mode")
     args = parser.parse_args()
-
     backend = get_backend_id(args.backend)
     dbmaster = DBMaster()
     pulses = None
@@ -76,7 +86,9 @@ if __name__ == "__main__":
         pprint.pprint(pulses)
 
     if pulses is not None:
-        df = get_quantities_from_pulses(args.idspath, tuple(pulses), args.list_count, False, dd_update=args.dd_update)
+        df = get_quantities_from_pulses(
+            args.idspath, tuple(pulses), args.list_count, args.verbose, query=args.query, dd_update=args.dd_update
+        )
         if args.saveas:
             if not Path(args.saveas).parent.exists():
                 raise FileNotFoundError(
@@ -86,13 +98,13 @@ if __name__ == "__main__":
             df.to_csv(args.saveas, na_rep="None", index=True, header=True)
         else:
             np.set_printoptions(threshold=4)
-            column_styles = {"URI": "green", "VALUE": "yellow"}
+            column_styles = {"URI": "green", args.idspath: "yellow"}
             console = Console()
             table = Table(show_header=True, header_style="bold magenta")
             for col in df.columns:
                 table.add_column(col, style=column_styles[col])
             for index, row in df.iterrows():
-                table.add_row(str(row["URI"]), str(row["VALUE"]))
+                table.add_row(str(row["URI"]), str(row[args.idspath]))
                 table.add_section()
 
             console.print(table)

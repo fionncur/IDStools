@@ -59,6 +59,7 @@ dependencies = [
     "rich_argparse",
     "six",
     "tabulate",
+    "simpleeval"
 ]
 dynamic = ["version"]
 
