@@ -116,7 +116,7 @@ def _show_waves_plots(connargs, args, hold=False, dd_update=False, rc=""):
     conn.close()
 
 
-def show_waves_plots(args, hold=False, dd_update=False,rc=""):
+def show_waves_plots(args, hold=False, dd_update=False, rc=""):
     pulse = args["pulse"]
     run = args["run"]
 
@@ -204,7 +204,7 @@ def _show_distribution_plots(connargs, args, hold=False, dd_update=False, rc="")
     conn.close()
 
 
-def show_distribution_plots(args, hold=False, dd_update=False,rc=""):
+def show_distribution_plots(args, hold=False, dd_update=False, rc=""):
     pulse = args["pulse"]
     run = args["run"]
 
@@ -228,7 +228,7 @@ def show_distribution_plots(args, hold=False, dd_update=False,rc=""):
             f"imas:{args['backend'].lower()}?user={connargs.user};pulse={connargs.pulse};"
             f"run={connargs.run};database={connargs.database};version={connargs.version}"
         )
-        _show_distribution_plots(connargs, args, hold, dd_update,rc)
+        _show_distribution_plots(connargs, args, hold, dd_update, rc)
 
 
 if __name__ == "__main__":
