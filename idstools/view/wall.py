@@ -145,31 +145,6 @@ class WallView:
 
                     ax.figure.canvas.draw_idle()
 
-            # def on_legend_click(event):
-            #     legend_object = ax.get_legend()
-            #     if not hasattr(legend_object, "is_wall_label_visible"):
-            #         legend_object.is_wall_label_visible = False
-            #     if not hasattr(legend_object, "is_wall_shape_visible"):
-            #         legend_object.is_wall_shape_visible = True
-            #     legend = event.artist
-            #     if isinstance(legend, mtext.Text) and "wall" in legend.get_text():
-            #         visible = not legend_object.is_wall_label_visible
-            #         for text in text_labels:
-            #             text.set_visible(visible)
-
-            #         legend_object.is_wall_label_visible = visible
-            #         font_weight = "bold" if visible else "normal"
-            #         legend.set_fontweight(font_weight)
-            #         ax.figure.canvas.draw_idle()
-            #     elif isinstance(legend, Rectangle) and "wall" in legend.get_label():
-            #         visible = not legend_object.is_wall_shape_visible
-            #         for scatter in shapes:
-            #             scatter.set_visible(visible)
-            #         legend_object.is_wall_shape_visible = visible
-            #         alpha_value = 1.0 if visible else 0.7
-            #         legend.set_alpha(alpha_value)
-            #         ax.figure.canvas.draw_idle()
-
             ax.figure.canvas.mpl_connect("pick_event", on_legend_click)
         title = ax.get_title()
         if title:
