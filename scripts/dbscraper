@@ -35,14 +35,17 @@ if __name__ == "__main__":
     parser.add_argument(
         "idspath",
         type=str,
-        help="IDS paths (starting with IDS name) to the desired data to be collected, e.g. equilibrium/time core_profiles/profiles_1d(0)/electrons/temperature",
+        nargs="+",
+        help="One or more IDS paths (starting with IDS name) to the desired data to be collected, e.g. "
+        "equilibrium/time core_profiles/profiles_1d(0)/electrons/temperature",
     )
     parser.add_argument(
         "--query",
         type=str,
         required=False,
         help="Query expression to evaluate on IDS field"
-        "Examples: 'x > 0.5', 'mean(x) > 10000', 'x[0] == 1.0', 'any(x > 5000)'",
+        "x1 referes to first idspath in the list, x2 to second, etc. "
+        "Examples: 'x1 > 0.5', 'mean(x1) > 10000', 'x1[0] == 1.0', 'any(x1 > 5000)'",
     )
     parser.add_argument(
         "--saveas",
@@ -89,6 +92,7 @@ if __name__ == "__main__":
         df = get_quantities_from_pulses(
             args.idspath, tuple(pulses), args.list_count, args.verbose, query=args.query, dd_update=args.dd_update
         )
+
         if args.saveas:
             if not Path(args.saveas).parent.exists():
                 raise FileNotFoundError(
@@ -98,13 +102,27 @@ if __name__ == "__main__":
             df.to_csv(args.saveas, na_rep="None", index=True, header=True)
         else:
             np.set_printoptions(threshold=4)
-            column_styles = {"URI": "green", args.idspath: "yellow"}
+            column_styles = {"URI": "green"}
+            # Add style for each idspath
+            for idspath in args.idspath:
+                column_styles[idspath] = "yellow"
+
             console = Console()
             table = Table(show_header=True, header_style="bold magenta")
-            for col in df.columns:
-                table.add_column(col, style=column_styles[col])
+            # Add columns - URI and all idspaths
+            table.add_column("URI", style="green")
+            for idspath in args.idspath:
+                table.add_column("..." + idspath[-20:], style="yellow")
+            if args.query:
+                table.add_column("..." + args.query[-20:], style="red")
+            # Add rows for each entry
             for index, row in df.iterrows():
-                table.add_row(str(row["URI"]), str(row[args.idspath]))
+                row_values = [str(row["URI"])]
+                for idspath in args.idspath:
+                    row_values.append(str(row[idspath]))
+                if args.query:
+                    row_values.append(str(row[args.query]))
+                table.add_row(*row_values)
                 table.add_section()
 
             console.print(table)
