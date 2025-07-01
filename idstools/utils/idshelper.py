@@ -14,7 +14,7 @@ import types
 import numpy as np
 import pandas as pd
 import rich
-from simpleeval import simple_eval
+import scipy
 
 try:
     import imaspy as imas
@@ -766,6 +766,71 @@ def compare_ids(
     return identical, output
 
 
+def get_ids_values(uri: str, idspaths: str | list, dd_update=False, verbose=False):
+    connection = imas.DBEntry(uri, "r")
+    if isinstance(idspaths, str):
+        idspaths = [idspaths]
+
+    output = {}
+    # Process each IDS path for this pulse
+    for full_path, idsname, valpath in idspaths:
+        try:
+            output[full_path] = None
+            if dd_update:
+                ids = imas.convert_ids(connection.get(idsname, autoconvert=False), connection.factory.version)
+            else:
+                ids = connection.get(idsname, autoconvert=False, lazy=True)
+
+            if ":" in valpath:
+                node, _, _, _ = partial_get(ids, valpath)
+            else:
+                node = eval("ids." + valpath)
+                if isinstance(node, imas.ids_primitive.IDSPrimitive) and not node.has_value:
+                    node = None
+                elif node == []:
+                    node = None
+            if node is not None:
+                output[full_path] = node
+        except Exception as e:
+            if verbose:
+                logger.error(f"Exception for {full_path}: {e}", exc_info=True)
+
+    connection.close()
+    return output
+
+
+def execute_query(
+    query: str,
+    ids_values: dict,
+):
+    query_names = {}
+    qcounter = 1
+    are_values_present = True
+    output = None
+    for _, ids_value in ids_values.items():
+        if ids_value is None:
+            are_values_present = False
+            break
+        _value = ids_value
+        if isinstance(_value, str):
+            _value = f"'{ids_value}'"
+        elif isinstance(_value, imas.ids_primitive.IDSNumericArray):
+            _value = _value.value
+        query_names[f"x{qcounter}"] = _value
+        qcounter += 1
+    query_names["np"] = np
+    query_names["scipy"] = scipy
+    if are_values_present:
+        result = eval(query, {}, query_names)
+        if result is not None:
+            if isinstance(result, (np.bool_, bool)):
+                if result:
+                    output = True
+            else:
+                output = result
+    return output
+
+
 def get_quantities_from_pulses(
     idspath: list, pulses: tuple, list_count: int = 0, verbose: bool = False, query=None, dd_update: bool = False
 ) -> pd.DataFrame:
@@ -791,68 +856,6 @@ def get_quantities_from_pulses(
         The function returns a pandas DataFrame containing the columns "URI", "FILEPATH", "FILETIME" and
         one column for each IDS path specified.
     """
-
-    def where_index(arr, value):
-        result = np.where(np.array(arr) == value)[0]
-        return int(result[0]) if result.size > 0 else -1
-
-    def integrate_profiles(profiles, axis):
-        """
-        Numerically integrates multiple 1D profiles over a shared axis using the trapezoidal rule.
-
-        Parameters:
-        - profiles: 2D array-like, shape (n_series, n_points)
-        Each row represents a profile to integrate.
-        - axis: 1D array-like, shape (n_points,)
-        The common x-axis (e.g., time, space, volume) over which to integrate.
-
-        Returns:
-        - List of floats: Integrated values per profile
-        """
-        profiles = np.asarray(profiles)
-        axis = np.asarray(axis)
-
-        if profiles.ndim != 2:
-            raise ValueError("profiles must be a 2D array (n_series x n_points)")
-        if axis.ndim != 1:
-            raise ValueError("axis must be a 1D array")
-        if profiles.shape[1] != axis.shape[0]:
-            raise ValueError("Each profile must match the length of the axis")
-
-        return [float(np.trapz(profile, axis)) for profile in profiles]
-
-    numpy_functions = {
-        "mean": np.mean,
-        "median": np.median,
-        "std": np.std,
-        "var": np.var,
-        "min": np.min,
-        "max": np.max,
-        "sum": np.sum,
-        "prod": np.prod,
-        "ptp": np.ptp,
-        "any": np.any,
-        "all": np.all,
-        "abs": np.abs,
-        "sqrt": np.sqrt,
-        "log": np.log,
-        "log10": np.log10,
-        "log2": np.log2,
-        "exp": np.exp,
-        "negative": np.negative,
-        "floor": np.floor,
-        "ceil": np.ceil,
-        "rint": np.rint,
-        "size": np.size,
-        "ndim": np.ndim,
-        "shape": np.shape,
-        "where_index": where_index,
-        "argmax": np.argmax,
-        "argmin": np.argmin,
-        "slice": slice,
-        "integrate_profiles": integrate_profiles,
-    }
-
     # Convert single string to list for consistent handling
     if isinstance(idspath, str):
         idspath = [idspath]
@@ -882,78 +885,31 @@ def get_quantities_from_pulses(
         if backend == imas.ids_defs.HDF5_BACKEND:
             backend_string = "hdf5"
 
-        uri = f'"imas:{backend_string}?user={user};shot={pulse};run={run};database={database};version={version}"'
+        uri = f"imas:{backend_string}?user={user};shot={pulse};run={run};database={database};version={version}"
         if verbose:
             print(f"fetching data from {pulse}, {run}")
-
-        connection = imas.DBEntry(backend, database, pulse, run, user, version)
-        connection.open()
-
-        pulse_data = {"URI": uri, "FILEPATH": file_path, "FILETIME": file_time}
         found_values = False
-
-        # Process each IDS path for this pulse
-        for full_path, idsname, valpath in paths_info:
-            try:
-                if dd_update:
-                    ids = imas.convert_ids(connection.get(idsname, autoconvert=False), connection.factory.version)
-                else:
-                    ids = connection.get(idsname, autoconvert=False, lazy=True)
-
-                if ":" in valpath:
-                    node, _, _, _ = partial_get(ids, valpath)
-                else:
-                    node = eval("ids." + valpath)
-                    if isinstance(node, imas.ids_primitive.IDSPrimitive) and not node.has_value:
-                        node = None
-                    elif node == []:
-                        node = None
-                if node is not None:
-                    pulse_data[full_path] = node
-                    if query is None:
-                        found_values = True
-                else:
-                    pulse_data[full_path] = None
-            except Exception as e:
-                if verbose:
-                    logger.error(f"Exception for {full_path}: {e}", exc_info=True)
-                pulse_data[full_path] = None
-
-        connection.close()
-
-        if query is not None:
-            query_names = {}
-            qcounter = 1
-            are_values_present = True
-            for full_path, idsname, valpath in paths_info:
-                if pulse_data[full_path] is None:
-                    are_values_present = False
+        pulse_data = {"URI": uri, "FILEPATH": file_path, "FILETIME": file_time}
+        ids_values = get_ids_values(uri, paths_info, dd_update=dd_update, verbose=verbose)
+        if ids_values:
+            for _path, _value in ids_values.items():
+                if _value is None:
+                    if verbose:
+                        print(uri, _path, "is None, skipping")
+                    found_values = False
                     break
-                _value = pulse_data[full_path]
-                if isinstance(_value, str):
-                    _value = f"'{pulse_data[full_path]}'"
-                elif isinstance(_value, imas.ids_primitive.IDSNumericArray):
-                    _value = _value.value
-                # required to simpleeval
-                if isinstance(_value, np.ndarray):
-                    if len(_value) != 0:
-                        _value = _value.tolist() if _value.size > 1 else _value.item()
-                query_names[f"x{qcounter}"] = _value
-                qcounter += 1
-            if are_values_present:
-                try:
-                    result = simple_eval(query, names=query_names, functions=numpy_functions)
-                    if result is not None:
-                        if isinstance(result, bool):
-                            if result:
-                                pulse_data[query] = True
-                                found_values = True
-                        else:
-                            pulse_data[query] = result
-                            found_values = True
-                except Exception as e:
-                    logger.warning(f"[WARNING] Failed to evaluate query '{query}' for {full_path}: {e}")
-                    pulse_data[query] = None
+                pulse_data[_path] = _value
+                if query is None:
+                    found_values = True
+            if query is not None:
+                pulse_data[query] = execute_query(query, ids_values)
+                if isinstance(pulse_data[query], (bool, np.bool_)):
+                    found_values = True
+                elif isinstance(pulse_data[query], np.ndarray):
+                    if pulse_data[query].size > 0:
+                        found_values = True
+                elif pulse_data[query] is not None:
+                    found_values = True
         if found_values:
             results.append(pulse_data)
             list_counter += 1

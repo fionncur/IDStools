@@ -17,6 +17,7 @@ import operator
 
 from rich.console import Console
 from rich.table import Table
+from rich.text import Text
 from rich_argparse import RichHelpFormatter
 
 from idstools.database import DBMaster
@@ -70,7 +71,11 @@ if __name__ == "__main__":
             "otherwise, use the original IDS stored on disk."
         ),
     )
-    parser.add_argument("--verbose", action="store_true", help="Verbose mode")
+    parser.add_argument(
+        "--verbose",
+        action="store_true",
+        help="Verbose mode, prints additional information",
+    )
     args = parser.parse_args()
     backend = get_backend_id(args.backend)
     dbmaster = DBMaster()
@@ -110,18 +115,37 @@ if __name__ == "__main__":
             console = Console()
             table = Table(show_header=True, header_style="bold magenta")
             # Add columns - URI and all idspaths
-            table.add_column("URI", style="green")
+            table.add_column("URI", style="green", no_wrap=False)
             for idspath in args.idspath:
-                table.add_column("..." + idspath[-20:], style="yellow")
+                idspath_text = Text(str(idspath), overflow="fold")
+                table.add_column(idspath_text, style="yellow")
             if args.query:
-                table.add_column("..." + args.query[-20:], style="red")
+                query_text = Text(str(args.query), overflow="fold")
+                table.add_column(query_text, style="red")
             # Add rows for each entry
             for index, row in df.iterrows():
-                row_values = [str(row["URI"])]
+                uri_text = Text(str(row["URI"]), overflow="fold")
+                row_values = [uri_text]
                 for idspath in args.idspath:
-                    row_values.append(str(row[idspath]))
+                    val = row[idspath]
+                    # If val is numpy array, convert to full string
+                    if isinstance(val, np.ndarray):
+                        if val.size <= 10:
+                            val_str = np.array2string(val, precision=3, suppress_small=True)
+                        else:
+                            val_str = f"{val.shape} array (mean={np.mean(val):.2f})"
+                        row_values.append(val_str)
+                    else:
+                        row_values.append(str(val))
                 if args.query:
-                    row_values.append(str(row[args.query]))
+                    val = row[args.query]
+                    if isinstance(val, np.ndarray):
+                        if val.size <= 10:
+                            val_str = np.array2string(val, precision=3, suppress_small=True)
+                        else:
+                            val_str = f"{val.shape} array (mean={np.mean(val):.2f})"
+                    else:
+                        row_values.append(str(val))
                 table.add_row(*row_values)
                 table.add_section()
 

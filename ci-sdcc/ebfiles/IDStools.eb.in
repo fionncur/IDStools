@@ -48,9 +48,6 @@ exts_list = [
     ('tabulate', '0.9.0', {
         'checksums': ['0095b12bf5966de529c0feb1fa08671671b3368eec77d7ef7ab114be2c068b3c'],
     }),
-    ('simpleeval', '1.0.3', {
-        'checksums': ['67bbf246040ac3b57c29cf048657b9cf31d4e7b9d6659684daa08ca8f1e45829'],
-    }),
     ('build', '1.0.3', {
         'checksums': ['9f8f6a3b5e5f8c8e8f3b6e6f8c8e8f3b6e6f8c8e8f3b6e6f8c8e8f3b6e6f8c8e'],
     }),
