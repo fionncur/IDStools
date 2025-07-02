@@ -783,13 +783,13 @@ def get_ids_values(uri: str, idspaths: str | list, dd_update=False, verbose=Fals
 
             if ":" in valpath:
                 node, _, _, _ = partial_get(ids, valpath)
-                if node.size ==0:
+                if node.size == 0:
                     node = None
             else:
                 node = eval("ids." + valpath)
                 if isinstance(node, imas.ids_primitive.IDSPrimitive) and not node.has_value:
                     node = None
-                elif node.size ==0:
+                elif node.size == 0:
                     node = None
             if node is not None:
                 output[full_path] = node
@@ -905,7 +905,7 @@ def get_quantities_from_pulses(
                     found_values = True
             if query is not None:
                 pulse_data[query] = execute_query(query, ids_values)
-                
+
                 if isinstance(pulse_data[query], (bool, np.bool_)):
                     found_values = True
                 elif isinstance(pulse_data[query], np.ndarray):

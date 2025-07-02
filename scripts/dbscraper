@@ -61,7 +61,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--list-count",
         type=int,
-        default = 0,
+        default=0,
         help="number of entries user needs to display",
     )
     parser.add_argument(
