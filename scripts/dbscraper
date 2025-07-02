@@ -61,6 +61,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--list-count",
         type=int,
+        default = 0,
         help="number of entries user needs to display",
     )
     parser.add_argument(
@@ -144,6 +145,7 @@ if __name__ == "__main__":
                             val_str = np.array2string(val, precision=3, suppress_small=True)
                         else:
                             val_str = f"{val.shape} array (mean={np.mean(val):.2f})"
+                        row_values.append(val_str)
                     else:
                         row_values.append(str(val))
                 table.add_row(*row_values)

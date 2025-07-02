@@ -150,3 +150,11 @@ Example:
             else:
                 console.print(f"[bold yellow]{key}[/bold yellow]:")
                 console.print(Pretty(value))
+    else:
+        console = Console()
+        console.print(
+            f"[bold red]No values found for the provided IDS paths: {', '.join(idspath)}[/bold red]",
+            style="red",
+        )
+        if args.query:
+            console.print(f"[bold red]Query expression '{args.query}' did not return any results.[/bold red]")

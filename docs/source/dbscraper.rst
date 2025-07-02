@@ -70,6 +70,32 @@ and identifying pulses with specific characteristics of interest.
         │ ersion=3                                                   │                                          │                                           │                                                            │
         └────────────────────────────────────────────────────────────┴──────────────────────────────────────────┴───────────────────────────────────────────┴────────────────────────────────────────────────────────────┘
 
+        $ dbscraper "summary/global_quantities/ip/value" --list-count 5 --query "np.max(np.abs(x1)) > 5000000 and np.max(np.abs(x1)) < 7500000"
+        ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+        ┃                                        ┃                                         ┃ np.max(np.abs(x1)) > 5000000 and       ┃
+        ┃ URI                                    ┃ summary/global_quantities/ip/value      ┃ np.max(np.abs(x1)) < 7500000           ┃
+        ┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
+        │ imas:mdsplus?user=public;shot=103034;r │ <IDSNumericArray (IDS:summary,          │ True                                   │
+        │ un=3;database=ITER;version=3           │ global_quantities/ip/value, FLT_1D)>    │                                        │
+        │                                        │ numpy.ndarray([-5107787.292])           │                                        │
+        ├────────────────────────────────────────┼─────────────────────────────────────────┼────────────────────────────────────────┤
+        │ imas:mdsplus?user=public;shot=103047;r │ <IDSNumericArray (IDS:summary,          │ True                                   │
+        │ un=3;database=ITER;version=3           │ global_quantities/ip/value, FLT_1D)>    │                                        │
+        │                                        │ numpy.ndarray([-5107787.292])           │                                        │
+        ├────────────────────────────────────────┼─────────────────────────────────────────┼────────────────────────────────────────┤
+        │ imas:mdsplus?user=public;shot=103055;r │ <IDSNumericArray (IDS:summary,          │ True                                   │
+        │ un=3;database=ITER;version=3           │ global_quantities/ip/value, FLT_1D)>    │                                        │
+        │                                        │ numpy.ndarray([-5107787.292])           │                                        │
+        ├────────────────────────────────────────┼─────────────────────────────────────────┼────────────────────────────────────────┤
+        │ imas:mdsplus?user=public;shot=103033;r │ <IDSNumericArray (IDS:summary,          │ True                                   │
+        │ un=3;database=ITER;version=3           │ global_quantities/ip/value, FLT_1D)>    │                                        │
+        │                                        │ numpy.ndarray([-5107787.292])           │                                        │
+        ├────────────────────────────────────────┼─────────────────────────────────────────┼────────────────────────────────────────┤
+        │ imas:mdsplus?user=public;shot=103042;r │ <IDSNumericArray (IDS:summary,          │ True                                   │
+        │ un=3;database=ITER;version=3           │ global_quantities/ip/value, FLT_1D)>    │                                        │
+        │                                        │ numpy.ndarray([-5107787.292])           │                                        │
+        └────────────────────────────────────────┴─────────────────────────────────────────┴────────────────────────────────────────┘
+
         # List data entries which has D+ ion density values
         $ dbscraper "core_profiles/profiles_1d(0)/ion(:)/label" --list-count 5 --query "'D+' in x1"
 
