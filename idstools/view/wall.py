@@ -90,8 +90,7 @@ class WallView:
         if vessel_units := self.compute_object.get_vessel_units(
             select_description2d=select_description2d, select_unit=select_unit
         ):
-            text_labels = []
-            shapes = []
+            legend_map = {}
             for _, description2d in vessel_units.items():
                 for v_index, vessel_unit in description2d["vesselunits"].items():
                     show_label_flag = True
@@ -125,32 +124,25 @@ class WallView:
                                     **kwargs,
                                 )
                             show_label_flag = False
-                            text_labels.append(text)
-                            shapes.append(shape)
+                            legend_map[text] = shape
 
             def on_legend_click(event):
-                legend_object = ax.get_legend()
-                if not hasattr(legend_object, "is_wall_label_visible"):
-                    legend_object.is_wall_label_visible = False
-                if not hasattr(legend_object, "is_wall_shape_visible"):
-                    legend_object.is_wall_shape_visible = True
                 legend = event.artist
-                if isinstance(legend, mtext.Text) and "wall" in legend.get_text():
-                    visible = not legend_object.is_wall_label_visible
-                    for text in text_labels:
-                        text.set_visible(visible)
 
-                    legend_object.is_wall_label_visible = visible
-                    font_weight = "bold" if visible else "normal"
-                    legend.set_fontweight(font_weight)
+                if isinstance(legend, mtext.Text) and "wall" in legend.get_text():
+                    for text, scatter in legend_map.items():
+                        if legend.get_text() == text.get_text():
+                            font_weight = "bold" if not text.get_visible() else "normal"
+                            legend.set_fontweight(font_weight)
+                            text.set_visible(not text.get_visible())
                     ax.figure.canvas.draw_idle()
                 elif isinstance(legend, Rectangle) and "wall" in legend.get_label():
-                    visible = not legend_object.is_wall_shape_visible
-                    for scatter in shapes:
-                        scatter.set_visible(visible)
-                    legend_object.is_wall_shape_visible = visible
-                    alpha_value = 1.0 if visible else 0.7
-                    legend.set_alpha(alpha_value)
+                    for text, scatter in legend_map.items():
+                        if legend.get_label() == text.get_text():
+                            alpha_value = 1.0 if not scatter.get_visible() else 0.7
+                            legend.set_alpha(alpha_value)
+                            scatter.set_visible(not scatter.get_visible())
+
                     ax.figure.canvas.draw_idle()
 
             ax.figure.canvas.mpl_connect("pick_event", on_legend_click)
@@ -196,59 +188,45 @@ class WallView:
         if limiter_units := self.compute_object.get_limiter_units(
             select_description2d=select_description2d, select_unit=select_unit
         ):
-            text_labels = []
-            shapes = []
-            show_label_flag = True
+            legend_map = {}
+            counter = 0
             for idescription2d, description2d in limiter_units.items():
                 for l_index, limiter_unit in description2d["limiterunits"].items():
+                    print(limiter_unit["name"])
                     if wallcolor:
                         kwargs.update({"color": wallcolor})
                     else:
                         kwargs.update({"color": colors[(l_index + v_index) % 4]})
-                    if show_label_flag:
-                        shape, text = self.add_wall_markings(
-                            ax,
-                            limiter_unit["r"],
-                            limiter_unit["z"],
-                            fill=False,
-                            label=f"wall/{limiter_unit['name']}" if limiter_unit["name"] != "" else "wall/limiter",
-                            **kwargs,
-                        )
-
-                        show_label_flag = False
                     shape, text = self.add_wall_markings(
                         ax,
                         limiter_unit["r"],
                         limiter_unit["z"],
                         fill=False,
+                        label=(
+                            f"wall/{limiter_unit['name']}" if limiter_unit["name"] != "" else f"wall/limiter{counter}"
+                        ),
                         **kwargs,
                     )
-                    text_labels.append(text)
-                    shapes.append(shape)
+                    counter = counter + 1
+                    legend_map[text] = shape
 
             def on_legend_click(event):
-                legend_object = ax.get_legend()
-                if not hasattr(legend_object, "is_wall_label_visible"):
-                    legend_object.is_wall_label_visible = False
-                if not hasattr(legend_object, "is_wall_shape_visible"):
-                    legend_object.is_wall_shape_visible = True
                 legend = event.artist
-                if isinstance(legend, mtext.Text) and "wall" in legend.get_text():
-                    visible = not legend_object.is_wall_label_visible
-                    for text in text_labels:
-                        text.set_visible(visible)
 
-                    legend_object.is_wall_label_visible = visible
-                    font_weight = "bold" if visible else "normal"
-                    legend.set_fontweight(font_weight)
+                if isinstance(legend, mtext.Text) and "wall" in legend.get_text():
+                    for text, scatter in legend_map.items():
+                        if legend.get_text() == text.get_text():
+                            font_weight = "bold" if not text.get_visible() else "normal"
+                            legend.set_fontweight(font_weight)
+                            text.set_visible(not text.get_visible())
                     ax.figure.canvas.draw_idle()
                 elif isinstance(legend, Rectangle) and "wall" in legend.get_label():
-                    visible = not legend_object.is_wall_shape_visible
-                    for scatter in shapes:
-                        scatter.set_visible(visible)
-                    legend_object.is_wall_shape_visible = visible
-                    alpha_value = 1.0 if visible else 0.7
-                    legend.set_alpha(alpha_value)
+                    for text, scatter in legend_map.items():
+                        if legend.get_label() == text.get_text():
+                            alpha_value = 1.0 if not scatter.get_visible() else 0.7
+                            legend.set_alpha(alpha_value)
+                            scatter.set_visible(not scatter.get_visible())
+
                     ax.figure.canvas.draw_idle()
 
             ax.figure.canvas.mpl_connect("pick_event", on_legend_click)
