@@ -838,7 +838,7 @@ class CoreProfilesCompute:
         pressure_electron_total = dict_electrons_pressure_properties["pressure_electron_total"]
 
         pressure_ion_total = self.get_pressure_ion_total(time_slice)
-        pressure_total = pressure_electron_total
+        pressure_total = np.copy(pressure_electron_total)
         if pressure_ion_total is not None:
             pressure_total += pressure_ion_total
 

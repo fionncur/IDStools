@@ -79,9 +79,9 @@ class KineticProfilesCompute:
         self.ion_temperature = None
         self.ion_density = None
 
-        self.vtor_flag = None
-        self.vtor_e_flag = None
-        self.ion_vtor = None
+        self.vphi_flag = None
+        self.vphi_e_flag = None
+        self.ion_vphi = None
 
         self.vpol_flag = None
         self.vpol_e_flag = None
@@ -92,8 +92,8 @@ class KineticProfilesCompute:
 
         self.profiles = None
 
-        self.max_vtor = None
-        self.min_vtor = None
+        self.max_vphi = None
+        self.min_vphi = None
         self.max_vpol = None
         self.min_vpol = None
 
@@ -135,10 +135,10 @@ class KineticProfilesCompute:
         self.ti_flag, self.ti_e_flag = self.getti_flag()  # Ti profile (not mandatory)
         self.ion_temperature = self.get_ion_temperature()  # ion temerature
         self.ion_density = self.get_ion_density()  # Ni profile (not mandatory)
-        vtor_profile = self.get_v_tor_profile()  # Vtor profile (not mandatory)
-        self.vtor_flag = vtor_profile["vtor_flag"]
-        self.vtor_e_flag = vtor_profile["vtor_e_flag"]
-        self.ion_vtor = vtor_profile["ion_vtor"]
+        vphi_profile = self.get_v_phi_profile()  # Vphi profile (not mandatory)
+        self.vphi_flag = vphi_profile["vphi_flag"]
+        self.vphi_e_flag = vphi_profile["vphi_e_flag"]
+        self.ion_vphi = vphi_profile["ion_vphi"]
         vpol_profile = self.get_vpol_profile()  # Vpol profile (not mandatory)
         self.vpol_flag = vpol_profile["vpol_flag"]
         self.vpol_e_flag = vpol_profile["vpol_e_flag"]
@@ -149,8 +149,8 @@ class KineticProfilesCompute:
         self.profiles = self.get_profiles()  # Create the dictionary defining the list of profiles
 
         velocity_profiles = self.get_min_max_velocity_profiles()  # Min and max of velocity profiles
-        self.max_vtor = velocity_profiles["max_vtor"]
-        self.min_vtor = velocity_profiles["min_vtor"]
+        self.max_vphi = velocity_profiles["max_vphi"]
+        self.min_vphi = velocity_profiles["min_vphi"]
         self.max_vpol = velocity_profiles["max_vpol"]
         self.min_vpol = velocity_profiles["min_vpol"]
 
@@ -1116,48 +1116,48 @@ class KineticProfilesCompute:
                                     )
         return ion_density
 
-    def get_v_tor_profile(self):
+    def get_v_phi_profile(self):
         """
         This function retrieves toroidal velocity profiles for ions from core and edge plasma profiles.
 
         Returns:
-            The function `get_v_tor_profile` returns a dictionary with three keys:
-            1. "vtor_flag": Indicates the status of the toroidal velocity for the core profiles. It can have
+            The function `get_v_phi_profile` returns a dictionary with three keys:
+            1. "vphi_flag": Indicates the status of the toroidal velocity for the core profiles. It can have
             values 0, 1, or 2.
-            2. "vtor_e_flag": Indicates the status of the toroidal velocity for the edge profiles. It can
+            2. "vphi_e_flag": Indicates the status of the toroidal velocity for the edge profiles. It can
             have values 0, 1
         """
-        vtor_flag = 0
-        vtor_e_flag = 0
-        ion_vtor = {}
+        vphi_flag = 0
+        vphi_e_flag = 0
+        ion_vphi = {}
         for ispecies in range(self.nspecies_core):
-            ion_vtor[ispecies] = [0] * (self.nrho + self.erho)
+            ion_vphi[ispecies] = [0] * (self.nrho + self.erho)
             if self.is_core_profiles_present:
-                vtoroid = self.core_profiles.profiles_1d[self.time_index_core_profiles].ion[ispecies].velocity.toroidal
-                if len(vtoroid) != self.nrho:
+                vphioid = self.core_profiles.profiles_1d[self.time_index_core_profiles].ion[ispecies].velocity.toroidal
+                if len(vphioid) != self.nrho:
                     logger.warning(f"core_profiles.profiles_1d[:].ion[{ispecies}].velocity.toroidal could not be read.")
                     logger.warning(
                         f"Size mismatch: rho_tor_norm = {self.nrho}, ion[{ispecies}].velocity.toroidal = "
-                        f"{len(vtoroid)}"
+                        f"{len(vphioid)}"
                     )
-                    vtoroid = np.asarray([np.NaN] * self.nrho)
+                    vphioid = np.asarray([np.NaN] * self.nrho)
                 else:
-                    vtor_flag = 1
+                    vphi_flag = 1
                     for i in range(self.nrho):
-                        ion_vtor[ispecies][i] = abs(vtoroid[i])
+                        ion_vphi[ispecies][i] = abs(vphioid[i])
                 if hasattr(self.core_profiles.profiles_1d[self.time_index_core_profiles].ion[ispecies], "velocity_tor"):
-                    vtor = self.core_profiles.profiles_1d[self.time_index_core_profiles].ion[ispecies].velocity_tor
-                    if len(vtor) != self.nrho:
+                    vphi = self.core_profiles.profiles_1d[self.time_index_core_profiles].ion[ispecies].velocity_tor
+                    if len(vphi) != self.nrho:
                         logger.warning(f"core_profiles.profiles_1d[:].ion[{ispecies}].velocity_tor could not be read.")
                         logger.warning(
-                            f"Size mismatch: rho_tor_norm = {self.nrho}, ion[{ispecies}].velocity_tor = " f"{len(vtor)}"
+                            f"Size mismatch: rho_tor_norm = {self.nrho}, ion[{ispecies}].velocity_tor = " f"{len(vphi)}"
                         )
-                        vtor = np.asarray([np.NaN] * self.nrho)
+                        vphi = np.asarray([np.NaN] * self.nrho)
                     else:
-                        if vtor_flag == 0:
-                            vtor_flag = 2
+                        if vphi_flag == 0:
+                            vphi_flag = 2
                             for i in range(self.nrho):
-                                ion_vtor[ispecies][i] = abs(vtor[i])
+                                ion_vphi[ispecies][i] = abs(vphi[i])
             if self.is_edge_profiles_present:
                 jspecies = self.species_map[ispecies]
                 if jspecies != -99:
@@ -1169,31 +1169,31 @@ class KineticProfilesCompute:
                         )
                         if multiple_states_flag == 0:
                             try:
-                                vtor = (
+                                vphi = (
                                     self.edge_profiles.profiles_1d[self.time_index_edge_profiles]
                                     .ion[jspecies]
                                     .velocity.toroidal
                                 )
-                                if len(vtor) == self.erho:
+                                if len(vphi) == self.erho:
                                     for i in range(self.erho):
-                                        ion_vtor[ispecies][self.nrho + i] = abs(vtor[i])
-                                    vtor_e_flag = 1
+                                        ion_vphi[ispecies][self.nrho + i] = abs(vphi[i])
+                                    vphi_e_flag = 1
                             except Exception as e:
                                 logger.debug(f"{e}")
                                 logger.warning(
                                     f"edge_profiles.profiles_1d[:].ion[{jspecies}].velocity.toroidal could not be read."
                                 )
-                            if vtor_e_flag != 1:
+                            if vphi_e_flag != 1:
                                 try:
-                                    vtor = (
+                                    vphi = (
                                         self.edge_profiles.profiles_1d[self.time_index_edge_profiles]
                                         .ion[jspecies]
                                         .velocity_tor
                                     )
-                                    if len(vtor) == self.erho:
+                                    if len(vphi) == self.erho:
                                         for i in range(self.erho):
-                                            ion_vtor[ispecies][self.nrho + i] = abs(vtor[i])
-                                        vtor_e_flag = 2
+                                            ion_vphi[ispecies][self.nrho + i] = abs(vphi[i])
+                                        vphi_e_flag = 2
                                 except Exception as e:
                                     logger.debug(f"{e}")
                                     logger.warning(
@@ -1204,52 +1204,52 @@ class KineticProfilesCompute:
                                 len(self.edge_profiles.profiles_1d[self.time_index_edge_profiles].ion[jspecies].state)
                             ):
                                 try:
-                                    vtor = (
+                                    vphi = (
                                         self.edge_profiles.profiles_1d[self.time_index_edge_profiles]
                                         .ion[jspecies]
                                         .state[istate]
                                         .velocity.toroidal
                                     )
-                                    if len(vtor) == self.erho:
+                                    if len(vphi) == self.erho:
                                         for i in range(self.erho):
                                             if self.ion_density[ispecies][self.nrho + i] > 0.0:
-                                                ion_vtor[ispecies][self.nrho + i] = (
-                                                    ion_vtor[ispecies][self.nrho + i]
-                                                    + abs(vtor[i])
+                                                ion_vphi[ispecies][self.nrho + i] = (
+                                                    ion_vphi[ispecies][self.nrho + i]
+                                                    + abs(vphi[i])
                                                     * self.edge_profiles.profiles_1d[self.time_index_edge_profiles]
                                                     .ion[jspecies]
                                                     .state[istate]
                                                     .density[i]
                                                     / self.ion_density[ispecies][self.nrho + i]
                                                 )
-                                        vtor_e_flag = 1
+                                        vphi_e_flag = 1
                                 except Exception as e:
                                     logger.debug(f"{e}")
                                     logger.warning(
                                         f"edge_profiles.profiles_1d[:].ion[{jspecies}].state[{istate}]."
                                         f"velocity.toroidal could not be read."
                                     )
-                                if vtor_e_flag != 1:
+                                if vphi_e_flag != 1:
                                     try:
-                                        vtor = (
+                                        vphi = (
                                             self.edge_profiles.profiles_1d[self.time_index_edge_profiles]
                                             .ion[jspecies]
                                             .state[istate]
                                             .velocity_tor
                                         )
-                                        if len(vtor) == self.erho:
+                                        if len(vphi) == self.erho:
                                             for i in range(self.erho):
                                                 if self.ion_density[ispecies][self.nrho + i] > 0.0:
-                                                    ion_vtor[ispecies][self.nrho + i] = (
-                                                        ion_vtor[ispecies][self.nrho + i]
-                                                        + abs(vtor[i])
+                                                    ion_vphi[ispecies][self.nrho + i] = (
+                                                        ion_vphi[ispecies][self.nrho + i]
+                                                        + abs(vphi[i])
                                                         * self.edge_profiles.profiles_1d[self.time_index_edge_profiles]
                                                         .ion[jspecies]
                                                         .state[istate]
                                                         .density[i]
                                                         / self.ion_density[ispecies][self.nrho + i]
                                                     )
-                                            vtor_e_flag = 2
+                                            vphi_e_flag = 2
                                     except Exception as e:
                                         logger.debug(f"{e}")
                                         logger.warning(
@@ -1271,8 +1271,8 @@ class KineticProfilesCompute:
                                 )
                                 if len(toroidal) == self.erho:
                                     for i in range(self.erho):
-                                        ion_vtor[ispecies][self.nrho + i] = abs(toroidal[i])
-                                    vtor_e_flag = 1
+                                        ion_vphi[ispecies][self.nrho + i] = abs(toroidal[i])
+                                    vphi_e_flag = 1
                             except Exception as e:
                                 logger.debug(f"{e}")
                                 logger.warning(
@@ -1293,8 +1293,8 @@ class KineticProfilesCompute:
                                     if len(toroidal) == self.erho:
                                         for i in range(self.erho):
                                             if self.ion_density[ispecies][self.nrho + i] > 0:
-                                                ion_vtor[ispecies][self.nrho + i] = (
-                                                    ion_vtor[ispecies][self.nrho + i]
+                                                ion_vphi[ispecies][self.nrho + i] = (
+                                                    ion_vphi[ispecies][self.nrho + i]
                                                     + abs(toroidal[i])
                                                     * self.edge_profiles.ggd[self.time_index_edge_profiles]
                                                     .ion[jspecies]
@@ -1303,7 +1303,7 @@ class KineticProfilesCompute:
                                                     .values[i]
                                                     / self.ion_density[ispecies][self.nrho + i]
                                                 )
-                                        vtor_e_flag = 1
+                                        vphi_e_flag = 1
                                 except Exception as e:
                                     logger.debug(f"{e}")
                                     logger.warning(
@@ -1311,11 +1311,11 @@ class KineticProfilesCompute:
                                         f"velocity.toroidal could not be read."
                                     )
 
-        logger.debug(f"Vtor_flag : {vtor_flag}, Vtor_e_flag : {vtor_e_flag}")
+        logger.debug(f"Vphi_flag : {vphi_flag}, Vphi_e_flag : {vphi_e_flag}")
         return {
-            "vtor_flag": vtor_flag,
-            "vtor_e_flag": vtor_e_flag,
-            "ion_vtor": ion_vtor,
+            "vphi_flag": vphi_flag,
+            "vphi_e_flag": vphi_e_flag,
+            "ion_vphi": ion_vphi,
         }
 
     def get_vpol_profile(self):
@@ -1505,18 +1505,29 @@ class KineticProfilesCompute:
                     species.append(table_mendeleiev[self.z[ispecies]][self.a[ispecies]].element)
                 else:
                     if self.is_core_profiles_present:
-                        species.append(
-                            self.core_profiles.profiles_1d[self.time_index_core_profiles].ion[ispecies].label.value
-                        )
+                        _coreprofiles_profile_1d_ion = self.core_profiles.profiles_1d[
+                            self.time_index_core_profiles
+                        ].ion[ispecies]
+                        if "label" in dir(_coreprofiles_profile_1d_ion):
+                            species.append(_coreprofiles_profile_1d_ion.label.value)
+                        elif "name" in dir(_coreprofiles_profile_1d_ion):
+                            species.append(_coreprofiles_profile_1d_ion.name.value)
                     else:
                         if not self.r_out_graph:
-                            species.append(
-                                self.edge_profiles.profiles_1d[self.time_index_edge_profiles].ion[ispecies].label.value
-                            )
+                            _edgeprofiles_profile_1d_ion = self.edge_profiles.profiles_1d[
+                                self.time_index_edge_profiles
+                            ].ion[ispecies]
+                            if "label" in dir(_edgeprofiles_profile_1d_ion):
+                                species.append(_edgeprofiles_profile_1d_ion.label.value)
+                            elif "name" in dir(_edgeprofiles_profile_1d_ion):
+                                species.append(_edgeprofiles_profile_1d_ion.name.value)
                         else:
-                            species.append(
-                                self.edge_profiles.ggd[self.time_index_edge_profiles].ion[ispecies].label.value
-                            )
+                            _edgeprofiles_ggd_ion = self.edge_profiles.ggd[self.time_index_edge_profiles].ion[ispecies]
+                            if "label" in dir(_edgeprofiles_ggd_ion):
+                                species.append(_edgeprofiles_ggd_ion.label.value)
+                            elif "name" in dir(_edgeprofiles_ggd_ion):
+                                species.append(_edgeprofiles_ggd_ion.name.value)
+
             return species
         return None
 
@@ -1700,8 +1711,8 @@ class KineticProfilesCompute:
                             profiles["n_species"][self.species[ispecies]]["density"] = [0] * self.nrho
                             if self.vpol_flag != 0:
                                 profiles["n_species"][self.species[ispecies]]["vpol"] = [0] * self.nrho
-                            if self.vtor_flag != 0:
-                                profiles["n_species"][self.species[ispecies]]["vtor"] = [0] * self.nrho
+                            if self.vphi_flag != 0:
+                                profiles["n_species"][self.species[ispecies]]["vphi"] = [0] * self.nrho
                             for i in range(self.nrho):
                                 profiles["n_species"][self.species[ispecies]]["density"][i] = self.ion_density[
                                     ispecies
@@ -1710,8 +1721,8 @@ class KineticProfilesCompute:
                                     profiles["n_species"][self.species[ispecies]]["vpol"][i] = self.ion_vpol[ispecies][
                                         i
                                     ]
-                                if self.vtor_flag != 0:
-                                    profiles["n_species"][self.species[ispecies]]["vtor"][i] = self.ion_vtor[ispecies][
+                                if self.vphi_flag != 0:
+                                    profiles["n_species"][self.species[ispecies]]["vphi"][i] = self.ion_vphi[ispecies][
                                         i
                                     ]
                 for i in range(self.nrho):
@@ -1723,8 +1734,8 @@ class KineticProfilesCompute:
                         profiles["n_species"][self.species[ispecies]]["density_e"] = [0] * self.erho
                         if self.vpol_e_flag != 0:
                             profiles["n_species"][self.species[ispecies]]["vpol_e"] = [0] * self.erho
-                        if self.vtor_e_flag != 0:
-                            profiles["n_species"][self.species[ispecies]]["vtor_e"] = [0] * self.erho
+                        if self.vphi_e_flag != 0:
+                            profiles["n_species"][self.species[ispecies]]["vphi_e"] = [0] * self.erho
                         for i in range(self.erho):
                             profiles["n_species"][self.species[ispecies]]["density_e"][i] = self.ion_density[ispecies][
                                 self.nrho + i
@@ -1733,8 +1744,8 @@ class KineticProfilesCompute:
                                 profiles["n_species"][self.species[ispecies]]["vpol_e"][i] = self.ion_vpol[ispecies][
                                     self.nrho + i
                                 ]
-                            if self.vtor_e_flag != 0:
-                                profiles["n_species"][self.species[ispecies]]["vtor_e"][i] = self.ion_vtor[ispecies][
+                            if self.vphi_e_flag != 0:
+                                profiles["n_species"][self.species[ispecies]]["vphi_e"][i] = self.ion_vphi[ispecies][
                                     self.nrho + i
                                 ]
                     if self.species_map[ispecies] != -99:
@@ -1749,20 +1760,20 @@ class KineticProfilesCompute:
 
         Returns:
             The `get_min_max_velocity_profiles` method returns a dictionary containing the maximum and
-            minimum velocity profiles for `vtor` and `vpol`. The keys in the dictionary are "max_vtor",
-            "min_vtor", "max_vpol", and "min_vpol", each corresponding to the maximum and minimum values for
-            the `vtor` and `vpol` profiles, respectively.
+            minimum velocity profiles for `vphi` and `vpol`. The keys in the dictionary are "max_vphi",
+            "min_vphi", "max_vpol", and "min_vpol", each corresponding to the maximum and minimum values for
+            the `vphi` and `vpol` profiles, respectively.
         """
-        # vtor_flag = vtor_profile["vtor_flag"]
-        # vtor_e_flag = vtor_profile["vtor_e_flag"]
-        # ion_vtor = vtor_profile["ion_vtor"]
+        # vphi_flag = vphi_profile["vphi_flag"]
+        # vphi_e_flag = vphi_profile["vphi_e_flag"]
+        # ion_vphi = vphi_profile["ion_vphi"]
 
         # vpol_flag = vpol_profile["vpol_flag"]
         # vpol_e_flag = vpol_profile["vpol_e_flag"]
         # ion_vpol = vpol_profile["ion_vpol"]
         # Min and max of velocity profiles
-        max_vtor = -9e99
-        min_vtor = 9e99
+        max_vphi = -9e99
+        min_vphi = 9e99
         max_vpol = -9e99
         min_vpol = 9e99
         if self.species:
@@ -1771,33 +1782,33 @@ class KineticProfilesCompute:
                     self.nspec_over_ne[ispecies] > KineticProfilesCompute.IMPURITY_LIMIT
                     or not self.is_core_profiles_present
                 ):
-                    if self.vtor_flag != 0:
-                        if "vtor" in self.profiles["n_species"][self.species[ispecies]].keys():
-                            if max_vtor < max(
-                                self.profiles["n_species"][self.species[ispecies]]["vtor"][0 : self.nrho - 1]
+                    if self.vphi_flag != 0:
+                        if "vphi" in self.profiles["n_species"][self.species[ispecies]].keys():
+                            if max_vphi < max(
+                                self.profiles["n_species"][self.species[ispecies]]["vphi"][0 : self.nrho - 1]
                             ):
-                                max_vtor = max(
-                                    self.profiles["n_species"][self.species[ispecies]]["vtor"][0 : self.nrho - 1]
+                                max_vphi = max(
+                                    self.profiles["n_species"][self.species[ispecies]]["vphi"][0 : self.nrho - 1]
                                 )
-                            if min_vtor > min(
-                                self.profiles["n_species"][self.species[ispecies]]["vtor"][0 : self.nrho - 1]
+                            if min_vphi > min(
+                                self.profiles["n_species"][self.species[ispecies]]["vphi"][0 : self.nrho - 1]
                             ):
-                                min_vtor = min(
-                                    self.profiles["n_species"][self.species[ispecies]]["vtor"][0 : self.nrho - 1]
+                                min_vphi = min(
+                                    self.profiles["n_species"][self.species[ispecies]]["vphi"][0 : self.nrho - 1]
                                 )
-                    if self.is_edge_profiles_present and self.species_map[ispecies] != -99 and self.vtor_e_flag != 0:
-                        if "vtor_e" in self.profiles["n_species"][self.species[ispecies]].keys():
-                            if max_vtor < max(
-                                self.profiles["n_species"][self.species[ispecies]]["vtor_e"][0 : self.erho - 1]
+                    if self.is_edge_profiles_present and self.species_map[ispecies] != -99 and self.vphi_e_flag != 0:
+                        if "vphi_e" in self.profiles["n_species"][self.species[ispecies]].keys():
+                            if max_vphi < max(
+                                self.profiles["n_species"][self.species[ispecies]]["vphi_e"][0 : self.erho - 1]
                             ):
-                                max_vtor = max(
-                                    self.profiles["n_species"][self.pecies[ispecies]]["vtor_e"][0 : self.erho - 1]
+                                max_vphi = max(
+                                    self.profiles["n_species"][self.pecies[ispecies]]["vphi_e"][0 : self.erho - 1]
                                 )
-                            if min_vtor > min(
-                                self.profiles["n_species"][self.species[ispecies]]["vtor_e"][0 : self.erho - 1]
+                            if min_vphi > min(
+                                self.profiles["n_species"][self.species[ispecies]]["vphi_e"][0 : self.erho - 1]
                             ):
-                                min_vtor = min(
-                                    self.profiles["n_species"][self.species[ispecies]]["vtor_e"][0 : self.erho - 1]
+                                min_vphi = min(
+                                    self.profiles["n_species"][self.species[ispecies]]["vphi_e"][0 : self.erho - 1]
                                 )
                     if self.vpol_flag != 0:
                         if "vpol" in self.profiles["n_species"][self.species[ispecies]].keys():
@@ -1828,16 +1839,16 @@ class KineticProfilesCompute:
                                     self.profiles["n_species"][self.species[ispecies]]["vpol_e"][0 : self.erho - 1]
                                 )
 
-            if self.vtor_flag != 0 or self.vtor_e_flag != 0:
-                logger.debug(f"max_vtor : {max_vtor}")
-                logger.debug(f"min_vtor : {min_vtor}")
+            if self.vphi_flag != 0 or self.vphi_e_flag != 0:
+                logger.debug(f"max_vphi : {max_vphi}")
+                logger.debug(f"min_vphi : {min_vphi}")
             if self.vpol_flag != 0 or self.vpol_e_flag != 0:
                 logger.debug(f"max_vpol : {max_vpol}")
                 logger.debug(f"min_vpol : {min_vpol}")
 
         return {
-            "max_vtor": max_vtor,
-            "min_vtor": min_vtor,
+            "max_vphi": max_vphi,
+            "min_vphi": min_vphi,
             "max_vpol": max_vpol,
             "min_vpol": min_vpol,
         }
@@ -1869,7 +1880,7 @@ class KineticProfilesCompute:
             density, impurity velocity components (poloidal and toroidal), and effective charge. The
             dictionary also includes information about the time array and the total ion density.
         """
-        vtor_flag = self.vtor_flag
+        vphi_flag = self.vphi_flag
 
         vpol_flag = self.vpol_flag
         # Create the dictionary defining the list of waveforms (central values) that can be displayed
@@ -1936,7 +1947,7 @@ class KineticProfilesCompute:
                         waveform["n_species"][self.species[ispecies]] = {
                             "density": self.create_wave_form(0),
                             "vpol": self.create_wave_form(0),
-                            "vtor": self.create_wave_form(0),
+                            "vphi": self.create_wave_form(0),
                         }
 
                         try:
@@ -1980,27 +1991,27 @@ class KineticProfilesCompute:
                                 #         f"profiles_1d(:)/ion({ispecies})/velocity_pol(0)",
                                 #     )
                                 # )
-                            if vtor_flag == 1:
+                            if vphi_flag == 1:
                                 velocity_toroidal = np.array([])
                                 for i, _ in enumerate(self.time_array_core_profiles):
                                     velocity_toroidal = np.append(
                                         velocity_toroidal,
                                         self.core_profiles.profiles_1d[i].ion[ispecies].velocity.toroidal[0],
                                     )
-                                waveform["n_species"][self.species[ispecies]]["vtor"]["central"] = velocity_toroidal
+                                waveform["n_species"][self.species[ispecies]]["vphi"]["central"] = velocity_toroidal
                                 # (
                                 #     self.connection.partial_get(
                                 #         "core_profiles",
                                 #         f"profiles_1d(:)/ion({ispecies})/velocity/toroidal(0)",
                                 #     )
                                 # )
-                            elif vtor_flag == 2:
+                            elif vphi_flag == 2:
                                 velocity_tor = np.array([])
                                 for i, _ in enumerate(self.time_array_core_profiles):
                                     velocity_tor = np.append(
                                         velocity_tor, self.core_profiles.profiles_1d[i].ion[ispecies].velocity_tor[0]
                                     )
-                                waveform["n_species"][self.species[ispecies]]["vtor"]["central"] = velocity_tor
+                                waveform["n_species"][self.species[ispecies]]["vphi"]["central"] = velocity_tor
                                 # (
                                 #     self.connection.partial_get(
                                 #         "core_profiles",
@@ -2015,7 +2026,7 @@ class KineticProfilesCompute:
                             waveform["n_species"][self.species[ispecies]]["vpol"]["central"] = [
                                 np.NaN
                             ] * self.common_time_length
-                            waveform["n_species"][self.species[ispecies]]["vtor"]["central"] = [
+                            waveform["n_species"][self.species[ispecies]]["vphi"]["central"] = [
                                 np.NaN
                             ] * self.common_time_length
 

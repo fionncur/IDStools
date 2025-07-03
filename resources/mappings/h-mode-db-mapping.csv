@@ -127,9 +127,9 @@
 126,TORQ,Torque on plasma due to neutral beam injection,,,has 12025 empty cells,,PENDING,
 127,TORQBM,Volume-integrated torque due to beam,,,has 13287 empty cells,,PENDING,
 128,TORQIN,Volume-integrated total input torque,,,has 13287 empty cells,,PENDING,
-129,VTOR0,Central rotation velocity of plasma,,,has 12555 empty cells,,PENDING,Discussion
-130,VTORV,Volume-averaged rotation velocity of plasma,,,has 14153 (all) empty cells,,Nothing to map,
-131,VTORIMP,Volume-averaged rotation velocity of impurity species,,,has 14153 (all) empty cells,,Nothing to map,
+129,VPHI0,Central rotation velocity of plasma,,,has 12555 empty cells,,PENDING,Discussion
+130,VPHIV,Volume-averaged rotation velocity of plasma,,,has 14153 (all) empty cells,,Nothing to map,
+131,VPHIIMP,Volume-averaged rotation velocity of impurity species,,,has 14153 (all) empty cells,,Nothing to map,
 132,WDIA,Total plasma energy as determined from the diamagnetic loop,summary/global_quantities/energy_diamagnetic/value,,,,PENDING,Discussion
 133,WMHD,Total plasma energy as determined by MHD equilibrium calculations,summary/global_quantities/energy_mhd/value,Plasma energy content = 3/2 * integral over the plasma volume of the total kinetic pressure (pressure determined by an equilibrium reconstruction code),,,Yes,
 134,WKIN,Total thermal plasma energy as determined from kinetic measurements,summary/global_quantities/energy_thermal/value,,,,Yes,
