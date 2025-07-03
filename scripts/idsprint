@@ -49,7 +49,8 @@ def view_plot(ax, field, coordinate, field_name="", coordinate_name="", field_un
         data - field.value
         field_unit = field.metadata.units
         yfield_name = field.metadata.name
-        if coordinate and coordinate.sdigit():
+
+        if coordinate and isinstance(coordinate, int):
             _coordinate = field.coordinates[coordinate]
 
             if isinstance(_coordinate, imas.ids_primitive.IDSPrimitive):
