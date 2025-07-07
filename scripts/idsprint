@@ -58,7 +58,8 @@ def view_plot(
         data - field.value
         field_unit = field.metadata.units
         yfield_name = field.metadata.name
-        if coordinate and coordinate.sdigit():
+
+        if coordinate and isinstance(coordinate, int):
             _coordinate = field.coordinates[coordinate]
 
             if isinstance(_coordinate, imas.ids_primitive.IDSPrimitive):
@@ -165,7 +166,7 @@ def _make_tree(structure, hide_empty_nodes, compact, *, tree=None):
                 group = Columns([txt])
             tree.add(group)
             return tree
-        elif isinstance(structure, np.float64):
+        elif isinstance(structure, np.float64) or isinstance(structure, imas.ids_primitive.IDSPrimitive):
             return structure
         else:
             tree = Tree(f"[magenta]{structure.metadata.name}")
@@ -173,7 +174,6 @@ def _make_tree(structure, hide_empty_nodes, compact, *, tree=None):
     iterator = structure
     if hide_empty_nodes and isinstance(structure, imas.ids_structure.IDSStructure):
         iterator = structure.iter_nonempty_(accept_lazy=True)
-
     for counter, child in enumerate(iterator):
         if isinstance(child, (np.ndarray)):
             if child.size == 0:
