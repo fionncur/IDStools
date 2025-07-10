@@ -83,6 +83,21 @@ class EquilibriumView(BasePlot):
         cartestion_grid = self.compute_obj.get2d_cartesian_grid(time_slice, profiles2d_index)
         if cartestion_grid is not None:
             levels = 30
+
+            contour_lines = ax.contour(
+                cartestion_grid["r2d"], cartestion_grid["z2d"], cartestion_grid["psi2d"], levels, cmap="viridis"
+            )
+            cbar = plt.colorbar(contour_lines, ax=ax, orientation="horizontal", pad=0.15, fraction=0.03)
+            cbar.set_label(r"$\psi$ [Wb]")
+
+            ax.clabel(
+                contour_lines,
+                colors="black",
+                inline=False,
+                fontsize=10,
+                # fmt="%.2e",       
+                inline_spacing=1,
+            )
             if plot_rho:
                 rho2d = self.compute_obj.get_rho2d(time_slice)
                 if rho2d is not None:
@@ -90,15 +105,9 @@ class EquilibriumView(BasePlot):
                         cartestion_grid["r2d"],
                         cartestion_grid["z2d"],
                         rho2d,
-                        levels,
-                        colors="r",
+                        levels=levels,
+                        colors="red",
                     )
-            ax.contour(
-                cartestion_grid["r2d"],
-                cartestion_grid["z2d"],
-                cartestion_grid["psi2d"],
-                levels,
-            )
             ax.set_aspect("equal", adjustable="box")
             ax.set_xlabel("$R$ [m]")
             ax.set_ylabel("$Z$ [m]")
