@@ -177,7 +177,13 @@ if __name__ == "__main__":
                 ids_data = get_md_data(mduris, args.dd_update)
             plot_machine_description(ax1, ids_data)
 
-        view_object.view_magnetic_poloidal_flux(ax1, time_slice, plot_rho=args.rho)
+        c_psi, c_rho = view_object.view_magnetic_poloidal_flux(ax1, time_slice, plot_rho=args.rho)
+        if c_psi:
+            cbar_psi = canvas.fig.colorbar(c_psi, ax=ax1, orientation="horizontal", pad=0.08, fraction=0.03)
+            cbar_psi.set_label(r"$\psi$ [Wb]")
+        if c_rho:
+            cbar_rho = canvas.fig.colorbar(c_rho, ax=ax1, orientation="horizontal", pad=0.08, fraction=0.03)
+            cbar_rho.set_label(r"$\rho$ [Wb]")
         ax1.set_title(title)
 
         xmin, xmax = ax1.get_xlim()
