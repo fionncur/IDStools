@@ -9,6 +9,8 @@ try:
     import imaspy as imas
 except ImportError:
     import imas
+from itertools import tee
+
 import numpy as np
 import rich
 from rich.columns import Columns
@@ -204,7 +206,15 @@ def _make_tree(structure, hide_empty_nodes, compact, *, tree=None):
         else:
             if isinstance(child, imas.ids_structure.IDSStructure):
                 txt = f"[magenta]{child._path}[/]"
-                ntree = tree.add(txt)
+                # check if structure is not empty
+                iterator, iterator_copy = tee(child.iter_nonempty_(accept_lazy=True))
+                try:
+                    next(iterator_copy)
+                except StopIteration:
+                    pass
+                else:
+                    ntree = tree.add(txt)
+                    _make_tree(child, hide_empty_nodes, compact, tree=ntree)
                 _make_tree(child, hide_empty_nodes, compact, tree=ntree)
             elif isinstance(child, imas.ids_struct_array.IDSStructArray):
                 ntree = tree
