@@ -215,7 +215,6 @@ def _make_tree(structure, hide_empty_nodes, compact, *, tree=None):
                 else:
                     ntree = tree.add(txt)
                     _make_tree(child, hide_empty_nodes, compact, tree=ntree)
-                _make_tree(child, hide_empty_nodes, compact, tree=ntree)
             elif isinstance(child, imas.ids_struct_array.IDSStructArray):
                 ntree = tree
                 if not child.has_value:
