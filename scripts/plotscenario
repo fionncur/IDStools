@@ -71,7 +71,8 @@ if __name__ == "__main__":
     if connection is None:
         logger.critical("----> Aborted.")
         exit(1)
-
+    time_value = 0.0
+    time_slice = 0
     if not args.no_profiles:
         ids_core_profiles = None
         for idsname, occ in availables_ids:
@@ -87,13 +88,14 @@ if __name__ == "__main__":
                     break
                 except Exception as e:
                     logger.error(f"core_profiles ids is not present {e}")
-        if ids_core_profiles.time is None:
-            ids_core_profiles = None
-            logger.critical("core_profiles IDS time is empty")
-        else:
-            time_array = ids_core_profiles.time
-            ntime = len(ids_core_profiles.time)
-            time_slice, time_value = get_nearest_time(time_array, args.time)
+        if ids_core_profiles:
+            if ids_core_profiles.time is None:
+                ids_core_profiles = None
+                logger.critical("core_profiles IDS time is empty")
+            else:
+                time_array = ids_core_profiles.time
+                ntime = len(ids_core_profiles.time)
+                time_slice, time_value = get_nearest_time(time_array, args.time)
 
         ids_equilibrium = None
         for idsname, occ in availables_ids:
@@ -107,16 +109,16 @@ if __name__ == "__main__":
                     break
                 except Exception as e:
                     logger.error(f"equilibrium ids is not present, detailed error: {e}")
-
-        if ids_equilibrium.time is None:
-            ids_equilibrium = None
-            logger.critical("equilibrium IDS time is empty")
-        else:
-            if time_array is not None:
-                # Search for adequate time slice for display
-                time_array = ids_equilibrium.time
-                ntime = len(ids_equilibrium.time)
-                time_slice, time_value = get_nearest_time(time_array, args.time)
+        if ids_equilibrium:
+            if ids_equilibrium.time is None:
+                ids_equilibrium = None
+                logger.critical("equilibrium IDS time is empty")
+            else:
+                if time_array is not None:
+                    # Search for adequate time slice for display
+                    time_array = ids_equilibrium.time
+                    ntime = len(ids_equilibrium.time)
+                    time_slice, time_value = get_nearest_time(time_array, args.time)
     ids_summary = None
 
     for idsname, occ in availables_ids:
@@ -190,13 +192,14 @@ if __name__ == "__main__":
             obje_summary_view.view_time_line(ax4, time_value)
 
     if not args.no_profiles:
-        core_core_profiles_view = CoreProfilesView(ids_core_profiles)
-        core_core_profiles_view.view_q_profile_and_magnetic_shear_profile(ax6, time_slice)
+        if ids_core_profiles:
+            core_core_profiles_view = CoreProfilesView(ids_core_profiles)
+            core_core_profiles_view.view_q_profile_and_magnetic_shear_profile(ax6, time_slice)
 
-        core_core_profiles_view.view_current_density_profiles(ax7, time_slice)
-
-        plotequilibrium = EquilibriumView(ids_equilibrium)
-        plotequilibrium.plotequilibrium(ax5, time_slice)
+            core_core_profiles_view.view_current_density_profiles(ax7, time_slice)
+        if ids_equilibrium:
+            plotequilibrium = EquilibriumView(ids_equilibrium)
+            plotequilibrium.plotequilibrium(ax5, time_slice)
 
     title = get_title(args, "Scenario")
     if not args.no_profiles:
