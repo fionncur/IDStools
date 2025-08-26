@@ -57,7 +57,7 @@ def view_plot(
         if not field.has_value:
             logger.error("Values are not present")
             return
-        data - field.value
+        data = field.value
         field_unit = field.metadata.units
         yfield_name = field.metadata.name
 
@@ -116,26 +116,31 @@ def view_plot(
     ax.legend()
 
 
-def print_tree(structure, hide_empty_nodes, compact, full_array):
+def print_tree(structure, hide_empty_nodes, compact, full_array, depth=None):
     if full_array:
         with np.printoptions(threshold=sys.maxsize, linewidth=1024, precision=4):
-            rich.print(_make_tree(structure, hide_empty_nodes, compact))
+            rich.print(_make_tree(structure, hide_empty_nodes, compact, depth=depth))
     else:
         with np.printoptions(threshold=5, linewidth=1024, precision=4):
-            rich.print(_make_tree(structure, hide_empty_nodes, compact))
+            rich.print(_make_tree(structure, hide_empty_nodes, compact, depth=depth))
 
 
-def _make_tree(structure, hide_empty_nodes, compact, *, tree=None):
+def _make_tree(structure, hide_empty_nodes, compact, *, tree=None, depth=None, current_depth=0):
     """Build the ``rich.tree.Tree`` for display in :py:meth:`print_tree`.
 
     Args:
         structure: IDS structure to add to the tree
         hide_empty_nodes: Show or hide nodes without value.
+        compact: Compact display mode
+        depth: Maximum depth to traverse (None for unlimited)
+        current_depth: Current traversal depth (internal parameter)
 
     Keyword Args:
         tree: If provided, child items will be added to this Tree object. Otherwise a
             new Tree is constructed.
     """
+    if depth is not None and current_depth >= depth:
+        return tree
 
     if tree is None:
         if isinstance(structure, np.ndarray):
@@ -214,12 +219,14 @@ def _make_tree(structure, hide_empty_nodes, compact, *, tree=None):
                     pass
                 else:
                     ntree = tree.add(txt)
-                    _make_tree(child, hide_empty_nodes, compact, tree=ntree)
+                    _make_tree(
+                        child, hide_empty_nodes, compact, tree=ntree, depth=depth, current_depth=current_depth + 1
+                    )
             elif isinstance(child, imas.ids_struct_array.IDSStructArray):
                 ntree = tree
                 if not child.has_value:
                     tree.add(f"[magenta]{child._path}[][/]")
-                _make_tree(child, hide_empty_nodes, compact, tree=ntree)
+                _make_tree(child, hide_empty_nodes, compact, tree=ntree, depth=depth, current_depth=current_depth + 1)
 
     return tree
 
@@ -295,6 +302,13 @@ if __name__ == "__main__":
         "--compact",
         action="store_true",
         help="Print only names which has data",
+    )
+    parser.add_argument(
+        "-d",
+        "--depth",
+        type=int,
+        default=None,
+        help="Maximum depth to traverse when printing tree structure (None for unlimited)",
     )
     parser.add_argument(
         "-i",
@@ -430,7 +444,9 @@ if __name__ == "__main__":
             else:
                 logger.error(f"Please provide valid export type")
         else:
-            print_tree(ids, hide_empty_nodes=not args.show_empty, compact=args.compact, full_array=args.full)
+            print_tree(
+                ids, hide_empty_nodes=not args.show_empty, compact=args.compact, full_array=args.full, depth=args.depth
+            )
     else:
         lazy_value = True
         if args.dd_update:
@@ -569,5 +585,7 @@ if __name__ == "__main__":
                 canvas.show()
 
         else:
-            print_tree(node, hide_empty_nodes=not args.show_empty, compact=args.compact, full_array=args.full)
+            print_tree(
+                node, hide_empty_nodes=not args.show_empty, compact=args.compact, full_array=args.full, depth=args.depth
+            )
     connection.close()
