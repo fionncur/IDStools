@@ -113,8 +113,9 @@ if __name__ == "__main__":
         "-m",
         "--mapping",
         type=str,
-        default=os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-        + "/resources/mappings/h-mode-db-mapping.csv",
+        default=os.path.join(
+            os.path.dirname(os.path.dirname(os.path.realpath(__file__))), "bin/mappings/h-mode-db-mapping.csv"
+        ),
         help="Path to csv-formatted mapping file \t(default=%(default)s)",
     )
     parser.add_argument(
@@ -175,7 +176,7 @@ if __name__ == "__main__":
     parser.add_argument("-v", "--verbose", action="store_true", help="Run in verbose mode")
     parser.add_argument("--debug", action="store_true", help="Run in debug mode")
     args = parser.parse_args()
-    
+
     try:
         f = open(args.inputcsv, "r")
         f.close()
@@ -184,6 +185,13 @@ if __name__ == "__main__":
         url = "https://osf.io/zhwa3/download"
         dl = requests.get(url, allow_redirects=True)  # ,verify="/work/imas/etc/iter.pem"
         open(args.inputcsv, "wb").write(dl.content)
+
+    if not os.path.exists(args.mapping):  # using local version
+        base_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+        args.mapping = os.path.join(base_dir, "resources/mappings/h-mode-db-mapping.csv")
+        if not os.path.exists(args.mapping):
+            print(f"Abort! Mapping file `{args.mapping}` doesn't exists")
+            exit(1)
 
     mf = pd.read_csv(args.mapping, keep_default_na=False, usecols=[args.varcol, args.pathcol, args.tracol])
     mf.dropna(how="all")
@@ -201,8 +209,13 @@ if __name__ == "__main__":
     print(f"Starts mapping of the DB {args.inputcsv}, please be patient...")
     for row in rows:
         DBVAR = db.iloc[row]
-        de = imas.DBEntry(get_backend_id(args.backend), args.database, 1, row, 
-                          dd_version=(args.convert_to if args.convert_to!=None else args.mapping_version))
+        de = imas.DBEntry(
+            get_backend_id(args.backend),
+            args.database,
+            1,
+            row,
+            dd_version=(args.convert_to if args.convert_to != None else args.mapping_version),
+        )
         de.create()
 
         iod = {}
