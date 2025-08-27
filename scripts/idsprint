@@ -139,7 +139,7 @@ def _make_tree(structure, hide_empty_nodes, compact, *, tree=None, depth=None, c
         tree: If provided, child items will be added to this Tree object. Otherwise a
             new Tree is constructed.
     """
-    if depth is not None and current_depth >= depth:
+    if depth is not None and current_depth > depth:
         return tree
 
     if tree is None:
