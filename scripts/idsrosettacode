@@ -146,7 +146,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--mapping-version",
         type=str,
-        default="3.33.0",
+        default="3.37.0",
         help="Data dictionary version for which the mapping was expressed",
     )
     parser.add_argument(
@@ -206,8 +206,8 @@ if __name__ == "__main__":
         de.create()
 
         iod = {}
-        factory = imas.ids_factory.IDSFactory(version=args.mapping_version)
-        for ids in get_ids_types():
+        factory = imas.IDSFactory(version=args.mapping_version)
+        for ids in factory.ids_names():
             iod[ids] = factory.new(ids)
         for var in mf.loc[:, args.varcol]:
             idspath = mf[mf[args.varcol] == var].iloc[0].at[args.pathcol]
