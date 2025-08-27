@@ -2,9 +2,9 @@ import logging
 
 from idstools.compute.equilibrium import EquilibriumCompute
 from idstools.domain.ecstray import EcStrayCompute
+import matplotlib.pyplot as plt
 
 # Font/Colour definition
-fontsize = 9
 bndcolor = "chocolate"
 shotcolors = ["b", "r", "c", "y", "m", "b"]
 shotstyle = ["-", "--", "-.", ":", ".", ","]
@@ -78,7 +78,6 @@ class EcStrayView:
                         res_layer[i_harm]["r"],
                         res_layer[i_harm]["z"],
                         color="r",
-                        linewidth=2,
                     )
                     return ax_polview_plot_res
                 else:
@@ -98,13 +97,17 @@ class EcStrayView:
         rho2d = self.equilibrium_compute.get_rho2d(time_slice, profile2d_index)
 
         # Poloidal view plot
-        ax.contour(r2d, z2d, psi2d, 50, cmap="summer")
+        contour_lines = ax.contour(r2d, z2d, psi2d, 50, cmap="summer")
+        cbar_psi = plt.colorbar(contour_lines, ax=ax, orientation="horizontal", pad=0.08, fraction=0.03)
+        cbar_psi.set_label(r"$\psi$ [Wb]")
         if rho2d is not None and len(rho2d) > 0:
-            ax.contour(r2d, z2d, rho2d, 50, cmap="YlOrBr")
+            contour_lines_rho = ax.contour(r2d, z2d, rho2d, 50, cmap="YlOrBr")
+            cbar_rho = plt.colorbar(contour_lines_rho, ax=ax, orientation="horizontal", pad=0.08, fraction=0.03)
+            cbar_rho.set_label(r"$\rho$ [Wb]")
         # ax_polview.set_xlim(r2d.min(),r2d.max())
-        ax.set_title("Poloidal view (R,Z)", fontsize=fontsize)
-        ax.set_xlabel("R [m]", fontsize=fontsize, labelpad=lpad)
-        ax.set_ylabel("Z [m]", fontsize=fontsize, labelpad=lpad)
+        ax.set_title("Poloidal view (R,Z)")
+        ax.set_xlabel("R [m]", labelpad=lpad)
+        ax.set_ylabel("Z [m]", labelpad=lpad)
         ax.set_xlim(3.4, r2d.max())
         ax.set_ylim(z2d.min() * 0.7, z2d.max() * 0.7)
         ax.set_aspect("equal", adjustable="box")
@@ -115,7 +118,6 @@ class EcStrayView:
                     resonance_layer[i_harm]["r"],
                     resonance_layer[i_harm]["z"],
                     color="r",
-                    linewidth=2,
                 )
 
     def plot_cut_off_layer(
@@ -173,7 +175,7 @@ class EcStrayView:
 
         # TODO Work on this function to keep call back function and events and not to pass init=1
         if init == 1:
-            (ax_polview_plot_cut,) = ax.plot(cutoff_layer["r"], cutoff_layer["z"], color="g", linewidth=2)
+            (ax_polview_plot_cut,) = ax.plot(cutoff_layer["r"], cutoff_layer["z"], color="g")
             return ax_polview_plot_cut
         else:
             ax.set_data(cutoff_layer["r"], cutoff_layer["z"])

@@ -22,16 +22,6 @@ class KineticProfilesView:
             self.plotstyle = KineticProfilesView.single_style
 
     @staticmethod
-    def customize_legend(legend, facecolor="0.95", text_font=10, line_width=1.5):
-        frame = legend.get_frame()
-        frame.set_facecolor(facecolor)
-        for label in legend.get_texts():
-            label.set_fontsize(text_font)
-        for label in legend.get_lines():
-            label.set_linewidth(line_width)  # the legend line width
-        return
-
-    @staticmethod
     def view_time_line(ax, time):
         ymin = ax.get_ylim()[0]
         ymax = ax.get_ylim()[1]
@@ -40,7 +30,6 @@ class KineticProfilesView:
             [ymin, ymax],
             color="gray",
             linestyle="--",
-            linewidth=2,
             label=r"$t_{slice}$",
         )
         ax.set_ylim(ymin, ymax)
@@ -80,8 +69,7 @@ class KineticProfilesView:
         ax.set_xlabel("$Time\\/[\\mathrm{s}]$")
         ax.set_ylabel("$T\\/[\\mathrm{keV}]$")
         # ax.ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
-        legend = ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
-        KineticProfilesView.customize_legend(legend)
+        ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
         ax.set_title("Profiles displayed for t = " + "%.1f" % self.k_profiles.common_time_value + " s")
 
     def view_central_density_waveforms(self, ax, logscale=False):
@@ -131,8 +119,7 @@ class KineticProfilesView:
                 self.k_profiles.common_time_array[self.k_profiles.common_time_length - 1],
             )
         # ax.ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
-        legend = ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
-        KineticProfilesView.customize_legend(legend)
+        ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
         if logscale:
             ax.set_yscale("log")
 
@@ -162,8 +149,7 @@ class KineticProfilesView:
                 self.k_profiles.common_time_array[self.k_profiles.common_time_length - 1],
             )
         # ax.ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
-        legend = ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
-        KineticProfilesView.customize_legend(legend)
+        ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
 
     def view_temperature_profiles(self, ax):
         """
@@ -209,8 +195,7 @@ class KineticProfilesView:
         ax.set_xlim(self.k_profiles.xbeg, self.k_profiles.xend)
         # ax.ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
         ax.set_title("t = " + "%.1f" % self.k_profiles.common_time_value + " s")
-        legend = ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
-        KineticProfilesView.customize_legend(legend)
+        ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
 
     def view_density_profiles(self, ax, logscale=False):
         """
@@ -277,8 +262,7 @@ class KineticProfilesView:
         ax.set_xlim(self.k_profiles.xbeg, self.k_profiles.xend)
         # ax.ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
         ax.set_title("t = " + "%.1f" % self.k_profiles.common_time_value + " s")
-        legend = ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
-        KineticProfilesView.customize_legend(legend)
+        ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
 
     def view_zeff_profile(self, ax):
         """
@@ -310,10 +294,9 @@ class KineticProfilesView:
         ax.set_xlim(self.k_profiles.xbeg, self.k_profiles.xend)
         # ax.ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
         ax.set_title("t = " + "%.1f" % self.k_profiles.common_time_value + " s")
-        legend = ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
-        KineticProfilesView.customize_legend(legend)
+        ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
 
-    def view_vtor_profile(self, ax, logscale=False):
+    def view_vphi_profile(self, ax, logscale=False):
         """
         This Python function plots the toroidal rotation velocity profiles for different species in a plasma
         simulation.
@@ -324,27 +307,27 @@ class KineticProfilesView:
         if self.k_profiles.species:
             if (
                 self.k_profiles.is_composition_available
-                and (self.k_profiles.vtor_flag != 0 or self.k_profiles.vtor_e_flag != 0)
+                and (self.k_profiles.vphi_flag != 0 or self.k_profiles.vphi_e_flag != 0)
                 and (max(self.k_profiles.nspec_over_ne) > 0 or not self.k_profiles.is_core_profiles_present)
             ):
                 for ispecies in range(self.k_profiles.nspecies_core):
                     if self.k_profiles.nspec_over_ne[ispecies] > KineticProfilesCompute.IMPURITY_LIMIT:
-                        if "vtor" in self.k_profiles.profiles["n_species"][self.k_profiles.species[ispecies]].keys():
-                            if self.k_profiles.vtor_flag != 0:
+                        if "vphi" in self.k_profiles.profiles["n_species"][self.k_profiles.species[ispecies]].keys():
+                            if self.k_profiles.vphi_flag != 0:
                                 ax.plot(
                                     self.k_profiles.profiles["rhonorm"],
-                                    self.k_profiles.profiles["n_species"][self.k_profiles.species[ispecies]]["vtor"],
-                                    label=r"$vtor_" + self.k_profiles.species[ispecies] + "$",
+                                    self.k_profiles.profiles["n_species"][self.k_profiles.species[ispecies]]["vphi"],
+                                    label=r"$vphi_" + self.k_profiles.species[ispecies] + "$",
                                 )
                             if (
                                 self.k_profiles.is_edge_profiles_present
                                 and self.k_profiles.species_map[ispecies] != -99
-                                and self.k_profiles.vtor_e_flag != 0
+                                and self.k_profiles.vphi_e_flag != 0
                             ):
                                 ax.plot(
                                     self.k_profiles.profiles["rhonorm_e"],
-                                    self.k_profiles.profiles["n_species"][self.k_profiles.species[ispecies]]["vtor_e"],
-                                    label=r"$vtor_{" + self.k_profiles.species[ispecies] + ",edge}$",
+                                    self.k_profiles.profiles["n_species"][self.k_profiles.species[ispecies]]["vphi_e"],
+                                    label=r"$vphi_{" + self.k_profiles.species[ispecies] + ",edge}$",
                                 )
                 if not self.k_profiles.r_out_graph:
                     ax.set_xlabel(r"$\rho/\rho_0$")
@@ -354,13 +337,12 @@ class KineticProfilesView:
                     ax.set_ylabel(r"$|v_{tor}|\/[\mathrm{m.s^{-1}}]$")
                 ax.set_xlim(self.k_profiles.xbeg, self.k_profiles.xend)
                 if logscale is False:
-                    if self.k_profiles.max_vtor > self.k_profiles.min_vtor:
-                        ax.set_ylim(self.k_profiles.min_vtor, self.k_profiles.max_vtor * 1.1)
+                    if self.k_profiles.max_vphi > self.k_profiles.min_vphi:
+                        ax.set_ylim(self.k_profiles.min_vphi, self.k_profiles.max_vphi * 1.1)
 
                 ax.ticklabel_format(axis="y", style="sci", scilimits=(0, 0))
                 ax.set_title("t = " + "%.1f" % self.k_profiles.common_time_value + " s")
-                legend = ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
-                KineticProfilesView.customize_legend(legend)
+                ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
                 if logscale:
                     ax.set_yscale("log")
         else:
@@ -412,8 +394,7 @@ class KineticProfilesView:
 
                 ax.ticklabel_format(axis="y", style="sci", scilimits=(0, 0))
                 ax.set_title("t = " + "%.1f" % self.k_profiles.common_time_value + " s")
-                legend = ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
-                KineticProfilesView.customize_legend(legend)
+                ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
                 if logscale:
                     ax.set_yscale("log")
         else:

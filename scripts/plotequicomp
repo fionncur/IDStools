@@ -18,11 +18,8 @@ except ImportError:
 from rich_argparse import RichHelpFormatter
 
 from idstools.compute.common import get_nearest_time
-from idstools.database import DBMaster
 from idstools.utils.clihelper import (
-    dbentry_parser,
-    get_file_name,
-    get_title,
+    rcparam_parser,
 )
 from idstools.utils.idslogger import setup_logger
 from idstools.view.common import PlotCanvas
@@ -35,6 +32,7 @@ if __name__ == "__main__":
         description="""---- Display the plasma equilibrium from the equilibrium IDS.
         It also shows pf coils and wall position overlay if exists [Previously known as equiplot]""",
         formatter_class=RichHelpFormatter,
+        parents=[rcparam_parser],
     )
     parser.add_argument(
         "-u",
@@ -111,6 +109,7 @@ if __name__ == "__main__":
                 exit(1)
 
     canvas = PlotCanvas(1, 4)
+    canvas.update_style(args.rc)
     ax1 = canvas.add_axes(title="", xlabel="", row=0, col=0)
     ax2 = canvas.add_axes(title="", xlabel="", row=0, col=1)
     ax3 = canvas.add_axes(title="", xlabel="", row=0, col=2)
@@ -129,15 +128,15 @@ if __name__ == "__main__":
         wallview2.view_inner_wall_line(ax2)
 
     if equilibrium2:
-        equiview.view_equlibrium_plot(ax2, time_index1=220, equilibrium2_ids=equilibrium2)
-        equiview.view_current_plot(ax3, time_index1=220, equilibrium2_ids=equilibrium2)
+        equiview.view_equlibrium_plot(ax2, time_index1=time_slice1, equilibrium2_ids=equilibrium2)
+        equiview.view_current_plot(ax3, time_index1=time_slice1, equilibrium2_ids=equilibrium2)
         equiview.view_constraints(ax4, time_index1=time_slice1, equilibrium2_ids=equilibrium2)
     else:
         equiview.view_equlibrium_plot(ax2, time_index1=time_slice1)
         equiview.view_current_plot(ax3, time_index1=time_slice1)
         equiview.view_constraints(ax4, time_index1=time_slice1)
 
-    canvas.fig.suptitle(",".join(args.uri) + f" time {time_value1}", size=8)
+    canvas.fig.suptitle(",".join(args.uri) + f" time {time_value1}")
     canvas.fig.subplots_adjust(top=0.933, bottom=0.05, left=0.038, right=0.988, hspace=0.221, wspace=0.364)
     canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
     if args.save:

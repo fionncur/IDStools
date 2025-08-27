@@ -60,6 +60,15 @@ dbentry_parser.add_argument(
     ),
 )
 
+rcparam_parser = argparse.ArgumentParser(add_help=False, description="Plot with customizable rcParams flags")
+
+rcparam_parser.add_argument(
+    "--rc",
+    type=str,
+    default="",
+    help="Semicolon-separated rcParams string (e.g., 'lines.linewidth=2;axes.titlesize=14')",
+)
+
 
 def get_backend_id(name):
     """

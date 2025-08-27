@@ -24,6 +24,7 @@ from idstools.utils.clihelper import (
     get_database_path,
     get_file_name,
     get_title,
+    rcparam_parser,
 )
 from idstools.utils.idslogger import setup_logger
 from idstools.view.common import PlotCanvas
@@ -43,7 +44,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="""---- Display the plasma equilibrium from the equilibrium IDS.
         It also shows pf coils and wall position overlay if exists [Previously known as equiplot]""",
-        parents=[dbentry_parser],
+        parents=[dbentry_parser, rcparam_parser],
         formatter_class=RichHelpFormatter,
     )
     parser.add_argument("-t", "--time", help="Time (default=middle)", type=float, default=-99.0)
@@ -143,7 +144,6 @@ if __name__ == "__main__":
 
             col_size = col_size + 1
             canvas = PlotCanvas(2, col_size)
-
             ax1 = canvas.add_axes(title="", xlabel="", row=0, col=0, rowspan=2)
             axes_list1 = []
             axes_list2 = []
@@ -160,6 +160,7 @@ if __name__ == "__main__":
             canvas = PlotCanvas(1, 1)
             ax1 = canvas.add_axes(title="", xlabel="", row=0, col=0)
 
+        canvas.update_style(args.rc)
         if args.md:
             idses = ""
             mduris = []
@@ -176,7 +177,13 @@ if __name__ == "__main__":
                 ids_data = get_md_data(mduris, args.dd_update)
             plot_machine_description(ax1, ids_data)
 
-        view_object.view_magnetic_poloidal_flux(ax1, time_slice, plot_rho=args.rho)
+        c_psi, c_rho = view_object.view_magnetic_poloidal_flux(ax1, time_slice, plot_rho=args.rho)
+        if c_psi:
+            cbar_psi = canvas.fig.colorbar(c_psi, ax=ax1, orientation="horizontal", pad=0.08, fraction=0.03)
+            cbar_psi.set_label(r"$\psi$ [Wb]")
+        if c_rho:
+            cbar_rho = canvas.fig.colorbar(c_rho, ax=ax1, orientation="horizontal", pad=0.08, fraction=0.03)
+            cbar_rho.set_label(r"$\rho$ [Wb]")
         ax1.set_title(title)
 
         xmin, xmax = ax1.get_xlim()
@@ -194,7 +201,7 @@ if __name__ == "__main__":
             view_object.plot_profiles_1d_quantities(axes_list1, time_slice)
             view_object.plot_global_quantities(axes_list2, time_value)
 
-        canvas.fig.suptitle(get_title(args, "Equilibrium", time_value), size=12)
+        canvas.fig.suptitle(get_title(args, "Equilibrium", time_value))
         canvas.fig.subplots_adjust(top=0.933, bottom=0.05, left=0.024, right=0.988, hspace=0.221, wspace=0.25)
         canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
         if args.save:

@@ -45,8 +45,7 @@ class DistributionsView:
         ax.set_ylabel("Absorbed power $\\mathrm{[MW/m^{3}]}$")
         ax.set_xlabel("Normalized toroidal flux coordinate")
 
-        legend = ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
-        DistributionsView.customize_legend(legend)
+        ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
 
     # PROFILE OF ABSORBED POWER DENSITY ON ELECTRONS+IONS FOR ALL INJECTORS AND EACH OF THEM INDIVIDUALLY [MW/M3]
     def plot_absorbed_power_density(
@@ -76,8 +75,7 @@ class DistributionsView:
         ax.set_ylabel("Absorbed power $\\mathrm{[MW/m^{3}]}$")
         ax.set_xlabel("Normalized toroidal flux coordinate")
 
-        legend = ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
-        DistributionsView.customize_legend(legend)
+        ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
 
     # CD PROFILE [MA/M2]
     def plot_cd_profile(
@@ -109,8 +107,7 @@ class DistributionsView:
         ax.set_xlabel("Normalized toroidal flux coordinate")
         ax.set_title("NBI/FUS power profile")
 
-        legend = ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
-        DistributionsView.customize_legend(legend)
+        ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
 
     # NBI/FUS POWER AND CD WAVEFORMS
     def plot_nbi_fus_power_and_cd_waveforms(
@@ -155,8 +152,7 @@ class DistributionsView:
         ax.set_title("NBI/FUS power waveform")
         if profiles is not None:
             ax.set_ylim(0, max(profiles["all_injectors_total_power_waveform"]) * 1.2e-6)
-        legend = ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
-        DistributionsView.customize_legend(legend)
+        ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
 
     # CD WAVEFORM
     def plot_cd_waveform(
@@ -192,17 +188,6 @@ class DistributionsView:
             ax.set_xlabel("Time (s)")
             ax.set_title("NBI/FUS Current Density waveform")
             # ax.set_ylim(0,max(profiles['all_injectors_current_waveform'])*1.2e-3)
-            legend = ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
-            DistributionsView.customize_legend(legend)
+            ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
         else:
             ax.remove()
-
-    @staticmethod
-    def customize_legend(legend):
-        frame = legend.get_frame()
-        frame.set_facecolor("0.95")
-        for label in legend.get_texts():
-            label.set_fontsize(10)
-        for label in legend.get_lines():
-            label.set_linewidth(1.5)  # the legend line width
-        return

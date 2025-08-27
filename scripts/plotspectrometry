@@ -20,6 +20,7 @@ from idstools.utils.clihelper import (
     get_database_path,
     get_file_name,
     get_title,
+    rcparam_parser,
 )
 from idstools.utils.idslogger import setup_logger
 from idstools.view.common import PlotCanvas
@@ -29,7 +30,7 @@ logger = setup_logger("module", stdout_level=logging.INFO)
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="---- Display spectrum from spectrometer_visible [previsouly known as svplot]",
-        parents=[dbentry_parser],
+        parents=[dbentry_parser, rcparam_parser],
         formatter_class=RichHelpFormatter,
     )
 
@@ -81,6 +82,7 @@ if __name__ == "__main__":
     else:
         rows = int(total_spectrometers / 3) + 1
     canvas_radiance = PlotCanvas(rows, columns)
+    canvas_radiance.update_style(args.rc)
     row_counter = 0
     column_counter = 0
 
@@ -96,7 +98,7 @@ if __name__ == "__main__":
 
     canvas_radiance.fig.subplots_adjust(top=0.88, bottom=0.11, left=0.065, right=0.893, hspace=0.497, wspace=0.243)
     canvas_radiance.set_text(text=f"{get_database_path(args, time_value=time_value)}")
-    canvas_radiance.fig.suptitle(get_title(args, "Spectrum (Radiance) from spectrometer_visible", time_value), size=12)
+    canvas_radiance.fig.suptitle(get_title(args, "Spectrum (Radiance) from spectrometer_visible", time_value))
     canvas_radiance.get_current_fig_manager().set_window_title(os.path.basename(__file__) + "-radiance")
 
     if args.save:
@@ -109,7 +111,7 @@ if __name__ == "__main__":
     else:
         canvas_radiance.show(block=False)
     canvas_intensity = PlotCanvas(rows, columns)
-
+    canvas_intensity.update_style(args.rc)
     row_counter = 0
     column_counter = 0
     for spectro_index in spectrometers_list:
@@ -123,9 +125,7 @@ if __name__ == "__main__":
             ax.get_legend().remove()
 
     canvas_intensity.set_text(text=f"{get_database_path(args, time_value=time_value)}")
-    canvas_intensity.fig.suptitle(
-        get_title(args, "Spectrum (Intensity) from spectrometer_visible", time_value), size=12
-    )
+    canvas_intensity.fig.suptitle(get_title(args, "Spectrum (Intensity) from spectrometer_visible", time_value))
     canvas_intensity.fig.subplots_adjust(top=0.88, bottom=0.113, left=0.033, right=0.891, hspace=0.497, wspace=0.18)
     canvas_intensity.get_current_fig_manager().set_window_title(os.path.basename(__file__) + "-intensity")
 

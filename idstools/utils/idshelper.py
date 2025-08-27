@@ -14,6 +14,7 @@ import types
 import numpy as np
 import pandas as pd
 import rich
+import scipy
 
 try:
     import imaspy as imas
@@ -765,16 +766,83 @@ def compare_ids(
     return identical, output
 
 
+def get_ids_values(uri: str, idspaths: str | list, dd_update=False, verbose=False):
+    connection = imas.DBEntry(uri, "r")
+    if isinstance(idspaths, str):
+        idspaths = [idspaths]
+
+    output = {}
+    # Process each IDS path for this pulse
+    for full_path, idsname, valpath in idspaths:
+        try:
+            output[full_path] = None
+            if dd_update:
+                ids = imas.convert_ids(connection.get(idsname, autoconvert=False), connection.factory.version)
+            else:
+                ids = connection.get(idsname, autoconvert=False, lazy=True)
+
+            if ":" in valpath:
+                node, _, _, _ = partial_get(ids, valpath)
+                if node.size == 0:
+                    node = None
+            else:
+                node = eval("ids." + valpath)
+                if isinstance(node, imas.ids_primitive.IDSPrimitive) and not node.has_value:
+                    node = None
+                elif node.size == 0:
+                    node = None
+            if node is not None:
+                output[full_path] = node
+        except Exception as e:
+            if verbose:
+                logger.error(f"Exception for {full_path}: {e}", exc_info=True)
+
+    connection.close()
+    return output
+
+
+def execute_query(
+    query: str,
+    ids_values: dict,
+):
+    query_names = {}
+    qcounter = 1
+    are_values_present = True
+    output = None
+    for _, ids_value in ids_values.items():
+        if ids_value is None:
+            are_values_present = False
+            break
+        _value = ids_value
+        if isinstance(_value, str):
+            _value = f"'{ids_value}'"
+        elif isinstance(_value, imas.ids_primitive.IDSNumericArray):
+            _value = _value.value
+        query_names[f"x{qcounter}"] = _value
+        qcounter += 1
+    query_names["np"] = np
+    query_names["scipy"] = scipy
+    if are_values_present:
+        result = eval(query, {}, query_names)
+        if result is not None:
+            if isinstance(result, (np.bool_, bool)):
+                if result:
+                    output = True
+            else:
+                output = result
+    return output
+
+
 def get_quantities_from_pulses(
-    idspath: str, pulses: tuple, list_count: int = 0, verbose: bool = False, dd_update: bool = False
+    idspath: list, pulses: tuple, list_count: int = 0, verbose: bool = False, query=None, dd_update: bool = False
 ) -> pd.DataFrame:
     """
-    The `get_quantities_from_pulses` function retrieves values from a specified IDS path for a given set of pulses and
+    The `get_quantities_from_pulses` function retrieves values from specified IDS paths for a given set of pulses and
     returns a DataFrame containing the pulse, run, and corresponding values.
 
     Args:
-        idspath (str): The `idspath` parameter is a string that represents the path to the IDS node from which the
-            quantities will be extracted. It is used to specify the location of the data in the IDS
+        idspath (list or str): The `idspath` parameter is either a single string or a list of strings that represent
+            the paths to the IDS nodes from which the quantities will be extracted.
         pulses (tuple): The `pulses` parameter is a tuple containing information about each pulse. Each element in
             the tuple is itself a tuple with the following elements: pulse, run, backend, database, user, version, and
             file path.
@@ -783,17 +851,26 @@ def get_quantities_from_pulses(
             `pulses` tuple. If `list_count` is set to a positive integer, values will be retrieved for first `listCount`
             pulses in the `pulses` tuple. Defaults to 0
         verbose (bool): print debug information
+        query (str, optional): Query string to filter results. Defaults to None.
+        dd_update (bool, optional): Flag to indicate whether to update data dictionary. Defaults to False.
 
     Returns:
-        The function `get_quantities_from_pulses` returns a pandas DataFrame containing the columns "PULSE", "RUN",
-        and "VALUE".
+        The function returns a pandas DataFrame containing the columns "URI", "FILEPATH", "FILETIME" and
+        one column for each IDS path specified.
     """
-    idsname = idspath.split("/")[0]
-    valpath = idspath[1 + len(idsname) :]
-    list_counter = 0
+    # Convert single string to list for consistent handling
+    if isinstance(idspath, str):
+        idspath = [idspath]
 
-    values = []
-    pulse_for_df = []
+    paths_info = []
+    for path in idspath:
+        idsname = path.split("/")[0]
+        valpath = path[1 + len(idsname) :]
+        paths_info.append((path, idsname, valpath.replace("(", "[").replace(")", "]").replace("/", ".")))
+
+    list_counter = 0
+    results = []
+
     for pulse_tuple in pulses:
         pulse = pulse_tuple[0]
         run = pulse_tuple[1]
@@ -803,50 +880,53 @@ def get_quantities_from_pulses(
         version = pulse_tuple[5]
         file_path = pulse_tuple[6]
         file_time = pulse_tuple[7]
+
         backend_string = ""
         if backend == imas.ids_defs.MDSPLUS_BACKEND:
             backend_string = "mdsplus"
         if backend == imas.ids_defs.HDF5_BACKEND:
             backend_string = "hdf5"
 
-        uri = f'"imas:{backend_string}?user={user};shot={pulse};run={run};database={database};version={version}"'
+        uri = f"imas:{backend_string}?user={user};shot={pulse};run={run};database={database};version={version}"
         if verbose:
             print(f"fetching data from {pulse}, {run}")
-        connection = imas.DBEntry(backend, database, pulse, run, user, version)
-        connection.open()
-        valpath = valpath.replace("(", "[").replace(")", "]").replace("/", ".")
-        try:
-            if dd_update:
-                ids = imas.convert_ids(
-                    connection.get(idsname, autoconvert=False), connection.factory.version
-                )  # noqa: F841
-            else:
-                ids = connection.get(idsname, autoconvert=False, lazy=True)  # noqa: F841
-            node = eval("ids." + valpath)
-            if node.has_value:
-                values.append(node)
-                list_counter = list_counter + 1
-                pulse_for_df.append((uri, file_path, file_time))
-        except Exception as e:
-            logger.debug(f"{e}")
+        found_values = False
+        pulse_data = {"URI": uri, "FILEPATH": file_path, "FILETIME": file_time}
+        ids_values = get_ids_values(uri, paths_info, dd_update=dd_update, verbose=verbose)
+        if ids_values:
+            for _path, _value in ids_values.items():
+                if _value is None:
+                    if verbose:
+                        print(uri, _path, "is None, skipping")
+                    found_values = False
+                    break
+                pulse_data[_path] = _value
+                if query is None:
+                    found_values = True
+            if query is not None:
+                pulse_data[query] = execute_query(query, ids_values)
 
-        connection.close()
-        if list_count != 0:
-            if list_counter == list_count:
+                if isinstance(pulse_data[query], (bool, np.bool_)):
+                    found_values = True
+                elif isinstance(pulse_data[query], np.ndarray):
+                    if pulse_data[query].size > 0:
+                        found_values = True
+                elif pulse_data[query] is not None:
+                    found_values = True
+        if found_values:
+            results.append(pulse_data)
+            list_counter += 1
+
+            if list_count != 0 and list_counter >= list_count:
                 break
-    df = pd.DataFrame(
-        pulse_for_df,
-        columns=[
-            "URI",
-            "FILEPATH",
-            "FILETIME",
-        ],
-    )
+    df = pd.DataFrame(results)
 
-    df["VALUE"] = values
-    df_filtered = df[df["VALUE"].notna()]
-    df_extract = df_filtered[["URI", "VALUE"]]
-    return df_extract
+    # If no results were found, create empty dataframe with appropriate columns
+    if df.empty:
+        columns = ["URI", "FILEPATH", "FILETIME"] + idspath
+        df = pd.DataFrame(columns=columns)
+
+    return df
 
 
 def idsdiff_full(

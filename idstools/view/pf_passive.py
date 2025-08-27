@@ -36,7 +36,6 @@ class PFPassiveView:
         edgecolor="#52bf90",
         facecolor="#52bf90",
         alpha=0.7,
-        linewidth=1,
     ):
         """
         Visualizes passive PF (Poloidal Field) loops on the given matplotlib axis.
@@ -213,7 +212,7 @@ class PFPassiveView:
             text = ax.text(cx, cy, name, fontsize="small", ha=ha, color="#333333", visible=False)
             text_labels.append(text)
         pf_passive_legend = Patch(
-            edgecolor=edgecolor, facecolor=facecolor, alpha=alpha, linewidth=linewidth, label="pf_passive"
+            edgecolor=edgecolor, facecolor=facecolor, alpha=alpha, linewidth=1, label="pf_passive"
         )
         pf_passive_legend.is_label_visible = False
         pf_passive_legend.is_shape_visible = True

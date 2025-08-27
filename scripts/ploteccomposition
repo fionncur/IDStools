@@ -17,6 +17,7 @@ from idstools.utils.clihelper import (
     get_database_path,
     get_file_name,
     get_title,
+    rcparam_parser,
 )
 from idstools.utils.idslogger import setup_logger
 from idstools.view.common import PlotCanvas
@@ -27,7 +28,7 @@ if __name__ == "__main__":
     # ------------------------------
     parser = argparse.ArgumentParser(
         description="---- Display EC results [previously known as eccomp]",
-        parents=[dbentry_parser],
+        parents=[dbentry_parser, rcparam_parser],
         formatter_class=RichHelpFormatter,
     )
     parser.add_argument(
@@ -96,6 +97,7 @@ if __name__ == "__main__":
         logger.error("Only one time slice --> ECCD and ECRH waveforms not displayed")
         rows = 1
     canvas = PlotCanvas(rows, 2)
+    canvas.update_style(args.rc)
     ax1 = canvas.add_axes(title="", xlabel="", row=0, col=0)
     ax2 = canvas.add_axes(title="", xlabel="", row=0, col=1)
     if ntime != 1:
@@ -112,7 +114,7 @@ if __name__ == "__main__":
         waves_view.plot_e_c_c_d_waveform(ax4, time_slice)
 
     canvas.set_text(text=f"{get_database_path(args, time_value)}")
-    canvas.fig.suptitle(get_title(args, "EC Composition", time_value), size=12)
+    canvas.fig.suptitle(get_title(args, "EC Composition", time_value))
     canvas.fig.subplots_adjust(top=0.941, bottom=0.122, left=0.052, right=0.925, hspace=0.2, wspace=0.2)
     canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
 

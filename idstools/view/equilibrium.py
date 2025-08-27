@@ -80,31 +80,35 @@ class EquilibriumView(BasePlot):
 
             :meth:`plotIP`
         """
+        contour_lines_psi = contour_lines_rho = None
         cartestion_grid = self.compute_obj.get2d_cartesian_grid(time_slice, profiles2d_index)
         if cartestion_grid is not None:
-            levels = 30
+            levels = 50
+
+            contour_lines_psi = ax.contour(
+                cartestion_grid["r2d"], cartestion_grid["z2d"], cartestion_grid["psi2d"], levels, cmap="summer"
+            )
+            # ax.clabel(
+            #     contour_lines_psi,
+            #     colors="black",
+            #     inline=False,
+            #     fontsize=10,
+            #     # fmt="%.2e",
+            #     inline_spacing=1,
+            # )
             if plot_rho:
                 rho2d = self.compute_obj.get_rho2d(time_slice)
                 if rho2d is not None:
-                    ax.contour(
-                        cartestion_grid["r2d"],
-                        cartestion_grid["z2d"],
-                        rho2d,
-                        levels,
-                        colors="r",
+                    contour_lines_rho = ax.contour(
+                        cartestion_grid["r2d"], cartestion_grid["z2d"], rho2d, levels=levels, cmap="YlOrBr"
                     )
-            ax.contour(
-                cartestion_grid["r2d"],
-                cartestion_grid["z2d"],
-                cartestion_grid["psi2d"],
-                levels,
-            )
+
             ax.set_aspect("equal", adjustable="box")
             ax.set_xlabel("$R$ [m]")
             ax.set_ylabel("$Z$ [m]")
             # ax.set_xlim(3.4, cartestionGrid["r2d"].max())
             # ax.set_ylim(cartestionGrid["z2d"].min() * 0.7, cartestionGrid["z2d"].max() * 0.7)
-            ax.tick_params(axis="both", which="major")
+        return contour_lines_psi, contour_lines_rho
 
     def view_pulse_info(self, ax: plt.axes, title: str, hostdir: str, shot: int, run: int, t: float):
         self.database_info(ax, title, hostdir, shot, run, t)
@@ -130,7 +134,6 @@ class EquilibriumView(BasePlot):
             loc="center left",
             borderaxespad=0.0,
             frameon=False,
-            fontsize="x-small",
         )
         ax.set_ylim(0, 20)
 
@@ -153,8 +156,10 @@ class EquilibriumView(BasePlot):
         # rho2d = data["rho2d"]
         psi2d = data["psi2d"]
         cntr = ax.contour(r2d, z2d, psi2d, 50, cmap="summer")
+        cbar = plt.colorbar(cntr, ax=ax, pad=0.08, fraction=0.03)
+        cbar.set_label(r"$\psi$ [Wb]")
         # if len(rho2d)>0:
-        #    cntr = ax_polview.contour(r2d,z2d,rho2d,50,cmap='YlOrBr')
+        #    cntr = ax.contour(r2d,z2d,rho2d,50,cmap='YlOrBr')
 
         # ax_polview.set_xlim(r2d.min(),r2d.max())
         ax.set_xlim(3.4, r2d.max())
@@ -203,22 +208,20 @@ class EquilibriumView(BasePlot):
             ax.xaxis.tick_top()
             ax.xaxis.set_label_position("top")
 
-            ax.contour(r2d, z2d, psi2d, 50)  # ,label=r'$\Psi_{pol}$')
+            contour_lines = ax.contour(r2d, z2d, psi2d, levels=50, cmap="summer")  # ,label=r'$\Psi_{pol}$')
+            cbar = plt.colorbar(contour_lines, ax=ax, pad=0.08, fraction=0.03)
+            cbar.set_label(r"$\psi$ [Wb]")
             ax.set_xlim(r2d.min(), r2d.max())
             ax.set_aspect("equal", adjustable="box")
             ax.set_xlabel("R (m)")
             ax.set_ylabel("Z (m)")
 
             ax.set_xlabel("$R\\/\\mathrm{[m]}$")
-            # ax.tick_params(axis='both',which='major',labelsize=ticksize)
             ax.set_ylabel(r"$Z\/\mathrm{[m]}$")
-            # ax.tick_params(
-            #     axis="x", which="both", bottom=False, top=False, labelbottom=False
-            # )
             ax.set_title("2D equilibrium")
         else:
-            ax.text(0.2, 0.5, "2D equilibrium", fontsize=10)
-            ax.text(0.2, 0.45, "not available", fontsize=10)
+            ax.text(0.2, 0.5, "2D equilibrium")
+            ax.text(0.2, 0.45, "not available")
 
     def plot_profiles_1d_quantities(self, axes_list, time_slice, attributes=None):
         quantities = self.compute_obj.get_profiles_1d_quantities(time_slice, attributes)

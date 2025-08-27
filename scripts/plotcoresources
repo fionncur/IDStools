@@ -18,6 +18,7 @@ from idstools.utils.clihelper import (
     get_database_path,
     get_file_name,
     get_title,
+    rcparam_parser,
 )
 from idstools.utils.idslogger import setup_logger
 from idstools.view.common import PlotCanvas
@@ -27,7 +28,7 @@ logger = setup_logger("module", stdout_level=logging.INFO)
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="---- Display core_sources results [Previously known as csplot]",
-        parents=[dbentry_parser],
+        parents=[dbentry_parser, rcparam_parser],
         formatter_class=RichHelpFormatter,
     )
 
@@ -75,6 +76,7 @@ if __name__ == "__main__":
     core_source_view = CoreSourcesView(core_sources)
 
     canvas = PlotCanvas(2, 4)
+    canvas.update_style(args.rc)
     ret = ax_power_profiles = canvas.add_axes(title=r"Power Profiles [MW/M3]", row=0, col=0)
     core_source_view.view_power_profiles(ax_power_profiles, time_slice)
 
@@ -100,7 +102,7 @@ if __name__ == "__main__":
 
     canvas.fig.subplots_adjust(top=0.916, bottom=0.09, left=0.044, right=0.953, hspace=0.287, wspace=0.2)
     canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
-    canvas.fig.suptitle(get_title(args, "Core sources", time_value), size=12)
+    canvas.fig.suptitle(get_title(args, "Core sources", time_value))
     if args.save:
         fname = get_file_name(args, os.path.basename(__file__) + "_core_sources", time_value)
         if args.directory:

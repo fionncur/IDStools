@@ -114,13 +114,7 @@ class CoreSourcesView:
             ax.set_ylabel("Power to bulk $\\mathrm{[MW/m^{3}]}$")
             ax.set_xlabel("Normalized toroidal flux coordinate")
             # set legend
-            legend = ax.legend()
-            frame = legend.get_frame()
-            frame.set_facecolor("0.95")
-            for label in legend.get_texts():
-                label.set_fontsize(7)
-            for label in legend.get_lines():
-                label.set_linewidth(1.5)
+            ax.legend()
             return 0
         else:
             logger.warning("viewPowerProfiles:No active sources available")
@@ -169,13 +163,7 @@ class CoreSourcesView:
             ax.set_ylabel("Density $\\mathrm{[m^{-3}.s^{-1}]}$")
             ax.set_xlabel("Normalized toroidal flux coordinate")
             # set legend
-            legend = ax.legend()
-            frame = legend.get_frame()
-            frame.set_facecolor("0.95")
-            for label in legend.get_texts():
-                label.set_fontsize(7)
-            for label in legend.get_lines():
-                label.set_linewidth(1.5)
+            ax.legend()
             return 0
         else:
             logger.warning("viewParticlesProfiles:No active sources available")
@@ -211,13 +199,7 @@ class CoreSourcesView:
             ax.set_ylabel("Current density $\\mathrm{[kA/m^{2}]}$")
             ax.set_xlabel("Normalized toroidal flux coordinate")
             # set legend
-            legend = ax.legend()
-            frame = legend.get_frame()
-            frame.set_facecolor("0.95")
-            for label in legend.get_texts():
-                label.set_fontsize(7)
-            for label in legend.get_lines():
-                label.set_linewidth(1.5)
+            ax.legend()
             return 0
         else:
             logger.warning("viewCurrentProfiles:No active sources available")
@@ -284,13 +266,7 @@ class CoreSourcesView:
                 ax.set_ylabel("Power waveforms $\\mathrm{[MW]}$")
                 ax.set_xlabel("Time (s)")
                 # set legend
-                legend = ax.legend()
-                frame = legend.get_frame()
-                frame.set_facecolor("0.95")
-                for label in legend.get_texts():
-                    label.set_fontsize(7)
-                for label in legend.get_lines():
-                    label.set_linewidth(1.5)
+                ax.legend()
                 return 0
         else:
             logger.warning("viewPowerAndParticleWaveforms:No active sources available")
@@ -359,13 +335,7 @@ class CoreSourcesView:
                 ax.set_ylabel("Particles waveforms $\\mathrm{[s^{-1}]}$")
                 ax.set_xlabel("Time (s)")
                 # set legend
-                legend = ax.legend()
-                frame = legend.get_frame()
-                frame.set_facecolor("0.95")
-                for label in legend.get_texts():
-                    label.set_fontsize(7)
-                for label in legend.get_lines():
-                    label.set_linewidth(1.5)
+                ax.legend()
                 return 0
         else:
             logger.warning("viewParticlesWaveform:No active sources available")
@@ -406,13 +376,7 @@ class CoreSourcesView:
                 ax.set_ylabel("Current waveforms $\\mathrm{[kA.m]}$")
                 ax.set_xlabel("Time (s)")
                 # set legend
-                legend = ax.legend()
-                frame = legend.get_frame()
-                frame.set_facecolor("0.95")
-                for label in legend.get_texts():
-                    label.set_fontsize(7)
-                for label in legend.get_lines():
-                    label.set_linewidth(1.5)
+                ax.legend()
                 return 0
         else:
             logger.warning("viewCurrentWaveform:No active sources available")
@@ -454,13 +418,7 @@ class CoreSourcesView:
                 ax.set_ylabel("Torque waveforms $\\mathrm{[kg.m^2.s^{-2}]}$")
                 ax.set_xlabel("Time (s)")
                 # set legend
-                legend = ax.legend()
-                frame = legend.get_frame()
-                frame.set_facecolor("0.95")
-                for label in legend.get_texts():
-                    label.set_fontsize(7)
-                for label in legend.get_lines():
-                    label.set_linewidth(1.5)
+                ax.legend()
                 return 0
         else:
             logger.warning("view_torque_waveform:No active sources available")

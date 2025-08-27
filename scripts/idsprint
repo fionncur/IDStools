@@ -9,6 +9,8 @@ try:
     import imaspy as imas
 except ImportError:
     import imas
+from itertools import tee
+
 import numpy as np
 import rich
 from rich.columns import Columns
@@ -24,6 +26,7 @@ from idstools.utils.clihelper import (
     get_database_path,
     get_file_name,
     get_title,
+    rcparam_parser,
 )
 from idstools.utils.idshelper import get_available_ids_and_times, parse_uri, partial_get
 from idstools.utils.idslogger import setup_logger
@@ -32,7 +35,15 @@ from idstools.view.common import PlotCanvas
 logger = setup_logger("module", stdout_level=logging.INFO)
 
 
-def view_plot(ax, field, coordinate, field_name="", coordinate_name="", field_unit="", coordinate_unit=""):
+def view_plot(
+    ax,
+    field,
+    coordinate,
+    field_name="",
+    coordinate_name="",
+    field_unit="",
+    coordinate_unit="",
+):
     if not isinstance(field, (imas.ids_primitive.IDSNumericArray, np.ndarray)):
         logger.error("Not a numeric array, Please select ids path")
         return
@@ -49,7 +60,8 @@ def view_plot(ax, field, coordinate, field_name="", coordinate_name="", field_un
         data - field.value
         field_unit = field.metadata.units
         yfield_name = field.metadata.name
-        if coordinate and coordinate.sdigit():
+
+        if coordinate and isinstance(coordinate, int):
             _coordinate = field.coordinates[coordinate]
 
             if isinstance(_coordinate, imas.ids_primitive.IDSPrimitive):
@@ -94,31 +106,14 @@ def view_plot(ax, field, coordinate, field_name="", coordinate_name="", field_un
     else:
         ax.plot(coordinate, data, label=field_name)
 
-    # Set Plot properties
-    font_args = {
-        "fontfamily": "serif",
-        "color": "darkred",
-        "fontweight": "normal",
-        "fontsize": 12,
-    }
-    ax.tick_params(
-        which="both",
-        labelsize=12,
-    )
     # ax.set_xlim(rho_tor_norm[0], rho_tor_norm[nrho - 1])
-    ax.set_xlabel(f"{coordinate_name} [{coordinate_unit}]", font_args, labelpad=1)
-    ax.set_ylabel(f"{yfield_name} [{field_unit}]", font_args, labelpad=0)
+    ax.set_xlabel(f"{coordinate_name} [{coordinate_unit}]", labelpad=1)
+    ax.set_ylabel(f"{yfield_name} [{field_unit}]", labelpad=0)
 
     # set legend
     # legx_pos = 1.35
     # legy_pos = 1.05
-    legend = ax.legend(loc="upper right")
-    frame = legend.get_frame()
-    frame.set_facecolor("0.95")
-    for label in legend.get_texts():
-        label.set_fontsize(10)
-    for label in legend.get_lines():
-        label.set_linewidth(1.5)
+    ax.legend()
 
 
 def print_tree(structure, hide_empty_nodes, compact, full_array):
@@ -173,7 +168,7 @@ def _make_tree(structure, hide_empty_nodes, compact, *, tree=None):
                 group = Columns([txt])
             tree.add(group)
             return tree
-        elif isinstance(structure, np.float64):
+        elif isinstance(structure, np.float64) or isinstance(structure, imas.ids_primitive.IDSPrimitive):
             return structure
         else:
             tree = Tree(f"[magenta]{structure.metadata.name}")
@@ -181,7 +176,6 @@ def _make_tree(structure, hide_empty_nodes, compact, *, tree=None):
     iterator = structure
     if hide_empty_nodes and isinstance(structure, imas.ids_structure.IDSStructure):
         iterator = structure.iter_nonempty_(accept_lazy=True)
-
     for counter, child in enumerate(iterator):
         if isinstance(child, (np.ndarray)):
             if child.size == 0:
@@ -212,8 +206,15 @@ def _make_tree(structure, hide_empty_nodes, compact, *, tree=None):
         else:
             if isinstance(child, imas.ids_structure.IDSStructure):
                 txt = f"[magenta]{child._path}[/]"
-                ntree = tree.add(txt)
-                _make_tree(child, hide_empty_nodes, compact, tree=ntree)
+                # check if structure is not empty
+                iterator, iterator_copy = tee(child.iter_nonempty_(accept_lazy=True))
+                try:
+                    next(iterator_copy)
+                except StopIteration:
+                    pass
+                else:
+                    ntree = tree.add(txt)
+                    _make_tree(child, hide_empty_nodes, compact, tree=ntree)
             elif isinstance(child, imas.ids_struct_array.IDSStructArray):
                 ntree = tree
                 if not child.has_value:
@@ -274,7 +275,7 @@ if __name__ == "__main__":
         '#equilibrium/time_slice[0]/profiles_2d[0].r'.
         [idsprint was previously known as idsdump and idsdumppath]""",
         formatter_class=RichHelpFormatter,
-        parents=[dbentry_parser],
+        parents=[dbentry_parser, rcparam_parser],
     )
     parser.add_argument(
         "-e",
@@ -539,6 +540,7 @@ if __name__ == "__main__":
                 exit(0)
 
             canvas = PlotCanvas(1, 1)
+            canvas.update_style(args.rc)
             ax = canvas.add_axes(title="", xlabel="", row=0, col=0)
             view_plot(
                 ax,
@@ -554,7 +556,7 @@ if __name__ == "__main__":
 
             canvas.fig.subplots_adjust(top=0.916, bottom=0.09, left=0.044, right=0.953, hspace=0.287, wspace=0.2)
             canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
-            canvas.fig.suptitle(get_title(args, f"{ids_name}/{original_ids_path}", None), size=12)
+            canvas.fig.suptitle(get_title(args, f"{ids_name}/{original_ids_path}", None))
 
             if args.save:
                 fname = get_file_name(args, os.path.basename(__file__), None)

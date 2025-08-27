@@ -13,7 +13,7 @@ class WavesView:
         self.waves_compute = WavesCompute(ids)
         self.ids = ids
 
-    def plot_pol_view_traces(self, ax, time_slice, color="b", style="-", label="", fontsize=9, labelpad=-1):
+    def plot_pol_view_traces(self, ax, time_slice, color="b", style="-", label=""):
         beam_tracing_dict = self.waves_compute.get_beam_tracing(time_slice)
         beam_data_length_for_each_wave = beam_tracing_dict["beam_data_length_for_each_wave"]
 
@@ -37,8 +37,8 @@ class WavesView:
                     display_label_once = False
                     label = ""
 
-    def plot_top_view_traces(self, ax, time_slice, color="b", style="-", label="", fontsize=9, labelpad=-1):
-        ax.set_title("Top View (X,Y)", fontsize=fontsize)
+    def plot_top_view_traces(self, ax, time_slice, color="b", style="-", label=""):
+        ax.set_title("Top View (X,Y)")
         ax.set_xlabel("X [m]")
         ax.set_ylabel("Y [m]")
 
@@ -65,8 +65,8 @@ class WavesView:
                     display_label_once = False
                     label = ""
 
-    def plot_electron_power(self, ax, time_slice, color="b", style="-", label="", fontsize=9, labelpad=-1):
-        ax.set_title("Power along the beams", fontsize=fontsize)
+    def plot_electron_power(self, ax, time_slice, color="b", style="-", label=""):
+        ax.set_title("Power along the beams")
         ax.set_xlabel("Path length [m]")
         ax.set_ylabel("P$_{electrons}$ [MW]")
 
@@ -95,8 +95,8 @@ class WavesView:
                     label = ""
         ax.legend()
 
-    def plot_power_flow_normal(self, ax, time_slice, color="b", style="-", label="", fontsize=9, labelpad=-1):
-        ax.set_title("Power flow to the magnetic field", fontsize=fontsize)
+    def plot_power_flow_normal(self, ax, time_slice, color="b", style="-", label=""):
+        ax.set_title("Power flow to the magnetic field")
         ax.set_xlabel("Path length [m]")
 
         beam_tracing_dict = self.waves_compute.get_beam_tracing(time_slice)
@@ -364,16 +364,6 @@ class WavesView:
             else:
                 logger.info(f"{ec_launcher_info['single_ec_launcher_name'][i_wave]} is off")
 
-    @staticmethod
-    def customize_legend(legend):
-        frame = legend.get_frame()
-        frame.set_facecolor("0.95")
-        for label in legend.get_texts():
-            label.set_fontsize(6)
-        for label in legend.get_lines():
-            label.set_linewidth(1.5)  # the legend line width
-        return
-
     # CD WAVEFORM
     def view_c_d_waveform(self, ax, time_slice, usepsi=False):
         time_array = self.ids.time
@@ -398,8 +388,7 @@ class WavesView:
             )
         ax.set_ylabel("Current Density $\\mathrm{[kA]}$")
         ax.set_xlabel("Time (s)")
-        legend = ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
-        WavesView.customize_legend(legend)
+        ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
 
     # EC POWER WAVEFORM
     def view_e_c_power_waveform(self, ax, time_slice, usepsi=False):
@@ -425,8 +414,7 @@ class WavesView:
             )
         ax.set_ylabel("Power to the electrons $\\mathrm{[MW]}$")
         ax.set_xlabel("Time (s)")
-        legend = ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
-        WavesView.customize_legend(legend)
+        ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
 
     # CD PROFILE [MA/M2]
     def view_c_d_profile(self, ax, time_slice, usepsi=False):
@@ -457,8 +445,7 @@ class WavesView:
             ax.set_xlabel("Normalized toroidal flux coordinate")
         else:
             ax.set_xlabel("-(Poloidal flux coordinate) [Wb]")
-        legend = ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
-        WavesView.customize_legend(legend)
+        ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
 
     # PROFILE OF ABSORBED POWER DENSITY [MW/M3]
     def view_absorbed_power_density_profile(self, ax, time_slice, usepsi=False):
@@ -488,8 +475,7 @@ class WavesView:
             ax.set_xlabel("Normalized toroidal flux coordinate")
         else:
             ax.set_xlabel("-(Poloidal flux coordinate) [Wb]")
-        legend = ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
-        WavesView.customize_legend(legend)
+        ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
 
     def plot_beam_index(self, ax):
         """

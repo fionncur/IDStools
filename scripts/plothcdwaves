@@ -18,6 +18,7 @@ from idstools.utils.clihelper import (
     get_database_path,
     get_file_name,
     get_title,
+    rcparam_parser,
 )
 from idstools.utils.idslogger import setup_logger
 from idstools.view.common import PlotCanvas
@@ -66,6 +67,7 @@ def show_plots(args):
             logger.error("Only one time slice --> ECCD and ECRH waveforms not displayed")
             rows = 1
         canvas = PlotCanvas(rows, 2)
+        canvas.update_style(args.rc)
         # canvas.setStyle(style="retro")
         ax1 = canvas.add_axes(title="", xlabel="", row=0, col=0)
         ax2 = canvas.add_axes(title="", xlabel="", row=0, col=1)
@@ -105,7 +107,7 @@ def show_plots(args):
             wspace=0.13,
         )
         canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
-        canvas.fig.suptitle(get_title(args, "HCD Waves Plot", time_value), size=12)
+        canvas.fig.suptitle(get_title(args, "HCD Waves Plot", time_value))
 
         if args.save:
             fname = get_file_name(args, os.path.basename(__file__) + "_ECRH_profile_time", time_value)
@@ -122,7 +124,7 @@ def show_plots(args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="---- Display EC results",
-        parents=[dbentry_parser],
+        parents=[dbentry_parser, rcparam_parser],
         formatter_class=RichHelpFormatter,
     )
     parser.add_argument("-t", "--time", help="Time", required=False, type=float, default=-99.0)

@@ -14,7 +14,7 @@ class DistributionSourcesView(BasePlot):
         self.distribution_sources_compute = DistributionSourcesCompute(ids)
         self.ids = ids
 
-    def view_neutrons(self, ax: plt.axes, time_slice, source_index=0):
+    def view_neutrons(self, ax: plt.axes, time_slice, source_index=0, **kwargs):
         rho_tor_norm = self.distribution_sources_compute.get_rho_tor_norm(time_slice, source_index)
         nrho = len(rho_tor_norm)
         if rho_tor_norm is not None and nrho == 0:
@@ -32,31 +32,14 @@ class DistributionSourcesView(BasePlot):
                 f' {source["label"]}; P = ' + "%.2f" % (source["powerInKW"]) + " kW",
             )
 
-        # Set Plot properties
-        font_args = {
-            "fontfamily": "serif",
-            "color": "darkred",
-            "fontweight": "normal",
-            "fontsize": 12,
-        }
-        ax.tick_params(
-            which="both",
-            labelsize=12,
-        )
         ax.set_xlim(rho_tor_norm[0], rho_tor_norm[nrho - 1])
-        ax.set_xlabel(r"$\rho/\rho_0$", font_args, labelpad=1)
-        ax.set_ylabel(r"Neutron rate ($s^{-1}.m{^{-3}}$)", font_args, labelpad=0)
+        ax.set_xlabel(r"$\rho/\rho_0$", labelpad=1)
+        ax.set_ylabel(r"Neutron rate ($s^{-1}.m{^{-3}}$)", labelpad=0)
 
         # set legend
         # legx_pos = 1.35
         # legy_pos = 1.05
-        legend = ax.legend(loc="upper right")
-        frame = legend.get_frame()
-        frame.set_facecolor("0.95")
-        for label in legend.get_texts():
-            label.set_fontsize(7)
-        for label in legend.get_lines():
-            label.set_linewidth(1.5)
+        ax.legend()
 
     def view_time(self, ax: plt.axes, time: float):
         ax_time = ax.twiny()

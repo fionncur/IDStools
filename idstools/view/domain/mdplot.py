@@ -147,8 +147,8 @@ def plot_machine_description(ax, ids_data):
         for patch in legend.get_patches():
             patch.set_picker(True)
     ax.set_aspect("equal", adjustable="box")
-    ax.callbacks.connect("xlim_changed", update_labels)
-    ax.callbacks.connect("ylim_changed", update_labels)
+    # ax.callbacks.connect("xlim_changed", update_labels)
+    # ax.callbacks.connect("ylim_changed", update_labels)
     ax.plot()
 
     xmin, xmax = ax.get_xlim()

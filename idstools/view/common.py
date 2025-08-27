@@ -12,28 +12,6 @@ import matplotlib.pyplot as plt
 
 logger = logging.getLogger("module")
 
-# fsize = 8
-# tsize = 10
-# tdir = "in"
-# major = 5.0
-# minor = 3.0
-# lwidth = 0.8
-# lhandle = 2.0
-# plt.style.use("default")
-# # plt.rcParams["text.usetex"] = True
-# plt.rcParams["font.size"] = fsize
-# plt.rcParams["legend.fontsize"] = tsize
-# plt.rcParams["xtick.direction"] = tdir
-# plt.rcParams["ytick.direction"] = tdir
-# plt.rcParams["xtick.major.size"] = major
-# plt.rcParams["xtick.minor.size"] = minor
-# plt.rcParams["ytick.major.size"] = 5.0
-# plt.rcParams["ytick.minor.size"] = 3.0
-# plt.rcParams["axes.linewidth"] = lwidth
-# plt.rcParams["legend.handlelength"] = lhandle
-
-# plt.rcParams["lines.linewidth"] = 1
-
 current_directory = os.path.abspath(os.path.dirname(__file__))
 # reach to `share` directory (sys.prefix won't work if using --prefix option)
 share_directory = os.path.abspath(os.path.join(current_directory, "../../../../../"))
@@ -93,7 +71,6 @@ class PlotCanvas:
             ax.set_xlabel(xlabel)
         if ylabel is not None:
             ax.set_ylabel(ylabel)
-        ax.grid()
         return ax
 
     def save(
@@ -266,6 +243,22 @@ class PlotCanvas:
                 ["4477AA", "EE6677", "228833", "CCBB44", "66CCEE", "AA3377", "BBBBBB"],
             )
 
+    def update_style(self, param_string=""):
+        """
+        Updates matplotlib rcParams using a semicolon-separated string.
+        Example input: "lines.linewidth=2;axes.titlesize=16"
+        """
+        for item in param_string.split(";"):
+            if not item.strip():
+                continue
+            try:
+                key, value = item.split("=", 1)
+                key = key.strip()
+                value = eval(value.strip(), {}, {})  # Convert to actual Python type
+                matplotlib.rcParams[key] = value
+            except Exception as e:
+                print(f"Error applying rcParam '{item}': {e}")
+
 
 class BasePlot:
     def database_info(self, ax, title, hostdir, shot, run, t):
@@ -284,12 +277,6 @@ class BasePlot:
             rotation="vertical",
             fontsize=7,
         )
-        # from matplotlib.offsetbox import AnchoredText
-
-        # anchored_text = AnchoredText(
-        #     "Shot " + str(shot) + " / " + "Run " + str(run), prop=dict(size=8), loc=4
-        # )
-        # self.ax.add_artist(anchored_text)
 
 
 class Terminal:

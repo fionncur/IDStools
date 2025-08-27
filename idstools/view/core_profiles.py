@@ -148,7 +148,6 @@ class CoreProfilesView:
             loc="center left",
             borderaxespad=0.0,
             frameon=False,
-            fontsize="x-small",
         )
         ax.set_ylim(0, 20)
 
@@ -211,7 +210,7 @@ class CoreProfilesView:
                 ax.set_yscale("log")
             return ax_density_plot_dens, nmax
 
-    def plot_ion_pressure_properties(self, ax, time_slice):
+    def plot_ion_pressure_properties(self, ax, time_slice, **kwargs):
         FACTOR = 1.0e-6
         rho_tor_norm = self.core_profiles_compute.get_rho_tor_norm(time_slice)  # Rho profile (mandatory)
         nrho = len(rho_tor_norm)
@@ -228,13 +227,6 @@ class CoreProfilesView:
         pressure_ion_fast_parallel = dict_ion_pressure_properties["pressure_ion_fast_parallel"]
         pressure_ion_fast_perpendicular = dict_ion_pressure_properties["pressure_ion_fast_perpendicular"]
 
-        font_args = {
-            "fontfamily": "serif",
-            "color": "darkred",
-            "fontweight": "normal",
-            "fontsize": 12,
-        }
-
         ax.plot(rho_tor_norm, pressure_ion_thermal * FACTOR, label="Thermal ion")
         ax.plot(rho_tor_norm, pressure_ion_fast_parallel * FACTOR, label="Fast parallel ion")
         ax.plot(
@@ -243,22 +235,9 @@ class CoreProfilesView:
             label="Fast perpendicular ion",
         )
         ax.set_ylim(0, maxima_ion * FACTOR)
-        ax.tick_params(
-            which="both",
-            labelsize=12,
-        )
-        ax.set_xlabel(r"$\rho/\rho_0$", font_args, labelpad=1)
-        ax.set_ylabel(r"P (MPa)", font_args, labelpad=0)
-        # set legend
-        # legx_pos = 1.35
-        # legy_pos = 1.05
-        legend = ax.legend(loc="upper right")  # bbox_to_anchor=(legx_pos - 0.4, legy_pos - 0.05)
-        frame = legend.get_frame()
-        frame.set_facecolor("0.95")
-        for label in legend.get_texts():
-            label.set_fontsize(7)
-        for label in legend.get_lines():
-            label.set_linewidth(1.5)
+        ax.set_xlabel(r"$\rho/\rho_0$", labelpad=1)
+        ax.set_ylabel(r"P (MPa)", labelpad=0)
+        ax.legend()
         ax.set_title("Ion Pressure Properties", loc="left")
 
     def show_info_on_plot(self, ax, info: str = "", location="right"):
@@ -303,12 +282,7 @@ class CoreProfilesView:
         pressure_electron_fast_perpendicular = dict_electrons_pressure_properties[
             "pressure_electron_fast_perpendicular"
         ]
-        font_args = {
-            "fontfamily": "serif",
-            "color": "darkred",
-            "fontweight": "normal",
-            "fontsize": 12,
-        }
+
         ax.plot(rho_tor_norm, pressure_electron_total * FACTOR, label="Total electron")
         ax.plot(rho_tor_norm, pressure_electron_thermal * FACTOR, label="Thermal electron")
         ax.plot(
@@ -323,22 +297,9 @@ class CoreProfilesView:
         )
         ax.set_ylim(0, maxima_electrons * FACTOR)
 
-        ax.tick_params(
-            which="both",
-            labelsize=12,
-        )
-        ax.set_xlabel(r"$\rho/\rho_0$", font_args, labelpad=1)
-        ax.set_ylabel(r"P (MPa)", font_args, labelpad=0)
-        # set legend
-        # legx_pos = 1.35
-        # legy_pos = 1.05
-        legend = ax.legend(loc="upper right")  # bbox_to_anchor=(legx_pos - 0.5, legy_pos - 0.05)
-        frame = legend.get_frame()
-        frame.set_facecolor("0.95")
-        for label in legend.get_texts():
-            label.set_fontsize(7)
-        for label in legend.get_lines():
-            label.set_linewidth(1.5)
+        ax.set_xlabel(r"$\rho/\rho_0$", labelpad=1)
+        ax.set_ylabel(r"P (MPa)", labelpad=0)
+        ax.legend()
         ax.set_title("Electrons Pressure Properties", loc="left")
 
     def plot_total_pressure_properties(self, ax, time_slice, **kwargs):
@@ -369,29 +330,9 @@ class CoreProfilesView:
         # ax.set_xlim(rhoTorNorm[0], rhoTorNorm[nrho - 1])
         ax.set_ylim(0, maxima_total * FACTOR)
 
-        # Set Plot properties
-        font_args = {
-            "fontfamily": "serif",
-            "color": "darkred",
-            "fontweight": "normal",
-            "fontsize": 12,
-        }
-        ax.tick_params(
-            which="both",
-            labelsize=12,
-        )
-        ax.set_xlabel(r"$\rho/\rho_0$", font_args, labelpad=1)
-        ax.set_ylabel(r"P (MPa)", font_args, labelpad=0)
-        # set legend
-        # legx_pos = 1.35
-        # legy_pos = 1.05
-        legend = ax.legend(loc="upper right")  # bbox_to_anchor=(legx_pos - 0.35, legy_pos - 0.05)
-        frame = legend.get_frame()
-        frame.set_facecolor("0.95")
-        for label in legend.get_texts():
-            label.set_fontsize(7)
-        for label in legend.get_lines():
-            label.set_linewidth(1.5)
+        ax.set_xlabel(r"$\rho/\rho_0$", labelpad=1)
+        ax.set_ylabel(r"P (MPa)", labelpad=0)
+        ax.legend()
         ax.set_title("Total Pressure Properties", loc="left")
 
     def view_q_profile_and_magnetic_shear_profile(self, ax, time_slice, **kwargs):
@@ -455,29 +396,10 @@ class CoreProfilesView:
         ax.plot(rho_tor_norm, radial * FACTOR, label="E-field")
         ax.set_xlim(rho_tor_norm[0], rho_tor_norm[nrho - 1])
 
-        # Set Plot properties
-        font_args = {
-            "fontfamily": "serif",
-            "color": "darkred",
-            "fontweight": "normal",
-            "fontsize": 12,
-        }
-        ax.tick_params(
-            which="both",
-            labelsize=12,
-        )
-        ax.set_xlabel(r"$\rho/\rho_0$", font_args, labelpad=1)
-        ax.set_ylabel(r"E-field ($kV/m$)", font_args, labelpad=0)
+        ax.set_xlabel(r"$\rho/\rho_0$", labelpad=1)
+        ax.set_ylabel(r"E-field ($kV/m$)", labelpad=0)
         # set legend
-        # legx_pos = 1.35
-        # legy_pos = 1.05
-        legend = ax.legend(loc="upper right")  # bbox_to_anchor=(legx_pos - 0.35, legy_pos - 0.05)
-        frame = legend.get_frame()
-        frame.set_facecolor("0.95")
-        for label in legend.get_texts():
-            label.set_fontsize(7)
-        for label in legend.get_lines():
-            label.set_linewidth(1.5)
+        ax.legend()
         ax.set_title("Electric field profile", loc="left")
 
     def plot_toroidal_velocity_profile(self, ax, time_slice, **kwargs):
@@ -509,32 +431,15 @@ class CoreProfilesView:
 
         ax.set_xlim(rho_tor_norm[0], rho_tor_norm[nrho - 1])
 
-        # Set Plot properties
-        font_args = {
-            "fontfamily": "serif",
-            "color": "darkred",
-            "fontweight": "normal",
-            "fontsize": 12,
-        }
-        ax.tick_params(
-            which="both",
-            labelsize=12,
-        )
-        ax.set_xlabel(r"$\rho/\rho_0$", font_args, labelpad=1)
-        ax.set_ylabel(r"$v_{tor}$ ($km/s$)", font_args, labelpad=0)
+        ax.set_xlabel(r"$\rho/\rho_0$", labelpad=1)
+        ax.set_ylabel(r"$v_{tor}$ ($km/s$)", labelpad=0)
         # TODO update
         # ax2.yaxis.tick_right()
         # ax2.yaxis.set_label_position("right")
         # set legend
         # legx_pos = 1.35
         # legy_pos = 1.05
-        legend = ax.legend(loc="upper right")  # bbox_to_anchor=(legx_pos - 0.35, legy_pos - 0.05)
-        frame = legend.get_frame()
-        frame.set_facecolor("0.95")
-        for label in legend.get_texts():
-            label.set_fontsize(7)
-        for label in legend.get_lines():
-            label.set_linewidth(1.5)
+        ax.legend()
         ax.set_title("Toroidal velocity profile", loc="left")
 
     def plot_poloidal_velocity_profile(self, ax, time_slice, **kwargs):
@@ -566,30 +471,11 @@ class CoreProfilesView:
 
         ax.set_xlim(rho_tor_norm[0], rho_tor_norm[nrho - 1])
 
-        # Set Plot properties
-        font_args = {
-            "fontfamily": "serif",
-            "color": "darkred",
-            "fontweight": "normal",
-            "fontsize": 12,
-        }
-        ax.tick_params(
-            which="both",
-            labelsize=12,
-        )
-        ax.set_xlabel(r"$\rho/\rho_0$", font_args, labelpad=1)
-        ax.set_ylabel(r"$v_{pol}$ ($km/s$)", font_args, labelpad=0)
+        ax.set_xlabel(r"$\rho/\rho_0$", labelpad=1)
+        ax.set_ylabel(r"$v_{pol}$ ($km/s$)", labelpad=0)
 
         # set legend
-        # legx_pos = 1.35
-        # legy_pos = 1.05
-        legend = ax.legend(loc="upper right")  # bbox_to_anchor=(legx_pos - 0.35, legy_pos - 0.05)
-        frame = legend.get_frame()
-        frame.set_facecolor("0.95")
-        for label in legend.get_texts():
-            label.set_fontsize(7)
-        for label in legend.get_lines():
-            label.set_linewidth(1.5)
+        ax.legend()
         ax.set_title("Poloidal velocity profile", loc="left")
 
     def plot_diamagnetic_velocity_profile(self, ax, time_slice, **kwargs):
@@ -624,28 +510,10 @@ class CoreProfilesView:
         ax.set_xlim(rho_tor_norm[0], rho_tor_norm[nrho - 1])
         # ax4.yaxis.tick_right()
         # ax4.yaxis.set_label_position("right")
-        # Set Plot properties
-        font_args = {
-            "fontfamily": "serif",
-            "color": "darkred",
-            "fontweight": "normal",
-            "fontsize": 12,
-        }
-        ax.tick_params(
-            which="both",
-            labelsize=12,
-        )
-        ax.set_xlabel(r"$\rho/\rho_0$", font_args, labelpad=1)
-        ax.set_ylabel(r"$v_{dia}$ ($km/s$)", font_args, labelpad=0)
+
+        ax.set_xlabel(r"$\rho/\rho_0$", labelpad=1)
+        ax.set_ylabel(r"$v_{dia}$ ($km/s$)", labelpad=0)
 
         # set legend
-        # legx_pos = 1.35
-        # legy_pos = 1.05
-        legend = ax.legend(loc="upper right")  # bbox_to_anchor=(legx_pos - 0.35, legy_pos - 0.05)
-        frame = legend.get_frame()
-        frame.set_facecolor("0.95")
-        for label in legend.get_texts():
-            label.set_fontsize(7)
-        for label in legend.get_lines():
-            label.set_linewidth(1.5)
+        ax.legend()
         ax.set_title("Diamagnetic velocity profile", loc="left")

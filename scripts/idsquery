@@ -1,0 +1,160 @@
+#!/usr/bin/env python3
+"""
+Script for querying and extracting data from IDSes.
+This script allows users to specify one or more IDS paths to extract data and optionally evaluate
+query expressions on the extracted data. It supports rich console output for displaying results
+and provides options for handling large arrays.
+Features:
+- Extract data from specified IDS paths.
+- Evaluate query expressions on IDS fields.
+- Display results in a formatted and readable manner using the `rich` library.
+- Option to print all array elements for large datasets.
+Usage:
+- Provide one or more IDS paths to extract data.
+- Optionally specify a query expression to evaluate on the extracted data.
+- x1,x2,... refer to the first, second, etc. IDS path in the list when using query.
+- Use the `--full` flag to display all elements of large arrays.
+Example:
+    idsquery -u "imas:hdf5?user=public;pulse=134174;run=117;database=ITER;version=3"
+    "core_profiles/profiles_1d(:)/electrons/temperature" --query "mean(x1)"
+"""
+# -*- coding: utf-8 -*-
+import argparse
+import logging
+
+try:
+    import imaspy as imas
+except ImportError:
+    import imas
+import numpy as np
+from rich.console import Console
+from rich.panel import Panel
+from rich.pretty import Pretty
+from rich_argparse import RichHelpFormatter
+
+from idstools.utils.clihelper import (
+    dbentry_parser,
+)
+from idstools.utils.idshelper import (
+    execute_query,
+    get_ids_values,
+)
+from idstools.utils.idslogger import setup_logger
+
+logger = setup_logger("module", stdout_level=logging.INFO)
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        description="""Script for querying and extracting data from IDSes.
+This script allows users to specify one or more IDS paths to extract data and optionally evaluate
+query expressions on the extracted data. It supports rich console output for displaying results
+and provides options for handling large arrays.
+Features:
+- Extract data from specified IDS paths.
+- Evaluate query expressions on IDS fields.
+- Display results in a formatted and readable manner using the `rich` library.
+- Option to print all array elements for large datasets.
+Usage:
+- Provide one or more IDS paths to extract data.
+- Optionally specify a query expression to evaluate on the extracted data.
+- x1,x2,... refer to the first, second, etc. IDS path in the list when using query.
+- Use the `--full` flag to display all elements of large arrays.
+Example:
+    idsquery -u \"imas:hdf5?user=public;pulse=134174;run=117;database=ITER;version=3\" 
+    "core_profiles/profiles_1d(:)/electrons/temperature" --query \"mean(x1)\"""",
+        formatter_class=RichHelpFormatter,
+        parents=[dbentry_parser],
+    )
+    parser.add_argument(
+        "idspath",
+        type=str,
+        nargs="+",
+        help="One or more IDS paths (starting with IDS name) to the desired data to be collected, e.g. "
+        "equilibrium/time core_profiles/profiles_1d(0)/electrons/temperature",
+    )
+    parser.add_argument(
+        "--query",
+        type=str,
+        required=False,
+        help="Query expression to evaluate on IDS field"
+        "x1 referes to first idspath in the list, x2 to second, etc. "
+        "Examples: 'x1 > 0.5', 'mean(x1) > 10000', 'x1[0] == 1.0', 'any(x1 > 5000)'",
+    )
+    parser.add_argument(
+        "-f",
+        "--full",
+        action="store_true",
+        help="Print all array elements (can be slow for large data)",
+    )
+    parser.add_argument(
+        "--verbose",
+        action="store_true",
+        help="Verbose mode, prints additional information",
+    )
+    args = parser.parse_args()
+    pulse_data = {}
+    found_values = False
+
+    if isinstance(args.idspath, str):
+        idspath = [args.idspath]
+    else:
+        idspath = args.idspath
+
+    paths_info = []
+    for path in idspath:
+        idsname = path.split("/")[0]
+        valpath = path[1 + len(idsname) :]
+        paths_info.append((path, idsname, valpath.replace("(", "[").replace(")", "]").replace("/", ".")))
+
+    ids_values = get_ids_values(args.uri, paths_info, dd_update=args.dd_update, verbose=args.verbose)
+    if ids_values:
+        for _path, _value in ids_values.items():
+            if _value is None:
+                print(_path, "is None, skipping")
+                found_values = False
+                break
+            pulse_data[_path] = _value
+            if args.query is None:
+                found_values = True
+        if args.query is not None:
+            pulse_data[args.query] = execute_query(args.query, ids_values)
+            if isinstance(pulse_data[args.query], (bool, np.bool_)):
+                found_values = True
+            elif isinstance(pulse_data[args.query], np.ndarray):
+                if pulse_data[args.query].size > 0:
+                    found_values = True
+            elif pulse_data[args.query] is not None:
+                found_values = True
+    if found_values:
+        console = Console()
+        console.rule("[bold cyan]Evaluation Result[/bold cyan]")
+
+        for key, value in pulse_data.items():
+            if isinstance(value, np.ndarray):
+                # Show only a preview for large arrays
+                if args.full:
+                    arr_str = np.array2string(value, precision=2, suppress_small=True)
+                    panel = Panel(arr_str, title=f"[bold yellow]{key}[/bold yellow]", style="bright_magenta")
+                    console.print(panel)
+                else:
+                    preview = str(value) if value.size <= 10 else f"{value.shape} array (mean={np.mean(value):.2f})"
+                    console.print(
+                        Panel(
+                            preview, title=f"[bold yellow]{key}[/bold yellow]", subtitle="numpy array", style="magenta"
+                        )
+                    )
+            elif isinstance(value, bool):
+                color = "green" if value else "red"
+                console.print(f"[bold yellow]{key}[/bold yellow]: [{color}]{value}[/{color}]")
+            else:
+                console.print(f"[bold yellow]{key}[/bold yellow]:")
+                console.print(Pretty(value))
+    else:
+        console = Console()
+        console.print(
+            f"[bold red]No values found for the provided IDS paths: {', '.join(idspath)}[/bold red]",
+            style="red",
+        )
+        if args.query:
+            console.print(f"[bold red]Query expression '{args.query}' did not return any results.[/bold red]")

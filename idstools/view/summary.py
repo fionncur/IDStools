@@ -228,7 +228,6 @@ class SummaryView(BasePlot):
             [ymin, ymax],
             color="gray",
             linestyle="--",
-            linewidth=1,
             label=r"$t_{slice}$",
         )
         ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
