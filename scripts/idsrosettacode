@@ -144,18 +144,18 @@ if __name__ == "__main__":
         help="Name of the IDS from which the time will be extracted to populate time-empty IDSs \t(default=%(default)s",
     )
     parser.add_argument(
-        "--default-dd-version",
+        "--mapping-version",
         type=str,
-        default="3.42.0",
-        help="Data dictionary version to write to",
+        default="3.33.0",
+        help="Data dictionary version for which the mapping was expressed",
     )
     parser.add_argument(
-        "--dd-update-to",
+        "--convert-to",
         type=str,
         default=None,
         help=(
             "If enabled, convert IDS to the specified version of the data dictionary before storing."
-            "Otherwise, store using the default data dictionary version specified by --default-dd-version."
+            "Otherwise, store using the mapping-version."
         ),
     )
     parser.add_argument("-b", "--backend", type=str, default="ASCII", help="backend format \t(default=%(default)s)")
@@ -175,7 +175,7 @@ if __name__ == "__main__":
     parser.add_argument("-v", "--verbose", action="store_true", help="Run in verbose mode")
     parser.add_argument("--debug", action="store_true", help="Run in debug mode")
     args = parser.parse_args()
-
+    
     try:
         f = open(args.inputcsv, "r")
         f.close()
@@ -201,11 +201,12 @@ if __name__ == "__main__":
     print(f"Starts mapping of the DB {args.inputcsv}, please be patient...")
     for row in rows:
         DBVAR = db.iloc[row]
-        de = imas.DBEntry(get_backend_id(args.backend), args.database, 1, row, dd_version=args.default_dd_version)
+        de = imas.DBEntry(get_backend_id(args.backend), args.database, 1, row, 
+                          dd_version=(args.convert_to if args.convert_to!=None else args.mapping_version))
         de.create()
 
         iod = {}
-        factory = imas.ids_factory.IDSFactory(version=args.default_dd_version)
+        factory = imas.ids_factory.IDSFactory(version=args.mapping_version)
         for ids in get_ids_types():
             iod[ids] = factory.new(ids)
         for var in mf.loc[:, args.varcol]:
@@ -244,8 +245,8 @@ if __name__ == "__main__":
                 if hasattr(iod[sids], "time") and iod[sids].time.size == 0:
                     iod[sids].time = iod[args.timeloc].time
                 try:
-                    if args.dd_update_to:
-                        converted_ids = imas.convert_ids(iod[sids], args.dd_update_to)
+                    if args.convert_to:
+                        converted_ids = imas.convert_ids(iod[sids], args.convert_to)
                         de.put(converted_ids)
                     else:
                         de.put(iod[sids])
