@@ -47,7 +47,8 @@ if __name__ == "__main__":
     parser.add_argument(
         "--set-dataset-version",
         action="store_true",
-        help="Store current DD version into dataset_description IDS if it exists",
+        help="(DEPRECATED) Store current DD version into dataset_description IDS if it exists. "
+        "This option is deprecated and may be removed in the next major version.",
     )
     parser.add_argument(
         "-i",

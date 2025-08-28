@@ -12,7 +12,7 @@ except ImportError:
 import numpy as np
 import pandas as pd
 import requests
-from rich.progress import track
+from packaging.version import Version
 from rich_argparse import RichHelpFormatter
 
 from idstools.utils.clihelper import get_backend_id
@@ -95,19 +95,6 @@ def evaluate(expr):
     return result
 
 
-# apply DD4 conversion
-def get_dd4_conversion(idspath):
-    if idspath == "dataset_description/data_entry/machine":
-        return "dataset_description/machine"
-    if idspath == "dataset_description/data_entry/pulse":
-        return "dataset_description/pulse"
-    if idspath == "summary/global_quantities/li/value":
-        return "summary/global_quantities/li_3/value"
-    if idspath == "summary/global_quantities/li_mhd/value":
-        return "summary/global_quantities/li_3_mhd/value"
-    return idspath
-
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="This script applies mapping of a non-IDS database content (e.g. ITPA DBs)"
@@ -126,8 +113,9 @@ if __name__ == "__main__":
         "-m",
         "--mapping",
         type=str,
-        default=os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-        + "/resources/mappings/h-mode-db-mapping.csv",
+        default=os.path.join(
+            os.path.dirname(os.path.dirname(os.path.realpath(__file__))), "bin/mappings/h-mode-db-mapping.csv"
+        ),
         help="Path to csv-formatted mapping file \t(default=%(default)s)",
     )
     parser.add_argument(
@@ -156,6 +144,21 @@ if __name__ == "__main__":
         default="summary",
         help="Name of the IDS from which the time will be extracted to populate time-empty IDSs \t(default=%(default)s",
     )
+    parser.add_argument(
+        "--mapping-version",
+        type=str,
+        default="3.37.0",
+        help="Data dictionary version for which the mapping was expressed",
+    )
+    parser.add_argument(
+        "--convert-to",
+        type=str,
+        default=None,
+        help=(
+            "If enabled, convert IDS to the specified version of the data dictionary before storing."
+            "Otherwise, store using the mapping-version."
+        ),
+    )
     parser.add_argument("-b", "--backend", type=str, default="ASCII", help="backend format \t(default=%(default)s)")
     parser.add_argument(
         "-d", "--database", type=str, default="test", help="target IMAS database name \t(default=%(default)s)"
@@ -183,6 +186,13 @@ if __name__ == "__main__":
         dl = requests.get(url, allow_redirects=True)  # ,verify="/work/imas/etc/iter.pem"
         open(args.inputcsv, "wb").write(dl.content)
 
+    if not os.path.exists(args.mapping):  # using local version
+        base_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+        args.mapping = os.path.join(base_dir, "resources/mappings/h-mode-db-mapping.csv")
+        if not os.path.exists(args.mapping):
+            print(f"Abort! Mapping file `{args.mapping}` doesn't exists")
+            exit(1)
+
     mf = pd.read_csv(args.mapping, keep_default_na=False, usecols=[args.varcol, args.pathcol, args.tracol])
     mf.dropna(how="all")
 
@@ -197,18 +207,23 @@ if __name__ == "__main__":
     rows = [args.row] if args.row is not None else db.index
 
     print(f"Starts mapping of the DB {args.inputcsv}, please be patient...")
-    for row in track(rows, description="[green]Processing..."):
+    for row in rows:
         DBVAR = db.iloc[row]
-        de = imas.DBEntry(get_backend_id(args.backend), args.database, 1, row)
+        de = imas.DBEntry(
+            get_backend_id(args.backend),
+            args.database,
+            1,
+            row,
+            dd_version=(args.convert_to if args.convert_to != None else args.mapping_version),
+        )
         de.create()
 
         iod = {}
-        factory = imas.ids_factory.IDSFactory()
-        for ids in get_ids_types():
+        factory = imas.IDSFactory(version=args.mapping_version)
+        for ids in factory.ids_names():
             iod[ids] = factory.new(ids)
         for var in mf.loc[:, args.varcol]:
             idspath = mf[mf[args.varcol] == var].iloc[0].at[args.pathcol]
-            idspath = get_dd4_conversion(idspath)
 
             transformation = mf[mf[args.varcol] == var].iloc[0].at[args.tracol]
             if idspath == "":
@@ -233,10 +248,7 @@ if __name__ == "__main__":
                     else:
                         try:
                             ids_setter(ids, path, val)
-                            if idsname in ["dataset_description"]:
-                                ids.ids_properties.homogeneous_time = 2
-                            else:
-                                ids.ids_properties.homogeneous_time = 1
+                            ids.ids_properties.homogeneous_time = 1
                         except AttributeError as ae:
                             print(ae)
                             sys.exit()
@@ -246,18 +258,21 @@ if __name__ == "__main__":
                 if hasattr(iod[sids], "time") and iod[sids].time.size == 0:
                     iod[sids].time = iod[args.timeloc].time
                 try:
-                    de.put(iod[sids])
+                    if args.convert_to:
+                        converted_ids = imas.convert_ids(iod[sids], args.convert_to)
+                        de.put(converted_ids)
+                    else:
+                        de.put(iod[sids])
                 except Exception as ex:
                     print(f"Error while attempting to write the IDS {sids} into the IMAS DB: {ex}")
                     sys.exit()
                 if args.verbose:
                     print(f"The IDS {sids} was stored successfully for DB entry {row}")
+        print(".", end="", flush=True)
 
     if args.debug:
-        dd = iod["dataset_description"]
         s = iod["summary"]
         barometry = iod["barometry"]
-        print(dd.ids_properties.homogeneous_time)
         print(s.boundary.type.value)
         print(s.time)
         print(s.global_quantities.ip.value)
