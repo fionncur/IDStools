@@ -299,11 +299,7 @@ class GEQDSK:
 
         return COCOS(values=values)
 
-    def _extract_time(
-        self,
-        header_line: str,
-        skip_if_unit_missing: bool = False
-    ) -> Optional[float]:
+    def _extract_time(self, header_line: str, skip_if_unit_missing: bool = False) -> Optional[float]:
         """
         Extracts a time value from header string of GEQDSK file.
 
