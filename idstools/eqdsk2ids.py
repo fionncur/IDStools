@@ -427,7 +427,7 @@ def map__GEQDSK_to_ids(geqdsk, eq):
     if gdsk["TIME"]:
         eq.time[0] = gdsk["TIME"]
     else:
-        eq.time[0] = -1.0
+        eq.time[0] = 9.0e40
 
     # 0D
     eq.time_slice.resize(1)
