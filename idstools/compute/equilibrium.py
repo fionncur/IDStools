@@ -8,6 +8,7 @@ This module provides compute functions and classes for equilibrium ids data
 import functools
 import logging
 from typing import Union
+import traceback
 
 try:
     import imaspy as imas
@@ -1381,70 +1382,119 @@ class EquilibriumCompute:
             scaleFactor = 1e6
             text = "[MA]"
             try:
-                y1 = (constraints["ip_meas"])[time_index1, :]
-                y2 = (constraints["ip_recon"])[time_index1, :]
+                y1 = constraints["ip_meas"][time_index1, :] if constraints["ip_meas"] is not None else None
+                if constraints["ip_meas"] is None:
+                    logger.info("Warning: first ['ip_meas'] data is not present")
+                y2 = constraints["ip_recon"][time_index1, :] if constraints["ip_recon"] is not None else None
+                if constraints["ip_recon"] is None:
+                    logger.info("Warning: first ['ip_recon'] data is not present")
             except Exception as e:
                 logger.error(f"Exception occurred detailed description : {e}")
             try:
                 time_index2 = np.argmin(abs(timeE - time[time_index1]))
-                y3 = (constraintsE["ip_meas"])[time_index2, :]
-                y4 = (constraintsE["ip_recon"])[time_index2, :]
+                y3 = constraintsE["ip_meas"][time_index2, :] if constraintsE["ip_meas"] is not None else None
+                if constraintsE["ip_meas"] is None:
+                    logger.info("Warning: second ['ip_meas'] data is not present")
+                y4 = constraintsE["ip_recon"][time_index2, :] if constraintsE["ip_recon"] is not None else None
+                if constraintsE["ip_recon"] is None:
+                    logger.info("Warning: second ['ip_recon'] data is not present")
             except Exception as e:
                 logger.error(f"Exception occurred detailed description : {e}")
         elif constraintSelected == "pf-currents":
             text = "[kA]"
             scaleFactor = 1e3
             try:
-                y1 = (constraints["pf_meas"])[time_index1, :]
-                y2 = (constraints["pf_recon"])[time_index1, :]
+                y1 = constraints["pf_meas"][time_index1, :] if constraints["pf_meas"] is not None else None
+                if constraints["pf_meas"] is None:
+                    logger.info("Warning: first ['pf_meas'] data is not present")
+                y2 = constraints["pf_recon"][time_index1, :] if constraints["pf_recon"] is not None else None
+                if constraints["pf_recon"] is None:
+                    logger.info("Warning: first ['pf_recon'] data is not present")
             except Exception as e:
                 logger.error(f"Exception occurred detailed description : {e}")
             try:
                 time_index2 = np.argmin(abs(timeE - time[time_index1]))
-                y3 = (constraintsE["pf_meas"])[time_index2, :]
-                y4 = (constraintsE["pf_recon"])[time_index2, :]
+                y3 = constraintsE["pf_meas"][time_index2, :] if constraintsE["pf_meas"] is not None else None
+                if constraintsE["pf_meas"] is None:
+                    logger.info("Warning: second ['pf_meas'] data is not present")
+                y4 = constraintsE["pf_recon"][time_index2, :] if constraintsE["pf_recon"] is not None else None
+                if constraintsE["pf_recon"] is None:
+                    logger.info("Warning: second ['pf_recon'] data is not present")
             except Exception as e:
                 logger.error(f"Exception occurred detailed description : {e}")
+                print(f"Full error traceback for pf-currents constraintsE: {traceback.format_exc()}")
         elif constraintSelected == "passive-currents":
             text = "[kA]"
             scaleFactor = 1e3
             try:
-                y1 = (constraints["pas_meas"])[time_index1, :]
-                y2 = (constraints["pas_recon"])[time_index1, :]
+                y1 = constraints["pas_meas"][time_index1, :] if constraints["pas_meas"] is not None else None
+                if constraints["pas_meas"] is None:
+                    logger.info("Warning: first ['pas_meas'] data is not present")
+                y2 = constraints["pas_recon"][time_index1, :] if constraints["pas_recon"] is not None else None
+                if constraints["pas_recon"] is None:
+                    logger.info("Warning: first ['pas_recon'] data is not present")
             except Exception as e:
                 logger.error(f"Exception occurred detailed description : {e}")
             try:
                 time_index2 = np.argmin(abs(timeE - time[time_index1]))
-                y3 = (constraintsE["pas_meas"])[time_index2, :]
-                y4 = (constraintsE["pas_recon"])[time_index2, :]
+                y3 = constraintsE["pas_meas"][time_index2, :] if constraintsE["pas_meas"] is not None else None
+                if constraintsE["pas_meas"] is None:
+                    logger.info("Warning: second ['pas_meas'] data is not present")
+                y4 = constraintsE["pas_recon"][time_index2, :] if constraintsE["pas_recon"] is not None else None
+                if constraintsE["pas_recon"] is None:
+                    logger.info("Warning: second ['pas_recon'] data is not present")
             except Exception as e:
                 logger.error(f"Exception occurred detailed description : {e}")
         elif constraintSelected == "$B_{pol}$ probes":
             text = "[mT]"
             scaleFactor = 1e-3
             try:
-                y1 = (constraints["bpol_meas"])[time_index1, :]
-                y2 = (constraints["bpol_recon"])[time_index1, :]
+                y1 = constraints["bpol_meas"][time_index1, :] if constraints["bpol_meas"] is not None else None
+                if constraints["bpol_meas"] is None:
+                    logger.info("Warning: first ['bpol_meas'] data is not present")
+                y2 = constraints["bpol_recon"][time_index1, :] if constraints["bpol_recon"] is not None else None
+                if constraints["bpol_recon"] is None:
+                    logger.info("Warning: firs ['bpol_recon'] data is not present")
             except Exception as e:
                 logger.error(f"Exception occurred detailed description : {e}")
             try:
                 time_index2 = np.argmin(abs(timeE - time[time_index1]))
-                y3 = (constraintsE["bpol_meas"])[time_index2, :]
-                y4 = (constraintsE["bpol_recon"])[time_index2, :]
+                y3 = constraintsE["bpol_meas"][time_index2, :] if constraintsE["bpol_meas"] is not None else None
+                if constraintsE["bpol_meas"] is None:
+                    logger.info("Warning: second ['bpol_meas'] data is not present")
+                y4 = constraintsE["bpol_recon"][time_index2, :] if constraintsE["bpol_recon"] is not None else None
+                if constraintsE["bpol_recon"] is None:
+                    logger.info("Warning: second ['bpol_recon'] data is not present")
             except Exception as e:
                 logger.error(f"Exception occurred detailed description : {e}")
         elif constraintSelected == "flux loops":
             text = "[Wb]"
             scaleFactor = 1e0
             try:
-                y1 = (constraints["fluxloop_meas"])[time_index1, :]
-                y2 = (constraints["fluxloop_recon"])[time_index1, :]
+                y1 = constraints["fluxloop_meas"][time_index1, :] if constraints["fluxloop_meas"] is not None else None
+                if constraints["fluxloop_meas"] is None:
+                    logger.info("Warning: first ['fluxloop_meas'] data is not present")
+                y2 = (
+                    constraints["fluxloop_recon"][time_index1, :] if constraints["fluxloop_recon"] is not None else None
+                )
+                if constraints["fluxloop_recon"] is None:
+                    logger.info("Warning: first ['fluxloop_recon'] data is not present")
             except Exception as e:
                 logger.error(f"Exception occurred detailed description : {e}")
             try:
                 time_index2 = np.argmin(abs(timeE - time[time_index1]))
-                y3 = (constraintsE["fluxloop_meas"])[time_index2, :]
-                y4 = (constraintsE["fluxloop_recon"])[time_index2, :]
+                y3 = (
+                    constraintsE["fluxloop_meas"][time_index2, :] if constraintsE["fluxloop_meas"] is not None else None
+                )
+                if constraintsE["fluxloop_meas"] is None:
+                    logger.info("Warning: second ['fluxloop_meas'] data is not present")
+                y4 = (
+                    constraintsE["fluxloop_recon"][time_index2, :]
+                    if constraintsE["fluxloop_recon"] is not None
+                    else None
+                )
+                if constraintsE["fluxloop_recon"] is None:
+                    logger.info("Warning: second ['fluxloop_recon'] data is not present")
             except Exception as e:
                 logger.error(f"Exception occurred detailed description : {e}")
         return y1, y2, y3, y4, constraintSelected, text, scaleFactor
