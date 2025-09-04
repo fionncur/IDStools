@@ -110,7 +110,7 @@ def show_plots(args):
         canvas.fig.suptitle(get_title(args, "HCD Waves Plot", time_value))
 
         if args.save:
-            fname = get_file_name(args, os.path.basename(__file__) + "_ECRH_profile_time", time_value)
+            fname = get_file_name(args, os.path.basename(__file__) + "_heating_profiles_time", time_value)
             if args.directory:
                 if not os.path.exists(args.directory):
                     os.makedirs(args.directory)
