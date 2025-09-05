@@ -1413,16 +1413,16 @@ class EquilibriumCompute:
             except Exception as e:
                 logger.error(f"Exception occurred detailed description : {e}")
             try:
-                time_index2 = np.argmin(abs(timeE - time[time_index1]))
-                y3 = constraintsE["pf_meas"][time_index2, :] if constraintsE["pf_meas"] is not None else None
-                if constraintsE["pf_meas"] is None:
-                    logger.info("Warning: second ['pf_meas'] data is not present")
-                y4 = constraintsE["pf_recon"][time_index2, :] if constraintsE["pf_recon"] is not None else None
-                if constraintsE["pf_recon"] is None:
-                    logger.info("Warning: second ['pf_recon'] data is not present")
+                if timeE is not None:
+                    time_index2 = np.argmin(abs(timeE - time[time_index1]))
+                    y3 = constraintsE["pf_meas"][time_index2, :] if constraintsE["pf_meas"] is not None else None
+                    if constraintsE["pf_meas"] is None:
+                        logger.info("Warning: second ['pf_meas'] data is not present")
+                    y4 = constraintsE["pf_recon"][time_index2, :] if constraintsE["pf_recon"] is not None else None
+                    if constraintsE["pf_recon"] is None:
+                        logger.info("Warning: second ['pf_recon'] data is not present")
             except Exception as e:
                 logger.error(f"Exception occurred detailed description : {e}")
-                print(f"Full error traceback for pf-currents constraintsE: {traceback.format_exc()}")
         elif constraintSelected == "passive-currents":
             text = "[kA]"
             scaleFactor = 1e3

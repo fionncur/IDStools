@@ -98,7 +98,6 @@ if __name__ == "__main__":
                 equilibrium2 = connection2.get("equilibrium", autoconvert=False)
             time_array2 = equilibrium2.time
             time_slice2 = np.argmin(abs(time_array2 - time_array1[time_slice1]))
-            time_value2 = time_array2[time_slice2]
             if args.dd_update:
                 wall2 = connection2.get("wall", autoconvert=False)
                 wall2 = imas.convert_ids(wall2, connection2.factory.version)
@@ -140,7 +139,7 @@ if __name__ == "__main__":
     if len(args.uri) == 2:
         y = 0.97
         canvas.fig.text(0.5, y, args.uri[0] + f"(time {time_value1}), ", ha="right", va="top", color="tab:blue")
-        canvas.fig.text(0.5, y, args.uri[1] + f"(time {time_value2})", ha="left", va="top", color="tab:green")
+        canvas.fig.text(0.5, y, args.uri[1] + f"(time {time_value1})", ha="left", va="top", color="tab:green")
     else:
         canvas.fig.suptitle(f"{args.uri[0]} time {time_value1}")
     canvas.fig.subplots_adjust(top=0.916, bottom=0.101, left=0.044, right=0.946, hspace=0.216, wspace=0.240)

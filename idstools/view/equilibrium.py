@@ -325,6 +325,7 @@ class EquilibriumView(BasePlot):
         targetZValue = 0
         diff = np.abs(z - targetZValue)
         k = np.argmin(diff)
+        kE = None
         if zE is not None:
             diff = np.abs(zE - targetZValue)
             kE = np.argmin(diff)
@@ -336,9 +337,10 @@ class EquilibriumView(BasePlot):
         except Exception as e:
             logger.error(f"Exception occurred, detailed error {e}")
         try:
-            new_y12 = jtor2DE[time_index2, :, kE]
-            y_min = min(y_min, new_y12.min())
-            y_max = max(y_max, new_y12.max())
+            if kE:
+                new_y12 = jtor2DE[time_index2, :, kE]
+                y_min = min(y_min, new_y12.min())
+                y_max = max(y_max, new_y12.max())
         except Exception as e:
             logger.error(f"Exception occurred, detailed error {e}")
 
