@@ -393,14 +393,14 @@ if __name__ == "__main__":
         if args.time:
             ids = connection.get_slice(
                 ids_name,
-                occurrence=0,
+                occurrence=occurrence,
                 time_requested=time_slice,
                 autoconvert=False,
                 interpolation_method=imas.ids_defs.CLOSEST_INTERP,
             )
 
         else:
-            ids = connection.get(ids_name, occurrence=0, autoconvert=False, ignore_unknown_dd_version=True)
+            ids = connection.get(ids_name, occurrence=occurrence, autoconvert=False, ignore_unknown_dd_version=True)
         if args.dd_update:
             ids = imas.convert_ids(ids, connection.factory.version)
         if args.inspect:
@@ -454,7 +454,7 @@ if __name__ == "__main__":
         if args.time:
             ids = connection.get_slice(
                 ids_name,
-                occurrence=0,
+                occurrence=occurrence,
                 autoconvert=False,
                 ignore_unknown_dd_version=True,
                 lazy=lazy_value,
@@ -463,7 +463,7 @@ if __name__ == "__main__":
             )
         else:
             ids = connection.get(
-                ids_name, occurrence=0, autoconvert=False, ignore_unknown_dd_version=True, lazy=lazy_value
+                ids_name, occurrence=occurrence, autoconvert=False, ignore_unknown_dd_version=True, lazy=lazy_value
             )
         if args.dd_update:
             ids = imas.convert_ids(ids, connection.factory.version)
