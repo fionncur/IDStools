@@ -3,10 +3,12 @@ import datetime
 import logging
 import os
 import re
-from typing import Optional
+import inspect
+import subprocess
+from typing import Optional, Any
 from pprint import pformat
 from statistics import median
-import copy
+from copy import deepcopy
 
 try:
     import imaspy as imas
@@ -385,6 +387,51 @@ class GEQDSK:
 # ----------------------------------------------------------------------
 
 
+def get_idstools_version() -> str:
+    """
+    Return the version string of the 'idstools' module.
+    If the module cannot be imported or has no '__version__', return ''.
+    """
+    try:
+        import idstools
+        version: Any = getattr(idstools, "__version__", "")
+        return str(version) if version else ""
+    except Exception:
+        return ""
+
+
+def get_git_hash_of_current_file_dir() -> str:
+    """
+    Return the Git commit hash of the directory containing the running file.
+    If the directory is not under Git control or any error occurs, return ''.
+    """
+    try:
+        current_frame = inspect.currentframe()
+        if current_frame is None:
+            return ""
+        caller_globals = (
+            current_frame.f_back.f_globals
+            if current_frame.f_back else {}
+        )
+        file_path: Optional[str] = caller_globals.get("__file__")
+        if not file_path:
+            return ""
+        dir_path: str = os.path.dirname(os.path.abspath(file_path))
+        result: subprocess.CompletedProcess[str] = subprocess.run(
+            ["git", "-C", dir_path, "rev-parse", "HEAD"],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.DEVNULL,
+            check=True,
+            text=True
+        )
+        return result.stdout.strip()
+    except Exception:
+        return ""
+
+
+# ----------------------------------------------------------------------
+
+
 def map__GEQDSK_to_ids(geqdsk, eq):
     """
     Convert GEQDSK file into IDS/equilibrium
@@ -410,6 +457,8 @@ def map__GEQDSK_to_ids(geqdsk, eq):
 
         ids.code.name = "IDStools/eqdsk2ids"
         ids.code.repository = "https://git.iter.org/projects/IMAS/repos/idstools/browse"
+        ids.code.commit = get_git_hash_of_current_file_dir()
+        ids.code.version = get_idstools_version()
         ids.code.output_flag.resize(1)
         ids.code.output_flag[0] = 0
 
@@ -548,22 +597,22 @@ def merge_equilibrium(eq1, eq2, sort_by_time=True):
     eq.time_slice.resize(n_total)
     eq.vacuum_toroidal_field.b0.resize(n_total)
 
-    eq.ids_properties = copy.deepcopy(eq1.ids_properties)
+    eq.ids_properties = deepcopy(eq1.ids_properties)
 
     # Copy time slices from both sources
     for i in range(n2):
         eq.time[i] = eq2.time[i]
-        eq.time_slice[i] = copy.deepcopy(eq2.time_slice[i])
+        eq.time_slice[i] = deepcopy(eq2.time_slice[i])
         eq.vacuum_toroidal_field.b0[i] = eq2.vacuum_toroidal_field.b0[i]
 
     for i in range(n1):
         idx = i + n2
         eq.time[idx] = eq1.time[i]
-        eq.time_slice[idx] = copy.deepcopy(eq1.time_slice[i])
+        eq.time_slice[idx] = deepcopy(eq1.time_slice[i])
         eq.vacuum_toroidal_field.b0[idx] = eq1.vacuum_toroidal_field.b0[i]
 
     if sort_by_time:
-        eqw = copy.deepcopy(eq)
+        eqw = deepcopy(eq)
         # Sort all fields by ascending time
         sorted_indices = np.argsort(eq.time[:])
         for i, j in enumerate(sorted_indices):
