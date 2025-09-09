@@ -1,3 +1,8 @@
+import os
+import inspect
+import subprocess
+from typing import Optional
+
 try:
     import imaspy as imas
 except ImportError:
@@ -32,3 +37,50 @@ More info: https://pypi.org/project/imas-python/
 """
     )
     exit(1)
+
+
+def get_version() -> str:
+    """
+    Return the version string of the 'idstools' module.
+    If the module cannot be imported or has no '__version__', return ''.
+    """
+    try:
+        import idstools
+        version: Any = getattr(idstools, "__version__", "")
+        return str(version) if version else ""
+    except Exception:
+        return ""
+ 
+
+def get_git_hash() -> str:
+    """
+    Return the Git commit hash of the directory containing the running file.
+    If the directory is not under Git control or any error occurs, return ''.
+    """
+    try:
+        current_frame = inspect.currentframe()
+        if current_frame is None:
+            print("current_frame is None")
+            return ""
+        caller_globals = (
+            current_frame.f_back.f_globals
+            if current_frame.f_back else {}
+        )
+        print("current_globals")
+        print("current_globals[__file__]=",caller_globals.get("__file__"))
+        file_path: Optional[str] = caller_globals.get("__file__")
+        print("file_path=",file_path)
+        if not file_path:
+            return ""
+        dir_path: str = os.path.dirname(os.path.abspath(file_path))
+        result: subprocess.CompletedProcess[str] = subprocess.run(
+            ["git", "-C", dir_path, "rev-parse", "HEAD"],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.DEVNULL,
+            check=True,
+            text=True
+        )
+        return result.stdout.strip()
+    except Exception as e:
+        print("Exception!",e)
+        return ""

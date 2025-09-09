@@ -3,9 +3,7 @@ import datetime
 import logging
 import os
 import re
-import inspect
-import subprocess
-from typing import Optional, Any
+from typing import Optional
 from pprint import pformat
 from statistics import median
 from copy import deepcopy
@@ -17,6 +15,7 @@ except ImportError:
 import numpy as np
 from fortranformat import FortranRecordReader
 
+from idstools import get_git_hash, get_version
 from idstools.cocos import COCOS, IDS_COCOS, compute_COCOS
 
 logger = logging.getLogger(__name__)
@@ -387,51 +386,6 @@ class GEQDSK:
 # ----------------------------------------------------------------------
 
 
-def get_idstools_version() -> str:
-    """
-    Return the version string of the 'idstools' module.
-    If the module cannot be imported or has no '__version__', return ''.
-    """
-    try:
-        import idstools
-        version: Any = getattr(idstools, "__version__", "")
-        return str(version) if version else ""
-    except Exception:
-        return ""
-
-
-def get_git_hash_of_current_file_dir() -> str:
-    """
-    Return the Git commit hash of the directory containing the running file.
-    If the directory is not under Git control or any error occurs, return ''.
-    """
-    try:
-        current_frame = inspect.currentframe()
-        if current_frame is None:
-            return ""
-        caller_globals = (
-            current_frame.f_back.f_globals
-            if current_frame.f_back else {}
-        )
-        file_path: Optional[str] = caller_globals.get("__file__")
-        if not file_path:
-            return ""
-        dir_path: str = os.path.dirname(os.path.abspath(file_path))
-        result: subprocess.CompletedProcess[str] = subprocess.run(
-            ["git", "-C", dir_path, "rev-parse", "HEAD"],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.DEVNULL,
-            check=True,
-            text=True
-        )
-        return result.stdout.strip()
-    except Exception:
-        return ""
-
-
-# ----------------------------------------------------------------------
-
-
 def map__GEQDSK_to_ids(geqdsk, eq):
     """
     Convert GEQDSK file into IDS/equilibrium
@@ -457,8 +411,8 @@ def map__GEQDSK_to_ids(geqdsk, eq):
 
         ids.code.name = "IDStools/eqdsk2ids"
         ids.code.repository = "https://git.iter.org/projects/IMAS/repos/idstools/browse"
-        ids.code.commit = get_git_hash_of_current_file_dir()
-        ids.code.version = get_idstools_version()
+        ids.code.commit = get_git_hash()
+        ids.code.version = get_version()
         ids.code.output_flag.resize(1)
         ids.code.output_flag[0] = 0
 
@@ -596,20 +550,27 @@ def merge_equilibrium(eq1, eq2, sort_by_time=True):
     eq.time.resize(n_total)
     eq.time_slice.resize(n_total)
     eq.vacuum_toroidal_field.b0.resize(n_total)
+    eq.code.output_flag.resize(n_total)
 
     eq.ids_properties = deepcopy(eq1.ids_properties)
+    eq.code.name = eq1.code.name
+    eq.code.repository = eq1.code.repository
+    eq.code.commit = eq1.code.commit
+    eq.code.version = eq1.code.version
 
     # Copy time slices from both sources
     for i in range(n2):
         eq.time[i] = eq2.time[i]
         eq.time_slice[i] = deepcopy(eq2.time_slice[i])
         eq.vacuum_toroidal_field.b0[i] = eq2.vacuum_toroidal_field.b0[i]
+        eq.code.output_flag[i] = eq2.code.output_flag[i]
 
     for i in range(n1):
         idx = i + n2
         eq.time[idx] = eq1.time[i]
         eq.time_slice[idx] = deepcopy(eq1.time_slice[i])
         eq.vacuum_toroidal_field.b0[idx] = eq1.vacuum_toroidal_field.b0[i]
+        eq.code.output_flag[idx] = eq1.code.output_flag[i]
 
     if sort_by_time:
         eqw = deepcopy(eq)
@@ -618,7 +579,8 @@ def merge_equilibrium(eq1, eq2, sort_by_time=True):
         for i, j in enumerate(sorted_indices):
             eq.time[i] = eqw.time[j]
             eq.time_slice[i] = eqw.time_slice[j]
-            eq.vacuum_toroidal_field.b0[i] = eq.vacuum_toroidal_field.b0[j]
+            eq.vacuum_toroidal_field.b0[i] = eqw.vacuum_toroidal_field.b0[j]
+            eq.code.output_flag[i] = eqw.code.output_flag[j]
 
     return eq
 
