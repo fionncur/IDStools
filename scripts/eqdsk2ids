@@ -24,7 +24,7 @@ def main():
     """
 
     # Convert GEQDSK to IDS/equilibrium
-    eq = eqdsk2ids(args.gpath, cocos_in=args.cocos_in)
+    eq = eqdsk2ids(args.gpath, ipsign=args.ipsign, b0sign=args.b0sign, cocos_in=args.cocos_in)
 
     outputargs = argparse.Namespace()
     outputargs.uri = args.dest
@@ -141,6 +141,22 @@ if __name__ == "__main__":
         type=int,
         default=None,
         choices=[*range(1, 9), *range(11, 19)],
+    )
+    parser.add_argument(
+        "--ipsign",
+        dest="ipsign",
+        default=0,
+        type=int,
+        choices=[-1,0,1],
+        help="Set Ip sign in output, default=%(default)s keeps sign of input",
+    )
+    parser.add_argument(
+        "--b0sign",
+        dest="b0sign",
+        default=0,
+        type=int,
+        choices=[-1,0,1],
+        help="Set B0 sign in output, default=%(default)s keeps sign of input",
     )
     args = parser.parse_args()
     # Initialize logger
