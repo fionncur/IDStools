@@ -1,7 +1,7 @@
 import os
 import inspect
 import subprocess
-from typing import Optional
+from typing import Optional, Any
 
 try:
     import imaspy as imas
@@ -22,8 +22,8 @@ if not hasattr(imas, "ids_defs"):
         """
 [ERROR] Detected an outdated version of the 'imas' module.
 
-The installed 'imas' package appears to be an incompatible legacy version of the high-level
-Python interface of the IMAS Access Layer.
+The installed 'imas' package appears to be an incompatible legacy version of \
+the high-level Python interface of the IMAS Access Layer.
 
 To resolve this, remove / unload this version and re-install using:
 

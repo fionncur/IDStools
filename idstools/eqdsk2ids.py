@@ -301,7 +301,11 @@ class GEQDSK:
 
         return COCOS(values=values)
 
-    def _extract_time(self, header_line: str, skip_if_unit_missing: bool = False) -> Optional[float]:
+    def _extract_time(
+        self,
+        header_line: str,
+        skip_if_unit_missing: bool = False,
+    ) -> Optional[float]:
         """
         Extracts a time value from header string of GEQDSK file.
 
@@ -464,9 +468,8 @@ def map__GEQDSK_to_ids(geqdsk, eq):
     simag = gdsk["SIMAG"]
     sibry = gdsk["SIBRY"]
     for i in range(nw):
-        eq.time_slice[0].profiles_1d.psi[i] = ((1.0 - float(i) / float(nw - 1)) * (simag - sibry) + sibry) * coef[
-            "fact_psi"
-        ]
+        psi_val = (1.0 - float(i) / float(nw - 1)) * (simag - sibry) + sibry
+        eq.time_slice[0].profiles_1d.psi[i] = psi_val * coef["fact_psi"]
 
     # Boundary
     if gdsk["NBBBS"] > 0:
@@ -534,7 +537,8 @@ def merge_equilibrium(eq1, eq2, sort_by_time=True):
     Returns
     -------
     eq : imas_*_ual_*.equilibrium.equilibrium
-        New IDS/equilibrium instance with combined (and optionally sorted) content.
+        New IDS/equilibrium instance with combined (and optionally sorted)
+        content.
     """
 
     if eq1 is None or eq2 is None:
@@ -625,7 +629,7 @@ def geqdsk2ids(fpath, ipsign=0, b0sign=0, cocos_in=None):
     # Check if COCOS is equal to IDS_COCOS
     if cocos["COCOS"] != IDS_COCOS:
         logger.warning("COCOS Target= {}, Output= {}, Input= {}".format(IDS_COCOS, cocos["COCOS"], geqdsk.cocos.COCOS))
-        raise SystemExit("Input COCOS is inconsistent between GEQDSK file and COCOS with the option '--cocos_in'.")
+        raise SystemExit("Input COCOS is inconsistent between GEQDSK file and COCOS " "with the option '--cocos_in'.")
 
     return eq
 

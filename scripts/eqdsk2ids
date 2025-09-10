@@ -8,7 +8,6 @@ import imas
 from rich.markdown import Markdown
 from rich_argparse import RichHelpFormatter
 
-from idstools.database import DBMaster
 from idstools.eqdsk2ids import eqdsk2ids
 from idstools.set_logger import set_logger
 from idstools.utils.clihelper import (
@@ -24,7 +23,12 @@ def main():
     """
 
     # Convert GEQDSK to IDS/equilibrium
-    eq = eqdsk2ids(args.gpath, ipsign=args.ipsign, b0sign=args.b0sign, cocos_in=args.cocos_in)
+    eq = eqdsk2ids(
+        args.gpath,
+        ipsign=args.ipsign,
+        b0sign=args.b0sign,
+        cocos_in=args.cocos_in,
+    )
 
     outputargs = argparse.Namespace()
     outputargs.uri = args.dest
@@ -36,7 +40,7 @@ def main():
         if outputargs.uri != "" and outputargs.uri is not None:
             dest_connection = imas.DBEntry(outputargs.uri, outputargs.mode)
         if dest_connection is None:
-            logger.error("Error creating destination pulse! Please check parameters and permissions.")
+            logger.error("Error creating destination pulse! " "Please check parameters and permissions.")
             exit(1)
     else:
         outputargs.mode = "a"
@@ -45,17 +49,18 @@ def main():
         if outputargs.uri != "" and outputargs.uri is not None:
             try:
                 dest_connection = imas.DBEntry(outputargs.uri, outputargs.mode)
-            except Exception as e:
+            except Exception:
                 outputargs.mode = "w"
                 dest_connection = imas.DBEntry(outputargs.uri, outputargs.mode)
 
         if dest_connection is None:
-            logger.error("Error opening destination pulse! Please check parameters and permissions.")
+            logger.error("Error opening destination pulse! " "Please check parameters and permissions.")
             exit(1)
 
     dest_connection.put(eq)
     dest_connection.close()
-    logger.info(f"IDS/equilibrium populated in  {get_database_path(outputargs)}.")
+    db_path = get_database_path(outputargs)
+    logger.info(f"IDS/equilibrium populated in {db_path}.")
 
 
 # ----------------------------------------------------------------------
@@ -76,9 +81,9 @@ description = r"""
 
     > eqdsk2ids -g path_to_gfile -d "imas:hdf5?path=/path/to/data" -c 11
 
-2) Increase verbosity to see information as COCOS index and transformation coeff.
+2) Increase verbosity to see COCOS index and transformation coefficient info.
 
-    > eqdsk2ids -g path_to_gfile -d "imas:hdf5?path=/path/to/data" -c 11 --log INFO
+    > eqdsk2ids -g gfile -d "imas:hdf5?path=/path/to/data" -c 11 --log INFO
 
 (II) Functional Interface in Python (idstools/eqdsk2ids.py)
 ------------------------------------------------------------
@@ -115,7 +120,7 @@ if __name__ == "__main__":
         "-f",
         "--force",
         action="store_true",
-        help="Force the creation of destination data-entry (existing data will be lost)",
+        help="Force creation of destination data-entry (existing data lost)",
     )
     parser.add_argument(
         "-g",
@@ -164,5 +169,5 @@ if __name__ == "__main__":
 
     try:
         main()
-    except Exception as e:
+    except Exception:
         logger.error(traceback.format_exc())
