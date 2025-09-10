@@ -3,7 +3,7 @@ import datetime
 import logging
 import os
 import re
-from typing import Optional
+from typing import Optional, List
 from pprint import pformat
 from statistics import median
 from copy import deepcopy
@@ -633,44 +633,53 @@ def geqdsk2ids(fpath, ipsign=0, b0sign=0, cocos_in=None):
 # ----------------------------------------------------------------------
 
 
-def eqdsk2ids(gfile=None, afile=None, ipsign=0, b0sign=0, cocos_in=None):
+def eqdsk2ids(
+    gfile: Optional[str] = None,
+    afile: Optional[str] = None,
+    ipsign: int = 0,
+    b0sign: int = 0,
+    cocos_in: Optional[int] = None
+) -> "imas.ids.equilibrium.equilibrium":
     """
-    Convert one or more GEQDSK files into an IMAS equilibrium IDS.
+    Convert one or more GEQDSK files into a merged IMAS equilibrium IDS.
 
     Parameters
     ----------
-    gfile : str
-        Path to a GEQDSK file or directory containing multiple GEQDSK files.
+    gfile : str, optional
+        Path to a GEQDSK file or a directory containing GEQDSK files.
     afile : str, optional
         Path to AEQDSK file (currently not used).
-    ipsign: int=0, optional
-        Desired sign(Ip) in output
-    b0sign: int=0, optional
-        Desired sign(B0) in output
+    ipsign : int, default=0
+        Desired sign of plasma current (Ip) in the output.
+    b0sign : int, default=0
+        Desired sign of toroidal field (B0) in the output.
     cocos_in : int or None, optional
-        Coerce input COCOS.
+        Input COCOS convention to coerce. None means autodetect.
 
     Returns
     -------
     eq : imas.ids.equilibrium.equilibrium
-        Merged equilibrium IDS from one or more GEQDSK files.
+        Combined equilibrium IDS from one or more GEQDSK files.
     """
 
-    # Resolve environment variables and user home path
+    if not gfile:
+        raise ValueError("No GEQDSK file or directory provided.")
+
+    # Expand environment variables and resolve to absolute path
     abs_path = os.path.abspath(os.path.expanduser(os.path.expandvars(gfile)))
 
-    # Determine directory path
-    if os.path.isdir(abs_path):
-        dir_path = abs_path
+    # If it's a file, just process that one
+    if os.path.isfile(abs_path):
+        file_list: List[str] = [abs_path]
+    # If it's a directory, get all files inside (sorted)
+    elif os.path.isdir(abs_path):
+        file_list = [
+            os.path.join(abs_path, fname)
+            for fname in sorted(os.listdir(abs_path))
+            if os.path.isfile(os.path.join(abs_path, fname))
+        ]
     else:
-        dir_path = os.path.dirname(abs_path)
-
-    # Gather all files in the directory
-    file_list = [
-        os.path.join(dir_path, fname)
-        for fname in sorted(os.listdir(dir_path))
-        if os.path.isfile(os.path.join(dir_path, fname))
-    ]
+        raise FileNotFoundError(f"Path not found: {gfile}")
 
     # Initialize empty equilibrium IDS
     eq = imas.IDSFactory().equilibrium()

@@ -24,7 +24,8 @@ def main():
     """
 
     # Convert GEQDSK to IDS/equilibrium
-    eq = eqdsk2ids(args.gpath, ipsign=args.ipsign, b0sign=args.b0sign, cocos_in=args.cocos_in)
+    #eq = eqdsk2ids(args.gpath, ipsign=args.ipsign, b0sign=args.b0sign, cocos_in=args.cocos_in)
+    eq = eqdsk2ids(args.gpath, ipsign=args.ipsign, b0sign=args.b0sign)
 
     outputargs = argparse.Namespace()
     outputargs.uri = args.dest
