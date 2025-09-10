@@ -350,6 +350,9 @@ class DBMaster:
                 num_end_pos = datafile.rfind(".")
                 num = int(datafile[num_start_pos:num_end_pos])
                 pulse = num // 10000
+                if not run_list[0].isdigit():
+                    print(f"warning:run number is not an integer {run_list[0]} {data_file_path}")
+                    continue
                 run = int(run_list[0]) * 10000 + (num % 10000)
 
             else:  # AL5 layout
