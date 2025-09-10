@@ -148,7 +148,7 @@ if __name__ == "__main__":
         default=0,
         type=int,
         choices=[-1,0,1],
-        help="Set Ip sign in output, default=%(default)s keeps sign of input",
+        help="Fixed Ip sign in output, default=%(default)s transforms as is" ,
     )
     parser.add_argument(
         "--b0sign",
@@ -156,7 +156,7 @@ if __name__ == "__main__":
         default=0,
         type=int,
         choices=[-1,0,1],
-        help="Set B0 sign in output, default=%(default)s keeps sign of input",
+        help="Fixed B0 sign in output, default=%(default)s transforms as is",
     )
     args = parser.parse_args()
     # Initialize logger
