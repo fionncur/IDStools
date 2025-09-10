@@ -24,8 +24,7 @@ def main():
     """
 
     # Convert GEQDSK to IDS/equilibrium
-    #eq = eqdsk2ids(args.gpath, ipsign=args.ipsign, b0sign=args.b0sign, cocos_in=args.cocos_in)
-    eq = eqdsk2ids(args.gpath, ipsign=args.ipsign, b0sign=args.b0sign)
+    eq = eqdsk2ids(args.gpath, ipsign=args.ipsign, b0sign=args.b0sign, cocos_in=args.cocos_in)
 
     outputargs = argparse.Namespace()
     outputargs.uri = args.dest
@@ -138,7 +137,7 @@ if __name__ == "__main__":
         "--cocos_in",
         dest="cocos_in",
         help="Tokamak coordinate conventions (COCOS) describing input data",
-        required=True,
+        required=False,
         type=int,
         default=None,
         choices=[*range(1, 9), *range(11, 19)],
