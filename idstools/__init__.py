@@ -60,16 +60,12 @@ def get_git_hash() -> str:
     try:
         current_frame = inspect.currentframe()
         if current_frame is None:
-            print("current_frame is None")
             return ""
         caller_globals = (
             current_frame.f_back.f_globals
             if current_frame.f_back else {}
         )
-        print("current_globals")
-        print("current_globals[__file__]=",caller_globals.get("__file__"))
         file_path: Optional[str] = caller_globals.get("__file__")
-        print("file_path=",file_path)
         if not file_path:
             return ""
         dir_path: str = os.path.dirname(os.path.abspath(file_path))
@@ -81,6 +77,5 @@ def get_git_hash() -> str:
             text=True
         )
         return result.stdout.strip()
-    except Exception as e:
-        print("Exception!",e)
+    except Exception:
         return ""

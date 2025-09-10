@@ -668,7 +668,7 @@ def eqdsk2ids(gfile=None, afile=None, ipsign=0, b0sign=0, cocos_in=None):
     # Gather all files in the directory
     file_list = [
         os.path.join(dir_path, fname)
-        for fname in os.listdir(dir_path)
+        for fname in sorted(os.listdir(dir_path))
         if os.path.isfile(os.path.join(dir_path, fname))
     ]
 
