@@ -147,15 +147,15 @@ if __name__ == "__main__":
         dest="ipsign",
         default=0,
         type=int,
-        choices=[-1,0,1],
-        help="Fixed Ip sign in output, default=%(default)s transforms as is" ,
+        choices=[-1, 0, 1],
+        help="Fixed Ip sign in output, default=%(default)s transforms as is",
     )
     parser.add_argument(
         "--b0sign",
         dest="b0sign",
         default=0,
         type=int,
-        choices=[-1,0,1],
+        choices=[-1, 0, 1],
         help="Fixed B0 sign in output, default=%(default)s transforms as is",
     )
     args = parser.parse_args()

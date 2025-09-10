@@ -638,7 +638,7 @@ def eqdsk2ids(
     afile: Optional[str] = None,
     ipsign: int = 0,
     b0sign: int = 0,
-    cocos_in: Optional[int] = None
+    cocos_in: Optional[int] = None,
 ) -> "imas.ids.equilibrium.equilibrium":
     """
     Convert one or more GEQDSK files into a merged IMAS equilibrium IDS.

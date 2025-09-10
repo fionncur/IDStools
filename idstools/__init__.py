@@ -46,11 +46,12 @@ def get_version() -> str:
     """
     try:
         import idstools
+
         version: Any = getattr(idstools, "__version__", "")
         return str(version) if version else ""
     except Exception:
         return ""
- 
+
 
 def get_git_hash() -> str:
     """
@@ -61,10 +62,7 @@ def get_git_hash() -> str:
         current_frame = inspect.currentframe()
         if current_frame is None:
             return ""
-        caller_globals = (
-            current_frame.f_back.f_globals
-            if current_frame.f_back else {}
-        )
+        caller_globals = current_frame.f_back.f_globals if current_frame.f_back else {}
         file_path: Optional[str] = caller_globals.get("__file__")
         if not file_path:
             return ""
@@ -74,7 +72,7 @@ def get_git_hash() -> str:
             stdout=subprocess.PIPE,
             stderr=subprocess.DEVNULL,
             check=True,
-            text=True
+            text=True,
         )
         return result.stdout.strip()
     except Exception:
