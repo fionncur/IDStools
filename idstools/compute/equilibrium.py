@@ -8,7 +8,6 @@ This module provides compute functions and classes for equilibrium ids data
 import functools
 import logging
 from typing import Union
-import traceback
 
 try:
     import imaspy as imas
