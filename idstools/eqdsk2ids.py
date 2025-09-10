@@ -2,6 +2,8 @@
 import datetime
 import logging
 import os
+import re
+from typing import Optional
 from pprint import pformat
 from statistics import median
 
@@ -118,6 +120,7 @@ class GEQDSK:
 
         #
         header = fp.readline().rstrip()
+        data["TIME"] = self._extract_time(header)
         rec = fmt00.read(header)
         data["CASE"] = rec[0:6]
         if len(header) != 60:
@@ -296,6 +299,87 @@ class GEQDSK:
 
         return COCOS(values=values)
 
+    def _extract_time(self, header_line: str, skip_if_unit_missing: bool = False) -> Optional[float]:
+        """
+        Extracts a time value from header string of GEQDSK file.
+
+        Supported formats:
+            - "260ms", "2.6e2(ms)", "150 [s]", "time=1.0", "t = 2 (s)"
+
+        Parameters:
+            header_line (str): The header line containing text.
+            skip_if_unit_missing (bool): If True, skip values with no unit;
+                                         if False, assume seconds.
+
+        Returns:
+            float or None: Time in seconds, or None if not found or skipped.
+        """
+
+        # Supported unit conversion map
+        unit_map = {
+            "s": 1e0,
+            "ms": 1e-3,
+            "us": 1e-6,
+            "μs": 1e-6,
+            "min": 6e1,
+        }
+
+        # Remove trailing integers at the end (e.g., "3 129 129")
+        header_line = re.sub(r"(\d+\s+){2,}\d+$", "", header_line.strip())
+
+        # 1. Pattern: numeric value + optional unit
+        # (in any brackets, with optional spaces)
+        time_regex = re.compile(
+            (
+                r"(?P<value>[+-]?\d+(?:\.\d*)?(?:[eE][+-]?\d+)?)"
+                r"[\s]*[\(\[\{]?\s*"
+                r"(?P<unit>s|ms|us|μs|min)"
+                r"\s*[\)\]\}]?"
+            ),
+            re.IGNORECASE,
+        )
+
+        # 2. Pattern: key=value with optional brackets for unit
+        # (e.g., t = 2 (s), time=1.[ms])
+        key_value_regex = re.compile(
+            (
+                r"(?:\btime\b|\bt\b)\s*=\s*"
+                r"(?P<value>[+-]?\d+(?:\.\d*)?(?:[eE][+-]?\d+)?)"
+                r"(?:\s*[\(\[\{]?\s*"
+                r"(?P<unit>s|ms|us|μs|min)\s*[\)\]\}]?)?"
+            ),
+            re.IGNORECASE,
+        )
+
+        # Step 1: Try general value+unit match
+        for match in time_regex.finditer(header_line):
+            value = float(match.group("value"))
+            unit = match.group("unit").lower()
+            factor = unit_map.get(unit)
+            if factor is not None:
+                return value * factor
+
+        # Step 2: Try key=value[unit] match
+        for match in key_value_regex.finditer(header_line):
+            value = float(match.group("value"))
+            unit = match.group("unit")
+            if unit:
+                factor = unit_map.get(unit.lower())
+                if factor is not None:
+                    return value * factor
+                else:
+                    logger.warning(f"Unknown unit: {unit}, skipping.")
+                    return None
+            else:
+                if skip_if_unit_missing:
+                    logger.warning(f"No unit found, t={value}; skipping.")
+                    return None
+                else:
+                    logger.warning(f"No unit found, t={value}; assuming sec.")
+                    return value
+
+        return None
+
 
 # ----------------------------------------------------------------------
 
@@ -315,12 +399,6 @@ def map__GEQDSK_to_ids(geqdsk, eq):
     ----------
     None
     """
-
-    def set_timebase(ids):
-        """ """
-
-        ids.time.resize(1)
-        ids.time[0] = -1.0
 
     def common_properties(ids):
         """ """
@@ -345,7 +423,11 @@ def map__GEQDSK_to_ids(geqdsk, eq):
     common_properties(eq)
 
     # Set time
-    set_timebase(eq)
+    eq.time.resize(1)
+    if gdsk["TIME"]:
+        eq.time[0] = gdsk["TIME"]
+    else:
+        eq.time[0] = imas.ids_defs.EMPTY_FLOAT
 
     # 0D
     eq.time_slice.resize(1)
