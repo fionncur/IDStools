@@ -9,7 +9,7 @@ from rich.markdown import Markdown
 from rich_argparse import RichHelpFormatter
 
 from idstools.database import DBMaster
-from idstools.eqdsk2ids import geqdsk2ids
+from idstools.eqdsk2ids import eqdsk2ids
 from idstools.set_logger import set_logger
 from idstools.utils.clihelper import (
     get_database_path,
@@ -24,7 +24,7 @@ def main():
     """
 
     # Convert GEQDSK to IDS/equilibrium
-    eq = geqdsk2ids(args.gpath, cocos_in=args.cocos_in)
+    eq = eqdsk2ids(args.gpath, ipsign=args.ipsign, b0sign=args.b0sign, cocos_in=args.cocos_in)
 
     outputargs = argparse.Namespace()
     outputargs.uri = args.dest
@@ -137,10 +137,26 @@ if __name__ == "__main__":
         "--cocos_in",
         dest="cocos_in",
         help="Tokamak coordinate conventions (COCOS) describing input data",
-        required=True,
+        required=False,
         type=int,
         default=None,
         choices=[*range(1, 9), *range(11, 19)],
+    )
+    parser.add_argument(
+        "--ipsign",
+        dest="ipsign",
+        default=0,
+        type=int,
+        choices=[-1,0,1],
+        help="Fixed Ip sign in output, default=%(default)s transforms as is" ,
+    )
+    parser.add_argument(
+        "--b0sign",
+        dest="b0sign",
+        default=0,
+        type=int,
+        choices=[-1,0,1],
+        help="Fixed B0 sign in output, default=%(default)s transforms as is",
     )
     args = parser.parse_args()
     # Initialize logger

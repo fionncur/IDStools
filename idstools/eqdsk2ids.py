@@ -3,9 +3,10 @@ import datetime
 import logging
 import os
 import re
-from typing import Optional
+from typing import Optional, List
 from pprint import pformat
 from statistics import median
+from copy import deepcopy
 
 try:
     import imaspy as imas
@@ -14,6 +15,7 @@ except ImportError:
 import numpy as np
 from fortranformat import FortranRecordReader
 
+from idstools import get_git_hash, get_version
 from idstools.cocos import COCOS, IDS_COCOS, compute_COCOS
 
 logger = logging.getLogger(__name__)
@@ -409,6 +411,8 @@ def map__GEQDSK_to_ids(geqdsk, eq):
 
         ids.code.name = "IDStools/eqdsk2ids"
         ids.code.repository = "https://git.iter.org/projects/IMAS/repos/idstools/browse"
+        ids.code.commit = get_git_hash()
+        ids.code.version = get_version()
         ids.code.output_flag.resize(1)
         ids.code.output_flag[0] = 0
 
@@ -513,6 +517,77 @@ def map__GEQDSK_to_ids(geqdsk, eq):
 # ----------------------------------------------------------------------
 
 
+def merge_equilibrium(eq1, eq2, sort_by_time=True):
+    """
+    Concatenate two IMAS IDS/equilibrium objects (eq1 appended after eq2),
+    with an option to sort the resulting time slices by time.
+
+    Parameters
+    ----------
+    eq1 : imas_*_ual_*.equilibrium.equilibrium
+        The equilibrium IDS to append.
+    eq2 : imas_*_ual_*.equilibrium.equilibrium
+        The base equilibrium IDS.
+    sort_by_time : bool, optional
+        If True, the resulting IDS will be sorted by time (default: True).
+
+    Returns
+    -------
+    eq : imas_*_ual_*.equilibrium.equilibrium
+        New IDS/equilibrium instance with combined (and optionally sorted) content.
+    """
+
+    if eq1 is None or eq2 is None:
+        raise ValueError("Both eq1 and eq2 must be valid IDS/equilibrium objects.")
+
+    # Prepare new equilibrium IDS
+    eq = imas.IDSFactory().equilibrium()
+
+    n1 = len(eq1.time)
+    n2 = len(eq2.time)
+    n_total = n1 + n2
+
+    eq.time.resize(n_total)
+    eq.time_slice.resize(n_total)
+    eq.vacuum_toroidal_field.b0.resize(n_total)
+    eq.code.output_flag.resize(n_total)
+
+    eq.ids_properties = deepcopy(eq1.ids_properties)
+    eq.code.name = eq1.code.name
+    eq.code.repository = eq1.code.repository
+    eq.code.commit = eq1.code.commit
+    eq.code.version = eq1.code.version
+
+    # Copy time slices from both sources
+    for i in range(n2):
+        eq.time[i] = eq2.time[i]
+        eq.time_slice[i] = deepcopy(eq2.time_slice[i])
+        eq.vacuum_toroidal_field.b0[i] = eq2.vacuum_toroidal_field.b0[i]
+        eq.code.output_flag[i] = eq2.code.output_flag[i]
+
+    for i in range(n1):
+        idx = i + n2
+        eq.time[idx] = eq1.time[i]
+        eq.time_slice[idx] = deepcopy(eq1.time_slice[i])
+        eq.vacuum_toroidal_field.b0[idx] = eq1.vacuum_toroidal_field.b0[i]
+        eq.code.output_flag[idx] = eq1.code.output_flag[i]
+
+    if sort_by_time:
+        eqw = deepcopy(eq)
+        # Sort all fields by ascending time
+        sorted_indices = np.argsort(eq.time[:])
+        for i, j in enumerate(sorted_indices):
+            eq.time[i] = eqw.time[j]
+            eq.time_slice[i] = eqw.time_slice[j]
+            eq.vacuum_toroidal_field.b0[i] = eqw.vacuum_toroidal_field.b0[j]
+            eq.code.output_flag[i] = eqw.code.output_flag[j]
+
+    return eq
+
+
+# ----------------------------------------------------------------------
+
+
 def geqdsk2ids(fpath, ipsign=0, b0sign=0, cocos_in=None):
     """
     Functional Interface of GEQDSK Converter (geqdsk2ids)
@@ -551,37 +626,67 @@ def geqdsk2ids(fpath, ipsign=0, b0sign=0, cocos_in=None):
     if cocos["COCOS"] != IDS_COCOS:
         logger.warning("COCOS Target= {}, Output= {}, Input= {}".format(IDS_COCOS, cocos["COCOS"], geqdsk.cocos.COCOS))
         raise SystemExit("Input COCOS is inconsistent between GEQDSK file and COCOS with the option '--cocos_in'.")
+
     return eq
 
 
 # ----------------------------------------------------------------------
 
 
-def eqdsk2ids(gfile=None, afile=None, ipsign=0, b0sign=0, cocos_in=None):
+def eqdsk2ids(
+    gfile: Optional[str] = None,
+    afile: Optional[str] = None,
+    ipsign: int = 0,
+    b0sign: int = 0,
+    cocos_in: Optional[int] = None
+) -> "imas.ids.equilibrium.equilibrium":
     """
-    Functional Interface of EQDSK Converter (eqdsk2ids)
+    Convert one or more GEQDSK files into a merged IMAS equilibrium IDS.
 
     Parameters
     ----------
-    gfile: str
-        Path to GEQDSK file
-    afile: str
-        Path to AEQDSK file (not in use)
-    ipsign: int=0, optional
-        Desired sign(Ip) in output
-    b0sign: int=0, optional
-        Desired sign(B0) in output
-    cocos_in: int=None, optional
-        Coerce input COCOS
+    gfile : str, optional
+        Path to a GEQDSK file or a directory containing GEQDSK files.
+    afile : str, optional
+        Path to AEQDSK file (currently not used).
+    ipsign : int, default=0
+        Desired sign of plasma current (Ip) in the output.
+    b0sign : int, default=0
+        Desired sign of toroidal field (B0) in the output.
+    cocos_in : int or None, optional
+        Input COCOS convention to coerce. None means autodetect.
 
     Returns
     -------
-    eq: imas_*_ual_*.equilibrium.equilibrium ('*' corresponds to IMAS/UAL ver.)
-        IDS/equilibrium
+    eq : imas.ids.equilibrium.equilibrium
+        Combined equilibrium IDS from one or more GEQDSK files.
     """
 
-    # option "afile" not yet implemented
-    if gfile is not None:
-        return geqdsk2ids(gfile, ipsign=ipsign, b0sign=b0sign, cocos_in=cocos_in)
+    if not gfile:
+        raise ValueError("No GEQDSK file or directory provided.")
+
+    # Expand environment variables and resolve to absolute path
+    abs_path = os.path.abspath(os.path.expanduser(os.path.expandvars(gfile)))
+
+    # If it's a file, just process that one
+    if os.path.isfile(abs_path):
+        file_list: List[str] = [abs_path]
+    # If it's a directory, get all files inside (sorted)
+    elif os.path.isdir(abs_path):
+        file_list = [
+            os.path.join(abs_path, fname)
+            for fname in sorted(os.listdir(abs_path))
+            if os.path.isfile(os.path.join(abs_path, fname))
+        ]
     else:
-        return None
+        raise FileNotFoundError(f"Path not found: {gfile}")
+
+    # Initialize empty equilibrium IDS
+    eq = imas.IDSFactory().equilibrium()
+
+    # Convert and merge each GEQDSK file
+    for fpath in file_list:
+        geq = geqdsk2ids(fpath, ipsign=ipsign, b0sign=b0sign, cocos_in=cocos_in)
+        eq = merge_equilibrium(geq, eq, sort_by_time=True)
+
+    return eq
