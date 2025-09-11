@@ -622,9 +622,9 @@ def geqdsk2ids(fpath, ipsign=0, b0sign=0, cocos_in=None):
     eq = imas.ids_factory.IDSFactory().equilibrium()
     map__GEQDSK_to_ids(geqdsk, eq)
 
-    # COCOS Check
+    # Compute COCOS in output IDS/equilibrium
     cocos = compute_COCOS(eq)
-    logger.info("IDS COCOS: \n%s", pformat(cocos, indent=2))
+    logger.info("COCOS values in output IDS/equilibrium: \n%s", pformat(cocos, indent=2))
 
     # Check if COCOS is equal to IDS_COCOS
     if cocos["COCOS"] != IDS_COCOS:
