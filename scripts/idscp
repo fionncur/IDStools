@@ -123,9 +123,8 @@ if __name__ == "__main__":
     for idsname, data_dictionary_version in ids_dd_versions.items():
         ids_grouped_by_dd_version[data_dictionary_version].append(idsname)
     if not args.dd_update:
-
+        src_dd_version = max(ids_dd_versions.values(), key=version.parse)
         if len(args.ids) != 1 and len(set(ids_dd_versions.values())) > 1:
-            src_dd_version = max(ids_dd_versions.values(), key=version.parse)
             ids_grouped_by_dd_version_output = ", ".join(
                 f"{k}: {', '.join(v)}" for k, v in ids_grouped_by_dd_version.items()
             )

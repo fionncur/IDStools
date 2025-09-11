@@ -742,13 +742,13 @@ class EdgeProfilesCompute:
         for grid_subset in self.ids.grid_ggd[time_slice].grid_subset:
             if grid_subset.identifier.index == CORE_BOUNDRY_SUBSET_INDEX:
                 core_boundry_grid_subset = grid_subset
-                print(
+                logger.info(
                     f"Found Grid subset for core_boundry subset name:{grid_subset.identifier.name}, Index: \
                     {grid_subset.identifier.index}"
                 )
             if grid_subset.identifier.index == CORE_SUBSET_INDEX:
                 core_grid_subset = grid_subset
-                print(
+                logger.info(
                     f"Found Grid subset for core name:{grid_subset.identifier.name}, Index: \
                     {grid_subset.identifier.index}"
                 )
@@ -767,9 +767,12 @@ class EdgeProfilesCompute:
                 index = obj.index - 1  # 1 based indexing
                 space = obj.space - 1
                 dim = 0  # choosing nodes 1=nodes, 2=edges, 3=faces, 4=cells/volumes
-                sep_coords[ielement, :] = (
-                    self.ids.grid_ggd[time_slice].space[space].objects_per_dimension[dim].object[index].geometry[:2]
-                )
+                if len(self.ids.grid_ggd[time_slice].space[space].objects_per_dimension[dim].object) > index:
+                    sep_coords[ielement, :] = (
+                        self.ids.grid_ggd[time_slice].space[space].objects_per_dimension[dim].object[index].geometry[:2]
+                    )
+                else:
+                    logger.warning(f"Grid object at index {index} not found in space {space} dimension {dim}")
         # hull = ConvexHull(sep_coords[0 : num_sep - 1, :])  # find a closed core_boundry contour
         # core_boundry = np.array([sep_coords[hull.vertices, 0], sep_coords[hull.vertices, 1]]).T
         return sep_coords
