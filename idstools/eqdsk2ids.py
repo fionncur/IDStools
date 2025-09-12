@@ -641,7 +641,7 @@ def geqdsk2ids(fpath, ipsign=0, b0sign=0, cocos_in=None):
 def _expand_file_patterns(pattern: str) -> List[str]:
     """
     Expand a file pattern to a list of matching files.
-    
+
     Parameters
     ----------
     pattern : str
@@ -649,7 +649,7 @@ def _expand_file_patterns(pattern: str) -> List[str]:
         - A single file path
         - A directory path
         - A glob pattern with wildcards
-    
+
     Returns
     -------
     List[str]
@@ -657,11 +657,11 @@ def _expand_file_patterns(pattern: str) -> List[str]:
     """
     # Expand environment variables and user home directory
     expanded = os.path.expanduser(os.path.expandvars(pattern))
-    
+
     # Check if it's an existing file
     if os.path.isfile(expanded):
         return [os.path.abspath(expanded)]
-    
+
     # Check if it's an existing directory
     if os.path.isdir(expanded):
         abs_dir = os.path.abspath(expanded)
@@ -670,14 +670,13 @@ def _expand_file_patterns(pattern: str) -> List[str]:
             for fname in sorted(os.listdir(abs_dir))
             if os.path.isfile(os.path.join(abs_dir, fname))
         ]
-    
+
     # Try glob expansion for patterns with wildcards
     matches = glob.glob(expanded)
     if matches:
         # Filter to only include files (not directories)
-        return [os.path.abspath(match) for match in sorted(matches)
-                if os.path.isfile(match)]
-    
+        return [os.path.abspath(match) for match in sorted(matches) if os.path.isfile(match)]
+
     # If no matches found, raise an error
     raise FileNotFoundError(f"No files found matching pattern: {pattern}")
 
@@ -720,7 +719,7 @@ def eqdsk2ids(
         raise ValueError("No GEQDSK file(s) provided.")
 
     file_list: List[str] = []
-    
+
     # Handle different input types
     if isinstance(gfile, list):
         # If it's already a list, process each element
@@ -728,7 +727,7 @@ def eqdsk2ids(
             file_list.extend(_expand_file_patterns(item))
     elif isinstance(gfile, str):
         # If it's a string, it could be space-separated or a single path
-        if ' ' in gfile:
+        if " " in gfile:
             # Split by whitespace and expand each part
             parts = gfile.split()
             for part in parts:

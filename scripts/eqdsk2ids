@@ -142,10 +142,10 @@ if __name__ == "__main__":
         "-g",
         "--gpath",
         dest="gpath",
-        nargs='+',
+        nargs="+",
         help="path(s) to GEQDSK file(s). Can specify multiple files "
-             "separated by spaces, use wildcards (e.g., *.g), or "
-             "provide a directory",
+        "separated by spaces, use wildcards (e.g., *.g), or "
+        "provide a directory",
         required=True,
         default=None,
     )
