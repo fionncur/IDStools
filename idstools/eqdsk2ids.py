@@ -3,7 +3,8 @@ import datetime
 import logging
 import os
 import re
-from typing import Optional, List
+import glob
+from typing import Optional, List, Union
 from pprint import pformat
 from statistics import median
 from copy import deepcopy
@@ -637,8 +638,52 @@ def geqdsk2ids(fpath, ipsign=0, b0sign=0, cocos_in=None):
 # ----------------------------------------------------------------------
 
 
+def _expand_file_patterns(pattern: str) -> List[str]:
+    """
+    Expand a file pattern to a list of matching files.
+    
+    Parameters
+    ----------
+    pattern : str
+        File pattern that can be:
+        - A single file path
+        - A directory path
+        - A glob pattern with wildcards
+    
+    Returns
+    -------
+    List[str]
+        List of matching file paths
+    """
+    # Expand environment variables and user home directory
+    expanded = os.path.expanduser(os.path.expandvars(pattern))
+    
+    # Check if it's an existing file
+    if os.path.isfile(expanded):
+        return [os.path.abspath(expanded)]
+    
+    # Check if it's an existing directory
+    if os.path.isdir(expanded):
+        abs_dir = os.path.abspath(expanded)
+        return [
+            os.path.join(abs_dir, fname)
+            for fname in sorted(os.listdir(abs_dir))
+            if os.path.isfile(os.path.join(abs_dir, fname))
+        ]
+    
+    # Try glob expansion for patterns with wildcards
+    matches = glob.glob(expanded)
+    if matches:
+        # Filter to only include files (not directories)
+        return [os.path.abspath(match) for match in sorted(matches)
+                if os.path.isfile(match)]
+    
+    # If no matches found, raise an error
+    raise FileNotFoundError(f"No files found matching pattern: {pattern}")
+
+
 def eqdsk2ids(
-    gfile: Optional[str] = None,
+    gfile: Union[str, List[str], None] = None,
     afile: Optional[str] = None,
     ipsign: int = 0,
     b0sign: int = 0,
@@ -649,8 +694,13 @@ def eqdsk2ids(
 
     Parameters
     ----------
-    gfile : str, optional
-        Path to a GEQDSK file or a directory containing GEQDSK files.
+    gfile : str, list of str, optional
+        Path(s) to GEQDSK file(s). Can be:
+        - Single file path
+        - Directory path (all files processed)
+        - Space-separated string of multiple files/patterns
+        - List of file paths
+        - Glob pattern(s) with wildcards (*, ?, [])
     afile : str, optional
         Path to AEQDSK file (currently not used).
     ipsign : int, default=0
@@ -667,23 +717,34 @@ def eqdsk2ids(
     """
 
     if not gfile:
-        raise ValueError("No GEQDSK file or directory provided.")
+        raise ValueError("No GEQDSK file(s) provided.")
 
-    # Expand environment variables and resolve to absolute path
-    abs_path = os.path.abspath(os.path.expanduser(os.path.expandvars(gfile)))
-
-    # If it's a file, just process that one
-    if os.path.isfile(abs_path):
-        file_list: List[str] = [abs_path]
-    # If it's a directory, get all files inside (sorted)
-    elif os.path.isdir(abs_path):
-        file_list = [
-            os.path.join(abs_path, fname)
-            for fname in sorted(os.listdir(abs_path))
-            if os.path.isfile(os.path.join(abs_path, fname))
-        ]
+    file_list: List[str] = []
+    
+    # Handle different input types
+    if isinstance(gfile, list):
+        # If it's already a list, process each element
+        for item in gfile:
+            file_list.extend(_expand_file_patterns(item))
+    elif isinstance(gfile, str):
+        # If it's a string, it could be space-separated or a single path
+        if ' ' in gfile:
+            # Split by whitespace and expand each part
+            parts = gfile.split()
+            for part in parts:
+                file_list.extend(_expand_file_patterns(part))
+        else:
+            # Single string - could be file, dir, or pattern
+            file_list.extend(_expand_file_patterns(gfile))
     else:
-        raise FileNotFoundError(f"Path not found: {gfile}")
+        raise TypeError("gfile must be a string or list of strings")
+
+    if not file_list:
+        raise FileNotFoundError(f"No GEQDSK files found matching: {gfile}")
+
+    # Sort the file list for consistent processing order
+    file_list = sorted(set(file_list))  # Remove duplicates and sort
+    logger.info(f"Processing {len(file_list)} GEQDSK files: {file_list}")
 
     # Initialize empty equilibrium IDS
     eq = imas.IDSFactory().equilibrium()

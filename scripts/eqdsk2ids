@@ -24,7 +24,7 @@ def main():
 
     # Convert GEQDSK to IDS/equilibrium
     eq = eqdsk2ids(
-        args.gpath,
+        gfile=args.gpath,
         ipsign=args.ipsign,
         b0sign=args.b0sign,
         cocos_in=args.cocos_in,
@@ -81,7 +81,15 @@ description = r"""
 
     > eqdsk2ids -g path_to_gfile -d "imas:hdf5?path=/path/to/data" -c 11
 
-2) Increase verbosity to see COCOS index and transformation coefficient info.
+2) Process multiple files using wildcards
+
+    > eqdsk2ids -g "*.geqdsk" -d "imas:hdf5?path=/path/to/data" -c 11
+
+3) Process multiple files by specifying them individually
+
+    > eqdsk2ids -g file1.g file2.g file3.g -d "imas:hdf5?path=/path/to/data" -c 11
+
+4) Increase verbosity to see COCOS index and transformation coefficient info.
 
     > eqdsk2ids -g gfile -d "imas:hdf5?path=/path/to/data" -c 11 --log INFO
 
@@ -94,11 +102,19 @@ description = r"""
 
     > from idstools.eqdsk2ids import eqdsk2ids
 
-1) Convert Gfile
+1) Convert single G-file
 
     > eq = eqdsk2ids(gfile='path/to/gfile')
 
-2) Convert Gfile with COCOS input (=1) coerced
+2) Convert multiple files with wildcards
+
+    > eq = eqdsk2ids(gfile='path/to/*.geqdsk')
+
+3) Convert multiple files as a list
+
+    > eq = eqdsk2ids(gfile=['file1.g', 'file2.g', 'file3.g'])
+
+4) Convert with COCOS input (=1) coerced
 
     > eq = eqdsk2ids(gfile='path/to/gfile', cocos_in=1)"""
 if __name__ == "__main__":
@@ -126,7 +142,10 @@ if __name__ == "__main__":
         "-g",
         "--gpath",
         dest="gpath",
-        help="path to single GEQDSK file or directory containing G-files",
+        nargs='+',
+        help="path(s) to GEQDSK file(s). Can specify multiple files "
+             "separated by spaces, use wildcards (e.g., *.g), or "
+             "provide a directory",
         required=True,
         default=None,
     )
