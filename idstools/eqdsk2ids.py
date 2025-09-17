@@ -16,7 +16,7 @@ except ImportError:
 import numpy as np
 from fortranformat import FortranRecordReader
 
-from idstools import get_git_hash, get_version
+from idstools import __version__, GIT_REV
 from idstools.cocos import COCOS, IDS_COCOS, compute_COCOS
 
 logger = logging.getLogger(__name__)
@@ -416,8 +416,8 @@ def map__GEQDSK_to_ids(geqdsk, eq):
 
         ids.code.name = "IDStools/eqdsk2ids"
         ids.code.repository = "https://git.iter.org/projects/IMAS/repos/idstools/browse"
-        ids.code.commit = get_git_hash()
-        ids.code.version = get_version()
+        ids.code.commit = GIT_REV
+        ids.code.version = __version__
         ids.code.output_flag.resize(1)
         ids.code.output_flag[0] = 0
 
