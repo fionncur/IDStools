@@ -56,8 +56,7 @@ if __name__ == "__main__":
         help="List ids with their number of occurrences with comment and occurrence_type if available",
     )
     parser.add_argument(
-        "-v",
-        "--version",
+        "--dd-version",
         action="store_true",
         help="List ids with their number of occurrences with data dictionary version",
     )
@@ -151,7 +150,7 @@ if __name__ == "__main__":
         console.print(table)
         connection.close()
         exit(0)
-    elif args.version is True:
+    elif args.dd_version is True:
         console = Console()
         table = Table(title="List of IDSes with Occurrences and DD Version")
         table.add_column("IDS", style="magenta")
