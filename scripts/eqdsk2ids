@@ -8,8 +8,7 @@ import imas
 from rich.markdown import Markdown
 from rich_argparse import RichHelpFormatter
 
-from idstools.database import DBMaster
-from idstools.eqdsk2ids import geqdsk2ids
+from idstools.eqdsk2ids import eqdsk2ids
 from idstools.set_logger import set_logger
 from idstools.utils.clihelper import (
     get_database_path,
@@ -24,7 +23,10 @@ def main():
     """
 
     # Convert GEQDSK to IDS/equilibrium
-    eq = geqdsk2ids(args.gpath, cocos_in=args.cocos_in)
+    eq = eqdsk2ids(
+        gfile=args.gpath,
+        cocos_in=args.cocos_in,
+    )
 
     outputargs = argparse.Namespace()
     outputargs.uri = args.dest
@@ -36,7 +38,7 @@ def main():
         if outputargs.uri != "" and outputargs.uri is not None:
             dest_connection = imas.DBEntry(outputargs.uri, outputargs.mode)
         if dest_connection is None:
-            logger.error("Error creating destination pulse! Please check parameters and permissions.")
+            logger.error("Error creating destination pulse! " "Please check parameters and permissions.")
             exit(1)
     else:
         outputargs.mode = "a"
@@ -45,17 +47,18 @@ def main():
         if outputargs.uri != "" and outputargs.uri is not None:
             try:
                 dest_connection = imas.DBEntry(outputargs.uri, outputargs.mode)
-            except Exception as e:
+            except Exception:
                 outputargs.mode = "w"
                 dest_connection = imas.DBEntry(outputargs.uri, outputargs.mode)
 
         if dest_connection is None:
-            logger.error("Error opening destination pulse! Please check parameters and permissions.")
+            logger.error("Error opening destination pulse! " "Please check parameters and permissions.")
             exit(1)
 
     dest_connection.put(eq)
     dest_connection.close()
-    logger.info(f"IDS/equilibrium populated in  {get_database_path(outputargs)}.")
+    db_path = get_database_path(outputargs)
+    logger.info(f"IDS/equilibrium populated in {db_path}.")
 
 
 # ----------------------------------------------------------------------
@@ -76,9 +79,17 @@ description = r"""
 
     > eqdsk2ids -g path_to_gfile -d "imas:hdf5?path=/path/to/data" -c 11
 
-2) Increase verbosity to see information as COCOS index and transformation coeff.
+2) Process multiple files using wildcards
 
-    > eqdsk2ids -g path_to_gfile -d "imas:hdf5?path=/path/to/data" -c 11 --log INFO
+    > eqdsk2ids -g "*.geqdsk" -d "imas:hdf5?path=/path/to/data" -c 11
+
+3) Process multiple files by specifying them individually
+
+    > eqdsk2ids -g file1.g file2.g file3.g -d "imas:hdf5?path=/path/to/data" -c 11
+
+4) Increase verbosity to see COCOS index and transformation coefficient info.
+
+    > eqdsk2ids -g gfile -d "imas:hdf5?path=/path/to/data" -c 11 --log INFO
 
 (II) Functional Interface in Python (idstools/eqdsk2ids.py)
 ------------------------------------------------------------
@@ -89,11 +100,19 @@ description = r"""
 
     > from idstools.eqdsk2ids import eqdsk2ids
 
-1) Convert Gfile
+1) Convert single G-file
 
     > eq = eqdsk2ids(gfile='path/to/gfile')
 
-2) Convert Gfile with COCOS input (=1) coerced
+2) Convert multiple files with wildcards
+
+    > eq = eqdsk2ids(gfile='path/to/*.geqdsk')
+
+3) Convert multiple files as a list
+
+    > eq = eqdsk2ids(gfile=['file1.g', 'file2.g', 'file3.g'])
+
+4) Convert with COCOS input (=1) coerced
 
     > eq = eqdsk2ids(gfile='path/to/gfile', cocos_in=1)"""
 if __name__ == "__main__":
@@ -115,13 +134,16 @@ if __name__ == "__main__":
         "-f",
         "--force",
         action="store_true",
-        help="Force the creation of destination data-entry (existing data will be lost)",
+        help="Force creation of destination data-entry (existing data lost)",
     )
     parser.add_argument(
         "-g",
-        "--gfile",
+        "--gpath",
         dest="gpath",
-        help="path to GEQDSK file",
+        nargs="+",
+        help="path(s) to GEQDSK file(s). Can specify multiple files "
+        "separated by spaces, use wildcards (e.g., *.g), or "
+        "provide a directory",
         required=True,
         default=None,
     )
@@ -148,5 +170,5 @@ if __name__ == "__main__":
 
     try:
         main()
-    except Exception as e:
+    except Exception:
         logger.error(traceback.format_exc())

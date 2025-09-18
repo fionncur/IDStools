@@ -5,11 +5,12 @@ except ImportError:
 
 
 try:
-    from ._version import version as __version__  # noqa: F401
+    from ._version import __version__, GIT_REV, GIT_DESCRIBE, GIT_DATE  # noqa: F401
     from ._version import version_tuple  # noqa: F401
 except ImportError:
     __version__ = "unknown"
     version_tuple = (0, 0, 0)
+    GIT_REV = GIT_DESCRIBE = GIT_DATE = "unknown"
 
 
 if not hasattr(imas, "ids_defs"):
@@ -17,8 +18,8 @@ if not hasattr(imas, "ids_defs"):
         """
 [ERROR] Detected an outdated version of the 'imas' module.
 
-The installed 'imas' package appears to be an incompatible legacy version of the high-level
-Python interface of the IMAS Access Layer.
+The installed 'imas' package appears to be an incompatible legacy version of \
+the high-level Python interface of the IMAS Access Layer.
 
 To resolve this, remove / unload this version and re-install using:
 
