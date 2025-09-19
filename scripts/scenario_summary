@@ -163,13 +163,6 @@ if __name__ == "__main__":
     else:
         selection = None
 
-    # SORT
-    if args["sort"] is not None:
-        sort = args["sort"].split(",")
-        sort = [x for x in sort if x in displayMapping.keys()]
-    else:
-        sort = ["pulse", "run"]
-
     if args["obsolete"] is not None:
         obsolete = args["obsolete"]
     else:
@@ -209,6 +202,13 @@ if __name__ == "__main__":
             "workflow",
             "date",
         ]
+
+    # SORT
+    if args["sort"] is not None:
+        sort = args["sort"].split(",")
+        sort = [x for x in sort if x in displayMapping.keys()]
+    else:
+        sort = choice
 
     # Print the arguments of the default call to the function
     if args["choice"] is None:
