@@ -1099,6 +1099,7 @@ class EquilibriumCompute:
         if len(output_flag) == 0:
             output_flag = np.zeros(len(self.ids.time_slice), dtype=int)
         if self.ids.time_slice:
+            max_boundary_size = 0
             for time_slice in self.ids.time_slice:
                 if time_slice:
                     if hasattr(time_slice, "profiles_1d") and time_slice.profiles_1d:
@@ -1111,7 +1112,10 @@ class EquilibriumCompute:
                         and hasattr(time_slice.boundary, "outline")
                         and time_slice.boundary.outline
                     ):
-                        n3 = time_slice.boundary.outline.r.size
+                        boundary_size = time_slice.boundary.outline.r.size
+                        max_boundary_size = max(max_boundary_size, boundary_size)
+                        if n3 == 0:  # Set n3 to first valid boundary size
+                            n3 = boundary_size
                     constraints = time_slice.constraints
                     if hasattr(constraints, "ip") and constraints.ip:
                         n4 = 1
@@ -1128,6 +1132,8 @@ class EquilibriumCompute:
                         continue  # Moves to the next iteration
                     else:
                         break  # Exits the loop
+
+            n3 = max_boundary_size
 
         if n > 0:
             psi1D = np.zeros((nt, n))
@@ -1160,12 +1166,28 @@ class EquilibriumCompute:
                     rin1D[i, :] = time_slice.profiles_1d.r_inboard
                 if time_slice.profiles_1d.r_outboard.size > 0:
                     rout1D[i, :] = time_slice.profiles_1d.r_outboard
+        else:
+            # Initialize with None when no 1D profiles available
+            psi1D = None
+            qpsi1D = None
+            press1D = None
+            j_tor1D = None
+            rin1D = None
+            rout1D = None
+
+        # Initialize variables with defaults
+        rb = None
+        zb = None
+        r = None
+        z = None
+        psi2D = None
+        jtor2D = None
+        r2D = None
+        z2D = None
 
         if isinstance(n2, tuple):
             psi2D = np.zeros((nt, n2[0], n2[1]))
             jtor2D = np.zeros((nt, n2[0], n2[1]))
-            r2D = np.zeros((nt, n2[0], n2[1]))
-            z2D = np.zeros((nt, n2[0], n2[1]))
             r2D = np.zeros((nt, n2[0], n2[1]))
             z2D = np.zeros((nt, n2[0], n2[1]))
             rb = np.zeros((nt, n3))
@@ -1180,26 +1202,33 @@ class EquilibriumCompute:
                         z2D[i, :, :] = time_slice.profiles_2d[0].z
                     if time_slice.profiles_2d[0].psi.size > 0:
                         psi2D[i, :, :] = time_slice.profiles_2d[0].psi
+                    print(time_slice.profiles_2d[0].j_tor)
                     if time_slice.profiles_2d[0].j_tor.size > 0:
                         jtor2D[i, :, :] = time_slice.profiles_2d[0].j_tor
+                    # Handle boundary data with proper size checking
                     if time_slice.boundary.outline.r.size > 0:
-                        rb[i, :] = time_slice.boundary.outline.r
+                        boundary_r_size = min(time_slice.boundary.outline.r.size, n3)
+                        rb[i, :boundary_r_size] = time_slice.boundary.outline.r[:boundary_r_size]
                     if time_slice.boundary.outline.z.size > 0:
-                        zb[i, :] = time_slice.boundary.outline.z
+                        boundary_z_size = min(time_slice.boundary.outline.z.size, n3)
+                        zb[i, :boundary_z_size] = time_slice.boundary.outline.z[:boundary_z_size]
                     if time_slice.profiles_2d[0].grid.dim1.size > 0:
                         r = time_slice.profiles_2d[0].grid.dim1
                     if time_slice.profiles_2d[0].grid.dim2.size > 0:
                         z = time_slice.profiles_2d[0].grid.dim2
 
-        if n3 > 0:
+        # Initialize boundary arrays if n3 > 0 but not already initialized
+        if n3 > 0 and rb is None:
             rb = np.zeros((nt, n3))
             zb = np.zeros((nt, n3))
 
             for i, time_slice in enumerate(self.ids.time_slice):
                 if time_slice.boundary.outline.r.size > 0:
-                    rb[i, : len(time_slice.boundary.outline.r)] = time_slice.boundary.outline.r
+                    boundary_r_size = min(time_slice.boundary.outline.r.size, n3)
+                    rb[i, :boundary_r_size] = time_slice.boundary.outline.r[:boundary_r_size]
                 if time_slice.boundary.outline.z.size > 0:
-                    zb[i, : len(time_slice.boundary.outline.z)] = time_slice.boundary.outline.z
+                    boundary_z_size = min(time_slice.boundary.outline.z.size, n3)
+                    zb[i, :boundary_z_size] = time_slice.boundary.outline.z[:boundary_z_size]
 
         if n4 > 0:
             constr_ip_meas = np.zeros((nt, 1))

@@ -79,12 +79,15 @@ if __name__ == "__main__":
 
             time_array1 = equilibrium1.time
             time_slice1, time_value1 = get_nearest_time(time_array1, args.time)
-
-            if args.dd_update:
-                wall1 = connection1.get("wall", autoconvert=False)
-                wall1 = imas.convert_ids(wall1, connection1.factory.version)
-            else:
-                wall1 = connection1.get("wall", lazy=True, autoconvert=False)
+            try:
+                if args.dd_update:
+                    wall1 = connection1.get("wall", autoconvert=False)
+                    wall1 = imas.convert_ids(wall1, connection1.factory.version)
+                else:
+                    wall1 = connection1.get("wall", lazy=True, autoconvert=False)
+            except Exception as e:
+                logger.warning(f"Could not load wall data for first connection: {e}")
+                wall1 = None
 
             if connection1 is None:
                 logger.critical("----> Could not open first data entry. Aborted.")
@@ -99,11 +102,15 @@ if __name__ == "__main__":
             time_array2 = equilibrium2.time
             time_slice2 = np.argmin(abs(time_array2 - time_array1[time_slice1]))
             time_value2 = time_array2[time_slice2]
-            if args.dd_update:
-                wall2 = connection2.get("wall", autoconvert=False)
-                wall2 = imas.convert_ids(wall2, connection2.factory.version)
-            else:
-                wall2 = connection2.get("wall", autoconvert=False)
+            try:
+                if args.dd_update:
+                    wall2 = connection2.get("wall", autoconvert=False)
+                    wall2 = imas.convert_ids(wall2, connection2.factory.version)
+                else:
+                    wall2 = connection2.get("wall", autoconvert=False)
+            except Exception as e:
+                logger.warning(f"Could not load wall data for second connection: {e}")
+                wall2 = None
 
             if connection2 is None:
                 logger.critical("----> Could not open second data entry.")
@@ -139,8 +146,8 @@ if __name__ == "__main__":
 
     if len(args.uri) == 2:
         y = 0.97
-        canvas.fig.text(0.5, y, args.uri[0] + f"(time {time_value1}), ", ha="right", va="top", color="tab:blue")
-        canvas.fig.text(0.5, y, args.uri[1] + f"(time {time_value2})", ha="left", va="top", color="tab:green")
+        canvas.fig.text(0.5, y, args.uri[0] + f"(time {time_value1}), ", ha="right", va="top", color="tab:green")
+        canvas.fig.text(0.5, y, args.uri[1] + f"(time {time_value2})", ha="left", va="top", color="tab:blue")
     else:
         canvas.fig.suptitle(f"{args.uri[0]} time {time_value1}")
     canvas.fig.subplots_adjust(top=0.916, bottom=0.101, left=0.044, right=0.946, hspace=0.216, wspace=0.240)
