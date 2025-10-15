@@ -1202,7 +1202,6 @@ class EquilibriumCompute:
                         z2D[i, :, :] = time_slice.profiles_2d[0].z
                     if time_slice.profiles_2d[0].psi.size > 0:
                         psi2D[i, :, :] = time_slice.profiles_2d[0].psi
-                    print(time_slice.profiles_2d[0].j_tor)
                     if time_slice.profiles_2d[0].j_tor.size > 0:
                         jtor2D[i, :, :] = time_slice.profiles_2d[0].j_tor
                     # Handle boundary data with proper size checking
