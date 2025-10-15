@@ -414,24 +414,36 @@ class EquilibriumView(BasePlot):
         ax.set_xlabel("R [m]")
         ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.13), fancybox=True, shadow=True, ncol=2)
 
-    def view_equlibrium_plot(self, ax, time_index1, equilibrium2_ids=None):
+    def view_equilibrium_plot(self, ax, time_index1, equilibrium2_ids=None):
         if self.equilibria is None:
             self.equilibria = self.compute_obj.get_equilibria()
             data = self.equilibria
         else:
             data = self.equilibria
+
+        # Validate time_index1 bounds
+        if time_index1 < 0 or time_index1 >= len(data["time"]):
+            logger.error(f"time_index1 {time_index1} is out of bounds for time array of length {len(data['time'])}")
+            return
+
         data2 = None
         if equilibrium2_ids:
-            self.compute_obj2 = EquilibriumCompute(equilibrium2_ids)
-            data2 = self.compute_obj2.get_equilibria()
-            timeE = data["time"]
-            psi2DE = data2["psi2D"]
-            rbE = data2["rb"]
-            zbE = data2["zb"]
-            rE = data2["r"]
-            zE = data2["z"]
-            psi_axisE = data["psi_axis"]
-            psi_boundaryE = data["psi_boundary"]
+            try:
+                self.compute_obj2 = EquilibriumCompute(equilibrium2_ids)
+                data2 = self.compute_obj2.get_equilibria()
+
+                timeE = data2["time"]
+                psi2DE = data2["psi2D"]
+                rbE = data2["rb"]
+                zbE = data2["zb"]
+                rE = data2["r"]
+                zE = data2["z"]
+                psi_axisE = data2["psi_axis"]
+                psi_boundaryE = data2["psi_boundary"]
+            except Exception as e:
+                logger.error(f"Error processing second equilibrium data: {e}")
+                return
+
         time = data["time"]
         psi2D = data["psi2D"]
         rb = data["rb"]
@@ -451,18 +463,32 @@ class EquilibriumView(BasePlot):
         ax.set_title("Poloidal Flux")
         ax.set_xlabel("R[m]")
         ax.set_ylabel("Z[m]")
-        if np.min(psi2D[time_index1]) < np.max(psi2D[time_index1]):
-            ax.contour(r, z, np.transpose(psi2D[time_index1]), colors="green", levels=c, linewidths=0.85)
-            (lineb1,) = ax.plot([], linewidth=2, color="green")
-            lineb1.set_xdata(rb[time_index1])
-            lineb1.set_ydata(zb[time_index1])
+
+        try:
+            if np.min(psi2D[time_index1]) < np.max(psi2D[time_index1]):
+                ax.contour(r, z, np.transpose(psi2D[time_index1]), colors="green", levels=c, linewidths=0.85)
+                (lineb1,) = ax.plot([], linewidth=2, color="green")
+                lineb1.set_xdata(rb[time_index1])
+                lineb1.set_ydata(zb[time_index1])
+        except (IndexError, ValueError) as e:
+            logger.error(f"Error plotting primary equilibrium: {e}")
+
         if data2:
-            if np.min(psi2DE[time_index1]) < np.max(psi2DE[time_index1]):
+            try:
+                if len(timeE) == 0 or len(time) == 0:
+                    logger.warning("Empty time arrays for equilibrium comparison")
+                    return
+
                 time_index2 = np.argmin(abs(timeE - time[time_index1]))
-                ax.contour(rE, zE, np.transpose(psi2DE[time_index2]), colors="blue", levels=cE, linewidths=0.85)
-                (lineb2,) = ax.plot([], linewidth=2, color="blue")
-                lineb2.set_xdata(rbE[time_index1])
-                lineb2.set_ydata(zbE[time_index1])
+                time_index2 = min(time_index2, len(psi2DE) - 1)
+
+                if time_index2 >= 0 and len(psi2DE) > 0 and np.min(psi2DE[time_index2]) < np.max(psi2DE[time_index2]):
+                    ax.contour(rE, zE, np.transpose(psi2DE[time_index2]), colors="blue", levels=cE, linewidths=0.85)
+                    (lineb2,) = ax.plot([], linewidth=2, color="blue")
+                    lineb2.set_xdata(rbE[time_index2])
+                    lineb2.set_ydata(zbE[time_index2])
+            except (IndexError, ValueError) as e:
+                logger.error(f"Error plotting second equilibrium: {e}")
 
     def view_current_plot(self, ax, time_index1, equilibrium2_ids=None):
         if self.equilibria is None:
@@ -474,7 +500,7 @@ class EquilibriumView(BasePlot):
         if equilibrium2_ids:
             self.compute_obj2 = EquilibriumCompute(equilibrium2_ids)
             data2 = self.compute_obj2.get_equilibria()
-            timeE = data["time"]
+            timeE = data2["time"]
             ipE = data2["ip"]
         time = data["time"]
         ip = data["ip"]
@@ -532,7 +558,7 @@ class EquilibriumView(BasePlot):
         if equilibrium2_ids:
             self.compute_obj2 = EquilibriumCompute(equilibrium2_ids)
             data2 = self.compute_obj2.get_equilibria()
-            timeE = data["time"]
+            timeE = data2["time"]
             constraintsE = data2["constraints"]
         time = data["time"]
         constraints = data["constraints"]

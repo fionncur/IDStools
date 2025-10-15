@@ -5,8 +5,13 @@ except ImportError:
 
 
 try:
-    from ._version import __version__, GIT_REV, GIT_DESCRIBE, GIT_DATE  # noqa: F401
-    from ._version import version_tuple  # noqa: F401
+    from ._version import (  # noqa: F401
+        GIT_DATE,
+        GIT_DESCRIBE,
+        GIT_REV,
+        __version__,
+        version_tuple,  # noqa: F401
+    )
 except ImportError:
     __version__ = "unknown"
     version_tuple = (0, 0, 0)

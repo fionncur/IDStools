@@ -200,9 +200,25 @@ class WallCompute:
         try:
             rw = self.ids_object.description_2d[0].limiter.unit[0].outline.r
             zw = self.ids_object.description_2d[0].limiter.unit[0].outline.z
-            # append first value to end of array
+
+            if not hasattr(rw, "has_value") or not rw.has_value or len(rw) == 0:
+                logger.warning("Inner wall r coordinates are empty")
+                return None
+
+            if not hasattr(zw, "has_value") or not zw.has_value or len(zw) == 0:
+                logger.warning("Inner wall z coordinates are empty")
+                return None
+
+            rw = np.array(rw)
+            zw = np.array(zw)
+
+            if len(rw) != len(zw):
+                logger.error(f"Mismatched array lengths: r={len(rw)}, z={len(zw)}")
+                return None
+
             rw = np.concatenate((rw, [rw[0]]))
             zw = np.concatenate((zw, [zw[0]]))
+
         except Exception as e:
             logger.error(f"Exception occurred, detailed error {e}")
             return None
