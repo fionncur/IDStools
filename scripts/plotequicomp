@@ -98,7 +98,7 @@ if __name__ == "__main__":
                 equilibrium2 = connection2.get("equilibrium", autoconvert=False)
                 equilibrium2 = imas.convert_ids(equilibrium2, connection2.factory.version)
             else:
-                equilibrium2 = connection2.get("equilibrium", autoconvert=False)
+                equilibrium2 = connection2.get("equilibrium", lazy=True, autoconvert=False)
             time_array2 = equilibrium2.time
             time_slice2 = np.argmin(abs(time_array2 - time_array1[time_slice1]))
             time_value2 = time_array2[time_slice2]
@@ -107,7 +107,7 @@ if __name__ == "__main__":
                     wall2 = connection2.get("wall", autoconvert=False)
                     wall2 = imas.convert_ids(wall2, connection2.factory.version)
                 else:
-                    wall2 = connection2.get("wall", autoconvert=False)
+                    wall2 = connection2.get("wall", lazy=True, autoconvert=False)
             except Exception as e:
                 logger.warning(f"Could not load wall data for second connection: {e}")
                 wall2 = None
