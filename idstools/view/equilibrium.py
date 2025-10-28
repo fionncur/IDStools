@@ -416,7 +416,6 @@ class EquilibriumView(BasePlot):
             line11.set_xdata(r)
             line11.set_ydata(new_y11)
             ax.set_xlim([min(r), max(r)])
-            ax.set_ylim([y_min, y_max])
 
             # Check if data is all zeros or near-zero
             if np.allclose(new_y11, 0.0, atol=1e-10):
@@ -424,6 +423,17 @@ class EquilibriumView(BasePlot):
         else:
             logger.warning(f"Equilibrium1 {name}: No valid r or jtor data available")
 
+        # Set ylim with check for identical values to avoid matplotlib warning
+        if abs(y_max - y_min) < 1e-10:
+            # If y_min and y_max are essentially equal, create a small range around the value
+            if abs(y_min) < 1e-10:
+                # If both are near zero, use a default range
+                y_min, y_max = -0.1, 0.1
+            else:
+                # Otherwise expand by a small percentage
+                delta = abs(y_min) * 0.1
+                y_min -= delta
+                y_max += delta
         ax.set_ylim(y_min, y_max)
         ax.set_ylabel("$" + scaleStr + "A/m^2$")
         ax.set_title("$J_{tor}$(mid-plane)")
