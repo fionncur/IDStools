@@ -50,7 +50,7 @@ if __name__ == "__main__":
         ),
     )
     parser.add_argument("-t", "--time", help="Time (default=middle)", type=float, default=-99.0)
-    
+
     parser.add_argument(
         "--log-level",
         choices=["DEBUG", "INFO", "WARNING", "ERROR"],
@@ -69,7 +69,7 @@ if __name__ == "__main__":
         default=None,
     )
     args = parser.parse_args()
-    
+
     # Set up logger with user-specified level
     log_level = getattr(logging, args.log_level)
     logger = setup_logger("module", stdout_level=log_level)
@@ -141,7 +141,7 @@ if __name__ == "__main__":
     if wall1:
         wallview1 = WallView(wall1)
         wallview1.view_inner_wall_line(ax2)
-    if wall2:            
+    if wall2:
 
         wallview2 = WallView(wall2)
         wallview2.view_inner_wall_line(ax2)

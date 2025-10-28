@@ -381,7 +381,7 @@ class EquilibriumView(BasePlot):
         jtor2D = data["jtor2D"]
         r = data["r"]
         z = data["z"]
-        
+
         # Debug logging
         logger.debug(f"jtor2D shape: {jtor2D.shape if jtor2D is not None else 'None'}")
         logger.debug(f"jtor2D[{time_index1}] min: {np.min(jtor2D[time_index1]) if jtor2D is not None else 'N/A'}")
@@ -401,7 +401,7 @@ class EquilibriumView(BasePlot):
             if rE is not None and new_y12 is not None:
                 line12.set_xdata(rE)
                 line12.set_ydata(new_y12)
-                
+
                 # Check if data is all zeros or near-zero
                 if np.allclose(new_y12, 0.0, atol=1e-10):
                     logger.warning(f"Equilibrium2 {nameE}: jtor profile is all zeros or near-zero")
@@ -417,7 +417,7 @@ class EquilibriumView(BasePlot):
             line11.set_ydata(new_y11)
             ax.set_xlim([min(r), max(r)])
             ax.set_ylim([y_min, y_max])
-            
+
             # Check if data is all zeros or near-zero
             if np.allclose(new_y11, 0.0, atol=1e-10):
                 logger.warning(f"Equilibrium1 {name}: jtor profile is all zeros or near-zero")
@@ -428,14 +428,20 @@ class EquilibriumView(BasePlot):
         ax.set_ylabel("$" + scaleStr + "A/m^2$")
         ax.set_title("$J_{tor}$(mid-plane)")
         ax.set_xlabel("R [m]")
-        
+
         # Add warning text if data is problematic
         if new_y11 is not None and np.allclose(new_y11, 0.0, atol=1e-10):
-            ax.text(0.5, 0.5, 'Warning: Jtor data is all zeros\nCheck equilibrium reconstruction', 
-                   transform=ax.transAxes, ha='center', va='center',
-                   bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.5),
-                   fontsize=9)
-        
+            ax.text(
+                0.5,
+                0.5,
+                "Warning: Jtor data is all zeros\nCheck equilibrium reconstruction",
+                transform=ax.transAxes,
+                ha="center",
+                va="center",
+                bbox=dict(boxstyle="round", facecolor="wheat", alpha=0.5),
+                fontsize=9,
+            )
+
         ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.13), fancybox=True, shadow=True, ncol=2)
 
     def view_equilibrium_plot(self, ax, time_index1, equilibrium2_ids=None):
@@ -479,23 +485,32 @@ class EquilibriumView(BasePlot):
 
         if data2:
             c, cE = self.compute_obj.get_contour(
-                psi_axis, psi_boundary, time, time_index1, 
-                psi_axis2=psi_axisE, psi_boundary2=psi_boundaryE, time2=timeE,
-                psi2D1=psi2D, psi2D2=psi2DE
+                psi_axis,
+                psi_boundary,
+                time,
+                time_index1,
+                psi_axis2=psi_axisE,
+                psi_boundary2=psi_boundaryE,
+                time2=timeE,
+                psi2D1=psi2D,
+                psi2D2=psi2DE,
             )
         else:
             c, cE = self.compute_obj.get_contour(psi_axis, psi_boundary, time, time_index1, psi2D1=psi2D)
-        
+
         # Debug logging
         logger.debug(f"Contour levels c: {c}")
         logger.debug(f"Contour levels cE: {cE}")
-        logger.debug(f"psi_axis[{time_index1}]: {psi_axis[time_index1]}, psi_boundary[{time_index1}]: {psi_boundary[time_index1]}")
-        
+        logger.debug(
+            f"psi_axis[{time_index1}]: {psi_axis[time_index1]}, "
+            f"psi_boundary[{time_index1}]: {psi_boundary[time_index1]}"
+        )
+
         ax.set_aspect("equal", adjustable="box")
         ax.set_title("Poloidal Flux")
         ax.set_xlabel("R[m]")
         ax.set_ylabel("Z[m]")
-        
+
         plot1_success = False
         plot2_success = False
 
@@ -503,7 +518,7 @@ class EquilibriumView(BasePlot):
             psi_min = np.min(psi2D[time_index1])
             psi_max = np.max(psi2D[time_index1])
             logger.debug(f"Equilibrium1: psi2D range [{psi_min}, {psi_max}]")
-            
+
             if psi_min < psi_max and len(c) > 0:
                 ax.contour(r, z, np.transpose(psi2D[time_index1]), colors="green", levels=c, linewidths=0.85)
                 (lineb1,) = ax.plot([], linewidth=2, color="green")
@@ -511,7 +526,9 @@ class EquilibriumView(BasePlot):
                 lineb1.set_ydata(zb[time_index1])
                 plot1_success = True
             else:
-                logger.warning(f"Cannot plot equilibrium1 contours: psi_min={psi_min}, psi_max={psi_max}, levels={len(c)}")
+                logger.warning(
+                    f"Cannot plot equilibrium1 contours: psi_min={psi_min}, psi_max={psi_max}, levels={len(c)}"
+                )
         except (IndexError, ValueError) as e:
             logger.error(f"Error plotting primary equilibrium: {e}")
 
@@ -527,16 +544,22 @@ class EquilibriumView(BasePlot):
                 psi_min2 = np.min(psi2DE[time_index2])
                 psi_max2 = np.max(psi2DE[time_index2])
                 logger.debug(f"Equilibrium2: psi2D range [{psi_min2}, {psi_max2}]")
-                logger.debug(f"psi_axisE[{time_index2}]: {psi_axisE[time_index2]}, psi_boundaryE[{time_index2}]: {psi_boundaryE[time_index2]}")
+                logger.debug(
+                    f"psi_axisE[{time_index2}]: {psi_axisE[time_index2]}, "
+                    f"psi_boundaryE[{time_index2}]: {psi_boundaryE[time_index2]}"
+                )
 
                 # Check for fill values (but we can still plot if psi2D has valid range and contours are valid)
                 is_fill_value = abs(psi_axisE[time_index2]) > 1e30 or abs(psi_boundaryE[time_index2]) > 1e30
                 if is_fill_value:
-                    logger.info(f"Equilibrium2 psi_axis/boundary are fill values, but will attempt to use calculated contours from psi2D")
-                
+                    logger.info(
+                        "Equilibrium2 psi_axis/boundary are fill values, "
+                        "but will attempt to use calculated contours from psi2D"
+                    )
+
                 # Check if we have valid data to plot (psi2D has range and contour levels are not fill values)
                 contours_valid = len(cE) > 0 and not (len(cE) == 1 and abs(cE[0]) > 1e30)
-                
+
                 if time_index2 >= 0 and len(psi2DE) > 0 and psi_min2 < psi_max2 and contours_valid:
                     ax.contour(rE, zE, np.transpose(psi2DE[time_index2]), colors="blue", levels=cE, linewidths=0.85)
                     (lineb2,) = ax.plot([], linewidth=2, color="blue")
@@ -544,16 +567,25 @@ class EquilibriumView(BasePlot):
                     lineb2.set_ydata(zbE[time_index2])
                     plot2_success = True
                 else:
-                    logger.warning(f"Cannot plot equilibrium2 contours: psi_min={psi_min2}, psi_max={psi_max2}, levels={len(cE) if cE is not None else 0}, contours_valid={contours_valid}")
+                    logger.warning(
+                        f"Cannot plot equilibrium2 contours: psi_min={psi_min2}, psi_max={psi_max2}, "
+                        f"levels={len(cE) if cE is not None else 0}, contours_valid={contours_valid}"
+                    )
             except (IndexError, ValueError) as e:
                 logger.error(f"Error plotting second equilibrium: {e}")
-        
+
         # Add warning text if no data was plotted
         if not plot1_success and not plot2_success:
-            ax.text(0.5, 0.5, 'Warning: No valid equilibrium data to plot\nCheck psi_axis, psi_boundary, and psi2D data', 
-                   transform=ax.transAxes, ha='center', va='center',
-                   bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.5),
-                   fontsize=9)
+            ax.text(
+                0.5,
+                0.5,
+                "Warning: No valid equilibrium data to plot\nCheck psi_axis, psi_boundary, and psi2D data",
+                transform=ax.transAxes,
+                ha="center",
+                va="center",
+                bbox=dict(boxstyle="round", facecolor="wheat", alpha=0.5),
+                fontsize=9,
+            )
 
     def view_current_plot(self, ax, time_index1, equilibrium2_ids=None):
         data = self.compute_obj.get_equilibria(selection=["time", "ip"])
@@ -637,16 +669,22 @@ class EquilibriumView(BasePlot):
             )
         else:
             result = self.compute_obj.get_constraints_info("pf-currents", constraints, None, time, time_index1, None)
-        
+
         if not result:
             logger.warning("No pf-currents constraint data available")
-            ax.text(0.5, 0.5, 'No pf-currents constraint data available\nCheck equilibrium reconstruction constraints', 
-                   transform=ax.transAxes, ha='center', va='center',
-                   bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.5),
-                   fontsize=9)
+            ax.text(
+                0.5,
+                0.5,
+                "No pf-currents constraint data available\nCheck equilibrium reconstruction constraints",
+                transform=ax.transAxes,
+                ha="center",
+                va="center",
+                bbox=dict(boxstyle="round", facecolor="wheat", alpha=0.5),
+                fontsize=9,
+            )
             ax.set_title("pf-currents")
             return
-            
+
         if result:
             y1in, y2in, y3in, y4in, titlelabel, ylabel, scaleFactor = result
             y1 = None
@@ -748,8 +786,14 @@ class EquilibriumView(BasePlot):
                 ax.set_ylim(miny, maxy)
             else:
                 logger.warning(f"No valid {titlelabel} data (all values are fill values or empty)")
-                ax.text(0.5, 0.5, f'No valid {titlelabel} data\n(all values are fill values or empty)', 
-                       transform=ax.transAxes, ha='center', va='center',
-                       bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.5),
-                       fontsize=9)
+                ax.text(
+                    0.5,
+                    0.5,
+                    f"No valid {titlelabel} data\n(all values are fill values or empty)",
+                    transform=ax.transAxes,
+                    ha="center",
+                    va="center",
+                    bbox=dict(boxstyle="round", facecolor="wheat", alpha=0.5),
+                    fontsize=9,
+                )
                 ax.set_title(titlelabel)
