@@ -1585,23 +1585,46 @@ class EquilibriumCompute:
 
         return data
 
-    def get_contour(self, psi_axis, psi_boundary, time, time_index1, psi_axis2=None, psi_boundary2=None, time2=None):
+    def get_contour(self, psi_axis, psi_boundary, time, time_index1, psi_axis2=None, psi_boundary2=None, time2=None, psi2D1=None, psi2D2=None):
         n = 10
-        dp = (psi_boundary[time_index1] - psi_axis[time_index1]) / n
-        if dp == 0.0:
-            c = np.array(psi_axis[time_index1])
+        
+        # Check if psi_axis/boundary are fill values and calculate from psi2D if available
+        is_fill_1 = abs(psi_axis[time_index1]) > 1e30 or abs(psi_boundary[time_index1]) > 1e30
+        if is_fill_1 and psi2D1 is not None and len(psi2D1) > time_index1:
+            logger.info(f"psi_axis/boundary are fill values for equilibrium 1, calculating from psi2D data")
+            psi_axis_calc = np.min(psi2D1[time_index1])
+            psi_boundary_calc = np.max(psi2D1[time_index1])
         else:
-            c = np.arange(psi_axis[time_index1], psi_axis[time_index1] + 2 * n * dp, dp)
+            psi_axis_calc = psi_axis[time_index1]
+            psi_boundary_calc = psi_boundary[time_index1]
+        
+        dp = (psi_boundary_calc - psi_axis_calc) / n
+        if dp == 0.0:
+            c = np.array([psi_axis_calc])
+        else:
+            c = np.arange(psi_axis_calc, psi_axis_calc + 2 * n * dp, dp)
             is_decreasing = np.all(np.diff(c) < 0)
             if is_decreasing:
                 c = c[::-1]
+                
         if psi_axis2 is not None:
             time_index2 = np.argmin(abs(time2 - time[time_index1]))
-            dp = (psi_boundary2[time_index2] - psi_axis2[time_index2]) / n
-            if dp == 0.0:
-                ce = np.array(psi_axis2[time_index1])
+            
+            # Check if psi_axis2/boundary2 are fill values and calculate from psi2D2 if available
+            is_fill_2 = abs(psi_axis2[time_index2]) > 1e30 or abs(psi_boundary2[time_index2]) > 1e30
+            if is_fill_2 and psi2D2 is not None and len(psi2D2) > time_index2:
+                logger.info(f"psi_axis/boundary are fill values for equilibrium 2, calculating from psi2D data")
+                psi_axis2_calc = np.min(psi2D2[time_index2])
+                psi_boundary2_calc = np.max(psi2D2[time_index2])
             else:
-                ce = np.arange(psi_axis2[time_index2], psi_axis2[time_index2] + 2 * n * dp, dp)
+                psi_axis2_calc = psi_axis2[time_index2]
+                psi_boundary2_calc = psi_boundary2[time_index2]
+            
+            dp = (psi_boundary2_calc - psi_axis2_calc) / n
+            if dp == 0.0:
+                ce = np.array([psi_axis2_calc])
+            else:
+                ce = np.arange(psi_axis2_calc, psi_axis2_calc + 2 * n * dp, dp)
                 is_decreasing = np.all(np.diff(ce) < 0)
                 if is_decreasing:
                     ce = ce[::-1]
@@ -1613,20 +1636,31 @@ class EquilibriumCompute:
     def get_constraints_info(self, label, constraints, constraintsE, time, time_index1, timeE):
         labels = ["$I_p$", "pf-currents", "passive-currents", "$B_{pol}$ probes", "flux loops"]
         constraint_available = [True] * len(labels)
-        if "ip_recon" not in constraints or constraints["ip_recon"] is None:
-            constraint_available[0] = False
-        if "pf_recon" not in constraints or constraints["pf_recon"] is None:
-            constraint_available[1] = False
-        if "pas_recon" not in constraints or constraints["pas_recon"] is None:
-            constraint_available[2] = False
-        if "bpol_recon" not in constraints or constraints["bpol_recon"] is None:
-            constraint_available[3] = False
-        if "fluxloop_recon" not in constraints or constraints["fluxloop_recon"] is None:
-            constraint_available[4] = False
+        
+        # Debug logging
+        logger.debug(f"Checking constraints for label: {label}")
+        logger.debug(f"Constraints dict keys: {constraints.keys() if constraints and hasattr(constraints, 'keys') else 'N/A'}")
+        
+        # Check if either measurement or reconstruction data is available for each constraint type
+        has_ip = ("ip_meas" in constraints and constraints["ip_meas"] is not None) or \
+                 ("ip_recon" in constraints and constraints["ip_recon"] is not None)
+        has_pf = ("pf_meas" in constraints and constraints["pf_meas"] is not None) or \
+                 ("pf_recon" in constraints and constraints["pf_recon"] is not None)
+        has_pas = ("pas_meas" in constraints and constraints["pas_meas"] is not None) or \
+                  ("pas_recon" in constraints and constraints["pas_recon"] is not None)
+        has_bpol = ("bpol_meas" in constraints and constraints["bpol_meas"] is not None) or \
+                   ("bpol_recon" in constraints and constraints["bpol_recon"] is not None)
+        has_flux = ("fluxloop_meas" in constraints and constraints["fluxloop_meas"] is not None) or \
+                   ("fluxloop_recon" in constraints and constraints["fluxloop_recon"] is not None)
+        
+        constraint_available = [has_ip, has_pf, has_pas, has_bpol, has_flux]
+        
+        logger.debug(f"Constraint availability: IP={has_ip}, PF={has_pf}, PAS={has_pas}, BPOL={has_bpol}, FLUX={has_flux}")
         for index, item in enumerate(labels):
             if label == item:
                 break
         if not constraint_available[index]:
+            logger.warning(f"Constraint '{label}' is not available in the data")
             return
         constraintSelected = label
         y1 = None

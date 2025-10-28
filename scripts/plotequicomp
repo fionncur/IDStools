@@ -26,7 +26,6 @@ from idstools.view.common import PlotCanvas
 from idstools.view.equilibrium import EquilibriumView
 from idstools.view.wall import WallView
 
-logger = setup_logger("module", stdout_level=logging.INFO)
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="""---- Display the plasma equilibrium from the equilibrium IDS.
@@ -51,6 +50,13 @@ if __name__ == "__main__":
         ),
     )
     parser.add_argument("-t", "--time", help="Time (default=middle)", type=float, default=-99.0)
+    
+    parser.add_argument(
+        "--log-level",
+        choices=["DEBUG", "INFO", "WARNING", "ERROR"],
+        default="INFO",
+        help="Set the logging level (default=%(default)s)",
+    )
 
     parser.add_argument(
         "--save",
@@ -63,6 +69,10 @@ if __name__ == "__main__":
         default=None,
     )
     args = parser.parse_args()
+    
+    # Set up logger with user-specified level
+    log_level = getattr(logging, args.log_level)
+    logger = setup_logger("module", stdout_level=log_level)
     equilibrium1 = None
     equilibrium2 = None
     wall1 = None
@@ -100,7 +110,7 @@ if __name__ == "__main__":
             else:
                 equilibrium2 = connection2.get("equilibrium", lazy=True, autoconvert=False)
             time_array2 = equilibrium2.time
-            time_slice2 = np.argmin(abs(time_array2 - time_array1[time_slice1]))
+            time_slice2 = np.argmin(abs(time_array2 - time_value1))
             time_value2 = time_array2[time_slice2]
             try:
                 if args.dd_update:
@@ -131,7 +141,8 @@ if __name__ == "__main__":
     if wall1:
         wallview1 = WallView(wall1)
         wallview1.view_inner_wall_line(ax2)
-    if wall2:
+    if wall2:            
+
         wallview2 = WallView(wall2)
         wallview2.view_inner_wall_line(ax2)
 
