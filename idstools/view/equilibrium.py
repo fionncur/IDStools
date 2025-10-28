@@ -452,7 +452,7 @@ class EquilibriumView(BasePlot):
                 fontsize=9,
             )
 
-        ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.13), fancybox=True, shadow=True, ncol=2)
+        ax.legend(loc="upper right", fancybox=True, shadow=True)
 
     def view_equilibrium_plot(self, ax, time_index1, equilibrium2_ids=None):
         data = self.compute_obj.get_equilibria(
