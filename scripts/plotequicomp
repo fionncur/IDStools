@@ -269,10 +269,14 @@ if __name__ == "__main__":
             animation_state["is_playing"] = True
             logger.info("Animation playing (SPACEBAR to pause)")
             if animation_state["animation"] is None:
-                # Use faster animation speed (50ms per frame)
                 animation_state["animation"] = FuncAnimation(
-                    canvas.fig, animate, interval=5, blit=False, cache_frame_data=False
+                    canvas.fig,
+                    animate,
+                    interval=50,
+                    blit=False,
+                    cache_frame_data=False,
                 )
+            canvas.fig.canvas.draw_idle()
         else:
             # Pause
             animation_state["is_playing"] = False
