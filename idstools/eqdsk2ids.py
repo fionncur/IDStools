@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 import datetime
+import glob
 import logging
 import os
 import re
-import glob
-from typing import Optional, List, Union
+from copy import deepcopy
 from pprint import pformat
 from statistics import median
-from copy import deepcopy
+from typing import List, Optional, Union
 
 try:
     import imaspy as imas
@@ -16,7 +16,7 @@ except ImportError:
 import numpy as np
 from fortranformat import FortranRecordReader
 
-from idstools import __version__, GIT_REV
+from idstools import GIT_REV, __version__
 from idstools.cocos import COCOS, IDS_COCOS, compute_COCOS
 
 logger = logging.getLogger(__name__)

@@ -34,7 +34,6 @@ class EquilibriumView(BasePlot):
         """
         self.ids = ids
         self.compute_obj = EquilibriumCompute(ids)
-        self.equilibria = None
 
     def view_magnetic_poloidal_flux(
         self,
@@ -369,15 +368,11 @@ class EquilibriumView(BasePlot):
         return new_y12, new_y11, y_min, y_max, scalStr
 
     def view_profile_plot(self, ax, time_index1, equilibrium2_ids=None, time_index2=None):
-        if self.equilibria is None:
-            self.equilibria = self.compute_obj.get_equilibria()
-            data = self.equilibria
-        else:
-            data = self.equilibria
+        data = self.compute_obj.get_equilibria(selection=["name", "jtor2D", "r", "z"])
         data2 = None
         if equilibrium2_ids is not None:
             compute_obj2 = EquilibriumCompute(equilibrium2_ids)
-            data2 = compute_obj2.get_equilibria()
+            data2 = compute_obj2.get_equilibria(selection=["name", "jtor2D", "r", "z"])
             nameE = data2["name"]
             jtor2DE = data2["jtor2D"]
             rE = data2["r"]
@@ -386,6 +381,15 @@ class EquilibriumView(BasePlot):
         jtor2D = data["jtor2D"]
         r = data["r"]
         z = data["z"]
+
+        # Debug logging
+        logger.debug(f"jtor2D shape: {jtor2D.shape if jtor2D is not None else 'None'}")
+        logger.debug(f"jtor2D[{time_index1}] min: {np.min(jtor2D[time_index1]) if jtor2D is not None else 'N/A'}")
+        logger.debug(f"jtor2D[{time_index1}] max: {np.max(jtor2D[time_index1]) if jtor2D is not None else 'N/A'}")
+        if equilibrium2_ids and jtor2DE is not None:
+            logger.debug(f"jtor2DE shape: {jtor2DE.shape}")
+            logger.debug(f"jtor2DE[{time_index2}] min: {np.min(jtor2DE[time_index2])}")
+            logger.debug(f"jtor2DE[{time_index2}] max: {np.max(jtor2DE[time_index2])}")
         if data2:
             new_y12, new_y11, y_min, y_max, scaleStr = self._get_profile(
                 jtor2D, z, time_index1, jtor2DE, zE, time_index2
@@ -397,6 +401,12 @@ class EquilibriumView(BasePlot):
             if rE is not None and new_y12 is not None:
                 line12.set_xdata(rE)
                 line12.set_ydata(new_y12)
+
+                # Check if data is all zeros or near-zero
+                if np.allclose(new_y12, 0.0, atol=1e-10):
+                    logger.warning(f"Equilibrium2 {nameE}: jtor profile is all zeros or near-zero")
+            else:
+                logger.warning(f"Equilibrium2 {nameE}: No valid r or jtor data available")
         else:
             new_y12, new_y11, y_min, y_max, scaleStr = self._get_profile(jtor2D, z, time_index1)
 
@@ -406,32 +416,74 @@ class EquilibriumView(BasePlot):
             line11.set_xdata(r)
             line11.set_ydata(new_y11)
             ax.set_xlim([min(r), max(r)])
-            ax.set_ylim([y_min, y_max])
 
+            # Check if data is all zeros or near-zero
+            if np.allclose(new_y11, 0.0, atol=1e-10):
+                logger.warning(f"Equilibrium1 {name}: jtor profile is all zeros or near-zero")
+        else:
+            logger.warning(f"Equilibrium1 {name}: No valid r or jtor data available")
+
+        # Set ylim with check for identical values to avoid matplotlib warning
+        if abs(y_max - y_min) < 1e-10:
+            # If y_min and y_max are essentially equal, create a small range around the value
+            if abs(y_min) < 1e-10:
+                # If both are near zero, use a default range
+                y_min, y_max = -0.1, 0.1
+            else:
+                # Otherwise expand by a small percentage
+                delta = abs(y_min) * 0.1
+                y_min -= delta
+                y_max += delta
         ax.set_ylim(y_min, y_max)
         ax.set_ylabel("$" + scaleStr + "A/m^2$")
         ax.set_title("$J_{tor}$(mid-plane)")
         ax.set_xlabel("R [m]")
-        ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.13), fancybox=True, shadow=True, ncol=2)
 
-    def view_equlibrium_plot(self, ax, time_index1, equilibrium2_ids=None):
-        if self.equilibria is None:
-            self.equilibria = self.compute_obj.get_equilibria()
-            data = self.equilibria
-        else:
-            data = self.equilibria
+        # Add warning text if data is problematic
+        if new_y11 is not None and np.allclose(new_y11, 0.0, atol=1e-10):
+            ax.text(
+                0.5,
+                0.5,
+                "Warning: Jtor data is all zeros\nCheck equilibrium reconstruction",
+                transform=ax.transAxes,
+                ha="center",
+                va="center",
+                bbox=dict(boxstyle="round", facecolor="wheat", alpha=0.5),
+                fontsize=9,
+            )
+
+        ax.legend(loc="upper right", fancybox=True, shadow=True)
+
+    def view_equilibrium_plot(self, ax, time_index1, equilibrium2_ids=None):
+        data = self.compute_obj.get_equilibria(
+            selection=["time", "psi2D", "rb", "zb", "r", "z", "psi_axis", "psi_boundary"]
+        )
+
+        # Validate time_index1 bounds
+        if time_index1 < 0 or time_index1 >= len(data["time"]):
+            logger.error(f"time_index1 {time_index1} is out of bounds for time array of length {len(data['time'])}")
+            return
+
         data2 = None
         if equilibrium2_ids:
-            self.compute_obj2 = EquilibriumCompute(equilibrium2_ids)
-            data2 = self.compute_obj2.get_equilibria()
-            timeE = data["time"]
-            psi2DE = data2["psi2D"]
-            rbE = data2["rb"]
-            zbE = data2["zb"]
-            rE = data2["r"]
-            zE = data2["z"]
-            psi_axisE = data["psi_axis"]
-            psi_boundaryE = data["psi_boundary"]
+            try:
+                compute_obj2 = EquilibriumCompute(equilibrium2_ids)
+                data2 = compute_obj2.get_equilibria(
+                    selection=["time", "psi2D", "rb", "zb", "r", "z", "psi_axis", "psi_boundary"]
+                )
+
+                timeE = data2["time"]
+                psi2DE = data2["psi2D"]
+                rbE = data2["rb"]
+                zbE = data2["zb"]
+                rE = data2["r"]
+                zE = data2["z"]
+                psi_axisE = data2["psi_axis"]
+                psi_boundaryE = data2["psi_boundary"]
+            except Exception as e:
+                logger.error(f"Error processing second equilibrium data: {e}")
+                return
+
         time = data["time"]
         psi2D = data["psi2D"]
         rb = data["rb"]
@@ -443,38 +495,115 @@ class EquilibriumView(BasePlot):
 
         if data2:
             c, cE = self.compute_obj.get_contour(
-                psi_axis, psi_boundary, time, time_index1, psi_axis2=psi_axisE, psi_boundary2=psi_boundaryE, time2=timeE
+                psi_axis,
+                psi_boundary,
+                time,
+                time_index1,
+                psi_axis2=psi_axisE,
+                psi_boundary2=psi_boundaryE,
+                time2=timeE,
+                psi2D1=psi2D,
+                psi2D2=psi2DE,
             )
         else:
-            c, cE = self.compute_obj.get_contour(psi_axis, psi_boundary, time, time_index1)
+            c, cE = self.compute_obj.get_contour(psi_axis, psi_boundary, time, time_index1, psi2D1=psi2D)
+
+        # Debug logging
+        logger.debug(f"Contour levels c: {c}")
+        logger.debug(f"Contour levels cE: {cE}")
+        logger.debug(
+            f"psi_axis[{time_index1}]: {psi_axis[time_index1]}, "
+            f"psi_boundary[{time_index1}]: {psi_boundary[time_index1]}"
+        )
+
         ax.set_aspect("equal", adjustable="box")
         ax.set_title("Poloidal Flux")
         ax.set_xlabel("R[m]")
         ax.set_ylabel("Z[m]")
-        if np.min(psi2D[time_index1]) < np.max(psi2D[time_index1]):
-            ax.contour(r, z, np.transpose(psi2D[time_index1]), colors="green", levels=c, linewidths=0.85)
-            (lineb1,) = ax.plot([], linewidth=2, color="green")
-            lineb1.set_xdata(rb[time_index1])
-            lineb1.set_ydata(zb[time_index1])
+
+        plot1_success = False
+        plot2_success = False
+
+        try:
+            psi_min = np.min(psi2D[time_index1])
+            psi_max = np.max(psi2D[time_index1])
+            logger.debug(f"Equilibrium1: psi2D range [{psi_min}, {psi_max}]")
+
+            if psi_min < psi_max and len(c) > 0:
+                ax.contour(r, z, np.transpose(psi2D[time_index1]), colors="green", levels=c, linewidths=0.85)
+                (lineb1,) = ax.plot([], linewidth=2, color="green")
+                lineb1.set_xdata(rb[time_index1])
+                lineb1.set_ydata(zb[time_index1])
+                plot1_success = True
+            else:
+                logger.warning(
+                    f"Cannot plot equilibrium1 contours: psi_min={psi_min}, psi_max={psi_max}, levels={len(c)}"
+                )
+        except (IndexError, ValueError) as e:
+            logger.error(f"Error plotting primary equilibrium: {e}")
+
         if data2:
-            if np.min(psi2DE[time_index1]) < np.max(psi2DE[time_index1]):
+            try:
+                if len(timeE) == 0 or len(time) == 0:
+                    logger.warning("Empty time arrays for equilibrium comparison")
+                    return
+
                 time_index2 = np.argmin(abs(timeE - time[time_index1]))
-                ax.contour(rE, zE, np.transpose(psi2DE[time_index2]), colors="blue", levels=cE, linewidths=0.85)
-                (lineb2,) = ax.plot([], linewidth=2, color="blue")
-                lineb2.set_xdata(rbE[time_index1])
-                lineb2.set_ydata(zbE[time_index1])
+                time_index2 = min(time_index2, len(psi2DE) - 1)
+
+                psi_min2 = np.min(psi2DE[time_index2])
+                psi_max2 = np.max(psi2DE[time_index2])
+                logger.debug(f"Equilibrium2: psi2D range [{psi_min2}, {psi_max2}]")
+                logger.debug(
+                    f"psi_axisE[{time_index2}]: {psi_axisE[time_index2]}, "
+                    f"psi_boundaryE[{time_index2}]: {psi_boundaryE[time_index2]}"
+                )
+
+                # Check for fill values (but we can still plot if psi2D has valid range and contours are valid)
+                is_fill_value = abs(psi_axisE[time_index2]) > 1e30 or abs(psi_boundaryE[time_index2]) > 1e30
+                if is_fill_value:
+                    logger.info(
+                        "Equilibrium2 psi_axis/boundary are fill values, "
+                        "but will attempt to use calculated contours from psi2D"
+                    )
+
+                # Check if we have valid data to plot (psi2D has range and contour levels are not fill values)
+                contours_valid = len(cE) > 0 and not (len(cE) == 1 and abs(cE[0]) > 1e30)
+
+                if time_index2 >= 0 and len(psi2DE) > 0 and psi_min2 < psi_max2 and contours_valid:
+                    ax.contour(rE, zE, np.transpose(psi2DE[time_index2]), colors="blue", levels=cE, linewidths=0.85)
+                    (lineb2,) = ax.plot([], linewidth=2, color="blue")
+                    lineb2.set_xdata(rbE[time_index2])
+                    lineb2.set_ydata(zbE[time_index2])
+                    plot2_success = True
+                else:
+                    logger.warning(
+                        f"Cannot plot equilibrium2 contours: psi_min={psi_min2}, psi_max={psi_max2}, "
+                        f"levels={len(cE) if cE is not None else 0}, contours_valid={contours_valid}"
+                    )
+            except (IndexError, ValueError) as e:
+                logger.error(f"Error plotting second equilibrium: {e}")
+
+        # Add warning text if no data was plotted
+        if not plot1_success and not plot2_success:
+            ax.text(
+                0.5,
+                0.5,
+                "Warning: No valid equilibrium data to plot\nCheck psi_axis, psi_boundary, and psi2D data",
+                transform=ax.transAxes,
+                ha="center",
+                va="center",
+                bbox=dict(boxstyle="round", facecolor="wheat", alpha=0.5),
+                fontsize=9,
+            )
 
     def view_current_plot(self, ax, time_index1, equilibrium2_ids=None):
-        if self.equilibria is None:
-            self.equilibria = self.compute_obj.get_equilibria()
-            data = self.equilibria
-        else:
-            data = self.equilibria
+        data = self.compute_obj.get_equilibria(selection=["time", "ip"])
         data2 = None
         if equilibrium2_ids:
-            self.compute_obj2 = EquilibriumCompute(equilibrium2_ids)
-            data2 = self.compute_obj2.get_equilibria()
-            timeE = data["time"]
+            compute_obj2 = EquilibriumCompute(equilibrium2_ids)
+            data2 = compute_obj2.get_equilibria(selection=["time", "ip"])
+            timeE = data2["time"]
             ipE = data2["ip"]
         time = data["time"]
         ip = data["ip"]
@@ -523,19 +652,20 @@ class EquilibriumView(BasePlot):
         ax.set_ylim(ylims)
 
     def view_constraints(self, ax, time_index1, equilibrium2_ids=None):
-        if self.equilibria is None:
-            self.equilibria = self.compute_obj.get_equilibria()
-            data = self.equilibria
-        else:
-            data = self.equilibria
+        data = self.compute_obj.get_equilibria(selection=["time", "pf_constraints"])
         data2 = None
         if equilibrium2_ids:
-            self.compute_obj2 = EquilibriumCompute(equilibrium2_ids)
-            data2 = self.compute_obj2.get_equilibria()
-            timeE = data["time"]
+            compute_obj2 = EquilibriumCompute(equilibrium2_ids)
+            data2 = compute_obj2.get_equilibria(selection=["time", "pf_constraints"])
+            timeE = data2["time"]
             constraintsE = data2["constraints"]
         time = data["time"]
         constraints = data["constraints"]
+
+        # Debug logging
+        logger.debug(f"Constraints data available: {constraints is not None}")
+        if constraints:
+            logger.debug(f"Constraints keys: {constraints.keys() if hasattr(constraints, 'keys') else 'N/A'}")
 
         (line41,) = ax.plot([], marker="x", color="darkgreen", label="target")
         (line42,) = ax.plot([], marker="x", color="darkblue", label="fitted")
@@ -549,6 +679,22 @@ class EquilibriumView(BasePlot):
             )
         else:
             result = self.compute_obj.get_constraints_info("pf-currents", constraints, None, time, time_index1, None)
+
+        if not result:
+            logger.warning("No pf-currents constraint data available")
+            ax.text(
+                0.5,
+                0.5,
+                "No pf-currents constraint data available\nCheck equilibrium reconstruction constraints",
+                transform=ax.transAxes,
+                ha="center",
+                va="center",
+                bbox=dict(boxstyle="round", facecolor="wheat", alpha=0.5),
+                fontsize=9,
+            )
+            ax.set_title("pf-currents")
+            return
+
         if result:
             y1in, y2in, y3in, y4in, titlelabel, ylabel, scaleFactor = result
             y1 = None
@@ -648,3 +794,16 @@ class EquilibriumView(BasePlot):
                 ax.set_title(titlelabel)
                 ax.set_xlim(minx, maxx)
                 ax.set_ylim(miny, maxy)
+            else:
+                logger.warning(f"No valid {titlelabel} data (all values are fill values or empty)")
+                ax.text(
+                    0.5,
+                    0.5,
+                    f"No valid {titlelabel} data\n(all values are fill values or empty)",
+                    transform=ax.transAxes,
+                    ha="center",
+                    va="center",
+                    bbox=dict(boxstyle="round", facecolor="wheat", alpha=0.5),
+                    fontsize=9,
+                )
+                ax.set_title(titlelabel)

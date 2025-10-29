@@ -1,8 +1,9 @@
 import logging
 
+import matplotlib.pyplot as plt
+
 from idstools.compute.equilibrium import EquilibriumCompute
 from idstools.domain.ecstray import EcStrayCompute
-import matplotlib.pyplot as plt
 
 # Font/Colour definition
 bndcolor = "chocolate"
