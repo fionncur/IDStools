@@ -232,8 +232,17 @@ if __name__ == "__main__":
                 transform=canvas.fig.transFigure,
             )
         else:
-            text_artists["title"] = canvas.fig.suptitle(f"{args.uri[0]} time {time_val1:.2f}")
+            text_artists["title"] = canvas.fig.text(
+                0.5,
+                0.99,
+                f"{args.uri[0]} time {time_val1:.2f}",
+                ha="center",
+                va="top",
+                fontsize=12,
+                transform=canvas.fig.transFigure,
+            )
 
+        canvas.fig.canvas.draw()
         canvas.fig.canvas.flush_events()
 
     def on_slider_change(val):
@@ -351,13 +360,33 @@ if __name__ == "__main__":
     if len(args.uri) == 2:
         y = 0.99
         text_artists["text1"] = canvas.fig.text(
-            0.5, y, args.uri[0] + f"(time {time_value1:.2f})", ha="center", va="top", color="tab:green"
+            0.5,
+            y,
+            args.uri[0] + f"(time {time_value1:.2f})",
+            ha="center",
+            va="top",
+            color="tab:green",
+            transform=canvas.fig.transFigure,
         )
         text_artists["text2"] = canvas.fig.text(
-            0.5, y - 0.03, args.uri[1] + f"(time {time_value2:.2f})", ha="center", va="top", color="tab:blue"
+            0.5,
+            y - 0.03,
+            args.uri[1] + f"(time {time_value2:.2f})",
+            ha="center",
+            va="top",
+            color="tab:blue",
+            transform=canvas.fig.transFigure,
         )
     else:
-        text_artists["title"] = canvas.fig.suptitle(f"{args.uri[0]} time {time_value1:.2f}")
+        text_artists["title"] = canvas.fig.text(
+            0.5,
+            0.99,
+            f"{args.uri[0]} time {time_value1:.2f}",
+            ha="center",
+            va="top",
+            fontsize=12,
+            transform=canvas.fig.transFigure,
+        )
 
     canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
 

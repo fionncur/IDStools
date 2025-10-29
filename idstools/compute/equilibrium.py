@@ -1225,7 +1225,6 @@ class EquilibriumCompute:
         n8 = 0
 
         if self.ids.time_slice:
-            max_boundary_size = 0
             for time_slice in self.ids.time_slice:
                 if time_slice:
                     if need_profiles_1d and hasattr(time_slice, "profiles_1d") and time_slice.profiles_1d:
@@ -1239,7 +1238,6 @@ class EquilibriumCompute:
                         and time_slice.boundary.outline
                     ):
                         boundary_size = time_slice.boundary.outline.r.size
-                        max_boundary_size = max(max_boundary_size, boundary_size)
                         if n3 == 0:  # Set n3 to first valid boundary size
                             n3 = boundary_size
                     if need_constraints:
@@ -1277,9 +1275,6 @@ class EquilibriumCompute:
 
                     if profiles_ok and profiles_2d_ok and boundaries_ok:
                         break  # Exits the loop
-
-            if need_boundaries:
-                n3 = max_boundary_size
 
         if need_profiles_1d and n > 0:
             psi1D = np.zeros((nt, n)) if "psi1D" in selection else None
@@ -1376,18 +1371,27 @@ class EquilibriumCompute:
                     if "z" in selection and time_slice.profiles_2d[0].grid.dim2.size > 0:
                         z = time_slice.profiles_2d[0].grid.dim2
 
-        # Initialize boundary arrays if n3 > 0 but not already initialized
+        # Initialize boundary arrays - each time slice can have different size
         if need_boundaries and n3 > 0:
-            rb = np.zeros((nt, n3)) if "rb" in selection else None
-            zb = np.zeros((nt, n3)) if "zb" in selection else None
+            rb = [] if "rb" in selection else None
+            zb = [] if "zb" in selection else None
 
             for i, time_slice in enumerate(self.ids.time_slice):
                 if time_slice.boundary.outline.r.size > 0 and rb is not None:
-                    boundary_r_size = min(time_slice.boundary.outline.r.size, n3)
-                    rb[i, :boundary_r_size] = time_slice.boundary.outline.r[:boundary_r_size]
+                    rb.append(time_slice.boundary.outline.r)
+                elif rb is not None:
+                    rb.append(np.array([]))
+
                 if time_slice.boundary.outline.z.size > 0 and zb is not None:
-                    boundary_z_size = min(time_slice.boundary.outline.z.size, n3)
-                    zb[i, :boundary_z_size] = time_slice.boundary.outline.z[:boundary_z_size]
+                    zb.append(time_slice.boundary.outline.z)
+                elif zb is not None:
+                    zb.append(np.array([]))
+
+            # Convert lists to arrays of objects to allow variable-length arrays
+            if rb is not None:
+                rb = np.array(rb, dtype=object)
+            if zb is not None:
+                zb = np.array(zb, dtype=object)
 
         constraints = None
         if need_constraints:
