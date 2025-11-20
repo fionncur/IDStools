@@ -77,12 +77,13 @@ with open("_static/version.json", "w") as file:
 # -- Intersphinx configuration -----------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/extensions/intersphinx.html#configuration
 
-# intersphinx_mapping = {
-#     "python": ("https://docs.python.org/3", None),
-#     "numpy": ("https://numpy.org/doc/stable/", None),
-#     "pandas": ("https://pandas.pydata.org/docs/", None),
-#     "scipy": ("https://docs.scipy.org/doc/scipy/", None),
-# }
+intersphinx_mapping = {
+    "python": ("https://docs.python.org/3", None),
+    "numpy": ("https://numpy.org/doc/stable/", None),
+    "pandas": ("https://pandas.pydata.org/docs/", None),
+    "scipy": ("https://docs.scipy.org/doc/scipy/", None),
+    "matplotlib": ("https://matplotlib.org/stable/", None),
+}
 
 # -- General configuration ---------------------------------------------------
 
@@ -115,6 +116,15 @@ autoapi_type = "python"
 autoapi_template_dir = "_templates/autoapi"
 autoapi_keep_files = True
 autoapi_member_order = 'groupwise'
+# Ignore import resolution warnings for dynamically generated modules
+autoapi_ignore = ['*/_version.py', '*/test/*']  # _version.py is generated at build time, test modules not documented
+autoapi_python_use_implicit_namespaces = True
+autoapi_python_class_content = 'both'
+autoapi_options = [
+    "members",
+    "undoc-members",
+    "show-inheritance",
+]
 
 # Configure sphinxcontrib-images
 images_config = {
@@ -134,6 +144,19 @@ source_suffix = {
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ["_build"]
+
+# Suppress warnings for informal/prose type descriptions in docstrings
+# These are common when documentation describes return types in prose rather than formal type hints
+suppress_warnings = [
+    "ref.class",  # Suppress "py:class reference target not found" warnings for informal type descriptions
+    "ref.exc",    # Suppress "py:exc reference target not found" for None exceptions
+    "ref.meth",   # Suppress "py:meth reference target not found" for informal method references
+    "ref.func",   # Suppress "py:func reference target not found" for informal function references
+    "ref.obj",    # Suppress "py:obj reference target not found" for external library types like cerberus.Validator
+    "autoapi.python_import_resolution",  # Suppress import resolution warnings for dynamically generated modules
+    "docutils.attribute",  # Suppress attribute directive errors from autoapi-generated docs
+    "docutils.emphasis",  # Suppress emphasis parsing errors in docstrings
+]
 
 
 # -- Extension configuration -------------------------------------------------

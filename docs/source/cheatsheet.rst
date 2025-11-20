@@ -2,7 +2,7 @@
  IDStools Cheatsheet
 #####################
 
-This cheat sheet provides quick reference of commonly used commands in IDStools. :download:`download cheatsheet here <_static/cheatsheet.pdf>`
+This cheat sheet provides quick reference of commonly used commands in IDStools.
 
 
 ****************

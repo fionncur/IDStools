@@ -12,8 +12,6 @@ Following are the pages that shows tools available in the IDStools and
 how to utilize them. It also gives API documentation to help with
 knowledge of core functionalities.
 
-:download:`download cheatsheet here <_static/cheatsheet.pdf>`
-
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
@@ -28,6 +26,7 @@ knowledge of core functionalities.
    :maxdepth: 1
    :caption: API documentation
 
+   autoapi/index
    autoapi/idstools/index.rst
 
 *********
