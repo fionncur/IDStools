@@ -959,7 +959,7 @@ class EdgeProfilesCompute:
         if subset_index is None:
             logger.warning("Did not find outer_midplane GGD grid subset.")
         else:
-            logger.debug(f"Outer midplane GGD grid subset is number {subset_index+1} of {nsubsets}")
+            logger.debug(f"Outer midplane GGD grid subset is number {subset_index + 1} of {nsubsets}")
         return subset_index
 
     def getnrho(self, time_slice):

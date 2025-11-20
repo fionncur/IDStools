@@ -10,6 +10,7 @@ import re
 import sys
 import time
 import types
+from typing import Union
 
 import numpy as np
 import pandas as pd
@@ -350,10 +351,12 @@ def get_available_ids_and_occurrences(
     This function returns a list of pairs of available IDS types and their occurrences in a given DBEntry object.
 
     Args:
-        db_entry_object: An object of the class , which represents an open DBEntry in
+        db_entry_object: An object of the class DBEntry, which represents an open DBEntry in
             which available IDSs will be looked for.
-        time_mode: The time mode of interest for the IDSs in the given DBEntry. It can be one of the following
+        time_mode: The time mode of interest for the IDSs in the given DBEntry.
         get_comment: Output ids_properties.comment field for each found occurrence
+        dd_update (bool, optional): Flag to indicate whether to update the data dictionary. Defaults to False.
+        get_version: Whether to return version information
 
     Returns:
         a list of pairs (idstype:str,occurrence:int) with data in the given DBEntry.
@@ -440,7 +443,7 @@ def get_available_ids_and_times(db_entry_object, dd_update=False) -> list:
                     if getattr(ids_object, "time", None):
                         time_array = ids_object.time.value
                 if homogeneous_time == imas.ids_defs.IDS_TIME_MODE_INDEPENDENT:
-                    time_array = [np.NINF]
+                    time_array = [-np.inf]
             except Exception as e:
                 logger.debug(f"{e}")
                 time_array = []
@@ -523,7 +526,6 @@ def resample_times(
         start (float, optional): The start time for resampling. Defaults to None.
         stop (float, optional): The stop time for resampling. Defaults to None.
         step (float, optional): The time step for resampling. Defaults to None.
-        dd_update (bool, optional): Flag to indicate whether to update the data dictionary. Defaults to False.
         interpolation_method (int, optional): The interpolation method to use for resampling.
             Defaults to `imas.ids_defs.PREVIOUS_INTERP`.
 
@@ -766,7 +768,7 @@ def compare_ids(
     return identical, output
 
 
-def get_ids_values(uri: str, idspaths: str | list, dd_update=False, verbose=False):
+def get_ids_values(uri: str, idspaths: Union[str, list], dd_update=False, verbose=False):
     connection = imas.DBEntry(uri, "r")
     if isinstance(idspaths, str):
         idspaths = [idspaths]

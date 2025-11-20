@@ -115,7 +115,7 @@ class CoreProfilesView:
                         if state_data["label"].strip() != "":
                             label_space = 7
                         print(
-                            f"\t {'state' +str(istate + 1) : <8}{state_data['label'].value: <{label_space}}z : "
+                            f"\t {'state' + str(istate + 1) : <8}{state_data['label'].value: <{label_space}}z : "
                             f"{state_data['z_average']: <10} n/ni, % :{n_ni : >12}"
                         )
                     istate = istate + 1

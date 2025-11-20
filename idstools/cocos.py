@@ -23,31 +23,19 @@ class COCOS:
     References:
         O. Sauter and S. Yu. Medvedev, "Tokamak Coordinate Conventions: COCOS",Comput. Physics Commun 84 (2013), 293.
         `cocos_module.f90 (CHEASE)`.
-
-    Attributes
-    ----------
-    COCOS: int
-    sigma_Ip: int
-    sigma_B0: int
-    exp_Bp: int
-    sigma_Bp: int
-    sigma_RphiZ: int
-    sigma_rhothetaphi: int
-    sign_q_pos: int
-    sign_pprime_pos: int
-    theta_sign_clockwise: int
     """
 
     def __init__(self, index=None, values=None):
         """
-        Initialize COCOS index using values, or values using COCOS index
+        Initialize COCOS index using values, or values using COCOS index.
 
         Parameters
         ----------
-        index: dict=None
-            COCOS index with signs of Ip and B0, e.g. index={"COCOS": 11}
-        values: dict=None
-            COCOS values
+        index : dict, optional
+            COCOS index dictionary with signs of Ip and B0.
+            Example: ``{"COCOS": 11, "ipsign": 1, "b0sign": 1}``
+        values : dict, optional
+            COCOS values dictionary with coordinate convention parameters.
         """
 
         if (index is None) and (values is None):
@@ -219,22 +207,22 @@ class COCOS:
     def values_coefficients(self, COCOS_in, COCOS_out, ip_in, b0_in, ipsign_out, b0sign_out):
         """
         Provide transformation values for a set of quantities for a given pair
-        of input/output COCOS numbers
+        of input/output COCOS numbers.
 
         Parameters
         ----------
-        COCOS_in: int
+        COCOS_in : int
             COCOS input
-        COCOS_out: int
+        COCOS_out : int
             COCOS output
-        ip_in: float
-            Plasma curent (toroidal component) [A]
-        b0_in: float
+        ip_in : float
+            Plasma current (toroidal component) [A]
+        b0_in : float
             Vacuum toroidal field [T]
-        ipsign_out: int
-            desired sign of Ip in output
-        b0sign_out: int
-            desired sign of B0 in output
+        ipsign_out : int
+            Desired sign of Ip in output
+        b0sign_out : int
+            Desired sign of B0 in output
 
         Returns
         -------
@@ -319,20 +307,22 @@ class COCOS:
 
 
 def compute_COCOS(ids, itime=None, i1=0):
-    """Compute COCOS values using experimental data in IDS/equilibrium
+    """
+    Compute COCOS values using experimental data in IDS/equilibrium.
 
     Parameters
     ----------
-    ids: IDS
+    ids : object
         IDS/equilibrium for COCOS estimation
-    itime: int|None
+    itime : int, optional
         Index of struct_array time_slice in IDS/equilibrium
-    i1: int=0
-        Index of struct_array profiles_2d in IDS/equilibrium
+    i1 : int, optional
+        Index of struct_array profiles_2d in IDS/equilibrium. Default is 0.
 
     Returns
     -------
-    cocos: COCOS
+    dict
+        Dictionary with COCOS values
     """
 
     # COCOS Values in the middle of time sequence
@@ -413,20 +403,21 @@ def compute_COCOS(ids, itime=None, i1=0):
 
 
 def ids_compute_cocos(ids, itime=None, i1=0):
-    """Function Interface for computing COCOS
+    """
+    Function Interface for computing COCOS.
 
     Parameters
     ----------
-    ids: IDS
+    ids : object
         IDS for cocos estimation
-    itime: int|None
+    itime : int, optional
         Index of struct_array time_slice in IDS/equilibrium
-    i1: int=0
-        Index of struct_array profiles_2d in IDS/equilibrium
+    i1 : int, optional
+        Index of struct_array profiles_2d in IDS/equilibrium. Default is 0.
 
     Returns
     -------
-    cocos: int
+    int
         COCOS number computed
     """
 

@@ -24,7 +24,7 @@ class SpectrometerVisibleView:
         """Initialization SpectrometerVisibleView object.
 
         Args:
-            idsObj : spectrometer_visible ids object
+            ids_obj : spectrometer_visible ids object
         """
         self.ids_obj = ids_obj
         self.compute_obj = SpectrometerVisibleCompute(ids_obj)

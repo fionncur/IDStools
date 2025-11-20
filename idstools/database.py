@@ -564,23 +564,22 @@ class DBMaster:
     @staticmethod
     def get_database_files_from_folder(folder=None, backends=None):
         """
-        The function `get_database_files` retrieves a list of database files based on the specified user,
-        database, version, and backends.
+        Retrieve database files from a folder based on specified backends.
 
-        Args:
-            user: The ``user`` parameter is used to specify the user for whom the database files are being
-                retrieved. If no user is specified, it defaults to ``None``.
-            database: The ``database`` parameter is used to specify the name of the database.
-            version: The ``version`` parameter is used to specify a specific version of the database.
-            backends: The ``backends`` parameter is a list of strings that specifies the database backends to
-                retrieve files from. The possible values for ``backends`` are ``hdf5`` and ``mdsplus``. If ``backends``
-                is not provided, it defaults to ``DBMaster.ALL_BACKENDS``
+        Parameters
+        ----------
+        folder : str, optional
+            The folder path from which to retrieve database files.
+        backends : list, optional
+            A list of strings specifying the database backends to retrieve files from.
+            The possible values for backends are 'hdf5' and 'mdsplus'. If backends
+            is not provided, it defaults to DBMaster.ALL_BACKENDS
 
-        Returns:
-            The function ``get_database_files`` returns a list of tuples. Each tuple contains the name of a database,
-            followed by a list of tuples. Each inner tuple contains a version number, followed by a list of tuples.
-            Each innermost tuple contains the name of a backend (either ``hdf5`` or ``mdsplus``), followed by a
-            dictionary of database files.
+        Returns
+        -------
+        list
+            A list of tuples. Each tuple contains the backend name (either 'hdf5' or 'mdsplus'),
+            followed by a dictionary of database files.
         """
         if not backends:
             backends = DBMaster.ALL_BACKENDS

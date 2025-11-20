@@ -158,7 +158,7 @@ class WavesView:
             ax.plot(totalx1, totaly1, label=totallabel1)
             if verbose:
                 maxima = find_maxima(totaly1)
-                logger.info(f"There are {len(maxima)-1} maxima")
+                logger.info(f"There are {len(maxima) - 1} maxima")
                 fwhm = []
                 for i in range(len(maxima)):
                     if i == 0:
@@ -357,10 +357,10 @@ class WavesView:
             if wave_data["is_active"] is True:
                 logger.info(
                     f"{ec_launcher_info['single_ec_launcher_name'][i_wave]} is active with a power of"
-                    f"{ec_launcher_info['single_injected_power'][i_wave]*1.e-6:.2f} MW --> Absorbed power ="
-                    f"{ec_launcher_info['single_absorbed_power'][i_wave]*1.e-6:.2f} MW"
+                    f"{ec_launcher_info['single_injected_power'][i_wave] * 1.e-6:.2f} MW --> Absorbed power ="
+                    f"{ec_launcher_info['single_absorbed_power'][i_wave] * 1.e-6:.2f} MW"
                 )
-                logger.info(f"--> ECCD =  {ec_launcher_info['single_eccd'][i_wave]*1.e-3:.2f} kA")
+                logger.info(f"--> ECCD =  {ec_launcher_info['single_eccd'][i_wave] * 1.e-3:.2f} kA")
             else:
                 logger.info(f"{ec_launcher_info['single_ec_launcher_name'][i_wave]} is off")
 

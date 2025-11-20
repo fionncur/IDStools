@@ -227,12 +227,12 @@ def get_database_path(imasargs, time_value=None) -> str:
             if publichome is None:
                 return None
             database_absolute_path = (
-                f"{publichome}/shared/imasdb/{imasargs.database}/{imasargs.version}/{imasargs.run//10000}"
+                f"{publichome}/shared/imasdb/{imasargs.database}/{imasargs.version}/{imasargs.run // 10000}"
             )
         else:
             database_absolute_path = (
                 f'{os.path.expanduser(f"~{imasargs.user}")}/public/imasdb/'
-                f"{str(imasargs.database)}/{imasargs.version}/{imasargs.run//10000}"
+                f"{str(imasargs.database)}/{imasargs.version}/{imasargs.run // 10000}"
             )
         pulse_info = f"pulse {imasargs.pulse},{imasargs.run}"
         database_absolute_path = database_absolute_path[:-2]

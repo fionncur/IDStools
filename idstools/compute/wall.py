@@ -28,14 +28,19 @@ class WallCompute:
         """
         Retrieve vessel units information from the IDS object.
 
-        Args:
-            select_description2d (str, optional): A slice notation string to filter the description_2d list.
-            Defaults to ":".
-            select_unit (str, optional): A slice notation string to filter the units list. Defaults to ":".
-            name_filter (str, optional): A string to filter units by name or identifier. Defaults to None.
+        Parameters
+        ----------
+        select_description2d : str, optional
+            A slice notation string to filter the description_2d list. Default is ":".
+        select_unit : str, optional
+            A slice notation string to filter the units list. Default is ":".
+        name_filter : str, optional
+            A string to filter units by name or identifier. Default is None.
 
-        Returns:
-            dict: A dictionary containing information about the vessel units.
+        Returns
+        -------
+        dict
+            A dictionary containing information about the vessel units.
             The keys are the indices of the description_2d elements, and the values
             are dictionaries containing the name, description, and vessel units information.
         """

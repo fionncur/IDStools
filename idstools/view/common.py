@@ -4,10 +4,19 @@ import sys
 
 import matplotlib
 
+# Always use non-GUI backend in headless environments or when tkinter is not available
 if "DISPLAY" not in os.environ:
     matplotlib.use("agg")
 else:
-    matplotlib.use("TKagg")
+    # Check if tkinter is available
+    try:
+        import tkinter  # noqa: F401 - imported to check availability
+
+        matplotlib.use("TkAgg")
+    except (ImportError, ModuleNotFoundError):
+        # tkinter not available, use non-GUI backend
+        matplotlib.use("agg")
+
 import matplotlib.pyplot as plt
 
 logger = logging.getLogger("module")

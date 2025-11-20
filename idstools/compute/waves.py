@@ -358,7 +358,7 @@ class WavesCompute:
             if len(self.ids.coherent_wave[iwave].identifier.antenna_name) > 0:
                 single_ec_launcher_name[iwave] = self.ids.coherent_wave[iwave].identifier.antenna_name
             else:
-                single_ec_launcher_name[iwave] = f"Launcher{iwave+1}"
+                single_ec_launcher_name[iwave] = f"Launcher{iwave + 1}"
             if np.size(self.ids.coherent_wave[iwave].global_quantities) > 0:
                 if self.is_active_during_pulse(iwave) is True:
                     single_power_waveform[iwave] = []

@@ -399,8 +399,7 @@ def map__GEQDSK_to_ids(geqdsk, eq):
     ----------
     geqdsk: GEQDSK
         Class GEQDSK
-    eq: imas_*_ual_*.equilibrium.equilibrium ('*' corresponds to IMAS/UAL ver.)
-        IDS/equilibrium
+    eq: object
 
     Returns
     ----------
@@ -528,16 +527,16 @@ def merge_equilibrium(eq1, eq2, sort_by_time=True):
 
     Parameters
     ----------
-    eq1 : imas_*_ual_*.equilibrium.equilibrium
+    eq1 : object
         The equilibrium IDS to append.
-    eq2 : imas_*_ual_*.equilibrium.equilibrium
+    eq2 : object
         The base equilibrium IDS.
     sort_by_time : bool, optional
         If True, the resulting IDS will be sorted by time (default: True).
 
     Returns
     -------
-    eq : imas_*_ual_*.equilibrium.equilibrium
+    eq : object
         New IDS/equilibrium instance with combined (and optionally sorted)
         content.
     """
@@ -610,7 +609,7 @@ def geqdsk2ids(fpath, ipsign=0, b0sign=0, cocos_in=None):
 
     Returns
     -------
-    eq: imas_*_ual_*.equilibrium.equilibrium ('*' corresponds to IMAS/UAL ver.)
+    eq: ``imas_*_ual_*``.equilibrium.equilibrium ('*' corresponds to IMAS/UAL ver.)
         IDS/equilibrium
     """
 
@@ -699,7 +698,7 @@ def eqdsk2ids(
         - Directory path (all files processed)
         - Space-separated string of multiple files/patterns
         - List of file paths
-        - Glob pattern(s) with wildcards (*, ?, [])
+        - Glob pattern(s) with wildcards (``*``, ``?``, ``[]``)
     afile : str, optional
         Path to AEQDSK file (currently not used).
     ipsign : int, default=0

@@ -61,10 +61,10 @@ yaml_mapping = {
 class ScenarioDescriptionSummary:
     def __init__(self, directory_list=[]) -> None:
         """
-        The function initializes a folder path variable based on the provided input or a default value.
+        The function initializes a directory list variable based on the provided input or a default value.
 
         Args:
-            folder_path (str): The `folder_path` parameter is a string that represents the path to a folder.
+            directory_list (list): A list of directory paths to search for scenario files.
         """
         self.directory_list = directory_list
 
@@ -198,15 +198,13 @@ class ScenarioDescriptionSummary:
 class ScenarioDescription:
     def __init__(self, pulse: int, run: int, yaml_path: str) -> None:
         """
-        The above function initializes an object with a pulse, run, and folder path, and attempts to load
-        YAML data from a file based on the pulse and run numbers.
+        The above function initializes an object with a pulse, run, and yaml path, and attempts to load
+        YAML data from a file.
 
         Args:
-            pulse (int): The "pulse" parameter is an integer that represents a pulse number. It is used to
-                construct the filename for the YAML file that will be loaded.
+            pulse (int): The "pulse" parameter is an integer that represents a pulse number.
             run (int): The `run` parameter is an integer that represents the run number.
-            folder_path (str): The `folder_path` parameter is a string that represents the path to a folder
-                where the YAML file is located.
+            yaml_path (str): The `yaml_path` parameter is a string that represents the path to the YAML file.
         """
         self.yaml_path = yaml_path
         self.yaml_data = None
@@ -252,10 +250,10 @@ class ScenarioDescription:
 
             parent_dir = os.path.dirname(self.yaml_path)
             if os.path.basename(parent_dir) == "0":
-                yaml_file_name = parent_dir + f'/ids_{pulsec}{str(runc).rjust(4,"0")}.yaml'
+                yaml_file_name = parent_dir + f'/ids_{pulsec}{str(runc).rjust(4, "0")}.yaml'
             else:
                 grandparent_dir = os.path.dirname(os.path.dirname(parent_dir))
-                yaml_file_name = grandparent_dir + f'/{pulsec}/{runc}/ids_{pulsec}{str(runc).rjust(4,"0")}.yaml'
+                yaml_file_name = grandparent_dir + f'/{pulsec}/{runc}/ids_{pulsec}{str(runc).rjust(4, "0")}.yaml'
 
             scenario_description = ScenarioDescription(pulsec, runc, yaml_file_name)
 
@@ -301,10 +299,10 @@ class ScenarioDescription:
             parent_dir = os.path.dirname(self.yaml_path)
 
             if os.path.basename(parent_dir) == "0":
-                yaml_file_name = parent_dir + f'/ids_{pulsep}{str(runp).rjust(4,"0")}.yaml'
+                yaml_file_name = parent_dir + f'/ids_{pulsep}{str(runp).rjust(4, "0")}.yaml'
             else:
                 grandparent_dir = os.path.dirname(os.path.dirname(parent_dir))
-                yaml_file_name = grandparent_dir + f'/{pulsep}/{runp}/ids_{pulsep}{str(runp).rjust(4,"0")}.yaml'
+                yaml_file_name = grandparent_dir + f'/{pulsep}/{runp}/ids_{pulsep}{str(runp).rjust(4, "0")}.yaml'
 
             scenario_description = ScenarioDescription(pulsep, runp, yaml_file_name)
 
