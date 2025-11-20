@@ -3,11 +3,11 @@ requires = ["setuptools", "packaging>=24.2", "wheel", "setuptools_scm>8"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "IDStools"
+name = "imas-idstools"
 authors = [{ name = "ITER Organization", email = "imas-support@iter.org" }]
 description = "Python based collection of data analysis and visualization tools written in IMAS framework"
 readme = { file = "README.md", content-type = "text/markdown" }
-requires-python = ">=3.9"
+requires-python = ">=3.8"
 keywords = ["IMAS", "IDS"]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
@@ -49,6 +49,7 @@ dependencies = [
     "fortranformat",
     "imas-python",
     "matplotlib",
+    "netCDF4",
     "numpy",
     "packaging",
     "pandas",
@@ -98,7 +99,7 @@ ignore = ["E203", "W503"]
 
 [project.optional-dependencies]
 # these self-dependencies are available since pip 21.2
-all = ["IDStools[test,docs]"]
+all = ["imas-idstools[test,docs]"]
 docs = [
     "Sphinx",
     "numpy",
@@ -114,7 +115,7 @@ docs = [
     "setuptools-scm",
 ]
 
-test = ["pytest", "IDStools"]
+test = ["pytest", "pytest-cov", "pytest-xdist"]
 
 
 [tool.black]
@@ -124,6 +125,11 @@ exclude = '''
     idstools/_version\.py
 )/
 '''
+
+[tool.pylint]
+max-line-length = 120
+disable = ["all"]
+enable = ["E"]
 
 [tool.setuptools.data-files]
 "bin" = ["scripts/*"]
