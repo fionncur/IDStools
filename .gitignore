@@ -35,3 +35,17 @@ idstools/_version.py
 
 # IDE
 .vscode/
+
+# Test coverage and reports
+.coverage
+junit.xml
+
+# Documentation
+docs/source/autoapi/
+
+# Extra files
+extra/
+myenv/
+
+# Test data files (NetCDF files downloaded from Zenodo)
+*.nc
