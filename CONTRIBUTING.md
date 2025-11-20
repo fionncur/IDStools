@@ -1,5 +1,6 @@
 # Contributing Guidelines for IDStools
-Thank you for your interest in contributing to IDStools. We welcome contributions from the fusion community to help each other . Please take a moment to review the following guidelines to ensure a smooth and productive collaboration.
+
+Thank you for your interest in contributing to IDStools. We welcome contributions from the fusion community to help each other. Please take a moment to review the following guidelines to ensure a smooth and productive collaboration.
 
 ## Getting Started
 
@@ -8,14 +9,14 @@ Please read and adhere to ITER Code of Conduct. We expect all contributors to cr
 
 ### Prerequisites
 Before you start, ensure you have met the following requirements:
-*   IMAS module is loaded
-*   Python 3+ is loaded
-
+- Python 3.8+ is installed and available
+- IMAS-Core module is loaded (Optional)
 
 ### Clone the repository
-Clone repository to your local machine.
-```
-git clone ssh://git@git.iter.org/imas/idstools.git
+Clone the repository to your local machine:
+```bash
+git clone https://github.com/iter-organization/IDStools.git
+cd IDStools
 ```
 
 ## Making Contributions
@@ -23,81 +24,87 @@ git clone ssh://git@git.iter.org/imas/idstools.git
 Create a new branch for each contribution. Use a descriptive name for the branch.
 To create a new branch and switch to it:
 
-```
-git checkout -b feature/your-feature
+```bash
+git checkout -b feature/your-feature-name
 ```
 
 ### Coding Guidelines
- - Follow the coding style and conventions used in the project.
- - Follow SOLID principles while coding [read more](https://www.freecodecamp.org/news/solid-principles-explained-in-plain-english/)
+- Follow the coding style and conventions used in the project
+- Follow SOLID principles while coding ([read more](https://www.freecodecamp.org/news/solid-principles-explained-in-plain-english/))
 
-
-#### Code organization
- - Code is organized in two main packages, `compute` and `view`
- - All calculation operations on IDS to get meaningful data are added to `compute`
- - There is a distinct module in the `compute` and `view` packages for every IDS.
- - Each `Compute` class receives respective ids object to operate on
- - `domain` package is used if you have operations on 2 or more idses and need return the result
+#### Code Organization
+- Code is organized in three main packages: `compute`, `view`, and `domain`
+- All calculation operations on IDS to get meaningful data are added to `compute`
+- There is a distinct module in the `compute` and `view` packages for every IDS
+- Each `Compute` class receives respective IDS object to operate on
+- `domain` package is used when you have operations on 2 or more IDSs and need to return the result
 
 #### Functions
- - Define clear and meaningful function names `getBResonance`, `getActivePfCoils`
- - While writing functions always remember to make it generalized and can be used later by other codes
- - Follow `single responsibility principle` while writing functions
- - `typehint` for parameters and return types is mandatory
- - `docstring` with example will be useful for others to understand what code is doing
+- Define clear and meaningful function names (e.g., `getBResonance`, `getActivePfCoils`)
+- Write functions to be generalized and reusable by other code
+- Follow the `single responsibility principle` when writing functions
+- Type hints for parameters and return types are mandatory
+- Docstrings with examples are helpful for others to understand what the code does
 
 #### Variable Naming
-Define clear and meaningful variable names `b_total`, `profile_2d_index`
-*   Use PascalCase for class names
-*   Use camelCase for variables, function names
+- Define clear and meaningful variable names (e.g., `b_total`, `profile_2d_index`)
+- Use PascalCase for class names
+- Use snake_case for variables and function names (following Python conventions)
 
-### Scripts Naming
-*   Visualization scripts (console print or plots) starts with `view` prefix e.g. `plotequilibrium`
-*   ids related operations like copy, performance, size prefix with `ids` e.g. `idscp`, `idsresample`
-*   database related operations prefix with `db` e.g. dblist
+### Script Naming Conventions
+- Visualization scripts (console print or plots) start with `plot` prefix (e.g., `plotequilibrium`)
+- IDS-related operations like copy, performance, size are prefixed with `ids` (e.g., `idscp`, `idsresample`)
+- Database-related operations are prefixed with `db` (e.g., `dblist`)
 
-#### Formatting
-Use black formatter https://black.readthedocs.io/en/stable/
+#### Code Formatting
+We use the [Black formatter](https://black.readthedocs.io/en/stable/) for consistent code formatting.
 
-Code formatting is done with the black
+To format your code:
+```bash
+black -l 120 idstools
+```
 
-.. code-block:: bash
+Append formatting-related commits to the `.git-blame-ignore-revs` file in the root of the repository.
 
-   black -l 120 idstools
-   
-Append commits related to the formatting of the code `.git-blame-ignore-revs` file which is 
-placed in the root of the repository
+Configure git to ignore formatting-related commits:
+```bash
+git config blame.ignoreRevsFile .git-blame-ignore-revs
+```
 
-Configure git to ignore formatting related commits
+#### Pre-commit Hooks
+Pre-commit hooks are used in the repository. To configure them:
 
-.. code-block:: bash
+1. Ensure pre-commit is installed:
+```bash
+pip install pre-commit
+```
 
-   $ git config blame.ignoreRevsFile .git-blame-ignore-revs
-
-
-pre-commit hooks are used in the repository, It just need to be configured
-Ensure pre-commit is aready installled 
-
-.. code-block:: bash
-
-    $ pip install pre-commit
-    $ pre-commit install
-    pre-commit installed at .git/hooks/pre-commit
+2. Install the hooks:
+```bash
+pre-commit install
+```
 
 More information: 
-https://black.readthedocs.io/en/stable/integrations/source_version_control.html
-https://pre-commit.com/#install
+- [Black integrations](https://black.readthedocs.io/en/stable/integrations/source_version_control.html)
+- [Pre-commit](https://pre-commit.com/#install)
 
-#### Type checking
-It is very important to type check variables to avoid last minute surprises. To check your code for static type checking you can use mypy.
-https://mypy.readthedocs.io/en/stable/getting_started.html
+#### Type Checking
+Type checking is important to avoid runtime errors. Use [mypy](https://mypy.readthedocs.io/en/stable/getting_started.html) for static type checking:
+
+```bash
+pip install mypy
+mypy idstools
+```
 
 
 ### Testing
-Ensure your changes do not break existing functionality.
-Write tests for new features or bug fixes, if applicable.
-if new scripts are written then it should be added in tests\testscripts.sh, This script  is used in CI for testing regression
-Run the project's test suite before submitting a pull request.
+- Ensure your changes do not break existing functionality
+- Write tests for new features or bug fixes, if applicable
+- Run the project's test suite before submitting a pull request
+
+```bash
+pytest tests/
+```
 
 ### Commit Messages
 Write clear and concise commit messages that describe the purpose of your changes.
@@ -106,24 +113,31 @@ Reference issue numbers (e.g., `Fix IMAS-XXXX`) if relevant.
 
 ### Submitting Changes
 #### Pull Request Guidelines
-Create a pull request.
-Provide a clear description of the changes and why they are necessary.
-Engage in discussions and address feedback promptly.
+1. Create a pull request from your feature branch
+2. Provide a clear description of the changes and why they are necessary
+3. Reference any related issues
+4. Engage in discussions and address feedback promptly
 
 #### Code Review
-Be open to feedback and make necessary changes.
+- Be open to feedback and make necessary changes
+- Respond to review comments in a timely manner
+- Update your branch if requested
 
 ## Community
+
 ### Code of Conduct
-ITER has Code of Conduct to maintain a respectful and inclusive community. Please follow it.
+ITER has a Code of Conduct to maintain a respectful and inclusive community. Please follow it in all interactions.
 
 ### Issue Tracking
-Check the issue tracker for open issues that need attention.
-Create issues to report bugs or suggest enhancements.
+- Check the issue tracker for open issues that need attention
+- Create issues to report bugs or suggest enhancements
+- Use appropriate labels and provide detailed descriptions
 
 ## Discussion
-Join our Discussion Forum here to engage with the community.
-Participate in project-related discussions and share your insights.
+Join our community discussions to engage with other contributors:
+- Participate in project-related discussions
+- Share your insights and expertise
+- Ask questions and help others
 
 ## Acknowledgment
-Thank you for your contributions to IDStools project!
+Thank you for your contributions to the IDStools project! Your involvement helps advance fusion research and supports the broader scientific community.
