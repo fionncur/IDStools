@@ -1,0 +1,39 @@
+name: linting-and-code-formatting
+
+on: 
+  push:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout IDStools sources
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          # until saxonche is available in 3.13
+          # https://saxonica.plan.io/issues/6561
+          python-version: "<3.13"
+
+      - name: Display Python version
+        run: python -c "import sys; print(sys.version)"
+
+      - name: Install the code linting and formatting tools
+        run: pip install --upgrade 'black >=24,<25' flake8 pylint
+
+      - name: Check formatting of code with black
+        run: |
+          black --check -l 120 idstools
+          black --check -l 120 scripts/*
+
+      - name: Check linting with flake8
+        run: flake8 --max-line-length=120 --ignore=E203,W503 idstools
+
+      - name: Check linting with pylint
+        run: pylint --max-line-length=120 -E ./idstools || true
