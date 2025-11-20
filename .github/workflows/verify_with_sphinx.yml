@@ -44,3 +44,12 @@ jobs:
         run: |
           export SPHINXOPTS='-W -n --keep-going'
           make -C docs realclean autogen html man
+
+      - name: Upload Sphinx documentation as artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sphinx-documentation
+          path: docs/build/html/
+          retention-days: 30
+          if-no-files-found: warn
