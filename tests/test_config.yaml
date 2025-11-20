@@ -1,0 +1,48 @@
+# Test Configuration File
+# 
+# This file defines test data sources (URIs) for different profiles.
+# Users can choose which configuration to use by setting the TEST_PROFILE environment variable.
+#
+# Supported URI formats:
+#   - NetCDF files: "iter_disruption_113112_1.nc" (files will be downloaded from Zenodo if needed)
+#   - IMAS HDF5 URIs: "imas:hdf5?path=/work/imas/shared/imasdb/ITER/3/134174/117"
+#
+# Usage:
+#   pytest tests/ -v                          # Uses local profile by default
+#   TEST_PROFILE=local pytest tests/ -v       # Use local test data (NetCDF files, downloaded if needed)
+#   TEST_PROFILE=imas pytest tests/ -v        # Use IMAS database URIs (no downloads needed)
+#   TEST_PROFILE=ci pytest tests/ -v          # Use NetCDF files (downloaded before test execution)
+
+profiles:
+  # Local development profile - uses NetCDF files (downloaded if not present)
+  local:
+    uris:
+      - "iter_disruption_113112_1.nc"
+      - "iter_scenario_123364_1.nc"
+      - "iter_scenario_53298_seq1_DD3.nc"
+      - "iter_scenario_53298_seq1_DD4.nc"
+
+  # IMAS database profile - uses direct IMAS HDF5 URIs (no downloads)
+  imas:
+    uris:
+      - "imas:hdf5?path=/work/imas/shared/imasdb/ITER/3/134174/117"
+      - "imas:hdf5?path=/work/imas/shared/imasdb/ITER/3/134174/118"
+
+  # CI/CD profile - uses NetCDF files (downloaded in GitHub workflows before tests)
+  ci:
+    uris:
+      - "iter_disruption_113112_1.nc"
+      - "iter_scenario_123364_1.nc"
+      - "iter_scenario_53298_seq1_DD3.nc"
+      - "iter_scenario_53298_seq1_DD4.nc"
+
+# Default profile if TEST_PROFILE is not set
+default_profile: "local"
+
+# Zenodo download information for NetCDF files
+zenodo_record_id: "17062700"
+netcdf_files:
+  iter_disruption_113112_1.nc: "https://zenodo.org/records/17062700/files/iter_disruption_113112_1.nc"
+  iter_scenario_123364_1.nc: "https://zenodo.org/records/17062700/files/iter_scenario_123364_1.nc"
+  iter_scenario_53298_seq1_DD3.nc: "https://zenodo.org/records/17062700/files/iter_scenario_53298_seq1_DD3.nc"
+  iter_scenario_53298_seq1_DD4.nc: "https://zenodo.org/records/17062700/files/iter_scenario_53298_seq1_DD4.nc"
