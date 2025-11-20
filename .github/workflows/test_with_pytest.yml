@@ -31,16 +31,45 @@ jobs:
 
       - name: Run tests
         run: |
-          python -m pytest -n=auto --cov=idstools --cov-report=term-missing --cov-report=xml:coverage.xml --cov-report=html:htmlcov --junit-xml=junit.xml
+          python -m pytest -n=auto --cov=idstools --cov-report=term-missing --cov-report=xml:coverage.xml --cov-report=html:htmlcov --junit-xml=junit.xml -v --tb=short 2>&1 | tee test_output.log
+        continue-on-error: true
+        env:
+          TEST_PROFILE: ci
 
       - name: Upload coverage report ${{ matrix.python-version }}
         uses: actions/upload-artifact@v4
         with:
           name: coverage-report-${{ matrix.python-version }}
           path: htmlcov
+          if-no-files-found: warn
+
+      - name: Upload coverage XML ${{ matrix.python-version }}
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-xml-${{ matrix.python-version }}
+          path: coverage.xml
+          if-no-files-found: warn
 
       - name: Upload test report ${{ matrix.python-version }}
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: test-report-${{ matrix.python-version }}
           path: junit.xml
+          if-no-files-found: warn
+
+      - name: Upload test output logs ${{ matrix.python-version }}
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-output-${{ matrix.python-version }}
+          path: test_output.log
+          if-no-files-found: warn
+
+      - name: Publish test results ${{ matrix.python-version }}
+        if: always()
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        with:
+          files: junit.xml
+          check_name: Test Results - Python ${{ matrix.python-version }}

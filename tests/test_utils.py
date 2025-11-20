@@ -195,9 +195,13 @@ def run_idstools_script(script_name, args, timeout=30):
 
     logger.debug(f"\nReturn code: {result.returncode}")
     if result.stdout:
-        logger.debug(f"\n--- STDOUT ---\n{result.stdout[:500]}")
+        logger.debug(f"\n--- STDOUT (first 500 chars) ---\n{result.stdout[:500]}")
+        if len(result.stdout) > 500:
+            logger.debug(f"--- STDOUT (last 500 chars) ---\n{result.stdout[-500:]}")
     if result.stderr:
-        logger.debug(f"\n--- STDERR ---\n{result.stderr[:500]}")
+        logger.debug(f"\n--- STDERR (first 500 chars) ---\n{result.stderr[:500]}")
+        if len(result.stderr) > 500:
+            logger.debug(f"--- STDERR (last 500 chars) ---\n{result.stderr[-500:]}")
     logger.debug(f"{'='*60}\n")
 
     return result
