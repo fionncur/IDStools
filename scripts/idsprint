@@ -378,13 +378,22 @@ if __name__ == "__main__":
             if len(time_array) == 1 and np.isnan(time_array[0]):
                 value = f"{question_string}"
                 type = "heterogeneous IDS"
-            elif len(time_array) == 1 and time_array[0] == np.NINF:
+            elif len(time_array) == 1 and time_array[0] == -np.inf:
                 value = f"{question_string}"
                 type = "time independent IDS"
             else:
                 value = f"{len(time_array)}"
                 type = time_array
-            table.add_row(ids_name, value, str(type[0]) + ",...," + str(type[-1]))
+
+            # Handle both string and list types safely
+            if isinstance(type, str):
+                type_str = type
+            elif len(type) > 0:
+                type_str = str(type[0]) + ",...," + str(type[-1])
+            else:
+                type_str = "empty"
+
+            table.add_row(ids_name, value, type_str)
         console.print(table)
         connection.close()
         exit(1)

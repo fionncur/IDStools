@@ -243,7 +243,7 @@ def print_times(dbs, args, print_times=False, pulse_number=None, run_number=None
                                     + " slices ( "
                                     + "heterogeneous IDS )"
                                 )
-                            elif len(times) == 1 and times[0] == np.NINF:
+                            elif len(times) == 1 and times[0] == -np.inf:
                                 print(
                                     TAB * 5
                                     + extended(idsname, IDSNAME_STR_LEN)
@@ -321,7 +321,7 @@ def print_times_with_folder(dbs, print_times=False, pulse_number=None, run_numbe
                             + " slices ( "
                             + "heterogeneous IDS )"
                         )
-                    elif len(times) == 1 and times[0] == np.NINF:
+                    elif len(times) == 1 and times[0] == -np.inf:
                         print(
                             TAB * 15
                             + extended(idsname, IDSNAME_STR_LEN)

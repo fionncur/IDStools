@@ -186,7 +186,7 @@ if __name__ == "__main__":
             if time_array is not None and len(time_array) == 1 and np.isnan(time_array[0]):
                 value = f"{not_applicable}"
                 type = "heterogeneous IDS"
-            elif time_array is not None and len(time_array) == 1 and time_array[0] == np.NINF:
+            elif time_array is not None and len(time_array) == 1 and time_array[0] == -np.inf:
                 value = f"{not_applicable}"
                 type = "time independent IDS"
             elif time_array is not None:
