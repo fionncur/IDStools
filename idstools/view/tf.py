@@ -72,20 +72,22 @@ class TFView:
             else:
                 name = coil_info["name"]
 
-            cx = 0 
-            cy = 0 
+            cx = 0
+            cy = 0
             for _, conductor_info in conductors.items():
                 elements = conductor_info["elements"]
-                if ("outline" not in conductor_info):
+                if "outline" not in conductor_info:
                     # cross_sections = conductor_info["cross_section"]
-                    scatter = ax.scatter(elements["start_points"]["r"], elements["start_points"]["z"], color=color, s=10)
+                    scatter = ax.scatter(
+                        elements["start_points"]["r"], elements["start_points"]["z"], color=color, s=10
+                    )
                     shapes.append(scatter)
                     scatter = ax.scatter(elements["end_points"]["r"], elements["end_points"]["z"], color=color, s=10)
                     shapes.append(scatter)
 
                     for ielement in range(len(elements.types)):
                         if elements["types"][ielement] == 1:  # line
-    
+
                             r1 = elements["start_points"]["r"][ielement]
                             z1 = elements["start_points"]["z"][ielement]
                             r2 = elements["end_points"]["r"][ielement]
@@ -101,33 +103,30 @@ class TFView:
                 else:
                     # Plot cross-section contours if available
                     outline = conductor_info.get("outline", {})
-                    
+
                     # Convert to numpy arrays for easier manipulation
                     x1 = np.array(outline["inner"]["r"])
                     y1 = np.array(outline["inner"]["z"])
                     x2 = np.array(outline["outer"]["r"])
                     y2 = np.array(outline["outer"]["z"])
-                    
+
                     # Close the contour loops by appending the first point to the end
                     x1 = np.append(x1, x1[0])
                     y1 = np.append(y1, y1[0])
                     x2 = np.append(x2, x2[0])
                     y2 = np.append(y2, y2[0])
-    
+
                     # Create filled polygon connecting inner and outer contours
                     x_fill = np.append(x1, x2[::-1])
                     y_fill = np.append(y1, y2[::-1])
-                    
+
                     # Plot contour lines
                     line1 = ax.plot(x1, y1, color=edgecolor, linewidth=1, alpha=alpha)
                     line2 = ax.plot(x2, y2, color=edgecolor, linewidth=1, alpha=alpha)
                     shapes.extend(line1)
                     shapes.extend(line2)
-                    
-                    fill_patch = ax.fill(x_fill, y_fill,
-                                         alpha=0.7,
-                                         linewidth=0,
-                                         facecolor=facecolor)
+
+                    fill_patch = ax.fill(x_fill, y_fill, alpha=0.7, linewidth=0, facecolor=facecolor)
                     shapes.extend(fill_patch)
 
             name = ""
@@ -172,42 +171,43 @@ class TFView:
             ax.set_title("tf")
         return tf_legend
 
+
 def sectional_interpolation(x, y, points_per_section=20):
     """
     Apply adaptive interpolation to contour sections with smart
     gradient control for line segments.
-    
+
     This function uses a two-pass approach:
     1. First pass: Identify all line segments in the contour
     2. Second pass: Apply appropriate interpolation method
-    
+
     This ensures smooth transitions between line segments and curves.
-    
+
     Parameters
     ----------
     x, y : array_like
         1D arrays of the polygon vertices, ordered along the loop.
     points_per_section : int, optional
         Number of points to interpolate in each section (default: 20).
-        
+
     Returns
     -------
     xs, ys : ndarray
         Interpolated points along the smoothed contour.
-        
+
     Notes
     -----
     Three interpolation strategies based on segment type:
-    
+
     1. **Line segments** (both P1 and P2 on a line):
        - Uses linear interpolation: x = (1-t)*x1 + t*x2
        - Guarantees perfect straightness (zero deviation)
-       
+
     2. **Curved sections** (both P1 and P2 on curves):
        - Uses cubic Hermite with Catmull-Rom gradients
        - g1 = 0.5 * (P2 - P0), g2 = 0.5 * (P3 - P1)
        - Provides smooth curve interpolation
-       
+
     3. **Transitions** (one point on line, one on curve):
        - Uses cubic Hermite with mixed gradients
        - Line points use line segment gradient
@@ -216,58 +216,55 @@ def sectional_interpolation(x, y, points_per_section=20):
     """
     x = np.asarray(x, dtype=float)
     y = np.asarray(y, dtype=float)
-    
+
     if len(x) < 4:
         return x, y
-    
+
     # Ensure the contour is closed
     if not (x[0] == x[-1] and y[0] == y[-1]):
         x = np.append(x, x[0])
         y = np.append(y, y[0])
-    
+
     # Remove duplicate closing point for processing
     x_open = x[:-1]
     y_open = y[:-1]
     n = len(x_open)
-    
+
     # FIRST PASS: Identify all line segments
     # For each point, store whether it's part of a line segment
     is_on_line = np.zeros(n, dtype=bool)
     line_gradients = {}  # Store gradient for each point on a line
-    
+
     for i in range(n):
         # Check triplet: P(i-1), P(i), P(i+1)
         im1 = (i - 1) % n
         ip1 = (i + 1) % n
 
-        if _is_collinear(x_open[im1], y_open[im1],
-                         x_open[i], y_open[i],
-                         x_open[ip1], y_open[ip1]):
+        if _is_collinear(x_open[im1], y_open[im1], x_open[i], y_open[i], x_open[ip1], y_open[ip1]):
             is_on_line[i] = True
             # Store the line segment gradient at this point
-            line_gradients[i] = (x_open[ip1] - x_open[i],
-                                 y_open[ip1] - y_open[i])
-    
+            line_gradients[i] = (x_open[ip1] - x_open[i], y_open[ip1] - y_open[i])
+
     # SECOND PASS: Interpolate using computed gradients
     xs_new = []
     ys_new = []
-    
+
     for i in range(n):
         # Get 4 consecutive points with wraparound
         p0_idx = i
         p1_idx = (i + 1) % n
         p2_idx = (i + 2) % n
         p3_idx = (i + 3) % n
-        
+
         x0, y0 = x_open[p0_idx], y_open[p0_idx]
         x1, y1 = x_open[p1_idx], y_open[p1_idx]
         x2, y2 = x_open[p2_idx], y_open[p2_idx]
         x3, y3 = x_open[p3_idx], y_open[p3_idx]
-        
+
         # Add the starting point of this section
         xs_new.append(x1)
         ys_new.append(y1)
-        
+
         # Calculate gradients at P1 and P2 based on line membership
         if is_on_line[p1_idx]:
             # P1 is on a line - use the precomputed line gradient
@@ -275,14 +272,14 @@ def sectional_interpolation(x, y, points_per_section=20):
         else:
             # P1 is on a curve - use Catmull-Rom gradient
             g1_x, g1_y = 0.5 * (x2 - x0), 0.5 * (y2 - y0)
-        
+
         if is_on_line[p2_idx]:
             # P2 is on a line - use the precomputed line gradient
             g2_x, g2_y = line_gradients[p2_idx]
         else:
             # P2 is on a curve - use Catmull-Rom gradient
             g2_x, g2_y = 0.5 * (x3 - x1), 0.5 * (y3 - y1)
-        
+
         # Check if both P1 and P2 are on a line segment
         if is_on_line[p1_idx] and is_on_line[p2_idx]:
             # Use linear interpolation for line segments
@@ -298,40 +295,40 @@ def sectional_interpolation(x, y, points_per_section=20):
                 t = j / points_per_section
                 t2 = t * t
                 t3 = t2 * t
-                
+
                 # Hermite basis functions
-                h1 = 2*t3 - 3*t2 + 1
-                h2 = -2*t3 + 3*t2
-                h3 = t3 - 2*t2 + t
+                h1 = 2 * t3 - 3 * t2 + 1
+                h2 = -2 * t3 + 3 * t2
+                h3 = t3 - 2 * t2 + t
                 h4 = t3 - t2
-                
-                x_interp = h1*x1 + h2*x2 + h3*g1_x + h4*g2_x
-                y_interp = h1*y1 + h2*y2 + h3*g1_y + h4*g2_y
-                
+
+                x_interp = h1 * x1 + h2 * x2 + h3 * g1_x + h4 * g2_x
+                y_interp = h1 * y1 + h2 * y2 + h3 * g1_y + h4 * g2_y
+
                 xs_new.append(x_interp)
                 ys_new.append(y_interp)
-    
+
     # Close the contour
     xs_new.append(xs_new[0])
     ys_new.append(ys_new[0])
-    
+
     return np.array(xs_new), np.array(ys_new)
 
 
 def _is_collinear(x1, y1, x2, y2, x3, y3, tolerance=1e-6):
     """
     Check if three points are collinear (lie on the same straight line).
-    
+
     Uses the cross product method: if the cross product of vectors
     (p1->p2) and (p2->p3) is zero, the points are collinear.
-    
+
     Parameters
     ----------
     x1, y1, x2, y2, x3, y3 : float
         Coordinates of the three points to check.
     tolerance : float, optional
         Numerical tolerance for collinearity check (default: 1e-6).
-        
+
     Returns
     -------
     bool
@@ -340,7 +337,7 @@ def _is_collinear(x1, y1, x2, y2, x3, y3, tolerance=1e-6):
     # Calculate cross product of vectors (p1->p2) and (p2->p3)
     # Cross product = (x2-x1)*(y3-y2) - (y2-y1)*(x3-x2)
     cross_product = (x2 - x1) * (y3 - y2) - (y2 - y1) * (x3 - x2)
-    
+
     # Check if cross product is close to zero
     return abs(cross_product) < tolerance
 

@@ -79,6 +79,7 @@ class TFCompute:
 # Public API Functions
 # ============================================================================
 
+
 def get_outline(conductor, use_three_point_algorithm=True, skip=1):
     """
     Extract inner and outer contour coordinates for TF coil conductor cross-sections.
@@ -129,10 +130,7 @@ def get_outline(conductor, use_three_point_algorithm=True, skip=1):
     cross_section = conductor.cross_section
 
     # Initialize return dictionary
-    outline_dict = {
-        'inner': {'r': [], 'z': []},
-        'outer': {'r': [], 'z': []}
-    }
+    outline_dict = {"inner": {"r": [], "z": []}, "outer": {"r": [], "z": []}}
 
     # Calculate coil center coordinates
     x_center = np.average(elements.start_points.r)
@@ -140,22 +138,18 @@ def get_outline(conductor, use_three_point_algorithm=True, skip=1):
 
     if use_three_point_algorithm:
         # Three-point algorithm: use middle points of non-collinear triplets
-        return _get_outline_three_point(elements, cross_section, x_center,
-                                        y_center, outline_dict, skip)
+        return _get_outline_three_point(elements, cross_section, x_center, y_center, outline_dict, skip)
     else:
         # Original two-point interpolation algorithm
-        return _get_outline_interpolation(elements, cross_section, x_center,
-                                          y_center, outline_dict, skip)
+        return _get_outline_interpolation(elements, cross_section, x_center, y_center, outline_dict, skip)
 
 
 # ============================================================================
 # Coordinate Transformation Functions
 # ============================================================================
 
-def tn_to_xy(t, n,
-             x_start, y_start,
-             x_end, y_end,
-             x_center, y_center):
+
+def tn_to_xy(t, n, x_start, y_start, x_end, y_end, x_center, y_center):
     """
     Convert local (T, N) coordinates to Cartesian (x, y) for a general
     planar coil segment.
@@ -330,13 +324,14 @@ def tn_to_xy_three_points(x1, y1, x2, y2, x3, y3, n, x_center, y_center):
 # Utility Functions
 # ============================================================================
 
+
 def are_points_collinear(x1, y1, x2, y2, x3, y3, tolerance=1e-9):
     """
     Check if three points are collinear (lie on the same line).
-    
+
     Uses the cross product method: if the cross product of vectors
     (P2-P1) and (P3-P1) is close to zero, the points are collinear.
-    
+
     Parameters
     ----------
     x1, y1 : float
@@ -347,13 +342,13 @@ def are_points_collinear(x1, y1, x2, y2, x3, y3, tolerance=1e-9):
         Coordinates of the third point.
     tolerance : float, optional
         Tolerance for considering points as collinear. Default is 1e-9.
-        
+
     Returns
     -------
     bool
         True if the three points are collinear within the given tolerance,
         False otherwise.
-        
+
     Notes
     -----
     - Uses cross product magnitude compared to tolerance
@@ -364,22 +359,21 @@ def are_points_collinear(x1, y1, x2, y2, x3, y3, tolerance=1e-9):
     dy1 = y2 - y1
     dx2 = x3 - x1
     dy2 = y3 - y1
-    
+
     # Cross product magnitude
     cross_product = abs(dx1 * dy2 - dy1 * dx2)
-    
+
     # Scale tolerance by the magnitude of the vectors
     scale = max(abs(dx1), abs(dy1), abs(dx2), abs(dy2), 1.0)
-    
+
     return cross_product < tolerance * scale
 
 
-def _get_outline_three_point(elements, cross_section, x_center, y_center,
-                             outline_dict, skip=1):
+def _get_outline_three_point(elements, cross_section, x_center, y_center, outline_dict, skip=1):
     """
     Three-point algorithm for outline extraction.
     Selects middle points from non-collinear triplets.
-    
+
     Parameters
     ----------
     skip : int, optional
@@ -394,7 +388,7 @@ def _get_outline_three_point(elements, cross_section, x_center, y_center,
         # Skip points based on sampling rate
         if ielement % skip != 0:
             continue
-            
+
         if elements.types[ielement] == 1:  # line segment
             if len(cross_section) == 1:
                 cs_index = 0
@@ -404,8 +398,7 @@ def _get_outline_three_point(elements, cross_section, x_center, y_center,
                 continue
 
             cs = cross_section[cs_index]
-            centerline_points.append((elements.start_points.r[ielement],
-                                      elements.start_points.z[ielement]))
+            centerline_points.append((elements.start_points.r[ielement], elements.start_points.z[ielement]))
             valid_cross_sections.append(cs)
 
     if len(centerline_points) < 3:
@@ -418,7 +411,7 @@ def _get_outline_three_point(elements, cross_section, x_center, y_center,
         n_outer = np.min(cs.outline.normal)
     else:
         n_inner = abs(cs.width / 2.0)
-        n_outer = - n_inner
+        n_outer = -n_inner
 
     inner_r_points = []
     inner_z_points = []
@@ -428,22 +421,22 @@ def _get_outline_three_point(elements, cross_section, x_center, y_center,
     # Process triplets of consecutive points (including wraparound for closed loop)
     # Phase 1: Process all collinear triplets first
     processed_points = set()  # Track which points have been processed
-    
+
     for i in range(len(centerline_points)):
         # Handle wraparound indices for closed loop geometry
         prev_idx = (i - 1) % len(centerline_points)
         curr_idx = i
         next_idx = (i + 1) % len(centerline_points)
-        
-        x1, y1 = centerline_points[prev_idx]   # previous point
-        x2, y2 = centerline_points[curr_idx]   # current point (middle)
-        x3, y3 = centerline_points[next_idx]   # next point
+
+        x1, y1 = centerline_points[prev_idx]  # previous point
+        x2, y2 = centerline_points[curr_idx]  # current point (middle)
+        x3, y3 = centerline_points[next_idx]  # next point
 
         # Check if points are collinear
         if are_points_collinear(x1, y1, x2, y2, x3, y3, tolerance=1e-6):
             # Points are collinear, add inner/outer points for all three points
             # For collinear points, use tangent direction from first to third
-            
+
             # Add points for first point (x1, y1)
             xi1, yi1 = tn_to_xy(0.0, n_inner, x1, y1, x3, y3, x_center, y_center)
             xo1, yo1 = tn_to_xy(0.0, n_outer, x1, y1, x3, y3, x_center, y_center)
@@ -451,7 +444,7 @@ def _get_outline_three_point(elements, cross_section, x_center, y_center,
             inner_z_points.append(yi1)
             outer_r_points.append(xo1)
             outer_z_points.append(yo1)
-            
+
             # Add points for middle point (x2, y2)
             # Calculate the position parameter t for the middle point
             xi2, yi2 = tn_to_xy(0.0, n_inner, x2, y2, x3, y3, x_center, y_center)
@@ -460,7 +453,7 @@ def _get_outline_three_point(elements, cross_section, x_center, y_center,
             inner_z_points.append(yi2)
             outer_r_points.append(xo2)
             outer_z_points.append(yo2)
-            
+
             # Add points for third point (x3, y3)
             xi3, yi3 = tn_to_xy(0.0, n_inner, x3, y3, x1, y1, x_center, y_center)
             xo3, yo3 = tn_to_xy(0.0, n_outer, x3, y3, x1, y1, x_center, y_center)
@@ -479,23 +472,21 @@ def _get_outline_three_point(elements, cross_section, x_center, y_center,
         # Skip if current point was already processed in Phase 1
         if i in processed_points:
             continue
-            
+
         # Handle wraparound indices for closed loop geometry
         prev_idx = (i - 1) % len(centerline_points)
         curr_idx = i
         next_idx = (i + 1) % len(centerline_points)
-        
-        x1, y1 = centerline_points[prev_idx]   # previous point
-        x2, y2 = centerline_points[curr_idx]   # current point (middle)
-        x3, y3 = centerline_points[next_idx]   # next point
+
+        x1, y1 = centerline_points[prev_idx]  # previous point
+        x2, y2 = centerline_points[curr_idx]  # current point (middle)
+        x3, y3 = centerline_points[next_idx]  # next point
 
         # Check if points are collinear (should be false since we processed collinear ones first)
         if not are_points_collinear(x1, y1, x2, y2, x3, y3, tolerance=1e-6):
             # Points are not collinear, use three-point algorithm
-            xi, yi = tn_to_xy_three_points(x1, y1, x2, y2, x3, y3, n_inner,
-                                           x_center, y_center)
-            xo, yo = tn_to_xy_three_points(x1, y1, x2, y2, x3, y3, n_outer,
-                                           x_center, y_center)
+            xi, yi = tn_to_xy_three_points(x1, y1, x2, y2, x3, y3, n_inner, x_center, y_center)
+            xo, yo = tn_to_xy_three_points(x1, y1, x2, y2, x3, y3, n_outer, x_center, y_center)
 
             inner_r_points.append(xi)
             inner_z_points.append(yi)
@@ -503,25 +494,22 @@ def _get_outline_three_point(elements, cross_section, x_center, y_center,
             outer_z_points.append(yo)
 
     # Sort and remove duplicates for inner and outer contours
-    inner_r_sorted, inner_z_sorted = _sort_and_deduplicate_contour(
-        inner_r_points, inner_z_points)
-    outer_r_sorted, outer_z_sorted = _sort_and_deduplicate_contour(
-        outer_r_points, outer_z_points)
+    inner_r_sorted, inner_z_sorted = _sort_and_deduplicate_contour(inner_r_points, inner_z_points)
+    outer_r_sorted, outer_z_sorted = _sort_and_deduplicate_contour(outer_r_points, outer_z_points)
 
     # Store the results
-    outline_dict['inner']['r'] = inner_r_sorted
-    outline_dict['inner']['z'] = inner_z_sorted
-    outline_dict['outer']['r'] = outer_r_sorted
-    outline_dict['outer']['z'] = outer_z_sorted
+    outline_dict["inner"]["r"] = inner_r_sorted
+    outline_dict["inner"]["z"] = inner_z_sorted
+    outline_dict["outer"]["r"] = outer_r_sorted
+    outline_dict["outer"]["z"] = outer_z_sorted
 
     return outline_dict
 
 
-def _get_outline_interpolation(elements, cross_section, x_center, y_center,
-                               outline_dict, skip=1):
+def _get_outline_interpolation(elements, cross_section, x_center, y_center, outline_dict, skip=1):
     """
     Original interpolation algorithm for outline extraction.
-    
+
     Parameters
     ----------
     skip : int, optional
@@ -540,7 +528,7 @@ def _get_outline_interpolation(elements, cross_section, x_center, y_center,
         # Skip points based on sampling rate
         if ielement % skip != 0:
             continue
-            
+
         if elements.types[ielement] == 1:  # line segment
             if len(cross_section) == 1:
                 cs_index = 0
@@ -592,15 +580,9 @@ def _get_outline_interpolation(elements, cross_section, x_center, y_center,
         y_end = end_z_interp[i]
         t = 0.0
 
-        xi, yi = tn_to_xy(t, n_inner,
-                          x_start, y_start,
-                          x_end, y_end,
-                          x_center, y_center)
+        xi, yi = tn_to_xy(t, n_inner, x_start, y_start, x_end, y_end, x_center, y_center)
 
-        xo, yo = tn_to_xy(t, n_outer,
-                          x_start, y_start,
-                          x_end, y_end,
-                          x_center, y_center)
+        xo, yo = tn_to_xy(t, n_outer, x_start, y_start, x_end, y_end, x_center, y_center)
 
         inner_r_points.append(xi)
         inner_z_points.append(yi)
@@ -608,10 +590,10 @@ def _get_outline_interpolation(elements, cross_section, x_center, y_center,
         outer_z_points.append(yo)
 
     # Store the results
-    outline_dict['inner']['r'] = inner_r_points
-    outline_dict['inner']['z'] = inner_z_points
-    outline_dict['outer']['r'] = outer_r_points
-    outline_dict['outer']['z'] = outer_z_points
+    outline_dict["inner"]["r"] = inner_r_points
+    outline_dict["inner"]["z"] = inner_z_points
+    outline_dict["outer"]["r"] = outer_r_points
+    outline_dict["outer"]["z"] = outer_z_points
 
     return outline_dict
 
@@ -619,11 +601,11 @@ def _get_outline_interpolation(elements, cross_section, x_center, y_center,
 def _sort_and_deduplicate_contour(r_points, z_points, tolerance=1e-9):
     """
     Sort contour points in counter-clockwise order and remove duplicates.
-    
+
     This function takes a list of R, Z coordinates, removes duplicate points
-    within tolerance, and sorts the remaining points in counter-clockwise 
+    within tolerance, and sorts the remaining points in counter-clockwise
     order around their centroid.
-    
+
     Parameters
     ----------
     r_points : list or ndarray
@@ -633,14 +615,14 @@ def _sort_and_deduplicate_contour(r_points, z_points, tolerance=1e-9):
     tolerance : float, optional
         Distance tolerance for considering points as duplicates.
         Default is 1e-9.
-        
+
     Returns
     -------
     r_sorted : list
         R-coordinates sorted in counter-clockwise order with duplicates removed.
     z_sorted : list
         Z-coordinates sorted in counter-clockwise order with duplicates removed.
-        
+
     Notes
     -----
     - Uses centroid as reference point for angular sorting
@@ -650,46 +632,46 @@ def _sort_and_deduplicate_contour(r_points, z_points, tolerance=1e-9):
     """
     if len(r_points) == 0:
         return [], []
-    
+
     # Convert to numpy arrays
     r_points = np.array(r_points)
     z_points = np.array(z_points)
-    
+
     # Remove duplicates within tolerance
     unique_r = []
     unique_z = []
-    
+
     for i, (r, z) in enumerate(zip(r_points, z_points)):
         # Check if this point is too close to any existing unique point
         is_duplicate = False
         for ur, uz in zip(unique_r, unique_z):
-            distance = np.sqrt((r - ur)**2 + (z - uz)**2)
+            distance = np.sqrt((r - ur) ** 2 + (z - uz) ** 2)
             if distance < tolerance:
                 is_duplicate = True
                 break
-        
+
         # Only add the point if it's not a duplicate
         if not is_duplicate:
             unique_r.append(r)
             unique_z.append(z)
-    
+
     if len(unique_r) == 0:
         return [], []
-    
+
     # Calculate centroid
     centroid_r = np.mean(unique_r)
     centroid_z = np.mean(unique_z)
-    
+
     # Calculate angles from centroid to each point
     angles = []
     for r, z in zip(unique_r, unique_z):
         angle = np.arctan2(z - centroid_z, r - centroid_r)
         angles.append(angle)
-    
+
     # Sort points by angle (counter-clockwise order)
     sorted_indices = np.argsort(angles)
-    
+
     r_sorted = [unique_r[i] for i in sorted_indices]
     z_sorted = [unique_z[i] for i in sorted_indices]
-    
+
     return r_sorted, z_sorted
