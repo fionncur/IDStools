@@ -674,12 +674,15 @@ def get_conductor_outline(conductor, skip=1):
     Returns
     -------
     dict
-        A dictionary with the following structure:
-        {
-            'inner': {'r': list, 'z': list},
-            'outer': {'r': list, 'z': list}
-        }
+        A dictionary with the following structure::
+
+            {
+                'inner': {'r': list, 'z': list},
+                'outer': {'r': list, 'z': list}
+            }
+
         where:
+
         - 'inner' contains the inner boundary coordinates (R, Z)
         - 'outer' contains the outer boundary coordinates (R, Z)
 
