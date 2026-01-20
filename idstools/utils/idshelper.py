@@ -230,30 +230,32 @@ def get_ids_size(db_entry_object, ids_names=None, dd_update=False, ignore_empty=
         occurrences_count = max(occurrence_list)
 
         for o in range(occurrences_count + 1):
-
-            if dd_update:
-                ids_object = imas.convert_ids(
-                    db_entry_object.get(ids_name, occurrence=o, autoconvert=False), db_entry_object.factory.version
-                )
-            else:
-                ids_object = db_entry_object.get(ids_name, occurrence=o, autoconvert=False)
-
-            homogeneous_time = ids_object.ids_properties.homogeneous_time
-            if homogeneous_time >= 0:
-                field = f"{ids_name}/{o}"
-                ids_size_dict[field] = {}
-                start_time = time.time()
-                ids_size_dict[field]["bytes"] = get_object_size(ids_object, ignore_empty)
-                ids_size_dict[field]["time"] = time.time() - start_time
-                print(
-                    "Reading %0.3f MB of data for %s took %0.3f seconds"
-                    % (
-                        ids_size_dict[field]["bytes"] / 1024**2,
-                        field,
-                        ids_size_dict[field]["time"],
+            try:
+                if dd_update:
+                    ids_object = imas.convert_ids(
+                        db_entry_object.get(ids_name, occurrence=o, autoconvert=False), db_entry_object.factory.version
                     )
-                )
-                del ids_object
+                else:
+                    ids_object = db_entry_object.get(ids_name, occurrence=o, autoconvert=False)
+
+                homogeneous_time = ids_object.ids_properties.homogeneous_time
+                if homogeneous_time >= 0:
+                    field = f"{ids_name}/{o}"
+                    ids_size_dict[field] = {}
+                    start_time = time.time()
+                    ids_size_dict[field]["bytes"] = get_object_size(ids_object, ignore_empty)
+                    ids_size_dict[field]["time"] = time.time() - start_time
+                    print(
+                        "Reading %0.3f MB of data for %s took %0.3f seconds"
+                        % (
+                            ids_size_dict[field]["bytes"] / 1024**2,
+                            field,
+                            ids_size_dict[field]["time"],
+                        )
+                    )
+                    del ids_object
+            except Exception as e:
+                logger.warning(f"Failed to retrieve IDS '{ids_name}' with occurrence {o}: {str(e)}. Skipping this IDS.")
     return ids_size_dict
 
 
@@ -344,7 +346,6 @@ def get_available_ids_and_occurrences(
     db_entry_object,
     time_mode=None,
     get_comment=False,
-    dd_update=False,
     get_version=False,
 ):
     """
@@ -355,7 +356,6 @@ def get_available_ids_and_occurrences(
             which available IDSs will be looked for.
         time_mode: The time mode of interest for the IDSs in the given DBEntry.
         get_comment: Output ids_properties.comment field for each found occurrence
-        dd_update (bool, optional): Flag to indicate whether to update the data dictionary. Defaults to False.
         get_version: Whether to return version information
 
     Returns:
@@ -375,36 +375,39 @@ def get_available_ids_and_occurrences(
             comment = ""
             occ_type = ""
 
-            if dd_update:
-                ids_object = db_entry_object.get(idstype, occurrence=occ, autoconvert=False)
-                ids_object = imas.convert_ids(ids_object, db_entry_object.factory.version)
-            else:
-                ids_object = db_entry_object.get(idstype, occurrence=occ, lazy=True, autoconvert=False)
+            try:
+                ids_object = db_entry_object.get(
+                    idstype, occurrence=occ, lazy=True, autoconvert=False, ignore_unknown_dd_version=True
+                )
 
-            dd_version = ids_object.ids_properties.version_put.data_dictionary.value
-            homogeneous_time = ids_object.ids_properties.homogeneous_time
-            comment = ids_object.ids_properties.comment
+                dd_version = ids_object.ids_properties.version_put.data_dictionary.value
+                homogeneous_time = ids_object.ids_properties.homogeneous_time
+                comment = ids_object.ids_properties.comment
 
-            occ_type_text = ""
-            if hasattr(ids_object.ids_properties, "occurrence_type"):
-                occ_type = ids_object.ids_properties.occurrence_type
-                if occ_type.index != imas.ids_defs.EMPTY_INT:
-                    if occ_type.index.value in occ_type_dict.keys():
-                        occ_type_text = occ_type_dict[occ_type.index.value]
-                        comment += f" [occurrence type = {occ_type_text}]"
-            if homogeneous_time != imas.ids_defs.EMPTY_INT and (time_mode is None or time_mode == homogeneous_time):
-                if get_comment is True:
-                    availableidslist.append((idstype, occ, comment))
-                elif get_version is True:
-                    availableidslist.append((idstype, occ, dd_version))
-                elif get_comment is True and get_version is True:
-                    availableidslist.append(idstype, occ, comment, dd_version)
-                else:
-                    availableidslist.append((idstype, occ))
+                occ_type_text = ""
+                if hasattr(ids_object.ids_properties, "occurrence_type"):
+                    occ_type = ids_object.ids_properties.occurrence_type
+                    if occ_type.index != imas.ids_defs.EMPTY_INT:
+                        if occ_type.index.value in occ_type_dict.keys():
+                            occ_type_text = occ_type_dict[occ_type.index.value]
+                            comment += f" [occurrence type = {occ_type_text}]"
+                if homogeneous_time != imas.ids_defs.EMPTY_INT and (time_mode is None or time_mode == homogeneous_time):
+                    if get_comment is True:
+                        availableidslist.append((idstype, occ, comment))
+                    elif get_version is True:
+                        availableidslist.append((idstype, occ, dd_version))
+                    elif get_comment is True and get_version is True:
+                        availableidslist.append(idstype, occ, comment, dd_version)
+                    else:
+                        availableidslist.append((idstype, occ))
+            except Exception as e:
+                logger.warning(
+                    f"Failed to retrieve IDS '{idstype}' with occurrence {occ}: {str(e)}. Skipping this IDS."
+                )
     return availableidslist
 
 
-def get_available_ids_and_times(db_entry_object, dd_update=False) -> list:
+def get_available_ids_and_times(db_entry_object) -> list:
     """
     The function `get_available_ids_and_times` retrieves available IDS names and corresponding time
     arrays from a given `db_entry_object`.
@@ -428,11 +431,9 @@ def get_available_ids_and_times(db_entry_object, dd_update=False) -> list:
             time_array = None
             try:
 
-                if dd_update:
-                    ids_object = db_entry_object.get(_ids_name, occurrence=occurrence, autoconvert=False)
-                    ids_object = imas.convert_ids(ids_object, db_entry_object.factory.version)
-                else:
-                    ids_object = db_entry_object.get(_ids_name, occurrence=occurrence, lazy=True, autoconvert=False)
+                ids_object = db_entry_object.get(
+                    _ids_name, occurrence=occurrence, lazy=True, autoconvert=False, ignore_unknown_dd_version=True
+                )
 
                 homogeneous_time = ids_object.ids_properties.homogeneous_time
                 if homogeneous_time == imas.ids_defs.IDS_TIME_MODE_UNKNOWN:
