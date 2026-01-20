@@ -18,7 +18,7 @@ from rich.table import Table
 from rich_argparse import RichHelpFormatter
 
 from idstools.database import DBMaster
-from idstools.utils.clihelper import dbentry_parser
+from idstools.utils.clihelper import uri_parser
 from idstools.utils.idshelper import (
     get_available_ids_and_occurrences,
     get_available_ids_and_times,
@@ -41,7 +41,7 @@ if __name__ == "__main__":
         prog="idslist",
         formatter_class=RichHelpFormatter,
         description=Markdown(description, style="argparse.text"),
-        parents=[dbentry_parser],
+        parents=[uri_parser],
     )
     parser.add_argument(
         "-y",
@@ -78,18 +78,12 @@ if __name__ == "__main__":
     if args.yaml is True:
         if args.fullarray:
             print("(-f fullarray) option is provided, can not show full array for yaml output")
-        for idsname, oc in get_available_ids_and_occurrences(connection, dd_update=args.dd_update):
+        for idsname, oc in get_available_ids_and_occurrences(connection):
             if args.ids:
                 if idsname != args.ids:
                     continue
 
-            if args.dd_update:
-                ids = connection.get(idsname, occurrence=oc, autoconvert=False, ignore_unknown_dd_version=True)
-                ids = imas.convert_ids(ids, connection.factory.version)
-            else:
-                ids = connection.get(
-                    idsname, occurrence=oc, lazy=True, autoconvert=False, ignore_unknown_dd_version=True
-                )
+            ids = connection.get(idsname, occurrence=oc, lazy=True, autoconvert=False, ignore_unknown_dd_version=True)
             homogeneous_time = ids.ids_properties.homogeneous_time
             if getattr(ids, "time", None) is None:
                 times = None
@@ -134,9 +128,7 @@ if __name__ == "__main__":
         table = Table(title="List of IDSes with occurrences and comments")
         table.add_column("IDS", style="magenta")
         table.add_column("COMMENT", style="green")
-        for idsname, oc, comment in get_available_ids_and_occurrences(
-            connection, get_comment=True, dd_update=args.dd_update
-        ):
+        for idsname, oc, comment in get_available_ids_and_occurrences(connection, get_comment=True):
             # If user wants to check specific ids type
             if args.ids:
                 if idsname != args.ids:
@@ -155,9 +147,7 @@ if __name__ == "__main__":
         table = Table(title="List of IDSes with Occurrences and DD Version")
         table.add_column("IDS", style="magenta")
         table.add_column("DD VERSION", style="green")
-        for idsname, oc, dd_version in get_available_ids_and_occurrences(
-            connection, get_version=True, dd_update=args.dd_update
-        ):
+        for idsname, oc, dd_version in get_available_ids_and_occurrences(connection, get_version=True):
             # If user wants to check specific ids type
             if args.ids:
                 if idsname != args.ids:
@@ -172,7 +162,7 @@ if __name__ == "__main__":
         connection.close()
         exit(0)
     else:
-        available_ids_and_times = get_available_ids_and_times(connection, dd_update=args.dd_update)
+        available_ids_and_times = get_available_ids_and_times(connection)
         not_applicable = "N/A"
         console = Console()
         table = Table(title="List of IDSes")
