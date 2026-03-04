@@ -4,22 +4,39 @@ import sys
 
 import matplotlib
 
-# Always use non-GUI backend in headless environments or when tkinter is not available
-# On Windows, DISPLAY is not typically set, so check platform
-if sys.platform.startswith("win") or "DISPLAY" in os.environ:
-    # Windows or Unix/Linux with DISPLAY - try TkAgg
+
+def _is_jupyter() -> bool:
+    """Return True if running inside a Jupyter notebook/lab kernel."""
+    try:
+        from IPython import get_ipython
+
+        shell = get_ipython()
+        return shell is not None and shell.__class__.__name__ == "ZMQInteractiveShell"
+    except ImportError:
+        return False
+
+
+# Select the appropriate matplotlib backend
+if _is_jupyter():
+    if "matplotlib.pyplot" not in sys.modules:
+        try:
+            import ipympl  # noqa: F401 - imported to check availability
+
+            matplotlib.use("widget")
+        except ImportError:
+            matplotlib.use("agg")
+elif sys.platform.startswith("win") or "DISPLAY" in os.environ:
+
     try:
         import tkinter  # noqa: F401 - imported to check availability
 
         matplotlib.use("TkAgg")
     except (ImportError, ModuleNotFoundError):
-        # tkinter not available, use non-GUI backend
         matplotlib.use("agg")
 else:
-    # Unix/Linux without DISPLAY
     matplotlib.use("agg")
 
-import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt  # noqa: E402
 
 logger = logging.getLogger("module")
 
