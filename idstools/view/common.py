@@ -129,6 +129,17 @@ class PlotCanvas:
         plt.suptitle(text, *args, **kwargs)
 
     def show(self, *args, **kwargs):
+        backend = matplotlib.get_backend().lower()
+        if _is_jupyter():
+            try:
+                from IPython.display import display
+
+                display(self.fig)
+                if backend != "module://matplotlib_ipympl.backend_nbagg":
+                   plt.close("all")
+            except ImportError:
+                pass
+            return
         wm = self.get_current_fig_manager()
         try:
             # Try to maximize the window (only works with TkAgg backend)
