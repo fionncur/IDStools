@@ -155,6 +155,9 @@ def get_details_from_uri(uri):
     if path_match:
         param["path"] = path_match.group(1)
         param["pathPresent"] = True
+    elif not uri.startswith("imas:"):
+        param["path"] = uri
+        param["pathPresent"] = True
     else:
         param["pathPresent"] = False
     param["legacyPresent"] = True
