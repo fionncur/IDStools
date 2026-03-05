@@ -167,7 +167,17 @@ if __name__ == "__main__":
             idses = ""
             mduris = []
             for mduri in args.md:
-                if "imas:" in mduri:
+                mduri = mduri.strip()
+                is_uri_or_path = (
+                    mduri.startswith("imas:")
+                    or mduri.startswith(".")
+                    or mduri.startswith("~")
+                    or mduri.lower().endswith((".nc"))
+                    or "/" in mduri
+                    or "\\" in mduri
+                    or os.path.exists(mduri)
+                )
+                if is_uri_or_path:
                     mduris.append(mduri)
                 else:
                     idses += mduri + ","
