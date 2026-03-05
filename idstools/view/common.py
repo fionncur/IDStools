@@ -136,7 +136,7 @@ class PlotCanvas:
 
                 display(self.fig)
                 if backend != "module://matplotlib_ipympl.backend_nbagg":
-                   plt.close("all")
+                    plt.close("all")
             except ImportError:
                 pass
             return
