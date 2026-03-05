@@ -168,14 +168,15 @@ if __name__ == "__main__":
             mduris = []
             for mduri in args.md:
                 mduri = mduri.strip()
+                uri_base = mduri.split("#")[0]
                 is_uri_or_path = (
                     mduri.startswith("imas:")
-                    or mduri.startswith(".")
-                    or mduri.startswith("~")
-                    or mduri.lower().endswith((".nc"))
-                    or "/" in mduri
-                    or "\\" in mduri
-                    or os.path.exists(mduri)
+                    or uri_base.startswith(".")
+                    or uri_base.startswith("~")
+                    or uri_base.lower().endswith((".nc"))
+                    or "/" in uri_base
+                    or "\\" in uri_base
+                    or os.path.exists(uri_base)
                 )
                 if is_uri_or_path:
                     mduris.append(mduri)
