@@ -127,6 +127,9 @@ where = ["."]
 include = ["idstools*"]
 exclude = ["*.pyc", "*.pyo"]
 
+[tool.setuptools.package-data]
+"idstools.scripts" = ["bin/*"]
+
 [tool.pytest.ini_options]
 minversion = "6.0"
 addopts = "--strict-markers"

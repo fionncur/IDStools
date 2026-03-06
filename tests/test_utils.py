@@ -177,7 +177,7 @@ def run_idstools_script(script_name, args, timeout=30):
         cmd = [script_cmd] + args
     else:
         # Script not in PATH (common in editable installs), run with python
-        script_path = Path(__file__).parent.parent / "scripts" / script_name
+        script_path = Path(__file__).parent.parent / "idstools" / "scripts" / "bin" / script_name
         if not script_path.exists():
             raise FileNotFoundError(f"Script not found: {script_path}")
         # Use sys.executable to get the current Python interpreter
