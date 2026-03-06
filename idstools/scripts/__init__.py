@@ -14,318 +14,309 @@ import sys
 def _load_script_main(script_name):
     """
     Dynamically load and execute a root-level script as a main function.
-    
+
     Args:
         script_name (str): Name of the script file (without extension)
-        
+
     Returns:
         function: A callable that executes the script's main logic
     """
-    script_path = os.path.join(
-        os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
-        'scripts',
-        script_name
-    )
-    
+    script_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "scripts", script_name)
+
     if not os.path.exists(script_path):
         raise FileNotFoundError(f"Script not found: {script_path}")
-    
+
     def main():
         """Execute the script's main function."""
         # Read and execute the script directly
-        with open(script_path, 'r', encoding='utf-8') as f:
+        with open(script_path, "r", encoding="utf-8") as f:
             script_code = f.read()
-        
+
         # Create a namespace for execution
-        namespace = {'__name__': '__main__', '__file__': script_path}
-        
+        namespace = {"__name__": "__main__", "__file__": script_path}
+
         # Execute the script code
         exec(script_code, namespace)
-    
+
     return main
 
 
 # Create wrapper functions for each script
 def plotequilibrium():
     """Plot plasma equilibrium from equilibrium IDS."""
-    _load_script_main('plotequilibrium')()
+    _load_script_main("plotequilibrium")()
 
 
 def idslist():
     """List IDS shots and runs from a database."""
-    _load_script_main('idslist')()
+    _load_script_main("idslist")()
 
 
 def idsprint():
     """Print IDS structure and data."""
-    _load_script_main('idsprint')()
+    _load_script_main("idsprint")()
 
 
 def idsperf():
     """Analyze and display IDS performance metrics."""
-    _load_script_main('idsperf')()
+    _load_script_main("idsperf")()
 
 
 def plothcd():
     """Plot heating and current drive data."""
-    _load_script_main('plothcd')()
+    _load_script_main("plothcd")()
 
 
 def plotpressure():
     """Plot pressure profiles."""
-    _load_script_main('plotpressure')()
+    _load_script_main("plotpressure")()
 
 
 def plotrotation():
     """Plot rotation and velocity profiles."""
-    _load_script_main('plotrotation')()
+    _load_script_main("plotrotation")()
 
 
 def plotequicomp():
     """Compare equilibrium data."""
-    _load_script_main('plotequicomp')()
+    _load_script_main("plotequicomp")()
 
 
 def plotcoresources():
     """Plot core resource data."""
-    _load_script_main('plotcoresources')()
+    _load_script_main("plotcoresources")()
 
 
 def plotkineticprofiles():
     """Plot kinetic profiles."""
-    _load_script_main('plotkineticprofiles')()
+    _load_script_main("plotkineticprofiles")()
 
 
 def plothcdwaves():
     """Plot HCD wave data."""
-    _load_script_main('plothcdwaves')()
+    _load_script_main("plothcdwaves")()
 
 
 def plotecray():
     """Plot EC ray tracing data."""
-    _load_script_main('plotecray')()
+    _load_script_main("plotecray")()
 
 
 def plothcddistributions():
     """Plot HCD distributions."""
-    _load_script_main('plothcddistributions')()
+    _load_script_main("plothcddistributions")()
 
 
 def plotedgeprofiles():
     """Plot edge profile data."""
-    _load_script_main('plotedgeprofiles')()
+    _load_script_main("plotedgeprofiles")()
 
 
 def plotmachinedescription():
     """Plot machine description geometry."""
-    _load_script_main('plotmachinedescription')()
+    _load_script_main("plotmachinedescription")()
 
 
 def plotspectrometry():
     """Plot spectrometry data."""
-    _load_script_main('plotspectrometry')()
+    _load_script_main("plotspectrometry")()
 
 
 def plotneutron():
     """Plot neutron diagnostic data."""
-    _load_script_main('plotneutron')()
+    _load_script_main("plotneutron")()
 
 
 def ploteccomposition():
     """Plot electron cyclotron composition data."""
-    _load_script_main('ploteccomposition')()
+    _load_script_main("ploteccomposition")()
 
 
 def plotecstrayradiation():
     """Plot EC stray radiation."""
-    _load_script_main('plotecstrayradiation')()
+    _load_script_main("plotecstrayradiation")()
 
 
 def plotscenario():
     """Plot scenario data."""
-    _load_script_main('plotscenario')()
+    _load_script_main("plotscenario")()
 
 
 def idsquery():
     """Query IDS data."""
-    _load_script_main('idsquery')()
+    _load_script_main("idsquery")()
 
 
 def idsresample():
     """Resample IDS data."""
-    _load_script_main('idsresample')()
+    _load_script_main("idsresample")()
 
 
 def idsdiff():
     """Diff two IDS files."""
-    _load_script_main('idsdiff')()
+    _load_script_main("idsdiff")()
 
 
 def idscp():
     """Copy IDS data."""
-    _load_script_main('idscp')()
+    _load_script_main("idscp")()
 
 
 def idssize():
     """Display IDS size information."""
-    _load_script_main('idssize')()
+    _load_script_main("idssize")()
 
 
 def idsrescale_equilibrium():
     """Rescale equilibrium data."""
-    _load_script_main('idsrescale_equilibrium')()
+    _load_script_main("idsrescale_equilibrium")()
 
 
 def idsshift_equilibrium():
     """Shift equilibrium coordinates."""
-    _load_script_main('idsshift_equilibrium')()
+    _load_script_main("idsshift_equilibrium")()
 
 
 def idsrosettacode():
     """Convert between IDS formats."""
-    _load_script_main('idsrosettacode')()
+    _load_script_main("idsrosettacode")()
 
 
 def eqdsk2ids():
     """Convert EQDSK file to IDS format."""
-    _load_script_main('eqdsk2ids')()
+    _load_script_main("eqdsk2ids")()
 
 
 def dbconverter():
     """Convert database formats."""
-    _load_script_main('dbconverter')()
+    _load_script_main("dbconverter")()
 
 
 def dbscraper():
     """Scrape database metadata."""
-    _load_script_main('dbscraper')()
+    _load_script_main("dbscraper")()
 
 
 def dbselector():
     """Select data from database."""
-    _load_script_main('dbselector')()
+    _load_script_main("dbselector")()
 
 
 def dblist():
     """List database contents."""
-    _load_script_main('dblist')()
+    _load_script_main("dblist")()
 
 
 def dbperf():
     """Analyze database performance."""
-    _load_script_main('dbperf')()
+    _load_script_main("dbperf")()
 
 
 def printcoresources():
     """Print core resource information."""
-    _load_script_main('printcoresources')()
+    _load_script_main("printcoresources")()
 
 
 def printplasmacompo():
     """Print plasma composition."""
-    _load_script_main('printplasmacompo')()
+    _load_script_main("printplasmacompo")()
 
 
 def printfluxes():
     """Print magnetics flux values."""
-    _load_script_main('printfluxes')()
+    _load_script_main("printfluxes")()
 
 
 def scenario_status():
     """Show scenario status."""
-    _load_script_main('scenario_status')()
+    _load_script_main("scenario_status")()
 
 
 def scenario_summary():
     """Show scenario summary."""
-    _load_script_main('scenario_summary')()
-
-
-def scenario_status():
-    """Show scenario status."""
-    _load_script_main('scenario_status')()
+    _load_script_main("scenario_summary")()
 
 
 def disruption_summary():
     """Show disruption summary."""
-    _load_script_main('disruption_summary')()
+    _load_script_main("disruption_summary")()
 
 
 def create_db_entry():
     """Create database entry."""
-    _load_script_main('create_db_entry')()
+    _load_script_main("create_db_entry")()
 
 
 def create_db_entry_disruption():
     """Create disruption database entry."""
-    _load_script_main('create_db_entry_disruption')()
+    _load_script_main("create_db_entry_disruption")()
 
 
 def show_db_entry():
     """Display database entry."""
-    _load_script_main('show_db_entry')()
+    _load_script_main("show_db_entry")()
 
 
 def watch_db_entry():
     """Watch database entry for changes."""
-    _load_script_main('watch_db_entry')()
+    _load_script_main("watch_db_entry")()
 
 
 def md_status():
     """Show machine description status."""
-    _load_script_main('md_status')()
+    _load_script_main("md_status")()
 
 
 def md_summary():
     """Show machine description summary."""
-    _load_script_main('md_summary')()
+    _load_script_main("md_summary")()
 
 
 __all__ = [
-    'plotequilibrium',
-    'idslist',
-    'idsprint',
-    'idsperf',
-    'plothcd',
-    'plotpressure',
-    'plotrotation',
-    'plotequicomp',
-    'plotcoresources',
-    'plotkineticprofiles',
-    'plothcdwaves',
-    'plotecray',
-    'plothcddistributions',
-    'plotedgeprofiles',
-    'plotmachinedescription',
-    'plotspectrometry',
-    'plotneutron',
-    'ploteccomposition',
-    'plotecstrayradiation',
-    'plotscenario',
-    'idsquery',
-    'idsresample',
-    'idsdiff',
-    'idscp',
-    'idssize',
-    'idsrescale_equilibrium',
-    'idsshift_equilibrium',
-    'idsrosettacode',
-    'eqdsk2ids',
-    'dbconverter',
-    'dbscraper',
-    'dbselector',
-    'dblist',
-    'dbperf',
-    'printcoresources',
-    'printplasmacompo',
-    'printfluxes',
-    'scenario_status',
-    'scenario_summary',
-    'disruption_summary',
-    'create_db_entry',
-    'create_db_entry_disruption',
-    'show_db_entry',
-    'watch_db_entry',
-    'md_status',
-    'md_summary',
+    "plotequilibrium",
+    "idslist",
+    "idsprint",
+    "idsperf",
+    "plothcd",
+    "plotpressure",
+    "plotrotation",
+    "plotequicomp",
+    "plotcoresources",
+    "plotkineticprofiles",
+    "plothcdwaves",
+    "plotecray",
+    "plothcddistributions",
+    "plotedgeprofiles",
+    "plotmachinedescription",
+    "plotspectrometry",
+    "plotneutron",
+    "ploteccomposition",
+    "plotecstrayradiation",
+    "plotscenario",
+    "idsquery",
+    "idsresample",
+    "idsdiff",
+    "idscp",
+    "idssize",
+    "idsrescale_equilibrium",
+    "idsshift_equilibrium",
+    "idsrosettacode",
+    "eqdsk2ids",
+    "dbconverter",
+    "dbscraper",
+    "dbselector",
+    "dblist",
+    "dbperf",
+    "printcoresources",
+    "printplasmacompo",
+    "printfluxes",
+    "scenario_status",
+    "scenario_summary",
+    "disruption_summary",
+    "create_db_entry",
+    "create_db_entry_disruption",
+    "show_db_entry",
+    "watch_db_entry",
+    "md_status",
+    "md_summary",
 ]
