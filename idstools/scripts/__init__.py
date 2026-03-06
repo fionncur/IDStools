@@ -30,10 +30,15 @@ def _load_script_main(script_name):
 
     def main():
         """Execute the script's main function."""
+        import builtins
+
         with open(script_path, "r", encoding="utf-8") as f:
             script_code = f.read()
-        namespace = {"__name__": "__main__", "__file__": script_path}
-        exec(script_code, namespace)
+        namespace = {"__name__": "__main__", "__file__": script_path, "__builtins__": builtins}
+        try:
+            exec(script_code, namespace)
+        except SystemExit:
+            pass
 
     return main
 
@@ -335,29 +340,31 @@ def register_magics():
         >>> # %plotequilibrium -u "iter_scenario_53298_seq1_DD4.nc"
     """
     try:
+        import shlex
+        import sys
         from IPython import get_ipython
-        from IPython.core.magic import register_line_magic
 
         ip = get_ipython()
         if ip is None:
             return
 
-        import sys
-
         for name in __all__:
-            func = globals()[name]
 
-            # Create a closure to capture name/func correctly
-            def _make_magic(fn):
+            def _make_magic(magic_name):
                 def magic_fn(line):
-                    sys.argv = [fn.__name__] + (line.split() if line else [])
-                    fn()
+                    orig_argv = sys.argv[:]
+                    try:
+                        sys.argv = [magic_name] + (shlex.split(line) if line.strip() else [])
+                        _load_script_main(magic_name)()
+                    except SystemExit:
+                        pass
+                    finally:
+                        sys.argv = orig_argv
 
-                magic_fn.__name__ = fn.__name__
-                magic_fn.__doc__ = fn.__doc__
+                magic_fn.__name__ = magic_name
                 return magic_fn
 
-            register_line_magic(_make_magic(func))
+            ip.register_magic_function(_make_magic(name), magic_kind="line", magic_name=name)
 
     except ImportError:
         pass
