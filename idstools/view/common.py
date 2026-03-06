@@ -6,12 +6,17 @@ import matplotlib
 
 
 def _is_jupyter() -> bool:
-    """Return True if running inside a Jupyter notebook/lab kernel."""
+    """Return True if running inside a Jupyter notebook/lab/Colab kernel."""
     try:
         from IPython import get_ipython
 
         shell = get_ipython()
-        return shell is not None and shell.__class__.__name__ == "ZMQInteractiveShell"
+        if shell is None:
+            return False
+        shell_class = shell.__class__.__name__
+        # ZMQInteractiveShell: Jupyter Notebook/Lab
+        # Shell: Google Colab
+        return shell_class in ("ZMQInteractiveShell", "Shell")
     except ImportError:
         return False
 
