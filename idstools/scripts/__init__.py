@@ -317,3 +317,47 @@ __all__ = [
     "md_status",
     "md_summary",
 ]
+
+
+def register_magics():
+    """
+    Register all idstools CLI tools as IPython line magics.
+
+    After calling this, you can use ``%plotequilibrium``, ``%idslist``, etc.
+    directly in Jupyter/Colab cells instead of ``!plotequilibrium``.
+
+    This is called automatically when ``idstools.scripts`` is imported inside
+    a Jupyter or Colab kernel.
+
+    Examples:
+        >>> import idstools.scripts  # magics auto-registered in Jupyter/Colab
+        >>> # Then in a cell:
+        >>> # %plotequilibrium -u "iter_scenario_53298_seq1_DD4.nc"
+    """
+    try:
+        from IPython import get_ipython
+        from IPython.core.magic import register_line_magic
+
+        ip = get_ipython()
+        if ip is None:
+            return
+
+        import sys
+
+        for name in __all__:
+            func = globals()[name]
+
+            # Create a closure to capture name/func correctly
+            def _make_magic(fn):
+                def magic_fn(line):
+                    sys.argv = [fn.__name__] + (line.split() if line else [])
+                    fn()
+
+                magic_fn.__name__ = fn.__name__
+                magic_fn.__doc__ = fn.__doc__
+                return magic_fn
+
+            register_line_magic(_make_magic(func))
+
+    except ImportError:
+        pass
