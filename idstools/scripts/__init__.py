@@ -2,40 +2,37 @@
 CLI script entry points for idstools.
 
 These modules provide command-line entry points for the visualization and
-analysis tools. Each entry point corresponds to a script in the root-level
-scripts/ directory.
+analysis tools. Each entry point corresponds to a script in the bin/ directory
+within this package, which is included in the installed package data.
 """
 
-import importlib.util
 import os
-import sys
 
 
 def _load_script_main(script_name):
     """
-    Dynamically load and execute a root-level script as a main function.
+    Load and execute a packaged script as a main function.
+
+    The scripts are stored in the bin/ subdirectory of this package and are
+    included as package data, so they are always available at a fixed path
+    relative to this module regardless of how the package was installed.
 
     Args:
-        script_name (str): Name of the script file (without extension)
+        script_name (str): Name of the script file
 
     Returns:
         function: A callable that executes the script's main logic
     """
-    script_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "scripts", script_name)
+    script_path = os.path.join(os.path.dirname(__file__), "bin", script_name)
 
     if not os.path.exists(script_path):
         raise FileNotFoundError(f"Script not found: {script_path}")
 
     def main():
         """Execute the script's main function."""
-        # Read and execute the script directly
         with open(script_path, "r", encoding="utf-8") as f:
             script_code = f.read()
-
-        # Create a namespace for execution
         namespace = {"__name__": "__main__", "__file__": script_path}
-
-        # Execute the script code
         exec(script_code, namespace)
 
     return main
