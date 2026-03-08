@@ -1,7 +1,7 @@
 """
 This module provides compute functions and classes for core_transport ids data
 
-`refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`_.
+`refer data dictionary <https://imas-data-dictionary.readthedocs.io/en/latest/>`_.
 
 """
 
@@ -13,6 +13,14 @@ logger = logging.getLogger("module")
 
 
 class CoreTransportCompute:
+    """This class provides compute functions for core transport ids.
+
+    Attributes:
+        ids (object): The core transport IDS (Integrated Data Structure) object containing
+            transport coefficients and flux data describing particle and energy transport
+            in the core plasma region.
+    """
+
     def __init__(self, ids):
         self.ids = ids
 

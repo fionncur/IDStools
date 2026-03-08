@@ -9,10 +9,6 @@ build:
       - git fetch --unshallow || true
     post_install:
       - pip install --upgrade pip
-    post_build:
-      - make -C docs realclean
-      - make -C docs autogen
-      - make -C docs man
 
 python:
   install:

@@ -15,7 +15,13 @@ logger = logging.getLogger("module")
 
 
 class MagneticsCompute:
-    """This class provides compute functions for magnetics ids"""
+    """This class provides compute functions for magnetics ids.
+
+    Attributes:
+        ids (object): The magnetics IDS (Integrated Data Structure) object containing
+            magnetic measurement data including field probes, flux loops, Rogowski coils,
+            and shunt measurements.
+    """
 
     def __init__(self, ids: object):
         """Initialization MagneticsCompute object.

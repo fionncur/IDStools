@@ -1,7 +1,7 @@
 """
 This module provides compute functions and classes for edge_profiles ids data
 
-`refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`_.
+`refer data dictionary <https://imas-data-dictionary.readthedocs.io/en/latest/>`_.
 
 """
 
@@ -19,6 +19,14 @@ logger = logging.getLogger("module")
 
 
 class EdgeProfilesCompute:
+    """This class provides compute functions for edge profiles ids.
+
+    Attributes:
+        ids (object): The edge profiles IDS (Integrated Data Structure) object containing
+            edge and scrape-off layer plasma profile data including density, temperature,
+            and potential profiles near the plasma boundary.
+    """
+
     def __init__(self, ids):
         self.ids = ids
 
@@ -49,9 +57,13 @@ class EdgeProfilesCompute:
             .. code-block:: python
 
                 import imas
-                connection = imas.DBEntry("imas:mdsplus?user=public;pulse=123276;run=1;database=ITER;version=3", "r")
+                from idstools.compute.edge_profiles import EdgeProfilesCompute
+
+                connection = imas.DBEntry(
+                    \"imas:mdsplus?user=public;pulse=123276;run=1;database=ITER;version=3\", \"r\")
                 idsObj = connection.get('edge_profiles')
-                result = EdgeProfilesCompute.getPlasmaCompositionWithSpeciesConcentration(idsObj, 0)
+                connection.close()
+                result = EdgeProfilesCompute.get_plasma_composition_with_species_concentration(idsObj, 0)
 
                 {'0':
                     {'a': 2.0,

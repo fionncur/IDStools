@@ -10,6 +10,14 @@ CHANNEL_NAME_PATTERN = r"^(\d{2}\.\w{2}) CH#(\d{2}) Spectrum (\d{1})$"
 
 
 class SpectrometerVisibleCompute:
+    """This class provides compute functions for visible spectrometer ids.
+
+    Attributes:
+        ids_object (object): The visible spectrometer IDS (Integrated Data Structure) object
+            containing spectroscopic measurements from visible light observations including
+            channel definitions and spectral data.
+    """
+
     def __init__(self, ids_object):
         self.ids_object = ids_object
 

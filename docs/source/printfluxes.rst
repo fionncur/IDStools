@@ -6,7 +6,7 @@
 models. It uses core_transport ids
 It gives information about Mass of atom, Nuclear charge and Ion charge
 along with particles and nergy flux of ions.
-`refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`_.
+`refer data dictionary <https://imas-data-dictionary.readthedocs.io/en/latest/>`_.
 
 *******************
  Syntax printfluxes
