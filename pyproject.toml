@@ -65,7 +65,7 @@ dynamic = ["version"]
 
 
 [project.urls]
-homepage = "https://git.iter.org/projects/IMAS/repos/idstools/browse"
+homepage = "https://github.com/iterorganization/IDStools"
 
 [tool.setuptools.packages.find]
 where = ["."]
@@ -102,6 +102,7 @@ ignore = ["E203", "W503"]
 all = ["imas-idstools[test,docs]"]
 docs = [
     "sphinx>=6.0.0,<7.0.0",
+    "astroid<4",
     "numpy",
     "pyparsing",
     "python-dateutil",

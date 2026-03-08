@@ -4,7 +4,7 @@
 
 *plotkineticprofiles* shows plasma kinetic profiles from the
 core_profiles IDSs
-`refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`_.
+`refer data dictionary <https://imas-data-dictionary.readthedocs.io/en/latest/>`_.
 
 ****************************
  Syntax plotkineticprofiles

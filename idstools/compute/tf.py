@@ -1,7 +1,7 @@
 """
 This module provides compute functions and classes for tf ids data
 
-`refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`_.
+`refer data dictionary <https://imas-data-dictionary.readthedocs.io/en/latest/>`_.
 
 """
 
@@ -16,10 +16,16 @@ logger = logging.getLogger("module")
 
 
 class TFCompute:
-    """This class provides compute functions for tf ids"""
+    """This class provides compute functions for tf ids.
+
+    Attributes:
+        ids (object): The toroidal field (TF) IDS (Integrated Data Structure) object
+            containing toroidal field coil data including coil geometry, conductors,
+            electrical properties, and mechanical support information.
+    """
 
     def __init__(self, ids: object):
-        """Initialization PfPassiveCompute object.
+        """Initialization TFCompute object.
 
         Args:
             ids : tf ids object

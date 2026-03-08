@@ -1,7 +1,7 @@
 """
 This module provides compute functions and classes for pf_passive ids data
 
-`refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`_.
+`refer data dictionary <https://imas-data-dictionary.readthedocs.io/en/latest/>`_.
 
 """
 
@@ -13,7 +13,13 @@ logger = logging.getLogger("module")
 
 
 class PfPassiveCompute:
-    """This class provides compute functions for pf_passive ids"""
+    """This class provides compute functions for pf_passive ids.
+
+    Attributes:
+        ids (object): The PF passive IDS (Integrated Data Structure) object containing
+            passive poloidal field loop data including loop geometry, mechanical properties,
+            and electromagnetic response parameters.
+    """
 
     def __init__(self, ids: object):
         """Initialization PfPassiveCompute object.

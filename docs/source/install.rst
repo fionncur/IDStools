@@ -15,7 +15,7 @@ Install using pip
 
 .. code-block:: bash
 
-   $ git clone ssh://git@git.iter.org/imas/idstools.git
+   $ git clone https://github.com/iterorganization/IDStools.git
    $ pip install --upgrade pip
    $ pip install --upgrade wheel setuptools
    $ pip install .
@@ -24,7 +24,7 @@ Also it is possible to install it in the Python virtual environment
 
 .. code-block:: bash
 
-   $ git clone ssh://git@git.iter.org/imas/idstools.git
+   $ git clone https://github.com/iterorganization/IDStools.git
    $ cd idstools
    $ python -m venv idsenv
    $ source idsenv/bin/activate
@@ -60,14 +60,14 @@ Also it is possible to install it in the Python virtual environment
 ****************
 
 .. note ::
-   IDStools is currently hosted in ITER repository server 
-   Get access to https://git.iter.org/projects/IMAS/repos/idstools  repository if you don't it have already
+   IDStools is currently hosted on GitHub.
+   Get access to https://github.com/iterorganization/IDStools repository if you don't have it already
 
 Clone *IDStools* repository.
 
 .. code-block:: bash
 
-   $ git clone ssh://git@git.iter.org/imas/idstools.git
+   $ git clone https://github.com/iterorganization/IDStools.git
 
 If you wish to include additional tools or expand functionalities,
 submit pull requests.
@@ -104,7 +104,6 @@ To build the *IDStools* documentation, execute:
 
    $ pip install .[docs]
    $ make -C docs realclean
-   $ make -C docs autogen
    $ make -C docs html
    $ make -C docs man
 

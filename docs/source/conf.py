@@ -11,7 +11,6 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
 import datetime
-import json
 import os
 import re
 import sys
@@ -33,46 +32,21 @@ author = "ITER Organization"
 # Get release
 release = idstools.__version__
 
-# Get version
+# Get version (setuptools-scm format: "1.2.3" or "1.2.3+devN+gHASH")
 versionList = idstools.__version__.split("+")
-version = ""
-is_develop = False
 if len(versionList) == 1:
     version = versionList[0]
-if len(versionList) == 2:
+    is_develop = False
+else:
     version = f"{versionList[0]}dev"
     is_develop = True
 
+# Available in Jinja2 templates (e.g. to show a dev banner)
 html_context = {"is_develop": is_develop}
 
 print(f"version : {version}, release : {release}")
 
 language = "en"
-
-# {"version": "5.0/index.html#", "title": "5.0", "aliases": ["5.0"]}
-switcher_version = ""
-if "dev" in version:
-    switcher_version = "devdocs"
-    version_string = {
-        "title": "devdocs",
-        "version": "devdocs/index.html#",
-        "aliases": ["devdocs"],
-    }
-else:
-    switcher_version = f"{version}"
-    version_string = {
-        "title": release,
-        "version": f"{release}/index.html#",
-        "aliases": [release, "latest"],
-    }
-
-
-print(f"release : {release}")
-print(f"version_string : {version_string}")
-
-# Open a file in write mode
-with open("_static/version.json", "w") as file:
-    json.dump(version_string, file)
 
 # -- Intersphinx configuration -----------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/extensions/intersphinx.html#configuration
@@ -107,18 +81,19 @@ extensions = [
     # "sphinx_toolbox.collapse",
     # "sphinxcontrib.mermaid",
     "sphinx_immaterial",
-    "sphinx_immaterial.apidoc.python.apigen",
     "sphinxcontrib.programoutput",
 ]
 
-autoapi_dirs = ['../../idstools']
+autoapi_dirs = [os.path.join(root_path, "idstools")]
 autoapi_type = "python"
+autoapi_file_patterns = ["*.py"]
+autoapi_root = "autoapi"
+autoapi_add_toctree_entry = False
 autoapi_template_dir = "_templates/autoapi"
 autoapi_keep_files = True
 autoapi_member_order = 'groupwise'
 # Ignore import resolution warnings for dynamically generated modules
 autoapi_ignore = ['*/_version.py', '*/test/*']  # _version.py is generated at build time, test modules not documented
-autoapi_python_use_implicit_namespaces = True
 autoapi_python_class_content = 'both'
 autoapi_options = [
     "members",
@@ -184,11 +159,11 @@ html_logo = "_static/idstools-48.png"
 #     "navbar_end": ["theme-switcher", "version-switcher", "navbar-icon-links"],
 # }
 html_theme_options = {
-    "site_url": "https://sharepoint.iter.org/departments/POP/CM/IMDesign/Code%20Documentation/idstools-doc/latest.html",
-    "repo_url": "https://git.iter.org/projects/IMAS/repos/idstools",
+    "site_url": "https://idstools.readthedocs.io/",
+    "repo_url": "https://github.com/iterorganization/IDStools",
     "repo_name": "IDStools",
     "icon": {
-        "repo": "fontawesome/brands/bitbucket",
+        "repo": "fontawesome/brands/github",
     },
     "features": [
         # "navigation.expand",
@@ -230,8 +205,7 @@ html_theme_options = {
             },
         },
     ],
-    "version_dropdown": True,
-    "version_json": "../versions.js",
+    # Version dropdown is handled by ReadTheDocs' built-in flyout
 }
 # templates_path = ["_templates"]
 object_description_options = []
@@ -264,9 +238,6 @@ html_static_path = ["_static"]
 html_file_suffix = ".html"
 htmlhelp_basename = "IDStools"
 
-# Configuration of sphinx.ext.autosummary
-# https://www.sphinx-doc.org/en/master/usage/extensions/autosummary.html
-autosummary_generate = True
 
 
 # Configuration of sphinx.ext.napoleon
@@ -329,7 +300,7 @@ napoleon_type_aliases = {
     "Series": "~pandas.Series",
     "DataFrame": "~pandas.DataFrame",
     "Categorical": "~pandas.Categorical",
-    "Path": "~~pathlib.Path",
+    "Path": "~pathlib.Path",
     # objects with abbreviated namespace (from pandas)
     "pd.Index": "~pandas.Index",
     "pd.NaT": "~pandas.NaT",
