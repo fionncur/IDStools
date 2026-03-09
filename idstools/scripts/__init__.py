@@ -38,7 +38,7 @@ def _load_script_main(script_name):
         try:
             exec(script_code, namespace)
         except SystemExit:
-            pass
+            raise
 
     return main
 
