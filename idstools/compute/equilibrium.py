@@ -1,7 +1,7 @@
 """
 This module provides compute functions and classes for equilibrium ids data
 
-`refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`_.
+`refer data dictionary <https://imas-data-dictionary.readthedocs.io/en/latest/>`_.
 
 """
 
@@ -20,7 +20,13 @@ logger = logging.getLogger("module")
 
 
 class EquilibriumCompute:
-    """This class provides compute functions for equilibrium ids"""
+    """This class provides compute functions for equilibrium ids.
+
+    Attributes:
+        ids (object): The equilibrium IDS (Integrated Data Structure) object containing
+            time-resolved equilibrium data including profiles, magnetic field information,
+            constraints, and boundary information.
+    """
 
     def __init__(self, ids: object):
         """Initialization EquilibriumCompute object.

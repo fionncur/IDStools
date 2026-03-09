@@ -1,7 +1,7 @@
 """
 This module provides view functions and classes for tf ids data
 
-`refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`_.
+`refer data dictionary <https://imas-data-dictionary.readthedocs.io/en/latest/>`_.
 
 """
 
