@@ -2,6 +2,9 @@ name: linting-and-code-formatting
 
 on: 
   push:
+    branches:
+      - main
+      - develop
   pull_request:
     types: [opened, synchronize, reopened]
 
