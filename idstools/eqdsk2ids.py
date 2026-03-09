@@ -414,7 +414,7 @@ def map__GEQDSK_to_ids(geqdsk, eq):
         ids.ids_properties.provider = os.getenv("USER")
 
         ids.code.name = "IDStools/eqdsk2ids"
-        ids.code.repository = "https://git.iter.org/projects/IMAS/repos/idstools/browse"
+        ids.code.repository = "https://github.com/iterorganization/IDStools"
         ids.code.commit = GIT_REV
         ids.code.version = __version__
         ids.code.output_flag.resize(1)

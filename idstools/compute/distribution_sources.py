@@ -13,6 +13,14 @@ logger = logging.getLogger("module")
 
 
 class DistributionSourcesCompute:
+    """This class provides compute functions for distribution sources ids.
+
+    Attributes:
+        ids (object): The distribution sources IDS (Integrated Data Structure) object containing
+            source/sink data and parameters relevant to fast particle and energetic ion distributions
+            such as neutral beams or fusion products.
+    """
+
     def __init__(self, ids):
         self.ids = ids
 

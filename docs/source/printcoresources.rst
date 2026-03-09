@@ -7,7 +7,7 @@ It gives information about Mass of atom, Nuclear charge and Ion charge
 along with particles and energy flux of ions.
 It uses core_sources ids
 
-`refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`_.
+`refer data dictionary <https://imas-data-dictionary.readthedocs.io/en/latest/>`_.
 
 *************************
  Syntax printcoresources

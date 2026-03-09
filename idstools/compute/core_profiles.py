@@ -1,7 +1,7 @@
 """
 This module provides compute functions and classes for core_profiles ids data
 
-`refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`_.
+`refer data dictionary <https://imas-data-dictionary.readthedocs.io/en/latest/>`_.
 
 """
 
@@ -23,6 +23,14 @@ logger = logging.getLogger("module")
 
 
 class CoreProfilesCompute:
+    """This class provides compute functions for core profiles ids.
+
+    Attributes:
+        ids (object): The core profiles IDS (Integrated Data Structure) object containing
+            plasma profile data including temperature, density, pressure, and rotation profiles.
+        volume (object, optional): Optional volume data object for spatial integration and analysis.
+    """
+
     def __init__(self, ids, volume=None):
         self.ids = ids
         self.volume = volume

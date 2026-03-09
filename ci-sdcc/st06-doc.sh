@@ -25,7 +25,6 @@ pip list
 
 # Build documentation
 make -C docs realclean
-make -C docs autogen
 make -C docs html 
 make -C docs man
 

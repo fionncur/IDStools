@@ -1,7 +1,7 @@
 """
 This module provides compute functions and classes for summary ids data
 
-`more about summary ids <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/CI/latest.html>`_.
+`more about summary ids <https://imas-data-dictionary.readthedocs.io/en/latest/>`_.
 
 """
 
@@ -14,7 +14,13 @@ EMPTY_DOUBLE = -9e40
 
 
 class SummaryCompute:
-    """This class provides compute functions for summary ids"""
+    """This class provides compute functions for summary ids.
+
+    Attributes:
+        ids (object): The summary IDS (Integrated Data Structure) object containing
+            high-level summary data and indices providing quick access to important
+            discharge parameters and data references.
+    """
 
     def __init__(self, ids):
         """Initialization SummaryCompute object.

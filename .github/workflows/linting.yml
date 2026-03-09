@@ -2,6 +2,9 @@ name: linting-and-code-formatting
 
 on: 
   push:
+    branches:
+      - main
+      - develop
   pull_request:
     types: [opened, synchronize, reopened]
 
@@ -30,7 +33,7 @@ jobs:
       - name: Check formatting of code with black
         run: |
           black --check -l 120 idstools
-          black --check -l 120 scripts/*
+          black --check -l 120 idstools/scripts/bin/*
 
       - name: Check linting with flake8
         run: flake8 --max-line-length=120 --ignore=E203,W503 idstools

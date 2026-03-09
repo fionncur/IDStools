@@ -35,9 +35,11 @@ if __name__ == "__main__":
         default=[],
         help="""Provide machine descriptions that you need to plot\n
     with uris for example\n
-    "imas:mdsplus?user=public;pulse=116000;run=4;database=ITER_MD;version=3#wall"\n
-    "imas:mdsplus?user=public;pulse=116000;run=4;database=ITER_MD#wall:0/description2d[0]/vessel/unit[:]"
-    "imas:mdsplus?user=public;pulse=116000;run=4;database=ITER_MD;version=3"\n
+    "imas:mdsplus?user=public;pulse=116000;run=4;database=ITER_MD;version=3#wall",
+    "imas:mdsplus?user=public;pulse=116000;run=4;database=ITER_MD#wall:0/description2d[0]/vessel/unit[:]",
+    "imas:mdsplus?user=public;pulse=116000;run=4;database=ITER_MD;version=3",
+    "imas:hdf5?path=./testdb",
+    "testpulse.nc"
     """,
     )
     parser.add_argument(
@@ -63,7 +65,7 @@ if __name__ == "__main__":
     ids_data = get_md_data(args.uri, args.dd_update)
 
     # Initialization
-    mdcanvas = PlotCanvas(1, 1)
+    mdcanvas = PlotCanvas(1, 1, figsize=(10, 10))
     mdcanvas.update_style(args.rc)
     ax = mdcanvas.add_axes(title="", xlabel="R (m)", ylabel="Z (m)", row=0, col=0)
     plot_machine_description(ax, ids_data)

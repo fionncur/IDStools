@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-# ids_shift_eq -pi 131035 -ri 124 -po 123001 -ro 1 --shift -0.01 -u bonninx -d iter
-
 import argparse
 import logging
 import os
@@ -18,12 +16,11 @@ from idstools.utils.idshelper import get_ids_types
 from idstools.utils.idslogger import setup_logger
 
 logger = setup_logger("module", stdout_level=logging.INFO)
-#
 if __name__ == "__main__":
     # Management of input arguments
     parser = argparse.ArgumentParser(
-        description="""Rigidly shifts vertically an equilibrium, storing the output into another
-        entry of the same DB. replaced by ids_shift_eq""",
+        description="Rescaling an equilibrium magnetic field, storing the output into another entry of the same "
+        "DB. replaced by ids_rescale_eq",
         formatter_class=RichHelpFormatter,
     )
     parser.add_argument(
@@ -31,14 +28,21 @@ if __name__ == "__main__":
         "--src",
         type=str,
         required=True,
-        help="source uri",
+        help="source uri (e.g. imas:hdf5?path=./testdb1 or ./testpulse1.nc)",
     )
     parser.add_argument(
         "-d",
         "--dest",
         type=str,
         required=True,
-        help="destination uri",
+        help="destination uri (e.g. imas:hdf5?path=./testdb2 or ./testpulse2.nc)",
+    )
+
+    parser.add_argument(
+        "--rescale",
+        help="Rescaling factor of the equilibrium magnetic field",
+        type=float,
+        required=True,
     )
     parser.add_argument(
         "--dd-update",
@@ -48,18 +52,20 @@ if __name__ == "__main__":
             "otherwise, use the original IDS stored on disk."
         ),
     )
-
-    parser.add_argument("--shift", help="Upward shift of equilibrium (m)", type=float, required=True)
-
     args = parser.parse_args()
 
-    shift_param = args.shift
+    rescale = args.rescale
+
+    if rescale == 0:
+        logger.critical("Rescale factor cannot be zero!")
+        sys.exit(1)
 
     # OPEN INPUT
     inputargs = argparse.Namespace()
     inputargs.uri = args.src
     connection = DBMaster.get_connection(inputargs)
     if connection is None:
+        print("Error opening source pulse! Please check existence.")
         sys.exit()
 
     # hack to get underlying data dictionary version used by idses
@@ -71,8 +77,9 @@ if __name__ == "__main__":
                 _dummy = connection.get(idsname, lazy=True, autoconvert=False)
                 src_dd_version = _dummy.ids_properties.version_put.data_dictionary.value
                 break
-            except Exception as _:
+            except Exception as e:
                 pass
+
     ids_equilibrium = connection.get("equilibrium", autoconvert=False)
 
     outputargs = argparse.Namespace()
@@ -92,11 +99,9 @@ if __name__ == "__main__":
         logger.error("Error opening destination pulse! Please check parameters and permissions.")
         exit(1)
 
-    logger.info(f"Shifting equilibrium by {shift_param} m")
-    logger.info("Values for wall gaps, locations of strike-points and closest wall points are no longer guaranteed!")
+    logger.info(f"Rescaling equilibrium magnetic field by {rescale}")
     equilibrium_compute = EquilibriumCompute(ids_equilibrium)
-
-    equout = equilibrium_compute.z_shift(shift_param, dd_update=args.dd_update)
+    equout = equilibrium_compute.rescale(rescale, dd_update=args.dd_update)
     if args.dd_update:
         dest_ids_object = imas.convert_ids(equout, output_connection.factory.version)
     # PUT IDS INTO OUTPUT
@@ -105,12 +110,12 @@ if __name__ == "__main__":
     # CLOSE FILES
     connection.close()
     output_connection.close()
-    logger.info("Equilibrium IDS is upward shifted successfully.")
 
+    logger.info("Equilibrium IDS is rescaled successfully.")
     if args.dest is not None:
         logger.info(f"Output database details {args.dest}")
     else:
         logger.info(
-            f"Output database details database={args.dest_database}, pulse={args.dest_pulse},"
+            f"Output database details database={args.dest_database}, pulse={args.dest_pulse}, "
             f"run={args.dest_run}, user={os.environ['USER']}"
         )
