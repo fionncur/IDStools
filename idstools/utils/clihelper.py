@@ -15,7 +15,7 @@ uri_parser.add_argument(
     "--uri",
     type=str,
     required=True,
-    help="uri",
+    help="URI of the dataentry\t(e.g, imas:hdf5?path=./testdb or ./testpulse.nc)",
 )
 
 imas_parser = argparse.ArgumentParser(add_help=False)
@@ -154,6 +154,9 @@ def get_details_from_uri(uri):
         param["run"] = int(param["run"])
     if path_match:
         param["path"] = path_match.group(1)
+        param["pathPresent"] = True
+    elif not uri.startswith("imas:"):
+        param["path"] = uri
         param["pathPresent"] = True
     else:
         param["pathPresent"] = False

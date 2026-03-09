@@ -1,7 +1,7 @@
 """
 This module provides compute functions and classes for core_sources ids data
 
-`refer data dictionary <https://sharepoint.iter.org/departments/POP/CM/IMDesign/Data%20Model/sphinx/latest.html>`_.
+`refer data dictionary <https://imas-data-dictionary.readthedocs.io/en/latest/>`_.
 
 """
 
@@ -15,6 +15,14 @@ logger = logging.getLogger("module")
 
 
 class CoreSourcesCompute:
+    """This class provides compute functions for core sources ids.
+
+    Attributes:
+        ids (object): The core sources IDS (Integrated Data Structure) object containing
+            source/sink data for particles and energy in the core plasma including heating,
+            current drive, and particle injection sources.
+    """
+
     def __init__(self, ids):
         self.ids = ids
 
