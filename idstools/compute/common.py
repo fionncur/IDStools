@@ -12,7 +12,18 @@ logger = logging.getLogger("module")
 
 
 def find_nearest(a, a0):
-    "Element in nd array `a` closest to the scalar value `a0`"
+    """
+    Find the element in an n-dimensional array closest to a scalar value.
+
+    Args:
+        a (np.ndarray): Input array of any shape or dimension.
+        a0 (float): The scalar value to find the nearest element to.
+
+    Returns:
+        tuple: A tuple containing:
+            - The value of the element in array `a` closest to `a0`
+            - The flat index of that element
+    """
     idx = abs(a - a0).argmin()
     return a.flat[idx], idx
 
@@ -152,6 +163,18 @@ def cyl2xyz(rcyl):
 
 
 def find_minima(y):
+    """
+    Find the indices of local minima in a 1D array.
+
+    A point is considered a local minimum if it is lower than its neighbors
+    at distances t = len(y)//50 and immediate neighbors.
+
+    Args:
+        y (np.ndarray or list): 1D array of values.
+
+    Returns:
+        list: List of indices where local minima occur in the input array.
+    """
     # mindex = sig.argrelextrema(y,np.less)
     mindex = []
     t = len(y) // 50
@@ -162,6 +185,18 @@ def find_minima(y):
 
 
 def find_maxima(y):
+    """
+    Find the indices of local maxima in a 1D array.
+
+    A point is considered a local maximum if it is higher than its neighbors
+    at distances t = len(y)//50 and immediate neighbors.
+
+    Args:
+        y (np.ndarray or list): 1D array of values.
+
+    Returns:
+        list: List of indices where local maxima occur in the input array.
+    """
     # maxdex = sig.argrelextrema(y,np.greater)
     maxdex = []
     t = len(y) // 50
@@ -172,6 +207,23 @@ def find_maxima(y):
 
 
 def findfwhm(x, y, maxind, lowbnd, uppbnd):
+    """
+    Calculate the Full Width at Half Maximum (FWHM) of a peak in a dataset.
+
+    The FWHM is the width of the curve at half the maximum height of a peak.
+    This function finds the x-axis span between the two points at half the peak height.
+
+    Args:
+        x (np.ndarray): X-axis values (independent variable).
+        y (np.ndarray): Y-axis values (dependent variable/signal).
+        maxind (int): Index of the maximum value (peak) in the array.
+        lowbnd (int): Lower boundary index for the peak region.
+        uppbnd (int): Upper boundary index for the peak region.
+
+    Returns:
+        float: The Full Width at Half Maximum value (difference in x between
+            left and right points at half max height).
+    """
     npyleft = np.array(y[lowbnd:maxind])
     npyright = np.array(y[maxind:uppbnd])
     lindex = lowbnd + find_nearest(npyleft, y[maxind] / 2)[1]
