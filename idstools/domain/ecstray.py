@@ -177,8 +177,8 @@ class EcStrayCompute:
                 ) + constants.e * b_total[ir, iz] / (2 * constants.m_e)
             except Exception as e:  # Not defined outside LCFS
                 logger.debug(f"{e}")
-                ne2d_eq[ir, iz] = -1  # np.NaN
-                omega_r[ir, iz] = -1  # np.NaN
+                ne2d_eq[ir, iz] = -1  # np.nan
+                omega_r[ir, iz] = -1  # np.nan
 
         # Find (R,Z) where omega_R = omega_EC (within the tolerance omega_err)
         [nr, nz] = np.shape(omega_r)
