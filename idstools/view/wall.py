@@ -1,9 +1,13 @@
+import logging
+
 import matplotlib.patches as patches
 import matplotlib.text as mtext
 from matplotlib.patches import Rectangle
 from matplotlib.path import Path
 
 from idstools.compute.wall import WallCompute
+
+logger = logging.getLogger("module")
 
 
 class WallView:
@@ -192,7 +196,7 @@ class WallView:
             counter = 0
             for idescription2d, description2d in limiter_units.items():
                 for l_index, limiter_unit in description2d["limiterunits"].items():
-                    print(limiter_unit["name"])
+                    logger.debug(f"Processing limiter: {limiter_unit['name']}")
                     if wallcolor:
                         kwargs.update({"color": wallcolor})
                     else:
