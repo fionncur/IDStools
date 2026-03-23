@@ -2,6 +2,9 @@ name: Test using pytest
 
 on: 
     push:
+      branches:
+        - main
+        - develop
     pull_request:
       types: [opened, synchronize, reopened]
 
@@ -10,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.8","3.9", "3.10", "3.11", "3.12"]  # Test on multiple Python versions
+        python-version: ["3.11", "3.12", "3.13"]  # Test on multiple Python versions
     
     steps:
       - name: Checkout repository
@@ -66,10 +69,3 @@ jobs:
           name: test-output-${{ matrix.python-version }}
           path: test_output.log
           if-no-files-found: warn
-
-      - name: Publish test results ${{ matrix.python-version }}
-        if: always()
-        uses: EnricoMi/publish-unit-test-result-action@v2
-        with:
-          files: junit.xml
-          check_name: Test Results - Python ${{ matrix.python-version }}

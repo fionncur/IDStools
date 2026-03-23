@@ -363,7 +363,7 @@ if __name__ == "__main__":
     connection = DBMaster.get_connection(args)
     if connection is None:
         logger.error("Please provide valid URI")
-        exit(1)
+        sys.exit(1)
     if ids_name == "":
         logger.info("Please provide ids name at the end of uri with # character")
         logger.info("Following are available IDSes")
@@ -396,7 +396,7 @@ if __name__ == "__main__":
             table.add_row(ids_name, value, type_str)
         console.print(table)
         connection.close()
-        exit(1)
+        sys.exit(1)
 
     if ids_path is None:
         if args.time:
@@ -555,14 +555,14 @@ if __name__ == "__main__":
         elif args.plot:
             if isinstance(node, (imas.ids_structure.IDSStructure, imas.ids_struct_array.IDSStructArray)):
                 logger.error("Can not plot data, fragment is structure. inspect data with -i option")
-                exit(0)
+                sys.exit(0)
             if len(node) == 0:
                 logger.error("Can not plot data, no values present in the array. inspect data with -i option")
-                exit(0)
+                sys.exit(0)
 
             if isinstance(node[0], (imas.ids_structure.IDSStructure, imas.ids_struct_array.IDSStructArray)):
                 logger.error("Can not plot data, fragment values are structures. inspect data with -i option")
-                exit(0)
+                sys.exit(0)
 
             canvas = PlotCanvas(1, 1)
             canvas.update_style(args.rc)

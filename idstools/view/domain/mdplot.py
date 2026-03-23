@@ -57,7 +57,7 @@ def plot_machine_description(ax, ids_data):
         idsfield = ids_data_and_config["idsfield"] or ""
         idsocc = ids_data_and_config["idsocc"]
 
-        logger.info(f"Started to process {ids_name} ids for plotting {idsinfo}")
+        logger.debug(f"Started to process {ids_name} ids for plotting {idsinfo}")
 
         matches = re.findall(r"[\[(]([^\])]+)[\])]", idsfield)
         select = ":"

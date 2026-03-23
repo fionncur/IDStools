@@ -4,22 +4,44 @@ import sys
 
 import matplotlib
 
-# Always use non-GUI backend in headless environments or when tkinter is not available
-# On Windows, DISPLAY is not typically set, so check platform
-if sys.platform.startswith("win") or "DISPLAY" in os.environ:
-    # Windows or Unix/Linux with DISPLAY - try TkAgg
+
+def _is_jupyter() -> bool:
+    """Return True if running inside a Jupyter notebook/lab/Colab kernel."""
+    try:
+        from IPython import get_ipython
+
+        shell = get_ipython()
+        if shell is None:
+            return False
+        shell_class = shell.__class__.__name__
+        # ZMQInteractiveShell: Jupyter Notebook/Lab
+        # Shell: Google Colab
+        return shell_class in ("ZMQInteractiveShell", "Shell")
+    except ImportError:
+        return False
+
+
+# Select the appropriate matplotlib backend
+if _is_jupyter():
+    if "matplotlib.pyplot" not in sys.modules:
+        try:
+            import ipympl  # noqa: F401 - imported to check availability
+
+            matplotlib.use("widget")
+        except ImportError:
+            matplotlib.use("agg")
+elif sys.platform.startswith("win") or "DISPLAY" in os.environ:
+
     try:
         import tkinter  # noqa: F401 - imported to check availability
 
         matplotlib.use("TkAgg")
     except (ImportError, ModuleNotFoundError):
-        # tkinter not available, use non-GUI backend
         matplotlib.use("agg")
 else:
-    # Unix/Linux without DISPLAY
     matplotlib.use("agg")
 
-import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt  # noqa: E402
 
 logger = logging.getLogger("module")
 
@@ -221,6 +243,17 @@ class PlotCanvas:
             >>> ax.plot([1, 2, 3], [1, 4, 9])
             >>> canvas.show()
         """
+        backend = matplotlib.get_backend().lower()
+        if _is_jupyter():
+            try:
+                from IPython.display import display
+
+                display(self.fig)
+                if backend != "module://matplotlib_ipympl.backend_nbagg":
+                    plt.close("all")
+            except ImportError:
+                pass
+            return
         wm = self.get_current_fig_manager()
         try:
             # Try to maximize the window (only works with TkAgg backend)

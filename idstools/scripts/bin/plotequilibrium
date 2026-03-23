@@ -167,7 +167,18 @@ if __name__ == "__main__":
             idses = ""
             mduris = []
             for mduri in args.md:
-                if "imas:" in mduri:
+                mduri = mduri.strip()
+                uri_base = mduri.split("#")[0]
+                is_uri_or_path = (
+                    mduri.startswith("imas:")
+                    or uri_base.startswith(".")
+                    or uri_base.startswith("~")
+                    or uri_base.lower().endswith((".nc"))
+                    or "/" in uri_base
+                    or "\\" in uri_base
+                    or os.path.exists(uri_base)
+                )
+                if is_uri_or_path:
                     mduris.append(mduri)
                 else:
                     idses += mduri + ","
@@ -204,6 +215,7 @@ if __name__ == "__main__":
             view_object.plot_global_quantities(axes_list2, time_value)
 
         canvas.fig.suptitle(get_title(args, "Equilibrium", time_value))
+        canvas.fig.set_size_inches(14, 8)
         canvas.fig.subplots_adjust(top=0.933, bottom=0.05, left=0.024, right=0.988, hspace=0.221, wspace=0.25)
         canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
         if args.save:

@@ -73,7 +73,7 @@ if __name__ == "__main__":
     connection = DBMaster.get_connection(args)
     if connection is None:
         print("----> Aborted.")
-        exit(1)
+        sys.exit(1)
 
     if args.yaml is True:
         if args.fullarray:
@@ -121,7 +121,7 @@ if __name__ == "__main__":
                     print(f"     time_step_number: 0")
                 print("     time:             [static]")
         connection.close()
-        exit(0)
+        sys.exit(0)
 
     elif args.comment is True:
         console = Console()
@@ -141,7 +141,7 @@ if __name__ == "__main__":
             table.add_row(idsnameoc, comment.value)
         console.print(table)
         connection.close()
-        exit(0)
+        sys.exit(0)
     elif args.dd_version is True:
         console = Console()
         table = Table(title="List of IDSes with Occurrences and DD Version")
@@ -160,7 +160,7 @@ if __name__ == "__main__":
             table.add_row(idsnameoc, dd_version)
         console.print(table)
         connection.close()
-        exit(0)
+        sys.exit(0)
     else:
         available_ids_and_times = get_available_ids_and_times(connection)
         not_applicable = "N/A"
@@ -192,4 +192,4 @@ if __name__ == "__main__":
         else:
             console.print(table)
         connection.close()
-        exit(0)
+        sys.exit(0)

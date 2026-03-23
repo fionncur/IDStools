@@ -65,7 +65,7 @@ if __name__ == "__main__":
     ids_data = get_md_data(args.uri, args.dd_update)
 
     # Initialization
-    mdcanvas = PlotCanvas(1, 1)
+    mdcanvas = PlotCanvas(1, 1, figsize=(10, 10))
     mdcanvas.update_style(args.rc)
     ax = mdcanvas.add_axes(title="", xlabel="R (m)", ylabel="Z (m)", row=0, col=0)
     plot_machine_description(ax, ids_data)

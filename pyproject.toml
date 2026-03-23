@@ -67,10 +67,68 @@ dynamic = ["version"]
 [project.urls]
 homepage = "https://github.com/iterorganization/IDStools"
 
+[project.scripts]
+# Visualization and analysis tools
+plotequilibrium = "idstools.scripts:plotequilibrium"
+idslist = "idstools.scripts:idslist"
+idsprint = "idstools.scripts:idsprint"
+idsperf = "idstools.scripts:idsperf"
+plothcd = "idstools.scripts:plothcd"
+plotpressure = "idstools.scripts:plotpressure"
+plotrotation = "idstools.scripts:plotrotation"
+plotequicomp = "idstools.scripts:plotequicomp"
+plotcoresources = "idstools.scripts:plotcoresources"
+plotkineticprofiles = "idstools.scripts:plotkineticprofiles"
+plothcdwaves = "idstools.scripts:plothcdwaves"
+plotecray = "idstools.scripts:plotecray"
+plothcddistributions = "idstools.scripts:plothcddistributions"
+plotedgeprofiles = "idstools.scripts:plotedgeprofiles"
+plotmachinedescription = "idstools.scripts:plotmachinedescription"
+plotspectrometry = "idstools.scripts:plotspectrometry"
+plotneutron = "idstools.scripts:plotneutron"
+ploteccomposition = "idstools.scripts:ploteccomposition"
+plotecstrayradiation = "idstools.scripts:plotecstrayradiation"
+plotscenario = "idstools.scripts:plotscenario"
+# Query and data manipulation tools
+idsquery = "idstools.scripts:idsquery"
+idsresample = "idstools.scripts:idsresample"
+idsdiff = "idstools.scripts:idsdiff"
+idscp = "idstools.scripts:idscp"
+idssize = "idstools.scripts:idssize"
+idsrescale_equilibrium = "idstools.scripts:idsrescale_equilibrium"
+idsshift_equilibrium = "idstools.scripts:idsshift_equilibrium"
+idsrosettacode = "idstools.scripts:idsrosettacode"
+eqdsk2ids = "idstools.scripts:eqdsk2ids"
+# Database management tools
+dbconverter = "idstools.scripts:dbconverter"
+dbscraper = "idstools.scripts:dbscraper"
+dbselector = "idstools.scripts:dbselector"
+dblist = "idstools.scripts:dblist"
+dbperf = "idstools.scripts:dbperf"
+# Print and report tools
+printcoresources = "idstools.scripts:printcoresources"
+printplasmacompo = "idstools.scripts:printplasmacompo"
+printfluxes = "idstools.scripts:printfluxes"
+# Scenario and disruption tools
+scenario_status = "idstools.scripts:scenario_status"
+scenario_summary = "idstools.scripts:scenario_summary"
+disruption_summary = "idstools.scripts:disruption_summary"
+# Database entry management
+create_db_entry = "idstools.scripts:create_db_entry"
+create_db_entry_disruption = "idstools.scripts:create_db_entry_disruption"
+show_db_entry = "idstools.scripts:show_db_entry"
+watch_db_entry = "idstools.scripts:watch_db_entry"
+# Machine description tools
+md_status = "idstools.scripts:md_status"
+md_summary = "idstools.scripts:md_summary"
+
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["idstools*", "scripts*"]
+include = ["idstools*"]
 exclude = ["*.pyc", "*.pyo"]
+
+[tool.setuptools.package-data]
+"idstools.scripts" = ["bin/*"]
 
 [tool.pytest.ini_options]
 minversion = "6.0"
@@ -133,7 +191,6 @@ disable = ["all"]
 enable = ["E"]
 
 [tool.setuptools.data-files]
-"bin" = ["scripts/*"]
 "bin/validation_schemas/ITER" = ["resources/validation_schemas/ITER/*.*"]
 "bin/validation_schemas/generic" = ["resources/validation_schemas/generic/*.*"]
 "bin/geqdsk" = ["resources/geqdsk/*.*"]

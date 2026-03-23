@@ -38,3 +38,16 @@ More info: https://pypi.org/project/imas-python/
 """
     )
     exit(1)
+
+# Auto-register CLI tools as IPython line magics (%plotequilibrium, etc.)
+# when running inside a Jupyter or Google Colab environment.
+try:
+    from IPython import get_ipython as _get_ipython
+
+    _shell = _get_ipython()
+    if _shell is not None and _shell.__class__.__name__ in ("ZMQInteractiveShell", "Shell"):
+        from idstools.scripts import register_magics
+
+        register_magics()
+except Exception:
+    pass
