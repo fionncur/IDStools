@@ -1155,6 +1155,9 @@ class EquilibriumCompute:
         name = self.ids.code.name
         if homogeneous_time == 1:
             time = self.ids.time
+        else:
+            # Extract time from time_slice array
+            time = np.array([ts.time for ts in self.ids.time_slice]) if len(self.ids.time_slice) > 0 else np.array([])
         nt = time.size
 
         data = {}
@@ -1378,10 +1381,10 @@ class EquilibriumCompute:
                         z = time_slice.profiles_2d[0].grid.dim2
 
         # Initialize boundary arrays - each time slice can have different size
-        if need_boundaries and n3 > 0:
-            rb = [] if "rb" in selection else None
-            zb = [] if "zb" in selection else None
+        rb = [] if "rb" in selection else None
+        zb = [] if "zb" in selection else None
 
+        if need_boundaries:
             for i, time_slice in enumerate(self.ids.time_slice):
                 if time_slice.boundary.outline.r.size > 0 and rb is not None:
                     rb.append(time_slice.boundary.outline.r)

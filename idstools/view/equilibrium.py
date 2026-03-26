@@ -424,7 +424,9 @@ class EquilibriumView(BasePlot):
             logger.warning(f"Equilibrium1 {name}: No valid r or jtor data available")
 
         # Set ylim with check for identical values to avoid matplotlib warning
-        if abs(y_max - y_min) < 1e-10:
+        if not np.isfinite(y_min) or not np.isfinite(y_max):
+            y_min, y_max = -1.0, 1.0
+        elif abs(y_max - y_min) < 1e-10:
             # If y_min and y_max are essentially equal, create a small range around the value
             if abs(y_min) < 1e-10:
                 # If both are near zero, use a default range
@@ -619,14 +621,16 @@ class EquilibriumView(BasePlot):
         line31.set_xdata(time)
         line31.set_ydata(ip / 1e6)
         xlims = np.array([min(time), max(time)])
-        ylims = np.array([min(ip), max(ip)]) / 1e6
+        ip_valid = ip[np.isfinite(ip)]
+        ylims = np.array([ip_valid.min(), ip_valid.max()]) / 1e6 if ip_valid.size > 0 else np.array([-1.0, 1.0])
         if data2 is not None:
             line32.set_xdata(timeE)
             line32.set_ydata(ipE / 1e6)
+            ipE_valid = ipE[np.isfinite(ipE)]
             xlims[0] = np.minimum(xlims[0], np.min(timeE))
-            ylims[0] = np.minimum(ylims[0], np.min(ipE / 1e6))
+            ylims[0] = np.minimum(ylims[0], np.min(ipE_valid / 1e6)) if ipE_valid.size > 0 else ylims[0]
             xlims[1] = np.maximum(xlims[1], np.max(timeE))
-            ylims[1] = np.maximum(ylims[1], np.max(ipE / 1e6))
+            ylims[1] = np.maximum(ylims[1], np.max(ipE_valid / 1e6)) if ipE_valid.size > 0 else ylims[1]
         dy = ylims[1] - ylims[0]
         if dy > 0:
             ylims[0] = ylims[0] - 0.01 * dy
