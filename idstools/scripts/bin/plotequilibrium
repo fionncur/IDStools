@@ -49,11 +49,6 @@ if __name__ == "__main__":
     )
     parser.add_argument("-t", "--time", help="Time (default=middle)", type=float, default=-99.0)
     parser.add_argument(
-        "--rho",
-        help="Show rho overlay on the plot",
-        action="store_true",
-    )
-    parser.add_argument(
         "-p",
         "--plots",
         help="Plots available quantities along with equilibrium",
@@ -190,13 +185,28 @@ if __name__ == "__main__":
                 ids_data = get_md_data(mduris, args.dd_update)
             plot_machine_description(ax1, ids_data)
 
-        c_psi, c_rho = view_object.view_magnetic_poloidal_flux(ax1, time_slice, plot_rho=args.rho)
+        c_psi, c_rho, rho_collections = view_object.view_magnetic_poloidal_flux(ax1, time_slice)
+
+        # rho — created second, stacks further left of psi (pad=0.02 keeps a small gap)
+        if c_rho and rho_collections:
+            # cbar_rho = canvas.fig.colorbar(c_rho, ax=ax1, location="left", pad=0.004, fraction=0.04)
+            cbar_rho = canvas.fig.colorbar(c_rho, ax=ax1, location="left")
+            cbar_rho.set_label(r"$\rho$")
+            cbar_rho.ax.set_visible(False)  # hidden by default, synced with rho overlay
+
+            def _sync_rho_cbar(event):
+                # fires after the view's on_legend_click already toggled visibility
+                visible = rho_collections[0].get_visible()
+                if cbar_rho.ax.get_visible() != visible:
+                    cbar_rho.ax.set_visible(visible)
+                    canvas.fig.canvas.draw_idle()
+
+            ax1.figure.canvas.mpl_connect("pick_event", _sync_rho_cbar)
+        # psi — created first, sits directly adjacent to the axes (pad=0.01)
         if c_psi:
-            cbar_psi = canvas.fig.colorbar(c_psi, ax=ax1, orientation="horizontal", pad=0.08, fraction=0.03)
+            # cbar_psi = canvas.fig.colorbar(c_psi, ax=ax1, location="left", pad=0.002, fraction=0.04)
+            cbar_psi = canvas.fig.colorbar(c_psi, ax=ax1, location="left")
             cbar_psi.set_label(r"$\psi$ [Wb]")
-        if c_rho:
-            cbar_rho = canvas.fig.colorbar(c_rho, ax=ax1, orientation="horizontal", pad=0.08, fraction=0.03)
-            cbar_rho.set_label(r"$\rho$ [Wb]")
         ax1.set_title(title)
 
         xmin, xmax = ax1.get_xlim()
@@ -216,6 +226,7 @@ if __name__ == "__main__":
 
         canvas.fig.suptitle(get_title(args, "Equilibrium", time_value))
         canvas.fig.set_size_inches(14, 8)
+        # left=0.15 reserves room for up to two vertical colorbars on the left
         canvas.fig.subplots_adjust(top=0.933, bottom=0.05, left=0.024, right=0.988, hspace=0.221, wspace=0.25)
         canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
         if args.save:

@@ -13,6 +13,7 @@ try:
 except ImportError:
     import imas
 import matplotlib.pyplot as plt
+from matplotlib.lines import Line2D as ProxyLine
 import numpy as np
 
 from idstools.compute.equilibrium import EquilibriumCompute
@@ -40,7 +41,9 @@ class EquilibriumView(BasePlot):
         ax: plt.axes,
         time_slice: int,
         profiles2d_index: int = 0,
-        plot_rho: bool = False,
+        plot_separatrix: bool = True,
+        plot_magnetic_axis: bool = True,
+        plot_current_centre: bool = True,
     ):
         """
         This function plots the magnetic poloidal flux contours on a 2D Cartesian grid.
@@ -80,6 +83,7 @@ class EquilibriumView(BasePlot):
             :meth:`plotIP`
         """
         contour_lines_psi = contour_lines_rho = None
+        _rho_collections = []
         cartestion_grid = self.compute_obj.get2d_cartesian_grid(time_slice, profiles2d_index)
         if cartestion_grid is not None:
             levels = 50
@@ -95,19 +99,113 @@ class EquilibriumView(BasePlot):
             #     # fmt="%.2e",
             #     inline_spacing=1,
             # )
-            if plot_rho:
-                rho2d = self.compute_obj.get_rho2d(time_slice)
-                if rho2d is not None:
-                    contour_lines_rho = ax.contour(
-                        cartestion_grid["r2d"], cartestion_grid["z2d"], rho2d, levels=levels, cmap="YlOrBr"
-                    )
+
+            # rho overlay: always draw when data is available;
+            # capture artists with before/after snapshot (works across all matplotlib versions)
+            rho2d = self.compute_obj.get_rho2d(time_slice)
+            if rho2d is not None:
+                _before = set(ax.collections)
+                contour_lines_rho = ax.contour(
+                    cartestion_grid["r2d"], cartestion_grid["z2d"], rho2d, levels=levels, cmap="YlOrBr"
+                )
+                _rho_collections = [c for c in ax.collections if c not in _before]
+                # hidden by default; user can toggle via legend click
+                for _c in _rho_collections:
+                    _c.set_visible(False)
+            else:
+                _rho_collections = []
 
             ax.set_aspect("equal", adjustable="box")
             ax.set_xlabel("$R$ [m]")
             ax.set_ylabel("$Z$ [m]")
-            # ax.set_xlim(3.4, cartestionGrid["r2d"].max())
-            # ax.set_ylim(cartestionGrid["z2d"].min() * 0.7, cartestionGrid["z2d"].max() * 0.7)
-        return contour_lines_psi, contour_lines_rho
+
+        # --- overlays: draw all available, store (proxy, artists_list) tuples ---
+        # Each entry: (proxy Line2D for legend, list of data artists to toggle)
+        overlay_entries = []
+
+        # rho contour (starts hidden by default)
+        if contour_lines_rho is not None and _rho_collections:
+            proxy_rho = ProxyLine(
+                [0], [0], color="darkorange", linewidth=1.5, label="\u03c1 contours", alpha=0.3
+            )  # dimmed to match hidden state
+            overlay_entries.append((proxy_rho, _rho_collections))
+
+        if plot_separatrix:
+            sep = self.compute_obj.get_separatrix(time_slice)
+            if sep is not None:
+                (line,) = ax.plot(sep["r"], sep["z"], color="red", linewidth=2.0, label="separatrix", zorder=5)
+                overlay_entries.append((line, [line]))
+
+        if plot_magnetic_axis:
+            mag_ax = self.compute_obj.get_magnetic_axis(time_slice)
+            if mag_ax is not None:
+                (marker,) = ax.plot(
+                    mag_ax["r"],
+                    mag_ax["z"],
+                    marker="^",
+                    color="yellow",
+                    markersize=14,
+                    markeredgecolor="black",
+                    markeredgewidth=0.8,
+                    linestyle="None",
+                    label="magnetic axis",
+                    zorder=6,
+                )
+                overlay_entries.append((marker, [marker]))
+
+        if plot_current_centre:
+            cc = self.compute_obj.get_current_centre(time_slice)
+            if cc is not None:
+                (marker,) = ax.plot(
+                    cc["r"],
+                    cc["z"],
+                    marker="+",
+                    color="cyan",
+                    markersize=12,
+                    markeredgewidth=2.0,
+                    linestyle="None",
+                    label="current centre",
+                    zorder=6,
+                )
+                overlay_entries.append((marker, [marker]))
+
+        # --- clickable legend: click a legend entry to toggle its overlay ----
+        if overlay_entries:
+            handles = [proxy for proxy, _ in overlay_entries]
+            legend = ax.legend(
+                handles=handles,
+                loc="upper left",
+                bbox_to_anchor=(1.15, 1),
+                fancybox=True,
+                fontsize=10,
+                labelspacing=1.2,
+                title="Overlays\n(click to toggle)",
+            )
+            legend.get_title().set_fontsize(10)
+            legend.get_title().set_fontstyle("italic")
+            legend.get_title().set_color("gray")
+
+            leg_map = {}
+            for legline, (_, artists) in zip(legend.get_lines(), overlay_entries):
+                legline.set_picker(8)
+                leg_map[legline] = artists
+
+            def on_legend_click(event):
+                legline = event.artist
+                if legline not in leg_map:
+                    return
+                artists = leg_map[legline]
+                if not artists:
+                    return
+                visible = not artists[0].get_visible()
+                for a in artists:
+                    a.set_visible(visible)
+                legline.set_alpha(1.0 if visible else 0.3)
+                ax.figure.canvas.draw_idle()
+
+            ax.figure.canvas.mpl_connect("pick_event", on_legend_click)
+
+        return contour_lines_psi, contour_lines_rho, _rho_collections
 
     def view_pulse_info(self, ax: plt.axes, title: str, hostdir: str, shot: int, run: int, t: float):
         self.database_info(ax, title, hostdir, shot, run, t)

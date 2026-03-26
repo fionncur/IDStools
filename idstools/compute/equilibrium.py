@@ -301,6 +301,100 @@ class EquilibriumCompute:
             for time_index in range(len(self.ids.time_slice))
         ]
 
+    def get_separatrix(self, time_slice: int) -> Union[dict, None]:
+        """Return the closed separatrix outline for a given time slice.
+
+        Reads ``boundary.outline.r/z``, validates that the arrays are
+        non-empty and contain at least one finite, non-fill value, then
+        closes the polygon by appending the first point.
+
+        Args:
+            time_slice (int): Index into ``time_slice``.
+
+        Returns:
+            dict with keys ``"r"`` and ``"z"`` (1-D ndarrays, polygon
+            closed), or ``None`` if the data are absent or invalid.
+        """
+        try:
+            bnd = self.ids.time_slice[time_slice].boundary
+            r = np.asarray(bnd.outline.r, dtype=float)
+            z = np.asarray(bnd.outline.z, dtype=float)
+        except Exception as exc:
+            logger.debug(f"get_separatrix: could not read boundary.outline – {exc}")
+            return None
+
+        def _valid(arr):
+            return arr.size > 0 and np.any(np.isfinite(arr) & (np.abs(arr) < 1.0e20))
+
+        if not (_valid(r) and _valid(z)):
+            logger.debug("get_separatrix: boundary.outline contains no valid data")
+            return None
+
+        # close the polygon
+        r = np.append(r, r[0])
+        z = np.append(z, z[0])
+        return {"r": r, "z": z}
+
+    def get_magnetic_axis(self, time_slice: int) -> Union[dict, None]:
+        """Return the magnetic axis position for a given time slice.
+
+        Reads ``global_quantities.magnetic_axis.r/z`` and validates the
+        scalar values.
+
+        Args:
+            time_slice (int): Index into ``time_slice``.
+
+        Returns:
+            dict with scalar keys ``"r"`` and ``"z"`` (floats), or
+            ``None`` if the data are absent or invalid.
+        """
+        try:
+            mag_ax = self.ids.time_slice[time_slice].global_quantities.magnetic_axis
+            r = float(mag_ax.r)
+            z = float(mag_ax.z)
+        except Exception as exc:
+            logger.debug(f"get_magnetic_axis: could not read magnetic_axis – {exc}")
+            return None
+
+        def _valid(val):
+            return np.isfinite(val) and abs(val) < 1.0e20
+
+        if not (_valid(r) and _valid(z)):
+            logger.debug("get_magnetic_axis: magnetic_axis contains no valid data")
+            return None
+
+        return {"r": r, "z": z}
+
+    def get_current_centre(self, time_slice: int) -> Union[dict, None]:
+        """Return the current centroid position for a given time slice.
+
+        Reads ``global_quantities.current_centre.r/z`` and validates the
+        scalar values.
+
+        Args:
+            time_slice (int): Index into ``time_slice``.
+
+        Returns:
+            dict with scalar keys ``"r"`` and ``"z"`` (floats), or
+            ``None`` if the data are absent or invalid.
+        """
+        try:
+            cc = self.ids.time_slice[time_slice].global_quantities.current_centre
+            r = float(cc.r)
+            z = float(cc.z)
+        except Exception as exc:
+            logger.debug(f"get_current_centre: could not read current_centre – {exc}")
+            return None
+
+        def _valid(val):
+            return np.isfinite(val) and abs(val) < 1.0e20
+
+        if not (_valid(r) and _valid(z)):
+            logger.debug("get_current_centre: current_centre contains no valid data")
+            return None
+
+        return {"r": r, "z": z}
+
     def get_top_view(self, time_slice: int) -> dict:
         """
         The function returns data for plotting the top view of a 2D shape.
