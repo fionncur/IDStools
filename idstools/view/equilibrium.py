@@ -100,8 +100,7 @@ class EquilibriumView(BasePlot):
             #     inline_spacing=1,
             # )
 
-            # rho overlay: always draw when data is available;
-            # capture artists with before/after snapshot (works across all matplotlib versions)
+            # rho overlay
             rho2d = self.compute_obj.get_rho2d(time_slice)
             if rho2d is not None:
                 _before = set(ax.collections)
@@ -109,7 +108,6 @@ class EquilibriumView(BasePlot):
                     cartestion_grid["r2d"], cartestion_grid["z2d"], rho2d, levels=levels, cmap="YlOrBr"
                 )
                 _rho_collections = [c for c in ax.collections if c not in _before]
-                # hidden by default; user can toggle via legend click
                 for _c in _rho_collections:
                     _c.set_visible(False)
             else:
@@ -128,11 +126,9 @@ class EquilibriumView(BasePlot):
             _md_handles, _md_labels = [], []
         overlay_entries = []
 
-        # rho contour (starts hidden by default)
+        # rho contour
         if contour_lines_rho is not None and _rho_collections:
-            proxy_rho = ProxyLine(
-                [0], [0], color="darkorange", linewidth=1.5, label="\u03c1 contours", alpha=0.3
-            )  # dimmed to match hidden state
+            proxy_rho = ProxyLine([0], [0], color="darkorange", linewidth=1.5, label="\u03c1 contours", alpha=0.3)
             overlay_entries.append((proxy_rho, _rho_collections))
 
         if plot_separatrix:
@@ -192,7 +188,6 @@ class EquilibriumView(BasePlot):
                 )
                 overlay_entries.append((proxy_cc, [marker]))
 
-        # annotation text box (quantities summary below the axes)
         self.view_global_quantities_annotation(ax, time_slice)
 
         # --- clickable legend
