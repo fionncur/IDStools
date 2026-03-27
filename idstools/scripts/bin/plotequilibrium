@@ -124,14 +124,15 @@ if __name__ == "__main__":
         database_text = ""
         if args.plots:
             compute_obj = EquilibriumCompute(ids_obj_equilibrium)
-            profiles_1d_quantities = compute_obj.get_profiles_1d_quantities(time_slice, ["pressure", "q", "beta_pol"])
+            profiles_1d_quantities = compute_obj.get_profiles_1d_quantities(
+                time_slice, ["pressure", "q", "beta_pol"]
+            )
             p1dcounter = sum(1 for value in profiles_1d_quantities.values() if value.has_value)
 
             global_quantities = compute_obj.get_global_quantities(
                 time_slice, ["q_min.value", "q_95", "li_3", "beta_tor", "energy_mhd"]
             )
             gcounter = sum(1 for value in global_quantities.values() if value["has_value"])
-
             total_plots = p1dcounter + gcounter
 
             if total_plots % 2 == 1:
@@ -140,12 +141,13 @@ if __name__ == "__main__":
                 col_size = int(total_plots / 2)
 
             col_size = col_size + 1
-            canvas = PlotCanvas(2, col_size)
+
+            canvas = PlotCanvas(2, col_size + 1)
             ax1 = canvas.add_axes(title="", xlabel="", row=0, col=0, rowspan=2)
             axes_list1 = []
             axes_list2 = []
             plotting_counter = 0
-            for col in range(1, col_size):
+            for col in range(2, col_size + 1):
                 for row in [0, 1]:
                     if plotting_counter < p1dcounter:
                         axes_list1.append(canvas.add_axes(title="", xlabel="", row=row, col=col))
@@ -187,26 +189,23 @@ if __name__ == "__main__":
 
         c_psi, c_rho, rho_collections = view_object.view_magnetic_poloidal_flux(ax1, time_slice)
 
-        # rho — created second, stacks further left of psi (pad=0.02 keeps a small gap)
+        if c_psi:
+            cbar_psi = canvas.fig.colorbar(c_psi, ax=ax1, orientation="horizontal", pad=0.08, fraction=0.03)
+            cbar_psi.set_label(r"$\psi$ [Wb]")
+
         if c_rho and rho_collections:
-            # cbar_rho = canvas.fig.colorbar(c_rho, ax=ax1, location="left", pad=0.004, fraction=0.04)
-            cbar_rho = canvas.fig.colorbar(c_rho, ax=ax1, location="left")
+            cbar_rho = canvas.fig.colorbar(c_rho, ax=ax1, orientation="horizontal", pad=0.08, fraction=0.03)
             cbar_rho.set_label(r"$\rho$")
-            cbar_rho.ax.set_visible(False)  # hidden by default, synced with rho overlay
+            cbar_rho.ax.set_visible(False)
 
             def _sync_rho_cbar(event):
-                # fires after the view's on_legend_click already toggled visibility
                 visible = rho_collections[0].get_visible()
                 if cbar_rho.ax.get_visible() != visible:
                     cbar_rho.ax.set_visible(visible)
                     canvas.fig.canvas.draw_idle()
 
-            ax1.figure.canvas.mpl_connect("pick_event", _sync_rho_cbar)
-        # psi — created first, sits directly adjacent to the axes (pad=0.01)
-        if c_psi:
-            # cbar_psi = canvas.fig.colorbar(c_psi, ax=ax1, location="left", pad=0.002, fraction=0.04)
-            cbar_psi = canvas.fig.colorbar(c_psi, ax=ax1, location="left")
-            cbar_psi.set_label(r"$\psi$ [Wb]")
+            canvas.fig.canvas.mpl_connect("pick_event", _sync_rho_cbar)
+
         ax1.set_title(title)
 
         xmin, xmax = ax1.get_xlim()
@@ -220,14 +219,18 @@ if __name__ == "__main__":
             rotation="vertical",
             fontsize=7,
         )
+
         if args.plots:
             view_object.plot_profiles_1d_quantities(axes_list1, time_slice)
             view_object.plot_global_quantities(axes_list2, time_value)
 
         canvas.fig.suptitle(get_title(args, "Equilibrium", time_value))
-        canvas.fig.set_size_inches(14, 8)
-        # left=0.15 reserves room for up to two vertical colorbars on the left
-        canvas.fig.subplots_adjust(top=0.933, bottom=0.05, left=0.024, right=0.988, hspace=0.221, wspace=0.25)
+        if args.plots:
+            canvas.fig.set_size_inches(10 + col_size * 1.6, 8)
+            canvas.fig.subplots_adjust(top=0.933, bottom=0.05, left=0.024, right=0.988, hspace=0.221, wspace=0.20)
+        else:
+            canvas.fig.set_size_inches(14, 8)
+            canvas.fig.subplots_adjust(top=0.933, bottom=0.05, left=0.024, right=0.988, hspace=0.221, wspace=0.25)
         canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
         if args.save:
             fname = get_file_name(args, f"{os.path.basename(__file__)}_Equilibrium", time_value)

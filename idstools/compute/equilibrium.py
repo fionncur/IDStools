@@ -395,6 +395,60 @@ class EquilibriumCompute:
 
         return {"r": r, "z": z}
 
+    def get_scalar_annotation_quantities(self, time_slice: int) -> list:
+        """Return validated scalar global/boundary quantities for annotation display.
+
+        Reads a fixed set of scalar fields from ``global_quantities`` and
+        ``boundary``, validates each value (finite and < 1e20), and returns
+        only those with valid data.
+
+        Args:
+            time_slice (int): Index into ``time_slice``.
+
+        Returns:
+            list of dicts, each with ``"label"`` (LaTeX str) and ``"text"``
+            (formatted value + unit str).  Empty list if nothing is valid.
+        """
+
+        def _valid(val):
+            try:
+                v = float(val)
+                return np.isfinite(v) and abs(v) < 1.0e20
+            except Exception:
+                return False
+
+        items = []
+        ts = self.ids.time_slice[time_slice]
+        gq = ts.global_quantities
+        bnd = ts.boundary
+
+        _specs = [
+            (lambda: float(gq.ip), lambda v: {"label": "$I_p$", "text": f"{v/1e6:.3f} MA"}),
+            (
+                lambda: float(
+                    getattr(
+                        gq.magnetic_axis, "b_field_phi" if hasattr(gq.magnetic_axis, "b_field_phi") else "b_field_tor"
+                    )
+                ),
+                lambda v: {"label": r"$B_\phi$(axis)", "text": f"{v:.3f} T"},
+            ),
+            (lambda: float(gq.psi_axis), lambda v: {"label": r"$\psi_{\rm axis}$", "text": f"{v:.4g} Wb"}),
+            (lambda: float(gq.psi_boundary), lambda v: {"label": r"$\psi_{\rm bnd}$", "text": f"{v:.4g} Wb"}),
+            (lambda: float(gq.q_axis), lambda v: {"label": "$q_0$", "text": f"{v:.3f}"}),
+            (lambda: float(gq.q_95), lambda v: {"label": "$q_{95}$", "text": f"{v:.3f}"}),
+            (lambda: float(bnd.minor_radius), lambda v: {"label": "$a$", "text": f"{v:.3f} m"}),
+            (lambda: float(bnd.elongation), lambda v: {"label": r"$\kappa$", "text": f"{v:.3f}"}),
+            (lambda: float(bnd.triangularity), lambda v: {"label": r"$\delta$", "text": f"{v:.3f}"}),
+        ]
+        for getter, formatter in _specs:
+            try:
+                val = getter()
+                if _valid(val):
+                    items.append(formatter(val))
+            except Exception:
+                pass
+        return items
+
     def get_top_view(self, time_slice: int) -> dict:
         """
         The function returns data for plotting the top view of a 2D shape.

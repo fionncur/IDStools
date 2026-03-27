@@ -133,8 +133,10 @@ class EquilibriumView(BasePlot):
         if plot_separatrix:
             sep = self.compute_obj.get_separatrix(time_slice)
             if sep is not None:
-                (line,) = ax.plot(sep["r"], sep["z"], color="red", linewidth=2.0, label="separatrix", zorder=5)
-                overlay_entries.append((line, [line]))
+                (line,) = ax.plot(sep["r"], sep["z"], color="red", linewidth=2.0, zorder=5)
+                line.set_visible(False)
+                proxy_sep = ProxyLine([0], [0], color="red", linewidth=2.0, label="separatrix")
+                overlay_entries.append((proxy_sep, [line]))
 
         if plot_magnetic_axis:
             mag_ax = self.compute_obj.get_magnetic_axis(time_slice)
@@ -142,16 +144,25 @@ class EquilibriumView(BasePlot):
                 (marker,) = ax.plot(
                     mag_ax["r"],
                     mag_ax["z"],
-                    marker="^",
-                    color="yellow",
-                    markersize=14,
-                    markeredgecolor="black",
-                    markeredgewidth=0.8,
+                    marker="x",
+                    color="saddlebrown",
+                    markersize=6,
+                    markeredgewidth=1.5,
                     linestyle="None",
-                    label="magnetic axis",
                     zorder=6,
                 )
-                overlay_entries.append((marker, [marker]))
+                marker.set_visible(False)
+                proxy_mag = ProxyLine(
+                    [0],
+                    [0],
+                    color="saddlebrown",
+                    marker="x",
+                    markersize=6,
+                    markeredgewidth=1.5,
+                    linestyle="None",
+                    label="magnetic axis",
+                )
+                overlay_entries.append((proxy_mag, [marker]))
 
         if plot_current_centre:
             cc = self.compute_obj.get_current_centre(time_slice)
@@ -160,16 +171,32 @@ class EquilibriumView(BasePlot):
                     cc["r"],
                     cc["z"],
                     marker="+",
-                    color="cyan",
-                    markersize=12,
+                    color="deeppink",
+                    markersize=8,
+                    markeredgewidth=2.0,
+                    linestyle="None",
+                    zorder=6,
+                )
+                marker.set_visible(False)
+                proxy_cc = ProxyLine(
+                    [0],
+                    [0],
+                    color="deeppink",
+                    marker="+",
+                    markersize=8,
                     markeredgewidth=2.0,
                     linestyle="None",
                     label="current centre",
-                    zorder=6,
                 )
-                overlay_entries.append((marker, [marker]))
+                overlay_entries.append((proxy_cc, [marker]))
 
-        # --- clickable legend: click a legend entry to toggle its overlay ----
+        # annotation text box (quantities summary below the axes)
+        ann_txt = self.view_global_quantities_annotation(ax, time_slice)
+        if ann_txt is not None:
+            proxy_ann = ProxyLine([0], [0], color="steelblue", linewidth=3, label="quantities")
+            overlay_entries.append((proxy_ann, [ann_txt]))
+
+        # --- clickable legend
         if overlay_entries:
             handles = [proxy for proxy, _ in overlay_entries]
             legend = ax.legend(
@@ -183,12 +210,18 @@ class EquilibriumView(BasePlot):
             )
             legend.get_title().set_fontsize(10)
             legend.get_title().set_fontstyle("italic")
-            legend.get_title().set_color("gray")
+
+            legend.get_title().set_ha("center")
+            for text in legend.get_texts():
+                text.set_ha("center")
 
             leg_map = {}
             for legline, (_, artists) in zip(legend.get_lines(), overlay_entries):
                 legline.set_picker(8)
                 leg_map[legline] = artists
+
+                if artists and not artists[0].get_visible():
+                    legline.set_alpha(0.3)
 
             def on_legend_click(event):
                 legline = event.artist
@@ -209,6 +242,38 @@ class EquilibriumView(BasePlot):
 
     def view_pulse_info(self, ax: plt.axes, title: str, hostdir: str, shot: int, run: int, t: float):
         self.database_info(ax, title, hostdir, shot, run, t)
+
+    def view_global_quantities_annotation(self, ax: plt.axes, time_slice: int):
+        """Draw a scalar global-quantities text box below the axes.
+
+        Reads validated scalars via
+        :meth:`idstools.compute.equilibrium.EquilibriumCompute.get_scalar_annotation_quantities`
+        and renders them as a styled text box just below the axes.
+
+        Args:
+            ax: matplotlib axes.
+            time_slice (int): time-slice index.
+
+        Returns:
+            matplotlib ``Text`` artist, or ``None`` if no valid data.
+        """
+        items = self.compute_obj.get_scalar_annotation_quantities(time_slice)
+        if not items:
+            return None
+
+        textstr = "\n".join(f"{d['label']} = {d['text']}" for d in items)
+        txt = ax.text(
+            1.20,
+            0.5,
+            textstr,
+            transform=ax.transAxes,
+            fontsize=8,
+            horizontalalignment="left",
+            verticalalignment="center",
+            clip_on=False,
+            bbox=dict(boxstyle="round,pad=0.5", facecolor="white", alpha=0.85, edgecolor="steelblue"),
+        )
+        return txt
 
     def plot_ip(self, ax):
         """
