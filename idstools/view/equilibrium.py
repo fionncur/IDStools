@@ -119,8 +119,13 @@ class EquilibriumView(BasePlot):
             ax.set_xlabel("$R$ [m]")
             ax.set_ylabel("$Z$ [m]")
 
-        # --- overlays: draw all available, store (proxy, artists_list) tuples ---
-        # Each entry: (proxy Line2D for legend, list of data artists to toggle)
+        # Get any handles already in the axes legend (e.g. from machine description).
+        _existing_legend = ax.get_legend()
+        if _existing_legend is not None:
+            _md_handles = list(_existing_legend.legend_handles)
+            _md_labels = [t.get_text() for t in _existing_legend.get_texts()]
+        else:
+            _md_handles, _md_labels = [], []
         overlay_entries = []
 
         # rho contour (starts hidden by default)
@@ -133,9 +138,8 @@ class EquilibriumView(BasePlot):
         if plot_separatrix:
             sep = self.compute_obj.get_separatrix(time_slice)
             if sep is not None:
-                (line,) = ax.plot(sep["r"], sep["z"], color="red", linewidth=2.0, zorder=5)
-                line.set_visible(False)
-                proxy_sep = ProxyLine([0], [0], color="red", linewidth=2.0, label="separatrix")
+                (line,) = ax.plot(sep["r"], sep["z"], color="saddlebrown", linewidth=2.0, linestyle="--", zorder=5)
+                proxy_sep = ProxyLine([0], [0], color="saddlebrown", linewidth=2.0, linestyle="--", label="separatrix")
                 overlay_entries.append((proxy_sep, [line]))
 
         if plot_magnetic_axis:
@@ -151,7 +155,6 @@ class EquilibriumView(BasePlot):
                     linestyle="None",
                     zorder=6,
                 )
-                marker.set_visible(False)
                 proxy_mag = ProxyLine(
                     [0],
                     [0],
@@ -177,7 +180,6 @@ class EquilibriumView(BasePlot):
                     linestyle="None",
                     zorder=6,
                 )
-                marker.set_visible(False)
                 proxy_cc = ProxyLine(
                     [0],
                     [0],
@@ -197,10 +199,15 @@ class EquilibriumView(BasePlot):
             overlay_entries.append((proxy_ann, [ann_txt]))
 
         # --- clickable legend
-        if overlay_entries:
-            handles = [proxy for proxy, _ in overlay_entries]
+        if overlay_entries or _md_handles:
+            overlay_proxies = [proxy for proxy, _ in overlay_entries]
+
+            all_handles = _md_handles + overlay_proxies
+            all_labels = _md_labels + [p.get_label() for p in overlay_proxies]
+
             legend = ax.legend(
-                handles=handles,
+                handles=all_handles,
+                labels=all_labels,
                 loc="upper left",
                 bbox_to_anchor=(1.15, 1),
                 fancybox=True,
@@ -210,18 +217,23 @@ class EquilibriumView(BasePlot):
             )
             legend.get_title().set_fontsize(10)
             legend.get_title().set_fontstyle("italic")
-
             legend.get_title().set_ha("center")
             for text in legend.get_texts():
                 text.set_ha("center")
 
             leg_map = {}
-            for legline, (_, artists) in zip(legend.get_lines(), overlay_entries):
-                legline.set_picker(8)
-                leg_map[legline] = artists
+            n_md = len(_md_handles)
+            for i, orig_artist in enumerate(_md_handles):
+                leg_h = legend.legend_handles[i]
+                leg_h.set_picker(8)
+                leg_map[leg_h] = [orig_artist]
 
+            for i, (_, artists) in enumerate(overlay_entries):
+                leg_h = legend.legend_handles[n_md + i]
+                leg_h.set_picker(8)
+                leg_map[leg_h] = artists
                 if artists and not artists[0].get_visible():
-                    legline.set_alpha(0.3)
+                    leg_h.set_alpha(0.3)
 
             def on_legend_click(event):
                 legline = event.artist
@@ -264,7 +276,7 @@ class EquilibriumView(BasePlot):
         textstr = "\n".join(f"{d['label']} = {d['text']}" for d in items)
         txt = ax.text(
             1.20,
-            0.5,
+            0.1,
             textstr,
             transform=ax.transAxes,
             fontsize=8,
