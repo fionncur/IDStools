@@ -193,10 +193,7 @@ class EquilibriumView(BasePlot):
                 overlay_entries.append((proxy_cc, [marker]))
 
         # annotation text box (quantities summary below the axes)
-        ann_txt = self.view_global_quantities_annotation(ax, time_slice)
-        if ann_txt is not None:
-            proxy_ann = ProxyLine([0], [0], color="steelblue", linewidth=3, label="quantities")
-            overlay_entries.append((proxy_ann, [ann_txt]))
+        self.view_global_quantities_annotation(ax, time_slice)
 
         # --- clickable legend
         if overlay_entries or _md_handles:
