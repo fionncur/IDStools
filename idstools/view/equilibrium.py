@@ -138,8 +138,8 @@ class EquilibriumView(BasePlot):
         if plot_separatrix:
             sep = self.compute_obj.get_separatrix(time_slice)
             if sep is not None:
-                (line,) = ax.plot(sep["r"], sep["z"], color="saddlebrown", linewidth=2.0, linestyle="--", zorder=5)
-                proxy_sep = ProxyLine([0], [0], color="saddlebrown", linewidth=2.0, linestyle="--", label="separatrix")
+                (line,) = ax.plot(sep["r"], sep["z"], color="red", linewidth=2.0, linestyle="--", zorder=5)
+                proxy_sep = ProxyLine([0], [0], color="red", linewidth=2.0, linestyle="--", label="separatrix")
                 overlay_entries.append((proxy_sep, [line]))
 
         if plot_magnetic_axis:
@@ -279,7 +279,7 @@ class EquilibriumView(BasePlot):
             0.1,
             textstr,
             transform=ax.transAxes,
-            fontsize=8,
+            fontsize=9,
             horizontalalignment="left",
             verticalalignment="center",
             clip_on=False,
