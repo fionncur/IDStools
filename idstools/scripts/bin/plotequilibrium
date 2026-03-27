@@ -190,12 +190,16 @@ if __name__ == "__main__":
         c_psi, c_rho, rho_collections = view_object.view_magnetic_poloidal_flux(ax1, time_slice)
 
         if c_psi:
-            cbar_psi = canvas.fig.colorbar(c_psi, ax=ax1, orientation="horizontal", pad=0.08, fraction=0.03)
-            cbar_psi.set_label(r"$\psi$ [Wb]")
+            cax_psi = ax1.inset_axes([-0.20, 0.05, 0.05, 0.88])  # [x, y, w, h] in axes coords
+            cbar_psi = canvas.fig.colorbar(c_psi, cax=cax_psi)
+            cbar_psi.ax.set_title(r"$\psi$ [Wb]", fontsize=7, pad=4)
+            cbar_psi.ax.tick_params(labelsize=7)
 
         if c_rho and rho_collections:
-            cbar_rho = canvas.fig.colorbar(c_rho, ax=ax1, orientation="horizontal", pad=0.08, fraction=0.03)
-            cbar_rho.set_label(r"$\rho$")
+            cax_rho = ax1.inset_axes([-0.35, 0.05, 0.05, 0.88])  # just to the right of psi bar
+            cbar_rho = canvas.fig.colorbar(c_rho, cax=cax_rho)
+            cbar_rho.ax.set_title(r"$\rho$", fontsize=7, pad=4)
+            cbar_rho.ax.tick_params(labelsize=7)
             cbar_rho.ax.set_visible(False)
 
             def _sync_rho_cbar(event):
