@@ -189,9 +189,8 @@ class EquilibriumView(BasePlot):
 
             # boundary outline
             if bd["bnd_r"] is not None and bd["bnd_z"] is not None:
-                bnd_type_str = {0: "limiter", 1: "diverted"}.get(bd["bnd_type"], "")
                 psi_label = f" (\u03c8_n={bd['bnd_psi_norm']:.4f})" if bd["bnd_psi_norm"] is not None else ""
-                bnd_label = f"boundary{psi_label}" + (f" [{bnd_type_str}]" if bnd_type_str else "")
+                bnd_label = f"boundary{psi_label}"
                 (bnd_line,) = ax.plot(
                     bd["bnd_r"],
                     bd["bnd_z"],
@@ -213,9 +212,7 @@ class EquilibriumView(BasePlot):
                     linestyle="--",
                     zorder=4,
                 )
-                proxy_sep_bnd = ProxyLine(
-                    [0], [0], color="#d62728", linewidth=2.0, linestyle="--", label="boundary_separatrix"
-                )
+                proxy_sep_bnd = ProxyLine([0], [0], color="#d62728", linewidth=2.0, linestyle="--", label="separatrix")
                 overlay_entries.append((proxy_sep_bnd, [sep_line]))
 
             # geometric axis
@@ -244,7 +241,7 @@ class EquilibriumView(BasePlot):
 
             # x-points  (boundary_separatrix)
             _xp_groups = [
-                (bd["sep_xpoints"], "darkgreen", "x_point (sep)"),
+                (bd["sep_xpoints"], "darkgreen", "x_point"),
             ]
             for xp_list, xp_color, xp_label in _xp_groups:
                 _xp_artists = []
@@ -287,7 +284,7 @@ class EquilibriumView(BasePlot):
 
             # strike-points  (boundary_separatrix)
             _sp_groups = [
-                (bd["sep_strikepoints"], "darkorange", "strike_point (sep)"),
+                (bd["sep_strikepoints"], "darkorange", "strike_point"),
             ]
             for sp_list, sp_color, sp_label in _sp_groups:
                 _sp_artists = []

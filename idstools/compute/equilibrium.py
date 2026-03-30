@@ -356,7 +356,15 @@ class EquilibriumCompute:
             if not (_valid_arr(r) and _valid_arr(z)):
                 return None, None
             r, z = _clean(r), _clean(z)
-            return np.append(r, r[0]), np.append(z, z[0])
+            # Insert NaN at large jumps so disconnected arcs are not joined
+            dist = np.sqrt(np.diff(r) ** 2 + np.diff(z) ** 2)
+            median_dist = np.nanmedian(dist)
+            if median_dist > 0:
+                breaks = np.where(dist > 20.0 * median_dist)[0] + 1
+                if len(breaks):
+                    r = np.insert(r, breaks, np.nan)
+                    z = np.insert(z, breaks, np.nan)
+            return r, z
 
         def _read_points(node, attr):
             pts = []
