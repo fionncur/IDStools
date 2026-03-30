@@ -41,9 +41,9 @@ class EquilibriumView(BasePlot):
         ax: plt.axes,
         time_slice: int,
         profiles2d_index: int = 0,
-        plot_separatrix: bool = True,
         plot_magnetic_axis: bool = True,
         plot_current_centre: bool = True,
+        plot_boundary_data: bool = True,
     ):
         """
         This function plots the magnetic poloidal flux contours on a 2D Cartesian grid.
@@ -131,23 +131,17 @@ class EquilibriumView(BasePlot):
             proxy_rho = ProxyLine([0], [0], color="darkorange", linewidth=1.5, label="\u03c1 contours", alpha=0.3)
             overlay_entries.append((proxy_rho, _rho_collections))
 
-        if plot_separatrix:
-            sep = self.compute_obj.get_separatrix(time_slice)
-            if sep is not None:
-                (line,) = ax.plot(sep["r"], sep["z"], color="red", linewidth=2.0, linestyle="--", zorder=5)
-                proxy_sep = ProxyLine([0], [0], color="red", linewidth=2.0, linestyle="--", label="separatrix")
-                overlay_entries.append((proxy_sep, [line]))
-
         if plot_magnetic_axis:
             mag_ax = self.compute_obj.get_magnetic_axis(time_slice)
             if mag_ax is not None:
                 (marker,) = ax.plot(
                     mag_ax["r"],
                     mag_ax["z"],
-                    marker="x",
+                    marker="o",
                     color="saddlebrown",
-                    markersize=6,
-                    markeredgewidth=1.5,
+                    markerfacecolor="saddlebrown",
+                    markeredgecolor="saddlebrown",
+                    markersize=7,
                     linestyle="None",
                     zorder=6,
                 )
@@ -155,9 +149,10 @@ class EquilibriumView(BasePlot):
                     [0],
                     [0],
                     color="saddlebrown",
-                    marker="x",
-                    markersize=6,
-                    markeredgewidth=1.5,
+                    marker="o",
+                    markerfacecolor="saddlebrown",
+                    markeredgecolor="saddlebrown",
+                    markersize=7,
                     linestyle="None",
                     label="magnetic axis",
                 )
@@ -187,6 +182,151 @@ class EquilibriumView(BasePlot):
                     label="current centre",
                 )
                 overlay_entries.append((proxy_cc, [marker]))
+
+        if plot_boundary_data:
+
+            bd = self.compute_obj.get_boundary_data(time_slice)
+
+            # boundary outline
+            if bd["bnd_r"] is not None and bd["bnd_z"] is not None:
+                bnd_type_str = {0: "limiter", 1: "diverted"}.get(bd["bnd_type"], "")
+                psi_label = f" (\u03c8_n={bd['bnd_psi_norm']:.4f})" if bd["bnd_psi_norm"] is not None else ""
+                bnd_label = f"boundary{psi_label}" + (f" [{bnd_type_str}]" if bnd_type_str else "")
+                (bnd_line,) = ax.plot(
+                    bd["bnd_r"],
+                    bd["bnd_z"],
+                    color="#1f77b4",
+                    linewidth=2.0,
+                    linestyle="-",
+                    zorder=4,
+                )
+                proxy_bnd = ProxyLine([0], [0], color="#1f77b4", linewidth=2.0, linestyle="-", label=bnd_label)
+                overlay_entries.append((proxy_bnd, [bnd_line]))
+
+            # boundary_separatrix outline
+            if bd["sep_r"] is not None and bd["sep_z"] is not None:
+                (sep_line,) = ax.plot(
+                    bd["sep_r"],
+                    bd["sep_z"],
+                    color="#d62728",
+                    linewidth=2.0,
+                    linestyle="--",
+                    zorder=4,
+                )
+                proxy_sep_bnd = ProxyLine(
+                    [0], [0], color="#d62728", linewidth=2.0, linestyle="--", label="boundary_separatrix"
+                )
+                overlay_entries.append((proxy_sep_bnd, [sep_line]))
+
+            # geometric axis
+            if bd["bnd_geom_r"] is not None and bd["bnd_geom_z"] is not None:
+                (gax_marker,) = ax.plot(
+                    bd["bnd_geom_r"],
+                    bd["bnd_geom_z"],
+                    marker="D",
+                    color="cyan",
+                    markersize=7,
+                    markeredgecolor="black",
+                    markeredgewidth=0.8,
+                    linestyle="None",
+                    zorder=6,
+                )
+                proxy_gax = ProxyLine(
+                    [0],
+                    [0],
+                    color="cyan",
+                    marker="D",
+                    markersize=7,
+                    linestyle="None",
+                    label=f"geom. axis (R={bd['bnd_geom_r']:.3f}, Z={bd['bnd_geom_z']:.3f} m)",
+                )
+                overlay_entries.append((proxy_gax, [gax_marker]))
+
+            # x-points  (boundary_separatrix)
+            _xp_groups = [
+                (bd["sep_xpoints"], "darkgreen", "x_point (sep)"),
+            ]
+            for xp_list, xp_color, xp_label in _xp_groups:
+                _xp_artists = []
+                for xp_idx, (xr, xz) in enumerate(xp_list):
+                    (mk,) = ax.plot(
+                        xr,
+                        xz,
+                        marker="x",
+                        color=xp_color,
+                        markersize=7,
+                        markeredgewidth=2,
+                        linestyle="None",
+                        zorder=7,
+                    )
+                    ann = ax.annotate(
+                        f"X{xp_idx}",
+                        xy=(xr, xz),
+                        xytext=(-6, 6),
+                        textcoords="offset points",
+                        fontsize=8,
+                        ha="right",
+                        color=xp_color,
+                        fontweight="bold",
+                        zorder=8,
+                    )
+                    _xp_artists.append(mk)
+                    _xp_artists.append(ann)
+                if _xp_artists:
+                    proxy_xp = ProxyLine(
+                        [0],
+                        [0],
+                        color=xp_color,
+                        marker="x",
+                        markersize=7,
+                        markeredgewidth=2,
+                        linestyle="None",
+                        label=xp_label,
+                    )
+                    overlay_entries.append((proxy_xp, _xp_artists))
+
+            # strike-points  (boundary_separatrix)
+            _sp_groups = [
+                (bd["sep_strikepoints"], "darkorange", "strike_point (sep)"),
+            ]
+            for sp_list, sp_color, sp_label in _sp_groups:
+                _sp_artists = []
+                for sp_idx, (sr, sz) in enumerate(sp_list):
+                    (mk,) = ax.plot(
+                        sr,
+                        sz,
+                        marker="+",
+                        color=sp_color,
+                        markersize=7,
+                        markeredgewidth=2.0,
+                        linestyle="None",
+                        zorder=7,
+                    )
+                    ann = ax.annotate(
+                        f"S{sp_idx}",
+                        xy=(sr, sz),
+                        xytext=(-6, 6),
+                        textcoords="offset points",
+                        fontsize=8,
+                        ha="right",
+                        color=sp_color,
+                        fontweight="bold",
+                        zorder=8,
+                    )
+                    _sp_artists.append(mk)
+                    _sp_artists.append(ann)
+                if _sp_artists:
+                    proxy_sp = ProxyLine(
+                        [0],
+                        [0],
+                        color=sp_color,
+                        marker="+",
+                        markersize=7,
+                        markeredgewidth=2.0,
+                        linestyle="None",
+                        label=sp_label,
+                    )
+                    overlay_entries.append((proxy_sp, _sp_artists))
 
         self.view_global_quantities_annotation(ax, time_slice)
 

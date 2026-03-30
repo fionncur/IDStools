@@ -301,39 +301,133 @@ class EquilibriumCompute:
             for time_index in range(len(self.ids.time_slice))
         ]
 
-    def get_separatrix(self, time_slice: int) -> Union[dict, None]:
-        """Return the closed separatrix outline for a given time slice.
+    def get_boundary_data(self, time_slice: int) -> dict:
+        """Return boundary and boundary_separatrix data for a given time slice.
 
-        Reads ``boundary.outline.r/z``, validates that the arrays are
-        non-empty and contain at least one finite, non-fill value, then
-        closes the polygon by appending the first point.
+        Reads:
+
+        * ``boundary/outline/r|z``
+        * ``boundary/type``  (0=limiter, 1=diverted)
+        * ``boundary/psi_norm``
+        * ``boundary/geometric_axis/r|z``
+        * ``boundary_separatrix/outline/r|z``
+        * ``boundary_separatrix/x_point[i]/r|z``
+        * ``boundary_separatrix/strike_point[i]/r|z``
 
         Args:
             time_slice (int): Index into ``time_slice``.
 
         Returns:
-            dict with keys ``"r"`` and ``"z"`` (1-D ndarrays, polygon
-            closed), or ``None`` if the data are absent or invalid.
+            dict with keys:
+
+            * ``"bnd_r"``, ``"bnd_z"``            boundary outline (closed), or ``None``
+            * ``"bnd_type"``                      int or ``None``
+            * ``"bnd_psi_norm"``                  float or ``None``
+            * ``"bnd_geom_r"``, ``"bnd_geom_z"``  geometric axis scalars or ``None``
+            * ``"sep_r"``, ``"sep_z"``            separatrix outline (closed), or ``None``
+            * ``"sep_xpoints"``                   list of (r, z) tuples
+            * ``"sep_strikepoints"``              list of (r, z) tuples
         """
+
+        _FILL = imas.ids_defs.EMPTY_FLOAT
+
+        def _valid_arr(arr):
+            a = np.asarray(arr, dtype=float)
+            return a.size > 0 and np.any(np.isfinite(a) & (np.abs(a) < 1.0e20))
+
+        def _valid_scalar(val):
+            try:
+                v = float(val)
+                return np.isfinite(v) and abs(v) < 1.0e20
+            except Exception:
+                return False
+
+        def _clean(arr):
+            a = np.asarray(arr, dtype=float)
+            a[(~np.isfinite(a)) | (np.abs(a) >= 1.0e20)] = np.nan
+            return a
+
+        def _read_outline(node):
+            try:
+                r = np.asarray(node.outline.r, dtype=float)
+                z = np.asarray(node.outline.z, dtype=float)
+            except Exception:
+                return None, None
+            if not (_valid_arr(r) and _valid_arr(z)):
+                return None, None
+            r, z = _clean(r), _clean(z)
+            return np.append(r, r[0]), np.append(z, z[0])
+
+        def _read_points(node, attr):
+            pts = []
+            try:
+                arr = getattr(node, attr)
+            except AttributeError:
+                return pts
+            for pt in arr:
+                try:
+                    r, z = float(pt.r), float(pt.z)
+                except Exception:
+                    continue
+                if _valid_scalar(r) and _valid_scalar(z):
+                    pts.append((r, z))
+            return pts
+
+        result = {
+            "bnd_r": None,
+            "bnd_z": None,
+            "bnd_type": None,
+            "bnd_psi_norm": None,
+            "bnd_geom_r": None,
+            "bnd_geom_z": None,
+            "sep_r": None,
+            "sep_z": None,
+            "sep_xpoints": [],
+            "sep_strikepoints": [],
+        }
+
         try:
-            bnd = self.ids.time_slice[time_slice].boundary
-            r = np.asarray(bnd.outline.r, dtype=float)
-            z = np.asarray(bnd.outline.z, dtype=float)
-        except Exception as exc:
-            logger.debug(f"get_separatrix: could not read boundary.outline – {exc}")
-            return None
+            ts = self.ids.time_slice[time_slice]
+        except Exception:
+            return result
 
-        def _valid(arr):
-            return arr.size > 0 and np.any(np.isfinite(arr) & (np.abs(arr) < 1.0e20))
+        # boundary
+        try:
+            bnd = ts.boundary
+            result["bnd_r"], result["bnd_z"] = _read_outline(bnd)
 
-        if not (_valid(r) and _valid(z)):
-            logger.debug("get_separatrix: boundary.outline contains no valid data")
-            return None
+            bnd_type = int(bnd.type)
+            if _valid_scalar(bnd_type):
+                result["bnd_type"] = bnd_type
+        except Exception:
+            pass
 
-        # close the polygon
-        r = np.append(r, r[0])
-        z = np.append(z, z[0])
-        return {"r": r, "z": z}
+        try:
+            psi_norm = float(ts.boundary.psi_norm)
+            if _valid_scalar(psi_norm):
+                result["bnd_psi_norm"] = psi_norm
+        except Exception:
+            pass
+
+        try:
+            gax_r = float(ts.boundary.geometric_axis.r)
+            gax_z = float(ts.boundary.geometric_axis.z)
+            if _valid_scalar(gax_r) and _valid_scalar(gax_z):
+                result["bnd_geom_r"] = gax_r
+                result["bnd_geom_z"] = gax_z
+        except Exception:
+            pass
+
+        # boundary_separatrix
+        try:
+            sep = ts.boundary_separatrix
+            result["sep_r"], result["sep_z"] = _read_outline(sep)
+            result["sep_xpoints"] = _read_points(sep, "x_point")
+            result["sep_strikepoints"] = _read_points(sep, "strike_point")
+        except Exception:
+            pass
+
+        return result
 
     def get_magnetic_axis(self, time_slice: int) -> Union[dict, None]:
         """Return the magnetic axis position for a given time slice.
