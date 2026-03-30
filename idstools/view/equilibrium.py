@@ -164,10 +164,10 @@ class EquilibriumView(BasePlot):
                 (marker,) = ax.plot(
                     cc["r"],
                     cc["z"],
-                    marker="+",
+                    marker="*",
                     color="deeppink",
-                    markersize=8,
-                    markeredgewidth=2.0,
+                    markersize=10,
+                    markeredgewidth=1.0,
                     linestyle="None",
                     zorder=6,
                 )
@@ -175,9 +175,9 @@ class EquilibriumView(BasePlot):
                     [0],
                     [0],
                     color="deeppink",
-                    marker="+",
-                    markersize=8,
-                    markeredgewidth=2.0,
+                    marker="*",
+                    markersize=10,
+                    markeredgewidth=1.0,
                     linestyle="None",
                     label="current centre",
                 )
