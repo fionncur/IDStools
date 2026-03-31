@@ -16,6 +16,8 @@ import numpy as np
 
 from idstools.database import DBMaster
 
+_IDS_VALID_THRESHOLD = abs(imas.ids_defs.EMPTY_FLOAT)
+
 logger = logging.getLogger("module")
 
 
@@ -329,22 +331,20 @@ class EquilibriumCompute:
             * ``"sep_strikepoints"``              list of (r, z) tuples
         """
 
-        _FILL = imas.ids_defs.EMPTY_FLOAT
-
         def _valid_arr(arr):
             a = np.asarray(arr, dtype=float)
-            return a.size > 0 and np.any(np.isfinite(a) & (np.abs(a) < 1.0e20))
+            return a.size > 0 and np.any(np.isfinite(a) & (np.abs(a) < _IDS_VALID_THRESHOLD))
 
         def _valid_scalar(val):
             try:
                 v = float(val)
-                return np.isfinite(v) and abs(v) < 1.0e20
+                return np.isfinite(v) and abs(v) < _IDS_VALID_THRESHOLD
             except Exception:
                 return False
 
         def _clean(arr):
             a = np.asarray(arr, dtype=float)
-            a[(~np.isfinite(a)) | (np.abs(a) >= 1.0e20)] = np.nan
+            a[(~np.isfinite(a)) | (np.abs(a) >= _IDS_VALID_THRESHOLD)] = np.nan
             return a
 
         def _read_outline(node):
@@ -459,7 +459,7 @@ class EquilibriumCompute:
             return None
 
         def _valid(val):
-            return np.isfinite(val) and abs(val) < 1.0e20
+            return np.isfinite(val) and abs(val) < _IDS_VALID_THRESHOLD
 
         if not (_valid(r) and _valid(z)):
             logger.debug("get_magnetic_axis: magnetic_axis contains no valid data")
@@ -489,7 +489,7 @@ class EquilibriumCompute:
             return None
 
         def _valid(val):
-            return np.isfinite(val) and abs(val) < 1.0e20
+            return np.isfinite(val) and abs(val) < _IDS_VALID_THRESHOLD
 
         if not (_valid(r) and _valid(z)):
             logger.debug("get_current_centre: current_centre contains no valid data")
@@ -501,7 +501,8 @@ class EquilibriumCompute:
         """Return validated scalar global/boundary quantities for annotation display.
 
         Reads a fixed set of scalar fields from ``global_quantities`` and
-        ``boundary``, validates each value (finite and < 1e20), and returns
+        ``boundary``, validates each value (finite and below the IDS fill
+        value threshold), and returns
         only those with valid data.
 
         Args:
@@ -515,7 +516,7 @@ class EquilibriumCompute:
         def _valid(val):
             try:
                 v = float(val)
-                return np.isfinite(v) and abs(v) < 1.0e20
+                return np.isfinite(v) and abs(v) < _IDS_VALID_THRESHOLD
             except Exception:
                 return False
 

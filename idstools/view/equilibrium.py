@@ -44,6 +44,7 @@ class EquilibriumView(BasePlot):
         plot_magnetic_axis: bool = True,
         plot_current_centre: bool = True,
         plot_boundary_data: bool = True,
+        plot_rho: bool = False,
     ):
         """
         This function plots the magnetic poloidal flux contours on a 2D Cartesian grid.
@@ -83,7 +84,6 @@ class EquilibriumView(BasePlot):
             :meth:`plotIP`
         """
         contour_lines_psi = contour_lines_rho = None
-        _rho_collections = []
         cartestion_grid = self.compute_obj.get2d_cartesian_grid(time_slice, profiles2d_index)
         if cartestion_grid is not None:
             levels = 50
@@ -101,17 +101,12 @@ class EquilibriumView(BasePlot):
             # )
 
             # rho overlay
-            rho2d = self.compute_obj.get_rho2d(time_slice)
-            if rho2d is not None:
-                _before = set(ax.collections)
-                contour_lines_rho = ax.contour(
-                    cartestion_grid["r2d"], cartestion_grid["z2d"], rho2d, levels=levels, cmap="YlOrBr"
-                )
-                _rho_collections = [c for c in ax.collections if c not in _before]
-                for _c in _rho_collections:
-                    _c.set_visible(False)
-            else:
-                _rho_collections = []
+            if plot_rho:
+                rho2d = self.compute_obj.get_rho2d(time_slice)
+                if rho2d is not None:
+                    contour_lines_rho = ax.contour(
+                        cartestion_grid["r2d"], cartestion_grid["z2d"], rho2d, levels=levels, cmap="YlOrBr"
+                    )
 
             ax.set_aspect("equal", adjustable="box")
             ax.set_xlabel("$R$ [m]")
@@ -125,11 +120,6 @@ class EquilibriumView(BasePlot):
         else:
             _md_handles, _md_labels = [], []
         overlay_entries = []
-
-        # rho contour
-        if contour_lines_rho is not None and _rho_collections:
-            proxy_rho = ProxyLine([0], [0], color="darkorange", linewidth=1.5, label="\u03c1 contours", alpha=0.3)
-            overlay_entries.append((proxy_rho, _rho_collections))
 
         if plot_magnetic_axis:
             mag_ax = self.compute_obj.get_magnetic_axis(time_slice)
@@ -379,7 +369,7 @@ class EquilibriumView(BasePlot):
 
             ax.figure.canvas.mpl_connect("pick_event", on_legend_click)
 
-        return contour_lines_psi, contour_lines_rho, _rho_collections
+        return contour_lines_psi, contour_lines_rho
 
     def view_pulse_info(self, ax: plt.axes, title: str, hostdir: str, shot: int, run: int, t: float):
         self.database_info(ax, title, hostdir, shot, run, t)

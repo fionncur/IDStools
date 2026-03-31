@@ -49,6 +49,11 @@ if __name__ == "__main__":
     )
     parser.add_argument("-t", "--time", help="Time (default=middle)", type=float, default=-99.0)
     parser.add_argument(
+        "--rho",
+        help="Show rho overlay on the plot",
+        action="store_true",
+    )
+    parser.add_argument(
         "-p",
         "--plots",
         help="Plots available quantities along with equilibrium",
@@ -185,7 +190,7 @@ if __name__ == "__main__":
                 ids_data = get_md_data(mduris, args.dd_update)
             plot_machine_description(ax1, ids_data)
 
-        c_psi, c_rho, rho_collections = view_object.view_magnetic_poloidal_flux(ax1, time_slice)
+        c_psi, c_rho = view_object.view_magnetic_poloidal_flux(ax1, time_slice, plot_rho=args.rho)
 
         if c_psi:
             cax_psi = ax1.inset_axes([-0.20, 0.05, 0.05, 0.88])  # [x, y, w, h] in axes coords
@@ -193,20 +198,11 @@ if __name__ == "__main__":
             cbar_psi.ax.set_title(r"$\psi$ [Wb]", fontsize=7, pad=4)
             cbar_psi.ax.tick_params(labelsize=7)
 
-        if c_rho and rho_collections:
-            cax_rho = ax1.inset_axes([-0.35, 0.05, 0.05, 0.88])  # just to the right of psi bar
+        if c_rho:
+            cax_rho = ax1.inset_axes([-0.35, 0.05, 0.05, 0.88])  # just to the left of psi bar
             cbar_rho = canvas.fig.colorbar(c_rho, cax=cax_rho)
             cbar_rho.ax.set_title(r"$\rho$", fontsize=7, pad=4)
             cbar_rho.ax.tick_params(labelsize=7)
-            cbar_rho.ax.set_visible(False)
-
-            def _sync_rho_cbar(event):
-                visible = rho_collections[0].get_visible()
-                if cbar_rho.ax.get_visible() != visible:
-                    cbar_rho.ax.set_visible(visible)
-                    canvas.fig.canvas.draw_idle()
-
-            canvas.fig.canvas.mpl_connect("pick_event", _sync_rho_cbar)
 
         ax1.set_title(title)
 
