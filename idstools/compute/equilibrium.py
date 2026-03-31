@@ -526,7 +526,7 @@ class EquilibriumCompute:
         bnd = ts.boundary
 
         _specs = [
-            (lambda: float(gq.ip), lambda v: {"label": "$I_p$", "text": f"{v/1e6:.3f} MA"}),
+            (lambda: float(gq.ip), lambda v: {"label": "$I_p$", "text": f"{v / 1e6:.3f} MA"}),
             (
                 lambda: float(
                     getattr(
