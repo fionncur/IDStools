@@ -312,9 +312,20 @@ class EquilibriumCompute:
         * ``boundary/type``  (0=limiter, 1=diverted)
         * ``boundary/psi_norm``
         * ``boundary/geometric_axis/r|z``
+
+        if boundary_separatrix is available:
+
         * ``boundary_separatrix/outline/r|z``
         * ``boundary_separatrix/x_point[i]/r|z``
         * ``boundary_separatrix/strike_point[i]/r|z``
+
+        if contour_tree is available:
+
+        * ``contour_tree/node[i]/critical_type``
+        * ``contour_tree/node[i]/r|z`` for X-points (``critical_type == 1``)
+        * ``contour_tree/node[i]/levelset/r|z`` for separatrix outline
+        * ``constraints/strike_point[i]/position_reconstructed/r|z`` for strike points
+          (fallback to ``position_measured/r|z`` when needed)
 
         Args:
             time_slice (int): Index into ``time_slice``.
@@ -381,6 +392,55 @@ class EquilibriumCompute:
                     pts.append((r, z))
             return pts
 
+        def _read_contour_tree(ts_node):
+            """Read separatrix/X-point data from ``time_slice.contour_tree.node``.
+
+            * ``node.critical_type == 1`` for X-points (saddle points)
+            * first valid X-point ``node.levelset.r/z`` as separatrix contour
+            """
+            sep_r = sep_z = None
+            xpoints = []
+
+            try:
+                nodes = ts_node.contour_tree.node
+            except Exception:
+                return sep_r, sep_z, xpoints
+
+            for node in nodes:
+                try:
+                    critical_type = int(node.critical_type)
+                except Exception:
+                    continue
+
+                if critical_type != 1:  # 1 = saddle / X-point
+                    continue
+
+                try:
+                    xr = float(node.r)
+                    xz = float(node.z)
+                except Exception:
+                    xr = xz = None
+
+                if xr is not None and _valid_scalar(xr) and xz is not None and _valid_scalar(xz):
+                    xpoints.append((xr, xz))
+
+                if sep_r is not None and sep_z is not None:
+                    continue
+
+                try:
+                    r = np.asarray(node.levelset.r, dtype=float)
+                    z = np.asarray(node.levelset.z, dtype=float)
+                except Exception:
+                    continue
+
+                if not (_valid_arr(r) and _valid_arr(z)):
+                    continue
+
+                sep_r = _clean(r)
+                sep_z = _clean(z)
+
+            return sep_r, sep_z, xpoints
+
         result = {
             "bnd_r": None,
             "bnd_z": None,
@@ -426,14 +486,30 @@ class EquilibriumCompute:
         except Exception:
             pass
 
-        # boundary_separatrix
-        try:
+        # boundary_separatrix (DD3 )
+        if hasattr(ts, "boundary_separatrix"):
             sep = ts.boundary_separatrix
-            result["sep_r"], result["sep_z"] = _read_outline(sep)
-            result["sep_xpoints"] = _read_points(sep, "x_point")
-            result["sep_strikepoints"] = _read_points(sep, "strike_point")
-        except Exception:
-            pass
+            try:
+                result["sep_r"], result["sep_z"] = _read_outline(sep)
+                result["sep_xpoints"] = _read_points(sep, "x_point")
+                result["sep_strikepoints"] = _read_points(sep, "strike_point")
+            except Exception:
+                pass
+
+        #  contour_tree.node (DD4)
+        if hasattr(ts, "contour_tree") and hasattr(ts.contour_tree, "node"):
+            contour_sep_r, contour_sep_z, contour_xpoints = _read_contour_tree(ts)
+
+            if (
+                (result["sep_r"] is None or result["sep_z"] is None)
+                and contour_sep_r is not None
+                and contour_sep_z is not None
+            ):
+                result["sep_r"] = contour_sep_r
+                result["sep_z"] = contour_sep_z
+
+            if not result["sep_xpoints"] and contour_xpoints:
+                result["sep_xpoints"] = contour_xpoints
 
         return result
 
