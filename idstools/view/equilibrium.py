@@ -177,32 +177,17 @@ class EquilibriumView(BasePlot):
 
             bd = self.compute_obj.get_boundary_data(time_slice)
 
-            # boundary outline
-            if bd["bnd_r"] is not None and bd["bnd_z"] is not None:
-                psi_label = f" (\u03c8_n={bd['bnd_psi_norm']:.4f})" if bd["bnd_psi_norm"] is not None else ""
-                bnd_label = f"boundary{psi_label}"
-                (bnd_line,) = ax.plot(
-                    bd["bnd_r"],
-                    bd["bnd_z"],
-                    color="#1f77b4",
-                    linewidth=2.0,
-                    linestyle="-",
-                    zorder=4,
-                )
-                proxy_bnd = ProxyLine([0], [0], color="#1f77b4", linewidth=2.0, linestyle="-", label=bnd_label)
-                overlay_entries.append((proxy_bnd, [bnd_line]))
-
             # boundary_separatrix outline
             if bd["sep_r"] is not None and bd["sep_z"] is not None:
                 (sep_line,) = ax.plot(
                     bd["sep_r"],
                     bd["sep_z"],
-                    color="#d62728",
+                    color="#000000",
                     linewidth=2.0,
                     linestyle="--",
                     zorder=4,
                 )
-                proxy_sep_bnd = ProxyLine([0], [0], color="#d62728", linewidth=2.0, linestyle="--", label="separatrix")
+                proxy_sep_bnd = ProxyLine([0], [0], color="#000000", linewidth=2.0, linestyle="--", label="separatrix")
                 overlay_entries.append((proxy_sep_bnd, [sep_line]))
 
             # geometric axis
@@ -231,7 +216,7 @@ class EquilibriumView(BasePlot):
 
             # x-points  (boundary_separatrix)
             _xp_groups = [
-                (bd["sep_xpoints"], "darkgreen", "x_point"),
+                (bd["sep_xpoints"], "red", "x_point"),
             ]
             for xp_list, xp_color, xp_label in _xp_groups:
                 _xp_artists = []
