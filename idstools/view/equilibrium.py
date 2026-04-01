@@ -84,8 +84,16 @@ class EquilibriumView(BasePlot):
         if cartestion_grid is not None:
             levels = 50
 
+            # As per IMAS data dictionary psi is stored as [R, Z] with shape (N_R, N_Z).
+            # Check this reference :
+            # https://imas-data-dictionary.readthedocs.io/en/latest/generated/identifier/poloidal_plane_coordinates_identifier.html
+
+            # For matplotlib contour as per the documentation:
+            # https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.contour.html
+            # matplotlib.contour(r, z, Zdata) expects Zdata as [rows=z, cols=r], so the shape must be (N_Z, N_R).
+            # Therefore we transpose psi before plotting.
             contour_lines_psi = ax.contour(
-                cartestion_grid["r2d"], cartestion_grid["z2d"], cartestion_grid["psi2d"], levels, cmap="summer"
+                cartestion_grid["r2d"], cartestion_grid["z2d"], cartestion_grid["psi2d"].T, levels, cmap="summer"
             )
             # ax.clabel(
             #     contour_lines_psi,
