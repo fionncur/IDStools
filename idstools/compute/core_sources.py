@@ -399,7 +399,7 @@ class CoreSourcesCompute:
                         total_ion_power = 0.0
 
                     total_power_waveform[time_index] = (
-                        total_electron_power_waveform[time_index] + electrons_power + total_ion_power
+                        total_power_waveform[time_index] + electrons_power + total_ion_power
                     )
                     total_particles_waveform[time_index] = (
                         total_electron_particles_waveform[time_index] + electrons_particles
