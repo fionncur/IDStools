@@ -370,7 +370,6 @@ class CoreSourcesCompute:
         single_power_waveform = {}
         single_particles_waveform = {}
         dict_single_and_total_electrons_waveforms = self.get_single_and_total_electrons_waveforms(time_slice)
-        total_electron_power_waveform = dict_single_and_total_electrons_waveforms["total_electron_power_waveform"]
         total_electron_particles_waveform = dict_single_and_total_electrons_waveforms[
             "total_electron_particles_waveform"
         ]
