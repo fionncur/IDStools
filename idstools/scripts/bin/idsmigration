@@ -1,0 +1,85 @@
+import imas
+import pandas as pd
+import numpy as np
+import os
+
+HERE = os.path.dirname(os.path.abspath(__file__))           # .../idstools/scripts/bin
+ROOT = os.path.dirname(os.path.dirname(os.path.dirname(HERE)))  # .../IDStools
+mappings_dir = os.path.join(ROOT, "resources", "mappings")
+input_dir = os.path.join(ROOT, "resources", "input")
+
+def resolve_parent(ids, branch: list[str]):
+    node = ids
+    for seg in branch[:-1]:
+        node = getattr(node, seg)
+        if isinstance(node, imas.ids_struct_array.IDSStructArray):
+            if len(node) == 0:
+                node.resize(1)
+            node = node[0]
+    return node, branch[-1]
+
+# Define paths for data and mapping files.
+data_path = os.path.join(input_dir, "TC-26_data.csv")
+mapping_path = os.path.join(mappings_dir, "TC26_crosswalk.xlsx")
+
+# Take crosswalk xlsx into dataframe.
+df = pd.read_excel(mapping_path)   
+
+# Convert needs_source to boolean.
+df['needs_source'] = df['needs_source'].fillna(False).astype(bool)
+
+sentence = (df["transform"] == "identity") 
+id_df = df[sentence]
+non_id_df = df[~sentence]
+
+# Import experimental data from csv.
+data = pd.read_csv(data_path, na_values=["-"])
+
+# Generate top-level IDSs for each imas_path in initial_df.
+
+factory = imas.IDSFactory() # Set DD version
+
+IDS_dict = {}  # Dictionary to store IDS instances for each row
+for index_d, row_d in data.iterrows(): # Iterate over data rows.
+    
+    pulse_ids = {} 
+ 
+    for index_i, row_i in id_df.iterrows():
+
+        imas_path = row_i["imas_path"]
+        ids_root = imas_path.split("/")[0]
+        if row_i["needs_source"] == True:
+            imas_path += "/value"  # Append "/value" to the IDS name if needs_source is True
+        ids_branch = imas_path.split("/")[1:]
+ 
+        # Generate the top-level IDS if it doesn't exist *for this pulse*.
+        if ids_root not in pulse_ids:
+            pulse_ids[ids_root] = factory.new(ids_root)
+            
+        ids = pulse_ids[ids_root]
+ 
+        # Resolve the leaf's parent and set the leaf to the source cell:
+        # row_i["csv_column"] names the column in `data`; row_d reads it.
+        value = row_d[row_i["csv_column"]]
+
+        # We want to put value into leaf of ids, given by ids_branch: list.
+
+        parent, leaf = resolve_parent(ids, ids_branch)
+
+        target = getattr(parent, leaf)
+
+        if isinstance(target, imas.ids_struct_array.IDSStructArray):
+            if len(target) == 0:
+                target.resize(1)
+            target[0] = value
+        elif isinstance(target, imas.ids_primitive.IDSNumericArray):
+            setattr(parent, leaf, np.atleast_1d(value))
+        else:
+            setattr(parent, leaf, value)
+
+    IDS_dict[index_d] = pulse_ids
+
+print(id_df)
+imas.util.print_tree(IDS_dict[1]["summary"])
+imas.util.print_tree(IDS_dict[1]["equilibrium"])
+
