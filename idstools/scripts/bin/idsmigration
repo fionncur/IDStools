@@ -18,7 +18,13 @@ def parse_seg(seg: str) -> tuple[str, int]:
     m = re.fullmatch(r"(\w+)\((\d+)\)", seg)
     if m:
         return m.group(1), int(m.group(2))
+    m = re.fullmatch(r"(\w+)\(\*\)", seg)
+    if m:
+        return m.group(1), 0
     return seg, 0
+
+def replace_wildcard_index(branch: list[str], idx: int) -> list[str]:
+    return [f"{seg[:-3]}({idx})" if seg.endswith("(*)") else seg for seg in branch]
 
 def resolve_parent(ids, branch: list[str]) -> tuple[Any, str]:
     node = ids
@@ -45,7 +51,6 @@ def set_leaf(ids, branch: list[str], value: Any) -> None:
         setattr(parent, leaf, np.atleast_1d(value))
     else:
         setattr(parent, leaf, value)
-
 
 # Define paths for data and mapping files.
 data_path = os.path.join(input_dir, "TC-26_data.csv")
@@ -127,9 +132,14 @@ for index_d, row_d in data.iterrows():
                     raise ValueError(f"Row {index_i}: transform='dictionary' but transform_args is missing")
                 dictionary = eval(row_i["transform_args"])
                 if value not in dictionary:
-                    raise ValueError(f"Row {index_i}: value {value!r} from column '{row_i['csv_column']}' not in dictionary")
+                    print(f"WARNING: Row {index_i}: value {value!r} from column '{row_i['csv_column']}' not in dictionary — skipping")
+                    continue
                 value = dictionary[value]
-                set_leaf(ids, ids_branch, value)
+                if isinstance(value, list):
+                    for i, v in enumerate(value):
+                        set_leaf(ids, replace_wildcard_index(ids_branch, i), v)
+                else:
+                    set_leaf(ids, replace_wildcard_index(ids_branch, 0), value)
             else:
                 raise ValueError(f"Row {index_i}: unhandled transform '{row_i['transform']}'")
 
@@ -139,7 +149,8 @@ print("Writing...")
 os.makedirs(output_dir, exist_ok=True)
 for pulse, pulse_ids in IDS_dict.items():
     uri = f"imas:hdf5?path={output_dir};pulse={pulse}"
-    if pulse % 20 == 0: print("Progress: "+str(pulse)+"/"+str(len(IDS_dict)))
+    if pulse % 20 == 0: 
+        print("Progress: "+str(pulse)+"/"+str(len(IDS_dict)))
     with imas.DBEntry(uri, "w") as entry:
         for ids in pulse_ids.values():
             entry.put(ids)
