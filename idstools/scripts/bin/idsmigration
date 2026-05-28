@@ -63,7 +63,7 @@ df = pd.read_excel(mapping_path)
 df['needs_source'] = df['needs_source'].fillna(False).astype(bool)
 
 # For testing, include only implemented transforms.
-sentence = (df["transform"] == "identity") | (df["transform"] == "dictionary")
+sentence = (df["transform"] == "identity") | (df["transform"] == "dictionary") | (df["transform"] == "formula")
 df = df[sentence]
 
 # Import experimental data from csv. Data cleaning
@@ -140,11 +140,17 @@ for index_d, row_d in data.iterrows():
                         set_leaf(ids, replace_wildcard_index(ids_branch, i), v)
                 else:
                     set_leaf(ids, replace_wildcard_index(ids_branch, 0), value)
+            elif row_i["transform"] == "formula":
+                if not isinstance(row_i["transform_args"], str):
+                    raise ValueError(f"Row {index_i}: transform='formula' but transform_args is missing")
+                value = eval(row_i["transform_args"], {"x": value})
+                set_leaf(ids, ids_branch, value)
             else:
                 raise ValueError(f"Row {index_i}: unhandled transform '{row_i['transform']}'")
 
     IDS_dict[index_d] = pulse_ids
 
+# Write IDSs to disk.
 print("Writing...")
 os.makedirs(output_dir, exist_ok=True)
 for pulse, pulse_ids in IDS_dict.items():
