@@ -61,8 +61,18 @@ df = df[sentence]
 data = pd.read_csv(data_path, na_values=["-"])
 data = data.map(lambda x: x.strip() if isinstance(x, str) else x)
 
+# Upfront validation: all csv_columns must exist in data.
+missing_cols = set(df["csv_column"]) - set(data.columns)
+if missing_cols:
+    raise ValueError(f"csv_column(s) not found in data CSV: {missing_cols}")
+
+# Upfront validation: needs_source rows must have a source string.
+bad_source = df[df["needs_source"] & ~df["source"].apply(lambda x: isinstance(x, str))]
+if not bad_source.empty:
+    raise ValueError(f"Rows with needs_source=True but missing source: {list(bad_source.index)}")
+
 # Create factory object, set DD version.
-factory = imas.IDSFactory(version = "4.1.1") 
+factory = imas.IDSFactory(version = "4.1.1")
 
 IDS_dict = {} 
 
@@ -74,6 +84,8 @@ for index_d, row_d in data.iterrows():
     for index_i, row_i in df.iterrows():
         
         imas_path = row_i["imas_path"]
+        if not isinstance(imas_path, str):
+            raise ValueError(f"Row {index_i}: imas_path is missing")
         imas_paths = [imas_path]  # Start with the original path
 
         if "&" in imas_path:
@@ -98,12 +110,16 @@ for index_d, row_d in data.iterrows():
                 set_leaf(ids, ids_branch, value)
                 if row_i["needs_source"] == True:
                     set_leaf(ids, ids_branch[:-1] + ["source"], row_i["source"])
-            if row_i["transform"] == "dictionary":
+            elif row_i["transform"] == "dictionary":
                 if not isinstance(row_i["transform_args"], str):
                     raise ValueError(f"Row {index_i}: transform='dictionary' but transform_args is missing")
                 dictionary = eval(row_i["transform_args"])
+                if value not in dictionary:
+                    raise ValueError(f"Row {index_i}: value {value!r} from column '{row_i['csv_column']}' not in dictionary")
                 value = dictionary[value]
                 set_leaf(ids, ids_branch, value)
+            else:
+                raise ValueError(f"Row {index_i}: unhandled transform '{row_i['transform']}'")
 
     IDS_dict[index_d] = pulse_ids
 
