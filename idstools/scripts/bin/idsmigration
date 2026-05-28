@@ -1,14 +1,19 @@
 from typing import Any
 import re
+import logging
 import imas
 import pandas as pd
 import numpy as np
 import os
 
+logging.getLogger("imas").setLevel(logging.WARNING)
+
 HERE = os.path.dirname(os.path.abspath(__file__))           # .../idstools/scripts/bin
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(HERE)))  # .../IDStools
 mappings_dir = os.path.join(ROOT, "resources", "mappings")
 input_dir = os.path.join(ROOT, "resources", "input")
+output_dir = os.path.join(ROOT, "resources", "results", "tc26")
+
 
 def parse_seg(seg: str) -> tuple[str, int]:
     m = re.fullmatch(r"(\w+)\((\d+)\)", seg)
@@ -67,19 +72,21 @@ if missing_cols:
     raise ValueError(f"csv_column(s) not found in data CSV: {missing_cols}")
 
 # Upfront validation: needs_source rows must have a source string.
-bad_source = df[df["needs_source"] & ~df["source"].apply(lambda x: isinstance(x, str))]
-if not bad_source.empty:
-    raise ValueError(f"Rows with needs_source=True but missing source: {list(bad_source.index)}")
+bad_source = df["needs_source"] & ~df["source"].apply(lambda x: isinstance(x, str))
+if bad_source.any():
+    print(f"WARNING: needs_source=True but source is missing for rows: {list(df.index[bad_source])} — defaulting to \"\"")
+    df["source"] = df["source"].astype(object)
+    df.loc[bad_source, "source"] = ""
 
 # Create factory object, set DD version.
 factory = imas.IDSFactory(version = "4.1.1")
 
-IDS_dict = {} 
+IDS_dict = {}
 
 # Loop over data rows.
-for index_d, row_d in data.iterrows(): 
-    
-    pulse_ids = {} 
+for index_d, row_d in data.iterrows():
+
+    pulse_ids = {}
  
     for index_i, row_i in df.iterrows():
         
@@ -100,12 +107,16 @@ for index_d, row_d in data.iterrows():
  
             # Generate the top-level IDS if it doesn't exist *for this pulse*.
             if ids_root not in pulse_ids:
-               pulse_ids[ids_root] = factory.new(ids_root)
+                ids_new = factory.new(ids_root)
+                ids_new.ids_properties.homogeneous_time = imas.ids_defs.IDS_TIME_MODE_HOMOGENEOUS
+                pulse_ids[ids_root] = ids_new
             
             ids = pulse_ids[ids_root]
  
             # row_i["csv_column"] names the column in `data`; row_d reads it.
             value = row_d[row_i["csv_column"]]
+            if pd.isna(value):
+                continue
             if row_i["transform"] == "identity":
                 set_leaf(ids, ids_branch, value)
                 if row_i["needs_source"] == True:
@@ -123,9 +134,13 @@ for index_d, row_d in data.iterrows():
 
     IDS_dict[index_d] = pulse_ids
 
-# Diagnostic
-print(df)
-for key in pulse_ids.keys():
-    imas.util.print_tree(IDS_dict[1][key])
+os.makedirs(output_dir, exist_ok=True)
+for pulse, pulse_ids in IDS_dict.items():
+    uri = f"imas:hdf5?path={output_dir};pulse={pulse}"
+    with imas.DBEntry(uri, "w") as entry:
+        for ids in pulse_ids.values():
+            entry.put(ids)
+
+print(f"Wrote {len(IDS_dict)} pulses to {output_dir}")
 
 
