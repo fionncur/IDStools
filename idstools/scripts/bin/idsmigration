@@ -1,5 +1,5 @@
 from typing import Any
-
+import re
 import imas
 import pandas as pd
 import numpy as np
@@ -10,19 +10,27 @@ ROOT = os.path.dirname(os.path.dirname(os.path.dirname(HERE)))  # .../IDStools
 mappings_dir = os.path.join(ROOT, "resources", "mappings")
 input_dir = os.path.join(ROOT, "resources", "input")
 
+def parse_seg(seg: str) -> tuple[str, int]:
+    m = re.fullmatch(r"(\w+)\((\d+)\)", seg)
+    if m:
+        return m.group(1), int(m.group(2))
+    return seg, 0
+
 def resolve_parent(ids, branch: list[str]):
     node = ids
     for seg in branch[:-1]:
-        node = getattr(node, seg)
+        attr, idx = parse_seg(seg)
+        node = getattr(node, attr)
         if isinstance(node, imas.ids_struct_array.IDSStructArray):
-            if len(node) == 0:
-                node.resize(1)
-            node = node[0]
+            if len(node) <= idx:
+                node.resize(idx + 1)
+            node = node[idx]
     return node, branch[-1]
 
 def set_leaf(ids, branch: list[str], value: Any):
-    parent, leaf = resolve_parent(ids, ids_branch)
 
+    parent, leaf_seg = resolve_parent(ids, branch)
+    leaf, _ = parse_seg(leaf_seg)
     target = getattr(parent, leaf)
 
     if isinstance(target, imas.ids_struct_array.IDSStructArray):
@@ -34,6 +42,7 @@ def set_leaf(ids, branch: list[str], value: Any):
     else:
         setattr(parent, leaf, value)
 
+
 # Define paths for data and mapping files.
 data_path = os.path.join(input_dir, "TC-26_data.csv")
 mapping_path = os.path.join(mappings_dir, "TC26_crosswalk.xlsx")
@@ -44,27 +53,27 @@ df = pd.read_excel(mapping_path)
 # Convert needs_source to boolean.
 df['needs_source'] = df['needs_source'].fillna(False).astype(bool)
 
-sentence = (df["transform"] == "identity") | (df["transform"] == "dictionary")  # We want to include source transforms for this example.
+# For testing, include only implemented transforms.
+sentence = (df["transform"] == "identity") | (df["transform"] == "dictionary")
 df = df[sentence]
+
 # Import experimental data from csv. Data cleaning
 data = pd.read_csv(data_path, na_values=["-"])
 data = data.map(lambda x: x.strip() if isinstance(x, str) else x)
 
-# Generate top-level IDSs for each imas_path in initial_df.
+# Create factory object, set DD version.
+factory = imas.IDSFactory(version = "4.1.1") 
 
-factory = imas.IDSFactory() # Set DD version
+IDS_dict = {} 
 
-IDS_dict = {}  # Dictionary to store IDS instances for each row
-for index_d, row_d in data.iterrows(): # Iterate over data rows.
+# Loop over data rows.
+for index_d, row_d in data.iterrows(): 
     
     pulse_ids = {} 
  
     for index_i, row_i in df.iterrows():
         
-        # strip () from imas_path, and handle concatenated paths
         imas_path = row_i["imas_path"]
-        if "(0)" in imas_path:
-            imas_path = imas_path.replace("(0)", "")
         imas_paths = [imas_path]  # Start with the original path
 
         if "&" in imas_path:
@@ -83,19 +92,22 @@ for index_d, row_d in data.iterrows(): # Iterate over data rows.
             
             ids = pulse_ids[ids_root]
  
-            # Resolve the leaf's parent and set the leaf to the source cell:
             # row_i["csv_column"] names the column in `data`; row_d reads it.
             value = row_d[row_i["csv_column"]]
             if row_i["transform"] == "identity":
                 set_leaf(ids, ids_branch, value)
+                if row_i["needs_source"] == True:
+                    set_leaf(ids, ids_branch[:-1] + ["source"], row_i["source"])
             if row_i["transform"] == "dictionary":
                 dictionary = eval(row_i["transform_args"])
                 value = dictionary[value]
                 set_leaf(ids, ids_branch, value)
+
     IDS_dict[index_d] = pulse_ids
 
+# Diagnostic
 print(df)
 for key in pulse_ids.keys():
-    imas.util.print_tree(IDS_dict[1][key])  # Print all top-level IDSs for this pulse.
+    imas.util.print_tree(IDS_dict[1][key])
 
 
