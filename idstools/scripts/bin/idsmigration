@@ -33,7 +33,7 @@ def resolve_parent(ids, branch: list[str]) -> tuple[Any, str]:
         node = getattr(node, attr)
         if isinstance(node, imas.ids_struct_array.IDSStructArray):
             if len(node) <= idx:
-                node.resize(idx + 1)
+                node.resize(idx + 1, keep=True)
             node = node[idx]
     return node, branch[-1]
 
