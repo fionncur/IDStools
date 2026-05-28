@@ -20,7 +20,7 @@ def parse_seg(seg: str) -> tuple[str, int]:
         return m.group(1), int(m.group(2))
     return seg, 0
 
-def resolve_parent(ids, branch: list[str]):
+def resolve_parent(ids, branch: list[str]) -> tuple[Any, str]:
     node = ids
     for seg in branch[:-1]:
         attr, idx = parse_seg(seg)
@@ -31,7 +31,7 @@ def resolve_parent(ids, branch: list[str]):
             node = node[idx]
     return node, branch[-1]
 
-def set_leaf(ids, branch: list[str], value: Any):
+def set_leaf(ids, branch: list[str], value: Any) -> None:
 
     parent, leaf_seg = resolve_parent(ids, branch)
     leaf, _ = parse_seg(leaf_seg)
@@ -73,9 +73,11 @@ if missing_cols:
 # Upfront validation: needs_source rows must have a source string.
 bad_source = df["needs_source"] & ~df["source"].apply(lambda x: isinstance(x, str))
 if bad_source.any():
-    print(f"WARNING: needs_source=True but source is missing for rows: {list(df.index[bad_source])} — defaulting to \"\"")
+    print(f"WARNING: needs_source=True but source is missing for rows: {list(df.index[bad_source])} — falling back to csv_description")
     df["source"] = df["source"].astype(object)
-    df.loc[bad_source, "source"] = ""
+    df.loc[bad_source, "source"] = df.loc[bad_source, "csv_description"].where(
+        df.loc[bad_source, "csv_description"].apply(lambda x: isinstance(x, str)), other=""
+    )
 
 # Create factory object, set DD version.
 factory = imas.IDSFactory(version = "4.1.1")
