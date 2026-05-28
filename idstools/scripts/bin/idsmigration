@@ -154,10 +154,12 @@ for index_d, row_d in data.iterrows():
 print("Writing...")
 os.makedirs(output_dir, exist_ok=True)
 for pulse, pulse_ids in IDS_dict.items():
-    uri = f"imas:hdf5?path={output_dir};pulse={pulse}"
-    if pulse % 20 == 0: 
+    pulse_dir = os.path.join(output_dir, f"pulse_{pulse:04d}")
+    os.makedirs(pulse_dir, exist_ok=True)
+    uri = f"imas:hdf5?path={pulse_dir};pulse={pulse}"
+    if pulse % 20 == 0:
         print("Progress: "+str(pulse)+"/"+str(len(IDS_dict)))
-    with imas.DBEntry(uri, "w") as entry:
+    with imas.DBEntry(uri, "a") as entry:
         for ids in pulse_ids.values():
             entry.put(ids)
 
