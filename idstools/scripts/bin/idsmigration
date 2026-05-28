@@ -99,6 +99,8 @@ for index_d, row_d in data.iterrows():
                 if row_i["needs_source"] == True:
                     set_leaf(ids, ids_branch[:-1] + ["source"], row_i["source"])
             if row_i["transform"] == "dictionary":
+                if not isinstance(row_i["transform_args"], str):
+                    raise ValueError(f"Row {index_i}: transform='dictionary' but transform_args is missing")
                 dictionary = eval(row_i["transform_args"])
                 value = dictionary[value]
                 set_leaf(ids, ids_branch, value)
