@@ -14,7 +14,6 @@ mappings_dir = os.path.join(ROOT, "resources", "mappings")
 input_dir = os.path.join(ROOT, "resources", "input")
 output_dir = os.path.join(ROOT, "resources", "results", "tc26")
 
-
 def parse_seg(seg: str) -> tuple[str, int]:
     m = re.fullmatch(r"(\w+)\((\d+)\)", seg)
     if m:
@@ -134,9 +133,11 @@ for index_d, row_d in data.iterrows():
 
     IDS_dict[index_d] = pulse_ids
 
+print("Writing...")
 os.makedirs(output_dir, exist_ok=True)
 for pulse, pulse_ids in IDS_dict.items():
     uri = f"imas:hdf5?path={output_dir};pulse={pulse}"
+    if pulse % 20 == 0: print("Progress: "+str(pulse)+"/"+str(len(IDS_dict)))
     with imas.DBEntry(uri, "w") as entry:
         for ids in pulse_ids.values():
             entry.put(ids)
