@@ -1,0 +1,258 @@
+# IDS Migration: Crosswalk Format and Script Reference
+
+The `idsmigration` script converts tabular experimental data (CSV) into
+IMAS IDS objects written to HDF5.  It is driven entirely by a spreadsheet
+called the **crosswalk** (`resources/mappings/TC26_crosswalk.xlsx`).
+Everything below describes how to read and extend that file.
+
+---
+
+## Crosswalk columns
+
+| Column | Type | Purpose |
+|--------|------|---------|
+| `csv_column` | str | Column/variable name in the source CSV |
+| `csv_unit` | str | Unit of the source value |
+| `imas_unit` | str | Unit of the IDS target field (automatically populated by DD) |
+| `csv_dtype` | str | Storage bucket for `status=temporary` rows (see [Temporary IDSs](#temporary-idss)) |
+| `imas_dtype` | str | IDS data type (automatically populated by DD) |
+| `imas_path` | str | Target path inside the IDS (see [Path notation](#path-notation-and-indexing)) |
+| `csv_description` | str | Human-readable description of the source variable |
+| `imas_description` | str | Description of the IDS target field (automatically populated by DD) |
+| `kind` | str | `constant`, `dynamic`, or `static` (automatically populated by DD) |
+| `status` | str | `mapped`, `mapped_caveat`, `temporary`, or `derived` (see [Status values](#status-values)) |
+| `notes` | str | Free-text notes, caveats, warnings, etc. |
+| `transform` | str | `identity`, `dictionary`, or `formula` (see [Transform types](#transform-types)) |
+| `transform_args` | str | Arguments for the transform (dict literal or Python expression) |
+| `needs_source` | bool | When `True`, write a value/source pair instead of a bare value (see [Value/source pairs](#valuesource-pairs)) |
+| `source` | str | Source string written alongside the value when `needs_source=True` |
+
+---
+
+## Transform types
+
+### `identity`
+
+Copies the CSV value directly to the IDS path.  No `transform_args` needed.
+
+```
+csv_column: IP
+imas_path:  summary/global_quantities/ip
+transform:  identity
+```
+
+### `dictionary`
+
+Maps discrete CSV values to IDS values via a Python dict in
+`transform_args`.  The string is parsed with `ast.literal_eval()` and must be a valid Python
+dict literal; any other result will raise a `ValueError` at parse time.
+Only Python data literals (dicts, lists, strings, numbers, booleans, `None`)
+are accepted — arbitrary expressions cannot be evaluated.
+
+```
+csv_column:     WALMAT
+imas_path:      summary/wall/material/index
+transform:      dictionary
+transform_args: {"MO": 11, "W": 2, "Be": 10}
+```
+
+If a CSV value is not present as a key, the row is skipped with a warning
+rather than raising an error.
+
+#### Dictionary of lists
+
+When a dict value is itself a Python list, the script performs a
+**many-to-one expansion**: it iterates the list and writes each element to
+a separate array-of-structures slot, using wildcard index replacement on
+the `imas_path` (see [Wildcard indexing](#wildcard-indexing-)).
+
+```
+csv_column:     AUXHEAT
+imas_path:      core_sources/source(:)/identifier/index
+transform:      dictionary
+transform_args: {"NB": 2, "IC": 5, "EC": 3,
+                 "NBIC": [2, 5], "NBEC": [2, 3],
+                 "ECIC": [3, 5], "NBICEC": [2, 5, 3]}
+```
+
+`AUXHEAT = "NBIC"` resolves to `[2, 5]` and writes:
+
+- `core_sources/source(0)/identifier/index = 2`
+- `core_sources/source(1)/identifier/index = 5`
+
+Single-value entries (e.g. `"NB": 2`) are treated equivalently to a
+one-element list and always land at index `0`.
+
+### `formula`
+
+Evaluates an arbitrary Python expression. The source value is bound to the
+variable `x`.
+
+```
+transform:      formula
+transform_args: x * 1e6
+```
+
+---
+
+## Path notation and indexing
+
+`imas_path` uses `/` for hierarchy and parenthetical suffixes for
+array-of-structures (AoS) indexing:
+
+### Fixed indexing `(n)`
+
+```
+nbi/unit(0)/energy/data
+```
+
+Always targets element `n` of the AoS.  The array is resized if needed.
+
+### Wildcard indexing `(:)`
+
+```
+core_sources/source(:)/identifier/index
+```
+
+The `:` is a placeholder resolved at write time.  For `imas_path`
+wildcards the index comes from the position in the list produced by the
+dictionary-of-lists expansion (`enumerate(value)`), so the first element
+lands at `(0)`, the second at `(1)`, and so on.  Two crosswalk rows that
+both carry `(:)` in their paths are independent — each starts from `0`.
+
+Wildcards are resolved segment-by-segment by `replace_wildcard_index()`:
+it replaces only the `(:)` suffix of the matched segment (e.g.
+`source(:)` → `source(0)`), leaving the rest of the path untouched.
+
+### Multiple target paths `&`
+
+A single crosswalk row can fan out to several IDS paths by separating them
+with `&`.  The same (transformed) value is written to every path.
+
+```
+imas_path: summary/time(0)&equilibrium/time(0)&divertors/time(0)
+```
+
+Each path may belong to a different top-level IDS; the script creates IDS
+objects on demand.
+
+---
+
+## Value/source pairs
+
+When `needs_source = True`, the script appends `/value` to `imas_path`
+before writing, and writes the `source` column string to the sibling field
+at the same level:
+
+```
+# effective write with needs_source=True on imas_path = "summary/global_quantities/ip"
+summary/global_quantities/ip/value  ← transformed CSV value
+summary/global_quantities/ip/source ← row["source"], e.g. "experiment"
+```
+
+This is the standard IMAS mechanism for recording data provenance.
+If `source` is blank the script falls back to `csv_description` and emits
+a warning.
+
+**Constraint:** `needs_source` may only be set on fields whose IDS node
+actually has `.value` and `.source` sub-fields.  If the target node is a
+bare scalar (no `.value` child), appending `/value` will produce an
+attribute error at runtime.  Check the Data Dictionary before setting this
+flag on a new row.
+
+---
+
+## Temporary IDSs
+
+Rows with `status = temporary` are **not** written to a named IDS in the
+physics hierarchy.  Instead they are stored in IMAS's `temporary` IDS,
+which provides generic typed buckets for values of arbitrary dimensionality
+(0-D scalars through 5-D arrays).
+
+The `csv_dtype` column names the bucket and its indexing mode:
+
+| `csv_dtype` | Meaning |
+|-------------|---------|
+| `constant_float0d(:)` | Append a new float scalar slot each time (auto-incremented index) |
+| `constant_string0d(:)` | Append a new string scalar slot each time (auto-incremented index) |
+| `constant_float0d(2)` | Fix to slot 2; array is resized to at least 3 with `keep=True`, leaving intermediate slots empty if not yet filled |
+| `constant_float0d` *(no index)* | Always write to slot 0; warns if the array is already non-empty |
+
+The `(:)` suffix triggers a persistent per-pulse counter, keyed by the
+segment name before `(:)` (e.g. `constant_float0d` from
+`constant_float0d(:)`).  All temporary rows sharing the same base name
+draw from the same counter, so they append sequentially within a pulse.
+Counters reset between pulses.
+
+Each temporary entry automatically receives three sub-fields:
+
+```
+constant_float0d(n)/value             ← transformed CSV value
+constant_float0d(n)/identifier/name   ← csv_column name
+constant_float0d(n)/identifier/description ← csv_description (if present)
+```
+
+The `imas_path` column is ignored for temporary rows; the entire path is
+derived from `csv_dtype`.
+
+---
+
+## Status values
+
+| Status | Behaviour |
+|--------|-----------|
+| `mapped` | Primary, authoritative mapping to the IDS hierarchy. |
+| `mapped_caveat` | Written to the IDS but subject to known caveats (sign conventions, approximations). See `notes`. |
+| `temporary` | Stored in the `temporary` IDS instead of a physics IDS.  Useful for quantities that have no stable IMAS path yet. |
+| `derived` | Not currently implemented; row is skipped.  Reserved for quantities that must be computed from other fields. |
+
+Rows without a recognised `transform` value (`identity`, `dictionary`,
+`formula`) are also silently excluded from processing.
+
+---
+
+## Many-to-one transformations in the crosswalk
+
+The crosswalk is **one-row-per-source-column**, not one-row-per-target-path.
+A single source column can write to multiple targets in two complementary ways:
+
+1. **`&`-separated paths** in `imas_path` — same value, multiple destinations.
+2. **Dictionary of lists** — one source value expands into multiple elements
+   of an AoS via wildcard indexing.
+
+Both mechanisms are resolved within `apply_transform()` and require no
+special columns beyond those already described.
+
+---
+
+## Running the script
+
+```bash
+python idstools/scripts/bin/idsmigration
+```
+
+Paths to input CSV, crosswalk XLSX, and output directory are hardcoded at
+the top of the script:
+
+| Variable | Default path |
+|----------|-------------|
+| `data_path` | `resources/input/TC-26_data.csv` |
+| `mapping_path` | `resources/mappings/TC26_crosswalk.xlsx` |
+| `output_dir` | `resources/results/tc26/` |
+
+Output is one HDF5 directory per pulse:
+
+```
+resources/results/tc26/
+  pulse_0000/
+  pulse_0001/
+  ...
+```
+
+Each directory is a valid IMAS DBEntry accessible via:
+
+```python
+uri = "imas:hdf5?path=resources/results/tc26/pulse_0000;pulse=0"
+with imas.DBEntry(uri, "r") as entry:
+    summary = entry.get("summary")
+```
