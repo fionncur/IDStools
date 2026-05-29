@@ -1,4 +1,5 @@
 from typing import Any
+import ast
 import re
 import logging
 import imas
@@ -60,7 +61,7 @@ def apply_transform(ids, ids_branch: list[str], value: Any, row_i) -> None:
     elif row_i["transform"] == "dictionary":
         if not isinstance(row_i["transform_args"], str):
             raise ValueError(f"Row {row_i.name}: transform='dictionary' but transform_args is missing")
-        dictionary = eval(row_i["transform_args"])
+        dictionary = ast.literal_eval(row_i["transform_args"])
         if value not in dictionary:
             print(f"WARNING: Row {row_i.name}: value {value!r} from column '{row_i['csv_column']}' not in dictionary — skipping")
             return
