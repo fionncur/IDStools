@@ -19,13 +19,13 @@ def parse_seg(seg: str) -> tuple[str, int]:
     m = re.fullmatch(r"(\w+)\((\d+)\)", seg)
     if m:
         return m.group(1), int(m.group(2))
-    m = re.fullmatch(r"(\w+)\(\*\)", seg)
+    m = re.fullmatch(r"(\w+)\(:\)", seg)
     if m:
         return m.group(1), 0
     return seg, 0
 
 def replace_wildcard_index(branch: list[str], idx: int) -> list[str]:
-    return [f"{seg[:-3]}({idx})" if seg.endswith("(*)") else seg for seg in branch]
+    return [f"{seg[:-3]}({idx})" if seg.endswith("(:)") else seg for seg in branch]
 
 def resolve_parent(ids, branch: list[str]) -> tuple[Any, str]:
     node = ids
@@ -39,7 +39,6 @@ def resolve_parent(ids, branch: list[str]) -> tuple[Any, str]:
     return node, branch[-1]
 
 def set_leaf(ids, branch: list[str], value: Any) -> None:
-
     parent, leaf_seg = resolve_parent(ids, branch)
     leaf, _ = parse_seg(leaf_seg)
     target = getattr(parent, leaf)
@@ -66,7 +65,7 @@ def apply_transform(ids, ids_branch: list[str], value: Any, row_i) -> None:
             print(f"WARNING: Row {row_i.name}: value {value!r} from column '{row_i['csv_column']}' not in dictionary — skipping")
             return
         value = dictionary[value]
-        if isinstance(value, list):
+        if isinstance(value, list): # Dictionary of lists feature, resize AoS to fit len(value).
             for i, v in enumerate(value):
                 set_leaf(ids, replace_wildcard_index(ids_branch, i), v)
         else:
@@ -95,7 +94,7 @@ df = df[sentence]
 
 # Import experimental data from csv. Data cleaning
 data = pd.read_csv(data_path, na_values=["-"])
-data = data.map(lambda x: x.strip() if isinstance(x, str) else x)
+data = data.map(lambda x: x.strip() if isinstance(x, str) else x) # Strip whitespace. Important for CMOD, but very data/machine specific. Remove in later version.
 
 # Upfront validation: all csv_columns must exist in data.
 missing_cols = set(df["csv_column"]) - set(data.columns)
@@ -120,17 +119,18 @@ IDS_dict = {}
 for index_d, row_d in data.iterrows():
 
     pulse_ids = {}
-    temp_counters = {}  # {bucket_base_name: next_index} for wildcard (*) resolution
+    temp_counters = {}  # {bucket_base_name: next_index} for wildcard (:) resolution
 
     for index_i, row_i in df.iterrows():
         
         if row_i["status"] == "temporary":
-            value = row_d[row_i["csv_column"]]
+            value = row_d[row_i["csv_column"]] # Data associated with variable name
             if pd.isna(value):
                 continue
             bucket_raw = row_i["csv_dtype"]
+            # For variable indexing of the AoS for each temporary/datatype(:)
             bucket_base, _ = parse_seg(bucket_raw)
-            if "(*)" in bucket_raw:
+            if "(:)" in bucket_raw:
                 idx = temp_counters.get(bucket_base, 0)
                 temp_counters[bucket_base] = idx + 1
                 resolved = f"{bucket_base}({idx})"
@@ -142,7 +142,7 @@ for index_d, row_d in data.iterrows():
                 pulse_ids["temporary"] = tmp
             ids = pulse_ids["temporary"]
             if "(" not in bucket_raw and len(getattr(ids, bucket_base)) > 0:
-                print(f"WARNING: Row {row_i.name} ('{row_i['csv_column']}'): overwriting slot 0 of '{bucket_base}' in temporary IDS — use (*) in csv_dtype for append behaviour")
+                print(f"WARNING: Row {row_i.name} ('{row_i['csv_column']}'): overwriting slot 0 of '{bucket_base}' in temporary IDS — use (:) in csv_dtype for append behaviour")
             apply_transform(ids, [resolved, "value"], value, row_i)
             set_leaf(ids, [resolved, "identifier", "name"], row_i["csv_column"])
             if isinstance(row_i["csv_description"], str):
