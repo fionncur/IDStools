@@ -6,7 +6,7 @@ import pandas as pd
 import numpy as np
 import os
 
-logging.getLogger("imas").setLevel(logging.WARNING)
+logging.getLogger("imas").setLevel(logging.WARNING) # Avoid IMAS errors for type mismatches.
 
 HERE = os.path.dirname(os.path.abspath(__file__))           # .../idstools/scripts/bin
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(HERE)))  # .../IDStools
@@ -14,6 +14,7 @@ mappings_dir = os.path.join(ROOT, "resources", "mappings")
 input_dir = os.path.join(ROOT, "resources", "input")
 output_dir = os.path.join(ROOT, "resources", "results", "tc26")
 
+# Parses node segments, for fixed AoS indexing or placeholder (wildcard) indexes.
 def parse_seg(seg: str) -> tuple[str, int]:
     m = re.fullmatch(r"(\w+)\((\d+)\)", seg)
     if m:
@@ -51,6 +52,32 @@ def set_leaf(ids, branch: list[str], value: Any) -> None:
         setattr(parent, leaf, np.atleast_1d(value))
     else:
         setattr(parent, leaf, value)
+
+def apply_transform(ids, ids_branch: list[str], value: Any, row_i) -> None:
+    if row_i["transform"] == "identity":
+        set_leaf(ids, ids_branch, value)
+        if row_i["needs_source"] == True:
+            set_leaf(ids, ids_branch[:-1] + ["source"], row_i["source"])
+    elif row_i["transform"] == "dictionary":
+        if not isinstance(row_i["transform_args"], str):
+            raise ValueError(f"Row {row_i.name}: transform='dictionary' but transform_args is missing")
+        dictionary = eval(row_i["transform_args"])
+        if value not in dictionary:
+            print(f"WARNING: Row {row_i.name}: value {value!r} from column '{row_i['csv_column']}' not in dictionary — skipping")
+            return
+        value = dictionary[value]
+        if isinstance(value, list):
+            for i, v in enumerate(value):
+                set_leaf(ids, replace_wildcard_index(ids_branch, i), v)
+        else:
+            set_leaf(ids, replace_wildcard_index(ids_branch, 0), value)
+    elif row_i["transform"] == "formula":
+        if not isinstance(row_i["transform_args"], str):
+            raise ValueError(f"Row {row_i.name}: transform='formula' but transform_args is missing")
+        value = eval(row_i["transform_args"], {"x": value})
+        set_leaf(ids, ids_branch, value)
+    else:
+        raise ValueError(f"Row {row_i.name}: unhandled transform '{row_i['transform']}'")
 
 # Define paths for data and mapping files.
 data_path = os.path.join(input_dir, "TC-26_data.csv")
@@ -93,9 +120,35 @@ IDS_dict = {}
 for index_d, row_d in data.iterrows():
 
     pulse_ids = {}
- 
+    temp_counters = {}  # {bucket_base_name: next_index} for wildcard (*) resolution
+
     for index_i, row_i in df.iterrows():
         
+        if row_i["status"] == "temporary":
+            value = row_d[row_i["csv_column"]]
+            if pd.isna(value):
+                continue
+            bucket_raw = row_i["csv_dtype"]
+            bucket_base, _ = parse_seg(bucket_raw)
+            if "(*)" in bucket_raw:
+                idx = temp_counters.get(bucket_base, 0)
+                temp_counters[bucket_base] = idx + 1
+                resolved = f"{bucket_base}({idx})"
+            else:
+                resolved = bucket_raw
+            if "temporary" not in pulse_ids:
+                tmp = factory.new("temporary")
+                tmp.ids_properties.homogeneous_time = imas.ids_defs.IDS_TIME_MODE_HOMOGENEOUS
+                pulse_ids["temporary"] = tmp
+            ids = pulse_ids["temporary"]
+            if "(" not in bucket_raw and len(getattr(ids, bucket_base)) > 0:
+                print(f"WARNING: Row {row_i.name} ('{row_i['csv_column']}'): overwriting slot 0 of '{bucket_base}' in temporary IDS — use (*) in csv_dtype for append behaviour")
+            apply_transform(ids, [resolved, "value"], value, row_i)
+            set_leaf(ids, [resolved, "identifier", "name"], row_i["csv_column"])
+            if isinstance(row_i["csv_description"], str):
+                set_leaf(ids, [resolved, "identifier", "description"], row_i["csv_description"])
+            continue
+
         imas_path = row_i["imas_path"]
         if not isinstance(imas_path, str):
             raise ValueError(f"Row {index_i}: imas_path is missing")
@@ -123,30 +176,7 @@ for index_d, row_d in data.iterrows():
             value = row_d[row_i["csv_column"]]
             if pd.isna(value):
                 continue
-            if row_i["transform"] == "identity":
-                set_leaf(ids, ids_branch, value)
-                if row_i["needs_source"] == True:
-                    set_leaf(ids, ids_branch[:-1] + ["source"], row_i["source"])
-            elif row_i["transform"] == "dictionary":
-                if not isinstance(row_i["transform_args"], str):
-                    raise ValueError(f"Row {index_i}: transform='dictionary' but transform_args is missing")
-                dictionary = eval(row_i["transform_args"])
-                if value not in dictionary:
-                    print(f"WARNING: Row {index_i}: value {value!r} from column '{row_i['csv_column']}' not in dictionary — skipping")
-                    continue
-                value = dictionary[value]
-                if isinstance(value, list):
-                    for i, v in enumerate(value):
-                        set_leaf(ids, replace_wildcard_index(ids_branch, i), v)
-                else:
-                    set_leaf(ids, replace_wildcard_index(ids_branch, 0), value)
-            elif row_i["transform"] == "formula":
-                if not isinstance(row_i["transform_args"], str):
-                    raise ValueError(f"Row {index_i}: transform='formula' but transform_args is missing")
-                value = eval(row_i["transform_args"], {"x": value})
-                set_leaf(ids, ids_branch, value)
-            else:
-                raise ValueError(f"Row {index_i}: unhandled transform '{row_i['transform']}'")
+            apply_transform(ids, ids_branch, value, row_i)
 
     IDS_dict[index_d] = pulse_ids
 
