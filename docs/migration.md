@@ -160,6 +160,8 @@ bare scalar (no `.value` child), appending `/value` will produce an
 attribute error at runtime.  Check the Data Dictionary before setting this
 flag on a new row.
 
+When the leaf of imas_path is "index", the sibling "description" field is automatically populated from the "source" column (if non-empty).
+
 ---
 
 ## Temporary IDSs
