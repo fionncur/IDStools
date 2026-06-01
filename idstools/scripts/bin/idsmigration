@@ -17,17 +17,19 @@ output_dir = os.path.join(ROOT, "resources", "results", "tc26")
 
 # Parses node segments, for fixed AoS indexing or placeholder (wildcard) indexes.
 def parse_seg(seg: str) -> tuple[str, int]:
-    m = re.fullmatch(r"(\w+)\((\d+)\)", seg)
+    m = re.fullmatch(r"(\w+)\((\d+)\)", seg) # Explicit index, like divertors.divertor(3)
     if m:
-        return m.group(1), int(m.group(2))
-    m = re.fullmatch(r"(\w+)\(:\)", seg)
+        return m.group(1), int(m.group(2)) 
+    m = re.fullmatch(r"(\w+)\(:\)", seg) # Variable/wildcard index, like divertors.divertor(:).
     if m:
         return m.group(1), 0
     return seg, 0
 
+# Replaces wildcard index segments in a branch with a concrete index idx.
 def replace_wildcard_index(branch: list[str], idx: int) -> list[str]:
     return [f"{seg[:-3]}({idx})" if seg.endswith("(:)") else seg for seg in branch]
 
+# Take IDS object and list of node segments (as strings), return parent IDS object and the final branch node.
 def resolve_parent(ids, branch: list[str]) -> tuple[Any, str]:
     node = ids
     for seg in branch[:-1]:
@@ -187,7 +189,7 @@ os.makedirs(output_dir, exist_ok=True)
 for pulse, pulse_ids in IDS_dict.items():
     pulse_dir = os.path.join(output_dir, f"pulse_{pulse:04d}")
     os.makedirs(pulse_dir, exist_ok=True)
-    uri = f"imas:hdf5?path={pulse_dir};pulse={pulse}"
+    uri = f"imas:hdf5?path={pulse_dir};pulse=0"
     if pulse % 20 == 0:
         print("Progress: "+str(pulse)+"/"+str(len(IDS_dict)))
     with imas.DBEntry(uri, "a") as entry:
