@@ -7,9 +7,9 @@ import pandas as pd
 import numpy as np
 import os
 
-EXPERIMENT_FOLDER = "tc26"
-DATASET_NAME = "TC-26_data.csv"
-MAPPING_NAME = "TC26_crosswalk.xlsx"
+EXPERIMENT_FOLDER = "2008"
+DATASET_NAME = "2008_data.csv"
+MAPPING_NAME = "2008_crosswalk.xlsx"
 
 logging.getLogger("imas").setLevel(logging.WARNING) # Avoid IMAS errors for type mismatches.
 
@@ -107,12 +107,16 @@ df = pd.read_excel(mapping_path)
 df['needs_source'] = df['needs_source'].fillna(False).astype(bool)
 
 # For testing, include only implemented transforms.
-sentence = (df["transform"] == "identity") | (df["transform"] == "dictionary") | (df["transform"] == "formula")
+sentence = (df["transform"] == "identity")  &\
+              ((df["status"] == "mapped") | (df["status"] == "temporary") \
+               | (df["status"] == "mapped_caveat")) 
 df = df[sentence]
 
 # Import experimental data from csv. Data cleaning
 data = pd.read_csv(data_path, na_values=["-"])
 data = data.map(lambda x: x.strip() if isinstance(x, str) else x) # Strip whitespace. Important for CMOD, but very data/machine specific. Remove in later version.
+data = data[data["TIME"].notna()]
+data = data[data["IP"].notna()]
 
 # Upfront validation: all csv_columns must exist in data.
 missing_cols = set(df["csv_column"]) - set(data.columns)
@@ -135,6 +139,9 @@ IDS_dict = {}
 
 # Loop over data rows.
 for index_d, row_d in data.iterrows():
+
+    if row_d.isna().all():
+        continue
 
     pulse_ids = {}
     temp_counters = {}  # {bucket_base_name: next_index} for wildcard (:) resolution
@@ -205,7 +212,7 @@ for pulse, pulse_ids in IDS_dict.items():
     pulse_dir = os.path.join(output_dir, f"pulse_{pulse:04d}")
     os.makedirs(pulse_dir, exist_ok=True)
     uri = f"imas:hdf5?path={pulse_dir};pulse=0"
-    if pulse % 20 == 0:
+    if pulse % 100 == 0:
         print("Progress: "+str(pulse)+"/"+str(len(IDS_dict)))
     with imas.DBEntry(uri, "a") as entry:
         for ids in pulse_ids.values():
