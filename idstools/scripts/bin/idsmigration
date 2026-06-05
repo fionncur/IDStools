@@ -7,13 +7,17 @@ import pandas as pd
 import numpy as np
 import os
 
+EXPERIMENT_FOLDER = "tc26"
+DATASET_NAME = "TC-26_data.csv"
+MAPPING_NAME = "TC26_crosswalk.xlsx"
+
 logging.getLogger("imas").setLevel(logging.WARNING) # Avoid IMAS errors for type mismatches.
 
 HERE = os.path.dirname(os.path.abspath(__file__))           # .../idstools/scripts/bin
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(HERE)))  # .../IDStools
 mappings_dir = os.path.join(ROOT, "resources", "mappings")
 input_dir = os.path.join(ROOT, "resources", "input")
-output_dir = os.path.join(ROOT, "resources", "results", "tc26")
+output_dir = os.path.join(ROOT, "resources", "results", EXPERIMENT_FOLDER)
 
 # Parses node segments, for fixed AoS indexing or placeholder (wildcard) indexes.
 def parse_seg(seg: str) -> tuple[str, int]:
@@ -91,9 +95,10 @@ def apply_transform(ids, ids_branch: list[str], value: Any, row_i) -> None:
     else:
         raise ValueError(f"Row {row_i.name}: unhandled transform '{row_i['transform']}'")
 
+
 # Define paths for data and mapping files.
-data_path = os.path.join(input_dir, "TC-26_data.csv")
-mapping_path = os.path.join(mappings_dir, "TC26_crosswalk.xlsx")
+data_path = os.path.join(input_dir, DATASET_NAME)
+mapping_path = os.path.join(mappings_dir, MAPPING_NAME)
 
 # Take crosswalk xlsx into dataframe.
 df = pd.read_excel(mapping_path)   
