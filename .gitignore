@@ -49,3 +49,8 @@ myenv/
 
 # Test data files (NetCDF files downloaded from Zenodo)
 *.nc
+
+# data files
+resources/results/2008
+resources/results/tc26
+resources/input
