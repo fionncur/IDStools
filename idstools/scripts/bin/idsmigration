@@ -107,7 +107,7 @@ df = pd.read_excel(mapping_path)
 df['needs_source'] = df['needs_source'].fillna(False).astype(bool)
 
 # For testing, include only implemented transforms.
-sentence = (df["transform"] == "identity")  &\
+sentence = ((df["transform"] == "identity") | (df["transform"] == "dictionary"))  &\
               ((df["status"] == "mapped") | (df["status"] == "temporary") \
                | (df["status"] == "mapped_caveat")) 
 df = df[sentence]
@@ -115,8 +115,6 @@ df = df[sentence]
 # Import experimental data from csv. Data cleaning
 data = pd.read_csv(data_path, na_values=["-"])
 data = data.map(lambda x: x.strip() if isinstance(x, str) else x) # Strip whitespace. Important for CMOD, but very data/machine specific. Remove in later version.
-data = data[data["TIME"].notna()]
-data = data[data["IP"].notna()]
 
 # Upfront validation: all csv_columns must exist in data.
 missing_cols = set(df["csv_column"]) - set(data.columns)
@@ -208,7 +206,16 @@ for index_d, row_d in data.iterrows():
 # Write IDSs to disk.
 print("Writing...")
 os.makedirs(output_dir, exist_ok=True)
+written = 0
 for pulse, pulse_ids in IDS_dict.items():
+    summary = pulse_ids.get("summary")
+    try:
+        tag_name = summary.tag.name.strip()
+    except AttributeError:
+        tag_name = None
+    if tag_name != "SELEC2007=True":
+        continue
+
     pulse_dir = os.path.join(output_dir, f"pulse_{pulse:04d}")
     os.makedirs(pulse_dir, exist_ok=True)
     uri = f"imas:hdf5?path={pulse_dir};pulse=0"
@@ -217,7 +224,8 @@ for pulse, pulse_ids in IDS_dict.items():
     with imas.DBEntry(uri, "a") as entry:
         for ids in pulse_ids.values():
             entry.put(ids)
+    written += 1
 
-print(f"Wrote {len(IDS_dict)} pulses to {output_dir}")
+print(f"Wrote {written}/{len(IDS_dict)} pulses to {output_dir}")
 
 
