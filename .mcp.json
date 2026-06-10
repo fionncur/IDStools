@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "imas-codex": {
+      "type": "http",
+      "url": "https://imas-dd.iter.org/mcp"
+    }
+  }
+}
