@@ -107,7 +107,7 @@ df = pd.read_excel(mapping_path)
 df['needs_source'] = df['needs_source'].fillna(False).astype(bool)
 
 # For testing, include only implemented transforms.
-sentence = ((df["transform"] == "identity") | (df["transform"] == "dictionary"))  &\
+sentence = (df["transform"] == "identity") | (df["transform"] == "dictionary")  &\
               ((df["status"] == "mapped") | (df["status"] == "temporary") \
                | (df["status"] == "mapped_caveat")) 
 df = df[sentence]
