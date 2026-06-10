@@ -10,6 +10,7 @@ import os
 EXPERIMENT_FOLDER = "2008"
 DATASET_NAME = "2008_data.csv"
 MAPPING_NAME = "2008_crosswalk.xlsx"
+REPEAT_SOURCE = False  # False: write companion strings only on the first pulse.
 
 logging.getLogger("imas").setLevel(logging.WARNING) # Avoid IMAS errors for type mismatches.
 
@@ -103,11 +104,18 @@ def resolve_writes(ids_branch: list[str], value: Any, row_i) -> list[tuple[list[
 
 # Write each transformed value to its leaf; when needs_source, also write the
 # source string to the sibling leaf named by source_fields[1].
-def apply_transform(ids, ids_branch: list[str], value: Any, row_i) -> None:
+# _companion_written: if not None, the companion write is skipped for any
+# parent path already in the set (used when repeat_source=False).
+def apply_transform(ids, ids_branch: list[str], value: Any, row_i,
+                    _companion_written: set | None = None) -> None:
     for branch, v in resolve_writes(ids_branch, value, row_i):
         set_leaf(ids, branch, v)
         if row_i["needs_source"] == True:
-            set_leaf(ids, branch[:-1] + [row_i["_source_pair"][1]], row_i["source"])
+            companion_key = (row_i.name, tuple(branch[:-1]))
+            if _companion_written is None or companion_key not in _companion_written:
+                set_leaf(ids, branch[:-1] + [row_i["_source_pair"][1]], row_i["source"])
+                if _companion_written is not None:
+                    _companion_written.add(companion_key)
 
 
 # Define paths for data and mapping files.
@@ -159,6 +167,7 @@ if bad_source.any():
 factory = imas.IDSFactory(version = "4.1.1")
 
 IDS_dict = {}
+_companion_written: set = set()  # parent paths whose companion has been written once
 
 # Loop over data rows.
 for index_d, row_d in data.iterrows():
@@ -224,7 +233,8 @@ for index_d, row_d in data.iterrows():
             value = row_d[row_i["csv_column"]]
             if pd.isna(value):
                 continue
-            apply_transform(ids, ids_branch, value, row_i)
+            written_set = None if REPEAT_SOURCE else _companion_written
+            apply_transform(ids, ids_branch, value, row_i, _companion_written=written_set)
 
     IDS_dict[index_d] = pulse_ids
 
@@ -238,7 +248,7 @@ for pulse, pulse_ids in IDS_dict.items():
         tag_name = summary.tag.name.strip()
     except AttributeError:
         tag_name = None
-    if tag_name != "SELEC2007=True":
+    if (tag_name != "SELEC2007=True") & (pulse != 0):
         continue
 
     pulse_dir = os.path.join(output_dir, f"pulse_{pulse:04d}")

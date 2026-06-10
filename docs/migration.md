@@ -24,8 +24,9 @@ Everything below describes how to read and extend that file.
 | `notes` | str | Free-text notes, caveats, warnings, etc. |
 | `transform` | str | `identity`, `dictionary`, or `formula` (see [Transform types](#transform-types)) |
 | `transform_args` | str | Arguments for the transform (dict literal or Python expression) |
-| `needs_source` | bool | When `True`, write a value/source pair instead of a bare value (see [Value/source pairs](#valuesource-pairs)) |
-| `source` | str | Source string written alongside the value when `needs_source=True` |
+| `needs_source` | bool | When `True`, write a value plus a companion sibling instead of a bare value (see [Value/source pairs](#valuesource-pairs)) |
+| `source_fields` | str | Optional `("value_leaf", "source_leaf")` 2-tuple naming the sibling leaves written when `needs_source=True`; defaults to `("value", "source")` |
+| `source` | str | Source string written to the companion sibling leaf when `needs_source=True` |
 
 ---
 
@@ -46,8 +47,6 @@ transform:  identity
 Maps discrete CSV values to IDS values via a Python dict in
 `transform_args`.  The string is parsed with `ast.literal_eval()` and must be a valid Python
 dict literal; any other result will raise a `ValueError` at parse time.
-Only Python data literals (dicts, lists, strings, numbers, booleans, `None`)
-are accepted — arbitrary expressions cannot be evaluated.
 
 ```
 csv_column:     WALMAT
@@ -138,29 +137,52 @@ objects on demand.
 
 ---
 
-## Value/source pairs
+## Sibling-pair writes (`needs_source` and `source_fields`)
 
-When `needs_source = True`, the script appends `/value` to `imas_path`
-before writing, and writes the `source` column string to the sibling field
-at the same level:
+Many IDS nodes pair a measured value with a companion string (provenance,
+label, etc.) as two sibling leaves under a shared parent.  When
+`needs_source = True`, the script writes to **two** leaves at the same level
+instead of one bare scalar:
+
+1. The **value leaf** receives the transformed CSV value.
+2. The **companion leaf** receives the string from the `source` column.
+
+By default the two leaves are `value` and `source`:
 
 ```
-# effective write with needs_source=True on imas_path = "summary/global_quantities/ip"
+# needs_source=True, source_fields blank, imas_path = "summary/global_quantities/ip"
 summary/global_quantities/ip/value  ← transformed CSV value
 summary/global_quantities/ip/source ← row["source"], e.g. "experiment"
 ```
 
-This is the standard IMAS mechanism for recording data provenance.
+### Customising the leaf names with `source_fields`
+
+Set `source_fields` to a 2-tuple of strings to name the leaves explicitly.
+The **first** element is the value leaf; the **second** is the companion leaf.
+The cell is parsed with `ast.literal_eval()` and must be a 2-tuple of strings;
+anything else raises a `ValueError` at startup naming the offending `csv_column`.
+
+```
+# needs_source=True, source_fields = ("name", "description")
+# imas_path = "divertors/divertor(0)/identifier"
+divertors/divertor(0)/identifier/name        ← transformed CSV value
+divertors/divertor(0)/identifier/description ← row["source"]
+```
+
+This applies to every transform type (`identity`, `dictionary` including
+dictionary-of-lists, and `formula`).  For dictionary-of-lists, the companion
+string is written alongside each expanded AoS slot.
+
 If `source` is blank the script falls back to `csv_description` and emits
 a warning.
 
-**Constraint:** `needs_source` may only be set on fields whose IDS node
-actually has `.value` and `.source` sub-fields.  If the target node is a
-bare scalar (no `.value` child), appending `/value` will produce an
-attribute error at runtime.  Check the Data Dictionary before setting this
-flag on a new row.
+By default the companion string is written for every pulse.  Set the
+script-level constant `REPEAT_SOURCE = False` to write it only on the first
+pulse — useful when the provenance label is constant across pulses and
+repeating it wastes space (see [Running the script](#running-the-script)).
 
-When the leaf of imas_path is "index", the sibling "description" field is automatically populated from the "source" column (if non-empty).
+**Constraint:** both named leaves must exist as sub-fields of the `imas_path`
+node.  Check the Data Dictionary before setting `needs_source` on a new row.
 
 ---
 
@@ -233,14 +255,14 @@ special columns beyond those already described.
 python idstools/scripts/bin/idsmigration
 ```
 
-Paths to input CSV, crosswalk XLSX, and output directory are hardcoded at
-the top of the script:
+Configuration constants at the top of the script control paths and behaviour:
 
-| Variable | Default path |
-|----------|-------------|
-| `data_path` | `resources/input/TC-26_data.csv` |
-| `mapping_path` | `resources/mappings/TC26_crosswalk.xlsx` |
-| `output_dir` | `resources/results/tc26/` |
+| Constant | Default | Purpose |
+|----------|---------|---------|
+| `EXPERIMENT_FOLDER` | `"2008"` | Sub-folder under `resources/results/` for output |
+| `DATASET_NAME` | `"2008_data.csv"` | Input CSV filename |
+| `MAPPING_NAME` | `"2008_crosswalk.xlsx"` | Crosswalk spreadsheet filename |
+| `REPEAT_SOURCE` | `True` | When `True`, the companion string (source/description/etc.) is written to every pulse. When `False`, it is written only on the **first pulse** for each target node and omitted for all subsequent pulses — useful when the provenance label is constant and repeating it wastes space. |
 
 Output is one HDF5 directory per pulse:
 
