@@ -288,6 +288,13 @@ if __name__ == "__main__":
                 written_set = None if args.repeat_source else _companion_written
                 apply_transform(ids, ids_branch, value, row_i, _companion_written=written_set)
 
+        # Backfill an empty root `time` (NaN time column) so dynamic nodes can fit in arrays.
+        for ids in pulse_ids.values():
+            if (ids.ids_properties.homogeneous_time
+                    == imas.ids_defs.IDS_TIME_MODE_HOMOGENEOUS
+                    and len(ids.time) == 0):
+                ids.time = np.array([0.0])
+
         IDS_dict[index_d] = pulse_ids
 
     # Write IDSs to disk.
