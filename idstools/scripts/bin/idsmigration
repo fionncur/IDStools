@@ -33,6 +33,26 @@ def parse_seg(seg: str) -> tuple[str, int]:
 def replace_wildcard_index(branch: list[str], idx: int) -> list[str]:
     return [f"{seg[:-3]}({idx})" if seg.endswith("(:)") else seg for seg in branch]
 
+# Parse a source_fields cell into a (value_leaf, source_leaf) pair.
+# Blank / NaN -> ("value", "source"), the historical default.
+def parse_source_pair(source_fields_val: Any, csv_column: str) -> tuple[str, str]:
+    if not isinstance(source_fields_val, str) or source_fields_val.strip() == "":
+        return ("value", "source")
+    try:
+        parsed = ast.literal_eval(source_fields_val.strip())
+    except (ValueError, SyntaxError) as e:
+        raise ValueError(
+            f"source_fields {source_fields_val!r} for csv_column "
+            f"'{csv_column}' is not a valid Python literal: {e}"
+        )
+    if (not isinstance(parsed, tuple) or len(parsed) != 2
+            or not all(isinstance(p, str) for p in parsed)):
+        raise ValueError(
+            f"source_fields for csv_column '{csv_column}' must be a 2-tuple of "
+            f"strings, e.g. ('name', 'description'); got {parsed!r}"
+        )
+    return parsed
+
 # Take IDS object and list of node segments (as strings), return parent IDS object and the final branch node.
 def resolve_parent(ids, branch: list[str]) -> tuple[Any, str]:
     node = ids
@@ -59,41 +79,35 @@ def set_leaf(ids, branch: list[str], value: Any) -> None:
     else:
         setattr(parent, leaf, value)
 
-def apply_transform(ids, ids_branch: list[str], value: Any, row_i) -> None:
-    if row_i["transform"] == "identity":
-        set_leaf(ids, ids_branch, value)
-        if row_i["needs_source"] == True:
-            set_leaf(ids, ids_branch[:-1] + ["source"], row_i["source"])
-        if ids_branch[-1] == "index" and isinstance(row_i["source"], str):
-            set_leaf(ids, ids_branch[:-1] + ["description"], row_i["source"])
-    elif row_i["transform"] == "dictionary":
+# Compute the (branch, value) writes a transform produces. Returns [] to skip the row (e.g. dictionary miss).
+def resolve_writes(ids_branch: list[str], value: Any, row_i) -> list[tuple[list[str], Any]]:
+    t = row_i["transform"]
+    if t == "identity":
+        return [(ids_branch, value)]
+    if t == "dictionary":
         if not isinstance(row_i["transform_args"], str):
             raise ValueError(f"Row {row_i.name}: transform='dictionary' but transform_args is missing")
         dictionary = ast.literal_eval(row_i["transform_args"])
         if value not in dictionary:
             print(f"WARNING: Row {row_i.name}: value {value!r} from column '{row_i['csv_column']}' not in dictionary — skipping")
-            return
-        value = dictionary[value]
-        if isinstance(value, list): # Dictionary of lists feature, resize AoS to fit len(value).
-            for i, v in enumerate(value):
-                resolved = replace_wildcard_index(ids_branch, i)
-                set_leaf(ids, resolved, v)
-                if resolved[-1] == "index" and isinstance(row_i["source"], str):
-                    set_leaf(ids, resolved[:-1] + ["description"], row_i["source"])
-        else:
-            resolved = replace_wildcard_index(ids_branch, 0)
-            set_leaf(ids, resolved, value)
-            if resolved[-1] == "index" and isinstance(row_i["source"], str):
-                set_leaf(ids, resolved[:-1] + ["description"], row_i["source"])
-    elif row_i["transform"] == "formula":
+            return []
+        mapped = dictionary[value]
+        if isinstance(mapped, list):  # Dictionary of lists feature, expand AoS to fit len(mapped).
+            return [(replace_wildcard_index(ids_branch, i), v) for i, v in enumerate(mapped)]
+        return [(replace_wildcard_index(ids_branch, 0), mapped)]
+    if t == "formula":
         if not isinstance(row_i["transform_args"], str):
             raise ValueError(f"Row {row_i.name}: transform='formula' but transform_args is missing")
-        value = eval(row_i["transform_args"], {"x": value})
-        set_leaf(ids, ids_branch, value)
-        if ids_branch[-1] == "index" and isinstance(row_i["source"], str):
-            set_leaf(ids, ids_branch[:-1] + ["description"], row_i["source"])
-    else:
-        raise ValueError(f"Row {row_i.name}: unhandled transform '{row_i['transform']}'")
+        return [(ids_branch, eval(row_i["transform_args"], {"x": value}))]
+    raise ValueError(f"Row {row_i.name}: unhandled transform '{row_i['transform']}'")
+
+# Write each transformed value to its leaf; when needs_source, also write the
+# source string to the sibling leaf named by source_fields[1].
+def apply_transform(ids, ids_branch: list[str], value: Any, row_i) -> None:
+    for branch, v in resolve_writes(ids_branch, value, row_i):
+        set_leaf(ids, branch, v)
+        if row_i["needs_source"] == True:
+            set_leaf(ids, branch[:-1] + [row_i["_source_pair"][1]], row_i["source"])
 
 
 # Define paths for data and mapping files.
@@ -111,6 +125,17 @@ sentence = (df["transform"] == "identity") | (df["transform"] == "dictionary")  
               ((df["status"] == "mapped") | (df["status"] == "temporary") \
                | (df["status"] == "mapped_caveat")) 
 df = df[sentence]
+
+# Parse the optional source_fields column into (value_leaf, source_leaf) pairs.
+# Blank/NaN or non-needs_source rows -> ("value", "source").
+if "source_fields" in df.columns:
+    pairs = [
+        parse_source_pair(sf, col) if ns else ("value", "source")
+        for sf, col, ns in zip(df["source_fields"], df["csv_column"], df["needs_source"])
+    ]
+else:
+    pairs = [("value", "source")] * len(df)
+df["_source_pair"] = pd.Series(pairs, index=df.index, dtype=object)
 
 # Import experimental data from csv. Data cleaning
 data = pd.read_csv(data_path, na_values=["-"])
@@ -184,7 +209,7 @@ for index_d, row_d in data.iterrows():
  
             ids_root = imas_path.split("/")[0]
             if row_i["needs_source"] == True:
-                imas_path += "/value"  # Append "/value" to the IDS name if needs_source is True
+                imas_path += "/" + row_i["_source_pair"][0]  # Append the value leaf (default "value") when needs_source
             ids_branch = imas_path.split("/")[1:]
  
             # Generate the top-level IDS if it doesn't exist *for this pulse*.
