@@ -207,6 +207,12 @@ if __name__ == "__main__":
             df.loc[bad_source, "csv_description"].apply(lambda x: isinstance(x, str)), other=""
         )
 
+    # Upfront validation: temporary rows must have a csv_dtype string.
+    is_temp = df["status"] == "temporary"
+    bad_dtype = is_temp & ~df["csv_dtype"].apply(lambda x: isinstance(x, str) and x.strip() != "")
+    if bad_dtype.any():
+        print(f"WARNING: status 'temporary' but csv_dtype is missing for rows: {list(df.index[bad_dtype])} — skipping")
+
     # Create factory object, set DD version.
     factory = imas.IDSFactory(version=args.dd_version)
 
@@ -229,6 +235,8 @@ if __name__ == "__main__":
                 if pd.isna(value):
                     continue
                 bucket_raw = row_i["csv_dtype"]
+                if not isinstance(bucket_raw, str) or bucket_raw.strip() == "":
+                    continue  # missing csv_dtype, already warned upfront
                 # For variable indexing of the AoS for each temporary/datatype(:)
                 bucket_base, _ = parse_seg(bucket_raw)
                 if "(:)" in bucket_raw:
