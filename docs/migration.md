@@ -176,9 +176,9 @@ string is written alongside each expanded AoS slot.
 If `source` is blank the script falls back to `csv_description` and emits
 a warning.
 
-By default the companion string is written for every pulse.  Set the
-script-level constant `REPEAT_SOURCE = False` to write it only on the first
-pulse — useful when the provenance label is constant across pulses and
+By default the companion string is written only on the first pulse for each
+target node.  Pass the `--repeat-source` flag to write it for every pulse
+instead — useful when the provenance label is constant across pulses and
 repeating it wastes space (see [Running the script](#running-the-script)).
 
 **Constraint:** both named leaves must exist as sub-fields of the `imas_path`

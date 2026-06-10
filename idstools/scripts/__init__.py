@@ -279,6 +279,11 @@ def md_summary():
     _load_script_main("md_summary")()
 
 
+def idsmigration():
+    """Convert tabular CSV data into IMAS IDS objects via a crosswalk."""
+    _load_script_main("idsmigration")()
+
+
 __all__ = [
     "plotequilibrium",
     "idslist",
@@ -327,6 +332,7 @@ __all__ = [
     "watch_db_entry",
     "md_status",
     "md_summary",
+    "idsmigration",
 ]
 
 

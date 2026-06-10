@@ -6,6 +6,8 @@ import argparse
 import ast
 import re
 import logging
+import time
+from datetime import timedelta
 import imas
 import pandas as pd
 import numpy as np
@@ -283,26 +285,46 @@ if __name__ == "__main__":
     # Write IDSs to disk.
     print("Writing...")
     os.makedirs(output_dir, exist_ok=True)
+    total = len(IDS_dict)
     written = 0
+    start_time = time.monotonic()
+    last_report = start_time
+    report_interval = 5.0  # seconds between progress prints
+
     for pulse, pulse_ids in IDS_dict.items():
         summary = pulse_ids.get("summary")
         try:
             tag_name = summary.tag.name.strip()
         except AttributeError:
             tag_name = None
-        if (tag_name != "SELEC2007=True") & (pulse != 0):
-            continue
+   #     if (tag_name != "SELEC2007=True") & (pulse != 0):
+   #         continue
 
         pulse_dir = os.path.join(output_dir, f"pulse_{pulse:04d}")
         os.makedirs(pulse_dir, exist_ok=True)
         uri = f"imas:hdf5?path={pulse_dir};pulse=0"
-        if written % 50 == 0:
-            print("Progress: "+str(pulse)+"/"+str(len(IDS_dict)))
         with imas.DBEntry(uri, "a") as entry:
             for ids in pulse_ids.values():
                 entry.put(ids)
         written += 1
 
-    print(f"Wrote {written}/{len(IDS_dict)} pulses to {output_dir}")
+        now = time.monotonic()
+        if now - last_report >= report_interval:
+            last_report = now
+            elapsed = now - start_time
+            rate = written / elapsed if elapsed > 0 else 0
+            eta = (total - written) / rate if rate > 0 else 0
+            pct = 100 * written / total
+            print(
+                f"Progress: {written:{len(str(total))}d}/{total} ({pct:3.1f}%)  pulse {pulse}  "
+                f"elapsed {timedelta(seconds=int(elapsed))}  "
+                f"ETA {timedelta(seconds=int(eta))}  "
+                f"({rate:.1f} pulses/s)"
+            )
+
+    print(
+        f"Wrote {written}/{total} pulses to {output_dir} "
+        f"in {timedelta(seconds=int(time.monotonic() - start_time))}"
+    )
 
 
