@@ -1,4 +1,8 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
 from typing import Any
+import argparse
 import ast
 import re
 import logging
@@ -7,10 +11,7 @@ import pandas as pd
 import numpy as np
 import os
 
-EXPERIMENT_FOLDER = "2008"
-DATASET_NAME = "2008_data.csv"
-MAPPING_NAME = "2008_crosswalk.xlsx"
-REPEAT_SOURCE = False  # False: write companion strings only on the first pulse.
+from rich_argparse import RichHelpFormatter
 
 logging.getLogger("imas").setLevel(logging.WARNING) # Avoid IMAS errors for type mismatches.
 
@@ -18,7 +19,6 @@ HERE = os.path.dirname(os.path.abspath(__file__))           # .../idstools/scrip
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(HERE)))  # .../IDStools
 mappings_dir = os.path.join(ROOT, "resources", "mappings")
 input_dir = os.path.join(ROOT, "resources", "input")
-output_dir = os.path.join(ROOT, "resources", "results", EXPERIMENT_FOLDER)
 
 # Parses node segments, for fixed AoS indexing or placeholder (wildcard) indexes.
 def parse_seg(seg: str) -> tuple[str, int]:
@@ -118,149 +118,191 @@ def apply_transform(ids, ids_branch: list[str], value: Any, row_i,
                     _companion_written.add(companion_key)
 
 
-# Define paths for data and mapping files.
-data_path = os.path.join(input_dir, DATASET_NAME)
-mapping_path = os.path.join(mappings_dir, MAPPING_NAME)
-
-# Take crosswalk xlsx into dataframe.
-df = pd.read_excel(mapping_path)   
-
-# Convert needs_source to boolean.
-df['needs_source'] = df['needs_source'].fillna(False).astype(bool)
-
-# For testing, include only implemented transforms.
-sentence = (df["transform"] == "identity") | (df["transform"] == "dictionary")  &\
-              ((df["status"] == "mapped") | (df["status"] == "temporary") \
-               | (df["status"] == "mapped_caveat")) 
-df = df[sentence]
-
-# Parse the optional source_fields column into (value_leaf, source_leaf) pairs.
-# Blank/NaN or non-needs_source rows -> ("value", "source").
-if "source_fields" in df.columns:
-    pairs = [
-        parse_source_pair(sf, col) if ns else ("value", "source")
-        for sf, col, ns in zip(df["source_fields"], df["csv_column"], df["needs_source"])
-    ]
-else:
-    pairs = [("value", "source")] * len(df)
-df["_source_pair"] = pd.Series(pairs, index=df.index, dtype=object)
-
-# Import experimental data from csv. Data cleaning
-data = pd.read_csv(data_path, na_values=["-"])
-data = data.map(lambda x: x.strip() if isinstance(x, str) else x) # Strip whitespace. Important for CMOD, but very data/machine specific. Remove in later version.
-
-# Upfront validation: all csv_columns must exist in data.
-missing_cols = set(df["csv_column"]) - set(data.columns)
-if missing_cols:
-    raise ValueError(f"csv_column(s) not found in data CSV: {missing_cols}")
-
-# Upfront validation: needs_source rows must have a source string.
-bad_source = df["needs_source"] & ~df["source"].apply(lambda x: isinstance(x, str))
-if bad_source.any():
-    print(f"WARNING: needs_source=True but source is missing for rows: {list(df.index[bad_source])} — falling back to csv_description")
-    df["source"] = df["source"].astype(object)
-    df.loc[bad_source, "source"] = df.loc[bad_source, "csv_description"].where(
-        df.loc[bad_source, "csv_description"].apply(lambda x: isinstance(x, str)), other=""
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        description="Convert tabular experimental data (CSV) into IMAS IDS objects via a crosswalk spreadsheet",
+        formatter_class=RichHelpFormatter,
     )
+    parser.add_argument(
+        "-e",
+        "--experiment",
+        type=str,
+        default="2008",
+        help="Sub-folder under resources/results/ for output \t(default=%(default)s)",
+    )
+    parser.add_argument(
+        "-d",
+        "--dataset",
+        type=str,
+        default="2008_data.csv",
+        help="Input CSV filename under resources/input/ \t(default=%(default)s)",
+    )
+    parser.add_argument(
+        "-m",
+        "--mapping",
+        type=str,
+        default="2008_crosswalk.xlsx",
+        help="Crosswalk spreadsheet filename under resources/mappings/ \t(default=%(default)s)",
+    )
+    parser.add_argument(
+        "--dd-version",
+        type=str,
+        default="4.1.1",
+        help="Data Dictionary version used to build the IDS factory \t(default=%(default)s)",
+    )
+    parser.add_argument(
+        "--repeat-source",
+        action="store_true",
+        help="Write the companion string (source/description/etc.) to every pulse. "
+        "When omitted, it is written only on the first pulse for each target node.",
+    )
+    args = parser.parse_args()
 
-# Create factory object, set DD version.
-factory = imas.IDSFactory(version = "4.1.1")
+    output_dir = os.path.join(ROOT, "resources", "results", args.experiment)
 
-IDS_dict = {}
-_companion_written: set = set()  # parent paths whose companion has been written once
+    # Define paths for data and mapping files.
+    data_path = os.path.join(input_dir, args.dataset)
+    mapping_path = os.path.join(mappings_dir, args.mapping)
 
-# Loop over data rows.
-for index_d, row_d in data.iterrows():
+    # Take crosswalk xlsx into dataframe.
+    df = pd.read_excel(mapping_path)
 
-    if row_d.isna().all():
-        continue
+    # Convert needs_source to boolean.
+    df['needs_source'] = df['needs_source'].fillna(False).astype(bool)
 
-    pulse_ids = {}
-    temp_counters = {}  # {bucket_base_name: next_index} for wildcard (:) resolution
+    # For testing, include only implemented transforms.
+    sentence = (df["transform"] == "identity") | (df["transform"] == "dictionary")  &\
+                  ((df["status"] == "mapped") | (df["status"] == "temporary") \
+                   | (df["status"] == "mapped_caveat"))
+    df = df[sentence]
 
-    for index_i, row_i in df.iterrows():
-        
-        if row_i["status"] == "temporary":
-            value = row_d[row_i["csv_column"]] # Data associated with variable name
-            if pd.isna(value):
-                continue
-            bucket_raw = row_i["csv_dtype"]
-            # For variable indexing of the AoS for each temporary/datatype(:)
-            bucket_base, _ = parse_seg(bucket_raw)
-            if "(:)" in bucket_raw:
-                idx = temp_counters.get(bucket_base, 0)
-                temp_counters[bucket_base] = idx + 1
-                resolved = f"{bucket_base}({idx})"
-            else:
-                resolved = bucket_raw
-            if "temporary" not in pulse_ids:
-                tmp = factory.new("temporary")
-                tmp.ids_properties.homogeneous_time = imas.ids_defs.IDS_TIME_MODE_HOMOGENEOUS
-                pulse_ids["temporary"] = tmp
-            ids = pulse_ids["temporary"]
-            if "(" not in bucket_raw and len(getattr(ids, bucket_base)) > 0:
-                print(f"WARNING: Row {row_i.name} ('{row_i['csv_column']}'): overwriting slot 0 of '{bucket_base}' in temporary IDS — use (:) in csv_dtype for append behaviour")
-            apply_transform(ids, [resolved, "value"], value, row_i)
-            set_leaf(ids, [resolved, "identifier", "name"], row_i["csv_column"])
-            if isinstance(row_i["csv_description"], str):
-                set_leaf(ids, [resolved, "identifier", "description"], row_i["csv_description"])
+    # Parse the optional source_fields column into (value_leaf, source_leaf) pairs.
+    # Blank/NaN or non-needs_source rows -> ("value", "source").
+    if "source_fields" in df.columns:
+        pairs = [
+            parse_source_pair(sf, col) if ns else ("value", "source")
+            for sf, col, ns in zip(df["source_fields"], df["csv_column"], df["needs_source"])
+        ]
+    else:
+        pairs = [("value", "source")] * len(df)
+    df["_source_pair"] = pd.Series(pairs, index=df.index, dtype=object)
+
+    # Import experimental data from csv. Data cleaning
+    data = pd.read_csv(data_path, na_values=["-"])
+    data = data.map(lambda x: x.strip() if isinstance(x, str) else x) # Strip whitespace. Important for CMOD, but very data/machine specific. Remove in later version.
+
+    # Upfront validation: all csv_columns must exist in data.
+    missing_cols = set(df["csv_column"]) - set(data.columns)
+    if missing_cols:
+        raise ValueError(f"csv_column(s) not found in data CSV: {missing_cols}")
+
+    # Upfront validation: needs_source rows must have a source string.
+    bad_source = df["needs_source"] & ~df["source"].apply(lambda x: isinstance(x, str))
+    if bad_source.any():
+        print(f"WARNING: needs_source=True but source is missing for rows: {list(df.index[bad_source])} — falling back to csv_description")
+        df["source"] = df["source"].astype(object)
+        df.loc[bad_source, "source"] = df.loc[bad_source, "csv_description"].where(
+            df.loc[bad_source, "csv_description"].apply(lambda x: isinstance(x, str)), other=""
+        )
+
+    # Create factory object, set DD version.
+    factory = imas.IDSFactory(version=args.dd_version)
+
+    IDS_dict = {}
+    _companion_written: set = set()  # parent paths whose companion has been written once
+
+    # Loop over data rows.
+    for index_d, row_d in data.iterrows():
+
+        if row_d.isna().all():
             continue
 
-        imas_path = row_i["imas_path"]
-        if not isinstance(imas_path, str):
-            raise ValueError(f"Row {index_i}: imas_path is missing")
-        imas_paths = [imas_path]  # Start with the original path
+        pulse_ids = {}
+        temp_counters = {}  # {bucket_base_name: next_index} for wildcard (:) resolution
 
-        if "&" in imas_path:
-            imas_paths = imas_path.split("&")  # Take the first path if multiple are concatenated with "&"
+        for index_i, row_i in df.iterrows():
 
-        for imas_path in imas_paths:
- 
-            ids_root = imas_path.split("/")[0]
-            if row_i["needs_source"] == True:
-                imas_path += "/" + row_i["_source_pair"][0]  # Append the value leaf (default "value") when needs_source
-            ids_branch = imas_path.split("/")[1:]
- 
-            # Generate the top-level IDS if it doesn't exist *for this pulse*.
-            if ids_root not in pulse_ids:
-                ids_new = factory.new(ids_root)
-                ids_new.ids_properties.homogeneous_time = imas.ids_defs.IDS_TIME_MODE_HOMOGENEOUS
-                pulse_ids[ids_root] = ids_new
-            
-            ids = pulse_ids[ids_root]
- 
-            # row_i["csv_column"] names the column in `data`; row_d reads it.
-            value = row_d[row_i["csv_column"]]
-            if pd.isna(value):
+            if row_i["status"] == "temporary":
+                value = row_d[row_i["csv_column"]] # Data associated with variable name
+                if pd.isna(value):
+                    continue
+                bucket_raw = row_i["csv_dtype"]
+                # For variable indexing of the AoS for each temporary/datatype(:)
+                bucket_base, _ = parse_seg(bucket_raw)
+                if "(:)" in bucket_raw:
+                    idx = temp_counters.get(bucket_base, 0)
+                    temp_counters[bucket_base] = idx + 1
+                    resolved = f"{bucket_base}({idx})"
+                else:
+                    resolved = bucket_raw
+                if "temporary" not in pulse_ids:
+                    tmp = factory.new("temporary")
+                    tmp.ids_properties.homogeneous_time = imas.ids_defs.IDS_TIME_MODE_HOMOGENEOUS
+                    pulse_ids["temporary"] = tmp
+                ids = pulse_ids["temporary"]
+                if "(" not in bucket_raw and len(getattr(ids, bucket_base)) > 0:
+                    print(f"WARNING: Row {row_i.name} ('{row_i['csv_column']}'): overwriting slot 0 of '{bucket_base}' in temporary IDS — use (:) in csv_dtype for append behaviour")
+                apply_transform(ids, [resolved, "value"], value, row_i)
+                set_leaf(ids, [resolved, "identifier", "name"], row_i["csv_column"])
+                if isinstance(row_i["csv_description"], str):
+                    set_leaf(ids, [resolved, "identifier", "description"], row_i["csv_description"])
                 continue
-            written_set = None if REPEAT_SOURCE else _companion_written
-            apply_transform(ids, ids_branch, value, row_i, _companion_written=written_set)
 
-    IDS_dict[index_d] = pulse_ids
+            imas_path = row_i["imas_path"]
+            if not isinstance(imas_path, str):
+                raise ValueError(f"Row {index_i}: imas_path is missing")
+            imas_paths = [imas_path]  # Start with the original path
 
-# Write IDSs to disk.
-print("Writing...")
-os.makedirs(output_dir, exist_ok=True)
-written = 0
-for pulse, pulse_ids in IDS_dict.items():
-    summary = pulse_ids.get("summary")
-    try:
-        tag_name = summary.tag.name.strip()
-    except AttributeError:
-        tag_name = None
-    if (tag_name != "SELEC2007=True") & (pulse != 0):
-        continue
+            if "&" in imas_path:
+                imas_paths = imas_path.split("&")  # Take the first path if multiple are concatenated with "&"
 
-    pulse_dir = os.path.join(output_dir, f"pulse_{pulse:04d}")
-    os.makedirs(pulse_dir, exist_ok=True)
-    uri = f"imas:hdf5?path={pulse_dir};pulse=0"
-    if pulse % 100 == 0:
-        print("Progress: "+str(pulse)+"/"+str(len(IDS_dict)))
-    with imas.DBEntry(uri, "a") as entry:
-        for ids in pulse_ids.values():
-            entry.put(ids)
-    written += 1
+            for imas_path in imas_paths:
 
-print(f"Wrote {written}/{len(IDS_dict)} pulses to {output_dir}")
+                ids_root = imas_path.split("/")[0]
+                if row_i["needs_source"] == True:
+                    imas_path += "/" + row_i["_source_pair"][0]  # Append the value leaf (default "value") when needs_source
+                ids_branch = imas_path.split("/")[1:]
+
+                # Generate the top-level IDS if it doesn't exist *for this pulse*.
+                if ids_root not in pulse_ids:
+                    ids_new = factory.new(ids_root)
+                    ids_new.ids_properties.homogeneous_time = imas.ids_defs.IDS_TIME_MODE_HOMOGENEOUS
+                    pulse_ids[ids_root] = ids_new
+
+                ids = pulse_ids[ids_root]
+
+                # row_i["csv_column"] names the column in `data`; row_d reads it.
+                value = row_d[row_i["csv_column"]]
+                if pd.isna(value):
+                    continue
+                written_set = None if args.repeat_source else _companion_written
+                apply_transform(ids, ids_branch, value, row_i, _companion_written=written_set)
+
+        IDS_dict[index_d] = pulse_ids
+
+    # Write IDSs to disk.
+    print("Writing...")
+    os.makedirs(output_dir, exist_ok=True)
+    written = 0
+    for pulse, pulse_ids in IDS_dict.items():
+        summary = pulse_ids.get("summary")
+        try:
+            tag_name = summary.tag.name.strip()
+        except AttributeError:
+            tag_name = None
+        if (tag_name != "SELEC2007=True") & (pulse != 0):
+            continue
+
+        pulse_dir = os.path.join(output_dir, f"pulse_{pulse:04d}")
+        os.makedirs(pulse_dir, exist_ok=True)
+        uri = f"imas:hdf5?path={pulse_dir};pulse=0"
+        if written % 50 == 0:
+            print("Progress: "+str(pulse)+"/"+str(len(IDS_dict)))
+        with imas.DBEntry(uri, "a") as entry:
+            for ids in pulse_ids.values():
+                entry.put(ids)
+        written += 1
+
+    print(f"Wrote {written}/{len(IDS_dict)} pulses to {output_dir}")
 
 

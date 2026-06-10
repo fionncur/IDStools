@@ -251,23 +251,33 @@ special columns beyond those already described.
 
 ## Running the script
 
+The script is a command-line tool. 
+
 ```bash
+# defaults reproduce the original run
 python idstools/scripts/bin/idsmigration
+
+# override inputs / behaviour
+python idstools/scripts/bin/idsmigration -e 2008 -d 2008_data.csv -m 2008_crosswalk.xlsx \
+    --dd-version 4.1.1 --repeat-source
 ```
 
-Configuration constants at the top of the script control paths and behaviour:
+Run `python idstools/scripts/bin/idsmigration -h` for the full help. The arguments and their
+defaults are:
 
-| Constant | Default | Purpose |
+| Argument | Default | Purpose |
 |----------|---------|---------|
-| `EXPERIMENT_FOLDER` | `"2008"` | Sub-folder under `resources/results/` for output |
-| `DATASET_NAME` | `"2008_data.csv"` | Input CSV filename |
-| `MAPPING_NAME` | `"2008_crosswalk.xlsx"` | Crosswalk spreadsheet filename |
-| `REPEAT_SOURCE` | `True` | When `True`, the companion string (source/description/etc.) is written to every pulse. When `False`, it is written only on the **first pulse** for each target node and omitted for all subsequent pulses — useful when the provenance label is constant and repeating it wastes space. |
+| `-e`, `--experiment` | `2008` | Sub-folder under `resources/results/` for output |
+| `-d`, `--dataset` | `2008_data.csv` | Input CSV filename under `resources/input/` |
+| `-m`, `--mapping` | `2008_crosswalk.xlsx` | Crosswalk spreadsheet filename under `resources/mappings/` |
+| `--dd-version` | `4.1.1` | Data Dictionary version used to build the IDS factory |
+| `--repeat-source` | *off* | When passed, the companion string (source/description/etc.) is written to **every** pulse. When omitted (the default), it is written only on the **first pulse** for each target node and skipped for subsequent pulses — useful when the provenance label is constant and repeating it wastes space. |
 
-Output is one HDF5 directory per pulse:
+Output is one HDF5 directory per pulse, under the folder named by `-e`/`--experiment` (the default
+`2008` is shown):
 
 ```
-resources/results/tc26/
+resources/results/2008/
   pulse_0000/
   pulse_0001/
   ...
@@ -276,7 +286,7 @@ resources/results/tc26/
 Each directory is a valid IMAS DBEntry accessible via:
 
 ```python
-uri = "imas:hdf5?path=resources/results/tc26/pulse_0000;pulse=0"
+uri = "imas:hdf5?path=resources/results/2008/pulse_0000;pulse=0"
 with imas.DBEntry(uri, "r") as entry:
     summary = entry.get("summary")
 ```
