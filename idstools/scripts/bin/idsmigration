@@ -120,6 +120,32 @@ def apply_transform(ids, ids_branch: list[str], value: Any, row_i,
                     _companion_written.add(companion_key)
 
 
+# Timed, counted progress for the long pulse loops (build-in-memory and write-to-disk).
+def report_progress(count: int, total: int, label: Any, start: float,
+                    last_report: float, interval: float = 5.0) -> float:
+    now = time.monotonic()
+    if now - last_report < interval:
+        return last_report
+    elapsed = now - start
+    rate = count / elapsed if elapsed > 0 else 0
+    eta = (total - count) / rate if rate > 0 else 0
+    pct = 100 * count / total
+    print(
+        f"Progress: {count:{len(str(total))}d}/{total} ({pct:3.1f}%)  pulse {label}  "
+        f"elapsed {timedelta(seconds=int(elapsed))}  "
+        f"ETA {timedelta(seconds=int(eta))}  "
+        f"({rate:.1f} pulses/s)"
+    )
+    return now
+
+# Closing one-line summary for a pulse loop.
+def report_summary(verb: str, count: int, total: int, start: float, suffix: str = "") -> None:
+    print(
+        f"{verb} {count}/{total} pulses{suffix} "
+        f"in {timedelta(seconds=int(time.monotonic() - start))}"
+    )
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Convert tabular experimental data (CSV) into IMAS IDS objects via a crosswalk spreadsheet",
@@ -220,6 +246,12 @@ if __name__ == "__main__":
     _companion_written: set = set()  # parent paths whose companion has been written once
 
     # Loop over data rows.
+    print("Loading...")
+    total_rows = len(data)
+    loaded = 0
+    load_start = time.monotonic()
+    load_last_report = load_start
+
     for index_d, row_d in data.iterrows():
 
         if row_d.isna().all():
@@ -296,15 +328,18 @@ if __name__ == "__main__":
                 ids.time = np.array([0.0])
 
         IDS_dict[index_d] = pulse_ids
+        loaded += 1
+        load_last_report = report_progress(loaded, total_rows, index_d, load_start, load_last_report)
+
+    report_summary("Loaded", loaded, total_rows, load_start, " into memory")
 
     # Write IDSs to disk.
     print("Writing...")
     os.makedirs(output_dir, exist_ok=True)
     total = len(IDS_dict)
     written = 0
-    start_time = time.monotonic()
-    last_report = start_time
-    report_interval = 5.0  # seconds between progress prints
+    write_start = time.monotonic()
+    write_last_report = write_start
 
     for pulse, pulse_ids in IDS_dict.items():
         summary = pulse_ids.get("summary")
@@ -322,24 +357,8 @@ if __name__ == "__main__":
             for ids in pulse_ids.values():
                 entry.put(ids)
         written += 1
+        write_last_report = report_progress(written, total, pulse, write_start, write_last_report)
 
-        now = time.monotonic()
-        if now - last_report >= report_interval:
-            last_report = now
-            elapsed = now - start_time
-            rate = written / elapsed if elapsed > 0 else 0
-            eta = (total - written) / rate if rate > 0 else 0
-            pct = 100 * written / total
-            print(
-                f"Progress: {written:{len(str(total))}d}/{total} ({pct:3.1f}%)  pulse {pulse}  "
-                f"elapsed {timedelta(seconds=int(elapsed))}  "
-                f"ETA {timedelta(seconds=int(eta))}  "
-                f"({rate:.1f} pulses/s)"
-            )
-
-    print(
-        f"Wrote {written}/{total} pulses to {output_dir} "
-        f"in {timedelta(seconds=int(time.monotonic() - start_time))}"
-    )
+    report_summary("Wrote", written, total, write_start, f" to {output_dir}")
 
 
