@@ -1,0 +1,121 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+import argparse
+import os
+import re
+import sys
+from copy import deepcopy
+
+try:
+    import imaspy as imas
+except ImportError:
+    import imas
+from rich_argparse import RichHelpFormatter
+
+from idstools.database import DBMaster
+from idstools.utils.clihelper import dbentry_parser
+from idstools.utils.idshelper import parse_uri
+
+
+def overlay(base, top) -> None:
+    """Copy every populated leaf from ``top`` into ``base``. ``top`` wins on conflict;
+    leaves that ``top`` leaves empty keep ``base``'s value.
+    """
+    for child in top.iter_nonempty_(accept_lazy=True):
+        name = child.metadata.name
+        if isinstance(child, imas.ids_struct_array.IDSStructArray):
+            base_arr = getattr(base, name)
+            if len(base_arr) < len(child):
+                base_arr.resize(len(child), keep=True)  # keep=True: never wipe existing slots
+            for i, elem in enumerate(child):
+                overlay(base_arr[i], elem)
+        elif isinstance(child, imas.ids_structure.IDSStructure):
+            overlay(getattr(base, name), child)
+        else:  # IDSPrimitive / IDSNumericArray leaf
+            setattr(base, name, child.value)
+
+
+def load_ids(uri, fallback_name=None):
+    """Open ``uri`` and return ``(ids, ids_name)``."""
+    info = parse_uri(uri)
+    ids_name = info["ids_name"] or fallback_name
+    if not ids_name:
+        return None, None
+    connection = DBMaster.get_connection(argparse.Namespace(uri=info["uri_part"]))
+    if connection is None:
+        return None, ids_name
+    ids = connection.get(
+        ids_name, occurrence=info["occurrence"] or 0, autoconvert=False, ignore_unknown_dd_version=True
+    )
+    connection.close()
+    return ids, ids_name
+
+
+def default_reference_uri(uri_part):
+    """Derive the sibling ``reference`` entry URI from the ``-u`` URI's ``path=``.
+
+    e.g. ``imas:hdf5?path=.../2008/pulse_0000`` -> ``imas:hdf5?path=.../2008/reference``,
+    preserving the scheme and any other query parameters. Returns ``None`` if the
+    URI has no ``path=`` to rewrite (e.g. a bare ``./pulse.nc``).
+    """
+    m = re.search(r"path=([^;&]+)", uri_part)
+    if not m:
+        return None
+    ref_path = os.path.join(os.path.dirname(m.group(1).rstrip("/\\")), "reference").replace("\\", "/")
+    return uri_part[: m.start(1)] + ref_path + uri_part[m.end(1) :]
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        description="""Merge two IDSs of the same root into one and print the combined result.
+        The IDS name is taken from the -u URI #fragment, e.g.
+        idscollage -u 'imas:hdf5?path=./2008/pulse_0000#summary'.
+        If -r is omitted it defaults to the sibling 'reference' folder next to the -u entry.
+        On conflict the --prefer entry wins (default: u, the -u/value entry).""",
+        formatter_class=RichHelpFormatter,
+        parents=[dbentry_parser],
+    )
+    parser.add_argument(
+        "-r",
+        "--reference",
+        type=str,
+        default=None,
+        help="URI of the second data entry to merge (same IDS root). "
+        "Defaults to the sibling 'reference' folder next to the -u entry.",
+    )
+    parser.add_argument(
+        "--prefer",
+        choices=["u", "r"],
+        default="u",
+        help="Which entry wins on conflict \t(default=%(default)s)",
+    )
+    parser.add_argument(
+        "-e",
+        "--show-empty",
+        action="store_true",
+        dest="show_empty",
+        help="Show empty fields of the merged IDS",
+    )
+    args = parser.parse_args()
+
+    ids_u, ids_name = load_ids(args.uri)
+    if ids_name is None:
+        print("Please provide an IDS name at the end of -u with the # character", file=sys.stderr)
+        sys.exit(1)
+
+    reference_uri = args.reference or default_reference_uri(parse_uri(args.uri)["uri_part"])
+    if reference_uri is None:
+        print("Could not derive a default reference entry from -u; pass -r explicitly", file=sys.stderr)
+        sys.exit(1)
+
+    ids_r, _ = load_ids(reference_uri, fallback_name=ids_name)
+    if ids_u is None or ids_r is None:
+        print(f"Please provide valid URIs (reference resolved to: {reference_uri})", file=sys.stderr)
+        sys.exit(1)
+
+    winner, loser = (ids_u, ids_r) if args.prefer == "u" else (ids_r, ids_u)
+    merged = deepcopy(loser)  # start from the loser, overlay the winner on top
+    overlay(merged, winner)
+
+    imas.util.print_tree(merged, hide_empty_nodes=not args.show_empty)
