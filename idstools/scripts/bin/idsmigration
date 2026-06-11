@@ -104,20 +104,35 @@ def resolve_writes(ids_branch: list[str], value: Any, row_i) -> list[tuple[list[
         return [(ids_branch, eval(row_i["transform_args"], {"x": value}))]
     raise ValueError(f"Row {row_i.name}: unhandled transform '{row_i['transform']}'")
 
-# Write each transformed value to its leaf; when needs_source, also write the
-# source string to the sibling leaf named by source_fields[1].
-# _companion_written: if not None, the companion write is skipped for any
-# parent path already in the set (used when repeat_source=False).
-def apply_transform(ids, ids_branch: list[str], value: Any, row_i,
-                    _companion_written: set | None = None) -> None:
-    for branch, v in resolve_writes(ids_branch, value, row_i):
-        set_leaf(ids, branch, v)
-        if row_i["needs_source"] == True:
-            companion_key = (row_i.name, tuple(branch[:-1]))
-            if _companion_written is None or companion_key not in _companion_written:
-                set_leaf(ids, branch[:-1] + [row_i["_source_pair"][1]], row_i["source"])
-                if _companion_written is not None:
-                    _companion_written.add(companion_key)
+# Write resolved (branch, value) pairs to their leaves in the pulse `ids`.
+def write_values(ids, writes) -> None:
+    for branch, value in writes:
+        set_leaf(ids, branch, value)
+
+
+# Write each descriptor (leaf_segments, string) — e.g. the source sibling, or a
+# temporary row's identifier name/description — into the shared reference IDS, at
+# the sibling of every value's parent node (branch[:-1]), so it lands at the
+# correct path for each expanded AoS slot. The constant string is re-written on
+# every pulse (idempotent), so no dedup state is needed.
+def write_descriptors(reference, writes, descriptors) -> None:
+    for branch, _ in writes:
+        for desc_leaf, desc_str in descriptors:
+            set_leaf(reference, branch[:-1] + list(desc_leaf), desc_str)
+
+
+# Create a fresh top-level IDS with homogeneous time mode set.
+def new_ids(factory, name: str):
+    ids = factory.new(name)
+    ids.ids_properties.homogeneous_time = imas.ids_defs.IDS_TIME_MODE_HOMOGENEOUS
+    return ids
+
+
+# Backfill an empty root `time` (NaN time column) so dynamic nodes fit in arrays.
+def backfill_time(ids) -> None:
+    if (ids.ids_properties.homogeneous_time == imas.ids_defs.IDS_TIME_MODE_HOMOGENEOUS
+            and len(ids.time) == 0):
+        ids.time = np.array([0.0])
 
 
 # Timed, counted progress for the long pulse loops (build-in-memory and write-to-disk).
@@ -178,12 +193,6 @@ if __name__ == "__main__":
         default="4.1.1",
         help="Data Dictionary version used to build the IDS factory \t(default=%(default)s)",
     )
-    parser.add_argument(
-        "--repeat-source",
-        action="store_true",
-        help="Write the companion string (source/description/etc.) to every pulse. "
-        "When omitted, it is written only on the first pulse for each target node.",
-    )
     args = parser.parse_args()
 
     output_dir = os.path.join(ROOT, "resources", "results", args.experiment)
@@ -198,10 +207,11 @@ if __name__ == "__main__":
     # Convert needs_source to boolean.
     df['needs_source'] = df['needs_source'].fillna(False).astype(bool)
 
-    # For testing, include only implemented transforms.
-    sentence = (df["transform"] == "identity") | (df["transform"] == "dictionary")  &\
-                  ((df["status"] == "mapped") | (df["status"] == "temporary") \
-                   | (df["status"] == "mapped_caveat"))
+    # Include only implemented transforms (identity/dictionary) with an accepted status.
+    sentence = (
+        df["transform"].isin(["identity", "dictionary"])
+        & df["status"].isin(["mapped", "temporary", "mapped_caveat"])
+    )
     df = df[sentence]
 
     # Parse the optional source_fields column into (value_leaf, source_leaf) pairs.
@@ -242,8 +252,61 @@ if __name__ == "__main__":
     # Create factory object, set DD version.
     factory = imas.IDSFactory(version=args.dd_version)
 
+    # Build a per-row write spec used by the main loop:
+    #   _paths       : imas_path(s) to write to ("&"-split for multi-target rows)
+    #   _value_leaf  : leaf appended to each path for the value ("" = bare node)
+    #   _descriptors : list of (leaf_segments, string) written once to the reference
+    # Temporary rows are folded into the same structure with a "persistent" AoS index,
+    # assigned here in crosswalk order so a variable keeps the same slot in every
+    # pulse, which is required for temporary indices to match the reference IDS.
+    temp_idx: dict[str, int] = {}   # bucket_base -> next stable index for "(:)" buckets
+    temp_seen: dict[str, Any] = {}  # resolved "temporary/..." path -> first row (clash warning)
+    paths_list, value_leaf_list, descriptors_list = [], [], []
+    for _, row_i in df.iterrows():
+        if row_i["status"] == "temporary":
+            bucket_raw = row_i["csv_dtype"]
+            if not isinstance(bucket_raw, str) or bucket_raw.strip() == "":
+                paths_list.append([])           # missing csv_dtype, already warned upfront
+                value_leaf_list.append("value")
+                descriptors_list.append([])
+                continue
+            bucket_base, _ = parse_seg(bucket_raw)
+            if "(:)" in bucket_raw:
+                idx = temp_idx.get(bucket_base, 0)
+                temp_idx[bucket_base] = idx + 1
+                resolved = f"{bucket_base}({idx})"
+            else:
+                resolved = bucket_raw           # explicit (N) or bare slot 0
+            path = f"temporary/{resolved}"
+            if path in temp_seen:
+                print(f"WARNING: temporary path '{path}' used by rows {temp_seen[path]} "
+                      f"and {row_i.name} — values will overwrite; use (:) in csv_dtype "
+                      f"for append behaviour")
+            else:
+                temp_seen[path] = row_i.name
+            descriptors = [(["identifier", "name"], row_i["csv_column"])]
+            if isinstance(row_i["csv_description"], str):
+                descriptors.append((["identifier", "description"], row_i["csv_description"]))
+            paths_list.append([path])
+            value_leaf_list.append("value")
+            descriptors_list.append(descriptors)
+        else:
+            imas_path = row_i["imas_path"]
+            if not isinstance(imas_path, str):
+                raise ValueError(f"Row {row_i.name}: imas_path is missing")
+            paths_list.append(imas_path.split("&") if "&" in imas_path else [imas_path])
+            if row_i["needs_source"]:
+                value_leaf_list.append(row_i["_source_pair"][0])
+                descriptors_list.append([([row_i["_source_pair"][1]], row_i["source"])])
+            else:
+                value_leaf_list.append("")
+                descriptors_list.append([])
+    df["_paths"] = pd.Series(paths_list, index=df.index, dtype=object)
+    df["_value_leaf"] = pd.Series(value_leaf_list, index=df.index, dtype=object)
+    df["_descriptors"] = pd.Series(descriptors_list, index=df.index, dtype=object)
+
     IDS_dict = {}
-    _companion_written: set = set()  # parent paths whose companion has been written once
+    reference_ids: dict[str, Any] = {}   # ids_root -> reference IDS (descriptor strings, shared)
 
     # Loop over data rows.
     print("Loading...")
@@ -258,74 +321,37 @@ if __name__ == "__main__":
             continue
 
         pulse_ids = {}
-        temp_counters = {}  # {bucket_base_name: next_index} for wildcard (:) resolution
 
         for index_i, row_i in df.iterrows():
 
-            if row_i["status"] == "temporary":
-                value = row_d[row_i["csv_column"]] # Data associated with variable name
-                if pd.isna(value):
-                    continue
-                bucket_raw = row_i["csv_dtype"]
-                if not isinstance(bucket_raw, str) or bucket_raw.strip() == "":
-                    continue  # missing csv_dtype, already warned upfront
-                # For variable indexing of the AoS for each temporary/datatype(:)
-                bucket_base, _ = parse_seg(bucket_raw)
-                if "(:)" in bucket_raw:
-                    idx = temp_counters.get(bucket_base, 0)
-                    temp_counters[bucket_base] = idx + 1
-                    resolved = f"{bucket_base}({idx})"
-                else:
-                    resolved = bucket_raw
-                if "temporary" not in pulse_ids:
-                    tmp = factory.new("temporary")
-                    tmp.ids_properties.homogeneous_time = imas.ids_defs.IDS_TIME_MODE_HOMOGENEOUS
-                    pulse_ids["temporary"] = tmp
-                ids = pulse_ids["temporary"]
-                if "(" not in bucket_raw and len(getattr(ids, bucket_base)) > 0:
-                    print(f"WARNING: Row {row_i.name} ('{row_i['csv_column']}'): overwriting slot 0 of '{bucket_base}' in temporary IDS — use (:) in csv_dtype for append behaviour")
-                apply_transform(ids, [resolved, "value"], value, row_i)
-                set_leaf(ids, [resolved, "identifier", "name"], row_i["csv_column"])
-                if isinstance(row_i["csv_description"], str):
-                    set_leaf(ids, [resolved, "identifier", "description"], row_i["csv_description"])
+            # row_i["csv_column"] names the column in `data`; row_d reads it.
+            value = row_d[row_i["csv_column"]]
+            if pd.isna(value):
                 continue
 
-            imas_path = row_i["imas_path"]
-            if not isinstance(imas_path, str):
-                raise ValueError(f"Row {index_i}: imas_path is missing")
-            imas_paths = [imas_path]  # Start with the original path
-
-            if "&" in imas_path:
-                imas_paths = imas_path.split("&")  # Take the first path if multiple are concatenated with "&"
-
-            for imas_path in imas_paths:
-
+            for imas_path in row_i["_paths"]:
                 ids_root = imas_path.split("/")[0]
-                if row_i["needs_source"] == True:
-                    imas_path += "/" + row_i["_source_pair"][0]  # Append the value leaf (default "value") when needs_source
-                ids_branch = imas_path.split("/")[1:]
+                value_leaf = row_i["_value_leaf"]
+                full_path = imas_path + ("/" + value_leaf if value_leaf else "")
+                ids_branch = full_path.split("/")[1:]
 
-                # Generate the top-level IDS if it doesn't exist *for this pulse*.
+                # Expand the row's transform into concrete (branch, value) writes.
+                writes = resolve_writes(ids_branch, value, row_i)
+
+                # Write values to value path in the *pulse* IDS
                 if ids_root not in pulse_ids:
-                    ids_new = factory.new(ids_root)
-                    ids_new.ids_properties.homogeneous_time = imas.ids_defs.IDS_TIME_MODE_HOMOGENEOUS
-                    pulse_ids[ids_root] = ids_new
+                    pulse_ids[ids_root] = new_ids(factory, ids_root)
+                write_values(pulse_ids[ids_root], writes)
 
-                ids = pulse_ids[ids_root]
-
-                # row_i["csv_column"] names the column in `data`; row_d reads it.
-                value = row_d[row_i["csv_column"]]
-                if pd.isna(value):
-                    continue
-                written_set = None if args.repeat_source else _companion_written
-                apply_transform(ids, ids_branch, value, row_i, _companion_written=written_set)
+                # Write descriptors to sibling descriptor path in the *reference* IDS
+                if row_i["_descriptors"] and writes:
+                    if ids_root not in reference_ids:
+                        reference_ids[ids_root] = new_ids(factory, ids_root)
+                    write_descriptors(reference_ids[ids_root], writes, row_i["_descriptors"])
 
         # Backfill an empty root `time` (NaN time column) so dynamic nodes can fit in arrays.
         for ids in pulse_ids.values():
-            if (ids.ids_properties.homogeneous_time
-                    == imas.ids_defs.IDS_TIME_MODE_HOMOGENEOUS
-                    and len(ids.time) == 0):
-                ids.time = np.array([0.0])
+            backfill_time(ids)
 
         IDS_dict[index_d] = pulse_ids
         loaded += 1
@@ -360,5 +386,19 @@ if __name__ == "__main__":
         write_last_report = report_progress(written, total, pulse, write_start, write_last_report)
 
     report_summary("Wrote", written, total, write_start, f" to {output_dir}")
+
+    # Write the shared reference entry: one IDS per root holding the descriptor
+    # strings (source/identifier) once, at the same paths as the pulse values.
+    if reference_ids:
+        for ids in reference_ids.values():
+            backfill_time(ids)
+        ref_dir = os.path.join(output_dir, "reference")
+        os.makedirs(ref_dir, exist_ok=True)
+        ref_uri = f"imas:hdf5?path={ref_dir};pulse=0"
+        with imas.DBEntry(ref_uri, "a") as entry:
+            for ids in reference_ids.values():
+                entry.put(ids)
+        print(f"Wrote reference ({len(reference_ids)} IDSs: "
+              f"{', '.join(reference_ids)}) to {ref_dir}")
 
 

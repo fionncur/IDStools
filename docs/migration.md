@@ -176,10 +176,10 @@ string is written alongside each expanded AoS slot.
 If `source` is blank the script falls back to `csv_description` and emits
 a warning.
 
-By default the companion string is written only on the first pulse for each
-target node.  Pass the `--repeat-source` flag to write it for every pulse
-instead — useful when the provenance label is constant across pulses and
-repeating it wastes space (see [Running the script](#running-the-script)).
+The companion (source) string is **not** stored in the pulses.  Because it is
+constant across pulses, it is written **once** into a separate reference entry
+(see [Reference entry](#reference-entry)).  Each pulse therefore holds only the
+value leaf; the matching source leaf lives at the same path in the reference.
 
 **Constraint:** both named leaves must exist as sub-fields of the `imas_path`
 node.  Check the Data Dictionary before setting `needs_source` on a new row.
@@ -197,27 +197,57 @@ The `csv_dtype` column names the bucket and its indexing mode:
 
 | `csv_dtype` | Meaning |
 |-------------|---------|
-| `constant_float0d(:)` | Append a new float scalar slot each time (auto-incremented index) |
-| `constant_string0d(:)` | Append a new string scalar slot each time (auto-incremented index) |
+| `constant_float0d(:)` | Float scalar slot at a stable index (assigned in crosswalk order) |
+| `constant_string0d(:)` | String scalar slot at a stable index (assigned in crosswalk order) |
 | `constant_float0d(2)` | Fix to slot 2; array is resized to at least 3 with `keep=True`, leaving intermediate slots empty if not yet filled |
-| `constant_float0d` *(no index)* | Always write to slot 0; warns if the array is already non-empty |
+| `constant_float0d` *(no index)* | Always write to slot 0; warns if two rows clash on the same bare bucket |
 
-The `(:)` suffix triggers a persistent per-pulse counter, keyed by the
-segment name before `(:)` (e.g. `constant_float0d` from
-`constant_float0d(:)`).  All temporary rows sharing the same base name
-draw from the same counter, so they append sequentially within a pulse.
-Counters reset between pulses.
+The `(:)` suffix assigns a **stable index**, keyed by the segment name before
+`(:)` (e.g. `constant_float0d`).  Indices are assigned once, in crosswalk (row)
+order — **not** per pulse — so a given variable occupies the **same** slot in
+every pulse.  A pulse that lacks data for a variable simply leaves that slot
+empty.  This uniformity is what lets the reference entry line up with the pulse
+values (see [Reference entry](#reference-entry)).
 
-Each temporary entry automatically receives three sub-fields:
+As with physics-IDS rows, the value goes to the pulse and the descriptor
+strings (here the identifier name/description) go to the reference:
 
 ```
-constant_float0d(n)/value             ← transformed CSV value
-constant_float0d(n)/identifier/name   ← csv_column name
-constant_float0d(n)/identifier/description ← csv_description (if present)
+# pulse
+constant_float0d(n)/value                    ← transformed CSV value
+# reference (written once)
+constant_float0d(n)/identifier/name          ← csv_column name
+constant_float0d(n)/identifier/description   ← csv_description (if present)
 ```
 
 The `imas_path` column is ignored for temporary rows; the entire path is
-derived from `csv_dtype`.
+derived from `csv_dtype`.  Temporary rows are otherwise processed identically
+to physics-IDS rows (same transforms, same value/descriptor split).
+
+---
+
+## Reference entry
+
+Descriptor strings are **constant across pulses** (a source label, or a
+temporary variable's name/description), so writing them into every pulse is
+wasteful and non-uniform.  Instead they are collected into a single **reference
+entry**, written once to:
+
+```
+resources/results/<experiment>/reference/
+```
+
+The reference mirrors the pulse structure: one IDS per top-level root
+(`summary`, `core_profiles`, `temporary`, …), each holding only the descriptor
+leaves, at the **same paths** the pulse values use.  So:
+
+- a pulse holds `.../value` and leaves `.../source` empty;
+- the reference holds `.../source` and leaves `.../value` empty.
+
+Because the leaves are disjoint and the paths match, a value and its descriptor
+can be recombined later by overlaying the reference onto a pulse.  Each
+descriptor path is written exactly once (first writer wins), including one entry
+per expanded AoS slot for dictionary-of-lists transforms.
 
 ---
 
@@ -244,7 +274,7 @@ A single source column can write to multiple targets in two complementary ways:
 2. **Dictionary of lists** — one source value expands into multiple elements
    of an AoS via wildcard indexing.
 
-Both mechanisms are resolved within `apply_transform()` and require no
+Both mechanisms are resolved within `resolve_writes()` and require no
 special columns beyond those already described.
 
 ---
@@ -259,7 +289,7 @@ python idstools/scripts/bin/idsmigration
 
 # override inputs / behaviour
 python idstools/scripts/bin/idsmigration -e 2008 -d 2008_data.csv -m 2008_crosswalk.xlsx \
-    --dd-version 4.1.1 --repeat-source
+    --dd-version 4.1.1
 ```
 
 Run `python idstools/scripts/bin/idsmigration -h` for the full help. The arguments and their
@@ -271,7 +301,6 @@ defaults are:
 | `-d`, `--dataset` | `2008_data.csv` | Input CSV filename under `resources/input/` |
 | `-m`, `--mapping` | `2008_crosswalk.xlsx` | Crosswalk spreadsheet filename under `resources/mappings/` |
 | `--dd-version` | `4.1.1` | Data Dictionary version used to build the IDS factory |
-| `--repeat-source` | *off* | When passed, the companion string (source/description/etc.) is written to **every** pulse. When omitted (the default), it is written only on the **first pulse** for each target node and skipped for subsequent pulses — useful when the provenance label is constant and repeating it wastes space. |
 
 Output is one HDF5 directory per pulse, under the folder named by `-e`/`--experiment` (the default
 `2008` is shown):
