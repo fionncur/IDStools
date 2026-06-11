@@ -5,7 +5,6 @@
 # "imas:mdsplus?user=public;shot=111001;run=102;database=ITER_MD;version=3#pf_active"
 
 import argparse
-import copy
 import logging
 import os
 
@@ -80,6 +79,11 @@ if __name__ == "__main__":
         action="store_true",
     )
     parser.add_argument(
+        "--debug",
+        help="Show diagnostic logging",
+        action="store_true",
+    )
+    parser.add_argument(
         "--save",
         help="Save figure at default location",
         action="store_true",
@@ -104,7 +108,7 @@ if __name__ == "__main__":
             splitted_ids_path_fragment = ids_path_fragment.split("/", 1)
             occurrence = int(splitted_ids_path_fragment[0])
 
-    logger = setup_logger("module", stdout_level=logging.INFO)
+    logger = setup_logger("module", stdout_level=logging.DEBUG if args.debug else logging.INFO)
 
     connection = DBMaster.get_connection(args)
     if connection is None:
@@ -119,7 +123,7 @@ if __name__ == "__main__":
         ids_obj_equilibrium = connection.get("equilibrium", occurrence=occurrence, autoconvert=False)
         ids_obj_equilibrium = imas.convert_ids(ids_obj_equilibrium, connection.factory.version)
     else:
-        ids_obj_equilibrium = connection.get("equilibrium", occurrence=occurrence, autoconvert=False)
+        ids_obj_equilibrium = connection.get("equilibrium", occurrence=occurrence, lazy=True, autoconvert=False)
 
     if ids_obj_equilibrium.time is not None:
         time_slice, time_value = get_nearest_time(ids_obj_equilibrium.time, args.time)

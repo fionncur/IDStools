@@ -334,11 +334,12 @@ class EquilibriumCompute:
             try:
                 v = float(val)
                 return np.isfinite(v) and abs(v) < _IDS_VALID_THRESHOLD
-            except Exception:
+            except Exception as exc:
+                logger.debug(f"get_boundary_data: invalid scalar {val!r} ({exc})")
                 return False
 
         def _clean(arr):
-            a = np.asarray(arr, dtype=float)
+            a = np.array(arr, dtype=float, copy=True)
             a[(~np.isfinite(a)) | (np.abs(a) >= _IDS_VALID_THRESHOLD)] = np.nan
             return a
 
@@ -346,9 +347,11 @@ class EquilibriumCompute:
             try:
                 r = np.asarray(node.outline.r, dtype=float)
                 z = np.asarray(node.outline.z, dtype=float)
-            except Exception:
+            except Exception as exc:
+                logger.debug(f"get_boundary_data: could not read outline from {node!r}: {exc}")
                 return None, None
             if not (_valid_arr(r) and _valid_arr(z)):
+                logger.debug("get_boundary_data: outline has no valid data " f"(r.size={r.size}, z.size={z.size})")
                 return None, None
             r, z = _clean(r), _clean(z)
             # Insert NaN at large jumps so disconnected arcs are not joined
@@ -366,14 +369,27 @@ class EquilibriumCompute:
             try:
                 arr = getattr(node, attr)
             except AttributeError:
+                logger.debug(f"get_boundary_data: {attr} is not available on {node!r}")
                 return pts
-            for pt in arr:
+            except Exception as exc:
+                logger.debug(f"get_boundary_data: could not access {attr} on {node!r}: {exc}")
+                return pts
+            try:
+                n_points = len(arr)
+            except Exception as exc:
+                logger.debug(f"get_boundary_data: could not get length of {attr}: {exc}")
+                n_points = None
+            for pt_index, pt in enumerate(arr):
                 try:
                     r, z = float(pt.r), float(pt.z)
-                except Exception:
+                except Exception as exc:
+                    logger.debug(f"get_boundary_data: could not read {attr}[{pt_index}].r/z: {exc}")
                     continue
                 if _valid_scalar(r) and _valid_scalar(z):
                     pts.append((r, z))
+                else:
+                    logger.debug(f"get_boundary_data: {attr}[{pt_index}] contains invalid r/z ({r}, {z})")
+            logger.debug(f"get_boundary_data: read {len(pts)} valid {attr} points out of {n_points}")
             return pts
 
         def _read_contour_tree(ts_node):
@@ -387,26 +403,43 @@ class EquilibriumCompute:
 
             try:
                 nodes = ts_node.contour_tree.node
-            except Exception:
+            except Exception as exc:
+                logger.debug(f"get_boundary_data: could not access contour_tree.node: {exc}")
                 return sep_r, sep_z, xpoints
 
-            for node in nodes:
+            try:
+                n_nodes = len(nodes)
+            except Exception as exc:
+                logger.debug(f"get_boundary_data: could not get length of contour_tree.node: {exc}")
+                n_nodes = None
+
+            n_saddles = 0
+            for node_index, node in enumerate(nodes):
                 try:
                     critical_type = int(node.critical_type)
-                except Exception:
+                except Exception as exc:
+                    logger.debug(
+                        f"get_boundary_data: could not read contour_tree.node[{node_index}].critical_type: {exc}"
+                    )
                     continue
 
                 if critical_type != 1:  # 1 = saddle / X-point
                     continue
+                n_saddles += 1
 
                 try:
                     xr = float(node.r)
                     xz = float(node.z)
-                except Exception:
+                except Exception as exc:
+                    logger.debug(f"get_boundary_data: could not read contour_tree.node[{node_index}].r/z: {exc}")
                     xr = xz = None
 
                 if xr is not None and _valid_scalar(xr) and xz is not None and _valid_scalar(xz):
                     xpoints.append((xr, xz))
+                else:
+                    logger.debug(
+                        f"get_boundary_data: contour_tree.node[{node_index}] saddle has invalid r/z " f"({xr}, {xz})"
+                    )
 
                 if sep_r is not None and sep_z is not None:
                     continue
@@ -414,15 +447,27 @@ class EquilibriumCompute:
                 try:
                     r = np.asarray(node.levelset.r, dtype=float)
                     z = np.asarray(node.levelset.z, dtype=float)
-                except Exception:
+                except Exception as exc:
+                    logger.debug(
+                        f"get_boundary_data: could not read contour_tree.node[{node_index}].levelset.r/z: {exc}"
+                    )
                     continue
 
                 if not (_valid_arr(r) and _valid_arr(z)):
+                    logger.debug(
+                        f"get_boundary_data: contour_tree.node[{node_index}].levelset has no valid data "
+                        f"(r.size={r.size}, z.size={z.size})"
+                    )
                     continue
 
                 sep_r = _clean(r)
                 sep_z = _clean(z)
 
+            logger.debug(
+                "get_boundary_data: contour_tree summary "
+                f"(nodes={n_nodes}, saddles={n_saddles}, xpoints={len(xpoints)}, "
+                f"has_separatrix={sep_r is not None and sep_z is not None})"
+            )
             return sep_r, sep_z, xpoints
 
         result = {
@@ -440,7 +485,8 @@ class EquilibriumCompute:
 
         try:
             ts = self.ids.time_slice[time_slice]
-        except Exception:
+        except Exception as exc:
+            logger.debug(f"get_boundary_data: could not access time_slice[{time_slice}]: {exc}")
             return result
 
         # boundary
@@ -451,15 +497,15 @@ class EquilibriumCompute:
             bnd_type = int(bnd.type)
             if _valid_scalar(bnd_type):
                 result["bnd_type"] = bnd_type
-        except Exception:
-            pass
+        except Exception as exc:
+            logger.debug(f"get_boundary_data: could not read boundary data: {exc}")
 
         try:
             psi_norm = float(ts.boundary.psi_norm)
             if _valid_scalar(psi_norm):
                 result["bnd_psi_norm"] = psi_norm
-        except Exception:
-            pass
+        except Exception as exc:
+            logger.debug(f"get_boundary_data: could not read boundary.psi_norm: {exc}")
 
         try:
             gax_r = float(ts.boundary.geometric_axis.r)
@@ -467,8 +513,8 @@ class EquilibriumCompute:
             if _valid_scalar(gax_r) and _valid_scalar(gax_z):
                 result["bnd_geom_r"] = gax_r
                 result["bnd_geom_z"] = gax_z
-        except Exception:
-            pass
+        except Exception as exc:
+            logger.debug(f"get_boundary_data: could not read boundary.geometric_axis.r/z: {exc}")
 
         # boundary_separatrix (DD3 )
         if hasattr(ts, "boundary_separatrix"):
@@ -477,8 +523,13 @@ class EquilibriumCompute:
                 result["sep_r"], result["sep_z"] = _read_outline(sep)
                 result["sep_xpoints"] = _read_points(sep, "x_point")
                 result["sep_strikepoints"] = _read_points(sep, "strike_point")
-            except Exception:
-                pass
+                logger.debug(
+                    "get_boundary_data: boundary_separatrix summary "
+                    f"(has_outline={result['sep_r'] is not None and result['sep_z'] is not None}, "
+                    f"xpoints={len(result['sep_xpoints'])}, strikepoints={len(result['sep_strikepoints'])})"
+                )
+            except Exception as exc:
+                logger.debug(f"get_boundary_data: could not read boundary_separatrix data: {exc}")
 
         #  contour_tree.node (DD4)
         if hasattr(ts, "contour_tree") and hasattr(ts.contour_tree, "node"):
@@ -494,6 +545,13 @@ class EquilibriumCompute:
 
             if not result["sep_xpoints"] and contour_xpoints:
                 result["sep_xpoints"] = contour_xpoints
+
+        logger.debug(
+            "get_boundary_data: final summary "
+            f"(has_boundary={result['bnd_r'] is not None and result['bnd_z'] is not None}, "
+            f"has_separatrix={result['sep_r'] is not None and result['sep_z'] is not None}, "
+            f"xpoints={len(result['sep_xpoints'])}, strikepoints={len(result['sep_strikepoints'])})"
+        )
 
         return result
 
