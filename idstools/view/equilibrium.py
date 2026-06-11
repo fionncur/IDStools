@@ -135,11 +135,10 @@ class EquilibriumView(BasePlot):
                 (marker,) = ax.plot(
                     mag_ax["r"],
                     mag_ax["z"],
-                    marker="o",
+                    marker="+",
                     color="saddlebrown",
-                    markerfacecolor="saddlebrown",
-                    markeredgecolor="saddlebrown",
-                    markersize=7,
+                    markersize=6,
+                    markeredgewidth=1.4,
                     linestyle="None",
                     zorder=6,
                 )
@@ -147,10 +146,9 @@ class EquilibriumView(BasePlot):
                     [0],
                     [0],
                     color="saddlebrown",
-                    marker="o",
-                    markerfacecolor="saddlebrown",
-                    markeredgecolor="saddlebrown",
-                    markersize=7,
+                    marker="+",
+                    markersize=6,
+                    markeredgewidth=1.4,
                     linestyle="None",
                     label="magnetic axis",
                 )
@@ -162,10 +160,10 @@ class EquilibriumView(BasePlot):
                 (marker,) = ax.plot(
                     cc["r"],
                     cc["z"],
-                    marker="*",
+                    marker="+",
                     color="deeppink",
-                    markersize=10,
-                    markeredgewidth=1.0,
+                    markersize=6,
+                    markeredgewidth=1.4,
                     linestyle="None",
                     zorder=6,
                 )
@@ -173,9 +171,9 @@ class EquilibriumView(BasePlot):
                     [0],
                     [0],
                     color="deeppink",
-                    marker="*",
-                    markersize=10,
-                    markeredgewidth=1.0,
+                    marker="+",
+                    markersize=6,
+                    markeredgewidth=1.4,
                     linestyle="None",
                     label="current centre",
                 )
@@ -190,12 +188,14 @@ class EquilibriumView(BasePlot):
                 (sep_line,) = ax.plot(
                     bd["sep_r"],
                     bd["sep_z"],
-                    color="#000000",
+                    color="firebrick",
                     linewidth=2.0,
                     linestyle="--",
                     zorder=4,
                 )
-                proxy_sep_bnd = ProxyLine([0], [0], color="#000000", linewidth=2.0, linestyle="--", label="separatrix")
+                proxy_sep_bnd = ProxyLine(
+                    [0], [0], color="firebrick", linewidth=2.0, linestyle="--", label="separatrix"
+                )
                 overlay_entries.append((proxy_sep_bnd, [sep_line]))
 
             # geometric axis
@@ -203,20 +203,20 @@ class EquilibriumView(BasePlot):
                 (gax_marker,) = ax.plot(
                     bd["bnd_geom_r"],
                     bd["bnd_geom_z"],
-                    marker="D",
-                    color="cyan",
-                    markersize=7,
-                    markeredgecolor="black",
-                    markeredgewidth=0.8,
+                    marker="x",
+                    color="darkcyan",
+                    markersize=6,
+                    markeredgewidth=1.4,
                     linestyle="None",
                     zorder=6,
                 )
                 proxy_gax = ProxyLine(
                     [0],
                     [0],
-                    color="cyan",
-                    marker="D",
-                    markersize=7,
+                    color="darkcyan",
+                    marker="x",
+                    markersize=6,
+                    markeredgewidth=1.4,
                     linestyle="None",
                     label=f"geom. axis (R={bd['bnd_geom_r']:.3f}, Z={bd['bnd_geom_z']:.3f} m)",
                 )
