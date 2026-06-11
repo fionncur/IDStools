@@ -493,6 +493,13 @@ class EquilibriumCompute:
         try:
             bnd = ts.boundary
             result["bnd_r"], result["bnd_z"] = _read_outline(bnd)
+            result["sep_xpoints"] = _read_points(bnd, "x_point")
+            result["sep_strikepoints"] = _read_points(bnd, "strike_point")
+            logger.debug(
+                "get_boundary_data: boundary summary "
+                f"(has_outline={result['bnd_r'] is not None and result['bnd_z'] is not None}, "
+                f"xpoints={len(result['sep_xpoints'])}, strikepoints={len(result['sep_strikepoints'])})"
+            )
 
             bnd_type = int(bnd.type)
             if _valid_scalar(bnd_type):
@@ -521,12 +528,16 @@ class EquilibriumCompute:
             sep = ts.boundary_separatrix
             try:
                 result["sep_r"], result["sep_z"] = _read_outline(sep)
-                result["sep_xpoints"] = _read_points(sep, "x_point")
-                result["sep_strikepoints"] = _read_points(sep, "strike_point")
+                sep_xpoints = _read_points(sep, "x_point")
+                sep_strikepoints = _read_points(sep, "strike_point")
+                if sep_xpoints:
+                    result["sep_xpoints"] = sep_xpoints
+                if sep_strikepoints:
+                    result["sep_strikepoints"] = sep_strikepoints
                 logger.debug(
                     "get_boundary_data: boundary_separatrix summary "
                     f"(has_outline={result['sep_r'] is not None and result['sep_z'] is not None}, "
-                    f"xpoints={len(result['sep_xpoints'])}, strikepoints={len(result['sep_strikepoints'])})"
+                    f"xpoints={len(sep_xpoints)}, strikepoints={len(sep_strikepoints)})"
                 )
             except Exception as exc:
                 logger.debug(f"get_boundary_data: could not read boundary_separatrix data: {exc}")
