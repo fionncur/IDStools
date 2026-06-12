@@ -213,7 +213,7 @@ if __name__ == "__main__":
         database_label = get_database_path(args, time_value=time_value)
         if database_text:
             database_label += f"\n{database_text}"
-        canvas.set_text(y=0.985, text=database_label, fontsize=6)
+        canvas.set_text(y=0.985, text=database_label, fontsize=7)
 
         if args.plots:
             view_object.plot_profiles_1d_quantities(axes_list1, time_slice)

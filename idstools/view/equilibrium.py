@@ -308,7 +308,20 @@ class EquilibriumView(BasePlot):
                     )
                     overlay_entries.append((proxy_sp, _sp_artists))
 
-        self.view_global_quantities_annotation(ax, time_slice)
+        quantity_annotation = self.view_global_quantities_annotation(ax, time_slice)
+        if quantity_annotation is not None:
+            quantity_annotation.set_visible(False)
+            proxy_quantities = ProxyLine(
+                [0],
+                [0],
+                color="steelblue",
+                marker="*",
+                markerfacecolor="white",
+                markersize=7,
+                linestyle="None",
+                label="quantities",
+            )
+            overlay_entries.append((proxy_quantities, [quantity_annotation]))
 
         # --- clickable legend
         if overlay_entries or _md_handles:
@@ -334,18 +347,25 @@ class EquilibriumView(BasePlot):
                 text.set_ha("center")
 
             leg_map = {}
+            legend_texts = legend.get_texts()
             n_md = len(_md_handles)
             for i, orig_artist in enumerate(_md_handles):
                 leg_h = legend.legend_handles[i]
                 leg_h.set_picker(8)
                 leg_map[leg_h] = [orig_artist]
+                legend_texts[i].set_picker(True)
+                leg_map[legend_texts[i]] = [orig_artist]
 
             for i, (_, artists) in enumerate(overlay_entries):
                 leg_h = legend.legend_handles[n_md + i]
+                leg_text = legend_texts[n_md + i]
                 leg_h.set_picker(8)
                 leg_map[leg_h] = artists
+                leg_text.set_picker(True)
+                leg_map[leg_text] = artists
                 if artists and not artists[0].get_visible():
                     leg_h.set_alpha(0.3)
+                    leg_text.set_alpha(0.3)
 
             def on_legend_click(event):
                 legline = event.artist
@@ -358,6 +378,12 @@ class EquilibriumView(BasePlot):
                 for a in artists:
                     a.set_visible(visible)
                 legline.set_alpha(1.0 if visible else 0.3)
+                if legline in legend.legend_handles:
+                    leg_index = legend.legend_handles.index(legline)
+                    legend_texts[leg_index].set_alpha(1.0 if visible else 0.3)
+                elif legline in legend_texts:
+                    leg_index = legend_texts.index(legline)
+                    legend.legend_handles[leg_index].set_alpha(1.0 if visible else 0.3)
                 ax.figure.canvas.draw_idle()
 
             ax.figure.canvas.mpl_connect("pick_event", on_legend_click)
