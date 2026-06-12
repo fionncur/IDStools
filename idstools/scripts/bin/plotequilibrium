@@ -29,6 +29,7 @@ from idstools.utils.idslogger import setup_logger
 from idstools.view.common import PlotCanvas
 from idstools.view.domain.mdplot import plot_machine_description
 from idstools.view.equilibrium import EquilibriumView
+from matplotlib.widgets import Button
 
 
 class MdAction(argparse.Action):
@@ -149,12 +150,12 @@ if __name__ == "__main__":
 
             col_size = col_size + 1
 
-            canvas = PlotCanvas(2, col_size + 1)
+            canvas = PlotCanvas(2, col_size)
             ax1 = canvas.add_axes(title="", xlabel="", row=0, col=0, rowspan=2)
             axes_list1 = []
             axes_list2 = []
             plotting_counter = 0
-            for col in range(2, col_size + 1):
+            for col in range(1, col_size):
                 for row in [0, 1]:
                     if plotting_counter < p1dcounter:
                         axes_list1.append(canvas.add_axes(title="", xlabel="", row=row, col=col))
@@ -167,7 +168,10 @@ if __name__ == "__main__":
             ax1 = canvas.add_axes(title="", xlabel="", row=0, col=0)
 
         canvas.update_style(args.rc)
-        if args.md:
+
+        def plot_md_overlay():
+            if not args.md:
+                return
             idses = ""
             mduris = []
             for mduri in args.md:
@@ -194,7 +198,15 @@ if __name__ == "__main__":
                 ids_data = get_md_data(mduris, args.dd_update)
             plot_machine_description(ax1, ids_data)
 
-        c_psi, c_rho = view_object.view_magnetic_poloidal_flux(ax1, time_slice, plot_rho=args.rho)
+        c_psi, c_rho = view_object.view_magnetic_poloidal_flux(
+            ax1,
+            time_slice,
+            plot_magnetic_axis=False,
+            plot_current_centre=False,
+            plot_boundary_data=False,
+            plot_rho=args.rho,
+            plot_annotations=False,
+        )
 
         if c_psi:
             cax_psi = ax1.inset_axes([-0.20, 0.05, 0.05, 0.88])  # [x, y, w, h] in axes coords
@@ -222,10 +234,60 @@ if __name__ == "__main__":
         canvas.fig.suptitle(get_title(args, "Equilibrium", time_value))
         if args.plots:
             canvas.fig.set_size_inches(10 + col_size * 1.6, 8)
-            canvas.fig.subplots_adjust(top=0.933, bottom=0.05, left=0.024, right=0.988, hspace=0.221, wspace=0.20)
+            canvas.fig.subplots_adjust(top=0.933, bottom=0.05, left=0.048, right=0.988, hspace=0.221, wspace=0.20)
         else:
             canvas.fig.set_size_inches(14, 8)
-            canvas.fig.subplots_adjust(top=0.933, bottom=0.05, left=0.024, right=0.988, hspace=0.221, wspace=0.25)
+            canvas.fig.subplots_adjust(top=0.933, bottom=0.05, left=0.048, right=0.988, hspace=0.221, wspace=0.25)
+
+        if not args.save:
+            overlay_state = {"created": False, "artists": []}
+            clear_button_ax = canvas.fig.add_axes([0.74, 0.94, 0.125, 0.04])
+            clear_button = Button(clear_button_ax, "Clear overlays")
+            button_ax = canvas.fig.add_axes([0.875, 0.94, 0.095, 0.04])
+            overlay_button = Button(button_ax, "Show legend")
+
+            def on_overlay_button_clicked(_event):
+                if not overlay_state["created"]:
+                    before_artists = set(ax1.get_children()) | set(canvas.fig.get_children())
+                    plot_md_overlay()
+                    view_object.view_magnetic_poloidal_flux(
+                        ax1,
+                        time_slice,
+                        plot_magnetic_axis=True,
+                        plot_current_centre=True,
+                        plot_boundary_data=True,
+                        plot_rho=False,
+                        plot_annotations=True,
+                        plot_psi=False,
+                    )
+                    after_artists = set(ax1.get_children()) | set(canvas.fig.get_children())
+                    overlay_state["artists"] = list(after_artists - before_artists)
+                    overlay_state["created"] = True
+                    overlay_button.label.set_text("Hide legend")
+                else:
+                    legend = ax1.get_legend()
+                    if legend is not None:
+                        visible = not legend.get_visible()
+                        legend.set_visible(visible)
+                        overlay_button.label.set_text("Hide legend" if visible else "Show legend")
+                canvas.fig.canvas.draw_idle()
+
+            def on_clear_overlay_clicked(_event):
+                for artist in overlay_state["artists"]:
+                    try:
+                        artist.remove()
+                    except (NotImplementedError, ValueError):
+                        artist.set_visible(False)
+                overlay_state["artists"] = []
+                overlay_state["created"] = False
+                overlay_button.label.set_text("Show legend")
+                canvas.fig.canvas.draw_idle()
+
+            overlay_button.on_clicked(on_overlay_button_clicked)
+            clear_button.on_clicked(on_clear_overlay_clicked)
+            canvas.fig._idstools_overlay_button = overlay_button
+            canvas.fig._idstools_clear_overlay_button = clear_button
+
         canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
         if args.save:
             fname = get_file_name(args, f"{os.path.basename(__file__)}_Equilibrium", time_value)

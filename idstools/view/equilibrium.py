@@ -45,6 +45,8 @@ class EquilibriumView(BasePlot):
         plot_current_centre: bool = True,
         plot_boundary_data: bool = True,
         plot_rho: bool = False,
+        plot_annotations: bool = True,
+        plot_psi: bool = True,
     ):
         """
         This function plots the magnetic poloidal flux contours on a 2D Cartesian grid.
@@ -84,9 +86,11 @@ class EquilibriumView(BasePlot):
             :meth:`plotIP`
         """
         contour_lines_psi = contour_lines_rho = None
-        cartestion_grid = self.compute_obj.get2d_cartesian_grid(time_slice, profiles2d_index)
-        if cartestion_grid is not None:
-            levels = 50
+        levels = 50
+        cartestion_grid = None
+        if plot_psi or plot_rho:
+            cartestion_grid = self.compute_obj.get2d_cartesian_grid(time_slice, profiles2d_index)
+        if cartestion_grid is not None and plot_psi:
 
             # As per IMAS data dictionary psi is stored as [R, Z] with shape (N_R, N_Z).
             # Check this reference :
@@ -308,9 +312,8 @@ class EquilibriumView(BasePlot):
                     )
                     overlay_entries.append((proxy_sp, _sp_artists))
 
-        quantity_annotation = self.view_global_quantities_annotation(ax, time_slice)
+        quantity_annotation = self.view_global_quantities_annotation(ax, time_slice) if plot_annotations else None
         if quantity_annotation is not None:
-            quantity_annotation.set_visible(False)
             proxy_quantities = ProxyLine(
                 [0],
                 [0],
@@ -333,13 +336,19 @@ class EquilibriumView(BasePlot):
             legend = ax.legend(
                 handles=all_handles,
                 labels=all_labels,
-                loc="upper left",
-                bbox_to_anchor=(1.15, 1),
+                loc="upper right",
                 fancybox=True,
+                frameon=True,
+                framealpha=1.0,
+                facecolor="white",
+                edgecolor="black",
                 fontsize=10,
                 labelspacing=1.2,
-                title="Overlays\n(click to toggle)",
+                title="Overlays (click to toggle)",
             )
+            legend.get_frame().set_alpha(1.0)
+            legend.get_frame().set_facecolor("white")
+            legend.set_zorder(1000)
             legend.get_title().set_fontsize(10)
             legend.get_title().set_fontstyle("italic")
             legend.get_title().set_ha("center")
@@ -413,14 +422,14 @@ class EquilibriumView(BasePlot):
 
         textstr = "\n".join(f"{d['label']} = {d['text']}" for d in items)
         txt = ax.text(
-            1.20,
-            0.1,
+            0.98,
+            0.02,
             textstr,
             transform=ax.transAxes,
             fontsize=9,
-            horizontalalignment="left",
-            verticalalignment="center",
-            clip_on=False,
+            horizontalalignment="right",
+            verticalalignment="bottom",
+            clip_on=True,
             bbox=dict(boxstyle="round,pad=0.5", facecolor="white", alpha=0.85, edgecolor="steelblue"),
         )
         return txt
