@@ -210,17 +210,10 @@ if __name__ == "__main__":
 
         ax1.set_title(title)
 
-        xmin, xmax = ax1.get_xlim()
-        ymin, ymax = ax1.get_ylim()
-        ax1.text(
-            xmax + 0.01 * abs(xmax),
-            ymin + 0.5 * abs(ymax - ymin),
-            f"{get_database_path(args, time_value=time_value)}\n{database_text}",
-            horizontalalignment="left",
-            verticalalignment="center",
-            rotation="vertical",
-            fontsize=7,
-        )
+        database_label = get_database_path(args, time_value=time_value)
+        if database_text:
+            database_label += f"\n{database_text}"
+        canvas.set_text(y=0.985, text=database_label, fontsize=6)
 
         if args.plots:
             view_object.plot_profiles_1d_quantities(axes_list1, time_slice)

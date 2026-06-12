@@ -151,14 +151,5 @@ def plot_machine_description(ax, ids_data):
     # ax.callbacks.connect("ylim_changed", update_labels)
     ax.plot()
 
-    xmin, xmax = ax.get_xlim()
-    ymin, ymax = ax.get_ylim()
-    ax.text(
-        xmax + 0.01 * abs(xmax),
-        ymin + 0.5 * abs(ymax - ymin),
-        f"{database_path}",
-        horizontalalignment="left",
-        verticalalignment="center",
-        rotation="vertical",
-        fontsize=7,
-    )
+    if database_path:
+        ax.figure.text(0.001, 0.965, database_path, ha="left", va="top", fontsize=6)
