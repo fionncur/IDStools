@@ -36,7 +36,7 @@ def update_labels(ax):
     ax.figure.canvas.draw_idle()
 
 
-def plot_machine_description(ax, ids_data):
+def plot_machine_description(ax, ids_data, show_provenance=True):
     """
     The `plotMachineDescription` method is responsible for plotting the machine description
     based on the provided pulse list.
@@ -151,5 +151,5 @@ def plot_machine_description(ax, ids_data):
     # ax.callbacks.connect("ylim_changed", update_labels)
     ax.plot()
 
-    if database_path:
+    if show_provenance and database_path:
         ax.figure.text(0.001, 0.965, database_path, ha="left", va="top", fontsize=7)

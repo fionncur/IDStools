@@ -222,7 +222,7 @@ class EquilibriumView(BasePlot):
                     markersize=6,
                     markeredgewidth=1.4,
                     linestyle="None",
-                    label=f"geom. axis (R={bd['bnd_geom_r']:.3f}, Z={bd['bnd_geom_z']:.3f} m)",
+                    label="Geom axis",
                 )
                 overlay_entries.append((proxy_gax, [gax_marker]))
 
@@ -271,7 +271,7 @@ class EquilibriumView(BasePlot):
 
             # strike-points  (boundary_separatrix)
             _sp_groups = [
-                (bd["sep_strikepoints"], "darkorange", "strike_point"),
+                (bd["sep_strikepoints"], "red", "strike_point"),
             ]
             for sp_list, sp_color, sp_label in _sp_groups:
                 _sp_artists = []
@@ -312,19 +312,8 @@ class EquilibriumView(BasePlot):
                     )
                     overlay_entries.append((proxy_sp, _sp_artists))
 
-        quantity_annotation = self.view_global_quantities_annotation(ax, time_slice) if plot_annotations else None
-        if quantity_annotation is not None:
-            proxy_quantities = ProxyLine(
-                [0],
-                [0],
-                color="steelblue",
-                marker="*",
-                markerfacecolor="white",
-                markersize=7,
-                linestyle="None",
-                label="quantities",
-            )
-            overlay_entries.append((proxy_quantities, [quantity_annotation]))
+        if plot_annotations:
+            self.view_global_quantities_annotation(ax, time_slice)
 
         # --- clickable legend
         if overlay_entries or _md_handles:
@@ -336,7 +325,8 @@ class EquilibriumView(BasePlot):
             legend = ax.legend(
                 handles=all_handles,
                 labels=all_labels,
-                loc="upper right",
+                loc="upper left",
+                bbox_to_anchor=(1.15, 1),
                 fancybox=True,
                 frameon=True,
                 framealpha=1.0,
@@ -344,14 +334,10 @@ class EquilibriumView(BasePlot):
                 edgecolor="black",
                 fontsize=10,
                 labelspacing=1.2,
-                title="Overlays (click to toggle)",
             )
             legend.get_frame().set_alpha(1.0)
             legend.get_frame().set_facecolor("white")
             legend.set_zorder(1000)
-            legend.get_title().set_fontsize(10)
-            legend.get_title().set_fontstyle("italic")
-            legend.get_title().set_ha("center")
             for text in legend.get_texts():
                 text.set_ha("center")
 
@@ -422,15 +408,15 @@ class EquilibriumView(BasePlot):
 
         textstr = "\n".join(f"{d['label']} = {d['text']}" for d in items)
         txt = ax.text(
-            0.98,
-            0.02,
+            1.15,
+            0.55,
             textstr,
             transform=ax.transAxes,
             fontsize=9,
-            horizontalalignment="right",
-            verticalalignment="bottom",
-            clip_on=True,
-            bbox=dict(boxstyle="round,pad=0.5", facecolor="white", alpha=0.85, edgecolor="steelblue"),
+            horizontalalignment="left",
+            verticalalignment="top",
+            clip_on=False,
+            bbox=dict(boxstyle="round,pad=0.5", facecolor="white", alpha=1.0, edgecolor="steelblue"),
         )
         return txt
 

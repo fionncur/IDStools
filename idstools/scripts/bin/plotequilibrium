@@ -22,14 +22,12 @@ from idstools.utils.clihelper import (
     dbentry_parser,
     get_database_path,
     get_file_name,
-    get_title,
     rcparam_parser,
 )
 from idstools.utils.idslogger import setup_logger
 from idstools.view.common import PlotCanvas
 from idstools.view.domain.mdplot import plot_machine_description
 from idstools.view.equilibrium import EquilibriumView
-from matplotlib.widgets import Button
 
 
 class MdAction(argparse.Action):
@@ -82,6 +80,11 @@ if __name__ == "__main__":
     parser.add_argument(
         "--show-labels",
         help="Show labels",
+        action="store_true",
+    )
+    parser.add_argument(
+        "--provenance",
+        help="Show equilibrium and machine-description URIs on the figure",
         action="store_true",
     )
     parser.add_argument(
@@ -201,7 +204,8 @@ if __name__ == "__main__":
                 ids_data = get_md_data(mduris, args.dd_update, idses=idses)
             else:
                 ids_data = get_md_data(mduris, args.dd_update)
-            plot_machine_description(ax1, ids_data)
+            plot_machine_description(ax1, ids_data, show_provenance=args.provenance)
+            ax1.set_title("")
             md_overlay_state["created"] = True
             return True
 
@@ -233,16 +237,16 @@ if __name__ == "__main__":
             cbar_rho.ax.set_title(r"$\rho$", fontsize=7, pad=4)
             cbar_rho.ax.tick_params(labelsize=7)
 
-        database_label = get_database_path(args, time_value=time_value)
-        if database_text:
-            database_label += f"\n{database_text}"
-        canvas.set_text(y=0.985, text=database_label, fontsize=7)
+        if args.provenance:
+            database_label = get_database_path(args, time_value=time_value)
+            if database_text:
+                database_label += f"\n{database_text}"
+            canvas.set_text(y=0.985, text=database_label, fontsize=7)
 
         if args.plots:
             view_object.plot_profiles_1d_quantities(axes_list1, time_slice)
             view_object.plot_global_quantities(axes_list2, time_value)
 
-        canvas.fig.suptitle(get_title(args, "Equilibrium", time_value))
         if args.plots:
             canvas.fig.set_size_inches(10 + col_size * 1.6, 8)
             canvas.fig.subplots_adjust(top=0.933, bottom=0.05, left=0.048, right=0.988, hspace=0.221, wspace=0.20)
@@ -259,59 +263,15 @@ if __name__ == "__main__":
                 plot_current_centre=True,
                 plot_boundary_data=True,
                 plot_rho=False,
-                plot_annotations=True,
+                plot_annotations=not args.plots,
                 plot_psi=False,
             )
             legend = ax1.get_legend()
             if legend is not None:
                 legend.set_visible(show_legend)
 
-        startup_overlay_artists = []
         if args.overlay:
-            before_artists = set(ax1.get_children()) | set(canvas.fig.get_children())
-            create_overlays(show_legend=args.save)
-            after_artists = set(ax1.get_children()) | set(canvas.fig.get_children())
-            startup_overlay_artists = list(after_artists - before_artists)
-
-        if not args.save:
-            overlay_state = {"created": args.overlay, "artists": startup_overlay_artists}
-            clear_button_ax = canvas.fig.add_axes([0.74, 0.94, 0.125, 0.04])
-            clear_button = Button(clear_button_ax, "Clear overlays")
-            button_ax = canvas.fig.add_axes([0.875, 0.94, 0.095, 0.04])
-            overlay_button = Button(button_ax, "Show legend")
-
-            def on_overlay_button_clicked(_event):
-                if not overlay_state["created"]:
-                    before_artists = set(ax1.get_children()) | set(canvas.fig.get_children())
-                    create_overlays(show_legend=True)
-                    after_artists = set(ax1.get_children()) | set(canvas.fig.get_children())
-                    overlay_state["artists"] = list(after_artists - before_artists)
-                    overlay_state["created"] = True
-                    overlay_button.label.set_text("Hide legend")
-                else:
-                    legend = ax1.get_legend()
-                    if legend is not None:
-                        visible = not legend.get_visible()
-                        legend.set_visible(visible)
-                        overlay_button.label.set_text("Hide legend" if visible else "Show legend")
-                canvas.fig.canvas.draw_idle()
-
-            def on_clear_overlay_clicked(_event):
-                for artist in overlay_state["artists"]:
-                    try:
-                        artist.remove()
-                    except (NotImplementedError, ValueError):
-                        artist.set_visible(False)
-                overlay_state["artists"] = []
-                overlay_state["created"] = False
-                md_overlay_state["created"] = False
-                overlay_button.label.set_text("Show legend")
-                canvas.fig.canvas.draw_idle()
-
-            overlay_button.on_clicked(on_overlay_button_clicked)
-            clear_button.on_clicked(on_clear_overlay_clicked)
-            canvas.fig._idstools_overlay_button = overlay_button
-            canvas.fig._idstools_clear_overlay_button = clear_button
+            create_overlays(show_legend=not args.plots)
 
         canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
         if args.save:
