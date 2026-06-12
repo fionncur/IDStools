@@ -115,10 +115,11 @@ def write_values(ids, writes) -> None:
 # the sibling of every value's parent node (branch[:-1]), so it lands at the
 # correct path for each expanded AoS slot. The constant string is re-written on
 # every pulse (idempotent), so no dedup state is needed.
-def write_descriptors(reference, writes, descriptors) -> None:
+def write_descriptors(reference, writes, descriptors, value_leaf_depth) -> None:
     for branch, _ in writes:
+        anchor = branch[:len(branch) - value_leaf_depth]
         for desc_leaf, desc_str in descriptors:
-            set_leaf(reference, branch[:-1] + list(desc_leaf), desc_str)
+            set_leaf(reference, anchor + list(desc_leaf), desc_str)
 
 
 # Create a fresh top-level IDS with homogeneous time mode set.
@@ -297,7 +298,7 @@ if __name__ == "__main__":
             paths_list.append(imas_path.split("&") if "&" in imas_path else [imas_path])
             if row_i["needs_source"]:
                 value_leaf_list.append(row_i["_source_pair"][0])
-                descriptors_list.append([([row_i["_source_pair"][1]], row_i["source"])])
+                descriptors_list.append([(row_i["_source_pair"][1].split("/"), row_i["source"])])
             else:
                 value_leaf_list.append("")
                 descriptors_list.append([])
@@ -347,7 +348,8 @@ if __name__ == "__main__":
                 if row_i["_descriptors"] and writes:
                     if ids_root not in reference_ids:
                         reference_ids[ids_root] = new_ids(factory, ids_root)
-                    write_descriptors(reference_ids[ids_root], writes, row_i["_descriptors"])
+                    depth = len(value_leaf.split("/")) if value_leaf else 0
+                    write_descriptors(reference_ids[ids_root], writes, row_i["_descriptors"], depth)
 
         # Backfill an empty root `time` (NaN time column) so dynamic nodes can fit in arrays.
         for ids in pulse_ids.values():
