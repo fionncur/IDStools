@@ -226,8 +226,8 @@ if __name__ == "__main__":
     df["_source_pair"] = pd.Series(pairs, index=df.index, dtype=object)
 
     # Import experimental data from csv. Data cleaning
-    data = pd.read_csv(data_path, na_values=["-"])
-    data = data.map(lambda x: x.strip() if isinstance(x, str) else x) # Strip whitespace. Important for CMOD, but very data/machine specific. Remove in later version.
+    data = pd.read_csv(data_path)
+    data = data.map(lambda x: (x.strip() or np.nan) if isinstance(x, str) else x) # Important for CMOD, but very data/machine specific. Remove in later version.
 
     # Upfront validation: all csv_columns must exist in data.
     missing_cols = set(df["csv_column"]) - set(data.columns)
