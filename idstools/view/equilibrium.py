@@ -227,6 +227,10 @@ class EquilibriumView(BasePlot):
                 overlay_entries.append((proxy_gax, [gax_marker]))
 
             # x-points  (boundary_separatrix)
+            point_marker_size = 7
+            point_marker_edgewidth = 2.0
+            point_label_fontsize = 8
+
             _xp_groups = [
                 (bd["sep_xpoints"], "red", "x_point"),
             ]
@@ -238,8 +242,8 @@ class EquilibriumView(BasePlot):
                         xz,
                         marker="x",
                         color=xp_color,
-                        markersize=7,
-                        markeredgewidth=2,
+                        markersize=point_marker_size,
+                        markeredgewidth=point_marker_edgewidth,
                         linestyle="None",
                         zorder=7,
                     )
@@ -248,7 +252,7 @@ class EquilibriumView(BasePlot):
                         xy=(xr, xz),
                         xytext=(-6, 6),
                         textcoords="offset points",
-                        fontsize=8,
+                        fontsize=point_label_fontsize,
                         ha="right",
                         color=xp_color,
                         fontweight="bold",
@@ -262,8 +266,8 @@ class EquilibriumView(BasePlot):
                         [0],
                         color=xp_color,
                         marker="x",
-                        markersize=7,
-                        markeredgewidth=2,
+                        markersize=point_marker_size,
+                        markeredgewidth=point_marker_edgewidth,
                         linestyle="None",
                         label=xp_label,
                     )
@@ -281,8 +285,8 @@ class EquilibriumView(BasePlot):
                         sz,
                         marker="+",
                         color=sp_color,
-                        markersize=7,
-                        markeredgewidth=2.0,
+                        markersize=point_marker_size,
+                        markeredgewidth=point_marker_edgewidth,
                         linestyle="None",
                         zorder=7,
                     )
@@ -291,7 +295,7 @@ class EquilibriumView(BasePlot):
                         xy=(sr, sz),
                         xytext=(-6, 6),
                         textcoords="offset points",
-                        fontsize=8,
+                        fontsize=point_label_fontsize,
                         ha="right",
                         color=sp_color,
                         fontweight="bold",
@@ -305,8 +309,8 @@ class EquilibriumView(BasePlot):
                         [0],
                         color=sp_color,
                         marker="+",
-                        markersize=7,
-                        markeredgewidth=2.0,
+                        markersize=point_marker_size,
+                        markeredgewidth=point_marker_edgewidth,
                         linestyle="None",
                         label=sp_label,
                     )
@@ -328,18 +332,15 @@ class EquilibriumView(BasePlot):
                 loc="upper left",
                 bbox_to_anchor=(1.15, 1),
                 fancybox=True,
-                frameon=True,
+                frameon=False,
                 framealpha=1.0,
                 facecolor="white",
-                edgecolor="black",
                 fontsize=10,
                 labelspacing=1.2,
             )
-            legend.get_frame().set_alpha(1.0)
-            legend.get_frame().set_facecolor("white")
             legend.set_zorder(1000)
             for text in legend.get_texts():
-                text.set_ha("center")
+                text.set_ha("left")
 
             leg_map = {}
             legend_texts = legend.get_texts()
@@ -409,14 +410,14 @@ class EquilibriumView(BasePlot):
         textstr = "\n".join(f"{d['label']} = {d['text']}" for d in items)
         txt = ax.text(
             1.15,
-            0.55,
+            0.0,
             textstr,
             transform=ax.transAxes,
             fontsize=9,
             horizontalalignment="left",
-            verticalalignment="top",
+            verticalalignment="bottom",
             clip_on=False,
-            bbox=dict(boxstyle="round,pad=0.5", facecolor="white", alpha=1.0, edgecolor="steelblue"),
+            bbox=dict(boxstyle="round,pad=0.5", facecolor="white", alpha=1.0, edgecolor="none"),
         )
         return txt
 

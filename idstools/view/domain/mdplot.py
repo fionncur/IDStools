@@ -152,4 +152,4 @@ def plot_machine_description(ax, ids_data, show_provenance=True):
     ax.plot()
 
     if show_provenance and database_path:
-        ax.figure.text(0.001, 0.965, database_path, ha="left", va="top", fontsize=7)
+        ax.figure.text(0.001, 0.965, database_path, ha="left", va="top", fontsize=8)
