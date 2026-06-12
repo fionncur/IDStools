@@ -113,7 +113,7 @@ class EquilibriumView(BasePlot):
                 rho2d = self.compute_obj.get_rho2d(time_slice)
                 if rho2d is not None:
                     contour_lines_rho = ax.contour(
-                        cartestion_grid["r2d"], cartestion_grid["z2d"], rho2d, levels=levels, cmap="YlOrBr"
+                        cartestion_grid["r2d"], cartestion_grid["z2d"], rho2d.T, levels=levels, cmap="YlOrBr"
                     )
 
             ax.set_aspect("equal", adjustable="box")
