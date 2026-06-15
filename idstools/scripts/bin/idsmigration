@@ -1,5 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+"""idsmigration — convert tabular experimental data (CSV) into IMAS IDS objects.
+
+Driven by a crosswalk spreadsheet that maps source CSV columns to IDS paths and
+transforms. The pipeline (see ``main``): load the crosswalk and dataset, validate,
+build a per-row write spec, build one set of IDSs per pulse in memory, then write
+the pulses and a shared reference entry to HDF5.
+
+See docs/migration.md for the crosswalk format and full behaviour reference.
+"""
 
 from typing import Any
 import argparse
@@ -22,23 +31,32 @@ ROOT = os.path.dirname(os.path.dirname(os.path.dirname(HERE)))  # .../IDStools
 mappings_dir = os.path.join(ROOT, "resources", "mappings")
 input_dir = os.path.join(ROOT, "resources", "input")
 
-# Parses node segments, for fixed AoS indexing or placeholder (wildcard) indexes.
-def parse_seg(seg: str) -> tuple[str, int]:
-    m = re.fullmatch(r"(\w+)\((\d+)\)", seg) # Explicit index, like divertors.divertor(3)
-    if m:
-        return m.group(1), int(m.group(2)) 
-    m = re.fullmatch(r"(\w+)\(:\)", seg) # Variable/wildcard index, like divertors.divertor(:).
-    if m:
-        return m.group(1), 0
-    return seg, 0
 
-# Replaces wildcard index segments in a branch with a concrete index idx.
+# ---------------------------------------------------------------------------
+# Path / segment parsing
+# ---------------------------------------------------------------------------
+
+def parse_seg(seg: str) -> tuple[str, int]:
+    """Parse a node segment, for fixed AoS indexing or placeholder (wildcard) indexes."""
+    m = re.fullmatch(r"(\w+)\((\d+)\)", seg) # Explicit index, like divertor(3)
+    if m:
+        return m.group(1), int(m.group(2))  # "divertor(3)" -> ("divertor", 3)
+    m = re.fullmatch(r"(\w+)\(:\)", seg) # Variable/wildcard index, like divertor(:).
+    if m:
+        return m.group(1), 0  # "divertor(:)" -> ("divertor", 0)
+    return seg, 0  # bare segment, like "divertor" -> ("divertor", 0)
+
+
 def replace_wildcard_index(branch: list[str], idx: int) -> list[str]:
+    """Replace wildcard index segments in a branch with a concrete index idx."""
     return [f"{seg[:-3]}({idx})" if seg.endswith("(:)") else seg for seg in branch]
 
-# Parse a source_fields cell into a (value_leaf, source_leaf) pair.
-# Blank / NaN -> ("value", "source"), the historical default.
+
 def parse_source_pair(source_fields_val: Any, csv_column: str) -> tuple[str, str]:
+    """Parse a source_fields cell into a (value_leaf, source_leaf) pair.
+
+    Blank / NaN -> ("value", "source"), as a default.
+    """
     if not isinstance(source_fields_val, str) or source_fields_val.strip() == "":
         return ("value", "source")
     try:
@@ -56,8 +74,20 @@ def parse_source_pair(source_fields_val: Any, csv_column: str) -> tuple[str, str
         )
     return parsed
 
-# Take IDS object and list of node segments (as strings), return parent IDS object and the final branch node.
+
+# ---------------------------------------------------------------------------
+# IDS construction & writing
+# ---------------------------------------------------------------------------
+
+def new_ids(factory, name: str):
+    """Create a fresh top-level IDS with homogeneous time mode set."""
+    ids = factory.new(name)
+    ids.ids_properties.homogeneous_time = imas.ids_defs.IDS_TIME_MODE_HOMOGENEOUS
+    return ids
+
+
 def resolve_parent(ids, branch: list[str]) -> tuple[Any, str]:
+    """Take IDS object and list of node segments, return parent IDS object and the final branch node."""
     node = ids
     for seg in branch[:-1]:
         attr, idx = parse_seg(seg)
@@ -67,6 +97,7 @@ def resolve_parent(ids, branch: list[str]) -> tuple[Any, str]:
                 node.resize(idx + 1, keep=True)
             node = node[idx]
     return node, branch[-1]
+
 
 def set_leaf(ids, branch: list[str], value: Any) -> None:
     parent, leaf_seg = resolve_parent(ids, branch)
@@ -82,63 +113,70 @@ def set_leaf(ids, branch: list[str], value: Any) -> None:
     else:
         setattr(parent, leaf, value)
 
-# Compute the (branch, value) writes a transform produces. Returns [] to skip the row (e.g. dictionary miss).
-def resolve_writes(ids_branch: list[str], value: Any, row_i) -> list[tuple[list[str], Any]]:
-    t = row_i["transform"]
-    if t == "identity":
-        return [(ids_branch, value)]
-    if t == "dictionary":
-        if not isinstance(row_i["transform_args"], str):
-            raise ValueError(f"Row {row_i.name}: transform='dictionary' but transform_args is missing")
-        dictionary = ast.literal_eval(row_i["transform_args"])
-        if value not in dictionary:
-            print(f"WARNING: Row {row_i.name}: value {value!r} from column '{row_i['csv_column']}' not in dictionary — skipping")
-            return []
-        mapped = dictionary[value]
-        if isinstance(mapped, list):  # Dictionary of lists feature, expand AoS to fit len(mapped).
-            return [(replace_wildcard_index(ids_branch, i), v) for i, v in enumerate(mapped)]
-        return [(replace_wildcard_index(ids_branch, 0), mapped)]
-    if t == "formula":
-        if not isinstance(row_i["transform_args"], str):
-            raise ValueError(f"Row {row_i.name}: transform='formula' but transform_args is missing")
-        return [(ids_branch, eval(row_i["transform_args"], {"x": value}))]
-    raise ValueError(f"Row {row_i.name}: unhandled transform '{row_i['transform']}'")
 
-# Write resolved (branch, value) pairs to their leaves in the pulse `ids`.
 def write_values(ids, writes) -> None:
+    """Write resolved (branch, value) pairs to their leaves in the pulse `ids`."""
     for branch, value in writes:
         set_leaf(ids, branch, value)
 
 
-# Write each descriptor (leaf_segments, string) — e.g. the source sibling, or a
-# temporary row's identifier name/description — into the shared reference IDS, at
-# the sibling of every value's parent node (branch[:-1]), so it lands at the
-# correct path for each expanded AoS slot. The constant string is re-written on
-# every pulse (idempotent), so no dedup state is needed.
 def write_descriptors(reference, writes, descriptors, value_leaf_depth) -> None:
+    """Write each descriptor (leaf_segments, string) into the shared reference IDS.
+
+    Each is written at the sibling of every value's parent node (branch[:-1]), so it
+    lands at the correct path for each expanded AoS slot — e.g. the source sibling, or
+    a temporary row's identifier name/description.
+    """
     for branch, _ in writes:
         anchor = branch[:len(branch) - value_leaf_depth]
         for desc_leaf, desc_str in descriptors:
             set_leaf(reference, anchor + list(desc_leaf), desc_str)
 
 
-# Create a fresh top-level IDS with homogeneous time mode set.
-def new_ids(factory, name: str):
-    ids = factory.new(name)
-    ids.ids_properties.homogeneous_time = imas.ids_defs.IDS_TIME_MODE_HOMOGENEOUS
-    return ids
-
-
-# Backfill an empty root `time` (NaN time column) so dynamic nodes fit in arrays.
 def backfill_time(ids) -> None:
+    """Backfill an empty root `time` (NaN time column) so dynamic nodes fit in arrays."""
     if (ids.ids_properties.homogeneous_time == imas.ids_defs.IDS_TIME_MODE_HOMOGENEOUS
             and len(ids.time) == 0):
         ids.time = np.array([0.0])
 
 
-# Timed, counted progress for the long pulse loops (build-in-memory and write-to-disk).
+# ---------------------------------------------------------------------------
+# Transform resolution
+# ---------------------------------------------------------------------------
+
+def resolve_writes(ids_branch: list[str], value: Any, cw_row) -> list[tuple[list[str], Any]]:
+    """Compute the (branch, value) writes a transform produces.
+
+    Returns [] to skip the row (e.g. dictionary miss).
+    """
+    transform = cw_row["transform"]
+    if transform == "identity":
+        return [(ids_branch, value)]
+    if transform == "dictionary":
+        if not isinstance(cw_row["transform_args"], str):
+            raise ValueError(f"Row {cw_row.name}: transform='dictionary' but transform_args is missing")
+        dictionary = ast.literal_eval(cw_row["transform_args"])
+        if value not in dictionary:
+            print(f"WARNING: Row {cw_row.name}: value {value!r} from column '{cw_row['csv_column']}' not in dictionary — skipping")
+            return []
+        mapped = dictionary[value]
+        if isinstance(mapped, list):  # Dictionary of lists feature, expand AoS to fit len(mapped).
+            return [(replace_wildcard_index(ids_branch, i), v) for i, v in enumerate(mapped)]
+        return [(replace_wildcard_index(ids_branch, 0), mapped)]
+    if transform == "formula":
+        if not isinstance(cw_row["transform_args"], str):
+            raise ValueError(f"Row {cw_row.name}: transform='formula' but transform_args is missing")
+        return [(ids_branch, eval(cw_row["transform_args"], {"x": value}))]
+    raise ValueError(f"Row {cw_row.name}: unhandled transform '{cw_row['transform']}'")
+
+
+# ---------------------------------------------------------------------------
+# Progress reporting
+# ---------------------------------------------------------------------------
+
 def report_progress(count: int, total: int, label: Any, start: float,
                     last_report: float, interval: float = 5.0) -> float:
+    """Timed, counted progress for the long pulse loops (build-in-memory and write-to-disk)."""
     now = time.monotonic()
     if now - last_report < interval:
         return last_report
@@ -154,15 +192,21 @@ def report_progress(count: int, total: int, label: Any, start: float,
     )
     return now
 
-# Closing one-line summary for a pulse loop.
+
 def report_summary(verb: str, count: int, total: int, start: float, suffix: str = "") -> None:
+    """Closing one-line summary for a pulse loop."""
     print(
         f"{verb} {count}/{total} pulses{suffix} "
         f"in {timedelta(seconds=int(time.monotonic() - start))}"
     )
 
 
-if __name__ == "__main__":
+# ---------------------------------------------------------------------------
+# Pipeline stages
+# ---------------------------------------------------------------------------
+
+def parse_args() -> argparse.Namespace:
+    """Parse command-line arguments."""
     parser = argparse.ArgumentParser(
         description="Convert tabular experimental data (CSV) into IMAS IDS objects via a crosswalk spreadsheet",
         formatter_class=RichHelpFormatter,
@@ -194,26 +238,30 @@ if __name__ == "__main__":
         default="4.1.1",
         help="Data Dictionary version used to build the IDS factory \t(default=%(default)s)",
     )
-    args = parser.parse_args()
+    return parser.parse_args()
 
-    output_dir = os.path.join(ROOT, "resources", "results", args.experiment)
 
-    # Define paths for data and mapping files.
+def resolve_io_paths(args: argparse.Namespace) -> tuple[str, str, str]:
+    """Resolve (data_path, mapping_path, output_dir) from the parsed CLI args."""
     data_path = os.path.join(input_dir, args.dataset)
     mapping_path = os.path.join(mappings_dir, args.mapping)
+    output_dir = os.path.join(ROOT, "resources", "results", args.experiment)
+    return data_path, mapping_path, output_dir
 
-    # Take crosswalk xlsx into dataframe.
+
+def load_crosswalk(mapping_path: str) -> pd.DataFrame:
+    """Read the crosswalk xlsx, keep implemented+accepted rows, and parse source pairs."""
     df = pd.read_excel(mapping_path)
 
     # Convert needs_source to boolean.
     df['needs_source'] = df['needs_source'].fillna(False).astype(bool)
 
     # Include only implemented transforms (identity/dictionary) with an accepted status.
-    sentence = (
+    keep_mask = (
         df["transform"].isin(["identity", "dictionary"])
         & df["status"].isin(["mapped", "temporary", "mapped_caveat"])
     )
-    df = df[sentence]
+    df = df[keep_mask]
 
     # Parse the optional source_fields column into (value_leaf, source_leaf) pairs.
     # Blank/NaN or non-needs_source rows -> ("value", "source").
@@ -225,11 +273,18 @@ if __name__ == "__main__":
     else:
         pairs = [("value", "source")] * len(df)
     df["_source_pair"] = pd.Series(pairs, index=df.index, dtype=object)
+    return df
 
-    # Import experimental data from csv. Data cleaning
+
+def load_dataset(data_path: str) -> pd.DataFrame:
+    """Import experimental data from csv and apply (machine-specific) cleaning."""
     data = pd.read_csv(data_path, na_values=["-", "????????", "??????????", "********"])
     data = data.map(lambda x: (x.strip() or np.nan) if isinstance(x, str) else x) # Important for CMOD, but very data/machine specific. Remove in later version.
+    return data
 
+
+def validate(df: pd.DataFrame, data: pd.DataFrame) -> None:
+    """Upfront validation; warns and fixes up the `source` column in place where needed."""
     # Upfront validation: all csv_columns must exist in data.
     missing_cols = set(df["csv_column"]) - set(data.columns)
     if missing_cols:
@@ -250,22 +305,24 @@ if __name__ == "__main__":
     if bad_dtype.any():
         print(f"WARNING: status 'temporary' but csv_dtype is missing for rows: {list(df.index[bad_dtype])} — skipping")
 
-    # Create factory object, set DD version.
-    factory = imas.IDSFactory(version=args.dd_version)
 
-    # Build a per-row write spec used by the main loop:
-    #   _paths       : imas_path(s) to write to ("&"-split for multi-target rows)
-    #   _value_leaf  : leaf appended to each path for the value ("" = bare node)
-    #   _descriptors : list of (leaf_segments, string) written once to the reference
-    # Temporary rows are folded into the same structure with a "persistent" AoS index,
-    # assigned here in crosswalk order so a variable keeps the same slot in every
-    # pulse, which is required for temporary indices to match the reference IDS.
+def build_write_spec(df: pd.DataFrame) -> pd.DataFrame:
+    """Build the per-row write spec columns used by the main loop:
+
+      _paths       : imas_path(s) to write to ("&"-split for multi-target rows)
+      _value_leaf  : leaf appended to each path for the value ("" = bare node)
+      _descriptors : list of (leaf_segments, string) written once to the reference
+
+    Temporary rows are folded into the same structure with a "persistent" AoS index,
+    assigned here in crosswalk order so a variable keeps the same slot in every
+    pulse, which is required for temporary indices to match the reference IDS.
+    """
     temp_idx: dict[str, int] = {}   # bucket_base -> next stable index for "(:)" buckets
     temp_seen: dict[str, Any] = {}  # resolved "temporary/..." path -> first row (clash warning)
     paths_list, value_leaf_list, descriptors_list = [], [], []
-    for _, row_i in df.iterrows():
-        if row_i["status"] == "temporary":
-            bucket_raw = row_i["csv_dtype"]
+    for _, cw_row in df.iterrows():
+        if cw_row["status"] == "temporary":
+            bucket_raw = cw_row["csv_dtype"]
             if not isinstance(bucket_raw, str) or bucket_raw.strip() == "":
                 paths_list.append([])           # missing csv_dtype, already warned upfront
                 value_leaf_list.append("value")
@@ -281,32 +338,77 @@ if __name__ == "__main__":
             path = f"temporary/{resolved}"
             if path in temp_seen:
                 print(f"WARNING: temporary path '{path}' used by rows {temp_seen[path]} "
-                      f"and {row_i.name} — values will overwrite; use (:) in csv_dtype "
+                      f"and {cw_row.name} — values will overwrite; use (:) in csv_dtype "
                       f"for append behaviour")
             else:
-                temp_seen[path] = row_i.name
-            descriptors = [(["identifier", "name"], row_i["csv_column"])]
-            if isinstance(row_i["csv_description"], str):
-                descriptors.append((["identifier", "description"], row_i["csv_description"]))
+                temp_seen[path] = cw_row.name
+            descriptors = [(["identifier", "name"], cw_row["csv_column"])]
+            if isinstance(cw_row["csv_description"], str):
+                descriptors.append((["identifier", "description"], cw_row["csv_description"]))
             paths_list.append([path])
             value_leaf_list.append("value")
             descriptors_list.append(descriptors)
         else:
-            imas_path = row_i["imas_path"]
+            imas_path = cw_row["imas_path"]
             if not isinstance(imas_path, str):
-                raise ValueError(f"Row {row_i.name}: imas_path is missing")
+                raise ValueError(f"Row {cw_row.name}: imas_path is missing")
             paths_list.append(imas_path.split("&") if "&" in imas_path else [imas_path])
-            if row_i["needs_source"]:
-                value_leaf_list.append(row_i["_source_pair"][0])
-                descriptors_list.append([(row_i["_source_pair"][1].split("/"), row_i["source"])])
+            if cw_row["needs_source"]:
+                value_leaf_list.append(cw_row["_source_pair"][0])
+                descriptors_list.append([(cw_row["_source_pair"][1].split("/"), cw_row["source"])])
             else:
                 value_leaf_list.append("")
                 descriptors_list.append([])
     df["_paths"] = pd.Series(paths_list, index=df.index, dtype=object)
     df["_value_leaf"] = pd.Series(value_leaf_list, index=df.index, dtype=object)
     df["_descriptors"] = pd.Series(descriptors_list, index=df.index, dtype=object)
+    return df
 
-    IDS_dict = {}
+
+def process_pulse(data_row, crosswalk: pd.DataFrame, factory, reference_ids: dict) -> dict:
+    """Build the per-root IDS dict for a single data row (pulse).
+
+    Values go into fresh pulse IDSs; constant descriptor strings are written into the
+    shared `reference_ids` (mutated in place).
+    """
+    pulse_ids: dict[str, Any] = {}
+    for _, cw_row in crosswalk.iterrows():
+
+        # cw_row["csv_column"] names the column in `data`; data_row reads it.
+        value = data_row[cw_row["csv_column"]]
+        if pd.isna(value):
+            continue
+
+        for imas_path in cw_row["_paths"]:
+            ids_root = imas_path.split("/")[0]
+            value_leaf = cw_row["_value_leaf"]
+            full_path = imas_path + ("/" + value_leaf if value_leaf else "")
+            ids_branch = full_path.split("/")[1:]
+
+            # Expand the row's transform into concrete (branch, value) writes.
+            writes = resolve_writes(ids_branch, value, cw_row)
+
+            # Write values to value path in the *pulse* IDS
+            if ids_root not in pulse_ids:
+                pulse_ids[ids_root] = new_ids(factory, ids_root)
+            write_values(pulse_ids[ids_root], writes)
+
+            # Write descriptors to sibling descriptor path in the *reference* IDS
+            if cw_row["_descriptors"] and writes:
+                if ids_root not in reference_ids:
+                    reference_ids[ids_root] = new_ids(factory, ids_root)
+                depth = len(value_leaf.split("/")) if value_leaf else 0
+                write_descriptors(reference_ids[ids_root], writes, cw_row["_descriptors"], depth)
+
+    # Backfill an empty root `time` (NaN time column) so dynamic nodes can fit in arrays.
+    for ids in pulse_ids.values():
+        backfill_time(ids)
+    return pulse_ids
+
+
+def build_ids(crosswalk: pd.DataFrame, data: pd.DataFrame, factory) -> tuple[dict, dict]:
+    """Build all pulse IDSs in memory; returns (ids_by_pulse, reference_ids)."""
+    ids_by_pulse: dict[Any, dict] = {}
     reference_ids: dict[str, Any] = {}   # ids_root -> reference IDS (descriptor strings, shared)
 
     # Loop over data rows.
@@ -316,68 +418,28 @@ if __name__ == "__main__":
     load_start = time.monotonic()
     load_last_report = load_start
 
-    for index_d, row_d in data.iterrows():
-
-        if row_d.isna().all():
+    for pulse_idx, data_row in data.iterrows():
+        if data_row.isna().all():
             continue
-
-        pulse_ids = {}
-
-        for index_i, row_i in df.iterrows():
-
-            # row_i["csv_column"] names the column in `data`; row_d reads it.
-            value = row_d[row_i["csv_column"]]
-            if pd.isna(value):
-                continue
-
-            for imas_path in row_i["_paths"]:
-                ids_root = imas_path.split("/")[0]
-                value_leaf = row_i["_value_leaf"]
-                full_path = imas_path + ("/" + value_leaf if value_leaf else "")
-                ids_branch = full_path.split("/")[1:]
-
-                # Expand the row's transform into concrete (branch, value) writes.
-                writes = resolve_writes(ids_branch, value, row_i)
-
-                # Write values to value path in the *pulse* IDS
-                if ids_root not in pulse_ids:
-                    pulse_ids[ids_root] = new_ids(factory, ids_root)
-                write_values(pulse_ids[ids_root], writes)
-
-                # Write descriptors to sibling descriptor path in the *reference* IDS
-                if row_i["_descriptors"] and writes:
-                    if ids_root not in reference_ids:
-                        reference_ids[ids_root] = new_ids(factory, ids_root)
-                    depth = len(value_leaf.split("/")) if value_leaf else 0
-                    write_descriptors(reference_ids[ids_root], writes, row_i["_descriptors"], depth)
-
-        # Backfill an empty root `time` (NaN time column) so dynamic nodes can fit in arrays.
-        for ids in pulse_ids.values():
-            backfill_time(ids)
-
-        IDS_dict[index_d] = pulse_ids
+        pulse_ids = process_pulse(data_row, crosswalk, factory, reference_ids)
+        ids_by_pulse[pulse_idx] = pulse_ids
         loaded += 1
-        load_last_report = report_progress(loaded, total_rows, index_d, load_start, load_last_report)
+        load_last_report = report_progress(loaded, total_rows, pulse_idx, load_start, load_last_report)
 
     report_summary("Loaded", loaded, total_rows, load_start, " into memory")
+    return ids_by_pulse, reference_ids
 
-    # Write IDSs to disk.
+
+def write_pulses(ids_by_pulse: dict, output_dir: str) -> None:
+    """Write each pulse's IDSs to its own HDF5 DBEntry under output_dir."""
     print("Writing...")
     os.makedirs(output_dir, exist_ok=True)
-    total = len(IDS_dict)
+    total = len(ids_by_pulse)
     written = 0
     write_start = time.monotonic()
     write_last_report = write_start
 
-    for pulse, pulse_ids in IDS_dict.items():
-        summary = pulse_ids.get("summary")
-        try:
-            tag_name = summary.tag.name.strip()
-        except AttributeError:
-            tag_name = None
-   #     if (tag_name != "SELEC2007=True") & (pulse != 0):
-   #         continue
-
+    for pulse, pulse_ids in ids_by_pulse.items():
         pulse_dir = os.path.join(output_dir, f"pulse_{pulse:04d}")
         os.makedirs(pulse_dir, exist_ok=True)
         uri = f"imas:hdf5?path={pulse_dir};pulse=0"
@@ -389,18 +451,42 @@ if __name__ == "__main__":
 
     report_summary("Wrote", written, total, write_start, f" to {output_dir}")
 
-    # Write the shared reference entry: one IDS per root holding the descriptor
-    # strings (source/identifier) once, at the same paths as the pulse values.
-    if reference_ids:
+
+def write_reference(reference_ids: dict, output_dir: str) -> None:
+    """Write the shared reference entry: one IDS per root holding the descriptor
+    strings (source/identifier) once, at the same paths as the pulse values.
+    """
+    if not reference_ids:
+        return
+    for ids in reference_ids.values():
+        backfill_time(ids)
+    ref_dir = os.path.join(output_dir, "reference")
+    os.makedirs(ref_dir, exist_ok=True)
+    ref_uri = f"imas:hdf5?path={ref_dir};pulse=0"
+    with imas.DBEntry(ref_uri, "a") as entry:
         for ids in reference_ids.values():
-            backfill_time(ids)
-        ref_dir = os.path.join(output_dir, "reference")
-        os.makedirs(ref_dir, exist_ok=True)
-        ref_uri = f"imas:hdf5?path={ref_dir};pulse=0"
-        with imas.DBEntry(ref_uri, "a") as entry:
-            for ids in reference_ids.values():
-                entry.put(ids)
-        print(f"Wrote reference ({len(reference_ids)} IDSs: "
-              f"{', '.join(reference_ids)}) to {ref_dir}")
+            entry.put(ids)
+    print(f"Wrote reference ({len(reference_ids)} IDSs: "
+          f"{', '.join(reference_ids)}) to {ref_dir}")
 
 
+# ---------------------------------------------------------------------------
+# CLI
+# ---------------------------------------------------------------------------
+
+def main() -> None:
+    """Run the CSV -> IDS migration pipeline end to end."""
+    args = parse_args()
+    data_path, mapping_path, output_dir = resolve_io_paths(args)
+    crosswalk = load_crosswalk(mapping_path)
+    data = load_dataset(data_path)
+    validate(crosswalk, data)
+    crosswalk = build_write_spec(crosswalk)
+    factory = imas.IDSFactory(version=args.dd_version)
+    ids_by_pulse, reference_ids = build_ids(crosswalk, data, factory)
+    write_pulses(ids_by_pulse, output_dir)
+    write_reference(reference_ids, output_dir)
+
+
+if __name__ == "__main__":
+    main()
