@@ -31,6 +31,12 @@ ROOT = os.path.dirname(os.path.dirname(os.path.dirname(HERE)))  # .../IDStools
 mappings_dir = os.path.join(ROOT, "resources", "mappings")
 input_dir = os.path.join(ROOT, "resources", "input")
 
+# Type aliases for the structures passed between the helpers below.
+IDS = Any                        # an IMAS top-level IDS object (summary, equilibrium, ...)
+Branch = list[str]               # ordered node segments, e.g. ["divertor(0)", "value"]
+Write = tuple[Branch, Any]       # a (branch, value) pair destined for one leaf
+Descriptor = tuple[Branch, Any]  # a (leaf_segments, string) pair written to the reference IDS
+
 
 # ---------------------------------------------------------------------------
 # Path / segment parsing
@@ -47,7 +53,7 @@ def parse_seg(seg: str) -> tuple[str, int]:
     return seg, 0  # bare segment, like "divertor" -> ("divertor", 0)
 
 
-def replace_wildcard_index(branch: list[str], idx: int) -> list[str]:
+def replace_wildcard_index(branch: Branch, idx: int) -> Branch:
     """Replace wildcard index segments in a branch with a concrete index idx."""
     return [f"{seg[:-3]}({idx})" if seg.endswith("(:)") else seg for seg in branch]
 
@@ -79,14 +85,14 @@ def parse_source_pair(source_fields_val: Any, csv_column: str) -> tuple[str, str
 # IDS construction & writing
 # ---------------------------------------------------------------------------
 
-def new_ids(factory, name: str):
+def new_ids(factory: imas.IDSFactory, name: str) -> IDS:
     """Create a fresh top-level IDS with homogeneous time mode set."""
     ids = factory.new(name)
     ids.ids_properties.homogeneous_time = imas.ids_defs.IDS_TIME_MODE_HOMOGENEOUS
     return ids
 
 
-def resolve_parent(ids, branch: list[str]) -> tuple[Any, str]:
+def resolve_parent(ids: IDS, branch: Branch) -> tuple[IDS, str]:
     """Take IDS object and list of node segments, return parent IDS object and the final branch node."""
     node = ids
     for seg in branch[:-1]:
@@ -99,7 +105,7 @@ def resolve_parent(ids, branch: list[str]) -> tuple[Any, str]:
     return node, branch[-1]
 
 
-def set_leaf(ids, branch: list[str], value: Any) -> None:
+def set_leaf(ids: IDS, branch: Branch, value: Any) -> None:
     parent, leaf_seg = resolve_parent(ids, branch)
     leaf, _ = parse_seg(leaf_seg)
     target = getattr(parent, leaf)
@@ -114,13 +120,14 @@ def set_leaf(ids, branch: list[str], value: Any) -> None:
         setattr(parent, leaf, value)
 
 
-def write_values(ids, writes) -> None:
+def write_values(ids: IDS, writes: list[Write]) -> None:
     """Write resolved (branch, value) pairs to their leaves in the pulse `ids`."""
     for branch, value in writes:
         set_leaf(ids, branch, value)
 
 
-def write_descriptors(reference, writes, descriptors, value_leaf_depth) -> None:
+def write_descriptors(reference: IDS, writes: list[Write], descriptors: list[Descriptor],
+                      value_leaf_depth: int) -> None:
     """Write each descriptor (leaf_segments, string) into the shared reference IDS.
 
     Each is written at the sibling of every value's parent node (branch[:-1]), so it
@@ -133,7 +140,7 @@ def write_descriptors(reference, writes, descriptors, value_leaf_depth) -> None:
             set_leaf(reference, anchor + list(desc_leaf), desc_str)
 
 
-def backfill_time(ids) -> None:
+def backfill_time(ids: IDS) -> None:
     """Backfill an empty root `time` (NaN time column) so dynamic nodes fit in arrays."""
     if (ids.ids_properties.homogeneous_time == imas.ids_defs.IDS_TIME_MODE_HOMOGENEOUS
             and len(ids.time) == 0):
@@ -144,7 +151,7 @@ def backfill_time(ids) -> None:
 # Transform resolution
 # ---------------------------------------------------------------------------
 
-def resolve_writes(ids_branch: list[str], value: Any, cw_row) -> list[tuple[list[str], Any]]:
+def resolve_writes(ids_branch: Branch, value: Any, cw_row: pd.Series) -> list[Write]:
     """Compute the (branch, value) writes a transform produces.
 
     Returns [] to skip the row (e.g. dictionary miss).
@@ -365,13 +372,14 @@ def build_write_spec(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def process_pulse(data_row, crosswalk: pd.DataFrame, factory, reference_ids: dict) -> dict:
+def process_pulse(data_row: pd.Series, crosswalk: pd.DataFrame, factory: imas.IDSFactory,
+                  reference_ids: dict[str, IDS]) -> dict[str, IDS]:
     """Build the per-root IDS dict for a single data row (pulse).
 
     Values go into fresh pulse IDSs; constant descriptor strings are written into the
     shared `reference_ids` (mutated in place).
     """
-    pulse_ids: dict[str, Any] = {}
+    pulse_ids: dict[str, IDS] = {}
     for _, cw_row in crosswalk.iterrows():
 
         # cw_row["csv_column"] names the column in `data`; data_row reads it.
@@ -406,10 +414,11 @@ def process_pulse(data_row, crosswalk: pd.DataFrame, factory, reference_ids: dic
     return pulse_ids
 
 
-def build_ids(crosswalk: pd.DataFrame, data: pd.DataFrame, factory) -> tuple[dict, dict]:
+def build_ids(crosswalk: pd.DataFrame, data: pd.DataFrame,
+              factory: imas.IDSFactory) -> tuple[dict[Any, dict[str, IDS]], dict[str, IDS]]:
     """Build all pulse IDSs in memory; returns (ids_by_pulse, reference_ids)."""
-    ids_by_pulse: dict[Any, dict] = {}
-    reference_ids: dict[str, Any] = {}   # ids_root -> reference IDS (descriptor strings, shared)
+    ids_by_pulse: dict[Any, dict[str, IDS]] = {}
+    reference_ids: dict[str, IDS] = {}   # ids_root -> reference IDS (descriptor strings, shared)
 
     # Loop over data rows.
     print("Loading...")
@@ -430,7 +439,7 @@ def build_ids(crosswalk: pd.DataFrame, data: pd.DataFrame, factory) -> tuple[dic
     return ids_by_pulse, reference_ids
 
 
-def write_pulses(ids_by_pulse: dict, output_dir: str) -> None:
+def write_pulses(ids_by_pulse: dict[Any, dict[str, IDS]], output_dir: str) -> None:
     """Write each pulse's IDSs to its own HDF5 DBEntry under output_dir."""
     print("Writing...")
     os.makedirs(output_dir, exist_ok=True)
@@ -452,7 +461,7 @@ def write_pulses(ids_by_pulse: dict, output_dir: str) -> None:
     report_summary("Wrote", written, total, write_start, f" to {output_dir}")
 
 
-def write_reference(reference_ids: dict, output_dir: str) -> None:
+def write_reference(reference_ids: dict[str, IDS], output_dir: str) -> None:
     """Write the shared reference entry: one IDS per root holding the descriptor
     strings (source/identifier) once, at the same paths as the pulse values.
     """
@@ -475,7 +484,7 @@ def write_reference(reference_ids: dict, output_dir: str) -> None:
 # ---------------------------------------------------------------------------
 
 def main() -> None:
-    """Run the CSV -> IDS migration pipeline end to end."""
+    """Run the CSV -> IDS migration pipeline."""
     args = parse_args()
     data_path, mapping_path, output_dir = resolve_io_paths(args)
     crosswalk = load_crosswalk(mapping_path)
