@@ -285,7 +285,7 @@ def load_crosswalk(mapping_path: str) -> pd.DataFrame:
 
 def load_dataset(data_path: str) -> pd.DataFrame:
     """Import experimental data from csv and apply (machine-specific) cleaning."""
-    data = pd.read_csv(data_path, na_values=["-", "????????", "??????????", "********"])
+    data = pd.read_csv(data_path, na_values=["-", "????????", "??????????", "********, "."])
     data = data.map(lambda x: (x.strip() or np.nan) if isinstance(x, str) else x) # Important for CMOD, but very data/machine specific. Remove in later version.
     return data
 
@@ -320,11 +320,11 @@ def build_write_spec(df: pd.DataFrame) -> pd.DataFrame:
       _value_leaf  : leaf appended to each path for the value ("" = bare node)
       _descriptors : list of (leaf_segments, string) written once to the reference
 
-    Temporary rows are folded into the same structure with a "persistent" AoS index,
-    assigned here in crosswalk order so a variable keeps the same slot in every
+    Temporary rows are folded into the same structure with a "persistent" (same for each pulse)
+    AoS index, assigned here in crosswalk order so a variable keeps the same slot in every
     pulse, which is required for temporary indices to match the reference IDS.
     """
-    temp_idx: dict[str, int] = {}   # bucket_base -> next stable index for "(:)" buckets
+    temp_idx: dict[str, int] = {}   # dictionary to track temp paths: indices
     temp_seen: dict[str, Any] = {}  # resolved "temporary/..." path -> first row (clash warning)
     paths_list, value_leaf_list, descriptors_list = [], [], []
     for _, cw_row in df.iterrows():
