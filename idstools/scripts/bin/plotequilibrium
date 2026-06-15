@@ -266,13 +266,13 @@ if __name__ == "__main__":
         if args.overlay:
             create_overlays(show_legend=not args.plots)
 
+        title = get_database_path(args, time_value=time_value)
         if args.provenance:
-            database_label = get_database_path(args, time_value=time_value)
             if md_overlay_state["provenance_lines"]:
-                database_label += "\n" + "\n".join(md_overlay_state["provenance_lines"])
+                title += "\n" + "\n".join(md_overlay_state["provenance_lines"])
             if database_text:
-                database_label += f"\n{database_text}"
-            canvas.set_sup_title(database_label, fontsize=8, y=0.985)
+                title += f"\n{database_text}"
+        canvas.set_sup_title(title, fontsize=8, y=0.985)
 
         canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
         if args.save:

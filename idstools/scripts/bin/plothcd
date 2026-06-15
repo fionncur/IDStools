@@ -16,7 +16,6 @@ from idstools.database import DBMaster
 from idstools.utils.clihelper import (
     get_database_path,
     get_file_name,
-    get_title,
     rcparam_parser,
 )
 from idstools.utils.idslogger import setup_logger
@@ -67,7 +66,6 @@ def _show_waves_plots(connargs, args, hold=False, dd_update=False, rc=""):
         canvas = PlotCanvas(rows, 2)
         canvas.update_style(rc)
         # canvas.setStyle(style="retro")
-        canvas.set_sup_title(f"HCD Waves Plot {connargs.uri} Time : {time_value:.3f}")
 
         ax1 = canvas.add_axes(title="", xlabel="", row=0, col=0)
         ax2 = canvas.add_axes(title="", xlabel="", row=0, col=1)
@@ -96,8 +94,6 @@ def _show_waves_plots(connargs, args, hold=False, dd_update=False, rc=""):
             else:
                 ax4.get_legend().remove()
 
-        canvas.set_text(text=f"{get_database_path(connargs, time_value=time_value)}")
-
         canvas.fig.subplots_adjust(
             top=0.92,
             bottom=0.122,
@@ -107,7 +103,7 @@ def _show_waves_plots(connargs, args, hold=False, dd_update=False, rc=""):
             wspace=0.13,
         )
         canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
-        canvas.fig.suptitle(get_title(connargs, "HCD Waves Plot", time_value))
+        canvas.set_sup_title(get_database_path(connargs, time_value=time_value))
         if args["save"]:
             fname = get_file_name(connargs, "hcd_waves_plot", time_value)
             canvas.save(fname)
@@ -168,7 +164,6 @@ def _show_distribution_plots(connargs, args, hold=False, dd_update=False, rc="")
         canvas = PlotCanvas(3, 2)
         canvas.update_style(rc)
         # canvas.setStyle(style="retro")
-        canvas.set_sup_title(f"HCD Distributions Plot {connargs.uri} Time : {time_value:.3f}")
         if ntime == 1:
             logger.info("Only one time slice --> Power and CD waveforms not displayed")
         ax1 = canvas.add_axes(title="", xlabel="", row=0, col=0)
@@ -184,8 +179,6 @@ def _show_distribution_plots(connargs, args, hold=False, dd_update=False, rc="")
             distributions_view.plot_nbi_fus_power_and_cd_waveforms(ax4, time_slice)
             distributions_view.plot_cd_waveform(ax5, time_slice)
 
-        canvas.set_text(text=f"{get_database_path(connargs, time_value=time_value)}")
-
         canvas.fig.subplots_adjust(
             top=0.92,
             bottom=0.122,
@@ -195,7 +188,7 @@ def _show_distribution_plots(connargs, args, hold=False, dd_update=False, rc="")
             wspace=0.328,
         )
         canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
-        canvas.fig.suptitle(get_title(connargs, "HCD Distributions Plot", time_value))
+        canvas.set_sup_title(get_database_path(connargs, time_value=time_value))
         if args["save"]:
             fname = get_file_name(connargs, os.path.basename(__file__) + "_Distributions_profile_time", time_value)
             canvas.save(fname)

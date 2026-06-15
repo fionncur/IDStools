@@ -74,7 +74,7 @@ if __name__ == "__main__":
     suptitle = "Machine Description"
     if md_provenance:
         suptitle += "\n" + md_provenance
-    mdcanvas.fig.suptitle(suptitle, fontsize=8)
+    mdcanvas.set_sup_title(suptitle, fontsize=8)
     if args.save:
         fname = os.path.basename(__file__) + "_machine_description.png"
         if args.directory:

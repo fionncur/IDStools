@@ -463,7 +463,7 @@ class EquilibriumView(BasePlot):
         z2d = data["z2d"]
         # rho2d = data["rho2d"]
         psi2d = data["psi2d"]
-        cntr = ax.contour(r2d, z2d, psi2d, 50, cmap="summer")
+        cntr = ax.contour(r2d, z2d, psi2d.T, 50, cmap="summer")
         cbar = plt.colorbar(cntr, ax=ax, pad=0.08, fraction=0.03)
         cbar.set_label(r"$\psi$ [Wb]")
         # if len(rho2d)>0:
