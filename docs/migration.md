@@ -84,13 +84,35 @@ one-element list and always land at index `0`.
 
 ### `formula`
 
-Evaluates an arbitrary Python expression. The source value is bound to the
-variable `x`.
+Evaluates an arbitrary Python expression over the source row.  Every CSV
+column is bound as a **bare variable** named after the column, so the
+expression can combine several columns:
 
 ```
+csv_column:     TIME_X
 transform:      formula
-transform_args: x * 1e6
+transform_args: TIME_X - TIME_Y
 ```
+
+This writes `data_row["TIME_X"] - data_row["TIME_Y"]` to the target path.
+Python builtins such as `abs`, `min`, `max`, and `round` are available
+(e.g. `abs(TIME_X - TIME_Y)`).
+
+`csv_column` is still required and acts as the **primary** column: if its
+value is missing (NaN) for a given pulse, the whole row is skipped for that
+pulse (same as every other transform).  Set it to one of the columns the
+formula uses.
+
+A simple single-column rescale is just `transform_args: IP * 1e6` (name the
+column explicitly — there is no longer a generic `x` variable).
+
+Notes and limitations:
+
+- Only columns whose names are **valid Python identifiers** can be referenced
+  (no spaces, no leading digits).
+- The primary `csv_column` is validated at startup; other columns named in the
+  expression are resolved at run time.  A typo or a bad expression raises a
+  `ValueError` naming the offending row and formula.
 
 ---
 

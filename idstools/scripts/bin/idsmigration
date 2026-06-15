@@ -151,7 +151,7 @@ def backfill_time(ids: IDS) -> None:
 # Transform resolution
 # ---------------------------------------------------------------------------
 
-def resolve_writes(ids_branch: Branch, value: Any, cw_row: pd.Series) -> list[Write]:
+def resolve_writes(ids_branch: Branch, value: Any, cw_row: pd.Series, data_row: pd.Series) -> list[Write]:
     """Compute the (branch, value) writes a transform produces.
 
     Returns [] to skip the row (e.g. dictionary miss).
@@ -173,7 +173,15 @@ def resolve_writes(ids_branch: Branch, value: Any, cw_row: pd.Series) -> list[Wr
     if transform == "formula":
         if not isinstance(cw_row["transform_args"], str):
             raise ValueError(f"Row {cw_row.name}: transform='formula' but transform_args is missing")
-        return [(ids_branch, eval(cw_row["transform_args"], {"x": value}))]
+        # Evaluate the expression with the data row's columns bound as bare variables, so a
+        # formula like "TIMEX - TIMEY" resolves to data_row["TIMEX"] - data_row["TIMEY"].
+        try:
+            result = eval(cw_row["transform_args"], data_row.to_dict())
+        except Exception as exc:
+            raise ValueError(
+                f"Row {cw_row.name}: formula {cw_row['transform_args']!r} failed: {exc}"
+            ) from exc
+        return [(ids_branch, result)]
     raise ValueError(f"Row {cw_row.name}: unhandled transform '{cw_row['transform']}'")
 
 
@@ -265,7 +273,7 @@ def load_crosswalk(mapping_path: str) -> pd.DataFrame:
 
     # Include only implemented transforms (identity/dictionary) with an accepted status.
     keep_mask = (
-        df["transform"].isin(["identity", "dictionary"])
+        df["transform"].isin(["identity", "dictionary", "formula"])
         & df["status"].isin(["mapped", "temporary", "mapped_caveat"])
     )
     df = df[keep_mask]
@@ -285,7 +293,7 @@ def load_crosswalk(mapping_path: str) -> pd.DataFrame:
 
 def load_dataset(data_path: str) -> pd.DataFrame:
     """Import experimental data from csv and apply (machine-specific) cleaning."""
-    data = pd.read_csv(data_path, na_values=["-", "????????", "??????????", "********, "."])
+    data = pd.read_csv(data_path, na_values=["-", "????????", "??????????", "********", "."])
     data = data.map(lambda x: (x.strip() or np.nan) if isinstance(x, str) else x) # Important for CMOD, but very data/machine specific. Remove in later version.
     return data
 
@@ -394,7 +402,7 @@ def process_pulse(data_row: pd.Series, crosswalk: pd.DataFrame, factory: imas.ID
             ids_branch = full_path.split("/")[1:]
 
             # Expand the row's transform into concrete (branch, value) writes.
-            writes = resolve_writes(ids_branch, value, cw_row)
+            writes = resolve_writes(ids_branch, value, cw_row, data_row)
 
             # Write values to value path in the *pulse* IDS
             if ids_root not in pulse_ids:
