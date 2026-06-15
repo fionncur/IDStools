@@ -36,14 +36,24 @@ def update_labels(ax):
     ax.figure.canvas.draw_idle()
 
 
-def plot_machine_description(ax, ids_data, show_provenance=True):
+def plot_machine_description(ax, ids_data, main_uri=None):
     """
     The `plotMachineDescription` method is responsible for plotting the machine description
     based on the provided pulse list.
 
+    Args:
+        main_uri: If provided, machine description entries with the same URI are omitted
+                  from the provenance text (to avoid duplication when MD and main data share a URI).
     """
 
     database_path = ""
+
+    def _provenance_line(ids_name_label, connection_args):
+        """Return a provenance line for this IDS, or empty string if URI matches main_uri."""
+        uri = get_database_path(connection_args).strip()
+        if main_uri is not None and uri.strip() == main_uri.strip():
+            return ""
+        return f"{ids_name_label} = {uri}\n"
 
     mdlegends = []
     mdlabels = []
@@ -70,7 +80,7 @@ def plot_machine_description(ax, ids_data, show_provenance=True):
                 if _legend:
                     mdlegends.append(_legend)
                     mdlabels.append(f"pf_active:{idsocc}/coil[{select}]")
-                    database_path += "pf_active = " + get_database_path(ids_data_and_config["connectionArgs"]) + "\n"
+                    database_path += _provenance_line("pf_active", ids_data_and_config["connectionArgs"])
         elif ids_name == "tf":
             select2 = ":"
             if len(matches) == 2:
@@ -81,7 +91,7 @@ def plot_machine_description(ax, ids_data, show_provenance=True):
                 if _legend:
                     mdlegends.append(_legend)
                     mdlabels.append(f"tf:{idsocc}/coil[{select}]/conductor[{select2}]")
-                    database_path += "tf = " + get_database_path(ids_data_and_config["connectionArgs"]) + "\n"
+                    database_path += _provenance_line("tf", ids_data_and_config["connectionArgs"])
         elif ids_name == "pf_passive":
             pfpassiveview = PFPassiveView(ids_data_and_config["idsData"])
             if "loop" in idsfield or idsfield == "":
@@ -90,7 +100,7 @@ def plot_machine_description(ax, ids_data, show_provenance=True):
                     mdlegends.append(_legend)
 
                     mdlabels.append(f"pf_passive:{idsocc}/loop[{select}]")
-                    database_path += "pf_passive = " + get_database_path(ids_data_and_config["connectionArgs"]) + "\n"
+                    database_path += _provenance_line("pf_passive", ids_data_and_config["connectionArgs"])
         elif ids_name == "wall":
             wallview = WallView(ids_data_and_config["idsData"])
             select2 = ":"
@@ -100,7 +110,7 @@ def plot_machine_description(ax, ids_data, show_provenance=True):
                 wallview.view_wall_vessel(ax, select_description2d=select, select_unit=select2)
             if "limiter" in idsfield or idsfield == "":
                 wallview.view_wall_limiter(ax, select_description2d=select, select_unit=select2)
-            database_path += "wall = " + get_database_path(ids_data_and_config["connectionArgs"]) + "\n"
+            database_path += _provenance_line("wall", ids_data_and_config["connectionArgs"])
         elif ids_name == "magnetics":
             magnetics_view = MagneticsView(ids_data_and_config["idsData"])
             if "b_field_phi_probe" in idsfield or idsfield == "":
@@ -128,10 +138,10 @@ def plot_machine_description(ax, ids_data, show_provenance=True):
                 if _legend:
                     mdlegends.append(_legend)
                     mdlabels.append(f"magnetics:{idsocc}/shunt[{select}]")
-            database_path += "magnetics = " + get_database_path(ids_data_and_config["connectionArgs"]) + "\n"
+            database_path += _provenance_line("magnetics", ids_data_and_config["connectionArgs"])
         else:
-            database_path += (
-                f"{ids_name} = " + get_database_path(ids_data_and_config["connectionArgs"]) + "No visualization yet\n"
+            database_path += _provenance_line(ids_name, ids_data_and_config["connectionArgs"]).replace(
+                "\n", " No visualization yet\n", 1
             )
             logger.info(f"Visualization is not implemented yet for machine description {ids_name}")
 
@@ -151,5 +161,4 @@ def plot_machine_description(ax, ids_data, show_provenance=True):
     # ax.callbacks.connect("ylim_changed", update_labels)
     ax.plot()
 
-    if show_provenance and database_path:
-        ax.figure.text(0.001, 0.965, database_path, ha="left", va="top", fontsize=8)
+    return database_path.strip()

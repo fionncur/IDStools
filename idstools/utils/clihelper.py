@@ -241,11 +241,10 @@ def get_database_path(imasargs, time_value=None) -> str:
         database_absolute_path = database_absolute_path[:-2]
     time_string = ""
     if time_value:
-        time_string = f"time:{time_value:.3f})"
-    hostdir = f"{socket.gethostname()}:{database_absolute_path} "
+        time_string = f"time:{time_value:.3f}"
+    hostdir = f"{database_absolute_path} "
     if pulse_info:
         hostdir += f"({pulse_info})"
     if time_string:
         hostdir += f"#{time_string}"
-    #
     return hostdir

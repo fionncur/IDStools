@@ -52,9 +52,11 @@ if __name__ == "__main__":
         action="store_true",
     )
     parser.add_argument(
-        "--overlay",
-        help="Show equilibrium overlays",
-        action="store_true",
+        "--no-overlay",
+        dest="overlay",
+        help="Hide equilibrium overlays",
+        action="store_false",
+        default=True,
     )
     parser.add_argument(
         "-p",
@@ -76,11 +78,6 @@ if __name__ == "__main__":
     "imas:hdf5?path=./testdb",
     "testpulse.nc"
     """,
-    )
-    parser.add_argument(
-        "--show-labels",
-        help="Show labels",
-        action="store_true",
     )
     parser.add_argument(
         "--provenance",
@@ -175,11 +172,11 @@ if __name__ == "__main__":
             ax1 = canvas.add_axes(title="", xlabel="", row=0, col=0)
 
         canvas.update_style(args.rc)
-        md_overlay_state = {"created": False}
+        md_overlay_state = {"created": False, "provenance_lines": []}
 
         def plot_md_overlay():
             if not args.md or md_overlay_state["created"]:
-                return False
+                return md_overlay_state["provenance_lines"]
             idses = ""
             mduris = []
             for mduri in args.md:
@@ -204,7 +201,9 @@ if __name__ == "__main__":
                 ids_data = get_md_data(mduris, args.dd_update, idses=idses)
             else:
                 ids_data = get_md_data(mduris, args.dd_update)
-            plot_machine_description(ax1, ids_data, show_provenance=args.provenance)
+            md_provenance = plot_machine_description(ax1, ids_data, main_uri=get_database_path(args).strip())
+            if md_provenance:
+                md_overlay_state["provenance_lines"] = md_provenance.splitlines()
             ax1.set_title("")
             md_overlay_state["created"] = True
             return True
@@ -237,22 +236,16 @@ if __name__ == "__main__":
             cbar_rho.ax.set_title(r"$\rho$", fontsize=7, pad=4)
             cbar_rho.ax.tick_params(labelsize=7)
 
-        if args.provenance:
-            database_label = get_database_path(args, time_value=time_value)
-            if database_text:
-                database_label += f"\n{database_text}"
-            canvas.set_text(y=0.985, text=database_label, fontsize=8)
-
         if args.plots:
             view_object.plot_profiles_1d_quantities(axes_list1, time_slice)
             view_object.plot_global_quantities(axes_list2, time_value)
 
         if args.plots:
             canvas.fig.set_size_inches(10 + col_size * 1.6, 8)
-            canvas.fig.subplots_adjust(top=0.933, bottom=0.05, left=0.048, right=0.988, hspace=0.221, wspace=0.20)
+            canvas.fig.subplots_adjust(top=0.933, bottom=0.100, left=0.048, right=0.988, hspace=0.221, wspace=0.20)
         else:
             canvas.fig.set_size_inches(14, 8)
-            canvas.fig.subplots_adjust(top=0.933, bottom=0.05, left=0.048, right=0.988, hspace=0.221, wspace=0.25)
+            canvas.fig.subplots_adjust(top=0.933, bottom=0.100, left=0.048, right=0.988, hspace=0.221, wspace=0.25)
 
         def create_overlays(show_legend=True):
             plot_md_overlay()
@@ -272,6 +265,14 @@ if __name__ == "__main__":
 
         if args.overlay:
             create_overlays(show_legend=not args.plots)
+
+        if args.provenance:
+            database_label = get_database_path(args, time_value=time_value)
+            if md_overlay_state["provenance_lines"]:
+                database_label += "\n" + "\n".join(md_overlay_state["provenance_lines"])
+            if database_text:
+                database_label += f"\n{database_text}"
+            canvas.set_sup_title(database_label, fontsize=8, y=0.985)
 
         canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
         if args.save:
