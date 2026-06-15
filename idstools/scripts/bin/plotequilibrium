@@ -79,11 +79,7 @@ if __name__ == "__main__":
     "testpulse.nc"
     """,
     )
-    parser.add_argument(
-        "--provenance",
-        help="Show equilibrium and machine-description URIs on the figure",
-        action="store_true",
-    )
+
     parser.add_argument(
         "--debug",
         help="Show diagnostic logging",
@@ -267,11 +263,10 @@ if __name__ == "__main__":
             create_overlays(show_legend=not args.plots)
 
         title = get_database_path(args, time_value=time_value)
-        if args.provenance:
-            if md_overlay_state["provenance_lines"]:
-                title += "\n" + "\n".join(md_overlay_state["provenance_lines"])
-            if database_text:
-                title += f"\n{database_text}"
+        if md_overlay_state["provenance_lines"]:
+            title += "\n" + "\n".join(md_overlay_state["provenance_lines"])
+        if database_text:
+            title += f"\n{database_text}"
         canvas.set_sup_title(title, fontsize=8, y=0.985)
 
         canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
