@@ -26,7 +26,7 @@ Everything below describes how to read and extend that file.
 | `transform_args` | str | Arguments for the transform (dict literal or Python expression) |
 | `needs_source` | bool | When `True`, write a value plus a companion sibling instead of a bare value (see [Value/source pairs](#valuesource-pairs)) |
 | `source_fields` | str | Optional `("value_leaf", "source_leaf")` 2-tuple naming the sibling leaves written when `needs_source=True`; defaults to `("value", "source")` |
-| `source` | str | Source string written to the companion sibling leaf when `needs_source=True` |
+| `source` | str or number | Value written to the companion sibling leaf when `needs_source=True`. A **string** is a constant descriptor stored once in the reference entry; a **number** is a real value (e.g. a fixed coordinate) duplicated into every pulse (see [Value/source pairs](#sibling-pair-writes-needs_source-and-source_fields)) |
 
 ---
 
@@ -202,6 +202,30 @@ The companion (source) string is **not** stored in the pulses.  Because it is
 constant across pulses, it is written **once** into a separate reference entry
 (see [Reference entry](#reference-entry)).  Each pulse therefore holds only the
 value leaf; the matching source leaf lives at the same path in the reference.
+
+### Numeric `source`: a constant companion value
+
+When `source` is a **number** rather than a string, it is treated as a real value
+rather than a provenance label.  It is written to the companion leaf in **every
+pulse** alongside the value leaf — not to the reference entry.  This is the
+eval-free way to attach a fixed constant to a sibling node.
+
+```
+# needs_source=True, source_fields = ("rho_tor", "rho_tor_norm"), source = 0.95
+# csv_column = R95, imas_path = "summary/local/pedestal/position"
+summary/local/pedestal/position/rho_tor      ← transformed CSV value (R95, per pulse)
+summary/local/pedestal/position/rho_tor_norm ← 0.95 (constant, in every pulse)
+```
+
+A numeric companion is **ungated**: it is written into every pulse even when the
+primary `csv_column` value is missing for that pulse (the value leaf is simply left
+empty).  This makes it a way to stamp a fixed constant into each IDS.  (String
+companions, by contrast, are only written when the row has a real value.)
+
+So the companion routing is asymmetric by type:
+
+- **string** `source` → written once to the reference entry, when the value is present;
+- **numeric** `source` → written into every pulse, unconditionally.
 
 **Constraint:** both named leaves must exist as sub-fields of the `imas_path`
 node.  Check the Data Dictionary before setting `needs_source` on a new row.

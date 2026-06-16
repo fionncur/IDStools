@@ -126,6 +126,12 @@ def write_values(ids: IDS, writes: list[Write]) -> None:
         set_leaf(ids, branch, value)
 
 
+def write_companions(ids: IDS, anchor: Branch, descriptors: list[Descriptor]) -> None:
+    """Write each companion (leaf_segments, value) at `anchor`, the shared parent node."""
+    for desc_leaf, desc_val in descriptors:
+        set_leaf(ids, anchor + list(desc_leaf), desc_val)
+
+
 def write_descriptors(reference: IDS, writes: list[Write], descriptors: list[Descriptor],
                       value_leaf_depth: int) -> None:
     """Write each descriptor (leaf_segments, string) into the shared reference IDS.
@@ -136,8 +142,7 @@ def write_descriptors(reference: IDS, writes: list[Write], descriptors: list[Des
     """
     for branch, _ in writes:
         anchor = branch[:len(branch) - value_leaf_depth]
-        for desc_leaf, desc_str in descriptors:
-            set_leaf(reference, anchor + list(desc_leaf), desc_str)
+        write_companions(reference, anchor, descriptors)
 
 
 def backfill_time(ids: IDS) -> None:
@@ -298,15 +303,18 @@ def load_dataset(data_path: str) -> pd.DataFrame:
     return data
 
 
-def validate(df: pd.DataFrame, data: pd.DataFrame) -> None:
+def validate(df: pd.DataFrame, data: pd.DataFrame) -> pd.DataFrame:
     """Upfront validation; warns and fixes up the `source` column in place where needed."""
     # Upfront validation: all csv_columns must exist in data.
     missing_cols = set(df["csv_column"]) - set(data.columns)
     if missing_cols:
         raise ValueError(f"csv_column(s) not found in data CSV: {missing_cols}")
 
-    # Upfront validation: needs_source rows must have a source string.
-    bad_source = df["needs_source"] & ~df["source"].apply(lambda x: isinstance(x, str))
+    # Upfront validation: needs_source rows must have a source value — either a descriptor string
+    # mapped to reference IDS, or a numeric value mapped for every pulse.
+    def _has_source(x: Any) -> bool:
+        return isinstance(x, str) or (isinstance(x, (int, float)) and pd.notna(x))
+    bad_source = df["needs_source"] & ~df["source"].apply(_has_source)
     if bad_source.any():
         print(f"WARNING: needs_source=True but source is missing for rows: {list(df.index[bad_source])} — falling back to csv_description")
         df["source"] = df["source"].astype(object)
@@ -319,7 +327,8 @@ def validate(df: pd.DataFrame, data: pd.DataFrame) -> None:
     bad_dtype = is_temp & ~df["csv_dtype"].apply(lambda x: isinstance(x, str) and x.strip() != "")
     if bad_dtype.any():
         print(f"WARNING: status 'temporary' but csv_dtype is missing for rows: {list(df.index[bad_dtype])} — skipping")
-
+    
+    return df
 
 def build_write_spec(df: pd.DataFrame) -> pd.DataFrame:
     """Build the per-row write spec columns used by the main loop:
@@ -392,11 +401,26 @@ def process_pulse(data_row: pd.Series, crosswalk: pd.DataFrame, factory: imas.ID
 
         # cw_row["csv_column"] names the column in `data`; data_row reads it.
         value = data_row[cw_row["csv_column"]]
-        if pd.isna(value):
-            continue
+        value_present = not pd.isna(value)
+
+        # Create masks for "companion" node types.
+        string_desc = [d for d in cw_row["_descriptors"] if isinstance(d[1], str)]
+        numeric_desc = [d for d in cw_row["_descriptors"] if not isinstance(d[1], str)]
 
         for imas_path in cw_row["_paths"]:
             ids_root = imas_path.split("/")[0]
+
+            # Numeric companion constants: written to every pulse regardless of whether the
+            # primary CSV value is present. Their parent is the imas_path node itself.
+            if numeric_desc:
+                if ids_root not in pulse_ids:
+                    pulse_ids[ids_root] = new_ids(factory, ids_root)
+                anchor = replace_wildcard_index(imas_path.split("/")[1:], 0)
+                write_companions(pulse_ids[ids_root], anchor, numeric_desc)
+
+            if not value_present:
+                continue
+
             value_leaf = cw_row["_value_leaf"]
             full_path = imas_path + ("/" + value_leaf if value_leaf else "")
             ids_branch = full_path.split("/")[1:]
@@ -409,12 +433,12 @@ def process_pulse(data_row: pd.Series, crosswalk: pd.DataFrame, factory: imas.ID
                 pulse_ids[ids_root] = new_ids(factory, ids_root)
             write_values(pulse_ids[ids_root], writes)
 
-            # Write descriptors to sibling descriptor path in the *reference* IDS
-            if cw_row["_descriptors"] and writes:
+            # String companions → sibling descriptor path in the *reference* IDS, once.
+            if string_desc and writes:
                 if ids_root not in reference_ids:
                     reference_ids[ids_root] = new_ids(factory, ids_root)
                 depth = len(value_leaf.split("/")) if value_leaf else 0
-                write_descriptors(reference_ids[ids_root], writes, cw_row["_descriptors"], depth)
+                write_descriptors(reference_ids[ids_root], writes, string_desc, depth)
 
     # Backfill an empty root `time` (NaN time column) so dynamic nodes can fit in arrays.
     for ids in pulse_ids.values():
@@ -497,7 +521,7 @@ def main() -> None:
     data_path, mapping_path, output_dir = resolve_io_paths(args)
     crosswalk = load_crosswalk(mapping_path)
     data = load_dataset(data_path)
-    validate(crosswalk, data)
+    crosswalk = validate(crosswalk, data) # validate *does* modify the df in case of "bad_source"
     crosswalk = build_write_spec(crosswalk)
     factory = imas.IDSFactory(version=args.dd_version)
     ids_by_pulse, reference_ids = build_ids(crosswalk, data, factory)
