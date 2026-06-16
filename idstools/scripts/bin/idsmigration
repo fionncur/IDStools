@@ -403,41 +403,39 @@ def process_pulse(data_row: pd.Series, crosswalk: pd.DataFrame, factory: imas.ID
         value = data_row[cw_row["csv_column"]]
         value_present = not pd.isna(value)
 
-        # Create masks for "companion" node types.
+        # String companions are descriptors; numeric companions are constant values.
         string_desc = [d for d in cw_row["_descriptors"] if isinstance(d[1], str)]
         numeric_desc = [d for d in cw_row["_descriptors"] if not isinstance(d[1], str)]
 
         for imas_path in cw_row["_paths"]:
             ids_root = imas_path.split("/")[0]
+            value_leaf = cw_row["_value_leaf"]
+            full_path = imas_path + ("/" + value_leaf if value_leaf else "")
+            value_branch = full_path.split("/")[1:]
+            depth = len(value_leaf.split("/")) if value_leaf else 0
 
-            # Numeric companion constants: written to every pulse regardless of whether the
-            # primary CSV value is present. Their parent is the imas_path node itself.
+            # Create masks for "companion" node types.
             if numeric_desc:
                 if ids_root not in pulse_ids:
                     pulse_ids[ids_root] = new_ids(factory, ids_root)
-                anchor = replace_wildcard_index(imas_path.split("/")[1:], 0)
-                write_companions(pulse_ids[ids_root], anchor, numeric_desc)
+                placeholder = replace_wildcard_index(value_branch, 0)
+                write_descriptors(pulse_ids[ids_root], [(placeholder, None)], numeric_desc, depth)
 
             if not value_present:
                 continue
 
-            value_leaf = cw_row["_value_leaf"]
-            full_path = imas_path + ("/" + value_leaf if value_leaf else "")
-            ids_branch = full_path.split("/")[1:]
-
             # Expand the row's transform into concrete (branch, value) writes.
-            writes = resolve_writes(ids_branch, value, cw_row, data_row)
+            writes = resolve_writes(value_branch, value, cw_row, data_row)
 
             # Write values to value path in the *pulse* IDS
             if ids_root not in pulse_ids:
                 pulse_ids[ids_root] = new_ids(factory, ids_root)
             write_values(pulse_ids[ids_root], writes)
 
-            # String companions → sibling descriptor path in the *reference* IDS, once.
+            # Write descriptors to sibling descriptor path in the *reference* IDS
             if string_desc and writes:
                 if ids_root not in reference_ids:
                     reference_ids[ids_root] = new_ids(factory, ids_root)
-                depth = len(value_leaf.split("/")) if value_leaf else 0
                 write_descriptors(reference_ids[ids_root], writes, string_desc, depth)
 
     # Backfill an empty root `time` (NaN time column) so dynamic nodes can fit in arrays.
