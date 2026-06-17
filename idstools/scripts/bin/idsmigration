@@ -170,6 +170,9 @@ def backfill_time(ids: IDS) -> None:
 # ---------------------------------------------------------------------------
 
 
+_warned_dict_misses: set[tuple[Any, Any]] = set()  # (row, value) pairs already warned about
+
+
 def resolve_writes(ids_branch: Branch, value: Any, cw_row: pd.Series, data_row: pd.Series) -> list[Write]:
     """Compute the (branch, value) writes a transform produces.
 
@@ -183,9 +186,11 @@ def resolve_writes(ids_branch: Branch, value: Any, cw_row: pd.Series, data_row: 
             raise ValueError(f"Row {cw_row.name}: transform='dictionary' but transform_args is missing")
         dictionary = ast.literal_eval(cw_row["transform_args"])
         if value not in dictionary:
-            print(
-                f"WARNING: Row {cw_row.name}: value {value!r} from column '{cw_row['csv_column']}' not in dictionary — skipping"
-            )
+            if (cw_row.name, value) not in _warned_dict_misses:
+                _warned_dict_misses.add((cw_row.name, value))
+                print(
+                    f"WARNING: Row {cw_row.name}: value {value!r} from column '{cw_row['csv_column']}' not in dictionary — skipping"
+                )
             return []
         mapped = dictionary[value]
         if isinstance(mapped, list):  # Dictionary of lists feature, expand AoS to fit len(mapped).
