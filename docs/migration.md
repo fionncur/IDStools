@@ -27,6 +27,7 @@ Everything below describes how to read and extend that file.
 | `needs_source` | bool | When `True`, write a value plus a companion sibling instead of a bare value (see [Value/source pairs](#valuesource-pairs)) |
 | `source_fields` | str | Optional `("value_leaf", "source_leaf")` 2-tuple naming the sibling leaves written when `needs_source=True`; defaults to `("value", "source")` |
 | `source` | str or number | Value written to the companion sibling leaf when `needs_source=True`. A **string** is a constant descriptor stored once in the reference entry; a **number** is a real value (e.g. a fixed coordinate) duplicated into every pulse (see [Value/source pairs](#sibling-pair-writes-needs_source-and-source_fields)) |
+| `errors` | str | Optional `{machine: relative_error}` dict literal giving per-machine error bars (see [Error bars](#error-bars-errors)) |
 
 ---
 
@@ -229,6 +230,39 @@ So the companion routing is asymmetric by type:
 
 **Constraint:** both named leaves must exist as sub-fields of the `imas_path`
 node.  Check the Data Dictionary before setting `needs_source` on a new row.
+
+---
+
+## Error bars (`errors`)
+
+Many IDS leaves carry an uncertainty in a sibling field: for a value at
+`IMAS_PATH`, the upper error bar lives at `IMAS_PATH + "_error_upper"`. Because the
+confinement database spans multiple devices with different measurement uncertainties,
+error bars are authored **per machine**.
+
+Set `errors` to a dict literal mapping machine name to a **relative** error
+(e.g. `0.03` = 3 %). It is parsed with `ast.literal_eval()`:
+
+```
+# imas_path = "summary/global_quantities/ip", errors = {"JET": 0.05, "AUG": 0.03}
+```
+
+For each pulse the script looks up that pulse's machine (the value mapped to
+`summary/machine`) and, if it is a key, writes `abs(value) * relative_error` to the
+`_error_upper` sibling of wherever the row's value landed:
+
+- bare node → `<node>_error_upper`;
+- `needs_source` value/source pair → `value_error_upper` (matching the DD layout).
+
+Behaviour:
+
+- **Blank cell** → nothing extra written (normal behaviour).
+- **Machine not in the dict** → no error written for that pulse, silently.
+- **Non-numeric value** (e.g. a string identifier) → the `errors` cell is a no-op.
+
+The error is *relative*, so the absolute bar tracks the actual datum, including the
+post-transform result for `dictionary`/`formula` rows. The lookup requires a row mapping
+to `summary/machine`; the script raises at load if `errors` is used without one.
 
 ---
 

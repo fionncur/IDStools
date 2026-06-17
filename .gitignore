@@ -53,6 +53,7 @@ myenv/
 # data files
 resources/results/2008
 resources/results/tc26
+resources/results/hmode
 resources/input
 
 # Excel lock files
