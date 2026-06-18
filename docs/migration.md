@@ -240,15 +240,22 @@ Many IDS leaves carry an uncertainty in a sibling field: for a value at
 confinement database spans multiple devices with different measurement uncertainties,
 error bars are authored **per machine**.
 
-Set `errors` to a dict literal mapping machine name to a **relative** error
-(e.g. `0.03` = 3 %). It is parsed with `ast.literal_eval()`:
+Set `errors` to a dict literal mapping machine name to an error **spec**. It is
+parsed with `ast.literal_eval()`. Each spec is one of three forms:
+
+| Spec | Literal | Bar written |
+|------|---------|-------------|
+| Relative | `0.03` (= 3 %) | `abs(value) * 0.03` |
+| Range | `[0.10, 0.20]` | `abs(value) * max(range)` — conservative upper bound; the min is discarded |
+| Absolute | `{"abs": 300000}` | the value **verbatim, in IDS units** (independent of `value`) |
 
 ```
-# imas_path = "summary/global_quantities/ip", errors = {"JET": 0.05, "AUG": 0.03}
+# imas_path = "summary/global_quantities/ip"
+# errors = {"JET": 0.05, "AUG": 0.03, "TFTR": {"abs": 300000}, "D3D": [0.10, 0.20]}
 ```
 
 For each pulse the script looks up that pulse's machine (the value mapped to
-`summary/machine`) and, if it is a key, writes `abs(value) * relative_error` to the
+`summary/machine`) and, if it is a key, writes the resolved bar to the
 `_error_upper` sibling of wherever the row's value landed:
 
 - bare node → `<node>_error_upper`;
@@ -258,11 +265,19 @@ Behaviour:
 
 - **Blank cell** → nothing extra written (normal behaviour).
 - **Machine not in the dict** → no error written for that pulse, silently.
-- **Non-numeric value** (e.g. a string identifier) → the `errors` cell is a no-op.
+- **Non-numeric value** (e.g. a string identifier) → the `errors` cell is a no-op
+  (even for an `abs` spec — a bar is only written where a value was).
 
-The error is *relative*, so the absolute bar tracks the actual datum, including the
-post-transform result for `dictionary`/`formula` rows. The lookup requires a row mapping
-to `summary/machine`; the script raises at load if `errors` is used without one.
+Relative and range bars are *relative*, so the absolute bar tracks the actual datum,
+including the post-transform result for `dictionary`/`formula` rows. An **absolute**
+spec is written verbatim and must already be in IDS (post-conversion) units — the
+author pre-converts (e.g. cm→m, kW→W); it does **not** pass through the
+`csv_unit → imas_unit` conversion. The lookup requires a row mapping to
+`summary/machine`; the script raises at load if `errors` is used without one.
+
+Errors that cannot be expressed in these three forms — compound (`±15% abs + ±2% rel`),
+value-conditional (phase-dependent), formula-dependent (`±0.05/bp`), or unquantified —
+are left as free-text notes rather than encoded.
 
 ---
 

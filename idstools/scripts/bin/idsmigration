@@ -80,8 +80,32 @@ def parse_source_pair(source_fields_val: Any, csv_column: str) -> tuple[str, str
     return parsed
 
 
+def _validate_error_spec(machine: str, spec: Any) -> None:
+    """Validate one {machine: spec} value. Accepts a relative float, a 2-element numeric
+    range [min, max], or an absolute {"abs": value}; anything else raises ValueError."""
+    if isinstance(spec, bool):
+        pass  # falls through to the error below (bool is an int subclass we don't want)
+    elif isinstance(spec, (int, float)):
+        return
+    elif isinstance(spec, (list, tuple)):
+        if len(spec) == 2 and all(isinstance(p, (int, float)) and not isinstance(p, bool) for p in spec):
+            return
+    elif isinstance(spec, dict):
+        if set(spec) == {"abs"} and isinstance(spec["abs"], (int, float)) and not isinstance(spec["abs"], bool):
+            return
+    raise ValueError(
+        f"errors spec for machine '{machine}' must be a relative float, a 2-element "
+        f"numeric range [min, max], or an absolute {{'abs': value}}; got {spec!r}"
+    )
+
+
 def parse_errors(errors_val: Any) -> dict | None:
-    """Parse an `errors` cell into a {machine: relative_error} dict. Blank/NaN -> None."""
+    """Parse an `errors` cell into a {machine: spec} dict. Blank/NaN -> None.
+
+    Each spec is a relative float (error = |value| * rel), a 2-element range [min, max]
+    (relative; the conservative max is used), or an absolute {"abs": value} written
+    verbatim in IDS units. See docs/migration.md.
+    """
     if not isinstance(errors_val, str) or errors_val.strip() == "":
         return None
     try:
@@ -90,7 +114,24 @@ def parse_errors(errors_val: Any) -> dict | None:
         raise ValueError(f"errors {errors_val!r} is not a valid Python literal: {e}")
     if not isinstance(parsed, dict):
         raise ValueError(f"errors must be a dict literal, e.g. {{'JET': 0.05}}; got {parsed!r}")
+    for machine, spec in parsed.items():
+        _validate_error_spec(machine, spec)
     return parsed
+
+
+def error_bar(spec: Any, value: Any) -> Any:
+    """Resolve a per-machine error spec + leaf value into an absolute _error_upper magnitude.
+
+    - relative float    -> |value| * spec
+    - range [min, max]   -> |value| * max (conservative upper bound)
+    - {"abs": v}         -> v verbatim, in IDS units, independent of value
+    """
+    if isinstance(spec, (list, tuple)):
+        return np.abs(value) * max(spec)
+    if isinstance(spec, dict):  # {"abs": v}
+        a = float(spec["abs"])
+        return np.full(value.shape, a) if isinstance(value, np.ndarray) else a
+    return np.abs(value) * spec  # relative float
 
 
 # ---------------------------------------------------------------------------
@@ -471,14 +512,15 @@ def process_pulse(
             write_values(pulse_ids[ids_root], writes)
 
             # Write per-machine error bars to the "_error_upper" extension of each leaf path.
-            # errors holds {machine: relative_error}; the absolute bar is |value| * relative.
+            # errors holds {machine: spec}; error_bar() resolves each spec against the leaf
+            # value (relative, range, or absolute -- see parse_errors / docs/migration.md).
             errors = cw_row["_errors"]
             if errors is not None and writes:
                 machine = data_row.get(machine_col) if machine_col else None
                 if machine in errors:  # miss -> skip silently
-                    rel = errors[machine]
+                    spec = errors[machine]
                     error_writes = [
-                        (branch[:-1] + [branch[-1] + "_error_upper"], np.abs(v) * rel)
+                        (branch[:-1] + [branch[-1] + "_error_upper"], error_bar(spec, v))
                         for branch, v in writes
                         if isinstance(v, (int, float, np.number, np.ndarray)) and not isinstance(v, bool)
                     ]
