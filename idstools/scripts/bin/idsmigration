@@ -38,6 +38,11 @@ Write = tuple[Branch, Any]  # a (branch, value) pair destined for one leaf
 Descriptor = tuple[Branch, Any]  # a (leaf_segments, string) pair written to the reference IDS
 
 
+def is_number(x: Any) -> bool:
+    """True for a real int/float, excluding bool (an int subclass)."""
+    return isinstance(x, (int, float)) and not isinstance(x, bool)
+
+
 # ---------------------------------------------------------------------------
 # Path / segment parsing
 # ---------------------------------------------------------------------------
@@ -70,7 +75,7 @@ def parse_source_pair(source_fields_val: Any, csv_column: str) -> tuple[str, str
         parsed = ast.literal_eval(source_fields_val.strip())
     except (ValueError, SyntaxError) as e:
         raise ValueError(
-            f"source_fields {source_fields_val!r} for csv_column " f"'{csv_column}' is not a valid Python literal: {e}"
+            f"source_fields {source_fields_val!r} for csv_column '{csv_column}' is not a valid Python literal: {e}"
         )
     if not isinstance(parsed, tuple) or len(parsed) != 2 or not all(isinstance(p, str) for p in parsed):
         raise ValueError(
@@ -83,16 +88,12 @@ def parse_source_pair(source_fields_val: Any, csv_column: str) -> tuple[str, str
 def _validate_error_spec(machine: str, spec: Any) -> None:
     """Validate one {machine: spec} value. Accepts a relative float, a 2-element numeric
     range [min, max], or an absolute {"abs": value}; anything else raises ValueError."""
-    if isinstance(spec, bool):
-        pass  # falls through to the error below (bool is an int subclass we don't want)
-    elif isinstance(spec, (int, float)):
+    if is_number(spec):
         return
-    elif isinstance(spec, (list, tuple)):
-        if len(spec) == 2 and all(isinstance(p, (int, float)) and not isinstance(p, bool) for p in spec):
-            return
-    elif isinstance(spec, dict):
-        if set(spec) == {"abs"} and isinstance(spec["abs"], (int, float)) and not isinstance(spec["abs"], bool):
-            return
+    if isinstance(spec, (list, tuple)) and len(spec) == 2 and all(is_number(p) for p in spec):
+        return
+    if isinstance(spec, dict) and set(spec) == {"abs"} and is_number(spec["abs"]):
+        return
     raise ValueError(
         f"errors spec for machine '{machine}' must be a relative float, a 2-element "
         f"numeric range [min, max], or an absolute {{'abs': value}}; got {spec!r}"
@@ -160,6 +161,7 @@ def resolve_parent(ids: IDS, branch: Branch) -> tuple[IDS, str]:
 
 
 def set_leaf(ids: IDS, branch: Branch, value: Any) -> None:
+    """Write `value` to the leaf at `branch`, resizing AoS / wrapping numeric arrays as needed."""
     parent, leaf_seg = resolve_parent(ids, branch)
     leaf, _ = parse_seg(leaf_seg)
     target = getattr(parent, leaf)
@@ -277,7 +279,7 @@ def report_progress(
 
 def report_summary(verb: str, count: int, total: int, start: float, suffix: str = "") -> None:
     """Closing one-line summary for a pulse loop."""
-    print(f"{verb} {count}/{total} pulses{suffix} " f"in {timedelta(seconds=int(time.monotonic() - start))}")
+    print(f"{verb} {count}/{total} pulses{suffix} in {timedelta(seconds=int(time.monotonic() - start))}")
 
 
 # ---------------------------------------------------------------------------
@@ -336,7 +338,7 @@ def load_crosswalk(mapping_path: str) -> pd.DataFrame:
     # Convert needs_source to boolean.
     df["needs_source"] = df["needs_source"].fillna(False).astype(bool)
 
-    # Include only implemented transforms (identity/dictionary) with an accepted status.
+    # Include only implemented transforms (identity/dictionary/formula) with an accepted status.
     keep_mask = df["transform"].isin(["identity", "dictionary", "formula"]) & df["status"].isin(
         ["mapped", "temporary", "mapped_caveat"]
     )
@@ -353,7 +355,7 @@ def load_crosswalk(mapping_path: str) -> pd.DataFrame:
         pairs = [("value", "source")] * len(df)
     df["_source_pair"] = pd.Series(pairs, index=df.index, dtype=object)
 
-    # Parse the optional errors column into {machine: relative_error} dicts (or None).
+    # Parse the optional errors column into {machine: spec} dicts (or None).
     if "errors" in df.columns:
         errors = [parse_errors(e) for e in df["errors"]]
     else:
@@ -381,7 +383,7 @@ def validate(df: pd.DataFrame, data: pd.DataFrame) -> pd.DataFrame:
     # Upfront validation: needs_source rows must have a source value — either a descriptor string
     # mapped to reference IDS, or a numeric value mapped for every pulse.
     def _has_source(x: Any) -> bool:
-        return isinstance(x, str) or (isinstance(x, (int, float)) and pd.notna(x))
+        return isinstance(x, str) or (is_number(x) and pd.notna(x))
 
     bad_source = df["needs_source"] & ~df["source"].apply(_has_source)
     if bad_source.any():
@@ -493,7 +495,8 @@ def process_pulse(
             value_branch = full_path.split("/")[1:]
             depth = len(value_leaf.split("/")) if value_leaf else 0
 
-            # Create masks for "companion" node types.
+            # Numeric companions are constant values, seeded into the pulse IDS even when
+            # the row itself has no value for this pulse.
             if numeric_desc:
                 if ids_root not in pulse_ids:
                     pulse_ids[ids_root] = new_ids(factory, ids_root)
@@ -607,7 +610,7 @@ def write_reference(reference_ids: dict[str, IDS], output_dir: str) -> None:
     with imas.DBEntry(ref_uri, "a") as entry:
         for ids in reference_ids.values():
             entry.put(ids)
-    print(f"Wrote reference ({len(reference_ids)} IDSs: " f"{', '.join(reference_ids)}) to {ref_dir}")
+    print(f"Wrote reference ({len(reference_ids)} IDSs: {', '.join(reference_ids)}) to {ref_dir}")
 
 
 # ---------------------------------------------------------------------------
