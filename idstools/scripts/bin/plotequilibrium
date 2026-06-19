@@ -79,6 +79,11 @@ if __name__ == "__main__":
     "testpulse.nc"
     """,
     )
+    parser.add_argument(
+        "--no-provenance",
+        help="Hide URI provenance information from the plot title",
+        action="store_true",
+    )
 
     parser.add_argument(
         "--debug",
@@ -131,7 +136,6 @@ if __name__ == "__main__":
         time_slice, time_value = get_nearest_time(ids_obj_equilibrium.time, args.time)
         view_object = EquilibriumView(ids_obj_equilibrium)
 
-        database_text = ""
         if args.plots:
             compute_obj = EquilibriumCompute(ids_obj_equilibrium)
             profiles_1d_quantities = compute_obj.get_profiles_1d_quantities(time_slice, ["pressure", "q", "beta_pol"])
@@ -262,11 +266,12 @@ if __name__ == "__main__":
         if args.overlay:
             create_overlays(show_legend=not args.plots)
 
-        title = get_database_path(args, time_value=time_value)
-        if md_overlay_state["provenance_lines"]:
-            title += "\n" + "\n".join(md_overlay_state["provenance_lines"])
-        if database_text:
-            title += f"\n{database_text}"
+        title_lines = []
+        if not args.no_provenance:
+            title_lines.append(get_database_path(args, time_value=time_value))
+            if md_overlay_state["provenance_lines"]:
+                title_lines.extend(md_overlay_state["provenance_lines"])
+        title = "\n".join(title_lines)
         canvas.set_sup_title(title, fontsize=8, y=0.985)
 
         canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
