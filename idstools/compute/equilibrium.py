@@ -1428,7 +1428,7 @@ class EquilibriumCompute:
                     node = eval(f"self.ids.time_slice[{ti}].global_quantities.{attribute}")
                     if info_flag:
                         quantities[attribute]["unit"] = node.metadata.units
-                        quantities[attribute]["coordinate_unit"] = "t"
+                        quantities[attribute]["coordinate_unit"] = self.ids.time.metadata.units or "s"
 
                         quantities[attribute]["name"] = node.metadata.name
                         quantities[attribute]["coordinate_name"] = "time"

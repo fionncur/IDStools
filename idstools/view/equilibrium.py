@@ -556,13 +556,12 @@ class EquilibriumView(BasePlot):
 
                         coordinate_normalized = (psi - psi_first) / (psi_last - psi_first)
                 axes_list[counter].plot(
-                    coordinate_normalized, copied_field, label=f"{field.metadata.name} ({field.metadata.units})"
+                    coordinate_normalized, copied_field, label=f"{field.metadata.name} [{field.metadata.units}]"
                 )
                 if coordinate.metadata.name == "psi":
-                    axes_list[counter].set_xlabel(f"{coordinate.metadata.name} (normalized)")
+                    axes_list[counter].set_xlabel(f"{coordinate.metadata.name}_norm [1]")
                 else:
-                    axes_list[counter].set_xlabel(f"{coordinate.metadata.name} ({coordinate.metadata.units})")
-                axes_list[counter].set_ylabel(name)
+                    axes_list[counter].set_xlabel(f"{coordinate.metadata.name} [{coordinate.metadata.units}]")
                 axes_list[counter].legend(loc="upper right")
                 counter = counter + 1
 
@@ -576,11 +575,10 @@ class EquilibriumView(BasePlot):
                 field["node"][field["node"] == imas.ids_defs.EMPTY_FLOAT] = np.nan
             if field["has_value"]:
                 if len(field["node"]) < 5:
-                    axes_list[counter].scatter(field["coordinate"], field["node"], label=f"{name} ({field['unit']})")
+                    axes_list[counter].scatter(field["coordinate"], field["node"], label=f"{name} [{field['unit']}]")
                 else:
-                    axes_list[counter].plot(field["coordinate"], field["node"], label=f"{name} ({field['unit']})")
-                axes_list[counter].set_xlabel(f"{field['coordinate_name']} ({field['coordinate_unit']})")
-                axes_list[counter].set_ylabel(name)
+                    axes_list[counter].plot(field["coordinate"], field["node"], label=f"{name} [{field['unit']}]")
+                axes_list[counter].set_xlabel(f"{field['coordinate_name']} [{field['coordinate_unit']}]")
                 self.view_time_line(axes_list[counter], time_slice)
                 axes_list[counter].legend(loc="upper right")
                 counter = counter + 1
