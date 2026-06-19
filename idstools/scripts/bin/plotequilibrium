@@ -267,12 +267,14 @@ if __name__ == "__main__":
         else:
             create_overlays(show_legend=not args.profiles)
 
-        title_lines = []
+        provenance_parts = []
         if not args.no_provenance:
-            title_lines.append(get_database_path(args, time_value=time_value))
+            provenance_parts.append(get_database_path(args).strip())
             if md_overlay_state["provenance_lines"]:
-                title_lines.extend(md_overlay_state["provenance_lines"])
-        title = "\n".join(title_lines)
+                provenance_parts.extend(md_overlay_state["provenance_lines"])
+        title = " | ".join(provenance_parts)
+        if title and time_value is not None:
+            title += f"\n#time:{time_value:.3f}"
         canvas.set_sup_title(title, fontsize=8, y=0.985)
 
         canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
