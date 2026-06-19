@@ -53,10 +53,9 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--no-overlay",
-        dest="overlay",
+        dest="no_overlay",
         help="Hide equilibrium overlays",
-        action="store_false",
-        default=True,
+        action="store_true",
     )
     parser.add_argument(
         "--profiles",
@@ -207,9 +206,6 @@ if __name__ == "__main__":
             md_overlay_state["created"] = True
             return True
 
-        if args.save:
-            plot_md_overlay()
-
         c_psi, c_rho = view_object.view_magnetic_poloidal_flux(
             ax1,
             time_slice,
@@ -234,6 +230,8 @@ if __name__ == "__main__":
             cbar_rho = canvas.fig.colorbar(c_rho, cax=cax_rho)
             cbar_rho.ax.set_title(r"$\rho$", fontsize=7, pad=4)
             cbar_rho.ax.tick_params(labelsize=7)
+
+        plot_md_overlay()
 
         if args.profiles:
             view_object.plot_profiles_1d_quantities(axes_list1, time_slice)
@@ -262,7 +260,11 @@ if __name__ == "__main__":
             if legend is not None:
                 legend.set_visible(show_legend)
 
-        if args.overlay:
+        if args.no_overlay:
+            legend = ax1.get_legend()
+            if legend is not None:
+                legend.set_visible(not args.profiles)
+        else:
             create_overlays(show_legend=not args.profiles)
 
         title_lines = []
