@@ -54,6 +54,7 @@ myenv/
 resources/results/2008
 resources/results/tc26
 resources/results/hmode
+resources/results/hmode_sandbox
 resources/input
 
 # Excel lock files
