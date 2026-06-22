@@ -47,6 +47,7 @@ class EquilibriumView(BasePlot):
         plot_rho: bool = False,
         plot_annotations: bool = True,
         plot_psi: bool = True,
+        plot_boundary_outline: bool = False,
     ):
         """
         This function plots the magnetic poloidal flux contours on a 2D Cartesian grid.
@@ -183,12 +184,37 @@ class EquilibriumView(BasePlot):
                 )
                 overlay_entries.append((proxy_cc, [marker]))
 
+        if plot_boundary_outline:
+            bd = self.compute_obj.get_boundary_data(time_slice)
+            if bd["bnd_r"] is not None and bd["bnd_z"] is not None:
+                (boundary_line,) = ax.plot(
+                    bd["bnd_r"],
+                    bd["bnd_z"],
+                    color="royalblue",
+                    linewidth=2.0,
+                    linestyle="-",
+                    zorder=5,
+                )
+                proxy_boundary = ProxyLine(
+                    [0], [0], color="royalblue", linewidth=2.0, linestyle="-", label="boundary/outline"
+                )
+                overlay_entries.append((proxy_boundary, [boundary_line]))
+
         if plot_boundary_data:
 
             bd = self.compute_obj.get_boundary_data(time_slice)
 
+            separatrix_is_boundary = (
+                bd["bnd_r"] is not None
+                and bd["bnd_z"] is not None
+                and bd["sep_r"] is not None
+                and bd["sep_z"] is not None
+                and np.array_equal(np.asarray(bd["sep_r"]), np.asarray(bd["bnd_r"]))
+                and np.array_equal(np.asarray(bd["sep_z"]), np.asarray(bd["bnd_z"]))
+            )
+
             # boundary_separatrix outline
-            if bd["sep_r"] is not None and bd["sep_z"] is not None:
+            if bd["sep_r"] is not None and bd["sep_z"] is not None and not separatrix_is_boundary:
                 (sep_line,) = ax.plot(
                     bd["sep_r"],
                     bd["sep_z"],

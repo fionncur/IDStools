@@ -252,6 +252,7 @@ if __name__ == "__main__":
                 plot_magnetic_axis=True,
                 plot_current_centre=True,
                 plot_boundary_data=True,
+                plot_boundary_outline=True,
                 plot_rho=False,
                 plot_annotations=not args.profiles,
                 plot_psi=False,
