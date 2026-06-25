@@ -284,11 +284,6 @@ def idsmigration():
     _load_script_main("idsmigration")()
 
 
-def idscollage():
-    """Merge two same-root IDSs into one and print the combined result."""
-    _load_script_main("idscollage")()
-
-
 __all__ = [
     "plotequilibrium",
     "idslist",
@@ -338,7 +333,6 @@ __all__ = [
     "md_status",
     "md_summary",
     "idsmigration",
-    "idscollage",
 ]
 
 

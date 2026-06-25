@@ -199,17 +199,15 @@ string is written alongside each expanded AoS slot.
 If `source` is blank, the companion leaf is omitted and the value is
 written as a bare node (same as `needs_source = False`).
 
-The companion (source) string is **not** stored in the pulses.  Because it is
-constant across pulses, it is written **once** into a separate reference entry
-(see [Reference entry](#reference-entry)).  Each pulse therefore holds only the
-value leaf; the matching source leaf lives at the same path in the reference.
+The companion (source) string is written into **every pulse** alongside the value
+leaf, when the value is present.
 
 ### Numeric `source`: a constant companion value
 
 When `source` is a **number** rather than a string, it is treated as a real value
 rather than a provenance label.  It is written to the companion leaf in **every
-pulse** alongside the value leaf — not to the reference entry.  This is the
-eval-free way to attach a fixed constant to a sibling node.
+pulse** alongside the value leaf.  This is the eval-free way to attach a fixed
+constant to a sibling node.
 
 ```
 # needs_source=True, source_fields = ("rho_tor", "rho_tor_norm"), source = 0.95
@@ -223,11 +221,11 @@ primary `csv_column` value is missing for that pulse (the value leaf is simply l
 empty).  This makes it a way to stamp a fixed constant into each IDS.  (String
 companions, by contrast, are only written when the row has a real value.)
 
-So the companion routing is asymmetric by type:
+So the companion gating is asymmetric by type:
 
-- **string** `source` → written once to the reference entry, when the value is present;
+- **string** `source` → written into the pulse when the value is present;
 - **numeric** `source` → written into every pulse, unconditionally;
-- **dict** `source` → resolved per pulse by machine name, written to the pulse IDS (see below).
+- **dict** `source` → resolved per pulse by machine name, written to the pulse IDS when the value is present (see below).
 
 **Constraint:** both named leaves must exist as sub-fields of the `imas_path`
 node.  Check the Data Dictionary before setting `needs_source` on a new row.
@@ -245,9 +243,8 @@ summary/global_quantities/ip/value  ← transformed CSV value (per pulse)
 summary/global_quantities/ip/source ← "EFIT" for AUG pulses, "JFIT" for JET pulses
 ```
 
-Unlike plain string sources (which go into the reference entry), a dict source
-is resolved per pulse against the pulse's machine name and written into the
-**pulse IDS**.  Machines not present as keys are silently skipped.  A
+A dict source is resolved per pulse against the pulse's machine name and written
+into the pulse IDS.  Machines not present as keys are silently skipped.  A
 `summary/machine` mapping row is required; the script raises at load if none
 exists and a dict source is in use.
 
@@ -321,50 +318,20 @@ The `(:)` suffix assigns a **stable index**, keyed by the segment name before
 `(:)` (e.g. `constant_float0d`).  Indices are assigned once, in crosswalk (row)
 order — **not** per pulse — so a given variable occupies the **same** slot in
 every pulse.  A pulse that lacks data for a variable simply leaves that slot
-empty.  This uniformity is what lets the reference entry line up with the pulse
-values (see [Reference entry](#reference-entry)).
+empty.  This gives a deterministic, consistent layout across all pulses.
 
-As with physics-IDS rows, the value goes to the pulse and the descriptor
-strings (here the identifier name/description) go to the reference:
+As with physics-IDS rows, both the value and the descriptor strings
+(identifier name/description) are written directly into the pulse:
 
 ```
-# pulse (written every pulse)
-constant_float0d(n)/value                    ← transformed CSV value
-constant_float0d(n)/identifier/name          ← source (if present), else csv_column
-constant_float0d(n)/identifier/description   ← csv_description (if present)
-# reference (written once, for overlay)
-constant_float0d(n)/identifier/name          ← same as pulse
-constant_float0d(n)/identifier/description   ← same as pulse
+constant_float0d(n)/value                  ← transformed CSV value
+constant_float0d(n)/identifier/name        ← source (if present), else csv_column
+constant_float0d(n)/identifier/description ← csv_description (if present)
 ```
 
 The `imas_path` column is ignored for temporary rows; the entire path is
 derived from `csv_dtype`.  Temporary rows are otherwise processed identically
 to physics-IDS rows (same transforms, same value/descriptor split).
-
----
-
-## Reference entry
-
-Descriptor strings are **constant across pulses** (a source label, or a
-temporary variable's name/description), so writing them into every pulse is
-wasteful and non-uniform.  Instead they are collected into a single **reference
-entry**, written once to:
-
-```
-resources/results/<experiment>/reference/
-```
-
-The reference mirrors the pulse structure: one IDS per top-level root
-(`summary`, `core_profiles`, `temporary`, …), each holding only the descriptor
-leaves, at the **same paths** the pulse values use.  So:
-
-- a pulse holds `.../value` and leaves `.../source` empty;
-- the reference holds `.../source` and leaves `.../value` empty.
-
-Because the leaves are disjoint and the paths match, a value and its descriptor
-can be recombined later by overlaying the reference onto a pulse.  Each
-descriptor path is written exactly once (first writer wins), including one entry
-per expanded AoS slot for dictionary-of-lists transforms.
 
 ---
 

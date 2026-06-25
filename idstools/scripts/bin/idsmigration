@@ -5,7 +5,7 @@
 Driven by a crosswalk spreadsheet that maps source CSV columns to IDS paths and
 transforms. The pipeline (see ``main``): load the crosswalk and dataset, validate,
 build a per-row write spec, build one set of IDSs per pulse in memory, then write
-the pulses and a shared reference entry to HDF5.
+the pulses to HDF5.
 
 See docs/migration.md for the crosswalk format and full behaviour reference.
 """
@@ -35,7 +35,7 @@ input_dir = os.path.join(ROOT, "resources", "input")
 IDS = Any  # an IMAS top-level IDS object (summary, equilibrium, ...)
 Branch = list[str]  # ordered node segments, e.g. ["divertor(0)", "value"]
 Write = tuple[Branch, Any]  # a (branch, value) pair destined for one leaf
-Descriptor = tuple[Branch, Any]  # a (leaf_segments, string) pair written to the reference IDS
+Descriptor = tuple[Branch, Any]  # a (leaf_segments, value) pair written alongside the value in the pulse IDS
 
 
 def is_number(x: Any) -> bool:
@@ -200,10 +200,8 @@ def write_companions(ids: IDS, anchor: Branch, descriptors: list[Descriptor]) ->
         set_leaf(ids, anchor + list(desc_leaf), desc_val)
 
 
-def write_descriptors(
-    reference: IDS, writes: list[Write], descriptors: list[Descriptor], value_leaf_depth: int
-) -> None:
-    """Write each descriptor (leaf_segments, string) into the shared reference IDS.
+def write_descriptors(ids: IDS, writes: list[Write], descriptors: list[Descriptor], value_leaf_depth: int) -> None:
+    """Write each descriptor (leaf_segments, value) into the pulse IDS alongside values.
 
     Each is written at the sibling of every value's parent node (branch[:-1]), so it
     lands at the correct path for each expanded AoS slot — e.g. the source sibling, or
@@ -211,7 +209,7 @@ def write_descriptors(
     """
     for branch, _ in writes:
         anchor = branch[: len(branch) - value_leaf_depth]
-        write_companions(reference, anchor, descriptors)
+        write_companions(ids, anchor, descriptors)
 
 
 def backfill_time(ids: IDS) -> None:
@@ -396,7 +394,7 @@ def validate(df: pd.DataFrame, data: pd.DataFrame) -> pd.DataFrame:
         raise ValueError(f"csv_column(s) not found in data CSV: {missing_cols}")
 
     # Upfront validation: needs_source rows must have a source value — either a descriptor string
-    # mapped to reference IDS, a numeric value written per pulse, or a machine-keyed dict.
+    # written into each pulse, a numeric value written per pulse, or a machine-keyed dict.
     def _has_source(x: Any) -> bool:
         return isinstance(x, (str, dict)) or (is_number(x) and pd.notna(x))
 
@@ -420,11 +418,10 @@ def build_write_spec(df: pd.DataFrame) -> pd.DataFrame:
 
       _paths       : imas_path(s) to write to ("&"-split for multi-target rows)
       _value_leaf  : leaf appended to each path for the value ("" = bare node)
-      _descriptors : list of (leaf_segments, string) written once to the reference
+      _descriptors : list of (leaf_segments, value) written into the pulse alongside values
 
-    Temporary rows are folded into the same structure with a "persistent" (same for each pulse)
-    AoS index, assigned here in crosswalk order so a variable keeps the same slot in every
-    pulse, which is required for temporary indices to match the reference IDS.
+    Temporary rows are folded into the same structure with a stable AoS index, assigned here
+    in crosswalk order so a variable keeps the same slot in every pulse (deterministic layout).
     """
     temp_idx: dict[str, int] = {}  # dictionary to track temp paths: indices
     temp_seen: dict[str, Any] = {}  # resolved "temporary/..." path -> first row (clash warning)
@@ -483,13 +480,12 @@ def process_pulse(
     data_row: pd.Series,
     crosswalk: pd.DataFrame,
     factory: imas.IDSFactory,
-    reference_ids: dict[str, IDS],
     machine_col: str | None = None,
 ) -> dict[str, IDS]:
     """Build the per-root IDS dict for a single data row (pulse).
 
-    Values go into fresh pulse IDSs; constant descriptor strings are written into the
-    shared `reference_ids` (mutated in place).
+    All values and their companion descriptors (provenance strings, identifier names)
+    are written into the pulse IDS.
     """
     pulse_ids: dict[str, IDS] = {}
     for _, cw_row in crosswalk.iterrows():
@@ -498,7 +494,7 @@ def process_pulse(
         value = data_row[cw_row["csv_column"]]
         value_present = not pd.isna(value)
 
-        # String companions go to reference; numeric are constant values per pulse; dict are machine-specific per pulse.
+        # Numeric companions are constant values per pulse; string/dict are gated on value presence.
         string_desc = [d for d in cw_row["_descriptors"] if isinstance(d[1], str)]
         numeric_desc = [d for d in cw_row["_descriptors"] if is_number(d[1])]
         dict_desc = [d for d in cw_row["_descriptors"] if isinstance(d[1], dict)]
@@ -524,7 +520,7 @@ def process_pulse(
             # Expand the row's transform into concrete (branch, value) writes.
             writes = resolve_writes(value_branch, value, cw_row, data_row)
 
-            # Write values to value path in the *pulse* IDS
+            # Write values to value path in the pulse IDS.
             if ids_root not in pulse_ids:
                 pulse_ids[ids_root] = new_ids(factory, ids_root)
             write_values(pulse_ids[ids_root], writes)
@@ -545,15 +541,9 @@ def process_pulse(
                     if error_writes:
                         write_values(pulse_ids[ids_root], error_writes)
 
-            # Write descriptors to sibling descriptor path in the *reference* IDS
+            # Write string and machine-specific (dict) companion descriptors to the pulse IDS.
             if string_desc and writes:
-                if ids_root not in reference_ids:
-                    reference_ids[ids_root] = new_ids(factory, ids_root)
-                write_descriptors(reference_ids[ids_root], writes, string_desc, depth)
-                if ids_root == "temporary":
-                    write_descriptors(pulse_ids[ids_root], writes, string_desc, depth)
-
-            # Write machine-specific (dict) companion strings to the pulse IDS.
+                write_descriptors(pulse_ids[ids_root], writes, string_desc, depth)
             if dict_desc and writes:
                 machine = data_row.get(machine_col) if machine_col else None
                 resolved = [(leaf, d[machine]) for leaf, d in dict_desc if machine in d]
@@ -566,14 +556,11 @@ def process_pulse(
     return pulse_ids
 
 
-def build_ids(
-    crosswalk: pd.DataFrame, data: pd.DataFrame, factory: imas.IDSFactory
-) -> tuple[dict[Any, dict[str, IDS]], dict[str, IDS]]:
-    """Build all pulse IDSs in memory; returns (ids_by_pulse, reference_ids)."""
+def build_ids(crosswalk: pd.DataFrame, data: pd.DataFrame, factory: imas.IDSFactory) -> dict[Any, dict[str, IDS]]:
+    """Build all pulse IDSs in memory; returns ids_by_pulse."""
     ids_by_pulse: dict[Any, dict[str, IDS]] = {}
-    reference_ids: dict[str, IDS] = {}  # ids_root -> reference IDS (descriptor strings, shared)
 
-    # Error bars are looked up per pulse by machine: find the column mapped to summary/machine.
+    # Error bars and dict sources are looked up per pulse by machine: find the column mapped to summary/machine.
     machine_rows = crosswalk.loc[crosswalk["imas_path"] == "summary/machine", "csv_column"]
     machine_col = machine_rows.iloc[0] if len(machine_rows) else None
     if machine_col is None and crosswalk["_errors"].notna().any():
@@ -592,13 +579,13 @@ def build_ids(
     for pulse_idx, data_row in data.iterrows():
         if data_row.isna().all():
             continue
-        pulse_ids = process_pulse(data_row, crosswalk, factory, reference_ids, machine_col)
+        pulse_ids = process_pulse(data_row, crosswalk, factory, machine_col)
         ids_by_pulse[pulse_idx] = pulse_ids
         loaded += 1
         load_last_report = report_progress(loaded, total_rows, pulse_idx, load_start, load_last_report)
 
     report_summary("Loaded", loaded, total_rows, load_start, " into memory")
-    return ids_by_pulse, reference_ids
+    return ids_by_pulse
 
 
 def write_pulses(ids_by_pulse: dict[Any, dict[str, IDS]], output_dir: str) -> None:
@@ -623,23 +610,6 @@ def write_pulses(ids_by_pulse: dict[Any, dict[str, IDS]], output_dir: str) -> No
     report_summary("Wrote", written, total, write_start, f" to {output_dir}")
 
 
-def write_reference(reference_ids: dict[str, IDS], output_dir: str) -> None:
-    """Write the shared reference entry: one IDS per root holding the descriptor
-    strings (source/identifier) once, at the same paths as the pulse values.
-    """
-    if not reference_ids:
-        return
-    for ids in reference_ids.values():
-        backfill_time(ids)
-    ref_dir = os.path.join(output_dir, "reference")
-    os.makedirs(ref_dir, exist_ok=True)
-    ref_uri = f"imas:hdf5?path={ref_dir};pulse=0"
-    with imas.DBEntry(ref_uri, "a") as entry:
-        for ids in reference_ids.values():
-            entry.put(ids)
-    print(f"Wrote reference ({len(reference_ids)} IDSs: {', '.join(reference_ids)}) to {ref_dir}")
-
-
 # ---------------------------------------------------------------------------
 # CLI
 # ---------------------------------------------------------------------------
@@ -654,9 +624,8 @@ def main() -> None:
     crosswalk = validate(crosswalk, data)  # validate *does* modify the df in case of "bad_source"
     crosswalk = build_write_spec(crosswalk)
     factory = imas.IDSFactory(version=args.dd_version)
-    ids_by_pulse, reference_ids = build_ids(crosswalk, data, factory)
+    ids_by_pulse = build_ids(crosswalk, data, factory)
     write_pulses(ids_by_pulse, output_dir)
-    write_reference(reference_ids, output_dir)
 
 
 if __name__ == "__main__":
