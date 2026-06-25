@@ -58,15 +58,15 @@ def _read_temporary_scalars(pulse_dir: pathlib.Path) -> dict:
     result = {}
     for el in tmp.constant_float0d:
         name = str(el.identifier.name)
-        if name and el.value.has_value():
+        if name and el.value.has_value:
             result[name] = float(el.value)
     for el in tmp.constant_integer0d:
         name = str(el.identifier.name)
-        if name and el.value.has_value():
+        if name and el.value.has_value:
             result[name] = int(el.value)
     for el in tmp.constant_string0d:
         name = str(el.identifier.name)
-        if name and el.value.has_value():
+        if name and el.value.has_value:
             result[name] = str(el.value)
     return result
 

@@ -120,6 +120,18 @@ def parse_errors(errors_val: Any) -> dict | None:
     return parsed
 
 
+def _try_parse_dict(x: Any) -> Any:
+    """If x is a string that looks like a dict literal, parse and return the dict; else return x."""
+    if isinstance(x, str) and x.strip().startswith("{"):
+        try:
+            parsed = ast.literal_eval(x.strip())
+            if isinstance(parsed, dict):
+                return parsed
+        except (ValueError, SyntaxError):
+            pass
+    return x
+
+
 def error_bar(spec: Any, value: Any) -> Any:
     """Resolve a per-machine error spec + leaf value into an absolute _error_upper magnitude.
 
@@ -338,6 +350,9 @@ def load_crosswalk(mapping_path: str) -> pd.DataFrame:
     # Convert needs_source to boolean.
     df["needs_source"] = df["needs_source"].fillna(False).astype(bool)
 
+    # Parse source cells that are dict literals (machine-specific provenance).
+    df["source"] = df["source"].map(_try_parse_dict)
+
     # Include only implemented transforms (identity/dictionary/formula) with an accepted status.
     keep_mask = df["transform"].isin(["identity", "dictionary", "formula"]) & df["status"].isin(
         ["mapped", "temporary", "mapped_caveat"]
@@ -381,18 +396,14 @@ def validate(df: pd.DataFrame, data: pd.DataFrame) -> pd.DataFrame:
         raise ValueError(f"csv_column(s) not found in data CSV: {missing_cols}")
 
     # Upfront validation: needs_source rows must have a source value — either a descriptor string
-    # mapped to reference IDS, or a numeric value mapped for every pulse.
+    # mapped to reference IDS, a numeric value written per pulse, or a machine-keyed dict.
     def _has_source(x: Any) -> bool:
-        return isinstance(x, str) or (is_number(x) and pd.notna(x))
+        return isinstance(x, (str, dict)) or (is_number(x) and pd.notna(x))
 
     bad_source = df["needs_source"] & ~df["source"].apply(_has_source)
     if bad_source.any():
         print(
-            f"WARNING: needs_source=True but source is missing for rows: {list(df.index[bad_source])} — falling back to csv_description"
-        )
-        df["source"] = df["source"].astype(object)
-        df.loc[bad_source, "source"] = df.loc[bad_source, "csv_description"].where(
-            df.loc[bad_source, "csv_description"].apply(lambda x: isinstance(x, str)), other=""
+            f"WARNING: needs_source=True but source is missing for rows: {list(df.index[bad_source])} — companion leaf will not be written"
         )
 
     # Upfront validation: temporary rows must have a csv_dtype string.
@@ -442,7 +453,8 @@ def build_write_spec(df: pd.DataFrame) -> pd.DataFrame:
                 )
             else:
                 temp_seen[path] = cw_row.name
-            descriptors = [(["identifier", "name"], cw_row["csv_column"])]
+            name_val = cw_row["source"] if isinstance(cw_row["source"], str) else cw_row["csv_column"]
+            descriptors = [(["identifier", "name"], name_val)]
             if isinstance(cw_row["csv_description"], str):
                 descriptors.append((["identifier", "description"], cw_row["csv_description"]))
             paths_list.append([path])
@@ -455,7 +467,9 @@ def build_write_spec(df: pd.DataFrame) -> pd.DataFrame:
             paths_list.append(imas_path.split("&") if "&" in imas_path else [imas_path])
             if cw_row["needs_source"]:
                 value_leaf_list.append(cw_row["_source_pair"][0])
-                descriptors_list.append([(cw_row["_source_pair"][1].split("/"), cw_row["source"])])
+                source = cw_row["source"]
+                has_source = isinstance(source, (str, dict)) or (is_number(source) and pd.notna(source))
+                descriptors_list.append([(cw_row["_source_pair"][1].split("/"), source)] if has_source else [])
             else:
                 value_leaf_list.append("")
                 descriptors_list.append([])
@@ -484,9 +498,10 @@ def process_pulse(
         value = data_row[cw_row["csv_column"]]
         value_present = not pd.isna(value)
 
-        # String companions are descriptors; numeric companions are constant values.
+        # String companions go to reference; numeric are constant values per pulse; dict are machine-specific per pulse.
         string_desc = [d for d in cw_row["_descriptors"] if isinstance(d[1], str)]
-        numeric_desc = [d for d in cw_row["_descriptors"] if not isinstance(d[1], str)]
+        numeric_desc = [d for d in cw_row["_descriptors"] if is_number(d[1])]
+        dict_desc = [d for d in cw_row["_descriptors"] if isinstance(d[1], dict)]
 
         for imas_path in cw_row["_paths"]:
             ids_root = imas_path.split("/")[0]
@@ -538,6 +553,13 @@ def process_pulse(
                 if ids_root == "temporary":
                     write_descriptors(pulse_ids[ids_root], writes, string_desc, depth)
 
+            # Write machine-specific (dict) companion strings to the pulse IDS.
+            if dict_desc and writes:
+                machine = data_row.get(machine_col) if machine_col else None
+                resolved = [(leaf, d[machine]) for leaf, d in dict_desc if machine in d]
+                if resolved:
+                    write_descriptors(pulse_ids[ids_root], writes, resolved, depth)
+
     # Backfill an empty root `time` (NaN time column) so dynamic nodes can fit in arrays.
     for ids in pulse_ids.values():
         backfill_time(ids)
@@ -556,6 +578,9 @@ def build_ids(
     machine_col = machine_rows.iloc[0] if len(machine_rows) else None
     if machine_col is None and crosswalk["_errors"].notna().any():
         raise ValueError("errors column is used but no row maps to 'summary/machine' to key the lookup")
+    has_dict_source = crosswalk["_descriptors"].apply(lambda ds: any(isinstance(v, dict) for _, v in ds)).any()
+    if machine_col is None and has_dict_source:
+        raise ValueError("dict source is used but no row maps to 'summary/machine' to key the lookup")
 
     # Loop over data rows.
     print("Loading...")

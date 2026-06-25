@@ -196,8 +196,8 @@ This applies to every transform type (`identity`, `dictionary` including
 dictionary-of-lists, and `formula`).  For dictionary-of-lists, the companion
 string is written alongside each expanded AoS slot.
 
-If `source` is blank the script falls back to `csv_description` and emits
-a warning.
+If `source` is blank, the companion leaf is omitted and the value is
+written as a bare node (same as `needs_source = False`).
 
 The companion (source) string is **not** stored in the pulses.  Because it is
 constant across pulses, it is written **once** into a separate reference entry
@@ -226,10 +226,30 @@ companions, by contrast, are only written when the row has a real value.)
 So the companion routing is asymmetric by type:
 
 - **string** `source` → written once to the reference entry, when the value is present;
-- **numeric** `source` → written into every pulse, unconditionally.
+- **numeric** `source` → written into every pulse, unconditionally;
+- **dict** `source` → resolved per pulse by machine name, written to the pulse IDS (see below).
 
 **Constraint:** both named leaves must exist as sub-fields of the `imas_path`
 node.  Check the Data Dictionary before setting `needs_source` on a new row.
+
+### Machine-specific source
+
+When provenance differs across machines, set `source` to a Python dict literal
+mapping machine name to the provenance string.  The cell is parsed with
+`ast.literal_eval()` and must be a valid dict literal.
+
+```
+# needs_source=True, source = {"AUG": "EFIT", "JET": "JFIT"}
+# imas_path = "summary/global_quantities/ip"
+summary/global_quantities/ip/value  ← transformed CSV value (per pulse)
+summary/global_quantities/ip/source ← "EFIT" for AUG pulses, "JFIT" for JET pulses
+```
+
+Unlike plain string sources (which go into the reference entry), a dict source
+is resolved per pulse against the pulse's machine name and written into the
+**pulse IDS**.  Machines not present as keys are silently skipped.  A
+`summary/machine` mapping row is required; the script raises at load if none
+exists and a dict source is in use.
 
 ---
 
@@ -308,11 +328,13 @@ As with physics-IDS rows, the value goes to the pulse and the descriptor
 strings (here the identifier name/description) go to the reference:
 
 ```
-# pulse
+# pulse (written every pulse)
 constant_float0d(n)/value                    ← transformed CSV value
-# reference (written once)
-constant_float0d(n)/identifier/name          ← csv_column name
+constant_float0d(n)/identifier/name          ← source (if present), else csv_column
 constant_float0d(n)/identifier/description   ← csv_description (if present)
+# reference (written once, for overlay)
+constant_float0d(n)/identifier/name          ← same as pulse
+constant_float0d(n)/identifier/description   ← same as pulse
 ```
 
 The `imas_path` column is ignored for temporary rows; the entire path is
