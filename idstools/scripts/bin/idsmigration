@@ -535,6 +535,8 @@ def process_pulse(
                 if ids_root not in reference_ids:
                     reference_ids[ids_root] = new_ids(factory, ids_root)
                 write_descriptors(reference_ids[ids_root], writes, string_desc, depth)
+                if ids_root == "temporary":
+                    write_descriptors(pulse_ids[ids_root], writes, string_desc, depth)
 
     # Backfill an empty root `time` (NaN time column) so dynamic nodes can fit in arrays.
     for ids in pulse_ids.values():
