@@ -333,6 +333,15 @@ The `imas_path` column is ignored for temporary rows; the entire path is
 derived from `csv_dtype`.  Temporary rows are otherwise processed identically
 to physics-IDS rows (same transforms, same value/descriptor split).
 
+### Diversion under `--simdb`
+
+By default the `temporary` IDS is written to the HDF5 backend like any other root.
+When the script is run with `--simdb` (see [SimDB ingestion](#simdb-ingestion---simdb)),
+the `temporary` IDS is built in memory exactly as above but **not** written to disk;
+instead its scalars are read back out (`identifier/name` → `value`) and attached to the
+pulse's SimDB manifest as `variables.*` metadata.  `csv_dtype` still drives the in-memory
+layout in both cases.
+
 ---
 
 ## Status values
@@ -385,6 +394,7 @@ defaults are:
 | `-d`, `--dataset` | `2008_data.csv` | Input CSV filename under `resources/input/` |
 | `-m`, `--mapping` | `2008_crosswalk.xlsx` | Crosswalk spreadsheet filename under `resources/mappings/` |
 | `--dd-version` | `4.1.1` | Data Dictionary version used to build the IDS factory |
+| `--simdb` | off | Ingest each migrated pulse into the local SimDB (see below) |
 
 Output is one HDF5 directory per pulse, under the folder named by `-e`/`--experiment` (the default
 `2008` is shown):
@@ -403,3 +413,27 @@ uri = "imas:hdf5?path=resources/results/2008/pulse_0000;pulse=0"
 with imas.DBEntry(uri, "r") as entry:
     summary = entry.get("summary")
 ```
+
+---
+
+## SimDB ingestion (`--simdb`)
+
+`simdb` is an **optional** dependency.  When it is importable and `--simdb` is passed,
+the migration ingests **one SimDB entry per pulse** as it runs.  If `--simdb` is given but
+the package is not importable, the script prints a warning and continues the migration with
+ingestion disabled.
+
+Each entry's manifest carries:
+
+| Field | Source |
+|-------|--------|
+| `alias` | `{dataset}-{machine}-{index}`, where `dataset` is the `--experiment` value and `index` is a per-machine counter |
+| `metadata.dataset` / `metadata.machine` | the experiment label and the pulse's `summary/machine` value |
+| `metadata.variables.*` | scalars diverted from the in-memory `temporary` IDS (see [Diversion under `--simdb`](#diversion-under---simdb)) |
+| `outputs.uri` | `imas:hdf5?path=<pulse_dir>#summary` — a **reference** to the on-disk summary IDS |
+
+SimDB is a metadata catalogue: it stores the manifest plus a checksummed *reference* to the
+`summary` IDS, not its array data.  The `summary` IDS is therefore always written to HDF5,
+with or without `--simdb`; only the `temporary` IDS write is suppressed when ingesting.
+A `summary/machine` mapping row is required; the script raises at load if `--simdb` is used
+without one.

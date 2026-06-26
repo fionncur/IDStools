@@ -16,6 +16,7 @@ import ast
 import re
 import logging
 import time
+import pathlib
 from datetime import timedelta
 import imas
 import pandas as pd
@@ -23,6 +24,17 @@ import numpy as np
 import os
 
 from rich_argparse import RichHelpFormatter
+
+# SimDB is an optional dependency: the --simdb step is disabled if it is not importable.
+try:
+    from simdb.config.config import Config
+    from simdb.database import get_local_db, DatabaseError
+    from simdb.cli.manifest import Manifest
+    from simdb.database.models import Simulation
+
+    SIMDB_AVAILABLE = True
+except ImportError:
+    SIMDB_AVAILABLE = False
 
 logging.getLogger("imas").setLevel(logging.WARNING)  # Avoid IMAS errors for type mismatches.
 
@@ -330,6 +342,12 @@ def parse_args() -> argparse.Namespace:
         default="4.1.1",
         help="Data Dictionary version used to build the IDS factory \t(default=%(default)s)",
     )
+    parser.add_argument(
+        "--simdb",
+        action="store_true",
+        help="Ingest each migrated pulse into the local SimDB; diverts temporary quantities "
+        "into manifest variables instead of a temporary IDS \t(requires the simdb package)",
+    )
     return parser.parse_args()
 
 
@@ -565,23 +583,89 @@ def process_pulse(
     return pulse_ids
 
 
+# ---------------------------------------------------------------------------
+# SimDB ingestion (optional --simdb step)
+# ---------------------------------------------------------------------------
+
+
+def extract_variables(temporary_ids: IDS) -> dict:
+    """Read scalars out of an in-memory `temporary` IDS into a {name: value} dict.
+
+    Mirrors the original two-stage pipeline (simdb_ingest._read_temporary_scalars) but reads
+    the IDS already in memory rather than from disk, so names/values stay identical.
+    """
+    result: dict[str, Any] = {}
+    for el in temporary_ids.constant_float0d:
+        name = str(el.identifier.name)
+        if name and el.value.has_value:
+            result[name] = float(el.value)
+    for el in temporary_ids.constant_integer0d:
+        name = str(el.identifier.name)
+        if name and el.value.has_value:
+            result[name] = int(el.value)
+    for el in temporary_ids.constant_string0d:
+        name = str(el.identifier.name)
+        if name and el.value.has_value:
+            result[name] = str(el.value)
+    return result
+
+
+def make_manifest(pulse_dir: str, dataset: str, machine: str, index: int, variables: dict) -> "Manifest":
+    """Build a SimDB Manifest for one migrated pulse (one entry per pulse)."""
+    metadata = [
+        {"dataset": dataset},
+        {"machine": machine},
+        {"code": {"name": "idsmigration", "version": ""}},
+        {"description": f"{machine} pulse from the {dataset} database migrated to IMAS HDF5."},
+    ]
+    if variables:
+        metadata.append({"variables": variables})
+    uri = f"imas:hdf5?path={os.path.abspath(pulse_dir).replace(os.sep, '/')}#summary"
+    data = {
+        "manifest_version": 2,
+        "alias": f"{dataset}-{machine.lower()}-{index}",
+        "inputs": [],
+        "outputs": [{"uri": uri}],
+        "metadata": metadata,
+    }
+    m = Manifest()
+    m._data = data
+    m._path = pathlib.Path(pulse_dir).resolve() / "manifest.yaml"
+    m._metadata = {"metadata": metadata}
+    return m
+
+
 def run_migration(
     crosswalk: pd.DataFrame,
     data: pd.DataFrame,
     factory: imas.IDSFactory,
     output_dir: str,
+    dataset: str = "",
+    simdb_enabled: bool = False,
+    config: Any = None,
+    db: Any = None,
 ) -> None:
-    """Build and write each pulse to disk immediately, without accumulating in memory."""
+    """Build and write each pulse to disk immediately, without accumulating in memory.
+
+    When `simdb_enabled`, the in-memory `temporary` IDS is diverted into the SimDB manifest as
+    `variables` metadata instead of being written to HDF5, and one SimDB entry is ingested per
+    pulse. The `summary` IDS is always written to disk (SimDB catalogues it by reference).
+    """
     machine_rows = crosswalk.loc[crosswalk["imas_path"] == "summary/machine", "csv_column"]
     machine_col = machine_rows.iloc[0] if len(machine_rows) else None
     if machine_col is None and crosswalk["_errors"].notna().any():
         raise ValueError("errors column is used but no row maps to 'summary/machine' to key the lookup")
     if machine_col is None and crosswalk["_dict_descs"].apply(bool).any():
         raise ValueError("dict source is used but no row maps to 'summary/machine' to key the lookup")
+    if simdb_enabled and machine_col is None:
+        raise ValueError("--simdb is set but no row maps to 'summary/machine' to label each entry")
 
     os.makedirs(output_dir, exist_ok=True)
     total = len(data)
     done = 0
+    counters: dict[str, int] = {}  # per-machine entry index for the SimDB alias
+    ingested = 0
+    failed: list[str] = []
     start = time.monotonic()
     last_report = start
 
@@ -589,15 +673,43 @@ def run_migration(
         if data_row.isna().all():
             continue
         pulse_ids = process_pulse(data_row, crosswalk, factory, machine_col)
+
+        # When ingesting into SimDB, the temporary IDS is diverted into manifest variables
+        # rather than written to disk; otherwise it is written like any other root.
+        temp_ids = pulse_ids.pop("temporary", None) if simdb_enabled else None
+
         pulse_dir = os.path.join(output_dir, f"pulse_{pulse_idx:04d}")
         os.makedirs(pulse_dir, exist_ok=True)
         with imas.DBEntry(f"imas:hdf5?path={pulse_dir};pulse=0", "w") as entry:
             for ids in pulse_ids.values():
                 entry.put(ids)
         done += 1
+
+        if simdb_enabled:
+            machine = str(data_row[machine_col])
+            index = counters.get(machine, 0)
+            counters[machine] = index + 1
+            alias = f"{dataset}-{machine.lower()}-{index}"
+            variables = extract_variables(temp_ids) if temp_ids is not None else {}
+            manifest = make_manifest(pulse_dir, dataset, machine, index, variables)
+            try:
+                try:
+                    db.delete_simulation(alias)  # overwrite: drop any existing entry for this alias
+                except DatabaseError:
+                    pass  # no existing entry to replace
+                db.insert_simulation(Simulation(manifest, config))
+                ingested += 1
+            except Exception as exc:
+                print(f"  SimDB ingest FAILED for {alias}: {exc}")
+                failed.append(f"pulse_{pulse_idx:04d}")
+
         last_report = report_progress(done, total, pulse_idx, start, last_report)
 
     report_summary("Processed", done, total, start, f" to {output_dir}")
+    if simdb_enabled:
+        report_summary("Ingested", ingested, done, start, " into SimDB")
+        if failed:
+            print("Failed to ingest:", failed)
 
 
 # ---------------------------------------------------------------------------
@@ -614,7 +726,26 @@ def main() -> None:
     crosswalk = validate(crosswalk, data)  # validate *does* modify the df in case of "bad_source"
     crosswalk = build_write_spec(crosswalk)
     factory = imas.IDSFactory(version=args.dd_version)
-    run_migration(crosswalk, data, factory, output_dir)
+
+    simdb_enabled = args.simdb
+    config = db = None
+    if args.simdb and not SIMDB_AVAILABLE:
+        print("WARNING: --simdb given but the 'simdb' package is not importable — skipping ingestion")
+        simdb_enabled = False
+    elif simdb_enabled:
+        config = Config()
+        db = get_local_db(config)
+
+    run_migration(
+        crosswalk,
+        data,
+        factory,
+        output_dir,
+        dataset=args.experiment,
+        simdb_enabled=simdb_enabled,
+        config=config,
+        db=db,
+    )
 
 
 if __name__ == "__main__":
