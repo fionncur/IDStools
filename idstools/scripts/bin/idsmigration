@@ -21,7 +21,6 @@ from datetime import timedelta
 import imas
 import pandas as pd
 import numpy as np
-import os
 
 from rich_argparse import RichHelpFormatter
 
@@ -38,10 +37,10 @@ except ImportError:
 
 logging.getLogger("imas").setLevel(logging.WARNING)  # Avoid IMAS errors for type mismatches.
 
-HERE = os.path.dirname(os.path.abspath(__file__))  # .../idstools/scripts/bin
-ROOT = os.path.dirname(os.path.dirname(os.path.dirname(HERE)))  # .../IDStools
-mappings_dir = os.path.join(ROOT, "resources", "mappings")
-input_dir = os.path.join(ROOT, "resources", "input")
+HERE = pathlib.Path(__file__).resolve().parent  # .../idstools/scripts/bin
+ROOT = HERE.parents[2]  # .../IDStools
+mappings_dir = ROOT / "resources" / "mappings"
+input_dir = ROOT / "resources" / "input"
 
 # Type aliases for the structures passed between the helpers below.
 IDS = Any  # an IMAS top-level IDS object (summary, equilibrium, ...)
@@ -351,11 +350,11 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def resolve_io_paths(args: argparse.Namespace) -> tuple[str, str, str]:
+def resolve_io_paths(args: argparse.Namespace) -> tuple[pathlib.Path, pathlib.Path, pathlib.Path]:
     """Resolve (data_path, mapping_path, output_dir) from the parsed CLI args."""
-    data_path = os.path.join(input_dir, args.dataset)
-    mapping_path = os.path.join(mappings_dir, args.mapping)
-    output_dir = os.path.join(ROOT, "resources", "results", args.experiment)
+    data_path = input_dir / args.dataset
+    mapping_path = mappings_dir / args.mapping
+    output_dir = ROOT / "resources" / "results" / args.experiment
     return data_path, mapping_path, output_dir
 
 
@@ -610,7 +609,7 @@ def extract_variables(temporary_ids: IDS) -> dict:
     return result
 
 
-def make_manifest(pulse_dir: str, dataset: str, machine: str, index: int, variables: dict) -> "Manifest":
+def make_manifest(pulse_dir: pathlib.Path, dataset: str, machine: str, index: int, variables: dict) -> "Manifest":
     """Build a SimDB Manifest for one migrated pulse (one entry per pulse)."""
     metadata = [
         {"dataset": dataset},
@@ -620,7 +619,7 @@ def make_manifest(pulse_dir: str, dataset: str, machine: str, index: int, variab
     ]
     if variables:
         metadata.append({"variables": variables})
-    uri = f"imas:hdf5?path={os.path.abspath(pulse_dir).replace(os.sep, '/')}#summary"
+    uri = f"imas:hdf5?path={pathlib.Path(pulse_dir).resolve().as_posix()}#summary"
     data = {
         "manifest_version": 2,
         "alias": f"{dataset}-{machine.lower()}-{index}",
@@ -639,7 +638,7 @@ def run_migration(
     crosswalk: pd.DataFrame,
     data: pd.DataFrame,
     factory: imas.IDSFactory,
-    output_dir: str,
+    output_dir: pathlib.Path,
     dataset: str = "",
     simdb_enabled: bool = False,
     config: Any = None,
@@ -660,7 +659,7 @@ def run_migration(
     if simdb_enabled and machine_col is None:
         raise ValueError("--simdb is set but no row maps to 'summary/machine' to label each entry")
 
-    os.makedirs(output_dir, exist_ok=True)
+    output_dir.mkdir(parents=True, exist_ok=True)
     total = len(data)
     done = 0
     counters: dict[str, int] = {}  # per-machine entry index for the SimDB alias
@@ -678,8 +677,8 @@ def run_migration(
         # rather than written to disk; otherwise it is written like any other root.
         temp_ids = pulse_ids.pop("temporary", None) if simdb_enabled else None
 
-        pulse_dir = os.path.join(output_dir, f"pulse_{pulse_idx:04d}")
-        os.makedirs(pulse_dir, exist_ok=True)
+        pulse_dir = output_dir / f"pulse_{pulse_idx:04d}"
+        pulse_dir.mkdir(parents=True, exist_ok=True)
         with imas.DBEntry(f"imas:hdf5?path={pulse_dir};pulse=0", "w") as entry:
             for ids in pulse_ids.values():
                 entry.put(ids)
