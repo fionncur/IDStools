@@ -378,12 +378,9 @@ def load_crosswalk(mapping_path: str) -> pd.DataFrame:
 
 
 def load_dataset(data_path: str) -> pd.DataFrame:
-    """Import experimental data from csv and apply (machine-specific) cleaning."""
+    """Import experimental data from csv and strip leading/trailing whitespace from string cells."""
     data = pd.read_csv(data_path, na_values=["-", "????????", "??????????", "********", "."])
-    data = data.map(
-        lambda x: (x.strip() or np.nan) if isinstance(x, str) else x
-    )  # Important for CMOD, but very data/machine specific. Remove in later version.
-    return data
+    return data.map(lambda x: (x.strip() or np.nan) if isinstance(x, str) else x)
 
 
 def validate(df: pd.DataFrame, data: pd.DataFrame) -> pd.DataFrame:
@@ -416,23 +413,28 @@ def validate(df: pd.DataFrame, data: pd.DataFrame) -> pd.DataFrame:
 def build_write_spec(df: pd.DataFrame) -> pd.DataFrame:
     """Build the per-row write spec columns used by the main loop:
 
-      _paths       : imas_path(s) to write to ("&"-split for multi-target rows)
-      _value_leaf  : leaf appended to each path for the value ("" = bare node)
-      _descriptors : list of (leaf_segments, value) written into the pulse alongside values
+      _paths      : imas_path(s) to write to ("&"-split for multi-target rows)
+      _value_leaf : leaf appended to each path for the value ("" = bare node)
+      _str_descs  : pre-classified string descriptors  (leaf_segments, str)
+      _num_descs  : pre-classified numeric descriptors (leaf_segments, number)
+      _dict_descs : pre-classified dict descriptors    (leaf_segments, dict)
 
     Temporary rows are folded into the same structure with a stable AoS index, assigned here
     in crosswalk order so a variable keeps the same slot in every pulse (deterministic layout).
     """
     temp_idx: dict[str, int] = {}  # dictionary to track temp paths: indices
     temp_seen: dict[str, Any] = {}  # resolved "temporary/..." path -> first row (clash warning)
-    paths_list, value_leaf_list, descriptors_list = [], [], []
+    paths_list, value_leaf_list = [], []
+    str_descs_list, num_descs_list, dict_descs_list = [], [], []
     for _, cw_row in df.iterrows():
         if cw_row["status"] == "temporary":
             bucket_raw = cw_row["csv_dtype"]
             if not isinstance(bucket_raw, str) or bucket_raw.strip() == "":
                 paths_list.append([])  # missing csv_dtype, already warned upfront
                 value_leaf_list.append("value")
-                descriptors_list.append([])
+                str_descs_list.append([])
+                num_descs_list.append([])
+                dict_descs_list.append([])
                 continue
             bucket_base, _ = parse_seg(bucket_raw)
             if "(:)" in bucket_raw:
@@ -456,7 +458,9 @@ def build_write_spec(df: pd.DataFrame) -> pd.DataFrame:
                 descriptors.append((["identifier", "description"], cw_row["csv_description"]))
             paths_list.append([path])
             value_leaf_list.append("value")
-            descriptors_list.append(descriptors)
+            str_descs_list.append([d for d in descriptors if isinstance(d[1], str)])
+            num_descs_list.append([d for d in descriptors if is_number(d[1])])
+            dict_descs_list.append([d for d in descriptors if isinstance(d[1], dict)])
         else:
             imas_path = cw_row["imas_path"]
             if not isinstance(imas_path, str):
@@ -466,13 +470,18 @@ def build_write_spec(df: pd.DataFrame) -> pd.DataFrame:
                 value_leaf_list.append(cw_row["_source_pair"][0])
                 source = cw_row["source"]
                 has_source = isinstance(source, (str, dict)) or (is_number(source) and pd.notna(source))
-                descriptors_list.append([(cw_row["_source_pair"][1].split("/"), source)] if has_source else [])
+                descriptors = [(cw_row["_source_pair"][1].split("/"), source)] if has_source else []
             else:
                 value_leaf_list.append("")
-                descriptors_list.append([])
+                descriptors = []
+            str_descs_list.append([d for d in descriptors if isinstance(d[1], str)])
+            num_descs_list.append([d for d in descriptors if is_number(d[1])])
+            dict_descs_list.append([d for d in descriptors if isinstance(d[1], dict)])
     df["_paths"] = pd.Series(paths_list, index=df.index, dtype=object)
     df["_value_leaf"] = pd.Series(value_leaf_list, index=df.index, dtype=object)
-    df["_descriptors"] = pd.Series(descriptors_list, index=df.index, dtype=object)
+    df["_str_descs"] = pd.Series(str_descs_list, index=df.index, dtype=object)
+    df["_num_descs"] = pd.Series(num_descs_list, index=df.index, dtype=object)
+    df["_dict_descs"] = pd.Series(dict_descs_list, index=df.index, dtype=object)
     return df
 
 
@@ -494,10 +503,10 @@ def process_pulse(
         value = data_row[cw_row["csv_column"]]
         value_present = not pd.isna(value)
 
-        # Numeric companions are constant values per pulse; string/dict are gated on value presence.
-        string_desc = [d for d in cw_row["_descriptors"] if isinstance(d[1], str)]
-        numeric_desc = [d for d in cw_row["_descriptors"] if is_number(d[1])]
-        dict_desc = [d for d in cw_row["_descriptors"] if isinstance(d[1], dict)]
+        # Descriptor types pre-classified in build_write_spec; numeric ungated, string/dict gated on value.
+        string_desc = cw_row["_str_descs"]
+        numeric_desc = cw_row["_num_descs"]
+        dict_desc = cw_row["_dict_descs"]
 
         for imas_path in cw_row["_paths"]:
             ids_root = imas_path.split("/")[0]
@@ -556,58 +565,39 @@ def process_pulse(
     return pulse_ids
 
 
-def build_ids(crosswalk: pd.DataFrame, data: pd.DataFrame, factory: imas.IDSFactory) -> dict[Any, dict[str, IDS]]:
-    """Build all pulse IDSs in memory; returns ids_by_pulse."""
-    ids_by_pulse: dict[Any, dict[str, IDS]] = {}
-
-    # Error bars and dict sources are looked up per pulse by machine: find the column mapped to summary/machine.
+def run_migration(
+    crosswalk: pd.DataFrame,
+    data: pd.DataFrame,
+    factory: imas.IDSFactory,
+    output_dir: str,
+) -> None:
+    """Build and write each pulse to disk immediately, without accumulating in memory."""
     machine_rows = crosswalk.loc[crosswalk["imas_path"] == "summary/machine", "csv_column"]
     machine_col = machine_rows.iloc[0] if len(machine_rows) else None
     if machine_col is None and crosswalk["_errors"].notna().any():
         raise ValueError("errors column is used but no row maps to 'summary/machine' to key the lookup")
-    has_dict_source = crosswalk["_descriptors"].apply(lambda ds: any(isinstance(v, dict) for _, v in ds)).any()
-    if machine_col is None and has_dict_source:
+    if machine_col is None and crosswalk["_dict_descs"].apply(bool).any():
         raise ValueError("dict source is used but no row maps to 'summary/machine' to key the lookup")
 
-    # Loop over data rows.
-    print("Loading...")
-    total_rows = len(data)
-    loaded = 0
-    load_start = time.monotonic()
-    load_last_report = load_start
+    os.makedirs(output_dir, exist_ok=True)
+    total = len(data)
+    done = 0
+    start = time.monotonic()
+    last_report = start
 
     for pulse_idx, data_row in data.iterrows():
         if data_row.isna().all():
             continue
         pulse_ids = process_pulse(data_row, crosswalk, factory, machine_col)
-        ids_by_pulse[pulse_idx] = pulse_ids
-        loaded += 1
-        load_last_report = report_progress(loaded, total_rows, pulse_idx, load_start, load_last_report)
-
-    report_summary("Loaded", loaded, total_rows, load_start, " into memory")
-    return ids_by_pulse
-
-
-def write_pulses(ids_by_pulse: dict[Any, dict[str, IDS]], output_dir: str) -> None:
-    """Write each pulse's IDSs to its own HDF5 DBEntry under output_dir."""
-    print("Writing...")
-    os.makedirs(output_dir, exist_ok=True)
-    total = len(ids_by_pulse)
-    written = 0
-    write_start = time.monotonic()
-    write_last_report = write_start
-
-    for pulse, pulse_ids in ids_by_pulse.items():
-        pulse_dir = os.path.join(output_dir, f"pulse_{pulse:04d}")
+        pulse_dir = os.path.join(output_dir, f"pulse_{pulse_idx:04d}")
         os.makedirs(pulse_dir, exist_ok=True)
-        uri = f"imas:hdf5?path={pulse_dir};pulse=0"
-        with imas.DBEntry(uri, "a") as entry:
+        with imas.DBEntry(f"imas:hdf5?path={pulse_dir};pulse=0", "w") as entry:
             for ids in pulse_ids.values():
                 entry.put(ids)
-        written += 1
-        write_last_report = report_progress(written, total, pulse, write_start, write_last_report)
+        done += 1
+        last_report = report_progress(done, total, pulse_idx, start, last_report)
 
-    report_summary("Wrote", written, total, write_start, f" to {output_dir}")
+    report_summary("Processed", done, total, start, f" to {output_dir}")
 
 
 # ---------------------------------------------------------------------------
@@ -624,8 +614,7 @@ def main() -> None:
     crosswalk = validate(crosswalk, data)  # validate *does* modify the df in case of "bad_source"
     crosswalk = build_write_spec(crosswalk)
     factory = imas.IDSFactory(version=args.dd_version)
-    ids_by_pulse = build_ids(crosswalk, data, factory)
-    write_pulses(ids_by_pulse, output_dir)
+    run_migration(crosswalk, data, factory, output_dir)
 
 
 if __name__ == "__main__":
