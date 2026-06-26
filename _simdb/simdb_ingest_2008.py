@@ -1,4 +1,4 @@
-"""Ingest TC-26 IMAS pulse data into local SimDB, one entry per pulse."""
+"""Ingest 2008 IMAS pulse data into local SimDB, one entry per pulse."""
 
 import pathlib
 import time
@@ -14,7 +14,7 @@ import logging
 logging.getLogger("imas").setLevel(logging.WARNING)
 
 REPO_ROOT = pathlib.Path(__file__).parent.parent
-TC26_ROOT = REPO_ROOT / "resources" / "results" / "tc26"
+DB2008_ROOT = REPO_ROOT / "resources" / "results" / "2008"
 SIMDB_DIR = pathlib.Path(__file__).parent
 
 CODE_NAME = "idsmigration"
@@ -22,7 +22,6 @@ CODE_VERSION = ""
 DB_REF = ""
 
 
-# Copied from idstools/scripts/bin/idsmigration.
 def _report_progress(
     count: int, total: int, label: str, start: float, last_report: float, interval: float = 5.0
 ) -> float:
@@ -72,14 +71,14 @@ def _read_temporary_scalars(pulse_dir: pathlib.Path) -> dict:
 
 
 def make_manifest(pulse_dir: pathlib.Path, machine: str, index: int, variables: dict) -> Manifest:
-    alias = f"tc26-{machine.lower()}-{index}"
+    alias = f"2008-{machine.lower()}-{index}"
     metadata = [
-        {"dataset": "tc26"},
+        {"dataset": "2008"},
         {"machine": machine},
         {"code": {"name": CODE_NAME, "version": CODE_VERSION}},
         {
             "description": (
-                f"{machine} pulse from ITPA TC-26 L-H threshold database migrated to IMAS HDF5. "
+                f"{machine} pulse from the 2008 ITPA L-H threshold database migrated to IMAS HDF5. "
                 f"Reference: {DB_REF}."
             )
         },
@@ -101,7 +100,7 @@ def make_manifest(pulse_dir: pathlib.Path, machine: str, index: int, variables: 
 
 
 def main():
-    pulse_dirs = sorted(p for p in TC26_ROOT.iterdir() if p.name.startswith("pulse_"))
+    pulse_dirs = sorted(p for p in DB2008_ROOT.iterdir() if p.name.startswith("pulse_"))
     total = len(pulse_dirs)
     print(f"Reading {total} pulses ...")
 
@@ -129,7 +128,7 @@ def main():
         machine = labels[p]
         idx = counters.get(machine, 0)
         counters[machine] = idx + 1
-        alias = f"tc26-{machine.lower()}-{idx}"
+        alias = f"2008-{machine.lower()}-{idx}"
         try:
             sim = Simulation(make_manifest(p, machine, idx, temp_vars[p]), config)
             db.insert_simulation(sim)
