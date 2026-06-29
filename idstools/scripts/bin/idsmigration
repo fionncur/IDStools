@@ -189,7 +189,7 @@ def _np_dtype(data_type: Any) -> Any:
 
 
 def _empty_fill(data_type: Any) -> Any:
-    """IMAS empty sentinel for an IDS numeric leaf, used to pad missing time-slices."""
+    """IMAS empty placeholder for an IDS numeric leaf, used to pad missing time-slices."""
     return imas.ids_defs.EMPTY_INT if data_type.name == "INT" else imas.ids_defs.EMPTY_FLOAT
 
 
@@ -208,7 +208,7 @@ def _values_equal(a: Any, b: Any) -> bool:
 def set_slice(parent: IDS, leaf: str, target: Any, value: Any, slice_index: int, n_slices: int) -> None:
     """Place `value` at `slice_index`, growing the leaf to `n_slices` with appropriate padding.
 
-    Numeric leaves use IMAS empty sentinels; string leaves pad with "".
+    Numeric leaves use IMAS empty placeholders; string leaves pad with "".
     """
     if target.metadata.data_type.name == "STR":
         cur = list(target.value) if target.has_value else []
@@ -832,7 +832,7 @@ def run_migration(
     """Build and write each pulse to disk immediately, without accumulating in memory.
 
     Default: one IDS set per pulse (rows grouped by (machine, pulse), dynamic nodes carry the
-    ordered time-slices). With `per_time_slice=False`, one IDS set per CSV row.
+    ordered time-slices). With `--per-time-slice`, one IDS set per CSV row.
 
     When `simdb_enabled`, the in-memory `temporary` IDS is diverted into the SimDB manifest as
     `variables` metadata instead of being written to disk, and one SimDB entry is ingested per
@@ -856,22 +856,22 @@ def run_migration(
 
     time_rows = crosswalk.loc[crosswalk["imas_path"].apply(_maps_summary_time), "csv_column"]
     time_col = time_rows.iloc[0] if len(time_rows) else None
-    if per_time_slice and pulse_col is None:
-        raise ValueError("--per-pulse is set but no row maps to 'summary/pulse' to group time-slices")
-    if per_time_slice and machine_col is None:
-        raise ValueError("--per-pulse is set but no row maps to 'summary/machine' to group/name pulses")
-    if per_time_slice and time_col is None:
-        print("WARNING: --per-pulse but no row maps to 'summary/time' — slices kept in CSV order")
+    if not per_time_slice and pulse_col is None:
+        raise ValueError("no row maps to 'summary/pulse' to group time-slices")
+    if not per_time_slice and machine_col is None:
+        raise ValueError("no row maps to 'summary/machine' to group/name pulses")
+    if not per_time_slice and time_col is None:
+        print("WARNING: no row maps to 'summary/time' — slices kept in CSV order")
 
     output_dir.mkdir(parents=True, exist_ok=True)
     done = 0
-    counters: dict[str, int] = {}  # per-machine entry index for the SimDB alias (per-row mode)
+    counters: dict[str, int] = {}  # per-machine entry index for the SimDB alias (per-time-slice mode)
     ingested = 0
     failed: list[str] = []
     start = time.monotonic()
     last_report = start
 
-    if per_time_slice:
+    if not per_time_slice:
         groups = list(data.groupby([machine_col, pulse_col], sort=False))
         total = len(groups)
         for (machine, pulse), gdf in groups:
@@ -913,7 +913,7 @@ def run_migration(
                     ingested += 1
 
             last_report = report_progress(done, total, ctx, start, last_report)
-    else:
+    else:  # --per-time-slice: one IDS per CSV row
         total = len(data)
         for pulse_idx, data_row in data.iterrows():
             if data_row.isna().all():
