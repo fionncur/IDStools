@@ -584,7 +584,8 @@ def build_write_spec(df: pd.DataFrame) -> pd.DataFrame:
                 )
             else:
                 temp_seen[path] = cw_row.name
-            name_val = cw_row["source"] if isinstance(cw_row["source"], str) else cw_row["csv_column"]
+            std_name = cw_row.get("imas_standard_name", "")
+            name_val = std_name if isinstance(std_name, str) and std_name.strip() else cw_row["csv_column"]
             descriptors = [(["identifier", "name"], name_val)]
             if isinstance(cw_row["csv_description"], str):
                 descriptors.append((["identifier", "description"], cw_row["csv_description"]))
