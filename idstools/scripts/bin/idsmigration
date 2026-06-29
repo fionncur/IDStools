@@ -171,7 +171,7 @@ def new_ids(factory: imas.IDSFactory, name: str) -> IDS:
 
 
 def resolve_parent(ids: IDS, branch: Branch) -> tuple[IDS, str]:
-    """Take IDS object and list of node segments, return parent IDS object and the final branch node."""
+    """Navigate to the parent of the branch leaf, resizing any struct-arrays as needed."""
     node = ids
     for seg in branch[:-1]:
         attr, idx = parse_seg(seg)
@@ -183,35 +183,139 @@ def resolve_parent(ids: IDS, branch: Branch) -> tuple[IDS, str]:
     return node, branch[-1]
 
 
-def set_leaf(ids: IDS, branch: Branch, value: Any) -> None:
-    """Write `value` to the leaf at `branch`, resizing AoS / wrapping numeric arrays as needed."""
+def _np_dtype(data_type: Any) -> Any:
+    """numpy dtype for an IDS numeric leaf (int leaves -> int32, everything else -> float)."""
+    return np.int32 if data_type.name == "INT" else np.float64
+
+
+def _empty_fill(data_type: Any) -> Any:
+    """IMAS empty sentinel for an IDS numeric leaf, used to pad missing time-slices."""
+    return imas.ids_defs.EMPTY_INT if data_type.name == "INT" else imas.ids_defs.EMPTY_FLOAT
+
+
+def _values_equal(a: Any, b: Any) -> bool:
+    """Loose equality used for the constant-consistency check across a pulse's time-slices."""
+    try:
+        if isinstance(a, np.ndarray) or isinstance(b, np.ndarray):
+            return np.array_equal(np.asarray(a), np.asarray(b), equal_nan=True)
+        if is_number(a) and is_number(b):
+            return bool(np.isclose(a, b, equal_nan=True))
+        return a == b
+    except Exception:
+        return False
+
+
+def set_slice(parent: IDS, leaf: str, target: Any, value: Any, slice_index: int, n_slices: int) -> None:
+    """Place `value` at `slice_index`, growing the leaf to `n_slices` with appropriate padding.
+
+    Numeric leaves use IMAS empty sentinels; string leaves pad with "".
+    """
+    if target.metadata.data_type.name == "STR":
+        cur = list(target.value) if target.has_value else []
+        if len(cur) < n_slices:
+            cur += [""] * (n_slices - len(cur))
+    else:
+        data_type = target.metadata.data_type
+        cur = (
+            np.atleast_1d(np.array(target.value, copy=True))
+            if target.has_value
+            else np.empty(0, dtype=_np_dtype(data_type))
+        )
+        if cur.size < n_slices:
+            grown = np.full(n_slices, _empty_fill(data_type), dtype=_np_dtype(data_type))
+            if cur.size:
+                grown[: cur.size] = cur
+            cur = grown
+    cur[slice_index] = value
+    setattr(parent, leaf, cur)
+
+
+def set_leaf(
+    ids: IDS,
+    branch: Branch,
+    value: Any,
+    slice_index: int = 0,
+    n_slices: int = 1,
+    const_ctx: str | None = None,
+    label: str | None = None,
+) -> None:
+    """Write `value` to the leaf at `branch` for time-slice `slice_index` of an `n_slices` pulse.
+
+    Dynamic numeric leaves are filled by array position; constant/static leaves are written once
+    and, when `n_slices > 1`, checked for agreement across slices (warn and keep first on mismatch).
+    """
     parent, leaf_seg = resolve_parent(ids, branch)
     leaf, _ = parse_seg(leaf_seg)
     target = getattr(parent, leaf)
 
     if isinstance(target, imas.ids_struct_array.IDSStructArray):
-        if len(target) == 0:
-            target.resize(1)
-        target[0] = value
+        if target.metadata.type.is_dynamic:
+            if len(target) <= slice_index:
+                target.resize(slice_index + 1, keep=True)
+            target[slice_index] = value
+        else:
+            if len(target) == 0:
+                target.resize(1)
+            target[0] = value
     elif isinstance(target, imas.ids_primitive.IDSNumericArray):
-        setattr(parent, leaf, np.atleast_1d(value))
+        if target.metadata.type.is_dynamic:
+            set_slice(parent, leaf, target, value, slice_index, n_slices)
+        else:
+            setattr(parent, leaf, np.atleast_1d(value))
+    elif target.metadata.data_type.name == "STR" and target.metadata.ndim >= 1:
+        set_slice(parent, leaf, target, value, slice_index, n_slices)
     else:
+        # Scalar / string leaf: constant or static. Write once; warn if it disagrees across slices.
+        if n_slices > 1 and target.has_value:
+            # Identify the quantity by its crosswalk variable name
+            name = label or "/".join(branch)
+            if not _values_equal(target.value, value) and (const_ctx, name) not in _warned_const_mismatch:
+                _warned_const_mismatch.add((const_ctx, name))
+                print(
+                    f"WARNING: constant '{name}' differs across slices of pulse "
+                    f"{const_ctx}: {target.value!r} vs {value!r} — keeping first"
+                )
+            return  # keep the first value
         setattr(parent, leaf, value)
 
 
-def write_values(ids: IDS, writes: list[Write]) -> None:
+def write_values(
+    ids: IDS,
+    writes: list[Write],
+    slice_index: int = 0,
+    n_slices: int = 1,
+    const_ctx: str | None = None,
+    label: str | None = None,
+) -> None:
     """Write resolved (branch, value) pairs to their leaves in the pulse `ids`."""
     for branch, value in writes:
-        set_leaf(ids, branch, value)
+        set_leaf(ids, branch, value, slice_index, n_slices, const_ctx, label)
 
 
-def write_companions(ids: IDS, anchor: Branch, descriptors: list[Descriptor]) -> None:
+def write_companions(
+    ids: IDS,
+    anchor: Branch,
+    descriptors: list[Descriptor],
+    slice_index: int = 0,
+    n_slices: int = 1,
+    const_ctx: str | None = None,
+    label: str | None = None,
+) -> None:
     """Write each companion (leaf_segments, value) at `anchor`, the shared parent node."""
     for desc_leaf, desc_val in descriptors:
-        set_leaf(ids, anchor + list(desc_leaf), desc_val)
+        set_leaf(ids, anchor + list(desc_leaf), desc_val, slice_index, n_slices, const_ctx, label)
 
 
-def write_descriptors(ids: IDS, writes: list[Write], descriptors: list[Descriptor], value_leaf_depth: int) -> None:
+def write_descriptors(
+    ids: IDS,
+    writes: list[Write],
+    descriptors: list[Descriptor],
+    value_leaf_depth: int,
+    slice_index: int = 0,
+    n_slices: int = 1,
+    const_ctx: str | None = None,
+    label: str | None = None,
+) -> None:
     """Write each descriptor (leaf_segments, value) into the pulse IDS alongside values.
 
     Each is written at the sibling of every value's parent node (branch[:-1]), so it
@@ -220,13 +324,17 @@ def write_descriptors(ids: IDS, writes: list[Write], descriptors: list[Descripto
     """
     for branch, _ in writes:
         anchor = branch[: len(branch) - value_leaf_depth]
-        write_companions(ids, anchor, descriptors)
+        write_companions(ids, anchor, descriptors, slice_index, n_slices, const_ctx, label)
 
 
-def backfill_time(ids: IDS) -> None:
-    """Backfill an empty root `time` (NaN time column) so dynamic nodes fit in arrays."""
+def backfill_time(ids: IDS, times: Any = None) -> None:
+    """Set the root `time` if it is still empty, so dynamic nodes have a coordinate.
+
+    Per-row mode passes nothing (a single NaN-equivalent [0.0] column); the per-pulse driver
+    passes the pulse's ordered time vector for any root not already populated via a TIME mapping.
+    """
     if ids.ids_properties.homogeneous_time == imas.ids_defs.IDS_TIME_MODE_HOMOGENEOUS and len(ids.time) == 0:
-        ids.time = np.array([0.0])
+        ids.time = np.asarray([0.0] if times is None else times, dtype=float)
 
 
 # ---------------------------------------------------------------------------
@@ -235,6 +343,7 @@ def backfill_time(ids: IDS) -> None:
 
 
 _warned_dict_misses: set[tuple[Any, Any]] = set()  # (row, value) pairs already warned about
+_warned_const_mismatch: set[tuple[Any, str]] = set()  # (pulse ctx, leaf path) already warned about
 
 
 def resolve_writes(ids_branch: Branch, value: Any, cw_row: pd.Series, data_row: pd.Series) -> list[Write]:
@@ -346,6 +455,12 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Ingest each migrated pulse into the local SimDB; diverts temporary quantities "
         "into manifest variables instead of a temporary IDS \t(requires the simdb package)",
+    )
+    parser.add_argument(
+        "--per-time-slice",
+        action="store_true",
+        help="Group CSV rows by (machine, pulse) and write one IDS set per pulse with all its "
+        "time-slices, instead of one IDS set per row",
     )
     return parser.parse_args()
 
@@ -474,7 +589,9 @@ def build_write_spec(df: pd.DataFrame) -> pd.DataFrame:
             if isinstance(cw_row["csv_description"], str):
                 descriptors.append((["identifier", "description"], cw_row["csv_description"]))
             paths_list.append([path])
-            value_leaf_list.append("value")
+            # Dynamic temporary buckets (dynamic_float1d/dynamic_integer1d) hold their per-slice
+            # series under value/data (over a local value/time); constant buckets store a scalar value.
+            value_leaf_list.append("value/data" if bucket_base.startswith("dynamic_") else "value")
             str_descs_list.append([d for d in descriptors if isinstance(d[1], str)])
             num_descs_list.append([d for d in descriptors if is_number(d[1])])
             dict_descs_list.append([d for d in descriptors if isinstance(d[1], dict)])
@@ -507,16 +624,24 @@ def process_pulse(
     crosswalk: pd.DataFrame,
     factory: imas.IDSFactory,
     machine_col: str | None = None,
+    *,
+    pulse_ids: dict[str, IDS] | None = None,
+    slice_index: int = 0,
+    n_slices: int = 1,
+    const_ctx: str | None = None,
 ) -> dict[str, IDS]:
-    """Build the per-root IDS dict for a single data row (pulse).
+    """Write one data row (= one time-slice) into the per-root IDS dict for a pulse.
 
-    All values and their companion descriptors (provenance strings, identifier names)
-    are written into the pulse IDS.
+    All values and their companion descriptors (provenance strings, identifier names) are
+    written into the pulse IDS at `slice_index`. Pass a shared `pulse_ids` and increasing
+    `slice_index` to accumulate a pulse's time-slices into one IDS set; the default
+    (fresh dict, single slice) reproduces the original one-IDS-per-row behaviour.
     """
-    pulse_ids: dict[str, IDS] = {}
+    if pulse_ids is None:
+        pulse_ids = {}
     for _, cw_row in crosswalk.iterrows():
 
-        # cw_row["csv_column"] names the column in `data`; data_row reads it.
+        var_label = cw_row["csv_column"]
         value = data_row[cw_row["csv_column"]]
         value_present = not pd.isna(value)
 
@@ -538,7 +663,16 @@ def process_pulse(
                 if ids_root not in pulse_ids:
                     pulse_ids[ids_root] = new_ids(factory, ids_root)
                 placeholder = replace_wildcard_index(value_branch, 0)
-                write_descriptors(pulse_ids[ids_root], [(placeholder, None)], numeric_desc, depth)
+                write_descriptors(
+                    pulse_ids[ids_root],
+                    [(placeholder, None)],
+                    numeric_desc,
+                    depth,
+                    slice_index,
+                    n_slices,
+                    const_ctx,
+                    var_label,
+                )
 
             if not value_present:
                 continue
@@ -549,7 +683,7 @@ def process_pulse(
             # Write values to value path in the pulse IDS.
             if ids_root not in pulse_ids:
                 pulse_ids[ids_root] = new_ids(factory, ids_root)
-            write_values(pulse_ids[ids_root], writes)
+            write_values(pulse_ids[ids_root], writes, slice_index, n_slices, const_ctx, var_label)
 
             # Write per-machine error bars to the "_error_upper" extension of each leaf path.
             # errors holds {machine: spec}; error_bar() resolves each spec against the leaf
@@ -565,20 +699,21 @@ def process_pulse(
                         if isinstance(v, (int, float, np.number, np.ndarray)) and not isinstance(v, bool)
                     ]
                     if error_writes:
-                        write_values(pulse_ids[ids_root], error_writes)
+                        write_values(pulse_ids[ids_root], error_writes, slice_index, n_slices, const_ctx, var_label)
 
             # Write string and machine-specific (dict) companion descriptors to the pulse IDS.
             if string_desc and writes:
-                write_descriptors(pulse_ids[ids_root], writes, string_desc, depth)
+                write_descriptors(
+                    pulse_ids[ids_root], writes, string_desc, depth, slice_index, n_slices, const_ctx, var_label
+                )
             if dict_desc and writes:
                 machine = data_row.get(machine_col) if machine_col else None
                 resolved = [(leaf, d[machine]) for leaf, d in dict_desc if machine in d]
                 if resolved:
-                    write_descriptors(pulse_ids[ids_root], writes, resolved, depth)
+                    write_descriptors(
+                        pulse_ids[ids_root], writes, resolved, depth, slice_index, n_slices, const_ctx, var_label
+                    )
 
-    # Backfill an empty root `time` (NaN time column) so dynamic nodes can fit in arrays.
-    for ids in pulse_ids.values():
-        backfill_time(ids)
     return pulse_ids
 
 
@@ -606,10 +741,25 @@ def extract_variables(temporary_ids: IDS) -> dict:
         name = str(el.identifier.name)
         if name and el.value.has_value:
             result[name] = str(el.value)
+    # constant_string1d holds a per-time-slice string series (no dynamic_string1d AoS exists).
+    for el in temporary_ids.constant_string1d:
+        name = str(el.identifier.name)
+        if name and el.value.has_value:
+            result[name] = np.asarray(el.value)
+    # Dynamic temporary quantities carry a per-time-slice series; expose them as np.ndarray
+    # (the manifest metadata stores native types and ndarrays, but treats lists as nested structure).
+    for el in temporary_ids.dynamic_float1d:
+        name = str(el.identifier.name)
+        if name and el.value.data.has_value:
+            result[name] = np.asarray(el.value.data, dtype=float)
+    for el in temporary_ids.dynamic_integer1d:
+        name = str(el.identifier.name)
+        if name and el.value.data.has_value:
+            result[name] = np.asarray(el.value.data, dtype=int)
     return result
 
 
-def make_manifest(pulse_dir: pathlib.Path, dataset: str, machine: str, index: int, variables: dict) -> "Manifest":
+def make_manifest(pulse_dir: pathlib.Path, dataset: str, machine: str, alias: str, variables: dict) -> "Manifest":
     """Build a SimDB Manifest for one migrated pulse (one entry per pulse)."""
     metadata = [
         {"dataset": dataset},
@@ -622,7 +772,7 @@ def make_manifest(pulse_dir: pathlib.Path, dataset: str, machine: str, index: in
     uri = f"imas:hdf5?path={pathlib.Path(pulse_dir).resolve().as_posix()}#summary"
     data = {
         "manifest_version": 2,
-        "alias": f"{dataset}-{machine.lower()}-{index}",
+        "alias": alias,
         "inputs": [],
         "outputs": [{"uri": uri}],
         "metadata": metadata,
@@ -634,6 +784,40 @@ def make_manifest(pulse_dir: pathlib.Path, dataset: str, machine: str, index: in
     return m
 
 
+def set_temporary_local_time(temp_ids: IDS, times: Any) -> None:
+    """Give each populated dynamic temporary signal the pulse's time vector (its local value/time)."""
+    t = np.asarray(times, dtype=float)
+    for bucket in ("dynamic_float1d", "dynamic_integer1d"):
+        for el in getattr(temp_ids, bucket):
+            if el.value.data.has_value:
+                el.value.time = t
+
+
+def write_pulse_dir(output_dir: pathlib.Path, name: str, pulse_ids: dict[str, IDS]) -> pathlib.Path:
+    """Write a pulse's IDS set to its own HDF5 directory (pulse=0) and return the directory."""
+    pulse_dir = output_dir / name
+    pulse_dir.mkdir(parents=True, exist_ok=True)
+    with imas.DBEntry(f"imas:hdf5?path={pulse_dir};pulse=0", "w") as entry:
+        for ids in pulse_ids.values():
+            entry.put(ids)
+    return pulse_dir
+
+
+def simdb_ingest(db: Any, config: Any, manifest: "Manifest", alias: str, label: str, failed: list[str]) -> bool:
+    """Insert one pulse into SimDB, overwriting any existing entry for `alias`. Returns success."""
+    try:
+        try:
+            db.delete_simulation(alias)  # overwrite: drop any existing entry for this alias
+        except DatabaseError:
+            pass  # no existing entry to replace
+        db.insert_simulation(Simulation(manifest, config))
+        return True
+    except Exception as exc:
+        print(f"  SimDB ingest FAILED for {alias}: {exc}")
+        failed.append(label)
+        return False
+
+
 def run_migration(
     crosswalk: pd.DataFrame,
     data: pd.DataFrame,
@@ -643,11 +827,15 @@ def run_migration(
     simdb_enabled: bool = False,
     config: Any = None,
     db: Any = None,
+    per_time_slice: bool = True,
 ) -> None:
     """Build and write each pulse to disk immediately, without accumulating in memory.
 
+    Default: one IDS set per pulse (rows grouped by (machine, pulse), dynamic nodes carry the
+    ordered time-slices). With `per_time_slice=False`, one IDS set per CSV row.
+
     When `simdb_enabled`, the in-memory `temporary` IDS is diverted into the SimDB manifest as
-    `variables` metadata instead of being written to HDF5, and one SimDB entry is ingested per
+    `variables` metadata instead of being written to disk, and one SimDB entry is ingested per
     pulse. The `summary` IDS is always written to disk (SimDB catalogues it by reference).
     """
     machine_rows = crosswalk.loc[crosswalk["imas_path"] == "summary/machine", "csv_column"]
@@ -659,50 +847,96 @@ def run_migration(
     if simdb_enabled and machine_col is None:
         raise ValueError("--simdb is set but no row maps to 'summary/machine' to label each entry")
 
+    # Pulse-grouping columns: SHOT->summary/pulse keys the group; TIME->summary/time orders slices.
+    pulse_rows = crosswalk.loc[crosswalk["imas_path"] == "summary/pulse", "csv_column"]
+    pulse_col = pulse_rows.iloc[0] if len(pulse_rows) else None
+
+    def _maps_summary_time(p: Any) -> bool:
+        return isinstance(p, str) and any(seg.strip().startswith("summary/time") for seg in p.split("&"))
+
+    time_rows = crosswalk.loc[crosswalk["imas_path"].apply(_maps_summary_time), "csv_column"]
+    time_col = time_rows.iloc[0] if len(time_rows) else None
+    if per_time_slice and pulse_col is None:
+        raise ValueError("--per-pulse is set but no row maps to 'summary/pulse' to group time-slices")
+    if per_time_slice and machine_col is None:
+        raise ValueError("--per-pulse is set but no row maps to 'summary/machine' to group/name pulses")
+    if per_time_slice and time_col is None:
+        print("WARNING: --per-pulse but no row maps to 'summary/time' — slices kept in CSV order")
+
     output_dir.mkdir(parents=True, exist_ok=True)
-    total = len(data)
     done = 0
-    counters: dict[str, int] = {}  # per-machine entry index for the SimDB alias
+    counters: dict[str, int] = {}  # per-machine entry index for the SimDB alias (per-row mode)
     ingested = 0
     failed: list[str] = []
     start = time.monotonic()
     last_report = start
 
-    for pulse_idx, data_row in data.iterrows():
-        if data_row.isna().all():
-            continue
-        pulse_ids = process_pulse(data_row, crosswalk, factory, machine_col)
+    if per_time_slice:
+        groups = list(data.groupby([machine_col, pulse_col], sort=False))
+        total = len(groups)
+        for (machine, pulse), gdf in groups:
+            rows = [row for _, row in gdf.iterrows() if not row.isna().all()]
+            if not rows:
+                continue
+            if time_col is not None:  # insert slices in ascending time order (CSV order is not trusted)
+                rows.sort(key=lambda row: (pd.isna(row[time_col]), row[time_col]))
+            n = len(rows)
+            times = [row[time_col] for row in rows] if time_col is not None else list(range(n))
+            ctx = f"{machine}/{pulse}"
 
-        # When ingesting into SimDB, the temporary IDS is diverted into manifest variables
-        # rather than written to disk; otherwise it is written like any other root.
-        temp_ids = pulse_ids.pop("temporary", None) if simdb_enabled else None
-
-        pulse_dir = output_dir / f"pulse_{pulse_idx:04d}"
-        pulse_dir.mkdir(parents=True, exist_ok=True)
-        with imas.DBEntry(f"imas:hdf5?path={pulse_dir};pulse=0", "w") as entry:
+            pulse_ids: dict[str, IDS] = {}
+            for ti, row in enumerate(rows):
+                process_pulse(
+                    row,
+                    crosswalk,
+                    factory,
+                    machine_col,
+                    pulse_ids=pulse_ids,
+                    slice_index=ti,
+                    n_slices=n,
+                    const_ctx=ctx,
+                )
             for ids in pulse_ids.values():
-                entry.put(ids)
-        done += 1
+                backfill_time(ids, times)
+            if "temporary" in pulse_ids:
+                set_temporary_local_time(pulse_ids["temporary"], times)
 
-        if simdb_enabled:
-            machine = str(data_row[machine_col])
-            index = counters.get(machine, 0)
-            counters[machine] = index + 1
-            alias = f"{dataset}-{machine.lower()}-{index}"
-            variables = extract_variables(temp_ids) if temp_ids is not None else {}
-            manifest = make_manifest(pulse_dir, dataset, machine, index, variables)
-            try:
-                try:
-                    db.delete_simulation(alias)  # overwrite: drop any existing entry for this alias
-                except DatabaseError:
-                    pass  # no existing entry to replace
-                db.insert_simulation(Simulation(manifest, config))
-                ingested += 1
-            except Exception as exc:
-                print(f"  SimDB ingest FAILED for {alias}: {exc}")
-                failed.append(f"pulse_{pulse_idx:04d}")
+            temp_ids = pulse_ids.pop("temporary", None) if simdb_enabled else None
+            pulse_dir = write_pulse_dir(output_dir, f"{str(machine).lower()}_{pulse}", pulse_ids)
+            done += 1
 
-        last_report = report_progress(done, total, pulse_idx, start, last_report)
+            if simdb_enabled:
+                alias = f"{machine}/{pulse}"
+                variables = extract_variables(temp_ids) if temp_ids is not None else {}
+                manifest = make_manifest(pulse_dir, dataset, str(machine), alias, variables)
+                if simdb_ingest(db, config, manifest, alias, pulse_dir.name, failed):
+                    ingested += 1
+
+            last_report = report_progress(done, total, ctx, start, last_report)
+    else:
+        total = len(data)
+        for pulse_idx, data_row in data.iterrows():
+            if data_row.isna().all():
+                continue
+            pulse_ids = process_pulse(data_row, crosswalk, factory, machine_col)
+            for ids in pulse_ids.values():
+                backfill_time(ids)
+
+            temp_ids = pulse_ids.pop("temporary", None) if simdb_enabled else None
+            pulse_dir = write_pulse_dir(output_dir, f"pulse_{pulse_idx:04d}", pulse_ids)
+            done += 1
+
+            if simdb_enabled:
+                machine = str(data_row[machine_col])
+                index = counters.get(machine, 0)
+                counters[machine] = index + 1
+                alias = f"{dataset}-{machine.lower()}-{index}"
+                variables = extract_variables(temp_ids) if temp_ids is not None else {}
+                manifest = make_manifest(pulse_dir, dataset, machine, alias, variables)
+                if simdb_ingest(db, config, manifest, alias, f"pulse_{pulse_idx:04d}", failed):
+                    ingested += 1
+
+            last_report = report_progress(done, total, pulse_idx, start, last_report)
 
     report_summary("Processed", done, total, start, f" to {output_dir}")
     if simdb_enabled:
@@ -744,6 +978,7 @@ def main() -> None:
         simdb_enabled=simdb_enabled,
         config=config,
         db=db,
+        per_time_slice=args.per_time_slice,
     )
 
 
