@@ -19,6 +19,7 @@ Everything below describes how to read and extend that file.
 | `imas_path` | str | Target path inside the IDS (see [Path notation](#path-notation-and-indexing)) |
 | `csv_description` | str | Human-readable description of the source variable |
 | `imas_description` | str | Description of the IDS target field (automatically populated by DD) |
+| `imas_standard_name` | str | IMAS standard name for the variable; used as `identifier/name` for `temporary` rows (falls back to `csv_column` when blank) |
 | `kind` | str | `constant`, `dynamic`, or `static` (automatically populated by DD) |
 | `status` | str | `mapped`, `mapped_caveat`, `temporary`, or `derived` (see [Status values](#status-values)) |
 | `notes` | str | Free-text notes, caveats, warnings, etc. |
@@ -311,8 +312,17 @@ The `csv_dtype` column names the bucket and its indexing mode:
 |-------------|---------|
 | `constant_float0d(:)` | Float scalar slot at a stable index (assigned in crosswalk order) |
 | `constant_string0d(:)` | String scalar slot at a stable index (assigned in crosswalk order) |
+| `constant_string1d(:)` | String 1-D array slot; in per-pulse mode, each element corresponds to one time-slice (no `dynamic_string1d` AoS exists in the DD) |
+| `dynamic_float1d(:)` | Float time-series slot; stores per-slice values in `value/data` with a shared `value/time` axis |
+| `dynamic_integer1d(:)` | Integer time-series slot; same layout as `dynamic_float1d` |
 | `constant_float0d(2)` | Fix to slot 2; array is resized to at least 3 with `keep=True`, leaving intermediate slots empty if not yet filled |
 | `constant_float0d` *(no index)* | Always write to slot 0; warns if two rows clash on the same bare bucket |
+
+The `constant_*` buckets store a single scalar per pulse.  The `dynamic_*` buckets
+accumulate one value per time-slice and are only meaningful in the default per-pulse
+mode (they reduce to a one-element array in `--per-time-slice` mode).  When the
+script is run with `--simdb`, all populated bucket types (constant and dynamic) are
+extracted into the manifest's `variables.*` metadata.
 
 The `(:)` suffix assigns a **stable index**, keyed by the segment name before
 `(:)` (e.g. `constant_float0d`).  Indices are assigned once, in crosswalk (row)
@@ -325,8 +335,12 @@ As with physics-IDS rows, both the value and the descriptor strings
 
 ```
 constant_float0d(n)/value                  ← transformed CSV value
-constant_float0d(n)/identifier/name        ← source (if present), else csv_column
+constant_float0d(n)/identifier/name        ← imas_standard_name (if set), else csv_column
 constant_float0d(n)/identifier/description ← csv_description (if present)
+
+dynamic_float1d(n)/value/data              ← transformed CSV value (one element per time-slice)
+dynamic_float1d(n)/value/time              ← pulse's time vector (set after all slices are processed)
+dynamic_float1d(n)/identifier/name         ← imas_standard_name (if set), else csv_column
 ```
 
 The `imas_path` column is ignored for temporary rows; the entire path is
@@ -377,12 +391,15 @@ special columns beyond those already described.
 The script is a command-line tool. 
 
 ```bash
-# defaults reproduce the original run
+# defaults: per-pulse grouping (one IDS set per machine/pulse combination)
 python idstools/scripts/bin/idsmigration
 
 # override inputs / behaviour
 python idstools/scripts/bin/idsmigration -e 2008 -d 2008_data.csv -m 2008_crosswalk.xlsx \
     --dd-version 4.1.1
+
+# one-IDS-per-row (old behaviour, restored with --per-time-slice)
+python idstools/scripts/bin/idsmigration --per-time-slice
 ```
 
 Run `python idstools/scripts/bin/idsmigration -h` for the full help. The arguments and their
@@ -395,9 +412,34 @@ defaults are:
 | `-m`, `--mapping` | `2008_crosswalk.xlsx` | Crosswalk spreadsheet filename under `resources/mappings/` |
 | `--dd-version` | `4.1.1` | Data Dictionary version used to build the IDS factory |
 | `--simdb` | off | Ingest each migrated pulse into the local SimDB (see below) |
+| `--per-time-slice` | off | Write one IDS set per CSV row instead of one per `(machine, pulse)` group |
 
-Output is one HDF5 directory per pulse, under the folder named by `-e`/`--experiment` (the default
-`2008` is shown):
+### Default mode: per-pulse grouping
+
+By default the script groups CSV rows by `(machine, pulse)`, sorts each group in ascending
+time order, and writes **one IDS set per pulse**.  Dynamic IDS nodes (those whose `kind` is
+`dynamic`) accumulate one value per time-slice; static and constant nodes are written once and
+checked for consistency across slices (a warning is printed if a "constant" quantity differs
+between slices, and the first-seen value is kept).
+
+The crosswalk must contain rows mapping to `summary/machine` and `summary/pulse` for grouping
+to work.  A `summary/time` mapping is optional but recommended — without it, slices are kept
+in CSV order and the `summary/time` vector is absent.
+
+Output is one directory per `(machine, pulse)` pair, named `{machine}_{pulse}`:
+
+```
+resources/results/tc26/
+  aug_12345/
+  aug_12346/
+  jet_99001/
+  ...
+```
+
+### `--per-time-slice` mode (one IDS per row)
+
+Restores the original behaviour: each CSV row becomes an independent IDS set, written to
+a sequentially-numbered directory:
 
 ```
 resources/results/2008/
@@ -427,9 +469,9 @@ Each entry's manifest carries:
 
 | Field | Source |
 |-------|--------|
-| `alias` | `{dataset}-{machine}-{index}`, where `dataset` is the `--experiment` value and `index` is a per-machine counter |
+| `alias` | **default mode:** `{machine}/{pulse}` — **`--per-time-slice` mode:** `{dataset}-{machine}-{index}`, where `dataset` is the `--experiment` value and `index` is a per-machine counter |
 | `metadata.dataset` / `metadata.machine` | the experiment label and the pulse's `summary/machine` value |
-| `metadata.variables.*` | scalars diverted from the in-memory `temporary` IDS (see [Diversion under `--simdb`](#diversion-under---simdb)) |
+| `metadata.variables.*` | scalars and arrays diverted from the in-memory `temporary` IDS (see [Diversion under `--simdb`](#diversion-under---simdb)); includes constant, string, and dynamic bucket types |
 | `outputs.uri` | `imas:hdf5?path=<pulse_dir>#summary` — a **reference** to the on-disk summary IDS |
 
 SimDB is a metadata catalogue: it stores the manifest plus a checksummed *reference* to the

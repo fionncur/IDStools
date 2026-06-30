@@ -769,7 +769,7 @@ def make_manifest(pulse_dir: pathlib.Path, dataset: str, machine: str, alias: st
         {"description": f"{machine} pulse from the {dataset} database migrated to IMAS HDF5."},
     ]
     if variables:
-        metadata.append({"variables": variables})
+        metadata.append({"standard_names": variables})
     uri = f"imas:hdf5?path={pathlib.Path(pulse_dir).resolve().as_posix()}#summary"
     data = {
         "manifest_version": 2,
