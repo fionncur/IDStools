@@ -542,6 +542,17 @@ def validate(df: pd.DataFrame, data: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
+def temp_var_name(cw_row: pd.Series) -> tuple[str, str]:
+    """Resolve a temporary row's identifier/name and its provenance kind.
+
+    Returns (imas_standard_name, "standard_name") when set, else (csv_column, "dbvariable").
+    """
+    std_name = cw_row.get("imas_standard_name", "")
+    if isinstance(std_name, str) and std_name.strip():
+        return std_name.strip(), "standard_name"
+    return cw_row["csv_column"], "dbvariable"
+
+
 def build_write_spec(df: pd.DataFrame) -> pd.DataFrame:
     """Build the per-row write spec columns used by the main loop:
 
@@ -584,8 +595,7 @@ def build_write_spec(df: pd.DataFrame) -> pd.DataFrame:
                 )
             else:
                 temp_seen[path] = cw_row.name
-            std_name = cw_row.get("imas_standard_name", "")
-            name_val = std_name if isinstance(std_name, str) and std_name.strip() else cw_row["csv_column"]
+            name_val, _ = temp_var_name(cw_row)
             descriptors = [(["identifier", "name"], name_val)]
             if isinstance(cw_row["csv_description"], str):
                 descriptors.append((["identifier", "description"], cw_row["csv_description"]))
@@ -760,16 +770,32 @@ def extract_variables(temporary_ids: IDS) -> dict:
     return result
 
 
-def make_manifest(pulse_dir: pathlib.Path, dataset: str, machine: str, alias: str, variables: dict) -> "Manifest":
-    """Build a SimDB Manifest for one migrated pulse (one entry per pulse)."""
+def make_manifest(
+    pulse_dir: pathlib.Path,
+    dataset: str,
+    machine: str,
+    alias: str,
+    variables: dict,
+    name_kind: dict[str, str],
+) -> "Manifest":
+    """Build a SimDB Manifest for one migrated pulse (one entry per pulse).
+
+    `variables` (from extract_variables) is split into "standard_name" and "dbvariable"
+    metadata groups per `name_kind` (from temp_var_name), so each is queryable as
+    standard_name.<name> or dbvariable.<name>.
+    """
     metadata = [
         {"dataset": dataset},
         {"machine": machine},
         {"code": {"name": "idsmigration", "version": ""}},
         {"description": f"{machine} pulse from the {dataset} database migrated to IMAS HDF5."},
     ]
-    if variables:
-        metadata.append({"standard_names": variables})
+    standard_vars = {name: v for name, v in variables.items() if name_kind.get(name) == "standard_name"}
+    dbvariable_vars = {name: v for name, v in variables.items() if name_kind.get(name, "dbvariable") != "standard_name"}
+    if standard_vars:
+        metadata.append({"standard_name": standard_vars})
+    if dbvariable_vars:
+        metadata.append({"dbvariable": dbvariable_vars})
     uri = f"imas:hdf5?path={pathlib.Path(pulse_dir).resolve().as_posix()}#summary"
     data = {
         "manifest_version": 2,
@@ -839,6 +865,11 @@ def run_migration(
     `variables` metadata instead of being written to disk, and one SimDB entry is ingested per
     pulse. The `summary` IDS is always written to disk (SimDB catalogues it by reference).
     """
+    # name -> "standard_name"/"dbvariable", used to split SimDB manifest variables (see make_manifest).
+    temp_name_kind = dict(
+        temp_var_name(cw_row) for _, cw_row in crosswalk.loc[crosswalk["status"] == "temporary"].iterrows()
+    )
+
     machine_rows = crosswalk.loc[crosswalk["imas_path"] == "summary/machine", "csv_column"]
     machine_col = machine_rows.iloc[0] if len(machine_rows) else None
     if machine_col is None and crosswalk["_errors"].notna().any():
@@ -876,6 +907,8 @@ def run_migration(
         groups = list(data.groupby([machine_col, pulse_col], sort=False))
         total = len(groups)
         for (machine, pulse), gdf in groups:
+            if isinstance(pulse, float) and pulse.is_integer():
+                pulse = int(pulse)  # groupby key is float when the pulse column has any NaN elsewhere
             rows = [row for _, row in gdf.iterrows() if not row.isna().all()]
             if not rows:
                 continue
@@ -909,7 +942,7 @@ def run_migration(
             if simdb_enabled:
                 alias = f"{machine}/{pulse}"
                 variables = extract_variables(temp_ids) if temp_ids is not None else {}
-                manifest = make_manifest(pulse_dir, dataset, str(machine), alias, variables)
+                manifest = make_manifest(pulse_dir, dataset, str(machine), alias, variables, temp_name_kind)
                 if simdb_ingest(db, config, manifest, alias, pulse_dir.name, failed):
                     ingested += 1
 
@@ -933,7 +966,7 @@ def run_migration(
                 counters[machine] = index + 1
                 alias = f"{dataset}-{machine.lower()}-{index}"
                 variables = extract_variables(temp_ids) if temp_ids is not None else {}
-                manifest = make_manifest(pulse_dir, dataset, machine, alias, variables)
+                manifest = make_manifest(pulse_dir, dataset, machine, alias, variables, temp_name_kind)
                 if simdb_ingest(db, config, manifest, alias, f"pulse_{pulse_idx:04d}", failed):
                     ingested += 1
 

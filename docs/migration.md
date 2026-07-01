@@ -262,7 +262,7 @@ The `imas_path` column is ignored for temporary rows; the entire path is derived
 
 ### Diversion under `--simdb`
 
-By default the `temporary` IDS is written to the HDF5 backend like any other root.  When the script is run with `--simdb` (see [SimDB ingestion](#simdb-ingestion---simdb)), the `temporary` IDS is built in memory exactly as above but **not** written to disk; instead its scalars are read back out (`identifier/name` → `value`) and attached to the pulse's SimDB manifest as `variables.*` metadata.  `csv_dtype` still drives the in-memory layout in both cases.
+By default the `temporary` IDS is written to the HDF5 backend like any other root.  When the script is run with `--simdb` (see [SimDB ingestion](#simdb-ingestion---simdb)), the `temporary` IDS is built in memory exactly as above but **not** written to disk; instead its scalars are read back out (`identifier/name` → `value`) and attached to the pulse's SimDB manifest as `standard_name.*`/`dbvariable.*` metadata (see [SimDB ingestion](#simdb-ingestion---simdb) for how that split is decided).  `csv_dtype` still drives the in-memory layout in both cases.
 
 ---
 
@@ -364,7 +364,10 @@ Each entry's manifest carries:
 | --------------------------------------- | ------ |
 | `alias`                                 | **default mode:** `{machine}/{pulse}` — **`--per-time-slice` mode:** `{dataset}-{machine}-{index}`, where `dataset` is the `--experiment` value and `index` is a per-machine counter |
 | `metadata.dataset` / `metadata.machine` | the experiment label and the pulse's `summary/machine` value |
-| `metadata.variables.*`                  | scalars and arrays diverted from the in-memory `temporary` IDS (see [Diversion under `--simdb`](#diversion-under---simdb)); includes constant, string, and dynamic bucket types |
+| `metadata.standard_name.*`              | temporary quantities diverted from the in-memory `temporary` IDS (see [Diversion under `--simdb`](#diversion-under---simdb)) whose crosswalk row has an `imas_standard_name`, keyed by that standard name |
+| `metadata.dbvariable.*`                 | the same, for temporary quantities with no `imas_standard_name`, keyed by `csv_column` instead |
 | `outputs.uri`                           | `imas:hdf5?path=<pulse_dir>#summary` — a **reference** to the on-disk summary IDS |
+
+Each temporary quantity lands in exactly one of the two groups, decided per-row by `temp_var_name()`: a set `imas_standard_name` sends it to `standard_name.<name>`; a blank one falls back to `dbvariable.<csv_column>`.  This keeps quantities with an agreed IMAS standard name distinguishable, when queried later, from ad-hoc database columns that don't have one yet — e.g. `simdb simulation query standard_name.loss_power=...` vs `dbvariable.SELEC2007=...`.
 
 SimDB is a metadata catalogue: it stores the manifest plus a checksummed *reference* to the `summary` IDS, not its array data.  The `summary` IDS is therefore always written to HDF5, with or without `--simdb`; only the `temporary` IDS write is suppressed when ingesting.  A `summary/machine` mapping row is required; the script raises at load if `--simdb` is used without one.
