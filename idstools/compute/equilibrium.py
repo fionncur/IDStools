@@ -16,6 +16,8 @@ import numpy as np
 
 from idstools.database import DBMaster
 
+_IDS_VALID_THRESHOLD = abs(imas.ids_defs.EMPTY_FLOAT)
+
 logger = logging.getLogger("module")
 
 
@@ -93,22 +95,20 @@ class EquilibriumCompute:
 
         return {"r2d": r1d, "z2d": z1d, "psi2d": psi2d}
 
-    def get_rho2d(self, time_slice: int, profiles2d_index: int = 0) -> Union[np.ndarray, None]:
+    def get_phi2d(self, time_slice: int, profiles2d_index: int = 0) -> Union[np.ndarray, None]:
         """
-        This function calculates rho(R,Z) using toroidal flux  and returns a dictionary containing the result.
+        Returns the toroidal magnetic flux Φ(R,Z) on the 2D grid.
+
+        Reads ``equilibrium.time_slice[i].profiles_2d[j].phi`` directly from the IDS.
 
         Args:
-            time_slice (int): The time slice is an integer value that represents the index of the time slice in
-                the equilibrium ids. It is used to select a specific time slice for the calculation of rho(R,Z).
-                Defaults to 0
-            profiles2d_index (int): `profiles2d_index` is an integer parameter that represents the index of  the
-                ``profiles_2d`` to be used for the calculation of rho(R,Z). It is used to access the `profiles_2d`
-                list in the `time_slice` object. Defaults to 0
+            time_slice (int): Index of the time slice in the equilibrium IDS. Defaults to 0.
+            profiles2d_index (int): Index into ``profiles_2d`` from which
+                ``phi`` (toroidal flux, Wb) is read. Defaults to 0.
 
         Returns:
-            a value containing the square root of the toroidal flux values divided by the maximum toroidal
-            flux value, if the length of toroidal flux  is greater than 0. If the length of toroidal flux is
-            less than 1, it returns None.
+            np.ndarray or None: 2-D array of toroidal flux Φ [Wb] with the same shape as
+            the ``profiles_2d`` grid, or None if ``phi`` is unavailable or all-NaN.
 
         Examples:
             .. code-block:: python
@@ -117,7 +117,7 @@ class EquilibriumCompute:
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=134173;run=106;database=ITER;version=3", "r")
                 idsObj = connection.get('equilibrium')
                 computeObj = EquilibriumCompute(idsObj)
-                result = computeObj.get_rho2d(time_slice=0)
+                result = computeObj.get_phi2d(time_slice=0)
 
         """
         phi = None
@@ -134,7 +134,7 @@ class EquilibriumCompute:
                 f"all values are nan for equilibrium.time_slice[{time_slice}].profiles_2d[{profiles2d_index}].phi "
             )
             return None
-        return np.sqrt(phi / np.amax(phi))
+        return phi
 
     def get_b_total(self, time_slice: int) -> tuple:
         """
@@ -243,8 +243,8 @@ class EquilibriumCompute:
 
         Returns:
             a dictionary containing information about flux surfaces at a specific time slice. The dictionary includes
-            a 2D Cartesian grid, a 2D profile index, and a 2D array of rho values. If no profiles are found,
-            the function returns None.
+            a 2D Cartesian grid, a 2D profile index, and a 2D array of rho_tor_norm [-] values (dimensionless,
+            range [0, 1]). If no profiles are found, the function returns None.
         """
         GRID_TYPE_RECTANGULAR = 1
         list_of_profiles = self.get2d_profiles_indices(time_slice, GRID_TYPE_RECTANGULAR)
@@ -255,10 +255,10 @@ class EquilibriumCompute:
         profile2d_index = list_of_profiles[0]
 
         result_dict = self.get2d_cartesian_grid(time_slice, profile2d_index)
-        rho2d = self.get_rho2d(time_slice, profile2d_index)
-        if rho2d is None:
-            rho2d = []
-        result_dict["rho2d"] = rho2d
+        phi2d = self.get_phi2d(time_slice, profile2d_index)
+        if phi2d is None:
+            phi2d = []
+        result_dict["phi2d"] = phi2d
         return result_dict
 
     def get_ip(self) -> list:
@@ -284,6 +284,408 @@ class EquilibriumCompute:
             -self.ids.time_slice[time_index].global_quantities.ip * 1.0e-6
             for time_index in range(len(self.ids.time_slice))
         ]
+
+    def get_boundary_data(self, time_slice: int) -> dict:
+        """Return boundary data for a given time slice.
+
+        Reads ``boundary/outline``, ``boundary_separatrix`` (DD3), or
+        ``contour_tree`` (DD4) for the separatrix outline, X-points, and
+        strike-points. If the separatrix is still missing, falls back to
+        ``boundary/outline`` for diverted plasmas (``type==1``) or
+        ``boundary/lcfs`` for limiter/unknown.
+
+        Returns a dict with keys ``bnd_r``, ``bnd_z``, ``bnd_type``,
+        ``bnd_psi_norm``, ``bnd_geom_r``, ``bnd_geom_z``, ``sep_r``,
+        ``sep_z``, ``sep_xpoints``, ``sep_strikepoints``.
+        """
+
+        def _valid_arr(arr):
+            a = np.asarray(arr, dtype=float)
+            return a.size > 0 and np.any(np.isfinite(a) & (np.abs(a) < _IDS_VALID_THRESHOLD))
+
+        def _valid_scalar(val):
+            try:
+                v = float(val)
+                return np.isfinite(v) and abs(v) < _IDS_VALID_THRESHOLD
+            except Exception as exc:
+                logger.debug(f"get_boundary_data: invalid scalar {val!r} ({exc})")
+                return False
+
+        def _clean(arr):
+            a = np.array(arr, dtype=float, copy=True)
+            a[(~np.isfinite(a)) | (np.abs(a) >= _IDS_VALID_THRESHOLD)] = np.nan
+            return a
+
+        def _read_outline(node):
+            try:
+                r = np.asarray(node.outline.r, dtype=float)
+                z = np.asarray(node.outline.z, dtype=float)
+            except Exception as exc:
+                logger.debug(f"get_boundary_data: could not read outline from {node!r}: {exc}")
+                return None, None
+            if not (_valid_arr(r) and _valid_arr(z)):
+                logger.debug("get_boundary_data: outline has no valid data " f"(r.size={r.size}, z.size={z.size})")
+                return None, None
+            r, z = _clean(r), _clean(z)
+            # Insert NaN at large jumps so disconnected arcs are not joined
+            dist = np.sqrt(np.diff(r) ** 2 + np.diff(z) ** 2)
+            median_dist = np.nanmedian(dist)
+            if median_dist > 0:
+                breaks = np.where(dist > 20.0 * median_dist)[0] + 1
+                if len(breaks):
+                    r = np.insert(r, breaks, np.nan)
+                    z = np.insert(z, breaks, np.nan)
+            return r, z
+
+        def _read_points(node, attr, ids_path):
+            pts = []
+            try:
+                arr = getattr(node, attr)
+            except AttributeError:
+                logger.debug(f"get_boundary_data: {ids_path}/{attr} is not available")
+                return pts
+            except Exception as exc:
+                logger.debug(f"get_boundary_data: could not access {ids_path}/{attr}: {exc}")
+                return pts
+            try:
+                n_points = len(arr)
+            except Exception as exc:
+                logger.debug(f"get_boundary_data: could not get length of {ids_path}/{attr}: {exc}")
+                n_points = None
+            for pt_index, pt in enumerate(arr):
+                try:
+                    r, z = float(pt.r), float(pt.z)
+                except Exception as exc:
+                    logger.debug(f"get_boundary_data: could not read {ids_path}/{attr}[{pt_index}]/r|z: {exc}")
+                    continue
+                if _valid_scalar(r) and _valid_scalar(z):
+                    pts.append((r, z))
+                else:
+                    logger.debug(f"get_boundary_data: {ids_path}/{attr}[{pt_index}]/r|z invalid ({r}, {z})")
+            logger.debug(f"get_boundary_data: {ids_path}/{attr} — read {len(pts)} valid points out of {n_points}")
+            return pts
+
+        def _read_contour_tree(ts_node):
+            """Read separatrix/X-point data from ``time_slice.contour_tree.node``.
+
+            * ``node.critical_type == 1`` for X-points (saddle points)
+            * first valid X-point ``node.levelset.r/z`` as separatrix contour
+            """
+            sep_r = sep_z = None
+            xpoints = []
+
+            try:
+                nodes = ts_node.contour_tree.node
+            except Exception as exc:
+                logger.debug(f"get_boundary_data: could not access contour_tree.node: {exc}")
+                return sep_r, sep_z, xpoints
+
+            try:
+                n_nodes = len(nodes)
+            except Exception as exc:
+                logger.debug(f"get_boundary_data: could not get length of contour_tree.node: {exc}")
+                n_nodes = None
+
+            n_saddles = 0
+            for node_index, node in enumerate(nodes):
+                try:
+                    critical_type = int(node.critical_type)
+                except Exception as exc:
+                    logger.debug(
+                        f"get_boundary_data: could not read contour_tree.node[{node_index}].critical_type: {exc}"
+                    )
+                    continue
+
+                if critical_type != 1:  # 1 = saddle / X-point
+                    continue
+                n_saddles += 1
+
+                try:
+                    xr = float(node.r)
+                    xz = float(node.z)
+                except Exception as exc:
+                    logger.debug(f"get_boundary_data: could not read contour_tree.node[{node_index}].r/z: {exc}")
+                    xr = xz = None
+
+                if xr is not None and _valid_scalar(xr) and xz is not None and _valid_scalar(xz):
+                    xpoints.append((xr, xz))
+                else:
+                    logger.debug(
+                        f"get_boundary_data: contour_tree.node[{node_index}] saddle has invalid r/z " f"({xr}, {xz})"
+                    )
+
+                if sep_r is not None and sep_z is not None:
+                    continue
+
+                try:
+                    r = np.asarray(node.levelset.r, dtype=float)
+                    z = np.asarray(node.levelset.z, dtype=float)
+                except Exception as exc:
+                    logger.debug(
+                        f"get_boundary_data: could not read contour_tree.node[{node_index}].levelset.r/z: {exc}"
+                    )
+                    continue
+
+                if not (_valid_arr(r) and _valid_arr(z)):
+                    logger.debug(
+                        f"get_boundary_data: contour_tree.node[{node_index}].levelset has no valid data "
+                        f"(r.size={r.size}, z.size={z.size})"
+                    )
+                    continue
+
+                sep_r = _clean(r)
+                sep_z = _clean(z)
+
+            logger.debug(
+                "get_boundary_data: contour_tree summary "
+                f"(nodes={n_nodes}, saddles={n_saddles}, xpoints={len(xpoints)}, "
+                f"has_separatrix={sep_r is not None and sep_z is not None})"
+            )
+            return sep_r, sep_z, xpoints
+
+        result = {
+            "bnd_r": None,
+            "bnd_z": None,
+            "bnd_type": None,
+            "bnd_psi_norm": None,
+            "bnd_geom_r": None,
+            "bnd_geom_z": None,
+            "sep_r": None,
+            "sep_z": None,
+            "sep_xpoints": [],
+            "sep_strikepoints": [],
+        }
+
+        try:
+            ts = self.ids.time_slice[time_slice]
+        except Exception as exc:
+            logger.debug(f"get_boundary_data: could not access time_slice[{time_slice}]: {exc}")
+            return result
+
+        # boundary
+        try:
+            bnd = ts.boundary
+            result["bnd_r"], result["bnd_z"] = _read_outline(bnd)
+            result["sep_xpoints"] = _read_points(bnd, "x_point", f"time_slice[{time_slice}]/boundary")
+            result["sep_strikepoints"] = _read_points(bnd, "strike_point", f"time_slice[{time_slice}]/boundary")
+            logger.debug(
+                f"get_boundary_data: time_slice[{time_slice}]/boundary summary "
+                f"(has_outline={result['bnd_r'] is not None and result['bnd_z'] is not None}, "
+                f"xpoints={len(result['sep_xpoints'])}, strikepoints={len(result['sep_strikepoints'])})"
+            )
+
+            bnd_type = int(bnd.type)
+            if _valid_scalar(bnd_type):
+                result["bnd_type"] = bnd_type
+        except Exception as exc:
+            logger.debug(f"get_boundary_data: could not read time_slice[{time_slice}]/boundary: {exc}")
+
+        try:
+            psi_norm = float(ts.boundary.psi_norm)
+            if _valid_scalar(psi_norm):
+                result["bnd_psi_norm"] = psi_norm
+        except Exception as exc:
+            logger.debug(f"get_boundary_data: could not read time_slice[{time_slice}]/boundary/psi_norm: {exc}")
+
+        try:
+            gax_r = float(ts.boundary.geometric_axis.r)
+            gax_z = float(ts.boundary.geometric_axis.z)
+            if _valid_scalar(gax_r) and _valid_scalar(gax_z):
+                result["bnd_geom_r"] = gax_r
+                result["bnd_geom_z"] = gax_z
+        except Exception as exc:
+            logger.debug(
+                f"get_boundary_data: could not read time_slice[{time_slice}]/boundary/geometric_axis/r|z: {exc}"
+            )
+
+        # boundary_separatrix (DD3 )
+        if hasattr(ts, "boundary_separatrix"):
+            sep = ts.boundary_separatrix
+            try:
+                result["sep_r"], result["sep_z"] = _read_outline(sep)
+                sep_xpoints = _read_points(sep, "x_point", f"time_slice[{time_slice}]/boundary_separatrix")
+                sep_strikepoints = _read_points(sep, "strike_point", f"time_slice[{time_slice}]/boundary_separatrix")
+                if sep_xpoints:
+                    result["sep_xpoints"] = sep_xpoints
+                if sep_strikepoints:
+                    result["sep_strikepoints"] = sep_strikepoints
+                logger.debug(
+                    f"get_boundary_data: time_slice[{time_slice}]/boundary_separatrix summary "
+                    f"(has_outline={result['sep_r'] is not None and result['sep_z'] is not None}, "
+                    f"xpoints={len(sep_xpoints)}, strikepoints={len(sep_strikepoints)})"
+                )
+            except Exception as exc:
+                logger.debug(f"get_boundary_data: could not read time_slice[{time_slice}]/boundary_separatrix: {exc}")
+
+        #  contour_tree.node (DD4)
+        if hasattr(ts, "contour_tree") and hasattr(ts.contour_tree, "node"):
+            contour_sep_r, contour_sep_z, contour_xpoints = _read_contour_tree(ts)
+
+            if (
+                (result["sep_r"] is None or result["sep_z"] is None)
+                and contour_sep_r is not None
+                and contour_sep_z is not None
+            ):
+                result["sep_r"] = contour_sep_r
+                result["sep_z"] = contour_sep_z
+
+            if not result["sep_xpoints"] and contour_xpoints:
+                result["sep_xpoints"] = contour_xpoints
+
+        # Separatrix fallback when boundary_separatrix / contour_tree provided nothing.
+        if result["sep_r"] is None or result["sep_z"] is None:
+            if result["bnd_type"] == 1:
+                # type=1 (diverted): boundary/outline IS the separatrix — reuse directly.
+                if result["bnd_r"] is not None and result["bnd_z"] is not None:
+                    result["sep_r"] = result["bnd_r"]
+                    result["sep_z"] = result["bnd_z"]
+                    logger.debug(
+                        f"get_boundary_data: time_slice[{time_slice}]/boundary/outline/r|z "
+                        f"— sep outline reused (type=1 diverted, {result['sep_r'].size} pts)"
+                    )
+            else:
+                # type=0 (limiter) or unknown: outline is the limiter contour, not the LCFS.
+                # Fall back to boundary/lcfs
+                try:
+                    r_raw = np.asarray(ts.boundary.lcfs.r, dtype=float)
+                    z_raw = np.asarray(ts.boundary.lcfs.z, dtype=float)
+                    mask = r_raw > 0
+                    r_raw, z_raw = _clean(r_raw[mask]), _clean(z_raw[mask])
+                    if r_raw.size > 0:
+                        result["sep_r"] = r_raw
+                        result["sep_z"] = z_raw
+                        logger.debug(
+                            f"get_boundary_data: time_slice[{time_slice}]/boundary/lcfs/r|z "
+                            f"— sep outline filled ({r_raw.size} pts)"
+                        )
+                except Exception as exc:
+                    logger.debug(f"get_boundary_data: could not read time_slice[{time_slice}]/boundary/lcfs/r|z: {exc}")
+
+        logger.debug(
+            "get_boundary_data: final summary "
+            f"(has_boundary={result['bnd_r'] is not None and result['bnd_z'] is not None}, "
+            f"has_separatrix={result['sep_r'] is not None and result['sep_z'] is not None}, "
+            f"xpoints={len(result['sep_xpoints'])}, strikepoints={len(result['sep_strikepoints'])})"
+        )
+
+        return result
+
+    def get_magnetic_axis(self, time_slice: int) -> Union[dict, None]:
+        """Return the magnetic axis position for a given time slice.
+
+        Reads ``global_quantities.magnetic_axis.r/z`` and validates the
+        scalar values.
+
+        Args:
+            time_slice (int): Index into ``time_slice``.
+
+        Returns:
+            dict with scalar keys ``"r"`` and ``"z"`` (floats), or
+            ``None`` if the data are absent or invalid.
+        """
+        try:
+            mag_ax = self.ids.time_slice[time_slice].global_quantities.magnetic_axis
+            r = float(mag_ax.r)
+            z = float(mag_ax.z)
+        except Exception as exc:
+            logger.debug(f"get_magnetic_axis: could not read magnetic_axis – {exc}")
+            return None
+
+        def _valid(val):
+            return np.isfinite(val) and abs(val) < _IDS_VALID_THRESHOLD
+
+        if not (_valid(r) and _valid(z)):
+            logger.debug("get_magnetic_axis: magnetic_axis contains no valid data")
+            return None
+
+        return {"r": r, "z": z}
+
+    def get_current_centre(self, time_slice: int) -> Union[dict, None]:
+        """Return the current centroid position for a given time slice.
+
+        Reads ``global_quantities.current_centre.r/z`` and validates the
+        scalar values.
+
+        Args:
+            time_slice (int): Index into ``time_slice``.
+
+        Returns:
+            dict with scalar keys ``"r"`` and ``"z"`` (floats), or
+            ``None`` if the data are absent or invalid.
+        """
+        try:
+            cc = self.ids.time_slice[time_slice].global_quantities.current_centre
+            r = float(cc.r)
+            z = float(cc.z)
+        except Exception as exc:
+            path = f"time_slice[{time_slice}]/global_quantities/current_centre/r|z"
+            logger.debug(f"get_current_centre: could not read {path} – {exc}")
+            return None
+
+        def _valid(val):
+            return np.isfinite(val) and abs(val) < _IDS_VALID_THRESHOLD
+
+        if not (_valid(r) and _valid(z)):
+            path = f"time_slice[{time_slice}]/global_quantities/current_centre/r|z"
+            logger.debug(f"get_current_centre: {path} contains no valid data")
+            return None
+
+        return {"r": r, "z": z}
+
+    def get_scalar_annotation_quantities(self, time_slice: int) -> list:
+        """Return validated scalar global/boundary quantities for annotation display.
+
+        Reads a fixed set of scalar fields from ``global_quantities`` and
+        ``boundary``, validates each value (finite and below the IDS fill
+        value threshold), and returns
+        only those with valid data.
+
+        Args:
+            time_slice (int): Index into ``time_slice``.
+
+        Returns:
+            list of dicts, each with ``"label"`` (LaTeX str) and ``"text"``
+            (formatted value + unit str).  Empty list if nothing is valid.
+        """
+
+        def _valid(val):
+            try:
+                v = float(val)
+                return np.isfinite(v) and abs(v) < _IDS_VALID_THRESHOLD
+            except Exception:
+                return False
+
+        items = []
+        ts = self.ids.time_slice[time_slice]
+        gq = ts.global_quantities
+        bnd = ts.boundary
+
+        _specs = [
+            (lambda: float(gq.ip), lambda v: {"label": "$I_p$", "text": f"{v / 1e6:.3f} MA"}),
+            (
+                lambda: float(
+                    getattr(
+                        gq.magnetic_axis, "b_field_phi" if hasattr(gq.magnetic_axis, "b_field_phi") else "b_field_tor"
+                    )
+                ),
+                lambda v: {"label": r"$B_\phi$(axis)", "text": f"{v:.3f} T"},
+            ),
+            (lambda: float(gq.psi_axis), lambda v: {"label": r"$\psi_{\rm axis}$", "text": f"{v:.4g} Wb"}),
+            (lambda: float(gq.psi_boundary), lambda v: {"label": r"$\psi_{\rm bnd}$", "text": f"{v:.4g} Wb"}),
+            (lambda: float(gq.q_axis), lambda v: {"label": "$q_0$", "text": f"{v:.3f}"}),
+            (lambda: float(gq.q_95), lambda v: {"label": "$q_{95}$", "text": f"{v:.3f}"}),
+            (lambda: float(bnd.minor_radius), lambda v: {"label": "$a$", "text": f"{v:.3f} m"}),
+            (lambda: float(bnd.elongation), lambda v: {"label": r"$\kappa$", "text": f"{v:.3f}"}),
+            (lambda: float(bnd.triangularity), lambda v: {"label": r"$\delta$", "text": f"{v:.3f}"}),
+        ]
+        for getter, formatter in _specs:
+            try:
+                val = getter()
+                if _valid(val):
+                    items.append(formatter(val))
+            except Exception:
+                pass
+        return items
 
     def get_top_view(self, time_slice: int) -> dict:
         """
@@ -1024,7 +1426,7 @@ class EquilibriumCompute:
                     node = eval(f"self.ids.time_slice[{ti}].global_quantities.{attribute}")
                     if info_flag:
                         quantities[attribute]["unit"] = node.metadata.units
-                        quantities[attribute]["coordinate_unit"] = "t"
+                        quantities[attribute]["coordinate_unit"] = self.ids.time.metadata.units or "s"
 
                         quantities[attribute]["name"] = node.metadata.name
                         quantities[attribute]["coordinate_name"] = "time"

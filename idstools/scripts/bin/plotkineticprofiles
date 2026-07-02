@@ -11,7 +11,6 @@ from idstools.utils.clihelper import (
     dbentry_parser,
     get_database_path,
     get_file_name,
-    get_title,
     rcparam_parser,
 )
 from idstools.utils.idslogger import setup_logger
@@ -80,12 +79,10 @@ if __name__ == "__main__":
         kp_view.view_density_profiles(ax7, logscale=args.logscale)  # Density profiles
         kp_view.view_vphi_profile(ax8, logscale=args.logscale)  # Vtol profiles
 
-        canvas.set_text(text=f"{get_database_path(args, time_value=kp_view.k_profiles.time_value_core_profiles)}")
-
         canvas.fig.subplots_adjust(top=0.928, bottom=0.11, left=0.033, right=0.91, hspace=0.435, wspace=0.518)
         canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
 
-        canvas.fig.suptitle(get_title(args, "Plasma kinetic profiles ", kp_view.k_profiles.time_value_core_profiles))
+        canvas.set_sup_title(get_database_path(args, time_value=kp_view.k_profiles.time_value_core_profiles))
 
         if args.save:
             fname = get_file_name(
