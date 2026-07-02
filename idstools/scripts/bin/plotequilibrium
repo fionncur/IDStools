@@ -79,12 +79,6 @@ if __name__ == "__main__":
     """,
     )
     parser.add_argument(
-        "--no-provenance",
-        help="Hide URI provenance information from the plot title",
-        action="store_true",
-    )
-
-    parser.add_argument(
         "--debug",
         help="Show diagnostic logging",
         action="store_true",
