@@ -67,6 +67,11 @@ rcparam_parser.add_argument(
     default="",
     help="Semicolon-separated rcParams string (e.g., 'lines.linewidth=2;axes.titlesize=14')",
 )
+rcparam_parser.add_argument(
+    "--no-provenance",
+    action="store_true",
+    help="Hide URI provenance information from plot titles",
+)
 
 
 def get_backend_id(name):
@@ -218,6 +223,9 @@ def get_database_path(imasargs, time_value=None) -> str:
     Returns:
         the absolute path of the database.
     """
+    if getattr(imasargs, "no_provenance", False):
+        return ""
+
     pulse_info = ""
     database_absolute_path = ""
     if "uri" in imasargs.__dict__ and imasargs.uri:

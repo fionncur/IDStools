@@ -954,14 +954,14 @@ def read_scenario_with_args(
         if test_mode:
             ids = connection.get_slice(ids_name, test_args_list)
         else:
-            ids = connection.get(ids_name)
+            ids = connection.get(ids_name, autoconvert=False)
         in_ids_dict[ids_name] = ids
 
     for ids_name in out_ids_list:
         if test_mode:
             ids = connection.get_slice(ids_name, test_args_list)
         else:
-            ids = connection.get(ids_name)
+            ids = connection.get(ids_name, autoconvert=False)
         out_ids_dict[ids_name] = ids
     connection.close()
 

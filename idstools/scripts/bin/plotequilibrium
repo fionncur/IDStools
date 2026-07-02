@@ -79,12 +79,6 @@ if __name__ == "__main__":
     """,
     )
     parser.add_argument(
-        "--no-provenance",
-        help="Hide URI provenance information from the plot title",
-        action="store_true",
-    )
-
-    parser.add_argument(
         "--debug",
         help="Show diagnostic logging",
         action="store_true",
@@ -213,7 +207,7 @@ if __name__ == "__main__":
             plot_magnetic_axis=False,
             plot_current_centre=False,
             plot_boundary_data=False,
-            plot_rho=args.phi,
+            plot_phi=args.phi,
             plot_annotations=False,
         )
         legend = ax1.get_legend()
@@ -272,7 +266,7 @@ if __name__ == "__main__":
                 plot_current_centre=True,
                 plot_boundary_data=True,
                 plot_boundary_outline=True,
-                plot_rho=False,
+                plot_phi=False,
                 plot_annotations=not args.profiles,
                 plot_psi=False,
             )

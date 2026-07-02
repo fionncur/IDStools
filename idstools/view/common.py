@@ -45,6 +45,8 @@ import matplotlib.pyplot as plt  # noqa: E402
 
 logger = logging.getLogger("module")
 
+PROVENANCE_TITLE_STYLE = {"fontsize": 8, "fontweight": "normal"}
+
 current_directory = os.path.abspath(os.path.dirname(__file__))
 # reach to `share` directory (sys.prefix won't work if using --prefix option)
 share_directory = os.path.abspath(os.path.join(current_directory, "../../../../../"))
@@ -217,6 +219,9 @@ class PlotCanvas:
             >>> canvas = PlotCanvas(nrows=2, ncols=2)
             >>> canvas.set_sup_title("Main Figure Title", fontsize=16, fontweight='bold')
         """
+        for key, value in PROVENANCE_TITLE_STYLE.items():
+            kwargs.setdefault(key, value)
+        kwargs.setdefault("y", 0.985)
         plt.suptitle(text, *args, **kwargs)
 
     def show(self, *args, **kwargs):

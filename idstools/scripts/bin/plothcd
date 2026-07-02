@@ -27,6 +27,7 @@ logger = setup_logger("module", stdout_level=logging.INFO)
 
 
 def _show_waves_plots(connargs, args, hold=False, dd_update=False, rc=""):
+    connargs.no_provenance = args.get("no_provenance", False)
     conn = DBMaster.get_connection(connargs)
     if conn is None:
         logger.critical(f"data entry not found : {connargs}")
@@ -141,6 +142,7 @@ def show_waves_plots(args, hold=False, dd_update=False, rc=""):
 
 
 def _show_distribution_plots(connargs, args, hold=False, dd_update=False, rc=""):
+    connargs.no_provenance = args.get("no_provenance", False)
     conn = DBMaster.get_connection(connargs)
     if conn is None:
         logger.critical(f"data entry not found : {connargs}")

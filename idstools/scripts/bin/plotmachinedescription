@@ -72,7 +72,7 @@ if __name__ == "__main__":
     ax.set_title("")
     mdcanvas.fig.subplots_adjust(top=0.916, bottom=0.09, left=0.044, right=0.953, hspace=0.287, wspace=0.2)
     mdcanvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
-    mdcanvas.set_sup_title(md_provenance, fontsize=8)
+    mdcanvas.set_sup_title("" if args.no_provenance else md_provenance, fontsize=8)
     if args.save:
         fname = os.path.basename(__file__) + "_machine_description.png"
         if args.directory:
