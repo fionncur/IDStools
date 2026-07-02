@@ -44,7 +44,7 @@ class EquilibriumView(BasePlot):
         plot_magnetic_axis: bool = True,
         plot_current_centre: bool = True,
         plot_boundary_data: bool = True,
-        plot_rho: bool = False,
+        plot_phi: bool = False,
         plot_annotations: bool = True,
         plot_psi: bool = True,
         plot_boundary_outline: bool = False,
@@ -89,7 +89,7 @@ class EquilibriumView(BasePlot):
         contour_lines_psi = contour_lines_rho = None
         levels = 50
         cartestion_grid = None
-        if plot_psi or plot_rho:
+        if plot_psi or plot_phi:
             cartestion_grid = self.compute_obj.get2d_cartesian_grid(time_slice, profiles2d_index)
         if cartestion_grid is not None and plot_psi:
 
@@ -114,7 +114,7 @@ class EquilibriumView(BasePlot):
             # )
 
             # phi (toroidal flux) overlay
-            if plot_rho:
+            if plot_phi:
                 phi2d = self.compute_obj.get_phi2d(time_slice)
                 if phi2d is not None:
                     contour_lines_rho = ax.contour(
