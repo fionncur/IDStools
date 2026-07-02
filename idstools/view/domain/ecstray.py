@@ -102,16 +102,16 @@ class EcStrayView:
         r2d = grid_data["r2d"]
         z2d = grid_data["z2d"]
         psi2d = grid_data["psi2d"]
-        rho2d = self.equilibrium_compute.get_rho2d(equilibrium_time_slice, profile2d_index)
+        phi2d = self.equilibrium_compute.get_phi2d(equilibrium_time_slice, profile2d_index)
 
         # Poloidal view plot
         contour_lines = ax.contour(r2d, z2d, psi2d.T, 50, cmap="summer")
         cbar_psi = plt.colorbar(contour_lines, ax=ax, orientation="horizontal", pad=0.08, fraction=0.03)
         cbar_psi.set_label(r"$\psi$ [Wb]")
-        if rho2d is not None and len(rho2d) > 0:
-            contour_lines_rho = ax.contour(r2d, z2d, rho2d.T, 50, cmap="YlOrBr")
+        if phi2d is not None and len(phi2d) > 0:
+            contour_lines_rho = ax.contour(r2d, z2d, phi2d.T, 50, cmap="YlOrBr")
             cbar_rho = plt.colorbar(contour_lines_rho, ax=ax, orientation="horizontal", pad=0.08, fraction=0.03)
-            cbar_rho.set_label(r"$\rho$ [Wb]")
+            cbar_rho.set_label(r"$\Phi$ [Wb]")
         # ax_polview.set_xlim(r2d.min(),r2d.max())
         ax.set_title("Poloidal view (R,Z)")
         ax.set_xlabel("R [m]", labelpad=lpad)

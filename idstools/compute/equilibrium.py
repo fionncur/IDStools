@@ -95,22 +95,20 @@ class EquilibriumCompute:
 
         return {"r2d": r1d, "z2d": z1d, "psi2d": psi2d}
 
-    def get_rho2d(self, time_slice: int, profiles2d_index: int = 0) -> Union[np.ndarray, None]:
+    def get_phi2d(self, time_slice: int, profiles2d_index: int = 0) -> Union[np.ndarray, None]:
         """
-        This function calculates rho(R,Z) using toroidal flux  and returns a dictionary containing the result.
+        Returns the toroidal magnetic flux Φ(R,Z) on the 2D grid.
+
+        Reads ``equilibrium.time_slice[i].profiles_2d[j].phi`` directly from the IDS.
 
         Args:
-            time_slice (int): The time slice is an integer value that represents the index of the time slice in
-                the equilibrium ids. It is used to select a specific time slice for the calculation of rho(R,Z).
-                Defaults to 0
-            profiles2d_index (int): `profiles2d_index` is an integer parameter that represents the index of  the
-                ``profiles_2d`` to be used for the calculation of rho(R,Z). It is used to access the `profiles_2d`
-                list in the `time_slice` object. Defaults to 0
+            time_slice (int): Index of the time slice in the equilibrium IDS. Defaults to 0.
+            profiles2d_index (int): Index into ``profiles_2d`` from which
+                ``phi`` (toroidal flux, Wb) is read. Defaults to 0.
 
         Returns:
-            a value containing the square root of the toroidal flux values divided by the maximum toroidal
-            flux value, if the length of toroidal flux  is greater than 0. If the length of toroidal flux is
-            less than 1, it returns None.
+            np.ndarray or None: 2-D array of toroidal flux Φ [Wb] with the same shape as
+            the ``profiles_2d`` grid, or None if ``phi`` is unavailable or all-NaN.
 
         Examples:
             .. code-block:: python
@@ -119,7 +117,7 @@ class EquilibriumCompute:
                 connection = imas.DBEntry("imas:mdsplus?user=public;pulse=134173;run=106;database=ITER;version=3", "r")
                 idsObj = connection.get('equilibrium')
                 computeObj = EquilibriumCompute(idsObj)
-                result = computeObj.get_rho2d(time_slice=0)
+                result = computeObj.get_phi2d(time_slice=0)
 
         """
         phi = None
@@ -136,7 +134,7 @@ class EquilibriumCompute:
                 f"all values are nan for equilibrium.time_slice[{time_slice}].profiles_2d[{profiles2d_index}].phi "
             )
             return None
-        return np.sqrt(phi / np.amax(phi))
+        return phi
 
     def get_b_total(self, time_slice: int) -> tuple:
         """
@@ -245,8 +243,8 @@ class EquilibriumCompute:
 
         Returns:
             a dictionary containing information about flux surfaces at a specific time slice. The dictionary includes
-            a 2D Cartesian grid, a 2D profile index, and a 2D array of rho values. If no profiles are found,
-            the function returns None.
+            a 2D Cartesian grid, a 2D profile index, and a 2D array of rho_tor_norm [-] values (dimensionless,
+            range [0, 1]). If no profiles are found, the function returns None.
         """
         GRID_TYPE_RECTANGULAR = 1
         list_of_profiles = self.get2d_profiles_indices(time_slice, GRID_TYPE_RECTANGULAR)
@@ -257,10 +255,10 @@ class EquilibriumCompute:
         profile2d_index = list_of_profiles[0]
 
         result_dict = self.get2d_cartesian_grid(time_slice, profile2d_index)
-        rho2d = self.get_rho2d(time_slice, profile2d_index)
-        if rho2d is None:
-            rho2d = []
-        result_dict["rho2d"] = rho2d
+        phi2d = self.get_phi2d(time_slice, profile2d_index)
+        if phi2d is None:
+            phi2d = []
+        result_dict["phi2d"] = phi2d
         return result_dict
 
     def get_ip(self) -> list:

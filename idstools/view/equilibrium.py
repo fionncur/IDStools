@@ -113,12 +113,12 @@ class EquilibriumView(BasePlot):
             #     inline_spacing=1,
             # )
 
-            # rho overlay
+            # phi (toroidal flux) overlay
             if plot_rho:
-                rho2d = self.compute_obj.get_rho2d(time_slice)
-                if rho2d is not None:
+                phi2d = self.compute_obj.get_phi2d(time_slice)
+                if phi2d is not None:
                     contour_lines_rho = ax.contour(
-                        cartestion_grid["r2d"], cartestion_grid["z2d"], rho2d.T, levels=levels, cmap="YlOrBr"
+                        cartestion_grid["r2d"], cartestion_grid["z2d"], phi2d.T, levels=levels, cmap="YlOrBr"
                     )
 
             ax.set_aspect("equal", adjustable="box")
@@ -248,7 +248,7 @@ class EquilibriumView(BasePlot):
                     markersize=6,
                     markeredgewidth=1.4,
                     linestyle="None",
-                    label="Geom axis",
+                    label="Geometric axis",
                 )
                 overlay_entries.append((proxy_gax, [gax_marker]))
 
@@ -487,7 +487,7 @@ class EquilibriumView(BasePlot):
         data = self.compute_obj.get_flux_surfaces(time_slice)
         r2d = data["r2d"]
         z2d = data["z2d"]
-        # rho2d = data["rho2d"]
+        # phi2d = data["phi2d"]
         psi2d = data["psi2d"]
         cntr = ax.contour(r2d, z2d, psi2d.T, 50, cmap="summer")
         cbar = plt.colorbar(cntr, ax=ax, pad=0.08, fraction=0.03)

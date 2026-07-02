@@ -246,9 +246,12 @@ def get_database_path(imasargs, time_value=None) -> str:
             )
         pulse_info = f"pulse {imasargs.pulse},{imasargs.run}"
         database_absolute_path = database_absolute_path[:-2]
+    time_string = ""
+    if time_value:
+        time_string = f"time:{time_value:.3f}"
     hostdir = f"{database_absolute_path} "
     if pulse_info:
         hostdir += f"({pulse_info})"
-    if time_value is not None:
-        hostdir = hostdir.rstrip() + f"\n#time:{time_value:.3f}"
+    if time_string:
+        hostdir += f"#{time_string}"
     return hostdir

@@ -12,6 +12,7 @@ try:
     import imaspy as imas
 except ImportError:
     import imas
+from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 from rich_argparse import RichHelpFormatter
 
 from idstools.compute.common import get_nearest_time
@@ -47,8 +48,8 @@ if __name__ == "__main__":
     )
     parser.add_argument("-t", "--time", help="Time (default=middle)", type=float, default=-99.0)
     parser.add_argument(
-        "--rho",
-        help="Show rho overlay on the plot",
+        "--phi",
+        help=("Overlay contours of toroidal magnetic flux Φ(R,Z) [Wb] " "from equilibrium profiles_2d/phi"),
         action="store_true",
     )
     parser.add_argument(
@@ -77,6 +78,12 @@ if __name__ == "__main__":
     "testpulse.nc"
     """,
     )
+    parser.add_argument(
+        "--no-provenance",
+        help="Hide URI provenance information from the plot title",
+        action="store_true",
+    )
+
     parser.add_argument(
         "--debug",
         help="Show diagnostic logging",
@@ -206,7 +213,7 @@ if __name__ == "__main__":
             plot_magnetic_axis=False,
             plot_current_centre=False,
             plot_boundary_data=False,
-            plot_rho=args.rho,
+            plot_rho=args.phi,
             plot_annotations=False,
         )
         legend = ax1.get_legend()
@@ -214,15 +221,33 @@ if __name__ == "__main__":
             legend.set_visible(False)
 
         if c_psi:
-            cax_psi = ax1.inset_axes([-0.20, 0.05, 0.05, 0.88])  # [x, y, w, h] in axes coords
+            cax_psi = inset_axes(
+                ax1,
+                width=0.24,
+                height="88%",
+                loc="lower left",
+                bbox_to_anchor=(-0.24, 0.05, 1, 1),
+                bbox_transform=ax1.transAxes,
+                borderpad=0,
+            )
             cbar_psi = canvas.fig.colorbar(c_psi, cax=cax_psi)
-            cbar_psi.ax.set_title(r"$\psi$ [Wb]", fontsize=7, pad=4)
+            cbar_psi.set_label(r"$\psi$ [Wb]", fontsize=7, rotation=90, labelpad=4)
+            cbar_psi.ax.yaxis.set_label_position("left")
             cbar_psi.ax.tick_params(labelsize=7)
 
         if c_rho:
-            cax_rho = ax1.inset_axes([-0.35, 0.05, 0.05, 0.88])  # just to the left of psi bar
+            cax_rho = inset_axes(
+                ax1,
+                width=0.24,
+                height="88%",
+                loc="lower left",
+                bbox_to_anchor=(-0.58, 0.05, 1, 1),
+                bbox_transform=ax1.transAxes,
+                borderpad=0,
+            )
             cbar_rho = canvas.fig.colorbar(c_rho, cax=cax_rho)
-            cbar_rho.ax.set_title(r"$\rho$", fontsize=7, pad=4)
+            cbar_rho.set_label(r"$\Phi$ [Wb]", fontsize=7, rotation=90, labelpad=4)
+            cbar_rho.ax.yaxis.set_label_position("left")
             cbar_rho.ax.tick_params(labelsize=7)
 
         plot_md_overlay()
