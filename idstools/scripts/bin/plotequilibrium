@@ -21,6 +21,7 @@ from idstools.database import DBMaster
 from idstools.machinedescription import get_md_data
 from idstools.utils.clihelper import (
     dbentry_parser,
+    show_plot,
     get_database_path,
     get_file_name,
     rcparam_parser,
@@ -292,14 +293,6 @@ if __name__ == "__main__":
         canvas.set_sup_title(title, fontsize=8, y=0.985)
 
         canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
-        if args.save:
-            fname = get_file_name(args, f"{os.path.basename(__file__)}_Equilibrium", time_value)
-            if args.directory:
-                if not os.path.exists(args.directory):
-                    os.makedirs(args.directory)
-                fname = os.path.join(args.directory, fname)
-            canvas.save(fname)
-        else:
-            canvas.show()
+        show_plot(canvas, args, f"{os.path.basename(__file__)}_Equilibrium", time_value)
     else:
         logger.warning("Can not produce plot, equilibrium/time is None")

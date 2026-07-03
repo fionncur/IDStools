@@ -1,8 +1,35 @@
+import ast
 import logging
 import os
 import sys
 
-import matplotlib
+
+def _backend_from_cli_rc(argv):
+    """Return a backend requested by a --rc backend=... command-line option."""
+    for index, argument in enumerate(argv):
+        if argument == "--rc" and index + 1 < len(argv):
+            rc_string = argv[index + 1]
+        elif argument.startswith("--rc="):
+            rc_string = argument.split("=", 1)[1]
+        else:
+            continue
+        for item in rc_string.split(";"):
+            key, separator, value = item.partition("=")
+            if separator and key.strip() == "backend":
+                value = value.strip()
+                try:
+                    value = ast.literal_eval(value)
+                except (SyntaxError, ValueError):
+                    pass
+                return str(value)
+    return None
+
+
+_requested_backend = _backend_from_cli_rc(sys.argv)
+if _requested_backend:
+    os.environ["MPLBACKEND"] = _requested_backend
+
+import matplotlib  # noqa: E402 - backend env must be set before importing matplotlib
 
 
 def _is_jupyter() -> bool:
@@ -21,25 +48,25 @@ def _is_jupyter() -> bool:
         return False
 
 
-# Select the appropriate matplotlib backend
-if _is_jupyter():
-    if "matplotlib.pyplot" not in sys.modules:
+if not os.environ.get("MPLBACKEND"):
+    if _is_jupyter():
+        if "matplotlib.pyplot" not in sys.modules:
+            try:
+                import ipympl  # noqa: F401 - imported to check availability
+
+                matplotlib.use("widget")
+            except ImportError:
+                matplotlib.use("agg")
+    elif sys.platform.startswith("win") or "DISPLAY" in os.environ:
+
         try:
-            import ipympl  # noqa: F401 - imported to check availability
+            import tkinter  # noqa: F401 - imported to check availability
 
-            matplotlib.use("widget")
-        except ImportError:
+            matplotlib.use("TkAgg")
+        except (ImportError, ModuleNotFoundError):
             matplotlib.use("agg")
-elif sys.platform.startswith("win") or "DISPLAY" in os.environ:
-
-    try:
-        import tkinter  # noqa: F401 - imported to check availability
-
-        matplotlib.use("TkAgg")
-    except (ImportError, ModuleNotFoundError):
+    else:
         matplotlib.use("agg")
-else:
-    matplotlib.use("agg")
 
 import matplotlib.pyplot as plt  # noqa: E402
 

@@ -16,6 +16,7 @@ from rich_argparse import RichHelpFormatter
 
 from idstools.compute.common import get_nearest_time
 from idstools.utils.clihelper import (
+    show_plot,
     rcparam_parser,
 )
 from idstools.utils.idslogger import setup_logger
@@ -401,12 +402,4 @@ if __name__ == "__main__":
 
     canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
 
-    if args.save:
-        fname = f"plotequicomp_time_{time_value1}.png"
-        if args.directory:
-            if not os.path.exists(args.directory):
-                os.makedirs(args.directory)
-            fname = os.path.join(args.directory, fname)
-        canvas.save(fname)
-    else:
-        canvas.show()
+    show_plot(canvas, args, fname=f"plotequicomp_time_{time_value1}.png")

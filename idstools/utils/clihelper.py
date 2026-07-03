@@ -213,6 +213,24 @@ def get_file_name(imasargs, title="", time_value=None):
     return _file_name
 
 
+def show_plot(canvas, imasargs, title="", time_value=None, fname=None, show_kwargs=None):
+    """Save non-interactive canvases automatically, otherwise show the plot."""
+    noninteractive = getattr(canvas.fig.canvas, "required_interactive_framework", None) is None
+    if not imasargs.save and not noninteractive:
+        canvas.show(**(show_kwargs or {}))
+        return
+
+    if fname is None:
+        fname = get_file_name(imasargs, title, time_value)
+    if noninteractive and not imasargs.save:
+        extension = canvas.fig.canvas.get_default_filetype()
+        fname = f"{os.path.splitext(fname)[0]}.{extension}"
+    if imasargs.directory:
+        os.makedirs(imasargs.directory, exist_ok=True)
+        fname = os.path.join(imasargs.directory, fname)
+    canvas.save(fname)
+
+
 def get_database_path(imasargs, time_value=None) -> str:
     """
     The function `get_database_path` returns the absolute path of a database based on the provided arguments.

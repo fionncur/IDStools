@@ -22,6 +22,7 @@ from rich_argparse import RichHelpFormatter
 from idstools.database import DBMaster
 from idstools.utils.clihelper import (
     dbentry_parser,
+    show_plot,
     get_database_path,
     get_file_name,
     rcparam_parser,
@@ -178,12 +179,4 @@ if __name__ == "__main__":
     canvas.fig.subplots_adjust(top=0.9, bottom=0.094, left=0.035, right=0.948, hspace=0.417, wspace=0.117)
     canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
     canvas.remove_empty_axes()
-    if args.save:
-        fname = get_file_name(args, os.path.basename(__file__) + "_core_transport", time_value)
-        if args.directory:
-            if not os.path.exists(args.directory):
-                os.makedirs(args.directory)
-            fname = os.path.join(args.directory, fname)
-        canvas.save(fname)
-    else:
-        canvas.show()
+    show_plot(canvas, args, os.path.basename(__file__) + "_core_transport", time_value)

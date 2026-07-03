@@ -17,6 +17,7 @@ from idstools.compute.common import get_nearest_time
 from idstools.database import DBMaster
 from idstools.utils.clihelper import (
     dbentry_parser,
+    show_plot,
     get_database_path,
     get_file_name,
     rcparam_parser,
@@ -128,12 +129,4 @@ if __name__ == "__main__":
     canvas.get_current_fig_manager().set_window_title(os.path.basename(__file__))
     canvas.set_sup_title(get_database_path(args, time_value=time_value))
 
-    if args.save:
-        fname = get_file_name(args, os.path.basename(__file__) + "_Neutrons", time_value)
-        if args.directory:
-            if not os.path.exists(args.directory):
-                os.makedirs(args.directory)
-            fname = os.path.join(args.directory, fname)
-        canvas.save(fname)
-    else:
-        canvas.show()
+    show_plot(canvas, args, os.path.basename(__file__) + "_Neutrons", time_value)
