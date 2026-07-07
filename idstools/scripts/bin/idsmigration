@@ -795,7 +795,7 @@ def make_manifest(
     if standard_vars:
         metadata.append({"standard_name": standard_vars})
     if dbvariable_vars:
-        metadata.append({"dbvariable": dbvariable_vars})
+        metadata.append({"db_variable": dbvariable_vars})
     uri = f"imas:hdf5?path={pathlib.Path(pulse_dir).resolve().as_posix()}#summary"
     data = {
         "manifest_version": 2,
