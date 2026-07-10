@@ -545,12 +545,12 @@ def validate(df: pd.DataFrame, data: pd.DataFrame) -> pd.DataFrame:
 def temp_var_name(cw_row: pd.Series) -> tuple[str, str]:
     """Resolve a temporary row's identifier/name and its provenance kind.
 
-    Returns (imas_standard_name, "standard_name") when set, else (csv_column, "dbvariable").
+    Returns (imas_standard_name, "standard_name") when set, else (csv_column, "db_variable").
     """
     std_name = cw_row.get("imas_standard_name", "")
     if isinstance(std_name, str) and std_name.strip():
         return std_name.strip(), "standard_name"
-    return cw_row["csv_column"], "dbvariable"
+    return cw_row["csv_column"], "db_variable"
 
 
 def build_write_spec(df: pd.DataFrame) -> pd.DataFrame:
@@ -752,7 +752,7 @@ def extract_variables(temporary_ids: IDS) -> dict:
         name = str(el.identifier.name)
         if name and el.value.has_value:
             result[name] = str(el.value)
-    # constant_string1d holds a per-time-slice string series (no dynamic_string1d AoS exists).
+    # constant_string1d holds a per-time-slice string series (no dynamic_string1d array exists).
     for el in temporary_ids.constant_string1d:
         name = str(el.identifier.name)
         if name and el.value.has_value:
@@ -780,9 +780,9 @@ def make_manifest(
 ) -> "Manifest":
     """Build a SimDB Manifest for one migrated pulse (one entry per pulse).
 
-    `variables` (from extract_variables) is split into "standard_name" and "dbvariable"
+    `variables` (from extract_variables) is split into "standard_name" and "db_variable"
     metadata groups per `name_kind` (from temp_var_name), so each is queryable as
-    standard_name.<name> or dbvariable.<name>.
+    standard_name.<name> or db_variable.<name>.
     """
     metadata = [
         {"dataset": dataset},
@@ -791,7 +791,9 @@ def make_manifest(
         {"description": f"{machine} pulse from the {dataset} database migrated to IMAS HDF5."},
     ]
     standard_vars = {name: v for name, v in variables.items() if name_kind.get(name) == "standard_name"}
-    dbvariable_vars = {name: v for name, v in variables.items() if name_kind.get(name, "dbvariable") != "standard_name"}
+    dbvariable_vars = {
+        name: v for name, v in variables.items() if name_kind.get(name, "db_variable") != "standard_name"
+    }
     if standard_vars:
         metadata.append({"standard_name": standard_vars})
     if dbvariable_vars:
@@ -865,7 +867,7 @@ def run_migration(
     `variables` metadata instead of being written to disk, and one SimDB entry is ingested per
     pulse. The `summary` IDS is always written to disk (SimDB catalogues it by reference).
     """
-    # name -> "standard_name"/"dbvariable", used to split SimDB manifest variables (see make_manifest).
+    # name -> "standard_name"/"db_variable", used to split SimDB manifest variables (see make_manifest).
     temp_name_kind = dict(
         temp_var_name(cw_row) for _, cw_row in crosswalk.loc[crosswalk["status"] == "temporary"].iterrows()
     )
