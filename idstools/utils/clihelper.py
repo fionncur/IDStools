@@ -1,7 +1,6 @@
 import argparse
 import os
 import re
-import socket
 
 try:
     import imaspy as imas
@@ -67,6 +66,11 @@ rcparam_parser.add_argument(
     type=str,
     default="",
     help="Semicolon-separated rcParams string (e.g., 'lines.linewidth=2;axes.titlesize=14')",
+)
+rcparam_parser.add_argument(
+    "--no-provenance",
+    action="store_true",
+    help="Hide URI provenance information from plot titles",
 )
 
 
@@ -209,6 +213,24 @@ def get_file_name(imasargs, title="", time_value=None):
     return _file_name
 
 
+def show_plot(canvas, imasargs, title="", time_value=None, fname=None, show_kwargs=None):
+    """Save non-interactive canvases automatically, otherwise show the plot."""
+    noninteractive = getattr(canvas.fig.canvas, "required_interactive_framework", None) is None
+    if not imasargs.save and not noninteractive:
+        canvas.show(**(show_kwargs or {}))
+        return
+
+    if fname is None:
+        fname = get_file_name(imasargs, title, time_value)
+    if noninteractive and not imasargs.save:
+        extension = canvas.fig.canvas.get_default_filetype()
+        fname = f"{os.path.splitext(fname)[0]}.{extension}"
+    if imasargs.directory:
+        os.makedirs(imasargs.directory, exist_ok=True)
+        fname = os.path.join(imasargs.directory, fname)
+    canvas.save(fname)
+
+
 def get_database_path(imasargs, time_value=None) -> str:
     """
     The function `get_database_path` returns the absolute path of a database based on the provided arguments.
@@ -219,6 +241,9 @@ def get_database_path(imasargs, time_value=None) -> str:
     Returns:
         the absolute path of the database.
     """
+    if getattr(imasargs, "no_provenance", False):
+        return ""
+
     pulse_info = ""
     database_absolute_path = ""
     if "uri" in imasargs.__dict__ and imasargs.uri:
@@ -241,11 +266,10 @@ def get_database_path(imasargs, time_value=None) -> str:
         database_absolute_path = database_absolute_path[:-2]
     time_string = ""
     if time_value:
-        time_string = f"time:{time_value:.3f})"
-    hostdir = f"{socket.gethostname()}:{database_absolute_path} "
+        time_string = f"time:{time_value:.3f}"
+    hostdir = f"{database_absolute_path} "
     if pulse_info:
         hostdir += f"({pulse_info})"
     if time_string:
         hostdir += f"#{time_string}"
-    #
     return hostdir
