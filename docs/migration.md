@@ -185,10 +185,10 @@ When provenance differs across machines, set `source` to a Python dict literal m
 An optional `"default"` key applies to any machine that has no more specific entry of its own.  A machine-specific entry always overrides `"default"` entirely (it is not joined or concatenated) — use it for the machines whose provenance genuinely differs from the rest.
 
 ```
-# needs_source=True, source = {"default": "EFIT", "AUG": "IDA"}
+# needs_source=True, source = {"default": "EFIT", "JET": "JFIT"}
 # imas_path = "summary/global_quantities/ip"
 summary/global_quantities/ip/value  ← transformed CSV value (per pulse)
-summary/global_quantities/ip/source ← "IDA" for AUG pulses, "EFIT" for every other machine
+summary/global_quantities/ip/source ← "JFIT" for JET pulses, "EFIT" for every other machine
 ```
 
 A dict source is resolved per pulse against the pulse's machine name and written into the pulse IDS: the machine's own key wins if present, otherwise `"default"` is used, otherwise the companion leaf is skipped for that pulse.  A `summary/machine` mapping row is required; the script raises at load if none exists and a dict source is in use.
