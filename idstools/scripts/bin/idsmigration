@@ -719,7 +719,11 @@ def process_pulse(
                 )
             if dict_desc and writes:
                 machine = data_row.get(machine_col) if machine_col else None
-                resolved = [(leaf, d[machine]) for leaf, d in dict_desc if machine in d]
+                resolved = [
+                    (leaf, d[machine] if machine in d else d["default"])
+                    for leaf, d in dict_desc
+                    if machine in d or "default" in d
+                ]
                 if resolved:
                     write_descriptors(
                         pulse_ids[ids_root], writes, resolved, depth, slice_index, n_slices, const_ctx, var_label

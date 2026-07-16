@@ -182,14 +182,16 @@ So the companion gating is asymmetric by type:
 
 When provenance differs across machines, set `source` to a Python dict literal mapping machine name to the provenance string.  The cell is parsed with `ast.literal_eval()` and must be a valid dict literal.
 
+An optional `"default"` key applies to any machine that has no more specific entry of its own.  A machine-specific entry always overrides `"default"` entirely (it is not joined or concatenated) — use it for the machines whose provenance genuinely differs from the rest.
+
 ```
-# needs_source=True, source = {"AUG": "EFIT", "JET": "JFIT"}
+# needs_source=True, source = {"default": "EFIT", "AUG": "IDA"}
 # imas_path = "summary/global_quantities/ip"
 summary/global_quantities/ip/value  ← transformed CSV value (per pulse)
-summary/global_quantities/ip/source ← "EFIT" for AUG pulses, "JFIT" for JET pulses
+summary/global_quantities/ip/source ← "IDA" for AUG pulses, "EFIT" for every other machine
 ```
 
-A dict source is resolved per pulse against the pulse's machine name and written into the pulse IDS.  Machines not present as keys are silently skipped.  A `summary/machine` mapping row is required; the script raises at load if none exists and a dict source is in use.
+A dict source is resolved per pulse against the pulse's machine name and written into the pulse IDS: the machine's own key wins if present, otherwise `"default"` is used, otherwise the companion leaf is skipped for that pulse.  A `summary/machine` mapping row is required; the script raises at load if none exists and a dict source is in use.
 
 ---
 
