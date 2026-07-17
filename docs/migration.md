@@ -364,7 +364,7 @@ Each entry's manifest carries:
 
 | Field                                   | Source |
 | --------------------------------------- | ------ |
-| `alias`                                 | **default mode:** `{machine}/{pulse}` — **`--per-time-slice` mode:** `{dataset}-{machine}-{index}`, where `dataset` is the `--experiment` value and `index` is a per-machine counter |
+| `alias`                                 | **default mode:** `{dataset}/{machine}/{pulse}` — **`--per-time-slice` mode:** `{dataset}-{machine}-{index}`, where `dataset` is the `--experiment` value and `index` is a per-machine counter |
 | `metadata.dataset` / `metadata.machine` | the experiment label and the pulse's `summary/machine` value |
 | `metadata.standard_name.*`              | temporary quantities diverted from the in-memory `temporary` IDS (see [Diversion under `--simdb`](#diversion-under---simdb)) whose crosswalk row has an `imas_standard_name`, keyed by that standard name |
 | `metadata.dbvariable.*`                 | the same, for temporary quantities with no `imas_standard_name`, keyed by `csv_column` instead |

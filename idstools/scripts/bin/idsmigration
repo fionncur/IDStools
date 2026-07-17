@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""idsmigration — convert tabular experimental data (CSV) into IMAS IDS objects.
+"""idsmigration -- convert tabular experimental data (CSV) into IMAS IDS objects.
 
 Driven by a crosswalk spreadsheet that maps source CSV columns to IDS paths and
-transforms. The pipeline (see ``main``): load the crosswalk and dataset, validate,
+transforms. The pipeline (see `main`): load the crosswalk and dataset, validate,
 build a per-row write spec, build one set of IDSs per pulse in memory, then write
 the pulses to HDF5.
 
@@ -273,7 +273,7 @@ def set_leaf(
                 _warned_const_mismatch.add((const_ctx, name))
                 print(
                     f"WARNING: constant '{name}' differs across slices of pulse "
-                    f"{const_ctx}: {target.value!r} vs {value!r} — keeping first"
+                    f"{const_ctx}: {target.value!r} vs {value!r} -- keeping first"
                 )
             return  # keep the first value
         setattr(parent, leaf, value)
@@ -319,7 +319,7 @@ def write_descriptors(
     """Write each descriptor (leaf_segments, value) into the pulse IDS alongside values.
 
     Each is written at the sibling of every value's parent node (branch[:-1]), so it
-    lands at the correct path for each expanded AoS slot — e.g. the source sibling, or
+    lands at the correct path for each expanded AoS slot -- e.g. the source sibling, or
     a temporary row's identifier name/description.
     """
     for branch, _ in writes:
@@ -362,7 +362,7 @@ def resolve_writes(ids_branch: Branch, value: Any, cw_row: pd.Series, data_row: 
             if (cw_row.name, value) not in _warned_dict_misses:
                 _warned_dict_misses.add((cw_row.name, value))
                 print(
-                    f"WARNING: Row {cw_row.name}: value {value!r} from column '{cw_row['csv_column']}' not in dictionary — skipping"
+                    f"WARNING: Row {cw_row.name}: value {value!r} from column '{cw_row['csv_column']}' not in dictionary -- skipping"
                 )
             return []
         mapped = dictionary[value]
@@ -522,7 +522,7 @@ def validate(df: pd.DataFrame, data: pd.DataFrame) -> pd.DataFrame:
     if missing_cols:
         raise ValueError(f"csv_column(s) not found in data CSV: {missing_cols}")
 
-    # Upfront validation: needs_source rows must have a source value — either a descriptor string
+    # Upfront validation: needs_source rows must have a source value -- either a descriptor string
     # written into each pulse, a numeric value written per pulse, or a machine-keyed dict.
     def _has_source(x: Any) -> bool:
         return isinstance(x, (str, dict)) or (is_number(x) and pd.notna(x))
@@ -530,14 +530,14 @@ def validate(df: pd.DataFrame, data: pd.DataFrame) -> pd.DataFrame:
     bad_source = df["needs_source"] & ~df["source"].apply(_has_source)
     if bad_source.any():
         print(
-            f"WARNING: needs_source=True but source is missing for rows: {list(df.index[bad_source])} — companion leaf will not be written"
+            f"WARNING: needs_source=True but source is missing for rows: {list(df.index[bad_source])} -- companion leaf will not be written"
         )
 
     # Upfront validation: temporary rows must have a csv_dtype string.
     is_temp = df["status"] == "temporary"
     bad_dtype = is_temp & ~df["csv_dtype"].apply(lambda x: isinstance(x, str) and x.strip() != "")
     if bad_dtype.any():
-        print(f"WARNING: status 'temporary' but csv_dtype is missing for rows: {list(df.index[bad_dtype])} — skipping")
+        print(f"WARNING: status 'temporary' but csv_dtype is missing for rows: {list(df.index[bad_dtype])} -- skipping")
 
     return df
 
@@ -590,7 +590,7 @@ def build_write_spec(df: pd.DataFrame) -> pd.DataFrame:
             if path in temp_seen:
                 print(
                     f"WARNING: temporary path '{path}' used by rows {temp_seen[path]} "
-                    f"and {cw_row.name} — values will overwrite; use (:) in csv_dtype "
+                    f"and {cw_row.name} -- values will overwrite; use (:) in csv_dtype "
                     f"for append behaviour"
                 )
             else:
@@ -899,7 +899,7 @@ def run_migration(
     if not per_time_slice and machine_col is None:
         raise ValueError("no row maps to 'summary/machine' to group/name pulses")
     if not per_time_slice and time_col is None:
-        print("WARNING: no row maps to 'summary/time' — slices kept in CSV order")
+        print("WARNING: no row maps to 'summary/time' -- slices kept in CSV order")
 
     output_dir.mkdir(parents=True, exist_ok=True)
     done = 0
@@ -946,7 +946,7 @@ def run_migration(
             done += 1
 
             if simdb_enabled:
-                alias = f"{machine}/{pulse}"
+                alias = f"{dataset}/{machine}/{pulse}"
                 variables = extract_variables(temp_ids) if temp_ids is not None else {}
                 manifest = make_manifest(pulse_dir, dataset, str(machine), alias, variables, temp_name_kind)
                 if simdb_ingest(db, config, manifest, alias, pulse_dir.name, failed):
@@ -1003,7 +1003,7 @@ def main() -> None:
     simdb_enabled = args.simdb
     config = db = None
     if args.simdb and not SIMDB_AVAILABLE:
-        print("WARNING: --simdb given but the 'simdb' package is not importable — skipping ingestion")
+        print("WARNING: --simdb given but the 'simdb' package is not importable -- skipping ingestion")
         simdb_enabled = False
     elif simdb_enabled:
         config = Config()
