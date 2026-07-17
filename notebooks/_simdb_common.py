@@ -1,0 +1,62 @@
+"""Shared SimDB import/data-access modules for the notebooks."""
+
+from typing import Any, Optional
+
+import numpy as np
+import numpy.typing as npt
+
+from simdb.config.config import Config
+from simdb.database import get_local_db
+from simdb.query import QueryType
+
+EMPTY_FLOAT = 9e40  # imas.EMPTY_FLOAT
+
+
+def get_db():
+    """Connect to the local SimDB."""
+    return get_local_db(Config())
+
+
+def guard(x: npt.ArrayLike) -> np.ndarray:
+    """Replace the IMAS empty-float sentinel with NaN."""
+    a = np.asarray(x, dtype=float)
+    return np.where(np.abs(a) >= EMPTY_FLOAT, np.nan, a)
+
+
+def path(md: dict, *keys: str, n: int) -> np.ndarray:
+    """Walk a nested meta_dict path"""
+    node = md
+    for k in keys:
+        if not isinstance(node, dict) or k not in node:
+            return np.full(n, np.nan)
+        node = node[k]
+    return guard(node)
+
+
+def temp(md: dict, *names: str, n: int) -> np.ndarray:
+    """First matching temporary-IDS quantity: db_variable.<name> or standard_name.<name>."""
+    for bucket in ("db_variable", "standard_name"):
+        for name in names:
+            v = md.get(bucket, {}).get(name)
+            if v is not None:
+                return guard(v)
+    return np.full(n, np.nan)
+
+
+def query_selected(db, dataset: str, selec_key: str, machine: Optional[str] = None, value: str = "1") -> list[Any]:
+    """Simulations for `dataset` (optionally restricted to `machine`) with at least one
+    time-slice where db_variable.<selec_key> == value."""
+    constraints = [("dataset", dataset, QueryType.EQ)]
+    if machine is not None:
+        constraints.append(("machine", machine, QueryType.EQ))
+    constraints.append((f"db_variable.{selec_key}", value, QueryType.EQ))
+    return db.query_meta(constraints)
+
+
+def query_dataset(db, dataset: str, machine: Optional[str] = None) -> list[Any]:
+    """All simulations for `dataset` (optionally restricted to `machine`), unfiltered by any
+    selection flag."""
+    constraints = [("dataset", dataset, QueryType.EQ)]
+    if machine is not None:
+        constraints.append(("machine", machine, QueryType.EQ))
+    return db.query_meta(constraints)
