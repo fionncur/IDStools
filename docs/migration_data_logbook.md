@@ -157,3 +157,29 @@ h-mode `SEPLIM` machine fills: TEXTOR all 1435 = `0.000`, TFTR all 104 = `0.000`
 ## 7. Design decisions
 
 Future work: Merge tool, locate duplicates, apply a strategy (most-recent / average / add-slice), decoupled from per-DB mapping
+
+## 8. `TAUTH` blank in h-mode, filled from `TAUTH2`/`TAUTH1`
+
+`TAUTH` (thermal energy confinement time, maps to `summary/global_quantities/tau_energy`) is blank in 328 timeslices, mostly ASDEX and AUG:
+
+| Machine | blank `TAUTH` cells | of which another τ column is filled in |
+|---|---|---|
+| ASDEX | 210 | 210 |
+| AUG | 70 | 70 |
+| JET | 43 | 43 |
+| DIII-D | 5 | 0 |
+
+14 of AUG's 70 fall inside the STD5+ELMy subset used in `hmode_analysis.ipynb`.
+
+Every blank row has one or more of `TAUTH1`, `TAUTH2`, `TAUMHD`, `TAUDIA` filled in instead, but only two of those four measure the same thing as `TAUTH`:
+
+| Column | What it measures | Same quantity as `TAUTH`? |
+|---|---|---|
+| `TAUTH1` | thermal τ_E from kinetic profiles | yes, but blank in all 14 AUG rows |
+| `TAUTH2` | thermal τ_E from total stored energy minus fast-ion energy | yes, filled in all 14 AUG rows |
+| `TAUMHD` | *total* τ_E (fast-ion energy included, loss channels not subtracted) | no, different quantity |
+| `TAUDIA` | *total* τ_E, diamagnetic version | no, different quantity |
+
+`hmode_analysis.ipynb` falls back to `TAUTH2`, then `TAUTH1`. Compare to paper Table 1's per-machine STD5+ELMy counts: 
+
+AUG was off by −11 (2133 vs. paper AUG+AUG-W 2144) with the 14 gaps left blank, vs. only +3 (2147) once they're filled from `TAUTH2`. `TAUTH1` is a second fallback for completeness.
