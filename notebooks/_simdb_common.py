@@ -43,6 +43,16 @@ def temp(md: dict, *names: str, n: int) -> np.ndarray:
     return np.full(n, np.nan)
 
 
+def temp_str(md: dict, *names: str, n: int) -> np.ndarray:
+    """Like temp(), but for string-valued temporary-IDS quantities."""
+    for bucket in ("db_variable", "standard_name"):
+        for name in names:
+            v = md.get(bucket, {}).get(name)
+            if v is not None:
+                return np.asarray(v, dtype=object)
+    return np.full(n, "", dtype=object)
+
+
 def query_selected(db, dataset: str, selec_key: str, machine: Optional[str] = None, value: str = "1") -> list[Any]:
     """Simulations for `dataset` (optionally restricted to `machine`) with at least one
     time-slice where db_variable.<selec_key> == value."""
