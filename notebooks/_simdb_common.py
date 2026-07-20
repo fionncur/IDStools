@@ -53,6 +53,19 @@ def temp_str(md: dict, *names: str, n: int) -> np.ndarray:
     return np.full(n, "", dtype=object)
 
 
+def path_str(md: dict, *keys: str, n: int) -> np.ndarray:
+    """Like path(), but for string-valued quantities. Broadcasts a shot-scalar to length n."""
+    node = md
+    for k in keys:
+        if not isinstance(node, dict) or k not in node:
+            return np.full(n, "", dtype=object)
+        node = node[k]
+    arr = np.asarray(node, dtype=object)
+    if arr.ndim == 0:
+        return np.full(n, arr.item(), dtype=object)
+    return arr
+
+
 def query_selected(db, dataset: str, selec_key: str, machine: Optional[str] = None, value: str = "1") -> list[Any]:
     """Simulations for `dataset` (optionally restricted to `machine`) with at least one
     time-slice where db_variable.<selec_key> == value."""
