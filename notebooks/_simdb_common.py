@@ -4,12 +4,11 @@ from typing import Any, Optional
 
 import numpy as np
 import numpy.typing as npt
+from imas.ids_defs import EMPTY_FLOAT, EMPTY_INT
 
 from simdb.config.config import Config
 from simdb.database import get_local_db
 from simdb.query import QueryType
-
-EMPTY_FLOAT = 9e40  # imas.EMPTY_FLOAT
 
 
 def get_db():
@@ -18,9 +17,10 @@ def get_db():
 
 
 def guard(x: npt.ArrayLike) -> np.ndarray:
-    """Replace the IMAS empty-float sentinel with NaN."""
+    """Replace the IMAS empty-float/empty-int sentinels with NaN."""
     a = np.asarray(x, dtype=float)
-    return np.where(np.abs(a) >= EMPTY_FLOAT, np.nan, a)
+    is_empty = (np.abs(a) >= abs(EMPTY_FLOAT)) | (a == EMPTY_INT)
+    return np.where(is_empty, np.nan, a)
 
 
 def path(md: dict, *keys: str, n: int) -> np.ndarray:
