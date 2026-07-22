@@ -48,7 +48,7 @@ transform:      dictionary
 transform_args: {"MO": 11, "W": 2, "Be": 10}
 ```
 
-If a CSV value is not present as a key, the row is skipped for that pulse rather than raising an error. All uncovered values are reported upfront, with counts, by the pre-run validation (see [Upfront validation](#upfront-validation)); the runtime skip itself is silent.
+String cells are stripped of leading/trailing whitespace at load (the CSVs are padded), so dictionary keys are authored against the stripped values (`"MO"`, never `" MO"`). If a CSV value is not present as a key, the row is skipped for that pulse rather than raising an error. All uncovered values are reported upfront, with counts, by the pre-run validation (see [Upfront validation](#upfront-validation)); the runtime skip itself is silent.
 
 #### Dictionary of lists
 
