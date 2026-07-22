@@ -158,7 +158,7 @@ h-mode `SEPLIM` machine fills: TEXTOR all 1435 = `0.000`, TFTR all 104 = `0.000`
 
 Future work: Merge tool, locate duplicates, apply a strategy (most-recent / average / add-slice), decoupled from per-DB mapping
 
-## 8. `TAUTH` blank in h-mode, filled from `TAUTH2`/`TAUTH1`
+## 8. `TAUTH` empty cells for some selected rows in h-mode, filled from `TAUTH2`/`TAUTH1`
 
 `TAUTH` (thermal energy confinement time, maps to `summary/global_quantities/tau_energy`) is blank in 328 timeslices, mostly ASDEX and AUG:
 

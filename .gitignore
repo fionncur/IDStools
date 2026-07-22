@@ -56,6 +56,13 @@ resources/results/tc26
 resources/results/hmode
 resources/results/hmode_sandbox
 resources/input
+resources/profiles
 
 # Excel lock files
 ~$*.xlsx
+
+notebooks/_notebooks
+
+.gitignore
+.mcp.json
+*.pdf
