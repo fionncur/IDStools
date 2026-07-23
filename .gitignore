@@ -57,6 +57,7 @@ resources/results/hmode
 resources/results/hmode_sandbox
 resources/input
 resources/profiles
+idstools/scripts/temporary/sync_to_migration
 
 # Excel lock files
 ~$*.xlsx
