@@ -76,7 +76,11 @@ def profile_numeric(col: str, values: pd.Series, machines: pd.Series, lines: lis
     sentinels = {}  # value -> (verdict, [signal descriptions])
     if continuous and n >= 10:
         counts = values.value_counts()
-        candidates = counts[(counts >= 3) & (counts >= 0.005 * n)]
+        # Low-precision data (2-3 significant digits) repeats exact values quite often, so the
+        # candidate threshold scales with the column's typical multiplicity n/n_distinct:
+        # a candidate must repeat ~5x more often than an ordinary value of this column does.
+        threshold = max(3, math.ceil(5 * n / n_distinct))
+        candidates = counts[(counts >= threshold) & (counts >= 0.005 * n)]
         for cand, cnt in candidates.items():
             rest = values[values != cand]
             if len(rest) < 5:
@@ -183,20 +187,21 @@ def profile(data: pd.DataFrame, machine_col: str, dataset_name: str) -> str:
         blank = raw.isna() | (raw.astype(str).str.strip() == "")
         present = raw[~blank]
         numeric = pd.to_numeric(present, errors="coerce")
-        parse_rate = numeric.notna().mean() if len(present) else 0.0
+        unparsed = present[numeric.isna()]
+        # NA markers are split off before type classification, so a marker-heavy float
+        # column (e.g. ZEFF: 199 x '-') is not mistaken for a string column.
+        markers, anomalies = {}, {}
+        for v, c in unparsed.astype(str).value_counts().items():
+            (markers if is_na_marker_form(v) else anomalies)[v] = c
+        n_real = len(present) - sum(markers.values())
+        parse_rate = numeric.notna().sum() / n_real if n_real else 0.0
 
         lines = [f"## {col}", ""]
         flags: list[str] = []
-        na_marker_count = 0
 
-        if parse_rate >= 0.90 and len(present):
-            unparsed = present[numeric.isna()]
-            markers, anomalies = {}, {}
-            for v, c in unparsed.astype(str).value_counts().items():
-                (markers if is_na_marker_form(v) else anomalies)[v] = c
+        if parse_rate >= 0.90 and n_real:
             for v, c in markers.items():
                 na_markers_global[v] = na_markers_global.get(v, 0) + c
-                na_marker_count += c
             if markers:
                 lines.append("- NA markers detected: " + ", ".join(f"{v!r} x{c}" for v, c in markers.items()))
                 flags.append("na-markers")
@@ -206,7 +211,9 @@ def profile(data: pd.DataFrame, machine_col: str, dataset_name: str) -> str:
                 )
                 flags.append("anomalies")
             values = numeric.dropna()
-            dtype = "numeric" if parse_rate == 1.0 else f"numeric-as-text ({len(unparsed)} non-numeric)"
+            int_form = present[numeric.notna()].astype(str).str.strip().str.fullmatch(r"[+-]?\d+").all()
+            base_dtype = "int" if int_form else "float"
+            dtype = base_dtype if not anomalies else f"{base_dtype} ({sum(anomalies.values())} anomalous strings)"
             n_fill = len(values)
             lines.insert(
                 1,
@@ -216,6 +223,7 @@ def profile(data: pd.DataFrame, machine_col: str, dataset_name: str) -> str:
             median = values.median() if len(values) else float("nan")
         else:
             values = present.astype(str)
+            base_dtype = "string"
             n_fill = len(values)
             lines.insert(
                 1,
@@ -229,7 +237,7 @@ def profile(data: pd.DataFrame, machine_col: str, dataset_name: str) -> str:
         index_rows.append(
             (
                 col,
-                "string" if math.isnan(median) and parse_rate < 0.9 else "numeric",
+                base_dtype,
                 f"{100 * n_fill / len(data):.0f}%",
                 values.nunique() if n_fill else 0,
                 fmt(median),
