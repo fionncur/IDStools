@@ -67,3 +67,4 @@ notebooks/_notebooks
 .gitignore
 .mcp.json
 *.pdf
+.pre-commit-config.yaml
