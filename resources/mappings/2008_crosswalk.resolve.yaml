@@ -1,5 +1,0 @@
-LUPDATE:
-  strategy: max
-EVAP:
-  strategy: avoid
-  avoid: ["NONE"]
