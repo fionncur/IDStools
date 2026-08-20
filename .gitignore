@@ -68,3 +68,5 @@ notebooks/_notebooks
 .mcp.json
 *.pdf
 .pre-commit-config.yaml
+
+idstools/scripts/temporary/4
