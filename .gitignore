@@ -70,7 +70,7 @@ notebooks/_notebooks
 *.pdf
 .pre-commit-config.yaml
 
-idstools/scripts/temporary/4
+idstools/scripts/temporary/*
 
 *.svg
 *.png
