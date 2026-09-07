@@ -51,6 +51,7 @@ myenv/
 *.nc
 
 # data files
+resources/results/*
 resources/results/2008
 resources/results/tc26
 resources/results/hmode
@@ -70,3 +71,6 @@ notebooks/_notebooks
 .pre-commit-config.yaml
 
 idstools/scripts/temporary/4
+
+*.svg
+*.png
